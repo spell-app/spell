@@ -1,9 +1,10 @@
 /*
  * The style sheet of `<ui-json>`:  ours, not Fomantic's.
- * - It styles the component's shadow DOM:  `<div class="ui json" part="viewer">` holding its
- *   `<div class="header">` (two `<button class="tool">`s) and `<div class="body">`, a `<div class="row" style="--level: n">`
- *   per line;  an object's or array's line is also `.container`, with a `<button class="toggle">` (a chevron
- *   `<ui-icon>`) in the gutter and, closed, `<span class="preview">`.
+ * - It styles the component's shadow DOM:  `<div class="ui json" part="viewer">`, holding
+ *   - its `<div class="header">`:  two `<button class="tool">`s
+ *   - its `<div class="body">`:  a `<div class="row" style="--level: n">` per line
+ *   - An object's or array's line is also `.container`,
+ *     with a `<button class="toggle">` (a chevron `<ui-icon>`) in the gutter and, closed, `<span class="preview">`.
  *   - Text spans:  `.key`, `.string`, `.number`, `.boolean`, `.null`, `.punct`;  the clickable ones also `.link`.
  *   - Editing (`editable`):  a `<ui-input>`, `<ui-select>` or `<ui-checkbox>`, `.edit`, in a key's or value's place.
  *   - Before them, the source parts:  `<ui-loader part="loader">` while loading, `<ui-message part="error">`.

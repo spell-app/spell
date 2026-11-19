@@ -338,7 +338,8 @@ export class PlaceIngest {
         changes.push(`${name}:  ${was ?? "never tried"} => ${state.is}${state.reason ? ` -- ${state.reason}` : ""}.`)
       }
     }
-    // ONE thing under each, read under its owner's first thing:  once its owner's list has rows (epic `from-console` P16)
+    // ONE thing under each, read under its owner's first thing:
+    // once its owner's list has rows (epic `from-console` P16)
     for (const [name, collection] of Object.entries(description.collections)) {
       if (!collection.isOneUnder || collection.leftOut || collection.state?.is === "disabled") continue
       reader.startAgain()
@@ -438,8 +439,8 @@ export class PlaceIngest {
   }
 
   /**
-   * One thing under each of another collection's things, `name`, tried under the first one `read` found (epic `from-console` P16):
-   * a system's snapshot, at `/instances/7/snapshot`.
+   * One thing under each of another collection's things, `name`, tried under the first one `read` found:
+   * a system's snapshot, at `/instances/7/snapshot` (epic `from-console` P16).
    * - `undefined` when no owner's list read a thing to try it under:  it stays as it was.
    * - NEVER throws for an answer, or none:  that's `failed`;  but `IngestStopped` past the reader's limits
    */

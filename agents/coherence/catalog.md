@@ -487,12 +487,16 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 
 ### A long list, drawn as you scroll
 
-- **It is:**  `drawnInWindow()` (`spell/element/drawnWindow`, epic `data` T76;  the parser's core until epic
-  `from-console` P8):  draws `MOST_AT_ONCE` items, then more as a sentinel nears the view, reading a place's next page;
-  what's drawn stays drawn;  an item the caller needs (`through`:  a pick, a key's target) is drawn at once.
+- **It is:**  `drawnInWindow()`, in `spell/element/drawnWindow`.
+  - Epic `data` T76;  the parser's core's until epic `from-console` P8.
+  - It draws the first lot of items (`MOST_AT_ONCE`), then more as a sentinel nears the view,
+    reading a place's next page.
+  - What's drawn stays drawn.
+  - An item the caller needs (`through`:  a pick, a key's target) is drawn at once.
   - In Spell it's every loop in a drawing, and `<for>` (epic `data` P22) adds the loader, Try again, the empty message,
     pages and a title.
-  - In Spell UI it's each `<ui-tree>` column from `items` (`UITree.itemRows()`):  5,000 rows open in 33 ms, as 300 do.
+  - In Spell UI it's each `<ui-tree>` column drawn from its items list (`UITree.itemRows()`):
+    5,000 rows open in 33 ms, as 300 do.
 - **Use it when:**  a list a page draws could be long.  Never a scroll listener or a list's own paging.
 
 ### Remembering a preference

@@ -147,7 +147,8 @@ export const SpellUrls = {
   /**
    * The address a path under one of spaces' folders names:  `folderFor()` backwards.
    * - `("builtins", "@spell/examples/solitaire/Card.spell")` => `@spell/examples/solitaire/Card.spell`
-   * - `("spaces", "@spell/owen@/errors/a.spell")` => `owen@spell/errors/a.spell`:  a person's space is inside their org's
+   * - `("spaces", "@spell/owen@/errors/a.spell")` => `owen@spell/errors/a.spell`:
+   *   a person's space is inside their org's
    * - `("spaces", "@three-degrees/bubble-trouble/x.spell")` => `@three-degrees/bubble-trouble/x.spell`
    * - `undefined` for a path no address names:  not under an org's folder (`__change-requests.json`)
    * - e.g. the page server tells pages of a changed project file at its address (the app's route module)

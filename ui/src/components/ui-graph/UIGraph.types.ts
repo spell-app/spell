@@ -146,7 +146,7 @@ export type GraphPlacedEdge = {
   readonly fromPath: string
   readonly toPath: string
   readonly points: readonly GraphPoint[]
-  /** Which way it leaves its start and enters its end:  `1` rightwards, `-1` leftwards, `0` up / down. */
+  /** Which side of its start it leaves from, and which side of its end it enters by. */
   readonly fromSide: GraphPortSide
   readonly toSide: GraphPortSide
   readonly depth: number

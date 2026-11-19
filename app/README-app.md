@@ -267,11 +267,16 @@ flowchart TB
 
 _Each app has a runtime, and so things, of its own;  they all draw with the page's one Solid._
 
-- Each `<spell-viewer>` fetches the runtime's text once per page, about 140 KB, then imports a fresh copy per element
+- Each `<spell-viewer>` fetches the runtime's text once per page, 279,580 bytes, then imports a fresh copy per element
   from a `blob:` URL of its own ([loadRuntime.ts](src/app/runner/loadRuntime.ts)).
   So two apps on a page share no things, no console, no event listeners and no mount point.
+- What each copy holds, and what they share, is one rule for the dev server and the production build
+  (`PER_COPY`, in [vite.config.ts](app/vite.config.ts)):
+  - its own:  core and the runner
+  - shared:  Solid, Spell UI, `spell/util` and the places
 - The program draws with the page's Solid, into a `<div>` its host hands it and never touches again.
 - `core` lives in `spell-runtime.js` alone:  the build tests fail if any other chunk of the app holds it.
+- Hand `defineElement()` or `useElement()` a view from another copy, and it warns, naming the class.
 
 ### A recompile keeps what the program made
 

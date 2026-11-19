@@ -3,8 +3,8 @@
  * - Its tag, attributes (each with its kind and allowed values), events, parts and texts.
  *   The shape is `ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Ours, not Fomantic's:  GENERIC, any node / edge graph;  netlists are one caller (a subclass restyles it).
- * - Rich properties, `graph`, `selected` and `boundary` (`UIGraph.types.ts`);  a static page may give `graph` as JSON
- *   in the attribute.
+ * - Rich properties:  `graph`, `selected` and `boundary` (`UIGraph.types.ts`).
+ *   A static page may give `graph` as JSON in the attribute.
  * - NOT `children` for how children open, though that's the word:  it would hide the platform's `Element.children`.
  *   So `child-view`.
  */

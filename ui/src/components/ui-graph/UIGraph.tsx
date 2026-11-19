@@ -60,18 +60,24 @@ export class DOMGraphElement extends E.DOMElement<UIGraph> {
  * The component behind `<ui-graph>`:  a node / edge graph drawn as an SVG, laid out left to right in layers
  * (`GraphLayout`), with ports on the nodes' sides, smooth edges, pan, zoom and fit.
  *
- * - GENERIC:  any graph from plain data (`GraphData`).  A subclass restyles and relabels it through the hooks below
+ * - GENERIC:  any graph from plain data (`GraphData`).
+ *   A subclass restyles and relabels it through the hooks below
  *   (`nodeLabel()`, `nodeClass()`, `renderNode()`, `edgeClass()` ...), its parts and its `--ui-graph-*` tokens.
  * - A node with `children` has a toggle;  opened, they show by `child-view` (or the node's `childView`):
  *   - `inline`:  the node grows into a container, its graph laid out inside it, recursively
  *   - `modal`:  a `<ui-modal>` holding another graph of the same tag
  *   - `drill`:  the drawing shows them instead, with `<ui-breadcrumbs>` back
  *   - `children` given as a function (or a promise of a graph) is called the first time it opens.
- * - Paths:  a node is known by its ids from the top graph, joined by `/` (`cpu/alu`);  a port by its node's path, `:`
- *   and its id;  an edge by its graph's path, `#` and its id.  So ids should hold none of `/`, `:` or `#`.
+ * - Paths:  how a node, a port or an edge is known.
+ *   - a node:  its ids from the top graph, joined by `/` (`cpu/alu`)
+ *   - a port:  its node's path, `:` and its id
+ *   - an edge:  its graph's path, `#` and its id
+ *   - So ids should hold none of `/`, `:` or `#`.
  * - Pan:  drag;  zoom:  the wheel, round the pointer;  fit:  the toolbar's button, and by itself on a new graph.
- * - `path` (`a/b`):  the node drilled to.  Set it to drill there;  a drill (double-click a node with children, or
- *   its toggle with `child-view="drill"`) or a breadcrumb sets it back and sends `ui-changed` `{ kind: 'path', path }`.
+ * - `path` (`a/b`):  the node drilled to.
+ *   - Set it to drill there.
+ *   - A drill (double-click a node with children, or its toggle with `child-view="drill"`) or a breadcrumb
+ *     sets it back, and sends `ui-changed` `{ kind: 'path', path }`.
  * - Click a node, an edge or a port to select it:  `ui-selecting` (cancelable), then `ui-changed`.
  *   Hovering an edge lights it and its two ends;  hovering a node lights its edges.
  * - Text is measured in the graph's real font (`TreeMeasure`, the canvas the tree diagram measures with);
@@ -130,8 +136,10 @@ export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
   }
 
   /**
-   * The breadcrumbs, top first:  each one's text, and what picking it does.  None (or one):  no breadcrumbs.
-   * - Default:  the top, then each node drilled into.  A subclass that shows its own levels gives its own trail.
+   * The breadcrumbs, top first:  each one's text, and what picking it does.
+   * - None (or one):  no breadcrumbs.
+   * - Default:  the top, then each node drilled into.
+   *   A subclass that shows its own levels gives its own trail.
    */
   trail(): { label: string; pick: () => void }[] {
     if (!this.drillPaths.length) return []
@@ -364,8 +372,10 @@ export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
   }
 
   /**
-   * Show the graph inside the node at `path` (`a/b`;  `""`:  the top), drilling through each node on the way and
-   * loading lazy children.  Sends nothing:  the page asked for it.  A subclass with a path of its own overrides it.
+   * Show the graph inside the node at `path`, drilling through each node on the way and loading lazy children.
+   * - `path`:  `a/b`;  `""`:  the top.
+   * - Sends nothing:  the page asked for it.
+   * - A subclass with a path of its own overrides it.
    */
   async applyPath(path: string): Promise<void> {
     if (path === (this.drillPath ?? "")) return
@@ -494,8 +504,9 @@ export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
     const box = this.svg && { width: this.svg.clientWidth, height: this.svg.clientHeight }
     if (!layout || !box?.width || !box.height) return
     const k = Math.max(this.minFitZoom, Math.min(box.width / layout.width, box.height / layout.height, 1.5))
-    // Centred, too big or not:  too big at the least zoom, its middle shows (where the nodes are;  its edges are often
-    // empty pins and margins), the rest a pan away.
+    // Centred, too big or not.
+    // Too big at the least zoom:  its middle shows, the rest a pan away
+    // (the middle is where the nodes are;  its edges are often empty pins and margins).
     const along = (room: number, size: number) => (room - size * k) / 2
     this.view = { x: along(box.width, layout.width), y: along(box.height, layout.height), k }
     this.isFitted = true

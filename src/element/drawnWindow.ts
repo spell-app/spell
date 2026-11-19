@@ -1,8 +1,8 @@
 /**
  * A long list draws what fits, and more as you scroll:  every long list Spell draws stands on it
  * (epic `data` T76, T43;  a column of `<ui-tree>`, epic `from-console` P8).
- * - In a Spell program no one says so, or writes a Show more:  `for each ... draw`, `draw each card in the deck` and
- *   a read of a place all come here.
+ * - In a Spell program no one says so, or writes a Show more:
+ *   `for each ... draw`, `draw each card in the deck` and a read of a place all come here.
  * - A program can say how many at a time:  `show them 12 at a time` (`atOnce`);  else `MOST_AT_ONCE`.
  * - Up to `MOST_AT_ONCE` items:  all of them, at once, exactly as a plain `<For>` draws them.
  *   So a list that fits in that is drawn as it always was:  no extra element, no waiting.
@@ -18,13 +18,15 @@
  *   Measured on 5,000 and 50,000 views:  the epic page, T76.
  * - A place that pages:  reads its next page when what it has is drawn (`more`).
  * - Find (⌘F, Ctrl-F) and printing draw the rest first, up to `MOST_FOR_FIND`:  a browser can only find what's there.
- * - Coming back to a long list that's still the same list (going back from a page) draws as many as were drawn, and scrolls back to
- *   where it was, unless the caller says it's going to the top (`isGoingToTheTop`:  a Spell program's `scroll to the top`).
+ * - Coming back to a long list that's still the same list (going back from a page):
+ *   it draws as many as were drawn, and scrolls back to where it was,
+ *   unless the caller says it's going to the top (`isGoingToTheTop`:  a Spell program's `scroll to the top`).
  * - With no `IntersectionObserver` (under node, `spell run`):  all of them.
- * - Its place:  a leaf of `spell/element`, NOT in its barrel, reached by path (`spell/element/drawnWindow`), as
- *   Spell UI's `<ui-tree>` and the parser's core (`drawing.ts`, `saved.ts`) both draw with it.
+ * - Its place:  a leaf of `spell/element`, NOT in its barrel, reached by path (`spell/element/drawnWindow`),
+ *   as Spell UI's `<ui-tree>` and the parser's core (`drawing.ts`, `saved.ts`) both draw with it.
  *   - It imports only Solid and util's generic `dom.ts`:  it knows nothing of Things, places or Spell UI.
- *   - Spell's core hands it what's Spell's own:  its `Cell` to say the count changed (`changes`), and `scroll to the top`.
+ *   - Spell's core hands it what's Spell's own:
+ *     its `Cell` to say the count changed (`changes`), and `scroll to the top`.
  *     It lived in the parser's core until epic `from-console` P8 moved it here.
  */
 import { createComponent, type JSX } from "@solidjs/web"
@@ -75,9 +77,11 @@ export type DrawnWindow<Item> = {
    */
   through?: () => number | undefined
   /**
-   * What tells its drawing how many to draw changed, when it isn't a Solid signal:  Spell's core hands its `Cell`.
-   * - Why:  a signal's write waits for whatever else is pending on the page, and a Spell action may be waiting all
-   *   this while;  a cell's reaches the drawing at once, through the page's cells bridge.
+   * What tells the drawing that how many to draw changed, when that isn't a Solid signal:
+   * Spell's core hands its `Cell`.
+   * - Why:  a signal's write waits for whatever else is pending on the page,
+   *   and a Spell action may be waiting all this while;
+   *   a cell's write reaches the drawing at once, through the page's cells bridge.
    */
   changes?: () => CountChanges
   /** Is the page going to its top, so a list coming back stays there rather than scrolling to where it was? */

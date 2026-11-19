@@ -1682,13 +1682,13 @@ export const LIVE_EVENTS = `${SERVER_API}/live`
 export const LIVE_SCRIPT = `${SERVER_API}/live.js`
 
 /**
- * Where a live page asks what its scripts hold now (`WebServer.versionsOf()`), and the server's run and write token
- * (`LiveVersions`):  `GET /api/server/versions?path=/a.js&path=/b.js` =>
- * `{ versions: { "/a.js": "<sha1>", "/b.js": null }, run, token }`.
- * - after the server restarts, a page takes the new token, and reloads only when one of ITS scripts changed
- *   (epic `epic-engine` I293)
- * - the token as every page it serves carries it:  a page of another origin can't read the answer, and the host check
- *   turns away every other host
+ * Where a live page asks what its scripts hold now (`WebServer.versionsOf()`),
+ * and the server's run and write token (`LiveVersions`):
+ * `GET /api/server/versions?path=/a.js&path=/b.js` => `{ versions: { "/a.js": "<sha1>", "/b.js": null }, run, token }`.
+ * - after the server restarts, a page takes the new token,
+ *   and reloads only when one of ITS scripts changed (epic `epic-engine` I293)
+ * - the token as every page it serves carries it:  a page of another origin can't read the answer,
+ *   and the host check turns away every other host
  */
 export const LIVE_VERSIONS = `${SERVER_API}/versions`
 
@@ -1700,8 +1700,9 @@ export const LIVE_VERSIONS = `${SERVER_API}/versions`
  * - How:  it sets `window.SPELL_SERVER` itself, and loads the live client (`LIVE_SCRIPT`), both through the proxy.
  *   - no write token:  the page saves through its own routes, never the live client's
  *   - no `run`:  a restart of the page server never reloads it (epic `epic-engine` I329:  the editor outlives one)
- * - The page's code stays its own:  every changed script it loaded is taken (`spell-server:scripts-reloading`,
- *   `preventDefault()`), so the live client never reloads it for new code;  its own dev server does that.
+ * - The page's code stays its own:
+ *   every changed script it loaded is taken (`spell-server:scripts-reloading`, `preventDefault()`),
+ *   so the live client never reloads it for new code;  its own dev server does that.
  * - Not in a frame:  the live client would hand a frame's keys and right-clicks to VS Code.
  * - Returns whether it joined;  a page already on the channel (a served page) counts.
  * - SIDE EFFECT:  adds a `<script>` to the page's `<head>`, and a listener on `window`.

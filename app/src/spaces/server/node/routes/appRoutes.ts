@@ -186,10 +186,11 @@ async function editorUrl(root: string): Promise<string | undefined> {
 /**
  * Tell every open page of each change to a project's file, at the address it's read at:
  * `/spaces/<address>` (`SP.SpellUrls.fileUrl()`), e.g. `/spaces/owen@spell/errors/a.spell`.
- * - over the page server's live channel (`spell-server:changed`):  the editor watches its open project's files by it
- *   (`editor.watchOpenFile()`)
+ * - over the page server's live channel (`spell-server:changed`):
+ *   the editor watches its open project's files by it (`editor.watchOpenFile()`)
  * - both of spaces' folders (`environment.spaceFolders`):  the built-ins, and spell.spaces
- * - never spaces' own names (`__data`, `__draft` ...):  a program's rows and a person's drafts aren't a project's files,
+ * - never spaces' own names (`__data`, `__draft` ...):
+ *   a program's rows and a person's drafts aren't a project's files,
  *   and the live rooms and data folders say their own changes
  * - Returns what stops it.
  */

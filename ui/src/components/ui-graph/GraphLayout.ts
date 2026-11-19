@@ -23,7 +23,7 @@ import {
  *   1. each node's size, from its label and ports;  a node open in place is laid out first, and grows round it
  *   2. cycles broken (depth first, back edges turned round), then layers by longest path, sources pulled right
  *   3. a dummy point per layer a long edge crosses, so it routes round the boxes
- *   4. order within each layer by barycentre sweeps, port positions counted
+ *   4. order within each layer by barycentre sweeps (each box moved towards its neighbours' mean), ports counted
  *   5. x by layer;  y pulled towards each box's neighbours, then pushed apart so nothing overlaps
  * - Edges come out as points;  `pathFor()` turns them into a smooth SVG path, leaving and entering ports sideways.
  * - The enclosing node's ports (`boundary`) are pins in the first and last layers:

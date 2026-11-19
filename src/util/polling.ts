@@ -33,18 +33,22 @@ export function pollWhileVisible(seconds: number, fn: () => unknown, { at }: { a
 }
 
 /**
- * Keep a page fresh on `window`:  `refresh()` when the page server says a file it cares about changed, when the page
- * becomes visible, and every `every` ms while visible:  the ONE watch of every page (epic `coherence` C9;
- * moved down from spell-epic's `ServerLink.watch()`, which wraps it, by epic `from-console` P17).
- * - Changes come from the page's live client (spell/server's `liveClient()`, or `joinLiveChannel()` for a page the
- *   server didn't serve):  `spell-server:changed`, never a connection of our own, each holds one of Chrome's 6 per host
+ * Keep a page fresh on `window`:  the ONE watch of every page.
+ * - `refresh()` runs:
+ *   - when the page server says a file it cares about changed
+ *   - when the page becomes visible
+ *   - every `every` ms while visible
+ * - Epic `coherence` C9;  moved down from spell-epic's `ServerLink.watch()`, which wraps it, by epic `from-console` P17.
+ * - Changes come from the page's live client, as `spell-server:changed`:
+ *   spell/server's `liveClient()`, or `joinLiveChannel()` for a page the server didn't serve.
+ *   - never a connection of our own:  each holds one of Chrome's 6 per host
  * - `files`:  a test of each changed file's URL path, decoded (`/spaces/@spell/examples/Solitaire/Card.spell`);
  *   `undefined`:  none, only the poll and the page coming back into view
  * - `every`:  ms;  `0` (the default) for no poll;  `polls`:  poll only while it answers true
  *   - e.g. the editor polls slowly only while its live channel isn't open (`isLiveChannelOpen()`)
- * - the server down (`spell-server:down`, the live client's word):  no poll and no look on the page coming into view
- *   until it's back (`spell-server:up`), then one look at once;  so a restart leaves no failed requests on the
- *   console (epic `epic-engine` I294)
+ * - the server down (`spell-server:down`, the live client's word):
+ *   no poll and no look on the page coming into view until it's back (`spell-server:up`), then one look at once;
+ *   so a restart leaves no failed requests on the console (epic `epic-engine` I294)
  * - `every` in ms, not seconds as `pollWhileVisible()`:  its callers' periods are (`REVIEW_POLL_MS`)
  * - NOT on `pollWhileVisible()`:  it takes the page's `window`, so a test hands it one of its own
  * - Returns the undo.
@@ -57,8 +61,8 @@ export function watchServerFiles(
   { every = 0, polls }: { every?: number; polls?: () => boolean } = {}
 ): () => void {
   const { document } = window
-  // the server down (restarting:  every merge into main does it), as the page's live client hears it:  no poll asks
-  // until it's back, then one does at once (epic `epic-engine` I294)
+  // the server down (restarting:  every merge into main does it), as the page's live client hears it:
+  // no poll asks until it's back, then one does at once (epic `epic-engine` I294)
   let down = false
   const timer = every
     ? window.setInterval(() => {

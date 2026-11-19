@@ -82,12 +82,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `h()` returns a thunk:  the error boundary makes it, once, and a throw while it's made shows the stand-in.
     - `core.element()`, what it called before, is gone (epic `output-targets` P22):
       every committed example is recompiled, and a program compiled before P20 no longer draws.
-- A long list draws what fits, and more as you scroll (`drawnInWindow()`, epic `data` T76):
-  every loop in a drawing (`core.drawEach()`), `draw each ...` (`drawItems()`) and a read of a place (`drawRead()`).
+- A long list draws what fits, and more as you scroll (`drawnInWindow()`, epic `data` T76).
+  Every long list comes there:
+  - every loop in a drawing (`core.drawEach()`)
+  - `draw each ...` (`drawItems()`)
+  - a read of a place (`drawRead()`)
   - It's the kit's, [spell/element/drawnWindow](../../../src/element/drawnWindow.ts), since epic `from-console` P8,
     so Spell UI's `<ui-tree>` draws its columns with it too;  this folder's until then.
-  - Each call spreads in `SPELL_WINDOW` ([ui.ts](ui.ts)):  a spell cell says how many are drawn, and
-    `scroll to the top` keeps a list coming back at the top.
+  - Each call spreads in `SPELL_WINDOW` ([ui.ts](ui.ts)):
+    a spell cell says how many are drawn, and `scroll to the top` keeps a list coming back at the top.
   - Up to 24 items it's a plain drawing, no different;  past that, 24 at a time, as the end of the list comes near the view.
   - What it drew last took no room (items still reading, or drawing nothing):  it waits a second before more,
     so a list of the Met's artworks, read one by one, isn't read all at once (epic `mockup` T42).

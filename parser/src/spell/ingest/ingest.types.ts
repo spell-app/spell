@@ -398,7 +398,10 @@ export type ListUnderSeen = {
   list: string
   /** Where it is, the thing's id in braces:  `/posts/{id}/comments`. */
   at: string
-  /** It's ONE thing under each, not a list:  a system's snapshot, `/instances/{id}/snapshot` (epic `from-console` P16). */
+  /**
+   * It's ONE thing under each, not a list:
+   * a system's snapshot, `/instances/{id}/snapshot` (epic `from-console` P16).
+   */
   isOne?: boolean
 }
 
@@ -607,8 +610,8 @@ export type CollectionDescription = {
    */
   listsUnder?: Record<string, string>
   /**
-   * Each of its things is ONE thing under a thing of another collection, read from there, with no list of its own
-   * (epic `from-console` P16):  a system's snapshot.
+   * Each of its things is ONE thing under a thing of another collection, read from there:
+   * a system's snapshot, with no list of its own (epic `from-console` P16).
    * - Where:  the owner's `listsUnder`;  its own `at` is that address too, `snapshots are found at "..."`.
    */
   isOneUnder?: boolean

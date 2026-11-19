@@ -46,8 +46,9 @@ import treeDiagramCSS from "./UITreeDiagram.css?inline"
  * - Accessibility:  the `<svg>` is `role="img"`, named by a summary ("Tree:  If, with 3 children");
  *   each node's `title` is its box's `<title>` (hover text).
  *   - `foldable` or `clickable` make it `role="group"` under the same name, with real buttons to Tab to.
- * - Spell UI's other drawings of boxes and lines:  `<ui-diagram>` for boxes in columns (the NERD drawing);
- *   `<ui-graph>` for any graph, in layers left to right, with ports, nested graphs, pan and zoom.
+ * - Spell UI's other drawings of boxes and lines:
+ *   - `<ui-diagram>`:  boxes in columns (the NERD drawing)
+ *   - `<ui-graph>`:  any graph, in layers left to right, with ports, nested graphs, pan and zoom
  ****************/
 export class UITreeDiagram extends E.UIComponent<typeof treeDiagramVocabulary> {
   @E.proto static vocabulary = treeDiagramVocabulary

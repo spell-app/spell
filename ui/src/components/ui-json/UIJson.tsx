@@ -73,8 +73,8 @@ export class DOMJsonElement extends E.DOMLoadableElement<UIJson> {
  *
  * The outline:
  * - Two spaces per level, monospace, coloured by the theme's code tokens (`--ui-code-attr`, `--ui-code-string` ...).
- * - A header (part `header`;  `no-header` hides it):  Copy, and a toggle for the quotes round keys (`quotes`),
- *   plain icon buttons.
+ * - A header (part `header`;  `no-header` hides it), of plain icon buttons:
+ *   Copy, and a toggle for the quotes round keys (`quotes`).
  * - Each object and array has a toggle in the gutter just before its own indent:
  *   a real `<button aria-expanded>` (part `toggle`) holding a chevron;  Alt-click opens or closes its branch.
  *   - Closed, it's one line:  `[ 1, 2, 3, ... ]`, `{ "a": 1, ... }`, cut to the characters that fit (`columns`).
@@ -522,8 +522,10 @@ export class UIJson extends E.LoadableComponent<typeof jsonVocabulary> {
   }
 
   /**
-   * Follow an editor:  Enter or leaving it keeps the edit, Escape drops it;  a checkbox or a pick list keeps a change
-   * at once (`ui-changed`, which a translated tag sends under its own name:  the editors are always `ui-*` tags).  Focuses it once its family has drawn it.
+   * Follow an editor:  Enter or leaving it keeps the edit, Escape drops it.
+   * - A checkbox or a pick list keeps a change at once
+   *   (`ui-changed`, which a translated tag sends under its own name:  the editors are always `ui-*` tags).
+   * - Focuses it once its family has drawn it.
    */
   private watchEditor(host: EditorHost, edit: JsonEdit) {
     const keep = () => this.commitEdit(edit, valueFromEditor(host, edit))
@@ -756,8 +758,8 @@ function valueFromEditor(host: EditorHost, { part, kind, value }: JsonEdit): unk
 }
 
 /**
- * Text typed as a key:  read as JSON when it is a JSON string (`"name"` is `name`), else the text itself, trimmed;
- * `NO_CHANGE` when that leaves nothing.
+ * Text typed as a key, as the key it means;  `NO_CHANGE` when that leaves nothing.
+ * - Read as JSON when it is a JSON string (`"name"` is `name`), else the text itself, trimmed.
  */
 function keyFromText(text: string): unknown {
   const read = readLoose(text.trim())

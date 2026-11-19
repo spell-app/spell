@@ -533,6 +533,7 @@ so the editor and the command line load a project the same way, from a server or
 | `Logger` | named, levelled logging:  `new Logger({ prefix: "Foo", level: Logger.INFO })`, from `OFF` through `ERROR`, `WARN` (the default), `INFO` to `DEBUG`, the prefix in colour |
 | `CustomError`, `UIError` | errors that carry their context in `props` (`activity`, `context`, `params`, the original `error`), as `die()`'s above |
 | `assert.string()`, `.number()`, `.boolean()` | narrow a value, or throw a `TypeError` |
+| `watchServerFiles()` | hear the page server's file changes, at their URL paths, over its live channel, with an optional poll (`every`, `polls`) while the channel is down;  quiet while the server is down, and one look when it's back.  The editor and the epic pages share it |
 | `elementTagFor()` | a view's tag:  `elementTagFor("Solitaire", "Card")` is `"solitaire-card"`, the same in the runtime, the editor and the TypeScript writer |
 
 ## Node only:  JSON5 with its comments kept

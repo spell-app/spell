@@ -1932,11 +1932,13 @@ export class EditorStore extends Observable {
    * Watch the open file for a change from OUTSIDE the editor (another window, an agent, git),
    * and hand a changed one to `reloadFiles()`.
    * - The page server tells the editor when one of the open project's files changes, over its live channel
-   *   (`watchServerFiles()`;  epic `from-console` P17):  read again only then, and when the page shows again.
-   *   - The editor joins that channel through vite's proxy (`joinLiveChannel()`):  vite serves its page, not the page
-   *     server, so nothing else puts the live client on it.
+   *   (`watchServerFiles()`;  epic `from-console` P17).
+   *   The file is read again only then, and when the page shows again.
+   *   - The editor joins that channel through vite's proxy (`joinLiveChannel()`):
+   *     vite serves its page, not the page server, so nothing else puts the live client on it.
    *   - The page server says so for every project's files (the app's route module, `watchSpaceFiles()`).
-   * - While the channel isn't open (not yet, or in a frame, which joins none):  read every `FILE_FALLBACK_POLL` seconds.
+   * - While the channel isn't open (not yet, or in a frame, which joins none):
+   *   read every `FILE_FALLBACK_POLL` seconds.
    *   It replaced a read every 2 seconds, whatever happened.
    * - Any open project file (epic `notebook` P3:  a notebook page's own watch, lifted here).
    * - The running app takes it as any edit (`LiveEdit`):  a notebook page draws again where it changed.

@@ -1,6 +1,7 @@
 /**
  * The English vocabulary of `<ui-json>`:  every name the tag uses.
- * - Its tag, attributes, events, parts, states and texts.  The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
+ * - Its tag, attributes, events, parts, states and texts.
+ *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
  * - Ours, not Fomantic's (epic `elemental-spell` P31;  the outline from epic `from-console` P3).
  * - The source pieces (`source`, `load`, `ui-loaded` ... `ui-error`, the loader and error parts, the states and texts)
  *   are shared with `<ui-code>` and `<ui-markdown>`:  `UIT.Source*`, which `LoadableComponent` reads.

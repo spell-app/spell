@@ -1404,7 +1404,8 @@ export const savedMethods = defineCoreModule({
    * - A list the place keeps under the thing, at an address of its own,
    *   `- a post's comments live at "/posts/{id}/comments"`:
    *   read from there, the first time something reads it (epic `data` P30).
-   *   - A field of ONE thing there, `- a system's snapshot lives at "..."`:  that list's one row (epic `from-console` P16).
+   *   - A field of ONE thing there, `- a system's snapshot lives at "..."`:
+   *     that list's one row (epic `from-console` P16).
    * - An address or `{ name, url }`.  A thing is the thing, so a field set to one reads at once.
    * - Waits as a value does:  in a drawing, the nearest "…" or `while waiting:`.  Once it's known, it answers at once.
    * - Each read of it holds what it follows, so a drawing leaving stops its requests.
