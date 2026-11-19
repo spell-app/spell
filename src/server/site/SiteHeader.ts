@@ -431,13 +431,14 @@ header {
 a { color: inherit; text-decoration: none; }
 .brand { flex: none; display: inline-flex; align-items: center; color: light-dark(#5b3fd0, #b3a2ff); }
 .brand svg { display: block; height: 26px; width: auto; }
-/* the words, as the editor's wordmark:  its font, weight and tracking (the app's index.html, its --spell-wordmark-* tokens) */
+/* the words, as the editor's wordmark:  its font, weight, tracking and text colour, the hat alone in the brand colour (the app's index.html, its --spell-wordmark-* tokens) */
 .brand { gap: 4px; }
 .brand-name {
   font-family: var(--spell-wordmark-font, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Lato, Arial, sans-serif);
   font-size: 1.15em;
   font-weight: var(--spell-wordmark-weight, 900);
   letter-spacing: var(--spell-wordmark-tracking, -0.035em);
+  color: var(--ui-text-color, light-dark(#1d1d22, #ececf1));
   white-space: nowrap;
 }
 nav { display: flex; gap: 2px; }
