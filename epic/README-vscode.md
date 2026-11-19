@@ -161,7 +161,7 @@ as VS Code's Simple Browser does, docked in the right side bar beside your code 
 | --- | --- | --- | --- |
 | Review, `spellEpic.reviewView` | a checklist | epic pages and saga pages | `/epic review <name>`, `epic open <name>`, `epic test <name>`;  its checklist button;  "Review:  Open Epic..." in the Command Palette |
 | Details, `spellEpic.detailsView` | a speech bubble | details, review and choice pages:  the questions you answer on a page | `epic ask show <page>`, `epic choices show <page>`, `/details`;  its own list button |
-| Epic Docs, `spellEpic.docView` | the Spell hat | any other guide or docs page | `epic pages open <page> --vs`, `/spell-docs` (spell-app's skill) |
+| Epic Docs, `spellEpic.docView` | the Spell hat | any other guide or docs page | `epic pages open <page> --vs` |
 
 - Each view holds ONE page, and keeps its own:  the page you're reviewing stays put while the docs move.
 - The page's kind picks the tab, whichever command showed it:  an epic page always lands in Review.
@@ -204,11 +204,11 @@ Two quirks you'll meet in the first minute:
 ### The buttons
 
 Every title bar carries the same row, left to right:
-Back, Forward, Reload, Open in Browser, a blank gap, Home Page, This Window's Epic Page, Inspect, Restart Page Server.
+Back, Forward, Reload, Open in Browser, a blank gap, Epics Home, This Epic's Page, Restart Page Server.
 VS Code's own maximize comes last.
 
 - The gap is a blank, greyed-out button, 22 pixels wide, that does nothing.
-- Details has its list button where the others have Home Page, and no epic-page button.
+- Details has its list button where the others have Epics Home, and no epic-page button.
 - "Review:  Open Epic..." lives in the Command Palette, not on the title bar:
   the epic-page button opens the same list in the main checkout's window.
 
@@ -217,12 +217,14 @@ VS Code's own maximize comes last.
 | Back, Forward | the page's own history.  The view can't read a frame from another origin, so the page reports where it is;  a page from no page server never does, and both stay off |
 | Reload | the page again, in the same frame |
 | Open in Browser | the page, in your default browser |
-| Home Page | Epic Docs and Review:  a NEW frame, at the docs' home page:  the epic server's, else the window's own repo's |
-| This Window's Epic Page | the Review and Epic Docs tabs' checklist button:  in a worktree's window, always that worktree's epic page, in the Review tab, whatever the tab showed last;  in the main checkout's window, the epic list of "Review:  Open Epic..." |
-| Details:  This Epic's Details Pages (`spellEpic.detailsView.list`) | the Details tab's list button:  this window's epic's details and choice pages, newest first, the waiting ones red, the pages waiting their turn on top;  "Other epic..." picks another, remembered for the window |
+| Epics Home | Epic Docs and Review:  a NEW frame, at the docs' home page:  the epic server's, else the window's own repo's |
+| This Epic's Page | the Review and Epic Docs tabs' checklist button:  in a worktree's window, always that worktree's epic page, in the Review tab, whatever the tab showed last;  in the main checkout's window, the epic list of "Review:  Open Epic..." |
+| This Epic's Questions (`spellEpic.detailsView.list`) | the Details tab's list button:  this window's epic's details and choice pages, newest first, the waiting ones red, the pages waiting their turn on top;  "Other epic..." picks another, remembered for the window |
 | Review:  Open Epic... | a Command Palette command:  lists every epic page of every registered repo, and of the window's first folder, newest first, by title;  the one you pick opens in Review, in any window.  No terminal, no Claude:  it's how you review on a plane |
-| Inspect | VS Code's Developer Tools, which hold the page;  a second click closes them.  The tooltip says what to pick next:  Cmd + Shift + C for the element picker, or the Console tab and the page's frame (`127.0.0.1`) in the menu at its top left;  VS Code can't choose the frame itself.  Desktop VS Code only |
 | Restart Page Server | stops and starts the server behind the page, then shows the page again, on its new port if it moved |
+
+Each tooltip is the button's name only;  in the Command Palette, each is listed under its tab's name
+(Epic Docs, Review, Details), e.g. "Review:  Epics Home".
 
 ### When a page misbehaves
 
@@ -232,10 +234,10 @@ Four fixes, gentlest first:
 | --- | --- | --- |
 | is stale, or shows an error | Reload | loads it again, in the same frame |
 | stops taking clicks | `epic window reload` (`--review` for Review, `--details` for Details) | a new frame, at the same page |
-| stops answering at all | Home Page;  in Details, its list button | a new frame, at the docs' home page;  in Details, the list in its place |
+| stops answering at all | Epics Home;  in Details, its list button | a new frame, at the docs' home page;  in Details, the list in its place |
 | lost its server, or has a stale one | Restart Page Server | the server behind it, stopped and started, and the page shown again |
 
-Home Page builds a new frame rather than steering the old one,
+Epics Home builds a new frame rather than steering the old one,
 because a wedged page ignores every message the view sends it, Back included.
 
 ### One setting
@@ -478,7 +480,7 @@ or to the code it bundles:  the kit's page server, which the fallback runs, and 
 
 Two checks, both from spell-epic's root.
 The type check is `yarn vscode:check`.
-The tests are fifteen, of the pure parts, in [tests/vscode/](tests/vscode/), run by plain `node --test`:
+The tests are seventeen, of the pure parts, in [tests/vscode/](tests/vscode/), run by plain `node --test`:
 
 ```sh
 yarn test:vscode
@@ -493,9 +495,9 @@ yarn test:vscode
 ...
 ✔ folderIndex():  a window's folder by any spelling -- one reopened from the recent list after a move (I59) ...
 ...
-ℹ tests 15
+ℹ tests 17
 ℹ suites 0
-ℹ pass 15
+ℹ pass 17
 ℹ fail 0
 ...
 ```

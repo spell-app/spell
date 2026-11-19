@@ -1334,8 +1334,8 @@ export class ReviewInbox {
    *   skeleton's:  its body, a part, may not be in `html`), or an `<epic-change id>` not `accepted` in `html` itself
    * - every STANDING option set not closed (`<epic-choices id="s-upgrades" standing>`, epic `epic-engine` P50)
    * - the Manual tests section, `tests` (`TESTS_ID`):  its Start testing (epic `epic-engine` P51)
-   * - the kickoff box, `kickoff` (`KICKOFF_ID`, epic `epic-engine` P75), while the page (an `<epic-page>`) has no
-   *   phases:  still planning
+   * - the kickoff box, `kickoff` (`KICKOFF_ID`, epic `epic-engine` P75), while the page is an epic page in its
+   *   Overview stage (`PageStages.takesKickoff()`:  never a saga page, I349) with no phases:  still planning
    * - every update block not seen (`up3`, epic `epic-engine` I168):  listed in its host's `to-see` (`up3@<at>`), or
    *   an `<epic-update id>` without `seen` in `html` itself
    * - text, not a DOM:  cheap enough to run on every request;  attributes in any order, across lines
@@ -1356,9 +1356,10 @@ export class ReviewInbox {
   /** What takes a mark among the rows of an epic page's list (`EpicPageFormat.listIn()`). */
   private static itemIdsIn(rows: readonly PlaceRow[]): Set<string> {
     const ids = new Set<string>()
-    // the kickoff box (epic `epic-engine` P75):  an epic page, no phases yet, still being planned
-    const tags = new Set(rows.map((row) => EpicPageFormat.tagOf(row)))
-    if (tags.has("epic-page") && !tags.has("epic-phase")) ids.add(KICKOFF_ID)
+    // the kickoff box (epic `epic-engine` P75):  an epic page in its Overview stage, no phases yet (never a saga, I349)
+    const page = rows.find((row) => EpicPageFormat.tagOf(row) === "epic-page")
+    const planned = rows.some((row) => EpicPageFormat.tagOf(row) === "epic-phase")
+    if (page && PageStages.takesKickoff(page) && !planned) ids.add(KICKOFF_ID)
     for (const row of rows) {
       const name = EpicPageFormat.tagOf(row)
       const id = row.id as string | undefined

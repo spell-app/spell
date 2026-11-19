@@ -587,7 +587,7 @@ describe("<epic-page> Send and its countdown", () => {
         child.getAttribute("part")
       )
     expect([parts("centre"), parts("status")]).toEqual([
-      ["send", "spinner"],
+      ["send"],
       ["step-pill", "gear", "gear-menu"]
     ])
     expect(headerButtons(host)).toEqual({ send: ["unsent", `Send 2 marks to Claude${NOBODY}`] })
@@ -1218,12 +1218,9 @@ async function adoptAgents(routes: FakeAgents, { served = true } = {}) {
   return client
 }
 
-/**
- * The shadow root of `host`'s `<epic-agents>` drawing `draws`:  the agents' button in the header's pill, or the
- * session's spinner beside Send (P53).
- */
-function agentsRoot(host: Element, draws: "agents" | "spinner" | "words" = "agents"): ShadowRoot {
-  return host.shadowRoot!.querySelector(`epic-agents[draws="${draws}"]`)!.shadowRoot!
+/** The shadow root of `host`'s `<epic-agents>`:  the agents' button in the header's pill. */
+function agentsRoot(host: Element): ShadowRoot {
+  return host.shadowRoot!.querySelector(`epic-agents[draws="agents"]`)!.shadowRoot!
 }
 
 /** `host`'s agent rows, as drawn:  `[name, status, colour, age, task, redirects]` each. */
@@ -1297,8 +1294,8 @@ describe("<epic-page> Agents running", () => {
     expect(agentsRoot(host).querySelector(".agents-pop")!.getAttribute("aria-label")).toBe("Agents running")
     // no panel above the blocks any more:  the button is the header's pill's last part (Owen, 2026-10-25)
     expect(host.shadowRoot!.querySelector('epic-agents[draws="agents"]')!.closest('[part~="step-pill"]')).not.toBeNull()
-    // ONCE:  the spinner beside Send draws no second button (Owen, 2026-10-29:  "agent pill appears twice?")
-    expect(agentsRoot(host, "spinner").querySelector(".agents-button")).toBeNull()
+    // ONCE (Owen, 2026-10-29:  "agent pill appears twice?"):  the header holds no other `<epic-agents>`
+    expect(host.shadowRoot!.querySelectorAll("epic-agents")).toHaveLength(1)
     expect(agentRows(host)).toEqual([
       ["demo-aaa", "active", "blue", "2h 5m", "Port the parser", []],
       [
@@ -1408,30 +1405,25 @@ describe("<epic-page> what Claude is doing", () => {
     ReviewClient.adopt(undefined)
   })
 
-  // T53:  "Feels like this agent is chunking away circle should be in the top near the plane", then "the spinner is
-  // already round, doesn't need to be in a circular border"
-  // P55 (Owen, r46;  Q62 A):  answering a Send, the spinner hides and Send's own ring turns
-  test("the session's spinner beside Send, bare, its words beside it, for other work;  answering a Send, Send's ring turns instead;  none while idle", async () => {
+  // I340 (Owen, 2026-11-18):  "This 'Building P72...' is too big -- it cuts off the name of the epic.  Remove it, use
+  // the P76 pill instead, don't show the name of the phase"
+  test("no line in the header:  the step label turns for other work, whatever it names, the words its tooltip;  answering a Send, Send's ring turns instead", async () => {
     const routes = new FakeRoutes()
     routes.inbox.listening = { session: "s1", since: new Date().toISOString(), seen: new Date().toISOString() }
-    routes.inbox.doing = { text: "Building P53", at: new Date().toISOString() }
+    routes.inbox.doing = { text: "Building P1", at: new Date().toISOString() }
     const client = await adoptClient(routes)
-    // no phase under way:  the step label names the next, so the line keeps its own spinner (I316)
+    // no phase under way:  the step label names the next, and still turns
     const host = await render(page("", ["todo"]))
-    const line = () => agentsRoot(host, "spinner").querySelector<HTMLElement>("[part~='doing']")
-    await vi.waitFor(() => expect(line()).not.toBeNull())
-    // no pill, no words:  the spinner alone, its words the tooltip
-    // its words beside it, inline (I210), and the whole line its tooltip
-    expect([line()!.querySelector("ui-label"), line()!.textContent, line()!.title]).toEqual([
-      null,
-      "Building P53",
-      "Building P53"
-    ])
-    expect(line()!.querySelector(".spinner")).not.toBeNull()
-    expect(getComputedStyle(line()!).borderTopStyle).toBe("none")
-    // beside Send, in the header's middle;  none left in the toolbar
-    expect(host.shadowRoot!.querySelector('[part~="centre"] epic-agents[draws="spinner"]')).not.toBeNull()
-    expect(host.shadowRoot!.querySelector('[part~="toolbar"] epic-agents')).toBeNull()
+    const label = () => host.shadowRoot!.querySelector<HTMLElement>('[part~="step-pill"] ui-label')!
+    const turning = () => label().querySelector<HTMLElement>('ui-icon[slot="icon"]')
+    await vi.waitFor(() => expect(turning()).not.toBeNull())
+    // the pill says only `P1`;  the phase's name and what Claude is doing are its tooltip
+    expect(step(host)?.words).toBe("P1")
+    expect(label().title.split("\n").at(-1)).toBe("Claude:  Building P1")
+    // nothing of it in the header's middle, nor anywhere but the agents' button
+    expect(host.shadowRoot!.querySelector('[part~="centre"] epic-agents')).toBeNull()
+    expect(host.shadowRoot!.querySelectorAll("epic-agents")).toHaveLength(1)
+    expect(host.shadowRoot!.querySelector('[part~="header"]')!.textContent).not.toContain("Building")
     routes.inbox.doing = {
       text: "Responding",
       items: [
@@ -1444,19 +1436,20 @@ describe("<epic-page> what Claude is doing", () => {
     expect(send().hasAttribute("working")).toBe(false)
     await client.refresh()
     await ElementFixture.tick()
-    expect(line()).toBeNull()
+    expect(turning()).toBeNull()
     expect([send().hasAttribute("working"), send().getAttribute("working-on")]).toEqual([true, "Q1, C3"])
     expect(send().matches(":state(working)")).toBe(true)
     expect(send().shadowRoot!.querySelector("[part~='working']")).not.toBeNull()
     routes.inbox.doing = null
     await client.refresh()
     await ElementFixture.tick()
-    expect(line()).toBeNull()
+    expect(turning()).toBeNull()
+    expect(label().title).not.toContain("Claude:")
     expect(send().hasAttribute("working")).toBe(false)
   })
 
   // I316 (Owen, 2026-11-16):  "Don't need both of these indicators.  Just make the one in the pill a loading spinner"
-  test("a phase building:  the step label's icon turns, Spell UI's loading circle;  the line beside Send keeps only its words", async () => {
+  test("a phase building:  the step label's icon turns, Spell UI's loading circle", async () => {
     const routes = new FakeRoutes()
     routes.inbox.listening = { session: "s1", since: new Date().toISOString(), seen: new Date().toISOString() }
     routes.inbox.doing = { text: "Building P2", at: new Date().toISOString() }
@@ -1464,26 +1457,16 @@ describe("<epic-page> what Claude is doing", () => {
     const host = await render(page("", ["done", "active"]))
     const label = () => host.shadowRoot!.querySelector<HTMLElement>('[part~="step-pill"] ui-label')!
     const turning = () => label().querySelector<HTMLElement>('ui-icon[slot="icon"]')
-    const line = () => host.shadowRoot!.querySelector('[part~="centre"] epic-agents')!
     await vi.waitFor(() => expect(turning()).not.toBeNull())
     expect([turning()!.getAttribute("name"), turning()!.hasAttribute("loading"), label().hasAttribute("icon")]).toEqual(
       ["circle notch", true, false]
     )
     expect(step(host)?.words).toBe("P2")
-    // its words alone:  no second spinner
-    expect(line().getAttribute("draws")).toBe("words")
-    const doing = () => agentsRoot(host, "words").querySelector<HTMLElement>("[part~='doing']")
-    await vi.waitFor(() => expect(doing()?.textContent).toBe("Building P2"))
-    expect(doing()!.querySelector(".spinner")).toBeNull()
     // answering a Send:  Send's ring turns, the step label stands still, its icon back
     routes.inbox.doing = { text: "Responding", items: [{ id: "q1", title: "Which?" }], at: new Date().toISOString() }
     await client.refresh()
     await ElementFixture.tick()
-    expect([turning(), label().getAttribute("icon"), line().getAttribute("draws")]).toEqual([
-      null,
-      "circle notch",
-      "spinner"
-    ])
+    expect([turning(), label().getAttribute("icon")]).toEqual([null, "circle notch"])
     // idle, but Claude at work on the phase itself (`epic inbox working demo#P2 on`):  it turns again
     routes.inbox.doing = null
     routes.inbox.working = { p2: { action: "details", since: new Date().toISOString() } }

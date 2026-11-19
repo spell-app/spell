@@ -1670,7 +1670,7 @@ export class RepoInit {
       rows.push([done, `${file}  (superpowers' stand-aside words)`])
     }
     if (person.action === "kept" || person.action === "would keep")
-      rows.push([would("kept", "would keep"), `${EpicHome.personFile()}  (your name)`])
+      rows.push([would("saved", "would save"), `${EpicHome.personFile()}  (your name)`])
     if ((color?.action === "kept" || color?.action === "would keep") && color.file) {
       // no "at your next turn" while no push can go through (a refused first push)
       const later = remote.refusal ? ", shared once the epic repo takes a push" : ", pushed at your next turn"

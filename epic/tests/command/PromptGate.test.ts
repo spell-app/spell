@@ -361,3 +361,43 @@ describe("the hook", () => {
     expect(bad.stdout).toBe("")
   })
 })
+
+describe("the staged demo (epic `epic-engine` P77)", () => {
+  /** A repo whose epic folder holds the staged demo's step files. */
+  function stagedRepo(staged = true): string {
+    const repo = mkdtempSync(join(tmpdir(), "spell-demo-repo-"))
+    mkdirSync(join(repo, ".epic"))
+    writeFileSync(join(repo, ".epic", "config.json5"), '{ contentFolder: "content" }\n')
+    const folder = join(repo, "content", "epics", "epic-engine", "staged-demo")
+    mkdirSync(folder, { recursive: true })
+    if (staged) writeFileSync(join(folder, "00-paste.md"), "# 00\n")
+    return repo
+  }
+
+  test("/epic demo with the step files there:  let through, titled, sent to the Staged demo, its text saved", () => {
+    const repo = stagedRepo()
+    const answer = gate({ prompt: "/epic demo Harbor should brief me", cwd: repo }, OTHER_WINDOW)
+    expect(answer?.decision).toBeUndefined()
+    expect(answer?.hookSpecificOutput?.sessionTitle).toBe("🚧 demo")
+    expect(answer?.hookSpecificOutput?.additionalContext).toMatch(/Staged demo/)
+    expect(answer?.hookSpecificOutput?.additionalContext).toMatch(/no EnterWorktree/)
+    expect(readFileSync(join(prompts, "demo.md"), "utf8").trim()).toBe("Harbor should brief me")
+    rmSync(repo, { recursive: true, force: true })
+  })
+
+  test("another epic's session keeps its title", () => {
+    const repo = stagedRepo()
+    const answer = gate({ prompt: "/epic demo", cwd: repo, session_title: "🚧 seo" }, null)
+    expect(answer?.hookSpecificOutput?.sessionTitle).toBeUndefined()
+    expect(answer?.hookSpecificOutput?.additionalContext).toMatch(/STAGED DEMO/)
+    rmSync(repo, { recursive: true, force: true })
+  })
+
+  test("no step files:  /epic demo is an epic like any other", () => {
+    const repo = stagedRepo(false)
+    expect(PromptGate.isStagedDemo(repo)).toBe(false)
+    const answer = gate({ prompt: "/epic demo", cwd: repo }, null)
+    expect(answer?.hookSpecificOutput?.additionalContext ?? "").not.toMatch(/STAGED DEMO/)
+    rmSync(repo, { recursive: true, force: true })
+  })
+})

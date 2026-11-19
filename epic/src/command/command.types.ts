@@ -228,6 +228,15 @@ export const ENTRYPOINT_PLACES: Record<string, string> = {
  */
 export const TITLE_ICONS = { active: "🚧", future: "📅", done: "✅", errors: "🚨", paused: "⏸️" } as const
 
+/**
+ * The STAGED DEMO (epic `epic-engine` P77):  `/epic demo` runs a demo epic from pre-written text (`StagedDemo`).
+ * - `epic`:  the demo epic's id, and the word after `/epic` that starts it
+ * - `folder`:  where its step files are, in the epic folder;  the prompt gate treats `/epic demo` as the demo only
+ *   while that folder holds them
+ * - Here, not in `StagedDemo.ts`:  the prompt gate reads them, and loads in plain `node`
+ */
+export const STAGED_DEMO = { epic: "demo", folder: "epics/epic-engine/staged-demo", firstStep: "00-paste.md" } as const
+
 /** Icons titles may still start with from before:  😴, sleeping (gone 2026-10-10:  epic `airplane` P8). */
 const OLD_TITLE_ICONS = ["😴"]
 

@@ -1,7 +1,8 @@
 /**
  * An epic's running agents, on the page server (epic `skillz`, P3):  a ROUTE MODULE (`spell/server/page`'s
  * `RouteModule`), listed in the repo root's `package.json` `"pageServer": { "routes": [...] }`.
- * - The epic page shows them in its "Agents running" box (`<epic-page>`, `spell-epic`), each with a note box:
+ * - The epic page's header shows them:  `2 🤖`, a button whose popover holds a row per agent (`<epic-agents>`),
+ *   each with a note box:
  *   Owen's note REDIRECTS that agent.  It waits in the list (`AgentList.ts`) until a Claude session waiting on it
  *   (`epic agents wait`) passes it on, and marks it told.
  * - `page`:  the epic page's URL path, as it was served (`/epics/x/x.plan.html`, or a worktree's

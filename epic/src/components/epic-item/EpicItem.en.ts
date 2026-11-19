@@ -206,7 +206,7 @@ export const epicItemVocabulary = {
       kind: "boolean",
       description:
         "A judgement call or issue Claude has fixed (`epic update ... fixed`, epic `epic-engine` I232):  `replied` " +
-        "(orange), your turn to review it;  Approve closes it, Do this sends it back."
+        "(orange), your turn to review it;  Accept the fix closes it, Revisit (with a note) sends it back."
     },
     {
       name: "failed",
