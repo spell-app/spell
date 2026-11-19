@@ -471,6 +471,8 @@ const APP_TEXTS_ES: AppTextPack = {
   anatomyShows: "Qué mostrar",
   anatomyViews: "Vistas",
   anatomyViewsTip: "Una capa por cada vista que dibuja tu app",
+  anatomyNamed: "Con nombre",
+  anatomyNamedTip: "Una capa por cada vista que dibuja tu app, con su nombre",
   anatomyOutlines: "Contornos",
   anatomyOutlinesTip: "Dibuja cada vista como un marco vacío, sin lo que hay en ella",
   anatomyEscToClose: "Esc para cerrar",

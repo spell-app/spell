@@ -125,9 +125,10 @@ describe.skipIf(!SERVING)("Anatomy, over Solitaire", { timeout: 180_000 }, () =>
     // face on at first, then turned to its resting angle once it's waited half a second and turned
     expect(await turn()).toMatchObject({ tilt: 0, spin: 0 })
 
-    // what it shows:  Views | Outlines, no Depth slider (T118)
+    // what it shows:  Views | Named | Outlines, no Depth slider (T118, T121);  Named for the tags below
     const tabs = await page.locator(".AnatomyShows ui-item").allTextContents()
-    expect(tabs.map((tab) => tab.trim())).toEqual(["Views", "Outlines"])
+    expect(tabs.map((tab) => tab.trim())).toEqual(["Views", "Named", "Outlines"])
+    await page.locator(".AnatomyShows ui-item[value=named] [part~=item]").click()
     expect(await page.locator(".AnatomyBar ui-slider").count()).toBe(1)
     await page.waitForTimeout(2500)
     const resting = await turn()
@@ -248,7 +249,10 @@ describe.skipIf(!SERVING)("Anatomy, over Solitaire", { timeout: 180_000 }, () =>
         (selector) => getComputedStyle(document.querySelector(selector)!).backgroundColor
       )
     )
-    expect(behind).toEqual(["rgba(0, 0, 0, 0.88)", "rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"])
+    // the dim:  the page's colour, 90% opaque, not black (T121)
+    expect(behind[0]).toMatch(/ \/ 0\.9\)$|, 0\.9\)$/)
+    expect(behind[0]).not.toMatch(/^rgba\(0, 0, 0/)
+    expect(behind.slice(1)).toEqual(["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"])
     await page.evaluate(() => (window as unknown as TestWindow).AppAnatomy.toggleFullWindow())
     await page.waitForTimeout(300)
 

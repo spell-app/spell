@@ -19,7 +19,8 @@ import "./AppAnatomy.css"
  * - Its switch is beside Inspect app in the top bar (`<AnatomyButton>`), and View › Anatomy (⌥⌘A).
  * - The app itself turns and lifts (Q42 A):  the game keeps running on its floors, a live edit shows at once.
  *   - Turned off, every style it set is put back as it was (`AnatomyStyles`).
- * - Or Outlines (Q42's B, a switch in its bar):  each view an empty labelled frame, the app hidden under them.
+ * - Views | Named | Outlines, a switch in its bar (T121):  the layers alone, the layers with their types' tags,
+ *   or (Q42's B) each view an empty labelled frame, the app hidden under them.
  * - In the app pane, where the app already is (Q43 A);  Full Window lifts the pane over the whole editor (Q43 C).
  * - A floor per view the program draws (Q44 A), down to `DEPTH` floors deep.
  * - A floor's hover rings it as Inspect app's hover does, and a click selects it as a click on the app does:
@@ -95,12 +96,12 @@ export class AppAnatomy {
     setZoom(START_ZOOM)
   }
 
-  /** How the floors are drawn (reactive):  your views, the live app lifted apart, or outlines of them. */
+  /** How the floors are drawn (reactive):  your views lifted apart, the same with their tags, or outlines of them. */
   static get look(): AnatomyLook {
     return look()
   }
 
-  /** Show your views, or outlines of them;  remembered. */
+  /** Show your views, with or without their tags, or outlines of them;  remembered. */
   static setLook(next: AnatomyLook): void {
     setLook(next)
     editorPrefs.set(LOOK_PREF, next)
@@ -143,8 +144,13 @@ export class AppAnatomy {
   }
 }
 
-/** How Anatomy draws its floors:  the live app lifted apart (Views), or empty labelled outlines. */
-export type AnatomyLook = "live" | "outlines"
+/**
+ * How Anatomy draws its floors (T121):
+ * - `views`:  the live app lifted apart, no tags (Owen:  "Labels are distracting")
+ * - `named`:  the same, each floor tagged with its type
+ * - `outlines`:  empty labelled frames
+ */
+export type AnatomyLook = "views" | "named" | "outlines"
 
 /** What a click does while Anatomy shows:  goes to the app, or picks a floor. */
 export type AnatomyClicks = "play" | "inspect"
@@ -152,7 +158,8 @@ export type AnatomyClicks = "play" | "inspect"
 /** The prefs it remembers:  the look and the spacing. */
 const LOOK_PREF = "anatomy:look"
 const SPACING_PREF = "anatomy:spacing"
-editorPrefs.declare(LOOK_PREF, { oneOf: ["live", "outlines"] })
+// `live` was Views with their tags, before T121 parted them
+editorPrefs.declare(LOOK_PREF, { oneOf: ["views", "named", "outlines"], renamed: { live: "views" } })
 editorPrefs.declare(SPACING_PREF, { type: "number", default: 48 })
 
 /** How many floors deep it comes apart:  a floor below that sits flat on the one above it. */
@@ -306,13 +313,15 @@ function AnatomyStack(props: { pane: HTMLElement; body: HTMLElement; program: HT
     (state) => {
       styles.apply({ state, body, program, shown })
       const paneBox = pane.getBoundingClientRect()
-      if (state.look === "live") {
+      if (state.look !== "outlines") {
         setFrames([])
         setTags(
-          tagsFor(
-            state.floors.filter((floor) => shown(floor, state)),
-            paneBox
-          )
+          state.look === "named"
+            ? tagsFor(
+                state.floors.filter((floor) => shown(floor, state)),
+                paneBox
+              )
+            : []
         )
       } else {
         setTags([])
@@ -686,7 +695,7 @@ function isBar(target: EventTarget): boolean {
  * Anatomy's bar, across the top of the app pane:  where it's looking, and how.
  * - Left:  "Solitaire in 3D", then the floors down to the one shown alone, each a link back to it (breadcrumbs);
  *   then Play | Inspect, what a click does (T117).
- * - Then Front, the Spacing slider, and Views | Outlines, what it shows (I257, T118).
+ * - Then Front, the Spacing slider, and Views | Named | Outlines, what it shows (I257, T118, T121).
  * - At the right end, icons alone:  how to use it, Full Window, Close, each with the browser's own tooltip.
  ****************/
 function AnatomyBar(props: { floors: Floor[] }): JSX.Element {
@@ -765,8 +774,11 @@ function AnatomyBar(props: { floors: Floor[] }): JSX.Element {
         value={AppAnatomy.look}
         ref={on<{ value: string }>("ui-changed", (event) => AppAnatomy.setLook(event.detail.value as AnatomyLook))}
       >
-        <ui-item value="live" title={appTexts.text("anatomyViewsTip")}>
+        <ui-item value="views" title={appTexts.text("anatomyViewsTip")}>
           {appTexts.text("anatomyViews")}
+        </ui-item>
+        <ui-item value="named" title={appTexts.text("anatomyNamedTip")}>
+          {appTexts.text("anatomyNamed")}
         </ui-item>
         <ui-item value="outlines" title={appTexts.text("anatomyOutlinesTip")}>
           {appTexts.text("anatomyOutlines")}

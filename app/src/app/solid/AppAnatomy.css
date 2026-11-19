@@ -179,12 +179,13 @@
   z-index: 900;
   border-radius: 12px;
   /*
-   * no surface of its own:  the turned app sits on the dark dim, inside the pane as round it (I263)
-   * - the dim nearly black, so the editor behind doesn't show through (I260)
+   * no surface of its own:  the turned app sits on the dim, inside the pane as round it (I263)
+   * - the dim 90% opaque, so the editor behind barely shows through (I260)
+   * - the page's own colour, not black:  light in a light theme, dark in a dark one (T121)
    */
   background: var(--AnatomyFullWindow-dim);
   box-shadow: 0 0 0 100vmax var(--AnatomyFullWindow-dim);
-  --AnatomyFullWindow-dim: rgb(0 0 0 / 0.88);
+  --AnatomyFullWindow-dim: color-mix(in srgb, var(--ui-background, white) 90%, transparent);
 
   /* nor its body, nor the program's:  the editor's own surfaces would show behind the app */
   & > .AppPaneBody,
