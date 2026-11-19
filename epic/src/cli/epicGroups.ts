@@ -407,6 +407,80 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     }
   ],
 
+  demo: [
+    {
+      name: "check",
+      usage: "[--json]",
+      description:
+        "the staged demo (the default verb):  its step files are there, and nothing of an earlier run is left;  " +
+        "exits 1 naming what's wrong",
+      example: "epic demo check",
+      flags: { "--json": "print the report as JSON" }
+    },
+    {
+      name: "run",
+      usage: "<step> [--quiet]",
+      description:
+        "run a step of the staged demo:  its commands on the real demo epic (in the main checkout), then what " +
+        "Claude says;  a step by its number (03) or a word of its file's name (overview)",
+      example: "epic demo run 02",
+      flags: { "--quiet": "a rehearsal:  nothing shown in VS Code (its epic open and --show lines left out)" }
+    },
+    {
+      name: "lines",
+      usage: "[n]",
+      description: "n silly working lines (4 by default), picked at random from the demo's silly-lines.txt",
+      example: "epic demo lines 4",
+      flags: {}
+    },
+    {
+      name: "pause",
+      usage: "[seconds]",
+      description: "wait a moment between working lines (2 seconds by default, 30 at most)",
+      example: "epic demo pause 2",
+      flags: {}
+    },
+    {
+      name: "wait",
+      usage: "[--timeout 55m]",
+      description:
+        "wait for your Send or Accept on the demo page (an Accept goes at once, not after 5 minutes), take it in " +
+        "(inbox apply), and print the step to run next;  run it in the background",
+      example: "epic demo wait",
+      flags: { "--timeout <time>": "how long to wait:  55m (the default), 1h, or seconds" }
+    },
+    {
+      name: "next",
+      usage: "",
+      description: "the demo's next step, read from its page:  run 04, wait (your turn), or done",
+      example: "epic demo next",
+      flags: {}
+    },
+    {
+      name: "overview",
+      usage: "<step>",
+      description: "write a step file's html blocks as the demo page's Overview:  its summary, then each numbered part",
+      example: "epic demo overview 03",
+      flags: {}
+    },
+    {
+      name: "seen",
+      usage: "",
+      description: "mark the demo page's While you were out read, so it counts from now",
+      example: "epic demo seen",
+      flags: {}
+    },
+    {
+      name: "reset",
+      usage: "[--dry-run]",
+      description:
+        "delete the demo epic and everything it made (its page and files, its card, a worktree, branch or window " +
+        "file named demo, the saved prompt), so it can run again;  never another epic",
+      example: "epic demo reset --dry-run",
+      flags: { "--dry-run": "only say what would go" }
+    }
+  ],
+
   focus: [
     {
       name: "status",
@@ -1260,6 +1334,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
  *   `plugin` (`PluginInstall`)
  * - the docs pages' tools:  `pages` (`EpicTools.runPages()`)
  * - the `epic` tool's, every epic at once:  `focus` (`FocusCommands`, epic `epic-engine` T93)
+ * - the staged demo:  `demo` (`StagedDemo`, epic `epic-engine` P77)
  */
 export type GroupName =
   | "ask"
@@ -1269,6 +1344,7 @@ export type GroupName =
   | "agents"
   | "airplane"
   | "focus"
+  | "demo"
   | "worktree"
   | "session"
   | "park"

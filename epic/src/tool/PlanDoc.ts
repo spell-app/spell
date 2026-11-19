@@ -3944,7 +3944,32 @@ const NEED_PARTS: readonly { key: NeedPart; state: AwayState; title: string }[] 
 
 /** A prompt's text as `<p>`s:  blank lines split paragraphs, single newlines become `<br>`;  `""` for none. */
 function promptHTML(prompt: string | null | undefined): string {
-  return withPictures(PlanMarkup.paragraphs(prompt), prompt ?? "")
+  return withPictures(promptBlocks(prompt ?? ""), prompt ?? "")
+}
+
+/**
+ * A typed prompt as HTML:  its fenced code blocks (```` ```ts ```` ... ```` ``` ````) as code, the rest as paragraphs
+ * (`PlanMarkup.paragraphs()`;  epic `epic-engine` P77:  the demo's pasted code read as one paragraph, its fences and all).
+ * - a code block:  `<pre><code class="language-ts">`, escaped, its lines as typed;  colored and given a Copy button by the
+ *   docs runtime, as every `<pre><code>` on a page
+ * - a fence never closed:  the rest is code
+ */
+function promptBlocks(prompt: string): string {
+  const html: string[] = []
+  let rest = prompt
+  for (;;) {
+    const open = /^\s*```([\w+-]*)[^\n]*\n/m.exec(rest)
+    if (!open) break
+    html.push(PlanMarkup.paragraphs(rest.slice(0, open.index)))
+    const body = rest.slice(open.index + open[0].length)
+    const close = /^\s*```\s*$/m.exec(body)
+    const code = (close ? body.slice(0, close.index) : body).replace(/\n$/, "")
+    const language = open[1] ? ` class="language-${PlanMarkup.attribute(open[1])}"` : ""
+    html.push(`<pre><code${language}>${PlanMarkup.escapeAll(code)}</code></pre>`)
+    rest = close ? body.slice(close.index + close[0].length) : ""
+  }
+  html.push(PlanMarkup.paragraphs(rest))
+  return html.join("")
 }
 
 /**

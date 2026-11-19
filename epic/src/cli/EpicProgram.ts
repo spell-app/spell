@@ -475,6 +475,13 @@ export class EpicProgram {
         "on and off print a TELL: line for each running epic session;  summary:  what happened since",
       (args) => EpicTools.planDoc(["focus", ...args])
     )
+    this.group(
+      epic.command("demo"),
+      "the staged demo (/epic demo):  the real epic page and tools, run from pre-written text;  " +
+        "reset clears it to run again",
+      // loaded when run:  the epic tool's files stay out of every other verb's start
+      async (args) => new (await import("spell/epic/command/StagedDemo")).StagedDemo().run(args)
+    )
     this.page(
       epic.command("backfill"),
       "items you already went through in past sessions:  a dry run unless --apply",
