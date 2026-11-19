@@ -10,7 +10,7 @@ import {
   rmSync,
   writeFileSync
 } from "node:fs"
-import { tmpdir } from "node:os"
+import { homedir, tmpdir } from "node:os"
 import { dirname, join, relative } from "node:path"
 import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
@@ -834,6 +834,115 @@ describe('epic init:  GitLab refuses the epic repo\'s first push (epic-engine P6
   })
 })
 
+describe("epic init:  what the plugin step says about the machine (epic-engine I345, I346)", () => {
+  /** A scratch machine:  Claude Code's folder, the `PATH` folder `epic` goes in, and a folder with or without `claude`. */
+  function machine(name: string, { claude = false, sessions = false }: { claude?: boolean; sessions?: boolean } = {}) {
+    const root = join(TEMP, "machine", name)
+    const home = join(root, ".claude")
+    const bin = join(root, ".local", "bin")
+    const tools = join(root, "tools")
+    mkdirSync(home, { recursive: true })
+    mkdirSync(tools, { recursive: true })
+    if (sessions) mkdirSync(join(home, "projects"))
+    if (claude) writeFileSync(join(tools, "claude"), "")
+    return { home, bin, tools }
+  }
+
+  test("epic's folder not on the PATH:  one line saying so, and the line for zsh's or bash's profile", async () => {
+    const { home, bin, tools } = machine("off-path", { claude: true })
+    const env = { PATH: `${tools}:/usr/bin`, SHELL: "/bin/zsh" }
+    const report = await new RepoInit({ main: codeRepo("off-path"), plugin: stubPlugin({ home, bin }).make, env }).init(
+      {
+        plugin: true,
+        noRemote: true
+      }
+    )
+    expect(report.plugin).toEqual({
+      action: "installed",
+      changes: 3,
+      notOnPath: { folder: bin, profile: "~/.zshrc", line: `export PATH="${bin}:$PATH"` }
+    })
+    expect(said(report)).toEqual(
+      expect.arrayContaining([
+        "> installed epic for Claude Code",
+        "> Your terminal doesn't know where to find epic yet.",
+        "  To fix it, paste this line at the end of ~/.zshrc, then open a new terminal window:",
+        `    export PATH="${bin}:$PATH"`
+      ])
+    )
+    // on the PATH (a trailing slash too):  nothing said
+    const onPath = { PATH: `${tools}:${bin}/`, SHELL: "/bin/zsh" }
+    const again = await new RepoInit({
+      main: codeRepo("on-path"),
+      plugin: stubPlugin({ home, bin }).make,
+      env: onPath
+    }).init({
+      plugin: true,
+      noRemote: true
+    })
+    expect(again.plugin).toEqual({ action: "installed", changes: 3 })
+  })
+
+  test("the profile line:  ~ for the home folder, bash's own file, and no line for another shell", () => {
+    const bin = join(homedir(), ".local", "bin")
+    expect(RepoInit.pathFix(bin, "/usr/bin/zsh")).toEqual({
+      folder: "~/.local/bin",
+      profile: "~/.zshrc",
+      line: 'export PATH="$HOME/.local/bin:$PATH"'
+    })
+    expect(RepoInit.pathFix(bin, "/bin/bash").profile).toBe(
+      process.platform === "darwin" ? "~/.bash_profile" : "~/.bashrc"
+    )
+    expect(RepoInit.pathFix(bin, "/usr/bin/fish")).toEqual({ folder: "~/.local/bin" })
+    expect(RepoInit.pathLines({ folder: "~/.local/bin" })).toEqual([
+      "> Your terminal doesn't know where to find epic yet.",
+      "  To fix it, add ~/.local/bin to your PATH in your shell's settings, then open a new terminal window"
+    ])
+  })
+
+  test("no Claude Code (no claude on the PATH, no saved sessions):  never 'installed for Claude Code', how to add it later", async () => {
+    const { home, bin, tools } = machine("no-claude")
+    const env = { PATH: `${tools}:${bin}`, SHELL: "/bin/bash" }
+    const report = await new RepoInit({
+      main: codeRepo("no-claude"),
+      plugin: stubPlugin({ home, bin }).make,
+      env
+    }).init({
+      plugin: true,
+      noRemote: true
+    })
+    expect(report.plugin).toEqual({ action: "installed", changes: 3, noClaudeCode: true })
+    const lines = said(report)
+    expect(lines.join("\n")).not.toMatch(/installed epic for Claude Code|reload-plugins/)
+    expect(lines).toEqual(
+      expect.arrayContaining([
+        "> epic works inside Claude Code, and Claude Code isn't on this computer yet.",
+        "  1. Install Claude Code:  https://claude.com/claude-code",
+        "  2. Start a new conversation in it, and type /epic",
+        "  3. No /epic there?  Type this in your terminal, then start a new conversation:  epic plugin install"
+      ])
+    )
+  })
+
+  test("Claude Code there:  a claude on the PATH, or its saved sessions in Claude Code's folder (the VS Code panel's)", async () => {
+    const onPath = machine("claude-on-path", { claude: true })
+    const viaPath = await new RepoInit({
+      main: codeRepo("claude-on-path"),
+      plugin: stubPlugin(onPath).make,
+      env: { PATH: `${onPath.tools}:${onPath.bin}` }
+    }).init({ plugin: true, noRemote: true })
+    expect(viaPath.plugin).toEqual({ action: "installed", changes: 3 })
+    const panel = machine("claude-sessions", { sessions: true })
+    const viaSessions = await new RepoInit({
+      main: codeRepo("claude-sessions"),
+      plugin: stubPlugin(panel).make,
+      env: { PATH: `${panel.tools}:${panel.bin}` }
+    }).init({ plugin: true, noRemote: true })
+    expect(viaSessions.plugin).toEqual({ action: "installed", changes: 3 })
+    expect(said(viaSessions)).toContain("> installed epic for Claude Code")
+  })
+})
+
 describe("epic init:  first epic at work (epic-engine P71)", () => {
   test("the plugin updated, not only installed:  an open session needs /reload-plugins before /epic, a new one has it", async () => {
     const app = codeRepo("plugin-update")
@@ -937,12 +1046,17 @@ const SETUP = "epic-setup"
 function stubPlugin({
   installed = false,
   fails,
-  updates = false
-}: { installed?: boolean; fails?: string; updates?: boolean } = {}) {
+  updates = false,
+  home,
+  bin
+}: { installed?: boolean; fails?: string; updates?: boolean; home?: string; bin?: string } = {}) {
   const calls: string[] = []
   return {
     calls,
     make: () => ({
+      // `home` and `bin` turn on init's checks of the machine (I345, I346)
+      ...(home !== undefined && { home }),
+      ...(bin !== undefined && { bin }),
       isInstalled: () => installed,
       // as `PluginInstall.install()`:  run again, nothing to change
       install: () => {

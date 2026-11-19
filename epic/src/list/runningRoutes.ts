@@ -2,7 +2,10 @@
  * The RUNNING epics on the page server:  a ROUTE MODULE (`spell/server/page`'s `RouteModule`).
  * - listed in the repo root's `package.json`, `"pageServer": { "routes": [...] }`
  * - the logic:  `RunningEpics`
- * - `GET /api/epics/running` -- every running epic, as JSON (`RunningEpic[]`), never cached
+ * - `GET /api/epics/running` -- every running epic, as JSON (`RunningEpic[]`), never cached:  the Epics list's running
+ *   cards;  with what waits on each and its agents
+ *   - `?every`:  every epic, running or not (`RunningEpics.everyEpic()`):  the home page's Active epics
+ *     (`<epic-pills>`, epic `epic-engine` T99)
  * - the Epics list page (`epics/index.html`), as it's served (`RunningEpics.render()`):
  *   the running epics' cards added, every card marked again and regrouped
  * - live reload (`RunningEpics.watch()`):
@@ -29,10 +32,13 @@ import { RealPath } from "spell/server/RealPath"
 
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 
+// the route `<epic-pills>` asks:  its family's types file (data only)
+import { RUNNING_EPICS_API } from "spell/epic/components/epic-pills/EpicPills.types"
+
 import { RunningEpics } from "./RunningEpics"
 
 /** Where the list is answered. */
-export const RUNNING_API = "/api/epics/running"
+export const RUNNING_API = RUNNING_EPICS_API
 
 /**
  * A page server's `RouteContext`, with what spell-app's gains in epic `epic-eject` P12 (optional:  an older server
@@ -54,7 +60,9 @@ const runningRoutes: RouteModule = {
     const content = EpicConfig.contentOf(root)
     if (content !== resolve(root)) context.serveContent?.(content)
     const epics = new RunningEpics(root)
-    router.get(RUNNING_API, (_request, reply) => reply.set("Cache-Control", "no-store").json(epics.list()))
+    router.get(RUNNING_API, (request, reply) =>
+      reply.set("Cache-Control", "no-store").json(request.query.every === undefined ? epics.list() : epics.everyEpic())
+    )
     web.files.html.push((page, served) => (epics.isIndex(served.file) ? epics.render(page) : page))
     epics.watch(live)
     onStop(() => epics.close())

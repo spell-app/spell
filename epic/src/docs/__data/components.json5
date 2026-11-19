@@ -2879,11 +2879,11 @@
         },
         {
           "name": "handled",
-          "description": "With `handled`:  a grey `in P4` at its line's end, linking the phase whose text took its answer (epic `epic-engine` P31);  with `taken-in` (epic `epic-engine` I128), the same `in P1`, linking the phase that has it, while the item is still to finish (I307)."
+          "description": "With `handled`:  a grey `in P4` under its line's buttons (I348), linking the phase whose text took its answer (epic `epic-engine` P31);  with `taken-in` (epic `epic-engine` I128), the same `in P1`, linking the phase that has it, while the item is still to finish (I307)."
         },
         {
           "name": "done-in",
-          "description": "With `taken-in` on a finished item (done, canceled, decided):  a grey `done in P20` at its line's end, where its plane was, linking the phase it was done in (epic `epic-engine` J231)."
+          "description": "With `taken-in` on a finished item (done, canceled, decided):  a grey `in P20` under its line's buttons, linking the phase it was done in (epic `epic-engine` J231;  `done in P20` beside the buttons until I348)."
         },
         {
           "name": "git",
@@ -3054,17 +3054,12 @@
         {
           "key": "handledIn",
           "text": "in {phase}",
-          "description": "Its line's link to the phase that handled it:  `in P4`."
-        },
-        {
-          "key": "doneIn",
-          "text": "done in {phase}",
-          "description": "A finished item's link to the phase it was done in, where its plane was:  `done in P20` (J231)."
+          "description": "Its link to the phase that handled it, took it, or finished it, under its buttons:  `in P4` (I348)."
         },
         {
           "key": "donePillTip",
           "text": "Click:  go to {phase}.",
-          "description": "The `done in P20` pill's tooltip's second line (epic `epic-engine` J231)."
+          "description": "A finished item's `in P20` pill's tooltip's second line (epic `epic-engine` J231)."
         },
         {
           "key": "handledTip",
@@ -5654,6 +5649,104 @@
           "key": "thisPicture",
           "text": "this picture",
           "description": "What the x's tooltip names when it has no label."
+        }
+      ]
+    },
+    {
+      "tag": "epic-pills",
+      "name": "epic-pills",
+      "folder": "epic-pills",
+      "mainTag": "epic-pills",
+      "main": true,
+      "page": true,
+      "href": "epic-pills.html",
+      "topics": [
+        "epics-page"
+      ],
+      "aka": [
+        "active epics",
+        "epic pills",
+        "home page epics"
+      ],
+      "description": "The docs home page's Active epics (epic `epic-engine` T99):  a pill for each open epic worked on in the last week, in two columns, linking its epic page.  Each pill shows the epic's name, what waits on it in the epic page's badge colours (red, orange, blue), its phase under way (`P12`) or `Done`, and its running agents (`🤖 2`).  Drawn from the page server (`GET /api/epics/running?every`), and asked again whenever an epic page or its agents change, so it never goes stale.",
+      "noun": "pills",
+      "attributes": [],
+      "slots": [],
+      "events": [],
+      "parts": [
+        {
+          "name": "base",
+          "description": "The box around the heading and the pills."
+        },
+        {
+          "name": "heading",
+          "description": "The heading:  Active epics."
+        },
+        {
+          "name": "pills",
+          "description": "The pills, in two columns."
+        },
+        {
+          "name": "note",
+          "description": "Instead of pills:  none this week, the page opened from disk, or no answer."
+        }
+      ],
+      "states": [],
+      "texts": [
+        {
+          "key": "heading",
+          "text": "Active epics",
+          "description": "The heading over the pills."
+        },
+        {
+          "key": "done",
+          "text": "Done",
+          "description": "A pill's phase, when every phase is done."
+        },
+        {
+          "key": "urgent",
+          "text": "{count} urgent",
+          "description": "A pill's tooltip:  its red items."
+        },
+        {
+          "key": "replied",
+          "text": "{count} for your pick or review",
+          "description": "A pill's tooltip:  its orange items (light orange with them)."
+        },
+        {
+          "key": "running",
+          "text": "{count} running now",
+          "description": "A pill's tooltip:  its phases under way."
+        },
+        {
+          "key": "agentOne",
+          "text": "1 agent running",
+          "description": "A pill's tooltip, and its robot's name:  one agent."
+        },
+        {
+          "key": "agentMany",
+          "text": "{count} agents running",
+          "description": "A pill's tooltip, and its robot's name:  several agents."
+        },
+        {
+          "key": "allDone",
+          "text": "every phase done",
+          "description": "A pill's tooltip, when every phase is done."
+        },
+        {
+          "key": "none",
+          "text": "No epic has been worked on this week.",
+          "description": "No open epic was worked on in the last week."
+        },
+        {
+          "key": "file",
+          "text": "The active epics show when the page is served.",
+          "description": "Opened from disk:  only the page server knows the epics."
+        },
+        {
+          "key": "server",
+          "text": "Couldn't ask the page server for the active epics.",
+          "description": "The page server didn't answer, or has no such route yet."
         }
       ]
     },
@@ -8717,6 +8810,18 @@
       "docs": false,
       "tags": [
         "epic-picture"
+      ],
+      "tokens": []
+    },
+    "epic-pills": {
+      "folder": "epic-pills",
+      "mainTag": "epic-pills",
+      "title": "<epic-pills>",
+      "summary": "The <epic-pills> element: the docs home page's Active epics, a live pill per epic worked on this week.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "epic-pills"
       ],
       "tokens": []
     },

@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs"
-import { join } from "node:path"
+import { dirname, join, relative, sep } from "node:path"
 
 import type { AgentRuleChange, AgentRuleId, AgentRulePicks } from "spell/cli"
 
@@ -8,7 +8,11 @@ import type { AgentRuleChange, AgentRuleId, AgentRulePicks } from "spell/cli"
  * by writing their lines into its `CLAUDE.md` and `AGENTS.md`.
  * - The rules:  WWOD, the Solid 2 rules, and WWOD §21, the code is the spec (`AGENT_RULES`).
  * - `CLAUDE.md` gets `@`-imports, which Claude Code reads in every session;  created when missing.
- *   `AGENTS.md`, the file other agents (Codex ...) read, gets the same in plain words, when it exists.
+ *   `AGENTS.md`, the file other agents (Codex ...) read, gets the same in plain words, when it exists,
+ *   under a line saying to skip what the tool already loaded (`AGENTS_LEAD`):
+ *   Claude Code reads `AGENTS.md` too, and mustn't read the rules (~19k tokens) twice (epic `repo-split` T67).
+ * - Which folder:  the nearest with a `package.json`, or the root of the workspace it's in (`workspaceRootFor()`);
+ *   `spell wwod init` asks which.
  * - Each file's lines sit in ONE block between two markers (`BLOCK_START`, `BLOCK_END`), rewritten in place:
  *   so a second run changes the block, never adds a second one.
  * - A line someone wrote by hand, outside the block, counts:
@@ -24,19 +28,19 @@ export const AGENT_RULES: readonly AgentRule[] = [
     id: "wwod",
     file: "wwod/WWOD.md",
     label: "WWOD",
-    agentsLine: (path) => `**ALWAYS, before any code:  READ \`${path}\`, the house style (WWOD).**`
+    agentsLine: (path) => `- **Before any code:**  \`${path}\`, the house style (WWOD)`
   },
   {
     id: "solid",
     file: "solid/solid-2.md",
     label: "the Solid 2 rules",
-    agentsLine: (path) => `**Before any Solid 2 code:  READ \`${path}\` IN FULL.**`
+    agentsLine: (path) => `- **Before any Solid 2 code:**  \`${path}\`, IN FULL`
   },
   {
     id: "code-is-the-spec",
     file: "wwod/code-is-the-spec.md",
     label: "§21, the code is the spec",
-    agentsLine: (path) => `**Tests follow the code, which is the spec:  READ \`${path}\`.**`
+    agentsLine: (path) => `- **Tests follow the code, which is the spec:**  \`${path}\``
   }
 ]
 
@@ -47,6 +51,15 @@ export const BLOCK_START =
 /** The block's last line. */
 export const BLOCK_END = "<!-- /spell wwod init -->"
 
+/**
+ * `AGENTS.md`'s block's first line, above a bullet per rule:  read them, unless already loaded.
+ * - Said once here, not on every rule's line.
+ * - Why:  Claude Code reads `AGENTS.md` too, through `CLAUDE.md`'s `@AGENTS.md`, after `CLAUDE.md`'s `@` lines
+ *   loaded the rules;  reading them again costs ~19k tokens a session.
+ */
+export const AGENTS_LEAD =
+  "**READ these rules from the spell package, unless your tool already loaded them** (Claude Code does, through `CLAUDE.md`):"
+
 /** Where the rules are in a project that installed `spell`. */
 const INSTALLED_RULES = "node_modules/spell/agents"
 
@@ -56,13 +69,48 @@ const OWN_RULES = "agents"
 /**
  * Where `project`'s agents find the rules, from its root:  `node_modules/spell/agents`, or `agents` in the kit itself
  * (its `package.json` is named `spell`);  `undefined` when `spell` isn't installed there.
+ * - A folder above's install counts too, as `../../node_modules/spell/agents`:
+ *   a workspace's package manager installs `spell` at the workspace's root.
  * - NEVER throws.
  */
 export function rulesFolderFor(project: string): string | undefined {
   if (packageOf(project)?.name === "spell" && existsSync(join(project, OWN_RULES, AGENT_RULES[0].file)))
     return OWN_RULES
-  if (existsSync(join(project, INSTALLED_RULES, AGENT_RULES[0].file))) return INSTALLED_RULES
-  return undefined
+  for (let folder = project; ; folder = dirname(folder)) {
+    if (existsSync(join(folder, INSTALLED_RULES, AGENT_RULES[0].file)))
+      return relative(project, join(folder, INSTALLED_RULES)).split(sep).join("/")
+    if (dirname(folder) === folder) return undefined
+  }
+}
+
+/**
+ * The root of the yarn / npm workspace `project` is a member of:  the nearest folder above it whose `package.json`
+ * lists it in `workspaces`;  `undefined` when there's none.
+ * - `workspaces` as a list of globs, or `{ packages }`;  `*` matches within one folder name, `**` across folders
+ * - a `!` glob takes a folder back out
+ * - NEVER throws.
+ */
+export function workspaceRootFor(project: string): string | undefined {
+  for (let folder = dirname(project); ; folder = dirname(folder)) {
+    const workspaces = packageOf(folder)?.workspaces
+    const globs = Array.isArray(workspaces) ? workspaces : workspaces?.packages
+    if (globs?.length) {
+      const path = relative(folder, project).split(sep).join("/")
+      const matches = (glob: string) => globPattern(glob).test(path)
+      const included = globs.some((glob) => !glob.startsWith("!") && matches(glob))
+      if (included && !globs.some((glob) => glob.startsWith("!") && matches(glob.slice(1)))) return folder
+    }
+    if (dirname(folder) === folder) return undefined
+  }
+}
+
+/** A workspace glob (`packages/*`, `apps/**`, `./tools/cli`) as a pattern over a folder's path from the root. */
+function globPattern(glob: string): RegExp {
+  const parts = glob.replace(/^\.\//, "").replace(/\/+$/, "").split("/")
+  const pattern = parts
+    .map((part) => (part === "**" ? ".*" : part.replace(/[.+^${}()|[\]\\]/g, "\\$&").replaceAll("*", "[^/]*")))
+    .join("/")
+  return new RegExp(`^${pattern.replaceAll("/.*/", "(?:/.*)?/")}$`)
 }
 
 /**
@@ -159,9 +207,9 @@ function agentsChange(project: string, picks: AgentRulePicks, folder: string): A
   const { outside, at } = withoutBlock(lines)
   const namesOutside = (rule: AgentRule) => outside.some((line) => line.includes(`${folder}/${rule.file}`))
   const had = AGENT_RULES.filter((rule) => blockOf(lines).some((line) => line.includes(`${folder}/${rule.file}`)))
-  const block = AGENT_RULES.filter((rule) => picks[rule.id] && !namesOutside(rule)).map((rule) =>
-    rule.agentsLine(`${folder}/${rule.file}`)
-  )
+  const rules = AGENT_RULES.filter((rule) => picks[rule.id] && !namesOutside(rule))
+  // Re-run over an older block:  its lines are found by their paths, and written again in today's words
+  const block = rules.length ? [AGENTS_LEAD, ...rules.map((rule) => rule.agentsLine(`${folder}/${rule.file}`))] : []
   const notes = AGENT_RULES.filter((rule) => !picks[rule.id] && namesOutside(rule)).map(
     (rule) => `still names ${rule.label} outside the block:  remove that line by hand`
   )
@@ -295,6 +343,8 @@ type AgentRule = {
 /** The parts of a `package.json` read here. */
 type ProjectPackage = {
   name?: string
+  /** a workspace root's members:  globs, or yarn's older `{ packages }` */
+  workspaces?: string[] | { packages?: string[] }
   dependencies?: Record<string, string>
   devDependencies?: Record<string, string>
   peerDependencies?: Record<string, string>

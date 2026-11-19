@@ -260,6 +260,7 @@ run from any folder of an epic's worktree, `spell server start` starts that work
 | `spell wwod --json` | the report as JSON;  `init`'s changes |
 | `spell wwod init --solid`, `--code-is-the-spec`, `--no-wwod` | that rule in or out, without asking;  each has its `--no-` / plain twin |
 | `spell wwod init --yes` | asks nothing:  the flags, else what the project has, else the defaults |
+| `spell wwod init --here` | in a workspace, writes in the nearest folder with a `package.json`, not the workspace's root (asked, else the root) |
 | `spell wwod init --dry-run` | says what it would change, and writes nothing |
 | `spell deps --json` | the report as JSON |
 | `spell publish --dry-run` | everything but the publish:  build, pack, check, scratch install |

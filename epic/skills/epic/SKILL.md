@@ -1893,8 +1893,12 @@ The steps, each turn as short as it can be:
      (`epic inbox apply demo`) and ends with `NEXT:  <what>`.
 3. Woken (its notice, or a `📬 demo` line:  then `epic demo wait --timeout 5` first):  read its `NEXT:` line.
    - `NEXT:  wait`:  the person isn't done (picks sent before the Accept, one question of two answered):  one short
-     line ("Got your picks.  Press Accept Overview when it looks right."), arm `epic demo wait` again, end the turn.
+     line ("Got your picks.  Press Accept Overview when it looks right.";  a phase's thumbs up:  "Got your pick.
+     Press Accept Phases when it looks right."), arm `epic demo wait` again, end the turn.
    - `NEXT:  run 04`, `run 05`:  working lines, the step, its "Say" text, then step 2 again.
+     - The phase built is the one the person PICKED (Looks good on one phase, or Do this):  `epic demo wait` notes
+       it before applying, and the steps name it as `$PICK` (its id;  none picked:  the step's own default).
+       So the demo builds the person's choice, wherever it sits in the list, not always P1.
    - `NEXT:  run 06`:  6 working lines ("building"), `epic demo run 06`, `epic demo run 07`, then 07's "Say" text,
      and that's the end:  no more listening.
    - `NEXT:  done`:  the demo is over:  say so in one line.

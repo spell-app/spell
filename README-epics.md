@@ -47,7 +47,7 @@ If you've used a coding agent on anything bigger than a small fix, you've met th
 
 What it costs:
 - every worktree is another checkout, with an install of its own
-- a page can collect more than you'll read:  the work is only as reviewed as you make it
+- a page can collect more items than you'll read, and nobody reviews them for you
 
 ## How you'll use it
 
@@ -125,7 +125,7 @@ Four things to know before you start:
 - **It has run end to end outside Spell once**, in a throwaway repo:
   `epic init`, a saga, an epic page with a phase, a round through the review inbox, the pages on the epic server,
   `/epic done`'s merge, and the worktree removed after it.
-  - The rough edges are listed, not hidden:  [what's still Spell-shaped](epic/README-config.md#whats-still-spell-shaped).
+  - Its rough edges:  [what's still Spell-shaped](epic/README-config.md#whats-still-spell-shaped).
 
 ## See also
 

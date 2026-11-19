@@ -33,7 +33,7 @@ export type ReviewShows = (typeof REVIEW_SHOWS)[number]
  * - `issue-open`:  an open issue, nothing fixed (epic `epic-engine` I299):  Do this, Revisit, the x (`ISSUE_OPEN_BUTTONS`)
  * - `issue-fixed`:  an issue or call fixed, waiting for Owen (I299):  Revisit, Accept (`ISSUE_FIXED_BUTTONS`)
  * - `issue-done`:  an issue or call finished -- done, canceled, decided (epic `epic-engine` J231):  Revisit, Saw it
- *   (`ISSUE_DONE_BUTTONS`);  no plane, its `done in P20` pill in the plane's place when a phase took it
+ *   (`ISSUE_DONE_BUTTONS`);  no plane;  its `in P20` pill under them when a phase took it (I348)
  * - `todo`:  a todo's three (`TODO_BUTTONS`)
  * - `todo-in-phase`:  a todo already in a phase (its `in P52` pill, epic `epic-engine` I271):  Revisit and the x
  *   (`TODO_IN_PHASE_BUTTONS`);  the pill does what the plane would
@@ -232,7 +232,7 @@ export const ISSUE_FIXED_BUTTONS: readonly ReviewButtonSpec[] = [
 
 /**
  * An issue or a call FINISHED -- done, canceled, decided (epic `epic-engine` J231):  Revisit, then Saw it.
- * - no plane:  nothing left to send;  the item's `done in P20` pill stands in its place when a phase took it
+ * - no plane:  nothing left to send;  the item's `in P20` pill stands under them when a phase took it (I348)
  *   (`EpicItem.donePill`)
  * - Saw it (`approve`):  reviewed, its update label off, as a finished todo's (I296)
  */

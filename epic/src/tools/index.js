@@ -89,9 +89,6 @@ const REPO_TEMPLATE_PATH = REPO_TEMPLATES && `${pagePath(REPO_TEMPLATES)}/`
 /** The repo's name, as its windows show it (`windows.repoName`):  what the pages say they're about. */
 const REPO = EpicConfig.of(ROOT).windows.repoName
 
-/** How recently an open epic was worked on to get a pill on the home page:  a week. */
-const RECENT_DAYS = 7
-
 /** The home's markers:  its area cards go between. */
 export const HOME_START = "<!-- areas:start -->"
 export const HOME_END = "<!-- areas:end -->"
@@ -540,7 +537,7 @@ export function areaCards(pages, favorites = readFavorites(), sagas = readSagas(
         .map(([name, count]) => `${count} ${GROUP_COUNTS[name]}`)
         .join(" · "),
       description: "Epic pages, one per /epic session:  phases, questions, decisions and the log of the work.",
-      epics: recentEpics(of("epics"))
+      pills: true
     },
     {
       id: "templates",
@@ -613,6 +610,8 @@ ${cards.map(areaCard).join("\n")}
 
 /**
  * An area's card:  icon and linked title, its count, what's there.
+ * - `pills`:  the Epic Pages card's Active epics, `<epic-pills>`, which draws itself from the page server, live (epic
+ *   `epic-engine` T99;  J276 wrote a pill per epic here, as of the last `epic pages index`)
  * - `target="_self"`:  the home is a site's front page, so its cards navigate in place, as the top bar's tabs do
  *   (`doc-links.js` exempts `_self` from one-tab-per-destination)
  */
@@ -628,41 +627,8 @@ function areaCard(area) {
 <ui-header><ui-icon name="${area.icon}"></ui-icon> ${title}</ui-header>
 ${meta ? `<ui-meta>${meta}</ui-meta>` : ""}
 <ui-description>${descriptionLines(area.description)}</ui-description>
-${epicPills(area.epics)}
+${area.pills ? "<epic-pills></epic-pills>" : ""}
 </ui-content></ui-card>`
-}
-
-/**
- * The open epics worked on in the last week (`RECENT_DAYS`), for the Epic Pages card's pills, by name:
- * `{ name, title, href }` each (Owen, 2026-11-18:  "a 2 column list of the open epics as pills showing the name,
- * skipping any which have not been worked on in more than a week").
- * - open:  phases left, the Epics page's Active group (not done, future, or every phase done)
- * - worked on:  `describe()`'s `worked`, the latest of its page's "updated", its log and its branch's last commit
- * - as of when `epic pages index` last ran:  a pill isn't taken out by itself as the week passes
- */
-export function recentEpics(pages, now = new Date()) {
-  const since = now.getTime() - RECENT_DAYS * 86_400_000
-  return pages
-    .filter((page) => page.worked && page.worked.getTime() >= since)
-    .filter((page) => epicCard(page, "epics", new Set()).group === "active")
-    .map((page) => {
-      const name = page.path.split("/")[1]
-      return { name, title: page.title, href: `/${page.path}` }
-    })
-    .sort((a, b) => a.name.localeCompare(b.name))
-}
-
-/**
- * The Epic Pages card's pills:  Spell UI's labels, each linking an epic's page, in two columns (`spell-epic-pills`,
- * `spell-doc.css`);  none:  nothing.
- */
-function epicPills(epics = []) {
-  if (!epics.length) return ""
-  const pills = epics.map(
-    (epic) =>
-      `<ui-label link="${escapeHTML(epic.href)}" target="_self" appearance="tinted" color="blue" size="small" title="${escapeHTML(epic.title)}">${escapeHTML(epic.name)}</ui-label>`
-  )
-  return `<div class="spell-epic-pills">\n${pills.join("\n")}\n</div>`
 }
 
 /**

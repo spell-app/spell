@@ -8,11 +8,5 @@
     advisories: ["GHSA-mrhx-c7xc-m3w5"],
     in: ["repo", "npm"],
     reason: "@atproto's packages need zod 3, and the fix is in zod 4.6.6:  memory exhaustion validating oversized collections.  Only the Bluesky sign-in loads it, and an npm install gets it only with the add-ons."
-  },
-  {
-    package: "picomatch",
-    advisories: ["GHSA-fc5q-39xc-vjpf"],
-    in: ["repo", "npm"],
-    reason: "No fixed picomatch yet:  every version to 4.0.7, the newest, is affected (ReDoS on repeated extglobs).  Only build and test tools load it (vitest, anymatch), matching our own file patterns, never a pattern from outside.  Take this off once a fixed version ships."
   }
 ]

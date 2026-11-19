@@ -10,6 +10,8 @@ import { DataFile } from "spell/epic/data/DataFile"
 import { PhaseStatuses } from "spell/epic/phases"
 import { SRV } from "spell/server"
 
+import type { EpicBadges } from "spell/epic/components/epic-pills/EpicPills.types"
+import { AgentList } from "spell/epic/tools/AgentList"
 import { planDocIn } from "spell/epic/tools/pages.js"
 import {
   EPIC_CARDS_END,
@@ -36,7 +38,7 @@ import { URGENT_STATES } from "./EpicState"
  * - The page server serves worktree `<w>`'s files at `/worktrees/<w>/...` (dot files still refused),
  *   so an epic page's relative assets come from its own worktree.
  * - On the page server through epics' route module (`runningRoutes.ts`):
- *   - `/api/epics/running`:  the list, as JSON (`list()`:  `RunningEpic[]`)
+ *   - `/api/epics/running`:  the list, as JSON (`list()`:  `RunningEpic[]`);  `?every`, every epic (`everyEpic()`)
  *   - the Epics list page, as below (`render()`), and live reload (`watch()`)
  * - The Epics list page (`epics/index.html`;  the home page until claude-design P5), on each request (`render()`):
  *   - running and merged epics in ONE list, its `<epic-list>`, which groups, sorts and filters them in the browser
@@ -112,6 +114,22 @@ export class RunningEpics {
       }
     }
     return found
+  }
+
+  /**
+   * EVERY epic, running or not:  the running ones (`list()`), then each other epic page in the epic folder, by name,
+   * with no worktree (`worktree:  ""`):  the home page's Active epics (`<epic-pills>`, epic `epic-engine` T99), which
+   * picks the open ones worked on this week
+   * - an epic planned but never started has no worktree, yet is open (Owen's list had `review-review`)
+   */
+  everyEpic(): RunningEpic[] {
+    const running = this.list()
+    const listed = new Set(running.map((epic) => epic.name))
+    const rest = folders(this.epics).flatMap((name): RunningEpic[] => {
+      const file = listed.has(name) ? undefined : planDocIn(join(this.epics, name), name)
+      return file ? [{ name, worktree: "", url: `/epics/${name}/${basename(file)}`, ...read(file) }] : []
+    })
+    return [...running, ...rest]
   }
 
   /**
@@ -389,9 +407,13 @@ function remark(card: string, { running, favorite }: { running: boolean; favorit
  *   every phase done with some left, it has errors
  * - `worked`:  when it was last worked on, as the doc says:  the latest of its `updated` day and its log lines' times
  *   (`EpicCards` `lastWorked()`;  `docs index` adds the branch's last commit)
+ * - `badges`:  what waits, by the colour of the epic page's toolbar badges (`EpicBadges`):  the home page's pills
+ *   (`<epic-pills>`, epic `epic-engine` T99)
+ * - `agents`:  how many agents run for it (its `agents.json5`, `AgentList`);  none:  left out
  */
 export type RunningEpic = {
   name: string
+  /** its worktree's name;  `""` for an epic with none (`everyEpic()`) */
   worktree: string
   url: string
   title: string
@@ -407,6 +429,8 @@ export type RunningEpic = {
   /** its page's "0. While you were out" waits (epic `epic-engine` P62) */
   away?: boolean
   worked?: string
+  badges?: EpicBadges
+  agents?: number
 }
 
 /** The marker on the Epics list page where the running epics' cards go:  `EPIC_CARDS_START`. */
@@ -475,6 +499,8 @@ function read(
   | "urgent"
   | "away"
   | "worked"
+  | "badges"
+  | "agents"
 > {
   const html = readFileSync(file, "utf8")
   // drop the `Epic: ` epic pages' titles start with (since 2026-10-04):  the card is in the Epics list already
@@ -500,6 +526,8 @@ function read(
     .filter((tag) => (URGENT_STATES as readonly string[]).includes(attribute(tag, "state") ?? ""))
     .map((tag) => attribute(tag, "id") ?? "")
     .filter(Boolean)
+  const badges = badgesOf(tags(/<epic-item\b[^>]*>/g), tags(/<epic-phase\b[^>]*>/g), attribute)
+  const agents = agentsOf(file)
   const away = /<epic-section\b[^>]*\skind="away"/.test(html)
   const log = join(dirname(file), "parts", "log.html")
   const events = [...eventTimesIn(html), ...(existsSync(log) ? eventTimesIn(readFileSync(log, "utf8")) : [])]
@@ -516,9 +544,48 @@ function read(
     ...(saga && { saga }),
     ...(urgent.length > 0 && { urgent }),
     ...(away && { away }),
-    ...(worked && { worked: worked.toISOString() })
+    ...(worked && { worked: worked.toISOString() }),
+    ...(badges && { badges }),
+    ...(agents > 0 && { agents })
   }
 }
+
+/**
+ * What waits on an epic page, by its toolbar badges' colours (`spell-doc-toolbar.js` `toolbarItem()`), from its item
+ * and phase tags;  `undefined` when nothing does.
+ * - `urgent`, red:  `state="attention"`
+ * - `replied`, orange:  `state="replied"`, light orange with it (`requested`;  epic `epic-engine` I347), and a phase
+ *   whose plan waits for Accept (`waiting`)
+ * - `running`, blue:  the phases under way (`status="active"`), as the Phases button's badge
+ * - the states as the epic tool WROTE them:  the page itself also draws its live review (an item worked on now, Owen's
+ *   urgency not applied yet), which only a browser holding the inbox knows
+ */
+function badgesOf(
+  items: string[],
+  phases: string[],
+  attribute: (tag: string, name: string) => string | undefined
+): EpicBadges | undefined {
+  const stateOf = (tag: string) => attribute(tag, "state") ?? ""
+  const tags = [...items, ...phases]
+  const badges = {
+    urgent: tags.filter((tag) => stateOf(tag) === "attention").length,
+    replied: tags.filter((tag) => ORANGE_STATES.has(stateOf(tag))).length,
+    running: phases.filter((tag) => attribute(tag, "status") === "active").length
+  }
+  return badges.urgent || badges.replied || badges.running ? badges : undefined
+}
+
+/** How many agents run for the epic page at `file` (`AgentList`);  `0` when its list won't read.  NEVER throws. */
+function agentsOf(file: string): number {
+  try {
+    return AgentList.forPlanDoc(file).agents.length
+  } catch {
+    return 0
+  }
+}
+
+/** The states the orange badge counts:  Owen's turn to pick or review, to see what he asked for, to Accept a plan. */
+const ORANGE_STATES = new Set(["replied", "requested", "waiting"])
 
 /** The few entities an epic page's `<title>` and headers hold, back to text. */
 function decode(value: string): string {
