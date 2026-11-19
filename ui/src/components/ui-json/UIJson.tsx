@@ -55,8 +55,9 @@ export class DOMJsonElement extends E.DOMLoadableElement<UIJson> {
  *
  * The outline:
  * - Two spaces per level, monospace, coloured by the theme's code tokens (`--ui-code-attr`, `--ui-code-string` ...).
- * - A header (part `header`;  `no-header` hides it):  Copy, and a toggle for the quotes round keys (`quotes`).
- * - Each object and array has a toggle in the left gutter, one column for every row whatever its indent:
+ * - A header (part `header`;  `no-header` hides it):  Copy, and a toggle for the quotes round keys (`quotes`),
+ *   plain icon buttons.
+ * - Each object and array has a toggle in the gutter just before its own indent:
  *   a real `<button aria-expanded>` (part `toggle`) holding a chevron;  Alt-click opens or closes its branch.
  *   - Closed, it's one line:  `[ 1, 2, 3, ... ]`, `{ "a": 1, ... }`, cut to the characters that fit (`columns`).
  *   - `depth` levels start open (`1`:  the top alone).
@@ -247,31 +248,36 @@ export class UIJson extends E.LoadableComponent<typeof jsonVocabulary> {
     return () => observer.disconnect()
   }
 
-  /** Copy and the quotes toggle. */
+  /**
+   * Copy and the quotes toggle:  plain icon buttons, as big as an example's code button.
+   * - Native `<button>`s, not `<ui-button>`s:  no ring at rest, a background only on hover, a fill while pressed.
+   * - The quotes toggle draws its glyph as text, `""`:  the icon set has no outline quote mark.
+   */
   private header(): JSX.Element {
     const copyLabel = () => this.translationForKey(this.clipboard.isCopied ? "jsonCopied" : "jsonCopy")
     return (
       <div class="header" part={this.partForName("header")}>
-        <ui-button
-          class="copy"
-          appearance="basic"
-          size="tiny"
-          icon={this.clipboard.isCopied ? "check" : "clipboard"}
+        <button
+          type="button"
+          class="tool copy"
           aria-label={copyLabel()}
           title={copyLabel()}
           onClick={() => void this.copy()}
-        />
-        <ui-button
-          class="quotes"
-          appearance="basic"
-          size="tiny"
-          icon="quote-left"
-          selected={!!this.quotes}
+        >
+          <ui-icon name={this.clipboard.isCopied ? COPIED_ICON : COPY_ICON} />
+        </button>
+        <button
+          type="button"
+          class="tool quotes"
           aria-pressed={this.quotes ? "true" : "false"}
           aria-label={this.translationForKey("jsonQuotes")}
           title={this.translationForKey(this.quotes ? "jsonQuotesOff" : "jsonQuotesOn")}
           onClick={() => this.setQuotes(!this.quotes)}
-        />
+        >
+          <span class="glyph" aria-hidden="true">
+            ""
+          </span>
+        </button>
       </div>
     )
   }
@@ -471,7 +477,6 @@ export class UIJson extends E.LoadableComponent<typeof jsonVocabulary> {
         <ui-select
           class="edit"
           part={part}
-          size="mini"
           aria-label={label}
           options={options}
           value={plainText(edit.value)}
@@ -487,13 +492,12 @@ export class UIJson extends E.LoadableComponent<typeof jsonVocabulary> {
       <ui-input
         class="edit"
         part={part}
-        size="mini"
         aria-label={label}
         type={INPUT_TYPES[kind]}
         step={kind === "number" ? "any" : kind === "datetime" ? "1" : undefined}
         value={shown}
         spellcheck={false}
-        style={`--edit-chars: ${Math.max(4, shown.length + 1)}`}
+        style={`--edit-chars: ${editChars(shown)}`}
         ref={ref}
       />
     )
@@ -512,6 +516,10 @@ export class UIJson extends E.LoadableComponent<typeof jsonVocabulary> {
       event.preventDefault()
       event.stopPropagation()
     })
+    // a text field grows with its text as it's typed
+    host.addEventListener("input", () =>
+      host.style.setProperty("--edit-chars", String(editChars(plainText(host.value))))
+    )
     host.addEventListener("focusout", (event) => {
       const next = event.relatedTarget as Node | null
       if (next && (next === host || host.contains(next))) return
@@ -659,6 +667,9 @@ type JsonEdit = {
 /** An editor's element:  a `<ui-input>`, `<ui-select>` or `<ui-checkbox>`. */
 type EditorHost = HTMLElement & { value?: unknown; selected?: boolean; ready?: Promise<void> }
 
+/** Copy's icons:  outline, as an example's code button is a line drawing;  the check at the same weight. */
+const COPY_ICON = "clipboard outline"
+const COPIED_ICON = "check circle outline"
 /** How many characters a closed object or array shows at least;  and before it's measured. */
 const PREVIEW_MIN = 24
 const PREVIEW_CHARS = 90
@@ -695,6 +706,11 @@ function loadEditors(): Promise<unknown> {
   ])
 }
 
+/** How many characters wide a text field is for `text`:  one spare, at least 4;  its sheet caps it at the line. */
+function editChars(text: string): number {
+  return Math.max(4, text.length + 1)
+}
+
 /** What an editor starts with. */
 function shownForEditing({ part, kind, value }: JsonEdit): string {
   if (kind === "datetime") return ISO_DATE_TIME.exec(plainText(value))?.[1] ?? ""
@@ -706,7 +722,7 @@ function shownForEditing({ part, kind, value }: JsonEdit): string {
 function valueFromEditor(host: EditorHost, { part, kind, value }: JsonEdit): unknown {
   if (kind === "boolean") return !!host.selected
   const text = plainText(host.value)
-  if (part === "key") return text.trim() || NO_CHANGE
+  if (part === "key") return keyFromText(text)
   if (Array.isArray(kind) || kind === "text") return text
   if (kind === "json") return readLoose(text)
   if (!text) return NO_CHANGE
@@ -719,6 +735,16 @@ function valueFromEditor(host: EditorHost, { part, kind, value }: JsonEdit): unk
     return next + zone
   }
   return text
+}
+
+/**
+ * Text typed as a key:  read as JSON when it is a JSON string (`"name"` is `name`), else the text itself, trimmed;
+ * `NO_CHANGE` when that leaves nothing.
+ */
+function keyFromText(text: string): unknown {
+  const read = readLoose(text.trim())
+  const key = typeof read === "string" ? read : text.trim()
+  return key || NO_CHANGE
 }
 
 /** A key or scalar as plain text:  a string as it is, `""` for nothing, anything else as JSON. */

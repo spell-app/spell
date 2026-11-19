@@ -6,6 +6,7 @@
 	<section>
 		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
 			<item link="#types">Types</>
+			<item link="#variations">Variations</>
 		</>
 	</>
 
@@ -37,6 +38,15 @@
 				<tree-diagram>
 					<json source="/components/ui/examples/tree-data.json"/>
 				</tree-diagram>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Hidden" sticky="stack" collapsible dividing>
+			<example "Hidden" description="`hidden` holds the data without showing it, for script or another element to read.">
+				<json hidden>{ "kept": "out of sight" }</json>
+				<text color="grey" italic>Nothing shows:  the data is kept for script.</text>
 			</example>
 		</>
 	</>

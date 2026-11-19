@@ -7,6 +7,7 @@ import type { DOMJsonElement } from "spell/ui/components/ui-json"
 
 import "spell/ui/components/ui-json"
 import "spell/ui/components/ui-tree-diagram"
+import "spell/ui/components/ui-diagram"
 
 /** Element-markup examples, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-json/examples/elements/*.html", {
@@ -176,6 +177,16 @@ describe("<ui-tree-diagram> reading a <ui-json> child", () => {
     diagram.querySelector<DOMJsonElement>("ui-json")!.value = { label: "Set" }
     await ElementFixture.settle()
     expect(labels(diagram)).toEqual(["Set"])
+  })
+})
+
+describe("<ui-diagram> reading a <ui-json> child", () => {
+  test("its data child stays unseen", async () => {
+    const diagram = await ElementFixture.render(
+      `<ui-diagram><ui-json>{ "nodes": [{ "id": "a" }] }</ui-json></ui-diagram>`
+    )
+    await ElementFixture.settle()
+    expect(diagram.querySelector("ui-json")!.checkVisibility()).toBe(false)
   })
 })
 

@@ -104,11 +104,16 @@ describe("<ui-json> outline", () => {
 
   test("the quotes button turns quotes off and on", async () => {
     const element = await json(`<ui-json>{ "name": "a" }</ui-json>`)
-    const quotes = element.shadowRoot!.querySelector<HTMLElement>("ui-button.quotes")!
+    const quotes = element.shadowRoot!.querySelector<HTMLButtonElement>("button.quotes")!
+    expect(quotes.getAttribute("aria-pressed")).toBe("true")
     quotes.click()
     await ElementFixture.settle()
     expect(element.getAttribute("quotes")).toBe("no")
+    expect(quotes.getAttribute("aria-pressed")).toBe("false")
     expect(lines(element)[1]).toBe('name: "a"')
+    quotes.click()
+    await ElementFixture.settle()
+    expect(element.hasAttribute("quotes")).toBe(false)
   })
 
   test("nothing to show:  says so", async () => {
@@ -198,6 +203,37 @@ describe("<ui-json editable>", () => {
     editor.value = "2.5"
     await press(editor, "Enter")
     expect(element.value).toEqual({ n: 2.5 })
+  })
+
+  test("a text field grows as it's typed", async () => {
+    const element = await json(`<ui-json editable>{ "id": "x1" }</ui-json>`)
+    const editor = await startEditing(element, span(element, '"x1"'))
+    expect(editor.style.getPropertyValue("--edit-chars")).toBe("4")
+    const input = editor.shadowRoot!.querySelector("input")!
+    input.value = "a much longer id"
+    input.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
+    expect(editor.style.getPropertyValue("--edit-chars")).toBe("17")
+  })
+
+  test("`null`:  a JSON field;  what reads as JSON is kept as JSON, the rest as a string", async () => {
+    const element = await json(`<ui-json editable>{ "a": null, "b": null }</ui-json>`)
+    const a = await startEditing(element, span(element, "null"))
+    expect(a.getAttribute("type")).toBe("text")
+    expect(a.value).toBe("null")
+    a.value = "[1, 2]"
+    await press(a, "Enter")
+    const b = await startEditing(element, span(element, "null"))
+    b.value = "not json"
+    await press(b, "Enter")
+    expect(element.value).toEqual({ a: [1, 2], b: "not json" })
+  })
+
+  test("a key typed with quotes is read as JSON:  the quotes aren't kept", async () => {
+    const element = await json(`<ui-json editable>{ "old": 1 }</ui-json>`)
+    const editor = await startEditing(element, span(element, '"old"'))
+    editor.value = '"new"'
+    await press(editor, "Enter")
+    expect(element.value).toEqual({ new: 1 })
   })
 
   test("a date, and a date and time:  date pickers, written back in the same form", async () => {
