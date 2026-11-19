@@ -6,7 +6,9 @@ import { EDITOR, SERVING } from "./runningEditor"
 /**
  * Anatomy (epic `editor` P34):  Solitaire's running app pulled apart into floors, in the editor, shown in Debug
  * (the Program panel open, the Inspector open).
+ * - It opens face on, then turns to its resting angle a second later (I256).
  * - Each view is a floor over the view that holds it, lifted by the spacing:  nested as the Views tree is.
+ * - The cards of a pile step up one by one, each over the one under it (I256).
  * - Each floor has its type's tag over it.
  * - A click on a card's floor selects that card:  the Inspector's selection and the tree's row.
  * - Turned off, every style it set is put back:  the app's elements are as they were.
@@ -21,7 +23,14 @@ type Spot = { id: string; x: number; y: number }
 
 /** The page's globals the tests reach. */
 type TestWindow = Window & {
-  AppAnatomy: { show(): void; hide(): void; spacing: number; isShowing: boolean; focus?: Element }
+  AppAnatomy: {
+    show(): void
+    hide(): void
+    spacing: number
+    isShowing: boolean
+    focus?: Element
+    view: { tilt: number; spin: number; zoom: number }
+  }
   Inspector: { selected?: { element: Element }; area?: HTMLElement }
 }
 
@@ -64,10 +73,54 @@ describe.skipIf(!SERVING)("Anatomy, over Solitaire", { timeout: 180_000 }, () =>
       return styles
     })
 
+  /**
+   * A spot on the card `id`, on the card's own floor:  where neither of its pictures, floors over it, covers it.
+   * - Searched from its bottom right, through the shadow roots under the pointer.
+   */
+  const spotOnCard = (id: string) =>
+    page.evaluate((cardId): Spot => {
+      const card = document.getElementById(cardId)!
+      const box = card.getBoundingClientRect()
+      // the element drawn at (x, y), down through shadow roots
+      const deepest = (x: number, y: number) => {
+        let found = document.elementFromPoint(x, y)
+        for (let inside = found?.shadowRoot?.elementFromPoint(x, y); inside && inside !== found;) {
+          found = inside
+          inside = found.shadowRoot?.elementFromPoint(x, y)
+        }
+        return found
+      }
+      // what holds `element`, through shadow roots, itself first
+      const holders = (element: Element | null) => {
+        const all: Element[] = []
+        for (let node = element; node; node = node.parentElement ?? ((node.getRootNode() as ShadowRoot).host || null))
+          all.push(node)
+        return all
+      }
+      for (let across = 0.95; across > 0; across -= 0.05) {
+        for (let down = 0.95; down > 0; down -= 0.05) {
+          const [x, y] = [box.x + box.width * across, box.y + box.height * down]
+          const held = holders(deepest(x, y))
+          if (held.includes(card) && !held.some((each) => each.localName === "solitaire-card-image"))
+            return { id: cardId, x, y }
+        }
+      }
+      throw new Error(`spotOnCard():  every spot on ${cardId} is under its pictures`)
+    }, id)
+
   test("each view is a floor over the view holding it, tagged with its type;  a click selects;  off puts it back", async () => {
     const before = await stylesNow()
     await page.locator(".AnatomyButton [part~=item]").first().click()
-    await page.waitForTimeout(1200)
+    const turn = () => page.evaluate(() => (window as unknown as TestWindow).AppAnatomy.view)
+
+    // face on at first, then turned to its resting angle once it's waited a second and turned
+    expect(await turn()).toMatchObject({ tilt: 0, spin: 0 })
+    await page.waitForTimeout(2500)
+    const resting = await turn()
+    expect(resting.tilt).toBeGreaterThan(0)
+    expect(resting.spin).not.toBe(0)
+    await page.waitForTimeout(300)
+    expect(await turn()).toEqual(resting)
 
     // nested as the tree is:  the app flat, each pile lifted over it, each card over its pile, by the spacing
     const lifts = await page.evaluate(() => {
@@ -88,13 +141,22 @@ describe.skipIf(!SERVING)("Anatomy, over Solitaire", { timeout: 180_000 }, () =>
     expect(lifts.card).toBe(`0px 0px ${lifts.spacing}px`)
     expect(lifts.tags).toEqual(expect.arrayContaining(["Solitaire", "Column", "Card"]))
 
+    // each column's cards step up one by one:  every card higher than the one under it
+    const piles = await page.evaluate(() =>
+      [...document.querySelectorAll("solitaire-column")].map((column) =>
+        [...column.querySelectorAll(":scope > solitaire-card")].map((card) =>
+          Number.parseFloat((card as HTMLElement).style.translate.split(" ")[2] ?? "0")
+        )
+      )
+    )
+    expect(piles.some((pile) => pile.length > 1)).toBe(true)
+    for (const pile of piles) for (let at = 1; at < pile.length; at++) expect(pile[at]).toBeGreaterThan(pile[at - 1]!)
+
     // a click on the top card of the last column's floor selects that card
-    const card = (await page.evaluate(() => {
-      const columns = document.querySelectorAll("solitaire-column")
-      const top = [...columns[columns.length - 1]!.children].at(-1)!
-      const box = top.getBoundingClientRect()
-      return { id: top.id, x: box.x + box.width / 2, y: box.y + box.height * 0.75 }
-    })) as Spot
+    const topCard = await page.evaluate(
+      () => [...document.querySelectorAll("solitaire-column")].at(-1)!.lastElementChild!.id
+    )
+    const card = await spotOnCard(topCard)
     await page.mouse.move(card.x, card.y)
     await page.mouse.click(card.x, card.y)
     await page.waitForTimeout(800)
@@ -109,10 +171,7 @@ describe.skipIf(!SERVING)("Anatomy, over Solitaire", { timeout: 180_000 }, () =>
     expect(row).toBe(true)
 
     // a double-click shows that card's floor alone:  the rest hidden;  Esc goes back to the whole app
-    const again = (await page.evaluate((id) => {
-      const box = document.getElementById(id)!.getBoundingClientRect()
-      return { id, x: box.x + box.width / 2, y: box.y + box.height * 0.75 }
-    }, card.id)) as Spot
+    const again = await spotOnCard(card.id)
     await page.mouse.dblclick(again.x, again.y)
     await page.waitForTimeout(600)
     const focused = await page.evaluate(() => {

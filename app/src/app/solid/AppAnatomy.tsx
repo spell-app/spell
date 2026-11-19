@@ -42,7 +42,7 @@ export class AppAnatomy {
   }
 
   /**
-   * Pull the app apart, from the front tilted back, the whole app shown.
+   * Pull the app apart, the whole app shown:  face on for a second, then turning to its resting angle (`turnOpen()`).
    * - SIDE EFFECT:  stops inspecting:  a click on a floor selects already.
    */
   static show(): void {
@@ -50,13 +50,14 @@ export class AppAnatomy {
     Inspector.stopInspecting()
     setPartsShown(!!editorPrefs.get(Inspector.projectPref(PARTS_PREF)))
     setFocus(undefined)
-    setTurn(TILTED)
     setZoom(START_ZOOM)
+    turnOpen()
     setShowing(true)
   }
 
   /** Fold the app back flat, as it was. */
   static hide(): void {
+    stopTurning()
     setShowing(false)
     setFocus(undefined)
     setFullWindow(false)
@@ -90,6 +91,7 @@ export class AppAnatomy {
 
   /** Look at it straight on again, at its starting size. */
   static front(): void {
+    stopTurning()
     setTurn(FRONT)
     setZoom(START_ZOOM)
   }
@@ -166,10 +168,13 @@ editorPrefs.declare(LOOK_PREF, { oneOf: ["live", "outlines"] })
 editorPrefs.declare(SPACING_PREF, { type: "number", default: 48 })
 editorPrefs.declare(DEPTH_PREF, { type: "number", default: 8 })
 
-/** The turn it starts at:  tilted back and turned a little, so the floors show apart. */
-const TILTED = { tilt: 48, spin: -28 }
-/** Front:  straight on. */
+/** The turn it rests at once open:  tilted back a little and turned a little, still mostly facing you. */
+const RESTING = { tilt: 14, spin: -24 }
+/** Front:  straight on, where it opens. */
 const FRONT = { tilt: 0, spin: 0 }
+/** How long it opens face on before turning, and how long the turn takes, msec. */
+const OPEN_HOLD_MS = 1000
+const OPEN_TURN_MS = 700
 /** The size it starts at, so the turned stack fits the pane. */
 const START_ZOOM = 0.72
 /** The least and most it zooms. */
@@ -189,9 +194,48 @@ const [spacing, setSpacing] = createSignal(editorPrefs.get(SPACING_PREF) as numb
 const [depth, setDepth] = createSignal(editorPrefs.get(DEPTH_PREF) as number)
 const [partsShown, setPartsShown] = createSignal(false)
 const [focus, setFocus] = createSignal<Element>()
-const [turn, setTurn] = createSignal(TILTED)
+const [turn, setTurn] = createSignal(FRONT)
 const [zoom, setZoom] = createSignal(START_ZOOM)
 const [isFullWindow, setFullWindow] = createSignal(false)
+
+/** The opening turn while it runs:  the wait before it, then its frame. */
+let opening: { timer: ReturnType<typeof setTimeout>; frame: number } | undefined
+
+/**
+ * Open face on, wait `OPEN_HOLD_MS`, then turn to `RESTING` over `OPEN_TURN_MS`, easing in and out:
+ * so it's seen to come apart from the app as it was.
+ * - Asked for less motion (`prefers-reduced-motion`):  straight to `RESTING`, no wait, no turn.
+ * - Front, a drag or closing stops it where it is (`stopTurning()`).
+ */
+function turnOpen(): void {
+  stopTurning()
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return void setTurn(RESTING)
+  setTurn(FRONT)
+  const turning = {
+    timer: setTimeout(() => (turning.frame = requestAnimationFrame(turnFrom(performance.now()))), OPEN_HOLD_MS),
+    frame: 0
+  }
+  opening = turning
+  // each frame of the turn, from `start`
+  function turnFrom(start: number) {
+    const step = (now: number): void => {
+      const done = Math.min(1, (now - start) / OPEN_TURN_MS)
+      const eased = done < 0.5 ? 2 * done * done : 1 - (-2 * done + 2) ** 2 / 2
+      setTurn({ tilt: RESTING.tilt * eased, spin: RESTING.spin * eased })
+      if (done < 1) turning.frame = requestAnimationFrame(step)
+      else if (opening === turning) opening = undefined
+    }
+    return step
+  }
+}
+
+/** Stop the opening turn where it is, if it's running. */
+function stopTurning(): void {
+  if (!opening) return
+  clearTimeout(opening.timer)
+  cancelAnimationFrame(opening.frame)
+  opening = undefined
+}
 
 /****************
  * ### `<AnatomyButton>`
@@ -430,12 +474,27 @@ type FloorFrame = {
 }
 
 /**
- * The outlines:  each floor shown, measured flat where the app draws it, lifted by its depth.
+ * How far `floor` is lifted over the floor holding it, px:  `spacing`, and a step more for each card under it in a pile.
+ * - A pile's step is a share of the spacing, smaller in a tall pile, so a 20-card pile stays near its column.
+ */
+function liftOf(floor: Floor, spacing: number): number {
+  if (!floor.step) return spacing
+  return spacing + floor.step * spacing * Math.min(PILE_STEP, PILE_MOST / floor.steps)
+}
+
+/** A pile's step, as a share of the spacing;  and the most a whole pile rises, in spacings. */
+const PILE_STEP = 0.25
+const PILE_MOST = 2
+
+/**
+ * The outlines:  each floor shown, measured flat where the app draws it, lifted by its depth and its pile.
  * - Measured with the app untouched:  the outlines look never turns it.
  */
 function framesFor(state: StackState, program: HTMLElement, shown: (floor: Floor, state: StackState) => boolean) {
   const origin = program.getBoundingClientRect()
-  const base = state.focus ? (state.floors.find((floor) => floor.element === state.focus)?.depth ?? 0) : 0
+  // how high a floor is over the focus (or the app):  each floor's lift, from it down
+  const heightOf = (floor: Floor): number =>
+    !floor.parent || floor.element === state.focus ? 0 : liftOf(floor, state.spacing) + heightOf(floor.parent)
   return state.floors
     .filter((floor) => shown(floor, state))
     .map((floor): FloorFrame => {
@@ -448,7 +507,7 @@ function framesFor(state: StackState, program: HTMLElement, shown: (floor: Floor
         top: box.top - origin.top,
         width: box.width,
         height: box.height,
-        z: (floor.depth - base) * state.spacing
+        z: heightOf(floor)
       }
     })
 }
@@ -545,6 +604,7 @@ function usePointer(props: {
         const [dx, dy] = [event.clientX - press.x, event.clientY - press.y]
         press.isTurning ||= Math.hypot(dx, dy) >= DRAG_START_PX
         if (press.isTurning) {
+          stopTurning()
           setTurn({ tilt: press.turn.tilt - dy * TURN_PER_PX, spin: press.turn.spin + dx * TURN_PER_PX })
           setHovered(undefined)
           Inspector.ring(undefined)
@@ -764,7 +824,11 @@ class AnatomyStyles {
       const app = state.floors[0]?.element
       for (const floor of state.floors) {
         if (!floor.parent || !shown(floor, state)) continue
-        want(floor.element, "translate", liftedBy(this.ownStyle(floor.element, "translate"), state.spacing))
+        want(
+          floor.element,
+          "translate",
+          liftedBy(this.ownStyle(floor.element, "translate"), liftOf(floor, state.spacing))
+        )
         for (const box of AnatomyFloors.boxesBetween(floor.element, program)) {
           want(box, "transform-style", "preserve-3d")
           if (app && !app.contains(box) && !isInShadowOf(box, app)) want(box, "overflow", "visible")

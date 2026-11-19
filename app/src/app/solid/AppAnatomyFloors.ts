@@ -12,6 +12,8 @@ import { SpellElement } from "spell/app/app/runner/SpellElement"
  * - Through every shadow root:  a card's pictures are drawn inside the card's.
  * - A floor whose drawing CLIPS what's inside it (a scrolling list, a rounded box that hides its overflow) can't lift
  *   its insides:  the browser draws them flat into it.  It's marked `clips`, and the floors inside it `isFlat`.
+ * - Floors side by side over the same floor that overlap (a pile of cards) step up one by one, in the order they're
+ *   drawn:  each one's `step` is one more than the highest step of a sibling drawn before it that it covers.
  * - Plain DOM, no Solid:  it reads the page, and changes nothing.
  */
 export class AnatomyFloors {
@@ -28,7 +30,14 @@ export class AnatomyFloors {
         const kind = kindOf(element, { parts, isPart })
         let floor: Floor | undefined
         if (kind && hasBox(element)) {
-          floor = { element: element as HTMLElement, kind, depth: parent ? parent.depth + 1 : 0, parent }
+          floor = {
+            element: element as HTMLElement,
+            kind,
+            depth: parent ? parent.depth + 1 : 0,
+            parent,
+            step: 0,
+            steps: 0
+          }
           floor.isFlat = !!parent && (parent.isFlat || AnatomyFloors.clipsBetween(floor.element, parent.element))
           if (floor.isFlat && parent && !parent.isFlat) parent.clips = true
           floors.push(floor)
@@ -38,7 +47,30 @@ export class AnatomyFloors {
       }
     }
     walk(stage, undefined)
+    AnatomyFloors.stepPiles(floors)
     return floors
+  }
+
+  /**
+   * Step up each pile in `floors`:  siblings over the same floor that overlap, as a pile of cards does.
+   * - Each one's `step` is one more than the highest of the siblings drawn before it that it covers;  0 on none.
+   * - Each sibling's `steps` is its siblings' highest `step`, so a tall pile can take smaller steps.
+   * - Measured where the page lays them out (`offsetLeft` ...), never their drawn boxes:
+   *   Anatomy's own turn and lift would move those, and turned boxes side by side overlap.
+   */
+  static stepPiles(floors: Floor[]): void {
+    const siblings = new Map<Floor | undefined, { floor: Floor; box: DOMRect }[]>()
+    for (const floor of floors) {
+      const pile = siblings.get(floor.parent) ?? []
+      const box = layoutBoxOf(floor.element)
+      for (const below of pile) if (overlaps(box, below.box)) floor.step = Math.max(floor.step, below.floor.step + 1)
+      pile.push({ floor, box })
+      siblings.set(floor.parent, pile)
+    }
+    for (const pile of siblings.values()) {
+      const steps = Math.max(...pile.map((each) => each.floor.step))
+      for (const each of pile) each.floor.steps = steps
+    }
   }
 
   /**
@@ -85,6 +117,10 @@ export type Floor = {
   depth: number
   /** the floor holding it;  none for the app */
   parent: Floor | undefined
+  /** how many siblings drawn before it it sits on, in a pile (a card on the cards under it);  0 for none */
+  step: number
+  /** the highest `step` among its siblings:  its pile's height */
+  steps: number
   /** its drawing clips the floors inside it, so they stay flat on it:  it's lifted whole */
   clips?: boolean
   /** inside a floor that clips:  drawn flat on it, never lifted */
@@ -102,6 +138,24 @@ function kindOf(
   if (SpellElement.thingOf(element)) return "view"
   if (parts && isPart(element)) return "part"
   return undefined
+}
+
+/**
+ * Where the page lays `element` out, in the page's pixels:  its offsets summed up its offset parents.
+ * - Untouched by any transform, Anatomy's own turn and lift among them.
+ */
+function layoutBoxOf(element: HTMLElement): DOMRect {
+  let [left, top] = [0, 0]
+  for (let node: HTMLElement | null = element; node; node = node.offsetParent as HTMLElement | null) {
+    left += node.offsetLeft
+    top += node.offsetTop
+  }
+  return new DOMRect(left, top, element.offsetWidth, element.offsetHeight)
+}
+
+/** Do boxes `one` and `other` overlap, by more than an edge? */
+function overlaps(one: DOMRect, other: DOMRect): boolean {
+  return one.left < other.right && other.left < one.right && one.top < other.bottom && other.top < one.bottom
 }
 
 /** Does `element` draw a box of its own:  not `display: contents`, nor `none`? */

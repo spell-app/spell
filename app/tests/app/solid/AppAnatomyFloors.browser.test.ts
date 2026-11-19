@@ -61,6 +61,26 @@ describe("AnatomyFloors.in()", () => {
     ])
   })
 
+  test("siblings that overlap step up one by one, in the order they're drawn;  ones side by side don't", () => {
+    const app = view("x-app", "position: relative; width: 400px; height: 300px")
+    const column = view("x-column", "position: absolute; left: 0; top: 0; width: 80px; height: 300px")
+    const cards = [0, 20, 40].map((top) =>
+      view("x-card", `position: absolute; left: 0; top: ${top}px; width: 80px; height: 100px`)
+    )
+    const other = view("x-column", "position: absolute; left: 100px; top: 0; width: 80px; height: 300px")
+    column.append(...cards)
+    app.append(column, other)
+    const floors = AnatomyFloors.in(staged(app), { parts: false, isPart })
+    expect(floors.map((floor) => [floor.element.localName, floor.step, floor.steps])).toEqual([
+      ["x-app", 0, 0],
+      ["x-column", 0, 0],
+      ["x-card", 0, 2],
+      ["x-card", 1, 2],
+      ["x-card", 2, 2],
+      ["x-column", 0, 0]
+    ])
+  })
+
   test("a view that clips what's inside it keeps its floors flat on it", () => {
     const app = view("x-app")
     const list = view("x-list", "overflow: hidden")
