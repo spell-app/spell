@@ -1922,11 +1922,7 @@
       left: 0;
       top: 100%;
       width: var(--cmb-rail);
-      /* ... through the rows a description takes under it (`.cmb-head-description-below`) */
-      height: calc(
-        (var(--cmb-line-height) - var(--bubbly-pill-height)) / 2 + 1px + var(--cmb-description-rows, 0) *
-          var(--cmb-line-height)
-      );
+      height: calc((var(--cmb-line-height) - var(--bubbly-pill-height)) / 2 + 1px);
       background: var(--bubbly-pill);
     }
     /*
@@ -1956,62 +1952,30 @@
     }
 
     /*
-     * a block's foot:  its rail turning round a corner into a short bar (I113), on a thin line of its
-     * own;  the page's sizes, at the editor's size
+     * a block's feet:  its rail turning round a corner into a short bar (I113), drawn over the lines, taking no room,
+     * so every line is one line tall (`FeetWidget`;  Owen, 2026-11-19, epic `codemirror` P7:  "make line spacing
+     * completely regular");  the page's sizes, at the editor's size
      * - the corner:  as thick round it as down the rail and along the bar, its outside the page's gutter corner
-     *   (10.3px);  it reaches up into the row above, where the rail stops short for it (`--cmb-rail-sizes`)
+     *   (10.3px);  it reaches up into the block's last line, where the rail stops short for it (`--cmb-rail-sizes`)
      * - the bar's end round;  the whole foot as wide as the page's (14.1px)
+     * - several blocks ending on one line:  their feet side by side, each at its block's indent, overlapping, each one
+     *   inside drawn over the bar of the one round it
      */
     --cmb-foot-corner: calc(var(--bubbly-gutter-corner) * var(--bubbly-editor-scale));
-    /* the body's paper under its last line, above its foot */
+    /* the paper between the line and the bar */
     --cmb-foot-drop: calc(var(--bubbly-body-pad-bottom) * var(--bubbly-editor-scale));
-    /* how far the corner reaches up into the row above */
+    /* how far the corner reaches up into the block's last line, from the foot along the top of the line under it */
     --cmb-foot-lift: calc(var(--cmb-foot-corner) - var(--cmb-foot-drop) - var(--cmb-rail));
-    .cmb-foot-row {
+    /* the line holding them places them:  an empty span at its start, of no size */
+    .cm-line:has(> .cmb-feet) {
       position: relative;
-      /*
-       * so the band on the next line is the page's line gap below the foot;  on whole pixels, so every line under it
-       * starts on one and its words sit as on the lines above (they're placed on whole pixels;  it was 5.03px, I114)
-       * - the last of a stack of feet under one line:  the rows above it in the stack (`--cmb-foot-drops-above`, in
-       *   tabs) and it, together, on whole pixels (I125)
-       */
-      --cmb-foot-above: calc(var(--cmb-foot-drops-above, 0) * var(--cmb-indent));
-      height: calc(
-        round(
-            calc(
-              var(--cmb-foot-above) + var(--cmb-foot-drop) + var(--cmb-rail) + var(--bubbly-line-gap) *
-                var(--bubbly-editor-scale) - var(--cmb-band-margin)
-            ),
-            1px
-          ) -
-          var(--cmb-foot-above)
-      );
-      background-image: var(--cmb-rails, none);
-      background-size: var(--cmb-rail-sizes, auto);
-      background-repeat: no-repeat;
     }
-    /*
-     * ... one with a foot under it, a block round it ending on the same line:  as tall as their rails are apart across
-     * (`--cmb-foot-drop-tabs`), so that one's foot is as far below this one as its rail is left of it (Owen, 2026-11-11;
-     * the drawn-bubbly page's stack, I125)
-     */
-    .cmb-foot-row.cmb-foot-over {
-      height: calc(var(--cmb-foot-drop-tabs) * var(--cmb-indent));
-    }
-    /*
-     * ... the last one, right above a band:  room under its foot, so the two blocks stand apart, the rails round them
-     * running on through it (Owen:  "add some space between the pill blocks";  T141)
-     * - `--cmb-block-gap`:  a blank line's height on the page at the editor's size, on whole pixels (8px), so the
-     *   lines under it start on one
-     */
-    --cmb-block-gap: round(calc(var(--bubbly-gap-height) * var(--bubbly-editor-scale)), 1px);
-    .cmb-foot-row.cmb-foot-above-band {
-      /* on top of its height (the page's sizing counts padding in it) */
-      box-sizing: content-box;
-      padding-bottom: var(--cmb-block-gap);
+    .cmb-feet {
+      pointer-events: none;
     }
     .cmb-foot {
       position: absolute;
+      /* a blank line's:  along its top (`cmb-feet-blank`) */
       top: var(--cmb-foot-drop);
       left: calc(
         var(--cmb-line-pad) + var(--cmb-column) * var(--cmb-indent) + var(--cmb-rail-left) + var(--cmb-foot-corner)
@@ -2033,6 +1997,20 @@
       border-width: 0 0 var(--cmb-rail) var(--cmb-rail);
       border-bottom-left-radius: var(--cmb-foot-corner);
     }
+    /*
+     * ... a line with words under the blocks:  along the bottom of their last line instead, off those words
+     * (`cmb-feet-above`, from the line under;  `cmb-feet-end`, the file's last line, from itself)
+     */
+    .cmb-feet-above > .cmb-foot {
+      top: calc(-1 * (var(--cmb-foot-drop) + var(--cmb-rail)));
+    }
+    .cmb-feet-end > .cmb-foot {
+      top: calc(100% - var(--cmb-foot-drop) - var(--cmb-rail));
+    }
+    /* ... their rails stopping short that much higher, where the corners turn */
+    .cm-line:is(:has(+ .cm-line > .cmb-feet-above), :has(> .cmb-feet-end)) {
+      --cmb-foot-lift: calc(var(--cmb-foot-corner) + var(--cmb-foot-drop));
+    }
 
     /****** a head's description, `-- A playing card`:  at its band's right end, the band to the box's edge (Owen) ******/
 
@@ -2048,31 +2026,17 @@
     }
     .cmb-description {
       float: right;
-      /* too wide for the room beside the head's words:  wrapped, under them */
-      white-space: pre-wrap;
+      white-space: pre;
     }
     /*
-     * ... one that doesn't fit there:  in rows of its own under the head, its words under the head's, wrapped,
-     * each row a line's height, so nothing below is drawn over (`DescriptionRoom`, which measures them;  I120)
-     * - `--cmb-description-rows`:  how many it takes
-     * - as wide as its words, so `DescriptionRoom` can tell when a wider editor has room for it at the band's end again
+     * ... one that doesn't fit there:  cut short with a `…`, in the room after the head's words, so the head stays one
+     * line (`DescriptionRoom`, which measures the room;  epic `codemirror` P7)
+     * - before, it took rows of its own under the head (epic `language` I120):  a line two or three lines tall
      */
-    .cm-line.cmb-head-description-below {
-      padding-bottom: calc(var(--cmb-description-rows) * var(--cmb-line-height));
-      --cmb-description-left: calc(var(--cmb-band-inset) + var(--cmb-indent) - var(--cmb-slide));
-      .cmb-band-hung {
-        --cmb-description-left: calc(var(--cmb-band-inset) + 2 * var(--cmb-indent) - var(--cmb-slide));
-      }
-      .cmb-description {
-        position: absolute;
-        /* the top of the row under the head */
-        top: calc(var(--cmb-line-height) - var(--cmb-band-margin));
-        left: var(--cmb-description-left);
-        float: none;
-        width: max-content;
-        max-width: calc(100% - var(--cmb-description-left) - 14px);
-        line-height: var(--cmb-line-height);
-      }
+    .cm-line.cmb-description-cut .cmb-description {
+      max-width: var(--cmb-description-room);
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     /****** a folded block (I116):  its head alone, a pill, the fold's `…` in its right end, a click there unfolds it ******/
@@ -2312,17 +2276,18 @@
      *   itself, small, in a pill pointed at both ends as a tag in a line is
      * - every bar on one level:  the innermost end tag first, a short bar from its rail;  each one round it further
      *   along, its bar running on behind the end tags before it, so they sit on it
-     * - the row one foot tall, on whole pixels, so every line under it starts on one (I114)
+     * - the row one line tall, as every line is:  before, one foot tall, about 21px (epic `codemirror` P7)
      * - its rails from where the rails are (`--cmb-rail-left`), as every rail's
      */
-    /* how far down the rail turns, before its slant;  the slant's height;  the bar after it */
-    --cmb-feet-top: 3px;
+    /*
+     * how far down the rail turns, before its slant:  the end tags about in the middle of the row;
+     * the slant's height;  the bar after it
+     */
+    --cmb-feet-top: 5px;
     --cmb-feet-turn: 6px;
     --cmb-feet-bar: 12px;
     /* between one end tag and the next along the bar */
     --cmb-feet-gap: 6px;
-    /* paper under the pills */
-    --cmb-feet-bottom: 4px;
     /*
      * - its end tags in a line, in the file's order, left to right:  so CodeMirror finds each under the pointer
      * - what else is in the row (its indent, CodeMirror's marks beside widgets) takes no room:  no letters of its own,
@@ -2338,13 +2303,12 @@
       --cmb-foot-tiny-height: calc(var(--cmb-feet-size) * var(--bubbly-foot-tiny-height) * var(--bubbly-editor-scale));
       position: relative;
       isolation: isolate;
-      /* on whole pixels:  `--cmb-feet-top` is one, so the rest is too */
-      height: calc(
-        round(calc(var(--cmb-feet-top) + var(--cmb-foot-tiny-height) + var(--cmb-feet-bottom)), 1px) -
-          var(--cmb-feet-top)
-      );
-      /* its padding on top of its height:  room under it (below) adds to the row */
-      box-sizing: content-box;
+      /*
+       * one line tall, as every line is (epic `codemirror` P7;  Owen, 2026-11-19:  "make line spacing completely
+       * regular"):  its end tags `--cmb-feet-top` down, the rest paper under them
+       */
+      box-sizing: border-box;
+      height: var(--cmb-line-height);
       padding-top: var(--cmb-feet-top);
       font-size: 0;
       line-height: 0;
@@ -2359,10 +2323,6 @@
       display: inline-block;
       height: var(--cmb-foot-tiny-height);
       vertical-align: top;
-    }
-    /* ... right above a band:  room under it, so the two blocks stand apart (T141), as under a Spell foot */
-    .cm-line.cmb-feet-row.cmb-feet-above-band {
-      padding-bottom: var(--cmb-block-gap);
     }
     .cm-line.cmb-feet-row .cmb-tag-foot {
       /* its tip at its slant, as an inline tag's:  as slanted as a tag's, for its height */
