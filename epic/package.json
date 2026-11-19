@@ -120,6 +120,7 @@
     "dir": "src"
   },
   "spellPublish": {
+    "build": "vscode:package",
     "exclude": [
       "demo/**"
     ],
