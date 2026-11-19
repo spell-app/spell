@@ -34,7 +34,12 @@ import type { DrawnDeclaration } from "spell/parser/spell/rules/JSX/JSX.shared"
  *   - a line that doesn't parse alone, for a name another file declares (`if the stock is empty`):
  *     its block from its first word, as its project's parse draws it (`shapeOf()`;  epic `codemirror` I23)
  *   - a type's member that reads whole only in a list's body, for a type built on one another file declares
- *     (`it is droppable when`):  read again as one (`rereadAsMember()`;  epic `codemirror` I26)
+ *     (`it is droppable when`), or naming a type declared below it:  read again (`rereadAsMember()`;  epic `codemirror`
+ *     I26, I28)
+ *   - a top-level line naming a type another file declares (`a square belongs to one board`):  read again, that type a
+ *     stand-in (`rereadWithStandInType()`;  I28)
+ *   - among steps, a line that read as a declaration, or not at all:  the control line its first word starts
+ *     (`para rango en ...`, `while waiting`;  `controlOf()`, I28)
  * - Another language's Spell lays out with its own parser (`SP.Language.for("es").parser`):  the table is by rule
  *   name, the same in every language;  only its pronouns (`its`, `su`) are its own words.
  * - Pure data, no HTML:  the app draws it (`BubblyHtml`), and so do the app's code editor (epic `codemirror` P3) and VS Code (P51).
@@ -76,7 +81,7 @@ export class BubblyLayout {
   /** The lines whose statement read only part of them, a parse error after it (`it is droppable`, then `when`). */
   private readonly partlyRead = new Set<number>()
 
-  /** Was the text parsed here, alone, with no project's parse of it?  Only then is a line read again (`rereadAsMember()`). */
+  /** Was the text parsed here, alone, with no project's parse of it?  Only then is a line read again (`rereadIn()`). */
   private isAlone = false
 
   /** Where each line starts. */
@@ -467,8 +472,18 @@ export class BubblyLayout {
       let statement = this.isMarkup(line) ? undefined : this.statements.get(line.index)
       // a type's member that didn't read whole alone, for a type declared elsewhere:  read again, as a list's
       if (inType && statement && this.rereadAsMember(line)) statement = this.statements.get(line.index)
+      // a top-level line naming a type declared elsewhere:  read again, that type a stand-in
+      else if (!level && !inSteps && statement && this.rereadWithStandInType(line))
+        statement = this.statements.get(line.index)
+      // in a body of steps, a line that read as a declaration, or didn't read:  a control line, if its first word starts one
+      const control =
+        (inSteps || inProperty) && statement && line.children.length ? this.controlOf(line, statement) : ""
+      if (control) {
+        nodes.push(this.control(line, control, level, inSteps))
+        continue
+      }
       // a head that didn't parse, for a name declared elsewhere:  its shape from its first word (`shapeOf()`)
-      const shape = statement?.rule.name === PARSE_ERROR_RULE ? this.shapeOf(line) : undefined
+      const shape = statement?.rule.name === PARSE_ERROR_RULE ? this.shapeOf(line, { inType }) : undefined
       if (shape?.isControl && line.children.length) {
         nodes.push(this.control(line, shape.rule, level, inSteps))
         continue
@@ -586,10 +601,12 @@ export class BubblyLayout {
    *   - EXCEPT a type's name alone, `a card`, `a two sided view` (its article `reopen_type`'s first word),
    *     with lines under it:  reopening a type declared elsewhere, a thing's head
    *   - and a pronoun before a quoted name, `it "can go up" if ...`:  a property's head, the name it declares
+   *   - and, in a type's body (`inType`), a quoted name first, `"card" is a new card with ...`:  a property's head
    * - A control line only with lines under it:  alone, it's a step (`if the pile is empty return`).
    */
-  private shapeOf(line: SourceLine): LineShape | undefined {
+  private shapeOf(line: SourceLine, { inType }: Pick<LayoutPlace, "inType">): LineShape | undefined {
     const words = this.text.slice(line.start, this.commentStart(line))
+    if (inType && QUOTED_NAME_FIRST.test(words)) return { rule: QUOTED_GETTER_RULE, band: "property" }
     const word = /^[\p{L}]+/u.exec(words)?.[0]
     if (!word) return undefined
     const shape = BubblyLayout.shapesFor(this.parser).get(word)
@@ -600,24 +617,51 @@ export class BubblyLayout {
     if (this.smallWords.has(word.toLowerCase()) && TYPE_THEN_QUOTED_NAME.test(words.slice(word.length)))
       return { rule: QUOTED_PROPERTY_RULE, band: "property" }
     if (!line.children.length) return undefined
+    return this.isArticle(word) && TYPE_NAME_ALONE.test(words.trimEnd())
+      ? { rule: REOPEN_TYPE_RULE, band: "thing" }
+      : undefined
+  }
+
+  /** Is `word` an article that starts reopening a type, `a` in `a card` (`reopen_type`'s first words)? */
+  private isArticle(word: string): boolean {
     const reopen = this.parser.rules[REOPEN_TYPE_RULE]
     const articles = reopen instanceof P.Group ? reopen.rules : reopen ? [reopen] : []
-    const isArticle = articles.some((rule) => rule instanceof P.Sequence && rule.firstWords?.includes(word))
-    return isArticle && TYPE_NAME_ALONE.test(words.trimEnd()) ? { rule: REOPEN_TYPE_RULE, band: "thing" } : undefined
+    return articles.some((rule) => rule instanceof P.Sequence && rule.firstWords?.includes(word))
   }
 
   /**
-   * Read `line`, a type's member that didn't read whole alone, again, as a LIST's member, with the lines under it:
-   * so it draws as its project's parse draws it (epic `codemirror` I26).
+   * The control rule `line` is, in a body of steps:  a line with steps under it that read as a declaration, or not at
+   * all, whose first word starts a control line too (epic `codemirror` I28);  else `""`.
+   * - Why:  a declaration can't be among steps.  Laid out from its text alone, Spanish's `para rango en rangos de carta`
+   *   (`rangos` another file's) reads as `para ...`, an action;  `while waiting` doesn't read, and `while` starts
+   *   declarations too (`while a card is over it`), so `shapeOf()` can't tell by its first word.
+   * - A line that read as a control line, or a step, is left as it is.
+   */
+  private controlOf(line: SourceLine, statement: P.Match): string {
+    const isError = statement.rule.name === PARSE_ERROR_RULE
+    if (!isError && !BubblyRoles.of(statement.rule).band) return ""
+    const word = /^[\p{L}]+/u.exec(this.text.slice(line.start, line.end))?.[0]
+    return (word && BubblyLayout.controlsFor(this.parser).get(word)) || ""
+  }
+
+  /**
+   * Read `line`, a type's member that didn't read whole alone, again, with the lines under it:
+   * so it draws as its project's parse draws it (epic `codemirror` I26, I28).
    * - Why:  laid out from its text alone, a type built on one another file declares doesn't know what it is:
    *   - `a "foundation" is a pile`:  not known to be a list, so `it is droppable when`, a list's own line, reads
    *     only as far as `droppable`, a plain band;  and its body as the type's members, the property's band its
    *     project draws gone, a band of its own drawn round its body
    *   - `a card` (reopened):  no type at all, so `belongs to one pile` doesn't read
-   * - Read in a stand-in type's body, a list of things:  a list is a thing too, so either kind's members read.
-   *   - Its own scope, under the one the line was read in:  the names declared above it still known (`pile`), and
-   *     nothing it declares reaches the parse the drawing reads.
-   * - Taken only when its head reads whole, as a declaration:  its reading then replaces theirs, under it too.
+   *   - and a member naming a type declared BELOW it (`wiki pages are found at ...`) reads only as far as it knows
+   * - Read in, the first that reads it:
+   *   - its own scope, which by now knows every type the text declares, below it too (`wiki pages`)
+   *   - a stand-in type's body, a list of things:  a list is a thing too, so either kind's members read
+   *   - a stand-in list of what its line names after an article (`the piece`, `it is droppable when the piece ...`):
+   *     a list's own line whose body names its item
+   *   - Each stand-in its own scope, under the one the line was read in:  the names declared above it still known
+   *     (`pile`), and nothing it declares reaches the parse the drawing reads.
+   * - Taken only when its head reads whole (in a stand-in, as a declaration):  its reading then replaces theirs, under
+   *   it too.
    * - Only a line that didn't read whole, and only from a parse of the text here (`isAlone`):  a project's parse knows.
    * - The parser's own rules, so any language's:  `es soltable cuando`.
    * - Returns whether it was taken.
@@ -627,27 +671,105 @@ export class BubblyLayout {
     const isRead = statement?.rule.name !== PARSE_ERROR_RULE && !this.partlyRead.has(line.index)
     const scope = statement?.scope
     if (!this.isAlone || isRead || !scope?.parser) return false
-    const lineStart = this.lineStarts[line.index]!
-    const end = (flattened(line.children).at(-1) ?? line).end
+    // its own scope's reading is the project's, whatever it reads as:  `wiki pages are found at ...` no declaration
+    if (
+      this.rereadIn(
+        line,
+        () => new P.Scope({ parentScope: scope }),
+        () => true
+      )
+    )
+      return true
+    for (const itemType of [THING_TYPE, ...this.namesAfterArticles(line)])
+      if (this.rereadIn(line, () => BubblyLayout.standInList(scope, itemType))) return true
+    return false
+  }
+
+  /** A stand-in list type's body under `scope`, a list of `itemType`s (`rereadAsMember()`). */
+  private static standInList(scope: P.Scope, itemType: string): P.Scope {
+    const owner = new P.ProjectScope({ name: STAND_IN_TYPE, parentScope: scope })
+    owner.types.add({ name: STAND_IN_TYPE, superType: LIST_TYPE, itemType })
+    if (itemType !== THING_TYPE) owner.types.add({ name: itemType, superType: THING_TYPE })
+    return new P.SubjectScope({ name: STAND_IN_TYPE, parentScope: owner, subject: STAND_IN_TYPE })
+  }
+
+  /**
+   * Read `line`, a top-level line that didn't read alone, starting with an article (`a square belongs to one board`),
+   * again, with its first words a stand-in type, a thing:  so it draws as its project's parse draws it
+   * (epic `codemirror` I28).
+   * - Why:  laid out from its text alone, a type another file declares (`square`) isn't known, so the line doesn't
+   *   read, and `shapeOf()` takes it for reopening a type, a thing's band, where its project's draws a property's.
+   * - Its first word after the article, then its first two, its first three:  the first that reads whole as a
+   *   declaration, but not as reopening a type (`shapeOf()` guesses that already).
+   * - Only from a parse of the text here (`isAlone`).
+   * - Returns whether it was taken.
+   */
+  private rereadWithStandInType(line: SourceLine): boolean {
+    const statement = this.statements.get(line.index)
+    const scope = statement?.scope
+    if (!this.isAlone || statement?.rule.name !== PARSE_ERROR_RULE || !scope?.parser) return false
+    const [article, ...words] = this.text.slice(line.start, this.commentStart(line)).trim().split(/\s+/)
+    if (!article || !this.isArticle(article)) return false
+    for (let count = 1; count < words.length && count <= MAX_TYPE_WORDS; count++) {
+      if (!/^[\p{L}-]+$/u.test(words[count - 1]!)) return false
+      const typeName = P.classCase(words.slice(0, count).join(" "))
+      const standIn = () => {
+        const owner = new P.ProjectScope({ name: STAND_IN_TYPE, parentScope: scope })
+        owner.types.add({ name: typeName, superType: THING_TYPE })
+        return owner
+      }
+      if (this.rereadIn(line, standIn, (rule) => isDeclaration(rule) && rule.name !== REOPEN_TYPE_RULE)) return true
+    }
+    return false
+  }
+
+  /**
+   * Read `line` and the lines under it again in a new scope from `scopeFor()`:  taken when its head reads whole, as a
+   * rule `isTaken` takes (a declaration, by default), its reading then replacing what was read of those lines.
+   * - Its head alone first, then with its lines:  each read in a scope of its own, so neither sees what the other
+   *   declared.
+   * - Returns whether it was taken.  NEVER throws.
+   */
+  private rereadIn(line: SourceLine, scopeFor: () => P.Scope, isTaken = isDeclaration): boolean {
+    // its head alone first, so a body under it is read again only for a head that's taken:  `a card`'s whole body
+    if (line.children.length && !this.readIn(line, line.end, scopeFor(), isTaken)) return false
+    const head = this.readIn(line, (flattened(line.children).at(-1) ?? line).end, scopeFor(), isTaken)
+    if (!head) return false
+    this.forget(this.lineStarts[line.index]!, (flattened(line.children).at(-1) ?? line).end)
+    this.read(head)
+    return true
+  }
+
+  /**
+   * The text from `line`'s start to `end` read in `scope`:  `line`'s match, when its head reads whole as a rule
+   * `isTaken` takes;  else `undefined`.  NEVER throws.
+   */
+  private readIn(line: SourceLine, end: number, scope: P.Scope, isTaken: (rule: P.Rule) => boolean) {
     let match: P.Match | undefined
     try {
       // its lines alone, tokenized where they are in the text, so its matches' offsets are the text's
       const { tokenizer } = scope.parser as SP.SpellParser
-      const tokens = tokenizer.breakIntoIndentedBlocks(tokenizer.tokenize(this.text, lineStart, end))
-      const owner = new P.ProjectScope({ name: STAND_IN_TYPE, parentScope: scope })
-      owner.types.add({ name: STAND_IN_TYPE, superType: LIST_TYPE, itemType: THING_TYPE })
-      const body = new P.SubjectScope({ name: STAND_IN_TYPE, parentScope: owner, subject: STAND_IN_TYPE })
-      match = scope.parser.parse(tokens, BLOCK_RULE, body)
+      const tokens = tokenizer.tokenize(this.text, this.lineStarts[line.index]!, end)
+      match = scope.parser!.parse(tokenizer.breakIntoIndentedBlocks(tokens), BLOCK_RULE, scope)
     } catch {
-      return false
+      return undefined
     }
     const head = match && BubblyLayout.lineMatchAt(match, line.start)
     const read = head ? childrenOf(head).filter((child) => child.rule.name !== COMMENT_RULE) : []
-    if (read.length !== 1 || read[0]!.rule.name === PARSE_ERROR_RULE || !BubblyRoles.of(read[0]!.rule).band)
-      return false
-    this.forget(lineStart, end)
-    this.read(head!)
-    return true
+    const [statement] = read
+    const isRead = read.length === 1 && statement!.rule.name !== PARSE_ERROR_RULE
+    return isRead && isTaken(statement!.rule) ? head : undefined
+  }
+
+  /** The words after an article on `line`, not pronouns, each once:  `piece` in `it is droppable when the piece ...`. */
+  private namesAfterArticles(line: SourceLine): string[] {
+    const words = this.text.slice(line.start, this.commentStart(line)).match(/[\p{L}]+/gu) ?? []
+    const names = new Set<string>()
+    for (let index = 1; index < words.length; index++) {
+      const [before, word] = [words[index - 1]!.toLowerCase(), words[index]!]
+      if (this.smallWords.has(before) && !this.smallWords.has(word.toLowerCase())) names.add(P.classCase(word))
+    }
+    return [...names].slice(0, MAX_STAND_IN_ITEMS)
   }
 
   /** The line match in `match` whose statement starts at `start`. */
@@ -704,6 +826,23 @@ export class BubblyLayout {
     BubblyLayout.shapes.set(parser, shapes)
     return shapes
   }
+
+  /** The control rule each first word starts, for `parser`'s statements (`controlOf()`):  worked out once a parser. */
+  private static controlsFor(parser: SP.SpellParser): Map<string, string> {
+    let controls = BubblyLayout.controls.get(parser)
+    if (controls) return controls
+    controls = new Map()
+    const flatten = (rule: P.Rule): P.Rule[] => (rule instanceof P.Group ? rule.rules.flatMap(flatten) : [rule])
+    const statements = parser.rules[STATEMENT]
+    for (const rule of statements ? flatten(statements) : [])
+      if (rule instanceof P.Sequence && BubblyPresentation.for(rule)?.isControl)
+        for (const word of rule.firstWords ?? []) if (!controls.has(word)) controls.set(word, rule.name ?? "")
+    BubblyLayout.controls.set(parser, controls)
+    return controls
+  }
+
+  /** `controlsFor()`'s, by parser. */
+  private static readonly controls = new WeakMap<SP.SpellParser, Map<string, string>>()
 
   /** `shapesFor()`'s, by parser. */
   private static readonly shapes = new WeakMap<SP.SpellParser, Map<string, LineShape | undefined>>()
@@ -1183,6 +1322,18 @@ const TYPE_THEN_QUOTED_NAME = /^\s+[\p{L}][\p{L}-]*\s+"[^"]+"/u
 /** An article and a name, nothing else:  `a card`, `a two sided view`. */
 const TYPE_NAME_ALONE = /^[\p{L}]+( +[\p{L}]+)+$/u
 
+/** The rule of a property worked out, `"card" is a new card with ...`:  a quoted name first, in a type's body. */
+const QUOTED_GETTER_RULE = "property_value_getter"
+
+/** A quoted name first, then a word:  `"card" is a new card with ...`. */
+const QUOTED_NAME_FIRST = /^"[^"]+"\s+[\p{L}]/u
+
+/** The most words a stand-in type takes (`rereadWithStandInType()`):  `a two sided view`'s three. */
+const MAX_TYPE_WORDS = 3
+
+/** The most stand-in lists of what a line names a member is read again in (`rereadAsMember()`). */
+const MAX_STAND_IN_ITEMS = 3
+
 /** The stand-in type a member that didn't read alone is read again in (`rereadAsMember()`). */
 const STAND_IN_TYPE = "StandInList"
 
@@ -1279,6 +1430,11 @@ function descendantsNamed(match: P.Match, names: readonly string[] | undefined):
   }
   walk(match)
   return found
+}
+
+/** Is `rule` a declaration's, drawn on a band? */
+function isDeclaration(rule: P.Rule): boolean {
+  return !!BubblyRoles.of(rule).band
 }
 
 /** Is `rule` an expression, a value, and not a statement (its twin, `play the card`, is a statement too)? */

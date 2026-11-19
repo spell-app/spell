@@ -37,26 +37,36 @@ describe("every example and guide draws as its snapshot", () => {
 })
 
 /**
- * Laid out from its TEXT alone (as the editor draws a file before its project's parse, or with none), Solitaire's
- * files have the SAME blocks as in the project's parse:  each control block and declaration, its band's kind, where its
- * head and its foot are, how deep it sits (epic `codemirror` I23, I26).
+ * Laid out from its TEXT alone (as the editor draws a file before its project's parse, or with none), every example's
+ * and guide's files have the SAME blocks as in the project's parse:  each control block and declaration, its band's
+ * kind, where its head and its foot are, how deep it sits (epic `codemirror` I23, I26, I28).
  * - Its lines naming what another file declares (`if the stock is empty`) don't parse alone:  their shape comes from
- *   their first words (`BubblyLayout.shapeOf()`).
- * - A type's member that reads whole only in a list's body (the foundation's `it is droppable when`, Pile.spell's
- *   `belongs to one pile`) is read again as one (`BubblyLayout.rereadAsMember()`).
+ *   their first words (`BubblyLayout.shapeOf()`), or, among steps, the control line their first word starts
+ *   (`BubblyLayout.controlOf()`:  Spanish's `para rango en rangos de carta`, `while waiting`).
+ * - A type's member that doesn't read whole alone (the foundation's `it is droppable when`, Pile.spell's
+ *   `belongs to one pile`, Wikipedia's `wiki pages are found at ...`) is read again (`BubblyLayout.rereadAsMember()`);
+ *   so is a top-level line naming another file's type (`a square belongs to one board`,
+ *   `BubblyLayout.rereadWithStandInType()`).
  * - Not which rule a head is:  one that parses alone may read as another rule of the same band (`to draw its placeholder`).
  */
-test("Solitaire's files have the same blocks laid out from their text as from their project's parse", () => {
-  const name = "@spell/examples/Solitaire"
-  const { files } = parseSpellProject(loadFixtureProject(name), {
-    parentScope: fixtureImportScope(name),
-    projectPath: fixtureProjectId(name)
-  })
-  for (const { path, contents, scope, match } of files) {
-    const parser = scope.parser as SP.SpellParser
-    const within = { match, inputLines: contents.split("\n") } as unknown as SP.SpellFile
-    const fromParse = blocksOf(SP.BubblyLayout.of(contents, parser, { within }))
-    expect(blocksOf(SP.BubblyLayout.of(contents, parser)), path).toEqual(fromParse)
+describe("every example's and guide's files have the same blocks laid out from their text as from their project's parse", () => {
+  for (const name of [...EXAMPLE_PROJECTS, ...GUIDE_PROJECTS]) {
+    test(
+      name,
+      () => {
+        const { files } = parseSpellProject(loadFixtureProject(name), {
+          parentScope: fixtureImportScope(name),
+          projectPath: fixtureProjectId(name)
+        })
+        for (const { path, contents, scope, match } of files) {
+          const parser = scope.parser as SP.SpellParser
+          const within = { match, inputLines: contents.split("\n") } as unknown as SP.SpellFile
+          const fromParse = blocksOf(SP.BubblyLayout.of(contents, parser, { within }))
+          expect(blocksOf(SP.BubblyLayout.of(contents, parser)), path).toEqual(fromParse)
+        }
+      },
+      30_000
+    )
   }
 })
 
