@@ -1050,4 +1050,3 @@ function pageUI(): PageUI | undefined {
 
 /** Spell UI's `RUNTIME_KEY`:  a copy, as core never imports `ui`. */
 const UI_RUNTIME_KEY = Symbol.for("spell-ui:runtime")
-

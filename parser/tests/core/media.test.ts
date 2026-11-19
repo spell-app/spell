@@ -40,7 +40,6 @@ class FakeAudio {
   }
 }
 
-
 afterEach(() => {
   FakeAudio.made = []
   vi.unstubAllGlobals()
@@ -50,21 +49,21 @@ afterEach(() => {
 describe("core.play() / core.stop():  `play its sound`, `stop its sound` (epic `data` T145)", () => {
   test("play makes ONE player per sound file, loading at once, and plays it in the same moment", () => {
     vi.stubGlobal("Audio", FakeAudio)
-    core.play("https://example.com/one.ogg")
+    void core.play("https://example.com/one.ogg")
     expect(FakeAudio.made).toHaveLength(1)
     const [player] = FakeAudio.made
     expect(player).toMatchObject({ src: "https://example.com/one.ogg", preload: "auto", plays: 1, paused: false })
-    core.play("https://example.com/one.ogg")
+    void core.play("https://example.com/one.ogg")
     expect(FakeAudio.made).toHaveLength(1)
     expect(player!.plays).toBe(2)
   })
 
   test("playing it again starts it over", () => {
     vi.stubGlobal("Audio", FakeAudio)
-    core.play("https://example.com/two.ogg")
+    void core.play("https://example.com/two.ogg")
     const [player] = FakeAudio.made
     player!.currentTime = 1.5
-    core.play("https://example.com/two.ogg")
+    void core.play("https://example.com/two.ogg")
     expect(player!.currentTime).toBe(0)
   })
 
@@ -74,7 +73,7 @@ describe("core.play() / core.stop():  `play its sound`, `stop its sound` (epic `
     expect(FakeAudio.made).toHaveLength(1)
     const [player] = FakeAudio.made
     expect(player).toMatchObject({ preload: "auto", plays: 0, paused: true })
-    core.play("https://example.com/three.ogg")
+    void core.play("https://example.com/three.ogg")
     player!.currentTime = 0.7
     core.stop("https://example.com/three.ogg")
     expect(player).toMatchObject({ paused: true, currentTime: 0, plays: 1 })
@@ -83,7 +82,7 @@ describe("core.play() / core.stop():  `play its sound`, `stop its sound` (epic `
 
   test("no address, or no Audio (node):  nothing, and no throw", () => {
     vi.stubGlobal("Audio", FakeAudio)
-    core.play(undefined)
+    void core.play(undefined)
     core.stop("")
     expect(FakeAudio.made).toHaveLength(0)
     vi.stubGlobal("Audio", undefined)
@@ -95,17 +94,16 @@ describe("core.play() / core.stop():  `play its sound`, `stop its sound` (epic `
     const warn = vi.spyOn(core.console, "warn").mockImplementation(() => {})
     core.stop("https://example.com/five.ogg")
     FakeAudio.made[0]!.refuse = Object.assign(new Error("no"), { name: "NotAllowedError" })
-    core.play("https://example.com/five.ogg")
+    void core.play("https://example.com/five.ogg")
     core.stop("https://example.com/six.ogg")
     FakeAudio.made[1]!.refuse = Object.assign(new Error("stopped"), { name: "AbortError" })
-    core.play("https://example.com/six.ogg")
+    void core.play("https://example.com/six.ogg")
     await Promise.resolve()
     await Promise.resolve()
     expect(warn).toHaveBeenCalledTimes(1)
     expect(String(warn.mock.calls[0]![0])).toContain("five.ogg")
   })
 })
-
 
 describe("named sounds and videos (epic `language` P65)", () => {
   test("a name is found from anywhere, in any case or spacing;  the same name and address give the same one", () => {
@@ -120,13 +118,13 @@ describe("named sounds and videos (epic `language` P65)", () => {
     expect(FakeAudio.made).toHaveLength(1)
   })
 
-  test("`play \"card slide\"` alone plays the name first, then a file at that address", () => {
+  test('`play "card slide"` alone plays the name first, then a file at that address', () => {
     vi.stubGlobal("Audio", FakeAudio)
     core.media("sound", "sounds/flip.mp3", "card flip")
-    core.play("card flip")
+    void core.play("card flip")
     expect(FakeAudio.made).toHaveLength(1)
     expect(FakeAudio.made[0]!.plays).toBe(1)
-    core.play("sounds/other.mp3")
+    void core.play("sounds/other.mp3")
     expect(FakeAudio.made).toHaveLength(2)
     expect(FakeAudio.made[1]).toMatchObject({ src: "sounds/other.mp3", plays: 1 })
   })
@@ -134,9 +132,15 @@ describe("named sounds and videos (epic `language` P65)", () => {
   test("speed, a start partway, volume, muted and looping are each play's own", () => {
     vi.stubGlobal("Audio", FakeAudio)
     const music = core.media("sound", "music.mp3", "theme music")
-    core.play(music, { speed: 1.5, from: 30, volume: 0.5, muted: true, loop: true })
-    expect(FakeAudio.made[0]).toMatchObject({ playbackRate: 1.5, currentTime: 30, volume: 0.5, muted: true, loop: true })
-    core.play(music, { volume: 7 })
+    void core.play(music, { speed: 1.5, from: 30, volume: 0.5, muted: true, loop: true })
+    expect(FakeAudio.made[0]).toMatchObject({
+      playbackRate: 1.5,
+      currentTime: 30,
+      volume: 0.5,
+      muted: true,
+      loop: true
+    })
+    void core.play(music, { volume: 7 })
     expect(FakeAudio.made[0]).toMatchObject({ playbackRate: 1, currentTime: 0, volume: 1, muted: false, loop: false })
   })
 
@@ -167,7 +171,7 @@ describe("named sounds and videos (epic `language` P65)", () => {
     const song = core.media("sound", "song.mp3", "song")
     const player = FakeAudio.made[0]!
     expect(core.isPlaying(song)).toBe(false)
-    core.play(song)
+    void core.play(song)
     expect(core.isPlaying("song")).toBe(true)
     player.currentTime = 12
     core.pause("song")
@@ -182,11 +186,11 @@ describe("named sounds and videos (epic `language` P65)", () => {
     expect(core.isDone(song)).toBe(true)
   })
 
-  test("stop all sounds stops every sound, named or by address;  videos only by `stopAll(\"video\")`", () => {
+  test('stop all sounds stops every sound, named or by address;  videos only by `stopAll("video")`', () => {
     vi.stubGlobal("Audio", FakeAudio)
     core.media("sound", "a.mp3", "sound a")
-    core.play("sound a")
-    core.play("b.mp3")
+    void core.play("sound a")
+    void core.play("b.mp3")
     expect(FakeAudio.made.every((player) => !player.paused)).toBe(true)
     core.stopAll("sound")
     expect(FakeAudio.made.every((player) => player.paused && player.currentTime === 0)).toBe(true)
@@ -258,7 +262,7 @@ describe("where a video plays (epic `language` J280)", () => {
     expect(drawn.localName).toBe("video")
     expect((drawn as HTMLVideoElement).controls).toBe(true)
     document.body.append(drawn)
-    core.play(intro)
+    void core.play(intro)
     expect(drawn.parentNode).toBe(document.body)
     expect(document.querySelector("ui-modal")).toBeNull()
   })
@@ -266,7 +270,7 @@ describe("where a video plays (epic `language` J280)", () => {
   test("drawn nowhere, or `in a new window`:  a see-through modal, which closing stops and puts it back", () => {
     const { document, videos } = stubPage()
     core.media("video", "outro.mp4", "outro")
-    core.play("outro")
+    void core.play("outro")
     const modal = document.querySelector("ui-modal") as HTMLElement & { visible?: boolean }
     expect(modal.hasAttribute("transparent")).toBe(true)
     expect(modal.visible).toBe(true)
@@ -277,7 +281,7 @@ describe("where a video plays (epic `language` J280)", () => {
     // drawn, but asked for a new window:  back where it was drawn once it closes
     const drawn = core.drawMedia("outro") as HTMLElement
     document.body.append(drawn)
-    core.play("outro", { where: "window" })
+    void core.play("outro", { where: "window" })
     expect(document.querySelector("ui-modal video")).toBe(drawn)
     core.stop("outro")
     expect(drawn.parentNode).toBe(document.body)
@@ -286,7 +290,7 @@ describe("where a video plays (epic `language` J280)", () => {
   test("`full screen`:  full screen, in a window first when it's drawn nowhere", () => {
     const { document, videos } = stubPage()
     core.media("video", "trailer.mp4", "trailer")
-    core.play("trailer", { where: "full screen" })
+    void core.play("trailer", { where: "full screen" })
     expect(videos[0]!.fullScreens).toBe(1)
     expect(document.querySelector("ui-modal video")).toBe(videos[0])
   })
@@ -296,7 +300,7 @@ describe("where a video plays (epic `language` J280)", () => {
     vi.stubGlobal("Audio", FakeAudio)
     core.media("sound", "x.mp3", "quiet one")
     expect(core.drawMedia("quiet one")).toBeUndefined()
-    core.play("clips/cat.mp4")
+    void core.play("clips/cat.mp4")
     expect(videos).toHaveLength(1)
     expect(FakeAudio.made).toHaveLength(1)
   })

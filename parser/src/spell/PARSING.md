@@ -1916,6 +1916,33 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
     block (`SP.markCodeSpell()`), and `SpellJSX` reads a marked element, and everything inside it, `{...}` too, as
     code spell.
 
+## Sounds and videos:  `play the "intro" video in a new window` (epic `language` P65)
+
+- A NAME, given on a page or the app, either way round, or by a drawing's tag:
+  - `sound "card slide" is at "sounds/slide.mp3"` (`define_media`, in a type's outline body:  `subject_implied`)
+  - `its "intro" is a video at "intro.mp4"` (`outline_specifier_media`, which `DefinePropertyHas` names, `madeAs()`)
+  - `<sound "boing" source="boing.mp3" />`, `<video "intro" source="..." />` (`SpellJSX.mediaDrawnBy()`, declared as a
+    drawn member, `DrawnDeclaration.media`, by `DrawnMarkup`);  `<video "intro" />` with no source only draws it
+  - Each is a property, starting as `core.media("sound", "sounds/slide.mp3", "card slide")`, made with its thing
+    (`P.ASTReactiveProperty.early`), so the core finds it by its name at once.
+  - Each notes its name for its project (`noteMediaName()`, `UI.shared.ts`), as menus' names are.
+- A sound or video BY ITS NAME, `media_named`:  `sound "card slide"`, `the "intro" video`, Spanish `el vídeo "intro"`,
+  `el vídeo llamado "intro"`;  compiled `core.mediaNamed("intro", "video")`, found while its page or app is there.
+  - Without quotes (`media_name_words`, its own `parse()`):  the words of a name noted by then, the longest that fits;
+    or the words before `sound` / `video` that, with it, are no property of the thing it's in, for a name given
+    further down (a drawing below the action);  the longest reading wins, so `the card slide sound` beats the member
+    read `the card slide`, then `sound`.
+  - A quoted or bare name nobody gives is refused once the program has parsed (`unknown-media`).
+- `play_sound` reads, after what it plays, each optional in this order:  `media_speed` (`at 1.5x`, `at half speed`),
+  `from` + `media_time` (`0:30`, its own `parse()`:  the `:` touches its numbers;  only here, so `9:30` elsewhere stays
+  a `time_literal`), `media_volume` (a percent, kept as its fraction), `media_loop`, `media_place`, `and wait`:
+  one options object, `core.play(x, { speed: 1.5, from: 30, where: "window" })`, awaited for `and wait`.
+- `stop_all_media`, `media_call` (`pause` / `resume`, a named one only:  `pause for 2 seconds` stays a pause),
+  `media_is` (`is playing`, `is done`), `media_length` (a duration, `SP.SECONDS`).
+- `when_media` (events, on `On`):  `when the "intro" video ends`, its event `intro-video-ends`, the name's words, the
+  kind and what happened, dashed, the same in every language (`mediaEventName()`, a copy of the core's).
+- What they compile to runs on the core's `media.ts`.
+
 ## Fill-ins:  `"images/[rank]-of-[suit].png"`
 
 - `[x]` inside text ALWAYS fills in (epic page Q2).

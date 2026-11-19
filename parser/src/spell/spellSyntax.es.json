@@ -2043,6 +2043,7 @@
             "is_greater_or_less_than",
             "rounding",
             "passive_event",
+            "media_event",
             "list_end",
             "before_or_after",
             "print_kind",
@@ -2052,6 +2053,11 @@
             "toast_progress",
             "text_size",
             "shown_dates",
+            "media_kind",
+            "media_kinds",
+            "media_speed_word",
+            "media_loop",
+            "media_place",
             "take_or_give_up",
             "drag_or_drop",
             "drag_moment",
@@ -2129,6 +2135,9 @@
               "syntax": "((click:se pulsa)|(double_click:se pulsa dos veces)|(right_click:se pulsa con el botón derecho)|(long_press:se mantiene pulsado|se mantiene pulsada)|(drag:se arrastra)|(drag_cancelled:se cancela el arrastre|se cancela su arrastre))"
             },
             {
+              "syntax": "((ends:termina|acaba)|(starts:empieza a sonar|empieza|comienza)|(pauses:se pausa|se detiene))"
+            },
+            {
               "syntax": "((start:principio|comienzo|inicio|frente|abajo)|(end:final|fin|fondo|arriba))"
             },
             {
@@ -2154,6 +2163,21 @@
             },
             {
               "syntax": "((short:fechas cortas)|(long:fechas largas)|(abbreviated:fechas abreviadas)|(date_and_time:fechas y horas)|(timestamp:marcas de tiempo)|(plain:fechas simples)|(reader:las del lector))"
+            },
+            {
+              "syntax": "((sound:sonido)|(video:vídeo|video|película))"
+            },
+            {
+              "syntax": "((sound:sonidos)|(video:vídeos|videos|películas))"
+            },
+            {
+              "syntax": "((half:media velocidad|la mitad de velocidad)|(normal:velocidad normal)|(double:doble velocidad|doble de velocidad|el doble de velocidad))"
+            },
+            {
+              "syntax": "((loop:una y otra vez|en bucle))"
+            },
+            {
+              "syntax": "((window:en una ventana nueva|en una nueva ventana)|(full_screen:a pantalla completa|en pantalla completa))"
             },
             {
               "syntax": "((take:agregar|añadir|anadir|tomar)|(give_up:soltar|quitar|eliminar|ceder))"
@@ -3332,6 +3356,32 @@
                 },
                 "py": {
                   "code": "@core.on(\"a-receta-change\")\ndef on_a_receta_change(event: Any) -> None:\n    receta = event.receta\n    core.console.log(receta.título)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "WhenMedia",
+          "ruleNames": ["when_media"],
+          "internal": false,
+          "file": "src/spell/rules/events/WhenMedia.ts",
+          "line": 24,
+          "purpose": "Run this when a sound or video ends, starts playing or pauses -- `when the \"intro\" video ends`, `when sound \"card slide\" starts playing` (epic `language` P65); Spanish `cuando el vídeo \"intro\" termina`.",
+          "syntaxes": [
+            {
+              "syntax": "cuando {media:media_named} {happened:media_event} (:|,)? {statement_body}?",
+              "example": "cuando el vídeo \"intro\" termina\n\timprimir 1",
+              "outputs": {
+                "js": {
+                  "code": "on(\"intro-video-ends\", () => core.console.log(1))"
+                },
+                "ts": {
+                  "code": "on(\"intro-video-ends\", () => core.console.log(1))"
+                },
+                "py": {
+                  "code": "@core.on(\"intro-video-ends\")\ndef on_intro_video_ends(event: Any) -> None:\n    print(1)"
                 }
               }
             }
@@ -5084,6 +5134,105 @@
           "aliases": ["statement", "expression"]
         },
         {
+          "className": "MediaNamed",
+          "ruleNames": ["media_named"],
+          "internal": false,
+          "file": "src/spell/rules/UI/MediaNamed.ts",
+          "line": 19,
+          "purpose": "A sound or a video the program named, by its name (epic `language` P65).",
+          "syntaxes": [
+            {
+              "syntax": "(el|la)? {kind:media_kind} {name:text}",
+              "example": "el sonido \"deslizar\"",
+              "outputs": {
+                "js": {
+                  "code": "core.mediaNamed(\"deslizar\", \"sound\")"
+                },
+                "ts": {
+                  "code": "core.mediaNamed(\"deslizar\", \"sound\")"
+                },
+                "py": {
+                  "code": "core.media_named(\"deslizar\", \"sound\")"
+                }
+              }
+            },
+            {
+              "syntax": "(el|la)? {kind:media_kind} (llamado|llamada) {name:text}",
+              "example": "el vídeo llamado \"intro\"",
+              "outputs": {
+                "js": {
+                  "code": "core.mediaNamed(\"intro\", \"video\")"
+                },
+                "ts": {
+                  "code": "core.mediaNamed(\"intro\", \"video\")"
+                },
+                "py": {
+                  "code": "core.media_named(\"intro\", \"video\")"
+                }
+              }
+            },
+            {
+              "syntax": "(el|la) {kind:media_kind} {name:media_name_words}"
+            },
+            {
+              "syntax": "{kind:media_kind} {name:media_name_words}"
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "MediaIs",
+          "ruleNames": ["media_is"],
+          "internal": false,
+          "file": "src/spell/rules/UI/MediaIs.ts",
+          "line": 16,
+          "purpose": "Is a sound or video playing, or done -- `if the \"intro\" video is playing`, `if sound \"card slide\" is not done` (epic `language` P65); Spanish `si el vídeo \"intro\" está sonando`, `... está terminado`.",
+          "syntaxes": [
+            {
+              "syntax": "{media:media_named} {operator:is_or_is_not} ((playing:sonando|reproduciéndose)|(done:terminado|terminada|acabado|acabada))",
+              "example": "el vídeo \"intro\" está sonando",
+              "outputs": {
+                "js": {
+                  "code": "core.isPlaying(core.mediaNamed(\"intro\", \"video\"))"
+                },
+                "ts": {
+                  "code": "core.isPlaying(core.mediaNamed(\"intro\", \"video\"))"
+                },
+                "py": {
+                  "code": "core.is_playing(core.media_named(\"intro\", \"video\"))"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
+          "className": "MediaLength",
+          "ruleNames": ["media_length"],
+          "internal": false,
+          "file": "src/spell/rules/UI/MediaLength.ts",
+          "line": 15,
+          "purpose": "How long a sound or video is -- `the length of the \"intro\" video` (epic `language` P65); Spanish `la duración del vídeo \"intro\"`.",
+          "syntaxes": [
+            {
+              "syntax": "la (duración|longitud) (del|de) {media:media_named}",
+              "example": "la duración del vídeo \"intro\"",
+              "outputs": {
+                "js": {
+                  "code": "core.mediaLength(core.mediaNamed(\"intro\", \"video\"))"
+                },
+                "ts": {
+                  "code": "core.mediaLength(core.mediaNamed(\"intro\", \"video\"))"
+                },
+                "py": {
+                  "code": "core.media_length(core.media_named(\"intro\", \"video\"))"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "Print",
           "ruleNames": ["print"],
           "internal": false,
@@ -5255,15 +5404,67 @@
           "aliases": ["statement"]
         },
         {
+          "className": "MediaTime",
+          "ruleNames": ["media_time"],
+          "internal": false,
+          "file": "src/spell/rules/UI/MediaTime.ts",
+          "line": 14,
+          "purpose": "Where in a sound or video to start, minutes and seconds -- `0:30` in `play video \"intro\" from 0:30` (epic `language` P65).",
+          "syntaxes": [
+            {
+              "syntax": "{number} : {number}",
+              "example": "1:05",
+              "outputs": {
+                "js": {
+                  "code": "65"
+                },
+                "ts": {
+                  "code": "65"
+                },
+                "py": {
+                  "code": "65"
+                }
+              }
+            }
+          ],
+          "aliases": []
+        },
+        {
+          "className": "MediaSpeed",
+          "ruleNames": ["media_speed"],
+          "internal": false,
+          "file": "src/spell/rules/UI/MediaSpeed.ts",
+          "line": 13,
+          "purpose": "How fast to play a sound or video -- `at 1.5x`, `at half speed`, `at double speed` (epic `language` P65); Spanish `a 1.5x`, `a media velocidad`, `al doble de velocidad`.",
+          "syntaxes": [
+            {
+              "syntax": "(a|al) ({speed:number} x|{word:media_speed_word})",
+              "example": "a 1.5x",
+              "outputs": {
+                "js": {
+                  "code": "1.5"
+                },
+                "ts": {
+                  "code": "1.5"
+                },
+                "py": {
+                  "code": "1.5"
+                }
+              }
+            }
+          ],
+          "aliases": []
+        },
+        {
           "className": "PlaySound",
           "ruleNames": ["play_sound"],
           "internal": false,
           "file": "src/spell/rules/UI/PlaySound.ts",
-          "line": 14,
-          "purpose": "Play a sound file, from its start, as a click or a key asks (epic `data` Q40, T145).",
+          "line": 28,
+          "purpose": "Play a sound or a video, from its start, as a click or a key asks (epic `data` Q40, T145; epic `language` P65).",
           "syntaxes": [
             {
-              "syntax": "reproducir {sound:expression}",
+              "syntax": "reproducir {sound:expression} {speed:media_speed}? (desde {from:media_time})? {volume:media_volume}? {loop:media_loop}? {place:media_place}? (wait:y esperar)?",
               "example": "reproducir \"cry.ogg\"",
               "outputs": {
                 "js": {
@@ -5278,7 +5479,7 @@
               }
             }
           ],
-          "aliases": ["statement"]
+          "aliases": ["statement", "async"]
         },
         {
           "className": "StopSound",
@@ -5300,6 +5501,73 @@
                 },
                 "py": {
                   "code": "core.stop(\"cry.ogg\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "StopAllMedia",
+          "ruleNames": ["stop_all_media"],
+          "internal": false,
+          "file": "src/spell/rules/UI/StopAllMedia.ts",
+          "line": 12,
+          "purpose": "Stop every sound, or every video, the program has played -- `stop all sounds`, `stop all videos`, `stop all movies` (epic `language` P65); Spanish `parar todos los sonidos`, `parar todos los vídeos`.",
+          "syntaxes": [
+            {
+              "syntax": "parar (todos los|todas las) {kind:media_kinds}",
+              "example": "parar todos los sonidos",
+              "outputs": {
+                "js": {
+                  "code": "core.stopAll(\"sound\")"
+                },
+                "ts": {
+                  "code": "core.stopAll(\"sound\")"
+                },
+                "py": {
+                  "code": "core.stop_all(\"sound\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "MediaCall",
+          "ruleNames": ["media_call"],
+          "internal": false,
+          "file": "src/spell/rules/UI/MediaCall.ts",
+          "line": 14,
+          "purpose": "Pause a sound or video, or go on playing it -- `pause video \"intro\"`, `resume video \"intro\"` (epic `language` P65); Spanish `pausar el vídeo \"intro\"`, `reanudar el vídeo \"intro\"`.",
+          "syntaxes": [
+            {
+              "syntax": "pausar {media:media_named}",
+              "example": "pausar el vídeo \"intro\"",
+              "outputs": {
+                "js": {
+                  "code": "core.pause(core.mediaNamed(\"intro\", \"video\"))"
+                },
+                "ts": {
+                  "code": "core.pause(core.mediaNamed(\"intro\", \"video\"))"
+                },
+                "py": {
+                  "code": "core.pause(core.media_named(\"intro\", \"video\"))"
+                }
+              }
+            },
+            {
+              "syntax": "reanudar {media:media_named}",
+              "example": "reanudar el vídeo \"intro\"",
+              "outputs": {
+                "js": {
+                  "code": "core.resume(core.mediaNamed(\"intro\", \"video\"))"
+                },
+                "ts": {
+                  "code": "core.resume(core.mediaNamed(\"intro\", \"video\"))"
+                },
+                "py": {
+                  "code": "core.resume(core.media_named(\"intro\", \"video\"))"
                 }
               }
             }
@@ -5537,6 +5805,48 @@
             }
           ],
           "aliases": ["statement"]
+        },
+        {
+          "className": "DefineMedia",
+          "ruleNames": ["define_media"],
+          "internal": false,
+          "file": "src/spell/rules/UI/DefineMedia.ts",
+          "line": 21,
+          "purpose": "Names a sound or a video on a page or the app, and says where its file is -- `sound \"card slide\" is at \"sounds/slide.mp3\"`, `video \"intro\" is at \"https://...\"`, `movie \"intro\" is at ...` (epic `language` P65); Spanish `sonido \"deslizar\" está en \"...\"`, `vídeo \"intro\" está en \"...\"`.",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_implied} {kind:media_kind} {property:quoted_member} (está|esta) en {path:text}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "MediaNameWords",
+          "ruleNames": ["media_name_words"],
+          "internal": false,
+          "file": "src/spell/rules/UI/MediaNameWords.ts",
+          "line": 21,
+          "purpose": "A sound or video's name without quotes, `card slide` in `play the card slide sound` (epic `language` P65).",
+          "syntaxes": [
+            {
+              "syntax": "{identifier}"
+            }
+          ],
+          "aliases": []
+        },
+        {
+          "className": "MediaVolume",
+          "ruleNames": ["media_volume"],
+          "internal": false,
+          "file": "src/spell/rules/UI/MediaVolume.ts",
+          "line": 13,
+          "purpose": "How loud to play a sound or video -- `at 50% volume`, `quietly`, `muted` (epic `language` P65); Spanish `al 50% de volumen`, `bajito`, `en silencio`.",
+          "syntaxes": [
+            {
+              "syntax": "(((a|al) {volume:measure_literal} de volumen)|(quiet:bajito|suavemente)|(muted:en silencio|silenciado))"
+            }
+          ],
+          "aliases": []
         }
       ]
     },
@@ -6755,7 +7065,7 @@
           "ruleNames": ["define_property_has"],
           "internal": false,
           "file": "src/spell/rules/classes/DefinePropertyHas.ts",
-          "line": 69,
+          "line": 72,
           "purpose": "Declares an instance property on `type`, optionally constrained/initialized by a `type_specifier`.",
           "syntaxes": [
             {
@@ -6850,6 +7160,32 @@
                 },
                 "py": {
                   "code": "[\"up\", \"down\"]"
+                }
+              }
+            }
+          ],
+          "aliases": ["outline_specifier"]
+        },
+        {
+          "className": "OutlineSpecifierMedia",
+          "ruleNames": ["outline_specifier_media"],
+          "internal": false,
+          "file": "src/spell/rules/classes/OutlineSpecifierMedia.ts",
+          "line": 16,
+          "purpose": "A property that's a sound or a video, and where its file is -- `its \"card slide\" is a sound at \"sounds/slide.mp3\"`, `its \"intro\" is a video at \"https://...\"` (epic `language` P65); Spanish `su \"deslizar\" es un sonido en \"...\"`.",
+          "syntaxes": [
+            {
+              "syntax": "(un|una) {kind:media_kind} en {path:text}",
+              "example": "un sonido en \"sonidos/deslizar.mp3\"",
+              "outputs": {
+                "js": {
+                  "code": "core.media(\"sound\", \"sonidos/deslizar.mp3\")"
+                },
+                "ts": {
+                  "code": "core.media(\"sound\", \"sonidos/deslizar.mp3\")"
+                },
+                "py": {
+                  "code": "core.media(\"sound\", \"sonidos/deslizar.mp3\")"
                 }
               }
             }
@@ -7764,7 +8100,7 @@
           "ruleNames": ["drawn_markup"],
           "internal": false,
           "file": "src/spell/rules/classes/DrawnMarkup.ts",
-          "line": 37,
+          "line": 39,
           "purpose": "In a drawing's body, a line of markup IS what it draws -- no `return` (epic `elemental-spell` P5, Q14).",
           "syntaxes": [
             {
@@ -10405,7 +10741,7 @@
           "ruleNames": ["jsxElement"],
           "internal": false,
           "file": "src/spell/rules/JSX/SpellJSX.ts",
-          "line": 121,
+          "line": 126,
           "purpose": "Match a JSX element (`<tag attr=.../>` or `<tag>...</tag>`) as an `expression`/`jsxChild`.",
           "syntaxes": [
             {
