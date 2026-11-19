@@ -1,7 +1,7 @@
 ---
 name: epic
 description: Run an epic -- a piece of work planned and built against its live epic page, `epics/<name>/<name>.plan.html`, in its own worktree.  `/epic <name> [what to plan]` plans one (or "make this a plan doc" about this session's work);  `/epic review [<name>]` takes the person's marks, comments and Sends from the page ("review the seo epic", "go through its todos");  `/epic resume [<name>]` picks one back up where its page says it stopped;  `/epic future <name> [idea]` saves an idea as a future epic;  `/epic phase [ids] [name]` adds a phase;  `/epic start <P1 | ids>` works a phase or items now;  `/epic request <epic> [<rN>]` takes up a `/send` request;  `/epic tidy [<epic>]` closes items other work made obsolete;  `/epic done` is `/isolate done`.
-argument-hint: <name> [what to plan] | done | review [<name>] | resume [<name>] | future <name> [idea] | phase [ids] [name] | start <P1 | ids> | request <epic> [<rN>] | tidy [<epic>] | color <look>
+argument-hint: <name> [what to plan] | demo [pasted text] | done | review [<name>] | resume [<name>] | future <name> [idea] | phase [ids] [name] | start <P1 | ids> | request <epic> [<rN>] | tidy [<epic>] | color <look>
 ---
 
 # /epic
@@ -120,6 +120,8 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
     Go to "14. Tidy" (epic `epic-engine` Q69).
   - `request`:  `/epic request <epic> [<rN>...]` takes up a request the person sent from another session:
     it becomes a todo or a phase.  Go to "12. Request" (epic `epic-workflow`;  epic `epic-engine` T88).
+  - `demo`:  `/epic demo [pasted text]` runs the STAGED DEMO when its step files are ready (`epic demo check`):
+    NOT a new epic.  Go to "15. Staged demo", and skip everything else here (epic `epic-engine` P77).
   - `done`:  `/epic done` is `/isolate done`, word for word.
     - In an epic's session, every prompt and question names it `/epic done`, never `/isolate done` (2026-10-24):
       the close-out modal's "Run `/epic done`", a reply's "`/epic done` when you're ready".
@@ -1858,6 +1860,52 @@ Its mechanical half runs BY ITSELF at the end of every turn (epic `epic-engine` 
    - A refusal from `epic close` (exit 1, one line per id, the others closed):  leave that item as it is.
 3. Reply:  how many closed, how many left noted, how many left alone, every "promised, not delivered" by id with what's
    missing (the person decides those), and the epic page's link pair.
+
+## 15. Staged demo:  `/epic demo`
+
+A demo of the epic tooling for a room, run from PRE-WRITTEN text, so nobody waits for Claude to think
+(epic `epic-engine` P77;  Owen, 2026-11-18:  "pre-seed an epic so that I can do a 'realistic' demo without people
+waiting for you to think").
+- The page and the tools are REAL:  the demo epic, `demo`, is made, filled and moved through its stages by the
+  real `epic` verbs.  Only the thinking is faked.
+- The text:  the STEP FILES in the epic folder's `epics/epic-engine/staged-demo/` (`epic demo check` prints where),
+  `00-paste.md` (what the person pastes) to `07-while-you-were-out.md`, each with its commands and its "Say" text.
+  The person rewrites them between runs;  never improvise past them.
+- The prompt hook says so (`STAGED DEMO:`), titles the session `🚧 demo` and saves the pasted text.
+- NO worktree, no `EnterWorktree`, no window move, no saga question, no install, no agents, no coherence review,
+  no modal.  Everything in THIS session, from where it is.
+  - In Codex:  the same steps;  run each `epic demo wait` in the foreground.
+
+WORKING LINES fill each wait, the person's words:  "phrases like 'I'm confabulating the confabulator' which are even
+more ridiculous than your normal 'Wibbling...' messages ... 3 or 4 per wait".
+- `epic demo lines 4` prints 4 (6 before step 06), picked at random from the step files' `silly-lines.txt`.
+- Write each as its OWN line of reply text, in italics, then `epic demo pause 2`, then the next:  about 10 seconds
+  in all.  Never `sleep`:  Claude Code refuses a foreground one.
+- Nothing else in between:  no narration, no tool output read out.
+
+The steps, each turn as short as it can be:
+1. Prompt `/epic demo ...`:  `epic demo check` (it fails:  say its lines, and stop).  Then working lines, then
+   `epic demo run 01` and `epic demo run 02`, then working lines, then `epic demo run 03`.
+   - Reply with the three "Say" texts, run together as one reply in the order they ran, and nothing else.
+2. Listen:  `epic demo wait` with Bash `run_in_background: true`, and END THE TURN.
+   - In Codex:  run it in the foreground;  it returns when the person acts.
+   - It hears the person's Send or Accept on the page (an Accept goes at once, not after its 5 minutes), applies it
+     (`epic inbox apply demo`) and ends with `NEXT:  <what>`.
+3. Woken (its notice, or a `📬 demo` line:  then `epic demo wait --timeout 5` first):  read its `NEXT:` line.
+   - `NEXT:  wait`:  the person isn't done (picks sent before the Accept, one question of two answered):  one short
+     line ("Got your picks.  Press Accept Overview when it looks right."), arm `epic demo wait` again, end the turn.
+   - `NEXT:  run 04`, `run 05`:  working lines, the step, its "Say" text, then step 2 again.
+   - `NEXT:  run 06`:  6 working lines ("building"), `epic demo run 06`, `epic demo run 07`, then 07's "Say" text,
+     and that's the end:  no more listening.
+   - `NEXT:  done`:  the demo is over:  say so in one line.
+4. Something the person TYPES in chat mid-demo:  answer it in a line or two, in the demo's voice, then go on from
+   `epic demo next`.
+5. A step fails:  say what failed in one line, and `epic demo next` says where things stand.  Never fix the page by
+   hand mid-demo.
+- `epic demo reset` clears it all for the next run (the page, its card, a worktree, branch or window file named
+  `demo`, the saved paste);  only when the person asks.
+- Rehearsing with nobody watching:  `epic demo run <step> --quiet` (nothing shown in VS Code), and
+  `node src/demo/shoot-staged-demo.mjs overview|phases|away|items` from `epic/` for pictures of the page.
 
 ## Migrations:  bringing epic pages up to today's markup
 
