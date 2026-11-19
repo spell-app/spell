@@ -7,8 +7,8 @@
  * - `spell commands [list|check]`:  every command against the commands page
  * - `spell wwod [check]`:  WWOD's citations and paths;  `spell wwod init`:  a project picks which of the rules its
  *   agents read (epic `repo-split` T66)
- * - `spell dev local-spell [checkout] [--off | --status]`:  run your own checkout in a project that installs `spell` from
- *   npm, for you alone (epic `repo-split` T70;  `.spell/kit.json5`)
+ * - `spell local [status | on [checkout] | off]`:  run your own checkout in a project that installs `spell` from npm,
+ *   for you alone (epic `repo-split` T70;  `.spell/kit.json5`)
  * - `spell deps [check]`:  the lockfile's advisories and deprecated packages, before a push
  * - `spell readme check | test | pictures [pages...]`:  every repo's README pages, checked, their examples run
  *   (epic `readme` P16), or their `html example` blocks pictured (epic `ui-gaps` P14)
@@ -146,25 +146,18 @@ export default function kitCommands(spell: Command): void {
       CLI.runCommand(async () => (await import("spell/cli/commands/wwodCommand")).wwodCommand(verb, files, options))
     )
 
-  ////////////////
-  // ## Working on Spell
-  ////////////////
-
-  const dev = spell.command("dev").description("working on Spell itself, from a checkout of it")
-
-  dev
-    .command("local-spell")
+  spell
+    .command("local")
     .description(
       "run your own Spell checkout in this project instead of npm's spell, for you alone:  " +
-        "written into the project's .spell/kit.json5, never committed"
+        "on writes the project's .spell/kit.json5, never committed;  off removes it"
     )
-    .argument("[checkout]", "your checkout of Spell (default:  the one this spell runs from, else ~/www/spell)")
-    .option("--off", "run npm's spell here again")
-    .option("--status", "say which Spell runs here, and why;  change nothing")
+    .argument("[verb]", "status (default):  which Spell runs here, and why;  on [checkout];  off")
+    .argument("[checkout]", "on:  your checkout of Spell (default:  the one this spell runs from, else ~/www/spell)")
     .option("--json", "print what it found (and did) as JSON")
-    .action((checkout: string | undefined, options: CLI.LocalSpellOptions) =>
+    .action((verb: string | undefined, checkout: string | undefined, options: CLI.LocalOptions) =>
       CLI.runCommand(async () =>
-        (await import("spell/cli/commands/localSpellCommand")).localSpellCommand(checkout, options)
+        (await import("spell/cli/commands/localCommand")).localCommand(verb, checkout, options)
       )
     )
 

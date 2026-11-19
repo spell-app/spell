@@ -69,14 +69,14 @@ One command, in the project, makes its `spell` run your checkout instead, for yo
 
 ```sh
 cd ~/work/acme-spell
-yarn spell dev local-spell ~/www/spell     # or npx spell ...;  spell ... when it's on your PATH
-yarn start                                 # the page server and editor from ~/www/spell, the org still acme's
+yarn spell local on ~/www/spell     # or npx spell ...;  spell ... when it's on your PATH
+yarn start                          # the page server and editor from ~/www/spell, the org still acme's
 ```
 
 - It writes the project's `.spell/kit.json5`, naming your checkout, and adds `/.spell/` to its `.gitignore` when git
   doesn't leave it out already:  everyone else runs npm's copy, and nothing committed changes.
 - With no checkout named:  the one this `spell` runs from, else `~/www/spell`.
-- `--status` says which Spell runs here, and why;  `--off` goes back to npm's.
+- `spell local` alone says which Spell runs here, and why;  `spell local off` goes back to npm's.
 - Your checkout runs from its own install:  `yarn install` there first, or nothing is written.
 - For every project on the machine:  `export SPELL_KIT=~/www/spell`, in your shell profile.
   It wins over a project's file, so one command can try another checkout.
