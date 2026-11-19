@@ -370,34 +370,34 @@ export const FILTER_TEXTS = [
   { key: "filterLabel", text: "Show items by state", description: "The state filter's group, for a screen reader." },
   {
     key: "chipWords",
-    text: "{count} {words}:  {does}\n{only}",
+    text: "{count} {words}\n{does} · {only}",
     description:
       "A state chip's name and tooltip:  how many, its state, what a click does (`showAll`, `chipHide` ...), " +
       "then what an ⌥-click does (`chipAltOnly`)."
   },
   {
     key: "chipAltOnly",
-    text: "⌥-click:  show only these",
+    text: "⌥-click:  only these",
     description: "A state chip's ⌥-click (epic `epic-engine` I166):  only its state shows, whatever showed."
   },
   {
     key: "markedWords",
-    text: "with Claude (marked in this pass, or being worked on)",
+    text: "with Claude",
     description:
       "The ONE blue badge's name and tooltip:  how many items are with Claude, whatever their kind -- marked in this pass, or being worked on (epic `epic-engine` P43)."
   },
-  { key: "showAll", text: "show everything", description: "A state chip's click:  every state shows again." },
-  { key: "chipAlso", text: "show these too", description: "A state chip's click, hidden:  its state shows too." },
-  { key: "chipHide", text: "hide these", description: "A state chip's click, showing:  its state hides." },
+  { key: "showAll", text: "Show everything", description: "A state chip's click:  every state shows again." },
+  { key: "chipAlso", text: "Show these too", description: "A state chip's click, hidden:  its state shows too." },
+  { key: "chipHide", text: "Hide these", description: "A state chip's click, showing:  its state hides." },
   {
     key: "chipNext",
-    text: "show the next ones instead",
+    text: "Show the next ones instead",
     description: "A state chip's click, the last one showing:  the next colour shows, and this one hides."
   },
-  { key: "chipStays", text: "nothing else to show", description: "A state chip's click, the only colour there is." },
+  { key: "chipStays", text: "Nothing else to show", description: "A state chip's click, the only colour there is." },
   {
     key: "chipMixed",
-    text: "shown in some sections, hidden in others:  show them in every section",
+    text: "Hidden in some sections:  show them in all",
     description:
       "The page toolbar's chip while sections disagree about its colour (`mixed`, epic `epic-engine` I259):  a click " +
       "shows it in every section."
@@ -407,23 +407,23 @@ export const FILTER_TEXTS = [
     text: "Claude is working on it",
     description: "A state chip's words:  `progress` (blue)."
   },
-  { key: "stateAttention", text: "needs attention", description: "A state chip's words:  `attention` (red)." },
+  { key: "stateAttention", text: "urgent", description: "A state chip's words:  `attention` (red)." },
   {
     key: "stateReplied",
-    text: "your turn:  Claude answered or fixed it",
+    text: "answered or fixed:  your turn",
     description: "A state chip's words:  `replied` (orange)."
   },
   {
     key: "stateRequested",
-    text: "your turn:  what you asked for is finished",
+    text: "finished as you asked:  your turn",
     description: "A state chip's words:  `requested` (light orange)."
   },
   {
     key: "stateHanded",
-    text: "you pressed Do this, Claude hasn't started",
+    text: "waiting for Claude to start",
     description: "A state's words, counted in the blue badge:  `handed`."
   },
-  { key: "stateOpen", text: "open, still undecided", description: "A state chip's words:  `open` (yellow)." },
+  { key: "stateOpen", text: "undecided", description: "A state chip's words:  `open` (yellow)." },
   {
     key: "stateScheduled",
     text: "agreed, not started",
@@ -431,7 +431,7 @@ export const FILTER_TEXTS = [
   },
   {
     key: "stateQuiet",
-    text: "open, nothing to think about",
+    text: "open, nothing to decide",
     description: "A state chip's words:  `quiet` (grey:  a limit)."
   },
   { key: "stateRecent", text: "decided or done", description: "A state chip's words:  `recent` (green)." },
@@ -443,19 +443,19 @@ export const FILTER_TEXTS = [
   { key: "stateOld", text: "no longer relevant", description: "A state chip's words:  `old` (grey)." },
   {
     key: "markedPhaseWords",
-    text: "to do:  under way, scheduled, or marked in this pass",
+    text: "under way, scheduled or marked",
     description:
       "The Phases section's ONE blue badge:  its phases under way or being worked on (`progress`), scheduled " +
       "(`scheduled`, epic `epic-engine` I260), and the ones marked in this pass (I170)."
   },
   {
     key: "phaseAttention",
-    text: "need you:  a choice open",
+    text: "blocked on a choice",
     description: "A Phases chip's words:  `attention` (red:  a choice in it is open, blocking its build)."
   },
   {
     key: "phaseWaiting",
-    text: "your turn:  a plan to read and accept",
+    text: "with a plan to accept",
     description:
       "A Phases chip's words:  `waiting` (orange:  its build plan waits for Owen's Accept;  epic `epic-engine` P63)."
   },
@@ -466,18 +466,18 @@ export const FILTER_TEXTS = [
   },
   {
     key: "phaseProgress",
-    text: "under way, or being worked on",
+    text: "under way",
     description: "A Phases chip's words:  `progress` (blue:  active, or Claude at work on it)."
   },
   {
     key: "phasePaused",
-    text: "paused, on hold till you accept it",
+    text: "on hold till you accept",
     description:
       "A Phases chip's words:  `paused` (grey, a pause glyph:  held by you, epic `epic-engine` I221;  not built till you accept its plan again)."
   },
   {
     key: "phaseScheduled",
-    text: "scheduled, not running yet",
+    text: "scheduled",
     description: "A Phases chip's words:  `scheduled` (dotted blue:  still to do, nothing waiting on Owen)."
   },
   { key: "phaseRecent", text: "done in the last 3 days", description: "A Phases chip's words:  `recent` (green)." },

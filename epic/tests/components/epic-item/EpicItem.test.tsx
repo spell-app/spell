@@ -92,7 +92,7 @@ describe("<epic-item>", () => {
     expect(title.textContent).toBe("Which colour names?")
     expect(slotNames(host)).toEqual(["title", "actions", "", "status"])
     expect(host.querySelector("p")!.assignedSlot!.getAttribute("name")).toBeNull()
-    expect(chip.title).toBe("Needs attention · not reviewed yet")
+    expect(chip.title).toBe("Urgent · not reviewed")
     await expectAccessible(host)
   })
 
@@ -156,7 +156,7 @@ describe("<epic-item>", () => {
       `<epic-item id="j17" title="A call" status="open" state="replied" reviewed="2026-10-09"></epic-item>`
     )
     expect(host.shadowRoot!.querySelector("[part~='base']")!.className).toBe("replied item")
-    expect(chip.title).toBe("Claude answered:  your turn to pick · reviewed 10/9/26")
+    expect(chip.title).toBe("Answered:  your pick · reviewed 10/9/26")
     const [orange, ink] = [colorOf("var(--ui-orange)"), colorOf("var(--ui-orange-on)")]
     expect(orange).not.toBe(colorOf("transparent"))
     expect([getComputedStyle(chip).backgroundColor, getComputedStyle(chip).color]).toEqual([orange, ink])
@@ -167,7 +167,7 @@ describe("<epic-item>", () => {
       `<epic-item id="i7" title="An issue" status="open" state="replied" fixed></epic-item>`
     )
     expect(host.shadowRoot!.querySelector("[part~='base']")!.className).toBe("replied item")
-    expect(chip.title).toMatch(/^Claude fixed it:  your turn to review/)
+    expect(chip.title).toMatch(/^Fixed:  your review/)
   })
 
   test("the review label:  `to do` (queued), else `deferred`, else `reviewed 10/6/26`;  none when unmarked", async () => {
@@ -362,8 +362,7 @@ describe("<epic-item>", () => {
       expect([mark.textContent, mark.getAttribute("link"), mark.title]).toEqual([
         "in P2",
         "#p-retry",
-        "Handled in P2 · Retry Logic:  rewritten into that phase's text.  Reopen its change mark to talk it over again.\n" +
-          "Click:  go to P2.  ⌥-click:  start P2."
+        "Rewritten into P2 · Retry Logic\nGo to P2 · ⌥-click:  start it"
       ])
       expect(chip.title).toMatch(/^Handled in a phase/)
       await expectAccessible(host)
@@ -511,7 +510,7 @@ describe("<epic-item>", () => {
       expect([mark.textContent, mark.getAttribute("link"), mark.title]).toEqual([
         "in P2",
         "#p-fix",
-        "Taken up in P2 · Fix Open Issues:  fixed or done there\nClick:  go to P2.  ⌥-click:  start P2."
+        "Done in P2 · Fix Open Issues\nGo to P2 · ⌥-click:  start it"
       ])
       await expectAccessible(host)
     } finally {
@@ -533,8 +532,8 @@ describe("<epic-item>", () => {
         expect([done.textContent, done.getAttribute("link")]).toEqual(["in P2", "#p-fix"])
         // on its own line, under the buttons (I348)
         expect(done.parentElement!.classList.contains("phase-row")).toBe(true)
-        expect(done.title).toBe("Taken up in P2 · Fix Open Issues:  fixed or done there\nClick:  go to P2.")
-        expect(chip.title).toContain("Taken up in P2 · Fix Open Issues:  fixed or done there")
+        expect(done.title).toBe("Done in P2 · Fix Open Issues\nGo to P2")
+        expect(chip.title).toContain("Done in P2 · Fix Open Issues")
       }
       // still to finish:  its `in P2`, no `done in`
       const open = await item(`<epic-item id="i1" title="Old numbers" status="open" taken-in="p-fix"></epic-item>`)
@@ -551,7 +550,7 @@ describe("<epic-item>", () => {
 
   test("`calm`:  the chip follows the script's `state` (open:  yellow), and stays a link without a review", async () => {
     const { chip } = await item(`<epic-item id="j10" title="Follows WWOD" status="open" state="open" calm></epic-item>`)
-    expect([chip.localName, chip.title]).toEqual(["a", "Open, still undecided · not reviewed yet"])
+    expect([chip.localName, chip.title]).toEqual(["a", "Undecided · not reviewed"])
   })
 
   test("the chip's colours (Q20):  open yellow with DARK text, progress blue;  both readable (axe's contrast)", async () => {

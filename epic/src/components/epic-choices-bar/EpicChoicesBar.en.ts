@@ -48,24 +48,24 @@ export const epicChoicesBarVocabulary = {
     { key: "doIt", text: "Do it", description: "The button." },
     {
       key: "sendTip",
-      text: "Send {changed} changed of {rows}, and the feedback, to Claude",
+      text: "Send {changed} of {rows} changed, and the feedback",
       description: "The button's tooltip:  the count."
     },
     {
       key: "sendTipCommented",
-      text: "Send {changed} changed of {rows}, {commented} commented, and the feedback, to Claude",
+      text: "Send {changed} of {rows} changed, {commented} commented, and the feedback",
       description: "The button's tooltip, once a row's comment box holds anything (epic `epic-engine` P58)."
     },
     { key: "copyAnswers", text: "Copy my answers", description: "Puts what's typed on the clipboard." },
     { key: "copied", text: "Copied", description: "Copy my answers, for a moment after a click." },
     {
       key: "copyTip",
-      text: "Copy every box you changed, and the feedback, as JSON:  for when this page can't save",
+      text: "Copy your changes and feedback as JSON, when the page can't save",
       description: "Copy my answers' tooltip."
     },
     {
       key: "copyFailed",
-      text: "Couldn't copy:  the browser refused the clipboard",
+      text: "Couldn't copy:  the browser blocked the clipboard",
       description: "Copy my answers' tooltip after a copy failed."
     },
     { key: "expandAll", text: "Expand all", description: "Unfolds every section of rows." },

@@ -230,7 +230,7 @@ describe("<epic-run>, <epic-run-row>", () => {
     const [task, done, todo] = rows(run) as [Element, Element, Element]
     expect(task.matches(":state(taken)")).toBe(true)
     expect(part(task, "taken")!.textContent).toBe("taken")
-    expect(part(task, "taken")!.title).toMatch(/^The run took this at \d\d:\d\d$/)
+    expect(part(task, "taken")!.title).toMatch(/^Taken at \d\d:\d\d$/)
     expect(part(done, "taken")).toBeNull()
     // answered BEFORE it was taken:  no note
     expect(todo.matches(":state(changed-after-taken)")).toBe(false)

@@ -10,6 +10,7 @@ import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 
 import { epicClarifyVocabulary } from "./EpicClarify.en"
 
+import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 import clarifyCSS from "./EpicClarify.css?inline"
 
 /****************
@@ -39,7 +40,7 @@ import clarifyCSS from "./EpicClarify.css?inline"
 export class EpicClarify extends E.UIComponent<typeof epicClarifyVocabulary> {
   @E.proto static vocabulary = epicClarifyVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-clarify": clarifyCSS }
+    styleSheets: { "epic-tooltip": tooltipCSS, "epic-clarify": clarifyCSS }
   } satisfies Partial<E.ElementSetup>
 
   /** Its item's view of the review inbox. */

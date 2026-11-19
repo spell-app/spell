@@ -744,11 +744,11 @@ class PageComments {
     const count = this.waitingInPageOrder().length
     const open = this.jumpTargets().length
     const jumps = count
-      ? `${count} ${count === 1 ? "thread waits" : "threads wait"} on you:  jump to the next`
-      : `${open} ${open === 1 ? "comment" : "comments"}:  jump to the next`
+      ? `${count} ${count === 1 ? "thread waits" : "threads wait"} on you:  next one`
+      : `${open} ${open === 1 ? "comment" : "comments"}:  next one`
     // a page whose markdown is edited in place says how (epic `epic-engine` P60):  ⌥ is the only way in
     const edits = document.querySelector("ui-markdown[editable]:not([editable=tabs])")
-    const tip = edits ? `${jumps}.  ⌥-click text to edit it` : jumps
+    const tip = edits ? `${jumps} · ⌥-click text:  edit it` : jumps
     const badge = bullhorn.querySelector(".spell-toolbar-count")
     badge.textContent = String(count)
     badge.hidden = !count
@@ -1864,9 +1864,9 @@ class PageComments {
  */
 function sendWords({ epic, unsent, waiting }, state) {
   const count = (n) => `${n} comment${n === 1 ? "" : "s"}`
-  if (state === "unsent") return `Send ${count(unsent.length)} to epic ${epic}`
+  if (state === "unsent") return `Send ${count(unsent.length)} to ${epic}`
   if (state === "sent") return `Sent to ${epic}:  ${count(waiting.length)} waiting for Claude`
-  return "Nothing to send:  no comment here is waiting for Claude"
+  return "Nothing to send"
 }
 
 /**
@@ -1882,12 +1882,10 @@ function whoLabel({ epic, owned, wakes, listening }) {
 
 /** The tooltip of who is listening, beside a docs page's Send (`drawSend()`):  where its comments go, and when. */
 function whoWords({ epic, owned, wakes, listening }) {
-  const where = owned
-    ? `epic ${epic}`
-    : `epic ${epic}, the standing epic for every page no epic owns (no epic's See Also lists this one)`
-  if (listening) return `A Claude session is reviewing ${where}:  Send hands it these comments now`
-  if (wakes) return `No Claude session is reviewing ${where}:  Send wakes its session`
-  return `No epic's See Also lists this page, and epic ${epic} isn't made yet:  /airplane land gathers its comments`
+  const where = owned ? epic : `${epic}, for pages no epic owns`
+  if (listening) return `Claude is reviewing ${where}:  Send hands these over now`
+  if (wakes) return `Nobody is reviewing ${where}:  Send wakes it`
+  return `No epic owns this page yet:  its comments wait`
 }
 
 /** The first line of `words`, cut to a short line with `…`. */

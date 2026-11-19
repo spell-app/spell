@@ -186,7 +186,7 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
   private star(): JSX.Element {
     const epic = () => this.epic ?? ""
     const tip = () => {
-      if (!this.canStar) return this.translationForKey("starOffline")
+      if (!this.canStar) return this.translationForKey("offline")
       return this.translationForKey(this.favorite ? "unstarTip" : "starTip")
     }
     return (
@@ -207,7 +207,7 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
   /** The `...` menu:  its entries, a done epic's without Resume and Complete;  disabled where it can't act. */
   private menu(): JSX.Element {
     const title = () =>
-      this.canStar ? this.translationForKey("menu", { epic: this.epic ?? "" }) : this.translationForKey("menuOffline")
+      this.canStar ? this.translationForKey("menu", { epic: this.epic ?? "" }) : this.translationForKey("offline")
     const entries = () => CARD_ACTIONS.filter((action) => this.state.name !== "done" || !DONE_HIDES.includes(action))
     return (
       <ui-dropdown

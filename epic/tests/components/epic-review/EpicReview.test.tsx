@@ -241,13 +241,9 @@ describe("<epic-item> review controls", () => {
         button(host, action).title
       ])
     ).toEqual([
-      [
-        "paper plane",
-        "green",
-        "Start it now:  an agent takes it at once (a note asking for a phase gets it a new one)"
-      ],
-      ["history", "blue", "Revisit:  I'm adding a note for you:  Write a note for Claude in the box at its end"],
-      ["xmark", "grey", "Drop it:  Canceled, struck through, once Claude applies it"]
+      ["paper plane", "green", "Start it now:  An agent takes it at once"],
+      ["history", "blue", "Revisit:  I'm adding a note for you:  Write it in the box at its end"],
+      ["xmark", "grey", "Drop it:  Canceled, struck through"]
     ])
     // the plane marks it, dashed green, and so does its chip;  again, cleared
     button(host, "next").click()
@@ -745,15 +741,11 @@ describe("<epic-item> review controls", () => {
     expect(deep(host).querySelector("[part~='review']")).toBeNull()
     expect(button(host, "approve").getAttribute("title")).toBe("Approve:  Fine as it is · reviewed 10/7/26")
     // a judgement call's first button is Do this (I232)
-    expect(button(host, "todo").getAttribute("title")).toBe(
-      "Do this:  Yes:  fix this, right here, then I'll review it · reviewed 10/7/26"
-    )
+    expect(button(host, "todo").getAttribute("title")).toBe("Do this:  Fix it now, then I'll review · reviewed 10/7/26")
     const question = await render(
       `<epic-item id="q5" title="A question" status="decided" reviewed="2026-10-07"><p>Text</p></epic-item>`
     )
-    expect(button(question, "todo").getAttribute("title")).toBe(
-      "Make Todo:  Follow it up later, as a todo:  work still to do · reviewed 10/7/26"
-    )
+    expect(button(question, "todo").getAttribute("title")).toBe("Make Todo:  Follow up later · reviewed 10/7/26")
   })
 
   test("an open judgement call's id chip:  urgent (red) <-> not urgent (yellow, I275), through the inbox", async () => {
@@ -762,7 +754,7 @@ describe("<epic-item> review controls", () => {
     const chip = () => deep(host).querySelector<HTMLElement>("[part~='id']")!
     const box = () => deep(host).querySelector("[part~='base']")!
     expect(chip().localName).toBe("button")
-    expect(chip().title).toMatch(/click:  not urgent$/)
+    expect(chip().title).toMatch(/Mark not urgent$/)
     chip().click()
     await settle()
     expect(routes.inbox.urgency.j6?.calm).toBe(true)
@@ -900,7 +892,7 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
     // the icon alone, its name the tooltip:  the words are the page's Send's, at the top (I305;  Owen, 2026-11-15:
     // "The item plane should be just the plane")
     expect(button(host, "todo").hasAttribute("label")).toBe(false)
-    expect(button(host, "todo").title).toBe("Do this:  Yes:  build this phase")
+    expect(button(host, "todo").title).toBe("Do this:  Build this phase")
     expect(deep(host).querySelector("[part~='note-box'] >>> ui-textarea >>> textarea")).not.toBeNull()
     expect(noteButtons(host)).toEqual(["note-pick"])
     button(host, "todo").click()
@@ -921,9 +913,7 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
     expect(check.parentElement!.firstElementChild).toBe(check)
     expect(check.dataset).toMatchObject({ color: "green", fill: "outline" })
     expect(check.getAttribute("icon")).toBe("thumbs up")
-    expect(check.title).toBe(
-      "Plan accepted:  ready to build:  you accepted Claude's plan for this phase;  click to hold it"
-    )
+    expect(check.title).toBe("Plan accepted:  Ready to build;  a press holds it")
     // the ring is a WAITING plan's alone
     expect(deep(host).querySelector(".review-group")!.hasAttribute("data-asks")).toBe(false)
     // a click un-clicks it:  a hold mark, the thumbs up plain and dashed till sent;  it never folds the phase
@@ -934,7 +924,7 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
     expect(routes.inbox.marks.p2?.action).toBe("hold")
     const held = deep(host).querySelector<HTMLElement>('ui-button[data-action="hold"]')!
     expect(held.dataset).toMatchObject({ state: "held", fill: "dashed" })
-    expect(held.title).toBe("On hold:  not built until you accept its plan again;  click to take the hold back")
+    expect(held.title).toBe("On hold:  Not built till you accept again;  a press undoes it")
     expect(host.matches(":state(open)")).toBe(true)
     // a second click takes it back
     held.click()
@@ -976,9 +966,7 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
     ]
     await adoptClient()
     const host = await render(`<epic-phase id="p2" title="Themes as Data" status="todo" plan="accepted"></epic-phase>`)
-    expect(button(host, "revisit").title).toBe(
-      "Revisit:  Talk it over:  your comments in its text (C1, C3) are your note"
-    )
+    expect(button(host, "revisit").title).toBe("Revisit:  Talk it over:  your comments (C1, C3) are the note")
     button(host, "revisit").click()
     await settle()
     expect(routes.inbox.marks.p2).toMatchObject({
@@ -1104,7 +1092,7 @@ describe("<epic-review> note pictures", () => {
     await adoptClient()
     const host = await render(`<epic-item id="m4" title="A test" status="open" open><p>Step</p></epic-item>`)
     const pick = deep(host).querySelector<HTMLButtonElement>("[part~='details'] [part~='note-box'] >>> .note-pick")!
-    expect(pick.title).toMatch(/^Add pictures:  paste them/)
+    expect(pick.title).toMatch(/^Add pictures:  paste/)
   })
 })
 

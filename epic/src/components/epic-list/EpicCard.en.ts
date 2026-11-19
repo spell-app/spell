@@ -116,33 +116,28 @@ export const epicCardVocabulary = {
     { key: "away", text: "While you were out", description: "`away`:  the mark's words." },
     {
       key: "awayTip",
-      text: "Claude worked on it while you were out:  what was done, and what needs you",
+      text: "Done while you were out",
       description: "`away`:  the mark's tooltip."
     },
     { key: "star", text: "Star {epic}", description: "The star's name, not starred." },
     { key: "unstar", text: "Unstar {epic}", description: "The star's name, starred." },
     {
       key: "starTip",
-      text: "Star it:  listed first, under Favorites",
+      text: "Star:  list it under Favorites",
       description: "The star's tooltip, not starred."
     },
     {
       key: "unstarTip",
-      text: "A favorite:  listed first.  Click to unstar",
+      text: "Unstar",
       description: "The star's tooltip, starred."
     },
     {
-      key: "starOffline",
-      text: "Starring needs the epic server (epic hub ensure)",
-      description: "The star's tooltip where it can't star:  opened from disk, or no write token."
+      key: "offline",
+      text: "Needs the page server",
+      description: "The star's and the `...` menu's tooltip where they can't act:  opened from disk, or no write token."
     },
     { key: "worked", text: "Last worked on {date}", description: "The day's tooltip:  the full date and time." },
     { key: "menu", text: "More for {epic}", description: "The `...` menu's name and tooltip." },
-    {
-      key: "menuOffline",
-      text: "These need the epic server (epic hub ensure)",
-      description: "The `...` menu's tooltip where it can't act:  opened from disk, or no write token."
-    },
     { key: "resume", text: "Resume", description: "Menu:  its session, in its own VS Code window." },
     { key: "rename", text: "Rename Epic…", description: "Menu:  a new name." },
     { key: "complete", text: "Complete", description: "Menu:  mark it done." },

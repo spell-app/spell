@@ -61,7 +61,7 @@ describe("<epic-comment-pane>", () => {
       slotted: !!fresh.querySelector("textarea")!.assignedSlot
     }).toEqual({
       headline: "“2. Context”",
-      tip: "On a section in “2. Context”\n(Drag to move)",
+      tip: "On a section in “2. Context”\nDrag to move",
       buttons: 1,
       floppy: false,
       role: "dialog",
