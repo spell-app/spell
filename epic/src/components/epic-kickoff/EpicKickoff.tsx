@@ -19,7 +19,8 @@ import kickoffCSS from "./EpicKickoff.css?inline"
  * The KICKOFF BOX at the top of a new epic's Overview (epic `epic-engine` P75;  Owen, 2026-11-17:  "start with an
  * empty-ish epic doc and a field where I can type in what i want to do, rather than typing it in chat.  I should be
  * able to paste in/drop multiple pictures there").
- * - Who draws it:  `<epic-overview>`, while the epic has no kickoff prompt and no phases, and the page is reviewed;
+ * - Who draws it:  `<epic-overview>`, while the epic has no kickoff prompt and no phases, and the page is reviewed
+ *   and an EPIC page in its Overview stage (`PageStages.takesKickoff()`:  never a saga page, epic `epic-engine` I349);
  *   once `epic inbox apply` writes the Kickoff prompt, the Overview draws that instead
  * - In a person's violet (their voice), in its order:
  *   - its lead line, "What should this epic do?"
