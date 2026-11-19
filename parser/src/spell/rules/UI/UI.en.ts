@@ -22,11 +22,21 @@ import { ShowDatesAs } from "./ShowDatesAs"
 import { ShowDrawn, ShowDrawnWith } from "./ShowDrawn"
 import { TheResult } from "./TheResult"
 import { WithoutClosing } from "./WithoutClosing"
-import { PlaySound } from "./PlaySound"
+import { PlaySound, MEDIA_PLACES } from "./PlaySound"
 import { StopSound } from "./StopSound"
 import { LoadSound } from "./LoadSound"
+import { DefineMedia } from "./DefineMedia"
+import { MediaCall } from "./MediaCall"
+import { MediaIs } from "./MediaIs"
+import { MediaLength } from "./MediaLength"
+import { MediaNamed } from "./MediaNamed"
+import { MediaNameWords } from "./MediaNameWords"
+import { MediaSpeed } from "./MediaSpeed"
+import { MediaTime } from "./MediaTime"
+import { MediaVolume } from "./MediaVolume"
+import { StopAllMedia } from "./StopAllMedia"
 import { Prompt } from "./Prompt"
-import { TEXT_SIZES } from "./UI.shared"
+import { MEDIA_KINDS, TEXT_SIZES } from "./UI.shared"
 import { Warn } from "./Warn"
 
 ////////////////
@@ -192,14 +202,157 @@ UI.addRule(OpenPrinting, {
   tests: [{ compileAs: "statement", tests: [["open printing", "core.openPrinting()"]] }]
 })
 
+////////////////
+// ## Sounds and videos (epic `data` T145;  named, played many ways, and asked about, epic `language` P65)
+////////////////
+
+// What a program plays:  `sound`, and `video`, the same as `movie`
+UI.addRule(Wording.specialize({ ruleName: "media_kind", meanings: MEDIA_KINDS }), {
+  syntax: "((sound:sound)|(video:video|movie))"
+})
+// ... and several:  `stop all sounds`
+UI.addRule(Wording.specialize({ ruleName: "media_kinds", meanings: MEDIA_KINDS }), {
+  syntax: "((sound:sounds)|(video:videos|movies))"
+})
+// How fast, in words:  `at half speed`
+UI.addRule(Wording.specialize({ ruleName: "media_speed_word", meanings: ["half", "normal", "double"] }), {
+  syntax: "((half:half speed)|(normal:normal speed)|(double:double speed|twice the speed))"
+})
+// Starting again each time it ends:  `over and over`
+UI.addRule(Wording.specialize({ ruleName: "media_loop", meanings: ["loop"] }), {
+  syntax: "((loop:over and over|looping))"
+})
+// Where a video plays:  `in a new window`, `full screen`
+UI.addRule(Wording.specialize({ ruleName: "media_place", meanings: MEDIA_PLACES }), {
+  syntax: "((window:in a new window)|(full_screen:full screen|in full screen))"
+})
+
+// a name without quotes, one the program gave:  its own `parse()` reads it
+UI.addRule(MediaNameWords, { syntax: "{identifier}" })
+
+UI.addRule(MediaNamed, {
+  syntax: "{kind:media_kind} {name:text}",
+  tests: [
+    {
+      compileAs: "expression",
+      tests: [
+        [`sound "card slide"`, `core.mediaNamed("card slide", "sound")`],
+        [`movie "intro"`, `core.mediaNamed("intro", "video")`]
+      ]
+    }
+  ]
+})
+UI.addRule(MediaNamed, {
+  syntax: "the {name:text} {kind:media_kind}",
+  tests: [{ compileAs: "expression", tests: [[`the "intro" video`, `core.mediaNamed("intro", "video")`]] }]
+})
+UI.addRule(MediaNamed, { syntax: "the {name:media_name_words} {kind:media_kind}" })
+UI.addRule(MediaNamed, { syntax: "{kind:media_kind} {name:media_name_words}" })
+
+UI.addRule(MediaTime, {
+  syntax: "{number} : {number}",
+  tests: [{ tests: [["1:05", 65]] }]
+})
+UI.addRule(MediaSpeed, {
+  syntax: "at ({speed:number} x|{word:media_speed_word})",
+  tests: [
+    {
+      tests: [
+        ["at 1.5x", 1.5],
+        ["at half speed", 0.5],
+        ["at twice the speed", 2]
+      ]
+    }
+  ]
+})
+UI.addRule(MediaVolume, { syntax: "((at {volume:measure_literal} volume)|(quiet:quietly)|(muted:muted))" })
+
+// a page's or an app's sound or video, by its name:  `sound "card slide" is at "sounds/slide.mp3"`
+UI.addRule(DefineMedia, {
+  roles: { band: "property", property: "declaration" },
+  syntax: "{type:subject_implied} {kind:media_kind} {property:quoted_member} is at {path:text}"
+})
+// ... the other way round, `its "card slide" is a sound at "..."`:  `outline_specifier_media`, the `classes` module's
+
 UI.addRule(PlaySound, {
-  syntax: "play {sound:expression}",
-  tests: [{ compileAs: "statement", tests: [[`play "cry.ogg"`, `core.play("cry.ogg")`]] }]
+  syntax:
+    "play {sound:expression} {speed:media_speed}? (from {from:media_time})? {volume:media_volume}?" +
+    " {loop:media_loop}? {place:media_place}? (wait:and wait)?",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [
+        [`play "cry.ogg"`, `core.play("cry.ogg")`],
+        [`play sound "card slide"`, `core.play(core.mediaNamed("card slide", "sound"))`],
+        {
+          input: `play the "intro" video at 1.5x from 0:30 in a new window`,
+          js: [
+            `core.play(core.mediaNamed("intro", "video"), {`,
+            `  speed: 1.5,`,
+            `  from: 30,`,
+            `  where: "window"`,
+            `})`
+          ]
+        },
+        [`play "ding" at 50% volume and wait`, `await core.play("ding", { volume: 0.5 })`],
+        [`play "theme" quietly over and over`, `core.play("theme", { volume: 0.3, loop: true })`],
+        [`play "intro" muted full screen`, `core.play("intro", { muted: true, where: "full screen" })`]
+      ]
+    }
+  ]
 })
 
 UI.addRule(StopSound, {
   syntax: "stop {sound:expression}",
   tests: [{ compileAs: "statement", tests: [[`stop "cry.ogg"`, `core.stop("cry.ogg")`]] }]
+})
+
+UI.addRule(StopAllMedia, {
+  syntax: "stop all {kind:media_kinds}",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [
+        [`stop all sounds`, `core.stopAll("sound")`],
+        [`stop all movies`, `core.stopAll("video")`]
+      ]
+    }
+  ]
+})
+
+UI.addRule(MediaCall.specialize({ methodName: "pause" }), {
+  syntax: "pause {media:media_named}",
+  tests: [{ compileAs: "statement", tests: [[`pause video "intro"`, `core.pause(core.mediaNamed("intro", "video"))`]] }]
+})
+UI.addRule(MediaCall.specialize({ methodName: "resume" }), {
+  syntax: "resume {media:media_named}",
+  tests: [
+    { compileAs: "statement", tests: [[`resume video "intro"`, `core.resume(core.mediaNamed("intro", "video"))`]] }
+  ]
+})
+
+UI.addRule(MediaIs, {
+  roles: { match: "question" },
+  syntax: "{media:media_named} {operator:is_or_is_not} ((playing:playing)|(done:done|finished))",
+  tests: [
+    {
+      compileAs: "expression",
+      tests: [
+        [`the "intro" video is playing`, `core.isPlaying(core.mediaNamed("intro", "video"))`],
+        [`sound "card slide" is not done`, `!core.isDone(core.mediaNamed("card slide", "sound"))`]
+      ]
+    }
+  ]
+})
+
+UI.addRule(MediaLength, {
+  syntax: "the (length|duration) of {media:media_named}",
+  tests: [
+    {
+      compileAs: "expression",
+      tests: [[`the length of the "intro" video`, `core.mediaLength(core.mediaNamed("intro", "video"))`]]
+    }
+  ]
 })
 
 UI.addRule(LoadSound, {

@@ -22,6 +22,7 @@ export function isGoingToTheTop(): boolean {
  * - time (`pauseFor`)
  * - talking to the person running the program, on Spell UI's toasts and dialogs:
  *   `notify`, `alert`, `confirm`, `prompt` (spell's `rules/UI/`)
+ * - Sounds and videos are `media.ts`.
  * - stylesheet installation (`installStyles`)
  * - printing the app alone (`openPrinting`, `printing.ts`)
  * - Drawing (`h()`, `drawThing()` ...) is `drawing.ts`.
@@ -49,55 +50,6 @@ export const uiMethods = defineCoreModule({
   openPrinting(): void {
     if (typeof document === "undefined") return
     printAlone((core as { appElement?: () => Element | null }).appElement?.() ?? undefined)
-  },
-
-  ////////////////
-  // ## Sound
-  //
-  // One player per sound file, by its address, for the page's life:  `play` and `stop` (epic `data` T145).
-  // Made the first time either names it, it starts loading at once (`preload="auto"`),
-  // so a program that `load`s a sound as its page opens has it ready for the click that plays it.
-  // Under node, or a page with no `Audio`:  nothing.
-  ////////////////
-
-  /**
-   * Play `sound`, a sound file's address, from its start:  what `play its sound` compiles to.
-   * - Started right here, in the same moment:  so in a click's action, a browser that wants sound to start from a
-   *   click (Safari, phones) lets it.
-   * - Playing it again while it plays starts it over.
-   * - No address:  nothing.
-   * - NEVER throws:  a sound the browser refuses, or can't load, is said on the program's console.
-   */
-  play(sound: string | undefined): void {
-    const player = soundPlayerFor(sound)
-    if (!player) return
-    player.currentTime = 0
-    player.play().catch((error: unknown) => {
-      // `stop` while it was starting:  not a failure
-      if ((error as Error | undefined)?.name === "AbortError") return
-      core.console.warn(`play:  can't play ${sound}`, error)
-    })
-  },
-
-  /**
-   * Start loading `sound` now, so a later `play` starts it at once:  what `load its sound` compiles to.
-   * - A page that opens with `load its sound` has it ready for the click that plays it.
-   * - No address, or loaded already:  nothing.
-   */
-  loadSound(sound: string | undefined): void {
-    soundPlayerFor(sound)
-  },
-
-  /**
-   * Stop `sound`, if it's playing, and put it back to its start:  what `stop its sound` compiles to.
-   * - Its player is made if it has none, so it loads now, as `loadSound()`.
-   * - No address:  nothing.
-   */
-  stop(sound: string | undefined): void {
-    const player = soundPlayerFor(sound)
-    if (!player) return
-    player.pause()
-    player.currentTime = 0
   },
 
   ////////////////
@@ -1098,22 +1050,3 @@ function pageUI(): PageUI | undefined {
 
 /** Spell UI's `RUNTIME_KEY`:  a copy, as core never imports `ui`. */
 const UI_RUNTIME_KEY = Symbol.for("spell-ui:runtime")
-
-/** Each sound file's player, by its address:  `core.play()` and `core.stop()`'s. */
-const soundPlayers = new Map<string, HTMLAudioElement>()
-
-/**
- * `sound`'s player, made the first time it's asked for, and loading from then on.
- * - `undefined` for no address, or where there's no `Audio` (node).
- */
-function soundPlayerFor(sound: string | undefined): HTMLAudioElement | undefined {
-  if (!sound || typeof Audio === "undefined") return undefined
-  let player = soundPlayers.get(sound)
-  if (!player) {
-    player = new Audio()
-    player.preload = "auto"
-    player.src = sound
-    soundPlayers.set(sound, player)
-  }
-  return player
-}

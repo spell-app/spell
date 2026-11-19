@@ -21,7 +21,7 @@ import "./AppAnatomy.css"
  *   - Turned off, every style it set is put back as it was (`AnatomyStyles`).
  * - Or Outlines (Q42's B, a switch in its bar):  each view an empty labelled frame, the app hidden under them.
  * - In the app pane, where the app already is (Q43 A);  Full Window lifts the pane over the whole editor (Q43 C).
- * - A floor per view the program draws (Q44 A);  Parts adds Spell UI's parts inside them, remembered per project.
+ * - A floor per view the program draws (Q44 A), down to `DEPTH` floors deep.
  * - A floor's hover rings it as Inspect app's hover does, and a click selects it as a click on the app does:
  *   the tree's row, the properties and the code follow (`Inspector.clicked()`).
  * - A double-click (or F, what's selected) shows one floor and what's inside it alone;  Esc goes back to the whole
@@ -42,21 +42,21 @@ export class AppAnatomy {
   }
 
   /**
-   * Pull the app apart, from the front tilted back, the whole app shown.
+   * Pull the app apart, the whole app shown:  face on for half a second, then turning to its resting angle (`turnOpen()`).
    * - SIDE EFFECT:  stops inspecting:  a click on a floor selects already.
    */
   static show(): void {
     if (isShowing()) return
     Inspector.stopInspecting()
-    setPartsShown(!!editorPrefs.get(Inspector.projectPref(PARTS_PREF)))
     setFocus(undefined)
-    setTurn(TILTED)
     setZoom(START_ZOOM)
+    turnOpen()
     setShowing(true)
   }
 
   /** Fold the app back flat, as it was. */
   static hide(): void {
+    stopTurning()
     setShowing(false)
     setFocus(undefined)
     setFullWindow(false)
@@ -90,30 +90,30 @@ export class AppAnatomy {
 
   /** Look at it straight on again, at its starting size. */
   static front(): void {
+    stopTurning()
     setTurn(FRONT)
     setZoom(START_ZOOM)
   }
 
-  /** Are Spell UI's parts floors of their own too (reactive)? */
-  static get showsParts(): boolean {
-    return partsShown()
-  }
-
-  /** Give Spell UI's parts floors of their own, or not;  remembered with the project. */
-  static setShowsParts(shows: boolean): void {
-    setPartsShown(shows)
-    editorPrefs.set(Inspector.projectPref(PARTS_PREF), shows || undefined)
-  }
-
-  /** How the floors are drawn (reactive):  the live app, or outlines. */
+  /** How the floors are drawn (reactive):  your views, the live app lifted apart, or outlines of them. */
   static get look(): AnatomyLook {
     return look()
   }
 
-  /** Draw the floors as the live app, or as outlines;  remembered. */
+  /** Show your views, or outlines of them;  remembered. */
   static setLook(next: AnatomyLook): void {
     setLook(next)
     editorPrefs.set(LOOK_PREF, next)
+  }
+
+  /** What a click does while it shows (reactive):  plays the app, or picks a floor;  Option held does the other. */
+  static get clicks(): AnatomyClicks {
+    return clicks()
+  }
+
+  /** Let clicks through to the app (`play`), or pick floors with them (`inspect`). */
+  static setClicks(next: AnatomyClicks): void {
+    setClicks(next)
   }
 
   /** How far apart the floors are, px (reactive). */
@@ -125,17 +125,6 @@ export class AppAnatomy {
   static setSpacing(px: number): void {
     setSpacing(px)
     editorPrefs.set(SPACING_PREF, px)
-  }
-
-  /** How many floors deep it comes apart (reactive):  a floor below that sits flat on the one above it. */
-  static get depth(): number {
-    return depth()
-  }
-
-  /** Set how many floors deep it comes apart;  remembered. */
-  static setDepth(levels: number): void {
-    setDepth(levels)
-    editorPrefs.set(DEPTH_PREF, levels)
   }
 
   /** Does the pane cover the whole editor (reactive)? */
@@ -154,22 +143,31 @@ export class AppAnatomy {
   }
 }
 
-/** How Anatomy draws its floors:  the live app lifted apart, or empty labelled outlines. */
+/** How Anatomy draws its floors:  the live app lifted apart (Views), or empty labelled outlines. */
 export type AnatomyLook = "live" | "outlines"
 
-/** The prefs it remembers:  the look, the spacing and depth;  the Parts switch, each project's own. */
+/** What a click does while Anatomy shows:  goes to the app, or picks a floor. */
+export type AnatomyClicks = "play" | "inspect"
+
+/** The prefs it remembers:  the look and the spacing. */
 const LOOK_PREF = "anatomy:look"
 const SPACING_PREF = "anatomy:spacing"
-const DEPTH_PREF = "anatomy:depth"
-const PARTS_PREF = "anatomy:parts"
 editorPrefs.declare(LOOK_PREF, { oneOf: ["live", "outlines"] })
 editorPrefs.declare(SPACING_PREF, { type: "number", default: 48 })
-editorPrefs.declare(DEPTH_PREF, { type: "number", default: 8 })
 
-/** The turn it starts at:  tilted back and turned a little, so the floors show apart. */
-const TILTED = { tilt: 48, spin: -28 }
-/** Front:  straight on. */
+/** How many floors deep it comes apart:  a floor below that sits flat on the one above it. */
+const DEPTH = 8
+
+/**
+ * The turn it rests at once open:  its bottom tipped away a little and turned a little, still mostly facing you.
+ * - Bottom away, not top:  the layers lift down the screen, so the app's own top bar stays in view (Owen, I256).
+ */
+const RESTING = { tilt: -14, spin: -24 }
+/** Front:  straight on, where it opens. */
 const FRONT = { tilt: 0, spin: 0 }
+/** How long it opens face on before turning, and how long the turn takes, msec. */
+const OPEN_HOLD_MS = 500
+const OPEN_TURN_MS = 700
 /** The size it starts at, so the turned stack fits the pane. */
 const START_ZOOM = 0.72
 /** The least and most it zooms. */
@@ -186,12 +184,50 @@ const SPACINGS = { least: 0, most: 160, step: 4 }
 const [isShowing, setShowing] = createSignal(false)
 const [look, setLook] = createSignal<AnatomyLook>(editorPrefs.get(LOOK_PREF) as AnatomyLook)
 const [spacing, setSpacing] = createSignal(editorPrefs.get(SPACING_PREF) as number)
-const [depth, setDepth] = createSignal(editorPrefs.get(DEPTH_PREF) as number)
-const [partsShown, setPartsShown] = createSignal(false)
 const [focus, setFocus] = createSignal<Element>()
-const [turn, setTurn] = createSignal(TILTED)
+const [turn, setTurn] = createSignal(FRONT)
 const [zoom, setZoom] = createSignal(START_ZOOM)
 const [isFullWindow, setFullWindow] = createSignal(false)
+const [clicks, setClicks] = createSignal<AnatomyClicks>("inspect")
+
+/** The opening turn while it runs:  the wait before it, then its frame. */
+let opening: { timer: ReturnType<typeof setTimeout>; frame: number } | undefined
+
+/**
+ * Open face on, wait `OPEN_HOLD_MS`, then turn to `RESTING` over `OPEN_TURN_MS`, easing in and out:
+ * so it's seen to come apart from the app as it was.
+ * - Asked for less motion (`prefers-reduced-motion`):  straight to `RESTING`, no wait, no turn.
+ * - Front, a drag or closing stops it where it is (`stopTurning()`).
+ */
+function turnOpen(): void {
+  stopTurning()
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return void setTurn(RESTING)
+  setTurn(FRONT)
+  const turning = {
+    timer: setTimeout(() => (turning.frame = requestAnimationFrame(turnFrom(performance.now()))), OPEN_HOLD_MS),
+    frame: 0
+  }
+  opening = turning
+  // each frame of the turn, from `start`
+  function turnFrom(start: number) {
+    const step = (now: number): void => {
+      const done = Math.min(1, (now - start) / OPEN_TURN_MS)
+      const eased = done < 0.5 ? 2 * done * done : 1 - (-2 * done + 2) ** 2 / 2
+      setTurn({ tilt: RESTING.tilt * eased, spin: RESTING.spin * eased })
+      if (done < 1) turning.frame = requestAnimationFrame(step)
+      else if (opening === turning) opening = undefined
+    }
+    return step
+  }
+}
+
+/** Stop the opening turn where it is, if it's running. */
+function stopTurning(): void {
+  if (!opening) return
+  clearTimeout(opening.timer)
+  cancelAnimationFrame(opening.frame)
+  opening = undefined
+}
 
 /****************
  * ### `<AnatomyButton>`
@@ -241,19 +277,18 @@ export function AppAnatomyView(props: {
 function AnatomyStack(props: { pane: HTMLElement; body: HTMLElement; program: HTMLElement }): JSX.Element {
   const { pane, body, program } = props
   const styles = new AnatomyStyles()
-  const redrawn = watchRedraws(program)
+  const redrawn = watchRedraws(program, (record) => styles.isOwnWrite(record))
   const floors = createMemo(() => {
     redrawn()
-    return AnatomyFloors.in(program, { parts: partsShown(), isPart: Inspector.isPart })
+    return AnatomyFloors.in(program)
   })
-  const deepest = createMemo(() => Math.max(1, ...floors().map((floor) => floor.depth)))
   const [tags, setTags] = createSignal<FloorTag[]>([])
   const [frames, setFrames] = createSignal<FloorFrame[]>([])
   const [hovered, setHovered] = createSignal<Element>()
 
   // what's shown as a floor of its own now:  within the depth, inside the focus, and liftable in the live look
   const shown = (floor: Floor, state: StackState) =>
-    floor.depth <= state.depth &&
+    floor.depth <= DEPTH &&
     (state.look === "outlines" || !floor.isFlat) &&
     (!state.focus || state.focus === floor.element || isInside(floor, state.focus))
 
@@ -262,11 +297,11 @@ function AnatomyStack(props: { pane: HTMLElement; body: HTMLElement; program: HT
       floors: floors(),
       look: look(),
       spacing: spacing(),
-      depth: depth(),
       focus: focus(),
       turn: turn(),
       zoom: zoom(),
-      selected: Inspector.allSelected.map((part) => part.element)
+      selected: Inspector.allSelected.map((part) => part.element),
+      hovered: hovered()
     }),
     (state) => {
       styles.apply({ state, body, program, shown })
@@ -293,14 +328,14 @@ function AnatomyStack(props: { pane: HTMLElement; body: HTMLElement; program: HT
 
   // a floor under the pointer:  the first along its path that shows as a floor
   const floorAt = (event: Event): Element | undefined => {
-    const state = { look: look(), depth: depth(), focus: focus() } as StackState
+    const state = { look: look(), focus: focus() } as StackState
     const byElement = new Map(floors().map((floor) => [floor.element as Element, floor]))
     for (const target of event.composedPath()) {
       if (!(target instanceof Element)) continue
       const framed = frameFloors.get(target)
       if (framed) return framed
       const floor = byElement.get(target)
-      if (floor && shown(floor, state)) return floor.element
+      if (floor && shown(floor, state)) return clickedFloor(floor, (each) => shown(each, state))
     }
     return undefined
   }
@@ -309,13 +344,16 @@ function AnatomyStack(props: { pane: HTMLElement; body: HTMLElement; program: HT
   return (
     <>
       <AnatomyFullWindow pane={pane} />
+      <Show when={AppAnatomy.isFullWindow}>
+        <span class="AnatomyEscHint">{appTexts.text("anatomyEscToClose")}</span>
+      </Show>
       <Show when={frames().length}>
         <div class="AnatomyOutlines" style={{ perspective: `${EYE_DISTANCE}px` }}>
           <div class="AnatomyOutlinesStage" style={frameStageStyle(program, pane)}>
             <For each={frames()} keyed={(frame) => frame.element}>
               {(frame) => (
                 <div
-                  class={["AnatomyFrame", frame().kind, { hovered: hovered() === frame().element }]}
+                  class={["AnatomyFrame", { hovered: hovered() === frame().element }]}
                   style={{
                     left: `${frame().left}px`,
                     top: `${frame().top}px`,
@@ -325,7 +363,7 @@ function AnatomyStack(props: { pane: HTMLElement; body: HTMLElement; program: HT
                   }}
                   ref={(div: HTMLDivElement) => frameFloors.set(div, untrack(frame).element)}
                 >
-                  <span class={["AnatomyTag", frame().kind]}>{frame().label}</span>
+                  <span class="AnatomyTag">{frame().label}</span>
                 </div>
               )}
             </For>
@@ -338,7 +376,6 @@ function AnatomyStack(props: { pane: HTMLElement; body: HTMLElement; program: HT
             <span
               class={[
                 "AnatomyTag",
-                tag().kind,
                 { hovered: hovered() === tag().element, selected: Inspector.isSelected(tag().element) }
               ]}
               style={{ left: `${tag().left}px`, top: `${tag().top}px` }}
@@ -352,7 +389,7 @@ function AnatomyStack(props: { pane: HTMLElement; body: HTMLElement; program: HT
           )}
         </For>
       </div>
-      <AnatomyBar deepest={deepest()} floors={floors()} />
+      <AnatomyBar floors={floors()} />
     </>
   )
 }
@@ -362,12 +399,13 @@ type StackState = {
   floors: Floor[]
   look: AnatomyLook
   spacing: number
-  depth: number
   focus: Element | undefined
   turn: { tilt: number; spin: number }
   zoom: number
   /** what's selected:  outlined on its floor, as the Inspector's own outline can't follow a turned floor */
   selected: Element[]
+  /** the floor under the pointer:  ringed on its floor, turned with it, as the Inspector's hover ring can't be (I258) */
+  hovered: Element | undefined
 }
 
 /** On `<body>` while Anatomy shows:  the Inspector's flat outline round what's selected gives way to the floor's. */
@@ -376,6 +414,20 @@ const SHOWING_CLASS = "AnatomyShowing"
 /** Each outline frame's floor's element, for a click on the frame. */
 const frameFloors = new WeakMap<Element, Element>()
 
+/**
+ * The floor a click on `floor` picks (I259):  a floor that fills the floor holding it (a pile's picture) is that
+ * floor's face, so the click picks the floor under it;  clicked again, once that's selected, it picks the one on top.
+ * - Down a chain of such floors, the outermost not selected yet, else the one just above what's selected.
+ * - `isShown`:  whether a floor shows as a floor of its own now.
+ */
+function clickedFloor(floor: Floor, isShown: (floor: Floor) => boolean): Element {
+  const chain = [floor]
+  for (let top = floor; top.parent && isShown(top.parent) && AnatomyFloors.fillsParent(top); top = top.parent)
+    chain.push(top.parent)
+  const selectedAt = chain.findIndex((each, index) => index > 0 && Inspector.isSelected(each.element))
+  return (selectedAt > 0 ? chain[selectedAt - 1]! : chain.at(-1)!).element
+}
+
 /** Is `floor` inside `focus`'s floor? */
 function isInside(floor: Floor, focus: Element): boolean {
   for (let parent = floor.parent; parent; parent = parent.parent) if (parent.element === focus) return true
@@ -383,7 +435,7 @@ function isInside(floor: Floor, focus: Element): boolean {
 }
 
 /** A floor's tag:  its type, at its top left corner on screen. */
-type FloorTag = { element: Element; kind: Floor["kind"]; label: string; clips: boolean; left: number; top: number }
+type FloorTag = { element: Element; label: string; clips: boolean; left: number; top: number }
 
 /**
  * The tags of `floors`, placed at each one's turned top left, in the pane's own pixels.
@@ -402,7 +454,7 @@ function tagsFor(floors: Floor[], paneBox: DOMRect): FloorTag[] {
     const room = new DOMRect(left, top, label.length * TAG_LETTER_WIDTH + TAG_PADDING, TAG_HEIGHT)
     if (placed.some((other) => overlaps(room, other))) continue
     placed.push(room)
-    tags.push({ element: floor.element, kind: floor.kind, label, clips: !!floor.clips, left, top })
+    tags.push({ element: floor.element, label, clips: !!floor.clips, left, top })
   }
   return tags
 }
@@ -420,7 +472,6 @@ function overlaps(one: DOMRect, other: DOMRect): boolean {
 /** An outline:  a floor's flat box, in the app's own pixels, lifted `z`. */
 type FloorFrame = {
   element: Element
-  kind: Floor["kind"]
   label: string
   left: number
   top: number
@@ -430,25 +481,39 @@ type FloorFrame = {
 }
 
 /**
- * The outlines:  each floor shown, measured flat where the app draws it, lifted by its depth.
+ * How far `floor` is lifted over the floor holding it, px:  `spacing`, and a step more for each card under it in a pile.
+ * - A pile's step is a share of the spacing, smaller in a tall pile, so a 20-card pile stays near its column.
+ */
+function liftOf(floor: Floor, spacing: number): number {
+  if (!floor.step) return spacing
+  return spacing + floor.step * spacing * Math.min(PILE_STEP, PILE_MOST / floor.steps)
+}
+
+/** A pile's step, as a share of the spacing;  and the most a whole pile rises, in spacings. */
+const PILE_STEP = 0.25
+const PILE_MOST = 2
+
+/**
+ * The outlines:  each floor shown, measured flat where the app draws it, lifted by its depth and its pile.
  * - Measured with the app untouched:  the outlines look never turns it.
  */
 function framesFor(state: StackState, program: HTMLElement, shown: (floor: Floor, state: StackState) => boolean) {
   const origin = program.getBoundingClientRect()
-  const base = state.focus ? (state.floors.find((floor) => floor.element === state.focus)?.depth ?? 0) : 0
+  // how high a floor is over the focus (or the app):  each floor's lift, from it down
+  const heightOf = (floor: Floor): number =>
+    !floor.parent || floor.element === state.focus ? 0 : liftOf(floor, state.spacing) + heightOf(floor.parent)
   return state.floors
     .filter((floor) => shown(floor, state))
     .map((floor): FloorFrame => {
       const box = floor.element.getBoundingClientRect()
       return {
         element: floor.element,
-        kind: floor.kind,
         label: Inspector.typeWordsOf(floor.element),
         left: box.left - origin.left,
         top: box.top - origin.top,
         width: box.width,
         height: box.height,
-        z: (floor.depth - base) * state.spacing
+        z: heightOf(floor)
       }
     })
 }
@@ -476,13 +541,15 @@ const BAR_ROOM = 40
 /**
  * A signal bumped once a frame at most while the app draws something new:  its children change, in its document or
  * any shadow root, or an element's style or class (a card turned over).
- * - Its own writes come back once:  `AnatomyStyles` writes only what differs, so the second pass writes nothing.
+ * - `isOwn`:  is a change Anatomy's own style write (`AnatomyStyles.isOwnWrite()`):  left out (I262).
+ *   Every turn writes the stack's transform, so a drag or the opening turn measured the whole app again each move.
  */
-function watchRedraws(program: HTMLElement): () => number {
+function watchRedraws(program: HTMLElement, isOwn: (record: MutationRecord) => boolean): () => number {
   const [redrawn, setRedrawn] = createSignal(0)
   onSettled(() => {
     let frame = 0
-    const observer = new MutationObserver(() => {
+    const observer = new MutationObserver((records) => {
+      if (records.every(isOwn)) return
       frame ||= requestAnimationFrame(() => {
         frame = 0
         observeShadowRoots(program)
@@ -511,9 +578,9 @@ function watchRedraws(program: HTMLElement): () => number {
 /**
  * The pointer while Anatomy shows, taken before the app sees it:
  * - a drag turns the stack;  the wheel zooms
- * - a hover rings the floor under it (`Inspector.ring()`);  a click selects it, as a click on the app does
+ * - a hover rings the floor under it, drawn on the floor itself;  a click selects it, as a click on the app does
  * - a double-click shows that floor alone
- * - ⌥ held:  every press goes on to the app, so the game can be played
+ * - Play (`AppAnatomy.clicks`):  every press goes on to the app, so the game can be played;  ⌥ held flips it
  */
 function usePointer(props: {
   body: HTMLElement
@@ -531,12 +598,14 @@ function usePointer(props: {
       const path = event.composedPath()
       return path.includes(body) || (path.includes(pane) && !path.some(isBar))
     }
+    // Play, or Inspect with ⌥ held:  the press goes on to the app
+    const passesOn = (event: Event) => !!(event as MouseEvent).altKey !== (clicks() === "play")
     const swallow = (event: Event) => {
       event.stopImmediatePropagation()
       event.preventDefault()
     }
     const down = (event: PointerEvent) => {
-      if (!isOver(event) || event.altKey || event.button !== 0) return
+      if (!isOver(event) || passesOn(event) || event.button !== 0) return
       swallow(event)
       press = { x: event.clientX, y: event.clientY, turn: turn(), isTurning: false }
     }
@@ -545,17 +614,15 @@ function usePointer(props: {
         const [dx, dy] = [event.clientX - press.x, event.clientY - press.y]
         press.isTurning ||= Math.hypot(dx, dy) >= DRAG_START_PX
         if (press.isTurning) {
+          stopTurning()
           setTurn({ tilt: press.turn.tilt - dy * TURN_PER_PX, spin: press.turn.spin + dx * TURN_PER_PX })
           setHovered(undefined)
-          Inspector.ring(undefined)
         }
         swallow(event)
         return
       }
-      if (!isOver(event) || event.altKey) return
-      const floor = floorAt(event)
-      setHovered(floor)
-      Inspector.ring(floor)
+      if (!isOver(event)) return
+      setHovered(passesOn(event) ? undefined : floorAt(event))
     }
     const up = (event: PointerEvent) => {
       if (!press) return
@@ -573,15 +640,17 @@ function usePointer(props: {
     }
     // the app's own click, double-click and presses never reach it:  the pointer's up is the click here
     const clicked = (event: MouseEvent) => {
-      if (isOver(event) && !event.altKey) swallow(event)
+      if (isOver(event) && !passesOn(event)) swallow(event)
     }
     const zoomed = (event: WheelEvent) => {
       event.preventDefault()
       setZoom((size) => Math.min(ZOOMS.most, Math.max(ZOOMS.least, size * Math.exp(-event.deltaY * 0.002))))
     }
-    const left = () => {
-      setHovered(undefined)
-      Inspector.ring(undefined)
+    const left = () => setHovered(undefined)
+    // the browser's own drag (of a picture, of selected text) and text selection:  never while it's turning or picking,
+    // or the browser cancels the press and the drag stops turning it (I262)
+    const native = (event: Event) => {
+      if (press || (isOver(event) && !passesOn(event))) swallow(event)
     }
     const listeners: [string, EventListener][] = [
       ["pointerdown", down as EventListener],
@@ -591,7 +660,9 @@ function usePointer(props: {
       ["mousedown", clicked as EventListener],
       ["mouseup", clicked as EventListener],
       ["click", clicked as EventListener],
-      ["dblclick", clicked as EventListener]
+      ["dblclick", clicked as EventListener],
+      ["dragstart", native],
+      ["selectstart", native]
     ]
     for (const [type, listener] of listeners) window.addEventListener(type, listener, true)
     body.addEventListener("wheel", zoomed, { passive: false })
@@ -613,12 +684,12 @@ function isBar(target: EventTarget): boolean {
 /****************
  * ### `<AnatomyBar>`
  * Anatomy's bar, across the top of the app pane:  where it's looking, and how.
- * - Left:  the whole app, then the floors down to the one shown alone, each a link back to it (breadcrumbs).
- * - Then Front, Spacing and Depth (sliders), Parts and Outlines (switches), Full Window, Close, and how to use it
- *   (its tooltip).
- * - `deepest`:  the deepest floor, Depth's most.
+ * - Left:  "Solitaire in 3D", then the floors down to the one shown alone, each a link back to it (breadcrumbs);
+ *   then Play | Inspect, what a click does (T117).
+ * - Then Front, the Spacing slider, and Views | Outlines, what it shows (I257, T118).
+ * - At the right end, icons alone:  how to use it, Full Window, Close, each with the browser's own tooltip.
  ****************/
-function AnatomyBar(props: { deepest: number; floors: Floor[] }): JSX.Element {
+function AnatomyBar(props: { floors: Floor[] }): JSX.Element {
   const crumbs = () => {
     const shown = focus()
     const floor = shown && props.floors.find((each) => each.element === shown)
@@ -626,12 +697,16 @@ function AnatomyBar(props: { deepest: number; floors: Floor[] }): JSX.Element {
     for (let each = floor; each; each = each.parent) chain.unshift(each)
     return chain
   }
+  const appName = () => {
+    const app = props.floors[0]?.element
+    return app ? Inspector.typeWordsOf(app) : appTexts.text("anatomy")
+  }
   return (
     <div class="AnatomyBar" role="toolbar" aria-label={appTexts.text("anatomy")}>
       <span class="AnatomyCrumbs">
         <ui-icon name={ANATOMY_ICON} />
         <a class={["AnatomyCrumb", { current: !focus() }]} onClick={() => AppAnatomy.focusOn(undefined)}>
-          {appTexts.text("anatomyWholeApp")}
+          {appTexts.text("anatomyWholeApp", { app: appName() })}
         </a>
         <For each={crumbs()}>
           {(floor) => (
@@ -647,6 +722,23 @@ function AnatomyBar(props: { deepest: number; floors: Floor[] }): JSX.Element {
           )}
         </For>
       </span>
+      {/* each segmented menu has a `name`:  only then does a choice send `ui-changed` */}
+      <ui-menu
+        appearance="segmented link"
+        size="small"
+        class="AnatomyClicks"
+        name="anatomy-clicks"
+        aria-label={appTexts.text("anatomyClicks")}
+        value={AppAnatomy.clicks}
+        ref={on<{ value: string }>("ui-changed", (event) => AppAnatomy.setClicks(event.detail.value as AnatomyClicks))}
+      >
+        <ui-item value="play" title={appTexts.text("anatomyPlayTip")}>
+          {appTexts.text("anatomyPlay")}
+        </ui-item>
+        <ui-item value="inspect" title={appTexts.text("anatomyInspectTip")}>
+          {appTexts.text("anatomyInspect")}
+        </ui-item>
+      </ui-menu>
       <span class="AnatomyControls">
         <ui-button size="tiny" {...barTooltip(appTexts.text("anatomyFrontTip"))} onClick={() => AppAnatomy.front()}>
           {appTexts.text("anatomyFront")}
@@ -663,53 +755,45 @@ function AnatomyBar(props: { deepest: number; floors: Floor[] }): JSX.Element {
             ref={on<{ value: number }>("ui-moved", (event) => AppAnatomy.setSpacing(event.detail.value))}
           />
         </label>
-        <label class="AnatomySlider">
-          {appTexts.text("anatomyDepth")}
-          <ui-slider
-            size="mini"
-            min={1}
-            max={props.deepest}
-            step={1}
-            value={Math.min(AppAnatomy.depth, props.deepest)}
-            aria-label={appTexts.text("anatomyDepth")}
-            ref={on<{ value: number }>("ui-moved", (event) => AppAnatomy.setDepth(event.detail.value))}
-          />
-        </label>
-        <ui-checkbox
-          appearance="toggle"
-          selected={AppAnatomy.showsParts}
-          {...barTooltip(appTexts.text("anatomyPartsTip"))}
-          ref={on<{ selected: boolean }>("ui-changed", (event) => AppAnatomy.setShowsParts(event.detail.selected))}
-        >
-          {appTexts.text("anatomyParts")}
-        </ui-checkbox>
-        <ui-checkbox
-          appearance="toggle"
-          selected={AppAnatomy.look === "outlines"}
-          {...barTooltip(appTexts.text("anatomyOutlinesTip"))}
-          ref={on<{ selected: boolean }>("ui-changed", (event) =>
-            AppAnatomy.setLook(event.detail.selected ? "outlines" : "live")
-          )}
-        >
+      </span>
+      <ui-menu
+        appearance="segmented link"
+        size="small"
+        class="AnatomyShows"
+        name="anatomy-shows"
+        aria-label={appTexts.text("anatomyShows")}
+        value={AppAnatomy.look}
+        ref={on<{ value: string }>("ui-changed", (event) => AppAnatomy.setLook(event.detail.value as AnatomyLook))}
+      >
+        <ui-item value="live" title={appTexts.text("anatomyViewsTip")}>
+          {appTexts.text("anatomyViews")}
+        </ui-item>
+        <ui-item value="outlines" title={appTexts.text("anatomyOutlinesTip")}>
           {appTexts.text("anatomyOutlines")}
-        </ui-checkbox>
-        <ui-button
-          size="mini"
-          icon={AppAnatomy.isFullWindow ? "compress" : "expand"}
+        </ui-item>
+      </ui-menu>
+      {/* icons alone at the right end:  how to use it (its tooltip), Full Window, Close */}
+      <span class="AnatomyEnd">
+        <ui-icon name="question circle outline" class="AnatomyHelp" title={appTexts.text("anatomyHelp")} />
+        <ui-icon
+          name={AppAnatomy.isFullWindow ? "compress" : "expand"}
+          link=""
+          class="AnatomyFullWindowToggle"
+          role="button"
           aria-pressed={AppAnatomy.isFullWindow ? "true" : "false"}
-          aria-label={appTexts.text("anatomyFullWindow")}
-          {...barTooltip(appTexts.text("anatomyFullWindowTip"))}
+          label={appTexts.text("anatomyFullWindow")}
+          title={appTexts.text("anatomyFullWindowTip")}
           onClick={() => AppAnatomy.toggleFullWindow()}
         />
-        <ui-button
-          size="mini"
-          icon="close"
-          aria-label={appTexts.text("anatomyClose")}
-          {...barTooltip(appTexts.text("anatomyStopTip"))}
+        <ui-icon
+          name="close"
+          link=""
+          class="AnatomyClose"
+          role="button"
+          label={appTexts.text("anatomyClose")}
+          title={appTexts.text("anatomyStopTip")}
           onClick={() => AppAnatomy.hide()}
         />
-        {/* how to use it:  a tooltip on its icon, so the bar stays one row over a narrow pane */}
-        <ui-icon name="question circle outline" class="AnatomyHelp" title={appTexts.text("anatomyHelp")} />
       </span>
     </div>
   )
@@ -764,11 +848,19 @@ class AnatomyStyles {
       const app = state.floors[0]?.element
       for (const floor of state.floors) {
         if (!floor.parent || !shown(floor, state)) continue
-        want(floor.element, "translate", liftedBy(this.ownStyle(floor.element, "translate"), state.spacing))
+        want(
+          floor.element,
+          "translate",
+          liftedBy(this.ownStyle(floor.element, "translate"), liftOf(floor, state.spacing))
+        )
         for (const box of AnatomyFloors.boxesBetween(floor.element, program)) {
           want(box, "transform-style", "preserve-3d")
           if (app && !app.contains(box) && !isInShadowOf(box, app)) want(box, "overflow", "visible")
         }
+      }
+      if (state.hovered instanceof HTMLElement && !state.selected.includes(state.hovered)) {
+        want(state.hovered, "outline", HOVERED_OUTLINE)
+        want(state.hovered, "outline-offset", "2px")
       }
       for (const element of state.selected) {
         if (!(element instanceof HTMLElement)) continue
@@ -804,6 +896,7 @@ class AnatomyStyles {
       this.set.set(element, kept)
     }
     if (element.style.getPropertyValue(property) !== value) element.style.setProperty(property, value)
+    this.written.set(element, element.getAttribute("style"))
   }
 
   /** Put `property` back on `element` as it was before Anatomy. */
@@ -815,6 +908,21 @@ class AnatomyStyles {
     if (!Object.keys(kept).length) this.set.delete(element)
     if (was) element.style.setProperty(property, was)
     else element.style.removeProperty(property)
+    this.written.set(element, element.getAttribute("style"))
+  }
+
+  /**
+   * Is `record` a style change of Anatomy's own:  the element's `style` still as it last wrote it?
+   * - A change the app made since (a card turned over) is not.
+   */
+  isOwnWrite(record: MutationRecord): boolean {
+    const element = record.target as Element
+    return (
+      record.type === "attributes" &&
+      record.attributeName === "style" &&
+      this.written.has(element) &&
+      this.written.get(element) === element.getAttribute("style")
+    )
   }
 
   /** `element`'s own inline `property`, before Anatomy set it. */
@@ -825,10 +933,15 @@ class AnatomyStyles {
 
   /** Each element's inline styles before Anatomy set them:  `""` for none. */
   private set = new Map<HTMLElement, Record<string, string>>()
+
+  /** Each element's `style` attribute as Anatomy last left it, to tell its own writes from the app's. */
+  private written = new WeakMap<Element, string | null>()
 }
 
 /** What's selected, outlined on its floor:  the views' colour, as its tag. */
 const SELECTED_OUTLINE = "2px solid var(--bubbly-thing, #7c5cd6)"
+/** The floor under the pointer, ringed on its floor:  dashed, as Inspect app's hover ring. */
+const HOVERED_OUTLINE = "2px dashed var(--bubbly-thing, #7c5cd6)"
 
 /** An element's own `translate` (`own`, inline), lifted `by` px toward the eye. */
 function liftedBy(own: string, by: number): string {

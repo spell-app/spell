@@ -310,7 +310,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - `docs index`:  [index.js](tools/index.js)
     - `RunningEpics`:  the running epics, still in their worktrees, on the main checkout's page server
     - [runningRoutes.ts](list/runningRoutes.ts):  its route module
-      - `GET /api/epics/running`
+      - `GET /api/epics/running`;  `?every`, every epic, running or not:  the home page's `<epic-pills>` (T99)
       - the list page's running cards, as it's served
     - `EpicState` and `EpicCards` load in plain `node` too (`docs index`):  their headers say what that forbids
   - `config/` -- `EpicConfig` (epic `epic-eject` P4):
@@ -1034,8 +1034,13 @@ The shared folders:
 - [The docs' home page](../../spell.epics/pages/index.html):  a routing page (P5 of `claude-design`).
   - One card per area, each with its count:  Guides · Sagas · Epic Pages · Templates
     - each card's description on two lines, broken at its first colon (`descriptionLines()`)
-    - the Epic Pages card:  the open epics worked on in the last week, a pill each in two columns (`recentEpics()`,
-      J276), as of the last `epic pages index`
+    - the Epic Pages card:  its Active epics, the open epics worked on in the last week, a pill each in two columns:
+      `<epic-pills>`, which draws itself from the page server, live (epic `epic-engine` T99;  J276's generator wrote
+      plain pills into the page, as of the last `epic pages index`)
+      - each pill:  the epic's name, what waits in its toolbar badge colours (red, orange, blue), its phase under way
+        or `Done`, its agents (`🤖 2`);  the tooltip says it in words
+      - its data:  `GET /api/epics/running?every` (`RunningEpics.everyEpic()`:  every epic, running or not, with its
+        `badges` and `agents`), asked again as epic pages or their agents' lists change, and every 30 seconds
     - the top bar's tab is "Epic Pages" too, and the bar says "Spell Epic" beside the hat (`SiteHeader`)
     - Spell's own areas left out (2026-11-18, epic `epic-engine` J275:  "Remove anything Spell related in this page
       permanently.  No longer relevant to Epics"):  Epic/UI, Spell/UI, App, App/UI and Brand had cards, and tabs;
@@ -1844,15 +1849,16 @@ Each kind of page has ONE name, written everywhere a person reads it.
 
 ## Which side bar tab
 
-VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never the command that shows it
+VS Code's right side bar has two tabs, and the PAGE'S KIND picks one, never the command that shows it
 (epic `epic-engine` P59, request r50:  a choice page the person was answering vanished,
 the epic page shown in both tabs).
 - The ONE rule:  `docViewFor()`, in the extension's [docUrls.ts](../vscode/src/docUrls.ts), from the page's path:
-  - an epic page, a saga page:  "Review" (`review`), whatever was asked
   - a details, review or choice page (a page in a `details/` folder):  "Details" (`details`)
-  - anything else:  "Epic Docs" (`docs`), unless the caller asked for "Review" (`--review`, `view=review`)
+  - anything else -- epic pages, saga pages, guides, the home page, the list pages:  "Review" (`review`)
+  - a third tab, "Epic Docs" (`docs`), held guides until epic `epic-engine` Q73 folded it into Review;
+    the bridge still takes `docs` from an older `epic`, as Review (`docViewNamed()`)
 - So the callers pass no tab:  `epic open`, `epic ask show`, `epic choices show`, `epic pages link --show`, the show
-  route (`GET /api/docs/show`), `epic window show`;  `--review` stays, asking for a page of no kind of its own
+  route (`GET /api/docs/show`), `epic window show`;  `--review` stays for old scripts, and changes nothing
   - the bridge's `show-doc` answers which tab it took, `{ file, view }`:  the show route's closing page names it
 - The "Details" tab never replaces a page still WAITING for the person's answer (`DetailsPages.isWaiting()`,
   [DetailsPages.ts](tools/DetailsPages.ts):  no answer for its round now, or a session waiting on it):
@@ -2939,8 +2945,8 @@ In this order, from `epic/` (a page by its path in the checkout it's in):
   - `page` may be a short address:  `SAGA:/drawable-spell`, `SAGA:/drawable-spell/python-target#T1` (landing on T1)
   - in Chrome, reusing its tab
   - `--vs`:  in VS Code's right side bar, in the tab the page's kind says (see "Which side bar tab");
-    "Epic Docs" for a guide (`/spell-docs`)
-  - `--review`:  asks for its "Review" tab, for a page of no kind of its own (`/epic review`)
+    "Review" for a guide (`/spell-docs`)
+  - `--review`:  the same as `--vs` (`/epic review`)
   - Each tab keeps its own page.
     Showing the page a tab already has doesn't reload it:  the page updates itself.
 - `epic ask` ([details.js](tools/details.js)):  details pages (see "Details pages").

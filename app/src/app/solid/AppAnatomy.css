@@ -1,15 +1,14 @@
 /*
  * Look of Anatomy (`AppAnatomy.tsx`):  its bar across the top of the app pane, the floors' tags over the turned app,
  * and the outlines.
- * - A tag is coloured as its kind's band is in the bubbly code:  a view the program draws, a thing's purple;
- *   a Spell UI part, structure's blue (`bubbly.css`), so the drawing and the code read alike.
+ * - A tag is coloured as a view's band is in the bubbly code, a thing's purple (`bubbly.css`),
+ *   so the drawing and the code read alike.
  * - The tags and outlines never take the pointer:  Anatomy reads it on the window, before the app.
  */
 
 .AppPane:has(> .AnatomyBar) {
   position: relative;
   --AppAnatomy-view: var(--bubbly-thing, #7c5cd6);
-  --AppAnatomy-part: var(--bubbly-structure, #2f80d1);
 
   & > .AppPaneBody {
     overflow: hidden;
@@ -71,9 +70,33 @@
       width: 96px;
     }
   }
-  .AnatomyHelp {
+  /* the right end:  icons alone, no surround, 12px apart, as the top bar's */
+  .AnatomyEnd {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: auto;
+  }
+  .AnatomyEnd > ui-icon {
     color: var(--ui-text-muted);
+  }
+  .AnatomyHelp {
     cursor: help;
+  }
+
+  /* the full window's hint, at the 3D view's top left, under the bar (I260) */
+  .AnatomyEscHint {
+    position: absolute;
+    top: 64px;
+    left: 16px;
+    z-index: 3;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: rgb(0 0 0 / 0.56);
+    color: white;
+    font-size: 12px;
+    line-height: 16px;
+    pointer-events: none;
   }
 
   /* the tags, over the turned app:  in the pane's own pixels, never turned, so they always read */
@@ -102,9 +125,6 @@
     line-height: 16px;
     white-space: nowrap;
 
-    &.part {
-      --AppAnatomy-hue: var(--AppAnatomy-part);
-    }
     &.hovered,
     &.selected {
       box-shadow:
@@ -117,7 +137,7 @@
     }
   }
 
-  /* the outlines:  each floor an empty frame in its kind's colour, the app hidden under them */
+  /* the outlines:  each floor an empty frame in a view's colour, the app hidden under them */
   .AnatomyOutlines {
     position: absolute;
     inset: 0;
@@ -139,9 +159,6 @@
     background: color-mix(in srgb, var(--AppAnatomy-hue) 6%, transparent);
     pointer-events: auto;
 
-    &.part {
-      --AppAnatomy-hue: var(--AppAnatomy-part);
-    }
     &.hovered {
       background: color-mix(in srgb, var(--AppAnatomy-hue) 20%, transparent);
       border-width: 2px;
@@ -161,11 +178,18 @@
   inset: 16px;
   z-index: 900;
   border-radius: 12px;
-  background: var(--ui-surface, white);
-  /* the dim round it, then its own shadow */
+  /* the surface over an opaque backing:  a see-through surface would show the editor under it (I260) */
+  background: linear-gradient(var(--ui-surface, white), var(--ui-surface, white)), Canvas;
+  /* the dim round it, nearly black, so the editor behind doesn't show through (I260), then its own shadow */
   box-shadow:
-    0 0 0 100vmax rgb(0 0 0 / 0.32),
+    0 0 0 100vmax rgb(0 0 0 / 0.88),
     0 8px 40px rgb(0 0 0 / 0.32);
+}
+
+/* and the split panes holding it lift with it:  their own stacking would keep the editor's other panes on top */
+:is(.SplitPane, ui-split-panel):has(.AppPane.AnatomyFullWindow) {
+  isolation: auto;
+  z-index: 900;
 }
 
 /* the Inspector's flat outline round what's selected:  the floor draws its own while Anatomy shows */

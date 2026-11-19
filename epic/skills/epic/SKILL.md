@@ -18,9 +18,9 @@ An EPIC is a planning session and the work it plans;  its live record is the EPI
 Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole time.
 - The epic page:  `epics/<name>/<name>.plan.html`.
 - It's the user's view of the work:  they read it in the right side bar's REVIEW tab while you work.
-  - That's the checkbox icon;  never the "Epic Docs" tab, the book (rule, 2026-10-07).
+  - That's the checkbox icon (rule, 2026-10-07);  guides open there too (epic `epic-engine` Q73).
   - The extension sends every epic page there by itself, whatever the command asked (epic `epic-engine` P59);
-    details, review and choice pages go to the third tab, "Details" (the speech bubble), so a question never
+    details, review and choice pages go to the other tab, "Details" (the speech bubble), so a question never
     replaces the epic page, and one still waiting for an answer is never replaced either.
   - In Cursor:  the same Review view, wherever the person put it (Cursor keeps its right side bar for its own agent:
     **View: Open View...** › Review finds it;  epic `epic-friend` P16).
@@ -516,7 +516,8 @@ than just being able to move on").
     (epic `epic-engine` I163;  2026-10-29:  "just incorporate the feedback and auto-approve rather than asking
     me again").  `wait` prints "accepted, with comments to fold in:  C4, C5";  `inbox apply` accepts the plan as usual.
     - Fold them into the plan and KEEP it accepted:  `epic update <name>#P<N> --plan "<ol>...</ol>" --accepted`
-      (no `waiting`, no spinner), then answer each comment on its thread
+      (no `waiting`, no spinner), the words each one changed marked `<epic-change item="c4">` (epic `epic-engine`
+      T100;  never an Update block), then answer each comment on its thread
       (`epic inbox done <name>#C4 --file <answer.html>`:  what changed in the plan).  NO new Accept, no stop.
     - Only a comment that goes against something they decided, or changes the scope a lot, becomes a Q item instead
       (`epic add <name>#Q`, its thread answered with the link);  the rest are still folded in.
@@ -771,7 +772,7 @@ Until a `/back:  ...` message (or `epic focus status` says off):
      It's struck through:  the one struck status (J16 of `review-review`).
    - An item talked through with the person (they answered, accepted, or said leave it):
      `review <name>#<id> "outcome"`, so the next `/epic review` doesn't bring it up again ("7. Review").
-   - Changed a phase's PLAN, for a reason NO ITEM is (something found while building, a file moved, a comment):
+   - Changed a phase's PLAN, for a reason NO ITEM or comment is (something found while building, a file moved):
      - `updated <name>#P<N> "<p>what changed, and why</p>" --summary "..."`:
        an `<epic-update>` block at the end of the phase's description, after Goal:  **Update**: <summary>, dated.
        Never an "Updated" word in the text.
@@ -788,6 +789,9 @@ Until a `/back:  ...` message (or `epic focus status` says off):
    - An ANSWER rewrote the Overview's or a phase's words (epic `epic-engine` P30;  Q13, B):  mark the changed words
      themselves, `<epic-change item="q16">the new words</epic-change>`, as you rewrite them.
      NO `<epic-update>`, and no `epic updated` after `epic change` (I159):  the marks are the whole record.
+   - A COMMENT of theirs rewrote them (folded into a phase or the Overview;  epic `epic-engine` T100):  the same,
+     naming the comment, `<epic-change item="c2">the new words</epic-change>`;  `epic change <name>` stamps it with
+     the comment's words.  NO Update block for it.  Then answer its thread as ever, naming the phase.
      - The words, not the block:  one mark per change, the question's id alone.
      - Then `epic change <name>`:  it stamps each (id `ch3`, time, the answer in short) and lists them;
        `epic lint` fails one not stamped, or naming no item.
@@ -1302,7 +1306,8 @@ want you to just do it").
    - Approvals, picks and todos made or queued land in the doc;  it prints each.
    - An Accept that carries their comments in its text ("accepted, with comments to fold in:  C4, C5";  epic
      `epic-engine` I163):  `apply` accepts the plan and leaves the comments.  Fold them into the plan, keeping it
-     accepted (`epic update <name>#P<N> --plan "..." --accepted`), then answer each (`epic inbox done <name>#C4
+     accepted (`epic update <name>#P<N> --plan "..." --accepted`), each change marked `<epic-change item="c4">`
+     (T100, never an Update block), then answer each (`epic inbox done <name>#C4
      --file <answer.html>`).  No new Accept.  Only a comment against something they decided, or a big change of
      scope, becomes a Q item instead ("4b. Build plans").
    - TESTS, answered on the page (epic `epic-engine` P51, Q53;  no test run, no Passed / Failed / Skip / Not now):
@@ -1396,7 +1401,8 @@ want you to just do it").
      - Dropped without an answer:  `inbox working <name>#C3 off`.
      - What they said before it counts as read:  more words of theirs go after it, as a new reply (waiting again).
    - Answer each like a revisit's note:  INTO the item it's on (`details --append`, their comment quoted).
-     On a phase field or Overview prose:  into that phase or part.
+     On a phase field or Overview prose:  into that phase or part, the words it changed marked
+     `<epic-change item="c3">` (epic `epic-engine` T100), never an Update block.
    - Then `epic inbox done <name>#C3 --file <answer.html> [--commit <sha>]`.
      - The answer goes on their thread too (a line or two;  the full one is in the doc):  their turn, the thread opens.
      - `--commit`:  the commit it was built in;  their Done line shows it.
@@ -1893,8 +1899,12 @@ The steps, each turn as short as it can be:
      (`epic inbox apply demo`) and ends with `NEXT:  <what>`.
 3. Woken (its notice, or a `📬 demo` line:  then `epic demo wait --timeout 5` first):  read its `NEXT:` line.
    - `NEXT:  wait`:  the person isn't done (picks sent before the Accept, one question of two answered):  one short
-     line ("Got your picks.  Press Accept Overview when it looks right."), arm `epic demo wait` again, end the turn.
+     line ("Got your picks.  Press Accept Overview when it looks right.";  a phase's thumbs up:  "Got your pick.
+     Press Accept Phases when it looks right."), arm `epic demo wait` again, end the turn.
    - `NEXT:  run 04`, `run 05`:  working lines, the step, its "Say" text, then step 2 again.
+     - The phase built is the one the person PICKED (Looks good on one phase, or Do this):  `epic demo wait` notes
+       it before applying, and the steps name it as `$PICK` (its id;  none picked:  the step's own default).
+       So the demo builds the person's choice, wherever it sits in the list, not always P1.
    - `NEXT:  run 06`:  6 working lines ("building"), `epic demo run 06`, `epic demo run 07`, then 07's "Say" text,
      and that's the end:  no more listening.
    - `NEXT:  done`:  the demo is over:  say so in one line.

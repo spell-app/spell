@@ -10,7 +10,12 @@ import { EDITOR, SERVING } from "./runningEditor"
  *   so the example can't change.
  * - Needs this checkout's editor running:  `spell server start all`.  Skips itself when it isn't, as in CI.
  * - Headless Playwright, never a real browser window.
+ * - SKIPPED while the switch is hidden (`SHOW_VIEW_ALONE`, in `ViewAlone.tsx`):  epic `editor` T116 rethinks it.
+ *   Turn this back on with the switch.
  */
+
+/** Is the switch shown?  Keep it the same as `SHOW_VIEW_ALONE`:  off for epic `editor` T116. */
+const SHOW_VIEW_ALONE: boolean = false
 
 /** Solitaire's files a test may write:  the card's and its property editor's. */
 const WRITTEN = /\/Solitaire\/(Card\.spell|Card\.editor\.spell)(\?.*)?$/
@@ -21,7 +26,7 @@ const SETTLE_MS = 2500
 /** The button the palette's Button row writes. */
 const BUTTON = "<ui-button>Click me</ui-button>"
 
-describe.skipIf(!SERVING)("a view on its own", { timeout: 180_000 }, () => {
+describe.skipIf(!SERVING || !SHOW_VIEW_ALONE)("a view on its own", { timeout: 180_000 }, () => {
   let browser: Browser
   let page: Page
   /** What each save sent, by its file's name. */

@@ -21,6 +21,7 @@ import { DimensionBase } from "./DimensionBase"
 import { DimensionUnit } from "./DimensionUnit"
 import { OutlineSpecifierMeasure } from "./OutlineSpecifierMeasure"
 import { OutlineSpecifierPercent } from "./OutlineSpecifierPercent"
+import { OutlineSpecifierMedia } from "./OutlineSpecifierMedia"
 import { CreateThing } from "./CreateThing"
 import { CreateType } from "./CreateType"
 import { CSSBlock } from "./CSSBlock"
@@ -1973,6 +1974,16 @@ classes.addRule(DefinePropertyHas, {
   syntax: `{type:subject_its} {property:quoted_member} is {specifier:outline_specifier} ${RULES}`
 })
 
+// ... and its choices said as a sentence says them (epic `data` J289):  `- its "status" as one of pending or done`,
+// the same as `- its "status" is one of ...`;  and `- it has a "status" as one of ...`
+classes.addRule(DefinePropertyHas, {
+  syntax: `{type:subject_its} {property:quoted_member} {specifier:type_specifier_enum} ${RULES}`
+})
+
+classes.addRule(DefinePropertyHas, {
+  syntax: `{type:subject_it} has (a|an|a property)? {property:quoted_member} {specifier:type_specifier}? ${RULES}`
+})
+
 // ... and with the subject left out (P8):  `- has a deck`, `- "suit" is one of clubs, diamonds, hearts or spades`
 classes.addRule(DefinePropertyHas, {
   syntax: `{type:subject_implied} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? ${RULES}`
@@ -2014,6 +2025,13 @@ classes.addRule(OutlineSpecifierEnum, {
       ]
     }
   ]
+})
+
+// a sound or a video, and where its file is:  `its "card slide" is a sound at "sounds/slide.mp3"` (epic `language` P65)
+// -- before `a {type}`, which would make `sound` a type of its own
+classes.addRule(OutlineSpecifierMedia, {
+  syntax: "(a|an) {kind:media_kind} at {path:text}",
+  tests: [{ tests: [[`a sound at "sounds/slide.mp3"`, `core.media("sound", "sounds/slide.mp3")`]] }]
 })
 
 // a percent, kept as its fraction:  `its "tip" is a percent`, `<property "tip" type="percent">18%</>` (epic `language` P34)

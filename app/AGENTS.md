@@ -166,7 +166,7 @@ More on some of them:
     and it carries Spell UI's and the brand's HTML and CSS data, copied in by its build:
     a vocabulary change shows there after `spell app vscode`.
     - The brand's comes from spell-brand, beside the kit (`~/www/spell-brand`);  without it, an empty set.
-  - The Review tab, the Epic Docs view and the window bridge are the `epic/` folder's own extension, not this one.
+  - The Review and Details tabs and the window bridge are the `epic/` folder's own extension, not this one.
 - THE PAGE SERVER is the kit's, started from the kit's root only (`spell server start`, from any folder;
   epic `repo-split` P16):  [the kit's server AGENTS.md](../src/server/AGENTS.md).
   - The app declares ITS part of its settings in its own [package.json](package.json), `"pageServer"`, the way it

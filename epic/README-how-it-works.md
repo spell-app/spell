@@ -46,20 +46,17 @@ You start one in a Claude Code session:  `/epic <name> <what to plan>`.
 The agent makes a branch and a worktree, and opens the epic page in VS Code, beside your code.
 
 ![A drawing of a VS Code window:  the Explorer and a TypeScript file on the left, outlined as "your code, in the
-epic's own worktree";  the right side bar holds an epic page, with three tabs above it, Epic Docs, Review and Details,
+epic's own worktree";  the right side bar holds an epic page, with two tabs above it, Review and Details,
 and a row of buttons:  Back, Forward, Reload, Open in Browser, Epics Home, This Epic's Page,
 Restart Page Server.](docs/images/how-review-tab.png)
 
 _A sketch of the window, around a real epic page:  the page sits in VS Code's right side bar, in the Review tab._
 
-The window is drawn, not captured;  the page inside it is real.
-VS Code's side bar holds three tabs, each a page that stays put while the others move:
-- **Review:**  epic pages and saga pages, the ones you mark up
-- **Epic Docs:**  guides and every other page
+VS Code's side bar holds two tabs, each keeping its own page:
+- **Review:**  epic pages and saga pages, the ones you mark up;  guides and every other page too
 - **Details:**  a question too big for a chat, asked on a page of its own
 
-Any browser shows the same pages:  the side bar is the convenient place, not the only one
-([README-vscode.md](README-vscode.md)).
+Any browser shows the same pages too ([README-vscode.md](README-vscode.md)).
 
 ### The header:  what's happening, at a glance
 
@@ -95,8 +92,9 @@ So after a night away, it's the one section to read:  the rest of the page is th
 
 ![One item on an epic page, unfolded.  Its chip, J1, outlined:  "say approve J1 in the chat".  Its title, a judgement
 call, "a choice the agent made without you".  At the right, three buttons, Do this, Revisit and Approve, then the
-(i) Clarify button, "Claude rewrites it in plainer words".  Under it, the item's text, its Net effect, "what it
-changes", and a note box, "pictures welcome".](docs/images/how-item.png)
+(i) Clarify button, "Claude rewrites it in plainer words".  Before those buttons, a bullhorn, "comment on it".
+Under it, the item's text, its Net effect, "what it changes", and a note box,
+"pictures welcome".](docs/images/how-item.png)
 
 _A judgement call unfolded:  the agent's choice, what it changes, and your three answers._
 
@@ -109,6 +107,19 @@ T a todo, I an issue, M a manual test.
 
 Your presses wait on the page, dashed, until you press Send to Claude in the header (or Auto Send does).
 The whole review round, button by button:  [README-pages.md](README-pages.md).
+
+### Comment on anything with the bullhorn
+
+Items have buttons;  everything else takes a comment.
+- **The bullhorn** sits beside any block:  a section, a table, a code block, an item.
+  Press it, or select some words and press ⌘-I (Ctrl-I), and type.
+- **A thread:**  each comment becomes one, numbered `C1`, `C2` ..., under the words it quotes,
+  and the agent answers in it.
+- **It rides Send,** with your marks.
+  A thread turns orange when it's your turn to answer.
+
+Where each page's comments go, and what the thread's buttons do:
+[README-pages.md](README-pages.md#comments--a-bullhorn-on-every-block).
 
 ## The workflow:  two Accepts, then it builds
 
@@ -165,7 +176,7 @@ The guide is the short version, for the next person:
 - its limits, plainly
 
 It's written at the epic's Doc Review, in the readme voice (`epic voice readme` prints the rules).
-It lands under the top bar's Guides tab, and opens in the side bar's Epic Docs tab.
+It lands under the top bar's Guides tab, and opens in the side bar's Review tab.
 A saga's page counts its guides, so a saga's card shows how much of its aim has been written down.
 
 ## See also

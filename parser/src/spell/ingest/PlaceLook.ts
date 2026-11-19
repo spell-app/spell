@@ -487,7 +487,7 @@ function listedIn(body: unknown, address: string): Array<{ name: string; at: str
 }
 
 /** The rows of a wrapped list, and where they are:  `undefined` for anything else. */
-function wrappedRows(body: unknown): { rows: unknown[]; rowsAt: string } | undefined {
+export function wrappedRows(body: unknown): { rows: unknown[]; rowsAt: string } | undefined {
   if (!body || typeof body !== "object" || Array.isArray(body)) return undefined
   const fields = body as Record<string, unknown>
   const named = ROWS_FIELDS.find((field) => Array.isArray(fields[field]))

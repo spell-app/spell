@@ -2084,45 +2084,6 @@
       "description": "Open the browser's Print dialog for the app alone, not the page around it:  what `open printing` compiles to."
     },
     {
-      "kind": "method",
-      "name": "play",
-      "of": "core",
-      "module": "ui",
-      "params": [
-        {
-          "name": "sound"
-        }
-      ],
-      "section": "Sound",
-      "description": "Play `sound`, a sound file's address, from its start:  what `play its sound` compiles to."
-    },
-    {
-      "kind": "method",
-      "name": "loadSound",
-      "of": "core",
-      "module": "ui",
-      "params": [
-        {
-          "name": "sound"
-        }
-      ],
-      "section": "Sound",
-      "description": "Start loading `sound` now, so a later `play` starts it at once:  what `load its sound` compiles to."
-    },
-    {
-      "kind": "method",
-      "name": "stop",
-      "of": "core",
-      "module": "ui",
-      "params": [
-        {
-          "name": "sound"
-        }
-      ],
-      "section": "Sound",
-      "description": "Stop `sound`, if it's playing, and put it back to its start:  what `stop its sound` compiles to."
-    },
-    {
       "property": "TIME_UNITS_MAP",
       "of": "core",
       "module": "ui",
@@ -2375,6 +2336,162 @@
       ],
       "section": "Widget defaults",
       "description": "Give `element`, where the app is drawn, this run's widget defaults (`giveDefaults`):  none clears them."
+    },
+    {
+      "kind": "method",
+      "name": "media",
+      "of": "core",
+      "module": "media",
+      "params": [
+        {
+          "name": "kind"
+        },
+        {
+          "name": "source"
+        },
+        {
+          "name": "name"
+        }
+      ],
+      "description": "A sound or video named `name`, its file at `source`:  what a page's or app's named property starts as (`sound \"card slide\" is at \"sounds/slide.mp3\"`, `<video \"intro\" source=\"...\" />`)."
+    },
+    {
+      "kind": "method",
+      "name": "mediaNamed",
+      "of": "core",
+      "module": "media",
+      "params": [
+        {
+          "name": "name"
+        },
+        {
+          "name": "kind"
+        }
+      ],
+      "description": "The sound or video named `name`, of `kind` if it says:  what `sound \"card slide\"` and `the \"intro\" video` compile to."
+    },
+    {
+      "kind": "method",
+      "name": "play",
+      "of": "core",
+      "module": "media",
+      "params": [
+        {
+          "name": "target"
+        },
+        {
+          "name": "options"
+        }
+      ],
+      "description": "Play `target`, from its start, or from `options.from`:  what `play sound \"card slide\"`, `play its sound` and `play \"cry.ogg\"` compile to."
+    },
+    {
+      "kind": "method",
+      "name": "loadSound",
+      "of": "core",
+      "module": "media",
+      "params": [
+        {
+          "name": "target"
+        }
+      ],
+      "description": "Start loading `target` now, so a later `play` starts it at once:  what `load its sound` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "stop",
+      "of": "core",
+      "module": "media",
+      "params": [
+        {
+          "name": "target"
+        }
+      ],
+      "description": "Stop `target`, if it's playing, and put it back to its start:  what `stop sound \"card slide\"` and `stop its sound` compile to."
+    },
+    {
+      "kind": "method",
+      "name": "pause",
+      "of": "core",
+      "module": "media",
+      "params": [
+        {
+          "name": "target"
+        }
+      ],
+      "description": "Pause `target` where it is:  what `pause video \"intro\"` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "resume",
+      "of": "core",
+      "module": "media",
+      "params": [
+        {
+          "name": "target"
+        }
+      ],
+      "description": "Go on playing `target` from where it was paused:  what `resume video \"intro\"` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "stopAll",
+      "of": "core",
+      "module": "media",
+      "params": [
+        {
+          "name": "kind"
+        }
+      ],
+      "description": "Stop every sound, or every video, the program has played:  what `stop all sounds` and `stop all videos` compile to."
+    },
+    {
+      "kind": "method",
+      "name": "isPlaying",
+      "of": "core",
+      "module": "media",
+      "params": [
+        {
+          "name": "target"
+        }
+      ],
+      "description": "Is `target` playing now:  what `the \"intro\" video is playing` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "isDone",
+      "of": "core",
+      "module": "media",
+      "params": [
+        {
+          "name": "target"
+        }
+      ],
+      "description": "Has `target` played to its end:  what `the \"intro\" video is done` compiles to.  Never played:  no."
+    },
+    {
+      "kind": "method",
+      "name": "mediaLength",
+      "of": "core",
+      "module": "media",
+      "params": [
+        {
+          "name": "target"
+        }
+      ],
+      "description": "How long `target` is, in seconds:  what `the length of the \"intro\" video` compiles to, a duration."
+    },
+    {
+      "kind": "method",
+      "name": "drawMedia",
+      "of": "core",
+      "module": "media",
+      "params": [
+        {
+          "name": "target"
+        }
+      ],
+      "description": "What a drawing draws for `target`:  what `<video \"intro\" />` compiles to."
     },
     {
       "kind": "method",

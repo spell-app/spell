@@ -15,9 +15,6 @@ function view(tag: string, style = ""): HTMLElement {
   return element
 }
 
-/** Is `element` a Spell UI part:  its tag starts `ui-`. */
-const isPart = (element: Element) => element.localName.startsWith("ui-")
-
 let stage: HTMLElement
 afterEach(() => stage?.remove())
 
@@ -37,7 +34,7 @@ describe("AnatomyFloors.in()", () => {
     app.append(document.createElement("div"))
     app.firstElementChild!.append(pile)
     pile.attachShadow({ mode: "open" }).append(card)
-    const floors = AnatomyFloors.in(staged(app), { parts: false, isPart })
+    const floors = AnatomyFloors.in(staged(app))
     expect(floors.map((floor) => [floor.element.localName, floor.depth, floor.parent?.element.localName])).toEqual([
       ["x-app", 0, undefined],
       ["x-pile", 1, "x-app"],
@@ -45,19 +42,32 @@ describe("AnatomyFloors.in()", () => {
     ])
   })
 
-  test("Spell UI's parts are floors only with Parts on, and only with a box of their own", () => {
+  test("only views are floors:  a Spell UI part inside one is not", () => {
     const app = view("x-app")
     const toolbar = document.createElement("ui-toolbar")
     toolbar.style.display = "block"
-    const text = document.createElement("ui-text")
-    text.style.display = "contents"
-    toolbar.append(text)
     app.append(toolbar)
     staged(app)
-    expect(AnatomyFloors.in(stage, { parts: false, isPart }).map((floor) => floor.element.localName)).toEqual(["x-app"])
-    expect(AnatomyFloors.in(stage, { parts: true, isPart }).map((floor) => floor.element.localName)).toEqual([
-      "x-app",
-      "ui-toolbar"
+    expect(AnatomyFloors.in(stage).map((floor) => floor.element.localName)).toEqual(["x-app"])
+  })
+
+  test("siblings that overlap step up one by one, in the order they're drawn;  ones side by side don't", () => {
+    const app = view("x-app", "position: relative; width: 400px; height: 300px")
+    const column = view("x-column", "position: absolute; left: 0; top: 0; width: 80px; height: 300px")
+    const cards = [0, 20, 40].map((top) =>
+      view("x-card", `position: absolute; left: 0; top: ${top}px; width: 80px; height: 100px`)
+    )
+    const other = view("x-column", "position: absolute; left: 100px; top: 0; width: 80px; height: 300px")
+    column.append(...cards)
+    app.append(column, other)
+    const floors = AnatomyFloors.in(staged(app))
+    expect(floors.map((floor) => [floor.element.localName, floor.step, floor.steps])).toEqual([
+      ["x-app", 0, 0],
+      ["x-column", 0, 0],
+      ["x-card", 0, 2],
+      ["x-card", 1, 2],
+      ["x-card", 2, 2],
+      ["x-column", 0, 0]
     ])
   })
 
@@ -68,7 +78,7 @@ describe("AnatomyFloors.in()", () => {
     const loose = view("x-loose")
     list.append(item)
     app.append(list, loose)
-    const floors = AnatomyFloors.in(staged(app), { parts: false, isPart })
+    const floors = AnatomyFloors.in(staged(app))
     const of = (tag: string) => floors.find((floor) => floor.element.localName === tag)!
     expect(of("x-list").clips).toBe(true)
     expect(of("x-item").isFlat).toBe(true)

@@ -1706,6 +1706,8 @@ export class ASTPropertyDefinition extends ASTClassMember {
  * - `property` (required) is PropertyLiteral or string.
  * - `check` (optional) is what its setter warns about, e.g. `{ type: 'text' }` -- see `SC.PropCheck`.
  * - `initializer` (optional) is its default, made once per instance, e.g. `new List()`.
+ * - `early` (optional):  its default is made as its instance is, not on first read (`early: true` in its schema):
+ *   a new thing it holds always is;  a page's named sound too, so it's found by its name at once (epic `language` P65).
  * - A getter / setter pair over `getProp()` / `setProp()`, as a plain class field would shadow it:
  *   `get title() { return this.getProp('title') }` + `set title(value) { this.setProp('title', value) }`.
  * - `check` and `initializer` go in its class's SCHEMA, declared once, NOT passed on every get / set:
@@ -1720,6 +1722,7 @@ export type ASTReactivePropertyProps = Prettify<{
   check?: ASTObjectLiteral
   initializer?: ASTExpression
   linksTo?: ASTTypeExpression
+  early?: boolean
 }>
 
 export class ASTReactiveProperty extends ASTClassMember {
@@ -1728,6 +1731,8 @@ export class ASTReactiveProperty extends ASTClassMember {
   declare initializer: ASTExpression | undefined
   /** The saved type whose thing it holds the address of:  so reading it follows the address, `core.linked()` (epic `data` I33). */
   declare linksTo: ASTTypeExpression | undefined
+  /** Is its default made as its instance is, not on first read? */
+  declare early: boolean | undefined
   constructor(match: P.AnyMatch, props: ASTReactivePropertyProps) {
     super(match, props)
     if (typeof this.property === "string") this.property = new ASTPropertyLiteral(this.match, this.property)

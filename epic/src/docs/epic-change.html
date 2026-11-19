@@ -189,10 +189,12 @@
                 <tbody>
                   <tr>
                     <td><code>item</code></td>
-                    <td>an item's id, any case (<code>q16</code>)</td>
+                    <td>an item's id, any case (<code>q16</code>), or a comment's (<code>c2</code>)</td>
                     <td>
                       The question whose answer made the change: the chip's name, and what Reopen reopens.
                       <code>epic lint</code> fails a mark naming no item.
+                      A comment folded into the plan names the comment: the chip says C2, its words show unfolded and
+                      in the popup, with a link to its thread, and no Reopen.
                     </td>
                     <td>Claude (required)</td>
                   </tr>
@@ -327,9 +329,14 @@
                 hands a command.
               </li>
               <li>
+                Or as it folds the person's comment into the plan: <code>&lt;epic-change item="c2"&gt;</code>, the
+                comment's words copied in as it's stamped. The mark changes nothing on the comment: Claude answers its
+                thread as ever, naming the phase.
+              </li>
+              <li>
                 <code>epic change &lt;epic&gt; [--for q16]</code> stamps them (id, time, answer, the words they
                 replaced) and lists the ones waiting; any other <code>epic</code> edit stamps them too. <code>--for</code> names the marks written
-                with no <code>item</code>.
+                with no <code>item</code> (<code>--for c2</code>, a comment).
               </li>
               <li>
                 Reopen is a mark in the page's inbox, under the mark's id; <code>epic inbox apply</code> reopens the

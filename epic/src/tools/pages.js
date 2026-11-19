@@ -585,7 +585,7 @@ export function componentSetAddress(file) {
  * - for `epic open <name>`, `epic phase`, `/spell-docs`
  * - starts this checkout's page server first (`ensurePageServer()`), so the page live-reloads
  * - the spell extension (`spell app vscode`) finds the server by its pid file,
- *   and shows the page in a tab of the right side bar (or Simple Browser, `spell.docPreview.location`)
+ *   and shows the page in a tab of the right side bar
  *   - the page already in that tab isn't reloaded:  it updates itself
  * - first asks THIS session's window, through the extension's window bridge (the repo root's `src/window.mjs`);
  *   a `vscode://` URI goes to whichever window is focused
@@ -596,9 +596,10 @@ export function componentSetAddress(file) {
  *   - an extension from before it ignores it:  the page shows as usual
  * - which side bar tab:  the page's kind decides, in the extension (`docViewFor()`, epic `epic-engine` P59);  each tab
  *   keeps its own page
- *   - an epic or saga page:  "Review";  a details, review or choice page:  "Details";  anything else:  "Epic Docs"
- *   - `view`:  asks for a tab, for a page of no such kind:  `"review"` (`epic pages open <page> --review`);  none sent
- *     when not given
+ *   - a details, review or choice page:  "Details";  anything else (epic pages, saga pages, guides):  "Review"
+ *     (epic `epic-engine` Q73:  the third tab, "Epic Docs", folded into Review)
+ *   - `view`:  a tab asked for, `"review"` (`epic pages open <page> --review`), passed on;  the kind decides;  none
+ *     sent when not given
  * - the session is moving to a worktree's window (`/isolate`, `/epic`:  a pending handoff):
  *   shown THERE once it has moved, not in the window it's leaving
  * - no bridge (extension not reloaded, or not run from a VS Code window), or it failed:  the `vscode://` URI

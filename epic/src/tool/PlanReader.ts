@@ -38,6 +38,7 @@ import {
   type ReviewStatus
 } from "./planDoc.types"
 
+import type { Comment } from "./CommentList"
 import type { PickFields } from "./ReviewInbox"
 
 import { FIX_LABEL, FollowUpSummary } from "./FollowUpSummary"
@@ -84,6 +85,14 @@ export abstract class PlanReader {
    * - set by the command line's `edit()`:  the doc on disk before the edit, then its last commits;  none by default
    */
   earlierVersions: Iterable<Document> = []
+
+  /**
+   * The epic's comments, by id (`c3`), read when first asked:  what a change mark naming a comment
+   * (`<epic-change item="c2">`, epic `epic-engine` T100) is checked against, and its words copied from
+   * - set by the command line's `read()`:  the review inbox's comments;  none (a test, a page off disk):  not known,
+   *   so a comment's mark is taken as it is
+   */
+  readComments?: () => Record<string, Comment>
 
   constructor(
     document: Document,

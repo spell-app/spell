@@ -31,11 +31,8 @@ The plan for the pages you're reading came back in about a second:
 sixteen phases, `[x]` for each one done (a phase under way shows `[~]`), and the loose ends.
 P11 is the rewrite this page came out of.
 
-`gh issue list` asks a server for rows in a database.
-This asked nobody.
-
-`epic` read one HTML file, the epic page, from a git repo beside the checkout.
-The page IS the record, and `epic` reads and writes it directly:  no database, no API, no server that has to be up.
+`epic` read that from one HTML file, the epic page, in a git repo beside the checkout.
+It reads and writes the page directly:  no database, no API, no server that has to be up.
 
 It's the same page you review in VS Code.
 When Claude runs `epic close readme#J16`, the item closes on your screen, with no reload.
@@ -134,7 +131,7 @@ type `epic close seo#J3` anywhere, and it closes J3 on the one page every checko
 - "Where you are" is the nearest checkout above your folder whose repo is set up for epics
   (its main checkout has `.epic/config.json5`), so any folder of the repo will do.
   Outside every such repo, it works on spell-epic's own checkout, the one its code is in.
-- Pages are the exception, and the point.
+- Pages are the exception.
   They live in the epic folder, which every checkout reads where it is ([below](#the-epic-repo)),
   so no worktree has a copy to fall out of step.
 - It works in a worktree made a moment ago, before its install:
@@ -171,7 +168,7 @@ A Claude Code session that has ended its turn sits idle until something wakes it
 and one thing that does is a command it started in the background finishing.
 
 So a review session runs `epic inbox wait` in the background and ends its turn.
-The `wait` blocks until you send something from the page, prints it and exits:  the exit is the doorbell.
+The `wait` blocks until you send something from the page, prints it and exits, and the exit wakes the session.
 
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
@@ -583,8 +580,8 @@ A session can move itself into a worktree's window, wake an epic's session, or s
 [README-vscode.md](README-vscode.md) is the extension that carries it out.
 Without the extension, the window verbs exit 1, and say so.
 
-The side bar has three tabs, and a page's kind picks one:
-an epic or saga page goes to Review, a details or choice page to Details, anything else to Epic Docs.
+The side bar has two tabs, and a page's kind picks one:
+a details or choice page goes to Details, every other page (epic pages, saga pages, guides) to Review.
 
 | Verb | What it does |
 | --- | --- |
@@ -598,8 +595,8 @@ an epic or saga page goes to Review, a details or choice page to Details, anythi
 | `epic window color [<look>]` | gives this window a look, Tomorrow Night Blue's in one of twelve hues:  `red`, `orange`, `amber`, `green`, `teal`, `cyan`, `blue`, `indigo`, `purple`, `pink`, `brown`, `grey`;  no look:  lists them |
 | `epic window which` | prints this session's window:  its process, workspace file and folders |
 | `epic window hooks [--again <command>]` | do this session's hooks run?  The skills ask before a worktree is made, since a session opened before the plugin was installed has none:  exits 1 with the fix (`/reload-plugins`, then the command again);  under Codex, nothing to check |
-| `epic window show <file>` | shows an `.html` page in the window's side bar, in the tab its kind picks;  `--review`:  the Review tab, for a page of no kind of its own;  `--hash <id>` |
-| `epic window reload` | rebuilds the side bar's view from scratch, at the page it shows;  `--review` |
+| `epic window show <file>` | shows an `.html` page in the window's side bar, in the tab its kind picks;  `--hash <id>` |
+| `epic window reload` | rebuilds the side bar's Review view from scratch, at the page it shows;  `--details`:  the Details view |
 | `epic window add <path>` | adds a folder to the window (`--name <name>`);  never a worktree's:  a worktree has a window of its own |
 | `epic window remove <path>` | removes that folder again |
 | `epic window init` | writes each missing window file, and brings every window file up to date:  its folders, `files.exclude`, and the repo's own settings (`windows.settings`) |

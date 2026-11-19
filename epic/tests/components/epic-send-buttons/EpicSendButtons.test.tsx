@@ -185,6 +185,67 @@ describe("<epic-send-buttons>", () => {
   })
 })
 
+// epic `epic-engine` I352 (Owen:  "Should say `Sent to Claude` for 5 seconds after send, rather than `send`")
+describe("<epic-send-buttons>, just sent", () => {
+  beforeEach(() => vi.useFakeTimers({ toFake: ["setInterval", "clearInterval", "setTimeout", "clearTimeout", "Date"] }))
+  afterEach(() => vi.useRealTimers())
+
+  /** The words beside the plane. */
+  const words = (group: Element) => part(group, "words")!.textContent
+
+  test("a press that sends:  `Sent to Claude` for 5 seconds, in the same width, its tooltip saying when;  then back", async () => {
+    adoptCountdown()
+    const group = await ElementFixture.render(
+      `<epic-send-buttons state="unsent" send-tip="Send 1 mark" countdown></epic-send-buttons>`
+    )
+    await ElementFixture.settle()
+    const width = group.getBoundingClientRect().width
+    const left = part(group, "words")!.getBoundingClientRect().left
+    part(group, "send")!.click()
+    group.setAttribute("state", "sent")
+    group.setAttribute("send-tip", "Sent:  waiting for Claude")
+    await ElementFixture.settle()
+    expect(words(group)).toBe("Sent to Claude")
+    // nothing beside it moves:  the pill keeps its width, the words their place
+    expect(group.getBoundingClientRect().width).toBe(width)
+    expect(part(group, "words")!.getBoundingClientRect().left).toBe(left)
+    expect(part(group, "send")!.title).toMatch(/^Sent:  waiting for Claude · sent at \d{1,2}:\d{2}/)
+    vi.advanceTimersByTime(4900)
+    await ElementFixture.settle()
+    expect(words(group)).toBe("Sent to Claude")
+    vi.advanceTimersByTime(100)
+    await ElementFixture.settle()
+    expect(words(group)).toBe("Send to Claude")
+    expect(part(group, "send")!.title).toBe("Sent:  waiting for Claude")
+    expect(group.getBoundingClientRect().width).toBe(width)
+  })
+
+  test("Auto Send's send says it too;  something new marked:  `Send to Claude` at once", async () => {
+    adoptCountdown()
+    const group = await ElementFixture.render(`<epic-send-buttons state="unsent" countdown></epic-send-buttons>`)
+    await ElementFixture.settle()
+    group.addEventListener("epic-send-saving", () => group.setAttribute("state", "sent"))
+    vi.advanceTimersByTime(COUNTDOWN_MS)
+    await ElementFixture.settle()
+    expect(words(group)).toBe("Sent to Claude")
+    group.setAttribute("state", "unsent")
+    await ElementFixture.settle()
+    expect(words(group)).toBe("Send to Claude")
+  })
+
+  test("no send asked:  a mark taken back leaves `Send to Claude`;  a press with nothing to send too", async () => {
+    adoptCountdown()
+    const group = await ElementFixture.render(`<epic-send-buttons state="unsent"></epic-send-buttons>`)
+    await ElementFixture.settle()
+    group.setAttribute("state", "sent")
+    await ElementFixture.settle()
+    expect(words(group)).toBe("Send to Claude")
+    part(group, "send")!.click()
+    await ElementFixture.settle()
+    expect(words(group)).toBe("Send to Claude")
+  })
+})
+
 // epic `epic-engine` P55 (Owen, r46:  "put the spinning wheel cursor around this button (same size as countdown) while you
 // are digesting remarks")
 describe("<epic-send-buttons working>", () => {

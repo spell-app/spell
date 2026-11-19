@@ -118,7 +118,10 @@ export type LiveReview = {
   workedOn: boolean
   /** Owen's urgency, not applied yet (its id chip clicked):  `calm` true, not urgent */
   urgency?: { calm: boolean }
-  /** his check pressed (an `approve` mark), not applied yet */
+  /**
+   * his check pressed (an `approve` mark), not applied yet;  or applied, and still closing at it (`closingAs`), so
+   * nothing it hid (the `FIXED` label) shows again before the page's own update lands (epic `epic-engine` I348)
+   */
   approved: boolean
   /**
    * his ✓ or x with nothing for Claude, which the page server applies by itself (`ReviewClient.isClosing()`, epic
@@ -264,6 +267,10 @@ export const TOGGLE = "toggle"
 export const CHIP = "chip"
 export const TITLE = "title"
 export const EXTRAS = "extras"
+/** The end of the line's first row:  the page's buttons, the item's marks and review buttons. */
+export const MARKS = "marks"
+/** Under them, a small line of its own:  its phase pill, `in P4` (epic `epic-engine` I348). */
+export const PHASE_ROW = "phase-row"
 export const GIT = "git"
 export const OVERNIGHT = "overnight"
 /** Class of a failed test's mark on its line (`failed`, epic `epic-engine` P4). */
@@ -373,7 +380,7 @@ const ISSUE_ID = /^i\d+$/
  *   (`issue-fixed`, epic `epic-engine` I299, its plane gone with J231);  an open issue not fixed:  Do this, Revisit,
  *   the x (`issue-open`);  an open judgement call:  Do this, Revisit, Approve (`issue`)
  * - a FINISHED issue or call (done, canceled, decided):  Revisit and Saw it, no plane (`issue-done`, epic
- *   `epic-engine` J231);  its `done in P20` pill stands where the plane was
+ *   `epic-engine` J231);  its `in P20` pill stands under its buttons (I348)
  */
 export function buttonsForItem(
   id: string | undefined,

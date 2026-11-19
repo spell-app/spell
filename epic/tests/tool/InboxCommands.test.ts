@@ -920,6 +920,42 @@ test("change --for names the marks written with no item;  lint (check) fails one
   )
 })
 
+// epic `epic-engine` T100 (r79:  a comment folded into a phase couldn't be marked)
+test("a change mark may name a COMMENT:  stamped with its words, lint takes it, `change --for C1` names it;  no such comment fails", async () => {
+  const comment = ReviewInbox.update(inboxFile, (inbox) => {
+    inbox.commentList.add({ anchor: "o1", kind: "section" }, "Fold the todos  into   Caveats too", new Date(M1))
+  }).commentList.all[0]!
+  const plan = docWithChange()
+  plan.document.querySelector("epic-change")!.setAttribute("item", comment.id)
+  writeFileSync(file, plan.toString())
+  await commands().run(["change", "x"])
+  let after = commands().read(file)
+  const change = after.document.querySelector("epic-change")!
+  expect([change.id, change.getAttribute("item"), change.getAttribute("answer")]).toEqual([
+    "ch1",
+    "c1",
+    "Fold the todos into Caveats too"
+  ])
+  expect(after.check()).toEqual([])
+  expect(printed.join("\n")).toContain("CH1   C1   new")
+
+  const bare = docWithChange()
+  bare.document.querySelector("epic-change")!.removeAttribute("item")
+  writeFileSync(file, bare.toString())
+  await commands().run(["change", "x", "--for", "C1"])
+  expect(commands().read(file).document.querySelector("epic-change")!.getAttribute("item")).toBe("c1")
+  const owner = commands()
+  const warned = vi.spyOn(owner, "warn").mockImplementation(() => undefined)
+  expect(await owner.run(["change", "x", "--for", "C9"])).toBe(1)
+  expect(warned.mock.calls.flat().join("\n")).toContain('no comment "C9"')
+
+  after = commands().read(file)
+  after.document.querySelector("epic-change")!.setAttribute("item", "c9")
+  expect(after.check()).toContain('change "one list, Caveats; todos fold into it" names C9:  no such comment')
+  // parsed off disk, the comments aren't known:  taken as it is
+  expect(PlanDoc.parse(after.toString()).check()).toEqual([])
+})
+
 test("apply:  a change's sent Accept makes it accepted (no longer to accept), its chip's answer kept;  Reopen reopens its question", async () => {
   const plan = docWithChange()
   plan.updateStates()

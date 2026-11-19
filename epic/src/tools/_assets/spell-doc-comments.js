@@ -211,6 +211,8 @@ const THREADS_FIRST = /^(ui-section|epic-overview)$/
  *     - each click lands on the next (`nextWaiting()`), in page order, round again after the last:
  *       opened, below the stuck titles
  *   - Cmd / Ctrl + K takes a comment's id, and lists them (`openJumpPrompt()`)
+ *   - a change mark naming a comment (`<epic-change item="c2">`, epic `epic-engine` T100):  its popup's link asks
+ *     for the thread (`epic-comment-open`), and lands on it, opened
  * - drawn again:
  *   - after a live patch (`spell-doc:updated`)
  *   - when the page's content changes (an epic page's part loading)
@@ -236,6 +238,17 @@ export async function wireComments(main, { go, pageFolds, signal } = {}) {
   const reload = () => void comments.load().then((takes) => takes && !signal?.aborted && comments.draw())
   const listening = { signal }
   addEventListener("spell-doc:updated", () => comments.draw(), listening)
+  // a change mark naming a comment (`<epic-change item="c2">`, epic `epic-engine` T100):  its link opens the thread
+  document.addEventListener(
+    "epic-comment-open",
+    (event) => {
+      const comment = comments.find(event.detail?.id ?? "")
+      if (!comment) return
+      event.preventDefault()
+      void comments.landOn(comment.id)
+    },
+    listening
+  )
   // its inbox files changing, the page coming into view;  and every 30s:
   // - a docs page's Send:  who is listening, as a session that stopped leaves no file change, only an old heartbeat
   // - an epic or saga page:  a change the live socket missed (epic `epic-engine` I169:  a thread said "thinking…"

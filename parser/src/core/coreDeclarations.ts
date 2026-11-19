@@ -48,6 +48,7 @@ import { collectionOtherMethods } from "./collection-other"
 import { stringMethods } from "./string"
 import { dateMethods } from "./dates"
 import { uiMethods } from "./ui"
+import { mediaMethods } from "./media"
 import { drawingMethods } from "./drawing"
 import { elementsMethods } from "./elements"
 import { referencesMethods } from "./references"
@@ -82,6 +83,7 @@ const CORE_MODULES: Record<string, object> = {
   string: stringMethods,
   dates: dateMethods,
   ui: uiMethods,
+  media: mediaMethods,
   drawing: drawingMethods,
   elements: elementsMethods,
   references: referencesMethods,

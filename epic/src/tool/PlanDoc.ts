@@ -84,7 +84,7 @@ import {
 
 import { AuthorWords } from "./AuthorWords"
 import { ChangeOriginals } from "./ChangeOriginals"
-import { CommentList, type CommentPlace } from "./CommentList"
+import { CommentList, type Comment, type CommentPlace } from "./CommentList"
 import { IncomingHtml } from "./IncomingHtml"
 import { PhaseTakes } from "./PhaseTakes"
 import { PhaseNumbers } from "./PhaseNumbers"
@@ -724,8 +724,9 @@ export class PlanDoc extends PlanReader {
    * The items whose CHANGE MARKS in phase `n` already say what an Update block `html` would, upper case;  `[]`:  write
    * the block (epic `epic-engine` I159;  Owen, 2026-10-29:  an Update block only when no mark says it).
    * - `forIds` (`updated --for q53,j3`):  the items the change is for;  said when EVERY one has a mark in the phase
-   * - none given:  the item ids `html` names, said when every one has a mark of this pass (`UpdateMarks`:  stamped
-   *   within `SAME_PASS_MINUTES`, or not stamped yet) and `html` names no file (a move the marks can't say)
+   * - none given:  the item ids `html` names, and its comment ids (`C2`, T100),
+   *   said when every one has a mark of this pass (`UpdateMarks`:  stamped within `SAME_PASS_MINUTES`, or not stamped
+   *   yet) and `html` names no file (a move the marks can't say)
    * - names no item:  `[]`, a change no item caused
    */
   marksSay(n: number, html: string, forIds?: readonly string[]): string[] {
@@ -735,7 +736,7 @@ export class PlanDoc extends PlanReader {
       .map((node) => node.textContent ?? "")
       .join(" ")
     if (!given && UpdateMarks.namesFile(text)) return []
-    const ids = given ?? UpdateMarks.idsIn(text)
+    const ids = given ?? [...UpdateMarks.idsIn(text), ...UpdateMarks.commentsIn(text)]
     const marked = UpdateMarks.marked(phase, ids, given ? undefined : this.now)
     return ids.length && marked.length === ids.length ? ids.map((id) => id.toUpperCase()) : []
   }
@@ -3554,6 +3555,30 @@ export class PlanDoc extends PlanReader {
     return Array.from(this.document.querySelectorAll(CHANGE_TAG))
   }
 
+  /**
+   * Comment `id` of this epic (`C2`, `c2`), as its review inbox holds it (`readComments`):  what a change mark may name
+   * besides an item (epic `epic-engine` T100);  `undefined` for none.
+   * - `null`:  the comments aren't known here (no `readComments`:  a page parsed off disk, a test)
+   * - read once, then kept
+   */
+  findComment(id: string): Comment | undefined | null {
+    if (!this.readComments) return null
+    this.comments ??= this.readComments()
+    return this.comments[CommentList.idOf(id)]
+  }
+
+  /**
+   * Comment `id`'s id as a change mark names it (`c2`), however typed (`C2`);  throws when the epic hasn't got it.
+   * - comments not known here (`findComment()`):  taken as typed
+   */
+  comment(id: string): string {
+    if (this.findComment(id) === undefined) throw new PlanDocError(`no comment "${CommentList.label(id)}"`)
+    return CommentList.idOf(id)
+  }
+
+  /** The comments `readComments` gave, once read (`findComment()`). */
+  private comments: Record<string, Comment> | undefined
+
   /** The change mark with id `id` (`ch3`, any case), or `null`. */
   findChange(id: string): Element | null {
     const key = String(id).toLowerCase()
@@ -3569,11 +3594,15 @@ export class PlanDoc extends PlanReader {
    *   - `at`:  now
    *   - `answer`:  its question's answer, in short (its `<epic-answer title>`), once it has one:  the chip shows it
    *     months later, whatever the question says by then
+   *     - a mark naming a COMMENT (`item="c2"`, epic `epic-engine` T100):  the comment's words, in short, as Owen
+   *       wrote them (`findComment()`)
    *   - `was`:  the words it replaced, found in the doc's earlier versions (`earlierVersions`, `ChangeOriginals`;
    *     epic `epic-engine` I160), when first stamped;  none for new words, or when no version tells
    *   - inside a PHASE's text, the item it names is HANDLED IN that phase (`handled`, epic `epic-engine` P31;
    *     Q17, A):  grey, quiet in the lists, its line linking the phase;  logged.  Only when first stamped:  a Reopen
    *     takes it off (`applyChange()`), and the mark rewritten after the next answer puts it back
+   *     - a comment's mark changes nothing on its comment (epic `epic-engine` T100):  its thread is answered as
+   *       ever, Claude's reply naming the phase
    * - each body host (an Overview sub-section, a phase, an item, the log) lists the marks inside it still waiting
    *   for Accept, in `to-accept` (`ch3 ch5`;  none:  no attribute)
    *   - the SKELETON's, as `part-ids` is:  the page counts and finds them, and the review routes take their marks
@@ -3629,10 +3658,14 @@ export class PlanDoc extends PlanReader {
     return true
   }
 
-  /** Item `id`'s answer in short (its `<epic-answer title>`, at most `ANSWER_MAX` characters);  `undefined` for none. */
+  /**
+   * Item `id`'s answer in short (its `<epic-answer title>`, at most `ANSWER_MAX` characters);  `undefined` for none.
+   * - a comment's id (`c2`):  its words, in short (`findComment()`, epic `epic-engine` T100)
+   */
   private answerOf(id: string): string | undefined {
-    const item = id ? this.findItem(id) : null
-    const answer = PlanMarkup.squeeze(item?.querySelector(":scope > epic-answer")?.getAttribute("title") ?? "")
+    const words = CommentList.isCommentId(id) ? this.findComment(id)?.text : undefined
+    const item = id && words === undefined ? this.findItem(id) : null
+    const answer = PlanMarkup.squeeze(words ?? item?.querySelector(":scope > epic-answer")?.getAttribute("title") ?? "")
     if (!answer) return undefined
     return answer.length > ANSWER_MAX ? `${answer.slice(0, ANSWER_MAX - 1).trimEnd()}…` : answer
   }
@@ -3678,6 +3711,8 @@ export class PlanDoc extends PlanReader {
   /**
    * What's wrong with the change marks, as `check()` reports it:
    * - one naming no item on the page (`item`)
+   *   - or a comment (`c2`, epic `epic-engine` T100) the epic hasn't got;  taken as it is where the comments aren't
+   *     known (`findComment()`)
    * - one not stamped yet (no id):  written by hand, with no `epic` command since (`epic change <name>` stamps it)
    */
   private changeProblems(): string[] {
@@ -3685,7 +3720,11 @@ export class PlanDoc extends PlanReader {
     for (const change of this.changes) {
       const item = change.getAttribute("item")
       const words = PlanMarkup.squeeze(change.textContent ?? "").slice(0, 40)
-      if (item && !this.findItem(item)) problems.push(`change "${words}" names ${item.toUpperCase()}:  no such item`)
+      if (item && CommentList.isCommentId(item)) {
+        if (this.findComment(item) === undefined)
+          problems.push(`change "${words}" names ${CommentList.label(item)}:  no such comment`)
+      } else if (item && !this.findItem(item))
+        problems.push(`change "${words}" names ${item.toUpperCase()}:  no such item`)
       if (!CHANGE_ID.test(change.id))
         problems.push(`change "${words}" has no id:  \`epic change <name>\` stamps it (any epic edit does)`)
     }

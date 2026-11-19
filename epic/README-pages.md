@@ -145,7 +145,7 @@ _Phases:  done ones ticked, the two still to do a dotted circle.
 The gears turn on each phase's Files and Verify;  an orange pen, on a phase whose plan changed, counts the changes._
 
 You'll come back to most pages cold, weeks later, from another session.
-Three habits make that safe:
+These habits make that easier:
 - Everything starts folded.
   The page remembers what you opened, and a link to any id unfolds whatever hides it.
 - Nothing is deleted.
@@ -389,7 +389,8 @@ Comments ride the page's own Send, and where they land depends on the page:
 - any other page's, in the standing `feedback` epic
 
 Send's line says who'll hear it:  "python-target is listening", or "nobody is listening:  Send wakes feedback".
-Details and choice pages take no comments, since each sends its answers its own way;  nor do templates.
+A details page takes comments too, and its own Send carries them, with its answers.
+Choice pages take none, since each sends its picks its own way;  nor do templates.
 
 ## Manual tests and Focus mode:  one item at a time
 

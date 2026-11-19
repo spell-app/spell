@@ -519,7 +519,7 @@ describe("<epic-item>", () => {
     }
   })
 
-  test("a FINISHED item's `taken-in` draws `done in P2` where the plane was (J231), not `in P2` (I307);  `handled` keeps its pill", async () => {
+  test("a FINISHED item's `taken-in` draws its own `in P2` under its buttons (J231, I348), not `phasePill`'s (I307);  `handled` keeps its pill", async () => {
     const phases = document.createElement("div")
     phases.innerHTML = `<epic-phase id="p-one" title="One"></epic-phase><epic-phase id="p-fix" title="Fix Open Issues"></epic-phase>`
     document.body.append(phases)
@@ -530,7 +530,9 @@ describe("<epic-item>", () => {
         )
         expect(host.shadowRoot!.querySelector("[part~='handled']")).toBeNull()
         const done = host.shadowRoot!.querySelector<HTMLElement>("[part~='done-in']")!
-        expect([done.textContent, done.getAttribute("link")]).toEqual(["done in P2", "#p-fix"])
+        expect([done.textContent, done.getAttribute("link")]).toEqual(["in P2", "#p-fix"])
+        // on its own line, under the buttons (I348)
+        expect(done.parentElement!.classList.contains("phase-row")).toBe(true)
         expect(done.title).toBe("Taken up in P2 · Fix Open Issues:  fixed or done there\nClick:  go to P2.")
         expect(chip.title).toContain("Taken up in P2 · Fix Open Issues:  fixed or done there")
       }

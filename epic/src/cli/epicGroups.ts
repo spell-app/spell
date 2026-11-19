@@ -856,20 +856,21 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       name: "show",
       usage: "<file> [--hash <id>] [--review]",
       description:
-        "show an .html page in the window's side bar, in the tab its kind says:  an epic or saga page in Review, a details or choice page in Details, any other in Epic Docs",
+        "show an .html page in the window's side bar, in the tab its kind says:  a details or choice page in Details, any other in Review",
       example: "epic window show epics/seo/seo.plan.html --review",
       flags: {
         "--hash <id>": "land on that id",
-        "--review": "a page of no kind of its own:  in the Review tab"
+        "--review": "kept for old scripts:  every page but a details or choice page shows in the Review tab"
       }
     },
     {
       name: "reload",
-      usage: "[--review]",
-      description: "rebuild the side bar's view from scratch, at the page it shows",
-      example: "epic window reload --review",
+      usage: "[--details]",
+      description: "rebuild the side bar's Review view from scratch, at the page it shows",
+      example: "epic window reload --details",
       flags: {
-        "--review": "the Review tab's view"
+        "--details": "the Details tab's view instead",
+        "--review": "kept for old scripts:  the Review tab's view, the default"
       }
     },
     {
@@ -1235,11 +1236,11 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       name: "open",
       usage: "[<page>] [--vs | --review]",
       description:
-        "show a page in Chrome, or in VS Code's side bar (--vs), in the tab its kind says:  an epic or saga page in Review, a details or choice page in Details, any other in Epic Docs",
+        "show a page in Chrome, or in VS Code's side bar (--vs), in the tab its kind says:  a details or choice page in Details, any other in Review",
       example: "epic pages open epics/seo/seo.plan.html --review",
       flags: {
         "--vs": "in VS Code's side bar",
-        "--review": "in the side bar;  a page of no kind of its own:  in its Review tab"
+        "--review": "in the side bar (as --vs):  every page but a details or choice page shows in its Review tab"
       }
     },
     {

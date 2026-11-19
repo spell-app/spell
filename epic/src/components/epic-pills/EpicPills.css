@@ -1,0 +1,143 @@
+/*
+ * `<epic-pills>` (`EpicPills.tsx`):  the docs home page's Active epics, a pill each in two columns.
+ * - each pill a Spell UI label (small, tinted blue, round), its name at the left and what waits, its phase and its
+ *   agents at the right:  the epic page header's phase pill, smaller
+ * - the badges:  the epic page toolbar's (`spell-toolbar.css`, `.spell-toolbar-count`), their colours the page's
+ *   state tokens (`spell-doc.css`), each with a fallback for a list drawn outside the docs
+ * - every height and gap on the 4px grid:  pills 24px, badges 16px, gaps 4px and 8px
+ * - Units:  px and em, never rem (WWOD §18).
+ */
+
+@layer ui.components.epic-pills.types, ui.components.epic-pills.content;
+
+@layer ui.components.epic-pills.types {
+  :host {
+    display: block;
+    container: epic-pills / inline-size;
+    margin: 12px 0 0;
+    color: var(--epic-ink, var(--ui-text-color));
+    font: 400 13px/1.25 var(--epic-sans, var(--ui-font-family));
+  }
+  :host([hidden]) {
+    display: none;
+  }
+}
+
+@layer ui.components.epic-pills.content {
+  .heading {
+    margin: 0 0 4px;
+    color: var(--epic-muted, var(--ui-text-muted));
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+  }
+  .note {
+    margin: 0;
+    color: var(--epic-muted, var(--ui-text-muted));
+  }
+
+  /*
+   * two columns at the card's width (~560px), the side bar's too (~480px);  one in a card narrower than 360px (three
+   * cards to a row on a laptop's page:  ~310px), where two would cut every name short
+   */
+  .list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px 8px;
+  }
+  @container epic-pills (width < 360px) {
+    .list {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  .pill {
+    --ui-label-radius: 999px;
+    min-width: 0;
+  }
+  .pill::part(label) {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    height: 24px;
+    margin: 0;
+    padding: 0 4px 0 12px;
+    line-height: 16px;
+  }
+  .name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .facts {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+  }
+  /* nothing at the right:  the name's own padding there */
+  .facts:empty {
+    display: none;
+  }
+  .pill:has(.facts:empty)::part(label) {
+    padding-inline-end: 12px;
+  }
+
+  /* ## What waits:  the toolbar's count badge, or ONE circle split between its colours (I347) */
+  .badge {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 999px;
+    font: 700 10px/1 var(--epic-sans, var(--ui-font-family));
+    font-variant-numeric: tabular-nums;
+  }
+  .badge.urgent {
+    background: var(--spell-state-attention, var(--ui-red, #db2828));
+    color: var(--spell-state-attention-on, #fff);
+  }
+  .badge.replied {
+    background: var(--spell-state-replied, var(--ui-orange, #f2711c));
+    color: var(--spell-state-replied-on, #fff);
+  }
+  .badge.running {
+    background: var(--spell-state-progress, var(--ui-blue, #2185d0));
+    color: var(--spell-state-progress-on, #fff);
+  }
+  .badge.split {
+    width: 16px;
+    padding: 0;
+    background: var(--epic-pills-split);
+  }
+
+  /* ## The phase under way, and the agents:  the pill's own ink, numbers lined up */
+  .phase,
+  .agents {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: var(--ui-background, Canvas);
+    font-size: 11px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .robot {
+    display: inline-flex;
+    font-size: 11px;
+  }
+  .robot ui-icon::part(icon) {
+    width: auto;
+    margin: 0;
+  }
+}

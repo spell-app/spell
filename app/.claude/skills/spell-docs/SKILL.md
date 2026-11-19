@@ -1,6 +1,6 @@
 ---
 name: spell-docs
-description: Open the spell docs (the docs' home page, `pages/index.html`, or one page of it) in VS Code's doc preview -- the "Epic Docs" view in the right side bar (spell-epic's extension), served live by the page server.  Use for `/spell-docs [page]` (e.g. `/spell-docs`, `/spell-docs solid/solid-2`), or when Owen says "show me the docs" / "open the docs in VS Code".
+description: Open the spell docs (the docs' home page, `pages/index.html`, or one page of it) in VS Code's doc preview -- the "Review" view in the right side bar (spell-epic's extension), served live by the page server.  Use for `/spell-docs [page]` (e.g. `/spell-docs`, `/spell-docs solid/solid-2`), or when Owen says "show me the docs" / "open the docs in VS Code".
 argument-hint: "[page]"
 ---
 
@@ -16,10 +16,10 @@ argument-hint: "[page]"
      `.html` and a folder's own page may be left off (`solid/solid-2`, `server`).
    - It starts the page server first (live reload).
      Then it asks THIS session's window, through spell-epic's extension (`spell-app.spell-epic`), to show the page
-     in the doc preview:  the "Epic Docs" tab, in the right (secondary) side bar.
-     - ONE page at a time, shared with `epic open`.
-     - The "Review" tab beside it keeps its own (`--review`, `/epic review`).
-     - Setting `spellEpic.docPreview.location` to `beside`:  Simple Browser beside the editor, instead.
+     in the doc preview:  the "Review" tab, in the right (secondary) side bar.
+     - ONE page at a time, shared with `epic open` and `/epic review`:  a guide takes the epic page's place, and
+       Back brings it back.
+     - The "Details" tab beside it keeps its own (details and choice pages).
    - Its title bar:  back, forward, reload, restart the page server, open in the browser.
    - Mid-move to a worktree's window (`/isolate`, `/epic`):  shown there, once the session has moved.
    - Not running in VS Code (a CLI session in another terminal):  Chrome, as `epic pages open` without `--vs`.

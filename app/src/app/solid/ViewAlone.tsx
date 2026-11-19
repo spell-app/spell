@@ -39,7 +39,7 @@ export class ViewAlone {
   /** Is the open file's view shown alone (reactive)? */
   static get isShowing(): boolean {
     const path = editor.file?.path
-    return !!ViewAlone.view && !!path && aloneFiles().includes(path)
+    return SHOW_VIEW_ALONE && !!ViewAlone.view && !!path && aloneFiles().includes(path)
   }
 
   /** Show the open file's view alone, or the whole app again;  remembered for the file. */
@@ -55,6 +55,14 @@ export class ViewAlone {
 
 setDebugGlobal({ ViewAlone })
 
+/**
+ * Is the view-on-its-own switch shown at all?  Off while it's rethought (epic `editor` T116):
+ * Owen, "it's not quite what I was expecting".
+ * - Off, its button is hidden, and no file shows its view alone, though the files it remembers are kept.
+ * - The code stays as it is, for the rethink.
+ */
+export const SHOW_VIEW_ALONE: boolean = false
+
 /** The pref remembering which files show their view alone, by their paths. */
 const ALONE_PREF = "viewAlone"
 
@@ -68,10 +76,11 @@ const [aloneFiles, setAloneFiles] = createSignal<readonly string[]>(
  * The switch between the whole app and the open file's view alone, in the top bar's Run | Edit group after
  * Inspect app:  `Card alone`, pressed while the card shows alone.
  * - Only while the open file writes a view (`ViewAlone.view`).
+ * - Hidden while `SHOW_VIEW_ALONE` is off (epic `editor` T116).
  ****************/
 export function ViewAloneButton(): JSX.Element {
   return (
-    <Show when={ViewAlone.view}>
+    <Show when={SHOW_VIEW_ALONE ? ViewAlone.view : undefined}>
       {(view) => (
         <ui-item
           icon={ALONE_ICON}
