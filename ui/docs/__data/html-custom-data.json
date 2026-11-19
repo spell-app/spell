@@ -62385,7 +62385,7 @@
       "name": "ui-tree",
       "description": {
         "kind": "markdown",
-        "value": "A tree shows rows nested in rows, which open and close, and can be selected one or many at a time.\n\nAlso known as:  tree view, outline, hierarchy, file tree, nested list, folder list.\n\n**Slots:**  default, `empty`\n\n**Events:**  `ui-selecting`, `ui-changed`, `ui-settled`"
+        "value": "A tree shows rows nested in rows, which open and close, and can be selected one or many at a time.\n\nAlso known as:  tree view, outline, hierarchy, file tree, nested list, folder list.\n\n**Slots:**  default, `empty`, `detail`\n\n**Events:**  `ui-selecting`, `ui-changed`, `ui-settled`"
       },
       "attributes": [
         {
@@ -62465,6 +62465,13 @@
           "description": {
             "kind": "markdown",
             "value": "While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.  A click on one scrolls to its row, selecting nothing.  It shows only while one of them is scrolled out of sight.  `appearance=\"columns\"`:  a line above the columns naming each column's pick, shown once something is picked;  a click on one picks it again, keeping the columns after it, and scrolls its column into view.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "sticky-detail",
+          "description": {
+            "kind": "markdown",
+            "value": "`appearance=\"columns\"` with a `detail` pane:  the pane stays in view at the tree's end while the columns scroll sideways under it.\n\nTakes:  flag (present / absent)"
           }
         },
         {

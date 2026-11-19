@@ -127,6 +127,14 @@ export const treeVocabulary = {
         "row, selecting nothing.  It shows only while one of them is scrolled out of sight.  " +
         '`appearance="columns"`:  a line above the columns naming each column\'s pick, shown once something is ' +
         "picked;  a click on one picks it again, keeping the columns after it, and scrolls its column into view."
+    },
+    {
+      name: "sticky-detail",
+      group: "behaviour",
+      kind: "keyOnly",
+      description:
+        '`appearance="columns"` with a `detail` pane:  the pane stays in view at the tree\'s end while the columns ' +
+        "scroll sideways under it."
     }
   ],
   events: [
@@ -160,7 +168,15 @@ export const treeVocabulary = {
   ],
   slots: [
     { name: "", description: "The top rows:  `<ui-tree-item>`s." },
-    { name: "empty", description: "Shown when `filter` matches no row." }
+    { name: "empty", description: "Shown when `filter` matches no row." },
+    {
+      name: "detail",
+      description:
+        '`appearance="columns"`:  a pane after the last column, showing what\'s picked:  any element, which the tree ' +
+        "hands the picked row as its `item` property (the `<ui-tree-item>`, or the `items` entry), and the page can " +
+        "fill from `ui-changed`.  Drawn only while something is slotted and something is picked, tight against the " +
+        "last column, as wide as its content (up to `--ui-tree-detail-max-width`) until its line is dragged."
+    }
   ],
   parts: [
     { name: "empty", description: "The box around the `empty` slot." },
@@ -179,6 +195,7 @@ export const treeVocabulary = {
         "first column's (each deeper one is its row's `<ui-tree-item>`'s `column-title`)."
     },
     { name: "column", description: '`appearance="columns"` with `items`:  one column.' },
+    { name: "detail", description: '`appearance="columns"`:  the pane around the `detail` slot.' },
     { name: "column-row", description: '`appearance="columns"` with `items`:  one row of a column.' }
   ],
   states: [
@@ -199,6 +216,13 @@ export const treeVocabulary = {
       description:
         '`appearance="columns"`:  the name of the line after a column, for a screen reader:  drag it, or its arrow ' +
         "keys, to resize the column;  Option (Alt) resizes every column;  a double-click fits the column to its rows."
+    },
+    {
+      key: "resizeDetail",
+      text: "Resize the detail pane",
+      description:
+        '`appearance="columns"`:  the name of the line after the `detail` pane, for a screen reader:  drag it, or its ' +
+        "arrow keys, to resize the pane;  a double-click sizes it to its content again."
     },
     {
       key: "loading",

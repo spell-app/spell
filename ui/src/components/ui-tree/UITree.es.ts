@@ -17,11 +17,12 @@ export const treeEs = {
     "column-titles": "titulos-de-columnas",
     path: "ruta",
     show: "mostrar",
-    "narrow-before": "estrechar-antes"
+    "narrow-before": "estrechar-antes",
+    "sticky-detail": "detalle-fijo"
   },
   values: { appearance: { nav: "navegacion", columns: "columnas" } },
   events: { "ui-selecting": "ui-seleccionando", "ui-settled": "ui-asentado" },
-  slots: { empty: "vacio" },
+  slots: { empty: "vacio", detail: "detalle" },
   parts: {
     empty: "vacio",
     path: "ruta",
@@ -31,5 +32,10 @@ export const treeEs = {
     "narrow-column": "columna-estrecha",
     "column-title": "titulo-de-columna"
   },
-  texts: { noMatches: "Nada coincide", resizeColumn: "Cambiar el ancho de esta columna", loading: "Cargando" }
+  texts: {
+    noMatches: "Nada coincide",
+    resizeColumn: "Cambiar el ancho de esta columna",
+    resizeDetail: "Cambiar el ancho del panel de detalle",
+    loading: "Cargando"
+  }
 } as const satisfies E.TagDictionary

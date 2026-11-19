@@ -2346,7 +2346,9 @@ export const HELP_TABLE: Readonly<
       "narrow-before": '`appearance="columns"`: how many columns at the end never narrow.',
       show: '`appearance="columns"`: which parts each row shows, as words: `icon which count chevron`; the label always shows.',
       "sticky-path":
-        "While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit."
+        "While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.",
+      "sticky-detail":
+        '`appearance="columns"` with a `detail` pane: the pane stays in view at the tree\'s end while the columns scroll sideways under it.'
     }
   },
   "ui-tree-diagram": {

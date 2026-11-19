@@ -1046,3 +1046,206 @@ describe('<ui-tree appearance="columns"> from `items`', () => {
     await expectAccessible(host)
   })
 })
+
+describe('<ui-tree appearance="columns"> remembered path and `detail` pane', () => {
+  type TreeHost = HTMLElement & { items?: TreeItemData[]; path?: string[] }
+  type DetailHost = HTMLElement & { item?: unknown }
+
+  /** Acme (Menu (menu.pdf), Site), Books. */
+  function folders(): TreeItemData[] {
+    return [
+      {
+        id: "acme",
+        label: "Acme",
+        children: [
+          { id: "menu", label: "Menu", children: [{ id: "menu.pdf", label: "menu.pdf" }] },
+          { id: "site", label: "Site" }
+        ]
+      },
+      { id: "books", label: "Books" }
+    ]
+  }
+
+  /** A tree from `items`, 900px wide, with `inside` as its children. */
+  async function dataTree(attributes = "", inside = ""): Promise<TreeHost> {
+    const host = (await ElementFixture.render(
+      `<ui-tree appearance="columns" ${attributes} label="Work" style="height: 200px; width: 900px">${inside}</ui-tree>`
+    )) as TreeHost
+    host.items = folders()
+    await ElementFixture.settle()
+    return host
+  }
+
+  /** A click on the row of id `id`. */
+  async function pick(host: Element, id: string) {
+    host.shadowRoot!.querySelector<HTMLElement>(`.column-row[data-id="${CSS.escape(id)}"]`)!.click()
+    await ElementFixture.settle()
+  }
+
+  /** The pane, while it's drawn. */
+  function pane(host: Element): HTMLElement | null {
+    return host.shadowRoot!.querySelector<HTMLElement>(".detail")
+  }
+
+  /** A key on the pane's line. */
+  async function keyOnPaneLine(host: Element, key: string) {
+    const line = host.shadowRoot!.querySelector<HTMLElement>(".detail-edge")!
+    line.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, composed: true }))
+    await ElementFixture.settle()
+  }
+
+  /** Forget what the trees of ids `ids` kept. */
+  function forget(...ids: string[]) {
+    for (const id of ids) {
+      localStorage.removeItem(`ui-tree:path:${id}`)
+      localStorage.removeItem(`ui-tree:widths:${id}`)
+    }
+  }
+
+  it("keeps the last path under its `id`, and opens it again when the page sets none", async () => {
+    forget("kept")
+    const host = await dataTree('id="kept"')
+    await pick(host, "acme")
+    await pick(host, "menu")
+    expect(JSON.parse(localStorage.getItem("ui-tree:path:kept")!)).toEqual(["acme", "menu"])
+    host.remove()
+    const again = await dataTree('id="kept"')
+    expect(again.path).toEqual(["acme", "menu"])
+    expect(again.shadowRoot!.querySelectorAll("ul.column").length).toBe(3)
+    forget("kept")
+  })
+
+  it("a path the page sets wins over the kept one;  a tree without an `id` keeps nothing", async () => {
+    forget("set")
+    localStorage.setItem("ui-tree:path:set", JSON.stringify(["acme", "menu"]))
+    const host = (await ElementFixture.render(
+      `<ui-tree id="set" appearance="columns" label="Work" style="height: 200px; width: 900px"></ui-tree>`
+    )) as TreeHost
+    host.items = folders()
+    host.path = ["books"]
+    await ElementFixture.settle()
+    expect(host.path).toEqual(["books"])
+    expect(JSON.parse(localStorage.getItem("ui-tree:path:set")!)).toEqual(["books"])
+    forget("set")
+
+    const keys = Object.keys(localStorage).length
+    const plain = await dataTree()
+    await pick(plain, "acme")
+    expect(Object.keys(localStorage).length).toBe(keys)
+  })
+
+  it("from markup, rows the page marked open keep their path:  the kept one isn't opened", async () => {
+    forget("marked")
+    localStorage.setItem("ui-tree:path:marked", JSON.stringify(["Books"]))
+    const host = (await ElementFixture.render(
+      `<ui-tree id="marked" appearance="columns" label="Work" style="height: 200px; width: 900px">
+        <ui-tree-item label="Acme" open><ui-tree-item label="Menu" selected></ui-tree-item></ui-tree-item>
+        <ui-tree-item label="Books"></ui-tree-item>
+      </ui-tree>`
+    )) as TreeHost
+    await ElementFixture.settle()
+    expect(host.querySelector('ui-tree-item[label="Books"]')!.hasAttribute("open")).toBe(false)
+    forget("marked")
+  })
+
+  it("draws no pane with nothing slotted, nor before anything is picked", async () => {
+    const plain = await dataTree()
+    await pick(plain, "acme")
+    expect(pane(plain)).toBeNull()
+    const host = await dataTree("", `<div slot="detail">About it</div>`)
+    expect(pane(host)).toBeNull()
+    await pick(host, "acme")
+    expect(pane(host)).not.toBeNull()
+  })
+
+  it("hands the slotted element the picked item, as its `item`, as the pick changes", async () => {
+    const host = await dataTree("", `<div slot="detail">About it</div>`)
+    const detail = host.querySelector<DetailHost>('[slot="detail"]')!
+    await pick(host, "acme")
+    expect((detail.item as TreeItemData).id).toBe("acme")
+    await pick(host, "menu")
+    expect((detail.item as TreeItemData).id).toBe("menu")
+  })
+
+  it("sits tight against the last column, as wide as its content, the room after it left over", async () => {
+    const host = await dataTree("", `<div slot="detail" style="width: 150px">About it</div>`)
+    await pick(host, "acme")
+    const columns = [...host.shadowRoot!.querySelectorAll("ul.column")]
+    const last = columns.at(-1)!.getBoundingClientRect()
+    const box = pane(host)!.getBoundingClientRect()
+    expect(Math.round(box.left)).toBe(Math.round(last.right))
+    // its content, its padding (12px a side) and its border
+    expect(Math.round(box.width)).toBe(150 + 24 + 1)
+    expect(box.right).toBeLessThan(host.getBoundingClientRect().right - 100)
+  })
+
+  it("from markup too:  after the deepest column, tight against it", async () => {
+    const host = (await ElementFixture.render(
+      `<ui-tree appearance="columns" label="Work" style="height: 200px; width: 900px">
+        <ui-tree-item label="Acme"><ui-tree-item label="Menu"></ui-tree-item></ui-tree-item>
+        <div slot="detail">About it</div>
+      </ui-tree>`
+    )) as TreeHost
+    await ElementFixture.settle()
+    host.querySelector<HTMLElement>('ui-tree-item[label="Acme"]')!.click()
+    await ElementFixture.settle()
+    const acme = host.querySelector('ui-tree-item[label="Acme"]')!
+    const deepest = acme.shadowRoot!.querySelector(".rows")!.getBoundingClientRect()
+    expect(Math.round(pane(host)!.getBoundingClientRect().left)).toBe(Math.round(deepest.right))
+    expect((host.querySelector<DetailHost>('[slot="detail"]')!.item as Element).getAttribute("label")).toBe("Acme")
+  })
+
+  it("its line resizes it, kept with the widths under its `id`;  a double-click sizes it to its content again", async () => {
+    forget("pane")
+    const host = await dataTree('id="pane"', `<div slot="detail" style="width: 150px">About it</div>`)
+    await pick(host, "acme")
+    const start = Math.round(pane(host)!.getBoundingClientRect().width)
+    await keyOnPaneLine(host, "ArrowRight")
+    expect(Math.round(pane(host)!.getBoundingClientRect().width)).toBe(start + 16)
+    expect(JSON.parse(localStorage.getItem("ui-tree:widths:pane")!)).toEqual({ detail: start + 16 })
+    host.remove()
+    const again = await dataTree('id="pane"', `<div slot="detail" style="width: 150px">About it</div>`)
+    expect(Math.round(pane(again)!.getBoundingClientRect().width)).toBe(start + 16)
+    again
+      .shadowRoot!.querySelector(".detail-edge")!
+      .dispatchEvent(new MouseEvent("dblclick", { bubbles: true, composed: true }))
+    await ElementFixture.settle()
+    expect(Math.round(pane(again)!.getBoundingClientRect().width)).toBe(start)
+    expect(localStorage.getItem("ui-tree:widths:pane")).toBeNull()
+    forget("pane")
+  })
+
+  it("its room comes off the columns':  they narrow to make room for it", async () => {
+    const host = (await ElementFixture.render(
+      `<ui-tree appearance="columns" label="Work" style="height: 200px; width: 600px">
+        <div slot="detail" style="width: 260px">About it</div>
+      </ui-tree>`
+    )) as TreeHost
+    host.items = folders()
+    host.path = ["acme", "menu", "menu.pdf"]
+    await ElementFixture.settle()
+    await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)))
+    await ElementFixture.settle()
+    expect(host.shadowRoot!.querySelector("ul.column.narrow")).not.toBeNull()
+    const box = host.shadowRoot!.querySelector(".columns")!
+    expect(box.scrollWidth).toBeLessThanOrEqual(box.clientWidth + 1)
+  })
+
+  it("`sticky-detail` keeps it in view while the columns scroll sideways", async () => {
+    const host = (await ElementFixture.render(
+      `<ui-tree appearance="columns" sticky-detail size="200" narrow-before="9" label="Work" style="height: 200px; width: 400px">
+        <div slot="detail" style="width: 150px">About it</div>
+      </ui-tree>`
+    )) as TreeHost
+    host.items = folders()
+    host.path = ["acme", "menu", "menu.pdf"]
+    await ElementFixture.settle()
+    const box = host.shadowRoot!.querySelector<HTMLElement>(".columns")!
+    expect(box.scrollWidth).toBeGreaterThan(box.clientWidth)
+    box.scrollTo({ left: 0, behavior: "instant" })
+    await ElementFixture.settle()
+    const right = Math.round(pane(host)!.getBoundingClientRect().right)
+    expect(right).toBeLessThanOrEqual(Math.round(box.getBoundingClientRect().right))
+    expect(right).toBeGreaterThan(Math.round(box.getBoundingClientRect().right) - 4)
+  })
+})

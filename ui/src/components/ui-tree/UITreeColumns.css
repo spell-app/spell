@@ -23,10 +23,15 @@
  *   - A row's classes:  `selected` (the selected pick), `on-path` (an earlier pick), and a subclass's `rowClass()`.
  *   - Parts:  `column`, `column-row`, `column-title`, and `narrow-column` on a narrow one (from markup, the first
  *     column's;  each deeper one's is its row's `<ui-tree-item>`'s).
+ * - The `detail` pane (`UITree.detailPane()`):  after the last column, tight against it, as wide as its content up to
+ *   `--ui-tree-detail-max-width` until its line is dragged (`.sized`);  the space left over stays after it.
+ *   - Its line is inside it, at its end, so it moves with it;  `sticky-detail` (`.sticky`) pins it to the box's end.
+ *   - Its scroll snaps to its end, so a sideways scroll can stop with it whole.
  * - Tokens:
  *   | `--ui-tree-columns-height` | the tree's height (18em):  every column scrolls its own rows |
  *   | `--ui-tree-column-width` | each column's width |
  *   | `--ui-tree-narrow-width` | a narrow column's width (2em) |
+ *   | `--ui-tree-detail-max-width` | the widest the `detail` pane sizes itself to its content (50% of the tree) |
  *   | `--ui-tree-column-picked-background` | a row picked in an earlier column:  one of the chain of open rows |
  *   | `--ui-tree-column-selected-background` / `-color` | the selected row, the chain's last pick |
  */
@@ -136,6 +141,45 @@
   }
   .narrow-probe {
     width: var(--_ui-tree-narrow-width);
+  }
+
+  /* ## The `detail` pane:  after the last column, its content's width, its line inside it at its end */
+  .detail {
+    --_ui-tree-detail-max-width: var(--ui-tree-detail-max-width, 50%);
+    position: relative;
+    flex: none;
+    box-sizing: border-box;
+    width: max-content;
+    min-width: 80px;
+    max-width: var(--_ui-tree-detail-max-width);
+    height: 100%;
+    border-inline-end: 1px solid var(--ui-border-color);
+    background: var(--ui-background);
+    scroll-snap-align: end;
+  }
+  /* dragged:  the width it was dragged to */
+  .detail.sized {
+    max-width: none;
+  }
+  .detail.sticky {
+    position: sticky;
+    inset-inline-end: 0;
+    z-index: 2;
+  }
+  .detail-body {
+    box-sizing: border-box;
+    height: 100%;
+    padding: 8px 12px;
+    overflow: auto;
+  }
+  .detail > .detail-edge {
+    inset-inline-start: auto;
+    inset-inline-end: 0;
+    margin-inline-start: 0;
+  }
+  .detail > .detail-edge::after {
+    inset-inline-start: auto;
+    inset-inline-end: 0;
   }
 
   /* a column's title:  the same height in every column, so they read as one row of headers */

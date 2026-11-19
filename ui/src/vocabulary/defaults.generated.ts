@@ -1916,7 +1916,8 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "size", kind: "string", group: "appearance" },
     { name: "narrow-before", kind: "number", group: "appearance" },
     { name: "show", kind: "string", group: "appearance" },
-    { name: "sticky-path", kind: "keyOnly", group: "behaviour" }
+    { name: "sticky-path", kind: "keyOnly", group: "behaviour" },
+    { name: "sticky-detail", kind: "keyOnly", group: "behaviour" }
   ],
   "ui-tree-diagram": [
     { name: "tree", kind: "json", group: "content" },

@@ -10761,6 +10761,13 @@
       }
     },
     {
+      "name": "--ui-tree-detail-max-width",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-tree>`'s token.  Default:  `50%`"
+      }
+    },
+    {
       "name": "--ui-tree-diagram-font-family",
       "description": {
         "kind": "markdown",
@@ -11263,7 +11270,7 @@
       "name": "::part(detail)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-detail>`:  The detail box.\n- `<ui-label>`:  The `detail` shorthand."
+        "value": "Part of:\n\n- `<ui-detail>`:  The detail box.\n- `<ui-label>`:  The `detail` shorthand.\n- `<ui-tree>`:  `appearance=\"columns\"`:  the pane around the `detail` slot."
       }
     },
     {

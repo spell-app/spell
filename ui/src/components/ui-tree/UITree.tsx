@@ -41,6 +41,11 @@ import columnsCSS from "./UITreeColumns.css?inline"
  *     A width set so wins over `size`.  A tree with an `id` remembers them in this browser (the `ui-tree` store,
  *     `widths:<id>`);  one without, until the page reloads.
  *   - `path`:  the ids of each column's pick, from the top;  set it to open a path, read it as people pick.
+ *     A tree with an `id` keeps it in the same store (`path:<id>`), and opens it again on a page that sets none.
+ *   - `slot="detail"`:  a pane after the last column, tight against it, showing what's picked (`detailPane()`).
+ *     - Drawn only while something is slotted and something is picked;  the tree sets the slotted element's `item`.
+ *     - As wide as its content, until its line is dragged (kept with the widths);  the columns make room for it.
+ *     - `sticky-detail`:  it stays in view at the box's end while the columns scroll sideways.
  *   - `filter` filters one column:  the last one on screen as the filter starts, so moving about doesn't move it.
  *   - `sticky-path`:  the path line above the columns, naming each column's pick;  a click on one picks it again,
  *     keeping the columns after it, and scrolls its column into view.
@@ -285,6 +290,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
           <Show when={this.hasItemData} fallback={this.firstColumn()}>
             {this.itemColumns()}
           </Show>
+          <Show when={this.hasDetail}>{this.detailPane()}</Show>
           <div class={["column-filler", { titled: this.columnTitleList.length > 0 }]} aria-hidden="true" />
           <For each={this.columnIndexes}>{(column) => this.columnEdge(column)}</For>
           <div class="column-probe" aria-hidden="true" />
@@ -801,10 +807,30 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
 
   /** Drag column `index`'s line:  it follows the pointer;  with Option (Alt), every column takes its width.  Escape puts it back. */
   private startResizing(event: PointerEvent & { currentTarget: HTMLElement }, index: number) {
-    if (event.button !== 0) return
-    const startWidth = this.widthNowOf(index)
     const before = { columns: this.columnWidths, every: this.everyColumnWidth }
     const isEvery = event.altKey
+    this.dragWidth(event, this.widthNowOf(index), {
+      resize: (width) => {
+        if (isEvery) this.setEveryColumnWidth(width, { keeps: false })
+        else this.setColumnWidth(index, width, { keeps: false })
+      },
+      restore: () => {
+        this.columnWidths = before.columns
+        this.everyColumnWidth = before.every
+      }
+    })
+  }
+
+  /**
+   * Drag a line that sizes the box before it, from `startWidth` px:  a column's, or the `detail` pane's.
+   * - `resize(width)` as the pointer moves;  kept once it's dropped (`keepWidths()`);  `restore()` on Escape.
+   */
+  private dragWidth(
+    event: PointerEvent & { currentTarget: HTMLElement },
+    startWidth: number,
+    { resize, restore }: { resize: (width: number) => void; restore: () => void }
+  ) {
+    if (event.button !== 0) return
     const direction = this.isRightToLeft ? -1 : 1
     this.isResizing = true
     new Dragging(event.currentTarget, event, {
@@ -812,19 +838,14 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
       follows: false,
       // the line's own cursor, over the whole page while it's dragged
       cursor: "col-resize",
-      placing: (x) => {
-        const width = startWidth + (x - event.clientX) * direction
-        if (isEvery) this.setEveryColumnWidth(width, { keeps: false })
-        else this.setColumnWidth(index, width, { keeps: false })
-      },
+      placing: (x) => resize(startWidth + (x - event.clientX) * direction),
       onDrop: () => {
         this.isResizing = false
         this.keepWidths()
       },
       onCancel: () => {
         this.isResizing = false
-        this.columnWidths = before.columns
-        this.everyColumnWidth = before.every
+        restore()
       }
     })
   }
@@ -834,15 +855,24 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
 
   /** Left and right on column `index`'s line:  narrower and wider, ten times as far with Shift;  every column with Option. */
   private resizeByKey(event: KeyboardEvent, index: number) {
+    const change = this.keyStepPx(event)
+    if (change === undefined) return
+    const width = this.widthNowOf(index) + change
+    if (event.altKey) this.setEveryColumnWidth(width)
+    else this.setColumnWidth(index, width)
+  }
+
+  /**
+   * How far a key on a line moves it, in px, wider positive:  `undefined` for a key that doesn't.
+   * - SIDE EFFECT:  a key that does is the line's own, so it goes no further.
+   */
+  private keyStepPx(event: KeyboardEvent): number | undefined {
     const step = RESIZE_KEYS[event.key]
-    if (!step) return
+    if (!step) return undefined
     event.preventDefault()
     event.stopPropagation()
     const direction = this.isRightToLeft ? -1 : 1
-    const distance = KEY_STEP_PX * (event.shiftKey ? SHIFT_STEPS : 1)
-    const width = this.widthNowOf(index) + step * direction * distance
-    if (event.altKey) this.setEveryColumnWidth(width)
-    else this.setColumnWidth(index, width)
+    return step * direction * KEY_STEP_PX * (event.shiftKey ? SHIFT_STEPS : 1)
   }
 
   /**
@@ -882,20 +912,25 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     if (keeps) this.keepWidths()
   }
 
-  /** Keep the widths a person set under the tree's `id`, when it has one:  `widths:<id>` in the tree's store. */
+  /** Keep the widths a person set under the tree's `id`, when it has one:  `widths:<id>` in the tree's store, the `detail` pane's too. */
   private keepWidths() {
     const id = this.domElement.id
     if (!id || isServer) return
     const columns = this.columnWidths
     const every = this.everyColumnWidth
+    const detail = this.detailWidth
     const kept: KeptWidths = {
       ...(columns.length && { columns: columns.map((each) => each ?? null) }),
-      ...(every !== undefined && { every })
+      ...(every !== undefined && { every }),
+      ...(detail !== undefined && { detail })
     }
-    UITree.store.set(`${WIDTHS_KEY}${id}`, kept.columns || kept.every ? kept : undefined)
+    UITree.store.set(`${WIDTHS_KEY}${id}`, kept.columns || kept.every || kept.detail ? kept : undefined)
   }
 
-  /** The widths kept under its `id`, as it connects;  what an unsized one comes to;  its newest column, in view. */
+  /**
+   * As it connects:  the widths kept under its `id`, and the path, when the page sets none;  what an unsized column
+   * comes to;  its newest column, in view.
+   */
   @E.onChange("isConnected", "isColumns")
   protected onConnectedInColumns(isConnected: boolean, isColumns: boolean) {
     if (!isConnected || !isColumns || isServer) return
@@ -907,6 +942,8 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     const kept = UITree.keptWidths(id)
     this.columnWidths = (kept.columns ?? []).map((each) => (typeof each === "number" ? each : undefined))
     this.everyColumnWidth = typeof kept.every === "number" ? kept.every : undefined
+    this.detailWidth = typeof kept.detail === "number" ? kept.detail : undefined
+    this.openKeptPath(id)
   }
 
   /** Is it laid out right to left? */
@@ -1024,7 +1061,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     return Math.ceil(fit)
   }
 
-  /** The tree's store of what it keeps:  `widths:<id>` (and the path, later);  made on first use, so a server render never touches storage. */
+  /** The tree's store of what it keeps:  `widths:<id>` and `path:<id>`;  made on first use, so a server render never touches storage. */
   private static get store(): PrefStore {
     return (UITree.madeStore ??= new PrefStore(STORE_NAME))
   }
@@ -1044,6 +1081,168 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     }
     const kept = UITree.store.get(key)
     return kept && typeof kept === "object" ? (kept as KeptWidths) : {}
+  }
+
+  ////////////////
+  // ## The remembered path
+  ////////////////
+
+  /**
+   * A tree with an `id` opens where it was left:  the path kept under `path:<id>` in the tree's store, set as `path`,
+   * when the page sets none.
+   * - None:  a page that set `path`, or (from markup) marked a row `open` or `selected`.
+   * - A page setting `path` later still wins:  the kept one is only where it starts.
+   */
+  private openKeptPath(id: string) {
+    if (this.isControlledByPage("openPath") || this.openPath.length) return
+    if (!this.hasItemData && this.domElement.querySelector(MARKED_ROWS)) return
+    const kept = UITree.store.get(`${PATH_KEY}${id}`)
+    if (!Array.isArray(kept) || !kept.length || !kept.every((each) => typeof each === "string")) return
+    this.openPath = kept as string[]
+  }
+
+  /** Each new `path`, picked or set, kept under the tree's `id`, when it has one, so a reload opens it again. */
+  @E.onChange("openPath", "isConnected", { defer: true })
+  protected onPathToKeep(path: readonly string[], isConnected: boolean) {
+    const id = this.domElement.id
+    if (!isConnected || !this.isColumns || !id || isServer) return
+    UITree.store.set(`${PATH_KEY}${id}`, path.length ? [...path] : undefined)
+  }
+
+  ////////////////
+  // ## The detail pane
+  ////////////////
+
+  /** The element slotted as `detail`:  the first child with that `slot`, followed as children come and go. */
+  @E.watches({ childList: true })
+  get detailElement(): Element | undefined {
+    if (isServer) return undefined
+    const name = this.slotForName("detail")
+    for (const child of this.domElement.children) if (child.getAttribute("slot") === name) return child
+    return undefined
+  }
+
+  /** The selected row:  in columns, the `items` entry, or the `<ui-tree-item>`;  `undefined` while none is. */
+  get pickedItem(): TreeItemData | HTMLElement | undefined {
+    if (!this.isColumns) return undefined
+    if (this.hasItemData) {
+      const depth = this.selectedDepth
+      if (depth < 0) return undefined
+      return this.columnLists[depth]?.find((item) => item.id === this.openPath[depth])
+    }
+    const chain = this.openChain
+    return (chain.find((row) => row.selected) ?? chain.at(-1))?.domElement
+  }
+
+  /** In columns, with something slotted as `detail` and something picked:  the pane shows, after the last column. */
+  get hasDetail(): boolean {
+    return this.isColumns && !!this.detailElement && this.pickedItem !== undefined
+  }
+
+  /** The pane's width, in px, as a person dragged it:  `undefined` to size it to its content.  Kept with the widths. */
+  @E.state accessor detailWidth: number | undefined = undefined
+
+  /** The pane's width on screen, in px:  measured as it changes, 0 while it doesn't show. */
+  @E.state accessor detailWidthPx = 0
+
+  /** The picked row, handed to the element slotted as `detail` as its `item` property. */
+  @E.onChange("detailElement", "pickedItem")
+  protected onDetailItemChanged(detail: Element | undefined, item: TreeItemData | HTMLElement | undefined) {
+    if (detail) (detail as Element & { item?: unknown }).item = item
+  }
+
+  /**
+   * The `detail` pane:  its slot, and the line after it that sizes it, as a column's does.
+   * - From markup, the deeper columns are out of the row of columns (`position: fixed`), so it keeps their room
+   *   before it (`margin-inline-start`);  from `items`, they're beside it.
+   * - `sticky-detail`:  it sticks to the box's end while the columns scroll under it.
+   */
+  private detailPane() {
+    return (
+      <div
+        class={["detail", { sticky: !!this.stickyDetail, sized: this.detailWidth !== undefined }]}
+        part={this.partForName("detail")}
+        ref={(pane: HTMLElement) => this.watchDetailWidth(pane)}
+        style={{
+          width: this.detailWidth === undefined ? undefined : `${this.detailWidth}px`,
+          "margin-inline-start": this.hasItemData ? undefined : this.detailMarginCSS()
+        }}
+      >
+        <div class="detail-body">
+          <slot name={this.slotForName("detail")} />
+        </div>
+        <div
+          class="column-edge detail-edge"
+          role="separator"
+          tabindex="0"
+          aria-orientation="vertical"
+          aria-label={this.translationForKey("resizeDetail")}
+          aria-valuenow={Math.round(this.detailWidthPx)}
+          aria-valuemin={MIN_COLUMN_PX}
+          onPointerDown={(event) => this.startResizingDetail(event)}
+          onKeyDown={(event) => this.resizeDetailByKey(event)}
+          onDblClick={() => this.setDetailWidth(undefined)}
+        />
+      </div>
+    )
+  }
+
+  /** The pane came, went or changed width, or the tree did:  the selected row's column in view again, beside it. */
+  @E.onChange("hasDetail", "detailWidthPx", "boxWidthPx", { defer: true })
+  protected onDetailSizeChanged() {
+    if (this.isReady) this.showColumn(this.selectedColumn)
+  }
+
+  /** From markup:  the room of the columns after the first, as CSS, kept before the pane. */
+  private detailMarginCSS(): string {
+    return `calc(${this.columnStartCSS(this.columnIndexes.length)} - ${this.columnStartCSS(1)})`
+  }
+
+  /** The pane's width, measured as it changes, while it's drawn:  the columns make room for it (`columnsRoomPx`). */
+  private watchDetailWidth(pane: HTMLElement) {
+    if (isServer) return
+    const observer = new ResizeObserver(([entry]) => {
+      const width = entry?.borderBoxSize[0]?.inlineSize
+      if (width !== undefined) this.detailWidthPx = Math.round(width)
+    })
+    observer.observe(pane)
+    this.detailObserver?.disconnect()
+    this.detailObserver = observer
+  }
+
+  /** What measures the pane:  replaced each time it's drawn. */
+  private detailObserver: ResizeObserver | undefined
+
+  /** The pane's width on screen now, in px. */
+  private detailWidthNow(): number {
+    const pane = this.domElement.renderRoot.querySelector<HTMLElement>(".detail")
+    return this.detailWidth ?? (pane?.getBoundingClientRect().width || this.detailWidthPx)
+  }
+
+  /** Drag the line after the pane:  it follows the pointer.  Escape puts it back. */
+  private startResizingDetail(event: PointerEvent & { currentTarget: HTMLElement }) {
+    const before = this.detailWidth
+    this.dragWidth(event, this.detailWidthNow(), {
+      resize: (width) => this.setDetailWidth(width, { keeps: false }),
+      restore: () => (this.detailWidth = before)
+    })
+  }
+
+  /** Left and right on the pane's line:  narrower and wider, ten times as far with Shift. */
+  private resizeDetailByKey(event: KeyboardEvent) {
+    const change = this.keyStepPx(event)
+    if (change !== undefined) this.setDetailWidth(this.detailWidthNow() + change)
+  }
+
+  /**
+   * The pane is `width` px wide now, from `MIN_COLUMN_PX` to the box's width less a column's;
+   * `undefined`:  back to its content's width (a double-click on its line).
+   * - SIDE EFFECT:  kept under the tree's `id`, unless `keeps` is false (mid-drag).
+   */
+  private setDetailWidth(width: number | undefined, { keeps = true } = {}) {
+    const most = Math.max(MIN_COLUMN_PX, (this.boxWidthPx || Infinity) - MIN_COLUMN_PX)
+    this.detailWidth = width === undefined ? undefined : Math.round(Math.min(most, Math.max(MIN_COLUMN_PX, width)))
+    if (keeps) this.keepWidths()
   }
 
   ////////////////
@@ -1089,6 +1288,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
    * Scroll the columns' box the least that shows column `depth` whole, once it's drawn at its new width.
    * - Always to a column's start, where the box's scroll snaps (`scroll-snap-type`):  the first one far enough along
    *   to show column `depth`'s end.
+   * - Not under a `sticky-detail` pane:  it takes its width off the box's.
    */
   private showColumn(depth: number) {
     if (isServer) return
@@ -1102,10 +1302,14 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
       // right to left, `scrollLeft` runs from 0 down
       const direction = this.isRightToLeft ? -1 : 1
       const scrolled = box.scrollLeft * direction
+      // a sticky `detail` pane covers the box's end
+      const room = box.clientWidth - (this.hasDetail && this.stickyDetail ? this.detailWidthPx : 0)
       let to: number | undefined
       if (start < scrolled) to = start
-      else if (end > scrolled + box.clientWidth) to = starts.find((each) => each >= end - box.clientWidth) ?? start
+      else if (end > scrolled + room) to = starts.find((each) => each >= end - room) ?? start
       if (to === undefined) return
+      // past the end, the box's own end:  where the pane's end snaps
+      to = Math.min(to, box.scrollWidth - box.clientWidth)
       const isStill = matchMedia("(prefers-reduced-motion: reduce)").matches
       box.scrollTo({ left: to * direction, behavior: isStill ? "instant" : "smooth" })
     })
@@ -1131,6 +1335,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
    * The columns that take a narrow strip's room, by level:  while the columns don't fit the tree's width, the first
    * ones, as few as it takes, each a strip with its pick's name.
    * - Never the last `narrow-before` (2), nor the selected row's column.
+   * - The `detail` pane's room comes off the tree's width first (`columnsRoomPx`).
    * - A column a person sized, or `size` sizes, narrows too, and widens back to that size.
    * - The one under the pointer or with the focus too:  it widens OVER the columns after it (`peekColumn`), so they
    *   stay where they are and the selected one stays in view.
@@ -1139,15 +1344,25 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     if (!this.isColumns || !this.boxWidthPx || !this.defaultWidthPx) return []
     const count = this.columnIndexes.length
     const selected = this.selectedColumn
+    const room = this.columnsRoomPx
     let total = 0
     for (let index = 0; index < count; index++) total += this.widthPxOf(index)
     const narrow: number[] = []
-    for (let index = 0; index < count - (this.narrowBefore ?? 2) && total > this.boxWidthPx; index++) {
+    for (let index = 0; index < count - (this.narrowBefore ?? 2) && total > room; index++) {
       if (index === selected) continue
       narrow.push(index)
       total -= this.widthPxOf(index) - this.narrowWidthPx
     }
     return narrow
+  }
+
+  /**
+   * The room the columns have, in px:  the box of columns', less the `detail` pane's while it shows,
+   * never under `MIN_COLUMN_PX`.
+   */
+  get columnsRoomPx(): number {
+    const pane = this.hasDetail ? this.detailWidthPx : 0
+    return Math.max(MIN_COLUMN_PX, this.boxWidthPx - pane)
   }
 
   /** The narrow column under the pointer, else the one with the focus:  drawn whole, over the columns after it. */
@@ -1211,7 +1426,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
       .filter((index) => !narrow.includes(index))
       .map((index) => this.widthPxOf(index))
       .sort((a, b) => a - b)
-    let room = this.boxWidthPx - narrow.length * this.narrowWidthPx
+    let room = this.columnsRoomPx - narrow.length * this.narrowWidthPx
     if (full.reduce((sum, width) => sum + width, 0) <= room) return Infinity
     for (let at = 0; at < full.length; at++) {
       const share = room / (full.length - at)
@@ -1741,8 +1956,11 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
 
 export interface UITree extends E.AttributeValues<typeof treeVocabulary> {}
 
-/** The widths a person set, kept under a tree's `id`:  a column's own, by level (`null` for none), and an Option-drag's. */
-type KeptWidths = { columns?: (number | null)[]; every?: number }
+/**
+ * The widths a person set, kept under a tree's `id`:  a column's own, by level (`null` for none), an Option-drag's,
+ * and the `detail` pane's.
+ */
+type KeptWidths = { columns?: (number | null)[]; every?: number; detail?: number }
 
 /** `widths` without the `undefined`s at its end:  the columns after them take what `size` says. */
 function trimmedWidths(widths: readonly (number | undefined)[]): (number | undefined)[] {
@@ -1842,11 +2060,17 @@ const DEFAULT_WIDTH = "var(--_ui-tree-column-width)"
 /** A narrow column's width. */
 const NARROW_WIDTH = "var(--_ui-tree-narrow-width)"
 
-/** The tree's store, in this browser:  each tree's widths under `widths:<id>`. */
+/** The tree's store, in this browser:  each tree's widths under `widths:<id>`, its path under `path:<id>`. */
 const STORE_NAME = "ui-tree"
 
 /** The start of the key a tree's widths are kept under, before its `id`. */
 const WIDTHS_KEY = "widths:"
+
+/** The start of the key a tree's path is kept under, before its `id`. */
+const PATH_KEY = "path:"
+
+/** From markup:  rows the page marked as picked, so it set a path of its own. */
+const MARKED_ROWS = "ui-tree-item[open], ui-tree-item[selected]"
 
 /** Where the widths were kept before (epic `from-console` P5):  a list of widths under each tree's `id`, moved over once. */
 const OLD_WIDTHS_STORE = "ui-tree-column-widths"

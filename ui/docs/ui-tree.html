@@ -204,6 +204,42 @@
                   </script>
                 </ui-example>
               </ui-section>
+              <ui-section id="examples-types-detail-pane" label="Detail pane" sticky="stack" collapsible dividing>
+                <ui-example description="An element slotted as `detail` is a pane after the last column, showing what's picked.">
+                  <ul slot="description">
+                    <li>The tree hands it the picked row as its <code>item</code> property, and sends <code>ui-changed</code>, so any element can draw it:  here a <code>&lt;ui-json&gt;</code>.</li>
+                    <li>It's drawn only while something is slotted and something is picked, tight against the last column, as wide as its content.</li>
+                    <li>Drag the line after it to resize it;  double-click the line to fit its content again.</li>
+                    <li><code>sticky-detail</code> keeps it in view while the columns scroll sideways.</li>
+                    <li>With an <code>id</code> and no <code>path</code> set, the tree opens where you left it after a reload, and keeps the pane's width.</li>
+                  </ul>
+                  <ui-tree id="docs-tree-columns-detail" appearance="columns" sticky-detail column-titles="Shelf, Book, Chapters" show="icon which chevron" label="Library, with a detail pane" style="height: 15em">
+                    <ui-json slot="detail" depth="2"></ui-json>
+                  </ui-tree>
+                  <script type="module">
+                    const chapter = (name, pages) => ({ id: name, label: name, icon: "file alternate outline", data: { chapter: name, pages } })
+                    const book = (name, year, chapters) => ({ id: name, label: name, which: year, icon: "book", data: { title: name, year: Number(year), chapters: chapters.length }, children: chapters })
+                    await customElements.whenDefined("ui-tree")
+                    const tree = document.getElementById("docs-tree-columns-detail")
+                    tree.items = [
+                      {
+                        id: "Novels",
+                        label: "Novels",
+                        icon: "book",
+                        data: { shelf: "Novels", books: 2 },
+                        children: [
+                          book("Moby-Dick", "1851", [chapter("Loomings", 8), chapter("The Carpet-Bag", 6), chapter("The Spouter-Inn", 14)]),
+                          book("Middlemarch", "1871", [chapter("Miss Brooke", 22), chapter("Old and Young", 18)])
+                        ]
+                      },
+                      { id: "Poems", label: "Poems", icon: "book", data: { shelf: "Poems", books: 1 }, children: [book("Leaves of Grass", "1855", [chapter("Song of Myself", 52)])] }
+                    ]
+                    // the tree sets the pane's `item` as the pick changes:  here it shows the item's data
+                    const json = tree.querySelector("ui-json")
+                    Object.defineProperty(json, "item", { set: (item) => json.ready.then(() => (json.value = item?.data ?? null)) })
+                  </script>
+                </ui-example>
+              </ui-section>
             </ui-section>
             <ui-section id="examples-content" label="Content" sticky="stack" collapsible dividing>
               <ui-section id="examples-content-which-one" label="Which one" sticky="stack" collapsible dividing>
@@ -306,6 +342,8 @@
                   - Pointing at a narrow strip, or moving the focus into it, draws it whole over the columns after it, which stay where they are.  While even the strips don't make room, the full columns share what's left, so the selected one shows whole.
                   - `size` sets each column's width, by level, the last one going on for every deeper column:  px, `em`, a percent of the tree's width, `auto` to fit the rows it shows, or `*` for the token's.  `size="auto"` fits every column to its rows.
                   - Resizing works as in the Finder:  drag the line after a column;  hold Option (Alt) to resize every column together;  double-click the line to fit the column to its longest row, with Option every column.  The arrow keys on a line resize it too, Shift by ten times as much, Option every column.  A width you set wins over `size`, and with an `id` the tree remembers it in this browser.
+                  - With an `id`, the tree also keeps its `path`:  a reload opens it where it was left, unless the page sets a `path` of its own (or, from markup, marks rows `open` or `selected`).
+                  - An element with `slot="detail"` is a pane after the last column, tight against it, showing what's picked:  the tree sets its `item` property to the picked `items` entry or `<ui-tree-item>`, and sends `ui-changed`.  It's drawn only while something is picked, as wide as its content (up to `--ui-tree-detail-max-width`, half the tree), and the columns narrow to make room for it.  Drag the line after it to resize it, double-click to fit its content again;  with an `id`, the tree keeps that width too.  `sticky-detail` keeps it in view while the columns scroll sideways.
                   - `--ui-tree-columns-height` sets its height, `--ui-tree-column-width` each column's width, `--ui-tree-narrow-width` a narrow one's.
                 </script>
               </ui-markdown>

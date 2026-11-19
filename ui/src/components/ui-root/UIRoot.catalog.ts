@@ -1740,7 +1740,8 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "size",
       "narrow-before",
       "show",
-      "sticky-path"
+      "sticky-path",
+      "sticky-detail"
     ]
   },
   "ui-tree-diagram": {

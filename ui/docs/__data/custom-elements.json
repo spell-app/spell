@@ -50102,6 +50102,14 @@
               "fieldName": "stickyPath"
             },
             {
+              "name": "sticky-detail",
+              "description": "`appearance=\"columns\"` with a `detail` pane:  the pane stays in view at the tree's end while the columns scroll sideways under it.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "stickyDetail"
+            },
+            {
               "name": "disabled",
               "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
               "type": {
@@ -50271,6 +50279,10 @@
             {
               "name": "empty",
               "description": "Shown when `filter` matches no row."
+            },
+            {
+              "name": "detail",
+              "description": "`appearance=\"columns\"`:  a pane after the last column, showing what's picked:  any element, which the tree hands the picked row as its `item` property (the `<ui-tree-item>`, or the `items` entry), and the page can fill from `ui-changed`.  Drawn only while something is slotted and something is picked, tight against the last column, as wide as its content (up to `--ui-tree-detail-max-width`) until its line is dragged."
             }
           ],
           "cssParts": [
@@ -50297,6 +50309,10 @@
             {
               "name": "column",
               "description": "`appearance=\"columns\"` with `items`:  one column."
+            },
+            {
+              "name": "detail",
+              "description": "`appearance=\"columns\"`:  the pane around the `detail` slot."
             },
             {
               "name": "column-row",
@@ -50453,6 +50469,10 @@
             {
               "name": "--ui-tree-narrow-width",
               "default": "2em"
+            },
+            {
+              "name": "--ui-tree-detail-max-width",
+              "default": "50%"
             }
           ]
         },
