@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process"
 import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { homedir, tmpdir } from "node:os"
-import { delimiter, dirname, join } from "node:path"
+import { join } from "node:path"
 
 import { after } from "spell/util/timing"
 import { Git } from "spell/server/Git"
@@ -156,25 +156,76 @@ export class StagedDemo {
   }
 
   /**
-   * Run step `id`:  its `sh` blocks in the main checkout, stopping at the first failure, then its "Say" section.
+   * Run step `id`:  its `sh` blocks' `epic` commands, in order, stopping at the first failure, then its "Say" section.
    * - `$PROMPT_FILE` in the commands:  what Owen pasted after `/epic demo` (the prompt gate saved it), else the paste
-   *   block of `00-paste.md`
-   * - the commands run through `sh`:  the step files are Owen's to rewrite, and quote HTML as a shell does
-   * - `epic` there is this copy's:  a worktree rehearses its own code, never the main checkout's
-   * - `quiet`:  a rehearsal with nobody watching:  nothing shown in VS Code (`withoutShows()`)
+   *   block of `00-paste.md`;  `$CONTENT_FOLDER`:  the epic folder
+   * - `sh` reads the blocks (`commandsOf()`):  the step files are Owen's to rewrite, and quote HTML as a shell does
+   * - each command runs in THIS process, on the main checkout (`runCommand()`):  a step of 14 commands took 30s with
+   *   one `epic` started per command, in front of a room
+   * - `quiet`:  a rehearsal with nobody watching:  nothing shown in VS Code (no `epic open`, no `--show`)
    */
   async runStep(id: string, { quiet = false }: { quiet?: boolean } = {}): Promise<number> {
     const step = StagedDemo.parseStep(readFileSync(this.stepFile(id), "utf8"))
-    // `epic` in the commands is THIS copy's, so a worktree rehearses its own code (an install's bin needs `node`)
-    const path = EngineFiles.isBuilt ? process.env.PATH : `${dirname(EngineFiles.bin)}${delimiter}${process.env.PATH}`
-    const env = { ...process.env, PATH: path, PROMPT_FILE: this.promptFile(), EPIC_CHECKOUT: this.main }
-    for (const command of step.commands) {
-      const block = quiet ? StagedDemo.withoutShows(command) : command
-      const ran = spawnSync("/bin/sh", ["-e", "-c", block], { cwd: this.main, env, stdio: "inherit" })
-      if (ran.status !== 0) return ran.status ?? EXIT.ERRORS
+    const env = {
+      ...process.env,
+      PROMPT_FILE: this.promptFile(),
+      CONTENT_FOLDER: this.content,
+      EPIC_CHECKOUT: this.main
+    }
+    for (const block of step.commands) {
+      for (const argv of StagedDemo.commandsOf(block, { cwd: this.main, env })) {
+        if (quiet && StagedDemo.isShow(argv)) continue
+        const code = await this.runCommand(argv)
+        if (code !== EXIT.OK) return code
+      }
     }
     if (step.say) CLI.out(`\nSAY:\n${step.say}`)
     return EXIT.OK
+  }
+
+  /**
+   * One step's command, `epic <verb> ...` without the `epic`:  this group's own verbs, or the `epic` tool's
+   * (`EpicTools.runPlanDoc()`);  anything else (`pages link`, `config`) through a child `epic`, this copy's.
+   */
+  async runCommand(argv: string[]): Promise<number> {
+    const [verb] = argv
+    if (verb === STAGED_DEMO.epic) return this.run(argv.slice(1))
+    if (!OTHER_TOOLS.has(verb!)) {
+      try {
+        return await EpicTools.runPlanDoc(argv, this.main)
+      } catch (error) {
+        if (!(error instanceof EpicCommandError)) throw error
+        CLI.out(`epic:  ${error.message}`)
+        return EXIT.ERRORS
+      }
+    }
+    const ran = spawnSync(process.execPath, [EngineFiles.bin, ...argv], {
+      cwd: this.main,
+      env: { ...process.env, EPIC_CHECKOUT: this.main },
+      stdio: "inherit"
+    })
+    return ran.status ?? EXIT.ERRORS
+  }
+
+  /**
+   * The `epic` commands in `block`, each as its words (`epic` left off), as `sh` reads them:  quotes, `\\` line
+   * ends and `$VARIABLES` (from `env`) as a shell has them.
+   * - how:  `sh` runs the block with `epic` a function that prints its words, never runs anything else of it
+   * - throws when `sh` can't read it
+   */
+  static commandsOf(block: string, { cwd, env }: { cwd?: string; env?: NodeJS.ProcessEnv } = {}): string[][] {
+    const script = `epic() { printf '%s\\037' "$@"; printf '\\036'; }\n${block}`
+    const ran = spawnSync("/bin/sh", ["-e", "-c", script], { cwd, env, encoding: "utf8" })
+    if (ran.status !== 0) throw new EpicCommandError(`a step's commands won't read:  ${ran.stderr.trim()}`)
+    return ran.stdout
+      .split("\u001e")
+      .filter(Boolean)
+      .map((command) => command.split("\u001f").slice(0, -1))
+  }
+
+  /** Does command `argv` show a page in VS Code (`epic open`, `--show`)?  A quiet run leaves it out. */
+  static isShow(argv: string[]): boolean {
+    return argv[0] === "open" || argv.includes("--show")
   }
 
   /**
@@ -206,14 +257,6 @@ export class StagedDemo {
       say: sections.get("say") ?? "",
       html: blocks(text, "html")
     }
-  }
-
-  /** Commands `block` with each line that shows a page in VS Code (`epic open`, `--show`) left out. */
-  static withoutShows(block: string): string {
-    return block
-      .split("\n")
-      .map((line) => (/^\s*epic open\b|\s--show\b/.test(line) ? ":" : line))
-      .join("\n")
   }
 
   /** What Owen pasted after `/epic demo`, saved by the prompt gate;  none:  `00-paste.md`'s paste block, in a file. */
@@ -517,6 +560,9 @@ const MIN_SILLY_LINES = 30
 
 /** `pause`'s wait when it names none, seconds:  four of them, with Claude's own time between, make about 10s. */
 const DEFAULT_PAUSE_S = 2
+
+/** The `epic` verbs a step runs through a child `epic`:  not the `epic` tool's, whose verbs run in this process. */
+const OTHER_TOOLS = new Set(["pages", "config", "window", "server", "agents", "worktree"])
 
 /** The verbs' switches (flags with no value). */
 const SWITCHES = ["json", "dry-run", "quiet"]
