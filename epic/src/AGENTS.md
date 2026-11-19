@@ -1032,22 +1032,14 @@ The shared folders:
 - [pages.js](tools/pages.js) has a constant for each, and `findPages()` walks them.
   - `PAGES`, `GUIDES`, `EPICS`, `TEMPLATES` (the engine's, `templates/...` by `pagePath()`), `REPO_TEMPLATES`
 - [The docs' home page](../../spell.epics/pages/index.html):  a routing page (P5 of `claude-design`).
-  - One card per area, in the top bar's order, each with its count:
-    Guides · Sagas · Epics · Epic/UI · Spell/UI · App · App/UI · Brand · Templates
-    - The person's order (2026-10-11, epic `epic-workflow` J40);  the slashed names are the tabs' labels (J41).
+  - One card per area, each with its count:  Guides · Sagas · Epics · Templates
+    - Spell's own areas left out (2026-11-18, epic `epic-engine` J275:  "Remove anything Spell related in this page
+      permanently.  No longer relevant to Epics"):  Epic/UI, Spell/UI, App, App/UI and Brand had cards, and tabs;
+      their pages are still served at their addresses (`/components/ui/`, `/editor/`, `/brand/`)
+      - the top bar's tabs:  the epic repo's `page-server.json5` `"siteTabs"`, where those five are commented out
     - Sagas was Goals until P15 of `epic-workflow`:  its tab opens the Sagas list page,
       and lights on the saga pages and the parked goal sets (`goals/`) too.
-    - Spell/UI, Epic/UI and App/UI are COMPONENT SETS (each repo's `"pageServer"` `"componentSets"`, merged and read with
-      `componentSets()` in `spell/server/page`), in Spell UI's page shape.
-      Their cards link the sets' addresses:
-
-      ```text
-      ui/docs/          served at  /components/ui/
-      epic/src/docs/    served at  /components/epics/
-      app/app/docs/     served at  /components/app/
-      ```
-
-    - NEVER run `epic pages index` from a branch whose sets' addresses `main` doesn't serve yet:
+    - NEVER run `epic pages index` from a branch whose code `main` doesn't have yet:
       it writes the shared home, which `main`'s page server shows too.
   - `epic pages index` writes the cards, between the `areas:start` / `areas:end` markers.
     Edit only outside the markers.

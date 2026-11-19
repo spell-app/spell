@@ -44,7 +44,7 @@ const SAGAS = [
 ]
 
 describe("the home page's cards", () => {
-  it("come in the top bar's order (epic-workflow J40), counted from the pages", () => {
+  it("are the epic areas alone, Spell's own left out (epic-engine J275), counted from the pages", () => {
     const cards = areaCards(
       [
         epic("a", ["done", "done"]),
@@ -62,32 +62,16 @@ describe("the home page's cards", () => {
       new Set(),
       SAGAS
     )
-    expect(cards.map((card) => card.title)).toEqual([
-      "Guides",
-      "Sagas",
-      "Epics",
-      "Epic/UI",
-      "Spell/UI",
-      "App",
-      "App/UI",
-      "Brand",
-      "Templates"
-    ])
-    const sets = cards.filter((card) => card.id === "epic-ui" || card.id === "app-ui")
-    expect(sets.map((card) => card.href)).toEqual(["/components/epics/index.html", "/components/app/index.html"])
-    expect(sets[0].meta).toBe("served at /components/epics/, by the page server")
+    expect(cards.map((card) => card.title)).toEqual(["Guides", "Sagas", "Epics", "Templates"])
     const count = Object.fromEntries(cards.map((card) => [card.id, card.count]))
     // by the Epics page's groups (epic `airplane` P8):  `c` has no phases yet, so it's planning
     expect(count.epics).toBe("1 active · 1 planning · 1 done")
     const starred = areaCards([epic("a", ["done", "done"]), epic("b", ["done", "active"])], new Set(["a"]))
     expect(starred.find((card) => card.id === "epics").count).toBe("1 favorites · 1 active")
     expect(count.guides).toBe("2 guides")
-    expect(count.brand).toBe("1 copy · 1 element · 1 page")
     expect(count.templates).toBe("1 template")
     expect(count.sagas).toBe("2 sagas")
     expect(cards.find((card) => card.id === "sagas").href).toBe("/sagas/index.html")
-    // the App is only on the page server:  no link from disk
-    expect(cards.find((card) => card.id === "app").href).toBeUndefined()
   })
 })
 
