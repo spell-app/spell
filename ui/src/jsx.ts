@@ -54884,6 +54884,16 @@ export interface UITreeAttributes {
    */
   "prop:path"?: unknown
   /**
+   * `appearance="columns"`:  each column's width, by level, separated by commas;  the last one sizes every column deeper than the list goes.  Each one a number of px (`240`, `240px`), `em`, a percent of the tree's width (`30%`), `auto` to fit the column to the rows it shows (from 80px to three times `--ui-tree-column-width`), or `*` for `--ui-tree-column-width`.  So `auto` fits every column to its rows, and `12em, auto` keeps the first at 12em.  None:  every column is `--ui-tree-column-width` wide.  A column a person resizes keeps that width instead:  with an `id`, the tree remembers it in this browser.
+   * - takes:  text
+   */
+  size?: string
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
+  "prop:size"?: string
+  /**
    * `appearance="columns"`:  how many columns at the end never narrow.  While the columns don't fit the tree's width, the ones before those narrow, from the first, as few as it takes, each to a strip with its pick's name;  the pointer or the focus on one widens it again, and so does picking it from the path line.  The selected row's column never narrows.
    * - takes:  number
    * - default:  `2`

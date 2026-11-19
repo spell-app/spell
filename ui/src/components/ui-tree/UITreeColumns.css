@@ -6,11 +6,15 @@
  *     containing block:  so it sits beside the column it's drawn in, not inside it, and scrolls on its own.
  *   - The box of columns scrolls sideways;  the tree has a height of its own (18em), which a page sets.
  *   - Each column's width and start come from the tree (`UITree.columnWidthCSS()`, `columnStartCSS()`):
- *     the token's width, or the one a person dragged it to.
+ *     the one a person dragged it to, else its `size`, else the token's width;  while they don't fit even with the
+ *     narrow strips, the full columns share what's left (`UITree.fullColumnMostPx`).
  *   - The line after each column is a few px wide strip over its border (`.column-edge`):  dragging it sizes the column.
  * - `sticky-path`:  the path line (`UITree.css`'s `.path`) takes a line of its own above the box of columns.
  * - Narrow columns (`UITree.narrowColumns`):  a column the tree draws narrow is a strip showing only its pick, the
  *   pick's icon and name sideways;  its width eases, but not while a line is dragged, nor with reduced motion.
+ *   - Under the pointer or with the focus, it's drawn whole OVER the columns after it (`.peek`), keeping a strip's room.
+ * - The box of columns snaps its sideways scroll to a column's start;  after the last column, the title band goes on
+ *   to its end (`.column-filler`).
  *   - From `items`:  `ul.column.narrow`;  from markup, the tree's `.column.narrow`, an open row's `.rows.narrow`, and
  *     each row in it `:state(in-narrow)`.
  * - Rows from `items` are drawn in the tree's own shadow root instead:  each column a `ul.column.items`, its rows
@@ -61,6 +65,8 @@
     overflow-y: hidden;
     /* every open row's column is placed against this box, wherever in the rows it's drawn */
     contain: layout;
+    /* a sideways scroll never stops partway into a column */
+    scroll-snap-type: x mandatory;
   }
   .column {
     flex: none;
@@ -70,6 +76,17 @@
     /* no row is the browser's scroll anchor:  a column opening beside one never scrolls this one */
     overflow-anchor: none;
     border-inline-end: 1px solid var(--ui-border-color);
+    scroll-snap-align: start;
+  }
+  /* the room after the last column:  the title band carried across, so the titles read as one row */
+  .column-filler {
+    flex: 1 0 0;
+    min-width: 0;
+  }
+  .column-filler.titled {
+    box-sizing: border-box;
+    height: var(--_ui-tree-title-height);
+    border-block-end: 1px solid var(--ui-border-color);
   }
 
   /* the line after a column:  a strip over its border, centred on it, which sizes the column it ends */
@@ -82,6 +99,13 @@
     cursor: col-resize;
     touch-action: none;
     outline: none;
+  }
+  /* the last column's:  inside the box of columns, so it never makes the box scroll */
+  .column-edge.last {
+    margin-inline-start: -7px;
+  }
+  .column-edge.last::after {
+    inset-inline-start: 6px;
   }
   .column-edge::after {
     content: "";
@@ -336,7 +360,25 @@
   :host(:state(in-columns)) > .rows.narrow {
     overflow: hidden;
   }
+  /* a narrow column under the pointer or with the focus:  drawn whole OVER the columns after it, which stay put;
+     it keeps a strip's room by its negative end margin (the tree sets it) */
+  .column.peek,
+  :host(:state(in-columns)) > .rows.peek {
+    z-index: 3;
+    background: var(--ui-background);
+    box-shadow:
+      var(--ui-shadow-floating),
+      0 0 0 1px light-dark(transparent, oklch(1 0 0 / 0.08));
+  }
+  .column.peek {
+    position: relative;
+  }
+  /* from markup, a column wholly under it:  its border goes too (its lines are clipped, `UITree.peekClipCSS()`) */
+  :host(:state(in-columns)) > .rows.covered {
+    border-inline-end-color: transparent;
+  }
   .column-edge.narrow,
+  .column-edge.covered,
   .column.narrow > .column-title,
   .column.narrow > .empty,
   .column.narrow > .column-row:not(.on-path, .selected),

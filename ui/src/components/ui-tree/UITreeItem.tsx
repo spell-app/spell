@@ -99,6 +99,16 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
     return this.isInColumns && !!this.tree?.isNarrowColumn(this.depth + 1)
   }
 
+  /** `appearance="columns"`:  the column of rows inside it is narrow, but drawn whole for now, over the next ones. */
+  get hasPeekingRows(): boolean {
+    return this.isInColumns && !!this.tree?.isPeekColumn(this.depth + 1)
+  }
+
+  /** `appearance="columns"`:  the column of rows inside it is wholly under a narrow one drawn whole over it. */
+  get hasCoveredRows(): boolean {
+    return this.isInColumns && !!this.tree?.isCoveredColumn(this.depth + 1)
+  }
+
   /** Its tree is a side navigation (`appearance="nav"`):  `:state(nav)`. */
   @E.cssState("nav") @E.state accessor isInNav = false
 
@@ -193,7 +203,10 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
         <div
           class={["row", this.band]}
           part={this.partForName("row")}
-          style={{ "--_ui-tree-depth": this.isInColumns ? 0 : this.indent }}
+          style={{
+            "--_ui-tree-depth": this.isInColumns ? 0 : this.indent,
+            "clip-path": this.isInColumns ? this.tree?.peekClipCSS(this.depth) : undefined
+          }}
         >
           <Show when={this.shows("chevron")}>
             <span
@@ -236,7 +249,15 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
         </div>
         <Show when={this.drawsRows}>
           <div
-            class={["rows", { shut: !this.showsRows, narrow: this.hasNarrowRows }]}
+            class={[
+              "rows",
+              {
+                shut: !this.showsRows,
+                narrow: this.hasNarrowRows,
+                peek: this.hasPeekingRows,
+                covered: this.hasCoveredRows
+              }
+            ]}
             role="group"
             part={this.partForName("group")}
             inert={this.showsRows ? undefined : ""}
@@ -245,7 +266,11 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
           >
             <Show when={this.columnTitle}>
               {(title) => (
-                <div class="column-title" aria-hidden="true">
+                <div
+                  class="column-title"
+                  aria-hidden="true"
+                  style={{ "clip-path": this.tree?.peekClipCSS(this.depth + 1) }}
+                >
                   {title()}
                 </div>
               )}

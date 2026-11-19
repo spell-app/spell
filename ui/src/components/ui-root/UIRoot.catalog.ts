@@ -1737,6 +1737,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "column-titles",
       "items",
       "path",
+      "size",
       "narrow-before",
       "show",
       "sticky-path"

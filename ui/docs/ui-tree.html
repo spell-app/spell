@@ -80,7 +80,7 @@
                 </ui-example>
               </ui-section>
               <ui-section id="examples-types-columns" label="Columns" sticky="stack" collapsible dividing>
-                <ui-example description="With `appearance=&quot;columns&quot;`, each level is a column, as a Mac's Finder shows folders:  picking a row shows the rows inside it in the next column.  `column-titles` names the columns, by level;  the last title names every deeper one.  Drag the line after a column to resize it, or double-click it to put it back:  with an `id`, the tree remembers the widths.">
+                <ui-example description="With `appearance=&quot;columns&quot;`, each level is a column, as a Mac's Finder shows folders:  picking a row shows the rows inside it in the next column.  `column-titles` names the columns, by level;  the last title names every deeper one.  Drag the line after a column to resize it, as in the Finder:  hold Option (Alt) to resize every column together, or double-click the line to fit the column to its longest row (with Option, every column).  With an `id`, the tree remembers the widths.">
                   <ui-tree id="docs-tree-columns" appearance="columns" column-titles="Clients, Projects, Files" label="Work" style="height: 15em">
                     <ui-tree-item label="Acme Bakery" icon="building outline" open>
                       <ui-tree-item label="Spring menu" icon="folder" open>
@@ -161,6 +161,35 @@
                       part("enclosure", "top", [part("lid", "part"), part("base", "part")])
                     ]
                     tree.path = ["board", "radio", "front end", "mixer", "oscillator", "crystal"]
+                  </script>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-types-column-sizes" label="Column sizes" sticky="stack" collapsible dividing>
+                <ui-example description="`size` gives each column its width, by level, separated by commas;  the last one sizes every deeper column.  Each is px (`160` or `160px`), `em`, a percent of the tree's width, `auto` to fit the column to the rows it shows, or `*` for `--ui-tree-column-width`.  Here the first is 8em, the second 30%, and every one after fits its rows.  A column you resize keeps your width instead.">
+                  <ui-tree id="docs-tree-columns-sized" appearance="columns" size="8em, 30%, auto" column-titles="Shelf, Book, Chapters" show="icon which chevron" label="Library" style="height: 12em"></ui-tree>
+                  <script type="module">
+                    const chapters = (names) => names.map((name) => ({ id: name, label: name, icon: "file alternate outline" }))
+                    await customElements.whenDefined("ui-tree")
+                    const tree = document.getElementById("docs-tree-columns-sized")
+                    tree.items = [
+                      {
+                        id: "Novels",
+                        label: "Novels",
+                        icon: "book",
+                        children: [
+                          { id: "Moby-Dick", label: "Moby-Dick", which: "1851", icon: "book", children: chapters(["Loomings", "The Carpet-Bag", "The Spouter-Inn"]) },
+                          {
+                            id: "Middlemarch",
+                            label: "Middlemarch",
+                            which: "1871",
+                            icon: "book",
+                            children: chapters(["Miss Brooke", "Old and Young", "Waiting for Death", "Three Love Problems"])
+                          }
+                        ]
+                      },
+                      { id: "Poems", label: "Poems", icon: "book", children: [{ id: "Leaves of Grass", label: "Leaves of Grass", icon: "book", children: chapters(["Inscriptions", "Song of Myself"]) }] }
+                    ]
+                    tree.path = ["Novels", "Middlemarch", "Miss Brooke"]
                   </script>
                 </ui-example>
               </ui-section>
@@ -262,7 +291,10 @@
                   - `filter` filters one column:  the last one on screen as the filter starts, until it's cleared.
                   - `show` picks each row's parts:  `icon which count chevron`;  without it, `icon which chevron`.
                   - `sticky-path` puts a line above the columns naming each column's pick;  a click on one picks it again, keeping the columns after it, and scrolls its column into view.  Like the outline's, a screen reader skips it:  the columns' own keys are the way back.
-                  - While the columns don't fit the tree's width, the first ones narrow to a strip with their pick's name, as few as it takes.  The last `narrow-before` (2) and the selected row's never do;  the pointer or the focus on one widens it again.
+                  - While the columns don't fit the tree's width, the first ones narrow to a strip with their pick's name, as few as it takes.  The last `narrow-before` (2) and the selected row's never do;  the pointer or the focus on one widens it again, over the columns after it.
+                  - Pointing at a narrow strip, or moving the focus into it, draws it whole over the columns after it, which stay where they are.  While even the strips don't make room, the full columns share what's left, so the selected one shows whole.
+                  - `size` sets each column's width, by level, the last one going on for every deeper column:  px, `em`, a percent of the tree's width, `auto` to fit the rows it shows, or `*` for the token's.  `size="auto"` fits every column to its rows.
+                  - Resizing works as in the Finder:  drag the line after a column;  hold Option (Alt) to resize every column together;  double-click the line to fit the column to its longest row, with Option every column.  The arrow keys on a line resize it too, Shift by ten times as much, Option every column.  A width you set wins over `size`, and with an `id` the tree remembers it in this browser.
                   - `--ui-tree-columns-height` sets its height, `--ui-tree-column-width` each column's width, `--ui-tree-narrow-width` a narrow one's.
                 </script>
               </ui-markdown>
@@ -310,7 +342,7 @@
                   With `appearance="columns"`, the keys select as they move, as a Mac's Finder's do, and a selected row's rows show in the next column.
                   - Up and down move within a column;  Home and End go to its ends.
                   - Right goes into the next column, onto the row picked there before, else its first;  left goes back to the previous column's pick.  Right to left, they swap.
-                  - On the line after a column, left and right make it narrower and wider, ten times as far with Shift.
+                  - On the line after a column, left and right make it narrower and wider, ten times as far with Shift;  with Option (Alt), every column.
                 </script>
               </ui-markdown>
             </ui-section>

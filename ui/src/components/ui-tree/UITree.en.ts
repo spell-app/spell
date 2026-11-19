@@ -87,6 +87,18 @@ export const treeVocabulary = {
         "last item selected;  read it as people pick."
     },
     {
+      name: "size",
+      group: "appearance",
+      kind: "string",
+      description:
+        '`appearance="columns"`:  each column\'s width, by level, separated by commas;  the last one sizes every column ' +
+        "deeper than the list goes.  Each one a number of px (`240`, `240px`), `em`, a percent of the tree's width " +
+        "(`30%`), `auto` to fit the column to the rows it shows (from 80px to three times `--ui-tree-column-width`), " +
+        "or `*` for `--ui-tree-column-width`.  So `auto` fits every column to its rows, and `12em, auto` keeps the " +
+        "first at 12em.  None:  every column is `--ui-tree-column-width` wide.  A column a person resizes keeps " +
+        "that width instead:  with an `id`, the tree remembers it in this browser."
+    },
+    {
       name: "narrow-before",
       group: "appearance",
       kind: "number",
@@ -177,7 +189,9 @@ export const treeVocabulary = {
     {
       key: "resizeColumn",
       text: "Resize this column",
-      description: '`appearance="columns"`:  the name of the line after a column, for a screen reader.'
+      description:
+        '`appearance="columns"`:  the name of the line after a column, for a screen reader:  drag it, or its arrow ' +
+        "keys, to resize the column;  Option (Alt) resizes every column;  a double-click fits the column to its rows."
     },
     {
       key: "loading",

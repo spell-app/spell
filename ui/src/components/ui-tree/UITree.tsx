@@ -4,6 +4,7 @@ import { For, Show, type Accessor } from "solid-js"
 import { Dragging } from "spell/util/Dragging"
 import { PrefStore } from "spell/util/persist/PrefStore"
 import { E, UI } from "spell/ui/core"
+import { TreeMeasure } from "spell/ui/components/ui-tree-diagram/TreeMeasure"
 import { treeVocabulary } from "./UITree.en"
 import { DEFAULT_ROW_PARTS, type RowPart, type TreeItemData } from "./UITree.types"
 import { UITreeItem } from "./UITreeItem"
@@ -33,15 +34,21 @@ import columnsCSS from "./UITreeColumns.css?inline"
  *     the open rows are the chain of picks, one a column (a picked row with no rows is open too, drawing none).
  *   - The keys select as they move:  up and down within a column;  right and left to the next and previous column.
  *   - `column-titles`:  a title over each column, by level.
- *   - The line after each column resizes it:  dragged, or its arrow keys;  a double-click puts it back.
- *     A tree with an `id` remembers the widths in this browser, under it;  one without, until the page reloads.
+ *   - `size`:  each column's width, by level (`E.PaneSizes`, as `<ui-split-panel>` reads its sizes):  px, `em`, a
+ *     percent of the box of columns, `auto` to fit the rows it shows (measured, `fitWidths`), `*` for the token's.
+ *   - The line after each column resizes it, as a Mac's Finder's does:  dragged, or its arrow keys;  with Option (Alt),
+ *     every column together;  a double-click fits the column to its longest row, with Option every column.
+ *     A width set so wins over `size`.  A tree with an `id` remembers them in this browser (the `ui-tree` store,
+ *     `widths:<id>`);  one without, until the page reloads.
  *   - `path`:  the ids of each column's pick, from the top;  set it to open a path, read it as people pick.
  *   - `filter` filters one column:  the last one on screen as the filter starts, so moving about doesn't move it.
  *   - `sticky-path`:  the path line above the columns, naming each column's pick;  a click on one picks it again,
  *     keeping the columns after it, and scrolls its column into view.
  *   - Narrow columns:  while the columns don't fit the tree's width, the first ones narrow to a strip with their pick's
  *     name, as few as it takes, never the last `narrow-before` (2) nor the selected row's.
- *     The pointer or the focus on one widens it again.
+ *     The pointer or the focus on one draws it whole again, OVER the columns after it, which stay put.
+ *     While even the strips don't make room, the full columns share what they leave (`fullColumnMostPx`).
+ *   - The box scrolls sideways a column at a time (it snaps), and keeps the selected row's column in view.
  *   - `show`:  which parts each row shows (`icon which count chevron`).
  *   - An `expandable` row picked before its rows come shows a spinner in its column (`<ui-loader>`).
  *   - Its rows can be DATA instead:  `items`, a `TreeItemData` list, drawn in its shadow root ("Columns from data").
@@ -190,6 +197,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
           <Show when={this.hasItemData} fallback={this.firstColumn()}>
             {this.itemColumns()}
           </Show>
+          <div class={["column-filler", { titled: this.columnTitleList.length > 0 }]} aria-hidden="true" />
           <For each={this.columnIndexes}>{(column) => this.columnEdge(column)}</For>
           <div class="column-probe" aria-hidden="true" />
           <div class="narrow-probe" aria-hidden="true" />
@@ -201,7 +209,10 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   /** From markup:  the top rows, as the first column. */
   private firstColumn() {
     return (
-      <div class={["column", { narrow: this.isNarrowColumn(0) }]} style={{ width: this.columnWidthCSS(0) }}>
+      <div
+        class={["column", { narrow: this.isNarrowColumn(0), peek: this.isPeekColumn(0) }]}
+        style={{ width: this.columnWidthCSS(0), "margin-inline-end": this.peekMarginCSS(0) }}
+      >
         <Show when={this.titleForColumn(0)}>
           {(title) => (
             <div class="column-title" aria-hidden="true">
@@ -536,39 +547,135 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   ////////////////
 
   /**
-   * Each column's width by level, in px, as a person sized it:  `undefined` for one left at `--ui-tree-column-width`.
-   * - Kept under the tree's `id`, when it has one (`columnWidthStore`).
+   * `size`, read:  each column's size by level, the last going on for every deeper column.
+   * - `undefined` for `*`, or an entry that isn't a size (warned about):  that column takes `--ui-tree-column-width`.
+   */
+  @E.derived({ equals: E.isSameList })
+  get columnSizes(): readonly (E.PaneSize | undefined)[] {
+    return E.commaList(this.size).map((entry) => E.PaneSizes.sizeFor(entry, { source: "<ui-tree size>" }))
+  }
+
+  /** Column `index`'s `size`:  `undefined` for the token's width. */
+  sizeOfColumn(index: number): E.PaneSize | undefined {
+    const sizes = this.columnSizes
+    return sizes.length ? sizes[Math.min(index, sizes.length - 1)] : undefined
+  }
+
+  /**
+   * Each column's width by level, in px, as a person dragged it:  `undefined` for one left as `size` says.
+   * - Kept under the tree's `id`, when it has one (`keepWidths()`).
    */
   @E.state({ equals: E.isSameList }) accessor columnWidths: readonly (number | undefined)[] = []
 
-  /** Column `index`'s width, as CSS:  a narrow strip's (`narrowColumns`), else its own, else the token's. */
-  columnWidthCSS(index: number): string {
-    if (this.isNarrowColumn(index)) return NARROW_WIDTH
-    const width = this.columnWidths[index]
-    return width === undefined ? DEFAULT_WIDTH : `${width}px`
+  /** The width an Option-drag gave every column, in px:  a column's own drag still wins. */
+  @E.state accessor everyColumnWidth: number | undefined = undefined
+
+  /** Each `size="auto"` column's width by level, in px:  what its rows need, measured as they draw (`fitKey`). */
+  @E.state({ equals: E.isSameList }) accessor fitWidths: readonly (number | undefined)[] = []
+
+  /** Column `index`'s width as a person dragged it, in px:  its own drag, else an Option-drag's;  else `undefined`. */
+  private draggedWidthOf(index: number): number | undefined {
+    return this.columnWidths[index] ?? this.everyColumnWidth
   }
 
-  /** Where column `index` starts, as CSS:  the widths of the columns before it, added up. */
+  /**
+   * Column `index`'s width, as CSS:  a narrow strip's (`narrowColumns`), else its full width (`fullWidthCSS()`).
+   * - A narrow one under the pointer is drawn whole (`peekColumn`), over the columns after it.
+   */
+  columnWidthCSS(index: number): string {
+    if (this.isNarrowColumn(index)) return NARROW_WIDTH
+    return this.fullWidthCSS(index, { isShared: !this.isPeekColumn(index) })
+  }
+
+  /**
+   * The room column `index` takes in the row of columns, as CSS:  a strip's when it's narrow, though drawn whole for
+   * now, so the columns after it stay where they are.
+   */
+  private roomOfColumnCSS(index: number): string {
+    return this.narrowColumns.includes(index) ? NARROW_WIDTH : this.fullWidthCSS(index)
+  }
+
+  /**
+   * Column `index`'s `margin-inline-end`, while it's drawn whole over the columns after it (`peekColumn`):
+   * the strip's width less its own, so it takes a strip's room.  `undefined` otherwise.
+   */
+  peekMarginCSS(index: number): string | undefined {
+    return this.isPeekColumn(index)
+      ? `calc(${NARROW_WIDTH} - ${this.fullWidthCSS(index, { isShared: false })})`
+      : undefined
+  }
+
+  /**
+   * Column `index`'s full width, as CSS:  a person's drag, else `size`'s, else the token's;  never over
+   * `fullColumnMostPx` while the columns don't fit, unless `isShared` is false (a narrow one drawn whole over the rest).
+   * - `auto`:  its rows' width once measured;  the token's until then.
+   * - A percent is of the tree's box of columns, never under `MIN_COLUMN_PX`.
+   */
+  private fullWidthCSS(index: number, { isShared = true } = {}): string {
+    const most = this.fullColumnMostPx
+    if (isShared && most < this.widthPxOf(index)) return `${most}px`
+    const dragged = this.draggedWidthOf(index)
+    if (dragged !== undefined) return `${dragged}px`
+    const size = this.sizeOfColumn(index)
+    if (!size) return DEFAULT_WIDTH
+    if (E.PaneSizes.isAuto(size)) {
+      const fit = this.fitWidths[index]
+      return fit === undefined ? DEFAULT_WIDTH : `${fit}px`
+    }
+    if (size.units === "%") return `max(${MIN_COLUMN_PX}px, ${size.value}%)`
+    return `${size.value}${size.units}`
+  }
+
+  /** Column `index`'s width on screen, in px:  a strip's, or its full width, never over `fullColumnMostPx`. */
+  private shownWidthPxOf(index: number): number {
+    if (this.narrowColumns.includes(index)) return this.narrowWidthPx
+    return Math.min(this.fullColumnMostPx, this.widthPxOf(index))
+  }
+
+  /** Column `index`'s width when it isn't narrow, in px:  as `columnWidthCSS()` says, worked out. */
+  widthPxOf(index: number): number {
+    const dragged = this.draggedWidthOf(index)
+    if (dragged !== undefined) return dragged
+    const size = this.sizeOfColumn(index)
+    if (!size) return this.defaultWidthPx
+    if (E.PaneSizes.isAuto(size)) return this.fitWidths[index] ?? this.defaultWidthPx
+    if (size.units === "%") return Math.max(MIN_COLUMN_PX, (this.boxWidthPx * size.value) / 100)
+    if (size.units === "em") return size.value * this.emPx
+    if (size.units === "rem") return size.value * this.remPx
+    return size.value
+  }
+
+  /** Where column `index` starts, as CSS:  the room of the columns before it, added up. */
   columnStartCSS(index: number): string {
-    const widths = Array.from({ length: index }, (_, before) => this.columnWidthCSS(before))
+    const widths = Array.from({ length: index }, (_, before) => this.roomOfColumnCSS(before))
     return `calc(0px + ${widths.join(" + ") || "0px"})`
   }
 
-  /** The line after column `index`:  a few px of it to drag, or to move with the keys, sizing that column. */
+  /**
+   * The line after column `index`:  a few px of it to drag, or to move with the keys, sizing that column;
+   * Option (Alt) with either sizes every column.  A double-click fits the column to its rows;  with Option, every one.
+   */
   private columnEdge(index: number) {
     return (
       <div
-        class={["column-edge", { narrow: this.isNarrowColumn(index) }]}
+        class={[
+          "column-edge",
+          {
+            narrow: this.narrowColumns.includes(index),
+            covered: index > (this.peekColumn ?? Infinity),
+            last: index === this.columnIndexes.length - 1
+          }
+        ]}
         role="separator"
         tabindex="0"
         aria-orientation="vertical"
         aria-label={this.translationForKey("resizeColumn")}
-        aria-valuenow={Math.round(this.columnWidths[index] ?? this.defaultWidthPx)}
+        aria-valuenow={Math.round(this.widthPxOf(index))}
         aria-valuemin={MIN_COLUMN_PX}
         style={{ "inset-inline-start": this.columnStartCSS(index + 1) }}
         onPointerDown={(event) => this.startResizing(event, index)}
         onKeyDown={(event) => this.resizeByKey(event, index)}
-        onDblClick={() => this.setColumnWidth(index, undefined)}
+        onDblClick={(event: MouseEvent) => this.fitColumn(index, event)}
       />
     )
   }
@@ -576,29 +683,39 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   /** What an unsized column's width comes to, in px:  measured as the columns draw. */
   @E.state accessor defaultWidthPx = 0
 
-  /** Column `index`'s width on screen now, in px. */
-  private widthOf(index: number): number {
-    const width = this.columnWidths[index]
-    if (width !== undefined) return width
-    return this.measureDefaultWidth()
-  }
+  /** What `1em` comes to in the columns, in px:  for a `size` in `em`. */
+  @E.state accessor emPx = DEFAULT_EM_PX
 
-  /** Measure what an unsized column's width comes to, in px, and keep it (`defaultWidthPx`), and a narrow one's. */
+  /** What `1rem` comes to, in px:  for a `size` in `rem`. */
+  @E.state accessor remPx = DEFAULT_EM_PX
+
+  /** Measure what an unsized column's width comes to, in px, and keep it (`defaultWidthPx`);  a narrow one's;  an em's. */
   private measureDefaultWidth(): number {
-    const widthOf = (selector: string) =>
-      Math.round(this.domElement.renderRoot.querySelector(selector)?.getBoundingClientRect().width ?? 0)
-    const width = widthOf(".column-probe")
+    const root = this.domElement.renderRoot
+    const widthOf = (selector: string) => root.querySelector(selector)?.getBoundingClientRect().width ?? 0
+    const width = Math.round(widthOf(".column-probe"))
     if (width) this.defaultWidthPx = width
+    // not rounded:  several strips side by side, the full columns sharing what they leave, must add up
     const narrow = widthOf(".narrow-probe")
     if (narrow) this.narrowWidthPx = narrow
+    const box = root.querySelector(".columns")
+    if (box) this.emPx = parseFloat(getComputedStyle(box).fontSize) || this.emPx
+    this.remPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || this.remPx
     return width
   }
 
-  /** Drag column `index`'s line:  it follows the pointer;  Escape puts it back. */
+  /** Column `index`'s width on screen now, in px, measuring an unsized one's first if it hasn't been. */
+  private widthNowOf(index: number): number {
+    if (!this.defaultWidthPx) this.measureDefaultWidth()
+    return this.widthPxOf(index)
+  }
+
+  /** Drag column `index`'s line:  it follows the pointer;  with Option (Alt), every column takes its width.  Escape puts it back. */
   private startResizing(event: PointerEvent & { currentTarget: HTMLElement }, index: number) {
     if (event.button !== 0) return
-    const startWidth = this.widthOf(index)
-    const before = this.columnWidths[index]
+    const startWidth = this.widthNowOf(index)
+    const before = { columns: this.columnWidths, every: this.everyColumnWidth }
+    const isEvery = event.altKey
     const direction = this.isRightToLeft ? -1 : 1
     this.isResizing = true
     new Dragging(event.currentTarget, event, {
@@ -606,14 +723,19 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
       follows: false,
       // the line's own cursor, over the whole page while it's dragged
       cursor: "col-resize",
-      placing: (x) => this.setColumnWidth(index, startWidth + (x - event.clientX) * direction, { keeps: false }),
+      placing: (x) => {
+        const width = startWidth + (x - event.clientX) * direction
+        if (isEvery) this.setEveryColumnWidth(width, { keeps: false })
+        else this.setColumnWidth(index, width, { keeps: false })
+      },
       onDrop: () => {
         this.isResizing = false
-        this.setColumnWidth(index, this.columnWidths[index])
+        this.keepWidths()
       },
       onCancel: () => {
         this.isResizing = false
-        this.setColumnWidth(index, before, { keeps: false })
+        this.columnWidths = before.columns
+        this.everyColumnWidth = before.every
       }
     })
   }
@@ -621,7 +743,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   /** A column's line is being dragged:  `:state(resizing)`, so the columns follow the pointer with no easing. */
   @E.state @E.cssState("resizing") accessor isResizing = false
 
-  /** Left and right on column `index`'s line:  narrower and wider, ten times as far with Shift. */
+  /** Left and right on column `index`'s line:  narrower and wider, ten times as far with Shift;  every column with Option. */
   private resizeByKey(event: KeyboardEvent, index: number) {
     const step = RESIZE_KEYS[event.key]
     if (!step) return
@@ -629,27 +751,59 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     event.stopPropagation()
     const direction = this.isRightToLeft ? -1 : 1
     const distance = KEY_STEP_PX * (event.shiftKey ? SHIFT_STEPS : 1)
-    this.setColumnWidth(index, this.widthOf(index) + step * direction * distance)
+    const width = this.widthNowOf(index) + step * direction * distance
+    if (event.altKey) this.setEveryColumnWidth(width)
+    else this.setColumnWidth(index, width)
   }
 
   /**
-   * Column `index` is `width` px wide now, at least `MIN_COLUMN_PX`;  `undefined`:  back to the token's.
+   * A double-click on column `index`'s line:  the column fits its longest row, as a person's width (kept);
+   * with Option (Alt), every column on screen fits its own.
+   * - A narrow column keeps what it had:  its rows aren't drawn whole.
+   */
+  private fitColumn(index: number, event: MouseEvent) {
+    if (!event.altKey) return this.setColumnWidth(index, this.measureFitWidth(index, this.boxWidthPx || Infinity))
+    const widths = this.columnIndexes.map((each) =>
+      this.isNarrowColumn(each) ? this.draggedWidthOf(each) : this.measureFitWidth(each, this.boxWidthPx || Infinity)
+    )
+    this.everyColumnWidth = undefined
+    this.columnWidths = trimmedWidths(widths)
+    this.keepWidths()
+  }
+
+  /**
+   * Column `index` is `width` px wide now, at least `MIN_COLUMN_PX`;  `undefined`:  back to what `size` says.
    * - SIDE EFFECT:  kept under the tree's `id`, unless `keeps` is false (mid-drag).
    */
   private setColumnWidth(index: number, width: number | undefined, { keeps = true } = {}) {
     const widths = [...this.columnWidths]
     widths[index] = width === undefined ? undefined : Math.round(Math.max(MIN_COLUMN_PX, width))
-    while (widths.length && widths.at(-1) === undefined) widths.pop()
-    this.columnWidths = widths
+    this.columnWidths = trimmedWidths(widths)
+    if (keeps) this.keepWidths()
+  }
+
+  /**
+   * Every column is `width` px wide now, at least `MIN_COLUMN_PX`, deeper ones as they come:  an Option-drag.
+   * - Each column's own width goes, so they're all the same.
+   * - SIDE EFFECT:  kept under the tree's `id`, unless `keeps` is false (mid-drag).
+   */
+  private setEveryColumnWidth(width: number, { keeps = true } = {}) {
+    this.everyColumnWidth = Math.round(Math.max(MIN_COLUMN_PX, width))
+    this.columnWidths = []
+    if (keeps) this.keepWidths()
+  }
+
+  /** Keep the widths a person set under the tree's `id`, when it has one:  `widths:<id>` in the tree's store. */
+  private keepWidths() {
     const id = this.domElement.id
-    if (keeps && id) {
-      if (widths.length)
-        UITree.columnWidthStore.set(
-          id,
-          widths.map((each) => each ?? null)
-        )
-      else UITree.columnWidthStore.forget(id)
+    if (!id || isServer) return
+    const columns = this.columnWidths
+    const every = this.everyColumnWidth
+    const kept: KeptWidths = {
+      ...(columns.length && { columns: columns.map((each) => each ?? null) }),
+      ...(every !== undefined && { every })
     }
+    UITree.store.set(`${WIDTHS_KEY}${id}`, kept.columns || kept.every ? kept : undefined)
   }
 
   /** The widths kept under its `id`, as it connects;  what an unsized one comes to;  its newest column, in view. */
@@ -661,8 +815,9 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     this.showNewestColumn()
     const id = this.domElement.id
     if (!id) return
-    const kept = UITree.columnWidthStore.get<(number | null)[]>(id)
-    if (Array.isArray(kept)) this.columnWidths = kept.map((each) => (typeof each === "number" ? each : undefined))
+    const kept = UITree.keptWidths(id)
+    this.columnWidths = (kept.columns ?? []).map((each) => (typeof each === "number" ? each : undefined))
+    this.everyColumnWidth = typeof kept.every === "number" ? kept.every : undefined
   }
 
   /** Is it laid out right to left? */
@@ -670,11 +825,137 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     return getComputedStyle(this.domElement).direction === "rtl"
   }
 
-  /** Where every column tree's widths are kept, by its `id`:  made on first use, so a server render never touches storage. */
-  private static get columnWidthStore(): PrefStore {
-    return (UITree.madeColumnWidthStore ??= new PrefStore(COLUMN_WIDTHS_STORE))
+  ////////////////
+  // ## Fitting columns to their rows
+  ////////////////
+
+  /**
+   * What the `size="auto"` columns' widths depend on, as one text:  they're measured again as it changes.
+   * - Empty while there's nothing to measure:  not columns, not ready, or no `auto` column.
+   */
+  protected get fitKey(): string {
+    if (!this.isColumns || !this.isReady || !this.columnSizes.some((size) => E.PaneSizes.isAuto(size))) return ""
+    return JSON.stringify([
+      this.columnIndexes.length,
+      this.narrowColumns,
+      this.openPath,
+      this.rowsVersion,
+      this.childrenVersion,
+      this.filter,
+      this.filterColumn,
+      this.show
+    ])
   }
-  private static madeColumnWidthStore?: PrefStore
+
+  /** The `auto` columns' rows changed, or what they show:  measure them again, once they're drawn. */
+  @E.onChange("fitKey")
+  protected onFitKeyChanged(fitKey: string) {
+    if (!fitKey || isServer) return undefined
+    return E.beforeNextPaint(() => this.measureFitWidths())
+  }
+
+  /** Measure each `auto` column on screen that a person hasn't sized, and isn't narrow (`fitWidths`). */
+  private measureFitWidths() {
+    if (!this.defaultWidthPx) this.measureDefaultWidth()
+    const most = Math.max(MIN_COLUMN_PX, this.defaultWidthPx * FIT_MOST_TIMES)
+    this.fitWidths = this.columnIndexes.map((index) => {
+      const isMeasured =
+        E.PaneSizes.isAuto(this.sizeOfColumn(index)) &&
+        this.draggedWidthOf(index) === undefined &&
+        !this.isNarrowColumn(index)
+      return (isMeasured ? this.measureFitWidth(index, most) : undefined) ?? this.fitWidths[index]
+    })
+  }
+
+  /**
+   * The width column `index` needs to show its longest row whole, in px, from `MIN_COLUMN_PX` to `most`;
+   * `undefined` when it isn't drawn, or has no rows.
+   * - SIDE EFFECT:  lays the page out, once a column.
+   */
+  private measureFitWidth(index: number, most: number): number | undefined {
+    if (isServer) return undefined
+    const width = this.hasItemData ? this.fitOfItemColumn(index) : this.fitOfRowColumn(index)
+    return width === undefined ? undefined : Math.round(Math.min(most, Math.max(MIN_COLUMN_PX, width)))
+  }
+
+  /**
+   * From `items`:  the width column `index`'s rows need, in px, measured from the DATA, not the rows drawn.
+   * - Each label and `which` is measured in its row's font (`TreeMeasure.widthOf()`), so a row needn't be drawn
+   *   (`Row Windowing` draws only those in view).
+   * - What else a row takes (its icon, count, chevron, margins, the column's scroll bar) is the column's width
+   *   less its words' and `which`'s tracks and the room after them:  the grid makes them the same in every row.
+   */
+  private fitOfItemColumn(index: number): number | undefined {
+    const column = this.domElement.renderRoot.querySelector<HTMLElement>(`ul[data-depth="${index}"]`)
+    const words = column?.querySelector(".column-row .words")
+    const items = this.shownIn(this.columnLists[index] ?? [], index)
+    if (!column || !words || !items.length) return undefined
+    const tracks = getComputedStyle(column).gridTemplateColumns.split(/\s+/).map(parseFloat)
+    const [, wordsTrack = 0, whichTrack = 0, room = 0] = tracks
+    const others = column.offsetWidth - wordsTrack - whichTrack - room
+    const widest = (texts: (string | undefined)[], sample: Element) => {
+      const font = TreeMeasure.fontOf(sample)
+      return Math.max(0, ...texts.map((text) => (text ? (TreeMeasure.widthOf(text, font) ?? 0) : 0)))
+    }
+    const which = this.shows("which") ? column.querySelector(".column-row .which") : null
+    const whichWidth = which
+      ? widest(
+          items.map((item) => item.which),
+          which
+        ) + (parseFloat(getComputedStyle(which).marginInlineStart) || 0)
+      : 0
+    return Math.ceil(
+      others +
+        widest(
+          items.map((item) => item.label),
+          words
+        ) +
+        whichWidth
+    )
+  }
+
+  /**
+   * From markup:  the width column `index`'s rows need, in px:  its box measured at `max-content`, for a moment.
+   * - Rows from markup draw themselves (their icon, count, badge, actions), so their text alone wouldn't say.
+   * - The rows inside a picked row are out of the column's flow (`position: fixed`), so they don't count.
+   */
+  private fitOfRowColumn(index: number): number | undefined {
+    const parent = index ? this.openChain.filter((row) => row.canOpen)[index - 1]?.domElement : this.domElement
+    const box = index
+      ? parent?.renderRoot.querySelector<HTMLElement>(".rows")
+      : this.domElement.renderRoot.querySelector<HTMLElement>(".column")
+    if (!parent || !box || !this.rowsIn(parent).length) return undefined
+    const { width, transition } = box.style
+    // no easing, so it's measured at once (a page may ease to `max-content`:  `interpolate-size`)
+    box.style.transition = "none"
+    box.style.width = "max-content"
+    const fit = box.getBoundingClientRect().width
+    box.style.width = width
+    box.style.transition = transition
+    return Math.ceil(fit)
+  }
+
+  /** The tree's store of what it keeps:  `widths:<id>` (and the path, later);  made on first use, so a server render never touches storage. */
+  private static get store(): PrefStore {
+    return (UITree.madeStore ??= new PrefStore(STORE_NAME))
+  }
+  private static madeStore?: PrefStore
+
+  /**
+   * The widths kept under tree `id`.
+   * - SIDE EFFECT:  moves what the old store kept (`ui-tree-column-widths`, a list of widths by `id`) over, once.
+   */
+  private static keptWidths(id: string): KeptWidths {
+    const key = `${WIDTHS_KEY}${id}`
+    const old = new PrefStore(OLD_WIDTHS_STORE)
+    if (old.has(id)) {
+      const columns = old.get(id)
+      if (!UITree.store.has(key) && Array.isArray(columns)) UITree.store.set(key, { columns })
+      old.forget(id)
+    }
+    const kept = UITree.store.get(key)
+    return kept && typeof kept === "object" ? (kept as KeptWidths) : {}
+  }
 
   ////////////////
   // ## The columns' path line
@@ -715,22 +996,29 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     this.showColumn(depth)
   }
 
-  /** Scroll the columns' box the least that shows column `depth` whole, once it's drawn at its new width. */
+  /**
+   * Scroll the columns' box the least that shows column `depth` whole, once it's drawn at its new width.
+   * - Always to a column's start, where the box's scroll snaps (`scroll-snap-type`):  the first one far enough along
+   *   to show column `depth`'s end.
+   */
   private showColumn(depth: number) {
     if (isServer) return
     E.beforeNextPaint(() => {
       const box = this.domElement.renderRoot.querySelector<HTMLElement>(".columns")
       if (!box) return
-      const widthPx = (index: number) =>
-        this.isNarrowColumn(index) ? this.narrowWidthPx : (this.columnWidths[index] ?? this.defaultWidthPx)
-      let start = 0
-      for (let index = 0; index < depth; index++) start += widthPx(index)
-      const end = start + widthPx(depth)
+      const starts = [0]
+      for (let index = 0; index < depth; index++) starts.push(starts[index] + this.shownWidthPxOf(index))
+      const start = starts[depth]
+      const end = start + this.shownWidthPxOf(depth)
       // right to left, `scrollLeft` runs from 0 down
       const direction = this.isRightToLeft ? -1 : 1
       const scrolled = box.scrollLeft * direction
-      if (start < scrolled) box.scrollLeft = start * direction
-      else if (end > scrolled + box.clientWidth) box.scrollLeft = (end - box.clientWidth) * direction
+      let to: number | undefined
+      if (start < scrolled) to = start
+      else if (end > scrolled + box.clientWidth) to = starts.find((each) => each >= end - box.clientWidth) ?? start
+      if (to === undefined) return
+      const isStill = matchMedia("(prefers-reduced-motion: reduce)").matches
+      box.scrollTo({ left: to * direction, behavior: isStill ? "instant" : "smooth" })
     })
   }
 
@@ -744,38 +1032,104 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   /** What a narrow column's width comes to, in px (`--ui-tree-narrow-width`):  measured as the columns draw. */
   @E.state accessor narrowWidthPx = 0
 
-  /** The column under the pointer, by level:  a narrow one widens while it's there. */
+  /** The column under the pointer, by level:  a narrow one widens over the columns after it while it's there. */
   @E.state accessor hoveredColumn: number | undefined = undefined
 
-  /** The column with the focus, by level:  a narrow one widens while it has it. */
+  /** The column with the focus, by level:  a narrow one widens over the columns after it while it has it. */
   @E.state accessor focusedColumn: number | undefined = undefined
 
   /**
-   * The columns drawn narrow, by level:  while the columns don't fit the tree's width, the first ones, as few as it
-   * takes, each a strip with its pick's name.
+   * The columns that take a narrow strip's room, by level:  while the columns don't fit the tree's width, the first
+   * ones, as few as it takes, each a strip with its pick's name.
    * - Never the last `narrow-before` (2), nor the selected row's column.
-   * - Nor the one under the pointer or with the focus:  it widens, and the columns after it move along.
-   * - A column a person sized narrows too, and widens back to that size.
+   * - A column a person sized, or `size` sizes, narrows too, and widens back to that size.
+   * - The one under the pointer or with the focus too:  it widens OVER the columns after it (`peekColumn`), so they
+   *   stay where they are and the selected one stays in view.
    */
   get narrowColumns(): readonly number[] {
     if (!this.isColumns || !this.boxWidthPx || !this.defaultWidthPx) return []
     const count = this.columnIndexes.length
     const selected = this.selectedColumn
-    const widthOf = (index: number) => this.columnWidths[index] ?? this.defaultWidthPx
     let total = 0
-    for (let index = 0; index < count; index++) total += widthOf(index)
+    for (let index = 0; index < count; index++) total += this.widthPxOf(index)
     const narrow: number[] = []
     for (let index = 0; index < count - (this.narrowBefore ?? 2) && total > this.boxWidthPx; index++) {
       if (index === selected) continue
       narrow.push(index)
-      total -= widthOf(index) - this.narrowWidthPx
+      total -= this.widthPxOf(index) - this.narrowWidthPx
     }
-    return narrow.filter((index) => index !== this.hoveredColumn && index !== this.focusedColumn)
+    return narrow
   }
 
-  /** Is column `index` drawn narrow?  Rows from markup ask too (`UITreeItem`). */
+  /** The narrow column under the pointer, else the one with the focus:  drawn whole, over the columns after it. */
+  get peekColumn(): number | undefined {
+    const narrow = this.narrowColumns
+    for (const index of [this.hoveredColumn, this.focusedColumn]) {
+      if (index !== undefined && narrow.includes(index)) return index
+    }
+    return undefined
+  }
+
+  /** Is column `index` drawn narrow, a strip with its pick?  Rows from markup ask too (`UITreeItem`). */
   isNarrowColumn(index: number): boolean {
-    return this.narrowColumns.includes(index)
+    return this.narrowColumns.includes(index) && index !== this.peekColumn
+  }
+
+  /** Is column `index` a narrow one drawn whole for now, over the columns after it?  Rows from markup ask too. */
+  isPeekColumn(index: number): boolean {
+    return index === this.peekColumn
+  }
+
+  /**
+   * From markup, while a narrow column is drawn whole over the ones after it (`peekColumn`):  `clip-path` for the
+   * lines of column `index`, cutting off what the peeking column covers.  `undefined` for none.
+   * - Needed because each column from markup is drawn INSIDE the row picked before it, so a later column paints over
+   *   the peeking one, whatever its `z-index`;  from `items`, the columns are siblings, and `z-index` does it.
+   * - Each line's own box, not its column's:  clipping a column would clip every column drawn inside it.
+   */
+  peekClipCSS(index: number): string | undefined {
+    const peek = this.peekColumn
+    if (peek === undefined || index <= peek || this.hasItemData) return undefined
+    const peekEnd = `${this.columnStartCSS(peek)} + ${this.fullWidthCSS(peek, { isShared: false })}`
+    const covered = `max(0px, ${peekEnd} - ${this.columnStartCSS(index)})`
+    return this.isRightToLeft ? `inset(0 ${covered} 0 0)` : `inset(0 0 0 ${covered})`
+  }
+
+  /**
+   * From markup:  is column `index` wholly under the narrow column drawn whole over it (`peekColumn`)?
+   * Its border goes too, which `peekClipCSS()` can't reach.
+   */
+  isCoveredColumn(index: number): boolean {
+    const peek = this.peekColumn
+    if (peek === undefined || index <= peek || this.hasItemData) return false
+    let start = 0
+    for (let before = 0; before < index; before++) start += this.shownWidthPxOf(before)
+    let peekStart = 0
+    for (let before = 0; before < peek; before++) peekStart += this.shownWidthPxOf(before)
+    return start + this.shownWidthPxOf(index) <= peekStart + this.widthPxOf(peek)
+  }
+
+  /**
+   * The widest a full column is drawn, in px, while the columns don't fit even with the strips:  the full ones share
+   * what the strips leave, so the selected column shows whole (at a phone's width, say);  `Infinity` while they fit.
+   * - Shared fairly:  a column narrower than its share keeps its width, and the rest share what it leaves.
+   * - Never under `MIN_COLUMN_PX`.
+   */
+  get fullColumnMostPx(): number {
+    if (!this.isColumns || !this.boxWidthPx || !this.defaultWidthPx) return Infinity
+    const narrow = this.narrowColumns
+    const full = this.columnIndexes
+      .filter((index) => !narrow.includes(index))
+      .map((index) => this.widthPxOf(index))
+      .sort((a, b) => a - b)
+    let room = this.boxWidthPx - narrow.length * this.narrowWidthPx
+    if (full.reduce((sum, width) => sum + width, 0) <= room) return Infinity
+    for (let at = 0; at < full.length; at++) {
+      const share = room / (full.length - at)
+      if (full[at] > share) return Math.max(MIN_COLUMN_PX, Math.floor(share))
+      room -= full[at]
+    }
+    return Infinity
   }
 
   /** While it's in the page as columns:  the width of its box of columns, measured as it changes. */
@@ -1121,7 +1475,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     const shown = () => this.shownIn(list() ?? [], depth)
     return (
       <ul
-        class={["column items", { narrow: this.isNarrowColumn(depth) }]}
+        class={["column items", { narrow: this.isNarrowColumn(depth), peek: this.isPeekColumn(depth) }]}
         role="group"
         part={
           this.isNarrowColumn(depth)
@@ -1131,7 +1485,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
         data-depth={depth}
         aria-label={this.titleForColumn(depth)}
         aria-busy={list() ? undefined : "true"}
-        style={{ width: this.columnWidthCSS(depth) }}
+        style={{ width: this.columnWidthCSS(depth), "margin-inline-end": this.peekMarginCSS(depth) }}
       >
         <Show when={this.titleForColumn(depth)}>
           {(title) => (
@@ -1276,10 +1630,12 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     if (row && column) revealIn(column, row)
   }
 
-  /** `path` changed:  each column's pick in view, once drawn. */
+  /** `path` changed:  the selected row's column in view, its end too;  from `items`, each column's pick in view. */
   @E.onChange("openPath", "isReady", { defer: true })
   protected onOpenPathChanged() {
-    if (this.hasItemData && this.isReady) this.showPicks()
+    if (!this.isColumns || !this.isReady) return
+    this.showColumn(this.selectedColumn)
+    if (this.hasItemData) this.showPicks()
   }
 
   /** Scroll each column from `items` to its pick, before the next paint. */
@@ -1295,6 +1651,16 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
 }
 
 export interface UITree extends E.AttributeValues<typeof treeVocabulary> {}
+
+/** The widths a person set, kept under a tree's `id`:  a column's own, by level (`null` for none), and an Option-drag's. */
+type KeptWidths = { columns?: (number | null)[]; every?: number }
+
+/** `widths` without the `undefined`s at its end:  the columns after them take what `size` says. */
+function trimmedWidths(widths: readonly (number | undefined)[]): (number | undefined)[] {
+  const trimmed = [...widths]
+  while (trimmed.length && trimmed.at(-1) === undefined) trimmed.pop()
+  return trimmed
+}
 
 /** A row the path line names:  a `<ui-tree-item>`, or an `items` entry. */
 type PathRow = { readonly label?: string | undefined }
@@ -1330,8 +1696,20 @@ const DEFAULT_WIDTH = "var(--_ui-tree-column-width)"
 /** A narrow column's width. */
 const NARROW_WIDTH = "var(--_ui-tree-narrow-width)"
 
-/** What the column widths are kept under, in this browser. */
-const COLUMN_WIDTHS_STORE = "ui-tree-column-widths"
+/** The tree's store, in this browser:  each tree's widths under `widths:<id>`. */
+const STORE_NAME = "ui-tree"
+
+/** The start of the key a tree's widths are kept under, before its `id`. */
+const WIDTHS_KEY = "widths:"
+
+/** Where the widths were kept before (epic `from-console` P5):  a list of widths under each tree's `id`, moved over once. */
+const OLD_WIDTHS_STORE = "ui-tree-column-widths"
+
+/** What `1em` and `1rem` come to before they're measured, in px. */
+const DEFAULT_EM_PX = 16
+
+/** The widest a `size="auto"` column grows, in default widths (`--ui-tree-column-width`). */
+const FIT_MOST_TIMES = 3
 
 /** The narrowest a column can be made, in px. */
 const MIN_COLUMN_PX = 80

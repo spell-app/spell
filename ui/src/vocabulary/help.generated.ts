@@ -2342,6 +2342,7 @@ export const HELP_TABLE: Readonly<
       items:
         '`appearance="columns"`: the tree as data, given as a property, in place of `<ui-tree-item>`s: `{ id, label, icon?, which?, count?, children?, data?',
       path: "`appearance=\"columns\"`: the ids of each column's pick, from the top (`string[]`; a `<ui-tree-item>`'s id is its `value`, else its `label`).",
+      size: '`appearance="columns"`: each column\'s width, by level, separated by commas; the last one sizes every column deeper than the list goes.',
       "narrow-before": '`appearance="columns"`: how many columns at the end never narrow.',
       show: '`appearance="columns"`: which parts each row shows, as words: `icon which count chevron`; the label always shows.',
       "sticky-path":

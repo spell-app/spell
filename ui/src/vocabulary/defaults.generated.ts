@@ -1913,6 +1913,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "column-titles", kind: "string", group: "appearance" },
     { name: "items", kind: "json", group: "content" },
     { name: "path", kind: "json", group: "behaviour" },
+    { name: "size", kind: "string", group: "appearance" },
     { name: "narrow-before", kind: "number", group: "appearance" },
     { name: "show", kind: "string", group: "appearance" },
     { name: "sticky-path", kind: "keyOnly", group: "behaviour" }

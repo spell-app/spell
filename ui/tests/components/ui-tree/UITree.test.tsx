@@ -513,46 +513,124 @@ describe('<ui-tree appearance="columns">', () => {
     expect(getComputedStyle(title!).backgroundColor).not.toMatch(/rgba\(.*, 0\)|transparent/)
   })
 
-  it("the line after a column resizes it:  a drag, the arrow keys, a double-click to put it back", async () => {
+  /** Drag `line` by `distance` px, holding Option (Alt) with `isEvery`. */
+  async function dragLine(line: HTMLElement, distance: number, { isEvery = false } = {}) {
+    const box = line.getBoundingClientRect()
+    const at = { clientX: box.left + 3, clientY: box.top + 20, pointerId: 1, button: 0, bubbles: true, composed: true }
+    line.dispatchEvent(new PointerEvent("pointerdown", { ...at, altKey: isEvery }))
+    window.dispatchEvent(new PointerEvent("pointermove", { ...at, clientX: at.clientX + distance }))
+    window.dispatchEvent(new PointerEvent("pointerup", { ...at, clientX: at.clientX + distance }))
+    // a drag swallows the click its let-go makes, until the next task:  let that pass
+    await new Promise((done) => setTimeout(done, 0))
+    await ElementFixture.settle()
+  }
+
+  /** Column `index`'s width on screen, rounded. */
+  function widthOf(host: Element, index: number): number {
+    return Math.round(columnBox(host, index).getBoundingClientRect().width)
+  }
+
+  it("the line after a column resizes it:  a drag, the arrow keys, a double-click to fit its rows", async () => {
     const host = await columns()
     click(host, "Acme")
     await ElementFixture.settle()
     const start = columnBox(host, 0).getBoundingClientRect().width
     const line = edge(host, 0)
-    const box = line.getBoundingClientRect()
-    const at = { clientX: box.left + 3, clientY: box.top + 20, pointerId: 1, button: 0, bubbles: true, composed: true }
-    line.dispatchEvent(new PointerEvent("pointerdown", at))
-    window.dispatchEvent(new PointerEvent("pointermove", { ...at, clientX: at.clientX + 60 }))
-    window.dispatchEvent(new PointerEvent("pointerup", { ...at, clientX: at.clientX + 60 }))
-    await ElementFixture.settle()
-    expect(Math.round(columnBox(host, 0).getBoundingClientRect().width)).toBe(Math.round(start + 60))
+    await dragLine(line, 60)
+    expect(widthOf(host, 0)).toBe(Math.round(start + 60))
     // the next column moved with it
     expect(leftOf(host, "Menu") - leftOf(host, "Acme")).toBe(Math.round(start + 60))
     line.focus()
     line.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true, composed: true }))
     await ElementFixture.settle()
-    expect(Math.round(columnBox(host, 0).getBoundingClientRect().width)).toBe(Math.round(start + 44))
+    expect(widthOf(host, 0)).toBe(Math.round(start + 44))
+    // as the Finder's:  fits its longest row, "Books" and its chevron, at least 80px
     line.dispatchEvent(new MouseEvent("dblclick", { bubbles: true, composed: true }))
     await ElementFixture.settle()
-    expect(Math.round(columnBox(host, 0).getBoundingClientRect().width)).toBe(Math.round(start))
+    expect(widthOf(host, 0)).toBeLessThan(start)
+    expect(widthOf(host, 0)).toBeGreaterThanOrEqual(80)
+    expect(row(host, "Books").shadowRoot!.querySelector(".label")!.scrollWidth).toBeLessThanOrEqual(
+      row(host, "Books").shadowRoot!.querySelector<HTMLElement>(".label")!.clientWidth
+    )
   })
 
+  it("Option-dragging a line sizes every column the same, deeper ones as they come", async () => {
+    const host = await columns()
+    click(host, "Acme")
+    await ElementFixture.settle()
+    click(host, "Menu")
+    await ElementFixture.settle()
+    const start = widthOf(host, 1)
+    await dragLine(edge(host, 1), -50, { isEvery: true })
+    expect([widthOf(host, 0), widthOf(host, 1), widthOf(host, 2)]).toEqual([start - 50, start - 50, start - 50])
+    click(host, "photos")
+    await ElementFixture.settle()
+    expect(widthOf(host, 3)).toBe(start - 50)
+  })
+
+  it("`size` sizes the columns by level, the last for every deeper one:  px, em, a percent, `*`", async () => {
+    const host = await columns('size="150, 10em, 20%, *"')
+    for (const label of ["Acme", "Menu", "photos"]) {
+      click(host, label)
+      await ElementFixture.settle()
+    }
+    const em = parseFloat(getComputedStyle(host.shadowRoot!.querySelector(".columns")!).fontSize)
+    expect([widthOf(host, 0), widthOf(host, 1), widthOf(host, 2)]).toEqual([150, Math.round(10 * em), 180])
+    expect(widthOf(host, 3)).toBe(Math.round(columnProbeWidth(host)))
+    // a column a person sizes keeps that width instead
+    await dragLine(edge(host, 0), 30)
+    expect(widthOf(host, 0)).toBe(180)
+  })
+
+  it('`size="auto"` fits each column to the rows it shows', async () => {
+    const host = await columns(
+      'size="auto"',
+      '<ui-tree-item label="A row with a much longer label than the rest"></ui-tree-item>'
+    )
+    click(host, "Acme")
+    await ElementFixture.settle()
+    await nextPaint()
+    await nextPaint()
+    const label = row(host, "A row with a much longer label than the rest").shadowRoot!.querySelector<HTMLElement>(
+      ".label"
+    )!
+    // the long row shows whole;  the next column, of short rows, is narrower than the token's width
+    expect(label.scrollWidth).toBeLessThanOrEqual(label.clientWidth)
+    expect(widthOf(host, 0)).toBeGreaterThan(widthOf(host, 1))
+    expect(widthOf(host, 1)).toBeLessThan(Math.round(columnProbeWidth(host)))
+  })
+
+  /** What an unsized column's width comes to, px. */
+  function columnProbeWidth(host: Element): number {
+    return host.shadowRoot!.querySelector(".column-probe")!.getBoundingClientRect().width
+  }
+
   it("remembers the widths under its `id`, by level;  a tree without one doesn't keep them", async () => {
-    localStorage.removeItem("ui-tree-column-widths:work")
+    localStorage.removeItem("ui-tree:widths:work")
     const host = await columns('id="work"')
     edge(host, 0).dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, composed: true }))
     await ElementFixture.settle()
-    expect(JSON.parse(localStorage.getItem("ui-tree-column-widths:work")!)).toEqual([expect.any(Number)])
+    expect(JSON.parse(localStorage.getItem("ui-tree:widths:work")!)).toEqual({ columns: [expect.any(Number)] })
     const width = columnBox(host, 0).getBoundingClientRect().width
     const again = await columns('id="work"')
     expect(columnBox(again, 0).getBoundingClientRect().width).toBe(width)
-    localStorage.removeItem("ui-tree-column-widths:work")
+    localStorage.removeItem("ui-tree:widths:work")
 
     const keys = Object.keys(localStorage).length
     const plain = await columns()
     edge(plain, 0).dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, composed: true }))
     await ElementFixture.settle()
     expect(Object.keys(localStorage).length).toBe(keys)
+  })
+
+  it("moves widths kept under the old store over, once", async () => {
+    localStorage.removeItem("ui-tree:widths:moved")
+    localStorage.setItem("ui-tree-column-widths:moved", "[250]")
+    const host = await columns('id="moved"')
+    expect(widthOf(host, 0)).toBe(250)
+    expect(localStorage.getItem("ui-tree-column-widths:moved")).toBeNull()
+    expect(JSON.parse(localStorage.getItem("ui-tree:widths:moved")!)).toEqual({ columns: [250] })
+    localStorage.removeItem("ui-tree:widths:moved")
   })
 
   it("is accessible", async () => {
@@ -663,15 +741,27 @@ describe('<ui-tree appearance="columns">', () => {
     expect(leftOf(host, "menu.pdf")).toBeLessThan(2 * 224)
   })
 
+  it("while even the strips don't make room, the full columns share what they leave", async () => {
+    const host = await deepColumns("", 300)
+    expect(narrowColumns(host)).toEqual([0, 1])
+    const box = host.shadowRoot!.querySelector<HTMLElement>(".columns")!
+    expect(box.scrollWidth).toBeLessThanOrEqual(box.clientWidth)
+    expect(widthOf(host, 2)).toBe(widthOf(host, 3))
+  })
+
   it("narrows nothing while the columns fit, and never the last `narrow-before`", async () => {
     expect(narrowColumns(await deepColumns("", 900))).toEqual([])
     expect(narrowColumns(await deepColumns('narrow-before="3"'))).toEqual([0])
   })
 
-  it("widens a narrow column under the pointer, and narrows it again once the pointer leaves", async () => {
+  it("widens a narrow column under the pointer OVER the columns after it, and narrows it again once the pointer leaves", async () => {
     const host = await deepColumns()
+    const menuLeft = leftOf(host, "menu.pdf")
     await pointAt(row(host, "Acme"))
     expect(narrowColumns(host)).toEqual([1])
+    expect(widthOf(host, 0)).toBe(Math.round(columnProbeWidth(host)))
+    // the columns after it stay where they are
+    expect(leftOf(host, "menu.pdf")).toBe(menuLeft)
     host.dispatchEvent(new PointerEvent("pointerleave"))
     await ElementFixture.settle()
     expect(narrowColumns(host)).toEqual([0, 1])
