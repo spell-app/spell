@@ -184,6 +184,12 @@ export const treeVocabulary = {
     { name: "", description: "The top rows:  `<ui-tree-item>`s." },
     { name: "empty", description: "Shown when `filter` matches no row." },
     {
+      name: "tools",
+      description:
+        "At the end of the line above the rows, after `tools`' buttons:  a filter field, say.  On a narrow tree it drops " +
+        "to a line of its own;  slotted without `tools`, the line holds it alone."
+    },
+    {
       name: "detail",
       description:
         '`appearance="columns"`:  a pane after the last column, showing what\'s picked:  any element, which the tree ' +

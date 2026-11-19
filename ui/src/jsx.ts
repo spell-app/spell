@@ -58796,6 +58796,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - slots:
        *   - default:  The top rows:  `<ui-tree-item>`s.
        *   - `empty`:  Shown when `filter` matches no row.
+       *   - `tools`:  At the end of the line above the rows, after `tools`' buttons:  a filter field, say.  On a narrow tree it drops to a line of its own;  slotted without `tools`, the line holds it alone.
        *   - `detail`:  `appearance="columns"`:  a pane after the last column, showing what's picked:  any element, which the tree hands the picked row as its `item` property (the `<ui-tree-item>`, or the `items` entry), and the page can fill from `ui-changed`.  Drawn only while something is slotted and something is picked, tight against the last column, as wide as its content (up to `--ui-tree-detail-max-width`) until its line is dragged.
        * - events:  `ui-selecting`, `ui-changed`, `ui-settled`
        */

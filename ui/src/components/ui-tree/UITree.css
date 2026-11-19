@@ -8,7 +8,7 @@
  *   | `--ui-tree-selected-background` / `-color` | a selected row |
  *   | `--ui-tree-muted-color` | the triangle, the icon and `which` |
  *   | `--ui-tree-path-background` | `sticky-path`'s line, over the rows it covers |
- * - `tools`:  a line of small buttons above the rows (`.tools`, `.tool`).
+ * - `tools`:  a line of Spell UI's mini basic buttons above the rows (`.tools`), then the `tools` slot.
  * - `appearance="nav"` (the rows' `:state(nav)`):  the docs site's side navigation, its look matched to `<ui-docs-nav>`'s
  *   (epic `mockup` P5), with these tokens of its own:
  *   | `--ui-tree-nav-band-background` / `-color` | a `band="heading"` row |
@@ -43,37 +43,50 @@
   :host(:state(filtered-out)) {
     display: none;
   }
-  /* what isn't a row, between rows, makes no sense among matches */
-  :host(:state(filtering)) ::slotted(:not([label])) {
+  /* what isn't a row, between rows, makes no sense among matches;  what's in a named slot (`tools`, `detail`) stays */
+  :host(:state(filtering)) ::slotted(:not([label], [slot])) {
     display: none;
   }
 
-  /* `tools`:  a line of small buttons above the rows */
+  /*
+   * `tools`:  a line of Spell UI's mini basic buttons above the rows, then the `tools` slot at its end;
+   * its inline padding the rows' and the column titles', so they all start in line.
+   * - The buttons scroll sideways rather than wrap;  the slot drops to a line of its own when there's no room.
+   */
   .tools {
     display: flex;
     flex: none;
     flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    padding: 4px 8px 8px;
+  }
+  :host(:state(columns)) > .tools {
+    padding-inline: 10px;
+  }
+  .tool-buttons {
+    display: flex;
+    flex-wrap: nowrap;
     gap: 4px;
-    padding: 4px 4px 8px;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    /* room for a focused button's ring, which the scroll box would clip */
+    padding: 2px;
+    margin: -2px;
   }
-  .tool {
+  .tool-buttons > ui-button {
+    flex: none;
+  }
+  .tools > slot {
+    display: block;
+    flex: 1 1 12em;
+    max-width: 20em;
+    margin-inline-start: auto;
+  }
+  .tools ::slotted(*) {
     box-sizing: border-box;
-    min-height: 24px;
-    padding: 0 8px;
-    border: none;
-    border-radius: var(--ui-radius-s, 4px);
-    background: color-mix(in oklab, var(--ui-text-color) 7%, transparent);
-    color: var(--ui-text-color);
-    font: inherit;
-    font-size: 0.85em;
-    cursor: pointer;
-  }
-  .tool:hover {
-    background: color-mix(in oklab, var(--ui-text-color) 13%, transparent);
-  }
-  .tool:focus-visible {
-    outline: var(--ui-focus-width) solid var(--ui-focus-color);
-    outline-offset: 1px;
+    width: 100%;
   }
 
   .empty {

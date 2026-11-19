@@ -363,6 +363,11 @@
     background: var(--_ui-tree-column-selected-background);
     color: var(--_ui-tree-column-selected-color);
   }
+  /* the pick kept in the filtered column, though it doesn't match:  dimmed, so it doesn't read as a match */
+  .column-row.unmatched,
+  :host(:state(in-columns):state(unmatched)) > .row {
+    opacity: 0.55;
+  }
   .column-row.selected > .icon,
   .column-row.selected .which,
   .column-row.selected > .count {
@@ -531,32 +536,59 @@
     font-size: 0.85em;
   }
   .matches-title {
+    overflow: hidden;
     font-weight: var(--ui-font-weight-bold);
-  }
-  .match {
-    display: flex;
-    flex-direction: column;
-    margin-inline: 4px;
-    padding: 4px 6px;
-    border-radius: var(--ui-radius-s, 4px);
+    text-overflow: ellipsis;
     white-space: nowrap;
+  }
+  .matches-loading {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  /*
+   * A match:  its icon, then its words, and under them the rows it's inside, wrapping;
+   * the same inline room as a column's rows, so its icon and words line up with theirs.
+   */
+  .match {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    margin-inline: 4px;
+    padding: 2px 4px 2px 6px;
+    border-radius: var(--ui-radius-s, 4px);
     cursor: pointer;
   }
   .match:hover {
     background: var(--_ui-tree-hover-background);
   }
-  .match-words,
-  .match-path {
+  .match > .icon {
+    grid-column: 1;
+    display: inline-flex;
+    margin-inline-end: var(--_ui-tree-gap);
+  }
+  .match-words {
+    grid-column: 2;
+    min-height: var(--_ui-tree-row-height);
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .match-words > .words {
     overflow: hidden;
     text-overflow: ellipsis;
   }
   .match .which {
-    margin-inline-start: 0.4em;
+    margin-inline-start: 0.33em;
     color: var(--_ui-tree-muted-color);
   }
   .match-path {
+    grid-column: 2;
+    padding-block-end: 2px;
     color: var(--_ui-tree-muted-color);
     font-size: 0.85em;
+    overflow-wrap: anywhere;
   }
   /* a narrow column shows only its pick */
   .column.narrow .matches,

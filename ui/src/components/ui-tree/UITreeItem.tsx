@@ -123,6 +123,12 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
   /** The tree's `filter` hides it. */
   @E.state @E.cssState("filtered-out") accessor isFilteredOut = false
 
+  /**
+   * In a column view, it's the pick kept in the column `filter` filters, though it doesn't match:  dimmed, so it
+   * doesn't read as a match.
+   */
+  @E.state @E.cssState("unmatched") accessor isUnmatched = false
+
   /** The tree's `filter` matches a row inside it, so those show though it's closed. */
   @E.state accessor isKeptOpen = false
 

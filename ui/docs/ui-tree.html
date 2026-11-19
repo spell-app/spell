@@ -109,9 +109,16 @@
                 </ui-example>
               </ui-section>
               <ui-section id="examples-types-columns-from-data" label="Columns from data" sticky="stack" collapsible dividing>
-                <ui-example description="A big tree is given as data, in `items`:  each item's `children` a list, or a function run the first time it opens, which may return a promise:  the column shows a spinner until it comes (Archive takes a second).  Only the open path's columns are drawn.  `show` picks each row's parts, here with how many rows it holds;  `tools` adds Open 2 levels, Open 3 levels and Close all.  `filter` filters the last column on screen, and after its rows lists the matches elsewhere in the tree, at any depth:  type `zip`, and click one to open the path to it.">
-                  <ui-tree id="docs-tree-columns-data" appearance="columns" tools column-titles="Clients, Folders, Files" show="icon which count chevron" label="Work" style="height: 17em"></ui-tree>
-                  <ui-input id="docs-tree-columns-filter" icon="search" placeholder="Filter the whole tree" style="margin-top: 0.5em"></ui-input>
+                <ui-example description="A big tree is given as data, in `items`:  only the open path's columns are drawn.">
+                  <ul slot="description">
+                    <li>Each item's <code>children</code> is a list, or a function run the first time it opens.  It may return a promise:  the column shows a spinner until it comes (Archive takes a second).</li>
+                    <li><code>show</code> picks each row's parts, here with how many rows it holds.</li>
+                    <li><code>tools</code> adds Open&nbsp;2&nbsp;levels, Open&nbsp;3&nbsp;levels and Close&nbsp;all;  the <code>tools</code> slot puts the filter field at the end of their line.</li>
+                    <li><code>filter</code> filters the last column on screen, and after its rows lists the matches elsewhere in the tree, at any depth:  type <code>zip</code>, and click one to open the path to it.</li>
+                  </ul>
+                  <ui-tree id="docs-tree-columns-data" appearance="columns" tools column-titles="Clients, Folders, Files" show="icon which count chevron" label="Work" style="height: 20em">
+                    <ui-input slot="tools" id="docs-tree-columns-filter" icon="search" size="small" placeholder="Filter the whole tree" style="width: calc(100% - 2.5em)"></ui-input>
+                  </ui-tree>
                   <script type="module">
                     const files = (names) => names.map((name) => ({ id: name, label: name, icon: "file outline" }))
                     const later = (seconds, list) => () => new Promise((resolve) => setTimeout(() => resolve(list), seconds * 1000))
@@ -279,8 +286,8 @@
                 </ui-example>
               </ui-section>
               <ui-section id="examples-states-open-levels" label="Open levels" sticky="stack" collapsible dividing>
-                <ui-example description="With `tools`, a line of buttons above the rows:  Open 2 levels, Open 3 levels and Close all.  A script calls the same methods, `openTo(levels)` and `closeAll()`.">
-                  <ui-tree tools label="Netlist" style="width: 18em">
+                <ui-example description="With `tools`, a line of buttons above the rows:  Open&nbsp;2&nbsp;levels, Open&nbsp;3&nbsp;levels and Close&nbsp;all.  A script calls the same methods, `openTo(levels)` and `closeAll()`.">
+                  <ui-tree tools label="Netlist" style="width: 21em">
                     <ui-tree-item label="top" which="chip" icon="microchip">
                       <ui-tree-item label="core" which="block" icon="cube">
                         <ui-tree-item label="alu" which="cell" icon="cube">
@@ -338,7 +345,8 @@
                   - `open` shows the rows inside it.  A row whose rows are drawn only once it opens says `expandable`.
                   - `ui-changed` hands over what's selected.  To decide that yourself, cancel `ui-selecting`, and set each row's `selected`.
                   - `filter` looks only at rows that are drawn.
-                  - `tools` puts Open 2 levels, Open 3 levels and Close all above the rows;  a script calls `openTo(levels)` and `closeAll()`.
+                  - `tools` puts Open&nbsp;2&nbsp;levels, Open&nbsp;3&nbsp;levels and Close&nbsp;all above the rows;  a script calls `openTo(levels)` and `closeAll()`, which waits for rows still to come, level by level.
+                  - The `tools` slot goes at the end of that line:  a filter field, say.
                   - `ui-settled` hands it over again once it stays put for a moment:  for a page doing heavy work on each pick, as the arrow keys go by.
                 </script>
               </ui-markdown>

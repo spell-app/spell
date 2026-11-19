@@ -1310,7 +1310,7 @@ describe("<ui-tree> opening to a depth, and `filter` through the whole tree", ()
     items?: TreeItemData[]
     path?: string[]
     filter?: string
-    openTo(levels: number): void
+    openTo(levels: number): Promise<void>
     closeAll(): void
   }
 
@@ -1431,16 +1431,63 @@ describe("<ui-tree> opening to a depth, and `filter` through the whole tree", ()
 
   it("`openTo()` opens every row less deep, and closes the deeper ones;  `closeAll()` closes every row", async () => {
     const host = await outline()
-    host.openTo(3)
+    await host.openTo(3)
     await ElementFixture.settle()
     expect(onScreen(host)).toEqual(["a", "b", "c", "e", "f"])
-    host.openTo(2)
+    await host.openTo(2)
     await ElementFixture.settle()
     expect(onScreen(host)).toEqual(["a", "b", "e", "f"])
     expect(row(host, "b").hasAttribute("open")).toBe(false)
     host.closeAll()
     await ElementFixture.settle()
     expect(onScreen(host)).toEqual(["a", "e"])
+  })
+
+  it("`openTo()` waits for an `expandable` row's rows, then opens them in turn, a level at a time", async () => {
+    const host = await outline()
+    const later = (label: string, inside?: string) => {
+      const made = Object.assign(document.createElement("ui-tree-item"), { label })
+      if (inside) made.setAttribute("expandable", "")
+      made.dataset.inside = inside ?? ""
+      return made
+    }
+    host.append(later("g", "h"))
+    // a page that adds a row's rows only once it opens, a moment later
+    host.addEventListener("ui-opening", (event) => {
+      const opened = event.target as HTMLElement
+      const inside = opened.dataset.inside
+      if (!inside || opened.querySelector("ui-tree-item")) return
+      setTimeout(() => opened.append(later(inside, inside === "h" ? "i" : undefined)), 10)
+    })
+    await ElementFixture.settle()
+    await host.openTo(3)
+    await ElementFixture.settle()
+    // g's rows came as it opened, then h's as h did
+    expect(onScreen(host)).toEqual(["a", "b", "c", "e", "f", "g", "h", "i"])
+    expect(row(host, "h").hasAttribute("open")).toBe(true)
+  })
+
+  it("`tools` draws the buttons, Spell UI's mini basic ones, and the `tools` slot at the end of their line", async () => {
+    const host = await outline("tools")
+    host.style.width = "600px"
+    const field = Object.assign(document.createElement("input"), { slot: "tools" })
+    host.append(field)
+    await ElementFixture.settle()
+    expect(tools(host).every((tool) => tool.localName === "ui-button" && tool.getAttribute("size") === "mini")).toBe(
+      true
+    )
+    const line = host.shadowRoot!.querySelector(".tools")!
+    expect(line.querySelector<HTMLSlotElement>("slot")!.assignedElements()).toEqual([field])
+    // on the same line, at its end
+    const button = tools(host)[2]!.getBoundingClientRect()
+    const box = field.getBoundingClientRect()
+    expect(box.left).toBeGreaterThan(button.right)
+    expect(Math.abs(box.top + box.height / 2 - (button.top + button.height / 2))).toBeLessThan(4)
+    expect(Math.round(box.right)).toBe(Math.round(line.getBoundingClientRect().right - 8))
+    // a filter hides what isn't a row, but not what's in a named slot
+    host.setAttribute("filter", "a")
+    await ElementFixture.settle()
+    expect(field.checkVisibility()).toBe(true)
   })
 
   it("`tools` draws the buttons, which do the same, and is accessible", async () => {
@@ -1458,13 +1505,13 @@ describe("<ui-tree> opening to a depth, and `filter` through the whole tree", ()
 
   it("in columns from markup, `openTo()` shows that many columns, and `closeAll()` goes back to the first", async () => {
     const host = await columns()
-    host.openTo(3)
+    await host.openTo(3)
     await ElementFixture.settle()
     expect(chain(host)).toEqual(["Acme", "Menu"])
     expect(selected(host)).toEqual(["Menu"])
     click(host, "Books")
     await ElementFixture.settle()
-    host.openTo(2)
+    await host.openTo(2)
     await ElementFixture.settle()
     // each column's pick stays
     expect(chain(host)).toEqual(["Books"])
@@ -1554,6 +1601,7 @@ describe("<ui-tree> opening to a depth, and `filter` through the whole tree", ()
     host.filter = "came"
     await ElementFixture.settle()
     expect(host.shadowRoot!.querySelector(".matches ui-loader")).not.toBeNull()
+    expect(host.shadowRoot!.querySelector(".matches-loading")!.textContent).toBe("Looking through the tree")
     expect(host.shadowRoot!.querySelector("ul.column .empty")).toBeNull()
     arrive([{ id: "came", label: "came" }])
     await vi.waitFor(() => expect(matches(host.shadowRoot!)).toEqual(["came (Slow)"]))
@@ -1562,16 +1610,77 @@ describe("<ui-tree> opening to a depth, and `filter` through the whole tree", ()
 
   it("from `items`, `openTo()` picks down to that many columns, and `closeAll()` clears the path", async () => {
     const host = await dataTree()
-    host.openTo(4)
+    await host.openTo(4)
     await ElementFixture.settle()
     expect(host.path).toEqual(["acme", "menu", "photos"])
     expect(columnLabels(host).length).toBe(4)
-    host.openTo(2)
+    await host.openTo(2)
     await ElementFixture.settle()
     expect(host.path).toEqual(["acme"])
     host.closeAll()
     await ElementFixture.settle()
     expect(host.path).toEqual([])
+  })
+
+  it("from `items`, `openTo()` waits for promised children, then goes on to the depth asked", async () => {
+    const arrivals: ((list: TreeItemData[]) => void)[] = []
+    const promised = (list: TreeItemData[]) => () =>
+      new Promise<TreeItemData[]>((resolve) => arrivals.push(() => resolve(list)))
+    const host = await dataTree("", [
+      {
+        id: "a",
+        label: "a",
+        children: promised([
+          { id: "b", label: "b", children: promised([{ id: "c", label: "c", children: [{ id: "d", label: "d" }] }]) }
+        ])
+      }
+    ])
+    const opened = host.openTo(4)
+    await vi.waitFor(() => expect(arrivals.length).toBe(1))
+    // the path so far, its column a spinner, while the rows come
+    expect(host.path).toEqual(["a"])
+    expect(host.shadowRoot!.querySelector("ul.column .loading ui-loader")).not.toBeNull()
+    arrivals[0]!([])
+    await vi.waitFor(() => expect(arrivals.length).toBe(2))
+    arrivals[1]!([])
+    await opened
+    await ElementFixture.settle()
+    expect(host.path).toEqual(["a", "b", "c"])
+  })
+
+  it("from `items`, a match shows its row's icon, and the filtered column's kept pick is dimmed", async () => {
+    const items = folders()
+    items[1]!.icon = "book"
+    const host = await dataTree('show="icon chevron"', items)
+    host.path = ["acme", "menu", "menu.pdf"]
+    await ElementFixture.settle()
+    host.filter = "book"
+    await ElementFixture.settle()
+    const match = host.shadowRoot!.querySelector(".match")!
+    expect(match.querySelector(".icon ui-icon")?.getAttribute("name")).toBe("book")
+    expect(host.shadowRoot!.querySelector('.column-row[data-id="menu.pdf"]')!.classList.contains("unmatched")).toBe(
+      true
+    )
+    host.filter = "menu"
+    await ElementFixture.settle()
+    expect(host.shadowRoot!.querySelector('.column-row[data-id="menu.pdf"]')!.classList.contains("unmatched")).toBe(
+      false
+    )
+  })
+
+  it("from markup, the filtered column's kept pick is dimmed", async () => {
+    const host = await columns()
+    for (const label of ["Acme", "Menu", "menu.pdf"]) {
+      click(host, label)
+      await ElementFixture.settle()
+    }
+    host.setAttribute("filter", "photo")
+    await ElementFixture.settle()
+    expect(row(host, "menu.pdf").matches(":state(unmatched)")).toBe(true)
+    expect(row(host, "photos").matches(":state(unmatched)")).toBe(false)
+    host.removeAttribute("filter")
+    await ElementFixture.settle()
+    expect(row(host, "menu.pdf").matches(":state(unmatched)")).toBe(false)
   })
 
   it("from `items`, looks through a tree the netlist sample's size fast, listing the first 200", async () => {

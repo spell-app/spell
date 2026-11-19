@@ -17,9 +17,13 @@ import columnsCSS from "./UITreeColumns.css?inline"
  * The `<ui-tree>` in the page:  its script API, over its component (`UITree`).
  ****************/
 export class DOMTreeElement extends E.DOMElement<UITree> {
-  /** Open it so `levels` levels of rows show (`UITree.openTo()`):  in columns, that many columns. */
-  openTo(levels: number): void {
-    this.component?.openTo(levels)
+  /**
+   * Open it so `levels` levels of rows show (`UITree.openTo()`):  in columns, that many columns.
+   * - Settles once they show, rows a page adds as their row opens and promised `children` included.
+   * - NEVER rejects.
+   */
+  openTo(levels: number): Promise<void> {
+    return this.component?.openTo(levels) ?? Promise.resolve()
   }
 
   /** Close every row, so only the top rows show (`UITree.closeAll()`). */
@@ -44,7 +48,9 @@ export class DOMTreeElement extends E.DOMElement<UITree> {
  *   It changes no row's `open`.  Rows drawn only once their parent opens can't be found while that's closed.
  * - Plain walks over its light DOM, so 500 rows filter in a few milliseconds.
  * - `openTo(levels)` and `closeAll()`:  open it so that many levels of rows show, as a person would;  in columns,
- *   that many columns.  `tools` draws a button for each, "Open 2 levels", "Open 3 levels", "Close all".
+ *   that many columns.  Rows still to come (`expandable`, promised `children`) are waited for, a level at a time.
+ *   - `tools` draws a button for each, "Open 2 levels", "Open 3 levels", "Close all";
+ *     `slot="tools"` goes at the end of their line (a filter field, say).
  * - `appearance="columns"`:  a column per level, side by side, as a Mac's Finder shows folders.
  *   - The same rows, nested the same way:  each open row draws the rows inside it as the next column
  *     (`UITreeColumns.css`).
@@ -66,7 +72,7 @@ export class DOMTreeElement extends E.DOMElement<UITree> {
  *     - `sticky-detail`:  it stays in view at the box's end while the columns scroll sideways.
  *   - `filter` filters one column:  the last one on screen as the filter starts, so moving about doesn't move it.
  *     After its rows, the matches elsewhere in the tree, at any depth (`otherMatches`):  a click on one opens the
- *     path to it.  From `items`, it runs the `children` functions to look, waiting for promised ones, but opens no
+ *     path to it.  The column's kept pick, which may not match, is dimmed (`unmatched`).  From `items`, it runs the `children` functions to look, waiting for promised ones, but opens no
  *     column.
  *   - `sticky-path`:  the path line above the columns, naming each column's pick;  a click on one picks it again,
  *     keeping the columns after it, and scrolls its column into view.
@@ -147,7 +153,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   render() {
     return (
       <>
-        <Show when={this.tools}>{this.toolbar()}</Show>
+        <Show when={this.tools || this.toolsElement}>{this.toolbar()}</Show>
         <Show when={!this.isColumns} fallback={this.renderColumns()}>
           {this.renderRows()}
         </Show>
@@ -565,33 +571,62 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
 
   /**
    * `tools`:  a line of buttons above the rows, "Open 2 levels", "Open 3 levels" and "Close all" (`openTo()`,
-   * `closeAll()`), as the old netlist viewer's side bar has.
+   * `closeAll()`), as the old netlist viewer's side bar has;  Spell UI's mini basic buttons.
+   * - Then the `tools` slot, at the line's end:  a filter field, say.  Slotted alone, without `tools`, it draws the
+   *   line too.
+   * - The buttons scroll sideways rather than wrap;  the slot drops to a line of its own when there's no room.
    */
   private toolbar() {
     return (
       <div class="tools" part={this.partForName("tools")}>
-        <For each={OPEN_LEVELS}>
-          {(levels) => (
-            <button
-              type="button"
-              class="tool"
+        <Show when={this.tools}>
+          <div class="tool-buttons">
+            <For each={OPEN_LEVELS}>
+              {(levels) => (
+                <ui-button
+                  part={this.partForName("tool")}
+                  size="mini"
+                  appearance="basic"
+                  onClick={(event: MouseEvent) => this.startOpening(levels, event)}
+                >
+                  {this.translationForKey("openLevels", { levels })}
+                </ui-button>
+              )}
+            </For>
+            <ui-button
               part={this.partForName("tool")}
-              onClick={(event: MouseEvent) => this.openTo(levels, event)}
+              size="mini"
+              appearance="basic"
+              onClick={(event: MouseEvent) => this.closeAll(event)}
             >
-              {this.translationForKey("openLevels", { levels })}
-            </button>
-          )}
-        </For>
-        <button
-          type="button"
-          class="tool"
-          part={this.partForName("tool")}
-          onClick={(event: MouseEvent) => this.closeAll(event)}
-        >
-          {this.translationForKey("closeAll")}
-        </button>
+              {this.translationForKey("closeAll")}
+            </ui-button>
+          </div>
+        </Show>
+        <Show when={this.toolsElement}>
+          <slot name={this.slotForName("tools")} />
+        </Show>
       </div>
     )
+  }
+
+  /** The element slotted as `tools`:  the first child with that `slot`, followed as children come and go. */
+  @E.watches({ childList: true })
+  get toolsElement(): Element | undefined {
+    return this.childInSlot("tools")
+  }
+
+  /** Its first child in slot `slot` (by its translated name), else `undefined`. */
+  private childInSlot(slot: "detail" | "tools"): Element | undefined {
+    if (isServer) return undefined
+    const name = this.slotForName(slot)
+    for (const child of this.domElement.children) if (child.getAttribute("slot") === name) return child
+    return undefined
+  }
+
+  /** `openTo(levels)`, not waited for:  a failure only warned about. */
+  private startOpening(levels: number, event?: Event) {
+    void this.openTo(levels, event).catch((error) => E.Warnings.warn("<ui-tree>", "opening failed:", error))
   }
 
   /**
@@ -600,17 +635,18 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
    *   (`ui-opening` / `ui-closing`, each cancelable).
    * - In columns, `levels` columns show:  each column's pick stays, and where a column has none, its first row that
    *   holds rows is picked;  the last of them is selected, as a click would (`ui-selecting`, `ui-changed`).
-   *   A `children` function runs as its item opens;  a promised list stops it there, its column showing a spinner.
+   * - A level at a time:  rows still to come are waited for, then opened in turn.
+   *   - an `expandable` row's, which a page adds as it opens
+   *   - from `items`, a promised `children` list:  meanwhile the path so far is picked, its column a spinner
+   * - Settles once every level asked shows, or as deep as the tree goes;  a newer `openTo()` stops it.
    * - `openTo(1)`:  only the top rows, `closeAll()`.
    */
-  openTo(levels: number, originalEvent?: Event) {
+  openTo(levels: number, originalEvent?: Event): Promise<void> {
     const depth = Math.max(1, Math.floor(levels))
-    if (this.isColumns) return this.openColumnsTo(depth, originalEvent)
-    for (const row of this.allRows) {
-      if (!row.canOpen) continue
-      if (row.depth < depth - 1) row.disclosure.open(originalEvent)
-      else row.disclosure.close(originalEvent)
-    }
+    const open = ++this.opens
+    for (const stop of [...this.openWaits]) stop()
+    if (this.isColumns) return this.openColumnsTo(depth, open, originalEvent)
+    return this.openRowsTo(this.domElement, depth, open, originalEvent)
   }
 
   /**
@@ -618,25 +654,55 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
    * - In columns:  back to the first column, nothing picked, with no `ui-changed` (nothing new is selected).
    */
   closeAll(originalEvent?: Event) {
-    this.openTo(1, originalEvent)
+    this.startOpening(1, originalEvent)
+  }
+
+  /** Counts each `openTo()`, so one waiting for rows stops once a newer one starts. */
+  private opens = 0
+
+  /** Each wait for rows to come (`whenRowsCome()`):  called, it stops waiting. */
+  private readonly openWaits = new Set<() => void>()
+
+  /**
+   * `openTo()` in the outline, from `parent` down:  rows less deep than `depth - 1` open, deeper ones close.
+   * - Rows in the page are opened at once;  an `expandable` row's rows are waited for, then opened in turn.
+   */
+  private async openRowsTo(parent: Element, depth: number, open: number, event?: Event): Promise<void> {
+    const waits: Promise<void>[] = []
+    for (const row of this.rowsIn(parent)) {
+      if (!row.canOpen) continue
+      const opens = row.depth < depth - 1
+      if (opens) row.disclosure.open(event)
+      else row.disclosure.close(event)
+      if (this.rowsIn(row.domElement).length) waits.push(this.openRowsTo(row.domElement, depth, open, event))
+      else if (opens && row.isOpen) {
+        waits.push(
+          this.whenRowsCome(row, open).then((hasCome) => {
+            if (hasCome) return this.openRowsTo(row.domElement, depth, open, event)
+          })
+        )
+      }
+    }
+    await Promise.all(waits)
   }
 
   /** `openTo()` in columns:  `columns` columns, keeping each column's pick, else its first row that holds rows. */
-  private openColumnsTo(columns: number, event?: Event) {
-    if (this.hasItemData) return this.openItemColumnsTo(columns, event)
+  private async openColumnsTo(columns: number, open: number, event?: Event): Promise<void> {
+    if (this.hasItemData) return this.openItemColumnsTo(columns, open, event)
     const chain: UITreeItem[] = []
     for (let parent: Element = this.domElement; chain.length < columns - 1;) {
       const rows = this.rowsIn(parent).filter((row) => !row.isFilteredOut)
       const row = rows.find((each) => each.isOpen && each.canOpen) ?? rows.find((each) => each.canOpen)
       if (!row) break
       chain.push(row)
+      // an `expandable` row with more columns to go:  the path so far opens, its column a spinner, until its rows come
+      if (chain.length < columns - 1 && !this.rowsIn(row.domElement).length) {
+        this.openPicks(chain, event)
+        if (!row.isOpen || !(await this.whenRowsCome(row, open))) return
+      }
       parent = row.domElement
     }
-    const last = chain.at(-1)
-    if (last) {
-      for (const row of chain) row.disclosure.open(event)
-      return this.activate(last, event instanceof MouseEvent ? event : new MouseEvent("click"))
-    }
+    if (chain.length) return this.openPicks(chain, event)
     for (const row of this.allRows) {
       if (row.isOpen) row.disclosure.close(event)
       if (row.selected) row.selected = false
@@ -645,10 +711,23 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     this.keepPath()
   }
 
-  /** `openTo()` in columns from `items`:  the path to `columns` columns, its last pick selected, as a click would. */
-  private openItemColumnsTo(columns: number, event?: Event) {
+  /** Open every row of `chain`, and select its last, as a click would. */
+  private openPicks(chain: readonly UITreeItem[], event?: Event) {
+    for (const row of chain) row.disclosure.open(event)
+    const last = chain.at(-1)
+    if (last) this.activate(last, event instanceof MouseEvent ? event : new MouseEvent("click"))
+  }
+
+  /**
+   * `openTo()` in columns from `items`:  the path to `columns` columns, its last pick selected, as a click would.
+   * - A promised `children` list with more columns to go:  the path so far is picked, its column a spinner, until the
+   *   list comes;  then it goes on.
+   */
+  private async openItemColumnsTo(columns: number, open: number, event?: Event): Promise<void> {
     const path: string[] = []
+    const click = event ?? new MouseEvent("click")
     let last: TreeItemData | undefined
+    let pickedAt = -1
     let list: readonly TreeItemData[] | undefined = this.topItems
     while (list && path.length < columns - 1) {
       const depth = path.length
@@ -660,12 +739,47 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
       path.push(item.id)
       last = item
       list = this.childrenOf(item)
+      if (list || path.length >= columns - 1) continue
+      this.pickItem(item, depth, click, { path: [...path] })
+      pickedAt = depth
+      if (!E.isSameList(this.openPath, path)) return
+      await this.childrenOfItem.get(item)
+      if (open !== this.opens || !E.isSameList(this.openPath, path)) return
+      list = this.childrenOf(item)
     }
     if (!last) {
       if (this.openPath.length && this.requestChange("openPath", [], () => true)) this.keepPath()
       return
     }
-    this.pickItem(last, path.length - 1, event ?? new MouseEvent("click"), { path })
+    if (pickedAt !== path.length - 1) this.pickItem(last, path.length - 1, click, { path })
+  }
+
+  /**
+   * Wait for `row`'s rows to come, each ready:  an `expandable` row, which a page fills as it opens.
+   * - `false`:  a newer `openTo()` started, or the row closed or left the page, first.
+   */
+  private async whenRowsCome(row: UITreeItem, open: number): Promise<boolean> {
+    const parent = row.domElement
+    const rows = () => [...parent.children].filter((child) => child.localName === parent.localName) as E.DOMElement[]
+    if (!rows().length) {
+      const hasCome = await new Promise<boolean>((resolve) => {
+        const finish = (has: boolean) => {
+          observer.disconnect()
+          this.openWaits.delete(stop)
+          resolve(has)
+        }
+        const stop = () => finish(false)
+        // oxlint-disable-next-line spell-ui/no-mutation-observer -- watches a row, another element, only until its rows come
+        const observer = new MutationObserver(() => {
+          if (rows().length) finish(true)
+        })
+        observer.observe(parent, { childList: true })
+        this.openWaits.add(stop)
+      })
+      if (!hasCome) return false
+    }
+    await Promise.all(rows().map((each) => each.ready))
+    return open === this.opens && row.isOpen && parent.isConnected
   }
 
   ////////////////
@@ -1256,10 +1370,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   /** The element slotted as `detail`:  the first child with that `slot`, followed as children come and go. */
   @E.watches({ childList: true })
   get detailElement(): Element | undefined {
-    if (isServer) return undefined
-    const name = this.slotForName("detail")
-    for (const child of this.domElement.children) if (child.getAttribute("slot") === name) return child
-    return undefined
+    return this.childInSlot("detail")
   }
 
   /** The selected row:  in columns, the `items` entry, or the `<ui-tree-item>`;  `undefined` while none is. */
@@ -1742,6 +1853,11 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     this.applyFilter()
   }
 
+  /** `filter`, as it's matched:  trimmed, lower case. */
+  private get filterText(): string {
+    return (this.filter ?? "").trim().toLowerCase()
+  }
+
   /** It had a `filter` when that last changed. */
   @E.state private accessor hadFilter = false
 
@@ -1789,7 +1905,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
 
   /** Hide what doesn't match, and keep open what's around what does. */
   private applyFilter() {
-    const text = (this.filter ?? "").trim().toLowerCase()
+    const text = this.filterText
     if (this.isColumns) return this.applyColumnFilter(text)
     const matchIn = (parent: Element): boolean => {
       let anyMatch = false
@@ -1820,11 +1936,13 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     for (const row of this.allRows) {
       row.isFilteredOut = false
       row.isKeptOpen = false
+      row.isUnmatched = false
     }
     let anyMatch = false
     for (const row of this.rowsIn(this.filteredRowsParent)) {
       const isMatch = !text || row.filterWords.toLowerCase().includes(text)
       row.isFilteredOut = !isMatch && !row.isOpen
+      row.isUnmatched = !isMatch && row.isOpen
       anyMatch ||= isMatch
     }
     this.hasNoMatches = !!text && !anyMatch
@@ -1903,6 +2021,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
           const around = this.rowsAround(row)
           found.push({
             label: row.label ?? row.valueOrLabel,
+            icon: row.icon,
             which: row.which,
             path: [...around, row].map((each) => each.valueOrLabel),
             names: around.map((each) => each.label ?? each.valueOrLabel),
@@ -1951,7 +2070,8 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
           if (isFiltered || !wordsOf(child).includes(text)) continue
           count++
           if (found.length < MOST_MATCHES) {
-            found.push({ label: child.label, which: child.which, path: childStep.path, names: step.names, item: child })
+            const { label, icon, which } = child
+            found.push({ label, icon, which, path: childStep.path, names: step.names, item: child })
           }
         }
       }
@@ -1984,8 +2104,9 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   }
 
   /**
-   * The matches elsewhere, after the filtered column's rows:  each its words, and the rows it's inside, quieter;
-   * a spinner while promised `children` come;  a line when there are more than it lists, or it stopped looking.
+   * The matches elsewhere, after the filtered column's rows:  each its icon and words, the rows it's inside under its
+   * words, quieter;  a spinner and "Looking through the tree" while promised `children` come;  a line when there are
+   * more than it lists, or it stopped looking.
    * - Drawn by its column (`filteredColumn`):  from `items` and the first column, here;  else by the pick the column is
    *   inside (`UITreeItem`).
    */
@@ -2007,9 +2128,18 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
                 title={[...match.names, match.label].join(PATH_SEPARATOR)}
                 onClick={(event: MouseEvent) => this.pickMatch(match, event)}
               >
+                <Show when={this.shows("icon") && match.icon}>
+                  {(icon) => (
+                    <span class="icon">
+                      <ui-icon name={icon()} />
+                    </span>
+                  )}
+                </Show>
                 <span class="match-words">
                   <span class="words">{match.label}</span>
-                  <Show when={match.which}>{(which) => <span class="which">{which()}</span>}</Show>
+                  <Show when={this.shows("which") && match.which}>
+                    {(which) => <span class="which">{which()}</span>}
+                  </Show>
                 </span>
                 <Show when={match.names.length}>
                   <span class="match-path">{match.names.join(PATH_SEPARATOR)}</span>
@@ -2018,8 +2148,9 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
             )}
           </For>
           <Show when={this.isLooking}>
-            <div class="matches-loading">
-              <ui-loader visible="" size="mini" inline="" aria-label={this.translationForKey("lookingElsewhere")} />
+            <div class="matches-loading" role="status">
+              <ui-loader visible="" size="mini" inline="" aria-hidden="true" />
+              {this.translationForKey("lookingElsewhere")}
             </div>
           </Show>
           <Show when={this.otherMatchCount > this.otherMatches.length}>
@@ -2148,7 +2279,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
    * - Its pick stays, though it doesn't match:  the columns after it hang from it (a match elsewhere, picked).
    */
   private shownIn(list: readonly TreeItemData[], depth: number): readonly TreeItemData[] {
-    const text = (this.filter ?? "").trim().toLowerCase()
+    const text = this.filterText
     if (!text || depth !== this.filteredColumn) return list
     const pick = this.openPath[depth]
     return list.filter((item) => item.id === pick || wordsOf(item).includes(text))
@@ -2240,10 +2371,17 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   private itemRow(item: TreeItemData, depth: number) {
     const isPicked = () => this.openPath[depth] === item.id
     const isSelected = () => isPicked() && depth === this.selectedDepth
+    // the pick kept in the filtered column, though it doesn't match:  dimmed, so it doesn't read as a match
+    const isUnmatched = () =>
+      !!this.filterText && depth === this.filteredColumn && !wordsOf(item).includes(this.filterText)
     const ownClasses = (this.rowClass(item) ?? "").split(/\s+/).filter(Boolean)
     return (
       <li
-        class={["column-row", ...ownClasses, { selected: isSelected(), "on-path": isPicked() && !isSelected() }]}
+        class={[
+          "column-row",
+          ...ownClasses,
+          { selected: isSelected(), "on-path": isPicked() && !isSelected(), unmatched: isUnmatched() }
+        ]}
         part={this.partForName("column-row")}
         role="treeitem"
         data-id={item.id}
@@ -2403,6 +2541,8 @@ function trimmedWidths(widths: readonly (number | undefined)[]): (number | undef
 type OtherMatch = {
   /** its words */
   label: string
+  /** its icon, as its row shows it */
+  icon?: string | undefined
   /** its `which`, quieter */
   which?: string | undefined
   /** the ids from the top down to it:  `path` once it's picked */

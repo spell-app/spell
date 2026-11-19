@@ -62385,7 +62385,7 @@
       "name": "ui-tree",
       "description": {
         "kind": "markdown",
-        "value": "A tree shows rows nested in rows, which open and close, and can be selected one or many at a time.\n\nAlso known as:  tree view, outline, hierarchy, file tree, nested list, folder list.\n\n**Slots:**  default, `empty`, `detail`\n\n**Events:**  `ui-selecting`, `ui-changed`, `ui-settled`"
+        "value": "A tree shows rows nested in rows, which open and close, and can be selected one or many at a time.\n\nAlso known as:  tree view, outline, hierarchy, file tree, nested list, folder list.\n\n**Slots:**  default, `empty`, `tools`, `detail`\n\n**Events:**  `ui-selecting`, `ui-changed`, `ui-settled`"
       },
       "attributes": [
         {

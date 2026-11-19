@@ -23,7 +23,7 @@ export const treeEs = {
   },
   values: { appearance: { nav: "navegacion", columns: "columnas" } },
   events: { "ui-selecting": "ui-seleccionando", "ui-settled": "ui-asentado" },
-  slots: { empty: "vacio", detail: "detalle" },
+  slots: { empty: "vacio", detail: "detalle", tools: "herramientas" },
   parts: {
     empty: "vacio",
     path: "ruta",
