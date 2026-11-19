@@ -178,12 +178,19 @@
   inset: 16px;
   z-index: 900;
   border-radius: 12px;
-  /* the surface over an opaque backing:  a see-through surface would show the editor under it (I260) */
-  background: linear-gradient(var(--ui-surface, white), var(--ui-surface, white)), Canvas;
-  /* the dim round it, nearly black, so the editor behind doesn't show through (I260), then its own shadow */
-  box-shadow:
-    0 0 0 100vmax rgb(0 0 0 / 0.88),
-    0 8px 40px rgb(0 0 0 / 0.32);
+  /*
+   * no surface of its own:  the turned app sits on the dark dim, inside the pane as round it (I263)
+   * - the dim nearly black, so the editor behind doesn't show through (I260)
+   */
+  background: var(--AnatomyFullWindow-dim);
+  box-shadow: 0 0 0 100vmax var(--AnatomyFullWindow-dim);
+  --AnatomyFullWindow-dim: rgb(0 0 0 / 0.88);
+
+  /* nor its body, nor the program's:  the editor's own surfaces would show behind the app */
+  & > .AppPaneBody,
+  & > .AppPaneBody > .AppPaneProgram {
+    background: transparent;
+  }
 }
 
 /* and the split panes holding it lift with it:  their own stacking would keep the editor's other panes on top */
