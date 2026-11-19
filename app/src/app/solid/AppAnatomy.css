@@ -71,9 +71,33 @@
       width: 96px;
     }
   }
-  .AnatomyHelp {
+  /* the right end:  icons alone, no surround, 12px apart, as the top bar's */
+  .AnatomyEnd {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: auto;
+  }
+  .AnatomyEnd > ui-icon {
     color: var(--ui-text-muted);
+  }
+  .AnatomyHelp {
     cursor: help;
+  }
+
+  /* the full window's hint, at the 3D view's top left, under the bar (I260) */
+  .AnatomyEscHint {
+    position: absolute;
+    top: 64px;
+    left: 16px;
+    z-index: 3;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: rgb(0 0 0 / 0.56);
+    color: white;
+    font-size: 12px;
+    line-height: 16px;
+    pointer-events: none;
   }
 
   /* the tags, over the turned app:  in the pane's own pixels, never turned, so they always read */
@@ -161,11 +185,18 @@
   inset: 16px;
   z-index: 900;
   border-radius: 12px;
-  background: var(--ui-surface, white);
-  /* the dim round it, then its own shadow */
+  /* the surface over an opaque backing:  a see-through surface would show the editor under it (I260) */
+  background: linear-gradient(var(--ui-surface, white), var(--ui-surface, white)), Canvas;
+  /* the dim round it, nearly black, so the editor behind doesn't show through (I260), then its own shadow */
   box-shadow:
-    0 0 0 100vmax rgb(0 0 0 / 0.32),
+    0 0 0 100vmax rgb(0 0 0 / 0.88),
     0 8px 40px rgb(0 0 0 / 0.32);
+}
+
+/* and the split panes holding it lift with it:  their own stacking would keep the editor's other panes on top */
+:is(.SplitPane, ui-split-panel):has(.AppPane.AnatomyFullWindow) {
+  isolation: auto;
+  z-index: 900;
 }
 
 /* the Inspector's flat outline round what's selected:  the floor draws its own while Anatomy shows */

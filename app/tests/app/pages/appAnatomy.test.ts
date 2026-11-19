@@ -117,7 +117,7 @@ describe.skipIf(!SERVING)("Anatomy, over Solitaire", { timeout: 180_000 }, () =>
     expect(await turn()).toMatchObject({ tilt: 0, spin: 0 })
     await page.waitForTimeout(2500)
     const resting = await turn()
-    expect(resting.tilt).toBeGreaterThan(0)
+    expect(resting.tilt).not.toBe(0)
     expect(resting.spin).not.toBe(0)
     await page.waitForTimeout(300)
     expect(await turn()).toEqual(resting)
@@ -181,6 +181,29 @@ describe.skipIf(!SERVING)("Anatomy, over Solitaire", { timeout: 180_000 }, () =>
     await page.keyboard.press("Escape")
     await page.waitForTimeout(400)
     expect(await page.evaluate(() => (window as unknown as TestWindow).AppAnatomy.focus?.id)).toBe(undefined)
+
+    // a click on a foundation's layer picks the foundation, though its picture covers it;  again, the picture (I259)
+    const foundation = await page.evaluate(() => {
+      const box = document.querySelectorAll("solitaire-foundation")[1]!.getBoundingClientRect()
+      return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+    })
+    const selectedTag = () =>
+      page.evaluate(() => (window as unknown as TestWindow).Inspector.selected?.element.localName)
+    await page.mouse.click(foundation.x, foundation.y)
+    await page.waitForTimeout(800)
+    expect(await selectedTag()).toBe("solitaire-foundation")
+    await page.mouse.click(foundation.x, foundation.y)
+    await page.waitForTimeout(800)
+    expect(await selectedTag()).toBe("solitaire-card-image")
+
+    // Play:  a click goes to the game, so it never picks the foundation, as Inspect would now (T117)
+    await page.locator(".AnatomyClicks ui-item[value=play] [part~=item]").click()
+    await page.waitForTimeout(300)
+    await page.mouse.click(foundation.x, foundation.y)
+    await page.waitForTimeout(800)
+    expect(await selectedTag()).not.toBe("solitaire-foundation")
+    await page.locator(".AnatomyClicks ui-item[value=inspect] [part~=item]").click()
+    await page.waitForTimeout(300)
 
     // off:  every element as it was
     await page.locator(".AnatomyButton [part~=item]").first().click()

@@ -74,6 +74,19 @@ export class AnatomyFloors {
   }
 
   /**
+   * Does `floor` cover (nearly) all of the floor holding it, as a pile's picture fills the pile?
+   * - Then a click on it is first taken as a click on the floor under it:  the picture is that floor's face (I259).
+   * - Measured where the page lays them out, as `stepPiles()` does.
+   */
+  static fillsParent(floor: Floor): boolean {
+    if (!floor.parent) return false
+    const [own, under] = [layoutBoxOf(floor.element), layoutBoxOf(floor.parent.element)]
+    const width = Math.min(own.right, under.right) - Math.max(own.left, under.left)
+    const height = Math.min(own.bottom, under.bottom) - Math.max(own.top, under.top)
+    return width > 0 && height > 0 && width * height >= FILLS_SHARE * under.width * under.height
+  }
+
+  /**
    * Does anything from `element`'s box up to `floor`'s, `floor` included, draw what's inside it flat:
    * clip it, fade it, filter it ...?  Then `element` can't be lifted off `floor`.
    */
@@ -126,6 +139,9 @@ export type Floor = {
   /** inside a floor that clips:  drawn flat on it, never lifted */
   isFlat?: boolean
 }
+
+/** How much of the floor holding it a floor covers, at least, to fill it (`fillsParent()`). */
+const FILLS_SHARE = 0.8
 
 /** What a floor is:  a view the program draws, or a Spell UI part inside one. */
 export type FloorKind = "view" | "part"
