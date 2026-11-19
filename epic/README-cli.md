@@ -316,7 +316,7 @@ Every verb here only reads, but `create`, `stage` and `change`:  run them from a
 | `epic decisions <epic> [--json]` | prints what a page settled:  phases' Done and Updated notes, items' answers and chosen options |
 | `epic owns <path> ... [--json]` | prints which open epics own each file, a path from the checkout's root:  their branch changes it (`branch`), or their page names it (`plan`);  each with its stage, `planning` or `building`;  `--` for a file no open epic owns:  what `/coherence` reads to land a finding in its epic |
 | `epic open <epic>` | shows an epic's page in VS Code's side bar, in the Review tab, the one an epic page always goes to |
-| `epic lint <epic>` | checks ids, `#id` links, phases and parts, then the page's links, then draws it in a headless browser;  `--no-browser` skips the drawing;  `--links`:  a bad link fails it |
+| `epic lint <epic>` | checks ids, `#id` links, phases and parts, then the page's links, then draws it in a headless browser;  `--no-browser` skips the drawing;  `--links`:  a bad link fails it.  The drawing needs Playwright (`npm install playwright`, then `npx playwright install chromium`);  without it, lint skips that check and says so |
 
 ### Epic page:  phases
 

@@ -300,6 +300,18 @@ Its epic page, `~/www/my-app.epics/epics/seo/seo.plan.html`, opens in the Review
 
 What happens from there:  [the epic engine's front page](README.md).
 
+### Optional:  Playwright, for `epic lint`'s browser check
+
+`epic lint <epic>` checks a page's ids and links, then draws it in a headless browser.
+That last check needs Playwright, which `epic init` doesn't install:
+
+```sh
+npm install playwright
+npx playwright install chromium
+```
+
+Without it, `epic lint` skips the browser check and says so;  the other checks still run.
+
 ## <a id="nothing-in-your-repo"></a>Nothing in your repo:  `--local`
 
 When the team doesn't want any of it in the code repo, set epics up on your machine only:
