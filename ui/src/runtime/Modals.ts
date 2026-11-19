@@ -6,7 +6,8 @@ import type { Disposer, ModalOptions, ModalProvider } from "./runtime.types"
  * `$.modal('confirm', ...)` shortcuts.
  * - A thin front door:  the `ui-modal` family registers its provider (`register()`) when it's imported, so the
  *   runtime chunk carries no modal markup.
- * - Until then every method throws, rather than falling back to `window.confirm()` with different behaviour.
+ * - Until then every method throws, rather than falling back to `window.confirm()` with different behaviour;
+ *   `await UI.modals.ready()` first imports the family on a page with a `<ui-root>` that hasn't (`loadFamilyWith()`).
  * - Strings accept plain text or options:  `UI.modals.confirm("Delete?")`.
  ****************/
 export class Modals {
@@ -27,6 +28,23 @@ export class Modals {
     return () => {
       if (Modals.provider === provider) Modals.provider = previous
     }
+  }
+
+  /** How this page imports the `ui-modal` family:  `loadFamilyWith()`. */
+  private familyLoader: (() => Promise<unknown>) | undefined
+
+  /** Say how to import the `ui-modal` family, for a page that doesn't define it up front:  `RootLoader` does. */
+  loadFamilyWith(loader: () => Promise<unknown>): void {
+    this.familyLoader = loader
+  }
+
+  /**
+   * Resolves once a dialog can show, importing the `ui-modal` family the first time it's needed (as `UI.toasts.ready()`).
+   * - for a component pack's element, which can't import the family itself (`PACK_MODULES`)
+   * - rejects if the family can't be imported;  a page with no way to import it resolves, and a dialog says what's wrong
+   */
+  async ready(): Promise<void> {
+    if (!Modals.provider) await this.familyLoader?.()
   }
 
   /** Resolves `true` on approve, `false` on deny / dismiss. */

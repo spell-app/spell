@@ -26,7 +26,18 @@
  *   `epic pages index` writes the stars and groups it says into the page
  * - no Claude needed:  it works on a plane
  *
- * Each needs the page server's token (`x-server-token`) and its own origin (`SRV.Guard`).
+ * A CARD'S MENU (epic `epic-engine` T103;  Owen:  "on the epic home page cards, add a `...` menu in the TR corner, with
+ * Resume, Rename Epic..., Complete, Delete Epic..."):  each route a line or two, the work `EpicLifecycle`'s
+ * - `GET /api/epics/manage?epic=<name>` -- what the card's dialogs say first (`EpicManageFacts`):  why it can't be
+ *   renamed or deleted, what's left;  a read, no token
+ * - `POST /api/epics/manage/resume` `{ name }` -- its session resumed in its own VS Code window (`epic window
+ *   launch <name> --prompt "/epic resume <name>"`);  answers `{ said }`, what the launch said
+ * - `POST /api/epics/manage/rename` `{ name, to }` -- answers `{ page }`, the new epic page's URL path
+ * - `POST /api/epics/manage/complete` `{ name }` -- answers `{ dropped, canceled }`
+ * - `POST /api/epics/manage/delete` `{ name }` -- answers `{}`
+ * - each refusal an `HttpError` whose words the page shows as they are (400, 404, 409)
+ *
+ * Each write needs the page server's token (`x-server-token`) and its own origin (`SRV.Guard`).
  *
  * SEE ALSO (Owen, 2026-10-13:  "There is no easy way to get to a "decisions" or "details" pages from an epic"):  the
  * pages an epic made or leans on, which `<epic-page>` lists in its See Also box, above the Overview
@@ -62,13 +73,13 @@ import { slug } from "spell/util/string"
 import { SRV } from "spell/server"
 import type { RouteModule } from "spell/server/page"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
-import { DataFile } from "spell/epic/data/DataFile"
-import { FAVORITES_FILE, favoritesIn } from "spell/epic/list/EpicCards"
 import type { ContentRouteContext } from "spell/epic/list/runningRoutes"
 
-// the route `<epic-cards>` asks:  its family's types file (data only)
+// the routes `<epic-cards>` and `<epic-card>` ask:  their families' types files (data only)
 import { SAGA_EPICS_API } from "spell/epic/components/epic-cards/EpicCards.types"
+import { MANAGE_API } from "spell/epic/components/epic-list/EpicList.types"
 
+import { EpicLifecycle, editFavorites } from "./EpicLifecycle"
 import { EpicTests, TESTS_API } from "./EpicTests"
 import { PlanDocCommands } from "./PlanDocCommands"
 import { PlanDocFiles } from "./PlanDocFiles"
@@ -111,6 +122,25 @@ const epicRoutes: RouteModule = {
     })
     router.get(TESTS_API, (_request, reply) => {
       reply.set("Cache-Control", "no-store").json(new EpicTests(content ?? EpicConfig.contentOf(root)).waiting())
+    })
+    const lifecycle = () => new EpicLifecycle({ root, ...(content && { content }) })
+    const body = SRV.parseBodies({ limit: MAX_BODY })
+    router.get(MANAGE_API, (request, reply) => {
+      reply.set("Cache-Control", "no-store").json(lifecycle().facts(String(request.query.epic ?? "")))
+    })
+    router.post(`${MANAGE_API}/resume`, guard.writeCheck, body, async (request, reply) => {
+      reply.json({ said: await lifecycle().resume(nameIn(request.body)) })
+    })
+    router.post(`${MANAGE_API}/rename`, guard.writeCheck, body, async (request, reply) => {
+      const to = (request.body as { to?: unknown } | undefined)?.to
+      reply.json({ page: await lifecycle().rename(nameIn(request.body), typeof to === "string" ? to.trim() : "") })
+    })
+    router.post(`${MANAGE_API}/complete`, guard.writeCheck, body, async (request, reply) => {
+      reply.json(await lifecycle().complete(nameIn(request.body)))
+    })
+    router.post(`${MANAGE_API}/delete`, guard.writeCheck, body, async (request, reply) => {
+      await lifecycle().remove(nameIn(request.body))
+      reply.json({})
     })
     router.get(SAGA_EPICS_API, (request, reply) => {
       const saga = String(request.query.saga ?? "")
@@ -157,26 +187,20 @@ const RESERVED = new Set(["review", "resume", "color", "future", "phase", "start
 /**
  * Star (`favorite`) or unstar epic `name` in checkout `root`'s favourites (`FAVORITES_FILE`, in its epic folder);
  * resolves to every starred epic's name after, sorted.
- * - SIDE EFFECT:  writes the file through the page server's one safe write (`SRV.FileOperations.save()`:
- *   read and written under its lock, all at once), keeping a comment added to it by hand (`DataFile.edited()`);
- *   its old `favorites.json` read, then removed
+ * - SIDE EFFECT:  writes the file (`editFavorites()`:  under the page server's lock, a comment kept)
  * - throws `HttpError(400)` when `name` isn't an epic's name (lower-kebab-case, as `epicName()` makes them)
  */
 export async function setFavorite(root: string, name: string, favorite: boolean): Promise<string[]> {
   if (!EPIC_NAME.test(name)) throw new SRV.HttpError(400, `not an epic's name:  "${name}"`)
-  let list: string[] = []
-  const file = join(EpicConfig.contentOf(root), FAVORITES_FILE)
-  await SRV.FileOperations.save(file, (current) =>
-    DataFile.edited<unknown>(file, current, (read) => {
-      const favorites = favoritesIn(read)
-      if (favorite) favorites.add(name)
-      else favorites.delete(name)
-      list = [...favorites].sort()
-      return list
-    })
+  return editFavorites(EpicConfig.contentOf(root), (favorites) =>
+    favorite ? favorites.add(name) : favorites.delete(name)
   )
-  DataFile.removeOld(file)
-  return list
+}
+
+/** The epic's name a card's menu sent (`{ name }`);  `""` for none, which `EpicLifecycle` refuses. */
+function nameIn(body: unknown): string {
+  const name = (body as { name?: unknown } | undefined)?.name
+  return typeof name === "string" ? name : ""
 }
 
 /**

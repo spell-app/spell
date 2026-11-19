@@ -1423,6 +1423,9 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--stage <stage>": "the stage it starts in:  overview (the default), phases or building"
   },
   stage: {},
+  rename: {},
+  complete: {},
+  delete: {},
   change: { "--for <item>": "the item of the change marks that name none" },
   list: { "--json": "print them as JSON" },
   summary: { "--json": "print it as JSON" },
