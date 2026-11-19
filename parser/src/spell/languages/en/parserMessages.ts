@@ -340,6 +340,11 @@ export const PARSER_MESSAGES = {
   /** A right-click menu reusing a menu by its name, naming none the program draws or declares (epic `language` T156). */
   "unknown-menu":
     '<{tag} "{menu}"> names no menu here:  draw one with that name, e.g. <menu "{menu}">, and put its actions in it',
+  /** `sound "card slide"`, `the "intro" video`:  a name the program never gives a sound or video (epic `language` P65). */
+  "unknown-media": 'Nothing here is named "{name}":  name it first, e.g. sound "{name}" is at "sounds/{name}.mp3"',
+  /** A quoted word as an event's name in a handler, holding a fill-in:  `when the "[x]" video ends` (epic `language` P65). */
+  "media-event-name":
+    "A handler's name must be written out:  say the sound or video's name in quotes, with no [ ] in it",
   /** `context-menu="game menu"` on an element, naming no menu the program draws or declares (epic `language` T156). */
   "unknown-menu-attribute":
     '{attribute}="{menu}" names no menu here:  draw one with that name, e.g. <menu "{menu}">, or declare one, its "{menu}" is a menu of ...',

@@ -30,6 +30,7 @@ import { DimensionBase } from "./DimensionBase"
 import { DimensionUnit } from "./DimensionUnit"
 import { OutlineSpecifierMeasure } from "./OutlineSpecifierMeasure"
 import { OutlineSpecifierPercent } from "./OutlineSpecifierPercent"
+import { OutlineSpecifierMedia } from "./OutlineSpecifierMedia"
 import { CreateThing } from "./CreateThing"
 import { CreateType } from "./CreateType"
 import { CSSBlock } from "./CSSBlock"
@@ -1976,6 +1977,12 @@ classesEs.addRule(OutlineSpecifierEnum, {
       ]
     }
   ]
+})
+
+// un sonido o un vídeo, y dónde está su archivo:  `su "deslizar" es un sonido en "..."` (epic `language` P65)
+classesEs.addRule(OutlineSpecifierMedia, {
+  syntax: "(un|una) {kind:media_kind} en {path:text}",
+  tests: [{ tests: [[`un sonido en "sonidos/deslizar.mp3"`, `core.media("sound", "sonidos/deslizar.mp3")`]] }]
 })
 
 // un porcentaje, guardado como su fracción:  `su "propina" es un porcentaje` (epic `language` P34)

@@ -570,9 +570,11 @@ export abstract class ProgramWriter extends Writer {
    * - e.g. `- its clubs is a new foundation with ...` (epic `outline-spell` P19):
    *   so the solitaire's piles exist as soon as it does, and `every pile` finds them.
    * - A new list (`as a new list of tasks`) is still made when first read:  a saved thing never gets an empty one.
+   * - Or said outright, `node.early`:  a page's named sound or video (epic `language` P65).
    * - Its class's schema says so:  `early: true` (`PropInfo.early`).
    */
   madeEarly(node: P.ASTReactiveProperty): boolean {
+    if (node.early) return true
     const initializer = node.initializer && unwrapped(node.initializer)
     return initializer instanceof P.ASTNewInstanceExpression && initializer.type.name !== "List"
   }

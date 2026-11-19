@@ -21,6 +21,7 @@ import { DimensionBase } from "./DimensionBase"
 import { DimensionUnit } from "./DimensionUnit"
 import { OutlineSpecifierMeasure } from "./OutlineSpecifierMeasure"
 import { OutlineSpecifierPercent } from "./OutlineSpecifierPercent"
+import { OutlineSpecifierMedia } from "./OutlineSpecifierMedia"
 import { CreateThing } from "./CreateThing"
 import { CreateType } from "./CreateType"
 import { CSSBlock } from "./CSSBlock"
@@ -2024,6 +2025,13 @@ classes.addRule(OutlineSpecifierEnum, {
       ]
     }
   ]
+})
+
+// a sound or a video, and where its file is:  `its "card slide" is a sound at "sounds/slide.mp3"` (epic `language` P65)
+// -- before `a {type}`, which would make `sound` a type of its own
+classes.addRule(OutlineSpecifierMedia, {
+  syntax: "(a|an) {kind:media_kind} at {path:text}",
+  tests: [{ tests: [[`a sound at "sounds/slide.mp3"`, `core.media("sound", "sounds/slide.mp3")`]] }]
 })
 
 // a percent, kept as its fraction:  `its "tip" is a percent`, `<property "tip" type="percent">18%</>` (epic `language` P34)

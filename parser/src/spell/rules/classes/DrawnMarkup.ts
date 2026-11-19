@@ -3,7 +3,9 @@ import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { Priority } from "spell/parser/spell/rules/rules.types"
 // Through the folder:  read only when called, once the folder has loaded
-import { DrawIt } from "spell/parser/spell/rules/classes"
+import { DrawIt, OutlineSpecifierMedia } from "spell/parser/spell/rules/classes"
+// Through the folder:  read only when called, once the folder has loaded
+import { noteMediaName } from "spell/parser/spell/rules/UI"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import type { DrawnDeclaration } from "spell/parser/spell/rules/JSX/JSX.shared"
@@ -74,6 +76,7 @@ export class DrawnMarkup extends SpellStatement<"markup", { slot?: string }> {
         asWritten: declares.name,
         datatype: declares.view ?? declares.datatype
       })
+      if (declares.media) noteMediaName(match.scope, declares.name)
     }
   }
 
@@ -132,6 +135,19 @@ export class DrawnMarkup extends SpellStatement<"markup", { slot?: string }> {
   /** One member `declares` says, declared by the tag `at` -- see `membersDeclared()`. */
   private static memberAST(declares: DrawnDeclaration, at: P.Match, type: P.ASTTypeExpression): P.ASTReactiveProperty {
     const check = new P.ASTObjectLiteral(at)
+    // a sound or video, `<video "intro" source="..." />`:  made with its thing, so its name is found at once (P65)
+    if (declares.media) {
+      const { source } = (at.data as { media?: { source?: P.Match } }).media ?? {}
+      const value = (source?.AST as P.ASTJSXAttribute | undefined)?.value
+      const path = value instanceof P.ASTExpression ? value : undefined
+      const initializer = OutlineSpecifierMedia.made(at, declares.media, path, declares.name)
+      return new P.ASTReactiveProperty(at, {
+        type,
+        property: QuotedMember.nameOf(declares.name),
+        initializer,
+        early: true
+      })
+    }
     if (declares.datatype) {
       check.addProp("type", new P.ASTTypeNameLiteral(at, { value: declares.datatype, quote: "'" }))
       return new P.ASTReactiveProperty(at, { type, property: QuotedMember.nameOf(declares.name), check })

@@ -50,6 +50,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Compiled by the same `yarn core:gen:templates` into the kit's `spell/util/measures/dimensions.generated.ts`
     (what [dimensions.ts](dimensions.ts), Spell UI and the compiler read) and Python's `spell_core/dimensions_generated.py`.
     NEVER edit those:  edit the source, run that.
+- Sounds and videos are [media.ts](media.ts)'s (epic `data` T145, epic `language` P65):  one player per sound or video,
+  a named one found by its name (`core.mediaNamed()`), played with its speed, start, volume and looping, a video where
+  it's drawn or in a window (Spell UI's `ui-modal`, by its tag), each named one sending its events by `trigger()`.
 - Random numbers come from the core's own generator, [`ParkMiller`](ParkMiller.ts), NEVER `Math.random()`:
   - `core.seedRandom(n)` makes everything random after it repeat;  unseeded, each run differs.
   - `core.shuffled()` is lodash's shuffle, step for step.

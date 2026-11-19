@@ -75,8 +75,21 @@
       ]
     },
     {
-      "why": "Sound (epic data T145):  a page's speakers, played from a person's click;  a Python program's page would play it, not the program",
-      "names": ["play", "stop", "loadSound"]
+      "why": "Sounds and videos (epic data T145, language P65):  a page's speakers and screen, played from a person's click;  a Python program's page would play them, not the program",
+      "names": [
+        "play",
+        "stop",
+        "loadSound",
+        "media",
+        "mediaNamed",
+        "pause",
+        "resume",
+        "stopAll",
+        "isPlaying",
+        "isDone",
+        "mediaLength",
+        "drawMedia"
+      ]
     },
     {
       "why": "The mouse and keys (epic elemental-spell P9):  a Python program's page sends them to its things",

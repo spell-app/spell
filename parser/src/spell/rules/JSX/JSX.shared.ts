@@ -162,6 +162,11 @@ const PLAIN_WORD = /^\p{L}+(-\p{L}+)*$/u
  *   array of `jsxAttribute` matches) -- splitting per-rule would just mean re-importing one another's type.
  */
 export type JSXMatchData = {
+  /**
+   * (`jsxElement`) A sound or video's tag with a quoted word, `<video "intro" />` (epic `language` P65):
+   * drawn where it is (`core.drawMedia()`), named by its word;  `source`, its file, when the tag says it.
+   */
+  media?: { kind: string; name: string; source?: P.Match }
   /** (`jsxAttribute`/`jsxExpression`) Sub-expression match parsed out of the attribute/expression value. */
   expression?: P.Match
   /** (`jsxAttribute`/`jsxExpression`) The items of the loops around it, in a drawing:  `readableInDrawing()`. */
@@ -304,6 +309,11 @@ export type DrawnDeclaration = {
   datatype?: string
   /** A value said on a line of its own:  the tag only draws it, declaring nothing. */
   drawnOnly?: boolean
+  /**
+   * A sound or a video, `<sound "card slide" source="..." />`, `<video "intro" source="..." />` (epic `language` P65):
+   * its kind, the core's `sound` or `video`;  its file is the tag's `source`, its starting value `core.media(...)`.
+   */
+  media?: string
   /**
    * A view's tag that says `hidden` (Spanish `oculto`):  it declares the member and draws NOTHING (epic `language` T123).
    * - `<deck "deck" hidden/>` ~== `"deck" is a new deck`:  a viewable list drawn would take its items' elements

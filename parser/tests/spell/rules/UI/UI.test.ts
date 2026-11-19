@@ -60,6 +60,100 @@ describe("testing spell module UI", () => {
     })
   })
 
+  describe("sounds and videos, by name (epic `language` P65)", () => {
+    /** `contents`, parsed whole as `path`:  what it compiled to, and its errors. */
+    function parsed(contents: string, path = "/Test.spell") {
+      const { compiled, errors } = parseSpellProject([{ path, contents }]).files[0]!
+      return { compiled, errors }
+    }
+
+    test("named on the app, either way round:  a property made with it, found by its name", () => {
+      const { compiled, errors } = parsed(`my game is an app
+	sound "card slide" is at "sounds/slide.mp3"
+	its "intro" is a video at "intro.mp4"
+	to start over
+		play the card slide sound at double speed
+		play sound "card slide" from 0:30
+		play the "intro" video in a new window and wait
+		play "card slide"
+		play its intro
+`)
+      expect(errors).toEqual([])
+      expect(compiled).toContain(
+        `this.declareProp("cardSlide", { init: () => core.media("sound", "sounds/slide.mp3", "card slide"), early: true })`
+      )
+      expect(compiled).toContain(
+        `this.declareProp("intro", { init: () => core.media("video", "intro.mp4", "intro"), early: true })`
+      )
+      expect(compiled).toContain(`core.play(core.mediaNamed("card slide", "sound"), { speed: 2 })`)
+      expect(compiled).toContain(`core.play(core.mediaNamed("card slide", "sound"), { from: 30 })`)
+      expect(compiled).toContain(`await core.play(core.mediaNamed("intro", "video"), { where: "window" })`)
+      expect(compiled).toContain(`core.play("card slide")`)
+      expect(compiled).toContain(`core.play(this.intro)`)
+    })
+
+    test("a name nobody gives won't compile;  a property called `... sound` stays the property", () => {
+      const { errors } = parsed(`my game is an app
+	sound "ding" is at "ding.mp3"
+	to ring it
+		play sound "dong"
+`)
+      expect(errors.join()).toContain('Nothing here is named "dong"')
+      const { compiled, errors: none } = parsed(`a pokemon is a thing
+	its "cry sound" is text
+	to hear it
+		play the cry sound
+`)
+      expect(none).toEqual([])
+      expect(compiled).toContain("core.play(this.crySound)")
+    })
+
+    test("a drawing's tags name them and draw them;  a handler hears one end, above the drawing that names it", () => {
+      const { compiled, errors } = parsed(`my game is an app
+	when the "intro" video ends
+		play the boing sound
+	to draw it
+		<video "intro" source="intro.mp4" />
+		<sound "boing" source="boing.mp3" />
+		<button onClick={play video "intro"}>Play</button>
+`)
+      expect(errors).toEqual([])
+      expect(compiled).toContain("onIntroVideoEnds(event)")
+      expect(compiled).toContain(`core.play(core.mediaNamed("boing", "sound"))`)
+      expect(compiled).toContain(`() => core.drawMedia(core.mediaNamed("intro", "video"))`)
+      expect(compiled).toContain(
+        `this.declareProp("boing", { init: () => core.media("sound", "boing.mp3", "boing"), early: true })`
+      )
+    })
+
+    test("and in Spanish", () => {
+      const { compiled, errors } = parsed(
+        `mi juego es una app
+	sonido "deslizar" está en "sonidos/deslizar.mp3"
+	su "intro" es una película en "intro.mp4"
+	para empezar de nuevo
+		reproducir el sonido deslizar al doble de velocidad
+		reproducir el vídeo "intro" a pantalla completa y esperar
+		pausar el vídeo "intro"
+		parar todos los vídeos
+	cuando el vídeo "intro" termina
+		reproducir "deslizar"
+	para dibujarlo
+		<vídeo "intro" />
+`,
+        "/Juego.es.spell"
+      )
+      expect(errors).toEqual([])
+      expect(compiled).toContain(`core.media("video", "intro.mp4", "intro")`)
+      expect(compiled).toContain(`core.play(core.mediaNamed("deslizar", "sound"), { speed: 2 })`)
+      expect(compiled).toContain(`await core.play(core.mediaNamed("intro", "video"), { where: "full screen" })`)
+      expect(compiled).toContain(`core.pause(core.mediaNamed("intro", "video"))`)
+      expect(compiled).toContain(`core.stopAll("video")`)
+      expect(compiled).toContain("onIntroVideoEnds(event)")
+      expect(compiled).toContain(`return core.drawMedia(core.mediaNamed("intro", "video"))`)
+    })
+  })
+
   describe("`open printing` (epic `mockup` P21)", () => {
     /** `contents`, parsed whole as `path`:  what it compiled to, and its errors. */
     function parsed(contents: string, path = "/Test.spell") {

@@ -15,6 +15,7 @@ import { EventWords } from "./EventWords"
 import { ChangedProperty } from "./ChangedProperty"
 import { On } from "./On"
 import { WhenSomeoneElseChanges, WhenThingChanges } from "./WhenChanges"
+import { MEDIA_EVENTS, WhenMedia } from "./WhenMedia"
 import { Trigger } from "./Trigger"
 import { Send } from "./Send"
 import { EventPart } from "./EventPart"
@@ -448,6 +449,26 @@ events.addRule(WhenThingChanges, {
   ]
 })
 events.addRule(WhenSomeoneElseChanges, { syntax: "when someone else changes it (:|,)? {statement_body}?" })
+
+// a sound or video ending, starting or pausing (epic `language` P65):  above an event of the same words
+events.addRule(Wording.specialize({ ruleName: "media_event", meanings: MEDIA_EVENTS }), {
+  syntax: "((ends:ends|finishes|is done)|(starts:starts playing|starts)|(pauses:pauses|is paused))"
+})
+events.addRule(WhenMedia, {
+  syntax: "when {media:media_named} {happened:media_event} (:|,)? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: [`when the "intro" video ends`, "\tprint 1"],
+          js: ['on("intro-video-ends", () => core.console.log(1))']
+        },
+        [`when sound "Card Slide" starts playing`, 'on("card-slide-sound-starts")']
+      ]
+    }
+  ]
+})
 
 // `when flipped:`, the same as `on flipped:` (Q42:  `on` or `when`, either, for an event);
 // `when creating a deck` (and `when created`) stays the creation hook, which wins on the same words (`priority`)
