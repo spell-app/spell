@@ -475,13 +475,10 @@ export const APP_TEXTS = {
   anatomyFront: "Front",
   anatomyFrontTip: "Look at it straight on again",
   anatomySpacing: "Spacing",
-  anatomyDepth: "Depth",
-  // what it shows as layers (I257):  your views, those and every part inside them, or empty frames of your views
+  // what it shows as layers (I257, T118):  your views, or empty frames of them
   anatomyShows: "What to show",
-  anatomyTopLevel: "Top Level",
-  anatomyTopLevelTip: "A layer for each view your app draws",
-  anatomyAllParts: "All Parts",
-  anatomyAllPartsTip: "A layer for every part too, so buttons, menus and boxes each float on their own",
+  anatomyViews: "Views",
+  anatomyViewsTip: "A layer for each view your app draws",
   anatomyOutlines: "Outlines",
   anatomyOutlinesTip: "Draw each view as an empty frame instead of showing what's on it",
   // over the 3D view in the full window (I260)

@@ -6,7 +6,8 @@ import { EDITOR, SERVING } from "./runningEditor"
 /**
  * Anatomy (epic `editor` P34):  Solitaire's running app pulled apart into floors, in the editor, shown in Debug
  * (the Program panel open, the Inspector open).
- * - It opens face on, then turns to its resting angle a second later (I256).
+ * - It opens face on, then turns to its resting angle half a second later (I256, T118);
+ *   once it rests, a drag turns it (I262).
  * - Each view is a floor over the view that holds it, lifted by the spacing:  nested as the Views tree is.
  * - The cards of a pile step up one by one, each over the one under it (I256).
  * - Each floor has its type's tag over it.
@@ -113,14 +114,40 @@ describe.skipIf(!SERVING)("Anatomy, over Solitaire", { timeout: 180_000 }, () =>
     await page.locator(".AnatomyButton [part~=item]").first().click()
     const turn = () => page.evaluate(() => (window as unknown as TestWindow).AppAnatomy.view)
 
-    // face on at first, then turned to its resting angle once it's waited a second and turned
+    // face on at first, then turned to its resting angle once it's waited half a second and turned
     expect(await turn()).toMatchObject({ tilt: 0, spin: 0 })
+
+    // what it shows:  Views | Outlines, no Depth slider (T118)
+    const tabs = await page.locator(".AnatomyShows ui-item").allTextContents()
+    expect(tabs.map((tab) => tab.trim())).toEqual(["Views", "Outlines"])
+    expect(await page.locator(".AnatomyBar ui-slider").count()).toBe(1)
     await page.waitForTimeout(2500)
     const resting = await turn()
     expect(resting.tilt).not.toBe(0)
     expect(resting.spin).not.toBe(0)
     await page.waitForTimeout(300)
     expect(await turn()).toEqual(resting)
+
+    // once it rests, a drag in Inspect turns it (I262)
+    const middle = await page.evaluate(() => {
+      const box = document.querySelector(".AppPaneBody")!.getBoundingClientRect()
+      return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+    })
+    await page.mouse.move(middle.x, middle.y)
+    await page.mouse.down()
+    for (let step = 1; step <= 10; step++) await page.mouse.move(middle.x + step * 8, middle.y + step * 3)
+    await page.mouse.up()
+    const dragged = await turn()
+    expect(dragged.spin).toBeCloseTo(resting.spin + 80 * 0.4, 0)
+    expect(dragged.tilt).toBeCloseTo(resting.tilt - 30 * 0.4, 0)
+    // and dragged back, it rests where it was
+    const end = { x: middle.x + 80, y: middle.y + 30 }
+    await page.mouse.down()
+    for (let step = 1; step <= 10; step++) await page.mouse.move(end.x - step * 8, end.y - step * 3)
+    await page.mouse.up()
+    const back = await turn()
+    expect(back.spin).toBeCloseTo(resting.spin, 0)
+    expect(back.tilt).toBeCloseTo(resting.tilt, 0)
 
     // nested as the tree is:  the app flat, each pile lifted over it, each card over its pile, by the spacing
     const lifts = await page.evaluate(() => {

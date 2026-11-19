@@ -7,7 +7,6 @@ import { SpellElement } from "spell/app/app/runner/SpellElement"
  * each view it draws, a floor over the view that holds it.
  * - A view:  an element drawing one of the program's things (`<solitaire-card>`):  the app, a pile, a card, a card's
  *   picture.
- * - With `parts`, Spell UI's elements inside them too (`<ui-toolbar>`), each a floor of its own:  Q44's Parts switch.
  * - Only what draws a box of its own:  a `display: contents` element (most `<ui-text>`s) has nothing to lift.
  * - Through every shadow root:  a card's pictures are drawn inside the card's.
  * - A floor whose drawing CLIPS what's inside it (a scrolling list, a rounded box that hides its overflow) can't lift
@@ -19,20 +18,17 @@ import { SpellElement } from "spell/app/app/runner/SpellElement"
 export class AnatomyFloors {
   /**
    * The floors of the app drawn in `stage`, in document order, the app's own first.
-   * - `isPart`:  is an element a part the Inspector shows (`Inspector.isPart`):  a Spell UI element, say.
    * - Never the editor's own, round the program (`EDITOR_OWN`).
    */
-  static in(stage: Element, { parts, isPart }: { parts: boolean; isPart: (element: Element) => boolean }): Floor[] {
+  static in(stage: Element): Floor[] {
     const floors: Floor[] = []
     const walk = (root: Element | ShadowRoot, parent: Floor | undefined) => {
       for (const element of root.children) {
         if (element.hasAttribute(EDITOR_OWN)) continue
-        const kind = kindOf(element, { parts, isPart })
         let floor: Floor | undefined
-        if (kind && hasBox(element)) {
+        if (SpellElement.thingOf(element) && hasBox(element)) {
           floor = {
             element: element as HTMLElement,
-            kind,
             depth: parent ? parent.depth + 1 : 0,
             parent,
             step: 0,
@@ -124,8 +120,6 @@ export class AnatomyFloors {
 export type Floor = {
   /** the element:  `<solitaire-card>` */
   element: HTMLElement
-  /** a view of the program, or a Spell UI part inside one (with Parts on) */
-  kind: FloorKind
   /** how many floors hold it:  0 for the app */
   depth: number
   /** the floor holding it;  none for the app */
@@ -142,19 +136,6 @@ export type Floor = {
 
 /** How much of the floor holding it a floor covers, at least, to fill it (`fillsParent()`). */
 const FILLS_SHARE = 0.8
-
-/** What a floor is:  a view the program draws, or a Spell UI part inside one. */
-export type FloorKind = "view" | "part"
-
-/** What `element` is as a floor, if it is one. */
-function kindOf(
-  element: Element,
-  { parts, isPart }: { parts: boolean; isPart: (element: Element) => boolean }
-): FloorKind | undefined {
-  if (SpellElement.thingOf(element)) return "view"
-  if (parts && isPart(element)) return "part"
-  return undefined
-}
 
 /**
  * Where the page lays `element` out, in the page's pixels:  its offsets summed up its offset parents.

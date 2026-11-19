@@ -1,15 +1,14 @@
 /*
  * Look of Anatomy (`AppAnatomy.tsx`):  its bar across the top of the app pane, the floors' tags over the turned app,
  * and the outlines.
- * - A tag is coloured as its kind's band is in the bubbly code:  a view the program draws, a thing's purple;
- *   a Spell UI part, structure's blue (`bubbly.css`), so the drawing and the code read alike.
+ * - A tag is coloured as a view's band is in the bubbly code, a thing's purple (`bubbly.css`),
+ *   so the drawing and the code read alike.
  * - The tags and outlines never take the pointer:  Anatomy reads it on the window, before the app.
  */
 
 .AppPane:has(> .AnatomyBar) {
   position: relative;
   --AppAnatomy-view: var(--bubbly-thing, #7c5cd6);
-  --AppAnatomy-part: var(--bubbly-structure, #2f80d1);
 
   & > .AppPaneBody {
     overflow: hidden;
@@ -126,9 +125,6 @@
     line-height: 16px;
     white-space: nowrap;
 
-    &.part {
-      --AppAnatomy-hue: var(--AppAnatomy-part);
-    }
     &.hovered,
     &.selected {
       box-shadow:
@@ -141,7 +137,7 @@
     }
   }
 
-  /* the outlines:  each floor an empty frame in its kind's colour, the app hidden under them */
+  /* the outlines:  each floor an empty frame in a view's colour, the app hidden under them */
   .AnatomyOutlines {
     position: absolute;
     inset: 0;
@@ -163,9 +159,6 @@
     background: color-mix(in srgb, var(--AppAnatomy-hue) 6%, transparent);
     pointer-events: auto;
 
-    &.part {
-      --AppAnatomy-hue: var(--AppAnatomy-part);
-    }
     &.hovered {
       background: color-mix(in srgb, var(--AppAnatomy-hue) 20%, transparent);
       border-width: 2px;
