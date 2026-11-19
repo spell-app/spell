@@ -947,11 +947,18 @@ export const HELP_TABLE: Readonly<
     }
   },
   "ui-json": {
-    description: "JSON data holds data in a page, as its text or from a file with `source`.",
+    description:
+      "JSON data holds data in a page, as its text or from a file with `source`, and shows it as an outline whose objects and arrays open and close.",
     empty: true,
     attributes: {
       source: "URL of the file to show, relative to the page; same origin only (another site's URL shows an error).",
-      load: "When to fetch `source`: `eager` (at once), `visible` (once scrolled into view) or `idle` (when the browser has nothing else to do)."
+      load: "When to fetch `source`: `eager` (at once), `visible` (once scrolled into view) or `idle` (when the browser has nothing else to do).",
+      depth: "How many levels start open: `1`, the top object or array alone; `0`, everything closed.",
+      quotes: 'Keys in quotes, as JSON writes them: `"type": "optical"`.',
+      "no-header": "Hides the header: the Copy and quotes buttons.",
+      editable:
+        "Double-click a key or a value to edit it, in a control that fits the value: a text field for a string, a number field for a number, a date picker for an ISO date, a checkbox for `true` / `false`, a pick list for a key `editors` gives choices.",
+      editors: 'With `editable`, the control for each key, as a PROPERTY: `{ direction: ["in", "out"], when: "date" }`.'
     }
   },
   "ui-keys": {

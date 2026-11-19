@@ -231,7 +231,7 @@ Every family, by group, A-Z inside each.
 
 <!-- components:start -->
 
-89 families, 141 tags;  3 families in progress.
+91 families, 143 tags;  4 families in progress.
 
 ### Elements
 
@@ -306,7 +306,7 @@ Elements with behaviour:  they open, pick, move.
 | <img src="docs/images/components/ui-embed.png" alt="Embed, its first example" width="171" height="96"> | [Embed](docs/ui-embed.html) | `<ui-embed>` | An embed displays content from other websites, like YouTube videos, loaded only when asked for. | iframe, video, youtube, vimeo |
 |  | [Flyout](docs/ui-flyout.html) | `<ui-flyout>` | A flyout is a modal that slides in from a side of the page. | drawer, sheet, side panel, off canvas |
 | <img src="docs/images/components/ui-include.png" alt="Include, its first example" width="200" height="40"> | [Include](docs/ui-include.html) | `<ui-include>` | An include shows part of another page from this site in this one, loaded at once, when idle or when scrolled into view. | island, partial, fragment, server-side include |
-|  | [JSON data](docs/ui-json.html) | `<ui-json>` | JSON data holds data in a page, as its text or from a file with `source`.  It draws nothing:  `value` is the parsed data, `ui-changed` says when it changed, and an element it sits inside may read it. | data, data island, json script, application/json |
+|  | [JSON data](docs/ui-json.html) | `<ui-json>` | JSON data holds data in a page, as its text or from a file with `source`, and shows it as an outline whose objects and arrays open and close.  `value` is the parsed data, and an element it sits inside may read it. | data, data island, json script, application/json |
 |  | [Modal](docs/ui-modal.html) | `<ui-modal>` | A modal displays content that temporarily blocks interactions with the main view of a site. | dialog, popup window, lightbox, confirm |
 | <img src="docs/images/components/ui-nag.png" alt="Nag, its first example" width="200" height="18"> | [Nag](docs/ui-nag.html) | `<ui-nag>` | A nag is a persistent message that stays until dismissed, and can remember the dismissal. | banner, cookie notice, announcement bar, sticky banner |
 |  | [Popup](docs/ui-popup.html) | `<ui-popup>` | A popup displays additional information on top of a page. | tooltip, popover, hint, hover card |
@@ -340,6 +340,7 @@ Elements with no Fomantic counterpart.
 |  | [Action](docs/ui-action.html) | `<ui-action>` | A menu item or toolbar button drawn from an action:  its title, icon and shortcut keys. | action, command, menu item, toolbar button |
 |  | [App menu](docs/ui-app-menu.html) | `<ui-app-menu>` | An app menu is an app's top bar, joined to the top of its window or page:  a start section (a menu or sidebar button, then a title or breadcrumb), a middle that stays on the bar's centre, and an end section for buttons.  It takes every `<ui-menu>` attribute. | app bar, top bar, title bar, header bar |
 | <img src="docs/images/components/ui-code.png" alt="Code, its first example" width="200" height="17"> | [Code](docs/ui-code.html) | `<ui-code>` | Code shows a block of source code coloured by its language, from the element's own text or a file on this site. | code block, syntax highlighting, highlighter, pre |
+|  | [Device](docs/ui-device.html) | `<ui-device>` | A device draws a phone, tablet or desktop round what it holds, at that device's screen size, with buttons in its thick bottom edge. | device frame, phone frame, mockup, device mockup |
 |  | [Dimension](docs/ui-dimension.html) | `<ui-dimension>` | A dimension shows one measure in the reader's own units:  5 ft 8 in in the US, 172 cm elsewhere. | measure, measurement, unit, number with units |
 |  | [Example](docs/ui-example.html) | `<ui-example>` | An example shows its own markup live, under a heading and description, with the same markup as code a button shows and hides. | example, demo, live example, code sample |
 |  | [Icon Picker](docs/ui-icon-picker.html) | `<ui-icon-picker>` | An icon picker lets people choose an icon by searching for it and clicking its glyph. | icon chooser, icon selector, glyph picker, symbol picker |
@@ -374,7 +375,7 @@ Elements with no Fomantic counterpart.
 | Docs index | `<ui-docs-index>` | A site index draws a card for each of a site's pages, grouped by the pages' tags, with a search field above them. | site index, site map, component index, table of contents |
 | Docs inspector | `<ui-docs-inspector>` | An inspector shows another element's attributes, properties and custom states, live:  click the element, and watch them change. | inspector, element inspector, devtools, live properties |
 | Docs nav | `<ui-docs-nav>` | A docs nav is a panel listing the site's pages and every component, A-Z or by topic, in folding groups, with search and favourites;  the current page is highlighted and scrolled into view. | sidebar, table of contents, toc, site nav |
-| Docs palette | `<ui-docs-palette>` | A palette groups editor shows the Spell editor's palette as columns, a group each:  drag a component to another group or place, drag a group to reorder it, rename a group, add or remove one, then save. | palette groups, palette editor, component groups, palette table |
+| Docs palette | `<ui-docs-palette>` | A palette groups editor shows the Spell editor's palette as columns, a group each:  drag a component to another group or place, drag a group to reorder it, rename a group or pick its icon, add or remove one, then save. | palette groups, palette editor, component groups, palette table |
 | Docs search | `<ui-docs-search>` | A docs search is a field that finds sections of the page shown, components, attributes and every page's sections as you type, and jumps to the one you pick;  `/` or Cmd / Ctrl+K focuses it from anywhere. | site search, docs search, quick find, jump to |
 | Docs theme bench | `<ui-docs-theme-bench>` | A theme bench shows the theme editor full width, previewing Spell's real pages side by side in the theme being made:  the editor, an epic page, Spell UI's docs and a notebook. | theme bench, theme workbench, look tuner, token tuner |
 | Docs tokens | `<ui-docs-tokens>` | A token table lists the CSS custom properties of a component family, or of the whole foundation, with their defaults and a live swatch for each colour;  a playground adds inputs that restyle a live preview. | css variables, custom properties, design tokens, theme tokens |

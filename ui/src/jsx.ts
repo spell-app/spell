@@ -23100,7 +23100,7 @@ export interface UIJsonEventMap {
    */
   "ui-loaded": CustomEvent<{ source?: string; content: string }>
   /**
-   * `ui-changed`:  The data changed:  loaded from `source`, set through `value` or `content`, or its text edited.  `value` is `undefined` when the text is empty or isn't JSON.
+   * `ui-changed`:  The data changed:  loaded from `source`, set through `value` or `content`, edited in the outline, or its text edited.  `value` is `undefined` when the text is empty or isn't JSON.
    * - `event.detail`:  `{ value: unknown, content: string }`
    */
   "ui-changed": CustomEvent<{ value: unknown; content: string }>
@@ -23125,6 +23125,22 @@ export interface UIJsonEventMap {
     source?: string
     error: unknown
   }>
+  /**
+   * `ui-navigating`:  A key or a value was clicked (not a double-click, nor the end of a text selection).  `path`:  the keys from the top value down to that member (`[]`:  the top value);  `key`:  its key, an array member's index;  `value`:  its value (an object or array too, when its key was clicked);  `part`:  which was clicked.  The page decides what it means (jumping to what a value names) and calls `preventDefault()`.
+   * - `event.detail`:  `{ path: (string | number)[], key: string | number | undefined, value: unknown, part: "key" | "value" }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-navigating": CustomEvent<{
+    path: (string | number)[]
+    key: string | number | undefined
+    value: unknown
+    part: "key" | "value"
+  }>
+  /**
+   * `ui-copied`:  The Copy button copied `content`, as JSON.
+   * - `event.detail`:  `{ content: string }`
+   */
+  "ui-copied": CustomEvent<{ content: string }>
 }
 
 /** `<ui-json>`'s own attributes, from its vocabulary. */
@@ -23150,6 +23166,61 @@ export interface UIJsonAttributes {
    * @deprecated write `load` -- `prop:` stays only for compiled spell
    */
   "prop:load"?: "eager" | "visible" | "idle"
+  /**
+   * How many levels start open:  `1`, the top object or array alone;  `0`, everything closed.  New data opens this way again.
+   * - takes:  number
+   * - default:  `1`
+   */
+  depth?: number | `${number}`
+  /**
+   * `depth`, as the DOM element's property.
+   * @deprecated write `depth` -- `prop:` stays only for compiled spell
+   */
+  "prop:depth"?: number | `${number}`
+  /**
+   * Keys in quotes, as JSON writes them:  `"type": "optical"`.  `quotes="no"`:  `type: "optical"`, as JSON5 allows (a key that isn't a name keeps its quotes).  The header's quotes button sets it.  Copy always copies JSON.
+   * - takes:  flag (present / absent)
+   * - default:  `true`
+   */
+  quotes?: boolean | "" | "false"
+  /**
+   * `quotes`, as the DOM element's property.
+   * @deprecated write `quotes` -- `prop:` stays only for compiled spell
+   */
+  "prop:quotes"?: boolean | "" | "false"
+  /**
+   * Hides the header:  the Copy and quotes buttons.
+   * - takes:  flag (present / absent)
+   * - default:  `false`
+   */
+  "no-header"?: boolean | ""
+  /**
+   * `no-header`, as the DOM element's property.
+   * @deprecated write `no-header` -- `prop:` stays only for compiled spell
+   */
+  "prop:noHeader"?: boolean | ""
+  /**
+   * Double-click a key or a value to edit it, in a control that fits the value:  a text field for a string, a number field for a number, a date picker for an ISO date, a checkbox for `true` / `false`, a pick list for a key `editors` gives choices.  Enter (or leaving it) keeps the edit, Escape drops it.  `value` changes and `ui-changed` is sent;  what's open stays open.
+   * - takes:  flag (present / absent)
+   * - default:  `false`
+   */
+  editable?: boolean | ""
+  /**
+   * `editable`, as the DOM element's property.
+   * @deprecated write `editable` -- `prop:` stays only for compiled spell
+   */
+  "prop:editable"?: boolean | ""
+  /**
+   * With `editable`, the control for each key, as a PROPERTY:  `{ direction: ["in", "out"], when: "date" }`.  A list of strings makes a pick list;  a word names the control:  `text`, `number`, `date`, `datetime`, `boolean` or `json` (a text field read as JSON).  A key it doesn't name gets the control its value's type picks.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  editors?: unknown
+  /**
+   * With `editable`, the control for each key, as a PROPERTY:  `{ direction: ["in", "out"], when: "date" }`.  A list of strings makes a pick list;  a word names the control:  `text`, `number`, `date`, `datetime`, `boolean` or `json` (a text field read as JSON).  A key it doesn't name gets the control its value's type picks.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `editors` -- `prop:` stays only for compiled spell
+   */
+  "prop:editors"?: unknown
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
@@ -23431,7 +23502,7 @@ export interface UIJsonAttributes {
    */
   "on-ui-loaded"?: (event: UIJsonEventMap["ui-loaded"]) => void
   /**
-   * `ui-changed`:  The data changed:  loaded from `source`, set through `value` or `content`, or its text edited.  `value` is `undefined` when the text is empty or isn't JSON.
+   * `ui-changed`:  The data changed:  loaded from `source`, set through `value` or `content`, edited in the outline, or its text edited.  `value` is `undefined` when the text is empty or isn't JSON.
    * - `event.detail`:  `{ value: unknown, content: string }`
    */
   "on-ui-changed"?: (event: UIJsonEventMap["ui-changed"]) => void
@@ -23452,6 +23523,17 @@ export interface UIJsonAttributes {
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-error"?: (event: UIJsonEventMap["ui-error"]) => void
+  /**
+   * `ui-navigating`:  A key or a value was clicked (not a double-click, nor the end of a text selection).  `path`:  the keys from the top value down to that member (`[]`:  the top value);  `key`:  its key, an array member's index;  `value`:  its value (an object or array too, when its key was clicked);  `part`:  which was clicked.  The page decides what it means (jumping to what a value names) and calls `preventDefault()`.
+   * - `event.detail`:  `{ path: (string | number)[], key: string | number | undefined, value: unknown, part: "key" | "value" }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-navigating"?: (event: UIJsonEventMap["ui-navigating"]) => void
+  /**
+   * `ui-copied`:  The Copy button copied `content`, as JSON.
+   * - `event.detail`:  `{ content: string }`
+   */
+  "on-ui-copied"?: (event: UIJsonEventMap["ui-copied"]) => void
 }
 
 /** `<ui-json>` in JSX:  its own attributes, and HTML's global ones. */
@@ -57976,6 +58058,12 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-form": UIFormJSXAttributes
       /**
+       * `<ui-graph>`:  A graph draws nodes joined by edges, laid out left to right.  A node may hold a graph of its own, opened in place, in a modal, or in its stead.
+       * - also known as:  graph, node graph, network diagram, flow chart, dataflow, netlist, schematic, block diagram, DAG
+       * - events:  `ui-selecting`, `ui-changed`, `ui-node-toggled`
+       */
+      "ui-graph": UIGraphJSXAttributes
+      /**
        * `<ui-grid>`:  A grid is used to harmonize negative space in a layout.
        * - also known as:  columns, row, flex grid, layout grid, responsive grid
        * - slots:
@@ -58056,9 +58144,9 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-items": UIItemsJSXAttributes
       /**
-       * `<ui-json>`:  JSON data holds data in a page, as its text or from a file with `source`.  It draws nothing:  `value` is the parsed data, `ui-changed` says when it changed, and an element it sits inside may read it.
-       * - also known as:  data, data island, json script, application/json, data block, datos
-       * - events:  `ui-loaded`, `ui-changed`, `ui-saving`, `ui-saved`, `ui-error`
+       * `<ui-json>`:  JSON data holds data in a page, as its text or from a file with `source`, and shows it as an outline whose objects and arrays open and close.  `value` is the parsed data, and an element it sits inside may read it.
+       * - also known as:  data, data island, json script, application/json, data block, json viewer, json tree, object inspector, pretty print, datos
+       * - events:  `ui-loaded`, `ui-changed`, `ui-saving`, `ui-saved`, `ui-error`, `ui-navigating`, `ui-copied`
        */
       "ui-json": UIJsonJSXAttributes
       /**
@@ -58116,12 +58204,6 @@ declare module "@solidjs/web/types/jsx.js" {
        * - slots:
        *   - default:  `<ui-item>`s, sub-menus (`<ui-menu position>`), and other content.
        *   - `overflow`:  `shrinkable`:  what the overflow button shows instead of its `…`, e.g. `<ui-icon name="bars">`.
-      /**
-       * `<ui-graph>`:  A graph draws nodes joined by edges, laid out left to right.  A node may hold a graph of its own, opened in place, in a modal, or in its stead.
-       * - also known as:  graph, node graph, network diagram, flow chart, dataflow, netlist, schematic, block diagram, DAG
-       * - events:  `ui-selecting`, `ui-changed`, `ui-node-toggled`
-       */
-      "ui-graph": UIGraphJSXAttributes
        * - events:  `ui-choosing`, `ui-changed`, `ui-form-value`
        */
       "ui-menu": UIMenuJSXAttributes
@@ -58775,8 +58857,11 @@ export interface UIEventMap {
   "ui-applied": CustomEvent<unknown>
   "ui-cancelling": CustomEvent<unknown>
   "ui-cancelled": CustomEvent<unknown>
+  "ui-selecting": CustomEvent<unknown>
+  "ui-node-toggled": CustomEvent<unknown>
   "ui-drawing": CustomEvent<unknown>
   "ui-typed": CustomEvent<unknown>
+  "ui-navigating": CustomEvent<unknown>
   "ui-removing": CustomEvent<unknown>
   "ui-chosen": CustomEvent<unknown>
   "ui-drawn": CustomEvent<unknown>
@@ -58786,7 +58871,6 @@ export interface UIEventMap {
   "ui-show-code": CustomEvent<unknown>
   "ui-replied": CustomEvent<unknown>
   "ui-animated": CustomEvent<unknown>
-  "ui-navigating": CustomEvent<unknown>
   "ui-starred": CustomEvent<unknown>
   "ui-moved": CustomEvent<unknown>
   "ui-stuck": CustomEvent<unknown>
@@ -58797,8 +58881,6 @@ export interface UIEventMap {
   "ui-command": CustomEvent<unknown>
   "ui-scrolled-to": CustomEvent<unknown>
   "ui-settled": CustomEvent<unknown>
-  "ui-selecting": CustomEvent<unknown>
-  "ui-node-toggled": CustomEvent<unknown>
   "ui-in-view": CustomEvent<unknown>
   "ui-out-of-view": CustomEvent<unknown>
   "ui-top-in-view": CustomEvent<unknown>
@@ -58856,6 +58938,7 @@ declare global {
     "ui-flag": HTMLElement
     "ui-flyout": UIHTMLElement<UIFlyoutEventMap>
     "ui-form": UIHTMLElement<UIFormEventMap>
+    "ui-graph": UIHTMLElement<UIGraphEventMap>
     "ui-grid": HTMLElement
     "ui-header": HTMLElement
     "ui-icon": HTMLElement
@@ -58956,4 +59039,3 @@ declare global {
   interface HTMLElementEventMap extends UIEventMap {}
   interface DocumentEventMap extends UIEventMap {}
 }
-    "ui-graph": UIHTMLElement<UIGraphEventMap>

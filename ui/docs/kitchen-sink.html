@@ -2189,9 +2189,19 @@
                   JSON data holds data in a page, as its text or from a file:  it draws nothing, and other elements read it.
                   <a href="ui-json.html">JSON data page</a>
                 </p>
-                <ui-tree-diagram>
-                  <ui-json>{ "label": "Add", "children": [{ "label": "Number 1" }, { "label": "Number 2" }] }</ui-json>
-                </ui-tree-diagram>
+                <ui-json>
+                  { "name": "port-a", "kind": "optical", "lanes": 4, "active": true, "owner": null, "tags": ["in", "test"],
+                  "bounds": { "x": 0, "y": 12.5, "w": 400, "h": 220 } }
+                </ui-json>
+              </ui-example>
+              <ui-example description="Three levels open, editable">
+                <ui-json depth="3" editable>
+                  { "board": { "name": "demo", "parts": { "a1": { "kind": "switch", "on": false }, "b2": { "kind": "lamp", "watts":
+                  60 } } }, "made": "2026-11-18" }
+                </ui-json>
+              </ui-example>
+              <ui-example description="All closed, no header">
+                <ui-json depth="0" no-header>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]</ui-json>
               </ui-example>
             </ui-section>
 
@@ -3206,15 +3216,19 @@
                   A tree shows rows nested in rows, which open and close, and can be selected one or many at a time.
                   <a href="ui-tree.html">Tree page</a>
                 </p>
-                <ui-tree choose="many" label="Files" style="width: 16em">
-                  <ui-tree-item label="src" icon="folder" open>
-                    <ui-tree-item label="Card.spell" icon="file code" selected></ui-tree-item>
-                    <ui-tree-item label="Deck.spell" icon="file code"></ui-tree-item>
-                    <ui-tree-item label="styles" icon="folder">
-                      <ui-tree-item label="card.css" icon="file code"></ui-tree-item>
+                <ui-tree appearance="columns" column-titles="Clients, Projects, Files" show="icon which count chevron" label="Work" style="height: 12em; width: 40em">
+                  <ui-tree-item label="Acme Bakery" icon="building outline" open>
+                    <ui-tree-item label="Spring menu" icon="folder" open>
+                      <ui-tree-item label="menu.pdf" icon="file pdf outline" selected></ui-tree-item>
+                      <ui-tree-item label="prices.csv" icon="file alternate outline"></ui-tree-item>
+                    </ui-tree-item>
+                    <ui-tree-item label="Website" icon="folder">
+                      <ui-tree-item label="home.html" icon="file code outline"></ui-tree-item>
                     </ui-tree-item>
                   </ui-tree-item>
-                  <ui-tree-item label="README.md" which="notes" icon="file alternate outline"></ui-tree-item>
+                  <ui-tree-item label="Harbor Books" icon="building outline">
+                    <ui-tree-item label="Catalogue" icon="folder"></ui-tree-item>
+                  </ui-tree-item>
                 </ui-tree>
               </ui-example>
             </ui-section>

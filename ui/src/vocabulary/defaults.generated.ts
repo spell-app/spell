@@ -796,7 +796,12 @@ export const DEFAULTS_TABLE: Readonly<
   ],
   "ui-json": [
     { name: "source", kind: "string" },
-    { name: "load", kind: "enum", values: ["eager", "visible", "idle"] }
+    { name: "load", kind: "enum", values: ["eager", "visible", "idle"] },
+    { name: "depth", kind: "number", group: "behaviour" },
+    { name: "quotes", kind: "boolean", group: "appearance" },
+    { name: "no-header", kind: "boolean", group: "appearance" },
+    { name: "editable", kind: "boolean", group: "behaviour" },
+    { name: "editors", kind: "json", group: "behaviour" }
   ],
   "ui-keys": [
     { name: "shortcut", kind: "string", group: "content" },

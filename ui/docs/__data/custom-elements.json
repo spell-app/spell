@@ -19031,8 +19031,8 @@
           "name": "UIJson",
           "tagName": "ui-json",
           "customElement": true,
-          "summary": "JSON data holds data in a page, as its text or from a file with `source`.  It draws nothing:  `value` is the parsed data, `ui-changed` says when it changed, and an element it sits inside may read it.",
-          "description": "JSON data holds data in a page, as its text or from a file with `source`.  It draws nothing:  `value` is the parsed data, `ui-changed` says when it changed, and an element it sits inside may read it.\n\nAlso known as:  data, data island, json script, application/json, data block, datos.",
+          "summary": "JSON data holds data in a page, as its text or from a file with `source`, and shows it as an outline whose objects and arrays open and close.  `value` is the parsed data, and an element it sits inside may read it.",
+          "description": "JSON data holds data in a page, as its text or from a file with `source`, and shows it as an outline whose objects and arrays open and close.  `value` is the parsed data, and an element it sits inside may read it.\n\nAlso known as:  data, data island, json script, application/json, data block, json viewer, json tree, object inspector, pretty print, datos.",
           "attributes": [
             {
               "name": "source",
@@ -19050,6 +19050,42 @@
               },
               "default": "\"eager\"",
               "fieldName": "load"
+            },
+            {
+              "name": "depth",
+              "description": "How many levels start open:  `1`, the top object or array alone;  `0`, everything closed.  New data opens this way again.",
+              "type": {
+                "text": "number"
+              },
+              "default": "1",
+              "fieldName": "depth"
+            },
+            {
+              "name": "quotes",
+              "description": "Keys in quotes, as JSON writes them:  `\"type\": \"optical\"`.  `quotes=\"no\"`:  `type: \"optical\"`, as JSON5 allows (a key that isn't a name keeps its quotes).  The header's quotes button sets it.  Copy always copies JSON.",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "true",
+              "fieldName": "quotes"
+            },
+            {
+              "name": "no-header",
+              "description": "Hides the header:  the Copy and quotes buttons.",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "fieldName": "noHeader"
+            },
+            {
+              "name": "editable",
+              "description": "Double-click a key or a value to edit it, in a control that fits the value:  a text field for a string, a number field for a number, a date picker for an ISO date, a checkbox for `true` / `false`, a pick list for a key `editors` gives choices.  Enter (or leaving it) keeps the edit, Escape drops it.  `value` changes and `ui-changed` is sent;  what's open stays open.",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "fieldName": "editable"
             },
             {
               "name": "disabled",
@@ -19180,7 +19216,16 @@
               "fieldName": "onPlatform"
             }
           ],
-          "members": [],
+          "members": [
+            {
+              "kind": "field",
+              "name": "editors",
+              "description": "With `editable`, the control for each key, as a PROPERTY:  `{ direction: [\"in\", \"out\"], when: \"date\" }`.  A list of strings makes a pick list;  a word names the control:  `text`, `number`, `date`, `datetime`, `boolean` or `json` (a text field read as JSON).  A key it doesn't name gets the control its value's type picks.  A JS property (rich data), not an attribute.",
+              "type": {
+                "text": "unknown"
+              }
+            }
+          ],
           "events": [
             {
               "name": "ui-loaded",
@@ -19191,7 +19236,7 @@
             },
             {
               "name": "ui-changed",
-              "description": "The data changed:  loaded from `source`, set through `value` or `content`, or its text edited.  `value` is `undefined` when the text is empty or isn't JSON.",
+              "description": "The data changed:  loaded from `source`, set through `value` or `content`, edited in the outline, or its text edited.  `value` is `undefined` when the text is empty or isn't JSON.",
               "type": {
                 "text": "CustomEvent<{ value: unknown, content: string }>"
               }
@@ -19216,10 +19261,57 @@
               "type": {
                 "text": "CustomEvent<{ kind: 'load' | 'cross-origin' | 'file-protocol' | 'save' | 'conflict' | 'no-saver' | 'render', source?: string, error: unknown }>"
               }
+            },
+            {
+              "name": "ui-navigating",
+              "description": "A key or a value was clicked (not a double-click, nor the end of a text selection).  `path`:  the keys from the top value down to that member (`[]`:  the top value);  `key`:  its key, an array member's index;  `value`:  its value (an object or array too, when its key was clicked);  `part`:  which was clicked.  The page decides what it means (jumping to what a value names) and calls `preventDefault()`.  Cancelable:  `preventDefault()` vetoes it.",
+              "type": {
+                "text": "CustomEvent<{ path: (string | number)[], key: string | number | undefined, value: unknown, part: \"key\" | \"value\" }>"
+              }
+            },
+            {
+              "name": "ui-copied",
+              "description": "The Copy button copied `content`, as JSON.",
+              "type": {
+                "text": "CustomEvent<{ content: string }>"
+              }
             }
           ],
           "slots": [],
-          "cssParts": [],
+          "cssParts": [
+            {
+              "name": "loader",
+              "description": "The `<ui-loader>` shown while `source` loads."
+            },
+            {
+              "name": "error",
+              "description": "The `<ui-message>` shown when loading or showing failed."
+            },
+            {
+              "name": "viewer",
+              "description": "The box round it all."
+            },
+            {
+              "name": "header",
+              "description": "The bar above the data:  Copy, then the quotes button."
+            },
+            {
+              "name": "row",
+              "description": "Each line."
+            },
+            {
+              "name": "toggle",
+              "description": "Each object's or array's open / close button, a chevron in the left gutter;  Alt-click:  its whole branch."
+            },
+            {
+              "name": "preview",
+              "description": "A closed object or array, on one line."
+            },
+            {
+              "name": "editor",
+              "description": "The control a key or value is edited in (`editable`)."
+            }
+          ],
           "cssStates": [
             {
               "name": "loading",
@@ -19274,7 +19366,56 @@
               "description": "`on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
-          "cssProperties": []
+          "cssProperties": [
+            {
+              "name": "--ui-json-font-family",
+              "default": "var(--ui-font-family-mono, ui-monospace, monospace)"
+            },
+            {
+              "name": "--ui-json-font-size",
+              "default": "0.875em"
+            },
+            {
+              "name": "--ui-json-line-height",
+              "default": "1.5"
+            },
+            {
+              "name": "--ui-json-color",
+              "default": "var(--ui-code-color, var(--ui-text-color))"
+            },
+            {
+              "name": "--ui-json-key-color",
+              "default": "var(--ui-code-attr, light-dark(#b8322a, #e06c75))"
+            },
+            {
+              "name": "--ui-json-string-color",
+              "default": "var(--ui-code-string, light-dark(#387a37, #98c379))"
+            },
+            {
+              "name": "--ui-json-number-color",
+              "default": "var(--ui-code-number, var(--ui-code-constant, light-dark(#986801, #d19a66)))"
+            },
+            {
+              "name": "--ui-json-keyword-color",
+              "default": "var(--ui-code-keyword, light-dark(#a626a4, #c678dd))"
+            },
+            {
+              "name": "--ui-json-punctuation-color",
+              "default": "var(--ui-text-muted)"
+            },
+            {
+              "name": "--ui-json-muted-color",
+              "default": "var(--ui-text-muted)"
+            },
+            {
+              "name": "--ui-json-hover-background",
+              "default": "var(--ui-surface-muted, transparent)"
+            },
+            {
+              "name": "--ui-json-focus-color",
+              "default": "var(--ui-focus-color, var(--ui-primary))"
+            }
+          ]
         }
       ],
       "exports": [

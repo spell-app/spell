@@ -249,7 +249,7 @@
     },
     "ui-json": {
       "title": "JSON data",
-      "summary": "JSON data holds data in a page, as its text or from a file:  it draws nothing, and other elements read it.",
+      "summary": "JSON data holds data in a page, as its text or from a file, and shows it as an outline that opens and closes.",
       "status": "done"
     },
     "ui-keys": {
