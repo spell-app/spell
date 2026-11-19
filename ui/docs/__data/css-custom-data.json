@@ -11715,6 +11715,20 @@
       }
     },
     {
+      "name": "::part(match)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-tree>`:  `appearance=\"columns\"` with a `filter`:  a match elsewhere in the tree, with the rows it's inside."
+      }
+    },
+    {
+      "name": "::part(matches-title)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-tree>`:  `appearance=\"columns\"` with a `filter`:  the title over the matches elsewhere in the tree."
+      }
+    },
+    {
       "name": "::part(measure)",
       "description": {
         "kind": "markdown",
@@ -12387,6 +12401,13 @@
       }
     },
     {
+      "name": "::part(tool)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-tree>`:  `tools`:  each button."
+      }
+    },
+    {
       "name": "::part(toolbar)",
       "description": {
         "kind": "markdown",
@@ -12397,7 +12418,7 @@
       "name": "::part(tools)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-example>`:  The row round the `tools` slot, just left of the code button."
+        "value": "Part of:\n\n- `<ui-example>`:  The row round the `tools` slot, just left of the code button.\n- `<ui-tree>`:  `tools`:  the line of buttons above the rows."
       }
     },
     {

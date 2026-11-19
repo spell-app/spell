@@ -31,6 +31,8 @@ import columnsCSS from "./UITreeColumns.css?inline"
  *   - Its parts are as the tree's `show` says:  its icon, `which`, how many rows it holds, the chevron.
  *   - Picked while `expandable` with no rows yet:  a spinner in its column, until they come.
  *   - In a column the tree draws narrow:  `:state(in-narrow)`, only the column's pick showing, its name sideways.
+ *   - The tree's `filter` listing its matches elsewhere in the column of rows inside it:  after those rows, drawn by
+ *     the tree (`UITree.matchList()`).
  * - Its tree's `appearance="nav"` (a site's side navigation) gives it the docs site's look:  `:state(nav)`, read as it
  *   connects too.  Then a `band` row is a heading over the rows inside it, and `count` / `badge` label its words.
  *   - `band="group"`:  a quiet label over its rows, with no arrow:  whatever holds the tree opens it.
@@ -145,10 +147,22 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
     return this.isInColumns && this.isOpen && !!this.expandable && !this.hasRows
   }
 
-  /** In a column view, the tree's `filter` filters its rows, and none matches. */
+  /** In a column view, the tree's `filter` filters its rows. */
+  get hasFilteredRows(): boolean {
+    const { tree } = this
+    return this.isInColumns && !!tree?.filter && tree.filteredRowsParent === this.domElement
+  }
+
+  /** In a column view, the tree's `filter` filters its rows, and none matches, here or elsewhere. */
   get showsNoMatches(): boolean {
     const { tree } = this
-    return this.isInColumns && !!tree?.hasNoMatches && tree.filteredRowsParent === this.domElement
+    return this.hasFilteredRows && !!tree?.hasNoMatches && !tree.hasOtherMatches
+  }
+
+  /** In a column view, the tree's matches elsewhere go after the rows inside it:  their column is its rows'. */
+  get showsMatchList(): boolean {
+    const { tree } = this
+    return this.isInColumns && this.showsRows && !!tree?.filter && tree.filteredColumn === this.depth + 1
   }
 
   /** It can open:  it has rows, or says it will. */
@@ -290,6 +304,7 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
               <Show when={this.showsNoMatches}>
                 <div class="empty">{this.tree?.translationForKey("noMatches")}</div>
               </Show>
+              <Show when={this.showsMatchList}>{this.tree?.matchList()}</Show>
             </div>
           </div>
         </Show>

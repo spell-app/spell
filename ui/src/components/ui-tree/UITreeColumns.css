@@ -490,4 +490,55 @@
   :host(:state(in-narrow)) > .row .which {
     display: none;
   }
+
+  /* ## A `filter`'s matches elsewhere in the tree:  after the filtered column's rows, each with the rows it's inside */
+  .column.items > .matches-box {
+    display: block;
+    grid-column: 1 / -1;
+  }
+  .matches {
+    margin-block-start: 4px;
+    padding-block: 4px;
+    border-block-start: 1px solid var(--ui-border-color);
+  }
+  .matches-title,
+  .matches-note,
+  .matches-loading {
+    padding: 4px 10px;
+    color: var(--_ui-tree-muted-color);
+    font-size: 0.85em;
+  }
+  .matches-title {
+    font-weight: var(--ui-font-weight-bold);
+  }
+  .match {
+    display: flex;
+    flex-direction: column;
+    margin-inline: 4px;
+    padding: 4px 6px;
+    border-radius: var(--ui-radius-s, 4px);
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .match:hover {
+    background: var(--_ui-tree-hover-background);
+  }
+  .match-words,
+  .match-path {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .match .which {
+    margin-inline-start: 0.4em;
+    color: var(--_ui-tree-muted-color);
+  }
+  .match-path {
+    color: var(--_ui-tree-muted-color);
+    font-size: 0.85em;
+  }
+  /* a narrow column shows only its pick */
+  .column.narrow .matches,
+  :host(:state(in-columns)) > .rows.narrow .matches {
+    display: none;
+  }
 }

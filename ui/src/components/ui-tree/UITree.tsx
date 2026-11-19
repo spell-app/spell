@@ -13,6 +13,22 @@ import treeCSS from "./UITree.css?inline"
 import columnsCSS from "./UITreeColumns.css?inline"
 
 /****************
+ * ### `DOMTreeElement`
+ * The `<ui-tree>` in the page:  its script API, over its component (`UITree`).
+ ****************/
+export class DOMTreeElement extends E.DOMElement<UITree> {
+  /** Open it so `levels` levels of rows show (`UITree.openTo()`):  in columns, that many columns. */
+  openTo(levels: number): void {
+    this.component?.openTo(levels)
+  }
+
+  /** Close every row, so only the top rows show (`UITree.closeAll()`). */
+  closeAll(): void {
+    this.component?.closeAll()
+  }
+}
+
+/****************
  * ### `UITree`
  * The component behind `<ui-tree>`:  rows nested in rows (`<ui-tree-item>`s), which open and close,
  * selected one or many at a time.
@@ -27,6 +43,8 @@ import columnsCSS from "./UITreeColumns.css?inline"
  * - `filter`:  only the rows whose words hold it, with the rows they're inside kept open.
  *   It changes no row's `open`.  Rows drawn only once their parent opens can't be found while that's closed.
  * - Plain walks over its light DOM, so 500 rows filter in a few milliseconds.
+ * - `openTo(levels)` and `closeAll()`:  open it so that many levels of rows show, as a person would;  in columns,
+ *   that many columns.  `tools` draws a button for each, "Open 2 levels", "Open 3 levels", "Close all".
  * - `appearance="columns"`:  a column per level, side by side, as a Mac's Finder shows folders.
  *   - The same rows, nested the same way:  each open row draws the rows inside it as the next column
  *     (`UITreeColumns.css`).
@@ -47,6 +65,9 @@ import columnsCSS from "./UITreeColumns.css?inline"
  *     - As wide as its content, until its line is dragged (kept with the widths);  the columns make room for it.
  *     - `sticky-detail`:  it stays in view at the box's end while the columns scroll sideways.
  *   - `filter` filters one column:  the last one on screen as the filter starts, so moving about doesn't move it.
+ *     After its rows, the matches elsewhere in the tree, at any depth (`otherMatches`):  a click on one opens the
+ *     path to it.  From `items`, it runs the `children` functions to look, waiting for promised ones, but opens no
+ *     column.
  *   - `sticky-path`:  the path line above the columns, naming each column's pick;  a click on one picks it again,
  *     keeping the columns after it, and scrolls its column into view.
  *     The selected row's name is in bold;  outer names that would show fewer than about 3 letters fold into one `…`.
@@ -75,7 +96,8 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   @E.protoMerged static elementSetup: Partial<E.ElementSetup> = {
     styleSheets: { tree: treeCSS, columns: columnsCSS },
     delegatesFocus: false,
-    aria: { role: "tree" }
+    aria: { role: "tree" },
+    DOMElement: DOMTreeElement
   }
 
   /** The anchor of a Shift range. */
@@ -124,9 +146,12 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
 
   render() {
     return (
-      <Show when={!this.isColumns} fallback={this.renderColumns()}>
-        {this.renderRows()}
-      </Show>
+      <>
+        <Show when={this.tools}>{this.toolbar()}</Show>
+        <Show when={!this.isColumns} fallback={this.renderColumns()}>
+          {this.renderRows()}
+        </Show>
+      </>
     )
   }
 
@@ -316,11 +341,12 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
           )}
         </Show>
         <slot />
-        <Show when={this.hasNoMatches && this.filteredRowsParent === this.domElement}>
+        <Show when={this.hasNoMatches && !this.hasOtherMatches && this.filteredRowsParent === this.domElement}>
           <div class="empty" part={this.partForName("empty")}>
             <slot name="empty">{this.translationForKey("noMatches")}</slot>
           </div>
         </Show>
+        <Show when={!!this.filter && this.filteredColumn === 0}>{this.matchList()}</Show>
       </div>
     )
   }
@@ -372,7 +398,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   @E.on("click")
   protected onClicked(event: MouseEvent) {
     const row = this.rowOf(event)
-    if (!row || E.OwnControls.isClicked(event, { upTo: row.domElement })) return
+    if (!row || E.OwnControls.isClicked(event, { upTo: row.domElement }) || isMatchClick(event)) return
     this.roving?.focus(this.roving.items.indexOf(row.domElement))
     this.activate(row, event)
   }
@@ -530,6 +556,114 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
         behavior: isStill ? "instant" : "smooth"
       })
     })
+  }
+
+  ////////////////
+  // ## Opening to a depth
+  ////////////////
+
+  /**
+   * `tools`:  a line of buttons above the rows, "Open 2 levels", "Open 3 levels" and "Close all" (`openTo()`,
+   * `closeAll()`), as the old netlist viewer's side bar has.
+   */
+  private toolbar() {
+    return (
+      <div class="tools" part={this.partForName("tools")}>
+        <For each={OPEN_LEVELS}>
+          {(levels) => (
+            <button
+              type="button"
+              class="tool"
+              part={this.partForName("tool")}
+              onClick={(event: MouseEvent) => this.openTo(levels, event)}
+            >
+              {this.translationForKey("openLevels", { levels })}
+            </button>
+          )}
+        </For>
+        <button
+          type="button"
+          class="tool"
+          part={this.partForName("tool")}
+          onClick={(event: MouseEvent) => this.closeAll(event)}
+        >
+          {this.translationForKey("closeAll")}
+        </button>
+      </div>
+    )
+  }
+
+  /**
+   * Open the tree so `levels` levels of rows show:  `openTo(2)`, the top rows and the rows inside them.
+   * - In the outline, every row less deep than that opens, and every deeper one closes, as a person would
+   *   (`ui-opening` / `ui-closing`, each cancelable).
+   * - In columns, `levels` columns show:  each column's pick stays, and where a column has none, its first row that
+   *   holds rows is picked;  the last of them is selected, as a click would (`ui-selecting`, `ui-changed`).
+   *   A `children` function runs as its item opens;  a promised list stops it there, its column showing a spinner.
+   * - `openTo(1)`:  only the top rows, `closeAll()`.
+   */
+  openTo(levels: number, originalEvent?: Event) {
+    const depth = Math.max(1, Math.floor(levels))
+    if (this.isColumns) return this.openColumnsTo(depth, originalEvent)
+    for (const row of this.allRows) {
+      if (!row.canOpen) continue
+      if (row.depth < depth - 1) row.disclosure.open(originalEvent)
+      else row.disclosure.close(originalEvent)
+    }
+  }
+
+  /**
+   * Close every row, so only the top rows show.
+   * - In columns:  back to the first column, nothing picked, with no `ui-changed` (nothing new is selected).
+   */
+  closeAll(originalEvent?: Event) {
+    this.openTo(1, originalEvent)
+  }
+
+  /** `openTo()` in columns:  `columns` columns, keeping each column's pick, else its first row that holds rows. */
+  private openColumnsTo(columns: number, event?: Event) {
+    if (this.hasItemData) return this.openItemColumnsTo(columns, event)
+    const chain: UITreeItem[] = []
+    for (let parent: Element = this.domElement; chain.length < columns - 1;) {
+      const rows = this.rowsIn(parent).filter((row) => !row.isFilteredOut)
+      const row = rows.find((each) => each.isOpen && each.canOpen) ?? rows.find((each) => each.canOpen)
+      if (!row) break
+      chain.push(row)
+      parent = row.domElement
+    }
+    const last = chain.at(-1)
+    if (last) {
+      for (const row of chain) row.disclosure.open(event)
+      return this.activate(last, event instanceof MouseEvent ? event : new MouseEvent("click"))
+    }
+    for (const row of this.allRows) {
+      if (row.isOpen) row.disclosure.close(event)
+      if (row.selected) row.selected = false
+    }
+    this.openPath = []
+  }
+
+  /** `openTo()` in columns from `items`:  the path to `columns` columns, its last pick selected, as a click would. */
+  private openItemColumnsTo(columns: number, event?: Event) {
+    const path: string[] = []
+    let last: TreeItemData | undefined
+    let list: readonly TreeItemData[] | undefined = this.topItems
+    while (list && path.length < columns - 1) {
+      const depth = path.length
+      const shown = this.shownIn(list, depth)
+      const item =
+        shown.find((each) => each.id === this.openPath[depth] && this.hasChildren(each)) ??
+        shown.find((each) => this.hasChildren(each))
+      if (!item) break
+      path.push(item.id)
+      last = item
+      list = this.childrenOf(item)
+    }
+    if (!last) {
+      if (this.openPath.length) this.requestChange("openPath", [], () => true)
+      return
+    }
+    this.pickItem(last, path.length - 1, event ?? new MouseEvent("click"), { path })
   }
 
   ////////////////
@@ -1456,8 +1590,13 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     }
   }
 
-  /** The pointer moved onto a column:  a narrow one widens while it's there.  Its line, after it, changes nothing. */
-  @E.on("pointerover")
+  /**
+   * The pointer moved onto a column:  a narrow one widens while it's there.  Its line, after it, changes nothing.
+   * - Heard on the shadow root:  a move between two of its own boxes never reaches the tree's element, as both ends
+   *   of it are the element there (the rows from `items` stayed peeking, epic `from-console` P7).
+   *   Rows from markup pass through it too, by their slots.
+   */
+  @E.on("pointerover", { target: "renderRoot" })
   protected onPointerOver(event: PointerEvent) {
     if (!this.isColumns) return
     const path = event.composedPath()
@@ -1471,16 +1610,31 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     this.hoveredColumn = undefined
   }
 
-  /** The focus moved into a column:  a narrow one widens while it has it. */
-  @E.on("focusin")
+  /** The focus moved into a column:  a narrow one widens while it has it.  Heard on the shadow root, as the pointer is. */
+  @E.on("focusin", { target: "renderRoot" })
   protected onFocusIn(event: FocusEvent) {
     if (this.isColumns) this.focusedColumn = this.columnOf(event.composedPath())
   }
 
   /** The focus left:  the next `focusin`, if it stays in the tree, says where it went. */
-  @E.on("focusout")
+  @E.on("focusout", { target: "renderRoot" })
   protected onFocusOut() {
     this.focusedColumn = undefined
+  }
+
+  /** The columns narrow when they were last looked at:  so a column that turns narrow is told from one that was. */
+  private lastNarrowColumns: readonly number[] = []
+
+  /**
+   * A column turned narrow, as a later one was picked:  it isn't drawn whole, though the pointer or the focus was
+   * last in it.  The next move onto it widens it again.
+   */
+  @E.onChange("narrowColumns", { defer: true })
+  protected onNarrowColumnsChanged(narrow: readonly number[]) {
+    const turned = narrow.filter((index) => !this.lastNarrowColumns.includes(index))
+    this.lastNarrowColumns = narrow
+    if (this.hoveredColumn !== undefined && turned.includes(this.hoveredColumn)) this.hoveredColumn = undefined
+    if (this.focusedColumn !== undefined && turned.includes(this.focusedColumn)) this.focusedColumn = undefined
   }
 
   /**
@@ -1567,8 +1721,11 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   // ## Filtering
   ////////////////
 
-  /** The text to look for changed:  as it starts, in a column view, the last column on screen is the one it filters. */
-  @E.onChange("filter", "isReady")
+  /**
+   * The text to look for changed, or the rows it looks in:  as it starts, in a column view, the last column on screen
+   * is the one it filters.
+   */
+  @E.onChange("filter", "isReady", "items")
   protected onFilterChanged(filter: string | undefined) {
     if (filter && !this.hadFilter) this.filterColumn = Math.max(0, this.columnIndexes.length - 1)
     this.hadFilter = !!filter
@@ -1578,13 +1735,38 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   /** It had a `filter` when that last changed. */
   @E.state private accessor hadFilter = false
 
-  /** `appearance="columns"`:  the column `filter` filters, by level, set as it starts. */
+  /** `appearance="columns"`:  the column `filter` filters, by level, set as it starts:  the last one on screen. */
   @E.state accessor filterColumn = 0
+
+  /**
+   * `appearance="columns"`:  the column `filter` filters now, by level:  `filterColumn`, else, while that's off
+   * screen (a match nearer the top was picked), the last one on screen.
+   * - Its rows that match show, and after them the matches elsewhere in the tree (`matchList()`).
+   */
+  get filteredColumn(): number {
+    return Math.max(0, Math.min(this.filterColumn, this.columnIndexes.length - 1))
+  }
 
   /** From markup, in a column view:  the element whose rows `filter` filters, the tree or a pick. */
   get filteredRowsParent(): Element {
-    if (!this.isColumns || !this.filterColumn) return this.domElement
-    return this.openChain.filter((row) => row.canOpen)[this.filterColumn - 1]?.domElement ?? this.domElement
+    const column = this.filteredColumn
+    if (!this.isColumns || !column) return this.domElement
+    return this.openChain.filter((row) => row.canOpen)[column - 1]?.domElement ?? this.domElement
+  }
+
+  /**
+   * From `items`, in a column view:  the picks before the column `filter` filters, as one text.
+   * - A pick there changes what that column holds, so it's looked through again (`onFilterBaseChanged()`).
+   */
+  protected get filterBase(): string {
+    if (!this.isColumns || !this.hasItemData) return ""
+    return this.openPath.slice(0, this.filteredColumn).join("\n")
+  }
+
+  /** From `items`:  a pick before the filtered column changed what it holds. */
+  @E.onChange("filterBase", { defer: true })
+  protected onFilterBaseChanged() {
+    if (this.filter) this.applyFilter()
   }
 
   /** Rows came or went, or their words changed. */
@@ -1613,12 +1795,17 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     this.hasNoMatches = !matchIn(this.domElement) && !!text
   }
 
-  /** In a column view, `text` filters one column (`filterColumn`):  it hides the rows there that don't hold it. */
+  /**
+   * In a column view, `text` filters one column (`filteredColumn`), then looks through the rest of the tree
+   * (`lookElsewhere()`).
+   * - That column shows its rows that hold it, and its pick, which the columns after it hang from.
+   */
   private applyColumnFilter(text: string) {
     if (this.hasItemData) {
-      const list = this.columnLists[this.filterColumn]
-      this.hasNoMatches = !!text && !!list?.length && !this.shownIn(list, this.filterColumn).length
-      return
+      const column = this.filteredColumn
+      const list = this.columnLists[column]
+      this.hasNoMatches = !!text && !!list?.length && !this.shownIn(list, column).length
+      return this.lookElsewhere(text)
     }
     for (const row of this.allRows) {
       row.isFilteredOut = false
@@ -1627,10 +1814,215 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     let anyMatch = false
     for (const row of this.rowsIn(this.filteredRowsParent)) {
       const isMatch = !text || row.filterWords.toLowerCase().includes(text)
-      row.isFilteredOut = !isMatch
+      row.isFilteredOut = !isMatch && !row.isOpen
       anyMatch ||= isMatch
     }
     this.hasNoMatches = !!text && !anyMatch
+    this.lookElsewhere(text)
+  }
+
+  ////////////////
+  // ## Matches elsewhere in the tree
+  ////////////////
+
+  /**
+   * In columns, `filter`'s matches anywhere in the tree but the column it filters, nearest the top first, at most
+   * `MOST_MATCHES`:  listed after that column's own rows (`matchList()`), a click opening the path to one
+   * (`pickMatch()`).
+   */
+  @E.state({ equals: E.isSameList }) accessor otherMatches: readonly OtherMatch[] = []
+
+  /** How many matches elsewhere there are, listed or not:  up to `REACH_ROWS` rows looked at. */
+  @E.state accessor otherMatchCount = 0
+
+  /** Promised `children` are on their way, to be looked through. */
+  @E.state accessor isLooking = false
+
+  /** It stopped after `REACH_ROWS` rows, with more left to look at. */
+  @E.state accessor didStopLooking = false
+
+  /** Counts each look, so one that's waiting on promised `children` stops once a newer one starts. */
+  private looks = 0
+
+  /** It has matches elsewhere, or is still looking:  so the filtered column doesn't say nothing matches. */
+  get hasOtherMatches(): boolean {
+    return this.otherMatches.length > 0 || this.isLooking
+  }
+
+  /**
+   * In columns, look for `text` through the whole tree, but the filtered column's own rows (`otherMatches`).
+   * - From markup, every row is in the page already.
+   * - From `items`, each `children` function runs once, as opening its item would, its list kept;
+   *   promised lists are waited for, a level at a time.  It opens no column:  a click on a match does.
+   * - It stops after `REACH_ROWS` rows (`didStopLooking`).
+   */
+  private lookElsewhere(text: string) {
+    const look = ++this.looks
+    this.isLooking = false
+    this.didStopLooking = false
+    if (!text) {
+      this.otherMatches = []
+      this.otherMatchCount = 0
+      return
+    }
+    if (this.hasItemData) {
+      void this.lookInItems(text, look).catch((error) => {
+        E.Warnings.warn("<ui-tree filter>", "looking through the tree failed:", error)
+      })
+      return
+    }
+    this.lookInRows(text)
+  }
+
+  /** From markup:  `text`'s matches through the whole tree, a level at a time, but the filtered column's rows. */
+  private lookInRows(text: string) {
+    const filtered = this.filteredRowsParent
+    const found: OtherMatch[] = []
+    let count = 0
+    let looked = 0
+    let level: Element[] = [this.domElement]
+    while (level.length && looked <= REACH_ROWS) {
+      const next: Element[] = []
+      for (const parent of level) {
+        for (const row of this.rowsIn(parent)) {
+          if (++looked > REACH_ROWS) break
+          next.push(row.domElement)
+          if (parent === filtered || !row.filterWords.toLowerCase().includes(text)) continue
+          count++
+          if (found.length >= MOST_MATCHES) continue
+          const around = this.rowsAround(row)
+          found.push({
+            label: row.label ?? row.valueOrLabel,
+            which: row.which,
+            path: [...around, row].map((each) => each.valueOrLabel),
+            names: around.map((each) => each.label ?? each.valueOrLabel),
+            row
+          })
+        }
+      }
+      level = next
+    }
+    this.otherMatches = found
+    this.otherMatchCount = count
+    this.didStopLooking = looked > REACH_ROWS
+  }
+
+  /**
+   * From `items`:  `text`'s matches through the whole tree, a level at a time, but the filtered column's items,
+   * waiting for promised `children` (`isLooking`);  `look` stops it once a newer look starts.
+   */
+  private async lookInItems(text: string, look: number) {
+    const filtered = this.openPath.slice(0, this.filteredColumn).join("\n")
+    const found: OtherMatch[] = []
+    let count = 0
+    let looked = 0
+    let didRun = false
+    let level: LookStep[] = [{ path: [], names: [] }]
+    while (level.length && looked <= REACH_ROWS) {
+      const lists = level.map((step) => {
+        if (!step.item) return this.topItems
+        didRun ||= !this.childrenOfItem.has(step.item) && typeof step.item.children === "function"
+        return this.childrenNow(step.item)
+      })
+      const waiting = lists.filter((list): list is Promise<unknown> => list instanceof Promise)
+      if (waiting.length) {
+        this.isLooking = true
+        await Promise.all(waiting)
+        if (look !== this.looks) return
+      }
+      const next: LookStep[] = []
+      for (const step of level) {
+        const known = step.item ? this.childrenOfItem.get(step.item) : this.topItems
+        const isFiltered = step.path.join("\n") === filtered
+        for (const child of Array.isArray(known) ? known : []) {
+          if (++looked > REACH_ROWS) break
+          const childStep = { item: child, path: [...step.path, child.id], names: [...step.names, child.label] }
+          next.push(childStep)
+          if (isFiltered || !wordsOf(child).includes(text)) continue
+          count++
+          if (found.length < MOST_MATCHES) {
+            found.push({ label: child.label, which: child.which, path: childStep.path, names: step.names, item: child })
+          }
+        }
+      }
+      level = next
+      this.otherMatches = [...found]
+      this.otherMatchCount = count
+    }
+    this.isLooking = false
+    this.didStopLooking = looked > REACH_ROWS
+    // a `children` function that made nothing:  its chevron goes
+    if (didRun) this.childrenVersion++
+  }
+
+  /**
+   * A match elsewhere was clicked:  the path to it opens, and it's selected, as a click on it would.
+   * - The filtered column keeps its pick, though it doesn't match;  a match nearer the top than that column filters the
+   *   last column on screen instead (`filteredColumn`).
+   */
+  private pickMatch(match: OtherMatch, event: MouseEvent) {
+    if (match.item) {
+      this.pickItem(match.item, match.path.length - 1, event, { path: match.path })
+      E.afterSolidUpdate(() => this.focusKeyRow())
+      return
+    }
+    const { row } = match
+    if (!row) return
+    for (const around of this.rowsAround(row)) around.disclosure.open(event)
+    this.activate(row, event)
+    E.afterSolidUpdate(() => this.focusRow(row))
+  }
+
+  /**
+   * The matches elsewhere, after the filtered column's rows:  each its words, and the rows it's inside, quieter;
+   * a spinner while promised `children` come;  a line when there are more than it lists, or it stopped looking.
+   * - Drawn by its column (`filteredColumn`):  from `items` and the first column, here;  else by the pick the column is
+   *   inside (`UITreeItem`).
+   */
+  matchList() {
+    return (
+      <Show when={this.hasOtherMatches || this.didStopLooking}>
+        <div class="matches" role="group" aria-label={this.translationForKey("elsewhere")}>
+          <div class="matches-title" part={this.partForName("matches-title")} aria-hidden="true">
+            {this.translationForKey("elsewhere")}
+          </div>
+          <For each={this.otherMatches}>
+            {(match) => (
+              <div
+                class="match"
+                part={this.partForName("match")}
+                role="treeitem"
+                aria-selected="false"
+                tabindex="-1"
+                title={[...match.names, match.label].join(PATH_SEPARATOR)}
+                onClick={(event: MouseEvent) => this.pickMatch(match, event)}
+              >
+                <span class="match-words">
+                  <span class="words">{match.label}</span>
+                  <Show when={match.which}>{(which) => <span class="which">{which()}</span>}</Show>
+                </span>
+                <Show when={match.names.length}>
+                  <span class="match-path">{match.names.join(PATH_SEPARATOR)}</span>
+                </Show>
+              </div>
+            )}
+          </For>
+          <Show when={this.isLooking}>
+            <div class="matches-loading">
+              <ui-loader visible="" size="mini" inline="" aria-label={this.translationForKey("lookingElsewhere")} />
+            </div>
+          </Show>
+          <Show when={this.otherMatchCount > this.otherMatches.length}>
+            <div class="matches-note">
+              {this.translationForKey("moreMatches", { count: this.otherMatchCount - this.otherMatches.length })}
+            </div>
+          </Show>
+          <Show when={this.didStopLooking}>
+            <div class="matches-note">{this.translationForKey("stoppedLooking", { count: REACH_ROWS })}</div>
+          </Show>
+        </div>
+      </Show>
+    )
   }
 
   ////////////////
@@ -1674,14 +2066,25 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
    */
   private childrenOf(item: TreeItemData): readonly TreeItemData[] | undefined {
     void this.childrenVersion
+    const hasRun = this.childrenOfItem.has(item)
+    const made = this.childrenNow(item)
+    if (!Array.isArray(made)) return undefined
+    // a function that made none:  its chevron goes
+    if (!hasRun && typeof item.children === "function") this.childrenVersion++
+    return made
+  }
+
+  /**
+   * `item`'s children, made once:  the list, or the promise of it, with no reactive read or write.
+   * - SIDE EFFECT:  the first call runs a `children` function;  a promised list bumps `childrenVersion` as it comes.
+   */
+  private childrenNow(item: TreeItemData): readonly TreeItemData[] | Promise<unknown> {
     const known = this.childrenOfItem.get(item)
-    if (known) return Array.isArray(known) ? known : undefined
+    if (known) return known
     const { children } = item
     const made = typeof children === "function" ? children() : (children ?? [])
     if (Array.isArray(made)) {
       this.childrenOfItem.set(item, made)
-      // a function that made none:  its chevron goes
-      if (typeof children === "function") this.childrenVersion++
       return made
     }
     const promised = Promise.resolve(made)
@@ -1692,7 +2095,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
       })
       .finally(() => this.childrenVersion++)
     this.childrenOfItem.set(item, promised)
-    return undefined
+    return promised
   }
 
   /** Does `item` open a column?  A `children` function does until it's run;  then, if it made any. */
@@ -1708,7 +2111,8 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     void this.childrenVersion
     const known = this.childrenOfItem.get(item)
     if (item.count !== undefined) return item.count
-    if (Array.isArray(known)) return known.length
+    // a list made by a function:  a look through the tree keeps an empty one for an item with no `children` too
+    if (Array.isArray(known) && typeof item.children === "function") return known.length
     return Array.isArray(item.children) ? item.children.length : undefined
   }
 
@@ -1729,11 +2133,15 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     return lists
   }
 
-  /** The items column `depth` shows:  `list`, filtered if it's `filter`'s column. */
+  /**
+   * The items column `depth` shows:  `list`, filtered if it's `filter`'s column.
+   * - Its pick stays, though it doesn't match:  the columns after it hang from it (a match elsewhere, picked).
+   */
   private shownIn(list: readonly TreeItemData[], depth: number): readonly TreeItemData[] {
     const text = (this.filter ?? "").trim().toLowerCase()
-    if (!text || depth !== this.filterColumn) return list
-    return list.filter((item) => `${item.label} ${item.which ?? ""}`.toLowerCase().includes(text))
+    if (!text || depth !== this.filteredColumn) return list
+    const pick = this.openPath[depth]
+    return list.filter((item) => item.id === pick || wordsOf(item).includes(text))
   }
 
   /**
@@ -1804,9 +2212,14 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
             <ui-loader visible="" size="small" aria-label={this.translationForKey("loading")} />
           </li>
         </Show>
-        <Show when={!!list()?.length && !shown().length}>
+        <Show when={!!list()?.length && !shown().length && !(depth === this.filteredColumn && this.hasOtherMatches)}>
           <li class="empty" role="none" part={this.partForName("empty")}>
             <slot name="empty">{this.translationForKey("noMatches")}</slot>
+          </li>
+        </Show>
+        <Show when={depth === this.filteredColumn && !!this.filter}>
+          <li class="matches-box" role="none">
+            {this.matchList()}
           </li>
         </Show>
       </ul>
@@ -1855,10 +2268,16 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
    * `item`, in column `depth`, was clicked, or a key moved onto it:  it's selected, asking first.
    * - The path is cut there, so the columns after it close and its children open in the next;
    *   with `keepsInside`, and it already picked (the keys going back or in), the columns after it stay.
+   * - `path`:  the whole path to it, when it isn't in a column on screen yet (a match elsewhere, `openTo()`).
    */
-  private pickItem(item: TreeItemData, depth: number, event: Event, { keepsInside = false } = {}) {
+  private pickItem(
+    item: TreeItemData,
+    depth: number,
+    event: Event,
+    { keepsInside = false, path: wholePath }: { keepsInside?: boolean; path?: readonly string[] } = {}
+  ) {
     const isPicked = this.openPath[depth] === item.id
-    const path = keepsInside && isPicked ? this.openPath : [...this.openPath.slice(0, depth), item.id]
+    const path = wholePath ?? (keepsInside && isPicked ? this.openPath : [...this.openPath.slice(0, depth), item.id])
     const detailPath = path.slice(0, depth + 1)
     const announce = () => this.send("ui-selecting", { item, value: item.id, path: detailPath, originalEvent: event })
     const isDone = E.isSameList(path, this.openPath) ? announce() : this.requestChange("openPath", path, announce)
@@ -1969,6 +2388,35 @@ function trimmedWidths(widths: readonly (number | undefined)[]): (number | undef
   return trimmed
 }
 
+/** One of `filter`'s matches elsewhere in the tree than the column it filters (`UITree.otherMatches`). */
+type OtherMatch = {
+  /** its words */
+  label: string
+  /** its `which`, quieter */
+  which?: string | undefined
+  /** the ids from the top down to it:  `path` once it's picked */
+  path: readonly string[]
+  /** the rows it's inside, from the top:  shown under its words */
+  names: readonly string[]
+  /** the item, from `items` */
+  item?: TreeItemData
+  /** the row, from markup */
+  row?: UITreeItem
+}
+
+/** An item `lookInItems()` looks inside, with the ids and names down to it:  no item, the top. */
+type LookStep = { item?: TreeItemData; path: readonly string[]; names: readonly string[] }
+
+/** The words `filter` looks in, for an item from `items`:  its label and `which`, lower case. */
+function wordsOf(item: TreeItemData): string {
+  return `${item.label} ${item.which ?? ""}`.toLowerCase()
+}
+
+/** Was `event` a click on a match elsewhere?  Its own handler picks it:  the row it's drawn in isn't clicked. */
+function isMatchClick(event: Event): boolean {
+  return event.composedPath().some((target) => (target as Element).classList?.contains("match"))
+}
+
 /** A row the path line names:  a `<ui-tree-item>`, or an `items` entry. */
 type PathRow = { readonly label?: string | undefined }
 
@@ -2044,6 +2492,15 @@ const PATH_LEAST_EM = 1.5
 
 /** The narrowest a path line's name may show and still be read, in em:  about 3 letters and the ellipsis. */
 const PATH_FEWEST_EM = 2.4
+
+/** The levels the `tools` buttons open to:  "Open 2 levels", "Open 3 levels". */
+const OPEN_LEVELS = [2, 3]
+
+/** The most matches elsewhere a filtered column lists. */
+const MOST_MATCHES = 200
+
+/** The most rows a look through the tree goes through before it stops:  the netlist sample has about 49,000. */
+const REACH_ROWS = 100_000
 
 /** `choose` of a tree whose rows are selected many at a time. */
 const MANY = "many"

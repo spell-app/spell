@@ -2334,6 +2334,7 @@ export const HELP_TABLE: Readonly<
         "How rows are selected: `one` (the default), or `many`, where Shift takes a range, and Command or Control adds a row or takes it away.",
       filter:
         "Show only the rows whose words hold this text, whatever its case, and the rows they're inside, opened to show them.",
+      tools: "A line of buttons above the rows: Open 2 levels, Open 3 levels and Close all.",
       label: "What a screen reader calls the tree.",
       appearance:
         "`nav`: a site's side navigation, as the docs site's is: taller rows, a selected row a rounded box in the primary colour, the open-and-close chevron at a row's end, and `band` rows as heading bands.",

@@ -109,9 +109,9 @@
                 </ui-example>
               </ui-section>
               <ui-section id="examples-types-columns-from-data" label="Columns from data" sticky="stack" collapsible dividing>
-                <ui-example description="A big tree is given as data, in `items`:  each item's `children` a list, or a function run the first time it opens, which may return a promise:  the column shows a spinner until it comes (Archive takes a second).  Only the open path's columns are drawn.  `show` picks each row's parts, here with how many rows it holds;  `filter` filters the last column on screen.">
-                  <ui-tree id="docs-tree-columns-data" appearance="columns" column-titles="Clients, Folders, Files" show="icon which count chevron" label="Work" style="height: 15em"></ui-tree>
-                  <ui-input id="docs-tree-columns-filter" icon="search" placeholder="Filter the last column" style="margin-top: 0.5em"></ui-input>
+                <ui-example description="A big tree is given as data, in `items`:  each item's `children` a list, or a function run the first time it opens, which may return a promise:  the column shows a spinner until it comes (Archive takes a second).  Only the open path's columns are drawn.  `show` picks each row's parts, here with how many rows it holds;  `tools` adds Open 2 levels, Open 3 levels and Close all.  `filter` filters the last column on screen, and after its rows lists the matches elsewhere in the tree, at any depth:  type `zip`, and click one to open the path to it.">
+                  <ui-tree id="docs-tree-columns-data" appearance="columns" tools column-titles="Clients, Folders, Files" show="icon which count chevron" label="Work" style="height: 17em"></ui-tree>
+                  <ui-input id="docs-tree-columns-filter" icon="search" placeholder="Filter the whole tree" style="margin-top: 0.5em"></ui-input>
                   <script type="module">
                     const files = (names) => names.map((name) => ({ id: name, label: name, icon: "file outline" }))
                     const later = (seconds, list) => () => new Promise((resolve) => setTimeout(() => resolve(list), seconds * 1000))
@@ -278,6 +278,24 @@
                   </ui-tree>
                 </ui-example>
               </ui-section>
+              <ui-section id="examples-states-open-levels" label="Open levels" sticky="stack" collapsible dividing>
+                <ui-example description="With `tools`, a line of buttons above the rows:  Open 2 levels, Open 3 levels and Close all.  A script calls the same methods, `openTo(levels)` and `closeAll()`.">
+                  <ui-tree tools label="Netlist" style="width: 18em">
+                    <ui-tree-item label="top" which="chip" icon="microchip">
+                      <ui-tree-item label="core" which="block" icon="cube">
+                        <ui-tree-item label="alu" which="cell" icon="cube">
+                          <ui-tree-item label="a" which="in" icon="plug"></ui-tree-item>
+                          <ui-tree-item label="sum" which="out" icon="plug"></ui-tree-item>
+                        </ui-tree-item>
+                        <ui-tree-item label="regs" which="cell" icon="cube"></ui-tree-item>
+                      </ui-tree-item>
+                      <ui-tree-item label="io" which="block" icon="cube">
+                        <ui-tree-item label="pads" which="cell" icon="cube"></ui-tree-item>
+                      </ui-tree-item>
+                    </ui-tree-item>
+                  </ui-tree>
+                </ui-example>
+              </ui-section>
               <ui-section id="examples-states-sticky-path" label="Sticky path" sticky="stack" collapsible dividing>
                 <ui-example description="With `sticky-path`, scroll down:  one line pinned at the top names the open rows the first row in view is inside.  A click on one scrolls back to it, selecting nothing.">
                   <div style="height: 12em; overflow-y: auto; width: 18em">
@@ -320,6 +338,7 @@
                   - `open` shows the rows inside it.  A row whose rows are drawn only once it opens says `expandable`.
                   - `ui-changed` hands over what's selected.  To decide that yourself, cancel `ui-selecting`, and set each row's `selected`.
                   - `filter` looks only at rows that are drawn.
+                  - `tools` puts Open 2 levels, Open 3 levels and Close all above the rows;  a script calls `openTo(levels)` and `closeAll()`.
                   - `ui-settled` hands it over again once it stays put for a moment:  for a page doing heavy work on each pick, as the arrow keys go by.
                 </script>
               </ui-markdown>
@@ -335,7 +354,8 @@
                   `appearance="columns"` shows a column per level.  Its rows are `<ui-tree-item>`s, or data in the `items` property.
                   - `items`:  `{ id, label, icon?, which?, count?, children?, data? }[]`.  `children` is a list, or a function run the first time its item opens, which may return a promise.
                   - `path` is the ids of each column's pick, from the top.  Set it to open a path, its last item selected;  `ui-changed` hands it over with the `item`.
-                  - `filter` filters one column:  the last one on screen as the filter starts, until it's cleared.
+                  - `filter` filters one column:  the last one on screen as the filter starts, until it's cleared.  After its rows, it lists the matches elsewhere in the tree, at any depth, each with the rows it's inside;  a click on one opens the path to it.  From `items`, it runs the `children` functions to look inside (waiting for promised ones), but opens no column.  It lists the first 200, and stops after 100,000 rows.
+                  - `openTo(levels)` shows that many columns, keeping each column's pick, else picking its first row that holds rows;  `closeAll()` goes back to the first column.
                   - `show` picks each row's parts:  `icon which count chevron`;  without it, `icon which chevron`.
                   - `sticky-path` puts a line above the columns naming each column's pick;  a click on one picks it again, keeping the columns after it, and scrolls its column into view.  Like the outline's, a screen reader skips it:  the columns' own keys are the way back.
                   - While the columns don't fit the tree's width, the first ones narrow to a strip with their pick's name, as few as it takes.  The last `narrow-before` (2) and the selected row's never do;  the pointer or the focus on one widens it again, over the columns after it.
@@ -412,6 +432,10 @@
 
             <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-tree" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-properties" label="Properties" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-tree" only="properties"></ui-docs-api>
             </ui-section>
 
             <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>

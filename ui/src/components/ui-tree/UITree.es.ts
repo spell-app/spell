@@ -18,7 +18,8 @@ export const treeEs = {
     path: "ruta",
     show: "mostrar",
     "narrow-before": "estrechar-antes",
-    "sticky-detail": "detalle-fijo"
+    "sticky-detail": "detalle-fijo",
+    tools: "herramientas"
   },
   values: { appearance: { nav: "navegacion", columns: "columnas" } },
   events: { "ui-selecting": "ui-seleccionando", "ui-settled": "ui-asentado" },
@@ -30,12 +31,22 @@ export const treeEs = {
     column: "columna",
     "column-row": "fila-de-columna",
     "narrow-column": "columna-estrecha",
-    "column-title": "titulo-de-columna"
+    "column-title": "titulo-de-columna",
+    tools: "herramientas",
+    tool: "herramienta",
+    "matches-title": "titulo-de-coincidencias",
+    match: "coincidencia"
   },
   texts: {
     noMatches: "Nada coincide",
     resizeColumn: "Cambiar el ancho de esta columna",
     resizeDetail: "Cambiar el ancho del panel de detalle",
-    loading: "Cargando"
+    loading: "Cargando",
+    openLevels: "Abrir {levels} niveles",
+    closeAll: "Cerrar todo",
+    elsewhere: "En otras partes del árbol",
+    lookingElsewhere: "Buscando en el árbol",
+    moreMatches: "{count} más, sin listar",
+    stoppedLooking: "Dejó de buscar tras {count} filas"
   }
 } as const satisfies E.TagDictionary

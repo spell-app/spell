@@ -54822,7 +54822,7 @@ export interface UITreeAttributes {
    */
   "prop:choose"?: "one" | "many"
   /**
-   * Show only the rows whose words hold this text, whatever its case, and the rows they're inside, opened to show them.  It changes no row's `open`:  clearing it puts the tree back as it was.  A row drawn only once its parent opens can't be found while that's closed.  `appearance="columns"`:  it filters one column, the last one on screen as the filter starts, until it's cleared.
+   * Show only the rows whose words hold this text, whatever its case, and the rows they're inside, opened to show them.  It changes no row's `open`:  clearing it puts the tree back as it was.  A row drawn only once its parent opens can't be found while that's closed.  `appearance="columns"`:  it filters one column, the last one on screen as the filter starts, until it's cleared;  after that column's rows, it lists the matches elsewhere in the tree, at any depth, each with the rows it's inside, and a click on one opens the path to it.  From `items`, it runs each `children` function to look inside, waiting for promised ones, as opening the items would, but opens no column;  it lists the first 200 matches, and stops after 100,000 rows.
    * - takes:  text
    */
   filter?: string
@@ -54831,6 +54831,16 @@ export interface UITreeAttributes {
    * @deprecated write `filter` -- `prop:` stays only for compiled spell
    */
   "prop:filter"?: string
+  /**
+   * A line of buttons above the rows:  Open 2 levels, Open 3 levels and Close all.  Scripts call the same methods:  `openTo(levels)` and `closeAll()`.  `appearance="columns"`:  `openTo(2)` shows two columns, keeping each column's pick, else picking its first row that holds rows.
+   * - takes:  flag (present / absent)
+   */
+  tools?: boolean | ""
+  /**
+   * `tools`, as the DOM element's property.
+   * @deprecated write `tools` -- `prop:` stays only for compiled spell
+   */
+  "prop:tools"?: boolean | ""
   /**
    * What a screen reader calls the tree.
    * - takes:  text

@@ -1908,6 +1908,7 @@ export const DEFAULTS_TABLE: Readonly<
   "ui-tree": [
     { name: "choose", kind: "valueOnly", group: "behaviour", values: ["one", "many"] },
     { name: "filter", kind: "string", group: "behaviour" },
+    { name: "tools", kind: "keyOnly", group: "behaviour" },
     { name: "label", kind: "string", group: "behaviour" },
     { name: "appearance", kind: "valueOnly", group: "appearance", values: ["nav", "columns"] },
     { name: "column-titles", kind: "string", group: "appearance" },

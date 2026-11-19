@@ -37,7 +37,21 @@ export const treeVocabulary = {
         "Show only the rows whose words hold this text, whatever its case, and the rows they're inside, opened to show " +
         "them.  It changes no row's `open`:  clearing it puts the tree back as it was.  " +
         "A row drawn only once its parent opens can't be found while that's closed.  " +
-        '`appearance="columns"`:  it filters one column, the last one on screen as the filter starts, until it\'s cleared.'
+        '`appearance="columns"`:  it filters one column, the last one on screen as the filter starts, until it\'s ' +
+        "cleared;  after that column's rows, it lists the matches elsewhere in the tree, at any depth, each with the " +
+        "rows it's inside, and a click on one opens the path to it.  From `items`, it runs each `children` function to look " +
+        "inside, waiting for promised ones, as opening the items would, but opens no column;  it lists the first 200 " +
+        "matches, and stops after 100,000 rows."
+    },
+    {
+      name: "tools",
+      group: "behaviour",
+      kind: "keyOnly",
+      description:
+        "A line of buttons above the rows:  Open 2 levels, Open 3 levels and Close all.  Scripts call the same " +
+        "methods:  `openTo(levels)` and `closeAll()`.  " +
+        '`appearance="columns"`:  `openTo(2)` shows two columns, keeping each column\'s pick, else picking its ' +
+        "first row that holds rows."
     },
     {
       name: "label",
@@ -196,7 +210,17 @@ export const treeVocabulary = {
     },
     { name: "column", description: '`appearance="columns"` with `items`:  one column.' },
     { name: "detail", description: '`appearance="columns"`:  the pane around the `detail` slot.' },
-    { name: "column-row", description: '`appearance="columns"` with `items`:  one row of a column.' }
+    { name: "column-row", description: '`appearance="columns"` with `items`:  one row of a column.' },
+    { name: "tools", description: "`tools`:  the line of buttons above the rows." },
+    { name: "tool", description: "`tools`:  each button." },
+    {
+      name: "matches-title",
+      description: '`appearance="columns"` with a `filter`:  the title over the matches elsewhere in the tree.'
+    },
+    {
+      name: "match",
+      description: '`appearance="columns"` with a `filter`:  a match elsewhere in the tree, with the rows it\'s inside.'
+    }
   ],
   states: [
     { name: "filtering", description: "It has a `filter`." },
@@ -228,6 +252,34 @@ export const treeVocabulary = {
       key: "loading",
       text: "Loading",
       description: '`appearance="columns"`:  what a screen reader hears while a column\'s rows are on their way.'
+    },
+    {
+      key: "openLevels",
+      text: "Open {levels} levels",
+      description: "`tools`:  the button that opens the tree so that many levels of rows show."
+    },
+    { key: "closeAll", text: "Close all", description: "`tools`:  the button that closes every row." },
+    {
+      key: "elsewhere",
+      text: "Elsewhere in the tree",
+      description: '`appearance="columns"` with a `filter`:  the title over the matches outside the filtered column.'
+    },
+    {
+      key: "lookingElsewhere",
+      text: "Looking through the tree",
+      description:
+        '`appearance="columns"` with a `filter`:  what a screen reader hears while promised rows are on their way.'
+    },
+    {
+      key: "moreMatches",
+      text: "{count} more, not listed",
+      description: '`appearance="columns"` with a `filter`:  how many matches elsewhere aren\'t listed.'
+    },
+    {
+      key: "stoppedLooking",
+      text: "Stopped looking after {count} rows",
+      description:
+        '`appearance="columns"` with a `filter`:  the look through the tree went through that many rows, and stopped.'
     }
   ]
 } as const satisfies E.ComponentVocabulary

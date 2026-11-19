@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vite-plus/test"
+import { userEvent } from "vite-plus/test/browser"
 
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
@@ -1252,5 +1253,333 @@ describe('<ui-tree appearance="columns"> remembered path and `detail` pane', () 
     const right = Math.round(pane(host)!.getBoundingClientRect().right)
     expect(right).toBeLessThanOrEqual(Math.round(box.getBoundingClientRect().right))
     expect(right).toBeGreaterThan(Math.round(box.getBoundingClientRect().right) - 4)
+  })
+})
+
+describe("<ui-tree> opening to a depth, and `filter` through the whole tree", () => {
+  type TreeHost = HTMLElement & {
+    items?: TreeItemData[]
+    path?: string[]
+    filter?: string
+    openTo(levels: number): void
+    closeAll(): void
+  }
+
+  /** An outline three levels deep:  a (b (c (d))), e (f). */
+  async function outline(attributes = "") {
+    const host = (await ElementFixture.render(
+      `<ui-tree ${attributes} label="Files" style="width: 300px">
+        <ui-tree-item label="a">
+          <ui-tree-item label="b">
+            <ui-tree-item label="c">
+              <ui-tree-item label="d"></ui-tree-item>
+            </ui-tree-item>
+          </ui-tree-item>
+        </ui-tree-item>
+        <ui-tree-item label="e">
+          <ui-tree-item label="f"></ui-tree-item>
+        </ui-tree-item>
+      </ui-tree>`
+    )) as TreeHost
+    await ElementFixture.settle()
+    return host
+  }
+
+  /** The `tools` buttons' words. */
+  function tools(host: Element): HTMLButtonElement[] {
+    return [...host.shadowRoot!.querySelectorAll<HTMLButtonElement>('[part~="tool"]')]
+  }
+
+  /** Columns from markup:  Acme (Menu (menu.pdf, photos (loaf.jpg)), Site), Books (Catalogue). */
+  async function columns(attributes = "") {
+    const host = (await ElementFixture.render(
+      `<ui-tree appearance="columns" ${attributes} label="Work" style="height: 240px; width: 900px">
+        <ui-tree-item label="Acme">
+          <ui-tree-item label="Menu">
+            <ui-tree-item label="menu.pdf"></ui-tree-item>
+            <ui-tree-item label="photos">
+              <ui-tree-item label="loaf.jpg"></ui-tree-item>
+            </ui-tree-item>
+          </ui-tree-item>
+          <ui-tree-item label="Site"></ui-tree-item>
+        </ui-tree-item>
+        <ui-tree-item label="Books">
+          <ui-tree-item label="Catalogue"></ui-tree-item>
+        </ui-tree-item>
+      </ui-tree>`
+    )) as TreeHost
+    await ElementFixture.settle()
+    return host
+  }
+
+  /** The open rows from markup, outermost first. */
+  function chain(host: Element): string[] {
+    const open: string[] = []
+    for (let level: Element | undefined = host; level;) {
+      const next: Element | undefined = [...level.children].find(
+        (child) => child.localName === "ui-tree-item" && child.hasAttribute("open")
+      )
+      if (next) open.push(next.getAttribute("label")!)
+      level = next
+    }
+    return open
+  }
+
+  /** Each match elsewhere in the tree, as its words and the rows it's inside:  `loaf.jpg (Acme › Menu › photos)`. */
+  function matches(root: ParentNode): string[] {
+    return [...root.querySelectorAll(".match")].map((match) => {
+      const words = match.querySelector(".words")!.textContent
+      const path = match.querySelector(".match-path")?.textContent
+      return path ? `${words} (${path})` : words!
+    })
+  }
+
+  /** Made from `children` functions, counted:  how many times each one ran. */
+  const runs: Record<string, number> = {}
+
+  /** The folders from data:  Acme (Menu (menu.pdf, photos (loaf.jpg)), Site), Books (Catalogue). */
+  function folders(): TreeItemData[] {
+    const made = (id: string, list: TreeItemData[]) => () => {
+      runs[id] = (runs[id] ?? 0) + 1
+      return list
+    }
+    return [
+      {
+        id: "acme",
+        label: "Acme",
+        children: made("acme", [
+          {
+            id: "menu",
+            label: "Menu",
+            children: made("menu", [
+              { id: "menu.pdf", label: "menu.pdf" },
+              { id: "photos", label: "photos", children: [{ id: "loaf.jpg", label: "loaf.jpg" }] }
+            ])
+          },
+          { id: "site", label: "Site" }
+        ])
+      },
+      { id: "books", label: "Books", children: [{ id: "catalogue", label: "Catalogue" }] }
+    ]
+  }
+
+  async function dataTree(attributes = "", items: TreeItemData[] = folders()): Promise<TreeHost> {
+    for (const key of Object.keys(runs)) delete runs[key]
+    const host = (await ElementFixture.render(
+      `<ui-tree appearance="columns" ${attributes} label="Work" style="height: 240px; width: 900px"></ui-tree>`
+    )) as TreeHost
+    host.items = items
+    await ElementFixture.settle()
+    return host
+  }
+
+  /** The rows of each column from data, by label. */
+  function columnLabels(host: Element): string[][] {
+    return [...host.shadowRoot!.querySelectorAll("ul.column")].map((column) =>
+      [...column.querySelectorAll(".column-row .words")].map((words) => words.textContent!)
+    )
+  }
+
+  it("`openTo()` opens every row less deep, and closes the deeper ones;  `closeAll()` closes every row", async () => {
+    const host = await outline()
+    host.openTo(3)
+    await ElementFixture.settle()
+    expect(onScreen(host)).toEqual(["a", "b", "c", "e", "f"])
+    host.openTo(2)
+    await ElementFixture.settle()
+    expect(onScreen(host)).toEqual(["a", "b", "e", "f"])
+    expect(row(host, "b").hasAttribute("open")).toBe(false)
+    host.closeAll()
+    await ElementFixture.settle()
+    expect(onScreen(host)).toEqual(["a", "e"])
+  })
+
+  it("`tools` draws the buttons, which do the same, and is accessible", async () => {
+    const host = await outline("tools")
+    expect(tools(host).map((tool) => tool.textContent)).toEqual(["Open 2 levels", "Open 3 levels", "Close all"])
+    tools(host)[1]!.click()
+    await ElementFixture.settle()
+    expect(onScreen(host)).toEqual(["a", "b", "c", "e", "f"])
+    tools(host)[2]!.click()
+    await ElementFixture.settle()
+    expect(onScreen(host)).toEqual(["a", "e"])
+    expect(selected(host)).toEqual([])
+    await expectAccessible(host)
+  })
+
+  it("in columns from markup, `openTo()` shows that many columns, and `closeAll()` goes back to the first", async () => {
+    const host = await columns()
+    host.openTo(3)
+    await ElementFixture.settle()
+    expect(chain(host)).toEqual(["Acme", "Menu"])
+    expect(selected(host)).toEqual(["Menu"])
+    click(host, "Books")
+    await ElementFixture.settle()
+    host.openTo(2)
+    await ElementFixture.settle()
+    // each column's pick stays
+    expect(chain(host)).toEqual(["Books"])
+    host.closeAll()
+    await ElementFixture.settle()
+    expect(chain(host)).toEqual([])
+    expect(selected(host)).toEqual([])
+    expect(host.path).toEqual([])
+  })
+
+  it("in columns from markup, `filter` lists the matches elsewhere in the tree, and a click on one opens its path", async () => {
+    const host = await columns()
+    host.setAttribute("filter", "loaf")
+    await ElementFixture.settle()
+    expect(onScreen(host)).toEqual([])
+    expect(matches(host.shadowRoot!)).toEqual(["loaf.jpg (Acme › Menu › photos)"])
+    expect(host.shadowRoot!.querySelector(".column > .empty")).toBeNull()
+    host.shadowRoot!.querySelector<HTMLElement>(".match")!.click()
+    await ElementFixture.settle()
+    expect(chain(host)).toEqual(["Acme", "Menu", "photos", "loaf.jpg"])
+    expect(selected(host)).toEqual(["loaf.jpg"])
+    // the filtered column keeps its pick, which the columns after it hang from
+    expect(row(host, "Acme").checkVisibility()).toBe(true)
+    expect(row(host, "Books").checkVisibility()).toBe(false)
+  })
+
+  it("in columns from markup, a filter on a deeper column lists the matches outside it, after its rows, and says when nothing matches", async () => {
+    const host = await columns()
+    click(host, "Acme")
+    await ElementFixture.settle()
+    host.setAttribute("filter", "u")
+    await ElementFixture.settle()
+    // its own rows:  Menu, which holds a u, and not Site
+    expect(onScreen(host)).toEqual(["Acme", "Menu", "Books"])
+    expect(matches(row(host, "Acme").shadowRoot!)).toEqual(["Catalogue (Books)", "menu.pdf (Acme › Menu)"])
+    host.setAttribute("filter", "zzz")
+    await ElementFixture.settle()
+    expect(matches(row(host, "Acme").shadowRoot!)).toEqual([])
+    expect(row(host, "Acme").shadowRoot!.querySelector(".empty")?.textContent).toBe("Nothing matches")
+  })
+
+  it("from `items`, `filter` runs the `children` functions to look through the tree, and opens no column", async () => {
+    const host = await dataTree('show="icon count chevron"')
+    host.filter = "loaf"
+    await ElementFixture.settle()
+    expect(runs).toEqual({ acme: 1, menu: 1 })
+    expect(columnLabels(host)).toEqual([[]])
+    expect(matches(host.shadowRoot!)).toEqual(["loaf.jpg (Acme › Menu › photos)"])
+    host.shadowRoot!.querySelector<HTMLElement>(".match")!.click()
+    await ElementFixture.settle()
+    expect(host.path).toEqual(["acme", "menu", "photos", "loaf.jpg"])
+    expect(columnLabels(host)[0]).toEqual(["Acme"])
+    expect(columnLabels(host).length).toBe(4)
+    // a row with no `children` still shows no count, though the look went through it
+    const countOf = (id: string) => host.shadowRoot!.querySelector(`.column-row[data-id="${id}"] .count`)?.textContent
+    expect(countOf("loaf.jpg")).toBeUndefined()
+    expect(countOf("menu")).toBe("2")
+    // a second look runs nothing again
+    host.filter = "pdf"
+    await ElementFixture.settle()
+    expect(runs).toEqual({ acme: 1, menu: 1 })
+  })
+
+  it("from `items`, a filter on a leaf's column still finds the whole tree's matches;  one nearer the top moves the list along", async () => {
+    const host = await dataTree()
+    host.path = ["acme", "menu", "menu.pdf"]
+    await ElementFixture.settle()
+    host.filter = "o"
+    await ElementFixture.settle()
+    const column = (depth: number) => host.shadowRoot!.querySelector(`ul[data-depth="${depth}"]`)!
+    // the last column on screen, menu.pdf's, keeps its pick;  photos and loaf.jpg are elsewhere
+    expect(columnLabels(host)[2]).toEqual(["menu.pdf", "photos"])
+    expect(matches(column(2))).toEqual(["Books", "Catalogue (Books)", "loaf.jpg (Acme › Menu › photos)"])
+    column(2).querySelector<HTMLElement>(".match")!.click()
+    await ElementFixture.settle()
+    expect(host.path).toEqual(["books"])
+    // Books' column, the last on screen now, is the one filtered
+    expect(columnLabels(host)[1]).toEqual(["Catalogue"])
+    expect(matches(column(1))).toEqual(["Books", "photos (Acme › Menu)", "loaf.jpg (Acme › Menu › photos)"])
+  })
+
+  it("from `items`, waits for promised children while it looks, with a spinner", async () => {
+    let arrive: (list: TreeItemData[]) => void = () => {}
+    const host = await dataTree("", [
+      { id: "slow", label: "Slow", children: () => new Promise<TreeItemData[]>((resolve) => (arrive = resolve)) }
+    ])
+    host.filter = "came"
+    await ElementFixture.settle()
+    expect(host.shadowRoot!.querySelector(".matches ui-loader")).not.toBeNull()
+    expect(host.shadowRoot!.querySelector("ul.column .empty")).toBeNull()
+    arrive([{ id: "came", label: "came" }])
+    await vi.waitFor(() => expect(matches(host.shadowRoot!)).toEqual(["came (Slow)"]))
+    expect(host.shadowRoot!.querySelector(".matches ui-loader")).toBeNull()
+  })
+
+  it("from `items`, `openTo()` picks down to that many columns, and `closeAll()` clears the path", async () => {
+    const host = await dataTree()
+    host.openTo(4)
+    await ElementFixture.settle()
+    expect(host.path).toEqual(["acme", "menu", "photos"])
+    expect(columnLabels(host).length).toBe(4)
+    host.openTo(2)
+    await ElementFixture.settle()
+    expect(host.path).toEqual(["acme"])
+    host.closeAll()
+    await ElementFixture.settle()
+    expect(host.path).toEqual([])
+  })
+
+  it("from `items`, looks through a tree the netlist sample's size fast, listing the first 200", async () => {
+    // about the sample's shape:  7,800 nodes 4 levels deep (12 x 10 x 8 x 8), 5 ports on each of the deepest
+    let nodes = 0
+    const level = (path: string, depth: number): TreeItemData[] => {
+      const count = [12, 10, 8, 8][depth]!
+      return Array.from({ length: count }, (_, index) => {
+        nodes++
+        const id = `${path}${index}`
+        const ports = () => Array.from({ length: 5 }, (_, port) => ({ id: `${id}:p${port}`, label: `port ${port}` }))
+        return { id, label: `node ${id}`, children: depth < 3 ? () => level(`${id}.`, depth + 1) : ports }
+      })
+    }
+    const items = level("n", 0)
+    const host = await dataTree("", items)
+    const started = performance.now()
+    host.filter = "port 3"
+    await ElementFixture.settle()
+    const took = performance.now() - started
+    expect(nodes).toBe(12 + 120 + 960 + 7680)
+    expect(host.shadowRoot!.querySelectorAll(".match").length).toBe(200)
+    expect(host.shadowRoot!.querySelector(".matches-note")?.textContent).toBe("7480 more, not listed")
+    expect(took).toBeLessThan(500)
+  })
+
+  it("a column that turns narrow as a later one is picked doesn't stay drawn whole once the pointer leaves", async () => {
+    const books: TreeItemData[] = [
+      {
+        id: "novels",
+        label: "Novels",
+        children: [
+          {
+            id: "middlemarch",
+            label: "Middlemarch",
+            children: [
+              { id: "brooke", label: "Miss Brooke" },
+              { id: "old", label: "Old and Young" }
+            ]
+          }
+        ]
+      },
+      { id: "poems", label: "Poems", children: [{ id: "odes", label: "Odes" }] }
+    ]
+    const host = await dataTree('narrow-before="1"', books)
+    host.style.width = "420px"
+    await nextPaint()
+    for (const id of ["novels", "middlemarch", "brooke"]) {
+      await userEvent.click(host.shadowRoot!.querySelector<HTMLElement>(`.column-row[data-id="${id}"]`)!)
+      await nextPaint()
+    }
+    const peeking = () => [...host.shadowRoot!.querySelectorAll(".column.peek")].length
+    const narrow = () => [...host.shadowRoot!.querySelectorAll(".column.narrow")].length
+    expect(narrow()).toBeGreaterThan(0)
+    await userEvent.unhover(host)
+    host.dispatchEvent(new PointerEvent("pointerleave"))
+    await nextPaint()
+    expect(peeking()).toBe(0)
   })
 })
