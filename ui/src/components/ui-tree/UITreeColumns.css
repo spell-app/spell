@@ -8,7 +8,12 @@
  *   - Each column's width and start come from the tree (`UITree.columnWidthCSS()`, `columnStartCSS()`):
  *     the token's width, or the one a person dragged it to.
  *   - The line after each column is a few px wide strip over its border (`.column-edge`):  dragging it sizes the column.
+ * - Rows from `items` are drawn in the tree's own shadow root instead:  each column a `ul.column.items`, its rows
+ *   `li.column-row`s, ONE grid a column, so icon, label, `which`, count and chevron line up down it.
+ *   - A row's classes:  `selected` (the selected pick), `on-path` (an earlier pick), and a subclass's `rowClass()`.
+ *   - Parts:  `column`, `column-row`.
  * - Tokens:
+ *   | `--ui-tree-columns-height` | the tree's height (18em):  every column scrolls its own rows |
  *   | `--ui-tree-column-width` | each column's width |
  *   | `--ui-tree-column-picked-background` | a row picked in an earlier column:  one of the chain of open rows |
  *   | `--ui-tree-column-selected-background` / `-color` | the selected row, the chain's last pick |
@@ -16,7 +21,18 @@
 @layer ui.components {
   /* ## The tree:  `:state(columns)`;  each of its rows says `:state(in-columns)` */
   :host(:state(columns)) {
-    height: 18em;
+    --_ui-tree-columns-height: var(--ui-tree-columns-height, 18em);
+    height: var(--_ui-tree-columns-height);
+  }
+  /* the picks' colours:  the tree's own rows (from `items`) and every row from markup */
+  :host(:state(columns)),
+  :host(:state(in-columns)) {
+    --_ui-tree-column-picked-background: var(
+      --ui-tree-column-picked-background,
+      color-mix(in oklab, var(--ui-text-color) 13%, transparent)
+    );
+    --_ui-tree-column-selected-background: var(--ui-tree-column-selected-background, var(--ui-primary));
+    --_ui-tree-column-selected-color: var(--ui-tree-column-selected-color, var(--ui-primary-on));
   }
   .columns {
     --_ui-tree-column-width: var(--ui-tree-column-width, 14em);
@@ -95,15 +111,7 @@
     white-space: nowrap;
   }
 
-  /* ## A row */
-  :host(:state(in-columns)) {
-    --_ui-tree-column-picked-background: var(
-      --ui-tree-column-picked-background,
-      color-mix(in oklab, var(--ui-text-color) 13%, transparent)
-    );
-    --_ui-tree-column-selected-background: var(--ui-tree-column-selected-background, var(--ui-primary));
-    --_ui-tree-column-selected-color: var(--ui-tree-column-selected-color, var(--ui-primary-on));
-  }
+  /* ## A row from markup */
   :host(:state(in-columns)) > .row {
     margin-inline: 4px;
     padding-inline: 6px 4px;
@@ -150,6 +158,21 @@
   :host(:state(in-columns)) > .row > .actions {
     margin-inline-start: 0;
   }
+  /* `show="count"`:  how many rows it holds, before the chevron */
+  .row-count {
+    flex: none;
+    margin-inline-start: auto;
+    font-size: 0.85em;
+    font-variant-numeric: tabular-nums;
+    color: var(--_ui-tree-muted-color);
+  }
+  :host(:state(in-columns):state(selected)) > .row > .row-count {
+    color: inherit;
+  }
+  :host(:state(in-columns)) > .row > .row-count + .actions,
+  :host(:state(in-columns)) > .row > .row-count ~ .toggle {
+    margin-inline-start: var(--_ui-tree-gap);
+  }
 
   /* the rows inside an open row:  the next column, beside the one it's in */
   :host(:state(in-columns)) > .rows {
@@ -169,5 +192,102 @@
   .column > slot {
     display: block;
     padding-block: 4px;
+  }
+  /* a picked `expandable` row's column, while its rows come:  a spinner in the middle, no empty line */
+  :host(:state(in-columns)) > .rows > .folded > .loading {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* ## Rows from `items`:  ONE grid a column, so each part lines up down it */
+  .column.items {
+    position: relative;
+    display: grid;
+    /* icon | words | which | (room) | count | chevron:  a part a row doesn't draw leaves its track 0 wide */
+    grid-template-columns: auto minmax(0, max-content) minmax(0, max-content) 1fr auto auto;
+    align-content: start;
+    margin: 0;
+    padding: 0 0 4px;
+    list-style: none;
+  }
+  .column.items:not(:has(> .column-title)) {
+    padding-block-start: 4px;
+  }
+  .column.items > .column-title {
+    grid-column: 1 / -1;
+    margin-block-end: 4px;
+  }
+  .column.items > .empty {
+    grid-column: 1 / -1;
+  }
+  .column-row {
+    display: grid;
+    grid-template-columns: subgrid;
+    grid-column: 1 / -1;
+    align-items: center;
+    box-sizing: border-box;
+    min-height: var(--_ui-tree-row-height);
+    margin-inline: 4px;
+    padding-inline: 6px 4px;
+    border-radius: var(--ui-radius-s, 4px);
+    white-space: nowrap;
+    outline: none;
+  }
+  .column-row:hover {
+    background: var(--_ui-tree-hover-background);
+  }
+  .column-row:focus-visible {
+    outline: var(--ui-focus-width) solid var(--ui-focus-color);
+    outline-offset: calc(var(--ui-focus-width) * -1);
+  }
+  /* an earlier pick:  grey;  the selected one:  the accent */
+  .column-row.on-path {
+    background: var(--_ui-tree-column-picked-background);
+  }
+  .column-row.selected {
+    background: var(--_ui-tree-column-selected-background);
+    color: var(--_ui-tree-column-selected-color);
+  }
+  .column-row.selected > .icon,
+  .column-row.selected .which,
+  .column-row.selected > .count {
+    color: inherit;
+  }
+  /* a box around the `<ui-icon>`, which is `display: contents`, so the first track holds it */
+  .column-row > .icon {
+    grid-column: 1;
+    display: inline-flex;
+    margin-inline-end: var(--_ui-tree-gap);
+  }
+  .column-row > .label {
+    display: contents;
+  }
+  .column-row .words {
+    grid-column: 2;
+  }
+  .column-row .which {
+    grid-column: 3;
+    margin-inline-start: 0.33em;
+  }
+  .column-row > .count {
+    grid-column: 5;
+    justify-self: end;
+    margin-inline-start: var(--_ui-tree-gap);
+    font-size: 0.85em;
+    font-variant-numeric: tabular-nums;
+    color: var(--_ui-tree-muted-color);
+  }
+  /* the chevron, pointing to the next column:  the same stroke as a markup row's */
+  .column-row > .chevron {
+    grid-column: 6;
+    width: 0.42em;
+    height: 0.42em;
+    margin-inline: 8px 4px;
+    border-inline-end: 1.5px solid currentColor;
+    border-block-end: 1.5px solid currentColor;
+    rotate: -45deg;
+  }
+  .column-row > .chevron:dir(rtl) {
+    rotate: 45deg;
   }
 }

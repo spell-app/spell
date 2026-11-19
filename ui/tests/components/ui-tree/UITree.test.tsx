@@ -2,7 +2,15 @@ import { describe, expect, it, vi } from "vite-plus/test"
 
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
-import { UITree, UITreeItem } from "spell/ui/components/ui-tree"
+import { UITree, UITreeItem, type TreeItemData } from "spell/ui/components/ui-tree"
+
+/** A subclass that classes its rows from `items` by `which`:  `<x-classed-tree>`. */
+class ClassedTree extends UITree {
+  override rowClass(item: TreeItemData) {
+    return item.which ? `has-which  ${item.which}` : undefined
+  }
+}
+ClassedTree.define("x-classed-tree")
 
 /** A tree in the page:  a (b, c (d)), e;  a open, c closed. */
 async function tree(attributes = "") {
@@ -528,6 +536,281 @@ describe('<ui-tree appearance="columns">', () => {
     const host = await columns('column-titles="Clients, Projects, Files"')
     click(host, "Acme")
     await ElementFixture.settle()
+    await expectAccessible(host)
+  })
+
+  it("`path` names each column's pick as people pick, and the events carry it", async () => {
+    const host = (await columns()) as HTMLElement & { path?: string[] }
+    const changed = vi.fn()
+    host.addEventListener("ui-changed", (event) => changed((event as CustomEvent).detail))
+    click(host, "Acme")
+    await ElementFixture.settle()
+    click(host, "Menu")
+    await ElementFixture.settle()
+    expect(host.path).toEqual(["Acme", "Menu"])
+    expect(changed).toHaveBeenLastCalledWith(
+      expect.objectContaining({ path: ["Acme", "Menu"], item: row(host, "Menu") })
+    )
+  })
+
+  it("a page that sets `path` opens its rows, and selects the last", async () => {
+    const host = (await columns()) as HTMLElement & { path?: string[] }
+    host.path = ["Acme", "Menu", "photos"]
+    await ElementFixture.settle()
+    expect(chain(host)).toEqual(["Acme", "Menu", "photos"])
+    expect(selected(host)).toEqual(["photos"])
+    host.path = ["Books"]
+    await ElementFixture.settle()
+    expect(chain(host)).toEqual(["Books"])
+  })
+
+  it("`filter` filters the last column on screen as it starts, and leaves the others alone", async () => {
+    const host = await columns()
+    click(host, "Acme")
+    await ElementFixture.settle()
+    host.setAttribute("filter", "men")
+    await ElementFixture.settle()
+    expect(onScreen(host)).toEqual(["Acme", "Menu", "Books"])
+    host.setAttribute("filter", "zzz")
+    await ElementFixture.settle()
+    expect(row(host, "Acme").shadowRoot!.querySelector(".empty")?.textContent).toBe("Nothing matches")
+    host.removeAttribute("filter")
+    await ElementFixture.settle()
+    expect(onScreen(host)).toEqual(["Acme", "Menu", "Site", "Books"])
+  })
+
+  it("`show` picks a row's parts:  a count of its rows, no chevron", async () => {
+    const host = await columns('show="icon count"')
+    const count = row(host, "Acme").shadowRoot!.querySelector(".row-count")
+    expect(count?.textContent).toBe("2")
+    expect(row(host, "Acme").shadowRoot!.querySelector(".toggle")).toBeNull()
+    expect(row(host, "Site").shadowRoot!.querySelector(".row-count")).toBeNull()
+  })
+
+  it("an `expandable` row picked before its rows come shows a spinner in its column", async () => {
+    const host = await columns("", '<ui-tree-item label="Later" expandable></ui-tree-item>')
+    click(host, "Later")
+    await ElementFixture.settle()
+    expect(row(host, "Later").shadowRoot!.querySelector(".rows ui-loader")).not.toBeNull()
+    row(host, "Later").append(Object.assign(document.createElement("ui-tree-item"), { label: "came" }))
+    await ElementFixture.settle()
+    expect(row(host, "Later").shadowRoot!.querySelector(".rows ui-loader")).toBeNull()
+  })
+
+  it("sends `ui-settled` once what's selected stays put", async () => {
+    const host = await columns()
+    const settled = vi.fn()
+    host.addEventListener("ui-settled", (event) => settled((event as CustomEvent).detail.value))
+    row(host, "Acme").focus()
+    await press("ArrowDown")
+    await press("ArrowUp")
+    await press("ArrowDown")
+    expect(settled).not.toHaveBeenCalled()
+    await vi.waitFor(() => expect(settled).toHaveBeenCalledTimes(1), { timeout: 2000 })
+    expect(settled).toHaveBeenCalledWith("Books")
+  })
+})
+
+describe('<ui-tree appearance="columns"> from `items`', () => {
+  type TreeHost = HTMLElement & { items?: TreeItemData[]; path?: string[] }
+
+  /** Made from `children` functions, counted:  how many times each one ran. */
+  const runs: Record<string, number> = {}
+
+  /** The folders:  Acme (Menu (menu.pdf, photos (loaf.jpg)), Site), Books (Catalogue), Empty (nothing, once run). */
+  function folders(): TreeItemData[] {
+    const made = (id: string, list: TreeItemData[]) => () => {
+      runs[id] = (runs[id] ?? 0) + 1
+      return list
+    }
+    return [
+      {
+        id: "acme",
+        label: "Acme",
+        icon: "building outline",
+        which: "bakery",
+        children: made("acme", [
+          {
+            id: "menu",
+            label: "Menu",
+            children: [
+              { id: "menu.pdf", label: "menu.pdf" },
+              { id: "photos", label: "photos", children: [{ id: "loaf.jpg", label: "loaf.jpg" }] }
+            ]
+          },
+          { id: "site", label: "Site" }
+        ])
+      },
+      { id: "books", label: "Books", children: [{ id: "catalogue", label: "Catalogue" }] },
+      { id: "empty", label: "Empty", children: made("empty", []) }
+    ]
+  }
+
+  async function dataTree(attributes = "", tag = "ui-tree"): Promise<TreeHost> {
+    for (const key of Object.keys(runs)) delete runs[key]
+    const host = (await ElementFixture.render(
+      `<${tag} appearance="columns" ${attributes} label="Work" style="height: 200px; width: 900px"></${tag}>`
+    )) as TreeHost
+    host.items = folders()
+    await ElementFixture.settle()
+    return host
+  }
+
+  /** The rows of each column, by label. */
+  function columnLabels(host: Element): string[][] {
+    return [...host.shadowRoot!.querySelectorAll("ul.column")].map((column) =>
+      [...column.querySelectorAll(".column-row .words")].map((words) => words.textContent!)
+    )
+  }
+
+  /** The row of id `id`. */
+  function dataRow(host: Element, id: string): HTMLElement {
+    return host.shadowRoot!.querySelector<HTMLElement>(`.column-row[data-id="${CSS.escape(id)}"]`)!
+  }
+
+  /** A click on the row of id `id`. */
+  async function pick(host: Element, id: string) {
+    dataRow(host, id).click()
+    await ElementFixture.settle()
+  }
+
+  it("draws the top items as the first column, and a pick's children as the next", async () => {
+    const host = await dataTree()
+    expect(columnLabels(host)).toEqual([["Acme", "Books", "Empty"]])
+    await pick(host, "acme")
+    expect(columnLabels(host)).toEqual([
+      ["Acme", "Books", "Empty"],
+      ["Menu", "Site"]
+    ])
+    await pick(host, "menu")
+    expect(host.path).toEqual(["acme", "menu"])
+    expect(dataRow(host, "acme").classList).toContain("on-path")
+    expect(dataRow(host, "menu").classList).toContain("selected")
+    // as wide as the line after it says:  one per column
+    expect(host.shadowRoot!.querySelectorAll(".column-edge").length).toBe(3)
+  })
+
+  it("runs a `children` function once, the first time its item opens", async () => {
+    const host = await dataTree()
+    expect(runs.acme).toBeUndefined()
+    await pick(host, "acme")
+    await pick(host, "books")
+    await pick(host, "acme")
+    expect(runs.acme).toBe(1)
+  })
+
+  it("a `children` function that makes nothing loses its chevron, and opens no column", async () => {
+    const host = await dataTree()
+    expect(dataRow(host, "empty").querySelector(".chevron")).not.toBeNull()
+    await pick(host, "empty")
+    expect(columnLabels(host).length).toBe(1)
+    expect(dataRow(host, "empty").querySelector(".chevron")).toBeNull()
+    expect(dataRow(host, "empty").classList).toContain("selected")
+  })
+
+  it("shows a spinner, and no empty line, while a promised list comes", async () => {
+    const host = await dataTree()
+    let arrive: (list: TreeItemData[]) => void = () => {}
+    host.items = [
+      { id: "slow", label: "Slow", children: () => new Promise<TreeItemData[]>((resolve) => (arrive = resolve)) }
+    ]
+    await ElementFixture.settle()
+    await pick(host, "slow")
+    const column = host.shadowRoot!.querySelectorAll("ul.column")[1]!
+    expect(column.querySelector("ui-loader")).not.toBeNull()
+    expect(column.querySelector(".empty")).toBeNull()
+    arrive([{ id: "came", label: "came" }])
+    await vi.waitFor(() => expect(columnLabels(host)[1]).toEqual(["came"]))
+    expect(host.shadowRoot!.querySelector("ul.column ui-loader")).toBeNull()
+  })
+
+  it("a page that sets `path` opens it", async () => {
+    const host = await dataTree()
+    host.path = ["acme", "menu", "photos"]
+    await ElementFixture.settle()
+    expect(columnLabels(host).at(-1)).toEqual(["loaf.jpg"])
+    expect(dataRow(host, "photos").classList).toContain("selected")
+  })
+
+  it("asks first, and the events carry the item and its path", async () => {
+    const host = await dataTree()
+    const changed = vi.fn()
+    host.addEventListener("ui-changed", (event) => changed((event as CustomEvent).detail))
+    const refuse = (event: Event) => event.preventDefault()
+    host.addEventListener("ui-selecting", refuse)
+    await pick(host, "acme")
+    expect(host.path ?? []).toEqual([])
+    expect(changed).not.toHaveBeenCalled()
+    host.removeEventListener("ui-selecting", refuse)
+    await pick(host, "acme")
+    expect(changed).toHaveBeenCalledWith(expect.objectContaining({ value: "acme", path: ["acme"] }))
+    expect(changed.mock.calls[0]![0].item.label).toBe("Acme")
+  })
+
+  it("keys select as they move:  up and down in a column, right goes in, left comes back keeping the columns after", async () => {
+    const host = await dataTree()
+    /** `key` pressed on the row that has the focus, in the tree's shadow root. */
+    const press = async (key: string) => {
+      const target = host.shadowRoot!.activeElement as HTMLElement
+      target.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, composed: true, cancelable: true }))
+      await ElementFixture.settle()
+    }
+    dataRow(host, "acme").focus()
+    await press("ArrowDown")
+    expect(host.path).toEqual(["books"])
+    expect(host.shadowRoot!.activeElement).toBe(dataRow(host, "books"))
+    await press("ArrowUp")
+    await press("ArrowRight")
+    expect(host.path).toEqual(["acme", "menu"])
+    expect(host.shadowRoot!.activeElement).toBe(dataRow(host, "menu"))
+    await press("ArrowRight")
+    await press("ArrowDown")
+    expect(host.path).toEqual(["acme", "menu", "photos"])
+    await press("ArrowLeft")
+    expect(host.shadowRoot!.activeElement).toBe(dataRow(host, "menu"))
+    expect(dataRow(host, "menu").classList).toContain("selected")
+    expect(dataRow(host, "photos").classList).toContain("on-path")
+    expect(columnLabels(host).length).toBe(4)
+    await press("ArrowRight")
+    expect(host.shadowRoot!.activeElement).toBe(dataRow(host, "photos"))
+    expect(host.shadowRoot!.querySelectorAll('.column-row[tabindex="0"]').length).toBe(1)
+  })
+
+  it("`filter` filters the last column on screen as it starts", async () => {
+    const host = await dataTree()
+    await pick(host, "acme")
+    host.setAttribute("filter", "sit")
+    await ElementFixture.settle()
+    expect(columnLabels(host)).toEqual([["Acme", "Books", "Empty"], ["Site"]])
+    host.setAttribute("filter", "zzz")
+    await ElementFixture.settle()
+    expect(host.shadowRoot!.querySelector("ul.column .empty")?.textContent).toBe("Nothing matches")
+  })
+
+  it("titles each column, and lines its rows' parts up as `show` says", async () => {
+    const host = await dataTree('column-titles="Clients, Projects" show="icon which count"')
+    await pick(host, "acme")
+    expect([...host.shadowRoot!.querySelectorAll(".column-title")].map((title) => title.textContent)).toEqual([
+      "Clients",
+      "Projects"
+    ])
+    expect(dataRow(host, "acme").querySelector(".chevron")).toBeNull()
+    expect(dataRow(host, "acme").querySelector(".which")?.textContent).toBe("bakery")
+    expect(dataRow(host, "books").querySelector(".count")?.textContent).toBe("1")
+    // the label starts at the same place on a row with an icon and one without
+    const words = (id: string) => dataRow(host, id).querySelector(".words")!.getBoundingClientRect().left
+    expect(words("books")).toBe(words("acme"))
+  })
+
+  it("a subclass's `rowClass(item)` adds classes to its rows", async () => {
+    const host = await dataTree("", "x-classed-tree")
+    expect([...dataRow(host, "acme").classList]).toEqual(expect.arrayContaining(["column-row", "has-which", "bakery"]))
+    expect([...dataRow(host, "books").classList]).not.toContain("has-which")
+  })
+
+  it("is accessible", async () => {
+    const host = await dataTree('column-titles="Clients, Projects"')
+    await pick(host, "acme")
     await expectAccessible(host)
   })
 })

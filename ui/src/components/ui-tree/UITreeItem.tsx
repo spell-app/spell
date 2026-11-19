@@ -2,6 +2,7 @@ import { Show } from "solid-js"
 
 import { E } from "spell/ui/core"
 import type { UITree } from "./UITree"
+import type { RowPart } from "./UITree.types"
 import { treeItemVocabulary } from "./UITreeItem.en"
 
 import treeCSS from "./UITree.css?inline"
@@ -27,6 +28,8 @@ import columnsCSS from "./UITreeColumns.css?inline"
  *   - While it's open, the rows inside it are the tree's next column, beside the one it's in, with that column's title
  *     (`UITreeColumns.css`).
  *   - The tree does the picking:  a click on its triangle is a click on the row.
+ *   - Its parts are as the tree's `show` says:  its icon, `which`, how many rows it holds, the chevron.
+ *   - Picked while `expandable` with no rows yet:  a spinner in its column, until they come.
  * - Its tree's `appearance="nav"` (a site's side navigation) gives it the docs site's look:  `:state(nav)`, read as it
  *   connects too.  Then a `band` row is a heading over the rows inside it, and `count` / `badge` label its words.
  *   - `band="group"`:  a quiet label over its rows, with no arrow:  whatever holds the tree opens it.
@@ -99,10 +102,31 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
   /** The tree's `filter` matches a row inside it, so those show though it's closed. */
   @E.state accessor isKeptOpen = false
 
-  /** Does it have a row inside it?  Rows only, so a marker between them doesn't count. */
+  /** How many rows are directly inside it.  Rows only, so a marker between them doesn't count. */
   @E.watches({ childList: true })
+  get rowCount(): number {
+    return [...this.domElement.children].filter((child) => child.localName === this.domElement.localName).length
+  }
+
+  /** Does it have a row inside it? */
   get hasRows(): boolean {
-    return [...this.domElement.children].some((child) => child.localName === this.domElement.localName)
+    return this.rowCount > 0
+  }
+
+  /** In a column view, does it show `part`, as its tree's `show` says?  Every part, anywhere else. */
+  private shows(part: RowPart): boolean {
+    return !this.isInColumns || !!this.tree?.shows(part)
+  }
+
+  /** In a column view, it's picked and `expandable`, its rows not here yet:  its column shows a spinner. */
+  get isLoadingRows(): boolean {
+    return this.isInColumns && this.isOpen && !!this.expandable && !this.hasRows
+  }
+
+  /** In a column view, the tree's `filter` filters its rows, and none matches. */
+  get showsNoMatches(): boolean {
+    const { tree } = this
+    return this.isInColumns && !!tree?.hasNoMatches && tree.filteredRowsParent === this.domElement
   }
 
   /** It can open:  it has rows, or says it will. */
@@ -159,20 +183,22 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
           part={this.partForName("row")}
           style={{ "--_ui-tree-depth": this.isInColumns ? 0 : this.indent }}
         >
-          <span
-            class="toggle"
-            part={this.partForName("toggle")}
-            aria-hidden="true"
-            title={this.canOpen ? this.translationForKey(this.isOpen ? "close" : "open") : undefined}
-            onClick={this.onToggleClicked}
-          />
+          <Show when={this.shows("chevron")}>
+            <span
+              class="toggle"
+              part={this.partForName("toggle")}
+              aria-hidden="true"
+              title={this.canOpen ? this.translationForKey(this.isOpen ? "close" : "open") : undefined}
+              onClick={this.onToggleClicked}
+            />
+          </Show>
           <slot name="icon">
-            <Show when={this.icon}>{(icon) => <ui-icon class="icon" name={icon()} />}</Show>
+            <Show when={this.shows("icon") && this.icon}>{(icon) => <ui-icon class="icon" name={icon()} />}</Show>
           </slot>
           <span class="label" part={this.partForName("label")}>
             <slot name="label">
               <span class="words">{this.label}</span>
-              <Show when={this.which}>{(which) => <span class="which">{which()}</span>}</Show>
+              <Show when={this.shows("which") && this.which}>{(which) => <span class="which">{which()}</span>}</Show>
             </slot>
           </span>
           <Show when={this.count}>
@@ -181,6 +207,9 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
                 {count()}
               </ui-label>
             )}
+          </Show>
+          <Show when={this.isInColumns && !this.count && this.hasRows && this.shows("count")}>
+            <span class="row-count">{this.rowCount}</span>
           </Show>
           <Show when={this.badge}>
             {(badge) => (
@@ -211,6 +240,14 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
             </Show>
             <div class="folded">
               <slot />
+              <Show when={this.isLoadingRows}>
+                <div class="loading">
+                  <ui-loader visible="" size="small" aria-label={this.tree?.translationForKey("loading")} />
+                </div>
+              </Show>
+              <Show when={this.showsNoMatches}>
+                <div class="empty">{this.tree?.translationForKey("noMatches")}</div>
+              </Show>
             </div>
           </div>
         </Show>

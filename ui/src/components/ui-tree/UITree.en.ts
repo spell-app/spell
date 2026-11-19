@@ -36,7 +36,8 @@ export const treeVocabulary = {
       description:
         "Show only the rows whose words hold this text, whatever its case, and the rows they're inside, opened to show " +
         "them.  It changes no row's `open`:  clearing it puts the tree back as it was.  " +
-        "A row drawn only once its parent opens can't be found while that's closed."
+        "A row drawn only once its parent opens can't be found while that's closed.  " +
+        '`appearance="columns"`:  it filters one column, the last one on screen as the filter starts, until it\'s cleared.'
     },
     {
       name: "label",
@@ -65,6 +66,35 @@ export const treeVocabulary = {
         "None:  no titles."
     },
     {
+      name: "items",
+      group: "content",
+      kind: "json",
+      reflect: false,
+      description:
+        '`appearance="columns"`:  the tree as data, given as a property, in place of `<ui-tree-item>`s:  ' +
+        "`{ id, label, icon?, which?, count?, children?, data? }[]` (`TreeItemData`), where `children` is a list, " +
+        "or a function run the first time the item opens, which may return a promise (a spinner shows until it " +
+        "comes).  Only the open path's columns are drawn."
+    },
+    {
+      name: "path",
+      group: "behaviour",
+      kind: "json",
+      reflect: false,
+      description:
+        "`appearance=\"columns\"`:  the ids of each column's pick, from the top (`string[]`;  a `<ui-tree-item>`'s id " +
+        "is its `value`, else its `label`).  The last one's rows are the next column.  Set it to open a path, its " +
+        "last item selected;  read it as people pick."
+    },
+    {
+      name: "show",
+      group: "appearance",
+      kind: "string",
+      description:
+        '`appearance="columns"`:  which parts each row shows, as words:  `icon which count chevron`;  the label ' +
+        "always shows.  None:  `icon which chevron`.  `count` is how many rows a row holds, when it knows."
+    },
+    {
       name: "sticky-path",
       group: "behaviour",
       kind: "keyOnly",
@@ -78,17 +108,29 @@ export const treeVocabulary = {
     {
       name: "ui-selecting",
       cancelable: true,
-      detail: "{ item: HTMLElement, value: string, originalEvent?: Event }",
+      detail: "{ item: HTMLElement | TreeItemData, value: string, path?: string[], originalEvent?: Event }",
       description:
         "A row is about to be selected, by a click, or by Enter or Space:  cancel it to decide what's selected yourself, " +
-        "reading the keys held from `originalEvent`."
+        "reading the keys held from `originalEvent`.  " +
+        '`appearance="columns"`:  the arrow keys select as they move too;  `item` is the `<ui-tree-item>`, or the ' +
+        "`items` entry;  `path`, the ids of each column's pick down to it."
     },
     {
       name: "ui-changed",
-      detail: "{ value: string, values: string[], originalEvent?: Event }",
+      detail:
+        "{ value: string, values: string[], item?: HTMLElement | TreeItemData, path?: string[], originalEvent?: Event }",
       description:
         "What's selected changed:  `value`, the row clicked;  `values`, every selected row in the tree's order " +
-        "(each one's `value`, else its `label`)."
+        "(each one's `value`, else its `label`).  " +
+        '`appearance="columns"`:  also `item` and `path`, as `ui-selecting`\'s.'
+    },
+    {
+      name: "ui-settled",
+      detail:
+        "{ value: string, values: string[], item?: HTMLElement | TreeItemData, path?: string[], originalEvent?: Event }",
+      description:
+        "What's selected has stayed put for a moment:  `ui-changed`'s detail, once the arrow keys stop.  " +
+        "For a page doing heavy work on each pick."
     }
   ],
   slots: [
@@ -98,7 +140,9 @@ export const treeVocabulary = {
   parts: [
     { name: "empty", description: "The box around the `empty` slot." },
     { name: "path", description: "`sticky-path`:  the pinned line naming the rows scrolled out of sight." },
-    { name: "path-row", description: "`sticky-path`:  each row's name in the path." }
+    { name: "path-row", description: "`sticky-path`:  each row's name in the path." },
+    { name: "column", description: '`appearance="columns"` with `items`:  one column.' },
+    { name: "column-row", description: '`appearance="columns"` with `items`:  one row of a column.' }
   ],
   states: [
     { name: "filtering", description: "It has a `filter`." },
@@ -115,6 +159,11 @@ export const treeVocabulary = {
       key: "resizeColumn",
       text: "Resize this column",
       description: '`appearance="columns"`:  the name of the line after a column, for a screen reader.'
+    },
+    {
+      key: "loading",
+      text: "Loading",
+      description: '`appearance="columns"`:  what a screen reader hears while a column\'s rows are on their way.'
     }
   ]
 } as const satisfies E.ComponentVocabulary

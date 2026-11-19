@@ -1,10 +1,11 @@
 import { isServer } from "@solidjs/web"
-import { For, Show } from "solid-js"
+import { For, Show, type Accessor } from "solid-js"
 
 import { Dragging } from "spell/util/Dragging"
 import { PrefStore } from "spell/util/persist/PrefStore"
 import { E, UI } from "spell/ui/core"
 import { treeVocabulary } from "./UITree.en"
+import { DEFAULT_ROW_PARTS, type RowPart, type TreeItemData } from "./UITree.types"
 import { UITreeItem } from "./UITreeItem"
 
 import treeCSS from "./UITree.css?inline"
@@ -34,6 +35,18 @@ import columnsCSS from "./UITreeColumns.css?inline"
  *   - `column-titles`:  a title over each column, by level.
  *   - The line after each column resizes it:  dragged, or its arrow keys;  a double-click puts it back.
  *     A tree with an `id` remembers the widths in this browser, under it;  one without, until the page reloads.
+ *   - `path`:  the ids of each column's pick, from the top;  set it to open a path, read it as people pick.
+ *   - `filter` filters one column:  the last one on screen as the filter starts, so moving about doesn't move it.
+ *   - `show`:  which parts each row shows (`icon which count chevron`).
+ *   - An `expandable` row picked before its rows come shows a spinner in its column (`<ui-loader>`).
+ *   - Its rows can be DATA instead:  `items`, a `TreeItemData` list, drawn in its shadow root ("Columns from data").
+ *     For big trees:  a `children` function runs the first time its item opens, and only the open path is drawn.
+ *     Rows from markup draw themselves, as in every tree:  none builds a shadow root it doesn't show.
+ * - `ui-settled`:  `ui-changed`'s detail again, once what's selected has stayed put for a moment (the arrow keys stopped).
+ * - For subclasses (a `<netlist-columns>` built on it):
+ *   - `rowClass(item)`:  class names for a row drawn from `items`, which the subclass's own sheet styles
+ *     (`elementSetup.styleSheets`, spread from this one's)
+ *   - its tokens and parts:  `UITreeColumns.css`'s header
  * - `sticky-path`:  while it scrolls, one line pinned at its top names the open rows the first row in view is inside.
  *   - Read again on every scroll of whatever scrolls it, before the next paint:  rows know nothing of it.
  *   - Hidden from screen readers:  each row already says how deep it is (`aria-level`), and the keys walk the rows.
@@ -134,29 +147,40 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   }
 
   /**
-   * `appearance="columns"`:  the top rows as the first column, in a box that scrolls sideways.
-   * - Each open row draws the rows inside it as the next column, placed against this box (`UITreeColumns.css`).
+   * `appearance="columns"`:  the columns, in a box that scrolls sideways, with the line after each to size it.
+   * - From markup:  the top rows are the first column, and each open row draws the rows inside it as the next,
+   *   placed against this box (`UITreeColumns.css`).
+   * - From `items`:  every column is drawn here (`itemColumns()`).
    */
   private renderColumns() {
     return (
       <div class="columns">
-        <div class="column" style={{ width: this.columnWidthCSS(0) }}>
-          <Show when={this.titleForColumn(0)}>
-            {(title) => (
-              <div class="column-title" aria-hidden="true">
-                {title()}
-              </div>
-            )}
-          </Show>
-          <slot />
-          <Show when={this.hasNoMatches}>
-            <div class="empty" part={this.partForName("empty")}>
-              <slot name="empty">{this.translationForKey("noMatches")}</slot>
-            </div>
-          </Show>
-        </div>
+        <Show when={this.hasItemData} fallback={this.firstColumn()}>
+          {this.itemColumns()}
+        </Show>
         <For each={this.columnIndexes}>{(column) => this.columnEdge(column)}</For>
         <div class="column-probe" aria-hidden="true" />
+      </div>
+    )
+  }
+
+  /** From markup:  the top rows, as the first column. */
+  private firstColumn() {
+    return (
+      <div class="column" style={{ width: this.columnWidthCSS(0) }}>
+        <Show when={this.titleForColumn(0)}>
+          {(title) => (
+            <div class="column-title" aria-hidden="true">
+              {title()}
+            </div>
+          )}
+        </Show>
+        <slot />
+        <Show when={this.hasNoMatches && this.filteredRowsParent === this.domElement}>
+          <div class="empty" part={this.partForName("empty")}>
+            <slot name="empty">{this.translationForKey("noMatches")}</slot>
+          </div>
+        </Show>
       </div>
     )
   }
@@ -224,7 +248,8 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
       return
     }
     const value = row.valueOrLabel
-    if (!this.send("ui-selecting", { item: row.domElement, value, originalEvent: event })) return
+    const path = this.isColumns ? [...this.rowsAround(row), row].map((each) => each.valueOrLabel) : undefined
+    if (!this.send("ui-selecting", { item: row.domElement, value, path, originalEvent: event })) return
     if (this.isColumns) this.openColumnOf(row, event, keepsInside)
     const rows = this.rowsOnScreen.filter((each) => !each.group)
     const selected = this.allRows.filter((each) => each.selected)
@@ -235,7 +260,21 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
       if (!!each.selected !== next.has(each)) each.selected = next.has(each)
     }
     const values = this.allRows.filter((each) => next.has(each)).map((each) => each.valueOrLabel)
-    this.send("ui-changed", { value, values, originalEvent: event })
+    const detail = { value, values, item: row.domElement, path, originalEvent: event }
+    this.send("ui-changed", detail)
+    this.settleSoon(detail)
+  }
+
+  /** A `ui-settled` waiting for what's selected to stay put. */
+  private settleTimer: ReturnType<typeof E.after> | undefined
+
+  /** `ui-settled`, with `detail`, once nothing else is selected for `SETTLE_SECONDS`. */
+  private settleSoon(detail: object) {
+    this.settleTimer?.cancel()
+    this.settleTimer = E.after(SETTLE_SECONDS, () => {
+      this.settleTimer = undefined
+      this.send("ui-settled", detail)
+    })
   }
 
   ////////////////
@@ -257,6 +296,42 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     }
     row.disclosure.open(event)
     if (!keepsInside) this.showNewestColumn()
+    this.openPath = this.openChain.map((each) => each.valueOrLabel)
+    if (this.filter) this.applyFilter()
+  }
+
+  /**
+   * The ids of each column's pick, from the top:  the `path` property.
+   * - From `items`, it's the one fact the columns are drawn from.
+   * - From markup, the rows' `open` is:  a pick writes it here, and a page that sets it opens those rows.
+   */
+  @E.controlled("path") accessor openPath: readonly string[] = []
+
+  /** From markup:  a page set `path`, so open its rows, and select the last, as a pick would, sending nothing. */
+  @E.onChange("openPath", "isReady", "rowsVersion")
+  protected onPathChanged(path: readonly string[]) {
+    if (!this.isColumns || this.hasItemData || !this.isReady || !this.isControlledByPage("openPath")) return
+    if (
+      E.isSameList(
+        path,
+        this.openChain.map((each) => each.valueOrLabel)
+      )
+    )
+      return
+    const rows: UITreeItem[] = []
+    for (const id of path) {
+      const row = this.rowsIn(rows.at(-1)?.domElement ?? this.domElement).find((each) => each.valueOrLabel === id)
+      if (!row) break
+      rows.push(row)
+    }
+    const last = rows.at(-1)
+    if (!last) return
+    for (const each of this.allRows) {
+      if (each.isOpen && !rows.includes(each)) each.disclosure.close()
+      if (!!each.selected !== (each === last)) each.selected = each === last
+    }
+    for (const row of rows) row.disclosure.open()
+    this.showNewestColumn()
   }
 
   /** The open rows, outermost first, one a level:  each column's pick, the last one the newest. */
@@ -274,7 +349,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   /** The columns on screen, by level:  the top rows', then one for each pick with rows inside it. */
   get columnIndexes(): number[] {
     if (!this.isColumns) return []
-    const count = 1 + this.openChain.filter((row) => row.canOpen).length
+    const count = this.hasItemData ? this.columnLists.length : 1 + this.openChain.filter((row) => row.canOpen).length
     return Array.from({ length: count }, (_, index) => index)
   }
 
@@ -323,7 +398,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
 
   /** Is it in the page, with the runtime there to rove with? */
   protected get canRove(): boolean {
-    return this.isReady && this.isConnected
+    return this.isReady && this.isConnected && !this.hasItemData
   }
 
   /** The keys, while it's in the page:  the rows are read again on each press. */
@@ -349,6 +424,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   /** Right, left, Enter and Space;  the rest are `UI.focus.roving()`'s. */
   @E.on("keydown")
   protected onKeyDown(event: KeyboardEvent) {
+    if (this.hasItemData) return this.onItemKeyDown(event)
     const row = this.rowOf(event)
     if (!row || event.target !== row.domElement) return
     const handled = this.keyActions(row)[event.key]?.(event)
@@ -618,10 +694,24 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   // ## Filtering
   ////////////////
 
-  /** The text to look for changed. */
+  /** The text to look for changed:  as it starts, in a column view, the last column on screen is the one it filters. */
   @E.onChange("filter", "isReady")
-  protected onFilterChanged() {
+  protected onFilterChanged(filter: string | undefined) {
+    if (filter && !this.hadFilter) this.filterColumn = Math.max(0, this.columnIndexes.length - 1)
+    this.hadFilter = !!filter
     this.applyFilter()
+  }
+
+  /** It had a `filter` when that last changed. */
+  @E.state private accessor hadFilter = false
+
+  /** `appearance="columns"`:  the column `filter` filters, by level, set as it starts. */
+  @E.state accessor filterColumn = 0
+
+  /** From markup, in a column view:  the element whose rows `filter` filters, the tree or a pick. */
+  get filteredRowsParent(): Element {
+    if (!this.isColumns || !this.filterColumn) return this.domElement
+    return this.openChain.filter((row) => row.canOpen)[this.filterColumn - 1]?.domElement ?? this.domElement
   }
 
   /** Rows came or went, or their words changed. */
@@ -635,6 +725,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   /** Hide what doesn't match, and keep open what's around what does. */
   private applyFilter() {
     const text = (this.filter ?? "").trim().toLowerCase()
+    if (this.isColumns) return this.applyColumnFilter(text)
     const matchIn = (parent: Element): boolean => {
       let anyMatch = false
       for (const row of this.rowsIn(parent)) {
@@ -648,6 +739,340 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     }
     this.hasNoMatches = !matchIn(this.domElement) && !!text
   }
+
+  /** In a column view, `text` filters one column (`filterColumn`):  it hides the rows there that don't hold it. */
+  private applyColumnFilter(text: string) {
+    if (this.hasItemData) {
+      const list = this.columnLists[this.filterColumn]
+      this.hasNoMatches = !!text && !!list?.length && !this.shownIn(list, this.filterColumn).length
+      return
+    }
+    for (const row of this.allRows) {
+      row.isFilteredOut = false
+      row.isKeptOpen = false
+    }
+    let anyMatch = false
+    for (const row of this.rowsIn(this.filteredRowsParent)) {
+      const isMatch = !text || row.filterWords.toLowerCase().includes(text)
+      row.isFilteredOut = !isMatch
+      anyMatch ||= isMatch
+    }
+    this.hasNoMatches = !!text && !anyMatch
+  }
+
+  ////////////////
+  // ## Showing parts
+  ////////////////
+
+  /** `show`'s words:  the parts of a column's row it shows. */
+  get shownParts(): readonly RowPart[] {
+    const words = (this.show ?? "").split(/\s+/).filter(Boolean)
+    return words.length ? (words as RowPart[]) : DEFAULT_ROW_PARTS
+  }
+
+  /** Does a column's row show `part`?  Rows from markup ask too (`UITreeItem`). */
+  shows(part: RowPart): boolean {
+    return this.shownParts.includes(part)
+  }
+
+  ////////////////
+  // ## Columns from data
+  ////////////////
+
+  /** `items` is set:  the columns are drawn from it, here, not from `<ui-tree-item>`s. */
+  get hasItemData(): boolean {
+    return Array.isArray(this.items)
+  }
+
+  /** The top items. */
+  private get topItems(): readonly TreeItemData[] {
+    return (this.items as unknown as readonly TreeItemData[] | undefined) ?? []
+  }
+
+  /** Each item's children once its `children` has run:  the list, or the promise of it. */
+  private readonly childrenOfItem = new WeakMap<TreeItemData, readonly TreeItemData[] | Promise<unknown>>()
+
+  /** Bumped as a promised list comes:  what's read from `childrenOfItem` is read again. */
+  @E.state private accessor childrenVersion = 0
+
+  /**
+   * `item`'s children, made once:  `undefined` while a promise of them is on its way.
+   * - SIDE EFFECT:  the first call runs a `children` function.
+   */
+  private childrenOf(item: TreeItemData): readonly TreeItemData[] | undefined {
+    void this.childrenVersion
+    const known = this.childrenOfItem.get(item)
+    if (known) return Array.isArray(known) ? known : undefined
+    const { children } = item
+    const made = typeof children === "function" ? children() : (children ?? [])
+    if (Array.isArray(made)) {
+      this.childrenOfItem.set(item, made)
+      // a function that made none:  its chevron goes
+      if (typeof children === "function") this.childrenVersion++
+      return made
+    }
+    const promised = Promise.resolve(made)
+      .then((list) => this.childrenOfItem.set(item, list))
+      .catch((error) => {
+        E.Warnings.warn("<ui-tree items>", `\`${item.id}\`'s children didn't come:`, error)
+        this.childrenOfItem.set(item, [])
+      })
+      .finally(() => this.childrenVersion++)
+    this.childrenOfItem.set(item, promised)
+    return undefined
+  }
+
+  /** Does `item` open a column?  A `children` function does until it's run;  then, if it made any. */
+  private hasChildren(item: TreeItemData): boolean {
+    void this.childrenVersion
+    const known = this.childrenOfItem.get(item)
+    if (known) return !Array.isArray(known) || known.length > 0
+    return typeof item.children === "function" || (item.children?.length ?? 0) > 0
+  }
+
+  /** The count `item`'s row shows:  its own, else how many children it has, once known. */
+  private countOf(item: TreeItemData): number | undefined {
+    void this.childrenVersion
+    const known = this.childrenOfItem.get(item)
+    if (item.count !== undefined) return item.count
+    if (Array.isArray(known)) return known.length
+    return Array.isArray(item.children) ? item.children.length : undefined
+  }
+
+  /**
+   * Each column's items, by level:  the top items, then the children of each pick of `path` that has some.
+   * - `undefined`:  that column's items are on their way.
+   */
+  private get columnLists(): (readonly TreeItemData[] | undefined)[] {
+    const lists: (readonly TreeItemData[] | undefined)[] = [this.topItems]
+    for (const id of this.openPath) {
+      const item = lists.at(-1)?.find((each) => each.id === id)
+      if (!item || !this.hasChildren(item)) break
+      const children = this.childrenOf(item)
+      if (children?.length === 0) break
+      lists.push(children)
+      if (!children) break
+    }
+    return lists
+  }
+
+  /** The items column `depth` shows:  `list`, filtered if it's `filter`'s column. */
+  private shownIn(list: readonly TreeItemData[], depth: number): readonly TreeItemData[] {
+    const text = (this.filter ?? "").trim().toLowerCase()
+    if (!text || depth !== this.filterColumn) return list
+    return list.filter((item) => `${item.label} ${item.which ?? ""}`.toLowerCase().includes(text))
+  }
+
+  /**
+   * Was a pick made by going back a column (the left key), so the columns after it stay?
+   * - Kept with the `path` it was made on:  any other path (a new pick, a page setting it) ends it.
+   */
+  @E.state private accessor wentBack: { depth: number; path: readonly string[] } | undefined = undefined
+
+  /** The column of the selected item:  the last pick, unless the keys went back. */
+  private get selectedDepth(): number {
+    const back = this.wentBack
+    return back && back.path === this.openPath ? back.depth : this.openPath.length - 1
+  }
+
+  /** The item that takes the tab stop in column `depth`:  its pick, else its first. */
+  private keyItemIn(depth: number): TreeItemData | undefined {
+    const list = this.shownIn(this.columnLists[depth] ?? [], depth)
+    return list.find((item) => item.id === this.openPath[depth]) ?? list[0]
+  }
+
+  /**
+   * Extra class names for `item`'s row in a column drawn from `items`:  none here;  a subclass overrides it.
+   * - Set on the row (`.column-row`), for the subclass's own sheet (`elementSetup.styleSheets`) to style:
+   *   `.column-row.port .which { ... }`.
+   * - Read once, as the row is drawn.
+   * - Rows from markup draw themselves, in shadow roots a subclass's sheet doesn't reach:  so only `items` rows.
+   */
+  rowClass(_item: TreeItemData): string | undefined {
+    return undefined
+  }
+
+  /** Every column, from `items`. */
+  private itemColumns() {
+    return (
+      <For each={this.columnLists} keyed={false}>
+        {(list, depth) => this.itemColumn(list, depth)}
+      </For>
+    )
+  }
+
+  /** Column `depth`:  its title, its rows, and while they're on their way, a spinner. */
+  private itemColumn(list: Accessor<readonly TreeItemData[] | undefined>, depth: number) {
+    const shown = () => this.shownIn(list() ?? [], depth)
+    return (
+      <ul
+        class="column items"
+        role="group"
+        part={this.partForName("column")}
+        data-depth={depth}
+        aria-label={this.titleForColumn(depth)}
+        aria-busy={list() ? undefined : "true"}
+        style={{ width: this.columnWidthCSS(depth) }}
+      >
+        <Show when={this.titleForColumn(depth)}>
+          {(title) => (
+            <li class="column-title" role="none" aria-hidden="true">
+              {title()}
+            </li>
+          )}
+        </Show>
+        <For each={shown()}>{(item) => this.itemRow(item, depth)}</For>
+        <Show when={!list()}>
+          <li class="loading" role="none">
+            <ui-loader visible="" size="small" aria-label={this.translationForKey("loading")} />
+          </li>
+        </Show>
+        <Show when={!!list()?.length && !shown().length}>
+          <li class="empty" role="none" part={this.partForName("empty")}>
+            <slot name="empty">{this.translationForKey("noMatches")}</slot>
+          </li>
+        </Show>
+      </ul>
+    )
+  }
+
+  /** `item`'s row in column `depth`:  icon, label and which, count, chevron, each as `show` says. */
+  private itemRow(item: TreeItemData, depth: number) {
+    const isPicked = () => this.openPath[depth] === item.id
+    const isSelected = () => isPicked() && depth === this.selectedDepth
+    const ownClasses = (this.rowClass(item) ?? "").split(/\s+/).filter(Boolean)
+    return (
+      <li
+        class={["column-row", ...ownClasses, { selected: isSelected(), "on-path": isPicked() && !isSelected() }]}
+        part={this.partForName("column-row")}
+        role="treeitem"
+        data-id={item.id}
+        tabindex={depth === Math.max(0, this.selectedDepth) && this.keyItemIn(depth) === item ? "0" : "-1"}
+        aria-level={depth + 1}
+        aria-selected={isSelected() ? "true" : "false"}
+        aria-expanded={this.hasChildren(item) ? (isPicked() ? "true" : "false") : undefined}
+        onClick={(event: MouseEvent) => this.pickItem(item, depth, event)}
+      >
+        <Show when={this.shows("icon") && item.icon}>
+          {(icon) => (
+            <span class="icon">
+              <ui-icon name={icon()} />
+            </span>
+          )}
+        </Show>
+        <span class="label">
+          <span class="words">{item.label}</span>
+          <Show when={this.shows("which") && item.which}>{(which) => <span class="which">{which()}</span>}</Show>
+        </span>
+        <Show when={this.shows("count") && this.countOf(item) !== undefined}>
+          <span class="count">{this.countOf(item)}</span>
+        </Show>
+        <Show when={this.shows("chevron") && this.hasChildren(item)}>
+          <span class="chevron" aria-hidden="true" />
+        </Show>
+      </li>
+    )
+  }
+
+  /**
+   * `item`, in column `depth`, was clicked, or a key moved onto it:  it's selected, asking first.
+   * - The path is cut there, so the columns after it close and its children open in the next;
+   *   with `keepsInside`, and it already picked (the keys going back or in), the columns after it stay.
+   */
+  private pickItem(item: TreeItemData, depth: number, event: Event, { keepsInside = false } = {}) {
+    const isPicked = this.openPath[depth] === item.id
+    const path = keepsInside && isPicked ? this.openPath : [...this.openPath.slice(0, depth), item.id]
+    const detailPath = path.slice(0, depth + 1)
+    const announce = () => this.send("ui-selecting", { item, value: item.id, path: detailPath, originalEvent: event })
+    const isDone = E.isSameList(path, this.openPath) ? announce() : this.requestChange("openPath", path, announce)
+    if (!isDone) return
+    this.wentBack = depth < this.openPath.length - 1 ? { depth, path: this.openPath } : undefined
+    const detail = { value: item.id, values: [item.id], item, path: detailPath, originalEvent: event }
+    this.send("ui-changed", detail)
+    this.settleSoon(detail)
+    if (!keepsInside) this.showNewestColumn()
+    this.showPicks()
+  }
+
+  /**
+   * The keys on a row from `items`, as the markup rows' (`columnKeyActions()`):  they select as they move.
+   * - Up, down, Home and End within its column;  the key toward the next column goes in, onto its pick, else its
+   *   first;  the other goes back, the columns after it kept.  Enter and Space select.
+   */
+  private onItemKeyDown(event: KeyboardEvent) {
+    const box = (event.composedPath()[0] as Element).closest?.("li[data-id]") as HTMLElement | null | undefined
+    const depth = Number((box?.parentElement as HTMLElement | null | undefined)?.dataset.depth)
+    if (!box || Number.isNaN(depth)) return
+    const list = this.shownIn(this.columnLists[depth] ?? [], depth)
+    const at = list.findIndex((each) => each.id === box.dataset.id)
+    const item = list[at]
+    if (!item) return
+    const pick = (next: TreeItemData | undefined, nextDepth = depth, keepsInside = false) => {
+      if (!next) return false
+      this.pickItem(next, nextDepth, event, { keepsInside })
+      return true
+    }
+    const moveTo = (index: number) => {
+      const next = list[Math.max(0, Math.min(list.length - 1, index))]
+      return next === item ? true : pick(next)
+    }
+    const goIn = () => {
+      if (this.openPath[depth] !== item.id || !this.hasChildren(item)) return false
+      const inside = this.shownIn(this.childrenOf(item) ?? [], depth + 1)
+      return pick(inside.find((each) => each.id === this.openPath[depth + 1]) ?? inside[0], depth + 1, true)
+    }
+    const goOut = () => {
+      if (!depth) return false
+      const before = this.shownIn(this.columnLists[depth - 1] ?? [], depth - 1)
+      return pick(
+        before.find((each) => each.id === this.openPath[depth - 1]),
+        depth - 1,
+        true
+      )
+    }
+    const actions: Record<string, () => boolean> = {
+      ArrowDown: () => moveTo(at + 1),
+      ArrowUp: () => moveTo(at - 1),
+      Home: () => moveTo(0),
+      End: () => moveTo(list.length - 1),
+      ArrowRight: this.isRightToLeft ? goOut : goIn,
+      ArrowLeft: this.isRightToLeft ? goIn : goOut,
+      Enter: () => pick(item),
+      " ": () => pick(item)
+    }
+    const action = actions[event.key]
+    if (!action) return
+    event.preventDefault()
+    if (action()) E.afterSolidUpdate(() => this.focusKeyRow())
+  }
+
+  /** The focus goes to the row with the tab stop, scrolled into its column's view. */
+  private focusKeyRow() {
+    const depth = Math.max(0, this.selectedDepth)
+    const id = this.keyItemIn(depth)?.id
+    if (id === undefined) return
+    const column = this.domElement.renderRoot.querySelector<HTMLElement>(`ul[data-depth="${depth}"]`)
+    const row = column?.querySelector<HTMLElement>(`li[data-id="${CSS.escape(id)}"]`)
+    row?.focus({ preventScroll: true })
+    if (row && column) revealIn(column, row)
+  }
+
+  /** `path` changed:  each column's pick in view, once drawn. */
+  @E.onChange("openPath", "isReady", { defer: true })
+  protected onOpenPathChanged() {
+    if (this.hasItemData && this.isReady) this.showPicks()
+  }
+
+  /** Scroll each column from `items` to its pick, before the next paint. */
+  private showPicks() {
+    if (isServer) return
+    E.beforeNextPaint(() => {
+      for (const column of this.domElement.renderRoot.querySelectorAll<HTMLElement>("ul.column")) {
+        const pick = column.querySelector<HTMLElement>("li.selected, li.on-path")
+        if (pick) revealIn(column, pick)
+      }
+    })
+  }
 }
 
 export interface UITree extends E.AttributeValues<typeof treeVocabulary> {}
@@ -657,8 +1082,22 @@ function rowBoxOf(row: UITreeItem): DOMRect {
   return (row.domElement.renderRoot.querySelector(".row") ?? row.domElement).getBoundingClientRect()
 }
 
+/**
+ * Scroll `column` the least that shows `row`, up or down only, so the page itself never moves.
+ * - `row`'s offset parent is `column` (the sheet makes it `position: relative`).
+ */
+function revealIn(column: HTMLElement, row: HTMLElement) {
+  const { offsetTop: top, offsetHeight: height } = row
+  const titleHeight = column.querySelector<HTMLElement>(".column-title")?.offsetHeight ?? 0
+  if (top - titleHeight < column.scrollTop) column.scrollTop = top - titleHeight
+  else if (top + height > column.scrollTop + column.clientHeight) column.scrollTop = top + height - column.clientHeight
+}
+
 /** `choose` of a tree whose rows are selected many at a time. */
 const MANY = "many"
+
+/** How long what's selected stays put before `ui-settled`, in seconds. */
+const SETTLE_SECONDS = 0.3
 
 /** The tree's `appearance` that shows a column per level. */
 const COLUMNS = "columns"

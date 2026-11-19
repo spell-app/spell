@@ -108,6 +108,35 @@
                   </ui-tree>
                 </ui-example>
               </ui-section>
+              <ui-section id="examples-types-columns-from-data" label="Columns from data" sticky="stack" collapsible dividing>
+                <ui-example description="A big tree is given as data, in `items`:  each item's `children` a list, or a function run the first time it opens, which may return a promise:  the column shows a spinner until it comes (Archive takes a second).  Only the open path's columns are drawn.  `show` picks each row's parts, here with how many rows it holds;  `filter` filters the last column on screen.">
+                  <ui-tree id="docs-tree-columns-data" appearance="columns" column-titles="Clients, Folders, Files" show="icon which count chevron" label="Work" style="height: 15em"></ui-tree>
+                  <ui-input id="docs-tree-columns-filter" icon="search" placeholder="Filter the last column" style="margin-top: 0.5em"></ui-input>
+                  <script type="module">
+                    const files = (names) => names.map((name) => ({ id: name, label: name, icon: "file outline" }))
+                    const later = (seconds, list) => () => new Promise((resolve) => setTimeout(() => resolve(list), seconds * 1000))
+                    const client = (id, folders) => ({
+                      id,
+                      label: id,
+                      icon: "building outline",
+                      children: () => Object.entries(folders).map(([name, list]) => ({ id: name, label: name, icon: "folder", ...list }))
+                    })
+                    await customElements.whenDefined("ui-tree")
+                    const tree = document.getElementById("docs-tree-columns-data")
+                    tree.items = [
+                      client("Acme Bakery", {
+                        "Spring menu": { children: files(["menu.pdf", "prices.csv", "croissant.jpg", "loaf.jpg"]) },
+                        Website: { children: files(["home.html", "about.html"]) },
+                        Archive: { which: "old", count: 3, children: later(1, files(["2022.zip", "2023.zip", "2024.zip"])) }
+                      }),
+                      client("Harbor Books", { Catalogue: { children: files(["autumn.pdf", "winter.pdf"]) } }),
+                      client("Pine Studio", { Logo: { children: files(["logo.svg"]) } })
+                    ]
+                    tree.path = ["Acme Bakery", "Spring menu", "menu.pdf"]
+                    document.getElementById("docs-tree-columns-filter").addEventListener("input", (event) => (tree.filter = event.target.value))
+                  </script>
+                </ui-example>
+              </ui-section>
             </ui-section>
             <ui-section id="examples-content" label="Content" sticky="stack" collapsible dividing>
               <ui-section id="examples-content-which-one" label="Which one" sticky="stack" collapsible dividing>
@@ -188,11 +217,56 @@
                   - `open` shows the rows inside it.  A row whose rows are drawn only once it opens says `expandable`.
                   - `ui-changed` hands over what's selected.  To decide that yourself, cancel `ui-selecting`, and set each row's `selected`.
                   - `filter` looks only at rows that are drawn.
+                  - `ui-settled` hands it over again once it stays put for a moment:  for a page doing heavy work on each pick, as the arrow keys go by.
                 </script>
               </ui-markdown>
               <ui-code language="js">
                 <script type="text/plain">
                   document.querySelector("ui-tree").addEventListener("ui-changed", (event) => show(event.detail.values))
+                </script>
+              </ui-code>
+            </ui-section>
+            <ui-section id="usage-columns" label="Columns" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  `appearance="columns"` shows a column per level.  Its rows are `<ui-tree-item>`s, or data in the `items` property.
+                  - `items`:  `{ id, label, icon?, which?, count?, children?, data? }[]`.  `children` is a list, or a function run the first time its item opens, which may return a promise.
+                  - `path` is the ids of each column's pick, from the top.  Set it to open a path, its last item selected;  `ui-changed` hands it over with the `item`.
+                  - `filter` filters one column:  the last one on screen as the filter starts, until it's cleared.
+                  - `show` picks each row's parts:  `icon which count chevron`;  without it, `icon which chevron`.
+                  - `--ui-tree-columns-height` sets its height, `--ui-tree-column-width` each column's width.
+                </script>
+              </ui-markdown>
+            </ui-section>
+            <ui-section id="usage-a-look-of-your-own" label="A look of your own" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  A subclass gives a column view its own look.
+                  - `rowClass(item)` puts class names on each row drawn from `items`.
+                  - The subclass's own sheet, added to the tree's in `elementSetup`, styles them:  rows are `.column-row`s.
+                  - Its tokens set the tree's.
+                </script>
+              </ui-markdown>
+              <ui-code language="js">
+                <script type="text/plain">
+                  import { E } from "spell/ui/core"
+                  import { UITree } from "spell/ui/ui-tree"
+
+                  const sheet = `
+                    :host { --ui-tree-column-selected-background: var(--files-accent, teal); }
+                    .column-row.secret .words { font-style: italic; }
+                  `
+
+                  class FileColumns extends UITree {
+                    @E.protoMerged static elementSetup = {
+                      styleSheets: { ...UITree.prototype.elementSetup.styleSheets, "file-columns": sheet }
+                    }
+
+                    rowClass(item) {
+                      return item.data?.isSecret ? "secret" : undefined
+                    }
+                  }
+                  FileColumns.define("file-columns") // <file-columns appearance="columns">
                 </script>
               </ui-code>
             </ui-section>
