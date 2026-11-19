@@ -135,7 +135,7 @@ describe("<spell-site-header>'s icon buttons (I43)", () => {
       })
     })
     expect(buttons.map(({ title }) => title)).toEqual([
-      "Spell docs",
+      "Spell Epic home page",
       "Edit sections in place",
       "Open the source in VS Code",
       expect.stringMatching(/^(Light|Dark)/)
