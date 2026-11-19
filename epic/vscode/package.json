@@ -401,14 +401,14 @@
           "icon": "media/spell.svg"
         },
         {
+          "id": "spell-epic-docs",
+          "title": "Epic Docs",
+          "icon": "$(library)"
+        },
+        {
           "id": "spell-epic-details",
           "title": "Details",
           "icon": "$(comment-discussion)"
-        },
-        {
-          "id": "spell-epic-docs",
-          "title": "Epic Docs",
-          "icon": "$(book)"
         }
       ]
     },
@@ -420,18 +420,18 @@
           "name": "Review"
         }
       ],
-      "spell-epic-details": [
-        {
-          "type": "webview",
-          "id": "spellEpic.detailsView",
-          "name": "Details"
-        }
-      ],
       "spell-epic-docs": [
         {
           "type": "webview",
           "id": "spellEpic.docsView",
           "name": "Epic Docs"
+        }
+      ],
+      "spell-epic-details": [
+        {
+          "type": "webview",
+          "id": "spellEpic.detailsView",
+          "name": "Details"
         }
       ]
     }
