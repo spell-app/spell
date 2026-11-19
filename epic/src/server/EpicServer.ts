@@ -676,9 +676,9 @@ const HOME_PAGE = "pages/index.html"
  * as Spell's epic repo names them (its `page-server.json5`).
  */
 const DEFAULT_SITE_TABS: readonly SiteTab[] = [
-  { name: "Guides", path: "guides/index.html", areas: ["guides"] },
+  { name: "Epic Pages", path: "epics/index.html", areas: ["epics"] },
   { name: "Sagas", path: "sagas/index.html", areas: ["sagas"] },
-  { name: "Epic Pages", path: "epics/index.html", areas: ["epics"] }
+  { name: "Guides", path: "guides/index.html", areas: ["guides"] }
 ]
 
 /** Folders page edits may write when a repo's `package.json` names none:  the epic repo areas. */

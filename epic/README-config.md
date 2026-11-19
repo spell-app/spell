@@ -262,7 +262,7 @@ What you'd trip on today, roughly in the order you'd meet it.
    `epic repos default <name>` picks which repo that is.
 4. **Your pages wear Spell's look.**
    They load Spell's theme.
-   The top bar shows three tabs, Guides, Sagas and Epic Pages, unless your settings name others.
+   The top bar shows three tabs, Epic Pages, Sagas and Guides, centred, unless your settings name others.
 5. **A few skills reach for Spell's own tools.**
    Where a skill wants the repo's house style or text-rewriting skill, its example is Spell's.
    - The epic skill's three test tiers name Spell's folders and scripts, `yarn test:unit` among them:
