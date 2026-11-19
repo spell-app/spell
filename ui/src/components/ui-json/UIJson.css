@@ -208,20 +208,32 @@
   }
   ui-input.edit,
   ui-select.edit {
-    --ui-input-padding-block: 0;
-    --ui-input-padding-inline: 0.25em;
-    --ui-input-line-height: calc(var(--_ui-json-line-height) * 1em - 2 * var(--ui-border-width, 1px));
-    --ui-select-padding-block: 0;
-    --ui-select-line-height: calc(var(--_ui-json-line-height) * 1em - 2 * var(--ui-border-width, 1px));
     box-sizing: border-box;
     height: calc(var(--_ui-json-line-height) * 1em);
+  }
+  /*
+   * The native control inside, through its part:  no padding top or bottom, its line the code's less its border.
+   * - Not the controls' public tokens (`--ui-input-line-height` ...):  a component sheet never sets another's.
+   * - The rule from out here beats the control's own, whatever its selector:  it's the page's side of the shadow root.
+   */
+  ui-input.edit::part(control),
+  ui-select.edit::part(select) {
+    min-height: 0;
+    padding-block: 0;
+    line-height: calc(var(--_ui-json-line-height) * 1em - 2 * var(--ui-border-width, 1px));
+  }
+  ui-input.edit::part(control) {
+    padding-inline: 0.25em;
   }
   ui-input.edit {
     width: min(calc(var(--edit-chars, 8) * 1ch + 0.5em + 2 * var(--ui-border-width, 1px)), 100%);
   }
-  /* a checkbox the size of a line's letters, centred on it:  it overlapped the row above at its own size */
+  /*
+   * a checkbox the size of a line's letters, centred on it:  it overlapped the row above at its own size
+   * - scaled down from its own box, 1.21428em, to 1em:  it draws no words, so only the box shrinks
+   */
   ui-checkbox.edit {
-    --ui-checkbox-size: 1em;
+    --ui-scale: calc(1 / 1.21428);
     vertical-align: middle;
   }
   /* phones zoom into a field under 16px */
