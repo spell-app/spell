@@ -108,7 +108,15 @@ export const APP_TEXTS = {
   partNothingSelected: "Nothing's selected.",
   partBusy: "One moment:  the app is catching up with your last change.",
   partAcrossFiles: "These are written in different files, so they can't be moved together yet.",
-  partNoDrawing: "This program has no drawing to add to:\nadd a <draw> to it first.",
+  partNoDrawing:
+    "There's nowhere to put this part yet:  your app doesn't show anything on screen.\n" +
+    'In the code on the left, add a "to draw" section under your app, saying what it shows.\n' +
+    "Then pick the part again.",
+  // a part added, drawn, but with nothing to see (epic `editor` P35)
+  partAddedEmpty:
+    "What you added is in your app, but it's empty, so you can't see it yet.\n" +
+    "It's selected in the Views list on the right.\n" +
+    "Give it a label, or drag another part into it.",
   partInsideItself: "Something can't go inside itself.",
   lineNumbers: "Line Numbers",
   softWrap: "Soft Wrap",

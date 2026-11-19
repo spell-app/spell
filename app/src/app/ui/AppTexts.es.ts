@@ -113,7 +113,14 @@ const APP_TEXTS_ES: AppTextPack = {
   partNothingSelected: "No hay nada seleccionado.",
   partBusy: "Un momento:\nla aplicación se está poniendo al día con tu último cambio.",
   partAcrossFiles: "Están escritos en archivos distintos, así que aún no se pueden mover juntos.",
-  partNoDrawing: "Este programa no tiene un dibujo al que añadir:\nañádele primero un <draw>.",
+  partNoDrawing:
+    "Aún no hay dónde poner esta parte:  tu aplicación no muestra nada en la pantalla.\n" +
+    "En el código de la izquierda, añade una sección «para dibujar» bajo tu aplicación, que diga lo que muestra.\n" +
+    "Luego vuelve a elegir la parte.",
+  partAddedEmpty:
+    "Lo que añadiste ya está en tu aplicación, pero está vacío, así que aún no se ve.\n" +
+    "Está seleccionado en la lista Vistas, a la derecha.\n" +
+    "Dale un texto, o arrastra otra parte dentro.",
   partInsideItself: "Algo no puede ir dentro de sí mismo.",
   lineNumbers: "Números de línea",
   softWrap: "Ajuste de línea",

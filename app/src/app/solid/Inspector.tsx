@@ -583,8 +583,11 @@ export class Inspector {
       const wanted = placesToSelect
       const found = rows.filter((row) => wanted.has(writtenKeyOf(row.element) ?? "")).map((row) => row.element)
       if (found.length) {
+        const drawn = whenDrawn
         placesToSelect = undefined
+        whenDrawn = undefined
         Inspector.selectAll(found)
+        drawn?.(found)
         if (wordsReadyNext) requestAnimationFrame(() => setTimeout(makeWordsReady, WORDS_READY_DELAY))
         wordsReadyNext = false
         return
@@ -637,9 +640,11 @@ export class Inspector {
   /**
    * Select what's written at `places` once it's drawn:  what was just added or moved, which the next compile draws.
    * - Each place is `path:line:column`, as a part's written key is.
+   * - `drawn`:  told what's selected, once it is (`PartEdits` shows it).
    */
-  static selectWhenDrawn(places: readonly string[]): void {
+  static selectWhenDrawn(places: readonly string[], drawn?: (elements: readonly Element[]) => void): void {
     placesToSelect = new Set(places)
+    whenDrawn = drawn
   }
 
   /** A gesture's compile is running:  what's drawn is behind the text (`PartEdits`). */
@@ -1888,6 +1893,8 @@ const clicks = new ListSelection<Element>()
 
 /** The places `Inspector.selectWhenDrawn()` is waiting to see drawn. */
 let placesToSelect: Set<string> | undefined
+/** Told what `placesToSelect` found, once it's selected:  `Inspector.selectWhenDrawn()`'s `drawn`. */
+let whenDrawn: ((elements: readonly Element[]) => void) | undefined
 /** Are the words of what's selected next ready to type over?  `Inspector.readyWordsNext()`. */
 let wordsReadyNext = false
 
