@@ -92,8 +92,9 @@ So after a night away, it's the one section to read:  the rest of the page is th
 
 ![One item on an epic page, unfolded.  Its chip, J1, outlined:  "say approve J1 in the chat".  Its title, a judgement
 call, "a choice the agent made without you".  At the right, three buttons, Do this, Revisit and Approve, then the
-(i) Clarify button, "Claude rewrites it in plainer words".  Under it, the item's text, its Net effect, "what it
-changes", and a note box, "pictures welcome".](docs/images/how-item.png)
+(i) Clarify button, "Claude rewrites it in plainer words".  Before those buttons, a bullhorn, "comment on it".
+Under it, the item's text, its Net effect, "what it changes", and a note box,
+"pictures welcome".](docs/images/how-item.png)
 
 _A judgement call unfolded:  the agent's choice, what it changes, and your three answers._
 
@@ -106,6 +107,19 @@ T a todo, I an issue, M a manual test.
 
 Your presses wait on the page, dashed, until you press Send to Claude in the header (or Auto Send does).
 The whole review round, button by button:  [README-pages.md](README-pages.md).
+
+### Comment on anything with the bullhorn
+
+Items have buttons;  everything else takes a comment.
+- **The bullhorn** sits beside any block:  a section, a table, a code block, an item.
+  Press it, or select some words and press ⌘-I (Ctrl-I), and type.
+- **A thread:**  each comment becomes one, numbered `C1`, `C2` ..., under the words it quotes,
+  and the agent answers in it.
+- **It rides Send,** with your marks.
+  A thread turns orange when it's your turn to answer.
+
+Where each page's comments go, and what the thread's buttons do:
+[README-pages.md](README-pages.md#comments--a-bullhorn-on-every-block).
 
 ## The workflow:  two Accepts, then it builds
 
