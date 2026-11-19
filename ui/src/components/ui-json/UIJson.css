@@ -106,17 +106,9 @@
    * a background on hover, a fill while the quotes toggle is pressed (not the toggle's positive colour).
    */
   .tool {
-    --ui-button-basic-border-width: 0px;
-    --ui-button-color: var(--_ui-json-muted-color);
-    --ui-button-color-hover: var(--_ui-json-color);
-    --ui-button-color-active: var(--_ui-json-color);
-    --ui-button-basic-background-hover: oklch(from var(--ui-ink) l c h / 0.08);
-    --ui-button-basic-background-down: oklch(from var(--ui-ink) l c h / 0.14);
-    --ui-button-toggle-background: oklch(from var(--ui-ink) l c h / 0.14);
-    --ui-button-toggle-background-hover: oklch(from var(--ui-ink) l c h / 0.18);
-    --ui-button-toggle-color: var(--_ui-json-color);
     margin: 0;
   }
+  /* through the inner button's part, never ui-button's public tokens:  this sheet sets none of another tag's */
   .tool::part(button) {
     box-sizing: border-box;
     width: var(--_json-tool-size);
@@ -126,6 +118,24 @@
     margin: 0;
     justify-content: center;
     border-radius: var(--ui-radius-s, 4px);
+    color: var(--_ui-json-muted-color);
+    background: transparent;
+    box-shadow: none;
+  }
+  .tool::part(button):hover {
+    color: var(--_ui-json-color);
+    background: oklch(from var(--ui-ink) l c h / 0.08);
+  }
+  .tool::part(button):active {
+    background: oklch(from var(--ui-ink) l c h / 0.14);
+  }
+  /* the quotes toggle while on:  a neutral fill, not the toggle's positive colour */
+  .tool:state(active)::part(button) {
+    color: var(--_ui-json-color);
+    background: oklch(from var(--ui-ink) l c h / 0.14);
+  }
+  .tool:state(active)::part(button):hover {
+    background: oklch(from var(--ui-ink) l c h / 0.18);
   }
   /* the quotes glyph, as text:  two straight quotes in the code font, at the icon's size */
   .tool .glyph {
