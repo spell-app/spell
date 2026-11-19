@@ -17,6 +17,7 @@ import {
   folderIndex,
   isDocView,
   isLoopback,
+  openingPage,
   planDocsIn,
   planDocsOf,
   samePage,
@@ -212,4 +213,34 @@ test("silentFrameStep():  a frame whose page never said where it is (epic `epic-
   equal(silentFrameStep({ serverUp: true, reloads: 0 }), "reload")
   equal(silentFrameStep({ serverUp: true, reloads: SILENT_FRAME_RELOADS - 1 }), "reload")
   equal(silentFrameStep({ serverUp: true, reloads: SILENT_FRAME_RELOADS }), "say")
+})
+
+test("openingPage():  a page asked for while a fresh view looks up its fallbacks wins (epic `epic-engine` I341)", async () => {
+  const EPIC = "http://127.0.0.1:4747/epics/demo/demo.plan.html"
+  const REMEMBERED = "http://127.0.0.1:4747/pages/index.html"
+  // the checklist button pressed while the remembered page's server is looked for:  the press wins
+  let asked: string | undefined
+  const remembered = async () => {
+    asked = EPIC
+    return REMEMBERED
+  }
+  equal(await openingPage(() => asked, [remembered]), EPIC)
+  // asked for before the view opened:  no fallback is even tried
+  let tried = false
+  equal(
+    await openingPage(
+      () => EPIC,
+      [
+        async () => {
+          tried = true
+          return REMEMBERED
+        }
+      ]
+    ),
+    EPIC
+  )
+  equal(tried, false)
+  // nothing asked for:  the first fallback that has a page
+  equal(await openingPage(() => undefined, [async () => undefined, async () => REMEMBERED]), REMEMBERED)
+  equal(await openingPage(() => undefined, []), undefined)
 })

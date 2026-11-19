@@ -98,6 +98,7 @@ import {
   DOC_VIEWS,
   type DocViewName,
   fileForPath,
+  openingPage,
   planDocsIn,
   planDocsOf,
   samePage,
@@ -567,6 +568,8 @@ export class DocView implements vscode.WebviewViewProvider {
 
   /**
    * VS Code shows the view:  build its html, ONCE, for the page asked for;  else, in "Epic Docs", the home page.
+   * - the page asked for:  as it is once the remembered page and the home page are known (`openingPage()`),
+   *   so a page asked for while they're looked up is the one shown
    * - MUST `enableScripts`:  without it the webview's frame is sandboxed WITHOUT `allow-scripts`, and the page's
    *   iframe inherits that, so no `ui-*` element ever defines itself
    * - SIDE EFFECT:  the page's `place` reports set `<view id>.canGoBack` / `.canGoForward`,
@@ -596,8 +599,15 @@ export class DocView implements vscode.WebviewViewProvider {
         void vscode.commands.executeCommand("setContext", `${this.id}.canGoForward`, !!message.canGoForward)
       }
     )
-    if (!this.isListing) this.url ??= await this.remembered()
-    if (this.name === "docs") this.url ??= await DocView.home?.()
+    // a page asked for while these are awaited (the checklist button, pressed as the tab opens) wins over them:
+    // `??=` would read `url` BEFORE the wait and replace that ask after it (epic `epic-engine` I341)
+    this.url = await openingPage(
+      () => this.url,
+      [
+        ...(this.isListing ? [] : [() => this.remembered()]),
+        ...(this.name === "docs" ? [async () => DocView.home?.()] : [])
+      ]
+    )
     if (this.name === "details" && !this.url) this.isListing = true
     this.showCount()
     view.webview.html = this.html(this.url)
