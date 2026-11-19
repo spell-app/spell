@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
+
 import chalk from "chalk"
 import { Command, Help, Option } from "commander"
 
@@ -978,12 +981,26 @@ export class EpicProgram {
 
   /**
    * `epic --version`:  the code this `epic` runs, `<short sha> (<branch>) <checkout>`.
+   * - an npm install of `spell` has no git:  `epic 0.8.10 (npm) <folder>`, the package's version
+   *   (it said `epic ? (detached)` before epic `epic-engine` I343)
    * - static:  this code's checkout, whoever calls
    */
   static version(): string {
-    const sha = Git.run(["rev-parse", "--short", "HEAD"], EpicCheckout.CODE_ROOT).out || "?"
+    const sha = Git.run(["rev-parse", "--short", "HEAD"], EpicCheckout.CODE_ROOT).out
+    if (!sha) return `epic ${EpicProgram.packageVersion()} (npm) ${EpicCheckout.CODE_ROOT}`
     const branch = Git.run(["branch", "--show-current"], EpicCheckout.CODE_ROOT).out || "detached"
     return `epic ${sha} (${branch}) ${EpicCheckout.CODE_ROOT}`
+  }
+
+  /** The `spell` package's version, from its `package.json`;  `?` if it can't be read.  NEVER throws. */
+  static packageVersion(): string {
+    try {
+      return (
+        (JSON.parse(readFileSync(join(CLI.KIT_ROOT, "package.json"), "utf8")) as { version?: string }).version ?? "?"
+      )
+    } catch {
+      return "?"
+    }
   }
 
   /**
