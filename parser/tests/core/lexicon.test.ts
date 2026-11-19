@@ -140,7 +140,7 @@ describe("spellTypeFor()", () => {
     expect(spellTypeFor(fields).source.split("\n").slice(3, -1)).toEqual([
       '\tits "name" is required text, with maximum length 40',
       '\tits "nick" is text, with minimum length 2',
-      '\tits "mood" is one of happy or sad',
+      '\tits "mood" as one of happy or sad',
       '\tits "count" is a required integer',
       "\tits name must be at least 2 letters long",
       "\tits mood must not be empty"

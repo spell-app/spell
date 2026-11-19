@@ -210,6 +210,38 @@ describe("<spell-site-header>'s tabs (I4)", () => {
   })
 })
 
+// epic `epic-engine` (Owen, 2026-11-18):  "center in the toolbar"
+describe("<spell-site-header>'s tabs, centred", () => {
+  /** the bar's, the brand's, the tabs' and the tools' left and right edges, px */
+  function edges(page: Page) {
+    return page.evaluate(() => {
+      const shadow = document.querySelector("spell-site-header")!.shadowRoot!
+      const box = (selector: string) => {
+        const rect = shadow.querySelector(selector)!.getBoundingClientRect()
+        return { left: rect.left, right: rect.right }
+      }
+      return { bar: box("header"), brand: box(".brand"), tabs: box("nav"), end: box(".end") }
+    })
+  }
+
+  it("wide:  the tabs' middle is the bar's middle", async () => {
+    const page = await opened("/guides/guide.html")
+    await page.setViewportSize({ width: 1280, height: 600 })
+    const { bar, tabs } = await edges(page)
+    expect(Math.abs((tabs.left + tabs.right) / 2 - (bar.left + bar.right) / 2)).toBeLessThanOrEqual(1)
+    await page.close()
+  })
+
+  it("the side bar's width:  nothing overlaps", async () => {
+    const page = await opened("/guides/guide.html")
+    await page.setViewportSize({ width: 520, height: 600 })
+    const { brand, tabs, end } = await edges(page)
+    expect(tabs.left).toBeGreaterThanOrEqual(brand.right)
+    expect(end.left).toBeGreaterThanOrEqual(tabs.right)
+    await page.close()
+  })
+})
+
 // epic `epic-engine` P46:  a page's root links mean the checkout serving it (Owen's Q6)
 describe("a worktree page's root links (the live client's `worktreeHref()`)", () => {
   /** `id`'s href on the page at `path`, after it's pressed */

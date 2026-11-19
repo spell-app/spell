@@ -34,7 +34,7 @@ import { Worktrees } from "./Worktrees"
  *   - `lines [n]`, `pause [seconds]`:  the working lines, and the wait between them (a foreground `sleep` is refused
  *     in Claude Code)
  *   - `wait`:  `epic inbox wait demo`, letting a pressed Accept go at once rather than after its 5 minutes, then
- *     `epic inbox apply demo`, and the step to run next
+ *     `epic inbox apply demo`, and the step to run next;  the phase Owen picked to build is noted first (`notePick()`)
  *   - `next`:  which step comes next, read from the page
  *   - `overview <step>`:  the step file's `html` blocks become the Overview (hand-written prose, which no verb writes)
  *   - `seen`:  "0. While you were out" read, so it counts from now
@@ -158,7 +158,8 @@ export class StagedDemo {
   /**
    * Run step `id`:  its `sh` blocks' `epic` commands, in order, stopping at the first failure, then its "Say" section.
    * - `$PROMPT_FILE` in the commands:  what Owen pasted after `/epic demo` (the prompt gate saved it), else the paste
-   *   block of `00-paste.md`;  `$CONTENT_FOLDER`:  the epic folder
+   *   block of `00-paste.md`;  `$CONTENT_FOLDER`:  the epic folder;  `$PICK`:  the phase Owen picked to build, its
+   *   stable id (`pickedPhase`), else empty, so a step names its own default (`demo#${PICK:-p-a-joke}`)
    * - `sh` reads the blocks (`commandsOf()`):  the step files are Owen's to rewrite, and quote HTML as a shell does
    * - each command runs in THIS process, on the main checkout (`runCommand()`):  a step of 14 commands took 30s with
    *   one `epic` started per command, in front of a room
@@ -170,6 +171,7 @@ export class StagedDemo {
       ...process.env,
       PROMPT_FILE: this.promptFile(),
       CONTENT_FOLDER: this.content,
+      PICK: this.pickedPhase ?? "",
       EPIC_CHECKOUT: this.main
     }
     for (const block of step.commands) {
@@ -343,6 +345,7 @@ export class StagedDemo {
       clearInterval(timer)
     }
     if (code !== EXIT.OK) return code
+    this.notePick(inbox)
     await EpicTools.runPlanDoc(["inbox", "apply", STAGED_DEMO.epic], this.main)
     CLI.out(`\nNEXT:  ${this.next()}`)
     return EXIT.OK
@@ -366,10 +369,56 @@ export class StagedDemo {
   }
 
   /**
+   * The phase Owen picked to build, from the marks in inbox `file`, kept in `pickFile` before `inbox apply` clears them.
+   * - his pick:  Looks good on ONE phase while the phases are agreed, or Do this on it once building (`pickOf()`);
+   *   the latest wins, and a later Send with no pick keeps the one noted
+   * - Why:  the demo builds the phase he chose, wherever it sits in the list, not always P1
+   *   (Owen, 2026-11-18:  "Make 4 phases, I'll choose the Joke phase to do")
+   * - NEVER throws:  no inbox, or none picked, notes nothing
+   */
+  notePick(file: string): void {
+    try {
+      const phases = this.files.read(this.mustPage()).phaseElements.map((phase) => phase.id)
+      const phase = StagedDemo.pickOf(ReviewInbox.read(file).markList, phases)
+      if (phase) writeFileSync(this.pickFile, `${JSON.stringify({ phase }, null, 2)}\n`)
+    } catch {
+      // nothing to note
+    }
+  }
+
+  /**
+   * The phase `marks` pick to build:  the stable id of the last phase (of `phaseIds`) marked Looks good (`approve`)
+   * or Do this (`todo`);  none:  `undefined`.
+   * - PURE
+   */
+  static pickOf(marks: readonly { id: string; action: string }[], phaseIds: readonly string[]): string | undefined {
+    const byKey = new Map(phaseIds.map((id) => [id.toLowerCase(), id]))
+    const picked = marks.filter((mark) => byKey.has(mark.id.toLowerCase()) && PICK_ACTIONS.has(mark.action)).at(-1)
+    return picked && byKey.get(picked.id.toLowerCase())
+  }
+
+  /** the file keeping the phase Owen picked (`notePick()`):  in the demo's folder, so `reset` clears it */
+  get pickFile(): string {
+    return join(this.epicFolder, PICK_FILE)
+  }
+
+  /** The phase Owen picked to build, its stable id (`p-a-joke`);  none picked:  `undefined`. */
+  get pickedPhase(): string | undefined {
+    try {
+      const { phase } = JSON.parse(readFileSync(this.pickFile, "utf8")) as { phase?: unknown }
+      return typeof phase === "string" && phase ? phase : undefined
+    } catch {
+      return undefined
+    }
+  }
+
+  /**
    * Which step comes next, read from the page:  `run 01` ... `run 06`, `wait` (Owen's turn), or `done`.
    * - no page:  01;  in the Overview stage:  wait (for Accept Overview)
    * - Phases stage, no phases yet:  04;  with phases:  wait (for Accept Phases)
-   * - building, P1 not started:  05;  P1 under way with a question open:  wait;  none open:  06;  P1 done:  done
+   * - building, no phase started:  05;  a phase under way with a question open:  wait;  none open:  06;
+   *   a phase done:  done
+   * - any phase, not only P1:  the one built is the one Owen picked (`pickedPhase`)
    */
   next(): string {
     if (!existsSync(this.page)) return "run 01"
@@ -378,9 +427,9 @@ export class StagedDemo {
     const phases = plan.phaseElements
     if (stage === "overview") return "wait"
     if (stage === "phases") return phases.length ? "wait" : "run 04"
-    const first = phases[0]?.getAttribute("status") ?? "todo"
-    if (first === "todo") return "run 05"
-    if (first === "done") return "done"
+    const statuses = phases.map((phase) => phase.getAttribute("status") ?? "todo")
+    if (statuses.includes("done")) return "done"
+    if (!statuses.includes("active")) return "run 05"
     const asking = Array.from(plan.page.querySelectorAll('epic-item[id^="q"]')).some(
       (item) => item.getAttribute("status") === "open"
     )
@@ -563,6 +612,12 @@ const DEFAULT_PAUSE_S = 2
 
 /** The `epic` verbs a step runs through a child `epic`:  not the `epic` tool's, whose verbs run in this process. */
 const OTHER_TOOLS = new Set(["pages", "config", "window", "server", "agents", "worktree"])
+
+/** The marks that pick a phase to build:  Looks good while the phases are agreed, Do this once building. */
+const PICK_ACTIONS = new Set(["approve", "todo"])
+
+/** The file, in the demo epic's folder, keeping the phase Owen picked (`StagedDemo.notePick()`). */
+const PICK_FILE = "staged-demo-pick.json"
 
 /** The verbs' switches (flags with no value). */
 const SWITCHES = ["json", "dry-run", "quiet"]

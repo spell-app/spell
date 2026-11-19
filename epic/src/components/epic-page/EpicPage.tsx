@@ -24,6 +24,7 @@ import {
 import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 // the fold and filter pieces the blocks share:  their files, not their families' barrels (which would define them here)
 import { Fold, expandAllUnder, foldAllUnder } from "spell/epic/components/epic-item/Fold"
+import { ScrollAnchor } from "spell/epic/components/epic-item/ScrollAnchor"
 import { StateFilter, type ChipPick } from "spell/epic/components/epic-section/StateFilter"
 import { STATE_PICK, type StatePickDetail } from "spell/epic/components/epic-state-filter/EpicStateFilter.types"
 import { FILTER, FILTER_STATES, type StateFilterEntry } from "spell/epic/components/epic-section/EpicSection.types"
@@ -1020,8 +1021,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
             expanded: () => this.allOpen,
             onToggle: () => {
               this.allOpen = !this.allOpen
-              if (this.allOpen) this.expandAll()
-              else this.collapseAll()
+              // what's at the window's top stays put as everything opens or folds (I350)
+              void ScrollAnchor.keep(() => (this.allOpen ? this.expandAll() : this.collapseAll()), this.domElement)
             }
           })}
         </span>
@@ -1072,7 +1073,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   @E.on(STATE_PICK, { target: "renderRoot" })
   protected onStatePick(event: CustomEvent<StatePickDetail>) {
     event.stopPropagation()
-    this.pickState(event.detail.state, event.detail.how)
+    // the item at the window's top stays put, however much hides above and below it (I350)
+    void ScrollAnchor.keep(() => this.pickState(event.detail.state, event.detail.how), this.domElement)
   }
 
   /**
@@ -1679,13 +1681,13 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   }
 
   /**
-   * The toolbar's collapse-all:  every block, item, card and panel on the page folded (`foldAllUnder()`),
-   * then the page back at its top, where the folded blocks now all show (Owen, 2026-10-10).
+   * The toolbar's collapse-all:  every block, item, card and panel on the page folded (`foldAllUnder()`).
+   * - the toggle keeps what was at the window's top in its spot, or the block it folded into (`ScrollAnchor`, I350);
+   *   it scrolled the page back to its top before (Owen, 2026-10-10), the reader's place lost
    */
   @E.untracked
   private collapseAll() {
     foldAllUnder(this.domElement)
-    window.scrollTo({ top: 0, behavior: "instant" })
   }
 
   /** The toolbar's toggle-all, its last use:  everything opened. */

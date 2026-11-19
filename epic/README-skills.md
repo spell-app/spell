@@ -13,13 +13,11 @@ add a sitemap
 
 _A skill typed in plan mode, and the hook that answered before Claude read a word:  its reply from a real run._
 
-You asked for a skill, and a hook answered.
-The prompt never reached Claude.
-The hook read it first, knew that plan mode can't make a worktree, and refused it, keeping your words:
+A hook answered that prompt before Claude saw it.
+Plan mode can't make a worktree, so the hook refused the prompt and saved your words:
 leave plan mode, type `/epic seo`, and the plan starts from what you wrote.
 
-The whole plugin works like that.
-It gives Claude Code twenty-two skills, workflows you start by typing a name,
+The plugin gives Claude Code twenty-two skills, workflows you start by typing a name,
 and fourteen hooks, scripts Claude Code runs by itself when something happens.
 - Choosing a skill:  find the moment you're in, in the three tables below.
 - Something happened you didn't ask for (a session renamed, a prompt refused, a commit nobody made):
@@ -55,10 +53,9 @@ echo '{"prompt": "/epic seo add a sitemap", "permission_mode": "plan"}' | node e
 
 ## Twenty-two you type, fourteen that run by themselves
 
-In most tools, a slash command is a saved prompt:  it pastes some text and hopes.
-A skill here is a procedure.
-Each one is a `SKILL.md` in [skills/](skills/), 44 lines for `/title` and over a thousand for `/epic`,
-and Claude follows it step by step:  when to ask you, what to recommend, what to write on the epic page.
+A skill is a written procedure, one file in the [skills folder](skills/):
+44 lines for `/title`, over a thousand for `/epic`.
+Claude follows it step by step:  when to ask you, what to recommend, what to write on the epic page.
 - The judgement and the questions live in the skill.
   Every change it makes goes through the `epic` command ([README-cli.md](README-cli.md)),
   so a page or a worktree changes the same way whichever session asks.
@@ -69,7 +66,7 @@ and Claude follows it step by step:  when to ask you, what to recommend, what to
 
 A hook is a git hook for Claude Code.
 Instead of a commit or a push, it fires when a session starts, a prompt is sent, a worktree is made or a turn ends.
-You never type one;  you notice one.
+You never type one.
 - The hooks act only in a repo that has `.epic/config.json5`, but for the prompt gate,
   which reads an `/epic`, `/isolate` or `/unpark` prompt in any repo.
 - A hook always exits 0:  a broken one never blocks a session.
@@ -179,7 +176,7 @@ and `/epic done` the only finish ([README-config.md](README-superpowers.md)).
 
 A session ends, gets compacted, or opens in the wrong window.
 These skills give work a worktree of its own, set it aside safely, and find it again,
-so a closed tab costs you nothing but the tab.
+so closing a tab loses no work.
 
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
@@ -392,7 +389,7 @@ Codex reads the same `SKILL.md` files Claude Code does:  type `$epic review seo`
   - Called by name, its first line says what to do in Codex instead.
 - The designer, coherence and plan-check reviewers are Codex custom agents too, `~/.codex/agents/epic-designer.toml`,
   `epic-coherence.toml` and `epic-plan-check.toml`, generated from their Claude Code agent files at install.
-- `epic skills check` keeps the one copy honest, and the `epic/` folder's tests run it:
+- `epic skills check` checks the one copy, and the `epic/` folder's tests run it:
   - a step naming a Claude-only tool with no "In Codex:" line within 10 lines of it fails
   - so does a Claude-only skill without its `agents/openai.yaml`, or descriptions past Codex's 8,000-character list
 

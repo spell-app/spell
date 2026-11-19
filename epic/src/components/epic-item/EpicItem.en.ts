@@ -335,15 +335,15 @@ export const epicItemVocabulary = {
     {
       name: "handled",
       description:
-        "With `handled`:  a grey `in P4` at its line's end, linking the phase whose text took its answer (epic " +
+        "With `handled`:  a grey `in P4` under its line's buttons (I348), linking the phase whose text took its answer (epic " +
         "`epic-engine` P31);  with `taken-in` (epic `epic-engine` I128), the same `in P1`, linking the phase that " +
         "has it, while the item is still to finish (I307)."
     },
     {
       name: "done-in",
       description:
-        "With `taken-in` on a finished item (done, canceled, decided):  a grey `done in P20` at its line's end, where " +
-        "its plane was, linking the phase it was done in (epic `epic-engine` J231)."
+        "With `taken-in` on a finished item (done, canceled, decided):  a grey `in P20` under its line's buttons, " +
+        "linking the phase it was done in (epic `epic-engine` J231;  `done in P20` beside the buttons until I348)."
     },
     {
       name: "git",
@@ -433,16 +433,15 @@ export const epicItemVocabulary = {
       text: "Handled in a phase:  its answer is in that phase's text now",
       description: "Id chip tooltip, `state=handled` (epic `epic-engine` P31)."
     },
-    { key: "handledIn", text: "in {phase}", description: "Its line's link to the phase that handled it:  `in P4`." },
     {
-      key: "doneIn",
-      text: "done in {phase}",
-      description: "A finished item's link to the phase it was done in, where its plane was:  `done in P20` (J231)."
+      key: "handledIn",
+      text: "in {phase}",
+      description: "Its link to the phase that handled it, took it, or finished it, under its buttons:  `in P4` (I348)."
     },
     {
       key: "donePillTip",
       text: "Click:  go to {phase}.",
-      description: "The `done in P20` pill's tooltip's second line (epic `epic-engine` J231)."
+      description: "A finished item's `in P20` pill's tooltip's second line (epic `epic-engine` J231)."
     },
     {
       key: "handledTip",

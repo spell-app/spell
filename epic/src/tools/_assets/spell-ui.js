@@ -5961,16 +5961,18 @@ ${c}`).join(""),u=t.split(`
     <nav part="nav" aria-label="Site">${a}</nav>
     <button class="scroll" data-scroll="1" tabindex="-1" aria-hidden="true" title="${iEt}">\u203A</button>
   </div>
-  <span class="spacer"></span>
-  ${n}${f}${c}
-  <slot name="${gV}"></slot>${x}
+  <div class="end">
+    ${n}${f}${c}
+    <slot name="${gV}"></slot>${x}
+  </div>
 </header>`;let A=e.querySelector('[data-action="scheme"]');A&&(A.onclick=()=>this.flipScheme());let T=e.querySelector('[data-action="edit"]');T&&(T.onclick=()=>this.toggleEdit()),this.wireScrollKeys()}wireScrollKeys(){let e=this.shadowRoot.querySelector("nav");if(!(!e||this.docked)){e.onscroll=()=>this.showScrollKeys();for(let t of this.shadowRoot.querySelectorAll("[data-scroll]"))t.onclick=()=>DIe(e,Number(t.dataset.scroll));this.tabsResize.disconnect(),this.tabsResize.observe(e),e.querySelector('[aria-current="page"]')?.scrollIntoView({block:"nearest",inline:"nearest"}),this.showScrollKeys()}}showScrollKeys(){let e=this.shadowRoot?.querySelector("nav"),t=e?.parentElement;if(!e||!t)return;let{start:i,end:a}=TIe(e);t.dataset.more=[i&&"start",a&&"end"].filter(Boolean).join(" ")}schemeLabel(){let e=El.chosen(),t=El.osScheme(),i=El.shown(),a=i==="dark"?"light":"dark",o={light:"Light scheme",dark:"Dark scheme"}[i];return!e&&i===t?`${o}, as the OS (click:  ${a})`:`${o} (click:  ${a}${a===t?", as the OS":""})`}flipScheme(){let e=El.shown()==="dark"?"light":"dark";El.choose(e===El.osScheme()?void 0:e),this.render()}toggleEdit(){let e=!bC();KIe.set(cV,e?YIe:void 0),document.dispatchEvent(new CustomEvent(e?"spell-site:edit-opened":"spell-site:edit-closed",{detail:{on:e}})),this.render()}async ping(){try{let e=await fetch("/api/server");if(!e.ok)return;this.info=await e.json(),this.render()}catch{}}},gV="theme",KIe=new Ci(UIe,{place:"session"}),eEt="Spell Epic",GIe="Spell Epic home page",tEt="Scroll the tabs back",iEt="More tabs",YIe=1;function Gf(){return window.SPELL_SERVER}function bC(){return document.querySelector(`${Ey.tag}[no-tools]`)?!1:KIe.get(cV)===YIe}function rEt(r){if(document.getElementById("spell-site-header-page"))return;let e=document.createElement("style");e.id="spell-site-header-page";let t=r?0:Ey.height;e.textContent=`:root { --spell-site-header-height: ${t}px; scroll-padding-top: var(--spell-site-header-height); }
 html body { padding-top: var(--spell-site-header-height); }`,document.head.append(e)}function aEt(){if(document.head.querySelector('link[rel~="icon" i]'))return;let r=document.createElement("link");r.rel="icon",r.type="image/svg+xml",r.href=`data:image/svg+xml,${encodeURIComponent(qIe)}`,document.head.append(r)}var mV={code:S6('<path d="M8 6 2 12l6 6M16 6l6 6-6 6"/>'),pencil:S6('<path d="M4 20h4L19 9l-4-4L4 16v4zM14 6l4 4"/>'),light:S6('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M5 19l1.5-1.5M17.5 6.5 19 5"/>'),dark:S6('<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>')};function S6(r){return`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${r}</svg>`}var oEt=`
 :host { display: block; }
 header {
   box-sizing: border-box;
   position: fixed; inset: 0 0 auto 0; z-index: 1000; height: ${Ey.height}px;
-  display: flex; align-items: center; gap: 12px; padding: 0 16px;
+  /* the tabs centred:  the two sides an equal share each, but never narrower than their own content */
+  display: grid; grid-template-columns: 1fr minmax(0, auto) 1fr; align-items: center; gap: 12px; padding: 0 16px;
   font: 500 14px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   color: light-dark(#1d1d22, #ececf1);
   /* the fill under the tabs' \u2039 / \u203A, which hide the tab they sit on:  the page's, else opaque */
@@ -5982,7 +5984,7 @@ header {
   box-shadow: var(--spell-site-header-shadow, none);
 }
 a { color: inherit; text-decoration: none; }
-.brand { flex: none; display: inline-flex; align-items: center; color: light-dark(#5b3fd0, #b3a2ff); }
+.brand { flex: none; justify-self: start; display: inline-flex; align-items: center; color: light-dark(#5b3fd0, #b3a2ff); }
 .brand svg { display: block; height: 26px; width: auto; }
 /* the words, as the editor's wordmark:  its font, weight, tracking and text colour, the hat alone in the brand colour (the app's index.html, its --spell-wordmark-* tokens) */
 .brand { gap: 4px; }
@@ -5994,8 +5996,10 @@ a { color: inherit; text-decoration: none; }
   color: var(--ui-text-color, light-dark(#1d1d22, #ececf1));
   white-space: nowrap;
 }
-nav { display: flex; gap: 2px; }
+nav { display: flex; gap: 2px; min-width: 0; }
 .tabs { position: relative; display: flex; min-width: 0; }
+/* the checkout, the tools and the theme control, at the bar's end */
+.end { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
 /* the tabs' \u2039 / \u203A:  over the row's ends, the row fading out under them;  only while there's more that way */
 .scroll {
   position: absolute; inset-block: 0; z-index: 1; display: none; place-items: center; width: 26px; padding: 0;
@@ -6014,7 +6018,6 @@ nav { display: flex; gap: 2px; }
   background: var(--ui-primary-background, light-dark(#e9e4ff, #33295e));
   color: var(--ui-primary-text, light-dark(#3d2a9e, #d9d0ff));
 }
-.spacer { flex: 1; }
 .badge { flex: none; padding: 4px 9px; border-radius: 999px; font-size: 12px; background: light-dark(#eef0f3, #2a2d33); }
 .badge.worktree { background: light-dark(#fff1d6, #4a3610); color: light-dark(#7a4c00, #ffd48a); }
 .tool {
@@ -6036,11 +6039,13 @@ nav { display: flex; gap: 2px; }
 }
 /* docked:  a compact row in the page's own chrome */
 :host([docked]) header {
-  position: static; height: auto; flex-wrap: wrap; gap: 4px 6px; padding: 0;
+  position: static; height: auto; display: flex; flex-wrap: wrap; gap: 4px 6px; padding: 0;
   font-size: 13px; background: none; border: 0; backdrop-filter: none; -webkit-backdrop-filter: none;
 }
 :host([docked]) nav { flex-wrap: wrap; }
 :host([docked]) .tabs { display: contents; }
+/* the tools still at the row's end, as one group */
+:host([docked]) .end { gap: 4px 6px; margin-inline-start: auto; }
 :host([docked]) .brand svg { height: 20px; }
 :host([docked]) .brand-name { display: none; }
 :host([docked]) .tab { padding: 5px 8px; }
@@ -6050,9 +6055,8 @@ nav { display: flex; gap: 2px; }
    the pages' own eyebrow crumbs hide at the same width (spell-doc.css, <epic-page>'s Crumbs.css) */
 @media (max-width: 720px) {
   header { gap: 6px; padding: 0 8px; }
-  .tabs { flex: 1; }
+  .end { gap: 6px; }
   nav { overflow-x: auto; flex: 1; scrollbar-width: none; }
-  .spacer { display: none; }
   .tab { padding: 7px 8px; }
   .badge { display: none; }
 }

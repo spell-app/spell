@@ -310,7 +310,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - `docs index`:  [index.js](tools/index.js)
     - `RunningEpics`:  the running epics, still in their worktrees, on the main checkout's page server
     - [runningRoutes.ts](list/runningRoutes.ts):  its route module
-      - `GET /api/epics/running`
+      - `GET /api/epics/running`;  `?every`, every epic, running or not:  the home page's `<epic-pills>` (T99)
       - the list page's running cards, as it's served
     - `EpicState` and `EpicCards` load in plain `node` too (`docs index`):  their headers say what that forbids
   - `config/` -- `EpicConfig` (epic `epic-eject` P4):
@@ -1034,8 +1034,13 @@ The shared folders:
 - [The docs' home page](../../spell.epics/pages/index.html):  a routing page (P5 of `claude-design`).
   - One card per area, each with its count:  Guides · Sagas · Epic Pages · Templates
     - each card's description on two lines, broken at its first colon (`descriptionLines()`)
-    - the Epic Pages card:  the open epics worked on in the last week, a pill each in two columns (`recentEpics()`,
-      J276), as of the last `epic pages index`
+    - the Epic Pages card:  its Active epics, the open epics worked on in the last week, a pill each in two columns:
+      `<epic-pills>`, which draws itself from the page server, live (epic `epic-engine` T99;  J276's generator wrote
+      plain pills into the page, as of the last `epic pages index`)
+      - each pill:  the epic's name, what waits in its toolbar badge colours (red, orange, blue), its phase under way
+        or `Done`, its agents (`🤖 2`);  the tooltip says it in words
+      - its data:  `GET /api/epics/running?every` (`RunningEpics.everyEpic()`:  every epic, running or not, with its
+        `badges` and `agents`), asked again as epic pages or their agents' lists change, and every 30 seconds
     - the top bar's tab is "Epic Pages" too, and the bar says "Spell Epic" beside the hat (`SiteHeader`)
     - Spell's own areas left out (2026-11-18, epic `epic-engine` J275:  "Remove anything Spell related in this page
       permanently.  No longer relevant to Epics"):  Epic/UI, Spell/UI, App, App/UI and Brand had cards, and tabs;

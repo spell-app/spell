@@ -151,7 +151,9 @@ export class ReviewState {
       return {
         workedOn: client.isWorkedOn(id),
         urgency: urgency && { calm: urgency.calm },
-        approved: client.markOf(id)?.action === "approve",
+        // his ✓ stays pressed after the server applied it, until the page's own update lands (I348):  else the
+        // item's `FIXED` label came back for the moment between the inbox clearing and the page catching up
+        approved: client.markOf(id)?.action === "approve" || client.closingAs(id) === "approve",
         closing: client.isClosing(id),
         heldInView: client.isHeldInView(id),
         closingAs: client.closingAs(id),

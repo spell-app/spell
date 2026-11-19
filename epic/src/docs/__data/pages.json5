@@ -70,7 +70,7 @@
     {
       "id": "epics-page",
       "title": "The Epics page",
-      "tags": ["epic-list", "epic-card", "epic-sort"]
+      "tags": ["epic-list", "epic-card", "epic-sort", "epic-pills"]
     },
     {
       "id": "comments",
