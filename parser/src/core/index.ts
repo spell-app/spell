@@ -6,7 +6,7 @@
  *   each sibling module here does `Object.assign(core, <module>Methods)`
  *   as a top-level side effect when its file first loads -- see `defineCoreModule()` in `core.types.ts`.
  *   - The modules:  `collection-core`, `collection-other`, `deprecated`, `paths`, `string`, `dates`, `messages`, `tests`,
- *     `console`, `runtime`, `things`, `json`, `carry`, `ui`, `drawing`, `elements`, `references`, `described`, `acting`, `waiting`,
+ *     `console`, `runtime`, `things`, `json`, `carry`, `ui`, `media`, `drawing`, `elements`, `references`, `described`, `acting`, `waiting`,
  *     `timers`, `abilities`, `dimensions`, `sending`, `sites`, `stepping` (its `_stepper`, outside the core contract),
  *     plus `core` itself.
  * - NOTE: most of those modules are imported here ONLY for that side effect (bare `import "./x"`, no named import):
@@ -35,6 +35,7 @@ import "./things"
 import "./json"
 import "./carry"
 import "./ui"
+import "./media"
 import "./drawing"
 import "./elements"
 import "./references"
@@ -107,6 +108,8 @@ export type { MenuItem, ContextMenuItem, ActionRun, ActionWay, ShortcutKey } fro
 export type { ContextMenuElement } from "./drawing"
 // What `notify` takes after its message:  its toast's title, kind, colour, place, time ... -- see `ui.ts`.
 export type { NotifyOptions } from "./ui"
+// A sound or video, and what `play` takes after it -- see `media.ts`.
+export type { SpellMedia, MediaKind, PlayOptions } from "./media"
 // A page drawing a program that runs elsewhere, e.g. in Python (P19):  see `page.ts`.
 export {
   startPage,

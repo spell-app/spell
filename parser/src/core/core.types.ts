@@ -4,6 +4,7 @@ import type { collectionOtherMethods } from "./collection-other"
 import type { stringMethods } from "./string"
 import type { dateMethods } from "./dates"
 import type { uiMethods } from "./ui"
+import type { mediaMethods } from "./media"
 import type { drawingMethods } from "./drawing"
 import type { elementsMethods } from "./elements"
 import type { referencesMethods } from "./references"
@@ -96,6 +97,7 @@ export type Core = typeof coreMethods &
   typeof stringMethods &
   typeof dateMethods &
   typeof uiMethods &
+  typeof mediaMethods &
   typeof drawingMethods &
   typeof elementsMethods &
   typeof referencesMethods &
