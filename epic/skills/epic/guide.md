@@ -219,6 +219,8 @@ These words reach a session two ways:
 - the repo's `AGENTS.md`, which every session reads:  `epic init` offers to put them there when superpowers is on
   (`epic init --superpowers` without asking), and keeps them current once they are
 
+The whole story, for people:  the epic plugin's README-superpowers.md (`epic guide --root` prints its folder).
+
 ## tidy -- Close what other work made obsolete
 
 Only when the person asks (the skill's word:  `$epic tidy`).
