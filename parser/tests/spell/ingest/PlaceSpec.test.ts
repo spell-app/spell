@@ -260,6 +260,42 @@ describe("spell place verify (epic `data` P49)", () => {
     expect(spell).not.toContain("this type is unverified")
   })
 
+  test("NetBox for real (epic `data` P55):  a list no schema typed reads its wrapped rows;  writes keep its slash", async () => {
+    const QUEUE = { name: "default", url: `${NETBOX}/api/core/background-queues/default/`, jobs: 0 }
+    const asked: string[] = []
+    const fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = `${input instanceof Request ? input.url : input}`
+      asked.push(`${init?.method ?? "GET"} ${url}`)
+      if (url === SPEC_AT) return Response.json(DOCUMENT)
+      const path = url.replace(NETBOX, "").replace(/\?.*$/, "")
+      // its queues are named, and their id is their own address
+      if (path === "/api/core/background-tasks/") return Response.json({ count: 1, next: null, results: [QUEUE] })
+      if (url === QUEUE.url) return Response.json(QUEUE)
+      if (path === "/api/tenancy/tenants/") {
+        if (init?.method === "POST") return Response.json({ ...TENANT, id: 2 }, { status: 201 })
+        return Response.json({ count: 1, next: null, results: [TENANT] })
+      }
+      if (/^\/api\/tenancy\/tenants\/\d+\/$/.test(path)) {
+        return init?.method === "DELETE" ? new Response(null, { status: 204 }) : Response.json(TENANT)
+      }
+      // NetBox answers 404 to an address without its slash
+      if (!path.endsWith("/")) return new Response("Not found", { status: 404 })
+      return Response.json({ count: 0, next: null, results: [] })
+    }) as typeof globalThis.fetch
+    const { ingest, descriptions } = await ingested(fetch)
+    await ingest.verify("NetBox.api.spell", { triesWrites: true })
+    const { collections, canDo } = descriptions.get("NetBox.api.json5")!
+    expect(collections.background_tasks!.state).toMatchObject({ is: "verified", rows: 1 })
+    expect(collections.background_tasks!.rowsAt).toBe("results")
+    expect(asked).toContain(`GET ${QUEUE.url}`)
+    expect(asked.filter((request) => !request.startsWith("GET"))).toEqual([
+      `POST ${NETBOX}/api/tenancy/tenants/`,
+      `PATCH ${NETBOX}/api/tenancy/tenants/1/`,
+      `DELETE ${NETBOX}/api/tenancy/tenants/2/`
+    ])
+    expect(canDo.write).toMatch(/^Yes:  it took a write of each kind, tried on tenants/)
+  })
+
   test("on a deployment from the project's file;  a read only one takes no writes", async () => {
     const STAGING = "https://staging.netbox.test"
     const { fetch, asked } = answering(STAGING)
