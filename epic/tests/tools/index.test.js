@@ -12,7 +12,6 @@ import {
   START,
   areaCards,
   descriptionLines,
-  recentEpics,
   listSection,
   planOf,
   replaceBetween,
@@ -70,6 +69,8 @@ describe("the home page's cards", () => {
     expect(count.epics).toBe("1 active · 1 planning · 1 done")
     const starred = areaCards([epic("a", ["done", "done"]), epic("b", ["done", "active"])], new Set(["a"]))
     expect(starred.find((card) => card.id === "epics").count).toBe("1 favorites · 1 active")
+    // its Active epics draw themselves, live (`<epic-pills>`, epic `epic-engine` T99)
+    expect(starred.find((card) => card.id === "epics").pills).toBe(true)
     expect(count.guides).toBe("2 guides")
     expect(count.templates).toBe("1 template")
     expect(count.sagas).toBe("2 sagas")
@@ -83,25 +84,6 @@ describe("a card's description", () => {
       "Epic pages, one per /epic session:<br />phases &amp; the log"
     )
     expect(descriptionLines("A starting point for every page.")).toBe("A starting point for every page.")
-  })
-})
-
-describe("the Epic Pages card's pills", () => {
-  it("are the open epics worked on in the last week, by name", () => {
-    const now = new Date("2026-11-18T12:00:00Z")
-    const worked = (days) => new Date(now.getTime() - days * 86_400_000)
-    const pills = recentEpics(
-      [
-        { ...epic("zeta", ["active"]), worked: worked(1) },
-        { ...epic("alpha", ["done", "todo"]), worked: worked(6) },
-        { ...epic("stale", ["active"]), worked: worked(8) },
-        { ...epic("finished", ["done"]), worked: worked(1) },
-        { ...epic("unknown", ["active"]) }
-      ],
-      now
-    )
-    expect(pills.map((pill) => pill.name)).toEqual(["alpha", "zeta"])
-    expect(pills[0].href).toBe("/epics/alpha/alpha.plan.html")
   })
 })
 

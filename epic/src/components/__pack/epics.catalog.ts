@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  21b1f805efc16b1f
+// sources:  888d996238f6d8ce
 
 import type { RootCatalogEntry } from "spell/ui"
 
@@ -43,6 +43,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-page-note-head": {"folder":"epic-page-note-head","attributes":["at","status","replies","preview","open"]},
   "epic-phase": {"folder":"epic-phase","attributes":["id","number","title","status","estimate","took","span","unmerged","source","part-ids","commits","to-accept","to-see","choices-open","plan","done-at","changes","open"]},
   "epic-picture": {"folder":"epic-picture","attributes":["label","removable"]},
+  "epic-pills": {"folder":"epic-pills","skeleton":{"height":"2em"},"attributes":[]},
   "epic-prompt": {"folder":"epic-prompt","attributes":[]},
   "epic-question": {"folder":"epic-question","attributes":[]},
   "epic-reply": {"folder":"epic-answer","attributes":["from","agent","at","re"]},
