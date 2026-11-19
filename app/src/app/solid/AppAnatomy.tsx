@@ -22,7 +22,8 @@ import "./AppAnatomy.css"
  * - Views | Named | Outlines, a switch in its bar (T121):  the layers alone, the layers with their types' tags,
  *   or (Q42's B) each view an empty labelled frame, the app hidden under them.
  * - In the app pane, where the app already is (Q43 A);  Full Window lifts the pane over the whole editor (Q43 C).
- * - A floor per view the program draws (Q44 A), down to `DEPTH` floors deep.
+ * - A floor per part the program draws, as the Views tree lists them (Q44 A;  Spell UI's too since I261),
+ *   down to `DEPTH` floors deep.
  * - A floor's hover rings it as Inspect app's hover does, and a click selects it as a click on the app does:
  *   the tree's row, the properties and the code follow (`Inspector.clicked()`).
  * - A double-click (or F, what's selected) shows one floor and what's inside it alone;  Esc goes back to the whole
@@ -288,7 +289,7 @@ function AnatomyStack(props: { pane: HTMLElement; body: HTMLElement; program: HT
   const redrawn = watchRedraws(program, (record) => styles.isOwnWrite(record))
   const floors = createMemo(() => {
     redrawn()
-    return AnatomyFloors.in(program)
+    return AnatomyFloors.in(program, { isPart: Inspector.isPart })
   })
   const [tags, setTags] = createSignal<FloorTag[]>([])
   const [frames, setFrames] = createSignal<FloorFrame[]>([])
@@ -453,7 +454,7 @@ function tagsFor(floors: Floor[], paneBox: DOMRect): FloorTag[] {
   const tags: FloorTag[] = []
   const byDepth = [...floors].sort((one, other) => one.depth - other.depth)
   for (const floor of byDepth) {
-    const box = floor.element.getBoundingClientRect()
+    const box = floor.box.getBoundingClientRect()
     if (!box.width || !box.height) continue
     const label = Inspector.typeWordsOf(floor.element)
     const left = box.left - paneBox.left
@@ -512,7 +513,7 @@ function framesFor(state: StackState, program: HTMLElement, shown: (floor: Floor
   return state.floors
     .filter((floor) => shown(floor, state))
     .map((floor): FloorFrame => {
-      const box = floor.element.getBoundingClientRect()
+      const box = floor.box.getBoundingClientRect()
       return {
         element: floor.element,
         label: Inspector.typeWordsOf(floor.element),
@@ -917,7 +918,10 @@ function AnatomyFullWindow(props: { pane: HTMLElement }): JSX.Element {
  * - Lifted floors:  `translate`'s depth, which adds to an element's own `transform` (a card flipped) rather than
  *   replacing it.
  * - Every box between a lifted floor and the turned `program`:  `transform-style: preserve-3d`, so it lifts off.
- * - The editor's own wrappers round the app:  `overflow: visible`, so the turned stack isn't cut at their edges.
+ * - The editor's own wrappers round the app:  `overflow: visible`, so the turned stack isn't cut at their edges;
+ *   and every box in the app that hides its overflow, blurs as glass or isolates, so what's inside lifts out of it
+ *   (`AnatomyFloors.liftingStylesFor()`;  I261).
+ * - A floor's lift, outline and ring go on its layer box (`Floor.box`):  a tag that draws no box shows none of them.
  * - The focus:  the rest hidden (`visibility`), the floor shown and what's inside it.
  * - `apply()` writes only what differs, so its own writes, seen by the watch on the app, settle in one pass.
  ****************/
@@ -951,24 +955,28 @@ class AnatomyStyles {
       const app = state.floors[0]?.element
       for (const floor of state.floors) {
         if (!floor.parent || !shown(floor, state)) continue
-        want(
-          floor.element,
-          "translate",
-          liftedBy(this.ownStyle(floor.element, "translate"), liftOf(floor, state.spacing))
-        )
-        for (const box of AnatomyFloors.boxesBetween(floor.element, program)) {
+        want(floor.box, "translate", liftedBy(this.ownStyle(floor.box, "translate"), liftOf(floor, state.spacing)))
+        for (const box of AnatomyFloors.boxesBetween(floor.box, program)) {
           want(box, "transform-style", "preserve-3d")
-          if (app && !app.contains(box) && !isInShadowOf(box, app)) want(box, "overflow", "visible")
+          const isInApp = !!app && (app.contains(box) || isInShadowOf(box, app))
+          // the editor's wrappers, so the turned stack isn't cut at their edges
+          if (!isInApp) want(box, "overflow", "visible")
+          // in the app, what would draw its insides flat, so they lift out of it (I261)
+          else for (const [property, value] of Object.entries(this.liftingStylesFor(box))) want(box, property, value)
         }
       }
-      if (state.hovered instanceof HTMLElement && !state.selected.includes(state.hovered)) {
-        want(state.hovered, "outline", HOVERED_OUTLINE)
-        want(state.hovered, "outline-offset", "2px")
+      // ringed and outlined on what draws it:  a tag that draws no box can't show an outline
+      const boxOf = (element: Element) => state.floors.find((floor) => floor.element === element)?.box ?? element
+      const hovered = state.hovered && !state.selected.includes(state.hovered) ? boxOf(state.hovered) : undefined
+      if (hovered instanceof HTMLElement) {
+        want(hovered, "outline", HOVERED_OUTLINE)
+        want(hovered, "outline-offset", "2px")
       }
       for (const element of state.selected) {
-        if (!(element instanceof HTMLElement)) continue
-        want(element, "outline", SELECTED_OUTLINE)
-        want(element, "outline-offset", "2px")
+        const box = boxOf(element)
+        if (!(box instanceof HTMLElement)) continue
+        want(box, "outline", SELECTED_OUTLINE)
+        want(box, "outline-offset", "2px")
       }
       if (state.focus instanceof HTMLElement) {
         want(program, "visibility", "hidden")
@@ -1014,6 +1022,18 @@ class AnatomyStyles {
     if (was) element.style.setProperty(property, was)
     else element.style.removeProperty(property)
     this.written.set(element, element.getAttribute("style"))
+  }
+
+  /**
+   * What `box` needs set while Anatomy shows, so its insides lift out of it (`AnatomyFloors.liftingStylesFor()`).
+   * - What Anatomy set on it already stays wanted:  once set, the box reads as needing it no more.
+   */
+  liftingStylesFor(box: HTMLElement): Record<string, string> {
+    const lifting = AnatomyFloors.liftingStylesFor(getComputedStyle(box))
+    const kept = this.set.get(box) ?? {}
+    for (const [property, value] of Object.entries(AnatomyFloors.liftingStyles))
+      if (property in kept) lifting[property] = value
+    return lifting
   }
 
   /**

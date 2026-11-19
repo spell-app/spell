@@ -9,6 +9,7 @@ import { EDITOR, SERVING } from "./runningEditor"
  * - It opens face on, then turns to its resting angle half a second later (I256, T118);
  *   once it rests, a drag turns it (I262).
  * - Each view is a floor over the view that holds it, lifted by the spacing:  nested as the Views tree is.
+ * - Spell UI's parts too:  the header comes apart into its toolbar, title, buttons and score (I261).
  * - The cards of a pile step up one by one, each over the one under it (I256).
  * - Each floor has its type's tag over it.
  * - A click on a card's floor selects that card:  the Inspector's selection and the tree's row.
@@ -217,6 +218,26 @@ describe.skipIf(!SERVING)("Anatomy, over Solitaire", { timeout: 180_000 }, () =>
     expect(lifts.column).toBe(`0px 0px ${lifts.spacing}px`)
     expect(lifts.card).toBe(`0px 0px ${lifts.spacing}px`)
     expect(lifts.tags).toEqual(expect.arrayContaining(["Solitaire", "Column", "Card"]))
+
+    // the header comes apart (I261):  its toolbar over its segment, its title, buttons and score each over the toolbar,
+    // each lifted by the box its tag draws in its shadow root;  nothing in the app is lifted "in one piece"
+    const header = await page.evaluate(() => {
+      const toolbar = document.querySelector("solitaire-app ui-toolbar")!
+      const drawnBy = (part: Element) =>
+        (part.shadowRoot?.querySelector("[part]") as HTMLElement | null)?.style.translate ?? ""
+      return {
+        segment: drawnBy(toolbar.closest("ui-segment")!),
+        toolbar: (toolbar as HTMLElement).style.translate,
+        parts: [...toolbar.querySelectorAll(":scope > ui-text, :scope > ui-action")].map(drawnBy),
+        flat: [...document.querySelectorAll(".AnatomyTags .AnatomyFlat")].map((flat) => flat.parentElement!.textContent)
+      }
+    })
+    const lifted = `0px 0px ${lifts.spacing}px`
+    expect(header.segment).toBe(lifted)
+    expect(header.toolbar).toBe(lifted)
+    expect(header.parts).toHaveLength(7)
+    for (const part of header.parts) expect(part).toBe(lifted)
+    expect(header.flat.filter((tag) => /Solitaire|toolbar/.test(tag ?? ""))).toEqual([])
 
     // each column's cards step up one by one:  every card higher than the one under it
     const piles = await page.evaluate(() =>
