@@ -114,7 +114,7 @@ describe("<epic-send-buttons>", () => {
       const left = ring.querySelector<SVGCircleElement>(".done")!
       expect(parseFloat(left.style.strokeDasharray)).toBeCloseTo(50, 0)
       expect(getComputedStyle(left).strokeLinecap).toBe("round")
-      expect(part(group, "send")!.title).toBe("Send 1 mark · sends by itself in 1:00;  click to send now")
+      expect(part(group, "send")!.title).toBe("Send 1 mark · sends itself in 1:00, or now")
       vi.advanceTimersByTime(COUNTDOWN_MS / 2)
       expect(heard).toEqual([true])
       group.setAttribute("state", "sent")

@@ -153,7 +153,7 @@ export const epicSendButtonsVocabulary = {
     },
     {
       key: "counting",
-      text: "sends by itself in {time};  click to send now",
+      text: "sends itself in {time}, or now",
       description: "After the plane's words while the ring counts;  `{time}` like `1:42`."
     },
     {
@@ -168,7 +168,7 @@ export const epicSendButtonsVocabulary = {
     },
     {
       key: "held",
-      text: "sends by itself once you leave the note box;  click to send now",
+      text: "sends itself when you leave the note box, or now",
       description: "After the plane's words while a note box with words has the focus:  the ring stays full."
     }
   ],

@@ -159,7 +159,7 @@ describe("<epic-phase>", () => {
       const pill = phase.shadowRoot!.querySelector('[part~="unmerged"]')
       return pill && [pill.textContent, pill.getAttribute("title")]
     })
-    expect(shown).toEqual([["not on main", "Done on branch editor, not merged into main yet"], null, null])
+    expect(shown).toEqual([["not on main", "Done on editor, not merged yet"], null, null])
   })
 
   // epic `epic-engine` I228 (atmosphere's r60, Owen:  "P18 should show as 'done', or better, crossed out somehow")
@@ -270,8 +270,8 @@ describe("<epic-phase> while Claude works on it", () => {
       const status = () => phase.shadowRoot!.querySelector<HTMLElement>('[part~="status"]')!
       await vi.waitFor(() => expect(status().matches(".working") && status().querySelector("svg")).toBeTruthy())
       expect([status().title, status().getAttribute("aria-label")]).toEqual([
-        "Claude is writing this phase's plan",
-        "Claude is writing this phase's plan"
+        "Claude is writing its plan",
+        "Claude is writing its plan"
       ])
       expect(phase.matches(":state(working)")).toBe(true)
       // blue, as the header's step label under way:  not the grey of a to-do phase
@@ -353,7 +353,7 @@ describe("<epic-phase> plan changes (Owen, 2026-10-11:  no Plan changes surround
     const mark = host.shadowRoot!.querySelector('[part~="changed"]')!
     expect(mark.textContent).toBe("2")
     await vi.waitFor(() => expect(mark.querySelector("svg")).not.toBeNull())
-    expect(mark.getAttribute("title")).toContain("2 × Update")
+    expect(mark.getAttribute("title")).toContain("2 new updates")
     host.setAttribute("status", "done")
     await ElementFixture.tick()
     expect(host.shadowRoot!.querySelector('[part~="changed"]')).toBeNull()
@@ -382,7 +382,7 @@ describe("<epic-phase> plan changes (Owen, 2026-10-11:  no Plan changes surround
         expect(button).not.toBeNull()
         return button!
       })
-      expect(all.title).toContain("all 2 new updates")
+      expect(all.title).toBe("Mark all 2 updates seen")
       all.click()
       await vi.waitFor(() => expect(Object.keys(routes.inbox.marks).sort()).toEqual(["up2", "up3"]))
       await vi.waitFor(() => expect(pen()).toBeNull())

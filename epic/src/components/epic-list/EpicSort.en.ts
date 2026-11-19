@@ -36,11 +36,11 @@ export const epicSortVocabulary = {
   texts: [
     { key: "label", text: "Sort the epics in each group", description: "The pair, spoken." },
     { key: "title", text: "A–Z", description: "The title sort's words." },
-    { key: "titleTip", text: "Sort each group by title, A to Z", description: "The title sort's tooltip." },
+    { key: "titleTip", text: "Sort A to Z", description: "The title sort's tooltip." },
     { key: "date", text: "Date", description: "The date sort's words." },
     {
       key: "dateTip",
-      text: "Sort each group by when it was last worked on, newest first",
+      text: "Sort by last worked on, newest first",
       description: "The date sort's tooltip."
     },
     { key: "inUse", text: "{words}, in use", description: "The pressed button's name, spoken." }

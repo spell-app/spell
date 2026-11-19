@@ -288,9 +288,7 @@ export const epicSectionVocabulary = {
     },
     {
       key: "startTestingTip",
-      text:
-        "Claude checks the tests it can check itself, writes out exactly what to do for the rest, with a screenshot, " +
-        "then the first test opens:  Approve one that passed, write what you saw in its note, the x if it no longer applies",
+      text: "Claude checks what it can and writes out the rest, then the first test opens",
       description: "Start testing's tooltip (epic `epic-engine` P51)."
     },
     {
@@ -300,12 +298,12 @@ export const epicSectionVocabulary = {
     },
     {
       key: "preparingTip",
-      text: "Claude is checking what it can and writing out the rest;  the first test opens when it's done · click to call it off",
+      text: "Claude is preparing the tests:  stop",
       description: "Preparing tests' tooltip."
     },
     {
       key: "waitingTip",
-      text: "Asked:  {why} · click to call it off",
+      text: "Asked:  {why} · stop",
       description: "Preparing tests' tooltip while nobody has taken it yet."
     },
     {
@@ -322,7 +320,7 @@ export const epicSectionVocabulary = {
     },
     {
       key: "focusTestsTip",
-      text: "Go through the tests in Focus mode, in Claude's order:  Approve if it passed, your note (and a screenshot) if not, the x if it no longer applies",
+      text: "Go through the tests one at a time",
       description: "The button's tooltip once the tests are prepared."
     },
     {

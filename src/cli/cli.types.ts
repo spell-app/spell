@@ -88,6 +88,11 @@ export type WwodOptions = GlobalOptions & {
   dryRun?: boolean
 }
 
+/** `spell local`'s flags (epic `repo-split` T70). */
+export type LocalOptions = GlobalOptions & {
+  json?: boolean
+}
+
 /** `spell deps`'s flags. */
 export type DepsOptions = GlobalOptions & {
   json?: boolean

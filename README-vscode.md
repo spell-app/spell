@@ -139,7 +139,7 @@ flowchart LR
     direction TB
     file["Card.spell:  colours, errors as you type;  TS, JS, PY and ▶ at the top right"]
     run["Run Project, beside it:  the program, running"]
-    bar["the right side bar:  the Review and Details tabs"]
+    bar["the right side bar:  the Review, Details and Epic Docs tabs"]
     claude["the Claude panel:  every session"]
   end
   spell["Spell, built from spell-app"] --> file
@@ -453,9 +453,9 @@ Spell Epic puts the epic page in VS Code's RIGHT side bar instead, beside your c
 live from a page server:  the machine's epic server (`epic hub`, port 4848) when it runs,
 else a checkout's own (4747 for the main checkout).
 
-Two tabs, and the page decides which one it opens in, whatever command showed it:
+Three tabs, and the page decides which one it opens in, whatever command showed it:
 
-- **Review** (`spellEpic.reviewView`, the checklist):  epic pages and saga pages (`epic open <epic>`,
+- **Review** (`spellEpic.reviewView`, the Spell hat):  epic pages and saga pages (`epic open <epic>`,
   `/epic review <name>`), test runs, and every other guide or docs page, reloading as it changes
   (`epic pages open <page> --vs`, `/spell-docs`).
   You mark items on it, and a listening Claude session acts on your marks
@@ -467,9 +467,9 @@ Two tabs, and the page decides which one it opens in, whatever command showed it
     "2 pages waiting", and it shows once you've answered.
   - Opened with nothing shown, or by its list button:  every details and choice page of the window's epic,
     newest first, the ones waiting for you in red.
-- A third tab, Epic Docs, held guides until it folded into Review (epic `epic-engine` Q73):
-  one tab for reading, one for answering.
-- A page that stopped answering:  Reload, Restart Page Server, or Epics Home, a fresh view at the docs' home page
+- **Epic Docs** (`spellEpic.docsView`, a book):  the epic tooling's READMEs, rendered by the page server
+  (`/_epic/docs/README-epics.md`);  the epics home's Epic Documentation card opens it too.
+- A page that stopped answering:  Reload, Restart Page Server, or Home, a fresh view at the tab's first page
   (in Details, its list button).
 
 It also runs the WINDOW BRIDGE, which the windows below lean on.

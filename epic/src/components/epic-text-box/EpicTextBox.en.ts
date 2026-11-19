@@ -103,7 +103,7 @@ export const epicTextBoxVocabulary = {
     { key: "keptDrop", text: "Drop {label}", description: "A kept text's ×, for a screen reader." },
     {
       key: "keptDropTip",
-      text: "Drop this:  it's no longer sent",
+      text: "Drop it:  no longer sent",
       description: "A kept text's ×'s tooltip."
     },
     { key: "comment", text: "Comment on this section", description: "A `comment` box's placeholder." },

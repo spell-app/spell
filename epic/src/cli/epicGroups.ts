@@ -1423,6 +1423,9 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--stage <stage>": "the stage it starts in:  overview (the default), phases or building"
   },
   stage: {},
+  rename: {},
+  complete: {},
+  delete: {},
   change: { "--for <item>": "the item of the change marks that name none" },
   list: { "--json": "print them as JSON" },
   summary: { "--json": "print it as JSON" },
@@ -1648,6 +1651,9 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--no-server": "don't start the epic server",
     "--host <github|gitlab>": "where the code is hosted, for an address that doesn't say",
     "--dry-run": "only say what it would do",
+    "--demo":
+      "show it as someone new sees it, every question asked, changing nothing:  for showing epic init to people, in " +
+      "any folder",
     "--json": "print what it did as JSON"
   },
   pr: {
@@ -1660,6 +1666,10 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--json": "print it as JSON"
   },
   whois: { "--json": "print it as JSON" },
+  upgrade: {
+    "--dry-run": "only say what it would do:  asks npm, but installs and changes nothing",
+    "--json": "print the report as JSON"
+  },
   guide: {
     "--list": "the topics, a line each",
     "--path": "the guide's file, for an agent to read",

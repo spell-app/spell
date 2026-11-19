@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process"
 import {
   chmodSync,
   cpSync,
@@ -55,16 +56,16 @@ export class PluginPackage extends PublishedPackage {
     mkdirSync(dirname(bin), { recursive: true })
     writeFileSync(
       bin,
-      "#!/usr/bin/env node\n// `epic`:  the epic command, from the `spell` this plugin depends on (written by `spell publish`)\n" +
-        'await import("spell/epic/cli/epicMain")\n'
+      "#!/usr/bin/env node\n// `epic`:  the epic command, from the `spell` this plugin depends on (written by `spell publish`);\n" +
+        "// a checkout of spell's instead, when SPELL_KIT or the project's .spell/kit.json5 names one\n" +
+        'import { checkoutToRun } from "spell/cli/kitCheckout"\n' +
+        'await import(checkoutToRun("epic/bin/epic", import.meta.url) ?? "spell/epic/cli/epicMain")\n'
     )
     chmodSync(bin, 0o755)
     writeFileSync(join(this.stageDir, "package.json"), `${JSON.stringify(this.manifest(), null, 2)}\n`)
-    // the VS Code extension `epic plugin install` installs (epic `epic-friend` P15):  built beforehand, never here
-    const warnings = existsSync(join(this.stageDir, VSIX))
-      ? []
-      : [`no ${VSIX}:  \`yarn vscode:package\` in epic/ first, or epic plugin install can't install the extension`]
-    this.built = { compiled: 0, modules: 0, copied, declarations: 0, warnings }
+    // the VS Code extension `epic plugin install` installs (epic `epic-friend` P15):  built by the folder's own
+    // build (`"spellPublish": { "build" }`) before this, and checked in `checks()` (`vsixProblem()`)
+    this.built = { compiled: 0, modules: 0, copied, declarations: 0, warnings: [] }
     return this.built
   }
 
@@ -100,6 +101,7 @@ export class PluginPackage extends PublishedPackage {
     }
     const code = packed.files.filter((file) => /\.(tsx?|jsx?)$/.test(file) && !file.startsWith("skills/"))
     const codexProblems = PluginPackage.codexManifestProblems(this.stageDir)
+    const vsixProblem = PluginPackage.vsixProblem(join(this.stageDir, VSIX), join(this.repo.root, VSIX_SOURCE))
     const unpacked = PluginPackage.namedFiles(this.repo.root).filter(
       (path) => !packed.files.some((file) => file === path || file.startsWith(`${path.replace(/\/$/, "")}/`))
     )
@@ -116,6 +118,12 @@ export class PluginPackage extends PublishedPackage {
         check: `its Codex manifest ships, named ${PLUGIN_NAME}, its skills and hooks there`,
         ok: codexProblems.length === 0,
         ...(codexProblems.length && { detail: codexProblems.join(", ") })
+      },
+      {
+        pkg: this.name,
+        check: `its VS Code extension is the one just built (${VSIX}, at ${VSIX_SOURCE}'s version)`,
+        ok: !vsixProblem,
+        ...(vsixProblem && { detail: vsixProblem })
       },
       {
         pkg: this.name,
@@ -146,6 +154,32 @@ export class PluginPackage extends PublishedPackage {
       if (!path || !existsSync(join(root, path))) problems.push(`its ${key} (${String(path)}) isn't there`)
     }
     return problems
+  }
+
+  /**
+   * What's wrong with the VS Code extension the plugin ships, `vsix`:  missing, unreadable, or not at the version
+   * of the extension's source, `sourceManifest` (`epic/vscode/package.json`);  nothing wrong, `undefined`.
+   * - Why (epic `epic-engine` I353):  the `.vsix` is git-ignored and built per checkout, so a stale one on disk
+   *   shipped in spell-epic 0.8.13;  only its OWN `extension/package.json` says which build it is.
+   * - Read with `unzip -p` (macOS and Linux have it):  the kit has no zip reader of its own outside the app folder.
+   * - NEVER throws:  every failure is the problem it returns
+   */
+  static vsixProblem(vsix: string, sourceManifest: string): string | undefined {
+    if (!existsSync(vsix)) return `no ${vsix}:  the extension wasn't built (the folder's "spellPublish": { "build" })`
+    const expected = (JSON.parse(readFileSync(sourceManifest, "utf8")) as { version?: string }).version
+    let built: string | undefined
+    try {
+      const manifest = execFileSync("unzip", ["-p", vsix, "extension/package.json"], {
+        encoding: "utf8",
+        stdio: "pipe"
+      })
+      built = (JSON.parse(manifest) as { version?: string }).version
+    } catch (error) {
+      return `can't read extension/package.json in ${vsix}:  ${(error as Error).message.split("\n")[0]}`
+    }
+    return built === expected
+      ? undefined
+      : `the .vsix is version ${String(built)}, but ${sourceManifest} says ${String(expected)}`
   }
 
   /**
@@ -219,6 +253,9 @@ export const PLUGIN_NAME = "epic"
 
 /** The epic VS Code extension's package, as the plugin ships it (`PluginInstall`'s step 7). */
 const VSIX = "vscode/spell-epic.vsix"
+
+/** The epic VS Code extension's own manifest, whose `version` the `.vsix` must have. */
+const VSIX_SOURCE = "vscode/package.json"
 
 /** The plugin manifests' folders:  Claude Code's, and Codex's (epic `epic-friend` P12). */
 const MANIFEST_FOLDERS = [".claude-plugin", ".codex-plugin"]

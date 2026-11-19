@@ -1,13 +1,14 @@
 /**
  * Shows an `.html` doc (docs pages, epic pages, details pages) rendered,
- * in one of the right side bar's two doc views (`DocView`).
+ * in one of the right side bar's three doc views (`DocView`).
  * spell-epic's own copy (epic `epic-eject` P7), from the spell language extension's, which it replaces.
  * - Which view:  the page's kind decides (`docViewFor()`, epic `epic-engine` P59), the ONE rule:
  *   - `details` (the "Details" tab):  details, review and choice pages
+ *   - `docs` (the "Epic Docs" tab):  the epic tooling's READMEs, `/_epic/docs/...`
  *   - `review` (the "Review" tab):  everything else -- epic pages, saga pages, guides, the home page, the list pages
- *   - NOT Simple Browser beside the editor:  its setting, `spellEpic.docPreview.location`, went with the third tab,
- *     Epic Docs, which it moved (epic `epic-engine` Q73)
- * - Opened by URI:  `vscode://spell-app.spell-epic/doc-preview?file=<absolute path>[&view=review|details]`;
+ *   - NOT Simple Browser beside the editor:  its setting, `spellEpic.docPreview.location`, went with the first
+ *     Epic Docs tab, which it moved (epic `epic-engine` Q73)
+ * - Opened by URI:  `vscode://spell-app.spell-epic/doc-preview?file=<absolute path>[&view=review|details|docs]`;
  *   the page's kind decides over `view`
  *   - what spell-epic's `src/tools/pages.js` `openInVSCode()` opens (`epic open`, `epic phase`)
  * - Or `?url=<http://127.0.0.1:port/...>`:  a page some local server already serves, shown as is.
@@ -45,7 +46,7 @@ import { RepoList } from "spell/epic/server/RepoList"
 import { ENGINE_ROUTES, PID_FILE } from "spell/epic/server/server.types"
 
 import { DocView, docsIndex, ensurePageServer } from "./DocView"
-import { PREVIEW_PATH, type DocViewName, docViewFor, isLoopback, stamped } from "./docUrls"
+import { EPIC_DOCS_HOME, PREVIEW_PATH, type DocViewName, docViewFor, isLoopback, stamped } from "./docUrls"
 
 /****************
  * ### `DocPreview`
@@ -64,9 +65,10 @@ export class DocPreview {
    */
   static register(context: vscode.ExtensionContext): void {
     DocView.register(context)
-    DocView.home = () => DocPreview.homeUrl()
+    DocView.home = (view) => DocPreview.homeUrl(view)
     DocView.showFile = (file) => DocPreview.show(file)
     DocView.urlOf = (file) => DocPreview.urlOf(file)
+    DocView.showUrl = (url, view) => DocPreview.showUrl(url, view)
     context.subscriptions.push(
       vscode.window.registerUriHandler({
         handleUri: (uri) => {
@@ -86,14 +88,24 @@ export class DocPreview {
   }
 
   /**
-   * The home page:  the default repo's on the epic server, when it runs;  else the window's first folder's.
-   * - `undefined`:  neither has one
+   * Where view `view` opens:
+   * - `review`:  the home page, the default repo's on the epic server when it runs;  else the window's first folder's
+   * - `docs`:  the front page for epics (`EPIC_DOCS_HOME`), on that same server, under the same worktree's address
+   * - `undefined`:  neither has one;  always for `details`, which opens on its list
    */
-  static async homeUrl(): Promise<string | undefined> {
+  static async homeUrl(view: DocViewName = "review"): Promise<string | undefined> {
+    if (view === "details") return undefined
     const hub = await DocPreview.epicServer()
-    if (hub) return `${hub.base}/pages/index.html`
     const index = docsIndex()
-    return index && existsSync(index) ? DocPreview.urlOf(index) : undefined
+    const home = hub
+      ? `${hub.base}/pages/index.html`
+      : index && existsSync(index)
+        ? await DocPreview.urlOf(index)
+        : undefined
+    if (!home || view === "review") return home
+    const url = new URL(home)
+    const worktree = WORKTREE_ADDRESS.exec(url.pathname)?.[0] ?? ""
+    return new URL(`${worktree}${EPIC_DOCS_HOME}`, url.origin).href
   }
 
   /**
@@ -191,6 +203,9 @@ export class DocPreview {
     return DocView.of(view).show(fresh)
   }
 }
+
+/** A worktree's address on the main checkout's page server, at a path's start:  `/worktrees/<name>`. */
+const WORKTREE_ADDRESS = /^\/worktrees\/[^/]+/
 
 /** What a side-bar view says while the page server for a page asked for is being found or started. */
 const FINDING_SERVER = "Finding the page server..."

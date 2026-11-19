@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!--
+      The Docs tab's page:  one README of the epic tooling, rendered.
+      - Served by `docsRoutes` for every README at `/_epic/docs/...`;  the same page each time.
+      - Its `<ui-markdown>` reads the README at this page's own address, plus `?raw`:
+        so the README's relative links (`epic/README-setup.md`) lead to the next README's page.
+    -->
+    <title>Epic Docs</title>
+    <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+  </head>
+  <body class="spell-doc-page">
+    <spell-site-header></spell-site-header>
+    <div class="spell-doc">
+      <main class="spell-doc-main">
+        <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+          <ui-breadcrumb link="/_epic/docs/README-epics.md">Spell Epic</ui-breadcrumb>
+          <ui-breadcrumb selected>This page</ui-breadcrumb>
+        </ui-breadcrumbs>
+        <ui-markdown id="readme"></ui-markdown>
+      </main>
+    </div>
+    <script>
+      {
+        const readme = document.getElementById("readme")
+        const name = decodeURIComponent(location.pathname.split("/").pop())
+        readme.setAttribute("source", `${encodeURIComponent(name)}?raw`)
+        // the landing page is the top:  no crumbs back to itself
+        const crumbs = document.querySelector(".spell-crumbs")
+        if (name === "README-epics.md") crumbs.remove()
+        // the tab's title and the last crumb:  the README's own title, once drawn
+        readme.addEventListener("ui-drawn", () => {
+          const title = readme.headings?.[0]?.text
+          if (!title) return
+          document.title = title
+          const last = crumbs.querySelector("[selected]")
+          if (last) last.textContent = title
+        })
+      }
+    </script>
+    <script src="/_epic/assets/highlight.min.js"></script>
+    <script src="/_epic/assets/spell-ui.js"></script>
+  </body>
+</html>

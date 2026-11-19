@@ -62,11 +62,19 @@ export const epicListVocabulary = {
     { key: "noSaga", text: "No saga", description: "The chip of the epics that name no saga." },
     {
       key: "noSagaTip",
-      text: "Epics that name no saga yet:  epic saga set <epic> <saga>",
+      text: "Epics with no saga",
       description: "The No saga chip's tooltip."
     },
-    { key: "showOnly", text: "Click to show only {saga}", description: "A chip's tooltip's last line, while shown." },
-    { key: "showToo", text: "Click to show {saga} too", description: "A chip's tooltip's last line, while hidden." }
+    {
+      key: "showOnly",
+      text: "Show only the {count} in {saga}",
+      description: "A chip's tooltip's last line, while shown."
+    },
+    {
+      key: "showToo",
+      text: "Show the {count} in {saga} too",
+      description: "A chip's tooltip's last line, while hidden."
+    }
   ],
   children: [{ tag: "epic-card", description: "One epic's card, any number, in any order." }]
 } as const satisfies EpicVocabulary

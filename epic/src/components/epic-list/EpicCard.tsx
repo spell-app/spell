@@ -1,4 +1,4 @@
-import { Show } from "solid-js"
+import { For, Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
 import { E, UI } from "spell/ui/core"
@@ -9,7 +9,16 @@ import { epicStateFor, type EpicState } from "spell/epic/list/EpicState"
 import { ServerLink } from "spell/epic/review"
 
 import { epicCardVocabulary } from "./EpicCard.en"
-import { FAVORITE_API, cardFactsOf, shortDay, type FavoriteDetail } from "./EpicList.types"
+import {
+  CARD_ACTIONS,
+  FAVORITE_API,
+  MANAGE_API,
+  cardFactsOf,
+  shortDay,
+  type CardAction,
+  type EpicManageFacts,
+  type FavoriteDetail
+} from "./EpicList.types"
 
 import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 import cardCSS from "./EpicCard.css?inline"
@@ -26,8 +35,20 @@ import cardCSS from "./EpicCard.css?inline"
  *   refused:  back as it was, and a toast says why
  *   - its answer, every starred epic, goes to its list (`epic-starred`):  another window may have starred one
  *   - only served with a write token:  from `file://`, the star shows, disabled, saying why
+ * - the `...` MENU at its top right, the star just left of it (epic `epic-engine` T103;  Owen:  "on the epic home page
+ *   cards, add a `...` menu in the TR corner, with Resume, Rename Epic..., Complete, Delete Epic..."):  Spell UI's
+ *   dropdown, as an epic page's gears are (`EpicFold.gearMenu()`), each entry asking the page server
+ *   (`MANAGE_API`, `EpicLifecycle`)
+ *   - Resume:  its session in its own VS Code window, as `/epic resume <name>` from another window;  not on a done epic
+ *   - Rename Epic...:  a dialog asking the new name;  Complete:  a dialog saying what it closes;  not on a done epic
+ *   - Delete Epic...:  a dialog saying how to get it back
+ *   - each asks the server first what it would refuse (a worktree, a branch not merged, the tooling home):  a dialog
+ *     says why, and nothing is asked
+ *   - the dialogs are Spell UI's (`UI.modals`), its family loaded the first time (`UI.modals.ready()`):  a close ✕ and
+ *     Escape cancel
+ *   - only served with a write token, as the star
  * - the day it was last worked on at its bottom right, no year (`10/9`), the full date and time its tooltip
- * - SIDE EFFECT:  a star click sets its own `favorite` attribute;  posts to the page server
+ * - SIDE EFFECT:  a star click sets its own `favorite` attribute;  posts to the page server;  so does each menu entry
  ****************/
 export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
   @E.proto static vocabulary = epicCardVocabulary
@@ -42,6 +63,9 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
 
   /** Its star is on its way to the page server:  a second click meanwhile does nothing. */
   @E.state accessor isStarring = false
+
+  /** A menu entry is asking the page server:  another meanwhile does nothing. */
+  @E.state accessor isActing = false
 
   ////////////////
   // ## Derived state
@@ -112,6 +136,7 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
           </ui-content>
         </ui-card>
         {this.star()}
+        {this.menu()}
         <Show when={shortDay(this.worked)}>
           {(day) => (
             <time class={WORKED} part={this.partForName("worked")} datetime={this.worked} title={this.workedTip()}>
@@ -161,7 +186,7 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
   private star(): JSX.Element {
     const epic = () => this.epic ?? ""
     const tip = () => {
-      if (!this.canStar) return this.translationForKey("starOffline")
+      if (!this.canStar) return this.translationForKey("offline")
       return this.translationForKey(this.favorite ? "unstarTip" : "starTip")
     }
     return (
@@ -176,6 +201,42 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
         disabled={this.canStar ? undefined : ""}
         onClick={this.onStar}
       />
+    )
+  }
+
+  /** The `...` menu:  its entries, a done epic's without Resume and Complete;  disabled where it can't act. */
+  private menu(): JSX.Element {
+    const title = () =>
+      this.canStar ? this.translationForKey("menu", { epic: this.epic ?? "" }) : this.translationForKey("offline")
+    const entries = () => CARD_ACTIONS.filter((action) => this.state.name !== "done" || !DONE_HIDES.includes(action))
+    return (
+      <ui-dropdown
+        class={MENU}
+        part={this.partForName("menu")}
+        direction="left"
+        title={title()}
+        aria-label={title()}
+        disabled={this.canStar && !this.isActing ? undefined : ""}
+        on-ui-changed={this.onMenuPick}
+      >
+        <ui-button
+          slot="trigger"
+          appearance="circular basic"
+          size="mini"
+          icon="ellipsis"
+          tabindex="-1"
+          aria-label={title()}
+        />
+        {/* no caret:  the dots say it's a menu */}
+        <span slot="icon" />
+        <For each={entries()}>
+          {(action) => (
+            <ui-item value={action} icon={ACTION_ICONS[action]}>
+              {this.translationForKey(action)}
+            </ui-item>
+          )}
+        </For>
+      </ui-dropdown>
     )
   }
 
@@ -228,6 +289,120 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
     if (!E.DOMElement.isAttached("ui-toast")) return console.error(message)
     UI.toast({ message, type: "error" })
   }
+
+  ////////////////
+  // ## The menu
+  ////////////////
+
+  /** A menu entry picked:  its action, and the dropdown lets go of its value, to pick again. */
+  @E.untracked
+  private readonly onMenuPick = (event: CustomEvent<{ value: string | string[] }>) => {
+    const action = String(event.detail.value) as CardAction
+    const dropdown = event.currentTarget as HTMLElement & { value: string }
+    // picked again next time:  a dropdown tells only of a new value
+    E.afterSolidUpdate(() => (dropdown.value = ""))
+    if (!CARD_ACTIONS.includes(action) || this.isActing || !this.canStar) return
+    void this.act(action)
+  }
+
+  /** Do `action` to its epic:  ask the page server, with a dialog first where it needs one.  NEVER throws. */
+  @E.untracked
+  private async act(action: CardAction) {
+    const epic = this.epic ?? ""
+    const link = new ServerLink(ServerLink.pageOptions())
+    this.isActing = true
+    try {
+      if (action === "resume") {
+        await link.post(`${MANAGE_API}/resume`, { name: epic })
+        return await this.say(this.translationForKey("resumed", { epic }))
+      }
+      const facts = await link.get<EpicManageFacts>(MANAGE_API, { query: { epic } })
+      if (!facts) throw new Error(`no epic called ${epic}`)
+      await UI.modals.ready()
+      if (action === "rename") await this.rename(link, facts)
+      else if (action === "complete") await this.complete(link, facts)
+      else await this.remove(link, facts)
+    } catch (error) {
+      await this.say(this.translationForKey(`${action}Failed`, { epic, error: (error as Error).message }), "error")
+    } finally {
+      this.isActing = false
+    }
+  }
+
+  /** Rename:  why not, else the new name asked, then the server;  the page follows by itself (reindexed). */
+  private async rename(link: ServerLink, facts: EpicManageFacts) {
+    const { epic } = facts
+    if (facts.blocked) return this.refuse(this.translationForKey("cantRename", { epic }), facts.blocked)
+    const to = await UI.modals.prompt({
+      title: this.translationForKey("renameTitle", { epic }),
+      message: this.translationForKey("renameAsk"),
+      value: epic,
+      okText: this.translationForKey("renameOk"),
+      cancelText: this.translationForKey("cancel")
+    })
+    if (!to?.trim() || to.trim() === epic) return
+    await link.post(`${MANAGE_API}/rename`, { name: epic, to: to.trim() })
+    await this.say(this.translationForKey("renamed", { epic, to: to.trim() }))
+  }
+
+  /** Complete:  what it closes said first, then the server. */
+  private async complete(link: ServerLink, facts: EpicManageFacts) {
+    const { epic } = facts
+    if (!facts.phases)
+      return this.refuse(this.translationForKey("cantComplete", { epic }), this.translationForKey("noPhases"))
+    const lines = [
+      this.translationForKey("completeAsk", { epic }),
+      this.counted(facts.phasesLeft, "completePhase", "completePhases"),
+      this.counted(facts.needsYou.length, "completeItem", "completeItems")
+    ]
+    const isSure = await UI.modals.confirm({
+      title: this.translationForKey("completeTitle", { epic }),
+      message: lines.filter(Boolean).join("\n"),
+      okText: this.translationForKey("completeOk"),
+      cancelText: this.translationForKey("cancel")
+    })
+    if (!isSure) return
+    await link.post(`${MANAGE_API}/complete`, { name: epic })
+    await this.say(this.translationForKey("completed", { epic }))
+  }
+
+  /** Delete:  why not, else how to get it back said first, then the server. */
+  private async remove(link: ServerLink, facts: EpicManageFacts) {
+    const { epic } = facts
+    const why = facts.home ? this.translationForKey("isHome", { epic }) : facts.blocked
+    if (why) return this.refuse(this.translationForKey("cantDelete", { epic }), why)
+    const isSure = await UI.modals.confirm({
+      title: this.translationForKey("deleteTitle", { epic }),
+      message: this.translationForKey("deleteAsk", { epic }),
+      okText: this.translationForKey("deleteOk"),
+      okColor: "negative",
+      cancelText: this.translationForKey("cancel")
+    })
+    if (!isSure) return
+    await link.post(`${MANAGE_API}/delete`, { name: epic })
+    await this.say(this.translationForKey("deleted", { epic }))
+  }
+
+  /** `count` in words:  `one`'s text for 1, `many`'s for more, `""` for none. */
+  private counted(count: number, one: "completePhase" | "completeItem", many: "completePhases" | "completeItems") {
+    if (!count) return ""
+    return count === 1 ? this.translationForKey(one) : this.translationForKey(many, { count: String(count) })
+  }
+
+  /** Why it can't, in a dialog of one button. */
+  private refuse(title: string, message: string): Promise<void> {
+    return UI.modals.alert({ title, message, okText: this.translationForKey("ok") })
+  }
+
+  /** A toast saying `message`;  the console where toasts can't show. */
+  private async say(message: string, type: "success" | "error" = "success") {
+    try {
+      await UI.toasts.ready()
+      UI.toast({ message, type })
+    } catch {
+      console[type === "error" ? "error" : "log"](message)
+    }
+  }
 }
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
@@ -241,4 +416,16 @@ const SAGA = "saga"
 const AWAY = "away"
 const META = "meta"
 const STAR = "star"
+const MENU = "menu"
+
+/** Each menu entry's icon, an icon of the docs bundle's `ICONS`. */
+const ACTION_ICONS: Record<CardAction, string> = {
+  resume: "circle play",
+  rename: "pen",
+  complete: "circle check",
+  delete: "trash can"
+}
+
+/** The entries a done epic leaves out:  nothing to resume or complete. */
+const DONE_HIDES: readonly CardAction[] = ["resume", "complete"]
 const WORKED = "worked"

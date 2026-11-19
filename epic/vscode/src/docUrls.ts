@@ -80,13 +80,19 @@ export function isLoopback(url: string): boolean {
 ////////////////
 
 /**
- * The side bar's doc views, each its own tab:  "Review", "Details" (epic `epic-engine` Q73).
- * - a third tab, "Epic Docs", held guides, the home page and the list pages until Q73:  they open in Review now
+ * The side bar's doc views, each its own tab, in its order (Owen, 2026-11-19):
+ * - "Review" (the Spell hat):  epic pages, guides, the home page, the list pages
+ * - "Details" (a speech bubble):  the pages you answer on
+ * - "Epic Docs" (a book):  the epic tooling's READMEs, from the page server's `/_epic/docs/`
+ * - the first "Epic Docs" tab (until epic `epic-engine` Q73) held guides and the home page:  they stay in Review
  */
-export type DocViewName = "review" | "details"
+export type DocViewName = "review" | "details" | "docs"
 
 /** Every doc view's name, in the side bar's order. */
-export const DOC_VIEWS: readonly DocViewName[] = ["review", "details"]
+export const DOC_VIEWS: readonly DocViewName[] = ["review", "details", "docs"]
+
+/** Where the "Epic Docs" tab opens, on any page server:  the front page for epics (spell-epic's `docsRoutes.ts`). */
+export const EPIC_DOCS_HOME = "/_epic/docs/README-epics.md"
 
 /** An epic page's path:  `epics/<id>/<id>.plan.html`. */
 const EPIC_PAGE = /(?:^|\/)epics\/([^/]+)\/\1\.plan\.html$/
@@ -94,9 +100,13 @@ const EPIC_PAGE = /(?:^|\/)epics\/([^/]+)\/\1\.plan\.html$/
 /** A details, review or choice page's path:  a page right inside a `details/` folder. */
 const DETAILS_PAGE = /(?:^|\/)details\/[^/]+\.html$/
 
+/** An epic doc's path:  a README under `/_epic/docs/`, under a worktree's address too. */
+const EPIC_DOC = /^(?:\/worktrees\/[^/]+)?\/_epic\/docs\//
+
 /**
  * The tab page `path` goes to (a file path or a URL's path), the ONE rule every show takes (epic `epic-engine` P59):
  * - a details, review or choice page (a page in a `details/` folder, an epic's or `pages/details/`):  `details`
+ * - an epic doc (`/_epic/docs/...`, a README the page server renders):  `docs`
  * - anything else -- epic pages, saga pages, guides, the home page, the list pages:  `review`
  * - never the tab a command asked for:  each command picked its tab by its own flag, so an epic page landed in two
  *   tabs, and a choice page still waiting for Owen's answer was replaced (request r50)
@@ -104,15 +114,12 @@ const DETAILS_PAGE = /(?:^|\/)details\/[^/]+\.html$/
  */
 export function docViewFor(path: string): DocViewName {
   const unix = path.split("\\").join("/")
+  if (EPIC_DOC.test(unix)) return "docs"
   return !EPIC_PAGE.test(unix) && DETAILS_PAGE.test(unix) ? "details" : "review"
 }
 
-/**
- * The doc view `name` names, as the bridge and the `vscode://` URI take it;  `undefined` for anything else.
- * - `"docs"`, the Epic Docs tab before epic `epic-engine` Q73, is `"review"`:  an older checkout's `epic` still sends it
- */
+/** The doc view `name` names, as the bridge and the `vscode://` URI take it;  `undefined` for anything else. */
 export function docViewNamed(name: unknown): DocViewName | undefined {
-  if (name === "docs") return "review"
   return DOC_VIEWS.includes(name as DocViewName) ? (name as DocViewName) : undefined
 }
 

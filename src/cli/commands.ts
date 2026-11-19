@@ -7,6 +7,8 @@
  * - `spell commands [list|check]`:  every command against the commands page
  * - `spell wwod [check]`:  WWOD's citations and paths;  `spell wwod init`:  a project picks which of the rules its
  *   agents read (epic `repo-split` T66)
+ * - `spell local [status | on [checkout] | off]`:  run your own checkout in a project that installs `spell` from npm,
+ *   for you alone (epic `repo-split` T70;  `.spell/kit.json5`)
  * - `spell deps [check]`:  the lockfile's advisories and deprecated packages, before a push
  * - `spell readme check | test | pictures [pages...]`:  every repo's README pages, checked, their examples run
  *   (epic `readme` P16), or their `html example` blocks pictured (epic `ui-gaps` P14)
@@ -142,6 +144,21 @@ export default function kitCommands(spell: Command): void {
     .option("--dry-run", "init:  say what would change, and write nothing")
     .action((verb: string | undefined, files: string[], options: CLI.WwodOptions) =>
       CLI.runCommand(async () => (await import("spell/cli/commands/wwodCommand")).wwodCommand(verb, files, options))
+    )
+
+  spell
+    .command("local")
+    .description(
+      "run your own Spell checkout in this project instead of npm's spell, for you alone:  " +
+        "on writes the project's .spell/kit.json5, never committed;  off removes it"
+    )
+    .argument("[verb]", "status (default):  which Spell runs here, and why;  on [checkout];  off")
+    .argument("[checkout]", "on:  your checkout of Spell (default:  the one this spell runs from, else ~/www/spell)")
+    .option("--json", "print what it found (and did) as JSON")
+    .action((verb: string | undefined, checkout: string | undefined, options: CLI.LocalOptions) =>
+      CLI.runCommand(async () =>
+        (await import("spell/cli/commands/localCommand")).localCommand(verb, checkout, options)
+      )
     )
 
   spell

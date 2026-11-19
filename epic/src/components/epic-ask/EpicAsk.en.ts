@@ -79,12 +79,12 @@ export const epicAskVocabulary = {
     { key: "pickSeveral", text: "Pick any", description: "Its line's switch, on:  `multiple` (or flipped)." },
     {
       key: "toSeveralTip",
-      text: "Let me pick several",
+      text: "Allow several picks",
       description: "The switch's tooltip while it's pick one (epic `epic-engine` P50)."
     },
     {
       key: "toOneTip",
-      text: "Back to one pick:  the newest pick stays, the others turn off",
+      text: "Back to one pick:  the newest stays",
       description: "The switch's tooltip while it's pick any."
     },
     { key: "selectAll", text: "Select all", description: "Ticks every option shown." },
@@ -99,7 +99,7 @@ export const epicAskVocabulary = {
     { key: "doneTip", text: "{id}:  decided", description: "The chip's tooltip:  an option picked." },
     {
       key: "workingTip",
-      text: "{id}:  Claude has more to do",
+      text: "{id}:  Claude is still on it",
       description: "The chip's tooltip:  more details asked, or only Other written."
     }
   ],

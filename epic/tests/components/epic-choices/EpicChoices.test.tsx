@@ -281,7 +281,7 @@ describe("<epic-option>'s Choose pill (P10)", () => {
       true,
       true
     ])
-    expect(pillOf(options[1])!.title).toBe("B is picked:  click to un-pick · not sent yet")
+    expect(pillOf(options[1])!.title).toBe("B picked:  un-pick it · not sent yet")
     // the fill rule (Q20):  a pick not sent is DASHED green, pill and card
     expect([
       getComputedStyle(pillOf(options[1])!).borderTopStyle,
@@ -310,7 +310,7 @@ describe("<epic-option>'s Choose pill (P10)", () => {
     await settle()
     expect([pillOf(options[0])!.classList.contains("sent"), pillOf(options[0])!.title]).toEqual([
       true,
-      "A is picked:  click to un-pick · sent"
+      "A picked:  un-pick it · sent"
     ])
     expect([
       part(options[0], "base")!.classList.contains("sent"),
@@ -334,7 +334,7 @@ describe("<epic-option>'s Choose pill (P10)", () => {
       applied.title,
       getComputedStyle(applied).backgroundColor === getComputedStyle(applied).borderTopColor,
       options[0].matches(":state(picked)")
-    ]).toEqual([true, "true", "A is the chosen option", true, false])
+    ]).toEqual([true, "true", "A chosen", true, false])
     applied.click()
     await settle()
     expect(routes.posts).toEqual([])
@@ -730,7 +730,7 @@ describe("<epic-choices> P50:  pick any, the switch, Add choice, edits", () => {
       ["Chosen · not sent", "true"],
       ["Chosen · not sent", "true"]
     ])
-    expect(pillOf(second![1]!)!.title).toBe("B2 is picked:  click to un-pick · not sent yet")
+    expect(pillOf(second![1]!)!.title).toBe("B2 picked:  un-pick it · not sent yet")
   })
 
   test("a 2nd set answered names its pick `B2` in its folded heading (I227)", async () => {

@@ -454,7 +454,7 @@ describe("<epic-section> counts and state filter", () => {
       host.shadowRoot!.querySelector('[part~="filter"] epic-state-filter')!.shadowRoot!.querySelector("svg")
     ).toBeNull()
     const open = chip(host, "open")
-    expect(open.title).toBe("2 open, still undecided:  hide these\n⌥-click:  show only these")
+    expect(open.title).toBe("2 undecided\nHide these · ⌥-click:  only these")
     expect(getComputedStyle(open).backgroundColor).not.toMatch(/^rgba\(0, 0, 0, 0\)$|^transparent$/)
     await expectAccessible(host)
   })
@@ -473,10 +473,10 @@ describe("<epic-section> counts and state filter", () => {
     // hidden, outlined:  no fill
     const yellow = chip(host, "open")
     expect(getComputedStyle(yellow).backgroundColor).toMatch(/^rgba\(0, 0, 0, 0\)$|^transparent$/)
-    expect(yellow.title).toBe("2 open, still undecided:  show everything\n⌥-click:  show only these")
+    expect(yellow.title).toBe("2 undecided\nShow everything · ⌥-click:  only these")
     await click("attention")
     expect(chips(host)).toEqual({ attention: false, open: false, recent: true })
-    expect(yellow.title).toBe("2 open, still undecided:  show these too\n⌥-click:  show only these")
+    expect(yellow.title).toBe("2 undecided\nShow these too · ⌥-click:  only these")
     // the last one off, and the last in the list:  the first shows instead
     await click("recent")
     expect(chips(host)).toEqual({ attention: true, open: false, recent: false })

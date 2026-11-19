@@ -70,6 +70,21 @@ describe("UIRuntime.toast() / modals", () => {
     }
   })
 
+  it("modals.ready() imports the family the first time, and not once a provider is there", async () => {
+    const ui = new UIRuntime()
+    const load = vi.fn(async () => {
+      Modals.provider = { confirm: async () => true, alert: async () => {}, prompt: async () => undefined }
+    })
+    ui.modals.loadFamilyWith(load)
+    try {
+      await ui.modals.ready()
+      await ui.modals.ready()
+      expect(load).toHaveBeenCalledTimes(1)
+    } finally {
+      Modals.provider = undefined
+    }
+  })
+
   it("toasts and modals throw until their component registers a provider", async () => {
     const runtime = await UI.load()
     expect(() => runtime.toast({ message: "hi" })).toThrow(/ui-toast not registered/)

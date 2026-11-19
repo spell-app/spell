@@ -107,7 +107,7 @@ export const epicRunRowVocabulary = {
     { key: "proposed", text: "proposed", description: "The proposal's pill's tooltip." },
     { key: "details", text: "Details · {count}", description: "The details' fold:  how many lines." },
     { key: "taken", text: "taken", description: "The taken mark's word." },
-    { key: "takenTip", text: "The run took this at {time}", description: "The taken mark's tooltip." },
+    { key: "takenTip", text: "Taken at {time}", description: "The taken mark's tooltip." },
     {
       key: "changedAfterTaken",
       text: "changed after the run took it",
@@ -115,7 +115,7 @@ export const epicRunRowVocabulary = {
     },
     {
       key: "changedAfterTakenTip",
-      text: "The command may pick the change up if it can",
+      text: "Changed after the run took it",
       description: "The orange note's tooltip."
     }
   ],

@@ -223,7 +223,7 @@ export class EpicList extends E.UIComponent<typeof epicListVocabulary> {
 
   /** A chip's tooltip:  its saga's purpose, then what a click does. */
   private chipTip(chip: SagaChip, on: boolean): string {
-    const does = this.translationForKey(on ? "showOnly" : "showToo", { saga: chip.title })
+    const does = this.translationForKey(on ? "showOnly" : "showToo", { saga: chip.title, count: chip.count })
     return chip.tip ? `${chip.tip}\n${does}` : does
   }
 

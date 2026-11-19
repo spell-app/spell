@@ -2,8 +2,8 @@
  * `<epic-card>` (`EpicCard.tsx`):  one epic's card on the Epics page, the look `spell-doc.css` gave its `<ui-card>`
  * before epic `epic-engine` P3.
  * - a Spell UI card, filling the host:  the host is the box its list's grid places
- * - the star at its top right, the day it was last worked on at its bottom right:  both absolute, over the card, so
- *   its title and meta line keep room for them (`padding-right`)
+ * - the `...` menu at its top right, the star left of it, the day it was last worked on at its bottom right:  all
+ *   absolute, over the card, so its title and meta line keep room for them (`padding-right`)
  * - the page's tokens (`--spell-*`, `spell-doc.css`), each with a fallback for a card drawn outside a docs page
  * - Units:  px and em, never rem (WWOD §18).
  */
@@ -28,7 +28,9 @@
     height: 100%;
     margin: 0;
   }
-  .header,
+  .header {
+    padding-right: 48px;
+  }
   .meta {
     padding-right: 22px;
   }
@@ -70,7 +72,7 @@
   .star {
     position: absolute;
     top: 4px;
-    right: 4px;
+    right: 28px;
   }
   .star::part(button) {
     margin: 0;
@@ -82,6 +84,48 @@
   .star:is(:hover, :focus-within)::part(button),
   .star[icon="star"]::part(button) {
     color: var(--spell-favorite, #fbbd08);
+  }
+  /*
+   * the `...` menu (epic `epic-engine` T103):  a quiet round button at the top right, as an epic page's gears are
+   * (`EpicFold.css`), its entries' icons in a column;  24px, the star's height
+   */
+  .menu {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    --ui-dropdown-icon-column: 1;
+  }
+  .menu::part(icon) {
+    display: none;
+  }
+  .menu::part(text) {
+    display: flex;
+    line-height: 1;
+  }
+  .menu > ui-button {
+    --ui-button-circular-min-width: 24px;
+    --ui-button-basic-border-width: 0px;
+  }
+  .menu > ui-button::part(button) {
+    display: inline-grid;
+    place-items: center;
+    box-sizing: border-box;
+    width: 24px;
+    height: 24px;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    color: var(--spell-muted, var(--ui-text-muted, GrayText));
+    background: none;
+    box-shadow: none;
+    font-size: 12px;
+    line-height: 1;
+  }
+  .menu > ui-button::part(icon) {
+    margin: 0;
+  }
+  .menu:is(:hover, :focus-within) > ui-button::part(button) {
+    color: var(--spell-heading-ink, var(--ui-text-color, CanvasText));
   }
   .worked {
     position: absolute;

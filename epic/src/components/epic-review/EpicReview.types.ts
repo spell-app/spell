@@ -641,7 +641,7 @@ export const REVIEW_NAME_TEXTS = [
   },
   {
     key: "acceptPlanTip",
-    text: "Claude's plan for this phase is good:  build it",
+    text: "Build this plan",
     description: "What Accept plan does."
   },
   {
@@ -667,23 +667,23 @@ export const REVIEW_TEXTS = [
   { key: "approveTip", text: "Fine as it is", description: "Review button:  what Approve does." },
   {
     key: "todoTip",
-    text: "Follow it up later, as a todo:  work still to do",
+    text: "Follow up later",
     description: "Review button:  what Make Todo does."
   },
   {
     key: "doThisTip",
-    text: "Yes:  build this phase",
+    text: "Build this phase",
     description: "A to-do phase's review button:  what Do this does."
   },
   {
     key: "doThisIssueTip",
-    text: "Yes:  fix this, right here, then I'll review it",
+    text: "Fix it now, then I'll review",
     description: "An issue's or a judgement call's review button:  what Do this does."
   },
-  { key: "revisitTip", text: "Talk it over:  write in the box at its end", description: "Review button:  Revisit." },
+  { key: "revisitTip", text: "Talk it over in a note", description: "Review button:  Revisit." },
   {
     key: "revisitCommentsTip",
-    text: "Talk it over:  your comments in its text ({ids}) are your note",
+    text: "Talk it over:  your comments ({ids}) are the note",
     description:
       "Review button:  Revisit, on a part with your comments waiting in its text (epic `epic-engine` I140):  a click marks it at once."
   },
@@ -694,7 +694,7 @@ export const REVIEW_TEXTS = [
   },
   {
     key: "planAcceptedTip",
-    text: "ready to build:  you accepted Claude's plan for this phase;  click to hold it",
+    text: "Ready to build;  a press holds it",
     description: "A to-do phase's green check:  what it says, and that a click un-clicks it (epic `epic-engine` I218)."
   },
   {
@@ -704,73 +704,73 @@ export const REVIEW_TEXTS = [
   },
   {
     key: "planOnHoldTip",
-    text: "not built until you accept its plan again;  click to take the hold back",
+    text: "Not built till you accept again;  a press undoes it",
     description:
       "A to-do phase's thumbs up, un-clicked:  what it means once sent, and that a click before then undoes it."
   },
   {
     key: "nextTip",
-    text: "an agent takes it at once (a note asking for a phase gets it a new one)",
+    text: "An agent takes it at once",
     description: "A todo's review button:  what the plane does."
   },
   {
     key: "revisitNoteTip",
-    text: "Write a note for Claude in the box at its end",
+    text: "Write it in the box at its end",
     description: "A todo's review button:  what Revisit does."
   },
   {
     key: "sawItTip",
-    text: "It's done and you've looked:  marked reviewed, its update label gone",
+    text: "Mark it reviewed",
     description: "A finished todo's review button:  what Saw it does (I296)."
   },
   {
     key: "closeIssueTip",
-    text: "Not needed:  closed, canceled, once Claude applies it",
+    text: "Canceled, unfixed",
     description: "An open issue's review button:  what the x does (I299)."
   },
   {
     key: "sendBackTip",
-    text: "Not fixed:  back to Claude, to fix it again here",
+    text: "Not fixed:  back to Claude",
     description: "A fixed issue's or call's review button:  what the plane does (I299)."
   },
   {
     key: "acceptFixTip",
-    text: "The fix is good:  closed",
+    text: "Closes it",
     description: "A fixed issue's or call's review button:  what the check does (I299)."
   },
   {
     key: "dropTip",
-    text: "Canceled, struck through, once Claude applies it",
+    text: "Canceled, struck through",
     description: "A todo's review button:  what the x does."
   },
   {
     key: "looksGoodTip",
-    text: "The phase stands as written",
+    text: "Keep the phase as written",
     description: "A phase's review button while the phases are agreed:  what Looks good does."
   },
   {
     key: "deferTip",
-    text: "Later:  after the other phases, still to do, once Claude applies it",
+    text: "Later, after the other phases",
     description: "A phase's review button while the phases are agreed:  what Defer does."
   },
   {
     key: "readLineTip",
-    text: "it leaves While you were out;  the rest stays (the item itself stays open)",
+    text: "Remove this line;  the item stays open",
     description: 'A line of "0. While you were out":  what Read does.'
   },
   {
     key: "doneReadingTip",
-    text: "the section goes, and what Claude does next starts a new one",
+    text: "Clear this section",
     description: '"0. While you were out"\'s button:  what Done reading does.'
   },
   {
     key: "seenUpdateTip",
-    text: "Seen:  fold it to one grey line, for everyone, once Claude applies it",
+    text: "Fold it to one grey line",
     description: "A new update block's button:  what Seen does."
   },
   {
     key: "reopenChangeTip",
-    text: "Talk the question over again:  it opens for you to answer",
+    text: "Talk the question over again",
     description: "A change mark's button:  what Reopen does."
   },
   {
@@ -783,11 +783,11 @@ export const REVIEW_TEXTS = [
     text: "asked · waiting for Claude to take it",
     description: "A request for now (a revisit now) not taken yet."
   },
-  { key: "working", text: "Claude is on it · click to call it off", description: "A button whose work is under way." },
-  { key: "callOff", text: "{label}:  click to call it off", description: "A spinning button's tooltip." },
+  { key: "working", text: "Claude is on it · stop", description: "A button whose work is under way." },
+  { key: "callOff", text: "{label}:  stop", description: "A spinning button's tooltip." },
   { key: "buttonTip", text: "{label}:  {what}", description: "A review button's tooltip:  its name, what it does." },
-  { key: "chosenSent", text: "sent · click to clear", description: "A chosen button, its mark sent." },
-  { key: "chosenUnsent", text: "not sent yet · click to clear", description: "A chosen button, its mark not sent." },
+  { key: "chosenSent", text: "sent · clear it", description: "A chosen button, its mark sent." },
+  { key: "chosenUnsent", text: "not sent yet · clear it", description: "A chosen button, its mark not sent." },
   { key: "pickedSent", text: "Picked {letter} · sent", description: "The pick's letter, sent." },
   { key: "pickedUnsent", text: "Picked {letter} · not sent yet", description: "The pick's letter, not sent." },
   { key: "noteDraft", text: "Your note, not sent yet (saved):  {note}", description: "The note bubble:  a draft." },
@@ -797,7 +797,7 @@ export const REVIEW_TEXTS = [
   { key: "noteLabel", text: "{id}:  your note", description: "The note box, for a screen reader." },
   {
     key: "pictureAdd",
-    text: "Add pictures:  paste them (⌘V) or drop them in the box, or choose files",
+    text: "Add pictures:  paste (⌘V), drop or choose",
     description: "The note box's picture button (epic `epic-engine` P51;  several since P75):  its tooltip."
   },
   {
@@ -805,7 +805,7 @@ export const REVIEW_TEXTS = [
     text: "Take the picture out",
     description: "The ✕ on a note's one old picture, kept apart from its words (before P75)."
   },
-  { key: "pictureZoom", text: "Your picture:  click to see it full size", description: "A note's picture." },
+  { key: "pictureZoom", text: "See it full size", description: "A note's picture." },
   { key: "notImage", text: "That isn't a picture", description: "Something else dropped or pasted in the note." },
   { key: "tooBig", text: "That picture is over 8 MB", description: "A picture too big for the page server." },
   { key: "saved", text: "Saved {time}", description: "The note box's floppy:  its draft is saved." },
@@ -828,12 +828,12 @@ export const REVIEW_TEXTS = [
   { key: "saidTaken", text: "You, {time}", description: "The note Claude took:  who wrote it, and when." },
   {
     key: "saidTakenTip",
-    text: "Claude has this note, and is answering it.  Type in the box below for a new one.",
+    text: "Claude has this note;  write a new one below",
     description: "The note Claude took:  its tooltip."
   },
   { key: "threadAnswer", text: "Your answer", description: "A thread's answer buttons, for a screen reader." },
   { key: "threadGood", text: "That's good", description: "A thread's check:  its name." },
-  { key: "threadGoodTitle", text: "That's good:  done", description: "A thread's check:  its tooltip." },
+  { key: "threadGoodTitle", text: "Done:  fold the thread", description: "A thread's check:  its tooltip." },
   { key: "threadGoodTip", text: "done:  the thread folds, green", description: "A thread's check:  what it does." },
   { key: "threadReply", text: "Reply", description: "A thread's Reply:  its name." },
   { key: "threadReplyTitle", text: "Reply", description: "A thread's Reply:  its tooltip." },
@@ -843,16 +843,16 @@ export const REVIEW_TEXTS = [
     description: "A thread's Reply:  what it does."
   },
   { key: "threadSkip", text: "Skip it", description: "A thread's x:  its name." },
-  { key: "threadSkipTitle", text: "Skip it:  done, nothing more to do", description: "A thread's x:  its tooltip." },
+  { key: "threadSkipTitle", text: "Skip:  nothing more to do", description: "A thread's x:  its tooltip." },
   { key: "threadSkipTip", text: "done, nothing more to do", description: "A thread's x:  what it does." },
   { key: "threadReopen", text: "Reopen", description: "A closed thread's button:  its name." },
   {
     key: "threadReopenTitle",
-    text: "Reopen:  your turn on it again",
+    text: "Reopen:  your turn again",
     description: "A closed thread's button:  its tooltip."
   },
   { key: "threadReopenTip", text: "your turn on it again", description: "A closed thread's button:  what it does." },
-  { key: "editTip", text: "Edit:  put your note back in the box", description: "A marked note's button:  tooltip." }
+  { key: "editTip", text: "Edit your note", description: "A marked note's button:  tooltip." }
 ] as const
 
 // the tags the review controls draw, and its own (drawn by the families it belongs to)

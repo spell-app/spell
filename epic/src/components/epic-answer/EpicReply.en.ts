@@ -102,7 +102,7 @@ export const epicReplyVocabulary = {
     { key: "new", text: "NEW", description: "The tag on Claude's newest reply, until you've seen it." },
     {
       key: "newTip",
-      text: "Claude's newest reply:  new since you looked",
+      text: "New since you looked",
       description: "The NEW tag's tooltip."
     }
   ],

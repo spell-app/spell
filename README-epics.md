@@ -79,6 +79,16 @@ A question or a bug has an id you can say out loud:  "approve J3" works in the c
 
 You need Claude Code, VS Code, git, Node 24.11 or later, and your code host's command, logged in.
 
+**If you don't have NodeJS installed** (a Python team, say), on macOS:
+
+```sh
+brew install node                        # no Homebrew yet:  its install line is at https://brew.sh
+node --version                           # v24.11.0 or higher
+```
+
+Linux or Windows:  the installer from https://nodejs.org.
+Every step, Homebrew's own install included:  [If you don't have NodeJS installed](epic/README-setup.md#1-if-you-dont-have-nodejs-installed).
+
 **On GitHub:**
 
 ```sh
@@ -98,6 +108,8 @@ Then in your repo, a git repo with at least one commit:
 ```sh
 npx spell@next epic init                 # a self-hosted GitLab whose address doesn't say so:  add --host gitlab
 ```
+
+To show it to people without changing anything, add `--demo`:  every question, every step, nothing written.
 
 It asks your name and a colour, installs the Claude Code plugin and the VS Code extension,
 makes the shared repo for the pages, and starts a small local server that shows them (port 4848).
@@ -127,6 +139,20 @@ Four things to know before you start:
   `/epic done`'s merge, and the worktree removed after it.
   - Its rough edges:  [what's still Spell-shaped](epic/README-config.md#whats-still-spell-shaped).
 
+### Upgrading
+
+When a newer `spell@next` is out:
+
+```sh
+epic upgrade --dry-run                   # says the version you have, the newest, and what it would do
+epic upgrade
+```
+
+- It keeps each version in a folder of its own, `~/.spell-epic/versions/<version>/`, and points the plugin and `epic` there.
+  - Not npm's download cache, where `npx` left it:  npm can clear that.
+- Then type `/reload-plugins` in each Claude Code session that's open;  new sessions have it.
+- Already the newest, it says so and changes nothing.
+
 ## See also
 
 - [Setting epics up](epic/README-setup.md):  every step of setting a repo up
@@ -134,3 +160,4 @@ Four things to know before you start:
 - [Skills and hooks](epic/README-skills.md):  the commands you type in Claude Code
 - [The `epic` command](epic/README-cli.md):  every `epic` verb
 - [Epic FAQ](epic/README-faq.md):  when something goes wrong, what you see, why, and the fix
+- [The epic demo](epic/README-demo.md):  showing epics to your team, stage by stage, in about 20 minutes

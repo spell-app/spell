@@ -10,9 +10,9 @@ import "spell/app/app/components/spell-code/bubbly.css"
 /**
  * Clicking in a comment in the bubbly look, on a real CodeMirror editor (epic `codemirror` I19):
  * the caret lands on the letter clicked, wherever the comment is drawn.
- * - A head's description, `-- e.g. "the card is a face card"`, too wide for the band's right end, is drawn in rows of
- *   its own under the head, out of the band's box.
- *   CodeMirror finds the place under the pointer from its pieces' boxes, so it put the caret in the head's words above.
+ * - A head's description, `-- e.g. "the card is a face card"`, too wide for the band's right end, is cut short there
+ *   (epic `codemirror` P7):  a click on a letter still shown puts the caret there.
+ *   Drawn in rows under the head before, out of the band's box, CodeMirror put the caret in the head's words above.
  * - A long comment in a body wraps as any line does:  checked here too.
  */
 describe("clicking in a comment", () => {
@@ -43,7 +43,7 @@ describe("clicking in a comment", () => {
     })
     view = new EditorView({ parent: host, state })
     view.focus()
-    // drawn, the descriptions measured, their rows set, drawn again
+    // drawn, the descriptions measured, those too wide cut short, drawn again
     for (let frame = 0; frame < 6; frame++) await new Promise((done) => requestAnimationFrame(done))
     return view
   }
@@ -81,21 +81,31 @@ describe("clicking in a comment", () => {
     return view.state.sliceDoc(from, to)
   }
 
-  test("a description too wide for its band is drawn in rows under the head", async () => {
+  test("a description too wide for its band is cut short on it, its head one line tall", async () => {
     const view = await bubblyEditor(500)
-    const head = view.contentDOM.querySelectorAll(".cm-line")[3]!
-    expect(head.classList.contains("cmb-head-description-below")).toBe(true)
-    expect(view.coordsAtPos(at("the card"))!.top).toBeGreaterThan(view.coordsAtPos(at("if its rank"))!.bottom)
+    const head = view.contentDOM.querySelectorAll<HTMLElement>(".cm-line")[3]!
+    expect(head.classList.contains("cmb-description-cut")).toBe(true)
+    expect(head.getBoundingClientRect().height).toBe(25)
+    expect(view.coordsAtPos(at("e.g."))!.top).toBe(view.coordsAtPos(at("if its rank"))!.top)
   })
 
-  test("a click on each letter of a description under its head puts the caret there", async () => {
-    const view = await bubblyEditor(500)
+  test("a click on each letter shown of a description cut short puts the caret there", async () => {
+    // room for a few of its letters
+    const view = await bubblyEditor(580)
+    expect(view.contentDOM.querySelectorAll(".cm-line")[3]!.classList.contains("cmb-description-cut")).toBe(true)
+    const shown = view.contentDOM.querySelectorAll(".cmb-description")[1]!.getBoundingClientRect()
+    let clicked = 0
     for (let pos = at("e.g."); pos < at('face card"', 10); pos++) {
-      await press(view, middleOf(view, pos))
+      const middle = middleOf(view, pos)
+      // past the `…`:  not drawn
+      if (middle.clientX > shown.right - 16) break
+      await press(view, middle)
       const { head } = view.state.selection.main
       // the middle of a letter is its start or its end
       expect([pos, pos + 1], `${pos}: ${CARD.slice(pos, pos + 1)}`).toContain(head)
+      clicked++
     }
+    expect(clicked).toBeGreaterThan(3)
   })
 
   test("a click past a description's end puts the caret at its line's end", async () => {

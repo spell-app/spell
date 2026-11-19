@@ -62,6 +62,30 @@ It's a link, not a copy:  `spell` runs [bin/spell.mjs](../bin/spell.mjs) in this
   After that the base answers in about 0.1 s, and a language command, which loads the parser and Spell's rules,
   in about one:  `spell explain print` and `spell parse` each took 0.9 s here.
 
+### Your checkout, in a project that installs Spell from npm
+
+A project that depends on `spell` runs the npm copy.
+One command, in the project, makes its `spell` run your checkout instead, for you alone:
+
+```sh
+cd ~/work/acme-spell
+yarn spell local on ~/www/spell     # or npx spell ...;  spell ... when it's on your PATH
+yarn start                          # the page server and editor from ~/www/spell, the org still acme's
+```
+
+- It writes the project's `.spell/kit.json5`, naming your checkout, and adds `/.spell/` to its `.gitignore` when git
+  doesn't leave it out already:  everyone else runs npm's copy, and nothing committed changes.
+- With no checkout named:  the one this `spell` runs from, else `~/www/spell`.
+- `spell local` alone says which Spell runs here, and why;  `spell local off` goes back to npm's.
+- Your checkout runs from its own install:  `yarn install` there first, or nothing is written.
+- For every project on the machine:  `export SPELL_KIT=~/www/spell`, in your shell profile.
+  It wins over a project's file, so one command can try another checkout.
+- A checkout named that can't run stops `spell` with one line saying why, never npm's copy instead.
+- It covers `spell` and the commands under it (`spell epic` ...), `epic` from npm's `spell-epic`, and `spell-pack`;
+  not `spell-types`.
+- Only from a release that has it:  0.8.13 or later.
+- The other way, `"spell": "portal:../spell"` in the project's `package.json`, changes its committed files.
+
 ## Naming projects:  a path, an address or a group
 
 Every command is `spell <command> [what] [--flags]`, and `--help` after any of them says the rest.

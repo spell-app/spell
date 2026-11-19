@@ -7,6 +7,7 @@
  */
 import { deepEqual, equal } from "node:assert/strict"
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -68,7 +69,7 @@ test("isLoopback():  plain http on this machine only", () => {
   equal(isLoopback("not a url"), false)
 })
 
-test("docViewFor():  details pages to Details, everything else to Review (epic `epic-engine` P59, Q73)", () => {
+test("docViewFor():  details pages to Details, epic docs to Epic Docs, everything else to Review (epic `epic-engine` P59)", () => {
   const content = "/Users/o/www/spell/spell.epics"
   // an epic page and a saga page:  Review
   equal(docViewFor(`${content}/epics/data/data.plan.html`), "review")
@@ -89,13 +90,17 @@ test("docViewFor():  details pages to Details, everything else to Review (epic `
   equal(docViewFor(`${content}/pages/index.html`), "review")
   equal(docViewFor(`${content}/sagas/index.html`), "review")
   equal(docViewFor(`${content}/epics/data/parts/p1.html`), "review")
+  // the epic tooling's READMEs, rendered by the page server:  Epic Docs, a worktree's address too
+  equal(docViewFor("/_epic/docs/README-epics.md"), "docs")
+  equal(docViewFor("/worktrees/data/_epic/docs/epic/README-setup.md"), "docs")
+  equal(docViewFor(`${content}/guides/_epic/docs/x.html`), "review")
 })
 
-test("docViewNamed():  the two tabs' names;  an older epic's `docs` is Review", () => {
+test("docViewNamed():  the three tabs' names", () => {
   deepEqual(["review", "details", "docs", "Docs", "", undefined, 1].map(docViewNamed), [
     "review",
     "details",
-    "review",
+    "docs",
     undefined,
     undefined,
     undefined,
@@ -275,7 +280,8 @@ test("title bars:  every tab's buttons, each a short plain tooltip, each answere
   const COMMON = ["Back", "Forward", "Reload", "Open in Browser", "Restart Page Server"]
   deepEqual(tooltips("reviewView"), new Set([...COMMON, "Epics Home", "This Epic's Page"]))
   deepEqual(tooltips("detailsView"), new Set([...COMMON, "This Epic's Questions"]))
-  const CATEGORY = { reviewView: "Review", detailsView: "Details" }
+  deepEqual(tooltips("docsView"), new Set([...COMMON, "Epic Docs Home"]))
+  const CATEGORY = { reviewView: "Review", detailsView: "Details", docsView: "Epic Docs" }
   for (const [view, category] of Object.entries(CATEGORY))
     for (const command of buttons(view)) {
       // the Command Palette names the tab by the category;  VS Code shows only the title as the tooltip
@@ -294,21 +300,27 @@ test("title bars:  every tab's buttons, each a short plain tooltip, each answere
   )
 })
 
-test("two side-bar tabs, Review and Details:  no Epic Docs view, nor its commands or setting (epic `epic-engine` Q73)", () => {
+test("three side-bar tabs:  Review (the Spell hat), Epic Docs (books on a shelf), Details;  Owen, 2026-11-19", () => {
   const { contributes } = MANIFEST
   deepEqual(
-    contributes.viewsContainers.secondarySidebar!.map((each) => each.title),
-    ["Review", "Details"]
+    contributes.viewsContainers.secondarySidebar!.map((each) => [each.title, each.icon]),
+    [
+      ["Review", "media/spell.svg"],
+      ["Epic Docs", "$(library)"],
+      ["Details", "$(comment-discussion)"]
+    ]
   )
+  // the hat ships in the .vsix
+  equal(existsSync(join(import.meta.dirname, "../../vscode/media/spell.svg")), true)
   deepEqual(
     Object.values(contributes.views).flatMap((views) => views.map((view) => view.id)),
-    ["spellEpic.reviewView", "spellEpic.detailsView"]
+    ["spellEpic.reviewView", "spellEpic.docsView", "spellEpic.detailsView"]
   )
+  // NOT the first Epic Docs tab's id, nor its setting (epic `epic-engine` Q73):  a new view, with its own place
   const everything = JSON.stringify(contributes)
-  equal(everything.includes("spellEpic.docView"), false)
-  equal(everything.includes("Epic Docs"), false)
+  equal(everything.includes("spellEpic.docView."), false)
   equal(contributes.configuration?.properties["spellEpic.docPreview.location"], undefined)
-  // and the views the source makes are the manifest's
-  deepEqual(DOC_VIEWS, ["review", "details"])
-  equal(DOC_VIEW_SOURCE.includes("spellEpic.docView"), false)
+  // and the views the source makes are the manifest's, in its order
+  deepEqual(DOC_VIEWS, ["review", "details", "docs"])
+  for (const view of contributes.views["spell-epic-docs"]!) equal(DOC_VIEW_SOURCE.includes(`"${view.id}"`), true)
 })
