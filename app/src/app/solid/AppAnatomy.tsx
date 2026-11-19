@@ -999,6 +999,8 @@ class AnatomyStyles {
       this.set.set(element, kept)
     }
     if (element.style.getPropertyValue(property) !== value) element.style.setProperty(property, value)
+    // as the browser reads it back, which may differ from what was written (a colour, a `var()`)
+    this.lastSet.set(element, { ...this.lastSet.get(element), [property]: element.style.getPropertyValue(property) })
     this.written.set(element, element.getAttribute("style"))
   }
 
@@ -1028,17 +1030,26 @@ class AnatomyStyles {
     )
   }
 
-  /** `element`'s own inline `property`, before Anatomy set it. */
+  /**
+   * `element`'s own inline `property`:  as it was before Anatomy set it, or as the app set it since.
+   * - The app's own write wins, and is what's put back:  a card dragged in Play moves by its `translate` (T120).
+   */
   ownStyle(element: HTMLElement, property: string): string {
     const kept = this.set.get(element)
-    return kept && property in kept ? kept[property]! : element.style.getPropertyValue(property)
+    const now = element.style.getPropertyValue(property)
+    if (!kept || !(property in kept)) return now
+    if (now !== this.lastSet.get(element)?.[property]) kept[property] = now
+    return kept[property]!
   }
 
-  /** Each element's inline styles before Anatomy set them:  `""` for none. */
+  /** Each element's inline styles before Anatomy set them (or as the app set them since):  `""` for none. */
   private set = new Map<HTMLElement, Record<string, string>>()
 
   /** Each element's `style` attribute as Anatomy last left it, to tell its own writes from the app's. */
   private written = new WeakMap<Element, string | null>()
+
+  /** What Anatomy set each element's properties to last:  another value there now is the app's own. */
+  private lastSet = new WeakMap<HTMLElement, Record<string, string>>()
 }
 
 /** What's selected, outlined on its floor:  the views' colour, as its tag. */

@@ -319,7 +319,7 @@ describe.skipIf(!SERVING)("Anatomy, over Solitaire", { timeout: 180_000 }, () =>
     expect(warnings).toEqual([])
   })
 
-  test("in Play, a click on the stock deals a card, and a drag off the cards turns it", async () => {
+  test("in Play, a click on the stock deals a card, a drag off the cards turns it, and a card drags in 3D", async () => {
     const turn = () => page.evaluate(() => (window as unknown as TestWindow).AppAnatomy.view)
     await page.locator(".AnatomyButton [part~=item]").first().click()
     await page.waitForTimeout(2500)
@@ -351,6 +351,75 @@ describe.skipIf(!SERVING)("Anatomy, over Solitaire", { timeout: 180_000 }, () =>
     await page.mouse.up()
     expect((await turn()).spin).toBeCloseTo(playTurn.spin + 60 * 0.4, 0)
 
+    // a card dragged in Play stays under the pointer, at its depth, in the turned board's plane (T120)
+    const cards = await page.evaluate(() => {
+      const draggable = (element: Element) => element.matches(":state(draggable)")
+      return [...document.querySelectorAll("solitaire-column, solitaire-discard-pile")]
+        .map((pile) => pile.lastElementChild)
+        .filter((top) => top && draggable(top))
+        .map((top) => top!.id)
+    })
+    const centreOf = (id: string) =>
+      page.evaluate((cardId) => {
+        const box = document.getElementById(cardId)!.getBoundingClientRect()
+        return { x: (box.left + box.right) / 2, y: (box.top + box.bottom) / 2 }
+      }, id)
+    // the first that shows:  one may be wholly under a pile lifted over it
+    let card = ""
+    let grab = { x: 0, y: 0 }
+    for (const each of cards) {
+      grab = await spotIn(`[id="${each}"]`).catch(() => grab)
+      if (grab.x) {
+        card = each
+        break
+      }
+    }
+    expect(card).not.toBe("")
+    const held = await centreOf(card)
+    await page.mouse.move(grab.x, grab.y)
+    await page.mouse.down()
+    for (let step = 1; step <= 10; step++) await page.mouse.move(grab.x + step * 6, grab.y + step * 3)
+    const moved = await centreOf(card)
+    const depth = await page.evaluate((cardId) => document.getElementById(cardId)!.style.translate.split(" ")[2], card)
+    await page.mouse.move(grab.x, grab.y, { steps: 5 })
+    await page.mouse.up()
+    await page.waitForTimeout(600)
+    expect(Math.abs(moved.x - held.x - 60)).toBeLessThan(8)
+    expect(Math.abs(moved.y - held.y - 30)).toBeLessThan(8)
+    expect(depth).toMatch(/px$/)
+
+    // and dropped on a column that takes it, it moves there, when the deal has such a move
+    const move = await page.evaluate(() => {
+      const draggable = (element: Element) => element.matches(":state(draggable)")
+      const ranks: Record<string, number> = { ace: 1, jack: 11, queen: 12, king: 13 }
+      const valueOf = (id: string) => {
+        const [rank = "", , suit = ""] = id.split("-")
+        return { value: ranks[rank] ?? Number(rank), isRed: /hearts|diamonds/.test(suit) }
+      }
+      const columns = [...document.querySelectorAll("solitaire-column")]
+      for (const pile of document.querySelectorAll("solitaire-column, solitaire-discard-pile")) {
+        const top = pile.lastElementChild
+        if (!top || !draggable(top)) continue
+        for (const column of columns) {
+          const onto = column.lastElementChild
+          if (!onto || onto === top || !draggable(onto)) continue
+          const [one, other] = [valueOf(top.id), valueOf(onto.id)]
+          if (other.value === one.value + 1 && other.isRed !== one.isRed)
+            return { card: top.id, onto: onto.id, to: column.id }
+        }
+      }
+      return undefined
+    })
+    if (move) {
+      const from = await spotIn(`[id="${move.card}"]`)
+      const to = await spotIn(`[id="${move.onto}"]`)
+      await page.mouse.move(from.x, from.y)
+      await page.mouse.down()
+      await page.mouse.move(to.x, to.y, { steps: 12 })
+      await page.mouse.up()
+      await page.waitForTimeout(800)
+      expect(await page.evaluate((id) => document.getElementById(id)!.parentElement!.id, move.card)).toBe(move.to)
+    }
     await page.locator(".AnatomyButton [part~=item]").first().click()
     await page.waitForTimeout(800)
     expect(warnings).toEqual([])
