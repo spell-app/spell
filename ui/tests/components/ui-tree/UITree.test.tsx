@@ -1743,16 +1743,28 @@ describe("<ui-tree> opening to a depth, and `filter` through the whole tree", ()
 })
 
 describe('<ui-tree appearance="columns"> from `items`, a big column', () => {
-  type TreeHost = HTMLElement & { items?: TreeItemData[]; path?: string[]; filter?: string; openTo(levels: number): Promise<void> }
+  type TreeHost = HTMLElement & {
+    items?: TreeItemData[]
+    path?: string[]
+    filter?: string
+    openTo(levels: number): Promise<void>
+  }
 
   /** Rows per big column. */
   const COUNT = 5_000
 
-  /** A column of `COUNT` rows;  the last one holds two more. */
-  function bigColumn(): TreeItemData[] {
+  /** The last row's label, in `bigColumn({ isLongLast })`:  far longer than the rest. */
+  const LONG_LABEL = "The very last row, with a far longer label than every other"
+
+  /**
+   * A column of `COUNT` rows;  the last one holds two more.
+   * - `which`:  each row's which, `w` and `www` in turn;  `isLongLast`:  the last row's label is `LONG_LABEL`.
+   */
+  function bigColumn({ which = false, isLongLast = false } = {}): TreeItemData[] {
     return Array.from({ length: COUNT }, (_, index) => ({
       id: `row-${index}`,
-      label: `Row ${index}`,
+      label: isLongLast && index === COUNT - 1 ? LONG_LABEL : `Row ${index}`,
+      ...(which && { which: index % 2 ? "www" : "w" }),
       ...(index === COUNT - 1 && {
         children: [
           { id: "inner-a", label: "Inner A" },
@@ -1762,11 +1774,11 @@ describe('<ui-tree appearance="columns"> from `items`, a big column', () => {
     }))
   }
 
-  async function bigTree(): Promise<TreeHost> {
+  async function bigTree(attributes = "", items = bigColumn()): Promise<TreeHost> {
     const host = (await ElementFixture.render(
-      `<ui-tree appearance="columns" label="Big" style="height: 300px; width: 700px"></ui-tree>`
+      `<ui-tree appearance="columns" ${attributes} label="Big" style="height: 300px; width: 700px"></ui-tree>`
     )) as TreeHost
-    host.items = bigColumn()
+    host.items = items
     await ElementFixture.settle()
     return host
   }
@@ -1830,5 +1842,56 @@ describe('<ui-tree appearance="columns"> from `items`, a big column', () => {
     host.path = [`row-${COUNT - 1}`, "inner-b"]
     await ElementFixture.settle()
     expect(dataRow(host, "inner-b")?.classList).toContain("selected")
+  })
+
+  it("each row's `which` stays put as more rows draw in:  its track is as wide as the data's widest label", async () => {
+    const host = await bigTree("", bigColumn({ which: true }))
+    await nextPaint()
+    const column = host.shadowRoot!.querySelector<HTMLElement>('ul[data-depth="0"]')!
+    const whichLeft = () => dataRow(host, "row-0")!.querySelector(".which")!.getBoundingClientRect().left
+    const before = whichLeft()
+    const first = rowsIn(host)
+    // the words track is set from the data:  "Row 4999" is wider than "Row 9", the widest drawn so far
+    expect(column.style.getPropertyValue("--_tree-words-track")).toMatch(/px$/)
+    for (let at = 0; at < 10; at++) {
+      column.scrollTop = column.scrollHeight
+      await nextPaint()
+    }
+    expect(rowsIn(host)).toBeGreaterThan(first)
+    column.scrollTop = 0
+    await nextPaint()
+    expect(whichLeft()).toBe(before)
+  })
+
+  it('`size="auto"` sizes it from the data, not the rows drawn;  `sticky-path` names its pick', async () => {
+    const host = await bigTree('size="auto" sticky-path', bigColumn({ isLongLast: true }))
+    await nextPaint()
+    await nextPaint()
+    const column = host.shadowRoot!.querySelector<HTMLElement>('ul[data-depth="0"]')!
+    // the long row isn't drawn, yet the column is wide enough for it
+    expect(dataRow(host, `row-${COUNT - 1}`)).toBeNull()
+    const words = dataRow(host, "row-0")!.querySelector(".words")!
+    const canvas = document.createElement("canvas").getContext("2d")!
+    canvas.font = getComputedStyle(words).font
+    const width = column.getBoundingClientRect().width
+    expect(width).toBeGreaterThan(canvas.measureText(LONG_LABEL).width)
+
+    // End draws down to the long row:  it shows whole, and the column keeps its width
+    dataRow(host, "row-0")!.focus()
+    await press(host, "End")
+    await nextPaint()
+    const long = dataRow(host, `row-${COUNT - 1}`)!
+      .querySelector(".words")!
+      .getBoundingClientRect()
+    expect(long.right).toBeLessThanOrEqual(column.getBoundingClientRect().right)
+    expect(column.getBoundingClientRect().width).toBe(width)
+
+    // the path line names the picks;  a click on the first picks it again, keeping the column after it
+    await press(host, "ArrowRight")
+    await nextPaint()
+    expect(pathWords(host)).toEqual([LONG_LABEL, "Inner A"])
+    await clickPath(host, 0)
+    expect(host.path).toEqual([`row-${COUNT - 1}`, "inner-a"])
+    expect(dataRow(host, `row-${COUNT - 1}`)?.classList).toContain("selected")
   })
 })

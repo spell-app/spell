@@ -1259,38 +1259,108 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
 
   /**
    * From `items`:  the width column `index`'s rows need, in px, measured from the DATA, not the rows drawn.
-   * - Each label and `which` is measured in its row's font (`TreeMeasure.widthOf()`), so a row needn't be drawn
+   * - Its words' and `which`'s tracks, as `textTracksOf()` measures them, so a row needn't be drawn
    *   (`Row Windowing` draws only those in view).
    * - What else a row takes (its icon, count, chevron, margins, the column's scroll bar) is the column's width
    *   less its words' and `which`'s tracks and the room after them:  the grid makes them the same in every row.
    */
   private fitOfItemColumn(index: number): number | undefined {
-    const column = this.domElement.renderRoot.querySelector<HTMLElement>(`ul[data-depth="${index}"]`)
-    const words = column?.querySelector(".column-row .words")
+    const column = this.itemColumnElement(index)
     const items = this.shownIn(this.columnLists[index] ?? [], index)
-    if (!column || !words || !items.length) return undefined
+    const text = column && items.length ? this.textTracksOf(column, items) : undefined
+    if (!column || !text) return undefined
     const tracks = getComputedStyle(column).gridTemplateColumns.split(/\s+/).map(parseFloat)
     const [, wordsTrack = 0, whichTrack = 0, room = 0] = tracks
     const others = column.offsetWidth - wordsTrack - whichTrack - room
-    const widest = (texts: (string | undefined)[], sample: Element) => {
-      const font = TreeMeasure.fontOf(sample)
-      return Math.max(0, ...texts.map((text) => (text ? (TreeMeasure.widthOf(text, font) ?? 0) : 0)))
-    }
+    return Math.ceil(others + text.words + (text.which ?? whichTrack))
+  }
+
+  /** Column `index`'s `<ul>`, from `items`;  `undefined` when it isn't drawn. */
+  private itemColumnElement(index: number): HTMLElement | undefined {
+    return this.domElement.renderRoot.querySelector<HTMLElement>(`ul[data-depth="${index}"]`) ?? undefined
+  }
+
+  ////////////////
+  // ## A column's words and `which` tracks, from its data
+  ////////////////
+
+  /**
+   * Each column's words and `which` tracks, by level, in px:  as wide as its widest label and `which`, from `items`.
+   * - Measured from the data, so they don't move as `Row Windowing` draws more rows in (I13).
+   * - Set on the column as `--_tree-words-track` / `--_tree-which-track`;  `undefined`:  sized from the rows drawn.
+   */
+  @E.state({ equals: E.isSameList }) private accessor textTracks: readonly (TextTracks | undefined)[] = []
+
+  /**
+   * What the columns' text tracks are measured from:  each column's shown items, and what the rows show.
+   * - `undefined` while there's nothing to measure:  not columns from `items`, or not ready.
+   */
+  protected get textTrackSources(): { lists: readonly (readonly TreeItemData[])[]; show: string | undefined } | undefined {
+    if (!this.isColumns || !this.isReady || !this.hasItemData) return undefined
+    return { lists: this.columnLists.map((list, depth) => this.shownIn(list ?? [], depth)), show: this.show }
+  }
+
+  /** The columns' items changed, or what their rows show:  measure their text tracks again, once they're drawn. */
+  @E.onChange("textTrackSources")
+  protected onTextTrackSourcesChanged(sources: UITree["textTrackSources"]) {
+    if (!sources || isServer) return undefined
+    return E.beforeNextPaint(() => {
+      const tracks = sources.lists.map((items, index) => {
+        const column = this.itemColumnElement(index)
+        return column && items.length ? this.textTracksOf(column, items) : undefined
+      })
+      if (!E.isSameList(tracks, this.textTracks)) this.textTracks = tracks
+    })
+  }
+
+  /**
+   * The words and `which` tracks `items` need in `column`, in px:  each label and `which` measured in its row's
+   * font (`TreeMeasure.widthOf()`), from one row drawn;  `undefined` while no row is.
+   * - `which`:  its widest, with its margin;  `undefined` when no drawn row has one to take its font from,
+   *   but some item does, so the grid sizes it from the rows drawn.
+   * - Kept per list and font:  a pick that leaves a column's list alone doesn't measure its 5,000 labels again.
+   */
+  private textTracksOf(column: HTMLElement, items: readonly TreeItemData[]): TextTracks | undefined {
+    const words = column.querySelector(".column-row .words")
+    if (!words) return undefined
     const which = this.shows("which") ? column.querySelector(".column-row .which") : null
-    const whichWidth = which
-      ? widest(
-          items.map((item) => item.which),
-          which
-        ) + (parseFloat(getComputedStyle(which).marginInlineStart) || 0)
-      : 0
-    return Math.ceil(
-      others +
-        widest(
-          items.map((item) => item.label),
-          words
-        ) +
-        whichWidth
-    )
+    const wordsFont = TreeMeasure.fontOf(words)
+    const whichFont = which ? TreeMeasure.fontOf(which) : ""
+    const whichMargin = which ? parseFloat(getComputedStyle(which).marginInlineStart) || 0 : 0
+    const key = `${wordsFont}|${whichFont}|${whichMargin}|${this.shows("which")}`
+    const kept = this.measuredTracks.get(items)
+    if (kept?.key === key) return kept.tracks
+    const widest = (texts: (string | undefined)[], font: string) =>
+      Math.ceil(Math.max(0, ...texts.map((text) => (text ? (TreeMeasure.widthOf(text, font) ?? 0) : 0))))
+    const hasWhich = this.shows("which") && items.some((item) => item.which)
+    const tracks: TextTracks = {
+      words: widest(
+        items.map((item) => item.label),
+        wordsFont
+      ),
+      which: !hasWhich
+        ? 0
+        : which
+          ? widest(
+              items.map((item) => item.which),
+              whichFont
+            ) + Math.ceil(whichMargin)
+          : undefined
+    }
+    this.measuredTracks.set(items, { key, tracks })
+    return tracks
+  }
+
+  /** `textTracksOf()`'s answers, by list:  with the fonts they were measured in (`key`). */
+  private readonly measuredTracks = new WeakMap<readonly TreeItemData[], { key: string; tracks: TextTracks }>()
+
+  /** Column `depth`'s text tracks, as the CSS variables its grid reads. */
+  private textTracksCSS(depth: number): Record<string, string | undefined> {
+    const tracks = this.textTracks[depth]
+    return {
+      "--_tree-words-track": tracks ? `${tracks.words}px` : undefined,
+      "--_tree-which-track": tracks?.which !== undefined ? `${tracks.which}px` : undefined
+    }
   }
 
   /**
@@ -2341,7 +2411,11 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
         data-depth={depth}
         aria-label={this.titleForColumn(depth)}
         aria-busy={list() ? undefined : "true"}
-        style={{ width: this.columnWidthCSS(depth), "margin-inline-end": this.peekMarginCSS(depth) }}
+        style={{
+          width: this.columnWidthCSS(depth),
+          "margin-inline-end": this.peekMarginCSS(depth),
+          ...this.textTracksCSS(depth)
+        }}
       >
         <Show when={this.titleForColumn(depth)}>
           {(title) => (
@@ -2350,6 +2424,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
             </li>
           )}
         </Show>
+        {this.trackProbe(shown)}
         {this.itemRows(shown, depth)}
         <Show when={!list()}>
           <li class="loading" role="none">
@@ -2385,9 +2460,42 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
         const list = shown()
         const key = this.keyItemIn(depth)
         const pick = this.openPath[depth]
-        return Math.max(key ? list.indexOf(key) : -1, list.findIndex((item) => item.id === pick))
+        return Math.max(
+          key ? list.indexOf(key) : -1,
+          list.findIndex((item) => item.id === pick)
+        )
       }
     })
+  }
+
+  /**
+   * An empty row that holds open the column's icon, count and chevron tracks as wide as any of its rows needs them,
+   * though that row isn't drawn yet (`Row Windowing`):  no height, hidden, out of the accessibility tree.
+   * - Its icon when any item has one, its widest count (tabular figures, so the longest), its chevron when any item
+   *   has children:  so neither the parts nor `size="auto"`'s width move as rows draw in (I13).
+   * - The words and `which` tracks come from `textTracks` instead:  their widths need measuring.
+   */
+  private trackProbe(shown: () => readonly TreeItemData[]) {
+    return (
+      <li class="track-probe" role="none" aria-hidden="true">
+        {(() => {
+          const items = shown()
+          const icon = this.shows("icon") ? items.find((item) => item.icon)?.icon : undefined
+          const counts = this.shows("count") ? items.map((item) => this.countOf(item) ?? "").map(String) : []
+          const count = counts.reduce((longest, each) => (each.length > longest.length ? each : longest), "")
+          const hasChevron = this.shows("chevron") && items.some((item) => this.hasChildren(item))
+          return [
+            icon && (
+              <span class="icon">
+                <ui-icon name={icon} />
+              </span>
+            ),
+            count && <span class="count">{count}</span>,
+            hasChevron && <span class="chevron" />
+          ]
+        })()}
+      </li>
+    )
   }
 
   /** `item`'s row in column `depth`:  icon, label and which, count, chevron, each as `show` says. */
@@ -2589,6 +2697,14 @@ function wordsOf(item: TreeItemData): string {
 /** Was `event` a click on a match elsewhere?  Its own handler picks it:  the row it's drawn in isn't clicked. */
 function isMatchClick(event: Event): boolean {
   return event.composedPath().some((target) => (target as Element).classList?.contains("match"))
+}
+
+/** A column's words and `which` tracks, in px (`UITree.textTracks`). */
+type TextTracks = {
+  /** its widest label */
+  words: number
+  /** its widest `which`, with its margin;  `undefined`:  sized from the rows drawn */
+  which: number | undefined
 }
 
 /** A row the path line names:  a `<ui-tree-item>`, or an `items` entry. */

@@ -318,8 +318,14 @@
   .column.items {
     position: relative;
     display: grid;
-    /* icon | words | which | (room) | count | chevron:  a part a row doesn't draw leaves its track 0 wide */
-    grid-template-columns: auto minmax(0, max-content) minmax(0, max-content) 1fr auto auto;
+    /*
+     * icon | words | which | (room) | count | chevron:  a part a row doesn't draw leaves its track 0 wide;
+     * words and which as wide as the column's widest, measured from its data (`UITree.textTracks`), so they don't
+     * move as more rows draw in;  until then, from the rows drawn
+     */
+    grid-template-columns:
+      auto minmax(0, var(--_tree-words-track, max-content)) minmax(0, var(--_tree-which-track, max-content))
+      1fr auto auto;
     align-content: start;
     margin: 0;
     padding: 0 0 4px;
@@ -335,7 +341,8 @@
   .column.items > .empty {
     grid-column: 1 / -1;
   }
-  .column-row {
+  .column-row,
+  .track-probe {
     display: grid;
     grid-template-columns: subgrid;
     grid-column: 1 / -1;
@@ -347,6 +354,13 @@
     border-radius: var(--ui-radius-s, 4px);
     white-space: nowrap;
     outline: none;
+  }
+  /* the empty row holding the icon, count and chevron tracks open (`UITree.trackProbe()`):  takes no height */
+  .column.items > .track-probe {
+    visibility: hidden;
+    min-height: 0;
+    height: 0;
+    overflow: hidden;
   }
   .column-row:hover {
     background: var(--_ui-tree-hover-background);
@@ -374,7 +388,7 @@
     color: inherit;
   }
   /* a box around the `<ui-icon>`, which is `display: contents`, so the first track holds it */
-  .column-row > .icon {
+  :is(.column-row, .track-probe) > .icon {
     grid-column: 1;
     display: inline-flex;
     margin-inline-end: var(--_ui-tree-gap);
@@ -389,7 +403,7 @@
     grid-column: 3;
     margin-inline-start: 0.33em;
   }
-  .column-row > .count {
+  :is(.column-row, .track-probe) > .count {
     grid-column: 5;
     justify-self: end;
     margin-inline-start: var(--_ui-tree-gap);
@@ -398,7 +412,7 @@
     color: var(--_ui-tree-muted-color);
   }
   /* the chevron, pointing to the next column:  the same stroke as a markup row's */
-  .column-row > .chevron {
+  :is(.column-row, .track-probe) > .chevron {
     grid-column: 6;
     width: 0.42em;
     height: 0.42em;
@@ -460,6 +474,7 @@
   .column-edge.narrow,
   .column-edge.covered,
   .column.narrow > .empty,
+  .column.narrow > .track-probe,
   .column.narrow > .column-row:not(.on-path, .selected) {
     display: none;
   }
