@@ -1032,7 +1032,11 @@ The shared folders:
 - [pages.js](tools/pages.js) has a constant for each, and `findPages()` walks them.
   - `PAGES`, `GUIDES`, `EPICS`, `TEMPLATES` (the engine's, `templates/...` by `pagePath()`), `REPO_TEMPLATES`
 - [The docs' home page](../../spell.epics/pages/index.html):  a routing page (P5 of `claude-design`).
-  - One card per area, each with its count:  Guides · Sagas · Epics · Templates
+  - One card per area, each with its count:  Guides · Sagas · Epic Pages · Templates
+    - each card's description on two lines, broken at its first colon (`descriptionLines()`)
+    - the Epic Pages card:  the open epics worked on in the last week, a pill each in two columns (`recentEpics()`,
+      J276), as of the last `epic pages index`
+    - the top bar's tab is "Epic Pages" too, and the bar says "Spell Epic" beside the hat (`SiteHeader`)
     - Spell's own areas left out (2026-11-18, epic `epic-engine` J275:  "Remove anything Spell related in this page
       permanently.  No longer relevant to Epics"):  Epic/UI, Spell/UI, App, App/UI and Brand had cards, and tabs;
       their pages are still served at their addresses (`/components/ui/`, `/editor/`, `/brand/`)
