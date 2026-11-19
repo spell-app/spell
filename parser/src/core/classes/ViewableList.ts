@@ -2,6 +2,7 @@ import h from "@solidjs/h"
 
 import type { Drawing } from "spell/parser/core/drawing"
 import { core } from "spell/parser/core/core"
+import { VIEW_MARK } from "spell/parser/core/core.types"
 import { noAbilities } from "spell/parser/core/abilities"
 // Import directly to avoid circular import
 import { List } from "./List"
@@ -107,3 +108,6 @@ export class ViewableList<T = unknown> extends List<T> {
     return core.drawThing(item) ?? (item == null ? null : String(item))
   }
 }
+
+// what tells a view class from another copy of the runtime's -- see `VIEW_MARK`
+Object.defineProperty(ViewableList.prototype, VIEW_MARK, { value: true })

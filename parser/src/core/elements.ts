@@ -16,7 +16,7 @@
 import { dedent, elementTagFor, schemaOf, type Schema } from "spell/util"
 
 import { core, programThings, recordingSettings } from "./core"
-import { defineCoreModule } from "./core.types"
+import { defineCoreModule, VIEW_MARK } from "./core.types"
 import type { ShownHistory } from "./undoing"
 import { App } from "./classes/App"
 import { View } from "./classes/View"
@@ -108,12 +108,13 @@ export const elementsMethods = defineCoreModule({
    *   when one of its things is first drawn (`elementFor()`), else in a microtask.
    *   Not now:  the class's later statics, e.g. its `css`, aren't set yet.
    * - `undefined`, doing nothing, for a class that isn't a view.
+   *   A view class of ANOTHER copy of the runtime (its own `View`) isn't one of ours:  a warning says so.
    * - SIDE EFFECT:  the class keeps its tag (`elementTagOf()`).
    * - SIDE EFFECT:  the program's things know the class now (`core.things`), before any of its things is made:
    *   so a card's element finds its pile's class on a page that only mirrors the program (`elementApiOf()`).
    */
   defineElement(Class: unknown, project: string, name?: string): string | undefined {
-    if (!isViewClass(Class)) return undefined
+    if (!isViewClass(Class, "defineElement")) return undefined
     const tag = elementTagFor(project, name ?? Class.name)
     Object.defineProperty(Class, ELEMENT_TAG, { value: tag, configurable: true })
     programThings()?.addClasses({ [Class.name]: Class })
@@ -138,7 +139,7 @@ export const elementsMethods = defineCoreModule({
    * - SIDE EFFECT:  `Class` keeps it, as its own -- see `elementClassOf()`.
    */
   useElement(Class: unknown, ElementClass: Function): void {
-    if (!isViewClass(Class)) return
+    if (!isViewClass(Class, "useElement")) return
     Object.defineProperty(Class, ELEMENT_CLASS, { value: ElementClass, configurable: true })
   },
 
@@ -359,11 +360,22 @@ function tellDefiner(Class: Function, tag: string): void {
   core.elementDefiner(tag, Class)
 }
 
-/** Is `value` a class of views:  `View`, `ViewableList`, or below them? */
-function isViewClass(value: unknown): value is Function {
+/**
+ * Is `value` a class of views:  `View`, `ViewableList`, or below them?
+ * - A view class of ANOTHER copy of the runtime, below its own `View`, isn't:
+ *   `method` warns about it, as its element will never be defined (epic `from-console` P13).
+ *   It's how a program run on one copy and linked to another fails;  silent, it drew as plain unknown tags.
+ */
+function isViewClass(value: unknown, method: string): value is Function {
   if (typeof value !== "function" || !value.name) return false
-  const { prototype } = value as { prototype?: unknown }
-  return prototype instanceof View || prototype instanceof ViewableList
+  const { prototype } = value as { prototype?: object }
+  if (prototype instanceof View || prototype instanceof ViewableList) return true
+  if (prototype && VIEW_MARK in prototype)
+    console.warn(
+      `core.${method}():  ${value.name} is a view of another copy of the runtime, not this one;\n` +
+        "its element won't be defined.  The program should be linked to the runtime it runs on."
+    )
+  return false
 }
 
 /**

@@ -1,4 +1,4 @@
-import { describe, test, expect, afterEach } from "vite-plus/test"
+import { describe, test, expect, afterEach, vi } from "vite-plus/test"
 
 import { core, Thing, View, ViewableList, css, elementTagFor } from "spell/parser/core"
 
@@ -44,6 +44,24 @@ describe("views' elements", () => {
     expect(core.elementTagOf(new Pile())).toBe("solitaire-pile")
     expect(Note.elementTag).toBeUndefined()
     expect(core.elementTagOf(new Note())).toBeUndefined()
+  })
+
+  test("a view of another copy of the runtime gets no tag, and a warning says why (epic `from-console` P13)", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    try {
+      // another copy's `View`:  marked as one, but not this copy's
+      class OtherView {}
+      Object.defineProperty(OtherView.prototype, Symbol.for("spell-parser:view"), { value: true })
+      class Card extends OtherView {}
+      expect(core.defineElement(Card, "Solitaire")).toBeUndefined()
+      expect(warn).toHaveBeenCalledOnce()
+      expect(String(warn.mock.calls[0]![0])).toMatch(/^core\.defineElement\(\):  Card is a view of another copy/)
+      // a class that's no view at all stays quiet
+      expect(core.defineElement(class Note {}, "Solitaire")).toBeUndefined()
+      expect(warn).toHaveBeenCalledOnce()
+    } finally {
+      warn.mockRestore()
+    }
   })
 
   test("loaded over the running program, a view class's tag is told only once the running things are its (I47)", async () => {
