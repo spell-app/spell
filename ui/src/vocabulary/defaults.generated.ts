@@ -570,6 +570,13 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "value", kind: "json", group: "form" },
     { name: "debug", kind: "boolean", group: "advanced" }
   ],
+  "ui-graph": [
+    { name: "graph", kind: "json", group: "content" },
+    { name: "child-view", kind: "enum", group: "behaviour", values: ["inline", "modal", "drill"] },
+    { name: "path", kind: "string", group: "behaviour" },
+    { name: "selected", kind: "json", group: "states" },
+    { name: "boundary", kind: "json", group: "content" }
+  ],
   "ui-grid": [
     { name: "columns", kind: "width", group: "layout", values: "widths" },
     { name: "equal-width", kind: "keyOnly", group: "layout" },

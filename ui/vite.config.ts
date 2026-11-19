@@ -124,6 +124,7 @@ export const COMPONENTS = [
   "ui-markdown",
   "ui-tree-diagram",
   "ui-diagram",
+  "ui-graph",
   "ui-theme-editor"
 ] as const
 

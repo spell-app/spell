@@ -18064,6 +18064,393 @@ export interface UIFormAttributes {
 export interface UIFormJSXAttributes
   extends Omit<UIGlobalJSXAttributes<UIHTMLElement<UIFormEventMap>>, keyof UIFormAttributes>, UIFormAttributes {}
 
+/** `<ui-graph>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UIGraphEventMap {
+  /**
+   * `ui-selecting`:  A node, edge or port is about to be selected by a click:  cancel it to keep the selection.
+   * - `event.detail`:  `{ kind: 'node' | 'edge' | 'port', id: string, path: string, item: object, originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-selecting": CustomEvent<{
+    kind: "node" | "edge" | "port"
+    id: string
+    path: string
+    item: object
+    originalEvent?: Event
+  }>
+  /**
+   * `ui-changed`:  What's selected changed:  `value` is the new `selected`;  `item` the node, edge or port itself.  ALSO when the graph shown changes by a drill or a breadcrumb:  `{ kind: 'path', path }` (`path` the new `path`), so one listener keeps a page in step with both.
+   * - `event.detail`:  `{ value: { kind: string, id: string, path: string } | undefined, kind?: string, id?: string, path?: string, item?: object, originalEvent?: Event } | { kind: 'path', path: string, originalEvent?: Event }`
+   */
+  "ui-changed": CustomEvent<
+    | {
+        value: { kind: string; id: string; path: string } | undefined
+        kind?: string
+        id?: string
+        path?: string
+        item?: object
+        originalEvent?: Event
+      }
+    | { kind: "path"; path: string; originalEvent?: Event }
+  >
+  /**
+   * `ui-node-toggled`:  A node with children was opened or closed, by a person or by `open()` / `close()`.
+   * - `event.detail`:  `{ node: object, path: string, open: boolean, view: 'inline' | 'modal' | 'drill', originalEvent?: Event }`
+   */
+  "ui-node-toggled": CustomEvent<{
+    node: object
+    path: string
+    open: boolean
+    view: "inline" | "modal" | "drill"
+    originalEvent?: Event
+  }>
+}
+
+/** `<ui-graph>`'s own attributes, from its vocabulary. */
+export interface UIGraphAttributes {
+  /**
+   * The graph to draw, a `GraphData`:  `nodes` (`id`, `label`, `kind`, `ports`, `children`, `data`) and `edges` (`from` / `to` `{ node, port }`).  An end with no `node` is the enclosing node's port.  A JS property (JSON in the attribute);  set a NEW graph to redraw.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  graph?: unknown
+  /**
+   * The graph to draw, a `GraphData`:  `nodes` (`id`, `label`, `kind`, `ports`, `children`, `data`) and `edges` (`from` / `to` `{ node, port }`).  An end with no `node` is the enclosing node's port.  A JS property (JSON in the attribute);  set a NEW graph to redraw.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `graph` -- `prop:` stays only for compiled spell
+   */
+  "prop:graph"?: unknown
+  /**
+   * How a node's children show when it's opened:  `inline`, inside the node, which grows round them;  `modal`, a graph in a modal;  `drill`, the graph replaced by them, with breadcrumbs back.  A node's own `childView` wins.
+   * - takes:  `inline` · `modal` · `drill`
+   * - default:  `inline`
+   */
+  "child-view"?: "inline" | "modal" | "drill"
+  /**
+   * `child-view`, as the DOM element's property.
+   * @deprecated write `child-view` -- `prop:` stays only for compiled spell
+   */
+  "prop:childView"?: "inline" | "modal" | "drill"
+  /**
+   * The node whose child graph is shown, drilled to, by its ids from the top joined by `/` (`cpu/alu`);  `""`:  the top.  Setting it drills there, loading lazy children on the way;  drilling and the breadcrumbs set it back, with `ui-changed` `{ kind: 'path', path }`.
+   * - takes:  text
+   * - default:  ``
+   */
+  path?: string
+  /**
+   * `path`, as the DOM element's property.
+   * @deprecated write `path` -- `prop:` stays only for compiled spell
+   */
+  "prop:path"?: string
+  /**
+   * PROPERTY:  what's selected, `{ kind: 'node' | 'edge' | 'port', id, path }`;  `undefined`:  nothing.  Clicks set it.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  selected?: unknown
+  /**
+   * PROPERTY:  what's selected, `{ kind: 'node' | 'edge' | 'port', id, path }`;  `undefined`:  nothing.  Clicks set it.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `selected` -- `prop:` stays only for compiled spell
+   */
+  "prop:selected"?: unknown
+  /**
+   * PROPERTY:  the enclosing node's ports, drawn as pins on the graph's sides, for edges with no `node`.  Set by a modal's graph;  a page rarely needs it.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  boundary?: unknown
+  /**
+   * PROPERTY:  the enclosing node's ports, drawn as pins on the graph's sides, for edges with no `node`.  Set by a modal's graph;  a page rarely needs it.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `boundary` -- `prop:` stays only for compiled spell
+   */
+  "prop:boundary"?: unknown
+  /**
+   * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `coin` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "coin"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "coin"
+    | "none"
+  /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
+   * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
+   * - takes:  text
+   */
+  target?: string
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
+  "prop:target"?: string
+  /**
+   * How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font="bold italic"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font="bold serif 10/20"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.
+   * - takes:  space-separated:  `bold` · `heavy` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript` · `all-caps` · `title-caps` · `headline` · `subhead` · `serif` · `sans-serif` · `typewriter`
+   */
+  font?: string
+  /**
+   * `font`, as the DOM element's property.
+   * @deprecated write `font` -- `prop:` stays only for compiled spell
+   */
+  "prop:font"?: string
+  /**
+   * A hard shadow behind its letters, down and to the right, in a hue:  `shadow="yellow"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em).
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
+   */
+  shadow?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * `shadow`, as the DOM element's property.
+   * @deprecated write `shadow` -- `prop:` stays only for compiled spell
+   */
+  "prop:shadow"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * Its box's own width where it sits, any CSS length:  `width="10em"`, `"50%"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns.
+   * - takes:  text
+   */
+  width?: string
+  /**
+   * `width`, as the DOM element's property.
+   * @deprecated write `width` -- `prop:` stays only for compiled spell
+   */
+  "prop:width"?: string
+  /**
+   * The narrowest its box gets, any CSS length:  `min-width="16em"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower.
+   * - takes:  text
+   */
+  "min-width"?: string
+  /**
+   * `min-width`, as the DOM element's property.
+   * @deprecated write `min-width` -- `prop:` stays only for compiled spell
+   */
+  "prop:minWidth"?: string
+  /**
+   * The widest its box gets, any CSS length:  `max-width="36em"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it.
+   * - takes:  text
+   */
+  "max-width"?: string
+  /**
+   * `max-width`, as the DOM element's property.
+   * @deprecated write `max-width` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxWidth"?: string
+  /**
+   * Its tooltip:  the browser's own, written as the element's `title`.
+   * - takes:  text
+   */
+  tooltip?: string
+  /**
+   * `tooltip`, as the DOM element's property.
+   * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
+   */
+  "prop:tooltip"?: string
+  /**
+   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
+   * - takes:  text
+   */
+  label?: string
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
+  "prop:label"?: string
+  /**
+   * People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.
+   * - takes:  text
+   */
+  movable?: string
+  /**
+   * `movable`, as the DOM element's property.
+   * @deprecated write `movable` -- `prop:` stays only for compiled spell
+   */
+  "prop:movable"?: string
+  /**
+   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * - takes:  text
+   */
+  resizable?: string
+  /**
+   * `resizable`, as the DOM element's property.
+   * @deprecated write `resizable` -- `prop:` stays only for compiled spell
+   */
+  "prop:resizable"?: string
+  /**
+   * Shown only on these devices, a comma list:  `on-platform="desktop, tablet"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.
+   * - takes:  text
+   */
+  "on-platform"?: string
+  /**
+   * `on-platform`, as the DOM element's property.
+   * @deprecated write `on-platform` -- `prop:` stays only for compiled spell
+   */
+  "prop:onPlatform"?: string
+  /**
+   * `ui-selecting`:  A node, edge or port is about to be selected by a click:  cancel it to keep the selection.
+   * - `event.detail`:  `{ kind: 'node' | 'edge' | 'port', id: string, path: string, item: object, originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-selecting"?: (event: UIGraphEventMap["ui-selecting"]) => void
+  /**
+   * `ui-changed`:  What's selected changed:  `value` is the new `selected`;  `item` the node, edge or port itself.  ALSO when the graph shown changes by a drill or a breadcrumb:  `{ kind: 'path', path }` (`path` the new `path`), so one listener keeps a page in step with both.
+   * - `event.detail`:  `{ value: { kind: string, id: string, path: string } | undefined, kind?: string, id?: string, path?: string, item?: object, originalEvent?: Event } | { kind: 'path', path: string, originalEvent?: Event }`
+   */
+  "on-ui-changed"?: (event: UIGraphEventMap["ui-changed"]) => void
+  /**
+   * `ui-node-toggled`:  A node with children was opened or closed, by a person or by `open()` / `close()`.
+   * - `event.detail`:  `{ node: object, path: string, open: boolean, view: 'inline' | 'modal' | 'drill', originalEvent?: Event }`
+   */
+  "on-ui-node-toggled"?: (event: UIGraphEventMap["ui-node-toggled"]) => void
+}
+
+/** `<ui-graph>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UIGraphJSXAttributes
+  extends Omit<UIGlobalJSXAttributes<UIHTMLElement<UIGraphEventMap>>, keyof UIGraphAttributes>, UIGraphAttributes {}
+
 /** `<ui-grid>`'s own attributes, from its vocabulary. */
 export interface UIGridAttributes {
   /**
@@ -57670,6 +58057,12 @@ declare module "@solidjs/web/types/jsx.js" {
        * - slots:
        *   - default:  `<ui-item>`s, sub-menus (`<ui-menu position>`), and other content.
        *   - `overflow`:  `shrinkable`:  what the overflow button shows instead of its `…`, e.g. `<ui-icon name="bars">`.
+      /**
+       * `<ui-graph>`:  A graph draws nodes joined by edges, laid out left to right.  A node may hold a graph of its own, opened in place, in a modal, or in its stead.
+       * - also known as:  graph, node graph, network diagram, flow chart, dataflow, netlist, schematic, block diagram, DAG
+       * - events:  `ui-selecting`, `ui-changed`, `ui-node-toggled`
+       */
+      "ui-graph": UIGraphJSXAttributes
        * - events:  `ui-choosing`, `ui-changed`, `ui-form-value`
        */
       "ui-menu": UIMenuJSXAttributes
@@ -58503,3 +58896,4 @@ declare global {
   interface HTMLElementEventMap extends UIEventMap {}
   interface DocumentEventMap extends UIEventMap {}
 }
+    "ui-graph": UIHTMLElement<UIGraphEventMap>

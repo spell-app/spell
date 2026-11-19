@@ -713,6 +713,19 @@ export const HELP_TABLE: Readonly<
       debug: "Show the bound `value` (else `values`) as JSON below the form, live."
     }
   },
+  "ui-graph": {
+    description: "A graph draws nodes joined by edges, laid out left to right.",
+    empty: true,
+    attributes: {
+      graph:
+        "The graph to draw, a `GraphData`: `nodes` (`id`, `label`, `kind`, `ports`, `children`, `data`) and `edges` (`from` / `to` `{ node, port }`).",
+      "child-view":
+        "How a node's children show when it's opened: `inline`, inside the node, which grows round them; `modal`, a graph in a modal; `drill`, the graph replaced by them, with breadcrumbs back.",
+      path: 'The node whose child graph is shown, drilled to, by its ids from the top joined by `/` (`cpu/alu`); `""`: the top.',
+      selected: "PROPERTY: what's selected, `{ kind: 'node' | 'edge' | 'port', id, path }`; `undefined`: nothing.",
+      boundary: "PROPERTY: the enclosing node's ports, drawn as pins on the graph's sides, for edges with no `node`."
+    }
+  },
   "ui-grid": {
     description: "A grid is used to harmonize negative space in a layout.",
     attributes: {

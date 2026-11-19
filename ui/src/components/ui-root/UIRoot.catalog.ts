@@ -560,6 +560,11 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "debug"
     ]
   },
+  "ui-graph": {
+    folder: "ui-graph",
+    skeleton: { height: "16em" },
+    attributes: ["graph", "child-view", "path", "selected", "boundary"]
+  },
   "ui-grid": {
     folder: "ui-grid",
     attributes: [

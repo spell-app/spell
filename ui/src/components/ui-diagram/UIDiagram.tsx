@@ -76,6 +76,8 @@ export class DOMDiagramElement extends E.DOMElement<UIDiagram> {
  * - Accessibility:  the `<svg>` is a `group`, named by a summary ("Diagram:  9 boxes, 11 links");
  *   each box is a button named by its name, its description saying the arrow keys move it.
  * - NEVER knows where its spec came from:  the ingester's NERD (P11) and a hand-written spec look the same to it.
+ * - Spell UI's other drawings of boxes and lines:  `<ui-tree-diagram>` for a tree;
+ *   `<ui-graph>` for any graph, in layers left to right, with ports, nested graphs, pan and zoom.
  ****************/
 export class UIDiagram extends E.UIComponent<typeof diagramVocabulary> {
   @E.proto static vocabulary = diagramVocabulary
