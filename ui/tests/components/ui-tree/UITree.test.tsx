@@ -1741,3 +1741,94 @@ describe("<ui-tree> opening to a depth, and `filter` through the whole tree", ()
     expect(peeking()).toBe(0)
   })
 })
+
+describe('<ui-tree appearance="columns"> from `items`, a big column', () => {
+  type TreeHost = HTMLElement & { items?: TreeItemData[]; path?: string[]; filter?: string; openTo(levels: number): Promise<void> }
+
+  /** Rows per big column. */
+  const COUNT = 5_000
+
+  /** A column of `COUNT` rows;  the last one holds two more. */
+  function bigColumn(): TreeItemData[] {
+    return Array.from({ length: COUNT }, (_, index) => ({
+      id: `row-${index}`,
+      label: `Row ${index}`,
+      ...(index === COUNT - 1 && {
+        children: [
+          { id: "inner-a", label: "Inner A" },
+          { id: "inner-b", label: "Inner B" }
+        ]
+      })
+    }))
+  }
+
+  async function bigTree(): Promise<TreeHost> {
+    const host = (await ElementFixture.render(
+      `<ui-tree appearance="columns" label="Big" style="height: 300px; width: 700px"></ui-tree>`
+    )) as TreeHost
+    host.items = bigColumn()
+    await ElementFixture.settle()
+    return host
+  }
+
+  const rowsIn = (host: Element, depth = 0) =>
+    host.shadowRoot!.querySelectorAll(`ul[data-depth="${depth}"] .column-row`).length
+  const dataRow = (host: Element, id: string) =>
+    host.shadowRoot!.querySelector<HTMLElement>(`.column-row[data-id="${CSS.escape(id)}"]`)
+  const press = async (host: Element, key: string) => {
+    const target = host.shadowRoot!.activeElement as HTMLElement
+    target.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, composed: true, cancelable: true }))
+    await ElementFixture.settle()
+  }
+
+  it("draws its first rows, then more as the column scrolls toward its end;  what's drawn stays drawn", async () => {
+    const host = await bigTree()
+    await nextPaint()
+    const first = rowsIn(host)
+    expect(first).toBeGreaterThan(0)
+    expect(first).toBeLessThan(200)
+    const column = host.shadowRoot!.querySelector<HTMLElement>('ul[data-depth="0"]')!
+    for (let at = 0; at < 10; at++) {
+      column.scrollTop = column.scrollHeight
+      await nextPaint()
+    }
+    expect(rowsIn(host)).toBeGreaterThan(first)
+    column.scrollTop = 0
+    await nextPaint()
+    expect(rowsIn(host)).toBeGreaterThan(first)
+  })
+
+  it("End goes to the last row, drawing down to it first, and focuses it;  right goes in", async () => {
+    const host = await bigTree()
+    dataRow(host, "row-0")!.focus()
+    await press(host, "End")
+    expect(host.path).toEqual([`row-${COUNT - 1}`])
+    expect(host.shadowRoot!.activeElement).toBe(dataRow(host, `row-${COUNT - 1}`))
+    await press(host, "ArrowRight")
+    expect(host.path).toEqual([`row-${COUNT - 1}`, "inner-a"])
+    await press(host, "ArrowLeft")
+    await press(host, "Home")
+    expect(host.path).toEqual(["row-0"])
+  })
+
+  it("a `path` set to a row far down draws down to it, and marks it", async () => {
+    const host = await bigTree()
+    host.path = ["row-3000"]
+    await ElementFixture.settle()
+    expect(dataRow(host, "row-3000")?.classList).toContain("selected")
+    expect(rowsIn(host)).toBeLessThan(COUNT)
+  })
+
+  it("`openTo()` reaches a row far down, and the filter finds rows not drawn yet", async () => {
+    const host = await bigTree()
+    await host.openTo(1)
+    host.filter = "Row 4321"
+    await ElementFixture.settle()
+    expect(dataRow(host, "row-4321")).not.toBeNull()
+    host.filter = ""
+    await ElementFixture.settle()
+    host.path = [`row-${COUNT - 1}`, "inner-b"]
+    await ElementFixture.settle()
+    expect(dataRow(host, "inner-b")?.classList).toContain("selected")
+  })
+})

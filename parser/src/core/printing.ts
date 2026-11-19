@@ -101,11 +101,7 @@ function sheetOf(css: string): CSSStyleSheet {
   return sheet
 }
 
-/**
- * `element`'s parent as it's drawn:  the slot it's in, else its parent, else its shadow root's host.
- * - Here, not in `drawnWindow.ts`, which uses it too:  plain DOM, so a library that prints loads no Solid
- *   (`ui.ts` imports this file, and every compiled library imports `ui.ts`)
- */
-export function parentOf(element: Element): Element | null {
+/** `element`'s parent as it's drawn:  the slot it's in, else its parent, else its shadow root's host. */
+function parentOf(element: Element): Element | null {
   return element.assignedSlot ?? element.parentElement ?? (element.getRootNode() as ShadowRoot).host ?? null
 }

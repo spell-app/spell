@@ -3,6 +3,7 @@ import { For, Show, type Accessor } from "solid-js"
 
 import { Dragging } from "spell/util/Dragging"
 import { PrefStore } from "spell/util/persist/PrefStore"
+import { drawnInWindow } from "spell/element/drawnWindow"
 import { E, UI } from "spell/ui/core"
 import { TreeMeasure } from "spell/ui/components/ui-tree-diagram/TreeMeasure"
 import { treeVocabulary } from "./UITree.en"
@@ -86,6 +87,8 @@ export class DOMTreeElement extends E.DOMElement<UITree> {
  *   - An `expandable` row picked before its rows come shows a spinner in its column (`<ui-loader>`).
  *   - Its rows can be DATA instead:  `items`, a `TreeItemData` list, drawn in its shadow root ("Columns from data").
  *     For big trees:  a `children` function runs the first time its item opens, and only the open path is drawn.
+ *     Each column draws its first rows, then more as its end scrolls near (`drawnInWindow()`, `itemRows()`):
+ *     5,000 rows open as fast as 300 (epic `from-console` P8).
  *     Rows from markup draw themselves, as in every tree:  none builds a shadow root it doesn't show.
  * - `ui-settled`:  `ui-changed`'s detail again, once what's selected has stayed put for a moment (the arrow keys stopped).
  * - For subclasses (a `<netlist-columns>` built on it):
@@ -2347,7 +2350,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
             </li>
           )}
         </Show>
-        <For each={shown()}>{(item) => this.itemRow(item, depth)}</For>
+        {this.itemRows(shown, depth)}
         <Show when={!list()}>
           <li class="loading" role="none">
             <ui-loader visible="" size="small" aria-label={this.translationForKey("loading")} />
@@ -2365,6 +2368,26 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
         </Show>
       </ul>
     )
+  }
+
+  /**
+   * Column `depth`'s rows:  the first ones, then more as its end scrolls near (`drawnInWindow()`), so a column of
+   * 5,000 rows opens as fast as one of 300.
+   * - Its pick, and the row with the tab stop, are always drawn, with every row before them:
+   *   a path set, `openTo()`, a match elsewhere picked, or End pressed, draws down to it first.
+   * - What's drawn stays drawn, as in every long list:  a column scrolled to its end holds all its rows.
+   */
+  private itemRows(shown: () => readonly TreeItemData[], depth: number) {
+    return drawnInWindow({
+      items: shown,
+      drawItem: (item) => this.itemRow(item, depth),
+      through: () => {
+        const list = shown()
+        const key = this.keyItemIn(depth)
+        const pick = this.openPath[depth]
+        return Math.max(key ? list.indexOf(key) : -1, list.findIndex((item) => item.id === pick))
+      }
+    })
   }
 
   /** `item`'s row in column `depth`:  icon, label and which, count, chevron, each as `show` says. */

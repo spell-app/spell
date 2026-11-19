@@ -223,9 +223,7 @@ const DRAWN_FAMILIES = [
   "ui-section",
   "ui-segment",
   "ui-table"
-].map(
-  (family) => `spell/ui/components/${family}`
-)
+].map((family) => `spell/ui/components/${family}`)
 
 /**
  * Specifiers another bundle takes from `SHARED_SOLID`'s files.
@@ -282,6 +280,13 @@ const SHARED_H = "\0spell-shared-h"
  */
 const UI_DATA = /^spell\/ui\/.+\.generated$/
 
+/**
+ * `spell/element`'s leaves that hold no state a page must share, so each build bundles its own copy, as any plain
+ * module is:  `drawnWindow`, every long list's drawing (epic `from-console` P8), which the parser's core draws with.
+ * - It imports only Solid and util's generic files, which come from the shared files as usual.
+ */
+const BUNDLED_ELEMENT_LEAVES = new Set(["spell/element/drawnWindow"])
+
 /** Any other import from Solid's or `ui`'s packages:  `sharedSolid()` refuses it, as the shared files may lack it. */
 const SOLID_FAMILY = /^(solid-js|@solidjs\/[^/]+|spell\/ui|spell\/element)(\/|$)/
 
@@ -295,7 +300,7 @@ const SOLID_FAMILY = /^(solid-js|@solidjs\/[^/]+|spell\/ui|spell\/element)(\/|$)
  * - Side-effect imports too:  `import "spell/ui/components/ui-table"` becomes `import "./spell-ui-shared.js"`.
  * - Looked up by the import name itself, the key of the maps above and of a page's `SpellUI.packModules`
  *   (`SHARED_SPECIFIERS`;  epic `repo-split` P14, Q45).
- * - `ui`'s generated data (`UI_DATA`) is bundled, as it holds no Solid.
+ * - `ui`'s generated data (`UI_DATA`) is bundled, as it holds no Solid;  so are `BUNDLED_ELEMENT_LEAVES`.
  * - Any other Solid / `ui` specifier (`solid-js/store`, `spell/ui/runtime`) is a build ERROR:
  *   add it to `FROM_SHARED_SOLID` and to what `vite.solid.config.ts` exports, or the shared files won't have its names.
  * - Type-only imports (`@solidjs/web/types/jsx.js`) are gone before this runs.
@@ -312,7 +317,7 @@ export function sharedSolid(): Plugin {
       const file = FROM_SHARED_SOLID.get(source)
       if (file) return { id: `${SHARED_ID}${file}`, external: true }
       if (source.startsWith(SHARED_ID)) return { id: source, external: true }
-      if (UI_DATA.test(source)) return null
+      if (UI_DATA.test(source) || BUNDLED_ELEMENT_LEAVES.has(source)) return null
       if (SOLID_FAMILY.test(source)) {
         this.error(`"${source}" can't come from ${Object.values(SHARED_SOLID).join(" / ")}:  see sharedSolid()`)
       }

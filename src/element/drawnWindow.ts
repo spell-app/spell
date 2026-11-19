@@ -1,12 +1,15 @@
 /**
- * A long list draws what fits, and more as you scroll:  what every loop in a drawing stands on (epic `data` T76, T43).
- * - No program says so, or writes a Show more:  `for each ... draw`, `draw each card in the deck` and a read of a place all come here.
+ * A long list draws what fits, and more as you scroll:  every long list Spell draws stands on it
+ * (epic `data` T76, T43;  a column of `<ui-tree>`, epic `from-console` P8).
+ * - In a Spell program no one says so, or writes a Show more:  `for each ... draw`, `draw each card in the deck` and
+ *   a read of a place all come here.
  * - A program can say how many at a time:  `show them 12 at a time` (`atOnce`);  else `MOST_AT_ONCE`.
  * - Up to `MOST_AT_ONCE` items:  all of them, at once, exactly as a plain `<For>` draws them.
  *   So a list that fits in that is drawn as it always was:  no extra element, no waiting.
  * - Past that:  the first `MOST_AT_ONCE`, then a small empty element after them, which says when it comes near the view.
  *   Each time it does, `MOST_AT_ONCE` more, until it's out of reach again.  When there's nothing more it's gone,
  *   so a list drawn to its end is the same elements a plain `<For>` would have drawn.
+ * - An item the caller needs drawn (a picked row, where a key moved to):  everything up to it, at once (`through`).
  * - What it drew last took no room (items still reading from a server, or drawing nothing):  it waits a moment before more,
  *   `WAIT_WHEN_NOTHING_MOVED_MS`, so such a list doesn't read every item at once (epic `mockup` T42, the Met's artworks).
  * - What's drawn stays drawn:  it's never taken down again, so keys, focus and what's in a form stay as they are.
@@ -16,17 +19,18 @@
  * - A place that pages:  reads its next page when what it has is drawn (`more`).
  * - Find (⌘F, Ctrl-F) and printing draw the rest first, up to `MOST_FOR_FIND`:  a browser can only find what's there.
  * - Coming back to a long list that's still the same list (going back from a page) draws as many as were drawn, and scrolls back to
- *   where it was, unless the program just said `scroll to the top`.
+ *   where it was, unless the caller says it's going to the top (`isGoingToTheTop`:  a Spell program's `scroll to the top`).
  * - With no `IntersectionObserver` (under node, `spell run`):  all of them.
- * - Imported by `drawing.ts` and `saved.ts`;  knows nothing of Things or places.
+ * - Its place:  a leaf of `spell/element`, NOT in its barrel, reached by path (`spell/element/drawnWindow`), as
+ *   Spell UI's `<ui-tree>` and the parser's core (`drawing.ts`, `saved.ts`) both draw with it.
+ *   - It imports only Solid and util's generic `dom.ts`:  it knows nothing of Things, places or Spell UI.
+ *   - Spell's core hands it what's Spell's own:  its `Cell` to say the count changed (`changes`), and `scroll to the top`.
+ *     It lived in the parser's core until epic `from-console` P8 moved it here.
  */
 import { createComponent, type JSX } from "@solidjs/web"
-import { For, createEffect, createMemo, onCleanup } from "solid-js"
+import { For, createEffect, createMemo, createSignal, onCleanup } from "solid-js"
 
-import { Cell } from "spell/util/reactive"
-
-import { parentOf } from "./printing"
-import { isGoingToTheTop } from "./ui"
+import { flatParentFor } from "spell/util/dom"
 
 /** How many items are drawn at a time. */
 export const MOST_AT_ONCE = 24
@@ -65,6 +69,27 @@ export type DrawnWindow<Item> = {
   more?: () => MorePages | undefined
   /** How many it draws at a time, when it isn't `MOST_AT_ONCE`:  `show them 12 at a time`. */
   atOnce?: number
+  /**
+   * The position of an item that must be drawn now, tracked:  everything up to it is drawn at once.
+   * - A picked row, or where a key moved to, past what's drawn;  `-1` or `undefined` for none.
+   */
+  through?: () => number | undefined
+  /**
+   * What tells its drawing how many to draw changed, when it isn't a Solid signal:  Spell's core hands its `Cell`.
+   * - Why:  a signal's write waits for whatever else is pending on the page, and a Spell action may be waiting all
+   *   this while;  a cell's reaches the drawing at once, through the page's cells bridge.
+   */
+  changes?: () => CountChanges
+  /** Is the page going to its top, so a list coming back stays there rather than scrolling to where it was? */
+  isGoingToTheTop?: () => boolean
+}
+
+/** What says how many are drawn changed:  `read()` where it's read, `changed()` after it changes. */
+export type CountChanges = {
+  /** It's being read:  the drawing reading it follows it. */
+  read(): void
+  /** It changed. */
+  changed(): void
 }
 
 /** A list whose next page hasn't been read. */
@@ -97,6 +122,24 @@ const REMEMBERED = new WeakMap<object, Remembered>()
 /** Every long list drawn now, this page's. */
 const LIVE = new Set<LiveWindow>()
 
+/** Says the count changed through a Solid signal:  the default, for a page with no cells bridge. */
+function signalChanges(): CountChanges {
+  const [read, write] = createSignal(undefined, { equals: false })
+  return {
+    read() {
+      read()
+    },
+    changed() {
+      write(undefined)
+    }
+  }
+}
+
+/** No caller said it's going to the top. */
+function isNeverGoingToTheTop(): boolean {
+  return false
+}
+
 /** Can this page tell when something comes near the view? */
 export function canDrawInWindows(): boolean {
   return typeof IntersectionObserver !== "undefined" && typeof document !== "undefined"
@@ -112,7 +155,10 @@ export function drawnInWindow<Item>({
   drawItem,
   key,
   more,
-  atOnce = MOST_AT_ONCE
+  atOnce = MOST_AT_ONCE,
+  through,
+  changes = signalChanges,
+  isGoingToTheTop = isNeverGoingToTheTop
 }: DrawnWindow<Item>): JSX.Element {
   const each = (drawnItems: () => readonly Item[]) =>
     createComponent(
@@ -125,8 +171,7 @@ export function drawnInWindow<Item>({
       } as never
     ) as JSX.Element
   if (!canDrawInWindows()) return each(items)
-  // a cell, not a signal:  a signal's write waits for whatever else is pending on the page, and an action may be waiting all this while
-  const countChanged = new Cell()
+  const countChanged = changes()
   let drawnCount = atOnce
   const count = () => {
     countChanged.read()
@@ -138,6 +183,15 @@ export function drawnInWindow<Item>({
   }
   const remembered: Remembered = { count: drawnCount, scrollTop: 0, scroller: undefined }
   let isKeyed = !key
+  /**
+   * Everything up to `position` drawn, in whole lots.
+   * - Called in the list's own memo, so it gives no notice:  what follows how many are drawn reads that memo.
+   */
+  const drawThrough = (position: number) => {
+    if (position < drawnCount) return
+    drawnCount = Math.ceil((position + 1) / atOnce) * atOnce
+    remembered.count = drawnCount
+  }
   /** The list's first answer is here:  as many as it had drawn, and back to where it was. */
   const comeBack = () => {
     isKeyed = true
@@ -153,10 +207,12 @@ export function drawnInWindow<Item>({
   const shown = createMemo<readonly Item[]>(() => {
     const all = items()
     if (!isKeyed) comeBack()
+    drawThrough(through?.() ?? -1)
     return all.length <= count() ? all : all.slice(0, count())
   })
   const morePages = () => more?.()
-  const hasMore = createMemo(() => items().length > count() || !!morePages()?.hasMorePages)
+  // the drawn list's length, not `count()`:  `through` draws more without a notice
+  const hasMore = createMemo(() => items().length > shown().length || !!morePages()?.hasMorePages)
 
   /** Draw more:  what's in hand, else the next page. */
   const drawMore = () => {
@@ -188,7 +244,7 @@ export function drawnInWindow<Item>({
 
   // watching it again each time says at once whether it's still in reach:  it only tells of changes otherwise
   createEffect(
-    () => [count(), items().length, hasMore()] as const,
+    () => [shown().length, items().length, hasMore()] as const,
     ([, , isMore]) => {
       observer.unobserve(moreBelow)
       clearTimeout(waiting)
@@ -286,7 +342,7 @@ function goBackTo({ scrollTop: target, scroller }: Remembered): void {
 
 /** What scrolls `element`:  its nearest ancestor that can, through any shadow root;  else the page. */
 function scrollerOf(element: Element): Element | null {
-  for (let at: Element | null = parentOf(element); at; at = parentOf(at)) {
+  for (let at = flatParentFor(element); at; at = flatParentFor(at)) {
     const { overflowY } = getComputedStyle(at)
     if (overflowY === "auto" || overflowY === "scroll") return at
   }

@@ -1,5 +1,6 @@
 import { after, soon } from "spell/util/timing"
 import { Cell, schemaOf, type Schema } from "spell/util/reactive"
+import type { DrawnWindow } from "spell/element/drawnWindow"
 
 import { core, whileReading } from "./core"
 import { defineCoreModule } from "./core.types"
@@ -16,6 +17,16 @@ let wentToTheTop = false
 export function isGoingToTheTop(): boolean {
   return wentToTheTop
 }
+
+/**
+ * What a Spell drawing hands every long list it draws (`drawnInWindow()`, `spell/element`'s), spread into its settings.
+ * - `changes`:  a spell cell says how many are drawn, so a Spell action waiting on a read never holds it back.
+ * - `isGoingToTheTop`:  `scroll to the top` keeps a list coming back at the top.
+ */
+export const SPELL_WINDOW = {
+  changes: () => new Cell(),
+  isGoingToTheTop
+} satisfies Partial<DrawnWindow<unknown>>
 
 /**
  * Assembled `core` UI-interaction methods:

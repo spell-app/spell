@@ -361,6 +361,7 @@
                 <script type="text/markdown">
                   `appearance="columns"` shows a column per level.  Its rows are `<ui-tree-item>`s, or data in the `items` property.
                   - `items`:  `{ id, label, icon?, which?, count?, children?, data? }[]`.  `children` is a list, or a function run the first time its item opens, which may return a promise.
+                  - A column from `items` draws its first rows, then more as you scroll near its end, so a column of 5,000 rows opens as fast as one of 300.  Its pick, and a row the keys move to, are drawn at once.  What's drawn stays drawn.  Rows from markup are all drawn:  for a big tree, use `items`.
                   - `path` is the ids of each column's pick, from the top.  Set it to open a path, its last item selected;  `ui-changed` hands it over with the `item`.
                   - `filter` filters one column:  the last one on screen as the filter starts, until it's cleared.  After its rows, it lists the matches elsewhere in the tree, at any depth, each with the rows it's inside;  a click on one opens the path to it.  From `items`, it runs the `children` functions to look inside (waiting for promised ones), but opens no column.  It lists the first 200, and stops after 100,000 rows.
                   - `openTo(levels)` shows that many columns, keeping each column's pick, else picking its first row that holds rows;  `closeAll()` goes back to the first column.
