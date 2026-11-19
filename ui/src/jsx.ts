@@ -54693,16 +54693,38 @@ export interface UITransitionJSXAttributes
 /** `<ui-tree>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UITreeEventMap {
   /**
-   * `ui-selecting`:  A row is about to be selected, by a click, or by Enter or Space:  cancel it to decide what's selected yourself, reading the keys held from `originalEvent`.
-   * - `event.detail`:  `{ item: HTMLElement, value: string, originalEvent?: Event }`
+   * `ui-selecting`:  A row is about to be selected, by a click, or by Enter or Space:  cancel it to decide what's selected yourself, reading the keys held from `originalEvent`.  `appearance="columns"`:  the arrow keys select as they move too;  `item` is the `<ui-tree-item>`, or the `items` entry;  `path`, the ids of each column's pick down to it.
+   * - `event.detail`:  `{ item: HTMLElement | TreeItemData, value: string, path?: string[], originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-selecting": CustomEvent<{ item: HTMLElement; value: string; originalEvent?: Event }>
+  "ui-selecting": CustomEvent<{
+    item: HTMLElement | UIT.TreeItemData
+    value: string
+    path?: string[]
+    originalEvent?: Event
+  }>
   /**
-   * `ui-changed`:  What's selected changed:  `value`, the row clicked;  `values`, every selected row in the tree's order (each one's `value`, else its `label`).
-   * - `event.detail`:  `{ value: string, values: string[], originalEvent?: Event }`
+   * `ui-changed`:  What's selected changed:  `value`, the row clicked;  `values`, every selected row in the tree's order (each one's `value`, else its `label`).  `appearance="columns"`:  also `item` and `path`, as `ui-selecting`'s.
+   * - `event.detail`:  `{ value: string, values: string[], item?: HTMLElement | TreeItemData, path?: string[], originalEvent?: Event }`
    */
-  "ui-changed": CustomEvent<{ value: string; values: string[]; originalEvent?: Event }>
+  "ui-changed": CustomEvent<{
+    value: string
+    values: string[]
+    item?: HTMLElement | UIT.TreeItemData
+    path?: string[]
+    originalEvent?: Event
+  }>
+  /**
+   * `ui-settled`:  What's selected has stayed put for a moment:  `ui-changed`'s detail, once the arrow keys stop.  For a page doing heavy work on each pick.
+   * - `event.detail`:  `{ value: string, values: string[], item?: HTMLElement | TreeItemData, path?: string[], originalEvent?: Event }`
+   */
+  "ui-settled": CustomEvent<{
+    value: string
+    values: string[]
+    item?: HTMLElement | UIT.TreeItemData
+    path?: string[]
+    originalEvent?: Event
+  }>
 }
 
 /** `<ui-tree>`'s own attributes, from its vocabulary. */
@@ -54718,7 +54740,7 @@ export interface UITreeAttributes {
    */
   "prop:choose"?: "one" | "many"
   /**
-   * Show only the rows whose words hold this text, whatever its case, and the rows they're inside, opened to show them.  It changes no row's `open`:  clearing it puts the tree back as it was.  A row drawn only once its parent opens can't be found while that's closed.
+   * Show only the rows whose words hold this text, whatever its case, and the rows they're inside, opened to show them.  It changes no row's `open`:  clearing it puts the tree back as it was.  A row drawn only once its parent opens can't be found while that's closed.  `appearance="columns"`:  it filters one column, the last one on screen as the filter starts, until it's cleared.
    * - takes:  text
    */
   filter?: string
@@ -54757,6 +54779,38 @@ export interface UITreeAttributes {
    * @deprecated write `column-titles` -- `prop:` stays only for compiled spell
    */
   "prop:columnTitles"?: string
+  /**
+   * `appearance="columns"`:  the tree as data, given as a property, in place of `<ui-tree-item>`s:  `{ id, label, icon?, which?, count?, children?, data? }[]` (`TreeItemData`), where `children` is a list, or a function run the first time the item opens, which may return a promise (a spinner shows until it comes).  Only the open path's columns are drawn.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  items?: unknown
+  /**
+   * `appearance="columns"`:  the tree as data, given as a property, in place of `<ui-tree-item>`s:  `{ id, label, icon?, which?, count?, children?, data? }[]` (`TreeItemData`), where `children` is a list, or a function run the first time the item opens, which may return a promise (a spinner shows until it comes).  Only the open path's columns are drawn.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `items` -- `prop:` stays only for compiled spell
+   */
+  "prop:items"?: unknown
+  /**
+   * `appearance="columns"`:  the ids of each column's pick, from the top (`string[]`;  a `<ui-tree-item>`'s id is its `value`, else its `label`).  The last one's rows are the next column.  Set it to open a path, its last item selected;  read it as people pick.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  path?: unknown
+  /**
+   * `appearance="columns"`:  the ids of each column's pick, from the top (`string[]`;  a `<ui-tree-item>`'s id is its `value`, else its `label`).  The last one's rows are the next column.  Set it to open a path, its last item selected;  read it as people pick.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `path` -- `prop:` stays only for compiled spell
+   */
+  "prop:path"?: unknown
+  /**
+   * `appearance="columns"`:  which parts each row shows, as words:  `icon which count chevron`;  the label always shows.  None:  `icon which chevron`.  `count` is how many rows a row holds, when it knows.
+   * - takes:  text
+   */
+  show?: string
+  /**
+   * `show`, as the DOM element's property.
+   * @deprecated write `show` -- `prop:` stays only for compiled spell
+   */
+  "prop:show"?: string
   /**
    * While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.  A click on one scrolls to its row, selecting nothing.  It shows only while one of them is scrolled out of sight.
    * - takes:  flag (present / absent)
@@ -55024,16 +55078,21 @@ export interface UITreeAttributes {
    */
   "prop:onPlatform"?: string
   /**
-   * `ui-selecting`:  A row is about to be selected, by a click, or by Enter or Space:  cancel it to decide what's selected yourself, reading the keys held from `originalEvent`.
-   * - `event.detail`:  `{ item: HTMLElement, value: string, originalEvent?: Event }`
+   * `ui-selecting`:  A row is about to be selected, by a click, or by Enter or Space:  cancel it to decide what's selected yourself, reading the keys held from `originalEvent`.  `appearance="columns"`:  the arrow keys select as they move too;  `item` is the `<ui-tree-item>`, or the `items` entry;  `path`, the ids of each column's pick down to it.
+   * - `event.detail`:  `{ item: HTMLElement | TreeItemData, value: string, path?: string[], originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-selecting"?: (event: UITreeEventMap["ui-selecting"]) => void
   /**
-   * `ui-changed`:  What's selected changed:  `value`, the row clicked;  `values`, every selected row in the tree's order (each one's `value`, else its `label`).
-   * - `event.detail`:  `{ value: string, values: string[], originalEvent?: Event }`
+   * `ui-changed`:  What's selected changed:  `value`, the row clicked;  `values`, every selected row in the tree's order (each one's `value`, else its `label`).  `appearance="columns"`:  also `item` and `path`, as `ui-selecting`'s.
+   * - `event.detail`:  `{ value: string, values: string[], item?: HTMLElement | TreeItemData, path?: string[], originalEvent?: Event }`
    */
   "on-ui-changed"?: (event: UITreeEventMap["ui-changed"]) => void
+  /**
+   * `ui-settled`:  What's selected has stayed put for a moment:  `ui-changed`'s detail, once the arrow keys stop.  For a page doing heavy work on each pick.
+   * - `event.detail`:  `{ value: string, values: string[], item?: HTMLElement | TreeItemData, path?: string[], originalEvent?: Event }`
+   */
+  "on-ui-settled"?: (event: UITreeEventMap["ui-settled"]) => void
 }
 
 /** `<ui-tree>` in JSX:  its own attributes, and HTML's global ones. */
@@ -58614,7 +58673,7 @@ declare module "@solidjs/web/types/jsx.js" {
        * - slots:
        *   - default:  The top rows:  `<ui-tree-item>`s.
        *   - `empty`:  Shown when `filter` matches no row.
-       * - events:  `ui-selecting`, `ui-changed`
+       * - events:  `ui-selecting`, `ui-changed`, `ui-settled`
        */
       "ui-tree": UITreeJSXAttributes
       /**
@@ -58737,6 +58796,7 @@ export interface UIEventMap {
   "ui-send": CustomEvent<unknown>
   "ui-command": CustomEvent<unknown>
   "ui-scrolled-to": CustomEvent<unknown>
+  "ui-settled": CustomEvent<unknown>
   "ui-selecting": CustomEvent<unknown>
   "ui-node-toggled": CustomEvent<unknown>
   "ui-in-view": CustomEvent<unknown>

@@ -2332,6 +2332,10 @@ export const HELP_TABLE: Readonly<
         "`nav`: a site's side navigation, as the docs site's is: taller rows, a selected row a rounded box in the primary colour, the open-and-close chevron at a row's end, and `band` rows as heading bands.",
       "column-titles":
         '`appearance="columns"`: a title over each column, by level, separated by commas (`Clients, Projects, Files`); the last one names every column deeper than the list goes.',
+      items:
+        '`appearance="columns"`: the tree as data, given as a property, in place of `<ui-tree-item>`s: `{ id, label, icon?, which?, count?, children?, data?',
+      path: "`appearance=\"columns\"`: the ids of each column's pick, from the top (`string[]`; a `<ui-tree-item>`'s id is its `value`, else its `label`).",
+      show: '`appearance="columns"`: which parts each row shows, as words: `icon which count chevron`; the label always shows.',
       "sticky-path":
         "While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit."
     }

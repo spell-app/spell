@@ -10635,10 +10635,10 @@
       }
     },
     {
-      "name": "--ui-tree-column-width",
+      "name": "--ui-tree-columns-height",
       "description": {
         "kind": "markdown",
-        "value": "`<ui-tree>`'s token.  Default:  `14em`"
+        "value": "`<ui-tree>`'s token.  Default:  `18em`"
       }
     },
     {
@@ -10660,6 +10660,13 @@
       "description": {
         "kind": "markdown",
         "value": "`<ui-tree>`'s token.  Default:  `var(--ui-primary-on)`"
+      }
+    },
+    {
+      "name": "--ui-tree-column-width",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-tree>`'s token.  Default:  `14em`"
       }
     },
     {
@@ -11053,7 +11060,14 @@
       "name": "::part(column)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-column>`:  The column box (a flex item)."
+        "value": "Part of:\n\n- `<ui-column>`:  The column box (a flex item).\n- `<ui-tree>`:  `appearance=\"columns\"` with `items`:  one column."
+      }
+    },
+    {
+      "name": "::part(column-row)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-tree>`:  `appearance=\"columns\"` with `items`:  one row of a column."
       }
     },
     {

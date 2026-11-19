@@ -1906,6 +1906,9 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "label", kind: "string", group: "behaviour" },
     { name: "appearance", kind: "valueOnly", group: "appearance", values: ["nav", "columns"] },
     { name: "column-titles", kind: "string", group: "appearance" },
+    { name: "items", kind: "json", group: "content" },
+    { name: "path", kind: "json", group: "behaviour" },
+    { name: "show", kind: "string", group: "appearance" },
     { name: "sticky-path", kind: "keyOnly", group: "behaviour" }
   ],
   "ui-tree-diagram": [

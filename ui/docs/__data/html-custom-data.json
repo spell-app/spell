@@ -62357,7 +62357,7 @@
       "name": "ui-tree",
       "description": {
         "kind": "markdown",
-        "value": "A tree shows rows nested in rows, which open and close, and can be selected one or many at a time.\n\nAlso known as:  tree view, outline, hierarchy, file tree, nested list, folder list.\n\n**Slots:**  default, `empty`\n\n**Events:**  `ui-selecting`, `ui-changed`"
+        "value": "A tree shows rows nested in rows, which open and close, and can be selected one or many at a time.\n\nAlso known as:  tree view, outline, hierarchy, file tree, nested list, folder list.\n\n**Slots:**  default, `empty`\n\n**Events:**  `ui-selecting`, `ui-changed`, `ui-settled`"
       },
       "attributes": [
         {
@@ -62379,7 +62379,7 @@
           "name": "filter",
           "description": {
             "kind": "markdown",
-            "value": "Show only the rows whose words hold this text, whatever its case, and the rows they're inside, opened to show them.  It changes no row's `open`:  clearing it puts the tree back as it was.  A row drawn only once its parent opens can't be found while that's closed.\n\nTakes:  text"
+            "value": "Show only the rows whose words hold this text, whatever its case, and the rows they're inside, opened to show them.  It changes no row's `open`:  clearing it puts the tree back as it was.  A row drawn only once its parent opens can't be found while that's closed.  `appearance=\"columns\"`:  it filters one column, the last one on screen as the filter starts, until it's cleared.\n\nTakes:  text"
           }
         },
         {
@@ -62409,6 +62409,13 @@
           "description": {
             "kind": "markdown",
             "value": "`appearance=\"columns\"`:  a title over each column, by level, separated by commas (`Clients, Projects, Files`);  the last one names every column deeper than the list goes.  None:  no titles.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "show",
+          "description": {
+            "kind": "markdown",
+            "value": "`appearance=\"columns\"`:  which parts each row shows, as words:  `icon which count chevron`;  the label always shows.  None:  `icon which chevron`.  `count` is how many rows a row holds, when it knows.\n\nTakes:  text"
           }
         },
         {

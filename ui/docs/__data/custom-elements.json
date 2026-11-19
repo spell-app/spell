@@ -49897,7 +49897,7 @@
             },
             {
               "name": "filter",
-              "description": "Show only the rows whose words hold this text, whatever its case, and the rows they're inside, opened to show them.  It changes no row's `open`:  clearing it puts the tree back as it was.  A row drawn only once its parent opens can't be found while that's closed.",
+              "description": "Show only the rows whose words hold this text, whatever its case, and the rows they're inside, opened to show them.  It changes no row's `open`:  clearing it puts the tree back as it was.  A row drawn only once its parent opens can't be found while that's closed.  `appearance=\"columns\"`:  it filters one column, the last one on screen as the filter starts, until it's cleared.",
               "type": {
                 "text": "string"
               },
@@ -49926,6 +49926,14 @@
                 "text": "string"
               },
               "fieldName": "columnTitles"
+            },
+            {
+              "name": "show",
+              "description": "`appearance=\"columns\"`:  which parts each row shows, as words:  `icon which count chevron`;  the label always shows.  None:  `icon which chevron`.  `count` is how many rows a row holds, when it knows.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "show"
             },
             {
               "name": "sticky-path",
@@ -50056,20 +50064,44 @@
               "fieldName": "onPlatform"
             }
           ],
-          "members": [],
+          "members": [
+            {
+              "kind": "field",
+              "name": "items",
+              "description": "`appearance=\"columns\"`:  the tree as data, given as a property, in place of `<ui-tree-item>`s:  `{ id, label, icon?, which?, count?, children?, data? }[]` (`TreeItemData`), where `children` is a list, or a function run the first time the item opens, which may return a promise (a spinner shows until it comes).  Only the open path's columns are drawn.  A JS property (rich data), not an attribute.",
+              "type": {
+                "text": "unknown"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "path",
+              "description": "`appearance=\"columns\"`:  the ids of each column's pick, from the top (`string[]`;  a `<ui-tree-item>`'s id is its `value`, else its `label`).  The last one's rows are the next column.  Set it to open a path, its last item selected;  read it as people pick.  A JS property (rich data), not an attribute.",
+              "type": {
+                "text": "unknown"
+              }
+            }
+          ],
           "events": [
             {
               "name": "ui-selecting",
-              "description": "A row is about to be selected, by a click, or by Enter or Space:  cancel it to decide what's selected yourself, reading the keys held from `originalEvent`.  Cancelable:  `preventDefault()` vetoes it.",
+              "description": "A row is about to be selected, by a click, or by Enter or Space:  cancel it to decide what's selected yourself, reading the keys held from `originalEvent`.  `appearance=\"columns\"`:  the arrow keys select as they move too;  `item` is the `<ui-tree-item>`, or the `items` entry;  `path`, the ids of each column's pick down to it.  Cancelable:  `preventDefault()` vetoes it.",
               "type": {
-                "text": "CustomEvent<{ item: HTMLElement, value: string, originalEvent?: Event }>"
+                "text": "CustomEvent<{ item: HTMLElement | TreeItemData, value: string, path?: string[], originalEvent?: Event }>"
               }
             },
             {
               "name": "ui-changed",
-              "description": "What's selected changed:  `value`, the row clicked;  `values`, every selected row in the tree's order (each one's `value`, else its `label`).",
+              "description": "What's selected changed:  `value`, the row clicked;  `values`, every selected row in the tree's order (each one's `value`, else its `label`).  `appearance=\"columns\"`:  also `item` and `path`, as `ui-selecting`'s.",
               "type": {
-                "text": "CustomEvent<{ value: string, values: string[], originalEvent?: Event }>"
+                "text": "CustomEvent<{ value: string, values: string[], item?: HTMLElement | TreeItemData, path?: string[], originalEvent?: Event }>"
+              }
+            },
+            {
+              "name": "ui-settled",
+              "description": "What's selected has stayed put for a moment:  `ui-changed`'s detail, once the arrow keys stop.  For a page doing heavy work on each pick.",
+              "type": {
+                "text": "CustomEvent<{ value: string, values: string[], item?: HTMLElement | TreeItemData, path?: string[], originalEvent?: Event }>"
               }
             }
           ],
@@ -50095,6 +50127,14 @@
             {
               "name": "path-row",
               "description": "`sticky-path`:  each row's name in the path."
+            },
+            {
+              "name": "column",
+              "description": "`appearance=\"columns\"` with `items`:  one column."
+            },
+            {
+              "name": "column-row",
+              "description": "`appearance=\"columns\"` with `items`:  one row of a column."
             }
           ],
           "cssStates": [
@@ -50221,8 +50261,8 @@
               "default": "var(--ui-ease-out)"
             },
             {
-              "name": "--ui-tree-column-width",
-              "default": "14em"
+              "name": "--ui-tree-columns-height",
+              "default": "18em"
             },
             {
               "name": "--ui-tree-column-picked-background",
@@ -50235,6 +50275,10 @@
             {
               "name": "--ui-tree-column-selected-color",
               "default": "var(--ui-primary-on)"
+            },
+            {
+              "name": "--ui-tree-column-width",
+              "default": "14em"
             }
           ]
         },
