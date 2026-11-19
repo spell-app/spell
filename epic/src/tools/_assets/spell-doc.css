@@ -1407,6 +1407,20 @@ ui-accordion.spell-aside::part(content) {
   margin: 0;
 }
 
+/* ## The home page's Epic Pages card:  the open epics worked on this week, a pill each, in two columns */
+.spell-doc-main .spell-epic-pills {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px 8px;
+  margin-top: 12px;
+}
+.spell-doc-main .spell-epic-pills > ui-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ## `.flow` steps:  small cards, as many to a row as fit (the source's 180px boxes);  public card tokens */
 .spell-doc-main ui-cards.spell-flow {
   --spell-card-min: 180px;

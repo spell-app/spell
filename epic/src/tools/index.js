@@ -89,6 +89,9 @@ const REPO_TEMPLATE_PATH = REPO_TEMPLATES && `${pagePath(REPO_TEMPLATES)}/`
 /** The repo's name, as its windows show it (`windows.repoName`):  what the pages say they're about. */
 const REPO = EpicConfig.of(ROOT).windows.repoName
 
+/** How recently an open epic was worked on to get a pill on the home page:  a week. */
+const RECENT_DAYS = 7
+
 /** The home's markers:  its area cards go between. */
 export const HOME_START = "<!-- areas:start -->"
 export const HOME_END = "<!-- areas:end -->"
@@ -529,14 +532,15 @@ export function areaCards(pages, favorites = readFavorites(), sagas = readSagas(
     },
     {
       id: "epics",
-      title: "Epics",
+      title: "Epic Pages",
       icon: "layer group",
       href: "/epics/index.html",
       count: counts
         .filter(([, count]) => count)
         .map(([name, count]) => `${count} ${GROUP_COUNTS[name]}`)
         .join(" · "),
-      description: "Epic pages, one per /epic session:  phases, questions, decisions and the log of the work."
+      description: "Epic pages, one per /epic session:  phases, questions, decisions and the log of the work.",
+      epics: recentEpics(of("epics"))
     },
     {
       id: "templates",
@@ -623,8 +627,54 @@ function areaCard(area) {
   return `<ui-card id="${area.id}"><ui-content>
 <ui-header><ui-icon name="${area.icon}"></ui-icon> ${title}</ui-header>
 ${meta ? `<ui-meta>${meta}</ui-meta>` : ""}
-<ui-description>${escapeHTML(area.description)}</ui-description>
+<ui-description>${descriptionLines(area.description)}</ui-description>
+${epicPills(area.epics)}
 </ui-content></ui-card>`
+}
+
+/**
+ * The open epics worked on in the last week (`RECENT_DAYS`), for the Epic Pages card's pills, by name:
+ * `{ name, title, href }` each (Owen, 2026-11-18:  "a 2 column list of the open epics as pills showing the name,
+ * skipping any which have not been worked on in more than a week").
+ * - open:  phases left, the Epics page's Active group (not done, future, or every phase done)
+ * - worked on:  `describe()`'s `worked`, the latest of its page's "updated", its log and its branch's last commit
+ * - as of when `epic pages index` last ran:  a pill isn't taken out by itself as the week passes
+ */
+export function recentEpics(pages, now = new Date()) {
+  const since = now.getTime() - RECENT_DAYS * 86_400_000
+  return pages
+    .filter((page) => page.worked && page.worked.getTime() >= since)
+    .filter((page) => epicCard(page, "epics", new Set()).group === "active")
+    .map((page) => {
+      const name = page.path.split("/")[1]
+      return { name, title: page.title, href: `/${page.path}` }
+    })
+    .sort((a, b) => a.name.localeCompare(b.name))
+}
+
+/**
+ * The Epic Pages card's pills:  Spell UI's labels, each linking an epic's page, in two columns (`spell-epic-pills`,
+ * `spell-doc.css`);  none:  nothing.
+ */
+function epicPills(epics = []) {
+  if (!epics.length) return ""
+  const pills = epics.map(
+    (epic) =>
+      `<ui-label link="${escapeHTML(epic.href)}" target="_self" appearance="tinted" color="blue" size="small" title="${escapeHTML(epic.title)}">${escapeHTML(epic.name)}</ui-label>`
+  )
+  return `<div class="spell-epic-pills">\n${pills.join("\n")}\n</div>`
+}
+
+/**
+ * A card's description, broken onto a second line at its first colon:  `Design notes, references and how-tos:` /
+ * `how each part works, and why.` (Owen, 2026-11-18:  "Split the text in these buttons into 2 lines at the colon").
+ * - no colon:  one line
+ */
+export function descriptionLines(description) {
+  const at = description.indexOf(":")
+  if (at < 0) return escapeHTML(description)
+  const rest = description.slice(at + 1).trim()
+  return `${escapeHTML(description.slice(0, at + 1))}<br />${escapeHTML(rest)}`
 }
 
 /** `count` and `noun`, plural unless 1:  `3 guides`, `1 page`. */

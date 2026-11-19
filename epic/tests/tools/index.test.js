@@ -11,6 +11,8 @@ import {
   LISTS,
   START,
   areaCards,
+  descriptionLines,
+  recentEpics,
   listSection,
   planOf,
   replaceBetween,
@@ -62,7 +64,7 @@ describe("the home page's cards", () => {
       new Set(),
       SAGAS
     )
-    expect(cards.map((card) => card.title)).toEqual(["Guides", "Sagas", "Epics", "Templates"])
+    expect(cards.map((card) => card.title)).toEqual(["Guides", "Sagas", "Epic Pages", "Templates"])
     const count = Object.fromEntries(cards.map((card) => [card.id, card.count]))
     // by the Epics page's groups (epic `airplane` P8):  `c` has no phases yet, so it's planning
     expect(count.epics).toBe("1 active · 1 planning · 1 done")
@@ -72,6 +74,34 @@ describe("the home page's cards", () => {
     expect(count.templates).toBe("1 template")
     expect(count.sagas).toBe("2 sagas")
     expect(cards.find((card) => card.id === "sagas").href).toBe("/sagas/index.html")
+  })
+})
+
+describe("a card's description", () => {
+  it("breaks at its first colon, onto a second line", () => {
+    expect(descriptionLines("Epic pages, one per /epic session:  phases & the log")).toBe(
+      "Epic pages, one per /epic session:<br />phases &amp; the log"
+    )
+    expect(descriptionLines("A starting point for every page.")).toBe("A starting point for every page.")
+  })
+})
+
+describe("the Epic Pages card's pills", () => {
+  it("are the open epics worked on in the last week, by name", () => {
+    const now = new Date("2026-11-18T12:00:00Z")
+    const worked = (days) => new Date(now.getTime() - days * 86_400_000)
+    const pills = recentEpics(
+      [
+        { ...epic("zeta", ["active"]), worked: worked(1) },
+        { ...epic("alpha", ["done", "todo"]), worked: worked(6) },
+        { ...epic("stale", ["active"]), worked: worked(8) },
+        { ...epic("finished", ["done"]), worked: worked(1) },
+        { ...epic("unknown", ["active"]) }
+      ],
+      now
+    )
+    expect(pills.map((pill) => pill.name)).toEqual(["alpha", "zeta"])
+    expect(pills[0].href).toBe("/epics/alpha/alpha.plan.html")
   })
 })
 
