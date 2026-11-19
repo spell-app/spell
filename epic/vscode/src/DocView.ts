@@ -38,11 +38,15 @@
  * - Opened by hand, before anything was shown:
  *   "Epic Docs" shows the default repo's home page on the epic server, else the window's first folder's;
  *   "Review" a line saying how to fill it;  "Details" its list.
- * - Title-bar buttons:  back, forward, reload, restart the page server, open in the browser;
- *   then Inspect (`toggleDevTools()`).
- *   - Home:  the page's own site header (its logo, or "Docs");  VS Code has no clickable view titles.
- *   - `spellEpic.docView.home` stays a palette command, as does "Review:  Home Page" (`spellEpic.reviewView.home`).
- *   - the Review and Epic Docs tabs':  a checklist right of Home, this window's worktree epic page, in the Review tab;
+ * - Title-bar buttons, each tooltip a short plain name (epic `epic-engine` I341):
+ *   - every tab:  Back, Forward, Reload, Open in Browser, Restart Page Server
+ *   - Epic Docs and Review:  Epics Home (the docs' home page, a fresh view:  `goHome()`) and This Epic's Page
+ *   - Details:  This Epic's Questions, its list (`showList()`)
+ *   - their titles carry no view name:  each command's `category` (Epic Docs, Review, Details) names it in the
+ *     Command Palette, and VS Code shows only the title as a button's tooltip
+ *   - no Inspect button (Owen, 2026-11-18:  "Remove the inspect button entirely"):  Inspect stays in the right-click menu
+ *   - Home also:  the page's own site header (its logo, or "Docs");  VS Code has no clickable view titles.
+ *   - This Epic's Page, a checklist right of Epics Home:  this window's worktree epic page, in the Review tab;
  *     in the main checkout's window, the epic list (`showWindowEpic()`;  epic `epic-engine` I266)
  * - "Review:  Open Epic..." (`spellEpic.reviewView.openEpic`), a palette command, the button before I266:
  *   pick an epic of ANY registered repo (`~/.spell-epic/repos.json5`), its epic page shows there.
@@ -277,7 +281,6 @@ export class DocView implements vscode.WebviewViewProvider {
       vscode.commands.registerCommand("spellEpic.reviewView.home", () => DocView.goHome("review")),
       vscode.commands.registerCommand("spellEpic.reviewView.openEpic", () => DocView.pickEpic()),
       vscode.commands.registerCommand("spellEpic.detailsView.list", () => DocView.of("details").showList()),
-      vscode.commands.registerCommand("spellEpic.docView.inspect", () => DocView.toggleDevTools()),
       ...MENU.map((item) =>
         vscode.commands.registerCommand(`spellEpic.docMenu.${item}`, (context?: MenuContext) =>
           DocView.withId(context?.webview)?.menuItem(item)
@@ -287,15 +290,15 @@ export class DocView implements vscode.WebviewViewProvider {
   }
 
   /**
-   * The Inspect button, on both views' title bars:
+   * Inspect, in the right-click menu:
    * open the developer tools that hold the page, and close them on the next click
    * (Owen, 2026-10-10:  "can't close the browser console pane, no (x)").
    * - VS Code's "Developer:  Toggle Developer Tools" (`workbench.action.toggleDevTools`):
    *   the window's tools, the same ones "Open Webview Developer Tools" opens in desktop VS Code
    *   (`webviewCommands.ts` calls `nativeHostService.openDevTools()`), but it closes them too
    * - the tools open on the tab last used:  the command takes no tab or mode
-   *   - so the tooltip says what to pick next:  the element picker (Cmd + Shift + C), or the Console tab and the
-   *     page's frame (`127.0.0.1`) in its context menu
+   *   - then Cmd + Shift + C for the element picker, or the Console tab and the page's frame (`127.0.0.1`) in its
+   *     context menu
    * - NOT the page's frame by itself:  VS Code has no way to choose the console's frame, and since webviews became
    *   plain iframes the tools open at `top` (Owen asked, 2026-10-22).  Show Console, a second button opening the same
    *   tools, went then
@@ -450,6 +453,8 @@ export class DocView implements vscode.WebviewViewProvider {
       case "forward":
         return this.go(1)
       case "reload": {
+        // the Details list in view:  drawn afresh, not the page shown before it
+        if (this.isListing) return this.showList()
         // nothing in view yet (a re-made view):  the page this window remembers
         const page = here ?? (await this.remembered())
         return void (page && (await this.show(stamped(page), { reload: true })))

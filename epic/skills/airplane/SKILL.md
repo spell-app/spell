@@ -67,7 +67,7 @@ Airplane mode:  the person works on the pages ALONE, with no internet and no Cla
    - what was fixed, and anything still failing, in bold
    - `/docs-check`, when it ran:  how many fixes, and where to review them
    - how it works on the plane, as bullets:
-     - open an epic page:  the Review tab's list button, "Review:  Open Epic...";  any page:  "Review:  Home Page"
+     - open an epic page:  the Review tab's list button, "Review:  Open Epic...";  any page:  "Review:  Epics Home"
      - mark items as usual;  Send isn't needed:  every mark is taken at landing, sent or not
      - "+" on an epic page's header (or its Todo / Questions):  a new todo or question;
        the bubble on a phase or the summary:  a note
