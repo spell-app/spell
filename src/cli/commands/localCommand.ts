@@ -7,24 +7,29 @@ import { CLI } from "spell/cli"
 import { KIT_FILE, kitProblem, kitSetting, SPELL_KIT } from "spell/cli/kitCheckout"
 
 /**
- * `spell dev local-spell [checkout] [--off | --status]`:  run your own Spell checkout in a project that installs
- * `spell` from npm, for you alone (epic `repo-split` T70).
- * - Writes the project's `KIT_FILE`, `.spell/kit.json5`, naming the checkout;  every published bin reads it and runs
+ * `spell local [status | on [checkout] | off]`:  run your own Spell checkout in a project that installs `spell` from
+ * npm, for you alone (epic `repo-split` T70).
+ * - `on` writes the project's `KIT_FILE`, `.spell/kit.json5`, naming the checkout;  every published bin reads it and runs
  *   the checkout's own instead (`kitCheckoutBin()`).  `SPELL_KIT`, when set, wins over it.
  * - The project:  the nearest folder from where it was started up with a `package.json`.
  * - The checkout:  `checkout`, else the one this `spell` runs from when it's a checkout, else `~/www/spell`;
  *   it must be installed (`yarn install` there), or nothing is written.
  * - Keeps the file out of git:  adds `/.spell/` to the project's `.gitignore` when git doesn't ignore it yet.
- * - `--off`:  removes the file;  `--status`:  says which Spell runs here, and why, changing nothing.
- * - Throws `CliError` for a checkout that can't run, or `--off` with a checkout named.
+ * - `off`:  removes the file;  `status` (the default):  says which Spell runs here, and why, changing nothing.
+ * - Throws `CliError` for a checkout that can't run, a checkout named to `off` or `status`, or another verb.
  */
-export async function localSpellCommand(checkout?: string, options: CLI.LocalSpellOptions = {}): Promise<number> {
+export async function localCommand(
+  verb = "status",
+  checkout?: string,
+  options: CLI.LocalOptions = {}
+): Promise<number> {
+  if (!LOCAL_VERBS.includes(verb)) throw new CLI.CliError(`unknown verb '${verb}':  ${LOCAL_VERBS.join(", ")}`)
+  if (checkout && verb !== "on") throw new CLI.CliError(`spell local ${verb} takes no checkout`)
   const from = process.env.INIT_CWD ?? process.cwd()
   const project = CLI.findCheckout("package.json", from, from)
   const file = join(project, KIT_FILE)
-  if (options.status) return report(project, options)
-  if (options.off) {
-    if (checkout) throw new CLI.CliError("spell dev local-spell --off takes no checkout")
+  if (verb === "status") return report(project, options)
+  if (verb === "off") {
     const had = existsSync(file)
     rmSync(file, { force: true })
     if (options.json) CLI.out(JSON.stringify({ project, off: true, removed: had ? file : undefined }, null, 2))
@@ -44,14 +49,17 @@ export async function localSpellCommand(checkout?: string, options: CLI.LocalSpe
     CLI.out(`Here, spell runs your checkout now:  ${shortPath(kit)}`)
     CLI.out(`- written:  ${CLI.relativePath(file)}, yours alone`)
     if (ignored) CLI.out(`- added /.spell/ to ${CLI.relativePath(ignored)}, so git leaves it out`)
-    CLI.out("- back to npm's spell:  spell dev local-spell --off")
+    CLI.out("- back to npm's spell:  spell local off")
   }
   warnVariable()
   return CLI.EXIT.OK
 }
 
-/** `--status`:  which Spell runs in `project`, and what said so. */
-function report(project: string, options: CLI.LocalSpellOptions): number {
+/** `spell local`'s verbs, the default first. */
+const LOCAL_VERBS = ["status", "on", "off"]
+
+/** `status`:  which Spell runs in `project`, and what said so. */
+function report(project: string, options: CLI.LocalOptions): number {
   const named = kitSetting(project)
   const problem = named && kitProblem(named.kit)
   if (options.json) CLI.out(JSON.stringify({ project, ...named, problem }, null, 2))
@@ -75,7 +83,7 @@ function checkoutToUse(checkout?: string): string {
 function kitFileText(kit: string): string {
   return [
     "// The Spell checkout `spell` runs here, instead of npm's:  yours alone, never committed.",
-    "// Written by `spell dev local-spell`;  `spell dev local-spell --off` removes it.",
+    "// Written by `spell local on`;  `spell local off` removes it.",
     `{ kit: ${JSON.stringify(shortPath(kit))} }`,
     ""
   ].join("\n")
@@ -92,10 +100,7 @@ function keepOutOfGit(project: string): string | undefined {
   const gitignore = join(project, ".gitignore")
   const before = existsSync(gitignore) ? readFileSync(gitignore, "utf8") : ""
   const gap = before && !before.endsWith("\n") ? "\n\n" : before ? "\n" : ""
-  appendFileSync(
-    gitignore,
-    `${gap}# each person's own Spell settings (spell dev local-spell):  never committed\n/.spell/\n`
-  )
+  appendFileSync(gitignore, `${gap}# each person's own Spell settings (spell local):  never committed\n/.spell/\n`)
   return gitignore
 }
 

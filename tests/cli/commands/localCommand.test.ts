@@ -5,11 +5,11 @@ import { join } from "node:path"
 import { afterAll, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
 import { CLI } from "spell/cli"
-import { localSpellCommand } from "spell/cli/commands/localSpellCommand"
+import { localCommand } from "spell/cli/commands/localCommand"
 import { kitSetting } from "spell/cli/kitCheckout"
 
 /** A made-up project (a git repo) and a made-up, installed checkout beside it. */
-const root = realpathSync(mkdtempSync(join(tmpdir(), "local-spell-")))
+const root = realpathSync(mkdtempSync(join(tmpdir(), "spell-local-")))
 const project = join(root, "acme-spell")
 const checkout = join(root, "spell")
 afterAll(() => rmSync(root, { recursive: true, force: true }))
@@ -36,9 +36,9 @@ beforeEach(() => {
   vi.stubEnv("SPELL_KIT", "")
 })
 
-describe("spell dev local-spell", () => {
+describe("spell local", () => {
   test("names the checkout in the project's own file, and keeps it out of git", async () => {
-    expect(await localSpellCommand(checkout)).toBe(CLI.EXIT.OK)
+    expect(await localCommand("on", checkout)).toBe(CLI.EXIT.OK)
     expect(kitSetting(project, {})?.kit).toBe(checkout)
     expect(readFileSync(join(project, ".gitignore"), "utf8")).toContain("\n/.spell/\n")
     expect(spawnSync("git", ["check-ignore", "-q", ".spell/kit.json5"], { cwd: project }).status).toBe(0)
@@ -47,27 +47,32 @@ describe("spell dev local-spell", () => {
 
   test("run again:  .gitignore left as it is", async () => {
     const before = readFileSync(join(project, ".gitignore"), "utf8")
-    await localSpellCommand(checkout)
+    await localCommand("on", checkout)
     expect(readFileSync(join(project, ".gitignore"), "utf8")).toBe(before)
   })
 
-  test("--status says which Spell runs, and why", async () => {
-    expect(await localSpellCommand(undefined, { status: true })).toBe(CLI.EXIT.OK)
+  test("status (the default) says which Spell runs, and why", async () => {
+    expect(await localCommand()).toBe(CLI.EXIT.OK)
     expect(printed[0]).toMatch(/Here, spell runs your checkout:  .*spell \(named by .*kit\.json5\)/)
   })
 
   test("a checkout that isn't installed:  nothing written", async () => {
     const fresh = join(root, "fresh")
     write(fresh, { "package.json": JSON.stringify({ name: "spell" }), "bin/spell.mjs": "" })
-    await expect(localSpellCommand(fresh)).rejects.toThrow("isn't installed yet")
+    await expect(localCommand("on", fresh)).rejects.toThrow("isn't installed yet")
     expect(kitSetting(project, {})?.kit).toBe(checkout)
   })
 
-  test("--off:  npm's spell again", async () => {
-    expect(await localSpellCommand(undefined, { off: true })).toBe(CLI.EXIT.OK)
+  test("off:  npm's spell again", async () => {
+    expect(await localCommand("off")).toBe(CLI.EXIT.OK)
     expect(existsSync(join(project, ".spell", "kit.json5"))).toBe(false)
     expect(kitSetting(project, {})).toBeUndefined()
-    await localSpellCommand(undefined, { status: true })
+    await localCommand("status")
     expect(printed.at(-1)).toContain("npm's copy")
+  })
+
+  test("a checkout named to off, or another verb:  a mistake", async () => {
+    await expect(localCommand("off", checkout)).rejects.toThrow("spell local off takes no checkout")
+    await expect(localCommand("maybe")).rejects.toThrow("unknown verb 'maybe':  status, on, off")
   })
 })

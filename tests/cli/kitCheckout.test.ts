@@ -66,7 +66,7 @@ describe("kitCheckoutBin()", () => {
   })
 })
 
-// epic `repo-split` T70:  one project's own file, `spell dev local-spell`'s
+// epic `repo-split` T70:  one project's own file, `spell local on`'s
 describe("kitSetting():  the project's .spell/kit.json5", () => {
   const project = folderWith("app", {
     "package.json": "{}",
@@ -92,11 +92,11 @@ describe("kitSetting():  the project's .spell/kit.json5", () => {
   test("one naming a checkout that can't run says to turn it off", () => {
     const broken = folderWith("broken-app", { ".spell/kit.json5": '{ kit: "../nowhere" }' })
     expect(() => kitCheckoutBin("bin/spell.mjs", installedBin, broken, {})).toThrow(
-      "fix it, or run spell dev local-spell --off to run the installed spell"
+      "fix it, or run spell local off to run the installed spell"
     )
   })
 
-  test("spell dev local-spell --off never hands off:  it works while the checkout can't run", () => {
-    expect(checkoutToRun("bin/spell.mjs", installedBin, ["dev", "local-spell", "--off"])).toBeUndefined()
+  test("spell local off never hands off:  it works while the checkout can't run", () => {
+    expect(checkoutToRun("bin/spell.mjs", installedBin, ["local", "off"])).toBeUndefined()
   })
 })

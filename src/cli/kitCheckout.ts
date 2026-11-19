@@ -10,7 +10,7 @@ import JSON5 from "json5"
  * - Two ways to name the checkout:
  *   - for every project on the machine:  the `SPELL_KIT` environment variable, `export SPELL_KIT=~/www/spell`
  *   - for one project:  its `.spell/kit.json5`, each person's own (git-ignored), `{ kit: "~/www/spell" }`,
- *     written by `spell dev local-spell`
+ *     written by `spell local on`
  *   - Both set:  the variable wins, so one command can try another checkout.
  * - Each published bin asks first (`checkoutToRun()`, `PublishedPackage`'s `writeBins()`), and runs the checkout's
  *   own bin instead;  the checkout's own bin never asks, so it never hands off twice.
@@ -88,7 +88,7 @@ export function kitCheckoutBin(
   if (existsSync(named.kit) && isInside(fileURLToPath(self), realpathSync(named.kit))) return undefined
   const problem = kitProblem(named.kit, binPath)
   if (problem) {
-    const off = named.namedBy === SPELL_KIT ? `unset ${SPELL_KIT}` : `run spell dev local-spell --off`
+    const off = named.namedBy === SPELL_KIT ? `unset ${SPELL_KIT}` : `run spell local off`
     throw new Error(
       `${named.namedBy} names ${named.setting}:  ${problem};  fix it, or ${off} to run the installed spell`
     )
@@ -99,10 +99,10 @@ export function kitCheckoutBin(
 /**
  * `kitCheckoutBin()` for a published bin:  its problem printed as one line, and the process ended (exit 1), rather
  * than a stack trace.
- * - `spell dev local-spell --off` never hands off:  so it works while the checkout named can't run.
+ * - `spell local off` never hands off:  so it works while the checkout named can't run.
  */
 export function checkoutToRun(binPath: string, self: string, args = process.argv.slice(2)): string | undefined {
-  if (args[0] === "dev" && args[1] === "local-spell" && args.includes("--off")) return undefined
+  if (args[0] === "local" && args[1] === "off") return undefined
   try {
     return kitCheckoutBin(binPath, self)
   } catch (error) {

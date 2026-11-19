@@ -52,11 +52,10 @@ describe("spell help", () => {
     expect(stderr).toContain("No command 'nope'")
   })
 
-  // `spell dev` holds only `local-spell` since epic `repo-split` T70
-  test("spell dev's old verbs are gone (epic repo-split P13)", () => {
+  test("spell dev is gone (epic repo-split P13)", () => {
     const { status, stderr } = spell(["dev", "server", "status"])
     expect(status).not.toBe(0)
-    expect(stderr).toContain("unknown command 'server'")
+    expect(stderr).toContain("unknown command 'dev'")
   })
 })
 

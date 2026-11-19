@@ -485,8 +485,7 @@ const WORDS: Array<{ pattern: RegExp; rule: Rule; message: string }> = [
   },
   { pattern: /\bno-cross-(?:repo-alias|package-import)\b/, rule: "word", message: "the alias lint rules are deleted" },
   { pattern: /\bpackModuleKey\b/, rule: "word", message: "gone: a pack's module key is its npm name (spell/ui/core)" },
-  // `spell dev local-spell` is new (epic `repo-split` T70);  the old `spell dev ...` verbs stay gone
-  { pattern: /\bspell dev\b(?! local-spell)/, rule: "word", message: "the command is gone (repo-split P13)" },
+  { pattern: /\bspell dev\b/, rule: "word", message: "the command is gone (repo-split P13)" },
   { pattern: /\bsix (?:git )?repos\b/i, rule: "word", message: "five public repos" },
   {
     pattern: /\bepic (?:new|check|stock)\b|\bepic inbox (?:listen|unlisten)\b|\bepic window stay-check\b/,
