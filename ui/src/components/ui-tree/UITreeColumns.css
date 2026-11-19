@@ -11,7 +11,8 @@
  *   - The line after each column is a few px wide strip over its border (`.column-edge`):  dragging it sizes the column.
  * - `sticky-path`:  the path line (`UITree.css`'s `.path`) takes a line of its own above the box of columns.
  * - Narrow columns (`UITree.narrowColumns`):  a column the tree draws narrow is a strip showing only its pick, the
- *   pick's icon and name sideways;  its width eases, but not while a line is dragged, nor with reduced motion.
+ *   pick's icon and name sideways, in a pill the same height in every strip, under an empty title cell;  its width
+ *   eases, but not while a line is dragged, nor with reduced motion.
  *   - Under the pointer or with the focus, it's drawn whole OVER the columns after it (`.peek`), keeping a strip's room.
  * - The box of columns snaps its sideways scroll to a column's start;  after the last column, the title band goes on
  *   to its end (`.column-filler`).
@@ -20,7 +21,8 @@
  * - Rows from `items` are drawn in the tree's own shadow root instead:  each column a `ul.column.items`, its rows
  *   `li.column-row`s, ONE grid a column, so icon, label, `which`, count and chevron line up down it.
  *   - A row's classes:  `selected` (the selected pick), `on-path` (an earlier pick), and a subclass's `rowClass()`.
- *   - Parts:  `column`, `column-row`.
+ *   - Parts:  `column`, `column-row`, `column-title`, and `narrow-column` on a narrow one (from markup, the first
+ *     column's;  each deeper one's is its row's `<ui-tree-item>`'s).
  * - Tokens:
  *   | `--ui-tree-columns-height` | the tree's height (18em):  every column scrolls its own rows |
  *   | `--ui-tree-column-width` | each column's width |
@@ -229,6 +231,8 @@
     overflow-y: auto;
     overflow-anchor: none;
     border-inline-end: 1px solid var(--ui-border-color);
+    /* a place the box of columns' sideways scroll stops at, as every column is:  without it, only the first was */
+    scroll-snap-align: start;
   }
   :host(:state(in-columns)) > .rows > .folded > slot {
     display: block;
@@ -344,6 +348,11 @@
   :host(:state(columns):state(resizing)) {
     --_ui-tree-narrow-duration: 0s;
   }
+  /* a strip's pill:  one height in every strip, its name cut short with an ellipsis when it's longer */
+  :host(:state(columns)),
+  :host(:state(in-columns)) {
+    --_ui-tree-narrow-pill-height: 8em;
+  }
   @media (prefers-reduced-motion: reduce) {
     :host(:state(columns)) {
       --_ui-tree-narrow-duration: 0s;
@@ -379,21 +388,32 @@
   }
   .column-edge.narrow,
   .column-edge.covered,
-  .column.narrow > .column-title,
   .column.narrow > .empty,
-  .column.narrow > .column-row:not(.on-path, .selected),
-  :host(:state(in-columns)) > .rows.narrow > .column-title {
+  .column.narrow > .column-row:not(.on-path, .selected) {
     display: none;
   }
-  /* the pick:  its icon upright, its name down the strip */
+  /* its title cell stays, empty, with its border:  the row of titles runs on unbroken over the strips */
+  .column.narrow > .column-title,
+  :host(:state(in-columns)) > .rows.narrow > .column-title {
+    padding-inline: 0;
+    color: transparent;
+  }
+  /* the pick:  its icon upright, its name down the strip, every strip's pill one height */
   .column.narrow > .column-row {
     display: flex;
     align-items: center;
     gap: var(--_ui-tree-gap);
+    box-sizing: border-box;
+    height: var(--_ui-tree-narrow-pill-height);
     margin-inline: 2px;
     padding: 8px 0;
     writing-mode: vertical-rl;
     overflow: hidden;
+  }
+  .column.narrow > .column-row .words {
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .column.narrow > .column-row :is(.which, .count, .chevron),
   .column.narrow > .column-row > :is(.count, .chevron) {
@@ -408,11 +428,19 @@
   }
   :host(:state(in-narrow)) > .row {
     justify-content: start;
+    box-sizing: border-box;
+    height: var(--_ui-tree-narrow-pill-height);
     min-height: 0;
     margin-inline: 2px;
     padding: 8px 0;
     writing-mode: vertical-rl;
     overflow: hidden;
+  }
+  :host(:state(in-narrow)) > .row > .label,
+  :host(:state(in-narrow)) > .row .words {
+    min-inline-size: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   :host(:state(in-narrow)) > .row > :is(.toggle, .row-count, .count, .badge, .actions),
   :host(:state(in-narrow)) > .row .which {

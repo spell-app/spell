@@ -44,6 +44,7 @@ import columnsCSS from "./UITreeColumns.css?inline"
  *   - `filter` filters one column:  the last one on screen as the filter starts, so moving about doesn't move it.
  *   - `sticky-path`:  the path line above the columns, naming each column's pick;  a click on one picks it again,
  *     keeping the columns after it, and scrolls its column into view.
+ *     The selected row's name is in bold;  outer names that would show fewer than about 3 letters fold into one `…`.
  *   - Narrow columns:  while the columns don't fit the tree's width, the first ones narrow to a strip with their pick's
  *     name, as few as it takes, never the last `narrow-before` (2) nor the selected row's.
  *     The pointer or the focus on one draws it whole again, OVER the columns after it, which stay put.
@@ -146,7 +147,10 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
    * The path line:  `rows`' names, outermost first, `›` between them, each a click handing `onPick` its row and place.
    * - The outline's `sticky-path`, pinned over the rows;  in columns, a line of its own above them.
    * - `current`:  the place of the row that reads as where you are, the last unless it says.
+   *   It's in bold, and never shrinks;  in columns, it's the selected row's column (`.current`).
    * - The outer names give way first:  each shrinks a hundred times more than the one after it.
+   *   Those that would show fewer than about 3 letters fold into one `…` (`pathFolded`), its tooltip naming them.
+   * - Every name's tooltip is its whole name.
    * - Hidden from screen readers (the class docstring says why).
    */
   private renderPath<Row extends PathRow>(
@@ -154,28 +158,112 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     onPick: (row: Row, index: number, event: MouseEvent) => void,
     current: () => number = () => rows().length - 1
   ) {
+    const folded = () => Math.max(0, Math.min(this.pathFolded, current(), rows().length - 1))
     return (
       <Show when={rows().length}>
         <div class="path" part={this.partForName("path")} aria-hidden="true">
-          <For each={rows()}>
-            {(row, index) => (
-              <>
-                <Show when={index()}>
-                  <span class="separator">›</span>
-                </Show>
-                <span
-                  class={["path-row", { current: index() === current() }]}
-                  part={this.partForName("path-row")}
-                  style={{ "flex-shrink": 100 ** (rows().length - 1 - index()) }}
-                  onClick={(event: MouseEvent) => onPick(row, index(), event)}
-                >
-                  {row.label}
-                </span>
-              </>
-            )}
+          <Show when={folded()}>
+            <span
+              class="path-row folded"
+              part={this.partForName("path-row")}
+              title={rows()
+                .slice(0, folded())
+                .map((row) => row.label)
+                .join(PATH_SEPARATOR)}
+              onClick={(event: MouseEvent) => onPick(rows()[folded() - 1]!, folded() - 1, event)}
+            >
+              {FOLDED_NAMES}
+            </span>
+          </Show>
+          <For each={rows().slice(folded())}>
+            {(row, at) => {
+              const index = () => at() + folded()
+              return (
+                <>
+                  <Show when={index()}>
+                    <span class="separator">›</span>
+                  </Show>
+                  <span
+                    class={["path-row", { current: index() === current() }]}
+                    part={this.partForName("path-row")}
+                    title={row.label}
+                    style={{ "flex-shrink": index() === current() ? 0 : 100 ** (rows().length - 1 - index()) }}
+                    onClick={(event: MouseEvent) => onPick(row, index(), event)}
+                  >
+                    {row.label}
+                  </span>
+                </>
+              )
+            }}
           </For>
         </div>
       </Show>
+    )
+  }
+
+  /** How many of the path line's outer names fold into one `…`:  measured as its names or the tree's width change. */
+  @E.state accessor pathFolded = 0
+
+  /** The tree's width, in px, while it has a `sticky-path`:  the path line is measured again as it changes. */
+  @E.state accessor treeWidthPx = 0
+
+  /** The path line's names, and the place of the one that reads as where you are:  as one text, empty for none. */
+  protected get pathKey(): string {
+    if (!this.stickyPath) return ""
+    const rows: readonly PathRow[] = this.isColumns ? this.columnPicks : this.pathRows
+    if (!rows.length) return ""
+    const current = this.isColumns ? this.selectedColumn : rows.length - 1
+    return JSON.stringify([rows.map((row) => row.label ?? ""), current])
+  }
+
+  /** While it's in the page with a `sticky-path`:  its width, measured as it changes. */
+  @E.onChange("isConnected", "stickyPath")
+  protected watchTreeWidth(isConnected: boolean, stickyPath: boolean | undefined) {
+    if (!isConnected || !stickyPath || isServer) return undefined
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry) this.treeWidthPx = Math.round(entry.contentRect.width)
+    })
+    observer.observe(this.domElement)
+    return () => observer.disconnect()
+  }
+
+  /** The path line's names or the tree's width changed:  how many names fold, worked out before the next paint. */
+  @E.onChange("pathKey", "treeWidthPx")
+  protected onPathLineChanged(pathKey: string) {
+    if (!pathKey || isServer) {
+      this.pathFolded = 0
+      return undefined
+    }
+    return E.beforeNextPaint(() => this.measurePathFold(pathKey))
+  }
+
+  /**
+   * How many of the path line's outer names fold into one `…`, so none shows fewer than about 3 letters
+   * (`foldedNamesFor()`):  each name measured in the line's font, the current one in its own (bold).
+   */
+  private measurePathFold(pathKey: string) {
+    const line = this.domElement.renderRoot.querySelector<HTMLElement>(".path")
+    if (!line) return
+    const [labels, current] = JSON.parse(pathKey) as [string[], number]
+    const plain = line.querySelector(".path-row:not(.current)") ?? line
+    const bold = line.querySelector(".path-row.current") ?? plain
+    const plainFont = TreeMeasure.fontOf(plain)
+    const boldFont = TreeMeasure.fontOf(bold)
+    const widthOf = (text: string, font: string) => TreeMeasure.widthOf(text, font) ?? 0
+    const style = getComputedStyle(line)
+    const em = parseFloat(style.fontSize) || DEFAULT_EM_PX
+    const room =
+      line.clientWidth - (parseFloat(style.paddingInlineStart) || 0) - (parseFloat(style.paddingInlineEnd) || 0)
+    this.pathFolded = foldedNamesFor(
+      labels.map((label, index) => widthOf(label, index === current ? boldFont : plainFont)),
+      {
+        current,
+        room,
+        separator: widthOf("›", plainFont) + 2 * (parseFloat(style.columnGap) || 0),
+        folded: widthOf(FOLDED_NAMES, plainFont),
+        least: PATH_LEAST_EM * em,
+        fewest: PATH_FEWEST_EM * em
+      }
     )
   }
 
@@ -211,11 +299,12 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     return (
       <div
         class={["column", { narrow: this.isNarrowColumn(0), peek: this.isPeekColumn(0) }]}
+        part={this.isNarrowColumn(0) ? this.partForName("narrow-column") : undefined}
         style={{ width: this.columnWidthCSS(0), "margin-inline-end": this.peekMarginCSS(0) }}
       >
         <Show when={this.titleForColumn(0)}>
           {(title) => (
-            <div class="column-title" aria-hidden="true">
+            <div class="column-title" part={this.partForName("column-title")} aria-hidden="true">
               {title()}
             </div>
           )}
@@ -970,7 +1059,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   }
 
   /** In columns, the column of the selected row, by level:  the last pick's, unless the keys or the path went back. */
-  get selectedColumn(): number {
+  private get selectedColumn(): number {
     if (this.hasItemData) return this.selectedDepth
     const chain = this.openChain
     const at = chain.findIndex((row) => row.selected)
@@ -1489,7 +1578,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
       >
         <Show when={this.titleForColumn(depth)}>
           {(title) => (
-            <li class="column-title" role="none" aria-hidden="true">
+            <li class="column-title" role="none" part={this.partForName("column-title")} aria-hidden="true">
               {title()}
             </li>
           )}
@@ -1665,6 +1754,51 @@ function trimmedWidths(widths: readonly (number | undefined)[]): (number | undef
 /** A row the path line names:  a `<ui-tree-item>`, or an `items` entry. */
 type PathRow = { readonly label?: string | undefined }
 
+/**
+ * How many of the path line's outer names to fold into one `…`, so no name shows fewer than about 3 letters:
+ * the fewest that does it, never the `current` one nor any after it.
+ * - `widths`:  each name's whole width, in px;  `room`:  the line's, less its padding.
+ * - Each name shrinks a hundred times more than the one after it, so the overflow comes off the outer ones in turn,
+ *   each down to `least` (its `min-width`);  the current one never shrinks.
+ * - A name shows too little when it comes out under `fewest`, unless it's shorter than that whole.
+ */
+function foldedNamesFor(
+  widths: readonly number[],
+  { current, room, separator, folded, least, fewest }: PathFoldSizes
+): number {
+  for (let fold = 0; fold < current; fold++) {
+    const shown = widths.slice(fold)
+    const items = shown.length + (fold ? 1 : 0)
+    let over = shown.reduce((sum, width) => sum + width, 0) + (fold ? folded : 0) + (items - 1) * separator - room
+    let isReadable = true
+    for (let at = 0; at < shown.length; at++) {
+      if (fold + at === current) continue
+      const width = shown[at]!
+      const cut = Math.min(Math.max(over, 0), Math.max(0, width - least))
+      over -= cut
+      if (width - cut < Math.min(width, fewest)) isReadable = false
+    }
+    if (isReadable) return fold
+  }
+  return Math.max(0, current)
+}
+
+/** What `foldedNamesFor()` measures the path line by, in px. */
+type PathFoldSizes = {
+  /** the place of the name that never shrinks */
+  current: number
+  /** the line's width, less its padding */
+  room: number
+  /** a `›` with the gaps either side of it */
+  separator: number
+  /** the `…` the outer names fold into */
+  folded: number
+  /** the narrowest a name shrinks to, its `min-width` */
+  least: number
+  /** the narrowest a name may show and still be read:  about 3 letters and the ellipsis */
+  fewest: number
+}
+
 /** Where `row`'s own line is on screen, without the rows inside it. */
 function rowBoxOf(row: UITreeItem): DOMRect {
   return (row.domElement.renderRoot.querySelector(".row") ?? row.domElement).getBoundingClientRect()
@@ -1680,6 +1814,18 @@ function revealIn(column: HTMLElement, row: HTMLElement) {
   if (top - titleHeight < column.scrollTop) column.scrollTop = top - titleHeight
   else if (top + height > column.scrollTop + column.clientHeight) column.scrollTop = top + height - column.clientHeight
 }
+
+/** What the path line's outer names fold into, when they'd show too little of themselves. */
+const FOLDED_NAMES = "…"
+
+/** Between the folded names, in the `…`'s tooltip. */
+const PATH_SEPARATOR = " › "
+
+/** The narrowest a path line's name shrinks to, in em:  its `min-width` in `UITree.css`. */
+const PATH_LEAST_EM = 1.5
+
+/** The narrowest a path line's name may show and still be read, in em:  about 3 letters and the ellipsis. */
+const PATH_FEWEST_EM = 2.4
 
 /** `choose` of a tree whose rows are selected many at a time. */
 const MANY = "many"

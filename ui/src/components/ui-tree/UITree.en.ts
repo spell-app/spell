@@ -169,7 +169,14 @@ export const treeVocabulary = {
     {
       name: "narrow-column",
       description:
-        '`appearance="columns"` with `items`:  a column drawn narrow, a strip with its pick (`narrow-before`).'
+        '`appearance="columns"`:  a column drawn narrow, a strip with its pick (`narrow-before`):  from `items`, beside ' +
+        "`column`;  from markup, the first column (each deeper one is its row's `<ui-tree-item>`'s `narrow-column`)."
+    },
+    {
+      name: "column-title",
+      description:
+        "`appearance=\"columns\"`:  a column's title (`column-titles`):  every column's from `items`;  from markup, the " +
+        "first column's (each deeper one is its row's `<ui-tree-item>`'s `column-title`)."
     },
     { name: "column", description: '`appearance="columns"` with `items`:  one column.' },
     { name: "column-row", description: '`appearance="columns"` with `items`:  one row of a column.' }

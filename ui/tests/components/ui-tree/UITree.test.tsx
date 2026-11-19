@@ -737,6 +737,10 @@ describe('<ui-tree appearance="columns">', () => {
     expect(row(host, "Books").checkVisibility()).toBe(false)
     expect(row(host, "Acme").matches(":state(in-narrow)")).toBe(true)
     expect(row(host, "photos").matches(":state(in-narrow)")).toBe(false)
+    // the `narrow-column` part:  the tree's first column, and each deeper one on its row's `group`
+    expect(columnBox(host, 0).getAttribute("part")).toBe("narrow-column")
+    expect(columnBox(host, 1).getAttribute("part")).toBe("group narrow-column")
+    expect(columnBox(host, 2).getAttribute("part")).toBe("group")
     // the columns after a narrow one move along
     expect(leftOf(host, "menu.pdf")).toBeLessThan(2 * 224)
   })
@@ -782,6 +786,29 @@ describe('<ui-tree appearance="columns">', () => {
     // the picked column is the selected row's, so it widens
     expect(narrowColumns(host)).toEqual([0])
     expect(document.activeElement).toBe(row(host, "Menu"))
+  })
+
+  it("a click on a name in the path line scrolls the box of columns to show that pick's column", async () => {
+    // no strips (`narrow-before="4"`):  four columns at their narrowest, 80px, overflow a 260px tree
+    const host = await deepColumns('sticky-path narrow-before="4"', 260)
+    expect(pathWords(host)).toEqual(["Acme", "Menu", "photos", "loaf.jpg"])
+    const box = host.shadowRoot!.querySelector<HTMLElement>(".columns")!
+    expect(box.scrollWidth).toBeGreaterThan(box.clientWidth)
+    box.scrollTo({ left: box.scrollWidth, behavior: "instant" })
+    expect(box.scrollLeft).toBeGreaterThan(0)
+    await clickPath(host, 0)
+    await vi.waitFor(() => expect(box.scrollLeft).toBe(0), { timeout: 2000 })
+  })
+
+  it("folds the path line's outer names that would show fewer than 3 letters into one `…`, naming them", async () => {
+    const host = await deepColumns('sticky-path narrow-before="4"', 300)
+    host.style.width = "150px"
+    await vi.waitFor(() => expect(pathWords(host)[0]).toBe("…"))
+    const [folded] = host.shadowRoot!.querySelectorAll<HTMLElement>('[part~="path-row"]')
+    expect(folded!.title).toContain("Acme")
+    expect(pathWords(host).at(-1)).toBe("loaf.jpg")
+    host.style.width = "900px"
+    await vi.waitFor(() => expect(pathWords(host)).toEqual(["Acme", "Menu", "photos", "loaf.jpg"]))
   })
 
   it("shows no path line without `sticky-path`, nor before anything is picked", async () => {

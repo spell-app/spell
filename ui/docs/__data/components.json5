@@ -51307,7 +51307,11 @@
         },
         {
           "name": "narrow-column",
-          "description": "`appearance=\"columns\"` with `items`:  a column drawn narrow, a strip with its pick (`narrow-before`)."
+          "description": "`appearance=\"columns\"`:  a column drawn narrow, a strip with its pick (`narrow-before`):  from `items`, beside `column`;  from markup, the first column (each deeper one is its row's `<ui-tree-item>`'s `narrow-column`)."
+        },
+        {
+          "name": "column-title",
+          "description": "`appearance=\"columns\"`:  a column's title (`column-titles`):  every column's from `items`;  from markup, the first column's (each deeper one is its row's `<ui-tree-item>`'s `column-title`)."
         },
         {
           "name": "column",
@@ -52037,6 +52041,14 @@
         {
           "name": "group",
           "description": "The box around the rows inside it."
+        },
+        {
+          "name": "column-title",
+          "description": "`appearance=\"columns\"`:  the title over the column of rows inside it (the tree's `column-titles`)."
+        },
+        {
+          "name": "narrow-column",
+          "description": "`appearance=\"columns\"`:  beside `group`, while the column of rows inside it is drawn narrow, a strip with its pick (the tree's `narrow-before`)."
         }
       ],
       "states": [

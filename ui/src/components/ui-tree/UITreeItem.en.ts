@@ -91,7 +91,17 @@ export const treeItemVocabulary = {
     { name: "label", description: "Its words." },
     { name: "count", description: "Its `count`'s label." },
     { name: "badge", description: "Its `badge`'s label." },
-    { name: "group", description: "The box around the rows inside it." }
+    { name: "group", description: "The box around the rows inside it." },
+    {
+      name: "column-title",
+      description: '`appearance="columns"`:  the title over the column of rows inside it (the tree\'s `column-titles`).'
+    },
+    {
+      name: "narrow-column",
+      description:
+        '`appearance="columns"`:  beside `group`, while the column of rows inside it is drawn narrow, a strip with its ' +
+        "pick (the tree's `narrow-before`)."
+    }
   ],
   states: [
     { name: "open", description: "The rows inside it show." },

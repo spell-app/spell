@@ -79,13 +79,25 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
+  /* where you are:  in bold, and never shrinking (`renderPath()`'s `flex-shrink`);  the others a click */
   .path-row.current {
     min-width: 0;
     color: var(--ui-text-color);
+    font-weight: var(--ui-font-weight-bold);
   }
-  .path-row:hover {
-    color: var(--ui-text-color);
-    text-decoration: underline;
+  .path-row:not(.current) {
+    cursor: pointer;
+  }
+  /* the outer names folded into one `…`, its tooltip naming them */
+  .path-row.folded {
+    flex: none;
+    min-width: 0;
+  }
+  @media (hover: hover) {
+    .path-row:not(.current):hover {
+      color: var(--ui-text-color);
+      text-decoration: underline;
+    }
   }
   .separator {
     flex: none;

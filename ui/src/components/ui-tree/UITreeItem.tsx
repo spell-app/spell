@@ -259,7 +259,11 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
               }
             ]}
             role="group"
-            part={this.partForName("group")}
+            part={
+              this.hasNarrowRows
+                ? `${this.partForName("group")} ${this.partForName("narrow-column")}`
+                : this.partForName("group")
+            }
             inert={this.showsRows ? undefined : ""}
             aria-label={this.columnTitle}
             style={this.columnPlace}
@@ -268,6 +272,7 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
               {(title) => (
                 <div
                   class="column-title"
+                  part={this.partForName("column-title")}
                   aria-hidden="true"
                   style={{ "clip-path": this.tree?.peekClipCSS(this.depth + 1) }}
                 >

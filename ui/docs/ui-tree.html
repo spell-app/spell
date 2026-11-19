@@ -119,6 +119,7 @@
                       id,
                       label: id,
                       icon: "building outline",
+                      count: Object.keys(folders).length,
                       children: () => Object.entries(folders).map(([name, list]) => ({ id: name, label: name, icon: "folder", ...list }))
                     })
                     await customElements.whenDefined("ui-tree")
@@ -138,7 +139,13 @@
                 </ui-example>
               </ui-section>
               <ui-section id="examples-types-deep-paths" label="Deep paths" sticky="stack" collapsible dividing>
-                <ui-example description="When the open path is deeper than the tree is wide, the first columns narrow to a strip with their pick's name, as few as it takes;  the last two, and the selected row's, never do.  Point at a strip to widen it.  With `sticky-path`, the line above the columns names each pick:  a click on one picks it again, keeping the columns after it.  `narrow-before` says how many columns at the end stay wide.">
+                <ui-example description="When the open path is deeper than the tree is wide, the first columns narrow to strips.">
+                  <ul slot="description">
+                    <li>Each strip shows only its pick's name, as few strips as it takes.</li>
+                    <li>The last two columns never narrow, nor the selected row's:  <code>narrow-before</code> says how many at the end stay wide.</li>
+                    <li>Point at a strip to see its column whole.</li>
+                    <li>With <code>sticky-path</code>, the line above the columns names each pick:  click one to pick it again, keeping the columns after it.</li>
+                  </ul>
                   <ui-tree id="docs-tree-columns-deep" appearance="columns" sticky-path column-titles="Parts" show="icon which count chevron" label="Parts" style="height: 15em"></ui-tree>
                   <script type="module">
                     const part = (id, which, children) => ({ id, label: id, which, icon: children ? "microchip" : "circle outline", children })
@@ -165,8 +172,9 @@
                 </ui-example>
               </ui-section>
               <ui-section id="examples-types-column-sizes" label="Column sizes" sticky="stack" collapsible dividing>
-                <ui-example description="`size` gives each column its width, by level, separated by commas;  the last one sizes every deeper column.  Each is px (`160` or `160px`), `em`, a percent of the tree's width, `auto` to fit the column to the rows it shows, or `*` for `--ui-tree-column-width`.  Here the first is 8em, the second 30%, and every one after fits its rows.  A column you resize keeps your width instead.">
+                <ui-example description="`size` gives each column its width, by level, separated by commas;  the last one sizes every deeper column.  Each is px (`160` or `160px`), `em`, a percent of the tree's width, `auto` to fit the column to the rows it shows, or `*` for `--ui-tree-column-width`.  In the first tree the first column is 8em, the second 30%, and every one after fits its rows;  in the second, the first is 160px, and every one after takes the token's width.  A column you resize keeps your width instead.">
                   <ui-tree id="docs-tree-columns-sized" appearance="columns" size="8em, 30%, auto" column-titles="Shelf, Book, Chapters" show="icon which chevron" label="Library" style="height: 12em"></ui-tree>
+                  <ui-tree id="docs-tree-columns-sized-px" appearance="columns" size="160, *" column-titles="Shelf, Book, Chapters" show="icon which chevron" label="Library, in px" style="height: 12em; margin-top: 0.5em"></ui-tree>
                   <script type="module">
                     const chapters = (names) => names.map((name) => ({ id: name, label: name, icon: "file alternate outline" }))
                     await customElements.whenDefined("ui-tree")
@@ -190,6 +198,9 @@
                       { id: "Poems", label: "Poems", icon: "book", children: [{ id: "Leaves of Grass", label: "Leaves of Grass", icon: "book", children: chapters(["Inscriptions", "Song of Myself"]) }] }
                     ]
                     tree.path = ["Novels", "Middlemarch", "Miss Brooke"]
+                    const inPx = document.getElementById("docs-tree-columns-sized-px")
+                    inPx.items = tree.items
+                    inPx.path = tree.path
                   </script>
                 </ui-example>
               </ui-section>

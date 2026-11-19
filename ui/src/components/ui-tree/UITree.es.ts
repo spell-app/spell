@@ -28,7 +28,8 @@ export const treeEs = {
     "path-row": "fila-de-ruta",
     column: "columna",
     "column-row": "fila-de-columna",
-    "narrow-column": "columna-estrecha"
+    "narrow-column": "columna-estrecha",
+    "column-title": "titulo-de-columna"
   },
   texts: { noMatches: "Nada coincide", resizeColumn: "Cambiar el ancho de esta columna", loading: "Cargando" }
 } as const satisfies E.TagDictionary

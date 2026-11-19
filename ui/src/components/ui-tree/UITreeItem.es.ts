@@ -12,6 +12,12 @@ export const treeItemEs = {
   aka: ["nodo", "fila de arbol"],
   attributes: { which: "cual", expandable: "desplegable", band: "franja", count: "cuenta" },
   values: { band: { heading: "titular", subheading: "subtitular", group: "grupo" } },
-  parts: { row: "fila", toggle: "triangulo", count: "cuenta" },
+  parts: {
+    row: "fila",
+    toggle: "triangulo",
+    count: "cuenta",
+    "narrow-column": "columna-estrecha",
+    "column-title": "titulo-de-columna"
+  },
   texts: { open: "Abrir", close: "Cerrar" }
 } as const satisfies E.TagDictionary

@@ -11162,6 +11162,13 @@
       }
     },
     {
+      "name": "::part(column-title)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-tree>`:  `appearance=\"columns\"`:  a column's title (`column-titles`):  every column's from `items`;  from markup, the first column's (each deeper one is its row's `<ui-tree-item>`'s `column-title`).\n- `<ui-tree-item>`:  `appearance=\"columns\"`:  the title over the column of rows inside it (the tree's `column-titles`)."
+      }
+    },
+    {
       "name": "::part(comment)",
       "description": {
         "kind": "markdown",
@@ -11767,7 +11774,7 @@
       "name": "::part(narrow-column)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-tree>`:  `appearance=\"columns\"` with `items`:  a column drawn narrow, a strip with its pick (`narrow-before`)."
+        "value": "Part of:\n\n- `<ui-tree>`:  `appearance=\"columns\"`:  a column drawn narrow, a strip with its pick (`narrow-before`):  from `items`, beside `column`;  from markup, the first column (each deeper one is its row's `<ui-tree-item>`'s `narrow-column`).\n- `<ui-tree-item>`:  `appearance=\"columns\"`:  beside `group`, while the column of rows inside it is drawn narrow, a strip with its pick (the tree's `narrow-before`)."
       }
     },
     {
