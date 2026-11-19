@@ -562,7 +562,7 @@
         "favorite",
         "star"
       ],
-      "description": "One epic's card on the Epics page (epic `epic-engine` P3), in an `<epic-list>`:  its state's mark before its linked title, its description, its saga's label and meta line;  a star at its top right that stars or unstars it on the page server, and the day it was last worked on at its bottom right.  Written by `epic pages index` (`spell/epic/list/EpicCards` `epicCardHtml()`), its facts as attributes;  the page server marks it `running` and `favorite` as it serves the page.",
+      "description": "One epic's card on the Epics page (epic `epic-engine` P3), in an `<epic-list>`:  its state's mark before its linked title, its description, its saga's label and meta line;  a star at its top right that stars or unstars it on the page server, a `...` menu at its top right (Resume, Rename Epic..., Complete, Delete Epic...), and the day it was last worked on at its bottom right.  Written by `epic pages index` (`spell/epic/list/EpicCards` `epicCardHtml()`), its facts as attributes;  the page server marks it `running` and `favorite` as it serves the page.",
       "noun": "card",
       "attributes": [
         {
@@ -676,7 +676,11 @@
         },
         {
           "name": "star",
-          "description": "The star at its top right, a `<ui-button>`."
+          "description": "The star, left of its menu, a `<ui-button>`."
+        },
+        {
+          "name": "menu",
+          "description": "The `...` menu at its top right, a `<ui-dropdown>`:  Resume, Rename Epic..., Complete, Delete Epic..."
         },
         {
           "name": "worked",
@@ -729,6 +733,176 @@
           "key": "worked",
           "text": "Last worked on {date}",
           "description": "The day's tooltip:  the full date and time."
+        },
+        {
+          "key": "menu",
+          "text": "More for {epic}",
+          "description": "The `...` menu's name and tooltip."
+        },
+        {
+          "key": "menuOffline",
+          "text": "These need the epic server (epic hub ensure)",
+          "description": "The `...` menu's tooltip where it can't act:  opened from disk, or no write token."
+        },
+        {
+          "key": "resume",
+          "text": "Resume",
+          "description": "Menu:  its session, in its own VS Code window."
+        },
+        {
+          "key": "rename",
+          "text": "Rename Epic…",
+          "description": "Menu:  a new name."
+        },
+        {
+          "key": "complete",
+          "text": "Complete",
+          "description": "Menu:  mark it done."
+        },
+        {
+          "key": "delete",
+          "text": "Delete Epic…",
+          "description": "Menu:  delete its folder."
+        },
+        {
+          "key": "resumed",
+          "text": "Opening {epic} in its own VS Code window.",
+          "description": "A toast:  Resume asked."
+        },
+        {
+          "key": "renameTitle",
+          "text": "Rename {epic}",
+          "description": "Rename's dialog:  its heading."
+        },
+        {
+          "key": "renameAsk",
+          "text": "Type a new name for this epic.\nUse lowercase letters, numbers and dashes, like my-epic.",
+          "description": "Rename's dialog:  its message, over the name box."
+        },
+        {
+          "key": "renameOk",
+          "text": "Rename",
+          "description": "Rename's dialog:  its OK button."
+        },
+        {
+          "key": "renamed",
+          "text": "Renamed {epic} to {to}.",
+          "description": "A toast:  renamed."
+        },
+        {
+          "key": "cantRename",
+          "text": "You can't rename {epic} yet",
+          "description": "A dialog:  Rename refused first."
+        },
+        {
+          "key": "cantDelete",
+          "text": "You can't delete {epic} yet",
+          "description": "A dialog:  Delete refused first."
+        },
+        {
+          "key": "isHome",
+          "text": "Requests about how you work go to {epic}, so it can't be deleted.",
+          "description": "Delete refused:  it's the tooling home."
+        },
+        {
+          "key": "completeTitle",
+          "text": "Mark the epic {epic} as complete?",
+          "description": "Complete's dialog:  its heading."
+        },
+        {
+          "key": "completeAsk",
+          "text": "This marks {epic} as done.",
+          "description": "Complete's dialog:  its first line."
+        },
+        {
+          "key": "completePhase",
+          "text": "Claude won't build its 1 unfinished phase:  it will be skipped.",
+          "description": "Complete's dialog:  one phase left."
+        },
+        {
+          "key": "completePhases",
+          "text": "Claude won't build its {count} unfinished phases:  they will be skipped.",
+          "description": "Complete's dialog:  the phases left, when there are several."
+        },
+        {
+          "key": "completeItem",
+          "text": "Its 1 question waiting for you will be closed unanswered.",
+          "description": "Complete's dialog:  one item waiting on the person."
+        },
+        {
+          "key": "completeItems",
+          "text": "Its {count} questions waiting for you will be closed unanswered.",
+          "description": "Complete's dialog:  the items waiting on the person, when there are several."
+        },
+        {
+          "key": "completeOk",
+          "text": "Complete",
+          "description": "Complete's dialog:  its OK button."
+        },
+        {
+          "key": "cantComplete",
+          "text": "{epic} can't be completed",
+          "description": "A dialog:  Complete refused first."
+        },
+        {
+          "key": "noPhases",
+          "text": "It has no phases yet, so there's nothing to finish.  You can delete it instead.",
+          "description": "Complete refused:  no phases."
+        },
+        {
+          "key": "completed",
+          "text": "{epic} is complete.",
+          "description": "A toast:  completed."
+        },
+        {
+          "key": "deleteTitle",
+          "text": "Delete the epic {epic}?",
+          "description": "Delete's dialog:  its heading."
+        },
+        {
+          "key": "deleteAsk",
+          "text": "This deletes {epic}'s plan and its notes.\nIf you change your mind, ask Claude to bring {epic} back.",
+          "description": "Delete's dialog:  its message."
+        },
+        {
+          "key": "deleteOk",
+          "text": "Delete",
+          "description": "Delete's dialog:  its OK button, red."
+        },
+        {
+          "key": "deleted",
+          "text": "Deleted {epic}.",
+          "description": "A toast:  deleted."
+        },
+        {
+          "key": "ok",
+          "text": "OK",
+          "description": "A refusal's dialog:  its one button."
+        },
+        {
+          "key": "cancel",
+          "text": "Cancel",
+          "description": "A dialog's Cancel button."
+        },
+        {
+          "key": "resumeFailed",
+          "text": "Couldn't open {epic}:\n{error}",
+          "description": "A toast:  Resume failed."
+        },
+        {
+          "key": "renameFailed",
+          "text": "Couldn't rename {epic}:\n{error}",
+          "description": "A toast:  Rename failed."
+        },
+        {
+          "key": "completeFailed",
+          "text": "Couldn't complete {epic}:\n{error}",
+          "description": "A toast:  Complete failed."
+        },
+        {
+          "key": "deleteFailed",
+          "text": "Couldn't delete {epic}:\n{error}",
+          "description": "A toast:  Delete failed."
         },
         {
           "key": "starFailed",

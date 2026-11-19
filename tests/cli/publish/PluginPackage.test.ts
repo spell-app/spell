@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process"
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
@@ -90,5 +91,47 @@ describe("sourceToNpm()", () => {
     expect(marketplace.plugins[0]).toMatchObject({ name: "epic", source: { source: "npm", package: "spell-epic" } })
     expect(PluginPackage.sourceToNpm(join(ROOT, "kit"))).toBe(false)
     expect(PluginPackage.sourceToNpm(join(ROOT, "none"))).toBe(false)
+  })
+})
+
+describe("the VS Code extension (epic `epic-engine` I353)", () => {
+  const folder = join(ROOT, "vsix")
+  mkdirSync(join(folder, "extension"), { recursive: true })
+  const source = join(folder, "package.json")
+  writeFileSync(source, '{ "name": "spell-epic", "version": "0.3.0" }')
+
+  /** A made-up `.vsix` whose own `extension/package.json` is at `version`, zipped as vsce does. */
+  function vsixAt(version: string): string {
+    writeFileSync(join(folder, "extension", "package.json"), JSON.stringify({ name: "spell-epic", version }))
+    const vsix = join(folder, `spell-epic-${version}.vsix`)
+    execFileSync("zip", ["-q", "-r", vsix, "extension"], { cwd: folder })
+    return vsix
+  }
+
+  test("the epic folder builds it before it's staged, by a script it has", () => {
+    const { settings, manifest } = epicRepo()
+    expect(settings.build).toBe("vscode:package")
+    expect((manifest.scripts as Record<string, string>)[settings.build!]).toBe("cd vscode && yarn package")
+    const extension = JSON.parse(readFileSync(join(EPIC, "vscode", "package.json"), "utf8"))
+    expect(extension.scripts.package).toContain("vsce package")
+  })
+
+  test("at its source's version:  no problem", () => {
+    expect(PluginPackage.vsixProblem(vsixAt("0.3.0"), source)).toBeUndefined()
+  })
+
+  test("an older build, as 0.8.13 shipped:  fails, naming both versions", () => {
+    expect(PluginPackage.vsixProblem(vsixAt("0.2.0"), source)).toBe(
+      `the .vsix is version 0.2.0, but ${source} says 0.3.0`
+    )
+  })
+
+  test("missing, or not a zip:  fails", () => {
+    expect(PluginPackage.vsixProblem(join(folder, "none.vsix"), source)).toMatch(
+      /^no .*none\.vsix:  the extension wasn't built/
+    )
+    const broken = join(folder, "broken.vsix")
+    writeFileSync(broken, "not a zip")
+    expect(PluginPackage.vsixProblem(broken, source)).toMatch(/^can't read extension\/package\.json in /)
   })
 })

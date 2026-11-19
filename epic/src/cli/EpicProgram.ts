@@ -203,6 +203,30 @@ export class EpicProgram {
     ).usage(
       '<epic> [--title "Title"] [--prompt "text" | --prompt-file <file>] [--future] [--saga <id>] [--stage <stage>]'
     )
+    // a whole epic, as its card's menu on the Epics page does (`EpicLifecycle`, epic `epic-engine` T103)
+    const lifecycle = (verb: Command) =>
+      this.verb(verb, async (args) => {
+        const { EpicLifecycle } = await import("spell/epic/tool/EpicLifecycle")
+        return new EpicLifecycle({ root: EpicCheckout.nearest() }).run([verb.name(), ...args])
+      })
+    lifecycle(epic.command("rename"))
+      .description(
+        "rename an epic:  its folder, its files and the links to it follow;  refused while it has a worktree, or a " +
+          "branch with work not merged"
+      )
+      .usage("<epic> <new-name>")
+      .addHelpText("after", example("epic rename seo docs-seo"))
+    lifecycle(epic.command("complete"))
+      .description("mark an epic complete:  its phases left dropped, the items waiting on you canceled, standing off")
+      .usage("<epic>")
+      .addHelpText("after", example("epic complete seo"))
+    lifecycle(epic.command("delete"))
+      .description(
+        "delete an epic's folder from the epic repo, its history keeping it;  refused while it has a worktree, or a " +
+          "branch with work not merged"
+      )
+      .usage("<epic>")
+      .addHelpText("after", example("epic delete seo"))
     this.page(
       epic.command("stage"),
       "set the page's stage, which decides what it shows:  overview (the Overview, Questions and Todos), phases (the " +

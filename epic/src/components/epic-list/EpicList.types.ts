@@ -16,6 +16,39 @@ import { epicStateFor, type EpicFacts } from "spell/epic/list/EpicState"
 export const FAVORITE_API = "/api/epics/favorite"
 
 /**
+ * The page server's routes behind a card's `...` menu (epic `epic-engine` T103;  `spell/epic/tool/epicRoutes.ts`,
+ * `EpicLifecycle`):
+ * - `GET ?epic=<name>`:  what the dialogs say first (`EpicManageFacts`)
+ * - `POST /resume`, `/complete`, `/delete` `{ name }`;  `POST /rename` `{ name, to }`
+ */
+export const MANAGE_API = "/api/epics/manage"
+
+/** What `GET MANAGE_API` answers about an epic, for its card's dialogs (`EpicLifecycle.facts()`). */
+export type EpicManageFacts = {
+  /** the epic's name */
+  epic: string
+  /** why it can't be renamed or deleted now, in words for the page;  absent:  it can */
+  blocked?: string
+  /** every phase finished, nothing waiting, not standing:  nothing to resume or complete */
+  done: boolean
+  /** how many phases it has, and how many aren't finished */
+  phases: number
+  phasesLeft: number
+  /** its items waiting on the person, by id:  `["Q3", "J12"]` */
+  needsYou: string[]
+  /** open for good (`<epic-page standing>`) */
+  standing: boolean
+  /** the tooling home, where tooling requests go:  never deleted */
+  home: boolean
+}
+
+/** The `...` menu's entries, in order:  each a text key of `<epic-card>`'s vocabulary too. */
+export const CARD_ACTIONS = ["resume", "rename", "complete", "delete"] as const
+
+/** One of `CARD_ACTIONS`. */
+export type CardAction = (typeof CARD_ACTIONS)[number]
+
+/**
  * `localStorage` key of the sagas the Epics page shows:  a JSON list of their ids (`""` for No saga).
  * - absent:  every one
  * - one for every Epics page

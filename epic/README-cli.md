@@ -297,11 +297,14 @@ these are the verbs under it.
 
 ### Epic page:  making and reading
 
-Every verb here only reads, but `create`, `stage` and `change`:  run them from anywhere, as often as you like.
+Every verb here only reads, but `create`, `rename`, `complete`, `delete`, `stage` and `change`:  run the rest from anywhere, as often as you like.
 
 | Verb | What it does |
 | --- | --- |
 | `epic create <epic> --title "Title"` | makes an epic page from the template, and lists it on the docs' home page;  `--prompt "..."` or `--prompt-file <file>`:  the prompt that started it;  `--saga <id>`:  the saga it serves;  `--future`:  an idea for later, not planned yet;  `--stage <stage>`:  the stage it starts in (`overview`, unless you say);  on a future epic's page, plans it where it is |
+| `epic rename <epic> <new-name>` | renames an epic:  its folder, its files, its page and the links to it follow, its star and the tooling home too;  refused while it has a worktree, or a branch with work not merged (as each card's `...` menu on the Epics page does) |
+| `epic complete <epic>` | marks an epic done:  its phases left are dropped, the items waiting on you canceled, a standing epic stands no more;  refused with no phases |
+| `epic delete <epic>` | deletes an epic's folder from the epic repo, which commits first, so its history keeps it;  refused while it has a worktree or a branch not merged, and for the tooling home |
 | `epic stage <epic> overview \| phases \| building` | sets the page's stage, which decides what it shows:  `overview` (the Overview, Questions and Todos), `phases` (the Phases and Issues too) or `building` (everything);  a new epic starts in `overview`, a page with none reads as `building` |
 | `epic change <epic> [--for <item>]` | stamps the change marks written by hand (`<epic-change item="q13">words</epic-change>`) with their id, time, answer and the words they replaced, then lists them;  `--for`:  the item of the marks that name none;  any epic edit stamps them too |
 | `epic list [--json]` | lists every epic once:  in progress, future or done, where it runs, and how many of its items you haven't reviewed |
