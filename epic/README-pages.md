@@ -71,11 +71,12 @@ where the build stands and where you're needed are one glance up.
    - In the header's middle:  Send (the paper plane), while the page is being reviewed.
      A press sends at once;  left alone, a ring round it drains, and it sends by itself.
      The gear picks the wait:  Immediately, 2 minutes (the default), 5 minutes or Off, remembered in this browser.
-   - Beside Send, while Claude is at other work, its word or two (`Building P35`).
-     ONE spinner says it's busy:  while a phase builds, the step pill's own icon turns;  with no phase under way,
-     a spinner before the words;  while it answers what you sent, a blue arc round the plane instead.
+   - ONE spinner says Claude is busy, and the header never spells out what at:
+     while Claude is at other work (building a phase, say), the step pill's own icon turns,
+     and hovering the pill shows its words last (`Claude:  Building P35`);
+     while it answers what you sent, a blue arc turns round the plane instead.
    - The epic's name, at the left, copies `/epic resume <name>` when you click it.
-   - While agents the epic started are running, the header counts them (`4` and a robot):
+   - While agents the epic started are running, the pill counts them after the phase (`2 🤖`):
      click it for their rows, each with a box that redirects it ([README-skills.md](README-skills.md#the-session-answers--agents-build)).
 2. **The toolbar says where you're needed.**
    An icon per section jumps there;  a red badge on it counts what needs you,
@@ -95,7 +96,14 @@ where the build stands and where you're needed are one glance up.
    links), gathered by the page server each time it serves the page, never written by hand.
 5. **The eight sections** follow, folded, each with its counts.
 
-While the plan is still being written, a folded "Plan hung?" notice says how to restart it.
+A new epic, with no kickoff prompt and no phases yet, opens its Overview with the KICKOFF BOX:
+"What should this epic do?", one box that grows as you type, pictures pasted or dropped in.
+- Each picture is saved beside the page and written into your words labelled, `![IMG2](<path>)`, a chip on its
+  thumbnail;  the x on a chip takes it out and the rest renumber.
+- Send hands it over:  the session writes it as the Kickoff prompt, and plans from it.
+
+While the plan is still being written, a folded "Plan hung?" notice says how to restart it;
+it stays hidden until there's a kickoff prompt.
 
 ## Eight sections, and their ids never change
 
@@ -124,6 +132,8 @@ Three more appear only when they have something to say, and the eight never move
   What you've already addressed leaves it, and a finished phase ages out after 3 days (`epic settings`).
   With nothing new, there's no section.
 - **Choices** (`#choices`), between the Overview and the Phases:  an open-ended list you pick from, round after round.
+  Add choice, or an option's pencil, opens ONE box that grows as you type:  its first line the option's title, the
+  rest its note, pictures pasted or dropped in, or chosen with the round button at the end of its Save row.
 - **A report**, after the Overview:  what a run wrote for you to read, like an overnight `/bedtime`.
 
 ![The Phases section opened, under the sticky header and toolbar:  its title with counts of 2 phases to do and 14
@@ -233,6 +243,8 @@ The command behind each step, and why a finished `wait` is what wakes a session:
 - Nothing goes until you press the paper plane or Auto Send's wait runs out:
   the plane is filled blue while something waits.
 - Typing in an item's note box turns its Revisit on at the first key;  the box stays open while you type.
+- A note box takes pictures:  paste or drop as many as you like.
+  Each goes into your words labelled in order (`![IMG1](...)`, `IMG2` ...), with a strip of thumbnails under the box.
 - A request Claude is on spins its button:  click it again to call it off ("nevermind");  an answer that arrives
   after that is refused.
 - A revisit on a judgement call or a todo that's work starts with `do it` already in its note box, Revisit on with it:
@@ -416,7 +428,7 @@ A new element takes its colour from this table, never one that means something e
 
 | Colour | Means | For example |
 | --- | --- | --- |
-| red | needs you | an open question's chip;  an unreviewed judgement call or issue, unless calm;  a phase with a choice open;  the toolbar's count |
+| red | needs you | an open question's chip;  an unreviewed judgement call or issue, unless calm;  a todo flagged red as a reminder;  a phase with a choice open;  the toolbar's count |
 | orange | your turn to read:  changed since you looked, or something waiting on your pick or review | UPDATE labels;  a plan waiting for your Accept;  the agent's options;  a fix to review;  a manual test whose phase isn't done;  "nobody is listening" |
 | light orange | what you asked for is finished:  your turn to see it | an issue or todo filed from your own words (a request from another session included), closed by the agent, until you review it |
 | yellow | open, still undecided | an open todo;  a test whose phase is done;  a calm issue;  a reviewed call or issue |
@@ -608,9 +620,9 @@ This one line, from the repo-split page, is a whole judgement call:
 _Trimmed of its change time.  Its body waits in a part file;  the element draws its chip, buttons and fold._
 
 Epic UI is `spell-epic`'s set of these:  one component pack, `epics`, every tag starting `epic-`,
-58 tags in 45 families.
+59 tags in 46 families.
 The frame around them (sections, tables, buttons, icons) is [Spell UI](https://github.com/spell-app/spell/blob/main/ui/README.md)'s `<ui-*>` elements.
-52 of them have a docs page in the Epic UI set, at `/components/epics/<tag>.html`.
+53 of them have a docs page in the Epic UI set, at `/components/epics/<tag>.html`.
 The other six (`epic-review`, `epic-new-item`, `epic-agents`, `epic-thread-message`, `epic-option-form`,
 `epic-stage-button`) are drawn only inside other elements.
 
@@ -618,7 +630,7 @@ The other six (`epic-review`, `epic-new-item`, `epic-agents`, `epic-thread-messa
 | --- | --- |
 | Page structure | `epic-page` (the header, meta, step pill, Send, the toolbar), `epic-overview`, `epic-summary`, `epic-prompt`, `epic-section`, `epic-phase`, `epic-field`, `epic-item` (one element for every kind of item), `epic-away-line` (a line of While you were out), `epic-actions` (a block's actions row), `epic-mark` (an id as a chip), `epic-change` (words a decision changed), `epic-event` (a log line), `epic-commit` |
 | Prose blocks | `epic-question`, `epic-choices` and `epic-option`, `epic-answer`, `epic-net-effect`, `epic-reply`, `epic-more` (More Details), `epic-original` and `epic-version` (Original Discussion), `epic-update`, `epic-note`, `epic-aside`, `epic-code`, `epic-link`, `epic-picture` (a picture given an item) |
-| Review | `epic-review` (an item's buttons), `epic-stage-button` (Accept Overview, Accept Phases), `epic-status` (Underway, Done, Noted), `epic-new-item`, `epic-option-form`, `epic-state-filter`, `epic-hidden-note`, `epic-agents` (the running agents), `epic-focus` (Focus mode), `epic-clarify` (Clarify, on an item with no details) |
+| Review | `epic-review` (an item's buttons), `epic-stage-button` (Accept Overview, Accept Phases), `epic-status` (Underway, Done, Noted), `epic-new-item`, `epic-option-form`, `epic-state-filter`, `epic-hidden-note`, `epic-agents` (the running agents), `epic-focus` (Focus mode), `epic-clarify` (Clarify, on an item with no details;  the (i) on every item's line), `epic-kickoff` (a new epic's kickoff box) |
 | Comments | `epic-comment-pane`, `epic-thread`, `epic-thread-message`, `epic-threads`, `epic-page-note-head` (older page notes) |
 | Lists | `epic-list`, `epic-card` and `epic-sort` (the Epics list), `epic-cards` (a saga's epics) |
 | Answer pages | `epic-ask`, `epic-text-box`, `epic-send`, `epic-send-buttons` (Send, every page's), `epic-choice-rows` and `epic-choice-row`, `epic-choices-bar`, `epic-run` and `epic-run-row` (run pages) |

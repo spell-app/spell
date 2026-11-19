@@ -130,7 +130,7 @@ A teammate joining has the team's plans cloned before the colour question, so th
 - **superpowers is on here:  put its stand-aside words in AGENTS.md, for every session?**
   Asked only when the superpowers plugin is turned on for this repo, in any of your settings.
   - It suggests yes, and with no terminal to ask in, takes yes;  `--superpowers` answers it;  `--local` never asks.
-  - What the words say:  [With superpowers](README-config.md#with-superpowers).
+  - What the words say:  [With superpowers](README-superpowers.md).
 - **Commit and push .epic/config.json5 and .gitignore on main?**  Asked last, after the files.
   - It suggests yes, and with no terminal to ask in, takes yes;  `--no-commit` leaves them for you.
   - It pushes to the branch's upstream, else `origin`.
@@ -449,7 +449,7 @@ epic worktree remove <name> --branches
 The skills know how to plan, build and review;  what your project counts as "done" they leave to you.
 
 They look for it in your repo's own `AGENTS.md`.
-Spell's `CLAUDE.md` loads its own with one line, `@AGENTS.md`;  yours can too.
+A `CLAUDE.md` can load it with one line, `@AGENTS.md`.
 
 For an agent without the skills (Codex reads `AGENTS.md` by itself), one more line there finds the workflow:
 "Working an epic:  run `epic guide`, and end every turn with `epic turn end`."
@@ -457,11 +457,11 @@ For an agent without the skills (Codex reads `AGENTS.md` by itself), one more li
 What they look for:
 - the checks to run before a phase is done, in three tiers when your suite is slow:
   - the tests beside a change, as it's made
-  - a quick unit run before an agent merges:  Spell's is `yarn test:unit`, so say what yours is
+  - a quick unit run before an agent merges (`yarn test:unit`, say):  name yours
   - the full run after the merge, by the last agent of the epic still running (`epic agents last <name>` says which)
 - its changelog, if it keeps one:
   `epic docs` looks for an epic's entry in the epic folder's guides, in `changelog.html`
-- its house style, and a skill that rewrites text to it, if it has one
+- its house style, and a skill that rewrites text to it, if it has one:  [Your house style](README-config.md#your-house-style)
 - NOT the pages' formatting:  that's the engine's own
 
 ## See also

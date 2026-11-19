@@ -107,7 +107,7 @@ Four things to know before you start:
   Bitbucket or a bare git server work too, but you make the repo by hand and pass its address
   (`epic init --remote <address>`).
 - **Claude Code first, Codex beside it.**
-  Fifteen of the twenty skills run in both, from one copy;  the moves between worktrees and windows are Claude Code's,
+  Seventeen of the twenty-two skills run in both, from one copy;  the moves between worktrees and windows are Claude Code's,
   in VS Code or Cursor, on macOS, Linux or Windows (Cursor, Windows and Linux not yet tried by a person).
   Any other agent works an epic from `epic guide` and its own end-of-turn step:
   [With Codex](epic/README-teams.md#with-codex).
@@ -115,7 +115,7 @@ Four things to know before you start:
   Both plugins plan, make worktrees and finish, so in an epic's worktree superpowers is told to stand aside for those
   three jobs;  inside a phase, its test-driven and debugging skills still run.
   - `epic init` offers to write those words into your repo's agent instructions, which every session reads.
-  - The words, and the flag that skips the question:  [With superpowers](epic/README-config.md#with-superpowers).
+  - The words, and the flag that skips the question:  [Epics with superpowers](epic/README-superpowers.md).
 - **It has run end to end outside Spell once**, in a throwaway repo:
   `epic init`, a saga, an epic page with a phase, a round through the review inbox, the pages on the epic server,
   `/isolate done`'s merge, and the worktree removed after it.
@@ -127,3 +127,4 @@ Four things to know before you start:
 - [The pages you review on](epic/README-pages.md):  a review round, on the page
 - [Skills and hooks](epic/README-skills.md):  the commands you type in Claude Code
 - [The `epic` command](epic/README-cli.md):  every `epic` verb
+- [Epic FAQ](epic/README-faq.md):  when something goes wrong, what you see, why, and the fix
