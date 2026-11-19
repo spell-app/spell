@@ -851,7 +851,7 @@ Drawn, never written:  one meaning per colour on every element (decision Q20, 20
 | violet | a person's voice                         | their reply cards, the note box, the forms and kept text of their own words |
 | terracotta | an agent's voice (Claude's, Codex's) | their reply cards' mark and name;  "recommended", a thumbs-up with no word |
 | ivory  | the page's warm ground               | the toolbar, the rail, a comment thread's ground                       |
-| light orange | what they asked for is finished, their turn to see it | `requested` chips (DARK text) |
+| light orange | what they asked for is finished, their turn to see it | `requested` chips (DARK text);  only the item's own:  every COUNT by colour takes it as orange (the page's and a section's state chips, the toolbar's badges, the Epics list page's chips;  epic `epic-engine` I347, Owen, 2026-11-18:  "Lump the light orange icons in with the orange") |
 | grey   | no longer relevant, inactive, not chosen, nothing to think about | `quiet` chips (a calm call, a limit);  `old` chips (canceled);  a todo's x (drop it);  the note box's x (skip this);  a phase to do;  FUTURE;  buttons at rest |
 
 The FILL, on every button, pill and chip with a lifecycle.

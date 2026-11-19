@@ -50,15 +50,13 @@
     --_chip: var(--epic-state-attention, var(--ui-red));
     --_chip-on: var(--epic-state-attention-on, var(--ui-red-on));
   }
-  /* Claude answered with options, Owen's turn to pick (`replied`, Owen, 2026-10-09) */
+  /*
+   * Owen's turn to pick or review (`replied`, Owen, 2026-10-09);  what he asked for, finished, his turn to see it
+   * (`requested`) counts here too:  no light orange chip (epic `epic-engine` I347)
+   */
   .chip[data-color="orange"] {
     --_chip: var(--epic-state-replied, var(--ui-orange));
     --_chip-on: var(--epic-state-replied-on, var(--ui-orange-on));
-  }
-  /* what Owen asked for is finished, his turn to see it (`requested`, epic `epic-engine` P63) */
-  .chip[data-color="light-orange"] {
-    --_chip: var(--epic-state-requested, var(--ui-orange-background));
-    --_chip-on: var(--epic-state-requested-on, var(--ui-yellow-on));
   }
   .chip[data-color="yellow"] {
     --_chip: var(--epic-state-open, var(--ui-yellow));

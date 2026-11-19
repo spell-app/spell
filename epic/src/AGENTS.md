@@ -1468,12 +1468,18 @@ In `tools/`:
       blue, never red;  2026-10-26:  "badges don't match up")
       - red:  urgent (`state="attention"`);  on the Phases button, the phases drawn red (a plan waiting for their
         Accept, a choice open:  `PhaseState`, epic `epic-engine` I170)
-      - orange:  Claude replied with options for them to pick (`state="replied"`)
+      - orange:  their turn to pick or review (`state="replied"`), light orange with it (`requested`, done, their turn
+        to see it:  every count by colour takes it as orange, the state chips too;  only the item's own chip keeps it;
+        epic `epic-engine` I347, 2026-11-18:  "Lump the light orange icons in with the orange")
       - blue, on the Phases button:  phases under way, or being worked on, and drawn blue:
         one changed since they looked
         is orange first, and not counted (I170)
       - a block's count changing with the inbox alone fires `epic-count-changed`;  the runtime counts them again
-      - both kinds, both badges;  none, none
+      - one colour, its count badge;  none, none
+      - two colours or more:  ONE circle the size of a badge, a slice of each colour meeting in its centre, NO number
+        (red, then orange, then blue:  halves, the first on the left;  three, thirds);  the counts in the button's
+        tooltip (`toolbarItem()`, epic `epic-engine` I347;  2026-11-18:  "Maybe when we have two colors, we just show
+        two half-circles with the colors meeting in the center, with no number")
       - over the icon's top right, a third of a badge on the icon
     - At the row's right, `<epic-page>`'s own tools (see "Overview"):
       the page's state filter, collapse-all, the new item button.
