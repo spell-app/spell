@@ -969,7 +969,7 @@ export class DocView implements vscode.WebviewViewProvider {
     const count = this.queue.length
     const words = `${count} ${count === 1 ? "page" : "pages"} waiting`
     this.view.description = count ? words : undefined
-    this.view.badge = count ? { value: count, tooltip: `${words}:  the list button shows them` } : undefined
+    this.view.badge = count ? { value: count, tooltip: words } : undefined
   }
 
   /**

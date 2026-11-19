@@ -55,7 +55,7 @@ describe("<epic-update>", () => {
       label: shadow.querySelector('[part~="label"]')!.textContent,
       pill: pill.textContent,
       tip: pill.getAttribute("title")
-    }).toEqual({ label: "FIXED", pill: "Not in main", tip: "On branch epic-engine, not merged into main yet" })
+    }).toEqual({ label: "FIXED", pill: "Not in main", tip: "On epic-engine, not merged yet" })
     // merged:  the pill goes, the words stay
     update.removeAttribute("unmerged")
     await ElementFixture.settle(root)
@@ -297,7 +297,7 @@ describe("<epic-update> new, seen, quiet", () => {
     await ElementFixture.settle()
     await vi.waitFor(() => expect(seenButton(update)).not.toBeNull())
     const button = seenButton(update)!
-    expect(button.getAttribute("title")).toContain("fold it to one grey line")
+    expect(button.getAttribute("title")).toContain("Fold it to one grey line")
     await expectAccessible(update)
     button.click()
     await vi.waitFor(() => expect(routes.inbox.marks.up3?.action).toBe("seen"))

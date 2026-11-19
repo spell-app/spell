@@ -326,13 +326,12 @@ export class AnswerForm extends PageStore {
     if (this.listening)
       return {
         text: `${who} is listening`,
-        title: `A session is waiting for this page's answer (epic ask wait, since ${clockOf(this.listening.since)}):  Send wakes it`,
+        title: `Waiting for your answer since ${clockOf(this.listening.since)}:  Send wakes it`,
         isListening: true
       }
     return {
       text: "nobody is waiting yet",
-      title:
-        "No session is waiting for this page's answer (epic ask wait).  Send still saves it:  Claude reads it when it next looks.",
+      title: "Nobody is waiting:  Send saves it for Claude's next look",
       isListening: false
     }
   }

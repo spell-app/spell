@@ -34,7 +34,7 @@ export const epicHiddenNoteVocabulary = {
   states: [],
   texts: [
     { key: "hiddenNote", text: "{count} hidden · show all", description: "The line;  a click shows all." },
-    { key: "hiddenTip", text: "Show everything:  clear the filter", description: "The line's tooltip." }
+    { key: "hiddenTip", text: "Show everything", description: "The line's tooltip." }
   ],
   children: []
 } as const satisfies EpicVocabulary

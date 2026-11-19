@@ -134,7 +134,7 @@ export const epicStatusVocabulary = {
     },
     {
       key: "unmergedTip",
-      text: "Done on branch {branch}, not merged into main yet",
+      text: "Done on {branch}, not merged yet",
       description: "That pill's tooltip."
     },
     {

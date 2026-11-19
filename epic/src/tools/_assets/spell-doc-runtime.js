@@ -507,9 +507,7 @@ function wireTableWidths(main) {
     toggle.hidden = roomWidth(box, main) <= (narrow.get(box) ?? 0) + MIN_WIDE_GAIN
     const wide = isWide(box) && !toggle.hidden
     toggle.toggleAttribute("selected", wide)
-    toggle.title = wide
-      ? "Back into the column  (⌥-click:  every table, and forget their widths)"
-      : "Expand to the page's width  (⌥-click:  every table)"
+    toggle.title = wide ? "Back into the column · ⌥-click:  every table" : "Full page width · ⌥-click:  every table"
     toggle.setAttribute("aria-label", toggle.title)
     toggle.setAttribute("icon", wide ? "arrows left right to line" : "arrows left right")
     titleInside(toggle)
@@ -1868,9 +1866,9 @@ function outermost(item, section) {
  * - `data-state` when the page writes one;  else from the status (`stateOf()`)
  */
 const ITEM_STATES = [
-  ["attention", "needs you"],
+  ["attention", "urgent"],
   ["progress", "Claude is working on it"],
-  ["open", "open, still undecided"],
+  ["open", "undecided"],
   ["recent", "decided or done"],
   ["old", "no longer relevant"]
 ]
@@ -1915,7 +1913,7 @@ function stateTip(item) {
   if (queued) parts.push(`to do:  ${work || "queued"}`)
   if (reviewed) parts.push(`reviewed ${reviewed}`)
   else if (deferred) parts.push(`deferred ${deferred}`)
-  else if (status === "open") parts.push("not reviewed yet")
+  else if (status === "open") parts.push("not reviewed")
   return parts.join(" · ")
 }
 
@@ -3448,7 +3446,7 @@ function wireNewEpic(main) {
   const head = main.querySelector(".spell-page-head")
   if (!head || head.querySelector(".spell-new-epic")) return
   // the browser's own tooltip, a `title` (Owen, 2026-10-10:  never a `<ui-popup>` as a tooltip)
-  const tip = "Write an idea down as a future epic"
+  const tip = "Save an idea as a future epic"
   const button = el(
     "ui-button",
     { appearance: "circular basic", size: "tiny", icon: "seedling", title: tip },

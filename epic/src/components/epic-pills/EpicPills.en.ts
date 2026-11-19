@@ -39,17 +39,17 @@ export const epicPillsVocabulary = {
     { key: "urgent", text: "{count} urgent", description: "A pill's tooltip:  its red items." },
     {
       key: "replied",
-      text: "{count} for your pick or review",
+      text: "{count} to pick or review",
       description: "A pill's tooltip:  its orange items (light orange with them)."
     },
-    { key: "running", text: "{count} running now", description: "A pill's tooltip:  its phases under way." },
+    { key: "running", text: "{count} under way", description: "A pill's tooltip:  its phases under way." },
     { key: "agentOne", text: "1 agent running", description: "A pill's tooltip, and its robot's name:  one agent." },
     {
       key: "agentMany",
       text: "{count} agents running",
       description: "A pill's tooltip, and its robot's name:  several agents."
     },
-    { key: "allDone", text: "every phase done", description: "A pill's tooltip, when every phase is done." },
+    { key: "allDone", text: "All phases done", description: "A pill's tooltip, when every phase is done." },
     {
       key: "none",
       text: "No epic has been worked on this week.",

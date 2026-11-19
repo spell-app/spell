@@ -76,11 +76,11 @@ export const epicOptionFormVocabulary = {
       description: "The box's placeholder (`spell voice check`:  a pass)."
     },
     { key: "wordsLabel", text: "Your choice and what it means", description: "The box's name, for a screen reader." },
-    { key: "choose", text: "Add pictures from your computer", description: "The picture button's label and tooltip." },
+    { key: "choose", text: "Add pictures", description: "The picture button's label and tooltip." },
     { key: "save", text: "Save", description: "Save's words, without `submit`." },
-    { key: "saveTip", text: "Keep it (Ctrl / Cmd + Enter):  sent with your next Send", description: "Save's tooltip." },
+    { key: "saveTip", text: "Save (Ctrl / Cmd + Enter)", description: "Save's tooltip." },
     { key: "cancel", text: "Cancel", description: "Cancel's words." },
-    { key: "cancelTip", text: "Close the form, keeping nothing (Escape)", description: "Cancel's tooltip." },
+    { key: "cancelTip", text: "Cancel (Escape)", description: "Cancel's tooltip." },
     {
       key: "needsTitle",
       text: "Your choice needs a title.  Type it on the first line, then press Save again.",

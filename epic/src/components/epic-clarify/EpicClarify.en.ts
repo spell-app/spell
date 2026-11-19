@@ -71,17 +71,17 @@ export const epicClarifyVocabulary = {
     { key: "clarify", text: "Clarify", description: "The link's words." },
     {
       key: "clarifyTip",
-      text: "Ask Claude for this item's details now, without waiting for Send",
+      text: "Ask Claude for details now",
       description: "The link's tooltip."
     },
     {
       key: "iconTip",
-      text: "Click to have Claude rewrite this item in plainer words.  It starts right away.",
+      text: "Rewrite it in plainer words, now",
       description: "With `icon`:  the button's tooltip and name."
     },
     {
       key: "turningTip",
-      text: "Claude is rewriting this item to make it clearer.  Click to stop.",
+      text: "Claude is rewriting it:  stop",
       description: "With `icon`, while it turns:  the button's tooltip and name."
     }
   ],

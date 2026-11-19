@@ -110,7 +110,7 @@ describe("<epic-list>", () => {
     // `unused` names no card:  no chip;  `gone` isn't listed:  No saga's
     expect(chips(host)).toEqual(["Drawable Spell 1*", "Epic Tooling 2*", "No saga 2*"])
     const tip = host.shadowRoot!.querySelectorAll(".chip")[1]!.getAttribute("title")
-    expect(tip).toBe("Epic Tooling, for good\nClick to show only Epic Tooling")
+    expect(tip).toBe("Epic Tooling, for good\nShow only the 2 in Epic Tooling")
     ;(host.shadowRoot!.querySelectorAll(".chip")[1] as HTMLElement).click()
     await ElementFixture.settle()
     expect(chips(host)).toEqual(["Drawable Spell 1", "Epic Tooling 2*", "No saga 2"])

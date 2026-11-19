@@ -263,7 +263,7 @@ export const epicPhaseVocabulary = {
     { key: "statusDropped", text: "Dropped", description: "The status icon's name:  `dropped` (I228)." },
     {
       key: "workingPlan",
-      text: "Claude is writing this phase's plan",
+      text: "Claude is writing its plan",
       description: "Its spinner while Claude is at work on it and its plan isn't accepted yet:  its tooltip and name."
     },
     {
@@ -299,7 +299,7 @@ export const epicPhaseVocabulary = {
     },
     {
       key: "unmergedTip",
-      text: "Done on branch {branch}, not merged into main yet",
+      text: "Done on {branch}, not merged yet",
       description: "That pill's tooltip."
     },
     {
@@ -324,14 +324,12 @@ export const epicPhaseVocabulary = {
     },
     {
       key: "changedTip",
-      text:
-        "{count} × Update new in this phase.  ✓ Seen on one (or the ✓ here, on all) folds it to a grey line for " +
-        "everyone;  unseen, each goes quiet by itself 3 days after it was written",
+      text: "{count} new updates:  ✓ Seen folds them;  they go quiet after 3 days",
       description: "The title's pen while it isn't done:  its tooltip and name;  `count` how many new updates."
     },
     {
       key: "seenAllTip",
-      text: "Seen:  all {count} new updates in this phase, folded to grey lines for everyone once Claude applies it",
+      text: "Mark all {count} updates seen",
       description: "The pen's ✓:  what it does."
     }
   ],
