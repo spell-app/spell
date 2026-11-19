@@ -1,3 +1,5 @@
+import { relative } from "node:path"
+
 import { CLI, type AgentRuleId, type AgentRulePicks } from "spell/cli"
 
 /**
@@ -30,18 +32,19 @@ export async function wwodCommand(
 
 /**
  * `spell wwod init`:  ask which rules the project wants, then write them in.
- * - the project:  the nearest folder from the current one up with a `package.json`, else the current folder
+ * - the project:  the nearest folder from `from` up with a `package.json`, else `from`;
+ *   in a workspace, its root or that nearer folder (`projectFor()`)
  * - each rule's answer:  its flag;  else, with `--yes` or no terminal, what the project has, else its default;
  *   else asked, suggesting the same
  * - the defaults:  WWOD on;  the Solid 2 rules on when the project depends on `solid-js`;  §21 OFF, since many
  *   projects write tests first, and asked only when WWOD is on
  * - throws `CliError` when `spell` isn't installed in the project:  the rules are files of the package
  */
-export async function wwodInit(
-  options: CLI.WwodOptions = {},
-  project = CLI.findCheckout("package.json", process.cwd(), process.cwd())
-): Promise<number> {
+export async function wwodInit(options: CLI.WwodOptions = {}, from = process.cwd()): Promise<number> {
   const init = await import("spell/cli/commands/wwodInit")
+  const nearest = CLI.findCheckout("package.json", from, from)
+  const workspaceRoot = init.workspaceRootFor(nearest)
+  const project = await projectFor(nearest, workspaceRoot, options)
   const folder = init.rulesFolderFor(project)
   if (!folder)
     throw new CLI.CliError(
@@ -69,10 +72,49 @@ export async function wwodInit(
   }
   const changes = init.planAgentRules(project, picks, folder)
   if (!options.dryRun) init.writeAgentRules(project, changes)
-  if (options.json)
-    CLI.out(JSON.stringify({ project, folder, picks, dryRun: Boolean(options.dryRun), changes }, null, 2))
-  else for (const line of init.agentRuleChangeLines(changes, { dryRun: options.dryRun })) CLI.out(line)
+  if (options.json) {
+    const report = { project, workspaceRoot, folder, picks, dryRun: Boolean(options.dryRun), changes }
+    CLI.out(JSON.stringify(report, null, 2))
+    return CLI.EXIT.OK
+  }
+  if (workspaceRoot) CLI.out(whichFolderLine(project, nearest, workspaceRoot))
+  for (const line of init.agentRuleChangeLines(changes, { dryRun: options.dryRun })) CLI.out(line)
   return CLI.EXIT.OK
+}
+
+/**
+ * Which folder `init` writes in, when `nearest` (the nearest with a `package.json`) is in a workspace:
+ * its root (`workspaceRoot`), or `nearest` itself.
+ * - `--here`:  `nearest`;  `--yes`, or no terminal:  the root;  else asked, suggesting the root
+ * - no workspace:  `nearest`
+ */
+async function projectFor(
+  nearest: string,
+  workspaceRoot: string | undefined,
+  options: CLI.WwodOptions
+): Promise<string> {
+  if (!workspaceRoot || options.here) return nearest
+  if (options.yes) return workspaceRoot
+  return CLI.choose(
+    "This folder is part of a workspace.  Which folder's agents should get the rules?",
+    [
+      { value: workspaceRoot, label: shown(workspaceRoot), hint: "the workspace's root:  every folder in it" },
+      { value: nearest, label: shown(nearest), hint: "only this folder (--here)" }
+    ],
+    { suggestion: workspaceRoot }
+  )
+}
+
+/** `folder` as a person typing in this one would:  `../..`, `.` for this one. */
+function shown(folder: string): string {
+  return relative(process.cwd(), folder) || "."
+}
+
+/** The report's first line, in a workspace:  which folder it wrote in, and the other it could have. */
+function whichFolderLine(project: string, nearest: string, workspaceRoot: string): string {
+  return project === workspaceRoot
+    ? `In ${shown(project)}, the workspace's root  (--here:  only ${shown(nearest)})`
+    : `In ${shown(project)}, not the workspace's root, ${shown(workspaceRoot)}`
 }
 
 /** `init`'s question for each rule. */

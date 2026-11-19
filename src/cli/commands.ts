@@ -135,6 +135,10 @@ export default function kitCommands(spell: Command): void {
     .option("--code-is-the-spec", "init:  WWOD §21, the code is the spec (off unless asked for)")
     .option("--no-code-is-the-spec", "init:  leave §21 out")
     .option("-y, --yes", "init:  ask nothing:  the flags, else what the project has, else the defaults")
+    .option(
+      "--here",
+      "init:  in a workspace, write in the nearest folder with a package.json, not the workspace's root"
+    )
     .option("--dry-run", "init:  say what would change, and write nothing")
     .action((verb: string | undefined, files: string[], options: CLI.WwodOptions) =>
       CLI.runCommand(async () => (await import("spell/cli/commands/wwodCommand")).wwodCommand(verb, files, options))

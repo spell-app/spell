@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/tes
 import { CLI } from "spell/cli"
 import { wwodInit } from "spell/cli/commands/wwodCommand"
 import {
+  AGENTS_LEAD,
   agentRuleChangeLines,
   BLOCK_END,
   BLOCK_START,
@@ -13,6 +14,7 @@ import {
   planAgentRules,
   rulesFolderFor,
   usesSolid,
+  workspaceRootFor,
   writeAgentRules
 } from "spell/cli/commands/wwodInit"
 
@@ -43,6 +45,24 @@ describe("rulesFolderFor()", () => {
     rmSync(join(project, "node_modules"), { recursive: true })
     put("package.json", JSON.stringify({ name: "acme" }))
     expect(rulesFolderFor(project)).toBeUndefined()
+  })
+
+  test("installed in a folder above, as a workspace does:  a path up to it", () => {
+    put("packages/app/package.json", "{}")
+    expect(rulesFolderFor(join(project, "packages/app"))).toBe(`../../${FOLDER}`)
+  })
+})
+
+describe("workspaceRootFor()", () => {
+  test("the folder above whose workspaces list it;  none outside one", () => {
+    put("package.json", JSON.stringify({ workspaces: ["packages/*", "tools/**", "!packages/old"] }))
+    expect(workspaceRootFor(join(project, "packages/app"))).toBe(project)
+    expect(workspaceRootFor(join(project, "tools/build/cli"))).toBe(project)
+    expect(workspaceRootFor(join(project, "packages/old"))).toBeUndefined()
+    expect(workspaceRootFor(join(project, "docs"))).toBeUndefined()
+    put("package.json", JSON.stringify({ workspaces: { packages: ["./apps/web"] } }))
+    expect(workspaceRootFor(join(project, "apps/web"))).toBe(project)
+    expect(workspaceRootFor(join(project, "apps/website"))).toBeUndefined()
   })
 })
 
@@ -79,7 +99,8 @@ describe("planAgentRules()", () => {
         "# Acme",
         "",
         BLOCK_START,
-        `**ALWAYS, before any code:  READ \`${FOLDER}/wwod/WWOD.md\`, the house style (WWOD).**`,
+        AGENTS_LEAD,
+        `- **Before any code:**  \`${FOLDER}/wwod/WWOD.md\`, the house style (WWOD)`,
         BLOCK_END,
         "",
         "Our rules.",
@@ -125,6 +146,16 @@ describe("planAgentRules()", () => {
     )
   })
 
+  test("AGENTS.md's block in T66's words:  rewritten in today's, the same rules", () => {
+    const old = `**ALWAYS, before any code:  READ \`${FOLDER}/wwod/WWOD.md\`, the house style (WWOD).**`
+    put("AGENTS.md", `# Acme\n\n${BLOCK_START}\n${old}\n${BLOCK_END}\n`)
+    expect(currentAgentRules(project, FOLDER)).toMatchObject({ wwod: true })
+    const [, agents] = planAgentRules(project, picks("wwod"), FOLDER)
+    expect(agents).toMatchObject({ changed: true, added: [], removed: [] })
+    expect(agents!.text).toContain(`${BLOCK_START}\n${AGENTS_LEAD}\n- **Before any code:**`)
+    expect(agents!.text).not.toContain("ALWAYS")
+  })
+
   test("AGENTS.md naming a rule by hand:  not repeated when wanted;  a note when not", () => {
     put("AGENTS.md", `# Acme\n\nREAD \`${FOLDER}/solid/solid-2.md\` first.\n`)
     const [, agents] = planAgentRules(project, picks("wwod"), FOLDER)
@@ -157,6 +188,27 @@ describe("wwodInit()", () => {
     quietly()
     await wwodInit({}, project)
     expect(currentAgentRules(project, FOLDER)).toEqual({ wwod: true, solid: false, "code-is-the-spec": false })
+  })
+
+  test("in a workspace:  --yes (or no terminal) writes at its root;  --here, in the nearer folder", async () => {
+    put("package.json", JSON.stringify({ workspaces: ["packages/*"] }))
+    put("packages/app/package.json", JSON.stringify({ name: "app" }))
+    const app = join(project, "packages/app")
+    vi.spyOn(process, "cwd").mockReturnValue(app)
+    const printed = quietly()
+    await wwodInit({ yes: true, dryRun: true }, join(app, "src"))
+    expect(printed()).toEqual([
+      "In ../.., the workspace's root  (--here:  only .)",
+      "CLAUDE.md:  would create;  would add WWOD"
+    ])
+    vi.mocked(process.stdout.write).mockClear()
+    await wwodInit({ here: true, json: true }, app)
+    const report = JSON.parse(printed().join("\n"))
+    expect(report).toMatchObject({ project: app, workspaceRoot: project, folder: `../../${FOLDER}` })
+    expect(read("packages/app/CLAUDE.md")).toContain(`@../../${FOLDER}/wwod/WWOD.md`)
+    expect(existsSync(join(project, "CLAUDE.md"))).toBe(false)
+    await wwodInit({}, app)
+    expect(read("CLAUDE.md")).toContain(`@${FOLDER}/wwod/WWOD.md`)
   })
 
   test("spell not installed:  a CliError saying what to install", async () => {

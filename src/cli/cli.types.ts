@@ -73,7 +73,9 @@ export type CommandsOptions = GlobalOptions & {
  *   - `wwod`:  WWOD (`--no-wwod` leaves it out)
  *   - `solid`:  the Solid 2 rules
  *   - `codeIsTheSpec`:  WWOD §21, the code is the spec
- * - `yes`:  `init` asks nothing:  the flags, else what the project has, else the defaults
+ * - `yes`:  `init` asks nothing:  the flags, else what the project has, else the defaults;
+ *   in a workspace, its root
+ * - `here`:  `init` writes in the nearest folder with a `package.json`, not the root of the workspace it's in
  * - `dryRun`:  `init` says what it would change, and writes nothing
  */
 export type WwodOptions = GlobalOptions & {
@@ -82,6 +84,7 @@ export type WwodOptions = GlobalOptions & {
   solid?: boolean
   codeIsTheSpec?: boolean
   yes?: boolean
+  here?: boolean
   dryRun?: boolean
 }
 

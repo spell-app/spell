@@ -254,7 +254,12 @@ Each is opt-in:  take WWOD, the Solid 2 rules, both, or neither.
 
 - `spell wwod init` writes them in for you:
   - `CLAUDE.md` gets an `@` line per rule, which Claude Code reads in every session;  it's made when missing.
-  - `AGENTS.md`, which other agents (Codex ...) read, gets the same in plain words, when you have one.
+  - `AGENTS.md`, which other agents (Codex ...) read, gets the same in plain words, when you have one,
+    under a line saying to skip a rule the tool already loaded:
+    Claude Code reads `AGENTS.md` too, and the rules are long (about 19k tokens), so it reads them once.
+  - In a workspace (a folder whose `package.json` is listed in a `workspaces` above it),
+    it asks which folder gets them:  the workspace's root (the default, and `--yes`'s), or the nearer folder.
+    `--here` takes the nearer folder without asking.
   - Each file's lines sit in one marked block.
     Run it again to add or drop a rule:  it changes that block, and never writes a second one.
   - Without asking:  `--yes`, with `--solid`, `--code-is-the-spec` or `--no-wwod` for what you want.
@@ -274,8 +279,9 @@ Each is opt-in:  take WWOD, the Solid 2 rules, both, or neither.
   And in plain words, at the top of your `AGENTS.md`:
 
   ```markdown
-  **ALWAYS, before any code:  READ `node_modules/spell/agents/wwod/WWOD.md`, the house style.**
-  **Before any Solid 2 code:  READ `node_modules/spell/agents/solid/solid-2.md` IN FULL.**
+  **READ these rules from the spell package, unless your tool already loaded them** (Claude Code does, through `CLAUDE.md`):
+  - **Before any code:**  `node_modules/spell/agents/wwod/WWOD.md`, the house style (WWOD)
+  - **Before any Solid 2 code:**  `node_modules/spell/agents/solid/solid-2.md`, IN FULL
   ```
 
 - The limits:
