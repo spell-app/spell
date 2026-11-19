@@ -64,7 +64,7 @@
     padding-inline-start: calc(var(--_json-indent) + 2ch);
     text-indent: -2ch;
     white-space: pre-wrap;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     border-radius: 0.25em;
   }
 

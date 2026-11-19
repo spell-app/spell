@@ -186,6 +186,9 @@
                   data.value = { label: "New" }
                   ```
 
+                  Set `item` to show a thing:  its `data`, else the thing itself, becomes `value`.
+                  So slotted as a tree's `detail`, it shows each pick's data with no code:  the tree sets its `item`.
+
                   A click on a key or a value sends `ui-navigating`, with where it is:
                   `path`, the keys from the top down, then `key`, `value` and `part` (`"key"` or `"value"`).
                   The page decides what it means, such as showing what a value names.

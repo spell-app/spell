@@ -6,6 +6,7 @@ import { UI } from "spell/ui/core"
 import type { DOMJsonElement } from "spell/ui/components/ui-json"
 
 import "spell/ui/components/ui-json"
+import "spell/ui/components/ui-tree"
 import "spell/ui/components/ui-tree-diagram"
 import "spell/ui/components/ui-diagram"
 
@@ -82,6 +83,32 @@ describe("<ui-json> value", () => {
     expect(changed).toHaveBeenCalledTimes(1)
     expect(changed.mock.calls[0]![0].value).toEqual({ a: 2 })
     expect(element.dirty).toBe(true)
+  })
+
+  test("`item` shows a thing:  its `data`, else the thing itself;  an element without `data`, nothing", async () => {
+    const element = await json(`<ui-json></ui-json>`)
+    element.item = { id: "acme", data: { client: "Acme" } }
+    await ElementFixture.settle()
+    expect(element.value).toEqual({ client: "Acme" })
+    expect((element.item as { id: string }).id).toBe("acme")
+    element.item = { id: "books" }
+    await ElementFixture.settle()
+    expect(element.value).toEqual({ id: "books" })
+    element.item = document.createElement("div")
+    await ElementFixture.settle()
+    expect(element.value).toBeUndefined()
+  })
+
+  test("slotted as a `<ui-tree>`'s `detail`, it shows each pick's data with no page code", async () => {
+    const tree = (await ElementFixture.render(
+      `<ui-tree appearance="columns" label="Work" style="height: 200px; width: 900px">
+        <ui-json slot="detail"></ui-json>
+      </ui-tree>`
+    )) as HTMLElement & { items: unknown[]; path: string[] }
+    tree.items = [{ id: "acme", label: "Acme", data: { client: "Acme" } }]
+    tree.path = ["acme"]
+    await ElementFixture.settle()
+    expect(tree.querySelector<DOMJsonElement>("ui-json")!.value).toEqual({ client: "Acme" })
   })
 
   test("follows its text as the page changes it", async () => {

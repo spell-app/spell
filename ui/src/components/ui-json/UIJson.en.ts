@@ -6,6 +6,7 @@
  *   are shared with `<ui-code>` and `<ui-markdown>`:  `UIT.Source*`, which `LoadableComponent` reads.
  *   - Its `ui-changed` is its own, with the parsed `value`.
  * - `value` is the DOM element's property (any JSON value):  not an attribute.
+ *   `item`, also a property, sets it from a thing's `data` (a tree's `detail` pane hands it the pick).
  */
 
 import type { E } from "spell/ui/core"

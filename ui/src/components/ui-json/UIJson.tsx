@@ -9,7 +9,7 @@ import jsonCSS from "./UIJson.css?inline"
 
 /****************
  * ### `DOMJsonElement`
- * The DOM element of `<ui-json>`:  the source element's script API, plus `value`, `copy()` and `setQuotes()`.
+ * The DOM element of `<ui-json>`:  the source element's script API, plus `value`, `item`, `copy()` and `setQuotes()`.
  ****************/
 export class DOMJsonElement extends E.DOMLoadableElement<UIJson> {
   /**
@@ -24,6 +24,24 @@ export class DOMJsonElement extends E.DOMLoadableElement<UIJson> {
   set value(value: unknown) {
     this.content = JSON.stringify(value, null, 2) ?? ""
   }
+
+  /**
+   * A thing to show:  its `data`, else the thing itself, becomes `value`.
+   * - So it draws a tree's pick with no page code:  `<ui-tree>` hands its `detail` element the picked row as `item`.
+   * - An element without `data` (a `<ui-tree-item>`):  nothing to show.
+   */
+  get item(): unknown {
+    return this.shownItem
+  }
+
+  set item(item: unknown) {
+    this.shownItem = item
+    const data = (item as { data?: unknown } | null | undefined)?.data
+    this.value = data !== undefined ? data : item instanceof Element ? undefined : item
+  }
+
+  /** The last `item`:  declared, never a field, as a family DOM class has none (`DOMElement`, "Defined early"). */
+  declare private shownItem: unknown
 
   /**
    * Copy the data to the clipboard, as JSON with 2-space indents;  true once it's there.
