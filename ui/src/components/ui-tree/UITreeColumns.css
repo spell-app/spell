@@ -8,6 +8,11 @@
  *   - Each column's width and start come from the tree (`UITree.columnWidthCSS()`, `columnStartCSS()`):
  *     the token's width, or the one a person dragged it to.
  *   - The line after each column is a few px wide strip over its border (`.column-edge`):  dragging it sizes the column.
+ * - `sticky-path`:  the path line (`UITree.css`'s `.path`) takes a line of its own above the box of columns.
+ * - Narrow columns (`UITree.narrowColumns`):  a column the tree draws narrow is a strip showing only its pick, the
+ *   pick's icon and name sideways;  its width eases, but not while a line is dragged, nor with reduced motion.
+ *   - From `items`:  `ul.column.narrow`;  from markup, the tree's `.column.narrow`, an open row's `.rows.narrow`, and
+ *     each row in it `:state(in-narrow)`.
  * - Rows from `items` are drawn in the tree's own shadow root instead:  each column a `ul.column.items`, its rows
  *   `li.column-row`s, ONE grid a column, so icon, label, `which`, count and chevron line up down it.
  *   - A row's classes:  `selected` (the selected pick), `on-path` (an earlier pick), and a subclass's `rowClass()`.
@@ -15,6 +20,7 @@
  * - Tokens:
  *   | `--ui-tree-columns-height` | the tree's height (18em):  every column scrolls its own rows |
  *   | `--ui-tree-column-width` | each column's width |
+ *   | `--ui-tree-narrow-width` | a narrow column's width (2em) |
  *   | `--ui-tree-column-picked-background` | a row picked in an earlier column:  one of the chain of open rows |
  *   | `--ui-tree-column-selected-background` / `-color` | the selected row, the chain's last pick |
  */
@@ -22,7 +28,16 @@
   /* ## The tree:  `:state(columns)`;  each of its rows says `:state(in-columns)` */
   :host(:state(columns)) {
     --_ui-tree-columns-height: var(--ui-tree-columns-height, 18em);
+    display: flex;
+    flex-direction: column;
     height: var(--_ui-tree-columns-height);
+  }
+  /* `sticky-path`:  a line of its own above the columns, nothing under it to pin over */
+  :host(:state(columns)) > .path {
+    position: static;
+    flex: none;
+    margin-block-end: 0;
+    backdrop-filter: none;
   }
   /* the picks' colours:  the tree's own rows (from `items`) and every row from markup */
   :host(:state(columns)),
@@ -36,10 +51,12 @@
   }
   .columns {
     --_ui-tree-column-width: var(--ui-tree-column-width, 14em);
+    --_ui-tree-narrow-width: var(--ui-tree-narrow-width, 2em);
     --_ui-tree-title-height: calc(var(--_ui-tree-row-height) + 6px);
     display: flex;
+    flex: 1 1 0;
     box-sizing: border-box;
-    height: 100%;
+    min-height: 0;
     overflow-x: auto;
     overflow-y: hidden;
     /* every open row's column is placed against this box, wherever in the rows it's drawn */
@@ -83,12 +100,16 @@
     width: var(--ui-focus-width);
     background: var(--ui-focus-color);
   }
-  /* what an unsized column's width comes to, in px, for a drag to start from */
-  .column-probe {
+  /* what an unsized column's width comes to, in px, for a drag to start from;  and a narrow one's */
+  .column-probe,
+  .narrow-probe {
     position: absolute;
     visibility: hidden;
     width: var(--_ui-tree-column-width);
     height: 0;
+  }
+  .narrow-probe {
+    width: var(--_ui-tree-narrow-width);
   }
 
   /* a column's title:  the same height in every column, so they read as one row of headers */
@@ -289,5 +310,70 @@
   }
   .column-row > .chevron:dir(rtl) {
     rotate: 45deg;
+  }
+
+  /* ## Narrow columns:  a strip with only the pick, its name sideways */
+  /* how long a column takes to narrow or widen:  inherited by the rows' own columns;  none while a line is dragged */
+  :host(:state(columns)) {
+    --_ui-tree-narrow-duration: var(--ui-duration-normal);
+  }
+  :host(:state(columns):state(resizing)) {
+    --_ui-tree-narrow-duration: 0s;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :host(:state(columns)) {
+      --_ui-tree-narrow-duration: 0s;
+    }
+  }
+  .column,
+  .column-edge,
+  :host(:state(in-columns)) > .rows {
+    transition-property: width, inset-inline-start;
+    transition-duration: var(--_ui-tree-narrow-duration, 0s);
+    transition-timing-function: ease;
+  }
+  .column.narrow,
+  :host(:state(in-columns)) > .rows.narrow {
+    overflow: hidden;
+  }
+  .column-edge.narrow,
+  .column.narrow > .column-title,
+  .column.narrow > .empty,
+  .column.narrow > .column-row:not(.on-path, .selected),
+  :host(:state(in-columns)) > .rows.narrow > .column-title {
+    display: none;
+  }
+  /* the pick:  its icon upright, its name down the strip */
+  .column.narrow > .column-row {
+    display: flex;
+    align-items: center;
+    gap: var(--_ui-tree-gap);
+    margin-inline: 2px;
+    padding: 8px 0;
+    writing-mode: vertical-rl;
+    overflow: hidden;
+  }
+  .column.narrow > .column-row :is(.which, .count, .chevron),
+  .column.narrow > .column-row > :is(.count, .chevron) {
+    display: none;
+  }
+  .column.narrow > .column-row > .icon {
+    margin: 0;
+  }
+  /* from markup:  every row but the pick goes;  the pick's row turns sideways */
+  :host(:state(in-narrow):not(:state(open))) {
+    display: none;
+  }
+  :host(:state(in-narrow)) > .row {
+    justify-content: start;
+    min-height: 0;
+    margin-inline: 2px;
+    padding: 8px 0;
+    writing-mode: vertical-rl;
+    overflow: hidden;
+  }
+  :host(:state(in-narrow)) > .row > :is(.toggle, .row-count, .count, .badge, .actions),
+  :host(:state(in-narrow)) > .row .which {
+    display: none;
   }
 }

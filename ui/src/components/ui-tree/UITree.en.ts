@@ -87,6 +87,17 @@ export const treeVocabulary = {
         "last item selected;  read it as people pick."
     },
     {
+      name: "narrow-before",
+      group: "appearance",
+      kind: "number",
+      default: 2,
+      description:
+        "`appearance=\"columns\"`:  how many columns at the end never narrow.  While the columns don't fit the tree's " +
+        "width, the ones before those narrow, from the first, as few as it takes, each to a strip with its pick's " +
+        "name;  the pointer or the focus on one widens it again, and so does picking it from the path line.  The " +
+        "selected row's column never narrows."
+    },
+    {
       name: "show",
       group: "appearance",
       kind: "string",
@@ -101,7 +112,9 @@ export const treeVocabulary = {
       description:
         "While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, " +
         "`Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.  A click on one scrolls to its " +
-        "row, selecting nothing.  It shows only while one of them is scrolled out of sight."
+        "row, selecting nothing.  It shows only while one of them is scrolled out of sight.  " +
+        '`appearance="columns"`:  a line above the columns naming each column\'s pick, shown once something is ' +
+        "picked;  a click on one picks it again, keeping the columns after it, and scrolls its column into view."
     }
   ],
   events: [
@@ -141,13 +154,19 @@ export const treeVocabulary = {
     { name: "empty", description: "The box around the `empty` slot." },
     { name: "path", description: "`sticky-path`:  the pinned line naming the rows scrolled out of sight." },
     { name: "path-row", description: "`sticky-path`:  each row's name in the path." },
+    {
+      name: "narrow-column",
+      description:
+        '`appearance="columns"` with `items`:  a column drawn narrow, a strip with its pick (`narrow-before`).'
+    },
     { name: "column", description: '`appearance="columns"` with `items`:  one column.' },
     { name: "column-row", description: '`appearance="columns"` with `items`:  one row of a column.' }
   ],
   states: [
     { name: "filtering", description: "It has a `filter`." },
     { name: "no-matches", description: "Its `filter` matches no row." },
-    { name: "columns", description: "Its `appearance` is `columns`:  a column per level, side by side." }
+    { name: "columns", description: "Its `appearance` is `columns`:  a column per level, side by side." },
+    { name: "resizing", description: '`appearance="columns"`:  the line after a column is being dragged.' }
   ],
   texts: [
     {

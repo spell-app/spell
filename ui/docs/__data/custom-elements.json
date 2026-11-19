@@ -50069,6 +50069,15 @@
               "fieldName": "columnTitles"
             },
             {
+              "name": "narrow-before",
+              "description": "`appearance=\"columns\"`:  how many columns at the end never narrow.  While the columns don't fit the tree's width, the ones before those narrow, from the first, as few as it takes, each to a strip with its pick's name;  the pointer or the focus on one widens it again, and so does picking it from the path line.  The selected row's column never narrows.",
+              "type": {
+                "text": "number"
+              },
+              "default": "2",
+              "fieldName": "narrowBefore"
+            },
+            {
               "name": "show",
               "description": "`appearance=\"columns\"`:  which parts each row shows, as words:  `icon which count chevron`;  the label always shows.  None:  `icon which chevron`.  `count` is how many rows a row holds, when it knows.",
               "type": {
@@ -50078,7 +50087,7 @@
             },
             {
               "name": "sticky-path",
-              "description": "While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.  A click on one scrolls to its row, selecting nothing.  It shows only while one of them is scrolled out of sight.",
+              "description": "While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.  A click on one scrolls to its row, selecting nothing.  It shows only while one of them is scrolled out of sight.  `appearance=\"columns\"`:  a line above the columns naming each column's pick, shown once something is picked;  a click on one picks it again, keeping the columns after it, and scrolls its column into view.",
               "type": {
                 "text": "boolean"
               },
@@ -50270,6 +50279,10 @@
               "description": "`sticky-path`:  each row's name in the path."
             },
             {
+              "name": "narrow-column",
+              "description": "`appearance=\"columns\"` with `items`:  a column drawn narrow, a strip with its pick (`narrow-before`)."
+            },
+            {
               "name": "column",
               "description": "`appearance=\"columns\"` with `items`:  one column."
             },
@@ -50290,6 +50303,10 @@
             {
               "name": "columns",
               "description": "Its `appearance` is `columns`:  a column per level, side by side."
+            },
+            {
+              "name": "resizing",
+              "description": "`appearance=\"columns\"`:  the line after a column is being dragged."
             },
             {
               "name": "disabled",
@@ -50420,6 +50437,10 @@
             {
               "name": "--ui-tree-column-width",
               "default": "14em"
+            },
+            {
+              "name": "--ui-tree-narrow-width",
+              "default": "2em"
             }
           ]
         },
@@ -50725,6 +50746,10 @@
             {
               "name": "in-columns",
               "description": "Its tree's `appearance` is `columns`:  it's a row in one of its columns, and its rows the next one."
+            },
+            {
+              "name": "in-narrow",
+              "description": "Its tree's `appearance` is `columns`, and its column is drawn narrow:  only the column's pick shows, its name sideways."
             },
             {
               "name": "disabled",

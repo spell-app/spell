@@ -102,6 +102,12 @@ export const treeItemVocabulary = {
     {
       name: "in-columns",
       description: "Its tree's `appearance` is `columns`:  it's a row in one of its columns, and its rows the next one."
+    },
+    {
+      name: "in-narrow",
+      description:
+        "Its tree's `appearance` is `columns`, and its column is drawn narrow:  only the column's pick shows, its name " +
+        "sideways."
     }
   ],
   texts: [

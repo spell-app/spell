@@ -2342,6 +2342,7 @@ export const HELP_TABLE: Readonly<
       items:
         '`appearance="columns"`: the tree as data, given as a property, in place of `<ui-tree-item>`s: `{ id, label, icon?, which?, count?, children?, data?',
       path: "`appearance=\"columns\"`: the ids of each column's pick, from the top (`string[]`; a `<ui-tree-item>`'s id is its `value`, else its `label`).",
+      "narrow-before": '`appearance="columns"`: how many columns at the end never narrow.',
       show: '`appearance="columns"`: which parts each row shows, as words: `icon which count chevron`; the label always shows.',
       "sticky-path":
         "While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit."

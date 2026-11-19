@@ -137,6 +137,33 @@
                   </script>
                 </ui-example>
               </ui-section>
+              <ui-section id="examples-types-deep-paths" label="Deep paths" sticky="stack" collapsible dividing>
+                <ui-example description="When the open path is deeper than the tree is wide, the first columns narrow to a strip with their pick's name, as few as it takes;  the last two, and the selected row's, never do.  Point at a strip to widen it.  With `sticky-path`, the line above the columns names each pick:  a click on one picks it again, keeping the columns after it.  `narrow-before` says how many columns at the end stay wide.">
+                  <ui-tree id="docs-tree-columns-deep" appearance="columns" sticky-path column-titles="Parts" show="icon which count chevron" label="Parts" style="height: 15em"></ui-tree>
+                  <script type="module">
+                    const part = (id, which, children) => ({ id, label: id, which, icon: children ? "microchip" : "circle outline", children })
+                    await customElements.whenDefined("ui-tree")
+                    const tree = document.getElementById("docs-tree-columns-deep")
+                    tree.items = [
+                      part("board", "top", [
+                        part("power", "block", [part("regulator", "chip"), part("fuse", "part")]),
+                        part("radio", "block", [
+                          part("front end", "block", [
+                            part("mixer", "block", [
+                              part("oscillator", "block", [part("crystal", "part"), part("trim cap", "part"), part("buffer", "chip")]),
+                              part("filter", "part")
+                            ]),
+                            part("amplifier", "chip")
+                          ]),
+                          part("antenna", "part")
+                        ])
+                      ]),
+                      part("enclosure", "top", [part("lid", "part"), part("base", "part")])
+                    ]
+                    tree.path = ["board", "radio", "front end", "mixer", "oscillator", "crystal"]
+                  </script>
+                </ui-example>
+              </ui-section>
             </ui-section>
             <ui-section id="examples-content" label="Content" sticky="stack" collapsible dividing>
               <ui-section id="examples-content-which-one" label="Which one" sticky="stack" collapsible dividing>
@@ -234,7 +261,9 @@
                   - `path` is the ids of each column's pick, from the top.  Set it to open a path, its last item selected;  `ui-changed` hands it over with the `item`.
                   - `filter` filters one column:  the last one on screen as the filter starts, until it's cleared.
                   - `show` picks each row's parts:  `icon which count chevron`;  without it, `icon which chevron`.
-                  - `--ui-tree-columns-height` sets its height, `--ui-tree-column-width` each column's width.
+                  - `sticky-path` puts a line above the columns naming each column's pick;  a click on one picks it again, keeping the columns after it, and scrolls its column into view.  Like the outline's, a screen reader skips it:  the columns' own keys are the way back.
+                  - While the columns don't fit the tree's width, the first ones narrow to a strip with their pick's name, as few as it takes.  The last `narrow-before` (2) and the selected row's never do;  the pointer or the focus on one widens it again.
+                  - `--ui-tree-columns-height` sets its height, `--ui-tree-column-width` each column's width, `--ui-tree-narrow-width` a narrow one's.
                 </script>
               </ui-markdown>
             </ui-section>
@@ -336,7 +365,13 @@
               </ui-markdown>
               <ui-docs-tokens family="ui-tree" playground>
                 <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
-                <ui-tree appearance="columns" column-titles="Clients, Projects, Files" show="icon which count chevron" label="Work" style="height: 12em; width: 40em">
+                <ui-tree
+                  appearance="columns"
+                  column-titles="Clients, Projects, Files"
+                  show="icon which count chevron"
+                  label="Work"
+                  style="height: 12em; width: 44em"
+                >
                   <ui-tree-item label="Acme Bakery" icon="building outline" open>
                     <ui-tree-item label="Spring menu" icon="folder" open>
                       <ui-tree-item label="menu.pdf" icon="file pdf outline" selected></ui-tree-item>

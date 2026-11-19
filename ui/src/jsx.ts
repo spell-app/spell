@@ -54884,6 +54884,17 @@ export interface UITreeAttributes {
    */
   "prop:path"?: unknown
   /**
+   * `appearance="columns"`:  how many columns at the end never narrow.  While the columns don't fit the tree's width, the ones before those narrow, from the first, as few as it takes, each to a strip with its pick's name;  the pointer or the focus on one widens it again, and so does picking it from the path line.  The selected row's column never narrows.
+   * - takes:  number
+   * - default:  `2`
+   */
+  "narrow-before"?: number | `${number}`
+  /**
+   * `narrow-before`, as the DOM element's property.
+   * @deprecated write `narrow-before` -- `prop:` stays only for compiled spell
+   */
+  "prop:narrowBefore"?: number | `${number}`
+  /**
    * `appearance="columns"`:  which parts each row shows, as words:  `icon which count chevron`;  the label always shows.  None:  `icon which chevron`.  `count` is how many rows a row holds, when it knows.
    * - takes:  text
    */
@@ -54894,7 +54905,7 @@ export interface UITreeAttributes {
    */
   "prop:show"?: string
   /**
-   * While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.  A click on one scrolls to its row, selecting nothing.  It shows only while one of them is scrolled out of sight.
+   * While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.  A click on one scrolls to its row, selecting nothing.  It shows only while one of them is scrolled out of sight.  `appearance="columns"`:  a line above the columns naming each column's pick, shown once something is picked;  a click on one picks it again, keeping the columns after it, and scrolls its column into view.
    * - takes:  flag (present / absent)
    */
   "sticky-path"?: boolean | ""

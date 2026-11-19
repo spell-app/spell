@@ -10754,6 +10754,13 @@
       }
     },
     {
+      "name": "--ui-tree-narrow-width",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-tree>`'s token.  Default:  `2em`"
+      }
+    },
+    {
       "name": "--ui-tree-diagram-font-family",
       "description": {
         "kind": "markdown",
@@ -11754,6 +11761,13 @@
       "description": {
         "kind": "markdown",
         "value": "Part of:\n\n- `<ui-search>`:  Each group's name."
+      }
+    },
+    {
+      "name": "::part(narrow-column)",
+      "description": {
+        "kind": "markdown",
+        "value": "Part of:\n\n- `<ui-tree>`:  `appearance=\"columns\"` with `items`:  a column drawn narrow, a strip with its pick (`narrow-before`)."
       }
     },
     {
@@ -13033,6 +13047,13 @@
       }
     },
     {
+      "name": ":state(in-narrow)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-tree-item>`:  Its tree's `appearance` is `columns`, and its column is drawn narrow:  only the column's pick shows, its name sideways."
+      }
+    },
+    {
       "name": ":state(in-popup)",
       "description": {
         "kind": "markdown",
@@ -13450,6 +13471,13 @@
       "description": {
         "kind": "markdown",
         "value": "Custom state of:\n\n- `<ui-split-panel>`:  Its bars drag."
+      }
+    },
+    {
+      "name": ":state(resizing)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-tree>`:  `appearance=\"columns\"`:  the line after a column is being dragged."
       }
     },
     {

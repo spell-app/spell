@@ -16,7 +16,8 @@ export const treeEs = {
     "sticky-path": "ruta-fija",
     "column-titles": "titulos-de-columnas",
     path: "ruta",
-    show: "mostrar"
+    show: "mostrar",
+    "narrow-before": "estrechar-antes"
   },
   values: { appearance: { nav: "navegacion", columns: "columnas" } },
   events: { "ui-selecting": "ui-seleccionando", "ui-settled": "ui-asentado" },
@@ -26,7 +27,8 @@ export const treeEs = {
     path: "ruta",
     "path-row": "fila-de-ruta",
     column: "columna",
-    "column-row": "fila-de-columna"
+    "column-row": "fila-de-columna",
+    "narrow-column": "columna-estrecha"
   },
   texts: { noMatches: "Nada coincide", resizeColumn: "Cambiar el ancho de esta columna", loading: "Cargando" }
 } as const satisfies E.TagDictionary

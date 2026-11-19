@@ -72,14 +72,14 @@
     border-block-end: 1px solid var(--ui-border-color);
     color: var(--_ui-tree-muted-color);
   }
-  /* the outer rows give way first:  each shrinks a hundred times more than the one after it */
+  /* the outer rows give way first:  each shrinks a hundred times more than the one after it (`renderPath()`) */
   .path-row {
     flex: 0 1 auto;
     min-width: 1.5em;
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .path-row:last-child {
+  .path-row.current {
     min-width: 0;
     color: var(--ui-text-color);
   }

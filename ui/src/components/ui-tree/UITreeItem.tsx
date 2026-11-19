@@ -30,6 +30,7 @@ import columnsCSS from "./UITreeColumns.css?inline"
  *   - The tree does the picking:  a click on its triangle is a click on the row.
  *   - Its parts are as the tree's `show` says:  its icon, `which`, how many rows it holds, the chevron.
  *   - Picked while `expandable` with no rows yet:  a spinner in its column, until they come.
+ *   - In a column the tree draws narrow:  `:state(in-narrow)`, only the column's pick showing, its name sideways.
  * - Its tree's `appearance="nav"` (a site's side navigation) gives it the docs site's look:  `:state(nav)`, read as it
  *   connects too.  Then a `band` row is a heading over the rows inside it, and `count` / `badge` label its words.
  *   - `band="group"`:  a quiet label over its rows, with no arrow:  whatever holds the tree opens it.
@@ -85,6 +86,17 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
       "--_ui-tree-column-start": tree.columnStartCSS(this.depth + 1),
       "--_ui-tree-column-own-width": tree.columnWidthCSS(this.depth + 1)
     }
+  }
+
+  /** `appearance="columns"`:  the column it's in is drawn narrow, a strip with its pick:  `:state(in-narrow)`. */
+  @E.cssState("in-narrow")
+  get isInNarrowColumn(): boolean {
+    return this.isInColumns && !!this.tree?.isNarrowColumn(this.depth)
+  }
+
+  /** `appearance="columns"`:  the column of rows inside it is drawn narrow. */
+  get hasNarrowRows(): boolean {
+    return this.isInColumns && !!this.tree?.isNarrowColumn(this.depth + 1)
   }
 
   /** Its tree is a side navigation (`appearance="nav"`):  `:state(nav)`. */
@@ -224,7 +236,7 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
         </div>
         <Show when={this.drawsRows}>
           <div
-            class={["rows", { shut: !this.showsRows }]}
+            class={["rows", { shut: !this.showsRows, narrow: this.hasNarrowRows }]}
             role="group"
             part={this.partForName("group")}
             inert={this.showsRows ? undefined : ""}

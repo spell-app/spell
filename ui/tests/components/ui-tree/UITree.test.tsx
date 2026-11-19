@@ -52,6 +52,29 @@ function click(host: Element, label: string, keys: MouseEventInit = {}) {
   box.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true, ...keys }))
 }
 
+/** Two frames, then a settle:  a size measured, a scroll read. */
+async function nextPaint() {
+  await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)))
+  await ElementFixture.settle()
+}
+
+/** The path line's words, as it shows them;  empty while it doesn't. */
+function pathWords(host: Element): string[] {
+  return [...host.shadowRoot!.querySelectorAll('[part~="path-row"]')].map((each) => each.textContent!)
+}
+
+/** A click on the path line's `index`th name. */
+async function clickPath(host: Element, index: number) {
+  host.shadowRoot!.querySelectorAll<HTMLElement>('[part~="path-row"]')[index]!.click()
+  await nextPaint()
+}
+
+/** A pointer moved onto `box`, inside the tree. */
+async function pointAt(box: Element) {
+  box.dispatchEvent(new PointerEvent("pointerover", { bubbles: true, composed: true }))
+  await ElementFixture.settle()
+}
+
 /** `key` pressed on what has the focus. */
 async function press(key: string) {
   const target = document.activeElement as HTMLElement
@@ -609,6 +632,72 @@ describe('<ui-tree appearance="columns">', () => {
     await vi.waitFor(() => expect(settled).toHaveBeenCalledTimes(1), { timeout: 2000 })
     expect(settled).toHaveBeenCalledWith("Books")
   })
+
+  /** Every pick down to loaf.jpg, in a tree `width` px wide:  four columns of 224px. */
+  async function deepColumns(attributes = "", width = 600) {
+    const host = await columns(attributes)
+    host.style.width = `${width}px`
+    for (const label of ["Acme", "Menu", "photos", "loaf.jpg"]) {
+      click(host, label)
+      await ElementFixture.settle()
+    }
+    await nextPaint()
+    return host
+  }
+
+  /** Which columns, by level, are drawn narrow. */
+  function narrowColumns(host: Element): number[] {
+    return [0, 1, 2, 3].filter((index) => columnBox(host, index).classList.contains("narrow"))
+  }
+
+  it("narrows the first columns while they don't fit, as few as it takes, each showing only its pick", async () => {
+    const host = await deepColumns()
+    // 4 x 224 = 896 > 600:  the first narrows (704), then the second (512)
+    expect(narrowColumns(host)).toEqual([0, 1])
+    expect(Math.round(columnBox(host, 0).getBoundingClientRect().width)).toBe(32)
+    expect(row(host, "Acme").checkVisibility()).toBe(true)
+    expect(row(host, "Books").checkVisibility()).toBe(false)
+    expect(row(host, "Acme").matches(":state(in-narrow)")).toBe(true)
+    expect(row(host, "photos").matches(":state(in-narrow)")).toBe(false)
+    // the columns after a narrow one move along
+    expect(leftOf(host, "menu.pdf")).toBeLessThan(2 * 224)
+  })
+
+  it("narrows nothing while the columns fit, and never the last `narrow-before`", async () => {
+    expect(narrowColumns(await deepColumns("", 900))).toEqual([])
+    expect(narrowColumns(await deepColumns('narrow-before="3"'))).toEqual([0])
+  })
+
+  it("widens a narrow column under the pointer, and narrows it again once the pointer leaves", async () => {
+    const host = await deepColumns()
+    await pointAt(row(host, "Acme"))
+    expect(narrowColumns(host)).toEqual([1])
+    host.dispatchEvent(new PointerEvent("pointerleave"))
+    await ElementFixture.settle()
+    expect(narrowColumns(host)).toEqual([0, 1])
+  })
+
+  it("`sticky-path` names each column's pick above the columns;  a click picks it again, the columns after it kept", async () => {
+    const host = await deepColumns("sticky-path")
+    expect(pathWords(host)).toEqual(["Acme", "Menu", "photos", "loaf.jpg"])
+    const line = host.shadowRoot!.querySelector<HTMLElement>('[part~="path"]')!
+    expect(line.getAttribute("aria-hidden")).toBe("true")
+    expect(line.getBoundingClientRect().bottom).toBeLessThanOrEqual(columnBox(host, 0).getBoundingClientRect().top)
+    const changed = vi.fn()
+    host.addEventListener("ui-changed", (event) => changed((event as CustomEvent).detail.value))
+    await clickPath(host, 1)
+    expect(changed).toHaveBeenCalledWith("Menu")
+    expect(selected(host)).toEqual(["Menu"])
+    expect(chain(host)).toEqual(["Acme", "Menu", "photos", "loaf.jpg"])
+    // the picked column is the selected row's, so it widens
+    expect(narrowColumns(host)).toEqual([0])
+    expect(document.activeElement).toBe(row(host, "Menu"))
+  })
+
+  it("shows no path line without `sticky-path`, nor before anything is picked", async () => {
+    expect(pathWords(await deepColumns())).toEqual([])
+    expect(pathWords(await columns("sticky-path"))).toEqual([])
+  })
 })
 
 describe('<ui-tree appearance="columns"> from `items`', () => {
@@ -806,6 +895,32 @@ describe('<ui-tree appearance="columns"> from `items`', () => {
     const host = await dataTree("", "x-classed-tree")
     expect([...dataRow(host, "acme").classList]).toEqual(expect.arrayContaining(["column-row", "has-which", "bakery"]))
     expect([...dataRow(host, "books").classList]).not.toContain("has-which")
+  })
+
+  it("narrows the first columns while they don't fit, each showing only its pick, until the pointer is on one", async () => {
+    const host = await dataTree("sticky-path")
+    host.style.width = "600px"
+    host.path = ["acme", "menu", "photos", "loaf.jpg"]
+    await nextPaint()
+    const narrow = () =>
+      [...host.shadowRoot!.querySelectorAll<HTMLElement>("ul.column")].flatMap((column, index) =>
+        column.classList.contains("narrow") ? [index] : []
+      )
+    expect(narrow()).toEqual([0, 1])
+    const first = host.shadowRoot!.querySelector<HTMLElement>('ul.column[data-depth="0"]')!
+    expect(first.getAttribute("part")).toContain("narrow-column")
+    expect(dataRow(host, "acme").checkVisibility()).toBe(true)
+    expect(dataRow(host, "books").checkVisibility()).toBe(false)
+    await pointAt(dataRow(host, "acme"))
+    expect(narrow()).toEqual([1])
+    host.dispatchEvent(new PointerEvent("pointerleave"))
+    await ElementFixture.settle()
+    // the path line names each pick;  a click on one selects it, keeping the columns after it, and widens its column
+    expect(pathWords(host)).toEqual(["Acme", "Menu", "photos", "loaf.jpg"])
+    await clickPath(host, 1)
+    expect(host.path).toEqual(["acme", "menu", "photos", "loaf.jpg"])
+    expect(dataRow(host, "menu").classList).toContain("selected")
+    expect(narrow()).toEqual([0])
   })
 
   it("is accessible", async () => {

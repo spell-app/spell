@@ -37,6 +37,11 @@ import columnsCSS from "./UITreeColumns.css?inline"
  *     A tree with an `id` remembers the widths in this browser, under it;  one without, until the page reloads.
  *   - `path`:  the ids of each column's pick, from the top;  set it to open a path, read it as people pick.
  *   - `filter` filters one column:  the last one on screen as the filter starts, so moving about doesn't move it.
+ *   - `sticky-path`:  the path line above the columns, naming each column's pick;  a click on one picks it again,
+ *     keeping the columns after it, and scrolls its column into view.
+ *   - Narrow columns:  while the columns don't fit the tree's width, the first ones narrow to a strip with their pick's
+ *     name, as few as it takes, never the last `narrow-before` (2) nor the selected row's.
+ *     The pointer or the focus on one widens it again.
  *   - `show`:  which parts each row shows (`icon which count chevron`).
  *   - An `expandable` row picked before its rows come shows a spinner in its column (`<ui-loader>`).
  *   - Its rows can be DATA instead:  `items`, a `TreeItemData` list, drawn in its shadow root ("Columns from data").
@@ -50,6 +55,7 @@ import columnsCSS from "./UITreeColumns.css?inline"
  * - `sticky-path`:  while it scrolls, one line pinned at its top names the open rows the first row in view is inside.
  *   - Read again on every scroll of whatever scrolls it, before the next paint:  rows know nothing of it.
  *   - Hidden from screen readers:  each row already says how deep it is (`aria-level`), and the keys walk the rows.
+ *   - The same line as the columns' path line, drawn by one `renderPath()`.
  ****************/
 export class UITree extends E.UIComponent<typeof treeVocabulary> {
   @E.proto static vocabulary = treeVocabulary
@@ -115,27 +121,10 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   private renderRows() {
     return (
       <>
-        <Show when={this.pathRows.length}>
-          <div class="path" part={this.partForName("path")} aria-hidden="true">
-            <For each={this.pathRows}>
-              {(row, index) => (
-                <>
-                  <Show when={index()}>
-                    <span class="separator">›</span>
-                  </Show>
-                  <span
-                    class="path-row"
-                    part={this.partForName("path-row")}
-                    style={{ "flex-shrink": 100 ** (this.pathRows.length - 1 - index()) }}
-                    onClick={() => this.scrollToRow(row)}
-                  >
-                    {row.label}
-                  </span>
-                </>
-              )}
-            </For>
-          </div>
-        </Show>
+        {this.renderPath(
+          () => this.pathRows,
+          (row) => this.scrollToRow(row)
+        )}
         <slot />
         <Show when={this.hasNoMatches}>
           <div class="empty" part={this.partForName("empty")}>
@@ -147,6 +136,43 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   }
 
   /**
+   * The path line:  `rows`' names, outermost first, `›` between them, each a click handing `onPick` its row and place.
+   * - The outline's `sticky-path`, pinned over the rows;  in columns, a line of its own above them.
+   * - `current`:  the place of the row that reads as where you are, the last unless it says.
+   * - The outer names give way first:  each shrinks a hundred times more than the one after it.
+   * - Hidden from screen readers (the class docstring says why).
+   */
+  private renderPath<Row extends PathRow>(
+    rows: () => readonly Row[],
+    onPick: (row: Row, index: number, event: MouseEvent) => void,
+    current: () => number = () => rows().length - 1
+  ) {
+    return (
+      <Show when={rows().length}>
+        <div class="path" part={this.partForName("path")} aria-hidden="true">
+          <For each={rows()}>
+            {(row, index) => (
+              <>
+                <Show when={index()}>
+                  <span class="separator">›</span>
+                </Show>
+                <span
+                  class={["path-row", { current: index() === current() }]}
+                  part={this.partForName("path-row")}
+                  style={{ "flex-shrink": 100 ** (rows().length - 1 - index()) }}
+                  onClick={(event: MouseEvent) => onPick(row, index(), event)}
+                >
+                  {row.label}
+                </span>
+              </>
+            )}
+          </For>
+        </div>
+      </Show>
+    )
+  }
+
+  /**
    * `appearance="columns"`:  the columns, in a box that scrolls sideways, with the line after each to size it.
    * - From markup:  the top rows are the first column, and each open row draws the rows inside it as the next,
    *   placed against this box (`UITreeColumns.css`).
@@ -154,20 +180,28 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
    */
   private renderColumns() {
     return (
-      <div class="columns">
-        <Show when={this.hasItemData} fallback={this.firstColumn()}>
-          {this.itemColumns()}
-        </Show>
-        <For each={this.columnIndexes}>{(column) => this.columnEdge(column)}</For>
-        <div class="column-probe" aria-hidden="true" />
-      </div>
+      <>
+        {this.renderPath(
+          () => this.columnPicks,
+          (_row, index, event) => this.pickFromPath(index, event),
+          () => this.selectedColumn
+        )}
+        <div class="columns">
+          <Show when={this.hasItemData} fallback={this.firstColumn()}>
+            {this.itemColumns()}
+          </Show>
+          <For each={this.columnIndexes}>{(column) => this.columnEdge(column)}</For>
+          <div class="column-probe" aria-hidden="true" />
+          <div class="narrow-probe" aria-hidden="true" />
+        </div>
+      </>
     )
   }
 
   /** From markup:  the top rows, as the first column. */
   private firstColumn() {
     return (
-      <div class="column" style={{ width: this.columnWidthCSS(0) }}>
+      <div class={["column", { narrow: this.isNarrowColumn(0) }]} style={{ width: this.columnWidthCSS(0) }}>
         <Show when={this.titleForColumn(0)}>
           {(title) => (
             <div class="column-title" aria-hidden="true">
@@ -507,8 +541,9 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
    */
   @E.state({ equals: E.isSameList }) accessor columnWidths: readonly (number | undefined)[] = []
 
-  /** Column `index`'s width, as CSS:  its own, else the token's. */
+  /** Column `index`'s width, as CSS:  a narrow strip's (`narrowColumns`), else its own, else the token's. */
   columnWidthCSS(index: number): string {
+    if (this.isNarrowColumn(index)) return NARROW_WIDTH
     const width = this.columnWidths[index]
     return width === undefined ? DEFAULT_WIDTH : `${width}px`
   }
@@ -523,7 +558,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   private columnEdge(index: number) {
     return (
       <div
-        class="column-edge"
+        class={["column-edge", { narrow: this.isNarrowColumn(index) }]}
         role="separator"
         tabindex="0"
         aria-orientation="vertical"
@@ -548,11 +583,14 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     return this.measureDefaultWidth()
   }
 
-  /** Measure what an unsized column's width comes to, in px, and keep it (`defaultWidthPx`). */
+  /** Measure what an unsized column's width comes to, in px, and keep it (`defaultWidthPx`), and a narrow one's. */
   private measureDefaultWidth(): number {
-    const probe = this.domElement.renderRoot.querySelector<HTMLElement>(".column-probe")
-    const width = Math.round(probe?.getBoundingClientRect().width ?? 0)
+    const widthOf = (selector: string) =>
+      Math.round(this.domElement.renderRoot.querySelector(selector)?.getBoundingClientRect().width ?? 0)
+    const width = widthOf(".column-probe")
     if (width) this.defaultWidthPx = width
+    const narrow = widthOf(".narrow-probe")
+    if (narrow) this.narrowWidthPx = narrow
     return width
   }
 
@@ -562,16 +600,26 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     const startWidth = this.widthOf(index)
     const before = this.columnWidths[index]
     const direction = this.isRightToLeft ? -1 : 1
+    this.isResizing = true
     new Dragging(event.currentTarget, event, {
       carried: [event.currentTarget],
       follows: false,
       // the line's own cursor, over the whole page while it's dragged
       cursor: "col-resize",
       placing: (x) => this.setColumnWidth(index, startWidth + (x - event.clientX) * direction, { keeps: false }),
-      onDrop: () => this.setColumnWidth(index, this.columnWidths[index]),
-      onCancel: () => this.setColumnWidth(index, before, { keeps: false })
+      onDrop: () => {
+        this.isResizing = false
+        this.setColumnWidth(index, this.columnWidths[index])
+      },
+      onCancel: () => {
+        this.isResizing = false
+        this.setColumnWidth(index, before, { keeps: false })
+      }
     })
   }
+
+  /** A column's line is being dragged:  `:state(resizing)`, so the columns follow the pointer with no easing. */
+  @E.state @E.cssState("resizing") accessor isResizing = false
 
   /** Left and right on column `index`'s line:  narrower and wider, ten times as far with Shift. */
   private resizeByKey(event: KeyboardEvent, index: number) {
@@ -629,6 +677,173 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   private static madeColumnWidthStore?: PrefStore
 
   ////////////////
+  // ## The columns' path line
+  ////////////////
+
+  /** In columns, with `sticky-path`:  each column's pick, outermost first, as the path line names them. */
+  private get columnPicks(): readonly PathRow[] {
+    if (!this.stickyPath) return []
+    if (!this.hasItemData) return this.openChain
+    const lists = this.columnLists
+    return this.openPath.flatMap((id, depth) => lists[depth]?.find((item) => item.id === id) ?? [])
+  }
+
+  /** In columns, the column of the selected row, by level:  the last pick's, unless the keys or the path went back. */
+  get selectedColumn(): number {
+    if (this.hasItemData) return this.selectedDepth
+    const chain = this.openChain
+    const at = chain.findIndex((row) => row.selected)
+    return at >= 0 ? at : chain.length - 1
+  }
+
+  /**
+   * The path line's name for column `depth`'s pick was clicked:  that pick is selected again, as the key back to it
+   * would, the columns after it kept;  then its column is scrolled into view, and has the focus.
+   */
+  private pickFromPath(depth: number, event: MouseEvent) {
+    if (this.hasItemData) {
+      const item = this.columnLists[depth]?.find((each) => each.id === this.openPath[depth])
+      if (!item) return
+      this.pickItem(item, depth, event, { keepsInside: true })
+      E.afterSolidUpdate(() => this.focusKeyRow())
+    } else {
+      const row = this.openChain[depth]
+      if (!row) return
+      this.focusRow(row)
+      this.activate(row, event, { keepsInside: true })
+    }
+    this.showColumn(depth)
+  }
+
+  /** Scroll the columns' box the least that shows column `depth` whole, once it's drawn at its new width. */
+  private showColumn(depth: number) {
+    if (isServer) return
+    E.beforeNextPaint(() => {
+      const box = this.domElement.renderRoot.querySelector<HTMLElement>(".columns")
+      if (!box) return
+      const widthPx = (index: number) =>
+        this.isNarrowColumn(index) ? this.narrowWidthPx : (this.columnWidths[index] ?? this.defaultWidthPx)
+      let start = 0
+      for (let index = 0; index < depth; index++) start += widthPx(index)
+      const end = start + widthPx(depth)
+      // right to left, `scrollLeft` runs from 0 down
+      const direction = this.isRightToLeft ? -1 : 1
+      const scrolled = box.scrollLeft * direction
+      if (start < scrolled) box.scrollLeft = start * direction
+      else if (end > scrolled + box.clientWidth) box.scrollLeft = (end - box.clientWidth) * direction
+    })
+  }
+
+  ////////////////
+  // ## Narrow columns
+  ////////////////
+
+  /** How wide the box of columns is, in px:  measured as it changes size, 0 until then. */
+  @E.state accessor boxWidthPx = 0
+
+  /** What a narrow column's width comes to, in px (`--ui-tree-narrow-width`):  measured as the columns draw. */
+  @E.state accessor narrowWidthPx = 0
+
+  /** The column under the pointer, by level:  a narrow one widens while it's there. */
+  @E.state accessor hoveredColumn: number | undefined = undefined
+
+  /** The column with the focus, by level:  a narrow one widens while it has it. */
+  @E.state accessor focusedColumn: number | undefined = undefined
+
+  /**
+   * The columns drawn narrow, by level:  while the columns don't fit the tree's width, the first ones, as few as it
+   * takes, each a strip with its pick's name.
+   * - Never the last `narrow-before` (2), nor the selected row's column.
+   * - Nor the one under the pointer or with the focus:  it widens, and the columns after it move along.
+   * - A column a person sized narrows too, and widens back to that size.
+   */
+  get narrowColumns(): readonly number[] {
+    if (!this.isColumns || !this.boxWidthPx || !this.defaultWidthPx) return []
+    const count = this.columnIndexes.length
+    const selected = this.selectedColumn
+    const widthOf = (index: number) => this.columnWidths[index] ?? this.defaultWidthPx
+    let total = 0
+    for (let index = 0; index < count; index++) total += widthOf(index)
+    const narrow: number[] = []
+    for (let index = 0; index < count - (this.narrowBefore ?? 2) && total > this.boxWidthPx; index++) {
+      if (index === selected) continue
+      narrow.push(index)
+      total -= widthOf(index) - this.narrowWidthPx
+    }
+    return narrow.filter((index) => index !== this.hoveredColumn && index !== this.focusedColumn)
+  }
+
+  /** Is column `index` drawn narrow?  Rows from markup ask too (`UITreeItem`). */
+  isNarrowColumn(index: number): boolean {
+    return this.narrowColumns.includes(index)
+  }
+
+  /** While it's in the page as columns:  the width of its box of columns, measured as it changes. */
+  @E.onChange("isConnected", "isColumns", "isReady")
+  protected watchBoxWidth(isConnected: boolean, isColumns: boolean, isReady: boolean) {
+    if (!isConnected || !isColumns || !isReady || isServer) return undefined
+    const observer = new ResizeObserver(([entry]) => {
+      if (!entry) return
+      this.boxWidthPx = Math.round(entry.contentRect.width)
+      this.measureDefaultWidth()
+    })
+    // the box is drawn by the time the next paint comes
+    const cancel = E.beforeNextPaint(() => {
+      const box = this.domElement.renderRoot.querySelector(".columns")
+      if (box) observer.observe(box)
+    })
+    return () => {
+      cancel()
+      observer.disconnect()
+    }
+  }
+
+  /** The pointer moved onto a column:  a narrow one widens while it's there.  Its line, after it, changes nothing. */
+  @E.on("pointerover")
+  protected onPointerOver(event: PointerEvent) {
+    if (!this.isColumns) return
+    const path = event.composedPath()
+    if (path.some((target) => (target as Element).classList?.contains("column-edge"))) return
+    this.hoveredColumn = this.columnOf(path)
+  }
+
+  /** The pointer left the tree:  no column is under it. */
+  @E.on("pointerleave")
+  protected onPointerLeft() {
+    this.hoveredColumn = undefined
+  }
+
+  /** The focus moved into a column:  a narrow one widens while it has it. */
+  @E.on("focusin")
+  protected onFocusIn(event: FocusEvent) {
+    if (this.isColumns) this.focusedColumn = this.columnOf(event.composedPath())
+  }
+
+  /** The focus left:  the next `focusin`, if it stays in the tree, says where it went. */
+  @E.on("focusout")
+  protected onFocusOut() {
+    this.focusedColumn = undefined
+  }
+
+  /**
+   * The column an event went through, by level, from its `composedPath()`:  `undefined` for none.
+   * - From `items`, each column is a `ul.column` with its `data-depth`;  from markup, the first is the tree's own
+   *   `.column`, and each deeper one an open row's `.rows`, one level deeper than that row.
+   */
+  private columnOf(path: EventTarget[]): number | undefined {
+    for (const target of path) {
+      if (target === this.domElement) return undefined
+      const box = target as HTMLElement
+      if (box.classList?.contains("column")) return Number(box.dataset.depth ?? 0)
+      if (box.classList?.contains("rows")) {
+        const { component } = (box.getRootNode() as ShadowRoot).host as E.DOMElement
+        if (component instanceof UITreeItem) return component.depth + 1
+      }
+    }
+    return undefined
+  }
+
+  ////////////////
   // ## The sticky path
   ////////////////
 
@@ -638,10 +853,10 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   /** A read of the path is waiting for the next paint. */
   private cancelPathRead: (() => void) | undefined
 
-  /** While connected with `sticky-path`:  every scroll that moves the tree reads the path again. */
-  @E.onChange("isConnected", "stickyPath")
-  protected watchScrolling(isConnected: boolean, stickyPath: boolean | undefined) {
-    if (!isConnected || !stickyPath || isServer) {
+  /** While connected with `sticky-path`, as rows:  every scroll that moves the tree reads the path again. */
+  @E.onChange("isConnected", "stickyPath", "isColumns")
+  protected watchScrolling(isConnected: boolean, stickyPath: boolean | undefined, isColumns: boolean) {
+    if (!isConnected || !stickyPath || isColumns || isServer) {
       this.pathRows = []
       return undefined
     }
@@ -906,9 +1121,13 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     const shown = () => this.shownIn(list() ?? [], depth)
     return (
       <ul
-        class="column items"
+        class={["column items", { narrow: this.isNarrowColumn(depth) }]}
         role="group"
-        part={this.partForName("column")}
+        part={
+          this.isNarrowColumn(depth)
+            ? `${this.partForName("column")} ${this.partForName("narrow-column")}`
+            : this.partForName("column")
+        }
         data-depth={depth}
         aria-label={this.titleForColumn(depth)}
         aria-busy={list() ? undefined : "true"}
@@ -1077,6 +1296,9 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
 
 export interface UITree extends E.AttributeValues<typeof treeVocabulary> {}
 
+/** A row the path line names:  a `<ui-tree-item>`, or an `items` entry. */
+type PathRow = { readonly label?: string | undefined }
+
 /** Where `row`'s own line is on screen, without the rows inside it. */
 function rowBoxOf(row: UITreeItem): DOMRect {
   return (row.domElement.renderRoot.querySelector(".row") ?? row.domElement).getBoundingClientRect()
@@ -1104,6 +1326,9 @@ const COLUMNS = "columns"
 
 /** A column's width while nobody has sized it. */
 const DEFAULT_WIDTH = "var(--_ui-tree-column-width)"
+
+/** A narrow column's width. */
+const NARROW_WIDTH = "var(--_ui-tree-narrow-width)"
 
 /** What the column widths are kept under, in this browser. */
 const COLUMN_WIDTHS_STORE = "ui-tree-column-widths"
