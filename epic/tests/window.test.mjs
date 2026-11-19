@@ -197,9 +197,12 @@ test("reload:  sends the bridge's `reload-view` with the view to this session's 
   try {
     assert.equal(await Window.main(["reload"]), 0)
     assert.equal(await Window.main(["reload", "--review"]), 0)
+    assert.equal(await Window.main(["reload", "--details"]), 0)
+    // Review by default:  the Epic Docs view folded into it (epic `epic-engine` Q73)
     assert.deepEqual(seen, [
-      { op: "/reload-view", view: "docs" },
-      { op: "/reload-view", view: "review" }
+      { op: "/reload-view", view: "review" },
+      { op: "/reload-view", view: "review" },
+      { op: "/reload-view", view: "details" }
     ])
   } finally {
     server.close()

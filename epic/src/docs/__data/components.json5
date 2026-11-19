@@ -6934,7 +6934,7 @@
         "paper plane",
         "ring"
       ],
-      "description": "Send, the paper plane, its words \"Send to Claude\" beside it.  With `countdown` (an epic page's header;  epic `epic-engine` P53), Auto Send too:  with something not sent, a ring round the plane, set apart from it with rounded ends, drains clockwise over the wait the page header's gear chose (2 minutes by default, or 5), starting again at every key, click or scroll on the page and held full while a note box is typed in;  at the end the owner is asked to send, as a press would.  While the session works through what was sent (`working`, epic `epic-engine` P55), a blue arc turns round the plane in the same frame, unless the countdown runs.  Immediately:  no ring, each change goes as it's finished.  Off, or without `countdown`, with something not sent:  the plane is filled blue, waiting for a press.  Drawn by an epic page's header (`<epic-page>`), a details page's Send (`<epic-send>`) and a docs page's comments Send.",
+      "description": "Send, the paper plane, its words \"Send to Claude\" beside it;  \"Sent to Claude\" for 5 seconds after a send, a press or Auto Send's, in the same width.  With `countdown` (an epic page's header;  epic `epic-engine` P53), Auto Send too:  with something not sent, a ring round the plane, set apart from it with rounded ends, drains clockwise over the wait the page header's gear chose (2 minutes by default, or 5), starting again at every key, click or scroll on the page and held full while a note box is typed in;  at the end the owner is asked to send, as a press would.  While the session works through what was sent (`working`, epic `epic-engine` P55), a blue arc turns round the plane in the same frame, unless the countdown runs.  Immediately:  no ring, each change goes as it's finished.  Off, or without `countdown`, with something not sent:  the plane is filled blue, waiting for a press.  Drawn by an epic page's header (`<epic-page>`), a details page's Send (`<epic-send>`) and a docs page's comments Send.",
       "noun": "send-buttons",
       "attributes": [
         {
@@ -7010,7 +7010,7 @@
         },
         {
           "name": "words",
-          "description": "The words beside the plane, \"Send to Claude\" (I305)."
+          "description": "The words beside the plane, \"Send to Claude\" (I305);  \"Sent to Claude\" for 5 seconds after a send (I352)."
         },
         {
           "name": "working",
@@ -7054,6 +7054,16 @@
           "key": "words",
           "text": "Send to Claude",
           "description": "The words beside the plane (I305;  Owen, 2026-11-15:  \"The round plane icon at the top is what should say `send to claude`\")."
+        },
+        {
+          "key": "sentWords",
+          "text": "Sent to Claude",
+          "description": "The words beside the plane for 5 seconds after a send (I352;  Owen:  \"Should say `Sent to Claude` for 5 seconds after send\")."
+        },
+        {
+          "key": "sentAt",
+          "text": "sent at {time}",
+          "description": "After the plane's words for 5 seconds after a send;  `{time}` like `14:32`."
         },
         {
           "key": "counting",

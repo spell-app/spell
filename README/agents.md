@@ -502,7 +502,7 @@ spell-app's, in its own [`.claude/skills/`](https://github.com/spell-app/spell/t
 | `/design` | designs with Spell's real `<ui-*>` elements, in Claude Design or in VS Code:  `push`, `pull`, `new`, `page` |
 | `/fussbudget` | rewrites docstrings, comments, READMEs and docs to WWOD's writing rules, left uncommitted |
 | `solid-2` | the Solid 2 rules, loaded by itself before any Solid work |
-| `/spell-docs` | opens the docs in VS Code's Epic Docs tab |
+| `/spell-docs` | opens the docs in VS Code's Review tab |
 | `/spell-serve` | starts this checkout's servers, and says which port each is on |
 
 The hooks are the plugin's [`hooks.json`](https://github.com/spell-app/spell/blob/main/epic/hooks/hooks.json):

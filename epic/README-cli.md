@@ -580,8 +580,8 @@ A session can move itself into a worktree's window, wake an epic's session, or s
 [README-vscode.md](README-vscode.md) is the extension that carries it out.
 Without the extension, the window verbs exit 1, and say so.
 
-The side bar has three tabs, and a page's kind picks one:
-an epic or saga page goes to Review, a details or choice page to Details, anything else to Epic Docs.
+The side bar has two tabs, and a page's kind picks one:
+a details or choice page goes to Details, every other page (epic pages, saga pages, guides) to Review.
 
 | Verb | What it does |
 | --- | --- |
@@ -595,8 +595,8 @@ an epic or saga page goes to Review, a details or choice page to Details, anythi
 | `epic window color [<look>]` | gives this window a look, Tomorrow Night Blue's in one of twelve hues:  `red`, `orange`, `amber`, `green`, `teal`, `cyan`, `blue`, `indigo`, `purple`, `pink`, `brown`, `grey`;  no look:  lists them |
 | `epic window which` | prints this session's window:  its process, workspace file and folders |
 | `epic window hooks [--again <command>]` | do this session's hooks run?  The skills ask before a worktree is made, since a session opened before the plugin was installed has none:  exits 1 with the fix (`/reload-plugins`, then the command again);  under Codex, nothing to check |
-| `epic window show <file>` | shows an `.html` page in the window's side bar, in the tab its kind picks;  `--review`:  the Review tab, for a page of no kind of its own;  `--hash <id>` |
-| `epic window reload` | rebuilds the side bar's view from scratch, at the page it shows;  `--review` |
+| `epic window show <file>` | shows an `.html` page in the window's side bar, in the tab its kind picks;  `--hash <id>` |
+| `epic window reload` | rebuilds the side bar's Review view from scratch, at the page it shows;  `--details`:  the Details view |
 | `epic window add <path>` | adds a folder to the window (`--name <name>`);  never a worktree's:  a worktree has a window of its own |
 | `epic window remove <path>` | removes that folder again |
 | `epic window init` | writes each missing window file, and brings every window file up to date:  its folders, `files.exclude`, and the repo's own settings (`windows.settings`) |

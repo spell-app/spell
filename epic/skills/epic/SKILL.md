@@ -18,9 +18,9 @@ An EPIC is a planning session and the work it plans;  its live record is the EPI
 Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole time.
 - The epic page:  `epics/<name>/<name>.plan.html`.
 - It's the user's view of the work:  they read it in the right side bar's REVIEW tab while you work.
-  - That's the checkbox icon;  never the "Epic Docs" tab, the book (rule, 2026-10-07).
+  - That's the checkbox icon (rule, 2026-10-07);  guides open there too (epic `epic-engine` Q73).
   - The extension sends every epic page there by itself, whatever the command asked (epic `epic-engine` P59);
-    details, review and choice pages go to the third tab, "Details" (the speech bubble), so a question never
+    details, review and choice pages go to the other tab, "Details" (the speech bubble), so a question never
     replaces the epic page, and one still waiting for an answer is never replaced either.
   - In Cursor:  the same Review view, wherever the person put it (Cursor keeps its right side bar for its own agent:
     **View: Open View...** › Review finds it;  epic `epic-friend` P16).

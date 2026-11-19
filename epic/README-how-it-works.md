@@ -46,15 +46,14 @@ You start one in a Claude Code session:  `/epic <name> <what to plan>`.
 The agent makes a branch and a worktree, and opens the epic page in VS Code, beside your code.
 
 ![A drawing of a VS Code window:  the Explorer and a TypeScript file on the left, outlined as "your code, in the
-epic's own worktree";  the right side bar holds an epic page, with three tabs above it, Epic Docs, Review and Details,
+epic's own worktree";  the right side bar holds an epic page, with two tabs above it, Review and Details,
 and a row of buttons:  Back, Forward, Reload, Open in Browser, Epics Home, This Epic's Page,
 Restart Page Server.](docs/images/how-review-tab.png)
 
 _A sketch of the window, around a real epic page:  the page sits in VS Code's right side bar, in the Review tab._
 
-VS Code's side bar holds three tabs, each keeping its own page:
-- **Review:**  epic pages and saga pages, the ones you mark up
-- **Epic Docs:**  guides and every other page
+VS Code's side bar holds two tabs, each keeping its own page:
+- **Review:**  epic pages and saga pages, the ones you mark up;  guides and every other page too
 - **Details:**  a question too big for a chat, asked on a page of its own
 
 Any browser shows the same pages too ([README-vscode.md](README-vscode.md)).
@@ -163,7 +162,7 @@ The guide is the short version, for the next person:
 - its limits, plainly
 
 It's written at the epic's Doc Review, in the readme voice (`epic voice readme` prints the rules).
-It lands under the top bar's Guides tab, and opens in the side bar's Epic Docs tab.
+It lands under the top bar's Guides tab, and opens in the side bar's Review tab.
 A saga's page counts its guides, so a saga's card shows how much of its aim has been written down.
 
 ## See also

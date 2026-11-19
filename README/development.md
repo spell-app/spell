@@ -383,7 +383,7 @@ Find the row for what you want to change, then read the page beside it before yo
 | a Spell UI element | [spell-ui](https://github.com/spell-app/spell/blob/main/ui/README.md) |
 | the element framework under every set | the shared [element](../src/element/):  [README/element.md](element.md) |
 | epic pages, review, windows, hooks, skills | [spell-epic](https://github.com/spell-app/spell/blob/main/epic/README.md), with its own checks;  `/reload-plugins` for a skill's new text |
-| the Review tab and Epic Docs | spell-epic's [`vscode/`](https://github.com/spell-app/spell/tree/main/epic/vscode) |
+| the Review and Details tabs | spell-epic's [`vscode/`](https://github.com/spell-app/spell/tree/main/epic/vscode) |
 | the house style | [`agents/wwod/`](../agents/wwod/), then `spell wwod check` |
 
 ## When something's wrong, read the papercuts first

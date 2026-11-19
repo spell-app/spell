@@ -79,41 +79,41 @@ export function isLoopback(url: string): boolean {
 // ## Which tab
 ////////////////
 
-/** The side bar's doc views, each its own tab:  "Epic Docs", "Review", "Details". */
-export type DocViewName = "docs" | "review" | "details"
+/**
+ * The side bar's doc views, each its own tab:  "Review", "Details" (epic `epic-engine` Q73).
+ * - a third tab, "Epic Docs", held guides, the home page and the list pages until Q73:  they open in Review now
+ */
+export type DocViewName = "review" | "details"
 
 /** Every doc view's name, in the side bar's order. */
-export const DOC_VIEWS: readonly DocViewName[] = ["docs", "review", "details"]
+export const DOC_VIEWS: readonly DocViewName[] = ["review", "details"]
 
 /** An epic page's path:  `epics/<id>/<id>.plan.html`. */
 const EPIC_PAGE = /(?:^|\/)epics\/([^/]+)\/\1\.plan\.html$/
-
-/** A saga page's path, or a parked goal set's page. */
-const SAGA_PAGE = /\.(?:saga|goal)\.html$/
 
 /** A details, review or choice page's path:  a page right inside a `details/` folder. */
 const DETAILS_PAGE = /(?:^|\/)details\/[^/]+\.html$/
 
 /**
  * The tab page `path` goes to (a file path or a URL's path), the ONE rule every show takes (epic `epic-engine` P59):
- * - an epic page (`epics/<id>/<id>.plan.html`) or a saga page (`.saga.html`, the parked `.goal.html`):  `review`,
- *   whatever was `asked`
  * - a details, review or choice page (a page in a `details/` folder, an epic's or `pages/details/`):  `details`
- * - anything else:  the tab `asked` for, else `docs`
- * - why:  each command picked its tab by its own flag, so an epic page landed in Epic Docs as well as Review, and a
- *   choice page still waiting for Owen's answer was replaced (request r50)
+ * - anything else -- epic pages, saga pages, guides, the home page, the list pages:  `review`
+ * - never the tab a command asked for:  each command picked its tab by its own flag, so an epic page landed in two
+ *   tabs, and a choice page still waiting for Owen's answer was replaced (request r50)
  * - the epic page first:  the epic `details` keeps its page in `epics/details/`
  */
-export function docViewFor(path: string, asked?: DocViewName): DocViewName {
+export function docViewFor(path: string): DocViewName {
   const unix = path.split("\\").join("/")
-  if (EPIC_PAGE.test(unix) || SAGA_PAGE.test(unix)) return "review"
-  if (DETAILS_PAGE.test(unix)) return "details"
-  return asked && asked !== "details" ? asked : "docs"
+  return !EPIC_PAGE.test(unix) && DETAILS_PAGE.test(unix) ? "details" : "review"
 }
 
-/** Whether `name` names a doc view:  what the bridge and the `vscode://` URI take. */
-export function isDocView(name: unknown): name is DocViewName {
-  return DOC_VIEWS.includes(name as DocViewName)
+/**
+ * The doc view `name` names, as the bridge and the `vscode://` URI take it;  `undefined` for anything else.
+ * - `"docs"`, the Epic Docs tab before epic `epic-engine` Q73, is `"review"`:  an older checkout's `epic` still sends it
+ */
+export function docViewNamed(name: unknown): DocViewName | undefined {
+  if (name === "docs") return "review"
+  return DOC_VIEWS.includes(name as DocViewName) ? (name as DocViewName) : undefined
 }
 
 ////////////////

@@ -547,6 +547,9 @@ function headerButtons(host: Element) {
   return { send: group ? [group.getAttribute("state"), plane?.title] : null }
 }
 
+/** The plane's tooltip just after a send (I352):  the owner's words, then when it went. */
+const JUST_SENT_TIP = /^Sent:  waiting for Claude · sent at \d{1,2}:\d{2}/
+
 /** `host`'s Send group, in its header. */
 function sendGroup(host: Element): HTMLElement {
   return host.shadowRoot!.querySelector<HTMLElement>('[part~="send"]')!
@@ -586,10 +589,7 @@ describe("<epic-page> Send and its countdown", () => {
       Array.from(host.shadowRoot!.querySelector(`header [part~="${name}"]`)!.children, (child) =>
         child.getAttribute("part")
       )
-    expect([parts("centre"), parts("status")]).toEqual([
-      ["send"],
-      ["step-pill", "gear", "gear-menu"]
-    ])
+    expect([parts("centre"), parts("status")]).toEqual([["send"], ["step-pill", "gear", "gear-menu"]])
     expect(headerButtons(host)).toEqual({ send: ["unsent", `Send 2 marks to Claude${NOBODY}`] })
     // never dashed (Owen, 2026-10-22:  "Lose the dotted outline around both"):  marks not sent, a plain outline
     const outline = () => getComputedStyle(sendGroup(host).shadowRoot!.querySelector('[part~="base"]')!).borderTopStyle
@@ -614,7 +614,8 @@ describe("<epic-page> Send and its countdown", () => {
     routes.inbox.listening = { session: "s1", since: at, seen: at }
     await client.refresh()
     await ElementFixture.tick()
-    expect(headerButtons(host).send).toEqual(["sent", "Sent:  waiting for Claude"])
+    // just sent (I352):  its tooltip says when, for 5 seconds
+    expect(headerButtons(host).send).toEqual(["sent", expect.stringMatching(JUST_SENT_TIP)])
     expect(host.shadowRoot!.querySelector('[part~="pill"]')).toBeNull()
     // a countdown running out sends as Review Now did (decision Q7):  every revisit asked now
     sendGroup(host).dispatchEvent(
@@ -683,7 +684,9 @@ describe("<epic-page> Send and its countdown", () => {
     expect(headerButtons(host).send).toEqual(["unsent", "Send 2 marks, 2 comments to Claude"])
     plane(host).click()
     await vi.waitFor(() => expect(routes.posts.map(([route]) => route)).toEqual(["send"]))
-    await vi.waitFor(() => expect(headerButtons(host).send).toEqual(["sent", "Sent:  waiting for Claude"]))
+    await vi.waitFor(() => expect(headerButtons(host).send).toEqual(["sent", expect.stringMatching(JUST_SENT_TIP)]))
+    // its words too, for 5 seconds (I352)
+    expect(plane(host).querySelector('[part~="words"]')!.textContent).toBe("Sent to Claude")
   })
 
   // epic `epic-workflow` P16:  Send and Do Now with nobody listening wake the epic;  the pill says how, until a session
@@ -1767,7 +1770,7 @@ describe("<epic-page> stages", () => {
     await vi.waitFor(() => expect(accept()?.textContent).toContain("Accept Overview"))
     // the header:  the plane and its own words (I305), no stage's green words;  the step label says the stage
     expect(plane(host).querySelector("ui-icon")!.getAttribute("name")).toBe("paper plane")
-    expect(plane(host).textContent!.trim()).toBe("Send to Claude")
+    expect(plane(host).querySelector('[part~="words"]')!.textContent).toBe("Send to Claude")
     expect(step(host)?.words).toBe("OVERVIEW")
     // none on the Phases section:  the page isn't agreeing its phases yet
     expect(stageButtonOf(host.querySelector('epic-section[kind="phases"]')!)).toBeUndefined()

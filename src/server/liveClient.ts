@@ -225,7 +225,7 @@ export type ElementReadResult = { ok: boolean; status: number; html?: string; et
  *     so a restart leaves no row of failed requests on the console
  * - keeps its place across a reload:  the scroll position (`sessionStorage`, when it works);
  *   the docs runtime keeps its folds and comment drafts itself (`localStorage`)
- * - in a frame (VS Code's "Epic Docs" and "Review" views, spell-epic's `vscode/src/DocView.ts`):
+ * - in a frame (VS Code's "Review" and "Details" views, spell-epic's `vscode/src/DocView.ts`):
  *   - posts its place to the parent:  on every load and hash change, and on `spell-doc:scrolled-to`
  *     (the docs runtime moved the address with `history.replaceState()`, which fires no `hashchange`)
  *   - runs `history.go()` when the parent posts `{ spell: "history", go: -1 | 1 }`
@@ -338,7 +338,7 @@ export function liveClient(scrollKey: string): void {
   config.readPage = readPage
   config.reload = reloadQuietly
   config.reloadNow = reload
-  // in a frame (VS Code's "Epic Docs" view):  say where we are, and step back / forward when the frame's parent asks
+  // in a frame (VS Code's side-bar views):  say where we are, and step back / forward when the frame's parent asks
   if (window.parent !== window) {
     reportPlace()
     addEventListener("pageshow", reportPlace)

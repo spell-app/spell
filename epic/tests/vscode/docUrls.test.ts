@@ -21,10 +21,11 @@ import { join } from "node:path"
 import { after, test } from "node:test"
 
 import {
+  DOC_VIEWS,
   docViewFor,
+  docViewNamed,
   fileForPath,
   folderIndex,
-  isDocView,
   isLoopback,
   openingPage,
   planDocsIn,
@@ -67,41 +68,38 @@ test("isLoopback():  plain http on this machine only", () => {
   equal(isLoopback("not a url"), false)
 })
 
-test("docViewFor():  the page's kind picks the tab, an epic page never Epic Docs (epic `epic-engine` P59)", () => {
+test("docViewFor():  details pages to Details, everything else to Review (epic `epic-engine` P59, Q73)", () => {
   const content = "/Users/o/www/spell/spell.epics"
-  // an epic page and a saga page:  Review, whatever was asked
-  for (const asked of [undefined, "docs", "review", "details"] as const) {
-    equal(docViewFor(`${content}/epics/data/data.plan.html`, asked), "review")
-    equal(docViewFor("/epics/data/data.plan.html", asked), "review")
-    equal(docViewFor(`${content}/sagas/spell/spell.saga.html`, asked), "review")
-    equal(docViewFor(`${content}/goals/old/old.goal.html`, asked), "review")
-  }
-  // details, review and choice pages:  Details, whatever was asked (the choice page Owen lost, request r50)
-  for (const asked of [undefined, "docs", "review"] as const) {
-    equal(docViewFor(`${content}/epics/data/details/data-words.html`, asked), "details")
-    equal(docViewFor(`${content}/pages/details/pick-layout.html`, asked), "details")
-    equal(docViewFor("/r/other/epics/seo/details/names.html", asked), "details")
-  }
+  // an epic page and a saga page:  Review
+  equal(docViewFor(`${content}/epics/data/data.plan.html`), "review")
+  equal(docViewFor("/epics/data/data.plan.html"), "review")
+  equal(docViewFor(`${content}/sagas/spell/spell.saga.html`), "review")
+  equal(docViewFor(`${content}/goals/old/old.goal.html`), "review")
+  // details, review and choice pages:  Details (the choice page Owen lost, request r50)
+  equal(docViewFor(`${content}/epics/data/details/data-words.html`), "details")
+  equal(docViewFor(`${content}/pages/details/pick-layout.html`), "details")
+  equal(docViewFor("/r/other/epics/seo/details/names.html"), "details")
+  equal(docViewFor("C:\\spell.epics\\epics\\x\\details\\y.html"), "details")
   // the epic `details` keeps its epic page in a `details/` folder:  still Review
   equal(docViewFor(`${content}/epics/details/details.plan.html`), "review")
   equal(docViewFor(`${content}/epics/details/details/q.html`), "details")
-  // anything else:  as asked, else Epic Docs;  never Details by asking
-  equal(docViewFor(`${content}/guides/solid/solid-2.html`), "docs")
-  equal(docViewFor(`${content}/guides/solid/solid-2.html`, "review"), "review")
-  equal(docViewFor(`${content}/guides/solid/solid-2.html`, "details"), "docs")
-  equal(docViewFor(`${content}/epics/data/parts/p1.html`), "docs")
-  equal(docViewFor("C:\\spell.epics\\epics\\x\\details\\y.html"), "details")
+  // guides, the home page, the list pages, an epic's parts:  Review, where Epic Docs held them until Q73
+  equal(docViewFor(`${content}/guides/solid/solid-2.html`), "review")
+  equal(docViewFor("/r/other/guides/server.html"), "review")
+  equal(docViewFor(`${content}/pages/index.html`), "review")
+  equal(docViewFor(`${content}/sagas/index.html`), "review")
+  equal(docViewFor(`${content}/epics/data/parts/p1.html`), "review")
 })
 
-test("isDocView():  the three tabs' names, nothing else", () => {
-  deepEqual(["docs", "review", "details", "Docs", "", undefined, 1].map(isDocView), [
-    true,
-    true,
-    true,
-    false,
-    false,
-    false,
-    false
+test("docViewNamed():  the two tabs' names;  an older epic's `docs` is Review", () => {
+  deepEqual(["review", "details", "docs", "Docs", "", undefined, 1].map(docViewNamed), [
+    "review",
+    "details",
+    "review",
+    undefined,
+    undefined,
+    undefined,
+    undefined
   ])
 })
 
@@ -258,7 +256,10 @@ test("openingPage():  a page asked for while a fresh view looks up its fallbacks
 const MANIFEST = JSON.parse(readFileSync(join(import.meta.dirname, "../../vscode/package.json"), "utf8")) as {
   contributes: {
     commands: { command: string; title: string; category?: string }[]
-    menus: { "view/title": { command: string; when: string }[] }
+    menus: Record<string, { command: string; when: string }[]>
+    viewsContainers: Record<string, { id: string; title: string; icon: string }[]>
+    views: Record<string, { id: string; name: string }[]>
+    configuration?: { properties: Record<string, unknown> }
   }
 }
 const DOC_VIEW_SOURCE = readFileSync(join(import.meta.dirname, "../../vscode/src/DocView.ts"), "utf8")
@@ -272,10 +273,9 @@ test("title bars:  every tab's buttons, each a short plain tooltip, each answere
       .filter((command) => command !== "spellEpic.toolbarGap")
   const tooltips = (view: string) => new Set(buttons(view).map((command) => titles.get(command)?.title))
   const COMMON = ["Back", "Forward", "Reload", "Open in Browser", "Restart Page Server"]
-  deepEqual(tooltips("docView"), new Set([...COMMON, "Epics Home", "This Epic's Page"]))
   deepEqual(tooltips("reviewView"), new Set([...COMMON, "Epics Home", "This Epic's Page"]))
   deepEqual(tooltips("detailsView"), new Set([...COMMON, "This Epic's Questions"]))
-  const CATEGORY = { docView: "Epic Docs", reviewView: "Review", detailsView: "Details" }
+  const CATEGORY = { reviewView: "Review", detailsView: "Details" }
   for (const [view, category] of Object.entries(CATEGORY))
     for (const command of buttons(view)) {
       // the Command Palette names the tab by the category;  VS Code shows only the title as the tooltip
@@ -292,4 +292,23 @@ test("title bars:  every tab's buttons, each a short plain tooltip, each answere
     MANIFEST.contributes.menus["view/title"].some((item) => /inspect/i.test(item.command)),
     false
   )
+})
+
+test("two side-bar tabs, Review and Details:  no Epic Docs view, nor its commands or setting (epic `epic-engine` Q73)", () => {
+  const { contributes } = MANIFEST
+  deepEqual(
+    contributes.viewsContainers.secondarySidebar!.map((each) => each.title),
+    ["Review", "Details"]
+  )
+  deepEqual(
+    Object.values(contributes.views).flatMap((views) => views.map((view) => view.id)),
+    ["spellEpic.reviewView", "spellEpic.detailsView"]
+  )
+  const everything = JSON.stringify(contributes)
+  equal(everything.includes("spellEpic.docView"), false)
+  equal(everything.includes("Epic Docs"), false)
+  equal(contributes.configuration?.properties["spellEpic.docPreview.location"], undefined)
+  // and the views the source makes are the manifest's
+  deepEqual(DOC_VIEWS, ["review", "details"])
+  equal(DOC_VIEW_SOURCE.includes("spellEpic.docView"), false)
 })
