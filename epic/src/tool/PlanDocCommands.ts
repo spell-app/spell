@@ -928,7 +928,7 @@ export class PlanDocCommands {
    *   - an issue or judgement call Owen asked for with Do this is never closed by it:  `fixed`, below
    * - `fixed`:  an issue or judgement call fixed, for Owen to review (epic `epic-engine` I232):  ORANGE, still open
    *   - its latest underway card turns green, the summary under it;  with no underway card, a Done card of the summary
-   *   - his Approve closes it;  his Do this sends it back, red (`PlanDoc.fixedForReview()`)
+   *   - his Accept the fix closes it;  his Revisit with a note sends it back, red (`PlanDoc.fixedForReview()`)
    *   - the spinner off
    * - `noted`:  a STEP done that doesn't finish the item:  Claude RECORDED what Owen chose (Owen, 2026-10-10), or
    *   answered, added details, condensed it, called a request off

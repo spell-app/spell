@@ -2317,7 +2317,7 @@ export class PlanDoc extends PlanReader {
   /**
    * Claude has fixed issue or judgement call `id`:  ORANGE, Owen's turn to review it
    * (`epic update <name>#<id> fixed ["<what changed>"]`;  epic `epic-engine` I232).  Returns its title.
-   * - stays open;  Owen's Approve closes it (`acceptFix()`), his Do this sends it back, red
+   * - stays open;  Owen's Accept the fix closes it (`acceptFix()`), his Revisit with a note sends it back, red
    * - its latest underway card turns Done with `summary` under it;  no underway card:  `summary` is a Done card
    * - throws on anything but an open issue or call:  a todo's `done` closes it, a question is decided
    */

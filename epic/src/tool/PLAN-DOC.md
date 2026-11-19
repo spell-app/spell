@@ -51,7 +51,8 @@ once an epic page is in the `<epic-*>` markup (epic `epic-components`, P8).
   - the crumbs (`Docs › Epics › <title>`), the h1, the meta lines
   - the step label:  active phase, DONE, next, FUTURE
   - the bedtime label
-  - while reviewed, Send in the header's exact middle, with what the session is doing (a bare spinner) beside it
+  - while reviewed, Send in the header's exact middle;  while the session works, the step label's icon turns, what it
+    says it's doing (`epic inbox status`) in the label's tooltip, no words in the header (epic `epic-engine` I340)
   - the gear, last in the header:  Auto Send (Immediately, 2 minutes, 5 minutes, Off) and Theme (epic `epic-engine`
     P53, where the git toggle was:  the Log lists every commit)
   - the "Plan hung?" notice (while there's no phase), and a future epic's notice
@@ -706,7 +707,8 @@ As `plan-doc.md`, "Ids":
     ORANGE, on their list to review again.
   - Sent back, and its note handed on to another item (a Noted card naming it:  "Your C2 is being fixed as I148"):
     fixed again by itself once that one is fixed or done (`HandedOnFixes`, epic `epic-engine` I317)
-  - Their Approve closes it;  their Do this sends it back, red;  closing it takes off `urgent` and `fixed`.
+  - Its buttons are Revisit and Accept the fix (epic `epic-engine` I299, J231):  Accept the fix closes it;  Revisit,
+    with a note saying what's still wrong, sends it back, red (I303);  closing it takes off `urgent` and `fixed`.
   - A mark already sent with `todo` applies the same way.
   - Parts that aren't items (the summary, an Overview sub-section) still make a todo, through `followUp()`.
 - NEW items from the page (epic `airplane` P2).
@@ -914,7 +916,8 @@ EVERYTHING boxed in a section folds (2026-10-08):  every card with a heading ban
   an `<epic-update>` block,
   an older doc's `<epic-updated>` fence, an open question's option card.
 - As these already did:
-  More Details, Choices, an aside, a code block, Original Discussion, Agents running.
+  More Details, Choices, an aside, a code block, Original Discussion.
+  (The Agents running panel folded too, until it became the header's `2 🤖` popover:  epic `epic-engine` P35.)
 - Open to start with:  the text being read.
   - An item and an aside start folded.
   - Page state, never written.

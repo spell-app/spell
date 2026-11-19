@@ -18,7 +18,7 @@
  * - `last <name>`:  exit 0 when no OTHER agent of the list runs (`name` is the last one standing, and runs the full test
  *   suite after it merges);  exit 1, listing them, when others do (epic `epic-engine` T90)
  * - `wait [--every <s>] [--max <s>] [--json]`:  run in the BACKGROUND (Bash `run_in_background`) while agents run;
- *   exits when Owen has sent one a note from the epic page's Agents box (`agentRoutes.ts`), which wakes the session:
+ *   exits when Owen has sent one a note from the epic page's agents popover (`agentRoutes.ts`), which wakes the session:
  *   - 0:  untold redirects, printed `skillz-aaa:  <note>` (`--json`:  `[{ name, note, at }]`);  the session sends
  *     each to its agent (`SendMessage`), then `told <name>`
  *   - 3:  no agents running any more:  nothing to wait for

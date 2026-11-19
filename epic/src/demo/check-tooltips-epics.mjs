@@ -21,7 +21,7 @@
  *   - `review-sample.html` (default), with a judgement call of option cards added
  *   - or `--doc <name>`, a copy of `epics/<name>/`
  * - what it opens, so their controls are drawn:  every section and item unfolded, an item's note box (Revisit),
- *   the toolbar's New form, the git line, and an "Agents running" panel
+ *   the toolbar's New form, the git line, and the header's agents button, `1 🤖`
  *   (one agent, its `/api/epics/agents` answered here)
  * - `--list`:  print every control and its tooltip (the audit's table), not just the ones without
  * - fails (exit 1) on a page error, or a control with no tooltip
@@ -177,7 +177,7 @@ async function run() {
     })
     await page.waitForTimeout(300)
   }
-  // an item's note box (Revisit opens it), and the toolbar's New form;  the agents panel starts open
+  // an item's note box (Revisit opens it), and the toolbar's New form;  the agents button draws with the header
   await clickDeep(page, 'ui-button[data-action="revisit"]')
   await clickDeep(page, "epic-page >>> button.new-button")
   await page.waitForTimeout(400)
