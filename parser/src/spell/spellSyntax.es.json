@@ -9424,11 +9424,11 @@
           "ruleNames": ["lists_under"],
           "internal": false,
           "file": "src/spell/rules/places/ListsUnder.ts",
-          "line": 12,
+          "line": 14,
           "purpose": "A web server keeps a list under each thing of a type, at an address of its own (epic `data` P30).",
           "syntaxes": [
             {
-              "syntax": "(el|la|los|las) {property:member_words} de (un|una) {owner:known_type} están en {path:text}",
+              "syntax": "(el|la|los|las) {property:member_words} de (un|una) {owner:known_type} (están|está) en {path:text}",
               "example": "typicode es un servidor web en \"https://jsonplaceholder.typicode.com\"\n\t- los comentarios de una publicación están en \"/posts/{id}/comments\"",
               "outputs": {
                 "js": {
@@ -9443,7 +9443,7 @@
               }
             },
             {
-              "syntax": "(el|la|los|las) {property:quoted_member} de (un|una) {owner:known_type} están en {path:text}"
+              "syntax": "(el|la|los|las) {property:quoted_member} de (un|una) {owner:known_type} (están|está) en {path:text}"
             }
           ],
           "aliases": ["statement"]

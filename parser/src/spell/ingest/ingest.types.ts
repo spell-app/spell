@@ -398,6 +398,8 @@ export type ListUnderSeen = {
   list: string
   /** Where it is, the thing's id in braces:  `/posts/{id}/comments`. */
   at: string
+  /** It's ONE thing under each, not a list:  a system's snapshot, `/instances/{id}/snapshot` (epic `from-console` P16). */
+  isOne?: boolean
 }
 
 /** A source's own word for its version, and where it said so. */
@@ -604,6 +606,12 @@ export type CollectionDescription = {
    * at an address with the thing's id in braces (epic `data` P30):  `{ comments: "/posts/{id}/comments" }`.
    */
   listsUnder?: Record<string, string>
+  /**
+   * Each of its things is ONE thing under a thing of another collection, read from there, with no list of its own
+   * (epic `from-console` P16):  a system's snapshot.
+   * - Where:  the owner's `listsUnder`;  its own `at` is that address too, `snapshots are found at "..."`.
+   */
+  isOneUnder?: boolean
   /** Why the Spell leaves it out. */
   leftOut?: string
   /**

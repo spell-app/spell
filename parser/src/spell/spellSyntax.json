@@ -9461,11 +9461,11 @@
           "ruleNames": ["lists_under"],
           "internal": false,
           "file": "src/spell/rules/places/ListsUnder.ts",
-          "line": 12,
+          "line": 14,
           "purpose": "A web server keeps a list under each thing of a type, at an address of its own (epic `data` P30).",
           "syntaxes": [
             {
-              "syntax": "(a|an) {owner:known_type}'s {property:member_words} live at {path:text}",
+              "syntax": "(a|an) {owner:known_type}'s {property:member_words} (live|lives) at {path:text}",
               "example": "typicode is a web server at \"https://jsonplaceholder.typicode.com\"\n\t- a post's comments live at \"/posts/{id}/comments\"",
               "outputs": {
                 "js": {
@@ -9480,7 +9480,7 @@
               }
             },
             {
-              "syntax": "(a|an) {owner:known_type}'s {property:quoted_member} live at {path:text}"
+              "syntax": "(a|an) {owner:known_type}'s {property:quoted_member} (live|lives) at {path:text}"
             }
           ],
           "aliases": ["statement"]

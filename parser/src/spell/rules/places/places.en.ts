@@ -828,7 +828,7 @@ places.addRule(IsReadOnly, {
   ]
 })
 places.addRule(ListsUnder, {
-  syntax: "(a|an) {owner:known_type}'s {property:member_words} live at {path:text}",
+  syntax: "(a|an) {owner:known_type}'s {property:member_words} (live|lives) at {path:text}",
   tests: [
     {
       compileAs: "block",
@@ -857,6 +857,18 @@ places.addRule(ListsUnder, {
             '  listsUnder: { posts: { comments: "/posts/{id}/comments" } }',
             "})"
           ]
+        ],
+        [
+          'typicode is a web server at "https://jsonplaceholder.typicode.com"\n\t- a post\'s summary lives at "/posts/{id}/summary"',
+          [
+            "export class Typicode extends Place {}",
+            "export const typicode = core.place(new Typicode(), {",
+            '  name: "typicode",',
+            '  kind: "web server",',
+            '  at: "https://jsonplaceholder.typicode.com",',
+            '  listsUnder: { posts: { summary: "/posts/{id}/summary" } }',
+            "})"
+          ]
         ]
       ]
     },
@@ -869,7 +881,9 @@ places.addRule(ListsUnder, {
     }
   ]
 })
-places.addRule(ListsUnder, { syntax: "(a|an) {owner:known_type}'s {property:quoted_member} live at {path:text}" })
+places.addRule(ListsUnder, {
+  syntax: "(a|an) {owner:known_type}'s {property:quoted_member} (live|lives) at {path:text}"
+})
 places.addRule(ListsGiveOnly, {
   syntax: "{type:subject_its} lists give only each one's {field:text} (and {more:text})?"
 })
