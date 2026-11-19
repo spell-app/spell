@@ -1839,6 +1839,101 @@
       "href": "Actions.html"
     },
     {
+      "tag": "AnatomyButton",
+      "name": "AnatomyButton",
+      "folder": "AppAnatomyView",
+      "mainTag": "AppAnatomyView",
+      "main": false,
+      "page": false,
+      "topics": [
+        "panes"
+      ],
+      "aka": [],
+      "description": "Anatomy's switch, in the top bar's Run | Edit group right after Inspect app (Q43 A):  pressed while it shows.",
+      "noun": "AnatomyButton",
+      "attributes": [],
+      "slots": [],
+      "events": [],
+      "parts": [],
+      "states": [],
+      "texts": [],
+      "usedIn": [
+        {
+          "name": "EditorToolbar",
+          "file": "src/app/pages/SpellEditor.tsx"
+        }
+      ],
+      "href": "AppAnatomyView.html#AnatomyButton"
+    },
+    {
+      "tag": "AppAnatomy",
+      "name": "AppAnatomy",
+      "folder": "AppAnatomyView",
+      "mainTag": "AppAnatomyView",
+      "main": false,
+      "page": false,
+      "topics": [
+        "panes"
+      ],
+      "aka": [],
+      "description": "The running app pulled apart into floors, in 3D (epic `editor` P34, after React Anatomy): each view it draws lifted over the view that holds it, labelled with its type.",
+      "noun": "AppAnatomy",
+      "attributes": [],
+      "slots": [],
+      "events": [],
+      "parts": [],
+      "states": [],
+      "texts": [],
+      "href": "AppAnatomyView.html#AppAnatomy"
+    },
+    {
+      "tag": "AppAnatomyView",
+      "name": "AppAnatomyView",
+      "folder": "AppAnatomyView",
+      "mainTag": "AppAnatomyView",
+      "main": true,
+      "page": true,
+      "topics": [
+        "panes"
+      ],
+      "aka": [],
+      "description": "Anatomy over the app pane, while it shows:  its bar, the floors' tags, the outlines, and the app turned and lifted.",
+      "noun": "AppAnatomyView",
+      "attributes": [],
+      "slots": [],
+      "events": [],
+      "parts": [],
+      "states": [],
+      "texts": [],
+      "props": [
+        {
+          "name": "pane",
+          "type": "() => HTMLElement | undefined",
+          "required": true,
+          "description": ""
+        },
+        {
+          "name": "body",
+          "type": "() => HTMLElement | undefined",
+          "required": true,
+          "description": ""
+        },
+        {
+          "name": "program",
+          "type": "() => HTMLElement | undefined",
+          "required": true,
+          "description": ""
+        }
+      ],
+      "usedIn": [
+        {
+          "name": "AppPane",
+          "file": "src/app/pages/SpellEditor.tsx"
+        }
+      ],
+      "href": "AppAnatomyView.html"
+    },
+    {
       "tag": "AppBarMenus",
       "name": "AppBarMenus",
       "folder": "MenuBar",
@@ -1862,7 +1957,7 @@
           "name": "mode",
           "type": "Mode",
           "required": true,
-          "description": "### `<AppBarMenus>` The top bar's app menus, after the project's:  File · Edit · View · Run · Help, quieter than its name. - File, Edit, View and Run are Spell, `SpellEditor.spell`'s `bar menu`s (epic `editor` P29):  each a Spell UI menu of the app's actions, its rows drawn, greyed and ticked by the Spell, each title in the page's language; each menu's title, the bar's word for it, the Spell's too. - What each row does is the editor's, handed over by its name (`handOverActions()`). - Rows that are lists or follow the editor are the editor's own, drawn in the Spell's place for them: Undo and Redo (their titles the step), the selection's part actions, View's Inspector cards. - File:  New Spell File, New CSS File, ─, Save, Discard Changes, AutoSave, ─, Duplicate File. - Edit:  the code editor's Undo, Redo, ─, the selection's part actions, ─, Find, ─, Code Editor Settings…. - View:  Run, Edit, Site (a site's editor, epic `mockup` P4), ─, Code, Compiled Code, Inspector, Program Panel, ─, Line Numbers, Soft Wrap (Code Editor Settings…' Wrap long lines;  epic `editor` T100);  each ticked while on. - Run:  Compile and Run, Restart, ─, Inspect App, Stop Inspecting, ─, Clear Console. - Help:  Help, which does nothing yet;  none in the static build.  A menu of one item:  still the editor's own. - `mode`:  the page's, ticked in View. - SIDE EFFECT:  keeps the editor's Spell in step with the editor, for what greys and ticks its rows."
+          "description": "### `<AppBarMenus>` The top bar's app menus, after the project's:  File · Edit · View · Run · Help, quieter than its name. - File, Edit, View and Run are Spell, `SpellEditor.spell`'s `bar menu`s (epic `editor` P29):  each a Spell UI menu of the app's actions, its rows drawn, greyed and ticked by the Spell, each title in the page's language; each menu's title, the bar's word for it, the Spell's too. - What each row does is the editor's, handed over by its name (`handOverActions()`). - Rows that are lists or follow the editor are the editor's own, drawn in the Spell's place for them: Undo and Redo (their titles the step), the selection's part actions, View's Inspector cards. - File:  New Spell File, New CSS File, ─, Save, Discard Changes, AutoSave, ─, Duplicate File. - Edit:  the code editor's Undo, Redo, ─, the selection's part actions, ─, Find, ─, Code Editor Settings…. - View:  Run, Edit, Site (a site's editor, epic `mockup` P4), ─, Code, Compiled Code, Inspector, Anatomy (epic `editor` P34), Program Panel, ─, Line Numbers, Soft Wrap (Code Editor Settings…' Wrap long lines;  epic `editor` T100);  each ticked while on. - Run:  Compile and Run, Restart, ─, Inspect App, Stop Inspecting, ─, Clear Console. - Help:  Keyboard Shortcuts (epic `editor` P36), then Help, which does nothing yet;  the editor's own, not the Spell's. - The static build shows it too, with just Keyboard Shortcuts (Q49):  its Help draws nothing there. - `mode`:  the page's, ticked in View. - SIDE EFFECT:  keeps the editor's Spell in step with the editor, for what greys and ticks its rows."
         }
       ],
       "usedIn": [
@@ -4305,6 +4400,20 @@
       "docs": false,
       "tags": [
         "AppContainer"
+      ],
+      "tokens": []
+    },
+    "AppAnatomyView": {
+      "folder": "AppAnatomyView",
+      "mainTag": "AppAnatomyView",
+      "title": "AppAnatomyView",
+      "summary": "Anatomy:  the running app pulled apart into layers, in 3D, one for each view it draws.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "AppAnatomyView",
+        "AppAnatomy",
+        "AnatomyButton"
       ],
       "tokens": []
     },

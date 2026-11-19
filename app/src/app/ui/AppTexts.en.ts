@@ -455,6 +455,30 @@ export const APP_TEXTS = {
   inspectHelp:
     "Click a part of your app to see what it is.\nAlt-click picks a part inside it.\nHold Shift or ⌘ to pick several, or drag across an empty spot.\nPress Esc when you're done.",
   inspectHelpClose: "Close",
+  // Anatomy (epic `editor` P34):  the running app pulled apart into layers, in 3D;  its switch, then its bar
+  anatomy: "Anatomy",
+  anatomyTip: "Spread the app out in 3D, each part of it on a layer of its own",
+  anatomyStopTip: "Put the app back together",
+  anatomyWholeApp: "Whole app",
+  anatomyFront: "Front",
+  anatomyFrontTip: "Look at it straight on again",
+  anatomySpacing: "Spacing",
+  anatomyDepth: "Depth",
+  anatomyParts: "Parts",
+  anatomyPartsTip: "Split each part into more layers, so its buttons, menus and boxes each float on their own",
+  anatomyOutlines: "Outlines",
+  anatomyOutlinesTip: "Draw each layer as an empty frame instead of showing what's on it",
+  anatomyFullWindow: "Full window",
+  anatomyFullWindowTip: "Show the layers over the whole editor",
+  anatomyClose: "Close",
+  // a layer's tag, when its look cuts off what's inside it, so nothing inside comes apart from it
+  anatomyFlat: "in one piece",
+  anatomyFlatTip: "This part hides anything past its edges, so what's inside it can't come apart from it",
+  anatomyFocusShortcut: "Show the selected layer alone",
+  anatomyBackShortcut: "Go back out of Anatomy",
+  shortcutsWhileAnatomy: "Only while Anatomy shows",
+  anatomyHelp:
+    "Anatomy pulls your app apart into layers, one for each view it draws.\nDrag to turn it. Scroll to zoom. Click a layer to pick it, or double-click to show it alone.\nHold Option to play the app as usual. Press Esc to go back.",
   notSaved: "Not saved",
 
   ////////////////

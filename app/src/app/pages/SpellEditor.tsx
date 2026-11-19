@@ -16,6 +16,8 @@ import {
   InspectorPane,
   InspectHelp,
   AddPartButton,
+  AnatomyButton,
+  AppAnatomyView,
   InspectAppButton,
   Palette,
   PaletteStrip,
@@ -305,6 +307,8 @@ function drawnView(
  *     menu.
  * - The editor's own project (the group `@spell/editor`, epic `editor` P22, P29) shows each view of its Spell in a zone
  *   of its own, drawn as it's typed (`<EditorZones>`, T63):  the editor you're using runs the published Spell.
+ * - Anatomy, while it shows, pulls the program apart into floors in place, its bar over the pane's top
+ *   (`<AppAnatomyView>`, epic `editor` P34).
  ****************/
 export function AppPane() {
   const root = trackProjectRoot(() => undefined)
@@ -320,9 +324,11 @@ export function AppPane() {
   let program: HTMLDivElement | undefined
   // the body, watched while it's drawn:  `onSettled()`, as a ref callback has no owner to clean up with
   let body: HTMLDivElement | undefined
+  // the pane itself:  Anatomy's Full Window lifts it over the editor
+  let pane: HTMLDivElement | undefined
   onSettled(() => Inspector.watch(body!))
   return (
-    <div class="AppPane">
+    <div class="AppPane" ref={(element: HTMLDivElement) => (pane = element)}>
       <Show when={notebookPage()} keyed>
         {(page) => <NotebookHeader controller={page} icon={root().icon ?? PROJECT_ICON} title={title()} />}
       </Show>
@@ -361,6 +367,7 @@ export function AppPane() {
           </Show>
         </div>
       </div>
+      <AppAnatomyView pane={() => pane} body={() => body} program={() => program} />
     </div>
   )
 }
@@ -572,7 +579,12 @@ export function EditorToolbar(props: { mode: Mode }) {
         <ModeButtons
           current={props.mode}
           compiled={<CompiledCodeButton />}
-          inspect={<InspectAppButton id={INSPECT_APP_ID} />}
+          inspect={
+            <>
+              <InspectAppButton id={INSPECT_APP_ID} />
+              <AnatomyButton />
+            </>
+          }
           add={<AddPartButton />}
         />
       )

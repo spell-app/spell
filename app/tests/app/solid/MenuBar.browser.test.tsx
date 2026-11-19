@@ -127,7 +127,7 @@ describe("<AppBarMenus>", () => {
     expect(popup.visible).toBe(false)
   })
 
-  test("View:  Run, Edit, Site ─ Code, Compiled Code, Inspector, Program Panel ─ Line Numbers, Soft Wrap;  Soft Wrap turns long lines' wrapping on and off, ticked while on, remembered", async () => {
+  test("View:  Run, Edit, Site ─ Code, Compiled Code, Inspector, Anatomy, Program Panel ─ Line Numbers, Soft Wrap;  Soft Wrap turns long lines' wrapping on and off, ticked while on, remembered", async () => {
     const wrappedBefore = CodeSettings.choices.wrapLines
     cleanups.push(() => CodeSettings.choose("wrapLines", wrappedBefore))
     CodeSettings.choose("wrapLines", false)
@@ -140,6 +140,7 @@ describe("<AppBarMenus>", () => {
     await rowsReady(menu()!)
     const rows = [...menu()!.children].map((row) => (row.getAttribute("kind") === "divider" ? "─" : rowText(row)))
     // Owen, epic `editor` T100:  Inspector after Compiled Code, in one group with Program Panel;  Soft Wrap under Line Numbers
+    // Anatomy after the Inspector (P34)
     expect(rows).toEqual([
       "Run",
       "Edit",
@@ -148,6 +149,7 @@ describe("<AppBarMenus>", () => {
       "Code",
       "Compiled Code",
       "Inspector",
+      "Anatomy",
       "Program Panel",
       "─",
       "Line Numbers",

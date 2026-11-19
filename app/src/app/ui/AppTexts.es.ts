@@ -451,6 +451,29 @@ const APP_TEXTS_ES: AppTextPack = {
   inspectHelp:
     "Haz clic en una parte de tu app para ver qué es.\nAlt y clic elige una parte de dentro.\nMantén Mayús o ⌘ para elegir varias, o arrastra por un espacio vacío.\nPulsa Esc cuando termines.",
   inspectHelpClose: "Cerrar",
+  // Anatomía (epic `editor` P34)
+  anatomy: "Anatomía",
+  anatomyTip: "Despliega la app en 3D, cada parte en una capa propia",
+  anatomyStopTip: "Vuelve a juntar la app",
+  anatomyWholeApp: "Toda la app",
+  anatomyFront: "De frente",
+  anatomyFrontTip: "Mírala de frente otra vez",
+  anatomySpacing: "Separación",
+  anatomyDepth: "Profundidad",
+  anatomyParts: "Partes",
+  anatomyPartsTip: "Divide cada parte en más capas, para que sus botones, menús y cajas floten por separado",
+  anatomyOutlines: "Contornos",
+  anatomyOutlinesTip: "Dibuja cada capa como un marco vacío, sin lo que hay en ella",
+  anatomyFullWindow: "Pantalla completa",
+  anatomyFullWindowTip: "Muestra las capas sobre todo el editor",
+  anatomyClose: "Cerrar",
+  anatomyFlat: "de una pieza",
+  anatomyFlatTip: "Esta parte oculta lo que pasa de sus bordes, así que lo de dentro no puede separarse de ella",
+  anatomyFocusShortcut: "Muestra sola la capa elegida",
+  anatomyBackShortcut: "Vuelve atrás, fuera de Anatomía",
+  shortcutsWhileAnatomy: "Solo mientras se ve Anatomía",
+  anatomyHelp:
+    "Anatomía separa tu app en capas, una por cada vista que dibuja.\nArrastra para girarla. Desplaza para acercar. Haz clic en una capa para elegirla, o doble clic para verla sola.\nMantén Opción para usar la app como siempre. Pulsa Esc para volver.",
   notSaved: "Sin guardar",
 
   ////////////////

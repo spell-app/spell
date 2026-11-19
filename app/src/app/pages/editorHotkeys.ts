@@ -3,7 +3,7 @@ import { createSignal, onSettled } from "solid-js"
 import { UI } from "spell/ui/core"
 import { editor } from "spell/app/app/editor"
 import { debugging } from "spell/app/app/Debugging"
-import { ChangeThis, Inspector, PartEdits, uiReady, type PartAction } from "spell/app/app/solid"
+import { AppAnatomy, ChangeThis, Inspector, PartEdits, uiReady, type PartAction } from "spell/app/app/solid"
 import { codeEditors, type CodeEditorCommand, type CodeEditorHandle } from "spell/app/app/ui/ui.types"
 import type { AppTextKey } from "spell/app/app/ui/AppTexts.en"
 
@@ -200,6 +200,18 @@ export const EDITOR_HOTKEYS = {
     name: "stopInspecting",
     where: "shortcutsWhileInspecting"
   },
+  // Anatomy:  the app pulled apart into layers (epic `editor` P34);  ⌥⌘A, beside ⌥⌘N, which neither browser takes
+  anatomy: { shortcut: "alt+mod+A", run: () => AppAnatomy.toggle(), group: "running", name: "anatomy" },
+  anatomyFocus: {
+    shortcut: "F",
+    run: () => (AppAnatomy.focusSelected() ? undefined : false),
+    outsideCode: true,
+    group: "running",
+    name: "anatomyFocusShortcut",
+    where: "shortcutsWhileAnatomy"
+  },
+  // Esc's own run is `stopInspecting`'s, which steps back out of Anatomy first:  one key, one handler
+  anatomyBack: { shortcut: "Escape", group: "running", name: "anatomyBackShortcut", where: "shortcutsWhileAnatomy" },
 
   ////////////////
   // ## The step debugger:  VS Code's keys (epic `editor` P33);  only while the app's paused, else the key goes on
@@ -416,8 +428,12 @@ function isInProperties(event: KeyboardEvent): boolean {
   return event.composedPath().some((target) => target instanceof Element && target.localName === PROPERTY_EDITOR)
 }
 
-/** Esc:  stop inspecting, while inspecting;  otherwise not ours (`false`), so the key goes on. */
+/**
+ * Esc:  step back out of Anatomy while it shows (one layer alone, then the whole app);  else stop inspecting, while
+ * inspecting;  otherwise not ours (`false`), so the key goes on.
+ */
 function stopInspecting(): unknown {
+  if (AppAnatomy.back()) return undefined
   if (!Inspector.isInspecting) return false
   Inspector.stopInspecting()
   return undefined

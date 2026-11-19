@@ -8,6 +8,7 @@ import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import {
   Action,
   Actions,
+  AppAnatomy,
   AppMarkLabel,
   CodeSettings,
   CodeShown,
@@ -342,7 +343,8 @@ function ThemeItems(): JSX.Element {
  *   Undo and Redo (their titles the step), the selection's part actions, View's Inspector cards.
  * - File:  New Spell File, New CSS File, ─, Save, Discard Changes, AutoSave, ─, Duplicate File.
  * - Edit:  the code editor's Undo, Redo, ─, the selection's part actions, ─, Find, ─, Code Editor Settings….
- * - View:  Run, Edit, Site (a site's editor, epic `mockup` P4), ─, Code, Compiled Code, Inspector, Program Panel, ─,
+ * - View:  Run, Edit, Site (a site's editor, epic `mockup` P4), ─, Code, Compiled Code, Inspector, Anatomy (epic `editor`
+ *   P34), Program Panel, ─,
  *   Line Numbers, Soft Wrap (Code Editor Settings…' Wrap long lines;  epic `editor` T100);  each ticked while on.
  * - Run:  Compile and Run, Restart, ─, Inspect App, Stop Inspecting, ─, Clear Console.
  * - Help:  Keyboard Shortcuts (epic `editor` P36), then Help, which does nothing yet;  the editor's own, not the Spell's.
@@ -374,6 +376,7 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
     compiledCodeIsShowing: props.mode === "edit" && !!CodeOutputShown.target,
     programPanelShowing: props.mode === "edit" && ProgramPanelShown.isShowing,
     inspectorOpen: Inspector.isOpen,
+    anatomyShowing: AppAnatomy.isShowing,
     lineNumbersShowing: LineNumbers.isShowing,
     softWrapping: CodeSettings.choices.wrapLines,
     inspecting: Inspector.isInspecting,
@@ -595,6 +598,7 @@ function handOverActions(spell: EditorSpell) {
     },
     showProgramPanel: () => toggleProgramPanel(app.running ? "run" : "edit"),
     showInspector: () => Inspector.showOrHide(),
+    showAnatomy: () => AppAnatomy.toggle(),
     showLineNumbers: () => LineNumbers.toggle(),
     // the same choice as Code Editor Settings…' Wrap long lines:  one preference, so both agree
     softWrap: () => CodeSettings.choose("wrapLines", !CodeSettings.choices.wrapLines),

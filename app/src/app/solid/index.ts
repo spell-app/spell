@@ -20,6 +20,7 @@
  *   - `AppRoot` / `AppContainer`:  where a program draws, with React
  *   - `trackProjectRoot()`:  a group of projects as Solid reads it, and `openProject()`
  *   - `EditorZones`:  the app pane of the editor's own Spell, a zone per view (epic `editor` T63)
+ *   - `AppAnatomy`:  the running app pulled apart into floors, in 3D (epic `editor` P34)
  *   - The pages and the router are `spell/app/app/pages`.
  * - The editor's panes (P6):
  *   console, match and AST viewers, type and thing explorers, the code editors, `FileTabs`.
@@ -43,6 +44,7 @@ export * from "./chrome"
 export * from "./EditorTheme"
 export * from "./EditorMode"
 export * from "./Inspector"
+export * from "./AppAnatomy"
 export * from "./InspectorData"
 export * from "./PartEdits"
 export * from "./Palette"
