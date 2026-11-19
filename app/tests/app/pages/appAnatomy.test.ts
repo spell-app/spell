@@ -153,6 +153,16 @@ describe.skipIf(!SERVING)("Anatomy, over Solitaire", { timeout: 180_000 }, () =>
     expect(await page.locator(".PaletteStrip").count()).toBe(0)
     const turn = () => page.evaluate(() => (window as unknown as TestWindow).AppAnatomy.view)
 
+    // the pane fills its split pane while it shows, so the turned app is cut off only at the pane's edges (I266)
+    const edges = await page.evaluate(() => {
+      const body = document.querySelector(".AppPaneBody")!
+      return {
+        body: body.getBoundingClientRect().bottom,
+        split: body.closest(".SplitPane")!.getBoundingClientRect().bottom
+      }
+    })
+    expect(edges.body).toBeCloseTo(edges.split, 0)
+
     // face on at first, then turned to its resting angle once it's waited half a second and turned
     expect(await turn()).toMatchObject({ tilt: 0, spin: 0 })
 
@@ -283,6 +293,20 @@ describe.skipIf(!SERVING)("Anatomy, over Solitaire", { timeout: 180_000 }, () =>
     // the dim:  dark in every theme, 90% opaque (T121, J234)
     expect(behind[0]).toBe("rgba(0, 0, 0, 0.9)")
     expect(behind.slice(1)).toEqual(["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"])
+    // the bar's controls one group centred on the bar;  "Esc to close" 20px under it, yellow (T121)
+    const bar = await page.evaluate(() => {
+      const box = (selector: string) => document.querySelector(selector)!.getBoundingClientRect()
+      const centre = (rect: DOMRect) => (rect.left + rect.right) / 2
+      return {
+        bar: centre(box(".AnatomyBar")),
+        middle: centre(box(".AnatomyMiddle")),
+        gap: box(".AnatomyEscHint").top - box(".AnatomyBar").bottom,
+        hint: getComputedStyle(document.querySelector(".AnatomyEscHint")!).color
+      }
+    })
+    expect(bar.middle).toBeCloseTo(bar.bar, 0)
+    expect(bar.gap).toBeCloseTo(20, 0)
+    expect(bar.hint).not.toBe("rgb(255, 255, 255)")
     await page.evaluate(() => (window as unknown as TestWindow).AppAnatomy.toggleFullWindow())
     await page.waitForTimeout(300)
 

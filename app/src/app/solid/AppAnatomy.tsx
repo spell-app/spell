@@ -354,9 +354,6 @@ function AnatomyStack(props: { pane: HTMLElement; body: HTMLElement; program: HT
   return (
     <>
       <AnatomyFullWindow pane={pane} />
-      <Show when={AppAnatomy.isFullWindow}>
-        <span class="AnatomyEscHint">{appTexts.text("anatomyEscToClose")}</span>
-      </Show>
       <Show when={frames().length}>
         <div class="AnatomyOutlines" style={{ perspective: `${EYE_DISTANCE}px` }}>
           <div class="AnatomyOutlinesStage" style={frameStageStyle(program, pane)}>
@@ -779,10 +776,11 @@ function isBar(target: EventTarget): boolean {
 /****************
  * ### `<AnatomyBar>`
  * Anatomy's bar, across the top of the app pane:  where it's looking, and how.
- * - Left:  "Solitaire in 3D", then the floors down to the one shown alone, each a link back to it (breadcrumbs);
- *   then Play | Inspect, what a click does (T117).
- * - Then Front, the Spacing slider, and Views | Named | Outlines, what it shows (I257, T118, T121).
+ * - Left:  "Solitaire in 3D", then the floors down to the one shown alone, each a link back to it (breadcrumbs).
+ * - In the middle, one group centred on the bar (T121):  Play | Inspect, what a click does (T117);  Front;
+ *   the Spacing slider;  Views | Named | Outlines, what it shows (I257, T118, T121).
  * - At the right end, icons alone:  how to use it, Full Window, Close, each with the browser's own tooltip.
+ * - Under it at the left, in the full window:  "Esc to close" (I260).
  ****************/
 function AnatomyBar(props: { floors: Floor[] }): JSX.Element {
   const crumbs = () => {
@@ -817,59 +815,63 @@ function AnatomyBar(props: { floors: Floor[] }): JSX.Element {
           )}
         </For>
       </span>
-      {/* each segmented menu has a `name`:  only then does a choice send `ui-changed` */}
-      <ui-menu
-        appearance="segmented link"
-        size="small"
-        class="AnatomyClicks"
-        name="anatomy-clicks"
-        aria-label={appTexts.text("anatomyClicks")}
-        value={AppAnatomy.clicks}
-        ref={on<{ value: string }>("ui-changed", (event) => AppAnatomy.setClicks(event.detail.value as AnatomyClicks))}
-      >
-        <ui-item value="play" title={appTexts.text("anatomyPlayTip")}>
-          {appTexts.text("anatomyPlay")}
-        </ui-item>
-        <ui-item value="inspect" title={appTexts.text("anatomyInspectTip")}>
-          {appTexts.text("anatomyInspect")}
-        </ui-item>
-      </ui-menu>
-      <span class="AnatomyControls">
-        <ui-button size="tiny" {...barTooltip(appTexts.text("anatomyFrontTip"))} onClick={() => AppAnatomy.front()}>
-          {appTexts.text("anatomyFront")}
-        </ui-button>
-        <label class="AnatomySlider">
-          {appTexts.text("anatomySpacing")}
-          <ui-slider
-            size="mini"
-            min={SPACINGS.least}
-            max={SPACINGS.most}
-            step={SPACINGS.step}
-            value={AppAnatomy.spacing}
-            aria-label={appTexts.text("anatomySpacing")}
-            ref={on<{ value: number }>("ui-moved", (event) => AppAnatomy.setSpacing(event.detail.value))}
-          />
-        </label>
+      {/* the middle, one group centred on the bar;  each segmented menu has a `name`:  only then does a choice send `ui-changed` */}
+      <span class="AnatomyMiddle">
+        <ui-menu
+          appearance="segmented link"
+          size="small"
+          class="AnatomyClicks"
+          name="anatomy-clicks"
+          aria-label={appTexts.text("anatomyClicks")}
+          value={AppAnatomy.clicks}
+          ref={on<{ value: string }>("ui-changed", (event) =>
+            AppAnatomy.setClicks(event.detail.value as AnatomyClicks)
+          )}
+        >
+          <ui-item value="play" title={appTexts.text("anatomyPlayTip")}>
+            {appTexts.text("anatomyPlay")}
+          </ui-item>
+          <ui-item value="inspect" title={appTexts.text("anatomyInspectTip")}>
+            {appTexts.text("anatomyInspect")}
+          </ui-item>
+        </ui-menu>
+        <span class="AnatomyControls">
+          <ui-button size="tiny" {...barTooltip(appTexts.text("anatomyFrontTip"))} onClick={() => AppAnatomy.front()}>
+            {appTexts.text("anatomyFront")}
+          </ui-button>
+          <label class="AnatomySlider">
+            {appTexts.text("anatomySpacing")}
+            <ui-slider
+              size="mini"
+              min={SPACINGS.least}
+              max={SPACINGS.most}
+              step={SPACINGS.step}
+              value={AppAnatomy.spacing}
+              aria-label={appTexts.text("anatomySpacing")}
+              ref={on<{ value: number }>("ui-moved", (event) => AppAnatomy.setSpacing(event.detail.value))}
+            />
+          </label>
+        </span>
+        <ui-menu
+          appearance="segmented link"
+          size="small"
+          class="AnatomyShows"
+          name="anatomy-shows"
+          aria-label={appTexts.text("anatomyShows")}
+          value={AppAnatomy.look}
+          ref={on<{ value: string }>("ui-changed", (event) => AppAnatomy.setLook(event.detail.value as AnatomyLook))}
+        >
+          <ui-item value="views" title={appTexts.text("anatomyViewsTip")}>
+            {appTexts.text("anatomyViews")}
+          </ui-item>
+          <ui-item value="named" title={appTexts.text("anatomyNamedTip")}>
+            {appTexts.text("anatomyNamed")}
+          </ui-item>
+          <ui-item value="outlines" title={appTexts.text("anatomyOutlinesTip")}>
+            {appTexts.text("anatomyOutlines")}
+          </ui-item>
+        </ui-menu>
       </span>
-      <ui-menu
-        appearance="segmented link"
-        size="small"
-        class="AnatomyShows"
-        name="anatomy-shows"
-        aria-label={appTexts.text("anatomyShows")}
-        value={AppAnatomy.look}
-        ref={on<{ value: string }>("ui-changed", (event) => AppAnatomy.setLook(event.detail.value as AnatomyLook))}
-      >
-        <ui-item value="views" title={appTexts.text("anatomyViewsTip")}>
-          {appTexts.text("anatomyViews")}
-        </ui-item>
-        <ui-item value="named" title={appTexts.text("anatomyNamedTip")}>
-          {appTexts.text("anatomyNamed")}
-        </ui-item>
-        <ui-item value="outlines" title={appTexts.text("anatomyOutlinesTip")}>
-          {appTexts.text("anatomyOutlines")}
-        </ui-item>
-      </ui-menu>
       {/* icons alone at the right end:  how to use it (its tooltip), Full Window, Close */}
       <span class="AnatomyEnd">
         <ui-icon name="question circle outline" class="AnatomyHelp" title={appTexts.text("anatomyHelp")} />
@@ -893,6 +895,9 @@ function AnatomyBar(props: { floors: Floor[] }): JSX.Element {
           onClick={() => AppAnatomy.hide()}
         />
       </span>
+      <Show when={AppAnatomy.isFullWindow}>
+        <span class="AnatomyEscHint">{appTexts.text("anatomyEscToClose")}</span>
+      </Show>
     </div>
   )
 }
