@@ -100,7 +100,7 @@ describe("<epic-picture>", () => {
     const picture = await render()
     await vi.waitFor(() => expect(trashOf(picture)).not.toBeNull())
     const trash = trashOf(picture)!
-    expect(trash.getAttribute("title")).toBe("Delete this picture, and its file")
+    expect(trash.getAttribute("title")).toBe("Delete the picture and its file")
     await expectAccessible(picture)
     trash.click()
     await vi.waitFor(() => expect(isDeleted(picture)).toBe(true))
@@ -166,7 +166,7 @@ describe("<epic-picture> labels and the x", () => {
     const removed: unknown[] = []
     picture.addEventListener("epic-picture-removed", (event) => removed.push((event as CustomEvent).detail))
     const x = picture.shadowRoot!.querySelector<HTMLElement>('[part~="remove"]')!
-    expect(x.getAttribute("title")).toBe("Take IMG3 out")
+    expect(x.getAttribute("title")).toBe("Remove IMG3")
     x.click()
     expect(removed).toEqual([{ label: "IMG3", src: SRC }])
     await expectAccessible(picture)

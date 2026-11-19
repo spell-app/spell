@@ -82,20 +82,20 @@ describe("<epic-pills>", () => {
     )
     expect(zeta.querySelector(".phase")!.textContent).toBe("P2")
     expect(zeta.querySelector(".agents")!.textContent).toBe("2")
-    expect(zeta.getAttribute("title")).toBe("Zeta\n2 urgent · 1 running now\nP2 · Build It\n2 agents running")
+    expect(zeta.getAttribute("title")).toBe("Zeta\n2 urgent · 1 under way\nP2 · Build It\n2 agents running")
 
     // one colour:  its count
     const alpha = pills.get("alpha")!
     expect(alpha.querySelector(".badge.replied")!.textContent).toBe("3")
     expect(alpha.querySelector(".phase")).toBeNull()
     expect(alpha.querySelector(".agents")).toBeNull()
-    expect(alpha.getAttribute("title")).toBe("Alpha\n3 for your pick or review")
+    expect(alpha.getAttribute("title")).toBe("Alpha\n3 to pick or review")
 
     // every phase done:  Done
     const standing = pills.get("standing")!
     expect(standing.querySelector(".badge")).toBeNull()
     expect(standing.querySelector(".phase.done")!.textContent).toBe("Done")
-    expect(standing.getAttribute("title")).toBe("Standing\nevery phase done\n1 agent running")
+    expect(standing.getAttribute("title")).toBe("Standing\nAll phases done\n1 agent running")
     await expectAccessible(host)
   })
 

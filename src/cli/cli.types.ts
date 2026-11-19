@@ -88,6 +88,18 @@ export type WwodOptions = GlobalOptions & {
   dryRun?: boolean
 }
 
+/**
+ * `spell dev local-spell`'s flags (epic `repo-split` T70).
+ * - `off`:  run npm's copy again:  the project's `.spell/kit.json5` removed
+ * - `status`:  say which Spell runs here, and why;  change nothing
+ * - `json`:  print what it found (and did) as JSON
+ */
+export type LocalSpellOptions = GlobalOptions & {
+  off?: boolean
+  status?: boolean
+  json?: boolean
+}
+
 /** `spell deps`'s flags. */
 export type DepsOptions = GlobalOptions & {
   json?: boolean

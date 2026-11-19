@@ -391,12 +391,12 @@
         },
         {
           "key": "toSeveralTip",
-          "text": "Let me pick several",
+          "text": "Allow several picks",
           "description": "The switch's tooltip while it's pick one (epic `epic-engine` P50)."
         },
         {
           "key": "toOneTip",
-          "text": "Back to one pick:  the newest pick stays, the others turn off",
+          "text": "Back to one pick:  the newest stays",
           "description": "The switch's tooltip while it's pick any."
         },
         {
@@ -451,7 +451,7 @@
         },
         {
           "key": "workingTip",
-          "text": "{id}:  Claude has more to do",
+          "text": "{id}:  Claude is still on it",
           "description": "The chip's tooltip:  more details asked, or only Other written."
         }
       ]
@@ -701,7 +701,7 @@
         },
         {
           "key": "awayTip",
-          "text": "Claude worked on it while you were out:  what was done, and what needs you",
+          "text": "Done while you were out",
           "description": "`away`:  the mark's tooltip."
         },
         {
@@ -716,18 +716,18 @@
         },
         {
           "key": "starTip",
-          "text": "Star it:  listed first, under Favorites",
+          "text": "Star:  list it under Favorites",
           "description": "The star's tooltip, not starred."
         },
         {
           "key": "unstarTip",
-          "text": "A favorite:  listed first.  Click to unstar",
+          "text": "Unstar",
           "description": "The star's tooltip, starred."
         },
         {
-          "key": "starOffline",
-          "text": "Starring needs the epic server (epic hub ensure)",
-          "description": "The star's tooltip where it can't star:  opened from disk, or no write token."
+          "key": "offline",
+          "text": "Needs the page server",
+          "description": "The star's and the `...` menu's tooltip where they can't act:  opened from disk, or no write token."
         },
         {
           "key": "worked",
@@ -738,11 +738,6 @@
           "key": "menu",
           "text": "More for {epic}",
           "description": "The `...` menu's name and tooltip."
-        },
-        {
-          "key": "menuOffline",
-          "text": "These need the epic server (epic hub ensure)",
-          "description": "The `...` menu's tooltip where it can't act:  opened from disk, or no write token."
         },
         {
           "key": "resume",
@@ -1671,12 +1666,12 @@
         },
         {
           "key": "switchToAnyTip",
-          "text": "Let me pick several:  sent with your next Send",
+          "text": "Allow several picks",
           "description": "The switch's tooltip while it's pick one."
         },
         {
           "key": "switchToOneTip",
-          "text": "Back to one pick:  the newest pick stays, the others turn off;  sent with your next Send",
+          "text": "Back to one pick:  the newest stays",
           "description": "The switch's tooltip while it's pick any."
         },
         {
@@ -1686,7 +1681,7 @@
         },
         {
           "key": "addTip",
-          "text": "Add an option of your own:  sent with your next Send, picked",
+          "text": "Add your own option",
           "description": "Add choice's tooltip."
         },
         {
@@ -1726,12 +1721,12 @@
         },
         {
           "key": "tipNewChoose",
-          "text": "Pick your option",
+          "text": "Pick it",
           "description": "An added option's pill's tooltip."
         },
         {
           "key": "tipNewPicked",
-          "text": "Your option is picked:  click to un-pick",
+          "text": "Yours, picked:  un-pick it",
           "description": "... once picked."
         },
         {
@@ -1756,7 +1751,7 @@
         },
         {
           "key": "zoomTip",
-          "text": "Show it full size",
+          "text": "Full size",
           "description": "An option's picture:  its tooltip."
         },
         {
@@ -1776,7 +1771,7 @@
         },
         {
           "key": "unfoldListTip",
-          "text": "Show the list",
+          "text": "Unfold the list",
           "description": "A folded list's button, while folded."
         }
       ]
@@ -1851,12 +1846,12 @@
         },
         {
           "key": "sendTip",
-          "text": "Send {changed} changed of {rows}, and the feedback, to Claude",
+          "text": "Send {changed} of {rows} changed, and the feedback",
           "description": "The button's tooltip:  the count."
         },
         {
           "key": "sendTipCommented",
-          "text": "Send {changed} changed of {rows}, {commented} commented, and the feedback, to Claude",
+          "text": "Send {changed} of {rows} changed, {commented} commented, and the feedback",
           "description": "The button's tooltip, once a row's comment box holds anything (epic `epic-engine` P58)."
         },
         {
@@ -1871,12 +1866,12 @@
         },
         {
           "key": "copyTip",
-          "text": "Copy every box you changed, and the feedback, as JSON:  for when this page can't save",
+          "text": "Copy your changes and feedback as JSON, when the page can't save",
           "description": "Copy my answers' tooltip."
         },
         {
           "key": "copyFailed",
-          "text": "Couldn't copy:  the browser refused the clipboard",
+          "text": "Couldn't copy:  the browser blocked the clipboard",
           "description": "Copy my answers' tooltip after a copy failed."
         },
         {
@@ -1954,17 +1949,17 @@
         },
         {
           "key": "clarifyTip",
-          "text": "Ask Claude for this item's details now, without waiting for Send",
+          "text": "Ask Claude for details now",
           "description": "The link's tooltip."
         },
         {
           "key": "iconTip",
-          "text": "Click to have Claude rewrite this item in plainer words.  It starts right away.",
+          "text": "Rewrite it in plainer words, now",
           "description": "With `icon`:  the button's tooltip and name."
         },
         {
           "key": "turningTip",
-          "text": "Claude is rewriting this item to make it clearer.  Click to stop.",
+          "text": "Claude is rewriting it:  stop",
           "description": "With `icon`, while it turns:  the button's tooltip and name."
         }
       ]
@@ -2167,7 +2162,7 @@
         },
         {
           "key": "dragTip",
-          "text": "(Drag to move)",
+          "text": "Drag to move",
           "description": "After its header's tooltip."
         },
         {
@@ -2283,7 +2278,7 @@
         },
         {
           "key": "unfoldTip",
-          "text": "Show all of it",
+          "text": "Show it all",
           "description": "A long sentence's tooltip, folded to two lines."
         },
         {
@@ -2684,7 +2679,7 @@
         },
         {
           "key": "tabTip",
-          "text": "{tab}:  {count} to go through",
+          "text": "{tab}:  {count} to go",
           "description": "A tab's tooltip:  how many of its items show, by its chips."
         },
         {
@@ -2699,7 +2694,7 @@
         },
         {
           "key": "backTip",
-          "text": "The item before (←)",
+          "text": "Previous item (←)",
           "description": "Back's tooltip."
         },
         {
@@ -2709,7 +2704,7 @@
         },
         {
           "key": "nextTip",
-          "text": "The next item (→)",
+          "text": "Next item (→)",
           "description": "Next's tooltip."
         },
         {
@@ -2782,7 +2777,7 @@
         },
         {
           "key": "hiddenTip",
-          "text": "Show everything:  clear the filter",
+          "text": "Show everything",
           "description": "The line's tooltip."
         }
       ]
@@ -3187,47 +3182,47 @@
         },
         {
           "key": "stateAttention",
-          "text": "Needs attention",
+          "text": "Urgent",
           "description": "Id chip tooltip, `state=attention`."
         },
         {
           "key": "stateReplied",
-          "text": "Claude answered:  your turn to pick",
+          "text": "Answered:  your pick",
           "description": "Id chip tooltip, `state=replied`."
         },
         {
           "key": "stateFixed",
-          "text": "Claude fixed it:  your turn to review",
+          "text": "Fixed:  your review",
           "description": "Id chip tooltip, `fixed`."
         },
         {
           "key": "stateCommentReplied",
-          "text": "Claude answered your comment:  your turn (✓ closes it)",
+          "text": "Your comment answered:  ✓ closes it",
           "description": "Id chip tooltip, orange for a comment in it Claude answered last (epic `epic-engine` I284)."
         },
         {
           "key": "stateRequested",
-          "text": "Claude finished what you asked:  your turn to see it",
+          "text": "Finished as you asked:  take a look",
           "description": "Id chip tooltip, `state=requested` (light orange)."
         },
         {
           "key": "stateTestWaiting",
-          "text": "A test only you can run, its phase not done yet",
+          "text": "Your test, once its phase is done",
           "description": "Id chip tooltip, a manual test while its phase isn't done (orange)."
         },
         {
           "key": "stateHanded",
-          "text": "You pressed Do this:  waiting for Claude to start",
+          "text": "Waiting for Claude to start",
           "description": "Id chip tooltip, `state=handed` (blue outline)."
         },
         {
           "key": "stateScheduled",
-          "text": "Agreed, not started:  nothing for you to do",
+          "text": "Agreed, not started",
           "description": "Id chip tooltip, `state=scheduled` (blue dotted)."
         },
         {
           "key": "stateQuiet",
-          "text": "Open, nothing to think about",
+          "text": "Open, nothing to decide",
           "description": "Id chip tooltip, `state=quiet` (grey):  a limit."
         },
         {
@@ -3237,7 +3232,7 @@
         },
         {
           "key": "stateOpen",
-          "text": "Open, still undecided",
+          "text": "Undecided",
           "description": "Id chip tooltip, `state=open`."
         },
         {
@@ -3252,7 +3247,7 @@
         },
         {
           "key": "stateHandled",
-          "text": "Handled in a phase:  its answer is in that phase's text now",
+          "text": "Handled in a phase",
           "description": "Id chip tooltip, `state=handled` (epic `epic-engine` P31)."
         },
         {
@@ -3262,22 +3257,22 @@
         },
         {
           "key": "donePillTip",
-          "text": "Click:  go to {phase}.",
+          "text": "Go to {phase}",
           "description": "A finished item's `in P20` pill's tooltip's second line (epic `epic-engine` J231)."
         },
         {
           "key": "handledTip",
-          "text": "Handled in {phase}:  rewritten into that phase's text.  Reopen its change mark to talk it over again.",
+          "text": "Rewritten into {phase}",
           "description": "The phase link's tooltip:  the phase's number and name (`P4 · Retry Logic`)."
         },
         {
           "key": "phasePillTip",
-          "text": "Click:  go to {phase}.  ⌥-click:  start {phase}.",
+          "text": "Go to {phase} · ⌥-click:  start it",
           "description": "The phase link's tooltip's second line:  what a click and an ⌥-click do (epic `epic-engine` I271)."
         },
         {
           "key": "takenTip",
-          "text": "Taken up in {phase}:  fixed or done there",
+          "text": "Done in {phase}",
           "description": "The phase link's tooltip with `taken-in`:  the phase's number and name (epic `epic-engine` I128)."
         },
         {
@@ -3297,17 +3292,17 @@
         },
         {
           "key": "tipNotReviewed",
-          "text": "not reviewed yet",
+          "text": "not reviewed",
           "description": "Id chip tooltip:  open, never reviewed."
         },
         {
           "key": "tipMakeCalm",
-          "text": "click:  not urgent",
+          "text": "Mark not urgent",
           "description": "Id chip tooltip while reviewed, an urgent judgement call or issue:  what a click does."
         },
         {
           "key": "tipMakeUrgent",
-          "text": "click:  urgent",
+          "text": "Mark urgent",
           "description": "Id chip tooltip while reviewed, a judgement call or issue that isn't urgent:  what a click does."
         },
         {
@@ -3342,12 +3337,12 @@
         },
         {
           "key": "failedTip",
-          "text": "Failed in your test run:  filed as {id}",
+          "text": "Failed your test:  filed as {id}",
           "description": "The failed mark's tooltip."
         },
         {
           "key": "failedTipNone",
-          "text": "Failed in your test run",
+          "text": "Failed your test",
           "description": "The failed mark's tooltip, no issue."
         },
         {
@@ -3442,7 +3437,7 @@
         },
         {
           "key": "acceptPlanTip",
-          "text": "Claude's plan for this phase is good:  build it",
+          "text": "Build this plan",
           "description": "What Accept plan does."
         },
         {
@@ -3561,7 +3556,7 @@
         },
         {
           "key": "choose",
-          "text": "Add pictures from your computer",
+          "text": "Add pictures",
           "description": "The picture button's tooltip and name."
         },
         {
@@ -3756,17 +3751,17 @@
         },
         {
           "key": "noSagaTip",
-          "text": "Epics that name no saga yet:  epic saga set <epic> <saga>",
+          "text": "Epics with no saga",
           "description": "The No saga chip's tooltip."
         },
         {
           "key": "showOnly",
-          "text": "Click to show only {saga}",
+          "text": "Show only the {count} in {saga}",
           "description": "A chip's tooltip's last line, while shown."
         },
         {
           "key": "showToo",
-          "text": "Click to show {saga} too",
+          "text": "Show the {count} in {saga} too",
           "description": "A chip's tooltip's last line, while hidden."
         }
       ]
@@ -4286,7 +4281,7 @@
         },
         {
           "key": "zoomTip",
-          "text": "Show it full size",
+          "text": "Full size",
           "description": "A picture in an edit not applied yet:  its tooltip."
         },
         {
@@ -4321,7 +4316,7 @@
         },
         {
           "key": "tipTicked",
-          "text": "{letter} is picked:  click to un-pick",
+          "text": "{letter} picked:  un-pick it",
           "description": "In an `<epic-ask>`:  a picked option's pill's tooltip."
         },
         {
@@ -4331,7 +4326,7 @@
         },
         {
           "key": "tipChosen",
-          "text": "{letter} is picked:  click to un-pick",
+          "text": "{letter} picked:  un-pick it",
           "description": "The picked pill's tooltip."
         },
         {
@@ -4346,12 +4341,12 @@
         },
         {
           "key": "tipApplied",
-          "text": "{letter} is the chosen option",
+          "text": "{letter} chosen",
           "description": "The chosen option's pill's tooltip:  the pick applied."
         },
         {
           "key": "moreTip",
-          "text": "Provide more details",
+          "text": "Add details",
           "description": "In an `<epic-ask>`:  the (?)'s tooltip."
         },
         {
@@ -4381,12 +4376,12 @@
         },
         {
           "key": "foldWasTip",
-          "text": "Fold its earlier text",
+          "text": "Fold the earlier text",
           "description": "The `Was` line's button, while open."
         },
         {
           "key": "unfoldWasTip",
-          "text": "Show its earlier text",
+          "text": "Show the earlier text",
           "description": "The `Was` line's button, while folded."
         },
         {
@@ -4416,7 +4411,7 @@
         },
         {
           "key": "undoTip",
-          "text": "Take this change back",
+          "text": "Undo this change",
           "description": "Undo's tooltip."
         }
       ]
@@ -4918,12 +4913,12 @@
       "texts": [
         {
           "key": "hungTip",
-          "text": "Fold or unfold:  how to restart a hung session",
+          "text": "How to restart a hung session",
           "description": "Plan hung?:  its tooltip."
         },
         {
           "key": "copyHeading",
-          "text": "{name}:  click to copy {command}",
+          "text": "{name}:  copy {command}",
           "description": "The h1's name:  its tooltip, its full name first (narrow, the name is cut short)."
         },
         {
@@ -5033,7 +5028,7 @@
         },
         {
           "key": "sagaTip",
-          "text": "The saga this epic serves:  {purpose}",
+          "text": "Saga:  {purpose}",
           "description": "The saga link's tooltip, once the page server has said what the saga is for."
         },
         {
@@ -5068,7 +5063,7 @@
         },
         {
           "key": "bedtimeTip",
-          "text": "A /bedtime run is on ({phases}):  what it changes shows green until you review it.",
+          "text": "Overnight run ({phases}):  its changes show green until reviewed",
           "description": "The bedtime label's tooltip."
         },
         {
@@ -5083,7 +5078,7 @@
         },
         {
           "key": "focusModeTip",
-          "text": "Walk through the open items one at a time",
+          "text": "Open items, one at a time",
           "description": "Focus mode's row:  its tooltip."
         },
         {
@@ -5158,27 +5153,27 @@
         },
         {
           "key": "stageOverviewTip",
-          "text": "Agreeing the Overview:  only it, the questions and todos show until Accept Overview",
+          "text": "Agreeing the Overview:  phases come after Accept Overview",
           "description": "The step label's tooltip, Overview stage."
         },
         {
           "key": "stagePhasesTip",
-          "text": "Agreeing the phases and their build plans:  Defer any, then Accept Phases, one press for both",
+          "text": "Agreeing the phases and their plans:  Accept Phases starts the build",
           "description": "The step label's tooltip, Phases stage."
         },
         {
           "key": "plansWaitOne",
-          "text": "1 build plan waits for your Accept:  {phases}",
+          "text": "1 plan waits for your Accept:  {phases}",
           "description": "While building, Send's tooltip begins so while a phase's build plan waits (the pill ringed 3px);  `{phases}`:  `P43`."
         },
         {
           "key": "plansWaitMany",
-          "text": "{count} build plans wait for your Accept:  {phases}",
+          "text": "{count} plans wait for your Accept:  {phases}",
           "description": "The same, for several:  `{phases}` like `P43, P44`."
         },
         {
           "key": "sendIdle",
-          "text": "Nothing to send:  mark an item (its buttons) or leave a comment (its bullhorn)",
+          "text": "Nothing to send:  mark or comment first",
           "description": "Send, no marks or comments."
         },
         {
@@ -5223,7 +5218,7 @@
         },
         {
           "key": "listeningTitle",
-          "text": "It waits for your Send (epic inbox wait), and hears it at once",
+          "text": "Listening:  your Send reaches it at once",
           "description": "The listening words' tooltip."
         },
         {
@@ -5238,7 +5233,7 @@
         },
         {
           "key": "copyWait",
-          "text": "Copy the command, for the agent to run",
+          "text": "Copy the command",
           "description": "The pill's tooltip, while it names an agent that isn't listening."
         },
         {
@@ -5248,12 +5243,12 @@
         },
         {
           "key": "expandAll",
-          "text": "Open every section, phase and item",
+          "text": "Open everything",
           "description": "The toolbar's expand-all button:  its name and tooltip."
         },
         {
           "key": "collapseAll",
-          "text": "Fold everything on the page",
+          "text": "Fold everything",
           "description": "The toolbar's collapse-all button:  its name and tooltip."
         },
         {
@@ -5268,7 +5263,7 @@
         },
         {
           "key": "startReview",
-          "text": "Start the review in this epic's Claude session (and copy the command)",
+          "text": "Start the review in this epic's session",
           "description": "The nobody-listening pill's tooltip:  a click types the command into the epic's session."
         },
         {
@@ -5689,7 +5684,7 @@
         },
         {
           "key": "workingPlan",
-          "text": "Claude is writing this phase's plan",
+          "text": "Claude is writing its plan",
           "description": "Its spinner while Claude is at work on it and its plan isn't accepted yet:  its tooltip and name."
         },
         {
@@ -5729,7 +5724,7 @@
         },
         {
           "key": "unmergedTip",
-          "text": "Done on branch {branch}, not merged into main yet",
+          "text": "Done on {branch}, not merged yet",
           "description": "That pill's tooltip."
         },
         {
@@ -5754,12 +5749,12 @@
         },
         {
           "key": "changedTip",
-          "text": "{count} × Update new in this phase.  ✓ Seen on one (or the ✓ here, on all) folds it to a grey line for everyone;  unseen, each goes quiet by itself 3 days after it was written",
+          "text": "{count} new updates:  ✓ Seen folds them;  they go quiet after 3 days",
           "description": "The title's pen while it isn't done:  its tooltip and name;  `count` how many new updates."
         },
         {
           "key": "seenAllTip",
-          "text": "Seen:  all {count} new updates in this phase, folded to grey lines for everyone once Claude applies it",
+          "text": "Mark all {count} updates seen",
           "description": "The pen's ✓:  what it does."
         }
       ]
@@ -5831,7 +5826,7 @@
       "texts": [
         {
           "key": "deleteTip",
-          "text": "Delete this picture, and its file",
+          "text": "Delete the picture and its file",
           "description": "The trash's tooltip and name."
         },
         {
@@ -5846,7 +5841,7 @@
         },
         {
           "key": "removeTip",
-          "text": "Take {label} out",
+          "text": "Remove {label}",
           "description": "The x's tooltip and name (`removable`):  `{label}`, its label, else `this picture`."
         },
         {
@@ -5914,12 +5909,12 @@
         },
         {
           "key": "replied",
-          "text": "{count} for your pick or review",
+          "text": "{count} to pick or review",
           "description": "A pill's tooltip:  its orange items (light orange with them)."
         },
         {
           "key": "running",
-          "text": "{count} running now",
+          "text": "{count} under way",
           "description": "A pill's tooltip:  its phases under way."
         },
         {
@@ -5934,7 +5929,7 @@
         },
         {
           "key": "allDone",
-          "text": "every phase done",
+          "text": "All phases done",
           "description": "A pill's tooltip, when every phase is done."
         },
         {
@@ -6198,7 +6193,7 @@
         },
         {
           "key": "newTip",
-          "text": "Claude's newest reply:  new since you looked",
+          "text": "New since you looked",
           "description": "The NEW tag's tooltip."
         }
       ]
@@ -6319,7 +6314,7 @@
         },
         {
           "key": "waitingTip",
-          "text": "Send hands it your answers, and it carries on",
+          "text": "Send hands it your answers",
           "description": "The waiting line's tooltip."
         },
         {
@@ -6344,7 +6339,7 @@
         },
         {
           "key": "notRunningTip",
-          "text": "Your answers are saved as you give them;  the command reads them when it next waits",
+          "text": "Saved as you go;  the command reads them when it next waits",
           "description": "The not-running line's tooltip."
         },
         {
@@ -6414,7 +6409,7 @@
         },
         {
           "key": "sendTip",
-          "text": "Send your answers:  the waiting command carries on with them;  send again any time",
+          "text": "Send your answers;  again any time",
           "description": "The plane's tooltip and name (`<epic-send-buttons send-tip>`)."
         },
         {
@@ -6580,7 +6575,7 @@
         },
         {
           "key": "takenTip",
-          "text": "The run took this at {time}",
+          "text": "Taken at {time}",
           "description": "The taken mark's tooltip."
         },
         {
@@ -6590,7 +6585,7 @@
         },
         {
           "key": "changedAfterTakenTip",
-          "text": "The command may pick the change up if it can",
+          "text": "Changed after the run took it",
           "description": "The orange note's tooltip."
         }
       ]
@@ -6949,7 +6944,7 @@
         },
         {
           "key": "startTestingTip",
-          "text": "Claude checks the tests it can check itself, writes out exactly what to do for the rest, with a screenshot, then the first test opens:  Approve one that passed, write what you saw in its note, the x if it no longer applies",
+          "text": "Claude checks what it can and writes out the rest, then the first test opens",
           "description": "Start testing's tooltip (epic `epic-engine` P51)."
         },
         {
@@ -6959,12 +6954,12 @@
         },
         {
           "key": "preparingTip",
-          "text": "Claude is checking what it can and writing out the rest;  the first test opens when it's done · click to call it off",
+          "text": "Claude is preparing the tests:  stop",
           "description": "Preparing tests' tooltip."
         },
         {
           "key": "waitingTip",
-          "text": "Asked:  {why} · click to call it off",
+          "text": "Asked:  {why} · stop",
           "description": "Preparing tests' tooltip while nobody has taken it yet."
         },
         {
@@ -6979,7 +6974,7 @@
         },
         {
           "key": "focusTestsTip",
-          "text": "Go through the tests in Focus mode, in Claude's order:  Approve if it passed, your note (and a screenshot) if not, the x if it no longer applies",
+          "text": "Go through the tests one at a time",
           "description": "The button's tooltip once the tests are prepared."
         },
         {
@@ -7114,7 +7109,7 @@
       "texts": [
         {
           "key": "sendTip",
-          "text": "Send what's on the page:  a partial answer is fine, send again any time",
+          "text": "Send what's on the page;  again any time",
           "description": "The plane's tooltip and name (`<epic-send-buttons send-tip>`)."
         }
       ]
@@ -7271,7 +7266,7 @@
         },
         {
           "key": "counting",
-          "text": "sends by itself in {time};  click to send now",
+          "text": "sends itself in {time}, or now",
           "description": "After the plane's words while the ring counts;  `{time}` like `1:42`."
         },
         {
@@ -7286,7 +7281,7 @@
         },
         {
           "key": "held",
-          "text": "sends by itself once you leave the note box;  click to send now",
+          "text": "sends itself when you leave the note box, or now",
           "description": "After the plane's words while a note box with words has the focus:  the ring stays full."
         }
       ]
@@ -7339,7 +7334,7 @@
         },
         {
           "key": "titleTip",
-          "text": "Sort each group by title, A to Z",
+          "text": "Sort A to Z",
           "description": "The title sort's tooltip."
         },
         {
@@ -7349,7 +7344,7 @@
         },
         {
           "key": "dateTip",
-          "text": "Sort each group by when it was last worked on, newest first",
+          "text": "Sort by last worked on, newest first",
           "description": "The date sort's tooltip."
         },
         {
@@ -7436,47 +7431,47 @@
         },
         {
           "key": "chipWords",
-          "text": "{count} {words}:  {does}\n{only}",
+          "text": "{count} {words}\n{does} · {only}",
           "description": "A state chip's name and tooltip:  how many, its state, what a click does (`showAll`, `chipHide` ...), then what an ⌥-click does (`chipAltOnly`)."
         },
         {
           "key": "chipAltOnly",
-          "text": "⌥-click:  show only these",
+          "text": "⌥-click:  only these",
           "description": "A state chip's ⌥-click (epic `epic-engine` I166):  only its state shows, whatever showed."
         },
         {
           "key": "markedWords",
-          "text": "with Claude (marked in this pass, or being worked on)",
+          "text": "with Claude",
           "description": "The ONE blue badge's name and tooltip:  how many items are with Claude, whatever their kind -- marked in this pass, or being worked on (epic `epic-engine` P43)."
         },
         {
           "key": "showAll",
-          "text": "show everything",
+          "text": "Show everything",
           "description": "A state chip's click:  every state shows again."
         },
         {
           "key": "chipAlso",
-          "text": "show these too",
+          "text": "Show these too",
           "description": "A state chip's click, hidden:  its state shows too."
         },
         {
           "key": "chipHide",
-          "text": "hide these",
+          "text": "Hide these",
           "description": "A state chip's click, showing:  its state hides."
         },
         {
           "key": "chipNext",
-          "text": "show the next ones instead",
+          "text": "Show the next ones instead",
           "description": "A state chip's click, the last one showing:  the next colour shows, and this one hides."
         },
         {
           "key": "chipStays",
-          "text": "nothing else to show",
+          "text": "Nothing else to show",
           "description": "A state chip's click, the only colour there is."
         },
         {
           "key": "chipMixed",
-          "text": "shown in some sections, hidden in others:  show them in every section",
+          "text": "Hidden in some sections:  show them in all",
           "description": "The page toolbar's chip while sections disagree about its colour (`mixed`, epic `epic-engine` I259):  a click shows it in every section."
         },
         {
@@ -7486,27 +7481,27 @@
         },
         {
           "key": "stateAttention",
-          "text": "needs attention",
+          "text": "urgent",
           "description": "A state chip's words:  `attention` (red)."
         },
         {
           "key": "stateReplied",
-          "text": "your turn:  Claude answered or fixed it",
+          "text": "answered or fixed:  your turn",
           "description": "A state chip's words:  `replied` (orange)."
         },
         {
           "key": "stateRequested",
-          "text": "your turn:  what you asked for is finished",
+          "text": "finished as you asked:  your turn",
           "description": "A state chip's words:  `requested` (light orange)."
         },
         {
           "key": "stateHanded",
-          "text": "you pressed Do this, Claude hasn't started",
+          "text": "waiting for Claude to start",
           "description": "A state's words, counted in the blue badge:  `handed`."
         },
         {
           "key": "stateOpen",
-          "text": "open, still undecided",
+          "text": "undecided",
           "description": "A state chip's words:  `open` (yellow)."
         },
         {
@@ -7516,7 +7511,7 @@
         },
         {
           "key": "stateQuiet",
-          "text": "open, nothing to think about",
+          "text": "open, nothing to decide",
           "description": "A state chip's words:  `quiet` (grey:  a limit)."
         },
         {
@@ -7536,17 +7531,17 @@
         },
         {
           "key": "markedPhaseWords",
-          "text": "to do:  under way, scheduled, or marked in this pass",
+          "text": "under way, scheduled or marked",
           "description": "The Phases section's ONE blue badge:  its phases under way or being worked on (`progress`), scheduled (`scheduled`, epic `epic-engine` I260), and the ones marked in this pass (I170)."
         },
         {
           "key": "phaseAttention",
-          "text": "need you:  a choice open",
+          "text": "blocked on a choice",
           "description": "A Phases chip's words:  `attention` (red:  a choice in it is open, blocking its build)."
         },
         {
           "key": "phaseWaiting",
-          "text": "your turn:  a plan to read and accept",
+          "text": "with a plan to accept",
           "description": "A Phases chip's words:  `waiting` (orange:  its build plan waits for Owen's Accept;  epic `epic-engine` P63)."
         },
         {
@@ -7556,17 +7551,17 @@
         },
         {
           "key": "phaseProgress",
-          "text": "under way, or being worked on",
+          "text": "under way",
           "description": "A Phases chip's words:  `progress` (blue:  active, or Claude at work on it)."
         },
         {
           "key": "phasePaused",
-          "text": "paused, on hold till you accept it",
+          "text": "on hold till you accept",
           "description": "A Phases chip's words:  `paused` (grey, a pause glyph:  held by you, epic `epic-engine` I221;  not built till you accept its plan again)."
         },
         {
           "key": "phaseScheduled",
-          "text": "scheduled, not running yet",
+          "text": "scheduled",
           "description": "A Phases chip's words:  `scheduled` (dotted blue:  still to do, nothing waiting on Owen)."
         },
         {
@@ -7768,7 +7763,7 @@
         },
         {
           "key": "unmergedTip",
-          "text": "Done on branch {branch}, not merged into main yet",
+          "text": "Done on {branch}, not merged yet",
           "description": "That pill's tooltip."
         },
         {
@@ -7973,7 +7968,7 @@
         },
         {
           "key": "keptDropTip",
-          "text": "Drop this:  it's no longer sent",
+          "text": "Drop it:  no longer sent",
           "description": "A kept text's ×'s tooltip."
         },
         {
@@ -8445,7 +8440,7 @@
         },
         {
           "key": "unmergedTip",
-          "text": "On branch {branch}, not merged into main yet",
+          "text": "On {branch}, not merged yet",
           "description": "That pill's tooltip."
         }
       ]

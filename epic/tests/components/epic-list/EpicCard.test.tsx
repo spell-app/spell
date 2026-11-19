@@ -87,7 +87,7 @@ describe("<epic-card>", () => {
     const host = await render(`phases="active" updated="${TODAY}"`)
     const star = () => host.shadowRoot!.querySelector(".star")!
     expect(star().hasAttribute("disabled")).toBe(true)
-    expect(star().getAttribute("title")).toBe("Starring needs the epic server (epic hub ensure)")
+    expect(star().getAttribute("title")).toBe("Needs the page server")
     served()
     // read again as the page is served:  a fresh card
     const card = await render(`phases="active" updated="${TODAY}"`)
@@ -107,7 +107,7 @@ describe("<epic-card>", () => {
     expect(url).toBe("/api/epics/favorite")
     expect(JSON.parse(init!.body as string)).toEqual({ name: "seo", favorite: true })
     await vi.waitFor(() => expect(button.getAttribute("icon")).toBe("star"))
-    expect(button.getAttribute("title")).toBe("A favorite:  listed first.  Click to unstar")
+    expect(button.getAttribute("title")).toBe("Unstar")
   })
 
   test("a star the page server refuses goes back as it was, and says why", async () => {

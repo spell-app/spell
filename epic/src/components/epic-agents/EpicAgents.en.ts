@@ -70,7 +70,7 @@ export const epicAgentsVocabulary = {
     },
     {
       key: "agentSendTip",
-      text: "Send your note to {name}:  it changes what the agent does next",
+      text: "Send your note to {name}",
       description: "The Send button's tooltip."
     },
 

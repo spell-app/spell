@@ -74,7 +74,7 @@ export const epicCommentPaneVocabulary = {
   states: [{ name: "placed", description: "Put on the screen (`near`):  it shows from then on." }],
   texts: [
     { key: "label", text: "Comment on {headline}", description: "The pane, a dialog, for a screen reader." },
-    { key: "dragTip", text: "(Drag to move)", description: "After its header's tooltip." },
+    { key: "dragTip", text: "Drag to move", description: "After its header's tooltip." },
     { key: "closeTitle", text: "Close", description: "×'s tooltip." },
     { key: "closeLabel", text: "Close the comment box", description: "×, for a screen reader." },
     { key: "deleteTitle", text: "Delete this comment", description: "The trash's tooltip." },

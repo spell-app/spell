@@ -78,7 +78,7 @@ export const epicCommitVocabulary = {
   texts: [
     { key: "heading", text: "Commits:", description: "Over the first commit of a run." },
     { key: "open", text: "Open {sha} on GitHub", description: "The sha link's tooltip." },
-    { key: "unfoldTip", text: "Show all of it", description: "A long sentence's tooltip, folded to two lines." },
+    { key: "unfoldTip", text: "Show it all", description: "A long sentence's tooltip, folded to two lines." },
     { key: "foldTip", text: "Fold to two lines", description: "A long sentence's tooltip, unfolded." },
     { key: "refTip", text: "Go to {ref}:  {title}", description: "A chip's tooltip:  where it lands, and its title." },
     { key: "refGone", text: "{ref} isn't on this page any more", description: "A chip whose phase or item is gone." }
