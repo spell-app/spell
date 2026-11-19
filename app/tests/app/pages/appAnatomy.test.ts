@@ -110,6 +110,37 @@ describe.skipIf(!SERVING)("Anatomy, over Solitaire", { timeout: 180_000 }, () =>
       throw new Error(`spotOnCard():  every spot on ${cardId} is under its pictures`)
     }, id)
 
+  /**
+   * A spot well inside what shows of `selector`'s element on screen, over its floors:  the hit with most hits round it.
+   * - Not at an edge, where a pointer slipping a pixel lands on something else.
+   */
+  const spotIn = (selector: string) =>
+    page.evaluate((within): { x: number; y: number } => {
+      const element = document.querySelector(within)!
+      const box = element.getBoundingClientRect()
+      const holds = (found: Element | null) => {
+        for (let node = found; node; node = node.parentElement ?? ((node.getRootNode() as ShadowRoot).host || null))
+          if (node === element) return true
+        return false
+      }
+      const hits: { x: number; y: number }[] = []
+      for (let y = box.top + 2; y < box.bottom; y += 3) {
+        for (let x = box.left + 2; x < box.right; x += 3) {
+          let found = document.elementFromPoint(x, y)
+          for (let inside = found?.shadowRoot?.elementFromPoint(x, y); inside && inside !== found;) {
+            found = inside
+            inside = found.shadowRoot?.elementFromPoint(x, y)
+          }
+          if (holds(found)) hits.push({ x, y })
+        }
+      }
+      const around = (hit: { x: number; y: number }) =>
+        hits.filter((other) => Math.abs(other.x - hit.x) <= 9 && Math.abs(other.y - hit.y) <= 9).length
+      const best = hits.sort((one, other) => around(other) - around(one))[0]
+      if (!best) throw new Error(`spotIn():  nothing of ${within} shows`)
+      return best
+    }, selector)
+
   test("each view is a floor over the view holding it, tagged with its type;  a click selects;  off puts it back", async () => {
     const before = await stylesNow()
     // the palette kept open, so its strip shows
@@ -262,6 +293,43 @@ describe.skipIf(!SERVING)("Anatomy, over Solitaire", { timeout: 180_000 }, () =>
     expect(await stylesNow()).toEqual(before)
     // and the palette's strip back, without its first arrival again (I263)
     expect(await page.locator(".PaletteStrip").getAttribute("class")).toBe("PaletteStrip")
+    expect(warnings).toEqual([])
+  })
+
+  test("in Play, a click on the stock deals a card, and a drag off the cards turns it", async () => {
+    const turn = () => page.evaluate(() => (window as unknown as TestWindow).AppAnatomy.view)
+    await page.locator(".AnatomyButton [part~=item]").first().click()
+    await page.waitForTimeout(2500)
+    await page.locator(".AnatomyClicks ui-item[value=play] [part~=item]").click()
+    await page.waitForTimeout(300)
+    // Play:  a click on the stock deals a card, though the pointer slips a pixel or two before it lets go (I265)
+    const stockCards = () =>
+      page.evaluate(() => document.querySelectorAll("solitaire-stock-pile > solitaire-card").length)
+    for (let deal = 0; deal < 3; deal++) {
+      const stock = await spotIn("solitaire-stock-pile")
+      const before = await stockCards()
+      await page.mouse.move(stock.x, stock.y)
+      await page.mouse.down()
+      await page.mouse.move(stock.x + 2, stock.y + 1)
+      await page.mouse.up()
+      await page.waitForTimeout(800)
+      expect(await stockCards()).toBe(before - 1)
+    }
+
+    // and a drag where the game takes no press still turns it, in Play (I264)
+    const playTurn = await turn()
+    const below = await page.evaluate(() => {
+      const box = document.querySelector(".AppPaneBody")!.getBoundingClientRect()
+      return { x: box.x + box.width / 2, y: box.bottom - 40 }
+    })
+    await page.mouse.move(below.x, below.y)
+    await page.mouse.down()
+    for (let step = 1; step <= 10; step++) await page.mouse.move(below.x + step * 6, below.y)
+    await page.mouse.up()
+    expect((await turn()).spin).toBeCloseTo(playTurn.spin + 60 * 0.4, 0)
+
+    await page.locator(".AnatomyButton [part~=item]").first().click()
+    await page.waitForTimeout(800)
     expect(warnings).toEqual([])
   })
 })

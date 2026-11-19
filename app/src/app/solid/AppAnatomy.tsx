@@ -27,7 +27,8 @@ import "./AppAnatomy.css"
  *   the tree's row, the properties and the code follow (`Inspector.clicked()`).
  * - A double-click (or F, what's selected) shows one floor and what's inside it alone;  Esc goes back to the whole
  *   app, then folds it flat (both keys in `EDITOR_HOTKEYS`).
- * - The app's own clicks and drags wait while it shows:  ⌥ held passes them on, so the game can still be played.
+ * - The app's own clicks and drags wait while it shows (Inspect):  ⌥ held, or Play, passes them on, so the game can
+ *   still be played;  in Play a drag where the app takes none still turns it.
  * - The state is the page's, one Anatomy at a time:  STATIC and instance-free on purpose, as `Inspector` is.
  ****************/
 export class AppAnatomy {
@@ -589,7 +590,11 @@ function watchRedraws(program: HTMLElement, isOwn: (record: MutationRecord) => b
  * - a drag turns the stack;  the wheel zooms
  * - a hover rings the floor under it, drawn on the floor itself;  a click selects it, as a click on the app does
  * - a double-click shows that floor alone
- * - Play (`AppAnatomy.clicks`):  every press goes on to the app, so the game can be played;  ⌥ held flips it
+ * - Play (`AppAnatomy.clicks`):  a press on what the app takes goes on to it, so the game can be played;  ⌥ held flips it
+ *   - what it takes:  a thing it drags or clicks, or a control (`appTakes()`);  a drag anywhere else still turns the
+ *     stack (I264), and a click there still reaches the app
+ *   - a click goes to what was pressed, though the pointer slipped onto another floor before it let go (I265):
+ *     the browser would send it to what holds both, a pile, and the card's own click would never run
  */
 function usePointer(props: {
   body: HTMLElement
@@ -599,10 +604,17 @@ function usePointer(props: {
 }): void {
   const { body, pane, floorAt, setHovered } = props
   onSettled(() => {
-    let press: { x: number; y: number; turn: { tilt: number; spin: number }; isTurning: boolean } | undefined
+    // a press Anatomy took:  to turn the stack, or to pick a floor (`picks`) if it doesn't move
+    let press:
+      | { x: number; y: number; turn: { tilt: number; spin: number }; isTurning: boolean; picks: boolean }
+      | undefined
     // the last click:  its floor and when, so a second on it soon after is a double-click
     // (the first may move the floors, the Inspector opening;  and the browser sends no dblclick once its press is taken)
     let lastClick: { floor: Element | undefined; at: number } | undefined
+    // the last press that went on to the app:  what it was on, and where
+    let pressed: { target: EventTarget; x: number; y: number } | undefined
+    // a drag just turned the stack:  the click its let-go makes is no click, in Play too
+    let turned = false
     const isOver = (event: Event) => {
       const path = event.composedPath()
       return path.includes(body) || (path.includes(pane) && !path.some(isBar))
@@ -614,11 +626,20 @@ function usePointer(props: {
       event.preventDefault()
     }
     const down = (event: PointerEvent) => {
-      if (!isOver(event) || passesOn(event) || event.button !== 0) return
+      pressed = undefined
+      turned = false
+      if (!isOver(event) || event.button !== 0) return
+      const picks = !passesOn(event)
+      if (!picks && appTakes(event, body)) {
+        pressed = { target: event.composedPath()[0]!, x: event.clientX, y: event.clientY }
+        return
+      }
       swallow(event)
-      press = { x: event.clientX, y: event.clientY, turn: turn(), isTurning: false }
+      press = { x: event.clientX, y: event.clientY, turn: turn(), isTurning: false, picks }
     }
     const moved = (event: PointerEvent) => {
+      // let go outside the window, where its pointer up never reached the page
+      if (press && !(event.buttons & 1)) press = undefined
       if (press) {
         const [dx, dy] = [event.clientX - press.x, event.clientY - press.y]
         press.isTurning ||= Math.hypot(dx, dy) >= DRAG_START_PX
@@ -636,9 +657,11 @@ function usePointer(props: {
     const up = (event: PointerEvent) => {
       if (!press) return
       swallow(event)
-      const wasTurning = press.isTurning
+      const { isTurning, picks } = press
       press = undefined
-      if (wasTurning) return
+      turned = isTurning
+      // Play's press on what the app doesn't take:  its click goes on to the app
+      if (isTurning || !picks) return
       const isDouble = !!lastClick && event.timeStamp - lastClick.at < DOUBLE_CLICK_MS
       const floor = isDouble ? lastClick!.floor : floorAt(event)
       lastClick = isDouble ? undefined : { floor, at: event.timeStamp }
@@ -649,7 +672,22 @@ function usePointer(props: {
     }
     // the app's own click, double-click and presses never reach it:  the pointer's up is the click here
     const clicked = (event: MouseEvent) => {
-      if (isOver(event) && !passesOn(event)) swallow(event)
+      if (turned && event.type === "click") {
+        turned = false
+        return swallow(event)
+      }
+      if (!isOver(event)) return
+      if (!passesOn(event)) return swallow(event)
+      if (event.type === "click" && event.isTrusted) clickWhatWasPressed(event)
+    }
+    // the click of a press that went on to the app:  to what was pressed, if the browser sends it elsewhere (I265)
+    const clickWhatWasPressed = (event: MouseEvent) => {
+      const was = pressed
+      pressed = undefined
+      if (!was || event.composedPath().includes(was.target) || !(was.target as Node).isConnected) return
+      if (Math.hypot(event.clientX - was.x, event.clientY - was.y) >= DRAG_START_PX) return
+      swallow(event)
+      was.target.dispatchEvent(new MouseEvent("click", clickLike(event)))
     }
     const zoomed = (event: WheelEvent) => {
       event.preventDefault()
@@ -658,8 +696,9 @@ function usePointer(props: {
     const left = () => setHovered(undefined)
     // the browser's own drag (of a picture, of selected text) and text selection:  never while it's turning or picking,
     // or the browser cancels the press and the drag stops turning it (I262)
+    // (only the browser's own:  the app's drags send their own `dragstart`, which its elements need)
     const native = (event: Event) => {
-      if (press || (isOver(event) && !passesOn(event))) swallow(event)
+      if (event.isTrusted && (press || (isOver(event) && !passesOn(event)))) swallow(event)
     }
     const listeners: [string, EventListener][] = [
       ["pointerdown", down as EventListener],
@@ -683,6 +722,53 @@ function usePointer(props: {
       Inspector.ring(undefined)
     }
   })
+}
+
+/**
+ * Does the app take a press at `event` itself, in Play:  is it on a thing it drags or clicks, or on a control?
+ * - Looked for from the pointer out to `body`, where the app draws.
+ * - A drawn thing says so by its states (`SpellElement`'s `:state(draggable)`, `:state(clickable)`).
+ */
+function appTakes(event: Event, body: HTMLElement): boolean {
+  for (const target of event.composedPath()) {
+    if (target === body) return false
+    if (!(target instanceof Element)) continue
+    if (target.matches(CONTROLS) || hasState(target, "draggable") || hasState(target, "clickable")) return true
+  }
+  return false
+}
+
+/** What takes a press of its own on a page:  links, buttons, fields. */
+const CONTROLS =
+  "a[href], button, input, select, textarea, label, [contenteditable=''], [contenteditable=true], [role=button]"
+
+/** Is `element` showing custom state `name` (DOM API `:state(name)`)?  `false` where the browser can't say. */
+function hasState(element: Element, name: string): boolean {
+  try {
+    return element.matches(`:state(${name})`)
+  } catch {
+    return false
+  }
+}
+
+/** A click's settings, copied from `event`:  to send it again elsewhere. */
+function clickLike(event: MouseEvent): MouseEventInit {
+  const { clientX, clientY, screenX, screenY, button, buttons, detail, altKey, ctrlKey, metaKey, shiftKey } = event
+  const keys = { altKey, ctrlKey, metaKey, shiftKey }
+  return {
+    bubbles: true,
+    cancelable: true,
+    composed: true,
+    view: window,
+    clientX,
+    clientY,
+    screenX,
+    screenY,
+    button,
+    buttons,
+    detail,
+    ...keys
+  }
 }
 
 /** Is `target` Anatomy's own bar, whose clicks are its controls'? */

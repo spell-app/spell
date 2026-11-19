@@ -469,7 +469,7 @@ export const APP_TEXTS = {
   // what a click does while it shows:  plays the app, or picks a layer (T117)
   anatomyClicks: "What a click does",
   anatomyPlay: "Play",
-  anatomyPlayTip: "Clicks and drags go to your app, so you can play it in 3D.\nHold Option to pick a layer instead.",
+  anatomyPlayTip: "Clicks and drags go to your app, so you can play it in 3D.\nDrag anywhere else to turn it.\nHold Option to pick a layer instead.",
   anatomyInspect: "Inspect",
   anatomyInspectTip: "A click picks a layer, and a drag turns it.\nHold Option to play your app instead.",
   anatomyFront: "Front",
