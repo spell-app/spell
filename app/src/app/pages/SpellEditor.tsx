@@ -18,6 +18,7 @@ import {
   InspectHelp,
   AddPartButton,
   AnatomyButton,
+  AppAnatomy,
   AppAnatomyView,
   ViewAloneButton,
   ViewAloneStage,
@@ -189,8 +190,8 @@ export function SpellEditor(props: { mode: Mode }) {
   return (
     <SpellPage id="SpellEditor" fillWindow dark rows>
       <EditorToolbar mode={mode()} />
-      {/* never before the top bar:  on a cold start it waits for the bar's menus to be drawn (I255) */}
-      <Show when={isBarDrawn() && !isRunning() && Palette.isPinned}>
+      {/* never before the top bar:  on a cold start it waits for the bar's menus to be drawn (I255);  hidden while Anatomy shows (I263) */}
+      <Show when={isBarDrawn() && !isRunning() && Palette.isPinned && !AppAnatomy.isShowing}>
         <PaletteStrip />
       </Show>
       <PartMenu />

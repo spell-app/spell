@@ -29,6 +29,7 @@ type TestWindow = Window & {
     hide(): void
     spacing: number
     isShowing: boolean
+    toggleFullWindow(): void
     focus?: Element
     view: { tilt: number; spin: number; zoom: number }
   }
@@ -111,7 +112,14 @@ describe.skipIf(!SERVING)("Anatomy, over Solitaire", { timeout: 180_000 }, () =>
 
   test("each view is a floor over the view holding it, tagged with its type;  a click selects;  off puts it back", async () => {
     const before = await stylesNow()
+    // the palette kept open, so its strip shows
+    if (!(await page.locator(".PaletteStrip").count()))
+      await page.evaluate(() => (document.querySelector(".PalettePin") as HTMLElement).click())
+    await page.waitForSelector(".PaletteStrip")
     await page.locator(".AnatomyButton [part~=item]").first().click()
+    // the palette's strip hidden while Anatomy shows (I263)
+    await page.waitForTimeout(300)
+    expect(await page.locator(".PaletteStrip").count()).toBe(0)
     const turn = () => page.evaluate(() => (window as unknown as TestWindow).AppAnatomy.view)
 
     // face on at first, then turned to its resting angle once it's waited half a second and turned
@@ -232,10 +240,24 @@ describe.skipIf(!SERVING)("Anatomy, over Solitaire", { timeout: 180_000 }, () =>
     await page.locator(".AnatomyClicks ui-item[value=inspect] [part~=item]").click()
     await page.waitForTimeout(300)
 
+    // Full Window:  the turned app on the dark dim, no surface of the pane's own behind it (I263)
+    await page.evaluate(() => (window as unknown as TestWindow).AppAnatomy.toggleFullWindow())
+    await page.waitForTimeout(300)
+    const behind = await page.evaluate(() =>
+      [".AppPane.AnatomyFullWindow", ".AnatomyFullWindow > .AppPaneBody", ".AnatomyFullWindow .AppPaneProgram"].map(
+        (selector) => getComputedStyle(document.querySelector(selector)!).backgroundColor
+      )
+    )
+    expect(behind).toEqual(["rgba(0, 0, 0, 0.88)", "rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"])
+    await page.evaluate(() => (window as unknown as TestWindow).AppAnatomy.toggleFullWindow())
+    await page.waitForTimeout(300)
+
     // off:  every element as it was
     await page.locator(".AnatomyButton [part~=item]").first().click()
     await page.waitForTimeout(800)
     expect(await stylesNow()).toEqual(before)
+    // and the palette's strip back, without its first arrival again (I263)
+    expect(await page.locator(".PaletteStrip").getAttribute("class")).toBe("PaletteStrip")
     expect(warnings).toEqual([])
   })
 })
