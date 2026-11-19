@@ -28,7 +28,7 @@ Everything it does INSIDE a piece of work, test first, debugging, proof before d
 | the finish | `finishing-a-development-branch`:  merge here, push a pull request, or keep the branch | `/epic done`:  the merge or the pull request, the changelog, the worktree removed with its servers stopped |
 | what stays | the branch's commits, and its plan files | the epic page, as the record, and the epic's guide |
 
-The model in one line:  **the epic owns the plan, the worktree and the finish;  superpowers' craft skills work inside a phase.**
+The model in one line:  **the epic owns the plan, the worktree and the finish;  superpowers' test-first, debugging and verification skills work inside a phase.**
 
 ## Where they fit together
 
@@ -113,7 +113,7 @@ Checked:  yarn test, 1128 passed / 65 files (was 1130:  two tests merged);  yarn
 Before a phase closes, a `plan-check` agent holds the phase's diff up against the build plan you accepted.
 It returns two lists:  what the plan said that wasn't built, and what was built that the plan didn't say.
 - It changes nothing.  A small miss is built at once;  a bigger one is filed as an issue on the page.
-- A miss that drops or changes what you asked for is filed red, so you see it.
+- A miss that drops or changes what you asked for is filed as a red issue, which needs you.
 - Its instructions:  [plan-check-agent.md](plan-check/plan-check-agent.md), borrowed from superpowers' spec review.
 - In Codex:  `epic plugin install --codex` installs it as a custom agent.
 

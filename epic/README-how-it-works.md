@@ -78,7 +78,7 @@ _The header and toolbar of a busy epic page, mid-build:  phase 77, three agents 
 | The robot (`3 🤖`) | the background agents running for this epic;  click it for the list, and send one a note |
 | The gear | Auto Send's wait, focus mode, the page's look |
 | The section buttons | one per section;  a badge counts what needs you there |
-| The coloured counts | every item on the page by colour:  red needs you, orange is your turn to read, yellow is open, grey is done with;  click one to hide those |
+| The coloured counts | each colour counts a kind of item.  Red needs you.  Orange is yours to read.  Yellow is open.  Grey is done with.  Click a count to hide those items |
 
 ### "0. While you were out":  read this first
 
@@ -153,7 +153,6 @@ _An epic's life:  you agree the Overview, then the phases;  after that it builds
 
 _Before anything is built:  the stage pill says OVERVIEW, and Accept Overview waits on the Overview's title row._
 
-Each Accept counts down 5 minutes, a green ring round its thumbs up:  press it again to call it off.
 **Nothing is built before Accept Phases,** unless you say "go" in the chat.
 
 ## When it's done, the guide is what stays
