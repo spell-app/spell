@@ -7,7 +7,7 @@ import { ServerLink } from "./ServerLink"
  * An epic page's RUNNING AGENTS, as the page sees them (epic `skillz` P3):  the epic's list.
  * - read from and written to the page server's agents routes (`src/tools/agentRoutes.ts`)
  * - one client per page (`forPage()`), a `PageStore` the panel follows (`subscribe()`)
- * - `<epic-page>` draws its "Agents running" panel from it (`<epic-agents>`)
+ * - `<epic-page>` draws them from it in its header (`<epic-agents>`):  `2 🤖`, a button, and its popover of rows
  *
  * - LISTED only when the page is an epic page served with a token, and the list answers (`listed`):
  *   never from `file://`, nor from a server without the route

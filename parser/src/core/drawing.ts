@@ -558,6 +558,17 @@ function drawingOfType(name: string): Cell {
   return cell
 }
 
+/**
+ * Follow the edits to `thing`'s type, as a view's own drawing does:  a drawing that calls this, in a memo, is drawn
+ * again by an edit to that type (`core.drawAgain()`).
+ * - For a drawing made outside `drawThing()`:  a site's layout panes, each drawn by the layout's method itself
+ *   (`SiteBase.drawSlot()`;  epic `editor` P35).
+ */
+export function followsEditsOf(thing: object): void {
+  everyDrawing.read()
+  drawingOfType(thing.constructor.name).read()
+}
+
 /** One part of a drawing, `drawPart()`'s. */
 type DrawnPart = {
   /** the thing whose drawing holds it */

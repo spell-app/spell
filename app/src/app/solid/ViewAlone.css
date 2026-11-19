@@ -1,0 +1,57 @@
+/*
+ * A view shown on its own in the app pane (`ViewAlone.tsx`, epic `editor` P35):
+ * the view in the pane's middle, its property editor beside it;  the app hidden behind them.
+ */
+
+/* the app keeps running, out of sight, while a view shows alone */
+.AppPane > .AppPaneBody:has(> .ViewAloneStage) > .AppPaneProgram {
+  display: none;
+}
+
+.ViewAloneStage {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  padding: 32px 16px;
+}
+
+/* the view, drawn for one thing:  large enough to see and drop on */
+.ViewAloneView {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  min-height: 120px;
+}
+
+/* its property editor, as the Inspector draws it:  a card of its own, its groups' bars out to its edges */
+.ViewAloneEditor {
+  width: 400px;
+  max-width: 100%;
+  padding: 0 12px 12px;
+  overflow: hidden;
+  border-radius: var(--ui-radius-m, 8px);
+  background: var(--ui-background, Canvas);
+  box-shadow: var(--ui-shadow-s, 0 1px 3px rgb(0 0 0 / 0.12));
+
+  & ui-property-editor {
+    --ui-panel-padding: 12px;
+    --ui-panel-band-space: 12px;
+  }
+  & .InspectorOwnEditor {
+    display: contents;
+  }
+}
+.ViewAloneEditor:not(:has(ui-property-editor)) {
+  display: none;
+}
+
+.ViewAloneWaiting {
+  margin: 0;
+  color: var(--ui-text-muted, var(--ui-muted-color));
+}

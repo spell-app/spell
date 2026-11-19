@@ -1,6 +1,6 @@
 import { existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, rmSync, rmdirSync, writeFileSync } from "node:fs"
-import { tmpdir } from "node:os"
-import { basename, dirname, join, relative } from "node:path"
+import { homedir, tmpdir } from "node:os"
+import { basename, delimiter, dirname, join, relative } from "node:path"
 
 import chalk from "chalk"
 
@@ -116,18 +116,27 @@ export class RepoInit {
   /** the repo's main checkout:  where the config goes, and the folders are relative to */
   readonly main: string
   /** what installs the epic plugin (`pluginStep()`):  made when the step runs */
-  readonly plugin: () => Pick<PluginInstall, "isInstalled" | "install">
+  readonly plugin: () => PluginInstaller
   /** the machine's epic server (`serverStep()`) */
   readonly hub: () => Pick<Hub, "registerHere" | "addressOf">
+  /** the environment `pluginStep()` reads `PATH` and `SHELL` from */
+  readonly env: NodeJS.ProcessEnv
 
   /**
    * - `main`:  default the main checkout of the repo the current folder is in
    * - `plugin`, `hub`:  default the machine's own (`PluginInstall`, `Hub`);  a test hands in stand-ins
+   * - `env`:  default `process.env`;  a test hands in its own `PATH` and `SHELL`
    */
-  constructor({ main, plugin = () => new PluginInstall(), hub = () => new Hub() }: RepoInitProps = {}) {
+  constructor({
+    main,
+    plugin = () => new PluginInstall(),
+    hub = () => new Hub(),
+    env = process.env
+  }: RepoInitProps = {}) {
     this.main = main ?? RepoInit.mainHere()
     this.plugin = plugin
     this.hub = hub
+    this.env = env
   }
 
   /** Run `epic init <args>`;  resolves to the exit code.  Throws `EpicCommandError` outside a git repo. */
@@ -1012,11 +1021,60 @@ export class RepoInit {
       if (dryRun) return { action: installed ? "already" : "would install" }
       const changes = installer.install().changes
       const notes = changes.filter((change) => EDITOR_NOTE.test(change))
-      if (installed && changes.length === notes.length) return { action: "already", ...(notes.length && { notes }) }
-      return { action: installed ? "updated" : "installed", changes: changes.length, ...(notes.length && { notes }) }
+      const machine = this.machineFacts(installer)
+      if (installed && changes.length === notes.length)
+        return { action: "already", ...(notes.length && { notes }), ...machine }
+      return {
+        action: installed ? "updated" : "installed",
+        changes: changes.length,
+        ...(notes.length && { notes }),
+        ...machine
+      }
     } catch (error) {
       return { action: "failed", error: (error as Error).message }
     }
+  }
+
+  /**
+   * What the plugin step says about this machine, beyond the install itself (epic `epic-engine` I345, I346):
+   * - `noClaudeCode`:  no Claude Code here:  no `claude` on the `PATH`, and no saved sessions in Claude Code's folder
+   *   (`projects/`, which the install never writes:  it does write the folder's settings and lists)
+   * - `notOnPath`:  the folder the install linked `epic` into isn't on the `PATH`, and the line that puts it there
+   * - a stand-in installer without `home` / `bin` (the tests'):  neither is checked
+   * - NEVER throws
+   */
+  machineFacts({ home, bin }: PluginInstaller): Pick<PluginReport, "noClaudeCode" | "notOnPath"> {
+    const folders = (this.env.PATH ?? "").split(delimiter).filter(Boolean)
+    const facts: Pick<PluginReport, "noClaudeCode" | "notOnPath"> = {}
+    if (home !== undefined) {
+      const names = process.platform === "win32" ? ["claude.exe", "claude.cmd", "claude"] : ["claude"]
+      const onPath = folders.some((folder) => names.some((name) => existsSync(join(folder, name))))
+      if (!onPath && !existsSync(join(home, "projects"))) facts.noClaudeCode = true
+    }
+    if (bin !== undefined && !folders.some((folder) => folder.replace(/[\\/]+$/, "") === bin.replace(/[\\/]+$/, "")))
+      facts.notOnPath = RepoInit.pathFix(bin, this.env.SHELL)
+    return facts
+  }
+
+  /**
+   * How to put `bin` on the `PATH`:  the folder as people read it (`~/.local/bin`), and the line for the shell's
+   * profile, bash's or zsh's (from `$SHELL`);  any other shell, no profile, the folder alone.
+   */
+  static pathFix(bin: string, shell = ""): NonNullable<PluginReport["notOnPath"]> {
+    const home = homedir()
+    const inHome = bin === home || bin.startsWith(home + "/")
+    const folder = inHome ? "~" + bin.slice(home.length) : bin
+    const line = `export PATH="${inHome ? "$HOME" + bin.slice(home.length) : bin}:$PATH"`
+    const name = basename(shell)
+    const profile =
+      name === "zsh"
+        ? "~/.zshrc"
+        : name === "bash"
+          ? process.platform === "darwin"
+            ? "~/.bash_profile"
+            : "~/.bashrc"
+          : undefined
+    return { folder, ...(profile && { profile, line }) }
   }
 
   /**
@@ -1592,6 +1650,11 @@ export class RepoInit {
   /** The epic plugin's section:  installed, there already, or why not;  the VS Code extension's lines under it. */
   static pluginLines(plugin: PluginReport): string[] {
     const said = (() => {
+      if (
+        plugin.noClaudeCode &&
+        (plugin.action === "installed" || plugin.action === "updated" || plugin.action === "already")
+      )
+        return NO_CLAUDE_CODE
       switch (plugin.action) {
         case "already":
           return ["> epic is installed for Claude Code already"]
@@ -1611,7 +1674,21 @@ export class RepoInit {
           ]
       }
     })()
-    return ["", chalk.bold("Checking the epic plugin:"), ...said, ...(plugin.notes ?? []).map((note) => `> ${note}`)]
+    return [
+      "",
+      chalk.bold("Checking the epic plugin:"),
+      ...said,
+      ...(plugin.notes ?? []).map((note) => `> ${note}`),
+      ...(plugin.notOnPath ? RepoInit.pathLines(plugin.notOnPath) : [])
+    ]
+  }
+
+  /** What to do when `epic` isn't on the `PATH` (epic `epic-engine` I345):  the line for the shell's profile. */
+  static pathLines({ folder, profile, line }: NonNullable<PluginReport["notOnPath"]>): string[] {
+    const fix = profile
+      ? [`  To fix it, paste this line at the end of ${profile}, then open a new terminal window:`, `    ${line}`]
+      : [`  To fix it, add ${folder} to your PATH in your shell's settings, then open a new terminal window`]
+    return ["> Your terminal doesn't know where to find epic yet.", ...fix]
   }
 
   /**
@@ -1670,7 +1747,7 @@ export class RepoInit {
       rows.push([done, `${file}  (superpowers' stand-aside words)`])
     }
     if (person.action === "kept" || person.action === "would keep")
-      rows.push([would("kept", "would keep"), `${EpicHome.personFile()}  (your name)`])
+      rows.push([would("saved", "would save"), `${EpicHome.personFile()}  (your name)`])
     if ((color?.action === "kept" || color?.action === "would keep") && color.file) {
       // no "at your next turn" while no push can go through (a refused first push)
       const later = remote.refusal ? ", shared once the epic repo takes a push" : ", pushed at your next turn"
@@ -2174,7 +2251,22 @@ export type PluginReport = {
   notes?: string[]
   /** why it failed */
   error?: string
+  /** no Claude Code on this machine (`RepoInit.machineFacts()`):  the plugin waits for it */
+  noClaudeCode?: true
+  /** the folder `epic` was linked into isn't on the `PATH`:  how to put it there */
+  notOnPath?: {
+    /** the folder, as people read it:  `~/.local/bin` */
+    folder: string
+    /** the shell's profile the line goes in:  `~/.zshrc`, `~/.bashrc`;  none for another shell */
+    profile?: string
+    /** the line to add there:  `export PATH="$HOME/.local/bin:$PATH"` */
+    line?: string
+  }
 }
+
+/** What `RepoInit` asks of the plugin's installer:  `home` and `bin` for its checks, which a stand-in may leave out. */
+export type PluginInstaller = Pick<PluginInstall, "isInstalled" | "install"> &
+  Partial<Pick<PluginInstall, "home" | "bin">>
 
 /**
  * What `epic init` did about the person's colour (`RepoInit.colorStep()`):
@@ -2222,9 +2314,11 @@ export type RepoInitProps = {
   /** the repo's main checkout;  default the one the current folder is in */
   main?: string
   /** what installs the epic plugin;  default the machine's `PluginInstall` */
-  plugin?: () => Pick<PluginInstall, "isInstalled" | "install">
+  plugin?: () => PluginInstaller
   /** the machine's epic server;  default its `Hub` */
   hub?: () => Pick<Hub, "registerHere" | "addressOf">
+  /** where `PATH` and `SHELL` are read from;  default `process.env` */
+  env?: NodeJS.ProcessEnv
 }
 
 /** What `RepoInit.colorStep()` takes. */
@@ -2472,6 +2566,14 @@ const TERMINAL_COLORS: Readonly<Record<string, string>> = {
 
 /** A CSS hex colour (`#2f9e6e`):  the one kind of CSS colour a terminal can draw. */
 const CSS_HEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i
+
+/** The plugin's section when Claude Code isn't on the machine (epic `epic-engine` I346):  it's ready for it. */
+const NO_CLAUDE_CODE = [
+  "> epic works inside Claude Code, and Claude Code isn't on this computer yet.",
+  "  1. Install Claude Code:  https://claude.com/claude-code",
+  "  2. Start a new conversation in it, and type /epic",
+  "  3. No /epic there?  Type this in your terminal, then start a new conversation:  epic plugin install"
+]
 
 /** `PluginInstall`'s lines about the editor's extension (its step 7):  "VS Code:  extension ...", "Cursor:  ...". */
 const EDITOR_NOTE = /^(?:VS Code|Cursor):  /

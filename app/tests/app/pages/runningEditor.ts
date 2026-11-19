@@ -49,15 +49,20 @@ if (EDITOR && !(await isAnswering(EDITOR))) {
   throw new Error(`runningEditor:  the editor noted at ${EDITOR} doesn't answer;  start it:  spell server start all`)
 }
 
+/** Every built-in project's drafts, as a git path:  ignored, so `git status` lists them only with `--ignored`. */
+const DRAFTS = "':(glob)spaces/**/__draft/**'"
+
 /** Is there an editor to test?  (`describe.skipIf(!SERVING)`) */
 export const SERVING = !!EDITOR
 
 /**
  * What git says of the built-in projects right now, the changes themselves too.
  * - Compare it before and after a test:  someone's uncommitted work there is not the test's doing.
+ * - Their drafts too, which git ignores (`__draft/`):  an edit kept by AutoSave as a page closed left one in
+ *   Solitaire, and every later test that opened it read the draft
  */
 export function builtInProjectsNow(): string {
-  return execSync("git status --short spaces && git diff spaces", {
+  return execSync("git status --short spaces && git diff spaces && git status --short --ignored -- " + DRAFTS, {
     cwd: path.join(KIT, "app"),
     maxBuffer: 64 * 1024 * 1024
   }).toString()

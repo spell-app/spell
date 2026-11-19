@@ -57,9 +57,10 @@ describe("ReviewInbox marks", () => {
     expect(() => inbox.requestNow("j1", "prepare")).toThrow(InboxError)
     expect(inbox.cancelNow("tests", M2)).toEqual({ action: "prepare", at: M2, told: true })
     const page =
-      '<epic-page epic="x"><epic-section id="tests" kind="tests"><epic-item id="m1"></epic-item></epic-section></epic-page>'
-    // no phases yet:  the kickoff box takes a mark too (P75)
-    expect([...ReviewInbox.itemIds(page)].sort()).toEqual(["kickoff", "m1", "tests"])
+      '<epic-page epic="x" stage="overview"><epic-section id="tests" kind="tests"><epic-item id="m1"></epic-item></epic-section></epic-page>'
+    // no phases yet, in the Overview stage:  the kickoff box takes a mark too (P75), and the stage button
+
+    expect([...ReviewInbox.itemIds(page)].sort()).toEqual(["kickoff", "m1", "stage", "tests"])
     const shot = "tests/j3-20261029-1432.png"
     expect(ReviewInbox.toMark({ action: "revisit", note: "x", shot })).toEqual({
       action: "revisit",
@@ -84,9 +85,15 @@ describe("ReviewInbox marks", () => {
     expect(() => inbox.setMark("j1", { action: "kickoff", note })).toThrow(InboxError)
     expect(() => ReviewInbox.toMark({ action: "kickoff", note: "  " })).toThrow(InboxError)
     const overview = '<epic-page epic="x"><epic-overview id="overview"></epic-overview>'
-    expect([...ReviewInbox.itemIds(`${overview}</epic-page>`)]).toEqual(["kickoff"])
-    const planned = `${overview}<epic-section id="phases" kind="phases"><epic-phase id="p-one"></epic-phase></epic-section></epic-page>`
-    expect([...ReviewInbox.itemIds(planned)]).toEqual(["p-one"])
+    const fresh = overview.replace('epic="x"', 'epic="x" stage="overview"')
+    expect([...ReviewInbox.itemIds(`${fresh}</epic-page>`)].sort()).toEqual(["kickoff", "stage"])
+    const planned = `${fresh}<epic-section id="phases" kind="phases"><epic-phase id="p-one"></epic-phase></epic-section></epic-page>`
+    expect([...ReviewInbox.itemIds(planned)].sort()).toEqual(["p-one", "stage"])
+    // only an epic page in its Overview stage (I349):  never a saga page, nor a page with no stage
+    expect([...ReviewInbox.itemIds(`${overview}</epic-page>`)]).toEqual([])
+    const saga =
+      '<epic-page kind="saga" saga="epics" stage="overview"><epic-overview id="overview"></epic-overview></epic-page>'
+    expect(ReviewInbox.itemIds(saga).has("kickoff")).toBe(false)
   })
 
   test("set, replace, remove;  ids lower-cased", () => {

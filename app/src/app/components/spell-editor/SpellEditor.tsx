@@ -566,7 +566,18 @@ export const SPELL_EDITOR_HOTKEYS = {
   goToDefinition: { shortcut: "F12", codeEditorCommand: "goToDefinition" },
   peekDefinition: { shortcut: "alt+F12", codeEditorCommand: "peekDefinition" },
   peekReferences: { shortcut: "shift+alt+F12", codeEditorCommand: "peekReferences" },
-  rename: { shortcut: "F2", codeEditorCommand: "rename" }
+  rename: { shortcut: "F2", codeEditorCommand: "rename" },
+  formatDocument: { shortcut: "shift+alt+F", codeEditorCommand: "format" },
+  expandSelection: {
+    shortcut: "shift+alt+ArrowRight",
+    mac: "ctrl+shift+mod+ArrowRight",
+    codeEditorCommand: "expandSelection"
+  },
+  shrinkSelection: {
+    shortcut: "shift+alt+ArrowLeft",
+    mac: "ctrl+shift+mod+ArrowLeft",
+    codeEditorCommand: "shrinkSelection"
+  }
 } as const satisfies Readonly<Record<string, Hotkey>>
 
 /** Spell UI's `RootLoader`, the page's, once `loadSpellUINames()` has registered its names with spell. */

@@ -1,0 +1,174 @@
+/*
+ * Look of Anatomy (`AppAnatomy.tsx`):  its bar across the top of the app pane, the floors' tags over the turned app,
+ * and the outlines.
+ * - A tag is coloured as its kind's band is in the bubbly code:  a view the program draws, a thing's purple;
+ *   a Spell UI part, structure's blue (`bubbly.css`), so the drawing and the code read alike.
+ * - The tags and outlines never take the pointer:  Anatomy reads it on the window, before the app.
+ */
+
+.AppPane:has(> .AnatomyBar) {
+  position: relative;
+  --AppAnatomy-view: var(--bubbly-thing, #7c5cd6);
+  --AppAnatomy-part: var(--bubbly-structure, #2f80d1);
+
+  & > .AppPaneBody {
+    overflow: hidden;
+    perspective-origin: 50% 40%;
+    cursor: grab;
+  }
+  & > .AppPaneBody:active {
+    cursor: grabbing;
+  }
+
+  /* the bar:  the top bar's glass, over the app's top edge */
+  .AnatomyBar {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    z-index: 3;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    padding: 4px 12px;
+    border-radius: 12px;
+    background: var(--spell-menu-bar-fill, color-mix(in srgb, var(--ui-surface, white) 88%, transparent));
+    backdrop-filter: var(--spell-menu-bar-filter, blur(12px));
+    box-shadow: 0 1px 4px rgb(0 0 0 / 0.16);
+    font-size: 13px;
+  }
+  .AnatomyCrumbs,
+  .AnatomyControls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .AnatomyControls {
+    flex-wrap: wrap;
+    gap: 8px 12px;
+  }
+  .AnatomyCrumb {
+    cursor: pointer;
+    color: var(--ui-link);
+
+    &.current {
+      color: inherit;
+      font-weight: 600;
+      cursor: default;
+    }
+  }
+  .AnatomyCrumbGap {
+    color: var(--ui-text-muted);
+  }
+  .AnatomySlider {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+
+    & ui-slider {
+      width: 96px;
+    }
+  }
+  .AnatomyHelp {
+    color: var(--ui-text-muted);
+    cursor: help;
+  }
+
+  /* the tags, over the turned app:  in the pane's own pixels, never turned, so they always read */
+  .AnatomyTags {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .AnatomyTags > .AnatomyTag {
+    position: absolute;
+    translate: 0 -100%;
+  }
+  .AnatomyTag {
+    --AppAnatomy-hue: var(--AppAnatomy-view);
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+    height: 16px;
+    padding: 0 6px;
+    border-radius: 4px 4px 4px 0;
+    background: var(--AppAnatomy-hue);
+    color: white;
+    font-size: 11px;
+    line-height: 16px;
+    white-space: nowrap;
+
+    &.part {
+      --AppAnatomy-hue: var(--AppAnatomy-part);
+    }
+    &.hovered,
+    &.selected {
+      box-shadow:
+        0 0 0 2px white,
+        0 0 0 4px var(--AppAnatomy-hue);
+    }
+    .AnatomyFlat {
+      opacity: 0.8;
+      font-style: italic;
+    }
+  }
+
+  /* the outlines:  each floor an empty frame in its kind's colour, the app hidden under them */
+  .AnatomyOutlines {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+    perspective-origin: 50% 40%;
+  }
+  .AnatomyOutlinesStage {
+    position: absolute;
+    transform-style: preserve-3d;
+  }
+  .AnatomyFrame {
+    --AppAnatomy-hue: var(--AppAnatomy-view);
+    position: absolute;
+    box-sizing: border-box;
+    border: 1px solid var(--AppAnatomy-hue);
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--AppAnatomy-hue) 6%, transparent);
+    pointer-events: auto;
+
+    &.part {
+      --AppAnatomy-hue: var(--AppAnatomy-part);
+    }
+    &.hovered {
+      background: color-mix(in srgb, var(--AppAnatomy-hue) 20%, transparent);
+      border-width: 2px;
+    }
+    & > .AnatomyTag {
+      position: absolute;
+      top: 0;
+      left: -1px;
+      translate: 0 -100%;
+    }
+  }
+}
+
+/* Full Window (Q43 C):  the pane over the whole editor, the rest dimmed */
+.AppPane.AnatomyFullWindow {
+  position: fixed;
+  inset: 16px;
+  z-index: 900;
+  border-radius: 12px;
+  background: var(--ui-surface, white);
+  /* the dim round it, then its own shadow */
+  box-shadow:
+    0 0 0 100vmax rgb(0 0 0 / 0.32),
+    0 8px 40px rgb(0 0 0 / 0.32);
+}
+
+/* the Inspector's flat outline round what's selected:  the floor draws its own while Anatomy shows */
+body.AnatomyShowing > .InspectorSelected {
+  display: none;
+}

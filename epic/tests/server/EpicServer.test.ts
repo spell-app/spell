@@ -235,6 +235,21 @@ describe("EpicServer", () => {
     expect(other.siteTabs).toEqual(SITE_TABS)
   })
 
+  // epic-engine T96:  a repo `epic init` set up names no tabs, and its pages showed none
+  test("a default repo whose settings name no tabs:  the epic folder's own, Epic Pages, Sagas and Guides", () => {
+    const bare = join(top, "bare-home")
+    const list = new RepoList({ home: bare })
+    list.add(repo(top, "three"))
+    const plain = new EpicServer({ home: bare, engine: ENGINE, token: "t0ken" })
+    const file = join(top, "three", "docs", "epics", "seo", "seo.plan.html")
+    const tabs = plain.pageConfig({ path: "/epics/seo/seo.plan.html", file } as never).siteTabs as SiteTab[]
+    expect(tabs.map((tab) => [tab.name, tab.path])).toEqual([
+      ["Epic Pages", "epics/index.html"],
+      ["Sagas", "sagas/index.html"],
+      ["Guides", "guides/index.html"]
+    ])
+  })
+
   test("highlight.js from the engine, not cdnjs:  pages load offline", async () => {
     const html = (await ask(port, "GET", "/epics/seo/seo.plan.html")).text
     expect(html).toContain('<script src="/_epic/assets/highlight.min.js"></script>')

@@ -152,6 +152,7 @@ const SAMPLES: { [T in EpicTag]: EpicData<T> } = {
     favorite: true
   },
   "epic-sort": {},
+  "epic-pills": {},
   "epic-state-filter": { counts: "attention:1 open:4", shown: "open" },
   "epic-hidden-note": { count: 3 },
   "epic-focus": { for: "focus-sample" },

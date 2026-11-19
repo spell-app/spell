@@ -139,9 +139,10 @@ export class EpicServer {
 
   /**
    * the site header's tabs every page is told (`SPELL_SERVER.siteTabs`):  the default repo's settings' `"siteTabs"`,
-   * as its own page server tells them;  none:  `undefined`, and pages show no tabs (epic `epic-engine` P46)
+   * as its own page server tells them;  none:  the epic folder's own areas, `DEFAULT_SITE_TABS`
+   * - a repo `epic init` set up names none, and its pages showed no tabs at all (epic `epic-engine` T96)
    */
-  private readonly siteTabs?: readonly SiteTab[]
+  private readonly siteTabs: readonly SiteTab[]
 
   /**
    * CDN URLs pages load, each with its local copy's URL, as the kit's page server swaps them (`withLocalCopies()`):
@@ -175,7 +176,7 @@ export class EpicServer {
     this.setMounts = [...this.epicUiMounts(), ...this.componentSetMounts()]
     this.routeMounts = this.repoRouteMounts()
     const settings = this.defaultRepo && pageServerSettings(this.defaultRepo.checkout)
-    this.siteTabs = settings?.siteTabs
+    this.siteTabs = settings?.siteTabs ?? DEFAULT_SITE_TABS
     this.localCopies = { ...repoSettings(this.engine)?.localCopies, ...settings?.localCopies }
     this.pidFile = new SRV.PidFile(this.home, PID_FILE)
     this.info = {
@@ -484,7 +485,7 @@ export class EpicServer {
    * - `root`:  that repo's main checkout
    * - `engine`:  spell-epic's checkout
    * - `edit`, `etag`:  the page editor, for the default repo's pages
-   * - `siteTabs`:  the site header's tabs, the default repo's settings' (`siteTabs`), every page's alike:
+   * - `siteTabs`:  the site header's tabs, the default repo's settings' (`siteTabs`, else `DEFAULT_SITE_TABS`), every page's alike:
    *   the header keeps no repo's prefix (`/r/<repo>/`) on its links
    * - and what route modules add (`addPageConfig()`)
    */
@@ -509,7 +510,7 @@ export class EpicServer {
       engine: this.engine,
       ...(repo?.isDefault && { edit: PageEditor.PREFIX }),
       etag: SRV.StaticHandler.etagOf(statSync(served.file)),
-      ...(this.siteTabs && { siteTabs: this.siteTabs }),
+      siteTabs: this.siteTabs,
       ...Object.assign({}, ...this.pageConfigs.map((add) => add(served)))
     }
   }
@@ -669,6 +670,16 @@ const DOCS_INDEX = "src/tools/index.js"
 
 /** A repo's home page, in its epic folder:  where its address (`/`, `/r/<repo>/`) leads. */
 const HOME_PAGE = "pages/index.html"
+
+/**
+ * The site header's tabs when the default repo's settings name none (`"siteTabs"`):  the areas every epic folder has,
+ * as Spell's epic repo names them (its `page-server.json5`).
+ */
+const DEFAULT_SITE_TABS: readonly SiteTab[] = [
+  { name: "Epic Pages", path: "epics/index.html", areas: ["epics"] },
+  { name: "Sagas", path: "sagas/index.html", areas: ["sagas"] },
+  { name: "Guides", path: "guides/index.html", areas: ["guides"] }
+]
 
 /** Folders page edits may write when a repo's `package.json` names none:  the epic repo areas. */
 const WRITABLE = ["epics", "guides", "pages", "brand", "sagas"]

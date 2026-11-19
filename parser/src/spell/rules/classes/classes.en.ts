@@ -1974,6 +1974,16 @@ classes.addRule(DefinePropertyHas, {
   syntax: `{type:subject_its} {property:quoted_member} is {specifier:outline_specifier} ${RULES}`
 })
 
+// ... and its choices said as a sentence says them (epic `data` J289):  `- its "status" as one of pending or done`,
+// the same as `- its "status" is one of ...`;  and `- it has a "status" as one of ...`
+classes.addRule(DefinePropertyHas, {
+  syntax: `{type:subject_its} {property:quoted_member} {specifier:type_specifier_enum} ${RULES}`
+})
+
+classes.addRule(DefinePropertyHas, {
+  syntax: `{type:subject_it} has (a|an|a property)? {property:quoted_member} {specifier:type_specifier}? ${RULES}`
+})
+
 // ... and with the subject left out (P8):  `- has a deck`, `- "suit" is one of clubs, diamonds, hearts or spades`
 classes.addRule(DefinePropertyHas, {
   syntax: `{type:subject_implied} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? ${RULES}`

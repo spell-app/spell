@@ -13,6 +13,7 @@ import type { ReviewShows } from "spell/epic/components/epic-review/EpicReview.t
 import { NEW_KIND_LOOKS } from "spell/epic/components/epic-new-item/EpicNewItem.types"
 import { FOCUS_ASKED, type FocusAsk } from "spell/epic/components/epic-focus/EpicFocus.types"
 import { DrawnState, NEEDS_PERSON, STATUS_SLOT } from "spell/epic/components/epic-item/EpicItem.types"
+import { ScrollAnchor } from "spell/epic/components/epic-item/ScrollAnchor"
 import {
   SHOW_ALL,
   STATE_PICK,
@@ -1173,7 +1174,8 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   @E.on(STATE_PICK, { target: "renderRoot" })
   protected onStatePick(event: CustomEvent<StatePickDetail>) {
     event.stopPropagation()
-    this.pickState(event.detail.state, event.detail.how)
+    // the item at the window's top stays put as its list filters (I350)
+    void ScrollAnchor.keep(() => this.pickState(event.detail.state, event.detail.how))
   }
 
   /** A state chip, clicked:  what shows next, by `StateFilter.nextShown()`'s rule;  ⌥-clicked, only its state. */
@@ -1188,7 +1190,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   @E.on(SHOW_ALL, { target: "renderRoot" })
   protected onShowAll(event: Event) {
     event.stopPropagation()
-    this.showStates(undefined)
+    void ScrollAnchor.keep(() => this.showStates(undefined))
   }
 
   /** The states "0. While you were out" hides, for `EpicFold.css`:  its lines may not be loaded yet, so a rule hides them. */

@@ -108,7 +108,20 @@ export const APP_TEXTS = {
   partNothingSelected: "Nothing's selected.",
   partBusy: "One moment:  the app is catching up with your last change.",
   partAcrossFiles: "These are written in different files, so they can't be moved together yet.",
-  partNoDrawing: "This program has no drawing to add to:\nadd a <draw> to it first.",
+  partNoDrawing:
+    "There's nowhere to put this part yet:  your app doesn't show anything on screen.\n" +
+    'In the code on the left, add a "to draw" section under your app, saying what it shows.\n' +
+    "Then pick the part again.",
+  // a part added, drawn, but with nothing to see (epic `editor` P35)
+  partAddedEmpty:
+    "What you added is in your app, but it's empty, so you can't see it yet.\n" +
+    "It's selected in the Views list on the right.\n" +
+    "Give it a label, or drag another part into it.",
+  // a view shown on its own, the top bar's switch (epic `editor` P35)
+  viewAlone: "{view} alone",
+  viewAloneTip: "Show just one {view}, with its property editor, to work on it by itself",
+  viewAloneStopTip: "Show the whole app again",
+  viewAloneWaiting: "Waiting for the app to run…",
   partInsideItself: "Something can't go inside itself.",
   lineNumbers: "Line Numbers",
   softWrap: "Soft Wrap",
@@ -253,6 +266,39 @@ export const APP_TEXTS = {
   menuRun: "Run",
   menuHelp: "Help",
   menuAll: "Menus",
+  // Help › Keyboard Shortcuts, its dialog (`<ShortcutsDialog>`, epic `editor` P36):  `{words}`, what was typed
+  shortcuts: "Keyboard Shortcuts",
+  shortcutsSearch: "Search the shortcuts",
+  shortcutsNoMatch: "No shortcut matches “{words}”.\nTry another word.",
+  // its headings:  where the keys work (`HOTKEY_GROUPS`)
+  shortcutsFiles: "Files",
+  shortcutsEditing: "Editing",
+  shortcutsSelection: "What's selected in the app",
+  shortcutsCode: "The code",
+  shortcutsRunning: "Running the app",
+  shortcutsDebugger: "The step debugger",
+  // a row's note, where its key works only some of the time
+  shortcutsWhilePaused: "Only while the app is paused on a line",
+  shortcutsNotInCode: "Not while you're typing in the code",
+  shortcutsNotTyping: "Not while you're typing in the code or a text box",
+  shortcutsWhileInspecting: "Only while you're picking a part of the app",
+  // its rows the menus don't name
+  shortcutFind: "Find and Replace",
+  shortcutShowShortcuts: "Show Keyboard Shortcuts",
+  shortcutChangeThis: "Ask for a Change to What's Selected",
+  shortcutFormat: "Format Document",
+  shortcutExpandSelection: "Expand Selection",
+  shortcutShrinkSelection: "Shrink Selection",
+  shortcutToggleComment: "Comment or Uncomment Lines",
+  shortcutFold: "Hide a Block's Lines (Fold)",
+  shortcutUnfold: "Show a Block's Lines (Unfold)",
+  shortcutMoveLineUp: "Move Line Up",
+  shortcutMoveLineDown: "Move Line Down",
+  shortcutAddCursor: "Type on Several Lines at Once",
+  shortcutContinue: "Continue",
+  shortcutStepOver: "Step Over",
+  shortcutStepInto: "Step Into",
+  shortcutStepOut: "Step Out",
   appMenus: "Menus",
   projectMenu: "{project}:  its menu",
   spellMenu: "{app}:  its menu",
@@ -414,6 +460,30 @@ export const APP_TEXTS = {
   inspectHelp:
     "Click a part of your app to see what it is.\nAlt-click picks a part inside it.\nHold Shift or ⌘ to pick several, or drag across an empty spot.\nPress Esc when you're done.",
   inspectHelpClose: "Close",
+  // Anatomy (epic `editor` P34):  the running app pulled apart into layers, in 3D;  its switch, then its bar
+  anatomy: "Anatomy",
+  anatomyTip: "Spread the app out in 3D, each part of it on a layer of its own",
+  anatomyStopTip: "Put the app back together",
+  anatomyWholeApp: "Whole app",
+  anatomyFront: "Front",
+  anatomyFrontTip: "Look at it straight on again",
+  anatomySpacing: "Spacing",
+  anatomyDepth: "Depth",
+  anatomyParts: "Parts",
+  anatomyPartsTip: "Split each part into more layers, so its buttons, menus and boxes each float on their own",
+  anatomyOutlines: "Outlines",
+  anatomyOutlinesTip: "Draw each layer as an empty frame instead of showing what's on it",
+  anatomyFullWindow: "Full window",
+  anatomyFullWindowTip: "Show the layers over the whole editor",
+  anatomyClose: "Close",
+  // a layer's tag, when its look cuts off what's inside it, so nothing inside comes apart from it
+  anatomyFlat: "in one piece",
+  anatomyFlatTip: "This part hides anything past its edges, so what's inside it can't come apart from it",
+  anatomyFocusShortcut: "Show the selected layer alone",
+  anatomyBackShortcut: "Go back out of Anatomy",
+  shortcutsWhileAnatomy: "Only while Anatomy shows",
+  anatomyHelp:
+    "Anatomy pulls your app apart into layers, one for each view it draws.\nDrag to turn it. Scroll to zoom. Click a layer to pick it, or double-click to show it alone.\nHold Option to play the app as usual. Press Esc to go back.",
   notSaved: "Not saved",
 
   ////////////////

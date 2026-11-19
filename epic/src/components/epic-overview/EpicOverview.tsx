@@ -3,6 +3,7 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/ui/core"
 
+import { PageStages } from "spell/epic/phases"
 import { SUMMARY_ID } from "spell/epic/review"
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
 import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
@@ -85,12 +86,17 @@ export class EpicOverview extends EpicFold<typeof epicOverviewVocabulary> {
   /**
    * The kickoff box shows (epic `epic-engine` P75):  the page reviewed, no Kickoff prompt yet (an `<epic-prompt>`, or
    * an older doc's `slot="prompt"`), and no phases:  the epic is still to be planned.
+   * - only on an EPIC page in its Overview stage (`PageStages.takesKickoff()`):  never a saga page (`kind="saga"`),
+   *   nor a page made before stages, nor an Overview outside an `<epic-page>` (epic `epic-engine` I349)
    * - read again on every layout change:  `epic inbox apply` writing the prompt takes it away
    */
   get showsKickoff(): boolean {
     void this.layout
     if (!this.reviewState.reviewing() || this.domElement.querySelector(PROMPT_TAG)) return false
-    return !this.domElement.closest(PAGE_TAG)?.querySelector(PHASE_TAG)
+    const page = this.page
+    if (!page || !PageStages.takesKickoff({ kind: page.getAttribute("kind"), stage: page.getAttribute("stage") }))
+      return false
+    return !page.querySelector(PHASE_TAG)
   }
 
   /**
@@ -199,8 +205,7 @@ const ESTIMATE = "estimate"
 /** A Kickoff prompt in it:  today's `<epic-prompt>`, or an older doc's `slot="prompt"`. */
 const PROMPT_TAG = ':scope > epic-prompt, :scope > [slot="prompt"]'
 
-/** Its page, and a phase in it:  a page with phases is planned, so no kickoff box. */
-const PAGE_TAG = "epic-page"
+/** A phase in its page:  a page with phases is planned, so no kickoff box. */
 const PHASE_TAG = "epic-phase"
 
 /** Its summary:  what its review controls are about (keyed `summary`). */

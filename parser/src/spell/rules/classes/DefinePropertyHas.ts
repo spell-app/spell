@@ -13,6 +13,7 @@ import {
   OutlineSpecifierList,
   PropertyBodyMust,
   QuotedPropertyFormula,
+  TypeSpecifierEnum,
   TypeSpecifierTextKind
 } from "spell/parser/spell/rules/classes"
 import { QuotedTypeExpression } from "spell/parser/spell/rules/methods"
@@ -389,6 +390,10 @@ export class DefinePropertyHas extends SpellStatement<
     const has = { ...params, property: propertyWords, aProperty: language.withArticle("indefinite", propertyWords) }
     const said = specifier?.inputText.trim()
     if (!said) return language.parserMessage("long-form-has", has)
+    // `its "status" as one of ...` (epic `data` J289):  its specifier says its `as` / `como` already
+    if (specifier!.is(TypeSpecifierEnum) && !specifier.is(OutlineSpecifierEnum)) {
+      return language.parserMessage("long-form-has-as", { ...has, specifier: said.replace(/^\S+\s+/, "") })
+    }
     // an enumeration with no `either` / `one of`:  no words before its list
     if (specifier!.is(OutlineSpecifierEnum) && (specifier.groups.enumeration as P.Match).start === specifier.start) {
       return language.parserMessage("long-form-has-one-of", { ...has, values: said })

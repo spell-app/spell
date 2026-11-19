@@ -341,6 +341,30 @@ describe("<epic-update> bare, its item checked (I285)", () => {
     await vi.waitFor(() => expect(label()?.textContent).toBe("FIXED"))
   })
 
+  // epic `epic-engine` I348;  Owen, 2026-11-18:  "after you process it, there is still a flicker when you show the
+  // `FIXED` button for a second"
+  test("the server applies his ✓ and clears it from the inbox:  the label stays gone until the page's own update", async () => {
+    const routes = new FakeRoutes()
+    const client = await adoptClient(routes)
+    const root = await ElementFixture.render(
+      `<epic-item id="i91" status="open" fixed><span slot="title">Fixed <epic-update phase="52" became="fixed"></epic-update></span></epic-item>`
+    )
+    const update = root.querySelector("epic-update")!
+    await ElementFixture.settle()
+    const label = () => update.shadowRoot!.querySelector('[part~="label"]')
+    client.press("i91", "approve")
+    await vi.waitFor(() => expect(label()).toBeNull())
+    // the page server applied it:  off the inbox, the page's update not in yet
+    delete routes.inbox.marks.i91
+    await vi.waitFor(async () => {
+      await client.refresh()
+      expect(client.markOf("i91")).toBeUndefined()
+    })
+    await ElementFixture.settle()
+    expect(label()).toBeNull()
+    expect(update.matches(":state(checked)")).toBe(true)
+  })
+
   // epic `epic-engine` I302:  the copy on a line of "0. While you were out" follows the line's item
   test("a copy on a While you were out line:  its line's item's ✓ takes it off too", async () => {
     const routes = new FakeRoutes()

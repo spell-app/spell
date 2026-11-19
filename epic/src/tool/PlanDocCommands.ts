@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
+import { createRequire } from "node:module"
 import { dirname, join, relative, resolve } from "node:path"
 
 import { SRV } from "spell/server"
@@ -928,7 +929,7 @@ export class PlanDocCommands {
    *   - an issue or judgement call Owen asked for with Do this is never closed by it:  `fixed`, below
    * - `fixed`:  an issue or judgement call fixed, for Owen to review (epic `epic-engine` I232):  ORANGE, still open
    *   - its latest underway card turns green, the summary under it;  with no underway card, a Done card of the summary
-   *   - his Approve closes it;  his Do this sends it back, red (`PlanDoc.fixedForReview()`)
+   *   - his Accept the fix closes it;  his Revisit with a note sends it back, red (`PlanDoc.fixedForReview()`)
    *   - the spinner off
    * - `noted`:  a STEP done that doesn't finish the item:  Claude RECORDED what Owen chose (Owen, 2026-10-10), or
    *   answered, added details, condensed it, called a request off
@@ -1216,7 +1217,8 @@ export class PlanDocCommands {
    *   - a missing one is a problem
    *   - a note:  a host with content of its own besides its part (moved into the part on the next edit),
    *     or a part file nothing loads
-   * - the browser check:  `src/tools/check-spell.js`, a child `node` (its stderr passed on)
+   * - the browser check:  `src/tools/check-spell.js`, a child `node` (its stderr passed on);
+   *   skipped, saying so, where Playwright isn't installed (`hasPlaywright()`)
    */
   private lint(file: string, { noBrowser, links: strictLinks }: Flags): number | void {
     const { files } = this
@@ -1257,7 +1259,12 @@ export class PlanDocCommands {
         `${relative(files.content, file)}:  structure ok${parts.split ? ` (${parts.hosts.length} parts)` : ""}`
       )
     let browserOk = true
-    if (!noBrowser) {
+    if (!noBrowser && !PlanDocCommands.hasPlaywright())
+      this.print(
+        "check-spell:  skipped -- the browser check needs Playwright, which the basic install leaves out " +
+          "(npm install playwright, then npx playwright install chromium)"
+      )
+    else if (!noBrowser) {
       const run = spawnSync("node", [join(files.docsTools, "check-spell.js"), relative(files.docsPackage, file)], {
         cwd: files.docsPackage,
         encoding: "utf8",
@@ -1268,6 +1275,20 @@ export class PlanDocCommands {
       this.print(browserOk ? "check-spell:  ok" : "check-spell:  FAILED (problems above)")
     }
     if (problems.length || !browserOk) return 1
+  }
+
+  /**
+   * Can the browser check load Playwright?  An npm install of `spell` leaves it out (an optional peer):
+   * `epic lint` crashed there on its first browser check (epic `epic-engine` I342).
+   * - NEVER throws
+   */
+  static hasPlaywright(): boolean {
+    try {
+      createRequire(import.meta.url).resolve("playwright")
+      return true
+    } catch {
+      return false
+    }
   }
 
   /**

@@ -1927,6 +1927,16 @@ classesEs.addRule(DefinePropertyHas, {
   syntax: `{type:subject_its} {property:quoted_member} ${IS_OR_ARE} {specifier:outline_specifier} ${RULES}`
 })
 
+// ... and its choices said as a sentence says them (epic `data` J289):  `- su "estado" como uno de pendiente o hecho`,
+// the same as `- su "estado" es uno de ...`;  and English's `- it has a "status" as ...`, its twin:  Spanish has no word for `it`
+classesEs.addRule(DefinePropertyHas, {
+  syntax: `{type:subject_its} {property:quoted_member} {specifier:type_specifier_enum} ${RULES}`
+})
+
+classesEs.addRule(DefinePropertyHas, {
+  syntax: `{type:subject_it} tiene (un|una|unos|unas|una propiedad)? {property:quoted_member} {specifier:type_specifier}? ${RULES}`
+})
+
 // ... and with the subject left out (P8):  `- tiene un mazo`, `- "palo" es uno de tréboles, diamantes ...`
 classesEs.addRule(DefinePropertyHas, {
   syntax: `{type:subject_implied} tiene (un|una|unos|unas|una propiedad)? {property:member_words} {specifier:type_specifier}? ${RULES}`

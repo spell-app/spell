@@ -7040,7 +7040,7 @@
           "ruleNames": ["define_property_has"],
           "internal": false,
           "file": "src/spell/rules/classes/DefinePropertyHas.ts",
-          "line": 72,
+          "line": 73,
           "purpose": "Declares an instance property on `type`, optionally constrained/initialized by a `type_specifier`.",
           "syntaxes": [
             {
@@ -7084,6 +7084,12 @@
             },
             {
               "syntax": "{type:subject_its} {property:quoted_member} is {specifier:outline_specifier} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? with a? ((minimum:minimum)|(maximum:maximum)) length of? {lengthCount:number})? (,? which must {rule:must_rule})? {nested_statements}?"
+            },
+            {
+              "syntax": "{type:subject_its} {property:quoted_member} {specifier:type_specifier_enum} (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? with a? ((minimum:minimum)|(maximum:maximum)) length of? {lengthCount:number})? (,? which must {rule:must_rule})? {nested_statements}?"
+            },
+            {
+              "syntax": "{type:subject_it} has (a|an|a property)? {property:quoted_member} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? with a? ((minimum:minimum)|(maximum:maximum)) length of? {lengthCount:number})? (,? which must {rule:must_rule})? {nested_statements}?"
             },
             {
               "syntax": "{type:subject_implied} has (a|an|a property)? {property:member_words} {specifier:type_specifier}? (or [nothing:{word:text} or])? (,? stored as {storedAs:text})? (,? with a? ((minimum:minimum)|(maximum:maximum)) length of? {lengthCount:number})? (,? which must {rule:must_rule})? {nested_statements}?"

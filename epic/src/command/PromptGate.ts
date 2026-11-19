@@ -4,7 +4,8 @@ import { join } from "node:path"
 
 // By relative path, `.ts` and all:  the `UserPromptSubmit` hook loads this file with plain `node` (types stripped)
 import { LOOKS, worktreeOf } from "spell/epic/window.mjs"
-import { TITLE_ICONS } from "./command.types.ts"
+import { STAGED_DEMO, TITLE_ICONS } from "./command.types.ts"
+import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
 import { EpicRepo, type EpicHome } from "spell/epic/config/EpicRepo.ts"
 import { ClaudeHome } from "spell/epic/config/ClaudeHome.ts"
 import { Transcript } from "spell/epic/config/Transcript.ts"
@@ -49,6 +50,8 @@ import { Transcript } from "spell/epic/config/Transcript.ts"
  *    - Any text after the name is saved first, as below, so the new window's `/epic <name>` picks it up.
  *    - Why:  the session's `EnterWorktree` made `spell-app.worktrees/epic-engine`, and its edits went through that
  *      worktree's `spell-epic` link into spell-epic's MAIN checkout.  The worktree hook refuses that worktree too.
+ * 0. The STAGED DEMO (epic `epic-engine` P77):  `/epic demo ...` while its step files are in the epic folder
+ *    (`isStagedDemo()`):  let through with a note (`demoNote()`), the session titled `🚧 demo`;  no block, no worktree.
  * 0. `/epic review <name>`, first:  blocked in a session titled for a DIFFERENT epic
  *    (`🚧 <other>`:  epic `airplane` P12, Q10 B;  `reviewRefusal()`).  Any other review passes untouched.
  * 1. Plan mode, on `/isolate` or `/epic <name>`:  blocks the prompt.
@@ -87,7 +90,7 @@ import { Transcript } from "spell/epic/config/Transcript.ts"
  * - Natural-language triggers ("isolate as foo") never reach here:  each skill's step 0 repeats these checks.
  *
  * Its position:  imports only node's own modules, the window script, this folder's types and the config folder's
- * plain-node classes (`EpicRepo`, `ClaudeHome`, `Transcript`), by relative path,
+ * plain-node classes (`EpicRepo`, `EpicConfig`, `ClaudeHome`, `Transcript`), by relative path,
  * so plain `node` loads it (types stripped);  NEVER an alias, an `enum` or a parameter property.
  * All `static`:  no state, one answer per prompt.
  ****************/
@@ -119,6 +122,9 @@ export class PromptGate {
     const command = PromptGate.parseCommand(input.prompt)
     if (!command) return null
     const { skill, name, text } = command
+    // the staged demo (epic `epic-engine` P77):  no worktree, no window move, the step files followed
+    if (skill === "epic" && name === STAGED_DEMO.epic && PromptGate.isStagedDemo(input.cwd))
+      return demoNote(input, text)
     // another repo's epic:  its own window, never a worktree here (epic `epic-engine` I47)
     const home = skill === "epic future" || !input.cwd ? undefined : EpicRepo.elsewhere(name, input.cwd)
     if (home) return elsewhereNote(home, command)
@@ -163,6 +169,18 @@ export class PromptGate {
     }
 
     return rename(input, `${TITLE_ICONS.active} ${name}`, skill === "epic resume" || skill === "unpark")
+  }
+
+  /**
+   * Is a staged demo ready in the repo `cwd` is in:  its step files in the epic folder (`STAGED_DEMO.folder`)?
+   * - NEVER throws:  can't tell is no
+   */
+  static isStagedDemo(cwd: string | undefined): boolean {
+    try {
+      return existsSync(join(EpicConfig.of(cwd).contentFolder, STAGED_DEMO.folder, STAGED_DEMO.firstStep))
+    } catch {
+      return false
+    }
   }
 
   /**
@@ -373,6 +391,23 @@ function elsewhereNote(home: EpicHome, { skill, name, text }: GateCommand): Gate
     hookSpecificOutput: { hookEventName: "UserPromptSubmit", additionalContext: note },
     systemMessage: `⎇ ${name} is worked in ${home.checkout ?? home.url}:  its own window, not this one (\`${launch}\`).`
   }
+}
+
+/**
+ * The hook's answer to `/epic demo [pasted text]` while a staged demo is ready (epic `epic-engine` P77):  let through,
+ * titled `🚧 demo` (not over another epic's title), with a note sending Claude to the epic skill's "Staged demo".
+ * - why:  a demo in front of a room can't wait on a worktree, an install or a window move
+ * - SIDE EFFECT:  the pasted text saved first (`savePrompt()`), so `epic demo run 01` makes it the Kickoff prompt
+ */
+function demoNote(input: GateInput, text: string): GateAnswer {
+  if (text) PromptGate.savePrompt(STAGED_DEMO.epic, text)
+  const note =
+    `STAGED DEMO:  \`/epic ${STAGED_DEMO.epic}\` runs the staged demo, NOT a new epic.  Follow the /epic skill's ` +
+    `"Staged demo" section exactly:  no EnterWorktree, no worktree, no window move, no saga question, no install, no ` +
+    `agents.  Start with \`epic demo check\`, then the first step.`
+  const own = PromptGate.epicOfTitle(input.session_title)
+  const title = own && own !== STAGED_DEMO.epic ? {} : { sessionTitle: `${TITLE_ICONS.active} ${STAGED_DEMO.epic}` }
+  return { hookSpecificOutput: { hookEventName: "UserPromptSubmit", additionalContext: note, ...title } }
 }
 
 /**

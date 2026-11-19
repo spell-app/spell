@@ -35,7 +35,7 @@ flowchart LR
   class config,github data
 ```
 
-_Once per machine, `epic init` does the plugin, the command and the server;  the extension is by hand.
+_Once per machine, `epic init` does the plugin, the extension, the command and the server.
 Once per repo:  one small file in it, two folders beside it, and the team's copy of the plans on GitHub._
 
 The plans are NOT in your repo.
@@ -130,7 +130,7 @@ A teammate joining has the team's plans cloned before the colour question, so th
 - **superpowers is on here:  put its stand-aside words in AGENTS.md, for every session?**
   Asked only when the superpowers plugin is turned on for this repo, in any of your settings.
   - It suggests yes, and with no terminal to ask in, takes yes;  `--superpowers` answers it;  `--local` never asks.
-  - What the words say:  [With superpowers](README-config.md#with-superpowers).
+  - What the words say:  [With superpowers](README-superpowers.md).
 - **Commit and push .epic/config.json5 and .gitignore on main?**  Asked last, after the files.
   - It suggests yes, and with no terminal to ask in, takes yes;  `--no-commit` leaves them for you.
   - It pushes to the branch's upstream, else `origin`.
@@ -143,8 +143,13 @@ Then, in order, each step under a bold heading, the files in a gray table, a gra
    - `/epic` in a session that hasn't reloaded stops before it makes anything, and says the same.
    - Its skills and hooks, a bare `/epic`, and `epic` on your terminal's `PATH`
      ([the kit's agents page](https://github.com/spell-app/spell/blob/main/README/agents.md#the-epic-plugin) says what each step does).
+   - `epic` goes in `~/.local/bin`:  when that folder isn't on your `PATH`, init says so,
+     with the line to paste into your shell's settings file (`~/.zshrc`, `~/.bashrc`).
+   - No Claude Code on the machine yet (no `claude` command, no saved sessions):
+     init says the plugin is ready for it, where to get Claude Code, and to run `epic plugin install`
+     if `/epic` isn't there once it's installed.
    - Installed for the machine, its hooks run in every repo, not just yours:
-     in one `epic init` never set up they do nothing, and its worktrees are Claude Code's own.
+     in a repo `epic init` never set up they do nothing, and its worktrees are Claude Code's own.
    - `--no-plugin` skips it;  `epic plugin install` does it by itself.
 2. Writes `.epic/config.json5`, every key with a comment on each, valued for THIS repo
    ([the config file](README-config.md#the-config-file)).
@@ -273,7 +278,8 @@ epic ... (...) .../epic
 </details>
 
 - `--version` names the code that answers:  its commit, its branch and the folder it's in.
-- `~/.local/bin`, where the plugin step links `epic`, may not be on your `PATH`:  put the link wherever yours looks.
+- `~/.local/bin`, where the plugin step links `epic`, may not be on your `PATH`:  `epic init` says so, with the line
+  that puts it there;  or put the link wherever yours looks.
 
 🌱 Planned:  the plugin from Claude Code's marketplace, without `npx`.
 
@@ -299,6 +305,18 @@ The session titles itself for the epic and makes its worktree, `~/www/my-app.wor
 Its epic page, `~/www/my-app.epics/epics/seo/seo.plan.html`, opens in the Review tab and fills as it plans.
 
 What happens from there:  [the epic engine's front page](README.md).
+
+### Optional:  Playwright, for `epic lint`'s browser check
+
+`epic lint <epic>` checks a page's ids and links, then draws it in a headless browser.
+That last check needs Playwright, which `epic init` doesn't install:
+
+```sh
+npm install playwright
+npx playwright install chromium
+```
+
+Without it, `epic lint` skips the browser check and says so;  the other checks still run.
 
 ## <a id="nothing-in-your-repo"></a>Nothing in your repo:  `--local`
 
@@ -449,7 +467,7 @@ epic worktree remove <name> --branches
 The skills know how to plan, build and review;  what your project counts as "done" they leave to you.
 
 They look for it in your repo's own `AGENTS.md`.
-Spell's `CLAUDE.md` loads its own with one line, `@AGENTS.md`;  yours can too.
+A `CLAUDE.md` can load it with one line, `@AGENTS.md`.
 
 For an agent without the skills (Codex reads `AGENTS.md` by itself), one more line there finds the workflow:
 "Working an epic:  run `epic guide`, and end every turn with `epic turn end`."
@@ -457,11 +475,11 @@ For an agent without the skills (Codex reads `AGENTS.md` by itself), one more li
 What they look for:
 - the checks to run before a phase is done, in three tiers when your suite is slow:
   - the tests beside a change, as it's made
-  - a quick unit run before an agent merges:  Spell's is `yarn test:unit`, so say what yours is
+  - a quick unit run before an agent merges (`yarn test:unit`, say):  name yours
   - the full run after the merge, by the last agent of the epic still running (`epic agents last <name>` says which)
 - its changelog, if it keeps one:
   `epic docs` looks for an epic's entry in the epic folder's guides, in `changelog.html`
-- its house style, and a skill that rewrites text to it, if it has one
+- its house style, and a skill that rewrites text to it, if it has one:  [Your house style](README-config.md#your-house-style)
 - NOT the pages' formatting:  that's the engine's own
 
 ## See also

@@ -66,6 +66,13 @@
       "group": "shell",
       "file": "src/app/solid/AppContainer.tsx"
     },
+    "AppAnatomyView": {
+      "title": "AppAnatomyView",
+      "summary": "Anatomy:  the running app pulled apart into layers, in 3D, one for each view it draws.",
+      "status": "done",
+      "group": "panes",
+      "file": "src/app/solid/AppAnatomy.tsx"
+    },
     "chrome": {
       "title": "Chrome",
       "summary": "The menus and toolbars around the panes:  bars, sections, springs, \"...\" menus.",

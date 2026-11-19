@@ -8,6 +8,7 @@ import { isStaticBuild } from "spell/app/app/static/staticBuild"
 import {
   Action,
   Actions,
+  AppAnatomy,
   AppMarkLabel,
   CodeSettings,
   CodeShown,
@@ -342,10 +343,12 @@ function ThemeItems(): JSX.Element {
  *   Undo and Redo (their titles the step), the selection's part actions, View's Inspector cards.
  * - File:  New Spell File, New CSS File, ─, Save, Discard Changes, AutoSave, ─, Duplicate File.
  * - Edit:  the code editor's Undo, Redo, ─, the selection's part actions, ─, Find, ─, Code Editor Settings….
- * - View:  Run, Edit, Site (a site's editor, epic `mockup` P4), ─, Code, Compiled Code, Inspector, Program Panel, ─,
+ * - View:  Run, Edit, Site (a site's editor, epic `mockup` P4), ─, Code, Compiled Code, Inspector, Anatomy (epic `editor`
+ *   P34), Program Panel, ─,
  *   Line Numbers, Soft Wrap (Code Editor Settings…' Wrap long lines;  epic `editor` T100);  each ticked while on.
  * - Run:  Compile and Run, Restart, ─, Inspect App, Stop Inspecting, ─, Clear Console.
- * - Help:  Help, which does nothing yet;  none in the static build.  A menu of one item:  still the editor's own.
+ * - Help:  Keyboard Shortcuts (epic `editor` P36), then Help, which does nothing yet;  the editor's own, not the Spell's.
+ *   - The static build shows it too, with just Keyboard Shortcuts (Q49):  its Help draws nothing there.
  * - `mode`:  the page's, ticked in View.
  * - SIDE EFFECT:  keeps the editor's Spell in step with the editor, for what greys and ticks its rows.
  ****************/
@@ -373,13 +376,19 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
     compiledCodeIsShowing: props.mode === "edit" && !!CodeOutputShown.target,
     programPanelShowing: props.mode === "edit" && ProgramPanelShown.isShowing,
     inspectorOpen: Inspector.isOpen,
+    anatomyShowing: AppAnatomy.isShowing,
     lineNumbersShowing: LineNumbers.isShowing,
     softWrapping: CodeSettings.choices.wrapLines,
     inspecting: Inspector.isInspecting,
     siteReady: EditorMode.hasSite,
     consoleEmpty: !runtimeConsole()?.lines.length
   }))
-  const help = () => <Actions.showHelp menu disabled />
+  const help = () => (
+    <>
+      <Actions.showShortcuts menu />
+      <Actions.showHelp menu disabled />
+    </>
+  )
   return (
     <Show when={spell()}>
       {(loaded) => (
@@ -398,11 +407,9 @@ export function AppBarMenus(props: { mode: Mode }): JSX.Element {
                 )
               }}
             </For>
-            <Show when={!isStaticBuild}>
-              <BarMenu id="HelpBarMenu" label={appTexts.text("menuHelp")} name={appTexts.text("menuHelp")}>
-                {help()}
-              </BarMenu>
-            </Show>
+            <BarMenu id="HelpBarMenu" label={appTexts.text("menuHelp")} name={appTexts.text("menuHelp")}>
+              {help()}
+            </BarMenu>
           </span>
           <FoldedBarMenus spell={loaded()} help={help} />
         </>
@@ -447,11 +454,9 @@ function FoldedBarMenus(props: { spell: EditorSpell; help: () => JSX.Element }):
             </ui-submenu>
           )}
         </For>
-        <Show when={!isStaticBuild}>
-          <ui-submenu label={appTexts.text("menuHelp")} icon={FOLDED_ICONS.helpMenu}>
-            {props.help()}
-          </ui-submenu>
-        </Show>
+        <ui-submenu label={appTexts.text("menuHelp")} icon={FOLDED_ICONS.helpMenu}>
+          {props.help()}
+        </ui-submenu>
       </BarMenu>
     </span>
   )
@@ -593,6 +598,7 @@ function handOverActions(spell: EditorSpell) {
     },
     showProgramPanel: () => toggleProgramPanel(app.running ? "run" : "edit"),
     showInspector: () => Inspector.showOrHide(),
+    showAnatomy: () => AppAnatomy.toggle(),
     showLineNumbers: () => LineNumbers.toggle(),
     // the same choice as Code Editor Settings…' Wrap long lines:  one preference, so both agree
     softWrap: () => CodeSettings.choose("wrapLines", !CodeSettings.choices.wrapLines),

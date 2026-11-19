@@ -58,6 +58,16 @@ export class Palette {
   }
 
   /**
+   * Is the strip showing for the first time on this page?  Says so once (epic `editor` I255):
+   * only its first showing animates, never a later one (Run and back, another page).
+   */
+  static takeStripArrival(): boolean {
+    const arrives = !hasStripShown
+    hasStripShown = true
+    return arrives
+  }
+
+  /**
    * Keep it open, or stop;  remembered.
    * - Its menus close either way (epic `editor` I175):  pinned, the bar shows in the popup's place.
    */
@@ -154,6 +164,9 @@ let loading: Promise<void> | undefined
 /** Does it open when the `+` is next drawn?  `Palette.openOnArrival()`. */
 let opensOnArrival = false
 
+/** Has `<PaletteStrip>` shown on this page yet?  `Palette.takeStripArrival()`. */
+let hasStripShown = false
+
 /** Its menus, the popup and the pinned bar's:  `Palette.closeMenus()` closes them, forgetting those gone. */
 const menus = new Set<HTMLElement & { visible?: boolean }>()
 
@@ -215,13 +228,15 @@ const [offered, setOffered] = createSignal<readonly PaletteGroup[]>([])
 type PaletteGroup = import("spell/ui/components/ComponentDefinitions").PaletteGroup
 
 /** One of the app's own views, as the palette offers it. */
-type OwnView = {
+export type OwnView = {
   /** Its name, as a person reads it, e.g. `Stock pile`. */
   name: string
   /** What adding it writes, before what it must be told:  `{draw a new card}`. */
   snippet: string
   /** Its type's compiled name, then those it inherits:  `["Card", "TwoSidedView", ...]`. */
   classNames: readonly string[]
+  /** The file it's written in, by its name in the project:  `Card.spell`. */
+  file: string
 }
 
 /** Types an app draws on its page, the built-ins every view of an app's own extends. */
@@ -254,15 +269,17 @@ function ownViewsIn(tree: ScopeNode | undefined): OwnView[] {
     return names
   }
   return app.children
-    .flatMap((file) => file.children)
-    .filter((node) => node.kind === "type")
+    .flatMap((file) => file.children.map((node) => ({ file, node })))
+    .filter(({ node }) => node.kind === "type")
     .filter(
-      (node) => bases(node).some((name) => DRAWN_TYPES.has(name)) && !bases(node).some((name) => PAGE_TYPES.has(name))
+      ({ node }) =>
+        bases(node).some((name) => DRAWN_TYPES.has(name)) && !bases(node).some((name) => PAGE_TYPES.has(name))
     )
-    .map((node) => ({
+    .map(({ file, node }) => ({
       name: upperFirst(wordsOf(node.name)),
       snippet: `{draw a new ${wordsOf(node.name)}}`,
-      classNames: [node.name, ...bases(node)]
+      classNames: [node.name, ...bases(node)],
+      file: file.name
     }))
     .sort((a, b) => a.name.localeCompare(b.name))
 }
@@ -408,8 +425,11 @@ const ADD_BUTTON_ID = "AddPartButton"
  *   - A magnifying glass at its start, a fixed width, and a ✕ inside its end while it holds text (epic `editor` T87).
  *   - Escape, clearing the field, a click elsewhere, or choosing or dragging a row closes them;  typing opens them again.
  *   - ↓ goes into the first one;  Escape there comes back to the field.
+ * - It fades and slides in the first time it shows on a page, under a top bar already drawn (epic `editor` I255);
+ *   never again, switching modes or pages:  it stays where it was.
  */
 export function PaletteStrip(): JSX.Element {
+  const isArriving = Palette.takeStripArrival()
   const [filter, setFilter] = createSignal("")
   const [isDismissed, setDismissed] = createSignal(false)
   const words = () => filter().trim().toLowerCase()
@@ -487,7 +507,7 @@ export function PaletteStrip(): JSX.Element {
   }
 
   return (
-    <div class="PaletteStrip" ref={(element: HTMLElement) => (strip = element)}>
+    <div class={["PaletteStrip", { arriving: isArriving }]} ref={(element: HTMLElement) => (strip = element)}>
       <div class="PaletteStripAdd">
         <PinIcon />
         <span class="PaletteStripLabel">{appTexts.text("paletteAddView")}</span>

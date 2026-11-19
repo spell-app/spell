@@ -219,14 +219,15 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - Served at `/api/epics/agents`, by [agentRoutes.ts](tools/agentRoutes.ts), in the docs tools.
       - `<epic-page>` draws them in its header (epic `epic-engine` P35, P53):  `<epic-agents>`, in its shadow root,
         - in the header's pill:  `2 🤖` (its name "2 agents running"), a button whose popover holds their rows
-        - beside Send, in the header's middle:  the session's line ("Responding", `epic inbox status`, the inbox's
-          `doing`), a bare spinner (`draws="spinner"`, T53), its words beside it (I210), for OTHER work only ("Building
-          P35");  answering a Send (`doing` lists items), it hides, and Send's own ring turns instead (epic
-          `epic-engine` P55, Q62 A)
-        - while a phase is building (the step label names one under way, and the session does other work, or Claude
-          is at work on that phase):  the step label's circle turns, Spell UI's loading icon (`isStepTurning()`), and
-          the line beside Send keeps its words alone (`draws="words"`;  epic `epic-engine` I316, 2026-11-16:  "Don't
-          need both of these indicators.  Just make the one in the pill a loading spinner")
+        - NO line in the header (epic `epic-engine` I340;  2026-11-18:  "This 'Building P72...' is too big -- it cuts
+          off the name of the epic.  Remove it, use the P76 pill instead, don't show the name of the phase"):
+          - while the session does OTHER work than a Send (`epic inbox status`, the inbox's `doing`:  "Building P35"),
+            or Claude is at work on the phase under way:  the step label's circle turns, Spell UI's loading icon
+            (`isStepTurning()`;  I316, 2026-11-16:  "Just make the one in the pill a loading spinner")
+          - the session's words are the label's tooltip's last line, "Claude:  Building P35" (`stepTip()`)
+          - answering a Send (`doing` lists items):  Send's own ring turns instead (epic `epic-engine` P55, Q62 A)
+          - before:  a bare spinner beside Send with its words (`draws="spinner"`, T53, I210), then its words alone
+            (`draws="words"`, I316)
       - Both clients POST and watch through the same code, a `ServerLink` each:
         the token, its one refresh on a 403, the poll and `spell-server:changed`.
     - `ServerLink`:  EVERY epic-page and docs-page read, write and poll goes through it (epic `coherence` C9)
@@ -309,7 +310,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - `docs index`:  [index.js](tools/index.js)
     - `RunningEpics`:  the running epics, still in their worktrees, on the main checkout's page server
     - [runningRoutes.ts](list/runningRoutes.ts):  its route module
-      - `GET /api/epics/running`
+      - `GET /api/epics/running`;  `?every`, every epic, running or not:  the home page's `<epic-pills>` (T99)
       - the list page's running cards, as it's served
     - `EpicState` and `EpicCards` load in plain `node` too (`docs index`):  their headers say what that forbids
   - `config/` -- `EpicConfig` (epic `epic-eject` P4):
@@ -1031,22 +1032,23 @@ The shared folders:
 - [pages.js](tools/pages.js) has a constant for each, and `findPages()` walks them.
   - `PAGES`, `GUIDES`, `EPICS`, `TEMPLATES` (the engine's, `templates/...` by `pagePath()`), `REPO_TEMPLATES`
 - [The docs' home page](../../spell.epics/pages/index.html):  a routing page (P5 of `claude-design`).
-  - One card per area, in the top bar's order, each with its count:
-    Guides · Sagas · Epics · Epic/UI · Spell/UI · App · App/UI · Brand · Templates
-    - The person's order (2026-10-11, epic `epic-workflow` J40);  the slashed names are the tabs' labels (J41).
+  - One card per area, each with its count:  Guides · Sagas · Epic Pages · Templates
+    - each card's description on two lines, broken at its first colon (`descriptionLines()`)
+    - the Epic Pages card:  its Active epics, the open epics worked on in the last week, a pill each in two columns:
+      `<epic-pills>`, which draws itself from the page server, live (epic `epic-engine` T99;  J276's generator wrote
+      plain pills into the page, as of the last `epic pages index`)
+      - each pill:  the epic's name, what waits in its toolbar badge colours (red, orange, blue), its phase under way
+        or `Done`, its agents (`🤖 2`);  the tooltip says it in words
+      - its data:  `GET /api/epics/running?every` (`RunningEpics.everyEpic()`:  every epic, running or not, with its
+        `badges` and `agents`), asked again as epic pages or their agents' lists change, and every 30 seconds
+    - the top bar's tab is "Epic Pages" too, and the bar says "Spell Epic" beside the hat (`SiteHeader`)
+    - Spell's own areas left out (2026-11-18, epic `epic-engine` J275:  "Remove anything Spell related in this page
+      permanently.  No longer relevant to Epics"):  Epic/UI, Spell/UI, App, App/UI and Brand had cards, and tabs;
+      their pages are still served at their addresses (`/components/ui/`, `/editor/`, `/brand/`)
+      - the top bar's tabs:  the epic repo's `page-server.json5` `"siteTabs"`, where those five are commented out
     - Sagas was Goals until P15 of `epic-workflow`:  its tab opens the Sagas list page,
       and lights on the saga pages and the parked goal sets (`goals/`) too.
-    - Spell/UI, Epic/UI and App/UI are COMPONENT SETS (each repo's `"pageServer"` `"componentSets"`, merged and read with
-      `componentSets()` in `spell/server/page`), in Spell UI's page shape.
-      Their cards link the sets' addresses:
-
-      ```text
-      ui/docs/          served at  /components/ui/
-      epic/src/docs/    served at  /components/epics/
-      app/app/docs/     served at  /components/app/
-      ```
-
-    - NEVER run `epic pages index` from a branch whose sets' addresses `main` doesn't serve yet:
+    - NEVER run `epic pages index` from a branch whose code `main` doesn't have yet:
       it writes the shared home, which `main`'s page server shows too.
   - `epic pages index` writes the cards, between the `areas:start` / `areas:end` markers.
     Edit only outside the markers.
@@ -1471,12 +1473,18 @@ In `tools/`:
       blue, never red;  2026-10-26:  "badges don't match up")
       - red:  urgent (`state="attention"`);  on the Phases button, the phases drawn red (a plan waiting for their
         Accept, a choice open:  `PhaseState`, epic `epic-engine` I170)
-      - orange:  Claude replied with options for them to pick (`state="replied"`)
+      - orange:  their turn to pick or review (`state="replied"`), light orange with it (`requested`, done, their turn
+        to see it:  every count by colour takes it as orange, the state chips too;  only the item's own chip keeps it;
+        epic `epic-engine` I347, 2026-11-18:  "Lump the light orange icons in with the orange")
       - blue, on the Phases button:  phases under way, or being worked on, and drawn blue:
         one changed since they looked
         is orange first, and not counted (I170)
       - a block's count changing with the inbox alone fires `epic-count-changed`;  the runtime counts them again
-      - both kinds, both badges;  none, none
+      - one colour, its count badge;  none, none
+      - two colours or more:  ONE circle the size of a badge, a slice of each colour meeting in its centre, NO number
+        (red, then orange, then blue:  halves, the first on the left;  three, thirds);  the counts in the button's
+        tooltip (`toolbarItem()`, epic `epic-engine` I347;  2026-11-18:  "Maybe when we have two colors, we just show
+        two half-circles with the colors meeting in the center, with no number")
       - over the icon's top right, a third of a badge on the icon
     - At the row's right, `<epic-page>`'s own tools (see "Overview"):
       the page's state filter, collapse-all, the new item button.
@@ -1564,8 +1572,8 @@ In `tools/`:
       - the page header, three columns (epic `epic-engine` P53):
         - the h1, one line, cut short when narrow (its full name first in its tooltip)
         - in the exact middle (the person's comment C7):
-          Send while reviewed (`<epic-send-buttons countdown>`), and beside it
-          what the session is doing, a bare spinner;  narrow, they follow the title, never over it
+          Send while reviewed (`<epic-send-buttons countdown>`), alone (no session's line since epic `epic-engine`
+          I340);  narrow, it follows the title, never over it
           - while the session answers what was sent, a blue arc TURNS round the plane, the countdown ring's frame
             (`working`, `CountdownRing.turning()`;  epic `epic-engine` P55, the person's r46:  "put the spinning wheel
             cursor around this button (same size as countdown) while you are digesting remarks");  the countdown's
@@ -1611,12 +1619,12 @@ In `tools/`:
     - Running agents (epic `skillz` P3):  `<epic-page>`'s header pill has `2 🤖` ("2 agents running"),
       a button opening their rows in a popover (epic `epic-engine` P35;  the panel above its first section before).
       - It shows while any agent of the epic runs, after the step label, the pill grey (2026-10-25).
-      - Beside Send, in the header's middle, the session's line (P35, P53's T53):  "Responding", "Building P35"
-        (`epic inbox status`), gone when idle or nobody listens;  a bare spinner, no pill or border (2026-10-29:
-        "the spinner is already round, doesn't need to be in a circular border"), its words beside it, small and grey
-        (I210:  bare, it read as "the server is listening").  Answering a
-        Send, it hides:  Send's ring turns instead, its tooltip what it's answering (P55).  The toolbar no longer has it.
-        While a phase builds, the step label's circle turns instead, and the line keeps its words alone (I316).
+      - What the session is doing (`epic inbox status`:  "Responding", "Building P35"):  NO words in the header
+        (epic `epic-engine` I340:  the line beside Send cut off the epic's name).
+        - the step label's circle turns while the session does other work than a Send, or Claude works on the phase
+          under way (I316);  the words are the label's tooltip's last line
+        - answering a Send:  Send's ring turns instead, its tooltip what it's answering (P55)
+        - before:  a bare spinner beside Send with its words (P35, P53's T53, I210), then its words alone (I316)
       - Each agent has a note box that redirects it (see "Overview").
   - Links to any id in `main` land below the stuck titles.
     They unfold what hides the target, and open its panel.

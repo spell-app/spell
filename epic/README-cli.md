@@ -31,11 +31,8 @@ The plan for the pages you're reading came back in about a second:
 sixteen phases, `[x]` for each one done (a phase under way shows `[~]`), and the loose ends.
 P11 is the rewrite this page came out of.
 
-`gh issue list` asks a server for rows in a database.
-This asked nobody.
-
-`epic` read one HTML file, the epic page, from a git repo beside the checkout.
-The page IS the record, and `epic` reads and writes it directly:  no database, no API, no server that has to be up.
+`epic` read that from one HTML file, the epic page, in a git repo beside the checkout.
+It reads and writes the page directly:  no database, no API, no server that has to be up.
 
 It's the same page you review in VS Code.
 When Claude runs `epic close readme#J16`, the item closes on your screen, with no reload.
@@ -134,7 +131,7 @@ type `epic close seo#J3` anywhere, and it closes J3 on the one page every checko
 - "Where you are" is the nearest checkout above your folder whose repo is set up for epics
   (its main checkout has `.epic/config.json5`), so any folder of the repo will do.
   Outside every such repo, it works on spell-epic's own checkout, the one its code is in.
-- Pages are the exception, and the point.
+- Pages are the exception.
   They live in the epic folder, which every checkout reads where it is ([below](#the-epic-repo)),
   so no worktree has a copy to fall out of step.
 - It works in a worktree made a moment ago, before its install:
@@ -171,7 +168,7 @@ A Claude Code session that has ended its turn sits idle until something wakes it
 and one thing that does is a command it started in the background finishing.
 
 So a review session runs `epic inbox wait` in the background and ends its turn.
-The `wait` blocks until you send something from the page, prints it and exits:  the exit is the doorbell.
+The `wait` blocks until you send something from the page, prints it and exits, and the exit wakes the session.
 
 ```mermaid
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
@@ -316,7 +313,7 @@ Every verb here only reads, but `create`, `stage` and `change`:  run them from a
 | `epic decisions <epic> [--json]` | prints what a page settled:  phases' Done and Updated notes, items' answers and chosen options |
 | `epic owns <path> ... [--json]` | prints which open epics own each file, a path from the checkout's root:  their branch changes it (`branch`), or their page names it (`plan`);  each with its stage, `planning` or `building`;  `--` for a file no open epic owns:  what `/coherence` reads to land a finding in its epic |
 | `epic open <epic>` | shows an epic's page in VS Code's side bar, in the Review tab, the one an epic page always goes to |
-| `epic lint <epic>` | checks ids, `#id` links, phases and parts, then the page's links, then draws it in a headless browser;  `--no-browser` skips the drawing;  `--links`:  a bad link fails it |
+| `epic lint <epic>` | checks ids, `#id` links, phases and parts, then the page's links, then draws it in a headless browser;  `--no-browser` skips the drawing;  `--links`:  a bad link fails it.  The drawing needs Playwright (`npm install playwright`, then `npx playwright install chromium`);  without it, lint skips that check and says so |
 
 ### Epic page:  phases
 
@@ -357,9 +354,9 @@ and the text it had moves into a folded Original Discussion.
 
 | Verb | What it does |
 | --- | --- |
-| `epic add <epic>#J "Title"` | adds an item and prints its id;  the letter is its kind:  `J` judgement call, `Q` question, `I` issue, `T` todo (work still to do;  `--limit`:  a limit to know about), `M` manual test, `D` a question born answered (it gets a `Q` id);  `C` and `V`, older letters, are refused, naming the new ones (`C` is a comment's now);  `--details <html>`;  `--options "*Do it \| Don't"`:  a call's or question's option set, `*` on the one recommended;  `--requested`:  an issue or todo filed from your own words, light orange once Claude closes it, until you review it;  `--start "<your words>"` (`--agent <name>`):  taken up at once, your words its body, an Underway card naming the agent, blue rather than red;  `--picture <file>` (repeat it) or `--pasted <n>`, the last n pictures you pasted into the session's chat:  shown after its words, deletable on the page;  `--calm`, last, for a call or issue that wouldn't surprise you.  The title is at most 30 plain words, read cold:  one longer, a `"; "` list or two sentences is refused, and the rest goes in `--details` |
+| `epic add <epic>#J "Title"` | adds an item and prints its id;  the letter is its kind:  `J` judgement call, `Q` question, `I` issue, `T` todo (work still to do;  `--limit`:  a limit to know about;  `--loud`:  red as a reminder until you review it), `M` manual test, `D` a question born answered (it gets a `Q` id);  `C` and `V`, older letters, are refused, naming the new ones (`C` is a comment's now);  `--details <html>`;  `--options "*Do it \| Don't"`:  a call's or question's option set, `*` on the one recommended;  `--requested`:  an issue or todo filed from your own words, light orange once Claude closes it, until you review it;  `--start "<your words>"` (`--agent <name>`):  taken up at once, your words its body, an Underway card naming the agent, blue rather than red;  `--picture <file>` (repeat it) or `--pasted <n>`, the last n pictures you pasted into the session's chat:  shown after its words, deletable on the page;  `--calm`, last, for a call or issue that wouldn't surprise you.  The title is at most 30 plain words, read cold:  one longer, a `"; "` list or two sentences is refused, and the rest goes in `--details` |
 | `epic add <epic>#choices "Title"` | adds a standing option set to the page's Choices section;  `--multiple`:  pick any, not pick one;  `--note <html>`:  its lead |
-| `epic calm <epic>#J3 [J4 ...]` | marks calls or issues not urgent, yellow rather than red, as clicking the id chip does;  `--loud`:  red again |
+| `epic calm <epic>#J3 [J4 ...]` | marks calls or issues not urgent, yellow rather than red, as clicking the id chip does;  `--loud`:  red again, and a todo red as a reminder until you review it |
 | `epic decide <epic>#Q3 "answer"` | answers a question, writing the answer INTO it, and prints its id;  `--option A` marks the chosen option card;  `--details <html>` |
 | `epic choose <epic>#J9 <letter> ["outcome"]` | records an option you settled in conversation, on any item, as your pick on the page would:  chosen on the item's latest set of cards (`--set N`:  the Nth), the item answered, closed or reviewed, and a Noted card;  several letters in a pick-any set;  a phase's set or a standing set too |
 | `epic option add \| edit \| remove \| close <epic>#Q4 ...` | changes an option set:  `add` one, the next letter (`"Title" ["note"]`, `--image <png>`);  `edit` one in place (`B --title "..." --note "..."`, its old text kept, folded);  `remove` one (kept, folded);  `close` the set;  on an item, a phase or a standing set;  `--set N` |
@@ -369,7 +366,7 @@ and the text it had moves into a folded Original Discussion.
 | `epic cancel <epic>#J3 ["why"]` | strikes through an item made moot by another decision;  `reopen` undoes it |
 | `epic details <epic>#J3 --file <reply.html>` | writes an agent's details into an item, its old text moving into the Original Discussion;  `--append`:  added, as a reply;  `--more`:  a More Details card under it |
 | `epic summarize <epic>#J3 --file <condensed.html>` | condenses an item after a long back and forth:  the file replaces what it shows, and its text and every reply move into its Original Discussion, folded;  your picks and the answer stay |
-| `epic update <epic>#J3 underway "<reading>"` | puts Claude's status card on an item:  `underway`, blue, what Claude took the task to be, its spinner on;  `done ["<summary>"]`, green, the item's work finished, an open issue or todo closing with it;  `fixed ["<what changed>"]`, an issue or call fixed for your review, orange until your Approve closes it;  `noted "<what>"`, calm, a step done and the item not finished;  `promised "<what>"`, `/epic tidy`'s:  it waits on finished work, and what it promised never came |
+| `epic update <epic>#J3 underway "<reading>"` | puts Claude's status card on an item:  `underway`, blue, what Claude took the task to be, its spinner on;  `done ["<summary>"]`, green, the item's work finished, an open issue or todo closing with it;  `fixed ["<what changed>"]`, an issue or call fixed for your review, orange until your Approve closes it;  `noted "<what>"`, calm, a step done and the item not finished;  `promised "<what>"`, `/epic tidy`'s:  it waits on finished work, and what it promised never came.  A card is short paragraphs:  a blank line starts one, `- ` lines are bullets, `1. ` lines a numbered list;  a paragraph or bullet over 50 words is refused, so the story goes in the item's body;  `--file <html>` for a long card |
 | `epic restore <epic>#J3 --file <old.html>` | puts earlier text, taken from git, into an item's Original Discussion;  `--as-of "YYYY-MM-DD HH:MM"` dates it |
 | `epic review <epic>#J3 ["outcome"]` | marks an item reviewed today;  the outcome goes in the log |
 | `epic defer <epic>#J3` | puts an item off:  dated, still not reviewed |
@@ -420,7 +417,7 @@ inbox:  epic inbox wait seo  (the inbox's verb goes first)
 | `epic inbox ignore <epic>` | this session has stopped reviewing:  the page says so |
 | `epic inbox wait <epic>` | waits in the background until there's work, prints it and exits 0, which wakes the session;  nothing in 55 minutes:  exit 2 (`--timeout <seconds>`) |
 | `epic inbox apply <epic> [ids ...]` | applies the sent approvals, picks, new todos and test answers, printing each, and what it left to talk over;  `--all`:  unsent ones too |
-| `epic inbox status <epic> "<text>"` | sets the toolbar's line, what the session is doing (`"Responding"`);  `--items q3,c2`:  what it's answering;  `--clear`:  idle |
+| `epic inbox status <epic> "<text>"` | says what the session is doing (`"Responding"`):  the page's step label turns, the words its tooltip;  `--items q3,c2`:  what it's answering;  `--clear`:  idle |
 | `epic inbox working <epic>#J3 on \| off` | turns the page's spinner on an item on or off;  on a comment (`seo#C3`), its "Claude:  thinking…" |
 | `epic inbox done <epic>#J3` | an agent finished the item:  its mark and spinner go, unless you changed the mark meanwhile;  on a comment, `--file <reply.html>` is its answer (`--commit <sha>`:  where it was built) |
 | `epic inbox clear <epic>#J3` | drops an item's marks:  a revisit talked over |
@@ -435,6 +432,7 @@ Housekeeping, most of it run once, or after a change to the page markup.
 | `epic log <epic> ["text"]` | adds a timestamped line to the page's log;  no text:  prints the newest (`--last <n>`, 20 by default) |
 | `epic prompt <epic> "text"` | sets the prompt that started the epic, quoted in the Overview;  `--file <file>`;  `""` removes it |
 | `epic bedtime <epic> start "P3-P6,P9"` | turns bedtime mode on, for an overnight `/bedtime` run:  its changes stay green until you review them;  `done "summary"` turns it off |
+| `epic focus [status] \| on [--why "..."] \| off \| summary [<epic>]` | focus mode, one switch for the machine (`/focus`, `/back`):  every running epic keeps building and asks you nothing;  `on` and `off` print a `TELL:` line for each running epic session;  `summary`:  what happened on an epic since focus started, waiting on you, merged, still running |
 | `epic backfill <epic> \| --all` | marks items reviewed that past sessions show you went through;  a dry run unless `--apply` |
 | `epic split <epic>` | stores a page as a skeleton plus part files, `parts/<id>.html`, loaded when it opens;  `--done`:  every finished epic;  `--dry-run` |
 | `epic join <epic>` | puts a split page back into one file |
@@ -567,7 +565,7 @@ Codex, or any agent without the skills, works an epic from these;  `skills check
 
 | Verb | What it does |
 | --- | --- |
-| `epic guide [<topic>]` | prints the epic workflow in plain steps:  find the epic, plan, build each phase, take what you send from the page, end each turn, finish;  a topic alone (`epic guide build`), `--list` the topics, `--path` the guide's file.  `superpowers` is the words that tell the superpowers plugin to stand aside in an epic ([With superpowers](README-config.md#with-superpowers));  `tidy`, closing what other work made obsolete.  Its last topic, `claude-only-tools`, is the plain way to do each step that needs a tool only Claude Code has;  `--root` prints the plugin's folder, what a skill's `${CLAUDE_PLUGIN_ROOT}` names |
+| `epic guide [<topic>]` | prints the epic workflow in plain steps:  find the epic, plan, build each phase, take what you send from the page, end each turn, finish;  a topic alone (`epic guide build`), `--list` the topics, `--path` the guide's file.  `superpowers` is the words that tell the superpowers plugin to stand aside in an epic ([With superpowers](README-superpowers.md));  `tidy`, closing what other work made obsolete.  Its last topic, `claude-only-tools`, is the plain way to do each step that needs a tool only Claude Code has;  `--root` prints the plugin's folder, what a skill's `${CLAUDE_PLUGIN_ROOT}` names |
 | `epic turns run <kind> -- <command>` | runs a command in its turn:  one of each kind at a time on the machine, so five agents' full test runs queue rather than fight (`epic turns run test -- yarn test`);  it waits, saying who has the turn.  `epic merge` and `merge-main` take the `merge` turn by themselves |
 | `epic turns [list]` | the turns taken now:  each kind's holder, and since when |
 | `epic turn end` | ends an agent's turn:  the epic folder committed and synced, as `epic shared commit` does;  what Claude Code's and Codex's end-of-turn hooks run;  quiet with nothing to do, safe to run twice;  `--session <id>`, `--quiet` |

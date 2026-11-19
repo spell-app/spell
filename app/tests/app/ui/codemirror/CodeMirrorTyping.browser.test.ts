@@ -285,7 +285,7 @@ describe("typing Spell in a real CodeMirror editor", () => {
     })
 
     test("not after a step:  the line's own indent", () => {
-      const code = editorOf([`a "card" is a view`, `\tto flip it`, `\t\tturn it over`], 3, 15)
+      editorOf([`a "card" is a view`, `\tto flip it`, `\t\tturn it over`], 3, 15)
       press("Enter")
       expect(withCaret().split("\n")[3]).toBe(`\t\t|`)
     })
