@@ -1299,6 +1299,13 @@ In `tools/`:
   - The element itself is `spell/server/site`'s `SiteHeader`, bundled into `spell-ui.js`.
   - Its tabs:  the epic repo's `page-server.json5` `"siteTabs"` (epic `repo-split` P16);  the docs bundle gives none
     of its own since P46 (`DOCS_TABS`, for a page opened from disk, went).
+    - The epic server's, when a repo's settings name none:  `DEFAULT_SITE_TABS` ([EpicServer.ts](server/EpicServer.ts)).
+  - The Docs tab (epic `epic-engine`):  the epic tooling's READMEs, rendered, at `/_epic/docs/README-epics.md`
+    ([docsRoutes.ts](tools/docsRoutes.ts), its page [readme-page.html](tools/readme-page.html)).
+    - Every README's address is a page to a navigation, and its Markdown to the page's `<ui-markdown>` (`?raw`):
+      so the READMEs' relative links lead from page to page;  a link to a source file goes to GitHub.
+    - Found through `EngineFiles`:  `README-epics.md` and `epic/README*.md` ship in the `spell` package
+      (`"spellPublish": { "files" }`), beside its `epic/`, as in a checkout.
 - NEVER inline copies of `_assets`:  improve the shared files instead, and every page gets it.
 - Pages are SERVED, never opened from disk (epic `epic-engine` P46;  2026-10-25:  "Opening files is a no-go for
   many reasons"):  their links are ROOT PATHS, which mean something only on the page server.

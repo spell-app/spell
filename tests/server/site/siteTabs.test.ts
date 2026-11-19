@@ -28,9 +28,14 @@ function litName(path: string): string | undefined {
 describe.skipIf(!CONTENT || !existsSync(join(CONTENT, CONTENT_SETTINGS)))(
   "the site header's tabs (the settings' `siteTabs`)",
   () => {
-    it("are in Owen's order (Epic Pages, Sagas, Guides;  epic-engine), each list page its tab's home", () => {
-      expect(TABS.map((tab) => tab.name)).toEqual(["Epic Pages", "Sagas", "Guides"])
-      expect(TABS.map((tab) => tab.path)).toEqual(["epics/index.html", "sagas/index.html", "guides/index.html"])
+    it("are in Owen's order (Epic Pages, Sagas, Guides, Docs;  epic-engine), each list page its tab's home", () => {
+      expect(TABS.map((tab) => tab.name)).toEqual(["Epic Pages", "Sagas", "Guides", "Docs"])
+      expect(TABS.map((tab) => tab.path)).toEqual([
+        "epics/index.html",
+        "sagas/index.html",
+        "guides/index.html",
+        "/_epic/docs/README-epics.md"
+      ])
     })
 
     // epic `epic-engine` P46:  every page is served, so no tab is "only when served" (`serverOnly`, gone)
@@ -45,6 +50,11 @@ describe.skipIf(!CONTENT || !existsSync(join(CONTENT, CONTENT_SETTINGS)))(
       ["/epics/seo/details/q1.html", "Epic Pages"],
       ["/guides/index.html", "Guides"],
       ["/guides/solid/solid-2.html", "Guides"],
+      // the epic tooling's READMEs (`docsRoutes`), a worktree's address too;  a folder named docs elsewhere lights none
+      ["/_epic/docs/README-epics.md", "Docs"],
+      ["/_epic/docs/epic/README-setup.md", "Docs"],
+      ["/worktrees/w/_epic/docs/epic/README.md", "Docs"],
+      ["/docs/README.md", undefined],
       ["/brand/index.html", undefined],
       ["/brand/pony.html", undefined],
       ["/brand/compare.html", undefined],

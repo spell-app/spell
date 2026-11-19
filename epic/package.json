@@ -88,7 +88,8 @@
       "src/tools/agentRoutes.ts",
       "src/tools/showRoutes.ts",
       "src/tools/airplaneRoutes.ts",
-      "src/tools/personRoutes.ts"
+      "src/tools/personRoutes.ts",
+      "src/tools/docsRoutes.ts"
     ],
     "watch": [
       "src/tools/_assets",
@@ -141,6 +142,17 @@
       "src/AGENTS.md",
       "src/tool/PLAN-DOC.md",
       "README-vscode.md",
+      "README-cli.md",
+      "README-config.md",
+      "README-faq.md",
+      "README-how-it-works.md",
+      "README-pages.md",
+      "README-setup.md",
+      "README-skills.md",
+      "README-superpowers.md",
+      "README-teams.md",
+      "README.md",
+      "docs/images",
       "vscode/package.json",
       "vscode/spell-epic.vsix"
     ],

@@ -678,7 +678,9 @@ const HOME_PAGE = "pages/index.html"
 const DEFAULT_SITE_TABS: readonly SiteTab[] = [
   { name: "Epic Pages", path: "epics/index.html", areas: ["epics"] },
   { name: "Sagas", path: "sagas/index.html", areas: ["sagas"] },
-  { name: "Guides", path: "guides/index.html", areas: ["guides"] }
+  { name: "Guides", path: "guides/index.html", areas: ["guides"] },
+  // the engine's own READMEs, rendered (`docsRoutes`):  the same in every repo
+  { name: "Docs", path: "/_epic/docs/README-epics.md", paths: ["^(?:/worktrees/[^/]+)?/_epic/docs/"] }
 ]
 
 /** Folders page edits may write when a repo's `package.json` names none:  the epic repo areas. */
