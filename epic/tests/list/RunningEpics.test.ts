@@ -99,7 +99,9 @@ describe("RunningEpics", () => {
         phases: ["done", "active", "todo"],
         done: 1,
         total: 3,
-        active: "P2 · Site Map"
+        active: "P2 · Site Map",
+        // its phase under way:  the blue badge (`<epic-pills>`, epic `epic-engine` T99)
+        badges: { urgent: 0, replied: 0, running: 1 }
       },
       {
         name: "vite",
@@ -279,6 +281,55 @@ describe("RunningEpics", () => {
       )
     } finally {
       rmSync(quiet, { recursive: true, force: true })
+    }
+  })
+
+  // the home page's Active epics (`<epic-pills>`, epic `epic-engine` T99):  what waits, by the toolbar badges' colours,
+  // and the agents running
+  it("counts what waits by colour:  red attention, orange replied / requested / waiting, blue phases under way;  agents", () => {
+    const busy = realpathSync(mkdtempSync(join(tmpdir(), "srv-epics-busy-")))
+    try {
+      const dir = ".claude/worktrees/busy/epics/busy"
+      put(
+        busy,
+        `${dir}/busy.plan.html`,
+        `<html><head><title>Epic: Busy</title></head><body><epic-page epic="busy">` +
+          `<epic-section id="phases" kind="phases"><epic-phase id="p1" title="One" status="done"></epic-phase>` +
+          `<epic-phase\n  id="p2"\n  title="Two"\n  status="active"\n  state="waiting"\n></epic-phase>` +
+          `<epic-phase id="p3" title="Three" status="todo"></epic-phase></epic-section>` +
+          `<epic-section id="issues" kind="issues"><epic-item id="i1" status="open" state="attention"></epic-item>` +
+          `<epic-item id="i2" status="open" state="replied"></epic-item>` +
+          `<epic-item id="i3" status="done" state="requested"></epic-item>` +
+          `<epic-item id="i4" status="open" state="open"></epic-item></epic-section></epic-page></body></html>\n`
+      )
+      put(busy, `${dir}/agents.json5`, JSON.stringify([{ name: "busy-a" }, { name: "busy-b" }]))
+      put(
+        busy,
+        ".claude/worktrees/calm/epics/calm/calm.plan.html",
+        `<html><head><title>Epic: Calm</title></head><body><epic-page epic="calm">` +
+          `<epic-section id="phases" kind="phases"><epic-phase id="p1" title="One" status="todo"></epic-phase>` +
+          `</epic-section></epic-page></body></html>\n`
+      )
+      const [first, second] = new RunningEpics(busy).list()
+      expect(first).toMatchObject({
+        name: "busy",
+        active: "P2 · Two",
+        badges: { urgent: 1, replied: 3, running: 1 },
+        agents: 2
+      })
+      // nothing waits, no agents:  neither said
+      expect(second!.name).toBe("calm")
+      expect(second).not.toHaveProperty("badges")
+      expect(second).not.toHaveProperty("agents")
+      // every epic:  the running ones, then the epic folder's others, with no worktree
+      put(busy, "epics/planned/planned.plan.html", planDoc("Planned", [["todo", "P1 · One"]]))
+      expect(new RunningEpics(busy).everyEpic().map((epic) => [epic.name, epic.worktree, epic.url])).toEqual([
+        ["busy", "busy", "/worktrees/busy/epics/busy/busy.plan.html"],
+        ["calm", "calm", "/worktrees/calm/epics/calm/calm.plan.html"],
+        ["planned", "", "/epics/planned/planned.plan.html"]
+      ])
+    } finally {
+      rmSync(busy, { recursive: true, force: true })
     }
   })
 

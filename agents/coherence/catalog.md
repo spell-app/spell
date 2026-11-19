@@ -983,6 +983,17 @@ One press, past a few pixels, with Escape to cancel and the closed hand over the
   - the runtime's `EPIC_LAND_GAP` is its own since P22, no mirror:  `EpicFold`'s `LAND_GAP` went in P18
   - Left:  the site sections' sticking, in the site (the finding's "later":  into Spell UI's own code)
 
+### Keeping the reader's place while much of the page folds or hides
+
+- **It is:**  `ScrollAnchor.keep(change, root?)` (`epic/src/components/epic-item/ScrollAnchor.ts`;  epic `epic-engine`
+  I350):  notes the section, phase or item at the window's top (below the stuck titles, `--epic-stack`), makes the
+  change, then puts that one back in its spot every frame for 1.2s;  hidden by the change, the nearest one before it
+- **Use it when:**  a click hides, folds or opens many boxes of an epic page at once:  the state chips, "show all",
+  expand-all / collapse-all.  One box folded by its own title keeps its title put instead (`keepTitlePut()`,
+  `keepLinePut()`)
+- **Flag:**  `scrollBy\(\{ top: moved`
+- **Copies:**  `--` since I350 (the page's toolbar chips and toggle-all, a section's chips and "show all")
+
 ### Copying, with VS Code's side bar
 
 - **It is:**  `copyText()` (`spell/util`, `src/util/dom.ts`):  the browser's clipboard call, else the old

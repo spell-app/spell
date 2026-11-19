@@ -65,6 +65,32 @@ describe("reading a step file", () => {
   })
 })
 
+describe("the phase Owen picks to build", () => {
+  const phases = ["p-upcoming-meetings", "p-jira-and-confluence-links", "p-todays-weather", "p-a-joke"]
+
+  test("Looks good or Do this on a phase picks it;  the latest wins", () => {
+    expect(StagedDemo.pickOf([{ id: "P-A-Joke", action: "approve" }], phases)).toBe("p-a-joke")
+    expect(
+      StagedDemo.pickOf(
+        [
+          { id: "p-a-joke", action: "approve" },
+          { id: "p-todays-weather", action: "todo" }
+        ],
+        phases
+      )
+    ).toBe("p-todays-weather")
+  })
+
+  test("no pick:  a Defer, the stage's Accept or a question's answer picks nothing", () => {
+    const marks = [
+      { id: "p-upcoming-meetings", action: "defer" },
+      { id: "stage", action: "accept" },
+      { id: "q1", action: "approve" }
+    ]
+    expect(StagedDemo.pickOf(marks, phases)).toBeUndefined()
+  })
+})
+
 describe("check and reset", () => {
   let repo: string
   let demo: StagedDemo

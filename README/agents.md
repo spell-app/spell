@@ -229,28 +229,59 @@ Adding a rule ([WWOD's own README](../agents/wwod/README.md) has the same steps)
 
 ## Using these rules in your own project
 
-```text
-@node_modules/spell/agents/wwod/WWOD.md
-
-@node_modules/spell/agents/solid/solid-2.md
+```sh
+npx spell@next wwod init
 ```
 
-_Two lines in your project's `CLAUDE.md`:  WWOD, and the Solid 2 rules, in every Claude Code session._
+<details>
+<summary>What it printed</summary>
+
+```text
+? Should your coding agents follow WWOD, Spell's house style? Yes
+? Should they follow the Solid 2 rules?  Say yes if this project uses Solid 2. Yes
+? Should they treat the code as the spec, and rewrite a test to match it?  Say no if you write tests first. No
+CLAUDE.md:  created;  added WWOD, the Solid 2 rules
+AGENTS.md:  added WWOD, the Solid 2 rules
+```
+
+</details>
+
+_Three questions, then the rules' lines in your `CLAUDE.md` and `AGENTS.md`._
 
 WWOD and the Solid 2 rules ship in the npm `spell` package, under `agents/`,
 so a project that installs `spell` can hand them to its agents.
 Each is opt-in:  take WWOD, the Solid 2 rules, both, or neither.
 
+- `spell wwod init` writes them in for you:
+  - `CLAUDE.md` gets an `@` line per rule, which Claude Code reads in every session;  it's made when missing.
+  - `AGENTS.md`, which other agents (Codex ...) read, gets the same in plain words, when you have one,
+    under a line saying to skip a rule the tool already loaded:
+    Claude Code reads `AGENTS.md` too, and the rules are long (about 19k tokens), so it reads them once.
+  - In a workspace (a folder whose `package.json` is listed in a `workspaces` above it),
+    it asks which folder gets them:  the workspace's root (the default, and `--yes`'s), or the nearer folder.
+    `--here` takes the nearer folder without asking.
+  - Each file's lines sit in one marked block.
+    Run it again to add or drop a rule:  it changes that block, and never writes a second one.
+  - Without asking:  `--yes`, with `--solid`, `--code-is-the-spec` or `--no-wwod` for what you want.
+    `--dry-run` says what it would change, and writes nothing.
 - They ship from the release after 0.8.10:  the package's `"spellPublish": { "files" }` names `agents/wwod` and
   `agents/solid`, and nothing else of `agents/`.
   The logs and the coherence catalog are Spell's own, and stay home.
 - WWOD's hub sends the agent on to its spokes by file name:  they're beside it, in the same folder.
-- Other agents (Codex ...) read `AGENTS.md`, not `CLAUDE.md`.
-  The same in plain words, at the top of your `AGENTS.md`:
+- By hand, the same lines, in your `CLAUDE.md`:
+
+  ```text
+  @node_modules/spell/agents/wwod/WWOD.md
+
+  @node_modules/spell/agents/solid/solid-2.md
+  ```
+
+  And in plain words, at the top of your `AGENTS.md`:
 
   ```markdown
-  **ALWAYS, before any code:  READ `node_modules/spell/agents/wwod/WWOD.md`, the house style.**
-  **Before any Solid 2 code:  READ `node_modules/spell/agents/solid/solid-2.md` IN FULL.**
+  **READ these rules from the spell package, unless your tool already loaded them** (Claude Code does, through `CLAUDE.md`):
+  - **Before any code:**  `node_modules/spell/agents/wwod/WWOD.md`, the house style (WWOD)
+  - **Before any Solid 2 code:**  `node_modules/spell/agents/solid/solid-2.md`, IN FULL
   ```
 
 - The limits:
@@ -265,7 +296,8 @@ Each is opt-in:  take WWOD, the Solid 2 rules, both, or neither.
 @node_modules/spell/agents/wwod/code-is-the-spec.md
 ```
 
-_Spell's own `CLAUDE.md` has this line, as `@agents/wwod/code-is-the-spec.md`._
+_`spell wwod init` asks about it last, and only with WWOD;  `--code-is-the-spec` takes it without asking.
+Spell's own `CLAUDE.md` has this line, as `@agents/wwod/code-is-the-spec.md`._
 
 - In Spell, the source is the spec:  a test that disagrees with the code is rewritten to match it,
   unless the code is obviously wrong.

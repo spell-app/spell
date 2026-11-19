@@ -29,7 +29,8 @@ import {
   kindFoundAt,
   kindReadFrom,
   lookAtPlace,
-  messageOf
+  messageOf,
+  wrappedRows
 } from "./PlaceLook"
 import { checkSecondsWithin, describeLook, fieldsOf, fingerprintOf, idFieldOf, plainNameFor } from "./PlaceShape"
 import { partsInLanguageOf } from "./PlaceInLanguage"
@@ -62,6 +63,9 @@ const ERROR_LINE = /^(\d+):\d+ (.*)$/s
 
 /** The line that keeps a copy on this device, in either language:  a person's, if it's in the file. */
 const KEEPS_A_COPY = /keep a copy on this device|guarda una copia en este dispositivo/i
+
+/** An id that's an address of its own:  read where it says, not put in its collection's. */
+const IS_ITS_OWN_ADDRESS = /^https?:\/\//i
 
 /** A kind of place, as a person might write it:  `sheet` and `spreadsheet` are one. */
 const KIND_WORDS: Readonly<Record<string, string>> = {
@@ -394,6 +398,9 @@ export class PlaceIngest {
     }
     if (answer.status >= 400) return failed(`it answered ${answer.status}${detailOf(answer.text)}`, answer.status)
     const body = jsonOf(answer.text)
+    // no schema said where its rows are (NetBox's background queues):  a wrapped list says, as a look finds it
+    const wrapped = collection.rowsAt === undefined && !Array.isArray(body) ? wrappedRows(body) : undefined
+    if (wrapped) collection.rowsAt = wrapped.rowsAt
     const list =
       collection.rowsAt === undefined ? body : (body as Record<string, unknown> | undefined)?.[collection.rowsAt]
     if (!Array.isArray(list)) {
@@ -429,7 +436,10 @@ export class PlaceIngest {
     if (typeof id !== "string" && typeof id !== "number") return undefined
     const template =
       operations?.change?.at ?? operations?.delete?.at ?? `${at.replace(/\/+$/, "")}/{id}${at.endsWith("/") ? "/" : ""}`
-    const url = `${address}${template.replace(/\{[^{}/]*\}/, encodeURIComponent(`${id}`))}`
+    // an id that's its own address (NetBox's background queues' `url`) is read where it says
+    const url = IS_ITS_OWN_ADDRESS.test(`${id}`)
+      ? `${id}`
+      : `${address}${template.replace(/\{[^{}/]*\}/, encodeURIComponent(`${id}`))}`
     try {
       const { status } = await reader.read(url)
       return status >= 400 ? `its thing ${id}, read by its id at ${url}, answered ${status}` : undefined

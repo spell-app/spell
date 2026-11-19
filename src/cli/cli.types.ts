@@ -68,10 +68,24 @@ export type CommandsOptions = GlobalOptions & {
 
 /**
  * `spell wwod` flags.
- * - `json`:  `check` prints the report as JSON
+ * - `json`:  `check` prints the report as JSON;  `init`, its changes
+ * - `init`'s, one per rule, each `undefined` when not given (then it asks, or keeps what the project has):
+ *   - `wwod`:  WWOD (`--no-wwod` leaves it out)
+ *   - `solid`:  the Solid 2 rules
+ *   - `codeIsTheSpec`:  WWOD §21, the code is the spec
+ * - `yes`:  `init` asks nothing:  the flags, else what the project has, else the defaults;
+ *   in a workspace, its root
+ * - `here`:  `init` writes in the nearest folder with a `package.json`, not the root of the workspace it's in
+ * - `dryRun`:  `init` says what it would change, and writes nothing
  */
 export type WwodOptions = GlobalOptions & {
   json?: boolean
+  wwod?: boolean
+  solid?: boolean
+  codeIsTheSpec?: boolean
+  yes?: boolean
+  here?: boolean
+  dryRun?: boolean
 }
 
 /** `spell deps`'s flags. */
@@ -211,6 +225,33 @@ export type AgentRulesProblem = { file: string; line: number; cite: string; prob
 
 /** `spell wwod check`'s answer:  WWOD's size, how many files were read, and what's broken. */
 export type AgentRulesReport = { sections: number; rules: number; files: number; problems: AgentRulesProblem[] }
+
+/** The rules `spell wwod init` can hand a project's agents, in the order it asks:  its flags' names too. */
+export const AGENT_RULE_IDS = ["wwod", "solid", "code-is-the-spec"] as const
+
+/** One of `AGENT_RULE_IDS`. */
+export type AgentRuleId = (typeof AGENT_RULE_IDS)[number]
+
+/** Which rules a project takes. */
+export type AgentRulePicks = Record<AgentRuleId, boolean>
+
+/** What `spell wwod init` changes in one file, `CLAUDE.md` or `AGENTS.md` (`planAgentRules()`). */
+export type AgentRuleChange = {
+  /** the file, from the project's root */
+  file: string
+  /** the file is new */
+  created: boolean
+  /** its text changes:  `false` when it's already right */
+  changed: boolean
+  /** the rules it gains */
+  added: AgentRuleId[]
+  /** the rules it loses */
+  removed: AgentRuleId[]
+  /** its whole text, after */
+  text: string
+  /** what to do by hand:  a line it won't touch */
+  notes: string[]
+}
 
 ////////////////
 // ## The commands page

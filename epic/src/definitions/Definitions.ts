@@ -6,6 +6,7 @@ import { epicReplyVocabulary } from "spell/epic/components/epic-answer/EpicReply
 import { epicAsideVocabulary } from "spell/epic/components/epic-aside/EpicAside.en"
 import { epicAskVocabulary } from "spell/epic/components/epic-ask/EpicAsk.en"
 import { epicCardsVocabulary } from "spell/epic/components/epic-cards/EpicCards.en"
+import { epicPillsVocabulary } from "spell/epic/components/epic-pills/EpicPills.en"
 import { epicChangeVocabulary } from "spell/epic/components/epic-change/EpicChange.en"
 import { epicChoiceRowVocabulary } from "spell/epic/components/epic-choice-rows/EpicChoiceRow.en"
 import { epicChoiceRowsVocabulary } from "spell/epic/components/epic-choice-rows/EpicChoiceRows.en"
@@ -130,6 +131,8 @@ export class Definitions {
     "epic-list": epicListVocabulary,
     "epic-card": epicCardVocabulary,
     "epic-sort": epicSortVocabulary,
+    // the docs home page's Active epics, a live pill each (epic `epic-engine` T99)
+    "epic-pills": epicPillsVocabulary,
     // the state filter's chips and the line under a filtered list (epic `epic-engine` P3):  drawn by `<epic-section>`,
     // `<epic-page>`'s toolbar and the docs runtime, never written in a doc
     "epic-state-filter": epicStateFilterVocabulary,

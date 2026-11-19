@@ -167,6 +167,8 @@ export async function placeVerify(
     CLI.out(`Verified ${description.about.name}, for ${file}.  Its description:  ${descriptionPath}`)
     printList("What changed:", changes.length ? changes : ["Nothing."])
     if (couldntChange.length) printList("What it couldn't change for you:", couldntChange)
+    // what the writes it was told to try answered:  else only its description says (epic `data` P55)
+    if (tryWrites) printList("Writes:", [description.canDo.write])
     const failed = Object.entries(description.collections).filter(([, { state }]) => state?.is === "failed")
     if (failed.length)
       printList(
@@ -503,10 +505,16 @@ function printDescription(
   )
   const reads = Object.entries(collections)
     .filter(([, { leftOut }]) => !leftOut)
-    .map(
-      ([name, { state }]) =>
-        `${name}:  ${state?.rows ?? 0} rows${state?.readByTheLook ? ", by the look itself" : ""}${state?.reason ? ` -- ${state.reason}` : ""}`
+    .map(([name, { state }]) =>
+      // read from an OpenAPI description only:  never tried, so no count of rows yet (epic `data` P55)
+      state?.is === "unverified" || state?.is === "untyped"
+        ? `${name}:  not read yet, ${state.is}`
+        : `${name}:  ${state?.rows ?? 0} rows${state?.readByTheLook ? ", by the look itself" : ""}${state?.reason ? ` -- ${state.reason}` : ""}`
     )
+  const neverRead = Object.values(collections).filter(
+    ({ leftOut, state }) => !leftOut && (state?.is === "unverified" || state?.is === "untyped")
+  ).length
+  if (neverRead) reads.push(`${neverRead} not read yet:  \`spell place verify\` reads each one`)
   printList("A read through the Spell found:", reads)
   if (spellCantSay.length) printList("What Spell can't say about it:", spellCantSay)
   if (notes.length) printList("To know:", notes)

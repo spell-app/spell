@@ -10,7 +10,8 @@ const IS_FOUND_BY_NAME = /\{[^{}/]*\}/
 /**
  * One write of each kind, tried on the first collection that lists its rows, only because the person said it may
  * (`--try-writes`;  epic `data` P30).
- * - Adding:  a copy of its first row, without its id, `POST`ed to the collection.
+ * - Adding:  a copy of its first row, without its id, `POST`ed to the collection;
+ *   each thing inside it sent as its id alone, as NetBox takes them (epic `data` P55)
  * - Read again:  what was added, at its own address, to see whether the server keeps what it's sent.
  * - Changing:  its first row's first field, to what it already holds, `PATCH`ed:  so it changes nothing.
  * - Deleting:  what was added, so a server that keeps it is left as it was;  else, with nothing added, nothing is.
@@ -27,14 +28,18 @@ export async function writesTried(
       !searchedOnly && !listsGive && !IS_FOUND_BY_NAME.test(at) && rows[0]?.id !== undefined
   )
   if (!tried) return undefined
+  // its own slash kept:  NetBox answers 404 to `/api/circuits/circuits`, without it (epic `data` P55)
+  const slash = tried.at.endsWith("/") ? "/" : ""
   const address = `${place}${tried.at.replace(/\/+$/, "")}`
-  const { id, ...row } = tried.rows[0]!
-  const added = await reader.tryWrite(address, "POST", row)
+  const thingAt = (thingId: unknown) => `${address}/${encodeURIComponent(`${thingId}`)}${slash}`
+  const { id, ...whole } = tried.rows[0]!
+  const row = Object.fromEntries(Object.entries(whole).map(([field, value]) => [field, byIdOnly(value)]))
+  const added = await reader.tryWrite(`${address}${slash}`, "POST", row)
   const addedId = idIn(added.text)
-  const keeps = addedId === undefined ? undefined : (await reader.read(`${address}/${addedId}`)).status === 200
+  const keeps = addedId === undefined ? undefined : (await reader.read(thingAt(addedId))).status === 200
   const [field] = Object.keys(row)
-  const changed = await reader.tryWrite(`${address}/${id}`, "PATCH", field ? { [field]: row[field] } : {})
-  const deleted = addedId === undefined ? undefined : await reader.tryWrite(`${address}/${addedId}`, "DELETE")
+  const changed = await reader.tryWrite(thingAt(id), "PATCH", field ? { [field]: row[field] } : {})
+  const deleted = addedId === undefined ? undefined : await reader.tryWrite(thingAt(addedId), "DELETE")
   return {
     collection: tried.name,
     adding: added.status,
@@ -68,4 +73,11 @@ function idIn(text: string): string | undefined {
   } catch {
     return undefined
   }
+}
+
+/** A thing inside a row, `{ id, url, display ... }`, as `{ id }`;  a list of them, each so;  anything else as it is. */
+function byIdOnly(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(byIdOnly)
+  if (value && typeof value === "object" && "id" in value) return { id: (value as { id: unknown }).id }
+  return value
 }

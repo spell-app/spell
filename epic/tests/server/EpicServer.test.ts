@@ -236,7 +236,7 @@ describe("EpicServer", () => {
   })
 
   // epic-engine T96:  a repo `epic init` set up names no tabs, and its pages showed none
-  test("a default repo whose settings name no tabs:  the epic folder's own, Guides, Sagas and Epic Pages", () => {
+  test("a default repo whose settings name no tabs:  the epic folder's own, Epic Pages, Sagas and Guides", () => {
     const bare = join(top, "bare-home")
     const list = new RepoList({ home: bare })
     list.add(repo(top, "three"))
@@ -244,9 +244,9 @@ describe("EpicServer", () => {
     const file = join(top, "three", "docs", "epics", "seo", "seo.plan.html")
     const tabs = plain.pageConfig({ path: "/epics/seo/seo.plan.html", file } as never).siteTabs as SiteTab[]
     expect(tabs.map((tab) => [tab.name, tab.path])).toEqual([
-      ["Guides", "guides/index.html"],
+      ["Epic Pages", "epics/index.html"],
       ["Sagas", "sagas/index.html"],
-      ["Epic Pages", "epics/index.html"]
+      ["Guides", "guides/index.html"]
     ])
   })
 

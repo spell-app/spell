@@ -52,14 +52,12 @@ Restart Page Server.](docs/images/how-review-tab.png)
 
 _A sketch of the window, around a real epic page:  the page sits in VS Code's right side bar, in the Review tab._
 
-The window is drawn, not captured;  the page inside it is real.
-VS Code's side bar holds three tabs, each a page that stays put while the others move:
+VS Code's side bar holds three tabs, each keeping its own page:
 - **Review:**  epic pages and saga pages, the ones you mark up
 - **Epic Docs:**  guides and every other page
 - **Details:**  a question too big for a chat, asked on a page of its own
 
-Any browser shows the same pages:  the side bar is the convenient place, not the only one
-([README-vscode.md](README-vscode.md)).
+Any browser shows the same pages too ([README-vscode.md](README-vscode.md)).
 
 ### The header:  what's happening, at a glance
 

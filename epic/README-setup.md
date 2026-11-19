@@ -143,6 +143,11 @@ Then, in order, each step under a bold heading, the files in a gray table, a gra
    - `/epic` in a session that hasn't reloaded stops before it makes anything, and says the same.
    - Its skills and hooks, a bare `/epic`, and `epic` on your terminal's `PATH`
      ([the kit's agents page](https://github.com/spell-app/spell/blob/main/README/agents.md#the-epic-plugin) says what each step does).
+   - `epic` goes in `~/.local/bin`:  when that folder isn't on your `PATH`, init says so,
+     with the line to paste into your shell's settings file (`~/.zshrc`, `~/.bashrc`).
+   - No Claude Code on the machine yet (no `claude` command, no saved sessions):
+     init says the plugin is ready for it, where to get Claude Code, and to run `epic plugin install`
+     if `/epic` isn't there once it's installed.
    - Installed for the machine, its hooks run in every repo, not just yours:
      in a repo `epic init` never set up they do nothing, and its worktrees are Claude Code's own.
    - `--no-plugin` skips it;  `epic plugin install` does it by itself.
@@ -273,7 +278,8 @@ epic ... (...) .../epic
 </details>
 
 - `--version` names the code that answers:  its commit, its branch and the folder it's in.
-- `~/.local/bin`, where the plugin step links `epic`, may not be on your `PATH`:  put the link wherever yours looks.
+- `~/.local/bin`, where the plugin step links `epic`, may not be on your `PATH`:  `epic init` says so, with the line
+  that puts it there;  or put the link wherever yours looks.
 
 🌱 Planned:  the plugin from Claude Code's marketplace, without `npx`.
 
