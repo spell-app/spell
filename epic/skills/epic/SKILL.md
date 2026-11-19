@@ -668,7 +668,8 @@ Until a `/back:  ...` message (or `epic focus status` says off):
 
 1. `epic phase <name>#P<N> active`, then CHECK its accepted build plan ("4b. Build plans") against what's there now.
    - Check the session's name (the isolate skill's "Session name").
-   - The toolbar's line (epic `epic-engine` P35):  `epic inbox status <name> "Building P<N>"`;  `--clear` once it's done.
+   - What you're doing (epic `epic-engine` P35):  `epic inbox status <name> "Building P<N>"`;  `--clear` once it's done.
+     The page's step label turns while it's set, the words its tooltip (I340):  never left set when you stop.
    - Earlier phases, answers and requests may have moved things since it was written.  Adjust, and go on:
      - a SMALL change (a file moved, a step folded into an earlier phase, a name changed):  say what and why with
        `epic updated <name>#P<N> "<p>...</p>" --summary "Plan adjusted:  ..."`;  the plan stays accepted.  NO stop.
@@ -1109,7 +1110,7 @@ epic inbox apply <name> [ids]              approve / pick / Make Todo / Do this 
                                            that phase's plan to it;  on a STANDING set ("...:  act on this round"):
                                            act on the picked options, add new ones as they come (epic-engine P50)
 epic inbox working <name>#<id> on|off      the page's spinner on an item, or a phase (P20)
-epic inbox status <name> "<text>" [--items q3,c2] | --clear   the toolbar's line:  what you're doing, what you answer
+epic inbox status <name> "<text>" [--items q3,c2] | --clear   what you're doing (the step label's tooltip), what you answer
 epic update <name>#<id> underway "<reading>"   Claude's blue status card on an item, spinner on
 epic update <name>#<id> done ["<summary>"]     the item FINISHED:  that card green (Done);  an open issue / todo closes
 epic update <name>#<id> noted "<what>"         a STEP done (choice recorded, answer written):  an outlined Noted card
@@ -1207,7 +1208,7 @@ want you to just do it").
      so the person sees it was heard
    - go back to what you were doing, and take the queued ones after it
    - In Codex:  no background `wait`:  just the three steps above.
-0b. The toolbar's line (epic `epic-engine` P35):  `epic inbox status <name> "Responding" --items <the ids
+0b. What you're doing (epic `epic-engine` P35;  Send's ring turns while you answer, I340):  `epic inbox status <name> "Responding" --items <the ids
    taken>`, so the person sees what you're answering;  `epic inbox status <name> --clear` as you arm `wait` again (step 4).
 1. Exit 2 (timeout, nothing happened):  arm `wait` again, and end the turn with one line ("still listening").
 
@@ -1260,7 +1261,7 @@ want you to just do it").
    - START TESTING (epic `epic-engine` P51, Q53):  the person pressed "Start testing" on the Manual tests section.
      - `wait` prints it under now, keyed `tests` (the section's id, not an item):
        "Start testing:  check the open tests you can, write out the rest".
-     - No status card (it's no item):  `epic inbox status <name> "Preparing tests"`, the toolbar's line;
+     - No status card (it's no item):  `epic inbox status <name> "Preparing tests"` (the step label's tooltip);
        `wait` already marked `<name>#tests` working, so their button says "Preparing tests".
      - Then ONE background agent, which:
        - In Codex:  no background agents:  do these steps yourself, in order, then tell the person the tests are ready.

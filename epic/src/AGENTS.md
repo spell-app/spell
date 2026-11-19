@@ -219,14 +219,15 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - Served at `/api/epics/agents`, by [agentRoutes.ts](tools/agentRoutes.ts), in the docs tools.
       - `<epic-page>` draws them in its header (epic `epic-engine` P35, P53):  `<epic-agents>`, in its shadow root,
         - in the header's pill:  `2 🤖` (its name "2 agents running"), a button whose popover holds their rows
-        - beside Send, in the header's middle:  the session's line ("Responding", `epic inbox status`, the inbox's
-          `doing`), a bare spinner (`draws="spinner"`, T53), its words beside it (I210), for OTHER work only ("Building
-          P35");  answering a Send (`doing` lists items), it hides, and Send's own ring turns instead (epic
-          `epic-engine` P55, Q62 A)
-        - while a phase is building (the step label names one under way, and the session does other work, or Claude
-          is at work on that phase):  the step label's circle turns, Spell UI's loading icon (`isStepTurning()`), and
-          the line beside Send keeps its words alone (`draws="words"`;  epic `epic-engine` I316, 2026-11-16:  "Don't
-          need both of these indicators.  Just make the one in the pill a loading spinner")
+        - NO line in the header (epic `epic-engine` I340;  2026-11-18:  "This 'Building P72...' is too big -- it cuts
+          off the name of the epic.  Remove it, use the P76 pill instead, don't show the name of the phase"):
+          - while the session does OTHER work than a Send (`epic inbox status`, the inbox's `doing`:  "Building P35"),
+            or Claude is at work on the phase under way:  the step label's circle turns, Spell UI's loading icon
+            (`isStepTurning()`;  I316, 2026-11-16:  "Just make the one in the pill a loading spinner")
+          - the session's words are the label's tooltip's last line, "Claude:  Building P35" (`stepTip()`)
+          - answering a Send (`doing` lists items):  Send's own ring turns instead (epic `epic-engine` P55, Q62 A)
+          - before:  a bare spinner beside Send with its words (`draws="spinner"`, T53, I210), then its words alone
+            (`draws="words"`, I316)
       - Both clients POST and watch through the same code, a `ServerLink` each:
         the token, its one refresh on a 403, the poll and `spell-server:changed`.
     - `ServerLink`:  EVERY epic-page and docs-page read, write and poll goes through it (epic `coherence` C9)
@@ -1564,8 +1565,8 @@ In `tools/`:
       - the page header, three columns (epic `epic-engine` P53):
         - the h1, one line, cut short when narrow (its full name first in its tooltip)
         - in the exact middle (the person's comment C7):
-          Send while reviewed (`<epic-send-buttons countdown>`), and beside it
-          what the session is doing, a bare spinner;  narrow, they follow the title, never over it
+          Send while reviewed (`<epic-send-buttons countdown>`), alone (no session's line since epic `epic-engine`
+          I340);  narrow, it follows the title, never over it
           - while the session answers what was sent, a blue arc TURNS round the plane, the countdown ring's frame
             (`working`, `CountdownRing.turning()`;  epic `epic-engine` P55, the person's r46:  "put the spinning wheel
             cursor around this button (same size as countdown) while you are digesting remarks");  the countdown's
@@ -1611,12 +1612,12 @@ In `tools/`:
     - Running agents (epic `skillz` P3):  `<epic-page>`'s header pill has `2 🤖` ("2 agents running"),
       a button opening their rows in a popover (epic `epic-engine` P35;  the panel above its first section before).
       - It shows while any agent of the epic runs, after the step label, the pill grey (2026-10-25).
-      - Beside Send, in the header's middle, the session's line (P35, P53's T53):  "Responding", "Building P35"
-        (`epic inbox status`), gone when idle or nobody listens;  a bare spinner, no pill or border (2026-10-29:
-        "the spinner is already round, doesn't need to be in a circular border"), its words beside it, small and grey
-        (I210:  bare, it read as "the server is listening").  Answering a
-        Send, it hides:  Send's ring turns instead, its tooltip what it's answering (P55).  The toolbar no longer has it.
-        While a phase builds, the step label's circle turns instead, and the line keeps its words alone (I316).
+      - What the session is doing (`epic inbox status`:  "Responding", "Building P35"):  NO words in the header
+        (epic `epic-engine` I340:  the line beside Send cut off the epic's name).
+        - the step label's circle turns while the session does other work than a Send, or Claude works on the phase
+          under way (I316);  the words are the label's tooltip's last line
+        - answering a Send:  Send's ring turns instead, its tooltip what it's answering (P55)
+        - before:  a bare spinner beside Send with its words (P35, P53's T53, I210), then its words alone (I316)
       - Each agent has a note box that redirects it (see "Overview").
   - Links to any id in `main` land below the stuck titles.
     They unfold what hides the target, and open its panel.

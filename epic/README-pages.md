@@ -321,7 +321,7 @@ Only the tool writes it, under a lock.
   handedOver: "2026-10-21T12:50:32", // the last Send a session took
   comments: {},
   woken: null, // the last time Send woke a session
-  doing: null // what the session says it's on:  "Building P35", beside Send
+  doing: null // what the session says it's on:  "Building P35", in the header's step label's tooltip
 }
 ```
 

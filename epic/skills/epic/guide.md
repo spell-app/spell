@@ -82,7 +82,7 @@ its page server and editor, and says so;  a FAILED install leaves the merge in, 
 After a restart, agents it started are gone:  start each again from its task, as the epic's running list
 (`epic agents`) names it.
 
-1. `epic phase <epic>#P3 active`, and the page's line:  `epic inbox status <epic> "Building P3"`.
+1. `epic phase <epic>#P3 active`, and say what you're doing:  `epic inbox status <epic> "Building P3"` (the page's step label turns, the words its tooltip).
 2. Check the accepted plan still fits.
    - A small change:  `epic updated <epic>#P3 "<p>what changed</p>" --summary "Plan adjusted:  ..."`.
    - A big one (scope, a choice the person made):  write the plan again (`--plan`) and stop for them.

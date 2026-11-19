@@ -420,7 +420,7 @@ inbox:  epic inbox wait seo  (the inbox's verb goes first)
 | `epic inbox ignore <epic>` | this session has stopped reviewing:  the page says so |
 | `epic inbox wait <epic>` | waits in the background until there's work, prints it and exits 0, which wakes the session;  nothing in 55 minutes:  exit 2 (`--timeout <seconds>`) |
 | `epic inbox apply <epic> [ids ...]` | applies the sent approvals, picks, new todos and test answers, printing each, and what it left to talk over;  `--all`:  unsent ones too |
-| `epic inbox status <epic> "<text>"` | sets the toolbar's line, what the session is doing (`"Responding"`);  `--items q3,c2`:  what it's answering;  `--clear`:  idle |
+| `epic inbox status <epic> "<text>"` | says what the session is doing (`"Responding"`):  the page's step label turns, the words its tooltip;  `--items q3,c2`:  what it's answering;  `--clear`:  idle |
 | `epic inbox working <epic>#J3 on \| off` | turns the page's spinner on an item on or off;  on a comment (`seo#C3`), its "Claude:  thinking…" |
 | `epic inbox done <epic>#J3` | an agent finished the item:  its mark and spinner go, unless you changed the mark meanwhile;  on a comment, `--file <reply.html>` is its answer (`--commit <sha>`:  where it was built) |
 | `epic inbox clear <epic>#J3` | drops an item's marks:  a revisit talked over |

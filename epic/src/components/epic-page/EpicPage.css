@@ -230,10 +230,7 @@
     min-width: 0;
     overflow: hidden;
   }
-  /*
-   * the header's middle:  Send, then the session's bare spinner (T53);  while the spinner shows, as much room before
-   * Send as it takes after, so the plane stays at the exact middle
-   */
+  /* the header's middle:  Send alone (what the session is doing turns the step label:  epic `epic-engine` I340) */
   .centre {
     display: inline-flex;
     align-items: center;
@@ -242,13 +239,6 @@
   }
   .centre:empty {
     display: none;
-  }
-  .centre:has(epic-agents:state(doing)) {
-    padding-inline-start: calc(16px + 8px);
-  }
-  .centre epic-agents {
-    --epic-agents-ink: var(--epic-muted);
-    --epic-agents-spinner-size: 16px;
   }
   .heading-copy:hover {
     color: var(--epic-accent);

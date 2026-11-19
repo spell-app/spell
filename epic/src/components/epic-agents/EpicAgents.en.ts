@@ -16,25 +16,24 @@ export const epicAgentsVocabulary = {
   topics: ["status", "lists", "forms"],
   aka: ["agents", "running agents", "agents running", "redirect", "background agents"],
   skeleton: "header, 2 line paragraph",
-  noun: "agents panel",
+  noun: "agents button",
   ui: false,
   description:
     "What Claude is doing (epic `epic-engine` P35), drawn by `<epic-page>` in its shadow root, never written in a " +
     "doc:  the listening session's line (`Responding`, `Building P35`, set by `epic inbox status`), a grey pill with " +
-    "a spinner, or a bare spinner beside the header's Send (P53), its tooltip listing what it's answering;  and while agents " +
+    "a spinner, its tooltip listing what it's answering (an epic page's header draws no line since I340:  its phase pill " +
+    "turns, the line in its tooltip);  and while agents " +
     "run, `2` and a robot, a button (`2 agents running` its name and tooltip) whose popover holds a row per agent (name, status, age, task, the redirects so far), each with a note box " +
     "that redirects it, sent by a blue plane.  Only while the page is served with a token.",
   attributes: [
     {
       name: "draws",
       kind: "enum",
-      values: ["doing", "spinner", "words", "agents"],
+      values: ["doing", "agents"],
       description:
-        "Which part it draws:  `doing` (the session's line, a grey pill with a spinner and its words), `spinner` (the " +
-        "same line as a bare spinner, its words the tooltip:  beside an epic page header's Send, epic `epic-engine` " +
-        "P53;  hidden while the session answers a Send, whose own ring turns then, P55), `words` (that line's words " +
-        "alone, no spinner:  the header's step label turns for it instead, I316) or `agents` (the agents' button, in the header's pill:  Owen, 2026-10-25);  none:  the line and the " +
-        "agents both."
+        "Which part it draws:  `doing` (the session's line, a grey pill with a spinner and its words) or `agents` (the " +
+        "agents' button, in an epic page header's pill:  Owen, 2026-10-25);  none:  the line and the agents both.  " +
+        "`spinner` and `words`, the line beside the header's Send (P53, I316), went in epic `epic-engine` I340."
     }
   ],
   events: [],
@@ -55,7 +54,7 @@ export const epicAgentsVocabulary = {
   ],
   states: [
     { name: "running", description: "Agents are running:  its button shows." },
-    { name: "doing", description: "The session's line shows (`doing`, `spinner` or `words`):  the session is at work." }
+    { name: "doing", description: "The session's line shows (`doing`, or none):  the session is at work." }
   ],
   texts: [
     { key: "doingTip", text: "{doing}:", description: "The line's tooltip, its head:  what Claude is doing." },

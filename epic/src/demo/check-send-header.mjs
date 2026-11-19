@@ -1,7 +1,7 @@
 /**
  * Check the epic page HEADER of epic `epic-engine` P53 (Send Countdown) in a real browser:  Send at the header's
- * middle with Auto Send's ring part-filled round the plane, the session's bare spinner beside it (or, while a phase
- * builds, in the step label:  I316), the gear's menu with
+ * middle with Auto Send's ring part-filled round the plane, the step label turning while the session works (I316, I340:
+ * no words in the header), the gear's menu with
  * each sub-menu open (Auto Send, Theme);  and a page in each stage (epic `epic-engine` I180):  the header still the plain
  * paper plane, with its ring, and the stage's Accept on the title row of what it accepts:  Accept Overview on the
  * Overview's, Accept Phases on the Phases section's, before its gear.
@@ -10,12 +10,13 @@
  *   node src/demo/check-send-header.mjs [--doc <name>] [--bundle <spell-ui.js>] [outDir]
  * - the copy:  epic `<name>`'s page (default `epic-engine`), its skeleton and parts, NEVER its inbox, as
  *   `src/demo/shots/send-header/epics/send-header/` (git-ignored);  its inbox written here:  a session listening and
- *   "Building P53" (so the spinner shows), one item marked and not sent (so the ring counts)
+ *   "Building P53" (so the step label turns), one item marked and not sent (so the ring counts)
  * - the server:  a page server of its OWN (`DemoServer`), THIS checkout's pack and routes;  it wakes nobody
  * - the browser's clock is Playwright's:  45 seconds on, the ring is part-filled
- * - at 1200px and 400px (VS Code's side bar), light and dark;  measures:
+ * - at 1200px, 520px and 400px (VS Code's side bar), light and dark;  measures:
  *   - the plane at the header's exact middle (1px), or narrow:  after the h1, before the right side, never over either
- *   - the ring round the plane, inside the header;  the spinner and the gear on the plane's middle line (1px)
+ *   - the ring round the plane, inside the header;  the gear on the plane's middle line (1px)
+ *   - the epic's name in the h1 whole, never cut short (epic `epic-engine` I340)
  *   - nothing wider than the window, the gear's menu and its sub-menus included
  * - screenshots (outDir, default `src/demo/shots/send-header/`):  `header-<w>-<scheme>.png`, `gear-<w>-<scheme>.png`,
  *   `auto-send-<w>-<scheme>.png`, `theme-<w>-<scheme>.png`, `stage-<stage>-<w>-<scheme>.png`, and each stage's Accept
@@ -27,11 +28,11 @@
  * - every step waits for what it measures (the ring part-filled, Accept counting, its tooltip's time), never a fixed
  *   delay;  a page that reloads under a step (a bundle rebuilt by another server) is named as the problem
  * - Send's TURNING ring (P55):  the inbox says the session is answering two sent items, nothing unsent:  the ring
- *   turns round the plane, centred on it (1px), the element's height, no spinner beside it;  then idle:  neither ring;
+ *   turns round the plane, centred on it (1px), the element's height, the step label still;  then idle:  neither ring;
  *   `working-<w>-<scheme>.png`
  * - a phase BUILDING (epic `epic-engine` I316):  a copy with a phase under way, "Building P53":  the step label's icon
- *   turns (Spell UI's loading circle), centred where its still icon is (1px), the same size;  the line beside Send keeps
- *   its words, no spinner;  `building-<w>-<scheme>.png`, `building-pill-<w>-<scheme>.png`
+ *   turns (Spell UI's loading circle), centred where its still icon is (1px), the same size;  no line in the header
+ *   (I340), the words the label's tooltip;  `building-<w>-<scheme>.png`, `building-pill-<w>-<scheme>.png`
  * - fails (exit 1) on a page error or a measure off;  re-runs itself under `tsx` (the page server is TypeScript)
  */
 import { spawnSync } from "node:child_process"
@@ -79,8 +80,8 @@ const STAGE_ON_MS = 60_000
 const STAGE_LEFT_S = (STAGE_COUNTDOWN_MS - STAGE_ON_MS) / 1000
 const STAGE_TOLERANCE_S = 1
 const STAGED = { overview: "send-header-overview", phases: "send-header-phases" }
-/** The copy with a phase under way (I316). */
-const BUILDING = "send-header-building"
+/** The copy with a phase under way (I316):  a name as long as `epic-engine`'s, so its measure means the same (I340). */
+const BUILDING = "header-busy"
 const problems = []
 const summary = {}
 
@@ -96,7 +97,7 @@ copyEpic(BUILDING, "", { building: true })
 const server = await DemoServer.start({ content: CONTENT })
 const browser = await BrowserPage.launch()
 try {
-  for (const width of [1200, 400])
+  for (const width of [1200, 520, 400])
     for (const scheme of ["light", "dark"]) {
       await header(width, scheme)
       await working(width, scheme)
@@ -119,7 +120,7 @@ if (problems.length) {
 // ## The header
 ////////////////
 
-/** The header at `width`, in `scheme`:  the ring part-filled, the spinner, the gear and its sub-menus. */
+/** The header at `width`, in `scheme`:  the ring part-filled, the step label turning, the gear and its sub-menus. */
 async function header(width, scheme) {
   const tag = `${width}-${scheme}`
   writeInbox(NAME)
@@ -129,7 +130,7 @@ async function header(width, scheme) {
     .catch(() => problems.push(`${tag}:  no ring round the plane (marked ${marked})`))
   await page
     .waitForFunction(() => spinner(), null, { timeout: 8000 })
-    .catch(() => problems.push(`${tag}:  no spinner beside Send, nor in the step label`))
+    .catch(() => problems.push(`${tag}:  the step label doesn't turn`))
   await page.clock.fastForward(45_000)
   // the ring drains a tick at a time:  wait for it to show the 45 seconds gone
   await page.waitForFunction(() => (measure().done ?? 0) > 0.15, null, { timeout: 5000 }).catch(() => undefined)
@@ -138,6 +139,7 @@ async function header(width, scheme) {
   if (width > 600 && Math.abs(measured.plane.middle - measured.header.middle) > 1)
     problems.push(`${tag}:  the plane ${measured.plane.middle} is off the header's middle ${measured.header.middle}`)
   if (measured.heading.right > measured.plane.left + 0.5) problems.push(`${tag}:  the h1 runs under the plane`)
+  if (measured.name.cut) problems.push(`${tag}:  the epic's name is cut short (${JSON.stringify(measured.name)})`)
   // no ring is said above:  measure the rest
   if (measured.ring && measured.ring.right > measured.status.left + 0.5)
     problems.push(`${tag}:  the ring runs into the right side`)
@@ -145,7 +147,7 @@ async function header(width, scheme) {
     problems.push(`${tag}:  the ring leaves the header (${JSON.stringify(measured.ring)})`)
   if (!(measured.done > 0.15 && measured.done < 0.5))
     problems.push(`${tag}:  the ring isn't part-filled (${measured.done})`)
-  for (const name of ["spinner", "gear"])
+  for (const name of ["gear"])
     if (measured[name] && Math.abs(measured[name].centre - measured.plane.centre) > 1)
       problems.push(
         `${tag}:  the ${name} is off the plane's middle line by ${measured[name].centre - measured.plane.centre}px`
@@ -182,7 +184,7 @@ async function header(width, scheme) {
 
 /**
  * Send while the session answers what was sent (P55):  the turning ring round the plane, centred, no countdown ring,
- * no spinner;  then idle, neither.
+ * the step label still;  then idle, neither.
  */
 async function working(width, scheme) {
   const tag = `working-${width}-${scheme}`
@@ -214,7 +216,7 @@ async function working(width, scheme) {
     if (found.size > found.hostHeight + 0.5) problems.push(`${tag}:  the ring is wider than Send (${found.size})`)
     if (found.turning !== "epic-ring-turn") problems.push(`${tag}:  the ring doesn't turn`)
     if (found.countdown) problems.push(`${tag}:  the countdown ring shows too`)
-    if (found.spinner) problems.push(`${tag}:  the spinner still shows beside Send`)
+    if (found.spinner) problems.push(`${tag}:  the step label turns too`)
     const header = await page.evaluate(() => measure().header)
     await page.screenshot({ path: join(out, `${tag}.png`), clip: clipOf(header, width) })
   }
@@ -230,8 +232,9 @@ async function working(width, scheme) {
 }
 
 /**
- * A phase building (I316):  the step label's icon turns, centred where the still icon is, its size;  the line beside Send
- * its words alone.  Then idle:  the still icon, measured for the comparison.
+ * A phase building (I316):  the step label's icon turns, centred where the still icon is, its size;  no line in the
+ * header (I340), the words the label's tooltip, the epic's name whole.  Then idle:  the still icon, measured for the
+ * comparison.
  */
 async function building(width, scheme) {
   const tag = `building-${width}-${scheme}`
@@ -242,9 +245,10 @@ async function building(width, scheme) {
     .catch(() => problems.push(`${tag}:  the step label's icon doesn't turn`))
   const turning = await page.evaluate(() => ({
     ...stepIcon(),
-    line: page_().querySelector('[part~="centre"] epic-agents')?.getAttribute("draws"),
-    words: page_().querySelector('[part~="centre"] epic-agents')?.shadowRoot?.querySelector(".doing-words")?.textContent,
-    spinner: !!page_().querySelector('[part~="centre"] epic-agents')?.shadowRoot?.querySelector(".spinner"),
+    line: !!page_().querySelector('[part~="centre"] epic-agents'),
+    words: page_().querySelector('[part~="header"]').textContent.includes("Building"),
+    tip: page_().querySelector('[part~="step-pill"] ui-label')?.title,
+    name: measure().name,
     header: measure().header,
     pill: measure().pill
   }))
@@ -261,9 +265,10 @@ async function building(width, scheme) {
   const still = await idle.evaluate(() => stepIcon())
   await idle.close()
   summary[tag] = { turning, still }
-  if (turning.line !== "words") problems.push(`${tag}:  the line beside Send draws "${turning.line}", not its words alone`)
-  if (turning.spinner) problems.push(`${tag}:  a second spinner beside Send`)
-  if (!turning.words) problems.push(`${tag}:  the line's words are gone`)
+  if (turning.line) problems.push(`${tag}:  a line beside Send`)
+  if (turning.words) problems.push(`${tag}:  the header shows what the session is doing in words`)
+  if (!turning.tip?.endsWith("Claude:  Building P53")) problems.push(`${tag}:  the label's tooltip lacks the words (${turning.tip})`)
+  if (turning.name.cut) problems.push(`${tag}:  the epic's name is cut short (${JSON.stringify(turning.name)})`)
   if (still.turning) problems.push(`${tag}:  the icon still turns with nothing building`)
   if (turning.box && still.box) {
     for (const [what, a, b] of [
@@ -437,11 +442,8 @@ async function openPage(name, width, scheme) {
 function HELPERS() {
   window.page_ = () => document.querySelector("epic-page")?.shadowRoot
   window.sendRoot = () => page_()?.querySelector('[part~="send"]')?.shadowRoot
-  // the session's spinner:  beside Send, else the step label's turning icon while a phase builds (I316)
-  window.spinner = () =>
-    page_()?.querySelector('epic-agents[draws="spinner"]')?.shadowRoot?.querySelector(".spinner") ??
-    page_()?.querySelector('[part~="step-spinner"]')?.shadowRoot?.querySelector('[part~="icon"]') ??
-    null
+  // the session at work:  the step label's turning icon (I316, I340)
+  window.spinner = () => page_()?.querySelector('[part~="step-spinner"]')?.shadowRoot?.querySelector('[part~="icon"]') ?? null
   window.gearButton = () => page_().querySelector('[part~="gear"]')
   // the step label's icon (I316):  its box, and the glyph in it, from the label's own box;  a turning one's untransformed
   // size (`offsetWidth`:  a rotated box's bounds grow), its centre unchanged by the turn
@@ -500,6 +502,11 @@ function HELPERS() {
     return {
       header: box(page_().querySelector('[part~="header"]')),
       heading: box(page_().querySelector('[part~="heading"]')),
+      // the epic's name (I340):  cut short when its text is wider than its box
+      name: (() => {
+        const name = page_().querySelector(".heading-copy")
+        return { text: name.textContent, width: name.clientWidth, needs: name.scrollWidth, cut: name.scrollWidth > name.clientWidth + 1 }
+      })(),
       status: box(page_().querySelector('[part~="status"]')),
       plane: box(sendRoot().querySelector('[part~="send"] .glyph')),
       ring: sendRoot().querySelector('[part~="ring"]') ? box(sendRoot().querySelector('[part~="ring"]')) : null,
