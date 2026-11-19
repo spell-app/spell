@@ -167,6 +167,8 @@ export async function placeVerify(
     CLI.out(`Verified ${description.about.name}, for ${file}.  Its description:  ${descriptionPath}`)
     printList("What changed:", changes.length ? changes : ["Nothing."])
     if (couldntChange.length) printList("What it couldn't change for you:", couldntChange)
+    // what the writes it was told to try answered:  else only its description says (epic `data` P55)
+    if (tryWrites) printList("Writes:", [description.canDo.write])
     const failed = Object.entries(description.collections).filter(([, { state }]) => state?.is === "failed")
     if (failed.length)
       printList(
