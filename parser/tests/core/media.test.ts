@@ -224,7 +224,7 @@ describe("where a video plays (epic `language` J280)", () => {
   function stubPage() {
     const { document } = parseHTML("<html><body></body></html>")
     const create = document.createElement.bind(document)
-    const videos: Array<HTMLElement & { plays: number; fullScreens: number }> = []
+    const videos: Array<HTMLElement & { plays: number; fullScreens: number; paused: boolean }> = []
     document.createElement = ((tag: string) => {
       const element = create(tag)
       if (tag === "video") {

@@ -20,15 +20,18 @@ const MOST_WORDS = 6
  */
 export class MediaNameWords extends P.Sequence {
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
+    let most = 0
+    while (most < MOST_WORDS && tokens[most] instanceof P.WordToken) most++
+    if (!most) return undefined
+    const words = tokens.slice(0, most).map((token) => `${token.value}`)
     const names = mediaNamesIn(scope)
-    const words: string[] = []
     let found = 0
-    for (const token of tokens.slice(0, MOST_WORDS)) {
-      if (!(token instanceof P.WordToken)) break
-      words.push(`${token.value}`)
-      if (names.has(mediaNameKey(words.join(" ")))) found = words.length
+    if (names.size) {
+      for (let count = 1; count <= most; count++) {
+        if (names.has(mediaNameKey(words.slice(0, count).join(" ")))) found = count
+      }
     }
-    found ||= MediaNameWords.namedFurtherDown(scope, tokens, words.length)
+    found ||= MediaNameWords.namedFurtherDown(scope, tokens, most)
     if (!found) return undefined
     const matched = tokens.slice(0, found)
     return new P.Match({
@@ -46,11 +49,11 @@ export class MediaNameWords extends P.Sequence {
    * when they and it aren't a property of the thing `scope` is in -- 0 for none.
    */
   private static namedFurtherDown(scope: P.Scope, tokens: P.Token[], most: number): number {
-    const words = tokens.slice(0, most).map((token) => `${token.value}`)
     for (let count = 1; count < most; count++) {
       if (!Wording.lengthAt(scope, "media_kind", tokens, count)) continue
       const thing = P.MethodScope.thingTypeOf(scope)
-      const asProperty = QuotedMember.nameOf(words.slice(0, count + 1).join(" "))
+      const words = tokens.slice(0, count + 1).map((token) => `${token.value}`)
+      const asProperty = QuotedMember.nameOf(words.join(" "))
       return thing?.getMember(asProperty) ? 0 : count
     }
     return 0
