@@ -35,6 +35,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - in an npm install of `spell` (no `src/`), `runTool()` runs a tool's BUILT `.js` under plain node (`builtTool()`;
       epic `repo-split` P26):  `spell server` from a project depending on `spell`
   - [findCheckout.ts](findCheckout.ts) -- `findCheckout()`, `KIT_ROOT`, `KIT_MARKER`
+  - [kitCheckout.ts](kitCheckout.ts) -- `kitCheckoutBin()`, `checkoutToRun()`:
+    a published bin runs the checkout `SPELL_KIT` names instead (epic `repo-split` T69);  node built-ins only
   - [cli.types.ts](cli.types.ts) -- `EXIT`, `CliError`, the flags' types, `CommandList`, `HookList`, `SpellRepo`
 - The kit's own commands:  [commands.ts](commands.ts) is their list, [commands/](commands/) their work.
 
