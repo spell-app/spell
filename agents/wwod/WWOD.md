@@ -97,6 +97,16 @@ Read the spoke(s) for what you're touching BEFORE writing code or text:
 - **Delete a field, option or export nothing reads**, rather than keeping it.
 - **Ask before adding a dependency:**  ask Owen before adding any runtime dependency to a package;  lodash and
   `spell/util` first (above).
+- **Spell UI for ABSOLUTELY EVERYTHING possible:**  a component, a page, a docs page, an epic page, a mockup is built
+  from `<ui-*>` elements wherever one exists -- buttons, inputs, menus, loaders, messages, sections -- never a native
+  element or a hand-styled copy of one.  (Owen, 2026-11-19, epic `from-console`.)
+  - Inside a component's shadow root too:  `<ui-button size="mini" appearance="basic">`, not `<button>`.
+  - Restyle one through its parts and private tokens, never by setting its public tokens from outside
+    (`componentTokens.test.ts` fails that).
+  - A look Owen asks for that the element can't give:  ASK him, with the choices (change the element, or live
+    without the look), before building around it.
+    - Why:  a design review dropped `<ui-json>`'s `<ui-button>`s for native ones to lose a ring;  Owen:  "should use
+      ui-button. ??"
 - **API layers handle client / server communication and throw:**
   - `$fetch()` (`spell/util`) throws a `ResponseError` subclass for every failure (WWOD §5 › "Server → client error
     identity");  callers never check `response.ok` themselves.
