@@ -7,6 +7,9 @@ import { beforeNextPaint, soon } from "./timing"
  * - What it carries:  the element, and its list's items after it, e.g. a tableau's face-up card and the cards on it.
  *   - They follow the pointer by their `translate`, raised above the board,
  *     with no transition meanwhile, so a page whose cards glide (Solitaire) still keeps up with it (epic `editor` I99).
+ *   - On a board shown turned or scaled (the editor's Anatomy, in 3D), they move in the board's own plane,
+ *     so they stay under the pointer:  the pointer's move is turned back through the board's turn (`PlaneMap`),
+ *     and each keeps the depth its own `translate` gave it (epic `editor` T120).
  *   - They ignore the pointer meanwhile, so what's under it can be found.
  * - Or what its owner says (`DragOptions.carried`), staying where it is (`follows: false`):
  *   e.g. a task list's selected tasks, dimmed, while a line shows where they'd go
@@ -84,6 +87,10 @@ export class Dragging {
   private readonly listening = new AbortController()
   /** What's carried, once it's a drag:  the element, then its list's items after it -- or what `options` says. */
   private moving: HTMLElement[] = []
+  /** Each carried element's depth, the third part of its own `translate` as the drag started (`""`:  none). */
+  private depths: string[] = []
+  /** How a move on screen is a move in the board's plane:  worked out as the drag starts. */
+  private plane = PlaneMap.FLAT
 
   /** What's carried:  the element first. */
   get carried(): readonly HTMLElement[] {
@@ -117,7 +124,10 @@ export class Dragging {
       if (Math.hypot(dx, dy) < DRAG_START_PX) return
       this.start()
     }
-    if (this.follows) for (const element of this.moving) element.style.translate = `${dx}px ${dy}px`
+    if (this.follows) {
+      const [x, y] = this.plane.toPlane(dx, dy)
+      this.moving.forEach((element, index) => (element.style.translate = `${x}px ${y}px${this.depths[index]}`))
+    }
     event.preventDefault()
     Dragging.send(this.element, "drag", event)
     if (this.options.placing) return this.options.placing(event.clientX, event.clientY)
@@ -162,6 +172,8 @@ export class Dragging {
         // follows the pointer at once:  a page's own `transition` on `translate` (Solitaire's cards glide) would trail it
         element.style.transition = "none"
       }
+      this.depths = this.moving.map((element) => depthOf(element.style.translate))
+      this.plane = PlaneMap.of(this.element, this.depths[0]!)
     }
     // no text selected as the pointer sweeps the page, as the browser's own drag selects none
     getSelection()?.removeAllRanges()
@@ -228,17 +240,18 @@ export class Dragging {
   private settle() {
     for (const element of this.follows ? this.moving : []) {
       const from = element.style.translate
+      const depth = depthOf(from)
       element.style.translate = ""
       element.style.pointerEvents = ""
       element.style.zIndex = ""
       // its new place taken without a transition (read, so the browser has it), then the page's own back
       void getComputedStyle(element).translate
       element.style.transition = ""
-      if (element.isConnected && from && from !== "0px 0px") {
+      if (element.isConnected && from && from !== `0px 0px${depth}`) {
         element.animate(
           [
             { translate: from, zIndex: DRAGGING_Z_INDEX },
-            { translate: "0 0", zIndex: DRAGGING_Z_INDEX }
+            { translate: `0px 0px${depth}`, zIndex: DRAGGING_Z_INDEX }
           ],
           {
             duration: SLIDE_BACK_MS,
@@ -345,6 +358,62 @@ export class Dragging {
     // a pointer up off the element makes no click:  stop waiting for one
     soon(() => window.removeEventListener("click", swallow, { capture: true }))
   }
+}
+
+/**
+ * How a move of the pointer on screen is a move in the plane of the board an element lies on:
+ * the inverse of how the board's turn and size carry a move of the element across the screen.
+ * - Measured, not worked out from the transforms:  the element is moved 100px across and 100px down in its plane
+ *   (keeping its depth), and where its box goes on screen says how its plane lies.
+ * - A flat board, or one the browser can't say, is `FLAT`:  a move on screen is the same move in the plane.
+ */
+class PlaneMap {
+  /** No turn, no size:  the same move. */
+  static readonly FLAT = new PlaneMap(1, 0, 0, 1)
+
+  /** The map for `element`, whose own `translate` depth is `depth` (`""`, or ` <length>`). */
+  static of(element: HTMLElement, depth: string): PlaneMap {
+    const centre = () => {
+      const box = element.getBoundingClientRect()
+      return [box.left + box.width / 2, box.top + box.height / 2] as const
+    }
+    const own = element.style.translate
+    const [x0, y0] = centre()
+    element.style.translate = `${PROBE_PX}px 0px${depth}`
+    const [x1, y1] = centre()
+    element.style.translate = `0px ${PROBE_PX}px${depth}`
+    const [x2, y2] = centre()
+    element.style.translate = own
+    // across and down in the plane, on screen, per pixel
+    const [a, c, b, d] = [(x1 - x0) / PROBE_PX, (y1 - y0) / PROBE_PX, (x2 - x0) / PROBE_PX, (y2 - y0) / PROBE_PX]
+    const det = a * d - b * c
+    if (!Number.isFinite(det) || Math.abs(det) < 0.01) return PlaneMap.FLAT
+    if (Math.abs(a - 1) < 0.001 && Math.abs(d - 1) < 0.001 && Math.abs(b) < 0.001 && Math.abs(c) < 0.001)
+      return PlaneMap.FLAT
+    return new PlaneMap(d / det, -b / det, -c / det, a / det)
+  }
+
+  private constructor(
+    private readonly xx: number,
+    private readonly xy: number,
+    private readonly yx: number,
+    private readonly yy: number
+  ) {}
+
+  /** The move in the plane that carries the element `dx`, `dy` across the screen. */
+  toPlane(dx: number, dy: number): [number, number] {
+    if (this === PlaneMap.FLAT) return [dx, dy]
+    return [this.xx * dx + this.xy * dy, this.yx * dx + this.yy * dy]
+  }
+}
+
+/** How far `PlaneMap.of()` moves the element to see where its plane lies, px. */
+const PROBE_PX = 100
+
+/** The depth part of a `translate` (`"10px 4px 48px"` => `" 48px"`), with its space:  `""` for none. */
+function depthOf(translate: string): string {
+  const depth = translate.trim().split(/\s+/)[2]
+  return depth ? ` ${depth}` : ""
 }
 
 /** One owner's rule for what takes a drop:  `Dragging.addDropRule()`. */

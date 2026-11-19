@@ -9,7 +9,15 @@
 .AppPane:has(> .AnatomyBar) {
   position: relative;
   --AppAnatomy-view: var(--bubbly-thing, #7c5cd6);
+  /*
+   * the whole of its split pane, not just the app's height, so the turned app is cut off only at the pane's edges (I266)
+   * - the app keeps its own height:  only the room round it grows
+   */
+  height: 100%;
 
+  & > .AppPaneBody > .AppPaneProgram {
+    flex: 0 0 auto;
+  }
   & > .AppPaneBody {
     overflow: hidden;
     perspective-origin: 50% 40%;
@@ -19,15 +27,19 @@
     cursor: grabbing;
   }
 
-  /* the bar:  the top bar's glass, over the app's top edge */
+  /*
+   * the bar:  the top bar's glass, over the app's top edge
+   * - three columns:  where it's looking at the left, its controls in the middle, centred on the bar itself (T121),
+   *   the icons at the right
+   */
   .AnatomyBar {
     position: absolute;
     top: 8px;
     left: 8px;
     right: 8px;
     z-index: 3;
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
     gap: 8px 16px;
     padding: 4px 12px;
@@ -42,6 +54,20 @@
     display: flex;
     align-items: center;
     gap: 8px;
+  }
+  .AnatomyCrumbs {
+    justify-self: start;
+    white-space: nowrap;
+  }
+  /* the middle:  Play | Inspect, Front, Spacing, Views | Named | Outlines, as one group, wrapping in a narrow pane */
+  .AnatomyMiddle {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px 16px;
+    /* no block margin on its menus:  a menu first or last in its box keeps only one, and sits off the middle */
+    --ui-menu-margin: 0;
   }
   .AnatomyControls {
     flex-wrap: wrap;
@@ -75,7 +101,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-left: auto;
+    justify-self: end;
   }
   .AnatomyEnd > ui-icon {
     color: var(--ui-text-muted);
@@ -84,18 +110,19 @@
     cursor: help;
   }
 
-  /* the full window's hint, at the 3D view's top left, under the bar (I260) */
+  /*
+   * the full window's hint, under the bar at its left (I260):  20px below it, whatever the bar's height,
+   * big, bold and yellow on the dark dim (T121)
+   */
   .AnatomyEscHint {
     position: absolute;
-    top: 64px;
-    left: 16px;
-    z-index: 3;
-    padding: 4px 8px;
-    border-radius: 4px;
-    background: rgb(0 0 0 / 0.56);
-    color: white;
-    font-size: 12px;
-    line-height: 16px;
+    top: calc(100% + 20px);
+    left: 8px;
+    color: var(--ui-yellow-inverted, #fbbd08);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 20px;
+    white-space: nowrap;
     pointer-events: none;
   }
 
@@ -179,12 +206,14 @@
   z-index: 900;
   border-radius: 12px;
   /*
-   * no surface of its own:  the turned app sits on the dark dim, inside the pane as round it (I263)
-   * - the dim nearly black, so the editor behind doesn't show through (I260)
+   * no surface of its own:  the turned app sits on the dim, inside the pane as round it (I263)
+   * - the dim dark in every theme, 90% opaque, so the editor behind barely shows through (I260, T121, J234)
    */
   background: var(--AnatomyFullWindow-dim);
   box-shadow: 0 0 0 100vmax var(--AnatomyFullWindow-dim);
-  --AnatomyFullWindow-dim: rgb(0 0 0 / 0.88);
+  /* its inset decides its height */
+  height: auto;
+  --AnatomyFullWindow-dim: rgb(0 0 0 / 0.9);
 
   /* nor its body, nor the program's:  the editor's own surfaces would show behind the app */
   & > .AppPaneBody,

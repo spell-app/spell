@@ -1,22 +1,60 @@
 /*
- * The Keyboard Shortcuts dialog (`<ShortcutsDialog>`):  a search field, then the groups of rows, which scroll
- * under it on a short window.  On the 4px grid.
+ * The Keyboard Shortcuts dialog (`<ShortcutsDialog>`):  a title bar holding its title and search field,
+ * then the groups of rows, which scroll under it.  On the 4px grid.
+ * - The title bar is the dialog's own glass;  the rows sit on the theme's plain surface, made opaque
+ *   (`--ShortcutsDialog-paper`):  Glass's surfaces are see-through, and the app showing through made them hard to read.
+ * - The rows run to the dialog's right edge, so their scroll bar is at its edge, not inset beside the keys.
+ * - The ✕ is `<ui-modal>`'s own, placed on the title bar's centre line (its `--ui-modal-inner-close-*`).
  */
 .ShortcutsDialog {
-  --ui-modal-width: min(560px, 95vw);
+  --ui-modal-width: min(520px, 95vw);
+  /* the title bar's height, and the ✕'s box, centred in it */
+  --ShortcutsDialog-bar-height: 56px;
+  --ui-modal-close-hitbox: 32px;
+  --ui-modal-inner-close-top: calc((var(--ShortcutsDialog-bar-height) - 32px) / 2);
+  --ui-modal-inner-close-right: 12px;
+  --ShortcutsDialog-paper: oklch(from var(--ui-surface) l c h / 1);
+  /* key caps:  larger and bold, so ⌘ ⇧ ⌥ read at a glance */
+  --ui-keys-font-size: 14px;
+  --ui-keys-color: var(--ui-text-color);
+}
+
+/* the title bar:  the title, then the search field taking the room left before the ✕ */
+.ShortcutsDialog .ShortcutsHeader {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: var(--ShortcutsDialog-bar-height);
+  padding: 0 56px 0 20px;
+  border-bottom: var(--ui-border-width) solid var(--ui-border-color);
+}
+
+.ShortcutsDialog .ShortcutsTitle {
+  flex: none;
+  margin: 0;
+  font-family: var(--ui-font-family-heading);
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: var(--ui-font-weight-bold);
+  color: var(--ui-text-dark);
 }
 
 .ShortcutsDialog .ShortcutsSearch {
-  margin-bottom: 12px;
+  flex: 1;
+  min-width: 0;
 }
 
-/* the rows scroll inside the dialog, the search field staying put */
+/* the rows scroll inside the dialog, the title bar staying put */
 .ShortcutsDialog .ShortcutsList {
+  box-sizing: border-box;
   /* a set height:  the dialog keeps its size and place as the search narrows it */
-  height: min(60vh, 560px);
+  height: min(52vh, 480px);
   overflow-y: auto;
-  margin: 0 -4px;
-  padding: 0 4px;
+  /* 16px between the key caps and the scroll bar, at the dialog's edge */
+  padding: 12px 16px 16px 20px;
+  background: var(--ShortcutsDialog-paper);
+  font-size: 14px;
 }
 
 .ShortcutsDialog .ShortcutsGroup + .ShortcutsGroup {
@@ -25,7 +63,7 @@
 
 .ShortcutsDialog .ShortcutsGroup h3 {
   margin: 0 0 4px 0;
-  font-size: 12px;
+  font-size: 11px;
   line-height: 16px;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -70,8 +108,37 @@
   color: var(--ui-text-muted);
 }
 
-.ShortcutsDialog .ShortcutsRow ui-keys {
+/* its keys:  each shortcut that does it on a line of its own, at the right, "or" before the next */
+.ShortcutsDialog .ShortcutsKeys {
   flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.ShortcutsDialog .ShortcutsChord {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ShortcutsDialog .ShortcutsOr {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--ui-text-muted);
+}
+
+/* a cap 24px square at least, its symbol bold;  in the page's font, whose ⇧ and ⌥ are full size (the code font's
+   are drawn from a fallback, half as big) */
+.ShortcutsDialog ui-keys::part(key) {
+  min-width: 24px;
+  height: 24px;
+  padding-inline: 6px;
+  font-family: var(--ui-font-family);
+  font-weight: 700;
+  /* ↩ as a symbol, never the page font's emoji */
+  font-variant-emoji: text;
 }
 
 .ShortcutsDialog .ShortcutsNone {

@@ -9,6 +9,7 @@ import { EDITOR, SERVING } from "./runningEditor"
  * - It opens face on, then turns to its resting angle half a second later (I256, T118);
  *   once it rests, a drag turns it (I262).
  * - Each view is a floor over the view that holds it, lifted by the spacing:  nested as the Views tree is.
+ * - Spell UI's parts too:  the header comes apart into its toolbar, title, buttons and score (I261).
  * - The cards of a pile step up one by one, each over the one under it (I256).
  * - Each floor has its type's tag over it.
  * - A click on a card's floor selects that card:  the Inspector's selection and the tree's row.
@@ -110,6 +111,37 @@ describe.skipIf(!SERVING)("Anatomy, over Solitaire", { timeout: 180_000 }, () =>
       throw new Error(`spotOnCard():  every spot on ${cardId} is under its pictures`)
     }, id)
 
+  /**
+   * A spot well inside what shows of `selector`'s element on screen, over its floors:  the hit with most hits round it.
+   * - Not at an edge, where a pointer slipping a pixel lands on something else.
+   */
+  const spotIn = (selector: string) =>
+    page.evaluate((within): { x: number; y: number } => {
+      const element = document.querySelector(within)!
+      const box = element.getBoundingClientRect()
+      const holds = (found: Element | null) => {
+        for (let node = found; node; node = node.parentElement ?? ((node.getRootNode() as ShadowRoot).host || null))
+          if (node === element) return true
+        return false
+      }
+      const hits: { x: number; y: number }[] = []
+      for (let y = box.top + 2; y < box.bottom; y += 3) {
+        for (let x = box.left + 2; x < box.right; x += 3) {
+          let found = document.elementFromPoint(x, y)
+          for (let inside = found?.shadowRoot?.elementFromPoint(x, y); inside && inside !== found;) {
+            found = inside
+            inside = found.shadowRoot?.elementFromPoint(x, y)
+          }
+          if (holds(found)) hits.push({ x, y })
+        }
+      }
+      const around = (hit: { x: number; y: number }) =>
+        hits.filter((other) => Math.abs(other.x - hit.x) <= 9 && Math.abs(other.y - hit.y) <= 9).length
+      const best = hits.sort((one, other) => around(other) - around(one))[0]
+      if (!best) throw new Error(`spotIn():  nothing of ${within} shows`)
+      return best
+    }, selector)
+
   test("each view is a floor over the view holding it, tagged with its type;  a click selects;  off puts it back", async () => {
     const before = await stylesNow()
     // the palette kept open, so its strip shows
@@ -122,12 +154,23 @@ describe.skipIf(!SERVING)("Anatomy, over Solitaire", { timeout: 180_000 }, () =>
     expect(await page.locator(".PaletteStrip").count()).toBe(0)
     const turn = () => page.evaluate(() => (window as unknown as TestWindow).AppAnatomy.view)
 
+    // the pane fills its split pane while it shows, so the turned app is cut off only at the pane's edges (I266)
+    const edges = await page.evaluate(() => {
+      const body = document.querySelector(".AppPaneBody")!
+      return {
+        body: body.getBoundingClientRect().bottom,
+        split: body.closest(".SplitPane")!.getBoundingClientRect().bottom
+      }
+    })
+    expect(edges.body).toBeCloseTo(edges.split, 0)
+
     // face on at first, then turned to its resting angle once it's waited half a second and turned
     expect(await turn()).toMatchObject({ tilt: 0, spin: 0 })
 
-    // what it shows:  Views | Outlines, no Depth slider (T118)
+    // what it shows:  Views | Named | Outlines, no Depth slider (T118, T121);  Named for the tags below
     const tabs = await page.locator(".AnatomyShows ui-item").allTextContents()
-    expect(tabs.map((tab) => tab.trim())).toEqual(["Views", "Outlines"])
+    expect(tabs.map((tab) => tab.trim())).toEqual(["Views", "Named", "Outlines"])
+    await page.locator(".AnatomyShows ui-item[value=named] [part~=item]").click()
     expect(await page.locator(".AnatomyBar ui-slider").count()).toBe(1)
     await page.waitForTimeout(2500)
     const resting = await turn()
@@ -175,6 +218,26 @@ describe.skipIf(!SERVING)("Anatomy, over Solitaire", { timeout: 180_000 }, () =>
     expect(lifts.column).toBe(`0px 0px ${lifts.spacing}px`)
     expect(lifts.card).toBe(`0px 0px ${lifts.spacing}px`)
     expect(lifts.tags).toEqual(expect.arrayContaining(["Solitaire", "Column", "Card"]))
+
+    // the header comes apart (I261):  its toolbar over its segment, its title, buttons and score each over the toolbar,
+    // each lifted by the box its tag draws in its shadow root;  nothing in the app is lifted "in one piece"
+    const header = await page.evaluate(() => {
+      const toolbar = document.querySelector("solitaire-app ui-toolbar")!
+      const drawnBy = (part: Element) =>
+        (part.shadowRoot?.querySelector("[part]") as HTMLElement | null)?.style.translate ?? ""
+      return {
+        segment: drawnBy(toolbar.closest("ui-segment")!),
+        toolbar: (toolbar as HTMLElement).style.translate,
+        parts: [...toolbar.querySelectorAll(":scope > ui-text, :scope > ui-action")].map(drawnBy),
+        flat: [...document.querySelectorAll(".AnatomyTags .AnatomyFlat")].map((flat) => flat.parentElement!.textContent)
+      }
+    })
+    const lifted = `0px 0px ${lifts.spacing}px`
+    expect(header.segment).toBe(lifted)
+    expect(header.toolbar).toBe(lifted)
+    expect(header.parts).toHaveLength(7)
+    for (const part of header.parts) expect(part).toBe(lifted)
+    expect(header.flat.filter((tag) => /Solitaire|toolbar/.test(tag ?? ""))).toEqual([])
 
     // each column's cards step up one by one:  every card higher than the one under it
     const piles = await page.evaluate(() =>
@@ -248,7 +311,23 @@ describe.skipIf(!SERVING)("Anatomy, over Solitaire", { timeout: 180_000 }, () =>
         (selector) => getComputedStyle(document.querySelector(selector)!).backgroundColor
       )
     )
-    expect(behind).toEqual(["rgba(0, 0, 0, 0.88)", "rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"])
+    // the dim:  dark in every theme, 90% opaque (T121, J234)
+    expect(behind[0]).toBe("rgba(0, 0, 0, 0.9)")
+    expect(behind.slice(1)).toEqual(["rgba(0, 0, 0, 0)", "rgba(0, 0, 0, 0)"])
+    // the bar's controls one group centred on the bar;  "Esc to close" 20px under it, yellow (T121)
+    const bar = await page.evaluate(() => {
+      const box = (selector: string) => document.querySelector(selector)!.getBoundingClientRect()
+      const centre = (rect: DOMRect) => (rect.left + rect.right) / 2
+      return {
+        bar: centre(box(".AnatomyBar")),
+        middle: centre(box(".AnatomyMiddle")),
+        gap: box(".AnatomyEscHint").top - box(".AnatomyBar").bottom,
+        hint: getComputedStyle(document.querySelector(".AnatomyEscHint")!).color
+      }
+    })
+    expect(bar.middle).toBeCloseTo(bar.bar, 0)
+    expect(bar.gap).toBeCloseTo(20, 0)
+    expect(bar.hint).not.toBe("rgb(255, 255, 255)")
     await page.evaluate(() => (window as unknown as TestWindow).AppAnatomy.toggleFullWindow())
     await page.waitForTimeout(300)
 
@@ -258,6 +337,112 @@ describe.skipIf(!SERVING)("Anatomy, over Solitaire", { timeout: 180_000 }, () =>
     expect(await stylesNow()).toEqual(before)
     // and the palette's strip back, without its first arrival again (I263)
     expect(await page.locator(".PaletteStrip").getAttribute("class")).toBe("PaletteStrip")
+    expect(warnings).toEqual([])
+  })
+
+  test("in Play, a click on the stock deals a card, a drag off the cards turns it, and a card drags in 3D", async () => {
+    const turn = () => page.evaluate(() => (window as unknown as TestWindow).AppAnatomy.view)
+    await page.locator(".AnatomyButton [part~=item]").first().click()
+    await page.waitForTimeout(2500)
+    await page.locator(".AnatomyClicks ui-item[value=play] [part~=item]").click()
+    await page.waitForTimeout(300)
+    // Play:  a click on the stock deals a card, though the pointer slips a pixel or two before it lets go (I265)
+    const stockCards = () =>
+      page.evaluate(() => document.querySelectorAll("solitaire-stock-pile > solitaire-card").length)
+    for (let deal = 0; deal < 3; deal++) {
+      const stock = await spotIn("solitaire-stock-pile")
+      const before = await stockCards()
+      await page.mouse.move(stock.x, stock.y)
+      await page.mouse.down()
+      await page.mouse.move(stock.x + 2, stock.y + 1)
+      await page.mouse.up()
+      await page.waitForTimeout(800)
+      expect(await stockCards()).toBe(before - 1)
+    }
+
+    // and a drag where the game takes no press still turns it, in Play (I264)
+    const playTurn = await turn()
+    const below = await page.evaluate(() => {
+      const box = document.querySelector(".AppPaneBody")!.getBoundingClientRect()
+      return { x: box.x + box.width / 2, y: box.bottom - 40 }
+    })
+    await page.mouse.move(below.x, below.y)
+    await page.mouse.down()
+    for (let step = 1; step <= 10; step++) await page.mouse.move(below.x + step * 6, below.y)
+    await page.mouse.up()
+    expect((await turn()).spin).toBeCloseTo(playTurn.spin + 60 * 0.4, 0)
+
+    // a card dragged in Play stays under the pointer, at its depth, in the turned board's plane (T120)
+    const cards = await page.evaluate(() => {
+      const draggable = (element: Element) => element.matches(":state(draggable)")
+      return [...document.querySelectorAll("solitaire-column, solitaire-discard-pile")]
+        .map((pile) => pile.lastElementChild)
+        .filter((top) => top && draggable(top))
+        .map((top) => top!.id)
+    })
+    const centreOf = (id: string) =>
+      page.evaluate((cardId) => {
+        const box = document.getElementById(cardId)!.getBoundingClientRect()
+        return { x: (box.left + box.right) / 2, y: (box.top + box.bottom) / 2 }
+      }, id)
+    // the first that shows:  one may be wholly under a pile lifted over it
+    let card = ""
+    let grab = { x: 0, y: 0 }
+    for (const each of cards) {
+      grab = await spotIn(`[id="${each}"]`).catch(() => grab)
+      if (grab.x) {
+        card = each
+        break
+      }
+    }
+    expect(card).not.toBe("")
+    const held = await centreOf(card)
+    await page.mouse.move(grab.x, grab.y)
+    await page.mouse.down()
+    for (let step = 1; step <= 10; step++) await page.mouse.move(grab.x + step * 6, grab.y + step * 3)
+    const moved = await centreOf(card)
+    const depth = await page.evaluate((cardId) => document.getElementById(cardId)!.style.translate.split(" ")[2], card)
+    await page.mouse.move(grab.x, grab.y, { steps: 5 })
+    await page.mouse.up()
+    await page.waitForTimeout(600)
+    expect(Math.abs(moved.x - held.x - 60)).toBeLessThan(8)
+    expect(Math.abs(moved.y - held.y - 30)).toBeLessThan(8)
+    expect(depth).toMatch(/px$/)
+
+    // and dropped on a column that takes it, it moves there, when the deal has such a move
+    const move = await page.evaluate(() => {
+      const draggable = (element: Element) => element.matches(":state(draggable)")
+      const ranks: Record<string, number> = { ace: 1, jack: 11, queen: 12, king: 13 }
+      const valueOf = (id: string) => {
+        const [rank = "", , suit = ""] = id.split("-")
+        return { value: ranks[rank] ?? Number(rank), isRed: /hearts|diamonds/.test(suit) }
+      }
+      const columns = [...document.querySelectorAll("solitaire-column")]
+      for (const pile of document.querySelectorAll("solitaire-column, solitaire-discard-pile")) {
+        const top = pile.lastElementChild
+        if (!top || !draggable(top)) continue
+        for (const column of columns) {
+          const onto = column.lastElementChild
+          if (!onto || onto === top || !draggable(onto)) continue
+          const [one, other] = [valueOf(top.id), valueOf(onto.id)]
+          if (other.value === one.value + 1 && other.isRed !== one.isRed)
+            return { card: top.id, onto: onto.id, to: column.id }
+        }
+      }
+      return undefined
+    })
+    if (move) {
+      const from = await spotIn(`[id="${move.card}"]`)
+      const to = await spotIn(`[id="${move.onto}"]`)
+      await page.mouse.move(from.x, from.y)
+      await page.mouse.down()
+      await page.mouse.move(to.x, to.y, { steps: 12 })
+      await page.mouse.up()
+      await page.waitForTimeout(800)
+      expect(await page.evaluate((id) => document.getElementById(id)!.parentElement!.id, move.card)).toBe(move.to)
+    }
+    await page.locator(".AnatomyButton [part~=item]").first().click()
+    await page.waitForTimeout(800)
     expect(warnings).toEqual([])
   })
 })

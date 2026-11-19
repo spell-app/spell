@@ -270,6 +270,8 @@ export const APP_TEXTS = {
   shortcuts: "Keyboard Shortcuts",
   shortcutsSearch: "Search the shortcuts",
   shortcutsNoMatch: "No shortcut matches “{words}”.\nTry another word.",
+  // between two keys that do the same thing (Delete:  ⌫ or ⌦)
+  shortcutsOr: "or",
   // its headings:  where the keys work (`HOTKEY_GROUPS`)
   shortcutsFiles: "Files",
   shortcutsEditing: "Editing",
@@ -469,16 +471,18 @@ export const APP_TEXTS = {
   // what a click does while it shows:  plays the app, or picks a layer (T117)
   anatomyClicks: "What a click does",
   anatomyPlay: "Play",
-  anatomyPlayTip: "Clicks and drags go to your app, so you can play it in 3D.\nHold Option to pick a layer instead.",
+  anatomyPlayTip: "Clicks and drags go to your app, so you can play it in 3D.\nDrag anywhere else to turn it.\nHold Option to pick a layer instead.",
   anatomyInspect: "Inspect",
   anatomyInspectTip: "A click picks a layer, and a drag turns it.\nHold Option to play your app instead.",
   anatomyFront: "Front",
   anatomyFrontTip: "Look at it straight on again",
   anatomySpacing: "Spacing",
-  // what it shows as layers (I257, T118):  your views, or empty frames of them
+  // what it shows as layers (I257, T118, T121):  your views, the same with their names, or empty frames of them
   anatomyShows: "What to show",
   anatomyViews: "Views",
   anatomyViewsTip: "A layer for each view your app draws",
+  anatomyNamed: "Named",
+  anatomyNamedTip: "A layer for each view your app draws, with its name",
   anatomyOutlines: "Outlines",
   anatomyOutlinesTip: "Draw each view as an empty frame instead of showing what's on it",
   // over the 3D view in the full window (I260)
