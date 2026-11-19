@@ -220,7 +220,11 @@ describe("SiteBoard:  groups (epic `mockup` T36)", () => {
     expect(added.text).toBe(`${GROUPS}\tgroup "New section"\n`)
     const again = SiteBoard.withSectionAdded(added.text, "New section")
     expect(again.name).toBe(SiteEdits.groupKey("New section 2"))
-    expect(boardOf(again.text).at(-1)!.cards.map((card) => card.part.name)).toEqual([again.name])
+    expect(
+      boardOf(again.text)
+        .at(-1)!
+        .cards.map((card) => card.part.name)
+    ).toEqual([again.name])
   })
 
   test("a site with no parts has no line to add a section after", () => {

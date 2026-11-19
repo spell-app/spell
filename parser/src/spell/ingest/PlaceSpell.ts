@@ -1,4 +1,4 @@
-import { kindWordsOf, oneOfWords } from "spell/parser/core/schemaWords"
+import { kindWordsOf, oneOfWords, verbBefore } from "spell/parser/core/schemaWords"
 import { P } from "spell/parser/parser"
 import { englishAgreement } from "spell/parser/spell/languages/en/agreement"
 import { checkEveryInWords } from "spell/parser/spell/rules/places/CheckedEvery"
@@ -586,7 +586,7 @@ function typeLines(
   for (const [field, about] of Object.entries(description.fields)) {
     if (isLeftOut(field, description, about.leftOut, about.type, about)) continue
     const what = schemaWordsFor(about, typeWordsFor(about, collections, description.type, own, place))
-    const line = `its "${about.words}" is ${what}${nothingWordsFor(about)}${storedAsFor(field, about)}`
+    const line = `its "${about.words}" ${verbBefore(what)} ${what}${nothingWordsFor(about)}${storedAsFor(field, about)}`
     lines.push({ key: `field:${collection}:${field}`, text: `${line}${commentFor(about, collections)}` })
   }
   // each list it keeps under this one, read from there:  `its "comments" is a list of comments`
@@ -1096,7 +1096,8 @@ function markGone(lines: string[], at: number, indent: string, mark: string): vo
 /** The words a line is about:  a property's, or what a source's name maps to. */
 function wordsIn(line: string): string | undefined {
   return (
-    /^(?:- )?(?:its|su) "([^"]+)" (?:is|es) /.exec(line)?.[1] ?? /^(?:- )?an? .+?'s "?(.+?)"? is its "/.exec(line)?.[1]
+    /^(?:- )?(?:its|su) "([^"]+)" (?:is|es|as|como) /.exec(line)?.[1] ??
+    /^(?:- )?an? .+?'s "?(.+?)"? is its "/.exec(line)?.[1]
   )
 }
 

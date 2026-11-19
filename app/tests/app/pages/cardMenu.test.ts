@@ -101,7 +101,9 @@ describe.skipIf(!SERVING)('a home page card\'s "..." menu', { timeout: 240_000 }
     const place = await cardOf(title()).evaluate((holder) => {
       const button = holder.querySelector("ui-dropdown.CardMenu")!.getBoundingClientRect()
       const titleLine = holder.querySelector(".TileCard .title")!.getBoundingClientRect()
-      const dots = holder.querySelector("ui-dropdown.CardMenu ui-icon")!.shadowRoot!.querySelector("svg path")!
+      const dots = holder
+        .querySelector("ui-dropdown.CardMenu ui-icon")!
+        .shadowRoot!.querySelector<SVGGraphicsElement>("svg path")!
       const ink = dots.getBBox()
       const matrix = dots.getScreenCTM()!
       const inkStart = new DOMPoint(ink.x, ink.y).matrixTransform(matrix)

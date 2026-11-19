@@ -119,7 +119,8 @@ describe("editor hotkeys", () => {
     ["Ctrl+S", { key: "s", ctrlKey: true }, "saveAll"],
     ["Mod+Shift+R", { key: "R", metaKey: true, shiftKey: true }, "revertChanges"],
     ["Mod+Enter", { key: "Enter", metaKey: true }, "compileApp"],
-    ["Mod+Alt+N", { key: "˜", code: "KeyN", metaKey: true, altKey: true }, "createFile"]
+    ["Mod+Alt+N", { key: "˜", code: "KeyN", metaKey: true, altKey: true }, "createFile"],
+    ["?", { key: "?", code: "Slash", shiftKey: true }, "showShortcuts"]
   ] as const)("%s calls `editor.%s()`, instead of the browser's own", async (_name, init, method) => {
     const spies = spyOnHotkeys()
     await mountHotkeys()
@@ -221,36 +222,56 @@ function keydown(target: EventTarget, init: KeyboardEventInit): KeyboardEvent {
 
 /**
  * Spy on every `editor` method `EDITOR_HOTKEYS` runs
- * (Esc stops inspecting;  Undo, Redo, Find, Go to Definition, Find All References and Rename are the code editor's).
+ * - not the rest:  Esc stops inspecting;  Undo, Redo and the code's keys are the code editor's;
+ *   Change This, the parts' keys, Anatomy and the debugger's run their own objects
+ * - the list of names fails first when a shortcut is added, so a new `editor` method gets its spy here
  */
 function spyOnHotkeys() {
   expect(Object.keys(EDITOR_HOTKEYS)).toEqual([
     "saveAll",
     "revertChanges",
-    "compileApp",
     "createFile",
-    "stopInspecting",
-    "changeThis",
     "undo",
     "redo",
     "find",
-    "goToDefinition",
-    "findReferences",
-    "peekDefinition",
-    "peekReferences",
-    "rename",
+    "showShortcuts",
+    "changeThis",
     "cutParts",
     "copyParts",
     "pasteParts",
     "duplicateParts",
     "deleteParts",
-    "deletePartsForward"
+    "deletePartsForward",
+    "goToDefinition",
+    "findReferences",
+    "peekDefinition",
+    "peekReferences",
+    "rename",
+    "formatDocument",
+    "expandSelection",
+    "shrinkSelection",
+    "toggleComment",
+    "fold",
+    "unfold",
+    "moveLineUp",
+    "moveLineDown",
+    "addCursor",
+    "compileApp",
+    "stopInspecting",
+    "anatomy",
+    "anatomyFocus",
+    "anatomyBack",
+    "debugContinue",
+    "debugStepOver",
+    "debugStepInto",
+    "debugStepOut"
   ])
   return {
     saveAll: spyOnEditor("saveAll", () => Promise.resolve()),
     revertChanges: spyOnEditor("revertChanges", () => undefined),
     compileApp: spyOnEditor("compileApp", () => Promise.resolve()),
-    createFile: spyOnEditor("createFile", () => Promise.resolve())
+    createFile: spyOnEditor("createFile", () => Promise.resolve()),
+    showShortcuts: spyOnEditor("showShortcuts", () => undefined)
   }
 }
 

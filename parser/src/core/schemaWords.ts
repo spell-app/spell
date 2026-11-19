@@ -4,6 +4,8 @@
  * ```ts
  * fieldLineOf("name", { kind: "text", isRequired: true, maxLetters: 100 })
  * // => { line: 'its "name" is required text, with maximum length 100', rules: [] }
+ * fieldLineOf("status", { kind: "one of open or closed" })
+ * // => { line: 'its "status" as one of open or closed', rules: [] }
  * ```
  *
  * - Two readers hand it what a schema says:  a Lexicon (`spellTypeFor()`, in `lexicon.ts`) and an OpenAPI description
@@ -55,9 +57,18 @@ export function fieldLineOf(
 ): { line: string; rules: string[] } {
   const { said, inline } = kindWordsOf(field)
   return {
-    line: `its ${quoted ? `"${words}"` : words} is ${said}`,
+    line: `its ${quoted ? `"${words}"` : words} ${verbBefore(said)} ${said}`,
     rules: ruleLinesOf(words, field, inline)
   }
+}
+
+/**
+ * The word between a field's name and what it is:  `as` before its choices, as a sentence says them
+ * (`its "status" as one of open or closed`;  epic `data` J289, Owen's ask on the reference pages page), else `is`.
+ * - Both read the same:  `its "status" is one of ...` too.
+ */
+export function verbBefore(said: string): "as" | "is" {
+  return /^(one of|either) /.test(said) ? "as" : "is"
 }
 
 /** What `field`'s line says after `is`:  `required text, with maximum length 1`, `a required date`. */

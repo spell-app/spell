@@ -161,6 +161,51 @@ describe("outline style", () => {
     expect(compile(quoted)).toBe(compile(sentences))
   })
 
+  describe('`its "status" as one of ...`:  the same as `is one of` (epic `data` J289)', () => {
+    const IS = ['a "job" is a thing', '\tits "status" is one of pending, running or errored']
+
+    test("English:  `its ... as one of`, `as either`, and `it has a ... as one of`", () => {
+      const expected = compile(IS)
+      expect(compile([IS[0]!, '\tits "status" as one of pending, running or errored'])).toBe(expected)
+      expect(compile([IS[0]!, '\tit has a "status" as one of pending, running or errored'])).toBe(expected)
+      expect(compile([IS[0]!, '\tits "status" as either pending, running or errored'])).toBe(expected)
+      // its length, as on any property's line
+      expect(compile([IS[0]!, '\tits "status" as one of pending or done, with maximum length 10'])).toContain(
+        'rules: [{ type: "maxLength", value: "10" }]'
+      )
+    })
+
+    test("Spanish:  `su ... como uno de`", () => {
+      const es = (line: string) => {
+        const { files } = parseSpellProject([
+          { path: "/test.es.spell", contents: ['un "trabajo" es una cosa', `\t${line}`].join("\n") }
+        ])
+        expect(files[0]!.errors).toEqual([])
+        return withoutComments(files[0]!.compiled)
+      }
+      const expected = es('su "estado" es uno de pendiente, corriendo o fallido')
+      expect(es('su "estado" como uno de pendiente, corriendo o fallido')).toBe(expected)
+      expect(expected).toContain('static Estados = ["pendiente", "corriendo", "fallido"]')
+    })
+
+    test("its long form says `as` once", () => {
+      const { files } = parseSpellProject([
+        {
+          path: "/test.spell",
+          contents: ["a pile is a thing", IS[0], '\tits "status" as one of pending or done'].join("\n")
+        }
+      ])
+      expect(longFormsOf(files[0]!.match!)).toEqual(["a job has a status as one of pending or done"])
+    })
+
+    test("only choices:  `its ... as a number` is still an error", () => {
+      const { files } = parseSpellProject([
+        { path: "/test.spell", contents: [IS[0], '\tits "count" as a number'].join("\n") }
+      ])
+      expect(files[0]!.errors).not.toEqual([])
+    })
+  })
+
   test("a quoted type can be named above its line (issue I1)", () => {
     const quoted = compile(["the card is a new card", 'a "card" is a thing'])
     expect(quoted).toBe(compile(["the card is a new card", "a card is a thing"]))
