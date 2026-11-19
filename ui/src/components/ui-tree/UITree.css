@@ -8,6 +8,7 @@
  *   | `--ui-tree-selected-background` / `-color` | a selected row |
  *   | `--ui-tree-muted-color` | the triangle, the icon and `which` |
  *   | `--ui-tree-path-background` | `sticky-path`'s line, over the rows it covers |
+ * - `tools`:  a line of Spell UI's mini basic buttons above the rows (`.tools`), then the `tools` slot.
  * - `appearance="nav"` (the rows' `:state(nav)`):  the docs site's side navigation, its look matched to `<ui-docs-nav>`'s
  *   (epic `mockup` P5), with these tokens of its own:
  *   | `--ui-tree-nav-band-background` / `-color` | a `band="heading"` row |
@@ -42,9 +43,50 @@
   :host(:state(filtered-out)) {
     display: none;
   }
-  /* what isn't a row, between rows, makes no sense among matches */
-  :host(:state(filtering)) ::slotted(:not([label])) {
+  /* what isn't a row, between rows, makes no sense among matches;  what's in a named slot (`tools`, `detail`) stays */
+  :host(:state(filtering)) ::slotted(:not([label], [slot])) {
     display: none;
+  }
+
+  /*
+   * `tools`:  a line of Spell UI's mini basic buttons above the rows, then the `tools` slot at its end;
+   * its inline padding the rows' and the column titles', so they all start in line.
+   * - The buttons scroll sideways rather than wrap;  the slot drops to a line of its own when there's no room.
+   */
+  .tools {
+    display: flex;
+    flex: none;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    padding: 4px 8px 8px;
+  }
+  :host(:state(columns)) > .tools {
+    padding-inline: 10px;
+  }
+  .tool-buttons {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 4px;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    /* room for a focused button's ring, which the scroll box would clip */
+    padding: 2px;
+    margin: -2px;
+  }
+  .tool-buttons > ui-button {
+    flex: none;
+  }
+  .tools > slot {
+    display: block;
+    flex: 1 1 12em;
+    max-width: 20em;
+    margin-inline-start: auto;
+  }
+  .tools ::slotted(*) {
+    box-sizing: border-box;
+    width: 100%;
   }
 
   .empty {
@@ -72,20 +114,32 @@
     border-block-end: 1px solid var(--ui-border-color);
     color: var(--_ui-tree-muted-color);
   }
-  /* the outer rows give way first:  each shrinks a hundred times more than the one after it */
+  /* the outer rows give way first:  each shrinks a hundred times more than the one after it (`renderPath()`) */
   .path-row {
     flex: 0 1 auto;
     min-width: 1.5em;
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .path-row:last-child {
+  /* where you are:  in bold, and never shrinking (`renderPath()`'s `flex-shrink`);  the others a click */
+  .path-row.current {
     min-width: 0;
     color: var(--ui-text-color);
+    font-weight: var(--ui-font-weight-bold);
   }
-  .path-row:hover {
-    color: var(--ui-text-color);
-    text-decoration: underline;
+  .path-row:not(.current) {
+    cursor: pointer;
+  }
+  /* the outer names folded into one `…`, its tooltip naming them */
+  .path-row.folded {
+    flex: none;
+    min-width: 0;
+  }
+  @media (hover: hover) {
+    .path-row:not(.current):hover {
+      color: var(--ui-text-color);
+      text-decoration: underline;
+    }
   }
   .separator {
     flex: none;

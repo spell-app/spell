@@ -696,6 +696,7 @@ const JSX_DETAIL_TYPES: Readonly<Record<string, string>> = {
   TableEditDetail: "UIT.TableEditDetail",
   ThemeChoices: "UIT.ThemeChoices",
   ToastCloseReason: "UIT.ToastCloseReason",
+  TreeItemData: "UIT.TreeItemData",
   VisibilityCalculations: "E.VisibilityCalculations"
 }
 

@@ -377,12 +377,17 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
   ////////////////
   // ## The upgrade step
   //
-  // A page (or a framework) may set `el.options = [...]` before the tag is defined:
+  // A page (or a framework) may set `el.options = [...]` before the tag is defined, or before its family loads:
   // the value lands as an OWN property of the plain element,
   // which would hide the class's getter / setter forever.
   ////////////////
 
-  /** Constructor step:  take own properties set before the upgrade, and store their values at once. */
+  /**
+   * Constructor step:  take own properties set before the upgrade, and store their values at once.
+   * - An attribute's property:  its value stored now, and set again at the first connect.
+   * - Any other property the family's DOM element class has a setter for (`<ui-json>`'s `value`):
+   *   set again, through that setter, at the first connect.
+   */
   private captureUpgradeValues(definition: E.ElementDefinition) {
     const self = this as unknown as Record<string, unknown>
     for (const attribute of definition.attributes) {
@@ -393,6 +398,21 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
       if (value != null) (this.connectedState.ownValues ??= new Set()).add(attribute.key)
       this.attributeValues[attribute.key] = definition.convert(attribute, value)
     }
+    for (const property of Object.keys(this)) {
+      if (!DOMElement.hasSetterFor(this, property)) continue
+      const value = self[property]
+      delete self[property]
+      ;(this.connectedState.upgradeValues ??= new Map()).set(property, value)
+    }
+  }
+
+  /** Does a class between `element`'s own and `HTMLElement` give `property` a setter? */
+  private static hasSetterFor(element: HTMLElement, property: string): boolean {
+    for (let proto = Object.getPrototypeOf(element); proto && proto !== HTMLElement.prototype;) {
+      if (Object.getOwnPropertyDescriptor(proto, property)?.set) return true
+      proto = Object.getPrototypeOf(proto)
+    }
+    return false
   }
 
   /** First-connect step:  set the captured values again, through the real setters (so they reflect). */

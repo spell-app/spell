@@ -2150,3 +2150,6 @@ export const CODE_SPAN = /`([^`]+)`/g
  * - `group`:  a GROUP (a tag's header);  the entries after it, to the next group, nest in it.
  */
 export const TocMarks = { entry: "data-toc", group: "data-toc-group" } as const
+
+/** `<ui-tree>`'s data items (`appearance="columns"`, `items`):  its own file, named here for the JSX types (`UIT.TreeItemData`). */
+export type { TreeItemData } from "spell/ui/components/ui-tree/UITree.types"

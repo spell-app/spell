@@ -1028,6 +1028,26 @@ describe("DOMElement defined early", () => {
     expect((document.createElement(tag) as unknown as Greeter).greet()).toBe(`hi from ${tag}`)
   })
 
+  test("a property its family's DOM element class sets, given while pending, reaches that setter once attached", async () => {
+    /** A family's DOM element class with a script-API property of its own, not an attribute. */
+    class Holder extends E.DOMElement {
+      declare held: unknown
+      get data(): unknown {
+        return this.held
+      }
+      set data(value: unknown) {
+        this.held = { set: value }
+      }
+    }
+    const { tag, define } = earlyTag("early-setter", [], { setup: { DOMElement: Holder } })
+    const host = container().appendChild(document.createElement(tag)) as Host
+    host.data = 7
+    define()
+    await host.ready
+    expect(Object.hasOwn(host, "data")).toBe(false)
+    expect(host.data).toEqual({ set: 7 })
+  })
+
   test("a catalog that no longer matches its family throws as the family attaches, naming the fix", () => {
     const { tag, define } = testTag("early-stale", [attribute("label", "string")])
     E.DOMElement.defineEarly(tag, { attributes: [], isAFormControl: false })

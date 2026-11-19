@@ -29,6 +29,11 @@
     overflow-x: auto;
   }
 
+  /* Its data, a <ui-json> child (`JsonChild`):  read, never shown.  A <ui-json> draws its data itself now. */
+  ::slotted(:is(ui-json, es-json)) {
+    display: none;
+  }
+
   /* As wide as the drawing:  what its boxes hold is placed in percent of it. */
   .canvas {
     position: relative;

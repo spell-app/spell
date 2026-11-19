@@ -1,9 +1,259 @@
 /*
- * The style sheet of `<ui-json>`:  it draws nothing, so nothing shows, not even its text.
+ * The style sheet of `<ui-json>`:  ours, not Fomantic's.
+ * - It styles the component's shadow DOM:  `<div class="ui json" part="viewer">`, holding
+ *   - its `<div class="header">`:  two `<button class="tool">`s
+ *   - its `<div class="body">`:  a `<div class="row" style="--level: n">` per line
+ *   - An object's or array's line is also `.container`,
+ *     with a `<button class="toggle">` (a chevron `<ui-icon>`) in the gutter and, closed, `<span class="preview">`.
+ *   - Text spans:  `.key`, `.string`, `.number`, `.boolean`, `.null`, `.punct`;  the clickable ones also `.link`.
+ *   - Editing (`editable`):  a `<ui-input>`, `<ui-select>` or `<ui-checkbox>`, `.edit`, in a key's or value's place.
+ *   - Before them, the source parts:  `<ui-loader part="loader">` while loading, `<ui-message part="error">`.
+ * - The gutter:  a toggle's column, `--_json-gutter` wide, just before its own row's indent.
+ * - Two spaces per level:  `--level` times `2ch`, after the gutter.
+ *   A string that wraps hangs its later lines 2 more spaces in, past its key.
+ * - Colours:  the theme's code tokens (`--ui-code-*`), so light and dark follow the theme;  `--ui-json-*` override them.
+ * - Public tokens are NEVER declared here:  each is read through its private alias.
+ * - `hidden` hides it;  a diagram that reads it as its data hides it in its own sheet.
  */
+
+@import "../../styles/media.css";
+
+@layer ui.components.json.types;
 
 @layer ui.components.json.types {
   :host {
+    display: block;
+  }
+
+  :host([hidden]) {
     display: none;
+  }
+
+  .ui.json {
+    --_ui-json-font-family: var(--ui-json-font-family, var(--ui-font-family-mono, ui-monospace, monospace));
+    --_ui-json-font-size: var(--ui-json-font-size, 0.875em);
+    --_ui-json-line-height: var(--ui-json-line-height, 1.5);
+    --_ui-json-color: var(--ui-json-color, var(--ui-code-color, var(--ui-text-color)));
+    --_ui-json-key-color: var(--ui-json-key-color, var(--ui-code-attr, light-dark(#b8322a, #e06c75)));
+    --_ui-json-string-color: var(--ui-json-string-color, var(--ui-code-string, light-dark(#387a37, #98c379)));
+    --_ui-json-number-color: var(
+      --ui-json-number-color,
+      var(--ui-code-number, var(--ui-code-constant, light-dark(#986801, #d19a66)))
+    );
+    --_ui-json-keyword-color: var(--ui-json-keyword-color, var(--ui-code-keyword, light-dark(#a626a4, #c678dd)));
+    --_ui-json-punctuation-color: var(--ui-json-punctuation-color, var(--ui-text-muted));
+    --_ui-json-muted-color: var(--ui-json-muted-color, var(--ui-text-muted));
+    --_ui-json-hover-background: var(--ui-json-hover-background, var(--ui-surface-muted, transparent));
+    --_ui-json-focus-color: var(--ui-json-focus-color, var(--ui-focus-color, var(--ui-primary)));
+    /* an example's code button's size */
+    --_json-tool-size: 28px;
+    --_json-gutter: 1.5em;
+
+    position: relative;
+    font-family: var(--_ui-json-font-family);
+    font-size: var(--_ui-json-font-size);
+    line-height: var(--_ui-json-line-height);
+    color: var(--_ui-json-color);
+    tab-size: 2;
+  }
+
+  /* a line that wraps hangs:  its first line at the indent, the rest 2 spaces further in */
+  .row {
+    /* declared here, not on the box:  `--level` is each row's own */
+    --_json-indent: calc(var(--_json-gutter) + var(--level, 0) * 2ch);
+    position: relative;
+    padding-inline-start: calc(var(--_json-indent) + 2ch);
+    text-indent: -2ch;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    border-radius: 0.25em;
+  }
+
+  /* a closed line stays one line:  the preview gives way */
+  .row.container {
+    display: flex;
+    align-items: baseline;
+    padding-inline-start: var(--_json-indent);
+    text-indent: 0;
+    white-space: pre;
+  }
+  .row.container > * {
+    flex: none;
+  }
+  .row.container > .preview {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .row.container:hover {
+    background: var(--_ui-json-hover-background);
+  }
+
+  /* at the start:  a box's top end is where a host's own buttons sit (an example's code button) */
+  .header {
+    display: flex;
+    justify-content: flex-start;
+    gap: 0.25em;
+    padding-block-end: 0.25em;
+    margin-block-end: 0.25em;
+    border-block-end: 1px solid var(--ui-border-color, transparent);
+    font-family: var(--ui-font-family, system-ui);
+  }
+
+  /* Copy and quotes:  plain icons, an example's code button's size;  a background on hover, a fill while pressed */
+  .tool {
+    all: unset;
+    box-sizing: border-box;
+    display: inline-grid;
+    place-items: center;
+    width: var(--_json-tool-size);
+    height: var(--_json-tool-size);
+    border-radius: var(--ui-radius-s, 4px);
+    color: var(--_ui-json-muted-color);
+    cursor: pointer;
+  }
+  .tool ui-icon {
+    margin: 0;
+  }
+  .tool:hover {
+    color: var(--_ui-json-color);
+    background: color-mix(in srgb, currentColor 8%, transparent);
+  }
+  .tool[aria-pressed="true"] {
+    color: var(--_ui-json-color);
+    background: color-mix(in srgb, currentColor 14%, transparent);
+  }
+  .tool[aria-pressed="true"]:hover {
+    background: color-mix(in srgb, currentColor 18%, transparent);
+  }
+  .tool:focus-visible {
+    outline: 2px solid var(--_ui-json-focus-color);
+    outline-offset: -2px;
+  }
+  /* the quotes glyph, as text:  two straight quotes in the code font, at the icon's size */
+  .tool .glyph {
+    font-family: var(--_ui-json-font-family);
+    font-size: 1.125em;
+    line-height: 1;
+    letter-spacing: 0.05em;
+  }
+
+  /* the gutter:  each toggle just before its own row's indent */
+  .toggle {
+    all: unset;
+    position: absolute;
+    inset-inline-start: calc(var(--level, 0) * 2ch);
+    inset-block-start: 0;
+    width: var(--_json-gutter);
+    height: calc(var(--_ui-json-line-height) * 1em);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    color: var(--_ui-json-muted-color);
+    border-radius: 0.25em;
+  }
+  .toggle ui-icon {
+    margin: 0;
+    font-size: 0.875em;
+  }
+  .toggle:hover {
+    color: var(--_ui-json-color);
+  }
+  .toggle:focus-visible {
+    outline: 2px solid var(--_ui-json-focus-color);
+    outline-offset: -1px;
+  }
+
+  .key {
+    color: var(--_ui-json-key-color);
+  }
+  .string {
+    color: var(--_ui-json-string-color);
+  }
+  .number {
+    color: var(--_ui-json-number-color);
+  }
+  .boolean,
+  .null {
+    color: var(--_ui-json-keyword-color);
+  }
+  .punct {
+    color: var(--_ui-json-punctuation-color);
+  }
+
+  /* keys and values:  a click sends `ui-navigating` */
+  .link {
+    cursor: pointer;
+  }
+  .link:hover {
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, currentColor 55%, transparent);
+    text-underline-offset: 0.2em;
+  }
+
+  /*
+   * An editor sits in the line, in the code's font and size, and no taller than the line, so the rows below stay put.
+   * - The editors' own tokens:  each draws its text at `--ui-font-size` times `--ui-scale`, in `--ui-font-family`.
+   * - A text field is as wide as its text, and grows as it's typed (`--edit-chars`), up to the line.
+   */
+  .edit {
+    --ui-font-family: var(--_ui-json-font-family);
+    --ui-font-size: 1em;
+    --ui-scale: 1;
+    --ui-control-height: 0px;
+    margin: 0;
+    font-size: 1em;
+    text-indent: 0;
+    vertical-align: top;
+  }
+  ui-input.edit,
+  ui-select.edit {
+    box-sizing: border-box;
+    height: calc(var(--_ui-json-line-height) * 1em);
+  }
+  /*
+   * The native control inside, through its part:  no padding top or bottom, its line the code's less its border.
+   * - Not the controls' public tokens (`--ui-input-line-height` ...):  a component sheet never sets another's.
+   * - The rule from out here beats the control's own, whatever its selector:  it's the page's side of the shadow root.
+   */
+  ui-input.edit::part(control),
+  ui-select.edit::part(select) {
+    min-height: 0;
+    padding-block: 0;
+    line-height: calc(var(--_ui-json-line-height) * 1em - 2 * var(--ui-border-width, 1px));
+  }
+  ui-input.edit::part(control) {
+    padding-inline: 0.25em;
+  }
+  ui-input.edit {
+    width: min(calc(var(--edit-chars, 8) * 1ch + 0.5em + 2 * var(--ui-border-width, 1px)), 100%);
+  }
+  /*
+   * a checkbox the size of a line's letters, centred on it:  it overlapped the row above at its own size
+   * - scaled down from its own box, 1.21428em, to 1em:  it draws no words, so only the box shrinks
+   */
+  ui-checkbox.edit {
+    --ui-scale: calc(1 / 1.21428);
+    vertical-align: middle;
+  }
+  /* phones zoom into a field under 16px */
+  @media (--ui-mobile) {
+    .edit {
+      font-size: max(1em, 16px);
+    }
+  }
+
+  .empty {
+    color: var(--_ui-json-muted-color);
+    font-style: italic;
+  }
+
+  /* ten `0`s, measured for how many characters fit on a line */
+  .probe {
+    position: absolute;
+    visibility: hidden;
+    white-space: pre;
+    pointer-events: none;
   }
 }

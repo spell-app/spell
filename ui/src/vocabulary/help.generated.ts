@@ -713,6 +713,19 @@ export const HELP_TABLE: Readonly<
       debug: "Show the bound `value` (else `values`) as JSON below the form, live."
     }
   },
+  "ui-graph": {
+    description: "A graph draws nodes joined by edges, laid out left to right.",
+    empty: true,
+    attributes: {
+      graph:
+        "The graph to draw, a `GraphData`: `nodes` (`id`, `label`, `kind`, `ports`, `children`, `data`) and `edges` (`from` / `to` `{ node, port }`).",
+      "child-view":
+        "How a node's children show when it's opened: `inline`, inside the node, which grows round them; `modal`, a graph in a modal; `drill`, the graph replaced by them, with breadcrumbs back.",
+      path: 'The node whose child graph is shown, drilled to, by its ids from the top joined by `/` (`cpu/alu`); `""`: the top.',
+      selected: "PROPERTY: what's selected, `{ kind: 'node' | 'edge' | 'port', id, path }`; `undefined`: nothing.",
+      boundary: "PROPERTY: the enclosing node's ports, drawn as pins on the graph's sides, for edges with no `node`."
+    }
+  },
   "ui-grid": {
     description: "A grid is used to harmonize negative space in a layout.",
     attributes: {
@@ -934,11 +947,18 @@ export const HELP_TABLE: Readonly<
     }
   },
   "ui-json": {
-    description: "JSON data holds data in a page, as its text or from a file with `source`.",
+    description:
+      "JSON data holds data in a page, as its text or from a file with `source`, and shows it as an outline whose objects and arrays open and close.",
     empty: true,
     attributes: {
       source: "URL of the file to show, relative to the page; same origin only (another site's URL shows an error).",
-      load: "When to fetch `source`: `eager` (at once), `visible` (once scrolled into view) or `idle` (when the browser has nothing else to do)."
+      load: "When to fetch `source`: `eager` (at once), `visible` (once scrolled into view) or `idle` (when the browser has nothing else to do).",
+      depth: "How many levels start open: `1`, the top object or array alone; `0`, everything closed.",
+      quotes: 'Keys in quotes, as JSON writes them: `"type": "optical"`.',
+      "no-header": "Hides the header: the Copy and quotes buttons.",
+      editable:
+        "Double-click a key or a value to edit it, in a control that fits the value: a text field for a string, a number field for a number, a date picker for an ISO date, a checkbox for `true` / `false`, a pick list for a key `editors` gives choices.",
+      editors: 'With `editable`, the control for each key, as a PROPERTY: `{ direction: ["in", "out"], when: "date" }`.'
     }
   },
   "ui-keys": {
@@ -2314,13 +2334,22 @@ export const HELP_TABLE: Readonly<
         "How rows are selected: `one` (the default), or `many`, where Shift takes a range, and Command or Control adds a row or takes it away.",
       filter:
         "Show only the rows whose words hold this text, whatever its case, and the rows they're inside, opened to show them.",
+      tools: "A line of buttons above the rows: Open 2 levels, Open 3 levels and Close all.",
       label: "What a screen reader calls the tree.",
       appearance:
         "`nav`: a site's side navigation, as the docs site's is: taller rows, a selected row a rounded box in the primary colour, the open-and-close chevron at a row's end, and `band` rows as heading bands.",
       "column-titles":
         '`appearance="columns"`: a title over each column, by level, separated by commas (`Clients, Projects, Files`); the last one names every column deeper than the list goes.',
+      items:
+        '`appearance="columns"`: the tree as data, given as a property, in place of `<ui-tree-item>`s: `{ id, label, icon?, which?, count?, children?, data?',
+      path: "`appearance=\"columns\"`: the ids of each column's pick, from the top (`string[]`; a `<ui-tree-item>`'s id is its `value`, else its `label`).",
+      size: '`appearance="columns"`: each column\'s width, by level, separated by commas; the last one sizes every column deeper than the list goes.',
+      "narrow-before": '`appearance="columns"`: how many columns at the end never narrow.',
+      show: '`appearance="columns"`: which parts each row shows, as words: `icon which count chevron`; the label always shows.',
       "sticky-path":
-        "While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit."
+        "While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.",
+      "sticky-detail":
+        '`appearance="columns"` with a `detail` pane: the pane stays in view at the tree\'s end while the columns scroll sideways under it.'
     }
   },
   "ui-tree-diagram": {

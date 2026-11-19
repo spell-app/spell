@@ -5,7 +5,7 @@ import h from "@solidjs/h"
 
 import "spell/app/app/solid/cellsBridge"
 import { core } from "spell/parser/core"
-import { MOST_AT_ONCE } from "spell/parser/core/drawnWindow"
+import { MOST_AT_ONCE } from "spell/element/drawnWindow"
 
 /**
  * What a `<for>` draws, `core.drawRead()` with what its attributes say (epic `data` P22):  in a real browser.

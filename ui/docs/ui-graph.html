@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Graph | Spell UI</title>
+    <meta
+      name="description"
+      content="A graph draws nodes joined by edges, laid out left to right.  A node may hold a graph of its own, opened in place, in a modal, or in its stead."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (`ThemePreference.HEAD_SCRIPT`, as oxfmt lays it out).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="/components/ui/_assets/site.css" />
+    <script type="module" src="/components/ui/_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="Graph">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-menu icon class="site-page-links" aria-label="About this page">
+            <ui-item
+              link="https://github.com/spell-app/spell-app/issues/new?title=ui-graph%3A%20%20"
+              target="_blank"
+              icon="bug"
+              aria-label="Report a bug"
+              title="Report a bug"
+            ></ui-item>
+          </ui-menu>
+          <ui-header level="1" class="site-title">
+            Graph
+            <ui-header>A graph draws nodes joined by edges, laid out left to right.  A node may hold a graph of its own, opened in place, in a modal, or in its stead.</ui-header>
+          </ui-header>
+          <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
+          <ui-tab value="examples" label="Examples">
+            <!--
+              EXAMPLES:  ours only, no Fomantic page.  Every graph is made up, as JSON in the `graph` attribute, so the
+              code shown IS the data;  only the big one is made by the script at the end of the page.
+            -->
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-flat-graph" label="Flat graph" sticky="stack" collapsible dividing>
+                <ui-example description="A few nodes with ports, as JSON in the `graph` attribute.  Drag to pan, and use the wheel to zoom;  click a node, an edge or a port to select it;  hover an edge to light up its ends.">
+                  <ui-graph style="--ui-graph-height: 16em" graph='{"nodes":[{"id":"in","label":"Input","ports":[{"id":"out","kind":"out"}]},{"id":"parse","label":"Parse","ports":[{"id":"src","label":"src","kind":"in"},{"id":"ast","label":"ast","kind":"out"},{"id":"errors","label":"errors","kind":"out"}]},{"id":"check","label":"Check","ports":[{"id":"ast","label":"ast","kind":"in"},{"id":"ok","label":"ok","kind":"out"}]},{"id":"report","label":"Report"},{"id":"emit","label":"Emit"}],"edges":[{"from":{"node":"in","port":"out"},"to":{"node":"parse","port":"src"}},{"from":{"node":"parse","port":"ast"},"to":{"node":"check","port":"ast"},"label":"tree"},{"from":{"node":"parse","port":"errors"},"to":{"node":"report"}},{"from":{"node":"check","port":"ok"},"to":{"node":"emit"}}]}'></ui-graph>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+
+            <ui-section id="examples-children" label="Children" sticky="stack" collapsible dividing>
+              <ui-section id="examples-children-inline" label="Inline" sticky="stack" collapsible dividing>
+                <ui-example description="`child-view=&quot;inline&quot;`, the default:  the node grows into a container, its graph inside it.  `CPU` starts open (`open`), and `ALU` opens with its toggle.  An edge end with no `node` is the enclosing node&#39;s port.">
+                  <ui-graph style="--ui-graph-height: 24em" child-view="inline" graph='{"nodes":[{"id":"mem","label":"Memory","ports":[{"id":"d","label":"data","kind":"out"},{"id":"a","label":"addr","kind":"in"}]},{"id":"cpu","label":"CPU","open":true,"ports":[{"id":"clk","label":"clk","kind":"in"},{"id":"bus","label":"bus","kind":"out"}],"children":{"nodes":[{"id":"fetch","label":"Fetch","ports":[{"id":"pc","label":"pc","kind":"in"},{"id":"op","label":"op","kind":"out"}]},{"id":"alu","label":"ALU","ports":[{"id":"op","label":"op","kind":"in"},{"id":"r","label":"r","kind":"out"}],"children":{"nodes":[{"id":"add","label":"Adder","ports":[{"id":"a","kind":"in"},{"id":"s","kind":"out"}]},{"id":"shift","label":"Shifter","ports":[{"id":"a","kind":"in"},{"id":"s","kind":"out"}]},{"id":"mux","label":"Mux","ports":[{"id":"x","kind":"in"},{"id":"y","kind":"in"},{"id":"o","kind":"out"}]}],"edges":[{"from":{"port":"op"},"to":{"node":"add","port":"a"}},{"from":{"port":"op"},"to":{"node":"shift","port":"a"}},{"from":{"node":"add","port":"s"},"to":{"node":"mux","port":"x"}},{"from":{"node":"shift","port":"s"},"to":{"node":"mux","port":"y"}},{"from":{"node":"mux","port":"o"},"to":{"port":"r"}}]}},{"id":"regs","label":"Registers","ports":[{"id":"w","label":"w","kind":"in"},{"id":"pc","label":"pc","kind":"out"}]}],"edges":[{"from":{"port":"clk"},"to":{"node":"fetch","port":"pc"}},{"from":{"node":"fetch","port":"op"},"to":{"node":"alu","port":"op"},"label":"op"},{"from":{"node":"alu","port":"r"},"to":{"node":"regs","port":"w"}},{"from":{"node":"regs","port":"pc"},"to":{"node":"fetch","port":"pc"}},{"from":{"node":"regs","port":"pc"},"to":{"port":"bus"}}]}},{"id":"clock","label":"Clock","ports":[{"id":"t","kind":"out"}]},{"id":"io","label":"I/O"}],"edges":[{"from":{"node":"clock","port":"t"},"to":{"node":"cpu","port":"clk"}},{"from":{"node":"cpu","port":"bus"},"to":{"node":"mem","port":"a"}},{"from":{"node":"cpu","port":"bus"},"to":{"node":"io"}},{"from":{"node":"mem","port":"d"},"to":{"node":"io"},"label":"dma"}]}'></ui-graph>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-children-modal" label="Modal" sticky="stack" collapsible dividing>
+                <ui-example description="`child-view=&quot;modal&quot;`:  the children open in a modal holding another graph, the node&#39;s ports as pins on its sides.">
+                  <ui-graph style="--ui-graph-height: 24em" child-view="modal" graph='{"nodes":[{"id":"mem","label":"Memory","ports":[{"id":"d","label":"data","kind":"out"},{"id":"a","label":"addr","kind":"in"}]},{"id":"cpu","label":"CPU","ports":[{"id":"clk","label":"clk","kind":"in"},{"id":"bus","label":"bus","kind":"out"}],"children":{"nodes":[{"id":"fetch","label":"Fetch","ports":[{"id":"pc","label":"pc","kind":"in"},{"id":"op","label":"op","kind":"out"}]},{"id":"alu","label":"ALU","ports":[{"id":"op","label":"op","kind":"in"},{"id":"r","label":"r","kind":"out"}],"children":{"nodes":[{"id":"add","label":"Adder","ports":[{"id":"a","kind":"in"},{"id":"s","kind":"out"}]},{"id":"shift","label":"Shifter","ports":[{"id":"a","kind":"in"},{"id":"s","kind":"out"}]},{"id":"mux","label":"Mux","ports":[{"id":"x","kind":"in"},{"id":"y","kind":"in"},{"id":"o","kind":"out"}]}],"edges":[{"from":{"port":"op"},"to":{"node":"add","port":"a"}},{"from":{"port":"op"},"to":{"node":"shift","port":"a"}},{"from":{"node":"add","port":"s"},"to":{"node":"mux","port":"x"}},{"from":{"node":"shift","port":"s"},"to":{"node":"mux","port":"y"}},{"from":{"node":"mux","port":"o"},"to":{"port":"r"}}]}},{"id":"regs","label":"Registers","ports":[{"id":"w","label":"w","kind":"in"},{"id":"pc","label":"pc","kind":"out"}]}],"edges":[{"from":{"port":"clk"},"to":{"node":"fetch","port":"pc"}},{"from":{"node":"fetch","port":"op"},"to":{"node":"alu","port":"op"},"label":"op"},{"from":{"node":"alu","port":"r"},"to":{"node":"regs","port":"w"}},{"from":{"node":"regs","port":"pc"},"to":{"node":"fetch","port":"pc"}},{"from":{"node":"regs","port":"pc"},"to":{"port":"bus"}}]}},{"id":"clock","label":"Clock","ports":[{"id":"t","kind":"out"}]},{"id":"io","label":"I/O"}],"edges":[{"from":{"node":"clock","port":"t"},"to":{"node":"cpu","port":"clk"}},{"from":{"node":"cpu","port":"bus"},"to":{"node":"mem","port":"a"}},{"from":{"node":"cpu","port":"bus"},"to":{"node":"io"}},{"from":{"node":"mem","port":"d"},"to":{"node":"io"},"label":"dma"}]}'></ui-graph>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-children-drill" label="Drill" sticky="stack" collapsible dividing>
+                <ui-example description="`child-view=&quot;drill&quot;`:  the drawing shows the children instead, with breadcrumbs back up.  A double-click on a node with children drills into it whatever the view.">
+                  <ui-graph style="--ui-graph-height: 24em" child-view="drill" graph='{"nodes":[{"id":"mem","label":"Memory","ports":[{"id":"d","label":"data","kind":"out"},{"id":"a","label":"addr","kind":"in"}]},{"id":"cpu","label":"CPU","ports":[{"id":"clk","label":"clk","kind":"in"},{"id":"bus","label":"bus","kind":"out"}],"children":{"nodes":[{"id":"fetch","label":"Fetch","ports":[{"id":"pc","label":"pc","kind":"in"},{"id":"op","label":"op","kind":"out"}]},{"id":"alu","label":"ALU","ports":[{"id":"op","label":"op","kind":"in"},{"id":"r","label":"r","kind":"out"}],"children":{"nodes":[{"id":"add","label":"Adder","ports":[{"id":"a","kind":"in"},{"id":"s","kind":"out"}]},{"id":"shift","label":"Shifter","ports":[{"id":"a","kind":"in"},{"id":"s","kind":"out"}]},{"id":"mux","label":"Mux","ports":[{"id":"x","kind":"in"},{"id":"y","kind":"in"},{"id":"o","kind":"out"}]}],"edges":[{"from":{"port":"op"},"to":{"node":"add","port":"a"}},{"from":{"port":"op"},"to":{"node":"shift","port":"a"}},{"from":{"node":"add","port":"s"},"to":{"node":"mux","port":"x"}},{"from":{"node":"shift","port":"s"},"to":{"node":"mux","port":"y"}},{"from":{"node":"mux","port":"o"},"to":{"port":"r"}}]}},{"id":"regs","label":"Registers","ports":[{"id":"w","label":"w","kind":"in"},{"id":"pc","label":"pc","kind":"out"}]}],"edges":[{"from":{"port":"clk"},"to":{"node":"fetch","port":"pc"}},{"from":{"node":"fetch","port":"op"},"to":{"node":"alu","port":"op"},"label":"op"},{"from":{"node":"alu","port":"r"},"to":{"node":"regs","port":"w"}},{"from":{"node":"regs","port":"pc"},"to":{"node":"fetch","port":"pc"}},{"from":{"node":"regs","port":"pc"},"to":{"port":"bus"}}]}},{"id":"clock","label":"Clock","ports":[{"id":"t","kind":"out"}]},{"id":"io","label":"I/O"}],"edges":[{"from":{"node":"clock","port":"t"},"to":{"node":"cpu","port":"clk"}},{"from":{"node":"cpu","port":"bus"},"to":{"node":"mem","port":"a"}},{"from":{"node":"cpu","port":"bus"},"to":{"node":"io"}},{"from":{"node":"mem","port":"d"},"to":{"node":"io"},"label":"dma"}]}'></ui-graph>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+
+            <ui-section id="examples-big" label="Big" sticky="stack" collapsible dividing>
+              <ui-section id="examples-big-150-nodes" label="150 nodes" sticky="stack" collapsible dividing>
+                <ui-example description="150 nodes and about 300 edges in one level, made by the script at the end of this page and laid out as it loads.  Some nodes hold a graph of their own.">
+                  <ui-graph id="graph-big" style="--ui-graph-height: 36em"></ui-graph>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="usage" label="Usage">
+            <!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+            <ui-section id="usage-data" label="Data" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  A graph draws any nodes and edges:  it knows nothing about where they came from.
+                  Give it the `graph` property, or JSON in the attribute on a static page:
+
+                  - `nodes`, each `{ id, label?, kind?, ports?, children?, childView?, open?, title?, data? }`
+                    - `ports`, each `{ id, label?, side?, kind? }`.  With no `side`:  `kind` `in` or `input` is on the
+                      left, `out` or `output` on the right, else the side most of its edges come from.
+                    - `children`:  a graph, or a function giving one (or a promise of one), called the first time it opens.
+                    - `kind`:  a word added to its classes and parts (`kind-hub`), for a page's own style.
+                  - `edges`, each `{ id?, from: { node, port? }, to: { node, port? }, kind?, label?, data? }`
+                    - Inside a child graph, an end with NO `node` is the enclosing node:  `port` names its port.
+
+                  It lays the graph out in layers, left to right, and fits it to the view.
+                  Set a NEW graph to redraw:  one changed in place isn't seen.
+                </script>
+              </ui-markdown>
+              <ui-code language="js">
+                <script type="text/plain">
+                  const graph = document.querySelector("ui-graph")
+                  graph.graph = {
+                    nodes: [
+                      { id: "source", label: "Source", ports: [{ id: "out", kind: "out" }] },
+                      {
+                        id: "filter",
+                        label: "Filter",
+                        ports: [{ id: "in", kind: "in" }, { id: "out", kind: "out" }],
+                        children: async () => (await fetch("/filter.json")).json()
+                      }
+                    ],
+                    edges: [{ from: { node: "source", port: "out" }, to: { node: "filter", port: "in" } }]
+                  }
+                  graph.addEventListener("ui-changed", (event) => console.log(event.detail))
+                </script>
+              </ui-code>
+            </ui-section>
+            <ui-section id="usage-children" label="Children" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  A node with `children` has a toggle.  `child-view` says how they show, for the whole graph;
+                  a node's own `childView` wins for it.
+
+                  | `child-view` | What opening does |
+                  | --- | --- |
+                  | `inline` | The node grows into a container, and its graph is laid out inside it. |
+                  | `modal` | A modal opens, holding another graph of the same tag:  the node's ports are pins on its sides. |
+                  | `drill` | The drawing shows the children instead, with breadcrumbs back up. |
+
+                  `ui-node-toggled` says which node opened or closed, and how.
+                  From script:  `el.open(path, view?)`, `el.close(path)`, `el.drillTo(path?)` and `el.fit()`.
+                </script>
+              </ui-markdown>
+            </ui-section>
+            <ui-section id="usage-paths" label="Paths" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Everything in a graph is known by its PATH, so ids mustn't hold `/`, `:` or `#`:
+
+                  - a node:  its ids from the top, joined by `/` (`cpu/alu`)
+                  - a port:  its node's path, `:` and its id (`cpu/alu:op`)
+                  - an edge:  its graph's path, `#` and its id (`cpu#e3`);  an edge with no id is `#<index>`
+
+                  The `path` attribute is the node drilled into.  Set it to drill there, loading lazy children on the way.
+                  A drill, a breadcrumb or a double-click sets it back, and sends `ui-changed` `{ kind: "path", path }`.
+
+                  A click selects a node, an edge or a port:  `ui-selecting` first (cancel it to keep the selection),
+                  then the `selected` property, `{ kind, id, path }`, and `ui-changed`.
+                </script>
+              </ui-markdown>
+            </ui-section>
+            <ui-section id="usage-extending" label="Extending" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  A set's own graph element extends the component, `UIGraph`, and overrides its hooks:
+
+                  | Hook | What it gives |
+                  | --- | --- |
+                  | `nodeLabel(node)` | A node's text (it's measured, so the box fits it). |
+                  | `nodeClass(node)` | Extra classes on its group;  `kind-<kind>` is there already. |
+                  | `renderNode(placed)` | What its group holds:  the box and label, inside the box the layout gave it. |
+                  | `edgeLabel(edge)`, `edgeClass(edge)` | An edge's text and classes. |
+                  | `portLabel(port, node)`, `portClass(port, node)` | A port's text and classes. |
+                  | `metrics` | The sizes the layout works in. |
+                  | `trail()` | The breadcrumbs. |
+                  | `toolButtons()`, `overlay()` | More buttons beside Fit;  something drawn over the drawing. |
+
+                  The modal opens a graph of the same tag, so a subclass keeps its look there.
+                  Every node, container, edge, port and pin is a part, with `kind-<kind>` beside it:
+                  `ui-graph::part(kind-hub)`.
+                </script>
+              </ui-markdown>
+            </ui-section>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  | Key | What it does |
+                  | --- | --- |
+                  | Tab | Moves to the next open / close toggle, then the Fit button |
+                  | Enter or Space | Opens or closes the node of the toggle in focus |
+
+                  Moving between nodes with the keys isn't built yet.
+                </script>
+              </ui-markdown>
+            </ui-section>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  The drawing is a group (`role="group"`), named by how many nodes it has:  "Graph:  4 nodes".
+                  Each toggle is a button, named "Open CPU" or "Close CPU", and says whether it's open.
+                  A node's `title` is its hover text.  A page that relies on the graph should say what it shows in words too.
+                </script>
+              </ui-markdown>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="api" label="API">
+            <!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-graph" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-properties" label="Properties" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-graph" only="properties"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-graph" only="events"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-graph" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-graph" only="states"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-graph" only="texts"></ui-docs-api>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="theming" label="Theming">
+            <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
+                  root. Edit a value below to try it.
+                </script>
+              </ui-markdown>
+              <ui-docs-tokens family="ui-graph" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <ui-graph
+                  style="--ui-graph-height: 16em"
+                  graph='{"nodes":[{"id":"in","label":"Input","ports":[{"id":"out","kind":"out"}]},{"id":"parse","label":"Parse","ports":[{"id":"src","label":"src","kind":"in"},{"id":"ast","label":"ast","kind":"out"},{"id":"errors","label":"errors","kind":"out"}]},{"id":"check","label":"Check","ports":[{"id":"ast","label":"ast","kind":"in"},{"id":"ok","label":"ok","kind":"out"}]},{"id":"report","label":"Report"},{"id":"emit","label":"Emit"}],"edges":[{"from":{"node":"in","port":"out"},"to":{"node":"parse","port":"src"}},{"from":{"node":"parse","port":"ast"},"to":{"node":"check","port":"ast"},"label":"tree"},{"from":{"node":"parse","port":"errors"},"to":{"node":"report"}},{"from":{"node":"check","port":"ok"},"to":{"node":"emit"}}]}'
+                ></ui-graph>
+                <!-- playground:end -->
+              </ui-docs-tokens>
+            </ui-section>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+                  each restyling this component through its tokens.  Its colours come from the theme, so it follows
+                  light and dark mode by itself.
+                </script>
+              </ui-markdown>
+            </ui-section>
+          </ui-tab>
+        </ui-tabs>
+      </ui-container>
+    </main>
+    <script type="module">
+      // The Big example's graph, made here:  150 nodes in 12 layers, 2 edges from each, mostly to the next layer.
+      // Every 25th node holds a graph of 12 of its own, made the first time it opens.
+      function generated(count, prefix = "n", seed = 7) {
+        let state = seed
+        const random = () => (state = (state * 16807) % 2147483647) / 2147483647
+        const layers = 12
+        const nodes = []
+        const edges = []
+        for (let i = 0; i < count; i++) {
+          const node = { id: `${prefix}${i}`, kind: i % 9 === 0 ? "hub" : undefined }
+          if (count > 40 && i % 25 === 3) node.children = () => generated(12, `${prefix}${i}c`, i + 1)
+          nodes.push(node)
+        }
+        const layerOf = (i) => Math.floor((i * layers) / count)
+        for (let i = 0; i < count; i++) {
+          for (let k = 0; k < 2; k++) {
+            const span = random() < 0.85 ? 1 : 2
+            const target = Math.min(layers - 1, layerOf(i) + span)
+            if (layerOf(i) === layers - 1) break
+            const first = Math.ceil((target * count) / layers)
+            const last = Math.ceil(((target + 1) * count) / layers) - 1
+            const j = first + Math.floor(random() * (last - first + 1))
+            if (j < count) edges.push({ from: { node: nodes[i].id }, to: { node: nodes[j].id } })
+          }
+        }
+        return { nodes, edges }
+      }
+
+      customElements.whenDefined("ui-graph").then(() => {
+        document.querySelector("#graph-big").graph = generated(150)
+      })
+    </script>
+  </body>
+</html>

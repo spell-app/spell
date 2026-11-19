@@ -144,6 +144,23 @@ export const SpellUrls = {
     return { base: "builtins", path: place }
   },
 
+  /**
+   * The address a path under one of spaces' folders names:  `folderFor()` backwards.
+   * - `("builtins", "@spell/examples/solitaire/Card.spell")` => `@spell/examples/solitaire/Card.spell`
+   * - `("spaces", "@spell/owen@/errors/a.spell")` => `owen@spell/errors/a.spell`:
+   *   a person's space is inside their org's
+   * - `("spaces", "@three-degrees/bubble-trouble/x.spell")` => `@three-degrees/bubble-trouble/x.spell`
+   * - `undefined` for a path no address names:  not under an org's folder (`__change-requests.json`)
+   * - e.g. the page server tells pages of a changed project file at its address (the app's route module)
+   */
+  placeForFolder(base: SP.SpaceFolderBase, path: string): string | undefined {
+    const [org = "", second = "", ...rest] = path.split("/")
+    if (!/^@[^@/]+$/.test(org)) return undefined
+    if (base === "builtins") return path
+    const person = /^([^@/]+)@$/.exec(second)?.[1]
+    return person ? [`${person}${org}`, ...rest].join("/") : path
+  },
+
   /** One part of a URL, encoded on its own:  `@` stays as is, so a place reads as its address. */
   encodePart(part: string): string {
     return encodeURIComponent(part).replace(/%40/g, "@")

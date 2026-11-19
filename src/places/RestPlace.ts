@@ -315,7 +315,8 @@ export class RestPlace extends WebPlace implements Place {
     // asked for by a query, it may answer with one thing, not a list:  Open-Meteo's forecast for one place;
     // a search at its own address answers its own way:  GitHub's `{ total_count, items: [...] }`;
     // so does a list under a thing:  Open Library's `{ links, size, entries: [...] }` (epic `data` T114);
-    // ONE thing under a thing is that list's one row:  a system's snapshot, its own lists inside it (epic `from-console` P16)
+    // ONE thing under a thing is that list's one row:
+    // a system's snapshot, its own lists inside it (epic `from-console` P16)
     const rows =
       held === null
         ? []
@@ -640,7 +641,8 @@ export class RestPlace extends WebPlace implements Place {
 
   /**
    * Is each of `collection`'s things found at an address holding its owner's id, with no list of its own:
-   * `snapshots are found at "/instances/{id}/snapshot"`?  Then what's under a thing there is one of them (epic `from-console` P16).
+   * `snapshots are found at "/instances/{id}/snapshot"`?
+   * Then what's under a thing there is one of them (epic `from-console` P16).
    */
   private isFoundAtItsOwner(collection: string): boolean {
     return HOLDS_AN_ID.test(this.mappingOf(collection).path ?? "")

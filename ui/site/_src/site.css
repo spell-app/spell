@@ -836,6 +836,16 @@
   ui-example > ui-segment > :is(ui-button, ui-buttons, ui-label) {
     margin-block: 0.25em;
   }
+  /*
+   * a tree's columns in an example keep clear of the code button over their top end corner:
+   * its path line and column titles end 2.5em short of it (at phone width it covered the selected pick's name)
+   */
+  ui-example > ui-tree::part(path),
+  ui-example > ui-tree::part(column-title),
+  ui-example > ui-tree ui-tree-item::part(column-title) {
+    padding-inline-end: 2.5em;
+  }
+
   /* a message given as an example's description runs the frame's width, as every other message does */
   ui-example:has(> ui-message[slot="description"])::part(description) {
     max-width: none;

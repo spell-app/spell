@@ -5,6 +5,7 @@ import { AnatomyFloors } from "spell/app/app/solid/AppAnatomyFloors"
 /**
  * `AnatomyFloors.in()`:  which elements of a running app are Anatomy's floors (epic `editor` P34).
  * - A view stands in as an element whose `component.currentThing` is an object, as `SpellElement.thingOf()` reads it.
+ * - A Spell UI part, as a `ui-*` element that draws its box in its shadow root (`uiPart()`).
  */
 
 /** A stand-in view:  `tag`, drawing a thing. */
@@ -14,6 +15,23 @@ function view(tag: string, style = ""): HTMLElement {
   element.setAttribute("style", `display: block; ${style}`)
   return element
 }
+
+/**
+ * A stand-in Spell UI part:  `tag`, drawing no box of its own (`display: contents`), its box a `<div>` in its shadow
+ * root holding a slot, with `style` on that box.
+ */
+function uiPart(tag: string, style = ""): HTMLElement {
+  const element = document.createElement(tag)
+  element.style.display = "contents"
+  const box = document.createElement("div")
+  box.setAttribute("style", `display: block; ${style}`)
+  box.append(document.createElement("slot"))
+  element.attachShadow({ mode: "open" }).append(box)
+  return element
+}
+
+/** A part as the Views tree takes one:  a view, or a Spell UI element (`Inspector.isPart`, cut down). */
+const isPart = (element: Element) => "component" in element || element.localName.startsWith("ui-")
 
 let stage: HTMLElement
 afterEach(() => stage?.remove())
@@ -42,13 +60,43 @@ describe("AnatomyFloors.in()", () => {
     ])
   })
 
-  test("only views are floors:  a Spell UI part inside one is not", () => {
+  test("by default only views are floors:  a Spell UI part inside one is not", () => {
     const app = view("x-app")
     const toolbar = document.createElement("ui-toolbar")
     toolbar.style.display = "block"
     app.append(toolbar)
     staged(app)
     expect(AnatomyFloors.in(stage).map((floor) => floor.element.localName)).toEqual(["x-app"])
+  })
+
+  test("with Spell UI parts, a part that draws no box is a floor by the first box in its shadow root (I261)", () => {
+    const app = view("x-app")
+    const segment = uiPart("ui-segment", "backdrop-filter: blur(20px)")
+    const text = uiPart("ui-text")
+    segment.append(text)
+    app.append(segment)
+    const floors = AnatomyFloors.in(staged(app), { isPart })
+    expect(
+      floors.map((floor) => [floor.element.localName, floor.box.localName, floor.parent?.element.localName])
+    ).toEqual([
+      ["x-app", "x-app", undefined],
+      ["ui-segment", "div", "x-app"],
+      ["ui-text", "div", "ui-segment"]
+    ])
+    // the glass blur round the text doesn't keep it flat:  Anatomy turns that off while it shows
+    expect(floors.some((floor) => floor.isFlat || floor.clips)).toBe(false)
+  })
+
+  test("a Spell UI part's own drawing holds no floors;  a part that doesn't show isn't one", () => {
+    const app = view("x-app")
+    const button = uiPart("ui-button")
+    button.shadowRoot!.firstElementChild!.append(document.createElement("ui-icon"))
+    const closed = uiPart("ui-modal")
+    closed.shadowRoot!.firstElementChild!.setAttribute("style", "display: block; opacity: 0")
+    closed.append(uiPart("ui-content"))
+    app.append(button, closed)
+    const floors = AnatomyFloors.in(staged(app), { isPart })
+    expect(floors.map((floor) => floor.element.localName)).toEqual(["x-app", "ui-button"])
   })
 
   test("siblings that overlap step up one by one, in the order they're drawn;  ones side by side don't", () => {
@@ -71,9 +119,9 @@ describe("AnatomyFloors.in()", () => {
     ])
   })
 
-  test("a view that clips what's inside it keeps its floors flat on it", () => {
+  test("a view that fades what's inside it keeps its floors flat on it", () => {
     const app = view("x-app")
-    const list = view("x-list", "overflow: hidden")
+    const list = view("x-list", "opacity: 0.5")
     const item = view("x-item")
     const loose = view("x-loose")
     list.append(item)
@@ -84,6 +132,37 @@ describe("AnatomyFloors.in()", () => {
     expect(of("x-item").isFlat).toBe(true)
     expect(of("x-loose").isFlat).toBe(false)
     expect(of("x-app").clips).toBeFalsy()
+  })
+
+  test("a view inside one that clips, blurs, isolates or masks is a floor of its own, lifted out of it (I261)", () => {
+    const app = view("x-app")
+    const parents = [
+      "overflow: hidden",
+      "backdrop-filter: blur(20px)",
+      "isolation: isolate",
+      "mask-image: linear-gradient(black, black)"
+    ].map((style) => {
+      const box = document.createElement("div")
+      box.setAttribute("style", style)
+      box.append(view("x-item"))
+      return box
+    })
+    app.append(...parents)
+    const floors = AnatomyFloors.in(staged(app))
+    expect(floors.map((floor) => [floor.element.localName, floor.depth, !!floor.isFlat])).toEqual([
+      ["x-app", 0, false],
+      ["x-item", 1, false],
+      ["x-item", 1, false],
+      ["x-item", 1, false],
+      ["x-item", 1, false]
+    ])
+    // what Anatomy sets on each while it shows, and puts back as it closes
+    expect(parents.map((box) => AnatomyFloors.liftingStylesFor(getComputedStyle(box)))).toEqual([
+      { overflow: "visible" },
+      { "backdrop-filter": "none" },
+      { isolation: "auto" },
+      { "mask-image": "none" }
+    ])
   })
 
   test("the boxes between a floor and the stage leave out what draws no box", () => {

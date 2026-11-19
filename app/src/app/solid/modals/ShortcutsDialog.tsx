@@ -17,13 +17,16 @@ import "./ShortcutsDialog.css"
  *   a shortcut added there shows here, with no second edit (`shortcutRows()`).
  * - Grouped by where the keys work (`HOTKEY_GROUPS`):  each group a heading, then its rows.
  * - Each row:  what its key does, a note when it works only some of the time, then its keys as key caps
- *   (`<ui-keys>`), the same caps the menus draw.
+ *   (`<ui-keys>`), the same caps the menus draw, larger and bold here.
  *   - ⌘ ⇧ ⌥ on a Mac, Ctrl, Shift and Alt elsewhere;  a key that's another on a Mac (`mac`) shows that one there.
- * - A search field at the top, focused as it opens:  it narrows the rows to those whose name, heading or keys
- *   as drawn match ("save", "debug", "F5", "⌘S", "Ctrl S");  nothing found, it says so.
+ *   - Several keys that do the same thing (Delete:  ⌫ or ⌦) each on a line of its own, "or" before the next.
+ * - A search field in its title bar, beside its title, focused as it opens (I268):
+ *   it narrows the rows to those whose name, heading or keys as drawn match ("save", "debug", "F5", "⌘S", "Ctrl S");
+ *   nothing found, it says so.
+ * - Its rows on the page's plain surface, not the dialog's see-through glass, so they read easily (I268).
  * - A list to read:  no key changes here (Q48;  epic `editor` T112 holds that).
  * - Closes like every dialog:  its ✕, or Escape (`closedby="closerequest"`:  a click on the dimmer does nothing).
- * - Scrolls inside itself, the search field staying put, on a short window.
+ * - Its rows scroll inside it, the title bar staying put;  the scroll bar at its right edge.
  * - Show one with `openShortcuts()`, which mounts it and cleans up.
  ****************/
 export function ShortcutsDialog(props: ShortcutsDialogProps) {
@@ -42,19 +45,20 @@ export function ShortcutsDialog(props: ShortcutsDialogProps) {
       size="small"
       closedby="closerequest"
       closable=""
-      heading={appTexts.text("shortcuts")}
+      aria-label={appTexts.text("shortcuts")}
       visible=""
       ref={(element: HTMLElement) => {
         element.addEventListener("ui-opened", () => search?.focus(), { once: true })
         element.addEventListener("ui-closed", () => props.onClose(), { once: true })
       }}
     >
-      <ui-content>
+      <div class="ShortcutsHeader">
+        <h2 class="ShortcutsTitle">{appTexts.text("shortcuts")}</h2>
         <ui-input
           class="ShortcutsSearch"
-          fluid=""
           icon="search"
           icon-position="left"
+          size="small"
           aria-label={appTexts.text("shortcutsSearch")}
           placeholder={appTexts.text("shortcutsSearch")}
           ref={(element: HTMLElement) => {
@@ -62,34 +66,45 @@ export function ShortcutsDialog(props: ShortcutsDialogProps) {
             on<{ value: string }>("ui-typed", (event) => setWords(event.detail.value))(element)
           }}
         />
-        <div class="ShortcutsList">
-          <For each={shown()} keyed={(group) => group.group}>
-            {(group) => (
-              <section class="ShortcutsGroup" data-group={group().group}>
-                <h3>{appTexts.text(HOTKEY_GROUPS[group().group])}</h3>
-                <ul>
-                  <For each={group().rows}>
-                    {(row) => (
-                      <li class="ShortcutsRow" data-name={row.name}>
-                        <span class="ShortcutsWhat">
-                          <span class="ShortcutsName">{appTexts.text(row.name)}</span>
-                          <Show when={row.where}>
-                            {(where) => <span class="ShortcutsWhere">{appTexts.text(where())}</span>}
-                          </Show>
-                        </span>
-                        <ui-keys shortcut={row.shortcut} platform={props.platform} />
-                      </li>
-                    )}
-                  </For>
-                </ul>
-              </section>
-            )}
-          </For>
-          <Show when={!shown().length}>
-            <p class="ShortcutsNone">{appTexts.text("shortcutsNoMatch", { words: words().trim() })}</p>
-          </Show>
-        </div>
-      </ui-content>
+      </div>
+      <div class="ShortcutsList">
+        <For each={shown()} keyed={(group) => group.group}>
+          {(group) => (
+            <section class="ShortcutsGroup" data-group={group().group}>
+              <h3>{appTexts.text(HOTKEY_GROUPS[group().group])}</h3>
+              <ul>
+                <For each={group().rows}>
+                  {(row) => (
+                    <li class="ShortcutsRow" data-name={row.name}>
+                      <span class="ShortcutsWhat">
+                        <span class="ShortcutsName">{appTexts.text(row.name)}</span>
+                        <Show when={row.where}>
+                          {(where) => <span class="ShortcutsWhere">{appTexts.text(where())}</span>}
+                        </Show>
+                      </span>
+                      <span class="ShortcutsKeys">
+                        <For each={row.shortcuts}>
+                          {(shortcut, index) => (
+                            <span class="ShortcutsChord">
+                              <Show when={index() > 0}>
+                                <span class="ShortcutsOr">{appTexts.text("shortcutsOr")}</span>
+                              </Show>
+                              <ui-keys shortcut={shortcut} platform={props.platform} />
+                            </span>
+                          )}
+                        </For>
+                      </span>
+                    </li>
+                  )}
+                </For>
+              </ul>
+            </section>
+          )}
+        </For>
+        <Show when={!shown().length}>
+          <p class="ShortcutsNone">{appTexts.text("shortcutsNoMatch", { words: words().trim() })}</p>
+        </Show>
+      </div>
     </ui-modal>
   )
 }
@@ -148,7 +163,7 @@ const ROOT_CLASS = "ShortcutsDialogRoot"
 
 /**
  * The dialog's rows, from `EDITOR_HOTKEYS`, in its order:  one per name in a group.
- * - Shortcuts with the same name and group are one row, their keys a space apart:  Delete is Backspace and Delete.
+ * - Shortcuts with the same name and group are one row, with each one's keys:  Delete is Backspace or Delete.
  * - Each key as a Mac (`isApple`) or another keyboard has it:  a shortcut's `mac`, when it has one, on a Mac.
  * - Pure:  the coverage test reads it too.
  */
@@ -157,8 +172,8 @@ export function shortcutRows(isApple: boolean): ShortcutRow[] {
   for (const hotkey of Object.values(EDITOR_HOTKEYS) as ListedHotkey[]) {
     const shortcut = (isApple && hotkey.mac) || hotkey.shortcut
     const same = rows.find((row) => row.group === hotkey.group && row.name === hotkey.name)
-    if (same) same.shortcut += ` ${shortcut}`
-    else rows.push({ group: hotkey.group, name: hotkey.name, where: hotkey.where, shortcut })
+    if (same) same.shortcuts.push(shortcut)
+    else rows.push({ group: hotkey.group, name: hotkey.name, where: hotkey.where, shortcuts: [shortcut] })
   }
   return rows
 }
@@ -171,8 +186,8 @@ export type ShortcutRow = {
   name: AppTextKey
   /** Where it works, when that's narrower than its group. */
   where?: AppTextKey
-  /** Its keys, in Spell UI's words, a space apart:  `<ui-keys shortcut>`. */
-  shortcut: string
+  /** Each shortcut that does it, in Spell UI's words:  a `<ui-keys shortcut>` each. */
+  shortcuts: string[]
 }
 
 /** `rows` under their headings, in `HOTKEY_GROUPS`' order;  a group with none left out. */
@@ -191,7 +206,7 @@ function groupsOf(rows: readonly ShortcutRow[]): { group: HotkeyGroup; rows: Sho
 function matches(row: ShortcutRow, query: string, isApple: boolean): boolean {
   const words = [appTexts.text(row.name), appTexts.text(HOTKEY_GROUPS[row.group])]
   if (words.some((text) => searchText(text).includes(query))) return true
-  return capsTexts(row.shortcut, isApple).some((text) => searchText(text) === query)
+  return row.shortcuts.flatMap((shortcut) => capsTexts(shortcut, isApple)).some((text) => searchText(text) === query)
 }
 
 /** `shortcut`'s chords as their caps are drawn:  `mod+S` => `⌘S`, `⌘ S`, `⌘+S` on a Mac. */

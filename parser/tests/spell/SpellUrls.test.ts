@@ -96,6 +96,21 @@ describe("SpellUrls", () => {
     expect(SP.SpellUrls.folderFor("@local/my-folder")).toBeUndefined()
   })
 
+  test("a folder's address:  `folderFor()` backwards", () => {
+    for (const place of [
+      "@spell/examples/solitaire/Card.spell",
+      "owen@spell/errors/a.spell",
+      "owen@spell",
+      "@three-degrees/bubble-trouble/x.spell",
+      "matt@three-degrees/bubble-trouble/folder/y.spell"
+    ]) {
+      const { base, path } = SP.SpellUrls.folderFor(place)!
+      expect(SP.SpellUrls.placeForFolder(base, path)).toBe(place)
+    }
+    expect(SP.SpellUrls.placeForFolder("spaces", "__change-requests.json")).toBeUndefined()
+    expect(SP.SpellUrls.placeForFolder("builtins", "README.md")).toBeUndefined()
+  })
+
   test("every URL is written whole:  it starts `/spaces/` or `/api/`, and never climbs `../`", () => {
     const urls = [
       SP.SpellUrls.fileUrl("@spell/library/cards/Pile.spell"),

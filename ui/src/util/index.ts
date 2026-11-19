@@ -24,6 +24,7 @@
  *     `afterSolidUpdate()`, `beforeNextPaint()`, `soon()`, `after()`, `every()`;  and to wait:  `waitUntil()`, `within()`
  *   - `Warnings` -- `ui`'s console warnings, its own
  *   - `TopLayerTip` -- a tooltip in the top layer, so no frame cuts it off
+ *   - `PaneSizes` -- sizes as text (`"20%, *, auto"`), read one way by `<ui-split-panel>` and `<ui-tree>`
  *   - `LoadOnce` (`spell/util/LoadOnce`) -- a load per key, once per page, with a choice of what a failure does
  */
 
@@ -35,6 +36,7 @@ export * from "spell/util/string"
 export * from "spell/util/util.types"
 
 export * from "spell/util/timing"
+export * from "./PaneSizes"
 export * from "./TopLayerTip"
 export * from "./Warnings"
 export * from "spell/util/LoadOnce"

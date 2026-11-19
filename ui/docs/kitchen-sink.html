@@ -1814,6 +1814,33 @@
               </ui-example>
             </ui-section>
 
+            <ui-section id="views-graph" label="Graph" sticky="stack" collapsible dividing>
+              <ui-example>
+                <p slot="description">
+                  A graph draws nodes joined by edges, laid out left to right.  A node may hold a graph of its own, opened in place, in a modal, or in its stead.
+                  <a href="ui-graph.html">Graph page</a>
+                </p>
+                <ui-graph
+                  style="--ui-graph-height: 16em"
+                  graph='{"nodes":[{"id":"in","label":"Input","ports":[{"id":"out","kind":"out"}]},{"id":"parse","label":"Parse","ports":[{"id":"src","label":"src","kind":"in"},{"id":"ast","label":"ast","kind":"out"},{"id":"errors","label":"errors","kind":"out"}]},{"id":"check","label":"Check","ports":[{"id":"ast","label":"ast","kind":"in"},{"id":"ok","label":"ok","kind":"out"}]},{"id":"report","label":"Report"},{"id":"emit","label":"Emit"}],"edges":[{"from":{"node":"in","port":"out"},"to":{"node":"parse","port":"src"}},{"from":{"node":"parse","port":"ast"},"to":{"node":"check","port":"ast"},"label":"tree"},{"from":{"node":"parse","port":"errors"},"to":{"node":"report"}},{"from":{"node":"check","port":"ok"},"to":{"node":"emit"}}]}'
+                ></ui-graph>
+              </ui-example>
+              <ui-example description="Children: inline">
+                <ui-graph
+                  style="--ui-graph-height: 24em"
+                  child-view="inline"
+                  graph='{"nodes":[{"id":"mem","label":"Memory","ports":[{"id":"d","label":"data","kind":"out"},{"id":"a","label":"addr","kind":"in"}]},{"id":"cpu","label":"CPU","open":true,"ports":[{"id":"clk","label":"clk","kind":"in"},{"id":"bus","label":"bus","kind":"out"}],"children":{"nodes":[{"id":"fetch","label":"Fetch","ports":[{"id":"pc","label":"pc","kind":"in"},{"id":"op","label":"op","kind":"out"}]},{"id":"alu","label":"ALU","ports":[{"id":"op","label":"op","kind":"in"},{"id":"r","label":"r","kind":"out"}],"children":{"nodes":[{"id":"add","label":"Adder","ports":[{"id":"a","kind":"in"},{"id":"s","kind":"out"}]},{"id":"shift","label":"Shifter","ports":[{"id":"a","kind":"in"},{"id":"s","kind":"out"}]},{"id":"mux","label":"Mux","ports":[{"id":"x","kind":"in"},{"id":"y","kind":"in"},{"id":"o","kind":"out"}]}],"edges":[{"from":{"port":"op"},"to":{"node":"add","port":"a"}},{"from":{"port":"op"},"to":{"node":"shift","port":"a"}},{"from":{"node":"add","port":"s"},"to":{"node":"mux","port":"x"}},{"from":{"node":"shift","port":"s"},"to":{"node":"mux","port":"y"}},{"from":{"node":"mux","port":"o"},"to":{"port":"r"}}]}},{"id":"regs","label":"Registers","ports":[{"id":"w","label":"w","kind":"in"},{"id":"pc","label":"pc","kind":"out"}]}],"edges":[{"from":{"port":"clk"},"to":{"node":"fetch","port":"pc"}},{"from":{"node":"fetch","port":"op"},"to":{"node":"alu","port":"op"},"label":"op"},{"from":{"node":"alu","port":"r"},"to":{"node":"regs","port":"w"}},{"from":{"node":"regs","port":"pc"},"to":{"node":"fetch","port":"pc"}},{"from":{"node":"regs","port":"pc"},"to":{"port":"bus"}}]}},{"id":"clock","label":"Clock","ports":[{"id":"t","kind":"out"}]},{"id":"io","label":"I/O"}],"edges":[{"from":{"node":"clock","port":"t"},"to":{"node":"cpu","port":"clk"}},{"from":{"node":"cpu","port":"bus"},"to":{"node":"mem","port":"a"}},{"from":{"node":"cpu","port":"bus"},"to":{"node":"io"}},{"from":{"node":"mem","port":"d"},"to":{"node":"io"},"label":"dma"}]}'
+                ></ui-graph>
+              </ui-example>
+              <ui-example description="Children: modal">
+                <ui-graph
+                  style="--ui-graph-height: 24em"
+                  child-view="modal"
+                  graph='{"nodes":[{"id":"mem","label":"Memory","ports":[{"id":"d","label":"data","kind":"out"},{"id":"a","label":"addr","kind":"in"}]},{"id":"cpu","label":"CPU","ports":[{"id":"clk","label":"clk","kind":"in"},{"id":"bus","label":"bus","kind":"out"}],"children":{"nodes":[{"id":"fetch","label":"Fetch","ports":[{"id":"pc","label":"pc","kind":"in"},{"id":"op","label":"op","kind":"out"}]},{"id":"alu","label":"ALU","ports":[{"id":"op","label":"op","kind":"in"},{"id":"r","label":"r","kind":"out"}],"children":{"nodes":[{"id":"add","label":"Adder","ports":[{"id":"a","kind":"in"},{"id":"s","kind":"out"}]},{"id":"shift","label":"Shifter","ports":[{"id":"a","kind":"in"},{"id":"s","kind":"out"}]},{"id":"mux","label":"Mux","ports":[{"id":"x","kind":"in"},{"id":"y","kind":"in"},{"id":"o","kind":"out"}]}],"edges":[{"from":{"port":"op"},"to":{"node":"add","port":"a"}},{"from":{"port":"op"},"to":{"node":"shift","port":"a"}},{"from":{"node":"add","port":"s"},"to":{"node":"mux","port":"x"}},{"from":{"node":"shift","port":"s"},"to":{"node":"mux","port":"y"}},{"from":{"node":"mux","port":"o"},"to":{"port":"r"}}]}},{"id":"regs","label":"Registers","ports":[{"id":"w","label":"w","kind":"in"},{"id":"pc","label":"pc","kind":"out"}]}],"edges":[{"from":{"port":"clk"},"to":{"node":"fetch","port":"pc"}},{"from":{"node":"fetch","port":"op"},"to":{"node":"alu","port":"op"},"label":"op"},{"from":{"node":"alu","port":"r"},"to":{"node":"regs","port":"w"}},{"from":{"node":"regs","port":"pc"},"to":{"node":"fetch","port":"pc"}},{"from":{"node":"regs","port":"pc"},"to":{"port":"bus"}}]}},{"id":"clock","label":"Clock","ports":[{"id":"t","kind":"out"}]},{"id":"io","label":"I/O"}],"edges":[{"from":{"node":"clock","port":"t"},"to":{"node":"cpu","port":"clk"}},{"from":{"node":"cpu","port":"bus"},"to":{"node":"mem","port":"a"}},{"from":{"node":"cpu","port":"bus"},"to":{"node":"io"}},{"from":{"node":"mem","port":"d"},"to":{"node":"io"},"label":"dma"}]}'
+                ></ui-graph>
+              </ui-example>
+            </ui-section>
+
             <ui-section id="views-items" label="Items" sticky="stack" collapsible dividing>
               <ui-example>
                 <p slot="description">
@@ -2159,12 +2186,22 @@
             <ui-section id="modules-json-data" label="JSON data" sticky="stack" collapsible dividing>
               <ui-example>
                 <p slot="description">
-                  JSON data holds data in a page, as its text or from a file:  it draws nothing, and other elements read it.
+                  JSON data holds data in a page, as its text or from a file, and shows it as an outline that opens and closes.
                   <a href="ui-json.html">JSON data page</a>
                 </p>
-                <ui-tree-diagram>
-                  <ui-json>{ "label": "Add", "children": [{ "label": "Number 1" }, { "label": "Number 2" }] }</ui-json>
-                </ui-tree-diagram>
+                <ui-json>
+                  { "name": "port-a", "kind": "optical", "lanes": 4, "active": true, "owner": null, "tags": ["in", "test"],
+                  "bounds": { "x": 0, "y": 12.5, "w": 400, "h": 220 } }
+                </ui-json>
+              </ui-example>
+              <ui-example description="Three levels open, editable">
+                <ui-json depth="3" editable>
+                  { "board": { "name": "demo", "parts": { "a1": { "kind": "switch", "on": false }, "b2": { "kind": "lamp", "watts":
+                  60 } } }, "made": "2026-11-18" }
+                </ui-json>
+              </ui-example>
+              <ui-example description="All closed, no header">
+                <ui-json depth="0" no-header>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]</ui-json>
               </ui-example>
             </ui-section>
 
@@ -3179,15 +3216,25 @@
                   A tree shows rows nested in rows, which open and close, and can be selected one or many at a time.
                   <a href="ui-tree.html">Tree page</a>
                 </p>
-                <ui-tree choose="many" label="Files" style="width: 16em">
-                  <ui-tree-item label="src" icon="folder" open>
-                    <ui-tree-item label="Card.spell" icon="file code" selected></ui-tree-item>
-                    <ui-tree-item label="Deck.spell" icon="file code"></ui-tree-item>
-                    <ui-tree-item label="styles" icon="folder">
-                      <ui-tree-item label="card.css" icon="file code"></ui-tree-item>
+                <ui-tree
+                  appearance="columns"
+                  column-titles="Clients, Projects, Files"
+                  show="icon which count chevron"
+                  label="Work"
+                  style="height: 12em; width: 44em"
+                >
+                  <ui-tree-item label="Acme Bakery" icon="building outline" open>
+                    <ui-tree-item label="Spring menu" icon="folder" open>
+                      <ui-tree-item label="menu.pdf" icon="file pdf outline" selected></ui-tree-item>
+                      <ui-tree-item label="prices.csv" icon="file alternate outline"></ui-tree-item>
+                    </ui-tree-item>
+                    <ui-tree-item label="Website" icon="folder">
+                      <ui-tree-item label="home.html" icon="file code outline"></ui-tree-item>
                     </ui-tree-item>
                   </ui-tree-item>
-                  <ui-tree-item label="README.md" which="notes" icon="file alternate outline"></ui-tree-item>
+                  <ui-tree-item label="Harbor Books" icon="building outline">
+                    <ui-tree-item label="Catalogue" icon="folder"></ui-tree-item>
+                  </ui-tree-item>
                 </ui-tree>
               </ui-example>
             </ui-section>

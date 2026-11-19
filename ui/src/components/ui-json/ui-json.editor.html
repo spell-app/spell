@@ -1,7 +1,17 @@
 <!-- <ui-json>'s property editor layout:  move, pair (<ui-fields>) or leave out (data-omit) its properties.  How:  Spell UI's AGENTS.md, "Property editor layouts". -->
-<ui-property-editor schema="ui-json" data-omit="">
+<ui-property-editor schema="ui-json" data-omit="editors">
   <ui-property-group label="Appearance" data-group="appearance">
     <ui-property name="source"></ui-property>
     <ui-property name="load"></ui-property>
+    <ui-fields>
+      <ui-property name="quotes"></ui-property>
+      <ui-property name="no-header"></ui-property>
+    </ui-fields>
+  </ui-property-group>
+  <ui-property-group label="Behaviour" data-group="behaviour">
+    <ui-fields>
+      <ui-property name="depth"></ui-property>
+      <ui-property name="editable"></ui-property>
+    </ui-fields>
   </ui-property-group>
 </ui-property-editor>

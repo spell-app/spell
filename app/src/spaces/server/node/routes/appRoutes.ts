@@ -12,7 +12,9 @@ import { checkoutOf } from "spell/server/checkout"
 import type { RouteModule } from "spell/server/page"
 import { pageServerSettings } from "spell/server/page/settings"
 import { AtProtoIdentity, mailerFor, ReadCredentials, SignInCheck, SignIns } from "spell/server/signIn"
+import { SP } from "spell/parser/spell"
 import environment from "spell/app/spaces/server/node/environment"
+import { isSpaceName } from "spell/app/spaces/models/spaceNames"
 import { isSourceCheckout } from "spell/app/spaces/server/node/spellSpacesDir"
 import { peopleStore } from "spell/app/spaces/server/node/people/peopleRoutes"
 import { SpellAccounts } from "spell/app/spaces/server/node/people/SpellAccounts"
@@ -125,6 +127,9 @@ const appRoutes: RouteModule = {
     onStop(() => projectBuild.stop())
     // a person's pref saved (their theme):  every open page hears it, and follows (`ThemePreference`)
     onStop(onPrefSaved((saved) => live.send(PREF_SAVED_EVENT, saved)))
+    // a project file changed on disk (another window, an agent, git):  every open page hears it at its address,
+    // so the editor shows it at once, with no poll (epic `from-console` P17)
+    onStop(watchSpaceFiles(live))
     // before `/api`'s own routes, whose last answers every path it doesn't know
     // and their live rooms, each write as its page's person (epic `atmosphere` T38)
     folders.route({ router, guard, upgrade: (prefix, handle) => web.upgrade(prefix, handle), signIn })
@@ -175,6 +180,31 @@ async function editorUrl(root: string): Promise<string | undefined> {
     return url
   } catch {
     return undefined
+  }
+}
+
+/**
+ * Tell every open page of each change to a project's file, at the address it's read at:
+ * `/spaces/<address>` (`SP.SpellUrls.fileUrl()`), e.g. `/spaces/owen@spell/errors/a.spell`.
+ * - over the page server's live channel (`spell-server:changed`):
+ *   the editor watches its open project's files by it (`editor.watchOpenFile()`)
+ * - both of spaces' folders (`environment.spaceFolders`):  the built-ins, and spell.spaces
+ * - never spaces' own names (`__data`, `__draft` ...):
+ *   a program's rows and a person's drafts aren't a project's files,
+ *   and the live rooms and data folders say their own changes
+ * - Returns what stops it.
+ */
+function watchSpaceFiles(live: SRV.LiveReload): () => void {
+  const isProjectFile = (path: string) => !path.split("/").some(isSpaceName)
+  const watches = Object.entries(environment.spaceFolders).map(
+    ([base, dir]) =>
+      new SRV.FolderWatch(dir, { only: isProjectFile, keepsAlive: false }, ([inside]) => {
+        const place = SP.SpellUrls.placeForFolder(base as SP.SpaceFolderBase, inside!)
+        if (place) live.changed(join(dir, inside!), SP.SpellUrls.SPACES + SP.SpellUrls.encodeAddress(place))
+      })
+  )
+  return () => {
+    for (const watch of watches) watch.close()
   }
 }
 

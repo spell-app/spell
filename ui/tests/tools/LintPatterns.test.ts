@@ -181,6 +181,11 @@ const ALLOWED: readonly Allowed[] = [
     reason: "watches the managed TABLE, swapped with it"
   },
   {
+    file: "src/components/ui-tree/UITree.tsx",
+    rule: "no-mutation-observer",
+    reason: "watches a row, another element, only until its rows come"
+  },
+  {
     file: "src/components/ui-visibility/UIVisibility.tsx",
     rule: "no-mutation-observer",
     reason: "only while `images` is on and the element connected"

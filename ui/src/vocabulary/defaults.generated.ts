@@ -570,6 +570,13 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "value", kind: "json", group: "form" },
     { name: "debug", kind: "boolean", group: "advanced" }
   ],
+  "ui-graph": [
+    { name: "graph", kind: "json", group: "content" },
+    { name: "child-view", kind: "enum", group: "behaviour", values: ["inline", "modal", "drill"] },
+    { name: "path", kind: "string", group: "behaviour" },
+    { name: "selected", kind: "json", group: "states" },
+    { name: "boundary", kind: "json", group: "content" }
+  ],
   "ui-grid": [
     { name: "columns", kind: "width", group: "layout", values: "widths" },
     { name: "equal-width", kind: "keyOnly", group: "layout" },
@@ -789,7 +796,12 @@ export const DEFAULTS_TABLE: Readonly<
   ],
   "ui-json": [
     { name: "source", kind: "string" },
-    { name: "load", kind: "enum", values: ["eager", "visible", "idle"] }
+    { name: "load", kind: "enum", values: ["eager", "visible", "idle"] },
+    { name: "depth", kind: "number", group: "behaviour" },
+    { name: "quotes", kind: "boolean", group: "appearance" },
+    { name: "no-header", kind: "boolean", group: "appearance" },
+    { name: "editable", kind: "boolean", group: "behaviour" },
+    { name: "editors", kind: "json", group: "behaviour" }
   ],
   "ui-keys": [
     { name: "shortcut", kind: "string", group: "content" },
@@ -1896,10 +1908,17 @@ export const DEFAULTS_TABLE: Readonly<
   "ui-tree": [
     { name: "choose", kind: "valueOnly", group: "behaviour", values: ["one", "many"] },
     { name: "filter", kind: "string", group: "behaviour" },
+    { name: "tools", kind: "keyOnly", group: "behaviour" },
     { name: "label", kind: "string", group: "behaviour" },
     { name: "appearance", kind: "valueOnly", group: "appearance", values: ["nav", "columns"] },
     { name: "column-titles", kind: "string", group: "appearance" },
-    { name: "sticky-path", kind: "keyOnly", group: "behaviour" }
+    { name: "items", kind: "json", group: "content" },
+    { name: "path", kind: "json", group: "behaviour" },
+    { name: "size", kind: "string", group: "appearance" },
+    { name: "narrow-before", kind: "number", group: "appearance" },
+    { name: "show", kind: "string", group: "appearance" },
+    { name: "sticky-path", kind: "keyOnly", group: "behaviour" },
+    { name: "sticky-detail", kind: "keyOnly", group: "behaviour" }
   ],
   "ui-tree-diagram": [
     { name: "tree", kind: "json", group: "content" },

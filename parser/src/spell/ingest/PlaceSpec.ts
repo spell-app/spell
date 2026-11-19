@@ -42,7 +42,8 @@ const TOO_DEEP = "It's too far inside others:  read it by hand, a type of its ow
  * - What can be done to one:  `add` (a `POST` to its own address), `change` (`PUT` or `PATCH` by id), `delete`, and each
  *   action route under a thing by id, by its last word (`/background-tasks/{id}/enqueue/` is `enqueue`).
  * - ONE thing under each of a collection's things, a `GET` answering one object (`/instances/{id}/snapshot`):
- *   a collection of its own, by its last word too, read as part of its owner (`recordsUnder()`, epic `from-console` P16).
+ *   a collection of its own, by its last word too, read as part of its owner
+ *   (`recordsUnder()`, epic `from-console` P16).
  * - A reference into another file or address is named in the notes, and its field left untyped:  only local ones are
  *   followed, by a small reader of its own (no dependency).
  * - Plain data:  it reads nothing, so a test hands it a saved description.
@@ -177,10 +178,12 @@ export class PlaceSpec {
   /**
    * ONE thing under each thing of a collection, at an address of its own (epic `from-console` P16):
    * a `GET` under a thing by id that answers one object, `/instances/{id}/snapshot`.
-   * - Each is a collection of its own, named by its last word as an action is (`snapshot`), its fields from its schema,
-   *   found at that address;  its owner keeps it under each of its things (`ListUnderSeen.isOne`).
-   * - Its owner:  the collection whose address it's under, else the one its brace or the word before it names
-   *   (`/systems/instance/{instance_id}/snapshot` is under `instances`).
+   * - Each is a collection of its own:
+   *   - named by its last word, as an action is (`snapshot`)
+   *   - its fields from its schema, found at that address
+   *   - its owner keeps it under each of its things (`ListUnderSeen.isOne`)
+   * - Its owner:  the collection whose address it's under,
+   *   else the one its brace or the word before it names (`/systems/instance/{instance_id}/snapshot` is under `instances`).
    * - One with no owner found is said in the notes, and left out.
    */
   private recordsUnder(

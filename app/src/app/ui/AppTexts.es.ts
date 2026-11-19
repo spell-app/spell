@@ -267,6 +267,7 @@ const APP_TEXTS_ES: AppTextPack = {
   shortcuts: "Atajos de teclado",
   shortcutsSearch: "Buscar en los atajos",
   shortcutsNoMatch: "Ningún atajo coincide con «{words}».\nPrueba con otra palabra.",
+  shortcutsOr: "o",
   shortcutsFiles: "Archivos",
   shortcutsEditing: "Edición",
   shortcutsSelection: "Lo que está seleccionado en la app",

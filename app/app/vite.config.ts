@@ -53,7 +53,8 @@ export default defineConfig({
     sourcemap: false,
     rollupOptions: {
       // the app, and the runtime its programs run on -- its own entry, so it holds ALL of `core`
-      // (`runtimeOwnCoreInBuild()`), at a FIXED name for `editor.loadRuntime()` to import.  See `spellRuntime.ts`.
+      // (`runtimeOwnCoreInBuild()`), at a FIXED name for `editor.loadRuntime()` to import.
+      // See `spellRuntime.ts`.
       input: { index: "index.html", [RUNTIME_ENTRY]: RUNTIME_SOURCE },
       // keep `spell-runtime.js`'s exports by NAME:  it's compiled spell's `@spell/core`
       preserveEntrySignatures: "exports-only",
@@ -132,7 +133,8 @@ const RUNTIME_OWN = "?spell-runtime"
 const DYNAMIC_IMPORT = /\bimport\(\s*(["'])([^"'`\n]+)\1\s*\)/g
 
 /**
- * In a build, `spell-runtime.js` holds ALL of what a runtime keeps per copy (`PER_COPY`):  its `core`, and what runs on it.
+ * In a build, `spell-runtime.js` holds ALL of what a runtime keeps per copy (`PER_COPY`):
+ * its `core`, and what runs on it.
  * - `loadRuntime()` copies that ONE file, from a `blob:` URL, and the copy shares the chunks it imports.
  *   With `core` in a chunk the editor shares, every copy shared ONE `core`, each with its own `View`:
  *   the last copy loaded took `core.defineElement()` over, and an app's elements were never defined

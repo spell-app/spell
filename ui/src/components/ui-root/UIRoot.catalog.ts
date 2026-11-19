@@ -560,6 +560,11 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "debug"
     ]
   },
+  "ui-graph": {
+    folder: "ui-graph",
+    skeleton: { height: "16em" },
+    attributes: ["graph", "child-view", "path", "selected", "boundary"]
+  },
   "ui-grid": {
     folder: "ui-grid",
     attributes: [
@@ -734,7 +739,11 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     },
     attributes: ["size", "divided", "spacing", "appearance", "unstackable", "stack-with", "inverted", "disabled"]
   },
-  "ui-json": { folder: "ui-json", attributes: ["source", "load"] },
+  "ui-json": {
+    folder: "ui-json",
+    skeleton: { parts: [{ shape: "paragraph", lines: 4 }] },
+    attributes: ["source", "load", "depth", "quotes", "no-header", "editable", "editors"]
+  },
   "ui-keys": { folder: "ui-keys", attributes: ["shortcut", "platform"] },
   "ui-label": {
     folder: "ui-label",
@@ -1720,7 +1729,21 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-tree": {
     folder: "ui-tree",
     skeleton: { parts: [{ shape: "paragraph", lines: 3 }] },
-    attributes: ["choose", "filter", "label", "appearance", "column-titles", "sticky-path"]
+    attributes: [
+      "choose",
+      "filter",
+      "tools",
+      "label",
+      "appearance",
+      "column-titles",
+      "items",
+      "path",
+      "size",
+      "narrow-before",
+      "show",
+      "sticky-path",
+      "sticky-detail"
+    ]
   },
   "ui-tree-diagram": {
     folder: "ui-tree-diagram",

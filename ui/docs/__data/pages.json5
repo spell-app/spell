@@ -195,6 +195,11 @@
       "summary": "A form displays a set of related user input fields in a structured way.",
       "status": "done"
     },
+    "ui-graph": {
+      "title": "Graph",
+      "summary": "A graph draws nodes joined by edges, laid out left to right.  A node may hold a graph of its own, opened in place, in a modal, or in its stead.",
+      "status": "in-progress"
+    },
     "ui-grid": {
       "title": "Grid",
       "summary": "A grid is used to harmonize negative space in a layout.",
@@ -244,7 +249,7 @@
     },
     "ui-json": {
       "title": "JSON data",
-      "summary": "JSON data holds data in a page, as its text or from a file:  it draws nothing, and other elements read it.",
+      "summary": "JSON data holds data in a page, as its text or from a file, and shows it as an outline that opens and closes.",
       "status": "done"
     },
     "ui-keys": {

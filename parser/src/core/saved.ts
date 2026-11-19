@@ -41,6 +41,7 @@ import { rateLimitLeft, rateLimitResetAt, retryAfter } from "spell/util/retrying
 import { after } from "spell/util/timing"
 
 import { Cell, getProp, isOnlyShowing, schemaOf, untrackCells } from "spell/util/reactive"
+import { MOST_AT_ONCE, drawnInWindow, type MorePages } from "spell/element/drawnWindow"
 import type * as PlacesFolder from "spell/places"
 import type { Places } from "spell/places/Places"
 import type { PlaceResult } from "spell/places/PlaceResult"
@@ -49,10 +50,9 @@ import type { ListQuery, PersonHere, Place as PlaceBehind, PlaceRow } from "spel
 import type { PlaceRowsChange } from "spell/places/PendingChanges"
 
 import { compareSortKeys } from "./collection-other"
-import { MOST_AT_ONCE, drawnInWindow, type MorePages } from "./drawnWindow"
 import { CLASSES_DECLARED, core, isWhileReading, whileReading } from "./core"
 import { defineCoreModule } from "./core.types"
-import { nameTableColumns } from "./ui"
+import { SPELL_WINDOW, nameTableColumns } from "./ui"
 import type { Drawing } from "./drawing"
 import { knowCollection, limitOperations, placeBehind, type PlaceDetails } from "./placeKinds"
 import { PlaceThings, addressOfLinked, heldBy, rememberLinkedList } from "./places"
@@ -1404,7 +1404,8 @@ export const savedMethods = defineCoreModule({
    * - A list the place keeps under the thing, at an address of its own,
    *   `- a post's comments live at "/posts/{id}/comments"`:
    *   read from there, the first time something reads it (epic `data` P30).
-   *   - A field of ONE thing there, `- a system's snapshot lives at "..."`:  that list's one row (epic `from-console` P16).
+   *   - A field of ONE thing there, `- a system's snapshot lives at "..."`:
+   *     that list's one row (epic `from-console` P16).
    * - An address or `{ name, url }`.  A thing is the thing, so a field set to one reads at once.
    * - Waits as a value does:  in a drawing, the nearest "…" or `while waiting:`.  Once it's known, it answers at once.
    * - Each read of it holds what it follows, so a drawing leaving stops its requests.
@@ -1753,7 +1754,8 @@ export const savedMethods = defineCoreModule({
                 return list instanceof List ? list : undefined
               },
               more,
-              atOnce
+              atOnce,
+              ...SPELL_WINDOW
             })
       if (row) {
         row.remove()

@@ -13634,6 +13634,394 @@
     },
     {
       "kind": "javascript-module",
+      "path": "src/components/ui-graph/index.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "name": "UIGraph",
+          "tagName": "ui-graph",
+          "customElement": true,
+          "summary": "A graph draws nodes joined by edges, laid out left to right.  A node may hold a graph of its own, opened in place, in a modal, or in its stead.",
+          "description": "A graph draws nodes joined by edges, laid out left to right.  A node may hold a graph of its own, opened in place, in a modal, or in its stead.\n\nAlso known as:  graph, node graph, network diagram, flow chart, dataflow, netlist, schematic, block diagram, DAG.",
+          "attributes": [
+            {
+              "name": "child-view",
+              "description": "How a node's children show when it's opened:  `inline`, inside the node, which grows round them;  `modal`, a graph in a modal;  `drill`, the graph replaced by them, with breadcrumbs back.  A node's own `childView` wins.",
+              "type": {
+                "text": "\"inline\" | \"modal\" | \"drill\""
+              },
+              "default": "\"inline\"",
+              "fieldName": "childView"
+            },
+            {
+              "name": "path",
+              "description": "The node whose child graph is shown, drilled to, by its ids from the top joined by `/` (`cpu/alu`);  `\"\"`:  the top.  Setting it drills there, loading lazy children on the way;  drilling and the breadcrumbs set it back, with `ui-changed` `{ kind: 'path', path }`.",
+              "type": {
+                "text": "string"
+              },
+              "default": "\"\"",
+              "fieldName": "path"
+            },
+            {
+              "name": "disabled",
+              "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "disabled"
+            },
+            {
+              "name": "loading",
+              "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "loading"
+            },
+            {
+              "name": "visible",
+              "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "visible"
+            },
+            {
+              "name": "animation",
+              "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.",
+              "type": {
+                "text": "\"fade\" | \"fade up\" | \"fade down\" | \"fade left\" | \"fade right\" | \"scale\" | \"zoom\" | \"drop\" | \"browse\" | \"browse right\" | \"fly\" | \"fly up\" | \"fly down\" | \"fly left\" | \"fly right\" | \"slide\" | \"slide up\" | \"slide down\" | \"slide left\" | \"slide right\" | \"swing\" | \"swing up\" | \"swing down\" | \"swing left\" | \"swing right\" | \"horizontal flip\" | \"vertical flip\" | \"flash\" | \"shake\" | \"bounce\" | \"tada\" | \"pulse\" | \"jiggle\" | \"glow\" | \"coin\" | \"none\""
+              },
+              "fieldName": "animation"
+            },
+            {
+              "name": "link",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "link"
+            },
+            {
+              "name": "target",
+              "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "target"
+            },
+            {
+              "name": "font",
+              "description": "How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "font"
+            },
+            {
+              "name": "shadow",
+              "description": "A hard shadow behind its letters, down and to the right, in a hue:  `shadow=\"yellow\"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em).",
+              "type": {
+                "text": "\"primary\" | \"secondary\" | \"red\" | \"orange\" | \"yellow\" | \"olive\" | \"green\" | \"teal\" | \"blue\" | \"violet\" | \"purple\" | \"pink\" | \"brown\" | \"grey\" | \"black\" | \"positive\" | \"negative\""
+              },
+              "fieldName": "shadow"
+            },
+            {
+              "name": "width",
+              "description": "Its box's own width where it sits, any CSS length:  `width=\"10em\"`, `\"50%\"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "width"
+            },
+            {
+              "name": "min-width",
+              "description": "The narrowest its box gets, any CSS length:  `min-width=\"16em\"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "minWidth"
+            },
+            {
+              "name": "max-width",
+              "description": "The widest its box gets, any CSS length:  `max-width=\"36em\"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "maxWidth"
+            },
+            {
+              "name": "tooltip",
+              "description": "Its tooltip:  the browser's own, written as the element's `title`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "tooltip"
+            },
+            {
+              "name": "label",
+              "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "label"
+            },
+            {
+              "name": "movable",
+              "description": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "movable"
+            },
+            {
+              "name": "resizable",
+              "description": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "resizable"
+            },
+            {
+              "name": "on-platform",
+              "description": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onPlatform"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "graph",
+              "description": "The graph to draw, a `GraphData`:  `nodes` (`id`, `label`, `kind`, `ports`, `children`, `data`) and `edges` (`from` / `to` `{ node, port }`).  An end with no `node` is the enclosing node's port.  A JS property (JSON in the attribute);  set a NEW graph to redraw.  A JS property (rich data), not an attribute.",
+              "type": {
+                "text": "unknown"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "selected",
+              "description": "PROPERTY:  what's selected, `{ kind: 'node' | 'edge' | 'port', id, path }`;  `undefined`:  nothing.  Clicks set it.  A JS property (rich data), not an attribute.",
+              "type": {
+                "text": "unknown"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "boundary",
+              "description": "PROPERTY:  the enclosing node's ports, drawn as pins on the graph's sides, for edges with no `node`.  Set by a modal's graph;  a page rarely needs it.  A JS property (rich data), not an attribute.",
+              "type": {
+                "text": "unknown"
+              }
+            }
+          ],
+          "events": [
+            {
+              "name": "ui-selecting",
+              "description": "A node, edge or port is about to be selected by a click:  cancel it to keep the selection.  Cancelable:  `preventDefault()` vetoes it.",
+              "type": {
+                "text": "CustomEvent<{ kind: 'node' | 'edge' | 'port', id: string, path: string, item: object, originalEvent?: Event }>"
+              }
+            },
+            {
+              "name": "ui-changed",
+              "description": "What's selected changed:  `value` is the new `selected`;  `item` the node, edge or port itself.  ALSO when the graph shown changes by a drill or a breadcrumb:  `{ kind: 'path', path }` (`path` the new `path`), so one listener keeps a page in step with both.",
+              "type": {
+                "text": "CustomEvent<{ value: { kind: string, id: string, path: string } | undefined, kind?: string, id?: string, path?: string, item?: object, originalEvent?: Event } | { kind: 'path', path: string, originalEvent?: Event }>"
+              }
+            },
+            {
+              "name": "ui-node-toggled",
+              "description": "A node with children was opened or closed, by a person or by `open()` / `close()`.",
+              "type": {
+                "text": "CustomEvent<{ node: object, path: string, open: boolean, view: 'inline' | 'modal' | 'drill', originalEvent?: Event }>"
+              }
+            }
+          ],
+          "slots": [],
+          "cssParts": [
+            {
+              "name": "graph",
+              "description": "The box round it all."
+            },
+            {
+              "name": "canvas",
+              "description": "The `<svg>`."
+            },
+            {
+              "name": "node",
+              "description": "Each node's `<g>`."
+            },
+            {
+              "name": "container",
+              "description": "A node opened in place, its child graph inside;  also part `node`."
+            },
+            {
+              "name": "edge",
+              "description": "Each edge's `<path>`."
+            },
+            {
+              "name": "edge-label",
+              "description": "Each edge's label."
+            },
+            {
+              "name": "port",
+              "description": "Each port's `<g>`:  its dot and label."
+            },
+            {
+              "name": "pin",
+              "description": "Each pin, the enclosing node's port, on a modal or drilled graph's side."
+            },
+            {
+              "name": "toggle",
+              "description": "Each node's open / close button."
+            },
+            {
+              "name": "toolbar",
+              "description": "The buttons over the drawing (fit)."
+            },
+            {
+              "name": "breadcrumbs",
+              "description": "The trail back up, when drilled in."
+            }
+          ],
+          "cssStates": [
+            {
+              "name": "drilled",
+              "description": "It shows a node's children instead of its graph."
+            },
+            {
+              "name": "panning",
+              "description": "A drag is moving the view."
+            },
+            {
+              "name": "disabled",
+              "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+            },
+            {
+              "name": "loading",
+              "description": "`loading` is set."
+            },
+            {
+              "name": "busy",
+              "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+            },
+            {
+              "name": "dimmed",
+              "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+            },
+            {
+              "name": "hidden",
+              "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+            },
+            {
+              "name": "still",
+              "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+            },
+            {
+              "name": "hiding",
+              "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+            },
+            {
+              "name": "pending",
+              "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+            },
+            {
+              "name": "ready",
+              "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "on-platform",
+              "description": "`on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
+            }
+          ],
+          "cssProperties": [
+            {
+              "name": "--ui-graph-height",
+              "default": "28em"
+            },
+            {
+              "name": "--ui-graph-background",
+              "default": "var(--ui-surface)"
+            },
+            {
+              "name": "--ui-graph-border-color",
+              "default": "var(--ui-border-color)"
+            },
+            {
+              "name": "--ui-graph-radius",
+              "default": "var(--ui-radius-m)"
+            },
+            {
+              "name": "--ui-graph-node-background",
+              "default": "var(--ui-surface-muted)"
+            },
+            {
+              "name": "--ui-graph-node-border-color",
+              "default": "var(--ui-border-color-strong)"
+            },
+            {
+              "name": "--ui-graph-container-background",
+              "default": "transparent"
+            },
+            {
+              "name": "--ui-graph-container-border-color",
+              "default": "var(--ui-border-color-strong)"
+            },
+            {
+              "name": "--ui-graph-label-color",
+              "default": "var(--ui-text-color)"
+            },
+            {
+              "name": "--ui-graph-port-color",
+              "default": "var(--ui-text-muted)"
+            },
+            {
+              "name": "--ui-graph-edge-color",
+              "default": "var(--ui-text-light)"
+            },
+            {
+              "name": "--ui-graph-edge-label-color",
+              "default": "var(--ui-text-muted)"
+            },
+            {
+              "name": "--ui-graph-highlight-color",
+              "default": "var(--ui-primary)"
+            },
+            {
+              "name": "--ui-graph-selected-color",
+              "default": "var(--ui-orange, var(--ui-primary))"
+            },
+            {
+              "name": "--ui-graph-font-family",
+              "default": "var(--ui-font-family)"
+            }
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "UIGraph",
+          "declaration": {
+            "name": "UIGraph",
+            "module": "src/components/ui-graph/index.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-graph",
+          "declaration": {
+            "name": "UIGraph",
+            "module": "src/components/ui-graph/index.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
       "path": "src/components/ui-grid/index.ts",
       "declarations": [
         {
@@ -18643,8 +19031,8 @@
           "name": "UIJson",
           "tagName": "ui-json",
           "customElement": true,
-          "summary": "JSON data holds data in a page, as its text or from a file with `source`.  It draws nothing:  `value` is the parsed data, `ui-changed` says when it changed, and an element it sits inside may read it.",
-          "description": "JSON data holds data in a page, as its text or from a file with `source`.  It draws nothing:  `value` is the parsed data, `ui-changed` says when it changed, and an element it sits inside may read it.\n\nAlso known as:  data, data island, json script, application/json, data block, datos.",
+          "summary": "JSON data holds data in a page, as its text or from a file with `source`, and shows it as an outline whose objects and arrays open and close.  `value` is the parsed data, and an element it sits inside may read it.",
+          "description": "JSON data holds data in a page, as its text or from a file with `source`, and shows it as an outline whose objects and arrays open and close.  `value` is the parsed data, and an element it sits inside may read it.\n\nAlso known as:  data, data island, json script, application/json, data block, json viewer, json tree, object inspector, pretty print, datos.",
           "attributes": [
             {
               "name": "source",
@@ -18662,6 +19050,42 @@
               },
               "default": "\"eager\"",
               "fieldName": "load"
+            },
+            {
+              "name": "depth",
+              "description": "How many levels start open:  `1`, the top object or array alone;  `0`, everything closed.  New data opens this way again.",
+              "type": {
+                "text": "number"
+              },
+              "default": "1",
+              "fieldName": "depth"
+            },
+            {
+              "name": "quotes",
+              "description": "Keys in quotes, as JSON writes them:  `\"type\": \"optical\"`.  `quotes=\"no\"`:  `type: \"optical\"`, as JSON5 allows (a key that isn't a name keeps its quotes).  The header's quotes button sets it.  Copy always copies JSON.",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "true",
+              "fieldName": "quotes"
+            },
+            {
+              "name": "no-header",
+              "description": "Hides the header:  the Copy and quotes buttons.",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "fieldName": "noHeader"
+            },
+            {
+              "name": "editable",
+              "description": "Double-click a key or a value to edit it, in a control that fits the value:  a text field for a string, a number field for a number, a date picker for an ISO date, a checkbox for `true` / `false`, a pick list for a key `editors` gives choices.  Enter (or leaving it) keeps the edit, Escape drops it.  `value` changes and `ui-changed` is sent;  what's open stays open.",
+              "type": {
+                "text": "boolean"
+              },
+              "default": "false",
+              "fieldName": "editable"
             },
             {
               "name": "disabled",
@@ -18792,7 +19216,16 @@
               "fieldName": "onPlatform"
             }
           ],
-          "members": [],
+          "members": [
+            {
+              "kind": "field",
+              "name": "editors",
+              "description": "With `editable`, the control for each key, as a PROPERTY:  `{ direction: [\"in\", \"out\"], when: \"date\" }`.  A list of strings makes a pick list;  a word names the control:  `text`, `number`, `date`, `datetime`, `boolean` or `json` (a text field read as JSON).  A key it doesn't name gets the control its value's type picks.  A JS property (rich data), not an attribute.",
+              "type": {
+                "text": "unknown"
+              }
+            }
+          ],
           "events": [
             {
               "name": "ui-loaded",
@@ -18803,7 +19236,7 @@
             },
             {
               "name": "ui-changed",
-              "description": "The data changed:  loaded from `source`, set through `value` or `content`, or its text edited.  `value` is `undefined` when the text is empty or isn't JSON.",
+              "description": "The data changed:  loaded from `source`, set through `value` or `content`, edited in the outline, or its text edited.  `value` is `undefined` when the text is empty or isn't JSON.",
               "type": {
                 "text": "CustomEvent<{ value: unknown, content: string }>"
               }
@@ -18828,10 +19261,57 @@
               "type": {
                 "text": "CustomEvent<{ kind: 'load' | 'cross-origin' | 'file-protocol' | 'save' | 'conflict' | 'no-saver' | 'render', source?: string, error: unknown }>"
               }
+            },
+            {
+              "name": "ui-navigating",
+              "description": "A key or a value was clicked (not a double-click, nor the end of a text selection).  `path`:  the keys from the top value down to that member (`[]`:  the top value);  `key`:  its key, an array member's index;  `value`:  its value (an object or array too, when its key was clicked);  `part`:  which was clicked.  The page decides what it means (jumping to what a value names) and calls `preventDefault()`.  Cancelable:  `preventDefault()` vetoes it.",
+              "type": {
+                "text": "CustomEvent<{ path: (string | number)[], key: string | number | undefined, value: unknown, part: \"key\" | \"value\" }>"
+              }
+            },
+            {
+              "name": "ui-copied",
+              "description": "The Copy button copied `content`, as JSON.",
+              "type": {
+                "text": "CustomEvent<{ content: string }>"
+              }
             }
           ],
           "slots": [],
-          "cssParts": [],
+          "cssParts": [
+            {
+              "name": "loader",
+              "description": "The `<ui-loader>` shown while `source` loads."
+            },
+            {
+              "name": "error",
+              "description": "The `<ui-message>` shown when loading or showing failed."
+            },
+            {
+              "name": "viewer",
+              "description": "The box round it all."
+            },
+            {
+              "name": "header",
+              "description": "The bar above the data:  Copy, then the quotes button."
+            },
+            {
+              "name": "row",
+              "description": "Each line."
+            },
+            {
+              "name": "toggle",
+              "description": "Each object's or array's open / close button, a chevron in the left gutter;  Alt-click:  its whole branch."
+            },
+            {
+              "name": "preview",
+              "description": "A closed object or array, on one line."
+            },
+            {
+              "name": "editor",
+              "description": "The control a key or value is edited in (`editable`)."
+            }
+          ],
           "cssStates": [
             {
               "name": "loading",
@@ -18886,7 +19366,56 @@
               "description": "`on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
             }
           ],
-          "cssProperties": []
+          "cssProperties": [
+            {
+              "name": "--ui-json-font-family",
+              "default": "var(--ui-font-family-mono, ui-monospace, monospace)"
+            },
+            {
+              "name": "--ui-json-font-size",
+              "default": "0.875em"
+            },
+            {
+              "name": "--ui-json-line-height",
+              "default": "1.5"
+            },
+            {
+              "name": "--ui-json-color",
+              "default": "var(--ui-code-color, var(--ui-text-color))"
+            },
+            {
+              "name": "--ui-json-key-color",
+              "default": "var(--ui-code-attr, light-dark(#b8322a, #e06c75))"
+            },
+            {
+              "name": "--ui-json-string-color",
+              "default": "var(--ui-code-string, light-dark(#387a37, #98c379))"
+            },
+            {
+              "name": "--ui-json-number-color",
+              "default": "var(--ui-code-number, var(--ui-code-constant, light-dark(#986801, #d19a66)))"
+            },
+            {
+              "name": "--ui-json-keyword-color",
+              "default": "var(--ui-code-keyword, light-dark(#a626a4, #c678dd))"
+            },
+            {
+              "name": "--ui-json-punctuation-color",
+              "default": "var(--ui-text-muted)"
+            },
+            {
+              "name": "--ui-json-muted-color",
+              "default": "var(--ui-text-muted)"
+            },
+            {
+              "name": "--ui-json-hover-background",
+              "default": "var(--ui-surface-muted, transparent)"
+            },
+            {
+              "name": "--ui-json-focus-color",
+              "default": "var(--ui-focus-color, var(--ui-primary))"
+            }
+          ]
         }
       ],
       "exports": [
@@ -49509,11 +50038,19 @@
             },
             {
               "name": "filter",
-              "description": "Show only the rows whose words hold this text, whatever its case, and the rows they're inside, opened to show them.  It changes no row's `open`:  clearing it puts the tree back as it was.  A row drawn only once its parent opens can't be found while that's closed.",
+              "description": "Show only the rows whose words hold this text, whatever its case, and the rows they're inside, opened to show them.  It changes no row's `open`:  clearing it puts the tree back as it was.  A row drawn only once its parent opens can't be found while that's closed.  `appearance=\"columns\"`:  it filters one column, the last one on screen as the filter starts, until it's cleared;  after that column's rows, it lists the matches elsewhere in the tree, at any depth, each with the rows it's inside, and a click on one opens the path to it.  From `items`, it runs each `children` function to look inside, waiting for promised ones, as opening the items would, but opens no column;  it lists the first 200 matches, and stops after 100,000 rows.",
               "type": {
                 "text": "string"
               },
               "fieldName": "filter"
+            },
+            {
+              "name": "tools",
+              "description": "A line of buttons above the rows:  Open 2 levels, Open 3 levels and Close all.  Scripts call the same methods:  `openTo(levels)` and `closeAll()`.  `appearance=\"columns\"`:  `openTo(2)` shows two columns, keeping each column's pick, else picking its first row that holds rows.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "tools"
             },
             {
               "name": "label",
@@ -49540,12 +50077,45 @@
               "fieldName": "columnTitles"
             },
             {
+              "name": "size",
+              "description": "`appearance=\"columns\"`:  each column's width, by level, separated by commas;  the last one sizes every column deeper than the list goes.  Each one a number of px (`240`, `240px`), `em`, a percent of the tree's width (`30%`), `auto` to fit the column to the rows it shows (from 80px to three times `--ui-tree-column-width`), or `*` for `--ui-tree-column-width`.  So `auto` fits every column to its rows, and `12em, auto` keeps the first at 12em.  None:  every column is `--ui-tree-column-width` wide.  A column a person resizes keeps that width instead:  with an `id`, the tree remembers it in this browser.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "size"
+            },
+            {
+              "name": "narrow-before",
+              "description": "`appearance=\"columns\"`:  how many columns at the end never narrow.  While the columns don't fit the tree's width, the ones before those narrow, from the first, as few as it takes, each to a strip with its pick's name;  the pointer or the focus on one widens it again, and so does picking it from the path line.  The selected row's column never narrows.",
+              "type": {
+                "text": "number"
+              },
+              "default": "2",
+              "fieldName": "narrowBefore"
+            },
+            {
+              "name": "show",
+              "description": "`appearance=\"columns\"`:  which parts each row shows, as words:  `icon which count chevron`;  the label always shows.  None:  `icon which chevron`.  `count` is how many rows a row holds, when it knows.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "show"
+            },
+            {
               "name": "sticky-path",
-              "description": "While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.  A click on one scrolls to its row, selecting nothing.  It shows only while one of them is scrolled out of sight.",
+              "description": "While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.  A click on one scrolls to its row, selecting nothing.  It shows only while one of them is scrolled out of sight.  `appearance=\"columns\"`:  a line above the columns naming each column's pick, shown once something is picked;  a click on one picks it again, keeping the columns after it, and scrolls its column into view.",
               "type": {
                 "text": "boolean"
               },
               "fieldName": "stickyPath"
+            },
+            {
+              "name": "sticky-detail",
+              "description": "`appearance=\"columns\"` with a `detail` pane:  the pane stays in view at the tree's end while the columns scroll sideways under it.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "stickyDetail"
             },
             {
               "name": "disabled",
@@ -49668,20 +50238,44 @@
               "fieldName": "onPlatform"
             }
           ],
-          "members": [],
+          "members": [
+            {
+              "kind": "field",
+              "name": "items",
+              "description": "`appearance=\"columns\"`:  the tree as data, given as a property, in place of `<ui-tree-item>`s:  `{ id, label, icon?, which?, count?, children?, data? }[]` (`TreeItemData`), where `children` is a list, or a function run the first time the item opens, which may return a promise (a spinner shows until it comes).  Only the open path's columns are drawn.  A JS property (rich data), not an attribute.",
+              "type": {
+                "text": "unknown"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "path",
+              "description": "`appearance=\"columns\"`:  the ids of each column's pick, from the top (`string[]`;  a `<ui-tree-item>`'s id is its `value`, else its `label`).  The last one's rows are the next column.  Set it to open a path, its last item selected;  read it as people pick.  A JS property (rich data), not an attribute.",
+              "type": {
+                "text": "unknown"
+              }
+            }
+          ],
           "events": [
             {
               "name": "ui-selecting",
-              "description": "A row is about to be selected, by a click, or by Enter or Space:  cancel it to decide what's selected yourself, reading the keys held from `originalEvent`.  Cancelable:  `preventDefault()` vetoes it.",
+              "description": "A row is about to be selected, by a click, or by Enter or Space:  cancel it to decide what's selected yourself, reading the keys held from `originalEvent`.  `appearance=\"columns\"`:  the arrow keys select as they move too;  `item` is the `<ui-tree-item>`, or the `items` entry;  `path`, the ids of each column's pick down to it.  Cancelable:  `preventDefault()` vetoes it.",
               "type": {
-                "text": "CustomEvent<{ item: HTMLElement, value: string, originalEvent?: Event }>"
+                "text": "CustomEvent<{ item: HTMLElement | TreeItemData, value: string, path?: string[], originalEvent?: Event }>"
               }
             },
             {
               "name": "ui-changed",
-              "description": "What's selected changed:  `value`, the row clicked;  `values`, every selected row in the tree's order (each one's `value`, else its `label`).",
+              "description": "What's selected changed:  `value`, the row clicked;  `values`, every selected row in the tree's order (each one's `value`, else its `label`).  `appearance=\"columns\"`:  also `item` and `path`, as `ui-selecting`'s.",
               "type": {
-                "text": "CustomEvent<{ value: string, values: string[], originalEvent?: Event }>"
+                "text": "CustomEvent<{ value: string, values: string[], item?: HTMLElement | TreeItemData, path?: string[], originalEvent?: Event }>"
+              }
+            },
+            {
+              "name": "ui-settled",
+              "description": "What's selected has stayed put for a moment:  `ui-changed`'s detail, once the arrow keys stop.  For a page doing heavy work on each pick.",
+              "type": {
+                "text": "CustomEvent<{ value: string, values: string[], item?: HTMLElement | TreeItemData, path?: string[], originalEvent?: Event }>"
               }
             }
           ],
@@ -49693,6 +50287,14 @@
             {
               "name": "empty",
               "description": "Shown when `filter` matches no row."
+            },
+            {
+              "name": "tools",
+              "description": "At the end of the line above the rows, after `tools`' buttons:  a filter field, say.  On a narrow tree it drops to a line of its own;  slotted without `tools`, the line holds it alone."
+            },
+            {
+              "name": "detail",
+              "description": "`appearance=\"columns\"`:  a pane after the last column, showing what's picked:  any element, which the tree hands the picked row as its `item` property (the `<ui-tree-item>`, or the `items` entry), and the page can fill from `ui-changed`.  Drawn only while something is slotted and something is picked, tight against the last column, as wide as its content (up to `--ui-tree-detail-max-width`) until its line is dragged."
             }
           ],
           "cssParts": [
@@ -49707,6 +50309,42 @@
             {
               "name": "path-row",
               "description": "`sticky-path`:  each row's name in the path."
+            },
+            {
+              "name": "narrow-column",
+              "description": "`appearance=\"columns\"`:  a column drawn narrow, a strip with its pick (`narrow-before`):  from `items`, beside `column`;  from markup, the first column (each deeper one is its row's `<ui-tree-item>`'s `narrow-column`)."
+            },
+            {
+              "name": "column-title",
+              "description": "`appearance=\"columns\"`:  a column's title (`column-titles`):  every column's from `items`;  from markup, the first column's (each deeper one is its row's `<ui-tree-item>`'s `column-title`)."
+            },
+            {
+              "name": "column",
+              "description": "`appearance=\"columns\"` with `items`:  one column."
+            },
+            {
+              "name": "detail",
+              "description": "`appearance=\"columns\"`:  the pane around the `detail` slot."
+            },
+            {
+              "name": "column-row",
+              "description": "`appearance=\"columns\"` with `items`:  one row of a column."
+            },
+            {
+              "name": "tools",
+              "description": "`tools`:  the line of buttons above the rows."
+            },
+            {
+              "name": "tool",
+              "description": "`tools`:  each button."
+            },
+            {
+              "name": "matches-title",
+              "description": "`appearance=\"columns\"` with a `filter`:  the title over the matches elsewhere in the tree."
+            },
+            {
+              "name": "match",
+              "description": "`appearance=\"columns\"` with a `filter`:  a match elsewhere in the tree, with the rows it's inside."
             }
           ],
           "cssStates": [
@@ -49721,6 +50359,10 @@
             {
               "name": "columns",
               "description": "Its `appearance` is `columns`:  a column per level, side by side."
+            },
+            {
+              "name": "resizing",
+              "description": "`appearance=\"columns\"`:  the line after a column is being dragged."
             },
             {
               "name": "disabled",
@@ -49833,8 +50475,8 @@
               "default": "var(--ui-ease-out)"
             },
             {
-              "name": "--ui-tree-column-width",
-              "default": "14em"
+              "name": "--ui-tree-columns-height",
+              "default": "18em"
             },
             {
               "name": "--ui-tree-column-picked-background",
@@ -49847,6 +50489,22 @@
             {
               "name": "--ui-tree-column-selected-color",
               "default": "var(--ui-primary-on)"
+            },
+            {
+              "name": "--ui-tree-column-width",
+              "default": "14em"
+            },
+            {
+              "name": "--ui-tree-narrow-width",
+              "default": "2em"
+            },
+            {
+              "name": "--ui-tree-detail-max-width",
+              "default": "50%"
+            },
+            {
+              "name": "--ui-tree-detail-background",
+              "default": "linear-gradient(var(--_ui-tree-detail-tint), var(--_ui-tree-detail-tint)), var(--ui-background)"
             }
           ]
         },
@@ -50126,6 +50784,14 @@
             {
               "name": "group",
               "description": "The box around the rows inside it."
+            },
+            {
+              "name": "column-title",
+              "description": "`appearance=\"columns\"`:  the title over the column of rows inside it (the tree's `column-titles`)."
+            },
+            {
+              "name": "narrow-column",
+              "description": "`appearance=\"columns\"`:  beside `group`, while the column of rows inside it is drawn narrow, a strip with its pick (the tree's `narrow-before`)."
             }
           ],
           "cssStates": [
@@ -50152,6 +50818,10 @@
             {
               "name": "in-columns",
               "description": "Its tree's `appearance` is `columns`:  it's a row in one of its columns, and its rows the next one."
+            },
+            {
+              "name": "in-narrow",
+              "description": "Its tree's `appearance` is `columns`, and its column is drawn narrow:  only the column's pick shows, its name sideways."
             },
             {
               "name": "disabled",

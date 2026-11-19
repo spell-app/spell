@@ -412,6 +412,11 @@
       "types": "./ui/dist-types/src/components/ui-form/index.d.ts",
       "default": "./ui/src/components/ui-form/index.ts"
     },
+    "./ui/components/ui-graph": {
+      "spell-source": "./ui/src/components/ui-graph/index.ts",
+      "types": "./ui/dist-types/src/components/ui-graph/index.d.ts",
+      "default": "./ui/src/components/ui-graph/index.ts"
+    },
     "./ui/components/ui-grid": {
       "spell-source": "./ui/src/components/ui-grid/index.ts",
       "types": "./ui/dist-types/src/components/ui-grid/index.d.ts",
