@@ -26,6 +26,7 @@ import { Shared } from "spell/epic/command/Shared"
 import { Stock } from "spell/epic/command/Stock"
 import { TurnEnd } from "spell/epic/command/TurnEnd"
 import { Turns } from "spell/epic/command/Turns"
+import { Upgrade } from "spell/epic/command/Upgrade"
 import { VoiceCheck } from "spell/epic/command/VoiceCheck"
 import { Worktrees } from "spell/epic/command/Worktrees"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
@@ -57,6 +58,7 @@ import { GROUP_VERBS, VERB_FLAGS, type GroupName, type VerbFlags } from "./epicG
  *   - `init`:  a repo set up for epics (`RepoInit`, epic `epic-eject` P9)
  *   - `plugin install`:  the epic plugin installed in Claude Code, `epic@spell` (`PluginInstall`, epic `epic-engine` P49);
  *     `--codex`:  for Codex, its hooks, skills and custom agents (epic `epic-friend` P11, P12)
+ *   - `upgrade`:  the plugin brought up to the newest `spell@next` on npm (`Upgrade`, epic `epic-engine`)
  *   - `guide`, `turn end`:  the workflow for ANY agent, and the step that ends its turn (`EpicGuide`, `TurnEnd`;  epic
  *     `epic-friend` P11)
  *   - `turns`:  work that takes turns on the machine, a full test run (`Turns`, epic `epic-engine` T77)
@@ -663,7 +665,7 @@ export class EpicProgram {
   // ## The repo's settings
   ////////////////
 
-  /** `config`, `voice`, `init`, `whoami`, `whois`, `plugin`. */
+  /** `config`, `voice`, `init`, `whoami`, `whois`, `plugin`, `upgrade`. */
   private addSettingsVerbs(): void {
     const epic = this.epic
     epic.commandsGroup("The repo's settings:")
@@ -722,6 +724,14 @@ export class EpicProgram {
         "install --codex:  its hooks, skills and custom agents for Codex",
       (args) => new PluginInstall().run(args)
     )
+
+    this.verb(epic.command("upgrade"), (args) => new Upgrade().run(args))
+      .description(
+        "bring the epic plugin up to the newest spell on npm (spell@next):  installs it in ~/.spell-epic/versions, " +
+          "points Claude Code's plugin, its skills and the epic command at it;  in Spell's own checkout, says to git pull"
+      )
+      .usage("[--dry-run] [--json]")
+      .addHelpText("after", example("epic upgrade --dry-run"))
   }
 
   ////////////////

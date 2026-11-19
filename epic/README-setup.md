@@ -151,6 +151,8 @@ Then, in order, each step under a bold heading, the files in a gray table, a gra
    - Installed for the machine, its hooks run in every repo, not just yours:
      in a repo `epic init` never set up they do nothing, and its worktrees are Claude Code's own.
    - `--no-plugin` skips it;  `epic plugin install` does it by itself.
+   - A newer `spell@next` later:  `epic upgrade` installs it and points the plugin at it
+     ([README-cli.md](README-cli.md#the-repos-settings)).
 2. Writes `.epic/config.json5`, every key with a comment on each, valued for THIS repo
    ([the config file](README-config.md#the-config-file)).
    A file already there is kept as it is.

@@ -127,6 +127,20 @@ Four things to know before you start:
   `/epic done`'s merge, and the worktree removed after it.
   - Its rough edges:  [what's still Spell-shaped](epic/README-config.md#whats-still-spell-shaped).
 
+### Upgrading
+
+When a newer `spell@next` is out:
+
+```sh
+epic upgrade --dry-run                   # says the version you have, the newest, and what it would do
+epic upgrade
+```
+
+- It keeps each version in a folder of its own, `~/.spell-epic/versions/<version>/`, and points the plugin and `epic` there.
+  - Not npm's download cache, where `npx` left it:  npm can clear that.
+- Then type `/reload-plugins` in each Claude Code session that's open;  new sessions have it.
+- Already the newest, it says so and changes nothing.
+
 ## See also
 
 - [Setting epics up](epic/README-setup.md):  every step of setting a repo up

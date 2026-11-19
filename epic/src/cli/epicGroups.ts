@@ -1660,6 +1660,10 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--json": "print it as JSON"
   },
   whois: { "--json": "print it as JSON" },
+  upgrade: {
+    "--dry-run": "only say what it would do:  asks npm, but installs and changes nothing",
+    "--json": "print the report as JSON"
+  },
   guide: {
     "--list": "the topics, a line each",
     "--path": "the guide's file, for an agent to read",

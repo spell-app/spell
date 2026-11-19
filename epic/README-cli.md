@@ -642,7 +642,7 @@ And the docs pages they serve:  the home page, the guides, and the pages made fr
 - `init` sets a repo up, and `config` says what it set.
 - `settings` says how the tooling behaves for you, and which file said so.
 - `whoami` and `whois` say who is who on the pages.
-- `plugin install` sets Claude Code up, or Codex.
+- `plugin install` sets Claude Code up, or Codex;  `upgrade` brings it up to the newest `spell` on npm.
 
 Every key of the config file, and what `epic init` writes:  [README-config.md](README-config.md#the-config-file).
 
@@ -654,6 +654,7 @@ Every key of the config file, and what `epic init` writes:  [README-config.md](R
 | `epic whoami [<name>]` | prints who you are on the epics:  your short name (kept, else your GitHub login, else git's `user.name`), your full name, and the agent running it;  with a name, keeps it;  `--rename [--dry-run]` also writes it over your old one on every page, part and comments file, wherever it says who wrote something;  `--json` |
 | `epic whois <name>` | what the pages say about someone:  their replies and comments, by place, and when last;  `--json` |
 | `epic plugin install` | installs the epic plugin in Claude Code as `epic@spell`, run in place from the kit's `epic/`:  the old `spell-epic@spell-epic` taken out, the marketplace `spell` added from the kit's main checkout, the cache, every skill and `~/.local/bin/epic` linked to it;  `--kit <folder>` names another checkout;  `--dry-run` first;  safe to run again, then `/reload-plugins`.  `--codex`:  for Codex instead, its end-of-turn and session-start hooks in `~/.codex/hooks.json` (`$CODEX_HOME`), your own hooks there kept, every skill linked in `~/.agents/skills/`, the designer, coherence and plan-check reviewers as Codex agents in `~/.codex/agents/`, and `epic` on your `PATH`;  then trust them in Codex's `/hooks` |
+| `epic upgrade [--dry-run] [--json]` | brings the epic plugin up to the newest `spell` on npm (`spell@next`), for an install made with `npx spell@next epic init`:  says the version you have and the newest, and stops when they match;  else installs the newest into its own folder, `~/.spell-epic/versions/<version>/` (never npm's download cache, which npm can clear, nor `npm install -g`), and points the plugin, its skills and `~/.local/bin/epic` at it;  then `/reload-plugins` in each open session.  In Spell's own checkout it says to `git pull` (or `epic worktree merge-main`) and changes nothing |
 | `epic voice [<name> \| --for <kind>]` | prints a VOICE's file, the rules a kind of page is written to:  `epic voice readme`, or the voice a kind of page takes, `epic voice --for guide`;  no argument lists every voice and the kinds that use it.  A repo names its own in `.epic/config.json5` (`"voices"`, `"pageVoices"`);  spell-epic ships four, which `epic voice` lists |
 | `epic voice check [--voice <name>] [<file> \| - \| --text "..."] [--about "..."] [--model sonnet] [--json]` | a FRESH reader with no context (`claude -p`, Sonnet, nothing of the repo) checks a text people will see against a voice, novice by default:  comprehensible, concise, clear, or agent speak, each problem quoted with a rewrite;  exits 0 on a pass, 1 on a fail.  `spell voice check` is the same command, under `spell` |
 
