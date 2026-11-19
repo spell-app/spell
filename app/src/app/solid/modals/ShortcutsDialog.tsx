@@ -52,6 +52,7 @@ export function ShortcutsDialog(props: ShortcutsDialogProps) {
       <ui-content>
         <ui-input
           class="ShortcutsSearch"
+          fluid=""
           icon="search"
           icon-position="left"
           aria-label={appTexts.text("shortcutsSearch")}
@@ -115,30 +116,31 @@ const APPLE = "apple"
  * - Waits for `uiReady`:  `<ui-modal>` and `<ui-keys>` must be defined before it opens.
  */
 export async function openShortcuts(props: { platform?: ShortcutsPlatform } = {}): Promise<void> {
-  if (isOpen) return
-  isOpen = true
+  if (document.querySelector(`.${ROOT_CLASS}`)) return
+  // in the page at once, so a second call while Spell UI loads finds it
+  const root = document.createElement("div")
+  root.className = ROOT_CLASS
+  document.body.append(root)
   try {
     await uiReady
-    const root = document.createElement("div")
-    root.className = "ShortcutsDialogRoot"
-    document.body.append(root)
-    await new Promise<void>((resolve) => {
-      const dispose = render(() => <ShortcutsDialog platform={props.platform} onClose={finish} />, root)
-
-      /** Unmount, then resolve. */
-      function finish() {
-        dispose()
-        root.remove()
-        resolve()
-      }
-    })
-  } finally {
-    isOpen = false
+  } catch (error) {
+    root.remove()
+    throw error
   }
+  return new Promise<void>((resolve) => {
+    const dispose = render(() => <ShortcutsDialog platform={props.platform} onClose={finish} />, root)
+
+    /** Unmount, then resolve. */
+    function finish() {
+      dispose()
+      root.remove()
+      resolve()
+    }
+  })
 }
 
-/** Is the dialog showing?  `openShortcuts()` opens one at a time. */
-let isOpen = false
+/** What holds the dialog in `<body>`:  `openShortcuts()` opens one at a time. */
+const ROOT_CLASS = "ShortcutsDialogRoot"
 
 ////////////////
 // ## Rows
@@ -182,12 +184,14 @@ function groupsOf(rows: readonly ShortcutRow[]): { group: HotkeyGroup; rows: Sho
 
 /**
  * Does `row` match `query` (`searchText()`'s):  its name, its heading, or its keys as drawn?
- * - Keys as drawn:  each chord's caps run together (`⌘S`), a space apart (`Ctrl S`) or joined by `+` (`Ctrl+S`).
- * - In the page's language:  the words it shows.
+ * - Words:  anywhere in its name or heading, in the page's language.
+ * - Keys as drawn, a whole chord:  its caps run together (`⌘S`), a space apart (`Ctrl S`) or joined by `+`
+ *   (`Ctrl+S`);  whole, so "Ctrl S" isn't Ctrl Shift R's too.
  */
 function matches(row: ShortcutRow, query: string, isApple: boolean): boolean {
-  const texts = [appTexts.text(row.name), appTexts.text(HOTKEY_GROUPS[row.group]), ...capsTexts(row.shortcut, isApple)]
-  return texts.some((text) => searchText(text).includes(query))
+  const words = [appTexts.text(row.name), appTexts.text(HOTKEY_GROUPS[row.group])]
+  if (words.some((text) => searchText(text).includes(query))) return true
+  return capsTexts(row.shortcut, isApple).some((text) => searchText(text) === query)
 }
 
 /** `shortcut`'s chords as their caps are drawn:  `mod+S` => `⌘S`, `⌘ S`, `⌘+S` on a Mac. */

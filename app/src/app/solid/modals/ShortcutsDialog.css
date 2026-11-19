@@ -7,13 +7,13 @@
 }
 
 .ShortcutsDialog .ShortcutsSearch {
-  display: block;
   margin-bottom: 12px;
 }
 
 /* the rows scroll inside the dialog, the search field staying put */
 .ShortcutsDialog .ShortcutsList {
-  max-height: min(60vh, 560px);
+  /* a set height:  the dialog keeps its size and place as the search narrows it */
+  height: min(60vh, 560px);
   overflow-y: auto;
   margin: 0 -4px;
   padding: 0 4px;
@@ -75,6 +75,7 @@
 }
 
 .ShortcutsDialog .ShortcutsNone {
+  white-space: pre-line;
   margin: 16px 0;
   color: var(--ui-text-muted);
 }
