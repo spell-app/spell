@@ -44,9 +44,7 @@ describe("the one list", () => {
       for (const isApple of [true, false]) {
         const row = shortcutRows(isApple).find((it) => it.group === hotkey.group && it.name === hotkey.name)
         expect(row, key).toBeDefined()
-        expect(row!.shortcut.split(" "), key).toEqual(
-          expect.arrayContaining(((isApple && hotkey.mac) || hotkey.shortcut).split(" "))
-        )
+        expect(row!.shortcuts, key).toContain((isApple && hotkey.mac) || hotkey.shortcut)
       }
     }
   })
@@ -66,14 +64,24 @@ describe("<ShortcutsDialog>", () => {
     field.blur()
     await userEvent.keyboard("?")
     const modal = await current()
-    expect(modal.getAttribute("heading")).toBe("Keyboard Shortcuts")
+    expect(modal.getAttribute("aria-label")).toBe("Keyboard Shortcuts")
+    // its title and search field share its title bar
+    const header = modal.querySelector(".ShortcutsHeader")!
+    expect(header.querySelector(".ShortcutsTitle")!.textContent).toBe("Keyboard Shortcuts")
+    expect(header.querySelector(".ShortcutsSearch")).not.toBeNull()
     expect(modal.hasAttribute("closable")).toBe(true)
     expect(headings(modal)).toEqual(Object.values(HOTKEY_GROUPS).map((key) => APP_TEXTS[key]))
     expect(modal.querySelectorAll(".ShortcutsRow").length).toBe(shortcutRows(false).length)
     const save = modal.querySelector(`.ShortcutsRow[data-name=save] ui-keys`)!
     expect(save.getAttribute("shortcut")).toBe("mod+S")
-    // Delete is one row:  Backspace and Delete
-    expect(modal.querySelectorAll(".ShortcutsRow[data-name=menuDelete]").length).toBe(1)
+    // Delete is one row:  Backspace, or Delete, each its own caps
+    const deletes = modal.querySelectorAll(".ShortcutsRow[data-name=menuDelete]")
+    expect(deletes.length).toBe(1)
+    expect([...deletes[0].querySelectorAll("ui-keys")].map((keys) => keys.getAttribute("shortcut"))).toEqual([
+      "Backspace",
+      "Delete"
+    ])
+    expect(deletes[0].querySelector(".ShortcutsOr")!.textContent).toBe("or")
     // its search field has the focus
     await expect.poll(() => document.activeElement?.closest?.(".ShortcutsSearch")).toBeTruthy()
   })

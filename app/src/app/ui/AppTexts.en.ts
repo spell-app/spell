@@ -270,6 +270,8 @@ export const APP_TEXTS = {
   shortcuts: "Keyboard Shortcuts",
   shortcutsSearch: "Search the shortcuts",
   shortcutsNoMatch: "No shortcut matches “{words}”.\nTry another word.",
+  // between two keys that do the same thing (Delete:  ⌫ or ⌦)
+  shortcutsOr: "or",
   // its headings:  where the keys work (`HOTKEY_GROUPS`)
   shortcutsFiles: "Files",
   shortcutsEditing: "Editing",
