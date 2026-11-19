@@ -14,7 +14,7 @@ and you review it on the page itself, in VS Code, while it works.
   It's a Claude Code plugin first;  Codex runs seventeen of its twenty-two skills and its end-of-turn hooks from the same
   files, not yet tried with a real Codex (below, "Coming").
 
-Here to run one?  [Skip to "Try it"](#try-it--a-small-epic-start-to-finish).
+Here to run one?  [Skip to "Try it"](#try-it--a-small-epic-in-your-own-repo).
 
 ## An epic's life
 
@@ -149,39 +149,68 @@ So three can run at once without touching each other, and your main checkout isn
 
 Every worktree is another checkout, with an install of its own:  that's the price of three at once.
 
-## Try it:  a small epic, start to finish
+## Try it:  a small epic in your own repo
 
-You need, once:
-- a Spell checkout ([setup from zero](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero), on the kit's front page)
-- the plugin, and `epic` on your terminal's `PATH`:  one command from the kit's checkout,
-  `node epic/bin/epic plugin install`
-  ([the kit's agents page](https://github.com/spell-app/spell/blob/main/README/agents.md#the-epic-plugin) says
-  what it does)
-  - in a repo of your own:  `epic init` does this too ([README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md))
-- Spell Epic, the VS Code extension, for the Review tab ([README-vscode.md](README-vscode.md))
-- an epic folder for the pages:  a new machine has none, and `epic init` at the kit's root makes an empty one,
-  keeping the kit's settings as they are
+You need a git repo with at least one commit, Claude Code, and VS Code.
+One command, from any folder of the repo, sets it up:
 
-Then open the kit's folder in VS Code, start a Claude Code session, and give it a job nothing depends on.
-`spell pony` draws a pony in a wizard hat, saying your words, and keeps a long saying on one line:
-
-```text
-/epic hello-epic let spell pony wrap a long saying over several lines
+```sh
+cd ~/www/my-app
+npx spell@next epic init
 ```
 
-1. The session is titled `🚧 hello-epic` before the agent reads a word:  the prompt hook does it.
-2. The agent asks two things in Claude Code's question modal:
-   where to run, a new window or this one (with a recommendation);  and which saga the epic serves, if any.
-3. It makes the worktree, `~/www/spell.worktrees/hello-epic`, the whole kit on branch `hello-epic`,
-   and writes the epic page with your prompt quoted at the top.
-4. Picked a new window?  When its turn ends, the session moves to `⎇ hello-epic` and types `continue` there:
-   press Enter.
-5. The page opens in the Review tab, and fills while the agent explores, read-only, and drafts its plan.
+It installs the plugin, the `epic` command and the VS Code extension, asks your name and colour,
+and makes an epic repo beside yours for the pages.
+Every question, flag and edge:  [README-setup.md](README-setup.md).
 
-- `/epics` lists every open epic;  `/wtf` says where this one stands.
-- Done with it?  `/epic done` offers to merge it into `main`, or to leave it unmerged;
-  then `epic worktree remove hello-epic` takes the worktree away, and the page stays, as the record.
-- **Not yet:**  these steps walked end to end on a machine that's never had the plugin.
+Then start a Claude Code session in your repo, and give it a job nothing depends on:
+
+```text
+/epic hello-epic add a --version flag to the command line
+```
+
+1. The session titles itself `🚧 hello-epic`, and makes the epic's worktree, `~/www/my-app.worktrees/hello-epic`,
+   on a branch of the same name.
+2. The epic page opens in VS Code's Review tab, your prompt quoted at the top,
+   and fills while the agent reads your code, read-only.
+3. Its Overview says what it understood, with the questions it couldn't settle:
+   answer on the page, or in the chat.
+4. Press **Accept Overview**.
+   It writes the phases, each with a build plan;  **Accept Phases** agrees them all, and it builds,
+   a phase per commit, without stopping.
+5. `/epic done` merges the branch, or opens a pull request.
+   The worktree goes;  the page stays, as the record.
+
+What each button does, and the page's parts:  [README-how-it-works.md](README-how-it-works.md).
+
+From a terminal, `epic list` lists every epic once, with how many of its items you haven't reviewed:
+
+```sh
+epic list
+```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+in progress:  (not reviewed / items)
+  data                     340 / 700  (../spell.worktrees/data)
+  epic-engine              331 / 871  (../spell.worktrees/epic-engine)
+  ...
+future:  (not reviewed / items)
+  epic-linux                 3 / 3
+  ...
+```
+
+</details>
+
+_On Spell's own repo, which runs a dozen at once._
+
+**Not yet:**  `epic init` has run end to end only in throwaway repos outside Spell.
+Its rough edges:  [what's still Spell-shaped](README-config.md#whats-still-spell-shaped).
+
+Working on Spell itself?  The kit's checkout runs `node epic/bin/epic plugin install` instead:
+[the kit's agents page](https://github.com/spell-app/spell/blob/main/README/agents.md#the-epic-plugin).
 
 ---
 
