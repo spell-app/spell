@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "fs"
-import { dirname, join, resolve } from "path"
+import { dirname, isAbsolute, join, relative, resolve } from "path"
 import JSON5 from "json5"
 
 import { findUp } from "spell/util/node/findUp"
@@ -26,7 +26,8 @@ import { isSourceCheckout, repoDir, spellSpacesDir } from "spell/app/spaces/serv
  *   - No such file, from an npm install:  nobody yet;  the editor asks their name first (`POST /api/people/local`).
  * - The APP is the project the page server was started for:
  *   - `SPELL_APP_DIR`, when set
- *   - a source checkout:  the kit's root, the app folder's parent
+ *   - a source checkout, started inside it:  the kit's root, the app folder's parent
+ *   - a source checkout another project links in (`"spell": "portal:../spell"`):  that project, as an install's
  *   - an install:  the project whose `package.json` is nearest where it was started (`INIT_CWD`, the folder `yarn`
  *     ran in;  else the process's own), e.g. `acme-spell`
  * - Read ONCE, the first time anything asks (`thisMachinesPerson()`), then set on spaces' models (`setLocalPerson()`),
@@ -110,9 +111,17 @@ function meFileText(person: string): string {
 /** The app's folder:  see the file's docs. */
 export function appDir(): string {
   if (process.env.SPELL_APP_DIR) return resolve(process.env.SPELL_APP_DIR)
-  if (isSourceCheckout) return dirname(repoDir)
+  const kit = dirname(repoDir)
   const from = process.env.INIT_CWD ?? process.cwd()
-  return findUp(from, "package.json") ?? from
+  const project = findUp(from, "package.json") ?? from
+  // A project linking a kit checkout in (`"spell": "portal:../spell"`) is still its own app
+  return isSourceCheckout && isInside(project, kit) ? kit : project
+}
+
+/** Whether `dir` is `folder` or inside it. */
+function isInside(dir: string, folder: string): boolean {
+  const path = relative(folder, dir)
+  return !path.startsWith("..") && !isAbsolute(path)
 }
 
 /** The app's org:  its `package.json`'s `"spell": { "org" }`, else `spell`. */

@@ -211,27 +211,31 @@ export { REPOS_FILE }
 /**
  * The checkout a page server for folder `from` serves (epic `repo-split` P16):
  * - in a kit:  the kit (`kitOf()`), from any folder of it, a big folder's or the epic folder's alike
- * - outside a kit, run from an npm install of `spell`:  that installed package, which ships its `REPOS_FILE` and every
- *   folder's settings (`installedKit()`;  epic `repo-split` P26:  a project depending on `spell` runs its page server)
+ * - outside a kit:  the kit THIS code is from (`ownKit()`), so a project depending on `spell` runs its page server
+ *   - an npm install of `spell`, which ships its `REPOS_FILE` and every folder's settings (epic `repo-split` P26)
+ *   - or a kit checkout the project links in (`"spell": "portal:../spell"`, as spell-brand does)
  * - else the git checkout `from` is in (`findRoot()`), else `from` itself
  * - So `spell server start | status | stop` mean ONE server from anywhere in the kit.
  */
 export function pageServerRoot(from: string): string {
-  return kitOf(from) ?? installedKit() ?? findRoot(from) ?? resolve(from)
+  return kitOf(from) ?? ownKit() ?? findRoot(from) ?? resolve(from)
 }
 
 /**
- * The installed `spell` package this code runs from, when it's one:  its code built into `dist/`, this file
- * `dist/server/page/settings.js`;  `undefined` in a checkout (`src/server/page/`).
+ * The kit this code runs from, when it's one:  its root, holding `REPOS_FILE`.
+ * - an npm install of `spell`:  this file is `dist/server/page/settings.js`
+ * - a checkout:  `src/server/page/settings.ts`
+ * - else `undefined`
  */
-export function installedKit(): string | undefined {
+export function ownKit(): string | undefined {
   const page = dirname(fileURLToPath(import.meta.url))
   const kit = resolve(page, "..", "..", "..")
-  return basename(resolve(page, "..", "..")) === BUILT_FOLDER && existsSync(join(kit, REPOS_FILE)) ? kit : undefined
+  const codeFolder = basename(resolve(page, "..", ".."))
+  return CODE_FOLDERS.includes(codeFolder) && existsSync(join(kit, REPOS_FILE)) ? kit : undefined
 }
 
-/** The published package's folder of built code. */
-const BUILT_FOLDER = "dist"
+/** The kit's folder of code:  `src/` in a checkout, `dist/` built into the published package. */
+const CODE_FOLDERS = ["src", "dist"]
 
 /**
  * `root`, resolved, when it's a kit's root:  the page server starts from the kit's root ONLY (epic `repo-split` P16).
