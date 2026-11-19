@@ -173,7 +173,11 @@ async function clickCase(page, where, act) {
   await act()
   await page.waitForTimeout(SETTLE_MS)
   // expand-all loads every part:  wait till the page stops changing height (a minute on epic-engine's)
-  await page.waitForFunction(() => pageSettled(), null, { timeout: 180_000, polling: 250 })
+  const settled = await page
+    .waitForFunction(() => pageSettled(), null, { timeout: 180_000, polling: 250 })
+    .then(() => true)
+    .catch(() => false)
+  if (!settled) problems.push(`${where}:  the page still changed height 3 minutes on:  measured as it was`)
   const after = await page.evaluate(() => anchorAfter())
   const off = after.top === null ? null : Math.round((after.top - before.top) * 10) / 10
   rows.push({
