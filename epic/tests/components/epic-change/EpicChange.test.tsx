@@ -240,4 +240,36 @@ describe("<epic-change>", () => {
     expect(body.backgroundColor).not.toMatch(/^rgba\(.*, 0(\.\d+)?\)$|^transparent$/)
     expect(body.backdropFilter).toBe("none")
   })
+
+  // epic `epic-engine` T100:  a comment folded into a plan
+  test("T100:  naming a comment:  chip C2, unfolded its words;  the popup shows them and links its thread;  no Reopen", async () => {
+    await adoptClient()
+    const host = await render(
+      `<p>${NEW.replace(`item="q16"`, `item="c2"`).replace(`answer="One list, Caveats"`, `answer="Fold the todos in"`)}</p>`
+    ).then((p) => p.querySelector("epic-change")!)
+    const chip = part(host, "chip")
+    expect([chip.textContent, chip.title]).toEqual(["C2", "C2:  show the comment"])
+    chip.click()
+    await ElementFixture.settle()
+    expect(part(host, "qa").textContent).toBe("Fold the todos in")
+    await userEvent.click(part(host, "words"))
+    await ElementFixture.settle()
+    expect(popupText(host)).toMatch(/^Changed by C2 \(.*\)/)
+    expect(popup(host).querySelector(".comment q")!.textContent).toBe("Fold the todos in")
+    const link = part(host, "thread") as HTMLAnchorElement
+    expect([link.textContent, link.getAttribute("href")]).toEqual(["Open C2's thread", "#comment-c2"])
+    expect(button(host, "reopen")).toBeNull()
+    // the page's comments open the thread:  they take the event and cancel it, so the link goes nowhere itself
+    const asked: string[] = []
+    const take = (event: Event) => {
+      asked.push((event as CustomEvent<{ id: string }>).detail.id)
+      event.preventDefault()
+    }
+    document.addEventListener("epic-comment-open", take)
+    const click = new MouseEvent("click", { bubbles: true, composed: true, cancelable: true })
+    link.dispatchEvent(click)
+    document.removeEventListener("epic-comment-open", take)
+    expect([asked, click.defaultPrevented]).toEqual([["c2"], true])
+    await expectAccessible(host)
+  })
 })

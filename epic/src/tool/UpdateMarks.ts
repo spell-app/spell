@@ -8,6 +8,7 @@ import { ItemLetters } from "spell/epic/definitions"
  *   this?";  he picked "only when no mark says it"
  * - a plan change an ANSWER caused shows as its change marks alone (`<epic-change item="q53">`);  an Update block is
  *   for a change no item caused (a plan adjusted while building, a file moved)
+ *   - a COMMENT folded into a phase too (`<epic-change item="c2">`, epic `epic-engine` T100)
  * - the rule, ONE place for both users:
  *   - `epic updated ... --for q53` (`PlanDoc.marksSay()`):  writes nothing when every item it's for has a mark in the
  *     phase
@@ -24,6 +25,11 @@ export class UpdateMarks {
   /** The item ids `text` names, lower case, once each:  `Q53`, `j135`;  never a phase (`P5`) or a comment (`C3`). */
   static idsIn(text: string): string[] {
     return [...new Set(Array.from(text.matchAll(MENTIONED_ID), (match) => match[0].toLowerCase()))]
+  }
+
+  /** The comment ids `text` names, lower case, once each:  `C3` (a change mark may name one, epic `epic-engine` T100). */
+  static commentsIn(text: string): string[] {
+    return [...new Set(Array.from(text.matchAll(MENTIONED_COMMENT), (match) => match[0].toLowerCase()))]
   }
 
   /**
@@ -78,7 +84,7 @@ export class UpdateMarks {
       ids = [
         ...new Set([
           ...UpdateMarks.idsIn(text),
-          ...Array.from(text.matchAll(MENTIONED_COMMENT), (match) => match[0].toLowerCase()),
+          ...UpdateMarks.commentsIn(text),
           ...linked.filter((id) => !!id && LINKED_ID.test(id)).map((id) => id.toLowerCase())
         ])
       ]

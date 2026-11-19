@@ -26,6 +26,7 @@ import {
 } from "./planDoc.types"
 
 import { BedtimeAll } from "./BedtimeAll"
+import { CommentList } from "./CommentList"
 import { CommitRemap } from "./CommitRemap"
 import { EpicDocs, GROUPS, type EpicDecisions, type EpicDocList } from "./EpicDocs"
 import { EpicOwners, type PathOwners } from "./EpicOwners"
@@ -859,6 +860,7 @@ export class PlanDocCommands {
    * wrote them by hand into the Overview's or a phase's text (a part, or a command's HTML).
    * - stamps them, as every edit does (`PlanDoc.updateChanges()`):  each new one's id (`ch3`), time and answer
    * - `--for q13`:  first, the marks that name no item take that one;  refused for an id the doc has no item for
+   *   - or a comment, `--for c2` (epic `epic-engine` T100):  refused for one the epic hasn't got
    * - then prints each, new first:  `CH3  Q13  new  "todos fold into it" (Q13)  in o2`, and how many are new (3
    *   days, orange on the page;  no approval:  Owen, 2026-10-25)
    */
@@ -867,7 +869,7 @@ export class PlanDocCommands {
     const item = given === undefined ? undefined : need(given === true ? undefined : given, "--for <item id>")
     const named = await this.edit(file, (plan) => {
       if (!item) return 0
-      const id = plan.item(item).id
+      const id = CommentList.isCommentId(item) ? plan.comment(item) : plan.item(item).id
       const bare = plan.changes.filter((change) => !change.getAttribute("item"))
       for (const change of bare) Markup.set<"epic-change">(change, { item: id })
       if (bare.length)

@@ -605,6 +605,16 @@ describe("PlanDoc phases", () => {
     expect(later.marksSay(1, "<p>Owen answered Q1</p>", ["q1"])).toEqual(["Q1"])
   })
 
+  // epic `epic-engine` T100:  a comment folded into a phase is its marks alone too
+  test('marksSay (T100):  a comment\'s marks (`item="c2"`) say it, by `--for c2` or the text naming C2', () => {
+    const plan = freshPlan()
+    plan.addPhase("One", { symptom: "s", changes: '<p><epic-change item="c2">the new words</epic-change></p>' })
+    plan.updateStates()
+    expect(plan.marksSay(1, "<p>anything</p>", ["c2"])).toEqual(["C2"])
+    expect(plan.marksSay(1, "<p>Folded in Owen's comment C2.</p>")).toEqual(["C2"])
+    expect(plan.marksSay(1, "<p>Folded in C2 and C3.</p>")).toEqual([])
+  })
+
   // epic `epic-engine` I179 (Owen, 2026-10-29:  "If its 'accepting the update' I shouldn't have to do that if you are
   // doing what I said")
   test("Owen's own answer (I179):  an Update block carrying it out is written seen, out of `to-see`, logged", () => {

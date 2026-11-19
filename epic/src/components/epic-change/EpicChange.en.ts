@@ -23,7 +23,8 @@ export const epicChangeVocabulary = {
     "its answer in a line.  A click on the words (or Enter) opens a popup:  which answer changed them and when, the " +
     "words they replaced (`was`), and, while the page is reviewed and the change new, Reopen, which opens the " +
     "question again.  Claude writes the element with `item` alone;  the epic tool gives it its id, time, answer " +
-    "and the words it replaced.",
+    'and the words it replaced.  It may name a comment instead (`item="c2"`, a comment folded into the plan):  ' +
+    "the chip says C2, unfolded the comment's words, and the popup links to its thread, with no Reopen.",
   attributes: [
     {
       name: "id",
@@ -41,7 +42,8 @@ export const epicChangeVocabulary = {
       format: "anchor",
       description:
         "The question (or any item) whose answer made the change, by id, any case (`q16`):  the chip's name;  " +
-        "its title from the page, its answer from `answer`.  `epic lint` fails one naming no item."
+        "its title from the page, its answer from `answer`.  Or a comment (`c2`, epic `epic-engine` T100), whose " +
+        "words `answer` holds.  `epic lint` fails one naming no item, or a comment the epic hasn't got."
     },
     {
       name: "at",
@@ -54,7 +56,7 @@ export const epicChangeVocabulary = {
       kind: "string",
       description:
         "Its item's answer in short, as it was when the words changed:  the tool copies it from the item's " +
-        "`<epic-answer title>`, so the chip still says why months later."
+        "`<epic-answer title>`, so the chip still says why months later;  a comment's words, for a comment's mark."
     },
     {
       name: "was",
@@ -73,7 +75,15 @@ export const epicChangeVocabulary = {
         "orange;  an old Accept mark still writes it.  None:  orange while new (`at`, 3 days)."
     }
   ],
-  events: [],
+  events: [
+    {
+      name: "epic-comment-open",
+      detail: "{ id: string }",
+      description:
+        "A comment's mark's thread link was clicked (`detail.id`, `c2`):  bubbling and composed, cancelable.  The " +
+        "page's comments open the thread and cancel it;  not cancelled, the link goes to `#comment-c2`."
+    }
+  ],
   slots: [{ name: "", description: "The changed or new words:  running text, links and code included." }],
   parts: [
     { name: "base", description: "The whole mark:  the words, the chip, its question and answer." },
@@ -86,6 +96,12 @@ export const epicChangeVocabulary = {
     {
       name: "qa",
       description: "The question's title and its answer, in a line, after the chip;  hidden while folded."
+    },
+    {
+      name: "thread",
+      description:
+        "A comment's mark's link to its thread (`#comment-c2`), in the popup:  the page's comments open it " +
+        "(`epic-comment-open`)."
     },
     {
       name: "popup",
@@ -109,6 +125,18 @@ export const epicChangeVocabulary = {
     { key: "unfoldTip", text: "{item}:  show the question and its answer", description: "The chip's tooltip, folded." },
     { key: "foldTip", text: "{item}:  hide the question and its answer", description: "The chip's tooltip, open." },
     { key: "noAnswer", text: "not answered yet", description: "The answer's place when the change has none." },
+    {
+      key: "unfoldCommentTip",
+      text: "{item}:  show the comment",
+      description: "A comment's mark's chip tooltip, folded (T100)."
+    },
+    { key: "foldCommentTip", text: "{item}:  hide the comment", description: "A comment's mark's chip tooltip, open." },
+    { key: "noWords", text: "a comment", description: "The comment's words' place when the mark has none copied." },
+    {
+      key: "openThread",
+      text: "Open {item}'s thread",
+      description: "A comment's mark's link to its thread, in the popup."
+    },
     { key: "buttonsLabel", text: "the change by {item}", description: "Reopen's group, spoken." }
   ],
   children: [{ tag: "flow", description: "The changed words." }],

@@ -1019,10 +1019,13 @@ text itself, where an `<epic-update>` only said a block changed.
   from an answer:  in a part file, or in the HTML a command takes (`update ... --changes`, `details --file`).
   - the words, not the paragraph (Q13's option C lost):  one mark per change
   - `item`:  the question (or any item) whose answer made it, any case;  `check` fails one naming no item
+  - or the COMMENT folded in (`item="c2"`, epic `epic-engine` T100;  r79:  a comment's changes went in unmarked, with an
+    Update block):  `check` fails one naming a comment the epic's review inbox hasn't got (`PlanDoc.findComment()`,
+    the inbox read only when a mark names one;  a page parsed off disk takes it as it is)
 - The tool STAMPS it on every edit (`PlanDoc.updateChanges()`, from `updateStates()`):
   - `id`:  the next free `ch<N>`, never reused;  its inbox key, and a link's target (`#ch3`)
   - `at`:  now;  `answer`:  the item's answer in short (its `<epic-answer title>`, 160 characters at most), once it
-    has one, so the chip still says why months later
+    has one, so the chip still says why months later;  a comment's mark:  the comment's words in short
   - `was`:  the words it REPLACED, plain text, 300 characters at most (epic `epic-engine` I160;  2026-10-29:
     "Should say original text for comparison"), when first stamped (`ChangeOriginals`):
     - found by the tool, never written by hand:  the mark's block (its nearest ancestor with an id) lined up word by
@@ -1032,7 +1035,7 @@ text itself, where an `<epic-update>` only said a block changed.
     - none:  new words, words the mark only wrapped, or no version tells;  a `was` written by hand is kept
     - marks from before I160 have none, and keep none:  no migration step, the attribute is optional
   - `change <name> [--for q16]`:  an edit that does only that, after a hand edit of a part, then lists the marks;
-    `--for`:  the marks with no `item` take that one.  `check` fails one not stamped yet.
+    `--for`:  the marks with no `item` take that one (`--for c2`, a comment).  `check` fails one not stamped yet.
 - Each body host (an Overview sub-section, a phase, an item, the log) lists the marks inside it not `accepted`, in the
   skeleton:  `to-accept="ch1 ch3"` (the name from when marks waited for an Accept).  The page counts and finds them with the body not loaded;  the review routes take
   their marks from it (`ReviewInbox.itemIds()`).
@@ -1045,15 +1048,21 @@ text itself, where an `<epic-update>` only said a block changed.
     `{ action: "reopen" }`;  `inbox apply` reopens the item (an answered question back to open, red;  its answer
     kept):  answered again, Claude rewrites the words with a new mark
   - an Accept mark from before (`{ action: "accept" }`) still applies:  `accepted="2026-10-24 19:02"`, quiet
+  - a COMMENT's mark:  the chip says `C2`, unfolded the comment's words;  the popup shows them too, and "Open C2's
+    thread", which the page's comments open (`epic-comment-open`, else a plain link to `#comment-c2`);  NO Reopen:
+    the person disagrees on the thread
+    - it changes nothing on the comment (calm J of T100):  not handled, not taken;  Claude answers its thread as
+      ever, naming the phase (`epic inbox done <name>#C2 --file ...`)
 - The marks are the WHOLE record of an answer's change:  no `<epic-update>` block beside them (epic `epic-engine`
   I159;  2026-10-29, on P51's orange "Update:  No answer buttons ..." under its Q53 marks:  "Do we still need
   the orange update section like this?", then picked "only when no mark says it").
   - `updated` writes nothing when the marks say it (`PlanDoc.marksSay()`, `UpdateMarks`), printing
     `P51:  no Update block, the change marks say it (Q53)`:
-    - `--for q53,j3`:  every item given has a mark in the phase
-    - without it:  every item id its text names has a mark in the phase stamped this pass (within 15 minutes, or not
-      stamped yet), and it names no file
+    - `--for q53,j3`:  every item given has a mark in the phase (`--for c2`, a comment's)
+    - without it:  every item id its text names (and comment id, `C2`) has a mark in the phase stamped this pass
+      (within 15 minutes, or not stamped yet), and it names no file
   - a change no item caused still gets its block:  a plan adjusted while building, a file moved
+  - a COMMENT folded into a phase is marked too, `<epic-change item="c2">` (T100):  no Update block for it
   - the blocks written before beside their marks:  the migration `updates-said-by-marks` drops those the marks say
     ("Migrations")
 
@@ -1066,6 +1075,7 @@ answer lives in the phase now.
   (`PlanDoc.markHandled()`):  `<epic-item handled="p-retry-logic">`, the item stamped, the log saying
   `Q13 handled in P4`.
   - a mark in the Overview, an item or the log:  not handled;  only a phase takes an answer into its work
+  - a comment's mark (`item="c2"`):  nothing;  a comment is no item (T100)
 - Its state is `handled` (`itemState()`, before `recent`):  grey, as quiet as canceled, a chip of its own in the
   section's filter, never in "what needs you";  its line says `in P4`, linking the phase.
 - Reopen on the mark takes `handled` off (`applyChange()`):  the item is back in the lists, red;  rewritten after its next
