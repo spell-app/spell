@@ -1223,12 +1223,12 @@ describe('<ui-tree appearance="columns"> remembered path and `detail` pane', () 
     )) as TreeHost
     host.items = folders()
     host.path = ["acme", "menu", "menu.pdf"]
-    await ElementFixture.settle()
-    await new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done)))
-    await ElementFixture.settle()
-    expect(host.shadowRoot!.querySelector("ul.column.narrow")).not.toBeNull()
+    // measured as the pane and the box draw:  a frame or two, longer under load
     const box = host.shadowRoot!.querySelector(".columns")!
-    expect(box.scrollWidth).toBeLessThanOrEqual(box.clientWidth + 1)
+    await vi.waitFor(() => {
+      expect(host.shadowRoot!.querySelector("ul.column.narrow")).not.toBeNull()
+      expect(box.scrollWidth).toBeLessThanOrEqual(box.clientWidth + 1)
+    })
   })
 
   it("`sticky-detail` keeps it in view while the columns scroll sideways", async () => {
