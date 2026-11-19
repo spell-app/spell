@@ -1226,12 +1226,12 @@ describe('<ui-tree appearance="columns"> remembered path and `detail` pane', () 
     )) as TreeHost
     host.items = folders()
     host.path = ["acme", "menu", "menu.pdf"]
-    // no column under the pointer, wherever an earlier test left it:  a narrow one there would widen
-    host.dispatchEvent(new PointerEvent("pointerleave"))
     // measured as the pane and the box draw:  a frame or two, longer under load
+    // (the tree's own list, not the `narrow` class:  a pointer an earlier test left over a strip widens it)
     const box = host.shadowRoot!.querySelector(".columns")!
+    const tree = (host as TreeHost & { component: UITree }).component
     await vi.waitFor(() => {
-      expect(host.shadowRoot!.querySelector("ul.column.narrow")).not.toBeNull()
+      expect(tree.narrowColumns.length).toBeGreaterThan(0)
       expect(box.scrollWidth).toBeLessThanOrEqual(box.clientWidth + 1)
     })
   })
