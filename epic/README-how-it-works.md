@@ -6,9 +6,13 @@ epics";  Epic Pages, "one page per piece of work", with the epics under way list
 
 _The home page of the pages `epic init` sets up:  three kinds of page, one tab each._
 
+Not set up yet?  One command does it:  [Try it](https://github.com/spell-app/spell/blob/main/README-epics.md#try-it).
+This page is the map once you have.
+
 Three kinds of page, and each one holds the next:
 - A **saga** is a big aim, too big for one branch.  Its page lists the epics that serve it.
-- An **epic** is one piece of work:  one branch, one worktree, one EPIC PAGE, planned and built by a coding agent.
+- An **epic** is one piece of work:  one branch, one worktree (a second checkout of your repo, beside it),
+  and one EPIC PAGE, where a coding agent plans it, asks you questions and records what it built.
 - A **guide** is what an epic leaves behind when it merges:  what it built, for someone who wasn't there.
 
 If you know issue trackers:  a saga is an epic in the Jira sense, an epic here is a feature branch with its whole
@@ -34,7 +38,7 @@ epic saga list                         # the sagas in your order, each with its 
 - The list is in YOUR order, most important first;  `epic saga move` reorders it.
 - A saga's own page (`epic saga page <id>`) has an Overview, its Epics, Questions, Todo and a Log, like a small
   epic page.
-- The catch:  a saga plans nothing by itself.  The work happens in its epics.
+- The catch:  a saga builds nothing by itself.  The work happens in its epics.
 
 ## An epic is planned and built on its page
 
@@ -103,7 +107,7 @@ T a todo, I an issue, M a manual test.
   no Send needed.
 - **The id works in the chat too:**  "approve J1" in Claude Code does what the button does.
 
-Your presses wait on the page, dashed, until Send.
+Your presses wait on the page, dashed, until you press Send to Claude in the header (or Auto Send does).
 The whole review round, button by button:  [README-pages.md](README-pages.md).
 
 ## The workflow:  two Accepts, then it builds
@@ -127,19 +131,20 @@ _An epic's life:  you agree the Overview, then the phases;  after that it builds
    The agent reads your code and writes what it understood, with every question it couldn't settle.
    You answer on the page;  each answer rewrites the Overview, its changed words in orange.
 2. **Accept Overview.**
-   One press, on the Overview's title row, says "you understood the job".
+   The green button on the Overview's title row says "you understood the job".
+   A press starts a 5-minute countdown, so you can take it back;  then it sends by itself.
 3. **Phases and build plans.**
    The agent writes the phases, each with its build plan:  the files it will touch, the steps, how it'll check them.
 4. **Accept Phases.**
-   One press, on the Phases section's title row, agrees every phase and every plan waiting.
+   The same kind of button, on the Phases section's title row:  one press agrees every phase and every plan waiting.
 5. **Building.**
    Named background agents build each phase in the worktree, commit it as `P3:  Name -- ...`, and go straight on
    to the next.
    Before a phase closes, a plan-check agent holds its diff up against the plan you accepted.
 6. **Review, whenever you like.**
-   Mark items, comment on any paragraph, press Send;  the agent answers in the items themselves.
+   Mark items, comment on any paragraph, press Send to Claude;  the agent answers in the items themselves.
 7. **Done.**
-   The Doc Review writes the epic's guide and its changelog entry, and `/epic done` merges the branch or opens a
+   The last phase, the Doc Review, writes the epic's guide and its changelog entry, and `/epic done` merges the branch or opens a
    pull request.  The worktree goes;  the page stays, as the record.
 
 ![A future epic's page, CRDT, at its first stage.  At the top right, the stage pill reads OVERVIEW.  A box says
@@ -160,8 +165,8 @@ The guide is the short version, for the next person:
 - the choices that would surprise a reader, each with the option it beat
 - its limits, plainly
 
-It's written at the epic's Doc Review, in the readme voice (`epic voice readme` prints the rules), and it lands in
-the Guides tab.
+It's written at the epic's Doc Review, in the readme voice (`epic voice readme` prints the rules).
+It lands under the top bar's Guides tab, and opens in the side bar's Epic Docs tab.
 A saga's page counts its guides, so a saga's card shows how much of its aim has been written down.
 
 ## See also

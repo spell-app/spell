@@ -9,7 +9,8 @@ You start one by typing a line in Claude Code:
 ```
 
 From that line, the agent:
-- makes a git branch and a worktree of its own, so your checkout isn't touched until you merge
+- makes a git branch and a WORKTREE of its own (a second checkout of your repo, in a folder beside it),
+  so the files you're working on aren't touched until you merge
 - writes an EPIC PAGE, open beside your code in VS Code:  what it understood, what it needs to ask you, its plan in phases
 - keeps that page current as it builds:  each phase done, each choice it made without you, each problem it found
 
@@ -52,7 +53,8 @@ What it costs:
 
 1. **Ask.**
    In a Claude Code session in your repo:  `/epic <name> <what to plan>`.
-   The page opens in VS Code's right side bar, and fills as the agent reads your code.
+   The page opens in VS Code's right side bar, in its Review tab, and fills as the agent reads your code.
+   Every button named below, in annotated pictures:  [How epics work](epic/README-how-it-works.md).
    Or `/epic <name>` alone, then type the plan in the kickoff box at the top of the page, pictures and all, and Send.
 2. **Answer its questions, on the page.**
    Press Choose on the option you want, or leave a note.
@@ -98,8 +100,10 @@ npx spell@next epic init                 # a self-hosted GitLab whose address do
 ```
 
 It asks your name and a colour, installs the Claude Code plugin and the VS Code extension,
-makes the shared repo for the pages, and starts a small local server that shows them.
-It leaves one config file and a block in `.gitignore` in your repo.
+makes the shared repo for the pages, and starts a small local server that shows them (port 4848).
+It leaves one config file and a block in `.gitignore` in your repo, and puts the `epic` command on your `PATH`:
+after this, every command is `epic <verb>`.
+The tool ships in Spell's npm package, `spell`;  `@next` is its pre-release tag.
 
 Every step, and what each question means:  [Setting epics up](epic/README-setup.md).
 
@@ -120,7 +124,7 @@ Four things to know before you start:
   - The words, and the flag that skips the question:  [Epics with superpowers](epic/README-superpowers.md).
 - **It has run end to end outside Spell once**, in a throwaway repo:
   `epic init`, a saga, an epic page with a phase, a round through the review inbox, the pages on the epic server,
-  `/isolate done`'s merge, and the worktree removed after it.
+  `/epic done`'s merge, and the worktree removed after it.
   - The rough edges are listed, not hidden:  [what's still Spell-shaped](epic/README-config.md#whats-still-spell-shaped).
 
 ## See also

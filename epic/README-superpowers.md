@@ -13,6 +13,8 @@ Epics run a loop of their own, and three of its jobs are the same jobs.
 Install both and, left alone, two plugins would plan, two would make worktrees, and two would finish.
 
 So in an epic's worktree, superpowers is told to stand aside for those three jobs, and only those.
+You don't do anything for that:  epic says it, in the places below.
+Setting epics up first:  [Try it](https://github.com/spell-app/spell/blob/main/README-epics.md#try-it).
 Everything it does INSIDE a piece of work, test first, debugging, proof before done, is welcome.
 
 ## What each one does
@@ -24,7 +26,7 @@ Everything it does INSIDE a piece of work, test first, debugging, proof before d
 | the worktree | its `using-git-worktrees` skill, then an install | `/epic <name>` makes it beside your repo, and runs your repo's own install command |
 | the build | a subagent per task, test first | named background agents, a phase at a time, each phase committed as `P3:  Name -- ...` |
 | the finish | `finishing-a-development-branch`:  merge here, push a pull request, or keep the branch | `/epic done`:  the merge or the pull request, the changelog, the worktree removed with its servers stopped |
-| what stays | the branch's commits;  its plan files, if you keep them | the epic page, as the record, and the epic's guide |
+| what stays | the branch's commits, and its plan files | the epic page, as the record, and the epic's guide |
 
 The model in one line:  **the epic owns the plan, the worktree and the finish;  superpowers' craft skills work inside a phase.**
 
@@ -83,7 +85,7 @@ About $12 of runs, mostly Opus, with Sonnet and Haiku on the install check.
 
 | Clash | Without the words | With the words |
 | --- | --- | --- |
-| Who plans:  does `/epic sp-test ...` start a brainstorm? | no:  0 superpowers skills called;  the Overview went on the page, no `docs/` folder | the same |
+| Who plans:  does `/epic sp-test ...` start a brainstorm? | no brainstorm:  0 superpowers skills called;  the Overview went on the page, no `docs/` folder | no brainstorm |
 | The install:  does its worktree skill run `npm install` in a yarn repo? | 1 run of 4 did:  it wrote a `package-lock.json` and rewrote `yarn.lock`'s resolved line, with no hash | never:  3 of 3 with the hook's words, 3 of 3 with AGENTS.md's, 2 of 2 in an `/epic` session |
 | The finish:  does it merge with bare git? | yes:  `git -C <main checkout> merge sp-test`, skipping all of `/epic done` | never:  "your epic rules say an epic only finishes through `/epic done`" |
 | Does it remove the epic's worktree? | no:  it removes only worktrees it believes it made | no |
@@ -94,6 +96,7 @@ What that says:
 - The words worked wherever they were read:  the hook's, the skill's and AGENTS.md's alike.
 
 **Not yet tried:**  superpowers' own subagent-per-task build inside a phase, beside epic's named agents.
+It isn't on either list above;  until it's tried, let epic's agents build.
 
 ## Two ideas epic took from it
 
@@ -122,7 +125,7 @@ It returns two lists:  what the plan said that wasn't built, and what was built 
 | a `docs/superpowers/specs/` or `plans/` file in the branch | `writing-plans` ran | delete it;  the plan belongs on the epic page |
 | a `package-lock.json` in a yarn repo, `yarn.lock` rewritten | `using-git-worktrees` ran its install step | `git checkout -- yarn.lock`, delete the lock file, then `epic init --superpowers` |
 | the branch merged, but no changelog and the page didn't move | `finishing-a-development-branch` merged with bare git | run `/epic done` anyway:  it finishes the page, the changelog and the worktree |
-| commits named "Add subtract test" that the page doesn't list | superpowers commits per task, with its own messages | epic finds a phase's commits by their subject (`P3:  Name -- ...`);  ask for the phase's work as `P<N>:` commits |
+| commits named "Add subtract test" that the page doesn't list | superpowers commits per task, with its own messages | epic finds a phase's commits by their subject (`P3:  Name -- ...`);  say in the chat, or in AGENTS.md, that a phase's work is committed as `P<N>:` commits |
 | code you wrote before its test, deleted | `test-driven-development` deletes untested code, by design | say in AGENTS.md whether your repo wants tests first;  it's your call |
 | about 65 lines of "EXTREMELY IMPORTANT" text in every session | superpowers' session-start text | harmless;  it's how superpowers works |
 | its brainstorming companion loads a logo from its maker's site | it reports the version in use | set `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` |

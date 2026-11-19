@@ -35,7 +35,7 @@ flowchart LR
   class config,github data
 ```
 
-_Once per machine, `epic init` does the plugin, the command and the server;  the extension is by hand.
+_Once per machine, `epic init` does the plugin, the extension, the command and the server.
 Once per repo:  one small file in it, two folders beside it, and the team's copy of the plans on GitHub._
 
 The plans are NOT in your repo.
@@ -144,7 +144,7 @@ Then, in order, each step under a bold heading, the files in a gray table, a gra
    - Its skills and hooks, a bare `/epic`, and `epic` on your terminal's `PATH`
      ([the kit's agents page](https://github.com/spell-app/spell/blob/main/README/agents.md#the-epic-plugin) says what each step does).
    - Installed for the machine, its hooks run in every repo, not just yours:
-     in one `epic init` never set up they do nothing, and its worktrees are Claude Code's own.
+     in a repo `epic init` never set up they do nothing, and its worktrees are Claude Code's own.
    - `--no-plugin` skips it;  `epic plugin install` does it by itself.
 2. Writes `.epic/config.json5`, every key with a comment on each, valued for THIS repo
    ([the config file](README-config.md#the-config-file)).
