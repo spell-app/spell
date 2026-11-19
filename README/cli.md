@@ -62,6 +62,25 @@ It's a link, not a copy:  `spell` runs [bin/spell.mjs](../bin/spell.mjs) in this
   After that the base answers in about 0.1 s, and a language command, which loads the parser and Spell's rules,
   in about one:  `spell explain print` and `spell parse` each took 0.9 s here.
 
+### Your checkout, in a project that installs Spell from npm
+
+A project that depends on `spell` runs the npm copy.
+Set `SPELL_KIT` on your machine, and its `spell` runs your checkout instead:
+
+```sh
+export SPELL_KIT=~/www/spell     # in your shell profile
+cd ~/work/acme-spell
+yarn start                       # the page server and editor from ~/www/spell, the org still acme's
+```
+
+- The project changes nothing:  everyone else, without the variable, runs npm's copy.
+- Your checkout runs from its own install:  `yarn install` there first.
+- A `SPELL_KIT` that can't run (no checkout there, not installed) stops with one line saying why,
+  never npm's copy instead.
+- It covers `spell` and the commands under it (`spell epic` ...), and `spell-pack`;  not `spell-types`.
+- Only from a release that has it:  0.8.13 or later.
+- The other way, `"spell": "portal:../spell"` in the project's `package.json`, changes its committed files.
+
 ## Naming projects:  a path, an address or a group
 
 Every command is `spell <command> [what] [--flags]`, and `--help` after any of them says the rest.

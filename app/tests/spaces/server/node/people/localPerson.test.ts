@@ -1,11 +1,12 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "fs"
 import { tmpdir } from "os"
-import { join, resolve } from "path"
+import { dirname, join, resolve } from "path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
 import { SP } from "spell/parser/spell"
 import { SPACES } from "spell/app/spaces"
 import {
+  appDir,
   appOrg,
   ME_FILE,
   mePerson,
@@ -13,6 +14,7 @@ import {
   peopleIn,
   thisMachinesPerson
 } from "spell/app/spaces/server/node/people/localPerson"
+import { repoDir } from "spell/app/spaces/server/node/spellSpacesDir"
 
 /** Who's at this machine (epic `repo-split` P27):  an app's folder and a spell.spaces, both temporary. */
 const root = mkdtempSync(resolve(tmpdir(), "spell-local-person-"))
@@ -34,6 +36,22 @@ describe("localPerson", () => {
     expect(thisMachinesPerson().address).toBe("owen@spell")
     expect(SPACES.localPerson.address).toBe("owen@spell")
     expect(SP.SpellSetup.projectRoots["owen@spell"]?.title).toBe("Projects")
+  })
+
+  test("appDir():  in the kit, the kit;  a project linking the kit in from outside it, that project", () => {
+    const kit = dirname(repoDir)
+    const project = folderWith("linked", { "package.json": JSON.stringify({ spell: { org: "acme" } }) })
+    const started = process.env.INIT_CWD
+    try {
+      process.env.INIT_CWD = join(kit, "app")
+      expect(appDir()).toBe(kit)
+      process.env.INIT_CWD = project
+      expect(appDir()).toBe(project)
+      expect(appOrg()).toBe("acme")
+    } finally {
+      if (started === undefined) delete process.env.INIT_CWD
+      else process.env.INIT_CWD = started
+    }
   })
 
   test("appOrg():  the app's `spell.org`;  left out, or no package file, `spell`", () => {

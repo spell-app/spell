@@ -309,18 +309,35 @@ export class PublishedPackage {
   // ## Bins
   ////////////////
 
-  /** Each `bin`, at `binPath()`:  a file that imports its module's build, run when imported. */
+  /**
+   * Each `bin`, at `binPath()`:  a file that imports its module's build, run when imported.
+   * - One whose checkout bin plain node runs (`bin/spell.mjs`) runs THAT instead when `SPELL_KIT` names a checkout
+   *   (`checkoutToRun()`, epic `repo-split` T69);  a `.ts` one (`spell-types`) doesn't:  node can't run it from there.
+   */
   private writeBins(): void {
     for (const [name, module] of Object.entries(this.repo.settings.bin ?? {})) {
-      const file = join(this.stageDir, this.binPath(name))
+      const path = this.binPath(name)
+      const file = join(this.stageDir, path)
+      const own = this.ownBin(name)
+      const built = `"../${DIST}/${module}.js"`
+      const run =
+        own && /\.m?js$/.test(own)
+          ? `import { checkoutToRun } from "../${DIST}/cli/kitCheckout.js"\n` +
+            `await import(checkoutToRun(${JSON.stringify(own)}, import.meta.url) ?? ${built})\n`
+          : `await import(${built})\n`
       mkdirSync(dirname(file), { recursive: true })
       writeFileSync(
         file,
-        `#!/usr/bin/env node\n// \`${name}\`:  runs ${this.name}'s built \`${module}\` (written by \`spell publish\`)\n` +
-          `await import("../${DIST}/${module}.js")\n`
+        `#!/usr/bin/env node\n// \`${name}\`:  runs ${this.name}'s built \`${module}\` (written by \`spell publish\`)\n${run}`
       )
       chmodSync(file, 0o755)
     }
+  }
+
+  /** The checkout's own path of bin `name`, from its root (`bin/spell.mjs`);  `undefined` when it has none. */
+  private ownBin(name: string): string | undefined {
+    const own = (this.repo.manifest.bin as Record<string, string> | undefined)?.[name]
+    return own ? posix.normalize(own) : undefined
   }
 
   /**
@@ -329,8 +346,7 @@ export class PublishedPackage {
    * else `bin/<name>.js`.
    */
   private binPath(name: string): string {
-    const own = (this.repo.manifest.bin as Record<string, string> | undefined)?.[name]
-    return own ? posix.normalize(own).replace(/\.ts$/, ".js") : `bin/${name}.js`
+    return this.ownBin(name)?.replace(/\.ts$/, ".js") ?? `bin/${name}.js`
   }
 
   ////////////////
