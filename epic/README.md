@@ -1,33 +1,9 @@
 # spell-epic:  epics and sagas
 
-```text
-In Claude Code, you type:
-  /epic readme Goal: update readmes for all of the various new repos and to be fully informative and pretty. ...
+![An epic page:  the header with its Send button, the phase it is on and its counts by colour;  then its judgement calls, todos and issues, each item a coloured chip with its buttons at the right](docs/images/epic-page-items.png)
 
-On the epic page, the agent asks:
-  Q1 · Pictures:  Mermaid diagrams, drawn SVGs, or both?
-    A · Mermaid for every diagram, a few SVG hero pictures  👍
-        Cost: the hero SVGs are a few hours of care; everything else is minutes.
-    B · Mermaid only
-        Cost: nothing looks designed; "pretty" is a stretch.
-    C · Drawn SVGs everywhere
-        Cost: each picture is slow to make and slower to fix; Opus agents will drift them out of truth.
-
-You press Choose on A, then Send.  In the page's log:
-  11:55  Q1 picked A: Mermaid for every diagram, a few SVG hero pictures
-```
-
-_A real session, as text:  the epic that planned these READMEs, its first question, and the answer landing._
-
-You just watched a decision get made, and kept.
-It didn't scroll away in a chat, and nobody copied it into a ticket afterwards:
-it was asked on a page, answered on the page, and it's still there, with eleven more.
-
-The 👍 is advice, not a default:  three of that page's first five answers went the other way.
-
-That page isn't a wiki somebody remembers to update.
-The agent writes it as it works, through a command, `epic`, which keeps every id, colour and count right,
-and a hook commits it to git after every turn.
+_The demo epic, in its second phase.  Red needs you, orange is your turn to read, yellow is open, blue is with the agent:
+you can read the page by its colours before you read a word._
 
 `spell-epic` is a way of building software with a coding agent where the plan is a page that stays true.
 You ask for an EPIC;  the agent plans it on its page, builds it phase by phase in a worktree of its own,
@@ -42,11 +18,9 @@ Here to run one?  [Skip to "Try it"](#try-it--a-small-epic-start-to-finish).
 
 ## An epic's life
 
-Here's the whole life of one, drawn as one of the "few SVG hero pictures" that question chose.
+![An epic's life in nine numbered steps:  you type /epic and a name, the session is named for the epic, epic creates a git worktree and a new VS Code window, the agent drafts the plan, the page fills, each phase is built and committed with review rounds beside it, then doc review, then the merge](docs/images/epic-life.svg)
 
-![An epic's life in nine numbered steps:  you type /epic and a name, the session is named for the epic, it gets a worktree and a window, the agent drafts the plan, the page fills, each phase is built and committed with review rounds beside it, then doc review, then the merge](docs/images/epic-life.svg)
-
-_The page is the memory:  every decision, call, issue and test lives there._
+_Every decision, call, issue and test along the way is kept on the epic page._
 
 <details>
 <summary>As text</summary>
@@ -56,7 +30,7 @@ _The page is the memory:  every decision, call, issue and test lives there._
 flowchart TD
   name["1. You type /epic name, and what to plan"]
   gate["2. The session is named for the epic"]
-  tree["3. A worktree and a window of its own"]
+  tree["3. Epic creates a git worktree and new VS Code window"]
   plan["4. The agent explores and drafts the plan"]
   fill["5. The page fills:  phases, questions, calls"]
   phase["6. Each phase built and committed"]
@@ -255,7 +229,7 @@ _A judgement call on a real epic page, its note box open:  the yellow chip says 
 On an issue or a judgement call the group reads Do this, Revisit, Approve;
 on other items, Make Todo takes Do this's place._
 
-Nothing you press goes anywhere until Send, in the page's header, hands it all over:  you press the paper plane.
+Nothing you press is sent until you press Send, the paper plane in the page's header.
 
 Two more things you'll do on a page, and one you can do from any session:
 - comment on any block of any docs page, with the bullhorn beside it, or select text and press ⌘-I:
@@ -287,7 +261,7 @@ through spell-epic's own extension, Spell Epic.
 
 An epic page is a plain HTML file that holds data and prose, and nothing else:
 custom elements draw the rest, the chips, the buttons, the folds, the 👍.
-Here's the question from the top of this page, as its files hold it:
+Here's a question from the epic that planned these READMEs, as its files hold it:
 
 ```html
 <!-- readme.plan.html:  the item's line, in the Questions section -->
@@ -367,7 +341,7 @@ one config file in the repo, `.epic/config.json5`, and an epic folder beside it 
 
 One command sets a project up:  `npx spell@next epic init` installs the plugin and the extension,
 asks your name and colour, and starts the epic server.
-- It has run end to end outside Spell, in throwaway repos, and its rough edges are listed, not hidden.
+- It has run end to end outside Spell, in throwaway repos;  its rough edges are listed in README-epics.md.
 - The steps, sharing with a team, every setting and the rest of the edges:  [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md).
 
 ## Working on it
@@ -456,7 +430,7 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
 
 | Page | What's on it |
 | --- | --- |
-| [README.md](README.md) | <ul><li>this page:  a decision made and kept, and an epic's life</li><li>three things that move, if you know tickets, pull requests and chat</li><li>try it;  the words, what a page lets you do, the commands</li><li>beyond Spell;  working on it</li></ul> |
+| [README.md](README.md) | <ul><li>this page:  an epic page, and an epic's life</li><li>three things that move, if you know tickets, pull requests and chat</li><li>try it;  the words, what a page lets you do, the commands</li><li>beyond Spell;  working on it</li></ul> |
 | [README-how-it-works.md](README-how-it-works.md) | <ul><li>sagas, epics and guides:  how each holds the next</li><li>the workflow:  two Accepts, then it builds</li><li>the page in annotated pictures:  header, items, "While you were out", the Review tab</li></ul> |
 | [README-pages.md](README-pages.md) | <ul><li>your first review, in four moves</li><li>the header and toolbar;  eight sections whose ids never change</li><li>a review round, comments and manual tests;  what each colour means</li><li>saga, details and choice pages, guides, the home page;  the `<epic-*>` elements</li></ul> |
 | [README-skills.md](README-skills.md) | <ul><li>twenty-two skills you type, fourteen hooks that run by themselves</li><li>planning and review;  worktrees and sessions;  background and offline</li><li>the hooks, and the prompt gate that reads first</li><li>two names for every skill</li></ul> |

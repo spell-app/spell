@@ -178,8 +178,8 @@ Type `$` and the skill's name, as `/` in Claude Code:
 - five skills stay Claude Code's:  `bg`, `bedtime`, `comment`, `session` and `title`
   - Codex never picks them by itself (each has an `agents/openai.yaml` saying so)
   - called by name, `$bg`, each says in its first line what to do in Codex instead
-- `epic skills check` keeps the one copy honest:  it fails a skill naming a Claude-only tool with no "In Codex:" line
-  beside it, and the `epic/` folder's tests run it
+- `epic skills check` checks the one copy, and the `epic/` folder's tests run it:
+  it fails a skill naming a Claude-only tool with no "In Codex:" line beside it
 
 **What the agent runs**, in the workflow `epic guide` prints:
 - `epic turn end`, as its turn's last step, when no hook runs it:  safe to run twice, quiet with nothing to do.

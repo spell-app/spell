@@ -145,7 +145,7 @@ _Phases:  done ones ticked, the two still to do a dotted circle.
 The gears turn on each phase's Files and Verify;  an orange pen, on a phase whose plan changed, counts the changes._
 
 You'll come back to most pages cold, weeks later, from another session.
-Three habits make that safe:
+These habits make that easier:
 - Everything starts folded.
   The page remembers what you opened, and a link to any id unfolds whatever hides it.
 - Nothing is deleted.

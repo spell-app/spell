@@ -11,9 +11,8 @@ Click the first, and the epic page opens in VS Code's right side bar, in the Rev
 in the window that session runs in:  `window=41413` names it.
 The 🌐 opens the same page in Chrome.
 
-A chat scrollback is where a plan goes to scroll away.
-The epic page stays:  beside the session for as long as the epic runs,
-reloading itself each time the agent edits it, and taking your review marks while the agent works.
+The page stays there, beside the session, for as long as the epic runs.
+It reloads itself each time the agent edits it, and takes your review marks while the agent works.
 
 Spell Epic is [spell-epic](README.md)'s VS Code extension, and it does two jobs:
 - **three views in the right side bar**, Epic Docs, Review and Details, each holding one live page from a server on your
@@ -153,9 +152,8 @@ and its fallback server loses the engine's scripts and styles.
 
 ## Three views, each a page that stays
 
-A browser tab is a page you go to.
-Each of these is a page that stays where you work:  a frame holding the page's local address,
-as VS Code's Simple Browser does, docked in the right side bar beside your code and the Claude panel.
+Each view is a frame holding a page's local address, as VS Code's Simple Browser does,
+docked in the right side bar beside your code and the Claude panel.
 
 | View | Icon | What it shows | What opens it |
 | --- | --- | --- | --- |
@@ -263,7 +261,7 @@ The first three are processes of their own.
 When none of them answers, the extension starts the page's own page server (`epic server ensure`, in a login shell:
 a VS Code started from the Dock may have no `node` on its `PATH`), and the status bar says so.
 It never starts the epic server.
-The commands that open pages start a server first too, so the fourth is a fallback, not a plan:
+The commands that open pages start a server first too, so you rarely get the fourth:
 it's what you get when no page server can start, in a repo that isn't a Spell kit or with no `node` to run one.
 **The fourth is for reading, not reviewing:**
 it has live reload and the engine's own files, but none of the `/api/` routes your review marks are sent to.
