@@ -1,10 +1,8 @@
 import {
-  EditorSelection,
   type EditorState,
   type Extension,
   type Line,
   type Range,
-  type SelectionRange,
   StateEffect,
   StateField,
   type Text as Doc,
@@ -14,7 +12,7 @@ import { Decoration, type DecorationSet, EditorView, ViewPlugin, WidgetType } fr
 
 import { SP } from "spell/parser/spell"
 import { BubblyHtml } from "spell/app/app/components/spell-code/BubblyHtml"
-import { CodeMirrorDecorations, CodeMirrorMarkup, railsStyle, type Indent, type Rail } from "./CodeMirrorMarkup"
+import { CodeMirrorDecorations, CodeMirrorMarkup, type Indent, type Rail } from "./CodeMirrorMarkup"
 import { CodeMirrorRelayout } from "./CodeMirrorRelayout"
 import { CodeMirrorSelection } from "./CodeMirrorSelection"
 
@@ -26,9 +24,10 @@ import { CodeMirrorSelection } from "./CodeMirrorSelection"
  * - Everything is a REAL element in the text's own lines, laid out by the browser:
  *   - each declaration's head on a band:  a mark round its words (`cmb-band`), in its part of speech's colour;
  *     a head's description, `-- A playing card`, at the band's right end, the band reaching the editor's edge (Owen);
- *     one that doesn't fit there gets rows of its own under the head, wrapped (`DescriptionRoom`;  epic `language` I120)
+ *     one that doesn't fit there is cut short with a `…`, so the head stays one line (`DescriptionRoom`)
  *   - its body's rail:  a line decoration on every line under it, a stripe per enclosing block (`--cmb-rails`)
- *   - its foot:  a block widget after its last line
+ *   - its foot:  drawn in the line under its last line, taking no room of its own (`FeetWidget`):  every line is one
+ *     line tall, so CodeMirror's guess at the height of lines it hasn't drawn is always right (epic `codemirror` P7)
  *   - folded:  its head alone, a pill, the fold's `…` in its right end (`CodeMirrorSetup`;  epic `language` I116)
  *   - what a person typed in white pills, a quoted one's curly marks, bold names, italic values, faint marks,
  *     one dotted line under each value and question:  marks in the classes of the look's one sheet, `bubbly.css`
@@ -117,10 +116,8 @@ class BubblyDecorations {
   private readonly text: string
   /** A drawing's tags:  drawn as HTML is (`CodeMirrorMarkup`), so Spell's marks leave them alone. */
   private readonly tags: Array<{ start: number; end: number }> = []
-  /** The feet under each line end, by where it is, innermost first:  as they stack. */
-  private readonly feet = new Map<number, FootWidget[]>()
-  /** Where each line with a band starts. */
-  private readonly bandLines = new Set<number>()
+  /** The feet of the blocks ending on each line, by where that line ends, innermost first. */
+  private readonly feet = new Map<number, Foot[]>()
 
   constructor(
     private readonly state: EditorState,
@@ -139,9 +136,30 @@ class BubblyDecorations {
   /** The decorations, sorted as CodeMirror wants them. */
   build(): DecorationSet {
     this.nodes(this.drawing.nodes, [])
-    // a band right under a foot:  room between the two blocks (T141)
-    for (const [at, feet] of this.feet) if (this.bandLines.has(at + 1)) feet.at(-1)!.isAboveBand = true
+    for (const [at, feet] of this.feet) this.drawFeet(at, feet)
     return this.decorations.build()
+  }
+
+  /**
+   * The feet of the blocks ending on the line that ends `at`, side by side, each at its block's indent
+   * (Owen, 2026-11-19:  "feet in a blank line -- I like 'side by side in the blank line' a lot"):
+   * - a blank line under it:  along that line's top (`blank`)
+   * - a line with words under it:  along the bottom of the block's own last line, so they never sit on those words
+   *   (`above`)
+   * - nothing under it, the file's end or a slice's:  the same, drawn from the last line itself (`end`)
+   * - none takes any room:  the line under keeps its one line's height ("make line spacing completely regular")
+   */
+  private drawFeet(at: number, feet: Foot[]) {
+    const { doc } = this.state
+    const last = doc.lineAt(at)
+    const next = last.number < doc.lines ? doc.line(last.number + 1) : undefined
+    const isNextShown = !!next && (!this.options.slice || next.to <= this.options.slice.to)
+    if (!next || !isNextShown) {
+      this.decorations.add(FeetWidget.decoration(feet, "end").range(last.to))
+      return
+    }
+    const placement = next.text.trim() ? "above" : "blank"
+    this.decorations.add(FeetWidget.decoration(feet, placement).range(next.from))
   }
 
   /**
@@ -253,7 +271,6 @@ class BubblyDecorations {
       // a body opening with a group:  the group's band hangs on the rail right under this one, so no inside corner (I119)
       if (hasBody && opensWithGroup(block)) band.push("cmb-band-opens-group")
       this.decorations.mark(head.start, head.end, band, { style: `--cmb-column: ${indent.tabs}` })
-      this.bandLines.add(this.state.doc.lineAt(head.start).from)
     }
     if (!hasBody) return
     // a block the slice cuts:  its body drawn, its rail not;  a group's in its band's colour (I147)
@@ -265,46 +282,27 @@ class BubblyDecorations {
   }
 
   /**
-   * `block`'s foot, under its last line, its rail at `indent` inside `rails`.
-   * - Blocks in it ending on the same line have theirs first, and this one goes under them,
-   *   as far below the one right above it as its rail is left of that one's:  the feet as far apart down as the rails
-   *   across (Owen, 2026-11-11), as the drawn-bubbly page stacks them (epic `language` I125).
+   * `block`'s foot, under its last line, its rail at `indent` inside `rails` (`drawFeet()`).
+   * - Its rail stops short on its last line, where the foot's round corner turns.
+   * - Blocks in it ending on the same line have theirs first:  side by side with this one, each at its own indent,
+   *   overlapping (Owen, 2026-11-19, epic `codemirror` P7, question 4's A).
    * - A group in it ending there too, hung on its rail, ends in the SAME foot, the group's drawn:
-   *   stacked under it, they were one foot twice as thick, in two colours (Owen, 2026-11-13;  I125).
+   *   two feet there were one foot twice as thick, in two colours (Owen, 2026-11-13;  epic `language` I125).
    */
   private foot(block: SP.BubblyBlock, indent: Indent, rails: Rail[]) {
     const last = lastLineEnd(block)
     const at = this.state.doc.lineAt(last).to
-    const above = this.feet.get(at)?.at(-1)
-    const rail = rails.length
-    // its rail stops short in the row above its foot, where the foot's round corner turns:  its last line, or the foot of
-    // a block in it that ends there too
-    if (above && above.column <= indent.tabs) {
-      // the group's foot is this one's:  this rail ends beside it, stopping short where the group's does
-      above.ended.add(rail)
-      if (above.stoppedIn) above.stoppedIn.stopped.add(rail)
-      else this.decorations.stopRail(last, rail)
-      return
-    }
+    const feet = this.feet.get(at) ?? []
+    this.decorations.stopRail(last, rails.length)
+    // the group's foot is this one's:  this rail ends beside it
+    if (feet.at(-1) && feet.at(-1)!.column <= indent.tabs) return
     // a group's foot is its band's colour, as its rail is (I147)
-    const foot = block.isGroup
-      ? new FootWidget(indent.tabs, groupHue(rails), rails, "group")
-      : new FootWidget(indent.tabs, block.partOfSpeech, rails)
-    if (above) {
-      above.stopped.add(rail)
-      above.drop = above.column - indent.tabs
-      foot.stoppedIn = above
-      foot.dropsAbove = above.dropsAbove + above.drop
-    } else this.decorations.stopRail(last, rail)
-    this.feet.set(at, [...(this.feet.get(at) ?? []), foot])
-    this.decorations.add(
-      Decoration.widget({
-        widget: foot,
-        block: true,
-        // an inner block's foot before its parent's, when they end on the same line
-        side: 1000 - block.level
-      }).range(at)
+    feet.push(
+      block.isGroup
+        ? { column: indent.tabs, partOfSpeech: groupHue(rails), isGroup: true }
+        : { column: indent.tabs, partOfSpeech: block.partOfSpeech, isGroup: false }
     )
+    this.feet.set(at, feet)
   }
 
   /** Is all of `block` in the lines shown:  always, but in a slice that cuts it. */
@@ -463,6 +461,7 @@ function lastLineEnd(block: SP.BubblyBlock): number {
  *   - between a drawing's tags, or a blank line right above them:  nothing, a typed `<` starts at its indent
  *   - a group's own line (`cmb-group-line`):  where its members' words are, as the line beside it in the group
  *   - else, in a body:  the room after its tabs (`cmb-plain-indent`), and a blank one's caret past it (`WordsPlace`)
+ * - Feet in a blank line it typed on move up, off its words;  in a line left blank, down into it (`feetReplaced()`).
  * - Only lines with nothing drawn on them yet;  the next layout replaces it all.
  * - `hiddenIndent`:  a slice's, shown dedented (`Slice`)
  * - NEVER throws:  a look it can't work out is left to the layout.
@@ -480,7 +479,7 @@ function blankLinesDrawn(decorations: DecorationSet, transaction: Transaction, h
       }
     })
     if (!written.length) return decorations
-    const clipped = clippedAbove(decorations, written)
+    const clipped = feetReplaced(clippedAbove(decorations, written), written)
     const add = written.flatMap((line) => blankLineLook(clipped, doc, line, hiddenIndent))
     return add.length ? clipped.update({ add, sort: true }) : clipped
   } catch (error) {
@@ -494,8 +493,8 @@ function blankLinesDrawn(decorations: DecorationSet, transaction: Transaction, h
  * - Enter at the end of a line puts the new line between that line and what was drawn at its end:
  *   - a mark holding its end, a quoted name's (`to "reset the stock"`), grew with the line break, so the new line was
  *     drawn inside the name's pill:  it ends at the line's end again
- *   - what's drawn after its end (a tag's foot, a block's feet) moved down onto the new line, its caret pushed right:
- *     back at the line's end
+ *   - what's drawn after its end (the feet of blocks ending on the file's last line) moved down onto the new line,
+ *     its caret pushed right:  back at the line's end
  * - A words' place left anywhere but a blank line's end goes (`WordsPlace`), as a line left blank again keeps one at
  *   its start:  `blankLineLook()` places its own.
  */
@@ -503,13 +502,12 @@ function clippedAbove(decorations: DecorationSet, lines: readonly Line[]): Decor
   const blanks = lines.filter((line) => !line.text.trim() && line.number > 1)
   const lineCrossedInto = (from: number, to: number, value: Decoration) =>
     value.point ? undefined : lines.find((line) => from < line.from && to >= line.from)
-  // a words' place at a blank line's end is its own
+  // a words' place at a blank line's end is its own, and so are feet at its start
+  const isOwn = (widget: WidgetType, from: number, line: Line) =>
+    (widget instanceof WordsPlace && from === line.to) || (widget instanceof FeetWidget && widget.placement !== "end")
   const blankHolding = (from: number, value: Decoration) =>
     value.spec.widget
-      ? blanks.find(
-          (line) =>
-            line.from <= from && from <= line.to && !(value.spec.widget instanceof WordsPlace && from === line.to)
-        )
+      ? blanks.find((line) => line.from <= from && from <= line.to && !isOwn(value.spec.widget, from, line))
       : undefined
   const putBack: Range<Decoration>[] = []
   let isAny = false
@@ -527,6 +525,30 @@ function clippedAbove(decorations: DecorationSet, lines: readonly Line[]): Decor
     add: putBack,
     sort: true
   })
+}
+
+/**
+ * `decorations`, with the feet at the start of each of `lines` drawn where its words leave room for them, at once:
+ * - a line just typed on:  up, along the bottom of the line above, off its words
+ * - a line left blank:  along its own top
+ * - The next layout decides it all again.
+ */
+function feetReplaced(decorations: DecorationSet, lines: readonly Line[]): DecorationSet {
+  const replaced: Range<Decoration>[] = []
+  const isReplaced = (from: number, value: Decoration) => {
+    const widget = value.spec.widget
+    if (!(widget instanceof FeetWidget) || widget.placement === "end") return false
+    const line = lines.find((each) => each.from === from)
+    const placement = line && (line.text.trim() ? "above" : "blank")
+    return !!placement && placement !== widget.placement
+  }
+  decorations.between(lines[0]!.from, lines.at(-1)!.to, (from, _to, value) => {
+    if (!isReplaced(from, value)) return
+    const { feet, placement } = value.spec.widget as FeetWidget
+    replaced.push(FeetWidget.decoration(feet, placement === "blank" ? "above" : "blank").range(from))
+  })
+  if (!replaced.length) return decorations
+  return decorations.update({ filter: (from, _to, value) => !isReplaced(from, value), add: replaced, sort: true })
 }
 
 /**
@@ -641,29 +663,30 @@ const GROUP_BAND = "bubbly-group"
 
 /****************
  * ### `DescriptionRoom`
- * Rows of their own under a head for its description, when it doesn't fit at its band's right end (epic `language` I120).
+ * A head's description cut short with a `…` when it doesn't fit at its band's right end, so the head stays one line
+ * (epic `codemirror` P7;  Owen, 2026-11-19:  "make line spacing completely regular").
  * - The description floats at the band's right end;  too wide for the room beside the head's words,
- *   the browser drops it under them, where it was drawn over the next lines (`a "card"`'s over its first comments,
- *   a group's behind its first member's band).
- * - So it's measured as drawn:  a head line whose description reaches below its row gets as many rows under it as
- *   the description takes, wrapped, its words starting under the head's (`cmb-head-description-below`, `bubbly.css`).
- *   - CodeMirror measures lines as they're drawn, so the caret, the gutter and the lines below follow.
- *   - Measured again as the editor changes:  a wider one puts it back at the band's end (`fitsOnBand()`).
- * - Only lines on screen are measured;  the rest keep the rows they had, moved with the text.
+ *   the browser drops it under them, over the next line.
+ * - So it's measured as drawn:  a head line whose description doesn't fit gets the room it has, after the head's words
+ *   (`--cmb-description-room`, `cmb-description-cut` in `bubbly.css`), and is cut short there.
+ *   - Measured again as the editor changes:  a wider one shows it whole again.
+ * - Before, it took rows of its own under the head (epic `language` I120):  a head line two or three lines tall,
+ *   which CodeMirror guessed as one until it was drawn, so the file's height changed as it scrolled.
+ * - Only lines on screen are measured;  the rest keep the room they had, moved with the text.
  * - Its position in the import graph:  CodeMirror alone.
  ****************/
 class DescriptionRoom {
-  /** The rows under each head line, by where it starts, set as they're measured. */
+  /** The room for each cut description, by where its head line starts, set as they're measured. */
   private static readonly measured = StateEffect.define<Map<number, number>>()
 
-  /** The rows under each head line, by where it starts:  only lines that have any. */
-  private static readonly rows = StateField.define<Map<number, number>>({
+  /** The room for each cut description, in pixels, by where its head line starts:  only lines that cut one. */
+  private static readonly rooms = StateField.define<Map<number, number>>({
     create: () => new Map(),
-    update(rows, transaction) {
+    update(rooms, transaction) {
       for (const effect of transaction.effects) if (effect.is(DescriptionRoom.measured)) return effect.value
-      if (!transaction.docChanged || !rows.size) return rows
+      if (!transaction.docChanged || !rooms.size) return rooms
       const moved = new Map<number, number>()
-      for (const [from, count] of rows) moved.set(transaction.changes.mapPos(from), count)
+      for (const [from, room] of rooms) moved.set(transaction.changes.mapPos(from), room)
       return moved
     },
     provide: (it) =>
@@ -671,10 +694,10 @@ class DescriptionRoom {
         Decoration.set(
           [...state.field(it)]
             .filter(([from]) => from <= state.doc.length)
-            .map(([from, count]) =>
+            .map(([from, room]) =>
               Decoration.line({
-                class: DescriptionRoom.BELOW,
-                attributes: { style: `--cmb-description-rows: ${count}` }
+                class: DescriptionRoom.CUT,
+                attributes: { style: `--cmb-description-room: ${room}px` }
               }).range(state.doc.lineAt(from).from)
             ),
           true
@@ -682,10 +705,10 @@ class DescriptionRoom {
       )
   })
 
-  /** A head line's class while its description is in rows under it. */
-  static readonly BELOW = "cmb-head-description-below"
+  /** A head line's class while its description is cut short. */
+  static readonly CUT = "cmb-description-cut"
 
-  /** Measures the descriptions on screen after each update, and sets the rows when they've changed. */
+  /** Measures the descriptions on screen after each update, and sets their room when it's changed. */
   private static readonly measure = ViewPlugin.fromClass(
     class {
       constructor(readonly view: EditorView) {
@@ -699,16 +722,16 @@ class DescriptionRoom {
       private request() {
         this.view.requestMeasure({
           key: this,
-          read: (view) => ({ state: view.state, rows: DescriptionRoom.rowsOnScreen(view) }),
-          write: ({ state, rows }, view) => {
+          read: (view) => ({ state: view.state, rooms: DescriptionRoom.roomsOnScreen(view) }),
+          write: ({ state, rooms }, view) => {
             if (view.state !== state) return
-            const known = state.field(DescriptionRoom.rows)
+            const known = state.field(DescriptionRoom.rooms)
             const next = new Map(known)
-            for (const [from, count] of rows) {
-              if (count) next.set(from, count)
-              else next.delete(from)
+            for (const [from, room] of rooms) {
+              if (room === undefined) next.delete(from)
+              else next.set(from, room)
             }
-            if (sameRows(known, next)) return
+            if (sameRooms(known, next)) return
             // not inside CodeMirror's own update:  once it's done
             queueMicrotask(() => {
               if (view.state === state) view.dispatch({ effects: DescriptionRoom.measured.of(next) })
@@ -719,218 +742,120 @@ class DescriptionRoom {
     }
   )
 
-  /**
-   * A press in the rows under a head:  the caret on the description's letter under the pointer, and a drag from it
-   * selects as over any text (epic `codemirror` I19).
-   * - CodeMirror finds the place under the pointer from the boxes of the line's pieces, in their order.
-   *   The description is drawn out of the band's box, in the rows under it, so its box is in no piece's:
-   *   CodeMirror took the band for the nearest piece, and put the caret in the head's words above the press.
-   * - Two clicks pick a word, three the line, as CodeMirror's own;  four and more are `CodeMirrorSetup`'s.
-   * - A drag from anywhere else is CodeMirror's own, so one ending in a description's rows ends in the head's words.
-   */
-  private static readonly presses = EditorView.mouseSelectionStyle.of((view, event) => {
-    if (event.button !== 0 || event.detail > 3 || event.metaKey || event.ctrlKey || event.altKey) return null
-    const pressed = DescriptionRoom.posInRows(view, event.clientX, event.clientY)
-    if (pressed === undefined) return null
-    const { state } = view
-    let start: SelectionRange
-    if (event.detail === 1) start = EditorSelection.cursor(pressed)
-    else if (event.detail === 2) start = state.wordAt(pressed) ?? EditorSelection.cursor(pressed)
-    else {
-      const line = state.doc.lineAt(pressed)
-      start = EditorSelection.range(line.from, Math.min(line.to + 1, state.doc.length))
-    }
-    if (event.shiftKey) start = EditorSelection.range(state.selection.main.anchor, start.head)
-    return {
-      get(current) {
-        const head =
-          DescriptionRoom.posInRows(view, current.clientX, current.clientY) ??
-          view.posAtCoords({ x: current.clientX, y: current.clientY }, false)
-        if (event.detail === 1) return EditorSelection.single(start.anchor, head)
-        if (head >= start.from && head <= start.to) return EditorSelection.single(start.anchor, start.head)
-        // past the press's word or line:  from its far end to the place under the pointer, a whole word or line
-        const line = view.state.doc.lineAt(head)
-        const to =
-          event.detail === 2
-            ? (view.state.wordAt(head) ?? EditorSelection.cursor(head))
-            : EditorSelection.range(line.from, line.to)
-        return head < start.from ? EditorSelection.single(start.to, to.from) : EditorSelection.single(start.from, to.to)
-      },
-      update(update) {
-        if (update.docChanged) start = start.map(update.changes)
-      }
-    }
-  })
+  /** Measuring and cutting the descriptions on heads, for a bubbly editor. */
+  static readonly extension: Extension = [DescriptionRoom.rooms, DescriptionRoom.measure]
 
   /**
-   * The place under `x`, `y` when it's in the rows under a head, in its description:  the letter it's over, or, beside
-   * its words, the nearest end of the row it's in;  `undefined` anywhere else.
+   * Each line on screen's room for its description, in pixels:  `undefined` for one with none, or whose description
+   * fits whole on its band.
    */
-  private static posInRows(view: EditorView, x: number, y: number): number | undefined {
-    for (const line of view.contentDOM.querySelectorAll<HTMLElement>(`.cm-line.${DescriptionRoom.BELOW}`)) {
-      const box = line.getBoundingClientRect()
-      const band = line.querySelector<HTMLElement>(".cmb-band")
-      const description = line.querySelector<HTMLElement>(".cmb-description")
-      if (!band || !description || y < band.getBoundingClientRect().bottom || y > box.bottom) continue
-      return DescriptionRoom.posInText(view, description, x, y)
-    }
-    return undefined
-  }
-
-  /** The place in `element`'s text nearest `x`, `y`:  in the row nearest `y`, before or after the letter nearest `x`. */
-  private static posInText(view: EditorView, element: HTMLElement, x: number, y: number): number | undefined {
-    let best: { node: Text; offset: number; dy: number; dx: number } | undefined
-    const letter = document.createRange()
-    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT)
-    for (let node = walker.nextNode() as Text | null; node; node = walker.nextNode() as Text | null) {
-      for (let at = 0; at < node.length; at++) {
-        letter.setStart(node, at)
-        letter.setEnd(node, at + 1)
-        const rect = letter.getBoundingClientRect()
-        if (!rect.height) continue
-        const dy = y < rect.top ? rect.top - y : y > rect.bottom ? y - rect.bottom : 0
-        const dx = x < rect.left ? rect.left - x : x > rect.right ? x - rect.right : 0
-        if (best && (dy > best.dy || (dy === best.dy && dx >= best.dx))) continue
-        best = { node, offset: x > (rect.left + rect.right) / 2 ? at + 1 : at, dy, dx }
-      }
-    }
-    return best && view.posAtDOM(best.node, best.offset)
-  }
-
-  /** Measuring and drawing the rows under heads, and presses in them, for a bubbly editor. */
-  static readonly extension: Extension = [DescriptionRoom.rows, DescriptionRoom.measure, DescriptionRoom.presses]
-
-  /**
-   * Each line on screen's rows for its description:  0 for one with none, or whose description fits on its band.
-   * - Rows of the line's own height, as many as the description reaches below its row.
-   */
-  private static rowsOnScreen(view: EditorView): Map<number, number> {
-    const rows = new Map<number, number>()
-    const scale = view.scaleY || 1
+  private static roomsOnScreen(view: EditorView): Map<number, number | undefined> {
+    const rooms = new Map<number, number | undefined>()
+    const scale = view.scaleX || 1
     for (const line of view.contentDOM.querySelectorAll<HTMLElement>(".cm-line")) {
-      const description = line.querySelector<HTMLElement>(".cmb-description")
       const from = view.posAtDOM(line, 0)
-      if (!description) {
-        rows.set(from, 0)
+      const description = line.querySelector<HTMLElement>(".cmb-description")
+      const band = description?.closest<HTMLElement>(".cmb-band")
+      if (!description || !band?.firstChild) {
+        rooms.set(from, undefined)
         continue
       }
-      const rowHeight = Number.parseFloat(getComputedStyle(line).lineHeight)
-      if (!(rowHeight > 0)) continue
-      if (line.classList.contains(DescriptionRoom.BELOW) && DescriptionRoom.fitsOnBand(description)) {
-        rows.set(from, 0)
-        continue
-      }
-      const below = (description.getBoundingClientRect().bottom - line.getBoundingClientRect().top) / scale - rowHeight
-      // a pixel's slack:  a description on its band never reaches below it by more
-      rows.set(from, below > 1 ? Math.ceil((below - 1) / rowHeight) : 0)
+      const words = document.createRange()
+      words.setStartBefore(band.firstChild)
+      words.setEndBefore(description)
+      const wordsEnd = words.getBoundingClientRect().right
+      const end = band.getBoundingClientRect().right - Number.parseFloat(getComputedStyle(band).paddingRight) * scale
+      // its whole width, though it's cut:  its text's
+      const width = description.scrollWidth * scale
+      const room = (end - wordsEnd) / scale - DESCRIPTION_GAP
+      rooms.set(from, wordsEnd + width <= end + 0.5 ? undefined : Math.max(0, Math.floor(room)))
     }
-    return rows
-  }
-
-  /**
-   * Would `description`, drawn under its head, fit at its band's right end again, after the head's words?
-   * - Drawn under it, it's as wide as its words, up to the band's:  narrower than the band's room after the words,
-   *   it fits there, as the browser decides for it at the band's end.
-   */
-  private static fitsOnBand(description: HTMLElement): boolean {
-    const band = description.closest<HTMLElement>(".cmb-band")
-    if (!band?.firstChild) return false
-    const words = document.createRange()
-    words.setStartBefore(band.firstChild)
-    words.setEndBefore(description)
-    const end = band.getBoundingClientRect().right - Number.parseFloat(getComputedStyle(band).paddingRight)
-    return words.getBoundingClientRect().right + description.getBoundingClientRect().width <= end + 0.5
+    return rooms
   }
 }
 
-/** Do `a` and `b` give the same lines the same rows? */
-function sameRows(a: Map<number, number>, b: Map<number, number>): boolean {
+/** The room kept between a head's words and its description cut short, in pixels. */
+const DESCRIPTION_GAP = 12
+
+/** Do `a` and `b` give the same lines the same room? */
+function sameRooms(a: Map<number, number>, b: Map<number, number>): boolean {
   if (a.size !== b.size) return false
-  for (const [from, count] of a) if (b.get(from) !== count) return false
+  for (const [from, room] of a) if (b.get(from) !== room) return false
   return true
 }
 
+/** A block's foot, as `FeetWidget` draws it:  at its block's indent, in its colour. */
+type Foot = {
+  /** its block's indent, in tabs:  where its rail is */
+  column: number
+  /** its colour:  its block's part of speech, or a group's hue */
+  partOfSpeech: string
+  /** a group's foot:  its band's colour, lighter than its hue's other bands (`cmb-group-foot`) */
+  isGroup: boolean
+}
+
+/**
+ * Where a line's feet are drawn, from the line holding them (`BubblyDecorations.drawFeet()`):
+ * - `blank`:  it's the blank line under the blocks, the feet along its top
+ * - `above`:  it has words, the feet along the bottom of the line above it, the blocks' last
+ * - `end`:  it's the blocks' last line, nothing shown under it, the feet along its own bottom
+ */
+type FeetPlacement = "blank" | "above" | "end"
+
 /****************
- * ### `FootWidget`
- * A block's foot:  a short bar off the bottom of its rail, turning out of it round a corner (I113),
- * on a line of its own under its last line.
- * - The rails of the blocks around it run on beside it;
- *   one whose own foot is in the row under it stops short there, for that foot's corner (`stopped`).
- * - Feet stacked under one line (I125):
- *   - a row with another foot under it is as tall as their rails are apart across (`drop`), so each foot is that far
- *     below the one above it
- *   - the last row takes the rest, so the line under the stack starts on a whole pixel, as under one foot (I114)
- * - Right above a band, the last row has room under its foot (`--cmb-block-gap`), so the two blocks stand apart
- *   (Owen:  "add some space between the pill blocks";  T141):  in the foot's row, not the band's line,
- *   so the band's fold arrow stays centred on it, and a click there lands where a click on the foot does.
- * - A group's foot is its band's colour, as its rail is, drawn over its parent's (Owen, epic `language` I147:
- *   "This bar and curly should be colored by group, not app";  before, the parent's hue).
+ * ### `FeetWidget`
+ * The feet of the blocks ending on one line:  each its block's rail turning round a corner into a short bar (I113),
+ * side by side, each at its block's indent, overlapping (Owen, 2026-11-19, epic `codemirror` P7:
+ * "feet in a blank line -- I like 'side by side in the blank line' a lot").
+ * - An empty span of no size, its feet placed from its line (`.cmb-feet`, `bubbly.css`):  it takes no room, so every
+ *   line stays one line tall, and CodeMirror's guess at a line it hasn't drawn is right ("make line spacing completely
+ *   regular").  Before, each foot had a thin row of its own, 4-13px, and a stack of them a tab more each.
+ * - Its line's start (`blank`, `above`), before its first letter (`side: -1`), so a letter typed there goes after it;
+ *   the file's last line's end (`end`), after its last letter.
+ * - The rails of the blocks it ends stop short on their last line, for the corners (`--cmb-foot-lift`).
+ * - Typing on a blank line holding feet moves them up at once, off the words (`feetReplaced()`).
+ * - A group's foot is its band's colour, as its rail is (Owen, epic `language` I147:
+ *   "This bar and curly should be colored by group, not app").
  ****************/
-class FootWidget extends WidgetType {
+class FeetWidget extends WidgetType {
   constructor(
-    readonly column: number,
-    readonly partOfSpeech: string,
-    readonly rails: Rail[],
-    /** a group's foot:  its band's colour, lighter than its hue's other bands (`cmb-group-foot`) */
-    readonly of: "block" | "group" = "block"
+    /** innermost first */
+    readonly feet: readonly Foot[],
+    readonly placement: FeetPlacement
   ) {
     super()
   }
 
-  /** The rails beside it, by their place in `rails`, whose feet are in the row under it:  set while it's laid out. */
-  readonly stopped = new Set<number>()
+  /** `feet`, drawn at `placement`, as a decoration. */
+  static decoration(feet: readonly Foot[], placement: FeetPlacement): Decoration {
+    return Decoration.widget({ widget: new FeetWidget(feet, placement), side: placement === "end" ? 1 : -1 })
+  }
 
-  /** The rails beside it that end in it, a group's parent's, whose foot it is:  set while it's laid out. */
-  readonly ended = new Set<number>()
-
-  /** The foot right above it, in whose row its rail stops short;  none when that's its last line. */
-  stoppedIn: FootWidget | undefined
-
-  /** How many tabs further down the foot under it is:  0 when it's the last of its stack. */
-  drop = 0
-
-  /** The tabs the rows above it in its stack take. */
-  dropsAbove = 0
-
-  /** Is the next line a band:  then its row has room under the foot, so the two blocks stand apart (T141). */
-  isAboveBand = false
-
-  eq(other: FootWidget): boolean {
+  eq(other: FeetWidget): boolean {
     return (
-      other.column === this.column &&
-      other.partOfSpeech === this.partOfSpeech &&
-      other.of === this.of &&
-      other.drop === this.drop &&
-      other.dropsAbove === this.dropsAbove &&
-      other.isAboveBand === this.isAboveBand &&
-      other.style === this.style
+      other.placement === this.placement &&
+      other.feet.length === this.feet.length &&
+      other.feet.every(
+        (foot, index) =>
+          foot.column === this.feet[index]!.column &&
+          foot.partOfSpeech === this.feet[index]!.partOfSpeech &&
+          foot.isGroup === this.feet[index]!.isGroup
+      )
     )
   }
 
   toDOM(): HTMLElement {
-    const row = document.createElement("div")
-    row.className = "cmb-foot-row"
-    row.style.cssText = this.style
-    if (this.drop) row.classList.add("cmb-foot-over")
-    if (this.isAboveBand) row.classList.add("cmb-foot-above-band")
-
-    const foot = document.createElement("div")
-    foot.className = `cmb-foot cmb-hue bubbly-${this.partOfSpeech}${this.of === "group" ? " cmb-group-foot" : ""}`
-    foot.style.setProperty("--cmb-column", String(this.column))
-    row.append(foot)
-    return row
-  }
-
-  /** Its row's style:  the rails beside it, and how far down the foot under it is. */
-  private get style(): string {
-    const styles = this.rails.length ? [railsStyle(this.rails, this.stopped, this.ended)] : []
-    if (this.drop) styles.push(`--cmb-foot-drop-tabs: ${this.drop}`)
-    if (this.dropsAbove) styles.push(`--cmb-foot-drops-above: ${this.dropsAbove}`)
-    return styles.join("; ")
-  }
-
-  ignoreEvent(): boolean {
-    return false
+    const feet = document.createElement("span")
+    feet.className = `cmb-feet cmb-feet-${this.placement}`
+    feet.setAttribute("aria-hidden", "true")
+    // outermost first, so each foot inside it is drawn over its bar
+    for (const { column, partOfSpeech, isGroup } of [...this.feet].reverse()) {
+      const foot = document.createElement("span")
+      foot.className = `cmb-foot cmb-hue bubbly-${partOfSpeech}${isGroup ? " cmb-group-foot" : ""}`
+      foot.style.setProperty("--cmb-column", String(column))
+      feet.append(foot)
+    }
+    return feet
   }
 }
 

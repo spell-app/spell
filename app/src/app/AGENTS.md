@@ -186,8 +186,11 @@ and in the app's build folder, `app/` at the app folder's root.
     the look's one sheet, [bubbly.css](components/spell-code/bubbly.css), has the editor's CodeMirror section,
     and nothing of the look is in `codemirror.css`.
     - Spell:  [CodeMirrorBubbly](ui/codemirror/CodeMirrorBubbly.ts), from the parser's `SP.BubblyLayout`;
-      a head's description at its band's right end, or in rows of its own under the head when it doesn't fit there
-      (`DescriptionRoom`, epic `language` I120);  a drawing's tags as HTML's.
+      a head's description at its band's right end, cut short there with a `…` when it doesn't fit
+      (`DescriptionRoom`, epic `codemirror` P7);  a drawing's tags as HTML's.
+      - Every line one line tall (epic `codemirror` P7):  a block's feet drawn over the lines, in the blank line under it
+        or along the bottom of its last line (`FeetWidget`), a row of HTML end tags one line tall;
+        so CodeMirror's guess at a line it hasn't drawn is right, and a file's height never changes as it scrolls.
     - HTML, an HTML file's (a property editor page, `Card.editor.html`) and a drawing's tags:
       [CodeMirrorMarkup](ui/codemirror/CodeMirrorMarkup.ts), from [MarkupMarks](ui/MarkupMarks.ts), the page's own
       reading of it (`BubblyMarkup`);  both kinds of marks are worked out by [TextMarks](ui/TextMarks.ts), with no

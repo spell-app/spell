@@ -515,15 +515,13 @@ export class CodeMirrorDecorations {
    *   round it further along, its bar running on behind the end tags before it (`--cmb-foot-level`, its place in the run)
    * - the line breaks between them hidden, so the caret, a click and Delete reach each end tag as before
    * - its blocks' rails end in it:  each foot draws its own, down to its turn
-   * - right above a band:  room under it, so the two blocks stand apart, as under a Spell foot (T141)
+   * - one line tall, as every line is (epic `codemirror` P7):  no room under it above a band, as there was (T141)
    */
   private feetRow(run: FootAlone[]) {
     const { doc } = this.state
     const row = doc.lineAt(run[0]!.start)
     const rails = run.reduce((most, foot) => (foot.rails.length > most.length ? foot.rails : most), run[0]!.rails)
-    const classes = ["cmb-feet-row"]
-    if (this.isBandAt(doc.lineAt(run.at(-1)!.end).to + 1)) classes.push("cmb-feet-above-band")
-    this.line(row.from, rails, classes)
+    this.line(row.from, rails, ["cmb-feet-row"])
     const rowDecoration = this.decorationOf(row.from)
     rowDecoration.feet = run.length
     for (const [level, foot] of run.entries()) {
@@ -543,17 +541,6 @@ export class CodeMirrorDecorations {
       // the line break to the next one hidden, one step for the caret
       if (next && next.start > foot.end) this.ranges.push(FeetJoinWidget.decoration.range(foot.end, next.start))
     }
-  }
-
-  /** Does a band start the line `at` is on, a block's start tag or a Spell declaration's head? */
-  private isBandAt(at: number): boolean {
-    if (at > this.state.doc.length) return false
-    const { from, to } = this.state.doc.lineAt(at)
-    for (const [range, { classes }] of this.marks) {
-      const start = Number(range.split(":")[0])
-      if (start >= from && start <= to && (classes.has("cmb-band") || classes.has("cmb-band-open"))) return true
-    }
-    return false
   }
 
   /**
@@ -683,7 +670,7 @@ function railsOf(rails: Rail[]): string {
  * stops short above a foot's round corner in the row under it (`stopped`, `--cmb-foot-lift` in `bubbly.css`), or isn't
  * drawn in it (`ended`).
  */
-export function railsStyle(
+function railsStyle(
   rails: Rail[],
   stopped: ReadonlySet<number> = new Set(),
   ended: ReadonlySet<number> = new Set()
