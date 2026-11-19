@@ -1,0 +1,81 @@
+/*
+ * The Keyboard Shortcuts dialog (`<ShortcutsDialog>`):  a search field, then the groups of rows, which scroll
+ * under it on a short window.  On the 4px grid.
+ */
+.ShortcutsDialog {
+  --ui-modal-width: min(560px, 95vw);
+}
+
+.ShortcutsDialog .ShortcutsSearch {
+  margin-bottom: 12px;
+}
+
+/* the rows scroll inside the dialog, the search field staying put */
+.ShortcutsDialog .ShortcutsList {
+  /* a set height:  the dialog keeps its size and place as the search narrows it */
+  height: min(60vh, 560px);
+  overflow-y: auto;
+  margin: 0 -4px;
+  padding: 0 4px;
+}
+
+.ShortcutsDialog .ShortcutsGroup + .ShortcutsGroup {
+  margin-top: 16px;
+}
+
+.ShortcutsDialog .ShortcutsGroup h3 {
+  margin: 0 0 4px 0;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ui-text-muted);
+}
+
+.ShortcutsDialog .ShortcutsGroup ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* one row:  what the key does (and where), its keys at the right */
+.ShortcutsDialog .ShortcutsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 32px;
+  padding: 4px 0;
+}
+
+.ShortcutsDialog .ShortcutsRow + .ShortcutsRow {
+  /* a line drawn, not a border:  the rows stay 32px, on the grid */
+  box-shadow: inset 0 1px 0 var(--ui-border-color-internal);
+}
+
+.ShortcutsDialog .ShortcutsWhat {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ShortcutsDialog .ShortcutsName {
+  line-height: 20px;
+}
+
+.ShortcutsDialog .ShortcutsWhere {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--ui-text-muted);
+}
+
+.ShortcutsDialog .ShortcutsRow ui-keys {
+  flex: none;
+}
+
+.ShortcutsDialog .ShortcutsNone {
+  white-space: pre-line;
+  margin: 16px 0;
+  color: var(--ui-text-muted);
+}

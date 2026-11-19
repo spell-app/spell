@@ -2,11 +2,10 @@
  * `epic pages index`:  write the home page's area cards and each area's list page,
  * from every page's `<title>` and description (claude-design P5).
  * Usage (from spell-epic's root):  node src/tools/index.js
- * - The home, `pages/index.html`:  a routing page, one card per area in the top bar's order
- *   (`areaCards()`;  the site header's tabs, the checkout's `"pageServer"` `"siteTabs"`), each with its count,
+ * - The home, `pages/index.html`:  a routing page, one card per area (`areaCards()`), each with its count,
  *   written between `<!-- areas:start -->` and `<!-- areas:end -->`
  *   - a missing one is made from `homeSkeleton()` first (a repo `epic init` set up)
- *   - only the areas this checkout HAS (`areaCards()`):  a repo with no Spell UI, app or brand gets no card for them
+ *   - only the areas this checkout HAS (`areaCards()`):  Guides, Sagas, Epics, Templates
  *   - NOT `index:start` / `index:end`:  the home is shared, so an older checkout's `index.js` runs against it too
  *     - that one wrote three lists into the home
  *     - finding no markers, it stops instead of writing its lists back
@@ -58,7 +57,6 @@ import {
 } from "spell/epic/list/EpicCards.ts"
 import { URGENT_SELECTOR } from "spell/epic/list/EpicState.ts"
 import { PhaseIds } from "spell/epic/phases/PhaseIds.ts"
-import { COMPONENTS_PREFIX, componentSets, pageServerSettings } from "spell/server/page/settings"
 import { DataFile } from "spell/epic/data/DataFile.ts"
 import { Sagas } from "spell/epic/tool/Sagas.ts"
 import { PageNotes } from "./PageNotes.js"
@@ -91,11 +89,8 @@ const REPO_TEMPLATE_PATH = REPO_TEMPLATES && `${pagePath(REPO_TEMPLATES)}/`
 /** The repo's name, as its windows show it (`windows.repoName`):  what the pages say they're about. */
 const REPO = EpicConfig.of(ROOT).windows.repoName
 
-/**
- * The component sets checkout `ROOT`'s settings name (its root `package.json`'s `"pageServer"` `"componentSets"`,
- * `componentSets()`):  spell-app's are Spell UI, Epic UI, App UI and Brand;  a repo `epic init` set up has none.
- */
-const SETS = componentSets(pageServerSettings(ROOT))
+/** How recently an open epic was worked on to get a pill on the home page:  a week. */
+const RECENT_DAYS = 7
 
 /** The home's markers:  its area cards go between. */
 export const HOME_START = "<!-- areas:start -->"
@@ -498,20 +493,16 @@ function epicFacts(page) {
 ////////////////
 
 /**
- * The home's cards, in the top bar's order (Owen, 2026-10-11, J40 of `epic-workflow`):
- * Guides, Sagas, Epics, Epic/UI, Spell/UI, App, App/UI, Brand, Templates.
+ * The home's cards:  Guides, Sagas, Epics, Templates, the areas an epic user works in.
+ * - Owen, 2026-11-18 (epic `epic-engine` J275, before the demo):  "Remove anything Spell related in this page
+ *   permanently.  No longer relevant to Epics."
+ *   - before:  Epic/UI, Spell/UI, App, App/UI and Brand cards too (Owen, 2026-10-11, J40 of `epic-workflow`);
+ *     their pages are still served at their addresses (`/components/ui/`, `/editor/`, `/brand/`), and the top bar
+ *     leaves their tabs out (the epic repo's `page-server.json5`)
  * - Sagas was Goals until epic `epic-workflow` P15 (Owen, 2026-10-13:  "saga means roughly epic of epics")
- * - Owen's words:  "Docs toolbar:  Guides Goals Epics Epic/UI Spell/UI App App/UI";  Brand and Templates "At the end"
- * - the slashed titles are the tabs' labels as he typed them (J41);  prose keeps "Epic UI", "Spell UI", "App UI"
- * - the order before (claude-design Q6, 2026-10-05):  Epics, Guides, Brand, Spell UI, Templates, Goals, App
  *
- * Each `{ id, title, icon, href?, count?, description, meta? }`.
+ * Each `{ id, title, icon, href, count, description, meta? }`.
  * - `id`:  the card's id, so the old `pages/index.html#epics` / `#guides` / `#templates` links land on its card
- * - `href`:  from the home's folder;  none for the App, which only a server has (`/editor/`, `RepoApp` on the epic server):
- *   a link there would break from `file://`, and `doc-links.js --check` can't resolve it
- * - Spell UI, Epic UI, App UI (`SETS`;  `set`:  its id, `epics` for `/components/epics/`):
- *   - their home at its served address (`/components/epics/`), since their pages load their site bundle from there
- *   - their page counts from their folders (spell-epic's `src/docs/`)
  * - `pages`:  every page `describe()`d, so the counts come from the same data as the list pages;
  *   the Epics count by the Epics page's groups, `favorites` the starred epics' names (`readFavorites()`);
  *   the Sagas count is `sagas`' (`readSagas()`)
@@ -521,7 +512,6 @@ export function areaCards(pages, favorites = readFavorites(), sagas = readSagas(
   const of = (id) => pages.filter((page) => LISTS.find((list) => list.id === id).has(page.path))
   const groups = of("epics").map((page) => epicCard(page, "epics", favorites).group)
   const counts = EPIC_GROUPS.map((name) => [name, groups.filter((group) => group === name).length])
-  const [spellUI, epicUI, appUI] = ["ui", "epics", "app"].map(setOf)
   return [
     {
       id: "guides",
@@ -542,62 +532,15 @@ export function areaCards(pages, favorites = readFavorites(), sagas = readSagas(
     },
     {
       id: "epics",
-      title: "Epics",
+      title: "Epic Pages",
       icon: "layer group",
       href: "/epics/index.html",
       count: counts
         .filter(([, count]) => count)
         .map(([name, count]) => `${count} ${GROUP_COUNTS[name]}`)
         .join(" · "),
-      description: "Epic pages, one per /epic session:  phases, questions, decisions and the log of the work."
-    },
-    {
-      id: "epic-ui",
-      set: "epics",
-      title: "Epic/UI",
-      icon: "sitemap",
-      href: setHome(epicUI),
-      count: plural(setPages(epicUI), "element page"),
-      description:
-        "The <epic-*> elements an epic page is made of:  how they nest, and a page for each, with live examples.",
-      meta: `served at ${epicUI.prefix}/, by the page server`
-    },
-    {
-      id: "spell-ui",
-      set: "ui",
-      title: "Spell/UI",
-      icon: "puzzle piece",
-      href: setHome(spellUI),
-      count: plural(setPages(spellUI, "ui-"), "components page"),
-      description: "Fomantic UI reborn as ui-* custom elements, on Solid 2:  every element, with examples and its API.",
-      meta: `served at ${spellUI.prefix}/, by the page server`
-    },
-    {
-      id: "app",
-      title: "App",
-      icon: "wand magic sparkles",
-      description: "The spell editor:  write and run spell in the browser.",
-      meta: "Served only:  /editor/, the top bar's App tab, which starts it if it isn't up (the repo's app in .epic/config.json5)"
-    },
-    {
-      id: "app-ui",
-      set: "app",
-      title: "App/UI",
-      icon: "window maximize",
-      href: setHome(appUI),
-      count: plural(setPages(appUI), "components page"),
-      description:
-        "The spell app's own components:  what each draws and takes, with live examples where one draws alone.",
-      meta: `served at ${appUI.prefix}/, by the page server`
-    },
-    {
-      id: "brand",
-      title: "Brand",
-      icon: "palette",
-      href: "/brand/index.html",
-      count: brandCount(pages, of("brand").length),
-      description:
-        "Spell's brand:  Claude Design's pages beside their Spell UI copies, the ui-brand-* elements, and the pony."
+      description: "Epic pages, one per /epic session:  phases, questions, decisions and the log of the work.",
+      epics: recentEpics(of("epics"))
     },
     {
       id: "templates",
@@ -611,44 +554,19 @@ export function areaCards(pages, favorites = readFavorites(), sagas = readSagas(
 }
 
 /**
- * Component set `id` (`epics`:  `/components/epics/`), as `SETS` has it;  one they don't name:  its address alone,
- * no `dir` (no pages, and no card:  `hasArea()`).
- */
-function setOf(id) {
-  const prefix = `${COMPONENTS_PREFIX}/${id}`
-  return SETS.find((set) => set.prefix === prefix) ?? { prefix }
-}
-
-/**
- * How many pages a component set has (`SETS`), besides its home.
- * - the `.html` files of its folder
- * - or only those starting `prefix`:  Spell UI's element pages, `ui-*.html`, beside its other pages
- * - its layout and footer (`__parts/`) never count
- */
-function setPages(set, prefix = "") {
-  if (!set.dir) return 0
-  return htmlFiles(join(ROOT, set.dir)).filter((name) => name !== "index.html" && name.startsWith(prefix)).length
-}
-
-/** A component set's home:  its served address, a root path (`/components/epics/index.html`). */
-function setHome(set) {
-  return `${set.prefix}/index.html`
-}
-
-/**
  * A new home page, `pages/index.html`:  site header, sticky title, lede, the markers, a note on how it's made.
  * - for a repo `epic init` set up, which has none;  spell-app's is hand-authored
  * - written once, when missing;  after that only between the markers
  */
 export function homeSkeleton() {
-  const title = `${REPO} docs`
+  const title = `${REPO} epics`
   return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>${escapeHTML(title)}</title>
-<meta name="description" content="${escapeHTML(`${REPO}'s docs:  guides, sagas and epics, one card each.`)}" />
+<meta name="description" content="${escapeHTML(`${REPO}'s epics:  the plans, the sagas they serve, and the guides they leave behind.`)}" />
 <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
 </head>
 <body class="spell-doc-page">
@@ -656,7 +574,7 @@ export function homeSkeleton() {
 <div class="spell-doc">
 <main class="spell-doc-main">
 <ui-sticky class="spell-h1"><header class="spell-page-head"><h1>${escapeHTML(title)}</h1></header></ui-sticky>
-<p class="lede">Everything written about ${escapeHTML(REPO)}, one card per area.</p>
+<p class="lede">${escapeHTML(REPO)}'s epics, the sagas they serve, the guides they leave behind, and templates to start from.</p>
 ${HOME_START}
 ${HOME_END}
 
@@ -677,17 +595,10 @@ only outside its markers.</li>
 `
 }
 
-/**
- * Whether this checkout has area card `card`'s area:  its list page's folder (`guides/` ...), a component set's
- * pages (spell-epic's `src/docs/` ...), the app's package.
- */
+/** Whether this checkout has area card `card`'s area:  its list page's folder (`guides/` ...). */
 export function hasArea(card) {
   const list = LISTS.find((each) => each.id === card.id)
-  if (list) return existsSync(list.dir)
-  if (card.id === "app") return existsSync(join(ROOT, "packages", "app"))
-  if (!card.set) return true
-  const { dir } = setOf(card.set)
-  return dir !== undefined && existsSync(join(ROOT, dir))
+  return list ? existsSync(list.dir) : true
 }
 
 /** The home's one section:  the area cards in a grid. */
@@ -716,30 +627,59 @@ function areaCard(area) {
   return `<ui-card id="${area.id}"><ui-content>
 <ui-header><ui-icon name="${area.icon}"></ui-icon> ${title}</ui-header>
 ${meta ? `<ui-meta>${meta}</ui-meta>` : ""}
-<ui-description>${escapeHTML(area.description)}</ui-description>
+<ui-description>${descriptionLines(area.description)}</ui-description>
+${epicPills(area.epics)}
 </ui-content></ui-card>`
 }
 
 /**
- * The Brand card's count:  Claude Design's pages with a Spell UI copy, the element docs pages, and the other pages
- * (`others`:  the generated list's), e.g. `13 copies · 11 elements · 1 page`.
+ * The open epics worked on in the last week (`RECENT_DAYS`), for the Epic Pages card's pills, by name:
+ * `{ name, title, href }` each (Owen, 2026-11-18:  "a 2 column list of the open epics as pills showing the name,
+ * skipping any which have not been worked on in more than a week").
+ * - open:  phases left, the Epics page's Active group (not done, future, or every phase done)
+ * - worked on:  `describe()`'s `worked`, the latest of its page's "updated", its log and its branch's last commit
+ * - as of when `epic pages index` last ran:  a pill isn't taken out by itself as the week passes
  */
-function brandCount(pages, others) {
-  const copies = pages.filter((page) => /^brand\/spell-design-system\/[^/]+\.spell\.html$/.test(page.path)).length
-  const elements = pages.filter((page) => /^brand\/components\/ui-brand-[\w-]+\.html$/.test(page.path)).length
-  return [`${copies} ${copies === 1 ? "copy" : "copies"}`, plural(elements, "element"), plural(others, "page")].join(
-    " · "
+export function recentEpics(pages, now = new Date()) {
+  const since = now.getTime() - RECENT_DAYS * 86_400_000
+  return pages
+    .filter((page) => page.worked && page.worked.getTime() >= since)
+    .filter((page) => epicCard(page, "epics", new Set()).group === "active")
+    .map((page) => {
+      const name = page.path.split("/")[1]
+      return { name, title: page.title, href: `/${page.path}` }
+    })
+    .sort((a, b) => a.name.localeCompare(b.name))
+}
+
+/**
+ * The Epic Pages card's pills:  Spell UI's labels, each linking an epic's page, in two columns (`spell-epic-pills`,
+ * `spell-doc.css`);  none:  nothing.
+ */
+function epicPills(epics = []) {
+  if (!epics.length) return ""
+  const pills = epics.map(
+    (epic) =>
+      `<ui-label link="${escapeHTML(epic.href)}" target="_self" appearance="tinted" color="blue" size="small" title="${escapeHTML(epic.title)}">${escapeHTML(epic.name)}</ui-label>`
   )
+  return `<div class="spell-epic-pills">\n${pills.join("\n")}\n</div>`
+}
+
+/**
+ * A card's description, broken onto a second line at its first colon:  `Design notes, references and how-tos:` /
+ * `how each part works, and why.` (Owen, 2026-11-18:  "Split the text in these buttons into 2 lines at the colon").
+ * - no colon:  one line
+ */
+export function descriptionLines(description) {
+  const at = description.indexOf(":")
+  if (at < 0) return escapeHTML(description)
+  const rest = description.slice(at + 1).trim()
+  return `${escapeHTML(description.slice(0, at + 1))}<br />${escapeHTML(rest)}`
 }
 
 /** `count` and `noun`, plural unless 1:  `3 guides`, `1 page`. */
 function plural(count, noun) {
   return `${count} ${noun}${count === 1 ? "" : "s"}`
-}
-
-/** The `.html` files directly in `dir`;  none when it's missing. */
-function htmlFiles(dir) {
-  return existsSync(dir) ? readdirSync(dir).filter((name) => name.endsWith(".html")) : []
 }
 
 /** How many saga sets there are (goal sets, once):  folders of `goals/` with an `index.html`. */

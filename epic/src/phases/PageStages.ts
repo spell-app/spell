@@ -65,6 +65,18 @@ export class PageStages {
     return PageStages.ALL[Math.min(PageStages.ALL.indexOf(stage) + 1, PageStages.ALL.length - 1)]!
   }
 
+  /**
+   * Does a page take the kickoff box (`<epic-kickoff>`, epic `epic-engine` P75):  is it an EPIC page in its Overview
+   * stage?
+   * - `kind` and `stage`:  its `<epic-page>`'s attributes;  no `kind` is an epic page, `saga` a saga page, which
+   *   never takes one (epic `epic-engine` I349:  a saga isn't planned from a kickoff prompt)
+   * - a page with no `stage` (made before P29) is building, so it takes none either
+   * - phases and a Kickoff prompt already written are each reader's own check:  the Overview's, the inbox's
+   */
+  static takesKickoff({ kind, stage }: { kind?: unknown; stage?: unknown }): boolean {
+    return !kind && stage === "overview"
+  }
+
   /** Is the page still being agreed (`overview` or `phases`), not building yet? */
   static isPlanning(stage: PageStage): stage is PlanningStage {
     return stage !== "building"

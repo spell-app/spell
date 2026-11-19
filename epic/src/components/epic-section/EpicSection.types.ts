@@ -321,6 +321,8 @@ export const TEST_ID = /^m\d+$/
  *   `replied` (Owen's turn to pick, 2026-10-09) and `requested` (his turn to see it) beside `attention`:  all wait on Owen
  * - `handed` counts in the blue badge with `progress` (`StateFilter.isWithClaude()`);  `quiet` and `handled` in the one
  *   grey chip (`<epic-state-filter>`)
+ * - `requested` counts in the ONE orange chip, with `replied`:  no light orange chip of its own (epic `epic-engine` I347;
+ *   Owen, 2026-11-18:  "Lump the light orange icons in with the orange";  the item's own id chip keeps its light orange)
  */
 export const FILTER_STATES = [
   { state: "progress", color: "blue", words: "stateProgress" },
@@ -328,7 +330,7 @@ export const FILTER_STATES = [
   { state: "scheduled", color: "blue", words: "stateScheduled" },
   { state: "attention", color: "red", words: "stateAttention" },
   { state: "replied", color: "orange", words: "stateReplied" },
-  { state: "requested", color: "light-orange", words: "stateRequested" },
+  { state: "requested", color: "orange", words: "stateRequested" },
   { state: "open", color: "yellow", words: "stateOpen" },
   { state: "recent", color: "green", words: "stateRecent" },
   // handled in a phase (epic `epic-engine` P31):  grey, as quiet as canceled, counted apart

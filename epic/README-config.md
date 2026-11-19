@@ -134,6 +134,34 @@ A key the file leaves out reads as `epic init` would write it for your repo:  th
 
 </details>
 
+## <a id="your-house-style"></a>Your house style
+
+The skills write two kinds of text:  pages for people (READMEs, guides), and text in the code (comments, docstrings,
+`AGENTS.md` files, epic pages).
+Each kind follows a VOICE, a Markdown file of rules the skills read before they write.
+
+- Pages for people:  the plugin's own `readme` voice, unless you name yours.
+- Text in the code:  YOUR house style.  The plugin ships none for it, and `epic init` names none.
+  - Until you do, `epic voice code` says "no such voice here", and the skills fall back to what your `AGENTS.md` says.
+
+Name your file in `.epic/config.json5`, from the repo's root:
+
+```json5
+"voices": { "code": "docs/STYLE.md" }
+```
+
+Then check it:
+
+```sh
+epic voice code          # prints your file
+epic voice --for guide   # which voice guides take, and its file
+```
+
+- Any voice of the plugin's can be replaced the same way:  `"readme": "docs/our-readme-voice.md"`.
+- Which kind of page takes which voice:  `"pageVoices"` (default `readme` for READMEs and guides, `code` for code and
+  epic pages).
+- Spell's own:  WWOD, in the kit's `agents/wwod/`;  its config names `agents/wwod/writing.md`.
+
 ## Worktrees:  beside your repo, one per epic
 
 The plugin's worktree hook replaces Claude Code's own.
@@ -214,54 +242,10 @@ epic server url ~/www/my-app.epics/epics/seo/seo.plan.html
 
 ## <a id="with-superpowers"></a>With superpowers
 
-A session opened in an epic's worktree, with the superpowers plugin turned on, starts with this line:
-
-```text
-superpowers is on:  in epic seo it stands aside for planning, worktrees and finishing.
-```
-
-[superpowers](https://github.com/obra/superpowers) (MIT) is a popular plugin of skills that runs a piece of work from
-idea to merge:  a design doc, a plan file, a worktree, the build, the finish.
-epic does four of those jobs already, so with both installed, two plugins would plan, and two would finish.
-
-What epic tells it, in an epic's worktree only:
-- the epic page is the design and the plan:  no brainstorming, no plan file under `docs/superpowers/`
-- `/epic` made the worktree and ran your `installCommand`:  no second worktree, and no `npm install` in a yarn repo
-- `/epic done` is the only finish:  no bare `git merge`, no `git worktree remove` of an epic's worktree
-- inside a phase, DO use its test-driven-development, systematic-debugging and verification-before-completion
-
-The words are the `superpowers` topic of `epic guide`, said in up to three places:
-- in the epic skill
-- by the session-start hook, on every start, `/clear` and compaction, however superpowers was turned on:
-  your settings, the project's shared or local settings, the managed settings, or `claude --plugin-dir`
-- in your repo's AGENTS.md, which every session reads:  `epic init` offers to put them there (below)
-Outside an epic, superpowers runs as it always does.
-
-Two ideas from it are now epic's own, superpowers or not:
-- **Proof before done:**  a phase's Done list ends with each check run and what it printed.
-- **The plan check:**  before a phase closes, a `plan-check` agent holds the phase's diff up against its accepted
-  build plan, and lists what wasn't built and what was built unasked.
-
-The catch:  superpowers has no setting to turn a skill off, and obeys only YOUR instructions, by its own rule
-(CLAUDE.md, AGENTS.md, what you type).
-- A live trial obeyed the words wherever they were read:  the hook's, the skill's and AGENTS.md's alike.
-- AGENTS.md reaches every session, a teammate's too, so `epic init` offers to put them there when superpowers is on:
-
-```sh
-epic init --superpowers     # put them in AGENTS.md without asking
-epic guide superpowers      # the words themselves
-```
-
-- They go in a marked block (`<!-- epic:superpowers:start ... -->`) that `epic init` writes again when the guide's
-  words change;  the rest of the file is yours.
-- It's committed with `epic init`'s other two files;  `--local` never writes it.
-
-- Test-first is your repo's call:  superpowers deletes code written before its test, so say in your AGENTS.md
-  whether you want that.
-- Its brainstorming skill's optional browser companion loads a logo from its maker's site, which tells them the
-  version in use;  Claude Code's `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` turns that off.
-- The hook reads `--plugin-dir` off the session's own command line (`ps`):  on Windows, and for a folder whose path
-  has a space in it, it can't, so put the words in AGENTS.md there.
+With the superpowers plugin on, an epic's worktree tells it to stand aside for planning, worktrees and finishing,
+and keeps its test-first, debugging and verification skills.
+The words, the settings layers they reach, `epic init --superpowers`, and what a live trial showed:
+[README-superpowers.md](README-superpowers.md).
 
 ## What's still Spell-shaped
 
@@ -277,7 +261,8 @@ What you'd trip on today, roughly in the order you'd meet it.
    A second repo's pages draw, but their buttons, comments and details pages talk to the default repo's inbox.
    `epic repos default <name>` picks which repo that is.
 4. **Your pages wear Spell's look.**
-   They load Spell's theme, and the top bar's tabs are Spell's own areas, not yours.
+   They load Spell's theme.
+   The top bar shows three tabs, Guides, Sagas and Epic Pages, unless your settings name others.
 5. **A few skills reach for Spell's own tools.**
    Where a skill wants the repo's house style or text-rewriting skill, its example is Spell's.
    - The epic skill's three test tiers name Spell's folders and scripts, `yarn test:unit` among them:

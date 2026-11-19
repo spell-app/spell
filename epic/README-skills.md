@@ -19,12 +19,12 @@ The hook read it first, knew that plan mode can't make a worktree, and refused i
 leave plan mode, type `/epic seo`, and the plan starts from what you wrote.
 
 The whole plugin works like that.
-It gives Claude Code twenty skills, workflows you start by typing a name,
-and thirteen hooks, scripts Claude Code runs by itself when something happens.
+It gives Claude Code twenty-two skills, workflows you start by typing a name,
+and fourteen hooks, scripts Claude Code runs by itself when something happens.
 - Choosing a skill:  find the moment you're in, in the three tables below.
 - Something happened you didn't ask for (a session renamed, a prompt refused, a commit nobody made):
   [the hooks' table](#hooks) says which one did it.
-- Codex runs fifteen of the skills from the same files, as `$epic review`, and three of the hooks
+- Codex runs seventeen of the skills from the same files, as `$epic review`, and three of the hooks
   ([In Codex](#in-codex) below);  any other agent follows `epic guide`.
 
 <details>
@@ -53,7 +53,7 @@ echo '{"prompt": "/epic seo add a sitemap", "permission_mode": "plan"}' | node e
 
 </details>
 
-## Twenty you type, thirteen that run by themselves
+## Twenty-two you type, fourteen that run by themselves
 
 In most tools, a slash command is a saved prompt:  it pastes some text and hopes.
 A skill here is a procedure.
@@ -143,6 +143,8 @@ For a night away from the keyboard, `/bedtime` asks everything first, then asks 
 In an epic, the session you type to answers within seconds, and does almost no work itself.
 Anything longer than a minute (a phase, a fix, a check run) goes to a named background agent.
 
+Its replies come split by `##` headers, anything waiting on you first.
+
 Ask for a fix mid-phase, and the page shows it at once:
 an issue, your words as its body, blue, its spinner on, and an Underway card naming the agent.
 - A picture you pasted with the ask goes onto the item, not into a description of it (`epic add ... --pasted <n>`).
@@ -171,7 +173,7 @@ an issue, your words as its body, blue, its spinner on, and an Underway card nam
 The catch:  Codex has no background agents, so there the session does the work itself, a step at a time,
 reading the page's inbox between steps.
 With superpowers installed, `/epic` tells it where to stand aside:  the epic page is the design and the plan,
-and `/epic done` the only finish ([README-config.md](README-config.md#with-superpowers)).
+and `/epic done` the only finish ([README-config.md](README-superpowers.md)).
 
 ## Worktrees and sessions:  leaving work, and finding it again
 
@@ -244,13 +246,16 @@ Where they stop:
 
 ## Background and offline:  work that goes on without you
 
-Three skills for the hours you're not watching:
-a chore while you talk about something else, a night's phases, a flight with no Claude at all.
+Five skills for the hours you're not watching:
+a chore while you talk about something else, an afternoon heads-down on something else, a night's phases,
+a flight with no Claude at all.
 
 | When | Type | What happens |
 | --- | --- | --- |
 | a task doesn't need you watching | `/bg ["name"] [n] <task>` | a copy of this session does it in the background, so the panel is free in seconds;  `n`, 1 to 5:  the most agents it may use in all, itself included (one by default) |
 | the end of the day, with a clear plan | `/bedtime` | asks every question first, then builds the epic's remaining phases overnight:  a commit per phase, never merged;  it takes no arguments, and asks which phases |
+| you need to focus on something else for a while | `/focus [why]` | every running epic session keeps building and merging, and asks you nothing, until `/back`;  typed in any session;  a session started meanwhile hears it too (`epic focus status` says whether it's on) |
+| you're back | `/back` | ends focus mode:  each running epic session posts its own status in its own window, what's waiting on you first, then what merged and what's still running;  epics with news and no session are listed here |
 | before a flight, or on bad wifi | `/airplane [land \| status]` | readies the pages to be worked on with no Claude;  `land`, after:  gathers what you left across every epic and page, and works through it in the background;  `status`:  whether it's on |
 
 The `/bg` helper is a fork of this session, so "fix the thing we just talked about" works.
@@ -260,7 +265,7 @@ and it stages its changes without committing them, unless the task says to.
 - `/bg ?` lists what's running (name, status, age, task);  `/bg stop <name>` stops one, its staged changes left.
 - Two agents never share files:  a second task that names a running one's files waits, listed as blocked,
   and starts when the first comes back.
-- In an epic, it's listed on the page's toolbar, with a note box ([above](#the-session-answers--agents-build)).
+- In an epic, it's counted in the page header's pill (`2 🤖`):  click it for each agent's row and its note box ([above](#the-session-answers--agents-build)).
 - A session with no forks (the VS Code panel's, at last check) gets an ordinary agent instead,
   which sees none of the conversation:  the skill writes what the task leans on into its prompt.
 
@@ -289,18 +294,19 @@ Each of those is a row here, by when it happens.
 | a worktree is removed | [worktree.mjs](hooks/worktree.mjs) `remove`;  `WorktreeRemove`, Claude Code's default | keeps a worktree with uncommitted changes, or with commits `main` lacks;  else stops its page and Vite servers, then removes it and its branch |
 | a session starts, or enters a worktree | [behind-main.mjs](hooks/behind-main.mjs);  `SessionStart`, and `PostToolUse` on `EnterWorktree`, 10 seconds | says when the worktree is behind `main`, `⎇ <branch> is <n> commits behind main:  its code and pages are that old.`, and offers the merge;  behind or not, starts `epic worktree patch`'s work for the checkout in the background, without a word ([patch-checkout.mjs](hooks/patch-checkout.mjs)) |
 | a session starts | [sync-notice.mjs](hooks/sync-notice.mjs);  `SessionStart`, 10 seconds | says, to you and to Claude, when the epic repo's last sync stopped on a conflict it couldn't settle |
-| a session starts | [worktree-guard.mjs](hooks/worktree-guard.mjs);  `SessionStart`, 10 seconds | tells a worktree's session that opened outside its worktree to go back in:  otherwise its branch work lands on `main`;  and, with superpowers turned on, in an epic's worktree, where superpowers stands aside ([With superpowers](README-config.md#with-superpowers)) |
+| a session starts | [worktree-guard.mjs](hooks/worktree-guard.mjs);  `SessionStart`, 10 seconds | tells a worktree's session that opened outside its worktree to go back in:  otherwise its branch work lands on `main`;  and, with superpowers turned on, in an epic's worktree, where superpowers stands aside ([With superpowers](README-superpowers.md)) |
 | a session starts | [server-prune.mjs](hooks/server-prune.mjs);  `SessionStart`, 20 seconds | at most hourly, stops the page and Vite servers whose checkout is gone;  never a live checkout's;  and deletes removed worktrees' leftover folders set aside in the trash |
 | a session starts, and each turn ends | [listen.mjs](monitors/listen.mjs) `--hook`, the inbox poller;  `SessionStart` and `Stop`, `asyncRewake`, a day | waits in the background beside the session and watches its epic page's inbox;  prints nothing while idle, and when you Send, wakes the session with one `📬` line (exit 2);  one per session, the next turn's end starts it again;  in a scripted `claude -p`, nobody there, it ends at once, so the run never waits on it |
 | a session leaves a worktree | [left-worktree.mjs](hooks/left-worktree.mjs);  `PostToolUse` on `ExitWorktree`, 10 seconds | reminds the reply to end with its closing line, "*You can close this tab*", only when nothing is left:  no unmerged work, no agent running, no question waiting |
 | you send a prompt | [prompt-gate.mjs](hooks/prompt-gate.mjs);  `UserPromptSubmit`, Claude Code's default | titles the session for an `/epic`, `/isolate` or `/unpark`, or refuses one that would go wrong (below);  every other prompt passes untouched;  marks the session as one whose hooks run, and says a window move promised last turn that never happened;  a long message sent while the session is busy gets an `On it:  ...` line back, so you know it was seen (`promptAck` in the config turns it off) |
 | a session starts, after VS Code restarted | [restarted.mjs](hooks/restarted.mjs);  `SessionStart`, `asyncRewake`, 30 seconds | wakes the session with a `📬` line when the restart cut off its epic's background agents, naming each one, so it resumes them itself;  several tabs starting together share one wake;  silent when none was cut off, and in a scripted `claude -p` |
 | a session a Send started opens | [woken.mjs](hooks/woken.mjs);  `SessionStart`, 10 seconds | titles it `🚧 <epic>`, when the page server opened it for an epic nobody was running;  a fresh start only, never a resume |
+| a session starts | [focus-notice.mjs](hooks/focus-notice.mjs);  `SessionStart`, 10 seconds | says focus mode is on (`/focus`), to you and to Claude, so a session started meanwhile asks you nothing either, as the running ones were told |
 | a turn ends | [handoff.mjs](hooks/handoff.mjs);  `Stop`, Claude Code's default | moves the session to another window, when a move was armed (`epic window handoff <name>`, which refuses when this hook won't run) |
 | a turn ends | [shared-commit.mjs](hooks/shared-commit.mjs);  `Stop`, Claude Code's default | runs `epic turn end`:  commits the epic folder, one commit per group of files, `auto: epic seo`, then syncs it;  detached, so the turn never waits for git |
 
 - They all come from the plugin's [hooks.json](hooks/hooks.json);  no repo's own Claude settings add one.
-- Twelve scripts make those thirteen rows:  `worktree.mjs` answers both worktree events.
+- Thirteen scripts make those fourteen rows:  `worktree.mjs` answers both worktree events.
 - In a terminal session, the inbox poller also runs as the plugin's monitor ([monitors.json](monitors/monitors.json)).
   VS Code's panel never starts monitors, which is why the hook starts it too.
 - Codex gets three of them, from its own file, [codex-hooks.json](hooks/codex-hooks.json):

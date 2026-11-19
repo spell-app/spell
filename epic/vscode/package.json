@@ -23,44 +23,45 @@
       {
         "command": "spellEpic.docView.back",
         "title": "Back",
-        "category": "Spell Epic",
+        "category": "Epic Docs",
         "icon": "$(arrow-left)",
         "enablement": "spellEpic.docView.canGoBack"
       },
       {
         "command": "spellEpic.docView.forward",
         "title": "Forward",
-        "category": "Spell Epic",
+        "category": "Epic Docs",
         "icon": "$(arrow-right)",
         "enablement": "spellEpic.docView.canGoForward"
       },
       {
         "command": "spellEpic.docView.reload",
-        "title": "Reload Doc",
-        "category": "Spell Epic",
+        "title": "Reload",
+        "category": "Epic Docs",
         "icon": "$(refresh)"
       },
       {
         "command": "spellEpic.docView.restartServer",
         "title": "Restart Page Server",
-        "category": "Spell Epic",
+        "category": "Epic Docs",
         "icon": "$(server-process)"
       },
       {
         "command": "spellEpic.docView.openExternal",
-        "title": "Open Doc in Browser",
-        "category": "Spell Epic",
+        "title": "Open in Browser",
+        "category": "Epic Docs",
         "icon": "$(link-external)"
       },
       {
         "command": "spellEpic.docView.home",
-        "title": "Home Page:  a fresh view at the docs' home page, for a page that stopped responding",
-        "category": "Spell Epic",
+        "title": "Epics Home",
+        "category": "Epic Docs",
         "icon": "$(home)"
       },
       {
         "command": "spellEpic.docView.showWindowEpic",
-        "title": "This Window's Epic Page",
+        "title": "This Epic's Page",
+        "category": "Epic Docs",
         "icon": "$(checklist)"
       },
       {
@@ -71,96 +72,91 @@
       },
       {
         "command": "spellEpic.reviewView.back",
-        "title": "Review:  Back",
-        "category": "Spell Epic",
+        "title": "Back",
+        "category": "Review",
         "icon": "$(arrow-left)",
         "enablement": "spellEpic.reviewView.canGoBack"
       },
       {
         "command": "spellEpic.reviewView.forward",
-        "title": "Review:  Forward",
-        "category": "Spell Epic",
+        "title": "Forward",
+        "category": "Review",
         "icon": "$(arrow-right)",
         "enablement": "spellEpic.reviewView.canGoForward"
       },
       {
         "command": "spellEpic.reviewView.reload",
-        "title": "Review:  Reload Doc",
-        "category": "Spell Epic",
+        "title": "Reload",
+        "category": "Review",
         "icon": "$(refresh)"
       },
       {
         "command": "spellEpic.reviewView.restartServer",
-        "title": "Review:  Restart Page Server",
-        "category": "Spell Epic",
+        "title": "Restart Page Server",
+        "category": "Review",
         "icon": "$(server-process)"
       },
       {
         "command": "spellEpic.reviewView.openExternal",
-        "title": "Review:  Open Doc in Browser",
-        "category": "Spell Epic",
+        "title": "Open in Browser",
+        "category": "Review",
         "icon": "$(link-external)"
       },
       {
         "command": "spellEpic.reviewView.showWindowEpic",
-        "title": "Review:  This Window's Epic Page",
+        "title": "This Epic's Page",
+        "category": "Review",
         "icon": "$(checklist)"
       },
       {
         "command": "spellEpic.reviewView.openEpic",
-        "title": "Review:  Open Epic...",
-        "category": "Spell Epic",
+        "title": "Open Epic...",
+        "category": "Review",
         "icon": "$(list-unordered)"
       },
       {
         "command": "spellEpic.reviewView.home",
-        "title": "Review:  Home Page (a fresh view at the docs' home page)",
-        "category": "Spell Epic",
+        "title": "Epics Home",
+        "category": "Review",
         "icon": "$(home)"
       },
       {
         "command": "spellEpic.detailsView.back",
-        "title": "Details:  Back",
-        "category": "Spell Epic",
+        "title": "Back",
+        "category": "Details",
         "icon": "$(arrow-left)",
         "enablement": "spellEpic.detailsView.canGoBack"
       },
       {
         "command": "spellEpic.detailsView.forward",
-        "title": "Details:  Forward",
-        "category": "Spell Epic",
+        "title": "Forward",
+        "category": "Details",
         "icon": "$(arrow-right)",
         "enablement": "spellEpic.detailsView.canGoForward"
       },
       {
         "command": "spellEpic.detailsView.reload",
-        "title": "Details:  Reload Doc",
-        "category": "Spell Epic",
+        "title": "Reload",
+        "category": "Details",
         "icon": "$(refresh)"
       },
       {
         "command": "spellEpic.detailsView.list",
-        "title": "Details:  This Epic's Details Pages (the waiting ones red)",
-        "category": "Spell Epic",
+        "title": "This Epic's Questions",
+        "category": "Details",
         "icon": "$(list-unordered)"
       },
       {
         "command": "spellEpic.detailsView.restartServer",
-        "title": "Details:  Restart Page Server",
-        "category": "Spell Epic",
+        "title": "Restart Page Server",
+        "category": "Details",
         "icon": "$(server-process)"
       },
       {
         "command": "spellEpic.detailsView.openExternal",
-        "title": "Details:  Open Doc in Browser",
-        "category": "Spell Epic",
+        "title": "Open in Browser",
+        "category": "Details",
         "icon": "$(link-external)"
-      },
-      {
-        "command": "spellEpic.docView.inspect",
-        "title": "Inspect:  opens (or closes) Developer Tools;  then Cmd+Shift+C (the arrow, top left) and click in the page, or the Console tab and the page (127.0.0.1) in the menu at its top left",
-        "category": "Spell Epic",
-        "icon": "$(inspect)"
       },
       {
         "command": "spellEpic.docMenu.cut",
@@ -334,11 +330,6 @@
           "command": "spellEpic.detailsView.openExternal",
           "when": "view == spellEpic.detailsView",
           "group": "navigation@4"
-        },
-        {
-          "command": "spellEpic.docView.inspect",
-          "when": "view == spellEpic.docView || view == spellEpic.reviewView || view == spellEpic.detailsView",
-          "group": "navigation@9"
         }
       ],
       "webview/context": [

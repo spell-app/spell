@@ -266,3 +266,25 @@ export function silentFrameStep({ serverUp, reloads }: { serverUp: boolean; relo
 
 /** `silentFrameStep()`'s answer. */
 export type SilentFrameStep = "wait" | "reload" | "say"
+
+/**
+ * The page a view opens with, when VS Code first shows it (`DocView.resolveWebviewView()`):
+ * the page asked for (`asked()`), else the first of `fallbacks` that has one, tried in order.
+ * - `asked()` is read again after each fallback:  a fallback can take seconds
+ *   (the page remembered for the window waits up to 10s for its server), and a page asked for meanwhile wins
+ * - why (epic `epic-engine` I341;  Owen:  "Sometimes the 'show this epic's page' button doesn't work the first time"):
+ *   the checklist button, pressed while the Review tab was still opening, set the page to show;
+ *   the remembered page then came back and replaced it, so the first press did nothing
+ * - `undefined`:  nothing asked for, and no fallback had a page
+ */
+export async function openingPage(
+  asked: () => string | undefined,
+  fallbacks: (() => Promise<string | undefined>)[]
+): Promise<string | undefined> {
+  for (const fallback of fallbacks) {
+    if (asked() !== undefined) break
+    const page = await fallback()
+    if (asked() === undefined && page) return page
+  }
+  return asked()
+}

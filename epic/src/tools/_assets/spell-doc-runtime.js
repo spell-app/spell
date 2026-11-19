@@ -2152,9 +2152,11 @@ function buildPageToolbar(main, outline, counts) {
  *   section anyway");  scroll-follow marks the current one `selected`, by `data-rail` (as the rail's)
  * - BADGES:  how many of the block's items wait on Owen, from `counts` (none:  no badge)
  *   - red:  urgent (`state="attention"`)
- *   - orange:  Claude answered with options, their turn to pick (`state="replied"`)
+ *   - orange:  their turn to pick or review (`state="replied"`), and light orange with it:  done, their turn to see
+ *     it (`requested`;  epic `epic-engine` I347, Owen, 2026-11-18:  "Lump the light orange icons in with the orange")
  *   - blue:  the Phases button's, how many phases run now (`status="active"`;  epic `epic-engine` P43)
- *   - several kinds:  every one, red first, then orange, then blue
+ *   - one colour:  its count badge;  several:  ONE circle, a slice of each colour, no number (`toolbarItem()`,
+ *     I347), the counts in its tooltip, red first, then orange, then blue
  *   - over the icon's top right, a third of a badge on the icon:  every button is the same width, badge or not
  *     (Owen, 2026-10-10:  "Make badge 1/3 way overlap the icon")
  * - in the header's `toolbar` slot (`<epic-page>`'s):  it sticks with the header,
@@ -2182,7 +2184,7 @@ function buildToolbar(page, outline, counts) {
       mark: glyph ? undefined : el("b", { slot: "icon" }, name.charAt(0)),
       badges: [
         ["urgent", urgent, `${urgent} urgent`],
-        ["replied", replied, `${replied} replied:  ${waits} for your pick`],
+        ["replied", replied, `${replied} ${waits} for your pick or review`],
         ["running", running, `${running} running now`]
       ].filter(([, number]) => number > 0)
     })

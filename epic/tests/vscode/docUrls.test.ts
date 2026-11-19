@@ -6,7 +6,16 @@
  * - Plain `node --test` (types stripped):  the extension's own code needs `vscode`, these parts don't.
  */
 import { deepEqual, equal } from "node:assert/strict"
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, utimesSync, writeFileSync } from "node:fs"
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  symlinkSync,
+  utimesSync,
+  writeFileSync
+} from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { after, test } from "node:test"
@@ -17,6 +26,7 @@ import {
   folderIndex,
   isDocView,
   isLoopback,
+  openingPage,
   planDocsIn,
   planDocsOf,
   samePage,
@@ -212,4 +222,74 @@ test("silentFrameStep():  a frame whose page never said where it is (epic `epic-
   equal(silentFrameStep({ serverUp: true, reloads: 0 }), "reload")
   equal(silentFrameStep({ serverUp: true, reloads: SILENT_FRAME_RELOADS - 1 }), "reload")
   equal(silentFrameStep({ serverUp: true, reloads: SILENT_FRAME_RELOADS }), "say")
+})
+
+test("openingPage():  a page asked for while a fresh view looks up its fallbacks wins (epic `epic-engine` I341)", async () => {
+  const EPIC = "http://127.0.0.1:4747/epics/demo/demo.plan.html"
+  const REMEMBERED = "http://127.0.0.1:4747/pages/index.html"
+  // the checklist button pressed while the remembered page's server is looked for:  the press wins
+  let asked: string | undefined
+  const remembered = async () => {
+    asked = EPIC
+    return REMEMBERED
+  }
+  equal(await openingPage(() => asked, [remembered]), EPIC)
+  // asked for before the view opened:  no fallback is even tried
+  let tried = false
+  equal(
+    await openingPage(
+      () => EPIC,
+      [
+        async () => {
+          tried = true
+          return REMEMBERED
+        }
+      ]
+    ),
+    EPIC
+  )
+  equal(tried, false)
+  // nothing asked for:  the first fallback that has a page
+  equal(await openingPage(() => undefined, [async () => undefined, async () => REMEMBERED]), REMEMBERED)
+  equal(await openingPage(() => undefined, []), undefined)
+})
+
+/** The extension's manifest, and its doc views' source:  what the title bars show, and what answers each button. */
+const MANIFEST = JSON.parse(readFileSync(join(import.meta.dirname, "../../vscode/package.json"), "utf8")) as {
+  contributes: {
+    commands: { command: string; title: string; category?: string }[]
+    menus: { "view/title": { command: string; when: string }[] }
+  }
+}
+const DOC_VIEW_SOURCE = readFileSync(join(import.meta.dirname, "../../vscode/src/DocView.ts"), "utf8")
+
+test("title bars:  every tab's buttons, each a short plain tooltip, each answered (epic `epic-engine` I341)", () => {
+  const titles = new Map(MANIFEST.contributes.commands.map((each) => [each.command, each]))
+  const buttons = (view: string) =>
+    MANIFEST.contributes.menus["view/title"]
+      .filter((item) => item.when.split(" || ").includes(`view == spellEpic.${view}`))
+      .map((item) => item.command)
+      .filter((command) => command !== "spellEpic.toolbarGap")
+  const tooltips = (view: string) => new Set(buttons(view).map((command) => titles.get(command)?.title))
+  const COMMON = ["Back", "Forward", "Reload", "Open in Browser", "Restart Page Server"]
+  deepEqual(tooltips("docView"), new Set([...COMMON, "Epics Home", "This Epic's Page"]))
+  deepEqual(tooltips("reviewView"), new Set([...COMMON, "Epics Home", "This Epic's Page"]))
+  deepEqual(tooltips("detailsView"), new Set([...COMMON, "This Epic's Questions"]))
+  const CATEGORY = { docView: "Epic Docs", reviewView: "Review", detailsView: "Details" }
+  for (const [view, category] of Object.entries(CATEGORY))
+    for (const command of buttons(view)) {
+      // the Command Palette names the tab by the category;  VS Code shows only the title as the tooltip
+      equal(titles.get(command)?.category, category, command)
+      // answered:  a command of every view (`COMMANDS`), or one registered by its own name
+      const verb = command.split(".").at(-1)!
+      const answered =
+        new RegExp(`const COMMANDS = \\[[^\\]]*"${verb}"`).test(DOC_VIEW_SOURCE) ||
+        DOC_VIEW_SOURCE.includes(`registerCommand("${command}"`)
+      equal(answered, true, `${command} has no handler`)
+    }
+  // no Inspect button (Owen, 2026-11-18)
+  equal(
+    MANIFEST.contributes.menus["view/title"].some((item) => /inspect/i.test(item.command)),
+    false
+  )
 })

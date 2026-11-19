@@ -470,7 +470,7 @@ Three tabs, and the page decides which one it opens in, whatever command showed 
   (`epic pages open <page> --vs`, `/spell-docs`).
   Its one setting, `spellEpic.docPreview.location`, can move it to VS Code's Simple Browser
   (`beside`;  the default is `sidebar`);  an epic page never opens there.
-- A page that stopped answering:  Reload, Restart Page Server, or Home Page, a fresh view at the docs' home page
+- A page that stopped answering:  Reload, Restart Page Server, or Epics Home, a fresh view at the docs' home page
   (in Details, its list button).
 
 It also runs the WINDOW BRIDGE, which the windows below lean on.

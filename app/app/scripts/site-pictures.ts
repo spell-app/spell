@@ -126,6 +126,19 @@ const PICTURES: Picture[] = [
     page: PROJECT,
     prepare: (page) => showInEditor(page, "error"),
     clip: { x: 240, y: 0, width: 800, height: 200 }
+  },
+  {
+    name: "AppAnatomyView",
+    page: PROJECT,
+    prefs: DEBUG,
+    // Anatomy on (epic `editor` P34):  Solitaire pulled apart into layers, in the app pane
+    prepare: async (page) => {
+      await page.locator(".AnatomyButton [part~=item]").first().click()
+      // off the button, so its tooltip doesn't show
+      await page.mouse.move(0, 400)
+      await page.waitForTimeout(1500)
+    },
+    selector: ".AppPane"
   }
 ]
 

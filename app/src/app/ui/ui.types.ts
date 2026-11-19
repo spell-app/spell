@@ -144,6 +144,9 @@ export type CodeEditorCommand =
   | "peekDefinition"
   | "peekReferences"
   | "rename"
+  | "format"
+  | "expandSelection"
+  | "shrinkSelection"
 
 /**
  * A code editor as the page's keys and menus reach it, whichever it is (`editorHotkeys.ts`):

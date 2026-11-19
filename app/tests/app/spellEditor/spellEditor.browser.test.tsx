@@ -147,6 +147,7 @@ describe("<spell-editor>", () => {
       const theirs = EDITOR_HOTKEYS[name as keyof typeof EDITOR_HOTKEYS]
       expect(theirs, name).toBeDefined()
       expect(hotkey.shortcut, name).toBe(theirs.shortcut)
+      expect("mac" in hotkey ? hotkey.mac : undefined, name).toBe("mac" in theirs ? theirs.mac : undefined)
       expect("codeEditorCommand" in hotkey ? hotkey.codeEditorCommand : undefined, name).toBe(
         "codeEditorCommand" in theirs ? theirs.codeEditorCommand : undefined
       )

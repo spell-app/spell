@@ -82,7 +82,7 @@ its page server and editor, and says so;  a FAILED install leaves the merge in, 
 After a restart, agents it started are gone:  start each again from its task, as the epic's running list
 (`epic agents`) names it.
 
-1. `epic phase <epic>#P3 active`, and the page's line:  `epic inbox status <epic> "Building P3"`.
+1. `epic phase <epic>#P3 active`, and say what you're doing:  `epic inbox status <epic> "Building P3"` (the page's step label turns, the words its tooltip).
 2. Check the accepted plan still fits.
    - A small change:  `epic updated <epic>#P3 "<p>what changed</p>" --summary "Plan adjusted:  ..."`.
    - A big one (scope, a choice the person made):  write the plan again (`--plan`) and stop for them.
@@ -218,6 +218,8 @@ These words reach a session two ways:
   the managed settings, or `claude --plugin-dir`
 - the repo's `AGENTS.md`, which every session reads:  `epic init` offers to put them there when superpowers is on
   (`epic init --superpowers` without asking), and keeps them current once they are
+
+The whole story, for people:  the epic plugin's README-superpowers.md (`epic guide --root` prints its folder).
 
 ## tidy -- Close what other work made obsolete
 

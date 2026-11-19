@@ -210,15 +210,9 @@ export const epicPageVocabulary = {
     {
       name: "centre",
       description:
-        "The header's middle (epic `epic-engine` P53):  Send, then what the session is doing, a bare spinner.  Centred " +
+        "The header's middle (epic `epic-engine` P53):  Send, alone since I340 (what the session is doing turns the " +
+        "step label instead, its words in the label's tooltip).  Centred " +
         "on the header while the title fits beside it;  narrower, right after the title, never over it."
-    },
-    {
-      name: "spinner",
-      description:
-        "What the session is doing, beside Send (`<epic-agents draws=spinner>`, T53):  a turning spinner, its words " +
-        "(`Building P53`) beside it;  nothing while it's idle.  Its words alone (`draws=words`) while the step label " +
-        "turns for it (I316)."
     },
     {
       name: "status",
@@ -260,8 +254,9 @@ export const epicPageVocabulary = {
     {
       name: "step-spinner",
       description:
-        "The step label's icon while the phase it names is building (epic `epic-engine` I316):  its circle turns, " +
-        "Spell UI's loading icon;  the session's line beside Send keeps only its words then."
+        "The step label's icon while Claude is at work (epic `epic-engine` I316, I340):  its circle turns, Spell UI's " +
+        "loading icon, while the session is busy with other work than a Send or Claude works on the phase under way;  " +
+        "the session's words are the label's tooltip, never in the header."
     },
     {
       name: "agents-pill",
@@ -354,6 +349,13 @@ export const epicPageVocabulary = {
       description: "Step label:  a standing epic with every phase done:  open for requests."
     },
     { key: "next", text: "Next:  ", description: "Step label's tooltip, before the next phase." },
+    {
+      key: "stepDoing",
+      text: "Claude:  {doing}",
+      description:
+        "Step label's tooltip, its last line:  what the session says it's doing (`epic inbox status`), while the pill " +
+        "turns (epic `epic-engine` I340)."
+    },
     { key: "bedtime", text: "Bedtime {phases}", description: "The bedtime label:  a `/bedtime` run is on." },
     {
       key: "bedtimeTip",

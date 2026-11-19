@@ -148,7 +148,8 @@ The helper's report reaches this session as a notice, between whatever else it's
 
 ## Redirects
 
-In an epic, the epic page shows its running agents at the top ("Agents running"), each with a note box.
+In an epic, the epic page's header shows its running agents:  `2 🤖` after the step label,
+a button whose popover holds a row per agent, each with a note box.
 - The person types there to STEER an agent mid-task
   (P3 of epic `skillz`;  [agentRoutes.ts](https://github.com/spell-app/spell/blob/main/epic/src/tools/agentRoutes.ts)).
 - The note waits in the list, untold, until this session passes it on.

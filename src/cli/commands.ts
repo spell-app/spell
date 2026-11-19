@@ -5,7 +5,8 @@
  *   web server of the checkout
  * - `spell bundle [names...]` / `spell bundle check`:  the bundles the page server serves, built on demand
  * - `spell commands [list|check]`:  every command against the commands page
- * - `spell wwod [check]`:  WWOD's citations and paths
+ * - `spell wwod [check]`:  WWOD's citations and paths;  `spell wwod init`:  a project picks which of the rules its
+ *   agents read (epic `repo-split` T66)
  * - `spell deps [check]`:  the lockfile's advisories and deprecated packages, before a push
  * - `spell readme check | test | pictures [pages...]`:  every repo's README pages, checked, their examples run
  *   (epic `readme` P16), or their `html example` blocks pictured (epic `ui-gaps` P14)
@@ -121,11 +122,20 @@ export default function kitCommands(spell: Command): void {
   spell
     .command("wwod")
     .description(
-      "WWOD, the agents' rules:  check every citation and repo path in WWOD, AGENTS.md, CLAUDE.md and skills"
+      "WWOD, the agents' rules:  check every citation and repo path in WWOD, AGENTS.md, CLAUDE.md and skills;  " +
+        "init:  pick which of them a project's agents read"
     )
-    .argument("[verb]", "check (default)")
-    .argument("[files...]", "more files to check, beyond the default set")
-    .option("--json", "print the report as JSON")
+    .argument("[verb]", "check (default), init")
+    .argument("[files...]", "check:  more files to check, beyond the default set")
+    .option("--json", "print the report (init:  its changes) as JSON")
+    .option("--wwod", "init:  WWOD, the house style (the default)")
+    .option("--no-wwod", "init:  leave WWOD out")
+    .option("--solid", "init:  the Solid 2 rules")
+    .option("--no-solid", "init:  leave the Solid 2 rules out")
+    .option("--code-is-the-spec", "init:  WWOD §21, the code is the spec (off unless asked for)")
+    .option("--no-code-is-the-spec", "init:  leave §21 out")
+    .option("-y, --yes", "init:  ask nothing:  the flags, else what the project has, else the defaults")
+    .option("--dry-run", "init:  say what would change, and write nothing")
     .action((verb: string | undefined, files: string[], options: CLI.WwodOptions) =>
       CLI.runCommand(async () => (await import("spell/cli/commands/wwodCommand")).wwodCommand(verb, files, options))
     )

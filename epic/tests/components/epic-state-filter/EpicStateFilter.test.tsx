@@ -32,10 +32,17 @@ describe("<epic-state-filter>", () => {
     const quiet = await ElementFixture.render(
       `<epic-state-filter counts="handed:2 progress:1 quiet:3 old:1 requested:1"></epic-state-filter>`
     )
-    // One Color Each (epic `epic-engine` P63):  a Do this in the blue badge, calm calls in the grey chip, light orange its own
+    // One Color Each (epic `epic-engine` P63):  a Do this in the blue badge, calm calls in the grey chip;  light orange
+    // drawn as orange (I347:  "Lump the light orange icons in with the orange")
     expect(quiet.shadowRoot!.querySelector(".marked")!.textContent).toBe("3")
     expect(chip(quiet, "old").textContent).toBe("4")
-    expect(chip(quiet, "requested").dataset.color).toBe("light-orange")
+    expect(chip(quiet, "requested").dataset.color).toBe("orange")
+    // with orange too:  ONE orange chip, counting both, led by `replied`
+    const oranges = await ElementFixture.render(
+      `<epic-state-filter counts="replied:4 requested:2 open:8"></epic-state-filter>`
+    )
+    expect(chips(oranges)).toEqual(["replied:6+", "open:8+"])
+    expect(chip(oranges, "replied").title).toContain("6 ")
     const grey = await ElementFixture.render(`<epic-state-filter counts="old:3 handled:2 open:1"></epic-state-filter>`)
     expect(chips(grey)).toEqual(["open:1+", "old:5+"])
     expect(chip(host, "attention").dataset.color).toBe("red")

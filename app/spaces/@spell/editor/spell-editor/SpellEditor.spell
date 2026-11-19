@@ -39,6 +39,8 @@ spell editor is an app
 		// The Program panel shows under the code, in Edit
 	its "inspector open" is yes or no
 		// The Inspector shows
+	its "anatomy showing" is yes or no
+		// Anatomy pulls the running app apart into layers, in 3D
 	its "line numbers showing" is yes or no
 		// The code shows its line numbers
 	its "soft wrapping" is yes or no
@@ -128,6 +130,9 @@ spell editor is an app
 		selected when its program panel showing is yes
 	to "show inspector" with title "Inspector", icon "info circle"
 		selected when its inspector open is yes
+	to "show anatomy" with title "Anatomy", icon "layer group"
+		shortcut alt+meta+A
+		selected when its anatomy showing is yes
 	to "show line numbers" with title "Line Numbers", icon "list ol"
 		selected when its line numbers showing is yes
 	to "soft wrap" with title "Soft Wrap", icon "level down alternate"
@@ -162,7 +167,7 @@ an "editor bar" is a view
 	its "draft" is an editor part
 		// Draft, Publish and Discard, one pill, after Help, while you have drafts of the project
 	its "mode buttons" is an editor part
-		// Run and Edit, then in Edit the code's icon, the compiled code's, Inspect app and Add
+		// Run and Edit, then in Edit the code's icon, the compiled code's, Inspect app, Anatomy and Add
 	its "tools" is an editor part
 		// Restart and the theme
 	its "you" is an editor part
@@ -535,6 +540,7 @@ a "view menu" is a bar menu
 			<action "show code"/>
 			<action "show compiled code"/>
 			<action "show inspector"/>
+			<action "show anatomy"/>
 			<action "show program panel"/>
 			<divider/>
 			<action "show line numbers"/>

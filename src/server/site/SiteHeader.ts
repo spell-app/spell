@@ -62,7 +62,8 @@ import { worktreeHref } from "spell/server/liveClient"
  * - Parts, for a page that docks it:
  *   - `bar`:  the row
  *   - `nav`:  its links;  the Spell UI site's top bar keeps them on one line, scrolling sideways
- *   - `brand`:  the hat;  that bar hides it where its own brand already shows the hat
+ *   - `brand`:  the hat and the words "Spell Epic" (`BRAND_NAME`);  that bar hides it where its own brand already shows
+ *     the hat
  * - Re-draws on `spell-site:navigated` (a router swapped the page in place:  new title, new source file).
  * - SIDE EFFECT:  adds a `<style>` to the page:  `--spell-site-header-height`, body padding, scroll padding.
  * - SIDE EFFECT:  adds Spell's favicon (`FAVICON_SVG`, as a `data:` URI) to a page that links no icon:
@@ -224,7 +225,7 @@ export class SiteHeader extends HTMLElement {
         : `<button class="tool" data-action="scheme" title="${schemeLabel}" aria-label="${schemeLabel}">${ICONS[shown]}</button>`
     shadow.innerHTML = `<style>${STYLE}</style>
 <header part="bar">
-  <a class="brand" part="brand" href="${escapeHTML(this.href({ path: SITE_HOME }))}" title="Spell docs" aria-label="Spell docs">${LOGO_MARK}</a>
+  <a class="brand" part="brand" href="${escapeHTML(this.href({ path: SITE_HOME }))}" title="${BRAND_TITLE}" aria-label="${BRAND_TITLE}">${LOGO_MARK}<span class="brand-name">${BRAND_NAME}</span></a>
   <div class="tabs">
     <button class="scroll" data-scroll="-1" tabindex="-1" aria-hidden="true" title="${SCROLL_BACK}">‹</button>
     <nav part="nav" aria-label="Site">${links}</nav>
@@ -326,6 +327,18 @@ const THEME_SLOT = "theme"
 const tabPrefs = new PrefStore(SITE_PREFS, { place: "session" })
 
 /** The `‹` / `›` buttons' tooltips. */
+/**
+ * The words beside the hat, a link to the home page with it (Owen, 2026-11-18:  "Next to the hat, in the same bold
+ * font/weight/spacing as in the Editor app menu, have the text 'Spell Epic'").
+ * - drawn as the editor's `<AppMarkLabel>` draws "Spell" (the app's `EditorTheme.css`):  its wordmark tokens
+ *   (`--spell-wordmark-*`) when the page has them, else the editor's own values, at 1.15em
+ * - hidden when docked, and below 480px (a phone):  the hat alone, as the editor does on a phone
+ */
+const BRAND_NAME = "Spell Epic"
+
+/** The hat's tooltip and accessible name. */
+const BRAND_TITLE = "Spell Epic home page"
+
 const SCROLL_BACK = "Scroll the tabs back"
 const SCROLL_ON = "More tabs"
 
@@ -418,6 +431,16 @@ header {
 a { color: inherit; text-decoration: none; }
 .brand { flex: none; display: inline-flex; align-items: center; color: light-dark(#5b3fd0, #b3a2ff); }
 .brand svg { display: block; height: 26px; width: auto; }
+/* the words, as the editor's wordmark:  its font, weight, tracking and text colour, the hat alone in the brand colour (the app's index.html, its --spell-wordmark-* tokens) */
+.brand { gap: 4px; }
+.brand-name {
+  font-family: var(--spell-wordmark-font, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Lato, Arial, sans-serif);
+  font-size: 1.15em;
+  font-weight: var(--spell-wordmark-weight, 900);
+  letter-spacing: var(--spell-wordmark-tracking, -0.035em);
+  color: var(--ui-text-color, light-dark(#1d1d22, #ececf1));
+  white-space: nowrap;
+}
 nav { display: flex; gap: 2px; }
 .tabs { position: relative; display: flex; min-width: 0; }
 /* the tabs' ‹ / ›:  over the row's ends, the row fading out under them;  only while there's more that way */
@@ -453,7 +476,7 @@ nav { display: flex; gap: 2px; }
 /* the page's theme control, at the bar's end */
 ::slotted([slot="${THEME_SLOT}"]) { flex: none; display: inline-flex; align-items: center; }
 /* the icons take no pointer:  it lands on the titled link or button, so Electron shows its tooltip (I43) */
-.brand svg, .tool svg { pointer-events: none; }
+.brand svg, .brand-name, .tool svg { pointer-events: none; }
 .tool:focus-visible, .tab:focus-visible, .brand:focus-visible {
   outline: 2px solid var(--ui-focus-color, light-dark(#5b3fd0, #b3a2ff));
   outline-offset: 2px;
@@ -466,6 +489,7 @@ nav { display: flex; gap: 2px; }
 :host([docked]) nav { flex-wrap: wrap; }
 :host([docked]) .tabs { display: contents; }
 :host([docked]) .brand svg { height: 20px; }
+:host([docked]) .brand-name { display: none; }
 :host([docked]) .tab { padding: 5px 8px; }
 :host([docked]) .tool { width: 26px; height: 26px; }
 :host([docked]) .tool svg { width: 16px; height: 16px; }
@@ -478,5 +502,8 @@ nav { display: flex; gap: 2px; }
   .spacer { display: none; }
   .tab { padding: 7px 8px; }
   .badge { display: none; }
+}
+@media (max-width: 480px) {
+  .brand-name { display: none; }
 }
 `

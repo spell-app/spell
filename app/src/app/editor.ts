@@ -163,6 +163,17 @@ export class EditorStore extends Observable {
     console.warn("TODO: editor.showHelp() not yet implemented")
   }
   /**
+   * Show the Keyboard Shortcuts dialog (`openShortcuts()`, epic `editor` P36):  every key of the editor's one list,
+   * grouped by where it works, with a search field.
+   * - Help › Keyboard Shortcuts, and ? outside the code and the fields.
+   * - NEVER throws:  an error loading the dialog shows as the editor's error.
+   */
+  showShortcuts(): void {
+    void dialogs()
+      .then((modals) => modals.openShortcuts())
+      .catch((error: unknown) => editor.showError(error))
+  }
+  /**
    * Show the "You" panel (`openYouPanel()`, epic `people-and-orgs` P9):
    * this machine's person to change, and their orgs.
    * - Save writes their `__me.json5`.
