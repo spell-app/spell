@@ -27,11 +27,14 @@
  *   `--ui-tree-detail-max-width` until its line is dragged (`.sized`);  the space left over stays after it.
  *   - Its line is inside it, at its end, so it moves with it;  `sticky-detail` (`.sticky`) pins it to the box's end.
  *   - Its scroll snaps to its end, so a sideways scroll can stop with it whole.
+ *   - With `column-titles`, an empty title cell at its top carries the row of titles over it.
+ *   - It shows what's behind the tree, as the columns do;  stuck, it's opaque (`--ui-tree-detail-background`).
  * - Tokens:
  *   | `--ui-tree-columns-height` | the tree's height (18em):  every column scrolls its own rows |
  *   | `--ui-tree-column-width` | each column's width |
  *   | `--ui-tree-narrow-width` | a narrow column's width (2em) |
  *   | `--ui-tree-detail-max-width` | the widest the `detail` pane sizes itself to its content (50% of the tree) |
+ *   | `--ui-tree-detail-background` | a `sticky-detail` pane, opaque over the columns scrolling under it |
  *   | `--ui-tree-column-picked-background` | a row picked in an earlier column:  one of the chain of open rows |
  *   | `--ui-tree-column-selected-background` / `-color` | the selected row, the chain's last pick |
  */
@@ -147,30 +150,49 @@
   .detail {
     --_ui-tree-detail-max-width: var(--ui-tree-detail-max-width, 50%);
     position: relative;
+    display: flex;
     flex: none;
+    flex-direction: column;
     box-sizing: border-box;
     width: max-content;
     min-width: 80px;
     max-width: var(--_ui-tree-detail-max-width);
     height: 100%;
     border-inline-end: 1px solid var(--ui-border-color);
-    background: var(--ui-background);
+    /* the columns' own surface:  what's behind the tree shows through, as it does through them */
+    background: transparent;
     scroll-snap-align: end;
   }
   /* dragged:  the width it was dragged to */
   .detail.sized {
     max-width: none;
   }
+  /* stuck over the columns, it must hide them:  opaque, the page's background under an example card's tint
+     (the surface token is see-through, so it's a layer over the background, not mixed into it) */
   .detail.sticky {
+    --_ui-tree-detail-tint: color-mix(in oklab, var(--ui-surface) 45%, transparent);
     position: sticky;
     inset-inline-end: 0;
     z-index: 2;
+    background: var(
+      --ui-tree-detail-background,
+      linear-gradient(var(--_ui-tree-detail-tint), var(--_ui-tree-detail-tint)),
+      var(--ui-background)
+    );
+  }
+  .detail-title {
+    flex: none;
   }
   .detail-body {
+    flex: 1 1 0;
     box-sizing: border-box;
-    height: 100%;
+    min-height: 0;
     padding: 8px 12px;
     overflow: auto;
+  }
+  /* never squeezed under its narrowest:  a word too long for the pane scrolls it sideways, never breaks */
+  .detail-body > ::slotted(*) {
+    min-width: min-content;
   }
   .detail > .detail-edge {
     inset-inline-start: auto;

@@ -463,6 +463,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     row.disclosure.open(event)
     if (!keepsInside) this.showNewestColumn()
     this.openPath = this.openChain.map((each) => each.valueOrLabel)
+    this.keepPath()
     if (this.filter) this.applyFilter()
   }
 
@@ -641,6 +642,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
       if (row.selected) row.selected = false
     }
     this.openPath = []
+    this.keepPath()
   }
 
   /** `openTo()` in columns from `items`:  the path to `columns` columns, its last pick selected, as a click would. */
@@ -660,7 +662,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
       list = this.childrenOf(item)
     }
     if (!last) {
-      if (this.openPath.length) this.requestChange("openPath", [], () => true)
+      if (this.openPath.length && this.requestChange("openPath", [], () => true)) this.keepPath()
       return
     }
     this.pickItem(last, path.length - 1, event ?? new MouseEvent("click"), { path })
@@ -1235,11 +1237,15 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     this.openPath = kept as string[]
   }
 
-  /** Each new `path`, picked or set, kept under the tree's `id`, when it has one, so a reload opens it again. */
-  @E.onChange("openPath", "isConnected", { defer: true })
-  protected onPathToKeep(path: readonly string[], isConnected: boolean) {
+  /**
+   * A person's pick:  the new `path` kept under the tree's `id`, when it has one, so a reload opens it again.
+   * - Only picks (a click, a key, the path line, the filter's matches, the tools' buttons):  a page that sets `path`
+   *   keeps nothing, so it never writes over where a person left it.
+   */
+  private keepPath() {
     const id = this.domElement.id
-    if (!isConnected || !this.isColumns || !id || isServer) return
+    if (!this.isConnected || !this.isColumns || !id || isServer) return
+    const path = this.openPath
     UITree.store.set(`${PATH_KEY}${id}`, path.length ? [...path] : undefined)
   }
 
@@ -1290,6 +1296,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
    * - From markup, the deeper columns are out of the row of columns (`position: fixed`), so it keeps their room
    *   before it (`margin-inline-start`);  from `items`, they're beside it.
    * - `sticky-detail`:  it sticks to the box's end while the columns scroll under it.
+   * - With `column-titles`, an empty title cell tops it, so the row of titles runs on unbroken over it.
    */
   private detailPane() {
     return (
@@ -1302,6 +1309,9 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
           "margin-inline-start": this.hasItemData ? undefined : this.detailMarginCSS()
         }}
       >
+        <Show when={this.columnTitleList.length > 0}>
+          <div class="column-title detail-title" part={this.partForName("column-title")} aria-hidden="true" />
+        </Show>
         <div class="detail-body">
           <slot name={this.slotForName("detail")} />
         </div>
@@ -2283,6 +2293,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     const isDone = E.isSameList(path, this.openPath) ? announce() : this.requestChange("openPath", path, announce)
     if (!isDone) return
     this.wentBack = depth < this.openPath.length - 1 ? { depth, path: this.openPath } : undefined
+    this.keepPath()
     const detail = { value: item.id, values: [item.id], item, path: detailPath, originalEvent: event }
     this.send("ui-changed", detail)
     this.settleSoon(detail)

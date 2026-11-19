@@ -66301,6 +66301,11 @@
           "name": "--ui-tree-detail-max-width",
           "default": "50%",
           "type": "length"
+        },
+        {
+          "name": "--ui-tree-detail-background",
+          "default": "linear-gradient(var(--_ui-tree-detail-tint), var(--_ui-tree-detail-tint)), var(--ui-background)",
+          "type": "color"
         }
       ]
     },

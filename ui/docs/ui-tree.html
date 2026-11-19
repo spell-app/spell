@@ -205,13 +205,13 @@
                 </ui-example>
               </ui-section>
               <ui-section id="examples-types-detail-pane" label="Detail pane" sticky="stack" collapsible dividing>
-                <ui-example description="An element slotted as `detail` is a pane after the last column, showing what's picked.">
+                <ui-example description="Pick a chapter, and the pane on the right shows more about it.">
                   <ul slot="description">
-                    <li>The tree hands it the picked row as its <code>item</code> property, and sends <code>ui-changed</code>, so any element can draw it:  here a <code>&lt;ui-json&gt;</code>.</li>
-                    <li>It's drawn only while something is slotted and something is picked, tight against the last column, as wide as its content.</li>
-                    <li>Drag the line after it to resize it;  double-click the line to fit its content again.</li>
-                    <li><code>sticky-detail</code> keeps it in view while the columns scroll sideways.</li>
-                    <li>With an <code>id</code> and no <code>path</code> set, the tree opens where you left it after a reload, and keeps the pane's width.</li>
+                    <li>You choose what the pane shows by putting it in the tree's <code>detail</code> slot, the spot kept for it.  Here it holds a <code>&lt;ui-json&gt;</code>, which lists everything stored about the chapter.</li>
+                    <li>Drag the line at the pane's right edge to make it wider or narrower.  Double-click the line to fit it to what it shows.</li>
+                    <li>Add <code>sticky-detail</code> to the tree, and the pane stays in view while you scroll the columns sideways, as on a phone.</li>
+                    <li>Give the tree an <code>id</code> (a name of your choosing), and it remembers, in your browser, which row you picked and how wide the pane is.  Refresh the page, and it opens where you left it.</li>
+                    <li>For developers:  picking a row passes that row to the pane as its <code>item</code>.  The tree also announces the pick with a <code>ui-changed</code> event, which your own code can listen for.</li>
                   </ul>
                   <ui-tree id="docs-tree-columns-detail" appearance="columns" sticky-detail column-titles="Shelf, Book, Chapters" show="icon which chevron" label="Library, with a detail pane" style="height: 15em">
                     <ui-json slot="detail" depth="2"></ui-json>
@@ -234,9 +234,9 @@
                       },
                       { id: "Poems", label: "Poems", icon: "book", data: { shelf: "Poems", books: 1 }, children: [book("Leaves of Grass", "1855", [chapter("Song of Myself", 52)])] }
                     ]
-                    // the tree sets the pane's `item` as the pick changes:  here it shows the item's data
-                    const json = tree.querySelector("ui-json")
-                    Object.defineProperty(json, "item", { set: (item) => json.ready.then(() => (json.value = item?.data ?? null)) })
+                    // a first visit opens on a chapter;  after that, where you left it
+                    await tree.ready
+                    if (!tree.path?.length) tree.path = ["Novels", "Moby-Dick", "Loomings"]
                   </script>
                 </ui-example>
               </ui-section>

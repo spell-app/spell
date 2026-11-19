@@ -76,6 +76,18 @@ async function pointAt(box: Element) {
   await ElementFixture.settle()
 }
 
+/** Drag `line` by `distance` px, holding Option (Alt) with `isEvery`. */
+async function dragLine(line: HTMLElement, distance: number, { isEvery = false } = {}) {
+  const box = line.getBoundingClientRect()
+  const at = { clientX: box.left + 3, clientY: box.top + 20, pointerId: 1, button: 0, bubbles: true, composed: true }
+  line.dispatchEvent(new PointerEvent("pointerdown", { ...at, altKey: isEvery }))
+  window.dispatchEvent(new PointerEvent("pointermove", { ...at, clientX: at.clientX + distance }))
+  window.dispatchEvent(new PointerEvent("pointerup", { ...at, clientX: at.clientX + distance }))
+  // a drag swallows the click its let-go makes, until the next task:  let that pass
+  await new Promise((done) => setTimeout(done, 0))
+  await ElementFixture.settle()
+}
+
 /** `key` pressed on what has the focus. */
 async function press(key: string) {
   const target = document.activeElement as HTMLElement
@@ -513,18 +525,6 @@ describe('<ui-tree appearance="columns">', () => {
     // opaque:  the rows slide under it, unseen
     expect(getComputedStyle(title!).backgroundColor).not.toMatch(/rgba\(.*, 0\)|transparent/)
   })
-
-  /** Drag `line` by `distance` px, holding Option (Alt) with `isEvery`. */
-  async function dragLine(line: HTMLElement, distance: number, { isEvery = false } = {}) {
-    const box = line.getBoundingClientRect()
-    const at = { clientX: box.left + 3, clientY: box.top + 20, pointerId: 1, button: 0, bubbles: true, composed: true }
-    line.dispatchEvent(new PointerEvent("pointerdown", { ...at, altKey: isEvery }))
-    window.dispatchEvent(new PointerEvent("pointermove", { ...at, clientX: at.clientX + distance }))
-    window.dispatchEvent(new PointerEvent("pointerup", { ...at, clientX: at.clientX + distance }))
-    // a drag swallows the click its let-go makes, until the next task:  let that pass
-    await new Promise((done) => setTimeout(done, 0))
-    await ElementFixture.settle()
-  }
 
   /** Column `index`'s width on screen, rounded. */
   function widthOf(host: Element, index: number): number {
@@ -1119,7 +1119,7 @@ describe('<ui-tree appearance="columns"> remembered path and `detail` pane', () 
     forget("kept")
   })
 
-  it("a path the page sets wins over the kept one;  a tree without an `id` keeps nothing", async () => {
+  it("a path the page sets wins over the kept one, and isn't kept;  a tree without an `id` keeps nothing", async () => {
     forget("set")
     localStorage.setItem("ui-tree:path:set", JSON.stringify(["acme", "menu"]))
     const host = (await ElementFixture.render(
@@ -1129,7 +1129,10 @@ describe('<ui-tree appearance="columns"> remembered path and `detail` pane', () 
     host.path = ["books"]
     await ElementFixture.settle()
     expect(host.path).toEqual(["books"])
-    expect(JSON.parse(localStorage.getItem("ui-tree:path:set")!)).toEqual(["books"])
+    // only a person's pick is kept:  the page's path never writes over where they left it
+    expect(JSON.parse(localStorage.getItem("ui-tree:path:set")!)).toEqual(["acme", "menu"])
+    await pick(host, "acme")
+    expect(JSON.parse(localStorage.getItem("ui-tree:path:set")!)).toEqual(["acme"])
     forget("set")
 
     const keys = Object.keys(localStorage).length
@@ -1150,6 +1153,16 @@ describe('<ui-tree appearance="columns"> remembered path and `detail` pane', () 
     await ElementFixture.settle()
     expect(host.querySelector('ui-tree-item[label="Books"]')!.hasAttribute("open")).toBe(false)
     forget("marked")
+  })
+
+  it("with `column-titles`, an empty title cell tops it, in line with the columns' titles", async () => {
+    const host = await dataTree('column-titles="Client, Folder"', `<div slot="detail">About it</div>`)
+    await pick(host, "acme")
+    const title = pane(host)!.querySelector<HTMLElement>(".column-title")!
+    const columnTitle = host.shadowRoot!.querySelector<HTMLElement>("ul.column > .column-title")!
+    expect(title.textContent).toBe("")
+    expect(title.getBoundingClientRect().height).toBe(columnTitle.getBoundingClientRect().height)
+    expect(title.getBoundingClientRect().top).toBe(columnTitle.getBoundingClientRect().top)
   })
 
   it("draws no pane with nothing slotted, nor before anything is picked", async () => {
@@ -1217,6 +1230,42 @@ describe('<ui-tree appearance="columns"> remembered path and `detail` pane', () 
     expect(Math.round(pane(again)!.getBoundingClientRect().width)).toBe(start)
     expect(localStorage.getItem("ui-tree:widths:pane")).toBeNull()
     forget("pane")
+  })
+
+  it("a pointer drag on its line resizes it, kept with the widths", async () => {
+    forget("dragged")
+    const host = await dataTree('id="dragged"', `<div slot="detail" style="width: 150px">About it</div>`)
+    await pick(host, "acme")
+    const start = Math.round(pane(host)!.getBoundingClientRect().width)
+    await dragLine(host.shadowRoot!.querySelector<HTMLElement>(".detail-edge")!, 40)
+    expect(Math.round(pane(host)!.getBoundingClientRect().width)).toBe(start + 40)
+    expect(JSON.parse(localStorage.getItem("ui-tree:widths:dragged")!)).toEqual({ detail: start + 40 })
+    forget("dragged")
+  })
+
+  it("with nothing slotted, a narrow tree's columns are as wide as a tree that never had a pane", async () => {
+    /** A 400px tree open to menu.pdf, with `inside`;  its columns' widths on screen. */
+    const widths = async (inside: string) => {
+      const host = (await ElementFixture.render(
+        `<ui-tree appearance="columns" label="Work" style="height: 200px; width: 400px">${inside}</ui-tree>`
+      )) as TreeHost
+      host.items = folders()
+      host.path = ["acme", "menu", "menu.pdf"]
+      await nextPaint()
+      await nextPaint()
+      return { host, widths: [...host.shadowRoot!.querySelectorAll("ul.column")].map((each) => each.clientWidth) }
+    }
+    const plain = await widths("")
+    const emptied = await widths(`<div slot="detail" style="width: 200px">About it</div>`)
+    expect(pane(emptied.host)).not.toBeNull()
+    emptied.host.querySelector('[slot="detail"]')!.remove()
+    await nextPaint()
+    await nextPaint()
+    expect(pane(emptied.host)).toBeNull()
+    expect([...emptied.host.shadowRoot!.querySelectorAll("ul.column")].map((each) => each.clientWidth)).toEqual(
+      plain.widths
+    )
+    expect(pane(plain.host)).toBeNull()
   })
 
   it("its room comes off the columns':  they narrow to make room for it", async () => {

@@ -10768,6 +10768,13 @@
       }
     },
     {
+      "name": "--ui-tree-detail-background",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-tree>`'s token.  Default:  `linear-gradient(var(--_ui-tree-detail-tint), var(--_ui-tree-detail-tint)), var(--ui-background)`"
+      }
+    },
+    {
       "name": "--ui-tree-diagram-font-family",
       "description": {
         "kind": "markdown",
