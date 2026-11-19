@@ -45,6 +45,7 @@ export const treeEs = {
     openLevels: "Abrir {levels} niveles",
     closeAll: "Cerrar todo",
     elsewhere: "En otras partes del árbol",
+    matchIn: "{label}, en {path}",
     lookingElsewhere: "Buscando en el árbol",
     moreMatches: "{count} más, sin listar",
     stoppedLooking: "Dejó de buscar tras {count} filas"

@@ -73,7 +73,9 @@ export class DOMTreeElement extends E.DOMElement<UITree> {
  *     - `sticky-detail`:  it stays in view at the box's end while the columns scroll sideways.
  *   - `filter` filters one column:  the last one on screen as the filter starts, so moving about doesn't move it.
  *     After its rows, the matches elsewhere in the tree, at any depth (`otherMatches`):  a click on one opens the
- *     path to it.  The column's kept pick, which may not match, is dimmed (`unmatched`).  From `items`, it runs the `children` functions to look, waiting for promised ones, but opens no
+ *     path to it, as do Enter and Space.
+ *     - The keys go on into them:  down from the column's last row, up from the first match back to it.
+ *     The column's kept pick, which may not match, is dimmed (`unmatched`).  From `items`, it runs the `children` functions to look, waiting for promised ones, but opens no
  *     column.
  *   - `sticky-path`:  the path line above the columns, naming each column's pick;  a click on one picks it again,
  *     keeping the columns after it, and scrolls its column into view.
@@ -817,6 +819,8 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   /** Right, left, Enter and Space;  the rest are `UI.focus.roving()`'s. */
   @E.on("keydown")
   protected onKeyDown(event: KeyboardEvent) {
+    const match = matchBoxOf(event)
+    if (match) return this.onMatchKeyDown(event, match)
     if (this.hasItemData) return this.onItemKeyDown(event)
     const row = this.rowOf(event)
     if (!row || event.target !== row.domElement) return
@@ -875,8 +879,10 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     }
     const goOut = (event: KeyboardEvent) => pick(this.rowsAround(row).at(-1), event, true)
     const isRightToLeft = getComputedStyle(this.domElement).direction === "rtl"
+    // the filtered column's last row:  down goes on into the matches elsewhere in the tree
+    const isLastFiltered = at === column.length - 1 && row.domElement.parentElement === this.filteredRowsParent
     return {
-      ArrowDown: (event) => moveTo(at + 1, event),
+      ArrowDown: (event) => (isLastFiltered && this.focusMatch(0)) || moveTo(at + 1, event),
       ArrowUp: (event) => moveTo(at - 1, event),
       Home: (event) => moveTo(0, event),
       End: (event) => moveTo(column.length - 1, event),
@@ -1295,7 +1301,9 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
    * What the columns' text tracks are measured from:  each column's shown items, and what the rows show.
    * - `undefined` while there's nothing to measure:  not columns from `items`, or not ready.
    */
-  protected get textTrackSources(): { lists: readonly (readonly TreeItemData[])[]; show: string | undefined } | undefined {
+  protected get textTrackSources():
+    | { lists: readonly (readonly TreeItemData[])[]; show: string | undefined }
+    | undefined {
     if (!this.isColumns || !this.isReady || !this.hasItemData) return undefined
     return { lists: this.columnLists.map((list, depth) => this.shownIn(list ?? [], depth)), show: this.show }
   }
@@ -2159,11 +2167,12 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   }
 
   /**
-   * A match elsewhere was clicked:  the path to it opens, and it's selected, as a click on it would.
+   * A match elsewhere was clicked, or Enter or Space pressed on it:  the path to it opens, and it's selected, as a
+   * click on its row would.
    * - The filtered column keeps its pick, though it doesn't match;  a match nearer the top than that column filters the
    *   last column on screen instead (`filteredColumn`).
    */
-  private pickMatch(match: OtherMatch, event: MouseEvent) {
+  private pickMatch(match: OtherMatch, event: MouseEvent | KeyboardEvent) {
     if (match.item) {
       this.pickItem(match.item, match.path.length - 1, event, { path: match.path })
       E.afterSolidUpdate(() => this.focusKeyRow())
@@ -2174,6 +2183,74 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     for (const around of this.rowsAround(row)) around.disclosure.open(event)
     this.activate(row, event)
     E.afterSolidUpdate(() => this.focusRow(row))
+  }
+
+  /**
+   * The matches' boxes on screen, in order:  drawn in the tree's shadow root (from `items`, and the first column),
+   * else in the shadow root of the pick the filtered column is inside.
+   */
+  private get matchBoxes(): HTMLElement[] {
+    if (!this.isColumns || !this.filter) return []
+    const drawnIn = (this.hasItemData ? this.domElement : this.filteredRowsParent) as E.DOMElement
+    return [...(drawnIn.renderRoot?.querySelectorAll<HTMLElement>(".matches > .match") ?? [])]
+  }
+
+  /**
+   * The focus goes to match `index` (the last for -1), when there is one;  nothing is picked, so the columns stay.
+   * - The matches keep `tabindex="-1"`:  the tree stays one tab stop, its rows'.
+   */
+  private focusMatch(index: number): boolean {
+    const box = this.matchBoxes.at(index)
+    box?.focus()
+    return !!box
+  }
+
+  /**
+   * The keys on a match elsewhere, as part of the filtered column:
+   * - Up and down walk the matches;  up on the first goes back to the column's last row.
+   * - Home and End:  the first and last match.
+   * - Enter and Space open its path, as a click does (`pickMatch()`).
+   */
+  private onMatchKeyDown(event: KeyboardEvent, box: HTMLElement) {
+    const boxes = this.matchBoxes
+    const at = boxes.indexOf(box)
+    const match = this.otherMatches[Number(box.dataset.match)]
+    if (at < 0 || !match) return
+    const pick = () => {
+      this.pickMatch(match, event)
+      return true
+    }
+    const actions: Record<string, () => boolean> = {
+      ArrowDown: () => this.focusMatch(Math.min(at + 1, boxes.length - 1)),
+      ArrowUp: () => (at ? this.focusMatch(at - 1) : this.focusLastFilteredRow(event)),
+      Home: () => this.focusMatch(0),
+      End: () => this.focusMatch(-1),
+      Enter: pick,
+      " ": pick
+    }
+    if (actions[event.key]?.()) event.preventDefault()
+  }
+
+  /**
+   * Back from the matches to the filtered column's last row:  focused, and picked as a key moving onto it picks,
+   * unless it's the column's pick already.
+   */
+  private focusLastFilteredRow(event: KeyboardEvent): boolean {
+    const depth = this.filteredColumn
+    if (this.hasItemData) {
+      const last = this.shownIn(this.columnLists[depth] ?? [], depth).at(-1)
+      if (!last) return false
+      if (this.openPath[depth] !== last.id) this.pickItem(last, depth, event)
+      E.afterSolidUpdate(() => this.focusItemRow(depth, last.id))
+      return true
+    }
+    const last = this.rowsIn(this.filteredRowsParent)
+      .filter((row) => !row.isFilteredOut)
+      .at(-1)
+    if (!last) return false
+    this.focusRow(last)
+    if (!last.isOpen) this.activate(last, event)
+    return true
   }
 
   /**
@@ -2191,13 +2268,22 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
             {this.translationForKey("elsewhere")}
           </div>
           <For each={this.otherMatches}>
-            {(match) => (
+            {(match, index) => (
               <div
                 class="match"
                 part={this.partForName("match")}
                 role="treeitem"
                 aria-selected="false"
+                aria-label={
+                  match.names.length
+                    ? this.translationForKey("matchIn", {
+                        label: match.label,
+                        path: match.names.join(PATH_SEPARATOR)
+                      })
+                    : match.label
+                }
                 tabindex="-1"
+                data-match={index()}
                 title={[...match.names, match.label].join(PATH_SEPARATOR)}
                 onClick={(event: MouseEvent) => this.pickMatch(match, event)}
               >
@@ -2616,6 +2702,9 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
       Enter: () => pick(item),
       " ": () => pick(item)
     }
+    // the filtered column's last row:  down goes on into the matches elsewhere in the tree
+    const isLastFiltered = at === list.length - 1 && depth === this.filteredColumn
+    if (event.key === "ArrowDown" && isLastFiltered && this.focusMatch(0)) return event.preventDefault()
     const action = actions[event.key]
     if (!action) return
     event.preventDefault()
@@ -2625,7 +2714,11 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   /** The focus goes to the row with the tab stop, scrolled into its column's view. */
   private focusKeyRow() {
     const depth = Math.max(0, this.selectedDepth)
-    const id = this.keyItemIn(depth)?.id
+    this.focusItemRow(depth, this.keyItemIn(depth)?.id)
+  }
+
+  /** The focus goes to the row of item `id` in column `depth`, scrolled into its column's view. */
+  private focusItemRow(depth: number, id: string | undefined) {
     if (id === undefined) return
     const column = this.domElement.renderRoot.querySelector<HTMLElement>(`ul[data-depth="${depth}"]`)
     const row = column?.querySelector<HTMLElement>(`li[data-id="${CSS.escape(id)}"]`)
@@ -2696,7 +2789,14 @@ function wordsOf(item: TreeItemData): string {
 
 /** Was `event` a click on a match elsewhere?  Its own handler picks it:  the row it's drawn in isn't clicked. */
 function isMatchClick(event: Event): boolean {
-  return event.composedPath().some((target) => (target as Element).classList?.contains("match"))
+  return !!matchBoxOf(event)
+}
+
+/** The match elsewhere `event` happened on, its box:  its `data-match` is its place in `UITree.otherMatches`. */
+function matchBoxOf(event: Event): HTMLElement | undefined {
+  return event
+    .composedPath()
+    .find((target): target is HTMLElement => !!(target as Element).classList?.contains("match"))
 }
 
 /** A column's words and `which` tracks, in px (`UITree.textTracks`). */

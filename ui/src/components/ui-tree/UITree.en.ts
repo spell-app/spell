@@ -39,7 +39,8 @@ export const treeVocabulary = {
         "A row drawn only once its parent opens can't be found while that's closed.  " +
         '`appearance="columns"`:  it filters one column, the last one on screen as the filter starts, until it\'s ' +
         "cleared;  after that column's rows, it lists the matches elsewhere in the tree, at any depth, each with the " +
-        "rows it's inside, and a click on one opens the path to it.  From `items`, it runs each `children` function to look " +
+        "rows it's inside;  a click on one opens the path to it, as do Enter and Space, the down key going on into them " +
+        "from the column's last row.  From `items`, it runs each `children` function to look " +
         "inside, waiting for promised ones, as opening the items would, but opens no column;  it lists the first 200 " +
         "matches, and stops after 100,000 rows."
     },
@@ -269,6 +270,13 @@ export const treeVocabulary = {
       key: "elsewhere",
       text: "Elsewhere in the tree",
       description: '`appearance="columns"` with a `filter`:  the title over the matches outside the filtered column.'
+    },
+    {
+      key: "matchIn",
+      text: "{label}, in {path}",
+      description:
+        '`appearance="columns"` with a `filter`:  what a screen reader hears for a match elsewhere in the tree, ' +
+        "with the rows it's inside."
     },
     {
       key: "lookingElsewhere",
