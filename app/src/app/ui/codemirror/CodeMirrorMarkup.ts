@@ -128,13 +128,25 @@ export class CodeMirrorMarkup {
   /**
    * A Spell drawing's tags, from `from` to `to` in `state`'s text:  drawn into `decorations`, inside the blocks `rails`
    * holds;  returns where each tag is, so Spell's marks leave them alone.
+   * - `readings`:  the drawings of the same text read already, by where they are, to read each once:
+   *   a layout draws its whole file's part, then its marks again and again as the screen's lines change
+   *   (epic `codemirror` P7)
    * - throws if the reading does
    */
   static within(
     decorations: CodeMirrorDecorations,
-    { from, to, rails = [], ...within }: { from: number; to: number; rails?: Rail[] } & MarkupWithin
+    {
+      from,
+      to,
+      rails = [],
+      readings,
+      ...within
+    }: { from: number; to: number; rails?: Rail[]; readings?: MarkupReadings | undefined } & MarkupWithin
   ): Array<{ start: number; end: number }> {
-    const marks = MarkupMarks.within(decorations.text, from, to, CodeMirrorMarkup.make, [], within)
+    const key = `${from}:${to}`
+    const marks =
+      readings?.get(key) ?? MarkupMarks.within(decorations.text, from, to, CodeMirrorMarkup.make, [], within)
+    readings?.set(key, marks)
     CodeMirrorMarkup.draw(marks, decorations, rails)
     return marks.tags
   }
@@ -292,14 +304,14 @@ class MarkupShapes {
     const lastLine = isCloseAlone ? doc.line(closeLine.number - 1) : closeLine
     if (isCloseAlone) {
       const words = lastLine.from + lastLine.text.trimEnd().length
-      this.decorations.add(TagJoinWidget.closeDecoration.range(words, stretch.end - close[1]!.length))
+      this.decorations.wholeFile(TagJoinWidget.closeDecoration.range(words, stretch.end - close[1]!.length))
     }
     const firstRowLine = isJoined ? joined.number : firstLine.number
     const firstEnd =
       firstRowLine === lastLine.number ? stretch.end : isJoined ? Math.min(joined.to, stretch.end) : firstLine.to
     if (firstEnd === stretch.end) first.classes.push("cmb-tag-block-last", ...(isOpen ? ["cmb-tag-block-opens"] : []))
     if (isJoined)
-      this.decorations.add(TagJoinWidget.decoration.range(stretch.start + name.trimEnd().length, joinedFrom))
+      this.decorations.wholeFile(TagJoinWidget.decoration.range(stretch.start + name.trimEnd().length, joinedFrom))
     // the tag's own mark (`bubbly-piece`) on its first row alone:  over all its lines, it cut the last row in two
     const own = this.decorations.unmark(stretch.start, stretch.end)
     this.decorations.mark(
@@ -351,10 +363,16 @@ function hueOf(partOfSpeech: string): string[] {
  * - ONE mark per stretch, its classes together:  CodeMirror nests two marks over the same stretch in no set order,
  *   so `bubbly-quoted` round `bubbly-input` came out either way round;  a longer mark always holds a shorter one.
  * - ONE decoration per line, its classes together, the rails of every block round it.
+ * - In two parts, for a view that draws only the lines on screen (`build()`;  epic `codemirror` P7):
+ *   - the whole file's:  every line's decoration, the line breaks hidden, what a blank line holds (`wholeFile()`)
+ *   - the marks, worked out only for the lines on screen:  every mark, and what's drawn in place of a piece of a
+ *     line (a quote's curly mark, a tag's `/>`, a spacer)
  ****************/
 export class CodeMirrorDecorations {
-  /** The decorations that are neither marks nor lines:  feet, spacers. */
+  /** The decorations that are neither marks nor lines, drawn only on screen:  spacers, a tag's rows. */
   private readonly ranges: Array<Range<Decoration>> = []
+  /** The decorations that are neither marks nor lines, drawn whatever's on screen (`wholeFile()`). */
+  private readonly whole: Array<Range<Decoration>> = []
   /** Where a tag laid out over lines has its `>` or `/>`, drawn past its last attribute (`TagPointWidget`). */
   private readonly points: Array<{ start: number; end: number }> = []
   /** How many tags laid out over lines, and their rows, so far:  each one's number (`CodeMirrorMarkup.tagBlocks`). */
@@ -371,15 +389,20 @@ export class CodeMirrorDecorations {
   /** The end tags alone on their lines, drawn as feet (`footAlone()`). */
   private readonly feet: FootAlone[] = []
 
-  /**
-   * - `hiddenIndent`:  the characters of indent hidden at each line's start, a slice shown dedented (`<CodeSlice>`):
-   *   not counted in a line's indent, so its rails stand where its bands are drawn (epic `language` I128)
-   */
+  /** The characters of indent hidden at each line's start (`DecorationsOptions`). */
+  private readonly hiddenIndent: number
+  /** Which of the decorations to make, and the marks' region (`DecorationsOptions`). */
+  private readonly part: DecorationPart
+  private readonly region: Region | undefined
+
   constructor(
     readonly state: EditorState,
-    private readonly hiddenIndent = 0
+    { hiddenIndent = 0, part = "all", region }: DecorationsOptions = {}
   ) {
     this.text = state.doc.toString()
+    this.hiddenIndent = hiddenIndent
+    this.part = part
+    this.region = region
   }
 
   /** The text being drawn. */
@@ -402,7 +425,7 @@ export class CodeMirrorDecorations {
 
   /** Mark `start`-`end` with `classes`, and `attributes`, along with any the same stretch has. */
   mark(start: number, end: number, classes: string[], attributes: Record<string, string> = {}): void {
-    if (end <= start || (!classes.length && !Object.keys(attributes).length)) return
+    if (end <= start || (!classes.length && !Object.keys(attributes).length) || !this.isMarked(start, end)) return
     const key = `${start}:${end}`
     const marked = this.marks.get(key) ?? { classes: new Set(), attributes: {} }
     for (const each of classes) marked.classes.add(each)
@@ -420,6 +443,7 @@ export class CodeMirrorDecorations {
 
   /** The line `at` is on:  inside the blocks `rails` holds, outermost first, and in `classes`. */
   line(at: number, rails: Rail[], classes: string[] = []): void {
+    if (this.part === "marks") return
     const from = this.state.doc.lineAt(at).from
     const line = this.decorationOf(from)
     for (const each of classes) line.classes.add(each)
@@ -433,6 +457,7 @@ export class CodeMirrorDecorations {
    * a foot's round corner, in the row under it, takes its place there.
    */
   stopRail(at: number, rail: number): void {
+    if (this.part === "marks") return
     const from = this.state.doc.lineAt(at).from
     const line = this.decorationOf(from)
     line.stopped.add(rail)
@@ -441,6 +466,7 @@ export class CodeMirrorDecorations {
 
   /** The rail `rail` (its place among the line's rails, outermost 0) isn't drawn on the line `at` is on. */
   endRail(at: number, rail: number): void {
+    if (this.part === "marks") return
     const from = this.state.doc.lineAt(at).from
     const line = this.decorationOf(from)
     line.ended.add(rail)
@@ -454,6 +480,7 @@ export class CodeMirrorDecorations {
 
   /** Room `spacer` injected at `at`, before or after the text there. */
   spacer(at: number, spacer: Spacer, side: "before" | "after"): void {
+    if (!this.isMarked(at, at)) return
     const widget = Decoration.widget({
       widget: new SpacerWidget(spacer.inlineClassName),
       side: side === "before" ? -1 : 1
@@ -476,12 +503,33 @@ export class CodeMirrorDecorations {
    * the marks of its pieces drawn inside it.
    */
   point(start: number, end: number): void {
-    this.points.push({ start, end })
+    if (this.isMarked(start, end)) this.points.push({ start, end })
   }
 
-  /** Any other decoration, e.g. a foot. */
+  /** Any other decoration, e.g. a row of a tag laid out over lines:  drawn only on screen. */
   add(range: Range<Decoration>): void {
-    this.ranges.push(range)
+    if (this.isMarked(range.from, range.to)) this.ranges.push(range)
+  }
+
+  /**
+   * A decoration drawn whatever's on screen, kept in the editor's state (`build("whole")`):
+   * - a line break hidden, which CodeMirror must know of to guess the height of lines it hasn't drawn
+   * - feet, a blank line's room and caret's place:  read and moved as a blank line's typed on, far from the screen
+   *   (`CodeMirrorBubbly`'s `blankLinesDrawn()`)
+   */
+  wholeFile(range: Range<Decoration>): void {
+    if (this.part !== "marks") this.whole.push(range)
+  }
+
+  /**
+   * Are `start`-`end`'s marks made:  all of them, or only the marks' part and it touches their region?
+   * - The whole file's part makes none, and the marks' none off screen:  working them out is most of the work for a
+   *   long file (epic `codemirror` P7).
+   */
+  isMarked(start: number, end: number): boolean {
+    if (this.part === "all") return true
+    const { region } = this
+    return this.part === "marks" && (!region || (start <= region.to && end >= region.from))
   }
 
   /**
@@ -539,7 +587,7 @@ export class CodeMirrorDecorations {
       })
       const next = run[level + 1]
       // the line break to the next one hidden, one step for the caret
-      if (next && next.start > foot.end) this.ranges.push(FeetJoinWidget.decoration.range(foot.end, next.start))
+      if (next && next.start > foot.end) this.whole.push(FeetJoinWidget.decoration.range(foot.end, next.start))
     }
   }
 
@@ -562,10 +610,16 @@ export class CodeMirrorDecorations {
     return { from: Math.min(line.from + this.hiddenIndent, at), to: at }
   }
 
-  /** The decorations, sorted as CodeMirror wants them. */
+  /** The decorations, sorted as CodeMirror wants them:  those of the part asked for (`DecorationsOptions`). */
   build(): DecorationSet {
     this.feetRows()
+    return Decoration.set([...this.lineDecorations(), ...this.whole, ...this.markDecorations()], true)
+  }
+
+  /** Every mark and the rest drawn only on screen. */
+  private markDecorations(): Array<Range<Decoration>> {
     const ranges = [...this.ranges]
+    const { points } = this
     const marks = [...this.marks].map(([range, mark]) => {
       const [start, end] = range.split(":").map(Number) as [number, number]
       return { start, end, ...mark }
@@ -575,9 +629,8 @@ export class CodeMirrorDecorations {
     const quoteStarts = new Set(quotes.map((quote) => quote.start))
     const quoteEnds = new Set(quotes.map((quote) => quote.end))
     // a laid-out tag's `>` drawn past its last attribute:  its pieces' marks inside it
-    const isInPoint = (start: number, end: number) =>
-      this.points.find((point) => point.start <= start && end <= point.end)
-    for (const point of this.points) {
+    const isInPoint = (start: number, end: number) => points.find((point) => point.start <= start && end <= point.end)
+    for (const point of points) {
       const pieces = marks
         .filter((mark) => point.start <= mark.start && mark.end <= point.end)
         .sort((one, other) => one.start - other.start)
@@ -598,13 +651,19 @@ export class CodeMirrorDecorations {
       // unless the mark's inclusive there;  every one at that edge, so they still nest as they did
       const inclusiveStart = quoteStarts.has(start)
       // ... and a laid-out tag's `>` drawn at its end (`TagPointWidget`), its first row its last (I139)
-      const inclusiveEnd = quoteEnds.has(end) || this.points.some((point) => point.end === end)
+      const inclusiveEnd = quoteEnds.has(end) || points.some((point) => point.end === end)
       // a comment's `--`, drawn as ONE dash:  one step for the caret, so no click, arrow or letter lands inside it
       // and splits it (epic `codemirror` I25;  `CodeMirrorRelayout` reads `atomic`)
       const atomic = classes.has(DASH)
       const mark = Decoration.mark({ class: [...classes].join(" "), attributes, inclusiveStart, inclusiveEnd, atomic })
       ranges.push(mark.range(start, end))
     }
+    return ranges
+  }
+
+  /** Every line's decoration:  its classes, the rails of the blocks round it. */
+  private lineDecorations(): Array<Range<Decoration>> {
+    const ranges: Array<Range<Decoration>> = []
     for (const [from, { classes, rails, stopped, ended, feet }] of this.lines) {
       const innermost = rails.at(-1)
       const lineClasses = [...classes, ...(innermost ? hueOf(innermost.partOfSpeech) : [])]
@@ -620,9 +679,38 @@ export class CodeMirrorDecorations {
       const attributes: Record<string, string> = styles.length ? { style: styles.join("; ") } : {}
       ranges.push(Decoration.line({ class: lineClasses.join(" "), attributes }).range(from))
     }
-    return Decoration.set(ranges, true)
+    return ranges
   }
 }
+
+/**
+ * Which of a drawing's decorations `CodeMirrorDecorations.build()` gives:  all, the whole file's part, or the marks
+ * drawn only on screen.
+ */
+export type DecorationPart = "all" | "whole" | "marks"
+
+/** How `CodeMirrorDecorations` draws. */
+export type DecorationsOptions = {
+  /**
+   * the characters of indent hidden at each line's start, a slice shown dedented (`<CodeSlice>`):
+   * not counted in a line's indent, so its rails stand where its bands are drawn (epic `language` I128)
+   */
+  hiddenIndent?: number | undefined
+  /**
+   * which of the decorations to make (epic `codemirror` P7);  default all
+   * - `"whole"`:  the whole file's part, the lines' decorations and `wholeFile()`'s, kept in the editor's state
+   * - `"marks"`:  the rest, only those touching `region`, the lines on screen
+   */
+  part?: DecorationPart | undefined
+  /** the marks' part only:  the stretch of the text to mark;  default all of it */
+  region?: Region | undefined
+}
+
+/** A text's drawings' tags as read (`MarkupMarks.within()`), by where each drawing is, `from:to`. */
+export type MarkupReadings = Map<string, MarkupMarks<MarkedStretch>>
+
+/** A stretch of the text, `from` one offset `to` another. */
+export type Region = { from: number; to: number }
 
 /**
  * A line's decoration being made:  its classes, the rails of the blocks round it, which of them stop short or end;

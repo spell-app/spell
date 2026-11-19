@@ -199,6 +199,8 @@ and in the app's build folder, `app/` at the app folder's root.
         (`--bubbly-angle-ink`, the editor's `--bubbly-angle-mark`;  epic `codemirror` T17).
     - Marks worked out from the whole text follow it as it's typed, and are worked out again once typing pauses
       ([CodeMirrorRelayout](ui/codemirror/CodeMirrorRelayout.ts)).
+      - The marks themselves are made only for the lines CodeMirror draws, from the same layout, again as they change
+        (epic `codemirror` P7);  the editor's state keeps the whole file's lines, rails, feet and hidden line breaks.
     - The selection lies on the bands, in the middle of each line, a see-through black (white on dark paper), every
       letter in its own colour under it ([CodeMirrorSelection](ui/codemirror/CodeMirrorSelection.ts), epic `language`
       I124):  drawn in place of CodeMirror's own, which the sheet hides.

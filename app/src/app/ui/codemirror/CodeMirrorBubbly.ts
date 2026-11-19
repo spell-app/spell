@@ -12,8 +12,16 @@ import { Decoration, type DecorationSet, EditorView, ViewPlugin, WidgetType } fr
 
 import { SP } from "spell/parser/spell"
 import { BubblyHtml } from "spell/app/app/components/spell-code/BubblyHtml"
-import { CodeMirrorDecorations, CodeMirrorMarkup, type Indent, type Rail } from "./CodeMirrorMarkup"
-import { CodeMirrorRelayout } from "./CodeMirrorRelayout"
+import {
+  CodeMirrorDecorations,
+  CodeMirrorMarkup,
+  type DecorationPart,
+  type Indent,
+  type MarkupReadings,
+  type Rail,
+  type Region
+} from "./CodeMirrorMarkup"
+import { CodeMirrorRelayout, type LaidOut } from "./CodeMirrorRelayout"
 import { CodeMirrorSelection } from "./CodeMirrorSelection"
 
 /****************
@@ -40,6 +48,8 @@ import { CodeMirrorSelection } from "./CodeMirrorSelection"
  * - Typing never waits for the layout:  CodeMirror moves the marks with the text,
  *   and the layout is worked out again once the typing pauses (`RELAYOUT_MSEC`, `CodeMirrorRelayout`).
  *   - A blank body line the edit wrote is drawn at once, so the caret on it never moves (`blankLinesDrawn()`, I158).
+ * - The marks are made only for the lines CodeMirror draws, again as they change (`laidOutOf()`;  epic `codemirror` P7):
+ *   the editor's state keeps the whole file's lines, rails, feet and hidden line breaks.
  * - The editor's box is a `.bubbly` too (`EDITOR_CLASSES`), so the sheet's settings and rules reach it:
  *   its CodeMirror section draws the bands, rails, feet and tags.
  * - Its position in the import graph:  the parser's types and layout, CodeMirror, the shared marks.
@@ -57,7 +67,7 @@ export class CodeMirrorBubbly {
   ): Extension {
     return [
       CodeMirrorRelayout.extension(
-        (state) => CodeMirrorBubbly.decorationsOf(state, fileOf(), sliceOf(state)),
+        (state) => CodeMirrorBubbly.laidOutOf(state, fileOf(), sliceOf(state)),
         CodeMirrorBubbly.RELAYOUT_MSEC,
         {
           isAwaitingParse: () => CodeMirrorRelayout.isUnparsed(fileOf()),
@@ -67,7 +77,8 @@ export class CodeMirrorBubbly {
             return !!file?.match && !SP.BubblyLayout.isParseOf(file, state.doc.toString())
           },
           drawnAtOnce: (decorations, transaction) =>
-            blankLinesDrawn(decorations, transaction, sliceOf(transaction.state)?.hiddenIndent)
+            blankLinesDrawn(decorations, transaction, sliceOf(transaction.state)?.hiddenIndent),
+          marksTyped: marksTyped
         }
       ),
       EditorView.editorAttributes.of({ class: EDITOR_CLASSES }),
@@ -88,14 +99,42 @@ export class CodeMirrorBubbly {
    * - NEVER throws:  `Decoration.none` when the layout fails.
    */
   static decorationsOf(state: EditorState, within?: SP.SpellFile, slice?: Slice): DecorationSet {
-    const text = state.doc.toString()
     try {
-      const parser = within ? SP.Language.forFile(within.path).parser : SP.spellParser
-      const drawing = SP.BubblyLayout.of(text, parser, { within })
-      return new BubblyDecorations(state, drawing, { isView: (tag) => isViewTag(within, tag), slice }).build()
+      return new BubblyDecorations(state, drawingOf(state, within), {
+        isView: (tag) => isViewTag(within, tag),
+        slice
+      }).build()
     } catch (error) {
       console.error("CodeMirrorBubbly:  couldn't lay the code out", error)
       return Decoration.none
+    }
+  }
+
+  /**
+   * `state`'s text laid out bubbly, as an editor draws it (epic `codemirror` P7):
+   * - `decorations`:  the whole file's part, kept in the editor's state:  every line's, the line breaks hidden, feet
+   * - `marksIn()`:  the marks of the lines in a region, from the same layout, as the lines on screen change
+   * - Its arguments as `decorationsOf()`'s.
+   * - NEVER throws:  no decorations when the layout fails, and no marks when a region's marks fail.
+   */
+  static laidOutOf(state: EditorState, within?: SP.SpellFile, slice?: Slice): LaidOut {
+    try {
+      const drawing = drawingOf(state, within)
+      const isView = (tag: string) => isViewTag(within, tag)
+      const readings: MarkupReadings = new Map()
+      const decorations = new BubblyDecorations(state, drawing, { isView, slice, readings, part: "whole" }).build()
+      const marksIn = (region: Region) => {
+        try {
+          return new BubblyDecorations(state, drawing, { isView, slice, readings, part: "marks", region }).build()
+        } catch (error) {
+          console.error("CodeMirrorBubbly:  couldn't mark the code on screen", error)
+          return Decoration.none
+        }
+      }
+      return { decorations, marksIn }
+    } catch (error) {
+      console.error("CodeMirrorBubbly:  couldn't lay the code out", error)
+      return { decorations: Decoration.none }
     }
   }
 }
@@ -107,6 +146,15 @@ export class CodeMirrorBubbly {
  */
 export type Slice = { from: number; to: number; hiddenIndent?: number }
 
+/**
+ * `state`'s text laid out by the parser (`SP.BubblyLayout`):  from `within`'s parse, when it's of this very text.
+ * - throws if the layout does
+ */
+function drawingOf(state: EditorState, within?: SP.SpellFile): SP.BubblyDrawing {
+  const parser = within ? SP.Language.forFile(within.path).parser : SP.spellParser
+  return SP.BubblyLayout.of(state.doc.toString(), parser, { within })
+}
+
 /** The editor's own classes:  a `.bubbly`, so `bubbly.css` reaches it, and ours. */
 const EDITOR_CLASSES = "bubbly cmb-editor"
 
@@ -115,7 +163,7 @@ class BubblyDecorations {
   private readonly decorations: CodeMirrorDecorations
   private readonly text: string
   /** A drawing's tags:  drawn as HTML is (`CodeMirrorMarkup`), so Spell's marks leave them alone. */
-  private readonly tags: Array<{ start: number; end: number }> = []
+  private readonly tags = new Stretches()
   /** The feet of the blocks ending on each line, by where that line ends, innermost first. */
   private readonly feet = new Map<number, Foot[]>()
 
@@ -127,17 +175,35 @@ class BubblyDecorations {
       isView: (tag: string) => boolean
       /** the lines shown, when it's a slice */
       slice?: Slice | undefined
+      /** which of its decorations to make (`CodeMirrorDecorations.build()`);  default all */
+      part?: DecorationPart
+      /** the marks' part only:  the stretch of the text to mark, the lines on screen */
+      region?: Region
+      /** each drawing's tags as read already, by where they are:  so a layout reads them once, for every part */
+      readings?: MarkupReadings
     }
   ) {
     this.text = drawing.text
-    this.decorations = new CodeMirrorDecorations(state, options.slice?.hiddenIndent)
+    this.decorations = new CodeMirrorDecorations(state, {
+      hiddenIndent: options.slice?.hiddenIndent,
+      part: options.part,
+      region: options.region
+    })
   }
 
-  /** The decorations, sorted as CodeMirror wants them. */
+  /** The decorations, sorted as CodeMirror wants them:  the part asked for. */
   build(): DecorationSet {
     this.nodes(this.drawing.nodes, [])
     for (const [at, feet] of this.feet) this.drawFeet(at, feet)
     return this.decorations.build()
+  }
+
+  /**
+   * Are the marks of `stretch` (a line, a head) asked for:  every mark, or the marks' part and it's in their region?
+   * - The whole file's part makes no marks:  working out each line's stretches is most of the work (epic `codemirror` P7).
+   */
+  private isMarked(stretch: { start: number; end: number }): boolean {
+    return this.decorations.isMarked(stretch.start, stretch.end)
   }
 
   /**
@@ -155,11 +221,11 @@ class BubblyDecorations {
     const next = last.number < doc.lines ? doc.line(last.number + 1) : undefined
     const isNextShown = !!next && (!this.options.slice || next.to <= this.options.slice.to)
     if (!next || !isNextShown) {
-      this.decorations.add(FeetWidget.decoration(feet, "end").range(last.to))
+      this.decorations.wholeFile(FeetWidget.decoration(feet, "end").range(last.to))
       return
     }
     const placement = next.text.trim() ? "above" : "blank"
-    this.decorations.add(FeetWidget.decoration(feet, placement).range(next.from))
+    this.decorations.wholeFile(FeetWidget.decoration(feet, placement).range(next.from))
   }
 
   /**
@@ -184,7 +250,7 @@ class BubblyDecorations {
           // a plain body line's words where a band's on its level are, a tab in (I142);  a group's are already;
           // a blank one right above a drawing's tags is the drawing's:  a tag typed there starts at its indent (I157)
           if (!isGroupBody && !this.isAboveTags(nodes, index)) this.plainIndent(node)
-          this.line(node)
+          if (this.isMarked(node)) this.line(node)
           break
         case "block":
           this.block(node, rails, isGroupBody)
@@ -202,7 +268,10 @@ class BubblyDecorations {
     while (nodes[last + 1] && nodes[last + 1]!.kind !== "block") last++
     const lines = nodes.slice(first, last + 1).filter((node): node is SP.BubblyLine => node.kind === "line")
     for (const node of nodes.slice(first, last + 1)) if (node.kind !== "block") this.decorations.line(node.start, rails)
+    // its marks alone asked for, and none of its lines on screen:  nothing more to draw
+    if (this.options.part === "marks" && !this.isMarked({ start: lines[0]!.start, end: lines.at(-1)!.end })) return last
     const tags = CodeMirrorMarkup.within(this.decorations, {
+      readings: this.options.readings,
       from: lines[0]!.start,
       to: lines.at(-1)!.end,
       rails,
@@ -210,8 +279,8 @@ class BubblyDecorations {
       declaringTags: this.drawing.declaringTags,
       codes: lines.flatMap((line) => line.codes ?? [])
     })
-    this.tags.push(...tags)
-    for (const line of lines) this.line(line)
+    this.tags.add(tags)
+    for (const line of lines) if (this.isMarked(line)) this.line(line)
     return last
   }
 
@@ -226,8 +295,8 @@ class BubblyDecorations {
   private plainIndent(line: SP.BubblyLine) {
     const { from, to } = this.decorations.shownIndentBefore(line.start)
     if (!this.text.slice(from, to).includes("\t")) return
-    this.mark(from, to, [PLAIN_INDENT])
-    if (isBlank(line)) this.decorations.add(WordsPlace.decoration.range(to))
+    this.decorations.wholeFile(PLAIN_INDENT_MARK.range(from, to))
+    if (isBlank(line)) this.decorations.wholeFile(WordsPlace.decoration.range(to))
   }
 
   /**
@@ -257,12 +326,16 @@ class BubblyDecorations {
     // folded:  its head alone, a pill with the fold's `…` in its end;  nothing of its hidden body (I116)
     const isFolded = isShown && this.decorations.isFoldedAt(head.start)
     const hasBody = !isFolded && block.body.some((node) => node.kind !== "gap")
-    this.decorations.line(head.start, rails, [...(isShown ? [HEAD] : []), ...(isInGroup ? [IN_GROUP] : [])])
+    this.decorations.line(head.start, rails, [
+      ...(isShown ? [HEAD] : []),
+      ...(isShown && block.isGroup ? [GROUP_HEAD] : []),
+      ...(isInGroup ? [IN_GROUP] : [])
+    ])
     // a group's band and rail hang a tab out, its rail on its parent's, so its members' bands sit clear of it (I113)
     const isHung = block.isGroup && this.decorations.indentAt(head.start).tabs > 0
     const indent = hung(this.decorations.indentAt(head.start), isHung)
     const hue = ["cmb-hue", `bubbly-${partOfSpeech}`, ...(block.isGroup ? [GROUP_BAND] : [])]
-    const hasDescription = this.line(head, partOfSpeech)
+    const hasDescription = this.isMarked(head) && this.line(head, partOfSpeech)
     if (isShown) {
       const band = ["cmb-band", hasBody ? "cmb-band-open" : "cmb-band-pill", ...hue]
       if (isFolded) band.push("cmb-band-folded")
@@ -368,7 +441,8 @@ class BubblyDecorations {
       }
     }
     for (const code of line.codes ?? []) {
-      if (this.tags.some((tag) => code.start >= tag.start && code.end <= tag.end)) continue
+      if (this.tags.crossing(code.start, code.end).some((tag) => code.start >= tag.start && code.end <= tag.end))
+        continue
       this.mark(code.start, code.end, ["bubbly-input", "bubbly-expression"])
       this.mark(code.start, code.start + 1, ["bubbly-code-brace"])
       this.mark(code.end - 1, code.end, ["bubbly-code-brace"])
@@ -392,13 +466,50 @@ class BubblyDecorations {
   private outsideTags(start: number, end: number): Array<{ start: number; end: number }> {
     const pieces: Array<{ start: number; end: number }> = []
     let from = start
-    const crossing = this.tags.filter((tag) => tag.start < end && tag.end > start).sort((a, b) => a.start - b.start)
-    for (const tag of crossing) {
+    for (const tag of this.tags.crossing(start, end)) {
       if (tag.start > from) pieces.push({ start: from, end: tag.start })
       from = Math.max(from, tag.end)
     }
     if (from < end) pieces.push({ start: from, end })
     return pieces
+  }
+}
+
+/**
+ * Stretches of the text, sorted by where they start, found by a binary search:  a drawing's tags, which every stretch
+ * of Spell on a line is checked against (`BubblyDecorations.outsideTags()`).
+ * - A plain list, searched whole for each stretch, made marking a long drawing slow:
+ *   Table's examples, 2,668 lines, nearly all tags, took 110ms to mark, 45ms searched this way (epic `codemirror` P7).
+ * - Added a batch at a time, in the text's order:  a drawing's lines, one after another.
+ */
+class Stretches {
+  private readonly stretches: Array<{ start: number; end: number }> = []
+  /** The furthest any stretch up to each one reaches:  so a search knows when none before can reach a place. */
+  private readonly reaches: number[] = []
+
+  /** Add `stretches`, all after those added already. */
+  add(stretches: ReadonlyArray<{ start: number; end: number }>) {
+    for (const stretch of [...stretches].sort((one, other) => one.start - other.start)) {
+      this.reaches.push(Math.max(this.reaches.at(-1) ?? 0, stretch.end))
+      this.stretches.push(stretch)
+    }
+  }
+
+  /** The stretches crossing `start`-`end`, in order. */
+  crossing(start: number, end: number): Array<{ start: number; end: number }> {
+    // the first that starts at `end` or later
+    let low = 0
+    let high = this.stretches.length
+    while (low < high) {
+      const middle = (low + high) >> 1
+      if (this.stretches[middle]!.start < end) low = middle + 1
+      else high = middle
+    }
+    const crossing: Array<{ start: number; end: number }> = []
+    for (let index = low - 1; index >= 0 && this.reaches[index]! > start; index--) {
+      if (this.stretches[index]!.end > start) crossing.push(this.stretches[index]!)
+    }
+    return crossing.reverse()
   }
 }
 
@@ -469,15 +580,7 @@ function lastLineEnd(block: SP.BubblyBlock): number {
 function blankLinesDrawn(decorations: DecorationSet, transaction: Transaction, hiddenIndent = 0): DecorationSet {
   try {
     const { doc } = transaction.state
-    const written: Line[] = []
-    transaction.changes.iterChangedRanges((fromA, _toA, fromB, toB) => {
-      // a letter typed on a blank line:  its line was blank before the edit
-      const typedOn = transaction.startState.doc.lineAt(fromA).text.trim() ? 0 : doc.lineAt(fromB).number
-      for (let number = doc.lineAt(fromB).number; number <= doc.lineAt(toB).number; number++) {
-        const line = doc.line(number)
-        if (written.at(-1)?.number !== number && (!line.text.trim() || number === typedOn)) written.push(line)
-      }
-    })
+    const written = linesWritten(transaction)
     if (!written.length) return decorations
     const clipped = feetReplaced(clippedAbove(decorations, written), written)
     const add = written.flatMap((line) => blankLineLook(clipped, doc, line, hiddenIndent))
@@ -486,6 +589,36 @@ function blankLinesDrawn(decorations: DecorationSet, transaction: Transaction, h
     console.error("CodeMirrorBubbly:  couldn't draw a blank line at once", error)
     return decorations
   }
+}
+
+/**
+ * The marks on screen, moved with `transaction`'s edit:  a mark that grew onto a line it wrote put back above it
+ * (`clippedAbove()`), as `blankLinesDrawn()` does the whole file's part.
+ * - NEVER throws:  `marks` as they were moved, when it fails.
+ */
+function marksTyped(marks: DecorationSet, transaction: Transaction): DecorationSet {
+  try {
+    const written = linesWritten(transaction)
+    return written.length ? clippedAbove(marks, written) : marks
+  } catch (error) {
+    console.error("CodeMirrorBubbly:  couldn't move the marks on screen", error)
+    return marks
+  }
+}
+
+/** The blank lines `transaction`'s edit wrote, and a blank line it typed the first letter on, in order. */
+function linesWritten(transaction: Transaction): Line[] {
+  const { doc } = transaction.state
+  const written: Line[] = []
+  transaction.changes.iterChangedRanges((fromA, _toA, fromB, toB) => {
+    // a letter typed on a blank line:  its line was blank before the edit
+    const typedOn = transaction.startState.doc.lineAt(fromA).text.trim() ? 0 : doc.lineAt(fromB).number
+    for (let number = doc.lineAt(fromB).number; number <= doc.lineAt(toB).number; number++) {
+      const line = doc.line(number)
+      if (written.at(-1)?.number !== number && (!line.text.trim() || number === typedOn)) written.push(line)
+    }
+  })
+  return written
 }
 
 /**
@@ -572,9 +705,9 @@ function blankLineLook(decorations: DecorationSet, doc: Doc, line: Line, hiddenI
   const isGroupLine =
     hasClassAt(decorations, line.from, line.from, IN_GROUP) ||
     (!!sibling && hasClassAt(decorations, sibling.from, sibling.from, IN_GROUP)) ||
-    (!!previous && indentOf(previous) === indent && hasClassAt(decorations, previous.from, previous.to, GROUP_BAND))
+    (!!previous && indentOf(previous) === indent && hasClassAt(decorations, previous.from, previous.from, GROUP_HEAD))
   if (isGroupLine) return [Decoration.line({ class: GROUP_LINE }).range(line.from)]
-  const room = Decoration.mark({ class: PLAIN_INDENT }).range(shownFrom, shownTo)
+  const room = PLAIN_INDENT_MARK.range(shownFrom, shownTo)
   return isBlankLine ? [room, WordsPlace.decoration.range(line.to)] : [room]
 }
 
@@ -649,6 +782,9 @@ const HEAD = "cmb-head"
 /** A plain body line's room after its tabs (`BubblyDecorations.plainIndent()`). */
 const PLAIN_INDENT = "cmb-plain-indent"
 
+/** Its mark. */
+const PLAIN_INDENT_MARK = Decoration.mark({ class: PLAIN_INDENT })
+
 /** A group's own line, where its members' words are (`BubblyDecorations.nodes()`). */
 const GROUP_LINE = "cmb-group-line"
 
@@ -660,6 +796,12 @@ const IN_GROUP = "cmb-in-group"
 
 /** A group's band, on its head. */
 const GROUP_BAND = "bubbly-group"
+
+/**
+ * A group's head line:  no look of its own, the band says it;  a line, not a mark, so a blank line written right under
+ * it knows it's the group's though the band's drawn only on screen (`blankLineLook()`).
+ */
+const GROUP_HEAD = "cmb-group-head"
 
 /****************
  * ### `DescriptionRoom`
