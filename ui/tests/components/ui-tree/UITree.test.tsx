@@ -754,8 +754,11 @@ describe('<ui-tree appearance="columns">', () => {
   })
 
   it("narrows nothing while the columns fit, and never the last `narrow-before`", async () => {
-    expect(narrowColumns(await deepColumns("", 900))).toEqual([])
-    expect(narrowColumns(await deepColumns('narrow-before="3"'))).toEqual([0])
+    // the box's width is measured as it changes:  under load, a paint or two late
+    const wide = await deepColumns("", 900)
+    await vi.waitFor(() => expect(narrowColumns(wide)).toEqual([]))
+    const kept = await deepColumns('narrow-before="3"')
+    await vi.waitFor(() => expect(narrowColumns(kept)).toEqual([0]))
   })
 
   it("widens a narrow column under the pointer OVER the columns after it, and narrows it again once the pointer leaves", async () => {
