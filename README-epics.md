@@ -160,3 +160,4 @@ epic upgrade
 - [Skills and hooks](epic/README-skills.md):  the commands you type in Claude Code
 - [The `epic` command](epic/README-cli.md):  every `epic` verb
 - [Epic FAQ](epic/README-faq.md):  when something goes wrong, what you see, why, and the fix
+- [The epic demo](epic/README-demo.md):  showing epics to your team, stage by stage, in about 20 minutes
