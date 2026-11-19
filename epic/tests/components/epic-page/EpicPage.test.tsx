@@ -152,7 +152,7 @@ describe("<epic-page>", () => {
       crumb.getAttribute("link")
     ])
     expect(crumbs).toEqual([
-      ["Docs", "/pages/index.html"],
+      ["Spell Epic", "/pages/index.html"],
       ["Sagas", "/sagas/index.html"]
     ])
     const lines = Array.from(shadow.querySelectorAll('[part~="meta"] > li'), (li) =>
@@ -273,7 +273,7 @@ describe("<epic-page>", () => {
         crumb.hasAttribute("selected")
       ])
     ).toEqual([
-      ["Docs", "/pages/index.html", false],
+      ["Spell Epic", "/pages/index.html", false],
       ["Epics", "/epics/index.html", false]
     ])
     expect(crumbs.parentElement!.localName).toBe("h1")

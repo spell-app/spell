@@ -318,7 +318,7 @@ export const epicPageVocabulary = {
     { key: "seeAlsoGuide", text: "guide", description: "A See Also page's kind:  a guide the epic page links to." },
     { key: "seeAlsoDetails", text: "details", description: "A See Also page's kind:  a details page." },
     { key: "seeAlsoChoices", text: "choice", description: "A See Also page's kind:  a choice page." },
-    { key: "crumbDocs", text: "Docs", description: "The crumbs' first:  the docs' home page." },
+    { key: "crumbDocs", text: "Spell Epic", description: "The crumbs' first:  the epics' home page." },
     { key: "crumbEpics", text: "Epics", description: "The crumbs' second:  the Epics list page." },
     { key: "crumbSagas", text: "Sagas", description: "A saga page's crumbs' second:  the Sagas list page." },
     {

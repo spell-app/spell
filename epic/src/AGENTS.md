@@ -1032,7 +1032,11 @@ The shared folders:
 - [pages.js](tools/pages.js) has a constant for each, and `findPages()` walks them.
   - `PAGES`, `GUIDES`, `EPICS`, `TEMPLATES` (the engine's, `templates/...` by `pagePath()`), `REPO_TEMPLATES`
 - [The docs' home page](../../spell.epics/pages/index.html):  a routing page (P5 of `claude-design`).
-  - One card per area, each with its count:  Guides · Sagas · Epic Pages · Templates
+  - One card per area, each with its count, straight under the lede (no "Areas" section;  Owen, 2026-11-19):
+    Guides · Sagas · Epic Pages · Epic Documentation
+    - Epic Documentation:  the epic tooling's READMEs (`/_epic/docs/README-epics.md`), no count;  in VS Code's side bar
+      it opens the Epic Docs tab (`data-spell-open="tab"`, the kit's live client), in a browser it's a plain link
+    - no Templates card, nor an "About these pages" section:  the templates aren't ready for other people to edit
     - each card's description on two lines, broken at its first colon (`descriptionLines()`)
     - the Epic Pages card:  its Active epics, the open epics worked on in the last week, a pill each in two columns:
       `<epic-pills>`, which draws itself from the page server, live (epic `epic-engine` T99;  J276's generator wrote
@@ -1417,7 +1421,7 @@ In `tools/`:
   - A sticky page header above them, on EVERY page (the templates have it), so the title stays on screen:
     `<ui-sticky class="spell-h1"><header class="spell-page-head">` around the h1.
     - The runtime draws it on ONE line, as an epic page's (`oneLineHead()`;  2026-10-13):
-      - a copy of the breadcrumb goes into the h1:  `DOCS / SPELL SYNTAX`
+      - a copy of the breadcrumb goes into the h1:  `SPELL EPIC / SPELL SYNTAX`
       - the title in the crumbs' type (mono capitals), twice their size and bold
       - the breadcrumb above it hides
       - a lighter ivory than the toolbar under it

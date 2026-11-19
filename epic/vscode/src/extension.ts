@@ -2,7 +2,8 @@
  * spell-epic's VS Code extension (epic `epic-eject` P7):  the epic tooling's side of VS Code,
  * out of the spell language extension, built and installed from spell-epic's one checkout.
  * - the doc views, in the right side bar (`DocView`):
- *   "Review" (epic pages, guides, "Open Epic...") and "Details" (the pages you answer on)
+ *   "Review" (epic pages, guides, "Open Epic..."), "Details" (the pages you answer on)
+ *   and "Epic Docs" (the epic tooling's READMEs)
  *   - shown by URI or through the bridge (`DocPreview`)
  *   - live from spell-epic's one page server per machine (`epic hub`) when it runs
  * - the window bridge (`WindowBridge`):  a Claude Code session reaches ITS window

@@ -63,7 +63,7 @@ describe("the home page's cards", () => {
       new Set(),
       SAGAS
     )
-    expect(cards.map((card) => card.title)).toEqual(["Guides", "Sagas", "Epic Pages", "Templates"])
+    expect(cards.map((card) => card.title)).toEqual(["Guides", "Sagas", "Epic Pages", "Epic Documentation"])
     const count = Object.fromEntries(cards.map((card) => [card.id, card.count]))
     // by the Epics page's groups (epic `airplane` P8):  `c` has no phases yet, so it's planning
     expect(count.epics).toBe("1 active · 1 planning · 1 done")
@@ -72,7 +72,14 @@ describe("the home page's cards", () => {
     // its Active epics draw themselves, live (`<epic-pills>`, epic `epic-engine` T99)
     expect(starred.find((card) => card.id === "epics").pills).toBe(true)
     expect(count.guides).toBe("2 guides")
-    expect(count.templates).toBe("1 template")
+    // the epic READMEs, in place of Templates (Owen, 2026-11-19):  no count;  opens the side bar's Epic Docs tab
+    const docs = cards.find((card) => card.id === "epic-docs")
+    expect([docs.href, docs.icon, docs.count, docs.opensTab]).toEqual([
+      "/_epic/docs/README-epics.md",
+      "book",
+      undefined,
+      true
+    ])
     expect(count.sagas).toBe("2 sagas")
     expect(cards.find((card) => card.id === "sagas").href).toBe("/sagas/index.html")
   })
@@ -185,7 +192,7 @@ describe("the list pages", () => {
   it("start from a skeleton:  site header, breadcrumb home, sticky title, the markers", () => {
     const html = skeleton(guides)
     expect(html).toContain(`<spell-site-header></spell-site-header>`)
-    expect(html).toContain(`<ui-breadcrumb link="/pages/index.html" target="_self">Docs</ui-breadcrumb>`)
+    expect(html).toContain(`<ui-breadcrumb link="/pages/index.html" target="_self">Spell Epic</ui-breadcrumb>`)
     expect(html).toContain(`<h1>Guides</h1>`)
     expect(html.indexOf(START)).toBeLessThan(html.indexOf(END))
     expect(skeleton(LISTS.find((list) => list.id === "templates"))).toContain(`id="writing-docs"`)

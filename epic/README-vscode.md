@@ -15,8 +15,8 @@ The page stays there, beside the session, for as long as the epic runs.
 It reloads itself each time the agent edits it, and takes your review marks while the agent works.
 
 Spell Epic is [spell-epic](README.md)'s VS Code extension, and it does two jobs:
-- **two views in the right side bar**, Review and Details, each holding one live page from a server on your machine:
-  one for reading, one for answering
+- **three views in the right side bar**, Review, Details and Epic Docs, each holding one live page from a server on
+  your machine:  one for reading, one for answering, one for these READMEs
 - **the window bridge**, which lets a Claude Code session reach the window it runs in, not just the one in front
 
 ```mermaid
@@ -148,19 +148,20 @@ and its fallback server loses the engine's scripts and styles.
 
 </details>
 
-## Two views, each a page that stays
+## Three views, each a page that stays
 
 Each view is a frame holding a page's local address, as VS Code's Simple Browser does,
 docked in the right side bar beside your code and the Claude panel.
 
 | View | Icon | What it shows | What opens it |
 | --- | --- | --- | --- |
-| Review, `spellEpic.reviewView` | a checklist | epic pages and saga pages, and every other page:  guides, the home page, the list pages | `/epic review <name>`, `epic open <name>`, `epic test <name>`, `epic pages open <page> --vs`;  its checklist button;  "Review:  Open Epic..." in the Command Palette;  the page's own top bar (Guides, Sagas, Epic Pages) |
+| Review, `spellEpic.reviewView` | the Spell hat | epic pages and saga pages, and every other page:  guides, the home page, the list pages | `/epic review <name>`, `epic open <name>`, `epic test <name>`, `epic pages open <page> --vs`;  its checklist button;  "Review:  Open Epic..." in the Command Palette;  the page's own top bar (Guides, Sagas, Epic Pages) |
 | Details, `spellEpic.detailsView` | a speech bubble | details, review and choice pages:  the questions you answer on a page | `epic ask show <page>`, `epic choices show <page>`, `/details`;  its own list button |
+| Epic Docs, `spellEpic.docsView` | a book | these READMEs, rendered by the page server (`/_epic/docs/README-epics.md`) | opening the tab;  its Home button;  the epics home's Epic Documentation card |
 
 - Each view holds ONE page, and keeps its own:  the question you're answering stays put while you read.
 - The page's kind picks the tab, whichever command showed it:  a details, review or choice page lands in Details,
-  every other page in Review.
+  an epic README (`/_epic/docs/...`) in Epic Docs, every other page in Review.
 - The catch:  a guide opened in Review takes the epic page's place there.
   Back brings the epic page back, and agents rarely open guides.
 - A third view, Epic Docs, held guides until epic `epic-engine` Q73 folded it into Review:

@@ -4789,8 +4789,8 @@
         },
         {
           "key": "crumbDocs",
-          "text": "Docs",
-          "description": "The crumbs' first:  the docs' home page."
+          "text": "Spell Epic",
+          "description": "The crumbs' first:  the epics' home page."
         },
         {
           "key": "crumbEpics",

@@ -29,9 +29,9 @@
  *   - `show-doc { file, hash?, view?, query? }`:  `DocPreview.show(file, hash, query)`
  *     - `hash`:  an id on the page to land on
  *     - `query`:  the page's query, without its `?`:  `test=1` (a test run, `epic test`)
- *     - `view`:  the side bar tab asked for, `"review"` or `"details"` (`"docs"`, from an older `epic`, is Review);
- *       the page's kind decides, never `view` (`docViewFor()`:  a details or choice page to Details, everything else to
- *       Review), and the answer says which, `{ file, view }`
+ *     - `view`:  the side bar tab asked for, `"review"`, `"details"` or `"docs"`;
+ *       the page's kind decides, never `view` (`docViewFor()`:  a details or choice page to Details, an epic doc to
+ *       Epic Docs, everything else to Review), and the answer says which, `{ file, view }`
  *   - `reload-view { view? }`:  rebuild that doc view (Review when none) from scratch, a new iframe at the page in view
  *     (`DocView.rebuild()`);  answers its `url`, `null` when the view was never shown
  *   - `close-window {}`:  close this window, just after answering (`/isolate done` closes the worktree's window)

@@ -5,7 +5,7 @@
  * - The home, `pages/index.html`:  a routing page, one card per area (`areaCards()`), each with its count,
  *   written between `<!-- areas:start -->` and `<!-- areas:end -->`
  *   - a missing one is made from `homeSkeleton()` first (a repo `epic init` set up)
- *   - only the areas this checkout HAS (`areaCards()`):  Guides, Sagas, Epics, Templates
+ *   - only the areas this checkout HAS (`areaCards()`):  Guides, Sagas, Epics;  and Epic Documentation, every repo's
  *   - NOT `index:start` / `index:end`:  the home is shared, so an older checkout's `index.js` runs against it too
  *     - that one wrote three lists into the home
  *     - finding no markers, it stops instead of writing its lists back
@@ -490,7 +490,11 @@ function epicFacts(page) {
 ////////////////
 
 /**
- * The home's cards:  Guides, Sagas, Epics, Templates, the areas an epic user works in.
+ * The home's cards:  Guides, Sagas, Epics, the areas an epic user works in;  then Epic Documentation, the epic
+ * tooling's own READMEs.
+ * - Epic Documentation (Owen, 2026-11-19), in place of Templates:  `/_epic/docs/README-epics.md`, on every page server
+ *   (spell-epic's `docsRoutes.ts`);  in VS Code's side bar it opens the Epic Docs tab (`opensTab`)
+ *   - the Templates list page is still written, but no longer on the home:  not ready for other people to edit
  * - Owen, 2026-11-18 (epic `epic-engine` J275, before the demo):  "Remove anything Spell related in this page
  *   permanently.  No longer relevant to Epics."
  *   - before:  Epic/UI, Spell/UI, App, App/UI and Brand cards too (Owen, 2026-10-11, J40 of `epic-workflow`);
@@ -498,7 +502,7 @@ function epicFacts(page) {
  *     leaves their tabs out (the epic repo's `page-server.json5`)
  * - Sagas was Goals until epic `epic-workflow` P15 (Owen, 2026-10-13:  "saga means roughly epic of epics")
  *
- * Each `{ id, title, icon, href, count, description, meta? }`.
+ * Each `{ id, title, icon, href, count?, description, meta?, pills?, opensTab? }`.
  * - `id`:  the card's id, so the old `pages/index.html#epics` / `#guides` / `#templates` links land on its card
  * - `pages`:  every page `describe()`d, so the counts come from the same data as the list pages;
  *   the Epics count by the Epics page's groups, `favorites` the starred epics' names (`readFavorites()`);
@@ -540,12 +544,12 @@ export function areaCards(pages, favorites = readFavorites(), sagas = readSagas(
       pills: true
     },
     {
-      id: "templates",
-      title: "Templates",
-      icon: "copy",
-      href: "/templates/index.html",
-      count: plural(of("templates").length, "template"),
-      description: "A starting point for every kind of page, and the notes on writing docs."
+      id: "epic-docs",
+      title: "Epic Documentation",
+      icon: "book",
+      href: "/_epic/docs/README-epics.md",
+      description: "How epics work:  setting up, planning, building and reviewing.",
+      opensTab: true
     }
   ]
 }
@@ -571,18 +575,9 @@ export function homeSkeleton() {
 <div class="spell-doc">
 <main class="spell-doc-main">
 <ui-sticky class="spell-h1"><header class="spell-page-head"><h1>${escapeHTML(title)}</h1></header></ui-sticky>
-<p class="lede">${escapeHTML(REPO)}'s epics, the sagas they serve, the guides they leave behind, and templates to start from.</p>
+<p class="lede">${escapeHTML(REPO)}'s epics, the sagas they serve, and the guides they leave behind.</p>
 ${HOME_START}
 ${HOME_END}
-
-<ui-section id="about" label="About these docs" sticky collapsible dividing open="false">
-<ui-icon slot="icon" name="circle info"></ui-icon>
-<ul>
-<li>Served by the epic server (<code>epic hub ensure</code>), which every repo using spell-epic shares.</li>
-<li>The cards above, and each area's list page, are written by <code>epic pages index</code>.  On this page, edit
-only outside its markers.</li>
-</ul>
-</ui-section>
 </main>
 </div>
 <script src="/_epic/assets/highlight.min.js"></script>
@@ -598,26 +593,28 @@ export function hasArea(card) {
   return list ? existsSync(list.dir) : true
 }
 
-/** The home's one section:  the area cards in a grid. */
+/**
+ * What the home holds between its markers:  the area cards in a grid, straight under the lede.
+ * - no "Areas" section around them (Owen, 2026-11-19)
+ */
 function homeSection(cards) {
-  return `<ui-section id="areas" label="Areas" sticky collapsible dividing>
-<ui-icon slot="icon" name="compass"></ui-icon>
-<ui-cards class="spell-grid spell-areas" stackable>
+  return `<ui-cards class="spell-grid spell-areas" stackable>
 ${cards.map(areaCard).join("\n")}
-</ui-cards>
-</ui-section>`
+</ui-cards>`
 }
 
 /**
  * An area's card:  icon and linked title, its count, what's there.
  * - `pills`:  the Epic Pages card's Active epics, `<epic-pills>`, which draws itself from the page server, live (epic
  *   `epic-engine` T99;  J276 wrote a pill per epic here, as of the last `epic pages index`)
+ * - `opensTab`:  in VS Code's side bar, the page opens in the tab it belongs to (`data-spell-open="tab"`, the kit's live
+ *   client);  in a browser, a plain link
  * - `target="_self"`:  the home is a site's front page, so its cards navigate in place, as the top bar's tabs do
  *   (`doc-links.js` exempts `_self` from one-tab-per-destination)
  */
 function areaCard(area) {
   const title = area.href
-    ? `<a href="${escapeHTML(area.href)}" target="_self">${escapeHTML(area.title)}</a>`
+    ? `<a href="${escapeHTML(area.href)}" target="_self"${area.opensTab ? ` data-spell-open="tab"` : ""}>${escapeHTML(area.title)}</a>`
     : `<span>${escapeHTML(area.title)}</span>`
   const meta = [area.count, area.meta]
     .filter(Boolean)
@@ -681,7 +678,7 @@ export function skeleton(list) {
 <div class="spell-doc">
 <main class="spell-doc-main">
 <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
-<ui-breadcrumb link="/pages/index.html" target="_self">Docs</ui-breadcrumb>
+<ui-breadcrumb link="/pages/index.html" target="_self">Spell Epic</ui-breadcrumb>
 <ui-breadcrumb selected>${escapeHTML(list.title)}</ui-breadcrumb>
 </ui-breadcrumbs>
 <ui-sticky class="spell-h1"><header class="spell-page-head"><h1>${escapeHTML(list.title)}</h1></header></ui-sticky>

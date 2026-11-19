@@ -862,6 +862,9 @@ export function liveClient(scrollKey: string): void {
    *   `{ spell: "open", url, kind: "file" }` to the parent, which opens it in VS Code (a folder:  in the Explorer)
    * - another site, or a link marked `data-spell-open="browser"` (the header's App):
    *   `{ spell: "open", url, kind: "external" }`, opened in the browser
+   * - a link marked `data-spell-open="tab"` (the epics home's Epic Documentation card):
+   *   `{ spell: "open", url, kind: "tab" }`, shown in the side bar tab its page belongs to (spell-epic's `docViewFor()`),
+   *   which comes forward;  outside VS Code it's a plain link
    * - left alone:  a modified click, a download, a `javascript:` / `mailto:` link, a same-page `#id` link
    */
   function followInFrame(event: MouseEvent) {
@@ -878,6 +881,8 @@ export function liveClient(scrollKey: string): void {
     event.preventDefault()
     if (url.origin !== location.origin || link.dataset.spellOpen === "browser")
       return window.parent.postMessage({ spell: "open", url: url.href, kind: "external" }, "*")
+    if (link.dataset.spellOpen === "tab")
+      return window.parent.postMessage({ spell: "open", url: url.href, kind: "tab" }, "*")
     // a source reference (`doc-links.js` names its targets `src-<path>`) that isn't a page:  the editor
     if (!/\.html?$/.test(url.pathname) && link.target.startsWith("src-"))
       return window.parent.postMessage({ spell: "open", url: url.href, kind: "file" }, "*")
