@@ -282,8 +282,11 @@ describe("spell place verify (epic `data` P49)", () => {
       if (!path.endsWith("/")) return new Response("Not found", { status: 404 })
       return Response.json({ count: 0, next: null, results: [] })
     }) as typeof globalThis.fetch
-    const { ingest, descriptions } = await ingested(fetch)
+    const { ingest, texts, descriptions } = await ingested(fetch)
     await ingest.verify("NetBox.api.spell", { triesWrites: true })
+    expect(texts.get("NetBox.api.spell")).toMatch(
+      /^a "background task" is a thing\n\tit lives in netbox\n\tthis type is verified$/m
+    )
     const { collections, canDo } = descriptions.get("NetBox.api.json5")!
     expect(collections.background_tasks!.state).toMatchObject({ is: "verified", rows: 1 })
     expect(collections.background_tasks!.rowsAt).toBe("results")

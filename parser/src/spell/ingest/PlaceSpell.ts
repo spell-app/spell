@@ -622,8 +622,10 @@ function actionsOf({ operations = {} }: CollectionDescription): Array<[string, {
  * What a type read from an API's description says of whether it was tried (Q56, Q62):  `unverified`, `verified`,
  * `failed`;  nothing for a type read from rows, which a read through the Spell has tried.
  */
-function stateWordFor({ state, schemaAt }: CollectionDescription): string | undefined {
-  const isFromDescription = schemaAt !== undefined || state?.is === "unverified" || state?.is === "untyped"
+function stateWordFor({ state, schemaAt, tag }: CollectionDescription): string | undefined {
+  // a list no schema typed is still from the description, filed under its tag:  NetBox's background queues (P55)
+  const isFromDescription =
+    schemaAt !== undefined || tag !== undefined || state?.is === "unverified" || state?.is === "untyped"
   if (!state || state.readByTheLook || !isFromDescription) return undefined
   return state.is === "untyped" ? "unverified" : state.is === "disabled" ? undefined : state.is
 }
