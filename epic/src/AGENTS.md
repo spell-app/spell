@@ -1849,15 +1849,16 @@ Each kind of page has ONE name, written everywhere a person reads it.
 
 ## Which side bar tab
 
-VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never the command that shows it
+VS Code's right side bar has two tabs, and the PAGE'S KIND picks one, never the command that shows it
 (epic `epic-engine` P59, request r50:  a choice page the person was answering vanished,
 the epic page shown in both tabs).
 - The ONE rule:  `docViewFor()`, in the extension's [docUrls.ts](../vscode/src/docUrls.ts), from the page's path:
-  - an epic page, a saga page:  "Review" (`review`), whatever was asked
   - a details, review or choice page (a page in a `details/` folder):  "Details" (`details`)
-  - anything else:  "Epic Docs" (`docs`), unless the caller asked for "Review" (`--review`, `view=review`)
+  - anything else -- epic pages, saga pages, guides, the home page, the list pages:  "Review" (`review`)
+  - a third tab, "Epic Docs" (`docs`), held guides until epic `epic-engine` Q73 folded it into Review;
+    the bridge still takes `docs` from an older `epic`, as Review (`docViewNamed()`)
 - So the callers pass no tab:  `epic open`, `epic ask show`, `epic choices show`, `epic pages link --show`, the show
-  route (`GET /api/docs/show`), `epic window show`;  `--review` stays, asking for a page of no kind of its own
+  route (`GET /api/docs/show`), `epic window show`;  `--review` stays for old scripts, and changes nothing
   - the bridge's `show-doc` answers which tab it took, `{ file, view }`:  the show route's closing page names it
 - The "Details" tab never replaces a page still WAITING for the person's answer (`DetailsPages.isWaiting()`,
   [DetailsPages.ts](tools/DetailsPages.ts):  no answer for its round now, or a session waiting on it):
@@ -2944,8 +2945,8 @@ In this order, from `epic/` (a page by its path in the checkout it's in):
   - `page` may be a short address:  `SAGA:/drawable-spell`, `SAGA:/drawable-spell/python-target#T1` (landing on T1)
   - in Chrome, reusing its tab
   - `--vs`:  in VS Code's right side bar, in the tab the page's kind says (see "Which side bar tab");
-    "Epic Docs" for a guide (`/spell-docs`)
-  - `--review`:  asks for its "Review" tab, for a page of no kind of its own (`/epic review`)
+    "Review" for a guide (`/spell-docs`)
+  - `--review`:  the same as `--vs` (`/epic review`)
   - Each tab keeps its own page.
     Showing the page a tab already has doesn't reload it:  the page updates itself.
 - `epic ask` ([details.js](tools/details.js)):  details pages (see "Details pages").

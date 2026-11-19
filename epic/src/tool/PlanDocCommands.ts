@@ -1293,8 +1293,8 @@ export class PlanDocCommands {
 
   /**
    * `open <name>`:  show the doc in VS Code's side bar's Review tab, reusing it (`openInVSCode()`)
-   * - an epic page always goes there, by its kind (epic `epic-engine` P59):  never the Epic Docs tab, whatever was
-   *   asked;  `--docs`, Owen's 2026-10-12 rule until then, is accepted and does nothing
+   * - an epic page always goes there, by its kind (epic `epic-engine` P59), whatever was asked;
+   *   `--docs`, Owen's 2026-10-12 rule for a third tab (gone since epic `epic-engine` Q73), is accepted and does nothing
    */
   private open(file: string): void {
     this.read(file)

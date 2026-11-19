@@ -7,8 +7,8 @@
  * - `GET /api/docs/show?path=<url path>[&window=<pid>][&hash=<id>][&view=review][&in=browser]` -- what
  *   `epic pages link` prints
  *   - which side bar tab:  the extension decides, by the page's kind (its `docViewFor()`, epic `epic-engine` P59):
- *     an epic page to "Review", a details or choice page to "Details", anything else to "Epic Docs";
- *     `view=review` (or `docs`, `details`) only asks, for a page of no such kind
+ *     a details or choice page to "Details", anything else to "Review" (epic `epic-engine` Q73);
+ *     `view=review` (or `details`) is passed on, and changes nothing
  *   - `path`:  the page's URL path on this server (`/guides/...`, `/worktrees/<w>/...`), mapped to its file
  *     through the server's mounts;  only `.html`
  *   - `window`:  the VS Code window's pid (its registry entry, `src/window.mjs`);  gone (reloaded), or not given:
@@ -36,8 +36,11 @@ import { openUrlInChrome } from "./pages.js"
 /** How long after answering before VS Code is brought forward, in ms:  the tab closes first. */
 const FOCUS_DELAY = 300
 
-/** Each side bar tab's name, by the extension's view name:  what the closing page says. */
-const TAB_NAMES = { docs: "Epic Docs", review: "Review", details: "Details" }
+/**
+ * Each side bar tab's name, by the extension's view name:  what the closing page says.
+ * - an extension from before epic `epic-engine` Q73 may answer its third tab's name, `docs`:  "the side bar", unnamed
+ */
+const TAB_NAMES = { review: "Review", details: "Details" }
 
 const showRoutes: RouteModule = {
   name: "show",
@@ -62,8 +65,10 @@ const showRoutes: RouteModule = {
         { file, ...(hash && { hash }), ...(asked && { view: asked }) },
         window
       )
-      const tab = TAB_NAMES[shown.view as keyof typeof TAB_NAMES] ?? "Epic Docs"
-      reply.set("Cache-Control", "no-store").send(closingPage(path, `VS Code's side bar (${tab})`))
+      const tab = TAB_NAMES[shown.view as keyof typeof TAB_NAMES]
+      reply
+        .set("Cache-Control", "no-store")
+        .send(closingPage(path, tab ? `VS Code's side bar (${tab})` : "VS Code's side bar"))
       closeShownTab(window)
       if (process.platform === "darwin") void after(FOCUS_DELAY / 1000, focusVSCode).catch(console.error)
     })

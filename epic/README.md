@@ -247,9 +247,8 @@ Every mark and what applying it does, the colours, the comments and the manual t
 The pages open in VS Code's RIGHT side bar, beside your code and the Claude panel,
 through spell-epic's own extension, Spell Epic.
 
-- **Review**:  the epic page you're reviewing.
+- **Review**:  the epic page you're reviewing, and any guide or docs page, each reloading itself as the agent edits it.
 - **Details**:  the details, review and choice pages, so a question never replaces the epic page.
-- **Epic Docs**:  any guide or docs page, reloading itself as the agent edits it.
 - Each epic's window has a look of its own (one of twelve tints) and is titled `⎇ <name>`;
   its Claude session is titled `🚧 <name>`, so the panel's list reads like your epics.
 - A session reaches its own window through the extension:
@@ -435,7 +434,7 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
 | [README-pages.md](README-pages.md) | <ul><li>your first review, in four moves</li><li>the header and toolbar;  eight sections whose ids never change</li><li>a review round, comments and manual tests;  what each colour means</li><li>saga, details and choice pages, guides, the home page;  the `<epic-*>` elements</li></ul> |
 | [README-skills.md](README-skills.md) | <ul><li>twenty-two skills you type, fourteen hooks that run by themselves</li><li>planning and review;  worktrees and sessions;  background and offline</li><li>the hooks, and the prompt gate that reads first</li><li>two names for every skill</li></ul> |
 | [README-cli.md](README-cli.md) | <ul><li>the six commands you'll actually type</li><li>an address is a page and an id:  `seo#J3`</li><li>one copy of the code;  how a `wait` wakes a session</li><li>every verb, by group;  where it stops</li></ul> |
-| [README-vscode.md](README-vscode.md) | <ul><li>the Spell Epic extension:  three commands and a reload</li><li>three views, each a page that stays;  which server answers</li><li>the window bridge, and how a session moves</li><li>working on it</li></ul> |
+| [README-vscode.md](README-vscode.md) | <ul><li>the Spell Epic extension:  three commands and a reload</li><li>two views, each a page that stays;  which server answers</li><li>the window bridge, and how a session moves</li><li>working on it</li></ul> |
 | [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md), at the kit's root | <ul><li>what an epic is, why you'd want one, how you'll use it</li><li>try it, in one command</li></ul> |
 | [README-setup.md](README-setup.md) | <ul><li>every step of setting a repo up;  the extension</li><li>on GitLab;  when main takes only pull or merge requests</li><li>the plans live beside your repo;  what your AGENTS.md adds</li></ul> |
 | [README-teams.md](README-teams.md) | <ul><li>joining, who you are, every turn syncs</li><li>two people on one page;  whose agent answers whom</li><li>with Codex, or another agent</li></ul> |

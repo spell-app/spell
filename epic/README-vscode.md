@@ -15,8 +15,8 @@ The page stays there, beside the session, for as long as the epic runs.
 It reloads itself each time the agent edits it, and takes your review marks while the agent works.
 
 Spell Epic is [spell-epic](README.md)'s VS Code extension, and it does two jobs:
-- **three views in the right side bar**, Epic Docs, Review and Details, each holding one live page from a server on your
-  machine
+- **two views in the right side bar**, Review and Details, each holding one live page from a server on your machine:
+  one for reading, one for answering
 - **the window bridge**, which lets a Claude Code session reach the window it runs in, not just the one in front
 
 ```mermaid
@@ -31,12 +31,10 @@ flowchart LR
     subgraph bar["its right side bar"]
       review["Review"]
       details["Details"]
-      docs["Epic Docs"]
     end
   end
   server -- "live pages" --> review
   server -- "live pages" --> details
-  server -- "live pages" --> docs
   session -- "show this page" --> bridge
   bridge -- "here" --> review
   %% the Spell look:  yarn mermaid:pretty
@@ -136,8 +134,8 @@ and its fallback server loses the engine's scripts and styles.
 <details>
 <summary>What's in the .vsix, and what's built into it</summary>
 
-- Three files, by its [.vscodeignore](vscode/.vscodeignore):
-  `package.json`, the bundle `out/extension.js`, and `media/spell.svg`, the Spell hat.
+- Two files, by its [.vscodeignore](vscode/.vscodeignore):
+  `package.json` and the bundle `out/extension.js`.
 - The bundle is about 340 KB, because it carries the kit's page server (`spell/server`):
   the fallback server below runs it.
   It carries spell-epic's repo list and settings readers too.
@@ -150,20 +148,23 @@ and its fallback server loses the engine's scripts and styles.
 
 </details>
 
-## Three views, each a page that stays
+## Two views, each a page that stays
 
 Each view is a frame holding a page's local address, as VS Code's Simple Browser does,
 docked in the right side bar beside your code and the Claude panel.
 
 | View | Icon | What it shows | What opens it |
 | --- | --- | --- | --- |
-| Review, `spellEpic.reviewView` | a checklist | epic pages and saga pages | `/epic review <name>`, `epic open <name>`, `epic test <name>`;  its checklist button;  "Review:  Open Epic..." in the Command Palette |
+| Review, `spellEpic.reviewView` | a checklist | epic pages and saga pages, and every other page:  guides, the home page, the list pages | `/epic review <name>`, `epic open <name>`, `epic test <name>`, `epic pages open <page> --vs`;  its checklist button;  "Review:  Open Epic..." in the Command Palette;  the page's own top bar (Guides, Sagas, Epic Pages) |
 | Details, `spellEpic.detailsView` | a speech bubble | details, review and choice pages:  the questions you answer on a page | `epic ask show <page>`, `epic choices show <page>`, `/details`;  its own list button |
-| Epic Docs, `spellEpic.docView` | the Spell hat | any other guide or docs page | `epic pages open <page> --vs` |
 
-- Each view holds ONE page, and keeps its own:  the page you're reviewing stays put while the docs move.
-- The page's kind picks the tab, whichever command showed it:  an epic page always lands in Review.
-  A page of no kind of its own goes to Epic Docs, unless it's asked for with `--review`.
+- Each view holds ONE page, and keeps its own:  the question you're answering stays put while you read.
+- The page's kind picks the tab, whichever command showed it:  a details, review or choice page lands in Details,
+  every other page in Review.
+- The catch:  a guide opened in Review takes the epic page's place there.
+  Back brings the epic page back, and agents rarely open guides.
+- A third view, Epic Docs, held guides until epic `epic-engine` Q73 folded it into Review:
+  one tab fewer, and no guessing which tab a guide went to.
 - Details is why a question never replaces the epic page.
   A page there still waiting for your answer is never replaced either:
   a new one waits its turn, the tab's title says "2 pages waiting",
@@ -195,8 +196,9 @@ Two quirks you'll meet in the first minute:
 - The first page shown in a window opens the side bar AND moves your focus into it:
   VS Code has no way to show a view without focusing it.
   Later pages leave your focus where it is.
-- Opened before anything was shown, Epic Docs shows the docs' home page, and Review says what fills it:
-  "Nothing to review yet:  the list button above (Review:  Open Epic...), or /epic review <name>."
+- Opened before anything was shown, Review shows the docs' home page;
+  with no home page to show, it says what fills it:
+  "Nothing to review yet:  the checklist button above (This Epic's Page), /epic review <name>, or epic pages open <page>."
   Details lists this window's epic's details and choice pages, newest first, the ones waiting for you in red.
 
 ### The buttons
@@ -215,14 +217,14 @@ VS Code's own maximize comes last.
 | Back, Forward | the page's own history.  The view can't read a frame from another origin, so the page reports where it is;  a page from no page server never does, and both stay off |
 | Reload | the page again, in the same frame |
 | Open in Browser | the page, in your default browser |
-| Epics Home | Epic Docs and Review:  a NEW frame, at the docs' home page:  the epic server's, else the window's own repo's |
-| This Epic's Page | the Review and Epic Docs tabs' checklist button:  in a worktree's window, always that worktree's epic page, in the Review tab, whatever the tab showed last;  in the main checkout's window, the epic list of "Review:  Open Epic..." |
+| Epics Home | Review:  a NEW frame, at the docs' home page:  the epic server's, else the window's own repo's |
+| This Epic's Page | the Review tab's checklist button:  in a worktree's window, always that worktree's epic page, in the Review tab, whatever the tab showed last;  in the main checkout's window, the epic list of "Review:  Open Epic..." |
 | This Epic's Questions (`spellEpic.detailsView.list`) | the Details tab's list button:  this window's epic's details and choice pages, newest first, the waiting ones red, the pages waiting their turn on top;  "Other epic..." picks another, remembered for the window |
 | Review:  Open Epic... | a Command Palette command:  lists every epic page of every registered repo, and of the window's first folder, newest first, by title;  the one you pick opens in Review, in any window.  No terminal, no Claude:  it's how you review on a plane |
 | Restart Page Server | stops and starts the server behind the page, then shows the page again, on its new port if it moved |
 
 Each tooltip is the button's name only;  in the Command Palette, each is listed under its tab's name
-(Epic Docs, Review, Details), e.g. "Review:  Epics Home".
+(Review, Details), e.g. "Review:  Epics Home".
 
 ### When a page misbehaves
 
@@ -231,18 +233,18 @@ Four fixes, gentlest first:
 | When the page ... | Try | What it does |
 | --- | --- | --- |
 | is stale, or shows an error | Reload | loads it again, in the same frame |
-| stops taking clicks | `epic window reload` (`--review` for Review, `--details` for Details) | a new frame, at the same page |
+| stops taking clicks | `epic window reload` (Review;  `--details` for Details) | a new frame, at the same page |
 | stops answering at all | Epics Home;  in Details, its list button | a new frame, at the docs' home page;  in Details, the list in its place |
 | lost its server, or has a stale one | Restart Page Server | the server behind it, stopped and started, and the page shown again |
 
 Epics Home builds a new frame rather than steering the old one,
 because a wedged page ignores every message the view sends it, Back included.
 
-### One setting
+### No settings
 
-| Setting | Default | What it does |
-| --- | --- | --- |
-| `spellEpic.docPreview.location` | `sidebar` | where docs pages open:  `sidebar`, the Epic Docs view;  or `beside`, VS Code's Simple Browser in a column next to the editor, loaded afresh each time.  Epic pages always open in Review, details and choice pages in Details |
+It has none.
+Its one setting, `spellEpic.docPreview.location`, moved the Epic Docs view's pages to VS Code's Simple Browser,
+and went with that view (epic `epic-engine` Q73).
 
 ## Which server answers:  the first of four
 
@@ -454,7 +456,7 @@ Where the bridge can let you down:
     against a scratch Cursor profile (Cursor 3.22).
   - Cursor keeps its right side bar for its own agent (since its 3.15.6, Claude Code's panel opens as an editor tab:
     [Cursor's forum](https://forum.cursor.com/t/claude-code-extension-no-longer-appears-in-the-right-sidebar-after-cursor-3-15-6-update/167700)),
-    so the three views may not show there:  **View: Open View...**, then drag the view where you want it, or
+    so the two views may not show there:  **View: Open View...**, then drag the view where you want it, or
     **View: Move View**.  No person has tried that, nor a window move, in Cursor yet.
 
 ## Working on it
@@ -467,13 +469,13 @@ or to the code it bundles:  the kit's page server, which the fallback runs, and 
 | File | What's in it |
 | --- | --- |
 | [extension.ts](vscode/src/extension.ts) | starts the views and the bridge;  nothing to stop by hand |
-| [DocView.ts](vscode/src/DocView.ts) | the three views:  one frame each, steered rather than rebuilt (a rebuilt frame flashes white);  the buttons, the menu, and the keys and edits passed through |
+| [DocView.ts](vscode/src/DocView.ts) | the two views:  one frame each, steered rather than rebuilt (a rebuilt frame flashes white);  the buttons, the menu, and the keys and edits passed through |
 | [DocPreview.ts](vscode/src/DocPreview.ts) | shows a page:  which view, which server, and the `vscode://` link |
 | [WindowBridge.ts](vscode/src/WindowBridge.ts) | the window bridge:  the registry file and the eight operations |
 | [ClipboardImage.ts](vscode/src/ClipboardImage.ts) | a picture on the clipboard, read for a paste into a page, each system its own way |
 | [docUrls.ts](vscode/src/docUrls.ts) | the pure parts:  page addresses, which tab a page goes to, the "Open Epic..." list, which file a served address is, a Claude tab's label;  no `vscode`, so its tests run under plain `node` |
 | [build.mjs](vscode/build.mjs) | the esbuild bundle, `out/extension.js`, with the checkout's path built in |
-| [package.json](vscode/package.json) | the views, commands, menus and the setting VS Code reads |
+| [package.json](vscode/package.json) | the views, commands and menus VS Code reads |
 | [window.mjs](src/window.mjs) | the bridge's other side:  what `epic window` runs |
 
 Two checks, both from spell-epic's root.
