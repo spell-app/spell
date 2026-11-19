@@ -1,10 +1,12 @@
 # How epics work:  sagas, epics, guides
 
-![The docs' home page in a browser.  The top bar's three tabs, Guides, Sagas and Epic Pages, are outlined, and so
-are three cards under them:  Guides, "what each finished epic leaves behind";  Sagas, "the big aims, each an epic of
-epics";  Epic Pages, "one page per piece of work", with the epics under way listed in it.](docs/images/how-home.png)
+![The home page of the epic pages in a browser.  The top bar is outlined:  the wizard hat and "Spell Epic" at the
+left, and the tabs Epic Pages, Sagas and Guides in its centre.  So are the four cards under it:  Guides, "what each
+finished epic leaves behind";  Sagas, "the big aims, each an epic of epics";  Epic Pages, "one page per piece of
+work", with its Active epics, one pill per epic showing its phase and what waits on you;  and Templates, "a starting
+point for every kind of page".](docs/images/how-home.png)
 
-_The home page of the pages `epic init` sets up:  three kinds of page, one tab each._
+_The home page `epic init` sets up:  three tabs, and a card each for guides, sagas, epic pages and templates._
 
 Not set up yet?  One command does it:  [Try it](https://github.com/spell-app/spell/blob/main/README-epics.md#try-it).
 This page is the map once you have.

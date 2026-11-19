@@ -9,6 +9,9 @@ import { appConfig, pageServerProxy } from "./vite.shared.ts"
 /** Name of the runtime's entry in a build:  `dist/spell-runtime.js` -- see `editor.loadRuntime()`. */
 const RUNTIME_ENTRY = "spell-runtime"
 
+/** The runtime's source, from this folder:  the entry of `spell-runtime.js`. */
+const RUNTIME_SOURCE = "../src/app/runner/spellRuntime.ts"
+
 /** Plugins, dedupe and CSS:  `appConfig()`, with `spell-ui`'s icon packs. */
 const APP_CONFIG = appConfig({ iconPacks: true })
 
@@ -27,7 +30,7 @@ export default defineConfig({
     ignorePatterns: ["build", "dist", ".cache", "dist-runner", "dist-element", "static"]
   }),
   ...APP_CONFIG,
-  plugins: [...APP_CONFIG.plugins, repoSourceInDev(), runtimeCopyInDev()],
+  plugins: [...APP_CONFIG.plugins, repoSourceInDev(), runtimeCopyInDev(), runtimeOwnCoreInBuild()],
   server: {
     ...APP_CONFIG.server,
     port: environment.vitePort,
@@ -49,9 +52,9 @@ export default defineConfig({
     outDir: "dist",
     sourcemap: false,
     rollupOptions: {
-      // the app, and the runtime its programs run on -- its own entry, so it holds ALL of `core`, at a FIXED
-      // name for `editor.loadRuntime()` to import.  See `spellRuntime.ts`.
-      input: { index: "index.html", [RUNTIME_ENTRY]: "../src/app/runner/spellRuntime.ts" },
+      // the app, and the runtime its programs run on -- its own entry, so it holds ALL of `core`
+      // (`runtimeOwnCoreInBuild()`), at a FIXED name for `editor.loadRuntime()` to import.  See `spellRuntime.ts`.
+      input: { index: "index.html", [RUNTIME_ENTRY]: RUNTIME_SOURCE },
       // keep `spell-runtime.js`'s exports by NAME:  it's compiled spell's `@spell/core`
       preserveEntrySignatures: "exports-only",
       output: {
@@ -93,7 +96,10 @@ function repoSourceInDev(): Plugin {
 
 /** The queries that mark a module as a copy of its own:  the layout's (`layoutSpell.ts`), the tests' (`editor.runTests()`). */
 const COPY_QUERY = /\?(?:layout|tests)-copy$/
-/** The folders holding what a runtime keeps per copy:  its `core`, and what runs on it. */
+/**
+ * The folders holding what a runtime keeps per copy:  its `core`, and what runs on it.
+ * - Solid, Spell UI, `spell/util` and the places stay the page's one, in dev and in a build.
+ */
 const PER_COPY = /\/(parser\/src\/core|app\/src\/app\/runner)\//
 
 /**
@@ -115,6 +121,58 @@ function runtimeCopyInDev(): Plugin {
       const resolved = await this.resolve(id, importer.split("?")[0], { skipSelf: true })
       if (!resolved || !PER_COPY.test(resolved.id) || resolved.id.includes("?")) return resolved
       return { ...resolved, id: resolved.id + copy }
+    }
+  }
+}
+
+/** The query marking a module as `spell-runtime.js`'s own, in a build:  never the same module as the editor's. */
+const RUNTIME_OWN = "?spell-runtime"
+
+/** A dynamic `import()` of a quoted name, e.g. `import("./placeSamples")`:  its quote, then the name. */
+const DYNAMIC_IMPORT = /\bimport\(\s*(["'])([^"'`\n]+)\1\s*\)/g
+
+/**
+ * In a build, `spell-runtime.js` holds ALL of what a runtime keeps per copy (`PER_COPY`):  its `core`, and what runs on it.
+ * - `loadRuntime()` copies that ONE file, from a `blob:` URL, and the copy shares the chunks it imports.
+ *   With `core` in a chunk the editor shares, every copy shared ONE `core`, each with its own `View`:
+ *   the last copy loaded took `core.defineElement()` over, and an app's elements were never defined
+ *   (epic `from-console` P13).
+ * - So, as `runtimeCopyInDev()` does in dev, the runtime's imports into `PER_COPY` get modules of their own,
+ *   marked `RUNTIME_OWN`, followed from module to module:
+ *   only the runtime imports them, so they're bundled into it, never into a chunk the editor shares.
+ *   - The editor's own imports of the same files are other modules, in its own chunks.
+ * - Their lazy imports of each other are made static, so they're in the file too:
+ *   a lazy chunk is shared by every copy, as any chunk is.
+ *   - e.g. `core`'s `placeSamples`;  a lazy import of the places or of Spell UI stays lazy, the page's one.
+ * - Pinned by `build.test.ts`, which loads the built runtime and a copy of it in a browser.
+ */
+function runtimeOwnCoreInBuild(): Plugin {
+  const entry = path.resolve(import.meta.dirname, RUNTIME_SOURCE)
+  const isRuntimeOwn = (id: string) => id === entry || id.endsWith(RUNTIME_OWN)
+  return {
+    name: "spell-app:runtime-own-core-in-build",
+    apply: "build",
+    enforce: "pre",
+    async resolveId(id, importer) {
+      if (!importer || !isRuntimeOwn(importer)) return null
+      const resolved = await this.resolve(id, importer.split("?")[0], { skipSelf: true })
+      if (!resolved || resolved.external || !PER_COPY.test(resolved.id) || resolved.id.includes("?")) return resolved
+      return { ...resolved, id: resolved.id + RUNTIME_OWN }
+    },
+    async transform(code, id) {
+      if (!isRuntimeOwn(id)) return null
+      const file = id.split("?")[0]!
+      const inlined: string[] = []
+      let rewritten = code
+      for (const [whole, , name] of code.matchAll(DYNAMIC_IMPORT)) {
+        const resolved = await this.resolve(name!, file)
+        if (!resolved || resolved.external || !PER_COPY.test(resolved.id)) continue
+        const local = `__runtimeOwn${inlined.length}`
+        inlined.push(`import * as ${local} from ${JSON.stringify(name)}`)
+        rewritten = rewritten.replace(whole, `Promise.resolve(${local})`)
+      }
+      // at the end, so every line keeps its number
+      return inlined.length ? { code: `${rewritten}\n${inlined.join(";")}\n`, map: null } : null
     }
   }
 }

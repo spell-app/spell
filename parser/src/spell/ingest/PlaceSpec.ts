@@ -1,3 +1,4 @@
+import { P } from "spell/parser/parser"
 import { oneOfWords } from "spell/parser/core/schemaWords"
 
 import type { CollectionLook, FieldDescription, FieldKind, OperationDescription, PlaceLook } from "./ingest.types"
@@ -40,6 +41,8 @@ const TOO_DEEP = "It's too far inside others:  read it by hand, a type of its ow
  *   (`/tenants/{id}/`).
  * - What can be done to one:  `add` (a `POST` to its own address), `change` (`PUT` or `PATCH` by id), `delete`, and each
  *   action route under a thing by id, by its last word (`/background-tasks/{id}/enqueue/` is `enqueue`).
+ * - ONE thing under each of a collection's things, a `GET` answering one object (`/instances/{id}/snapshot`):
+ *   a collection of its own, by its last word too, read as part of its owner (`recordsUnder()`, epic `from-console` P16).
  * - A reference into another file or address is named in the notes, and its field left untyped:  only local ones are
  *   followed, by a small reader of its own (no dependency).
  * - Plain data:  it reads nothing, so a test hands it a saved description.
@@ -72,13 +75,14 @@ export class PlaceSpec {
     const prefix = new URL(place.replace(/^file:/, "http:")).pathname.replace(/\/+$/, "")
     const paths = this.document.paths ?? {}
     const collections: CollectionLook[] = []
+    const specPaths = new Map<CollectionLook, string>()
     for (const [path, item] of Object.entries(paths)) {
       if (HAS_BRACE.test(path) || !item?.get) continue
       // no list in its answer's schema, but things by id under it:  a collection all the same, untyped till a read fills it
       const rows = this.rowsOf(item.get) ?? (hasThingsUnder(path, paths) ? { item: {} } : undefined)
       if (!rows) continue
-      const at = prefix && path.startsWith(`${prefix}/`) ? path.slice(prefix.length) : path
-      collections.push({
+      const at = underPlace(path, prefix)
+      const collection: CollectionLook = {
         name: lastWordOf(path),
         at,
         rows: [],
@@ -93,8 +97,12 @@ export class PlaceSpec {
         idAt: "id",
         fields: this.fieldsOf(rows.item, rows.schemaAt ?? path),
         operations: this.operationsOf(path, at, paths)
-      })
+      }
+      collections.push(collection)
+      specPaths.set(collection, path)
     }
+    const records = this.recordsUnder(paths, prefix, specPaths)
+    collections.push(...records.map(({ record }) => record))
     nameApart(collections)
     for (const collection of collections) {
       if (!("id" in (collection.fields ?? {}))) delete collection.idAt
@@ -105,6 +113,14 @@ export class PlaceSpec {
       headers: {},
       docs: this.summary(collections),
       writesOffered: [...new Set(collections.flatMap(({ operations }) => Object.keys(operations ?? {})))],
+      ...(records.length && {
+        listsUnder: records.map(({ owner, record }) => ({
+          owner: owner.name,
+          list: record.name,
+          at: record.at,
+          isOne: true
+        }))
+      }),
       docsAt: this.at,
       specAt: this.at,
       ...(this.document.info?.version && {
@@ -152,6 +168,68 @@ export class PlaceSpec {
   /** Does its list take a `limit`, so it can be asked for more at a time? */
   private takesLimit(item: OpenApiPathItem): boolean {
     return (item.get?.parameters ?? []).some((each) => this.resolved(each)?.name === "limit")
+  }
+
+  ////////////////
+  // ## One thing under each
+  ////////////////
+
+  /**
+   * ONE thing under each thing of a collection, at an address of its own (epic `from-console` P16):
+   * a `GET` under a thing by id that answers one object, `/instances/{id}/snapshot`.
+   * - Each is a collection of its own, named by its last word as an action is (`snapshot`), its fields from its schema,
+   *   found at that address;  its owner keeps it under each of its things (`ListUnderSeen.isOne`).
+   * - Its owner:  the collection whose address it's under, else the one its brace or the word before it names
+   *   (`/systems/instance/{instance_id}/snapshot` is under `instances`).
+   * - One with no owner found is said in the notes, and left out.
+   */
+  private recordsUnder(
+    paths: Readonly<Record<string, OpenApiPathItem | undefined>>,
+    prefix: string,
+    specPaths: ReadonlyMap<CollectionLook, string>
+  ): Array<{ owner: CollectionLook; record: CollectionLook }> {
+    const found: Array<{ owner: CollectionLook; record: CollectionLook }> = []
+    for (const [path, item] of Object.entries(paths)) {
+      const words = path.replace(/^\/+|\/+$/g, "").split("/")
+      const get = item?.get
+      if (!get || words.filter((word) => HAS_BRACE.test(word)).length !== 1 || !HAS_BRACE.test(words.at(-2) ?? ""))
+        continue
+      const answer = this.answerOf(get)
+      if (!this.isOneThing(answer)) continue
+      const owner = ownerOf(words, specPaths)
+      if (!owner) {
+        this.notes.push(`${path} answers one thing under another, but no list of those is described:  read it by hand.`)
+        continue
+      }
+      const { schemaAt } = this.itemAt(answer!)
+      found.push({
+        owner,
+        record: {
+          name: lastWordOf(path),
+          at: underPlace(path, prefix).replace(HAS_BRACE, "{id}"),
+          rows: [],
+          paging: "none",
+          pagesRead: 0,
+          hasMore: false,
+          ...(schemaAt !== undefined && { schemaAt }),
+          ...(get.tags?.[0] !== undefined && { tag: get.tags[0] }),
+          idAt: "id",
+          fields: this.fieldsOf(answer!, schemaAt ?? path)
+        }
+      })
+    }
+    return found
+  }
+
+  /** Is `answer` one object with fields, not a list, nor one wrapped under a name a list's rows go under? */
+  private isOneThing(answer: Schema | undefined): boolean {
+    const resolved = this.resolved(answer)
+    if (!resolved || resolved.type === "array") return false
+    const properties = this.propertiesOf(resolved)
+    const isWrappedList = ROWS_NAMES.some(
+      (name) => properties[name] && this.resolved(properties[name])?.type === "array"
+    )
+    return !isWrappedList && Object.keys(properties).length > 0
   }
 
   ////////////////
@@ -414,6 +492,28 @@ function hasThingsUnder(path: string, paths: Readonly<Record<string, OpenApiPath
   return Object.keys(paths).some((other) => other.startsWith(path) && HAS_BRACE.test(other.slice(path.length)))
 }
 
+/** `path` under the place's own path, `prefix`:  `/api/jobs/` under `/api` is `/jobs/`. */
+function underPlace(path: string, prefix: string): string {
+  return prefix && path.startsWith(`${prefix}/`) ? path.slice(prefix.length) : path
+}
+
+/**
+ * The collection a path of one thing under another's is under, by the path's `words` (see `recordsUnder()`):
+ * the one at the address before its brace, else the one its brace's name or the word before it names, if just one.
+ */
+function ownerOf(words: readonly string[], specPaths: ReadonlyMap<CollectionLook, string>): CollectionLook | undefined {
+  const before = `/${words.slice(0, -2).join("/")}`
+  for (const [collection, path] of specPaths) if (path.replace(/\/+$/, "") === before) return collection
+  const brace = words.at(-2)!.replace(/[{}]/g, "")
+  const named = [brace.replace(/[-_ ]?id$/i, ""), words.at(-3) ?? ""].map((each) => P.singularize(wordsFor(each)))
+  for (const name of named) {
+    if (!name) continue
+    const matching = [...specPaths.keys()].filter((collection) => P.singularize(wordsFor(collection.name)) === name)
+    if (matching.length === 1) return matching[0]
+  }
+  return undefined
+}
+
 /** A path's last word:  `/api/tenancy/tenant-groups/` => `tenant-groups`. */
 function lastWordOf(path: string): string {
   return path.replace(/\/+$/, "").split("/").pop() ?? path
@@ -429,7 +529,7 @@ function nameApart(collections: CollectionLook[]): void {
   for (const collection of collections) {
     if (counts.get(collection.name)! < 2) continue
     const words = collection.at.replace(/\/+$/, "").split("/")
-    collection.name = `${words.at(-2) ?? ""} ${collection.name}`.trim()
+    collection.name = `${words.filter((word) => !HAS_BRACE.test(word)).at(-2) ?? ""} ${collection.name}`.trim()
   }
 }
 

@@ -1404,6 +1404,7 @@ export const savedMethods = defineCoreModule({
    * - A list the place keeps under the thing, at an address of its own,
    *   `- a post's comments live at "/posts/{id}/comments"`:
    *   read from there, the first time something reads it (epic `data` P30).
+   *   - A field of ONE thing there, `- a system's snapshot lives at "..."`:  that list's one row (epic `from-console` P16).
    * - An address or `{ name, url }`.  A thing is the thing, so a field set to one reads at once.
    * - Waits as a value does:  in a drawing, the nearest "…" or `while waiting:`.  Once it's known, it answers at once.
    * - Each read of it holds what it follows, so a drawing leaving stops its requests.
@@ -1422,9 +1423,13 @@ export const savedMethods = defineCoreModule({
       if (!(now instanceof List)) return undefined
       return now.items.flatMap((item) => addressIn(item) ?? [])
     }
-    // a list the place keeps under this thing, at an address of its own:  a post's comments
+    // a list the place keeps under this thing, at an address of its own:  a post's comments;
+    // or ONE thing there, the list's one row:  a system's snapshot (epic `from-console` P16)
     const under = program.addressUnder(owner, name)
     if (under !== undefined) {
+      const info = schemaOf(owner.constructor as SavedClass).info(name)
+      if (info && info.itemType === undefined)
+        return core.waitedValue(owner, name, async () => (await savedMethods.savedThings(saved, { under })).items[0])
       return core.waitedValue(owner, name, () => savedMethods.savedThings(saved, { under }))
     }
     if (held instanceof List) {

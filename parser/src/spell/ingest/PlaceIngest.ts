@@ -338,6 +338,18 @@ export class PlaceIngest {
         changes.push(`${name}:  ${was ?? "never tried"} => ${state.is}${state.reason ? ` -- ${state.reason}` : ""}.`)
       }
     }
+    // ONE thing under each, read under its owner's first thing:  once its owner's list has rows (epic `from-console` P16)
+    for (const [name, collection] of Object.entries(description.collections)) {
+      if (!collection.isOneUnder || collection.leftOut || collection.state?.is === "disabled") continue
+      reader.startAgain()
+      const was = collection.state?.is
+      const state = await this.verifyOneUnder(address, name, description, read, reader, deployment?.name)
+      if (!state) continue
+      collection.state = state
+      if (state.is !== was) {
+        changes.push(`${name}:  ${was ?? "never tried"} => ${state.is}${state.reason ? ` -- ${state.reason}` : ""}.`)
+      }
+    }
     // only because the person said it may, and never on a read only deployment (above)
     if (triesWrites) {
       const seen = await writesTried(address, read, reader)
@@ -423,6 +435,50 @@ export class PlaceIngest {
     const byId = await this.thingById(address, collection, rows[0], reader)
     if (byId) return failed(byId)
     return { state: { is: "verified", ...tried, status: answer.status, rows: rows.length }, rows }
+  }
+
+  /**
+   * One thing under each of another collection's things, `name`, tried under the first one `read` found (epic `from-console` P16):
+   * a system's snapshot, at `/instances/7/snapshot`.
+   * - `undefined` when no owner's list read a thing to try it under:  it stays as it was.
+   * - NEVER throws for an answer, or none:  that's `failed`;  but `IngestStopped` past the reader's limits
+   */
+  private async verifyOneUnder(
+    address: string,
+    name: string,
+    { collections }: PlaceDescription,
+    read: readonly CollectionLook[],
+    reader: PoliteReader,
+    deployment: string | undefined
+  ): Promise<PlaceState | undefined> {
+    const owned = Object.entries(collections).find(([, owner]) => owner.listsUnder?.[name] !== undefined)
+    if (!owned) return undefined
+    const [ownerName, owner] = owned
+    const id = read.find((each) => each.name === ownerName)?.rows[0]?.[owner.idField ?? "id"]
+    if (typeof id !== "string" && typeof id !== "number") return undefined
+    const tried = { at: this.nowISO(), ...(deployment !== undefined && { deployment }) }
+    const under = `under ${owner.type} ${id}`
+    const failed = (reason: string, status?: number): PlaceState => ({
+      is: "failed",
+      ...tried,
+      ...(status !== undefined && { status }),
+      reason
+    })
+    const url = `${address}${owner.listsUnder![name]!.replace("{id}", encodeURIComponent(`${id}`))}`
+    let answer: Awaited<ReturnType<PoliteReader["read"]>>
+    try {
+      answer = await reader.read(url)
+    } catch (error) {
+      if (error instanceof IngestStopped && !reader.hasRoom) throw error
+      return failed(`it didn't answer ${under}:  ${messageOf(error)}`)
+    }
+    if (answer.status >= 400)
+      return failed(`it answered ${answer.status} ${under}${detailOf(answer.text)}`, answer.status)
+    const body = jsonOf(answer.text)
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return failed(`its answer ${under} isn't one thing`, answer.status)
+    }
+    return { is: "verified", ...tried, status: answer.status, rows: 1 }
   }
 
   /** Read `row` again by its id, at its own address:  why it couldn't be, or `undefined` when it could, or has none. */
