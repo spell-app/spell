@@ -351,7 +351,17 @@ export class InspectorWrites {
 
   /** The program's spell file the compiler's marks call `path`. */
   static fileNamed(path: string): SP.AnySpellFile | undefined {
-    return editor.project?.spellFiles.find((file) => pathOf(file) === path)
+    const project = editor.project
+    return (
+      project?.spellFiles.find((file) => pathOf(file) === path) ??
+      // a property editors file, `Card.editor.spell`:  Spell to look at, but never compiled (epic `editor` P35)
+      project?.files.find((file) => SP.isPropertyEditorsName(file.path) && pathOf(file) === path)
+    )
+  }
+
+  /** `file`'s path as a drawn part's place names it, from its project:  `Card.editor.spell`. */
+  static pathOf(file: SP.AnySpellFile): string {
+    return pathOf(file)
   }
 }
 

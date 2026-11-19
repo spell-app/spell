@@ -1,4 +1,4 @@
-import { For, Show, createEffect, createMemo, createSignal, onCleanup } from "solid-js"
+import { For, Show, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js"
 import type { JSX } from "@solidjs/web"
 import type { TextEdit } from "vscode-languageserver"
 
@@ -56,6 +56,7 @@ import {
   propertyCodePlace,
   testsDeclared,
   propertyEditorInSource,
+  propertyEditorTagsIn,
   withClassNames,
   type CodePlace,
   type SourceFile,
@@ -697,15 +698,20 @@ export class Inspector {
   /**
    * The app's parts under `element`, in document order, each with its depth;  what isn't a part is looked through.
    * - Never the editor's own, round the program (`EDITOR_OWN`):  a notebook's contents, its examples' code editors.
+   * - A view shown alone (`VIEW_ALONE`):  its own drawing too, in its shadow root, as it's what's being edited
+   *   (epic `editor` P35).
    */
-  static partsIn(element: Element, depth = 0): PartRow[] {
-    return [...element.children].flatMap((child) =>
-      child.hasAttribute(EDITOR_OWN)
-        ? []
-        : Inspector.isPart(child)
-          ? [{ element: child, depth }, ...Inspector.partsIn(child, depth + 1)]
-          : Inspector.partsIn(child, depth)
-    )
+  static partsIn(element: Element | ShadowRoot, depth = 0): PartRow[] {
+    return [...element.children].flatMap((child) => {
+      if (child.hasAttribute(EDITOR_OWN)) return []
+      if (!Inspector.isPart(child)) return Inspector.partsIn(child, depth)
+      const drawing = child.hasAttribute(VIEW_ALONE) ? child.shadowRoot : null
+      return [
+        { element: child, depth },
+        ...Inspector.partsIn(child, depth + 1),
+        ...(drawing ? Inspector.partsIn(drawing, depth + 1) : [])
+      ]
+    })
   }
 
   /** The pref remembering what's selected, the project's own:  `inspector:selected:@spell/examples/tic-tac-toe`. */
@@ -1107,13 +1113,27 @@ export class Inspector {
    */
   static ownEditorOf(thing: object): string {
     const project = editor.project
-    const editors =
-      project?.files.filter((file) => SP.isPropertyEditorsName(file.path)).map((file) => file.contents ?? "") ?? []
+    const files = project?.files.filter((file) => SP.isPropertyEditorsName(file.path)) ?? []
+    loadUnread(files)
+    const editors = files.map((file) => file.contents ?? "")
     const markup = propertyEditorInSource(InspectorActions.typeWordsOf(thing), editors)
     const root = Inspector.programRoot
     if (!markup || !root) return markup
     const said = ClassSchemas.templateWordsOf(thing.constructor, root)
     return withClassNames(markup, new Map([...said].map(([name, words]) => [words.name, name])))
+  }
+
+  /**
+   * Where each element of `thing`'s own property editor is written (`ownEditorOf()`), as a drawn part's place:
+   * `Card.editor.spell:6:2`, in the order written;  `[]` with none.
+   * - So a view shown alone (`<ViewAloneStage>`) marks its editor's elements, and a drop on one writes beside it.
+   */
+  static ownEditorPlacesOf(thing: object): string[] {
+    const editors = (editor.project?.files ?? [])
+      .filter((file) => SP.isPropertyEditorsName(file.path))
+      .map((file) => ({ path: InspectorWrites.pathOf(file), text: file.contents ?? "" }))
+    const found = propertyEditorTagsIn(InspectorActions.typeWordsOf(thing), editors)
+    return found?.places.map(({ line, column }) => `${found.path}:${line}:${column}`) ?? []
   }
 
   /**
@@ -1459,9 +1479,11 @@ export class Inspector {
     setJustAdded("")
   }
 
-  /** What `element` is, as the Inspector shows it:  a drawn thing, a Spell UI element, else `undefined`. */
-  static partFor(element: Element): SelectedPart | undefined {
-    const thing = SpellElement.thingOf(element)
+  /**
+   * What `element` is, as the Inspector shows it:  a drawn thing, a Spell UI element, else `undefined`.
+   * - `thing`:  what it draws, when the caller knows it before the element does (a view drawn alone, as it is made).
+   */
+  static partFor(element: Element, thing = SpellElement.thingOf(element)): SelectedPart | undefined {
     if (thing) {
       return {
         element,
@@ -1890,6 +1912,12 @@ const [isInspecting, setInspecting] = createSignal(false)
 const [selectedParts, setSelectedParts] = createSignal<readonly SelectedPart[]>([])
 /** Clicks in the app and the views tree:  the pivot, where a shift-click's range starts. */
 const clicks = new ListSelection<Element>()
+
+/**
+ * Marks a view drawn alone (`<ViewAloneStage>`, epic `editor` P35):  the Inspector's parts are its own drawing's too,
+ * in its shadow root (`Inspector.partsIn()`).
+ */
+export const VIEW_ALONE = "data-view-alone"
 
 /** The places `Inspector.selectWhenDrawn()` is waiting to see drawn. */
 let placesToSelect: Set<string> | undefined
@@ -3595,7 +3623,7 @@ function NotSavedNote(props: { part: Inspected }): JSX.Element {
  * - An empty tag may close itself, `<ui-property name="rank" />`, as everywhere in spell.
  * - Drawn again when the markup changes.
  ****************/
-function OwnEditor(props: { markup: string }): JSX.Element {
+function OwnEditor(props: { markup: string; places?: readonly string[] }): JSX.Element {
   const holder = document.createElement("div")
   holder.className = "InspectorOwnEditor"
   createEffect(
@@ -3610,10 +3638,69 @@ function OwnEditor(props: { markup: string }): JSX.Element {
           if (/^on/i.test(attribute.name)) element.removeAttribute(attribute.name)
         }
       }
+      // each element where it's written, in order:  a drop on one writes beside it (`<OwnEditorPage>`)
+      const places = untrack(() => props.places)
+      if (places) {
+        template.content.querySelectorAll("*").forEach((element, at) => {
+          if (places[at]) element.setAttribute(SourceMarks.PLACE_ATTRIBUTE, places[at])
+        })
+      }
       holder.replaceChildren(template.content)
     }
   )
   return holder
+}
+
+/****************
+ * ### `<OwnEditorPage>`
+ * The property editor a view's type was written with (`Card.editor.spell`), drawn for `thing`, which `element` draws,
+ * as the Inspector draws it:  a view shown alone shows it beside the view (`<ViewAloneStage>`, epic `editor` P35).
+ * - A change in it is the Inspector's change, one step (`Inspector.fieldWritten()`).
+ * - Its elements are marked where they're written (`Inspector.ownEditorPlacesOf()`):
+ *   the palette's drops and clicks, moves and deletes write into its file.
+ * - Drawn again as its file changes;  nothing when the type has no editor of its own.
+ ****************/
+export function OwnEditorPage(props: { element: Element; thing: object }): JSX.Element {
+  const part = createMemo(() => Inspector.partFor(props.element, props.thing))
+  const written = createMemo(() => {
+    void editor.edits
+    const thing = part()?.value
+    return thing ? { markup: Inspector.ownEditorOf(thing), places: Inspector.ownEditorPlacesOf(thing) } : undefined
+  })
+  return (
+    <Show when={part() && written()?.markup ? part() : undefined} keyed>
+      {(shown) => (
+        <ui-property-editor
+          class="OwnEditorPage"
+          schema={shown.schema}
+          value={shown.value}
+          ref={on<{ name?: string; value: unknown }>("ui-changed", (event) => {
+            if (event.detail.name)
+              Inspector.fieldWritten({ ...shown, crumbs: [] }, event.detail.name, event.detail.value)
+          })}
+        >
+          <OwnEditor markup={written()!.markup} places={written()!.places} />
+        </ui-property-editor>
+      )}
+    </Show>
+  )
+}
+
+/**
+ * Start loading each of `files` not read yet, a property editors file no compile reads (`Card.editor.spell`):
+ * what reads its `contents` reads again once it's in.
+ * - After this moment:  a read in a drawing never writes.
+ * - NEVER throws:  one that won't load is said on the console.
+ */
+function loadUnread(files: readonly SP.AnySpellFile[]): void {
+  const unread = files.filter((file) => !file.isLoaded && !file.isLoading)
+  if (!unread.length) return
+  queueMicrotask(() => {
+    for (const file of unread) {
+      if (file.isLoaded || file.isLoading) continue
+      file.load().catch((error: unknown) => console.error(`Inspector:  can't load ${file.path}`, error))
+    }
+  })
 }
 
 /** An element's tag closing itself, `<ui-property name="rank" />`:  its name, then its attributes. */

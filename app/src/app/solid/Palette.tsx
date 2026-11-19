@@ -215,13 +215,15 @@ const [offered, setOffered] = createSignal<readonly PaletteGroup[]>([])
 type PaletteGroup = import("spell/ui/components/ComponentDefinitions").PaletteGroup
 
 /** One of the app's own views, as the palette offers it. */
-type OwnView = {
+export type OwnView = {
   /** Its name, as a person reads it, e.g. `Stock pile`. */
   name: string
   /** What adding it writes, before what it must be told:  `{draw a new card}`. */
   snippet: string
   /** Its type's compiled name, then those it inherits:  `["Card", "TwoSidedView", ...]`. */
   classNames: readonly string[]
+  /** The file it's written in, by its name in the project:  `Card.spell`. */
+  file: string
 }
 
 /** Types an app draws on its page, the built-ins every view of an app's own extends. */
@@ -254,15 +256,17 @@ function ownViewsIn(tree: ScopeNode | undefined): OwnView[] {
     return names
   }
   return app.children
-    .flatMap((file) => file.children)
-    .filter((node) => node.kind === "type")
+    .flatMap((file) => file.children.map((node) => ({ file, node })))
+    .filter(({ node }) => node.kind === "type")
     .filter(
-      (node) => bases(node).some((name) => DRAWN_TYPES.has(name)) && !bases(node).some((name) => PAGE_TYPES.has(name))
+      ({ node }) =>
+        bases(node).some((name) => DRAWN_TYPES.has(name)) && !bases(node).some((name) => PAGE_TYPES.has(name))
     )
-    .map((node) => ({
+    .map(({ file, node }) => ({
       name: upperFirst(wordsOf(node.name)),
       snippet: `{draw a new ${wordsOf(node.name)}}`,
-      classNames: [node.name, ...bases(node)]
+      classNames: [node.name, ...bases(node)],
+      file: file.name
     }))
     .sort((a, b) => a.name.localeCompare(b.name))
 }

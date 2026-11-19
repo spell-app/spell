@@ -117,6 +117,11 @@ export const APP_TEXTS = {
     "What you added is in your app, but it's empty, so you can't see it yet.\n" +
     "It's selected in the Views list on the right.\n" +
     "Give it a label, or drag another part into it.",
+  // a view shown on its own, the top bar's switch (epic `editor` P35)
+  viewAlone: "{view} alone",
+  viewAloneTip: "Show just one {view}, with its property editor, to work on it by itself",
+  viewAloneStopTip: "Show the whole app again",
+  viewAloneWaiting: "Waiting for the app to run…",
   partInsideItself: "Something can't go inside itself.",
   lineNumbers: "Line Numbers",
   softWrap: "Soft Wrap",

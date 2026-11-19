@@ -121,6 +121,10 @@ const APP_TEXTS_ES: AppTextPack = {
     "Lo que añadiste ya está en tu aplicación, pero está vacío, así que aún no se ve.\n" +
     "Está seleccionado en la lista Vistas, a la derecha.\n" +
     "Dale un texto, o arrastra otra parte dentro.",
+  viewAlone: "Solo {view}",
+  viewAloneTip: "Muestra solo un {view}, con su editor de propiedades, para trabajarlo por sí solo",
+  viewAloneStopTip: "Muestra otra vez la aplicación entera",
+  viewAloneWaiting: "Esperando a que la aplicación se ejecute…",
   partInsideItself: "Algo no puede ir dentro de sí mismo.",
   lineNumbers: "Números de línea",
   softWrap: "Ajuste de línea",

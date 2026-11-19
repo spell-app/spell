@@ -18,6 +18,8 @@ import {
   AddPartButton,
   AnatomyButton,
   AppAnatomyView,
+  ViewAloneButton,
+  ViewAloneStage,
   InspectAppButton,
   Palette,
   PaletteStrip,
@@ -309,6 +311,8 @@ function drawnView(
  *   of its own, drawn as it's typed (`<EditorZones>`, T63):  the editor you're using runs the published Spell.
  * - Anatomy, while it shows, pulls the program apart into floors in place, its bar over the pane's top
  *   (`<AppAnatomyView>`, epic `editor` P34).
+ * - A view's file open, the view can show alone, one thing drawn with its property editor beside it, the app hidden
+ *   behind it (`<ViewAloneStage>`, epic `editor` P35).
  ****************/
 export function AppPane() {
   const root = trackProjectRoot(() => undefined)
@@ -337,6 +341,7 @@ export function AppPane() {
         <Show when={isEditorPiece()}>
           <EditorZones />
         </Show>
+        <ViewAloneStage program={() => program} />
         <div
           class={[
             "AppPaneProgram",
@@ -583,6 +588,7 @@ export function EditorToolbar(props: { mode: Mode }) {
             <>
               <InspectAppButton id={INSPECT_APP_ID} />
               <AnatomyButton />
+              <ViewAloneButton />
             </>
           }
           add={<AddPartButton />}
