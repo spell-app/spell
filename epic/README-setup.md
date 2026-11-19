@@ -54,7 +54,27 @@ You need Claude Code, VS Code, git, Node 24.11 or later, and your code host's co
 ([On GitLab](#on-gitlab)).
 These steps are for the FIRST person on a team;  everyone after them:  [A teammate joins](README-teams.md#a-teammate-joins).
 
-### 1. Your code host's command, logged in
+### 1. If you don't have NodeJS installed
+
+`epic init` comes in an npm package, so it needs Node.js, version 24.11 or later, and `npx`, which comes with it.
+You don't need to write any JavaScript:  your repo can be Python or anything else.
+On macOS, with Homebrew:
+
+```sh
+brew install node
+```
+
+- No Homebrew yet?  Install it first, with the line from https://brew.sh:
+
+  ```sh
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  ```
+
+- Then check both work:  `node --version` should say `v24.11.0` or higher, and `npx --version` should print a number.
+- An older Node:  `brew upgrade node`.
+- Linux or Windows:  the installer from https://nodejs.org (the LTS version, 24 or later).
+
+### 2. Your code host's command, logged in
 
 `epic init` uses it to make the team's epic repo, so install it first.
 On macOS, with Homebrew, on GitHub:
@@ -78,7 +98,7 @@ glab auth login                          # your own GitLab:  glab auth login --h
 - Without it, `epic init` still sets everything else up, and says how to get it.
   Run `epic init` again once you're logged in:  it makes the epic repo then.
 
-### 2. `epic init`, in your repo
+### 3. `epic init`, in your repo
 
 From any folder of your repo, a git repo with at least one commit:
 
@@ -181,6 +201,12 @@ Then, in order, each step under a bold heading, the files in a gray table, a gra
 - `--remote <address>` uses an epic repo you made already (on GitHub or anywhere else git reaches).
 - `--no-remote` makes none:  the plans stay on this machine, as they did before sharing existed.
 - `--local` puts nothing in your repo at all:  [below](#nothing-in-your-repo).
+
+- `--demo` shows it as someone new sees it, for showing it to people:  every question asked, every step shown,
+  and nothing changed.
+  - It works in any folder, a repo set up already too:  it runs on a fresh copy of the repo in a temporary folder,
+    deleted at the end.
+  - It ends with what a real run would have done, and `demo:  nothing changed`.
 
 Try it first in a throwaway repo:  `--dry-run` says what it would do, and writes nothing.
 

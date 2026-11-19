@@ -1648,6 +1648,9 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--no-server": "don't start the epic server",
     "--host <github|gitlab>": "where the code is hosted, for an address that doesn't say",
     "--dry-run": "only say what it would do",
+    "--demo":
+      "show it as someone new sees it, every question asked, changing nothing:  for showing epic init to people, in " +
+      "any folder",
     "--json": "print what it did as JSON"
   },
   pr: {

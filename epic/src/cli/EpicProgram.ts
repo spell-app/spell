@@ -690,7 +690,7 @@ export class EpicProgram {
       )
       .addHelpText("after", VOICE_HELP)
 
-    this.verb(epic.command("init"), (args) => new RepoInit().run(args))
+    this.verb(epic.command("init"), (args) => RepoInit.runHere(args))
       .description(
         "set this repo up for epics, the one command to start (npx spell@next epic init):  the plugin, its " +
           ".epic/config.json5, the epic repo beside it (made, or cloned from the team's), shared on GitHub or GitLab, the " +
@@ -699,7 +699,7 @@ export class EpicProgram {
       .usage(
         "[--local] [--name <name>] [--color <colour>] [--install <command>] [--content-repo <name> | --remote <address> | --no-remote] " +
           "[--public] [--host github|gitlab] [--protected-base] [--superpowers] [--no-plugin] [--no-commit] [--no-server] " +
-          "[--dry-run] " +
+          "[--dry-run | --demo] " +
           "[--json]"
       )
       .addHelpText("after", INIT_HELP)
@@ -1298,9 +1298,15 @@ A config naming one keeps it, asking nothing.  Change it later in .epic/config.j
 without it, epic init asks in a terminal, suggesting your GitHub login (else git's user.name), and takes that
 anywhere else.
 
+--dry-run says what epic init would do, asking nothing, and changes nothing.
+--demo shows epic init as someone new sees it, to show it to people:  it asks every question and shows every step,
+but changes nothing:  no files, no epic repo, no commit, no plugin install, no epic server.  It works in any folder,
+a repo set up already too:  it runs against a fresh copy of the repo in a temporary folder, deleted at the end.
+
 Examples:
   npx spell@next epic init        the same, before anything is installed
   epic init --dry-run
+  npx spell@next epic init --demo   show it to people, changing nothing
   epic init --name Ana --color green
   epic init --install "uv sync --all-packages --all-extras"
   epic init --content-repo my-app.epics

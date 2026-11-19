@@ -218,7 +218,7 @@ describe("epic init:  one command (epic-friend P13)", () => {
     expect(report.plugin).toEqual({ action: "installed", changes: 3 })
     expect(said(report).slice(1, 5)).toEqual([
       "",
-      "Checking the epic plugin:",
+      "Installing the epic plugin for Claude Code:",
       "> installed epic for Claude Code",
       "> a Claude Code session already open doesn't have it yet:  type /reload-plugins there before /epic;  " +
         "a new session has it"
@@ -1259,3 +1259,79 @@ async function withGh<T>(gh: { command: string }, work: () => Promise<T>): Promi
 function git(cwd: string, ...args: string[]): string {
   return execFileSync("git", args, { cwd, encoding: "utf8" })
 }
+
+describe("epic init --demo:  what a newcomer sees, nothing changed (epic-engine, 2026-11-19)", () => {
+  /** `RepoInit.demo()` in `cwd`, printing caught:  the lines, the exit code and the temporary copy it ran on. */
+  async function demo(cwd: string, args: string[] = []) {
+    const made = vi.spyOn(RepoInit, "demoScratch")
+    let code: number | undefined
+    try {
+      const lines = await printed(async () => {
+        code = await RepoInit.demo(["--demo", ...args], { cwd })
+      })
+      return { lines, code, scratch: made.mock.results[0]!.value as { root: string } }
+    } finally {
+      made.mockRestore()
+    }
+  }
+
+  /** Every file under `folder`, and its contents:  what a run must leave as it was. */
+  function contentsOf(folder: string): string {
+    if (!existsSync(folder)) return "(none)"
+    return execFileSync("find", [folder, "-print"], { encoding: "utf8" }).split("\n").sort().join("\n")
+  }
+
+  test("outside a git repo:  says so once, pretends to be a fresh repo, and changes nothing", async () => {
+    const folder = join(TEMP, "demo-plain")
+    mkdirSync(folder, { recursive: true })
+    writeFileSync(join(folder, "notes.txt"), "hi\n")
+    const claude = process.env.CLAUDE_CONFIG_DIR!
+    const before = [contentsOf(folder), contentsOf(EpicHome.folder()), contentsOf(claude), contentsOf(TEMP)]
+    const { lines, code, scratch } = await demo(folder)
+    expect(code).toBe(0)
+    expect(lines.slice(0, 2)).toEqual(["Demo:  nothing will be changed", `Initializing Epic for repo ${folder}`])
+    expect(lines.filter((line) => /nothing will be changed/.test(line))).toHaveLength(1)
+    expect(tableOf(lines)).toContain(`  would write            ${join(folder, EpicConfig.FILE)}`)
+    expect(lines).toContain("That's it.")
+    expect(lines.at(-1)).toBe("demo:  nothing changed")
+    // never the temporary copy's paths
+    expect(lines.join("\n")).not.toContain(scratch.root)
+    expect(lines.join("\n")).not.toMatch(/epic-demo-/)
+    expect(existsSync(scratch.root)).toBe(false)
+    expect([contentsOf(folder), contentsOf(EpicHome.folder()), contentsOf(claude), contentsOf(TEMP)]).toEqual(before)
+    expect(process.env.SPELL_EPIC_HOME).toBe(EpicHome.folder())
+  })
+
+  test("the plugin step:  as a newcomer sees it, with what it would do, never the machine's Claude Code", async () => {
+    const { lines } = await demo(join(TEMP, "demo-plain"))
+    const at = lines.indexOf("Installing the epic plugin for Claude Code:")
+    expect(at).toBeGreaterThan(0)
+    expect(lines[at + 1]).toBe("> would install epic for Claude Code (epic plugin install)")
+    expect(lines.slice(at + 2).find((line) => /installed_plugins\.json/.test(line))).toMatch(
+      /~\/\.claude\/plugins\/cache/
+    )
+    expect(lines.join("\n")).not.toMatch(/installed already/)
+    expect(lines).toContain("- added the epic plugin to Claude Code")
+  })
+
+  test("a repo set up already:  shown as never set up, its files and branch left as they were", async () => {
+    const app = codeRepo("demo-set-up")
+    await offline(app).init({ commit: true })
+    const status = git(app, "status", "--porcelain")
+    const head = git(app, "rev-parse", "HEAD")
+    const before = [contentsOf(app), contentsOf(join(dirname(app), "demo-set-up.epics"))]
+    const { lines, code } = await demo(app, ["--no-remote"])
+    expect(code).toBe(0)
+    expect(tableOf(lines)[0]).toBe(`  would write            ${join(app, EpicConfig.FILE)}`)
+    expect(lines).toContain(`> would commit ${EpicConfig.FILE} and .gitignore on main, and push it`)
+    expect([contentsOf(app), contentsOf(join(dirname(app), "demo-set-up.epics"))]).toEqual(before)
+    expect(git(app, "status", "--porcelain")).toBe(status)
+    expect(git(app, "rev-parse", "HEAD")).toBe(head)
+  })
+
+  test("run() with --demo:  the demo of its own folder", async () => {
+    const lines = await printed(() => offline(join(TEMP, "demo-plain")).run(["--demo", "--no-remote"]))
+    expect(lines[0]).toBe("Demo:  nothing will be changed")
+    expect(lines.at(-1)).toBe("demo:  nothing changed")
+  })
+})

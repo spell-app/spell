@@ -140,6 +140,6 @@ Both are open todos on the plugin's own epic page.
 ## See also
 
 - [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md):  what an epic is, and the one command to set one up
-- [README-setup.md](README-setup.md#2-epic-init-in-your-repo):  `epic init`'s questions, the superpowers one among them
+- [README-setup.md](README-setup.md#3-epic-init-in-your-repo):  `epic init`'s questions, the superpowers one among them
 - [README-config.md](README-config.md#your-settings):  the settings layers the hook reads
 - [README-skills.md](README-skills.md):  every skill and hook, the session-start one among them

@@ -79,6 +79,16 @@ A question or a bug has an id you can say out loud:  "approve J3" works in the c
 
 You need Claude Code, VS Code, git, Node 24.11 or later, and your code host's command, logged in.
 
+**If you don't have NodeJS installed** (a Python team, say), on macOS:
+
+```sh
+brew install node                        # no Homebrew yet:  its install line is at https://brew.sh
+node --version                           # v24.11.0 or higher
+```
+
+Linux or Windows:  the installer from https://nodejs.org.
+Every step, Homebrew's own install included:  [If you don't have NodeJS installed](epic/README-setup.md#1-if-you-dont-have-nodejs-installed).
+
 **On GitHub:**
 
 ```sh
@@ -98,6 +108,8 @@ Then in your repo, a git repo with at least one commit:
 ```sh
 npx spell@next epic init                 # a self-hosted GitLab whose address doesn't say so:  add --host gitlab
 ```
+
+To show it to people without changing anything, add `--demo`:  every question, every step, nothing written.
 
 It asks your name and a colour, installs the Claude Code plugin and the VS Code extension,
 makes the shared repo for the pages, and starts a small local server that shows them (port 4848).
