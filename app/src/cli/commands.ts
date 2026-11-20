@@ -31,6 +31,7 @@
  *   - a library's published types as schema records
  * - `spell space export <space> <folder>`:  a space as a folder of plain JSON, leaving Spell (epic `atmosphere` P7)
  * - `spell space delete <space | account> --yes`:  a space, or an account, deleted for good (epic `atmosphere` P7)
+ * - `spell events write | check`:  the events page's data, every event a page can listen for (epic `language` P67)
  * - `spell app vscode [build|install]`:  the VS Code extension
  * - `spell projects [group]`:  the project groups, or one group's projects
  * - `spell content check [--bless]`:  every check of the `@spell` space's content, its examples, notebooks and
@@ -198,6 +199,27 @@ export default function appCommands(spell: Command): void {
       CLI.runCommand(async () =>
         (await loadApp()).appCommands.projects(group ? [group] : [], command.optsWithGlobals())
       )
+    )
+
+  // the events page's data, every event a page can listen for (epic `language` P67)
+  const events = spell
+    .command("events")
+    .description(
+      "the events page:  every event a page can listen for, Spell's and Spell UI's, and the Spell line that hears it"
+    )
+
+  events
+    .command("write")
+    .description("write the events page's data, events.json5, into the epic repo, made from the code")
+    .action(() =>
+      CLI.runCommand(async () => (await import("./commands/eventsCommand")).eventsCommand({ isCheck: false }))
+    )
+
+  events
+    .command("check")
+    .description("fail while the events page's data is stale:  an event added or renamed since it was written")
+    .action(() =>
+      CLI.runCommand(async () => (await import("./commands/eventsCommand")).eventsCommand({ isCheck: true }))
     )
 
   // Spell's hosting:  its own noun, apart from the app (Owen, 2026-11-06, epic `atmosphere` P14)

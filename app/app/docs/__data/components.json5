@@ -3800,7 +3800,43 @@
         }
       ],
       "slots": [],
-      "events": [],
+      "events": [
+        {
+          "name": "ui-dragged-over",
+          "detail": "{ thing: object, list: object, x: number, y: number }",
+          "description": "A thing is dragged over this list:  as it comes over, then while it moves, at most every 100ms.  `thing` and `list` are the program's things, `x` and `y` where the pointer is."
+        },
+        {
+          "name": "ui-dragged-out",
+          "detail": "{ thing: object, list: object }",
+          "description": "The thing left this list, or was dropped on it and not taken."
+        },
+        {
+          "name": "ui-dropped",
+          "detail": "{ thing: object, list: object }",
+          "description": "The thing was dropped on this list, and the list took it."
+        },
+        {
+          "name": "ui-file-dragged-over",
+          "detail": "{ count: number, kinds: string[], via: \"drop\", x: number, y: number }",
+          "description": "Files from the desktop are dragged over a view with a file line (`when a file is dropped on it:`):  how many, and their kinds;  again while they move, at most every 100ms."
+        },
+        {
+          "name": "ui-file-dragged-out",
+          "detail": "{ count: number, kinds: string[], via: \"drop\" }",
+          "description": "The files left without being dropped."
+        },
+        {
+          "name": "ui-file-dropped",
+          "detail": "{ file: File, name: string, path: string, size: number, type: string, lastModified: number, via: \"drop\", entry?: FileSystemEntry, handle?: FileSystemHandle }",
+          "description": "A file was dropped on the view:  the same detail as `<ui-uploader>`'s, one event per file."
+        },
+        {
+          "name": "ui-folder-dropped",
+          "detail": "{ name: string, path: string, files: File[], via: \"drop\", entry?: FileSystemEntry, handle?: FileSystemHandle }",
+          "description": "A folder was dropped on the view:  a `ui-file-dropped` follows for each file in it."
+        }
+      ],
       "parts": [
         {
           "name": "menu-bar",
