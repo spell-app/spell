@@ -15,7 +15,7 @@ import { type Vocabulary } from "./UIModal.types"
  *       its family imported the first time one is needed;
  *       the dialog shows once it has drawn, so it never opens on a half-drawn message
  *   - `<ui-actions>`:  a deny button (`cancel`, first:  it takes the initial focus, the least destructive choice)
- *     and a primary approve button.
+ *     and a primary approve button;  for `choose()`, a button per answer in place of the approve button.
  * - Escape denies (`closedby="closerequest"`:  no dimmer clicks, so a stray click can't answer).
  * - So does its close ✕ (`closable`), on unless `options.closable` is `false`.
  * - The promise settles once the modal is HIDDEN (`ui-closed`), so a caller can open the next dialog straight away.
@@ -54,6 +54,16 @@ export class ModalDialogs implements E.ModalProvider {
   }
 
   /**
+   * Ask a question with more answers than yes and no, each a button after Cancel:
+   * resolves with the picked one's `value`, `undefined` on Cancel, the close ✕ or Escape.
+   */
+  choose<T extends string>(options: E.ChooseOptions<T>): Promise<T | undefined> {
+    let picked: T | undefined
+    const pick = (value: string) => (picked = value as T)
+    return this.run(options, { canDeny: true, choices: options.choices, pick }, () => picked)
+  }
+
+  /**
    * Build, open and await one dialog;  `result()` turns "approved?" and the input's value into the answer.
    * - SIDE EFFECT:  a `<ui-modal>` in `<body>` until it has hidden.
    * - Throws when the parts or `<ui-button>` aren't registered (`tagFor()`).
@@ -71,7 +81,7 @@ export class ModalDialogs implements E.ModalProvider {
    */
   private open<T>(
     options: E.ModalOptions,
-    { canDeny, input }: DialogFlags,
+    { canDeny, input, choices, pick }: DialogFlags,
     result: (isApproved: boolean, value: string) => T,
     message?: HTMLElement
   ): Promise<T> {
@@ -88,7 +98,8 @@ export class ModalDialogs implements E.ModalProvider {
     if (canDeny) actions.append(this.button(options.cancelText ?? UI.i18n.t(CANCEL), CANCEL))
     const approve = this.button(options.okText ?? UI.i18n.t(OK), APPROVE_CLASS)
     approve.setAttribute(COLOR, options.okColor ?? PRIMARY)
-    actions.append(approve)
+    if (choices) actions.append(...choices.map((choice) => this.choiceButton(choice, modal, pick!)))
+    else actions.append(approve)
     modal.append(content, actions)
     field?.addEventListener("keydown", (event) => {
       if (event.key === UIT.Key.enter) approve.click()
@@ -193,6 +204,21 @@ export class ModalDialogs implements E.ModalProvider {
     return label
   }
 
+  /** One of `choose()`'s buttons:  a click notes its value, then hides the dialog, which settles the call. */
+  private choiceButton(
+    { value, text, color }: E.ModalChoice,
+    modal: HTMLElement & { visible: boolean },
+    pick: (value: string) => void
+  ): HTMLElement {
+    const button = this.button(text, CHOICE_CLASS)
+    if (color) button.setAttribute(COLOR, color)
+    button.addEventListener("click", () => {
+      pick(value)
+      modal.visible = false
+    })
+    return button
+  }
+
   /** A `<ui-button>` with Fomantic's action class (`approve` / `cancel`). */
   private button(text: string, actionClass: string): HTMLElement {
     const button = this.document.createElement(ModalDialogs.tagFor(UIT.BUTTON))
@@ -215,8 +241,16 @@ export class ModalDialogs implements E.ModalProvider {
   }
 }
 
-/** How `run()` builds a dialog:  a deny button or not;  `prompt()`'s input and its starting text. */
-type DialogFlags = { canDeny: boolean; input?: string }
+/**
+ * How `run()` builds a dialog:  a deny button or not;  `prompt()`'s input and its starting text;
+ * `choose()`'s answers, in place of the approve button, and what notes the one picked.
+ */
+type DialogFlags = {
+  canDeny: boolean
+  input?: string
+  choices?: readonly E.ModalChoice[]
+  pick?: (value: string) => void
+}
 
 /** Constructor props for `ModalDialogs`. */
 export type ModalDialogsProps = {
@@ -274,6 +308,9 @@ const COLOR = "color"
 
 /** Fomantic's approve class of a button. */
 const APPROVE_CLASS = "approve"
+
+/** A `choose()` answer's button:  neither approve nor deny, so the dialog's own actions leave it alone. */
+const CHOICE_CLASS = "choice"
 
 /** Fomantic's deny class of a button, and the text key of its label. */
 const CANCEL = "cancel"

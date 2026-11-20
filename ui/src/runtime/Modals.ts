@@ -1,9 +1,9 @@
-import type { Disposer, ModalOptions, ModalProvider } from "./runtime.types"
+import type { ChooseOptions, Disposer, ModalOptions, ModalProvider } from "./runtime.types"
 
 /****************
  * ### `Modals`
  * Promise-based dialogs, as `UI.modals`:  `confirm()`, `alert()`, `prompt()` -- the Fomantic
- * `$.modal('confirm', ...)` shortcuts.
+ * `$.modal('confirm', ...)` shortcuts -- and `choose()`, one button per answer.
  * - A thin front door:  the `ui-modal` family registers its provider (`register()`) when it's imported, so the
  *   runtime chunk carries no modal markup.
  * - Until then every method throws, rather than falling back to `window.confirm()` with different behaviour;
@@ -60,6 +60,14 @@ export class Modals {
   /** Resolves with the entered text, or `undefined` on deny / dismiss. */
   prompt(options: ModalOptions | string): Promise<string | undefined> {
     return this.registeredProvider.prompt(this.optionsFor(options))
+  }
+
+  /**
+   * Resolves with the picked choice's `value`, or `undefined` on Cancel, its close ✕ or Escape:
+   * for a question with more than yes and no (epic `editor` P41's keep theirs, keep yours, keep both).
+   */
+  choose<T extends string>(options: ChooseOptions<T>): Promise<T | undefined> {
+    return this.registeredProvider.choose(options)
   }
 
   /** `Modals.provider`;  throws until the `ui-modal` family has registered one. */

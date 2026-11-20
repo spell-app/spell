@@ -239,11 +239,29 @@ class ProgramPlaces {
     this.things = new PlaceThings({ places: this.places, classNamed: (name) => this.classNamed(name) })
     this.places.onRows((change) => this.rowsChanged(change))
     for (const [name, { details }] of this.declared) {
+      // a file a person picks shows its line as the program starts:  "Open a file", "Reopen" (epic `editor` P41)
+      if (details.picked && typeof document !== "undefined") this.pickedFile(name)
       if (!KINDS_WITH_SIGN_IN.has(details.kind ?? "")) continue
       const behind = this.places.placeFor(name) ?? this.placeNeedingNoClass(details)
       if (!this.places.placeFor(name)) this.places.add(name, behind)
       this.followSignIn(behind)
     }
+  }
+
+  /**
+   * The file a person picks that's the place called `name`, made if this is its first use (epic `editor` P41).
+   * - Call after `load()`.
+   * - `undefined` for any other place, or none.
+   */
+  pickedFile(name: string): PlacesFolder.PickedFilePlace | undefined {
+    const declared = this.declared.get(name)
+    if (!declared?.details.picked) return undefined
+    let behind = this.places!.placeFor(name)
+    if (!behind) {
+      behind = this.placeNeedingNoClass(declared.details)
+      this.places!.add(name, behind)
+    }
+    return behind instanceof this.folder!.PickedFilePlace ? behind : undefined
   }
 
   /** The places whose sign-in's followed:  whoever signs in there is who's at this page. */
@@ -346,6 +364,7 @@ class ProgramPlaces {
       collection,
       Class,
       person: this.person,
+      program: this.programName,
       ...keyFinder(),
       ...(deviceCopy && { deviceCopy })
     }
@@ -463,6 +482,7 @@ class ProgramPlaces {
       collection: "",
       Class: Object,
       person: this.person,
+      program: this.programName,
       ...keyFinder()
     })
   }
@@ -1669,6 +1689,30 @@ export const savedMethods = defineCoreModule({
     const sent = params.length ? Object.assign({ ...(row as object | undefined) }, ...params) : row
     const { savedIn } = (input as { constructor?: SavedClass } | undefined)?.constructor ?? {}
     return program.placesNow!.pendingFor(placeName).callShownAtOnce(name, sent, {}, savedIn?.collection, holdNotice)
+  },
+
+  /**
+   * The file picker, for the place called `placeName`, a file a person picks:  what `pick a file for family cookbook`
+   * compiles to (epic `editor` P41).
+   * - The file picked becomes the place's file, remembered for next time, replacing the one before.
+   * - Cancelled, or any other place:  nothing.
+   */
+  async pickFileFor(placeName: string): Promise<void> {
+    const program = programPlaces()
+    await program.load()
+    await program.pickedFile(placeName)?.pick()
+  },
+
+  /**
+   * Save the place called `placeName`, a file a person picks, back to its file:  what `save family cookbook` compiles
+   * to (epic `editor` P41).
+   * - Asks the browser first, at once, from the click or key that ran it;  where it can't write files, a download.
+   * - Any other place:  nothing.
+   */
+  async savePickedFile(placeName: string): Promise<void> {
+    const program = programPlaces()
+    await program.load()
+    await program.pickedFile(placeName)?.save()
   },
 
   /**

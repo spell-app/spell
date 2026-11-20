@@ -1,0 +1,154 @@
+{
+  "spellVersion": "0.8.0",
+  "provides": [
+    "Recipe",
+    "Cookbook",
+    "CookbookFile"
+  ],
+  "statements": [
+    {
+      "type": "Recipe",
+      "superType": "Thing",
+      "savedIn": {
+        "place": "cookbook_file",
+        "placeType": "CookbookFile",
+        "collection": "recipes"
+      },
+      "defined": "/RecipeFile.api.spell:339-457"
+    },
+    {
+      "property": "title",
+      "of": "Recipe",
+      "datatype": "text",
+      "defined": "/RecipeFile.api.spell:389-408"
+    },
+    {
+      "property": "servings",
+      "of": "Recipe",
+      "datatype": "number",
+      "defined": "/RecipeFile.api.spell:410-436"
+    },
+    {
+      "property": "notes",
+      "of": "Recipe",
+      "datatype": "text",
+      "defined": "/RecipeFile.api.spell:438-457"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Recipe",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/RecipeFile.spell:348-952"
+    },
+    {
+      "type": "CookbookFile",
+      "superType": "Place",
+      "place": {
+        "name": "cookbook_file",
+        "kind": "file"
+      },
+      "defined": "/RecipeFile.api.spell:300-337"
+    },
+    {
+      "uiDefaults": {
+        "ui-textarea": {
+          "grow": true
+        }
+      },
+      "defined": "/RecipeFile.spell:241-290"
+    },
+    {
+      "type": "Cookbook",
+      "superType": "App",
+      "defined": "/RecipeFile.spell:1032-2729"
+    },
+    {
+      "property": "new_recipe",
+      "asWritten": "new recipe",
+      "of": "Cookbook",
+      "datatype": "Recipe",
+      "defined": "/RecipeFile.spell:1052-1098"
+    },
+    {
+      "syntax": "open a file (of {thisArg:expression})?",
+      "output": "open_a_file",
+      "rule": "method_call",
+      "of": "Cookbook",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "open a file",
+      "returns": "nothing",
+      "waits": true,
+      "title": "Open",
+      "defined": "/RecipeFile.spell:1100-1203"
+    },
+    {
+      "syntax": "save the file (of {thisArg:expression})?",
+      "output": "save_the_file",
+      "rule": "method_call",
+      "of": "Cookbook",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "save the file",
+      "returns": "nothing",
+      "waits": true,
+      "title": "Save",
+      "defined": "/RecipeFile.spell:1206-1293"
+    },
+    {
+      "syntax": "add the new recipe (of {thisArg:expression})?",
+      "output": "add_the_new_recipe",
+      "rule": "method_call",
+      "of": "Cookbook",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "add the new recipe",
+      "returns": "nothing",
+      "defined": "/RecipeFile.spell:1296-1408"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "Cookbook",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/RecipeFile.spell:1411-2729"
+    }
+  ],
+  "codeLines": [
+    7,
+    8,
+    13,
+    18,
+    23,
+    72,
+    88,
+    98,
+    101,
+    106,
+    110,
+    114,
+    119
+  ]
+}

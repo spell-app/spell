@@ -20,6 +20,9 @@ import { OperationAt } from "./OperationAt"
 import { PlaceDetail, textIn, type PlaceDetailValue } from "./PlaceDetail"
 import { COLLECTION_NAME, PLACE_KIND_ABILITIES, isPlaceTypeReadOnly, placeKindWords } from "./places.shared"
 
+/** The kinds a person can pick a file of:  `a json file you pick`, `a csv file ...`, `an excel file ...`. */
+export const PICKED_FILE_KINDS = new Set(["file", "sheet", "excel file"])
+
 /** A key in an address, which anyone reading a browser program can read:  `?key=...`, `user:secret@`. */
 const KEY_IN_ADDRESS = /[?&](?:api[_-]?key|key|token|secret|access[_-]?token)=|\/\/[^/@\s]+:[^/@\s]+@/i
 
@@ -86,12 +89,19 @@ const JSON_FILE_NAME = /^[\p{L}\p{N}][\p{L}\p{N} _-]*\.json$/iu
  *   - a place that can't announce what changed warns, unless it says how often to ask
  *   - An atmosphere account warns of what no referee can promise, and that everything in it is public (`warnOfNoReferee()`).
  *   - An Airtable warns of the last save winning, of fields it works out, of its limits, of a missing id column or key (`warnOfAirtable()`).
+ * - A FILE A PERSON PICKS, on their own computer, with no address (epic `editor` P41, Q67's B and C, the same place):
+ *   `family cookbook is a json file you pick`, `... a json file on this device`;  a csv file and an excel file too.
+ *   - Compiles to `picked: true`:  core's `PickedFilePlace` (`spell/places`), which keeps a copy on this device and
+ *     saves back to the file where the browser can.
+ *   - `on this device` here is never the browser's own database (`database on this device`):  a kind must come first.
  * - Compiles to its class, then `core.place()`, handed everything the lines say.
  */
 export class CreatePlace extends TypeDeclaration<
-  "type|aka?|kind?|superType?|personal?|address?|each_tab?|with_nested_statements?|body?",
+  "type|aka?|kind?|superType?|personal?|address?|picked?|each_tab?|with_nested_statements?|body?",
   {
     placeKind?: string
+    /** A file on this computer a person picks or drops, with no address (`picked_file`, epic `editor` P41). */
+    picked?: boolean
     /** A project data folder's address on the page server, as `folderAddressFor()` worked it out. */
     folderAt?: string
   }
@@ -147,6 +157,11 @@ export class CreatePlace extends TypeDeclaration<
     }
     const placeKind = this.placeKindOf(match)
     if (placeKind) match.data.placeKind = placeKind
+    if (match.groups.picked) {
+      // only a file can be picked:  any other kind isn't ours
+      if (!PICKED_FILE_KINDS.has(placeKind ?? "")) return undefined
+      match.data.picked = true
+    }
     // `personal` goes only with a data folder:  another reading of the words may take it (`atmosphere personal`)
     if (personal && match.data.placeKind !== "data folder") return undefined
     if (personal && !FOLDER_NAME.test(textIn(address))) {
@@ -182,7 +197,8 @@ export class CreatePlace extends TypeDeclaration<
    * `jsonAddressFor()`;  any other kind, none.
    */
   protected folderAddressOf(match: P.MatchFor<this>): string | undefined {
-    const { placeKind } = match.data
+    const { placeKind, picked } = match.data
+    if (picked) return undefined
     if (placeKind === "data folder") return CreatePlace.folderAddressFor(match)
     if (placeKind === "room") return CreatePlace.roomAddressFor(match)
     if (placeKind === "file") return CreatePlace.jsonAddressFor(match)
@@ -269,7 +285,9 @@ export class CreatePlace extends TypeDeclaration<
 
   /** SIDE EFFECT:  a plain web server can't announce what changed:  say so, unless a line under it says how often to ask. */
   private warnIfItCantSay(match: P.MatchFor<this>): void {
-    const { placeKind } = match.data
+    const { placeKind, picked } = match.data
+    // a file a person picks says what changed:  it watches the file (epic `editor` P41)
+    if (picked) return
     const abilities = placeKind ? PLACE_KIND_ABILITIES[placeKind] : undefined
     if (!placeKind || abilities?.saysWhatChanged || abilities?.isReadOnly) return
     if (abilities?.checkedEveryByDefault !== undefined) return
@@ -426,10 +444,11 @@ export class CreatePlace extends TypeDeclaration<
   /** What `core.place()` is handed:  its name, kind and address, then everything its lines say. */
   protected descriptionOf(match: P.MatchFor<this>): Record<string, unknown> {
     const { address } = match.groups
-    const { placeKind, folderAt } = match.data
+    const { placeKind, folderAt, picked } = match.data
     return {
       name: CreatePlace.placeNameOf(match),
       ...(placeKind && { kind: placeKind }),
+      ...(picked && { picked }),
       ...((address || folderAt) && { at: folderAt ?? textIn(address) }),
       ...checkedByDefault(placeKind),
       ...CreatePlace.detailsOf(match),

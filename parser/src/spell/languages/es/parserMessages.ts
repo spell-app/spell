@@ -123,6 +123,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     "Un lugar aquí no puede aplicar los cambios todos juntos:  van de uno en uno, así que otros pueden ver algunos por un momento",
   "no-save-step":
     '"{text}" no es un borrador:  un cambio se guarda al hacerlo, sin paso de guardar.  Para una pantalla con botón de cancelar:  "un borrador de ..."',
+  "pick-file-not-a-file":
+    '"{text}" no es un archivo que se elige:  dilo donde se declara, "{text} es un archivo json que eliges"',
   "no-such-data-word":
     'Encanto no puede "{word}" eso:  di una vez dónde viven los datos, "x es un servidor web en ...", y "vive en x", y luego "cada receta donde ..." los lee',
   "belongs-to-saved-needs-list":

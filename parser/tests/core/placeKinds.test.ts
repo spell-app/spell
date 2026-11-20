@@ -165,6 +165,42 @@ describe("placeBehind(), a sheet or an Excel file (epic `data` P38)", () => {
   })
 })
 
+describe("placeBehind(), a file a person picks (epic `editor` P41)", () => {
+  /** What's behind a picked file of `kind`, in program `program`. */
+  const picked = (kind: string) =>
+    placeBehind({
+      details: { name: "family_cookbook", kind, picked: true },
+      folder: PlacesFolder,
+      collection: "recipes",
+      Class: Object,
+      person: { id: "guest-1", name: "Guest 1" },
+      program: "@test/cookbook"
+    }) as PlacesFolder.PickedFilePlace
+
+  test("a json, csv or excel file with no address is a picked file, in its format, remembered by program and name", () => {
+    expect(picked("file")).toBeInstanceOf(PlacesFolder.PickedFilePlace)
+    expect([picked("file"), picked("sheet"), picked("excel file")].map((place) => place.format)).toEqual([
+      "json",
+      "csv",
+      "excel"
+    ])
+    expect(picked("file").key).toBe("@test/cookbook/family_cookbook")
+    expect(picked("file").describe()).toMatchObject({ kind: "json file", write: ["insert", "update", "delete"] })
+  })
+
+  test("a file with no address that isn't picked still needs a server side", () => {
+    expect(() =>
+      placeBehind({
+        details: { name: "family_cookbook", kind: "file" },
+        folder: PlacesFolder,
+        collection: "recipes",
+        Class: Object,
+        person: { id: "guest-1", name: "Guest 1" }
+      })
+    ).toThrow(TypeError)
+  })
+})
+
 describe("placeBehind(), a sheet that's the program's own CSV file (epic `language` T65)", () => {
   /** What's behind a sheet at `at`, its line naming `idColumn`. */
   const sheetAt = (at: string, idColumn?: string) =>

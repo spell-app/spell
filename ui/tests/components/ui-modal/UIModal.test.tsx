@@ -605,6 +605,29 @@ describe("UI.modals", () => {
     expect(await escaped).toBe(false)
   })
 
+  it("choose():  a button per answer after Cancel;  the picked value, or undefined on Cancel or Escape", async () => {
+    const choices = [
+      { value: "theirs", text: "Keep theirs" },
+      { value: "yours", text: "Keep yours", color: "primary" }
+    ] as const
+    const picked = UI.modals.choose({ title: "Changed", message: "It changed.", choices })
+    let host = await current()
+    const buttons = [...host.querySelectorAll<HTMLElement>("ui-button")]
+    expect(buttons.map((button) => button.textContent)).toEqual(["Cancel", "Keep theirs", "Keep yours"])
+    expect(buttons[2]!.getAttribute("color")).toBe("primary")
+    buttons[1]!.click()
+    expect(await picked).toBe("theirs")
+    expect(host.isConnected).toBe(false)
+    const canceled = UI.modals.choose({ message: "Again?", choices })
+    host = await current()
+    host.querySelector<HTMLElement>(".cancel")!.click()
+    expect(await canceled).toBeUndefined()
+    const escaped = UI.modals.choose({ message: "Again?", choices })
+    await current()
+    await userEvent.keyboard("{Escape}")
+    expect(await escaped).toBeUndefined()
+  })
+
   it("confirm() focuses the least destructive choice, Cancel", async () => {
     const answer = UI.modals.confirm("Sure?")
     const host = await current()

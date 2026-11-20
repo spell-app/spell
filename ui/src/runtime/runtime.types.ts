@@ -514,8 +514,29 @@ export type ModalOptions = {
   closable?: boolean
 }
 
+/**
+ * One answer of `UI.modals.choose()`:  a button of its own.
+ * - `value`:  what the call resolves with when it's picked
+ */
+export type ModalChoice<T extends string = string> = {
+  /** what `choose()` resolves with */
+  value: T
+  /** the button's words */
+  text: string
+  /** the button's `color`;  default none, the plain look */
+  color?: string
+}
+
+/** Options for `UI.modals.choose()`:  a dialog's words, and its answers, each a button. */
+export type ChooseOptions<T extends string = string> = ModalOptions & {
+  /** the answers, in the order their buttons show, after Cancel */
+  choices: readonly ModalChoice<T>[]
+}
+
 /** What the modal component registers as `Modals.provider`. */
 export type ModalProvider = {
+  /** resolves with the picked choice's `value`, or `undefined` on Cancel, its close ✕ or Escape */
+  choose<T extends string>(options: ChooseOptions<T>): Promise<T | undefined>
   /** resolves `true` on approve, `false` on deny / dismiss */
   confirm(options: ModalOptions): Promise<boolean>
   /** resolves when acknowledged */

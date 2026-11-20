@@ -4445,6 +4445,32 @@
     },
     {
       "kind": "method",
+      "name": "pickFileFor",
+      "of": "core",
+      "module": "saved",
+      "waits": true,
+      "params": [
+        {
+          "name": "placeName"
+        }
+      ],
+      "description": "The file picker, for the place called `placeName`, a file a person picks:  what `pick a file for family cookbook` compiles to (epic `editor` P41)."
+    },
+    {
+      "kind": "method",
+      "name": "savePickedFile",
+      "of": "core",
+      "module": "saved",
+      "waits": true,
+      "params": [
+        {
+          "name": "placeName"
+        }
+      ],
+      "description": "Save the place called `placeName`, a file a person picks, back to its file:  what `save family cookbook` compiles to (epic `editor` P41)."
+    },
+    {
+      "kind": "method",
       "name": "savedThingOrMissing",
       "of": "core",
       "module": "saved",

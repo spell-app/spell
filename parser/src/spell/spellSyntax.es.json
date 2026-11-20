@@ -2073,6 +2073,7 @@
             "cancel_when",
             "place_kind",
             "place_kind_here",
+            "picked_file",
             "place_kind_each_person",
             "day_half",
             "clock_zone",
@@ -2223,6 +2224,9 @@
             },
             {
               "syntax": "((database_on_this_device:base de datos en este dispositivo)|(in_memory_database:base de datos en memoria))"
+            },
+            {
+              "syntax": "((you_pick:que eliges|que elijas)|(on_this_device:en este dispositivo))"
             },
             {
               "syntax": "(personal_atmosphere_account:cuenta personal de atmosphere/i|atmosphere/i personal)"
@@ -9034,7 +9038,7 @@
           "ruleNames": ["create_place"],
           "internal": false,
           "file": "src/spell/rules/places/CreatePlace.ts",
-          "line": 91,
+          "line": 99,
           "purpose": "A program's data lives here (epic `data` P11, Q2).",
           "syntaxes": [
             {
@@ -9049,6 +9053,21 @@
                 },
                 "py": {
                   "code": "class RecetarioFamiliar(Place):\n    pass\n\nrecetario_familiar = core.place(\n    RecetarioFamiliar(),\n    {\n        \"name\": \"recetario_familiar\",\n        \"kind\": \"web server\",\n        \"at\": \"https://api.example.com/v1\",\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            },
+            {
+              "syntax": "{type:type_words} es (un|una) {kind:place_kind} {picked:picked_file} {with_nested_statements}?",
+              "example": "recetario familiar es un archivo json que eliges",
+              "outputs": {
+                "js": {
+                  "code": "export class RecetarioFamiliar extends Place {}\nexport const recetarioFamiliar = core.place(new RecetarioFamiliar(), {\n  name: \"recetario_familiar\",\n  kind: \"file\",\n  picked: true,\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class RecetarioFamiliar extends Place {}\nexport const recetarioFamiliar = core.place(new RecetarioFamiliar(), {\n  name: \"recetario_familiar\",\n  kind: \"file\",\n  picked: true,\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class RecetarioFamiliar(Place):\n    pass\n\nrecetario_familiar = core.place(\n    RecetarioFamiliar(),\n    {\"name\": \"recetario_familiar\", \"kind\": \"file\", \"picked\": True, \"unclear_numbers\": \",\"},\n)"
                 }
               }
             },
@@ -9831,6 +9850,32 @@
           "aliases": ["statement"]
         },
         {
+          "className": "PickFileFor",
+          "ruleNames": ["pick_file_for"],
+          "internal": false,
+          "file": "src/spell/rules/places/PickFileFor.ts",
+          "line": 15,
+          "purpose": "The file picker, for a place that's a file a person picks (epic `editor` P41, Q67's B).",
+          "syntaxes": [
+            {
+              "syntax": "elige un archivo para {place:known_type}",
+              "example": "recetario familiar es un archivo json que eliges\npara abrir\n\telige un archivo para recetario familiar",
+              "outputs": {
+                "js": {
+                  "code": "export class RecetarioFamiliar extends Place {}\nexport const recetarioFamiliar = core.place(new RecetarioFamiliar(), {\n  name: \"recetario_familiar\",\n  kind: \"file\",\n  picked: true,\n  unclearNumbers: \",\"\n})\nexport async function abrir() {\n  return core.asAction({ undoneAs: \"Abrir\" }, async () => {\n    await core.pickFileFor(\"recetario_familiar\")\n  })\n}"
+                },
+                "ts": {
+                  "code": "export class RecetarioFamiliar extends Place {}\nexport const recetarioFamiliar = core.place(new RecetarioFamiliar(), {\n  name: \"recetario_familiar\",\n  kind: \"file\",\n  picked: true,\n  unclearNumbers: \",\"\n})\nexport async function abrir() {\n  return core.asAction({ undoneAs: \"Abrir\" }, async () => {\n    await core.pickFileFor(\"recetario_familiar\")\n  })\n}"
+                },
+                "py": {
+                  "code": "class RecetarioFamiliar(Place):\n    pass\n\nrecetario_familiar = core.place(\n    RecetarioFamiliar(),\n    {\"name\": \"recetario_familiar\", \"kind\": \"file\", \"picked\": True, \"unclear_numbers\": \",\"},\n)\n\n@core.as_action({\"undone_as\": \"Abrir\"})\nasync def abrir() -> None:\n    core.pick_file_for(\"recetario_familiar\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "WrapperAction",
           "ruleNames": ["wrapper_action"],
           "internal": false,
@@ -10432,9 +10477,12 @@
           "ruleNames": ["save_draft"],
           "internal": false,
           "file": "src/spell/rules/places/SaveDraft.ts",
-          "line": 14,
+          "line": 18,
           "purpose": "A draft's changes go out, together (epic `data` Q9).",
           "syntaxes": [
+            {
+              "syntax": "guardar {draft:known_type}"
+            },
             {
               "syntax": "guardar {draft:expression}"
             }

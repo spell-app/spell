@@ -70,6 +70,7 @@ import { ReloadThings } from "./ReloadThings"
 import { RowsIn } from "./RowsIn"
 import { ListsGiveOnly } from "./ListsGiveOnly"
 import { PageSizeIs } from "./PageSizeIs"
+import { PickFileFor } from "./PickFileFor"
 import { SaveDraft } from "./SaveDraft"
 import { KeepsNoTimes } from "./KeepsNoTimes"
 import { EnabledOperations, OPERATION_MEANINGS } from "./EnabledOperations"
@@ -145,6 +146,11 @@ places.addRule(Wording.specialize({ ruleName: "place_kind", meanings: KINDS_AT }
 
 places.addRule(Wording.specialize({ ruleName: "place_kind_here", meanings: KINDS_HERE }), {
   syntax: "((database_on_this_device:database on this device)|(in_memory_database:in memory database))"
+})
+
+/** How a file a person picks is said, after its kind (epic `editor` P41, Q67's B and C):  both make the same place. */
+places.addRule(Wording.specialize({ ruleName: "picked_file", meanings: ["you_pick", "on_this_device"] }), {
+  syntax: "((you_pick:you pick)|(on_this_device:on this device))"
 })
 
 places.addRule(Wording.specialize({ ruleName: "place_kind_each_person", meanings: ["personal_atmosphere_account"] }), {
@@ -238,6 +244,60 @@ places.addRule(CreatePlace, {
   syntax: "{type:type_words} is (a|an) {superType:type} (at|from) {address:text} {with_nested_statements}?"
 })
 places.addRule(CreatePlace, { syntax: "{type:type_words} is (a|an) {kind:place_kind_here} {with_nested_statements}?" })
+places.addRule(CreatePlace, {
+  syntax: "{type:type_words} is (a|an) {kind:place_kind} {picked:picked_file} {with_nested_statements}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          "family cookbook is a json file you pick",
+          [
+            "export class FamilyCookbook extends Place {}",
+            "export const familyCookbook = core.place(new FamilyCookbook(), {",
+            '  name: "family_cookbook",',
+            '  kind: "file",',
+            "  picked: true",
+            "})"
+          ]
+        ],
+        [
+          "family cookbook is a json file on this device",
+          [
+            "export class FamilyCookbook extends Place {}",
+            "export const familyCookbook = core.place(new FamilyCookbook(), {",
+            '  name: "family_cookbook",',
+            '  kind: "file",',
+            "  picked: true",
+            "})"
+          ]
+        ],
+        [
+          "task sheet is a csv file you pick",
+          [
+            "export class TaskSheet extends Place {}",
+            "export const taskSheet = core.place(new TaskSheet(), {",
+            '  name: "task_sheet",',
+            '  kind: "sheet",',
+            "  picked: true",
+            "})"
+          ]
+        ],
+        [
+          "budget is an excel file on this device",
+          [
+            "export class Budget extends Place {}",
+            "export const budget = core.place(new Budget(), {",
+            '  name: "budget",',
+            '  kind: "excel file",',
+            "  picked: true",
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
 places.addRule(CreatePlace, {
   syntax:
     "{type:type_words} is (a|an) {kind:place_kind_each_person} ((at|from) {address:text})? {with_nested_statements}?"
@@ -1356,7 +1416,59 @@ places.addRule(DraftOf, {
   syntax: "a draft of {thing:operand}",
   tests: [{ compileAs: "expression", tests: [["a draft of thing", undefined]] }]
 })
+places.addRule(SaveDraft, {
+  syntax: "save {draft:known_type}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: ["family cookbook is a json file you pick", "to keep it", "\tsave family cookbook"],
+          js: [
+            "export class FamilyCookbook extends Place {}",
+            "export const familyCookbook = core.place(new FamilyCookbook(), {",
+            '  name: "family_cookbook",',
+            '  kind: "file",',
+            "  picked: true",
+            "})",
+            "export async function keepIt() {",
+            '  return core.asAction({ undoneAs: "Keep It" }, async () => {',
+            '    await core.savePickedFile("family_cookbook")',
+            "  })",
+            "}"
+          ]
+        }
+      ]
+    }
+  ]
+})
 places.addRule(SaveDraft, { syntax: "save {draft:expression}" })
+places.addRule(PickFileFor, {
+  syntax: "pick a file for {place:known_type}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: ["family cookbook is a json file you pick", "to open", "\tpick a file for family cookbook"],
+          js: [
+            "export class FamilyCookbook extends Place {}",
+            "export const familyCookbook = core.place(new FamilyCookbook(), {",
+            '  name: "family_cookbook",',
+            '  kind: "file",',
+            "  picked: true",
+            "})",
+            "export async function open() {",
+            '  return core.asAction({ undoneAs: "Open" }, async () => {',
+            '    await core.pickFileFor("family_cookbook")',
+            "  })",
+            "}"
+          ]
+        }
+      ]
+    }
+  ]
+})
 places.addRule(DiscardDraft, { syntax: "discard {draft:expression}" })
 places.addRule(CancelAction, { syntax: "(stop|cancel) the? {action:identifier}" })
 places.addRule(ReloadThings, { syntax: "reload the {type:plural_type}" })

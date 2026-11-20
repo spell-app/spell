@@ -2056,6 +2056,7 @@
             "cancel_when",
             "place_kind",
             "place_kind_here",
+            "picked_file",
             "place_kind_each_person",
             "day_half",
             "clock_zone",
@@ -2206,6 +2207,9 @@
             },
             {
               "syntax": "((database_on_this_device:database on this device)|(in_memory_database:in memory database))"
+            },
+            {
+              "syntax": "((you_pick:you pick)|(on_this_device:on this device))"
             },
             {
               "syntax": "(personal_atmosphere_account:personal atmosphere/i account|personal atmosphere/i)"
@@ -9071,7 +9075,7 @@
           "ruleNames": ["create_place"],
           "internal": false,
           "file": "src/spell/rules/places/CreatePlace.ts",
-          "line": 91,
+          "line": 99,
           "purpose": "A program's data lives here (epic `data` P11, Q2).",
           "syntaxes": [
             {
@@ -9086,6 +9090,21 @@
                 },
                 "py": {
                   "code": "class FamilyCookbook(Place):\n    pass\n\nfamily_cookbook = core.place(\n    FamilyCookbook(),\n    {\"name\": \"family_cookbook\", \"kind\": \"web server\", \"at\": \"https://api.example.com/v1\"},\n)"
+                }
+              }
+            },
+            {
+              "syntax": "{type:type_words} is (a|an) {kind:place_kind} {picked:picked_file} {with_nested_statements}?",
+              "example": "family cookbook is a json file you pick",
+              "outputs": {
+                "js": {
+                  "code": "export class FamilyCookbook extends Place {}\nexport const familyCookbook = core.place(new FamilyCookbook(), {\n  name: \"family_cookbook\",\n  kind: \"file\",\n  picked: true\n})"
+                },
+                "ts": {
+                  "code": "export class FamilyCookbook extends Place {}\nexport const familyCookbook = core.place(new FamilyCookbook(), {\n  name: \"family_cookbook\",\n  kind: \"file\",\n  picked: true\n})"
+                },
+                "py": {
+                  "code": "class FamilyCookbook(Place):\n    pass\n\nfamily_cookbook = core.place(\n    FamilyCookbook(),\n    {\"name\": \"family_cookbook\", \"kind\": \"file\", \"picked\": True},\n)"
                 }
               }
             },
@@ -9868,6 +9887,61 @@
           "aliases": ["statement"]
         },
         {
+          "className": "SaveDraft",
+          "ruleNames": ["save_draft"],
+          "internal": false,
+          "file": "src/spell/rules/places/SaveDraft.ts",
+          "line": 18,
+          "purpose": "A draft's changes go out, together (epic `data` Q9).",
+          "syntaxes": [
+            {
+              "syntax": "save {draft:known_type}",
+              "example": "family cookbook is a json file you pick\nto keep it\n\tsave family cookbook",
+              "outputs": {
+                "js": {
+                  "code": "export class FamilyCookbook extends Place {}\nexport const familyCookbook = core.place(new FamilyCookbook(), {\n  name: \"family_cookbook\",\n  kind: \"file\",\n  picked: true\n})\nexport async function keepIt() {\n  return core.asAction({ undoneAs: \"Keep It\" }, async () => {\n    await core.savePickedFile(\"family_cookbook\")\n  })\n}"
+                },
+                "ts": {
+                  "code": "export class FamilyCookbook extends Place {}\nexport const familyCookbook = core.place(new FamilyCookbook(), {\n  name: \"family_cookbook\",\n  kind: \"file\",\n  picked: true\n})\nexport async function keepIt() {\n  return core.asAction({ undoneAs: \"Keep It\" }, async () => {\n    await core.savePickedFile(\"family_cookbook\")\n  })\n}"
+                },
+                "py": {
+                  "code": "class FamilyCookbook(Place):\n    pass\n\nfamily_cookbook = core.place(\n    FamilyCookbook(),\n    {\"name\": \"family_cookbook\", \"kind\": \"file\", \"picked\": True},\n)\n\n@core.as_action({\"undone_as\": \"Keep It\"})\nasync def keep_it() -> None:\n    core.save_picked_file(\"family_cookbook\")"
+                }
+              }
+            },
+            {
+              "syntax": "save {draft:expression}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "PickFileFor",
+          "ruleNames": ["pick_file_for"],
+          "internal": false,
+          "file": "src/spell/rules/places/PickFileFor.ts",
+          "line": 15,
+          "purpose": "The file picker, for a place that's a file a person picks (epic `editor` P41, Q67's B).",
+          "syntaxes": [
+            {
+              "syntax": "pick a file for {place:known_type}",
+              "example": "family cookbook is a json file you pick\nto open\n\tpick a file for family cookbook",
+              "outputs": {
+                "js": {
+                  "code": "export class FamilyCookbook extends Place {}\nexport const familyCookbook = core.place(new FamilyCookbook(), {\n  name: \"family_cookbook\",\n  kind: \"file\",\n  picked: true\n})\nexport async function open() {\n  return core.asAction({ undoneAs: \"Open\" }, async () => {\n    await core.pickFileFor(\"family_cookbook\")\n  })\n}"
+                },
+                "ts": {
+                  "code": "export class FamilyCookbook extends Place {}\nexport const familyCookbook = core.place(new FamilyCookbook(), {\n  name: \"family_cookbook\",\n  kind: \"file\",\n  picked: true\n})\nexport async function open() {\n  return core.asAction({ undoneAs: \"Open\" }, async () => {\n    await core.pickFileFor(\"family_cookbook\")\n  })\n}"
+                },
+                "py": {
+                  "code": "class FamilyCookbook(Place):\n    pass\n\nfamily_cookbook = core.place(\n    FamilyCookbook(),\n    {\"name\": \"family_cookbook\", \"kind\": \"file\", \"picked\": True},\n)\n\n@core.as_action({\"undone_as\": \"Open\"})\nasync def open() -> None:\n    core.pick_file_for(\"family_cookbook\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "WrapperAction",
           "ruleNames": ["wrapper_action"],
           "internal": false,
@@ -10460,20 +10534,6 @@
           "syntaxes": [
             {
               "syntax": "if that fails (:|,)? {statement_body}?"
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
-          "className": "SaveDraft",
-          "ruleNames": ["save_draft"],
-          "internal": false,
-          "file": "src/spell/rules/places/SaveDraft.ts",
-          "line": 14,
-          "purpose": "A draft's changes go out, together (epic `data` Q9).",
-          "syntaxes": [
-            {
-              "syntax": "save {draft:expression}"
             }
           ],
           "aliases": ["statement"]
