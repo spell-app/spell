@@ -33,8 +33,8 @@ Ask, with pictures, rather than pick:  the asks moved on each of these.
 - Section headers' glass:  the ask was 30% at rest and 95% stuck, then the reverse, then 50% at rest and 90% stuck
   (built in debut;  T14).
 - Bars' colour:  white toolbars, but the sticky page header in the page's own background, not white (T11).
-- Tooltips:  the standing rule is the browser's own (`title`), but in debut the ask was a styled dark-glass one (T44
-  against T45):  the browser's unless a styled one was asked for on that page.
+- Tooltips:  the standing rule was the browser's own (`title`) until 2026-11-19;  now it's Spell UI's tooltip with the
+  standard delay (T44), and in debut the ask was a slow dark-glass one (T45).
 
 
 ## House taste
@@ -439,15 +439,21 @@ Sources, short names used below:
 
 ### Tooltips
 
-#### T44 · Every button has a tooltip:  the browser's own
-- Look for:  an icon button with no tooltip;  a styled tooltip component where a plain one would do.
+#### T44 · Every button has a tooltip:  Spell UI's, with the standard delay
+- Look for:
+  - an icon button with no tooltip
+  - a tooltip that shows at once, or after a delay of its own instead of `--ui-tooltip-delay`
+  - a browser `title` tooltip in code being changed:  it becomes a `data-tooltip`
+- Fix:  `data-tooltip="..."` on the element (the runtime shows it in the top layer);  `<ui-tooltip>` or a
+  component's `TopLayerTip` for a richer one;  an `aria-label` on an icon-only control too.
 - Said:
-  - "Standing rule:  Tooltips should not be <ui-tooltip>, use the browser tooltip instead.  I'll say `add a ui-tooltip
-    with...`"
+  - "update this rule now that our tooltips are working properly:  'tooltips should use <ui-tooltip> with the
+    standard delay'" (2026-11-19)
+  - Before it, 2026-10-10:  "Standing rule:  Tooltips should not be <ui-tooltip>, use the browser tooltip instead."
   - "The buttons don't have browser tooltips -- unclear what they do."
   - "No tooltip on those same buttons"
-- Source:  memory `feedback_browser_tooltips.md`, 2026-10-10;  epic `airplane` J63;  spell-epic AGENTS (thread
-  buttons).
+- Source:  epic `from-console` C10, r80 (Owen, 2026-11-19), which replaced memory `feedback_browser_tooltips.md`
+  (2026-10-10);  epic `airplane` J63;  spell-epic AGENTS (thread buttons).
 
 #### T45 · A styled tooltip, when one is asked for, is a slow dark-glass pill
 - Theme: fruity
