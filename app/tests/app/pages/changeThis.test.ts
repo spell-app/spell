@@ -99,7 +99,7 @@ describe.skipIf(!SERVING)("change this", { timeout: 240_000 }, () => {
     request = { ...request, hasClaude: true, session: { pid: 1, at: new Date().toISOString(), log: "/x.log" } }
     await expect
       .poll(() => page.locator(".ChangeThisStatus").innerText(), { timeout: 5000 })
-      .toBe("Starting Claude session…")
+      .toBe("Starting your agent…")
   })
 
   test("it counts the seconds since it was sent, beside a spinner that shows (epic `editor` I138)", async () => {
@@ -127,7 +127,7 @@ describe.skipIf(!SERVING)("change this", { timeout: 240_000 }, () => {
     request = { ...request, status: "taken", listening: true, session: undefined, progress: undefined }
     await expect
       .poll(() => page.locator(".ChangeThisStatus").innerText(), { timeout: 5000 })
-      .toBe("Claude is working on it…")
+      .toBe("Your agent is working on it…")
     expect(await page.locator(".ChangeThisBox ui-code").count()).toBe(0)
   })
 

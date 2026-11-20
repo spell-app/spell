@@ -12,7 +12,7 @@ import { ClaudeStarter } from "./ClaudeStarter"
  * - `POST /api/changes`, body `ChangeAsked`:  the new request, whether a session is listening,
  *   and whether Claude Code is on this machine
  *   - nobody listening, and Claude Code here:  a session is started for it at once (`ClaudeStarter`, epic `editor` T66)
- * - `POST /api/changes/start?id=c3`:  start a session for a request still waiting, the box's Start Claude button
+ * - `POST /api/changes/start?id=c3`:  start a session for a request still waiting, the box's Start Claude Code button
  * - `GET /api/changes?id=c3`:  where it's got to, the same, and what its session is doing (`progress`);  404 for none
  *   - a session started for it that has ended without finishing, or hasn't taken it within a minute:
  *     failed (`ClaudeStarter.settle()`)
@@ -81,7 +81,7 @@ export const request_explain = respondWithJSON(async (request): Promise<SPACES.E
 })
 
 /**
- * Start a session for `request`;  one that won't start leaves it waiting, the box offering Start Claude.
+ * Start a session for `request`;  one that won't start leaves it waiting, the box offering Start Claude Code.
  * - NEVER throws:  the failure goes to the server's log
  */
 function startOrLeave(starter: ClaudeStarter, request: SPACES.ChangeRequest): SPACES.ChangeRequest {

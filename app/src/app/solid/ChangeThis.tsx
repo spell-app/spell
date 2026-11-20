@@ -97,7 +97,7 @@ export class ChangeThis {
   }
 
   /**
-   * Start a Claude session for the request under way, the box's Start Claude button:
+   * Start a Claude session for the request under way, the box's Start Claude Code button:
    * for when the page server didn't start one by itself (epic `editor` T66).
    * - NEVER throws:  a failure is said in the editor's error
    */
@@ -228,7 +228,7 @@ export class ChangeThis {
  * - Send, a small paper plane right of the words, at their foot, sends them;  so does Enter.  Shift+Enter starts a new line.
  * - A picture pasted or dropped into it goes with the words, a thumbnail under them, its ✕ taking it out (epic `editor` T62).
  * - Under way, a spinner, a short line of what Claude is doing, and the seconds since it was sent (epic `editor` I138):
- *   "Starting Claude session…", "Reading your request…", "Editing Solitaire.spell…" (`statusOf()`);
+ *   "Starting your agent…", "Reading your request…", "Editing Solitaire.spell…" (`statusOf()`);
  *   no Claude Code on this machine:  a link to install it, and the command to run by hand.
  * - `ChangeThis.open()` opens it.
  ****************/
@@ -360,7 +360,7 @@ export function ChangeThisBox(): JSX.Element {
  * - `starting`:  the page server started a Claude session, which hasn't taken it yet
  * - `working`:  a session has it, or one listening will take it
  * - `no claude`:  nobody listens, and Claude Code isn't on this machine
- * - `nobody`:  nobody listens, and no session started:  the Start Claude button
+ * - `nobody`:  nobody listens, and no session started:  the Start Claude Code button
  * - `undefined`:  no request
  */
 function stageOf(
@@ -381,7 +381,7 @@ function isUnderWay(request: SPACES.ChangeAnswer | undefined): boolean {
 /**
  * What Claude is doing with `request`, as the box says it, in one short line:
  * - a session the page server started:  what its log says (`progress`), "Editing Solitaire.spell…"
- * - else "Starting Claude session…" while none has taken it, then "Claude is working on it…"
+ * - else "Starting your agent…" while none has taken it, then "Your agent is working on it…"
  */
 function statusOf(request: SPACES.ChangeAnswer | undefined): string {
   const progress = request?.progress

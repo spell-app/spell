@@ -15,7 +15,7 @@ ui-popup.ChangeThisPopup::part(popup) {
     grid-column: 1 / -1;
   }
 }
-/* the top row:  "Tell your buddy Claude:", then its ✕ at the right (I133) */
+/* the top row:  "Tell your AI agent:", then its ✕ at the right (I133) */
 .ChangeThisBox > .ChangeThisTop {
   grid-column: 1;
   display: flex;
@@ -23,7 +23,7 @@ ui-popup.ChangeThisPopup::part(popup) {
   justify-content: space-between;
   gap: 8px;
 }
-/* "Tell your buddy Claude:" over the words (epic `editor` I103), its first letter over theirs (I121):
+/* "Tell your AI agent:" over the words (epic `editor` I103), its first letter over theirs (I121):
    the field's border and its own inline padding in */
 .ChangeThisHeader {
   padding-inline-start: calc(var(--ui-input-padding-inline, 1em) + var(--ui-border-width, 1px));
