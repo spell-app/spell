@@ -10,6 +10,7 @@ import {
   AppMenu,
   AppRoot,
   ConsoleRoot,
+  EditorMode,
   EditorZones,
   InputRoot,
   Inspector,
@@ -20,8 +21,7 @@ import {
   AnatomyButton,
   AppAnatomy,
   AppAnatomyView,
-  ViewAloneButton,
-  ViewAloneStage,
+  DesignStage,
   InspectAppButton,
   Palette,
   PaletteStrip,
@@ -314,8 +314,8 @@ function drawnView(
  *   of its own, drawn as it's typed (`<EditorZones>`, T63):  the editor you're using runs the published Spell.
  * - Anatomy, while it shows, pulls the program apart into floors in place, its bar over the pane's top
  *   (`<AppAnatomyView>`, epic `editor` P34).
- * - A view's file open, the view can show alone, one thing drawn with its property editor beside it, the app hidden
- *   behind it (`<ViewAloneStage>`, epic `editor` P35).
+ * - In Design, the bit of a view picked to design, drawn large, the app hidden behind it, or a site's page,
+ *   the app itself (`<DesignStage>`, epic `editor` P37).
  ****************/
 export function AppPane() {
   const root = trackProjectRoot(() => undefined)
@@ -344,7 +344,7 @@ export function AppPane() {
         <Show when={isEditorPiece()}>
           <EditorZones />
         </Show>
-        <ViewAloneStage program={() => program} />
+        <DesignStage program={() => program} />
         <div
           class={[
             "AppPaneProgram",
@@ -566,8 +566,8 @@ function tabFor(id: ProgramTabId): RunnerTab<ProgramTabId> {
  * The editor's top bar (epic `debut` P32, as Owen drew it):
  * - left:  Spell's menu (its hat and name:  the group's projects, Home), the project's menu (its name),
  *   then File · Edit · View · Run · Help (`MenuBar.tsx`), then the draft's pill while you have drafts (T107)
- * - middle:  Run | Edit, then in Edit, the code's icon, the compiled code's (its language's icon), Inspect app and Add,
- *   in the same group (epic `editor` T83)
+ * - middle:  Run | Edit | Design | Site, then in Edit and Design, the code's icon,
+ *   the compiled code's (its language's icon), Inspect app and Add, in the same group (epic `editor` T83)
  * - right, ONE group of icons:  Restart, the theme, you
  *   - no Inspector button (T83):  View › Inspector shows or hides it, and the Inspector card's ✕ hides it
  * - `mode`:  the page's, pressed in `<ModeButtons>`.
@@ -591,7 +591,6 @@ export function EditorToolbar(props: { mode: Mode }) {
             <>
               <InspectAppButton id={INSPECT_APP_ID} />
               <AnatomyButton />
-              <ViewAloneButton />
             </>
           }
           add={<AddPartButton />}
@@ -601,7 +600,7 @@ export function EditorToolbar(props: { mode: Mode }) {
     tools: {
       draw: () => (
         <>
-          <Show when={props.mode === "edit"}>
+          <Show when={EditorMode.isEditing(props.mode)}>
             <InspectHelp for={INSPECT_APP_ID} />
           </Show>
           {/* its tooltip and label say what a click does (I230) */}
@@ -670,8 +669,8 @@ const INSPECT_APP_ID = "InspectApp"
 
 /****************
  * ### `<ProjectPageRoute>`
- * The `/edit/...` and `/run/...` routes:  `<SpellEditor>`, showing the project / file the URL names (`followRoute()`),
- * in Run for `/run/`, else in Edit.
+ * The `/edit/...`, `/design/...` and `/run/...` routes:  `<SpellEditor>`, showing the project / file the URL names
+ * (`followRoute()`), in Run for `/run/`, Design for `/design/` (epic `editor` P37), else in Edit.
  * - ONE route for both:  it stays mounted while only the URL's params change, the page (`edit`, `run`) too,
  *   so switching between Run and Edit, or between files, doesn't redraw the page.
  * - Nothing stays selected in Run:  its ants would sit over the app alone (Owen, 2026-11-07).
@@ -679,10 +678,11 @@ const INSPECT_APP_ID = "InspectApp"
  ****************/
 export function ProjectPageRoute(props: RouteSectionProps) {
   const page = (): EditorPage => (props.params.page === RUN_PAGE ? "runner" : "editor")
-  followRoute(() => props.params, page)
+  const isDesigning = () => props.params.page === DESIGN_PAGE
+  followRoute(() => props.params, page, isDesigning)
   useBeforeLeave(letGoForRun)
   useBeforeLeave(askBeforeLeavingExample)
-  return <SpellEditor mode={page() === "runner" ? "run" : "edit"} />
+  return <SpellEditor mode={page() === "runner" ? "run" : isDesigning() ? "design" : "edit"} />
 }
 
 /**
@@ -737,3 +737,6 @@ const PHONE_QUERY = "(width <= 767px)"
 
 /** The run page's word in its URL, `/run/...`. */
 const RUN_PAGE = "run"
+
+/** Design's word in its URL, `/design/...` (epic `editor` P37). */
+const DESIGN_PAGE = "design"

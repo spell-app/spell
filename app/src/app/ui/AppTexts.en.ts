@@ -32,6 +32,19 @@ export const APP_TEXTS = {
   modes: "Run, edit or debug",
   runMode: "Run",
   editMode: "Edit",
+  // Design mode, the top bar's fourth tab, and its picker (epic `editor` P37)
+  designMode: "Design",
+  designTip: "Work on One Piece of Your App by Itself",
+  designingTip: "You're working on one piece of your app by itself",
+  designPickerLabel: "What to design",
+  designDrawing: "Its drawing",
+  designPropertyEditor: "Property editor",
+  designPages: "Pages",
+  designViews: "Views",
+  designOtherViews: "Other views",
+  designWaiting: "Starting your app…",
+  designNothing:
+    "This file has no pieces you can work on by themselves.\nPick one from the list on the left:  it opens here, on its own.",
   // the top bar's tooltips:  what a click does, in the state it's in (epic `editor` I230)
   runTip: "Run the App",
   stopEditingTip: "Stop Editing",
@@ -117,11 +130,6 @@ export const APP_TEXTS = {
     "What you added is in your app, but it's empty, so you can't see it yet.\n" +
     "It's selected in the Views list on the right.\n" +
     "Give it a label, or drag another part into it.",
-  // a view shown on its own, the top bar's switch (epic `editor` P35)
-  viewAlone: "{view} alone",
-  viewAloneTip: "Show just one {view}, with its property editor, to work on it by itself",
-  viewAloneStopTip: "Show the whole app again",
-  viewAloneWaiting: "Waiting for the app to run…",
   partInsideItself: "Something can't go inside itself.",
   lineNumbers: "Line Numbers",
   softWrap: "Soft Wrap",
@@ -356,6 +364,7 @@ export const APP_TEXTS = {
   siteChangePart: "Change {name}",
   siteMovePart: "Move {name}",
   siteOpenPage: "Open in Edit",
+  siteDesignPage: "Design",
   siteEditPart: "Edit {name}",
   siteBackToSite: "Back to the site",
   siteGroupTitle: "Sites",
@@ -471,7 +480,8 @@ export const APP_TEXTS = {
   // what a click does while it shows:  plays the app, or picks a layer (T117)
   anatomyClicks: "What a click does",
   anatomyPlay: "Play",
-  anatomyPlayTip: "Clicks and drags go to your app, so you can play it in 3D.\nDrag anywhere else to turn it.\nHold Option to pick a layer instead.",
+  anatomyPlayTip:
+    "Clicks and drags go to your app, so you can play it in 3D.\nDrag anywhere else to turn it.\nHold Option to pick a layer instead.",
   anatomyInspect: "Inspect",
   anatomyInspectTip: "A click picks a layer, and a drag turns it.\nHold Option to play your app instead.",
   anatomyFront: "Front",

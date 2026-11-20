@@ -12,8 +12,10 @@ import { ThemeEditorPage } from "./ThemeEditorPage"
 import { PLACE_PAGE, SITE_PAGE, THEME_PAGE } from "./pages.types"
 
 /**
- * The app's routes (`@solidjs/router`):  `/edit/` or `/run/`, then an address (decision Q40, epic `people-and-orgs` P4).
- * - `/edit/<address>`:  `<SpellEditor>` in Edit or Debug, e.g. `/edit/@spell/examples/Solitaire/Solitaire.spell`
+ * The app's routes (`@solidjs/router`):  `/edit/`, `/design/` or `/run/`, then an address (decision Q40, epic
+ * `people-and-orgs` P4).
+ * - `/edit/<address>`:  `<SpellEditor>` in Edit, e.g. `/edit/@spell/examples/Solitaire/Solitaire.spell`
+ * - `/design/<address>`:  the same page in Design (epic `editor` P37), e.g. `/design/@spell/examples/Solitaire/Card.spell`
  * - `/run/<address>`:  the same page in Run, e.g. `/run/owen@spell/errors`
  * - `/theme`:  the theme editor (`<ThemeEditorPage>`)
  * - `/site`:  every site there is (`<SitesHomePage>`)
@@ -21,7 +23,7 @@ import { PLACE_PAGE, SITE_PAGE, THEME_PAGE } from "./pages.types"
  * - `/site/<group>`:  the group's sites (`<SiteGroupPage>`);  a registered group's address, else it's a project's
  * - `/place/<description>`:  a place's reference page (`<PlaceReferencePage>`, epic `data` P52), e.g.
  *   `/place/@spell/examples/StarWars/StarWars.api.json5`
- * - ONE route for both (`ProjectPageRoute`), so switching between them keeps the page.
+ * - ONE route for all three (`ProjectPageRoute`), so switching between them keeps the page.
  * - anything else:  `<ProjectChooser>`
  * - Each page is ONE route:  it stays mounted while only its address changes, e.g.
  *   moving between files, and follows them (`followRoute()`).
@@ -29,7 +31,7 @@ import { PLACE_PAGE, SITE_PAGE, THEME_PAGE } from "./pages.types"
 export const ROUTES = defineRoutes([
   {
     path: "/:page/*address",
-    matchFilters: { page: ["edit", "run"] },
+    matchFilters: { page: ["edit", "design", "run"] },
     component: ProjectPageRoute
   },
   { path: THEME_PAGE, component: ThemeEditorPage },

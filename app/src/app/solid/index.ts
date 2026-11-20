@@ -10,7 +10,7 @@
  * - Shared UI:
  *   - `chrome.tsx`:  `AppMenu`, `PanelMenu`, `Submenu`, `MenuHeader`, `Spring`, `MoreMenu`, the icon names
  *   - `Actions.tsx`:  `Action`, `Actions`
- *   - `EditorTheme.tsx`, `EditorMode.tsx`:  the editor's look, and its Run / Edit modes (and the Program panel shown)
+ *   - `EditorTheme.tsx`, `EditorMode.tsx`:  the editor's look, and its Run / Edit / Design modes (and the Program panel shown)
  *   - `MenuBar.tsx`:  the top bar's menus, Spell's, the project's and File · Edit · View · Run · Help
  *   - `ErrorBoundary.tsx`:  `ErrorBoundary`
  *   - `ErrorNotice.tsx`:  `ErrorDisplay`, `ErrorNotice`;  `Notice.tsx`;  `Markdown.tsx`
@@ -21,7 +21,7 @@
  *   - `trackProjectRoot()`:  a group of projects as Solid reads it, and `openProject()`
  *   - `EditorZones`:  the app pane of the editor's own Spell, a zone per view (epic `editor` T63)
  *   - `AppAnatomy`:  the running app pulled apart into floors, in 3D (epic `editor` P34)
- *   - `ViewAlone`:  a view of the app shown on its own, with its property editor (epic `editor` P35)
+ *   - `Design`:  Design mode's state and its stage, the bit of a view picked to design, drawn large (epic `editor` P37)
  *   - The pages and the router are `spell/app/app/pages`.
  * - The editor's panes (P6):
  *   console, match and AST viewers, type and thing explorers, the code editors, `FileTabs`.
@@ -46,7 +46,7 @@ export * from "./EditorTheme"
 export * from "./EditorMode"
 export * from "./Inspector"
 export * from "./AppAnatomy"
-export * from "./ViewAlone"
+export * from "./Design"
 export * from "./InspectorData"
 export * from "./PartEdits"
 export * from "./Palette"

@@ -11,16 +11,21 @@ import { RunSite, runSite } from "./RunSite"
  * - Call in a route component's body:  the effect goes with it.
  * - The route stays mounted while only its params change (`routes.tsx`),
  *   so moving between a project's files re-selects without redrawing the page.
- * - SIDE EFFECT:  sets `editor.projectPage` first:  `selectPath()` reads it to redirect to the page's own URL.
+ * - SIDE EFFECT:  sets `editor.projectPage` and `editor.isDesigning` first:
+ *   `selectPath()` reads them to redirect to the page's own URL.
  * - A bad address shows as `editor.showError()`, never a throw:  an effect that throws halts Solid for the whole page.
  * - A page of a running app, `/run/owen@spell/solitaire/rules`, runs its app, and a SITE shows its page `/rules`
  *   (`RunSite.heard()`, epic `mockup` P2;  `SP.SpellUrls.withoutPage()`).
  *   - A file of a site, `/run/owen@spell/dashboard/home.spell`, shows the page it holds (epic `mockup` I15).
  */
-export function followRoute(params: () => Partial<SpellRouteParams>, page: () => EditorPage): void {
+export function followRoute(
+  params: () => Partial<SpellRouteParams>,
+  page: () => EditorPage,
+  isDesigning: () => boolean = () => false
+): void {
   createEffect(
-    () => [params().address ?? "", page()] as const,
-    ([tail, page]) => {
+    () => [params().address ?? "", page(), isDesigning()] as const,
+    ([tail, page, isDesigning]) => {
       let path: string
       try {
         path = SP.SpellUrls.withoutPage(tail)
@@ -29,6 +34,7 @@ export function followRoute(params: () => Partial<SpellRouteParams>, page: () =>
         return
       }
       editor.projectPage = page
+      editor.isDesigning = isDesigning
       // in Run, the part after the project is a running site's page:  `/run/<project>/films/4` (epic `mockup` P2),
       // or the file that holds it, `/run/<project>/home.spell` (I15)
       if (page === "runner") runSite.heard(RunSite.siteAddressIn(tail, location.pathname), fileIn(path))

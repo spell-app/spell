@@ -1,0 +1,109 @@
+/*
+ * Design, in the app pane (`Design.tsx`, epic `editor` P37):
+ * its picker down the left, the bit picked drawn large beside it;  the app hidden behind them,
+ * or, for a site's page, the app itself beside the picker.
+ */
+
+/* the picker beside the canvas, or beside the app for a page */
+.AppPane > .AppPaneBody:has(> .DesignStage) {
+  flex-direction: row;
+}
+.AppPane > .AppPaneBody:has(> .DesignStage) > .AppPaneProgram {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* the app keeps running, out of sight, while a view's bit shows */
+.AppPane > .AppPaneBody:has(> .DesignStage:not(.page)) > .AppPaneProgram {
+  display: none;
+}
+
+.DesignStage {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+.DesignStage.page {
+  flex: 0 0 auto;
+}
+
+.DesignPicker {
+  flex: 0 0 192px;
+  width: 192px;
+  min-width: 192px;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 12px 0 12px 12px;
+  overflow: auto;
+}
+
+.DesignCanvas {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  align-items: stretch;
+  gap: 32px;
+  padding: 16px;
+}
+
+/* what `<FitInside>` scales up, in the middle of its box */
+.DesignFit {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.DesignFitContent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* the property editor, as the Inspector draws it, large;  the thing small beside it */
+.DesignCanvas.editing {
+  flex-wrap: wrap;
+  align-items: center;
+  align-content: center;
+  justify-content: center;
+  overflow: auto;
+}
+.DesignEditor {
+  flex: 0 1 480px;
+  min-width: 360px;
+  max-height: 100%;
+  padding: 0 12px 12px;
+  overflow: auto;
+  border-radius: var(--ui-radius-m, 8px);
+  background: var(--ui-background, Canvas);
+  box-shadow: var(--ui-shadow-s, 0 1px 3px rgb(0 0 0 / 0.12));
+
+  & ui-property-editor {
+    --ui-panel-padding: 12px;
+    --ui-panel-band-space: 12px;
+  }
+  & .InspectorOwnEditor {
+    display: contents;
+  }
+}
+.DesignDrawing {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+}
+/* beside the form, or under it when the pane is narrow */
+.DesignCanvas.editing > .DesignDrawing {
+  flex: 0 0 160px;
+  height: 160px;
+}
+
+.DesignWaiting {
+  margin: auto;
+  white-space: pre-line;
+  text-align: center;
+  color: var(--ui-text-muted, var(--ui-muted-color));
+}

@@ -116,14 +116,16 @@ export class EditorStore extends Observable {
   /**
    * Show `<SpellEditor>` for `path` (default:  current file), and compile.
    * - Updates the URL, whose route calls `selectPath()`.
+   * - In Design, it stays in Design (`isDesigning`):  another file's tab opens that file there.
+   *   `page` says which, when it matters:  the top bar's Edit and Design tabs.
    */
-  showEditor(path?: string, selection?: UIT.EditorSelection): void {
+  showEditor(path?: string, selection?: UIT.EditorSelection, page: EditingPage = "same"): void {
     // pressing Edit on a page of the running site opens that page's file
     if (!path && editor.projectPage === "runner") path = editor.pageShownInSite()?.path
     if (!path) path = editor.file?.path
     // TODO: selection!!!!
     try {
-      navigate(new SP.SpellLocation(path!).editorUrl)
+      navigate(editor.editingUrlFor(new SP.SpellLocation(path!), page))
       void editor.compileApp()
     } catch {
       editor.showError(appTexts.text("pathInvalid", { path: String(path) }))
@@ -194,6 +196,23 @@ export class EditorStore extends Observable {
    */
   @prop({ type: "text", default: "editor" })
   accessor projectPage!: "editor" | "runner" | "site"
+
+  /**
+   * Is the editor page in Design (`/design/...`, epic `editor` P37), not Edit?
+   * - Set by the page's route, with `projectPage` (`"editor"` for both).
+   * - The app pane shows `<DesignStage>`:  the bit of a view picked to design, not the whole app.
+   */
+  @prop({ type: "choice", default: false })
+  accessor isDesigning!: boolean
+
+  /**
+   * The editor page's address for `location`, in Edit or Design:
+   * `"same"`, the one showing (`isDesigning`);  `"edit"` or `"design"`, that one.
+   */
+  editingUrlFor(location: SP.SpellLocation, page: EditingPage = "same"): string {
+    const isDesign = page === "same" ? editor.isDesigning && editor.projectPage === "editor" : page === "design"
+    return isDesign ? location.designUrl : location.editorUrl
+  }
 
   /**
    * Select a `path` to show in `<SpellEditor>`, in Edit or Run.
@@ -267,7 +286,7 @@ export class EditorStore extends Observable {
       editor.projectPage === "site"
     if (path !== file.path && !showsSitePage) {
       // console.warn({ path, file: file.path })
-      const url = file.location[editor.projectPage === "editor" ? "editorUrl" : "runnerUrl"]
+      const url = editor.projectPage === "editor" ? editor.editingUrlFor(file.location) : file.location.runnerUrl
       // keep the address's query and hash, which name no file:  a program's own (`?server=met`, its tab)
       const { search, hash } = globalThis.location ?? { search: "", hash: "" }
       navigate(`${url}${search}${hash}`, { replace: true })
@@ -2317,7 +2336,7 @@ export class EditorStore extends Observable {
    */
   async showFileAt(path: string, selection?: UIT.EditorSelection): Promise<void> {
     await editor.selectPath(path, selection)
-    navigate(new SP.SpellLocation(path).editorUrl)
+    navigate(editor.editingUrlFor(new SP.SpellLocation(path)))
     editor.onInputEffect()
   }
 
@@ -2653,6 +2672,13 @@ export type ProjectAction = {
 }
 
 export type EditorFile = SP.AnySpellFile & { initialSelection?: UIT.EditorSelection }
+
+/**
+ * Which of the editor page's two ways a file opens in (`editor.showEditor()`, `editingUrlFor()`):
+ * - `"same"`:  the one showing, Edit or Design
+ * - `"edit"`, `"design"`:  that one
+ */
+export type EditingPage = "same" | "edit" | "design"
 
 ////////////////
 // ## Overloaded helpers (`arguments.length`-sensitive, so plain `function`s rather than arrows)

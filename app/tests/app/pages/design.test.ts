@@ -1,21 +1,19 @@
 import { chromium, type Browser, type Page } from "playwright"
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
-import { EDITOR, SERVING } from "./runningEditor"
+import { CodeEditor, EDITOR, SERVING } from "./runningEditor"
 
 /**
- * A view shown on its own (epic `editor` P35, Placing And Isolation;  Q45 A, Q46 A):  Solitaire's `Card.spell` open,
- * Card alone draws one card in the app pane, its property editor beside it, both taking the palette's drops.
+ * Design mode (epic `editor` P37;  Q58, Q59, Q60, Q63):  Solitaire's `Card.spell` open in Design,
+ * its picker listing the card's drawings and its property editor, the bit picked drawn large on its own.
+ * - It opens on the drawing the code's cursor is in (Q63 B).
+ * - Picking the property editor shows the form, the card small beside it, not the card alone (T116).
+ * - A drop on what it draws writes into the right file:  the card's drawing, or its property editor.
  * - NOTHING reaches the disk:  every save is answered here, and what it sent is what the next load reads,
  *   so the example can't change.
  * - Needs this checkout's editor running:  `spell server start all`.  Skips itself when it isn't, as in CI.
  * - Headless Playwright, never a real browser window.
- * - SKIPPED while the switch is hidden (`SHOW_VIEW_ALONE`, in `ViewAlone.tsx`):  epic `editor` T116 rethinks it.
- *   Turn this back on with the switch.
  */
-
-/** Is the switch shown?  Keep it the same as `SHOW_VIEW_ALONE`:  off for epic `editor` T116. */
-const SHOW_VIEW_ALONE: boolean = false
 
 /** Solitaire's files a test may write:  the card's and its property editor's. */
 const WRITTEN = /\/Solitaire\/(Card\.spell|Card\.editor\.spell)(\?.*)?$/
@@ -26,7 +24,7 @@ const SETTLE_MS = 2500
 /** The button the palette's Button row writes. */
 const BUTTON = "<ui-button>Click me</ui-button>"
 
-describe.skipIf(!SERVING || !SHOW_VIEW_ALONE)("a view on its own", { timeout: 180_000 }, () => {
+describe.skipIf(!SERVING)("Design mode", { timeout: 180_000 }, () => {
   let browser: Browser
   let page: Page
   /** What each save sent, by its file's name. */
@@ -52,6 +50,23 @@ describe.skipIf(!SERVING || !SHOW_VIEW_ALONE)("a view on its own", { timeout: 18
       .filter(Boolean)
   }
 
+  /** What Design shows:  its picker's rows (the chosen one starred), and what its canvas draws. */
+  const shown = () =>
+    page.evaluate(() => {
+      const card = document.querySelector(".DesignView solitaire-card")
+      const { Inspector } = window as unknown as { Inspector: { allSelected: { element?: Element }[] } }
+      return {
+        address: location.pathname,
+        rows: [...document.querySelectorAll(".DesignBitRow")].map(
+          (row) => `${row.textContent}${row.hasAttribute("selected") ? "*" : ""}`
+        ),
+        direction: card?.getAttribute("direction"),
+        fields: document.querySelectorAll(".DesignEditor ui-property").length,
+        selected: Inspector.allSelected.at(-1)?.element?.localName,
+        isAppHidden: getComputedStyle(document.querySelector(".AppPaneProgram")!).display === "none"
+      }
+    })
+
   /** Take back the last change. */
   async function undo(): Promise<void> {
     await page.mouse.move(5, 400)
@@ -73,10 +88,10 @@ describe.skipIf(!SERVING || !SHOW_VIEW_ALONE)("a view on its own", { timeout: 18
     await page.waitForTimeout(SETTLE_MS)
   }
 
-  /** The middle of what `selector` draws in the stage, across shadow roots:  its own box, else its first child's. */
+  /** The middle of what `selector` draws in the canvas, across shadow roots:  its own box, else its first child's. */
   const middleOf = (selector: string) =>
     page.evaluate((wanted) => {
-      const stage = document.querySelector(".ViewAloneStage")!
+      const canvas = document.querySelector(".DesignCanvas")!
       const find = (root: ParentNode): Element | undefined => {
         const found = root.querySelector(wanted)
         if (found) return found
@@ -86,13 +101,19 @@ describe.skipIf(!SERVING || !SHOW_VIEW_ALONE)("a view on its own", { timeout: 18
         }
         return undefined
       }
-      const element = find(stage)!
+      const element = find(canvas)!
       const boxes = [element, ...element.children, ...(element.shadowRoot?.children ?? [])].map((each) =>
         each.getBoundingClientRect()
       )
       const box = boxes.find((one) => one.width && one.height)!
       return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
     }, selector)
+
+  /** Pick the picker's row for `bit`. */
+  async function pick(bit: string): Promise<void> {
+    await page.locator(`.DesignBitRow[data-bit="${bit}"]`).click()
+    await page.waitForTimeout(SETTLE_MS)
+  }
 
   beforeAll(async () => {
     browser = await chromium.launch()
@@ -121,30 +142,34 @@ describe.skipIf(!SERVING || !SHOW_VIEW_ALONE)("a view on its own", { timeout: 18
   }, 120_000)
 
   afterAll(async () => {
-    // the next run starts with the whole app again
-    await page
-      ?.evaluate(() => {
-        const { ViewAlone } = window as unknown as { ViewAlone?: { isShowing: boolean; toggle(): void } }
-        if (ViewAlone?.isShowing) ViewAlone.toggle()
-      })
-      .catch(() => {})
     await browser?.close()
   })
 
-  test("Card alone shows one card, selected, with its property editor beside it", async () => {
-    await page.locator(".ViewAloneButton [part~=item]").click()
+  test("Design opens on the drawing the code's cursor is in, face down for its back", async () => {
+    const code = new CodeEditor(page)
+    await code.clickLine(await code.lineOf("to draw its back"))
+    await page.waitForTimeout(500)
+    await page.locator(".ModeTabs ui-item", { hasText: "Design" }).click()
     await page.waitForTimeout(SETTLE_MS)
-    const shown = await page.evaluate(() => {
-      const stage = document.querySelector(".ViewAloneStage")
-      const { Inspector } = window as unknown as { Inspector: { allSelected: { element?: Element }[] } }
-      return {
-        cards: stage?.querySelectorAll(".ViewAloneView solitaire-card").length,
-        properties: stage?.querySelectorAll(".ViewAloneEditor ui-property").length,
-        selected: Inspector.allSelected.at(-1)?.element?.localName,
-        isAppHidden: getComputedStyle(document.querySelector(".AppPaneProgram")!).display === "none"
-      }
-    })
-    expect(shown).toEqual({ cards: 1, properties: 8, selected: "solitaire-card", isAppHidden: true })
+    const now = await shown()
+    expect(now.address).toBe("/design/@spell/examples/Solitaire/Card.spell")
+    expect(now.rows.slice(0, 3)).toEqual(["Front", "Back*", "Property editor"])
+    expect(now).toMatchObject({ direction: "down", fields: 0, selected: "solitaire-card", isAppHidden: true })
+  })
+
+  test("picking the property editor shows its form, the card small beside it", async () => {
+    await pick("editor")
+    expect(await shown()).toMatchObject({ fields: 8, selected: "solitaire-card", isAppHidden: true })
+    const sizes = await page.evaluate(() => ({
+      card: document.querySelector(".DesignView solitaire-card")!.getBoundingClientRect().width,
+      form: document.querySelector(".DesignEditor")!.getBoundingClientRect().width
+    }))
+    expect(sizes.card).toBeLessThan(sizes.form / 2)
+  })
+
+  test("picking the front draws the card face up, large", async () => {
+    await pick("drawing:to draw its front")
+    expect(await shown()).toMatchObject({ direction: "up", fields: 0 })
   })
 
   test("a drop on the card's front writes into `to draw its front`", async () => {
@@ -156,6 +181,7 @@ describe.skipIf(!SERVING || !SHOW_VIEW_ALONE)("a view on its own", { timeout: 18
   })
 
   test("a drop on its property editor writes into Card.editor.spell", async () => {
+    await pick("editor")
     const field = await middleOf('ui-property[name="rank"]')
     await dropFromPalette("Button", field.x, field.y)
     expect(await text("Card.editor.spell")).toContain(BUTTON)
@@ -163,25 +189,12 @@ describe.skipIf(!SERVING || !SHOW_VIEW_ALONE)("a view on its own", { timeout: 18
     expect(await text("Card.editor.spell")).not.toContain(BUTTON)
   })
 
-  test("a change to its suit in the Inspector draws the card again", async () => {
-    // the card's front, as drawn:  one letter of unicode's playing cards, its suit's
-    const drawnFront = () =>
-      page.evaluate(() => {
-        const card = document.querySelector(".ViewAloneView solitaire-card")!
-        const front = card.shadowRoot!.querySelector("solitaire-card-image[part=front]")!
-        return {
-          suit: (card as Element & { thing: { suit: string } }).thing.suit,
-          drawn: front.shadowRoot!.textContent
-        }
-      })
-    const before = await drawnFront()
-    const other = before.suit === "hearts" ? "spades" : "hearts"
-    // the Inspector's own card:  the view is selected in it
-    await page.locator(`.InspectorColumn ui-property[name="suit"] ui-item[value="${other}"]`).first().click()
+  test("Edit shows the whole app again", async () => {
+    await page.locator(".ModeTabs ui-item", { hasText: "Edit" }).first().click()
     await page.waitForTimeout(SETTLE_MS)
-    const after = await drawnFront()
-    expect(after.suit).toBe(other)
-    expect(after.drawn).not.toBe(before.drawn)
-    await undo()
+    const now = await shown()
+    expect(now.address).toBe("/edit/@spell/examples/Solitaire/Card.spell")
+    expect(now.rows).toEqual([])
+    expect(now.isAppHidden).toBe(false)
   })
 })

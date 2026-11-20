@@ -698,14 +698,14 @@ export class Inspector {
   /**
    * The app's parts under `element`, in document order, each with its depth;  what isn't a part is looked through.
    * - Never the editor's own, round the program (`EDITOR_OWN`):  a notebook's contents, its examples' code editors.
-   * - A view shown alone (`VIEW_ALONE`):  its own drawing too, in its shadow root, as it's what's being edited
-   *   (epic `editor` P35).
+   * - A view drawn in Design (`DESIGNED`):  its own drawing too, in its shadow root, as it's what's being edited
+   *   (epic `editor` P35, P37).
    */
   static partsIn(element: Element | ShadowRoot, depth = 0): PartRow[] {
     return [...element.children].flatMap((child) => {
       if (child.hasAttribute(EDITOR_OWN)) return []
       if (!Inspector.isPart(child)) return Inspector.partsIn(child, depth)
-      const drawing = child.hasAttribute(VIEW_ALONE) ? child.shadowRoot : null
+      const drawing = child.hasAttribute(DESIGNED) ? child.shadowRoot : null
       return [
         { element: child, depth },
         ...Inspector.partsIn(child, depth + 1),
@@ -1126,7 +1126,7 @@ export class Inspector {
   /**
    * Where each element of `thing`'s own property editor is written (`ownEditorOf()`), as a drawn part's place:
    * `Card.editor.spell:6:2`, in the order written;  `[]` with none.
-   * - So a view shown alone (`<ViewAloneStage>`) marks its editor's elements, and a drop on one writes beside it.
+   * - So Design (`<DesignStage>`) marks its editor's elements, and a drop on one writes beside it.
    */
   static ownEditorPlacesOf(thing: object): string[] {
     const editors = (editor.project?.files ?? [])
@@ -1914,10 +1914,16 @@ const [selectedParts, setSelectedParts] = createSignal<readonly SelectedPart[]>(
 const clicks = new ListSelection<Element>()
 
 /**
- * Marks a view drawn alone (`<ViewAloneStage>`, epic `editor` P35):  the Inspector's parts are its own drawing's too,
+ * Marks a view drawn in Design (`<DesignStage>`, epic `editor` P35, P37):  the Inspector's parts are its own drawing's too,
  * in its shadow root (`Inspector.partsIn()`).
  */
-export const VIEW_ALONE = "data-view-alone"
+export const DESIGNED = "data-designed"
+
+/**
+ * Marks what's drawn scaled up (Design's `<FitInside>`, epic `editor` P37):
+ * the selection's ants round a part in it are a box of their own, never a ring the scale would thicken.
+ */
+export const SCALED_UP = "data-scaled-up"
 
 /** The places `Inspector.selectWhenDrawn()` is waiting to see drawn. */
 let placesToSelect: Set<string> | undefined
@@ -2215,6 +2221,7 @@ function snapped(box: DOMRect, out: number): DOMRect {
  *   where the box lands comes from its drawn box, the bounds of the turned one.
  *   So no offsets, scrolls or transform origins are walked.
  * - A 3D transform counts as its flat part:  a perspective tilt comes out a little off.
+ * - Its scale is taken out of the matrix into its size (epic `editor` P37):  the ants' dashes are never scaled.
  */
 function turnedBox(element: Element): { width: number; height: number; matrix: DOMMatrix } | undefined {
   let linear: DOMMatrix | undefined
@@ -2233,7 +2240,14 @@ function turnedBox(element: Element): { width: number; height: number; matrix: D
   const drawn = element.getBoundingClientRect()
   const left = drawn.left - Math.min(...corners.map((corner) => corner.x))
   const top = drawn.top - Math.min(...corners.map((corner) => corner.y))
-  return { width, height, matrix: new DOMMatrix([linear.a, linear.b, linear.c, linear.d, left, top]) }
+  // its scale goes into its size, not the matrix:  the ants round a card drawn large (Design's) stay thin
+  const scale = Math.sqrt(Math.abs(linear.a * linear.d - linear.b * linear.c)) || 1
+  const { a, b, c, d } = linear
+  return {
+    width: width * scale,
+    height: height * scale,
+    matrix: new DOMMatrix([a / scale, b / scale, c / scale, d / scale, left, top])
+  }
 }
 
 /** The element whose shadow root holds `node`, if one does. */
@@ -2679,6 +2693,8 @@ class PartSelector {
    */
   private static canRing(element: Element): boolean {
     if (element.getRootNode() !== document) return false
+    // drawn scaled up (Design's):  a ring would scale up with it, its dashes too
+    if (element.closest(`[${SCALED_UP}]`)) return false
     if (getComputedStyle(element).display === "contents") return false
     // a box-less spacer:  a box stands in, over the room it takes (`roomOf()`)
     if (isFlat(element.getBoundingClientRect())) return false
@@ -2695,15 +2711,18 @@ class PartSelector {
    * - with Alt held, any Spell UI element:  the text or label inside a card too
    * - Not a drawn thing that is part of the one it's drawn in (`isPartOfItsThing()`):  a card's image is the card's, but with Alt
    * - Not one inside a Spell UI element's own shadow root:  a button's icon is the button's.
+   * - Nothing inside the editor's own (`EDITOR_OWN`):  Design's picker, a notebook's frame.
    * - A box-less tag the drawing writes, in the room it takes:  a toolbar's `<spacer />`, 0px wide,
    *   in the gap between the buttons on each side of it (`spacerAt()`;  epic `editor` I169).
    */
   static partAt(event: Event, area: HTMLElement): Element | undefined {
     const anyElement = (event as MouseEvent).altKey
-    for (const target of event.composedPath()) {
+    const path = event.composedPath()
+    // inside the editor's own, anywhere on the way up:  a row of Design's picker is no part, though it's a menu item
+    if (path.some((target) => target instanceof Element && target.hasAttribute(EDITOR_OWN))) return undefined
+    for (const target of path) {
       if (target === area) return undefined
       if (!(target instanceof Element)) continue
-      if (target.hasAttribute(EDITOR_OWN)) return undefined
       const host = (target.getRootNode() as ShadowRoot).host
       if (host?.localName.startsWith(UI_PREFIX)) continue
       const spacer = PartSelector.spacerAt(target, event as MouseEvent)
@@ -3654,7 +3673,8 @@ function OwnEditor(props: { markup: string; places?: readonly string[] }): JSX.E
 /****************
  * ### `<OwnEditorPage>`
  * The property editor a view's type was written with (`Card.editor.spell`), drawn for `thing`, which `element` draws,
- * as the Inspector draws it:  a view shown alone shows it beside the view (`<ViewAloneStage>`, epic `editor` P35).
+ * as the Inspector draws it:  Design draws it large when it's picked, the view small beside it (`<DesignStage>`,
+ * epic `editor` P37).
  * - A change in it is the Inspector's change, one step (`Inspector.fieldWritten()`).
  * - Its elements are marked where they're written (`Inspector.ownEditorPlacesOf()`):
  *   the palette's drops and clicks, moves and deletes write into its file.

@@ -7,14 +7,18 @@ import { SiteEdits } from "spell/app/app/pages/SiteEdits"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 
 import { barTooltip } from "./chrome"
+import { Design } from "./Design"
 import { on } from "./on"
 import { tracked } from "./tracked"
 
 /****************
  * ### `EditorMode`
- * How the editor shows a project:  Run, Edit or Site, picked from the top bar's `<ModeButtons>` (or its View menu).
+ * How the editor shows a project:  Run, Edit, Design or Site, picked from the top bar's `<ModeButtons>` (or its View
+ * menu).
  * - Run:  the program alone, the whole window (the run page, `editor.showRunner()`).
  * - Edit:  the code beside the program (the editor page).
+ * - Design:  the code beside the bit of a view picked to design, drawn large, not the whole app (`Design`, epic
+ *   `editor` P37);  only for a project with a view or a site to design (`Design.canShow`).
  * - Site:  the site editor, its pages and data (`editor.showSiteEditor()`);  only for a project with a site
  *   (`EditorMode.hasSite`, epic `mockup`).
  * - Debug went in epic `debut` P32:  its Program panel shows under the code in Edit, as `ProgramPanelShown` says.
@@ -23,12 +27,17 @@ export class EditorMode {
   /**
    * Show the project in `mode`.
    * - Run:  the run page.
-   * - Edit:  the editor page.
+   * - Edit, Design:  the editor page, in that mode.
    */
   static show(mode: Mode): void {
     if (mode === "run") void editor.showRunner()
     else if (mode === "site") editor.showSiteEditor()
-    else editor.showEditor()
+    else editor.showEditor(undefined, undefined, mode)
+  }
+
+  /** Is `mode` one that shows the code beside the app:  Edit or Design? */
+  static isEditing(mode: Mode): boolean {
+    return mode === "edit" || mode === "design"
   }
 
   /** Does the current project declare a site, so it has a Site mode (reactive)? */
@@ -41,11 +50,12 @@ export class EditorMode {
 export type Mode = (typeof MODES)[number]
 
 /** The modes, in the top bar's order. */
-const MODES = ["run", "edit", "site"] as const
+const MODES = ["run", "edit", "design", "site"] as const
 /** Each mode's icon (Fomantic's names) and its name's text key. */
 const MODE_LOOKS: Record<Mode, { icon: string; text: AppTextKey }> = {
   run: { icon: "play", text: "runMode" },
   edit: { icon: "pencil", text: "editMode" },
+  design: { icon: "paint brush", text: "designMode" },
   site: { icon: "sitemap", text: "siteView" }
 }
 
@@ -123,9 +133,10 @@ export function toggleCode() {
 
 /****************
  * ### `<ModeButtons>`
- * Run | Edit | Site in the top bar, as the theme's segmented tabs:  the one showing is chosen;
+ * Run | Edit | Design | Site in the top bar, as the theme's segmented tabs:  the one showing is chosen;
+ * Design only for a project with something to design (`Design.canShow`, epic `editor` P37);
  * Site only for a project that declares a site (`EditorMode.hasSite`);
- * then, in Edit, the code's icon, which shows the code or closes it, the compiled code's (`compiled`), Inspect app
+ * then, in Edit and Design, the code's icon, which shows the code or closes it, the compiled code's (`compiled`), Inspect app
  * (`inspect`), then Add (`add`) (Owen:  "it should be part of the run|edit group";  2026-11-14, I77:  "the code and
  * inspect buttons should be swapped";  T76:  "add a 'compiled code' button between `</>` and the inspector";
  * T83:  "Move `add` to the immediate right of the inspector crosshair").
@@ -162,10 +173,13 @@ export function ModeButtons(props: {
       >
         <ModeTab mode="run" current={props.current} />
         <ModeTab mode="edit" current={props.current} />
+        <Show when={Design.canShow || props.current === "design"}>
+          <ModeTab mode="design" current={props.current} />
+        </Show>
         <Show when={EditorMode.hasSite}>
           <ModeTab mode="site" current={props.current} />
         </Show>
-        <Show when={props.current === "edit"}>
+        <Show when={EditorMode.isEditing(props.current)}>
           <ui-item
             icon="code"
             appearance="circular"
@@ -202,11 +216,11 @@ function ModeTab(props: { mode: Mode; current: Mode }): JSX.Element {
 /**
  * A mode tab's tooltip:  what a click on it does, from the mode the page is in (epic `editor` I230).
  * - The tab chosen says what's happening:  "You're editing the app".
- * - Run, from Edit, is "Stop Editing";  from Site, "Run the App".
+ * - Run, from Edit or Design, is "Stop Editing";  from Site, "Run the App".
  */
 function modeTipFor(mode: Mode, current: Mode): AppTextKey {
   if (mode === current) return MODE_TIPS[mode].chosen
-  if (mode === "run" && current === "edit") return "stopEditingTip"
+  if (mode === "run" && EditorMode.isEditing(current)) return "stopEditingTip"
   return MODE_TIPS[mode].other
 }
 
@@ -214,6 +228,7 @@ function modeTipFor(mode: Mode, current: Mode): AppTextKey {
 const MODE_TIPS: Record<Mode, { chosen: AppTextKey; other: AppTextKey }> = {
   run: { chosen: "runningTip", other: "runTip" },
   edit: { chosen: "editingTip", other: "editTip" },
+  design: { chosen: "designingTip", other: "designTip" },
   site: { chosen: "siteShownTip", other: "siteTip" }
 }
 

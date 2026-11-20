@@ -6,7 +6,7 @@ import type { PropertyOrigin } from "spell/ui/components/ui-property-editor/UIPr
 import { SP } from "spell/parser/spell"
 import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import { editor } from "spell/app/app/editor"
-import { SpellPage, on, rememberedSizes } from "spell/app/app/solid"
+import { Design, SpellPage, on, rememberedSizes } from "spell/app/app/solid"
 import { editorHotkeys } from "./editorHotkeys"
 import { followRoute } from "./followRoute"
 import { PageStories, type PageStory } from "./PageStories"
@@ -195,6 +195,16 @@ export function SiteEditorPage() {
                       >
                         {appTexts.text("siteOpenPage")}
                       </ui-button>
+                      <Show when={part().kind === "page"}>
+                        <ui-button
+                          size="small"
+                          appearance="basic"
+                          icon="paint brush"
+                          onClick={() => Design.showPage(part().name)}
+                        >
+                          {appTexts.text("siteDesignPage")}
+                        </ui-button>
+                      </Show>
                       <ui-button
                         size="small"
                         appearance="basic"

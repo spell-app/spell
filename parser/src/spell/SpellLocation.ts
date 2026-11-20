@@ -185,6 +185,14 @@ export class SpellLocation {
     return `/edit/${SP.SpellUrls.encodeAddress(this.path)}`
   }
 
+  /**
+   * Return front-end `designUrl` to load this location in the editor's Design mode:  `/design/<address>`,
+   * e.g. `/design/@spell/examples/Solitaire/Card.spell` (epic `editor` P37).
+   */
+  get designUrl(): string {
+    return `/design/${SP.SpellUrls.encodeAddress(this.path)}`
+  }
+
   /** Return front-end `runnerUrl` to load this location:  `/run/<address>`, e.g. `/run/@spell/examples/solitaire`. */
   get runnerUrl(): string {
     return `/run/${SP.SpellUrls.encodeAddress(this.path)}`
