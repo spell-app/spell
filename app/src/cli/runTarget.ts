@@ -12,15 +12,16 @@
  * - Nothing is written into the project:  every file goes in a temp folder, removed after.
  */
 import { spawn, spawnSync, type ChildProcess } from "child_process"
-import { existsSync, mkdtempSync, readdirSync, rmSync, statSync, writeFileSync } from "fs"
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "fs"
 import { tmpdir } from "os"
-import { join, resolve } from "path"
-import { pathToFileURL } from "url"
+import { basename, join, resolve } from "path"
+import { fileURLToPath, pathToFileURL } from "url"
 
 import { waitUntil } from "spell/util/timing"
 import { SRV } from "spell/server"
 import { pageServerRoot } from "spell/server/page/settings"
 import environment from "spell/app/spaces/server/node/environment"
+import { P } from "spell/parser/parser"
 import { buildTsx } from "spell/parser/spell/node/buildTsx"
 import { SP } from "spell/parser/spell"
 import { PY } from "spell/parser/py"
@@ -144,6 +145,28 @@ export async function writeImports(
 }
 
 /**
+ * SIDE EFFECT:  the code files `project`'s Spell calls (`call native`) in `language`, written into `folder`
+ * (epic `from-console` P10):  `clipboard.py` beside the program, so `from clipboard import copy_text` finds it.
+ * - Those of the projects it imports too (`CLI.nativeFilesOf()`).
+ * - Returns each one's text, by its file name.
+ * - `spell compile --target py` writes them into the build folder;  `spell run --target py`'s web app into its temp folder.
+ */
+export function writeCodeFilesBeside(
+  project: SP.SpellProject,
+  language: P.NativeLanguage,
+  folder: string
+): Record<string, string> {
+  const written: Record<string, string> = {}
+  for (const url of Object.values(CLI.nativeFilesOf(project, language))) {
+    const source = fileURLToPath(url)
+    const file = basename(source)
+    written[file] = readFileSync(source, "utf8")
+    writeFileSync(join(folder, file), written[file])
+  }
+  return written
+}
+
+/**
  * Does `target`'s code import other projects from files beside it?
  * - Python does, `from counter import Counter`:  so compiling writes each one there too (`writeImports()`).
  * - javascript and TypeScript import them by module name, `@spell/project/...`, which a runner or `tsc` resolves.
@@ -155,7 +178,8 @@ export function importsBeside(target: SP.Target): boolean {
 /**
  * Serve `project`'s web app (`target.appSuffix`, Python's on Quart) from `folder`, open it in a browser,
  * and wait for `Ctrl-C`.
- * - Writes the program, its drawing half and its app into `folder`, beside its imports.
+ * - Writes the program, its drawing half, its code files (`clipboard.py`) and its app into `folder`,
+ *   beside its imports.
  * - Builds the page side first if it's missing or older than what it's built from (`ensurePageBuilt()`).
  * - `--seed`:  every visitor is dealt the same game (`$SPELL_SEED`).
  * - Returns the exit code.
@@ -173,6 +197,7 @@ async function serveApp(
   const elements = `${name}${target.elementsSuffix}`
   writeFileSync(join(folder, program), project.outputFileFor(target).contents ?? "")
   writeFileSync(join(folder, elements), project.elementsFileFor(target)?.contents ?? "")
+  writeCodeFilesBeside(project, target.writer.nativeLanguage, folder)
   const projects = Object.fromEntries(
     Object.values(imports).flatMap((it) => (it.elements ? [[it.module, it.elements]] : []))
   )

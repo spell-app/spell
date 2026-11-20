@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from "fs"
+import { readFileSync } from "fs"
 import { basename, dirname, join, resolve } from "path"
 import { fileURLToPath } from "url"
 
@@ -148,13 +148,9 @@ async function writeImportsBeside(
       wrote.push(join(folder, file), ...(elements ? [join(folder, elements)] : []))
     }
     // the code files its Spell calls (`call native`), `clipboard.py`:  `from clipboard import copy_text` finds it
-    for (const url of Object.values(CLI.nativeFilesOf(project, target.writer.nativeLanguage))) {
-      const source = fileURLToPath(url)
-      const file = basename(source)
-      written[target.name]![file] = readFileSync(source, "utf8")
-      writeFileSync(join(folder, file), written[target.name]![file]!)
-      wrote.push(join(folder, file))
-    }
+    const codeFiles = CLI.writeCodeFilesBeside(project, target.writer.nativeLanguage, folder)
+    Object.assign(written[target.name]!, codeFiles)
+    wrote.push(...Object.keys(codeFiles).map((file) => join(folder, file)))
   }
   return written
 }
