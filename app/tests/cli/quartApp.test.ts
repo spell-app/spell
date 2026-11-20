@@ -131,6 +131,8 @@ describe("a Python spell app, in a real browser", () => {
     // naming the card by reference, its name (epic `python-target` P27):  the card's `its rank + " of " + its suit`
     const reference = `Card#${turned.rank} of ${turned.suit}`
     expect(page.sent).toEqual([{ call: "on_click", on: reference, args: [{ type: "click" }] }])
+    // and asked the page to play its sound, not waiting for it (epic `mockup` P28)
+    expect(page.asked).toContainEqual(expect.objectContaining({ ui: "play", args: ["card slide"] }))
     // then its move:  the pile it joined, and the pile it left;  and the app, now with a step to undo (epic `language` P54)
     expect(patches[1]!.map((thing) => thing["$type"])).toEqual(["DiscardPile", "StockPile", "Solitaire"])
     const [joined, , solitaire] = patches[1]!
@@ -292,15 +294,19 @@ describe("a Python spell app, in a real browser", () => {
  * A new visitor's page, open on the app -- or, given `context`, another tab of that browser's:
  * its board drawn, with each message it sent and each frame it received, read as JSON.
  * - Received:  the whole state first, then a patch, a list of the things that changed (epic `python-target` P30).
+ * - Asked:  what the program asked the page to do meanwhile, not waiting for it, e.g. play a sound
+ *   (`{ "ui": "play", "args": ["card slide"], "asks": 1 }`;  Solitaire's sounds, epic `mockup` P28);
+ *   the page's answers to them are left out of `sent`.
  * - Logged:  each line the page wrote to its console, e.g. each frame, both ways (`logFrame()`).
  * - Errors:  each console error, a failed load (`404`) among them, and each error the page didn't catch.
  */
 async function opened(
   context?: BrowserContext
-): Promise<{ page: Page; sent: unknown[]; received: unknown[]; logged: string[]; errors: string[] }> {
+): Promise<{ page: Page; sent: unknown[]; received: unknown[]; asked: unknown[]; logged: string[]; errors: string[] }> {
   const page = await (context ?? (await browser.newContext())).newPage()
   const sent: unknown[] = []
   const received: unknown[] = []
+  const asked: unknown[] = []
   const logged: string[] = []
   const errors: string[] = []
   page.on("console", (message) => {
@@ -310,12 +316,23 @@ async function opened(
   page.on("pageerror", (error) => errors.push(String(error)))
   const read = (payload: string | Buffer) => JSON.parse(String(payload)) as unknown
   page.on("websocket", (socket) => {
-    socket.on("framesent", ({ payload }) => sent.push(read(payload)))
-    socket.on("framereceived", ({ payload }) => received.push(read(payload)))
+    socket.on("framesent", ({ payload }) => {
+      const frame = read(payload)
+      if (!isFrameWith(frame, "answer")) sent.push(frame)
+    })
+    socket.on("framereceived", ({ payload }) => {
+      const frame = read(payload)
+      ;(isFrameWith(frame, "asks") ? asked : received).push(frame)
+    })
   })
   await page.goto(url)
   await page.locator("solitaire-stock-pile").waitFor({ timeout: 20_000 })
-  return { page, sent, received, logged, errors }
+  return { page, sent, received, asked, logged, errors }
+}
+
+/** Is `frame` a message holding `key`:  a question to the page (`asks`), or the page's answer to one (`answer`)? */
+function isFrameWith(frame: unknown, key: "asks" | "answer"): boolean {
+  return !!frame && typeof frame === "object" && !Array.isArray(frame) && key in frame
 }
 
 /** SIDE EFFECT:  compile the temp Solitaire to `py`. */
