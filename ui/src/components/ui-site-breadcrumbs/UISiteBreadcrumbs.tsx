@@ -98,15 +98,22 @@ export class UISiteBreadcrumbs extends E.UIComponent<typeof siteBreadcrumbsVocab
     return walk(this.sitePages) ?? []
   }
 
-  /** The crumbs to draw, top first:  each a name, a link to a page above, or the page shown. */
+  /**
+   * The crumbs to draw, top first:  each a name, a link to a page above, or the page shown.
+   * - Following a Spell site, the pages shown below the one its navigation marks, which it doesn't list (a page with
+   *   a parameter), end the trail:  Datasets › Session (epic old-console-redo I29).
+   */
   @E.derived
   get crumbs(): readonly SiteCrumb[] {
     const path = this.pathToShown
-    return path.map((page, at): SiteCrumb => {
-      if (at === path.length - 1) return { title: page.title, isShown: true }
+    const below = path.length && this.isFollowing ? (this.followed?.shownBelow ?? []) : []
+    const last = path.length + below.length - 1
+    const listed = path.map((page, at): SiteCrumb => {
+      if (at === last) return { title: page.title, isShown: true }
       const isLink = !!page.href && page.band !== GROUP && !SitePages.hasParameter(page)
       return isLink ? { title: page.title, link: page.href } : { title: page.title }
     })
+    return [...listed, ...below.map((title, at): SiteCrumb => (path.length + at === last ? { title, isShown: true } : { title }))]
   }
 
   /** No crumbs to draw:  `:state(empty)`, which takes no room. */

@@ -82,11 +82,15 @@ export class SitePages {
     const nav = SitePages.navAround(element)
     if (!nav) return undefined
     const readNav = () =>
-      read({ pages: SitePages.parsed(nav.getAttribute(PAGES)), current: nav.getAttribute(CURRENT) ?? undefined })
+      read({
+        pages: SitePages.parsed(nav.getAttribute(PAGES)),
+        current: nav.getAttribute(CURRENT) ?? undefined,
+        shownBelow: SitePages.titlesIn(SitePages.parsed(nav.getAttribute(SHOWN_BELOW)))
+      })
     readNav()
     // oxlint-disable-next-line spell-ui/no-mutation-observer -- watches the site navigation around it, another element
     const observer = new MutationObserver(readNav)
-    observer.observe(nav, { attributes: true, attributeFilter: [PAGES, CURRENT] })
+    observer.observe(nav, { attributes: true, attributeFilter: [PAGES, CURRENT, SHOWN_BELOW] })
     return () => observer.disconnect()
   }
 
@@ -94,6 +98,11 @@ export class SitePages {
   private static navAround(element: Element): Element | undefined {
     const box = E.closestAcrossShadow(element, `:has(> ${SITE_NAV})`)
     return box?.querySelector(`:scope > ${SITE_NAV}`) ?? undefined
+  }
+
+  /** The titles in `value`, a list of text:  any else left out. */
+  private static titlesIn(value: unknown): string[] {
+    return Array.isArray(value) ? value.filter((each): each is string => typeof each === "string") : []
   }
 
   /** The pages in a navigation's `pages` text;  `undefined` for none, or text that isn't JSON. */
@@ -109,10 +118,13 @@ export class SitePages {
   /**
    * `href`'s path and hash, against the page's address:  `films/1` on `/guide/` => `/guide/films/1`.
    * - With its hash:  else every hash link (`#/films`) on one page would be the page shown.
+   * - Another site's address whole:  else a link out to `https://docs.example.com` would be the page shown at `/`
+   *   (epic old-console-redo I25).
    */
   private static pathOf(href: string): string {
     try {
       const url = new URL(href, location.href)
+      if (url.origin !== location.origin) return url.href
       return url.pathname + url.hash
     } catch {
       return href
@@ -148,12 +160,18 @@ export type FollowedSiteNav = {
   pages: unknown
   /** the navigation's `current` */
   current: string | undefined
+  /**
+   * the titles of the pages shown below `current` that it doesn't list (a page with a parameter, `/films/:film`), top
+   * first:  a Spell site writes them in its navigation's `data-shown` (epic old-console-redo I29)
+   */
+  shownBelow?: readonly string[]
 }
 
 /** The site navigation's tag, and the two attributes of it that are followed. */
 const SITE_NAV = "ui-site-nav"
 const PAGES = "pages"
 const CURRENT = "current"
+const SHOWN_BELOW = "data-shown"
 
 /** A parameter in an address (`/films/:film`), in the kit's ONE address grammar (`spell/util/addressPattern`). */
 const PARAMETER = /\/:|\*/

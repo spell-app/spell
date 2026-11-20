@@ -492,6 +492,8 @@ export class SiteBase extends App {
       // JSON text, which the attribute takes:  where Spell UI isn't loaded, a list would be written `[object Object]`
       pages: () => JSON.stringify(this.navPages()),
       current: () => this.navCurrent(),
+      // the pages it doesn't list, below `current`, for `<ui-site-breadcrumbs>` (epic old-console-redo I29)
+      "data-shown": () => JSON.stringify(this.navShownBelow()),
       // a listener, not an `on-ui-navigating` attribute:  Solid warns about a function on an attribute
       ref: (element: Element) =>
         element.addEventListener(NAVIGATING, (event) => {
@@ -594,7 +596,16 @@ export class SiteBase extends App {
       else if (pages.length === 1 && only) {
         rows.push({ ...only, ...(!only.icon && groupIcon && { icon: groupIcon }) })
       } else {
-        rows.push({ title: group, id: `group:${group}`, band: "group", ...(groupIcon && { icon: groupIcon }), pages })
+        // a group of links out only never holds the page shown, so never opens by itself:  it starts open (old-console-redo I26)
+        const linksOnly = run.every((entry) => "link" in entry)
+        rows.push({
+          title: group,
+          id: `group:${group}`,
+          band: "group",
+          ...(groupIcon && { icon: groupIcon }),
+          ...(linksOnly && { open: true }),
+          pages
+        })
       }
       at = end
     }
@@ -637,6 +648,17 @@ export class SiteBase extends App {
   navCurrent(): string {
     const listed = this.shownPath().filter((entry) => !entry.params?.length)
     return listed.at(-1)?.address ?? ""
+  }
+
+  /**
+   * The titles of the pages shown below `navCurrent()`, which the navigation doesn't list, top first:  a film's page,
+   * `["Film"]`, below Films (epic old-console-redo I29).  `<ui-site-breadcrumbs>` ends its trail with them.
+   */
+  navShownBelow(): string[] {
+    const path = this.shownPath()
+    let listed = path.length
+    while (listed > 0 && path[listed - 1]!.params?.length) listed--
+    return path.slice(listed).map((entry) => entry.title ?? entry.name)
   }
 
   /** The page shown, and the pages above it, from the site's top:  none for the not found and error pages. */
@@ -818,6 +840,7 @@ type SiteNavPage = {
   tags?: string[]
   live?: string
   band?: "group"
+  open?: boolean
   pages?: SiteNavPage[]
 }
 

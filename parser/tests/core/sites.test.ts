@@ -198,6 +198,15 @@ class Portal extends Site {
   ]
 }
 
+/** A site with a group of two links out (epic `old-console-redo` I26). */
+class Monitored extends Site {
+  static pages = [{ name: "home", page: "FilmsPage", address: "/", title: "Home" }]
+  static links = [
+    { link: "https://status.example.com", title: "Status", group: "Monitoring", at: 1 },
+    { link: "https://env.example.com", title: "Environment", group: "Monitoring", at: 1 }
+  ]
+}
+
 /** A site with page layouts (T39):  its films in a group, a page drawn alone, one in the bare layout. */
 class StarCharts extends Site {
   static pages = [
@@ -292,8 +301,11 @@ describe("a running site", () => {
     ])
     await site.showAddress("/films/a-new-hope")
     expect(site.navCurrent()).toBe("/films")
+    // the page it doesn't list, for the breadcrumbs (old-console-redo I29)
+    expect(site.navShownBelow()).toEqual(["film page"])
     await site.showAddress("/planets")
     expect(site.navCurrent()).toBe("")
+    expect(site.navShownBelow()).toEqual([])
   })
 
   test("lists a group of one page as that page alone, whatever its name, no group's header;  other groups as groups (I35, C2)", () => {
@@ -327,6 +339,22 @@ describe("a running site", () => {
       { title: "Settings", href: "/settings", id: "settings" },
       // no title:  its address
       { title: "https://status.example.com", href: "https://status.example.com", id: "link:https://status.example.com" }
+    ])
+  })
+
+  test("a group of links out only starts open:  it never holds the page shown (old-console-redo I26)", () => {
+    expect(new Monitored().navPages()).toEqual([
+      { title: "Home", href: "/", id: "home" },
+      {
+        title: "Monitoring",
+        id: "group:Monitoring",
+        band: "group",
+        open: true,
+        pages: [
+          { title: "Status", href: "https://status.example.com", id: "link:https://status.example.com" },
+          { title: "Environment", href: "https://env.example.com", id: "link:https://env.example.com" }
+        ]
+      }
     ])
   })
 

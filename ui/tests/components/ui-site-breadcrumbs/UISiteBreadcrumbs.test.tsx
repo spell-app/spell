@@ -92,6 +92,24 @@ describe("<ui-site-breadcrumbs>", () => {
     expect(crumbs(host)).toEqual([{ title: "Films", shown: true }])
   })
 
+  test("following a Spell site, ends with the pages shown below the one its navigation marks (old-console-redo I29)", async () => {
+    const site = await ElementFixture.render(
+      `<div><ui-site-nav current="/films"></ui-site-nav><header><ui-site-breadcrumbs></ui-site-breadcrumbs></header></div>`
+    )
+    const nav = site.querySelector("ui-site-nav")!
+    nav.setAttribute("pages", JSON.stringify(PAGES))
+    nav.setAttribute("data-shown", JSON.stringify(["Film"]))
+    const host = site.querySelector("ui-site-breadcrumbs")!
+    await ShadowTree.settle(host)
+    expect(crumbs(host)).toEqual([
+      { title: "Films", link: "/films" },
+      { title: "Film", shown: true }
+    ])
+    nav.setAttribute("data-shown", "[]")
+    await ShadowTree.settle(host)
+    expect(crumbs(host)).toEqual([{ title: "Films", shown: true }])
+  })
+
   test("`label` names the trail", async () => {
     const host = await siteBreadcrumbs("/films")
     host.setAttribute("label", "Breadcrumb")

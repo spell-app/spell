@@ -61,6 +61,22 @@ describe("<ui-site-nav>", () => {
     expect(row(host, "Film").hasAttribute("selected")).toBe(true)
   })
 
+  it("a link out to another site is never the page shown, whatever its path (old-console-redo I25)", async () => {
+    const host = (await ElementFixture.render(
+      `<ui-site-nav current="${location.pathname}" style="width: 300px"></ui-site-nav>`
+    )) as HTMLElement
+    host.setAttribute(
+      "pages",
+      JSON.stringify([
+        { title: "Home", href: location.pathname },
+        { title: "Help", href: `https://docs.example.com${location.pathname}` }
+      ])
+    )
+    await ElementFixture.settle()
+    expect(row(host, "Home").hasAttribute("selected")).toBe(true)
+    expect(row(host, "Help").hasAttribute("selected")).toBe(false)
+  })
+
   it("goes to a picked page, asking first with `ui-navigating`;  the tree's own selecting is left to `current`", async () => {
     const host = await siteNav()
     const navigating = vi.fn((event: Event) => event.preventDefault())
