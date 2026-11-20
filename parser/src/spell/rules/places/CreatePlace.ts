@@ -6,6 +6,7 @@ import {
   SPACE_FOLDERS_PREFIX,
   SPACE_ROOMS_PREFIX,
   airtableBaseIn,
+  authenticatedPlaceAddress,
   isPlaceServerAddress
 } from "spell/places/places.types"
 import { P } from "spell/parser/parser"
@@ -19,6 +20,12 @@ import { CollectionAt } from "./CollectionAt"
 import { OperationAt } from "./OperationAt"
 import { PlaceDetail, textIn, type PlaceDetailValue } from "./PlaceDetail"
 import { COLLECTION_NAME, PLACE_KIND_ABILITIES, isPlaceTypeReadOnly, placeKindWords } from "./places.shared"
+
+/** The kinds a person can pick a file of:  `a json file you pick`, `a csv file ...`, `an excel file ...`. */
+export const PICKED_FILE_KINDS = new Set(["file", "sheet", "excel file"])
+
+/** The kinds of place a page reads through its page server when they're authenticated:  see `servedAtFor()`. */
+const READ_THROUGH_PAGE_SERVER = new Set(["web server", "graphql server"])
 
 /** A key in an address, which anyone reading a browser program can read:  `?key=...`, `user:secret@`. */
 const KEY_IN_ADDRESS = /[?&](?:api[_-]?key|key|token|secret|access[_-]?token)=|\/\/[^/@\s]+:[^/@\s]+@/i
@@ -86,14 +93,23 @@ const JSON_FILE_NAME = /^[\p{L}\p{N}][\p{L}\p{N} _-]*\.json$/iu
  *   - a place that can't announce what changed warns, unless it says how often to ask
  *   - An atmosphere account warns of what no referee can promise, and that everything in it is public (`warnOfNoReferee()`).
  *   - An Airtable warns of the last save winning, of fields it works out, of its limits, of a missing id column or key (`warnOfAirtable()`).
+ * - A FILE A PERSON PICKS, on their own computer, with no address (epic `editor` P41, Q67's B and C, the same place):
+ *   `family cookbook is a json file you pick`, `... a json file on this device`;  a csv file and an excel file too.
+ *   - Compiles to `picked: true`:  core's `PickedFilePlace` (`spell/places`), which keeps a copy on this device and
+ *     saves back to the file where the browser can.
+ *   - `on this device` here is never the browser's own database (`database on this device`):  a kind must come first.
  * - Compiles to its class, then `core.place()`, handed everything the lines say.
  */
 export class CreatePlace extends TypeDeclaration<
-  "type|aka?|kind?|superType?|personal?|address?|each_tab?|with_nested_statements?|body?",
+  "type|aka?|kind?|superType?|personal?|address?|picked?|each_tab?|with_nested_statements?|body?",
   {
     placeKind?: string
+    /** A file on this computer a person picks or drops, with no address (`picked_file`, epic `editor` P41). */
+    picked?: boolean
     /** A project data folder's address on the page server, as `folderAddressFor()` worked it out. */
     folderAt?: string
+    /** The address of the project it.s in, `@acme/jobs`, looked up while parsing:  for `servedAtFor()`. */
+    projectAt?: string
   }
 > {
   @proto static priority = Priority.declaration + 1
@@ -151,6 +167,11 @@ export class CreatePlace extends TypeDeclaration<
     }
     const placeKind = this.placeKindOf(match)
     if (placeKind) match.data.placeKind = placeKind
+    if (match.groups.picked) {
+      // only a file can be picked:  any other kind isn't ours
+      if (!PICKED_FILE_KINDS.has(placeKind ?? "")) return undefined
+      match.data.picked = true
+    }
     // `personal` goes only with a data folder:  another reading of the words may take it (`atmosphere personal`)
     if (personal && match.data.placeKind !== "data folder") return undefined
     if (personal && !FOLDER_NAME.test(textIn(address))) {
@@ -161,6 +182,8 @@ export class CreatePlace extends TypeDeclaration<
     }
     const folderAt = this.folderAddressOf(match)
     if (folderAt) match.data.folderAt = folderAt
+    const projectAt = projectAddressOf(match.scope)
+    if (projectAt) match.data.projectAt = projectAt
     const refused = this.refuseTakenNames(match)
     if (refused !== match) return refused
     const notAnAddress = this.refuseAtmosphereAddress(match) ?? this.refuseAirtableAddress(match)
@@ -186,7 +209,8 @@ export class CreatePlace extends TypeDeclaration<
    * `jsonAddressFor()`;  any other kind, none.
    */
   protected folderAddressOf(match: P.MatchFor<this>): string | undefined {
-    const { placeKind } = match.data
+    const { placeKind, picked } = match.data
+    if (picked) return undefined
     if (placeKind === "data folder") return CreatePlace.folderAddressFor(match)
     if (placeKind === "room") return CreatePlace.roomAddressFor(match)
     if (placeKind === "file") return CreatePlace.jsonAddressFor(match)
@@ -273,7 +297,9 @@ export class CreatePlace extends TypeDeclaration<
 
   /** SIDE EFFECT:  a plain web server can't announce what changed:  say so, unless a line under it says how often to ask. */
   private warnIfItCantSay(match: P.MatchFor<this>): void {
-    const { placeKind } = match.data
+    const { placeKind, picked } = match.data
+    // a file a person picks says what changed:  it watches the file (epic `editor` P41)
+    if (picked) return
     const abilities = placeKind ? PLACE_KIND_ABILITIES[placeKind] : undefined
     if (!placeKind || abilities?.saysWhatChanged || abilities?.isReadOnly) return
     if (abilities?.checkedEveryByDefault !== undefined) return
@@ -399,6 +425,30 @@ export class CreatePlace extends TypeDeclaration<
     return Object.keys(details).length ? details : undefined
   }
 
+  /**
+   * What Spell's page server needs to read place `type` for a page, adding its secret (epic `from-console` P14):
+   * `undefined` for a place a page doesn't read through it (`servedAtFor()`).
+   * - Written into the project's declarations, which the page server reads (`SP.DeclaredPlace.served`).
+   */
+  static servedDetailsOf(type: P.TypeScope): SP.ServedPlace | undefined {
+    const { declaredBy } = type
+    if (!declaredBy?.is(CreatePlace)) return undefined
+    const match = declaredBy as P.MatchFor<CreatePlace>
+    const details = CreatePlace.detailsOf(match)
+    const servedAt = CreatePlace.servedAtFor(match, details)
+    if (!servedAt) return undefined
+    const { keyNamed, keyGoes, tokenFrom } = details
+    return definedProps({
+      servedAt,
+      at: textIn(match.groups.address),
+      kind: match.data.placeKind!,
+      keyNamed: keyNamed!,
+      keyGoes,
+      tokenFrom,
+      readOnly: isPlaceTypeReadOnly(type) || undefined
+    })
+  }
+
   /** Everything the lines under `match` say, merged. */
   static detailsOf(match: P.Match): PlaceDetailValue & { operations?: Record<string, string> } {
     const details: PlaceDetailValue & { operations?: Record<string, string> } = {}
@@ -427,18 +477,37 @@ export class CreatePlace extends TypeDeclaration<
     return details
   }
 
-  /** What `core.place()` is handed:  its name, kind and address, then everything its lines say. */
+  /**
+   * What `core.place()` is handed:  its name, kind and address, then everything its lines say;
+   * and, for an authenticated place, where a page reads it through its page server (`servedAt`).
+   */
   protected descriptionOf(match: P.MatchFor<this>): Record<string, unknown> {
     const { address } = match.groups
-    const { placeKind, folderAt } = match.data
+    const { placeKind, folderAt, picked } = match.data
+    const details = CreatePlace.detailsOf(match)
+    const servedAt = CreatePlace.servedAtFor(match, details)
     return {
       name: CreatePlace.placeNameOf(match),
       ...(placeKind && { kind: placeKind }),
+      ...(picked && { picked }),
       ...((address || folderAt) && { at: folderAt ?? textIn(address) }),
       ...checkedByDefault(placeKind),
-      ...CreatePlace.detailsOf(match),
+      ...details,
+      ...(servedAt && { servedAt }),
       ...unclearNumbersOf(match.scope)
     }
+  }
+
+  /**
+   * Where a page reads this place through Spell's page server, which adds its secret (epic `from-console` P14):
+   * `/api/places/projects/@acme/jobs/jobs`.
+   * - Only a web or graphql server authenticated with a secret it can't go without, in a project with an address.
+   */
+  static servedAtFor(match: P.MatchFor<CreatePlace>, { keyNamed, keyIfSet }: PlaceDetailValue): string | undefined {
+    if (keyNamed === undefined || keyIfSet || !READ_THROUGH_PAGE_SERVER.has(match.data.placeKind ?? ""))
+      return undefined
+    const project = match.data.projectAt
+    return project && authenticatedPlaceAddress(SP.SpellUrls.encodeAddress(project), CreatePlace.placeNameOf(match))
   }
 
   /** Its class, then `core.place()`, as one instance:  `export const familyCookbook = core.place(new FamilyCookbook(), {...})`. */

@@ -30,6 +30,8 @@
  * - The source elements' ENGINES stay lazy the same way (`LAZY`):
  *   - `<ui-code>`'s highlight.js (with all its languages)
  *   - `<ui-markdown>`'s marked (and DOMPurify, only for `sanitized`)
+ *   - `<ui-mermaid-diagram>`'s Mermaid (every kind of diagram, inlined:  a classic script can't split), and ELK,
+ *     through its one door, `ElkEngine` (the Mermaid script holds a copy of its own:  no sharing between scripts)
  *   - NOT spell's colouring:  Spell UI holds nothing of spell (epic `repo-split` P2).  spell-app's page server adds
  *     `/element/spell-language.js` to the pages it serves, which registers `spell` with this bundle's `UI.code`;
  *     elsewhere (the epic server, `file://`) spell code shows plain (`repo-split` Q23 A).
@@ -65,6 +67,7 @@
 
 import { build } from "esbuild"
 import { spawnSync } from "node:child_process"
+import { createRequire } from "node:module"
 import { renameSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs"
 import { dirname, join, relative, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -320,6 +323,21 @@ const LAZY = [
     source: join(UI_DIR, "src/components/ui-markdown/MarkdownSanitizer.ts"),
     chunk: /(?:^|\/)MarkdownSanitizer-[\w-]+\.js$/,
     hook: `MarkdownRenderer.sanitizerLoader = () => lazy("markdown-sanitizer", "__spellMarkdownSanitizer")`
+  },
+  {
+    name: "mermaid-engine",
+    global: "__spellMermaidEngine",
+    source: join(UI_DIR, "src/components/ui-mermaid-diagram/MermaidEngine.ts"),
+    chunk: /(?:^|\/)MermaidEngine-[\w-]+\.js$/,
+    hook: `MermaidDrawer.engineLoader = () => lazy("mermaid-engine", "__spellMermaidEngine")`
+  },
+  {
+    name: "elk-engine",
+    global: "__spellElk",
+    // elkjs's own bundled build:  CommonJS, so the global is its constructor itself
+    source: createRequire(import.meta.url).resolve("elkjs/lib/elk.bundled.js", { paths: [UI_DIR] }),
+    chunk: /(?:^|\/)elk\.bundled-[\w-]+\.js$/,
+    hook: `ElkEngine.loader = () => lazy("elk-engine", "__spellElk").then((elk) => ({ default: elk.default ?? elk }))`
   }
 ]
 
@@ -744,6 +762,7 @@ function lazyModule() {
   return [
     `import { CodeHighlighter } from "spell/ui/components/ui-code"`,
     `import { MarkdownRenderer } from "spell/ui/components/ui-markdown"`,
+    `import { ElkEngine, MermaidDrawer } from "spell/ui/components/ui-mermaid-diagram"`,
     baseUrlSource(),
     `const base = bundleUrl("lazy/")`,
     `const loading = new Map()`,

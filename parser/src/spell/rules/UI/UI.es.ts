@@ -37,6 +37,10 @@ import { MediaSpeed } from "./MediaSpeed"
 import { MediaTime } from "./MediaTime"
 import { MediaVolume } from "./MediaVolume"
 import { StopAllMedia } from "./StopAllMedia"
+import { StartTour } from "./StartTour"
+import { StopTour } from "./StopTour"
+import { ShowTourStep } from "./ShowTourStep"
+import { MoveTourStep } from "./MoveTourStep"
 import { Prompt } from "./Prompt"
 import { Choose, ChooseSeveral } from "./Choose"
 import { MEDIA_KINDS, TEXT_SIZES } from "./UI.shared"
@@ -309,6 +313,91 @@ UIEs.addRule(StopAllMedia, {
       tests: [
         [`parar todos los sonidos`, `core.stopAll("sound")`],
         [`parar todas las películas`, `core.stopAll("video")`]
+      ]
+    }
+  ]
+})
+
+// a page's tour, Spell UI's `<ui-tour>` (epic `editor` P40):  `empieza el recorrido "primera partida"`, `para el recorrido`
+// at a given step too (epic `editor` T128):  `empieza el recorrido "primera partida" en el paso 3`
+UIEs.addRule(StartTour, {
+  syntax: "(empieza|inicia) el recorrido {name:text} (en el paso {step:expression})?",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [
+        [`empieza el recorrido "primera partida"`, `core.startTour("primera partida")`],
+        [`empieza el recorrido "primera partida" en el paso 3`, `core.startTour("primera partida", 3)`],
+        [
+          `inicia el recorrido "primera partida" en el paso "arrastrar"`,
+          `core.startTour("primera partida", "arrastrar")`
+        ]
+      ]
+    }
+  ]
+})
+// English's second form, `start the "first game" tour`:  Spanish names it after `recorrido` either way
+UIEs.addRule(StartTour, {
+  syntax: "(empezar|iniciar) el recorrido {name:text} (en el paso {step:expression})?",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [
+        [`iniciar el recorrido "primera partida"`, `core.startTour("primera partida")`],
+        [`empezar el recorrido "primera partida" en el paso 2`, `core.startTour("primera partida", 2)`]
+      ]
+    }
+  ]
+})
+
+UIEs.addRule(StopTour, {
+  syntax: "(para|parar|deten|detener|termina|terminar) el recorrido",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [
+        [`para el recorrido`, `core.stopTour()`],
+        [`detener el recorrido`, `core.stopTour()`]
+      ]
+    }
+  ]
+})
+
+UIEs.addRule(ShowTourStep, {
+  syntax: "(muestra|mostrar) el paso {step:expression} (del recorrido)?",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [
+        [`muestra el paso 3`, `core.showTourStep(3)`],
+        [`mostrar el paso 3 del recorrido`, `core.showTourStep(3)`],
+        [`muestra el paso "arrastrar"`, `core.showTourStep("arrastrar")`]
+      ]
+    }
+  ]
+})
+
+UIEs.addRule(MoveTourStep, {
+  syntax: "(ve al|ir al|muestra el|mostrar el) (next:siguiente) paso (del recorrido)?",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [
+        [`ve al siguiente paso`, `core.nextTourStep()`],
+        [`muestra el siguiente paso`, `core.nextTourStep()`],
+        [`muestra el siguiente paso del recorrido`, `core.nextTourStep()`]
+      ]
+    }
+  ]
+})
+UIEs.addRule(MoveTourStep, {
+  syntax: "(retrocede|retroceder|vuelve|volver) un paso",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [
+        [`retrocede un paso`, `core.previousTourStep()`],
+        [`volver un paso`, `core.previousTourStep()`]
       ]
     }
   ]

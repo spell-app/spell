@@ -21,6 +21,7 @@ import { readFileSync } from "node:fs"
 import { resolve } from "node:path"
 
 import { writeOrCheck, type GeneratedOutput } from "spell/element-tools/generatedFiles.ts"
+import { SpellDiagramSettings, SpellThemeColors } from "spell/util/diagram/MermaidThemes.ts"
 
 import { ReadmeCheck } from "./readme-check.ts"
 
@@ -103,51 +104,19 @@ export type Kind = "repo" | "folder" | "step" | "data" | "coming"
 /** the kinds, in the order their lines are written */
 const KIND_NAMES: Kind[] = ["repo", "folder", "step", "data", "coming"]
 
-/** Spell Purple, the brand's seed (spell-brand's palette), and its ink */
+/** Spell Purple, the brand's seed (spell-brand's palette), and its ink:  the kinds' colours */
 const PURPLE = "#6550CA"
 const INK = "#1A1C27"
 
-/** the system's sans-serif:  no quotes, so the directive stays plain JSON */
-const FONT = "-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif"
-
 /**
  * The two themes:  Mermaid's `base` theme's variables, a flowchart's default node style and each kind's.
+ * - The variables are the Spell look's, shared with `<ui-mermaid-diagram>`:  `SpellThemeColors`, in `spell/util/diagram/MermaidThemes`.
  * - `light`, the default:  every text sits on a light box (nodes, edge labels, notes, subgraphs), and what sits on the
  *   page itself (lines, a sequence diagram's messages) is a mid-tone purple, so it reads on light and dark pages.
  */
 const THEMES: Record<ThemeName, { variables: Record<string, string>; node: string; kinds: Record<Kind, string> }> = {
   light: {
-    variables: {
-      fontFamily: FONT,
-      fontSize: "15px",
-      primaryColor: "#EFECFB",
-      primaryBorderColor: PURPLE,
-      primaryTextColor: INK,
-      secondaryColor: "#F4F1E9",
-      tertiaryColor: "#F7F6FC",
-      lineColor: "#7F6FD6",
-      textColor: "#7F6FD6",
-      clusterBkg: "#F7F6FC",
-      clusterBorder: "#B9B0E8",
-      titleColor: INK,
-      edgeLabelBackground: "#F7F6FC",
-      actorBkg: "#EFECFB",
-      actorBorder: PURPLE,
-      actorTextColor: INK,
-      actorLineColor: "#9C90DE",
-      signalColor: "#7F6FD6",
-      signalTextColor: "#7F6FD6",
-      labelBoxBkgColor: "#EFECFB",
-      labelBoxBorderColor: PURPLE,
-      labelTextColor: INK,
-      loopTextColor: "#7F6FD6",
-      noteBkgColor: "#F1E7D4",
-      noteBorderColor: "#C9B48A",
-      noteTextColor: INK,
-      activationBkgColor: "#DCD6F7",
-      activationBorderColor: PURPLE,
-      sequenceNumberColor: "#FFFFFF"
-    },
+    variables: SpellThemeColors.light,
     node: `fill:#EFECFB,stroke:${PURPLE},stroke-width:1.5px,color:${INK},rx:8px,ry:8px`,
     kinds: {
       repo: `fill:${PURPLE},stroke:#4A3AA0,stroke-width:2px,color:#FFFFFF,rx:10px,ry:10px,font-weight:600`,
@@ -158,39 +127,7 @@ const THEMES: Record<ThemeName, { variables: Record<string, string>; node: strin
     }
   },
   dark: {
-    variables: {
-      fontFamily: FONT,
-      fontSize: "15px",
-      darkMode: "true",
-      background: "#16141F",
-      primaryColor: "#2B2550",
-      primaryBorderColor: "#9C8EF0",
-      primaryTextColor: "#EEEBFA",
-      secondaryColor: "#2E2A22",
-      tertiaryColor: "#1F1C2E",
-      lineColor: "#9C8EF0",
-      textColor: "#D9D3F7",
-      clusterBkg: "#1F1C2E",
-      clusterBorder: "#5A4FA0",
-      titleColor: "#EEEBFA",
-      edgeLabelBackground: "#1F1C2E",
-      actorBkg: "#2B2550",
-      actorBorder: "#9C8EF0",
-      actorTextColor: "#EEEBFA",
-      actorLineColor: "#6F63C0",
-      signalColor: "#9C8EF0",
-      signalTextColor: "#D9D3F7",
-      labelBoxBkgColor: "#2B2550",
-      labelBoxBorderColor: "#9C8EF0",
-      labelTextColor: "#EEEBFA",
-      loopTextColor: "#D9D3F7",
-      noteBkgColor: "#3A3326",
-      noteBorderColor: "#8A7A58",
-      noteTextColor: "#F1E7D4",
-      activationBkgColor: "#3A3270",
-      activationBorderColor: "#9C8EF0",
-      sequenceNumberColor: "#16141F"
-    },
+    variables: SpellThemeColors.dark,
     node: `fill:#2B2550,stroke:#9C8EF0,stroke-width:1.5px,color:#EEEBFA,rx:8px,ry:8px`,
     kinds: {
       repo: `fill:${PURPLE},stroke:#B7ADF5,stroke-width:2px,color:#FFFFFF,rx:10px,ry:10px,font-weight:600`,
@@ -205,8 +142,8 @@ const THEMES: Record<ThemeName, { variables: Record<string, string>; node: strin
 /** The `%%{init: ...}%%` line for `theme`, for a diagram of `kind` (`flowchart`, `sequenceDiagram` ...). */
 function directiveFor(theme: ThemeName, kind: string): string {
   const config: Record<string, unknown> = { theme: "base", themeVariables: THEMES[theme].variables }
-  if (FLOWCHART.test(kind)) config.flowchart = { curve: "basis", padding: 12, nodeSpacing: 40, rankSpacing: 44 }
-  if (kind === "sequenceDiagram") config.sequence = { mirrorActors: false, messageAlign: "left", noteAlign: "left" }
+  if (FLOWCHART.test(kind)) config.flowchart = SpellDiagramSettings.flowchart
+  if (kind === "sequenceDiagram") config.sequence = SpellDiagramSettings.sequence
   return `%%{init: ${JSON.stringify(config)}}%%`
 }
 

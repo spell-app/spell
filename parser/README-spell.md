@@ -818,6 +818,29 @@ A page or the app names a sound or a video once, and plays it by that name from 
 - They're [Kenney](https://kenney.nl)'s, from seven of his free packs, CC0:
   [Spell UI's runtime page](https://github.com/spell-app/spell/blob/main/ui/README-runtime.md#sounds) says more.
 
+### Tours
+
+A page's tour, Spell UI's `<ui-tour>`, walks a person through a feature one step at a time;  these lines drive it.
+
+| Spell | JavaScript |
+| --- | --- |
+| `start tour "first game"`, `start the "first game" tour` | `core.startTour("first game")` |
+| `start tour "first game" at step 3`, `start the "first game" tour at step "drag"` | `core.startTour("first game", 3)` |
+| `stop tour`, `stop the tour` | `core.stopTour()` |
+| `show step 3`, `show the tour step 3`, `show step "drag"` | `core.showTourStep(3)`, `core.showTourStep("drag")` |
+| `go to the next step`, `show the next step of the tour` | `core.nextTourStep()` |
+| `go back a step` | `core.previousTourStep()` |
+
+- The quoted name is the tour's:  `start the "first game" tour` never reads as a property.
+- "The tour" is always the tour showing now:  `stop the tour` beats an action of the program's named `tour`.
+- A bare `go back` is not a step back.
+- Each line works in a handler too:  `<ui-button onClick={go to the next step}>Next</ui-button>`.
+- No tours on the page, or none of that name:  the program's console says so, and the program goes on.
+- The tour itself is written in the page's HTML, as a `<ui-tour>`, for now.
+- Spanish:  `empieza el recorrido "primera partida"`, `... en el paso 3`, `para el recorrido`, `muestra el paso 3`,
+  `ve al siguiente paso`, `retrocede un paso`.
+- A program compiled to Python doesn't drive tours yet.
+
 ### Tests, in English
 
 `to test ...` is a test, and each `expect ... to be ...` one check in it:
@@ -1493,9 +1516,12 @@ recipe box is an app
   - A field holding another thing may be nothing, and the X of nothing is nothing:
     `the name of its homeworld`, with no homeworld, is nothing, not a throw.
 - What a real server is like, a line each under it, which the ingest writes when it finds it:
-  - a key it can go without:  `its optional key is the secret "GITHUB_TOKEN"`
+  - a secret it can't go without:  `it is authenticated with the secret "JOBS_TOKEN"`;
+    a page reads it through Spell's page server, which adds the secret from its environment and never sends it back
+    (the old words, `its key is the secret "..."`, still read, with a warning naming the new line)
+  - a key it can go without:  `it is optionally authenticated with the secret "GITHUB_TOKEN"`
   - a key it wants anywhere but `Authorization: Bearer`:
-    `its key goes in its "X-Api-Key" header`, or `its key goes in the address as "api_key"`
+    `its secret goes in its "X-Api-Key" header`, or `its secret goes in the address as "api_key"`
   - paging by a header:  `its next page is in its "Link" header`
   - how many at a time, when that isn't its `limit`:  `it gives up to 100 at a time, asked for with "per_page"`
   - lists of names only, each thing reading the rest from its own address:  `its lists give only each one's "name"`
@@ -1530,7 +1556,7 @@ recipe box is an app
   - `add a new recipe with cook = them`
 - A place can't do what it can't do, and the compiler says so at that line:
   - a write to a sheet won't compile
-  - a key written into a program won't compile:  name it, `its key is the secret "COOKBOOK_KEY"`, and keep it on a server side
+  - a key written into a program won't compile:  name it, `it is authenticated with the secret "COOKBOOK_KEY"`, and keep it on a server side
   - a web server can't announce what changed, so it warns until a line says how often to ask
   - an airtable warns that the last save wins, of fields it works out, and of a missing id column or key;  its key stays on a server side
 - There's no save step:  changing a recipe keeps it.  `a draft of the recipe`, then `save the draft`, is for an Edit screen with a Cancel button.

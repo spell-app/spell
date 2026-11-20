@@ -1,0 +1,14 @@
+{
+  "title": "Recipe File",
+  "description": "Your recipes on cards, in a JSON file on your computer:  open it once, and every change is saved back to it, after a reload too.  In Safari and Firefox, a save downloads it.  One line of its API file says so, RecipeFile.api.spell",
+  "imports": [
+    {
+      "path": "/RecipeFile.api.spell",
+      "active": true
+    },
+    {
+      "path": "/RecipeFile.spell",
+      "active": true
+    }
+  ]
+}

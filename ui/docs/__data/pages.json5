@@ -293,6 +293,11 @@
         }
       }
     },
+    "ui-mermaid-diagram": {
+      "title": "Mermaid diagram",
+      "summary": "A Mermaid diagram draws a flowchart, a sequence, a timeline or any other kind of diagram Mermaid knows, from the element's own text or a file on this site.",
+      "status": "done"
+    },
     "ui-message": {
       "title": "Message",
       "summary": "A message displays information that explains nearby content.",
@@ -650,6 +655,11 @@
     "ui-toolbar": {
       "title": "Toolbar",
       "summary": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.",
+      "status": "done"
+    },
+    "ui-tour": {
+      "title": "Tour",
+      "summary": "A tour leads someone through a feature one numbered step at a time, pointing at what each step is about.",
       "status": "done"
     },
     "ui-transition": {

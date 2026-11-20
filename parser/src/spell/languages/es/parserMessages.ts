@@ -94,9 +94,9 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "nothing-the-same":
     'Aquí nada se llama "{field}" para comparar con él:  ponlo antes, p. ej. "poner {field} a ...", o di el valor, p. ej. "cada {thing} con {field} "...""',
   "key-written":
-    'Una clave escrita aquí la puede leer cualquiera con el programa:  nómbrala, p. ej. "su clave es el secreto "CLAVE_RECETARIO"", y guárdala en un servidor',
+    'Una clave escrita aquí la puede leer cualquiera con el programa:  nómbrala, p. ej. "se autentica con el secreto "CLAVE_RECETARIO"", y guárdala en un servidor',
   "key-not-a-name":
-    '"{name}" parece una clave, no su nombre:  una clave nunca se escribe aquí.  Nómbrala en mayúsculas, p. ej. "su clave es el secreto "CLAVE_RECETARIO""',
+    '"{name}" parece una clave, no su nombre:  una clave nunca se escribe aquí.  Nómbrala en mayúsculas, p. ej. "se autentica con el secreto "CLAVE_RECETARIO""',
   "key-needs-server-side":
     'Un programa en el navegador no puede leer "{name}":  este lugar necesita un pequeño servidor, que guarde la clave y responda por ella',
   "key-goes-bad-header":
@@ -104,7 +104,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "key-goes-bad-question":
     '"{name}" no puede ir en una dirección:  es una palabra de letras, dígitos, guiones y guiones bajos, p. ej. "api_key"',
   "key-goes-with-no-key":
-    'Esto dice dónde va su clave, y ninguna línea la nombra:  agrega "su clave es el secreto "CLAVE_RECETARIO""',
+    'Esto dice dónde va su clave, y ninguna línea la nombra:  agrega "se autentica con el secreto "CLAVE_RECETARIO""',
   "place-cant-announce":
     'Un lugar de tipo "{kind}" no puede avisar de lo que cambió, así que los cambios de otras personas no se ven hasta que esta página vuelva a leer:  agrega "se revisa cada 30 segundos" debajo',
   "change-not-saved":
@@ -138,6 +138,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     "Un lugar aquí no puede aplicar los cambios todos juntos:  van de uno en uno, así que otros pueden ver algunos por un momento",
   "no-save-step":
     '"{text}" no es un borrador:  un cambio se guarda al hacerlo, sin paso de guardar.  Para una pantalla con botón de cancelar:  "un borrador de ..."',
+  "pick-file-not-a-file":
+    '"{text}" no es un archivo que se elige:  dilo donde se declara, "{text} es un archivo json que eliges"',
   "no-such-data-word":
     'Encanto no puede "{word}" eso:  di una vez dónde viven los datos, "x es un servidor web en ...", y "vive en x", y luego "cada receta donde ..." los lee',
   "belongs-to-saved-needs-list":
@@ -204,7 +206,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "airtable-no-id-column":
     'Airtable crea sus propios ids, así que una fila nueva enviada otra vez tras perderse la respuesta sería una segunda fila:  agrega una columna de texto para los ids de Encanto, y "su id es su "id encanto"" debajo',
   "airtable-needs-key":
-    'Airtable no responde a nadie sin una clave:  agrega "su clave es el secreto "CLAVE_AIRTABLE"" debajo, y guarda la clave en un servidor',
+    'Airtable no responde a nadie sin una clave:  agrega "se autentica con el secreto "CLAVE_AIRTABLE"" debajo, y guarda la clave en un servidor',
   "never-both": 'Una cosa nunca puede ser las dos a la vez, así que esto no encuentra nada:  ¿querías decir "o"?',
   "where-field-unknown":
     '{AType} no tiene "{field}":  decláralo allí, o di "el {field} es esa persona" si es el del programa',

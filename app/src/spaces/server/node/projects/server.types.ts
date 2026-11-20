@@ -92,6 +92,11 @@ export type ProjectFileJSON = {
   listsStartAt?: 0 | 1
   /** Files it compiles, in order -- and other projects it imports. */
   imports: ImportEntryJSON[]
+  /**
+   * Each place's deployments, by the place's name as written, then the deployment's (epic `data` P49):
+   * `{ "netbox": { dev: { at: "...", key: "NETBOX_DEV_TOKEN" } } }`.  See `SP.SpellProject.deploymentsPicked()`.
+   */
+  places?: Record<string, Record<string, { at: string; key?: string; tokenFrom?: string; readOnly?: boolean }>>
   /** What's there for working on it, not for running it:  see `ProjectDevelopmentJSON`. */
   development?: ProjectDevelopmentJSON
   /** How its card's picture is taken:  see `ProjectThumbnailJSON`. */
@@ -175,7 +180,7 @@ export type ManifestJSON = Record<string, ManifestEntryJSON>
  * - And for other project-file routes that return the updated index.
  * - `manifest` -- current on-disk manifest:  NOT persisted, always freshly computed from file system.
  * - `imports` -- import list, synced with `manifest` and persisted back to the project file when it changes.
- * - `title` / `version` / `exports` / `targets` / `listsStartAt` / `development` -- straight from the project file (`ProjectFileJSON`).
+ * - `title` / `version` / `exports` / `targets` / `listsStartAt` / `development` / `places` -- straight from the project file (`ProjectFileJSON`).
  * - `buildFolder` -- where its compiled output goes, inside the checkout's `build/`:  `project-utils.buildFolderInBuild()`.
  * - `namesLanguages` -- the languages it has a names dictionary in, beside its project file (`Solitaire.es.names.json5`);
  *   left out when none:  see `SP.ProjectManifestJSON5`.
@@ -191,4 +196,5 @@ export type ProjectIndexJSON = {
   development?: ProjectDevelopmentJSON
   buildFolder?: string
   namesLanguages?: string[]
+  places?: ProjectFileJSON["places"]
 }

@@ -2056,6 +2056,7 @@
             "cancel_when",
             "place_kind",
             "place_kind_here",
+            "picked_file",
             "place_kind_each_person",
             "day_half",
             "clock_zone",
@@ -2206,6 +2207,9 @@
             },
             {
               "syntax": "((database_on_this_device:database on this device)|(in_memory_database:in memory database))"
+            },
+            {
+              "syntax": "((you_pick:you pick)|(on_this_device:on this device))"
             },
             {
               "syntax": "(personal_atmosphere_account:personal atmosphere/i account|personal atmosphere/i)"
@@ -5534,6 +5538,140 @@
           "aliases": ["statement"]
         },
         {
+          "className": "StartTour",
+          "ruleNames": ["start_tour"],
+          "internal": false,
+          "file": "src/spell/rules/UI/StartTour.ts",
+          "line": 20,
+          "purpose": "Start one of the page's tours, by its name (epic `editor` P40).",
+          "syntaxes": [
+            {
+              "syntax": "start tour {name:text} (at step {step:expression})?",
+              "example": "start tour \"first game\"",
+              "outputs": {
+                "js": {
+                  "code": "core.startTour(\"first game\")"
+                },
+                "ts": {
+                  "code": "core.startTour(\"first game\")"
+                },
+                "py": {
+                  "code": "core.start_tour(\"first game\")"
+                }
+              }
+            },
+            {
+              "syntax": "start the {name:text} tour (at step {step:expression})?",
+              "example": "start the \"first game\" tour",
+              "outputs": {
+                "js": {
+                  "code": "core.startTour(\"first game\")"
+                },
+                "ts": {
+                  "code": "core.startTour(\"first game\")"
+                },
+                "py": {
+                  "code": "core.start_tour(\"first game\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "StopTour",
+          "ruleNames": ["stop_tour"],
+          "internal": false,
+          "file": "src/spell/rules/UI/StopTour.ts",
+          "line": 14,
+          "purpose": "Stop the tour showing now (epic `editor` P40).",
+          "syntaxes": [
+            {
+              "syntax": "stop the? tour",
+              "example": "stop tour",
+              "outputs": {
+                "js": {
+                  "code": "core.stopTour()"
+                },
+                "ts": {
+                  "code": "core.stopTour()"
+                },
+                "py": {
+                  "code": "core.stop_tour()"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ShowTourStep",
+          "ruleNames": ["show_tour_step"],
+          "internal": false,
+          "file": "src/spell/rules/UI/ShowTourStep.ts",
+          "line": 15,
+          "purpose": "Go straight to one step of the tour showing, by its number or its name (epic `editor` P40).",
+          "syntaxes": [
+            {
+              "syntax": "show (the? tour)? step {step:expression}",
+              "example": "show step 3",
+              "outputs": {
+                "js": {
+                  "code": "core.showTourStep(3)"
+                },
+                "ts": {
+                  "code": "core.showTourStep(3)"
+                },
+                "py": {
+                  "code": "core.show_tour_step(3)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "MoveTourStep",
+          "ruleNames": ["move_tour_step"],
+          "internal": false,
+          "file": "src/spell/rules/UI/MoveTourStep.ts",
+          "line": 17,
+          "purpose": "One step on, or one step back, in the tour showing (epic `editor` P40).",
+          "syntaxes": [
+            {
+              "syntax": "(go to|show) the (next:next) step (of the tour)?",
+              "example": "go to the next step",
+              "outputs": {
+                "js": {
+                  "code": "core.nextTourStep()"
+                },
+                "ts": {
+                  "code": "core.nextTourStep()"
+                },
+                "py": {
+                  "code": "core.next_tour_step()"
+                }
+              }
+            },
+            {
+              "syntax": "go back a step",
+              "example": "go back a step",
+              "outputs": {
+                "js": {
+                  "code": "core.previousTourStep()"
+                },
+                "ts": {
+                  "code": "core.previousTourStep()"
+                },
+                "py": {
+                  "code": "core.previous_tour_step()"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "MediaCall",
           "ruleNames": ["media_call"],
           "internal": false,
@@ -8704,7 +8842,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 121,
+          "line": 123,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -9034,7 +9172,7 @@
           "ruleNames": ["create_place"],
           "internal": false,
           "file": "src/spell/rules/places/CreatePlace.ts",
-          "line": 91,
+          "line": 103,
           "purpose": "A program's data lives here (epic `data` P11, Q2).",
           "syntaxes": [
             {
@@ -9053,10 +9191,37 @@
               }
             },
             {
-              "syntax": "{type:type_words} is (a|an) {superType:type} (at|from) {address:text} {with_nested_statements}?"
+              "syntax": "{type:type_words} is (a|an) {kind:place_kind_here} {with_nested_statements}?",
+              "example": "family cookbook is a database on this device",
+              "outputs": {
+                "js": {
+                  "code": "export class FamilyCookbook extends Place {}\nexport const familyCookbook = core.place(new FamilyCookbook(), { name: \"family_cookbook\", kind: \"database on this device\" })"
+                },
+                "ts": {
+                  "code": "export class FamilyCookbook extends Place {}\nexport const familyCookbook = core.place(new FamilyCookbook(), { name: \"family_cookbook\", kind: \"database on this device\" })"
+                },
+                "py": {
+                  "code": "class FamilyCookbook(Place):\n    pass\n\nfamily_cookbook = core.place(\n    FamilyCookbook(),\n    {\"name\": \"family_cookbook\", \"kind\": \"database on this device\"},\n)"
+                }
+              }
             },
             {
-              "syntax": "{type:type_words} is (a|an) {kind:place_kind_here} {with_nested_statements}?"
+              "syntax": "{type:type_words} is (a|an) {kind:place_kind} {picked:picked_file} {with_nested_statements}?",
+              "example": "family cookbook is a json file you pick",
+              "outputs": {
+                "js": {
+                  "code": "export class FamilyCookbook extends Place {}\nexport const familyCookbook = core.place(new FamilyCookbook(), {\n  name: \"family_cookbook\",\n  kind: \"file\",\n  picked: true\n})"
+                },
+                "ts": {
+                  "code": "export class FamilyCookbook extends Place {}\nexport const familyCookbook = core.place(new FamilyCookbook(), {\n  name: \"family_cookbook\",\n  kind: \"file\",\n  picked: true\n})"
+                },
+                "py": {
+                  "code": "class FamilyCookbook(Place):\n    pass\n\nfamily_cookbook = core.place(\n    FamilyCookbook(),\n    {\"name\": \"family_cookbook\", \"kind\": \"file\", \"picked\": True},\n)"
+                }
+              }
+            },
+            {
+              "syntax": "{type:type_words} is (a|an) {superType:type} (at|from) {address:text} {with_nested_statements}?"
             },
             {
               "syntax": "{type:type_words} is (a|an) {kind:place_kind_each_person} ((at|from) {address:text})? {with_nested_statements}?"
@@ -9228,12 +9393,12 @@
           "ruleNames": ["token_from"],
           "internal": false,
           "file": "src/spell/rules/places/TokenFrom.ts",
-          "line": 15,
+          "line": 16,
           "purpose": "A place's key is a short-lived token, made from a secret at a token service (epic `data` P49, Q50 A).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_its} token comes from {address:text} ,? made with the secret {name:text}",
-              "example": "acme is a web server at \"https://acme.test\"\n\tits token comes from \"https://auth.acme.test/api-keys/{key id}/token\", made with the secret \"ACME_API_KEY\"",
+              "syntax": "{type:subject_it} is authenticated with a token from {address:text} ,? made with the secret {name:text}",
+              "example": "acme is a web server at \"https://acme.test\"\n\tit is authenticated with a token from \"https://auth.acme.test/api-keys/{key id}/token\", made with the secret \"ACME_API_KEY\"",
               "outputs": {
                 "js": {
                   "code": "export class Acme extends Place {}\nexport const acme = core.place(new Acme(), {\n  name: \"acme\",\n  kind: \"web server\",\n  at: \"https://acme.test\",\n  keyNamed: \"ACME_API_KEY\",\n  tokenFrom: \"https://auth.acme.test/api-keys/{key id}/token\"\n})"
@@ -9245,6 +9410,9 @@
                   "code": "class Acme(Place):\n    pass\n\nacme = core.place(\n    Acme(),\n    {\n        \"name\": \"acme\",\n        \"kind\": \"web server\",\n        \"at\": \"https://acme.test\",\n        \"key_named\": \"ACME_API_KEY\",\n        \"token_from\": \"https://auth.acme.test/api-keys/{key id}/token\",\n    },\n)"
                 }
               }
+            },
+            {
+              "syntax": "{type:subject_its} token comes from {address:text} ,? made with the secret {name:text}"
             }
           ],
           "aliases": ["statement"]
@@ -9280,12 +9448,12 @@
           "ruleNames": ["key_goes_in_header"],
           "internal": false,
           "file": "src/spell/rules/places/KeyGoesInHeader.ts",
-          "line": 16,
-          "purpose": "The header a server wants its key in, as it is (epic `data` T73).",
+          "line": 17,
+          "purpose": "The header a server wants its secret in, as it is (epic `data` T73).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_its} key goes in its {name:text} header",
-              "example": "cookbook is a web server at \"https://example.com\"\n\t- its key goes in its \"X-Api-Key\" header",
+              "syntax": "{type:subject_its} secret goes in its {name:text} header",
+              "example": "cookbook is a web server at \"https://example.com\"\n\t- its secret goes in its \"X-Api-Key\" header",
               "outputs": {
                 "js": {
                   "code": "export class Cookbook extends Place {}\nexport const cookbook = core.place(new Cookbook(), {\n  name: \"cookbook\",\n  kind: \"web server\",\n  at: \"https://example.com\",\n  keyGoes: { header: \"X-Api-Key\" }\n})"
@@ -9297,6 +9465,9 @@
                   "code": "class Cookbook(Place):\n    pass\n\ncookbook = core.place(\n    Cookbook(),\n    {\n        \"name\": \"cookbook\",\n        \"kind\": \"web server\",\n        \"at\": \"https://example.com\",\n        \"key_goes\": {\"header\": \"X-Api-Key\"},\n    },\n)"
                 }
               }
+            },
+            {
+              "syntax": "{type:subject_its} key goes in its {name:text} header"
             }
           ],
           "aliases": ["statement"]
@@ -9306,12 +9477,12 @@
           "ruleNames": ["key_goes_in_address"],
           "internal": false,
           "file": "src/spell/rules/places/KeyGoesInAddress.ts",
-          "line": 16,
-          "purpose": "The question a server wants its key asked as, in the address (epic `data` T73).",
+          "line": 17,
+          "purpose": "The question a server wants its secret asked as, in the address (epic `data` T73).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_its} key goes in the address as {name:text}",
-              "example": "cookbook is a web server at \"https://example.com\"\n\t- its key goes in the address as \"api_key\"",
+              "syntax": "{type:subject_its} secret goes in the address as {name:text}",
+              "example": "cookbook is a web server at \"https://example.com\"\n\t- its secret goes in the address as \"api_key\"",
               "outputs": {
                 "js": {
                   "code": "export class Cookbook extends Place {}\nexport const cookbook = core.place(new Cookbook(), {\n  name: \"cookbook\",\n  kind: \"web server\",\n  at: \"https://example.com\",\n  keyGoes: { inAddress: \"api_key\" }\n})"
@@ -9323,6 +9494,9 @@
                   "code": "class Cookbook(Place):\n    pass\n\ncookbook = core.place(\n    Cookbook(),\n    {\n        \"name\": \"cookbook\",\n        \"kind\": \"web server\",\n        \"at\": \"https://example.com\",\n        \"key_goes\": {\"in_address\": \"api_key\"},\n    },\n)"
                 }
               }
+            },
+            {
+              "syntax": "{type:subject_its} key goes in the address as {name:text}"
             }
           ],
           "aliases": ["statement"]
@@ -9831,6 +10005,61 @@
           "aliases": ["statement"]
         },
         {
+          "className": "SaveDraft",
+          "ruleNames": ["save_draft"],
+          "internal": false,
+          "file": "src/spell/rules/places/SaveDraft.ts",
+          "line": 18,
+          "purpose": "A draft's changes go out, together (epic `data` Q9).",
+          "syntaxes": [
+            {
+              "syntax": "save {draft:known_type}",
+              "example": "family cookbook is a json file you pick\nto keep it\n\tsave family cookbook",
+              "outputs": {
+                "js": {
+                  "code": "export class FamilyCookbook extends Place {}\nexport const familyCookbook = core.place(new FamilyCookbook(), {\n  name: \"family_cookbook\",\n  kind: \"file\",\n  picked: true\n})\nexport async function keepIt() {\n  return core.asAction({ undoneAs: \"Keep It\" }, async () => {\n    await core.savePickedFile(\"family_cookbook\")\n  })\n}"
+                },
+                "ts": {
+                  "code": "export class FamilyCookbook extends Place {}\nexport const familyCookbook = core.place(new FamilyCookbook(), {\n  name: \"family_cookbook\",\n  kind: \"file\",\n  picked: true\n})\nexport async function keepIt() {\n  return core.asAction({ undoneAs: \"Keep It\" }, async () => {\n    await core.savePickedFile(\"family_cookbook\")\n  })\n}"
+                },
+                "py": {
+                  "code": "class FamilyCookbook(Place):\n    pass\n\nfamily_cookbook = core.place(\n    FamilyCookbook(),\n    {\"name\": \"family_cookbook\", \"kind\": \"file\", \"picked\": True},\n)\n\n@core.as_action({\"undone_as\": \"Keep It\"})\nasync def keep_it() -> None:\n    core.save_picked_file(\"family_cookbook\")"
+                }
+              }
+            },
+            {
+              "syntax": "save {draft:expression}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "PickFileFor",
+          "ruleNames": ["pick_file_for"],
+          "internal": false,
+          "file": "src/spell/rules/places/PickFileFor.ts",
+          "line": 15,
+          "purpose": "The file picker, for a place that's a file a person picks (epic `editor` P41, Q67's B).",
+          "syntaxes": [
+            {
+              "syntax": "pick a file for {place:known_type}",
+              "example": "family cookbook is a json file you pick\nto open\n\tpick a file for family cookbook",
+              "outputs": {
+                "js": {
+                  "code": "export class FamilyCookbook extends Place {}\nexport const familyCookbook = core.place(new FamilyCookbook(), {\n  name: \"family_cookbook\",\n  kind: \"file\",\n  picked: true\n})\nexport async function open() {\n  return core.asAction({ undoneAs: \"Open\" }, async () => {\n    await core.pickFileFor(\"family_cookbook\")\n  })\n}"
+                },
+                "ts": {
+                  "code": "export class FamilyCookbook extends Place {}\nexport const familyCookbook = core.place(new FamilyCookbook(), {\n  name: \"family_cookbook\",\n  kind: \"file\",\n  picked: true\n})\nexport async function open() {\n  return core.asAction({ undoneAs: \"Open\" }, async () => {\n    await core.pickFileFor(\"family_cookbook\")\n  })\n}"
+                },
+                "py": {
+                  "code": "class FamilyCookbook(Place):\n    pass\n\nfamily_cookbook = core.place(\n    FamilyCookbook(),\n    {\"name\": \"family_cookbook\", \"kind\": \"file\", \"picked\": True},\n)\n\n@core.as_action({\"undone_as\": \"Open\"})\nasync def open() -> None:\n    core.pick_file_for(\"family_cookbook\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "WrapperAction",
           "ruleNames": ["wrapper_action"],
           "internal": false,
@@ -10050,9 +10279,12 @@
           "ruleNames": ["key_if_set"],
           "internal": false,
           "file": "src/spell/rules/places/KeyIfSet.ts",
-          "line": 13,
+          "line": 14,
           "purpose": "The NAME of a key a place takes when it's set, and goes without when it isn't (epic `data` P28, Q26).",
           "syntaxes": [
+            {
+              "syntax": "{type:subject_it} is optionally authenticated with the secret {name:text}"
+            },
             {
               "syntax": "{type:subject_its} optional key is the secret {name:text}"
             }
@@ -10064,9 +10296,12 @@
           "ruleNames": ["key_is_secret"],
           "internal": false,
           "file": "src/spell/rules/places/KeyIsSecret.ts",
-          "line": 18,
-          "purpose": "The NAME of the key a place needs, never the key (epic `data` Q11).",
+          "line": 21,
+          "purpose": "The NAME of the secret an authenticated place needs, never the secret (epic `data` Q11).",
           "syntaxes": [
+            {
+              "syntax": "{type:subject_it} is authenticated with the secret {name:text}"
+            },
             {
               "syntax": "{type:subject_its} key is the secret {name:text}"
             }
@@ -10081,6 +10316,9 @@
           "line": 12,
           "purpose": "A key written into a program, which won't compile (epic `data` Q11).",
           "syntaxes": [
+            {
+              "syntax": "{type:subject_it} is authenticated with {key:text}"
+            },
             {
               "syntax": "{type:subject_its} key is {key:text}"
             }
@@ -10423,20 +10661,6 @@
           "syntaxes": [
             {
               "syntax": "if that fails (:|,)? {statement_body}?"
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
-          "className": "SaveDraft",
-          "ruleNames": ["save_draft"],
-          "internal": false,
-          "file": "src/spell/rules/places/SaveDraft.ts",
-          "line": 14,
-          "purpose": "A draft's changes go out, together (epic `data` Q9).",
-          "syntaxes": [
-            {
-              "syntax": "save {draft:expression}"
             }
           ],
           "aliases": ["statement"]

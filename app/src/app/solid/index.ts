@@ -22,6 +22,7 @@
  *   - `EditorZones`:  the app pane of the editor's own Spell, a zone per view (epic `editor` T63)
  *   - `AppAnatomy`:  the running app pulled apart into floors, in 3D (epic `editor` P34)
  *   - `Design`:  Design mode's state and its stage, the bit of a view picked to design, drawn large (epic `editor` P37)
+ *   - `EditorTours`:  the editor's tours, Spell UI `<ui-tour>`s, in the Help menu (epic `editor` P40)
  *   - The pages and the router are `spell/app/app/pages`.
  * - The editor's panes (P6):
  *   console, match and AST viewers, type and thing explorers, the code editors, `FileTabs`.
@@ -47,6 +48,7 @@ export * from "./EditorMode"
 export * from "./Inspector"
 export * from "./AppAnatomy"
 export * from "./Design"
+export * from "./EditorTours"
 export * from "./InspectorData"
 export * from "./PartEdits"
 export * from "./Palette"

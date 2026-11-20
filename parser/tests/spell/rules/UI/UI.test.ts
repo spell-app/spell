@@ -199,4 +199,135 @@ describe("testing spell module UI", () => {
       expect(compiled).not.toContain("core.openPrinting(")
     })
   })
+
+  describe("a page's tour (epic `editor` P40)", () => {
+    /** `contents`, parsed whole as `path`:  what it compiled to, and its errors. */
+    function parsed(contents: string, path = "/Test.spell") {
+      const { compiled, errors } = parseSpellProject([{ path, contents }]).files[0]!
+      return { compiled, errors }
+    }
+
+    test("every tour line, in an action, in English", () => {
+      const { compiled, errors } = parsed(`a guide is a thing:
+	- to walk through it:
+		start tour "first game"
+		start the "first game" tour
+		show step 3
+		show the tour step "drag"
+		go to the next step
+		show the next step of the tour
+		go back a step
+		stop the tour
+`)
+      expect(errors).toEqual([])
+      expect(compiled).toContain('core.startTour("first game")')
+      expect(compiled).toContain("core.showTourStep(3)")
+      expect(compiled).toContain('core.showTourStep("drag")')
+      expect(compiled.match(/core\.nextTourStep\(\)/g)).toHaveLength(2)
+      expect(compiled).toContain("core.previousTourStep()")
+      expect(compiled).toContain("core.stopTour()")
+    })
+
+    test("and in Spanish, beside an action of its own (`para ...`)", () => {
+      const { compiled, errors } = parsed(
+        `una guía es una cosa:
+	- para enseñarlo:
+		empieza el recorrido "primera partida"
+		muestra el paso 2
+		ve al siguiente paso
+		retrocede un paso
+		para el recorrido
+	- para pararlo:
+		para el recorrido
+`,
+        "/Test.es.spell"
+      )
+      expect(errors).toEqual([])
+      expect(compiled).toContain('core.startTour("primera partida")')
+      expect(compiled).toContain("core.showTourStep(2)")
+      expect(compiled).toContain("core.nextTourStep()")
+      expect(compiled).toContain("core.previousTourStep()")
+      expect(compiled.match(/core\.stopTour\(\)/g)).toHaveLength(2)
+      expect(compiled).toContain("parar() {")
+    })
+
+    test("`the tour` is always the tour showing, even beside an action named tour", () => {
+      const { compiled, errors } = parsed(`a guide is a thing:
+	- to tour:
+		print 1
+	- to deal:
+		print 2
+	- to stop everything:
+		stop the tour
+		stop the deal
+`)
+      expect(errors).toEqual([])
+      expect(compiled).toContain("core.stopTour()")
+      expect(compiled).not.toContain('core.cancelActions(this, "tour")')
+      // the neighbour stays:  `stop the deal` stops the running action named deal
+      expect(compiled).toContain('core.cancelActions(this, "deal")')
+    })
+
+    test("every tour line in a handler, and a tour started at a step (epic `editor` T128)", () => {
+      const { compiled, errors } = parsed(`my game is an app:
+	- to draw it:
+		<ui-button onClick={start tour "first game"}>Tour</ui-button>
+		<ui-button onClick={start the "first game" tour at step 3}>From step 3</ui-button>
+		<ui-button onClick={start tour "first game" at step "drag"}>From drag</ui-button>
+		<ui-button onClick={show step 2}>Step 2</ui-button>
+		<ui-button onClick={go to the next step}>Next</ui-button>
+		<ui-button onClick={go back a step}>Back</ui-button>
+		<ui-button onClick={stop the tour}>Done</ui-button>
+`)
+      expect(errors).toEqual([])
+      expect(compiled).toContain('onClick: core.pressed(this, () => core.startTour("first game"))')
+      expect(compiled).toContain('onClick: core.pressed(this, () => core.startTour("first game", 3))')
+      expect(compiled).toContain('onClick: core.pressed(this, () => core.startTour("first game", "drag"))')
+      expect(compiled).toContain("onClick: core.pressed(this, () => core.showTourStep(2))")
+      expect(compiled).toContain("onClick: core.pressed(this, () => core.nextTourStep())")
+      expect(compiled).toContain("onClick: core.pressed(this, () => core.previousTourStep())")
+      expect(compiled).toContain("onClick: core.pressed(this, () => core.stopTour())")
+    })
+
+    test("and in Spanish:  `en el paso 3`", () => {
+      const { compiled, errors } = parsed(
+        `mi juego es una app:
+	- para empezar:
+		empieza el recorrido "primera partida" en el paso 3
+	- para dibujarlo:
+		<ui-button onClick={inicia el recorrido "primera partida" en el paso "arrastrar"}>Recorrido</ui-button>
+		<ui-button onClick={muestra el paso 2}>Paso 2</ui-button>
+		<ui-button onClick={ve al siguiente paso}>Siguiente</ui-button>
+		<ui-button onClick={retrocede un paso}>Atrás</ui-button>
+		<ui-button onClick={para el recorrido}>Listo</ui-button>
+`,
+        "/Juego.es.spell"
+      )
+      expect(errors).toEqual([])
+      expect(compiled).toContain('core.startTour("primera partida", 3)')
+      expect(compiled).toContain('onClick: core.pressed(this, () => core.startTour("primera partida", "arrastrar"))')
+      expect(compiled).toContain("onClick: core.pressed(this, () => core.showTourStep(2))")
+      expect(compiled).toContain("onClick: core.pressed(this, () => core.nextTourStep())")
+      expect(compiled).toContain("onClick: core.pressed(this, () => core.previousTourStep())")
+      expect(compiled).toContain("onClick: core.pressed(this, () => core.stopTour())")
+    })
+
+    test('the neighbouring lines read as before:  `show "help"`, `stop its sound`, a `go back` method', () => {
+      const { compiled, errors } = parsed(`a pokemon is a thing:
+	- it has a sound as text
+	- to hush it:
+		show "help"
+		stop its sound
+	- to go back:
+		print 1
+	- to undo it:
+		go back
+`)
+      expect(errors).toEqual([])
+      expect(compiled).toContain('await core.showDrawn("help")')
+      expect(compiled).toContain("core.stop(this.sound)")
+      expect(compiled).toContain("this.goBack()")
+      expect(compiled).not.toContain("TourStep")
+    })
+  })
 })

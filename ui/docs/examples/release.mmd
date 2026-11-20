@@ -1,0 +1,7 @@
+sequenceDiagram
+  participant Writer
+  participant Editor
+  participant Site
+  Writer->>Editor: Save the page
+  Editor->>Site: Publish it
+  Site-->>Writer: It's live

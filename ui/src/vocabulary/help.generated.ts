@@ -1144,6 +1144,26 @@ export const HELP_TABLE: Readonly<
         "An application menubar (`role=menubar`): one Tab stop, arrow keys between items, every item a `menuitem`."
     }
   },
+  "ui-mermaid-diagram": {
+    description:
+      "A Mermaid diagram draws a flowchart, a sequence, a timeline or any other kind of diagram Mermaid knows, from the element's own text or a file on this site.",
+    empty: true,
+    attributes: {
+      source: "URL of the file to show, relative to the page; same origin only (another site's URL shows an error).",
+      load: "When to fetch `source`: `eager` (at once), `visible` (once scrolled into view) or `idle` (when the browser has nothing else to do).",
+      theme: "The colours.",
+      scheme:
+        "Light or dark for this drawing alone: `auto` follows the page; `light` and `dark` hold it there, whatever the page does.",
+      look: "The drawing style: plain lines (`classic`), sketched by hand (`hand-drawn`), or flatter and softer (`neo`).",
+      layout:
+        "How the boxes are placed: `auto` lets Mermaid pick for each kind of diagram (ELK for flowcharts, state, class and ER diagrams); any other asks for that engine, where Mermaid has it for the kind.",
+      seed: "For `hand-drawn`: the same seed draws the same wobbles every time, so it doesn't wobble as it redraws.",
+      controls:
+        "A small menu button in the drawing's corner, shown on hover or keyboard focus, so a reader can change its colours and light or dark.",
+      remember: "The name a reader's picks from the menu are kept under, across reloads and visits.",
+      label: "What a screen reader says for the drawing."
+    }
+  },
   "ui-message": {
     description: "A message displays information that explains nearby content.",
     attributes: {
@@ -2356,6 +2376,30 @@ export const HELP_TABLE: Readonly<
         "With `max-visible`: an icon before the caret of the button listing every item, saying what they are (a project's files: `file outline`).",
       "all-items-at-end":
         "With `max-visible`: the button listing every item sits at the toolbar's far end, however few items show."
+    }
+  },
+  "ui-tour": {
+    description:
+      "A tour leads someone through a feature one numbered step at a time, pointing at what each step is about.",
+    attributes: {
+      name: "The tour's name: shown at the top of each step, in the Help menu and the tours list.",
+      summary: "One line about the tour, under its name in the tours list and the offer to take it.",
+      dim: 'Every step darkens the rest of the page, all but what it points at; a step can say `dim="false"`.',
+      remember: "Remembers that the tour was taken (finished or closed), so it isn't offered again.",
+      offer:
+        "How it offers itself when it starts by itself (`offer()`): `ask`, a small note asking first; `start`, straight away; `dot`, a pulsing dot on the first step's target, which starts it when clicked."
+    }
+  },
+  "ui-tour-step": {
+    description: "One step of a tour: what it says, and what it points at.",
+    attributes: {
+      name: 'Optional: a step can be shown by its name as well as its number (`show step "drag"`).',
+      target:
+        "What it points at: the name of a part of the app (its `id`), a `data-tour` name, or a CSS selector; an element set by script.",
+      placement: "Which side of its target the box goes; it moves to the other side when there's no room.",
+      dim: 'Darkens the rest of the page, all but its target; `dim="false"` turns the tour\'s `dim` off here.',
+      "wait-for":
+        "Waits for the person to do something to its target, an event's name (`click`, `input`, `ui-opened`): the rest of the page can't be clicked, Next is hidden, and the tour goes on when it happens."
     }
   },
   "ui-transition": {

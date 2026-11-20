@@ -338,6 +338,28 @@
           }
         }
       }
+    },
+    "/api/stacks": {
+      "get": {
+        "tags": ["stacks"],
+        "summary": "List Stacks",
+        "operationId": "list_stacks_api_stacks_get",
+        "parameters": [
+          {
+            "name": "system",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "title": "System" },
+            "example": "alpha"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Page_Stack_" } } }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -520,6 +542,24 @@
         "type": "object",
         "required": ["items", "total"],
         "title": "Page[Run]"
+      },
+      "Stack": {
+        "properties": {
+          "id": { "type": "integer", "title": "Id" },
+          "name": { "type": "string", "title": "Name" }
+        },
+        "type": "object",
+        "required": ["id", "name"],
+        "title": "Stack"
+      },
+      "Page_Stack_": {
+        "properties": {
+          "items": { "items": { "$ref": "#/components/schemas/Stack" }, "type": "array", "title": "Items" },
+          "total": { "type": "integer", "title": "Total" }
+        },
+        "type": "object",
+        "required": ["items", "total"],
+        "title": "Page[Stack]"
       }
     }
   }

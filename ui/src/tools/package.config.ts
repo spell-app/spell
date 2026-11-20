@@ -34,6 +34,9 @@ const EXTRA_ENTRIES = { api: ENTRIES.api!, styles: ENTRIES.styles! }
  *       - a family's lazily imported data (`components/ui-<family>/data/`, the emoji chunks)
  *       - the Temporal polyfill (`temporal-polyfill`, loaded only where the browser lacks `Temporal`)
  *       - the source elements' engines' libraries (highlight.js, marked, DOMPurify), loaded on first use
+ *       - Mermaid and everything it brings (d3, dagre, cytoscape, KaTeX, ELK ...), loaded on a page's first diagram
+ *         (ELK's one door, `util/ElkEngine.ts`, is `core`'s, as the families' other helpers taken by file):
+ *         any package but Solid's is one of these
  *       - a language's names (`components.es.ts`, each tag's `UI<Name>.es.ts`), loaded by a page in that language
  *   - `src/docs-components/` (the doc-only `<ui-docs-*>` families) => `docs`:  never in the lib build, which a check
  *     flags (`docsBundled`);  only the docs site's bundle adds them (`DocsFamilies`)
@@ -76,6 +79,8 @@ function bucket(id: string): Bucket {
     return "library"
   }
   if (/\/node_modules\/(temporal-(polyfill|utils)|highlight\.js|marked|dompurify)\//.test(id)) return "data"
+  // a lazy engine's own libraries (Mermaid's tree:  some keep their code in a `src/` of their own)
+  if (/\/node_modules\//.test(id)) return "data"
   // a path under a `src/`:  Spell UI's (its families in `src/components/`) or the kit's
   const file = id.split("?")[0]!
   const src = /\/src\/(.+)$/.exec(file)?.[1]

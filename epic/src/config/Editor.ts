@@ -1,4 +1,5 @@
 import type { SpawnSyncOptions, SpawnSyncReturns } from "node:child_process"
+import { join } from "node:path"
 
 import { Processes } from "spell/server/Processes"
 
@@ -73,6 +74,11 @@ export class Editor {
     return EDITOR_SCHEMES[this.id]
   }
 
+  /** Where it keeps its installed extensions, a folder each (`<id>-<version>`):  `~/.vscode/extensions`, `~/.cursor/extensions` */
+  extensionsFolder(home: string): string {
+    return join(home, EDITOR_FOLDERS[this.id], "extensions")
+  }
+
   /** A link into it:  `vscode://<path>`, `cursor://<path>` */
   url(path: string): string {
     return `${this.scheme}://${path}`
@@ -104,6 +110,9 @@ export const EDITOR_ENV = "SPELL_EPIC_EDITOR"
 const EDITOR_NAMES: Record<EditorId, string> = { code: "VS Code", cursor: "Cursor" }
 
 const EDITOR_SCHEMES: Record<EditorId, string> = { code: "vscode", cursor: "cursor" }
+
+/** Each editor's own folder in the home folder. */
+const EDITOR_FOLDERS: Record<EditorId, string> = { code: ".vscode", cursor: ".cursor" }
 
 /** Cursor's macOS bundle id (its `Info.plist`, Cursor 3.22), which macOS passes to what it starts. */
 const CURSOR_BUNDLE = "com.todesktop.230313mzl4w4u92"

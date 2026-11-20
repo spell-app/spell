@@ -16,6 +16,8 @@ exports[`spell place ingest --spec, of a FastAPI 3.1 description > English:  eve
 		it gives up to 100 at a time
 	runs live at "/api/runs"
 	runs are asked for by their team
+	stacks live at "/api/stacks"
+	stacks are asked for by their system
 	a job's steps live at "/api/jobs/{id}/steps"
 	to complete a job is at "/api/jobs/{job_id}/complete"
 	to retry a step is at "/api/jobs/{job_id}/steps/{step_id}/retry"
@@ -78,6 +80,13 @@ a "run" is a thing
 	enabled operations are read
 	its "team" is required text
 	its "state" is required text
+
+a "stack" is a thing
+	it lives in acme jobs
+	this type is unverified
+	enabled operations are read
+	its "name" is required text
+	its "system" is text
 
 a "step" is a thing
 	it lives in acme jobs

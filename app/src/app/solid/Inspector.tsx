@@ -2898,7 +2898,7 @@ export function InspectorColumn(): JSX.Element {
   )
   return (
     <Show when={Inspector.isOpen}>
-      <aside class="InspectorColumn" aria-label={appTexts.text("inspector")}>
+      <aside class="InspectorColumn" data-tour="inspector" aria-label={appTexts.text("inspector")}>
         <style>{brandTokens()}</style>
         <InspectorSheetBar />
         <ui-split-panel
@@ -4183,6 +4183,7 @@ export function InspectAppButton(props: { id?: string }): JSX.Element {
       icon="crosshairs"
       appearance="circular"
       class={["InspectAppButton", { inspecting: Inspector.isInspecting }]}
+      data-tour="inspect app"
       label={appTexts.text("inspectorInspect")}
       aria-pressed={pressed()}
       {...barTooltip(title())}

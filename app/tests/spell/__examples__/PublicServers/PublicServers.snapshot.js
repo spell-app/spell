@@ -18,159 +18,159 @@ core.heading("GitHub:  a repository's issues, the people who wrote it, anyone by
 
 export class Issue extends Thing {
   // - its "url" is an issue
-  static { this.declareProp("url", { type: "Issue", link: true, declaredAt: { path: "/GitHub.api.spell", start: 1721, end: 1742 } }) }
+  static { this.declareProp("url", { type: "Issue", link: true, declaredAt: { path: "/GitHub.api.spell", start: 1737, end: 1758 } }) }
   get url() { return core.linked(this, "url", Issue) }
   set url(value) { this.setProp("url", value) }
 
   /** an address */
   // - its "repository url" is text
   //   -- an address
-  static { this.declareProp("repositoryUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1744, end: 1788 } }) }
+  static { this.declareProp("repositoryUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1760, end: 1804 } }) }
   get repositoryUrl() { return this.getProp("repositoryUrl") }
   set repositoryUrl(value) { this.setProp("repositoryUrl", value) }
 
   /** an address */
   // - its "labels url" is text
   //   -- an address
-  static { this.declareProp("labelsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1790, end: 1830 } }) }
+  static { this.declareProp("labelsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1806, end: 1846 } }) }
   get labelsUrl() { return this.getProp("labelsUrl") }
   set labelsUrl(value) { this.setProp("labelsUrl", value) }
 
   /** an address */
   // - its "comments url" is text
   //   -- an address
-  static { this.declareProp("commentsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1832, end: 1874 } }) }
+  static { this.declareProp("commentsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1848, end: 1890 } }) }
   get commentsUrl() { return this.getProp("commentsUrl") }
   set commentsUrl(value) { this.setProp("commentsUrl", value) }
 
   /** an address */
   // - its "events url" is text
   //   -- an address
-  static { this.declareProp("eventsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1876, end: 1916 } }) }
+  static { this.declareProp("eventsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1892, end: 1932 } }) }
   get eventsUrl() { return this.getProp("eventsUrl") }
   set eventsUrl(value) { this.setProp("eventsUrl", value) }
 
   /** an address */
   // - its "html url" is text
   //   -- an address
-  static { this.declareProp("htmlUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1918, end: 1956 } }) }
+  static { this.declareProp("htmlUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1934, end: 1972 } }) }
   get htmlUrl() { return this.getProp("htmlUrl") }
   set htmlUrl(value) { this.setProp("htmlUrl", value) }
 
   // - its "node id" is text
-  static { this.declareProp("nodeId", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1958, end: 1979 } }) }
+  static { this.declareProp("nodeId", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 1974, end: 1995 } }) }
   get nodeId() { return this.getProp("nodeId") }
   set nodeId(value) { this.setProp("nodeId", value) }
 
   // - its "number" is a number
-  static { this.declareProp("number", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 1981, end: 2005 } }) }
+  static { this.declareProp("number", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 1997, end: 2021 } }) }
   get number() { return this.getProp("number") }
   set number(value) { this.setProp("number", value) }
 
   // - its "title" is text
-  static { this.declareProp("title", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2007, end: 2026 } }) }
+  static { this.declareProp("title", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2023, end: 2042 } }) }
   get title() { return this.getProp("title") }
   set title(value) { this.setProp("title", value) }
 
   // - its "user" is an issue user
-  static { this.declareProp("user", { type: "IssueUser", declaredAt: { path: "/GitHub.api.spell", start: 2028, end: 2055 } }) }
+  static { this.declareProp("user", { type: "IssueUser", declaredAt: { path: "/GitHub.api.spell", start: 2044, end: 2071 } }) }
   get user() { return this.getProp("user") }
   set user(value) { this.setProp("user", value) }
 
   // - its "labels" is a list of labels
-  static { this.declareProp("labels", { itemType: "Label", init: () => new List({ instanceType: "Label" }), declaredAt: { path: "/GitHub.api.spell", start: 2057, end: 2089 } }) }
+  static { this.declareProp("labels", { itemType: "Label", init: () => new List({ instanceType: "Label" }), declaredAt: { path: "/GitHub.api.spell", start: 2073, end: 2105 } }) }
   get labels() { return this.getProp("labels") }
   set labels(value) { this.setProp("labels", value) }
 
   // - its "state" is text
-  static { this.declareProp("state", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2091, end: 2110 } }) }
+  static { this.declareProp("state", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2107, end: 2126 } }) }
   get state() { return this.getProp("state") }
   set state(value) { this.setProp("state", value) }
 
   // - its "locked" is yes or no
-  static { this.declareProp("locked", { type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 2112, end: 2137 } }) }
+  static { this.declareProp("locked", { type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 2128, end: 2153 } }) }
   get locked() { return this.getProp("locked") }
   set locked(value) { this.setProp("locked", value) }
 
   // - its "assignees" is a list of assignees
-  static { this.declareProp("assignees", { itemType: "Assignee", init: () => new List({ instanceType: "Assignee" }), declaredAt: { path: "/GitHub.api.spell", start: 2139, end: 2177 } }) }
+  static { this.declareProp("assignees", { itemType: "Assignee", init: () => new List({ instanceType: "Assignee" }), declaredAt: { path: "/GitHub.api.spell", start: 2155, end: 2193 } }) }
   get assignees() { return this.getProp("assignees") }
   set assignees(value) { this.setProp("assignees", value) }
 
   // - its "comments" is a number
-  static { this.declareProp("comments", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 2179, end: 2205 } }) }
+  static { this.declareProp("comments", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 2195, end: 2221 } }) }
   get comments() { return this.getProp("comments") }
   set comments(value) { this.setProp("comments", value) }
 
   // - its "created at" is a date
-  static { this.declareProp("createdAt", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 2207, end: 2233 } }) }
+  static { this.declareProp("createdAt", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 2223, end: 2249 } }) }
   get createdAt() { return this.getProp("createdAt") }
   set createdAt(value) { this.setProp("createdAt", value) }
 
   // - its "updated at" is a date
-  static { this.declareProp("updatedAt", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 2235, end: 2261 } }) }
+  static { this.declareProp("updatedAt", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 2251, end: 2277 } }) }
   get updatedAt() { return this.getProp("updatedAt") }
   set updatedAt(value) { this.setProp("updatedAt", value) }
 
   // - its "author association" is text
-  static { this.declareProp("authorAssociation", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2263, end: 2295 } }) }
+  static { this.declareProp("authorAssociation", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2279, end: 2311 } }) }
   get authorAssociation() { return this.getProp("authorAssociation") }
   set authorAssociation(value) { this.setProp("authorAssociation", value) }
 
   // - its "issue field values" is a list of text
-  static { this.declareProp("issueFieldValues", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/GitHub.api.spell", start: 2297, end: 2339 } }) }
+  static { this.declareProp("issueFieldValues", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/GitHub.api.spell", start: 2313, end: 2355 } }) }
   get issueFieldValues() { return this.getProp("issueFieldValues") }
   set issueFieldValues(value) { this.setProp("issueFieldValues", value) }
 
   // - its "sub issues summary" is a sub issues summary
-  static { this.declareProp("subIssuesSummary", { type: "SubIssuesSummary", declaredAt: { path: "/GitHub.api.spell", start: 2341, end: 2389 } }) }
+  static { this.declareProp("subIssuesSummary", { type: "SubIssuesSummary", declaredAt: { path: "/GitHub.api.spell", start: 2357, end: 2405 } }) }
   get subIssuesSummary() { return this.getProp("subIssuesSummary") }
   set subIssuesSummary(value) { this.setProp("subIssuesSummary", value) }
 
   // - its "issue dependencies summary" is an issue dependencies summary
-  static { this.declareProp("issueDependenciesSummary", { type: "IssueDependenciesSummary", declaredAt: { path: "/GitHub.api.spell", start: 2391, end: 2456 } }) }
+  static { this.declareProp("issueDependenciesSummary", { type: "IssueDependenciesSummary", declaredAt: { path: "/GitHub.api.spell", start: 2407, end: 2472 } }) }
   get issueDependenciesSummary() { return this.getProp("issueDependenciesSummary") }
   set issueDependenciesSummary(value) { this.setProp("issueDependenciesSummary", value) }
 
   // - its "body" is text
-  static { this.declareProp("body", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2458, end: 2476 } }) }
+  static { this.declareProp("body", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2474, end: 2492 } }) }
   get body() { return this.getProp("body") }
   set body(value) { this.setProp("body", value) }
 
   // - its "reactions" is a reaction
-  static { this.declareProp("reactions", { type: "Reaction", declaredAt: { path: "/GitHub.api.spell", start: 2478, end: 2507 } }) }
+  static { this.declareProp("reactions", { type: "Reaction", declaredAt: { path: "/GitHub.api.spell", start: 2494, end: 2523 } }) }
   get reactions() { return this.getProp("reactions") }
   set reactions(value) { this.setProp("reactions", value) }
 
   /** an address */
   // - its "timeline url" is text
   //   -- an address
-  static { this.declareProp("timelineUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2509, end: 2551 } }) }
+  static { this.declareProp("timelineUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2525, end: 2567 } }) }
   get timelineUrl() { return this.getProp("timelineUrl") }
   set timelineUrl(value) { this.setProp("timelineUrl", value) }
 
   // - its "performed via github app" is a performed via github app
-  static { this.declareProp("performedViaGithubApp", { type: "PerformedViaGithubApp", declaredAt: { path: "/GitHub.api.spell", start: 2553, end: 2613 } }) }
+  static { this.declareProp("performedViaGithubApp", { type: "PerformedViaGithubApp", declaredAt: { path: "/GitHub.api.spell", start: 2569, end: 2629 } }) }
   get performedViaGithubApp() { return this.getProp("performedViaGithubApp") }
   set performedViaGithubApp(value) { this.setProp("performedViaGithubApp", value) }
 
   // - its "state reason" is text
-  static { this.declareProp("stateReason", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2615, end: 2641 } }) }
+  static { this.declareProp("stateReason", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2631, end: 2657 } }) }
   get stateReason() { return this.getProp("stateReason") }
   set stateReason(value) { this.setProp("stateReason", value) }
 
   // - its "draft" is yes or no
-  static { this.declareProp("draft", { type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 2643, end: 2667 } }) }
+  static { this.declareProp("draft", { type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 2659, end: 2683 } }) }
   get draft() { return this.getProp("draft") }
   set draft(value) { this.setProp("draft", value) }
 
   // - its "pull request" is a pull request
-  static { this.declareProp("pullRequest", { type: "PullRequest", declaredAt: { path: "/GitHub.api.spell", start: 2669, end: 2705 } }) }
+  static { this.declareProp("pullRequest", { type: "PullRequest", declaredAt: { path: "/GitHub.api.spell", start: 2685, end: 2721 } }) }
   get pullRequest() { return this.getProp("pullRequest") }
   set pullRequest(value) { this.setProp("pullRequest", value) }
 
   // - its "assignee" is an assignee
-  static { this.declareProp("assignee", { type: "Assignee", declaredAt: { path: "/GitHub.api.spell", start: 2707, end: 2736 } }) }
+  static { this.declareProp("assignee", { type: "Assignee", declaredAt: { path: "/GitHub.api.spell", start: 2723, end: 2752 } }) }
   get assignee() { return this.getProp("assignee") }
   set assignee(value) { this.setProp("assignee", value) }
 
@@ -194,133 +194,133 @@ export class Issue extends Thing {
     times: ["created", "modified"], select: ["htmlUrl", "number", "title", "state", "comments", "createdAt", "body", "pullRequest"] }
 
   // - it lives in github
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 1701, end: 1719 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 1717, end: 1735 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in github
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 1701, end: 1719 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 1717, end: 1735 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
 
 export class Contributor extends Thing {
   // - its "login" is text
-  static { this.declareProp("login", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2786, end: 2805 } }) }
+  static { this.declareProp("login", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2802, end: 2821 } }) }
   get login() { return this.getProp("login") }
   set login(value) { this.setProp("login", value) }
 
   // - its "node id" is text
-  static { this.declareProp("nodeId", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2807, end: 2828 } }) }
+  static { this.declareProp("nodeId", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2823, end: 2844 } }) }
   get nodeId() { return this.getProp("nodeId") }
   set nodeId(value) { this.setProp("nodeId", value) }
 
   /** an address */
   // - its "avatar url" is text
   //   -- an address
-  static { this.declareProp("avatarUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2830, end: 2870 } }) }
+  static { this.declareProp("avatarUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2846, end: 2886 } }) }
   get avatarUrl() { return this.getProp("avatarUrl") }
   set avatarUrl(value) { this.setProp("avatarUrl", value) }
 
   // - its "gravatar id" is text
-  static { this.declareProp("gravatarId", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2872, end: 2897 } }) }
+  static { this.declareProp("gravatarId", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2888, end: 2913 } }) }
   get gravatarId() { return this.getProp("gravatarId") }
   set gravatarId(value) { this.setProp("gravatarId", value) }
 
   /** an address */
   // - its "url" is text
   //   -- an address
-  static { this.declareProp("url", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2899, end: 2932 } }) }
+  static { this.declareProp("url", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2915, end: 2948 } }) }
   get url() { return this.getProp("url") }
   set url(value) { this.setProp("url", value) }
 
   /** an address */
   // - its "html url" is text
   //   -- an address
-  static { this.declareProp("htmlUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2934, end: 2972 } }) }
+  static { this.declareProp("htmlUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2950, end: 2988 } }) }
   get htmlUrl() { return this.getProp("htmlUrl") }
   set htmlUrl(value) { this.setProp("htmlUrl", value) }
 
   /** an address */
   // - its "followers url" is text
   //   -- an address
-  static { this.declareProp("followersUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2974, end: 3017 } }) }
+  static { this.declareProp("followersUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 2990, end: 3033 } }) }
   get followersUrl() { return this.getProp("followersUrl") }
   set followersUrl(value) { this.setProp("followersUrl", value) }
 
   /** an address */
   // - its "following url" is text
   //   -- an address
-  static { this.declareProp("followingUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3019, end: 3062 } }) }
+  static { this.declareProp("followingUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3035, end: 3078 } }) }
   get followingUrl() { return this.getProp("followingUrl") }
   set followingUrl(value) { this.setProp("followingUrl", value) }
 
   /** an address */
   // - its "gists url" is text
   //   -- an address
-  static { this.declareProp("gistsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3064, end: 3103 } }) }
+  static { this.declareProp("gistsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3080, end: 3119 } }) }
   get gistsUrl() { return this.getProp("gistsUrl") }
   set gistsUrl(value) { this.setProp("gistsUrl", value) }
 
   /** an address */
   // - its "starred url" is text
   //   -- an address
-  static { this.declareProp("starredUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3105, end: 3146 } }) }
+  static { this.declareProp("starredUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3121, end: 3162 } }) }
   get starredUrl() { return this.getProp("starredUrl") }
   set starredUrl(value) { this.setProp("starredUrl", value) }
 
   /** an address */
   // - its "subscriptions url" is text
   //   -- an address
-  static { this.declareProp("subscriptionsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3148, end: 3195 } }) }
+  static { this.declareProp("subscriptionsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3164, end: 3211 } }) }
   get subscriptionsUrl() { return this.getProp("subscriptionsUrl") }
   set subscriptionsUrl(value) { this.setProp("subscriptionsUrl", value) }
 
   /** an address */
   // - its "organizations url" is text
   //   -- an address
-  static { this.declareProp("organizationsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3197, end: 3244 } }) }
+  static { this.declareProp("organizationsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3213, end: 3260 } }) }
   get organizationsUrl() { return this.getProp("organizationsUrl") }
   set organizationsUrl(value) { this.setProp("organizationsUrl", value) }
 
   /** an address */
   // - its "repos url" is text
   //   -- an address
-  static { this.declareProp("reposUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3246, end: 3285 } }) }
+  static { this.declareProp("reposUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3262, end: 3301 } }) }
   get reposUrl() { return this.getProp("reposUrl") }
   set reposUrl(value) { this.setProp("reposUrl", value) }
 
   /** an address */
   // - its "events url" is text
   //   -- an address
-  static { this.declareProp("eventsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3287, end: 3327 } }) }
+  static { this.declareProp("eventsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3303, end: 3343 } }) }
   get eventsUrl() { return this.getProp("eventsUrl") }
   set eventsUrl(value) { this.setProp("eventsUrl", value) }
 
   /** an address */
   // - its "received events url" is text
   //   -- an address
-  static { this.declareProp("receivedEventsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3329, end: 3378 } }) }
+  static { this.declareProp("receivedEventsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3345, end: 3394 } }) }
   get receivedEventsUrl() { return this.getProp("receivedEventsUrl") }
   set receivedEventsUrl(value) { this.setProp("receivedEventsUrl", value) }
 
   // - its "kind" is text, stored as "type"
-  static { this.declareProp("kind", { type: "text", storedAs: "type", declaredAt: { path: "/GitHub.api.spell", start: 3380, end: 3416 } }) }
+  static { this.declareProp("kind", { type: "text", storedAs: "type", declaredAt: { path: "/GitHub.api.spell", start: 3396, end: 3432 } }) }
   get kind() { return this.getProp("kind") }
   set kind(value) { this.setProp("kind", value) }
 
   // - its "user view type" is text
-  static { this.declareProp("userViewType", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3418, end: 3446 } }) }
+  static { this.declareProp("userViewType", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3434, end: 3462 } }) }
   get userViewType() { return this.getProp("userViewType") }
   set userViewType(value) { this.setProp("userViewType", value) }
 
   // - its "site admin" is yes or no
-  static { this.declareProp("siteAdmin", { type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 3448, end: 3477 } }) }
+  static { this.declareProp("siteAdmin", { type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 3464, end: 3493 } }) }
   get siteAdmin() { return this.getProp("siteAdmin") }
   set siteAdmin(value) { this.setProp("siteAdmin", value) }
 
   // - its "contributions" is a number
-  static { this.declareProp("contributions", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 3479, end: 3510 } }) }
+  static { this.declareProp("contributions", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 3495, end: 3526 } }) }
   get contributions() { return this.getProp("contributions") }
   set contributions(value) { this.setProp("contributions", value) }
 
@@ -330,200 +330,200 @@ export class Contributor extends Thing {
     times: ["created", "modified"], select: ["login", "avatarUrl", "htmlUrl", "kind"] }
 
   // - it lives in github
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 2766, end: 2784 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 2782, end: 2800 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in github
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 2766, end: 2784 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 2782, end: 2800 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
 
 export class User extends Thing {
   // - its "login" is text
-  static { this.declareProp("login", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3553, end: 3572 } }) }
+  static { this.declareProp("login", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3569, end: 3588 } }) }
   get login() { return this.getProp("login") }
   set login(value) { this.setProp("login", value) }
 
   // - its "number" is a number, stored as "id"
-  static { this.declareProp("number", { type: "number", storedAs: "id", declaredAt: { path: "/GitHub.api.spell", start: 3574, end: 3614 } }) }
+  static { this.declareProp("number", { type: "number", storedAs: "id", declaredAt: { path: "/GitHub.api.spell", start: 3590, end: 3630 } }) }
   get number() { return this.getProp("number") }
   set number(value) { this.setProp("number", value) }
 
   // - its "node id" is text
-  static { this.declareProp("nodeId", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3616, end: 3637 } }) }
+  static { this.declareProp("nodeId", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3632, end: 3653 } }) }
   get nodeId() { return this.getProp("nodeId") }
   set nodeId(value) { this.setProp("nodeId", value) }
 
   /** an address */
   // - its "avatar url" is text
   //   -- an address
-  static { this.declareProp("avatarUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3639, end: 3679 } }) }
+  static { this.declareProp("avatarUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3655, end: 3695 } }) }
   get avatarUrl() { return this.getProp("avatarUrl") }
   set avatarUrl(value) { this.setProp("avatarUrl", value) }
 
   // - its "gravatar id" is text
-  static { this.declareProp("gravatarId", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3681, end: 3706 } }) }
+  static { this.declareProp("gravatarId", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3697, end: 3722 } }) }
   get gravatarId() { return this.getProp("gravatarId") }
   set gravatarId(value) { this.setProp("gravatarId", value) }
 
   /** an address */
   // - its "url" is text
   //   -- an address
-  static { this.declareProp("url", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3708, end: 3741 } }) }
+  static { this.declareProp("url", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3724, end: 3757 } }) }
   get url() { return this.getProp("url") }
   set url(value) { this.setProp("url", value) }
 
   /** an address */
   // - its "html url" is text
   //   -- an address
-  static { this.declareProp("htmlUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3743, end: 3781 } }) }
+  static { this.declareProp("htmlUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3759, end: 3797 } }) }
   get htmlUrl() { return this.getProp("htmlUrl") }
   set htmlUrl(value) { this.setProp("htmlUrl", value) }
 
   /** an address */
   // - its "followers url" is text
   //   -- an address
-  static { this.declareProp("followersUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3783, end: 3826 } }) }
+  static { this.declareProp("followersUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3799, end: 3842 } }) }
   get followersUrl() { return this.getProp("followersUrl") }
   set followersUrl(value) { this.setProp("followersUrl", value) }
 
   /** an address */
   // - its "following url" is text
   //   -- an address
-  static { this.declareProp("followingUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3828, end: 3871 } }) }
+  static { this.declareProp("followingUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3844, end: 3887 } }) }
   get followingUrl() { return this.getProp("followingUrl") }
   set followingUrl(value) { this.setProp("followingUrl", value) }
 
   /** an address */
   // - its "gists url" is text
   //   -- an address
-  static { this.declareProp("gistsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3873, end: 3912 } }) }
+  static { this.declareProp("gistsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3889, end: 3928 } }) }
   get gistsUrl() { return this.getProp("gistsUrl") }
   set gistsUrl(value) { this.setProp("gistsUrl", value) }
 
   /** an address */
   // - its "starred url" is text
   //   -- an address
-  static { this.declareProp("starredUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3914, end: 3955 } }) }
+  static { this.declareProp("starredUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3930, end: 3971 } }) }
   get starredUrl() { return this.getProp("starredUrl") }
   set starredUrl(value) { this.setProp("starredUrl", value) }
 
   /** an address */
   // - its "subscriptions url" is text
   //   -- an address
-  static { this.declareProp("subscriptionsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3957, end: 4004 } }) }
+  static { this.declareProp("subscriptionsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 3973, end: 4020 } }) }
   get subscriptionsUrl() { return this.getProp("subscriptionsUrl") }
   set subscriptionsUrl(value) { this.setProp("subscriptionsUrl", value) }
 
   /** an address */
   // - its "organizations url" is text
   //   -- an address
-  static { this.declareProp("organizationsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4006, end: 4053 } }) }
+  static { this.declareProp("organizationsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4022, end: 4069 } }) }
   get organizationsUrl() { return this.getProp("organizationsUrl") }
   set organizationsUrl(value) { this.setProp("organizationsUrl", value) }
 
   /** an address */
   // - its "repos url" is text
   //   -- an address
-  static { this.declareProp("reposUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4055, end: 4094 } }) }
+  static { this.declareProp("reposUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4071, end: 4110 } }) }
   get reposUrl() { return this.getProp("reposUrl") }
   set reposUrl(value) { this.setProp("reposUrl", value) }
 
   /** an address */
   // - its "events url" is text
   //   -- an address
-  static { this.declareProp("eventsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4096, end: 4136 } }) }
+  static { this.declareProp("eventsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4112, end: 4152 } }) }
   get eventsUrl() { return this.getProp("eventsUrl") }
   set eventsUrl(value) { this.setProp("eventsUrl", value) }
 
   /** an address */
   // - its "received events url" is text
   //   -- an address
-  static { this.declareProp("receivedEventsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4138, end: 4187 } }) }
+  static { this.declareProp("receivedEventsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4154, end: 4203 } }) }
   get receivedEventsUrl() { return this.getProp("receivedEventsUrl") }
   set receivedEventsUrl(value) { this.setProp("receivedEventsUrl", value) }
 
   // - its "kind" is text, stored as "type"
-  static { this.declareProp("kind", { type: "text", storedAs: "type", declaredAt: { path: "/GitHub.api.spell", start: 4189, end: 4225 } }) }
+  static { this.declareProp("kind", { type: "text", storedAs: "type", declaredAt: { path: "/GitHub.api.spell", start: 4205, end: 4241 } }) }
   get kind() { return this.getProp("kind") }
   set kind(value) { this.setProp("kind", value) }
 
   // - its "user view type" is text
-  static { this.declareProp("userViewType", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4227, end: 4255 } }) }
+  static { this.declareProp("userViewType", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4243, end: 4271 } }) }
   get userViewType() { return this.getProp("userViewType") }
   set userViewType(value) { this.setProp("userViewType", value) }
 
   // - its "site admin" is yes or no
-  static { this.declareProp("siteAdmin", { type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 4257, end: 4286 } }) }
+  static { this.declareProp("siteAdmin", { type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 4273, end: 4302 } }) }
   get siteAdmin() { return this.getProp("siteAdmin") }
   set siteAdmin(value) { this.setProp("siteAdmin", value) }
 
   // - its "name" is text
-  static { this.declareProp("name", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4288, end: 4306 } }) }
+  static { this.declareProp("name", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4304, end: 4322 } }) }
   get name() { return this.getProp("name") }
   set name(value) { this.setProp("name", value) }
 
   // - its "company" is text
-  static { this.declareProp("company", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4308, end: 4329 } }) }
+  static { this.declareProp("company", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4324, end: 4345 } }) }
   get company() { return this.getProp("company") }
   set company(value) { this.setProp("company", value) }
 
   /** an address */
   // - its "blog" is text
   //   -- an address
-  static { this.declareProp("blog", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4331, end: 4365 } }) }
+  static { this.declareProp("blog", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4347, end: 4381 } }) }
   get blog() { return this.getProp("blog") }
   set blog(value) { this.setProp("blog", value) }
 
   // - its "location" is text
-  static { this.declareProp("location", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4367, end: 4389 } }) }
+  static { this.declareProp("location", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4383, end: 4405 } }) }
   get location() { return this.getProp("location") }
   set location(value) { this.setProp("location", value) }
 
   // - its "email" is text
-  static { this.declareProp("email", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4391, end: 4410 } }) }
+  static { this.declareProp("email", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4407, end: 4426 } }) }
   get email() { return this.getProp("email") }
   set email(value) { this.setProp("email", value) }
 
   // - its "twitter username" is text
-  static { this.declareProp("twitterUsername", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4412, end: 4442 } }) }
+  static { this.declareProp("twitterUsername", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4428, end: 4458 } }) }
   get twitterUsername() { return this.getProp("twitterUsername") }
   set twitterUsername(value) { this.setProp("twitterUsername", value) }
 
   // - its "public repos" is a number
-  static { this.declareProp("publicRepos", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 4444, end: 4474 } }) }
+  static { this.declareProp("publicRepos", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 4460, end: 4490 } }) }
   get publicRepos() { return this.getProp("publicRepos") }
   set publicRepos(value) { this.setProp("publicRepos", value) }
 
   // - its "public gists" is a number
-  static { this.declareProp("publicGists", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 4476, end: 4506 } }) }
+  static { this.declareProp("publicGists", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 4492, end: 4522 } }) }
   get publicGists() { return this.getProp("publicGists") }
   set publicGists(value) { this.setProp("publicGists", value) }
 
   // - its "followers" is a number
-  static { this.declareProp("followers", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 4508, end: 4535 } }) }
+  static { this.declareProp("followers", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 4524, end: 4551 } }) }
   get followers() { return this.getProp("followers") }
   set followers(value) { this.setProp("followers", value) }
 
   // - its "following" is a number
-  static { this.declareProp("following", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 4537, end: 4564 } }) }
+  static { this.declareProp("following", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 4553, end: 4580 } }) }
   get following() { return this.getProp("following") }
   set following(value) { this.setProp("following", value) }
 
   // - its "created at" is a date
-  static { this.declareProp("createdAt", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 4566, end: 4592 } }) }
+  static { this.declareProp("createdAt", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 4582, end: 4608 } }) }
   get createdAt() { return this.getProp("createdAt") }
   set createdAt(value) { this.setProp("createdAt", value) }
 
   // - its "updated at" is a date
-  static { this.declareProp("updatedAt", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 4594, end: 4620 } }) }
+  static { this.declareProp("updatedAt", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 4610, end: 4636 } }) }
   get updatedAt() { return this.getProp("updatedAt") }
   set updatedAt(value) { this.setProp("updatedAt", value) }
 
   // - its "bio" is text
-  static { this.declareProp("bio", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4622, end: 4639 } }) }
+  static { this.declareProp("bio", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 4638, end: 4655 } }) }
   get bio() { return this.getProp("bio") }
   set bio(value) { this.setProp("bio", value) }
 
@@ -608,12 +608,12 @@ export class User extends Thing {
     times: ["created", "modified"], select: ["login", "number", "avatarUrl", "htmlUrl", "kind", "name", "email", "publicRepos", "followers", "createdAt", "bio"] }
 
   // - it lives in github
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 3533, end: 3551 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 3549, end: 3567 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in github
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 3533, end: 3551 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 3549, end: 3567 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }
@@ -1159,487 +1159,487 @@ export class PullRequest extends Thing {
 
 export class Repository extends Thing {
   // - its "node id" is text
-  static { this.declareProp("nodeId", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 7980, end: 8001 } }) }
+  static { this.declareProp("nodeId", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 7996, end: 8017 } }) }
   get nodeId() { return this.getProp("nodeId") }
   set nodeId(value) { this.setProp("nodeId", value) }
 
   // - its "name" is text
-  static { this.declareProp("name", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8003, end: 8021 } }) }
+  static { this.declareProp("name", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8019, end: 8037 } }) }
   get name() { return this.getProp("name") }
   set name(value) { this.setProp("name", value) }
 
   // - its "full name" is text
-  static { this.declareProp("fullName", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8023, end: 8046 } }) }
+  static { this.declareProp("fullName", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8039, end: 8062 } }) }
   get fullName() { return this.getProp("fullName") }
   set fullName(value) { this.setProp("fullName", value) }
 
   // - its "private" is yes or no
-  static { this.declareProp("private", { type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 8048, end: 8074 } }) }
+  static { this.declareProp("private", { type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 8064, end: 8090 } }) }
   get private() { return this.getProp("private") }
   set private(value) { this.setProp("private", value) }
 
   // - its "owner" is an owner
-  static { this.declareProp("owner", { type: "Owner", declaredAt: { path: "/GitHub.api.spell", start: 8076, end: 8099 } }) }
+  static { this.declareProp("owner", { type: "Owner", declaredAt: { path: "/GitHub.api.spell", start: 8092, end: 8115 } }) }
   get owner() { return this.getProp("owner") }
   set owner(value) { this.setProp("owner", value) }
 
   /** an address */
   // - its "html url" is text
   //   -- an address
-  static { this.declareProp("htmlUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8101, end: 8139 } }) }
+  static { this.declareProp("htmlUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8117, end: 8155 } }) }
   get htmlUrl() { return this.getProp("htmlUrl") }
   set htmlUrl(value) { this.setProp("htmlUrl", value) }
 
   // - its "description" is text
-  static { this.declareProp("description", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8141, end: 8166 } }) }
+  static { this.declareProp("description", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8157, end: 8182 } }) }
   get description() { return this.getProp("description") }
   set description(value) { this.setProp("description", value) }
 
   // - its "fork" is yes or no
-  static { this.declareProp("fork", { type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 8168, end: 8191 } }) }
+  static { this.declareProp("fork", { type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 8184, end: 8207 } }) }
   get fork() { return this.getProp("fork") }
   set fork(value) { this.setProp("fork", value) }
 
   /** an address */
   // - its "url" is text
   //   -- an address
-  static { this.declareProp("url", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8193, end: 8226 } }) }
+  static { this.declareProp("url", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8209, end: 8242 } }) }
   get url() { return this.getProp("url") }
   set url(value) { this.setProp("url", value) }
 
   /** an address */
   // - its "forks url" is text
   //   -- an address
-  static { this.declareProp("forksUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8228, end: 8267 } }) }
+  static { this.declareProp("forksUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8244, end: 8283 } }) }
   get forksUrl() { return this.getProp("forksUrl") }
   set forksUrl(value) { this.setProp("forksUrl", value) }
 
   /** an address */
   // - its "keys url" is text
   //   -- an address
-  static { this.declareProp("keysUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8269, end: 8307 } }) }
+  static { this.declareProp("keysUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8285, end: 8323 } }) }
   get keysUrl() { return this.getProp("keysUrl") }
   set keysUrl(value) { this.setProp("keysUrl", value) }
 
   /** an address */
   // - its "collaborators url" is text
   //   -- an address
-  static { this.declareProp("collaboratorsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8309, end: 8356 } }) }
+  static { this.declareProp("collaboratorsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8325, end: 8372 } }) }
   get collaboratorsUrl() { return this.getProp("collaboratorsUrl") }
   set collaboratorsUrl(value) { this.setProp("collaboratorsUrl", value) }
 
   /** an address */
   // - its "teams url" is text
   //   -- an address
-  static { this.declareProp("teamsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8358, end: 8397 } }) }
+  static { this.declareProp("teamsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8374, end: 8413 } }) }
   get teamsUrl() { return this.getProp("teamsUrl") }
   set teamsUrl(value) { this.setProp("teamsUrl", value) }
 
   /** an address */
   // - its "hooks url" is text
   //   -- an address
-  static { this.declareProp("hooksUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8399, end: 8438 } }) }
+  static { this.declareProp("hooksUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8415, end: 8454 } }) }
   get hooksUrl() { return this.getProp("hooksUrl") }
   set hooksUrl(value) { this.setProp("hooksUrl", value) }
 
   /** an address */
   // - its "issue events url" is text
   //   -- an address
-  static { this.declareProp("issueEventsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8440, end: 8486 } }) }
+  static { this.declareProp("issueEventsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8456, end: 8502 } }) }
   get issueEventsUrl() { return this.getProp("issueEventsUrl") }
   set issueEventsUrl(value) { this.setProp("issueEventsUrl", value) }
 
   /** an address */
   // - its "events url" is text
   //   -- an address
-  static { this.declareProp("eventsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8488, end: 8528 } }) }
+  static { this.declareProp("eventsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8504, end: 8544 } }) }
   get eventsUrl() { return this.getProp("eventsUrl") }
   set eventsUrl(value) { this.setProp("eventsUrl", value) }
 
   /** an address */
   // - its "assignees url" is text
   //   -- an address
-  static { this.declareProp("assigneesUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8530, end: 8573 } }) }
+  static { this.declareProp("assigneesUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8546, end: 8589 } }) }
   get assigneesUrl() { return this.getProp("assigneesUrl") }
   set assigneesUrl(value) { this.setProp("assigneesUrl", value) }
 
   /** an address */
   // - its "branches url" is text
   //   -- an address
-  static { this.declareProp("branchesUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8575, end: 8617 } }) }
+  static { this.declareProp("branchesUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8591, end: 8633 } }) }
   get branchesUrl() { return this.getProp("branchesUrl") }
   set branchesUrl(value) { this.setProp("branchesUrl", value) }
 
   /** an address */
   // - its "tags url" is text
   //   -- an address
-  static { this.declareProp("tagsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8619, end: 8657 } }) }
+  static { this.declareProp("tagsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8635, end: 8673 } }) }
   get tagsUrl() { return this.getProp("tagsUrl") }
   set tagsUrl(value) { this.setProp("tagsUrl", value) }
 
   /** an address */
   // - its "blobs url" is text
   //   -- an address
-  static { this.declareProp("blobsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8659, end: 8698 } }) }
+  static { this.declareProp("blobsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8675, end: 8714 } }) }
   get blobsUrl() { return this.getProp("blobsUrl") }
   set blobsUrl(value) { this.setProp("blobsUrl", value) }
 
   /** an address */
   // - its "git tags url" is text
   //   -- an address
-  static { this.declareProp("gitTagsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8700, end: 8742 } }) }
+  static { this.declareProp("gitTagsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8716, end: 8758 } }) }
   get gitTagsUrl() { return this.getProp("gitTagsUrl") }
   set gitTagsUrl(value) { this.setProp("gitTagsUrl", value) }
 
   /** an address */
   // - its "git refs url" is text
   //   -- an address
-  static { this.declareProp("gitRefsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8744, end: 8786 } }) }
+  static { this.declareProp("gitRefsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8760, end: 8802 } }) }
   get gitRefsUrl() { return this.getProp("gitRefsUrl") }
   set gitRefsUrl(value) { this.setProp("gitRefsUrl", value) }
 
   /** an address */
   // - its "trees url" is text
   //   -- an address
-  static { this.declareProp("treesUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8788, end: 8827 } }) }
+  static { this.declareProp("treesUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8804, end: 8843 } }) }
   get treesUrl() { return this.getProp("treesUrl") }
   set treesUrl(value) { this.setProp("treesUrl", value) }
 
   /** an address */
   // - its "statuses url" is text
   //   -- an address
-  static { this.declareProp("statusesUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8829, end: 8871 } }) }
+  static { this.declareProp("statusesUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8845, end: 8887 } }) }
   get statusesUrl() { return this.getProp("statusesUrl") }
   set statusesUrl(value) { this.setProp("statusesUrl", value) }
 
   /** an address */
   // - its "languages url" is text
   //   -- an address
-  static { this.declareProp("languagesUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8873, end: 8916 } }) }
+  static { this.declareProp("languagesUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8889, end: 8932 } }) }
   get languagesUrl() { return this.getProp("languagesUrl") }
   set languagesUrl(value) { this.setProp("languagesUrl", value) }
 
   /** an address */
   // - its "stargazers url" is text
   //   -- an address
-  static { this.declareProp("stargazersUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8918, end: 8962 } }) }
+  static { this.declareProp("stargazersUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8934, end: 8978 } }) }
   get stargazersUrl() { return this.getProp("stargazersUrl") }
   set stargazersUrl(value) { this.setProp("stargazersUrl", value) }
 
   /** an address */
   // - its "contributors url" is text
   //   -- an address
-  static { this.declareProp("contributorsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8964, end: 9010 } }) }
+  static { this.declareProp("contributorsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 8980, end: 9026 } }) }
   get contributorsUrl() { return this.getProp("contributorsUrl") }
   set contributorsUrl(value) { this.setProp("contributorsUrl", value) }
 
   /** an address */
   // - its "subscribers url" is text
   //   -- an address
-  static { this.declareProp("subscribersUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9012, end: 9057 } }) }
+  static { this.declareProp("subscribersUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9028, end: 9073 } }) }
   get subscribersUrl() { return this.getProp("subscribersUrl") }
   set subscribersUrl(value) { this.setProp("subscribersUrl", value) }
 
   /** an address */
   // - its "subscription url" is text
   //   -- an address
-  static { this.declareProp("subscriptionUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9059, end: 9105 } }) }
+  static { this.declareProp("subscriptionUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9075, end: 9121 } }) }
   get subscriptionUrl() { return this.getProp("subscriptionUrl") }
   set subscriptionUrl(value) { this.setProp("subscriptionUrl", value) }
 
   /** an address */
   // - its "commits url" is text
   //   -- an address
-  static { this.declareProp("commitsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9107, end: 9148 } }) }
+  static { this.declareProp("commitsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9123, end: 9164 } }) }
   get commitsUrl() { return this.getProp("commitsUrl") }
   set commitsUrl(value) { this.setProp("commitsUrl", value) }
 
   /** an address */
   // - its "git commits url" is text
   //   -- an address
-  static { this.declareProp("gitCommitsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9150, end: 9195 } }) }
+  static { this.declareProp("gitCommitsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9166, end: 9211 } }) }
   get gitCommitsUrl() { return this.getProp("gitCommitsUrl") }
   set gitCommitsUrl(value) { this.setProp("gitCommitsUrl", value) }
 
   /** an address */
   // - its "comments url" is text
   //   -- an address
-  static { this.declareProp("commentsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9197, end: 9239 } }) }
+  static { this.declareProp("commentsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9213, end: 9255 } }) }
   get commentsUrl() { return this.getProp("commentsUrl") }
   set commentsUrl(value) { this.setProp("commentsUrl", value) }
 
   /** an address */
   // - its "issue comment url" is text
   //   -- an address
-  static { this.declareProp("issueCommentUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9241, end: 9288 } }) }
+  static { this.declareProp("issueCommentUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9257, end: 9304 } }) }
   get issueCommentUrl() { return this.getProp("issueCommentUrl") }
   set issueCommentUrl(value) { this.setProp("issueCommentUrl", value) }
 
   /** an address */
   // - its "contents url" is text
   //   -- an address
-  static { this.declareProp("contentsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9290, end: 9332 } }) }
+  static { this.declareProp("contentsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9306, end: 9348 } }) }
   get contentsUrl() { return this.getProp("contentsUrl") }
   set contentsUrl(value) { this.setProp("contentsUrl", value) }
 
   /** an address */
   // - its "compare url" is text
   //   -- an address
-  static { this.declareProp("compareUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9334, end: 9375 } }) }
+  static { this.declareProp("compareUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9350, end: 9391 } }) }
   get compareUrl() { return this.getProp("compareUrl") }
   set compareUrl(value) { this.setProp("compareUrl", value) }
 
   /** an address */
   // - its "merges url" is text
   //   -- an address
-  static { this.declareProp("mergesUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9377, end: 9417 } }) }
+  static { this.declareProp("mergesUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9393, end: 9433 } }) }
   get mergesUrl() { return this.getProp("mergesUrl") }
   set mergesUrl(value) { this.setProp("mergesUrl", value) }
 
   /** an address */
   // - its "archive url" is text
   //   -- an address
-  static { this.declareProp("archiveUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9419, end: 9460 } }) }
+  static { this.declareProp("archiveUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9435, end: 9476 } }) }
   get archiveUrl() { return this.getProp("archiveUrl") }
   set archiveUrl(value) { this.setProp("archiveUrl", value) }
 
   /** an address */
   // - its "downloads url" is text
   //   -- an address
-  static { this.declareProp("downloadsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9462, end: 9505 } }) }
+  static { this.declareProp("downloadsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9478, end: 9521 } }) }
   get downloadsUrl() { return this.getProp("downloadsUrl") }
   set downloadsUrl(value) { this.setProp("downloadsUrl", value) }
 
   /** an address */
   // - its "issues url" is text
   //   -- an address
-  static { this.declareProp("issuesUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9507, end: 9547 } }) }
+  static { this.declareProp("issuesUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9523, end: 9563 } }) }
   get issuesUrl() { return this.getProp("issuesUrl") }
   set issuesUrl(value) { this.setProp("issuesUrl", value) }
 
   /** an address */
   // - its "pulls url" is text
   //   -- an address
-  static { this.declareProp("pullsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9549, end: 9588 } }) }
+  static { this.declareProp("pullsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9565, end: 9604 } }) }
   get pullsUrl() { return this.getProp("pullsUrl") }
   set pullsUrl(value) { this.setProp("pullsUrl", value) }
 
   /** an address */
   // - its "milestones url" is text
   //   -- an address
-  static { this.declareProp("milestonesUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9590, end: 9634 } }) }
+  static { this.declareProp("milestonesUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9606, end: 9650 } }) }
   get milestonesUrl() { return this.getProp("milestonesUrl") }
   set milestonesUrl(value) { this.setProp("milestonesUrl", value) }
 
   /** an address */
   // - its "notifications url" is text
   //   -- an address
-  static { this.declareProp("notificationsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9636, end: 9683 } }) }
+  static { this.declareProp("notificationsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9652, end: 9699 } }) }
   get notificationsUrl() { return this.getProp("notificationsUrl") }
   set notificationsUrl(value) { this.setProp("notificationsUrl", value) }
 
   /** an address */
   // - its "labels url" is text
   //   -- an address
-  static { this.declareProp("labelsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9685, end: 9725 } }) }
+  static { this.declareProp("labelsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9701, end: 9741 } }) }
   get labelsUrl() { return this.getProp("labelsUrl") }
   set labelsUrl(value) { this.setProp("labelsUrl", value) }
 
   /** an address */
   // - its "releases url" is text
   //   -- an address
-  static { this.declareProp("releasesUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9727, end: 9769 } }) }
+  static { this.declareProp("releasesUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9743, end: 9785 } }) }
   get releasesUrl() { return this.getProp("releasesUrl") }
   set releasesUrl(value) { this.setProp("releasesUrl", value) }
 
   /** an address */
   // - its "deployments url" is text
   //   -- an address
-  static { this.declareProp("deploymentsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9771, end: 9816 } }) }
+  static { this.declareProp("deploymentsUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9787, end: 9832 } }) }
   get deploymentsUrl() { return this.getProp("deploymentsUrl") }
   set deploymentsUrl(value) { this.setProp("deploymentsUrl", value) }
 
   // - its "created at" is a date
-  static { this.declareProp("createdAt", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 9818, end: 9844 } }) }
+  static { this.declareProp("createdAt", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 9834, end: 9860 } }) }
   get createdAt() { return this.getProp("createdAt") }
   set createdAt(value) { this.setProp("createdAt", value) }
 
   // - its "updated at" is a date
-  static { this.declareProp("updatedAt", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 9846, end: 9872 } }) }
+  static { this.declareProp("updatedAt", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 9862, end: 9888 } }) }
   get updatedAt() { return this.getProp("updatedAt") }
   set updatedAt(value) { this.setProp("updatedAt", value) }
 
   // - its "pushed at" is a date
-  static { this.declareProp("pushedAt", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 9874, end: 9899 } }) }
+  static { this.declareProp("pushedAt", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 9890, end: 9915 } }) }
   get pushedAt() { return this.getProp("pushedAt") }
   set pushedAt(value) { this.setProp("pushedAt", value) }
 
   // - its "git url" is text
-  static { this.declareProp("gitUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9901, end: 9922 } }) }
+  static { this.declareProp("gitUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9917, end: 9938 } }) }
   get gitUrl() { return this.getProp("gitUrl") }
   set gitUrl(value) { this.setProp("gitUrl", value) }
 
   // - its "ssh url" is text
-  static { this.declareProp("sshUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9924, end: 9945 } }) }
+  static { this.declareProp("sshUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9940, end: 9961 } }) }
   get sshUrl() { return this.getProp("sshUrl") }
   set sshUrl(value) { this.setProp("sshUrl", value) }
 
   /** an address */
   // - its "clone url" is text
   //   -- an address
-  static { this.declareProp("cloneUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9947, end: 9986 } }) }
+  static { this.declareProp("cloneUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9963, end: 10002 } }) }
   get cloneUrl() { return this.getProp("cloneUrl") }
   set cloneUrl(value) { this.setProp("cloneUrl", value) }
 
   /** an address */
   // - its "svn url" is text
   //   -- an address
-  static { this.declareProp("svnUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 9988, end: 10025 } }) }
+  static { this.declareProp("svnUrl", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 10004, end: 10041 } }) }
   get svnUrl() { return this.getProp("svnUrl") }
   set svnUrl(value) { this.setProp("svnUrl", value) }
 
   // - its "homepage" is text
-  static { this.declareProp("homepage", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 10027, end: 10049 } }) }
+  static { this.declareProp("homepage", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 10043, end: 10065 } }) }
   get homepage() { return this.getProp("homepage") }
   set homepage(value) { this.setProp("homepage", value) }
 
   // - its "size" is a number
-  static { this.declareProp("size", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10051, end: 10073 } }) }
+  static { this.declareProp("size", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10067, end: 10089 } }) }
   get size() { return this.getProp("size") }
   set size(value) { this.setProp("size", value) }
 
   // - its "stargazers count" is a number
-  static { this.declareProp("stargazersCount", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10075, end: 10109 } }) }
+  static { this.declareProp("stargazersCount", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10091, end: 10125 } }) }
   get stargazersCount() { return this.getProp("stargazersCount") }
   set stargazersCount(value) { this.setProp("stargazersCount", value) }
 
   // - its "watchers count" is a number
-  static { this.declareProp("watchersCount", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10111, end: 10143 } }) }
+  static { this.declareProp("watchersCount", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10127, end: 10159 } }) }
   get watchersCount() { return this.getProp("watchersCount") }
   set watchersCount(value) { this.setProp("watchersCount", value) }
 
   // - its "language" is text
-  static { this.declareProp("language", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 10145, end: 10167 } }) }
+  static { this.declareProp("language", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 10161, end: 10183 } }) }
   get language() { return this.getProp("language") }
   set language(value) { this.setProp("language", value) }
 
   // - its "issues" is yes or no, stored as "has_issues"
-  static { this.declareProp("issues", { type: "choice", storedAs: "has_issues", declaredAt: { path: "/GitHub.api.spell", start: 10169, end: 10218 } }) }
+  static { this.declareProp("issues", { type: "choice", storedAs: "has_issues", declaredAt: { path: "/GitHub.api.spell", start: 10185, end: 10234 } }) }
   get issues() { return this.getProp("issues") }
   set issues(value) { this.setProp("issues", value) }
 
   // - its "projects" is yes or no, stored as "has_projects"
-  static { this.declareProp("projects", { type: "choice", storedAs: "has_projects", declaredAt: { path: "/GitHub.api.spell", start: 10220, end: 10273 } }) }
+  static { this.declareProp("projects", { type: "choice", storedAs: "has_projects", declaredAt: { path: "/GitHub.api.spell", start: 10236, end: 10289 } }) }
   get projects() { return this.getProp("projects") }
   set projects(value) { this.setProp("projects", value) }
 
   // - its "downloads" is yes or no, stored as "has_downloads"
-  static { this.declareProp("downloads", { type: "choice", storedAs: "has_downloads", declaredAt: { path: "/GitHub.api.spell", start: 10275, end: 10330 } }) }
+  static { this.declareProp("downloads", { type: "choice", storedAs: "has_downloads", declaredAt: { path: "/GitHub.api.spell", start: 10291, end: 10346 } }) }
   get downloads() { return this.getProp("downloads") }
   set downloads(value) { this.setProp("downloads", value) }
 
   // - its "wiki" is yes or no, stored as "has_wiki"
-  static { this.declareProp("wiki", { type: "choice", storedAs: "has_wiki", declaredAt: { path: "/GitHub.api.spell", start: 10332, end: 10377 } }) }
+  static { this.declareProp("wiki", { type: "choice", storedAs: "has_wiki", declaredAt: { path: "/GitHub.api.spell", start: 10348, end: 10393 } }) }
   get wiki() { return this.getProp("wiki") }
   set wiki(value) { this.setProp("wiki", value) }
 
   // - its "pages" is yes or no, stored as "has_pages"
-  static { this.declareProp("pages", { type: "choice", storedAs: "has_pages", declaredAt: { path: "/GitHub.api.spell", start: 10379, end: 10426 } }) }
+  static { this.declareProp("pages", { type: "choice", storedAs: "has_pages", declaredAt: { path: "/GitHub.api.spell", start: 10395, end: 10442 } }) }
   get pages() { return this.getProp("pages") }
   set pages(value) { this.setProp("pages", value) }
 
   // - its "discussions" is yes or no, stored as "has_discussions"
-  static { this.declareProp("discussions", { type: "choice", storedAs: "has_discussions", declaredAt: { path: "/GitHub.api.spell", start: 10428, end: 10487 } }) }
+  static { this.declareProp("discussions", { type: "choice", storedAs: "has_discussions", declaredAt: { path: "/GitHub.api.spell", start: 10444, end: 10503 } }) }
   get discussions() { return this.getProp("discussions") }
   set discussions(value) { this.setProp("discussions", value) }
 
   // - its "forks count" is a number
-  static { this.declareProp("forksCount", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10489, end: 10518 } }) }
+  static { this.declareProp("forksCount", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10505, end: 10534 } }) }
   get forksCount() { return this.getProp("forksCount") }
   set forksCount(value) { this.setProp("forksCount", value) }
 
   // - its "archived" is yes or no
-  static { this.declareProp("archived", { type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 10520, end: 10547 } }) }
+  static { this.declareProp("archived", { type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 10536, end: 10563 } }) }
   get archived() { return this.getProp("archived") }
   set archived(value) { this.setProp("archived", value) }
 
   // - its "disabled" is yes or no
-  static { this.declareProp("disabled", { type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 10549, end: 10576 } }) }
+  static { this.declareProp("disabled", { type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 10565, end: 10592 } }) }
   get disabled() { return this.getProp("disabled") }
   set disabled(value) { this.setProp("disabled", value) }
 
   // - its "open issues count" is a number
-  static { this.declareProp("openIssuesCount", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10578, end: 10613 } }) }
+  static { this.declareProp("openIssuesCount", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10594, end: 10629 } }) }
   get openIssuesCount() { return this.getProp("openIssuesCount") }
   set openIssuesCount(value) { this.setProp("openIssuesCount", value) }
 
   // - its "license" is a license
-  static { this.declareProp("license", { type: "License", declaredAt: { path: "/GitHub.api.spell", start: 10615, end: 10641 } }) }
+  static { this.declareProp("license", { type: "License", declaredAt: { path: "/GitHub.api.spell", start: 10631, end: 10657 } }) }
   get license() { return this.getProp("license") }
   set license(value) { this.setProp("license", value) }
 
   // - its "allow forking" is yes or no
-  static { this.declareProp("allowForking", { type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 10643, end: 10675 } }) }
+  static { this.declareProp("allowForking", { type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 10659, end: 10691 } }) }
   get allowForking() { return this.getProp("allowForking") }
   set allowForking(value) { this.setProp("allowForking", value) }
 
   // - its "template" is yes or no, stored as "is_template"
-  static { this.declareProp("template", { type: "choice", storedAs: "is_template", declaredAt: { path: "/GitHub.api.spell", start: 10677, end: 10729 } }) }
+  static { this.declareProp("template", { type: "choice", storedAs: "is_template", declaredAt: { path: "/GitHub.api.spell", start: 10693, end: 10745 } }) }
   get template() { return this.getProp("template") }
   set template(value) { this.setProp("template", value) }
 
   // - its "web commit signoff required" is yes or no
-  static { this.declareProp("webCommitSignoffRequired", { type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 10731, end: 10777 } }) }
+  static { this.declareProp("webCommitSignoffRequired", { type: "choice", declaredAt: { path: "/GitHub.api.spell", start: 10747, end: 10793 } }) }
   get webCommitSignoffRequired() { return this.getProp("webCommitSignoffRequired") }
   set webCommitSignoffRequired(value) { this.setProp("webCommitSignoffRequired", value) }
 
   // - its "pull requests" is yes or no, stored as "has_pull_requests"
-  static { this.declareProp("pullRequests", { type: "choice", storedAs: "has_pull_requests", declaredAt: { path: "/GitHub.api.spell", start: 10779, end: 10842 } }) }
+  static { this.declareProp("pullRequests", { type: "choice", storedAs: "has_pull_requests", declaredAt: { path: "/GitHub.api.spell", start: 10795, end: 10858 } }) }
   get pullRequests() { return this.getProp("pullRequests") }
   set pullRequests(value) { this.setProp("pullRequests", value) }
 
   // - its "pull request creation policy" is text
-  static { this.declareProp("pullRequestCreationPolicy", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 10844, end: 10886 } }) }
+  static { this.declareProp("pullRequestCreationPolicy", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 10860, end: 10902 } }) }
   get pullRequestCreationPolicy() { return this.getProp("pullRequestCreationPolicy") }
   set pullRequestCreationPolicy(value) { this.setProp("pullRequestCreationPolicy", value) }
 
   // - its "topics" is a list of users
-  static { this.declareProp("topics", { itemType: "User", init: () => new List({ instanceType: "User" }), declaredAt: { path: "/GitHub.api.spell", start: 10888, end: 10919 } }) }
+  static { this.declareProp("topics", { itemType: "User", init: () => new List({ instanceType: "User" }), declaredAt: { path: "/GitHub.api.spell", start: 10904, end: 10935 } }) }
   get topics() { return core.linked(this, "topics", User) }
   set topics(value) { this.setProp("topics", value) }
 
   // - its "visibility" is text
-  static { this.declareProp("visibility", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 10921, end: 10945 } }) }
+  static { this.declareProp("visibility", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 10937, end: 10961 } }) }
   get visibility() { return this.getProp("visibility") }
   set visibility(value) { this.setProp("visibility", value) }
 
   // - its "forks" is a number
-  static { this.declareProp("forks", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10947, end: 10970 } }) }
+  static { this.declareProp("forks", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10963, end: 10986 } }) }
   get forks() { return this.getProp("forks") }
   set forks(value) { this.setProp("forks", value) }
 
   // - its "open issues" is a number
-  static { this.declareProp("openIssues", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10972, end: 11001 } }) }
+  static { this.declareProp("openIssues", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 10988, end: 11017 } }) }
   get openIssues() { return this.getProp("openIssues") }
   set openIssues(value) { this.setProp("openIssues", value) }
 
   // - its "watchers" is a number
-  static { this.declareProp("watchers", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 11003, end: 11029 } }) }
+  static { this.declareProp("watchers", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 11019, end: 11045 } }) }
   get watchers() { return this.getProp("watchers") }
   set watchers(value) { this.setProp("watchers", value) }
 
   // - its "default branch" is text
-  static { this.declareProp("defaultBranch", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 11031, end: 11059 } }) }
+  static { this.declareProp("defaultBranch", { type: "text", declaredAt: { path: "/GitHub.api.spell", start: 11047, end: 11075 } }) }
   get defaultBranch() { return this.getProp("defaultBranch") }
   set defaultBranch(value) { this.setProp("defaultBranch", value) }
 
   // - its "permissions" is a permission
-  static { this.declareProp("permissions", { type: "Permission", declaredAt: { path: "/GitHub.api.spell", start: 11061, end: 11094 } }) }
+  static { this.declareProp("permissions", { type: "Permission", declaredAt: { path: "/GitHub.api.spell", start: 11077, end: 11110 } }) }
   get permissions() { return this.getProp("permissions") }
   set permissions(value) { this.setProp("permissions", value) }
 
   // - its "score" is a number
-  static { this.declareProp("score", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 11096, end: 11119 } }) }
+  static { this.declareProp("score", { type: "number", declaredAt: { path: "/GitHub.api.spell", start: 11112, end: 11135 } }) }
   get score() { return this.getProp("score") }
   set score(value) { this.setProp("score", value) }
 
@@ -1668,12 +1668,12 @@ export class Repository extends Thing {
     times: ["created", "modified"], select: ["name", "fullName", "htmlUrl", "description", "createdAt", "stargazersCount", "language"] }
 
   // - it lives in github
-  static { this.declareProp("created", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 7960, end: 7978 } }) }
+  static { this.declareProp("created", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 7976, end: 7994 } }) }
   get created() { return this.getProp("created") }
   set created(value) { this.setProp("created", value) }
 
   // - it lives in github
-  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 7960, end: 7978 } }) }
+  static { this.declareProp("modified", { type: "date", declaredAt: { path: "/GitHub.api.spell", start: 7976, end: 7994 } }) }
   get modified() { return this.getProp("modified") }
   set modified(value) { this.setProp("modified", value) }
 }

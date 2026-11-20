@@ -136,6 +136,11 @@ const ALLOWED: readonly Allowed[] = [
     reason: "half-tracked on purpose (above)"
   },
   {
+    file: "src/components/ui-mermaid-diagram/UIMermaidDiagram.tsx",
+    rule: "no-mutation-observer",
+    reason: "watches <html>, where every light / dark switch shows"
+  },
+  {
     file: "src/components/ui-menu/ScrollingRow.tsx",
     rule: "no-mutation-observer",
     reason: "a watch on ANOTHER element (the row a component hands it), only while followed"

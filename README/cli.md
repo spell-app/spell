@@ -89,10 +89,25 @@ yarn start                          # the page server and editor from ~/www/spel
   counts as off);  a link you made yourself, with `yarn cli:install` or `epic plugin install`, it never removes.
 - A release from before 0.8.17 doesn't link them:  run `yarn spell local on` a second time, and your checkout,
   now running, does it.
-- Claude Code's `epic@spell` plugin is its own copy, which `spell local` never switches:
-  that rewrites Claude Code's settings, for every project at once.
-  `spell local on` says when it runs another copy, and prints the command that switches it
-  (`epic plugin install --kit ~/www/spell`, then `/reload-plugins`);  `off` prints the one back (`yarn spell epic plugin install`).
+- The project's git worktrees run your checkout too:  each follows the main checkout's `.spell/kit.json5`.
+  - A release from before 0.8.18 reads only its own folder's, so `spell local on` puts a copy in each worktree
+    there is (`/.spell/` in the repo's private ignore list), and `spell local off` removes the copies.
+  - A worktree made later has no copy:  `spell local on` again, or wait for that release.
+- It switches what's machine-wide too, for EVERY project on this computer:
+  - Claude Code's `epic@spell` plugin (its hooks and inbox helper) and its skills in `~/.claude/skills/`, through your
+    checkout's `epic plugin install --kit`;  a skill link left in another copy (an `npx` cache) is removed.
+    Type `/reload-plugins` in each Claude Code session after;  the old inbox helpers stop by themselves at the end of
+    each session's next turn.
+  - VS Code's epic extension, from your checkout's `epic/vscode/spell-epic.vsix`, when VS Code has another version or
+    an older build of it:  reload each VS Code window after.
+    Your checkout builds it with `yarn vscode:package` in its `epic/`;  until then, VS Code keeps its own.
+  - `~/.spell/local-plugin.json` records that `spell local` switched them, and which projects use them.
+- `spell local off` puts the plugin and its skills back on the project's npm copy once no project still runs a
+  checkout, and only when `spell local on` switched them;  VS Code keeps the extension it has, never an older one put
+  back.
+- Servers still running another copy of Spell (an older checkout's page server, an npm copy's epic page server, a
+  vite server of an old checkout) are listed, with their pid and port;  only `spell local on --stop` stops them, and
+  then starts the epic page server again from your checkout.
 - The project's own code that imports `spell/...` always runs the copy npm installed:  nothing can point an import at
   your checkout without changing the project's committed files.
 - In a project that doesn't run your checkout, the `spell` and `epic` on your `PATH` hand off to the project's own npm
@@ -111,7 +126,19 @@ yarn start                          # the page server and editor from ~/www/spel
     ~/.local/bin/epic:  spell local added it
   - yarn spell, npx spell:  ~/www/spell  [your checkout]
   - Claude Code's epic plugin:  ~/.claude/plugins/cache/spell/epic/0.8.9  [NOT your checkout]
-    to switch it, type epic plugin install --kit ~/www/spell here;  then /reload-plugins in Claude Code
+    run spell local on again;  then /reload-plugins in Claude Code
+  - Claude Code's epic skills:  ~/.npm/_npx/1a2b3c/node_modules/spell/epic/skills  [NOT your checkout]
+    20 links in ~/.claude/skills
+    run spell local on again;  then /reload-plugins in Claude Code
+  - VS Code's epic extension:  VS Code's, version 0.1.3 (your checkout's:  0.8.17)  [NOT your checkout]
+    run spell local on again;  then reload VS Code's windows
+  - the epic page server:  ~/work/acme-spell.worktrees/seo/node_modules/spell (pid 5120, port 4848)  [NOT your checkout]
+    type spell local on --stop to start it again from your checkout
+  - a page server:  ~/www/spell-app (pid 4410, port 4747)  [NOT your checkout]
+    type spell local on --stop to stop it
+  - this project's worktrees:  1 of 2 without your checkout's setting  [NOT your checkout]
+    ~/work/acme-spell.worktrees/docs
+    run spell local on again
   - this project's code that imports spell:  ~/work/acme-spell/node_modules/spell (0.8.16)  [NOT your checkout]
     that's normal:  your project's own code always uses the copy npm installed
   ```
@@ -119,6 +146,8 @@ yarn start                          # the page server and editor from ~/www/spel
   </details>
 
 - `spell local off` goes back to npm's.
+  Type it as plain `spell`:  a `yarn spell` from a release before 0.8.18 runs npm's own `local off`, which knows
+  nothing of the plugin or the worktrees.
 - Your checkout runs from its own install:  `yarn install` there first, or nothing is written.
 - For every project on the machine:  `export SPELL_KIT=~/www/spell`, in your shell profile.
   It wins over a project's file, so one command can try another checkout.
@@ -958,9 +987,9 @@ spell place update StarWars.api.spell
 | `--kind <kind>` | `web server`, `graphql server`, `sheet` (a CSV file, or an Excel `.xlsx`, one collection per sheet), `google sheet`.  With none, it reads the address, then asks the address itself, then asks you;  with no one to ask, it stops, naming those it tried |
 | `--into <file>` | the `.spell` file, one server to a file:  `StarWars.api.spell`.  With none, it asks;  with no one to ask, it stops |
 | `--name <words>` | what the program calls the place |
-| `--key-secret <NAME>` | the NAME of the key it needs, read from the environment, never written down;  the Spell says `its key is the secret "NAME"` |
-| `--key-header <name>` | the header its key goes in, as it is:  `X-Api-Key`.  With none, `Authorization: Bearer`.  The Spell says `its key goes in its "X-Api-Key" header` |
-| `--key-in-address <name>` | the question its key goes in the address as:  `api_key`, hidden from every message.  The Spell says `its key goes in the address as "api_key"` |
+| `--key-secret <NAME>` | the NAME of the key it needs, read from the environment, never written down;  the Spell says `it is authenticated with the secret "NAME"` |
+| `--key-header <name>` | the header its key goes in, as it is:  `X-Api-Key`.  With none, `Authorization: Bearer`.  The Spell says `its secret goes in its "X-Api-Key" header` |
+| `--key-in-address <name>` | the question its key goes in the address as:  `api_key`, hidden from every message.  The Spell says `its secret goes in the address as "api_key"` |
 | `--docs <address>` | where its docs are, over those it finds by itself |
 | `--collections <paths>` | its collections' paths, comma-separated, for a source that doesn't list them.  `name=path` names one;  a name in braces is found by name, with no list (`"wiki pages=/page/summary/{name}"`);  one asked with a search is searched (`"books=/search.json?q=dune"`) |
 | `--samples <names>` | names to read a collection found by name by:  `Tatooine,Hoth`;  `name=sample` for one collection's own (`authors=OL79034A`) |

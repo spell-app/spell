@@ -27703,6 +27703,481 @@ export interface UIMenuAttributes {
 export interface UIMenuJSXAttributes
   extends Omit<UIGlobalJSXAttributes<UIHTMLElement<UIMenuEventMap>>, keyof UIMenuAttributes>, UIMenuAttributes {}
 
+/** `<ui-mermaid-diagram>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UIMermaidDiagramEventMap {
+  /**
+   * `ui-loaded`:  Content arrived:  fetched from `source`, or read from the element's own content.
+   * - `event.detail`:  `{ source?: string, content: string }`
+   */
+  "ui-loaded": CustomEvent<{ source?: string; content: string }>
+  /**
+   * `ui-changed`:  The `content` property was set:  the element shows the new text, and is `dirty` until saved.
+   * - `event.detail`:  `{ content: string }`
+   */
+  "ui-changed": CustomEvent<{ content: string }>
+  /**
+   * `ui-saving`:  `host.save()` is about to save:  `preventDefault()` to save it yourself (an editor posting elsewhere).
+   * - `event.detail`:  `{ source?: string, content: string, etag?: string }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-saving": CustomEvent<{ source?: string; content: string; etag?: string }>
+  /**
+   * `ui-saved`:  Saved;  `etag` is the file's new version.
+   * - `event.detail`:  `{ source?: string, etag?: string }`
+   */
+  "ui-saved": CustomEvent<{ source?: string; etag?: string }>
+  /**
+   * `ui-error`:  Loading, showing or saving failed;  `kind` says why.  Load and render failures show an error message unless cancelled;  save failures keep the content as it is.
+   * - `event.detail`:  `{ kind: 'load' | 'cross-origin' | 'file-protocol' | 'save' | 'conflict' | 'no-saver' | 'render', source?: string, error: unknown }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-error": CustomEvent<{
+    kind: "load" | "cross-origin" | "file-protocol" | "save" | "conflict" | "no-saver" | "render"
+    source?: string
+    error: unknown
+  }>
+  /**
+   * `ui-drawn`:  Drawn;  `diagramType` is what Mermaid read the text as (`flowchart-v2`, `sequence` ...).
+   * - `event.detail`:  `{ diagramType: string }`
+   */
+  "ui-drawn": CustomEvent<{ diagramType: string }>
+}
+
+/** `<ui-mermaid-diagram>`'s own attributes, from its vocabulary. */
+export interface UIMermaidDiagramAttributes {
+  /**
+   * URL of the file to show, relative to the page;  same origin only (another site's URL shows an error).  Changing it loads the new file.  Without it, the element shows its own content.
+   * - takes:  text
+   */
+  source?: string
+  /**
+   * `source`, as the DOM element's property.
+   * @deprecated write `source` -- `prop:` stays only for compiled spell
+   */
+  "prop:source"?: string
+  /**
+   * When to fetch `source`:  `eager` (at once), `visible` (once scrolled into view) or `idle` (when the browser has nothing else to do).  Like Astro's `client:visible` / `client:idle`.
+   * - takes:  `eager` · `visible` · `idle`
+   * - default:  `eager`
+   */
+  load?: "eager" | "visible" | "idle"
+  /**
+   * `load`, as the DOM element's property.
+   * @deprecated write `load` -- `prop:` stays only for compiled spell
+   */
+  "prop:load"?: "eager" | "visible" | "idle"
+  /**
+   * The colours.  `spell`, the default:  Spell UI's own, read from the page, light or dark.  Mermaid's:  `default` (soft blue and grey), `neutral` (greys, for print), `dark`, `forest` (greens), `neo` and `neo-dark` (flat, soft shadows), `redux` and `redux-dark` (black outlines, no fill), `redux-color` and `redux-dark-color` (outlines with bold colours).  On a dark page a light one draws as its dark twin (`default` as `dark`, `neo` as `neo-dark`, `redux` as `redux-dark`, `redux-color` as `redux-dark-color`).  A theme set in the diagram's own text wins.
+   * - takes:  `spell` · `default` · `neutral` · `dark` · `forest` · `neo` · `neo-dark` · `redux` · `redux-color` · `redux-dark` · `redux-dark-color`
+   * - default:  `spell`
+   */
+  theme?:
+    | "spell"
+    | "default"
+    | "neutral"
+    | "dark"
+    | "forest"
+    | "neo"
+    | "neo-dark"
+    | "redux"
+    | "redux-color"
+    | "redux-dark"
+    | "redux-dark-color"
+  /**
+   * `theme`, as the DOM element's property.
+   * @deprecated write `theme` -- `prop:` stays only for compiled spell
+   */
+  "prop:theme"?:
+    | "spell"
+    | "default"
+    | "neutral"
+    | "dark"
+    | "forest"
+    | "neo"
+    | "neo-dark"
+    | "redux"
+    | "redux-color"
+    | "redux-dark"
+    | "redux-dark-color"
+  /**
+   * Light or dark for this drawing alone:  `auto` follows the page;  `light` and `dark` hold it there, whatever the page does.
+   * - takes:  `auto` · `light` · `dark`
+   * - default:  `auto`
+   */
+  scheme?: "auto" | "light" | "dark"
+  /**
+   * `scheme`, as the DOM element's property.
+   * @deprecated write `scheme` -- `prop:` stays only for compiled spell
+   */
+  "prop:scheme"?: "auto" | "light" | "dark"
+  /**
+   * The drawing style:  plain lines (`classic`), sketched by hand (`hand-drawn`), or flatter and softer (`neo`).
+   * - takes:  `classic` · `hand-drawn` · `neo`
+   * - default:  `classic`
+   */
+  look?: "classic" | "hand-drawn" | "neo"
+  /**
+   * `look`, as the DOM element's property.
+   * @deprecated write `look` -- `prop:` stays only for compiled spell
+   */
+  "prop:look"?: "classic" | "hand-drawn" | "neo"
+  /**
+   * How the boxes are placed:  `auto` lets Mermaid pick for each kind of diagram (ELK for flowcharts, state, class and ER diagrams);  any other asks for that engine, where Mermaid has it for the kind.
+   * - takes:  `auto` · `elk` · `dagre` · `cose-bilkent` · `swimlane`
+   * - default:  `auto`
+   */
+  layout?: "auto" | "elk" | "dagre" | "cose-bilkent" | "swimlane"
+  /**
+   * `layout`, as the DOM element's property.
+   * @deprecated write `layout` -- `prop:` stays only for compiled spell
+   */
+  "prop:layout"?: "auto" | "elk" | "dagre" | "cose-bilkent" | "swimlane"
+  /**
+   * For `hand-drawn`:  the same seed draws the same wobbles every time, so it doesn't wobble as it redraws.
+   * - takes:  number
+   * - default:  `1`
+   */
+  seed?: number | `${number}`
+  /**
+   * `seed`, as the DOM element's property.
+   * @deprecated write `seed` -- `prop:` stays only for compiled spell
+   */
+  "prop:seed"?: number | `${number}`
+  /**
+   * A small menu button in the drawing's corner, shown on hover or keyboard focus, so a reader can change its colours and light or dark.  Their pick is remembered (`remember`).
+   * - takes:  flag (present / absent)
+   */
+  controls?: boolean | ""
+  /**
+   * `controls`, as the DOM element's property.
+   * @deprecated write `controls` -- `prop:` stays only for compiled spell
+   */
+  "prop:controls"?: boolean | ""
+  /**
+   * The name a reader's picks from the menu are kept under, across reloads and visits.  None:  a name made from the page and the drawing's `id`, else its `source`, else its place on the page.
+   * - takes:  text
+   */
+  remember?: string
+  /**
+   * `remember`, as the DOM element's property.
+   * @deprecated write `remember` -- `prop:` stays only for compiled spell
+   */
+  "prop:remember"?: string
+  /**
+   * What a screen reader says for the drawing.  None:  the title in the diagram's own text (`accTitle`, or a `title`), else its kind ("Flowchart").
+   * - takes:  text
+   */
+  label?: string
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
+  "prop:label"?: string
+  /**
+   * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `coin` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "coin"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "coin"
+    | "none"
+  /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
+   * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
+   * - takes:  text
+   */
+  target?: string
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
+  "prop:target"?: string
+  /**
+   * How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font="bold italic"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font="bold serif 10/20"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.
+   * - takes:  space-separated:  `bold` · `heavy` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript` · `all-caps` · `title-caps` · `headline` · `subhead` · `serif` · `sans-serif` · `typewriter`
+   */
+  font?: string
+  /**
+   * `font`, as the DOM element's property.
+   * @deprecated write `font` -- `prop:` stays only for compiled spell
+   */
+  "prop:font"?: string
+  /**
+   * A hard shadow behind its letters, down and to the right, in a hue:  `shadow="yellow"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em).
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
+   */
+  shadow?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * `shadow`, as the DOM element's property.
+   * @deprecated write `shadow` -- `prop:` stays only for compiled spell
+   */
+  "prop:shadow"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * Its box's own width where it sits, any CSS length:  `width="10em"`, `"50%"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns.
+   * - takes:  text
+   */
+  width?: string
+  /**
+   * `width`, as the DOM element's property.
+   * @deprecated write `width` -- `prop:` stays only for compiled spell
+   */
+  "prop:width"?: string
+  /**
+   * The narrowest its box gets, any CSS length:  `min-width="16em"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower.
+   * - takes:  text
+   */
+  "min-width"?: string
+  /**
+   * `min-width`, as the DOM element's property.
+   * @deprecated write `min-width` -- `prop:` stays only for compiled spell
+   */
+  "prop:minWidth"?: string
+  /**
+   * The widest its box gets, any CSS length:  `max-width="36em"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it.
+   * - takes:  text
+   */
+  "max-width"?: string
+  /**
+   * `max-width`, as the DOM element's property.
+   * @deprecated write `max-width` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxWidth"?: string
+  /**
+   * Its tooltip:  the browser's own, written as the element's `title`.
+   * - takes:  text
+   */
+  tooltip?: string
+  /**
+   * `tooltip`, as the DOM element's property.
+   * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
+   */
+  "prop:tooltip"?: string
+  /**
+   * People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.
+   * - takes:  text
+   */
+  movable?: string
+  /**
+   * `movable`, as the DOM element's property.
+   * @deprecated write `movable` -- `prop:` stays only for compiled spell
+   */
+  "prop:movable"?: string
+  /**
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
+   * - takes:  text
+   */
+  resizable?: string
+  /**
+   * `resizable`, as the DOM element's property.
+   * @deprecated write `resizable` -- `prop:` stays only for compiled spell
+   */
+  "prop:resizable"?: string
+  /**
+   * Shown only on these devices, a comma list:  `on-platform="desktop, tablet"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.
+   * - takes:  text
+   */
+  "on-platform"?: string
+  /**
+   * `on-platform`, as the DOM element's property.
+   * @deprecated write `on-platform` -- `prop:` stays only for compiled spell
+   */
+  "prop:onPlatform"?: string
+  /**
+   * The text shown, as a PROPERTY:  set, it shows instead of the source's, until `source` changes or `reload()`.
+   */
+  content?: string
+  /**
+   * The text shown, as a PROPERTY:  set, it shows instead of the source's, until `source` changes or `reload()`.
+   * @deprecated write `content` -- `prop:` stays only for compiled spell
+   */
+  "prop:content"?: string
+  /**
+   * `ui-loaded`:  Content arrived:  fetched from `source`, or read from the element's own content.
+   * - `event.detail`:  `{ source?: string, content: string }`
+   */
+  "on-ui-loaded"?: (event: UIMermaidDiagramEventMap["ui-loaded"]) => void
+  /**
+   * `ui-changed`:  The `content` property was set:  the element shows the new text, and is `dirty` until saved.
+   * - `event.detail`:  `{ content: string }`
+   */
+  "on-ui-changed"?: (event: UIMermaidDiagramEventMap["ui-changed"]) => void
+  /**
+   * `ui-saving`:  `host.save()` is about to save:  `preventDefault()` to save it yourself (an editor posting elsewhere).
+   * - `event.detail`:  `{ source?: string, content: string, etag?: string }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-saving"?: (event: UIMermaidDiagramEventMap["ui-saving"]) => void
+  /**
+   * `ui-saved`:  Saved;  `etag` is the file's new version.
+   * - `event.detail`:  `{ source?: string, etag?: string }`
+   */
+  "on-ui-saved"?: (event: UIMermaidDiagramEventMap["ui-saved"]) => void
+  /**
+   * `ui-error`:  Loading, showing or saving failed;  `kind` says why.  Load and render failures show an error message unless cancelled;  save failures keep the content as it is.
+   * - `event.detail`:  `{ kind: 'load' | 'cross-origin' | 'file-protocol' | 'save' | 'conflict' | 'no-saver' | 'render', source?: string, error: unknown }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-error"?: (event: UIMermaidDiagramEventMap["ui-error"]) => void
+  /**
+   * `ui-drawn`:  Drawn;  `diagramType` is what Mermaid read the text as (`flowchart-v2`, `sequence` ...).
+   * - `event.detail`:  `{ diagramType: string }`
+   */
+  "on-ui-drawn"?: (event: UIMermaidDiagramEventMap["ui-drawn"]) => void
+}
+
+/** `<ui-mermaid-diagram>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UIMermaidDiagramJSXAttributes
+  extends
+    Omit<UIGlobalJSXAttributes<UIHTMLElement<UIMermaidDiagramEventMap>>, keyof UIMermaidDiagramAttributes>,
+    UIMermaidDiagramAttributes {}
+
 /** `<ui-message>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UIMessageEventMap {
   /**
@@ -55483,6 +55958,692 @@ export interface UIToolbarJSXAttributes
     Omit<UIGlobalJSXAttributes<UIHTMLElement<UIToolbarEventMap>>, keyof UIToolbarAttributes>,
     UIToolbarAttributes {}
 
+/** `<ui-tour>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UITourEventMap {
+  /**
+   * `ui-starting`:  About to start, at `step`;  `preventDefault()` keeps it from starting.
+   * - `event.detail`:  `{ step: number }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-starting": CustomEvent<{ step: number }>
+  /**
+   * `ui-started`:  Started:  its first step shows.
+   * - `event.detail`:  `{ step: number }`
+   */
+  "ui-started": CustomEvent<{ step: number }>
+  /**
+   * `ui-stepped`:  Moved from step `from` to step `to` (named `name`, or `""`);  `0` is no step.
+   * - `event.detail`:  `{ from: number, to: number, name: string }`
+   */
+  "ui-stepped": CustomEvent<{ from: number; to: number; name: string }>
+  /**
+   * `ui-ended`:  Ended:  `done` after its last step, `closed` by its ✕ or Escape, `stopped` by code (`stop()`, `stop tour`).
+   * - `event.detail`:  `{ reason: "done" | "closed" | "stopped" }`
+   */
+  "ui-ended": CustomEvent<{ reason: "done" | "closed" | "stopped" }>
+}
+
+/** `<ui-tour>`'s own attributes, from its vocabulary. */
+export interface UITourAttributes {
+  /**
+   * The tour's name:  shown at the top of each step, in the Help menu and the tours list.  Spell starts it by this name:  `start tour "first game"`.
+   * - takes:  text
+   */
+  name?: string
+  /**
+   * `name`, as the DOM element's property.
+   * @deprecated write `name` -- `prop:` stays only for compiled spell
+   */
+  "prop:name"?: string
+  /**
+   * One line about the tour, under its name in the tours list and the offer to take it.
+   * - takes:  text
+   */
+  summary?: string
+  /**
+   * `summary`, as the DOM element's property.
+   * @deprecated write `summary` -- `prop:` stays only for compiled spell
+   */
+  "prop:summary"?: string
+  /**
+   * Every step darkens the rest of the page, all but what it points at;  a step can say `dim="false"`.  Off by default.
+   * - takes:  flag (present / absent)
+   */
+  dim?: boolean | ""
+  /**
+   * `dim`, as the DOM element's property.
+   * @deprecated write `dim` -- `prop:` stays only for compiled spell
+   */
+  "prop:dim"?: boolean | ""
+  /**
+   * Remembers that the tour was taken (finished or closed), so it isn't offered again.  `remember` alone:  in this browser.  `remember="on server"`:  with the person's account, on every machine.
+   * - takes:  text
+   */
+  remember?: string
+  /**
+   * `remember`, as the DOM element's property.
+   * @deprecated write `remember` -- `prop:` stays only for compiled spell
+   */
+  "prop:remember"?: string
+  /**
+   * How it offers itself when it starts by itself (`offer()`):  `ask`, a small note asking first;  `start`, straight away;  `dot`, a pulsing dot on the first step's target, which starts it when clicked.
+   * - takes:  `ask` · `start` · `dot`
+   * - default:  `ask`
+   */
+  offer?: "ask" | "start" | "dot"
+  /**
+   * `offer`, as the DOM element's property.
+   * @deprecated write `offer` -- `prop:` stays only for compiled spell
+   */
+  "prop:offer"?: "ask" | "start" | "dot"
+  /**
+   * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `coin` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "coin"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "coin"
+    | "none"
+  /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
+   * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
+   * - takes:  text
+   */
+  target?: string
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
+  "prop:target"?: string
+  /**
+   * How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font="bold italic"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font="bold serif 10/20"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.
+   * - takes:  space-separated:  `bold` · `heavy` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript` · `all-caps` · `title-caps` · `headline` · `subhead` · `serif` · `sans-serif` · `typewriter`
+   */
+  font?: string
+  /**
+   * `font`, as the DOM element's property.
+   * @deprecated write `font` -- `prop:` stays only for compiled spell
+   */
+  "prop:font"?: string
+  /**
+   * A hard shadow behind its letters, down and to the right, in a hue:  `shadow="yellow"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em).
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
+   */
+  shadow?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * `shadow`, as the DOM element's property.
+   * @deprecated write `shadow` -- `prop:` stays only for compiled spell
+   */
+  "prop:shadow"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * Its box's own width where it sits, any CSS length:  `width="10em"`, `"50%"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns.
+   * - takes:  text
+   */
+  width?: string
+  /**
+   * `width`, as the DOM element's property.
+   * @deprecated write `width` -- `prop:` stays only for compiled spell
+   */
+  "prop:width"?: string
+  /**
+   * The narrowest its box gets, any CSS length:  `min-width="16em"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower.
+   * - takes:  text
+   */
+  "min-width"?: string
+  /**
+   * `min-width`, as the DOM element's property.
+   * @deprecated write `min-width` -- `prop:` stays only for compiled spell
+   */
+  "prop:minWidth"?: string
+  /**
+   * The widest its box gets, any CSS length:  `max-width="36em"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it.
+   * - takes:  text
+   */
+  "max-width"?: string
+  /**
+   * `max-width`, as the DOM element's property.
+   * @deprecated write `max-width` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxWidth"?: string
+  /**
+   * Its tooltip:  the browser's own, written as the element's `title`.
+   * - takes:  text
+   */
+  tooltip?: string
+  /**
+   * `tooltip`, as the DOM element's property.
+   * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
+   */
+  "prop:tooltip"?: string
+  /**
+   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
+   * - takes:  text
+   */
+  label?: string
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
+  "prop:label"?: string
+  /**
+   * People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.
+   * - takes:  text
+   */
+  movable?: string
+  /**
+   * `movable`, as the DOM element's property.
+   * @deprecated write `movable` -- `prop:` stays only for compiled spell
+   */
+  "prop:movable"?: string
+  /**
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
+   * - takes:  text
+   */
+  resizable?: string
+  /**
+   * `resizable`, as the DOM element's property.
+   * @deprecated write `resizable` -- `prop:` stays only for compiled spell
+   */
+  "prop:resizable"?: string
+  /**
+   * Shown only on these devices, a comma list:  `on-platform="desktop, tablet"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.
+   * - takes:  text
+   */
+  "on-platform"?: string
+  /**
+   * `on-platform`, as the DOM element's property.
+   * @deprecated write `on-platform` -- `prop:` stays only for compiled spell
+   */
+  "prop:onPlatform"?: string
+  /**
+   * `ui-starting`:  About to start, at `step`;  `preventDefault()` keeps it from starting.
+   * - `event.detail`:  `{ step: number }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-starting"?: (event: UITourEventMap["ui-starting"]) => void
+  /**
+   * `ui-started`:  Started:  its first step shows.
+   * - `event.detail`:  `{ step: number }`
+   */
+  "on-ui-started"?: (event: UITourEventMap["ui-started"]) => void
+  /**
+   * `ui-stepped`:  Moved from step `from` to step `to` (named `name`, or `""`);  `0` is no step.
+   * - `event.detail`:  `{ from: number, to: number, name: string }`
+   */
+  "on-ui-stepped"?: (event: UITourEventMap["ui-stepped"]) => void
+  /**
+   * `ui-ended`:  Ended:  `done` after its last step, `closed` by its ✕ or Escape, `stopped` by code (`stop()`, `stop tour`).
+   * - `event.detail`:  `{ reason: "done" | "closed" | "stopped" }`
+   */
+  "on-ui-ended"?: (event: UITourEventMap["ui-ended"]) => void
+}
+
+/** `<ui-tour>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UITourJSXAttributes
+  extends Omit<UIGlobalJSXAttributes<UIHTMLElement<UITourEventMap>>, keyof UITourAttributes>, UITourAttributes {}
+
+/** `<ui-tour-step>`'s own attributes, from its vocabulary. */
+export interface UITourStepAttributes {
+  /**
+   * Optional:  a step can be shown by its name as well as its number (`show step "drag"`).
+   * - takes:  text
+   */
+  name?: string
+  /**
+   * `name`, as the DOM element's property.
+   * @deprecated write `name` -- `prop:` stays only for compiled spell
+   */
+  "prop:name"?: string
+  /**
+   * What it points at:  the name of a part of the app (its `id`), a `data-tour` name, or a CSS selector;  an element set by script.  None:  its box shows near the top of the screen.  A target that isn't on the page skips the step.
+   * - takes:  text
+   */
+  target?: string
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
+  "prop:target"?: string
+  /**
+   * Which side of its target the box goes;  it moves to the other side when there's no room.
+   * - takes:  `bottom` · `top` · `left` · `right`
+   * - default:  `bottom`
+   */
+  placement?: "bottom" | "top" | "left" | "right"
+  /**
+   * `placement`, as the DOM element's property.
+   * @deprecated write `placement` -- `prop:` stays only for compiled spell
+   */
+  "prop:placement"?: "bottom" | "top" | "left" | "right"
+  /**
+   * Darkens the rest of the page, all but its target;  `dim="false"` turns the tour's `dim` off here.
+   * - takes:  flag (present / absent)
+   */
+  dim?: boolean | ""
+  /**
+   * `dim`, as the DOM element's property.
+   * @deprecated write `dim` -- `prop:` stays only for compiled spell
+   */
+  "prop:dim"?: boolean | ""
+  /**
+   * Waits for the person to do something to its target, an event's name (`click`, `input`, `ui-opened`):  the rest of the page can't be clicked, Next is hidden, and the tour goes on when it happens.
+   * - takes:  text
+   */
+  "wait-for"?: string
+  /**
+   * `wait-for`, as the DOM element's property.
+   * @deprecated write `wait-for` -- `prop:` stays only for compiled spell
+   */
+  "prop:waitFor"?: string
+  /**
+   * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `coin` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "coin"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "coin"
+    | "none"
+  /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
+   * How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font="bold italic"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font="bold serif 10/20"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.
+   * - takes:  space-separated:  `bold` · `heavy` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript` · `all-caps` · `title-caps` · `headline` · `subhead` · `serif` · `sans-serif` · `typewriter`
+   */
+  font?: string
+  /**
+   * `font`, as the DOM element's property.
+   * @deprecated write `font` -- `prop:` stays only for compiled spell
+   */
+  "prop:font"?: string
+  /**
+   * A hard shadow behind its letters, down and to the right, in a hue:  `shadow="yellow"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em).
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
+   */
+  shadow?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * `shadow`, as the DOM element's property.
+   * @deprecated write `shadow` -- `prop:` stays only for compiled spell
+   */
+  "prop:shadow"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * Its box's own width where it sits, any CSS length:  `width="10em"`, `"50%"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns.
+   * - takes:  text
+   */
+  width?: string
+  /**
+   * `width`, as the DOM element's property.
+   * @deprecated write `width` -- `prop:` stays only for compiled spell
+   */
+  "prop:width"?: string
+  /**
+   * The narrowest its box gets, any CSS length:  `min-width="16em"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower.
+   * - takes:  text
+   */
+  "min-width"?: string
+  /**
+   * `min-width`, as the DOM element's property.
+   * @deprecated write `min-width` -- `prop:` stays only for compiled spell
+   */
+  "prop:minWidth"?: string
+  /**
+   * The widest its box gets, any CSS length:  `max-width="36em"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it.
+   * - takes:  text
+   */
+  "max-width"?: string
+  /**
+   * `max-width`, as the DOM element's property.
+   * @deprecated write `max-width` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxWidth"?: string
+  /**
+   * Its tooltip:  the browser's own, written as the element's `title`.
+   * - takes:  text
+   */
+  tooltip?: string
+  /**
+   * `tooltip`, as the DOM element's property.
+   * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
+   */
+  "prop:tooltip"?: string
+  /**
+   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
+   * - takes:  text
+   */
+  label?: string
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
+  "prop:label"?: string
+  /**
+   * People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.
+   * - takes:  text
+   */
+  movable?: string
+  /**
+   * `movable`, as the DOM element's property.
+   * @deprecated write `movable` -- `prop:` stays only for compiled spell
+   */
+  "prop:movable"?: string
+  /**
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
+   * - takes:  text
+   */
+  resizable?: string
+  /**
+   * `resizable`, as the DOM element's property.
+   * @deprecated write `resizable` -- `prop:` stays only for compiled spell
+   */
+  "prop:resizable"?: string
+  /**
+   * Shown only on these devices, a comma list:  `on-platform="desktop, tablet"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.
+   * - takes:  text
+   */
+  "on-platform"?: string
+  /**
+   * `on-platform`, as the DOM element's property.
+   * @deprecated write `on-platform` -- `prop:` stays only for compiled spell
+   */
+  "prop:onPlatform"?: string
+}
+
+/** `<ui-tour-step>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UITourStepJSXAttributes
+  extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UITourStepAttributes>, UITourStepAttributes {}
+
 /** `<ui-transition>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UITransitionEventMap {
   /**
@@ -59997,6 +61158,12 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-menu": UIMenuJSXAttributes
       /**
+       * `<ui-mermaid-diagram>`:  A Mermaid diagram draws a flowchart, a sequence, a timeline or any other kind of diagram Mermaid knows, from the element's own text or a file on this site.
+       * - also known as:  mermaid, diagram, flowchart, chart, sequence diagram, gantt chart, mind map, timeline, diagram as code, text to diagram
+       * - events:  `ui-loaded`, `ui-changed`, `ui-saving`, `ui-saved`, `ui-error`, `ui-drawn`
+       */
+      "ui-mermaid-diagram": UIMermaidDiagramJSXAttributes
+      /**
        * `<ui-message>`:  A message displays information that explains nearby content.
        * - also known as:  alert, callout, notice, banner, info box, error message
        * - slots:
@@ -60536,6 +61703,21 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-toolbar": UIToolbarJSXAttributes
       /**
+       * `<ui-tour>`:  A tour leads someone through a feature one numbered step at a time, pointing at what each step is about.
+       * - also known as:  quick tour, product tour, walkthrough, guided tour, onboarding, coach marks
+       * - slots:
+       *   - default:  Its steps:  `<ui-tour-step>`s, in order.
+       * - events:  `ui-starting`, `ui-started`, `ui-stepped`, `ui-ended`
+       */
+      "ui-tour": UITourJSXAttributes
+      /**
+       * `<ui-tour-step>`:  One step of a tour:  what it says, and what it points at.
+       * - also known as:  tour stop, coach mark, hotspot
+       * - slots:
+       *   - default:  What the step says.
+       */
+      "ui-tour-step": UITourStepJSXAttributes
+      /**
        * `<ui-transition>`:  A transition is an animation used to show or hide content, or to draw attention to it.
        * - also known as:  animate, fade, slide, motion, effect
        * - slots:
@@ -60686,6 +61868,9 @@ export interface UIEventMap {
   "ui-send": CustomEvent<unknown>
   "ui-command": CustomEvent<unknown>
   "ui-scrolled-to": CustomEvent<unknown>
+  "ui-starting": CustomEvent<unknown>
+  "ui-started": CustomEvent<unknown>
+  "ui-stepped": CustomEvent<unknown>
   "ui-settled": CustomEvent<unknown>
   "ui-file-dragged-over": CustomEvent<unknown>
   "ui-file-dragged-out": CustomEvent<unknown>
@@ -60778,6 +61963,7 @@ declare global {
     "ui-loader": HTMLElement
     "ui-markdown": UIHTMLElement<UIMarkdownEventMap>
     "ui-menu": UIHTMLElement<UIMenuEventMap>
+    "ui-mermaid-diagram": UIHTMLElement<UIMermaidDiagramEventMap>
     "ui-message": UIHTMLElement<UIMessageEventMap>
     "ui-meta": HTMLElement
     "ui-modal": UIHTMLElement<UIModalEventMap>
@@ -60846,6 +62032,8 @@ declare global {
     "ui-toast": UIHTMLElement<UIToastEventMap>
     "ui-toc": UIHTMLElement<UITocEventMap>
     "ui-toolbar": UIHTMLElement<UIToolbarEventMap>
+    "ui-tour": UIHTMLElement<UITourEventMap>
+    "ui-tour-step": HTMLElement
     "ui-transition": UIHTMLElement<UITransitionEventMap>
     "ui-tree": UIHTMLElement<UITreeEventMap>
     "ui-tree-diagram": UIHTMLElement<UITreeDiagramEventMap>

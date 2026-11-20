@@ -21,6 +21,7 @@ import {
 } from "spell/places/places.types"
 
 import { core } from "./core"
+import { showPickedFileLines } from "./pickedFiles"
 
 /** What a program's lines say about one place. */
 export type PlaceDetails = {
@@ -61,13 +62,24 @@ export type PlaceDetails = {
   >
   /** The NAME of the key it needs:  never the key. */
   keyNamed?: string
-  /** Where its key's token is made, from the secret `keyNamed`:  `its token comes from "..."` (epic `data` P49). */
+  /**
+   * Where a page reads it through its own page server, which adds the key (epic `from-console` P14):
+   * `/api/places/projects/@acme/jobs/jobs`.
+   * - The compiler's, for an authenticated web or graphql server in a project with an address:  see `readThroughPageServer()`.
+   */
+  servedAt?: string
+  /** Where its key's token is made, from the secret `keyNamed`:  `it is authenticated with a token from "..."` (epic `data` P49). */
   tokenFrom?: string
-  /** It goes without its key where nothing holds it, a browser:  `its optional key is the secret "GITHUB_TOKEN"`. */
+  /**
+   * A file a person picks, with no address:  `a json file you pick`, `... on this device` (epic `editor` P41).
+   * - Its kind says the format:  `file` is JSON, `sheet` CSV, `excel file` Excel.
+   */
+  picked?: boolean
+  /** It goes without its key where nothing holds it, a browser:  `it is optionally authenticated with the secret "GITHUB_TOKEN"`. */
   keyIfSet?: boolean
   /** On this device, it's kept for this tab only:  `scratch is stored on this device, for each tab`. */
   forEachTab?: boolean
-  /** Where its key goes on a request, when that isn't `Authorization: Bearer`:  `its key goes in its "X-Api-Key" header`. */
+  /** Where its key goes on a request, when that isn't `Authorization: Bearer`:  `its secret goes in its "X-Api-Key" header`. */
   keyGoes?: PlacesFolder.KeyGoes
   /** How often it's asked what changed, in seconds. */
   checkedEvery?: number
@@ -208,6 +220,8 @@ export type PlaceMaking = {
    * - Left out:  a place that needs one refuses.
    */
   keyFrom?: (name: string) => string | undefined
+  /** The running program, for what's kept on this device:  its project's id, else the page's path. */
+  program?: string
   /** The copy of what it reads, kept on this device, when its line says so:  made by the program, which follows it. */
   deviceCopy?: PlacesFolder.DeviceCopy
 }
@@ -264,7 +278,7 @@ export function limitOperations(behind: PlaceBehind, { folder, collection, Class
 const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) => PlaceBehind> = {
   "web server": ({ details, collection, Class, keyFrom, deviceCopy }, folder) =>
     new folder.RestPlace({
-      url: details.at!,
+      url: addressOf(details, keyFrom),
       collections: restCollections(details, collection, storedAsIn(Class)),
       ...(details.namesLike !== undefined && { namesLike: folder.nameStyleLike(details.namesLike) }),
       ...(details.searches && { searches: details.searches }),
@@ -279,7 +293,7 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
     }),
   "graphql server": (making, folder) =>
     new folder.GraphPlace({
-      url: making.details.at!,
+      url: addressOf(making.details, making.keyFrom),
       collections: graphCollections(making),
       ...(making.details.versionsIn !== undefined && { versions: { field: making.details.versionsIn } }),
       ...keyLinesOf(making.details, making.keyFrom, folder)
@@ -330,7 +344,10 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
     const at = details.at!
     return new RemotePlace({ url: at, can: cloudCapabilities(at), signIn: SpellSignIn.for(at) })
   },
-  file: ({ details }, { RemotePlace }) => {
+  file: (making, folder) => {
+    const { details } = making
+    if (details.picked) return pickedFile(making, folder, "json")
+    const { RemotePlace } = folder
     const at = details.at!
     if (IS_SERVER_ADDRESS.test(at)) return new RemotePlace({ url: at, can: { kind: "file" } })
     throw new TypeError(
@@ -352,9 +369,10 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
     return room
   },
   // a CSV file, or an Excel workbook by its address's ending (`.xlsx`;  epic `data` P38)
-  sheet: (making, folder) => sheetAt(making, folder),
+  sheet: (making, folder) => (making.details.picked ? pickedFile(making, folder, "csv") : sheetAt(making, folder)),
   // an Excel workbook, whatever its address ends in (P38):  each sheet a collection
-  "excel file": (making, folder) => sheetAt(making, folder, "excel"),
+  "excel file": (making, folder) =>
+    making.details.picked ? pickedFile(making, folder, "excel") : sheetAt(making, folder, "excel"),
   "google sheet": (
     { details, collection, Class },
     { SheetPlace, RemotePlace, isPlaceServerAddress, googleSheetCsvAddress }
@@ -431,16 +449,55 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
 }
 
 /**
- * What a place's lines say of its key, for a place on a server:  nothing without one named.
- * - `its token comes from "...", made with the secret "..."` (epic `data` P49):  the key sent is a token made from the
- *   secret, kept, and made again before it runs out (`PlaceToken`).
+ * A file a person picks, in `format`:  kept on this device, saved back to the file where the browser can, and its
+ * lines on the page from now on (`showPickedFileLines()`, epic `editor` P41).
+ * - Remembered under the program and the place's name:  the last file opened into it.
  */
-function keyLinesOf(
-  { keyNamed, keyIfSet, keyGoes, tokenFrom }: PlaceDetails,
-  keyFrom: PlaceMaking["keyFrom"],
-  folder: typeof PlacesFolder
-) {
+function pickedFile(
+  { details, program = "" }: PlaceMaking,
+  { PickedFilePlace }: typeof PlacesFolder,
+  format: PlacesFolder.PickedFileFormat
+): PlaceBehind {
+  const place = new PickedFilePlace({
+    key: `${program}/${details.name}`,
+    format,
+    ...(details.idColumn !== undefined && { idOf: details.idColumn })
+  })
+  showPickedFileLines(place)
+  return place
+}
+
+/**
+ * Where a web or graphql server's requests go:  its own address, or, read through this page's own server, that
+ * server's address for it (`readThroughPageServer()`).
+ */
+function addressOf(details: PlaceDetails, keyFrom: PlaceMaking["keyFrom"]): string {
+  return readThroughPageServer(details, keyFrom) ? details.servedAt! : details.at!
+}
+
+/**
+ * Is it read through this page's own server, which adds its key (epic `from-console` P14)?
+ * - Only where nothing holds its key, a page, for a key it can't go without, and where the compiler said its address
+ *   there (`servedAt`).
+ * - Anywhere a key is found (`spell run`, a test), it's asked straight, with the key.
+ */
+function readThroughPageServer(
+  { keyNamed, keyIfSet, servedAt }: PlaceDetails,
+  keyFrom: PlaceMaking["keyFrom"]
+): boolean {
+  return keyNamed !== undefined && !keyIfSet && !keyFrom && servedAt !== undefined
+}
+
+/**
+ * What a place's lines say of its key, for a place on a server:  nothing without one named.
+ * - `it is authenticated with a token from "...", made with the secret "..."` (epic `data` P49):  the key sent is a
+ *   token made from the secret, kept, and made again before it runs out (`PlaceToken`).
+ * - Read through this page's own server:  no key here at all;  that server adds it (`throughPageServer`).
+ */
+function keyLinesOf(details: PlaceDetails, keyFrom: PlaceMaking["keyFrom"], folder: typeof PlacesFolder) {
+  const { keyNamed, keyIfSet, keyGoes, tokenFrom } = details
   if (keyNamed === undefined) return {}
+  if (readThroughPageServer(details, keyFrom)) return { throughPageServer: true }
   const token =
     keyFrom && tokenFrom !== undefined
       ? new folder.PlaceToken({ keyNamed, keyFrom, mint: folder.tokenServiceMint(tokenFrom) })

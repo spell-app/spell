@@ -13,6 +13,8 @@
 export class PlaceKeys {
   /** Each key, by its name. */
   private readonly keys: Map<string, string>
+  /** The names asked for, set or not:  for `missing()`. */
+  private readonly names: readonly string[]
 
   constructor({ names = [], from = process.env }: PlaceKeysProps = {}) {
     const entries = names.flatMap((name) => {
@@ -20,6 +22,16 @@ export class PlaceKeys {
       return key ? [[name, key] as const] : []
     })
     this.keys = new Map(entries)
+    this.names = names
+  }
+
+  /**
+   * The names it was asked for that aren't set, in their order:  what the page server says as it starts
+   * (epic `from-console` P14).
+   * - Only names:  never a value.
+   */
+  missing(): string[] {
+    return this.names.filter((name) => !this.keys.has(name))
   }
 
   /** The key by this name;  `undefined` if it isn't set.  Handed to a place as `keyFrom`. */

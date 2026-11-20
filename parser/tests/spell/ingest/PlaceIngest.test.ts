@@ -870,7 +870,7 @@ describe("a key", () => {
     const { ingest, asked, texts, descriptions } = ingestOf(echoing, { keyNamed: () => KEY, claude })
     const { description } = await ingest.add({ address: API, into: "/K.spell", name: "stuff", keySecret: "STUFF_KEY" })
     expect(asked[0]!.headers.get("authorization")).toBe(`Bearer ${KEY}`)
-    expect(texts.get("/K.spell")).toContain(`its optional key is the secret "STUFF_KEY"`)
+    expect(texts.get("/K.spell")).toContain(`it is optionally authenticated with the secret "STUFF_KEY"`)
     const written = [texts.get("/K.spell"), JSON.stringify(descriptions.get("/K.json5")), prompts.join("")].join("\n")
     expect(written).not.toContain(KEY)
     expect(description.about.keySecret).toBe("STUFF_KEY")
@@ -920,7 +920,7 @@ describe("GitHub's way (epic `data` P28)", () => {
   test("a key it answers without is taken when it's set;  a Link header pages;  what Spell can't read inside a row is left out", async () => {
     const { ingest, asked, descriptions } = ingestOf(ROUTES, { keyNamed: () => "k3y" })
     const { spell, description } = await ingest.add(ASK)
-    expect(spell).toContain(`its optional key is the secret "GH_KEY"`)
+    expect(spell).toContain(`it is optionally authenticated with the secret "GH_KEY"`)
     expect(spell).toContain(`its next page is in its "Link" header`)
     expect(spell).toContain(`a "user" is a thing`)
     expect(spell).toContain(`a user's id is its "login"`)
@@ -938,12 +938,12 @@ describe("GitHub's way (epic `data` P28)", () => {
   test("a key that goes elsewhere (T73):  it's sent there, the line says so, and looking again keeps both", async () => {
     const { ingest, asked, texts, descriptions } = ingestOf(ROUTES, { keyNamed: () => "k3y" })
     const { spell } = await ingest.add({ ...ASK, keyGoes: { header: "X-Api-Key" } })
-    expect(spell).toContain(`its key goes in its "X-Api-Key" header`)
+    expect(spell).toContain(`its secret goes in its "X-Api-Key" header`)
     expect(asked[0]!.headers.get("x-api-key")).toBe("k3y")
     expect(asked[0]!.headers.get("authorization")).toBeNull()
     expect(descriptions.get("/G.json5")!.about.keyGoes).toEqual({ header: "X-Api-Key" })
     await ingest.update("/G.spell")
-    expect(texts.get("/G.spell")).toContain(`its key goes in its "X-Api-Key" header`)
+    expect(texts.get("/G.spell")).toContain(`its secret goes in its "X-Api-Key" header`)
   })
 
   test("looking again leaves out what it left out before", async () => {

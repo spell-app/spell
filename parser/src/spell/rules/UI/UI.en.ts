@@ -35,6 +35,10 @@ import { MediaSpeed } from "./MediaSpeed"
 import { MediaTime } from "./MediaTime"
 import { MediaVolume } from "./MediaVolume"
 import { StopAllMedia } from "./StopAllMedia"
+import { StartTour } from "./StartTour"
+import { StopTour } from "./StopTour"
+import { ShowTourStep } from "./ShowTourStep"
+import { MoveTourStep } from "./MoveTourStep"
 import { Prompt } from "./Prompt"
 import { Choose, ChooseSeveral } from "./Choose"
 import { MEDIA_KINDS, TEXT_SIZES } from "./UI.shared"
@@ -319,6 +323,81 @@ UI.addRule(StopAllMedia, {
       ]
     }
   ]
+})
+
+// a page's tour, Spell UI's `<ui-tour>` (epic `editor` P40)
+// at a given step too (epic `editor` T128):  `start tour "first game" at step 3`
+UI.addRule(StartTour, {
+  syntax: "start tour {name:text} (at step {step:expression})?",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [
+        [`start tour "first game"`, `core.startTour("first game")`],
+        [`start tour "first game" at step 3`, `core.startTour("first game", 3)`],
+        [`start tour "first game" at step "drag"`, `core.startTour("first game", "drag")`]
+      ]
+    }
+  ]
+})
+UI.addRule(StartTour, {
+  syntax: "start the {name:text} tour (at step {step:expression})?",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [
+        [`start the "first game" tour`, `core.startTour("first game")`],
+        [`start the "first game" tour at step 3`, `core.startTour("first game", 3)`]
+      ]
+    }
+  ]
+})
+
+UI.addRule(StopTour, {
+  syntax: "stop the? tour",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [
+        [`stop tour`, `core.stopTour()`],
+        [`stop the tour`, `core.stopTour()`]
+      ]
+    }
+  ]
+})
+
+UI.addRule(ShowTourStep, {
+  syntax: "show (the? tour)? step {step:expression}",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [
+        [`show step 3`, `core.showTourStep(3)`],
+        [`show tour step 3`, `core.showTourStep(3)`],
+        [`show the tour step 3`, `core.showTourStep(3)`],
+        [`show step "drag"`, `core.showTourStep("drag")`]
+      ]
+    }
+  ]
+})
+
+UI.addRule(MoveTourStep, {
+  syntax: "(go to|show) the (next:next) step (of the tour)?",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [
+        [`go to the next step`, `core.nextTourStep()`],
+        [`show the next step`, `core.nextTourStep()`],
+        [`show the next step of the tour`, `core.nextTourStep()`],
+        [`go to the next step of the tour`, `core.nextTourStep()`]
+      ]
+    }
+  ]
+})
+UI.addRule(MoveTourStep, {
+  syntax: "go back a step",
+  tests: [{ compileAs: "statement", tests: [[`go back a step`, `core.previousTourStep()`]] }]
 })
 
 UI.addRule(MediaCall.specialize({ methodName: "pause" }), {

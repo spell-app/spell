@@ -23,6 +23,7 @@ export const words = {
       fillTheChecklist: "fill the checklist",
       addTheTaskTitle: "add the task (title as text)",
       addTheDraft: "add the draft",
+      takeTheTour: "take the tour",
       draw: "draw it"
     }
   },

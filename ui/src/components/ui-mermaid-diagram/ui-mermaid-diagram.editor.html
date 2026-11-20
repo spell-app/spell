@@ -1,0 +1,23 @@
+<!-- <ui-mermaid-diagram>'s property editor layout:  move, pair (<ui-fields>) or leave out (data-omit) its properties.  How:  Spell UI's AGENTS.md, "Property editor layouts". -->
+<ui-property-editor schema="ui-mermaid-diagram" data-omit="">
+  <ui-property-group label="Appearance" data-group="appearance">
+    <ui-property name="source"></ui-property>
+    <ui-property name="load"></ui-property>
+    <ui-fields>
+      <ui-property name="theme"></ui-property>
+      <ui-property name="scheme"></ui-property>
+    </ui-fields>
+    <ui-property name="look"></ui-property>
+    <ui-property name="seed"></ui-property>
+  </ui-property-group>
+  <ui-property-group label="Layout" data-group="layout">
+    <ui-property name="layout"></ui-property>
+  </ui-property-group>
+  <ui-property-group label="Behaviour" data-group="behaviour">
+    <ui-property name="controls"></ui-property>
+    <ui-property name="remember"></ui-property>
+  </ui-property-group>
+  <ui-property-group label="Name" data-group="name">
+    <ui-property name="label"></ui-property>
+  </ui-property-group>
+</ui-property-editor>

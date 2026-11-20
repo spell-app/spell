@@ -123,12 +123,32 @@ export function isReadOnlyPlace(saved: P.SavedPlace | undefined): boolean {
   return !!saved && isPlaceTypeReadOnly(saved.placeType)
 }
 
+/**
+ * The name of the place `expression` (a match that found a type while parsing, or a type's name) is, when it's a file a person picks
+ * (`a json file you pick`, epic `editor` P41):  `family_cookbook`.  `undefined` for anything else.
+ * - A lookup of the scope:  call it WHILE PARSING.
+ */
+export function pickedPlaceNameOf(scope: P.Scope, expression: P.Match | undefined): string | undefined {
+  // a place's type, by its name (`{place:known_type}`), from any file of the project;  else what an expression is
+  const { scopeType } = (expression?.data ?? {}) as { scopeType?: unknown }
+  const type =
+    scopeType instanceof P.TypeScope
+      ? scopeType
+      : expression?.datatype
+        ? scope.getType(`${expression.datatype}`)
+        : undefined
+  if (!type?.placeName) return undefined
+  return (type.declaredBy?.data as { picked?: boolean } | undefined)?.picked ? type.placeName : undefined
+}
+
 /** `isReadOnlyPlace()` of the place `type` is:  a place another project declared says so itself. */
 export function isPlaceTypeReadOnly(type: P.TypeScope): boolean {
   if (!PLACE_KIND_ABILITIES[type.placeKind ?? ""]?.isReadOnly) return false
   const { declaredBy, importedPlaceDetails } = type
   if (!declaredBy) return !!importedPlaceDetails?.readOnly
   if ((declaredBy.data as { folderAt?: string }).folderAt) return false
+  // a file a person picks is written back (epic `editor` P41)
+  if ((declaredBy.data as { picked?: boolean }).picked) return false
   const address = declaredBy.groups.address as P.Match | undefined
   return !address || !isPlaceServerAddress(textIn(address))
 }

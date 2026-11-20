@@ -188,7 +188,7 @@ describe("a private place, its key a token (epic `data` P49)", () => {
       rows: [{ id: 1, name: "The real payroll run" }]
     })
     const spell = texts.get("Acme.api.spell")!
-    expect(spell).toContain(`\tits token comes from "${TOKEN_AT}", made with the secret "ACME_API_KEY"`)
+    expect(spell).toContain(`\tit is authenticated with a token from "${TOKEN_AT}", made with the secret "ACME_API_KEY"`)
     expect(spell).toContain('\tits data is private, located in "~/.spell/places/acme"')
     expect(description.collections.jobs!.state).toMatchObject({ is: "verified", rows: 1 })
   })

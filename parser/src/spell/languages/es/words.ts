@@ -204,6 +204,15 @@ export const spanishWords: SP.LanguageWords = {
     clickable: "es pulsable"
   },
 
+  /** La línea de un lugar autenticado, por su regla:  la que pide el aviso de las palabras viejas (`su clave es ...`). */
+  authenticationLines: {
+    key_is_secret: 'se autentica con el secreto "{name}"',
+    key_if_set: 'se autentica opcionalmente con el secreto "{name}"',
+    token_from: 'se autentica con un token de "{address}", hecho con el secreto "{name}"',
+    key_goes_in_header: 'su secreto va en su cabecera "{name}"',
+    key_goes_in_address: 'su secreto va en la dirección como "{name}"'
+  },
+
   /**
    * Las palabras de una página en español (épica `language` P47):  su cabecera, `"api del botón" es una página cuaderno`,
    * y las etiquetas de su cuerpo.

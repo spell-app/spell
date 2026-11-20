@@ -31755,6 +31755,488 @@
       ]
     },
     {
+      "name": "ui-mermaid-diagram",
+      "description": {
+        "kind": "markdown",
+        "value": "A Mermaid diagram draws a flowchart, a sequence, a timeline or any other kind of diagram Mermaid knows, from the element's own text or a file on this site.\n\nAlso known as:  mermaid, diagram, flowchart, chart, sequence diagram, gantt chart, mind map, timeline, diagram as code, text to diagram.\n\n**Events:**  `ui-loaded`, `ui-changed`, `ui-saving`, `ui-saved`, `ui-error`, `ui-drawn`"
+      },
+      "attributes": [
+        {
+          "name": "source",
+          "description": {
+            "kind": "markdown",
+            "value": "URL of the file to show, relative to the page;  same origin only (another site's URL shows an error).  Changing it loads the new file.  Without it, the element shows its own content.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "load",
+          "description": {
+            "kind": "markdown",
+            "value": "When to fetch `source`:  `eager` (at once), `visible` (once scrolled into view) or `idle` (when the browser has nothing else to do).  Like Astro's `client:visible` / `client:idle`.\n\nTakes:  `eager` · `visible` · `idle`\nDefault:  `eager`"
+          },
+          "values": [
+            {
+              "name": "eager"
+            },
+            {
+              "name": "visible"
+            },
+            {
+              "name": "idle"
+            }
+          ]
+        },
+        {
+          "name": "theme",
+          "description": {
+            "kind": "markdown",
+            "value": "The colours.  `spell`, the default:  Spell UI's own, read from the page, light or dark.  Mermaid's:  `default` (soft blue and grey), `neutral` (greys, for print), `dark`, `forest` (greens), `neo` and `neo-dark` (flat, soft shadows), `redux` and `redux-dark` (black outlines, no fill), `redux-color` and `redux-dark-color` (outlines with bold colours).  On a dark page a light one draws as its dark twin (`default` as `dark`, `neo` as `neo-dark`, `redux` as `redux-dark`, `redux-color` as `redux-dark-color`).  A theme set in the diagram's own text wins.\n\nTakes:  `spell` · `default` · `neutral` · `dark` · `forest` · `neo` · `neo-dark` · `redux` · `redux-color` · `redux-dark` · `redux-dark-color`\nDefault:  `spell`"
+          },
+          "values": [
+            {
+              "name": "spell"
+            },
+            {
+              "name": "default"
+            },
+            {
+              "name": "neutral"
+            },
+            {
+              "name": "dark"
+            },
+            {
+              "name": "forest"
+            },
+            {
+              "name": "neo"
+            },
+            {
+              "name": "neo-dark"
+            },
+            {
+              "name": "redux"
+            },
+            {
+              "name": "redux-color"
+            },
+            {
+              "name": "redux-dark"
+            },
+            {
+              "name": "redux-dark-color"
+            }
+          ]
+        },
+        {
+          "name": "scheme",
+          "description": {
+            "kind": "markdown",
+            "value": "Light or dark for this drawing alone:  `auto` follows the page;  `light` and `dark` hold it there, whatever the page does.\n\nTakes:  `auto` · `light` · `dark`\nDefault:  `auto`"
+          },
+          "values": [
+            {
+              "name": "auto"
+            },
+            {
+              "name": "light"
+            },
+            {
+              "name": "dark"
+            }
+          ]
+        },
+        {
+          "name": "look",
+          "description": {
+            "kind": "markdown",
+            "value": "The drawing style:  plain lines (`classic`), sketched by hand (`hand-drawn`), or flatter and softer (`neo`).\n\nTakes:  `classic` · `hand-drawn` · `neo`\nDefault:  `classic`"
+          },
+          "values": [
+            {
+              "name": "classic"
+            },
+            {
+              "name": "hand-drawn"
+            },
+            {
+              "name": "neo"
+            }
+          ]
+        },
+        {
+          "name": "layout",
+          "description": {
+            "kind": "markdown",
+            "value": "How the boxes are placed:  `auto` lets Mermaid pick for each kind of diagram (ELK for flowcharts, state, class and ER diagrams);  any other asks for that engine, where Mermaid has it for the kind.\n\nTakes:  `auto` · `elk` · `dagre` · `cose-bilkent` · `swimlane`\nDefault:  `auto`"
+          },
+          "values": [
+            {
+              "name": "auto"
+            },
+            {
+              "name": "elk"
+            },
+            {
+              "name": "dagre"
+            },
+            {
+              "name": "cose-bilkent"
+            },
+            {
+              "name": "swimlane"
+            }
+          ]
+        },
+        {
+          "name": "seed",
+          "description": {
+            "kind": "markdown",
+            "value": "For `hand-drawn`:  the same seed draws the same wobbles every time, so it doesn't wobble as it redraws.\n\nTakes:  number\nDefault:  `1`"
+          }
+        },
+        {
+          "name": "controls",
+          "description": {
+            "kind": "markdown",
+            "value": "A small menu button in the drawing's corner, shown on hover or keyboard focus, so a reader can change its colours and light or dark.  Their pick is remembered (`remember`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "remember",
+          "description": {
+            "kind": "markdown",
+            "value": "The name a reader's picks from the menu are kept under, across reloads and visits.  None:  a name made from the page and the drawing's `id`, else its `source`, else its place on the page.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "label",
+          "description": {
+            "kind": "markdown",
+            "value": "What a screen reader says for the drawing.  None:  the title in the diagram's own text (`accTitle`, or a `title`), else its kind (\"Flowchart\").\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "disabled",
+          "description": {
+            "kind": "markdown",
+            "value": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "loading",
+          "description": {
+            "kind": "markdown",
+            "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "visible",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "animation",
+          "description": {
+            "kind": "markdown",
+            "value": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.\n\nTakes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `coin` · `none`"
+          },
+          "values": [
+            {
+              "name": "fade"
+            },
+            {
+              "name": "fade up"
+            },
+            {
+              "name": "fade down"
+            },
+            {
+              "name": "fade left"
+            },
+            {
+              "name": "fade right"
+            },
+            {
+              "name": "scale"
+            },
+            {
+              "name": "zoom"
+            },
+            {
+              "name": "drop"
+            },
+            {
+              "name": "browse"
+            },
+            {
+              "name": "browse right"
+            },
+            {
+              "name": "fly"
+            },
+            {
+              "name": "fly up"
+            },
+            {
+              "name": "fly down"
+            },
+            {
+              "name": "fly left"
+            },
+            {
+              "name": "fly right"
+            },
+            {
+              "name": "slide"
+            },
+            {
+              "name": "slide up"
+            },
+            {
+              "name": "slide down"
+            },
+            {
+              "name": "slide left"
+            },
+            {
+              "name": "slide right"
+            },
+            {
+              "name": "swing"
+            },
+            {
+              "name": "swing up"
+            },
+            {
+              "name": "swing down"
+            },
+            {
+              "name": "swing left"
+            },
+            {
+              "name": "swing right"
+            },
+            {
+              "name": "horizontal flip"
+            },
+            {
+              "name": "vertical flip"
+            },
+            {
+              "name": "flash"
+            },
+            {
+              "name": "shake"
+            },
+            {
+              "name": "bounce"
+            },
+            {
+              "name": "tada"
+            },
+            {
+              "name": "pulse"
+            },
+            {
+              "name": "jiggle"
+            },
+            {
+              "name": "glow"
+            },
+            {
+              "name": "coin"
+            },
+            {
+              "name": "none"
+            }
+          ]
+        },
+        {
+          "name": "link",
+          "description": {
+            "kind": "markdown",
+            "value": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "target",
+          "description": {
+            "kind": "markdown",
+            "value": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "font",
+          "description": {
+            "kind": "markdown",
+            "value": "How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.\n\nTakes:  space-separated:  `bold` · `heavy` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript` · `all-caps` · `title-caps` · `headline` · `subhead` · `serif` · `sans-serif` · `typewriter`"
+          },
+          "values": [
+            {
+              "name": "bold"
+            },
+            {
+              "name": "heavy"
+            },
+            {
+              "name": "italic"
+            },
+            {
+              "name": "underline"
+            },
+            {
+              "name": "strikethrough"
+            },
+            {
+              "name": "code"
+            },
+            {
+              "name": "highlight"
+            },
+            {
+              "name": "subscript"
+            },
+            {
+              "name": "superscript"
+            },
+            {
+              "name": "all-caps"
+            },
+            {
+              "name": "title-caps"
+            },
+            {
+              "name": "headline"
+            },
+            {
+              "name": "subhead"
+            },
+            {
+              "name": "serif"
+            },
+            {
+              "name": "sans-serif"
+            },
+            {
+              "name": "typewriter"
+            }
+          ]
+        },
+        {
+          "name": "shadow",
+          "description": {
+            "kind": "markdown",
+            "value": "A hard shadow behind its letters, down and to the right, in a hue:  `shadow=\"yellow\"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em).\n\nTakes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`"
+          },
+          "values": [
+            {
+              "name": "primary"
+            },
+            {
+              "name": "secondary"
+            },
+            {
+              "name": "red"
+            },
+            {
+              "name": "orange"
+            },
+            {
+              "name": "yellow"
+            },
+            {
+              "name": "olive"
+            },
+            {
+              "name": "green"
+            },
+            {
+              "name": "teal"
+            },
+            {
+              "name": "blue"
+            },
+            {
+              "name": "violet"
+            },
+            {
+              "name": "purple"
+            },
+            {
+              "name": "pink"
+            },
+            {
+              "name": "brown"
+            },
+            {
+              "name": "grey"
+            },
+            {
+              "name": "black"
+            },
+            {
+              "name": "positive"
+            },
+            {
+              "name": "negative"
+            }
+          ]
+        },
+        {
+          "name": "width",
+          "description": {
+            "kind": "markdown",
+            "value": "Its box's own width where it sits, any CSS length:  `width=\"10em\"`, `\"50%\"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "min-width",
+          "description": {
+            "kind": "markdown",
+            "value": "The narrowest its box gets, any CSS length:  `min-width=\"16em\"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "max-width",
+          "description": {
+            "kind": "markdown",
+            "value": "The widest its box gets, any CSS length:  `max-width=\"36em\"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "tooltip",
+          "description": {
+            "kind": "markdown",
+            "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
+        }
+      ]
+    },
+    {
       "name": "ui-message",
       "description": {
         "kind": "markdown",
@@ -62894,6 +63376,762 @@
           "description": {
             "kind": "markdown",
             "value": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "font",
+          "description": {
+            "kind": "markdown",
+            "value": "How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.\n\nTakes:  space-separated:  `bold` · `heavy` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript` · `all-caps` · `title-caps` · `headline` · `subhead` · `serif` · `sans-serif` · `typewriter`"
+          },
+          "values": [
+            {
+              "name": "bold"
+            },
+            {
+              "name": "heavy"
+            },
+            {
+              "name": "italic"
+            },
+            {
+              "name": "underline"
+            },
+            {
+              "name": "strikethrough"
+            },
+            {
+              "name": "code"
+            },
+            {
+              "name": "highlight"
+            },
+            {
+              "name": "subscript"
+            },
+            {
+              "name": "superscript"
+            },
+            {
+              "name": "all-caps"
+            },
+            {
+              "name": "title-caps"
+            },
+            {
+              "name": "headline"
+            },
+            {
+              "name": "subhead"
+            },
+            {
+              "name": "serif"
+            },
+            {
+              "name": "sans-serif"
+            },
+            {
+              "name": "typewriter"
+            }
+          ]
+        },
+        {
+          "name": "shadow",
+          "description": {
+            "kind": "markdown",
+            "value": "A hard shadow behind its letters, down and to the right, in a hue:  `shadow=\"yellow\"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em).\n\nTakes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`"
+          },
+          "values": [
+            {
+              "name": "primary"
+            },
+            {
+              "name": "secondary"
+            },
+            {
+              "name": "red"
+            },
+            {
+              "name": "orange"
+            },
+            {
+              "name": "yellow"
+            },
+            {
+              "name": "olive"
+            },
+            {
+              "name": "green"
+            },
+            {
+              "name": "teal"
+            },
+            {
+              "name": "blue"
+            },
+            {
+              "name": "violet"
+            },
+            {
+              "name": "purple"
+            },
+            {
+              "name": "pink"
+            },
+            {
+              "name": "brown"
+            },
+            {
+              "name": "grey"
+            },
+            {
+              "name": "black"
+            },
+            {
+              "name": "positive"
+            },
+            {
+              "name": "negative"
+            }
+          ]
+        },
+        {
+          "name": "width",
+          "description": {
+            "kind": "markdown",
+            "value": "Its box's own width where it sits, any CSS length:  `width=\"10em\"`, `\"50%\"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "min-width",
+          "description": {
+            "kind": "markdown",
+            "value": "The narrowest its box gets, any CSS length:  `min-width=\"16em\"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "max-width",
+          "description": {
+            "kind": "markdown",
+            "value": "The widest its box gets, any CSS length:  `max-width=\"36em\"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "tooltip",
+          "description": {
+            "kind": "markdown",
+            "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "label",
+          "description": {
+            "kind": "markdown",
+            "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
+        }
+      ]
+    },
+    {
+      "name": "ui-tour",
+      "description": {
+        "kind": "markdown",
+        "value": "A tour leads someone through a feature one numbered step at a time, pointing at what each step is about.\n\nAlso known as:  quick tour, product tour, walkthrough, guided tour, onboarding, coach marks.\n\n**Slots:**  default\n\n**Events:**  `ui-starting`, `ui-started`, `ui-stepped`, `ui-ended`"
+      },
+      "attributes": [
+        {
+          "name": "name",
+          "description": {
+            "kind": "markdown",
+            "value": "The tour's name:  shown at the top of each step, in the Help menu and the tours list.  Spell starts it by this name:  `start tour \"first game\"`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "summary",
+          "description": {
+            "kind": "markdown",
+            "value": "One line about the tour, under its name in the tours list and the offer to take it.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "dim",
+          "description": {
+            "kind": "markdown",
+            "value": "Every step darkens the rest of the page, all but what it points at;  a step can say `dim=\"false\"`.  Off by default.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "remember",
+          "description": {
+            "kind": "markdown",
+            "value": "Remembers that the tour was taken (finished or closed), so it isn't offered again.  `remember` alone:  in this browser.  `remember=\"on server\"`:  with the person's account, on every machine.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "offer",
+          "description": {
+            "kind": "markdown",
+            "value": "How it offers itself when it starts by itself (`offer()`):  `ask`, a small note asking first;  `start`, straight away;  `dot`, a pulsing dot on the first step's target, which starts it when clicked.\n\nTakes:  `ask` · `start` · `dot`\nDefault:  `ask`"
+          },
+          "values": [
+            {
+              "name": "ask"
+            },
+            {
+              "name": "start"
+            },
+            {
+              "name": "dot"
+            }
+          ]
+        },
+        {
+          "name": "disabled",
+          "description": {
+            "kind": "markdown",
+            "value": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "loading",
+          "description": {
+            "kind": "markdown",
+            "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "visible",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "animation",
+          "description": {
+            "kind": "markdown",
+            "value": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.\n\nTakes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `coin` · `none`"
+          },
+          "values": [
+            {
+              "name": "fade"
+            },
+            {
+              "name": "fade up"
+            },
+            {
+              "name": "fade down"
+            },
+            {
+              "name": "fade left"
+            },
+            {
+              "name": "fade right"
+            },
+            {
+              "name": "scale"
+            },
+            {
+              "name": "zoom"
+            },
+            {
+              "name": "drop"
+            },
+            {
+              "name": "browse"
+            },
+            {
+              "name": "browse right"
+            },
+            {
+              "name": "fly"
+            },
+            {
+              "name": "fly up"
+            },
+            {
+              "name": "fly down"
+            },
+            {
+              "name": "fly left"
+            },
+            {
+              "name": "fly right"
+            },
+            {
+              "name": "slide"
+            },
+            {
+              "name": "slide up"
+            },
+            {
+              "name": "slide down"
+            },
+            {
+              "name": "slide left"
+            },
+            {
+              "name": "slide right"
+            },
+            {
+              "name": "swing"
+            },
+            {
+              "name": "swing up"
+            },
+            {
+              "name": "swing down"
+            },
+            {
+              "name": "swing left"
+            },
+            {
+              "name": "swing right"
+            },
+            {
+              "name": "horizontal flip"
+            },
+            {
+              "name": "vertical flip"
+            },
+            {
+              "name": "flash"
+            },
+            {
+              "name": "shake"
+            },
+            {
+              "name": "bounce"
+            },
+            {
+              "name": "tada"
+            },
+            {
+              "name": "pulse"
+            },
+            {
+              "name": "jiggle"
+            },
+            {
+              "name": "glow"
+            },
+            {
+              "name": "coin"
+            },
+            {
+              "name": "none"
+            }
+          ]
+        },
+        {
+          "name": "link",
+          "description": {
+            "kind": "markdown",
+            "value": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "target",
+          "description": {
+            "kind": "markdown",
+            "value": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "font",
+          "description": {
+            "kind": "markdown",
+            "value": "How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.\n\nTakes:  space-separated:  `bold` · `heavy` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript` · `all-caps` · `title-caps` · `headline` · `subhead` · `serif` · `sans-serif` · `typewriter`"
+          },
+          "values": [
+            {
+              "name": "bold"
+            },
+            {
+              "name": "heavy"
+            },
+            {
+              "name": "italic"
+            },
+            {
+              "name": "underline"
+            },
+            {
+              "name": "strikethrough"
+            },
+            {
+              "name": "code"
+            },
+            {
+              "name": "highlight"
+            },
+            {
+              "name": "subscript"
+            },
+            {
+              "name": "superscript"
+            },
+            {
+              "name": "all-caps"
+            },
+            {
+              "name": "title-caps"
+            },
+            {
+              "name": "headline"
+            },
+            {
+              "name": "subhead"
+            },
+            {
+              "name": "serif"
+            },
+            {
+              "name": "sans-serif"
+            },
+            {
+              "name": "typewriter"
+            }
+          ]
+        },
+        {
+          "name": "shadow",
+          "description": {
+            "kind": "markdown",
+            "value": "A hard shadow behind its letters, down and to the right, in a hue:  `shadow=\"yellow\"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em).\n\nTakes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`"
+          },
+          "values": [
+            {
+              "name": "primary"
+            },
+            {
+              "name": "secondary"
+            },
+            {
+              "name": "red"
+            },
+            {
+              "name": "orange"
+            },
+            {
+              "name": "yellow"
+            },
+            {
+              "name": "olive"
+            },
+            {
+              "name": "green"
+            },
+            {
+              "name": "teal"
+            },
+            {
+              "name": "blue"
+            },
+            {
+              "name": "violet"
+            },
+            {
+              "name": "purple"
+            },
+            {
+              "name": "pink"
+            },
+            {
+              "name": "brown"
+            },
+            {
+              "name": "grey"
+            },
+            {
+              "name": "black"
+            },
+            {
+              "name": "positive"
+            },
+            {
+              "name": "negative"
+            }
+          ]
+        },
+        {
+          "name": "width",
+          "description": {
+            "kind": "markdown",
+            "value": "Its box's own width where it sits, any CSS length:  `width=\"10em\"`, `\"50%\"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "min-width",
+          "description": {
+            "kind": "markdown",
+            "value": "The narrowest its box gets, any CSS length:  `min-width=\"16em\"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "max-width",
+          "description": {
+            "kind": "markdown",
+            "value": "The widest its box gets, any CSS length:  `max-width=\"36em\"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "tooltip",
+          "description": {
+            "kind": "markdown",
+            "value": "Its tooltip:  the browser's own, written as the element's `title`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "label",
+          "description": {
+            "kind": "markdown",
+            "value": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "movable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "on-platform",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.\n\nTakes:  text"
+          }
+        }
+      ]
+    },
+    {
+      "name": "ui-tour-step",
+      "description": {
+        "kind": "markdown",
+        "value": "One step of a tour:  what it says, and what it points at.\n\nAlso known as:  tour stop, coach mark, hotspot.\n\n**Slots:**  default"
+      },
+      "attributes": [
+        {
+          "name": "name",
+          "description": {
+            "kind": "markdown",
+            "value": "Optional:  a step can be shown by its name as well as its number (`show step \"drag\"`).\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "target",
+          "description": {
+            "kind": "markdown",
+            "value": "What it points at:  the name of a part of the app (its `id`), a `data-tour` name, or a CSS selector;  an element set by script.  None:  its box shows near the top of the screen.  A target that isn't on the page skips the step.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "placement",
+          "description": {
+            "kind": "markdown",
+            "value": "Which side of its target the box goes;  it moves to the other side when there's no room.\n\nTakes:  `bottom` · `top` · `left` · `right`\nDefault:  `bottom`"
+          },
+          "values": [
+            {
+              "name": "bottom"
+            },
+            {
+              "name": "top"
+            },
+            {
+              "name": "left"
+            },
+            {
+              "name": "right"
+            }
+          ]
+        },
+        {
+          "name": "dim",
+          "description": {
+            "kind": "markdown",
+            "value": "Darkens the rest of the page, all but its target;  `dim=\"false\"` turns the tour's `dim` off here.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "wait-for",
+          "description": {
+            "kind": "markdown",
+            "value": "Waits for the person to do something to its target, an event's name (`click`, `input`, `ui-opened`):  the rest of the page can't be clicked, Next is hidden, and the tour goes on when it happens.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "disabled",
+          "description": {
+            "kind": "markdown",
+            "value": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "loading",
+          "description": {
+            "kind": "markdown",
+            "value": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "visible",
+          "description": {
+            "kind": "markdown",
+            "value": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
+          "name": "animation",
+          "description": {
+            "kind": "markdown",
+            "value": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.\n\nTakes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `coin` · `none`"
+          },
+          "values": [
+            {
+              "name": "fade"
+            },
+            {
+              "name": "fade up"
+            },
+            {
+              "name": "fade down"
+            },
+            {
+              "name": "fade left"
+            },
+            {
+              "name": "fade right"
+            },
+            {
+              "name": "scale"
+            },
+            {
+              "name": "zoom"
+            },
+            {
+              "name": "drop"
+            },
+            {
+              "name": "browse"
+            },
+            {
+              "name": "browse right"
+            },
+            {
+              "name": "fly"
+            },
+            {
+              "name": "fly up"
+            },
+            {
+              "name": "fly down"
+            },
+            {
+              "name": "fly left"
+            },
+            {
+              "name": "fly right"
+            },
+            {
+              "name": "slide"
+            },
+            {
+              "name": "slide up"
+            },
+            {
+              "name": "slide down"
+            },
+            {
+              "name": "slide left"
+            },
+            {
+              "name": "slide right"
+            },
+            {
+              "name": "swing"
+            },
+            {
+              "name": "swing up"
+            },
+            {
+              "name": "swing down"
+            },
+            {
+              "name": "swing left"
+            },
+            {
+              "name": "swing right"
+            },
+            {
+              "name": "horizontal flip"
+            },
+            {
+              "name": "vertical flip"
+            },
+            {
+              "name": "flash"
+            },
+            {
+              "name": "shake"
+            },
+            {
+              "name": "bounce"
+            },
+            {
+              "name": "tada"
+            },
+            {
+              "name": "pulse"
+            },
+            {
+              "name": "jiggle"
+            },
+            {
+              "name": "glow"
+            },
+            {
+              "name": "coin"
+            },
+            {
+              "name": "none"
+            }
+          ]
+        },
+        {
+          "name": "link",
+          "description": {
+            "kind": "markdown",
+            "value": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.\n\nTakes:  text"
           }
         },
         {

@@ -12,6 +12,7 @@ import { checkoutOf } from "spell/server/checkout"
 import type { RouteModule } from "spell/server/page"
 import { pageServerSettings } from "spell/server/page/settings"
 import { AtProtoIdentity, mailerFor, ReadCredentials, SignInCheck, SignIns } from "spell/server/signIn"
+import { AuthenticatedPlaces } from "spell/server/places"
 import { SP } from "spell/parser/spell"
 import environment from "spell/app/spaces/server/node/environment"
 import { isSpaceName } from "spell/app/spaces/models/spaceNames"
@@ -20,6 +21,7 @@ import { peopleStore } from "spell/app/spaces/server/node/people/peopleRoutes"
 import { SpellAccounts } from "spell/app/spaces/server/node/people/SpellAccounts"
 import { TERMS_PATH } from "spell/app/spaces/server/node/places/SpaceExport"
 import { SpaceFolders } from "spell/app/spaces/server/node/places/SpaceFolders"
+import { ProjectPlaces } from "spell/app/spaces/server/node/places/ProjectPlaces"
 import { onPrefSaved } from "spell/app/spaces/server/node/prefs/prefsRoutes"
 import { api, compileCache, projectBuild, spaceFiles } from "./api"
 import { spacesDailyRound } from "./DailyRound"
@@ -45,6 +47,8 @@ const TERMS_FILE = fileURLToPath(new URL("../places/terms.html", import.meta.url
  *   - `/api/places/spaces/<address>/...` -- every project data folder, by its address (`SpaceFolders`, epic `atmosphere` P1):
  *     `family cookbook is a data folder at "owen@spell/recipes"`, behind the page server's guard, as the Airtable
  *     routes are
+ *   - `/api/places/projects/<project>/<place>/...` -- every project's authenticated places, read for its pages with
+ *     the secret added (`ProjectPlaces`, the kit's `AuthenticatedPlaces`;  epic `from-console` P14)
  *   - `/api/reads/spaces/<address>/...` -- a space's own folder, read direct with a credential for the whole space,
  *     apart from where it's written (`SpaceFolders`, epic `atmosphere` P5)
  *   - `/api/rooms/spaces/<address>/<collection>` -- a space's own folder shared live, a websocket room per collection,
@@ -135,6 +139,9 @@ const appRoutes: RouteModule = {
     // and their live rooms, each write as its page's person (epic `atmosphere` T38)
     folders.route({ router, guard, upgrade: (prefix, handle) => web.upgrade(prefix, handle), signIn })
     onStop(() => folders.close())
+    // every project's authenticated places, read for its pages with the secret added (epic `from-console` P14):
+    // the kit's route module made their routes, and says the secrets that aren't set as the server starts
+    AuthenticatedPlaces.for({ router, guard }).addSource(new ProjectPlaces())
     router.get(TERMS_PATH, (_request, reply) => reply.sendFile(TERMS_FILE))
     // the daily round (a copy a night, real Spaces' lists), from the main checkout's server alone:
     // every worktree's reads the same spell.spaces

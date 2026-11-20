@@ -1,0 +1,114 @@
+==== /RecipeFile.api.spell
+⟪## Recipe File:  your recipes, in a file on your computer⟫
+⟦// The next line keeps them in a JSON file you pick:  the app remembers it, and every change goes back to it.⟧
+⟦// In Safari and Firefox, which can't save back to a file, your changes are kept in this browser,⟧
+⟦// and saving downloads the file.⟧
+[thing create_place L0]
+| «cookbook file» is a json file you pick
+
+[thing create_type L0]
+| a «"recipe"» is a **thing**
+|   it lives in **cookbook file**    ‾value(cookbook file)
+|   [property define_property_has L1]
+|   | its «"title"» is **text**
+|   [property define_property_has L1]
+|   | its «"servings"» is a **number**
+|   [property define_property_has L1]
+|   | its «"notes"» is **text**
+
+==== /RecipeFile.spell
+⟪# Recipe File⟫
+⟦// Your recipes, on cards, in a file on your computer:  open it once, and every change is saved back to it.⟧
+⟦// Where they're kept is in RecipeFile.api.spell, and only its first line knows.⟧
+
+⟦// Every notes box grows as you type⟧
+<⟨ui-defaults⟩>
+  <⟨ui-textarea⟩ grow/>
+</⟨ui-defaults⟩>
+
+⟪## A recipe:  a card you can read and change⟫
+
+[thing reopen_type L0]
+| a **recipe**
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨card⟩>
+|   |     <⟨content⟩>
+|   |       <⟨form⟩ value={it} class=«"recipe"»>    code({it})
+|   |         <⟨field⟩ label=«"Recipe name"»>
+|   |           <⟨button⟩ slot=«"actions"» class=«"remove"» icon=«"close"» size=«"mini"» appearance=«"transparent"» aria-label=«"Remove"» title=«"Remove"» onClick={remove it from the **recipes**}/>    code({remove it from the recipes})
+|   |           <⟨input⟩ name=«"title"» class=«"title"» size=«"large"»/>
+|   |         </⟨field⟩>
+|   |         <⟨field⟩ label=«"Serves"» inline>
+|   |           <⟨input⟩ class=«"serves"» name=«"servings"» type=«"number"» min=«"1"» labeled=«"right"» label=«"people"»/>
+|   |         </⟨field⟩>
+|   |         <⟨field⟩ label=«"Notes"»>
+|   |           <⟨textarea⟩ name=«"notes"» rows=«"2"»/>
+|   |         </⟨field⟩>
+|   |       </⟨form⟩>
+|   |     </⟨content⟩>
+|   |   </⟨card⟩>
+
+⟪## The box:  the card for a new recipe, then a card for each one in the file⟫
+
+[thing create_one_of_a_kind L0]
+| «cookbook» is an **app**
+|   [property define_property_has L1]
+|   | «"new recipe"» is **a new recipe** with **servings** = «4»
+|   [action to_do_something L1]
+|   | to «"open a file"» with title «"Open"», icon «"folder open"», can't be undone
+|   |   pick a file for **cookbook file**
+
+|   [action to_do_something L1]
+|   | to «"save the file"» with title «"Save"», icon «"save"», shortcut «"meta+S"», can't be undone
+|   |   save **cookbook file**
+
+|   [action to_do_something L1]
+|   | to «add the new recipe»
+|   |   add the **new recipe** to the **recipes**    ‾value(the new recipe) ‾value(the recipes)
+|   |   set its **new recipe** to **a new recipe** with **servings** = _4_    ‾value(its new recipe) ‾value(a new recipe with servings = 4)
+
+|   [action to_do_something L1]
+|   | to **draw** it
+|   |   <⟨container⟩>
+|   |     <⟨stack⟩ direction=«"horizontal"» wrap align=«"end"» justify=«"between"»>
+|   |       <⟨stack⟩ align=«"start"»>
+|   |         <⟨header⟩ size=«"large"»>Recipe File</⟨header⟩>
+|   |         <⟨text⟩ color=«"grey"»>Open a recipes file, and every change goes back to it.</⟨text⟩>
+|   |       </⟨stack⟩>
+|   |       <⟨stack⟩ direction=«"horizontal"»>
+|   |         <⟨action⟩ «"open a file"» />
+|   |         <⟨action⟩ «"save the file"» />
+|   |         <⟨action⟩ «"undo"» />
+|   |       </⟨stack⟩>
+|   |       // a recipes file dropped here, or picked, is the one the app saves to
+|   |       <⟨uploader⟩ for=«"cookbook file"» extensions=«"json"» appearance=«"compact"» />
+|   |     </⟨stack⟩>
+|   |     <⟨cards⟩>
+|   |       <⟨card⟩ class=«"new"»>
+|   |         <⟨content⟩>
+|   |           <⟨form⟩ value={its **new recipe**}>    code({its new recipe})
+|   |             <⟨header⟩ size=«"small"»>Add a recipe</⟨header⟩>
+|   |             <⟨field⟩ label=«"Recipe name"»>
+|   |               <⟨input⟩ name=«"title"» class=«"draft"» size=«"large"»/>
+|   |             </⟨field⟩>
+|   |             <⟨field⟩ label=«"Serves"» inline>
+|   |               <⟨input⟩ class=«"serves"» name=«"servings"» type=«"number"» min=«"1"» labeled=«"right"» label=«"people"»/>
+|   |             </⟨field⟩>
+|   |           </⟨form⟩>
+|   |         </⟨content⟩>
+|   |         <⟨extra⟩>
+|   |           <⟨button⟩ class=«"add"» size=«"small"» color=«"primary"» disabled={its **new recipe's title** is _""_} onClick={add the new recipe}>Add recipe</⟨button⟩>    code({its new recipe's title is ""}) code({add the new recipe})
+|   |         </⟨extra⟩>
+|   |       </⟨card⟩>
+|   |       <⟨for⟩ recipe in every recipe loading=«"Reading your recipes"»>
+|   |         <⟨empty⟩>
+|   |           <⟨card⟩ class=«"none"»>
+|   |             <⟨content⟩>
+|   |               <⟨text⟩ color=«"grey"»>No recipes yet. Open a recipes file, or add your first one.</⟨text⟩>
+|   |             </⟨content⟩>
+|   |           </⟨card⟩>
+|   |         </⟨empty⟩>
+|   |       </⟨for⟩>
+|   |     </⟨cards⟩>
+|   |   </⟨container⟩>

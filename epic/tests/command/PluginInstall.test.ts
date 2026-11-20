@@ -15,6 +15,7 @@ import {
   realpathSync,
   rmSync,
   symlinkSync,
+  utimesSync,
   writeFileSync
 } from "node:fs"
 import { homedir, tmpdir } from "node:os"
@@ -188,6 +189,22 @@ describe("install()", () => {
     expect(readlinkSync(cache)).toBe(engine)
   })
 
+  test("--no-bin, a skill of another copy's (an npx cache) the plugin doesn't have:  removed (repo-split T72)", () => {
+    const npx = join(top, "npm", "_npx", "abc", "node_modules", "spell", "epic", "skills")
+    mkdirSync(join(npx, "bedtime"), { recursive: true })
+    mkdirSync(join(npx, "epic"), { recursive: true })
+    mkdirSync(join(home, "skills"), { recursive: true })
+    symlinkSync(join(npx, "bedtime"), join(home, "skills", "bedtime"))
+    symlinkSync(join(npx, "epic"), join(home, "skills", "epic"))
+    const report = installer().install({ bin: false })
+    expect(readlinkSync(join(home, "skills", "epic"))).toBe(join(engine, "skills", "epic"))
+    expect(lstatSync(join(home, "skills", "bedtime"), { throwIfNoEntry: false })).toBeUndefined()
+    expect(report.changes).toContain(
+      `skills:  ${join(home, "skills", "bedtime")} removed (it led to ${join(npx, "bedtime")}, another copy of the plugin)`
+    )
+    expect(existsSync(join(bin, "epic"))).toBe(false)
+  })
+
   test("isInstalled() (epic-friend P13):  not on a fresh machine;  installed once it's run", () => {
     expect(installer().isInstalled()).toBe(false)
     installer().install()
@@ -229,12 +246,19 @@ describe("off macOS, and the VS Code extension (epic-friend P15)", () => {
       let listed = "spell-app.spell-epic@0.1.0\n"
       const code = (args: string[]) => (calls.push(args), args[0] === "--list-extensions" ? listed : "")
       const withCode = (run: (args: string[]) => string | undefined = code, editor = new Editor("code")) =>
-        new PluginInstall({ home, kit, bin, now: () => NOW, editor, code: run })
+        new PluginInstall({ home, kit, bin, now: () => NOW, editor, code: run, editorHome: top })
       expect(withCode().install().changes.at(-1)).toBe(
         "VS Code:  extension spell-app.spell-epic 0.2.0 installed;  then:  Developer:  Reload Window"
       )
       expect(calls.at(-1)).toEqual(["--install-extension", join(vscode, "spell-epic.vsix"), "--force"])
       listed = "spell-app.spell-epic@0.2.0\n"
+      expect(withCode().install().changes).toEqual([])
+      // the same version, but the .vsix rebuilt since VS Code installed its copy (T72):  installed again
+      const copy = join(top, ".vscode", "extensions", "spell-app.spell-epic-0.2.0")
+      mkdirSync(copy, { recursive: true })
+      utimesSync(copy, new Date("2026-01-01"), new Date("2026-01-01"))
+      expect(withCode().install().changes.at(-1)).toContain("extension spell-app.spell-epic 0.2.0 installed")
+      utimesSync(copy, new Date(), new Date(Date.now() + 60_000))
       expect(withCode().install().changes).toEqual([])
       expect(withCode(() => undefined).install().changes).toEqual([
         `VS Code:  no code command, so ${join(vscode, "spell-epic.vsix")} isn't installed;  in VS Code:  Install from VSIX...`

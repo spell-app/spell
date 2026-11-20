@@ -946,6 +946,35 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "tabs", kind: "boolean", group: "behaviour" },
     { name: "interactive", kind: "boolean", group: "behaviour" }
   ],
+  "ui-mermaid-diagram": [
+    { name: "source", kind: "string" },
+    { name: "load", kind: "enum", values: ["eager", "visible", "idle"] },
+    {
+      name: "theme",
+      kind: "enum",
+      group: "appearance",
+      values: [
+        "spell",
+        "default",
+        "neutral",
+        "dark",
+        "forest",
+        "neo",
+        "neo-dark",
+        "redux",
+        "redux-color",
+        "redux-dark",
+        "redux-dark-color"
+      ]
+    },
+    { name: "scheme", kind: "enum", group: "appearance", values: ["auto", "light", "dark"] },
+    { name: "look", kind: "enum", group: "appearance", values: ["classic", "hand-drawn", "neo"] },
+    { name: "layout", kind: "enum", group: "layout", values: ["auto", "elk", "dagre", "cose-bilkent", "swimlane"] },
+    { name: "seed", kind: "number", group: "appearance" },
+    { name: "controls", kind: "boolean", group: "behaviour" },
+    { name: "remember", kind: "string", group: "behaviour" },
+    { name: "label", kind: "string", group: "name" }
+  ],
   "ui-message": [
     { name: "size", kind: "size", group: "appearance" },
     { name: "color", kind: "color", group: "appearance" },
@@ -1921,6 +1950,20 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "remember", kind: "string", group: "layout" },
     { name: "all-items-icon", kind: "icon", group: "content" },
     { name: "all-items-at-end", kind: "boolean", group: "layout" }
+  ],
+  "ui-tour": [
+    { name: "name", kind: "string", group: "name" },
+    { name: "summary", kind: "string", group: "content" },
+    { name: "dim", kind: "boolean", group: "appearance" },
+    { name: "remember", kind: "string", group: "behaviour" },
+    { name: "offer", kind: "enum", group: "behaviour", values: ["ask", "start", "dot"] }
+  ],
+  "ui-tour-step": [
+    { name: "name", kind: "string", group: "name" },
+    { name: "target", kind: "string", group: "behaviour" },
+    { name: "placement", kind: "enum", group: "layout", values: ["bottom", "top", "left", "right"] },
+    { name: "dim", kind: "boolean", group: "appearance" },
+    { name: "wait-for", kind: "string", group: "behaviour" }
   ],
   "ui-transition": [
     { name: "duration", kind: "string", group: "behaviour" },

@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Mermaid diagram | Spell UI</title>
+    <meta
+      name="description"
+      content="A Mermaid diagram draws a flowchart, a sequence, a timeline or any other kind of diagram Mermaid knows, from the element&#39;s own text or a file on this site."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (`ThemePreference.HEAD_SCRIPT`, as oxfmt lays it out).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="/components/ui/_assets/site.css" />
+    <script type="module" src="/components/ui/_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="Mermaid diagram">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-menu icon class="site-page-links" aria-label="About this page">
+            <ui-item
+              link="https://github.com/spell-app/spell-app/issues/new?title=ui-mermaid-diagram%3A%20%20"
+              target="_blank"
+              icon="bug"
+              aria-label="Report a bug"
+              title="Report a bug"
+            ></ui-item>
+          </ui-menu>
+          <ui-header level="1" class="site-title">
+            Mermaid diagram
+            <ui-header>A Mermaid diagram draws a flowchart, a sequence, a timeline or any other kind of diagram Mermaid knows, from the element&#39;s own text or a file on this site.</ui-header>
+          </ui-header>
+          <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
+          <ui-tab value="examples" label="Examples">
+            <!--
+              EXAMPLES:  ours only, no Fomantic page.  One of each family of diagram, then the looks, the themes, the
+              menu, icons and the error.
+            -->
+            <ui-section id="examples-kinds-of-diagram" label="Kinds of diagram" sticky="stack" collapsible dividing>
+              <ui-section id="examples-kinds-of-diagram-flowchart" label="Flowchart" sticky="stack" collapsible dividing>
+                <ui-example description="Boxes and the arrows between them.">
+                  <ui-mermaid-diagram>
+                    <script type="text/mermaid">
+                      flowchart LR
+                        idea[An idea] --> draft[A draft]
+                        draft --> review{Reviewed?}
+                        review -->|yes| ship[Shipped]
+                        review -->|not yet| draft
+                    </script>
+                  </ui-mermaid-diagram>
+                </ui-example>
+              </ui-section>
+
+              <ui-section id="examples-kinds-of-diagram-sequence" label="Sequence" sticky="stack" collapsible dividing>
+                <ui-example description="Who says what to whom, in order.">
+                  <ui-mermaid-diagram>
+                    <script type="text/mermaid">
+                      sequenceDiagram
+                        participant Writer
+                        participant Site
+                        Writer->>Site: Publish the page
+                        Site-->>Writer: It's live
+                        Note right of Site: Readers see it at once
+                    </script>
+                  </ui-mermaid-diagram>
+                </ui-example>
+              </ui-section>
+
+              <ui-section id="examples-kinds-of-diagram-class" label="Class" sticky="stack" collapsible dividing>
+                <ui-example description="Classes, what they hold, and how they relate.">
+                  <ui-mermaid-diagram>
+                    <script type="text/mermaid">
+                      classDiagram
+                        class Deck {
+                          cards
+                          shuffle()
+                        }
+                        class Card {
+                          suit
+                          rank
+                        }
+                        Deck "1" --> "52" Card
+                    </script>
+                  </ui-mermaid-diagram>
+                </ui-example>
+              </ui-section>
+
+              <ui-section id="examples-kinds-of-diagram-state" label="State" sticky="stack" collapsible dividing>
+                <ui-example description="The states a thing can be in, and what moves it between them.">
+                  <ui-mermaid-diagram>
+                    <script type="text/mermaid">
+                      stateDiagram-v2
+                        [*] --> Draft
+                        Draft --> Review: send
+                        Review --> Draft: changes asked
+                        Review --> Published: approved
+                        Published --> [*]
+                    </script>
+                  </ui-mermaid-diagram>
+                </ui-example>
+              </ui-section>
+
+              <ui-section id="examples-kinds-of-diagram-gantt" label="Gantt" sticky="stack" collapsible dividing>
+                <ui-example description="Tasks laid out over the days they take.">
+                  <ui-mermaid-diagram>
+                    <script type="text/mermaid">
+                      gantt
+                        dateFormat YYYY-MM-DD
+                        title A small launch
+                        section Build
+                        Write it      :a1, 2026-12-01, 5d
+                        Test it       :after a1, 3d
+                        section Ship
+                        Release       :2026-12-10, 1d
+                    </script>
+                  </ui-mermaid-diagram>
+                </ui-example>
+              </ui-section>
+
+              <ui-section id="examples-kinds-of-diagram-mindmap" label="Mindmap" sticky="stack" collapsible dividing>
+                <ui-example description="An idea in the middle, its branches round it.">
+                  <ui-mermaid-diagram>
+                    <script type="text/mermaid">
+                      mindmap
+                        root((Spell))
+                          Language
+                            Plain English
+                            Live
+                          Editor
+                            Inspector
+                            Tours
+                          Spell UI
+                    </script>
+                  </ui-mermaid-diagram>
+                </ui-example>
+              </ui-section>
+
+              <ui-section id="examples-kinds-of-diagram-timeline" label="Timeline" sticky="stack" collapsible dividing>
+                <ui-example description="What happened when.">
+                  <ui-mermaid-diagram>
+                    <script type="text/mermaid">
+                      timeline
+                        title Mermaid's releases
+                        2026-09 : 12.0 : ELK by default
+                        2026-10 : 12.1 : 12.2
+                        2026-11 : 12.3 : Numbered steps
+                    </script>
+                  </ui-mermaid-diagram>
+                </ui-example>
+              </ui-section>
+
+              <ui-section id="examples-kinds-of-diagram-architecture" label="Architecture" sticky="stack" collapsible dividing>
+                <ui-example description="Services and how they connect, with icons.  `fa7-free:globe` is the page's own globe icon.">
+                  <ui-mermaid-diagram>
+                    <script type="text/mermaid">
+                      architecture-beta
+                        group app(cloud)[The app]
+                        service web(fa7-free:globe)[Web] in app
+                        service api(server)[API] in app
+                        service db(database)[Data] in app
+                        web:R --> L:api
+                        api:R --> L:db
+                    </script>
+                  </ui-mermaid-diagram>
+                </ui-example>
+              </ui-section>
+
+              <ui-section id="examples-kinds-of-diagram-kanban" label="Kanban" sticky="stack" collapsible dividing>
+                <ui-example description="Cards in columns.">
+                  <ui-mermaid-diagram>
+                    <script type="text/mermaid">
+                      kanban
+                        todo[To do]
+                          one[Write the docs]
+                        doing[Doing]
+                          two[Draw the diagrams]
+                        done[Done]
+                          three[Pick the colours]
+                    </script>
+                  </ui-mermaid-diagram>
+                </ui-example>
+              </ui-section>
+
+              <ui-section id="examples-kinds-of-diagram-packet" label="Packet" sticky="stack" collapsible dividing>
+                <ui-example description="A network packet, bit by bit.">
+                  <ui-mermaid-diagram>
+                    <script type="text/mermaid">
+                      packet
+                        0-15: "Source port"
+                        16-31: "Destination port"
+                        32-63: "Sequence number"
+                    </script>
+                  </ui-mermaid-diagram>
+                </ui-example>
+              </ui-section>
+
+              <ui-section id="examples-kinds-of-diagram-radar" label="Radar" sticky="stack" collapsible dividing>
+                <ui-example description="Several scores on one wheel.">
+                  <ui-mermaid-diagram>
+                    <script type="text/mermaid">
+                      radar-beta
+                        axis speed["Speed"], ease["Ease"], looks["Looks"], size["Size"]
+                        curve a["Spell UI"]{4, 5, 5, 3}
+                        curve b["Plain HTML"]{5, 2, 2, 5}
+                    </script>
+                  </ui-mermaid-diagram>
+                </ui-example>
+              </ui-section>
+
+              <ui-section id="examples-kinds-of-diagram-treemap" label="Treemap" sticky="stack" collapsible dividing>
+                <ui-example description="Parts of a whole, as boxes sized by how big each is.">
+                  <ui-mermaid-diagram>
+                    <script type="text/mermaid">
+                      treemap-beta
+                        "Spell UI"
+                          "Components": 90
+                          "Runtime": 20
+                        "Editor"
+                          "Inspector": 30
+                          "Tours": 10
+                    </script>
+                  </ui-mermaid-diagram>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+
+            <ui-section id="examples-looks" label="Looks" sticky="stack" collapsible dividing>
+              <ui-section id="examples-looks-each-look" label="Each look" sticky="stack" collapsible dividing>
+                <ui-example description="`look` picks the drawing style:  plain lines (`classic`, the default), sketched by hand (`hand-drawn`), or flatter and softer (`neo`).  A hand-drawn drawing keeps its wobbles from one draw to the next (`seed`).">
+                  <div class="ui-grid">
+                    <div class="ui-stack">
+                      <ui-header level="5">classic</ui-header>
+                      <ui-mermaid-diagram look="classic" label="The flowchart, classic">
+                        <script type="text/mermaid">
+                          flowchart TD
+                            idea[An idea] --> draft[A draft]
+                            draft --> review{Reviewed?}
+                            review -->|yes| ship[Shipped]
+                            review -->|not yet| draft
+                        </script>
+                      </ui-mermaid-diagram>
+                    </div>
+                    <div class="ui-stack">
+                      <ui-header level="5">hand-drawn</ui-header>
+                      <ui-mermaid-diagram look="hand-drawn" label="The flowchart, hand-drawn">
+                        <script type="text/mermaid">
+                          flowchart TD
+                            idea[An idea] --> draft[A draft]
+                            draft --> review{Reviewed?}
+                            review -->|yes| ship[Shipped]
+                            review -->|not yet| draft
+                        </script>
+                      </ui-mermaid-diagram>
+                    </div>
+                    <div class="ui-stack">
+                      <ui-header level="5">neo</ui-header>
+                      <ui-mermaid-diagram look="neo" label="The flowchart, neo">
+                        <script type="text/mermaid">
+                          flowchart TD
+                            idea[An idea] --> draft[A draft]
+                            draft --> review{Reviewed?}
+                            review -->|yes| ship[Shipped]
+                            review -->|not yet| draft
+                        </script>
+                      </ui-mermaid-diagram>
+                    </div>
+                  </div>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+
+            <ui-section id="examples-themes" label="Themes" sticky="stack" collapsible dividing>
+              <ui-section id="examples-themes-every-theme" label="Every theme" sticky="stack" collapsible dividing>
+                <ui-example description="`theme` picks the colours:  `spell`, the default, is Spell UI's own;  the rest are Mermaid's.  Switch the page to dark:  each light theme draws as its dark twin, and `spell` in Spell UI's dark colours.">
+                  <div class="ui-grid">
+                    <div class="ui-stack">
+                      <ui-header level="5">spell</ui-header>
+                      <ui-mermaid-diagram theme="spell" label="The flowchart, in spell">
+                        <script type="text/mermaid">
+                          flowchart TD
+                            idea[An idea] --> draft[A draft]
+                            draft --> review{Reviewed?}
+                            review -->|yes| ship[Shipped]
+                            review -->|not yet| draft
+                        </script>
+                      </ui-mermaid-diagram>
+                    </div>
+                    <div class="ui-stack">
+                      <ui-header level="5">default</ui-header>
+                      <ui-mermaid-diagram theme="default" label="The flowchart, in default">
+                        <script type="text/mermaid">
+                          flowchart TD
+                            idea[An idea] --> draft[A draft]
+                            draft --> review{Reviewed?}
+                            review -->|yes| ship[Shipped]
+                            review -->|not yet| draft
+                        </script>
+                      </ui-mermaid-diagram>
+                    </div>
+                    <div class="ui-stack">
+                      <ui-header level="5">neutral</ui-header>
+                      <ui-mermaid-diagram theme="neutral" label="The flowchart, in neutral">
+                        <script type="text/mermaid">
+                          flowchart TD
+                            idea[An idea] --> draft[A draft]
+                            draft --> review{Reviewed?}
+                            review -->|yes| ship[Shipped]
+                            review -->|not yet| draft
+                        </script>
+                      </ui-mermaid-diagram>
+                    </div>
+                    <div class="ui-stack">
+                      <ui-header level="5">dark</ui-header>
+                      <ui-mermaid-diagram theme="dark" label="The flowchart, in dark">
+                        <script type="text/mermaid">
+                          flowchart TD
+                            idea[An idea] --> draft[A draft]
+                            draft --> review{Reviewed?}
+                            review -->|yes| ship[Shipped]
+                            review -->|not yet| draft
+                        </script>
+                      </ui-mermaid-diagram>
+                    </div>
+                    <div class="ui-stack">
+                      <ui-header level="5">forest</ui-header>
+                      <ui-mermaid-diagram theme="forest" label="The flowchart, in forest">
+                        <script type="text/mermaid">
+                          flowchart TD
+                            idea[An idea] --> draft[A draft]
+                            draft --> review{Reviewed?}
+                            review -->|yes| ship[Shipped]
+                            review -->|not yet| draft
+                        </script>
+                      </ui-mermaid-diagram>
+                    </div>
+                    <div class="ui-stack">
+                      <ui-header level="5">neo</ui-header>
+                      <ui-mermaid-diagram theme="neo" label="The flowchart, in neo">
+                        <script type="text/mermaid">
+                          flowchart TD
+                            idea[An idea] --> draft[A draft]
+                            draft --> review{Reviewed?}
+                            review -->|yes| ship[Shipped]
+                            review -->|not yet| draft
+                        </script>
+                      </ui-mermaid-diagram>
+                    </div>
+                    <div class="ui-stack">
+                      <ui-header level="5">neo-dark</ui-header>
+                      <ui-mermaid-diagram theme="neo-dark" label="The flowchart, in neo-dark">
+                        <script type="text/mermaid">
+                          flowchart TD
+                            idea[An idea] --> draft[A draft]
+                            draft --> review{Reviewed?}
+                            review -->|yes| ship[Shipped]
+                            review -->|not yet| draft
+                        </script>
+                      </ui-mermaid-diagram>
+                    </div>
+                    <div class="ui-stack">
+                      <ui-header level="5">redux</ui-header>
+                      <ui-mermaid-diagram theme="redux" label="The flowchart, in redux">
+                        <script type="text/mermaid">
+                          flowchart TD
+                            idea[An idea] --> draft[A draft]
+                            draft --> review{Reviewed?}
+                            review -->|yes| ship[Shipped]
+                            review -->|not yet| draft
+                        </script>
+                      </ui-mermaid-diagram>
+                    </div>
+                    <div class="ui-stack">
+                      <ui-header level="5">redux-color</ui-header>
+                      <ui-mermaid-diagram theme="redux-color" label="The flowchart, in redux-color">
+                        <script type="text/mermaid">
+                          flowchart TD
+                            idea[An idea] --> draft[A draft]
+                            draft --> review{Reviewed?}
+                            review -->|yes| ship[Shipped]
+                            review -->|not yet| draft
+                        </script>
+                      </ui-mermaid-diagram>
+                    </div>
+                    <div class="ui-stack">
+                      <ui-header level="5">redux-dark</ui-header>
+                      <ui-mermaid-diagram theme="redux-dark" label="The flowchart, in redux-dark">
+                        <script type="text/mermaid">
+                          flowchart TD
+                            idea[An idea] --> draft[A draft]
+                            draft --> review{Reviewed?}
+                            review -->|yes| ship[Shipped]
+                            review -->|not yet| draft
+                        </script>
+                      </ui-mermaid-diagram>
+                    </div>
+                    <div class="ui-stack">
+                      <ui-header level="5">redux-dark-color</ui-header>
+                      <ui-mermaid-diagram theme="redux-dark-color" label="The flowchart, in redux-dark-color">
+                        <script type="text/mermaid">
+                          flowchart TD
+                            idea[An idea] --> draft[A draft]
+                            draft --> review{Reviewed?}
+                            review -->|yes| ship[Shipped]
+                            review -->|not yet| draft
+                        </script>
+                      </ui-mermaid-diagram>
+                    </div>
+                  </div>
+                </ui-example>
+              </ui-section>
+
+              <ui-section id="examples-themes-held-dark" label="Held dark" sticky="stack" collapsible dividing>
+                <ui-example description="`scheme=&quot;dark&quot;` draws dark whatever the page shows;  `light` holds it light.">
+                  <ui-mermaid-diagram scheme="dark">
+                    <script type="text/mermaid">
+                      flowchart LR
+                        idea[An idea] --> draft[A draft]
+                        draft --> review{Reviewed?}
+                        review -->|yes| ship[Shipped]
+                        review -->|not yet| draft
+                    </script>
+                  </ui-mermaid-diagram>
+                </ui-example>
+              </ui-section>
+
+              <ui-section id="examples-themes-colours-menu" label="Colours menu" sticky="stack" collapsible dividing>
+                <ui-example description="`controls` adds a small menu in the corner, shown when the pointer rests on the drawing:  a reader picks its colours and light or dark, and it's remembered for them.">
+                  <ui-mermaid-diagram controls remember="docs-colours-menu">
+                    <script type="text/mermaid">
+                      flowchart LR
+                        idea[An idea] --> draft[A draft]
+                        draft --> review{Reviewed?}
+                        review -->|yes| ship[Shipped]
+                        review -->|not yet| draft
+                    </script>
+                  </ui-mermaid-diagram>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+
+            <ui-section id="examples-content" label="Content" sticky="stack" collapsible dividing>
+              <ui-section id="examples-content-icons" label="Icons" sticky="stack" collapsible dividing>
+                <ui-example description="Font Awesome's names (`fa:fa-car`, `far:fa-heart`, `fab:fa-github`) draw the page's own icons, the ones `&lt;ui-icon&gt;` draws:  no Font Awesome sheet needed.">
+                  <ui-mermaid-diagram>
+                    <script type="text/mermaid">
+                      flowchart LR
+                        car["fa:fa-car Drive"] --> heart["far:fa-heart Love it"] --> code["fab:fa-github Share it"]
+                    </script>
+                  </ui-mermaid-diagram>
+                </ui-example>
+              </ui-section>
+
+              <ui-section id="examples-content-from-a-file" label="From a file" sticky="stack" collapsible dividing>
+                <ui-example description="`source` draws a file of this site, and draws again when it changes.">
+                  <ui-mermaid-diagram source="examples/release.mmd"></ui-mermaid-diagram>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+
+            <ui-section id="examples-states" label="States" sticky="stack" collapsible dividing>
+              <ui-section id="examples-states-error" label="Error" sticky="stack" collapsible dividing>
+                <ui-example description="Text Mermaid can't read shows a short message:  the line it stopped at, and what it expected.  While someone types, the last good drawing stays under it, dimmed.">
+                  <ui-mermaid-diagram>
+                    <script type="text/mermaid">
+                      flowchart LR
+                        a[Start] --> b[Half typed
+                    </script>
+                  </ui-mermaid-diagram>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="usage" label="Usage">
+            <!-- USAGE:  what to write, where Mermaid comes from, the events, keyboard and accessibility. -->
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Write Mermaid's text inside `<ui-mermaid-diagram>`:  every kind of diagram Mermaid has today draws, with
+                  nothing to turn on.  The text comes from, first match wins:
+
+                  - `source`:  a file of this site (same origin only), fetched when `load` says.
+                  - A `<script type="text/mermaid">` child:  its text exactly, so `<`, `>` and `&` need no escaping.
+                  - The element's own text, dedented.
+
+                  It draws again when the text changes:  typing in the editor, a script setting `content`, or the file
+                  changing.  A setting written in the diagram's own text (its front matter, or a `%%{init: ...}%%` line)
+                  wins over the attributes, as it does on GitHub.
+
+                  In `<ui-markdown>`, a ````mermaid```` block draws as a diagram too.
+                </script>
+              </ui-markdown>
+            </ui-section>
+
+            <ui-section id="usage-loading" label="Loading" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Mermaid is big, so it loads only the first time a page draws a diagram, in files of its own:  a page without
+                  one pays nothing.  Mermaid then loads only the part for each kind of diagram it draws.  ELK, the layout
+                  engine for flowcharts, state, class and ER diagrams, loads once a page, when one needs it.
+
+                  Mermaid draws in its strict mode:  HTML in a label shows as text, and clicks that would run code are off,
+                  so it's safe with text you didn't write.
+                </script>
+              </ui-markdown>
+            </ui-section>
+
+            <ui-section id="usage-events" label="Events" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  - `ui-drawn` -- drawn:  `{ diagramType }`, what Mermaid read the text as (`flowchart-v2`, `sequence` ...).
+                  - `ui-error` (cancelable) -- loading or drawing failed:  `{ kind, source, error }`, `kind` `render` for text
+                    Mermaid can't read.  Cancel it to skip the message.
+                  - `ui-loaded`, `ui-changed`, `ui-saving`, `ui-saved` -- the text, shared with `<ui-code>` and `<ui-markdown>`.
+
+                  The drawing itself is the `svg` property, as SVG text, for copying or saving;  `diagramType` and `error`
+                  say what was drawn, or what went wrong.  `putBack()` forgets a reader's picks from the menu.
+                </script>
+              </ui-markdown>
+              <ui-code language="js">
+                <script type="text/plain">
+                  const diagram = document.querySelector("ui-mermaid-diagram")
+                  diagram.addEventListener("ui-drawn", (event) => console.log("drew a", event.detail.diagramType))
+                  diagram.content = "flowchart LR\n  a --> b"
+                </script>
+              </ui-code>
+            </ui-section>
+
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  - With `controls`, **Tab** reaches the menu button, which shows at once;  **Enter** or **Space** opens it,
+                    and the arrow keys move through the themes and light or dark.
+                  - Without it, the drawing is no tab stop:  there's nothing in it to use.
+                </script>
+              </ui-markdown>
+            </ui-section>
+
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  - The drawing is an image (`role="img"`), named by `label`;  without one, by the title in the diagram's own
+                    text (`accTitle`, or a `title`);  else by its kind ("Flowchart diagram").  Give a `label` that says what
+                    the diagram shows.
+                  - An error is a `<ui-message>`, one short line per thing:  what went wrong, the line, what was expected.
+                  - The menu's words are translated, with the rest of the tag's.
+                </script>
+              </ui-markdown>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="api" label="API">
+            <!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-mermaid-diagram" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-mermaid-diagram" only="events"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-mermaid-diagram" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-mermaid-diagram" only="states"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-mermaid-diagram" only="texts"></ui-docs-api>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="theming" label="Theming">
+            <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  The `spell` theme's colours ARE Spell UI's tokens, read from the page as it draws:  the primary colour and its
+                  background for boxes, the text colour for words, the surfaces for groups, yellow for notes.  So a theme picked
+                  in the menu above, or edited in the theme editor, reaches the diagram too;  switching the page to dark draws
+                  it again, dark.
+
+                  Its own tokens are the box's:  `--ui-mermaid-diagram-padding`, and how faint the last good drawing is under
+                  an error, `--ui-mermaid-diagram-stale-opacity`.
+                </script>
+              </ui-markdown>
+              <ui-docs-tokens family="ui-mermaid-diagram" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <!-- playground:end -->
+              </ui-docs-tokens>
+            </ui-section>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Mermaid's own themes are offered beside Spell's (`theme`), by their own names.  A light one with a dark twin
+                  follows the page:  `default` draws as `dark` on a dark page, `neo` as `neo-dark`, `redux` as
+                  `redux-dark`, `redux-color` as `redux-dark-color`.  `neutral` and `forest` draw the same either way.
+
+                  The pictures in Spell's READMEs are drawn in the same Spell look, from the same table of colours
+                  (`yarn mermaid:pretty`), so a README and a page match.
+                </script>
+              </ui-markdown>
+            </ui-section>
+          </ui-tab>
+        </ui-tabs>
+
+      </ui-container>
+    </main>
+  </body>
+</html>

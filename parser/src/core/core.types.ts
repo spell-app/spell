@@ -27,6 +27,7 @@ import type { savedMethods } from "./saved"
 import type { abilityMethods } from "./abilities"
 import type { dimensionMethods } from "./dimensions"
 import type { siteMethods } from "./sites"
+import type { tourMethods } from "./tours"
 import type { PropRule } from "spell/util"
 
 // ## Importing core
@@ -126,6 +127,7 @@ export type Core = typeof coreMethods &
   typeof abilityMethods &
   typeof dimensionMethods &
   typeof siteMethods &
+  typeof tourMethods &
   typeof deprecatedMethods
 
 // ## Drawing again
@@ -223,6 +225,12 @@ export type TestCheck = {
  * | `write-refused-not-listed` | the same, refused as a sign-up sheet takes rows only from the people its list names (P27, J101) | `thing` |
  * | `write-refused-used-up` | the same, refused as you've asked for every invitation you have (P31) | `thing` |
  * | `write-retry`, `write-show-me` | that notice's buttons | |
+ * | `file-none`, `file-open` | a file a person picks, with none picked yet:  the line, and its button (epic `editor` P41) | |
+ * | `file-reopen`, `file-reopen-button` | the same, after a reload, when the browser forgot the page may save to it | `file` |
+ * | `file-missing`, `file-find`, `file-save-new` | the same, moved, renamed or deleted | `file` |
+ * | `file-changed`, `file-read-again` | the same, changed by someone else, with nothing unsaved here | `file` |
+ * | `file-conflict-title`, `file-conflict`, `file-keep-theirs`, `file-keep-yours`, `file-keep-both` | the dialog when a save finds someone else changed it | `file` |
+ * | `file-downloaded` | the same, its first download where the browser can't save back to a file | `file` |
  * | `room-out-of-date` | the notice when a room says this page runs an older version of the program (epic `data` T5) | |
  * | `room-reload` | that notice's button | |
  * | `number-sent-as-other-text` | the console's warning for a number field that sent other text (epic `data` T85) | `field`, `value` |
@@ -363,7 +371,25 @@ export const CORE_MESSAGES = {
   "site-create-it": "Create it",
   "site-page-failed": "Sorry, this page couldn't be shown.",
   "site-page-failed-why": "{page} failed:  {why}",
-  "table-edit": "Edit Table"
+  "table-edit": "Edit Table",
+  "file-none": "Open a file to work on.",
+  "file-open": "Open a file",
+  "file-reopen": "Reopen {file} to save to it.",
+  "file-reopen-button": "Reopen",
+  "file-missing":
+    "Can't find {file}. It may have been moved, renamed or deleted. Your changes are safe on this device.",
+  "file-find": "Find it",
+  "file-save-new": "Save as new file",
+  "file-changed": "{file} changed. Read it again?",
+  "file-read-again": "Read it again",
+  "file-conflict-title": "{file} changed",
+  "file-conflict":
+    "Someone changed {file} after you opened it. Which version do you want to keep?\nKeep theirs: open their version. Your changes are kept on this device, not lost.\nKeep yours: save your version over theirs.\nKeep both: save your version as a new file.",
+  "file-keep-theirs": "Keep theirs",
+  "file-keep-yours": "Keep yours",
+  "file-keep-both": "Keep both",
+  "file-downloaded":
+    "{file} is in your Downloads folder. This browser can't save back to the file you opened, so each save downloads a new copy."
 }
 
 /** One of the core's messages, e.g. `expect-failed` -- see `CORE_MESSAGES`. */

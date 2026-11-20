@@ -45,10 +45,22 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       `spell/cli/PathLink.ts`
   - [projectBin.ts](projectBin.ts) -- `projectBin()`:  [the `spell` bin](../../bin/spell.mjs) and
     [the `epic` bin](../../epic/bin/epic) hand off to a project's own npm install when that project runs no checkout;
-    node's modules only, loaded by plain node before `tsx`
+    node's modules and the kit's `checkoutOf()` only, loaded by plain node before `tsx`
     - the `spell` bin hands off to another kit checkout the current folder is in first (`checkoutBin()`)
+    - `KIT_FILE` and `kitFileAt()` live here too:  a project's git worktree follows its main checkout's
+      `.spell/kit.json5` (epic `repo-split` T72), for these bins and `kitCheckout.ts`' alike
   - [commands/localTools.ts](commands/localTools.ts) -- `localTools()`:  every way Spell runs in a project, and whether
-    it follows the checkout, for `spell local status`;  reads Claude Code's list of plugins, never writes it
+    it follows the checkout, for `spell local status`;  reads Claude Code's files and asks VS Code, never writes them
+  - `spell local`'s machine-wide part (epic `repo-split` T72, reversing J230), beside it in [commands/](commands/):
+    - [localMachine.ts](commands/localMachine.ts) -- `MachineTools`:  Claude Code's epic plugin, its skills and VS
+      Code's extension switched by the checkout's own `epic plugin install`, run as a program (this folder imports
+      no big folder);  recorded in `~/.spell/local-plugin.json`, so `off` undoes only what `on` did
+    - [localServers.ts](commands/localServers.ts) -- `spellServers()`:  Spell's page, epic and vite servers, and
+      whether each runs your checkout (the kit's `serverProcesses()`);  `stopServers()`, only for `on --stop`
+    - [localWorktrees.ts](commands/localWorktrees.ts) -- `ProjectWorktrees`:  a copy of the kit file in each of a
+      project's worktrees, for releases older than `kitFileAt()`
+    - their tests hand in a stand-in `epic`, servers and `kill` (`LocalProbes`):  the real `epic` runner refuses
+      under Vitest
   - [cli.types.ts](cli.types.ts) -- `EXIT`, `CliError`, the flags' types, `CommandList`, `HookList`, `SpellRepo`
 - The kit's own commands:  [commands.ts](commands.ts) is their list, [commands/](commands/) their work.
 

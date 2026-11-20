@@ -827,6 +827,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         (`SpellAccounts.didForHandle()`)
       - a handle's host is let in for that path alone:  no page, no write
       - its hosts reach it through a wildcard DNS record, once it has a real address (the mail and hosting guide)
+  - AUTHENTICATED PLACES ([ProjectPlaces.ts](server/node/places/ProjectPlaces.ts), epic `from-console` P14):  every
+    project's authenticated places, the kit's `AuthenticatedPlaces`' source, so a page reads them through the page
+    server, which adds the secret.
+    - Read from what each project compiled to, its declarations (`SP.DeclaredPlace.served`):  its address, kind and
+      the NAME of its secret.  Nothing a page sends says where a secret goes.
+    - In the deployment `SPELL_DEPLOYMENT` names, from the project file's `places`, as `spell run` picks it
+      (`SP.SpellProject.deploymentsIn()`).
+    - The secrets that aren't set, as the page server starts:  every project's declarations under `build/`.
+    - Its test, end to end:  [ProjectPlaces.test.ts](../../tests/spaces/server/node/places/ProjectPlaces.test.ts).
   - Its tests:  [SpaceFolders.test.ts](../../tests/spaces/server/node/places/SpaceFolders.test.ts);
     the recipe box in a browser, [recipeBox.test.ts](../../tests/spell/recipeBox.test.ts).
 - [cli.ts](server/node/routes/cli.ts):  the API (and `/spaces`) alone, on port 3001.

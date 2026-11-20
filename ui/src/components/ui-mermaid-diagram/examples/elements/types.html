@@ -1,0 +1,32 @@
+<!-- `<ui-mermaid-diagram>`'s examples, as element markup. -->
+<div class="ui-stack">
+  <section>
+    <h4>Mermaid diagram</h4>
+    <ui-mermaid-diagram>
+      <script type="text/mermaid">
+        flowchart LR
+          idea[An idea] --> draft[A draft]
+          draft --> review{Reviewed?}
+          review -->|yes| ship[Shipped]
+          review -->|not yet| draft
+      </script>
+    </ui-mermaid-diagram>
+  </section>
+
+  <section>
+    <h4>From a file</h4>
+    <ui-mermaid-diagram source="/src/components/ui-mermaid-diagram/examples/sources/release.mmd"></ui-mermaid-diagram>
+  </section>
+
+  <section>
+    <h4>Hand-drawn, with the colours menu</h4>
+    <ui-mermaid-diagram look="hand-drawn" controls remember="examples-hand-drawn">
+      <script type="text/mermaid">
+        flowchart TD
+          start([Start]) --> pick[Pick a card]
+          pick --> play[Play it]
+          play --> start
+      </script>
+    </ui-mermaid-diagram>
+  </section>
+</div>

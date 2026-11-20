@@ -183,10 +183,11 @@ export type PageEditResult = { ok: boolean; status: number; etag?: string; error
 
 /**
  * One element of the page's own file, read as it is on disk now (`GET /api/pages?id=`), for an edit of it.
- * - `id`:  the element
+ * - `id`:  the element;  none:  the WHOLE file (a block with no element with an id around it, epic `epic-engine`
+ *   T86), written back with `saveFile()`
  * - `parent`:  a tag name:  `#id`'s nearest such ancestor instead (a section, through its heading)
  */
-export type ElementRead = { id: string; parent?: string }
+export type ElementRead = { id?: string; parent?: string }
 
 /** What a read answered:  the element's markup, byte for byte, and the file's version (`ETag`) to edit it from. */
 export type ElementReadResult = { ok: boolean; status: number; html?: string; etag?: string; error?: string }
@@ -391,7 +392,7 @@ export function liveClient(scrollKey: string): void {
   }
 
   config.readElement = async ({ id, parent }) => {
-    const query = new URLSearchParams({ path: config.file, id, ...(parent && { parent }) })
+    const query = new URLSearchParams({ path: config.file, ...(id && { id }), ...(parent && { parent }) })
     const answer = await fetch(`${config.edit ?? "/api/pages"}?${query}`, { cache: "no-store" })
     const body = (await answer.json().catch(() => ({}))) as { html?: string; etag?: string; error?: string }
     const ok = answer.ok && typeof body.html === "string"

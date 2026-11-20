@@ -22,11 +22,11 @@ import { FieldCalled } from "./FieldCalled"
 import { FirstFewWhere } from "./FirstFewWhere"
 import { HelpfulWord } from "./HelpfulWord"
 import { IdColumn } from "./IdColumn"
-import { KeyGoesInAddress } from "./KeyGoesInAddress"
-import { KeyGoesInHeader } from "./KeyGoesInHeader"
-import { KeyIfSet } from "./KeyIfSet"
-import { KeyIsSecret } from "./KeyIsSecret"
-import { TokenFrom } from "./TokenFrom"
+import { KeyGoesInAddress, OLD_KEY_GOES_IN_ADDRESS } from "./KeyGoesInAddress"
+import { KeyGoesInHeader, OLD_KEY_GOES_IN_HEADER } from "./KeyGoesInHeader"
+import { KeyIfSet, OLD_KEY_IF_SET } from "./KeyIfSet"
+import { KeyIsSecret, OLD_KEY_IS_SECRET } from "./KeyIsSecret"
+import { TokenFrom, OLD_TOKEN_FROM } from "./TokenFrom"
 import { DataIsPrivate } from "./DataIsPrivate"
 import { KeyWritten } from "./KeyWritten"
 import { ListsUnder } from "./ListsUnder"
@@ -58,6 +58,7 @@ import {
   WhileWaiting
 } from "./ReadRider"
 import { ReloadThings } from "./ReloadThings"
+import { PickFileFor } from "./PickFileFor"
 import { SaveDraft } from "./SaveDraft"
 import { KeepsNoTimes } from "./KeepsNoTimes"
 import { EnabledOperations, OPERATION_MEANINGS } from "./EnabledOperations"
@@ -158,6 +159,10 @@ placesEs.addRule(
   }
 )
 
+placesEs.addRule(Wording.specialize({ ruleName: "picked_file", meanings: ["you_pick", "on_this_device"] }), {
+  syntax: "((you_pick:que eliges|que elijas)|(on_this_device:en este dispositivo))"
+})
+
 placesEs.addRule(
   Wording.specialize({ ruleName: "place_kind_each_person", meanings: ["personal_atmosphere_account"] }),
   { syntax: "(personal_atmosphere_account:cuenta personal de atmosphere/i|atmosphere/i personal)" }
@@ -192,7 +197,62 @@ placesEs.addRule(CreatePlace, {
 placesEs.addRule(CreatePlace, {
   syntax: `{type:type_words} es ${A} {superType:type} (en|desde) {address:text} {with_nested_statements}?`
 })
-placesEs.addRule(CreatePlace, { syntax: `{type:type_words} es ${A} {kind:place_kind_here} {with_nested_statements}?` })
+placesEs.addRule(CreatePlace, {
+  syntax: `{type:type_words} es ${A} {kind:place_kind_here} {with_nested_statements}?`,
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        // la base de datos del navegador:  nunca un archivo que se elige, aunque los dos digan "en este dispositivo"
+        [
+          "recetario familiar es una base de datos en este dispositivo",
+          [
+            "export class RecetarioFamiliar extends Place {}",
+            "export const recetarioFamiliar = core.place(new RecetarioFamiliar(), {",
+            '  name: "recetario_familiar",',
+            '  kind: "database on this device",',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+placesEs.addRule(CreatePlace, {
+  syntax: `{type:type_words} es ${A} {kind:place_kind} {picked:picked_file} {with_nested_statements}?`,
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          "recetario familiar es un archivo json que eliges",
+          [
+            "export class RecetarioFamiliar extends Place {}",
+            "export const recetarioFamiliar = core.place(new RecetarioFamiliar(), {",
+            '  name: "recetario_familiar",',
+            '  kind: "file",',
+            "  picked: true,",
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ],
+        [
+          "recetario familiar es un archivo json en este dispositivo",
+          [
+            "export class RecetarioFamiliar extends Place {}",
+            "export const recetarioFamiliar = core.place(new RecetarioFamiliar(), {",
+            '  name: "recetario_familiar",',
+            '  kind: "file",',
+            "  picked: true,",
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
 placesEs.addRule(CreatePlace, {
   syntax: `{type:type_words} es ${A} {kind:place_kind_each_person} ((en|desde) {address:text})? {with_nested_statements}?`
 })
@@ -384,16 +444,16 @@ placesEs.addRule(FieldCalled, {
 placesEs.addRule(FieldCalled, {
   syntax: `${THE} {property:quoted_member} de ${A} {owner:known_type} se (llama|llaman) {name:text}`
 })
-placesEs.addRule(KeyIfSet, { syntax: "{type:subject_its} clave opcional es el secreto {name:text}" })
-placesEs.addRule(KeyIsSecret, { syntax: "{type:subject_its} clave es el secreto {name:text}" })
+placesEs.addRule(KeyIfSet, { syntax: "{type:subject_implied} se autentica opcionalmente con el secreto {name:text}" })
+placesEs.addRule(KeyIsSecret, { syntax: "{type:subject_implied} se autentica con el secreto {name:text}" })
 placesEs.addRule(TokenFrom, {
-  syntax: "{type:subject_its} token viene de {address:text} ,? hecho con el secreto {name:text}",
+  syntax: "{type:subject_implied} se autentica con un token de {address:text} ,? hecho con el secreto {name:text}",
   tests: [
     {
       compileAs: "block",
       tests: [
         [
-          'acme es un servidor web en "https://acme.test"\n\tsu token viene de "https://auth.acme.test/api-keys/{key id}/token", hecho con el secreto "ACME_API_KEY"',
+          'acme es un servidor web en "https://acme.test"\n\tse autentica con un token de "https://auth.acme.test/api-keys/{key id}/token", hecho con el secreto "ACME_API_KEY"',
           [
             "export class Acme extends Place {}",
             "export const acme = core.place(new Acme(), {",
@@ -433,15 +493,22 @@ placesEs.addRule(DataIsPrivate, {
     }
   ]
 })
+// las palabras viejas (épica `from-console` P14):  cada una se sigue leyendo, con un aviso que nombra la línea nueva
+placesEs.addRule(OLD_KEY_IF_SET, { syntax: "{type:subject_its} clave opcional es el secreto {name:text}" })
+placesEs.addRule(OLD_KEY_IS_SECRET, { syntax: "{type:subject_its} clave es el secreto {name:text}" })
+placesEs.addRule(OLD_TOKEN_FROM, {
+  syntax: "{type:subject_its} token viene de {address:text} ,? hecho con el secreto {name:text}"
+})
+placesEs.addRule(KeyWritten, { syntax: "{type:subject_implied} se autentica con {key:text}" })
 placesEs.addRule(KeyWritten, { syntax: "{type:subject_its} clave es {key:text}" })
 placesEs.addRule(KeyGoesInHeader, {
-  syntax: "{type:subject_its} clave va en su cabecera {name:text}",
+  syntax: "{type:subject_its} secreto va en su cabecera {name:text}",
   tests: [
     {
       compileAs: "block",
       tests: [
         [
-          'recetario es un servidor web en "https://example.com"\n\t- su clave va en su cabecera "X-Api-Key"',
+          'recetario es un servidor web en "https://example.com"\n\t- su secreto va en su cabecera "X-Api-Key"',
           [
             "export class Recetario extends Place {}",
             "export const recetario = core.place(new Recetario(), {",
@@ -457,14 +524,15 @@ placesEs.addRule(KeyGoesInHeader, {
     }
   ]
 })
+placesEs.addRule(OLD_KEY_GOES_IN_HEADER, { syntax: "{type:subject_its} clave va en su cabecera {name:text}" })
 placesEs.addRule(KeyGoesInAddress, {
-  syntax: "{type:subject_its} clave va en la dirección como {name:text}",
+  syntax: "{type:subject_its} secreto va en la dirección como {name:text}",
   tests: [
     {
       compileAs: "block",
       tests: [
         [
-          'recetario es un servidor web en "https://example.com"\n\t- su clave va en la dirección como "api_key"',
+          'recetario es un servidor web en "https://example.com"\n\t- su secreto va en la dirección como "api_key"',
           [
             "export class Recetario extends Place {}",
             "export const recetario = core.place(new Recetario(), {",
@@ -480,6 +548,7 @@ placesEs.addRule(KeyGoesInAddress, {
     }
   ]
 })
+placesEs.addRule(OLD_KEY_GOES_IN_ADDRESS, { syntax: "{type:subject_its} clave va en la dirección como {name:text}" })
 placesEs.addRule(CheckedEvery, { syntax: "{type:subject_implied} se revisa cada {interval:measure_literal}" })
 placesEs.addRule(CheckedEvery, { syntax: "{type:subject_implied} se revisa cada {number}" })
 placesEs.addRule(CheckedEvery, { syntax: "{type:subject_implied} se revisa cada {unit:unit_words}" })
@@ -1293,7 +1362,65 @@ placesEs.addRule(DraftOf, {
   syntax: "un borrador de {thing:operand}",
   tests: [{ compileAs: "expression", tests: [["un borrador de cosa", undefined]] }]
 })
+placesEs.addRule(SaveDraft, {
+  syntax: "guardar {draft:known_type}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: ["recetario familiar es un archivo json que eliges", "para guardarlo", "\tguardar recetario familiar"],
+          js: [
+            "export class RecetarioFamiliar extends Place {}",
+            "export const recetarioFamiliar = core.place(new RecetarioFamiliar(), {",
+            '  name: "recetario_familiar",',
+            '  kind: "file",',
+            "  picked: true,",
+            '  unclearNumbers: ","',
+            "})",
+            "export async function guardarlo() {",
+            '  return core.asAction({ undoneAs: "Guardarlo" }, async () => {',
+            '    await core.savePickedFile("recetario_familiar")',
+            "  })",
+            "}"
+          ]
+        }
+      ]
+    }
+  ]
+})
 placesEs.addRule(SaveDraft, { syntax: "guardar {draft:expression}" })
+placesEs.addRule(PickFileFor, {
+  syntax: "elige un archivo para {place:known_type}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: [
+            "recetario familiar es un archivo json que eliges",
+            "para abrir",
+            "\telige un archivo para recetario familiar"
+          ],
+          js: [
+            "export class RecetarioFamiliar extends Place {}",
+            "export const recetarioFamiliar = core.place(new RecetarioFamiliar(), {",
+            '  name: "recetario_familiar",',
+            '  kind: "file",',
+            "  picked: true,",
+            '  unclearNumbers: ","',
+            "})",
+            "export async function abrir() {",
+            '  return core.asAction({ undoneAs: "Abrir" }, async () => {',
+            '    await core.pickFileFor("recetario_familiar")',
+            "  })",
+            "}"
+          ]
+        }
+      ]
+    }
+  ]
+})
 placesEs.addRule(DiscardDraft, { syntax: "descartar {draft:expression}" })
 placesEs.addRule(CancelAction, { syntax: `(parar|cancelar) ${THE}? {action:identifier}` })
 placesEs.addRule(ReloadThings, { syntax: `recargar ${THE} {type:plural_type}` })

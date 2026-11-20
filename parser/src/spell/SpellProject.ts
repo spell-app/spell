@@ -1,9 +1,10 @@
-import { JSON5File, TaskList, Task, getDier } from "spell/util"
+import { JSON5File, TaskList, Task, getDier, snakeCase } from "spell/util"
 import { P } from "spell/parser/parser"
 import { PY } from "spell/parser/py"
 // Import directly, NOT through the `spell/parser/core` barrel:  a project MUST NOT load `core` itself --
 // each runner runs its own copy.  See `spellRuntime.ts`.
 import { SPELL_CORE_MODULE, SPELL_CORE_NAMES } from "spell/parser/core/core.types"
+import type { PlaceDeployment } from "spell/parser/core/runtime"
 import { SP } from "spell/parser/spell"
 // Import directly:  these two helpers, not the rules' barrel
 import { overlayViewNamed, pageNamed } from "spell/parser/spell/rules/sites/sites.shared"
@@ -556,6 +557,38 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
 
   /** Targets the running `compile()` was asked for, instead of the project file's.  Plain field, as `saveCompiled`. */
   targetsThisRun: string[] | undefined
+
+  /**
+   * Each place's deployment named `deployment`, from our project file's `places`, by the place's name as compiled code
+   * names it:  `{ netbox: { at: "...", readOnly: true } }` (epic `data` P49).
+   * - `spell run` and the page server both pick this way (epic `from-console` P14), by `SP.DEPLOYMENT_VARIABLE`.
+   * - A place that lists no such deployment runs as its line says.
+   * - throws `TypeError` for a deployment no place in the project file has:  a mistake, named
+   */
+  deploymentsPicked(deployment: string): Record<string, PlaceDeployment> {
+    return SpellProject.deploymentsIn(this.contents?.places, deployment, this.projectId)
+  }
+
+  /**
+   * Each place's deployment named `deployment`, from `places`, a project file's:  see `deploymentsPicked()`.
+   * - For a reader that has the project file but no project:  the page server.
+   * - throws `TypeError` for a deployment no place in it has
+   */
+  static deploymentsIn(
+    places: SP.ProjectManifestJSON5["places"],
+    deployment: string,
+    projectId: string
+  ): Record<string, PlaceDeployment> {
+    const picked = Object.entries(places ?? {}).flatMap(([place, deployments]) =>
+      deployments[deployment] ? [[snakeCase(place), deployments[deployment]] as const] : []
+    )
+    if (!picked.length) {
+      throw new TypeError(
+        `no place in ${projectId}'s project file has a deployment named "${deployment}":  list it under "places"`
+      )
+    }
+    return Object.fromEntries(picked)
+  }
 
   /**
    * Targets we compile to, in order:

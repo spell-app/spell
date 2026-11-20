@@ -1,0 +1,104 @@
+/*
+ * The style sheet of `<ui-mermaid-diagram>`:  ours, not Fomantic's.
+ * - It styles the component's shadow DOM, in class names:
+ *   `<div class="ui mermaid diagram [held]" part="drawing">`, its `color-scheme` the one it's drawn in
+ *     `<div class="drawing [stale]" role="img">` + Mermaid's `<svg>`, whose own `<style>` colours it
+ *     `[<ui-dropdown class="controls" part="controls">`, the menu in the corner, with `controls`]
+ *   - before them, the source parts:  `<ui-loader part="loader">` while loading, `<ui-message part="error">`
+ * - The drawing's colours are Mermaid's, set from Spell UI's tokens as it draws (`MermaidDrawer`):  none here.
+ * - The menu shows when the pointer rests on the drawing, after the page's hover wait (`--ui-hover-delay`),
+ *   and at once when the keyboard reaches it.
+ * - Public tokens are NEVER declared here:  each is read through its private alias (`notes/theming.md`).
+ */
+
+@layer ui.components.mermaid-diagram.types, ui.components.mermaid-diagram.content, ui.components.mermaid-diagram.variations, ui.components.mermaid-diagram.states;
+
+/*******************************
+          Mermaid diagram
+*******************************/
+
+@layer ui.components.mermaid-diagram.types {
+  :host {
+    display: block;
+  }
+
+  .ui.mermaid.diagram {
+    --_ui-mermaid-diagram-padding: var(--ui-mermaid-diagram-padding, 0);
+    --_ui-mermaid-diagram-stale-opacity: var(--ui-mermaid-diagram-stale-opacity, 0.32);
+    position: relative;
+    padding: var(--_ui-mermaid-diagram-padding);
+  }
+
+  /* drawn in the other scheme than the page's:  that scheme's background, so its colours sit where they were made to */
+  .ui.mermaid.diagram.held {
+    --_ui-mermaid-diagram-held-padding: var(--ui-mermaid-diagram-held-padding, 0.75em);
+    padding: var(--_ui-mermaid-diagram-held-padding);
+    border-radius: var(--ui-radius);
+    background: var(--ui-background);
+    color: var(--ui-text-color);
+  }
+
+  .drawing {
+    display: flex;
+    justify-content: center;
+    min-height: 1em;
+  }
+
+  /* Mermaid sizes its drawing to fit (`useMaxWidth`):  never past the box */
+  .drawing > svg {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/*--------------
+    Content
+---------------*/
+
+@layer ui.components.mermaid-diagram.content {
+  /* the error says one thing a line:  what happened, the line, what was expected */
+  [part~="error"] {
+    white-space: pre-line;
+    margin-block-end: 0.75em;
+  }
+
+  /* the menu:  the drawing's top right corner, hidden until hovered or reached */
+  .controls {
+    position: absolute;
+    inset-block-start: 0.25em;
+    inset-inline-end: 0.25em;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--ui-duration-fast, 0.15s) var(--ui-ease, ease);
+  }
+
+  :host(:hover) .controls {
+    opacity: 1;
+    pointer-events: auto;
+    transition-delay: var(--ui-hover-delay, 0.8s);
+  }
+
+  .controls:focus-within,
+  .controls:state(open) {
+    opacity: 1;
+    pointer-events: auto;
+    transition-delay: 0s;
+  }
+}
+
+/*--------------
+     States
+---------------*/
+
+@layer ui.components.mermaid-diagram.states {
+  /* the last good drawing, under the message while the text doesn't draw */
+  .drawing.stale {
+    opacity: var(--_ui-mermaid-diagram-stale-opacity);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .controls {
+      transition: none;
+    }
+  }
+}

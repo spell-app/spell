@@ -14,7 +14,7 @@
 
 [thing create_place L0]
 | «github» is a web server at «"https://api.github.com"»
-|   its optional key is the secret _"GITHUB_TOKEN"_
+|   it is optionally authenticated with the secret _"GITHUB_TOKEN"_
 |   its next page is in its _"Link"_ header
 |   it gives up to _100_ at a time, asked for with _"per_page"_
 |   check it every _40_ minutes    ‾quantity(40 minutes)

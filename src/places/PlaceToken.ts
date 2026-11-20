@@ -31,7 +31,7 @@ export type TokenMint = (key: string) => Promise<MintedToken>
 /****************
  * ### `PlaceToken`
  * A short-lived token made from a key, kept, and made again before it runs out (epic `data` P49, J255):
- * what a place sends when its line says `its token comes from "...", made with the secret "ACME_API_KEY"`.
+ * what a place sends when its line says `it is authenticated with a token from "...", made with the secret "ACME_API_KEY"`.
  *
  * ```ts
  * const token = new PlaceToken({ keyNamed: "ACME_API_KEY", keyFrom, mint: tokenServiceMint("https://auth.acme.test/api-keys/{key id}/token") })

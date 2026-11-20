@@ -676,7 +676,7 @@ export type PlaceDescription = {
     version?: PlaceVersion
     /** The NAME of the key it needs, never the key. */
     keySecret?: string
-    /** Where a token is made from that key:  `its token comes from "..."` (epic `data` P49). */
+    /** Where a token is made from that key:  `it is authenticated with a token from "..."` (epic `data` P49). */
     tokenFrom?: string
     /** Its real rows stay on this machine, in this folder:  `its data is private, located in "..."` (epic `data` P49). */
     privateDataIn?: string

@@ -1,0 +1,1 @@
+122:24 TS2322 Type '{ for: string; extensions: string; appearance: "compact"; }' is not assignable to type 'UIUploaderJSXAttributes'.

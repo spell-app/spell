@@ -14,6 +14,7 @@ import { SpellElement } from "spell/app/app/runner/SpellElement"
 import { MenuHeader } from "./chrome"
 import { DesignSamples, type Sample } from "./DesignSamples"
 import { DESIGNED, Inspector, OwnEditorPage, SCALED_UP } from "./Inspector"
+import { EditorTours } from "./EditorTours"
 import { on } from "./on"
 import { MenuPopup, Palette, type OwnView } from "./Palette"
 
@@ -435,6 +436,10 @@ export function DesignStage(props: { program: () => HTMLElement | undefined }): 
   })
   const isEditorPicked = () => picked()?.kind === "editor" && hasEditor()
   const isGallery = () => Design.showing === "gallery" && !isEditorPicked()
+  // the Design tour offers itself the first time the Gallery opens (epic `editor` P40), unless taken before
+  createEffect(isGallery, (gallery) => {
+    if (gallery) EditorTours.offer("design")
+  })
   // selected as it's drawn:  the Inspector changes its thing
   createEffect(
     () => (isGallery() ? undefined : drawn()),
@@ -576,6 +581,7 @@ function DesignBar(props: { saveable: () => object | undefined; onSaved: (name: 
         appearance="segmented"
         size="small"
         class="DesignShowing"
+        data-tour="one or gallery"
         aria-label={appTexts.text("designShowingLabel")}
       >
         <ui-item selected={Design.showing === "one"} onClick={() => Design.setShowing("one")}>
@@ -590,6 +596,7 @@ function DesignBar(props: { saveable: () => object | undefined; onSaved: (name: 
         appearance="basic"
         icon="save outline"
         class="DesignSaveSample"
+        data-tour="save sample"
         title={appTexts.text("designSaveSampleTip")}
         onClick={() => void save().catch(editor.showError)}
       >
@@ -609,7 +616,7 @@ function DesignBar(props: { saveable: () => object | undefined; onSaved: (name: 
 function DesignSizes(): JSX.Element {
   const pick = (device: DesignSize["device"]) => Design.setSize(device === "fit" ? FIT : { device })
   return (
-    <div class="DesignSizes">
+    <div class="DesignSizes" data-tour="design sizes">
       <div class="DesignSizesHeading">{appTexts.text("designSizeLabel")}</div>
       <ui-menu
         direction="vertical"
@@ -811,6 +818,7 @@ function DesignPicker(props: { picked: DesignBit | undefined; hasEditor: boolean
       appearance="secondary pointing"
       size="small"
       class="DesignPicker"
+      data-tour="design picker"
       aria-label={appTexts.text("designPickerLabel")}
     >
       <Show when={Design.view}>

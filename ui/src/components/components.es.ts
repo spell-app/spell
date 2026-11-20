@@ -72,6 +72,7 @@ import { labelsEs } from "spell/ui/components/ui-label/UILabels.es"
 import { listEs } from "spell/ui/components/ui-list/UIList.es"
 import { loaderEs } from "spell/ui/components/ui-loader/UILoader.es"
 import { markdownEs } from "spell/ui/components/ui-markdown/UIMarkdown.es"
+import { mermaidDiagramEs } from "spell/ui/components/ui-mermaid-diagram/UIMermaidDiagram.es"
 import { menuEs } from "spell/ui/components/ui-menu/UIMenu.es"
 import { submenuEs } from "spell/ui/components/ui-menu/UISubmenu.es"
 import { messageEs } from "spell/ui/components/ui-message/UIMessage.es"
@@ -89,6 +90,8 @@ import { siteNavButtonEs } from "spell/ui/components/ui-site-nav-button/UISiteNa
 import { pageLayoutEs } from "spell/ui/components/ui-page-layout/UIPageLayout.es"
 import { deviceEs } from "spell/ui/components/ui-device/UIDevice.es"
 import { uploaderEs } from "spell/ui/components/ui-uploader/UIUploader.es"
+import { tourEs } from "spell/ui/components/ui-tour/UITour.es"
+import { tourStepEs } from "spell/ui/components/ui-tour/UITourStep.es"
 import { dialEs } from "spell/ui/components/ui-dial/UIDial.es"
 import { treeItemEs } from "spell/ui/components/ui-tree/UITreeItem.es"
 import { actionsEs } from "spell/ui/components/ui-parts/UIActions.es"
@@ -745,6 +748,7 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   listEs,
   loaderEs,
   markdownEs,
+  mermaidDiagramEs,
   menuEs,
   submenuEs,
   messageEs,
@@ -762,6 +766,8 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   pageLayoutEs,
   deviceEs,
   uploaderEs,
+  tourEs,
+  tourStepEs,
   dialEs,
   treeItemEs,
   actionsEs,

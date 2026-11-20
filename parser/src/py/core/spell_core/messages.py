@@ -66,6 +66,7 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `site-page-waiting` | a page a site lists that isn't made yet:  JS core's | |
 | `site-page-failed`, `site-page-failed-why` | a site's error page:  JS core's | `page`, `why` |
 | `table-edit` | the undo step of an editable table's change:  JS core's | |
+| `file-*` | a file a person picks (epic `editor` P41):  the JavaScript core's | `file` |
 | `language` | the program's language, `en`:  what dates are said in (`date_methods.py`) | |
 | `duration-ago`, `duration-from-now` | a date as how long ago or from now:  `in 2 days, 3 hours` | `time` |
 """
@@ -189,6 +190,21 @@ MESSAGES: dict[str, str] = {
     "site-page-failed": "Sorry, this page couldn't be shown.",
     "site-page-failed-why": "{page} failed:  {why}",
     "table-edit": "Edit Table",
+    "file-none": "Open a file to work on.",
+    "file-open": "Open a file",
+    "file-reopen": "Reopen {file} to save to it.",
+    "file-reopen-button": "Reopen",
+    "file-missing": "Can't find {file}. It may have been moved, renamed or deleted. Your changes are safe on this device.",
+    "file-find": "Find it",
+    "file-save-new": "Save as new file",
+    "file-changed": "{file} changed. Read it again?",
+    "file-read-again": "Read it again",
+    "file-conflict-title": "{file} changed",
+    "file-conflict": "Someone changed {file} after you opened it. Which version do you want to keep?\nKeep theirs: open their version. Your changes are kept on this device, not lost.\nKeep yours: save your version over theirs.\nKeep both: save your version as a new file.",
+    "file-keep-theirs": "Keep theirs",
+    "file-keep-yours": "Keep yours",
+    "file-keep-both": "Keep both",
+    "file-downloaded": "{file} is in your Downloads folder. This browser can't save back to the file you opened, so each save downloads a new copy.",
 }
 
 # A named placeholder in a message, `{type}`.

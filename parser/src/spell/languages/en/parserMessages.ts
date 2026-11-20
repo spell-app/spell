@@ -125,22 +125,22 @@ export const PARSER_MESSAGES = {
     'Nothing here is called "{field}", for "the same {field}" to match:  set it first, e.g. "set {field} to ...", or say the value, e.g. "every {thing} with {field} "...""',
   /** A key written into a program:  won't compile. */
   "key-written":
-    'A key written here can be read by anyone with the program:  name it instead, e.g. "its key is the secret "COOKBOOK_KEY"", and keep it on a server side',
+    'A secret written here can be read by anyone with the program:  name it instead, e.g. "it is authenticated with the secret "COOKBOOK_KEY"", and keep it on a server side',
   /** A secret's name that looks like the key itself. */
   "key-not-a-name":
-    '"{name}" looks like a key, not its name:  a key is never written here.  Name it in capitals, e.g. "its key is the secret "COOKBOOK_KEY""',
+    '"{name}" looks like a key, not its name:  a key is never written here.  Name it in capitals, e.g. "it is authenticated with the secret "COOKBOOK_KEY""',
   /** A place named a key:  a browser program has no way to read one. */
   "key-needs-server-side":
     'A program in a browser can\'t read "{name}":  this place needs a small server side, which holds the key and answers for it',
-  /** `its key goes in its "..." header`, a name a header can't have:  won't compile. */
+  /** `its secret goes in its "..." header`, a name a header can't have:  won't compile. */
   "key-goes-bad-header":
     '"{name}" can\'t be a header\'s name:  it\'s one word of letters, digits and dashes, e.g. "X-Api-Key"',
-  /** `its key goes in the address as "..."`, a name a question can't have:  won't compile. */
+  /** `its secret goes in the address as "..."`, a name a question can't have:  won't compile. */
   "key-goes-bad-question":
     '"{name}" can\'t be asked in an address:  it\'s one word of letters, digits, dashes and underscores, e.g. "api_key"',
   /** A line says where a key goes, and no line names one. */
   "key-goes-with-no-key":
-    'This says where its key goes, and no line names one:  add "its key is the secret "COOKBOOK_KEY""',
+    'This says where its key goes, and no line names one:  add "it is authenticated with the secret "COOKBOOK_KEY""',
   /** A place that can't announce what changed:  `{kind}`. */
   "place-cant-announce":
     "This {kind} can't announce what's changed, so other people's changes won't show until this page reads again:  add \"check it every 30 seconds\" under it",
@@ -184,6 +184,9 @@ export const PARSER_MESSAGES = {
   /** `save` of something that's no draft:  `{text}`. */
   "no-save-step":
     '"{text}" isn\'t a draft:  a change is kept as it\'s made, with no save step.  For an Edit screen with a Cancel button:  "a draft of ..."',
+  /** `pick a file for` something that's no file a person picks:  `{text}` (epic `editor` P41). */
+  "pick-file-not-a-file":
+    '"{text}" isn\'t a file a person picks:  say so where it\'s declared, "{text} is a json file you pick"',
   /** A word people bring from elsewhere:  `{word}`. */
   "no-such-data-word":
     'Spell can\'t "{word}" that:  say where the data lives once, "x is a web server at ...", and "it lives in x", then "every recipe where ..." reads it',
@@ -284,7 +287,7 @@ export const PARSER_MESSAGES = {
     'Airtable makes its own ids, so a new row sent again after a lost answer would be a second row:  add a text column for Spell\'s ids, and "its id is its "spell id"" under this',
   /** An Airtable at a base, with no key named. */
   "airtable-needs-key":
-    'Airtable answers nobody without a key:  add "its key is the secret "AIRTABLE_KEY"" under this, and keep the key on a server side',
+    'Airtable answers nobody without a key:  add "it is authenticated with the secret "AIRTABLE_KEY"" under this, and keep the key on a server side',
   /** Words that can never both be true. */
   "never-both": 'One thing can never be both of these at once, so this finds nothing:  did you mean "or"?',
   /** `where they are the cook`, of something with no `cook`. */
@@ -310,7 +313,11 @@ export const PARSER_MESSAGES = {
   /** A line under a property, `- its "suit" is ...`, that is neither its rule nor its alias (epic `elemental-spell` P5). */
   "not-a-property-body-line":
     "Only a property's rules and aliases go under it:  this line still works, but write it after the property, not under it",
-  /** An ability's old words, `- it can be dragged`:  `{line}` is the new, `it is draggable` (epic `debut` P27). */
+  /**
+   * Old words that still read:  `{line}` is the new.
+   * - An ability's, `- it can be dragged` for `it is draggable` (epic `debut` P27).
+   * - An authenticated place's, `its key is the secret "X"` for `it is authenticated with the secret "X"` (epic `from-console` P14).
+   */
   "say-is-able": 'Say "{line}":  "{old}" stops working in a later release',
   /** A list's rule's old `if:`, `- it can take a card if: ...` (epic `debut` P27, Q42). */
   "say-when": 'Say "when:":  "if:" here stops working in a later release',
