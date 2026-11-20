@@ -403,6 +403,7 @@ _The editor is a Vite dev server;  everything it saves or loads goes to the page
 
 - The editor:  Vite, on port 3000, or any free one;  its address is in `.spell-server.editor.json`,
   its log in `.spell-server.editor.log`.
+  - A page server started with its own `--spaces` has an editor of its own, its files named for that folder.
   The page server starts it, as its child ([the servers](README-spaces.md#the-servers--an-api-that-nothing-starts)).
 - The page server:  the kit's, one per kit, started from its root, on port 4747 if it's free
   ([what spell-app adds to it](README-page-server.md), [the kit's](https://github.com/spell-app/spell/blob/main/README/server.md)).

@@ -59,7 +59,7 @@ Address by address, with its one check and the builds behind it:
   - Its output goes to `.spell-server.editor.log`, beside it.
   - A page server with its own `--spaces` (a project's checkout, on the kit) names both by them,
     `.spell-server.editor.<folder>-<hash>.json`:  each checkout gets its own editor, on its own port, and starting
-    one never stops another's (epic `old-console-redo` I9).
+    one never stops another's.
 
 ## Running it
 

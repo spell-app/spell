@@ -939,6 +939,8 @@ galaxy guide is a site at "owen@spell/galaxy"
 - Every site lists a not found page and an error page.
 - A `:name` the page has no property for, or two pages at one address, is refused at its line.
 - A site wears a theme, named on its line:  `galaxy guide is a site with theme "mockup"`.
+  - One of Spell UI's, or the project's own, a `mockup.theme.json5` beside the site's Spell
+    ([Spell UI's themes page](https://github.com/spell-app/spell/blob/main/ui/README-themes.md#6-a-projects-own-theme)).
   - Its line takes its own values the way a type's does, several joined by commas.
   - `its "theme" is "mockup"`, under the site, says the same.
 - A site can be its titles and addresses alone, `Galaxy.site.spell`, each page a file of its own:
@@ -953,7 +955,8 @@ galaxy guide is a site
 - A page listed before any file declares it waits:  it runs as its title, and a line saying it isn't made yet.
 - `live=` is the real page it stands for:  its card in the site editor opens it.
 
-A site's navigation can link OUT, to what the site isn't, a docs site, another app:  a line like a page's, with no page.
+A site's navigation can also link OUT of the site, to a docs site or another app.
+The line is written like a page's, with an address in place of the page:
 
 ```spell
 galaxy guide is a site
@@ -963,8 +966,8 @@ galaxy guide is a site
 ```
 
 - It shows where its line is, under the group above it;  picking it opens the address in a new tab.
-- No title:  it shows the address.
-- An address from the site's root, `/help`, is a page's, and is refused:  list the page.
+- With no `named`, it shows the address.
+- An address from the site's root, like `/help`, is refused:  that's one of the site's own pages, so list the page.
 
 A PAGE LAYOUT is what stays on screen around a site's pages:  its menu, its drawer, side bars and a footer.
 Going between pages in the same layout redraws only the page, so nothing around it flashes.

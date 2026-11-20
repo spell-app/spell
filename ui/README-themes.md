@@ -420,17 +420,17 @@ To make a look of your own, start from one of Spell UI's and change what you lik
 
 ### 6. A project's own theme
 
-A Spell site can wear a theme that lives in its own project, not in Spell UI (epic `old-console-redo` P1).
+A Spell site can wear a theme that lives in its own project, not in Spell UI.
 Name it as you'd name one of Spell UI's:
 
 ```spell
-Harbor is a site with theme "harbor"
+galaxy guide is a site with theme "harbor"
 ```
 
 - Spell UI's themes come first.
   A name Spell UI hasn't got is looked for beside the site's Spell, as `harbor.theme.json5`.
-- It's a theme file like Spell UI's own, with the same names, checked the same way:  a name the theme tree hasn't got
-  is an error naming the file.
+- It's a theme file like Spell UI's own, with the same names, checked the same way:
+  a name the theme tree hasn't got is an error naming the file.
 - Start it from one of Spell UI's themes, and set only what differs:
 
   ```json5
@@ -441,15 +441,16 @@ Harbor is a site with theme "harbor"
   }
   ```
 
-  - It can extend another theme of the project too.
+  - It can extend another of the project's themes too.
   - No `palette` and no `rules`:  those are files in Spell UI's themes folder.
     What a value can't say stays the base theme's.
-- The site's frame wears it, and the page around it keeps its own theme.
-  So do a site in the editor's Run and one on a page, in `<spell-viewer>`.
+- The site wears it, and the page around the site keeps its own theme.
+  That holds in the editor's Run, and for a site on a page, in `<spell-viewer>`.
 - It's read again each time the site starts, so an edit shows on the next run.
-- A name in neither place:  the site keeps the page's look, and the console says where it looked.
-- In code, `UI.themes.define(name, css)` adds a sheet like this one:  `has()`, `load()`, `apply()` and
-  `scopedTokens()` treat it as one of the folder's.
+- The catch:  a name in neither place isn't an error.
+  The site keeps the page's look, and the browser's console says where it looked.
+- In code, `UI.themes.define(name, css)` adds a sheet like this one.
+  The rest of `UI.themes` then treats it as one of the folder's:  `has()`, `load()`, `apply()`, `scopedTokens()`.
   - It can't take the name of one of Spell UI's own sheets.
 
 ## 🌱 Coming:  themes per component

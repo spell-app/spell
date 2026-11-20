@@ -948,6 +948,7 @@ What's left is a handful of facts the reference doesn't explain:
 - `--root <dir>` names another kit's root than the one the current folder is in;  any other folder is an error.
 - `epic server <verb>` is the same command line, from spell-epic's `epic`.
 - `--spaces <dir>` sets `SPELL_SPACES_DIR`, which spaces' route modules read, and a background server inherits.
+  It also gives that page server an editor of its own, so starting one checkout's never stops another's.
 - `spell app serve [project]` brings up the editor and this server together ([README/cli.md](cli.md#spell-app)).
 - `yarn favicon [--hat 0.74]`, at the kit's root, regenerates Spell's favicon from the hat mark
   (headless Chromium draws the PNGs).
