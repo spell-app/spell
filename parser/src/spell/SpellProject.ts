@@ -896,7 +896,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                     })
                   }
                   // a function from our code files, `call native copyText`, that this target has no file for
-                  const nativeRefusal = SP.NativeCode.refusalFor(target.writer.nativeLanguage, parts)
+                  const nativeRefusal = SP.NativeCode.refusalFor(target.writer, parts)
                   if (nativeRefusal) {
                     throw new P.ParserError({
                       message: `'${this.projectName}', for target '${target.name}':  ${nativeRefusal}`,

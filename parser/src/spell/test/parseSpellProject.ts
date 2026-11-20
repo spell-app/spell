@@ -118,7 +118,7 @@ export function compiledSpellProject(
     ...(options.debugging && { debugging: { placeOf: SP.SpellProject.debugPlaceOf } })
   }
   // a function from its code files this target has no file for:  as a project's compile, refused
-  const refusal = SP.NativeCode.refusalFor(writer.nativeLanguage, parts)
+  const refusal = SP.NativeCode.refusalFor(writer, parts)
   if (refusal) throw new P.ParserError({ message: refusal, activity: "compiledSpellProject", params: {} })
   const combine = () => SP.SpellProject.combineCompiled(parts, writer, header, scope, writerOptions)
   const marked = sourceMarks ? P.SourceMarks.during(sourceMarks, combine) : combine()

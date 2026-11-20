@@ -268,14 +268,18 @@ export class NativeCode {
   }
 
   /**
-   * Why a target writing `language` can't write `files`' native calls, if it can't:
+   * Why `writer`'s target can't write `files`' native calls, if it can't:
    * - Python, for a code file only a browser can run:
    *   `"to copy (text) to the clipboard" needs a browser:  clipboard.ts runs only in one`
-   * - no file in `language`:  `copyText has no Python version:  add clipboard.py`
+   * - no file in its language:  `copyText has no Python version:  add clipboard.py`
    * - a file that doesn't export it:  `clipboard.py has no copy_text:  add it there`
+   * - one of the program's own top-level actions written with the same name, which the import would clash with:
+   *   `"to copy text" and clipboard.ts's copyText would have the same name in javascript` (from-console I24)
+   *   - an action on a type is its class's method, so it can't clash
    * - `undefined` when it can.
    */
-  static refusalFor(language: P.NativeLanguage, files: unknown): string | undefined {
+  static refusalFor(writer: P.ProgramWriter, files: unknown): string | undefined {
+    const language = writer.nativeLanguage
     let refusal: string | undefined
     P.forEachNode(files, (node) => {
       if (refusal || !(node instanceof P.ASTNativeCall)) return
@@ -291,7 +295,34 @@ export class NativeCode {
         refusal = `${codeFile}'s ${LANGUAGE_NAMES[language]} version has no ${written}:  add it there.`
       }
     })
-    return refusal
+    return refusal ?? NativeCode.clashIn(writer, files)
+  }
+
+  /** Why one of `files`' top-level actions and a native function they call would clash in `writer`'s code, if one would. */
+  private static clashIn(writer: P.ProgramWriter, files: unknown): string | undefined {
+    const language = writer.nativeLanguage
+    const natives = new Map<string, P.ASTNativeCall>()
+    P.forEachNode(files, (node) => {
+      if (!(node instanceof P.ASTNativeCall) || !node.modules[language]) return
+      natives.set(language === "py" ? PY.PyBaseWriter.nativeName(node.methodName) : node.methodName, node)
+    })
+    if (!natives.size) return undefined
+    let clash: string | undefined
+    P.forEachNode(files, (node) => {
+      // a top-level function:  `exported` is only ever set on one
+      if (clash || !(node instanceof P.ASTMethodDefinition) || !node.exported || !node.methodName) return
+      const name = writer.nameOf(node.methodName)
+      const native = natives.get(name)
+      if (!native) return
+      // its head line:  the text before its body, which starts on the next line, after a tab
+      const words = `${node.match.inputText}`
+        .split(/[\n\t]/)[0]!
+        .trim()
+        .replace(/:$/, "")
+      const file = `${native.codeFile}${language === "py" ? ".py" : ".ts"}`
+      clash = `"${words}" and ${file}'s ${name} would have the same name in ${LANGUAGE_NAMES[language]}:  rename the action, or the function in ${file}.`
+    })
+    return clash
   }
 }
 

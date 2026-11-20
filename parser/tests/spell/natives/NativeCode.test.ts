@@ -49,7 +49,7 @@ function compiled(files: SpellSourceFile[], writer: P.ProgramWriter, natives = N
   const errors = parsed.flatMap((file) => file.errors)
   if (errors.length) throw new Error(`parse errors:\n${errors.join("\n")}`)
   const parts = parsed.map(({ match, compiled }) => (match?.AST instanceof P.ASTStatementGroup ? match.AST : compiled))
-  const refusal = SP.NativeCode.refusalFor(writer.nativeLanguage, parts)
+  const refusal = SP.NativeCode.refusalFor(writer, parts)
   if (refusal) throw new Error(refusal)
   const written = SP.SpellProject.combineCompiled(parts, writer, SP.SpellProject.importHeaderFor(scope, writer), scope)
   return SP.SpellDeclarations.stripComments(written)
@@ -124,7 +124,8 @@ describe("call native", () => {
 
   test("no inputs", () => {
     const natives = [{ path: "/beep.ts", contents: "export function beep(): void {}\n" }]
-    const code = compiledSpellProject([{ path: "/Test.spell", contents: "to beep\n\tcall native beep" }], {
+    // an action named `to beep` would be `beep()` too:  refused, below
+    const code = compiledSpellProject([{ path: "/Test.spell", contents: "to make a beep\n\tcall native beep" }], {
       natives
     }).code
     expect(code).toContain("() => beep()")
@@ -178,6 +179,22 @@ describe("call native", () => {
     )
     // javascript still calls it
     expect(compiled(FILES.slice(0, 1), P.JSWriter.instance, natives)).toContain("await copyText(text)")
+  })
+
+  test("an action written with the same name as a native function is a compile error, in each target (from-console I24)", () => {
+    const files = [{ path: "/Test.spell", contents: "to copy text\n\tcall native copyText with 1\n" }]
+    for (const writer of [P.JSWriter.instance, PY.PyWriter.instance]) {
+      const name = writer === P.JSWriter.instance ? "clipboard.ts's copyText" : "clipboard.py's copy_text"
+      const language = writer === P.JSWriter.instance ? "javascript" : "Python"
+      expect(() => compiled(files, writer, NATIVES)).toThrow(
+        `"to copy text" and ${name} would have the same name in ${language}:  rename the action, or the function in ${name.split("'")[0]}.`
+      )
+    }
+    // an action on a type is its class's method:  no clash
+    const onAType = [
+      { path: "/Test.spell", contents: "a pad is a thing\n\tto copy text\n\t\tcall native copyText with 1\n" }
+    ]
+    expect(compiled(onAType, P.JSWriter.instance, NATIVES)).toContain("copyText(1)")
   })
 })
 
