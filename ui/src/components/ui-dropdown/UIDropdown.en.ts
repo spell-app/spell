@@ -82,11 +82,17 @@ export const dropdownVocabulary = {
       name: "appearance",
       group: "appearance",
       kind: "multiple",
-      values: ["simple"],
+      values: ["simple", "basic"],
       // each word is its own class (a `multiple` without `classes` would add its key:  `simple appearance`)
       classes: {},
-      replaces: [{ from: "simple", value: "simple" }],
-      description: "`simple`:  opens on hover / focus, with no script and no popover.  Old name:  `simple`."
+      replaces: [
+        { from: "simple", value: "simple" },
+        { from: "basic", value: "basic" }
+      ],
+      description:
+        "The look:  `simple` opens on hover / focus, with no script and no popover;  " +
+        "`basic` draws a `button` dropdown as a basic button, transparent with a hairline ring.  " +
+        "Old names:  `simple`, `basic`."
     },
     { name: "clearable", group: "form", kind: "keyOnly", description: "Shows a clear button while there's a value." },
     { name: "disabled", group: "states", kind: "keyOnly", description: "Can't be used;  dimmed and inert." },

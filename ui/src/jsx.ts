@@ -13895,8 +13895,8 @@ export interface UIDropdownAttributes {
    */
   "prop:scrolling"?: boolean | ""
   /**
-   * `simple`:  opens on hover / focus, with no script and no popover.  Old name:  `simple`.
-   * - takes:  space-separated:  `simple`
+   * The look:  `simple` opens on hover / focus, with no script and no popover;  `basic` draws a `button` dropdown as a basic button, transparent with a hairline ring.  Old names:  `simple`, `basic`.
+   * - takes:  space-separated:  `simple` · `basic`
    */
   appearance?: string
   /**

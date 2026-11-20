@@ -581,10 +581,9 @@
                 </ui-example>
               </ui-section>
 
-              <!-- GAP I11:  no basic button look. -->
               <ui-section id="examples-types-search-dropdown" label="Search Dropdown" sticky="stack" collapsible dividing>
                 <ui-example description="A dropdown can be searchable, on a labeled icon button too.">
-                  <ui-dropdown floating labeled button search icon="world" placeholder="Select Language">
+                  <ui-dropdown floating labeled button appearance="basic" search icon="world" placeholder="Select Language">
                     <ui-item>Arabic</ui-item>
                     <ui-item>Chinese</ui-item>
                     <ui-item>Danish</ui-item>
@@ -1638,6 +1637,21 @@
                   </ui-dropdown>
                 </ui-example>
               </ui-section>
+
+              <ui-section id="examples-variations-basic" label="Basic" sticky="stack" collapsible dividing>
+                <ui-example
+                  description='A button dropdown can be basic, as a basic button is:  `appearance="basic"`, a hairline ring and no fill.'
+                >
+                  <ui-dropdown button appearance="basic" label="Actions">
+                    <ui-item>Edit</ui-item>
+                    <ui-item>Delete</ui-item>
+                  </ui-dropdown>
+                  <ui-dropdown color="primary" button appearance="basic" label="Share">
+                    <ui-item>Email</ui-item>
+                    <ui-item>Link</ui-item>
+                  </ui-dropdown>
+                </ui-example>
+              </ui-section>
             </ui-section>
 
             <ui-section id="examples-selection-dropdowns" label="Selection Dropdowns" sticky="stack" collapsible dividing>
@@ -1990,12 +2004,11 @@
             </ui-section>
 
             <ui-section id="examples-coupling" label="Coupling" sticky="stack" collapsible dividing>
-              <!-- GAP I11:  no basic look, so the button group's dropdowns are filled. -->
               <ui-section id="examples-coupling-button-group" label="Button Group" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A button group can be formatted to show additional content as a dropdown."
                 >
-                  <ui-buttons>
+                  <ui-buttons appearance="basic">
                     <ui-dropdown button pointing="top left" label="Visit">
                       <ui-item>Home</ui-item>
                       <ui-item>Blog</ui-item>

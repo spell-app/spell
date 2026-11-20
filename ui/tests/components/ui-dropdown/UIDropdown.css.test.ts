@@ -38,8 +38,12 @@ const LAYERS =
 /** Sheets `<ui-dropdown>` adopts, in order. */
 const SHEETS = [...foundationCSS, buttonCSS, dropdownCSS]
 
-/** Class phrases with no rule of their own:  `top pointing` IS the default `pointing`. */
-const DEFAULT_PHRASES = new Set(["top pointing"])
+/**
+ * Class phrases with no rule of their own here:
+ * - `top pointing` IS the default `pointing`
+ * - `basic`:  `UIButton.css`'s `.ui.basic.button` draws a basic `button` dropdown (epic `from-console` I25)
+ */
+const DEFAULT_PHRASES = new Set(["top pointing", "basic"])
 
 ////////////////
 // ## Source

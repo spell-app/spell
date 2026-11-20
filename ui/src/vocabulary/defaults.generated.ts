@@ -31,7 +31,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "flag", kind: "string", group: "content" },
     { name: "link", kind: "string", group: "link" },
     { name: "target", kind: "string", group: "link" },
-    { name: "appearance", kind: "multiple", group: "appearance", values: ["link", "circular", "dashed"] },
+    { name: "appearance", kind: "multiple", group: "appearance", values: ["link", "circular"] },
     { name: "disabled", kind: "keyOnly", group: "states" },
     { name: "selected", kind: "keyOnly", group: "states" },
     { name: "padding", kind: "valueOnly", group: "layout", values: ["none", "none-x", "none-y"] },
@@ -427,7 +427,6 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "clearing", kind: "keyOnly", group: "appearance" },
     { name: "section", kind: "keyOnly", group: "appearance" },
     { name: "inverted", kind: "keyOnly", group: "appearance" },
-    { name: "appearance", kind: "multiple", group: "appearance", values: ["dashed"] },
     { name: "align", kind: "textAlign", group: "layout", values: ["left", "center", "right"] },
     { name: "icon", kind: "icon", group: "content" }
   ],
@@ -445,7 +444,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "padding", kind: "valueOnly", group: "layout", values: ["compact"] },
     { name: "fluid", kind: "keyOnly", group: "layout" },
     { name: "scrolling", kind: "keyOnly", group: "layout" },
-    { name: "appearance", kind: "multiple", group: "appearance", values: ["simple"] },
+    { name: "appearance", kind: "multiple", group: "appearance", values: ["simple", "basic"] },
     { name: "clearable", kind: "keyOnly", group: "form" },
     { name: "disabled", kind: "keyOnly", group: "states" },
     { name: "loading", kind: "keyOnly", group: "states" },
@@ -796,7 +795,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "flag", kind: "string", group: "content" },
     { name: "link", kind: "string", group: "link" },
     { name: "target", kind: "string", group: "link" },
-    { name: "appearance", kind: "multiple", group: "appearance", values: ["link", "circular", "dashed"] },
+    { name: "appearance", kind: "multiple", group: "appearance", values: ["link", "circular"] },
     { name: "disabled", kind: "keyOnly", group: "states" },
     { name: "selected", kind: "keyOnly", group: "states" },
     { name: "padding", kind: "valueOnly", group: "layout", values: ["none", "none-x", "none-y"] },
@@ -1052,8 +1051,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "drawer-hides", kind: "keyOnly", group: "behaviour" },
     { name: "left", kind: "valueOnly", group: "appearance", values: ["hidden"] },
     { name: "right", kind: "valueOnly", group: "appearance", values: ["hidden"] },
-    { name: "floating", kind: "keyOnly", group: "appearance" },
-    { name: "page-height", kind: "valueOnly", group: "layout", values: ["fluid"] }
+    { name: "floating", kind: "keyOnly", group: "appearance" }
   ],
   "ui-panel": [
     { name: "label", kind: "string", group: "name" },
@@ -1496,7 +1494,8 @@ export const DEFAULTS_TABLE: Readonly<
       kind: "keyOrValueAndKey",
       group: "layout",
       values: ["short", "very short", "long", "very long"]
-    }
+    },
+    { name: "resizable", kind: "keyOnly", group: "behaviour" }
   ],
   "ui-segments": [
     { name: "size", kind: "size", group: "appearance" },
@@ -1579,7 +1578,6 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "current", kind: "string", group: "content" },
     { name: "label", kind: "string", group: "content" },
     { name: "appearance", kind: "valueOnly", group: "appearance", values: ["nav"] },
-    { name: "groups", kind: "enum", group: "appearance", values: ["wells", "headings"] },
     { name: "collapsed", kind: "keyOnly", group: "appearance" },
     { name: "remember", kind: "string", group: "behaviour" }
   ],
@@ -1594,7 +1592,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "flag", kind: "string", group: "content" },
     { name: "link", kind: "string", group: "link" },
     { name: "target", kind: "string", group: "link" },
-    { name: "appearance", kind: "multiple", group: "appearance", values: ["link", "circular", "dashed"] },
+    { name: "appearance", kind: "multiple", group: "appearance", values: ["link", "circular"] },
     { name: "disabled", kind: "keyOnly", group: "states" },
     { name: "selected", kind: "keyOnly", group: "states" },
     { name: "padding", kind: "valueOnly", group: "layout", values: ["none", "none-x", "none-y"] },
@@ -1740,6 +1738,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "definition", kind: "keyOnly", group: "appearance" },
     { name: "fixed", kind: "keyOnly", group: "layout" },
     { name: "inverted", kind: "keyOnly", group: "appearance" },
+    { name: "resizable", kind: "keyOnly", group: "behaviour" },
     { name: "selectable", kind: "keyOnly", group: "behaviour" },
     { name: "editable", kind: "keyOnly", group: "behaviour" },
     { name: "single-line", kind: "keyOnly", group: "appearance" },
