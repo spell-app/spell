@@ -62,7 +62,7 @@ import type { PlaceDeployment } from "./runtime"
 import { readNumbersAs } from "./saving"
 import { showSignIn, signInMenu } from "./signInBar"
 import { failsAsMissing, holdNotice } from "./undoing"
-import { forgetWaitedValue, standInFor } from "./waiting"
+import { forgetWaitedValue, standInFor, waitingLoader } from "./waiting"
 // Import directly to avoid circular import
 import { List } from "./classes/List"
 import { Place } from "./classes/Place"
@@ -1752,6 +1752,17 @@ export const savedMethods = defineCoreModule({
   },
 
   /**
+   * An element whose attributes read what waits, `<activity-grid runs={its recent jobs} />`, in its own place:
+   * the rest of the drawing shows at once.
+   * - Waiting:  a spinner where it goes (`waitingLoader()`), as a list shows.
+   * - Failed:  a message there, and Try again, as a list's;  the page around it stays.
+   * - What the writers write for one:  `core.drawWaiting(() => h("my-site-activity-grid", ...))`.
+   */
+  drawWaiting(element: () => Drawing): Drawing {
+    return savedMethods.drawRead(element, null, { waiting: waitingLoader })
+  },
+
+  /**
    * What a read of a list draws:  each item by `drawEach`, kept by identity, with what its riders say around it.
    * - `read`:  the list, which may not have an answer yet.
    * - Waiting, with no rider:  the "…" every value that waits shows.
@@ -1841,7 +1852,7 @@ export const savedMethods = defineCoreModule({
       const isEmpty = createMemo(() => !items().length)
       return (() => (isEmpty() ? (riders.none?.() ?? null) : shown)) as unknown as Drawing
     }
-    const whileLoading = riders.waiting ?? (drawEach ? drawnLoader : undefined)
+    const whileLoading = riders.waiting ?? (drawEach ? waitingLoader : undefined)
     const body = () =>
       whileLoading
         ? createComponent(Loading, {
@@ -1892,11 +1903,6 @@ function putBack(program: ProgramPlaces, thing: Thing, placeName: string, collec
 /** A step for the program's undo history:  one that's running takes it into its own. */
 function noteUndo(title: "saved-added" | "saved-removed", undo: () => void, redo: () => void): void {
   core.RUNTIME?.history.record({ undo, redo }, { title: core.message(title) })
-}
-
-/** What a list shows while it waits, when nothing said what to. */
-function drawnLoader(): Drawing {
-  return h("ui-loader", { visible: true, inline: true }) as unknown as Drawing
 }
 
 /**

@@ -207,6 +207,7 @@ export type TestCheck = {
  * | `test-threw` | a test that threw (Python's core:  the javascript core's swallows it) | `test` |
  * | `cant-draw` | the stand-in on the page for a thing whose drawing failed | `type` |
  * | `waiting` | the stand-in on the page for a value that hasn't answered yet | |
+ * | `value-failed` | the stand-in on the page for a value that couldn't be read, why in its tooltip | |
  * | `confirm-default` | `confirm` with no Spell UI, e.g. `spell run`:  the question and its answer | `question` |
  * | `dialog-ok`, `dialog-cancel` | a modal's button that just closes it, `<action ok />` (epic `language` T155) | |
  * | `choose-thing`, `choose-things` | `choose`'s question when none is written:  `Choose a card` (epic `language` P66) | `thing`, `things` |
@@ -277,6 +278,7 @@ export const CORE_MESSAGES = {
   "test-threw": "Error in test {test}:",
   "cant-draw": "⚠ {type} can't draw",
   waiting: "…",
+  "value-failed": "⚠",
   "confirm-default": "{question} (yes)",
   "dialog-ok": "OK",
   "dialog-cancel": "Cancel",

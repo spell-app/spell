@@ -8,6 +8,7 @@ import { compilePattern, filledPattern, type AddressParams } from "spell/util/ad
 import { core } from "spell/parser/core/core"
 import type { SiteHost, SiteLinkEntry, SiteOverlayEntry, SitePageEntry } from "spell/parser/core/core.types"
 import { followsEditsOf, isElementThunk, type Drawing } from "spell/parser/core/drawing"
+import { pageWaitingLoader } from "spell/parser/core/waiting"
 // Import directly to avoid circular import
 import { App } from "./App"
 import { Page } from "./Page"
@@ -222,6 +223,9 @@ export class SiteBase extends App {
       this.showNow({ kind: "waiting", entry: found.entry })
       return
     }
+    // its parameters' things are read first:  meanwhile its layout, a spinner in the page's room
+    if (Object.keys(found.params).some((param) => !(propertyFor(param) in known)))
+      this.showNow({ kind: "loading", page, entry: found.entry })
     try {
       for (const [param, id] of Object.entries(found.params)) {
         const property = propertyFor(param)
@@ -379,8 +383,7 @@ export class SiteBase extends App {
    * - A layout the program doesn't make (yet):  the built-in frame.
    */
   layoutNameFor(showing: Showing | undefined): string {
-    const picked =
-      showing?.kind === "page" ? (showing.page.constructor as { layout?: string | false }).layout : undefined
+    const picked = isAPage(showing) ? (showing.page.constructor as { layout?: string | false }).layout : undefined
     if (picked === false) return JUST_THE_PAGE
     const name = picked ?? this.siteClass.mainLayout
     return name && this.layoutNamed(name) ? name : BUILT_IN_FRAME
@@ -402,7 +405,7 @@ export class SiteBase extends App {
    */
   get shownFillsWindow(): boolean {
     const showing = this.getState<Showing>("showing")
-    return showing?.kind === "page" && !!(showing.page.constructor as { fillsWindow?: boolean }).fillsWindow
+    return isAPage(showing) && !!(showing.page.constructor as { fillsWindow?: boolean }).fillsWindow
   }
 
   /** Every layout drawn so far, in the order first shown:  each one's drawing is kept, the one shown visible. */
@@ -742,7 +745,7 @@ export class SiteBase extends App {
   /** The page shown, and the pages above it, from the site's top:  none for the not found and error pages. */
   private shownPath(): SitePageEntry[] {
     const showing = this.getState<Showing>("showing")
-    if (showing?.kind !== "page") return []
+    if (!isAPage(showing)) return []
     const pathTo = (entries: SitePageEntry[] | undefined, above: SitePageEntry[]): SitePageEntry[] | undefined => {
       for (const entry of entries ?? []) {
         // by name:  a page compiled in as it's shown leaves the site with a new list of the same pages
@@ -774,7 +777,7 @@ export class SiteBase extends App {
     if (section) core.siteHost?.landOn?.(section)
   }
 
-  /** What it shows now:  its page, the not found page or the error page. */
+  /** What it shows now:  its page (a spinner while its parameters are read), the not found page or the error page. */
   private drawShowing(): unknown {
     const showing = this.getState<Showing>("showing")
     if (!showing) return null
@@ -782,6 +785,7 @@ export class SiteBase extends App {
     if (showing.kind === "page") return showing.page.draw === Thing.prototype.draw ? null : core.drawThing(showing.page)
     if (showing.kind === "missing") return this.drawMissing(showing.address)
     if (showing.kind === "waiting") return this.drawWaiting(showing.entry)
+    if (showing.kind === "loading") return pageWaitingLoader()
     return this.drawFailed(showing.name, showing.error)
   }
 
@@ -977,6 +981,8 @@ const SITE_CSS = `
 .spell-site, .spell-site-alone { flex: 1 0 auto }
 .spell-site[hidden], .spell-site-alone[hidden] { display: none }
 .spell-site-slot { display: contents }
+/* a page whose whole drawing waits:  its spinner in the middle of the page's room (core's \`pageWaitingLoader()\`) */
+.spell-page-waiting { display: flex; align-items: center; justify-content: center; min-height: 50vh; height: 100% }
 `
 
 /** What a site shows:  a page, the not found page for an address, or the error page for a page that failed. */
@@ -984,7 +990,14 @@ type Showing =
   | { kind: "page"; page: Page; entry: SitePageEntry }
   | { kind: "missing"; address: string }
   | { kind: "waiting"; entry: SitePageEntry }
+  /** a page whose address's parameters are still being read:  its layout, and a spinner where it goes */
+  | { kind: "loading"; page: Page; entry: SitePageEntry }
   | { kind: "failed"; name: string; error: unknown }
+
+/** Is `showing` a page, shown or with its parameters still being read:  its layout and its place in the site are its own. */
+function isAPage(showing: Showing | undefined): showing is Extract<Showing, { kind: "page" | "loading" }> {
+  return showing?.kind === "page" || showing?.kind === "loading"
+}
 
 /** The dialog or sidebar open over the page, and the view it draws, if it has one. */
 type OpenOverlay = { kind: "dialog" | "sidebar"; entry: SiteOverlayEntry; view?: object }

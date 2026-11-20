@@ -16,6 +16,7 @@ export const spanishMessages: CoreMessages = {
   "test-threw": "Error en la prueba {test}:",
   "cant-draw": "⚠ {type} no se puede dibujar",
   waiting: "…",
+  "value-failed": "⚠",
   "confirm-default": "{question} (sí)",
   "dialog-ok": "Aceptar",
   "dialog-cancel": "Cancelar",

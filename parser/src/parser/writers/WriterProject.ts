@@ -150,7 +150,12 @@ export class WriterProject {
   readonly waitedGetters = new Map<P.ASTMethodDefinition, string>()
   /** A drawing's values that read what waits, with a spot of their own for a "…":  `Total: {the total}`. */
   readonly spotsThatWait = new WeakSet<P.ASTNode>()
-  /** Drawings that read what waits somewhere with no spot for a "…", an `if` or an attribute:  held whole. */
+  /**
+   * A drawing's elements, inside another, whose attributes read what waits:  each in a spot of its own, a spinner
+   * there while it waits (`core.drawWaiting()`), so the rest of the drawing shows at once.
+   */
+  readonly elementsThatWait = new WeakSet<P.ASTJSXElement>()
+  /** Drawings that read what waits somewhere with no spot of its own, an `if` or the outermost element's attribute:  held whole. */
   readonly heldDrawings = new WeakSet<P.ASTPropertyDefinition>()
   /** The functions a drawing's loops draw each item with:  part of the drawing, so they never wait, and what they read is the drawing's. */
   readonly drawnLoopFunctions = new WeakSet<P.ASTMethodDefinition>()
@@ -350,7 +355,8 @@ export class WriterProject {
   /**
    * SIDE EFFECT:  notes where drawing `definition` reads what waits:
    * - a child value alone:  its own "…", `spotsThatWait`
-   * - anywhere else, an `if` or an attribute:  the whole thing is held, `heldDrawings`
+   * - an attribute of an element inside another:  that element in a spot of its own, `elementsThatWait`
+   * - anywhere else, an `if` or the outermost element's attribute:  the whole thing is held, `heldDrawings`
    * - not in a function inside it, a click's handler:  that's its own, and it waits when it's called
    *   - but a loop's is the drawing's:  `drawnLoopFunctions`
    */
@@ -375,9 +381,15 @@ export class WriterProject {
         return
       }
       visit(node.attrs)
+      visitChildren(node)
+    }
+    const visitChildren = (node: P.ASTJSXElement): void => {
       for (const child of node.childValues) {
         if (child instanceof P.ASTJSXLiveValue && reads(child.expression)) {
           this.spotsThatWait.add(child).add(child.expression)
+        } else if (child instanceof P.ASTJSXElement && reads(child.attrs)) {
+          this.elementsThatWait.add(child)
+          visitChildren(child)
         } else visit(child)
       }
     }
