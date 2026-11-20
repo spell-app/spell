@@ -492,6 +492,14 @@ export type ListQuery = {
    * - Only a place with lists under its things is handed one:  a web server's `- a post's comments live at "..."`.
    */
   under?: string
+  /**
+   * The rows under one thing are ONE thing, not a list:  a system's snapshot (epic `from-console` I4).
+   * - Said by the core, which knows the field holds one thing:  `- a system's snapshot lives at "..."`.
+   * - So the answer is its one row, even when it holds one list of its own,
+   *   which would otherwise read as a wrapped list, Open Library's `{ links, size, entries: [...] }`.
+   * - Only with `under`.
+   */
+  oneThing?: boolean
   /** Only rows whose field holds this value, for every field named. */
   filter?: Record<string, unknown>
   /**

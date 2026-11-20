@@ -1467,7 +1467,11 @@ export const savedMethods = defineCoreModule({
     if (under !== undefined) {
       const info = schemaOf(owner.constructor as SavedClass).info(name)
       if (info && info.itemType === undefined)
-        return core.waitedValue(owner, name, async () => (await savedMethods.savedThings(saved, { under })).items[0])
+        return core.waitedValue(
+          owner,
+          name,
+          async () => (await savedMethods.savedThings(saved, { under, oneThing: true })).items[0]
+        )
       return core.waitedValue(owner, name, () => savedMethods.savedThings(saved, { under }))
     }
     if (held instanceof List) {

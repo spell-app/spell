@@ -336,11 +336,11 @@ export class RestPlace extends WebPlace implements Place {
     // and a search beside lists, its rows not where theirs are:  FastAPI's `{ results, total_count }` (epic `data` I140);
     // or a plain list beside lists whose rows are wrapped:  FastAPI's steps under a job (epic `data` P56);
     // ONE thing under a thing is that list's one row:
-    // a system's snapshot, its own lists inside it
+    // a system's snapshot, its own lists inside it, found at its owner or said by the read (epic `from-console` I4)
     const rows =
       held === null
         ? []
-        : (askedBy || (query.under && this.isFoundAtItsOwner(collection))) && isOneRow(held)
+        : (askedBy || (query.under && (query.oneThing || this.isFoundAtItsOwner(collection)))) && isOneRow(held)
           ? [held]
           : !Array.isArray(held) &&
               (query.under || this.isSearchAddress(collection, url) || (held === undefined && rowsAt !== undefined))

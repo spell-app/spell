@@ -139,6 +139,20 @@ describe("one thing under each", () => {
     expect([...snapshot.components.items]).toEqual(["fridge", "laser"])
     expect(asked.map(({ url }) => url)).toEqual([`${HOST}/systems`, `${HOST}/systems/7/snapshot`])
   })
+
+  test("written by hand, with no found-at line:  still its one row, not its one list (from-console I4)", async () => {
+    serve({
+      [`${HOST}/systems`]: [{ id: 7, name: "Lab one" }],
+      [`${HOST}/systems/7/snapshot`]: { state: "deployed", components: ["fridge", "laser"] }
+    })
+    core.resetRuntime()
+    const { System, Snapshot } = runSpell(SYSTEMS.filter((line) => !line.includes("are found at")))("System, Snapshot")
+    delete (Snapshot as { savedIn: { select?: unknown } }).savedIn.select
+    const [one] = await every(System)
+    const snapshot = (await core.answerOf(one, "snapshot")) as { state: string; components: { items: string[] } }
+    expect(snapshot.state).toBe("deployed")
+    expect([...snapshot.components.items]).toEqual(["fridge", "laser"])
+  })
 })
 
 describe("writes, answered as if saved", () => {

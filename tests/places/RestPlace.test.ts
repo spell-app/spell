@@ -1144,6 +1144,18 @@ describe("RestPlace, what a FastAPI service asks for (epic `data` P56)", () => {
     expect(asked).toEqual(["https://shapes.test/layers/stack", "https://shapes.test/layers/stack?system=alpha"])
   })
 
+  test("one thing under a thing, holding one list, with no found-at line:  its one row when the read says so (from-console I4)", async () => {
+    const snapshot = { id: "s1", taken: "2026-11-20", components: [{ id: "c1" }, { id: "c2" }] }
+    fakeServer(() => snapshot)
+    // a record type written by hand:  no `snapshots are found at "..."` line, so no address with an id
+    const place = shapedPlace({ collections: { snapshots: {} } })
+    const one = await place.list("snapshots", { under: "/api/systems/instance/7/snapshot", oneThing: true }, {})
+    expect(one.rows).toEqual([snapshot])
+    // a list under a thing, as before:  Open Library's wrapped list, `{ links, size, entries: [...] }`
+    const listed = await place.list("snapshots", { under: "/api/systems/instance/7/snapshot" }, {})
+    expect(listed.rows).toEqual(snapshot.components)
+  })
+
   test("a list under a thing, a plain list beside wrapped ones;  an action on one, its braces from where it was read", async () => {
     const asked = fakeServer((_query, url) =>
       url.pathname.endsWith("/steps") ? [{ id: 3, name: "build" }] : { ok: 1 }
