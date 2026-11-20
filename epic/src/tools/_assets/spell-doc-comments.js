@@ -95,10 +95,13 @@ const COMMENT_READ_KEY_PREFIX = "spell-comment-read:"
 const SEEN_MS = 1200
 
 /** The smallest blocks a quote's thread goes under (`holderOf()`):  a paragraph, a list item, a cell ... */
-const TEXT_HOLDERS = "p, li, dt, dd, td, th, blockquote, pre, figcaption, h4, h5, h6"
+const TEXT_HOLDERS = "p, li, dt, dd, blockquote, pre, figcaption, h4, h5, h6"
 
-/** Of those, the ones a thread goes INSIDE, at the end, so the list or table stays valid. */
-const HOLDS_INSIDE = /^(li|dt|dd|td|th)$/
+/** Where a quote's thread goes when no `TEXT_HOLDERS` holds it (`holderOf()`):  a plain box of text. */
+const BOX_HOLDERS = "div, figure, details, aside, section, article, ui-message, ui-segment"
+
+/** Of those, the ones a thread goes INSIDE, at the end, so the list stays valid. */
+const HOLDS_INSIDE = /^(li|dt|dd)$/
 
 /** The CSS highlight the quoted text of every comment is drawn with (`::highlight()` in `spell-comments.css`). */
 const QUOTE_HIGHLIGHT = "spell-comment-quote"
@@ -180,7 +183,7 @@ const THREADS_FIRST = /^(ui-section|epic-overview)$/
  *   - the pane is for writing a NEW comment;  once saved and closed, it's a THREAD (below)
  *   - THREADS (Owen, 2026-10-10:  "the entire comment thread should be in one collapsable/accordion pane"):
  *     every comment shows as one, folding:  an `<epic-thread>` (`thread()`), in an `<epic-threads>` box
- *     - where:  under the paragraph (list item, cell ...) holding its quote (`holderOf()`), else under its block
+ *     - where:  under the paragraph (list item, whole table ...) holding its quote (`holderOf()`), else under its block
  *     - all ivory, the pane's outline and corners, whoever spoke last
  *     - its edges:  an epic page item's note box's, else the block's it's under (spell-comments.css)
  *     - its header:  a chevron, the bullhorn (a check circle once done), the pane's summary (`ThreadFacts.headline()`)
@@ -586,8 +589,8 @@ class PageComments {
 
   /**
    * Draw it all again:  every bullhorn, every comment's thread, the quotes' highlight.
-   * - a thread goes under the paragraph (list item, cell ...) holding its quote, else under its block (`holderOf()`),
-   *   in that block's box of threads (`<epic-threads>`, `boxFor()`)
+   * - a thread goes under the paragraph (list item, whole table ...) holding its quote, else under its block
+   *   (`holderOf()`), in that block's box of threads (`<epic-threads>`, `boxFor()`)
    * - each comment's thread is ONE `<epic-thread>` for the visit (`threads`):  given what the server holds now, and
    *   moved only when its place changed, so Owen's box in it, what's typed and the cursor stay as they are
    * - a comment whose block can't be found any more goes under the page header, saying so
@@ -1010,7 +1013,7 @@ class PageComments {
    * The box of threads under `under` (a block, or the paragraph holding a quote:  `holderOf()`):
    * an `<epic-threads>`, made on first use.
    * - a docs section's and the Overview's:  first in its body, under its title
-   * - a list item's or cell's:  last inside it
+   * - a list item's or definition's:  last inside it
    * - the page's:  right under the page header
    * - anything else's:  right after it
    * - only one this code made (`data-spell-added`):  never one a page writes as an example (Epic UI's)
@@ -1896,19 +1899,31 @@ export function firstWords(words) {
 }
 
 /**
- * Where a quote's thread goes (Owen, 2026-10-10:  "show them under the paragraph where they were defined"):  the
- * smallest paragraph, list item, cell ... (`TEXT_HOLDERS`) in `block` holding the quote (`quoted`:  `quoteIn()`'s);
- * else `block` itself.
+ * Where a quote's thread goes (Owen, 2026-10-10:  "show them under the paragraph where they were defined"), the nearest
+ * place in `block` around the quote (`quoted`:  `quoteIn()`'s);  only when there's none, `block` itself (its end).
+ * - in a table:  after the WHOLE table (its `<ui-table>`), never in a cell (epic `epic-engine` T107;  Owen,
+ *   2026-11-19:  "closer to the selected text, but e.g. not in the middle of a table")
+ * - else the smallest paragraph, list item, small heading, code block ... holding it (`TEXT_HOLDERS`):
+ *   after it, or inside a list item at its end (`boxFor()`)
+ * - else the smallest plain box holding it (`BOX_HOLDERS`:  a `<div>` of notes in a phase's field ...)
  * - never inside an element that would hide it:  one drawing its children in a shadow root with no default slot
  */
-function holderOf(block, { start, end }) {
+export function holderOf(block, { start, end }) {
   try {
-    const range = document.createRange()
-    range.setStart(...start)
-    range.setEnd(...end)
-    const node = range.commonAncestorContainer
-    const holder = (node.nodeType === 1 ? node : node.parentElement)?.closest(TEXT_HOLDERS)
-    if (!holder || holder === block || !holds(block, holder)) return block
+    // the nodes the quote starts and ends in:  their nearest common ancestor
+    const around = new Set()
+    for (let at = start[0]; at; at = at.parentNode) around.add(at)
+    let node = end[0]
+    while (node && !around.has(node)) node = node.parentNode
+    if (!node) return block
+    const from = node.nodeType === 1 ? node : node.parentElement
+    const inside = (each) => each && each !== block && holds(block, each)
+    const table = from?.closest("table")
+    const tableBox = table?.parentElement?.localName === "ui-table" ? table.parentElement : table
+    // a quote in a table that IS the block:  the block's own place, after it
+    if (tableBox && !inside(tableBox) && holds(block, table)) return block
+    const holder = inside(tableBox) ? tableBox : [from?.closest(TEXT_HOLDERS), from?.closest(BOX_HOLDERS)].find(inside)
+    if (!holder) return block
     const shadow = holder.parentElement?.shadowRoot
     if (shadow && !shadow.querySelector("slot:not([name])")) return block
     return holder
