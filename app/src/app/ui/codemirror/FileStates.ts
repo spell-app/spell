@@ -441,7 +441,8 @@ export class FileStates {
    * - Spell's before the setup's, so its keys (Enter) get the first go.
    * - Its look as the page's setting says (`CodeMirrorLook`):  a Spell file bubbly, else coloured by its tokens;
    *   an HTML file (a property editor page) bubbly, else plain (epic `codemirror` P3).
-   * - A property editors file, `Card.editor.spell`, is Spell to look at but never parsed (`SP.isPropertyEditorsName()`):
+   * - A property editors file, `Card.editor.spell`, is Spell to look at but never parsed (`SP.isPropertyEditorsName()`),
+   *   and so is a samples file, `Card.samples.spell` (`SP.isSamplesName()`, epic `editor` P38):
    *   drawn from its text alone, as Spell is, bubbly or coloured;  its headings, and the help in its tags
    *   (epic `codemirror` I18:  it had no look at all, plain black text).
    * - A CSS file (`styles.css`) coloured by CodeMirror's CSS language, through the ONE colour table (`CodeRules`),
@@ -465,7 +466,7 @@ export class FileStates {
             isBubbly ? CodeMirrorBubbly.extension(() => language.file) : CodeMirrorTokens.extension(() => language.file)
           )
         ]
-      : SP.isPropertyEditorsName(file.path)
+      : SP.isPropertyEditorsName(file.path) || SP.isSamplesName(file.path)
         ? [
             CodeMirrorTyping.markupExtension(),
             CodeMirrorHeadings.extension(),

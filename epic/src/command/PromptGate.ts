@@ -37,7 +37,7 @@ import { Transcript } from "spell/epic/config/Transcript.ts"
  *     - `/epic phase [ids] ...` adds a phase to THIS session's epic, `/epic start <phase | ids> ...` works one
  *       (epic `skillz` P4):  nothing to gate, no rename
  *     - `/epic fresh` hands THIS session's epic to a new session in this window (epic `epic-engine` T110):  nothing to
- *       gate, no rename (the old tab is found by its title)
+ *       gate, no rename (the old tab is found by its title);  `/epic fresh all` (T113), typed in any session, too
  *     - `/epic request <epic> <rN>` takes up a request sent from another session (epic `epic-workflow`):
  *       only renamed, `🚧 <epic>`, as a resume is;  refused in a session titled for another epic (step 0)
  *   - A look right after the name (`/epic x -purple`, epic `windows-and-review` P5) is the window's, not the plan's:
@@ -253,7 +253,7 @@ export class PromptGate {
     // it's already named, isolated and planned:  nothing to gate, no rename
     if (skill === "epic" && (name === "phase" || name === "start")) return null
     // `/epic fresh [--force]` hands THIS session's epic to a new session in this window (epic `epic-engine` T110):
-    // nothing to gate, and NO rename:  its old tab is found by the title it has
+    // nothing to gate, and NO rename:  its old tab is found by the title it has;  `/epic fresh all` (T113) likewise
     if (skill === "epic" && name === "fresh") return null
     // `/epic future <name> ...` writes an idea down, from any window, no worktree:
     // renamed `📅 <name>`, never blocked

@@ -696,6 +696,11 @@ The top bar's Run | Edit | Design | Site tabs pick how much of the editor shows:
   - What it draws takes the palette's drops, moves, cut, copy and paste, written into the view's file or its
     property editor's (`Card.editor.spell`).
   - A page picked shows in the app itself, the site going to it;  Site's page form has Design too.
+  - Its Gallery (epic `editor` P38) draws a view's samples side by side:  the ones saved in `Card.samples.spell`,
+    beside `Card.spell`, else ones made from its choices (each suit, face up and down).
+    Save Sample names the selected one and writes it there, one step Undo takes back.
+  - Its sizes, under the list:  Fit, Phone, Tablet, Desktop (Spell UI's `<ui-device>`, with its own Rotate), or a
+    width you type;  a site's page takes the size as the app's width.
 
 - Run is a page of its own, with its own address.
 - A phone only runs:  no Edit, for now.

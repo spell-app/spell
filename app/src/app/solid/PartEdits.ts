@@ -576,6 +576,8 @@ export class PartEdits {
         // first, before anything else:  the browser's own menu never shows over the app in Edit,
         // nor the program's on its own (`<context-menu>`):  its items go first in ours
         event.preventDefault()
+        // the editor's own boxes (Design's gallery names) have menus of their own:  theirs, not the part menu
+        if (isInEditorOwn(event)) return
         event.stopPropagation()
         const part = partAt(event) ?? Inspector.partsIn(area)[0]?.element
         if (!part) return
@@ -960,3 +962,8 @@ const RING_ROOM = 8
 
 /** The tag start of Spell UI's elements:  what's inside one's shadow root is its own. */
 const UI_PREFIX = "ui-"
+
+/** Is `event` on one of the editor's own boxes in the app's area (`EDITOR_OWN`), anywhere on its way up? */
+function isInEditorOwn(event: Event): boolean {
+  return event.composedPath().some((target) => target instanceof Element && target.hasAttribute(EDITOR_OWN))
+}

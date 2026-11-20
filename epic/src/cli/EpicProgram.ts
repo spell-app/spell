@@ -508,6 +508,12 @@ export class EpicProgram {
       (args) => EpicTools.planDoc(["focus", ...args])
     )
     this.group(
+      epic.command("fresh"),
+      "/epic fresh all:  every running epic session marked to go to a fresh session at its next clear moment;  " +
+        "TELL: lines for each, and which go now and which later;  one epic:  epic window fresh <epic>",
+      (args) => EpicTools.planDoc(["fresh", ...args])
+    )
+    this.group(
       epic.command("demo"),
       "the staged demo (/epic demo):  the real epic page and tools, run from pre-written text;  " +
         "reset clears it to run again",

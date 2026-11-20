@@ -1819,6 +1819,8 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     const name = location.file ?? ""
     // a property editors file, `Card.editor.spell` (epic `editor` P25):  text the Inspector reads, never compiled
     if (SP.isPropertyEditorsName(name)) return new SP.SpellJSFile(fullPath)
+    // a samples file, `Card.samples.spell` (epic `editor` P38):  text Design reads, never compiled
+    if (SP.isSamplesName(name)) return new SP.SpellJSFile(fullPath)
     const suffix = Object.keys(SpellProject.extensionMap).find((suffix) => name.endsWith(suffix))
     const Constructor = suffix ? SpellProject.extensionMap[suffix] : SP.SpellFile
     return new Constructor(fullPath)
