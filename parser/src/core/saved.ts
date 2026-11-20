@@ -1971,6 +1971,8 @@ function keepHeaderRow(row: Element, table: Element, items: () => readonly unkno
  * A list drawn a page at a time, with Previous and Next:  `paging="pages"`.
  * - A page holds `atOnce`:  `MOST_AT_ONCE`, unless the program says (`show them 12 at a time`).
  * - Next at the end of what's read asks a place for its next page.
+ * - Its footer says which it shows, "Showing 1-10 of 42" ("of 42+" while a place has more), on every page;
+ *   Previous, "Page 1 of 5" and Next beside it once there's more than one page.
  * - Hands back the page's items and the pager apart:  the caller draws the pager AFTER what's around the items
  *   (`<ui-cards>`, `<ui-table>`), so it's never one of them.
  */
@@ -2010,15 +2012,45 @@ function drawnInPages<Item>({
       children: (item: Item, position: () => number) => drawItem(item, () => pageNow() * atOnce + position())
     } as never
   ) as JSX.Element
+  ////// The footer:  "Showing 1-10 of 42" at its start;  Previous, "Page 1 of 5" and Next at its end, while there's more
+  // than one page
+  const isMore = () => !!more()?.hasMorePages
+  const showing = () => {
+    const count = items().length
+    const said = { first: pageNow() * atOnce + 1, last: Math.min(lastDrawn(), count), count }
+    return core.message(isMore() ? "page-showing-more" : "page-showing", said)
+  }
+  const pageNumber = () => {
+    const at = pageNow() + 1
+    if (isMore()) return core.message("page-number", { page: at })
+    return core.message("page-number-of", { page: at, pages: Math.max(1, Math.ceil(items().length / atOnce)) })
+  }
+  const buttons = h(
+    "ui-stack",
+    { direction: "horizontal", align: "center", spacing: "xs" },
+    h(
+      "ui-button",
+      { size: "small", appearance: "basic", disabled: () => !pageNow(), onClick: () => goTo(page - 1) },
+      core.message("page-previous")
+    ),
+    h("ui-text", { size: "small", color: "grey" }, pageNumber),
+    h(
+      "ui-button",
+      { size: "small", appearance: "basic", disabled: () => !hasNext(), onClick: () => void next() },
+      core.message("page-next")
+    )
+  )
   const pager = h(
     "ui-stack",
-    { direction: "horizontal", justify: "center", align: "center" },
-    h("ui-button", { disabled: () => !pageNow(), onClick: () => goTo(page - 1) }, core.message("page-previous")),
-    h("ui-text", () => core.message("page-number", { page: pageNow() + 1 })),
-    h("ui-button", { disabled: () => !hasNext(), onClick: () => void next() }, core.message("page-next"))
+    { direction: "horizontal", justify: "between", align: "center", spacing: "sm", wrap: "", [PAGER]: "" },
+    h("ui-text", { size: "small", color: "grey" }, showing),
+    () => (hasNext() || pageNow() ? buttons : null)
   )
-  return { list, pager: (() => (hasNext() || pageNow() ? pager : null)) as unknown as JSX.Element }
+  return { list, pager: pager as unknown as JSX.Element }
 }
+
+/** The mark on a paged list's footer:  a theme or a page styles it by this (`[data-pager]`). */
+const PAGER = "data-pager"
 
 /** What a cell's column is called, on the cell:  `<cell "Name">`. */
 const COLUMN_NAME = "data-column"
