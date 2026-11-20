@@ -1,10 +1,17 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
-import { afterAll, describe, expect, it } from "vite-plus/test"
+import { afterAll, describe, expect, it, vi } from "vite-plus/test"
 
 import { preFlight } from "spell/epic/tools/airplane.ts"
 import { HIGHLIGHT } from "spell/epic/tools/offline.ts"
+
+// The made-up checkout is in a temporary folder, no kit:  `pageServerRoot()` would fall back to the kit this code runs
+// from, whose page server may well be running (from-console I27).  Its own folder instead:  never a server there.
+vi.mock("spell/server/page", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("spell/server/page")>()),
+  pageServerRoot: (from: string) => from
+}))
 
 describe("epic airplane check:  preFlight()", () => {
   const root = mkdtempSync(join(tmpdir(), "airplane-check-"))
