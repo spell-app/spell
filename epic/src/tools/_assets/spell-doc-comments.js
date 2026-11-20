@@ -1366,16 +1366,50 @@ class PageComments {
     thread?.focusFold?.()
   }
 
-  /** Show the floating bullhorn beside a selection in a block;  hide it otherwise. */
+  /**
+   * Show the floating bullhorn beside a selection in a block;  hide it otherwise.
+   * - never over an example's code button (epic `from-console` I8):  a phone's selection reaches the window's edge,
+   *   where that button sits, so there it goes above the example's frame, its right edge the button's (`clearOfCode()`)
+   */
   showFloating() {
     const selected = this.selected()
     const button = this.floatingBullhorn()
     if (!selected) return button.setAttribute("hidden", "")
     const rects = selected.range.getClientRects()
     const last = rects[rects.length - 1] ?? selected.range.getBoundingClientRect()
-    button.style.left = `${Math.min(innerWidth - 36, last.right + 6)}px`
-    button.style.top = `${Math.max(4, last.top - 4)}px`
     button.removeAttribute("hidden")
+    const size = button.getBoundingClientRect()
+    const spot = this.clearOfCode(selected.range, {
+      left: Math.min(innerWidth - 36, last.right + 6),
+      top: Math.max(4, last.top - 4),
+      width: size.width,
+      height: size.height
+    })
+    button.style.left = `${spot.left}px`
+    button.style.top = `${spot.top}px`
+  }
+
+  /**
+   * Where the floating bullhorn goes instead of `spot` when it would cover the code button of the example the
+   * selection is in:  just above the example's frame, its right edge the code button's;  else `spot`.
+   */
+  clearOfCode(range, spot) {
+    // the example around it:  its description's own words are in its shadow root
+    let node = range.commonAncestorContainer
+    let example
+    while (node && !example) {
+      example = node.nodeType === Node.ELEMENT_NODE ? node.closest("ui-example") : null
+      node = example ? null : (node.parentElement ?? node.getRootNode().host)
+    }
+    const toggle = example?.shadowRoot?.querySelector('[part~="toggle"]')
+    if (!toggle) return spot
+    const code = toggle.getBoundingClientRect()
+    const covers =
+      spot.left < code.right && spot.left + spot.width > code.left && spot.top < code.bottom && spot.top + spot.height > code.top
+    if (!covers) return spot
+    // the frame the code button sits on the corner of
+    const frame = (toggle.parentElement ?? example).getBoundingClientRect()
+    return { ...spot, left: code.right - spot.width, top: Math.max(4, Math.min(frame.top, code.top) - spot.height - 4) }
   }
 
   /** The floating bullhorn, made once (in `body`, outside `main`):  a click comments on the selection. */
