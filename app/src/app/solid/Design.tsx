@@ -12,6 +12,7 @@ import { appTexts } from "spell/app/app/ui/AppTexts"
 import { EDITOR_FRAME, EDITOR_OWN } from "spell/app/app/ui/ui.types"
 import { SpellElement } from "spell/app/app/runner/SpellElement"
 import { MenuHeader } from "./chrome"
+import { DesignDrawings } from "./DesignDrawings"
 import { DesignSamples, type Sample } from "./DesignSamples"
 import { DESIGNED, Inspector, OwnEditorPage, SCALED_UP } from "./Inspector"
 import { EditorTours } from "./EditorTours"
@@ -78,8 +79,10 @@ export class Design {
   /** The open view's drawings, each `to draw ...` of its type in its file, in order (reactive). */
   static get drawings(): DesignBit[] {
     const view = Design.view
-    if (!view) return []
-    return drawingsIn(editor.file?.contents ?? "", view)
+    const file = editor.file
+    if (!view || !file) return []
+    const language = file instanceof SP.SpellFile ? file.language : SP.Language.default
+    return DesignDrawings.in(file.contents ?? "", view, language, appTexts.text("designDrawing"))
   }
 
   /** The site's pages, in its order (reactive):  none for a project that isn't a site. */
@@ -281,62 +284,8 @@ function pageTitleOf(part: SitePart): string {
   return part.title ?? part.name
 }
 
-/**
- * The drawings of `view` in its file's `text`:  each `to draw ...` line of its type's block, with the lines under it.
- * - Its type's block:  from the top-level line naming it (`a "card" is a ...`) to the next top-level line;
- *   no such line, every `to draw ...` in the file.
- * - Read from the text, as the site's parts are (`SiteEdits`):  English only, as the palette's views are.
- */
-function drawingsIn(text: string, view: OwnView): DesignBit[] {
-  const lines = text.split("\n")
-  const words = view.snippet.replace(/^\{draw an? new (.*)\}$/, "$1")
-  const typeLine = new RegExp(`^(?:an?\\s+)?"?${escapeRegExp(words)}"?\\s+(?:\\(.*\\)\\s+)?is\\b`, "i")
-  const isTop = (line: string) => /^\S/.test(line) && !/^(?:#|--|\/\/)/.test(line)
-  const start = lines.findIndex((line) => isTop(line) && typeLine.test(line))
-  const end = start < 0 ? lines.length : lines.findIndex((line, at) => at > start && isTop(line))
-  const isTwoSided = view.classNames.includes(TWO_SIDED)
-  const found: DesignBit[] = []
-  for (let at = Math.max(start, 0); at < (end < 0 ? lines.length : end); at++) {
-    const match = DRAW_LINE.exec(lines[at]!)
-    if (!match) continue
-    const indent = match[1]!.length
-    let last = at
-    for (let next = at + 1; next < lines.length; next++) {
-      const line = lines[next]!
-      if (!line.trim()) continue
-      if (/^\s*/.exec(line)![0].length <= indent) break
-      last = next
-    }
-    const written = `to draw ${match[2]!.trim()}`
-    const side = /^its\s+(\w+)$/.exec(match[2]!.trim())?.[1]
-    found.push({
-      kind: "drawing",
-      key: `drawing:${written}`,
-      label: side ? upperFirst(side) : appTexts.text("designDrawing"),
-      written,
-      lines: { start: at, end: last },
-      side: isTwoSided ? side : undefined,
-      name: view.classNames[0]
-    })
-  }
-  return found
-}
-
-/** A drawing's line:  its indent, then what it draws, `its front`;  any comment after it left out. */
-const DRAW_LINE = /^(\s+)to draw\s+(.*?)\s*:?\s*(?:--.*|\/\/.*)?$/
-
 /** The built-in a view with a front and a back extends. */
 const TWO_SIDED = "TwoSidedView"
-
-/** `words` with its first letter a capital. */
-function upperFirst(words: string): string {
-  return words.charAt(0).toUpperCase() + words.slice(1)
-}
-
-/** `text` matching itself in a regular expression. */
-function escapeRegExp(text: string): string {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-}
 
 /****************
  * ### `<DesignStage>`
