@@ -104,6 +104,35 @@
                   ></ui-site-nav>
                 </ui-example>
               </ui-section>
+              <ui-section id="examples-variations-headings" label="Headings" sticky="stack" collapsible dividing>
+                <ui-example description="`groups=&quot;headings&quot;`:  each group is a small plain heading over its pages, as an ops console&#x27;s sidebar draws them:  no well, no icon, always open, and a click on it goes nowhere.  A page&#x27;s own pages still fold under it, beside a guide line.">
+                  <ui-site-nav
+                    appearance="nav"
+                    groups="headings"
+                    style="max-width: 16em"
+                    current="#explore"
+                    pages='[{ "title": "Home", "icon": "gauge", "href": "#home" }, { "title": "Design", "band": "group", "pages": [{ "title": "Explore", "icon": "binoculars", "href": "#explore" }, { "title": "Resources", "icon": "server", "href": "#resources", "pages": [{ "title": "Assets", "icon": "tag", "href": "#assets" }, { "title": "Commissioning", "icon": "clipboard", "href": "#commissioning" }] }] }, { "title": "Run", "band": "group", "pages": [{ "title": "Jobs", "icon": "bolt", "href": "#jobs" }, { "title": "Reservations", "icon": "calendar check", "href": "#reservations" }] }]'
+                  ></ui-site-nav>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-variations-start-and-end" label="Start and end" sticky="stack" collapsible dividing>
+                <ui-example description="Its `start` slot shows above its pages, a logo or a picker;  its `end` slot at its foot, pushed to the bottom of the box it fills, a row of buttons.  Each is drawn only while it has something in it.  A Spell layout that draws its own drawer fills these around the site&#x27;s pages.">
+                  <ui-site-nav
+                    appearance="nav"
+                    groups="headings"
+                    style="max-width: 16em; height: 22em"
+                    current="#jobs"
+                    pages='[{ "title": "Home", "icon": "gauge", "href": "#home" }, { "title": "Run", "band": "group", "pages": [{ "title": "Jobs", "icon": "bolt", "href": "#jobs" }, { "title": "Reservations", "icon": "calendar check", "href": "#reservations" }] }]'
+                  >
+                    <ui-text slot="start" size="large" bold>Orbital Lab</ui-text>
+                    <ui-stack slot="end" direction="horizontal" justify="between">
+                      <ui-button icon="gear" appearance="tertiary" aria-label="Settings"></ui-button>
+                      <ui-button icon="book" appearance="tertiary" aria-label="Docs"></ui-button>
+                      <ui-button icon="sun" appearance="tertiary" aria-label="Theme"></ui-button>
+                    </ui-stack>
+                  </ui-site-nav>
+                </ui-example>
+              </ui-section>
               <ui-section id="examples-variations-collapsed" label="Collapsed" sticky="stack" collapsible dividing>
                 <ui-example description="`collapsed` shows only the icons, each row's title its tooltip:  every icon in one column, with no step in, an open group still in its well:  a page with no icon shows its title's first letter, and a group with no icon is a thin line.">
                   <ui-site-nav

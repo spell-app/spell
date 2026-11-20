@@ -313,7 +313,7 @@ await themes.apply(undefined) // no theme:  the plain default look
 - Two calls racing:  the last one called wins, even when the first one's chunk arrives later.
 - `themes.own` lists Spell UI's own ten themes, `spell`, `glass`, `fruity`, `merlot`, `paper`, `midnight`,
   `crisp`, `pop`, `matrix` and `mockup`:
-  the theme menu (`<ui-theme-menu>`) lists them, and nothing else.
+  the theme menu (`<ui-theme-menu>`) lists them, after any a page offers (recipe 6).
 - A name it doesn't know throws a `TypeError` that lists the ones it does.
 - To let people pick:  `<ui-theme-menu>`, one palette button holding Spell's ten themes and Light, Dark or Auto,
   ONE choice for every Spell place (`ThemePreference`):  picked in any menu, the editor, an epic page and Spell UI's
@@ -447,6 +447,15 @@ galaxy guide is a site with theme "harbor"
 - The site wears it, and the page around the site keeps its own theme.
   That holds in the editor's Run, and for a site on a page, in `<spell-viewer>`.
 - It's read again each time the site starts, so an edit shows on the next run.
+- The editor's theme menu offers it while the project is open:  first, under the project's title, each theme with the
+  Spell theme it builds on, then a dashed line, then Spell's own.
+  Picked, it dresses the editor too, and it's remembered as `project:<name>`;  with another project open, the editor
+  wears the default and keeps the pick.
+  - A page of your own offers its themes the same way, once it has defined them with `UI.themes.define()`:
+
+    ```js
+    ThemePreference.offer({ title: "Galaxy Guide", themes: [{ name: "harbor", title: "Harbor", base: "matrix" }] })
+    ```
 - The catch:  a name in neither place isn't an error.
   The site keeps the page's look, and the browser's console says where it looked.
 - In code, `UI.themes.define(name, css)` adds a sheet like this one.
