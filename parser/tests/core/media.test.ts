@@ -1,4 +1,4 @@
-import { describe, test, expect, afterEach, vi } from "vite-plus/test"
+import { describe, test, expect, afterEach, onTestFinished, vi } from "vite-plus/test"
 import { parseHTML } from "linkedom"
 
 import { core } from "spell/parser/core"
@@ -302,6 +302,42 @@ describe("where a video plays (epic `language` J280)", () => {
     expect(core.drawMedia("quiet one")).toBeUndefined()
     void core.play("clips/cat.mp4")
     expect(videos).toHaveLength(1)
+    expect(FakeAudio.made).toHaveLength(1)
+  })
+})
+
+describe("Spell's built-in sounds, and tests (epic `mockup` P28)", () => {
+  test("a built-in sound's name plays its file, as the page's Spell UI says where it is", () => {
+    vi.stubGlobal("Audio", FakeAudio)
+    const key = Symbol.for("spell-ui:runtime")
+    const sounds = { url: (name: string) => (name === "door knock" ? "https://example.com/door-knock.ogg" : undefined) }
+    ;(globalThis as Record<symbol, unknown>)[key] = { sounds }
+    onTestFinished(() => {
+      delete (globalThis as Record<symbol, unknown>)[key]
+    })
+    const warn = vi.spyOn(core.console, "warn").mockImplementation(() => {})
+    void core.play("door knock")
+    expect(FakeAudio.made[0]).toMatchObject({ src: "https://example.com/door-knock.ogg" })
+    void core.play("no such sound")
+    expect(FakeAudio.made).toHaveLength(1)
+    expect(String(warn.mock.calls[0]![0])).toContain("no sound called")
+  })
+
+  test("a built-in sound's name on a page without Spell UI:  said, and nothing plays", () => {
+    vi.stubGlobal("Audio", FakeAudio)
+    const warn = vi.spyOn(core.console, "warn").mockImplementation(() => {})
+    void core.play("win")
+    expect(FakeAudio.made).toHaveLength(0)
+    expect(String(warn.mock.calls[0]![0])).toContain("needs Spell UI")
+  })
+
+  test("a test plays no sounds:  a program's tests run as it loads, before anyone clicks", () => {
+    vi.stubGlobal("Audio", FakeAudio)
+    vi.spyOn(core.console, "groupCollapsed").mockImplementation(() => {})
+    vi.spyOn(core.console, "groupEnd").mockImplementation(() => {})
+    core.test("test counting", () => void core.play("https://example.com/click.ogg"))
+    expect(FakeAudio.made).toHaveLength(0)
+    void core.play("https://example.com/click.ogg")
     expect(FakeAudio.made).toHaveLength(1)
   })
 })

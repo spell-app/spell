@@ -81,6 +81,8 @@ yarn start                          # the page server and editor from ~/www/spel
 - For every project on the machine:  `export SPELL_KIT=~/www/spell`, in your shell profile.
   It wins over a project's file, so one command can try another checkout.
 - A checkout named that can't run stops `spell` with one line saying why, never npm's copy instead.
+  - So does a checkout older than the version the project installs (0.8.16 or later):
+    the line says to `git pull && yarn install` there.
 - It covers `spell` and the commands under it (`spell epic` ...), `epic` from npm's `spell-epic`, and `spell-pack`;
   not `spell-types`.
 - Only from a release that has it:  0.8.13 or later.

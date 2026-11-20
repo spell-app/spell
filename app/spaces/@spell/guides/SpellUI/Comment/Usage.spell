@@ -3,14 +3,6 @@
 		Comment
 		<header>A comment displays user feedback to site content.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#events">Events</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-		</>
-	</>
 
 	<!-- USAGE:  from the old Astro page (Behaviour, Accessibility), tightened. -->
 	<section label="Using it">

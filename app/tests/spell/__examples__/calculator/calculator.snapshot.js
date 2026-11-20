@@ -54,6 +54,7 @@ export class Calculator extends App {
   }
 
   clear() {
+    core.play("tap")
     this.input = ""
     this.left = ""
     this.operator = ""
@@ -62,6 +63,7 @@ export class Calculator extends App {
 
   /** Equals:  the total becomes the left number, ready for the next operator */
   finish() {
+    core.play("tap")
     if (!this.right) return
     this.left = `${this.total}`
     this.operator = ""
@@ -71,6 +73,7 @@ export class Calculator extends App {
 
   /** A digit, or the decimal point:  onto the number being typed, the left one until there's an operator */
   pressDigit(digit) {
+    core.play("tap")
     if (digit === ".") {
       if (!this.input) this.input = "0."
       else if (!this.input.includes(".")) this.input = `${this.input}.`
@@ -81,6 +84,7 @@ export class Calculator extends App {
 
   /** An operator:  after a whole sum, the total carries on as the next sum's left number */
   applyKey(key) {
+    core.play("tap")
     if (this.right) this.finish()
     this.operator = key
     this.input = ""

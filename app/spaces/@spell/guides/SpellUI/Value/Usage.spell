@@ -3,13 +3,6 @@
 		Value
 		<header>A value is what a statistic shows:  a number, a word, an icon or an image.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#owners">Owners</>
-			<item link="#accessibility">Accessibility</>
-		</>
-	</>
 
 	<section label="Using it">
 		<markdown>

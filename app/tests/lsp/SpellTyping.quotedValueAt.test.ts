@@ -5,10 +5,10 @@ import { LSP } from "spell/app/lsp"
 const { SpellTyping } = LSP
 
 /** What `quotedValueAt()` finds in `line`, the caret at its `|`:  the value's text, or `undefined`. */
-function valueAt(line: string, end?: LSP.QuotedValueEnd): string | undefined {
+function valueAt(line: string, end?: LSP.QuotedValueEnd, after?: LSP.QuotedValueAfter): string | undefined {
   const column = line.indexOf("|")
   const text = line.replace("|", "")
-  const found = SpellTyping.quotedValueAt(text, column, end)
+  const found = SpellTyping.quotedValueAt(text, column, end, after)
   return found && text.slice(found.from, found.to)
 }
 
@@ -48,5 +48,12 @@ describe("SpellTyping.quotedValueAt()", () => {
     expect(valueAt(`<text color="re|`)).toBeUndefined()
     expect(valueAt(`<text color="re|`, "closing-quote-or-caret")).toBe("re")
     expect(valueAt(`<text color="re|d"`, "closing-quote-or-caret")).toBe("red")
+  })
+
+  test("after a word, the sound picker's:  `play \"card s|\"`, though no attribute's (epic `mockup` P28)", () => {
+    expect(valueAt(`\t\tplay "cli|ck"`, "closing-quote-or-caret", "word")).toBe("click")
+    expect(valueAt(`\t\treproducir "deslizar c|`, "closing-quote-or-caret", "word")).toBe("deslizar c")
+    expect(valueAt(`\t\tplay "cli|ck"`, "closing-quote-or-caret")).toBeUndefined()
+    expect(valueAt(`\t\tplay "click"|`, "closing-quote-or-caret", "word")).toBeUndefined()
   })
 })

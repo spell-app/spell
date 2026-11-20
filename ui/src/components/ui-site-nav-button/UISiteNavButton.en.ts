@@ -23,12 +23,38 @@ export const siteNavButtonVocabulary = {
   skeleton: "inline 2.5 x 2.5",
   description:
     "A site nav button shows or hides the side navigation of the page layout around it:  its icons only and back " +
-    "on a wide page, slid in and out on a narrow one.  It's an item, for an app menu.",
+    "on a wide page, slid in and out on a narrow one;  or one of its side bars (`toggles`).  It's an item, for an " +
+    "app menu.",
+  attributes: [
+    ...itemVocabulary.attributes,
+    {
+      name: "toggles",
+      group: "behaviour",
+      kind: "valueOnly",
+      values: ["drawer", "left", "right"],
+      default: "drawer",
+      // no class words:  `right` is Fomantic's own word for an item pushed to a menu's end
+      classes: { drawer: "", left: "", right: "" },
+      description:
+        "What it shows and hides:  the layout's `drawer` (its side navigation), or its `left` or `right` side bar.  " +
+        "With one for a side bar, a narrow layout hides that side bar behind it."
+    }
+  ],
   texts: [
     {
       key: "label",
       text: "Show or hide the side bar",
       description: "What it's called, its tooltip and its name for a screen reader, without `aria-label`."
+    },
+    {
+      key: "leftLabel",
+      text: "Show or hide the left side bar",
+      description: 'What it\'s called with `toggles="left"`, without `aria-label`.'
+    },
+    {
+      key: "rightLabel",
+      text: "Show or hide the right side bar",
+      description: 'What it\'s called with `toggles="right"`, without `aria-label`.'
     },
     {
       key: "menuLabel",

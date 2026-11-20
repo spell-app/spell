@@ -238,24 +238,27 @@ describe("a build script's steps", () => {
   const root = mkdtempSync(join(tmpdir(), "assembler-bundle-steps-"))
   install(root, { spell: "." })
   put(root, "ui/src/icons/icon-packs/lucide/x.svg", "<svg/>")
+  put(root, "ui/src/sounds/sound-library/click.ogg", "ogg")
   const out = join(root, "site/out")
   afterAll(() => rmSync(root, { recursive: true, force: true }))
 
-  test("clearOutput() empties the folder but the icon packs' link;  linkIconPacks() links them, relative", () => {
+  test("clearOutput() empties the folder but the built-in files' links;  linkBuiltInFiles() links them, relative", () => {
     put(root, "site/out/old-chunk.js", "old")
     put(root, "site/out/.bundle.json", "{}")
-    SRV.Bundle.linkIconPacks(out)
-    SRV.Bundle.linkIconPacks(out)
+    SRV.Bundle.linkBuiltInFiles(out)
+    SRV.Bundle.linkBuiltInFiles(out)
     SRV.Bundle.clearOutput(out)
-    expect(readdirSync(out)).toEqual(["icon-packs"])
+    expect(readdirSync(out).toSorted()).toEqual(["icon-packs", "sound-library"])
     expect(readlinkSync(join(out, "icon-packs"))).toBe("../../ui/src/icons/icon-packs")
     expect(existsSync(join(out, "icon-packs/lucide/x.svg"))).toBe(true)
+    expect(readlinkSync(join(out, "sound-library"))).toBe("../../ui/src/sounds/sound-library")
+    expect(existsSync(join(out, "sound-library/click.ogg"))).toBe(true)
   })
 
-  test("linkIconPacks() points a link from another layout again", () => {
+  test("linkBuiltInFiles() points a link from another layout again", () => {
     rmSync(join(out, "icon-packs"))
     symlinkSync("../../../ui/src/icons/icon-packs", join(out, "icon-packs"))
-    SRV.Bundle.linkIconPacks(out)
+    SRV.Bundle.linkBuiltInFiles(out)
     expect(readlinkSync(join(out, "icon-packs"))).toBe("../../ui/src/icons/icon-packs")
   })
 

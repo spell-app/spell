@@ -1,0 +1,26 @@
+<!-- <ui-uploader>'s property editor layout:  move, pair (<ui-fields>) or leave out (data-omit) its properties.  How:  Spell UI's AGENTS.md, "Property editor layouts". -->
+<ui-property-editor schema="ui-uploader" data-omit="action drop-zone">
+  <ui-property-group label="Appearance" data-group="appearance">
+    <ui-property name="appearance"></ui-property>
+  </ui-property-group>
+  <ui-property-group label="Content" data-group="content">
+    <ui-property name="message"></ui-property>
+    <ui-property name="drop-message"></ui-property>
+    <ui-fields>
+      <ui-property name="uploading-message"></ui-property>
+      <ui-property name="done-message"></ui-property>
+    </ui-fields>
+  </ui-property-group>
+  <ui-property-group label="Behaviour" data-group="behaviour">
+    <ui-property name="destination"></ui-property>
+    <ui-property name="extensions"></ui-property>
+    <ui-fields>
+      <ui-property name="multiple"></ui-property>
+      <ui-property name="folder"></ui-property>
+    </ui-fields>
+    <ui-fields>
+      <ui-property name="max-size"></ui-property>
+      <ui-property name="max-files"></ui-property>
+    </ui-fields>
+  </ui-property-group>
+</ui-property-editor>

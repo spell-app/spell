@@ -77,9 +77,6 @@
     {
       "why": "Sounds and videos (epic data T145, language P65):  a page's speakers and screen, played from a person's click;  a Python program's page would play them, not the program",
       "names": [
-        "play",
-        "stop",
-        "loadSound",
         "media",
         "mediaNamed",
         "pause",

@@ -27,8 +27,9 @@ import "./FileTabs.css"
  * - what showing one does:  `editor.showEditor()`
  * - a drafted file's pen's tip, in the page's language:  "Updated in your draft.", and its link, Discard changes,
  *   which discards THAT file's draft (`editor.discardDraftOf()`;  epic `editor` I92)
- * - A tab's right-click menu is the Spell's too, a `<context-menu>` inside each tab:  Duplicate, Rename, Delete,
- *   the app's actions, which the editor does (`editorSpellWithActions()`);  the page's right click on the bar finds it.
+ * - A tab's right-click menu is the Spell's too, a `<context-menu>` inside each tab:
+ *   Duplicate, Rename, Delete, the app's actions, which the editor does (`editorSpellWithActions()`);
+ *   the page's right click on the bar finds it.
  *   - The right click shows that file first, so its actions are about it.
  * - Too many for the row, it scrolls;  too narrow for that, it's one dropdown (its `<ui-toolbar>`'s `scroll-first`).
  * - A tab dragged along the row moves its file there:  the project's file order, saved in its project file

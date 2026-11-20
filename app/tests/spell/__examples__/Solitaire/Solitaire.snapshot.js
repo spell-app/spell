@@ -92,8 +92,10 @@ export class Card extends TwoSidedView {
   }
 
   async play() {
-    if (this.pile === solitaire.stock) await solitaire.turnOverTheNextCard()
-    else {
+    if (this.pile === solitaire.stock) {
+      core.play("card slide")
+      await solitaire.turnOverTheNextCard()
+    } else {
       const endPile = core.filter(core.everyThing(Pile), (pile) => core.canTake(pile, this)).firstItem
       if (endPile === undefined) return false
       return this.moveToPile(endPile)
@@ -102,6 +104,7 @@ export class Card extends TwoSidedView {
 
   /** The move scores;  the column it left turns its new last card face up */
   afterMoveToPile(pile) {
+    core.play("card place")
     solitaire.score = solitaire.score + this.thePointsForCardOnPile(pile)
     const it2 = this.lastPile
     if (it2 instanceof Column && !it2.isEmpty) it2.lastItem?.turnFaceUp()
@@ -650,7 +653,10 @@ export class Solitaire extends App {
   }
 
   async onScoreChange(event) {
-    if (core.itemCountOf(core.mergeLists(core.everyThing(Foundation))) === 52) await core.showDrawn("you won")
+    if (core.itemCountOf(core.mergeLists(core.everyThing(Foundation))) === 52) {
+      core.play("win")
+      await core.showDrawn("you won")
+    }
   }
 }
 export const solitaire = new Solitaire()

@@ -4,13 +4,6 @@
 		<header>Markdown renders GitHub-flavoured markdown -- tables, task lists, code blocks -- from the element's
               own text or a file on this site.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#tokens">Tokens</>
-			<item link="#themes">Themes</>
-		</>
-	</>
-
 	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
 	<section label="Tokens">
 		<markdown>

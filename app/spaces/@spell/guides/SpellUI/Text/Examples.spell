@@ -3,13 +3,6 @@
 		Text
 		<header>A text is used to style some inline text with a simple color.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#states">States</>
-			<item link="#variations">Variations</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's text page, in its order (Types, Variations), plus our extras (all colours, Disabled,

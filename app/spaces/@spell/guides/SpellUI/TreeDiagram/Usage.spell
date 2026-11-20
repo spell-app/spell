@@ -3,16 +3,6 @@
 		Tree diagram
 		<header>A tree diagram draws a tree:  a box for each node, a line to each of its children.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#from-script">From script</>
-			<item link="#clicks-and-folding">Clicks and folding</>
-			<item link="#size">Size</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-		</>
-	</>
 
 	<!-- USAGE:  the data contract, the two ways to give it, sizing, framework snippets, accessibility. -->
 	<section label="Using it">

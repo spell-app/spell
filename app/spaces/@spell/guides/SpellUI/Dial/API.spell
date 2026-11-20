@@ -1,0 +1,36 @@
+"dial api" is a notebook page
+	<header level="1">
+		Dial
+		<header>A dial lets people pick a number by turning it, with its value in the middle and its label under it.</>
+	</>
+
+	<!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
+	<section label="Attributes">
+		<html>
+			<ui-docs-api family="ui-dial" only="attributes"></>
+		</>
+	</>
+
+	<section label="Properties">
+		<html>
+			<ui-docs-api family="ui-dial" only="properties"></>
+		</>
+	</>
+
+	<section label="Events">
+		<html>
+			<ui-docs-api family="ui-dial" only="events"></>
+		</>
+	</>
+
+	<section label="Parts">
+		<html>
+			<ui-docs-api family="ui-dial" only="parts"></>
+		</>
+	</>
+
+	<section label="States">
+		<html>
+			<ui-docs-api family="ui-dial" only="states"></>
+		</>
+	</>

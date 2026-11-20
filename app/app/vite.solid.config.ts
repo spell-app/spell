@@ -53,12 +53,13 @@ const EMOJI_DATA = /\/components\/ui-emoji\/data\/([\w-]+)\/(\w+)\.json$/
  *   (`SHARED_FAMILIES`):  the page's, on the same condition, else `spell-ui.js`'s (`sharedPage()`).
  * - The other builds mark those packages external and import these files instead --
  *   `sharedSolid()` in `vite.shared.ts`, which also lists what they may import.
- * - Icon packs (`appConfig({ iconPacks })`):  beside the chunk holding `BuiltInPacks`, wherever it lands.
+ * - Icon packs and sounds (`appConfig({ builtInFiles })`):  beside the chunks holding `BuiltInPacks` and
+ *   `BuiltInSounds`, wherever they land.
  * - Fixed entry names, no hashes:  the other bundles name them.
  * - `keepNames` MUST stay on:  `ui` reads custom element class names (`spell/ui/vite.config.ts`).
  * - Plugins, dedupe and CSS:  `appConfig()`, as `vite.config.ts`.
  */
-const shared = appConfig({ iconPacks: true })
+const shared = appConfig({ builtInFiles: true })
 export default defineConfig({
   ...shared,
   plugins: [...shared.plugins, sharedEntries(), sharedPage()],

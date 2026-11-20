@@ -1,0 +1,96 @@
+"dial examples" is a notebook page
+	<header level="1">
+		Dial
+		<header>A dial lets people pick a number by turning it, with its value in the middle and its label under it.</>
+	</>
+
+	<!--
+		EXAMPLES:  ours, not Fomantic's (it has no dial):  types, content, states, variations.  A dial is a form control:
+		every example is named (its `label`, or `aria-label`).
+	-->
+	<section label="Types">
+		<section label="Dial" sticky="stack" collapsible dividing>
+			<example "Dial" description="A dial:  `min` 0 to `max` 100 by default, its value in the middle, its `label` under it.  Drag the handle round, or focus it and use the arrow keys.">
+				<dial label="Volume" value="40"/>
+			</example>
+		</>
+
+		<section label="A row of dials" sticky="stack" collapsible dividing>
+			<example "A row of dials" description="A font's settings, each dial its own `color`:  the first with `ticks`, its value drawn at its own weight (`--ui-dial-value-font-weight`), the last two with `unit=\"%\"`.">
+				<stack direction="horizontal" wrap spacing="xl">
+					<dial label="Weight" color="orange" min="100" max="900" value="777" ticks style="--ui-dial-value-font-weight: 777"/>
+					<dial label="Roundness" color="teal" value="50"/>
+					<dial label="Size" color="blue" max="250" value="104"/>
+					<dial label="Line height" color="red" min="80" max="200" value="98" unit="%"/>
+					<dial label="Spacing" color="yellow" min="-20" max="50" value="0" unit="%"/>
+				</>
+			</example>
+		</>
+	</>
+
+	<section label="Content">
+		<section label="Ticks" sticky="stack" collapsible dividing>
+			<example "Ticks" description="`ticks` draws dots round the inside of the ring:  9 alone (a dot every eighth), or `ticks=\"12\"` for 12 gaps.  They're only a look:  values still snap to `step`.">
+				<stack direction="horizontal" wrap spacing="xl">
+					<dial label="Eighths" color="green" value="50" ticks/>
+					<dial label="Hours" color="green" max="12" value="3" ticks="12"/>
+				</>
+			</example>
+		</>
+
+		<section label="Unit" sticky="stack" collapsible dividing>
+			<example "Unit" description="`unit` is written right after the number:  `%` and `°` hug it, a leading space keeps it apart (`unit=\" px\"`).">
+				<stack direction="horizontal" wrap spacing="xl">
+					<dial label="Opacity" color="violet" value="85" unit="%"/>
+					<dial label="Hue" color="violet" max="360" value="250" unit="°"/>
+					<dial label="Padding" color="violet" max="64" step="4" value="16" unit=" px"/>
+				</>
+			</example>
+		</>
+	</>
+
+	<section label="States">
+		<section label="Read-only" sticky="stack" collapsible dividing>
+			<example "Read-only" description="A `readonly` dial shows its value and can't be turned, but still takes focus and is submitted.">
+				<dial label="Read-only" color="blue" value="60" readonly/>
+			</example>
+		</>
+
+		<section label="Disabled" sticky="stack" collapsible dividing>
+			<example "Disabled" description="A `disabled` dial is dimmed, can't be focused, and is left out of the form.">
+				<dial label="Disabled" color="blue" value="60" disabled/>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Size" sticky="stack" collapsible dividing>
+			<example "Size" description="A dial can be smaller or larger:  `size` scales all of it, the value's type too.">
+				<stack direction="horizontal" wrap spacing="lg" align="end">
+					<dial label="Mini" size="mini" color="pink" value="20"/>
+					<dial label="Small" size="small" color="pink" value="40"/>
+					<dial label="Medium" color="pink" value="60"/>
+					<dial label="Large" size="large" color="pink" value="80"/>
+				</>
+			</example>
+		</>
+
+		<section label="Colored" sticky="stack" collapsible dividing>
+			<example "Colored" description="A dial can be any of the theme's colours;  uncoloured, it takes the primary colour.">
+				<stack direction="horizontal" wrap>
+					<dial size="mini" aria-label="Primary" value="50"/>
+					<dial size="mini" color="red" aria-label="Red" value="50"/>
+					<dial size="mini" color="orange" aria-label="Orange" value="50"/>
+					<dial size="mini" color="yellow" aria-label="Yellow" value="50"/>
+					<dial size="mini" color="green" aria-label="Green" value="50"/>
+					<dial size="mini" color="teal" aria-label="Teal" value="50"/>
+					<dial size="mini" color="blue" aria-label="Blue" value="50"/>
+					<dial size="mini" color="violet" aria-label="Violet" value="50"/>
+					<dial size="mini" color="purple" aria-label="Purple" value="50"/>
+					<dial size="mini" color="pink" aria-label="Pink" value="50"/>
+					<dial size="mini" color="brown" aria-label="Brown" value="50"/>
+					<dial size="mini" color="grey" aria-label="Grey" value="50"/>
+				</>
+			</example>
+		</>
+	</>

@@ -77,7 +77,9 @@ export const LSP_TEXTS = {
   ////////////////
 
   pickColor: "Pick a color…",
-  pickIcon: "Pick an icon…"
+  pickIcon: "Pick an icon…",
+  pickSound: "Pick a sound…",
+  builtInSound: "a built-in sound"
 } as const
 
 /** Key of one of the language server's texts, e.g. `"declaredIn"`. */

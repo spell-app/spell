@@ -220,9 +220,12 @@ export const mediaMethods = defineCoreModule({
    * - A video plays where the page draws it, else in a new window;  `options.where` says so outright.
    * - The promise ends once it ends, or is stopped:  `play ... and wait` awaits it.  It never fails.
    * - Nothing to play:  nothing, and the promise ends at once.
+   * - Silent while a test runs (`core.ACTIVE_TEST`):  a program's tests run as it loads,
+   *   and Counter's `to test counting` would click twice before anyone clicked (epic `mockup` P28).
    * - NEVER throws:  a sound the browser refuses, or can't load, is said on the program's console.
    */
   play(target: MediaTarget, options: PlayOptions = {}): Promise<void> {
+    if (core.ACTIVE_TEST) return Promise.resolve()
     const media = mediaFor(target)
     const player = media?.player
     if (!media || !player) return Promise.resolve()
@@ -354,13 +357,44 @@ function mediaFor(target: MediaTarget): SpellMedia | undefined {
   if (target instanceof SpellMedia) return target
   const named = core.mediaNamed(target)
   if (named) return named
-  let media = BY_ADDRESS.get(target)
+  const address = builtInSoundFor(target)
+  if (!address) return undefined
+  let media = BY_ADDRESS.get(address)
   if (!media) {
-    media = new SpellMedia(VIDEO_FILE.test(target) ? "video" : "sound", target)
-    BY_ADDRESS.set(target, media)
+    media = new SpellMedia(VIDEO_FILE.test(address) ? "video" : "sound", address)
+    BY_ADDRESS.set(address, media)
   }
   return media
 }
+
+/**
+ * Where `target` is:  one of Spell's built-in sounds' files for its name (`card slide`), else `target` itself, an
+ * address (epic `mockup` P28).
+ * - A name is plain words:  no `/`, no `.` (an address always has one, `cry.ogg`).
+ * - Spell UI knows the built-in sounds (`UI.sounds`), as core never imports it.
+ * - `undefined` for a name Spell has no sound for, or while the page has no Spell UI yet:
+ *   said on the program's console, and nothing plays.
+ */
+function builtInSoundFor(target: string): string | undefined {
+  if (!SOUND_NAME.test(target)) return target
+  const ui = (globalThis as Record<symbol, PageSounds | undefined>)[UI_RUNTIME_KEY]
+  const address = ui?.sounds?.url(target)
+  if (!address) {
+    core.console.warn(
+      ui ? `play:  Spell has no sound called "${target}"` : `play:  "${target}" needs Spell UI on the page`
+    )
+  }
+  return address
+}
+
+/** A built-in sound's name, not an address:  plain words, no `/` or `.`. */
+const SOUND_NAME = /^[^/.]+$/
+
+/** The part of the page's Spell UI runtime that knows the built-in sounds:  `UI.sounds`. */
+type PageSounds = { sounds?: { url(name: string): string | undefined } }
+
+/** Spell UI's `RUNTIME_KEY`:  a copy, as core never imports `ui`. */
+const UI_RUNTIME_KEY = Symbol.for("spell-ui:runtime")
 
 /** Every sound and video made so far, named or by address. */
 function everyMedia(): SpellMedia[] {

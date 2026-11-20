@@ -1,0 +1,97 @@
+"dial usage" is a notebook page
+	<header level="1">
+		Dial
+		<header>A dial lets people pick a number by turning it, with its value in the middle and its label under it.</>
+	</>
+
+	<!-- USAGE:  how to use it (values, label, unit, events, forms), keyboard, accessibility, framework snippets. -->
+	<section label="Using it">
+		<markdown>
+			Write `<ui-dial>` with a `label`: it's the words under the dial, and its name for screen readers.
+
+			- `min` / `max` / `step` default to 0, 100 and 1; `step="0"` allows any value.
+			- `value` is the starting (and reset) value; the `value` property is the live one.
+			- `unit` is written right after the number (`98%`), and spoken with it.
+			- `ticks` draws dots round the ring: 9 alone, or that many gaps.
+			- `color` and `size` as on any Spell UI element.
+
+			It works the way a slider does, bent round: the same events, keys and form behaviour.
+		</>
+	</>
+
+	<section label="Events">
+		<markdown>
+			`ui-moved` fires on every move, and `ui-changed` when a key, a wheel notch or a drag ends somewhere new, both with
+			`{ value }`. Setting `value` inside a `ui-moved` handler wins, so you can clamp or refuse a turn.
+		</>
+		<markdown>
+			```js
+			const weight = document.querySelector("#weight") // <ui-dial id="weight" min="100" max="900" label="Weight">
+			weight.addEventListener("ui-changed", (event) => console.log(event.detail.value))
+			```
+		</>
+	</>
+
+	<section label="Forms">
+		<markdown>
+			A dial is a form-associated element.
+
+			- With a `name`, it submits `value`.
+			- A form reset puts back the starting `value` (the attribute).
+			- `disabled` leaves it out of the form; `readonly` still submits.
+			- `required`: until something sets a value, the handle rests at `min` but the dial counts as empty.
+		</>
+
+		<section label="In a form" sticky="stack" collapsible dividing>
+			<example "In a form" description="A volume, submitted as `volume`.  Turn it, then reset the form.">
+				<html>
+					<ui-form>
+						<ui-dial name="volume" label="Volume" color="blue" value="40"></ui-dial>
+						<ui-button type="reset" icon="undo" appearance="basic">Reset</ui-button>
+					</ui-form>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			| Key                 | Action                        |
+			| ------------------- | ----------------------------- |
+			| Right / Up          | Turn up a step                |
+			| Left / Down         | Turn down a step              |
+			| Page Up / Page Down | Turn two steps                |
+			| Home / End          | Turn to `min` / `max`         |
+			| Mouse wheel         | A step a notch, while focused |
+
+			The wheel turns the dial only while it has focus, so scrolling the page past it never changes it.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			The dial is an ARIA `slider` (the APG pattern) with `aria-valuemin`, `aria-valuemax`, `aria-valuenow` and
+			`aria-valuetext`, the value as shown (`98%`).
+
+			- Named by its `aria-label`, a `<label for>`, else its own `label`.
+			- Keyboard focus draws a ring round the handle.
+			- `readonly` stays focusable and announced but can't change; `disabled` leaves the tab order.
+			- If it can't draw, its fallback is the browser's range input, so the value can still be set and submitted.
+		</>
+	</>
+
+	<section label="Framework usage">
+		<markdown>`value` is a plain attribute; listen for `ui-moved` or `ui-changed`.</>
+		<header level="4" id="framework-react">React 19</>
+		<markdown>
+			```jsx
+			<ui-dial name="volume" label="Volume" value={volume} onui-moved={(event) => setVolume(event.detail.value)} />
+			```
+		</>
+		<header level="4" id="framework-solid">Solid 2</>
+		<markdown>
+			```jsx
+			<ui-dial name="volume" label="Volume" value={volume()} on-ui-moved={(event) => setVolume(event.detail.value)} />
+			```
+		</>
+	</>

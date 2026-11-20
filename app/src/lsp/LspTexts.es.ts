@@ -77,5 +77,7 @@ export const LSP_TEXTS_ES: LspTextPack = {
   ////////////////
 
   pickColor: "Elegir un color…",
-  pickIcon: "Elegir un icono…"
+  pickIcon: "Elegir un icono…",
+  pickSound: "Elegir un sonido…",
+  builtInSound: "un sonido incluido"
 }

@@ -3,13 +3,6 @@
 		Radio
 		<header>A radio button lets a user choose exactly one value of a group.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#states">States</>
-			<item link="#variations">Variations</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  the radio parts of Fomantic's checkbox page (Types, States, Variations), moved here from the

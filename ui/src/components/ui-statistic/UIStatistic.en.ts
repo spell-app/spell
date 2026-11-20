@@ -58,6 +58,7 @@ export const statisticVocabulary = {
       name: "value",
       group: "form",
       kind: "string",
+      canBeNumber: true,
       description: "Shorthand for a `<ui-value>`:  the number (or word) shown."
     },
     {

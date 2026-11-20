@@ -3,15 +3,6 @@
 		Sticky
 		<header>Sticky content stays fixed to the viewport while its container is on screen.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#context">Context</>
-			<item link="#stuck-state-and-events">Stuck state and events</>
-			<item link="#accessibility">Accessibility</>
-			<item link="#framework-usage">Framework usage</>
-		</>
-	</>
 
 	<!-- USAGE:  how it sticks, the context, the stuck state and events, accessibility, framework snippets. -->
 	<section label="Using it">

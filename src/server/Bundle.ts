@@ -41,7 +41,7 @@ import { packageRootFor } from "spell/toolchain/sourceNames"
  * - WHICH bundles:  the ones whose output folders the page server's settings name, `"bundles"`
  *   (every installed repo's `"pageServer"` part, merged:  `pageServerSettings()`), the list the page server reads too
  *   (`Bundle.specs()`)
- * - Its build scripts share their steps through it (`clearOutput()`, `linkIconPacks()`, `sizeReport()`):
+ * - Its build scripts share their steps through it (`clearOutput()`, `linkBuiltInFiles()`, `sizeReport()`):
  *   Spell UI's site bundle and the brand's.
  * - Knows no checkout's LAYOUT:  each bundle by its PACKAGE (`SRV.BUNDLES`), found through the checkout's
  *   `node_modules` wherever its repo is (epic `repo-split` P8);  imports no other package.
@@ -250,7 +250,7 @@ export class Bundle {
    * Its source files, sorted, by name:  a package's by its npm name and its path in it (`ui/src/core.ts`,
    * `spell/src/element/index.ts`),
    * anything else by its path from the install's root (`yarn.lock`);  `/`-separated.
-   * - every file under `spec.sources`, minus `SKIPPED` (tests, snapshots, dot files, the icon packs), its own `entry`
+   * - every file under `spec.sources`, minus `SKIPPED` (tests, snapshots, dot files, the icon packs and sounds), its own `entry`
    *   and what every committed one generates (`spec.generated`:  `generatedFiles()`)
    * - the same names wherever the repos are, so a move makes no bundle stale
    */
@@ -327,37 +327,48 @@ export class Bundle {
   ////////////////
 
   /**
-   * Empty `folder` for a fresh build, so a removed chunk doesn't linger:  everything but the icon packs' link
-   * (`linkIconPacks()`), the build record too;  makes it when missing.
+   * Empty `folder` for a fresh build, so a removed chunk doesn't linger:  everything but the built-in files' links
+   * (`linkBuiltInFiles()`), the build record too;  makes it when missing.
    * - SIDE EFFECT:  deletes files
    */
   static clearOutput(folder: string): void {
     mkdirSync(folder, { recursive: true })
     for (const entry of readdirSync(folder)) {
-      if (entry !== ICON_PACKS) rmSync(join(folder, entry), { recursive: true, force: true })
+      if (!(entry in BUILT_IN_FILES)) rmSync(join(folder, entry), { recursive: true, force: true })
     }
   }
 
   /**
-   * Link Spell UI's icon packs (its `src/icons/icon-packs`, ~8.7 MB, ~2,200 SVGs) into `folder` as `icon-packs`,
-   * unless it's linked there already.
-   * - A LINK, never a copy:  committing the packs twice would double them in every clone.
-   *   The page server follows it;  a static deploy must copy through it (`cp -RL`).
+   * Link Spell UI's built-in files into `folder`, each unless it's linked there already (`BUILT_IN_FILES`):
+   * - its icon packs (its `src/icons/icon-packs`, ~8.7 MB, ~2,200 SVGs), as `icon-packs`
+   * - Spell's built-in sounds (its `src/sounds/sound-library`, 1.5 MB, 139 sounds), as `sound-library`
+   * - LINKS, never copies:  committing them twice would double them in every clone.
+   *   The page server follows them;  a static deploy must copy through them (`cp -RL`).
    * - Relative, so the repos can move together;  Spell UI found in the ONE package `spell` (its `ui/`), wherever it is.
    * - A link left from another layout (the monorepo's `../../../ui/...`) is pointed again.
-   * - throws when Spell UI isn't installed, or the link leads to no folder
-   * - SIDE EFFECT:  makes or replaces the link
+   * - throws when Spell UI isn't installed, or a link leads to no folder
+   * - SIDE EFFECT:  makes or replaces the links
+   */
+  static linkBuiltInFiles(folder: string): void {
+    const spell = packageRootFor("spell", folder)
+    if (!spell) throw new Error(`Bundle.linkBuiltInFiles():  spell isn't installed where ${folder} finds packages`)
+    for (const [name, from] of Object.entries(BUILT_IN_FILES)) {
+      const link = join(folder, name)
+      const target = relative(SRV.RealPath.of(folder), join(SRV.RealPath.of(spell), from))
+      if (isLink(link) && readlinkSync(link) !== target) rmSync(link)
+      if (!existsSync(link) && !isLink(link)) symlinkSync(target, link, "dir")
+      if (!statSync(link).isDirectory()) {
+        throw new Error(`Bundle.linkBuiltInFiles():  ${link} doesn't lead to ${from};  delete it, and build again`)
+      }
+    }
+  }
+
+  /**
+   * DEPRECATED:  `linkBuiltInFiles()`, which links the sounds too.
+   * - Kept while spell-brand's build (`scripts/build.ts`, its own repo) still calls it.
    */
   static linkIconPacks(folder: string): void {
-    const spell = packageRootFor("spell", folder)
-    if (!spell) throw new Error(`Bundle.linkIconPacks():  spell isn't installed where ${folder} finds packages`)
-    const link = join(folder, ICON_PACKS)
-    const target = relative(SRV.RealPath.of(folder), join(SRV.RealPath.of(spell), "ui", "src", "icons", ICON_PACKS))
-    if (isLink(link) && readlinkSync(link) !== target) rmSync(link)
-    if (!existsSync(link) && !isLink(link)) symlinkSync(target, link, "dir")
-    if (!statSync(link).isDirectory()) {
-      throw new Error(`Bundle.linkIconPacks():  ${link} doesn't lead to the icon packs;  delete it, and build again`)
-    }
+    Bundle.linkBuiltInFiles(folder)
   }
 
   /**
@@ -365,7 +376,7 @@ export class Bundle {
    * chunks;  raw and gzipped, in `kb()`.
    * - eager:  `entries` and every chunk a JS one imports STATICALLY, transitively (what a page loads before any
    *   `import()`)
-   * - counted:  every file under `folder` but the icon packs and dot files (the build record), or only those `only`
+   * - counted:  every file under `folder` but the linked built-in files and dot files (the build record), or only those `only`
    *   matches
    */
   static sizeReport({ name, folder, seconds, entries, only }: SRV.BundleSizeParams): string[] {
@@ -386,7 +397,7 @@ export class Bundle {
       `${name} bundle (${seconds.toFixed(1)}s):  ${relative(process.cwd(), folder)}/`,
       ...eager.slice(0, 4).map((size) => `  ${size.file.padEnd(28)} ${kb(size.raw).padStart(10)}  gz ${kb(size.gzip)}`),
       `  eager ${kb(sum(eager, "raw"))} (gz ${kb(sum(eager, "gzip"))});  all ${files.length} files ` +
-        `${kb(sum(sizes, "raw"))} (gz ${kb(sum(sizes, "gzip"))}), icon packs linked`,
+        `${kb(sum(sizes, "raw"))} (gz ${kb(sum(sizes, "gzip"))}), icon packs and sounds linked`,
       `  biggest lazy:  ${lazy
         .slice(0, 6)
         .map((size) => `${size.file} ${kb(size.raw)}`)
@@ -413,13 +424,20 @@ function installRoot(from: string): string {
 }
 
 /**
- * Names never part of a bundle's sources:  dot files, `node_modules`, snapshots, tests, and the icon packs
- * (each bundle LINKS Spell UI's `src/icons/icon-packs`, never bundles it).
+ * Names never part of a bundle's sources:  dot files, `node_modules`, snapshots, tests, and the built-in files
+ * (each bundle LINKS Spell UI's icon packs and sounds, never bundles them).
  */
-const SKIPPED = /^(\..*|node_modules|__snapshots__|icon-packs|.*\.test\.[cm]?[jt]sx?)$/
+const SKIPPED = /^(\..*|node_modules|__snapshots__|icon-packs|sound-library|.*\.test\.[cm]?[jt]sx?)$/
 
-/** The icon packs' link in a bundle's output folder:  the one entry a fresh build keeps. */
-const ICON_PACKS = "icon-packs"
+/**
+ * Spell UI's built-in files, linked into a bundle's output folder (`linkBuiltInFiles()`):
+ * each link's name => its folder in the package `spell`.
+ * - The entries a fresh build keeps (`clearOutput()`).
+ */
+const BUILT_IN_FILES: Record<string, string> = {
+  "icon-packs": "ui/src/icons/icon-packs",
+  "sound-library": "ui/src/sounds/sound-library"
+}
 
 /** A static `import ... from "./x.js"` / `import "./x.js"` in minified output (never `import("./x.js")`). */
 const STATIC_IMPORT = /(?:^|[;}\n])\s*(?:import|export)(?:[^"'();]*?from)?\s*["'](\.\.?\/[^"']+)["']/g
@@ -433,7 +451,7 @@ function isLink(file: string): boolean {
   }
 }
 
-/** Every file under `folder`, `/`-separated, relative:  never through a link (the icon packs), nor a dot file. */
+/** Every file under `folder`, `/`-separated, relative:  never through a link (the icon packs, the sounds), nor a dot file. */
 function filesUnder(folder: string, prefix = ""): string[] {
   return readdirSync(folder, { withFileTypes: true }).flatMap((entry) => {
     if (entry.isSymbolicLink() || entry.name.startsWith(".")) return []

@@ -3,17 +3,6 @@
 		Select
 		<header>A select lets a user choose a value from a list, with the platform's own picker.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#forms">Forms</>
-			<item link="#events">Events</>
-			<item link="#select-or-dropdown">Select or dropdown?</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-			<item link="#framework-usage">Framework usage</>
-		</>
-	</>
 
 	<!-- USAGE:  native select, options, forms, events, select vs dropdown, accessibility, frameworks. -->
 	<section label="Using it">

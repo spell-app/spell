@@ -369,10 +369,8 @@ export class UIPopup extends E.UIComponent<Vocabulary> {
    */
   private get hoverDelay(): number {
     if (this.attributes["show-delay"] !== null) return this.showDelay ?? 0
-    const token = getComputedStyle(this.domElement).getPropertyValue(HOVER_DELAY_TOKEN).trim()
-    const match = DURATION.exec(token)
-    if (!match) return this.showDelay ?? 0
-    return Number(match[1]) * (match[2] === "s" ? 1000 : 1)
+    const seconds = E.cssSecondsFor(this.domElement, HOVER_DELAY_TOKEN)
+    return seconds === undefined ? (this.showDelay ?? 0) : seconds * 1000
   }
 
   /** Pointer off the target (`hover`):  hide after `hide-delay`, unless it reaches the popup first. */
@@ -789,6 +787,3 @@ const SHIFTED_FALLBACKS: Readonly<Record<string, string>> = {
 
 /** The page's hover-delay preference, a token (`styles.en.ts`'s `hoverDelay`). */
 const HOVER_DELAY_TOKEN = "--ui-hover-delay"
-
-/** A CSS time:  `800ms`, `2s`, `1.5s`. */
-const DURATION = /^(\d+(?:\.\d+)?)(ms|s)$/

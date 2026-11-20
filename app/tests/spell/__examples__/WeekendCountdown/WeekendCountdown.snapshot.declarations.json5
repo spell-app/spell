@@ -1,0 +1,60 @@
+{
+  "spellVersion": "0.8.0",
+  "provides": [
+    "WeekendCountdown"
+  ],
+  "statements": [
+    {
+      "type": "WeekendCountdown",
+      "superType": "App",
+      "defined": "/WeekendCountdown.spell:114-1187"
+    },
+    {
+      "property": "time",
+      "of": "WeekendCountdown",
+      "datatype": "date",
+      "defined": "/WeekendCountdown.spell:143-231"
+    },
+    {
+      "syntax": "{operator:is_or_is_not} the weekend",
+      "output": "is_the_weekend",
+      "rule": "method_postfix",
+      "of": "WeekendCountdown",
+      "kind": "method",
+      "name": "\"is the weekend\"",
+      "returns": "choice",
+      "defined": "/WeekendCountdown.spell:269-317"
+    },
+    {
+      "property": "time_left",
+      "asWritten": "time left",
+      "of": "WeekendCountdown",
+      "datatype": "number",
+      "measure": {
+        "dimension": "Duration",
+        "unit": "second"
+      },
+      "defined": "/WeekendCountdown.spell:386-432"
+    },
+    {
+      "syntax": "draw {thisArg:expression}",
+      "output": "draw",
+      "rule": "method_call",
+      "of": "WeekendCountdown",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "draw it",
+      "defined": "/WeekendCountdown.spell:494-1187"
+    }
+  ],
+  "codeLines": [
+    8,
+    12,
+    22,
+    27,
+    32
+  ]
+}

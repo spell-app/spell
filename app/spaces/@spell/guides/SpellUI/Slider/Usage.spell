@@ -3,16 +3,6 @@
 		Slider
 		<header>A slider allows users to select values within a range.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#events">Events</>
-			<item link="#forms">Forms</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-			<item link="#framework-usage">Framework usage</>
-		</>
-	</>
 
 	<!-- USAGE:  how to use it (values, labels, events, forms), keyboard, accessibility, framework snippets. -->
 	<section label="Using it">

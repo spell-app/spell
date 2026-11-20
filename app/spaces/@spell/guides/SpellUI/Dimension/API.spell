@@ -3,13 +3,6 @@
 		Dimension
 		<header>A dimension shows one measure in the reader's own units:  5 ft 8 in in the US, 172 cm elsewhere.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#attributes">Attributes</>
-			<item link="#parts">Parts</>
-			<item link="#texts">Texts</>
-		</>
-	</>
 
 	<section label="Attributes">
 		<html>

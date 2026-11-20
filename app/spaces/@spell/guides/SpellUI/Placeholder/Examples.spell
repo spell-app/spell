@@ -3,13 +3,6 @@
 		Placeholder
 		<header>A placeholder is used to reserve space for content that soon will appear in a layout.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#content">Content</>
-			<item link="#variations">Variations</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's placeholder page, section by section, in its order (Types, Content, Variations), plus our

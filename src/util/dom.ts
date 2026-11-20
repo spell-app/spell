@@ -64,6 +64,24 @@ export async function nextFrame(count = 1): Promise<number> {
   return time
 }
 
+/**
+ * The first of `properties` set on `element`, as a CSS time in seconds:  `800ms` => `0.8`, `1.5s` => `1.5`.
+ * - `undefined` when none is set, or what's set isn't a time.
+ * - The wait a hover reads, as it starts:  `cssSecondsFor(target, "--ui-tooltip-delay", "--ui-hover-delay")`.
+ * - Read live, each call:  so a page that changes the property (Settings… › Popup delay) is followed at once.
+ */
+export function cssSecondsFor(element: Element, ...properties: string[]): number | undefined {
+  const style = getComputedStyle(element)
+  for (const property of properties) {
+    const match = CSS_TIME.exec(style.getPropertyValue(property).trim())
+    if (match) return Number(match[1]) / (match[2] === "ms" ? 1000 : 1)
+  }
+  return undefined
+}
+
+/** A CSS time:  `800ms`, `2s`, `1.5s`. */
+const CSS_TIME = /^(\d+(?:\.\d+)?|\.\d+)(ms|s)$/
+
 ////////////////
 // ## Clipboard
 ////////////////

@@ -60,6 +60,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     region, first day of the week (`spell-site:week-start`), clock (`spell-site:clock`) and weekend.  Taken by file, in
     no barrel:  the core and `<ui-dimension>` use them
   - `dom.ts` -- shadow-aware traversal, `NodeType`, `byDocumentOrder`, `isBrowser`, `nextFrame`,
+    `cssSecondsFor()` (a CSS time property in seconds, the hover delay's reading),
     `copyText()` (the clipboard, with the fallback VS Code's side bar needs)
   - `util.types.ts` -- `Constructor`, `AbstractClass`, `Prettify`
   - `platform.ts` -- which device the page is on, `phone`, `tablet` or `desktop` (epic `mockup` T53):

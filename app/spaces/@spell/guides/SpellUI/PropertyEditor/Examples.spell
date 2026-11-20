@@ -3,13 +3,6 @@
 		Property Editor
 		<header>A property editor draws a form from a schema:  one field per property, in groups that open and close, for one thing or many.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#pages">Pages</>
-			<item link="#binding">Binding</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  ours, no Fomantic page (epic `property-editor` P4).

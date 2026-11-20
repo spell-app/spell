@@ -61,7 +61,7 @@
   border-inline-start: 1px solid var(--ui-border-color, rgb(34 36 38 / 0.15));
 }
 
-/* hidden by its Hide, or no room for it:  still drawn, following the scroll for the section tabs */
+/* hidden by its Hide, or no room for it */
 .NotebookAside.hidden {
   display: none;
 }
@@ -183,7 +183,7 @@
 }
 
 /*
- * an untitled section in what a notebook draws (`<section>`, its section tabs):  no rule, no title, no room
+ * an untitled section in what a notebook draws (`<section>` with no label):  no rule, no title, no room
  * - the rule came from the page's section round it:  its `dividing` look's private token reaches the sections it
  *   holds (the suspected-bugs log, "ui")
  */

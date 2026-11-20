@@ -4,8 +4,8 @@
  * - For the Solid components that can't be drawn alone on a docs page (they need the whole editor around them):
  *   the editor's page shell, its panes and editors, its menus, dialogs and notices.
  *   The runner's pieces and the explorers are drawn LIVE on their pages instead, inside a `<spell-viewer>`.
- * - Needs this checkout's editor running:  `spell server start` starts it,
- *   and writes its URL to `.spell-server.editor.json`, at the kit's root.
+ * - Needs this checkout's editor running:
+ *   `spell server start` starts it, and writes its URL to `.spell-server.editor.json`, at the kit's root.
  * - Rerun after changing how one of them looks, then look at the pictures and commit them.
  * - Headless Playwright, never a real browser window.
  */
@@ -164,8 +164,8 @@ try {
 
 /**
  * The box of `selector`'s first match, in CSS pixels.
- * - A `display: contents` element (many `<ui-*>` hosts) has none of its own:  its shadow root's and children's,
- *   together.
+ * - A `display: contents` element (many `<ui-*>` hosts) has none of its own:
+ *   its shadow root's and children's, together.
  */
 async function boxOf(page: Page, selector: string): Promise<{ x: number; y: number; width: number; height: number }> {
   return page.evaluate((selector) => {

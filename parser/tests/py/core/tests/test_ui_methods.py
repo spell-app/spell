@@ -172,6 +172,31 @@ def test_show_waits_for_the_page_to_answer_and_hide_does_not() -> None:
     assert not a_core.result_is("ok")
 
 
+def test_sounds_are_played_by_the_page_and_never_in_a_test() -> None:
+    # epic `mockup` P28:  `play "card slide"`, as the JavaScript core's `play()`
+    a_core, asked = asking({})
+
+    async def run() -> None:
+        a_core.load_sound("win")
+        a_core.play("card slide")
+        a_core.stop("card slide")
+        a_core.play(None)
+        a_core.active_test = object()
+        a_core.play("click")
+        a_core.active_test = None
+        await asyncio.sleep(0)
+
+    asyncio.run(run())
+    assert asked == [("loadSound", ["win"]), ("play", ["card slide"]), ("stop", ["card slide"])]
+
+
+def test_sounds_with_no_page_do_nothing() -> None:
+    a_core, out = printing()
+    a_core.play("card slide")
+    a_core.stop("card slide")
+    assert out.getvalue() == ""
+
+
 def test_the_result_after_alert_confirm_and_prompt() -> None:
     a_core, _ = asking({"confirm": False, "prompt": None})
 

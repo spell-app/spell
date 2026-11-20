@@ -59,7 +59,7 @@
     backdrop-filter: var(--ui-bar-wallpaper-filter, var(--ui-bar-filter, none));
     transition: background-color var(--ui-duration-normal, 200ms) var(--ui-ease, ease);
   }
-  :is(.site-main, .ui-docs-sections) ui-section[sticky]:not(:state(stuck))::part(title) {
+  .site-main ui-section[sticky]:not(:state(stuck))::part(title) {
     /*
      * its fill laid over the page's own ground (a theme's wallpaper, fixed as the page's is):  it looks see-through,
      * but hides what scrolls under it while its section's end pushes it up, not yet stuck (Owen, 2026-10-25:  "Need
@@ -76,6 +76,37 @@
     background-image: linear-gradient(var(--_site-title-rest), var(--_site-title-rest)), var(--ui-bar-wallpaper, none);
     backdrop-filter: var(--ui-bar-wallpaper-filter, var(--ui-bar-rest-filter, none));
   }
+  /*
+   * ## A notebook page's titles (Spell UI's Spell site, the editor's notebooks;  epic `mockup` T55):
+   * plain on the page's own ground in the flow, the stuck fill faded in as each one rises to where it sticks
+   * - Owen, 2026-11-17:  "Lose the white backgrounds on the H2/H3 unless it is sticky, in which case it stays white";
+   *   then:  keep their bottom corners round, keep the stuck band wider than the column, as it is, and "fade the white
+   *   in as the heading scrolls up to the very top ... not a hard switch"
+   * - the fade is `<ui-section>`'s own (`--ui-section-sticky-fill: fade`):  a scroll-driven animation from none of
+   *   the fill to all of it, which wins over the fill set here, the stuck one in both states
+   * - reduced motion, or no scroll-driven animations:  none of the fill until it's stuck
+   * - an example's own sections keep the element's look;  so does the docs site (`.site-main`, above)
+   */
+  .ui-docs-sections ui-section[sticky]:not(ui-example ui-section) {
+    --ui-section-sticky-fill: fade;
+  }
+  .ui-docs-sections ui-section[sticky]:not(ui-example ui-section):not(:state(stuck))::part(title) {
+    background: none;
+    backdrop-filter: none;
+  }
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .ui-docs-sections ui-section[sticky]:not(ui-example ui-section):not(:state(stuck))::part(title) {
+        background-color: var(--ui-bar-wallpaper-color, var(--ui-section-sticky-background));
+        background-image:
+          linear-gradient(var(--ui-bar-wallpaper-tint, transparent), var(--ui-bar-wallpaper-tint, transparent)),
+          var(--ui-bar-wallpaper, none);
+        background-attachment: scroll, fixed;
+        backdrop-filter: var(--ui-bar-wallpaper-filter, var(--ui-bar-filter, none));
+      }
+    }
+  }
+
   /* phones:  the gutter is narrow, so the bars reach less, and step in less */
   @media (--ui-mobile) {
     :is(.site-main, .ui-docs-sections) ui-section[sticky]:not(ui-example ui-section) {

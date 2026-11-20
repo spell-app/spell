@@ -203,7 +203,7 @@ Each row below is one rule's own test:  a line it reads, and the JavaScript that
 | math | arithmetic, biggest and smallest, rounding, `a random number between 1 and 6` | 11 | `largest of the prices` | `core.largestOf(prices)` |
 | properties | `the ... of ...`, `its ...`, `the ...` in an action, `the ...'s ...`, object literals | 20 | `the short rank of the card` | `card.shortRank` |
 | lists | positions, ranges, adding, removing, `for`, `where` | 50 | `remove last card of deck` | `core.removeItemAt(deck, -1)` |
-| UI | `print`, notices, alerts and prompts, `scroll to the top`, `open printing`, sounds and videos (naming one, `play`, `stop`, `pause`, `resume`, asking about one), styles | 25 | `prompt "Name for the new baby?"` | `const it = await core.prompt("Name for the new baby?")` |
+| UI | `print`, notices, alerts and prompts, `scroll to the top`, `open printing`, sounds and videos (a file, [one of Spell's own](#built-in-sounds), naming one, `play`, `stop`, `pause`, `resume`, asking about one), styles | 25 | `prompt "Name for the new baby?"` | `const it = await core.prompt("Name for the new baby?")` |
 | classes | templates, properties, aliases, saving, versions | 78 | `a card is a thing` | `export class Card extends Thing {}` |
 | async | waiting, pauses, processes | 8 | `pause for 2 seconds` | `await core.pauseFor(2, "seconds")` |
 | draw | drawing a list's items | 3 | `draw each card in the deck` | `core.drawItems(deck)` |
@@ -770,7 +770,20 @@ A page or the app names a sound or a video once, and plays it by that name from 
   - Everyone hears them, as `trigger` sends:  the app and each page by its own handler, then the program's listeners.
 - Spanish, the same lines its own way:  `sonido "deslizar" está en "..."`, `reproducir el vídeo "intro" a 1.5x en una ventana nueva y esperar`,
   `pausar el vídeo "intro"`, `parar todos los sonidos`, `si el vídeo "intro" está sonando`, `cuando el vídeo "intro" termina`.
-- A sound or video plays in the browser's page:  a Python program can't play one yet.
+- A program compiled to Python plays sounds too:  its page plays each one as the program asks.
+- While a test runs, nothing plays:  Counter's `to test counting` counts up twice as the program loads.
+
+#### Built-in sounds
+
+`play "click"` plays one of Spell's 139 built-in sounds, by its name, when the program has no sound of that name.
+- Names are plain words (`"card slide"`, `"win"`), each with a Spanish one too:  `reproducir "deslizar carta"`.
+- A name Spell has no sound for plays nothing, and the program's console says so.
+- The editor lists the names as you type `play "`;  its first row, "Pick a sound…", opens the sound picker,
+  where ▶ plays each one before you pick it.
+- The examples that play them:  Solitaire and Solitario, Checkers, Counter, Calculator and Calculadora.
+- They're Ogg files, which Safari plays only from version 18.4.
+- They're [Kenney](https://kenney.nl)'s, from seven of his free packs, CC0:
+  [Spell UI's runtime page](https://github.com/spell-app/spell/blob/main/ui/README-runtime.md#sounds) says more.
 
 ### Tests, in English
 

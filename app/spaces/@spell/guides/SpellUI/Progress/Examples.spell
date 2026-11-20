@@ -3,14 +3,6 @@
 		Progress
 		<header>A progress bar shows the progression of a task.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#content">Content</>
-			<item link="#states">States</>
-			<item link="#variations">Variations</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's progress page, section by section, in its order (Types, Content, States, Variations), plus

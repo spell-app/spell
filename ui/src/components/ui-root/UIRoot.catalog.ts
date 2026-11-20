@@ -336,6 +336,27 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     attributes: ["spec", "columns", "remember", "fixed"]
   },
   "ui-diagram-node": { folder: "ui-diagram", attributes: ["name", "resizable"] },
+  "ui-dial": {
+    folder: "ui-dial",
+    skeleton: { display: "inline", width: "10em", height: "11.5em" },
+    attributes: [
+      "label",
+      "size",
+      "color",
+      "ticks",
+      "unit",
+      "disabled",
+      "readonly",
+      "min",
+      "max",
+      "step",
+      "value",
+      "name",
+      "parameter",
+      "required"
+    ],
+    formControl: true
+  },
   "ui-dimension": {
     folder: "ui-dimension",
     skeleton: { display: "inline", width: "4em", height: "1em" },
@@ -937,7 +958,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-page-layout": {
     folder: "ui-page-layout",
     skeleton: { width: "24em", parts: [{ shape: "paragraph", lines: 4 }] },
-    attributes: ["drawer"]
+    attributes: ["drawer", "drawer-hides", "left", "right", "floating"]
   },
   "ui-panel": {
     folder: "ui-panel",
@@ -1375,6 +1396,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     formControl: true
   },
   "ui-site-breadcrumbs": { folder: "ui-site-breadcrumbs", attributes: ["pages", "current", "label"] },
+  "ui-site-links": { folder: "ui-site-links", attributes: ["pages", "current", "report"] },
   "ui-site-nav": {
     folder: "ui-site-nav",
     skeleton: { parts: [{ shape: "paragraph", lines: 4 }] },
@@ -1398,10 +1420,11 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "disabled",
       "selected",
       "padding",
-      "kind"
+      "kind",
+      "toggles"
     ]
   },
-  "ui-site-tabs": { folder: "ui-site-tabs", attributes: ["pages", "current", "label"] },
+  "ui-site-tabs": { folder: "ui-site-tabs", attributes: ["pages", "current", "appearance", "label"] },
   "ui-slider": {
     folder: "ui-slider",
     skeleton: { width: "16em", height: "1.25em" },
@@ -1758,6 +1781,25 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-tree-node": {
     folder: "ui-tree-diagram",
     attributes: ["label", "detail", "edge-label", "hover-text", "color", "kind", "folded"]
+  },
+  "ui-uploader": {
+    folder: "ui-uploader",
+    skeleton: { width: "18em", height: "9em" },
+    attributes: [
+      "appearance",
+      "destination",
+      "action",
+      "extensions",
+      "multiple",
+      "folder",
+      "max-size",
+      "max-files",
+      "drop-zone",
+      "message",
+      "drop-message",
+      "uploading-message",
+      "done-message"
+    ]
   },
   "ui-value": { folder: "ui-parts", attributes: ["text"] },
   "ui-video": {

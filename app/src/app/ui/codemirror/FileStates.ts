@@ -588,8 +588,8 @@ export class FileStates {
       .map((diagnostic) => LspToCodeMirror.diagnostic(state.doc, diagnostic))
     const { effects } = setDiagnostics(state, problems)
     this.dispatch(entry, { effects: [...asList(effects), CodeMirrorSetup.PARSED.of(null)] })
-    // its slices too, so their bubbly look takes the parse:  a slice made before it drew its `if`s as plain lines
-    // (epic `editor` I215)
+    // its slices too, so their bubbly look takes the parse:
+    // a slice made before it drew its `if`s as plain lines (epic `editor` I215)
     for (const slice of entry.slices) slice.dispatch({ effects: CodeMirrorSetup.PARSED.of(null) })
   }
 }
@@ -651,8 +651,8 @@ function isCssFile(file: SP.AnySpellFile): boolean {
 }
 
 /**
- * What a CSS file's editor takes:  CodeMirror's CSS language, coloured by `CodeRules`, its suggestions, its brackets
- * closed as typed.
+ * What a CSS file's editor takes:
+ * CodeMirror's CSS language, coloured by `CodeRules`, its suggestions, its brackets closed as typed.
  * - Its functions (`var()`, `calc()`) are actions, as a javascript call is:
  *   CodeMirror's CSS calls them `operatorKeyword`, which would colour them as `and` and `not` are.
  */

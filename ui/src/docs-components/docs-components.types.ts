@@ -217,6 +217,8 @@ export type SiteAttribute = {
   readonly aliases?: readonly string[]
   /** JS property name, when it isn't `camelCase(name)` */
   readonly property?: string
+  /** `true`:  takes a number as well as text (`AttributeSpec.canBeNumber`) */
+  readonly canBeNumber?: boolean
   /** `false`:  not reflected to the attribute (rich data) */
   readonly reflect?: boolean
   /** `true`:  one of the attributes every element takes (`SharedVocabulary`:  `disabled`, `loading`, `visible`) */

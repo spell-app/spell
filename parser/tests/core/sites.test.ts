@@ -576,6 +576,36 @@ describe("a running site", () => {
       expect(new StarCharts().isCompact("MainLayout")).toBe(false)
     })
 
+    // epic `mockup` T55:  the drawer hidden, and the side bars, remembered as the compact drawer is
+    test('its drawer hidden (`drawer="hidden"`) and its right side bar hidden:  remembered for each person, site and layout', async () => {
+      await charts.showAddress("/films")
+      await shown()
+      const main = () => layout("MainLayout")!
+      main().dispatchEvent(
+        new CustomEvent("ui-toggle", { detail: { region: "drawer", newState: "hidden", oldState: "full" } })
+      )
+      main().dispatchEvent(
+        new CustomEvent("ui-toggle", { detail: { region: "right", newState: "hidden", oldState: "shown" } })
+      )
+      await shown()
+      expect(main().getAttribute("drawer")).toBe("hidden")
+      expect(main().getAttribute("right")).toBe("hidden")
+      expect(new StarCharts().regionState("MainLayout", "drawer")).toBe("hidden")
+      expect(new StarCharts().regionState("MainLayout", "right")).toBe("hidden")
+      expect(new StarCharts().regionState("BareLayout", "right")).toBeUndefined()
+      expect(new StarCharts().isCompact("MainLayout")).toBe(false)
+      main().dispatchEvent(
+        new CustomEvent("ui-toggle", { detail: { region: "right", newState: "shown", oldState: "hidden" } })
+      )
+      main().dispatchEvent(
+        new CustomEvent("ui-toggle", { detail: { region: "drawer", newState: "full", oldState: "hidden" } })
+      )
+      await shown()
+      expect(main().hasAttribute("right")).toBe(false)
+      expect(main().hasAttribute("drawer")).toBe(false)
+      expect(new StarCharts().regionState("MainLayout", "right")).toBeUndefined()
+    })
+
     test("a site with no main layout draws its built-in frame:  the navigation and the page, nothing else", async () => {
       dispose?.()
       drawSite()

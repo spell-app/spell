@@ -1,5 +1,5 @@
 // `spell/ui/util` by name, never the `spell/ui/core` entry:  node scripts load this file (see the class docs)
-import { beforeNextPaint, slug } from "spell/ui/util"
+import { beforeNextPaint, closestAcrossShadow, flatParentFor, slug } from "spell/ui/util"
 import * as UIT from "spell/ui/components/components.types"
 import { PageOutline } from "./PageOutline"
 import {
@@ -36,10 +36,50 @@ export class TocIndex {
    * The element named by `forId` (else the page's `<main>`, else `<body>`), and the tab set when it is one.
    * - `undefined` while a named element doesn't exist yet (the toc may come first in the page).
    */
-  static followed(document: Document, forId: string | undefined): FollowedContent | undefined {
+  static followed(document: Document, forId: string | undefined, toc?: Element): FollowedContent | undefined {
+    const layout = !forId && toc ? closestAcrossShadow(toc, PAGE_LAYOUT_TAG) : null
+    if (layout) return { root: layout, layout }
     const root = forId ? document.getElementById(forId) : (document.querySelector("main") ?? document.body)
     if (!root) return undefined
     return root.localName === TABS_TAG ? { root, tabs: root } : { root }
+  }
+
+  /**
+   * The page of `layout`, a `<ui-page-layout>`:  its first child in no slot, the page a site shows in it
+   * (epic `mockup` T55).
+   */
+  static layoutPage(layout: Element): Element | undefined {
+    return [...layout.children].find((child) => !child.hasAttribute("slot"))
+  }
+
+  /**
+   * The title of `page`:  the text of its level 1 heading (`<h1>`, `<ui-header level="1">`), not its sub-header's;
+   * `undefined` with none.
+   */
+  static pageTitle(page: Element): string | undefined {
+    const heading = page.querySelector(PAGE_TITLE_SELECTOR)
+    if (!heading) return undefined
+    const own = [...heading.childNodes]
+      .filter((node) => node.nodeType === Node.TEXT_NODE)
+      .map((node) => node.textContent)
+      .join(" ")
+      .replace(/\s+/g, " ")
+      .trim()
+    return own || heading.textContent?.trim() || undefined
+  }
+
+  /**
+   * The box whose scroll `element` moves with:  the nearest one around it, across shadow roots, that scrolls
+   * (`overflow-y` auto or scroll);  `undefined` for the window.
+   */
+  static scrollerAround(element: Element): Element | undefined {
+    const view = element.ownerDocument.defaultView
+    // by its style, not by what it holds now:  the page in it may not have drawn yet (`scrollingBoxFor()` waits for that)
+    for (let box = flatParentFor(element); box; box = flatParentFor(box)) {
+      if (box === element.ownerDocument.documentElement || box === element.ownerDocument.body) return undefined
+      if (/auto|scroll/.test(view?.getComputedStyle(box).overflowY ?? "")) return box
+    }
+    return undefined
   }
 
   /** The pane of `tabs` on show:  `:state(selected)`, else the first child with a box. */
@@ -340,3 +380,9 @@ const HEADING = "heading"
 
 /** Where the shadow hosts are kept on `globalThis` (`hostTags()`). */
 const SHADOW_HOSTS = Symbol.for("spell-ui:toc-shadow-hosts")
+
+/** The page layout a toc in it follows the page of (`followed()`). */
+const PAGE_LAYOUT_TAG = "ui-page-layout"
+
+/** A page's level 1 heading, its title (`pageTitle()`). */
+const PAGE_TITLE_SELECTOR = 'h1, ui-header[level="1"]'

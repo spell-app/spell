@@ -3,13 +3,6 @@
 		Site breadcrumbs
 		<header>Site breadcrumbs say where you are in a site:  the group, the pages above the page shown, then the page, each page above a link.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#content">Content</>
-			<item link="#states">States</>
-		</>
-	</>
 
 	<section label="Types">
 		<section label="Where you are" sticky="stack" collapsible dividing>

@@ -1,0 +1,10 @@
+{
+  "title": "Cuenta atrás",
+  "description": "Weekend Countdown's Spanish twin:  how long until the weekend, ticking down every second, written in Spanish;  `es un día de fin de semana`, `el próximo fin de semana`, `como dos dígitos` and a `cada segundo` timer, drawn as statistics",
+  "imports": [
+    {
+      "path": "/CuentaAtras.es.spell",
+      "active": true
+    }
+  ]
+}

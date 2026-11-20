@@ -211,8 +211,8 @@ async function explain(editor: SpellCodeMirror): Promise<void> {
 /**
  * The lines Explain This explains in `editor`, each with the editor's own words for it (`wordsForLine()`):
  * - the selection's lines, when there is one
- * - right-clicked on an action's head line (`to turn over the next card`), or a handler's:  the whole of it,
- *   as the language service's outline says where it ends (`documentSymbols()`)
+ * - right-clicked on an action's head line (`to turn over the next card`), or a handler's:
+ *   the whole of it, as the language service's outline says where it ends (`documentSymbols()`)
  * - else the line the caret is on
  * - Their shared indent taken off (`sharedIndent()`):  they show from the margin.
  * - Each line's words:  the plain hovers over its words (`hover(..., "plain")`), as the code shows them.

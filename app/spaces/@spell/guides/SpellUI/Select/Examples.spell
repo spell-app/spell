@@ -3,15 +3,6 @@
 		Select
 		<header>A select lets a user choose a value from a list, with the platform's own picker.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#content">Content</>
-			<item link="#states">States</>
-			<item link="#variations">Variations</>
-			<item link="#examples">Examples</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  ours (no Fomantic page of its own):  the selection variants of Fomantic's dropdown page that a native

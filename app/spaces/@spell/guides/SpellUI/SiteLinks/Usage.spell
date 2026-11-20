@@ -1,0 +1,39 @@
+"site-links usage" is a notebook page
+	<header level="1">
+		Site links
+		<header>Site links are the page shown's own links, for an app menu's end:  the real page it stands for (its `live` link, Fomantic UI's original for Spell UI's pages), and a way to report a problem with it.</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			Put it at the end of a site's top bar, a `<ui-app-menu>` in a `<ui-page-layout>`:
+			with no `pages` of its own, it follows the site navigation around it,
+			and draws the page shown's own links as small icon buttons, each opening in a new tab.
+
+			- The original:  the real page the page shown stands for, its `live`, else the nearest page's above it.
+			  A Spell site's page line says it:  `, live "https://fomantic-ui.com/elements/button.html"`.
+			- The report link:  `report`, `{title}` in it standing for the family's title
+			  (`Button` on Button's API page).
+			- Nothing to link:  it takes no room.
+			- This site draws it so, beside the theme menu:
+
+			```spell
+			<site-links slot="end" report="https://github.com/spell-app/spell-ui/issues/new?title={title}" />
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			Its links are buttons:  Tab reaches each, Enter follows it.
+			In a menu bar, the bar's arrow keys reach them too.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			Each link is named by its words, its tooltip too:  "The original page", "Report a bug".
+			Nothing to add.
+		</>
+	</>

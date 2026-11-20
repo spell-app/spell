@@ -34,10 +34,10 @@ import type { DrawnDeclaration } from "spell/parser/spell/rules/JSX/JSX.shared"
  *   - a line that doesn't parse alone, for a name another file declares (`if the stock is empty`):
  *     its block from its first word, as its project's parse draws it (`shapeOf()`;  epic `codemirror` I23)
  *   - a type's member that reads whole only in a list's body, for a type built on one another file declares
- *     (`it is droppable when`), or naming a type declared below it:  read again (`rereadAsMember()`;  epic `codemirror`
- *     I26, I28)
- *   - a top-level line naming a type another file declares (`a square belongs to one board`):  read again, that type a
- *     stand-in (`rereadWithStandInType()`;  I28)
+ *     (`it is droppable when`), or naming a type declared below it:
+ *     read again (`rereadAsMember()`;  epic `codemirror` I26, I28)
+ *   - a top-level line naming a type another file declares (`a square belongs to one board`):
+ *     read again, that type a stand-in (`rereadWithStandInType()`;  I28)
  *   - among steps, a line that read as a declaration, or not at all:  the control line its first word starts
  *     (`para rango en ...`, `while waiting`;  `controlOf()`, I28)
  * - Another language's Spell lays out with its own parser (`SP.Language.for("es").parser`):  the table is by rule
@@ -190,8 +190,8 @@ export class BubblyLayout {
 
   /**
    * Is `match`, kept in its parent's `data`, of this text:  every word of it there, where it says it is?
-   * - Not words a rule parsed on their own, counted from their own start:  a text's fill-in
-   *   (`"Your score:  [solitaire's score]"`), a markdown hole, `<ui-markdown>`'s attributes.
+   * - Not words a rule parsed on their own, counted from their own start:
+   *   a text's fill-in (`"Your score:  [solitaire's score]"`), a markdown hole, `<ui-markdown>`'s attributes.
    *   Read as the text's, its `'s` made `solitaire is an app`'s `is` half bold (epic `codemirror` I27).
    */
   private isOfText(match: P.Match): boolean {
@@ -660,8 +660,8 @@ export class BubblyLayout {
    *     a list's own line whose body names its item
    *   - Each stand-in its own scope, under the one the line was read in:  the names declared above it still known
    *     (`pile`), and nothing it declares reaches the parse the drawing reads.
-   * - Taken only when its head reads whole (in a stand-in, as a declaration):  its reading then replaces theirs, under
-   *   it too.
+   * - Taken only when its head reads whole (in a stand-in, as a declaration):
+   *   its reading then replaces theirs, under it too.
    * - Only a line that didn't read whole, and only from a parse of the text here (`isAlone`):  a project's parse knows.
    * - The parser's own rules, so any language's:  `es soltable cuando`.
    * - Returns whether it was taken.
@@ -695,8 +695,8 @@ export class BubblyLayout {
 
   /**
    * Read `line`, a top-level line that didn't read alone, starting with an article (`a square belongs to one board`),
-   * again, with its first words a stand-in type, a thing:  so it draws as its project's parse draws it
-   * (epic `codemirror` I28).
+   * again, with its first words a stand-in type, a thing:
+   * so it draws as its project's parse draws it (epic `codemirror` I28).
    * - Why:  laid out from its text alone, a type another file declares (`square`) isn't known, so the line doesn't
    *   read, and `shapeOf()` takes it for reopening a type, a thing's band, where its project's draws a property's.
    * - Its first word after the article, then its first two, its first three:  the first that reads whole as a
@@ -726,8 +726,8 @@ export class BubblyLayout {
   /**
    * Read `line` and the lines under it again in a new scope from `scopeFor()`:  taken when its head reads whole, as a
    * rule `isTaken` takes (a declaration, by default), its reading then replacing what was read of those lines.
-   * - Its head alone first, then with its lines:  each read in a scope of its own, so neither sees what the other
-   *   declared.
+   * - Its head alone first, then with its lines:
+   *   each read in a scope of its own, so neither sees what the other declared.
    * - Returns whether it was taken.  NEVER throws.
    */
   private rereadIn(line: SourceLine, scopeFor: () => P.Scope, isTaken = isDeclaration): boolean {
@@ -1190,8 +1190,8 @@ export class BubblyLayout {
 
   /**
    * Paint an overlay:  only over Spell's own words, when it says so (`overWordsOnly`).
-   * - A name never takes a mark, nor the space after one:  its commas stay plain,
-   *   `**draggable**, **clickable two sided view**` (epic `language` J214)
+   * - A name never takes a mark, nor the space after one:
+   *   its commas stay plain, `**draggable**, **clickable two sided view**` (epic `language` J214)
    */
   private paintOverlay({ start, end, kind, overWordsOnly }: Overlay) {
     let afterMark = false

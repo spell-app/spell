@@ -4,13 +4,6 @@
 		<header>A rail is used to show accompanying content outside the boundaries of the main view of a
               site.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#variations">Variations</>
-		</>
-	</>
-
 	<!--
 		EXAMPLES:  Fomantic's rail page, section by section, in its order (Types, Variations).
 		- A rail is 300px wide and sits OUTSIDE its container:  two of them don't fit beside the docs column, so each

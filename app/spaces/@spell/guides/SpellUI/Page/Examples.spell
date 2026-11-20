@@ -3,11 +3,6 @@
 		Page
 		<header>A page frames a whole window:  a header, navigation, the main content, a side column and a footer.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,

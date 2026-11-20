@@ -3,12 +3,6 @@
 		Content
 		<header>Content is the main block of a card, item, feed event, comment, modal, message, list item or step.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#owners">Owners</>
-			<item link="#variations">Variations</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  `<ui-content>` in each owner that gives it a look (from the owners' own pages and

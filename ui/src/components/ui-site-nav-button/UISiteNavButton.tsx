@@ -7,7 +7,7 @@ import { E, UIT } from "spell/ui/core"
 // (SIDE EFFECT:  defines `<ui-item>`, which the button extends)
 import { UIItem } from "spell/ui/components/ui-item"
 import type { itemVocabulary } from "spell/ui/components/ui-item/UIItem.en"
-import type { DOMPageLayoutElement, UIPageLayout } from "spell/ui/components/ui-page-layout/UIPageLayout"
+import type { DOMPageLayoutElement, Side, UIPageLayout } from "spell/ui/components/ui-page-layout/UIPageLayout"
 import { siteNavButtonVocabulary } from "./UISiteNavButton.en"
 
 import siteNavButtonCSS from "./UISiteNavButton.css?inline"
@@ -27,8 +27,10 @@ import siteNavButtonCSS from "./UISiteNavButton.css?inline"
  *   - Outside a menu, where an item draws nothing of its own, it's a small basic `<ui-button>` with the same icon.
  * - A click:  the nearest `<ui-page-layout>` around it, across shadow roots, `toggleDrawer()`s.
  *   - So narrow, the drawer slides in and out;  wide, it shows only its icons, or all of it again.
- * - `aria-expanded` says whether the layout's drawer shows all of it.
- * - With one inside it, the layout draws no menu button of its own.
+ * - `toggles="right"` (or `left`):  a click `toggleSidebar()`s that side bar instead (epic `mockup` T55),
+ *   and its words say so (`rightLabel`);  narrow, the layout hides that side bar behind it.
+ * - `aria-expanded` says whether the layout's drawer (or its side bar) is shown.
+ * - With one for the drawer inside it, the layout draws no menu button of its own.
  * - It finds its layout by its English tag (`ui-page-layout`).
  ****************/
 export class UISiteNavButton extends UIItem {
@@ -60,10 +62,20 @@ export class UISiteNavButton extends UIItem {
     return this.layout?.component
   }
 
-  /** SIDE EFFECT:  a click shows or hides the layout's drawer. */
+  /** The side bar it shows and hides (`toggles`), or `undefined` for the drawer. */
+  private get side(): Side | undefined {
+    // the item's attributes are what TypeScript knows of its vocabulary:  `toggles` is the button's own
+    const toggles = this.attributes.toggles
+    return toggles === LEFT || toggles === RIGHT ? toggles : undefined
+  }
+
+  /** SIDE EFFECT:  a click shows or hides the layout's drawer, or its side bar (`toggles`). */
   @E.on("click")
   protected onClick() {
-    if (!this.isDisabled) this.layoutComponent?.toggleDrawer()
+    if (this.isDisabled) return
+    const side = this.side
+    if (side) this.layoutComponent?.toggleSidebar(side)
+    else this.layoutComponent?.toggleDrawer()
   }
 
   ////////////////
@@ -80,11 +92,16 @@ export class UISiteNavButton extends UIItem {
 
   /** Is the layout narrow, its drawer slid out of sight until this button slides it in? */
   private get isForHiddenDrawer(): boolean {
-    return this.layoutComponent?.isNarrow ?? false
+    return !this.side && (this.layoutComponent?.isNarrow ?? false)
   }
 
-  /** Its words:  for the menu while the drawer is hidden at a narrow width, else for the side bar. */
+  /**
+   * Its words:  for its side bar (`toggles`);  for the menu while the drawer is hidden at a narrow width;
+   * else for the drawer, the side bar a site calls it.
+   */
   private get words(): string | undefined {
+    const side = this.side
+    if (side) return this.translationForKey(side === LEFT ? LEFT_LABEL : RIGHT_LABEL)
     return this.translationForKey(this.isForHiddenDrawer ? MENU_LABEL : LABEL)
   }
 
@@ -104,10 +121,12 @@ export class UISiteNavButton extends UIItem {
     return own === null ? this.words : own || undefined
   }
 
-  /** Does the layout's drawer show all of it:  its `aria-expanded`. */
+  /** Does the layout's drawer show all of it, or is its side bar shown (`toggles`):  its `aria-expanded`. */
   protected get boxExpanded(): "true" | "false" | undefined {
     const layout = this.layoutComponent
-    return layout ? (String(layout.isDrawerShown) as "true" | "false") : undefined
+    if (!layout) return undefined
+    const side = this.side
+    return String(side ? layout.isSideShown(side) : layout.isDrawerShown) as "true" | "false"
   }
 
   ////////////////
@@ -144,6 +163,12 @@ export class UISiteNavButton extends UIItem {
 /** Its words' key in its vocabulary's `texts`:  TypeScript knows only the item's, which has none. */
 const LABEL = "label" as never
 const MENU_LABEL = "menuLabel" as never
+const LEFT_LABEL = "leftLabel" as never
+const RIGHT_LABEL = "rightLabel" as never
+
+/** `toggles`'s side bars. */
+const LEFT = "left"
+const RIGHT = "right"
 
 /** The layout's tag. */
 const PAGE_LAYOUT = "ui-page-layout"

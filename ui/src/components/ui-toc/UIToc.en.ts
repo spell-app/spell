@@ -33,20 +33,24 @@ export const tocVocabulary = {
       property: "htmlFor",
       description:
         "Id of the element whose headings to list.  A `<ui-tabs>`:  its SHOWN pane, followed as the tabs switch.  " +
-        "Default:  the page's `<main>`, else `<body>`."
+        "Default:  inside a `<ui-page-layout>` (a side bar of it), the layout's page, followed as the site shows " +
+        "another;  else the page's `<main>`, else `<body>`."
     },
     {
       name: "scroller",
       kind: "string",
       description:
         "Id of the element whose scroll it follows, when the content scrolls inside a box of its own (a pane) rather " +
-        "than the window.  Its reading line is then that box's top.  Default:  the window."
+        "than the window.  Its reading line is then that box's top.  Default:  inside a `<ui-page-layout>`, the box " +
+        "the layout scrolls in;  else the window."
     },
     {
       name: "heading",
       replaces: ["header"],
       kind: "string",
-      description: "Title above the links, e.g. the page's name (Fomantic's `Button`).  Its old name was `header`."
+      description:
+        "Title above the links, e.g. the page's name (Fomantic's `Button`).  Default:  inside a " +
+        "`<ui-page-layout>`, the title of the layout's page (its level 1 heading).  Its old name was `header`."
     },
     { name: "size", kind: "size", default: "small", description: "Text size, `mini` ... `massive`." },
     {

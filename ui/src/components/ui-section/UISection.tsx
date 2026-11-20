@@ -610,7 +610,12 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
         part={this.partForName("section")}
         aria-busy={this.isLoading ? "true" : undefined}
       >
-        <div ref={(element) => (this.sentinel = element)} class={SENTINEL} aria-hidden="true" />
+        <div
+          ref={(element) => (this.sentinel = element)}
+          class={SENTINEL}
+          aria-hidden="true"
+          style={{ [STICK_TOP_PROPERTY]: `${this.stickTop}px` }}
+        />
         {this.titleBar()}
         <Show when={this.hasHint}>
           <div class={SUBHEAD} part={this.partForName("subhead")}>

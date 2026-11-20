@@ -29,12 +29,14 @@ calculator is an app
 
 	group "What Its Keys Do"
 	to clear it
+		play "tap"
 		clear the input
 		clear the left
 		clear the operator
 		clear the right
 	to finish it
 		// Equals:  the total becomes the left number, ready for the next operator
+		play "tap"
 		if the right is empty return
 		set the left to the total as text
 		clear the operator
@@ -42,6 +44,7 @@ calculator is an app
 		clear the input
 	to press (digit as text)
 		// A digit, or the decimal point:  onto the number being typed, the left one until there's an operator
+		play "tap"
 		if the digit is "."
 			if the input is empty
 				set the input to "0."
@@ -55,6 +58,7 @@ calculator is an app
 			set the right to the input
 	to apply (key as text)
 		// An operator:  after a whole sum, the total carries on as the next sum's left number
+		play "tap"
 		if the right is not empty
 			finish it
 		set the operator to the key

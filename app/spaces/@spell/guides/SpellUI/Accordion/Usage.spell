@@ -3,18 +3,6 @@
 		Accordion
 		<header>An accordion allows users to toggle the display of sections of content.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#open-panels">Open panels</>
-			<item link="#events">Events</>
-			<item link="#content-from-a-file">Content from a file</>
-			<item link="#without-javascript">Without JavaScript</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-			<item link="#framework-usage">Framework usage</>
-		</>
-	</>
 
 	<!-- USAGE:  how to use it (panels, `open`, events), keyboard, accessibility, frameworks. -->
 	<section label="Using it">

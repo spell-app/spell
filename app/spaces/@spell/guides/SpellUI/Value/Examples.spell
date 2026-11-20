@@ -3,12 +3,6 @@
 		Value
 		<header>A value is what a statistic shows:  a number, a word, an icon or an image.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#owners">Owners</>
-			<item link="#variations">Variations</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  `<ui-value>` in each owner that gives it a look (from the owners' own pages and

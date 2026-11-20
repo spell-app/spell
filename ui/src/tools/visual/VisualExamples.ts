@@ -18,7 +18,7 @@ import { VisualSettings } from "./VisualSettings.ts"
 export class VisualExamples {
   /** Every element example, by family then name. */
   static async load(): Promise<VisualExample[]> {
-    const components = `${VisualSettings.ROOT}components`
+    const components = `${VisualSettings.ROOT}src/components`
     const examples: VisualExample[] = []
     for (const family of readdirSync(components).sort()) {
       const folder = `${components}/${family}/examples/elements`

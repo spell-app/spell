@@ -1,8 +1,27 @@
-// The frame round every page of Spell UI (epic `mockup` T39):  the site's navigation in the drawer;
-// above each page its app menu, the drawer's button and where you are;  under that, the page's family as tabs.
+// The frame round every page of Spell UI (epic `mockup` T39, T55):  Spell UI's docs site's look, its side bars floating.
+// - The drawer:  the site's navigation, a card its button hides and shows.
+// - Above each page its app menu:  the drawer's button and where you are;  in its middle the page's family as a switch,
+//   Usage | Examples | API | Theming, as the editor's Run | Edit;  at its end the page's own links (Fomantic's original,
+//   report a bug), the theme menu and the contents' button.
+// - Beside the page its contents, a card headed by the page's title, which its ✕ or that button closes.
+// - No row of tabs under the menu:  they're the menu's switch, and a page's sections are in its contents.
+<ui-defaults>
+	<ui-page-layout floating drawer-hides />
+</ui-defaults>
+
 main layout is a page layout
 	to draw its app menu
 		<app-menu>
 			<site-nav-button slot="start" />
 			<site-breadcrumbs slot="start" />
+			<site-tabs appearance="header" />
+			<site-links slot="end" report="https://github.com/spell-app/spell-ui/issues/new?title={title}" />
+			<theme-menu slot="end" show="theme" compact />
+			<site-nav-button slot="end" toggles="right" icon="list ul" />
 		</app-menu>
+	to draw its page menu
+		// nothing:  the page's family is the app menu's switch
+	to draw its right sidebar
+		<toc>
+			<site-nav-button slot="tools" toggles="right" icon="close" />
+		</>
