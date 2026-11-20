@@ -627,7 +627,8 @@ export class Worktrees {
         join(root, "tools"),
         join(root, "tsconfig.json")
       ]
-      const args = [...tsxImports(root), join(tools!, "plan-doc.js"), "summaries", ...todo]
+      // `--all`:  every phase, to tell a finished epic (`planStatus()`);  an older tool ignores the flag
+      const args = [...tsxImports(root), join(tools!, "plan-doc.js"), "summaries", "--all", ...todo]
       const run = spawnSync(process.execPath, args, {
         cwd: root,
         encoding: "utf8",

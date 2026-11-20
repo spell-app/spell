@@ -42,7 +42,9 @@ The person runs several epics at once:  one screen saying where each stands.
    - `epic summaries <file> ...`, every `file` in one call.
      - It gives JSON `{ <file>: summary }`, or `{ error }`.
      - Each summary has:
-       - `phases[]`:  each one's `n`, `name` and `status`
+       - `phases[]`:  the phases LEFT, each one's `n`, `number`, `name` and `status`
+       - `done`:  how many are finished, left out of `phases` (`2/5`:  `done` / `done` + `phases.length`);
+         `summaries --all` lists them too
        - `active` and `next`
        - `open`:  items by kind
        - `bedtime`:  the phases a `/bedtime` run is on, while it goes
