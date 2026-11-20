@@ -9,7 +9,7 @@ import { spellTextOf, type SpellLine, type SpellParts, type TypeLines } from "./
 /** How many times it translates, adding what the last time found missing. */
 const MOST_ROUNDS = 4
 
-/** The comments the ingest writes on a line, in each other language. */
+/** The notes the ingest writes under a line (`SpellLine.note`), in each other language. */
 const COMMENTS: Readonly<Record<string, Readonly<Record<string, string>>>> = {
   es: {
     "an address": "una dirección",
@@ -51,7 +51,9 @@ export function partsInLanguageOf(file: string, parts: SpellParts): SpellParts {
   const lines = translated.lines.filter((line) => line.trim()).map((line) => line.trim())
   let at = 0
   const next = (english: string) => withQuotedAsWritten(lines[at++]!, english)
-  const line = ({ key, text }: SpellLine): SpellLine => ({ key, text: next(text) })
+  // a line's note is the line after it, `-- cada una una dirección`
+  const line = ({ key, text, note }: SpellLine): SpellLine =>
+    note ? { key, text: next(text), note: lines[at++]!.replace(/^--\s*/, "") } : { key, text: next(text) }
   // its first words are the place's name, as written:  `stars`, which the language's plural rules would change
   const header = next(parts.header).replace(
     /^.+? (?=(?:is|es) )/,

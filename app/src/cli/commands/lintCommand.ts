@@ -24,6 +24,7 @@ const DESCRIPTION_BEFORE_EXAMPLE = "description-before-example"
  *   - a `.spell` file's HTML habits, e.g. `<ui-button>` => `<button>` -- see `fixHtmlHabits()`
  *   - a `.spell` page's old spellings, e.g. `<spell-notebook "x">` => `<spell-page "x" notebook>` --
  *     see `fixPageHabits()`
+ *   - a note after a line's code, `// ...`, moved to the line under it, `-- ...` -- see `fixLineEndNotes()`
  *   - each editor page
  *   - What it can't put right is still an error.
  * - A `.spell` file's HTML habit it can't put right, `on-click=`, is an error -- see `htmlHabitsIn()`.
@@ -45,6 +46,7 @@ export async function lintCommand(session: CLI.CliSession, args: string[], optio
         if (options.fix) fixes.push(...(await fixRetiredWords(session, project, resolved.file)))
         if (options.fix) fixes.push(...(await fixHtmlHabits(session, project, resolved.file)))
         if (options.fix) fixes.push(...(await fixPageHabits(session, project, resolved.file)))
+        if (options.fix) fixes.push(...(await fixLineEndNotes(session, project, resolved.file)))
         problems.push(...(await checkProject(session, project, resolved.file, status)))
         problems.push(...htmlHabitsIn(project, resolved.file))
         problems.push(...pageHabitsIn(project, resolved.file))
@@ -53,6 +55,7 @@ export async function lintCommand(session: CLI.CliSession, args: string[], optio
       if (options.fix) fixes.push(...(await fixRetiredWords(session, resolved.project)))
       if (options.fix) fixes.push(...(await fixHtmlHabits(session, resolved.project)))
       if (options.fix) fixes.push(...(await fixPageHabits(session, resolved.project)))
+      if (options.fix) fixes.push(...(await fixLineEndNotes(session, resolved.project)))
       problems.push(...(await checkProject(session, resolved.project, undefined, status)))
       problems.push(...htmlHabitsIn(resolved.project))
       problems.push(...pageHabitsIn(resolved.project))
@@ -207,6 +210,40 @@ async function fixPageHabits(
         )
       }
     }
+    fixes.push(...(await writeFixes(project, spellFile, edits)))
+  }
+  return fixes
+}
+
+/**
+ * With `--fix`:  move each note after a line's code in `project`, `load its sound  // so it plays at once`, to the
+ * first line inside its line, `-- so it plays at once` -- only `file`'s, if given -- and write each changed file back
+ * (`SP.LineEndComments`, epic `language` T166).
+ * - The parser warns about each one:  `BlockLine`.
+ * - Not a test project's files:  they stay frozen.
+ * - SIDE EFFECT:  parses `project`, then hands it each file's new text.
+ * - Returns what it fixed, each a problem saying so, where the note was.
+ */
+async function fixLineEndNotes(
+  session: CLI.CliSession,
+  project: SP.SpellProject,
+  file?: SP.SpellFile
+): Promise<CLI.Problem[]> {
+  await session.parse(project)
+  const fixes: CLI.Problem[] = []
+  for (const spellFile of file ? [file] : project.spellFiles) {
+    const text = spellFile.contents
+    if (!spellFile.match || text === undefined || CLI.isTestProject(spellFile.location.serverPath)) continue
+    const edits = SP.LineEndComments.in(spellFile.match.tokens).flatMap((comment) =>
+      SP.LineEndComments.moved(text, comment).map(({ start, end, newText }, index): Fix =>
+        fix(
+          text,
+          { start, end },
+          newText,
+          index ? undefined : 'fixed:  a "//" note moved to the line under it, as "--"'
+        )
+      )
+    )
     fixes.push(...(await writeFixes(project, spellFile, edits)))
   }
   return fixes

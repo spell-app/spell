@@ -35,9 +35,11 @@
 |   [property define_property_has L1]
 |   | its «"public domain"» is yes or no, stored as «"isPublicDomain"»
 |   [property define_property_has L1]
-|   | its «"primary image"» is **text**  ⟦// an address⟧
+|   | its «"primary image"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"primary image small"» is **text**  ⟦// an address⟧
+|   | its «"primary image small"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"additional images"» is a list of **text**
 |   [property define_property_has L1]
@@ -79,9 +81,11 @@
 |   [property define_property_has L1]
 |   | its «"artist gender"» is **text**
 |   [property define_property_has L1]
-|   | its «"artist wikidata url"» is **text**  ⟦// an address⟧
+|   | its «"artist wikidata url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"artist ulan url"» is **text**  ⟦// an address⟧
+|   | its «"artist ulan url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"object date"» is **text**
 |   [property define_property_has L1]
@@ -129,11 +133,13 @@
 |   [property define_property_has L1]
 |   | its «"repository"» is **text**
 |   [property define_property_has L1]
-|   | its «"object url"» is **text**, stored as «"objectURL"»  ⟦// an address⟧
+|   | its «"object url"» is **text**, stored as «"objectURL"»
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"tags"» is a list of **tags**
 |   [property define_property_has L1]
-|   | its «"object wikidata url"» is **text**  ⟦// an address⟧
+|   | its «"object wikidata url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"timeline work"» is yes or no, stored as «"isTimelineWork"»
 |   [property define_property_has L1]
@@ -148,9 +154,11 @@
 |   [property define_property_has L1]
 |   | its «"name"» is **text**
 |   [property define_property_has L1]
-|   | its «"constituent ulan url"» is **text**  ⟦// an address⟧
+|   | its «"constituent ulan url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"constituent wikidata url"» is **text**  ⟦// an address⟧
+|   | its «"constituent wikidata url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"gender"» is **text**
 
@@ -179,9 +187,11 @@
 |   [property define_property_has L1]
 |   | its «"term"» is **text**
 |   [property define_property_has L1]
-|   | its «"aat url"» is **text**  ⟦// an address⟧
+|   | its «"aat url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"wikidata url"» is **text**  ⟦// an address⟧
+|   | its «"wikidata url"» is **text**
+|   |   ⟦-- an address⟧
 
 ==== /MetArtworks.spell
 ⟪# Artworks from the Met⟫

@@ -2376,6 +2376,7 @@ export class SpellLanguageService {
    * - Goes just above the top-level statement the line is in, as a method is only visible to lines AFTER it.
    * - See `methodSignatureFor()` for how the words become a signature.
    * - And "Make it code" / "Make it text" on the attribute value the caret is in (`codeOrText()`, epic `editor` T74).
+   * - And "Move the note below" on a line ending in an old `// ...` note (`lineEndNotesMoved()`, epic `language` T166).
    */
   codeActions(file: SP.SpellFile, range: Range): CodeAction[] {
     if (!file.match) return []
@@ -2412,7 +2413,39 @@ export class SpellLanguageService {
     }
     const switched = this.codeOrText(file, from)
     if (switched) actions.push(switched)
+    actions.push(...this.lineEndNotesMoved(file, from, to))
     return actions
+  }
+
+  /**
+   * "Move the note below" on each old line-end note, `// ...` after a line's code, on the lines `from` ... `to`:
+   * to the first line inside its line, `-- ...` (`SP.LineEndComments`, epic `language` T166).
+   * - A quick fix for the warning `BlockLine` notes on it, its diagnostic attached.
+   */
+  private lineEndNotesMoved(file: SP.SpellFile, from: number, to: number): CodeAction[] {
+    const text = file.parseText
+    const lineStart = text.lastIndexOf("\n", from - 1) + 1
+    const lineEnd = text.indexOf("\n", to) < 0 ? text.length : text.indexOf("\n", to)
+    const comments = SP.LineEndComments.in(file.match!.tokens).filter(
+      (comment) => comment.start >= lineStart && comment.start <= lineEnd
+    )
+    return comments.map((comment): CodeAction => {
+      const at = comment.start
+      const diagnostic = this.diagnostics(file).find(
+        (it) => it.severity === DiagnosticSeverity.Warning && this.offsetAt(file, it.range.start) === at
+      )
+      const edits = SP.LineEndComments.moved(text, comment).map(({ start, end, newText }) => ({
+        range: { start: this.positionAt(file, start), end: this.positionAt(file, end) },
+        newText
+      }))
+      return {
+        title: LSP.LspTexts.of(this.scopeAt(file, at)).text("moveLineEndNote"),
+        kind: CodeActionKind.QuickFix,
+        diagnostics: diagnostic ? [diagnostic] : undefined,
+        isPreferred: true,
+        edit: { changes: { [this.addresses.uriFor(file)]: edits } }
+      }
+    })
   }
 
   /**

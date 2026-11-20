@@ -100,6 +100,7 @@ export class Current extends Thing {
 
   /** in wmo code */
   // - its "weather code" is a number
+  //   -- in wmo code
   @prop({ type: "number" })
   accessor weatherCode!: number
 }
@@ -115,6 +116,7 @@ export class Hour extends Thing {
 
   /** in wmo code */
   // - its "weather code" is a number
+  //   -- in wmo code
   @prop({ type: "number" })
   accessor weatherCode!: number
 

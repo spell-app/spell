@@ -31,9 +31,11 @@ a "current" is a thing
 	its "time" is a date
 	its "interval" is a duration in seconds
 	its "temperature" is a temperature in °C, stored as "temperature_2m"
-	its "weather code" is a number  // in wmo code
+	its "weather code" is a number
+		-- in wmo code
 
 an "hour" is a thing
 	its "time" is a date
 	its "temperature" is a temperature in °C, stored as "temperature_2m"
-	its "weather code" is a number  // in wmo code
+	its "weather code" is a number
+		-- in wmo code

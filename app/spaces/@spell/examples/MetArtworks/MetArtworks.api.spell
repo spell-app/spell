@@ -27,8 +27,10 @@ an "artwork" is a thing
 	its "accession number" is text
 	its "accession year" is a number
 	its "public domain" is yes or no, stored as "isPublicDomain"
-	its "primary image" is text  // an address
-	its "primary image small" is text  // an address
+	its "primary image" is text
+		-- an address
+	its "primary image small" is text
+		-- an address
 	its "additional images" is a list of text
 	its "constituents" is a list of constituents
 	its "department" is text
@@ -49,8 +51,10 @@ an "artwork" is a thing
 	its "artist begin date" is a number
 	its "artist end date" is a number
 	its "artist gender" is text
-	its "artist wikidata url" is text  // an address
-	its "artist ulan url" is text  // an address
+	its "artist wikidata url" is text
+		-- an address
+	its "artist ulan url" is text
+		-- an address
 	its "object date" is text
 	its "object begin date" is a number
 	its "object end date" is a number
@@ -74,9 +78,11 @@ an "artwork" is a thing
 	its "link resource" is text
 	its "metadata date" is a date
 	its "repository" is text
-	its "object url" is text, stored as "objectURL"  // an address
+	its "object url" is text, stored as "objectURL"
+		-- an address
 	its "tags" is a list of tags
-	its "object wikidata url" is text  // an address
+	its "object wikidata url" is text
+		-- an address
 	its "timeline work" is yes or no, stored as "isTimelineWork"
 	its "gallery number" is a number
 
@@ -84,8 +90,10 @@ a "constituent" is a thing
 	its "constituent id" is a number, stored as "constituentID"
 	its "role" is text
 	its "name" is text
-	its "constituent ulan url" is text  // an address
-	its "constituent wikidata url" is text  // an address
+	its "constituent ulan url" is text
+		-- an address
+	its "constituent wikidata url" is text
+		-- an address
 	its "gender" is text
 
 a "measurement" is a thing
@@ -101,5 +109,7 @@ an "element measurement" is a thing
 
 a "tag" is a thing
 	its "term" is text
-	its "aat url" is text  // an address
-	its "wikidata url" is text  // an address
+	its "aat url" is text
+		-- an address
+	its "wikidata url" is text
+		-- an address

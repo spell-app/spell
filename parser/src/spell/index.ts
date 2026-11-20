@@ -73,6 +73,7 @@ export {
 export * from "./SpellDeclarations"
 export * from "./SpellWords"
 export * from "./SpellWarnings"
+export * from "./LineEndComments"
 export * from "./hoistClassMembers"
 export * from "./targets"
 export * from "./highlight"

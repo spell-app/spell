@@ -30,11 +30,13 @@ a pokemon
 		if the pokedex's showing is it
 			return
 		if the pokedex's showing
-			stop the pokedex's showing's sound  // the last one's cry ends with its page
+			stop the pokedex's showing's sound
+				-- the last one's cry ends with its page
 			add the pokedex's showing to the pokedex's trail
 		set the pokedex's search to ""
 		set the pokedex's showing to it
-		load its sound  // so Hear it plays it at once
+		load its sound
+			-- so Hear it plays it at once
 		scroll to the top
 
 	to hear it

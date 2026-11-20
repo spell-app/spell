@@ -6,7 +6,8 @@
 
 a "rest countries page" is a thing
 	its "region" is text
-	its "language" is text  // its language's code, as REST Countries keys its names:  `fra`, `spa`, `deu`, `jpn`
+	its "language" is text
+		-- its language's code, as REST Countries keys its names:  `fra`, `spa`, `deu`, `jpn`
 	when creating a rest countries page
 		set its region to "Europe"
 		set its language to "fra"

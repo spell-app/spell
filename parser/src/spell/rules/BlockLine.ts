@@ -116,6 +116,9 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
       if (comment) {
         comments.push(comment)
         end -= 1
+        // a note after the code, `// ...`:  the old way, its place now the first line inside (epic `language` T166)
+        if (line === written && SP.LineEndComments.endingLine(line))
+          SP.SpellWarnings.note(comment, SP.Language.of(scope).parserMessage("line-end-comment"))
       }
       // add comments BEFORE statement
       matched.push(...comments)

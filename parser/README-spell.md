@@ -175,10 +175,20 @@ a "card" is a draggable two sided view, aka "playing card"
 
 - `a "card" is a draggable two sided view`:  an ability is a word before the template.
   `clickable`, `selectable` and `droppable` are the others;  `it is draggable` under it says the same.
-- A declaration's description is the first comment inside its body, `// Its shorthand`:
+- A declaration's description is the first comment inside its body, `-- Its shorthand`:
   hovered in an editor, and written above it in the code, `/** Its shorthand ... */`.
-  - A line with no body takes one holding just the comment:  `its "hint" is text`, then `// Said beside the score`.
+  - A line with no body takes one holding just the comment:  `its "hint" is text`, then `-- Said beside the score`.
   - A comment right above a declaration still describes it, when nothing under it does.
+- A note goes on a line of its own, never after a line's code:
+  a `//` note at a line's end still reads, with a warning, and `spell lint --fix` moves it to the line under it,
+  as `--`.
+
+  ```spell
+  its "primary image" is text
+  	-- an address
+  ```
+
+  - A `--` at the end of a drawing's line or a type's line stays:  `to draw its placeholder  -- a grey ace`.
 - The line that declares a thing can say more about it, after a comma:
   - a template's short name, `, aka "playing card"`
   - a property's start, `, starting at -1`, and a list's first value, `, with default down`

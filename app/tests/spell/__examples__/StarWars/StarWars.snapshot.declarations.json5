@@ -1019,123 +1019,123 @@
     {
       "type": "Thumbnail",
       "superType": "Thing",
-      "defined": "/Wikipedia.api.spell:1862-1974"
+      "defined": "/Wikipedia.api.spell:1862-1975"
     },
     {
       "property": "source",
       "of": "Thumbnail",
       "datatype": "text",
-      "defined": "/Wikipedia.api.spell:1888-1908"
+      "defined": "/Wikipedia.api.spell:1888-1924"
     },
     {
       "property": "width",
       "of": "Thumbnail",
       "datatype": "number",
-      "defined": "/Wikipedia.api.spell:1925-1948"
+      "defined": "/Wikipedia.api.spell:1926-1949"
     },
     {
       "property": "height",
       "of": "Thumbnail",
       "datatype": "number",
-      "defined": "/Wikipedia.api.spell:1950-1974"
+      "defined": "/Wikipedia.api.spell:1951-1975"
     },
     {
       "type": "Originalimage",
       "superType": "Thing",
-      "defined": "/Wikipedia.api.spell:1976-2093"
+      "defined": "/Wikipedia.api.spell:1977-2095"
     },
     {
       "property": "source",
       "of": "Originalimage",
       "datatype": "text",
-      "defined": "/Wikipedia.api.spell:2007-2027"
+      "defined": "/Wikipedia.api.spell:2008-2044"
     },
     {
       "property": "width",
       "of": "Originalimage",
       "datatype": "number",
-      "defined": "/Wikipedia.api.spell:2044-2067"
+      "defined": "/Wikipedia.api.spell:2046-2069"
     },
     {
       "property": "height",
       "of": "Originalimage",
       "datatype": "number",
-      "defined": "/Wikipedia.api.spell:2069-2093"
+      "defined": "/Wikipedia.api.spell:2071-2095"
     },
     {
       "type": "ContentUrl",
       "superType": "Thing",
-      "defined": "/Wikipedia.api.spell:2095-2175"
+      "defined": "/Wikipedia.api.spell:2097-2177"
     },
     {
       "property": "desktop",
       "of": "ContentUrl",
       "datatype": "Desktop",
-      "defined": "/Wikipedia.api.spell:2123-2149"
+      "defined": "/Wikipedia.api.spell:2125-2151"
     },
     {
       "property": "mobile",
       "of": "ContentUrl",
       "datatype": "Mobile",
-      "defined": "/Wikipedia.api.spell:2151-2175"
+      "defined": "/Wikipedia.api.spell:2153-2177"
     },
     {
       "type": "Desktop",
       "superType": "Thing",
-      "defined": "/Wikipedia.api.spell:2177-2344"
+      "defined": "/Wikipedia.api.spell:2179-2350"
     },
     {
       "property": "page",
       "of": "Desktop",
       "datatype": "text",
-      "defined": "/Wikipedia.api.spell:2201-2219"
+      "defined": "/Wikipedia.api.spell:2203-2237"
     },
     {
       "property": "revisions",
       "of": "Desktop",
       "datatype": "text",
-      "defined": "/Wikipedia.api.spell:2236-2259"
+      "defined": "/Wikipedia.api.spell:2239-2278"
     },
     {
       "property": "edit",
       "of": "Desktop",
       "datatype": "text",
-      "defined": "/Wikipedia.api.spell:2276-2294"
+      "defined": "/Wikipedia.api.spell:2280-2314"
     },
     {
       "property": "talk",
       "of": "Desktop",
       "datatype": "text",
-      "defined": "/Wikipedia.api.spell:2311-2329"
+      "defined": "/Wikipedia.api.spell:2316-2350"
     },
     {
       "type": "Mobile",
       "superType": "Thing",
-      "defined": "/Wikipedia.api.spell:2346-2512"
+      "defined": "/Wikipedia.api.spell:2352-2522"
     },
     {
       "property": "page",
       "of": "Mobile",
       "datatype": "text",
-      "defined": "/Wikipedia.api.spell:2369-2387"
+      "defined": "/Wikipedia.api.spell:2375-2409"
     },
     {
       "property": "revisions",
       "of": "Mobile",
       "datatype": "text",
-      "defined": "/Wikipedia.api.spell:2404-2427"
+      "defined": "/Wikipedia.api.spell:2411-2450"
     },
     {
       "property": "edit",
       "of": "Mobile",
       "datatype": "text",
-      "defined": "/Wikipedia.api.spell:2444-2462"
+      "defined": "/Wikipedia.api.spell:2452-2486"
     },
     {
       "property": "talk",
       "of": "Mobile",
       "datatype": "text",
-      "defined": "/Wikipedia.api.spell:2479-2497"
+      "defined": "/Wikipedia.api.spell:2488-2522"
     },
     {
       "type": "Wikipedia",
@@ -1809,92 +1809,92 @@
     1014,
     1020,
     1022,
-    1027,
-    1032,
-    1038,
-    1040,
-    1045,
-    1050,
-    1056,
-    1057,
-    1062,
-    1068,
+    1028,
+    1033,
+    1039,
+    1041,
+    1047,
+    1052,
+    1058,
+    1059,
+    1064,
     1070,
-    1076,
-    1082,
-    1088,
-    1094,
-    1096,
+    1072,
+    1079,
+    1086,
+    1093,
+    1100,
     1102,
-    1108,
-    1114,
-    1120,
-    1140,
-    1141,
-    1145,
-    1149,
-    1154,
-    1158,
-    1163,
+    1109,
+    1116,
+    1123,
+    1130,
+    1150,
+    1151,
+    1155,
+    1159,
+    1164,
     1168,
     1173,
-    1216,
-    1217,
-    1221,
+    1178,
+    1183,
     1226,
-    1243,
-    1244,
-    1248,
-    1252,
+    1227,
+    1231,
+    1236,
+    1253,
+    1254,
     1258,
-    1264,
-    1272,
-    1273,
-    1278,
+    1262,
+    1268,
+    1274,
+    1282,
     1283,
-    1292,
+    1288,
     1293,
-    1297,
     1302,
+    1303,
     1307,
+    1312,
     1317,
-    1318,
-    1322,
-    1326,
-    1331,
-    1335,
-    1339,
-    1344,
+    1327,
+    1328,
+    1332,
+    1336,
+    1341,
+    1345,
     1349,
-    1361,
-    1366,
-    1369,
-    1374,
+    1354,
+    1359,
+    1371,
+    1376,
     1379,
     1384,
     1389,
     1394,
     1399,
-    1405,
-    1417,
+    1404,
+    1409,
+    1415,
     1427,
-    1435,
-    1440,
-    1448,
-    1582,
-    1586,
-    1603,
-    1612,
-    1675,
-    1676,
-    1696,
-    1697,
-    1701,
-    1705,
-    1709,
-    1714,
+    1437,
+    1445,
+    1450,
+    1458,
+    1592,
+    1596,
+    1613,
+    1622,
+    1685,
+    1686,
+    1706,
+    1707,
+    1711,
+    1715,
     1719,
-    1723,
-    1730
+    1724,
+    1729,
+    1733,
+    1740
   ]
 }

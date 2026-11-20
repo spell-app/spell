@@ -113,6 +113,7 @@ export class Current extends Thing {
 
   /** in wmo code */
   // - its "weather code" is a number
+  //   -- in wmo code
   static { this.declareProp("weatherCode", { type: "number" }) }
   get weatherCode() { return this.getProp("weatherCode") }
   set weatherCode(value) { this.setProp("weatherCode", value) }
@@ -131,6 +132,7 @@ export class Hour extends Thing {
 
   /** in wmo code */
   // - its "weather code" is a number
+  //   -- in wmo code
   static { this.declareProp("weatherCode", { type: "number" }) }
   get weatherCode() { return this.getProp("weatherCode") }
   set weatherCode(value) { this.setProp("weatherCode", value) }
