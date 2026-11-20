@@ -310,14 +310,15 @@ export class SiteBase extends App {
   }
 
   /**
-   * Ask the host for its theme's look, worn by its frame alone (`SiteHost.themeTokens()`).
+   * Ask the host for its theme's look, worn by its frame alone (`SiteHost.themeTokens()`):  one of Spell UI's, or the
+   * project's own, in its folder (epic `old-console-redo` P1).
    * - NEVER throws:  a theme the host can't give leaves the page's, said on the console.
    */
   private wearTheme(): void {
     const name = this.themeName
     const host = core.siteHost
     if (!name || !host?.themeTokens) return
-    host.themeTokens(name).then(
+    host.themeTokens(name, core.projectFolder).then(
       (tokens) => this.setState("themeTokens", tokens),
       (error: unknown) => console.warn(`SiteBase:  can't wear theme "${name}";  it wears the page's`, error)
     )

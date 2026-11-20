@@ -412,6 +412,27 @@ describe("a running site", () => {
     expect(frame.getAttribute("style")).toContain("--ui-font-family: mockup")
   })
 
+  test("asks its host for its theme with the program's folder, where a theme of its own is (epic `old-console-redo` P1)", async () => {
+    Object.defineProperty(site, "theme", { value: "harbor" })
+    const asked: Array<[string, string | undefined]> = []
+    core.projectFolder = "/spaces/@spell/examples/Harbor"
+    core.siteHost = {
+      address: () => "/films",
+      go: () => {},
+      listen: () => {},
+      themeTokens: async (name, projectFolder) => {
+        asked.push([name, projectFolder])
+        return ""
+      }
+    }
+    try {
+      site.start()
+      expect(asked).toEqual([["harbor", "/spaces/@spell/examples/Harbor"]])
+    } finally {
+      core.projectFolder = undefined
+    }
+  })
+
   test("its navigation's pages are JSON text, which reads the same with or without Spell UI", async () => {
     drawSite()
     await site.showAddress("/films")

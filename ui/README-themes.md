@@ -235,7 +235,7 @@ Every theme colours code too, light and dark:  `--ui-code-<role>` (`keyword`, `s
 - Each reads at 4.5:1 or more on the theme's panel and in a code block, comments too.
 - The same colours ship as VS Code themes, in the Spell extension:  "Spell Matrix Dark", "Spell Light" ...
 
-## Five recipes
+## Six recipes
 
 ### 1. Sitewide defaults:  tokens on `:root`
 
@@ -417,6 +417,40 @@ To make a look of your own, start from one of Spell UI's and change what you lik
   `SavedTheme.restore()`;  Stop using forgets it.
 - It starts from the page's theme, `fruity` when there's none;  `base` and `value` start it elsewhere.
 - Its docs page, with the editor live:  `/components/ui/ui-theme-editor.html`.
+
+### 6. A project's own theme
+
+A Spell site can wear a theme that lives in its own project, not in Spell UI (epic `old-console-redo` P1).
+Name it as you'd name one of Spell UI's:
+
+```spell
+Harbor is a site with theme "harbor"
+```
+
+- Spell UI's themes come first.
+  A name Spell UI hasn't got is looked for beside the site's Spell, as `harbor.theme.json5`.
+- It's a theme file like Spell UI's own, with the same names, checked the same way:  a name the theme tree hasn't got
+  is an error naming the file.
+- Start it from one of Spell UI's themes, and set only what differs:
+
+  ```json5
+  {
+    "extends": "matrix",
+    "radii": { "m": "3px" },
+    "own": { "matrix-accent": { "light": "#0a6f8f", "dark": "#7fd6f0" } }
+  }
+  ```
+
+  - It can extend another theme of the project too.
+  - No `palette` and no `rules`:  those are files in Spell UI's themes folder.
+    What a value can't say stays the base theme's.
+- The site's frame wears it, and the page around it keeps its own theme.
+  So do a site in the editor's Run and one on a page, in `<spell-viewer>`.
+- It's read again each time the site starts, so an edit shows on the next run.
+- A name in neither place:  the site keeps the page's look, and the console says where it looked.
+- In code, `UI.themes.define(name, css)` adds a sheet like this one:  `has()`, `load()`, `apply()` and
+  `scopedTokens()` treat it as one of the folder's.
+  - It can't take the name of one of Spell UI's own sheets.
 
 ## 🌱 Coming:  themes per component
 

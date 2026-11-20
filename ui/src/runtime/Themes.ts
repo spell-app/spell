@@ -35,6 +35,10 @@ import type { Styles } from "./Styles"
  *       nested groups;  its sheet here is GENERATED from it (`ThemeFile`, `yarn gen:styles`), so this class still
  *       reads only sheets
  *     - a theme kept under an old name (`studio`, `spell-brand`):  `RENAMED`
+ * - And a project's own theme, defined as the page runs (`define()`, epic `old-console-redo` P1):  a site's
+ *   `<name>.theme.json5`, beside its Spell, made into one sheet by the site's host.
+ *   - Treated as a sheet of the folder:  `has()`, `load()`, `apply()`, `scopedTokens()`.
+ *   - Listed by no picker:  it's the project's, not Spell UI's.
  * - Registry names in `UI.styles` (`slots`):  `classic` (the base), `theme` (the current theme) and `tint` (a tint
  *   worn over it, epic `debut` P23).  ONE of each, so switching replaces its text in place.
  ****************/
@@ -69,8 +73,10 @@ export class Themes {
   /** `UI.styles` names:  base slot and theme slot */
   readonly slots = { base: BASE, theme: "theme", tint: "tint" } as const
 
-  /** every sheet in the folder, `classic` and `dark` included, A-Z */
-  readonly sheets: readonly string[] = Object.keys(THEME_LOADERS).sort()
+  /** every sheet, `classic` and `dark` included, A-Z:  the folder's, then those defined as the page runs */
+  get sheets(): readonly string[] {
+    return [...Object.keys(THEME_LOADERS).sort(), ...[...this.defined.keys()].sort()]
+  }
 
   /** name last passed to `apply()`, `undefined` for our own look */
   current: string | undefined
@@ -81,13 +87,39 @@ export class Themes {
   /** counts `apply()` calls, so a slow earlier one can't land after a later one */
   private calls = 0
 
+  /** the sheets defined as the page runs (`define()`), name => CSS text */
+  private readonly defined = new Map<string, string>()
+
   constructor({ styles }: ThemesProps) {
     this.styles = styles
   }
 
-  /** Is `name` a sheet in the themes folder? */
+  /** Is `name` a sheet:  one of the themes folder's, or one defined as the page runs? */
   has(name: string): boolean {
+    return name in THEME_LOADERS || this.defined.has(name)
+  }
+
+  /**
+   * Is `name` one of Spell UI's own sheets, in its themes folder?
+   * - Not a theme defined as the page runs:  so a site's host knows to look in its project.
+   */
+  isBuiltIn(name: string): boolean {
     return name in THEME_LOADERS
+  }
+
+  /**
+   * Make `css` sheet `name`, as if it were in the themes folder:  a project's own theme (epic `old-console-redo` P1).
+   * - The WHOLE sheet:  `classic` goes under it as under any theme, but what it extends must be in it already
+   *   (`ThemeFile.standaloneCss()`):  no `@import`, as there's no file beside it to import.
+   * - Defining it again replaces it:  the file was edited, or another project has one of that name.
+   *   A theme worn already keeps the text it had until it's applied again.
+   * - Throws a `TypeError` for the name of one of Spell UI's own sheets:  a project can't replace those.
+   */
+  define(name: string, css: string): void {
+    if (this.isBuiltIn(name)) {
+      throw new TypeError(`Themes.define():  \`${name}\` is one of Spell UI's own sheets;  name the theme another way`)
+    }
+    this.defined.set(name, css)
   }
 
   /**
@@ -96,6 +128,8 @@ export class Themes {
    * - Throws a `TypeError` on an unknown name.
    */
   load(name: string): Promise<string> {
+    const defined = this.defined.get(name)
+    if (defined !== undefined) return Promise.resolve(defined)
     const loader = THEME_LOADERS[name]
     if (!loader) {
       throw new TypeError(`Themes.load():  no sheet \`${name}\`;  pick one of:  ${this.sheets.join(", ")}`)
@@ -105,7 +139,7 @@ export class Themes {
 
   /**
    * Apply theme `name` page-wide, on the page and in every component shadow root.
-   * - One of `own` (or any other sheet of the folder):  `classic` + the theme.
+   * - One of `own` (or any other sheet of the folder, or one defined):  `classic` + the theme.
    * - `"classic"`:  `classic` alone.
    * - `undefined` (or `""`):  neither, our own look.
    * - Concurrent calls:  the LAST one wins, even if an earlier theme's chunk arrives after it.

@@ -9,6 +9,7 @@ import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import { TypeExplorer } from "spell/app/app/solid/TypeExplorer"
 import { ThingExplorer } from "spell/app/app/solid/ThingExplorer"
 import { loadRuntime, type LoadedRuntime } from "./loadRuntime"
+import { ViewerSiteHost } from "./ViewerSiteHost"
 import { fetchJSON, fetchText } from "./fetchFresh"
 import { languagesOf, mergedWords, wordsAt, wordsOfLanguages } from "./words"
 import {
@@ -47,6 +48,8 @@ import "./SpellAppRunner.css"
  * - `debug` and `fluid` are read once, to start;  `runtimeUrl` once per copy loaded.
  * - Its `<ui-*>` tags are the caller's to define, with Fomantic's icon names:
  *   `<spell-viewer>` is a root that loads them as they appear;  the VS Code runner imports `spell/app/app/solid/loadUI`.
+ * - A site it runs keeps its own address, and wears its theme:  one of Spell UI's, or its project's own
+ *   (`ViewerSiteHost`, epic `old-console-redo` P1).
  * - NEVER imports `spell/parser/core`:  it'd land in the bundle's shared chunk, so every app would share it.
  *   Everything of spell's comes from this app's copy of the runtime.
  ****************/
@@ -77,6 +80,8 @@ export function SpellAppRunner(props: SpellAppRunnerProps) {
 
   // what takes back the last run's `in="header"` slots -- see `slotsFromIn()`.  Up here, as above.
   let unslot: (() => void) | undefined
+  // a site's host:  its theme, and where it last went, for a run that keeps its things.  Up here, as above.
+  let siteHost = new ViewerSiteHost()
 
   // NOTE: ALWAYS here, just hidden without an app -- so its mount point is never redrawn
   const appRoot = (<div class="App" />) as HTMLDivElement
@@ -223,7 +228,13 @@ export function SpellAppRunner(props: SpellAppRunnerProps) {
       // oxlint-disable-next-line react-hooks/rules-of-hooks -- Spell UI's `useLanguage()` is no React hook
       await RootLoader.useLanguage(own.lang)
     }
-    const ran = await runProgram(copy, source, appRoot, { layout: !!layout, keepThings, messages: own?.messages })
+    if (!keepThings) siteHost = new ViewerSiteHost()
+    const ran = await runProgram(copy, source, appRoot, {
+      layout: !!layout,
+      keepThings,
+      messages: own?.messages,
+      siteHost
+    })
     compiledRef.current = ran.compiled
     setError(ran.error)
     setHasApp(ran.hasApp)
@@ -432,7 +443,12 @@ async function runProgram(
   copy: LoadedRuntime,
   source: SpellAppSource,
   appRoot: HTMLElement,
-  { layout, keepThings, messages }: { layout: boolean; keepThings: boolean; messages?: Record<string, string> }
+  {
+    layout,
+    keepThings,
+    messages,
+    siteHost
+  }: { layout: boolean; keepThings: boolean; messages?: Record<string, string>; siteHost: ViewerSiteHost }
 ): Promise<Ran> {
   const compiled = new Map<string, string>()
   try {
@@ -445,6 +461,7 @@ async function runProgram(
       keepThings,
       messages,
       projectId: source.projectId,
+      siteHost,
       // only a program this page fetched:  an editor's own compiles would each ask every other window to reload
       ...(source.compiled === undefined && { programVersion: textChecksum(text) }),
       coreUrl: copy.coreUrl,

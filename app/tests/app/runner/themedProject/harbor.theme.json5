@@ -1,0 +1,11 @@
+// Harbor, a project's own theme (epic `old-console-redo` P1):  Matrix's ops console, its accent a cyan.
+// - Read by `SiteThemes` from the project's folder, beside its Spell:  `Harbor is a site with theme "harbor"`.
+{
+  "extends": "matrix",
+  "typography": { "size": "14px" },
+  "radii": { "m": "3px" },
+  "own": {
+    "matrix-accent": { "light": "#0a6f8f", "dark": "#7fd6f0" },
+    "harbor-rail": "#0a6f8f"
+  }
+}

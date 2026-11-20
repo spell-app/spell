@@ -1,0 +1,6 @@
+Harbor is a site with theme "harbor"
+	it has a home page at "/"
+
+home page is a page
+	to draw it
+		<header size="large">Harbor</header>

@@ -67,6 +67,21 @@ describe("ThemeFile", () => {
     expect(css).toContain("--test-blur: blur(4px);")
   })
 
+  it("a theme outside the folder (a project's own):  what it extends as text first, its own values after, no import", () => {
+    const themes = { matrix: {}, harbor: { extends: "matrix", radii: { m: "3px" } } }
+    const css = new ThemeFile({ name: "harbor", data: themes.harbor, themes }).standaloneCss("/* matrix's sheet */")
+    expect(css).not.toContain("@import")
+    expect(css.indexOf("/* matrix's sheet */")).toBeLessThan(css.indexOf("--ui-radius-m: 3px;"))
+    expect(css).toContain("@layer ui.theme {")
+  })
+
+  it("a theme outside the folder takes no palette or rules, and what it extends must exist", () => {
+    const standalone = (data: ThemeData) => () => new ThemeFile({ name: "harbor", data, themes: {} }).standaloneCss()
+    expect(standalone({ palette: "apple" })).toThrow(/harbor\.theme\.json5:.*no `palette` and no `rules`/)
+    expect(standalone({ rules: ["modern"] })).toThrow(/no `palette` and no `rules`/)
+    expect(standalone({ extends: "nowhere" })).toThrow(/it extends `nowhere`/)
+  })
+
   it("imports what it extends, its palette, then its rules sheets", () => {
     const set: ThemeFileSet = {
       themes: { base: {}, test: { extends: "base", palette: "hues", rules: ["modern"] } },

@@ -90,6 +90,36 @@ describe("UI.themes.load()", () => {
   })
 })
 
+describe("UI.themes.define()", () => {
+  test("a project's own sheet is a sheet like the folder's:  has, load, sheets, scopedTokens;  not built in", async () => {
+    await UI.load()
+    UI.themes.define("test-project", "@layer ui.theme { :root { --ui-font-family-heading: Test Project Serif; } }")
+    expect(UI.themes.has("test-project")).toBe(true)
+    expect(UI.themes.isBuiltIn("test-project")).toBe(false)
+    expect(UI.themes.sheets).toContain("test-project")
+    expect(await UI.themes.load("test-project")).toContain("Test Project Serif")
+    expect(await UI.themes.scopedTokens("test-project", ".scoped")).toContain("Test Project Serif")
+    // defined again:  the file was edited
+    UI.themes.define("test-project", "@layer ui.theme { :root { --ui-font-family-heading: Edited Serif; } }")
+    expect(await UI.themes.load("test-project")).toContain("Edited Serif")
+  })
+
+  test("applies like one of the folder's:  classic, then the sheet", async () => {
+    await UI.load()
+    onTestFinished(() => UI.themes.apply(undefined))
+    UI.themes.define("test-applied", "@layer ui.theme { :root { --test-applied: yes; } }")
+    await UI.themes.apply("test-applied")
+    expect(UI.themes.current).toBe("test-applied")
+    expect(UI.styles.sheet(UI.themes.slots.theme)!.cssRules[0]!.cssText).toContain("--test-applied")
+  })
+
+  test("refuses the name of one of Spell UI's own sheets", async () => {
+    await UI.load()
+    expect(() => UI.themes.define("matrix", "")).toThrow(/one of Spell UI's own sheets/)
+    expect(() => UI.themes.define("classic", "")).toThrow(/one of Spell UI's own sheets/)
+  })
+})
+
 ////////////////
 // ## Applying
 ////////////////

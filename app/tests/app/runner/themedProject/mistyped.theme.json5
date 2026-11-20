@@ -1,0 +1,5 @@
+// A theme with a name the theme tree doesn't have:  refused, naming the file.
+{
+  "extends": "matrix",
+  "radii": { "medium": "3px" }
+}

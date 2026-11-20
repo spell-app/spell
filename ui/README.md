@@ -195,8 +195,8 @@ your own stylesheet, left unlayered, beats all seven, so plain CSS overrides the
 
 Each component also has public tokens of its own, `--ui-<tag>-*`, listed on its docs page's Theming tab:
 `ui-button.wide { --ui-button-padding-inline: 3em; }`.
-The layers in order, dark mode and five recipes (sitewide defaults, one component's, a whole theme,
-the app stylesheet, making a theme) are on [README-themes.md](README-themes.md#five-recipes).
+The layers in order, dark mode and six recipes (sitewide defaults, one component's, a whole theme,
+the app stylesheet, making a theme, a project's own theme) are on [README-themes.md](README-themes.md#six-recipes).
 
 ## Thirty seconds, three ways
 

@@ -2,6 +2,7 @@ import { waitUntil } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
 import type { SiteHost } from "spell/parser/core/core.types"
 import { editor, type RunningSitePage } from "spell/app/app/editor"
+import { SiteThemes } from "spell/app/app/runner/SiteThemes"
 import { navigate } from "./navigation"
 import { SiteWrites } from "./SiteWrites"
 
@@ -183,43 +184,11 @@ export class RunSite implements SiteHost {
 
   /**
    * Theme `name`'s look for the running site alone (epic `mockup` P8):  its tokens as one block of declarations, worn
-   * inline by the site's frame, so the editor around it keeps its own theme.
-   * - Spell UI's own scoping (`UI.themes.scopedTokens()`), kept to the theme's plain rules:  the light and dark of a
-   *   value say it themselves (`light-dark()`), so a scheme's own rules aren't needed.
-   * - Its fonts join the page:  a font a shadow root declares isn't loaded, so the theme's `@font-face` rules go in a
-   *   sheet of the page's own, once per theme.
-   * - NOT the theme's rules on Spell UI's class words (Mockup's uneven corners):  those go on the whole page or
-   *   nowhere, and the editor's own page isn't the site's.
-   * - Rejects on a theme Spell UI doesn't have.
+   * inline by the site's frame, so the editor around it keeps its own theme (`SiteThemes.tokens()`).
+   * - One of Spell UI's, else the project's own, `<name>.theme.json5` in `projectFolder` (epic `old-console-redo` P1).
+   * - Rejects on a theme in neither.
    */
-  themeTokens = async (name: string): Promise<string> => {
-    const { UI: SpellUI } = await import("spell/ui")
-    await SpellUI.load()
-    const [scoped, sheet] = await Promise.all([
-      SpellUI.themes.scopedTokens(name, SITE_SCOPE),
-      SpellUI.themes.load(name)
-    ])
-    RunSite.addFontsOf(name, sheet)
-    const rules = new CSSStyleSheet()
-    rules.replaceSync(scoped)
-    return [...rules.cssRules]
-      .filter(
-        (rule): rule is CSSStyleRule => rule instanceof CSSStyleRule && rule.selectorText === `:root ${SITE_SCOPE}`
-      )
-      .map((rule) => rule.style.cssText)
-      .join("  ")
-  }
-
-  /** Theme `name`'s `@font-face` rules, out of its sheet's text, into a sheet of the page's own:  once per theme. */
-  private static addFontsOf(name: string, sheetText: string): void {
-    if (FONTS_ADDED.has(name)) return
-    FONTS_ADDED.add(name)
-    const fonts = sheetText.match(FONT_FACE) ?? []
-    if (!fonts.length) return
-    const sheet = new CSSStyleSheet()
-    sheet.replaceSync(fonts.join("\n"))
-    document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet]
-  }
+  themeTokens = (name: string, projectFolder?: string): Promise<string> => SiteThemes.tokens(name, projectFolder)
 
   /** The editor's Run URL of a site's `address`, in project `projectPath`:  `/run/<project>/films/4`. */
   static runUrlFor(projectPath: string, address: string): string {
@@ -252,15 +221,6 @@ export class RunSite implements SiteHost {
 
 /** How long a link's `#section` waits for its section, in seconds. */
 const SECTION_WAIT = 5
-
-/** The selector a site's theme is scoped to, for `UI.themes.scopedTokens()`:  the rules come back on `:root` it. */
-const SITE_SCOPE = ".spell-site-frame"
-
-/** A theme sheet's `@font-face` rules, in its CSS text (none nest a brace). */
-const FONT_FACE = /@font-face\s*\{[^}]*\}/g
-
-/** The themes whose fonts the page has. */
-const FONTS_ADDED = new Set<string>()
 
 /** `path` decoded:  as it is when it won't decode. */
 function safelyDecoded(path: string): string {
