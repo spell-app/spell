@@ -2,7 +2,13 @@ import { afterEach, describe, expect, test } from "vite-plus/test"
 import { createSignal, flush } from "solid-js"
 import { render } from "@solidjs/web"
 
-import { MOST_AT_ONCE, WAIT_WHEN_NOTHING_MOVED_MS, drawnInWindow, type DrawnWindow } from "spell/element/drawnWindow"
+import {
+  MOST_AT_ONCE,
+  WAIT_WHEN_NOTHING_MOVED_MS,
+  drawnInWindow,
+  rowAt,
+  type DrawnWindow
+} from "spell/element/drawnWindow"
 
 /**
  * A long list draws what fits, and more as you scroll (epic `data` T76):  in a real browser, as it takes its layout to tell.
@@ -190,5 +196,53 @@ describe("a long list draws what fits", () => {
     expect(rowsDrawn()).toBeGreaterThanOrEqual(count)
     await nextFrames(6)
     expect(box.scrollTop).toBe(0)
+  })
+})
+
+describe("a row's position (`rowAt()`)", () => {
+  /** `rows` drawn by `drawnInWindow()`, each row its item and, when it takes one, its position:  `b@1`. */
+  function drawnAt(rows: () => readonly string[], takesPosition: boolean, reads = { count: 0 }) {
+    box = document.createElement("div")
+    document.body.append(box)
+    dispose = render(
+      () =>
+        drawnInWindow({
+          items: rows,
+          drawItem: (row, position) =>
+            rowAt(
+              () => (reads.count++, position()),
+              takesPosition,
+              (at) => {
+                const element = document.createElement("div")
+                element.className = "row"
+                element.textContent = takesPosition ? `${row}@${at}` : row
+                return element
+              }
+            )
+        }),
+      box
+    )
+    flush()
+    return reads
+  }
+
+  const texts = () => [...box.querySelectorAll(".row")].map((row) => row.textContent)
+
+  test("a row that takes none never reads it:  nothing reactive read in `<For>`'s row function", () => {
+    const [rows, setRows] = createSignal<readonly string[]>(["a", "b", "c"])
+    const reads = drawnAt(rows, false)
+    setRows(["c", "a", "b"])
+    flush()
+    expect(texts()).toEqual(["c", "a", "b"])
+    expect(reads.count).toBe(0)
+  })
+
+  test("a row that takes it follows it, as rows move", () => {
+    const [rows, setRows] = createSignal<readonly string[]>(["a", "b", "c"])
+    drawnAt(rows, true)
+    expect(texts()).toEqual(["a@0", "b@1", "c@2"])
+    setRows(["c", "a", "b"])
+    flush()
+    expect(texts()).toEqual(["c@0", "a@1", "b@2"])
   })
 })

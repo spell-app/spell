@@ -28,7 +28,7 @@ import { Errored, createMemo, createRoot, getOwner, onCleanup, runWithOwner, unt
 
 import { Cell, initialCaps } from "spell/util"
 import { untrackCells } from "spell/util/reactive"
-import { MOST_AT_ONCE, canDrawInWindows, drawnInWindow } from "spell/element/drawnWindow"
+import { MOST_AT_ONCE, canDrawInWindows, drawnInWindow, rowAt } from "spell/element/drawnWindow"
 
 import { core } from "./core"
 import { defineCoreModule, type PartEdit } from "./core.types"
@@ -416,7 +416,9 @@ export const drawingMethods = defineCoreModule({
     return drawnInWindow({
       items: () => items() ?? [],
       key: () => list as object,
-      drawItem: (item, position) => madeOnce(each(item, position(), list)),
+      // its position read only when `each` takes one (`rowAt()`)
+      drawItem: (item, position) =>
+        rowAt(position, each.length > 1, (at) => madeOnce(each(item, at, list)) as JSX.Element),
       ...SPELL_WINDOW
     })
   },

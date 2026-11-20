@@ -42,7 +42,7 @@ import { snakeCase } from "spell/util"
 import { after } from "spell/util/timing"
 
 import { Cell, getProp, isOnlyShowing, schemaOf, untrackCells } from "spell/util/reactive"
-import { MOST_AT_ONCE, drawnInWindow, type MorePages } from "spell/element/drawnWindow"
+import { MOST_AT_ONCE, drawnInWindow, rowAt, type MorePages } from "spell/element/drawnWindow"
 import type * as PlacesFolder from "spell/places"
 import type { Places } from "spell/places/Places"
 import type { PlaceResult } from "spell/places/PlaceResult"
@@ -1789,10 +1789,12 @@ export const savedMethods = defineCoreModule({
       const atOnce = riders.pageSize?.() ?? MOST_AT_ONCE
       const around = elementOf(riders.items?.())
       const row = around?.firstElementChild ?? undefined
-      const drawItem = (item: Item, position: () => number) => {
-        const drawing = drawEach(item, position() + 1)
-        return row ? rowOf(row, drawing) : drawing
-      }
+      // its position read only when `drawEach` takes one (`rowAt()`)
+      const drawItem = (item: Item, position: () => number) =>
+        rowAt(position, drawEach.length > 1, (at) => {
+          const drawing = drawEach(item, at + 1)
+          return (row ? rowOf(row, drawing) : drawing) as JSX.Element
+        })
       const paged = paging === "pages" ? drawnInPages({ items, drawItem, more, atOnce }) : undefined
       const list = paged
         ? paged.list
