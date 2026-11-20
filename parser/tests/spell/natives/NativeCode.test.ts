@@ -229,7 +229,7 @@ describe("use", () => {
     SP.NativeCode.listIn(project.scope, SP.NativeCode.of(natives, "test-project"))
     project.update("/Test.spell", `use shout from loud.ts\n\n${steps}`)
     /** The code file the file's `call native shout` calls, as it's parsed now. */
-    const calledFile = () => SP.NativeCode.importsIn(project.files[0]!.parse!.match.AST, "js")[0]?.module
+    const calledFile = () => SP.NativeCode.importsIn(project.files[0]!.parse!.match!.AST, "js")[0]?.module
     expect(calledFile()).toBe("@spell/native/test-project/loud.ts")
     project.update("/Test.spell", steps)
     expect(calledFile()).toBe("@spell/native/test-project/clipboard.ts")
