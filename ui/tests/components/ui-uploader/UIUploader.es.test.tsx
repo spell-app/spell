@@ -31,4 +31,28 @@ describe("<es-cargador-archivos>", () => {
     input.dispatchEvent(new Event("change", { bubbles: true }))
     await expect.poll(() => names).toEqual(["es-archivo-soltado"])
   })
+
+  it("takes its slots and its messages by their Spanish names", async () => {
+    const root = Fixture.render<DOMElement>(
+      `<ui-root lang="es"><es-cargador-archivos mensaje-soltar="Suelta para traer {count}">` +
+        `<span slot="mensaje">Trae tus netlists</span><ui-button slot="boton">Elegir netlists</ui-button>` +
+        `</es-cargador-archivos><es-cargador-archivos apariencia="botón" mensaje="Subir netlists"></es-cargador-archivos></ui-root>`
+    )
+    await root.ready
+    await (root.component as UIRoot).settled
+    const [slotted, button] = [...root.querySelectorAll<DOMElement>("es-cargador-archivos")]
+    await slotted!.ready
+    await button!.ready
+    expect(slotted!.querySelector('[slot="mensaje"]')!.assignedSlot).not.toBeNull()
+    expect(slotted!.querySelector('[slot="boton"]')!.assignedSlot).not.toBeNull()
+    await expect.poll(() => button!.shadowRoot!.textContent).toContain("Subir netlists")
+
+    const transfer = new DataTransfer()
+    transfer.items.add(new File(["{}"], "a.json", { type: "application/json" }))
+    transfer.items.add(new File(["{}"], "b.json", { type: "application/json" }))
+    slotted!.dispatchEvent(
+      new DragEvent("dragover", { dataTransfer: transfer, bubbles: true, cancelable: true, composed: true })
+    )
+    await expect.poll(() => slotted!.shadowRoot!.textContent).toContain("Suelta para traer 2")
+  })
 })

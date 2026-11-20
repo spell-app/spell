@@ -6,6 +6,16 @@ import { Fixture } from "spell/test-helpers/Fixture"
 import { ShadowTree } from "spell/ui/test-helpers/ShadowTree"
 import { DropZones, UIUploader, type DOMUploaderElement } from "spell/ui/components/ui-uploader"
 
+/** Element-markup rewrites of every example, by path. */
+const EXAMPLES = import.meta.glob<string>("/src/components/ui-uploader/examples/elements/*.html", {
+  query: "?raw",
+  import: "default",
+  eager: true
+})
+
+/** Its four looks. */
+const APPEARANCES = ["hero", "button", "input", "compact"]
+
 /** An uploader element, as its tag's DOM element. */
 type UploaderElement = DOMUploaderElement & HTMLElement & { action?: unknown; dropZone?: unknown }
 
@@ -60,6 +70,33 @@ async function rows(uploader: Element, count: number) {
   return rowsOf(uploader)
 }
 
+/** How see-through `element` is drawn:  its opacity times every box's around it, across shadow roots. */
+function drawnOpacity(element: Element) {
+  let opacity = 1
+  for (let node: Node | null = element; node; node = node.parentNode ?? (node as ShadowRoot).host ?? null) {
+    if (node.nodeType === Node.ELEMENT_NODE) opacity *= Number(getComputedStyle(node as Element).opacity)
+  }
+  return opacity
+}
+
+/** A folder of two files dropped on it, and a plain file beside it. */
+function folderDrop() {
+  return {
+    via: "drop",
+    folders: [
+      {
+        name: "netlists",
+        path: "netlists",
+        files: [
+          { file: fileOf("top.json"), path: "netlists/top.json" },
+          { file: fileOf("adc.json"), path: "netlists/sub/adc.json" }
+        ]
+      }
+    ],
+    files: [{ file: fileOf("stray.json"), path: "stray.json" }]
+  } as never
+}
+
 /** Every event of `names` it sends, in order:  each one's name and detail. */
 function heard(uploader: Element, names: string[]) {
   const events: { type: string; detail: Record<string, unknown> }[] = []
@@ -86,7 +123,13 @@ describe("<ui-uploader>", () => {
     await expectAccessible(uploader)
   })
 
-  test.each(["hero", "button", "input", "compact"])("%s:  a pick and a drop each take files", async (appearance) => {
+  test.each(Object.keys(EXAMPLES))("axe passes on %s", async (path) => {
+    const root = await ElementFixture.render(EXAMPLES[path]!)
+    await ShadowTree.settle(root.querySelector("ui-uploader") ?? root)
+    await expectAccessible(root)
+  })
+
+  test.each(APPEARANCES)("%s:  a pick and a drop each take files", async (appearance) => {
     const uploader = await uploaderWith(`appearance="${appearance}" multiple`)
     expect(uploader.matches(`:state(${appearance})`)).toBe(true)
     pick(uploader, [fileOf("a.json")])
@@ -112,9 +155,20 @@ describe("<ui-uploader>", () => {
     expect(await rows(uploader, 5)).toEqual([
       { name: "a.json", status: "Ready" },
       { name: "b.png", status: "Not a .json file" },
-      { name: "c.json", status: "Too big (over 1 KB)" },
+      { name: "c.json", status: "Too big" },
       { name: "d.json", status: "Ready" },
-      { name: "e.json", status: "Over 2 files" }
+      { name: "e.json", status: "Too many files" }
+    ])
+    // the full sentence is each row's tooltip
+    const tooltips = [...uploader.shadowRoot!.querySelectorAll('[part~="status"]')].map((status) =>
+      status.getAttribute("data-tooltip")
+    )
+    expect(tooltips).toEqual([
+      null,
+      "Only .json files can be uploaded. Choose a file that ends in .json.",
+      "This file is too big, so it wasn't added. Choose a file that's 1 KB or smaller.",
+      null,
+      "This file wasn't added: up to 2 files can be added at once. Remove one, then add this file again."
     ])
   })
 
@@ -123,7 +177,7 @@ describe("<ui-uploader>", () => {
     pick(uploader, [fileOf("a.json"), fileOf("b.json")])
     expect(await rows(uploader, 2)).toEqual([
       { name: "a.json", status: "Ready" },
-      { name: "b.json", status: "Only one at a time" }
+      { name: "b.json", status: "Only one file" }
     ])
     pick(uploader, [fileOf("c.json")])
     expect(await rows(uploader, 1)).toEqual([{ name: "c.json", status: "Ready" }])
@@ -177,20 +231,7 @@ describe("<ui-uploader>", () => {
     const uploader = await uploaderWith("folder multiple")
     const events = heard(uploader, ["ui-folder-dropping", "ui-folder-dropped", "ui-file-dropped"])
     const component = (uploader as unknown as { component: UIUploader }).component
-    await component.take({
-      via: "drop",
-      folders: [
-        {
-          name: "netlists",
-          path: "netlists",
-          files: [
-            { file: fileOf("top.json"), path: "netlists/top.json" },
-            { file: fileOf("adc.json"), path: "netlists/sub/adc.json" }
-          ]
-        }
-      ],
-      files: [{ file: fileOf("stray.json"), path: "stray.json" }]
-    } as never)
+    await component.take(folderDrop())
     expect(events.map((event) => [event.type, event.detail.path])).toEqual([
       ["ui-folder-dropping", "netlists"],
       ["ui-folder-dropped", "netlists"],
@@ -265,10 +306,26 @@ describe("<ui-uploader>", () => {
     expect(uploader.shadowRoot!.querySelector('[part~="remove"]')!.getAttribute("aria-label")).toBe("Remove")
   })
 
-  test("button:  its popup shows while it posts, and on hover after", async () => {
-    vi.stubGlobal("XMLHttpRequest", fakeServer([], { delay: 50 }))
-    const uploader = await uploaderWith('appearance="button" destination="/upload" multiple')
-    pick(uploader, [fileOf("good.json")])
+  test.each(APPEARANCES)("%s:  a folder uploader takes folders, and turns a plain file away", async (appearance) => {
+    const uploader = await uploaderWith(`appearance="${appearance}" folder multiple`)
+    await (uploader as unknown as { component: UIUploader }).component.take(folderDrop())
+    expect(uploader.files.map((file) => file.name)).toEqual(["top.json", "adc.json", "stray.json"])
+    await ShadowTree.settle(uploader)
+    if (appearance === "compact") {
+      expect(uploader.shadowRoot!.querySelector('[part~="status"]')!.textContent).toContain("1 file not added")
+    } else {
+      expect(rowsOf(uploader)).toEqual([
+        { name: "top.json", status: "Ready" },
+        { name: "adc.json", status: "Ready" },
+        { name: "stray.json", status: "Not a folder" }
+      ])
+    }
+  })
+
+  test("button:  a glimpse of its popup as an upload starts, then it shows on focus", async () => {
+    const uploader = await uploaderWith('appearance="button" multiple')
+    uploader.action = () => new Promise(() => {})
+    pick(uploader, [fileOf("a.json")])
     const popup = await vi.waitFor(() => {
       const found = uploader.shadowRoot!.querySelector<HTMLElement>('[part~="popup"]')
       expect(found).not.toBeNull()
@@ -276,7 +333,13 @@ describe("<ui-uploader>", () => {
     })
     await vi.waitFor(() => expect(popup.hidden).toBe(false))
     expect(popup.getAttribute("open-on")).toBe("hover")
-    await vi.waitFor(() => expect(popup.textContent).toContain("Uploaded"))
+    expect(popup.textContent).toContain("a.json")
+    // its glimpse over:  focus on its button shows it again
+    popup.hidden = true
+    await ShadowTree.settle(uploader)
+    const button = uploader.shadowRoot!.querySelector(".choose")!
+    button.shadowRoot!.querySelector("button")!.focus()
+    await vi.waitFor(() => expect(popup.hidden).toBe(false))
   })
 
   test("drop-zone:  the page, an #id, the section around it, an element;  a section's zone beats the page's", async () => {
@@ -336,12 +399,14 @@ describe("<ui-uploader>", () => {
     expect(uploader.shadowRoot!.textContent).toContain("Let go for 3")
   })
 
-  test("disabled:  takes nothing", async () => {
-    const uploader = await uploaderWith("disabled")
+  test.each(APPEARANCES)("%s, disabled:  greyed, and takes nothing", async (appearance) => {
+    const uploader = await uploaderWith(`appearance="${appearance}" disabled`)
     drop(uploader, [fileOf("a.json")])
     pick(uploader, [fileOf("b.json")])
     await ShadowTree.settle(uploader)
     expect(uploader.files).toEqual([])
+    const button = uploader.shadowRoot!.querySelector(".choose")!
+    expect(drawnOpacity(button.shadowRoot!.querySelector('[part~="button"]')!)).toBeLessThan(0.7)
   })
 
   test("UIUploader.bytesFor() reads max-size", () => {
