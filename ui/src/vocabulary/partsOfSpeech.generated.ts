@@ -144,6 +144,7 @@ export const PARTS_OF_SPEECH: Readonly<Record<string, PartOfSpeech>> = {
   "ui-tree-diagram": "structure",
   "ui-tree-item": "action",
   "ui-tree-node": "structure",
+  "ui-uploader": "action",
   "ui-value": "property",
   "ui-video": "property",
   "ui-visibility": "structure",

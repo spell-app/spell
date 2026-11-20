@@ -105,6 +105,7 @@
         "ui-sides",
         "ui-repeat",
         "ui-calendar",
+        "ui-uploader",
         "ui-property-editor",
         "ui-property-group",
         "ui-property"

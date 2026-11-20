@@ -657,6 +657,11 @@
       "summary": "A tree diagram draws a tree:  a box for each node, a line to each of its children.",
       "status": "done"
     },
+    "ui-uploader": {
+      "title": "Uploader",
+      "summary": "An uploader takes files someone picks or drops on it, or whole folders, then posts them, or hands them to an action.",
+      "status": "done"
+    },
     "ui-video": {
       "title": "Video",
       "summary": "A video plays a video file in the browser's own player.",

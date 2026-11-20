@@ -1759,6 +1759,25 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     folder: "ui-tree-diagram",
     attributes: ["label", "detail", "edge-label", "hover-text", "color", "kind", "folded"]
   },
+  "ui-uploader": {
+    folder: "ui-uploader",
+    skeleton: { width: "18em", height: "9em" },
+    attributes: [
+      "appearance",
+      "destination",
+      "action",
+      "extensions",
+      "multiple",
+      "folder",
+      "max-size",
+      "max-files",
+      "drop-zone",
+      "message",
+      "drop-message",
+      "uploading-message",
+      "done-message"
+    ]
+  },
   "ui-value": { folder: "ui-parts", attributes: ["text"] },
   "ui-video": {
     folder: "ui-video",

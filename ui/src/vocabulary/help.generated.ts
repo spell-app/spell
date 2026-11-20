@@ -2391,6 +2391,31 @@ export const HELP_TABLE: Readonly<
       folded: "Starts folded: the nodes under it don't show."
     }
   },
+  "ui-uploader": {
+    description:
+      "An uploader takes files someone picks or drops on it, or whole folders, then posts them to its `destination`, or hands them to its `action`.",
+    empty: true,
+    attributes: {
+      appearance:
+        "How it looks: `hero` -- a big drop area with an icon, a line of help and a Choose files button, a row per file under it; `button` -- just a button, its files in a popup from it; `input` -- a form field with a Browse button, its files listed under it; `compact` -- a one-line drop area, one line of status and one progress bar.",
+      destination:
+        "A URL each file is posted to, as form data (`file`, its path as its file name), one request per file.",
+      action:
+        "A function called with the files kept, `(files: File[]) => unknown`, instead of posting them: in Spell, an action (`action={read the netlist}`).",
+      extensions: "The kinds of file it takes, a comma list of extensions (`json, csv`); any other is turned away.",
+      multiple: "Takes more than one file at a time.",
+      folder:
+        "Takes folders instead of files, each with its files and their paths in it; its events are `ui-folder-*` for the drag and the folder itself, then `ui-file-dropped` for each file.",
+      "max-size": "The largest file it takes: `2 MB`, `500 KB`, `1.5 GB`, or a number of bytes.",
+      "max-files": "The most files it takes in one go; the rest are turned away.",
+      "drop-zone":
+        "Where else a drop counts as a drop on it: `page` -- anywhere on the page; a selector (`#editor`, `ui-section`), looked for first among the elements around it, then on the page; or, as a property, the element itself.",
+      message: "Its line of help (`Drop .json files here, or`); a `button` uploader's label.",
+      "drop-message": "What it says while files are dragged over it: `{count}` is how many.",
+      "uploading-message": "What it says while it posts: `{done}` is how many are done, `{count}` how many in all.",
+      "done-message": "What it says once they're all posted: `{count}` is how many."
+    }
+  },
   "ui-value": {
     description: "A statistic's value; a search result's price.",
     attributes: { text: "In a statistic: a word value, smaller and bold." }

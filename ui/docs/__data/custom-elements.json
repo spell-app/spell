@@ -51508,6 +51508,537 @@
     },
     {
       "kind": "javascript-module",
+      "path": "src/components/ui-uploader/index.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "name": "UIUploader",
+          "tagName": "ui-uploader",
+          "customElement": true,
+          "summary": "An uploader takes files someone picks or drops on it, or whole folders, then posts them to its `destination`, or hands them to its `action`.",
+          "description": "An uploader takes files someone picks or drops on it, or whole folders, then posts them to its `destination`, or hands them to its `action`.\n\nAlso known as:  file upload, file uploader, upload, dropzone, drop zone, file drop, file picker, drag and drop, attachment.",
+          "attributes": [
+            {
+              "name": "appearance",
+              "description": "How it looks:  `hero` -- a big drop area with an icon, a line of help and a Choose files button, a row per file under it;  `button` -- just a button, its files in a popup from it;  `input` -- a form field with a Browse button, its files listed under it;  `compact` -- a one-line drop area, one line of status and one progress bar.  All four take the same attributes and send the same events.",
+              "type": {
+                "text": "\"hero\" | \"button\" | \"input\" | \"compact\""
+              },
+              "default": "\"hero\"",
+              "fieldName": "appearance"
+            },
+            {
+              "name": "destination",
+              "description": "A URL each file is posted to, as form data (`file`, its path as its file name), one request per file.  `action` wins when both are set.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "destination"
+            },
+            {
+              "name": "extensions",
+              "description": "The kinds of file it takes, a comma list of extensions (`json, csv`);  any other is turned away.  None:  any file.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "extensions"
+            },
+            {
+              "name": "multiple",
+              "description": "Takes more than one file at a time.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "multiple"
+            },
+            {
+              "name": "folder",
+              "description": "Takes folders instead of files, each with its files and their paths in it;  its events are `ui-folder-*` for the drag and the folder itself, then `ui-file-dropped` for each file.  A plain file dropped on it is turned away.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "folder"
+            },
+            {
+              "name": "max-size",
+              "description": "The largest file it takes:  `2 MB`, `500 KB`, `1.5 GB`, or a number of bytes.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "maxSize"
+            },
+            {
+              "name": "max-files",
+              "description": "The most files it takes in one go;  the rest are turned away.",
+              "type": {
+                "text": "number"
+              },
+              "fieldName": "maxFiles"
+            },
+            {
+              "name": "message",
+              "description": "Its line of help (`Drop .json files here, or`);  a `button` uploader's label.  None:  its own, naming the kinds it takes.  The `message` slot wins over it.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "message"
+            },
+            {
+              "name": "drop-message",
+              "description": "What it says while files are dragged over it:  `{count}` is how many.  None:  `Drop to add {count} files`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "dropMessage"
+            },
+            {
+              "name": "uploading-message",
+              "description": "What it says while it posts:  `{done}` is how many are done, `{count}` how many in all.  None:  `Uploading {done} of {count}`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "uploadingMessage"
+            },
+            {
+              "name": "done-message",
+              "description": "What it says once they're all posted:  `{count}` is how many.  None:  `{count} files uploaded`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "doneMessage"
+            },
+            {
+              "name": "disabled",
+              "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "disabled"
+            },
+            {
+              "name": "loading",
+              "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "loading"
+            },
+            {
+              "name": "visible",
+              "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "visible"
+            },
+            {
+              "name": "animation",
+              "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.",
+              "type": {
+                "text": "\"fade\" | \"fade up\" | \"fade down\" | \"fade left\" | \"fade right\" | \"scale\" | \"zoom\" | \"drop\" | \"browse\" | \"browse right\" | \"fly\" | \"fly up\" | \"fly down\" | \"fly left\" | \"fly right\" | \"slide\" | \"slide up\" | \"slide down\" | \"slide left\" | \"slide right\" | \"swing\" | \"swing up\" | \"swing down\" | \"swing left\" | \"swing right\" | \"horizontal flip\" | \"vertical flip\" | \"flash\" | \"shake\" | \"bounce\" | \"tada\" | \"pulse\" | \"jiggle\" | \"glow\" | \"coin\" | \"none\""
+              },
+              "fieldName": "animation"
+            },
+            {
+              "name": "link",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "link"
+            },
+            {
+              "name": "target",
+              "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "target"
+            },
+            {
+              "name": "font",
+              "description": "How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "font"
+            },
+            {
+              "name": "shadow",
+              "description": "A hard shadow behind its letters, down and to the right, in a hue:  `shadow=\"yellow\"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em).",
+              "type": {
+                "text": "\"primary\" | \"secondary\" | \"red\" | \"orange\" | \"yellow\" | \"olive\" | \"green\" | \"teal\" | \"blue\" | \"violet\" | \"purple\" | \"pink\" | \"brown\" | \"grey\" | \"black\" | \"positive\" | \"negative\""
+              },
+              "fieldName": "shadow"
+            },
+            {
+              "name": "width",
+              "description": "Its box's own width where it sits, any CSS length:  `width=\"10em\"`, `\"50%\"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "width"
+            },
+            {
+              "name": "min-width",
+              "description": "The narrowest its box gets, any CSS length:  `min-width=\"16em\"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "minWidth"
+            },
+            {
+              "name": "max-width",
+              "description": "The widest its box gets, any CSS length:  `max-width=\"36em\"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "maxWidth"
+            },
+            {
+              "name": "tooltip",
+              "description": "Its tooltip:  the browser's own, written as the element's `title`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "tooltip"
+            },
+            {
+              "name": "label",
+              "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "label"
+            },
+            {
+              "name": "movable",
+              "description": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "movable"
+            },
+            {
+              "name": "resizable",
+              "description": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "resizable"
+            },
+            {
+              "name": "on-platform",
+              "description": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onPlatform"
+            }
+          ],
+          "members": [
+            {
+              "kind": "field",
+              "name": "action",
+              "description": "A function called with the files kept, `(files: File[]) => unknown`, instead of posting them:  in Spell, an action (`action={read the netlist}`).  Not a URL, as a form's `action` is:  that's `destination`.  A JS property (rich data), not an attribute.",
+              "type": {
+                "text": "unknown"
+              }
+            },
+            {
+              "kind": "field",
+              "name": "dropZone",
+              "description": "Where else a drop counts as a drop on it:  `page` -- anywhere on the page;  a selector (`#editor`, `ui-section`), looked for first among the elements around it, then on the page;  or, as a property, the element itself.  The zone shows `drop-message` while files are dragged over it.  A JS property (rich data), not an attribute.",
+              "type": {
+                "text": "unknown"
+              }
+            }
+          ],
+          "events": [
+            {
+              "name": "ui-file-dragged-over",
+              "description": "Files are dragged over it, or over its `drop-zone`:  how many, and their kinds.",
+              "type": {
+                "text": "CustomEvent<{ count: number, kinds: string[], via: \"drop\" | \"zone\" }>"
+              }
+            },
+            {
+              "name": "ui-file-dragged-out",
+              "description": "The files dragged over it left without being dropped.",
+              "type": {
+                "text": "CustomEvent<{ count: number, kinds: string[], via: \"drop\" | \"zone\" }>"
+              }
+            },
+            {
+              "name": "ui-folder-dragged-over",
+              "description": "With `folder`:  `ui-file-dragged-over`'s twin.  While dragging, a browser can't tell a folder from a file.",
+              "type": {
+                "text": "CustomEvent<{ count: number, kinds: string[], via: \"drop\" | \"zone\" }>"
+              }
+            },
+            {
+              "name": "ui-folder-dragged-out",
+              "description": "With `folder`:  `ui-file-dragged-out`'s twin.",
+              "type": {
+                "text": "CustomEvent<{ count: number, kinds: string[], via: \"drop\" | \"zone\" }>"
+              }
+            },
+            {
+              "name": "ui-file-dropping",
+              "description": "A file picked or dropped is about to be taken:  cancel it to leave it out.  `reason` says why it'll be turned away, when it will be.  Cancelable:  `preventDefault()` vetoes it.",
+              "type": {
+                "text": "CustomEvent<{ file: File, name: string, path: string, size: number, type: string, lastModified: number, via: \"dialog\" | \"drop\" | \"zone\", reason?: string, entry?: FileSystemEntry, handle?: FileSystemHandle }>"
+              }
+            },
+            {
+              "name": "ui-file-dropped",
+              "description": "A file was taken, kept or turned away (`reason`), the same for a pick (`via: \"dialog\"`) as for a drop.  `file.text()` reads it.  `entry` and `handle` are there when the browser gives them:  an entry on any drop, a handle on a drop in Chrome and Edge.",
+              "type": {
+                "text": "CustomEvent<{ file: File, name: string, path: string, size: number, type: string, lastModified: number, via: \"dialog\" | \"drop\" | \"zone\", reason?: string, entry?: FileSystemEntry, handle?: FileSystemHandle }>"
+              }
+            },
+            {
+              "name": "ui-folder-dropping",
+              "description": "With `folder`:  a folder is about to be taken, with its files:  cancel it to leave it all out.  Cancelable:  `preventDefault()` vetoes it.",
+              "type": {
+                "text": "CustomEvent<{ name: string, path: string, files: File[], via: \"dialog\" | \"drop\" | \"zone\", reason?: string, entry?: FileSystemEntry, handle?: FileSystemHandle }>"
+              }
+            },
+            {
+              "name": "ui-folder-dropped",
+              "description": "With `folder`:  a folder was taken;  a `ui-file-dropped` follows for each file in it.",
+              "type": {
+                "text": "CustomEvent<{ name: string, path: string, files: File[], via: \"dialog\" | \"drop\" | \"zone\", reason?: string, entry?: FileSystemEntry, handle?: FileSystemHandle }>"
+              }
+            },
+            {
+              "name": "ui-uploading",
+              "description": "The files kept are about to be posted to `destination`, or handed to `action`:  cancel it to take the upload over, and nothing is posted or called.  Cancelable:  `preventDefault()` vetoes it.",
+              "type": {
+                "text": "CustomEvent<{ files: File[] }>"
+              }
+            },
+            {
+              "name": "ui-upload-progress",
+              "description": "While a file posts:  how many bytes have gone, of its size.",
+              "type": {
+                "text": "CustomEvent<{ file: File, sent: number, size: number }>"
+              }
+            },
+            {
+              "name": "ui-uploaded",
+              "description": "A file was posted:  `response` is the server's answer, as JSON when it says so, else text;  with `action`, what the action returned.",
+              "type": {
+                "text": "CustomEvent<{ file: File, response: unknown }>"
+              }
+            },
+            {
+              "name": "ui-upload-failed",
+              "description": "A file couldn't be posted, or the `action` threw:  `error` says why.",
+              "type": {
+                "text": "CustomEvent<{ file: File, error: Error }>"
+              }
+            }
+          ],
+          "slots": [
+            {
+              "name": "icon",
+              "description": "Its icon, in place of its own cloud."
+            },
+            {
+              "name": "message",
+              "description": "Its line of help, in place of `message`."
+            },
+            {
+              "name": "button",
+              "description": "Its button (Choose files, Browse), in place of its own:  a click opens the file dialog."
+            }
+          ],
+          "cssParts": [
+            {
+              "name": "drop-area",
+              "description": "The area files are dropped on:  the hero's and compact's dashed box."
+            },
+            {
+              "name": "button",
+              "description": "The button that opens the file dialog:  a `<ui-button>`."
+            },
+            {
+              "name": "input",
+              "description": "With `appearance=\"input\"`:  the field, a `<ui-input>`."
+            },
+            {
+              "name": "files",
+              "description": "The list of files taken."
+            },
+            {
+              "name": "file",
+              "description": "A file's row."
+            },
+            {
+              "name": "name",
+              "description": "A file's name."
+            },
+            {
+              "name": "size",
+              "description": "A file's size."
+            },
+            {
+              "name": "progress",
+              "description": "A file's progress bar, a `<ui-progress>`;  compact's one bar for all."
+            },
+            {
+              "name": "status",
+              "description": "A file's status:  a tick, or the reason it failed;  compact's line of status."
+            },
+            {
+              "name": "remove",
+              "description": "A file's Remove button."
+            },
+            {
+              "name": "popup",
+              "description": "With `appearance=\"button\"`:  the popup of file rows, a `<ui-popup>`."
+            },
+            {
+              "name": "zone",
+              "description": "The light overlay over its `drop-zone` while files are dragged over it."
+            }
+          ],
+          "cssStates": [
+            {
+              "name": "dragged-over",
+              "description": "Files are dragged over it, or its `drop-zone`."
+            },
+            {
+              "name": "uploading",
+              "description": "It's posting files, or its `action` is running."
+            },
+            {
+              "name": "hero",
+              "description": "It's `appearance=\"hero\"`."
+            },
+            {
+              "name": "button",
+              "description": "It's `appearance=\"button\"`."
+            },
+            {
+              "name": "input",
+              "description": "It's `appearance=\"input\"`."
+            },
+            {
+              "name": "compact",
+              "description": "It's `appearance=\"compact\"`."
+            },
+            {
+              "name": "disabled",
+              "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+            },
+            {
+              "name": "loading",
+              "description": "`loading` is set."
+            },
+            {
+              "name": "busy",
+              "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+            },
+            {
+              "name": "dimmed",
+              "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+            },
+            {
+              "name": "hidden",
+              "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+            },
+            {
+              "name": "still",
+              "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+            },
+            {
+              "name": "hiding",
+              "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+            },
+            {
+              "name": "pending",
+              "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+            },
+            {
+              "name": "ready",
+              "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "on-platform",
+              "description": "`on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
+            }
+          ],
+          "cssProperties": [
+            {
+              "name": "--ui-uploader-border-width",
+              "default": "2px"
+            },
+            {
+              "name": "--ui-uploader-border-style",
+              "default": "dashed"
+            },
+            {
+              "name": "--ui-uploader-border-color",
+              "default": "var(--ui-border-color, oklch(from var(--ui-ink) l c h / 0.2))"
+            },
+            {
+              "name": "--ui-uploader-background",
+              "default": "transparent"
+            },
+            {
+              "name": "--ui-uploader-lit-color",
+              "default": "var(--ui-blue)"
+            },
+            {
+              "name": "--ui-uploader-radius",
+              "default": "var(--ui-radius-l, 8px)"
+            },
+            {
+              "name": "--ui-uploader-padding",
+              "default": "24px 16px"
+            },
+            {
+              "name": "--ui-uploader-icon-color",
+              "default": "var(--ui-text-muted)"
+            },
+            {
+              "name": "--ui-uploader-row-height",
+              "default": "44px"
+            },
+            {
+              "name": "--ui-uploader-row-gap",
+              "default": "8px"
+            },
+            {
+              "name": "--ui-uploader-popup-width",
+              "default": "360px"
+            }
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "UIUploader",
+          "declaration": {
+            "name": "UIUploader",
+            "module": "src/components/ui-uploader/index.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-uploader",
+          "declaration": {
+            "name": "UIUploader",
+            "module": "src/components/ui-uploader/index.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
       "path": "src/components/ui-video/index.ts",
       "declarations": [
         {

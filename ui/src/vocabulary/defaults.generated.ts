@@ -1948,6 +1948,21 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "kind", kind: "string", group: "appearance" },
     { name: "folded", kind: "boolean", group: "behaviour" }
   ],
+  "ui-uploader": [
+    { name: "appearance", kind: "enum", group: "appearance", values: ["hero", "button", "input", "compact"] },
+    { name: "destination", kind: "string", group: "behaviour" },
+    { name: "action", kind: "json", group: "behaviour" },
+    { name: "extensions", kind: "string", group: "behaviour" },
+    { name: "multiple", kind: "boolean", group: "behaviour" },
+    { name: "folder", kind: "boolean", group: "behaviour" },
+    { name: "max-size", kind: "string", group: "behaviour" },
+    { name: "max-files", kind: "number", group: "behaviour" },
+    { name: "drop-zone", kind: "json", group: "behaviour" },
+    { name: "message", kind: "string", group: "content" },
+    { name: "drop-message", kind: "string", group: "content" },
+    { name: "uploading-message", kind: "string", group: "content" },
+    { name: "done-message", kind: "string", group: "content" }
+  ],
   "ui-value": [{ name: "text", kind: "keyOnly", group: "name" }],
   "ui-video": [
     { name: "src", kind: "string", group: "link" },

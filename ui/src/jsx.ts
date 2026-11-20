@@ -56341,6 +56341,583 @@ export interface UITreeNodeAttributes {
 export interface UITreeNodeJSXAttributes
   extends Omit<UIGlobalJSXAttributes<HTMLElement>, keyof UITreeNodeAttributes>, UITreeNodeAttributes {}
 
+/** `<ui-uploader>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UIUploaderEventMap {
+  /**
+   * `ui-file-dragged-over`:  Files are dragged over it, or over its `drop-zone`:  how many, and their kinds.
+   * - `event.detail`:  `{ count: number, kinds: string[], via: "drop" | "zone" }`
+   */
+  "ui-file-dragged-over": CustomEvent<{ count: number; kinds: string[]; via: "drop" | "zone" }>
+  /**
+   * `ui-file-dragged-out`:  The files dragged over it left without being dropped.
+   * - `event.detail`:  `{ count: number, kinds: string[], via: "drop" | "zone" }`
+   */
+  "ui-file-dragged-out": CustomEvent<{ count: number; kinds: string[]; via: "drop" | "zone" }>
+  /**
+   * `ui-folder-dragged-over`:  With `folder`:  `ui-file-dragged-over`'s twin.  While dragging, a browser can't tell a folder from a file.
+   * - `event.detail`:  `{ count: number, kinds: string[], via: "drop" | "zone" }`
+   */
+  "ui-folder-dragged-over": CustomEvent<{ count: number; kinds: string[]; via: "drop" | "zone" }>
+  /**
+   * `ui-folder-dragged-out`:  With `folder`:  `ui-file-dragged-out`'s twin.
+   * - `event.detail`:  `{ count: number, kinds: string[], via: "drop" | "zone" }`
+   */
+  "ui-folder-dragged-out": CustomEvent<{ count: number; kinds: string[]; via: "drop" | "zone" }>
+  /**
+   * `ui-file-dropping`:  A file picked or dropped is about to be taken:  cancel it to leave it out.  `reason` says why it'll be turned away, when it will be.
+   * - `event.detail`:  `{ file: File, name: string, path: string, size: number, type: string, lastModified: number, via: "dialog" | "drop" | "zone", reason?: string, entry?: FileSystemEntry, handle?: FileSystemHandle }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-file-dropping": CustomEvent<{
+    file: File
+    name: string
+    path: string
+    size: number
+    type: string
+    lastModified: number
+    via: "dialog" | "drop" | "zone"
+    reason?: string
+    entry?: FileSystemEntry
+    handle?: FileSystemHandle
+  }>
+  /**
+   * `ui-file-dropped`:  A file was taken, kept or turned away (`reason`), the same for a pick (`via: "dialog"`) as for a drop.  `file.text()` reads it.  `entry` and `handle` are there when the browser gives them:  an entry on any drop, a handle on a drop in Chrome and Edge.
+   * - `event.detail`:  `{ file: File, name: string, path: string, size: number, type: string, lastModified: number, via: "dialog" | "drop" | "zone", reason?: string, entry?: FileSystemEntry, handle?: FileSystemHandle }`
+   */
+  "ui-file-dropped": CustomEvent<{
+    file: File
+    name: string
+    path: string
+    size: number
+    type: string
+    lastModified: number
+    via: "dialog" | "drop" | "zone"
+    reason?: string
+    entry?: FileSystemEntry
+    handle?: FileSystemHandle
+  }>
+  /**
+   * `ui-folder-dropping`:  With `folder`:  a folder is about to be taken, with its files:  cancel it to leave it all out.
+   * - `event.detail`:  `{ name: string, path: string, files: File[], via: "dialog" | "drop" | "zone", reason?: string, entry?: FileSystemEntry, handle?: FileSystemHandle }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-folder-dropping": CustomEvent<{
+    name: string
+    path: string
+    files: File[]
+    via: "dialog" | "drop" | "zone"
+    reason?: string
+    entry?: FileSystemEntry
+    handle?: FileSystemHandle
+  }>
+  /**
+   * `ui-folder-dropped`:  With `folder`:  a folder was taken;  a `ui-file-dropped` follows for each file in it.
+   * - `event.detail`:  `{ name: string, path: string, files: File[], via: "dialog" | "drop" | "zone", reason?: string, entry?: FileSystemEntry, handle?: FileSystemHandle }`
+   */
+  "ui-folder-dropped": CustomEvent<{
+    name: string
+    path: string
+    files: File[]
+    via: "dialog" | "drop" | "zone"
+    reason?: string
+    entry?: FileSystemEntry
+    handle?: FileSystemHandle
+  }>
+  /**
+   * `ui-uploading`:  The files kept are about to be posted to `destination`, or handed to `action`:  cancel it to take the upload over, and nothing is posted or called.
+   * - `event.detail`:  `{ files: File[] }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-uploading": CustomEvent<{ files: File[] }>
+  /**
+   * `ui-upload-progress`:  While a file posts:  how many bytes have gone, of its size.
+   * - `event.detail`:  `{ file: File, sent: number, size: number }`
+   */
+  "ui-upload-progress": CustomEvent<{ file: File; sent: number; size: number }>
+  /**
+   * `ui-uploaded`:  A file was posted:  `response` is the server's answer, as JSON when it says so, else text;  with `action`, what the action returned.
+   * - `event.detail`:  `{ file: File, response: unknown }`
+   */
+  "ui-uploaded": CustomEvent<{ file: File; response: unknown }>
+  /**
+   * `ui-upload-failed`:  A file couldn't be posted, or the `action` threw:  `error` says why.
+   * - `event.detail`:  `{ file: File, error: Error }`
+   */
+  "ui-upload-failed": CustomEvent<{ file: File; error: Error }>
+}
+
+/** `<ui-uploader>`'s own attributes, from its vocabulary. */
+export interface UIUploaderAttributes {
+  /**
+   * How it looks:  `hero` -- a big drop area with an icon, a line of help and a Choose files button, a row per file under it;  `button` -- just a button, its files in a popup from it;  `input` -- a form field with a Browse button, its files listed under it;  `compact` -- a one-line drop area, one line of status and one progress bar.  All four take the same attributes and send the same events.
+   * - takes:  `hero` · `button` · `input` · `compact`
+   * - default:  `hero`
+   */
+  appearance?: "hero" | "button" | "input" | "compact"
+  /**
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
+   */
+  "prop:appearance"?: "hero" | "button" | "input" | "compact"
+  /**
+   * A URL each file is posted to, as form data (`file`, its path as its file name), one request per file.  `action` wins when both are set.
+   * - takes:  text
+   */
+  destination?: string
+  /**
+   * `destination`, as the DOM element's property.
+   * @deprecated write `destination` -- `prop:` stays only for compiled spell
+   */
+  "prop:destination"?: string
+  /**
+   * A function called with the files kept, `(files: File[]) => unknown`, instead of posting them:  in Spell, an action (`action={read the netlist}`).  Not a URL, as a form's `action` is:  that's `destination`.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  action?: unknown
+  /**
+   * A function called with the files kept, `(files: File[]) => unknown`, instead of posting them:  in Spell, an action (`action={read the netlist}`).  Not a URL, as a form's `action` is:  that's `destination`.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `action` -- `prop:` stays only for compiled spell
+   */
+  "prop:action"?: unknown
+  /**
+   * The kinds of file it takes, a comma list of extensions (`json, csv`);  any other is turned away.  None:  any file.
+   * - takes:  text
+   */
+  extensions?: string
+  /**
+   * `extensions`, as the DOM element's property.
+   * @deprecated write `extensions` -- `prop:` stays only for compiled spell
+   */
+  "prop:extensions"?: string
+  /**
+   * Takes more than one file at a time.
+   * - takes:  flag (present / absent)
+   */
+  multiple?: boolean | ""
+  /**
+   * `multiple`, as the DOM element's property.
+   * @deprecated write `multiple` -- `prop:` stays only for compiled spell
+   */
+  "prop:multiple"?: boolean | ""
+  /**
+   * Takes folders instead of files, each with its files and their paths in it;  its events are `ui-folder-*` for the drag and the folder itself, then `ui-file-dropped` for each file.  A plain file dropped on it is turned away.
+   * - takes:  flag (present / absent)
+   */
+  folder?: boolean | ""
+  /**
+   * `folder`, as the DOM element's property.
+   * @deprecated write `folder` -- `prop:` stays only for compiled spell
+   */
+  "prop:folder"?: boolean | ""
+  /**
+   * The largest file it takes:  `2 MB`, `500 KB`, `1.5 GB`, or a number of bytes.
+   * - takes:  text
+   */
+  "max-size"?: string
+  /**
+   * `max-size`, as the DOM element's property.
+   * @deprecated write `max-size` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxSize"?: string
+  /**
+   * The most files it takes in one go;  the rest are turned away.
+   * - takes:  number
+   */
+  "max-files"?: number | `${number}`
+  /**
+   * `max-files`, as the DOM element's property.
+   * @deprecated write `max-files` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxFiles"?: number | `${number}`
+  /**
+   * Where else a drop counts as a drop on it:  `page` -- anywhere on the page;  a selector (`#editor`, `ui-section`), looked for first among the elements around it, then on the page;  or, as a property, the element itself.  The zone shows `drop-message` while files are dragged over it.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  dropZone?: unknown
+  /**
+   * Where else a drop counts as a drop on it:  `page` -- anywhere on the page;  a selector (`#editor`, `ui-section`), looked for first among the elements around it, then on the page;  or, as a property, the element itself.  The zone shows `drop-message` while files are dragged over it.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `dropZone` -- `prop:` stays only for compiled spell
+   */
+  "prop:dropZone"?: unknown
+  /**
+   * Its line of help (`Drop .json files here, or`);  a `button` uploader's label.  None:  its own, naming the kinds it takes.  The `message` slot wins over it.
+   * - takes:  text
+   */
+  message?: string
+  /**
+   * `message`, as the DOM element's property.
+   * @deprecated write `message` -- `prop:` stays only for compiled spell
+   */
+  "prop:message"?: string
+  /**
+   * What it says while files are dragged over it:  `{count}` is how many.  None:  `Drop to add {count} files`.
+   * - takes:  text
+   */
+  "drop-message"?: string
+  /**
+   * `drop-message`, as the DOM element's property.
+   * @deprecated write `drop-message` -- `prop:` stays only for compiled spell
+   */
+  "prop:dropMessage"?: string
+  /**
+   * What it says while it posts:  `{done}` is how many are done, `{count}` how many in all.  None:  `Uploading {done} of {count}`.
+   * - takes:  text
+   */
+  "uploading-message"?: string
+  /**
+   * `uploading-message`, as the DOM element's property.
+   * @deprecated write `uploading-message` -- `prop:` stays only for compiled spell
+   */
+  "prop:uploadingMessage"?: string
+  /**
+   * What it says once they're all posted:  `{count}` is how many.  None:  `{count} files uploaded`.
+   * - takes:  text
+   */
+  "done-message"?: string
+  /**
+   * `done-message`, as the DOM element's property.
+   * @deprecated write `done-message` -- `prop:` stays only for compiled spell
+   */
+  "prop:doneMessage"?: string
+  /**
+   * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `coin` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "coin"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "coin"
+    | "none"
+  /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
+   * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
+   * - takes:  text
+   */
+  target?: string
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
+  "prop:target"?: string
+  /**
+   * How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font="bold italic"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font="bold serif 10/20"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.
+   * - takes:  space-separated:  `bold` · `heavy` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript` · `all-caps` · `title-caps` · `headline` · `subhead` · `serif` · `sans-serif` · `typewriter`
+   */
+  font?: string
+  /**
+   * `font`, as the DOM element's property.
+   * @deprecated write `font` -- `prop:` stays only for compiled spell
+   */
+  "prop:font"?: string
+  /**
+   * A hard shadow behind its letters, down and to the right, in a hue:  `shadow="yellow"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em).
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
+   */
+  shadow?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * `shadow`, as the DOM element's property.
+   * @deprecated write `shadow` -- `prop:` stays only for compiled spell
+   */
+  "prop:shadow"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * Its box's own width where it sits, any CSS length:  `width="10em"`, `"50%"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns.
+   * - takes:  text
+   */
+  width?: string
+  /**
+   * `width`, as the DOM element's property.
+   * @deprecated write `width` -- `prop:` stays only for compiled spell
+   */
+  "prop:width"?: string
+  /**
+   * The narrowest its box gets, any CSS length:  `min-width="16em"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower.
+   * - takes:  text
+   */
+  "min-width"?: string
+  /**
+   * `min-width`, as the DOM element's property.
+   * @deprecated write `min-width` -- `prop:` stays only for compiled spell
+   */
+  "prop:minWidth"?: string
+  /**
+   * The widest its box gets, any CSS length:  `max-width="36em"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it.
+   * - takes:  text
+   */
+  "max-width"?: string
+  /**
+   * `max-width`, as the DOM element's property.
+   * @deprecated write `max-width` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxWidth"?: string
+  /**
+   * Its tooltip:  the browser's own, written as the element's `title`.
+   * - takes:  text
+   */
+  tooltip?: string
+  /**
+   * `tooltip`, as the DOM element's property.
+   * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
+   */
+  "prop:tooltip"?: string
+  /**
+   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
+   * - takes:  text
+   */
+  label?: string
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
+  "prop:label"?: string
+  /**
+   * People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.
+   * - takes:  text
+   */
+  movable?: string
+  /**
+   * `movable`, as the DOM element's property.
+   * @deprecated write `movable` -- `prop:` stays only for compiled spell
+   */
+  "prop:movable"?: string
+  /**
+   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * - takes:  text
+   */
+  resizable?: string
+  /**
+   * `resizable`, as the DOM element's property.
+   * @deprecated write `resizable` -- `prop:` stays only for compiled spell
+   */
+  "prop:resizable"?: string
+  /**
+   * Shown only on these devices, a comma list:  `on-platform="desktop, tablet"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.
+   * - takes:  text
+   */
+  "on-platform"?: string
+  /**
+   * `on-platform`, as the DOM element's property.
+   * @deprecated write `on-platform` -- `prop:` stays only for compiled spell
+   */
+  "prop:onPlatform"?: string
+  /**
+   * `ui-file-dragged-over`:  Files are dragged over it, or over its `drop-zone`:  how many, and their kinds.
+   * - `event.detail`:  `{ count: number, kinds: string[], via: "drop" | "zone" }`
+   */
+  "on-ui-file-dragged-over"?: (event: UIUploaderEventMap["ui-file-dragged-over"]) => void
+  /**
+   * `ui-file-dragged-out`:  The files dragged over it left without being dropped.
+   * - `event.detail`:  `{ count: number, kinds: string[], via: "drop" | "zone" }`
+   */
+  "on-ui-file-dragged-out"?: (event: UIUploaderEventMap["ui-file-dragged-out"]) => void
+  /**
+   * `ui-folder-dragged-over`:  With `folder`:  `ui-file-dragged-over`'s twin.  While dragging, a browser can't tell a folder from a file.
+   * - `event.detail`:  `{ count: number, kinds: string[], via: "drop" | "zone" }`
+   */
+  "on-ui-folder-dragged-over"?: (event: UIUploaderEventMap["ui-folder-dragged-over"]) => void
+  /**
+   * `ui-folder-dragged-out`:  With `folder`:  `ui-file-dragged-out`'s twin.
+   * - `event.detail`:  `{ count: number, kinds: string[], via: "drop" | "zone" }`
+   */
+  "on-ui-folder-dragged-out"?: (event: UIUploaderEventMap["ui-folder-dragged-out"]) => void
+  /**
+   * `ui-file-dropping`:  A file picked or dropped is about to be taken:  cancel it to leave it out.  `reason` says why it'll be turned away, when it will be.
+   * - `event.detail`:  `{ file: File, name: string, path: string, size: number, type: string, lastModified: number, via: "dialog" | "drop" | "zone", reason?: string, entry?: FileSystemEntry, handle?: FileSystemHandle }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-file-dropping"?: (event: UIUploaderEventMap["ui-file-dropping"]) => void
+  /**
+   * `ui-file-dropped`:  A file was taken, kept or turned away (`reason`), the same for a pick (`via: "dialog"`) as for a drop.  `file.text()` reads it.  `entry` and `handle` are there when the browser gives them:  an entry on any drop, a handle on a drop in Chrome and Edge.
+   * - `event.detail`:  `{ file: File, name: string, path: string, size: number, type: string, lastModified: number, via: "dialog" | "drop" | "zone", reason?: string, entry?: FileSystemEntry, handle?: FileSystemHandle }`
+   */
+  "on-ui-file-dropped"?: (event: UIUploaderEventMap["ui-file-dropped"]) => void
+  /**
+   * `ui-folder-dropping`:  With `folder`:  a folder is about to be taken, with its files:  cancel it to leave it all out.
+   * - `event.detail`:  `{ name: string, path: string, files: File[], via: "dialog" | "drop" | "zone", reason?: string, entry?: FileSystemEntry, handle?: FileSystemHandle }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-folder-dropping"?: (event: UIUploaderEventMap["ui-folder-dropping"]) => void
+  /**
+   * `ui-folder-dropped`:  With `folder`:  a folder was taken;  a `ui-file-dropped` follows for each file in it.
+   * - `event.detail`:  `{ name: string, path: string, files: File[], via: "dialog" | "drop" | "zone", reason?: string, entry?: FileSystemEntry, handle?: FileSystemHandle }`
+   */
+  "on-ui-folder-dropped"?: (event: UIUploaderEventMap["ui-folder-dropped"]) => void
+  /**
+   * `ui-uploading`:  The files kept are about to be posted to `destination`, or handed to `action`:  cancel it to take the upload over, and nothing is posted or called.
+   * - `event.detail`:  `{ files: File[] }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-uploading"?: (event: UIUploaderEventMap["ui-uploading"]) => void
+  /**
+   * `ui-upload-progress`:  While a file posts:  how many bytes have gone, of its size.
+   * - `event.detail`:  `{ file: File, sent: number, size: number }`
+   */
+  "on-ui-upload-progress"?: (event: UIUploaderEventMap["ui-upload-progress"]) => void
+  /**
+   * `ui-uploaded`:  A file was posted:  `response` is the server's answer, as JSON when it says so, else text;  with `action`, what the action returned.
+   * - `event.detail`:  `{ file: File, response: unknown }`
+   */
+  "on-ui-uploaded"?: (event: UIUploaderEventMap["ui-uploaded"]) => void
+  /**
+   * `ui-upload-failed`:  A file couldn't be posted, or the `action` threw:  `error` says why.
+   * - `event.detail`:  `{ file: File, error: Error }`
+   */
+  "on-ui-upload-failed"?: (event: UIUploaderEventMap["ui-upload-failed"]) => void
+}
+
+/** `<ui-uploader>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UIUploaderJSXAttributes
+  extends
+    Omit<UIGlobalJSXAttributes<UIHTMLElement<UIUploaderEventMap>>, keyof UIUploaderAttributes>,
+    UIUploaderAttributes {}
+
 /** `<ui-value>`'s own attributes, from its vocabulary. */
 export interface UIValueAttributes {
   /**
@@ -58828,6 +59405,16 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-tree-node": UITreeNodeJSXAttributes
       /**
+       * `<ui-uploader>`:  An uploader takes files someone picks or drops on it, or whole folders, then posts them to its `destination`, or hands them to its `action`.
+       * - also known as:  file upload, file uploader, upload, dropzone, drop zone, file drop, file picker, drag and drop, attachment
+       * - slots:
+       *   - `icon`:  Its icon, in place of its own cloud.
+       *   - `message`:  Its line of help, in place of `message`.
+       *   - `button`:  Its button (Choose files, Browse), in place of its own:  a click opens the file dialog.
+       * - events:  `ui-file-dragged-over`, `ui-file-dragged-out`, `ui-folder-dragged-over`, `ui-folder-dragged-out`, `ui-file-dropping`, `ui-file-dropped`, `ui-folder-dropping`, `ui-folder-dropped`, `ui-uploading`, `ui-upload-progress`, `ui-uploaded`, `ui-upload-failed`
+       */
+      "ui-uploader": UIUploaderJSXAttributes
+      /**
        * `<ui-value>`:  A statistic's value;  a search result's price.
        * - also known as:  statistic value, number, metric value
        * - slots:
@@ -58924,6 +59511,18 @@ export interface UIEventMap {
   "ui-command": CustomEvent<unknown>
   "ui-scrolled-to": CustomEvent<unknown>
   "ui-settled": CustomEvent<unknown>
+  "ui-file-dragged-over": CustomEvent<unknown>
+  "ui-file-dragged-out": CustomEvent<unknown>
+  "ui-folder-dragged-over": CustomEvent<unknown>
+  "ui-folder-dragged-out": CustomEvent<unknown>
+  "ui-file-dropping": CustomEvent<unknown>
+  "ui-file-dropped": CustomEvent<unknown>
+  "ui-folder-dropping": CustomEvent<unknown>
+  "ui-folder-dropped": CustomEvent<unknown>
+  "ui-uploading": CustomEvent<unknown>
+  "ui-upload-progress": CustomEvent<unknown>
+  "ui-uploaded": CustomEvent<unknown>
+  "ui-upload-failed": CustomEvent<unknown>
   "ui-in-view": CustomEvent<unknown>
   "ui-out-of-view": CustomEvent<unknown>
   "ui-top-in-view": CustomEvent<unknown>
@@ -59074,6 +59673,7 @@ declare global {
     "ui-tree-diagram": UIHTMLElement<UITreeDiagramEventMap>
     "ui-tree-item": UIHTMLElement<UITreeItemEventMap>
     "ui-tree-node": HTMLElement
+    "ui-uploader": UIHTMLElement<UIUploaderEventMap>
     "ui-value": HTMLElement
     "ui-video": UIHTMLElement<UIVideoEventMap>
     "ui-visibility": UIHTMLElement<UIVisibilityEventMap>

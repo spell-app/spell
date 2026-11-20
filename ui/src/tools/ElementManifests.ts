@@ -702,7 +702,7 @@ const JSX_DETAIL_TYPES: Readonly<Record<string, string>> = {
 
 /** The DOM's and TypeScript's own type names, which a `detail` text may name as they are (`jsxDetailType()`). */
 const JSX_GLOBAL_TYPE =
-  /^(?:Element|Event|Node|DocumentFragment|File|Blob|(?:HTML|SVG)\w*Element|\w+Event|Record|Readonly|Partial|Array)$/
+  /^(?:Element|Event|Node|DocumentFragment|File|Blob|FileSystem(?:Entry|Handle)|Error|(?:HTML|SVG)\w*Element|\w+Event|Record|Readonly|Partial|Array)$/
 
 /** The JSX types' header (`jsxTypes()`):  what the file is, and how a program uses it. */
 const JSX_HEADER = [
