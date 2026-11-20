@@ -87,7 +87,7 @@ describe("<epic-clarify>", () => {
     await vi.waitFor(() => expect(linkOf(clarify)).not.toBeNull())
     const link = linkOf(clarify)!
     expect(link.textContent).toBe("Clarify")
-    expect(link.title).toBe("Ask Claude for details now")
+    expect(link.dataset.tooltip).toBe("Ask Claude for details now")
     await expectAccessible(clarify)
     link.click()
     await vi.waitFor(() =>
@@ -133,7 +133,7 @@ describe("<epic-clarify>", () => {
     await vi.waitFor(() => expect(buttonOf(clarify)).not.toBeNull())
     const button = buttonOf(clarify)!
     expect(button.querySelector("ui-icon")?.getAttribute("name")).toBe("info circle")
-    expect(button.title).toBe("Rewrite it in plainer words, now")
+    expect(button.dataset.tooltip).toBe("Rewrite it in plainer words, now")
     await expectAccessible(clarify)
     button.click()
     await vi.waitFor(() =>
@@ -142,7 +142,7 @@ describe("<epic-clarify>", () => {
         body: expect.objectContaining({ id: "j182", action: "details" })
       })
     )
-    await vi.waitFor(() => expect(buttonOf(clarify)?.title).toMatch(/:  stop$/))
+    await vi.waitFor(() => expect(buttonOf(clarify)?.dataset.tooltip).toMatch(/:  stop$/))
     expect((clarify as unknown as { matches(s: string): boolean }).matches(":state(turning)")).toBe(true)
   })
 
@@ -155,7 +155,7 @@ describe("<epic-clarify>", () => {
     await vi.waitFor(() => expect(buttonOf(clarify)).not.toBeNull())
     const turning = () => (clarify as unknown as { matches(s: string): boolean }).matches(":state(turning)")
     expect(turning()).toBe(false)
-    expect(buttonOf(clarify)!.title).toMatch(/plainer words/)
+    expect(buttonOf(clarify)!.dataset.tooltip).toMatch(/plainer words/)
     buttonOf(clarify)!.click()
     await vi.waitFor(() =>
       expect(routes.posted).toContainEqual({

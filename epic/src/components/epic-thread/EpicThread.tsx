@@ -33,7 +33,6 @@ import {
 } from "./EpicThread.types"
 
 import threadCSS from "./EpicThread.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 import savedMarkCSS from "spell/epic/components/epic-review/SavedMark.css?inline"
 import { SAVED_MARK } from "spell/epic/components/epic-review/EpicReview.types"
 
@@ -83,7 +82,7 @@ export class DOMThreadElement extends E.DOMElement<EpicThread> {
 export class EpicThread extends E.UIComponent<typeof epicThreadVocabulary> {
   @E.proto static vocabulary = epicThreadVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-thread": threadCSS, "epic-saved-mark": savedMarkCSS },
+    styleSheets: { "epic-thread": threadCSS, "epic-saved-mark": savedMarkCSS },
     DOMElement: DOMThreadElement,
     // a click on its words selects them;  its fold and buttons take the focus themselves
     delegatesFocus: false
@@ -216,7 +215,13 @@ export class EpicThread extends E.UIComponent<typeof epicThreadVocabulary> {
               <div class={REPLY} part={this.partForName("reply")}>
                 <slot />
                 <Show when={this.saved}>
-                  <span class={`${FLOPPY} ${SAVED_MARK}`} title={this.saved} data-failed={this.failed ? "" : undefined}>
+                  <span
+                    class={`${FLOPPY} ${SAVED_MARK}`}
+                    role="img"
+                    aria-label={this.saved}
+                    data-tooltip={this.saved}
+                    data-failed={this.failed ? "" : undefined}
+                  >
                     <ui-icon name="floppy disk outline" />
                   </span>
                 </Show>
@@ -244,7 +249,7 @@ export class EpicThread extends E.UIComponent<typeof epicThreadVocabulary> {
           class={FOLD}
           part={this.partForName("fold")}
           aria-expanded={this.open ? "true" : "false"}
-          title={this.foldTip}
+          data-tooltip={this.foldTip}
         >
           <span class={CHEVRON}>
             <ui-icon name="chevron right" />
@@ -274,7 +279,7 @@ export class EpicThread extends E.UIComponent<typeof epicThreadVocabulary> {
             appearance="circular basic"
             size="mini"
             icon="edit"
-            title={this.translationForKey("editTitle")}
+            data-tooltip={this.translationForKey("editTitle")}
             aria-label={this.translationForKey("editLabel")}
             onClick={(event: MouseEvent) => this.say(event, THREAD_EDIT)}
           />
@@ -285,7 +290,7 @@ export class EpicThread extends E.UIComponent<typeof epicThreadVocabulary> {
             appearance="circular basic"
             size="mini"
             icon="trash can"
-            title={this.translationForKey("deleteTitle")}
+            data-tooltip={this.translationForKey("deleteTitle")}
             aria-label={this.translationForKey(comment()?.status === "new" ? "deleteNew" : "deleteHad")}
             onClick={(event: MouseEvent) => this.say(event, THREAD_DELETE)}
           />

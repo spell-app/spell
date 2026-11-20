@@ -1101,7 +1101,7 @@ The shared folders:
       - The page server marks every card by it as it serves the page.
       - From `file://` the stars show, disabled, saying why.
     - The day it was last worked on, bottom right, no year (`10/9`).
-      - Its `title` is the full date and time.
+      - Its tooltip is the full date and time.
       - It's the latest of:
         - the epic page's `updated`
         - its last log line (the `log.html` part)
@@ -1183,8 +1183,8 @@ In `tools/`:
       `spell-doc-helpers.js`, what they share
     - EVERY control it or the comments draw is a Spell UI component, never a raw `<button>` (epic `epic-engine` I26):
       - 2026-10-19:  "Why are we not using <ui-xxxx> or <epic-xxx> components for these pages?"
-      - an icon button (the comments' `iconButton()`), its `title` on the inner button too (`titleInside()`):
-        `<ui-button appearance="circular basic" size="mini" icon="..." title aria-label>`
+      - an icon button (the comments' `iconButton()`), its tooltip Spell UI's:
+        `<ui-button appearance="circular basic" size="mini" icon="..." data-tooltip aria-label>`
       - its icon centred BY THE COMPONENT:  no hand-set icon size, offset or `place-items` on it
         - measured:  within 0.4px of the button's centre, at 1200 and 390px, light and dark
         - the raw `<button>`s it replaced sat 1.3-1.7px off
@@ -1782,9 +1782,11 @@ In `tools/`:
     - `aria-label` on icon-only controls, as well
     - The person's standing rule (Owen, 2026-11-19, epic `from-console` C10, r80), now Spell UI's tooltips work:
       it replaces the 2026-10-10 one, "the browser's own `title`, never a `<ui-tooltip>`".
-    - A `title` tooltip left from before becomes a `data-tooltip` when that code is touched.
-      - Still on the old rule:  `goals-live.js`' buttons (`title`s since epic `epic-engine` P3), and the runtime's
-        heading fold button on the goal sets' pages, a `<ui-popup inverted size="mini">` (epic `epic-engine` I32).
+    - The epic pages, the comments, the docs runtime and `goals-live.js` were converted by epic `epic-engine` T106.
+      - Still `title`s:  the core reference and the syntax page (`titleInside()`), and Spell UI's own components
+        (`<ui-section>`'s fold button ...);  a `title` left from before becomes a `data-tooltip` when its code is touched.
+      - A `title` that isn't a tooltip stays:  a component's `title` attribute, the empty `title=""` on a card's
+        shadow wrapper (it stops the element's own `title` showing over all of it), and `<code title="path">`.
     - `basic` for quiet tools (sidebars, toolbars);  `primary` for the one main action in a dialog.
   - An icon a page uses must be in `ICONS`, in [bundle-spell-ui.js](tools/bundle-spell-ui.js)
     (then `epic pages update`):  any other name draws nothing.
@@ -2587,8 +2589,6 @@ the epic page shown in both tabs).
         each button its colour under the pointer.
       - Tooltips (2026-10-10:  "No tooltip on those same buttons"):
         "That's good:  done", "Reply", "Skip it:  done, nothing more to do".
-        - The pointer lands on the titled `<ui-button>` itself (the pack's `Tooltip.css`),
-          as the bullhorn's is.
         - See TOOLTIPS, below.
       - Approve's check (green):  "that's good".  The thread is done:  it folds, a check circle in its header.
       - Revisit's history (blue):  reply.  The cursor goes into the reply box at the thread's end.
@@ -2652,9 +2652,8 @@ the epic page shown in both tabs).
       `EpicThread.css` / `EpicCommentPane.css`;  epic `epic-engine` I26)
   - TOOLTIPS:  a few words each;  the longer wording is the `aria-label`.
     - 2026-10-10:  "The buttons don't have browser tooltips -- unclear what they do".
-    - Today they're the browser's own (`title`), below;  the rule now is Spell UI's tooltip (`data-tooltip`),
-      with the standard delay (above, "TOOLTIPS are Spell UI's own";  Owen, 2026-11-19, epic `from-console` C10, r80):
-      they convert when this code is next touched.
+    - Spell UI's tooltip (`data-tooltip`), with the standard delay (above, "TOOLTIPS are Spell UI's own";
+      Owen, 2026-11-19, epic `from-console` C10, r80;  the browser's own `title` until epic `epic-engine` T106).
     - Each button's:
       - ✓ "That's good:  done"
       - Revisit "Reply"
@@ -2663,19 +2662,11 @@ the epic page shown in both tabs).
       - the trash "Delete this comment"
       - the pen "Edit your last words"
       - the pane's × "Close"
-    - Why they didn't show in VS Code's side bar:  the pointer was on each button's icon.
+    - Why the `title`s didn't show in VS Code's side bar, before T106:  the pointer was on each button's icon.
       - Electron 38 and up, on macOS, mostly shows a `title`'s tooltip
-        only while the pointer is on the titled element ITSELF, not on a child of it.
-      - [electron/electron#49843](https://github.com/electron/electron/issues/49843), open;
-        VS Code 1.141 runs Electron 43.
-    - So every icon inside a comment's buttons takes no pointer, and the pointer lands on the titled button:
-      - the pill's, the pen, the trash, the fold, the pane's × and floppy, the bullhorn
-      - `pointer-events: none`, in spell-comments.css's "TOOLTIPS that show":
-        ONE rule for every titled `<ui-button>` the runtime draws (`ui-button[title]::part(icon)`)
-        - in the thread and the pane, the pack's `Tooltip.css`
-      - Keep it so for any new comment button.
-    - A plain browser shows them either way.
-      Headless Playwright can't show a native tooltip, only check what's under the pointer.
+        only while the pointer is on the titled element ITSELF, not on a child of it
+        ([electron/electron#49843](https://github.com/electron/electron/issues/49843), open).
+      - Spell UI's tooltip finds its `data-tooltip` up the pointer's path, so an icon inside a button needs nothing.
   - Built for reading offline, with no Claude:  only the page server writes them.
 - SEND on a docs page (epic `epic-workflow` P13), as on an epic page:
   the person comments, presses Send, and the session working the epic the page BELONGS to gets them.

@@ -19,6 +19,15 @@ const LOCAL_REF = /^#\//
 /** A path with a brace in it:  a thing by its id. */
 const HAS_BRACE = /\{[^{}/]+\}/
 
+/** What a list's question saying how many is called, when it pages by offset:  FastAPI's `limit`. */
+const LIMIT_NAMES = /^(limit|page_?size|per_?page|size|take|top|max_?results)$/i
+
+/** What a list's question saying where from is called, when it pages by offset:  `offset`, FastAPI's `skip`. */
+const OFFSET_NAMES = /^(offset|skip|start)$/i
+
+/** What a search's question is called:  `q`, `query`, `search`. */
+const SEARCH_NAMES = /^(q|query|search|term|keywords?|text)$/i
+
 /** Why an object that's a map by name is left out:  `custom_fields`. */
 const MAP_BY_NAME = "Its schema says it's a map by name, each key its own:  read it by hand, a type of its own."
 
@@ -52,6 +61,11 @@ const SEVERAL_KINDS = "Its schema says it holds one of several kinds:  read it b
  * - 3.0's and 3.1's ways to say a field may hold nothing read the same (epic `data` I109):
  *   `nullable: true`, `type: ["string", "null"]`, and FastAPI's `anyOf: [{ $ref }, { type: "null" }]`
  *   are each the one kind, never required.
+ * - What FastAPI services say, in a place's existing words (epic `data` I140):
+ *   - a list taking `limit` and `offset` pages by offset, `its next page is asked for with "limit" and "offset"`,
+ *     up to its limit's `maximum` at a time
+ *   - a list needing its `q` is searched only, `searches are searched at "/api/search"`
+ *   - what's deeper under a thing (a list under each, an action on something inside one) is said in the notes
  * - Plain data:  it reads nothing, so a test hands it a saved description.
  ****************/
 export class PlaceSpec {
@@ -83,12 +97,17 @@ export class PlaceSpec {
     const paths = this.document.paths ?? {}
     const collections: CollectionLook[] = []
     const specPaths = new Map<CollectionLook, string>()
+    const paged: OffsetPaging[] = []
     for (const [path, item] of Object.entries(paths)) {
       if (HAS_BRACE.test(path) || !item?.get) continue
       // no list in its answer's schema, but things by id under it:  a collection all the same, untyped till a read fills it
       const rows = this.rowsOf(item.get) ?? (hasThingsUnder(path, paths) ? { item: {} } : undefined)
       if (!rows) continue
       const at = underPlace(path, prefix)
+      const search = this.searchOf(item.get)
+      this.noteAskedFor(path, item.get, search?.param)
+      const pages = this.offsetPagingOf(item.get, rows.answer)
+      if (pages && !search) paged.push(pages)
       const collection: CollectionLook = {
         name: lastWordOf(path),
         at,
@@ -101,6 +120,12 @@ export class PlaceSpec {
         ...(this.takesLimit(item) && { takesLimit: true }),
         ...(rows.schemaAt !== undefined && { schemaAt: rows.schemaAt }),
         ...(item.get.tags?.[0] !== undefined && { tag: item.get.tags[0] }),
+        // a search needing its question:  `searches are searched at "/api/search"`, never read as a plain list
+        ...(search && {
+          searchedOnly: true,
+          searchedBy: { param: search.param, field: "", searchesEverything: true },
+          ...(search.example !== undefined && { searchedFor: search.example })
+        }),
         idAt: "id",
         fields: this.fieldsOf(rows.item, rows.schemaAt ?? path),
         operations: this.operationsOf(path, at, paths)
@@ -108,6 +133,7 @@ export class PlaceSpec {
       collections.push(collection)
       specPaths.set(collection, path)
     }
+    const pagesWith = pagesWithOf(paged)
     const records = this.recordsUnder(paths, prefix, specPaths)
     collections.push(...records.map(({ record }) => record))
     nameApart(collections)
@@ -133,6 +159,8 @@ export class PlaceSpec {
       ...(this.document.info?.version && {
         version: { says: this.document.info.version, where: "its OpenAPI description" }
       }),
+      // every list that pages by offset, the way most do:  `its next page is asked for with "limit" and "offset"`
+      ...(pagesWith && { serverTakes: { pagesWith } }),
       notes: [...new Set(this.notes)]
     }
   }
@@ -145,7 +173,7 @@ export class PlaceSpec {
   private rowsOf(operation: OpenApiOperation): ListAt | undefined {
     const answer = this.resolved(this.answerOf(operation))
     if (!answer) return undefined
-    if (answer.type === "array" && answer.items) return { item: answer.items, ...this.itemAt(answer.items) }
+    if (answer.type === "array" && answer.items) return { item: answer.items, answer, ...this.itemAt(answer.items) }
     const properties = answer.properties ?? {}
     const lists = Object.entries(properties).filter(([, each]) => this.resolved(each)?.type === "array")
     const [rowsAt, list] = lists.find(([name]) => ROWS_NAMES.includes(name)) ?? (lists.length === 1 ? lists[0]! : [])
@@ -153,6 +181,7 @@ export class PlaceSpec {
     if (!rowsAt || !items) return undefined
     return {
       item: items,
+      answer,
       rowsAt,
       ...("next" in properties && { nextAt: "next" }),
       ...this.itemAt(items)
@@ -176,6 +205,56 @@ export class PlaceSpec {
   /** Does its list take a `limit`, so it can be asked for more at a time? */
   private takesLimit(item: OpenApiPathItem): boolean {
     return (item.get?.parameters ?? []).some((each) => this.resolved(each)?.name === "limit")
+  }
+
+  /** A list's query parameters, each resolved. */
+  private queryParamsOf(operation: OpenApiOperation): OpenApiParameter[] {
+    return (operation.parameters ?? [])
+      .map((each) => this.resolved(each))
+      .filter((each): each is OpenApiParameter => each?.in === "query" && typeof each.name === "string")
+  }
+
+  /**
+   * How a list pages by offset (epic `data` I140):  FastAPI's `?limit=&offset=`, its answer `{ items, total, limit, offset }`.
+   * - Its questions, else its wrapped answer's fields of those names.
+   * - `most`:  its limit's schema's `maximum`, so a read never asks for more than it gives (a 422).
+   * - `undefined`:  it doesn't, as far as its description says.
+   */
+  private offsetPagingOf(operation: OpenApiOperation, answer: Schema | undefined): OffsetPaging | undefined {
+    const params = this.queryParamsOf(operation)
+    const limit = params.find(({ name }) => LIMIT_NAMES.test(name!))
+    const offset = params.find(({ name }) => OFFSET_NAMES.test(name!))
+    if (limit && offset) {
+      const most = this.resolved(limit.schema)?.maximum
+      return { limit: limit.name!, offset: offset.name!, ...(most !== undefined && { most }) }
+    }
+    const said = Object.keys(this.propertiesOf(answer))
+    const limitSaid = said.find((name) => LIMIT_NAMES.test(name))
+    const offsetSaid = said.find((name) => OFFSET_NAMES.test(name))
+    return limitSaid && offsetSaid ? { limit: limitSaid, offset: offsetSaid } : undefined
+  }
+
+  /**
+   * The search a list is, when it can't be asked without its question (epic `data` I140):
+   * FastAPI's `/api/search?q=`, `q` required.
+   * - `example`:  what its description says to search for, its parameter's `example` or first `examples`.
+   */
+  private searchOf(operation: OpenApiOperation): { param: string; example?: string } | undefined {
+    const param = this.queryParamsOf(operation).find(({ name, required }) => required && SEARCH_NAMES.test(name!))
+    if (!param) return undefined
+    const schema = this.resolved(param.schema)
+    const example = [param.example, ...(Array.isArray(param.examples) ? param.examples : []), schema?.example].find(
+      (each) => typeof each === "string" || typeof each === "number"
+    )
+    return { param: param.name!, ...(example !== undefined && { example: `${example}` }) }
+  }
+
+  /** SIDE EFFECT:  a list that needs a question besides its search's is said in the notes:  a read without it fails. */
+  private noteAskedFor(path: string, operation: OpenApiOperation, search: string | undefined): void {
+    const needed = this.queryParamsOf(operation)
+      .filter(({ name, required }) => required && name !== search)
+      .map(({ name }) => `"${name}"`)
+    if (needed.length) this.notes.push(`${path} can't be read without ${needed.join(" and ")}:  read it by hand.`)
   }
 
   ////////////////
@@ -205,7 +284,13 @@ export class PlaceSpec {
       if (!get || words.filter((word) => HAS_BRACE.test(word)).length !== 1 || !HAS_BRACE.test(words.at(-2) ?? ""))
         continue
       const answer = this.answerOf(get)
-      if (!this.isOneThing(answer)) continue
+      if (!this.isOneThing(answer)) {
+        // a list under each, `/jobs/{job_id}/steps`:  said, so it's read by hand (epic `data` I140)
+        const under = ownerOf(words, specPaths)
+        const each = under ? P.singularize(wordsFor(under.name)) : "one of another"
+        if (this.rowsOf(get)) this.notes.push(`${path} answers a list under each ${each}:  read it by hand.`)
+        continue
+      }
       const owner = ownerOf(words, specPaths)
       if (!owner) {
         this.notes.push(`${path} answers one thing under another, but no list of those is described:  read it by hand.`)
@@ -260,7 +345,7 @@ export class PlaceSpec {
     const own = paths[path]
     if (own?.post) operations.add = this.operationFor("POST", at, own.post)
     for (const [other, item] of Object.entries(paths)) {
-      if (!item || !other.startsWith(path) || other === path) continue
+      if (!item || !isUnder(other, path)) continue
       const rest = other
         .slice(path.length)
         .replace(/^\/|\/$/g, "")
@@ -275,6 +360,16 @@ export class PlaceSpec {
             : undefined
         if (change) operations.change = this.operationFor(change[0], under(other), change[1], other)
         if (item.delete) operations.delete = this.operationFor("DELETE", under(other), item.delete, other)
+        continue
+      }
+      // deeper:  an action on something inside a thing, `/{job_id}/steps/{step_id}/retry`, said so it's read by hand
+      if (rest.length > 2) {
+        for (const method of WRITE_METHODS) {
+          if (item[method])
+            this.notes.push(
+              `${method.toUpperCase()} ${other} acts on something inside ${articledWords(lastWordOf(path))}:  read it by hand.`
+            )
+        }
         continue
       }
       // an action route under a thing by id, by its last word:  `/{id}/enqueue/`, NOT a list under it (a `GET`)
@@ -567,7 +662,33 @@ function isSeveralKinds(schema: Schema | undefined): boolean {
 
 /** Is there a thing by id under `path`:  `/background-tasks/{id}/`? */
 function hasThingsUnder(path: string, paths: Readonly<Record<string, OpenApiPathItem | undefined>>): boolean {
-  return Object.keys(paths).some((other) => other.startsWith(path) && HAS_BRACE.test(other.slice(path.length)))
+  return Object.keys(paths).some((other) => isUnder(other, path) && HAS_BRACE.test(other.slice(path.length)))
+}
+
+/**
+ * Is `other` a path under `path`, a word at a time:  `/api/jobs/{id}` is under `/api/jobs`;
+ * `/api/jobs-archive/{id}` isn't (epic `data` I140).
+ */
+function isUnder(other: string, path: string): boolean {
+  return other.startsWith(`${path.replace(/\/+$/, "")}/`) && other.replace(/\/+$/, "") !== path.replace(/\/+$/, "")
+}
+
+/** One thing of a collection, in words:  `jobs` => `a job`. */
+function articledWords(collection: string): string {
+  const one = P.singularize(wordsFor(collection))
+  return `${/^[aeiou]/i.test(one) ? "an" : "a"} ${one}`
+}
+
+/** How every list that pages by offset pages, the way most of them do:  `undefined` for none. */
+function pagesWithOf(paged: readonly OffsetPaging[]): OffsetPaging | undefined {
+  const counts = new Map<string, number>()
+  for (const { limit, offset } of paged) counts.set(`${limit} ${offset}`, (counts.get(`${limit} ${offset}`) ?? 0) + 1)
+  const [usual] = [...counts.entries()].sort(([, a], [, b]) => b - a)[0] ?? []
+  if (!usual) return undefined
+  const [limit, offset] = usual.split(" ") as [string, string]
+  const mosts = paged.filter((each) => each.limit === limit && each.offset === offset && each.most !== undefined)
+  const most = mosts.length ? Math.min(...mosts.map((each) => each.most!)) : undefined
+  return { limit, offset, ...(most !== undefined && { most }) }
 }
 
 /** `path` under the place's own path, `prefix`:  `/api/jobs/` under `/api` is `/jobs/`. */
@@ -654,10 +775,22 @@ export type Schema = {
 }
 
 /** Where a list is:  its rows' schema, and where they are in a wrapped answer. */
-type ListAt = { item: Schema; rowsAt?: string; nextAt?: string; schemaAt?: string }
+type ListAt = { item: Schema; answer?: Schema; rowsAt?: string; nextAt?: string; schemaAt?: string }
+
+/** How one list pages by offset:  its two questions' names, and the most it gives at a time, when its schema says. */
+type OffsetPaging = { limit: string; offset: string; most?: number }
 
 /** A parameter, as far as it's read. */
-type OpenApiParameter = { $ref?: string; name?: string; in?: string; required?: boolean; schema?: Schema }
+type OpenApiParameter = {
+  $ref?: string
+  name?: string
+  in?: string
+  required?: boolean
+  schema?: Schema
+  example?: unknown
+  /** 3.1's, or a map of named examples. */
+  examples?: unknown
+}
 
 /** One operation. */
 export type OpenApiOperation = {

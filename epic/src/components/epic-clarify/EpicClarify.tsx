@@ -10,7 +10,6 @@ import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 
 import { epicClarifyVocabulary } from "./EpicClarify.en"
 
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 import clarifyCSS from "./EpicClarify.css?inline"
 
 /****************
@@ -40,7 +39,7 @@ import clarifyCSS from "./EpicClarify.css?inline"
 export class EpicClarify extends E.UIComponent<typeof epicClarifyVocabulary> {
   @E.proto static vocabulary = epicClarifyVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-clarify": clarifyCSS }
+    styleSheets: { "epic-clarify": clarifyCSS }
   } satisfies Partial<E.ElementSetup>
 
   /** Its item's view of the review inbox. */
@@ -95,7 +94,7 @@ export class EpicClarify extends E.UIComponent<typeof epicClarifyVocabulary> {
             type="button"
             class={this.rootClass}
             part={this.partForName("base")}
-            title={this.translationForKey(this.isTurning ? "turningTip" : "iconTip")}
+            data-tooltip={this.translationForKey(this.isTurning ? "turningTip" : "iconTip")}
             aria-label={this.translationForKey(this.isTurning ? "turningTip" : "iconTip")}
             onClick={this.clarify}
           >
@@ -109,7 +108,7 @@ export class EpicClarify extends E.UIComponent<typeof epicClarifyVocabulary> {
           type="button"
           class={[this.rootClass, LINK]}
           part={this.partForName("base")}
-          title={this.translationForKey("clarifyTip")}
+          data-tooltip={this.translationForKey("clarifyTip")}
           onClick={this.clarify}
         >
           {this.translationForKey("clarify")}

@@ -6,7 +6,6 @@ import { epicMoreVocabulary } from "./EpicMore.en"
 import { BODY } from "./EpicAnswer.types"
 
 import answerCSS from "./EpicAnswer.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicMore`
@@ -19,7 +18,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 export class EpicMore extends E.UIComponent<typeof epicMoreVocabulary> {
   @E.proto static vocabulary = epicMoreVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-answer": answerCSS },
+    styleSheets: { "epic-answer": answerCSS },
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
 

@@ -177,14 +177,29 @@ describe("request x T1 r3:  a request filed into a todo", () => {
     expect(picturesOf("t1")).toEqual(shown)
   })
 
-  test("refused for an item that isn't a todo, a limit too", async () => {
+  test("into an ISSUE too (T108):  a bug report's words, context and screenshot in it, marked requested", async () => {
     writeFileSync(join(root, "r3.html"), REQUEST)
-    await commands().run(["add", "x", "issue", "An issue"])
+    writeFileSync(join(root, "image-1.png"), png("shot"))
+    expect(await commands().run(["add", "x", "issue", "Menu over the title"])).toBe(0)
+    const argv = ["request", "x", "I1", "r3", "--file", join(root, "r3.html"), "--picture", join(root, "image-1.png")]
+    expect(await commands().run(argv)).toBe(0)
+    expect(printed.at(-1)).toBe("r3 filed into I1 · Menu over the title")
+    const item = FILES.read(file).findItem("i1")!
+    expect(item.hasAttribute("requested")).toBe(true)
+    expect(item.querySelector('a[href$="requests/r3/request.md"]')).not.toBeNull()
+    expect(picturesOf("i1")).toHaveLength(1)
+  })
+
+  test("refused for any other item:  a limit, a judgement call", async () => {
+    writeFileSync(join(root, "r3.html"), REQUEST)
     await commands().run(["add", "x", "todo", "A limit", "--limit"])
+    await commands().run(["add", "x", "judgement", "A call"])
     const run = (id: string) => commands().run(["request", "x", id, "r3", "--file", join(root, "r3.html")])
-    expect(await run("i1")).toBe(1)
     expect(await run("t1")).toBe(1)
-    expect(printed.join("\n")).toMatch(/T1 isn't a todo:  a request is filed into a todo or a phase/)
+    expect(await run("j1")).toBe(1)
+    expect(printed.join("\n")).toMatch(
+      /T1 isn't a todo or an issue:  a request is filed into an issue, a todo or a phase/
+    )
   })
 })
 

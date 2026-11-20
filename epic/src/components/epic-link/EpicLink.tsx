@@ -134,7 +134,7 @@ export class EpicLink extends E.UIComponent<typeof epicLinkVocabulary> {
       <Show
         when={this.href}
         fallback={
-          <span class={this.rootClass} part={this.partForName("base")} title={this.tooltip}>
+          <span class={this.rootClass} part={this.partForName("base")} data-tooltip={this.tooltip}>
             <slot>{this.label}</slot>
           </span>
         }
@@ -144,7 +144,7 @@ export class EpicLink extends E.UIComponent<typeof epicLinkVocabulary> {
           part={this.partForName("base")}
           href={this.href}
           target={this.linkTarget}
-          title={this.tooltip}
+          data-tooltip={this.tooltip}
         >
           <slot>{this.label}</slot>
         </a>

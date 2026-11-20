@@ -6,7 +6,6 @@ import { E } from "spell/ui/core"
 import { epicSortVocabulary } from "./EpicSort.en"
 import { SORT_KEY, save, savedSort, type EpicSortName, type SortDetail } from "./EpicList.types"
 
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 import sortCSS from "./EpicSort.css?inline"
 
 /****************
@@ -21,7 +20,7 @@ import sortCSS from "./EpicSort.css?inline"
 export class EpicSort extends E.UIComponent<typeof epicSortVocabulary> {
   @E.proto static vocabulary = epicSortVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-sort": sortCSS }
+    styleSheets: { "epic-sort": sortCSS }
   } satisfies Partial<E.ElementSetup>
 
   /** The sort in use, as remembered. */
@@ -44,7 +43,7 @@ export class EpicSort extends E.UIComponent<typeof epicSortVocabulary> {
               <ui-button
                 icon={button.icon}
                 selected={inUse() ? "" : undefined}
-                title={this.translationForKey(button.tip)}
+                data-tooltip={this.translationForKey(button.tip)}
                 aria-label={inUse() ? this.translationForKey("inUse", { words: words() }) : words()}
                 onClick={() => this.pick(button.sort)}
               >

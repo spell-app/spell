@@ -5,7 +5,6 @@ import { E } from "spell/ui/core"
 import { epicEventVocabulary } from "./EpicEvent.en"
 
 import eventCSS from "./EpicEvent.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicEvent`
@@ -17,7 +16,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 export class EpicEvent extends E.UIComponent<typeof epicEventVocabulary> {
   @E.proto static vocabulary = epicEventVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-event": eventCSS }
+    styleSheets: { "epic-event": eventCSS }
   } satisfies Partial<E.ElementSetup>
 
   /** Its icon. */

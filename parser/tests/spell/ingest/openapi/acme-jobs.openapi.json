@@ -149,6 +149,92 @@
         }
       }
     },
+    "/api/jobs/{job_id}/steps": {
+      "get": {
+        "tags": ["jobs"],
+        "summary": "List Steps",
+        "operationId": "list_steps_api_jobs__job_id__steps_get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Job Id" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Step" },
+                  "title": "Response List Steps"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/jobs/{job_id}/steps/{step_id}/retry": {
+      "post": {
+        "tags": ["jobs"],
+        "summary": "Retry Step",
+        "operationId": "retry_step_api_jobs__job_id__steps__step_id__retry_post",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Job Id" }
+          },
+          { "name": "step_id", "in": "path", "required": true, "schema": { "type": "integer", "title": "Step Id" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Step" } } }
+          }
+        }
+      }
+    },
+    "/api/jobs-archive/{archive_id}": {
+      "get": {
+        "tags": ["archive"],
+        "summary": "Get Archived Job",
+        "operationId": "get_archived_job_api_jobs_archive__archive_id__get",
+        "parameters": [
+          {
+            "name": "archive_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Archive Id" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Job" } } }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["archive"],
+        "summary": "Purge Archived Job",
+        "operationId": "purge_archived_job_api_jobs_archive__archive_id__delete",
+        "parameters": [
+          {
+            "name": "archive_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Archive Id" }
+          }
+        ],
+        "responses": { "204": { "description": "Successful Response" } }
+      }
+    },
     "/api/search": {
       "get": {
         "tags": ["search"],
@@ -159,7 +245,8 @@
             "name": "q",
             "in": "query",
             "required": true,
-            "schema": { "type": "string", "minLength": 1, "title": "Q" }
+            "schema": { "type": "string", "minLength": 1, "title": "Q" },
+            "examples": ["nightly"]
           },
           {
             "name": "limit",

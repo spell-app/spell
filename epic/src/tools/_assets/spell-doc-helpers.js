@@ -233,7 +233,7 @@ function codeCopyButton(code) {
     appearance: "circular basic",
     size: "mini",
     icon: "copy",
-    title: COPY_LABEL,
+    "data-tooltip": COPY_LABEL,
     "aria-label": COPY_LABEL,
     "data-spell-added": true
   })

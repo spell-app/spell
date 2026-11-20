@@ -161,7 +161,7 @@ export class EpicTextBox extends E.UIComponent<typeof epicTextBoxVocabulary> imp
         <For each={this.kept}>
           {(item) => (
             <div class={KEPT_ITEM} part={this.partForName("kept-item")}>
-              <p class={KEPT_LABEL} title={this.translationForKey("keptIdTip", { id: item.id })}>
+              <p class={KEPT_LABEL} data-tooltip={this.translationForKey("keptIdTip", { id: item.id })}>
                 {item.label}
               </p>
               <p class={KEPT_TEXT}>{item.text}</p>
@@ -171,7 +171,7 @@ export class EpicTextBox extends E.UIComponent<typeof epicTextBoxVocabulary> imp
                 appearance="basic circular"
                 icon="xmark"
                 aria-label={this.translationForKey("keptDrop", { label: item.label })}
-                title={this.translationForKey("keptDropTip")}
+                data-tooltip={this.translationForKey("keptDropTip")}
                 onClick={() => this.form?.dropKept(item)}
               />
             </div>

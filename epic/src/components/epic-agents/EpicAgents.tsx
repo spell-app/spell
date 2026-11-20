@@ -17,7 +17,6 @@ import type { DOMTextBoxElement } from "spell/epic/components/epic-text-box/Epic
 import { epicAgentsVocabulary } from "./EpicAgents.en"
 
 import agentsCSS from "./EpicAgents.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicAgents`
@@ -43,7 +42,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
   @E.proto static vocabulary = epicAgentsVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-agents": agentsCSS },
+    styleSheets: { "epic-agents": agentsCSS },
     // a toolbar's tools:  a click on its words must not jump to its first button
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
@@ -141,7 +140,7 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
             class={AGENTS_BUTTON}
             part={this.partForName("agents-button")}
             aria-label={this.agentsWords()}
-            title={this.agentsWords()}
+            data-tooltip={this.agentsWords()}
           >
             <span class={COUNT} aria-hidden="true">
               {this.agents.length}
@@ -223,7 +222,7 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
           <ui-label size="mini" appearance="basic" color={statusColorOf(agent().status)}>
             {agent().status}
           </ui-label>
-          <span class={AGENT_AGE} title={this.startedTip(agent())}>
+          <span class={AGENT_AGE} data-tooltip={this.startedTip(agent())}>
             {ageOf(agent().started, Date.now())}
           </span>
         </div>
@@ -268,7 +267,7 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
             disabled={redirect.canSend ? undefined : ""}
             loading={redirect.isSending ? "" : undefined}
             aria-label={this.translationForKey("agentSend", { name })}
-            title={this.translationForKey("agentSendTip", { name })}
+            data-tooltip={this.translationForKey("agentSendTip", { name })}
             onClick={() => redirect.sendNote()}
           />
         </div>

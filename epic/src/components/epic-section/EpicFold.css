@@ -304,7 +304,7 @@
   }
   /*
    * the title's words and icon let the pointer through to `<ui-section>`'s fold button around them,
-   * which has the tooltip:  VS Code shows one only on the titled element itself (`Tooltip.css`)
+   * which has the tooltip:  VS Code shows a `title` only on the titled element itself
    */
   .header,
   .icon,

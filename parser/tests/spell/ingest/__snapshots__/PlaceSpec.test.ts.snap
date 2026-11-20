@@ -142,23 +142,23 @@ an "owner summary" is a thing
 	its "number" is a number, stored as "id"
 	its "url" is text  // an address
 	its "display" is text
-	its "name" is text
-	its "description" is text
+	its "name" is required text, with maximum length 100
+	its "description" is text, with maximum length 200
 
 a "tag summary" is a thing
 	its "number" is a number, stored as "id"
 	its "url" is text  // an address
 	its "display url" is text  // an address
 	its "display" is text
-	its "name" is text
-	its "slug" is text
-	its "color" is text
+	its "name" is required text, with maximum length 100
+	its "slug" is required text, with maximum length 100
+	its "color" is text, with maximum length 6
 
 a "user summary" is a thing
 	its "number" is a number, stored as "id"
 	its "url" is text  // an address
 	its "display" is text
-	its "username" is text
+	its "username" is required text, with maximum length 150
 
 a "notification" is a thing
 	its "value" is text
@@ -168,9 +168,9 @@ a "contact group summary" is a thing
 	its "number" is a number, stored as "id"
 	its "url" is text  // an address
 	its "display" is text
-	its "name" is text
-	its "slug" is text
-	its "description" is text
+	its "name" is required text, with maximum length 100
+	its "slug" is required text, with maximum length 100
+	its "description" is text, with maximum length 200
 	its "contact count" is a number
 	its "depth" is a number
 "

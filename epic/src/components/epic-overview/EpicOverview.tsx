@@ -17,7 +17,6 @@ import { epicOverviewVocabulary } from "./EpicOverview.en"
 
 import foldCSS from "spell/epic/components/epic-section/EpicFold.css?inline"
 import overviewCSS from "./EpicOverview.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicOverview`
@@ -53,7 +52,6 @@ export class EpicOverview extends EpicFold<typeof epicOverviewVocabulary> {
   @E.proto static vocabulary = epicOverviewVocabulary
   @E.protoMerged static elementSetup = {
     styleSheets: {
-      "epic-tooltip": tooltipCSS,
       "epic-fold": foldCSS,
       "epic-overview": overviewCSS
     }
@@ -156,7 +154,7 @@ export class EpicOverview extends EpicFold<typeof epicOverviewVocabulary> {
           <slot name={this.slotForName("summary")} />
           <Show when={this.slots.hasContent(this.slotForName("prompt"))}>
             <details class={PROMPT} part={this.partForName("prompt")}>
-              <summary title={this.translationForKey("promptTip")}>
+              <summary data-tooltip={this.translationForKey("promptTip")}>
                 <span class="chevron" aria-hidden="true">
                   {this.icons.chevron.svg}
                 </span>
