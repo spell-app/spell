@@ -152,6 +152,8 @@
     --_ui-table-cell-border: var(--ui-table-cell-border, var(--ui-border-width) solid var(--ui-border-color-internal));
     --_ui-table-cell-padding-block: var(--ui-table-cell-padding-block, 0.785714em);
     --_ui-table-cell-padding-inline: var(--ui-table-cell-padding-inline, 0.785714em);
+    /* A link in a cell:  not underlined until it's hovered, as a console's tables draw one (epic old-console-redo I37). */
+    --_ui-table-link-underline: var(--ui-table-link-underline, none);
     --_ui-table-header-padding-block: var(--ui-table-header-padding-block, 0.928571em);
     --_ui-table-header-background: var(--ui-table-header-background, var(--ui-surface-muted));
     --_ui-table-header-color: var(--ui-table-header-color, var(--ui-text-color));
@@ -271,6 +273,7 @@
     --ui-scale: initial;
     --_table-hosted: initial;
     --_table-stack-by: initial;
+    --_link-underline: var(--_ui-table-link-underline);
     transition:
       background var(--_ui-table-duration) var(--ui-ease),
       color var(--_ui-table-duration) var(--ui-ease);
@@ -1680,6 +1683,7 @@
     --ui-scale: initial;
     --_table-hosted: initial;
     --_table-stack-by: initial;
+    --_link-underline: var(--_ui-table-link-underline);
     display: block;
     min-inline-size: 0;
     padding: var(--_ui-table-cell-padding-block) var(--_ui-table-cell-padding-inline);

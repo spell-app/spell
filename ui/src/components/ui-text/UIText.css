@@ -106,13 +106,14 @@
 
   /*
    * A link in running text (`link`), or in a paragraph, or a `<ui-link>` a click acts on (`:state(action)`, no `link`):
-   * the page's link colour, unless it has a hue;  underlined.
+   * the page's link colour, unless it has a hue;  underlined, unless what it's in says not until it's hovered
+   * (`--_link-underline: none`, which a table's cells set:  `UITable.css`).
    */
   a.ui.text,
   p.ui.text > a,
   :host(:state(action)) > span.ui.text {
     color: var(--ui-color-text, var(--_ui-text-link-color));
-    text-decoration-line: underline;
+    text-decoration-line: var(--_link-underline, underline);
     text-decoration-thickness: 0.06em;
     text-underline-offset: 0.15em;
   }
@@ -120,6 +121,7 @@
   p.ui.text > a:hover,
   :host(:state(action)) > span.ui.text:hover {
     color: var(--ui-color-text, var(--_ui-text-link-hover-color));
+    text-decoration-line: underline;
   }
   /*
    * An icon-only link (`<ui-link>`'s `:state(icon-only)`) after a word:  kept on the word's line, never wrapping alone

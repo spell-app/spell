@@ -118,6 +118,17 @@ describe("UITable.css on class-grammar examples", () => {
     expect(getComputedStyle(root.querySelector("table")!).borderTopLeftRadius).toBe("12px")
   })
 
+  it("hands its cells' links no underline until hovered, unless a wrapper says otherwise", () => {
+    Sheets.adopt([...foundationCSS, tableCSS])
+    const root = Fixture.render(
+      `<div><table class="ui table"><tbody><tr><td>A</td></tr></tbody></table>` +
+        `<div style="--ui-table-link-underline: underline"><table class="ui table"><tbody><tr><td>B</td></tr></tbody></table></div></div>`
+    )
+    const [quiet, underlined] = root.querySelectorAll("td")
+    expect(getComputedStyle(quiet!).getPropertyValue("--_link-underline").trim()).toBe("none")
+    expect(getComputedStyle(underlined!).getPropertyValue("--_link-underline").trim()).toBe("underline")
+  })
+
   it("stripes even body rows", () => {
     Sheets.adopt([...foundationCSS, tableCSS])
     const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
