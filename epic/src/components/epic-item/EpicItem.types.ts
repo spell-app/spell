@@ -141,6 +141,11 @@ export type LiveReview = {
    */
   closingAs?: string
   /**
+   * which of his ✓ or x shows PRESSED (its button, its chip's ring):  `closingAs` till his Send lets it go, then
+   * missing, applied yet or not (`ReviewClient.pressedAs()`, epic `epic-engine` I360)
+   */
+  pressedAs?: string
+  /**
    * his mark on it, sent or not, until `inbox apply` takes it (`ReviewClient.markOf()`):  its action and when;  a Do
    * this, Make Todo or Revisit on a canceled item draws it open at once (`reopensCanceled()`, epic `epic-engine`
    * I359);  missing:  none

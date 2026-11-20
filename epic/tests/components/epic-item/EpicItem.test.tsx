@@ -9,7 +9,9 @@ import "spell/epic/components/epic-item"
 import { buttonsForItem } from "spell/epic/components/epic-item/EpicItem.types"
 import { BUTTONS_OF } from "spell/epic/components/epic-review/EpicReview.types"
 import { ReviewClient } from "spell/epic/review/ReviewClient"
+import type { Inbox } from "spell/epic/review/review.types"
 import "spell/epic/components/epic-aside"
+import "spell/epic/components/epic-update"
 
 ////////////////
 // ## Helpers
@@ -722,5 +724,174 @@ describe("<epic-item> title, folded and open", () => {
       bareTitle.getBoundingClientRect().height > lineHeight * 1.5,
       bareTitle.hasAttribute("data-tooltip")
     ]).toEqual([true, false])
+  })
+})
+
+////////////////
+// ## No flash as the page server applies his ✓ (I360)
+////////////////
+
+// epic `epic-engine` I360;  Owen, 2026-11-20:  "When I e.g. mark an issue with an "updated" badge as OK (check) and
+// then send, still seeing flash when claude comes back to mark the item as "really grey."  This is super annoying."
+
+/** The review routes, as `fetch`, over an inbox kept here:  each reply the whole inbox (`<epic-update>`'s test's). */
+class FakeRoutes {
+  inbox: Inbox = {
+    marks: {},
+    drafts: {},
+    urgency: {},
+    sent: null,
+    now: [],
+    working: {},
+    taken: {},
+    listening: null,
+    lastListener: null,
+    unsentComments: [],
+    waitingComments: [],
+    repliedComments: [],
+    woken: null,
+    doing: null
+  }
+
+  readonly fetch = vi.fn(async (input: string, init?: RequestInit): Promise<Response> => {
+    const route = input.replace("/api/epics/review/", "").replace(/\?.*/, "")
+    if (route === "mark") {
+      const body = JSON.parse(init!.body as string) as { id: string; mark: Inbox["marks"][string] | null }
+      if (body.mark) this.inbox.marks[body.id] = { ...body.mark, at: new Date().toISOString() }
+      else delete this.inbox.marks[body.id]
+    }
+    return new Response(JSON.stringify(this.inbox), { headers: { "content-type": "application/json" } })
+  })
+}
+
+/** A started, served client on `routes`, adopted as the page's:  the page is reviewed. */
+async function adoptClient(routes: FakeRoutes): Promise<ReviewClient> {
+  const client = new ReviewClient({
+    page: "/epics/sample/sample.plan.html",
+    server: { token: "token" },
+    protocol: "http:",
+    fetch: routes.fetch as unknown as typeof fetch,
+    storage: null
+  })
+  await client.start()
+  ReviewClient.adopt(client)
+  return client
+}
+
+/** What a reader sees of item `host`'s line:  its look, its size, its chip and buttons, its FIXED label. */
+function lookOf(host: Element): string {
+  const root = host.shadowRoot!
+  const line = root.querySelector<HTMLElement>("[part~='line']")!
+  const chip = root.querySelector<HTMLElement>("[part~='id']")!
+  const review = root.querySelector("epic-review[shows='buttons']")
+  const label = host.querySelector("epic-update")
+  return JSON.stringify({
+    base: root.querySelector("[part~='base']")!.className,
+    height: Math.round(line.getBoundingClientRect().height),
+    ink: getComputedStyle(root.querySelector("[part~='title']")!).color,
+    chip: [chip.dataset.fill ?? "", chip.hasAttribute("data-marked"), getComputedStyle(chip).backgroundColor],
+    buttons: Array.from(
+      review?.shadowRoot?.querySelectorAll<HTMLElement>("ui-button[data-action]") ?? [],
+      (button) => `${button.dataset.action}:${button.dataset.fill ?? ""}`
+    ),
+    pill: root.querySelector("[part~='done-in']")?.textContent ?? "",
+    label: !!label?.shadowRoot?.querySelector("[part~='label']")
+  })
+}
+
+/** Every look item `host` showed, one per animation frame it changed in, until the returned `stop()`. */
+function watchLooks(host: Element): { looks: string[]; stop(): void } {
+  const looks: string[] = []
+  let going = true
+  const sample = () => {
+    if (!going) return
+    const look = lookOf(host)
+    if (look !== looks.at(-1)) looks.push(look)
+    requestAnimationFrame(sample)
+  }
+  sample()
+  return { looks, stop: () => (going = false) }
+}
+
+/** A page with an active phase, and issue I1, a fix waiting for Owen's review:  its `FIXED` label in its title. */
+const FIXED_PAGE = `<epic-page>
+  <epic-section kind="phases"><epic-phase id="p-two" title="Two" status="active"></epic-phase></epic-section>
+  <epic-section kind="issues">
+    <epic-item id="i1" status="open" state="replied" changed="2026-11-20T10:00:00-05:00" fixed
+      ><span slot="title">It jumps when it loads <epic-update phase="2" became="fixed"></epic-update></span
+      ><p>The details.</p></epic-item
+    >
+  </epic-section>
+</epic-page>`
+
+describe("<epic-item> his ✓ on a fix, then the page server's apply (I360)", () => {
+  afterEach(() => ReviewClient.adopt(undefined))
+
+  /** The page, reviewed, I1's ✓ (Accept the fix) pressed and drawn;  its host, client and routes. */
+  async function accepted() {
+    const routes = new FakeRoutes()
+    const client = await adoptClient(routes)
+    const page = await render<HTMLElement>(FIXED_PAGE)
+    const host = page.querySelector("epic-item")!
+    await vi.waitFor(() => expect(lookOf(host)).toContain('"approve:none"'))
+    client.press("i1", "approve")
+    await vi.waitFor(() => expect(lookOf(host)).toContain('"approve:dashed"'))
+    await nextFrame(2)
+    return { host, client, routes }
+  }
+
+  /**
+   * What the page server's apply does, in the order the page sees it:  the mark off the inbox first, then the page's
+   * update (`PlanDoc.acceptFix()`:  done, taken up in the active phase, reviewed, its `FIXED` label gone).
+   */
+  async function apply(host: Element, client: ReviewClient, routes: FakeRoutes) {
+    delete routes.inbox.marks.i1
+    await client.refresh()
+    await nextFrame(2)
+    host.setAttribute("status", "done")
+    host.setAttribute("state", "recent")
+    host.setAttribute("reviewed", "2026-11-20")
+    host.setAttribute("review-as", "approve")
+    host.setAttribute("taken-in", "p-two")
+    host.removeAttribute("fixed")
+    host.querySelector("epic-update")!.remove()
+    await ElementFixture.settle()
+    await nextFrame(3)
+  }
+
+  test("held in view:  its `in P` pill from the click, so the page's update changes nothing on screen;  Send lets go once", async () => {
+    const { host, client, routes } = await accepted()
+    const atClick = JSON.parse(lookOf(host)) as { pill: string; label: boolean }
+    // drawn as the server will leave it:  the pill the apply stamps, the label gone
+    expect([atClick.pill, atClick.label]).toEqual([expect.stringMatching(/^in P\d+$/), false])
+    const watch = watchLooks(host)
+    await apply(host, client, routes)
+    watch.stop()
+    expect(watch.looks).toHaveLength(1)
+    // his Send:  unpressed, as the server left it, in one step
+    await client.send()
+    await nextFrame(2)
+    const sent = JSON.parse(lookOf(host)) as { buttons: string[]; chip: [string, boolean, string] }
+    expect([sent.buttons, sent.chip.slice(0, 2)]).toEqual([
+      ["revisit:none", "approve:none"],
+      ["", false]
+    ])
+  })
+
+  test("Send before the server applies it:  let go at the Send, and the page's update then changes nothing", async () => {
+    const { host, client, routes } = await accepted()
+    await client.send()
+    await nextFrame(2)
+    const watch = watchLooks(host)
+    const sent = JSON.parse(lookOf(host)) as { buttons: string[]; chip: [string, boolean, string]; pill: string }
+    expect([sent.buttons, sent.chip.slice(0, 2)]).toEqual([
+      ["revisit:none", "approve:none"],
+      ["", false]
+    ])
+    expect(sent.pill).toMatch(/^in P\d+$/)
+    await apply(host, client, routes)
+    watch.stop()
+    // before:  pressed again till the apply, then unpressed, a row taller and its label back a moment, as it landed
+    expect(watch.looks).toHaveLength(1)
   })
 })

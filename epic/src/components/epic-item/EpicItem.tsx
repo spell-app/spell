@@ -782,8 +782,24 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
    * - `handled` keeps its own `in P4` pill (`phasePill`):  never both
    */
   get donePill(): string {
-    if (this.handled || !this.takenIn) return ""
+    if (this.handled) return ""
+    if (!this.takenIn) return this.acceptingFixIn
     return FINISHED.test(this.status ?? "") ? this.takenIn : ""
+  }
+
+  /**
+   * The phase his ✓ on a fix waiting for him (`fixed`, Accept the fix) will take this item up in, from the click:  the
+   * page's active phase, as the page server's apply stamps it (`PlanDoc.setItem()`'s `taken-in`);  else `""`
+   * (epic `epic-engine` I360).
+   * - so its `in P20` pill is there from the click, as the server will leave it:  appearing with the page's update,
+   *   it grew the line a row and moved everything under it as that update cross-faded in (Owen, 2026-11-20:  "still
+   *   seeing flash when claude comes back to mark the item as 'really grey'")
+   * - only work an active phase takes up (`PhaseTakes.isWork()`):  an issue, or a todo that isn't a limit
+   */
+  get acceptingFixIn(): string {
+    if (this.status !== "open" || !this.fixed || this.limit) return ""
+    if (this.reviewState.liveOf().closingAs !== "approve" || !this.domElement.closest(WORK_SECTION)) return ""
+    return this.domElement.closest(PAGE_TAG)?.querySelector(ACTIVE_PHASE)?.id ?? ""
   }
 
   /**
@@ -1189,6 +1205,14 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
 
 /** The statuses of a finished item:  its `taken-in` draws its `in P20` pill (`donePill`, J231), never `phasePill`'s (I307). */
 const FINISHED = /^(done|canceled|decided)$/
+
+/**
+ * Where an item an active phase takes up when it's closed done sits (`acceptingFixIn`):  the issues, the todos
+ * (`PhaseTakes`' sections);  and the page and its active phase.
+ */
+const WORK_SECTION = 'epic-section:is([kind="issues"], [kind="todos"], [kind="caveats"])'
+const PAGE_TAG = "epic-page"
+const ACTIVE_PHASE = 'epic-phase[status="active"]'
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface EpicItem extends E.AttributeValues<EpicItemVocabulary> {}

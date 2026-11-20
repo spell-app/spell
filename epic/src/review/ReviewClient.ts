@@ -162,6 +162,20 @@ export class ReviewClient extends PageStore {
    */
   private readonly heldInView = new Map<string, string>()
 
+  /**
+   * Which of his instant ✓ or x closed each item, id -> the action, from the click till its close ends
+   * (`closingAs()`, epic `epic-engine` I360):  after his Send let it go, and after the server took the mark off the
+   * inbox, the item still draws as that action left it (its `FIXED` label gone, an x struck) until the page's update.
+   */
+  private readonly closedAs = new Map<string, string>()
+
+  /**
+   * Items his Send (or Auto Send) let go of while still closing (`releaseHeld()`, epic `epic-engine` I360):  drawn as
+   * the server leaves them from then on, his button no longer pressed (`pressedAs()`), whether the server has applied
+   * the mark yet or not, so the page's update changes nothing on screen.
+   */
+  private readonly releasedHere = new Set<string>()
+
   /** Timers for `trackInstant()`, by `fail:<id>` and `hold:<id>`. */
   private readonly instantTimers = new Map<string, ReturnType<typeof setTimeout>>()
 
@@ -311,17 +325,30 @@ export class ReviewClient extends PageStore {
   }
 
   /**
-   * Which of his instant ✓ or x (`approve`, `drop`) is closing item `id`, from the click till his Send lets it go
-   * (epic `epic-engine` I308);  `undefined` when none is (`isClosing()` false, or the hold after a Send).
-   * - his mark while it's in the inbox, else the one held in view after the server applied it (T80)
-   * - the item draws as the server will leave it, its button pressed (`ReviewState.fillOf()`), so the page's own update
-   *   changes nothing on screen (Owen:  "it looks correct, then flashes ... when the update comes in")
+   * Which of his instant ✓ or x (`approve`, `drop`) is closing item `id`, from the click till its close ends
+   * (epic `epic-engine` I308);  `undefined` when none is (`isClosing()` false).
+   * - his mark while it's in the inbox, else the one held in view after the server applied it (T80), else the one that
+   *   closed it, through his Send and the server's apply till the page's update has landed (`closedAs`, I360)
+   * - the item draws as the server will leave it (an x struck, a `FIXED` label gone), so the page's own update changes
+   *   nothing on screen (Owen:  "it looks correct, then flashes ... when the update comes in");  its button shows
+   *   pressed only till his Send (`pressedAs()`)
    */
   closingAs(id: string): string | undefined {
     if (!this.isClosing(id)) return undefined
     const mark = this.inbox.marks[id]
     if (mark && isInstant(id, mark)) return mark.action
-    return this.heldInView.get(id)
+    return this.heldInView.get(id) ?? this.closedAs.get(id)
+  }
+
+  /**
+   * Which of his instant ✓ or x shows PRESSED on item `id` (its button, its id chip's ring):  `closingAs()` from the
+   * click till his Send lets it go, then `undefined` (epic `epic-engine` I360).
+   * - after his Send the item draws as the server leaves it, unpressed, at once:  before, it stayed pressed while the
+   *   mark was still in the inbox and let go only when the server applied it, a redraw as the page's own update landed
+   *   (Owen, 2026-11-20:  "still seeing flash when claude comes back to mark the item as 'really grey'")
+   */
+  pressedAs(id: string): string | undefined {
+    return this.releasedHere.has(id) ? undefined : this.closingAs(id)
   }
 
   /** Is `id` (`away:<line>`) read:  its Seen in the inbox, or applied and cleared since the page loaded? */
@@ -551,6 +578,7 @@ export class ReviewClient extends PageStore {
       if (isInstant(id, mark)) {
         this.undoneInstant.add(id)
         this.heldInView.delete(id)
+        this.forgetClose(id)
       }
       // an Approve that kept his comments goes back to the revisit they made (I163):  never lost by a click
       if (action === "approve" && mark.comments?.length)
@@ -603,6 +631,7 @@ export class ReviewClient extends PageStore {
    */
   private async undo(id: string) {
     this.heldInView.delete(id)
+    this.forgetClose(id)
     const mark = this.inbox.marks[id]
     if (mark && isInstant(id, mark)) {
       this.undoneInstant.add(id)
@@ -621,12 +650,21 @@ export class ReviewClient extends PageStore {
   private letGoOfClose(id: string) {
     this.heldInView.delete(id)
     this.closedHere.delete(id)
+    this.forgetClose(id)
     this.stopTimer(`hold:${id}`)
   }
 
   /** His instant `action` on `id`, just made:  kept in view till Send (T80). */
   private keepInstant(id: string, action: string) {
     this.heldInView.set(id, action)
+    this.releasedHere.delete(id)
+    this.closedAs.set(id, action)
+  }
+
+  /** Forget how item `id` was closed (`closedAs`, `releasedHere`):  its close taken back, wanted back, or over. */
+  private forgetClose(id: string) {
+    this.closedAs.delete(id)
+    this.releasedHere.delete(id)
   }
 
   /**
@@ -637,6 +675,8 @@ export class ReviewClient extends PageStore {
     const ids = [...this.heldInView.keys()]
     if (!ids.length) return ids
     this.heldInView.clear()
+    // drawn as the server leaves them from now on, unpressed, applied yet or not (I360)
+    for (const id of ids) this.releasedHere.add(id)
     const until = Date.now() + RELEASE_FOLD_MS
     for (const id of ids) if (!this.inbox.marks[id]) this.closedHere.set(id, until)
     this.changed()
@@ -954,6 +994,12 @@ export class ReviewClient extends PageStore {
     this.taken.delete(id)
     // a stage accept's countdown (I181):  held from the first frame, as the server dates it
     const at = Date.now() + (mark?.countdown ? STAGE_COUNTDOWN_MS : 0)
+    // his instant ✓ or x taken off by this page:  taken back, never applied, so not drawn as closed by it (I360)
+    const was = this.inbox.marks[id]
+    if (!mark && was && isInstant(id, was)) {
+      this.undoneInstant.add(id)
+      this.forgetClose(id)
+    }
     if (mark) this.inbox.marks[id] = { ...mark, at: new Date(at).toISOString() }
     else delete this.inbox.marks[id]
     this.changed()
@@ -1146,6 +1192,7 @@ export class ReviewClient extends PageStore {
       if (!isInstant(id, mark) || this.instantMarks.get(id) === mark.at) continue
       this.instantMarks.set(id, mark.at)
       this.closedHere.delete(id)
+      this.closedAs.set(id, mark.action)
       const key = `${id}@${mark.at}`
       const wait = Date.parse(mark.at) + INSTANT_GRACE_MS + INSTANT_FAIL_MS - now
       this.later(`fail:${id}`, wait, () => {
@@ -1163,6 +1210,7 @@ export class ReviewClient extends PageStore {
       this.closedHere.set(id, now + CLOSED_HOLD_MS)
       this.later(`hold:${id}`, CLOSED_HOLD_MS, () => {
         this.closedHere.delete(id)
+        this.forgetClose(id)
         this.changed()
       })
     }

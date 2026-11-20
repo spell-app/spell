@@ -968,7 +968,7 @@ describe("ReviewClient:  an instant ✓ or x held in view till Send", () => {
   })
 
   // epic `epic-engine` I308:  "it looks correct, then flashes ... when the update comes in.  Shouldn't flash"
-  test("closingAs():  the same action from the click, through the server applying it, till Send lets it go", async () => {
+  test("closingAs():  the same action from the click, through the server applying it and his Send;  pressedAs() till the Send (I360)", async () => {
     const { client, server } = await started()
     expect(client.closingAs("q1")).toBeUndefined()
     client.press("q1", "drop")
@@ -981,8 +981,26 @@ describe("ReviewClient:  an instant ✓ or x held in view till Send", () => {
     })
     // the mark is off the inbox, but nothing on screen may change:  still closing as his x
     expect(client.closingAs("q1")).toBe("drop")
+    expect(client.pressedAs("q1")).toBe("drop")
     expect(await client.send()).toBe(true)
-    expect(client.closingAs("q1")).toBeUndefined()
+    // let go:  unpressed at once, still closing as his x while its section folds it (I360)
+    expect(client.pressedAs("q1")).toBeUndefined()
+    expect(client.closingAs("q1")).toBe("drop")
+  })
+
+  // epic `epic-engine` I360:  his Send before the server applied it;  the apply then changes nothing on screen
+  test("pressedAs():  his Send before the server applies it lets go at once;  closingAs() holds through the apply", async () => {
+    const { client, server } = await started()
+    client.press("q1", "drop")
+    await vi.waitFor(() => expect(Object.keys(server.inbox.forPage().marks)).toEqual(["q1"]))
+    expect(await client.send()).toBe(true)
+    expect([client.pressedAs("q1"), client.closingAs("q1")]).toEqual([undefined, "drop"])
+    server.inbox.setMark("q1", null)
+    await vi.waitFor(async () => {
+      await client.refresh()
+      expect(client.markOf("q1")).toBeUndefined()
+    })
+    expect([client.pressedAs("q1"), client.closingAs("q1"), client.isClosing("q1")]).toEqual([undefined, "drop", true])
   })
 
   test("closingAs():  none once a second click takes the mark back", async () => {

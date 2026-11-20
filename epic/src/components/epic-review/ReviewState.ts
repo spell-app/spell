@@ -8,6 +8,7 @@ import {
   ReviewClient,
   hasPick,
   isImmediate,
+  isInstant,
   isSent,
   type InboxDoing,
   type InboxDraft,
@@ -89,15 +90,16 @@ export class ReviewState {
    *   yet, so the item keeps its colour and its count (Owen, 2026-10-29:  "Switched 'pick many' and Q4 thinks it was
    *   decided, even though I didn't pick one")
    * - his instant ✓ or x stays a mark after the server applied it, while held in view till his Send
-   *   (`ReviewClient.closingAs()`, epic `epic-engine` I308)
+   *   (`ReviewClient.closingAs()`, epic `epic-engine` I308);  from his Send on it's none, applied yet or not
+   *   (`ReviewClient.pressedAs()`, I360):  the item draws as the server leaves it
    */
   readonly isMarked = (itemId: string): boolean =>
     this.readPage((client) => {
       const id = itemId?.toLowerCase()
       const mark = id ? client.markOf(id) : undefined
-      // his instant ✓ or x the server applied already, held in view till his Send (I308):  still marked, as at the
-      // click, so its chip's ring and its section's counts don't change as the page's update lands
-      if (!mark) return !!id && client.closingAs(id) !== undefined
+      // his instant ✓ or x, till his Send (I308, I360):  marked as at the click, the server's apply or not, so its
+      // chip's ring and its section's counts change at his Send, never as the page's update lands
+      if (!mark || isInstant(id!, mark)) return !!id && client.pressedAs(id) !== undefined
       return !(mark.action === "pick" && !hasPick(mark))
     }) ?? false
 
@@ -158,6 +160,7 @@ export class ReviewState {
         closing: client.isClosing(id),
         heldInView: client.isHeldInView(id),
         closingAs: client.closingAs(id),
+        pressedAs: client.pressedAs(id),
         // his Do this on a canceled item draws it open at once (I359):  `DrawnState.isReopening()`
         mark: markWhen(client.markOf(id)),
         commentsReplied: client.hasRepliedComments(id)
@@ -225,12 +228,15 @@ export class ReviewState {
    * - EXCEPT his instant ✓ or x (epic `epic-engine` I308):  the page server takes it off the inbox ~2s after the click,
    *   but the item is held in view till his Send (T80), so its button stays pressed (`dashed`) as at the click;  the
    *   page's update of the item then changes nothing on screen (Owen:  "it looks correct, then flashes ... when the
-   *   update comes in.  Shouldn't flash")
+   *   update comes in.  Shouldn't flash");  his Send lets go of it (`pressedAs`, I360):  unpressed at once, whether the
+   *   server has applied it yet or not, so its apply never redraws the button
    */
   readonly fillOf = (action: ReviewAction): ReviewFill => {
     const mark = this.mark()
+    const pressed = this.liveOf().pressedAs
+    if (mark && isInstant(this.id(), mark)) return pressed === action ? "dashed" : "none"
     if (mark?.action === action && !isImmediate(mark)) return this.isSent() ? "outline" : "dashed"
-    return !mark && this.liveOf().closingAs === action ? "dashed" : "none"
+    return !mark && pressed === action ? "dashed" : "none"
   }
 
   /** Its id, as the inbox keys it. */
