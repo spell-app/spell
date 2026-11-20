@@ -1,3 +1,5 @@
+import { kebabCase } from "spell/util"
+
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 
@@ -54,6 +56,24 @@ export class UIViews {
       if (type) return { type, count }
     }
     return undefined
+  }
+
+  /**
+   * The Spell UI element's view class name `name` names, e.g. `UiTreeView` -- `undefined` if it names none.
+   * - For another project's declarations (epic `from-console` I19):  a type built on one names it as its super-type,
+   *   which the importer has only once one of its own lines names `ui tree view`.
+   * - The element is found by its tag's words, `tree`, in the importer's language:
+   *   its attributes are read in the importer's words, as its own line would make them.
+   * - SIDE EFFECT:  the first time, adds the type to the importer's scope, as `typeFor()` does.
+   * - A lookup:  call it WHILE PARSING (or loading declarations).
+   */
+  static typeNamed(scope: P.Scope, name: string): P.TypeScope | undefined {
+    const words = /^-ui-(.+)-view$/.exec(kebabCase(name))?.[1]
+    if (!words) return undefined
+    const packs = (scope.parser as SP.SpellParser | undefined)?.packs ?? SP.ComponentPacks.DEFAULT
+    const base = SP.ComponentPacks.viewBaseFor(words.replace(/-/g, " "), SP.Language.of(scope).lang, packs)
+    if (!base || P.classCase(`${base.tag}-view`) !== name) return undefined
+    return UIViews.typeOf(scope, base)
   }
 
   /** Is `type` a Spell UI element's view itself, `UiTreeView`, not a type built on one? */

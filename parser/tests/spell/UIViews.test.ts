@@ -152,6 +152,22 @@ describe("SP.UIViews", () => {
     expect(python).toContain('class NetlistColumn(View):\n    ui_element = "ui-tree"')
   })
 
+  test("another project importing a type built on one finds its super-type, and overrides its hooks", () => {
+    const { declarations } = compiledSpellProject([
+      { path: "/Harbor.spell", contents: 'a "netlist column" is a ui tree view\n\tits appearance is columns' }
+    ])
+    expect(declarations.statements.find(({ type }) => type === "NetlistColumn")?.superType).toBe("UiTreeView")
+    const path = "/Program.spell"
+    const root = SP.Language.rootScopeFor([SP.Language.forFile(path)])
+    const imports = SP.SpellDeclarations.importScope(root, [{ from: "@owen/harbor", declarations }])
+    const contents = ['a "port column" is a netlist column', "\tto give the row class of (an item)", '\t\treturn "port"']
+    const [file] = parseSpellProject([{ path, contents: contents.join("\n") }], { parentScope: imports }).files
+    expect(file!.errors).toEqual([])
+    const portColumn = file!.scope.getType("PortColumn")!
+    expect(SP.UIViews.baseOf(portColumn)?.tag).toBe("ui-tree")
+    expect(file!.compiled).toContain("rowClass(item) {")
+  })
+
   test("an element no pack has names no type", () => {
     const [file] = parseSpellProject([{ path: "/Harbor.spell", contents: 'a "gizmo" is a ui frobnicator view' }]).files
     expect(file!.errors).not.toEqual([])

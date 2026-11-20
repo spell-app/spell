@@ -364,6 +364,7 @@ export class SpellDeclarations {
       .map((name) => (renames.has(name) ? `${name} as ${renames.get(name)}` : name))
     if (module && scope instanceof P.ImportScope) scope.modules.set(module, provided)
     SpellDeclarations.loadSubclasses(scope, from, declarations, originals, module)
+    SpellDeclarations.loadUIViews(scope, declarations)
     // names as the importer knows them
     const names = new Set([...originals].map((name) => renames.get(name) ?? name))
     const saved: SP.SpellDeclaration[] = []
@@ -548,6 +549,19 @@ export class SpellDeclarations {
    * Type `type`, if picked -- throws if another import already declared it.
    * - `runtimeName`:  its class's name when the code runs, if it was renamed -- see `P.TypeScope.runtimeName`.
    */
+  /**
+   * SIDE EFFECT:  each Spell UI element's view a type of `declarations` is built on, e.g. `UiTreeView`,
+   * added to `scope` when it doesn't have it yet (epic `from-console` I19) -- see `SP.UIViews.typeNamed()`.
+   * - Not in `declarations` themselves:  each project makes its own, from its packs, the first time it's named.
+   */
+  private static loadUIViews(scope: P.RootScope, declarations: SP.SpellDeclarationsData) {
+    const declared = new Set(declarations.statements.map((it) => it.type).filter(Boolean))
+    for (const { superType } of declarations.statements) {
+      if (!superType || declared.has(superType) || scope.getType(superType)) continue
+      SP.UIViews.typeNamed(scope, superType)
+    }
+  }
+
   private static loadType(scope: P.RootScope, from: string, names: Set<string>, type: P.TypeScopeProps) {
     const { name } = type
     if (!names.has(name)) return

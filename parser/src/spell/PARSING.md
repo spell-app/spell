@@ -1536,6 +1536,10 @@ plain Spell.
   - The type, `UiTreeView`, is made the first time a line names it, in the project's scope, from the pack's
     `viewBaseFor()`:  a view with a property per attribute of the element, loaded as declarations are.
   - A type built on it compiles `extends View`, naming its element, `static uiElement = "ui-tree"` (`CreateType`).
+    - TypeScript writes no element class for it, nor for a type below it:  the page builds its tag on the element
+      (`TSWriter.elementClassFor()`, I17).
+  - Another project importing a type built on one gets `UiTreeView` too, as its declarations load:
+    its super-type names it, and the importer makes its own from its packs (`SP.UIViews.typeNamed()`, I19).
   - A `to` line in its body in a hook's words (`to give the row class of (an item)`) is that hook, under the
     element's name, `rowClass(item)`, never an action (`MethodDefinition.uiHookOf()`).
 
