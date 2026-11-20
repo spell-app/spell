@@ -9,10 +9,12 @@
  *     access token.  Nothing else registers for it, and nothing's loaded.
  *   - It answers at `/api/places/<base>`, behind the page server's `Guard`, where a program's `RemotePlace` looks.
  *   - ONE base, ONE key, called `AIRTABLE_KEY`:  a program naming another is told so.  More takes a `PlaceServer` of your own.
+ * - Its secrets:  the environment the page server started with, else the ones typed in once (`SRV.Secrets`).
  * - As the page server starts, each secret a place needs that isn't set is said, one line each, never a value.
  * - Local only, as `Guard` is:  a hosted server is The Cloud's question.
  * - Node only.
  */
+import { SRV } from "spell/server"
 import type { RouteContext, RouteModule } from "spell/server/page"
 
 import { AuthenticatedPlaces } from "./AuthenticatedPlaces"
@@ -55,8 +57,10 @@ function airtableSource(from: Readonly<Record<string, string | undefined>>) {
 const placeRoutes: RouteModule = {
   name: "places",
   async setup(context) {
-    const places = AuthenticatedPlaces.for(context).addSource(airtableSource(process.env))
-    await serveAirtableBase(context, process.env)
+    // the environment, else the secrets typed in once (`spell runbook`)
+    const secrets = new SRV.Secrets().withEnvironment()
+    const places = AuthenticatedPlaces.for(context).addSource(airtableSource(secrets))
+    await serveAirtableBase(context, secrets)
     // after every route module's setup:  the app's hands in its projects
     context.onListening(() => places.sayMissing())
   }

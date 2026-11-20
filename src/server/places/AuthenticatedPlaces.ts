@@ -61,7 +61,7 @@ const ONE_PER_ROUTER = new WeakMap<SRV.Router, AuthenticatedPlaces>()
 export class AuthenticatedPlaces {
   /** Where its places are:  each source's, in the order added. */
   private readonly sources: AuthenticatedPlaceSource[] = []
-  /** Where secrets are found, by name:  the environment. */
+  /** Where secrets are found, by name:  the environment, else the secrets kept (`SRV.Secrets`). */
   private readonly from: Readonly<Record<string, string | undefined>>
   /** Sends what it passes on. */
   private readonly fetch: typeof globalThis.fetch
@@ -70,7 +70,7 @@ export class AuthenticatedPlaces {
   /** The token each place's secret makes, by its address here, for a place whose line says so. */
   private readonly tokensByPlace = new Map<string, PlaceToken>()
 
-  constructor({ from = process.env, fetch = globalThis.fetch }: AuthenticatedPlacesProps = {}) {
+  constructor({ from = new SRV.Secrets().withEnvironment(), fetch = globalThis.fetch }: AuthenticatedPlacesProps = {}) {
     this.from = from
     this.fetch = fetch
   }
@@ -260,7 +260,7 @@ export class AuthenticatedPlaces {
 
 /** Constructor props of `AuthenticatedPlaces`. */
 export type AuthenticatedPlacesProps = {
-  /** Where secrets are found, by name;  default the environment. */
+  /** Where secrets are found, by name;  default the environment, else the secrets kept (`SRV.Secrets`). */
   from?: Readonly<Record<string, string | undefined>>
   /** What sends requests on;  default the platform's. */
   fetch?: typeof globalThis.fetch

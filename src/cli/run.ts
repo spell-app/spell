@@ -135,6 +135,51 @@ export async function ask(
 }
 
 /**
+ * Ask the person at the terminal for a secret, a token or a password:  what they type isn't shown, not even as dots.
+ * - their answer, trimmed;  `""` when there's no terminal to ask in (as `ask()`), or for Ctrl+D
+ * - Backspace takes back a letter;  Enter ends it, so a pasted token goes in whole with one Enter after it
+ * - keys typed before the question showed are thrown away (`dropTypedAhead()`), as `ask()` does
+ * - read in raw mode, a key at a time:  so Ctrl+C is caught by hand, and stops the command as anywhere else
+ * - NEVER throws, and never writes what's typed anywhere
+ */
+export async function askSecret(
+  question: string,
+  { input = process.stdin, output = process.stdout, typedAheadMs = TYPED_AHEAD_MS }: Omit<AskOptions, "suggestion"> = {}
+): Promise<string> {
+  if (!input.isTTY || !output.isTTY) return ""
+  const raw = input as RawInput
+  raw.setRawMode?.(true)
+  await dropTypedAhead(input, typedAheadMs, { keepRaw: true })
+  output.write(`${questionText(question)} `)
+  emitKeypressEvents(input)
+  raw.setRawMode?.(true)
+  input.resume()
+  try {
+    return await new Promise<string>((done) => {
+      let typed = ""
+      const finish = (value: string) => {
+        input.off("keypress", onKey)
+        output.write("\n")
+        done(value.trim())
+      }
+      const onKey = (text: string | undefined, key: { name?: string; ctrl?: boolean; meta?: boolean } = {}) => {
+        if (key.ctrl && key.name === "c") {
+          raw.setRawMode?.(false)
+          process.kill(process.pid, "SIGINT")
+        } else if (key.name === "return" || key.name === "enter") finish(typed)
+        else if (key.ctrl && key.name === "d") finish("")
+        else if (key.name === "backspace") typed = typed.slice(0, -1)
+        else if (text && !key.ctrl && !key.meta && text >= " ") typed += text
+      }
+      input.on("keypress", onKey)
+    })
+  } finally {
+    raw.setRawMode?.(false)
+    input.pause()
+  }
+}
+
+/**
  * Ask the person at the terminal to pick one of `choices`:  the value picked, else `suggestion`.
  * - drawn as a numbered list under the question, the suggestion first marked (`❯`):
  *   the up and down arrows move the mark, Enter takes it
@@ -142,6 +187,7 @@ export async function ask(
  *   - 9 choices or fewer:  its key takes that choice at once
  *   - more:  digits build the number and move the mark (`1` then `3` lands on 13), Enter takes it;  a digit that
  *     would go past the end starts a new number, and so does a pause of a second (`NUMBER_PAUSE_MS`)
+ * - a choice's own `key` (`s`, `q`) takes it at once too, shown after its label:  `3. Skip this step (s)`
  * - once picked, the list folds into one line:  the question and the answer (Escape's too)
  * - keys typed before the list showed are thrown away (`dropTypedAhead()`):  a stray arrow can't move the mark,
  *   nor a stray Enter pick (epic `epic-engine` P69:  "there was a problem with keys when selecting a color")
@@ -167,8 +213,8 @@ export async function choose(
     choices.findIndex(({ value }) => value === suggestion)
   )
   const lines = () =>
-    choices.map(({ label, hint }, index) => {
-      const line = `${index === at ? "❯" : " "} ${index + 1}. ${label}${hint ? `  -- ${hint}` : ""}`
+    choices.map(({ label, hint, key }, index) => {
+      const line = `${index === at ? "❯" : " "} ${index + 1}. ${label}${key ? ` (${key})` : ""}${hint ? `  -- ${hint}` : ""}`
       return index === at ? chalk.cyan(line) : line
     })
   const raw = input as RawInput
@@ -207,6 +253,8 @@ export async function choose(
           redraw()
         } else if (key.name === "return" || key.name === "enter") finish(choices[at]!.value)
         else if (key.name === "escape" || (key.ctrl && key.name === "d")) finish(suggestion)
+        else if (text && choices.some((choice) => choice.key === text))
+          finish(choices.find((choice) => choice.key === text)!.value)
         else if (text && /^\d$/.test(text)) {
           const number = numbered.type(text)
           if (number === undefined) return
@@ -363,6 +411,8 @@ export type Choice = {
   label: string
   /** a few words after it, after ` -- ` */
   hint?: string
+  /** a letter that takes it at once, shown after its label:  `s` for Skip;  never a digit */
+  key?: string
 }
 
 /** `ask()`'s and `choose()`'s options. */

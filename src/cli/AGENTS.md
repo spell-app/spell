@@ -29,6 +29,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       the mark (`1`, `3` lands on 13) and Enter takes it
     - both throw away keys typed before the question showed (`typedAheadMs`, 100ms;  a test passes 0):
       a stray arrow or Enter can't pick or answer (epic `epic-engine` P69)
+    - `askSecret()`:  a secret typed, a token or a password, never drawn, read a key at a time (epic `epic-engine` P78);
+      the app's mail setup and the runbooks' secret asks use it
+    - a `choose()` choice may have its own letter (`key: "s"`), which takes it at once
     - `waiting(text, work)`:  a gray line while something slow runs between questions, and what's typed meanwhile
       not shown (`stty -echo`, put back after, even on Ctrl+C);  never raw mode, which would stop Ctrl+C
   - [tools.ts](tools.ts) -- `runTool()`, `runChild()`, `epicBin()` / `runEpic()`, `runSpellEpic()` (`spell epic`)
@@ -65,7 +68,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - The kit's own commands:  [commands.ts](commands.ts) is their list, [commands/](commands/) their work.
 
   ```
-  server  bundle  commands  wwod  local  deps  readme  map  coherence  publish  epic  pony  (help is the program's own)
+  server  bundle  commands  wwod  local  deps  readme  map  coherence  runbook  publish  epic  pony  (help is the program's own)
   ```
 
 - `spell publish`'s work is a folder of its own, [publish/](publish/) (`spell/cli/publish`), with its own barrel:
@@ -77,6 +80,17 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - the code map runs graphify, an optional Python install (`Graphify`), in each repo, then merges and links them
     (`CodeMap`);  the docs map is ours, read by structure (`DocsMap`)
   - [README/cli.md](../../README/cli.md), "Asking the map", says how to use it
+- `spell runbook`'s work is a folder of its own too, [runbook/](runbook/) (`spell/cli/runbook`), with its own barrel
+  (epic `epic-engine` P78):
+  - `Runbook`, a runbook read (`<name>.runbook.md`:  settings, a step per `##` heading, each step's `ask` and `sh`
+    blocks);  `RunbookWalk`, the walk in the terminal;  `RunbookProgress`, how far it got
+    (`~/.spell/runbooks/`);  `Runbooks`, finding one by name in every folder's `runbooks/` and each epic's
+  - a secret typed goes to the server's `Secrets` (`~/.spell/secrets/`), loaded by file with `open`, `kitFolders` and
+    `contentFolder`, so a walk loads no linkedom
+  - [README/cli.md](../../README/cli.md), "Walking a runbook", says how to write one
+- [commandBlocks.ts](commandBlocks.ts) -- a page's fenced blocks, an `sh` block's Output fold, and `outputMatches()`:
+  the README tester's (`tools/readme-test.ts`, by plain node, as `spell/cli/commandBlocks.ts`) and the runbooks';
+  node's modules and `spell/util/string.ts` only, NOT in the barrel
 - `spell coherence score`'s work is a folder of its own too, [coherence/](coherence/) (`spell/cli/coherence`),
   with its own barrel (epic `coherence` P15):
   - it reads the catalog's **Score:** lines (`agents/coherence/`), counts each mechanism's copies with `git grep`
@@ -135,6 +149,9 @@ As WWOD §20, plus:
   never the real `~/.local/bin` or `~/.spell/`.
 - [publish/](../../tests/cli/publish/):  `PackageBuild` and `PublishedPackage` on a made-up repo.
   - The real five packages and the scratch install:  `spell publish --dry-run`, too slow for a unit test.
+- [runbook/](../../tests/cli/runbook/):  a runbook read, each kind of step and each mistake;  the walk on a fake
+  terminal (two streams that say they're one, each question answered as it's drawn), with stand-in commands, browser
+  and clock, a scratch home, and a fake token searched for in everything it showed or wrote.
 - [coherence/](../../tests/cli/coherence/):  the catalog's Score lines read, the counts over a made-up checkout of
   two git repos, the score's sums, a compare's words.
 - [map/](../../tests/cli/map/):  imports read and resolved, a made-up checkout's maps merged and linked,

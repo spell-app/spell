@@ -1,13 +1,16 @@
+import { SRV } from "spell/server"
+
 /****************
  * ### `PlaceKeys`
  * The keys a server side holds for its places, by name (epic `data` Q11):  a program names one, and only this knows it.
  *
  * ```ts
- * const keys = new PlaceKeys({ names: ["COOKBOOK_KEY"] })   // from the environment
+ * const keys = new PlaceKeys({ names: ["COOKBOOK_KEY"] })   // from the environment, else the secrets kept
  * new RestPlace({ url, keyNamed: "COOKBOOK_KEY", keyFrom: keys.keyNamed })
  * ```
  *
  * - `PlaceServer` runs every answer through `scrubbed()`, so a service that echoes a key can't send it on to a browser.
+ * - A key not in the environment is read from the secrets you've typed in once (`SRV.Secrets`, `~/.spell/secrets/`).
  * - Never prints:  turned to JSON or a string, it's only the names.
  ****************/
 export class PlaceKeys {
@@ -16,7 +19,7 @@ export class PlaceKeys {
   /** The names asked for, set or not:  for `missing()`. */
   private readonly names: readonly string[]
 
-  constructor({ names = [], from = process.env }: PlaceKeysProps = {}) {
+  constructor({ names = [], from = new SRV.Secrets().withEnvironment() }: PlaceKeysProps = {}) {
     const entries = names.flatMap((name) => {
       const key = from[name]
       return key ? [[name, key] as const] : []
@@ -44,17 +47,9 @@ export class PlaceKeys {
     this.keys.set(name, secret)
   }
 
-  /**
-   * `text`, with every key in it replaced by its name.
-   * - As written in JSON too:  a key with a line end in it doesn't look like itself inside an answer.
-   */
+  /** `text`, with every key in it replaced by its name:  `[the key COOKBOOK_KEY]` (`SRV.scrubbed()`). */
   scrubbed(text: string): string {
-    let clean = text
-    for (const [name, key] of this.keys) {
-      const inJson = JSON.stringify(key).slice(1, -1)
-      clean = clean.replaceAll(key, `[the key ${name}]`).replaceAll(inJson, `[the key ${name}]`)
-    }
-    return clean
+    return SRV.scrubbed(text, this.keys)
   }
 
   /** Only the names. */
@@ -77,6 +72,6 @@ export class PlaceKeys {
 export type PlaceKeysProps = {
   /** The names of the keys to hold. */
   names?: readonly string[]
-  /** Where they're found;  default the environment. */
+  /** Where they're found;  default the environment, else the secrets kept (`SRV.Secrets`). */
   from?: Readonly<Record<string, string | undefined>>
 }

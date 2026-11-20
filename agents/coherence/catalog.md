@@ -396,6 +396,31 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
   - beside them, node's own `parseArgs` in Spell UI's tools (`ui/src/tools/cli.ts` ...):  fine for a
     package-local tool
 
+### Walking a person through steps
+
+- **It is:**  a runbook, `spell runbook start <name>` (`spell/cli/runbook`, epic `epic-engine` P78):
+  a Markdown file, `<name>.runbook.md` in a `runbooks/` folder, walked in the terminal a step at a time
+  - a step by hand:  its words, then a pick (`choose()`, Enter / `o` / `s` / `q`);  a value:  `ask()`, a secret one
+    `askSecret()`;  commands:  run in its folder, every value in their environment, checked against an Output fold
+    the way the README examples are (`spell/cli/commandBlocks`:  `fencedBlocks()`, `outputMatches()`)
+  - where it got to:  `RunbookProgress`, `~/.spell/runbooks/`;  secrets:  `SRV.Secrets`, `~/.spell/secrets/`
+- **Use it when:**  three or more steps for a person, with commands to type:  never a list in a reply, nor a
+  one-off script of prompts (the kit's AGENTS.md, "Commands").
+- **Flag:**  `rl\.question\(|stty", \["-echo"\]`
+- **Copies:**  `--`
+  - the app's mail setup's hidden prompt went onto `askSecret()` in P78
+
+### A secret typed in once, and taken out of what's shown
+
+- **It is:**  `SRV.Secrets` (`spell/server/Secrets`, epic `epic-engine` P78):  one private file per secret,
+  `~/.spell/secrets/<NAME>`;  `named()` the environment first, then it;  `withEnvironment()` both, as a record
+  - `SRV.scrubbed(text, secrets)`:  each secret replaced by its name, as written in JSON too
+- **Use it when:**  a command or server needs a token by name, or must show text that may hold one.
+- **Flag:**  `replaceAll\(\w+, `\[the`
+- **Copies:**
+  - `PlaceSession.scrubbed()` (`src/server/places/PlaceSessions.ts`):  its own loop, `[its session]`;
+    left as it is in P78, as `PlaceSessions` loads node's modules alone
+
 ## Pages and the network
 
 ### Fetching

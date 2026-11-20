@@ -333,10 +333,9 @@ export class LocalSite {
     this.sudo(`Setting up this Mac's postfix to send through Gmail`, ["-v"])
 
     if (newPassword || !this.tools.succeeds("sudo", ["test", "-s", POSTFIX_PASSWORDS])) {
-      const password = (await this.tools.askSecret(`Gmail app password for ${from} (it won't show): `)).replace(
-        /\s/g,
-        ""
-      )
+      const password = (
+        await this.tools.askSecret(`Gmail app password for ${from} (it won't show as you type)`)
+      ).replace(/\s/g, "")
       if (!password) throw new CLI.CliError("No password given:  make one at https://myaccount.google.com/apppasswords")
       this.tools.run("sudo", ["touch", POSTFIX_PASSWORDS])
       this.tools.run("sudo", ["chmod", "600", POSTFIX_PASSWORDS])
@@ -443,7 +442,7 @@ export type LocalTools = LocalSiteTools & {
   open(url: string): void
   /** This Mac's address on its network. */
   lanAddress(): string | undefined
-  /** Ask for a line that isn't shown as it's typed. */
+  /** Ask for a line that isn't shown as it's typed:  the kit's `CLI.askSecret()`. */
   askSecret(question: string): Promise<string>
   /** Ask for a line. */
   askLine(question: string): Promise<string>
@@ -571,14 +570,7 @@ function macTools(): LocalTools {
     },
     open: (url) => void SRV.openBrowser(url),
     lanAddress: () => lanAddressOf(networkInterfaces()),
-    askSecret: (question) => {
-      // the terminal stops showing what's typed, and shows it again even if reading fails
-      spawnSync("stty", ["-echo"], { stdio: "inherit" })
-      return readLine(question).finally(() => {
-        spawnSync("stty", ["echo"], { stdio: "inherit" })
-        process.stdout.write("\n")
-      })
-    },
+    askSecret: (question) => CLI.askSecret(question),
     askLine: readLine,
     cloud: () => SpellCloud.record(),
     newestMailTo: async (email) => (await catcher.newestTo(email))?.text,

@@ -162,6 +162,15 @@ yarn kit:review       # the finishing pass:  ts, lint:fix, format, test
   - Every big folder adds its own commands to it, named in its `package.json`'s `"spell": { "commands" }`;
     `spell help` lists them, grouped by folder.
   - A word two folders both want goes under each one's short name (`spell parser check`, `spell app check`).
+- **Three or more steps for Owen to do, with commands to type, are a RUNBOOK, never a list in a reply**
+  (epic `epic-engine` P78):
+  - write `<name>.runbook.md` in the `runbooks/` folder beside the code it drives (`parser/runbooks/` ...), or in the
+    epic's own folder (`epics/<epic>/runbooks/`), and run `spell runbook check <name>` until it's clean
+  - reply with the ONE command that starts it, `spell runbook start <name>`, and what it's for
+  - its steps:  by hand (the exact words, the link, a `Should:`), a value to type in (an `ask` block, `secret` for a
+    token), commands it runs (an `sh` block, an Output fold to check them), an `If not:` where it can fail
+  - how it's written, and what the walk does:  [README/cli.md](README/cli.md), "Walking a runbook"
+  - a manual test (`#M`) whose steps are a runbook:  its Step says the start command
 - ONE session pushes to GitHub and publishes to npm:  epic `epic-engine`'s, the tooling home (Owen, 2026-11-19).
   - Every other session merges into `main` as usual, then asks it:  `/send epic-engine "release <what>"`.
     Never `git push` or `spell publish` itself.

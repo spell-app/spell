@@ -236,6 +236,16 @@ The coherence agent reads it too, and flags a second word for the same idea (epi
 - **Score:**  `(?i)\bdata pages?\b`
 - **Decided:**  epic `data` Q104 (Owen, 2026-11-18, the reference pages page's Q7:  A).
 
+### runbook
+
+- **Say:**  runbook, for a file of steps that `spell runbook start` walks a person through in the terminal:
+  steps by hand, values to type in, commands it runs;  a walk, for one go through it.
+  - Beside the run page, which is a COMMAND that stopped to ask on a page (`CommandRun`):  a runbook asks in the
+    terminal, so a secret can go through it.
+- **Not:**  setup (not every runbook sets something up), steps alone (the word for an epic page's and a manual
+  test's), `spell run` (compiles and runs a project).
+- **Decided:**  epic `epic-engine` P78's choices (Owen, 2026-11-18:  A, `spell runbook`).
+
 ## Themes
 
 One word for each idea about how a page looks (epic `debut` P17, Q29;  Owen, 2026-10-25:  "One word each").

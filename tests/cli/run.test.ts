@@ -51,6 +51,34 @@ describe("ask()", () => {
   })
 })
 
+describe("askSecret()", () => {
+  test("no terminal:  nothing, asking nothing", async () => {
+    const output = stream(false)
+    expect(await CLI.askSecret("Token?", { input: stream(false), output })).toBe("")
+    expect(output.read()).toBeNull()
+  })
+
+  test("a terminal:  what's typed, trimmed, and never drawn;  Backspace takes a letter back", async () => {
+    const input = stream(true)
+    const output = stream(true)
+    const answer = CLI.askSecret("Paste the token", { input, output, ...NOW })
+    input.write(" nbt_abc.dex")
+    input.write("\x7f")
+    input.write("f\r")
+    expect(await answer).toBe("nbt_abc.def")
+    const drawn = plain(output.read())
+    expect(drawn).toContain("? Paste the token")
+    expect(drawn).not.toContain("nbt_")
+  })
+
+  test("Ctrl+D:  nothing", async () => {
+    const input = stream(true)
+    const answer = CLI.askSecret("Token?", { input, output: stream(true), ...NOW })
+    input.write("abc\x04")
+    expect(await answer).toBe("")
+  })
+})
+
 describe("choose()", () => {
   const choices = [
     { value: "private", label: "private", hint: "only the people you add" },
@@ -151,6 +179,16 @@ describe("choose()", () => {
     input.write("2")
     input.write("\r")
     expect(await answer).toBe("c2")
+  })
+
+  test("a choice's own key takes it at once, shown after its label", async () => {
+    const input = stream(true)
+    const output = stream(true)
+    const keyed = [...choices, { value: "skip", label: "Skip", key: "s" }]
+    const answer = CLI.choose("Next?", keyed, { input, output, ...NOW })
+    input.write("s")
+    expect(await answer).toBe("skip")
+    expect(plain(output.read())).toContain("3. Skip (s)")
   })
 
   test("Escape:  the suggestion", async () => {

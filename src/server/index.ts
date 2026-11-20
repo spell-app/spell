@@ -52,6 +52,7 @@ export * from "./WebServer"
 export * from "./serveRoutes"
 export * from "./DiskCache"
 export * from "./FileStorage"
+export * from "./Secrets"
 
 export * from "./contentFolder"
 export * from "./DataFile"

@@ -83,6 +83,8 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
       a pick, with its link pair.
       - In Codex:  the question goes in the chat, under that header.
     - Why:  a page waiting for him, named mid-reply, got missed.
+  - Three or more steps for the person, with commands to type:  a runbook, and the reply gives its ONE start command,
+    `spell runbook start <name>` (the kit's AGENTS.md, "Commands";  epic `epic-engine` P78).
 - Naming a doc in a reply (the epic page, a guide, any docs page):
   paste what `epic pages link` prints, run in the checkout the doc is in.
   - In full:  `epic pages link <ABSOLUTE path> --hash <id> [--text "..."]`.
@@ -762,6 +764,8 @@ Until a `/back:  ...` message (or `epic focus status` says off):
          - a wait or a look between commands is a step of its own, between their blocks
          - the real names:  the extension's output channel is `Spell`, not "Spell Language Server"
          - nothing Claude can check itself:  CI (`gh run list`), a command's output, a page's markup are Claude's to check
+         - three or more steps with commands:  write them as a runbook, and the Step is its start command,
+           `spell runbook start <name>` (the kit's AGENTS.md, "Commands")
        - `--example`:  a screenshot you took of it working, copied beside the page (`tests/<id>.png`)
        - `details <name>#M3 --step ... --should ...` rewrites an older manual test in these fields
      - They answer it WHERE IT IS, with the page's own marks (epic `epic-engine` P51, Q53:  no separate test run,

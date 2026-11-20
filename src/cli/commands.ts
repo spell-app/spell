@@ -22,6 +22,8 @@
  *   `spell/ui/x` ...), kept for branches open when it landed
  * - `spell rename branches [--dry-run]`:  an epic's old child-repo branches carried into the merged folders, rewritten
  *   as P20's history was (`tools/one-repo/one-repo.ts --step carry-on`)
+ * - `spell runbook start | status | reset | list | check`:  a file of steps walked in the terminal, its commands run,
+ *   its values asked for, where you got to remembered (epic `epic-engine` P78)
  * - `spell epic <args>`:  the epic tool (`epic`), wherever it is:  `npx spell@next epic init` sets a repo up for epics
  *   (epic `epic-friend` P13;  `runSpellEpic()`)
  * - `spell pony`:  a pony, which proves `spell` runs with nothing else installed
@@ -334,6 +336,47 @@ export default function kitCommands(spell: Command): void {
     )
 
   ////////////////
+  // ## Runbooks
+  ////////////////
+
+  const runbook = spell
+    .command("runbook")
+    .description(
+      "a runbook:  a file of steps it walks you through in the terminal, running the commands itself, " +
+        "asking for values (a secret one hidden) and remembering where you got to"
+    )
+    .addHelpText("after", RUNBOOK_HELP)
+
+  runbook
+    .command("start")
+    .description("walk it from the first step not done:  Enter when a step is done, s to skip, q to stop")
+    .argument("<runbook>", "its name (netbox-demo), or its file")
+    .action((name: string) => runbookCommand("start", [name]))
+
+  runbook
+    .command("status")
+    .description("each step, done or not, and when the walk started and expires")
+    .argument("<runbook>", "its name, or its file")
+    .action((name: string) => runbookCommand("status", [name]))
+
+  runbook
+    .command("reset")
+    .description("forget how far you got, so the next start begins at step 1")
+    .argument("<runbook>", "its name, or its file")
+    .action((name: string) => runbookCommand("reset", [name]))
+
+  runbook
+    .command("list")
+    .description("every runbook found:  the kit's and its folders' runbooks/, and each epic's")
+    .action(() => runbookCommand("list", []))
+
+  runbook
+    .command("check")
+    .description("read each runbook and say its mistakes, each with its line -- exits 1 on a mistake")
+    .argument("[runbooks...]", "their names or files;  none:  every one found")
+    .action((names: string[]) => runbookCommand("check", names))
+
+  ////////////////
   // ## Epics
   ////////////////
 
@@ -376,6 +419,17 @@ const README_TEST: CLI.ToolSpec = { tool: "tools/readme-test.ts", cwd: "." }
 
 /** The README examples' pictures (`spell readme pictures`;  epic `ui-gaps` P14). */
 const README_PICTURES: CLI.ToolSpec = { tool: "tools/readme-pictures.ts", cwd: "." }
+
+/** `spell runbook`'s verbs, its work loaded when one runs. */
+function runbookCommand(verb: string, names: string[]): Promise<never> {
+  return CLI.runCommand(async () => (await import("spell/cli/commands/runbookCommand")).runbookCommand(verb, names))
+}
+
+/** After `spell runbook --help`'s verbs. */
+const RUNBOOK_HELP = `
+A runbook is a Markdown file, <name>.runbook.md, in a runbooks/ folder:  each ## heading a step.
+A step with an sh block runs it;  with an ask block, asks for a value (\`\`\`ask NAME secret hides it);
+with neither, it's done by hand.  How far you got:  ~/.spell/runbooks/.  Secrets:  ~/.spell/secrets/.`
 
 /** `serverCommand.ts`, loaded when a `spell server` verb runs. */
 function serverCommand() {

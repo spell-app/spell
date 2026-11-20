@@ -192,6 +192,12 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - The epic folder:  the one the server says it serves, `contentFolder` in its `/api/server`.
       - Which main checkout, when the caller names none (the doc preview):
         the one beside the epic repo whose pid file names it (`contentServerOf()`).
+  - `Secrets` -- the secrets typed in once (a token, a key), one private file each, `~/.spell/secrets/<NAME>`
+    (epic `epic-engine` P78):  `named()` reads the environment first, then them;  `withEnvironment()` is both as a
+    record, the place keys' default `from` (`PlaceKeys`, `AuthenticatedPlaces`, the page server's `placeRoutes`)
+    - `scrubbed(text, secrets)` beside it, the ONE way a secret is taken out of what's shown:  `PlaceKeys.scrubbed()`,
+      a runbook's command output (`spell runbook`)
+    - node's own modules only:  the runbooks load it by file, `spell/server/Secrets`
   - `FileStorage` -- a browser's `localStorage`, kept in ONE JSON file:  where the kit's `SaveQueue` keeps a server's
     unsent work (epic `atmosphere` P14, Q19 A:  ONE retry queue for the server's writes, mail and alerts)
     - each change written whole, through a temporary file and a rename;  synchronous, as `localStorage` is

@@ -313,6 +313,7 @@ If a pony in a wizard hat tells you "Neigh-tive custom elements, at your service
 | `spell publish [--dry-run] [--tag <tag>]` | builds, packs and checks the npm packages, installs them in a scratch project, then publishes them under the tag `next`, lowest first;  `--dry-run` stops before publishing;  a real one runs in the publish workflow, started from GitHub's Actions tab, with no npm token |
 | `spell map <verb>` | a map of every repo's code, and one of the docs:  what already does this, what uses it, which pages name it ([below](#asking-the-map)) |
 | `spell coherence score` | how coherent the code is:  each mechanism's copies left and its users, scored 0-100, and saved so it trends ([below](#scoring-coherence)) |
+| `spell runbook <verb>` | a file of steps it walks you through in the terminal, running the commands itself and remembering where you got to ([below](#walking-a-runbook)) |
 | `spell epic <args...>` | the epic tool, `epic`, with its own verbs:  `npx spell@next epic init` sets a repo up for epics, from nothing installed;  it runs the checkout's `epic/bin/epic`, which the published `spell` ships too, else the installed `spell-epic`'s, else `spell-epic` fetched at `spell`'s own version |
 | `spell pony [words...]` | a pony in Spell's wizard hat says your words, or one of its own |
 | `spell help [command...]` | every command, grouped by repo;  or one command's help:  `spell help compile` is `spell compile --help`, and `spell help server stop` a sub-command's |
@@ -524,6 +525,90 @@ After them, 9 places still do;  46 files use the shared `Git` instead.
 - **Snapshots** are saved in the epic folder, `epics/coherence/details/scores/`, named by when the code was.
 - A change reads as an improvement:  "55% better (fewer copies)", or "12% worse";
   a table's Improvement column holds the bare percent, a worse one `−12%`.
+
+### Walking a runbook
+
+Some setups take six steps, half in a browser and half typed in a terminal.
+A runbook is those steps in one file, and `spell runbook start` walks you through them:
+
+```sh
+spell runbook start netbox-demo
+```
+
+- A step done by hand shows its words and waits:  Enter when it's done, `o` to open its link, `s` to skip, `q` to stop.
+- A value to type in is asked for;  a secret one, a token, isn't shown as you type it.
+- A command runs by itself, in the runbook's folder, with every value in its environment:  no `export` step.
+  - It must succeed, and print what its Output fold says, as the README examples do.
+  - A secret it prints is shown as its name, `[the secret NETBOX_TOKEN]`.
+- It stops where you stop, or where a step fails, showing that step's "If not:":  the next `start` carries on there.
+
+The file is Markdown, named `<name>.runbook.md`, in a `runbooks/` folder:
+the kit's, one of its folders' (`parser/runbooks/`), or an epic's (`epics/<epic>/runbooks/`).
+It reads as plain instructions on GitHub too.
+
+````markdown
+---
+title: NetBox's demo, for Spell
+folder: ~/netbox-try
+fresh until: 04:00 UTC
+---
+
+## Make a token
+
+Click your user name, top right, then **API Tokens**, then **Add a Token**.
+
+```ask NETBOX_TOKEN secret
+Paste the whole token
+```
+
+## Check every list reads
+
+```sh
+spell place verify NetBox.api.spell
+```
+
+If not:  `403: Invalid v2 token` means part of the token was cut off.
+````
+
+- The settings, all optional:  `title`;  `folder`, where its commands run (`~` is your home);
+  `fresh until`, a time of day after which a walk started before it is forgotten (the demo wipes itself then).
+- A step is a `##` heading:  an `ask` block makes it a value to type in (`ask NAME secret` hides it),
+  an `sh` block commands to run, neither something to do by hand.
+  - `Should:` and `If not:` paragraphs say what you'll see, and what to do when it doesn't work.
+
+`spell runbook check` reads a runbook and names each mistake, with its line:
+
+```sh
+spell runbook check netbox-demo
+```
+
+<details>
+<summary>Output</summary>
+
+```text
+✓ netbox-demo:  5 steps
+```
+
+</details>
+
+| Verb | What it does |
+| --- | --- |
+| `spell runbook start <runbook>` | walks it from the first step not done |
+| `spell runbook status <runbook>` | each step, done or not, and when the walk started and when it expires |
+| `spell runbook reset <runbook>` | forgets how far you got, so the next start begins at step 1 |
+| `spell runbook list` | every runbook found, with how far its walk got |
+| `spell runbook check [runbooks...]` | reads each one and says its mistakes, each with its line;  none named:  every one;  exit 1 on a mistake |
+
+- A runbook is named by its file's name (`netbox-demo`), or by its path.
+- How far you got:  `~/.spell/runbooks/<name>.json5`, with the plain values you typed;  never a secret.
+- Secrets:  one private file each, `~/.spell/secrets/<NAME>`, readable only by you, never in a repo.
+  - Spell's places read them when the terminal has no such variable, so `spell place verify` works in a new terminal,
+    and so does the page server.
+  - `export NETBOX_TOKEN=...` still wins, for that terminal.
+- It needs a terminal you type in:  run from a pipe or by an agent, it says so and stops.
+  - Its commands get no keyboard:  one that asks a question gets its default answer.
+- Agents write one instead of listing three or more steps for you, with commands to type,
+  and reply with the one command that starts it.
 
 ## spell-parser
 
@@ -1501,7 +1586,7 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 | [commands.ts](../src/cli/commands.ts) | the kit's own command list (its `package.json`'s `"spell": { "commands" }`) |
 | [program.ts](../src/cli/program.ts) | `spellProgram()`, `addRepoCommands()` (the clash rule), `addHelp()` |
 | [repos.ts](../src/cli/repos.ts) | `spellRepos()`, `commandLists()`, `hook()`, `needHook()` |
-| [run.ts](../src/cli/run.ts) | `runCommand()`, `rawArgsAfter()`, `out()`, `err()`, `relativePath()` |
+| [run.ts](../src/cli/run.ts) | `runCommand()`, `rawArgsAfter()`, `out()`, `err()`, `relativePath()`;  the terminal's questions, `ask()`, `askSecret()`, `choose()` |
 | [tools.ts](../src/cli/tools.ts) | `runTool()`, `runChild()`, `epicBin()`, `runEpic()`, `runSpellEpic()`, `publishedEpicBin()` |
 | [findCheckout.ts](../src/cli/findCheckout.ts) | `findCheckout()`, `KIT_ROOT`, `KIT_MARKER` |
 | [cli.types.ts](../src/cli/cli.types.ts) | `EXIT`, `CliError`, the flags' types, `CommandList`, `HookList`, `SpellRepo`, `ToolSpec` |
@@ -1514,6 +1599,9 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 | [publish/PublishedPackage.ts](../src/cli/publish/PublishedPackage.ts) | one package's staging folder, its published `package.json`, `npm pack`, the checks |
 | [publish/ScratchInstall.ts](../src/cli/publish/ScratchInstall.ts) | the packed packages installed in a scratch project, and its three checks |
 | [publish/publish.types.ts](../src/cli/publish/publish.types.ts) | `"spellPublish"`'s shape, the reports, the folders |
+| [commands/runbookCommand.ts](../src/cli/commands/runbookCommand.ts) | `spell runbook`:  its five verbs |
+| [runbook/](../src/cli/runbook/index.ts) | `Runbook` (a runbook read), `RunbookWalk` (the walk), `RunbookProgress` (how far it got), `Runbooks` (finding one) |
+| [commandBlocks.ts](../src/cli/commandBlocks.ts) | a page's fenced blocks, an `sh` block's Output fold, and matching what was printed:  the README tester's and the runbooks' |
 | [commands/ponyCommand.ts](../src/cli/commands/ponyCommand.ts) | `spell pony` |
 | [tsconfig.node.json](../tsconfig.node.json) | the kit's node settings, and its node type check |
 | [tsconfig.tsx.json](../tsconfig.tsx.json) | the settings `tsx` runs every folder's commands under:  `tsconfig.node.json`'s, over every folder's files |

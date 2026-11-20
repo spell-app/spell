@@ -186,12 +186,14 @@ export async function placeVerify(
 async function ingestFor(ai: boolean, usesSession: boolean): Promise<PlaceIngest> {
   const chosen = ai ? claudeRunnerFor(process.env, { ai }) : undefined
   const sessions = usesSession ? new (await import("spell/server/places")).PlaceSessions() : undefined
+  // the environment's key, else one typed in once (`spell runbook`'s secret asks)
+  const secrets = new (await import("spell/server")).SRV.Secrets()
   return new PlaceIngest({
     fetch: fetchWithFiles(globalThis.fetch),
     ask: askAtTerminal,
     files: diskFiles,
     readThrough: readThroughSpell,
-    keyNamed: (secret) => process.env[secret],
+    keyNamed: secrets.named,
     ...(sessions && { sessionNamed: (place: string) => sessions.named(place) }),
     say: (line) => CLI.err(line),
     ...(chosen && { claude: chosen.run, claudeVia: chosen.via })

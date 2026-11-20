@@ -91,6 +91,8 @@ After a restart, agents it started are gone:  start each again from its task, as
    (`epic voice novice`), then checked by a reader with no context before it ships, a dialog whole:
    `epic voice check <file> --about "<what it is>"` (or `--text "..."`);  fix what it finds, or say why a finding is
    wrong.  Its output goes in the commit's item (`--details`).
+   Three or more steps for the person, with commands to type:  a runbook they start with one command,
+   `spell runbook start <name>`, never a list in a reply (Spell's AGENTS.md, "Commands").
    Record as you go
    (a title is at most 30 plain words saying what it is, read cold, hours later:
    nothing about a passing condition;  the rest goes in --details;  the full rule:  plan-doc.md's "Rules"):

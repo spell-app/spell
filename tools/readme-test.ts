@@ -4,8 +4,8 @@
  * - An EXAMPLE is a command a page prints, and what it printed:  an `sh` block, then, right after it, a fold whose
  *   summary is `Output`, holding a `text` block.  It runs from its page's repo root, and must print what the fold says.
  * - A command with no Output fold is never run:  installs, clones, servers.
- * - Node 24 runs it as is (its types stripped):  node's own modules only (and util's standalone `spell/util/string.ts`),
- *   `import type` for types.
+ * - Node 24 runs it as is (its types stripped):  node's own modules only (and the standalone
+ *   `spell/util/string.ts` and `spell/cli/commandBlocks.ts`), `import type` for types.
  *
  * ````markdown
  * ```sh
@@ -30,9 +30,8 @@
  * yarn readme:test --list             # the examples, not run
  * ```
  *
- * - Matching (`ReadmeTest.matches()`):  line by line, trailing spaces and blank lines ignored, colours stripped.
- *   - `...` alone on a line:  any lines, or none
- *   - `...` inside a line:  any text there (a time, a hash, a port)
+ * - Reading the blocks and matching what was printed (`...` for what varies) are the kit's command base's,
+ *   `spell/cli/commandBlocks.ts`, which the runbooks read with too (`spell runbook`).
  * - The `spell` and `epic` it runs are THIS checkout's (`bin/spell.mjs`, `epic/bin/epic`), never the ones on
  *   the `PATH`:  they're the main checkout's.
  * - Exit status 1 when an example fails, 0 when all pass.
@@ -42,7 +41,8 @@ import { mkdtempSync, readFileSync, writeFileSync, chmodSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join, relative, resolve } from "node:path"
 
-import { escapeRegExp, indented } from "spell/util/string.ts"
+import { indented } from "spell/util/string.ts"
+import { fencedBlocks, outputMatches, stripColours, tidyLines } from "spell/cli/commandBlocks.ts"
 
 import { ReadmeCheck } from "./readme-check.ts"
 
@@ -72,36 +72,17 @@ export class ReadmeTest {
     return join(this.root, new ReadmeCheck(this.root).repoOf(path))
   }
 
-  /** The examples on the page at `path` (absolute);  `text` its content, read from disk when not given. */
+  /** The examples on the page at `path` (absolute):  each `sh` block with an Output fold;  `text` its content. */
   examples(path: string, text = readFileSync(path, "utf8")): ReadmeExample[] {
-    const lines = text.split("\n")
-    const found: ReadmeExample[] = []
-    let index = 0
-    while (index < lines.length) {
-      // indented too:  an example under a bullet
-      const opening = /^(\s*)(`{3,})sh\s*$/.exec(lines[index])
-      if (!opening) {
-        // any other fenced block is skipped whole:  a page SHOWING an example (```` ````markdown ````) runs nothing
-        const other = /^\s*(`{3,})\S*\s*$/.exec(lines[index])
-        const end = other ? findClose(lines, index + 1, other[1]) : -1
-        index = end === -1 ? index + 1 : end + 1
-        continue
-      }
-      const close = findClose(lines, index + 1, opening[2])
-      if (close === -1) break
-      const output = outputAfter(lines, close + 1)
-      if (output) {
-        found.push({
-          page: relative(this.root, path),
-          line: index + 1,
-          folder: this.repoRootOf(path),
-          commands: dedent(lines.slice(index + 1, close), opening[1]),
-          expected: output.text
-        })
-        index = output.end
-      } else index = close + 1
-    }
-    return found
+    return fencedBlocks(text)
+      .filter((block) => block.language === "sh" && block.output !== undefined)
+      .map((block) => ({
+        page: relative(this.root, path),
+        line: block.line,
+        folder: this.repoRootOf(path),
+        commands: block.text,
+        expected: block.output!
+      }))
   }
 
   /**
@@ -129,29 +110,9 @@ export class ReadmeTest {
     return { printed: stripColours(printed), status: result.status ?? 1 }
   }
 
-  /**
-   * Whether `printed` is what `expected` says, line by line:
-   * - each side's trailing spaces, and its blank lines at the end, ignored
-   * - `...` alone on a line:  any lines, or none;  `...` inside a line:  any text there
-   */
+  /** Whether `printed` is what `expected` says:  `outputMatches()`, the kit's command base's. */
   static matches(expected: string, printed: string): boolean {
-    const want = tidyLines(expected)
-    const got = tidyLines(printed)
-    const patterns = want.map((line) => (line.trim() === "..." ? ANY_LINES : linePattern(line)))
-    // memo[i][j]:  whether want[i..] matches got[j..]
-    const memo = new Map<string, boolean>()
-    const match = (i: number, j: number): boolean => {
-      const key = `${i}:${j}`
-      const known = memo.get(key)
-      if (known !== undefined) return known
-      let result: boolean
-      if (i === patterns.length) result = j === got.length
-      else if (patterns[i] === ANY_LINES) result = match(i + 1, j) || (j < got.length && match(i, j + 1))
-      else result = j < got.length && (patterns[i] as RegExp).test(got[j]) && match(i + 1, j + 1)
-      memo.set(key, result)
-      return result
-    }
-    return match(0, 0)
+    return outputMatches(expected, printed)
   }
 
   /**
@@ -220,60 +181,6 @@ export type ReadmeExample = {
 
 /** What running an example printed, and its exit status. */
 export type ReadmeRun = { printed: string; status: number }
-
-/** A `...` line's place in `matches()`:  any lines. */
-const ANY_LINES = Symbol("any lines")
-
-/** The closing fence of a block opened by `marker`, from line `start`;  -1 when there's none. */
-function findClose(lines: string[], start: number, marker: string): number {
-  for (let index = start; index < lines.length; index++)
-    if (lines[index].trim().startsWith(marker) && lines[index].trim().replace(/`/g, "") === "") return index
-  return -1
-}
-
-/**
- * The Output fold right after line `start` (blank lines between allowed):  its `text` block's text, and the line
- * after the fold;  `undefined` when the next thing isn't one.
- */
-function outputAfter(lines: string[], start: number): { text: string; end: number } | undefined {
-  let index = start
-  while (index < lines.length && !lines[index].trim()) index++
-  if (!/^<details>\s*$/i.test(lines[index]?.trim() ?? "")) return undefined
-  if (!/^<summary>Output<\/summary>$/i.test(lines[index + 1]?.trim() ?? "")) return undefined
-  index += 2
-  while (index < lines.length && !lines[index].trim()) index++
-  const opening = /^(\s*)(`{3,})text\s*$/.exec(lines[index] ?? "")
-  if (!opening) return undefined
-  const close = findClose(lines, index + 1, opening[2])
-  if (close === -1) return undefined
-  return { text: dedent(lines.slice(index + 1, close), opening[1]), end: close + 1 }
-}
-
-/** `lines` joined, each without its block's indent (`indent`, the fence's own):  a block under a bullet. */
-function dedent(lines: string[], indent: string): string {
-  return lines.map((line) => (line.startsWith(indent) ? line.slice(indent.length) : line.trimStart())).join("\n")
-}
-
-/** `text`'s lines, each without trailing spaces, and without blank lines at the end. */
-function tidyLines(text: string): string[] {
-  const lines = text
-    .replace(/\r\n/g, "\n")
-    .split("\n")
-    .map((line) => line.trimEnd())
-  while (lines.length && !lines[lines.length - 1]) lines.pop()
-  return lines
-}
-
-/** A line of expected output as a pattern:  `...` inside it is any text, the rest literal. */
-function linePattern(line: string): RegExp {
-  return new RegExp(`^${line.split("...").map(escapeRegExp).join(".*")}$`)
-}
-
-/** `text` without terminal colour codes. */
-function stripColours(text: string): string {
-  // oxlint-disable-next-line no-control-regex -- the escape character starts every colour code
-  return text.replace(/\u001b\[[0-9;]*[A-Za-z]/g, "")
-}
 
 /** `text`'s first line. */
 function firstLine(text: string): string {
