@@ -102,6 +102,9 @@ export type EditorHistoryProps = {
 
 /** The offset of the `text` in `source` nearest `at`:  `undefined` when it isn't there. */
 function nearest(source: string, text: string, at: number): number | undefined {
+  // nothing to find (a step that only added, or only took away):  where it was, the text's end at most;
+  // `indexOf("")` past the end answers the end again, so the loop below would never stop
+  if (!text) return Math.min(Math.max(at, 0), source.length)
   let best: number | undefined
   for (let found = source.indexOf(text); found >= 0; found = source.indexOf(text, found + 1)) {
     if (best === undefined || Math.abs(found - at) < Math.abs(best - at)) best = found

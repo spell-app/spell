@@ -100,9 +100,10 @@ function holdsPageHead(text: string): boolean {
  * - `Card.spell`, `Carta.es.spell`
  * - NOT a project's built output, `Solitaire.spell.js`.
  * - NOT a property editors file, `Card.editor.spell` (`isPropertyEditorsName()`):  it's never compiled.
+ * - NOT a samples file, `Card.samples.spell` (`isSamplesName()`):  nor is it.
  */
 export function isSpellSourceName(name: string | undefined): boolean {
-  return !!name && name.endsWith(SPELL_SUFFIX) && !isPropertyEditorsName(name)
+  return !!name && name.endsWith(SPELL_SUFFIX) && !isPropertyEditorsName(name) && !isSamplesName(name)
 }
 
 /** The end of a property editors file's name:  `.editor.spell`, `.editors.spell`, `.editor.es.spell`, and the old endings. */
@@ -121,6 +122,21 @@ const PROPERTY_EDITORS_NAME = /\.editors?(?:\.[a-z]{2}(?:-[A-Za-z]{2,4})?)?\.spe
  */
 export function isPropertyEditorsName(name: string | undefined): boolean {
   return !!name && PROPERTY_EDITORS_NAME.test(name)
+}
+
+/** The end of a samples file's name:  `.samples.spell`, `.samples.es.spell`. */
+const SAMPLES_NAME = /\.samples(?:\.[a-z]{2}(?:-[A-Za-z]{2,4})?)?\.spell$/
+
+/**
+ * Is `name` (a file's name or path) a SAMPLES file's (epic `editor` P38, Q61 A)?
+ * - `Card.samples.spell`, beside the view it's for, as its property editor is (`Card.editor.spell`)
+ * - It holds the view's samples, each a name and the Spell that makes one, which the editor's Design gallery draws:
+ *   `"queen of spades" is a new card whose rank is queen, suit is spades and direction is down`
+ * - One of a project's own files, which the editor opens and Design reads;
+ *   NEVER compiled, so it's no spell SOURCE file (`isSpellSourceName()`).
+ */
+export function isSamplesName(name: string | undefined): boolean {
+  return !!name && SAMPLES_NAME.test(name)
 }
 
 /**

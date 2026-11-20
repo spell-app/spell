@@ -43,6 +43,20 @@ describe("EditorHistory", () => {
     expect(setUp.file.contents).toBe(SOURCE.replace("blue", "red"))
   })
 
+  test("a line added, then taken out:  each undone and redone, never hunting for empty text forever", () => {
+    const setUp = setup("head\n")
+    const { history, file } = setUp
+    history.change({ file, at: 5, before: "", after: "line\n" }, { title: "Add" })
+    history.change({ file, at: 5, before: "line\n", after: "" }, { title: "Take Out" })
+    expect(file.contents).toBe("head\n")
+    history.undo()
+    expect(file.contents).toBe("head\nline\n")
+    history.undo()
+    expect(file.contents).toBe("head\n")
+    history.redo()
+    expect(file.contents).toBe("head\nline\n")
+  })
+
   test("undo still works after typing elsewhere in the file", () => {
     const setUp = setup(SOURCE)
     changeColor(setUp, "blue", "red")

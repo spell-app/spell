@@ -28,14 +28,56 @@
   flex: 0 0 auto;
 }
 
-.DesignPicker {
+/* the picker, then the sizes, down the left */
+.DesignSide {
   flex: 0 0 192px;
   width: 192px;
   min-width: 192px;
-  box-sizing: border-box;
-  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   padding: 12px 0 12px 12px;
+  box-sizing: border-box;
   overflow: auto;
+}
+.DesignPicker {
+  width: auto;
+  margin: 0;
+}
+.DesignSizes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: auto;
+  padding-right: 12px;
+}
+.DesignSizesHeading {
+  font-weight: bold;
+  font-size: var(--ui-font-size-small, 13px);
+}
+.DesignSizeMenu {
+  width: auto;
+  margin: 0;
+}
+.DesignWidthField input {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* the bar over the drawing, then the drawing */
+.DesignMain {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.DesignBar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px 0;
 }
 
 .DesignCanvas {
@@ -46,6 +88,7 @@
   align-items: stretch;
   gap: 32px;
   padding: 16px;
+  overflow: auto;
 }
 
 /* what `<FitInside>` scales up, in the middle of its box */
@@ -106,4 +149,60 @@
   white-space: pre-line;
   text-align: center;
   color: var(--ui-text-muted, var(--ui-muted-color));
+}
+
+/* a phone, tablet or desktop round what's drawn;  what it holds at its screen's size */
+.DesignDevice {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+}
+.DesignScreen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+}
+/* a width typed:  that wide, the pane's height, scrolling sideways when wider */
+.DesignWidth {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  outline: 1px dashed var(--ui-border-color, rgb(0 0 0 / 0.2));
+}
+
+/* the gallery:  each sample drawn on its own, its name under it */
+.DesignCanvas.gallery {
+  overflow: auto;
+  align-items: flex-start;
+}
+.DesignGallery {
+  flex: 1 1 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(144px, 1fr));
+  gap: 16px;
+  align-content: start;
+}
+.DesignSample {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  border-radius: var(--ui-radius-m, 8px);
+  cursor: pointer;
+
+  & figcaption {
+    text-align: center;
+    font-size: var(--ui-font-size-small, 13px);
+  }
+}
+.DesignSample.chosen {
+  background: var(--ui-selected-background, rgb(0 0 0 / 0.06));
+}
+.DesignSampleDrawing {
+  height: 144px;
+  display: flex;
 }
