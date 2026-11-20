@@ -163,6 +163,7 @@ function describeCollection(look: CollectionLook, type: string): CollectionDescr
     ...(look.schemaAt !== undefined && { schemaAt: look.schemaAt }),
     ...(look.tag !== undefined && { tag: look.tag }),
     ...(look.operations && { operations: look.operations }),
+    ...(look.pagesWith && { pagesWith: look.pagesWith }),
     // from the description only:  `spell place verify` tries it
     // no field said:  `untyped`, as a read fills it
     ...(look.fields && {

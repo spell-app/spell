@@ -19,6 +19,8 @@ export type PlaceDetailValue = {
       searches?: { param: string; fields: string[]; at?: string }
       /** What its place lets be done to all of them:  see `EnabledOperations` (epic `data` P49). */
       operations?: string[]
+      /** How it pages, when it isn't the place's way:  see `CollectionAt` (epic `data` P56). */
+      paging?: PagingDetails
     }
   >
   keyNamed?: string
@@ -73,6 +75,19 @@ export type PlaceDetailValue = {
    */
   sheet?: SheetLines
 }
+
+/** What the place's paging lines say:  for every collection, or one step in under a collection's line, for it alone. */
+export type PagingDetails = Pick<
+  PlaceDetailValue,
+  | "pagesByOffset"
+  | "pagesByNumber"
+  | "pagesByLastId"
+  | "nextPageIn"
+  | "nextPageInLink"
+  | "nextPageSentAs"
+  | "pageSize"
+  | "pageSizeAskedWith"
+>
 
 /** What a sign-up sheet's lines say:  the kit's `SheetRules`, each line one part of it. */
 export type SheetLines = {

@@ -15,6 +15,7 @@ import { Priority } from "spell/parser/spell/rules/rules.types"
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
 // Import directly to avoid circular import
 import { TypeDeclaration } from "spell/parser/spell/rules/classes/TypeDeclaration"
+import { CollectionAt } from "./CollectionAt"
 import { OperationAt } from "./OperationAt"
 import { PlaceDetail, textIn, type PlaceDetailValue } from "./PlaceDetail"
 import { COLLECTION_NAME, PLACE_KIND_ABILITIES, isPlaceTypeReadOnly, placeKindWords } from "./places.shared"
@@ -398,17 +399,22 @@ export class CreatePlace extends TypeDeclaration<
   static detailsOf(match: P.Match): PlaceDetailValue & { operations?: Record<string, string> } {
     const details: PlaceDetailValue & { operations?: Record<string, string> } = {}
     const seen = new Set<P.Match>()
-    const visit = (each: P.Match) => {
+    // a paging line one step in under a collection's line is that collection's alone (`CollectionAt`, epic `data` P56)
+    const visit = (each: P.Match, isUnderCollection = false) => {
       if (seen.has(each)) return
       seen.add(each)
-      if (each.rule instanceof PlaceDetail) mergeDetail(details, each.rule.detailOf(each as never))
+      if (each.rule instanceof PlaceDetail) {
+        const detail = each.rule.detailOf(each as never)
+        if (!(isUnderCollection && CollectionAt.isPagingOnly(detail))) mergeDetail(details, detail)
+      }
+      const isCollection = isUnderCollection || each.rule instanceof CollectionAt
       if (each.rule instanceof OperationAt) {
         const operation = OperationAt.operationOf(each)
         if (operation) (details.operations ??= {})[operation.name] = operation.at
       }
-      for (const item of each.matched) if (item instanceof P.Match) visit(item)
+      for (const item of each.matched) if (item instanceof P.Match) visit(item, isCollection)
       for (const value of Object.values(each.data)) {
-        for (const item of [value].flat()) if (item instanceof P.Match) visit(item)
+        for (const item of [value].flat()) if (item instanceof P.Match) visit(item, isCollection)
       }
     }
     const body = (match.rule as CreatePlace).getBody(match as never)
@@ -501,7 +507,7 @@ function mergeDetail(into: PlaceDetailValue, { collections, accounts, ...rest }:
   }
   Object.assign(into, rest)
   if (accounts) (into.accounts ??= []).push(...accounts)
-  for (const [name, { at, fields, searchedOnly, pictures, askedBy, searches, operations }] of Object.entries(
+  for (const [name, { at, fields, searchedOnly, pictures, askedBy, searches, operations, paging }] of Object.entries(
     collections ?? {}
   )) {
     const held = ((into.collections ??= {})[name] ??= {})
@@ -512,6 +518,7 @@ function mergeDetail(into: PlaceDetailValue, { collections, accounts, ...rest }:
     if (pictures) held.pictures = { ...held.pictures, ...pictures }
     if (askedBy) held.askedBy = askedBy
     if (operations) held.operations = operations
+    if (paging) held.paging = { ...held.paging, ...paging }
   }
 }
 

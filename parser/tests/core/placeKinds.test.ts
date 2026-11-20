@@ -5,7 +5,7 @@
  * - where a space's own folder is read direct (P5)
  * - The rest of what a place does at run time:  `places.test.ts`.
  */
-import { describe, expect, test } from "vite-plus/test"
+import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 
 import * as PlacesFolder from "spell/places"
 import { placeBehind } from "spell/parser/core/placeKinds"
@@ -72,6 +72,32 @@ describe("placeBehind(), a web server (epic `data` I35)", () => {
 
   test("its next page in its `Link` header still pages by cursor", () => {
     expect(webServerWith({ nextPageInLink: true }).describe()).toMatchObject({ page: "cursor" })
+  })
+})
+
+describe("placeBehind(), a web server's collection paging its own way (epic `data` P56)", () => {
+  afterEach(() => void vi.unstubAllGlobals())
+
+  test("its own paging lines win for it;  the place's for the rest", async () => {
+    const asked: string[] = []
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+      asked.push(`${input instanceof Request ? input.url : input}`)
+      return Response.json([])
+    })
+    const behind = webServerWith({
+      pagesByOffset: { limit: "limit", offset: "offset" },
+      pageSize: 500,
+      collections: {
+        recipes: { at: "/recipes" },
+        events: { at: "/events", paging: { pagesByOffset: { limit: "take", offset: "skip" }, pageSize: 100 } }
+      }
+    })
+    await behind.list("recipes", {}, {})
+    await behind.list("events", {}, {})
+    expect(asked).toEqual([
+      "https://cookbook.test/recipes?limit=500&offset=0",
+      "https://cookbook.test/events?take=100&skip=0"
+    ])
   })
 })
 
