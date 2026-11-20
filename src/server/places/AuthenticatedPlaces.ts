@@ -2,11 +2,12 @@ import {
   AUTHENTICATED_PLACES_PREFIX,
   PAGE_SERVER_ANSWER_HEADER,
   PlaceError,
+  STALE_TOKEN_ANSWER,
   type PlaceErrorCause
 } from "spell/places/places.types"
 import { putKeyOn, type KeyGoes } from "spell/places/keyGoes"
 import { PlaceToken, tokenServiceMint } from "spell/places/PlaceToken"
-import { CHANGE_ID_HEADER } from "spell/places/WebPlace"
+import { CHANGE_ID_HEADER, TOKEN_HEADER } from "spell/places/WebPlace"
 import { SRV } from "spell/server"
 
 import { PlaceKeys } from "./PlaceKeys"
@@ -89,9 +90,32 @@ export class AuthenticatedPlaces {
 
   /** Add its routes to `router`, each behind `guard`:  this run's token, the server's own host and origin. */
   route(router: SRV.Router, guard: SRV.Guard): this {
-    router.all(`${AUTHENTICATED_PLACES_PREFIX}/:path*`, guard.hostCheck, guard.writeCheck, this.passOn)
+    router.all(
+      `${AUTHENTICATED_PLACES_PREFIX}/:path*`,
+      guard.hostCheck,
+      this.staleTokenCheck(guard),
+      guard.writeCheck,
+      this.passOn
+    )
     return this
   }
+
+  /**
+   * A page's request with an old run's write token, nobody signed in:  the page server restarted since it was served.
+   * - Answered 403, marked `STALE_TOKEN_ANSWER`, so the page takes it as no answer and asks again, as `RemotePlace`
+   *   does, until the page server's reload brings the new token (from-console I29);  every other check is `guard`'s.
+   */
+  private staleTokenCheck =
+    (guard: SRV.Guard): SRV.Handler =>
+    (request, reply, next) => {
+      const token = request.get(TOKEN_HEADER)
+      if (request.person !== undefined || token === undefined || token === guard.token) return next()
+      reply.status(403).set("Cache-Control", "no-store").set(PAGE_SERVER_ANSWER_HEADER, STALE_TOKEN_ANSWER)
+      reply.type("application/json")
+      reply.send(
+        JSON.stringify({ error: "this page's write token is from before the page server restarted:  reload the page" })
+      )
+    }
 
   /** SIDE EFFECT:  `source`'s places are read here too, and their secrets checked by `missing()`. */
   addSource(source: AuthenticatedPlaceSource): this {

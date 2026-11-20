@@ -69,6 +69,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - In a page, an authenticated place is read through the page server, which adds the key (`throughPageServer`):  its address is the page server's for it (`AUTHENTICATED_PLACES_PREFIX`), each request
         carries the page's write token, and a refusal the page server made itself says its words
         (`PAGE_SERVER_ANSWER_HEADER`).  The server's half is `AuthenticatedPlaces`, in `spell/server/places`.
+        A stale write token, the page server restarted since, is no answer (`STALE_TOKEN_ANSWER`):  asked again, as
+        `RemotePlace` does, until the page server's reload brings the new one (from-console I29).
     - A limit a server names (`retry-after`, or a rate limit with none left) is waited out (epic `data` T110):
       a few seconds waited for;  longer, `TooSoonError` says when, and a drawing tries again then.
     - What a web server can do is what its lines say (`restAbilitiesIn()`, in the parser's core;  epic `data` I35):

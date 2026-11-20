@@ -7,7 +7,7 @@ import { createServer, type IncomingMessage } from "node:http"
 
 import { afterEach, describe, expect, test } from "vite-plus/test"
 
-import { AUTHENTICATED_PLACES_PREFIX, PAGE_SERVER_ANSWER_HEADER } from "spell/places/places.types"
+import { AUTHENTICATED_PLACES_PREFIX, PAGE_SERVER_ANSWER_HEADER, STALE_TOKEN_ANSWER } from "spell/places/places.types"
 import { SRV } from "spell/server"
 import { AuthenticatedPlaces, type AuthenticatedPlace } from "spell/server/places"
 import { ask, serveHandler } from "spell/server/test/serve"
@@ -169,7 +169,10 @@ describe("a page's read, passed on", () => {
   test("behind the guard, reads too:  no write token, no read;  a path no place has, not found", async () => {
     const { url, asked } = await standIn()
     const { read } = await pageServer([jobs(url)], { JOBS_TOKEN: SECRET })
-    expect((await read("@acme/jobs/jobs/jobs", { token: "stale" })).status).toBe(403)
+    const stale = await read("@acme/jobs/jobs/jobs", { token: "stale" })
+    expect(stale.status).toBe(403)
+    // marked, so the page asks again once it has the new token, rather than taking it as refused (I29)
+    expect(stale.headers[PAGE_SERVER_ANSWER_HEADER]).toBe(STALE_TOKEN_ANSWER)
     expect((await read("@acme/other/place")).status).toBe(404)
     expect(asked).toHaveLength(0)
   })

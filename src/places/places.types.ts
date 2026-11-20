@@ -972,9 +972,19 @@ export function authenticatedPlaceAddress(projectId: string, place: string): str
 
 /**
  * The header on an answer the page server made ITSELF for an authenticated place, a refusal (a secret that isn't set,
- * a write to a read-only place), rather than one passed on from the place:  a page says its words (`WebPlace`).
+ * a write to a read-only place, a stale write token), rather than one passed on from the place:  a page says its words
+ * (`WebPlace`).
+ * - Its value:  `"refused"`, or `STALE_TOKEN_ANSWER`.
  */
 export const PAGE_SERVER_ANSWER_HEADER = "x-spell-page-server"
+
+/**
+ * The value of `PAGE_SERVER_ANSWER_HEADER` on the page server's answer to a page whose write token is stale:
+ * the page server restarted since the page was served (from-console I29).
+ * - Not about the request:  a page takes it as no answer and asks again, as `RemotePlace` does, until the page server's
+ *   own reload brings the new token.
+ */
+export const STALE_TOKEN_ANSWER = "stale token"
 
 /** What stands for the asker's own space, in a project data folder's address:  `personal "recipes"` is `personal/recipes`. */
 export const PERSONAL_FOLDERS = "personal"

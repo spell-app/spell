@@ -4,10 +4,12 @@ import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 import { SRV } from "spell/server"
 import { RecipeBox, restHandler, type RestServerProps } from "spell/server/test/recipeServers"
 import {
+  PAGE_SERVER_ANSWER_HEADER,
   PlaceError,
   PlaceQuery,
   Places,
   RestPlace,
+  STALE_TOKEN_ANSWER,
   TooSoonError,
   type PlaceChange,
   type PlaceConflict,
@@ -827,6 +829,29 @@ describe("RestPlace, a key", () => {
     await expect(asked).rejects.toMatchObject({ kind: "refused" })
     await expect(asked).rejects.toThrow('needs the key named "RECIPES_KEY"')
     expect(box.asks).toEqual([])
+  })
+})
+
+describe("RestPlace, read through the page server (epic `from-console` P14)", () => {
+  /** A place read through the page server, which answers every request with `status` and `said`. */
+  const throughPageServer = (status: number, said: string) => {
+    vi.stubGlobal("fetch", async () =>
+      Response.json({ error: "no" }, { status, headers: { [PAGE_SERVER_ANSWER_HEADER]: said } })
+    )
+    return new RestPlace({ url: "http://127.0.0.1:4747/api/places/projects/@acme/jobs/jobs", throughPageServer: true })
+  }
+  afterEach(() => vi.unstubAllGlobals())
+
+  test("a stale write token is no answer, so it's asked again:  the page server restarted (I29)", async () => {
+    const asked = throughPageServer(403, STALE_TOKEN_ANSWER).list("recipes", {}, {})
+    await expect(asked).rejects.not.toBeInstanceOf(PlaceError)
+    await expect(asked).rejects.toMatchObject({ status: 403 })
+  })
+
+  test("a refusal the page server made itself is refused, in its words", async () => {
+    const asked = throughPageServer(422, "refused").list("recipes", {}, {})
+    await expect(asked).rejects.toBeInstanceOf(PlaceError)
+    await expect(asked).rejects.toMatchObject({ kind: "refused", message: "no" })
   })
 })
 

@@ -8,6 +8,7 @@ import { keyHidden, putKeyOn, type KeyGoes } from "./keyGoes"
 import {
   PAGE_SERVER_ANSWER_HEADER,
   PlaceError,
+  STALE_TOKEN_ANSWER,
   TooSoonError,
   type PlaceCapabilities,
   type PlaceContext,
@@ -53,6 +54,8 @@ const LONGEST_WAIT_MS = 15_000
  *   - `throughPageServer`:  its address is this page's own server's
  *     (`AUTHENTICATED_PLACES_PREFIX`), which adds the key:  each request carries the page's write token, and a refusal
  *     the page server made itself says its own words (`PAGE_SERVER_ANSWER_HEADER`), the secret it needs that isn't set.
+ *     - A stale write token, the page server restarted since (`STALE_TOKEN_ANSWER`), is no answer:  asked again, as
+ *       `RemotePlace` does, until the page server's reload brings the new one (from-console I29).
  *   - On a server side, `keyFrom` finds it by that name (`PlaceKeys`, in `spell/server/places`), and it goes on each request.
  *   - There's no `headers` setting, so there's nowhere to write one.
  *   - It goes as `Authorization: Bearer`, or where `keyGoes` says (epic `data` T73):  a header of its own, or the address.
@@ -203,7 +206,7 @@ export abstract class WebPlace {
       if (error instanceof Error) error.message = keyHidden(error.message, key)
       if (!(error instanceof ApiError)) throw error
       if (error.response) this.noteLimit(error.response)
-      if (!this.isAnAnswer(error.status) || isOutOfRequests(error)) throw error
+      if (!this.isAnAnswer(error.status) || isOutOfRequests(error) || this.isStaleToken(error)) throw error
       const kind = this.errorKindFor(error.status!)
       const message = (await this.pageServerSaid(error)) ?? (await this.messageOf(error))
       const whyNot =
@@ -263,6 +266,11 @@ export abstract class WebPlace {
     const turn = Math.max(now, this.nextTurn)
     this.nextTurn = turn + 1000 / this.mostPerSecond
     if (turn > now) await new Promise((resolve) => setTimeout(resolve, turn - now))
+  }
+
+  /** The page server restarted since this page was served:  no answer about the request (`STALE_TOKEN_ANSWER`). */
+  private isStaleToken(error: ApiError): boolean {
+    return this.throughPageServer && error.response?.headers.get(PAGE_SERVER_ANSWER_HEADER) === STALE_TOKEN_ANSWER
   }
 
   /** What the page server said of a refusal it made itself, for a place read through it:  see the class. */

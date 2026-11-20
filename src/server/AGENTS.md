@@ -593,7 +593,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         which the page says;  and said as the server starts (`sayMissing()`), never a value
       - ONE per page server (`AuthenticatedPlaces.for()`):  `placeRoutes.ts` makes it;  its places come from SOURCES, the
         app's `ProjectPlaces` (every project's, from what it compiled to) and the Airtable base
-      - behind `Guard`, reads too, as `PlaceServer` is
+      - behind `Guard`, reads too, as `PlaceServer` is;  an old run's write token is answered 403 marked
+        `STALE_TOKEN_ANSWER`, which the page takes as no answer and asks again (from-console I29)
     - `SpacesHost`:  Spell's own AT Protocol Spaces host, both sides, as Bluesky's alpha answers (epic `atmosphere` P13, Q14 B)
       - why:  a member's own host has to run Spaces (T35), and an ordinary Bluesky account's doesn't yet
       - spaces, member lists, records, delegation tokens and credentials (real ES256 JWTs), signed reads, MACs, the
