@@ -1,7 +1,7 @@
 import { spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
 import { createRequire } from "node:module"
-import { dirname, join, relative, resolve } from "node:path"
+import { basename, dirname, join, relative, resolve } from "node:path"
 
 import { SRV } from "spell/server"
 import { duration, parseVerbArgs, stringFlag } from "spell/epic/command/command.types"
@@ -18,6 +18,7 @@ import {
   REVIEW_SECTIONS,
   ShortTitle,
   TITLE_PREFIX,
+  ISSUE_ID,
   TODO_ID,
   type CommitHistory,
   type Phase,
@@ -303,24 +304,25 @@ export class PlanDocCommands {
           plan.setStanding(value === "on")
         })
       case "request": {
-        // into a todo (epic `epic-engine` T88):  its text, its pictures copied in as the person's, marked requested
-        if (TODO_ID.test(need(rest[0], "a phase or a todo").toLowerCase())) {
+        // into a todo (epic `epic-engine` T88) or an issue (T108):  its text, its pictures copied in as the person's,
+        // marked requested
+        const into = need(rest[0], "a phase, a todo or an issue").toLowerCase()
+        if (TODO_ID.test(into) || ISSUE_ID.test(into)) {
           const pictures = ItemPictures.fromFiles(lists.picture ?? [])
           const html = readFileSync(need(stringFlag(flags.file), "--file (the request as html)"), "utf8")
-          const todo = rest[0]!.toLowerCase()
           const requestId = need(rest[1], "a request id")
           const filed = await this.edit(file, (plan) => {
-            const named = pictures.length ? ItemPictures.named(file, todo, pictures) : []
-            // labelled on from the todo's own pictures (epic `epic-engine` P75):  IMG3 after its IMG2
-            const first = ItemPictures.nextNumber(plan.findItem(todo))
-            const title = plan.addItemRequest(todo, requestId, `${html}${ItemPictures.html(named, first)}`)
+            const named = pictures.length ? ItemPictures.named(file, into, pictures) : []
+            // labelled on from the item's own pictures (epic `epic-engine` P75):  IMG3 after its IMG2
+            const first = ItemPictures.nextNumber(plan.findItem(into))
+            const title = plan.addItemRequest(into, requestId, `${html}${ItemPictures.html(named, first)}`)
             return { title, named: title === undefined ? [] : named }
           })
           ItemPictures.save(file, filed.named)
           return this.print(
             filed.title === undefined
-              ? `${requestId} is in ${todo.toUpperCase()} already`
-              : `${requestId} filed into ${todo.toUpperCase()} · ${filed.title}`
+              ? `${requestId} is in ${into.toUpperCase()} already`
+              : `${requestId} filed into ${into.toUpperCase()} · ${filed.title}`
           )
         }
         return this.edit(file, (plan) =>
@@ -482,6 +484,10 @@ export class PlanDocCommands {
       case "decisions":
         return this.printDecisions(new EpicDocs({ files: this.files, name }).decisions(), Boolean(flags.json))
       case "lint":
+        if (flags.fix) {
+          const fixed = await this.edit(file, (plan) => plan.finishStaleUnderway())
+          for (const id of fixed) this.print(`FIXED:  ${id.toUpperCase()}:  its status card left underway finished`)
+        }
         return this.lint(file, flags)
       case "open":
         return this.open(file)
@@ -1219,6 +1225,8 @@ export class PlanDocCommands {
    *   - a missing one is a problem
    *   - a note:  a host with content of its own besides its part (moved into the part on the next edit),
    *     or a part file nothing loads
+   * - an item finished with a status card still underway (`PlanDoc.staleUnderway()`, epic `epic-engine` I355);
+   *   `--fix` finishes those first (`finishStaleUnderway()`), saved, then checks
    * - the browser check:  `src/tools/check-spell.js`, a child `node` (its stderr passed on);
    *   skipped, saying so, where Playwright isn't installed (`hasPlaywright()`)
    */
@@ -1253,6 +1261,13 @@ export class PlanDocCommands {
     for (const orphan of orphans) this.print(`NOTE:  ${PARTS_DIR}/${orphan}:  nothing loads it`)
     // one question, one choice set (I88, epic `epic-engine` P33):  said, failing nothing
     for (const asks of plan.choiceSetProblems()) this.print(`ASKS:  ${asks}`)
+    // finished, yet a card still underway draws it blue (I355):  `--fix` finishes it
+    const name = basename(file).replace(/\.plan\.html$/, "")
+    for (const item of plan.staleUnderway())
+      problems.push(
+        `${item.id.toUpperCase()}:  its work is finished, but an earlier status card is still underway, so it shows blue:  ` +
+          `epic lint ${name} --fix`
+      )
     // run-together details (T74):  said, failing nothing
     for (const dense of plan.denseParagraphs()) this.print(`DENSE:  ${dense}`)
     for (const problem of problems) this.warn(`PROBLEM:  ${problem}`)

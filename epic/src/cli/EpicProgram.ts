@@ -156,10 +156,12 @@ export class EpicProgram {
 
     requests(epic.command("file"))
       .description(
-        "file a request into a phase or a todo:  your words and screenshots into its Requests field, or the todo's " +
-          'text and pictures;  or, a duplicate, mark which:  "same as T12"'
+        "file a request into a phase, a todo or an issue:  your words and screenshots into its Requests field, or the " +
+          'item\'s text and pictures;  or, a duplicate, mark which:  "same as T12"'
       )
-      .usage('<epic>#P3 <request id>  |  <epic>#T5 <request id>  |  <epic> <request id> "same as T12"')
+      .usage(
+        '<epic>#P3 <request id>  |  <epic>#T5 <request id>  |  <epic>#I5 <request id>  |  <epic> <request id> "same as T12"'
+      )
       .addHelpText("after", FILE_HELP)
 
     requests(epic.command("home"))
@@ -291,7 +293,7 @@ export class EpicProgram {
       epic.command("lint"),
       "ids, #id links, phases, parts;  its links;  then the browser check",
       "epic lint seo --no-browser"
-    ).usage("<epic> [--no-browser] [--links]")
+    ).usage("<epic> [--no-browser] [--links] [--fix]")
 
     ////////////////
     // ## Epic page:  phases
@@ -1356,15 +1358,17 @@ Examples:
 
 /** After `epic file --help`. */
 const FILE_HELP = `
-Every request becomes a todo or a phase (epic-engine T88).
+Every request becomes an issue (a bug report), a todo (a feature) or a phase (bigger;  epic-engine T88, T108).
 Into a phase, the request's words, context and screenshots go into its Requests field, and the request is marked
 filed there (P3).  Into a todo, they go at the end of its text, the screenshots as its pictures (deletable on the
-page), the todo marked requested (light orange once done), and the request filed there (T5).
+page), the todo marked requested (light orange once done), and the request filed there (T5).  Into an issue, the
+same (I5).
 With neither, it's only marked, saying where it went:  only for a duplicate, naming the todo or phase it duplicates.
 
 Examples:
   epic file seo#P3 r3
   epic file seo#T5 r3
+  epic file seo#I5 r3
   epic file seo r3 "same as T12"`
 
 /** After `epic update --help`. */

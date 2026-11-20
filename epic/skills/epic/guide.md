@@ -100,10 +100,11 @@ After a restart, agents it started are gone:  start each again from its task, as
      on them -- the epic skill's "The session answers;  agents build";
      a picture they pasted with it:  `--pasted <n>`, the n they pasted last into this session's chat, or
      `--picture <file>`, repeatable:  saved beside the page, shown in the item, deletable there, its file too)
-   - a request another session sent (`epic requests <epic>`):  a TODO or a PHASE, never only a note on the request
-     (epic `epic-engine` T88;  the epic skill's "12. Request")
-     - small, one agent's work:  `epic add <epic>#T "title" --requested --start "<their words>"`, then
-       `epic file <epic>#T<n> <rN>`:  its words, Context and screenshots go into the todo, the request filed there
+   - a request another session sent (`epic requests <epic>`):  a bug report an ISSUE, a feature a TODO, bigger a PHASE,
+     never only a note on the request (epic `epic-engine` T88, T108;  the epic skill's "12. Request")
+     - small, one agent's work:  `epic add <epic>#I "title" --requested --start "<their words>"` (a feature:  `#T`),
+       then `epic file <epic>#I<n> <rN>` (`#T<n>`):  its words, Context and screenshots go into the item, the request
+       filed there
      - bigger, or about a to-do phase:  that phase, or a new one, then `epic file <epic>#P<n> <rN>`
      - a true duplicate only:  `epic file <epic> <rN> "same as T12"`, naming the todo or phase it repeats
    - a choice made without the person:  `epic add <epic>#J "<title>" --calm --details "<p>...</p>"`

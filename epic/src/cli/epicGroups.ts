@@ -1447,7 +1447,11 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   decisions: { "--json": "print them as JSON" },
   owns: { "--json": "print them as JSON" },
   open: { "--review": "kept for old scripts:  an epic page always shows in the Review tab" },
-  lint: { "--no-browser": "skip the browser check", "--links": "fail on its links' problems too" },
+  lint: {
+    "--no-browser": "skip the browser check",
+    "--links": "fail on its links' problems too",
+    "--fix": "finish status cards left underway on finished items (I355)"
+  },
 
   // an epic page:  phases
   "add-phase": {
