@@ -1,6 +1,7 @@
 /**
  * The `UI` rule module:  user-facing I/O statements -- `print`, `notify`, `alert`, `warn`, `confirm`, `prompt` --
  * `scroll to the top`, `open printing`, sounds and videos (naming one, `play`, `stop`, `pause`, `resume`, asking about one),
+ * a page's tour (`start tour "x"`, `stop the tour`, `show step 3`, `go to the next step`, `go back a step`),
  * plus inline `css` string installation, and an app's widget defaults (`<ui-defaults>`).
  * - One rule class per file;  `UI.en.ts` registers them on `UI` (`UI.parser.ts`),
  *   and each other language's `UI.<lang>.ts` registers the same rules in its own words.
@@ -29,6 +30,10 @@ export * from "./LoadSound"
 export * from "./PlaySound"
 export * from "./StopSound"
 export * from "./StopAllMedia"
+export * from "./StartTour"
+export * from "./StopTour"
+export * from "./ShowTourStep"
+export * from "./MoveTourStep"
 export * from "./MediaCall"
 export * from "./MediaIs"
 export * from "./MediaLength"

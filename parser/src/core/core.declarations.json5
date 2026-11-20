@@ -4676,6 +4676,51 @@
       "description": "The address of the site's page `name`, its parameter filled with `thing`: what `the address of the film page for this film` compiles to, e.g. for a link, `<a href={...}>`."
     },
     {
+      "kind": "method",
+      "name": "startTour",
+      "of": "core",
+      "module": "tours",
+      "params": [
+        {
+          "name": "name"
+        }
+      ],
+      "description": "Start the page's tour `name`:  what `start tour \"first game\"` and `start the \"first game\" tour` compile to."
+    },
+    {
+      "kind": "method",
+      "name": "stopTour",
+      "of": "core",
+      "module": "tours",
+      "description": "Stop the tour showing, if one is:  what `stop the tour` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "showTourStep",
+      "of": "core",
+      "module": "tours",
+      "params": [
+        {
+          "name": "step"
+        }
+      ],
+      "description": "Show one step of the tour showing, by its number (from 1) or its name: what `show step 3` and `show step \"drag\"` compile to."
+    },
+    {
+      "kind": "method",
+      "name": "nextTourStep",
+      "of": "core",
+      "module": "tours",
+      "description": "Show the next step of the tour showing:  what `go to the next step` compiles to."
+    },
+    {
+      "kind": "method",
+      "name": "previousTourStep",
+      "of": "core",
+      "module": "tours",
+      "description": "Show the step before, in the tour showing:  what `go back a step` compiles to."
+    },
+    {
       "type": "Thing",
       "module": "classes/Thing",
       "description": "`Thing`: base for all object-like things in spell -- what `a task is a thing` extends. All things can be drawn, with Solid (`drawing.ts`), e.g.:"

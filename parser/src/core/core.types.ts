@@ -27,6 +27,7 @@ import type { savedMethods } from "./saved"
 import type { abilityMethods } from "./abilities"
 import type { dimensionMethods } from "./dimensions"
 import type { siteMethods } from "./sites"
+import type { tourMethods } from "./tours"
 import type { PropRule } from "spell/util"
 
 // ## Importing core
@@ -126,6 +127,7 @@ export type Core = typeof coreMethods &
   typeof abilityMethods &
   typeof dimensionMethods &
   typeof siteMethods &
+  typeof tourMethods &
   typeof deprecatedMethods
 
 // ## Drawing again

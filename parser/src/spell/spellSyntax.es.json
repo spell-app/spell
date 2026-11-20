@@ -5534,6 +5534,140 @@
           "aliases": ["statement"]
         },
         {
+          "className": "StartTour",
+          "ruleNames": ["start_tour"],
+          "internal": false,
+          "file": "src/spell/rules/UI/StartTour.ts",
+          "line": 15,
+          "purpose": "Start one of the page's tours, by its name (epic `editor` P40).",
+          "syntaxes": [
+            {
+              "syntax": "(empieza|inicia) el recorrido {name:text}",
+              "example": "empieza el recorrido \"primera partida\"",
+              "outputs": {
+                "js": {
+                  "code": "core.startTour(\"primera partida\")"
+                },
+                "ts": {
+                  "code": "core.startTour(\"primera partida\")"
+                },
+                "py": {
+                  "code": "core.start_tour(\"primera partida\")"
+                }
+              }
+            },
+            {
+              "syntax": "(empezar|iniciar) el recorrido {name:text}",
+              "example": "iniciar el recorrido \"primera partida\"",
+              "outputs": {
+                "js": {
+                  "code": "core.startTour(\"primera partida\")"
+                },
+                "ts": {
+                  "code": "core.startTour(\"primera partida\")"
+                },
+                "py": {
+                  "code": "core.start_tour(\"primera partida\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "StopTour",
+          "ruleNames": ["stop_tour"],
+          "internal": false,
+          "file": "src/spell/rules/UI/StopTour.ts",
+          "line": 14,
+          "purpose": "Stop the tour showing now (epic `editor` P40).",
+          "syntaxes": [
+            {
+              "syntax": "(para|parar|deten|detener|termina|terminar) el recorrido",
+              "example": "para el recorrido",
+              "outputs": {
+                "js": {
+                  "code": "core.stopTour()"
+                },
+                "ts": {
+                  "code": "core.stopTour()"
+                },
+                "py": {
+                  "code": "core.stop_tour()"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ShowTourStep",
+          "ruleNames": ["show_tour_step"],
+          "internal": false,
+          "file": "src/spell/rules/UI/ShowTourStep.ts",
+          "line": 15,
+          "purpose": "Go straight to one step of the tour showing, by its number or its name (epic `editor` P40).",
+          "syntaxes": [
+            {
+              "syntax": "(muestra|mostrar) el paso {step:expression} (del recorrido)?",
+              "example": "muestra el paso 3",
+              "outputs": {
+                "js": {
+                  "code": "core.showTourStep(3)"
+                },
+                "ts": {
+                  "code": "core.showTourStep(3)"
+                },
+                "py": {
+                  "code": "core.show_tour_step(3)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "MoveTourStep",
+          "ruleNames": ["move_tour_step"],
+          "internal": false,
+          "file": "src/spell/rules/UI/MoveTourStep.ts",
+          "line": 17,
+          "purpose": "One step on, or one step back, in the tour showing (epic `editor` P40).",
+          "syntaxes": [
+            {
+              "syntax": "(ve al|ir al|muestra el|mostrar el) (next:siguiente) paso (del recorrido)?",
+              "example": "ve al siguiente paso",
+              "outputs": {
+                "js": {
+                  "code": "core.nextTourStep()"
+                },
+                "ts": {
+                  "code": "core.nextTourStep()"
+                },
+                "py": {
+                  "code": "core.next_tour_step()"
+                }
+              }
+            },
+            {
+              "syntax": "(retrocede|retroceder|vuelve|volver) un paso",
+              "example": "retrocede un paso",
+              "outputs": {
+                "js": {
+                  "code": "core.previousTourStep()"
+                },
+                "ts": {
+                  "code": "core.previousTourStep()"
+                },
+                "py": {
+                  "code": "core.previous_tour_step()"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "MediaCall",
           "ruleNames": ["media_call"],
           "internal": false,

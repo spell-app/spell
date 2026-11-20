@@ -785,6 +785,27 @@ A page or the app names a sound or a video once, and plays it by that name from 
 - They're [Kenney](https://kenney.nl)'s, from seven of his free packs, CC0:
   [Spell UI's runtime page](https://github.com/spell-app/spell/blob/main/ui/README-runtime.md#sounds) says more.
 
+### Tours
+
+A page's tour, Spell UI's `<ui-tour>`, walks a person through a feature one step at a time;  these lines drive it.
+
+| Spell | JavaScript |
+| --- | --- |
+| `start tour "first game"`, `start the "first game" tour` | `core.startTour("first game")` |
+| `stop tour`, `stop the tour` | `core.stopTour()` |
+| `show step 3`, `show the tour step 3`, `show step "drag"` | `core.showTourStep(3)`, `core.showTourStep("drag")` |
+| `go to the next step`, `show the next step of the tour` | `core.nextTourStep()` |
+| `go back a step` | `core.previousTourStep()` |
+
+- The quoted name is the tour's:  `start the "first game" tour` never reads as a property.
+- "The tour" is always the tour showing now:  `stop the tour` beats an action of the program's named `tour`.
+- A bare `go back` is not a step back.
+- No tours on the page, or none of that name:  the program's console says so, and the program goes on.
+- The tour itself is written in the page's HTML, as a `<ui-tour>`, for now.
+- Spanish:  `empieza el recorrido "primera partida"`, `para el recorrido`, `muestra el paso 3`, `ve al siguiente paso`,
+  `retrocede un paso`.
+- A program compiled to Python doesn't drive tours yet.
+
 ### Tests, in English
 
 `to test ...` is a test, and each `expect ... to be ...` one check in it:

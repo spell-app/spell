@@ -199,4 +199,91 @@ describe("testing spell module UI", () => {
       expect(compiled).not.toContain("core.openPrinting(")
     })
   })
+
+  describe("a page's tour (epic `editor` P40)", () => {
+    /** `contents`, parsed whole as `path`:  what it compiled to, and its errors. */
+    function parsed(contents: string, path = "/Test.spell") {
+      const { compiled, errors } = parseSpellProject([{ path, contents }]).files[0]!
+      return { compiled, errors }
+    }
+
+    test("every tour line, in an action, in English", () => {
+      const { compiled, errors } = parsed(`a guide is a thing:
+	- to walk through it:
+		start tour "first game"
+		start the "first game" tour
+		show step 3
+		show the tour step "drag"
+		go to the next step
+		show the next step of the tour
+		go back a step
+		stop the tour
+`)
+      expect(errors).toEqual([])
+      expect(compiled).toContain('core.startTour("first game")')
+      expect(compiled).toContain("core.showTourStep(3)")
+      expect(compiled).toContain('core.showTourStep("drag")')
+      expect(compiled.match(/core\.nextTourStep\(\)/g)).toHaveLength(2)
+      expect(compiled).toContain("core.previousTourStep()")
+      expect(compiled).toContain("core.stopTour()")
+    })
+
+    test("and in Spanish, beside an action of its own (`para ...`)", () => {
+      const { compiled, errors } = parsed(
+        `una guía es una cosa:
+	- para enseñarlo:
+		empieza el recorrido "primera partida"
+		muestra el paso 2
+		ve al siguiente paso
+		retrocede un paso
+		para el recorrido
+	- para pararlo:
+		para el recorrido
+`,
+        "/Test.es.spell"
+      )
+      expect(errors).toEqual([])
+      expect(compiled).toContain('core.startTour("primera partida")')
+      expect(compiled).toContain("core.showTourStep(2)")
+      expect(compiled).toContain("core.nextTourStep()")
+      expect(compiled).toContain("core.previousTourStep()")
+      expect(compiled.match(/core\.stopTour\(\)/g)).toHaveLength(2)
+      expect(compiled).toContain("parar() {")
+    })
+
+    test("`the tour` is always the tour showing, even beside an action named tour", () => {
+      const { compiled, errors } = parsed(`a guide is a thing:
+	- to tour:
+		print 1
+	- to deal:
+		print 2
+	- to stop everything:
+		stop the tour
+		stop the deal
+`)
+      expect(errors).toEqual([])
+      expect(compiled).toContain("core.stopTour()")
+      expect(compiled).not.toContain('core.cancelActions(this, "tour")')
+      // the neighbour stays:  `stop the deal` stops the running action named deal
+      expect(compiled).toContain('core.cancelActions(this, "deal")')
+    })
+
+    test('the neighbouring lines read as before:  `show "help"`, `stop its sound`, a `go back` method', () => {
+      const { compiled, errors } = parsed(`a pokemon is a thing:
+	- it has a sound as text
+	- to hush it:
+		show "help"
+		stop its sound
+	- to go back:
+		print 1
+	- to undo it:
+		go back
+`)
+      expect(errors).toEqual([])
+      expect(compiled).toContain('await core.showDrawn("help")')
+      expect(compiled).toContain("core.stop(this.sound)")
+      expect(compiled).toContain("this.goBack()")
+      expect(compiled).not.toContain("TourStep")
+    })
+  })
 })

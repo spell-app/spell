@@ -5534,6 +5534,140 @@
           "aliases": ["statement"]
         },
         {
+          "className": "StartTour",
+          "ruleNames": ["start_tour"],
+          "internal": false,
+          "file": "src/spell/rules/UI/StartTour.ts",
+          "line": 15,
+          "purpose": "Start one of the page's tours, by its name (epic `editor` P40).",
+          "syntaxes": [
+            {
+              "syntax": "start tour {name:text}",
+              "example": "start tour \"first game\"",
+              "outputs": {
+                "js": {
+                  "code": "core.startTour(\"first game\")"
+                },
+                "ts": {
+                  "code": "core.startTour(\"first game\")"
+                },
+                "py": {
+                  "code": "core.start_tour(\"first game\")"
+                }
+              }
+            },
+            {
+              "syntax": "start the {name:text} tour",
+              "example": "start the \"first game\" tour",
+              "outputs": {
+                "js": {
+                  "code": "core.startTour(\"first game\")"
+                },
+                "ts": {
+                  "code": "core.startTour(\"first game\")"
+                },
+                "py": {
+                  "code": "core.start_tour(\"first game\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "StopTour",
+          "ruleNames": ["stop_tour"],
+          "internal": false,
+          "file": "src/spell/rules/UI/StopTour.ts",
+          "line": 14,
+          "purpose": "Stop the tour showing now (epic `editor` P40).",
+          "syntaxes": [
+            {
+              "syntax": "stop the? tour",
+              "example": "stop tour",
+              "outputs": {
+                "js": {
+                  "code": "core.stopTour()"
+                },
+                "ts": {
+                  "code": "core.stopTour()"
+                },
+                "py": {
+                  "code": "core.stop_tour()"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ShowTourStep",
+          "ruleNames": ["show_tour_step"],
+          "internal": false,
+          "file": "src/spell/rules/UI/ShowTourStep.ts",
+          "line": 15,
+          "purpose": "Go straight to one step of the tour showing, by its number or its name (epic `editor` P40).",
+          "syntaxes": [
+            {
+              "syntax": "show (the? tour)? step {step:expression}",
+              "example": "show step 3",
+              "outputs": {
+                "js": {
+                  "code": "core.showTourStep(3)"
+                },
+                "ts": {
+                  "code": "core.showTourStep(3)"
+                },
+                "py": {
+                  "code": "core.show_tour_step(3)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "MoveTourStep",
+          "ruleNames": ["move_tour_step"],
+          "internal": false,
+          "file": "src/spell/rules/UI/MoveTourStep.ts",
+          "line": 17,
+          "purpose": "One step on, or one step back, in the tour showing (epic `editor` P40).",
+          "syntaxes": [
+            {
+              "syntax": "(go to|show) the (next:next) step (of the tour)?",
+              "example": "go to the next step",
+              "outputs": {
+                "js": {
+                  "code": "core.nextTourStep()"
+                },
+                "ts": {
+                  "code": "core.nextTourStep()"
+                },
+                "py": {
+                  "code": "core.next_tour_step()"
+                }
+              }
+            },
+            {
+              "syntax": "go back a step",
+              "example": "go back a step",
+              "outputs": {
+                "js": {
+                  "code": "core.previousTourStep()"
+                },
+                "ts": {
+                  "code": "core.previousTourStep()"
+                },
+                "py": {
+                  "code": "core.previous_tour_step()"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "MediaCall",
           "ruleNames": ["media_call"],
           "internal": false,
