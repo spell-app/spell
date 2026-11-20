@@ -3,14 +3,6 @@
 		Example
 		<header>An example shows its own markup live, under a heading and description, with the same markup as code a button shows and hides.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#content">Content</>
-			<item link="#states">States</>
-			<item link="#variations">Variations</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,

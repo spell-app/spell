@@ -99,6 +99,7 @@
               <ui-markdown>
                 <script type="text/markdown">
                   Put it above the page's content.  Inside a site with a `<ui-site-nav>`, that's all:  with no `pages` of its own, it follows the navigation around it, its pages and the page it marks shown.  A page of a Spell site writes a bare `<site-tabs/>`;  the site draws no tabs by itself.
+                  - `appearance="header"`:  a switch for an app menu's middle, the look of the editor's Run | Edit, as wide as its tabs.
                   - Elsewhere, hand it the same `pages` you hand `<ui-site-nav>`.
                   - `pages`:  each page's `title` and `href`, its `pages` under it.  A parent page's `tab` is what its tab says, when not its `title`.
                   - `current` says which page is shown, by its `href` or its `id`;  without it, the page at the browser's address.

@@ -4,14 +4,6 @@
 		<header>A root loads the components inside it on demand, sets their theme, size, icons and emoji, and shows
               them once they're ready.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#tokens">Tokens</>
-			<item link="#defaults">Defaults</>
-			<item link="#themes">Themes</>
-		</>
-	</>
-
 	<!-- THEMING:  no tokens of its own;  what it sets for what's inside. -->
 	<section label="Tokens">
 		<markdown>

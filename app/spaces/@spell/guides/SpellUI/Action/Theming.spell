@@ -3,12 +3,6 @@
 		Action
 		<header>An action is a menu item or toolbar button drawn from something a program can do:  its title, icon and shortcut keys, greyed while it can't be done.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#tokens">Tokens</>
-			<item link="#themes">Themes</>
-		</>
-	</>
 
 	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
 	<section label="Tokens">

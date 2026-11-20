@@ -3,13 +3,6 @@
 		Panel
 		<header>A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#content">Content</>
-			<item link="#variations">Variations</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  ours, no Fomantic page (moved from the brand's `<ui-brand-panel>` page, epic `design-system`).

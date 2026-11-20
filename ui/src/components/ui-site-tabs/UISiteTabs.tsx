@@ -32,6 +32,8 @@ import siteTabsCSS from "./UISiteTabs.css?inline"
  *   - It's `<ui-toolbar>`'s scrolling row, the section tabs' too:  a `‹` / `›` and a fade at each end with more that way
  *     (epic `notebook` I11).
  * - Plain data in, no fetching:  `pages` and `current`, set on it by hand.
+ * - `appearance="header"`:  a switch for an app menu's middle, the editor's Run | Edit look (epic `mockup` T55):
+ *   the row as wide as its tabs, on the bar's fill, never each an equal share.
  * - Without `pages`, it follows the site navigation it's inside (epic `mockup` T38):
  *   - the nearest box around it with a `<ui-site-nav>` of its own, across shadow roots
  *     (`SitePages.followNavAround()`, which `<ui-site-breadcrumbs>` follows it with too)
@@ -194,15 +196,21 @@ export class UISiteTabs extends E.UIComponent<typeof siteTabsVocabulary> {
   // ## Rendering
   ////////////////
 
+  /** `appearance="header"`:  a switch in an app menu's middle, as the editor's Run | Edit. */
+  @E.cssState("header")
+  get isHeader(): boolean {
+    return this.appearance === HEADER
+  }
+
   render(): JSX.Element {
     return (
       <Show when={this.tabs.length}>
         <ui-toolbar
           ref={(element: HTMLElement) => (this.menu = element)}
           exportparts={`menu: ${this.partForName("tabs")}`}
-          appearance={SEGMENTED}
-          align={FLUID}
-          equal=""
+          appearance={this.isHeader ? HEADER_LOOK : SEGMENTED}
+          align={this.isHeader ? undefined : FLUID}
+          equal={this.isHeader ? undefined : ""}
           aria-label={this.label ?? this.family[0]?.title}
           on-ui-choosing={(event: CustomEvent<{ item: Element }>) => this.onChoosing(event)}
         >
@@ -252,6 +260,10 @@ const DATA_CURRENT = "data-current"
 /** The menu's look:  a segmented row of tabs, each an equal share of it. */
 const SEGMENTED = "segmented"
 const FLUID = "fluid"
+
+/** `appearance="header"`, and the toolbar's look for it:  the editor's Run | Edit switch's (its `<ModeButtons>`). */
+const HEADER = "header"
+const HEADER_LOOK = "segmented link header"
 
 /** The menu's own box, in its shadow root:  the row that scrolls. */
 const MENU_BOX = '[part~="menu"]'

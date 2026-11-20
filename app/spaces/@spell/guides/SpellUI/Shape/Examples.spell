@@ -3,13 +3,6 @@
 		Shape
 		<header>A shape is a three dimensional object displayed on a two dimensional plane.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#variations">Variations</>
-			<item link="#more-examples">More Examples</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's shape page, its Definition tab (Types), our own Variations, then its Examples tab (More

@@ -3,14 +3,6 @@
 		Message
 		<header>A message displays information that explains nearby content.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#content">Content</>
-			<item link="#states">States</>
-			<item link="#variations">Variations</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's message page, section by section, in its order (Types, States, Variations), plus our own

@@ -3,15 +3,6 @@
 		Icon Picker
 		<header>An icon picker lets people choose an icon by searching for it and clicking its glyph.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#attributes">Attributes</>
-			<item link="#events">Events</>
-			<item link="#parts">Parts</>
-			<item link="#states">States</>
-			<item link="#texts">Texts</>
-		</>
-	</>
 
 	<!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
 	<section label="Attributes">

@@ -3,12 +3,6 @@
 		Avatar
 		<header>An avatar is a small picture of a person, beside a comment, an item or a card.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#owners">Owners</>
-			<item link="#content">Content</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  `<ui-avatar>` in each owner that gives it a look (from the owners' own pages and

@@ -1,0 +1,30 @@
+# Cuenta atrás para el fin de semana
+// Cuánto falta para el fin de semana:  días, horas, minutos y segundos, que bajan cada segundo.
+
+cuenta atrás es una aplicación
+	su "hora" es una fecha
+		// Este momento:  se vuelve a poner cada segundo, para que la cuenta se redibuje
+	cada segundo
+		poner su hora a ahora
+	"es fin de semana" si su hora es un día de fin de semana
+		// Sábado y domingo en casi todas partes:  lo dice la región de cada persona
+	su "tiempo restante" es el próximo fin de semana - su hora
+		// Una duración:  2 días, 3 horas, 4 minutos y 5 segundos
+
+	para dibujarla
+		// Los días, horas, minutos y segundos que faltan, uno al lado del otro;  en fin de semana, una celebración
+		<contenedor ancho="32em">
+			<segmento relleno="lg">
+				<si es fin de semana>
+					<encabezado>¡Es fin de semana!</encabezado>
+				<de lo contrario>
+					<texto color="gris">El fin de semana empieza en</texto>
+					<estadisticas igual tamano="pequeño">
+						<estadistica value={los días de su tiempo restante} etiqueta="Días" />
+						<estadistica value={las horas de su tiempo restante como dos dígitos} etiqueta="Hr" />
+						<estadistica value={los minutos de su tiempo restante como dos dígitos} etiqueta="Min" />
+						<estadistica value={los segundos de su tiempo restante como dos dígitos} etiqueta="Seg" />
+					</estadisticas>
+				</si>
+			</segmento>
+		</contenedor>

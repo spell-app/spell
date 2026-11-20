@@ -3,12 +3,6 @@
 		Zoom
 		<header>A zoom shows something small in the page, and full size over it on a click.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#variations">Variations</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,

@@ -4,18 +4,6 @@
 		<header>An embed displays content from other websites, like YouTube videos, loaded only when asked
               for.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#privacy">Privacy</>
-			<item link="#events">Events</>
-			<item link="#behaviors">Behaviors</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-			<item link="#framework-usage">Framework usage</>
-		</>
-	</>
-
 	<!-- USAGE:  sources, privacy, events, script API, keyboard, accessibility, frameworks. -->
 	<section label="Using it">
 		<markdown>

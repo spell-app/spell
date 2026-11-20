@@ -3,16 +3,6 @@
 		Input
 		<header>An input is a field used to elicit a response from a user.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#forms-and-validation">Forms and validation</>
-			<item link="#events">Events</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-			<item link="#framework-usage">Framework usage</>
-		</>
-	</>
 
 	<!-- USAGE:  forms, validation, events, keyboard, accessibility, frameworks. -->
 	<section label="Using it">

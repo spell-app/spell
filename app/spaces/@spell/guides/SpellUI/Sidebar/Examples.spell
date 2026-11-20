@@ -3,14 +3,6 @@
 		Sidebar
 		<header>A sidebar hides additional content beside a page.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#states">States</>
-			<item link="#variations">Variations</>
-			<item link="#more-examples">More Examples</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's sidebar page, its Definition tab section by section (Types, States, Variations), then its

@@ -3,12 +3,6 @@
 		Divider
 		<header>A divider visually segments content into groups.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#tokens">Tokens</>
-			<item link="#themes">Themes</>
-		</>
-	</>
 
 	<section label="Tokens">
 		<markdown>

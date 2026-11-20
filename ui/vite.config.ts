@@ -109,9 +109,11 @@ export const COMPONENTS = [
   "ui-site-nav",
   "ui-site-tabs",
   "ui-site-breadcrumbs",
+  "ui-site-links",
   "ui-site-nav-button",
   "ui-page-layout",
   "ui-device",
+  "ui-dial",
   "ui-toolbar",
   "ui-app-menu",
   "ui-action",
@@ -214,7 +216,7 @@ export default defineConfig(() => {
     fmt: { ...fmtConfig, ignorePatterns: [...fmtConfig.ignorePatterns, ...FMT_IGNORE] },
     lint: packageLint({ name: "ui", ignorePatterns: LINT_IGNORE }),
     ...base,
-    plugins: [...base.plugins, hotElementsPlugin(), emitIconPacks(), dts(declarations())],
+    plugins: [...base.plugins, hotElementsPlugin(), emitIconPacks(), emitSoundLibrary(), dts(declarations())],
     build: {
       outDir: "dist",
       emptyOutDir: true,
@@ -462,3 +464,25 @@ export function emitIconPacks(dir = "icon-packs"): Plugin {
 
 /** Files of an icon pack:  its SVGs and its `pack.js` index. */
 const ICON_PACK_FILE = /\.(svg|js)$/
+
+/**
+ * Copies Spell's built-in sounds, `src/sounds/sound-library/*.ogg`, to `<dir>/` in the build output:
+ * beside the chunk holding `BuiltInSounds`, where it looks for them (`import.meta.url`), as `emitIconPacks()` does.
+ * - Library build:  `BuiltInSounds` is in the runtime's chunk, at `dist/`'s top, so `dist/sound-library/`.
+ * - Docs site:  not this plugin:  `site/_assets/sound-library` is a link (`Bundle.linkBuiltInFiles()`).
+ * - Client builds only.
+ */
+export function emitSoundLibrary(dir = "sound-library"): Plugin {
+  const root = fileURLToPath(new URL("./src/sounds/sound-library", import.meta.url))
+  return {
+    name: "spell-emit-sound-library",
+    apply: "build",
+    generateBundle() {
+      if (this.environment.name !== "client") return
+      for (const file of readdirSync(root)) {
+        if (!file.endsWith(".ogg")) continue
+        this.emitFile({ type: "asset", fileName: `${dir}/${file}`, source: readFileSync(path.join(root, file)) })
+      }
+    }
+  }
+}

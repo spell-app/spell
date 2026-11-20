@@ -92,6 +92,7 @@
  * | `--ui-section-scrolling-height`                       | `scrolling` cap (default grows with viewport) |
  * | `--ui-section-z-index`                                | a sticky title's stacking (minus its depth)   |
  * | `--ui-section-sticky-background` / `-stuck-shadow`    | sticky title fill, shadow while stuck         |
+ * | `--ui-section-sticky-fill`                            | `fade`:  a sticky title plain in the flow, its fill fading in over its last 3em before it sticks |
  * | `--ui-section-duration`                               | fold animation, chevron turn                  |
  * | `--ui-section-loader-*`, `--ui-section-disabled-opacity` | `loading` spinner / dimmer, `disabled`     |
  *
@@ -770,6 +771,48 @@
   }
 
   /*
+   * ## Its fill faded in as it rises (`--ui-section-sticky-fill: fade`, epic `mockup` T55)
+   * - Plain on the page in the flow;  the fill comes in over the last three font sizes before the title sticks,
+   *   all of it once stuck (Owen:  "fade the white in as the heading scrolls up to the very top ... not a hard
+   *   switch").
+   * - Driven by the scroll:  the sentinel's view of the box it scrolls in, its top inset by where the title sticks
+   *   (`--_ui-section-top`, set on both), shared with the title through the section (`timeline-scope`).
+   * - Reduced motion, or a browser with no scroll-driven animations:  none of the fill until it's stuck, then all of
+   *   it (`:state(stuck)`).
+   */
+}
+
+/* ... after the variations:  a stack's own fill above, the fade's here */
+@layer ui.components.section.states {
+  @container style(--ui-section-sticky-fill: fade) {
+    :host(:not(:state(stuck))) .ui.sticky.section > .title {
+      background: none;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+    @supports (animation-timeline: view()) {
+      @media (prefers-reduced-motion: no-preference) {
+        .ui.sticky.section {
+          timeline-scope: --_ui-section-rise;
+        }
+        .ui.sticky.section > .sentinel {
+          view-timeline: --_ui-section-rise block;
+          view-timeline-inset: var(--_ui-section-top, 0px) 0px;
+        }
+        .ui.sticky.section > .title,
+        :host(:not(:state(stuck))) .ui.sticky.section > .title {
+          background: var(--_section-title-background, var(--_ui-section-sticky-background));
+          animation: ui-section-fill-in linear both;
+          animation-timeline: --_ui-section-rise;
+          animation-range: contain calc(100% - 3em) contain 100%;
+        }
+      }
+    }
+  }
+}
+
+@layer ui.components.section.variations {
+  /*
    * ## Stack (`sticky="stack"`, the class words `stack sticky`;  or a plain `sticky` that joins one,
    * `:state(stacked)`):  the titles one stack of rounded bars with a slight shadow, as the
    * docs pages' sections
@@ -975,5 +1018,14 @@
     .ui.section > .title > .tip {
       transition: none;
     }
+  }
+}
+
+/* A sticky title three font sizes below where it sticks:  none of its fill (`--ui-section-sticky-fill: fade`). */
+@keyframes ui-section-fill-in {
+  from {
+    background: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 }

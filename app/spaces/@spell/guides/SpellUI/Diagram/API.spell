@@ -3,18 +3,6 @@
 		Diagram
 		<header>Boxes in columns and the links between them:  a NERD, an ERD, any boxes-and-lines picture, drawn by the NERD skill's rules.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#tags">Tags</>
-			<item link="#attributes">Attributes</>
-			<item link="#properties">Properties</>
-			<item link="#events">Events</>
-			<item link="#slots">Slots</>
-			<item link="#parts">Parts</>
-			<item link="#states">States</>
-			<item link="#texts">Texts</>
-		</>
-	</>
 
 	<!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
 	<section label="Tags">

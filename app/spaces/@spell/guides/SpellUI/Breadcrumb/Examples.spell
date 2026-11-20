@@ -3,14 +3,6 @@
 		Breadcrumb
 		<header>A breadcrumb is used to show hierarchy between content.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#content">Content</>
-			<item link="#states">States</>
-			<item link="#variations">Variations</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's breadcrumb page, section by section, in its order (Types, Content, States, Variations).

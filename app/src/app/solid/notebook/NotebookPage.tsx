@@ -108,13 +108,8 @@ export function NotebookPage(props: {
   const pageTitle = () => controller.model()?.cells.find((cell) => cell.title)?.title
   return (
     <>
-      {/* drawn while hidden too:  it follows the scroll for the section tabs (`selectSectionTab()`) */}
       <aside class={["NotebookAside", { hidden: !isColumnShown() }]} {...EDITORS}>
-        <Contents
-          scroller={props.scroller}
-          title={pageTitle()}
-          onScrolledTo={(id) => selectSectionTab(props.program, id)}
-        >
+        <Contents scroller={props.scroller} title={pageTitle()}>
           <ui-icon
             slot="tools"
             name="eye slash outline"
@@ -173,8 +168,6 @@ function Contents(props: {
   scroller: string
   title?: string
   onPick?: () => void
-  /** hears the entry in view change:  its target's id */
-  onScrolledTo?: (id: string) => void
   children?: JSX.Element
 }) {
   return (
@@ -187,11 +180,6 @@ function Contents(props: {
       onClick={(event: MouseEvent) => {
         if (scrollTo(event, document)) props.onPick?.()
       }}
-      ref={(toc: HTMLElement) =>
-        toc.addEventListener("ui-scrolled-to", (event) =>
-          props.onScrolledTo?.((event as CustomEvent<{ value: string }>).detail.value)
-        )
-      }
     >
       {props.children}
     </ui-toc>
@@ -347,7 +335,7 @@ function deepActiveElement(): Element | null {
 /**
  * A click on a link in the page:
  * - another notebook of the project (the tab bar's):  shown through the app's router, never a reload
- * - a section of the page (the section tabs'):  scrolled to within the page
+ * - a section of the page (its contents' links):  scrolled to within the page
  */
 function followLinks(event: MouseEvent, controller: NotebookController) {
   if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return
@@ -385,37 +373,6 @@ function scrollTo(event: MouseEvent, within: ParentNode): boolean {
   target?.scrollIntoView({ behavior: "smooth", block: "start" })
   return true
 }
-
-/**
- * Select the section tab of the top-level section holding `id`, the entry in view,
- * as the docs site's section toolbar follows the scroll.
- * - The section tabs:  `<ui-toolbar class="ui-docs-section-tabs">`, under the page's tabs.
- * - SIDE EFFECT:  sets `selected` on what the program drew;  drawn again, they're set again on the next scroll
- */
-function selectSectionTab(page: HTMLElement, id: string, tries = SECTION_TAB_TRIES) {
-  const tabs = page.querySelector(SECTION_TABS)
-  // the first entry in view is known before the program has drawn its tabs:  look again shortly
-  if (!tabs) {
-    if (tries > 0) after(0.1, () => selectSectionTab(page, id, tries - 1)).catch(() => undefined)
-    return
-  }
-  let section = page.querySelector(`[id="${CSS.escape(id)}"]`)?.closest("ui-section")
-  for (
-    let outer = section?.parentElement?.closest("ui-section");
-    outer;
-    outer = outer.parentElement?.closest("ui-section")
-  )
-    section = outer
-  if (!section?.id) return
-  for (const item of tabs.querySelectorAll("ui-item[link]"))
-    item.toggleAttribute("selected", item.getAttribute("link") === `#${section.id}`)
-}
-
-/** How many times, 0.1s apart, `selectSectionTab()` looks for the section tabs while they aren't drawn yet. */
-const SECTION_TAB_TRIES = 30
-
-/** The section tabs a notebook draws under its tabs (`docs-page.css`). */
-const SECTION_TABS = "ui-toolbar.ui-docs-section-tabs"
 
 /** The project's notebook `link` points at (`/edit/...`, `/run/...`), if it's one of `controller`'s project's. */
 function notebookAt(link: HTMLAnchorElement, controller: NotebookController): SP.AnySpellFile | undefined {

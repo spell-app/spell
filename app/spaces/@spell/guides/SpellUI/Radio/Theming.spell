@@ -3,12 +3,6 @@
 		Radio
 		<header>A radio button lets a user choose exactly one value of a group.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#tokens">Tokens</>
-			<item link="#themes">Themes</>
-		</>
-	</>
 
 	<!-- THEMING:  the checkbox family's tokens a radio reads, live. -->
 	<section label="Tokens">

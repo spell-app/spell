@@ -272,6 +272,7 @@ export class SiteDataBuilder {
       ...(spec.default !== undefined && { default: spec.default }),
       ...(spec.aliases?.length && { aliases: [...spec.aliases] }),
       ...(spec.property && { property: spec.property }),
+      ...(spec.canBeNumber && { canBeNumber: true }),
       ...(spec.reflect === false && { reflect: false }),
       ...(isShared && { shared: true }),
       description: spec.description

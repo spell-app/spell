@@ -41,6 +41,7 @@
 |   | group «"What Its Keys Do"»
 |   |   [action to_do_something L2]
 |   |   | to «clear it»
+|   |   |   play _"tap"_
 |   |   |   clear the **input**    ‾value(the input)
 |   |   |   clear the **left**    ‾value(the left)
 |   |   |   clear the **operator**    ‾value(the operator)
@@ -48,6 +49,7 @@
 |   |   [action to_do_something L2]
 |   |   | to «finish it»
 |   |   |   ⟦// Equals:  the total becomes the left number, ready for the next operator⟧
+|   |   |   play _"tap"_
 |   |   |   if the **right** is empty return    ‾question(the right is empty)
 |   |   |   set the **left** to the **total** as text    ‾value(the left) ‾value(the total as text)
 |   |   |   clear the **operator**    ‾value(the operator)
@@ -56,6 +58,7 @@
 |   |   [action to_do_something L2]
 |   |   | to «press (digit as text)»    ‾value(digit as text) bold(digit) bold(text)
 |   |   |   ⟦// A digit, or the decimal point:  onto the number being typed, the left one until there's an operator⟧
+|   |   |   play _"tap"_
 |   |   |   [control if L3]
 |   |   |   | if the **digit** is _"."_    ‾value(the digit)
 |   |   |   |   [control if L4]
@@ -76,6 +79,7 @@
 |   |   [action to_do_something L2]
 |   |   | to «apply (key as text)»    ‾value(key as text) bold(key) bold(text)
 |   |   |   ⟦// An operator:  after a whole sum, the total carries on as the next sum's left number⟧
+|   |   |   play _"tap"_
 |   |   |   [control if L3]
 |   |   |   | if the **right** is not empty    ‾question(the right is not empty)
 |   |   |   |   finish it    ‾call(finish it)

@@ -254,11 +254,16 @@
 |   |   | if **jumped**    ‾value(jumped)
 |   |   |   set **middle** to the square at (the **row** of **start** + the **row** of the **square**) / _2_ and (the **column** of **start** + the **column** of the **square**) / _2_ on **board**    ‾value(middle) ‾call(the square at (the row of start + the row of the square) / 2 and (the column of start + the column of the square) / 2 on board)
 |   |   |   empty **middle**    ‾value(middle)
+|   |   |   play _"piece take"_
+|   |   [control else L2]
+|   |   | otherwise
+|   |   |   play _"piece down"_
 |   |   add the **piece** to the **square**    ‾value(the piece) ‾value(the square)
 |   |   set the **picked piece** of **board** to nothing    ‾value(the picked piece of board) ‾value(nothing)
 |   |   [control if L2]
 |   |   | if the **piece** is not a king and the **row** of the **square** is the **far row** of the **piece**    ‾question(the piece is not a king) ‾value(the row of the square) ‾value(the far row of the piece)
 |   |   |   set the **rank** of the **piece** to _king_    ‾value(the rank of the piece)
+|   |   |   play _"level up"_
 |   |   |   end the turn on **board**    ‾call(end the turn on board)
 |   |   [control else_if L2]
 |   |   | otherwise if **jumped** and the **piece** has a jump    ‾value(jumped) ‾question(the piece has a jump)

@@ -180,7 +180,7 @@ export class SpellViewer extends UIRoot<typeof vocabulary> {
    * Where the built-in icon packs are:  `icon-packs/` in `assets`, else beside our script --
    * ours, even on a page whose Spell UI is its own (a docs page's, which has none to load).
    * - Built, they're beside our script:  beside `spell-solid.js`, whose chunk holds `BuiltInPacks`
-   *   (`iconPacksBesideBuiltIns()`, `vite.shared.ts`;  pinned by `element.build.test.ts`).
+   *   (`builtInFilesBesideTheirCode()`, `vite.shared.ts`;  pinned by `element.build.test.ts`).
    * - In dev and tests (vite serving the source):  `undefined`, so Spell UI's source finds its own.
    */
   protected get iconAssets(): string | undefined {

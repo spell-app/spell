@@ -67,7 +67,14 @@ const EXCEPTIONS: Record<string, Record<string, string>> = {
       "the menu's own hairline gives way to the layout's soft shadow, drawn by the menu's box or the page side's (epic `mockup` I36)",
     "--ui-button-padding-block":
       "its own menu button 32px tall, on the 4px grid, so the page starts 40px down as under a menu (I36)",
-    "--ui-button-line-height": "its own menu button 32px tall, on the 4px grid, so the page starts 40px down (I36)"
+    "--ui-button-line-height": "its own menu button 32px tall, on the 4px grid, so the page starts 40px down (I36)",
+    "--ui-toc-head-background":
+      "a table of contents in a floating side bar is headed as the editor's panels are:  it sets the nested toc's head (epic `mockup` T55)",
+    "--ui-toc-head-padding": "the same",
+    "--ui-toc-head-height": "the same",
+    "--ui-toc-head-gap": "the same",
+    "--ui-toc-head-position": "the same:  the head stuck at the card's top as it scrolls",
+    "--ui-toc-padding": "the same:  the links on the card's own fill, 12px in from its edges"
   },
   "ui-app-menu/UIAppMenu.css": {
     "--ui-button-padding-block":

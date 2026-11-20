@@ -25,6 +25,13 @@ describe("suggestsByItself():  where the suggestions show by themselves (epic `e
     expect(suggestsByItself("\t\tasigna su ")).toBe(true)
   })
 
+  test("a built-in sound's name, in the quotes after `play`, `stop` or `load` (epic `mockup` P28)", () => {
+    expect(suggestsByItself('\t\tplay "')).toBe(true)
+    expect(suggestsByItself('\t\tstop "')).toBe(true)
+    expect(suggestsByItself('\t\treproducir "')).toBe(true)
+    expect(suggestsByItself('\t\tsay "')).toBe(false)
+  })
+
   test("nowhere else:  a plain statement, or `its ` starting a line (a property's quoted name)", () => {
     expect(suggestsByItself("\t\tset ")).toBe(false)
     expect(suggestsByItself("\tits ")).toBe(false)

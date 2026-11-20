@@ -29,12 +29,14 @@ calculadora es una aplicación
 
 	grupo "Lo Que Hacen Sus Teclas"
 	para borrarla
+		reproducir "toque"
 		limpiar la entrada
 		limpiar el izquierdo
 		limpiar el operador
 		limpiar el derecho
 	para terminarla
 		// Igual:  el total pasa a ser el número izquierdo, listo para el siguiente operador
+		reproducir "toque"
 		si el derecho es vacío devolver
 		fijar el izquierdo en el total como texto
 		limpiar el operador
@@ -42,6 +44,7 @@ calculadora es una aplicación
 		limpiar la entrada
 	para pulsar (dígito como texto)
 		// Un dígito, o el punto decimal:  al final del número que se escribe, el izquierdo hasta que haya un operador
+		reproducir "toque"
 		si el dígito es "."
 			si la entrada es vacía
 				poner la entrada a "0."
@@ -55,6 +58,7 @@ calculadora es una aplicación
 			poner el derecho a la entrada
 	para aplicar (tecla como texto)
 		// Un operador:  tras una cuenta completa, el total pasa a ser el número izquierdo de la siguiente cuenta
+		reproducir "toque"
 		si el derecho no es vacío
 			terminar eso
 		poner el operador a la tecla

@@ -41,6 +41,7 @@
 |   | grupo «"Lo Que Hacen Sus Teclas"»
 |   |   [action to_do_something L2]
 |   |   | para «borrarla»
+|   |   |   reproducir _"toque"_
 |   |   |   limpiar la **entrada**    ‾value(la entrada)
 |   |   |   limpiar el **izquierdo**    ‾value(el izquierdo)
 |   |   |   limpiar el **operador**    ‾value(el operador)
@@ -48,6 +49,7 @@
 |   |   [action to_do_something L2]
 |   |   | para «terminarla»
 |   |   |   ⟦// Igual:  el total pasa a ser el número izquierdo, listo para el siguiente operador⟧
+|   |   |   reproducir _"toque"_
 |   |   |   si el **derecho** es vacío devolver    ‾question(el derecho es vacío)
 |   |   |   fijar el **izquierdo** en el **total** como texto    ‾value(el izquierdo) ‾value(el total como texto)
 |   |   |   limpiar el **operador**    ‾value(el operador)
@@ -56,6 +58,7 @@
 |   |   [action to_do_something L2]
 |   |   | para «pulsar (dígito como texto)»    ‾value(dígito como texto) bold(dígito) bold(texto)
 |   |   |   ⟦// Un dígito, o el punto decimal:  al final del número que se escribe, el izquierdo hasta que haya un operador⟧
+|   |   |   reproducir _"toque"_
 |   |   |   [control if L3]
 |   |   |   | si el **dígito** es _"."_    ‾value(el dígito)
 |   |   |   |   [control if L4]
@@ -76,6 +79,7 @@
 |   |   [action to_do_something L2]
 |   |   | para «aplicar (tecla como texto)»    ‾value(tecla como texto) bold(tecla) bold(texto)
 |   |   |   ⟦// Un operador:  tras una cuenta completa, el total pasa a ser el número izquierdo de la siguiente cuenta⟧
+|   |   |   reproducir _"toque"_
 |   |   |   [control if L3]
 |   |   |   | si el **derecho** no es vacío    ‾question(el derecho no es vacío)
 |   |   |   |   terminar eso    ‾call(terminar eso)

@@ -228,6 +228,8 @@ export type ComponentAttributeHelp = {
  * How an attribute's value is picked, in an editor:  `ComponentAttributeHelp.picker`.
  * - `color`:  a palette of its `values`, each drawn in `colors`' colour (the same order)
  * - `icon`:  an icon picker, its value an icon's name
+ * - `sound`:  a sound picker, its value a built-in sound's name, each listened to before it's picked
+ *   (`play "card slide"`;  epic `mockup` P28)
  */
 export type ComponentValuePicker =
   | {
@@ -236,6 +238,7 @@ export type ComponentValuePicker =
       colors: readonly string[]
     }
   | { kind: "icon" }
+  | { kind: "sound" }
 
 /** An attribute in a pack's own names, as `ComponentPacks.readAttribute()` reads it:  `size="large"`, `basic`. */
 export type AttributeReading = {

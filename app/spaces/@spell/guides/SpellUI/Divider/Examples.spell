@@ -3,12 +3,6 @@
 		Divider
 		<header>A divider visually segments content into groups.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#variations">Variations</>
-		</>
-	</>
 
 	<!-- EXAMPLES:  Fomantic's divider page, in its order (Types, Variations), plus our own extra (Colored). -->
 	<section label="Types">

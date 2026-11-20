@@ -20,7 +20,7 @@ import { isServer } from "@solidjs/web"
  * - NOT `<spell-viewer>`'s:  it's a root itself, loading each `<ui-*>` it draws as it appears,
  *   with `icons` defaulting to `fomantic` (`components/spell-viewer/SpellViewer.tsx`).
  * - Builds:  the packs load from beside `BuiltInPacks`' chunk;  the app's `vite.config.ts` emits them there
- *   (`appConfig({ iconPacks })`).  In dev and tests they're served from `packages/ui/src/icons/icon-packs/`.
+ *   (`appConfig({ builtInFiles })`).  In dev and tests they're served from `packages/ui/src/icons/icon-packs/`.
  * - NEVER reachable from `spell-runtime.js` (`spellRuntime.ts`):  compiled spell runs without Solid or `spell-ui`.
  * - Server (the `node` test project, `renderToString`):  nothing;  the tags render as plain markup.
  */

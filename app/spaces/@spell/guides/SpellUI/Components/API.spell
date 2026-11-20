@@ -3,12 +3,6 @@
 		Components
 		<header>Components name a pack of another package's elements, which the root around them loads on demand, once per page.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#attributes">Attributes</>
-			<item link="#states">States</>
-		</>
-	</>
 
 	<!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
 	<section label="Attributes">

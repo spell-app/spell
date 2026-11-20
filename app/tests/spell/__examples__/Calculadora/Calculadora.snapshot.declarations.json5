@@ -11,7 +11,7 @@
     {
       "type": "Calculadora",
       "superType": "App",
-      "defined": "/Calculadora.es.spell:229-4688"
+      "defined": "/Calculadora.es.spell:229-4772"
     },
     {
       "property": "entrada",
@@ -76,7 +76,7 @@
       "kind": "method",
       "name": "borrarla",
       "returns": "nothing",
-      "defined": "/Calculadora.es.spell:1435-1535"
+      "defined": "/Calculadora.es.spell:1435-1556"
     },
     {
       "syntax": "terminar {thisArg:expression}?",
@@ -91,7 +91,7 @@
       "kind": "method",
       "name": "terminarla",
       "returns": "nothing",
-      "defined": "/Calculadora.es.spell:1537-1781"
+      "defined": "/Calculadora.es.spell:1558-1823"
     },
     {
       "syntax": "pulsar {callArgs:expression} ((de|del) {thisArg:expression})?",
@@ -112,7 +112,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/Calculadora.es.spell:1783-2266"
+      "defined": "/Calculadora.es.spell:1825-2329"
     },
     {
       "syntax": "aplicar {callArgs:expression} ((de|del) {thisArg:expression})?",
@@ -133,7 +133,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/Calculadora.es.spell:2268-2503"
+      "defined": "/Calculadora.es.spell:2331-2587"
     },
     {
       "syntax": "probar dos cuentas seguidas",
@@ -142,7 +142,7 @@
       "alias": "statement",
       "kind": "function",
       "name": "dos cuentas seguidas",
-      "defined": "/Calculadora.es.spell:4341-4688"
+      "defined": "/Calculadora.es.spell:4425-4772"
     }
   ],
   "codeLines": [
@@ -155,9 +155,9 @@
     44,
     50,
     55,
-    63,
-    72,
-    82,
-    238
+    64,
+    74,
+    85,
+    242
   ]
 }

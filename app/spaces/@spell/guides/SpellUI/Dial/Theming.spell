@@ -1,0 +1,43 @@
+"dial theming" is a notebook page
+	<header level="1">
+		Dial
+		<header>A dial lets people pick a number by turning it, with its value in the middle and its label under it.</>
+	</>
+
+	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+	<section label="Tokens">
+		<markdown>
+			Theme with the public `--ui-dial-*` tokens: set one on the element, on any ancestor (`:root` included), or on the
+			dial's box through `::part(dial)`. They inherit into the shadow root, where the sheet reads each through a
+			private alias, so nothing inside blocks them. Style the pieces with `::part()`: `track`, `track-fill`, `handle`,
+			`disc`, `ticks`, `value` and `label`.
+		</>
+		<markdown>
+			```css
+			ui-dial {
+			  --ui-dial-size: 8em;
+			  --ui-dial-track-width: 6;
+			}
+			ui-dial::part(value) {
+			  font-weight: 600;
+			}
+			```
+		</>
+		<message state="info" size="small">
+			<markdown>
+				`--ui-dial-size` is the dial's width; `--ui-dial-track-width` the ring's, in its 100-wide drawing's units; `color`
+				replaces `--ui-dial-fill-color`; a size scales the whole dial. The value's type follows the dial's width. Never
+				set the `--_ui-*` names: they're the sheet's private plumbing.
+			</>
+		</>
+		<markdown>Edit a value below to try it.</>
+		<html>
+			<ui-docs-tokens family="ui-dial" playground>
+				<ui-dial label="Volume" color="blue" value="40" ticks></>
+			</>
+		</>
+	</>
+
+	<section label="Themes">
+		<markdown>The theme menu in the header (Spell, Glass, Fruity, Merlot, Paper, Midnight, Crisp, Pop, Matrix) changes the colours a dial inherits.</>
+	</>

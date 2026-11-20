@@ -1038,7 +1038,7 @@ One press, past a few pixels, with Escape to cancel and the closed hand over the
 
 ### A page bundle's build
 
-- **It is:**  the kit's `Bundle` (`spell/server`, `src/server/Bundle.ts`):  `clearOutput()`, `linkIconPacks()`,
+- **It is:**  the kit's `Bundle` (`spell/server`, `src/server/Bundle.ts`):  `clearOutput()`, `linkBuiltInFiles()`,
   `sizeReport()`, a build script's steps (epic `coherence` P11)
 - **Use it when:**  a script builds a bundle the page server serves.
 - **Copies:**  `--` since P11 (Spell UI's site bundle, the brand's build)

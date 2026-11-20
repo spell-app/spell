@@ -78,8 +78,10 @@ export class Carta extends TwoSidedView {
   }
 
   async jugar() {
-    if (this.pila === solitario.reserva) await solitario.robarDeLaReserva()
-    else {
+    if (this.pila === solitario.reserva) {
+      core.play("deslizar carta")
+      await solitario.robarDeLaReserva()
+    } else {
       const pilaFinal = core.filter(core.everyThing(Pila), (pila) => core.canTake(pila, this)).firstItem
       if (pilaFinal === undefined) return false
       return this.moverAPila(pilaFinal)
@@ -88,6 +90,7 @@ export class Carta extends TwoSidedView {
 
   /** El movimiento suma puntos;  la columna que dejó voltea su nueva última carta */
   afterMoverAPila(pila) {
+    core.play("poner carta")
     solitario.puntuación = solitario.puntuación + this.losPuntosPorEnPila(pila)
     const it2 = this.últimaPila
     if (it2 instanceof Columna && !it2.isEmpty) it2.lastItem?.turnFaceUp()
@@ -685,7 +688,10 @@ export class Solitario extends App {
   }
 
   async onPuntuaciónChange(event) {
-    if (core.itemCountOf(core.mergeLists(core.everyThing(Fundación))) === 52) await core.showDrawn("ganaste")
+    if (core.itemCountOf(core.mergeLists(core.everyThing(Fundación))) === 52) {
+      core.play("ganar")
+      await core.showDrawn("ganaste")
+    }
   }
 }
 export const solitario = new Solitario()

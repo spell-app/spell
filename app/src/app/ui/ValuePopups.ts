@@ -1,6 +1,8 @@
 import { after, type CancelablePromise } from "spell/util/timing"
 import type { SP } from "spell/parser/spell"
+import { BuiltInSounds, SOUND_KINDS, type SoundKind } from "spell/ui/sounds"
 import type { LSP } from "spell/app/lsp"
+import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import { hoverDelay } from "./codePopups"
 
 import "./ValuePopups.css"
@@ -20,7 +22,8 @@ import "./ValuePopups.css"
  *       Enter to choose, Esc or Tab back to the code
  *     - a click on a word chooses it
  *   - Only for an attribute that lists its words, and not more than `MOST_WORDS` of them.
- * - The picker (epic `editor` T61, `pick()`):  the color palette for `color="|"`, the icon picker for `icon="|"`.
+ * - The picker (epic `editor` T61, `pick()`):  the color palette for `color="|"`, the icon picker for `icon="|"`,
+ *   the sound picker for `play "|"` (epic `mockup` P28:  hear each of Spell's built-in sounds, then pick one).
  *   - Owen, on I55:  "Is it possible to show a custom menu here?  e.g. for `color`, we could show the color pallete,
  *     `icon` could show the icon picker".
  *   - Opened by the words list's first row, "Pick a color…" (`LSP.PICK_VALUE_COMMAND`):  the list opens there anyway,
@@ -33,7 +36,8 @@ import "./ValuePopups.css"
  * - Choosing either way writes the word between the quotes as ONE undo step, the caret after the closing quote:
  *   the editor's to do (`CaretValue.write()`).
  * - Both are in the page's `<body>`, placed by the value inside the window:  so no pane clips them.
- * - Its position in the import graph:  plain DOM, the page's popup delay (`codePopups`),
+ * - Its position in the import graph:  plain DOM, the page's popup delay (`codePopups`), the app's texts,
+ *   the built-in sounds' names (`spell/ui/sounds`),
  *   and types of the parser and the language service;
  *   it knows no editor:  what it needs of one is a `ValuePopupHost`.
  *   Where a value is on its line is the language service's (`LSP.SpellTyping.quotedValueAt()`), which each host asks.
@@ -206,15 +210,19 @@ export class ValuePopups {
    */
   static pick(host: ValuePopupHost, picker: SP.ComponentValuePicker, values: readonly string[]): void {
     PickerPopup.current?.close()
-    const value = host.valueAt("closing-quote-or-caret")
+    // a sound's name is quoted after `play`, not an attribute's value
+    const value = host.valueAt("closing-quote-or-caret", picker.kind === "sound" ? "word" : "attribute")
     if (value) PickerPopup.current = new PickerPopup(host, value, picker, values)
   }
 }
 
 /** What a code editor gives `ValuePopups`:  the value at its caret, its words, and its keys. */
 export type ValuePopupHost = {
-  /** the quoted value the caret is in, if any (`LSP.SpellTyping.quotedValueAt()` on the caret's line) */
-  valueAt(end: LSP.QuotedValueEnd): CaretValue | undefined
+  /**
+   * the quoted value the caret is in, if any (`LSP.SpellTyping.quotedValueAt()` on the caret's line)
+   * - `after`:  an attribute's value (the default), or text quoted after a word, the sound picker's `play "x"`
+   */
+  valueAt(end: LSP.QuotedValueEnd, after?: LSP.QuotedValueAfter): CaretValue | undefined
   /** the words the value at the caret takes, as the suggestion list's are (`attributeValuesAt()`) */
   wordsAt(): Promise<readonly string[] | undefined> | readonly string[] | undefined
   /**
@@ -255,7 +263,10 @@ export type ScreenBox = {
 
 /****************
  * ### `PickerPopup`
- * `ValuePopups.pick()`'s popup:  the palette of colour chips, or Spell UI's `<ui-icon-picker>`, opened at once.
+ * `ValuePopups.pick()`'s popup, opened at once:
+ * - the palette of colour chips
+ * - Spell UI's `<ui-icon-picker>`
+ * - or the sound picker:  the built-in sounds by kind, each with a ▶ to hear it, its name to pick it
  * - Placed just under the caret, or just over it where the window has no room below.
  * - ONE at a time, across every editor:  `current`.
  ****************/
@@ -279,6 +290,7 @@ class PickerPopup {
     this.node.className = `ValuePicker ValuePicker-${picker.kind}`
     document.body.append(this.node)
     if (picker.kind === "color") this.drawPalette(values, picker.colors)
+    else if (picker.kind === "sound") this.drawSoundPicker(values)
     else this.drawIconPicker()
     // drawn first:  its size says whether it fits below the caret
     this.place()
@@ -329,6 +341,76 @@ class PickerPopup {
       .catch((error: unknown) => console.error("ValuePopups:  the icon picker didn't open", error))
   }
 
+  /**
+   * The built-in sounds, grouped by kind, in the order Spell UI lists them:  each a ▶ that plays it, and its name,
+   * which picks it;  the value's name focused, else the first.
+   * - `names`:  each sound's name as the file's language writes it (`card slide`, `deslizar carta`).
+   * - The ↑ and ↓ keys move between the names (`moveFocus()`);  Space or Enter on a ▶ plays, on a name picks.
+   * - Played through the page's Spell UI (`UI.sounds`), whose sound files sit beside its own code:
+   *   this module's copy of `BuiltInSounds` may be bundled anywhere (`<spell-editor>`).
+   */
+  private drawSoundPicker(names: readonly string[]): void {
+    this.columns = 1
+    this.node.setAttribute("aria-label", appTexts.text("soundPicker"))
+    const hint = document.createElement("p")
+    hint.className = "ValuePickerHint"
+    hint.textContent = appTexts.text("soundPickerHint")
+    const list = document.createElement("div")
+    list.className = "ValuePickerSounds"
+    const current = BuiltInSounds.find(this.value.text)
+    let focus: HTMLElement | undefined
+    for (const kind of SOUND_KINDS) {
+      const kindNames = names.filter((name) => BuiltInSounds.find(name)?.kind === kind)
+      if (!kindNames.length) continue
+      const heading = document.createElement("h4")
+      heading.textContent = appTexts.text(SOUND_KIND_TEXTS[kind])
+      list.append(heading)
+      for (const name of kindNames) {
+        const row = document.createElement("div")
+        row.className = "ValuePickerSound"
+        const listen = document.createElement("button")
+        listen.type = "button"
+        listen.className = "ValuePickerListen"
+        listen.textContent = "▶"
+        listen.title = appTexts.text("soundListen", { sound: name })
+        listen.setAttribute("aria-label", listen.title)
+        listen.addEventListener("click", () => this.hear(name))
+        const chip = document.createElement("button")
+        chip.type = "button"
+        chip.className = "ValuePickerChip"
+        chip.textContent = name
+        const isCurrent = !!current && BuiltInSounds.find(name) === current
+        chip.toggleAttribute("aria-pressed", isCurrent)
+        chip.addEventListener("click", () => this.pick(name))
+        row.append(listen, chip)
+        list.append(row)
+        if (isCurrent) focus = chip
+        else focus ??= chip
+      }
+    }
+    this.node.append(hint, list)
+    focus?.focus()
+    focus?.scrollIntoView({ block: "nearest" })
+  }
+
+  /** The sound playing in the sound picker, if any:  one at a time, stopped when it closes. */
+  private hearing: HTMLAudioElement | undefined
+
+  /**
+   * Play the built-in sound `name` from its start, stopping the one before.
+   * - NEVER throws:  a page without Spell UI's runtime, or a sound the browser refuses, plays nothing.
+   */
+  private hear(name: string): void {
+    this.hearing?.pause()
+    const runtime = (globalThis as Record<symbol, { sounds?: { url(name: string): string | undefined } } | undefined>)[
+      UI_RUNTIME_KEY
+    ]
+    const address = runtime?.sounds?.url(name)
+    if (!address) return
+    this.hearing = new Audio(address)
+    this.hearing.play().catch((error: unknown) => console.warn(`ValuePopups:  can't play ${name}`, error))
+  }
+
   /** By the caret, inside the window;  `false` once the caret is scrolled out of the editor's view. */
   private place(): boolean {
     return placeNear(this.node, this.value.boxOf("caret"))
@@ -343,6 +425,7 @@ class PickerPopup {
   /** Close it, writing nothing. */
   close(): void {
     if (PickerPopup.current === this) PickerPopup.current = undefined
+    this.hearing?.pause()
     for (const cleanup of this.cleanups.splice(0)) cleanup()
     this.node.remove()
   }
@@ -382,12 +465,18 @@ class PickerPopup {
     )
   }
 
-  /** The arrow keys move between the palette's chips, by row and column. */
+  /** Chips to a row:  the palette's grid, or the sound picker's one name a row. */
+  private columns = PALETTE_COLUMNS
+
+  /** The arrow keys move between the chips, by row and column:  the palette's colours, the sound picker's names. */
   private moveFocus(key: string): void {
     const chips = [...this.node.querySelectorAll<HTMLElement>(".ValuePickerChip")]
     const at = chips.indexOf(document.activeElement as HTMLElement)
-    const step = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -PALETTE_COLUMNS, ArrowDown: PALETTE_COLUMNS }[key] ?? 0
-    chips[Math.max(0, Math.min(chips.length - 1, at + step))]?.focus()
+    const { columns } = this
+    const step = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -columns, ArrowDown: columns }[key] ?? 0
+    const next = chips[Math.max(0, Math.min(chips.length - 1, at + step))]
+    next?.focus()
+    next?.scrollIntoView({ block: "nearest" })
   }
 }
 
@@ -412,6 +501,22 @@ const GAP = 4
 
 /** The palette's chips to a row:  `ValuePopups.css`'s grid. */
 const PALETTE_COLUMNS = 3
+
+/** Each kind of built-in sound's heading in the sound picker, by its text's key. */
+const SOUND_KIND_TEXTS: Record<SoundKind, AppTextKey> = {
+  interface: "soundKindInterface",
+  cards: "soundKindCards",
+  casino: "soundKindCasino",
+  pieces: "soundKindPieces",
+  impacts: "soundKindImpacts",
+  footsteps: "soundKindFootsteps",
+  things: "soundKindThings",
+  digital: "soundKindDigital",
+  jingles: "soundKindJingles"
+}
+
+/** Spell UI's `RUNTIME_KEY`, where the page's runtime is (`UI.sounds`):  a copy, as this file never loads Spell UI. */
+const UI_RUNTIME_KEY = Symbol.for("spell-ui:runtime")
 
 /**
  * Place `node` just under `box`, or just over it where the window has no room below;  kept inside the window.

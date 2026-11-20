@@ -3,14 +3,6 @@
 		Segment
 		<header>A segment is used to create a grouping of related content.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#groups">Groups</>
-			<item link="#states">States</>
-			<item link="#variations">Variations</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's segment page, section by section, in its order (Types, Groups, States, Variations).

@@ -3,15 +3,6 @@
 		Step
 		<header>A step shows the completion status of an activity in a series of activities.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#groups">Groups</>
-			<item link="#content">Content</>
-			<item link="#states">States</>
-			<item link="#variations">Variations</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's step page, section by section, in its order (Types, Groups, Content, States, Variations).

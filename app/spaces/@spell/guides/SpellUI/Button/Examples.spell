@@ -3,17 +3,6 @@
 		Button
 		<header>A button indicates a possible user action.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#groups">Groups</>
-			<item link="#content">Content</>
-			<item link="#states">States</>
-			<item link="#variations">Variations</>
-			<item link="#group-variations">Group Variations</>
-			<item link="#not-ported-from-fomantic">Not ported from Fomantic</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's button page, section by section, in its order (Types, Groups, Content, States,

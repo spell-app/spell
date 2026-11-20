@@ -1,0 +1,30 @@
+# Weekend Countdown
+// How long until the weekend:  days, hours, minutes and seconds, ticking down every second.
+
+weekend countdown is an app
+	its "time" is a date
+		// This moment:  set again every second, so the countdown redraws
+	every second
+		set its time to now
+	it "is the weekend" if its time is a weekend day
+		// Saturday and Sunday in most places:  the person's region says
+	its "time left" is the next weekend - its time
+		// A duration:  2 days, 3 hours, 4 minutes and 5 seconds
+
+	to draw it
+		// The days, hours, minutes and seconds left, side by side;  on the weekend, a cheer instead
+		<container width="32em">
+			<segment padding="lg">
+				<if it is the weekend>
+					<header>It's the weekend!</header>
+				<else>
+					<text color="grey">Weekend starts in</text>
+					<statistics equal size="small">
+						<statistic value={the days of its time left} label="Days" />
+						<statistic value={the hours of its time left as two digits} label="Hr" />
+						<statistic value={the minutes of its time left as two digits} label="Min" />
+						<statistic value={the seconds of its time left as two digits} label="Sec" />
+					</statistics>
+				</if>
+			</segment>
+		</container>

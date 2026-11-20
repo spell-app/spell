@@ -3,16 +3,6 @@
 		Step
 		<header>A step shows the completion status of an activity in a series of activities.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#tags">Tags</>
-			<item link="#attributes">Attributes</>
-			<item link="#slots">Slots</>
-			<item link="#parts">Parts</>
-			<item link="#states">States</>
-			<item link="#texts">Texts</>
-		</>
-	</>
 
 	<!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
 	<section label="Tags">

@@ -88,6 +88,22 @@ export class EditorStore extends Observable {
     navigate("/")
   }
 
+  /**
+   * The editor's address for Spell UI's site, `spell ui is a site` (`SPACES.SPELL_UI_SITE_PROJECT`):
+   * where the home page's footer links to.
+   */
+  get spellUIUrl(): string {
+    return new SP.SpellLocation(SPACES.SPELL_UI_SITE_PROJECT).editorUrl
+  }
+
+  /**
+   * Show Spell UI's site in the editor, at its home page, as any project opens (`showEditor()`):
+   * the Spell menu's Spell UI, and the home page's footer (epic `mockup` T55).
+   */
+  showSpellUI(): void {
+    editor.showEditor(SPACES.SPELL_UI_SITE_PROJECT)
+  }
+
   /** Show the theme editor's page (`<ThemeEditorPage>`). */
   showThemeEditor(): void {
     navigate(THEME_PAGE)
