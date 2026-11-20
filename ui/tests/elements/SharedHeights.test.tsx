@@ -15,6 +15,9 @@ import "spell/ui/components/ui-modal"
 import "spell/ui/components/ui-embed"
 import "spell/ui/components/ui-markdown"
 import "spell/ui/components/ui-list"
+import "spell/ui/components/ui-stack"
+import "spell/ui/components/ui-grid"
+import "spell/ui/components/ui-page-layout"
 
 /****************
  * The shared `height`, `min-height` and `max-height`, and `resizable`'s sizes, on each of the eleven widgets that
@@ -115,5 +118,90 @@ describe("resizable", () => {
     const scroller = host.shadowRoot!.querySelector<HTMLElement>(".scroller")!
     expect(scroller.style.resize).toBe("vertical")
     expect(host.style.resize).toBe("")
+  })
+})
+
+/****************
+ * `height="fluid"` (epic `old-console-redo` T27):  what's left of its parent's height, shared;  and a `stretched` grid's
+ * column growing a segment's own box (T26).
+ ****************/
+/** The box `host` draws:  its own, or its shadow root's top one. */
+const boxOf = (host: Element) =>
+  getComputedStyle(host).display === "contents"
+    ? ([...host.shadowRoot!.children].find((child) => !child.matches("slot, style, link")) as HTMLElement)
+    : (host as HTMLElement)
+const heightOf = (host: Element) => boxOf(host).getBoundingClientRect().height
+
+describe('height="fluid"', () => {
+  it("in a stack 300px tall:  two fluid segments share what's left under a fixed one;  each scrolls what doesn't fit", async () => {
+    const stack = await ElementFixture.render<DOMElement>(
+      `<ui-stack height="300px" spacing="none">
+        <ui-segment height="100px">head</ui-segment>
+        <ui-segment height="fluid" id="a"><div style="height: 500px">tall</div></ui-segment>
+        <ui-segment height="fluid" id="b">short</ui-segment>
+      </ui-stack>`
+    )
+    await ElementFixture.settle()
+    const [a, b] = ["#a", "#b"].map((id) => stack.querySelector(id)!)
+    expect(a!.matches(":state(fluid-height)")).toBe(true)
+    expect(a!.matches(":state(height)")).toBe(false)
+    expect(heightOf(a!)).toBeCloseTo(100, 0)
+    expect(heightOf(b!)).toBeCloseTo(100, 0)
+    expect(boxOf(a!).scrollHeight).toBeGreaterThan(boxOf(a!).clientHeight)
+  })
+
+  it("a fluid segment lays its own content in a column:  a fluid child takes what's left of it", async () => {
+    const outer = await ElementFixture.render<DOMElement>(
+      `<ui-stack height="300px" spacing="none">
+        <ui-segment height="fluid" padding="none" id="outer">
+          <ui-segment height="60px">head</ui-segment>
+          <ui-segment height="fluid" id="inner"><div style="height: 900px">list</div></ui-segment>
+        </ui-segment>
+      </ui-stack>`
+    )
+    await ElementFixture.settle()
+    expect(heightOf(outer.querySelector("#outer")!)).toBeCloseTo(300, 0)
+    const inner = heightOf(outer.querySelector("#inner")!)
+    expect(inner).toBeGreaterThan(150)
+    expect(inner).toBeLessThan(240)
+  })
+
+  it("a fluid grid's fluid row takes what the other rows leave;  a stretched column's segments are its height (T26)", async () => {
+    const stack = await ElementFixture.render<DOMElement>(
+      `<ui-stack height="400px" spacing="none">
+        <ui-grid stretched height="fluid">
+          <ui-row><ui-column width="8"><ui-segment height="80px">top</ui-segment></ui-column></ui-row>
+          <ui-row height="fluid" id="rest">
+            <ui-column width="8"><ui-segment id="short">short</ui-segment></ui-column>
+            <ui-column width="8"><ui-segment height="fluid" id="long"><div style="height: 900px">long</div></ui-segment></ui-column>
+          </ui-row>
+        </ui-grid>
+      </ui-stack>`
+    )
+    await ElementFixture.settle()
+    const rest = heightOf(stack.querySelector("#rest")!)
+    expect(rest).toBeGreaterThan(200)
+    expect(rest).toBeLessThan(320)
+    const [short, long] = ["#short", "#long"].map((id) => heightOf(stack.querySelector(id)!))
+    // the bare segment grows to its column, as tall as the fluid one beside it
+    expect(short).toBeCloseTo(long!, 0)
+    expect(long).toBeLessThan(rest)
+  })
+})
+
+describe('<ui-page-layout page-height="fluid">', () => {
+  it("is the window's height, never more:  its page a column whose fluid child takes what's left", async () => {
+    const layout = await ElementFixture.render<DOMElement>(
+      `<ui-page-layout page-height="fluid">
+        <div slot="menu" style="height: 50px">menu</div>
+        <div><ui-segment height="fluid" id="page"><div style="height: 5000px">long</div></ui-segment></div>
+      </ui-page-layout>`
+    )
+    await ElementFixture.settle()
+    expect(layout.matches(":state(page-fluid)")).toBe(true)
+    expect(layout.getBoundingClientRect().height).toBeCloseTo(window.innerHeight, 0)
+    const page = heightOf(layout.querySelector("#page")!)
+    expect(page).toBeGreaterThan(50)
+    expect(page).toBeLessThan(window.innerHeight - 50)
   })
 })

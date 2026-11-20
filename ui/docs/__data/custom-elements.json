@@ -4188,7 +4188,7 @@
             },
             {
               "name": "height",
-              "description": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.",
+              "description": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  `height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.",
               "type": {
                 "text": "string"
               },
@@ -4196,7 +4196,7 @@
             },
             {
               "name": "min-height",
-              "description": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.",
+              "description": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too, and a fluid one (`height=\"fluid\"`) squeezes no further.  On the same boxes as `height`.",
               "type": {
                 "text": "string"
               },
@@ -5857,7 +5857,7 @@
             },
             {
               "name": "height",
-              "description": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.",
+              "description": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  `height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.",
               "type": {
                 "text": "string"
               },
@@ -5865,7 +5865,7 @@
             },
             {
               "name": "min-height",
-              "description": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.",
+              "description": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too, and a fluid one (`height=\"fluid\"`) squeezes no further.  On the same boxes as `height`.",
               "type": {
                 "text": "string"
               },
@@ -10549,7 +10549,7 @@
             },
             {
               "name": "height",
-              "description": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.",
+              "description": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  `height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.",
               "type": {
                 "text": "string"
               },
@@ -10557,7 +10557,7 @@
             },
             {
               "name": "min-height",
-              "description": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.",
+              "description": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too, and a fluid one (`height=\"fluid\"`) squeezes no further.  On the same boxes as `height`.",
               "type": {
                 "text": "string"
               },
@@ -12500,7 +12500,7 @@
             },
             {
               "name": "height",
-              "description": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.",
+              "description": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  `height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.",
               "type": {
                 "text": "string"
               },
@@ -12508,7 +12508,7 @@
             },
             {
               "name": "min-height",
-              "description": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.",
+              "description": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too, and a fluid one (`height=\"fluid\"`) squeezes no further.  On the same boxes as `height`.",
               "type": {
                 "text": "string"
               },
@@ -14289,7 +14289,7 @@
             },
             {
               "name": "height",
-              "description": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.",
+              "description": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  `height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.",
               "type": {
                 "text": "string"
               },
@@ -14297,7 +14297,7 @@
             },
             {
               "name": "min-height",
-              "description": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.",
+              "description": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too, and a fluid one (`height=\"fluid\"`) squeezes no further.  On the same boxes as `height`.",
               "type": {
                 "text": "string"
               },
@@ -15101,6 +15101,30 @@
               "fieldName": "maxWidth"
             },
             {
+              "name": "height",
+              "description": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  `height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "height"
+            },
+            {
+              "name": "min-height",
+              "description": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too, and a fluid one (`height=\"fluid\"`) squeezes no further.  On the same boxes as `height`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "minHeight"
+            },
+            {
+              "name": "max-height",
+              "description": "The tallest its box gets, any CSS length:  `max-height=\"60vh\"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "maxHeight"
+            },
+            {
               "name": "tooltip",
               "description": "Its tooltip:  the browser's own, written as the element's `title`.",
               "type": {
@@ -15491,6 +15515,30 @@
                 "text": "string"
               },
               "fieldName": "maxWidth"
+            },
+            {
+              "name": "height",
+              "description": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  `height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "height"
+            },
+            {
+              "name": "min-height",
+              "description": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too, and a fluid one (`height=\"fluid\"`) squeezes no further.  On the same boxes as `height`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "minHeight"
+            },
+            {
+              "name": "max-height",
+              "description": "The tallest its box gets, any CSS length:  `max-height=\"60vh\"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "maxHeight"
             },
             {
               "name": "tooltip",
@@ -19746,7 +19794,7 @@
             },
             {
               "name": "height",
-              "description": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.",
+              "description": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  `height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.",
               "type": {
                 "text": "string"
               },
@@ -19754,7 +19802,7 @@
             },
             {
               "name": "min-height",
-              "description": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.",
+              "description": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too, and a fluid one (`height=\"fluid\"`) squeezes no further.  On the same boxes as `height`.",
               "type": {
                 "text": "string"
               },
@@ -22375,7 +22423,7 @@
             },
             {
               "name": "height",
-              "description": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.",
+              "description": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  `height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.",
               "type": {
                 "text": "string"
               },
@@ -22383,7 +22431,7 @@
             },
             {
               "name": "min-height",
-              "description": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.",
+              "description": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too, and a fluid one (`height=\"fluid\"`) squeezes no further.  On the same boxes as `height`.",
               "type": {
                 "text": "string"
               },
@@ -25036,7 +25084,7 @@
             },
             {
               "name": "height",
-              "description": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.",
+              "description": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  `height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.",
               "type": {
                 "text": "string"
               },
@@ -25044,7 +25092,7 @@
             },
             {
               "name": "min-height",
-              "description": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.",
+              "description": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too, and a fluid one (`height=\"fluid\"`) squeezes no further.  On the same boxes as `height`.",
               "type": {
                 "text": "string"
               },
@@ -26278,6 +26326,14 @@
               "fieldName": "floating"
             },
             {
+              "name": "page-height",
+              "description": "`fluid`:  the layout is exactly as tall as what's seen of the window (or the pane it scrolls in), never scrolling it:  the page takes what's left under the menus, a column whose children with `height=\"fluid\"` share it out, each scrolling inside.  None:  as tall as the page, which the window scrolls.  A site's page asks for it on its line:  `home is a page, filling the window`.",
+              "type": {
+                "text": "\"fluid\""
+              },
+              "fieldName": "pageHeight"
+            },
+            {
               "name": "disabled",
               "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
               "type": {
@@ -26504,6 +26560,10 @@
             {
               "name": "sides-narrow",
               "description": "Below 64em of its own box:  a side bar with its button hides behind it, and shows over the page while open."
+            },
+            {
+              "name": "page-fluid",
+              "description": "`page-height=\"fluid\"`:  as tall as what's seen of the window, the page sharing out what's left."
             },
             {
               "name": "drawer-hidden",
@@ -38448,7 +38508,7 @@
             },
             {
               "name": "height",
-              "description": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.",
+              "description": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  `height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.",
               "type": {
                 "text": "string"
               },
@@ -38456,7 +38516,7 @@
             },
             {
               "name": "min-height",
-              "description": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.",
+              "description": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too, and a fluid one (`height=\"fluid\"`) squeezes no further.  On the same boxes as `height`.",
               "type": {
                 "text": "string"
               },
@@ -43825,6 +43885,30 @@
               "fieldName": "maxWidth"
             },
             {
+              "name": "height",
+              "description": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  `height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "height"
+            },
+            {
+              "name": "min-height",
+              "description": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too, and a fluid one (`height=\"fluid\"`) squeezes no further.  On the same boxes as `height`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "minHeight"
+            },
+            {
+              "name": "max-height",
+              "description": "The tallest its box gets, any CSS length:  `max-height=\"60vh\"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "maxHeight"
+            },
+            {
               "name": "tooltip",
               "description": "Its tooltip:  the browser's own, written as the element's `title`.",
               "type": {
@@ -46878,7 +46962,7 @@
             },
             {
               "name": "height",
-              "description": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.",
+              "description": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  `height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.",
               "type": {
                 "text": "string"
               },
@@ -46886,7 +46970,7 @@
             },
             {
               "name": "min-height",
-              "description": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.",
+              "description": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too, and a fluid one (`height=\"fluid\"`) squeezes no further.  On the same boxes as `height`.",
               "type": {
                 "text": "string"
               },
@@ -52259,7 +52343,7 @@
             },
             {
               "name": "height",
-              "description": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.",
+              "description": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  `height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.",
               "type": {
                 "text": "string"
               },
@@ -52267,7 +52351,7 @@
             },
             {
               "name": "min-height",
-              "description": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.",
+              "description": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too, and a fluid one (`height=\"fluid\"`) squeezes no further.  On the same boxes as `height`.",
               "type": {
                 "text": "string"
               },

@@ -938,9 +938,8 @@
                   </ui-grid>
                 </ui-example>
               </ui-section>
-              <!-- GAP I79:  a stretched row doesn't grow the `<ui-segment>`s inside its columns. -->
               <ui-section id="examples-variations-stretched" label="Stretched" sticky="stack" collapsible dividing>
-                <ui-example description="A row can stretch its contents to take up the entire column height.">
+                <ui-example description="A row can stretch its contents to take up the entire column height:  each column's segments grow to fill it.">
                   <ui-grid columns="3" divided>
                     <ui-row stretched>
                       <ui-column>
@@ -991,6 +990,32 @@
                       </ui-column>
                     </ui-row>
                   </ui-grid>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-variations-fluid-height" label="Fluid height" sticky="stack" collapsible dividing>
+                <ui-example description="`height=&quot;fluid&quot;` on a grid takes what's left of its parent's height (here a stack 18em tall), and lays its rows top to bottom:  a row with `height=&quot;fluid&quot;` takes what the others leave.  A page does it with the whole window:  `home is a page, filling the window`.">
+                  <ui-stack height="18em" spacing="none">
+                    <ui-grid stretched height="fluid">
+                      <ui-row>
+                        <ui-column width="16">
+                          <ui-segment>A row as tall as what's in it</ui-segment>
+                        </ui-column>
+                      </ui-row>
+                      <ui-row height="fluid">
+                        <ui-column width="10">
+                          <ui-segment height="fluid">
+                            <p>The row below takes the rest of the height;  this segment fills its column, and scrolls what doesn't fit.</p>
+                            <p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p>
+                            <p>Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante.</p>
+                            <p>Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est.</p>
+                          </ui-segment>
+                        </ui-column>
+                        <ui-column width="6">
+                          <ui-segment>Stretched to the row's height</ui-segment>
+                        </ui-column>
+                      </ui-row>
+                    </ui-grid>
+                  </ui-stack>
                 </ui-example>
               </ui-section>
               <ui-section id="examples-variations-padded" label="Padded" sticky="stack" collapsible dividing>

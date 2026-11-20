@@ -5925,7 +5925,7 @@ export interface UICardAttributes {
    */
   "prop:maxWidth"?: string
   /**
-   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.
+   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  `height="fluid"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.
    * - takes:  text
    */
   height?: string
@@ -5935,7 +5935,7 @@ export interface UICardAttributes {
    */
   "prop:height"?: string
   /**
-   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too, and a fluid one (`height="fluid"`) squeezes no further.  On the same boxes as `height`.
    * - takes:  text
    */
   "min-height"?: string
@@ -7596,7 +7596,7 @@ export interface UICodeAttributes {
    */
   "prop:maxWidth"?: string
   /**
-   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.
+   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  `height="fluid"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.
    * - takes:  text
    */
   height?: string
@@ -7606,7 +7606,7 @@ export interface UICodeAttributes {
    */
   "prop:height"?: string
   /**
-   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too, and a fluid one (`height="fluid"`) squeezes no further.  On the same boxes as `height`.
    * - takes:  text
    */
   "min-height"?: string
@@ -14789,7 +14789,7 @@ export interface UIEmbedAttributes {
    */
   "prop:maxWidth"?: string
   /**
-   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.
+   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  `height="fluid"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.
    * - takes:  text
    */
   height?: string
@@ -14799,7 +14799,7 @@ export interface UIEmbedAttributes {
    */
   "prop:height"?: string
   /**
-   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too, and a fluid one (`height="fluid"`) squeezes no further.  On the same boxes as `height`.
    * - takes:  text
    */
   "min-height"?: string
@@ -18012,7 +18012,7 @@ export interface UIFlyoutAttributes {
    */
   "prop:maxWidth"?: string
   /**
-   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.
+   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  `height="fluid"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.
    * - takes:  text
    */
   height?: string
@@ -18022,7 +18022,7 @@ export interface UIFlyoutAttributes {
    */
   "prop:height"?: string
   /**
-   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too, and a fluid one (`height="fluid"`) squeezes no further.  On the same boxes as `height`.
    * - takes:  text
    */
   "min-height"?: string
@@ -18965,7 +18965,7 @@ export interface UIGraphAttributes {
    */
   "prop:maxWidth"?: string
   /**
-   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.
+   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  `height="fluid"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.
    * - takes:  text
    */
   height?: string
@@ -18975,7 +18975,7 @@ export interface UIGraphAttributes {
    */
   "prop:height"?: string
   /**
-   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too, and a fluid one (`height="fluid"`) squeezes no further.  On the same boxes as `height`.
    * - takes:  text
    */
   "min-height"?: string
@@ -19478,6 +19478,36 @@ export interface UIGridAttributes {
    * @deprecated write `max-width` -- `prop:` stays only for compiled spell
    */
   "prop:maxWidth"?: string
+  /**
+   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  `height="fluid"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.
+   * - takes:  text
+   */
+  height?: string
+  /**
+   * `height`, as the DOM element's property.
+   * @deprecated write `height` -- `prop:` stays only for compiled spell
+   */
+  "prop:height"?: string
+  /**
+   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too, and a fluid one (`height="fluid"`) squeezes no further.  On the same boxes as `height`.
+   * - takes:  text
+   */
+  "min-height"?: string
+  /**
+   * `min-height`, as the DOM element's property.
+   * @deprecated write `min-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:minHeight"?: string
+  /**
+   * The tallest its box gets, any CSS length:  `max-height="60vh"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * - takes:  text
+   */
+  "max-height"?: string
+  /**
+   * `max-height`, as the DOM element's property.
+   * @deprecated write `max-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxHeight"?: string
   /**
    * Its tooltip:  the browser's own, written as the element's `title`.
    * - takes:  text
@@ -24063,7 +24093,7 @@ export interface UIJsonAttributes {
    */
   "prop:maxWidth"?: string
   /**
-   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.
+   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  `height="fluid"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.
    * - takes:  text
    */
   height?: string
@@ -24073,7 +24103,7 @@ export interface UIJsonAttributes {
    */
   "prop:height"?: string
   /**
-   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too, and a fluid one (`height="fluid"`) squeezes no further.  On the same boxes as `height`.
    * - takes:  text
    */
   "min-height"?: string
@@ -26927,7 +26957,7 @@ export interface UIMarkdownAttributes {
    */
   "prop:maxWidth"?: string
   /**
-   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.
+   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  `height="fluid"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.
    * - takes:  text
    */
   height?: string
@@ -26937,7 +26967,7 @@ export interface UIMarkdownAttributes {
    */
   "prop:height"?: string
   /**
-   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too, and a fluid one (`height="fluid"`) squeezes no further.  On the same boxes as `height`.
    * - takes:  text
    */
   "min-height"?: string
@@ -29296,7 +29326,7 @@ export interface UIModalAttributes {
    */
   "prop:maxWidth"?: string
   /**
-   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.
+   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  `height="fluid"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.
    * - takes:  text
    */
   height?: string
@@ -29306,7 +29336,7 @@ export interface UIModalAttributes {
    */
   "prop:height"?: string
   /**
-   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too, and a fluid one (`height="fluid"`) squeezes no further.  On the same boxes as `height`.
    * - takes:  text
    */
   "min-height"?: string
@@ -30708,6 +30738,16 @@ export interface UIPageLayoutAttributes {
    * @deprecated write `floating` -- `prop:` stays only for compiled spell
    */
   "prop:floating"?: boolean | ""
+  /**
+   * `fluid`:  the layout is exactly as tall as what's seen of the window (or the pane it scrolls in), never scrolling it:  the page takes what's left under the menus, a column whose children with `height="fluid"` share it out, each scrolling inside.  None:  as tall as the page, which the window scrolls.  A site's page asks for it on its line:  `home is a page, filling the window`.
+   * - takes:  `fluid`
+   */
+  "page-height"?: "fluid"
+  /**
+   * `page-height`, as the DOM element's property.
+   * @deprecated write `page-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:pageHeight"?: "fluid"
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
@@ -39895,6 +39935,36 @@ export interface UIRowAttributes {
    */
   "prop:maxWidth"?: string
   /**
+   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  `height="fluid"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.
+   * - takes:  text
+   */
+  height?: string
+  /**
+   * `height`, as the DOM element's property.
+   * @deprecated write `height` -- `prop:` stays only for compiled spell
+   */
+  "prop:height"?: string
+  /**
+   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too, and a fluid one (`height="fluid"`) squeezes no further.  On the same boxes as `height`.
+   * - takes:  text
+   */
+  "min-height"?: string
+  /**
+   * `min-height`, as the DOM element's property.
+   * @deprecated write `min-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:minHeight"?: string
+  /**
+   * The tallest its box gets, any CSS length:  `max-height="60vh"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * - takes:  text
+   */
+  "max-height"?: string
+  /**
+   * `max-height`, as the DOM element's property.
+   * @deprecated write `max-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxHeight"?: string
+  /**
    * Its tooltip:  the browser's own, written as the element's `title`.
    * - takes:  text
    */
@@ -41845,7 +41915,7 @@ export interface UISegmentAttributes {
    */
   "prop:maxWidth"?: string
   /**
-   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.
+   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  `height="fluid"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.
    * - takes:  text
    */
   height?: string
@@ -41855,7 +41925,7 @@ export interface UISegmentAttributes {
    */
   "prop:height"?: string
   /**
-   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too, and a fluid one (`height="fluid"`) squeezes no further.  On the same boxes as `height`.
    * - takes:  text
    */
   "min-height"?: string
@@ -47372,6 +47442,36 @@ export interface UIStackAttributes {
    */
   "prop:maxWidth"?: string
   /**
+   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  `height="fluid"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.
+   * - takes:  text
+   */
+  height?: string
+  /**
+   * `height`, as the DOM element's property.
+   * @deprecated write `height` -- `prop:` stays only for compiled spell
+   */
+  "prop:height"?: string
+  /**
+   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too, and a fluid one (`height="fluid"`) squeezes no further.  On the same boxes as `height`.
+   * - takes:  text
+   */
+  "min-height"?: string
+  /**
+   * `min-height`, as the DOM element's property.
+   * @deprecated write `min-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:minHeight"?: string
+  /**
+   * The tallest its box gets, any CSS length:  `max-height="60vh"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * - takes:  text
+   */
+  "max-height"?: string
+  /**
+   * `max-height`, as the DOM element's property.
+   * @deprecated write `max-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxHeight"?: string
+  /**
    * Its tooltip:  the browser's own, written as the element's `title`.
    * - takes:  text
    */
@@ -50920,7 +51020,7 @@ export interface UITableAttributes {
    */
   "prop:maxWidth"?: string
   /**
-   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.
+   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  `height="fluid"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.
    * - takes:  text
    */
   height?: string
@@ -50930,7 +51030,7 @@ export interface UITableAttributes {
    */
   "prop:height"?: string
   /**
-   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too, and a fluid one (`height="fluid"`) squeezes no further.  On the same boxes as `height`.
    * - takes:  text
    */
   "min-height"?: string
@@ -57478,7 +57578,7 @@ export interface UITreeAttributes {
    */
   "prop:maxWidth"?: string
   /**
-   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.
+   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  `height="fluid"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.
    * - takes:  text
    */
   height?: string
@@ -57488,7 +57588,7 @@ export interface UITreeAttributes {
    */
   "prop:height"?: string
   /**
-   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too, and a fluid one (`height="fluid"`) squeezes no further.  On the same boxes as `height`.
    * - takes:  text
    */
   "min-height"?: string

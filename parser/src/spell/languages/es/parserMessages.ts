@@ -182,6 +182,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "site-part-not-listed": 'El sitio no tiene "{part}":  sus páginas, diálogos y paneles son {parts}',
   "layout-not-on-a-page":
     "Solo una página tiene un diseño:  dilo en la línea de una página, p. ej. sistemas es una página, en el diseño sencillo",
+  "fills-window-not-on-a-page":
+    "Solo una página llena la ventana:  dilo en la línea de una página, p. ej. inicio es una página, llenando la ventana",
   "layout-not-declared": 'El programa no tiene "{layout}":  declaralo, p. ej. {layout} es un diseño',
   "site-top-bar-retired":
     'La barra superior de un sitio es ahora el menú de la aplicación de su diseño principal:  diseño principal es un diseño, luego - para "dibujar su menú de la aplicación", con las líneas de la vista de la barra en una <barra-aplicacion>;  esta línea no hace nada',

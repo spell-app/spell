@@ -34,6 +34,8 @@ export const gridVocabulary = {
   tag: "ui-grid",
   icon: "th",
   topics: ["layout", "basic", "collections"],
+  // the shared `height`, `min-height` and `max-height`:  `height="fluid"` shares a page's height out (epic `old-console-redo` T27)
+  heights: true,
   aka: ["columns", "row", "flex grid", "layout grid", "responsive grid"],
   noun: "grid",
   partOfSpeech: "structure",

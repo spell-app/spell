@@ -129,6 +129,14 @@ class PrintPage extends Page {
   }
 }
 
+/** A page filling the window, its line saying `, filling the window` (epic `old-console-redo` T27). */
+class DashPage extends Page {
+  static fillsWindow = true
+  draw(): Drawing {
+    return h("h1", null, "Dash") as unknown as Drawing
+  }
+}
+
 /** A page that draws the layout's right side bar itself:  its own wins while it's shown. */
 class CastPage extends Page {
   draw(): Drawing {
@@ -220,7 +228,8 @@ class StarCharts extends Site {
     { ...GalaxyGuide.pages[0]!, group: "Archive" },
     { name: "login page", page: "LoginPage", address: "/login" },
     { name: "print page", page: "PrintPage", address: "/print" },
-    { name: "cast page", page: "CastPage", address: "/cast" }
+    { name: "cast page", page: "CastPage", address: "/cast" },
+    { name: "dash page", page: "DashPage", address: "/dash" }
   ]
   static mainLayout = "MainLayout"
 }
@@ -588,6 +597,7 @@ describe("a running site", () => {
       new LoginPage()
       new PrintPage()
       new CastPage()
+      new DashPage()
       new MainLayout()
       new BareLayout()
       PrefStore.setAt("spell-sites:StarCharts.MainLayout.compact", undefined)
@@ -703,6 +713,15 @@ describe("a running site", () => {
       await charts.showAddress("/login")
       expect(await shown()).toBe("Log in")
       expect(element.querySelector("ui-page-layout:not([hidden])")).toBeNull()
+    })
+
+    test('`, filling the window`:  its layout is `page-height="fluid"` while it\'s shown, and only then (old-console-redo T27)', async () => {
+      await charts.showAddress("/dash")
+      expect(await shown()).toContain("Dash")
+      expect(layout("MainLayout")?.getAttribute("page-height")).toBe("fluid")
+      await charts.showAddress("/films")
+      await shown()
+      expect(layout("MainLayout")?.hasAttribute("page-height")).toBe(false)
     })
 
     test("the not found page is in the main layout:  its navigation is there, to get out", async () => {

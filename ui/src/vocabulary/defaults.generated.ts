@@ -1052,7 +1052,8 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "drawer-hides", kind: "keyOnly", group: "behaviour" },
     { name: "left", kind: "valueOnly", group: "appearance", values: ["hidden"] },
     { name: "right", kind: "valueOnly", group: "appearance", values: ["hidden"] },
-    { name: "floating", kind: "keyOnly", group: "appearance" }
+    { name: "floating", kind: "keyOnly", group: "appearance" },
+    { name: "page-height", kind: "valueOnly", group: "layout", values: ["fluid"] }
   ],
   "ui-panel": [
     { name: "label", kind: "string", group: "name" },

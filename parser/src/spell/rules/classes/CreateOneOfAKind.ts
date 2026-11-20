@@ -25,6 +25,9 @@ import { CreateType } from "./CreateType"
  *   `static layout = "BareLayout"`;  `login is a page, no layout` => `static layout = false`, just the page.
  *   - Said nothing, it's in the site's main layout, when the program has one (`static mainLayout`, `create_site`).
  *   - Refused on anything but a page, and when the words name a type that isn't a page layout.
+ * - And whether it fills the window (epic `old-console-redo` T27):  `home is a page, filling the window` =>
+ *   `static fillsWindow = true`;  its site draws its layout `page-height="fluid"`, exactly the window's height, and
+ *   the page's `height="fluid"` boxes share what's left.  Refused on anything but a page.
  */
 export class CreateOneOfAKind extends CreateType {
   @proto static declares: P.DeclaresSpec = { kind: "type", name: "type", detail: "superType" }
@@ -69,10 +72,16 @@ export class CreateOneOfAKind extends CreateType {
    *   file parsed after this one
    */
   private static refuseLayoutOf(match: P.MatchFor<CreateOneOfAKind>, type: P.TypeScope): P.Match | undefined {
-    const { layout, no_layout } = match.groups as LayoutGroups
-    if (!layout && !no_layout) return match
+    const { layout, no_layout, fills_window } = match.groups as LayoutGroups
+    if (!layout && !no_layout && !fills_window) return match
     const language = SP.Language.of(match.scope)
-    if (!type.isA("Page")) return CreateOneOfAKind.refuse(match, language.parserMessage("layout-not-on-a-page"))
+    if (!type.isA("Page"))
+      return CreateOneOfAKind.refuse(
+        match,
+        language.parserMessage(
+          fills_window && !layout && !no_layout ? "fills-window-not-on-a-page" : "layout-not-on-a-page"
+        )
+      )
     if (!layout) return match
     const words = `${layout.raw ?? layout.inputText}`.trim()
     const named = () => match.scope.getType(CreateOneOfAKind.layoutClassFor(match))
@@ -126,19 +135,27 @@ export class CreateOneOfAKind extends CreateType {
   }
 
   /**
-   * `group`, its class given the layout its line picks:  `static layout = "BareLayout"`, or `false` for `no layout`.
-   * - Nothing when its line picks none.
+   * `group`, its class given the layout its line picks:  `static layout = "BareLayout"`, or `false` for `no layout`;
+   * and `static fillsWindow = true` for `filling the window`.
+   * - Nothing when its line says neither.
    */
   private static withLayout(match: P.MatchFor<CreateOneOfAKind>, group: P.ASTStatementGroup): P.ASTStatementGroup {
-    const { layout, no_layout } = match.groups as LayoutGroups
-    if (!layout && !no_layout) return group
+    const { layout, no_layout, fills_window } = match.groups as LayoutGroups
+    if (!layout && !no_layout && !fills_window) return group
     const type = P.matchAST<P.ASTTypeExpression>(match.groups.type)
-    const value = layout
-      ? new P.ASTStringLiteral(match, { value: JSON.stringify(CreateOneOfAKind.layoutClassFor(match)) })
-      : new P.ASTBooleanLiteral(match, false)
-    const member = new P.ASTStaticDefinition(match, { type, name: LAYOUT, value })
+    const members: P.ASTStaticDefinition[] = []
+    if (layout || no_layout) {
+      const value = layout
+        ? new P.ASTStringLiteral(match, { value: JSON.stringify(CreateOneOfAKind.layoutClassFor(match)) })
+        : new P.ASTBooleanLiteral(match, false)
+      members.push(new P.ASTStaticDefinition(match, { type, name: LAYOUT, value }))
+    }
+    if (fills_window)
+      members.push(
+        new P.ASTStaticDefinition(match, { type, name: FILLS_WINDOW, value: new P.ASTBooleanLiteral(match, true) })
+      )
     const statements = (group.statements ?? []).map((statement) =>
-      statement instanceof P.ASTClassDeclaration ? statement.withMembers([member]) : statement
+      statement instanceof P.ASTClassDeclaration ? statement.withMembers(members) : statement
     )
     return new P.ASTStatementGroup(match, { statements })
   }
@@ -165,11 +182,16 @@ function namesOneOfAKindType(scope: P.Scope, tokens: P.Token[], index: number): 
   return false
 }
 
-/** The groups a page's line picks its layout with:  `, in the {layout} layout`, `, no layout`. */
-type LayoutGroups = { layout?: P.Match; no_layout?: P.Match }
+/**
+ * The groups a page's line picks its layout with:  `, in the {layout} layout`, `, no layout`;  and
+ * `, filling the window`.
+ */
+type LayoutGroups = { layout?: P.Match; no_layout?: P.Match; fills_window?: P.Match }
 
 /** The static a page's layout goes in:  `static layout = "BareLayout"`, read by the core's `SiteBase`. */
 const LAYOUT = "layout"
+/** The static saying a page fills the window:  `static fillsWindow = true`, read by the core's `SiteBase`. */
+const FILLS_WINDOW = "fillsWindow"
 
 /** Most words a kind's name may have:  as many as a type's (drawable-thing J7). */
 const MAX_KIND_WORDS = 4

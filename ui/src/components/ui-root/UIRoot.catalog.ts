@@ -976,7 +976,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-page-layout": {
     folder: "ui-page-layout",
     skeleton: { width: "24em", parts: [{ shape: "paragraph", lines: 4 }] },
-    attributes: ["drawer", "drawer-hides", "left", "right", "floating"]
+    attributes: ["drawer", "drawer-hides", "left", "right", "floating", "page-height"]
   },
   "ui-panel": {
     folder: "ui-panel",

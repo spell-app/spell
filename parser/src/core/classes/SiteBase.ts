@@ -343,6 +343,7 @@ export class SiteBase extends App {
    *   it flashes;  a page in another layout shows that one, and the first is kept, hidden, as it was left.
    * - A site with no main layout draws every page in its built-in frame:  the navigation and the page.
    *   A page whose line says `, no layout` is drawn alone.
+   *   A page whose line says `, filling the window` makes its layout the window's height (`shownFillsWindow`).
    * - Not `<ui-page>`:  that's a whole window's frame and root, and Run draws the site inside the editor's page.
    * - A link on the page to one of its addresses goes there without leaving the page (`followLink()`).
    */
@@ -394,6 +395,16 @@ export class SiteBase extends App {
     return this.getState<string>("shownLayout") ?? BUILT_IN_FRAME
   }
 
+  /**
+   * Does the page shown fill the window:  its line says `, filling the window` (`static fillsWindow`;  epic
+   * `old-console-redo` T27).  Its layout is then exactly the window's height (`<ui-page-layout page-height="fluid">`),
+   * and the page's `height="fluid"` boxes share out what's left under its menus.
+   */
+  get shownFillsWindow(): boolean {
+    const showing = this.getState<Showing>("showing")
+    return showing?.kind === "page" && !!(showing.page.constructor as { fillsWindow?: boolean }).fillsWindow
+  }
+
   /** Every layout drawn so far, in the order first shown:  each one's drawing is kept, the one shown visible. */
   get layoutsDrawn(): string[] {
     return this.getState<string[]>("layoutsDrawn") ?? []
@@ -438,6 +449,8 @@ export class SiteBase extends App {
         class: "spell-site",
         "data-layout": name || undefined,
         hidden: () => (isShown() ? undefined : ""),
+        // the page shown fills the window, its height shared out:  its line says `, filling the window` (old-console-redo T27)
+        "page-height": () => (isShown() && this.shownFillsWindow ? "fluid" : undefined),
         drawer: () => this.regionState(name, DRAWER),
         left: () => this.regionState(name, LEFT),
         right: () => this.regionState(name, RIGHT),

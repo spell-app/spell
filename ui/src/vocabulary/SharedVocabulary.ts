@@ -237,15 +237,19 @@ const SHARED_ATTRIBUTES: readonly AttributeSpec[] = [
     kind: "string",
     description:
       'Its box\'s own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn\'t fit scrolls inside it.  ' +
-      "Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, " +
-      "a flyout, a modal, an embed, markdown."
+      "`height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column " +
+      "of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page " +
+      "`filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its " +
+      "height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a " +
+      "graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row."
   },
   {
     name: "min-height",
     group: "layout",
     kind: "string",
     description:
-      'The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too.  ' +
+      'The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too, and ' +
+      'a fluid one (`height="fluid"`) squeezes no further.  ' +
       "On the same boxes as `height`."
   },
   {

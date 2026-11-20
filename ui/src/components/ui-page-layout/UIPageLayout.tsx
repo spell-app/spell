@@ -88,6 +88,9 @@ export class DOMPageLayoutElement extends E.DOMElement<UIPageLayout> {
  *     row, as before.
  * - `floating`:  the drawer and the side bars float, rounded cards with a soft shadow and room round them, over the
  *   page's own ground (Spell UI's docs site's look);  the page's side is no box of its own then.
+ * - `page-height="fluid"` (epic `old-console-redo` T27):  as tall as what's seen of the window or its pane
+ *   (`viewHeight`), never scrolling it;  the page a column taking what's left, its `height="fluid"` children
+ *   sharing it out (`SharedHeights.css`).
  * - It finds its navigations and buttons by their English tags (`ui-site-nav`, `ui-site-nav-button`).
  ****************/
 export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
@@ -114,6 +117,15 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
   @E.cssState("floating")
   get isFloating(): boolean {
     return !!this.floating
+  }
+
+  /**
+   * `page-height="fluid"` (epic `old-console-redo` T27):  exactly as tall as what's seen of the window, the page
+   * taking what's left under the menus, a column whose `height="fluid"` children share it.
+   */
+  @E.cssState("page-fluid")
+  get isPageFluid(): boolean {
+    return this.pageHeight === "fluid"
   }
 
   ////////////////

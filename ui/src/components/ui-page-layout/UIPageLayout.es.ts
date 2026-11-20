@@ -11,7 +11,13 @@ export const pageLayoutEs = {
   tag: "ui-page-layout",
   name: "diseno-de-pagina",
   aka: ["diseño de aplicación", "marco de página", "estructura del sitio", "cajón de navegación"],
-  attributes: { drawer: "cajon", "drawer-hides": "cajon-se-oculta", left: "izquierda", right: "derecha" },
+  attributes: {
+    drawer: "cajon",
+    "drawer-hides": "cajon-se-oculta",
+    left: "izquierda",
+    right: "derecha",
+    "page-height": "alto-de-pagina"
+  },
   slots: {
     menu: "menu",
     "page-menu": "menu-de-pagina",

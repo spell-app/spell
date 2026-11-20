@@ -1010,6 +1010,7 @@ main layout is a page layout
 
 login page is a page, no layout
 print page is a page, in the bare layout
+home page is a page, filling the window
 ```
 
 - Its slots:  `app menu` (the top bar), `page menu` (a row under it:  the page's family as tabs, unless it draws
@@ -1019,6 +1020,10 @@ print page is a page, in the bare layout
   around them, its own:  a logo in its `start` slot, a row of buttons in its `end` slot, at the drawer's foot.
   `<site-nav groups="headings">` draws each group as a plain heading over its pages, always open.
 - Every page is in the `main layout`;  a page picks another, or none, at the end of its own line.
+- `, filling the window` (after its layout, if it picks one):  the page is exactly the window's height, never scrolling
+  it.  Its boxes with `height="fluid"` share out what's left under the menus, each scrolling what doesn't fit:  a
+  `<grid height="fluid">` whose `<row height="fluid">` takes what the other rows leave, a `<segment height="fluid">`
+  list under a card's heading.
 - A page may draw a slot itself, `to draw its right sidebar`:  its own shows while it's shown.
 - A layout can build on another, `wide layout is a main layout`, drawing one slot again.
 - `<site-nav-button />` shows only the drawer's icons, or all of it again;  resting the pointer on the icons opens it

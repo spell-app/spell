@@ -250,6 +250,9 @@ export const PARSER_MESSAGES = {
   /** A layout picked on a line that's not a page's (epic `mockup` T39):  `solitaire is an app, no layout`. */
   "layout-not-on-a-page":
     "Only a page has a page layout:  say it on a page's line, e.g. systems is a page, in the bare layout",
+  /** `, filling the window` on a line that's not a page's (epic `old-console-redo` T27):  `solitaire is an app, filling the window`. */
+  "fills-window-not-on-a-page":
+    "Only a page fills the window:  say it on a page's line, e.g. home is a page, filling the window",
   /** A page's layout that the program doesn't declare:  `, in the bare layout` with no `bare layout is a page layout`. */
   "layout-not-declared": 'The program has no "{layout}":  declare it, e.g. {layout} is a page layout',
   /** `- it has a top bar`, retired by page layouts (epic `mockup` T39). */

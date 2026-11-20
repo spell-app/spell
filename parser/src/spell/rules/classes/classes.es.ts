@@ -451,8 +451,9 @@ classesEs.addRule(DimensionUnit, {
 })
 
 // el diseño de una página, en su línea (épica `mockup` T39):  `sistemas es una página, en el diseño sencillo`,
-// `entrar es una página, sin diseño`
-const PAGE_LAYOUT = "(, en el {layout:type_words}|, (no_layout:sin diseño))?"
+// `entrar es una página, sin diseño`;  luego si llena la ventana (épica `old-console-redo` T27):
+// `inicio es una página, llenando la ventana`
+const PAGE_LAYOUT = "(, en el {layout:type_words}|, (no_layout:sin diseño))? (, (fills_window:llenando la ventana))?"
 
 classesEs.addRule(CreateOneOfAKind, {
   syntax: `{type:type_words} es ${A} {superType:type} ${ABILITIES} (, alias {aka:quoted_type})? ${PAGE_LAYOUT} {with_nested_statements}?`,

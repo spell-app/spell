@@ -257,6 +257,28 @@ describe("a site", () => {
     })
   })
 
+  test("`, filling the window` on a page's line:  `static fillsWindow`, after its layout;  Spanish's too (old-console-redo T27)", () => {
+    const filling = compiled(
+      [
+        "main layout is a page layout",
+        "home page is a page, filling the window",
+        "print page is a page, no layout, filling the window"
+      ],
+      "/Home.spell"
+    )
+    expect(filling.errors).toEqual([])
+    expect(filling.code).toMatch(/class HomePage extends Page \{[^}]*static fillsWindow = true/)
+    expect(filling.code).toMatch(
+      /class PrintPage extends Page \{[^}]*static layout = false\s+static fillsWindow = true/
+    )
+    const es = compiled(["inicio es una página, llenando la ventana"], "/Inicio.es.spell")
+    expect(es.errors).toEqual([])
+    expect(es.code).toContain("static fillsWindow = true")
+    expect(compiled(["solitaire is an app, filling the window"], "/App.spell").errors.join()).toMatch(
+      /Only a page fills the window/
+    )
+  })
+
   test("`it has a ...` outside a site is a property, as before", () => {
     const { code, errors } = compiled(['a "card" is a thing where:', "\t- it has a settings dialog"], "/Card.spell")
     expect(errors).toEqual([])

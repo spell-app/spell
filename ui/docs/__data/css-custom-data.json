@@ -13929,6 +13929,13 @@
       }
     },
     {
+      "name": ":state(page-fluid)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-page-layout>`:  `page-height=\"fluid\"`:  as tall as what's seen of the window, the page sharing out what's left."
+      }
+    },
+    {
       "name": ":state(pane)",
       "description": {
         "kind": "markdown",

@@ -1266,7 +1266,9 @@ export const HELP_TABLE: Readonly<
       right:
         '`hidden`: the right side bar isn\'t shown, until its button (`<ui-site-nav-button toggles="right">`) shows it again.',
       floating:
-        "The drawer and the side bars float: rounded cards with a soft shadow and room round them, over the page's own ground."
+        "The drawer and the side bars float: rounded cards with a soft shadow and room round them, over the page's own ground.",
+      "page-height":
+        "`fluid`: the layout is exactly as tall as what's seen of the window (or the pane it scrolls in), never scrolling it: the page takes what's left under the menus, a column whose children with `height=\"fluid\"` share it out, each scrolling inside."
     }
   },
   "ui-panel": {
@@ -2574,7 +2576,8 @@ export const SHARED_HELP: Readonly<Record<string, string>> = {
     'People can drag its corner to resize it, the sizes it names: `resizable="width, height"`, `"height"` or `"width"`.',
   "on-platform": 'Shown only on these devices, a comma list: `on-platform="desktop, tablet"` hides it on phones.',
   height: 'Its box\'s own height, any CSS length: `height="18em"`, `"50vh"`.',
-  "min-height": 'The shortest its box gets, any CSS length: `min-height="8em"`; a drag (`resizable`) stops there too.',
+  "min-height":
+    'The shortest its box gets, any CSS length: `min-height="8em"`; a drag (`resizable`) stops there too, and a fluid one (`height="fluid"`) squeezes no further.',
   "max-height":
     'The tallest its box gets, any CSS length: `max-height="60vh"`; what doesn\'t fit scrolls inside it, and a drag (`resizable`) stops there too.'
 }

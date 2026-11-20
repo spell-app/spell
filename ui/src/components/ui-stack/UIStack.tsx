@@ -3,6 +3,7 @@ import type { JSX } from "@solidjs/web"
 import { E, UIT } from "spell/ui/core"
 import { stackVocabulary } from "./UIStack.en"
 
+import heightsCSS from "spell/ui/elements/SharedHeights.css?inline"
 import stackCSS from "./UIStack.css?inline"
 
 /****************
@@ -28,7 +29,7 @@ import stackCSS from "./UIStack.css?inline"
 export class UIStack extends E.UIComponent<typeof stackVocabulary> {
   @E.proto static vocabulary = stackVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { stack: stackCSS },
+    styleSheets: { heights: heightsCSS, stack: stackCSS },
     delegatesFocus: false,
     // a `fluid` stack in another stack's row takes the room left, as a `fluid` input does (epic `language` T88)
     cssStates: ["fluid"]

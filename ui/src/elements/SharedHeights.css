@@ -4,7 +4,7 @@
  * its box's own height, drawn as `reset.css` draws the shared widths.
  * - OPT-IN:  only the tags whose vocabulary says `heights: true` take them, and each of their families adopts this
  *   sheet first (`styleSheets: { heights: heightsCSS, ... }`):  tree, table, segment, card, graph, code, JSON,
- *   flyout, modal, embed, markdown.
+ *   flyout, modal, embed, markdown;  and stack, grid and row (T27).
  * - `UIComponent` writes each as a custom property on the element (`--_ui-height` ...), and a state saying it's set.
  * - On the element itself, where it draws a box (`<ui-tree>`, `<ui-code>` ...);  on its shadow root's top-level
  *   boxes where it's `display: contents` (`<ui-segment>`, `<ui-modal>`'s `<dialog>` ...):  `:state(sized-inside)`.
@@ -15,6 +15,13 @@
  *   a page's own rules still win.
  * - Here, not in `reset.css` beside the widths:  only these families adopt it, so every other tag's sheet stays as
  *   it was.
+ * - `height="fluid"` (`:state(fluid-height)`;  epic `old-console-redo` T27), Fomantic's `fluid`, the container's full
+ *   size:  it takes what's left of its parent's height, beside its siblings, and scrolls what doesn't fit.
+ *   - Its parent must be a column of boxes:  a stack, a `stretched` grid's column, a fluid segment, a fluid grid's
+ *     rows, a page filling the window (`<ui-page-layout page-height="fluid">`).  Anywhere else, it's as tall as its
+ *     content.
+ *   - Several fluid boxes in one column share what's left equally.
+ *   - The stack, the grid and its rows take the heights too (`heights: true`), so a page can share its height out.
  */
 :host(:state(height)),
 :host(:state(height):state(sized-inside)) > :not(slot) {
@@ -30,5 +37,12 @@
 }
 :host(:is(:state(height), :state(max-height)):not(:state(sized-inside))),
 :host(:is(:state(height), :state(max-height)):state(sized-inside)) > :not(slot) {
+  overflow: auto;
+}
+:host(:state(fluid-height)),
+:host(:state(fluid-height):state(sized-inside)) > :not(slot) {
+  flex: 1 1 0;
+  /* down to nothing, unless it has a `min-height` of its own */
+  min-height: var(--_ui-min-height, 0);
   overflow: auto;
 }

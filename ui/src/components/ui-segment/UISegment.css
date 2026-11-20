@@ -235,6 +235,18 @@
     --_segment-margin-top: 0;
     --_segment-margin-bottom: 0;
   }
+  /*
+   * `height="fluid"` (epic `old-console-redo` T27):  the segment takes what's left of its parent's height
+   * (`SharedHeights.css`), and lays its own content in a column, so a fluid child shares what's left of it in turn.
+   */
+  :host(:state(fluid-height)) > .ui.segment {
+    display: flex;
+    flex-direction: column;
+  }
+  /* ... its other content keeps its height, and scrolls in it, rather than squeezing */
+  :host(:state(fluid-height)) > .ui.segment > slot::slotted(:not(:state(fluid-height))) {
+    flex-shrink: 0;
+  }
 
   /*
    * What the segment hands its content:  none of its own or its group's layout tokens

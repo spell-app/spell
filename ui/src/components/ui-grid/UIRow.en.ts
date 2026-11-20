@@ -28,6 +28,8 @@ export const rowVocabulary = {
   tag: "ui-row",
   icon: "grip lines",
   topics: ["layout", "collections"],
+  // the shared `height`, `min-height` and `max-height`:  `height="fluid"` shares a page's height out (epic `old-console-redo` T27)
+  heights: true,
   aka: ["grid row", "table row", "tr"],
   noun: "row",
   partOfSpeech: "structure",

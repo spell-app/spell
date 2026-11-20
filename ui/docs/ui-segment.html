@@ -762,6 +762,19 @@
                   </ui-segment>
                 </ui-example>
               </ui-section>
+              <ui-section id="examples-sizing-fluid" label="Fluid" sticky="stack" collapsible dividing>
+                <ui-example description="`height=&quot;fluid&quot;` takes what's left of its parent's height, here a stack 16em tall:  the list under the heading fills the rest, and scrolls.  A fluid segment lays its own content in a column, so a fluid segment inside it shares out its height in turn.">
+                  <ui-stack height="16em" spacing="sm">
+                    <ui-header size="small">Recent runs</ui-header>
+                    <ui-segment height="fluid" appearance="secondary">
+                      <p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas.</p>
+                      <p>Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante.</p>
+                      <p>Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est.</p>
+                      <p>Mauris placerat eleifend leo.  Te eum doming eirmod, nominati pertinacia argumentum ad his.</p>
+                    </ui-segment>
+                  </ui-stack>
+                </ui-example>
+              </ui-section>
             </ui-section>
           </ui-tab>
 

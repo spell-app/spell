@@ -469,6 +469,8 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
    *   `reset.css` draws:  on the element itself where it draws a box, else on its shadow root's top-level boxes
    *   (`:state(sized-inside)`).
    * - Which it is, the element's computed `display`:  so only once its sheets are in (`isReady`).
+   * - `height="fluid"` (epic `old-console-redo` T27):  no length, but `:state(fluid-height)`, which `SharedHeights.css`
+   *   draws as taking what's left of its parent's height (Fomantic's `fluid`, a container's full size).
    * - SIDE EFFECT:  writes them in the element's `style` and states;  removes them again once they're gone.
    * - Not on a server:  the static render draws no sizes.
    */
@@ -479,11 +481,13 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
     const isSized = SIZES.some((name) => sizes[name] !== undefined)
     if (!isSized && !internalState.wroteSizes) return
     for (const name of SIZES) {
-      const size = sizes[name]
+      // `height="fluid"` is no length:  its own state instead (`:state(fluid-height)`)
+      const size = name === "height" && sizes[name] === FLUID ? undefined : sizes[name]
       if (size !== undefined) domElement.style.setProperty(`--_ui-${name}`, size)
       else domElement.style.removeProperty(`--_ui-${name}`)
       domElement.setState(name, size !== undefined)
     }
+    domElement.setState(FLUID_HEIGHT_STATE, sizes.height === FLUID)
     const isContents = isSized && isReady && getComputedStyle(domElement).display === "contents"
     domElement.setState(SIZED_INSIDE_STATE, isContents)
     internalState.wroteSizes = isSized
@@ -1613,6 +1617,9 @@ const SHADOW_COLOR_TOKEN = "--_ui-shadow-color"
  * - The heights only where the vocabulary takes them (`heights`).
  */
 const SIZES = ["width", "min-width", "max-width", "height", "min-height", "max-height"] as const
+/** `height="fluid"`:  takes what's left of its parent's height, drawn under `:state(fluid-height)` (epic `old-console-redo` T27). */
+const FLUID = "fluid"
+const FLUID_HEIGHT_STATE = "fluid-height"
 /** The state saying the shared sizes go on the shadow root's top-level boxes:  the element is `display: contents`. */
 const SIZED_INSIDE_STATE = "sized-inside"
 /** What, at the top of a shadow root, draws no box to resize (`UIComponent.resizeBox`). */

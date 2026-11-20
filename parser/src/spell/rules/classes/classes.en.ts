@@ -445,8 +445,9 @@ classes.addRule(DimensionUnit, {
   syntax: "one {unit:unit_names} , is {top:number} (/ {bottom:number})? {of:unit_words} (, starting at {start:number})?"
 })
 
-// a page's layout, on its line (epic `mockup` T39):  `systems is a page, in the bare layout`, `login is a page, no layout`
-const PAGE_LAYOUT = "(, in the {layout:type_words}|, (no_layout:no layout))?"
+// a page's layout, on its line (epic `mockup` T39):  `systems is a page, in the bare layout`, `login is a page, no layout`;
+// then whether it fills the window, sharing its height out (epic `old-console-redo` T27):  `home is a page, filling the window`
+const PAGE_LAYOUT = "(, in the {layout:type_words}|, (no_layout:no layout))? (, (fills_window:filling the window))?"
 
 classes.addRule(CreateOneOfAKind, {
   roles: { band: "thing", type: "declaration", ability: "name", superType: "name" },

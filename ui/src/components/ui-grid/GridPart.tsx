@@ -2,6 +2,7 @@ import type { JSX } from "@solidjs/web"
 
 import { E } from "spell/ui/core"
 
+import heightsCSS from "spell/ui/elements/SharedHeights.css?inline"
 import gridCSS from "./UIGrid.css?inline"
 
 /****************
@@ -23,7 +24,8 @@ import gridCSS from "./UIGrid.css?inline"
  ****************/
 export abstract class GridPart<V extends E.ComponentVocabulary = E.ComponentVocabulary> extends E.UIComponent<V> {
   @E.protoMerged static elementSetup: Partial<E.ElementSetup> = {
-    styleSheets: { grid: gridCSS },
+    // the shared heights first, for the grid and its rows (`heights`;  epic old-console-redo T27):  the grid's own win
+    styleSheets: { heights: heightsCSS, grid: gridCSS },
     delegatesFocus: false
   }
 

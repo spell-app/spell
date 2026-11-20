@@ -67,6 +67,17 @@ export const pageLayoutVocabulary = {
       description:
         "The drawer and the side bars float:  rounded cards with a soft shadow and room round them, over the " +
         "page's own ground.  None:  the drawer a column of its own fill, the page's side a box beside it."
+    },
+    {
+      name: "page-height",
+      group: "layout",
+      kind: "valueOnly",
+      values: ["fluid"],
+      description:
+        "`fluid`:  the layout is exactly as tall as what's seen of the window (or the pane it scrolls in), never " +
+        'scrolling it:  the page takes what\'s left under the menus, a column whose children with `height="fluid"` ' +
+        "share it out, each scrolling inside.  None:  as tall as the page, which the window scrolls.  A site's page " +
+        "asks for it on its line:  `home is a page, filling the window`."
     }
   ],
   events: [
@@ -126,6 +137,10 @@ export const pageLayoutVocabulary = {
       name: "sides-narrow",
       description:
         "Below 64em of its own box:  a side bar with its button hides behind it, and shows over the page while open."
+    },
+    {
+      name: "page-fluid",
+      description: "`page-height=\"fluid\"`:  as tall as what's seen of the window, the page sharing out what's left."
     },
     { name: "drawer-hidden", description: '`drawer="hidden"`:  no drawer, on a wide page.' },
     { name: "floating", description: "`floating`:  the drawer and the side bars are cards floating over the page." },
