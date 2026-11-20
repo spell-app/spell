@@ -250,9 +250,22 @@ export function namesSitePart(scope: P.Scope, words: string): boolean {
  * - What `the address of the ...` takes (epic `mockup` P8):  a dialog or a sidebar has no address.
  */
 export function namesSitePage(scope: P.Scope, words: string): boolean {
-  if (pageNamed(scope, words) || specialPageOf(scope, words)) return true
+  if (pageNamed(scope, words) || specialPageOf(scope, words) || listedPage(scope, words)) return true
   const all = words.trim().split(/\s+/)
   return all.length > 1 && (SP.typeName(all.at(-1)!) === "page" || SP.typeName(all[0]!) === "page")
+}
+
+/**
+ * Does a site already parsed list a page named `words`?  A site file read before its pages' files names every page,
+ * so `go to the Datasets Screen` reads in a file before the one declaring it, whatever its last word
+ * (epic old-console-redo P7).
+ */
+function listedPage(scope: P.Scope, words: string): boolean {
+  const wanted = sameWords(words)
+  return (scope.types?.get() ?? []).some(
+    (type) =>
+      !type.stub && type.isA("Site") && Object.values(type.sitePages ?? {}).some((part) => sameWords(part) === wanted)
+  )
 }
 
 /** Which kind of part `word` says, in the scope's language:  `dialog`, `sidebar`, or neither. */
