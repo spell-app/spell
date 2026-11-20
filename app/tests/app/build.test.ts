@@ -104,10 +104,19 @@ describe("production build", () => {
    * - each has its OWN `core`, so the copy loaded last can't take over the first one's `defineElement()`
    * - both draw on the page's ONE Spell UI element core, and the Solid under it:  `E`'s decorators are its
    *   - not `h`:  `@solidjs/h` is a thin layer each runtime bundles, over that Solid
+   * - a compiled program run on either (`runApp()`, as a runner runs one) gets its view's tag defined on the page
+   *   (epic `from-console` I3:  the real path, not only a class made by hand)
    * - a view class declared on either gets its tag defined on the page;
    *   one of the other copy's gets none, and a warning
    */
   test("a copy of the runtime has its own `core`, and the page's one Spell UI and Solid", async () => {
+    // a small program each, declaring a view, as a project's compile writes it
+    const cardProgram = await compiledProgram(
+      'a "card" is a view\n  its label is "ace"\n  to draw\n    <text>{its label}</>'
+    )
+    const pileProgram = await compiledProgram(
+      'a "pile" is a view\n  its label is "stock"\n  to draw\n    <text>{its label}</>'
+    )
     writeFileSync(join(outDir, "blank.html"), "<!doctype html><title>blank</title>")
     const served = await serveHandler(new SRV.StaticHandler({ mounts: [{ prefix: "/", dir: outDir }] }).handle)
     const browser = await chromium.launch()
@@ -121,11 +130,12 @@ describe("production build", () => {
       const url = `${served.base}/spell-runtime.js`
       const copySource = absoluteImports(readFileSync(join(outDir, "spell-runtime.js"), "utf8"), url)
       const seen = await page.evaluate(
-        async ([url, copySource]) => {
+        async ([url, copySource, cardProgram, pileProgram]) => {
           type Runtime = {
             core: { defineElement(Class: unknown, project: string): string | undefined }
             View: new () => object
             E: { proto: unknown }
+            runApp(compiled: string, options: { coreUrl: string; appRoot: HTMLElement }): Promise<string | undefined>
           }
           // not a bare `import()`:  Vitest would rewrite it into its own, which the page hasn't got
           // oxlint-disable-next-line no-implied-eval -- a fixed text, so Vitest leaves the `import()` in it alone
@@ -134,6 +144,9 @@ describe("production build", () => {
           // the copy loads AFTER the main one, as the layout's did when it broke
           const blob = URL.createObjectURL(new Blob([copySource!], { type: "text/javascript" }))
           const copy = await load(blob)
+          // a compiled program on each, its `@spell/core` that copy's own URL
+          const mainRun = await main.runApp(cardProgram!, { coreUrl: url!, appRoot: document.createElement("div") })
+          const copyRun = await copy.runApp(pileProgram!, { coreUrl: blob, appRoot: document.createElement("div") })
           const mainTag = main.core.defineElement(class Card extends main.View {}, "Probe")
           const copyTag = copy.core.defineElement(class Pile extends copy.View {}, "Probe")
           const foreignTag = main.core.defineElement(class Stray extends copy.View {}, "Probe")
@@ -146,10 +159,14 @@ describe("production build", () => {
             copyTag,
             foreignTag,
             mainDefined: !!mainTag && !!customElements.get(mainTag),
-            copyDefined: !!copyTag && !!customElements.get(copyTag)
+            copyDefined: !!copyTag && !!customElements.get(copyTag),
+            mainRun: mainRun ?? "ran",
+            copyRun: copyRun ?? "ran",
+            mainProgramDefined: !!customElements.get("test-project-card"),
+            copyProgramDefined: !!customElements.get("test-project-pile")
           }
         },
-        [url, copySource]
+        [url, copySource, cardProgram, pileProgram]
       )
       expect(seen).toMatchObject({
         sameCore: false,
@@ -158,7 +175,11 @@ describe("production build", () => {
         copyTag: "probe-pile",
         foreignTag: undefined,
         mainDefined: true,
-        copyDefined: true
+        copyDefined: true,
+        mainRun: "ran",
+        copyRun: "ran",
+        mainProgramDefined: true,
+        copyProgramDefined: true
       })
       expect(warnings.filter((text) => text.includes("Stray is a view of another copy"))).toHaveLength(1)
     } finally {
@@ -250,6 +271,20 @@ function importedChunks(dir: string, entry: string): string[] {
   }
   seen.delete(entry)
   return [...seen]
+}
+
+/**
+ * Spell `source`, one file of a project, compiled as code a runner runs:
+ * its `@spell/core` import whole, as a compile writes it for a project with no imports.
+ * - Its views' tags are `test-project-<view>`:  the project `compiledSpellProject()` parses it in.
+ */
+async function compiledProgram(source: string): Promise<string> {
+  // Spell UI's tags, which a drawing names bare (`<text>`)
+  await import("spell/app/spaces/models/spellUIPack")
+  const { compiledSpellProject } = await import("spell/parser/spell/test/parseSpellProject")
+  const { code } = compiledSpellProject([{ path: "/Probe.spell", contents: source }])
+  expect(code).not.toContain("PARSE ERROR")
+  return `import { core, Thing, List, App, View, h } from "@spell/core"\n${code.replace(/^import .* from "@spell\/core".*$/gm, "")}`
 }
 
 /** React and what renders with it, as they appear in a sourcemap's `sources`. */
