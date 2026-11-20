@@ -229,6 +229,7 @@ describe("priority and precedence", () => {
         "sign_in_menu:  Priority.overridable",
         "sign_ups_from:  Priority.declaration",
         "site_address_of:  Priority.mostSpecific",
+        "site_link:  Priority.aboveDeclaration",
         "site_overlay:  Priority.aboveDeclaration",
         "site_page:  Priority.aboveDeclaration",
         "sort_key_field:  Priority.preferred",

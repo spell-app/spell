@@ -230,6 +230,9 @@ export const PARSER_MESSAGES = {
   "stories-not-tags": "A page's stories are tags:  <story \"S1\">words</story>, one for each;  this isn't one:  {text}",
   /** A site's page whose address doesn't start with `/`. */
   "site-address-not-a-path": 'A page\'s address starts with "/", from the site\'s root:  "/{address}", not "{address}"',
+  /** A site's link out whose address is one of the site's own, from its root (epic `old-console-redo` I6). */
+  "site-link-not-outside":
+    'A link goes outside the site, to a whole address like "https://example.com";  "{address}" is the site\'s own:  list its page, - it has a help page at "{address}"',
   /** A parameter in a page's address that the page has no property for:  `/films/:film` on a page with no film. */
   "site-param-not-on-page":
     'The {page} has nothing called {param} for ":{param}" to fill:  say what it is on the page, e.g. - it has a {param}',

@@ -8,6 +8,7 @@ import { sites } from "./sites.parser"
 import { CreateSite } from "./CreateSite"
 import { SiteOverlay } from "./SiteOverlay"
 import { SitePage } from "./SitePage"
+import { SiteLink } from "./SiteLink"
 import { ShowSitePart } from "./ShowSitePart"
 import { SiteAddressOf } from "./SiteAddressOf"
 import { SitePartWords } from "./SitePartWords"
@@ -937,6 +938,198 @@ sites.addRule(SitePage, {
 // ... and a dialog or sidebar's:  `- it has a "dialog of settings"`
 sites.addRule(SiteOverlay, { syntax: `{type:subject_it} has (a|an) {part:quoted_member} ${CARD_DETAILS}` })
 sites.addRule(SiteOverlay, { syntax: `{type:subject_implied} has (a|an) {part:quoted_member} ${CARD_DETAILS}` })
+
+// a link out of the site, in its navigation among its pages (epic `old-console-redo` I6):
+// `- it has a link to "https://docs.example.com", named "Help", icon "book"`
+sites.addRule(SiteLink, {
+  syntax: `{type:subject_it} has (a|an) link to {address:text} (, named {title:text})? (, icon {icon:text})?`,
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "a link among the pages, in its group:  the site lists it apart from them, with its place",
+          input: [
+            'a "home page" is a page',
+            "galaxy guide is a site in the cloud:",
+            '\tit has a home page at "/", named "Home"',
+            '\tgroup "Help", icon "book"',
+            '\tit has a link to "https://docs.example.com", named "Help", icon "book"'
+          ],
+          js: [
+            "export class HomePage extends Page {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "}",
+            "export class GalaxyGuide extends Site {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "  static pages = [{",
+            '    name: "home page",',
+            '    page: "HomePage",',
+            '    address: "/",',
+            '    title: "Home"',
+            "  }]",
+            "  static links = [{",
+            '    link: "https://docs.example.com",',
+            '    title: "Help",',
+            '    icon: "book",',
+            '    group: "Help",',
+            '    groupIcon: "book",',
+            "    at: 1",
+            "  }]",
+            '  static livesAt = "cloud"',
+            "}",
+            "export const galaxyGuide = new GalaxyGuide()"
+          ],
+          ts: [
+            "export class HomePage extends Page {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "}",
+            "",
+            "/**",
+            " * `<test-sites-home-page>`:  a home page, drawn in its own element, e.g. by `draw the home page`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its home page's properties;  its methods call its home page's.",
+            " * - What every view's element does, e.g. drawing its home page, is `SpellElement`'s.",
+            " */",
+            "export class HomePageElement extends SpellElement<HomePage> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-home-page", "home page", [])',
+            "}",
+            "core.useElement(HomePage, HomePageElement)",
+            "export class GalaxyGuide extends Site {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "  static pages = [{",
+            '    name: "home page",',
+            '    page: "HomePage",',
+            '    address: "/",',
+            '    title: "Home"',
+            "  }]",
+            "  static links = [{",
+            '    link: "https://docs.example.com",',
+            '    title: "Help",',
+            '    icon: "book",',
+            '    group: "Help",',
+            '    groupIcon: "book",',
+            "    at: 1",
+            "  }]",
+            '  static livesAt = "cloud"',
+            "}",
+            "",
+            "/**",
+            " * `<test-sites-galaxy-guide>`:  a galaxy guide, drawn in its own element, e.g. by `draw the galaxy guide`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its galaxy guide's properties;  its methods call its galaxy guide's.",
+            " * - What every view's element does, e.g. drawing its galaxy guide, is `SpellElement`'s.",
+            " */",
+            "export class GalaxyGuideElement extends SpellElement<GalaxyGuide> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-galaxy-guide", "galaxy guide", [])',
+            "}",
+            "core.useElement(GalaxyGuide, GalaxyGuideElement)",
+            "export const galaxyGuide = new GalaxyGuide()"
+          ]
+        },
+        {
+          title: "a link under a page:  that page lists it",
+          input: [
+            'a "films page" is a page',
+            "galaxy guide is a site in the cloud:",
+            '\tit has a films page at "/films"',
+            '\t\tit has a link to "https://films.example.com"'
+          ],
+          js: [
+            "export class FilmsPage extends Page {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "}",
+            "export class GalaxyGuide extends Site {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "  static pages = [{",
+            '    name: "films page",',
+            '    page: "FilmsPage",',
+            '    address: "/films",',
+            '    links: [{ link: "https://films.example.com", at: 0 }]',
+            "  }]",
+            '  static livesAt = "cloud"',
+            "}",
+            "export const galaxyGuide = new GalaxyGuide()"
+          ],
+          ts: [
+            "export class FilmsPage extends Page {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "}",
+            "",
+            "/**",
+            " * `<test-sites-films-page>`:  a films page, drawn in its own element, e.g. by `draw the films page`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its films page's properties;  its methods call its films page's.",
+            " * - What every view's element does, e.g. drawing its films page, is `SpellElement`'s.",
+            " */",
+            "export class FilmsPageElement extends SpellElement<FilmsPage> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-films-page", "films page", [])',
+            "}",
+            "core.useElement(FilmsPage, FilmsPageElement)",
+            "export class GalaxyGuide extends Site {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "  static pages = [{",
+            '    name: "films page",',
+            '    page: "FilmsPage",',
+            '    address: "/films",',
+            '    links: [{ link: "https://films.example.com", at: 0 }]',
+            "  }]",
+            '  static livesAt = "cloud"',
+            "}",
+            "",
+            "/**",
+            " * `<test-sites-galaxy-guide>`:  a galaxy guide, drawn in its own element, e.g. by `draw the galaxy guide`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its galaxy guide's properties;  its methods call its galaxy guide's.",
+            " * - What every view's element does, e.g. drawing its galaxy guide, is `SpellElement`'s.",
+            " */",
+            "export class GalaxyGuideElement extends SpellElement<GalaxyGuide> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-galaxy-guide", "galaxy guide", [])',
+            "}",
+            "core.useElement(GalaxyGuide, GalaxyGuideElement)",
+            "export const galaxyGuide = new GalaxyGuide()"
+          ]
+        },
+        {
+          title: "an address from the site's root is a page's:  refused",
+          input: ["galaxy guide is a site in the cloud:", '\tit has a link to "/help", named "Help"'],
+          js: [
+            "export class GalaxyGuide extends Site {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            '  static livesAt = "cloud"',
+            "}",
+            "export const galaxyGuide = new GalaxyGuide()",
+            '/* PARSE ERROR: A link goes outside the site, to a whole address like "https://example.com";  "/help" is the site\'s own:  list its page, - it has a help page at "/help" */'
+          ],
+          ts: [
+            "export class GalaxyGuide extends Site {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            '  static livesAt = "cloud"',
+            "}",
+            "",
+            "/**",
+            " * `<test-sites-galaxy-guide>`:  a galaxy guide, drawn in its own element, e.g. by `draw the galaxy guide`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its galaxy guide's properties;  its methods call its galaxy guide's.",
+            " * - What every view's element does, e.g. drawing its galaxy guide, is `SpellElement`'s.",
+            " */",
+            "export class GalaxyGuideElement extends SpellElement<GalaxyGuide> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-galaxy-guide", "galaxy guide", [])',
+            "}",
+            "core.useElement(GalaxyGuide, GalaxyGuideElement)",
+            "export const galaxyGuide = new GalaxyGuide()",
+            '/* PARSE ERROR: A link goes outside the site, to a whole address like "https://example.com";  "/help" is the site\'s own:  list its page, - it has a help page at "/help" */'
+          ]
+        }
+      ]
+    }
+  ]
+})
+
+// ... with the subject left out:  `- has a link to "https://docs.example.com"`
+sites.addRule(SiteLink, {
+  syntax: `{type:subject_implied} has (a|an) link to {address:text} (, named {title:text})? (, icon {icon:text})?`
+})
 
 ////////////////
 // ## Its not found and error pages (epic `mockup` P2)

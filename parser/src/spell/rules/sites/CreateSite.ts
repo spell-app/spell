@@ -4,8 +4,15 @@ import { Priority } from "spell/parser/spell/rules/rules.types"
 import { CreateOneOfAKind, DefineGroup } from "spell/parser/spell/rules/classes"
 import { plainValueAST, textIn } from "spell/parser/spell/rules/places"
 import { SiteOverlay } from "./SiteOverlay"
+import { SiteLink } from "./SiteLink"
 import { SitePage } from "./SitePage"
-import { mainLayoutOf, overlayViewNamed, type SiteOverlayEntry, type SitePageEntry } from "./sites.shared"
+import {
+  mainLayoutOf,
+  overlayViewNamed,
+  type SiteLinkEntry,
+  type SiteOverlayEntry,
+  type SitePageEntry
+} from "./sites.shared"
 
 /**
  * `create_site` rule:  a SITE, and its one instance (epic `mockup` P1).
@@ -20,6 +27,8 @@ import { mainLayoutOf, overlayViewNamed, type SiteOverlayEntry, type SitePageEnt
  * - Gathers what the lines under it say into its class, for whatever shows its pages:
  *   - `static pages`, nested as its lines nest (`site_page`), each under the `<group>` above it, if any,
  *     with the icon that group's line names (`groupIcon`, epic `mockup` I20)
+ *   - `static links`, its links out of the site (`site_link`, epic `old-console-redo` I6), each with its place among
+ *     the pages beside it and its `<group>`;  a link under a page is in that page's `links`
  *   - `static dialogs` and `static sidebars` (`site_overlay`)
  *   - `static notFoundPage` and `static errorPage`, when it lists them (`site_overlay`, epic `mockup` P2)
  *   - `static mainLayout`, the class of the program's main layout, when it has one (`main layout is a page layout`,
@@ -41,13 +50,14 @@ export class CreateSite extends CreateOneOfAKind {
   /** Its class, with its pages, dialogs and sidebars, then its one instance -- see the class. */
   getAST(match: P.MatchFor<this>): P.ASTStatementGroup {
     const group = super.getAST(match)
-    const { pages, dialogs, sidebars, notFoundPage, errorPage } = CreateSite.partsOf(match)
+    const { pages, links, dialogs, sidebars, notFoundPage, errorPage } = CreateSite.partsOf(match)
     const mainLayout = mainLayoutOf(match.scope)
     const groups = match.groups as P.MatchGroups & { address?: P.Match; cloud?: P.Match }
     const livesAt = groups.address ? textIn(groups.address) : groups.cloud ? CLOUD : undefined
     const type = P.matchAST<P.ASTTypeExpression>(match.groups.type)
     const statics: Array<[string, unknown]> = [
       ["pages", pages],
+      ["links", links],
       ["dialogs", dialogs],
       ["sidebars", sidebars]
     ]
@@ -64,9 +74,10 @@ export class CreateSite extends CreateOneOfAKind {
     return new P.ASTStatementGroup(match, { statements })
   }
 
-  /** Everything the lines under `match` say:  its pages, nested as written, its dialogs and its sidebars. */
+  /** Everything the lines under `match` say:  its pages, nested as written, its links, its dialogs and its sidebars. */
   static partsOf(match: P.Match): {
     pages: SitePageEntry[]
+    links: SiteLinkEntry[]
     dialogs: SiteOverlayEntry[]
     sidebars: SiteOverlayEntry[]
     notFoundPage?: SiteOverlayEntry
@@ -76,8 +87,9 @@ export class CreateSite extends CreateOneOfAKind {
     let errorPage: SiteOverlayEntry | undefined
     const dialogs: SiteOverlayEntry[] = []
     const sidebars: SiteOverlayEntry[] = []
-    const pagesUnder = (under: P.Match | undefined): SitePageEntry[] => {
+    const pagesUnder = (under: P.Match | undefined): { pages: SitePageEntry[]; links: SiteLinkEntry[] } => {
       const pages: SitePageEntry[] = []
+      const links: SiteLinkEntry[] = []
       const seen = new Set<P.Match>()
       // the `<group>` the lines from here on are under:  only the site's own, as nothing nests in a group
       let group: string | undefined
@@ -99,8 +111,15 @@ export class CreateSite extends CreateOneOfAKind {
             ...entry,
             ...(group && { group }),
             ...(groupIcon && { groupIcon }),
-            ...(below.length && { pages: below })
+            ...(below.pages.length && { pages: below.pages }),
+            ...(below.links.length && { links: below.links })
           })
+          return
+        }
+        if (each.rule instanceof SiteLink) {
+          const entry = (each.data as { entry?: Omit<SiteLinkEntry, "at"> }).entry
+          if (!entry) return
+          links.push({ ...entry, ...(group && { group }), ...(groupIcon && { groupIcon }), at: pages.length })
           return
         }
         if (each.rule instanceof SiteOverlay) {
@@ -122,10 +141,10 @@ export class CreateSite extends CreateOneOfAKind {
         }
       }
       if (under) visit(under)
-      return pages
+      return { pages, links }
     }
-    const pages = pagesUnder((match.rule as CreateSite).getBody(match as never))
-    return { pages, dialogs, sidebars, notFoundPage, errorPage }
+    const { pages, links } = pagesUnder((match.rule as CreateSite).getBody(match as never))
+    return { pages, links, dialogs, sidebars, notFoundPage, errorPage }
   }
 }
 

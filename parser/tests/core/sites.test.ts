@@ -177,6 +177,27 @@ class Lobby extends Site {
   ]
 }
 
+/**
+ * A site with links out among its pages (epic `old-console-redo` I6):  one in a group of its own, one after the last
+ * page with no title, one under a page.
+ */
+class Portal extends Site {
+  static pages = [
+    {
+      name: "home",
+      page: "FilmsPage",
+      address: "/",
+      title: "Home",
+      links: [{ link: "https://films.example.com", title: "Films", at: 0 }]
+    },
+    { name: "settings", page: "FilmsPage", address: "/settings", title: "Settings", group: "Settings" }
+  ]
+  static links = [
+    { link: "https://docs.example.com", title: "Help", icon: "book", group: "Help", at: 1 },
+    { link: "https://status.example.com", at: 2 }
+  ]
+}
+
 /** A site with page layouts (T39):  its films in a group, a page drawn alone, one in the bare layout. */
 class StarCharts extends Site {
   static pages = [
@@ -292,6 +313,38 @@ describe("a running site", () => {
         ]
       }
     ])
+  })
+
+  test("lists its links out among its pages, each where its line is, in its group (old-console-redo I6)", () => {
+    expect(new Portal().navPages()).toEqual([
+      {
+        title: "Home",
+        href: "/",
+        id: "home",
+        pages: [{ title: "Films", href: "https://films.example.com", id: "link:https://films.example.com" }]
+      },
+      { title: "Help", href: "https://docs.example.com", id: "link:https://docs.example.com", icon: "book" },
+      { title: "Settings", href: "/settings", id: "settings" },
+      // no title:  its address
+      { title: "https://status.example.com", href: "https://status.example.com", id: "link:https://status.example.com" }
+    ])
+  })
+
+  test("a link out, picked in its navigation, opens in a new tab;  the site stays where it is (old-console-redo I6)", async () => {
+    const open = vi.fn()
+    // not `vi.stubGlobal()`:  unstubbing would take the fake page's globals with it
+    const was = globalThis.open
+    globalThis.open = open
+    drawSite()
+    await site.showAddress("/films")
+    await shown()
+    const nav = element.querySelector("ui-site-nav.spell-site-nav")!
+    const pick = (href: string) =>
+      nav.dispatchEvent(new window.CustomEvent("ui-navigating", { detail: { href }, cancelable: true }))
+    expect(pick("https://docs.example.com")).toBe(false)
+    expect(open).toHaveBeenCalledWith("https://docs.example.com", "_blank", "noopener")
+    expect(site.currentAddress).toBe("/films")
+    globalThis.open = was
   })
 
   test("draws its navigation beside the page:  a `<ui-site-nav>`, marking the page shown (P3)", async () => {

@@ -10645,7 +10645,7 @@
           "ruleNames": ["create_site"],
           "internal": false,
           "file": "src/spell/rules/sites/CreateSite.ts",
-          "line": 30,
+          "line": 39,
           "purpose": "A SITE, and its one instance (epic `mockup` P1).",
           "syntaxes": [
             {
@@ -10662,6 +10662,35 @@
                   "code": "class Portada(Page):\n    element_tag = \"syntax-block-portada\"\n\nclass GuíaGaláctica(Site):\n    element_tag = \"syntax-block-guia-galactica\"\n\n    @property\n    def theme(self) -> str:\n        return \"mockup\"\n\n    pages = [{\"name\": \"portada\", \"page\": \"Portada\", \"address\": \"/\"}]\n\nguía_galáctica = GuíaGaláctica()"
                 }
               }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SiteLink",
+          "ruleNames": ["site_link"],
+          "internal": false,
+          "file": "src/spell/rules/sites/SiteLink.ts",
+          "line": 22,
+          "purpose": "A link out of a site, in its navigation among its pages (epic `old-console-redo` I6).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} tiene (un|una) enlace a {address:text} (, (llamada|llamado) {title:text})? (, icono {icon:text})?",
+              "example": "una \"portada\" es una página\nguía galáctica es un sitio en la nube:\n\ttiene una portada en \"/\", llamada \"Inicio\"\n\ttiene un enlace a \"https://docs.example.com\", llamado \"Ayuda\", icono \"book\"",
+              "outputs": {
+                "js": {
+                  "code": "export class Portada extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\nexport class GuíaGaláctica extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"portada\",\n    page: \"Portada\",\n    address: \"/\",\n    title: \"Inicio\"\n  }]\n  static links = [{\n    link: \"https://docs.example.com\",\n    title: \"Ayuda\",\n    icon: \"book\",\n    at: 1\n  }]\n  static livesAt = \"cloud\"\n}\nexport const guíaGaláctica = new GuíaGaláctica()"
+                },
+                "ts": {
+                  "code": "export class Portada extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\n\nexport class PortadaElement extends SpellElement<Portada> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-portada\", \"portada\", [])\n}\ncore.useElement(Portada, PortadaElement)\nexport class GuíaGaláctica extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"portada\",\n    page: \"Portada\",\n    address: \"/\",\n    title: \"Inicio\"\n  }]\n  static links = [{\n    link: \"https://docs.example.com\",\n    title: \"Ayuda\",\n    icon: \"book\",\n    at: 1\n  }]\n  static livesAt = \"cloud\"\n}\n\nexport class GuíaGalácticaElement extends SpellElement<GuíaGaláctica> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-guia-galactica\", \"guía galáctica\", [])\n}\ncore.useElement(GuíaGaláctica, GuíaGalácticaElement)\nexport const guíaGaláctica = new GuíaGaláctica()"
+                },
+                "py": {
+                  "code": "class Portada(Page):\n    element_tag = \"syntax-block-portada\"\n\nclass GuíaGaláctica(Site):\n    element_tag = \"syntax-block-guia-galactica\"\n    pages = [{\"name\": \"portada\", \"page\": \"Portada\", \"address\": \"/\", \"title\": \"Inicio\"}]\n    links = [{\"link\": \"https://docs.example.com\", \"title\": \"Ayuda\", \"icon\": \"book\", \"at\": 1}]\n    lives_at = \"cloud\"\n\nguía_galáctica = GuíaGaláctica()"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_implied} tiene (un|una) enlace a {address:text} (, (llamada|llamado) {title:text})? (, icono {icon:text})?"
             }
           ],
           "aliases": ["statement"]

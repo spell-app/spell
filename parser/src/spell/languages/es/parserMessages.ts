@@ -169,6 +169,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     'Las historias de una página son etiquetas:  <historia "H1">palabras</historia>, una por cada una;  esto no lo es:  {text}',
   "site-address-not-a-path":
     'La dirección de una página empieza con "/", desde la raíz del sitio:  "/{address}", no "{address}"',
+  "site-link-not-outside":
+    'Un enlace va fuera del sitio, a una dirección completa como "https://example.com";  "{address}" es del propio sitio:  lista su página, - tiene una página de ayuda en "{address}"',
   "site-param-not-on-page":
     'La {page} no tiene nada llamado {param} que ":{param}" pueda llenar:  di qué es en la página, p. ej. - tiene un {param}',
   "page-part-names-a-page": '"{name}" es el nombre de {page}, una página de este proyecto:  ponle otro nombre',

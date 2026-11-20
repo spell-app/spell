@@ -2367,6 +2367,10 @@ sidebars any of them opens.
   - `- it has a film page at "/films/:film", named "Film"` (`site_page`):  a page, at its address;  the lines under it, its pages
   - `- it has a settings dialog`, `- it has a film sidebar` (`site_overlay`):  by its last word, the language's
     `site_dialog` and `site_sidebar` (Spanish's first:  `diálogo de ajustes`)
+  - `- it has a link to "https://docs.example.com", named "Help", icon "book"` (`site_link`, epic `old-console-redo` I6):
+    a link out of the site, in its navigation where its line is;  Spanish `- tiene un enlace a "...", llamado "Ayuda"`
+    - no page, no route:  `static links` (a page's `links`), each with its `<group>` and `at`, its place among the
+      pages beside it;  an address from the site's root (`/help`) is refused, as a page's
   - Only in a site's body (`siteOf()`, its subject a site):  anywhere else, `it has a ...` is a property.
   - A part's name is `site_part_words` (`SitePartWords`, epic `mockup` P3, T5):  a member's words joined by the language's
     `of`, so Spanish's `- tiene una página de película en "/peliculas/:película"` needs no quotes;  `de la` ends it.
@@ -2374,7 +2378,7 @@ sidebars any of them opens.
   - A parameter, `:film`, is one of the page's own properties (`- it has a film`):  its type is the page's, never written twice.
   - Refused at the line:  a name that isn't a page, an address without `/`, a parameter the page has no property for, and an
     address another page has (`P.TypeScope.declareSitePage()`, journaled).
-- Compiled:  `static pages` (nested as written), `static dialogs`, `static sidebars`, `static livesAt`, `static mainLayout`,
+- Compiled:  `static pages` (nested as written), `static links`, `static dialogs`, `static sidebars`, `static livesAt`, `static mainLayout`,
   on its class.
 - Its not found and error pages (epic `mockup` P2):  `- it has a not found page`, `- it has an error page`
   (`site_overlay`, by the wordings `site_not_found_page`, `site_error_page`):  `static notFoundPage`, `static errorPage`.

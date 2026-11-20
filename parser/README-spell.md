@@ -953,6 +953,19 @@ galaxy guide is a site
 - A page listed before any file declares it waits:  it runs as its title, and a line saying it isn't made yet.
 - `live=` is the real page it stands for:  its card in the site editor opens it.
 
+A site's navigation can link OUT, to what the site isn't, a docs site, another app:  a line like a page's, with no page.
+
+```spell
+galaxy guide is a site
+	it has a home page at "/", named "Home"
+	group "Help", icon "book"
+	it has a link to "https://docs.example.com", named "Help", icon "book"
+```
+
+- It shows where its line is, under the group above it;  picking it opens the address in a new tab.
+- No title:  it shows the address.
+- An address from the site's root, `/help`, is a page's, and is refused:  list the page.
+
 A PAGE LAYOUT is what stays on screen around a site's pages:  its menu, its drawer, side bars and a footer.
 Going between pages in the same layout redraws only the page, so nothing around it flashes.
 

@@ -493,6 +493,8 @@ function codePartsIn(text: string, start: number): SitePart[] {
       top.push(group)
       continue
     }
+    // a link out of the site (epic `old-console-redo` I6):  the navigation's, no card of the board's
+    if (CODE_LINK.test(line.text)) continue
     const written = CODE_PART.exec(line.text)
     if (!written) continue
     const [
@@ -690,6 +692,9 @@ const CODE_GROUP =
  */
 const CODE_PART =
   /^([ \t]+)(- )?it has an? (.+?)(?: at "([^"]*)")?(?:, named "([^"]*)")?(?:, icon "([^"]*)")?(?:, tab "([^"]*)")?(?:, tagged "([^"]*)")?(?:, (old|new|mocked|built))?(?:, thumbnail "([^"]*)")?(?:, live "([^"]*)")?(?:, (no top bar))?(?:, in row (\d+) column (\d+))?(?:, colou?red (\w+))?\s*$/
+
+/** A site's link out, which is no part:  `it has a link to "https://docs.example.com", named "Help"`. */
+const CODE_LINK = /^[ \t]+(?:- )?it has an? link to "/
 
 /** A name a part may have:  it starts with a letter or number, and has no quotes or brackets;  it's often a title. */
 const PART_NAME = /^[\p{L}\p{N}][^"<>{}\n]*$/u

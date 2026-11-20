@@ -6,6 +6,7 @@ exports[`testing spell module sites > rule group specs > match snapshot -- if th
   "define_group": "type|group|color?|icon?",
   "show_site_part": "part|thing?|close?",
   "site_address_of": "part|thing?",
+  "site_link": "type|address|title?|icon?",
   "site_overlay": "type|part|row?|column?|color?",
   "site_page": "type|part|address|title?|icon?|tab?|tags?|state?|thumbnail?|live?|no_top_bar?|row?|column?|color?|with_nested_statements?|body?",
 }

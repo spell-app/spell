@@ -438,6 +438,28 @@ export type SitePageEntry = {
   groupIcon?: string
   /** the pages under it, as the lines under its line list them */
   pages?: SitePageEntry[]
+  /** the links out of the site under it, among those pages (`SiteLinkEntry`) */
+  links?: SiteLinkEntry[]
+}
+
+/**
+ * One link out of a site, in its navigation among its pages (epic `old-console-redo` I6):  what its line compiled to.
+ * - e.g. `- it has a link to "https://docs.example.com", named "Help", icon "book"`, after two pages =>
+ *   `{ link: "https://docs.example.com", title: "Help", icon: "book", at: 2 }`
+ */
+export type SiteLinkEntry = {
+  /** where it goes, outside the site:  `https://docs.example.com` */
+  link: string
+  /** what the navigation calls it, if the line names it;  else its address */
+  title?: string
+  /** the icon before its title in the navigation, one of Spell UI's, if the line names it:  `book` */
+  icon?: string
+  /** the `<group>` it's under, at the site's top level:  its navigation's heading */
+  group?: string
+  /** the icon its `<group>`'s line names */
+  groupIcon?: string
+  /** its place among the pages beside it:  after the first `at` of them */
+  at: number
 }
 
 /**

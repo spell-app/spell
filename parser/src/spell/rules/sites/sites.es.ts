@@ -8,6 +8,7 @@ import { SpellParser } from "spell/parser/spell/SpellParser"
 import { CreateSite } from "./CreateSite"
 import { SiteOverlay } from "./SiteOverlay"
 import { SitePage } from "./SitePage"
+import { SiteLink } from "./SiteLink"
 import { ShowSitePart } from "./ShowSitePart"
 import { SiteAddressOf } from "./SiteAddressOf"
 import { SitePartWords } from "./SitePartWords"
@@ -782,6 +783,99 @@ sitesEs.addRule(SitePage, {
 // ... y un diálogo o un panel:  `- tiene un "diálogo de ajustes"`, `- tiene un "panel de películas"`
 sitesEs.addRule(SiteOverlay, { syntax: `{type:subject_it} tiene ${A} {part:quoted_member} ${CARD_DETAILS}` })
 sitesEs.addRule(SiteOverlay, { syntax: `{type:subject_implied} tiene ${A} {part:quoted_member} ${CARD_DETAILS}` })
+
+// un enlace fuera del sitio, en su navegación entre sus páginas (épica `old-console-redo` I6):
+// `- tiene un enlace a "https://docs.example.com", llamado "Ayuda", icono "book"`
+sitesEs.addRule(SiteLink, {
+  syntax: `{type:subject_it} tiene ${A} enlace a {address:text} (, (llamada|llamado) {title:text})? (, icono {icon:text})?`,
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "un enlace entre las páginas:  el sitio lo lista aparte, con su lugar",
+          input: [
+            'una "portada" es una página',
+            "guía galáctica es un sitio en la nube:",
+            '\ttiene una portada en "/", llamada "Inicio"',
+            '\ttiene un enlace a "https://docs.example.com", llamado "Ayuda", icono "book"'
+          ],
+          js: [
+            "export class Portada extends Page {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "}",
+            "export class GuíaGaláctica extends Site {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "  static pages = [{",
+            '    name: "portada",',
+            '    page: "Portada",',
+            '    address: "/",',
+            '    title: "Inicio"',
+            "  }]",
+            "  static links = [{",
+            '    link: "https://docs.example.com",',
+            '    title: "Ayuda",',
+            '    icon: "book",',
+            "    at: 1",
+            "  }]",
+            '  static livesAt = "cloud"',
+            "}",
+            "export const guíaGaláctica = new GuíaGaláctica()"
+          ],
+          ts: [
+            "export class Portada extends Page {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "}",
+            "",
+            "/**",
+            " * `<test-sites-portada>`:  a portada, drawn in its own element, e.g. by `draw the portada`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its portada's properties;  its methods call its portada's.",
+            " * - What every view's element does, e.g. drawing its portada, is `SpellElement`'s.",
+            " */",
+            "export class PortadaElement extends SpellElement<Portada> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-portada", "portada", [])',
+            "}",
+            "core.useElement(Portada, PortadaElement)",
+            "export class GuíaGaláctica extends Site {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "  static pages = [{",
+            '    name: "portada",',
+            '    page: "Portada",',
+            '    address: "/",',
+            '    title: "Inicio"',
+            "  }]",
+            "  static links = [{",
+            '    link: "https://docs.example.com",',
+            '    title: "Ayuda",',
+            '    icon: "book",',
+            "    at: 1",
+            "  }]",
+            '  static livesAt = "cloud"',
+            "}",
+            "",
+            "/**",
+            " * `<test-sites-guia-galactica>`:  a guía galáctica, drawn in its own element, e.g. by `draw the guía galáctica`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its guía galáctica's properties;  its methods call its guía galáctica's.",
+            " * - What every view's element does, e.g. drawing its guía galáctica, is `SpellElement`'s.",
+            " */",
+            "export class GuíaGalácticaElement extends SpellElement<GuíaGaláctica> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-guia-galactica", "guía galáctica", [])',
+            "}",
+            "core.useElement(GuíaGaláctica, GuíaGalácticaElement)",
+            "export const guíaGaláctica = new GuíaGaláctica()"
+          ]
+        }
+      ]
+    }
+  ]
+})
+
+// ... sin el sujeto:  `- tiene un enlace a "https://docs.example.com"`
+sitesEs.addRule(SiteLink, {
+  syntax: `{type:subject_implied} tiene ${A} enlace a {address:text} (, (llamada|llamado) {title:text})? (, icono {icon:text})?`
+})
 
 ////////////////
 // ## Sus páginas de no encontrada y de error (epic `mockup` P2)

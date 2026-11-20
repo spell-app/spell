@@ -10682,7 +10682,7 @@
           "ruleNames": ["create_site"],
           "internal": false,
           "file": "src/spell/rules/sites/CreateSite.ts",
-          "line": 30,
+          "line": 39,
           "purpose": "A SITE, and its one instance (epic `mockup` P1).",
           "syntaxes": [
             {
@@ -10699,6 +10699,35 @@
                   "code": "class Film(Thing):\n    title = prop(type=\"text\")\n\nclass FilmsPage(Page):\n    element_tag = \"syntax-block-films-page\"\n\nclass FilmPage(Page):\n    element_tag = \"syntax-block-film-page\"\n\n    film = prop()\n\nclass GalaxyGuide(Site):\n    element_tag = \"syntax-block-galaxy-guide\"\n    pages = [\n        {\n            \"name\": \"films page\",\n            \"page\": \"FilmsPage\",\n            \"address\": \"/films\",\n            \"title\": \"Films\",\n            \"icon\": \"film\",\n            \"pages\": [\n                {\"name\": \"film page\", \"page\": \"FilmPage\", \"address\": \"/films/:film\", \"params\": [\"film\"]},\n            ],\n        },\n    ]\n    dialogs = [{\"name\": \"settings dialog\"}]\n    sidebars = [{\"name\": \"film sidebar\"}]\n    lives_at = \"owen@spell/galaxy\"\n\ngalaxy_guide = GalaxyGuide()"
                 }
               }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "SiteLink",
+          "ruleNames": ["site_link"],
+          "internal": false,
+          "file": "src/spell/rules/sites/SiteLink.ts",
+          "line": 22,
+          "purpose": "A link out of a site, in its navigation among its pages (epic `old-console-redo` I6).",
+          "syntaxes": [
+            {
+              "syntax": "{type:subject_it} has (a|an) link to {address:text} (, named {title:text})? (, icon {icon:text})?",
+              "example": "a \"home page\" is a page\ngalaxy guide is a site in the cloud:\n\tit has a home page at \"/\", named \"Home\"\n\tgroup \"Help\", icon \"book\"\n\tit has a link to \"https://docs.example.com\", named \"Help\", icon \"book\"",
+              "outputs": {
+                "js": {
+                  "code": "export class HomePage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\nexport class GalaxyGuide extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"home page\",\n    page: \"HomePage\",\n    address: \"/\",\n    title: \"Home\"\n  }]\n  static links = [{\n    link: \"https://docs.example.com\",\n    title: \"Help\",\n    icon: \"book\",\n    group: \"Help\",\n    groupIcon: \"book\",\n    at: 1\n  }]\n  static livesAt = \"cloud\"\n}\nexport const galaxyGuide = new GalaxyGuide()"
+                },
+                "ts": {
+                  "code": "export class HomePage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\n\nexport class HomePageElement extends SpellElement<HomePage> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-home-page\", \"home page\", [])\n}\ncore.useElement(HomePage, HomePageElement)\nexport class GalaxyGuide extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"home page\",\n    page: \"HomePage\",\n    address: \"/\",\n    title: \"Home\"\n  }]\n  static links = [{\n    link: \"https://docs.example.com\",\n    title: \"Help\",\n    icon: \"book\",\n    group: \"Help\",\n    groupIcon: \"book\",\n    at: 1\n  }]\n  static livesAt = \"cloud\"\n}\n\nexport class GalaxyGuideElement extends SpellElement<GalaxyGuide> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-galaxy-guide\", \"galaxy guide\", [])\n}\ncore.useElement(GalaxyGuide, GalaxyGuideElement)\nexport const galaxyGuide = new GalaxyGuide()"
+                },
+                "py": {
+                  "code": "class HomePage(Page):\n    element_tag = \"syntax-block-home-page\"\n\nclass GalaxyGuide(Site):\n    element_tag = \"syntax-block-galaxy-guide\"\n    pages = [{\"name\": \"home page\", \"page\": \"HomePage\", \"address\": \"/\", \"title\": \"Home\"}]\n    links = [\n        {\n            \"link\": \"https://docs.example.com\",\n            \"title\": \"Help\",\n            \"icon\": \"book\",\n            \"group\": \"Help\",\n            \"group_icon\": \"book\",\n            \"at\": 1,\n        },\n    ]\n    lives_at = \"cloud\"\n\ngalaxy_guide = GalaxyGuide()"
+                }
+              }
+            },
+            {
+              "syntax": "{type:subject_implied} has (a|an) link to {address:text} (, named {title:text})? (, icon {icon:text})?"
             }
           ],
           "aliases": ["statement"]

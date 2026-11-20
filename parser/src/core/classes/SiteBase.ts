@@ -6,7 +6,7 @@ import { waitUntil } from "spell/util/timing"
 import { compilePattern, filledPattern, type AddressParams } from "spell/util/addressPattern"
 
 import { core } from "spell/parser/core/core"
-import type { SiteHost, SiteOverlayEntry, SitePageEntry } from "spell/parser/core/core.types"
+import type { SiteHost, SiteLinkEntry, SiteOverlayEntry, SitePageEntry } from "spell/parser/core/core.types"
 import { followsEditsOf, isElementThunk, type Drawing } from "spell/parser/core/drawing"
 // Import directly to avoid circular import
 import { App } from "./App"
@@ -34,6 +34,12 @@ import { Thing } from "./Thing"
 export class SiteBase extends App {
   /** Its pages, nested as its lines nest:  `- it has a film page at "/films/:film"`. */
   static pages: SitePageEntry[] = []
+
+  /**
+   * Its links out, among its pages in its navigation:  `- it has a link to "https://docs.example.com"`
+   * (epic `old-console-redo` I6).  A page's own are in its entry's `links`.
+   */
+  static links: SiteLinkEntry[] = []
 
   /** Its dialogs:  `- it has a settings dialog`. */
   static dialogs: SiteOverlayEntry[] = []
@@ -490,7 +496,10 @@ export class SiteBase extends App {
       ref: (element: Element) =>
         element.addEventListener(NAVIGATING, (event) => {
           event.preventDefault()
-          this.navigate((event as CustomEvent<{ href: string }>).detail.href)
+          const { href } = (event as CustomEvent<{ href: string }>).detail
+          // a link out of the site (`- it has a link to ...`):  a new tab, the site left as it is
+          if (SiteBase.isOwnAddress(href)) this.navigate(href)
+          else globalThis.open?.(href, "_blank", "noopener")
         })
     })
   }
@@ -537,11 +546,28 @@ export class SiteBase extends App {
   /**
    * Its pages as its navigation lists them:  each one's title (its name without one), address and tags, its pages under it.
    * - A page with a parameter (`/films/:film`) isn't listed:  it's reached from a page, with a film to show.
+   * - Its links out (`static links`, a page's `links`) among them, each where its line is (epic `old-console-redo` I6).
    */
   navPages(): SiteNavPage[] {
-    const listed = (entries: SitePageEntry[] | undefined): SiteNavPage[] =>
-      SiteBase.underGroups(entries ?? [], (group) => listed(group))
-    return listed(this.siteClass.pages)
+    const listed = (pages: SitePageEntry[] | undefined, links: SiteLinkEntry[] | undefined): SiteNavPage[] =>
+      SiteBase.underGroups(SiteBase.withLinks(pages ?? [], links ?? []), (entry) => listed(entry.pages, entry.links))
+    return listed(this.siteClass.pages, this.siteClass.links)
+  }
+
+  /** `pages` with `links` among them, each after the first `at` pages, in their lines' order. */
+  private static withLinks(pages: SitePageEntry[], links: SiteLinkEntry[]): NavEntry[] {
+    if (!links.length) return pages
+    const entries: NavEntry[] = []
+    pages.forEach((page, at) => {
+      entries.push(...links.filter((link) => link.at === at), page)
+    })
+    entries.push(...links.filter((link) => link.at >= pages.length))
+    return entries
+  }
+
+  /** Is `href` one of the site's own addresses, from its root (`/films`), not a link out of it? */
+  private static isOwnAddress(href: string): boolean {
+    return href.startsWith("/") && !href.startsWith("//")
   }
 
   /**
@@ -551,12 +577,9 @@ export class SiteBase extends App {
    * - A group's row shows the icon its line names (`groupIcon`, epic `mockup` I20).
    * - A group with one listed page (`group "Home"` round the Home page and its dialogs) is that page alone,
    *   whatever its name, with no group's header over it (epic `mockup` I35, C2):  the page's own icon, else the group's.
-   * - `listed` reads a run of entries that share a group, or none.
+   * - `listed` reads the rows under a page.
    */
-  private static underGroups(
-    entries: SitePageEntry[],
-    listed: (entries: SitePageEntry[]) => SiteNavPage[]
-  ): SiteNavPage[] {
+  private static underGroups(entries: NavEntry[], listed: (entry: SitePageEntry) => SiteNavPage[]): SiteNavPage[] {
     if (!entries.some((entry) => entry.group)) return SiteBase.navRows(entries, listed)
     const rows: SiteNavPage[] = []
     for (let at = 0; at < entries.length;) {
@@ -578,12 +601,21 @@ export class SiteBase extends App {
     return rows
   }
 
-  /** `entries` as navigation rows, each with its pages:  one with a parameter isn't listed. */
-  private static navRows(entries: SitePageEntry[], listed: (entries: SitePageEntry[]) => SiteNavPage[]): SiteNavPage[] {
+  /** `entries` as navigation rows, each page with its pages:  one with a parameter isn't listed. */
+  private static navRows(entries: NavEntry[], listed: (entry: SitePageEntry) => SiteNavPage[]): SiteNavPage[] {
     return entries
-      .filter((entry) => !entry.params?.length)
+      .filter((entry) => "link" in entry || !entry.params?.length)
       .map((entry) => {
-        const pages = listed(entry.pages ?? [])
+        // a link out:  its address, picked as any row is (the drawer opens it in a new tab)
+        if ("link" in entry) {
+          return {
+            title: entry.title ?? entry.link,
+            href: entry.link,
+            id: `link:${entry.link}`,
+            ...(entry.icon && { icon: entry.icon })
+          }
+        }
+        const pages = listed(entry)
         const page: SiteNavPage = {
           title: entry.title ?? entry.name,
           href: entry.address,
@@ -635,7 +667,7 @@ export class SiteBase extends App {
       | HTMLAnchorElement
       | undefined
     const href = link?.getAttribute("href")
-    if (!href?.startsWith("/") || href.startsWith("//") || link?.target || link?.hasAttribute("download")) return
+    if (!href || !SiteBase.isOwnAddress(href) || link?.target || link?.hasAttribute("download")) return
     event.preventDefault()
     const [address = "", section] = href.split("#")
     this.navigate(address)
@@ -788,6 +820,9 @@ type SiteNavPage = {
   band?: "group"
   pages?: SiteNavPage[]
 }
+
+/** A row of its navigation, before it's drawn:  a page, or a link out of the site. */
+type NavEntry = SitePageEntry | SiteLinkEntry
 
 /** The store a site keeps what each person chose in:  `spell-sites:<Site>.<Layout>.drawer` ... */
 const SITES_PREFS = "spell-sites"
