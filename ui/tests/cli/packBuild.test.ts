@@ -159,6 +159,10 @@ describe("a pack repo checked out on its own", () => {
 
 /** `spell pack <args>` run as a person would, in the throwaway pack's folder:  its exit code and output. */
 function spell(...args: string[]) {
-  const run = spawnSync(process.execPath, [SPELL, "pack", ...args], { cwd: PACK, encoding: "utf8" })
+  // `--no-deprecation`:  node's deprecation warnings aren't the command's output.  tsx 4.20's `register()`, which
+  // `bin/spell.mjs` runs the kit through, calls node's `module.register()` (DEP0205 since node 26);  tsx 4.23 calls
+  // `module.registerHooks()`, but breaks the kit's imports of a folder by its package name (`spell/parser/...`), so
+  // tsx stays where it is for now (epic `old-console-redo` I8)
+  const run = spawnSync(process.execPath, ["--no-deprecation", SPELL, "pack", ...args], { cwd: PACK, encoding: "utf8" })
   return { status: run.status, out: run.stdout + run.stderr }
 }
