@@ -284,8 +284,8 @@ export class EditorStore extends Observable {
     // if we were passed a `selection` and path matches full path passed in, select it
     if (selection && path === file.path) file.initialSelection = selection
 
-    // Set project and file together:  `<FileTabs>` reads both,
-    // and would list the old project's file among the new one's
+    // Set project and file together:
+    // `<FileTabs>` reads both, and would list the old project's file among the new one's
     editor.project = project
     editor.file = file
     await file.load(undefined)
@@ -446,8 +446,8 @@ export class EditorStore extends Observable {
   }
   /**
    * Delete a project (after asking).
-   * - `project`:  which one, e.g. a home page card's (epic `mockup` T47);  none:  the open one,
-   *   then shows its group, which selects another project.
+   * - `project`:  which one, e.g. a home page card's (epic `mockup` T47);
+   *   none:  the open one, then shows its group, which selects another project.
    */
   async deleteApp({ project: _project }: ProjectAction = {}): Promise<void> {
     try {
@@ -1195,8 +1195,8 @@ export class EditorStore extends Observable {
    */
   async leaveProject(project = editor.project): Promise<void> {
     const projectRoot = SPACES.SpellProjectRoot.projects
-    // an example's draft was asked about before the address changed (`asksBeforeLeaving()`):  this only catches
-    // a leave no route saw, which can't stay
+    // an example's draft was asked about before the address changed (`asksBeforeLeaving()`):
+    // this only catches a leave no route saw, which can't stay
     if (project && !isStaticBuild && SPACES.isExampleProject(project.path)) {
       await editor.askAboutExample(project, "leaving")
       return
@@ -1257,8 +1257,8 @@ export class EditorStore extends Observable {
    * - Cancel, Escape or the close ✕:  stays.
    * - Discard Changes:  after "are you sure?", your draft goes;  Keep Editing stays.
    * - "Save in My Apps", focused:  a copy in your own space with your draft in it, `owen@spell/Solitaire` or the next
-   *   free name;  the example is back as everyone sees it, for you too.  Saving, the copy is shown;  leaving, it waits
-   *   in your apps.
+   *   free name;  the example is back as everyone sees it, for you too.
+   *   Saving, the copy is shown;  leaving, it waits in your apps.
    * - An edit not saved yet counts:  kept into the draft first, unless you discard.
    * - Nothing to ask (no draft, the static build, asked already):  `true`.
    * - NEVER throws:  a failure is shown, and you stay.
@@ -1492,8 +1492,8 @@ export class EditorStore extends Observable {
   }
 
   /**
-   * "Save" (⌘S):  `saveAll()`;  then, in an example or a guide with your draft, what to keep (`askAboutExample()`,
-   * epic `mockup` T52).
+   * "Save" (⌘S):  `saveAll()`;
+   * then, in an example or a guide with your draft, what to keep (`askAboutExample()`, epic `mockup` T52).
    * - NEVER throws:  a failure is shown.
    */
   async saveDraft(): Promise<void> {
@@ -2175,8 +2175,8 @@ export class EditorStore extends Observable {
   }
 
   /**
-   * Ask a question with a button per answer (`Modals.ChoicesModalProps`):  resolves the answer's `value`,
-   * `undefined` on Escape.
+   * Ask a question with a button per answer (`Modals.ChoicesModalProps`):
+   * resolves the answer's `value`, `undefined` on Escape.
    */
   askWithChoices<Value extends string>(props: Modals.ChoicesModalProps<Value>): Promise<Value | undefined> {
     return dialogs().then((modals) => modals.askWithChoices(props))

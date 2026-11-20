@@ -154,7 +154,7 @@ function Divider(): JSX.Element {
  * - `useRunner`:  the one chosen opens in Run.
  * - The Spell UI site's:  "Spell Notebooks".
  * - SIDE EFFECT:  names the browser's tab for the project shown (`<AppMarkLabel>`).
- * - SEE:  its App UI components page, with the bar's other menus,
+ * - SEE:  its App UI components page, with the bar's other menus:
  *   `app/docs/MenuBar.html` (`/components/app/MenuBar.html`).
  ****************/
 export function SpellBarMenu(props: { useRunner?: boolean }): JSX.Element {

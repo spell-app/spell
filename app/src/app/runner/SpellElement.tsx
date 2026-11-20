@@ -17,9 +17,9 @@ import { LONG_PRESS_EVENT, LongPress } from "./LongPress"
 /**
  * How a view's states look.
  * - A clickable thing (`:state(clickable)`):  the cursor controls have (`--ui-control-cursor`), unless its drawing says otherwise
- * - A draggable thing:  the browser's grab cursor (`--spell-drag-cursor` changes it), unless its drawing says otherwise.
- *   While it's dragged, `Dragging` shows the closed hand over the whole page.
- *   And a finger drags it, rather than scrolling the page.
+ * - A draggable thing:  the browser's grab cursor (`--spell-drag-cursor` changes it), unless its drawing says otherwise
+ *   - while it's dragged, `Dragging` shows the closed hand over the whole page
+ *   - a finger drags it, rather than scrolling the page
  * - A list that will take what's dragged over it glows, a soft purple halo outside and in, a little out from its edges:
  *   - drawn by its `::after`, over its items, so it never moves them
  *   - `--spell-drop-glow` (a `box-shadow`), `--spell-drop-glow-gap` (how far out) and `--spell-drop-glow-radius`
@@ -80,9 +80,9 @@ const STATES_CSS = `
  * ### `SpellElement`
  * The component behind a view's own element, e.g. `<solitaire-card>` for `a card is a view`.
  *
- * - A Spell UI component like any `ui-*` one:  its own shadow root, with the page's theme and base styles.
- *   Then its type's own `<css>`, its class's `static css`, after its super-types' (`cssOf()`).
- *   Then the project's stylesheet, so `.card .title` reaches inside it (`core.projectSheet()`).
+ * - A Spell UI component like any `ui-*` one:  its own shadow root, with the page's theme and base styles, then:
+ *   - its type's own `<css>`, its class's `static css`, after its super-types' (`cssOf()`)
+ *   - the project's stylesheet, so `.card .title` reaches inside it (`core.projectSheet()`)
  * - It draws its `thing`, through the program's runtime:  `core.drawOwn()`, in the thing's error boundary.
  * - Its outside is its type's (epic `drawable-thing` P8), named as Spell UI names its own elements' API:
  *   - each property its type declares is an attribute and a property:  `<game-card rank="1">`, `card.rank = 12`
@@ -272,8 +272,8 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
    *   (epic `language` T139).
    * - A property holding a thing takes the thing its reference finds;  one that finds nothing is left out.
    * - The list holding it (a card's `pile`) is left out:  joining one is a move, made once it exists (`writeReference()`).
-   * - STATIC:  an element's own members can't take a name a type's method might have (the TypeScript writer's
-   *   `ELEMENT_MEMBERS`)
+   * - STATIC:  an element's own members can't take a name a type's method might have
+   *   (the TypeScript writer's `ELEMENT_MEMBERS`)
    */
   private static makeOwnThing(element: SpellElement, entry: SpellElementEntry): object {
     const values: Record<string, unknown> = {}
@@ -337,8 +337,9 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     this.numberItems()
     this.onChildrenDrawn()
     const mounted = super.onMount()
-    // a drawing's `ui-*` elements whose light content a page sheet styles (a table's rows):  that sheet reaches in,
-    // once the runtime is loaded (a Python app's page draws before it is);  un-awaited on purpose
+    // a drawing's `ui-*` elements whose light content a page sheet styles (a table's rows):
+    // that sheet reaches in, once the runtime is loaded (a Python app's page draws before it is);
+    // un-awaited on purpose
     const root = this.domElement.renderRoot
     void UI.load()
       .then(() => UI.styles.adoptPageSheetsInto(root))
@@ -872,10 +873,11 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
   }
 
   /**
-   * Send `spellEvent`, e.g. `click`, `drag-cancelled`, to our thing, through the program's core:  its handler takes it
-   * (`onDragCancelled()`), or hands it up its chain (`core.send()`).
+   * Send `spellEvent`, e.g. `click`, `drag-cancelled`, to our thing, through the program's core:
+   * its handler takes it (`onDragCancelled()`), or hands it up its chain (`core.send()`).
    * - A press (`PRESSES`) goes through the queue, if anything takes it:  it runs when no action is running.
-   *   `canRun`:  may it still, when its turn comes?  The mouse's other events run at once.
+   *   - `canRun`:  may it still, when its turn comes?
+   * - The mouse's other events run at once.
    * - A program running elsewhere (Python, `core.remote`) hears only its own handler.
    */
   private sendToThing(spellEvent: string, canRun?: () => boolean) {
@@ -1280,8 +1282,8 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
   }
 
   /**
-   * Be one of our tag's drawn elements, until we're released:  so we hear of a property our type gains as the program
-   * runs (`addNewProperties()`).
+   * Be one of our tag's drawn elements, until we're released:
+   * so we hear of a property our type gains as the program runs (`addNewProperties()`).
    */
   private joinOurTag() {
     const ourTag = SpellElement.tagOf(this.domElement.localName)
@@ -1969,8 +1971,8 @@ const HANDLED_EVENTS = new WeakSet<Event>()
  * The view whose own drawing `element` is part of, e.g. the card a `<card-image>` is drawn in -- `undefined` if none.
  * - Its drawing is its shadow root:  `element` is in it.
  * - NOT a list's items, e.g. a pile's cards:  they're its children, shown in its `<slot>`, each its own thing.
- * - Free rather than a member:  an element's members can't take a name a type's method might have
- *   (`TSWriter.ELEMENT_MEMBERS`).
+ * - Free rather than a member:
+ *   an element's members can't take a name a type's method might have (`TSWriter.ELEMENT_MEMBERS`).
  */
 function viewDrawing(element: HTMLElement): SpellElement | undefined {
   const root = element.getRootNode()

@@ -429,8 +429,8 @@ function isInProperties(event: KeyboardEvent): boolean {
 }
 
 /**
- * Esc:  step back out of Anatomy while it shows (one layer alone, then the whole app);  else stop inspecting, while
- * inspecting;  otherwise not ours (`false`), so the key goes on.
+ * Esc:  step back out of Anatomy while it shows (one layer alone, then the whole app);
+ * else stop inspecting, while inspecting;  otherwise not ours (`false`), so the key goes on.
  */
 function stopInspecting(): unknown {
   if (AppAnatomy.back()) return undefined
