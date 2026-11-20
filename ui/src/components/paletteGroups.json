@@ -157,7 +157,7 @@
     {
       "topic": "overlays",
       "icon": "layer group",
-      "tags": ["ui-popup", "ui-modal", "ui-device", "ui-dimmer", "ui-flyout", "ui-nag", "ui-toast", "ui-message"]
+      "tags": ["ui-popup", "ui-modal", "ui-device", "ui-dimmer", "ui-flyout", "ui-nag", "ui-toast", "ui-message", "ui-tour", "ui-tour-step"]
     },
     {
       "topic": "animation",

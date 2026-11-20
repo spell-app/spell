@@ -2629,6 +2629,27 @@
               </ui-example>
             </ui-section>
 
+            <ui-section id="modules-tour" label="Tour" sticky="stack" collapsible dividing>
+              <ui-example>
+                <p slot="description">
+                  A tour leads someone through a feature one numbered step at a time, pointing at what each step is about.
+                  <a href="ui-tour.html">Tour page</a>
+                </p>
+                <div class="ui-stack">
+                  <div class="ui-cluster">
+                    <ui-button id="tour-new" icon="plus">New</ui-button>
+                    <ui-button id="tour-save" icon="save">Save</ui-button>
+                    <ui-button commandfor="tour-example" command="--start" appearance="basic" icon="map signs">Take the tour</ui-button>
+                  </div>
+                  <ui-tour id="tour-example" name="The toolbar" summary="What its buttons do.">
+                    <ui-tour-step target="tour-new">New starts a fresh page.</ui-tour-step>
+                    <ui-tour-step name="save" target="tour-save" dim>Save keeps what you've done.</ui-tour-step>
+                    <ui-tour-step>That's it. You can take this tour again any time.</ui-tour-step>
+                  </ui-tour>
+                </div>
+              </ui-example>
+            </ui-section>
+
             <ui-section id="modules-transition" label="Transition" sticky="stack" collapsible dividing>
               <ui-example>
                 <p slot="description">

@@ -114,6 +114,7 @@ export const COMPONENTS = [
   "ui-page-layout",
   "ui-device",
   "ui-uploader",
+  "ui-tour",
   "ui-dial",
   "ui-toolbar",
   "ui-app-menu",

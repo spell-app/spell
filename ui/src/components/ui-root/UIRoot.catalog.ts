@@ -1736,6 +1736,8 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     ],
     formControl: true
   },
+  "ui-tour": { folder: "ui-tour", attributes: ["name", "summary", "dim", "remember", "offer"] },
+  "ui-tour-step": { folder: "ui-tour", attributes: ["name", "target", "placement", "dim", "wait-for"] },
   "ui-transition": {
     folder: "ui-transition",
     attributes: [

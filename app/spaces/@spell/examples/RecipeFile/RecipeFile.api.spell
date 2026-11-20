@@ -1,0 +1,11 @@
+## Recipe File:  your recipes, in a file on your computer
+// The next line keeps them in a JSON file you pick:  the app remembers it, and every change goes back to it.
+// In Safari and Firefox, which can't save back to a file, your changes are kept in this browser,
+// and saving downloads the file.
+cookbook file is a json file you pick
+
+a "recipe" is a thing
+	it lives in cookbook file
+	its "title" is text
+	its "servings" is a number
+	its "notes" is text

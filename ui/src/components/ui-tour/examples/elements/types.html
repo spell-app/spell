@@ -1,0 +1,13 @@
+<!-- `<ui-tour>`:  three steps over a small toolbar;  the button starts it -->
+<div class="ui-stack">
+  <div class="ui-cluster">
+    <ui-button id="tour-new" icon="plus">New</ui-button>
+    <ui-button id="tour-save" icon="save">Save</ui-button>
+    <ui-button commandfor="tour-example" command="--start" appearance="basic" icon="map signs">Take the tour</ui-button>
+  </div>
+  <ui-tour id="tour-example" name="The toolbar" summary="What its buttons do.">
+    <ui-tour-step target="tour-new">New starts a fresh page.</ui-tour-step>
+    <ui-tour-step name="save" target="tour-save" dim>Save keeps what you've done.</ui-tour-step>
+    <ui-tour-step>That's it. You can take this tour again any time.</ui-tour-step>
+  </ui-tour>
+</div>

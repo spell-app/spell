@@ -2073,6 +2073,7 @@
             "cancel_when",
             "place_kind",
             "place_kind_here",
+            "picked_file",
             "place_kind_each_person",
             "day_half",
             "clock_zone",
@@ -2223,6 +2224,9 @@
             },
             {
               "syntax": "((database_on_this_device:base de datos en este dispositivo)|(in_memory_database:base de datos en memoria))"
+            },
+            {
+              "syntax": "((you_pick:que eliges|que elijas)|(on_this_device:en este dispositivo))"
             },
             {
               "syntax": "(personal_atmosphere_account:cuenta personal de atmosphere/i|atmosphere/i personal)"
@@ -5527,6 +5531,140 @@
                 },
                 "py": {
                   "code": "core.stop_all(\"sound\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "StartTour",
+          "ruleNames": ["start_tour"],
+          "internal": false,
+          "file": "src/spell/rules/UI/StartTour.ts",
+          "line": 15,
+          "purpose": "Start one of the page's tours, by its name (epic `editor` P40).",
+          "syntaxes": [
+            {
+              "syntax": "(empieza|inicia) el recorrido {name:text}",
+              "example": "empieza el recorrido \"primera partida\"",
+              "outputs": {
+                "js": {
+                  "code": "core.startTour(\"primera partida\")"
+                },
+                "ts": {
+                  "code": "core.startTour(\"primera partida\")"
+                },
+                "py": {
+                  "code": "core.start_tour(\"primera partida\")"
+                }
+              }
+            },
+            {
+              "syntax": "(empezar|iniciar) el recorrido {name:text}",
+              "example": "iniciar el recorrido \"primera partida\"",
+              "outputs": {
+                "js": {
+                  "code": "core.startTour(\"primera partida\")"
+                },
+                "ts": {
+                  "code": "core.startTour(\"primera partida\")"
+                },
+                "py": {
+                  "code": "core.start_tour(\"primera partida\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "StopTour",
+          "ruleNames": ["stop_tour"],
+          "internal": false,
+          "file": "src/spell/rules/UI/StopTour.ts",
+          "line": 14,
+          "purpose": "Stop the tour showing now (epic `editor` P40).",
+          "syntaxes": [
+            {
+              "syntax": "(para|parar|deten|detener|termina|terminar) el recorrido",
+              "example": "para el recorrido",
+              "outputs": {
+                "js": {
+                  "code": "core.stopTour()"
+                },
+                "ts": {
+                  "code": "core.stopTour()"
+                },
+                "py": {
+                  "code": "core.stop_tour()"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ShowTourStep",
+          "ruleNames": ["show_tour_step"],
+          "internal": false,
+          "file": "src/spell/rules/UI/ShowTourStep.ts",
+          "line": 15,
+          "purpose": "Go straight to one step of the tour showing, by its number or its name (epic `editor` P40).",
+          "syntaxes": [
+            {
+              "syntax": "(muestra|mostrar) el paso {step:expression} (del recorrido)?",
+              "example": "muestra el paso 3",
+              "outputs": {
+                "js": {
+                  "code": "core.showTourStep(3)"
+                },
+                "ts": {
+                  "code": "core.showTourStep(3)"
+                },
+                "py": {
+                  "code": "core.show_tour_step(3)"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "MoveTourStep",
+          "ruleNames": ["move_tour_step"],
+          "internal": false,
+          "file": "src/spell/rules/UI/MoveTourStep.ts",
+          "line": 17,
+          "purpose": "One step on, or one step back, in the tour showing (epic `editor` P40).",
+          "syntaxes": [
+            {
+              "syntax": "(ve al|ir al|muestra el|mostrar el) (next:siguiente) paso (del recorrido)?",
+              "example": "ve al siguiente paso",
+              "outputs": {
+                "js": {
+                  "code": "core.nextTourStep()"
+                },
+                "ts": {
+                  "code": "core.nextTourStep()"
+                },
+                "py": {
+                  "code": "core.next_tour_step()"
+                }
+              }
+            },
+            {
+              "syntax": "(retrocede|retroceder|vuelve|volver) un paso",
+              "example": "retrocede un paso",
+              "outputs": {
+                "js": {
+                  "code": "core.previousTourStep()"
+                },
+                "ts": {
+                  "code": "core.previousTourStep()"
+                },
+                "py": {
+                  "code": "core.previous_tour_step()"
                 }
               }
             }
@@ -8997,7 +9135,7 @@
           "ruleNames": ["create_place"],
           "internal": false,
           "file": "src/spell/rules/places/CreatePlace.ts",
-          "line": 95,
+          "line": 103,
           "purpose": "A program's data lives here (epic `data` P11, Q2).",
           "syntaxes": [
             {
@@ -9016,10 +9154,37 @@
               }
             },
             {
-              "syntax": "{type:type_words} es (un|una) {superType:type} (en|desde) {address:text} {with_nested_statements}?"
+              "syntax": "{type:type_words} es (un|una) {kind:place_kind_here} {with_nested_statements}?",
+              "example": "recetario familiar es una base de datos en este dispositivo",
+              "outputs": {
+                "js": {
+                  "code": "export class RecetarioFamiliar extends Place {}\nexport const recetarioFamiliar = core.place(new RecetarioFamiliar(), {\n  name: \"recetario_familiar\",\n  kind: \"database on this device\",\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class RecetarioFamiliar extends Place {}\nexport const recetarioFamiliar = core.place(new RecetarioFamiliar(), {\n  name: \"recetario_familiar\",\n  kind: \"database on this device\",\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class RecetarioFamiliar(Place):\n    pass\n\nrecetario_familiar = core.place(\n    RecetarioFamiliar(),\n    {\n        \"name\": \"recetario_familiar\",\n        \"kind\": \"database on this device\",\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
             },
             {
-              "syntax": "{type:type_words} es (un|una) {kind:place_kind_here} {with_nested_statements}?"
+              "syntax": "{type:type_words} es (un|una) {kind:place_kind} {picked:picked_file} {with_nested_statements}?",
+              "example": "recetario familiar es un archivo json que eliges",
+              "outputs": {
+                "js": {
+                  "code": "export class RecetarioFamiliar extends Place {}\nexport const recetarioFamiliar = core.place(new RecetarioFamiliar(), {\n  name: \"recetario_familiar\",\n  kind: \"file\",\n  picked: true,\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class RecetarioFamiliar extends Place {}\nexport const recetarioFamiliar = core.place(new RecetarioFamiliar(), {\n  name: \"recetario_familiar\",\n  kind: \"file\",\n  picked: true,\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class RecetarioFamiliar(Place):\n    pass\n\nrecetario_familiar = core.place(\n    RecetarioFamiliar(),\n    {\"name\": \"recetario_familiar\", \"kind\": \"file\", \"picked\": True, \"unclear_numbers\": \",\"},\n)"
+                }
+              }
+            },
+            {
+              "syntax": "{type:type_words} es (un|una) {superType:type} (en|desde) {address:text} {with_nested_statements}?"
             },
             {
               "syntax": "{type:type_words} es (un|una) {kind:place_kind_each_person} ((en|desde) {address:text})? {with_nested_statements}?"
@@ -9803,6 +9968,61 @@
           "aliases": ["statement"]
         },
         {
+          "className": "SaveDraft",
+          "ruleNames": ["save_draft"],
+          "internal": false,
+          "file": "src/spell/rules/places/SaveDraft.ts",
+          "line": 18,
+          "purpose": "A draft's changes go out, together (epic `data` Q9).",
+          "syntaxes": [
+            {
+              "syntax": "guardar {draft:known_type}",
+              "example": "recetario familiar es un archivo json que eliges\npara guardarlo\n\tguardar recetario familiar",
+              "outputs": {
+                "js": {
+                  "code": "export class RecetarioFamiliar extends Place {}\nexport const recetarioFamiliar = core.place(new RecetarioFamiliar(), {\n  name: \"recetario_familiar\",\n  kind: \"file\",\n  picked: true,\n  unclearNumbers: \",\"\n})\nexport async function guardarlo() {\n  return core.asAction({ undoneAs: \"Guardarlo\" }, async () => {\n    await core.savePickedFile(\"recetario_familiar\")\n  })\n}"
+                },
+                "ts": {
+                  "code": "export class RecetarioFamiliar extends Place {}\nexport const recetarioFamiliar = core.place(new RecetarioFamiliar(), {\n  name: \"recetario_familiar\",\n  kind: \"file\",\n  picked: true,\n  unclearNumbers: \",\"\n})\nexport async function guardarlo() {\n  return core.asAction({ undoneAs: \"Guardarlo\" }, async () => {\n    await core.savePickedFile(\"recetario_familiar\")\n  })\n}"
+                },
+                "py": {
+                  "code": "class RecetarioFamiliar(Place):\n    pass\n\nrecetario_familiar = core.place(\n    RecetarioFamiliar(),\n    {\"name\": \"recetario_familiar\", \"kind\": \"file\", \"picked\": True, \"unclear_numbers\": \",\"},\n)\n\n@core.as_action({\"undone_as\": \"Guardarlo\"})\nasync def guardarlo() -> None:\n    core.save_picked_file(\"recetario_familiar\")"
+                }
+              }
+            },
+            {
+              "syntax": "guardar {draft:expression}"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "PickFileFor",
+          "ruleNames": ["pick_file_for"],
+          "internal": false,
+          "file": "src/spell/rules/places/PickFileFor.ts",
+          "line": 15,
+          "purpose": "The file picker, for a place that's a file a person picks (epic `editor` P41, Q67's B).",
+          "syntaxes": [
+            {
+              "syntax": "elige un archivo para {place:known_type}",
+              "example": "recetario familiar es un archivo json que eliges\npara abrir\n\telige un archivo para recetario familiar",
+              "outputs": {
+                "js": {
+                  "code": "export class RecetarioFamiliar extends Place {}\nexport const recetarioFamiliar = core.place(new RecetarioFamiliar(), {\n  name: \"recetario_familiar\",\n  kind: \"file\",\n  picked: true,\n  unclearNumbers: \",\"\n})\nexport async function abrir() {\n  return core.asAction({ undoneAs: \"Abrir\" }, async () => {\n    await core.pickFileFor(\"recetario_familiar\")\n  })\n}"
+                },
+                "ts": {
+                  "code": "export class RecetarioFamiliar extends Place {}\nexport const recetarioFamiliar = core.place(new RecetarioFamiliar(), {\n  name: \"recetario_familiar\",\n  kind: \"file\",\n  picked: true,\n  unclearNumbers: \",\"\n})\nexport async function abrir() {\n  return core.asAction({ undoneAs: \"Abrir\" }, async () => {\n    await core.pickFileFor(\"recetario_familiar\")\n  })\n}"
+                },
+                "py": {
+                  "code": "class RecetarioFamiliar(Place):\n    pass\n\nrecetario_familiar = core.place(\n    RecetarioFamiliar(),\n    {\"name\": \"recetario_familiar\", \"kind\": \"file\", \"picked\": True, \"unclear_numbers\": \",\"},\n)\n\n@core.as_action({\"undone_as\": \"Abrir\"})\nasync def abrir() -> None:\n    core.pick_file_for(\"recetario_familiar\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "WrapperAction",
           "ruleNames": ["wrapper_action"],
           "internal": false,
@@ -10404,20 +10624,6 @@
           "syntaxes": [
             {
               "syntax": "si falla (:|,)? {statement_body}?"
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
-          "className": "SaveDraft",
-          "ruleNames": ["save_draft"],
-          "internal": false,
-          "file": "src/spell/rules/places/SaveDraft.ts",
-          "line": 14,
-          "purpose": "A draft's changes go out, together (epic `data` Q9).",
-          "syntaxes": [
-            {
-              "syntax": "guardar {draft:expression}"
             }
           ],
           "aliases": ["statement"]

@@ -184,6 +184,9 @@ export const PARSER_MESSAGES = {
   /** `save` of something that's no draft:  `{text}`. */
   "no-save-step":
     '"{text}" isn\'t a draft:  a change is kept as it\'s made, with no save step.  For an Edit screen with a Cancel button:  "a draft of ..."',
+  /** `pick a file for` something that's no file a person picks:  `{text}` (epic `editor` P41). */
+  "pick-file-not-a-file":
+    '"{text}" isn\'t a file a person picks:  say so where it\'s declared, "{text} is a json file you pick"',
   /** A word people bring from elsewhere:  `{word}`. */
   "no-such-data-word":
     'Spell can\'t "{word}" that:  say where the data lives once, "x is a web server at ...", and "it lives in x", then "every recipe where ..." reads it',

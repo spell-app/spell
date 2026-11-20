@@ -58,6 +58,7 @@ import {
   WhileWaiting
 } from "./ReadRider"
 import { ReloadThings } from "./ReloadThings"
+import { PickFileFor } from "./PickFileFor"
 import { SaveDraft } from "./SaveDraft"
 import { KeepsNoTimes } from "./KeepsNoTimes"
 import { EnabledOperations, OPERATION_MEANINGS } from "./EnabledOperations"
@@ -158,6 +159,10 @@ placesEs.addRule(
   }
 )
 
+placesEs.addRule(Wording.specialize({ ruleName: "picked_file", meanings: ["you_pick", "on_this_device"] }), {
+  syntax: "((you_pick:que eliges|que elijas)|(on_this_device:en este dispositivo))"
+})
+
 placesEs.addRule(
   Wording.specialize({ ruleName: "place_kind_each_person", meanings: ["personal_atmosphere_account"] }),
   { syntax: "(personal_atmosphere_account:cuenta personal de atmosphere/i|atmosphere/i personal)" }
@@ -192,7 +197,62 @@ placesEs.addRule(CreatePlace, {
 placesEs.addRule(CreatePlace, {
   syntax: `{type:type_words} es ${A} {superType:type} (en|desde) {address:text} {with_nested_statements}?`
 })
-placesEs.addRule(CreatePlace, { syntax: `{type:type_words} es ${A} {kind:place_kind_here} {with_nested_statements}?` })
+placesEs.addRule(CreatePlace, {
+  syntax: `{type:type_words} es ${A} {kind:place_kind_here} {with_nested_statements}?`,
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        // la base de datos del navegador:  nunca un archivo que se elige, aunque los dos digan "en este dispositivo"
+        [
+          "recetario familiar es una base de datos en este dispositivo",
+          [
+            "export class RecetarioFamiliar extends Place {}",
+            "export const recetarioFamiliar = core.place(new RecetarioFamiliar(), {",
+            '  name: "recetario_familiar",',
+            '  kind: "database on this device",',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
+placesEs.addRule(CreatePlace, {
+  syntax: `{type:type_words} es ${A} {kind:place_kind} {picked:picked_file} {with_nested_statements}?`,
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        [
+          "recetario familiar es un archivo json que eliges",
+          [
+            "export class RecetarioFamiliar extends Place {}",
+            "export const recetarioFamiliar = core.place(new RecetarioFamiliar(), {",
+            '  name: "recetario_familiar",',
+            '  kind: "file",',
+            "  picked: true,",
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ],
+        [
+          "recetario familiar es un archivo json en este dispositivo",
+          [
+            "export class RecetarioFamiliar extends Place {}",
+            "export const recetarioFamiliar = core.place(new RecetarioFamiliar(), {",
+            '  name: "recetario_familiar",',
+            '  kind: "file",',
+            "  picked: true,",
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
 placesEs.addRule(CreatePlace, {
   syntax: `{type:type_words} es ${A} {kind:place_kind_each_person} ((en|desde) {address:text})? {with_nested_statements}?`
 })
@@ -1302,7 +1362,65 @@ placesEs.addRule(DraftOf, {
   syntax: "un borrador de {thing:operand}",
   tests: [{ compileAs: "expression", tests: [["un borrador de cosa", undefined]] }]
 })
+placesEs.addRule(SaveDraft, {
+  syntax: "guardar {draft:known_type}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: ["recetario familiar es un archivo json que eliges", "para guardarlo", "\tguardar recetario familiar"],
+          js: [
+            "export class RecetarioFamiliar extends Place {}",
+            "export const recetarioFamiliar = core.place(new RecetarioFamiliar(), {",
+            '  name: "recetario_familiar",',
+            '  kind: "file",',
+            "  picked: true,",
+            '  unclearNumbers: ","',
+            "})",
+            "export async function guardarlo() {",
+            '  return core.asAction({ undoneAs: "Guardarlo" }, async () => {',
+            '    await core.savePickedFile("recetario_familiar")',
+            "  })",
+            "}"
+          ]
+        }
+      ]
+    }
+  ]
+})
 placesEs.addRule(SaveDraft, { syntax: "guardar {draft:expression}" })
+placesEs.addRule(PickFileFor, {
+  syntax: "elige un archivo para {place:known_type}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: [
+            "recetario familiar es un archivo json que eliges",
+            "para abrir",
+            "\telige un archivo para recetario familiar"
+          ],
+          js: [
+            "export class RecetarioFamiliar extends Place {}",
+            "export const recetarioFamiliar = core.place(new RecetarioFamiliar(), {",
+            '  name: "recetario_familiar",',
+            '  kind: "file",',
+            "  picked: true,",
+            '  unclearNumbers: ","',
+            "})",
+            "export async function abrir() {",
+            '  return core.asAction({ undoneAs: "Abrir" }, async () => {',
+            '    await core.pickFileFor("recetario_familiar")',
+            "  })",
+            "}"
+          ]
+        }
+      ]
+    }
+  ]
+})
 placesEs.addRule(DiscardDraft, { syntax: "descartar {draft:expression}" })
 placesEs.addRule(CancelAction, { syntax: `(parar|cancelar) ${THE}? {action:identifier}` })
 placesEs.addRule(ReloadThings, { syntax: `recargar ${THE} {type:plural_type}` })

@@ -186,7 +186,7 @@ my_tasks = core.place(MyTask(), {"name": "my_tasks", "kind": "database on this d
 ############
 # ## The app
 ############
-# A header saying how many are left, the new task's field, then the list.
+# A header saying how many are left, the new task's field, then the list;  and a tour of them, its Tour button in the header.
 
 
 class TaskList(App):
@@ -234,6 +234,10 @@ class TaskList(App):
         self.add_the_task_title(self.draft)
         self.draft = ""
 
+    def take_the_tour(self) -> None:
+        """A few steps through the app, pointing at each part"""
+        core.start_tour("Task List")
+
     def draw(self) -> Element:
         return h(
             "ui-container",
@@ -244,15 +248,20 @@ class TaskList(App):
                     {"direction": "horizontal", "justify": "between"},
                     h("ui-header", {"level": "2"}, "Task List"),
                     h(
-                        "ui-text",
-                        {"color": "grey"},
-                        h("span", {"hidden": None if self.active_count == 0 else "until-found"}, "All done"),
+                        "ui-stack",
+                        {"direction": "horizontal", "spacing": "sm"},
                         h(
-                            "span",
-                            {"hidden": None if not self.active_count == 0 else "until-found"},
-                            self.active_count,
-                            " to do",
+                            "ui-text",
+                            {"color": "grey"},
+                            h("span", {"hidden": None if self.active_count == 0 else "until-found"}, "All done"),
+                            h(
+                                "span",
+                                {"hidden": None if not self.active_count == 0 else "until-found"},
+                                self.active_count,
+                                " to do",
+                            ),
                         ),
+                        core.draw_action(self, "take_the_tour", {"appearance": "tertiary"}),
                     ),
                 ),
                 h(
@@ -261,6 +270,7 @@ class TaskList(App):
                     h(
                         "ui-input",
                         {
+                            "id": "new task",
                             "name": "draft",
                             "placeholder": "Something to do",
                             "aria-label": "New task",
@@ -282,6 +292,18 @@ class TaskList(App):
                 ),
                 core.draw_thing(self.checklist),
             ),
+            h(
+                "ui-tour",
+                {"name": "Task List", "summary": "Add your tasks, tick them off and put them in order."},
+                h("ui-tour-step", {"target": "new task"}, "Type something to do here, then press Add."),
+                h(
+                    "ui-tour-step",
+                    {"target": "checklist"},
+                    "Your tasks are here. Tick one off when it's done.",
+                ),
+                h("ui-tour-step", {"target": "checklist"}, "Drag a task by its handle to move it."),
+                h("ui-tour-step", "That's it. Your tasks stay on this device for next time."),
+            ),
         )
 
 
@@ -289,6 +311,7 @@ task_list = TaskList()
 core.describe_action(TaskList, "fill_the_checklist", {"title": "Fill the Checklist", "undone_as": "Fill the Checklist"})
 core.describe_action(TaskList, "add_the_task_title", {"title": "Add the Task Title", "undone_as": "Add the Task Title"})
 core.describe_action(TaskList, "add_the_draft", {"title": "Add the Draft", "undone_as": "Add the Draft"})
+core.describe_action(TaskList, "take_the_tour", {"title": "Tour", "icon": "map signs", "undone_as": "Tour"})
 
 
 # -----------

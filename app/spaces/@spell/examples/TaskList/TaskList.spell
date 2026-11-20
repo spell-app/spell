@@ -4,7 +4,7 @@
 // They're kept on this device, so they're still there next time:  TaskList.api.spell says where.
 
 ## The app
-// A header saying how many are left, the new task's field, then the list.
+// A header saying how many are left, the new task's field, then the list;  and a tour of them, its Tour button in the header.
 
 task list is an app
 	"checklist" is a new checklist
@@ -41,20 +41,33 @@ task list is an app
 		add the task the draft
 		clear the draft
 
+	to "take the tour" with title "Tour", icon "map signs"
+		// A few steps through the app, pointing at each part
+		start tour "Task List"
+
 	to draw it
 		<container>
 			<stack>
 				<stack direction="horizontal" justify="between">
 					<header level="2">Task List</header>
-					<text color="grey">
-						<if the active count is 0>All done<otherwise>{the active count} to do</>
-					</text>
+					<stack direction="horizontal" spacing="sm">
+						<text color="grey">
+							<if the active count is 0>All done<otherwise>{the active count} to do</>
+						</text>
+						<action "take the tour" appearance="tertiary" />
+					</stack>
 				</stack>
 				<form value={it}>
-					<input name="draft" placeholder="Something to do" aria-label="New task" fluid action>
+					<input id="new task" name="draft" placeholder="Something to do" aria-label="New task" fluid action>
 						<button slot="action" color="primary" disabled={the draft is ""} onClick={add the draft}>Add</button>
 					</input>
 				</form>
 				{draw the checklist}
 			</stack>
+			<tour name="Task List" summary="Add your tasks, tick them off and put them in order.">
+				<tour-step target="new task">Type something to do here, then press Add.</tour-step>
+				<tour-step target="checklist">Your tasks are here. Tick one off when it's done.</tour-step>
+				<tour-step target="checklist">Drag a task by its handle to move it.</tour-step>
+				<tour-step>That's it. Your tasks stay on this device for next time.</tour-step>
+			</tour>
 		</container>

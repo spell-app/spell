@@ -1,0 +1,232 @@
+/*
+ * Look of <ui-tour> (UITour.tsx):  while it runs, a layer over the whole page (the DOM element, a popover in the top
+ * layer) that takes no clicks itself, holding:
+ * - the RING round the step's target, as the editor's Inspect ring looks:  a dashed line in the primary colour;
+ *   with `dim`, a shadow from it to the screen's edges darkens the rest of the page
+ * - the step's BOX beside the ring, placed by CSS anchor positioning, on the other side when there's no room
+ * - while a step waits, four MASKS round the ring that take every click, so only the target can be clicked
+ * - no target:  the ring is a point near the top of the screen, under the page's own bars (`--ui-tour-top`),
+ *   and the box hangs under it
+ * Tokens (public, NEVER declared here;  their private aliases are):
+ * - `--ui-tour-top`:  how far down a step with no target shows (default 16px:  a page with bars sets its height)
+ * - `--ui-tour-dim`:  the colour of the darkened page (default `oklch(0 0 0 / 0.5)`)
+ * - `--ui-tour-width`:  the box's width (default 320px, never wider than the screen)
+ */
+
+@layer ui.components {
+  :host {
+    --_ui-tour-top: var(--ui-tour-top, 16px);
+    --_ui-tour-dim: var(--ui-tour-dim, oklch(0 0 0 / 0.5));
+    --_ui-tour-width: var(--ui-tour-width, 320px);
+  }
+
+  :host(:popover-open) {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    overflow: visible;
+    pointer-events: none;
+    color: inherit;
+  }
+
+  .ring {
+    position: absolute;
+    box-sizing: border-box;
+    anchor-name: --ui-tour-target;
+    border-radius: calc(var(--ui-radius, 4px) + 6px);
+    outline: 2px dashed var(--ui-primary);
+    background: color-mix(in oklab, var(--ui-primary) 8%, transparent);
+    pointer-events: none;
+    transition:
+      left var(--ui-duration-fast, 150ms),
+      top var(--ui-duration-fast, 150ms),
+      width var(--ui-duration-fast, 150ms),
+      height var(--ui-duration-fast, 150ms);
+
+    &.dim {
+      box-shadow: 0 0 0 200vmax var(--_ui-tour-dim);
+    }
+
+    &.quiet {
+      outline: none;
+      background: none;
+    }
+
+    &.pointless {
+      left: 50%;
+      top: var(--_ui-tour-top);
+      width: 0;
+      height: 0;
+      outline: none;
+      background: none;
+    }
+  }
+
+  .mask {
+    position: absolute;
+    pointer-events: auto;
+    cursor: not-allowed;
+  }
+
+  .steps[hidden] {
+    display: none;
+  }
+
+  .box {
+    position: absolute;
+    position-anchor: --ui-tour-target;
+    width: min(var(--_ui-tour-width), calc(100vw - 32px));
+    margin: 12px;
+    pointer-events: auto;
+    outline: none;
+
+    &.bottom {
+      position-area: bottom span-all;
+      justify-self: anchor-center;
+      position-try-fallbacks: flip-block;
+    }
+    &.top {
+      position-area: top span-all;
+      justify-self: anchor-center;
+      position-try-fallbacks: flip-block;
+    }
+    &.left {
+      position-area: span-all left;
+      align-self: anchor-center;
+      position-try-fallbacks: flip-inline;
+    }
+    &.right {
+      position-area: span-all right;
+      align-self: anchor-center;
+      position-try-fallbacks: flip-inline;
+    }
+    &.pointless {
+      position-area: bottom span-all;
+      justify-self: anchor-center;
+      position-try-fallbacks: none;
+      margin: 0;
+    }
+  }
+
+  /* a step's text breaks where it says (\n), short lines of one idea each */
+  ::slotted(*) {
+    white-space: pre-line;
+  }
+
+  /* the step's segment fills its box */
+  .box > ui-segment::part(segment) {
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+  }
+
+  /* the segment's own box is its inner box (its DOM element is `display: contents`):  the column is a box inside it */
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+
+    .title {
+      flex: 1;
+      margin: 0;
+    }
+
+    /* the shared close button (`E.CloseButton`):  a bare icon button, quiet until pointed at */
+    .close.icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.5em;
+      height: 1.5em;
+      margin: -0.25em -0.25em 0 0;
+      padding: 0.25em;
+      border: 0;
+      border-radius: var(--ui-radius-s);
+      background: none;
+      color: inherit;
+      font: inherit;
+      opacity: 0.6;
+      cursor: var(--ui-control-cursor);
+
+      &:hover,
+      &:focus-visible {
+        opacity: 1;
+      }
+
+      > svg {
+        width: 1em;
+        height: 1em;
+      }
+    }
+  }
+
+  .bottom {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+
+    .dots {
+      flex: 1;
+      margin: 0;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 8px;
+      margin-left: auto;
+    }
+  }
+
+  /* for a screen reader only:  the dots say it to the eye */
+  .where {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .dot {
+    position: absolute;
+    position-anchor: --ui-tour-target;
+    left: calc(anchor(right) - 12px);
+    top: calc(anchor(top) - 12px);
+    pointer-events: auto;
+    animation: ui-tour-pulse 1.6s ease-in-out infinite;
+  }
+
+  @keyframes ui-tour-pulse {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.25);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ring {
+      transition: none;
+    }
+    .dot {
+      animation: none;
+    }
+  }
+}

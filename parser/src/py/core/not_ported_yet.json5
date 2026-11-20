@@ -10,6 +10,14 @@
       "names": ["siteHost", "showSitePart", "closeSitePart", "siteAddressOf", "SiteBase", "savedIdOf", "projectFolder", "addressOfFile"]
     },
     {
+      "why": "A page's tour, Spell UI's <ui-tour> (epic editor P40):  a tour lives on a page;  Python's pages come later",
+      "names": ["startTour", "stopTour", "showTourStep", "nextTourStep", "previousTourStep"]
+    },
+    {
+      "why": "A file a person picks, on this computer (epic editor P41):  a page's file pickers and its browser database;  Python's pages come later",
+      "names": ["pickFileFor", "savePickedFile"]
+    },
+    {
       "why": "A value that waits, on a page:  Python sends its page with its values (answer_of(), answer_now()), so it has no \"…\" to show (epic language P12)",
       "names": ["waitedValue", "waitedValueKeyFor", "whileWaiting"]
     },

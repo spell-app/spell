@@ -70,6 +70,7 @@ import { savedMethods } from "./saved"
 import { abilityMethods } from "./abilities"
 import { dimensionMethods } from "./dimensions"
 import { siteMethods } from "./sites"
+import { tourMethods } from "./tours"
 import { deprecatedMethods } from "./deprecated"
 
 /**
@@ -104,7 +105,8 @@ const CORE_MODULES: Record<string, object> = {
   saved: savedMethods,
   abilities: abilityMethods,
   dimensions: dimensionMethods,
-  sites: siteMethods
+  sites: siteMethods,
+  tours: tourMethods
 }
 
 /**

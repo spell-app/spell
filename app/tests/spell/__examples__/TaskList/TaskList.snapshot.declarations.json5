@@ -156,26 +156,26 @@
     {
       "type": "TaskList",
       "superType": "App",
-      "defined": "/TaskList.spell:388-2093"
+      "defined": "/TaskList.spell:440-2871"
     },
     {
       "property": "checklist",
       "of": "TaskList",
       "datatype": "Checklist",
-      "defined": "/TaskList.spell:409-439"
+      "defined": "/TaskList.spell:461-491"
     },
     {
       "property": "draft",
       "of": "TaskList",
       "datatype": "text",
-      "defined": "/TaskList.spell:441-521"
+      "defined": "/TaskList.spell:493-573"
     },
     {
       "property": "active_count",
       "asWritten": "active count",
       "of": "TaskList",
       "datatype": "number",
-      "defined": "/TaskList.spell:523-602"
+      "defined": "/TaskList.spell:575-654"
     },
     {
       "syntax": "fill the checklist (of {thisArg:expression})?",
@@ -190,7 +190,7 @@
       "name": "fill the checklist",
       "returns": "nothing",
       "waits": true,
-      "defined": "/TaskList.spell:696-1146"
+      "defined": "/TaskList.spell:748-1198"
     },
     {
       "syntax": "add the task {callArgs:expression} (of {thisArg:expression})?",
@@ -210,7 +210,7 @@
         }
       ],
       "returns": "nothing",
-      "defined": "/TaskList.spell:1149-1391"
+      "defined": "/TaskList.spell:1201-1443"
     },
     {
       "syntax": "add the draft (of {thisArg:expression})?",
@@ -224,7 +224,22 @@
       "kind": "method",
       "name": "add the draft",
       "returns": "nothing",
-      "defined": "/TaskList.spell:1394-1531"
+      "defined": "/TaskList.spell:1446-1583"
+    },
+    {
+      "syntax": "take the tour (of {thisArg:expression})?",
+      "output": "take_the_tour",
+      "rule": "method_call",
+      "of": "TaskList",
+      "alias": [
+        "statement",
+        "expression"
+      ],
+      "kind": "method",
+      "name": "take the tour",
+      "returns": "nothing",
+      "title": "Tour",
+      "defined": "/TaskList.spell:1586-1721"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -237,7 +252,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/TaskList.spell:1534-2093"
+      "defined": "/TaskList.spell:1724-2871"
     }
   ],
   "codeLines": [
@@ -263,6 +278,7 @@
     211,
     223,
     231,
-    237
+    238,
+    242
   ]
 }

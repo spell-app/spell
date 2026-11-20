@@ -21,6 +21,7 @@ import {
 } from "spell/places/places.types"
 
 import { core } from "./core"
+import { showPickedFileLines } from "./pickedFiles"
 
 /** What a program's lines say about one place. */
 export type PlaceDetails = {
@@ -69,6 +70,11 @@ export type PlaceDetails = {
   servedAt?: string
   /** Where its key's token is made, from the secret `keyNamed`:  `it is authenticated with a token from "..."` (epic `data` P49). */
   tokenFrom?: string
+  /**
+   * A file a person picks, with no address:  `a json file you pick`, `... on this device` (epic `editor` P41).
+   * - Its kind says the format:  `file` is JSON, `sheet` CSV, `excel file` Excel.
+   */
+  picked?: boolean
   /** It goes without its key where nothing holds it, a browser:  `it is optionally authenticated with the secret "GITHUB_TOKEN"`. */
   keyIfSet?: boolean
   /** On this device, it's kept for this tab only:  `scratch is stored on this device, for each tab`. */
@@ -214,6 +220,8 @@ export type PlaceMaking = {
    * - Left out:  a place that needs one refuses.
    */
   keyFrom?: (name: string) => string | undefined
+  /** The running program, for what's kept on this device:  its project's id, else the page's path. */
+  program?: string
   /** The copy of what it reads, kept on this device, when its line says so:  made by the program, which follows it. */
   deviceCopy?: PlacesFolder.DeviceCopy
 }
@@ -336,7 +344,10 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
     const at = details.at!
     return new RemotePlace({ url: at, can: cloudCapabilities(at), signIn: SpellSignIn.for(at) })
   },
-  file: ({ details }, { RemotePlace }) => {
+  file: (making, folder) => {
+    const { details } = making
+    if (details.picked) return pickedFile(making, folder, "json")
+    const { RemotePlace } = folder
     const at = details.at!
     if (IS_SERVER_ADDRESS.test(at)) return new RemotePlace({ url: at, can: { kind: "file" } })
     throw new TypeError(
@@ -358,9 +369,10 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
     return room
   },
   // a CSV file, or an Excel workbook by its address's ending (`.xlsx`;  epic `data` P38)
-  sheet: (making, folder) => sheetAt(making, folder),
+  sheet: (making, folder) => (making.details.picked ? pickedFile(making, folder, "csv") : sheetAt(making, folder)),
   // an Excel workbook, whatever its address ends in (P38):  each sheet a collection
-  "excel file": (making, folder) => sheetAt(making, folder, "excel"),
+  "excel file": (making, folder) =>
+    making.details.picked ? pickedFile(making, folder, "excel") : sheetAt(making, folder, "excel"),
   "google sheet": (
     { details, collection, Class },
     { SheetPlace, RemotePlace, isPlaceServerAddress, googleSheetCsvAddress }
@@ -434,6 +446,25 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
   "database on this device": ({ details }, { DevicePlace }) =>
     new DevicePlace({ wholeRows: true, ...(details.forEachTab && { forEachTab: true }) }),
   "in memory database": (_making, { MemoryPlace }) => new MemoryPlace()
+}
+
+/**
+ * A file a person picks, in `format`:  kept on this device, saved back to the file where the browser can, and its
+ * lines on the page from now on (`showPickedFileLines()`, epic `editor` P41).
+ * - Remembered under the program and the place's name:  the last file opened into it.
+ */
+function pickedFile(
+  { details, program = "" }: PlaceMaking,
+  { PickedFilePlace }: typeof PlacesFolder,
+  format: PlacesFolder.PickedFileFormat
+): PlaceBehind {
+  const place = new PickedFilePlace({
+    key: `${program}/${details.name}`,
+    format,
+    ...(details.idColumn !== undefined && { idOf: details.idColumn })
+  })
+  showPickedFileLines(place)
+  return place
 }
 
 /**

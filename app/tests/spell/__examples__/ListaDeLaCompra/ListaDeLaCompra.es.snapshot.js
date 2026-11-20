@@ -123,6 +123,21 @@ export const words = {
     "site-create-it": "Crearla",
     "site-page-failed": "Lo sentimos, no se pudo mostrar esta página.",
     "site-page-failed-why": "{page} falló:  {why}",
-    "table-edit": "Editar tabla"
+    "table-edit": "Editar tabla",
+    "file-none": "Abre un archivo para trabajar en él.",
+    "file-open": "Abrir un archivo",
+    "file-reopen": "Vuelve a abrir {file} para guardar en él.",
+    "file-reopen-button": "Volver a abrir",
+    "file-missing": "No se encuentra {file}. Puede que se haya movido, renombrado o borrado. Tus cambios están a salvo en este dispositivo.",
+    "file-find": "Buscarlo",
+    "file-save-new": "Guardar como archivo nuevo",
+    "file-changed": "{file} cambió. ¿Leerlo de nuevo?",
+    "file-read-again": "Leerlo de nuevo",
+    "file-conflict-title": "{file} cambió",
+    "file-conflict": "Alguien cambió {file} después de que lo abriste. ¿Qué versión quieres conservar?\nConservar la suya: abre su versión. Tus cambios se guardan en este dispositivo, no se pierden.\nConservar la tuya: guarda tu versión encima de la suya.\nConservar ambas: guarda tu versión como un archivo nuevo.",
+    "file-keep-theirs": "Conservar la suya",
+    "file-keep-yours": "Conservar la tuya",
+    "file-keep-both": "Conservar ambas",
+    "file-downloaded": "{file} está en tu carpeta de Descargas. Este navegador no puede guardar en el archivo que abriste, así que cada vez que guardas se descarga una copia nueva."
   }
 }
