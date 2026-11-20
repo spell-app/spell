@@ -1965,7 +1965,7 @@ function keepHeaderRow(row: Element, table: Element, items: () => readonly unkno
  * - A page holds `atOnce`:  `MOST_AT_ONCE`, unless the program says (`show them 12 at a time`).
  * - Next at the end of what's read asks a place for its next page.
  * - Its footer says which it shows, "Showing 1-10 of 42" ("of 42+" while a place has more), on every page;
- *   Previous, "Page 1 of 5" and Next beside it once there's more than one page (epic `old-console-redo` P11).
+ *   Previous, "Page 1 of 5" and Next beside it once there's more than one page.
  * - Hands back the page's items and the pager apart:  the caller draws the pager AFTER what's around the items
  *   (`<ui-cards>`, `<ui-table>`), so it's never one of them.
  */
