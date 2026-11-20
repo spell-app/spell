@@ -5,6 +5,7 @@ import { E, UIT } from "spell/ui/core"
 import { segmentVocabulary } from "./UISegment.en"
 
 import segmentCSS from "./UISegment.css?inline"
+import heightsCSS from "spell/ui/elements/SharedHeights.css?inline"
 
 /****************
  * ### `UISegment`
@@ -21,6 +22,8 @@ import segmentCSS from "./UISegment.css?inline"
  *
  * - `:state(piled)` (`appearance="piled"`):  the element becomes the stacking context the rotated sheets sit behind.
  * - `scrolling`:  the box is a keyboard stop (`tabindex=0`), as every scrollable region must be.
+ * - `resizable`:  the shared one (`MoveAndResize`), on its box;  bare, its height (`elementSetup.resizable`),
+ *   as its own keyOnly `resizable` was until epic `old-console-redo` P2.
  * - `loading`:  `aria-busy` (through `internals`) and a visually hidden `role=status` "Loading…".
  * - `disabled`:  unusable, the base class's way (`elementSetup.disabled`):
  *   faded, its content inert, `aria-disabled`.
@@ -28,10 +31,12 @@ import segmentCSS from "./UISegment.css?inline"
 export class UISegment extends E.UIComponent<typeof segmentVocabulary> {
   @E.proto static vocabulary = segmentVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { segment: segmentCSS },
+    styleSheets: { heights: heightsCSS, segment: segmentCSS },
     cssStates: ["inverted"],
     // `loading`:  Fomantic's veil
-    loading: "its own"
+    loading: "its own",
+    // a bare `resizable` drags its height
+    resizable: "vertically"
   } satisfies Partial<E.ElementSetup>
 
   ////////////////

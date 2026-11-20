@@ -1,0 +1,34 @@
+/*
+ * ### SharedHeights.css
+ * The shared `height`, `min-height` and `max-height` (`SharedVocabulary`;  epic `old-console-redo` P2):
+ * its box's own height, drawn as `reset.css` draws the shared widths.
+ * - OPT-IN:  only the tags whose vocabulary says `heights: true` take them, and each of their families adopts this
+ *   sheet first (`styleSheets: { heights: heightsCSS, ... }`):  tree, table, segment, card, graph, code, JSON,
+ *   flyout, modal, embed, markdown.
+ * - `UIComponent` writes each as a custom property on the element (`--_ui-height` ...), and a state saying it's set.
+ * - On the element itself, where it draws a box (`<ui-tree>`, `<ui-code>` ...);  on its shadow root's top-level
+ *   boxes where it's `display: contents` (`<ui-segment>`, `<ui-modal>`'s `<dialog>` ...):  `:state(sized-inside)`.
+ * - What doesn't fit scrolls inside it.  A family whose content scrolls in a box of its own (a table's scroller,
+ *   a graph's canvas, an embed's frame) makes that box fill the height in its own sheet, under `:state(height)`,
+ *   `:state(max-height)` or `:state(resizable-height)` (a person drags it:  `resizable`).
+ * - Unlayered, as `reset.css`'s widths:  it beats the family's own height (a scrolling segment's cap);
+ *   a page's own rules still win.
+ * - Here, not in `reset.css` beside the widths:  only these families adopt it, so every other tag's sheet stays as
+ *   it was.
+ */
+:host(:state(height)),
+:host(:state(height):state(sized-inside)) > :not(slot) {
+  height: var(--_ui-height);
+}
+:host(:state(min-height)),
+:host(:state(min-height):state(sized-inside)) > :not(slot) {
+  min-height: var(--_ui-min-height);
+}
+:host(:state(max-height)),
+:host(:state(max-height):state(sized-inside)) > :not(slot) {
+  max-height: var(--_ui-max-height);
+}
+:host(:is(:state(height), :state(max-height)):not(:state(sized-inside))),
+:host(:is(:state(height), :state(max-height)):state(sized-inside)) > :not(slot) {
+  overflow: auto;
+}

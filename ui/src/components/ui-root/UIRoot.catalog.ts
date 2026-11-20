@@ -1344,8 +1344,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "inverted",
       "loading",
       "disabled",
-      "scrolling",
-      "resizable"
+      "scrolling"
     ]
   },
   "ui-segments": {
@@ -1546,7 +1545,6 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "definition",
       "fixed",
       "inverted",
-      "resizable",
       "selectable",
       "editable",
       "single-line",

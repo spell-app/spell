@@ -413,3 +413,15 @@
     inline-size: 18em;
   }
 }
+
+/*
+ * Sized (epic `old-console-redo` P2):  a box of its own to hold a `height` (`SharedHeights.css`) or a size people
+ * drag (`resizable`), which an inline element hasn't.
+ */
+@layer ui.components.markdown.variations {
+  :host(
+    :is(:state(height), :state(min-height), :state(max-height), :state(resizable-height), :state(resizable-width))
+  ) {
+    display: block;
+  }
+}

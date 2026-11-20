@@ -5,7 +5,7 @@
  *   - registered as a PAGE sheet (`UI.styles.register("table", css, { page: true })`),
  *     where its class-grammar rules style the LIGHT-DOM `<table>`:
  *     a slotted table's `td` is out of reach of shadow CSS (`::slotted()` reaches the top level only)
- * - Shadow markup contract:  `<div class="[resizable] [attached ...] [scrolling ...] [overflowing ...] [sideways]
+ * - Shadow markup contract:  `<div class="[attached ...] [scrolling ...] [overflowing ...] [sideways]
  *   scroller" part="scroller"><slot></slot></div>`.
  *   While scrolling / overflowing, or `sideways` (a table too wide for it, which doesn't stack),
  *   the scroller is a focusable, named region (`tabindex="0" role="region" aria-label`).
@@ -1090,10 +1090,22 @@
     overflow-x: auto;
     overscroll-behavior-x: contain;
   }
-  .resizable.scrolling.scroller {
+  /* Resizable (the shared `resizable`, on the scroller:  `UITable.resizeBox`):  starts at the capped height,
+     a person drags it taller or shorter. */
+  :host(:state(resizable-height)) .scrolling.scroller {
     block-size: calc(var(--_ui-table-row-height) * (var(--_table-scroll-rows) * var(--_table-scroll-factor) + 1));
     max-block-size: none;
-    resize: vertical;
+  }
+  /* A height (`SharedHeights.css`):  the scroller fills what's left under the caption, and scrolls. */
+  :host(:is(:state(height), :state(max-height))) {
+    display: flex;
+    flex-direction: column;
+  }
+  :host(:is(:state(height), :state(max-height))) .scroller {
+    flex: 1 1 auto;
+    min-block-size: 0;
+    max-block-size: none;
+    overflow: auto;
   }
   .scroller:focus-visible {
     outline: var(--ui-focus-width) solid var(--ui-focus-color);

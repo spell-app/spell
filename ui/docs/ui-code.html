@@ -120,6 +120,22 @@
                 </ui-example>
               </ui-section>
             </ui-section>
+            <ui-section id="examples-sizing" label="Sizing" sticky="stack" collapsible dividing>
+              <ui-section id="examples-sizing-height" label="Height" sticky="stack" collapsible dividing>
+                <ui-example description="`height` gives the code a height, and its lines scroll;  `resizable=&quot;height&quot;` lets people drag it.">
+                  <ui-code language="ts" height="6em" resizable="height">
+type Rack = { name: string; ports: number }
+const racks: Rack[] = [
+  { name: "Rack 1", ports: 4 },
+  { name: "Rack 2", ports: 8 },
+  { name: "Rack 3", ports: 12 },
+  { name: "Rack 4", ports: 16 }
+]
+const ports = racks.reduce((sum, rack) => sum + rack.ports, 0)
+console.log(ports)</ui-code>
+                </ui-example>
+              </ui-section>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="usage" label="Usage">

@@ -18,6 +18,8 @@ export const embedVocabulary = {
   tag: "ui-embed",
   icon: "external alternate",
   topics: ["media", "modules"],
+  // the shared `height`, `min-height` and `max-height` (epic `old-console-redo` P2)
+  heights: true,
   aka: ["iframe", "video", "youtube", "vimeo", "player"],
   skeleton: "28 x 15.75",
   noun: "embed",

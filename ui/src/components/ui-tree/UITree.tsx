@@ -11,6 +11,7 @@ import { DEFAULT_ROW_PARTS, type RowPart, type TreeItemData } from "./UITree.typ
 import { UITreeItem } from "./UITreeItem"
 
 import treeCSS from "./UITree.css?inline"
+import heightsCSS from "spell/ui/elements/SharedHeights.css?inline"
 import columnsCSS from "./UITreeColumns.css?inline"
 
 /****************
@@ -105,7 +106,7 @@ export class DOMTreeElement extends E.DOMElement<UITree> {
 export class UITree extends E.UIComponent<typeof treeVocabulary> {
   @E.proto static vocabulary = treeVocabulary
   @E.protoMerged static elementSetup: Partial<E.ElementSetup> = {
-    styleSheets: { tree: treeCSS, columns: columnsCSS },
+    styleSheets: { heights: heightsCSS, tree: treeCSS, columns: columnsCSS },
     delegatesFocus: false,
     aria: { role: "tree" },
     DOMElement: DOMTreeElement

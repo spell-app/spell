@@ -6,6 +6,7 @@ import { JSON_CHANGED } from "./JsonChild"
 import { jsonVocabulary } from "./UIJson.en"
 
 import jsonCSS from "./UIJson.css?inline"
+import heightsCSS from "spell/ui/elements/SharedHeights.css?inline"
 
 /****************
  * ### `DOMJsonElement`
@@ -88,7 +89,7 @@ export class DOMJsonElement extends E.DOMLoadableElement<UIJson> {
 export class UIJson extends E.LoadableComponent<typeof jsonVocabulary> {
   @E.proto static vocabulary = jsonVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { json: jsonCSS },
+    styleSheets: { heights: heightsCSS, json: jsonCSS },
     DOMElement: DOMJsonElement,
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>

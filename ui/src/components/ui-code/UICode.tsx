@@ -8,6 +8,7 @@ import { CodeLines } from "./CodeLines"
 import type { Highlighted } from "./UICode.types"
 
 import codeCSS from "./UICode.css?inline"
+import heightsCSS from "spell/ui/elements/SharedHeights.css?inline"
 
 /****************
  * ### `DOMCodeElement`
@@ -54,7 +55,7 @@ export class UICode extends E.LoadableComponent<typeof codeVocabulary> {
   // typed wide, as `UIRoot`'s:  a subclass names its own (the app's `<spell-code>`)
   @E.proto static vocabulary: E.ComponentVocabulary = codeVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { code: codeCSS },
+    styleSheets: { heights: heightsCSS, code: codeCSS },
     DOMElement: DOMCodeElement,
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>

@@ -23,6 +23,7 @@ import {
 } from "./UIGraph.types"
 
 import graphCSS from "./UIGraph.css?inline"
+import heightsCSS from "spell/ui/elements/SharedHeights.css?inline"
 
 /****************
  * ### `DOMGraphElement`
@@ -91,7 +92,7 @@ export class DOMGraphElement extends E.DOMElement<UIGraph> {
 export class UIGraph extends E.UIComponent<typeof graphVocabulary> {
   @E.proto static vocabulary = graphVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { graph: graphCSS },
+    styleSheets: { heights: heightsCSS, graph: graphCSS },
     delegatesFocus: false,
     DOMElement: DOMGraphElement
   } satisfies Partial<E.ElementSetup>

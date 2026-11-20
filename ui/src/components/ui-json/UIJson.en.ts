@@ -24,6 +24,8 @@ export const jsonVocabulary = {
   tag: "ui-json",
   icon: "code",
   topics: ["data display", "modules"],
+  // the shared `height`, `min-height` and `max-height` (epic `old-console-redo` P2)
+  heights: true,
   aka: [
     "data",
     "data island",

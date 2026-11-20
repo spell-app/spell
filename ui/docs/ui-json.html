@@ -117,6 +117,17 @@
                 </ui-example>
               </ui-section>
             </ui-section>
+            <ui-section id="examples-sizing" label="Sizing" sticky="stack" collapsible dividing>
+              <ui-section id="examples-sizing-height" label="Height" sticky="stack" collapsible dividing>
+                <ui-example description="`max-height` caps the outline, and what doesn't fit scrolls;  `resizable=&quot;height&quot;` lets people drag it.">
+                  <ui-json max-height="8em" resizable="height">
+                    { "name": "port-a", "kind": "optical", "lanes": 4, "active": true, "owner": null,
+                      "tags": ["in", "test", "v2"], "bounds": { "x": 0, "y": 12.5, "w": 400, "h": 220 },
+                      "notes": { "text": "A long string that goes on for a while" }, "empty": {}, "none": [] }
+                  </ui-json>
+                </ui-example>
+              </ui-section>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="usage" label="Usage">

@@ -47,6 +47,8 @@ export const cardVocabulary = {
   icon: "id card outline",
   snippet: '<ui-card heading="A card" description="What it says"></ui-card>',
   topics: ["cards", "containers", "data display", "views"],
+  // the shared `height`, `min-height` and `max-height` (epic `old-console-redo` P2)
+  heights: true,
   aka: ["tile", "panel", "profile card"],
   skeleton: "18 wide: square image, header, 3 line paragraph",
   noun: "card",

@@ -982,6 +982,28 @@
                 </ui-example>
               </ui-section>
             </ui-section>
+            <ui-section id="examples-sizing" label="Sizing" sticky="stack" collapsible dividing>
+              <ui-section id="examples-sizing-height" label="Height" sticky="stack" collapsible dividing>
+                <ui-example description="Cards of one `height` line up in a row;  `resizable=&quot;height&quot;` lets people drag one taller.">
+                  <ui-cards>
+                    <ui-card height="12em" resizable="height">
+                      <ui-content>
+                        <ui-header>Rack 1</ui-header>
+                        <ui-meta>Hall A</ui-meta>
+                        <ui-description>Ready, 4 ports.</ui-description>
+                      </ui-content>
+                    </ui-card>
+                    <ui-card height="12em">
+                      <ui-content>
+                        <ui-header>Rack 2</ui-header>
+                        <ui-meta>Hall A</ui-meta>
+                        <ui-description>Busy, 8 ports;  a longer note, which still keeps the card's height.</ui-description>
+                      </ui-content>
+                    </ui-card>
+                  </ui-cards>
+                </ui-example>
+              </ui-section>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="usage" label="Usage">

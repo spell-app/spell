@@ -1749,8 +1749,7 @@ export const HELP_TABLE: Readonly<
       inverted: "The dark scheme; everything inside follows (`color-scheme: dark`, `--ui-inverted`).",
       loading: "Dims its content under a spinner; `aria-busy`.",
       disabled: "Dimmed and inert.",
-      scrolling: "A capped height (per breakpoint) that scrolls; `short` ...",
-      resizable: "With `scrolling`: people can drag its height."
+      scrolling: "A capped height (per breakpoint) that scrolls; `short` ..."
     }
   },
   "ui-segments": {
@@ -2101,7 +2100,6 @@ export const HELP_TABLE: Readonly<
       definition: "First column is a definition column; blank corner.",
       fixed: "`table-layout: fixed`; overflowing cell text is cut with `…`.",
       inverted: "For dark backgrounds: the dark scheme.",
-      resizable: "With `scrolling`: people can drag the height.",
       selectable: "Body rows highlight on hover.",
       editable: "Data mode: people edit the cells like a spreadsheet.",
       "single-line": "No wrapping: every cell's text stays on one line (`single line`).",
@@ -2525,6 +2523,11 @@ export const SHARED_HELP: Readonly<Record<string, string>> = {
   label: "Its name for screen readers (`aria-label`), where it has no words of its own.",
   movable:
     "People can drag it to a new place inside its container: bare or `both`, `horizontally` or `vertically` for one way only.",
-  resizable: "People can drag its corner to resize it: bare or `both`, `horizontally` or `vertically`.",
-  "on-platform": 'Shown only on these devices, a comma list: `on-platform="desktop, tablet"` hides it on phones.'
+  resizable:
+    'People can drag its corner to resize it, the sizes it names: `resizable="width, height"`, `"height"` or `"width"`.',
+  "on-platform": 'Shown only on these devices, a comma list: `on-platform="desktop, tablet"` hides it on phones.',
+  height: 'Its box\'s own height, any CSS length: `height="18em"`, `"50vh"`.',
+  "min-height": 'The shortest its box gets, any CSS length: `min-height="8em"`; a drag (`resizable`) stops there too.',
+  "max-height":
+    'The tallest its box gets, any CSS length: `max-height="60vh"`; what doesn\'t fit scrolls inside it, and a drag (`resizable`) stops there too.'
 }

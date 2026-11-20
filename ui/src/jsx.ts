@@ -465,7 +465,7 @@ export interface UIAccordionAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -945,7 +945,7 @@ export interface UIActionAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -1219,7 +1219,7 @@ export interface UIActionsAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -1569,7 +1569,7 @@ export interface UIAdAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -2211,7 +2211,7 @@ export interface UIAppMenuAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -2572,7 +2572,7 @@ export interface UIAudioAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -2861,7 +2861,7 @@ export interface UIAuthorAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -3145,7 +3145,7 @@ export interface UIAvatarAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -3429,7 +3429,7 @@ export interface UIBreadcrumbAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -3743,7 +3743,7 @@ export interface UIBreadcrumbsAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -4307,7 +4307,7 @@ export interface UIButtonAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -4809,7 +4809,7 @@ export interface UIButtonsAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -5448,7 +5448,7 @@ export interface UICalendarAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -5925,6 +5925,36 @@ export interface UICardAttributes {
    */
   "prop:maxWidth"?: string
   /**
+   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.
+   * - takes:  text
+   */
+  height?: string
+  /**
+   * `height`, as the DOM element's property.
+   * @deprecated write `height` -- `prop:` stays only for compiled spell
+   */
+  "prop:height"?: string
+  /**
+   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * - takes:  text
+   */
+  "min-height"?: string
+  /**
+   * `min-height`, as the DOM element's property.
+   * @deprecated write `min-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:minHeight"?: string
+  /**
+   * The tallest its box gets, any CSS length:  `max-height="60vh"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * - takes:  text
+   */
+  "max-height"?: string
+  /**
+   * `max-height`, as the DOM element's property.
+   * @deprecated write `max-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxHeight"?: string
+  /**
    * Its tooltip:  the browser's own, written as the element's `title`.
    * - takes:  text
    */
@@ -5955,7 +5985,7 @@ export interface UICardAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -6417,7 +6447,7 @@ export interface UICardsAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -6731,7 +6761,7 @@ export interface UICellAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -7198,7 +7228,7 @@ export interface UICheckboxAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -7566,6 +7596,36 @@ export interface UICodeAttributes {
    */
   "prop:maxWidth"?: string
   /**
+   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.
+   * - takes:  text
+   */
+  height?: string
+  /**
+   * `height`, as the DOM element's property.
+   * @deprecated write `height` -- `prop:` stays only for compiled spell
+   */
+  "prop:height"?: string
+  /**
+   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * - takes:  text
+   */
+  "min-height"?: string
+  /**
+   * `min-height`, as the DOM element's property.
+   * @deprecated write `min-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:minHeight"?: string
+  /**
+   * The tallest its box gets, any CSS length:  `max-height="60vh"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * - takes:  text
+   */
+  "max-height"?: string
+  /**
+   * `max-height`, as the DOM element's property.
+   * @deprecated write `max-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxHeight"?: string
+  /**
    * Its tooltip:  the browser's own, written as the element's `title`.
    * - takes:  text
    */
@@ -7596,7 +7656,7 @@ export interface UICodeAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -7937,7 +7997,7 @@ export interface UIColorChipAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -8569,7 +8629,7 @@ export interface UIColumnAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -8853,7 +8913,7 @@ export interface UICommentAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -9177,7 +9237,7 @@ export interface UICommentsAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -9461,7 +9521,7 @@ export interface UIComponentsAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -10193,7 +10253,7 @@ export interface UIContentAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -10477,7 +10537,7 @@ export interface UIDateAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -10751,7 +10811,7 @@ export interface UIDescriptionAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -11025,7 +11085,7 @@ export interface UIDetailAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -11376,7 +11436,7 @@ export interface UIDeviceAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -11721,7 +11781,7 @@ export interface UIDiagramAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -12462,7 +12522,7 @@ export interface UIDialAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -12786,7 +12846,7 @@ export interface UIDimensionAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -13167,7 +13227,7 @@ export interface UIDimmerAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -13597,7 +13657,7 @@ export interface UIDividerAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -14719,6 +14779,36 @@ export interface UIEmbedAttributes {
    */
   "prop:maxWidth"?: string
   /**
+   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.
+   * - takes:  text
+   */
+  height?: string
+  /**
+   * `height`, as the DOM element's property.
+   * @deprecated write `height` -- `prop:` stays only for compiled spell
+   */
+  "prop:height"?: string
+  /**
+   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * - takes:  text
+   */
+  "min-height"?: string
+  /**
+   * `min-height`, as the DOM element's property.
+   * @deprecated write `min-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:minHeight"?: string
+  /**
+   * The tallest its box gets, any CSS length:  `max-height="60vh"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * - takes:  text
+   */
+  "max-height"?: string
+  /**
+   * `max-height`, as the DOM element's property.
+   * @deprecated write `max-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxHeight"?: string
+  /**
    * Its tooltip:  the browser's own, written as the element's `title`.
    * - takes:  text
    */
@@ -14739,7 +14829,7 @@ export interface UIEmbedAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -15054,7 +15144,7 @@ export interface UIEmojiAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -15402,7 +15492,7 @@ export interface UIFeedEventAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -15762,7 +15852,7 @@ export interface UIExampleAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -16058,7 +16148,7 @@ export interface UIExtraAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -16436,7 +16526,7 @@ export interface UIFeedAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -16866,7 +16956,7 @@ export interface UIFieldAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -17210,7 +17300,7 @@ export interface UIFieldsAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -17504,7 +17594,7 @@ export interface UIFlagAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -17912,6 +18002,36 @@ export interface UIFlyoutAttributes {
    */
   "prop:maxWidth"?: string
   /**
+   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.
+   * - takes:  text
+   */
+  height?: string
+  /**
+   * `height`, as the DOM element's property.
+   * @deprecated write `height` -- `prop:` stays only for compiled spell
+   */
+  "prop:height"?: string
+  /**
+   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * - takes:  text
+   */
+  "min-height"?: string
+  /**
+   * `min-height`, as the DOM element's property.
+   * @deprecated write `min-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:minHeight"?: string
+  /**
+   * The tallest its box gets, any CSS length:  `max-height="60vh"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * - takes:  text
+   */
+  "max-height"?: string
+  /**
+   * `max-height`, as the DOM element's property.
+   * @deprecated write `max-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxHeight"?: string
+  /**
    * Its tooltip:  the browser's own, written as the element's `title`.
    * - takes:  text
    */
@@ -17942,7 +18062,7 @@ export interface UIFlyoutAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -18451,7 +18571,7 @@ export interface UIFormAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -18835,6 +18955,36 @@ export interface UIGraphAttributes {
    */
   "prop:maxWidth"?: string
   /**
+   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.
+   * - takes:  text
+   */
+  height?: string
+  /**
+   * `height`, as the DOM element's property.
+   * @deprecated write `height` -- `prop:` stays only for compiled spell
+   */
+  "prop:height"?: string
+  /**
+   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * - takes:  text
+   */
+  "min-height"?: string
+  /**
+   * `min-height`, as the DOM element's property.
+   * @deprecated write `min-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:minHeight"?: string
+  /**
+   * The tallest its box gets, any CSS length:  `max-height="60vh"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * - takes:  text
+   */
+  "max-height"?: string
+  /**
+   * `max-height`, as the DOM element's property.
+   * @deprecated write `max-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxHeight"?: string
+  /**
    * Its tooltip:  the browser's own, written as the element's `title`.
    * - takes:  text
    */
@@ -18865,7 +19015,7 @@ export interface UIGraphAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -19349,7 +19499,7 @@ export interface UIGridAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -19777,7 +19927,7 @@ export interface UIHeaderAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -20175,7 +20325,7 @@ export interface UIIconAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -20556,7 +20706,7 @@ export interface UIIconPickerAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -20895,7 +21045,7 @@ export interface UIIconsAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -21383,7 +21533,7 @@ export interface UIImageAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -21717,7 +21867,7 @@ export interface UIImagesAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -22072,7 +22222,7 @@ export interface UIIncludeAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -22759,7 +22909,7 @@ export interface UIInputAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -23188,7 +23338,7 @@ export interface UIItemAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -23532,7 +23682,7 @@ export interface UIItemsAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -23903,6 +24053,36 @@ export interface UIJsonAttributes {
    */
   "prop:maxWidth"?: string
   /**
+   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.
+   * - takes:  text
+   */
+  height?: string
+  /**
+   * `height`, as the DOM element's property.
+   * @deprecated write `height` -- `prop:` stays only for compiled spell
+   */
+  "prop:height"?: string
+  /**
+   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * - takes:  text
+   */
+  "min-height"?: string
+  /**
+   * `min-height`, as the DOM element's property.
+   * @deprecated write `min-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:minHeight"?: string
+  /**
+   * The tallest its box gets, any CSS length:  `max-height="60vh"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * - takes:  text
+   */
+  "max-height"?: string
+  /**
+   * `max-height`, as the DOM element's property.
+   * @deprecated write `max-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxHeight"?: string
+  /**
    * Its tooltip:  the browser's own, written as the element's `title`.
    * - takes:  text
    */
@@ -23933,7 +24113,7 @@ export interface UIJsonAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -24275,7 +24455,7 @@ export interface UIKeysAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -24793,7 +24973,7 @@ export interface UILabelAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -25197,7 +25377,7 @@ export interface UILabelsAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -25535,7 +25715,7 @@ export interface UILinkAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -25958,7 +26138,7 @@ export interface UIListAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -26371,7 +26551,7 @@ export interface UILoaderAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -26737,6 +26917,36 @@ export interface UIMarkdownAttributes {
    */
   "prop:maxWidth"?: string
   /**
+   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.
+   * - takes:  text
+   */
+  height?: string
+  /**
+   * `height`, as the DOM element's property.
+   * @deprecated write `height` -- `prop:` stays only for compiled spell
+   */
+  "prop:height"?: string
+  /**
+   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * - takes:  text
+   */
+  "min-height"?: string
+  /**
+   * `min-height`, as the DOM element's property.
+   * @deprecated write `min-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:minHeight"?: string
+  /**
+   * The tallest its box gets, any CSS length:  `max-height="60vh"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * - takes:  text
+   */
+  "max-height"?: string
+  /**
+   * `max-height`, as the DOM element's property.
+   * @deprecated write `max-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxHeight"?: string
+  /**
    * Its tooltip:  the browser's own, written as the element's `title`.
    * - takes:  text
    */
@@ -26767,7 +26977,7 @@ export interface UIMarkdownAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -27452,7 +27662,7 @@ export interface UIMenuAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -27911,7 +28121,7 @@ export interface UIMessageAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -28198,7 +28408,7 @@ export interface UIMetaAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -28601,6 +28811,36 @@ export interface UIModalAttributes {
    */
   "prop:maxWidth"?: string
   /**
+   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.
+   * - takes:  text
+   */
+  height?: string
+  /**
+   * `height`, as the DOM element's property.
+   * @deprecated write `height` -- `prop:` stays only for compiled spell
+   */
+  "prop:height"?: string
+  /**
+   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * - takes:  text
+   */
+  "min-height"?: string
+  /**
+   * `min-height`, as the DOM element's property.
+   * @deprecated write `min-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:minHeight"?: string
+  /**
+   * The tallest its box gets, any CSS length:  `max-height="60vh"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * - takes:  text
+   */
+  "max-height"?: string
+  /**
+   * `max-height`, as the DOM element's property.
+   * @deprecated write `max-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxHeight"?: string
+  /**
    * Its tooltip:  the browser's own, written as the element's `title`.
    * - takes:  text
    */
@@ -28631,7 +28871,7 @@ export interface UIModalAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -29168,7 +29408,7 @@ export interface UINagAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -29458,7 +29698,7 @@ export interface UIOrAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -29882,7 +30122,7 @@ export interface UIPageAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -30230,7 +30470,7 @@ export interface UIPageLayoutAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -30843,7 +31083,7 @@ export interface UIPanelAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -31175,7 +31415,7 @@ export interface UIPlaceholderAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -31459,7 +31699,7 @@ export interface UIPlaceholderHeaderAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -31755,7 +31995,7 @@ export interface UIPlaceholderImageAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -32039,7 +32279,7 @@ export interface UIPlaceholderLineAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -32313,7 +32553,7 @@ export interface UIPlaceholderParagraphAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -32830,7 +33070,7 @@ export interface UIPopupAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -33335,7 +33575,7 @@ export interface UIProgressAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -33836,7 +34076,7 @@ export interface UIPropertyAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -34754,7 +34994,7 @@ export interface UIPropertyEditorAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -35518,7 +35758,7 @@ export interface UIPropertyGroupAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -35837,7 +36077,7 @@ export interface UIPushableAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -36111,7 +36351,7 @@ export interface UIPusherAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -36405,7 +36645,7 @@ export interface UIQuoteAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -36852,7 +37092,7 @@ export interface UIRadioAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -37191,7 +37431,7 @@ export interface UIRailAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -37610,7 +37850,7 @@ export interface UIRatingAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -37910,7 +38150,7 @@ export interface UIRepeatAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -38264,7 +38504,7 @@ export interface UIRevealAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -38688,7 +38928,7 @@ export interface UIRootAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -39200,7 +39440,7 @@ export interface UIRowAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -40418,7 +40658,7 @@ export interface UISectionAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -40742,7 +40982,7 @@ export interface UISectionsAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -40914,7 +41154,7 @@ export interface UISegmentAttributes {
    */
   "prop:disabled"?: boolean | ""
   /**
-   * A capped height (per breakpoint) that scrolls;  `short` ... `very long` scale the cap.
+   * A capped height (per breakpoint) that scrolls;  `short` ... `very long` scale the cap.  With the shared `resizable`, bare or `height`, people drag its height from the cap, taller or shorter.
    * - takes:  flag, or `short` · `very short` · `long` · `very long`
    */
   scrolling?: boolean | "" | "short" | "very short" | "long" | "very long"
@@ -40923,16 +41163,6 @@ export interface UISegmentAttributes {
    * @deprecated write `scrolling` -- `prop:` stays only for compiled spell
    */
   "prop:scrolling"?: boolean | "" | "short" | "very short" | "long" | "very long"
-  /**
-   * With `scrolling`:  people can drag its height.
-   * - takes:  flag (present / absent)
-   */
-  resizable?: boolean | ""
-  /**
-   * `resizable`, as the DOM element's property.
-   * @deprecated write `resizable` -- `prop:` stays only for compiled spell
-   */
-  "prop:resizable"?: boolean | ""
   /**
    * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
    * - takes:  flag (present / absent)
@@ -41130,6 +41360,36 @@ export interface UISegmentAttributes {
    */
   "prop:maxWidth"?: string
   /**
+   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.
+   * - takes:  text
+   */
+  height?: string
+  /**
+   * `height`, as the DOM element's property.
+   * @deprecated write `height` -- `prop:` stays only for compiled spell
+   */
+  "prop:height"?: string
+  /**
+   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * - takes:  text
+   */
+  "min-height"?: string
+  /**
+   * `min-height`, as the DOM element's property.
+   * @deprecated write `min-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:minHeight"?: string
+  /**
+   * The tallest its box gets, any CSS length:  `max-height="60vh"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * - takes:  text
+   */
+  "max-height"?: string
+  /**
+   * `max-height`, as the DOM element's property.
+   * @deprecated write `max-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxHeight"?: string
+  /**
    * Its tooltip:  the browser's own, written as the element's `title`.
    * - takes:  text
    */
@@ -41159,6 +41419,16 @@ export interface UISegmentAttributes {
    * @deprecated write `movable` -- `prop:` stays only for compiled spell
    */
   "prop:movable"?: string
+  /**
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
+   * - takes:  text
+   */
+  resizable?: string
+  /**
+   * `resizable`, as the DOM element's property.
+   * @deprecated write `resizable` -- `prop:` stays only for compiled spell
+   */
+  "prop:resizable"?: string
   /**
    * Shown only on these devices, a comma list:  `on-platform="desktop, tablet"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.
    * - takes:  text
@@ -41504,7 +41774,7 @@ export interface UISegmentsAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -41918,7 +42188,7 @@ export interface UISelectAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -42269,7 +42539,7 @@ export interface UIShapeAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -42548,7 +42818,7 @@ export interface UISideAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -42944,7 +43214,7 @@ export interface UISidebarAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -43325,7 +43595,7 @@ export interface UISidesAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -43625,7 +43895,7 @@ export interface UISiteBreadcrumbsAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -43930,7 +44200,7 @@ export interface UISiteLinksAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -44298,7 +44568,7 @@ export interface UISiteNavAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -44753,7 +45023,7 @@ export interface UISiteNavButtonAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -45072,7 +45342,7 @@ export interface UISiteTabsAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -45626,7 +45896,7 @@ export interface UISliderAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -45960,7 +46230,7 @@ export interface UISpaceAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -46636,7 +46906,7 @@ export interface UIStackAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -47014,7 +47284,7 @@ export interface UIStatisticAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -47402,7 +47672,7 @@ export interface UIStatisticsAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -47790,7 +48060,7 @@ export interface UIStepAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -48228,7 +48498,7 @@ export interface UIStepsAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -48548,7 +48818,7 @@ export interface UIStickyAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -48882,7 +49152,7 @@ export interface UISubmenuAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -49156,7 +49426,7 @@ export interface UISummaryAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -49524,7 +49794,7 @@ export interface UITabAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -49681,16 +49951,6 @@ export interface UITableAttributes {
    * @deprecated write `inverted` -- `prop:` stays only for compiled spell
    */
   "prop:inverted"?: boolean | ""
-  /**
-   * With `scrolling`:  people can drag the height.
-   * - takes:  flag (present / absent)
-   */
-  resizable?: boolean | ""
-  /**
-   * `resizable`, as the DOM element's property.
-   * @deprecated write `resizable` -- `prop:` stays only for compiled spell
-   */
-  "prop:resizable"?: boolean | ""
   /**
    * Body rows highlight on hover.
    * - takes:  flag (present / absent)
@@ -50164,6 +50424,36 @@ export interface UITableAttributes {
    */
   "prop:maxWidth"?: string
   /**
+   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.
+   * - takes:  text
+   */
+  height?: string
+  /**
+   * `height`, as the DOM element's property.
+   * @deprecated write `height` -- `prop:` stays only for compiled spell
+   */
+  "prop:height"?: string
+  /**
+   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * - takes:  text
+   */
+  "min-height"?: string
+  /**
+   * `min-height`, as the DOM element's property.
+   * @deprecated write `min-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:minHeight"?: string
+  /**
+   * The tallest its box gets, any CSS length:  `max-height="60vh"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * - takes:  text
+   */
+  "max-height"?: string
+  /**
+   * `max-height`, as the DOM element's property.
+   * @deprecated write `max-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxHeight"?: string
+  /**
    * Its tooltip:  the browser's own, written as the element's `title`.
    * - takes:  text
    */
@@ -50193,6 +50483,16 @@ export interface UITableAttributes {
    * @deprecated write `movable` -- `prop:` stays only for compiled spell
    */
   "prop:movable"?: string
+  /**
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
+   * - takes:  text
+   */
+  resizable?: string
+  /**
+   * `resizable`, as the DOM element's property.
+   * @deprecated write `resizable` -- `prop:` stays only for compiled spell
+   */
+  "prop:resizable"?: string
   /**
    * Shown only on these devices, a comma list:  `on-platform="desktop, tablet"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.
    * - takes:  text
@@ -50675,7 +50975,7 @@ export interface UITabsAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -50975,7 +51275,7 @@ export interface UITermAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -51271,7 +51571,7 @@ export interface UITermsAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -51789,7 +52089,7 @@ export interface UITextAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -52273,7 +52573,7 @@ export interface UITextareaAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -52615,7 +52915,7 @@ export interface UIThemeEditorAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -52982,7 +53282,7 @@ export interface UIThemeMenuAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -53292,7 +53592,7 @@ export interface UIThemeTokenAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -53578,7 +53878,7 @@ export interface UITitleAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -54061,7 +54361,7 @@ export interface UIToastAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -54428,7 +54728,7 @@ export interface UITocAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -55140,7 +55440,7 @@ export interface UIToolbarAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -55565,7 +55865,7 @@ export interface UITransitionAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -55996,6 +56296,36 @@ export interface UITreeAttributes {
    */
   "prop:maxWidth"?: string
   /**
+   * Its box's own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn't fit scrolls inside it.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown.
+   * - takes:  text
+   */
+  height?: string
+  /**
+   * `height`, as the DOM element's property.
+   * @deprecated write `height` -- `prop:` stays only for compiled spell
+   */
+  "prop:height"?: string
+  /**
+   * The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * - takes:  text
+   */
+  "min-height"?: string
+  /**
+   * `min-height`, as the DOM element's property.
+   * @deprecated write `min-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:minHeight"?: string
+  /**
+   * The tallest its box gets, any CSS length:  `max-height="60vh"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.
+   * - takes:  text
+   */
+  "max-height"?: string
+  /**
+   * `max-height`, as the DOM element's property.
+   * @deprecated write `max-height` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxHeight"?: string
+  /**
    * Its tooltip:  the browser's own, written as the element's `title`.
    * - takes:  text
    */
@@ -56016,7 +56346,7 @@ export interface UITreeAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -56367,7 +56697,7 @@ export interface UITreeDiagramAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -56769,7 +57099,7 @@ export interface UITreeItemAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -57151,7 +57481,7 @@ export interface UITreeNodeAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -57663,7 +57993,7 @@ export interface UIUploaderAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -58012,7 +58342,7 @@ export interface UIValueAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -58386,7 +58716,7 @@ export interface UIVideoAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -58772,7 +59102,7 @@ export interface UIVisibilityAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string
@@ -59139,7 +59469,7 @@ export interface UIZoomAttributes {
    */
   "prop:movable"?: string
   /**
-   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or `"width"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)
    * - takes:  text
    */
   resizable?: string

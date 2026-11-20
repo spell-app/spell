@@ -18,6 +18,8 @@ export const codeVocabulary = {
   tag: "ui-code",
   icon: "code",
   topics: ["text", "typography", "data display"],
+  // the shared `height`, `min-height` and `max-height` (epic `old-console-redo` P2)
+  heights: true,
   aka: ["code block", "syntax highlighting", "highlighter", "pre", "snippet", "source code", "listing"],
   skeleton: "5 line paragraph",
   noun: "code",

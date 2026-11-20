@@ -728,7 +728,9 @@
       --_segment-scrolling-default: 30em;
     }
   }
-  /* Resizable:  starts at the capped height, a person drags it taller or shorter. */
+  /* Resizable:  starts at the capped height, a person drags it taller or shorter.
+     The element's shared `resizable` (`:state(resizable-height)`);  `.resizable`, class grammar's. */
+  :host(:state(resizable-height)) > .ui.scrolling.segment,
   .ui.resizable.scrolling.segment {
     height: var(--_segment-scroll);
     max-height: none;

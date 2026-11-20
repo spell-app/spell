@@ -362,6 +362,19 @@
                 </ui-example>
               </ui-section>
             </ui-section>
+            <ui-section id="examples-sizing" label="Sizing" sticky="stack" collapsible dividing>
+              <ui-section id="examples-sizing-height" label="Height" sticky="stack" collapsible dividing>
+                <ui-example description="`height` gives a `top` or `bottom` flyout its height;  `resizable=&quot;height&quot;` lets people drag it.">
+                  <ui-button commandfor="flyout-sizing-height" command="--show">Show</ui-button>
+                  <ui-flyout id="flyout-sizing-height" position="bottom" height="14em" resizable="height" closable>
+                    <ui-header>Log</ui-header>
+                    <ui-content>
+                      <p>Drag the corner to make the flyout taller or shorter.</p>
+                    </ui-content>
+                  </ui-flyout>
+                </ui-example>
+              </ui-section>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="usage" label="Usage">

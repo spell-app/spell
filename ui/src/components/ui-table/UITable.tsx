@@ -11,6 +11,7 @@ import { TableRows } from "./TableRows"
 import { TableSort } from "./TableSort"
 
 import tableCSS from "./UITable.css?inline"
+import heightsCSS from "spell/ui/elements/SharedHeights.css?inline"
 
 /****************
  * ### `UITable`
@@ -95,9 +96,11 @@ import tableCSS from "./UITable.css?inline"
 export class UITable extends E.UIComponent<typeof tableVocabulary> {
   @E.proto static vocabulary = tableVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { table: tableCSS },
+    styleSheets: { heights: heightsCSS, table: tableCSS },
     // the scroller and the light-DOM headers take focus themselves
-    delegatesFocus: false
+    delegatesFocus: false,
+    // a bare `resizable` drags its height (the scroller's:  `resizeBox`)
+    resizable: "vertically"
   } satisfies Partial<E.ElementSetup>
 
   ////////////////
@@ -1070,7 +1073,7 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
   // ## The scroller
   ////////////////
 
-  /** Shadow scroller's classes, e.g. `resizable short scrolling scroller`. */
+  /** Shadow scroller's classes, e.g. `top attached short scrolling scroller`. */
   @E.derived
   get scrollerClasses(): string {
     return TableGrammar.scroller((name) => this.scrollerValue(name))
@@ -1088,6 +1091,11 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
 
   /** The shadow scroller, once drawn (from its `ref`). */
   private scroller: HTMLDivElement | undefined
+
+  /** The shared `resizable` resizes the scroller, which holds the cap and scrolls. */
+  protected override get resizeBox(): HTMLElement {
+    return this.scroller ?? super.resizeBox
+  }
 
   /**
    * The table is wider than the scroller:  it doesn't stack, and the scroller scrolls it sideways (`SIDEWAYS`).

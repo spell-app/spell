@@ -405,6 +405,14 @@ export type ElementSetup = {
   link: LinkMeaning
 
   /**
+   * What a bare `resizable` drags, for this family (every element takes it:  `SharedVocabulary`;
+   * epic `old-console-redo` P2):  `"both"` (the default), `"vertically"` (its height:  a segment, a table), or
+   * `"horizontally"`.
+   * - `resizable="width"`, `"height"` or `"width, height"` names it outright, whatever this says.
+   */
+  resizable: E.MoveWay
+
+  /**
    * What the element shows when the page writes neither `visible` nor `hidden`.
    * - Every element takes both (`SharedVocabulary`):  one fact, two names (`DOMElement`, "Shown or hidden").
    * - `"shown"` (the default):  a message, a segment, a menu ...

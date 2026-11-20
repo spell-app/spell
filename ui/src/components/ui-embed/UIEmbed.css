@@ -186,3 +186,18 @@
     display: block;
   }
 }
+
+/*
+ * Sized (epic `old-console-redo` P2):  with a `height` or `max-height` (`SharedHeights.css`), or while people may drag
+ * its height (`resizable`), the frame fills the element's box:  its ratio is only where it starts.
+ */
+@layer ui.components.embed.variations {
+  :host(:is(:state(height), :state(max-height), :state(resizable-height))) {
+    display: flex;
+    flex-direction: column;
+  }
+  :host(:is(:state(height), :state(max-height), :state(resizable-height))) > .ui.embed {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+}

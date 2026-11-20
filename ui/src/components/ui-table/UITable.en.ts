@@ -24,6 +24,8 @@ export const tableVocabulary = {
   tag: "ui-table",
   icon: "table",
   topics: ["tables", "data display", "basic", "collections"],
+  // the shared `height`, `min-height` and `max-height` (epic `old-console-redo` P2)
+  heights: true,
   aka: ["data table", "data grid", "grid", "spreadsheet"],
   skeleton: "long line, 4 line paragraph",
   noun: "table",
@@ -57,12 +59,6 @@ export const tableVocabulary = {
       description: "`table-layout: fixed`;  overflowing cell text is cut with `…`."
     },
     { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds:  the dark scheme." },
-    {
-      name: "resizable",
-      group: "behaviour",
-      kind: "keyOnly",
-      description: "With `scrolling`:  people can drag the height."
-    },
     { name: "selectable", group: "behaviour", kind: "keyOnly", description: "Body rows highlight on hover." },
     {
       name: "editable",

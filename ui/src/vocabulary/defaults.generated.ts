@@ -1465,8 +1465,7 @@ export const DEFAULTS_TABLE: Readonly<
       kind: "keyOrValueAndKey",
       group: "layout",
       values: ["short", "very short", "long", "very long"]
-    },
-    { name: "resizable", kind: "keyOnly", group: "behaviour" }
+    }
   ],
   "ui-segments": [
     { name: "size", kind: "size", group: "appearance" },
@@ -1709,7 +1708,6 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "definition", kind: "keyOnly", group: "appearance" },
     { name: "fixed", kind: "keyOnly", group: "layout" },
     { name: "inverted", kind: "keyOnly", group: "appearance" },
-    { name: "resizable", kind: "keyOnly", group: "behaviour" },
     { name: "selectable", kind: "keyOnly", group: "behaviour" },
     { name: "editable", kind: "keyOnly", group: "behaviour" },
     { name: "single-line", kind: "keyOnly", group: "appearance" },

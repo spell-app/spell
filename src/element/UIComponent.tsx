@@ -326,6 +326,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
     disabled: "unusable",
     loading: "loader",
     link: "click",
+    resizable: "both",
     visible: "shown",
     // the runtime's (Spell UI's `"fade"`):  read as an element shows or hides, by then installed
     get animation() {
@@ -453,36 +454,39 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
   }
 
   /**
-   * The shared `width`, `min-width` and `max-width`, any CSS lengths, by name;  each `undefined` without one.
-   * - A new record each time:  only the three attributes are read, so `onWidthsChanged()` runs only when one changes.
+   * The shared `width`, `min-width` and `max-width`, and `height`, `min-height` and `max-height` where the
+   * vocabulary takes them (`heights`;  epic `old-console-redo` P2):  any CSS lengths, by name;  each `undefined`
+   * without one.
+   * - A new record each time:  only the six attributes are read, so `onSizesChanged()` runs only when one changes.
    */
-  get sharedWidths(): SharedWidths {
-    return Object.fromEntries(WIDTHS.map((name) => [name, this.sharedText(name)])) as SharedWidths
+  get sharedSizes(): SharedSizes {
+    return Object.fromEntries(SIZES.map((name) => [name, this.sharedText(name)])) as SharedSizes
   }
 
   /**
-   * The shared widths changed, or the element's style sheets arrived:  its box's own width where it sits.
-   * - Each as a custom property (`--_ui-width` ...) and a state (`:state(width)` ...), which `reset.css` draws:
-   *   on the element itself where it draws a box, else on its shadow root's top-level boxes (`:state(sized-inside)`).
+   * The shared sizes changed, or the element's style sheets arrived:  its box's own width and height where it sits.
+   * - Each as a custom property (`--_ui-width`, `--_ui-height` ...) and a state (`:state(width)` ...), which
+   *   `reset.css` draws:  on the element itself where it draws a box, else on its shadow root's top-level boxes
+   *   (`:state(sized-inside)`).
    * - Which it is, the element's computed `display`:  so only once its sheets are in (`isReady`).
    * - SIDE EFFECT:  writes them in the element's `style` and states;  removes them again once they're gone.
-   * - Not on a server:  the static render draws no widths.
+   * - Not on a server:  the static render draws no sizes.
    */
-  @onChange("sharedWidths", "isReady", { writesDOMElement: true })
-  protected onWidthsChanged(widths: SharedWidths, isReady: boolean) {
+  @onChange("sharedSizes", "isReady", { writesDOMElement: true })
+  protected onSizesChanged(sizes: SharedSizes, isReady: boolean) {
     if (isServer) return
     const { domElement, internalState } = this
-    const isSized = WIDTHS.some((name) => widths[name] !== undefined)
-    if (!isSized && !internalState.wroteWidths) return
-    for (const name of WIDTHS) {
-      const width = widths[name]
-      if (width !== undefined) domElement.style.setProperty(`--_ui-${name}`, width)
+    const isSized = SIZES.some((name) => sizes[name] !== undefined)
+    if (!isSized && !internalState.wroteSizes) return
+    for (const name of SIZES) {
+      const size = sizes[name]
+      if (size !== undefined) domElement.style.setProperty(`--_ui-${name}`, size)
       else domElement.style.removeProperty(`--_ui-${name}`)
-      domElement.setState(name, width !== undefined)
+      domElement.setState(name, size !== undefined)
     }
     const isContents = isSized && isReady && getComputedStyle(domElement).display === "contents"
     domElement.setState(SIZED_INSIDE_STATE, isContents)
-    internalState.wroteWidths = isSized
+    internalState.wroteSizes = isSized
   }
 
   /** The shared `tooltip`:  the browser's own tooltip, written as the element's `title`. */
@@ -544,37 +548,76 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
   ////////////////
   // ## Moved and resized
   //
-  // Two more shared attributes (`SharedVocabulary`;  epic `mockup` P14, J35):  `movable` and `resizable`,
-  // bare or `both`, `horizontally`, `vertically` (`MoveAndResize`).
-  // - A family that declares its own `resizable` keeps it (`<ui-segment resizable>` drags its height):
+  // Two more shared attributes (`SharedVocabulary`;  epic `mockup` P14, J35):  `movable` and `resizable`
+  // (`MoveAndResize`).
+  // - `movable`:  bare or `both`, `horizontally`, `vertically`.
+  // - `resizable` (epic `old-console-redo` P2):  the sizes people drag, `width`, `height` or `width, height`;
+  //   bare, the family's own (`elementSetup.resizable`:  a segment's and a table's, their height).
+  //   - ONE resize for every family:  the browser's grip on its box, the element's own or, for a
+  //     `display: contents` element, its shadow root's top box (`resizeBox`).
+  //   - `:state(resizable-width)` / `:state(resizable-height)` say which, so a family's sheet can let its box
+  //     grow past a cap of its own (a scrolling segment's `max-height`) or fill the size dragged.
+  // - A family that declares its own `resizable` keeps it (`<ui-split-panel>`, `<ui-diagram-node>`):
   //   the shared one is only where the vocabulary has none.
   ////////////////
 
   /** Which way people may move it (the shared `movable`);  `undefined`:  they can't. */
   get sharedMovable(): E.MoveWay | undefined {
-    return this.sharedWay(MOVABLE)
+    if (!this.elementDefinition.takesShared(MOVABLE)) return undefined
+    return E.MoveAndResize.wayOf(E.Reactive.attributeValue(this, MOVABLE))
   }
 
   /** Which way people may resize it (the shared `resizable`);  `undefined`:  they can't. */
   get sharedResizable(): E.MoveWay | undefined {
-    return this.sharedWay(RESIZABLE)
+    if (!this.elementDefinition.takesShared(RESIZABLE)) return undefined
+    return E.MoveAndResize.resizeWayOf(E.Reactive.attributeValue(this, RESIZABLE), this.elementSetup.resizable)
+  }
+
+  /** People may drag its width:  `:state(resizable-width)`. */
+  @cssState("resizable-width")
+  get resizesWidth(): boolean {
+    const way = this.sharedResizable
+    return way === "both" || way === "horizontally"
+  }
+
+  /** People may drag its height:  `:state(resizable-height)`. */
+  @cssState("resizable-height")
+  get resizesHeight(): boolean {
+    const way = this.sharedResizable
+    return way === "both" || way === "vertically"
+  }
+
+  /**
+   * Hook:  the box `resizable` resizes.
+   * - Default:  the element itself where it draws a box;  else (`display: contents`) the first box at the top of its
+   *   shadow root (a segment's, a card's, a modal's `<dialog>`).
+   * - Read once its sheets are in, so its `display` is known.
+   */
+  protected get resizeBox(): HTMLElement {
+    const { domElement } = this
+    if (getComputedStyle(domElement).display !== "contents") return domElement
+    const top = [...(domElement.shadowRoot?.children ?? [])].find(
+      (child): child is HTMLElement => child instanceof HTMLElement && !child.matches(NOT_A_BOX)
+    )
+    return top ?? domElement
   }
 
   /**
    * While it's connected, people may move and resize it the ways its shared `movable` and `resizable` say.
+   * - Resizing waits for its sheets (`isReady`):  which box it resizes depends on its `display`.
    * - SIDE EFFECT:  `MoveAndResize` writes its `style`, and listens for presses on it;  the cleanup stops both.
    * - Never on a server, where nothing connects.
    */
-  @onChange("isConnected", "sharedMovable", "sharedResizable", { writesDOMElement: true })
-  protected moveAndResize(isConnected: boolean, move: E.MoveWay | undefined, resize: E.MoveWay | undefined) {
+  @onChange("isConnected", "isReady", "sharedMovable", "sharedResizable", { writesDOMElement: true })
+  protected moveAndResize(
+    isConnected: boolean,
+    isReady: boolean,
+    move: E.MoveWay | undefined,
+    resize: E.MoveWay | undefined
+  ) {
     if (!isConnected || isServer || (!move && !resize)) return
-    return E.MoveAndResize.start(this.domElement, { move, resize })
-  }
-
-  /** A shared way attribute's value (`movable`, `resizable`), where the element takes it. */
-  private sharedWay(name: string): E.MoveWay | undefined {
-    if (!this.elementDefinition.takesShared(name)) return undefined
-    return E.MoveAndResize.wayOf(E.Reactive.attributeValue(this, name))
+    if (resize && !isReady) return
+    return E.MoveAndResize.start(this.domElement, { move, resize, box: resize ? this.resizeBox : undefined })
   }
 
   ////////////////
@@ -1565,12 +1608,17 @@ const LINE_HEIGHT_TOKEN = "--ui-line-height"
 const SHADOW = "shadow"
 /** Where the shared `shadow`'s hue goes, which `reset.css` draws under `:state(shadow)`. */
 const SHADOW_COLOR_TOKEN = "--_ui-shadow-color"
-/** The shared widths:  each one's state and custom property (`--_ui-width`) has its name. */
-const WIDTHS = ["width", "min-width", "max-width"] as const
-/** The state saying the shared widths go on the shadow root's top-level boxes:  the element is `display: contents`. */
+/**
+ * The shared sizes:  each one's state and custom property (`--_ui-width`, `--_ui-height`) has its name.
+ * - The heights only where the vocabulary takes them (`heights`).
+ */
+const SIZES = ["width", "min-width", "max-width", "height", "min-height", "max-height"] as const
+/** The state saying the shared sizes go on the shadow root's top-level boxes:  the element is `display: contents`. */
 const SIZED_INSIDE_STATE = "sized-inside"
-/** The shared widths, by name:  any CSS length each, or `undefined` (`UIComponent.sharedWidths`). */
-type SharedWidths = Record<(typeof WIDTHS)[number], string | undefined>
+/** What, at the top of a shadow root, draws no box to resize (`UIComponent.resizeBox`). */
+const NOT_A_BOX = "slot, style, link"
+/** The shared sizes, by name:  any CSS length each, or `undefined` (`UIComponent.sharedSizes`). */
+type SharedSizes = Record<(typeof SIZES)[number], string | undefined>
 const TOOLTIP = "tooltip"
 /** The shared `movable`:  people drag it to a new place. */
 const MOVABLE = "movable"
@@ -1603,8 +1651,8 @@ type InternalState = {
   wroteFontSize?: boolean
   /** the shared `shadow` wrote the element's `--_ui-shadow-color`, so a later empty one removes it again */
   wroteShadow?: boolean
-  /** the shared widths wrote the element's custom properties and states, so later empty ones clear them */
-  wroteWidths?: boolean
+  /** the shared sizes wrote the element's custom properties and states, so later empty ones clear them */
+  wroteSizes?: boolean
   /** the shared `on-platform` set the element's states, so a later empty one clears them */
   wrotePlatforms?: boolean
   /** `isVisible` as `onVisibleChange()` last ran with it;  `undefined` before the element first drew */

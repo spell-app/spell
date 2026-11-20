@@ -4,6 +4,7 @@ import { DialogComponent } from "spell/ui/components/ui-modal/DialogComponent"
 import { flyoutVocabulary } from "./UIFlyout.en"
 
 import flyoutCSS from "./UIFlyout.css?inline"
+import heightsCSS from "spell/ui/elements/SharedHeights.css?inline"
 
 /****************
  * ### `UIFlyout`
@@ -23,7 +24,7 @@ import flyoutCSS from "./UIFlyout.css?inline"
 export class UIFlyout extends DialogComponent<Vocabulary> {
   @E.proto static vocabulary = flyoutVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { flyout: flyoutCSS },
+    styleSheets: { heights: heightsCSS, flyout: flyoutCSS },
     // what the sheet's own transition is called (it slides in from `position`'s edge):
     // Fomantic's nearest name, for a flyout from the left (the default)
     animation: "fly right"

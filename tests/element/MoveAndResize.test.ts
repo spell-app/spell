@@ -41,7 +41,49 @@ describe("MoveAndResize.wayOf()", () => {
   })
 })
 
+describe("MoveAndResize.resizeWayOf()", () => {
+  test("names the sizes dragged, either order;  bare is the family's;  the move words still work", () => {
+    const ways = ["width", "height", "width, height", "height width", "", "both", "vertically", "depth", "width, x"]
+    expect(ways.map((value) => MoveAndResize.resizeWayOf(value))).toEqual([
+      "horizontally",
+      "vertically",
+      "both",
+      "both",
+      "both",
+      "both",
+      "vertically",
+      undefined,
+      undefined
+    ])
+    expect([MoveAndResize.resizeWayOf("", "vertically"), MoveAndResize.resizeWayOf(undefined, "vertically")]).toEqual([
+      "vertically",
+      undefined
+    ])
+  })
+})
+
 describe("MoveAndResize.start()", () => {
+  test("resizable on a box of its own:  the box gets the grip, and its size is remembered", async () => {
+    localStorage.removeItem("ui-element:boxed")
+    onTestFinished(() => localStorage.removeItem("ui-element:boxed"))
+    const element = page(`<div id="boxed"><div style="width: 100px; height: 50px">x</div></div>`)
+      .firstElementChild as HTMLElement
+    const box = element.firstElementChild as HTMLElement
+    const stop = MoveAndResize.start(element, { resize: "vertically", box })
+    expect([box.style.resize, element.style.resize]).toEqual(["vertical", ""])
+    // as the browser's grip leaves it:  a press on the grip, a new height, let go
+    const { right, bottom } = box.getBoundingClientRect()
+    box.dispatchEvent(new PointerEvent("pointerdown", { clientX: right - 2, clientY: bottom - 2, button: 0 }))
+    box.style.height = "80px"
+    window.dispatchEvent(new PointerEvent("pointerup"))
+    expect(await waitUntil(() => localStorage.getItem("ui-element:boxed")?.includes("80px"), WAIT)).toBeTruthy()
+    stop()
+    expect(box.style.resize).toBe("")
+    box.style.height = ""
+    onTestFinished(MoveAndResize.start(element, { resize: "vertically", box }))
+    expect(await waitUntil(() => box.style.height === "80px", WAIT)).toBeTruthy()
+  })
+
   test("resizable:  the browser's grip, its overflow scrolls;  stopping puts the style back", () => {
     const element = page(`<div style="width: 100px; height: 50px">x</div>`).firstElementChild as HTMLElement
     const stop = MoveAndResize.start(element, { resize: "vertically" })

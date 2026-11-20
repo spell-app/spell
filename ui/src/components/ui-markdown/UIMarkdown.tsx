@@ -18,6 +18,7 @@ import type {
 import { markdownVocabulary } from "./UIMarkdown.en"
 
 import markdownCSS from "./UIMarkdown.css?inline"
+import heightsCSS from "spell/ui/elements/SharedHeights.css?inline"
 
 /****************
  * ### `DOMMarkdownElement`
@@ -86,7 +87,7 @@ export class UIMarkdown extends E.LoadableComponent<typeof markdownVocabulary> {
   // typed wide, as `UIRoot`'s:  a subclass names its own (the app's `<spell-markdown>`)
   @E.proto static vocabulary: E.ComponentVocabulary = markdownVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { markdown: markdownCSS },
+    styleSheets: { heights: heightsCSS, markdown: markdownCSS },
     DOMElement: DOMMarkdownElement,
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>

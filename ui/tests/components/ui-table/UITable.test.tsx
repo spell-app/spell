@@ -181,7 +181,7 @@ describe("<ui-table> shadow markup", () => {
       `<caption>People</caption>${HEAD}${BODY}`
     )
     const box = scroller(host)
-    expect(box.className).toBe("top attached resizable short scrolling scroller")
+    expect(box.className).toBe("top attached short scrolling scroller")
     expect(box.getAttribute("role")).toBe("region")
     expect(box.getAttribute("tabindex")).toBe("0")
     expect(box.getAttribute("aria-label")).toBe("People")

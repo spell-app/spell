@@ -21,6 +21,8 @@ export const segmentVocabulary = {
   icon: "square outline",
   snippet: "<ui-segment>A box for things</ui-segment>",
   topics: ["containers", "layout", "basic", "elements"],
+  // the shared `height`, `min-height` and `max-height` (epic `old-console-redo` P2)
+  heights: true,
   aka: ["panel", "box", "section", "well", "paper", "card"],
   skeleton: "header, paragraph",
   noun: "segment",
@@ -148,13 +150,9 @@ export const segmentVocabulary = {
       group: "layout",
       kind: "keyOrValueAndKey",
       values: ["short", "very short", "long", "very long"],
-      description: "A capped height (per breakpoint) that scrolls;  `short` ... `very long` scale the cap."
-    },
-    {
-      name: "resizable",
-      group: "behaviour",
-      kind: "keyOnly",
-      description: "With `scrolling`:  people can drag its height."
+      description:
+        "A capped height (per breakpoint) that scrolls;  `short` ... `very long` scale the cap.  With the shared " +
+        "`resizable`, bare or `height`, people drag its height from the cap, taller or shorter."
     }
   ],
   events: [],

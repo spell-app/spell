@@ -7,6 +7,7 @@ import { EmbedSources } from "./EmbedSources"
 import type { EmbedParameters } from "./UIEmbed.types"
 
 import embedCSS from "./UIEmbed.css?inline"
+import heightsCSS from "spell/ui/elements/SharedHeights.css?inline"
 
 /****************
  * ### `DOMEmbedElement`
@@ -56,7 +57,7 @@ export class DOMEmbedElement extends E.DOMElement<UIEmbed> {
 export class UIEmbed extends E.UIComponent<Vocabulary> {
   @E.proto static vocabulary = embedVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { embed: embedCSS },
+    styleSheets: { heights: heightsCSS, embed: embedCSS },
     DOMElement: DOMEmbedElement
   } satisfies Partial<E.ElementSetup>
 

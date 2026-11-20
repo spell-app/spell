@@ -11,8 +11,12 @@ import type { AttributeSpec, ComponentVocabulary, SharedDictionary, StateSpec } 
  *   where a click goes, how its letters look, the browser's tooltip, its accessible name
  * - `shadow`, and `width`, `min-width` and `max-width` (epic `language` P35, I63):
  *   a hard shadow behind its letters, and how wide its box is where it sits
+ * - `height`, `min-height` and `max-height` (epic `old-console-redo` P2):  how tall its box is;  OPT-IN, only on a
+ *   tag whose vocabulary says `heights: true` (a tree, a table, a segment, a card, a graph, code, JSON, a flyout,
+ *   a modal, an embed, markdown), where a height means something
  * - `movable` and `resizable` (epic `mockup` P14, J35):  people drag it to a new place, or its corner to resize it
- *   (`MoveAndResize`, in `spell/element`)
+ *   (`MoveAndResize`, in `spell/element`);  `resizable` names the sizes they drag, `width`, `height` or both
+ *   (epic `old-console-redo` P2)
  * - `on-platform` (epic `mockup` T53):  shown only on the devices it names, `phone`, `tablet`, `desktop`
  *   (`spell/util/platform`);  `reset.css` hides it everywhere else
  * - `UIComponent` reads them ("Shared states", "Shown or hidden"):
@@ -77,6 +81,7 @@ export class SharedVocabulary {
   /**
    * The shared attributes' names, which every tag observes unless its vocabulary declares its own:
    * what a root adds to a tag it defines before its family loads (`RootLoader.defineEarly()`).
+   * - The heights too, though only some tags take them (`heights`):  a value kept early is only kept.
    */
   static get attributeNames(): readonly string[] {
     return SHARED_ATTRIBUTES.map(({ name }) => name)
@@ -95,7 +100,9 @@ export class SharedVocabulary {
     let found = SharedVocabulary.cache.get(vocabulary)
     if (found) return found
     const declared = new Set(vocabulary.attributes.map(({ name }) => name))
-    const added = SHARED_ATTRIBUTES.filter(({ name }) => !declared.has(name))
+    const added = SHARED_ATTRIBUTES.filter(
+      ({ name }) => !declared.has(name) && (vocabulary.heights || !HEIGHTS.has(name))
+    )
     const stateNames = new Set(vocabulary.states.map(({ name }) => name))
     found = {
       attributes: added.length ? [...vocabulary.attributes, ...added] : vocabulary.attributes,
@@ -225,6 +232,31 @@ const SHARED_ATTRIBUTES: readonly AttributeSpec[] = [
       "screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it."
   },
   {
+    name: "height",
+    group: "layout",
+    kind: "string",
+    description:
+      'Its box\'s own height, any CSS length:  `height="18em"`, `"50vh"`.  What doesn\'t fit scrolls inside it.  ' +
+      "Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, " +
+      "a flyout, a modal, an embed, markdown."
+  },
+  {
+    name: "min-height",
+    group: "layout",
+    kind: "string",
+    description:
+      'The shortest its box gets, any CSS length:  `min-height="8em"`;  a drag (`resizable`) stops there too.  ' +
+      "On the same boxes as `height`."
+  },
+  {
+    name: "max-height",
+    group: "layout",
+    kind: "string",
+    description:
+      'The tallest its box gets, any CSS length:  `max-height="60vh"`;  what doesn\'t fit scrolls inside it, and a ' +
+      "drag (`resizable`) stops there too.  On the same boxes as `height`."
+  },
+  {
     name: "tooltip",
     group: "content",
     kind: "string",
@@ -252,9 +284,11 @@ const SHARED_ATTRIBUTES: readonly AttributeSpec[] = [
     group: "behaviour",
     kind: "string",
     description:
-      "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  " +
-      "Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it " +
-      "is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height)."
+      'People can drag its corner to resize it, the sizes it names:  `resizable="width, height"`, `"height"` or ' +
+      "`\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with " +
+      "`min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is " +
+      "remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, " +
+      "`horizontally` and `vertically` still work.)"
   },
   {
     name: "on-platform",
@@ -267,6 +301,9 @@ const SHARED_ATTRIBUTES: readonly AttributeSpec[] = [
       "once.  For what a device can't do (a phone has no screen capture), or has no room for."
   }
 ]
+
+/** The opt-in shared attributes:  only a vocabulary with `heights: true` takes them. */
+const HEIGHTS: ReadonlySet<string> = new Set(["height", "min-height", "max-height"])
 
 /** Each language's names for the shared attributes, by `lang`:  one `SharedVocabulary.<lang>.ts` each. */
 const SHARED_DICTIONARIES: ReadonlyMap<string, SharedDictionary> = new Map([[sharedEs.lang, sharedEs]])

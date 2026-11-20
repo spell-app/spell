@@ -214,3 +214,18 @@
     }
   }
 }
+
+/*
+ * Sized (epic `old-console-redo` P2):  with a `height` or `max-height` (`SharedHeights.css`), or while people may drag
+ * its height (`resizable`), the graph fills the element's box instead of its own `--ui-graph-height`.
+ */
+@layer ui.components.graph.variations {
+  :host(:is(:state(height), :state(max-height), :state(resizable-height))) {
+    display: flex;
+    flex-direction: column;
+  }
+  :host(:is(:state(height), :state(max-height), :state(resizable-height))) > .ui.graph {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+}

@@ -87,6 +87,13 @@
                 </ui-example>
               </ui-section>
             </ui-section>
+            <ui-section id="examples-sizing" label="Sizing" sticky="stack" collapsible dividing>
+              <ui-section id="examples-sizing-height" label="Height" sticky="stack" collapsible dividing>
+                <ui-example description="`height` sizes the graph's box, in place of `--ui-graph-height`;  `resizable=&quot;height&quot;` lets people drag it.">
+                  <ui-graph height="14em" resizable="height" graph='{"nodes":[{"id":"in","label":"Input","ports":[{"id":"out","kind":"out"}]},{"id":"parse","label":"Parse","ports":[{"id":"src","label":"src","kind":"in"},{"id":"ast","label":"ast","kind":"out"},{"id":"errors","label":"errors","kind":"out"}]},{"id":"check","label":"Check","ports":[{"id":"ast","label":"ast","kind":"in"},{"id":"ok","label":"ok","kind":"out"}]},{"id":"report","label":"Report"},{"id":"emit","label":"Emit"}],"edges":[{"from":{"node":"in","port":"out"},"to":{"node":"parse","port":"src"}},{"from":{"node":"parse","port":"ast"},"to":{"node":"check","port":"ast"},"label":"tree"},{"from":{"node":"parse","port":"errors"},"to":{"node":"report"}},{"from":{"node":"check","port":"ok"},"to":{"node":"emit"}}]}'></ui-graph>
+                </ui-example>
+              </ui-section>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="usage" label="Usage">

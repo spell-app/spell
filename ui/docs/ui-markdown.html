@@ -176,6 +176,21 @@
                 </ui-example>
               </ui-section>
             </ui-section>
+            <ui-section id="examples-sizing" label="Sizing" sticky="stack" collapsible dividing>
+              <ui-section id="examples-sizing-height" label="Height" sticky="stack" collapsible dividing>
+                <ui-example description="`max-height` caps the text, and what doesn't fit scrolls;  `resizable=&quot;height&quot;` lets people drag it.">
+                  <ui-markdown max-height="8em" resizable="height">
+## What's new
+
+- Trees, tables and segments take a `height`
+- `resizable="height"` lets people drag one taller
+- `min-height` and `max-height` hold the drag
+
+Everything else is as it was.
+                  </ui-markdown>
+                </ui-example>
+              </ui-section>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="usage" label="Usage">

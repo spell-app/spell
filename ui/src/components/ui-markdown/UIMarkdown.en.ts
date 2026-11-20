@@ -20,6 +20,8 @@ export const markdownVocabulary = {
   tag: "ui-markdown",
   icon: "markdown",
   topics: ["text", "typography", "data display"],
+  // the shared `height`, `min-height` and `max-height` (epic `old-console-redo` P2)
+  heights: true,
   aka: ["markdown", "md", "gfm", "readme", "rich text", "prose"],
   skeleton: "header, 4 line paragraph",
   noun: "markdown",

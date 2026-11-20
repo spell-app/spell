@@ -25,6 +25,8 @@ export const modalVocabulary = {
   tag: "ui-modal",
   icon: "window restore outline",
   topics: ["dialogs", "overlays", "popups", "modules"],
+  // the shared `height`, `min-height` and `max-height` (epic `old-console-redo` P2)
+  heights: true,
   aka: ["dialog", "popup window", "lightbox", "confirm", "alert dialog"],
   noun: "modal",
   partOfSpeech: "structure",

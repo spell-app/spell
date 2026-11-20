@@ -21,6 +21,8 @@ export const graphVocabulary = {
   tag: "ui-graph",
   icon: "project diagram",
   topics: ["data display", "images", "views"],
+  // the shared `height`, `min-height` and `max-height` (epic `old-console-redo` P2)
+  heights: true,
   aka: [
     "graph",
     "node graph",

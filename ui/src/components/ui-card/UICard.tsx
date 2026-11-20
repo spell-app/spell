@@ -7,6 +7,7 @@ import { CardClicks } from "./CardClicks"
 import { UICards } from "./UICards"
 
 import cardCSS from "./UICard.css?inline"
+import heightsCSS from "spell/ui/elements/SharedHeights.css?inline"
 
 /**
  * Same nouns:  a rescan finding them again changes nothing (`UICard.slottedNouns`'s `equals`).
@@ -53,7 +54,7 @@ function isSameNouns(a: ReadonlySet<string>, b: ReadonlySet<string>): boolean {
 export class UICard extends E.UIComponent<typeof cardVocabulary> {
   @E.proto static vocabulary = cardVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { card: cardCSS, ...E.PartComponent.prototype.elementSetup.styleSheets },
+    styleSheets: { heights: heightsCSS, card: cardCSS, ...E.PartComponent.prototype.elementSetup.styleSheets },
     // `loading`:  Fomantic's veil
     loading: "its own"
   } satisfies Partial<E.ElementSetup>

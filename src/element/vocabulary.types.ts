@@ -440,6 +440,13 @@ export type ComponentVocabulary = {
    * - NEVER translated:  drawing data, like `states`.
    */
   skeleton?: string
+  /**
+   * Does it take the shared `height`, `min-height` and `max-height` (Spell UI's `SharedVocabulary`):  `true`, else
+   * left out (epic `old-console-redo` P2).
+   * - Opt-in, unlike the shared widths:  only a box whose height means something (a tree, a table, a segment, a
+   *   graph ...) takes them;  a button or a list doesn't.
+   */
+  heights?: true
 }
 
 /**
@@ -622,6 +629,9 @@ export type SharedDictionary = {
         | "width"
         | "min-width"
         | "max-width"
+        | "height"
+        | "min-height"
+        | "max-height"
         | "tooltip"
         | "label"
         | "movable"

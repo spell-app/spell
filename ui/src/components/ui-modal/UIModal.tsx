@@ -4,6 +4,7 @@ import { DialogComponent } from "./DialogComponent"
 import type { Vocabulary } from "./UIModal.types"
 
 import modalCSS from "./UIModal.css?inline"
+import heightsCSS from "spell/ui/elements/SharedHeights.css?inline"
 
 /****************
  * ### `UIModal`
@@ -20,7 +21,7 @@ import modalCSS from "./UIModal.css?inline"
 export class UIModal extends DialogComponent<Vocabulary> {
   @E.proto static vocabulary = modalVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { modal: modalCSS },
+    styleSheets: { heights: heightsCSS, modal: modalCSS },
     // the sheet's own transition is Fomantic's `scale`:  faded in from 80%
     animation: "scale"
   } satisfies Partial<E.ElementSetup>

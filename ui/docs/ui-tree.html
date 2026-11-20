@@ -333,6 +333,24 @@
                 </ui-example>
               </ui-section>
             </ui-section>
+            <ui-section id="examples-sizing" label="Sizing" sticky="stack" collapsible dividing>
+              <ui-section id="examples-sizing-height" label="Height" sticky="stack" collapsible dividing>
+                <ui-example description="`height` gives the tree a height, and its rows scroll inside it;  `resizable=&quot;height&quot;` lets people drag it taller or shorter, and `width` sets its width.">
+                  <ui-tree label="Racks" width="18em" height="8em" resizable="height">
+                    <ui-tree-item label="Hall A" icon="folder" open>
+                      <ui-tree-item label="Rack 1" icon="server"></ui-tree-item>
+                      <ui-tree-item label="Rack 2" icon="server"></ui-tree-item>
+                      <ui-tree-item label="Rack 3" icon="server"></ui-tree-item>
+                    </ui-tree-item>
+                    <ui-tree-item label="Hall B" icon="folder" open>
+                      <ui-tree-item label="Rack 4" icon="server"></ui-tree-item>
+                      <ui-tree-item label="Rack 5" icon="server"></ui-tree-item>
+                      <ui-tree-item label="Rack 6" icon="server"></ui-tree-item>
+                    </ui-tree-item>
+                  </ui-tree>
+                </ui-example>
+              </ui-section>
+            </ui-section>
           </ui-tab>
 
           <ui-tab value="usage" label="Usage">
