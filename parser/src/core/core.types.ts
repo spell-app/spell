@@ -462,6 +462,11 @@ export type SitePageEntry = {
   group?: string
   /** the icon its `<group>`'s line names, before the group's name in its navigation (epic `mockup` I20):  `microchip` */
   groupIcon?: string
+  /**
+   * its line says `, not in the navigation`:  the navigation doesn't list it, nor the pages under it;  it's reached by
+   * its address and the links to it (epic old-console-redo I35)
+   */
+  unlisted?: boolean
   /** the pages under it, as the lines under its line list them */
   pages?: SitePageEntry[]
   /** the links out of the site under it, among those pages (`SiteLinkEntry`) */

@@ -41661,6 +41661,15 @@
               "fieldName": "appearance"
             },
             {
+              "name": "groups",
+              "description": "How a group (`band` `group`) looks.  `wells` (the default):  an open group a slight inset well, its pages a step in from its label, folding as the person opens and closes it.  `headings`:  a small heading over its pages, always open, its pages in line with the rest, and a page's own pages beside a guide line.",
+              "type": {
+                "text": "\"wells\" | \"headings\""
+              },
+              "default": "\"wells\"",
+              "fieldName": "groups"
+            },
+            {
               "name": "collapsed",
               "description": "Only the icons, in one column:  each row's title its tooltip, a page with no icon its title's first letter, and a group with no icon a thin line.  None:  the titles beside the icons.",
               "type": {
@@ -41837,7 +41846,16 @@
               }
             }
           ],
-          "slots": [],
+          "slots": [
+            {
+              "name": "start",
+              "description": "Above its pages:  a logo, a picker."
+            },
+            {
+              "name": "end",
+              "description": "At its foot, below its pages, pushed to the bottom of the box it fills:  a row of buttons."
+            }
+          ],
           "cssParts": [
             {
               "name": "nav",
@@ -41846,12 +41864,24 @@
             {
               "name": "tree",
               "description": "The `<ui-tree>` of pages."
+            },
+            {
+              "name": "start",
+              "description": "The box around the `start` slot."
+            },
+            {
+              "name": "end",
+              "description": "The box around the `end` slot, at its foot."
             }
           ],
           "cssStates": [
             {
               "name": "collapsed",
               "description": "`collapsed`:  only the icons."
+            },
+            {
+              "name": "headings",
+              "description": "`groups=\"headings\"`:  its groups are headings."
             },
             {
               "name": "disabled",
@@ -47051,6 +47081,11 @@
             {
               "name": "--ui-table-cell-padding-inline",
               "default": "0.785714em"
+            },
+            {
+              "name": "--ui-table-link-underline",
+              "default": "none",
+              "description": "A link in a cell: not underlined until it's hovered, as a console's tables draw one (epic old-console-redo I37)."
             },
             {
               "name": "--ui-table-header-padding-block",

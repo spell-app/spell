@@ -11,8 +11,10 @@ export const siteNavEs = {
   tag: "ui-site-nav",
   name: "navegacion-del-sitio",
   aka: ["navegacion lateral", "menu lateral", "mapa del sitio", "arbol de paginas"],
-  attributes: { pages: "paginas", current: "actual", remember: "recordar" },
-  parts: { nav: "navegacion", tree: "arbol" },
+  attributes: { pages: "paginas", current: "actual", remember: "recordar", groups: "grupos" },
+  values: { groups: { wells: "pozos", headings: "titulos" } },
+  slots: { start: "inicio", end: "fin" },
+  parts: { nav: "navegacion", tree: "arbol", start: "inicio", end: "fin" },
   events: { "ui-starred": "ui-marcado" },
   texts: { label: "Sitio", star: "Agregar {title} a favoritos", unstar: "Quitar {title} de favoritos" }
 } as const satisfies E.TagDictionary

@@ -51,7 +51,7 @@ import {
  * - Compiles to nothing by itself:  `create_site` lists every page in its class, `static pages = [...]`.
  */
 export class SitePage extends SpellStatement<
-  "type|part|address|title?|icon?|tab?|tags?|state?|thumbnail?|live?|no_top_bar?|row?|column?|color?|with_nested_statements?|body?",
+  "type|part|address|title?|icon?|tab?|tags?|state?|thumbnail?|live?|no_top_bar?|unlisted?|row?|column?|color?|with_nested_statements?|body?",
   { entry?: SitePageEntry }
 > {
   @proto static priority = Priority.declaration + 1
@@ -108,6 +108,7 @@ export class SitePage extends SpellStatement<
       ...(state && { state }),
       ...(thumbnail && { thumbnail }),
       ...(live && { live }),
+      ...(match.groups.unlisted && { unlisted: true }),
       ...card,
       ...(params.length && { params })
     }

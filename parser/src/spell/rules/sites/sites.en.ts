@@ -15,10 +15,12 @@ import { SitePartWords } from "./SitePartWords"
 
 /**
  * What a page's line may say after its address:  what the navigation calls it, its icon there, its tab, its tags,
- * how far along it is, its picture, the real page it stands for, and that it's drawn without the site's top bar.
+ * how far along it is, its picture, the real page it stands for, that it's drawn without the site's top bar, and that
+ * its navigation doesn't list it (`, not in the navigation`:  reached by its address and links alone, epic
+ * old-console-redo I35).
  */
 const PAGE_DETAILS =
-  "(, named {title:text})? (, icon {icon:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, (no_top_bar:no top bar))?"
+  "(, named {title:text})? (, icon {icon:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, (no_top_bar:no top bar))? (, (unlisted:not in the navigation))?"
 
 /** What any part's line may end with:  its place in its section of the site editor's board, and its colour there. */
 const CARD_DETAILS = "(, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})?"
@@ -596,6 +598,70 @@ sites.addRule(CreateSite, {
             '    name: "home page",',
             '    page: "HomePage",',
             '    address: "/"',
+            "  }]",
+            '  static livesAt = "cloud"',
+            "}",
+            "",
+            "/**",
+            " * `<test-sites-galaxy-guide>`:  a galaxy guide, drawn in its own element, e.g. by `draw the galaxy guide`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its galaxy guide's properties;  its methods call its galaxy guide's.",
+            " * - What every view's element does, e.g. drawing its galaxy guide, is `SpellElement`'s.",
+            " */",
+            "export class GalaxyGuideElement extends SpellElement<GalaxyGuide> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-galaxy-guide", "galaxy guide", [])',
+            "}",
+            "core.useElement(GalaxyGuide, GalaxyGuideElement)",
+            "export const galaxyGuide = new GalaxyGuide()"
+          ]
+        },
+        {
+          title: "a page not in the navigation:  reached by its address alone (old-console-redo I35)",
+          input: [
+            'a "settings page" is a page',
+            "galaxy guide is a site in the cloud:",
+            '\t- it has a settings page at "/settings", named "Settings", not in the navigation'
+          ],
+          js: [
+            "export class SettingsPage extends Page {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "}",
+            "export class GalaxyGuide extends Site {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "  static pages = [{",
+            '    name: "settings page",',
+            '    page: "SettingsPage",',
+            '    address: "/settings",',
+            '    title: "Settings",',
+            "    unlisted: true",
+            "  }]",
+            '  static livesAt = "cloud"',
+            "}",
+            "export const galaxyGuide = new GalaxyGuide()"
+          ],
+          ts: [
+            "export class SettingsPage extends Page {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "}",
+            "",
+            "/**",
+            " * `<test-sites-settings-page>`:  a settings page, drawn in its own element, e.g. by `draw the settings page`.",
+            " * - The page defines its tag with this class:  `core.useElement()`, below.",
+            " * - Its attributes are its settings page's properties;  its methods call its settings page's.",
+            " * - What every view's element does, e.g. drawing its settings page, is `SpellElement`'s.",
+            " */",
+            "export class SettingsPageElement extends SpellElement<SettingsPage> {",
+            '  @E.proto static vocabulary = SpellElement.vocabularyFor("test-sites-settings-page", "settings page", [])',
+            "}",
+            "core.useElement(SettingsPage, SettingsPageElement)",
+            "export class GalaxyGuide extends Site {",
+            '  static elementTag = core.defineElement(this, "test_sites")',
+            "  static pages = [{",
+            '    name: "settings page",',
+            '    page: "SettingsPage",',
+            '    address: "/settings",',
+            '    title: "Settings",',
+            "    unlisted: true",
             "  }]",
             '  static livesAt = "cloud"',
             "}",

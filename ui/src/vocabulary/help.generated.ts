@@ -1886,6 +1886,7 @@ export const HELP_TABLE: Readonly<
       label: "What a screen reader calls the navigation.",
       appearance:
         '`nav`: the docs site\'s look, its pages a tree with `appearance="nav"`: taller rows, the page shown a rounded box in the primary colour, and `band` pages as heading bands.',
+      groups: "How a group (`band` `group`) looks.",
       collapsed:
         "Only the icons, in one column: each row's title its tooltip, a page with no icon its title's first letter, and a group with no icon a thin line.",
       remember: "Keep which pages are open for each person, under this name, across reloads and visits."

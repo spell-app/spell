@@ -15,6 +15,10 @@
  *   8px in only with all of it shown.
  * - Beside a bar (`--ui-site-nav-bar-height`, a `<ui-page-layout>`'s menu):  its first row's middle on the bar's,
  *   so the first page's icon lines up with the drawer's button (epic `mockup` I35).
+ * - `groups="headings"`:  a group a plain heading over its pages, no well, its pages in line with the rest;  a page's
+ *   own pages beside a faint guide line down from its icon (epic `old-console-redo` I35, the Harbor console's sidebar).
+ * - Its `start` slot above its pages, its `end` slot at its foot:  it fills the box it's in, a column, so the foot is
+ *   at the box's bottom (I35).
  * - `collapsed` (`:state(collapsed)`):  each row its icon alone, reached through the rows' parts, all in one column;
  *   a page with no icon its first letter, a group with no icon a thin line.
  */
@@ -42,8 +46,20 @@
       light-dark(oklch(0 0 0 / 0.04), oklch(0 0 0 / 0.18))
     );
     --_ui-site-nav-group-radius: var(--ui-site-nav-group-radius, var(--ui-radius-l));
-    display: block;
+    display: flex;
+    flex-direction: column;
+    /* in a column (a `<ui-page-layout>`'s drawer):  the whole of it, so its foot is at the bottom */
+    flex: 1 0 auto;
     min-width: 0;
+  }
+
+  /* its foot:  pushed to the bottom, its own room round it */
+  .end {
+    margin-block-start: auto;
+    padding: round(0.5em, var(--ui-grid, 4px));
+  }
+  .start {
+    padding: round(0.5em, var(--ui-grid, 4px));
   }
 
   nav {
@@ -103,7 +119,7 @@
    * - the well 4px in from the column, its rows 4px in from the well:  the rows stay where they were, 8px from the
    *   column's edges, as it opens and shuts
    */
-  ui-tree-item[band="group"]:state(open) {
+  :host(:not(:state(headings))) ui-tree-item[band="group"]:state(open) {
     display: block;
     margin: var(--ui-grid, 4px);
     padding-block-start: 0;
@@ -111,24 +127,38 @@
     outline: 1px solid light-dark(oklch(0 0 0 / 0.06), oklch(1 0 0 / 0.06));
     outline-offset: -1px;
   }
-  ui-tree-item[band="group"]:state(open)::part(group) {
+  :host(:not(:state(headings))) ui-tree-item[band="group"]:state(open)::part(group) {
     border-end-start-radius: var(--_ui-site-nav-group-radius);
     border-end-end-radius: var(--_ui-site-nav-group-radius);
     background: var(--_ui-site-nav-group-background);
     box-shadow: inset 0 1px 2px light-dark(oklch(0 0 0 / 0.08), oklch(0 0 0 / 0.3));
   }
   /* 4px of the tree's text, from inside each row's smaller text (a label's 0.8125em, a page's 0.875em) */
-  ui-tree-item[band="group"]:state(open)::part(row) {
+  :host(:not(:state(headings))) ui-tree-item[band="group"]:state(open)::part(row) {
     margin-inline: calc(0.25em / 0.8125);
   }
-  ui-tree-item[band="group"]:state(open) ui-tree-item::part(row) {
+  :host(:not(:state(headings))) ui-tree-item[band="group"]:state(open) ui-tree-item::part(row) {
     margin-inline: calc(0.25em / 0.875);
   }
 
   /* a group's pages 8px in from its label (Owen, I31:  "move the inset items 8px to the right"):
      its label 0.75em of the tree's text in, its pages 1.25em, from inside the rows' smaller text */
-  :host(:not(:state(collapsed))) ui-tree-item[band="group"] ui-tree-item::part(row) {
+  :host(:not(:state(collapsed)):not(:state(headings))) ui-tree-item[band="group"] ui-tree-item::part(row) {
     padding-inline-start: calc((0.75em + 0.5em) / 0.875 + var(--_ui-tree-depth, 0) * var(--_ui-tree-indent));
+  }
+
+  /* ## `groups="headings"`:  a group a plain heading, going nowhere;  a page's pages beside a guide line (I35) */
+  :host(:state(headings)) ui-tree-item[band="group"]::part(row) {
+    cursor: default;
+  }
+  :host(:state(headings)) ui-tree-item[band="group"]::part(row):hover {
+    color: var(--_ui-tree-nav-subheading-color, inherit);
+  }
+  /* the line down from a page's icon, beside its pages:  the icon's middle, 0.5em of the tree's text in from the
+     row's margin, then the row's 0.75em and half its 1.25em icon, in the row's 0.875em text */
+  :host(:state(headings):not(:state(collapsed))) ui-tree-item:not([band])::part(group) {
+    background: linear-gradient(var(--ui-border-color), var(--ui-border-color)) no-repeat
+      calc(0.5em + (0.75em + 0.625em) * 0.875) 0 / 1px 100%;
   }
 
   /* ## `collapsed`:  the icons alone, in one column, the titles their tooltips */

@@ -11690,7 +11690,7 @@
       "name": "::part(end)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-app-menu>`:  The end section's box, what's in it pushed to the bar's end."
+        "value": "Part of:\n\n- `<ui-app-menu>`:  The end section's box, what's in it pushed to the bar's end.\n- `<ui-site-nav>`:  The box around the `end` slot, at its foot."
       }
     },
     {
@@ -12621,7 +12621,7 @@
       "name": "::part(start)",
       "description": {
         "kind": "markdown",
-        "value": "Part of:\n\n- `<ui-app-menu>`:  The start section's box:  it shares the room the middle leaves with the end."
+        "value": "Part of:\n\n- `<ui-app-menu>`:  The start section's box:  it shares the room the middle leaves with the end.\n- `<ui-site-nav>`:  The box around the `start` slot."
       }
     },
     {
@@ -13352,6 +13352,13 @@
       "description": {
         "kind": "markdown",
         "value": "Custom state of:\n\n- `<ui-cell>`:  Set while it's a header cell (`header`).\n- `<ui-row>`:  Set while it's a table's header row (`header`).\n- `<ui-site-tabs>`:  `appearance=\"header\"`:  a switch for an app menu's middle."
+      }
+    },
+    {
+      "name": ":state(headings)",
+      "description": {
+        "kind": "markdown",
+        "value": "Custom state of:\n\n- `<ui-site-nav>`:  `groups=\"headings\"`:  its groups are headings."
       }
     },
     {

@@ -2365,6 +2365,8 @@ sidebars any of them opens.
     epic `mockup` I30):  `galaxy guide is a site with theme "mockup"`;  Spanish `con tema "mockup"`.
 - The lines under it compile to nothing by themselves;  `create_site` gathers them, walking its body (`CreateSite.partsOf()`):
   - `- it has a film page at "/films/:film", named "Film"` (`site_page`):  a page, at its address;  the lines under it, its pages
+    - `, not in the navigation` (Spanish `, fuera de la navegacion`, epic `old-console-redo` I35):  its entry's
+      `unlisted`, so the navigation lists neither it nor its pages;  it's reached by its address and links alone
   - `- it has a settings dialog`, `- it has a film sidebar` (`site_overlay`):  by its last word, the language's
     `site_dialog` and `site_sidebar` (Spanish's first:  `diálogo de ajustes`)
   - `- it has a link to "https://docs.example.com", named "Help", icon "book"` (`site_link`, epic `old-console-redo` I6):

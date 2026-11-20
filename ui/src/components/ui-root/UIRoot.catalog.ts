@@ -1405,7 +1405,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-site-nav": {
     folder: "ui-site-nav",
     skeleton: { parts: [{ shape: "paragraph", lines: 4 }] },
-    attributes: ["pages", "current", "label", "appearance", "collapsed", "remember"]
+    attributes: ["pages", "current", "label", "appearance", "groups", "collapsed", "remember"]
   },
   "ui-site-nav-button": {
     folder: "ui-site-nav-button",

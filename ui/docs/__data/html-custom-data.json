@@ -50756,7 +50756,7 @@
       "name": "ui-site-nav",
       "description": {
         "kind": "markdown",
-        "value": "A site nav lists a site's pages as a tree, the page shown marked;  a click goes to a page.\n\nAlso known as:  site navigation, side navigation, sidebar menu, nav menu, site map, page tree.\n\n**Events:**  `ui-navigating`, `ui-opening`, `ui-closing`, `ui-starred`"
+        "value": "A site nav lists a site's pages as a tree, the page shown marked;  a click goes to a page.\n\nAlso known as:  site navigation, side navigation, sidebar menu, nav menu, site map, page tree.\n\n**Slots:**  `start`, `end`\n\n**Events:**  `ui-navigating`, `ui-opening`, `ui-closing`, `ui-starred`"
       },
       "attributes": [
         {
@@ -50782,6 +50782,21 @@
           "values": [
             {
               "name": "nav"
+            }
+          ]
+        },
+        {
+          "name": "groups",
+          "description": {
+            "kind": "markdown",
+            "value": "How a group (`band` `group`) looks.  `wells` (the default):  an open group a slight inset well, its pages a step in from its label, folding as the person opens and closes it.  `headings`:  a small heading over its pages, always open, its pages in line with the rest, and a page's own pages beside a guide line.\n\nTakes:  `wells` · `headings`\nDefault:  `wells`"
+          },
+          "values": [
+            {
+              "name": "wells"
+            },
+            {
+              "name": "headings"
             }
           ]
         },

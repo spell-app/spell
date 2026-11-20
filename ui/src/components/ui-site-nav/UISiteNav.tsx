@@ -67,6 +67,11 @@ export class DOMSiteNavElement extends E.DOMElement<UISiteNav> {
  * - A group's `icon` shows before its label, and its pages are a step in from it (epic `mockup` I20).
  * - Beside a bar (`--ui-site-nav-bar-height`, which `<ui-page-layout>` sets to its menu's height):  its first row's
  *   middle on the bar's, so the first page's icon lines up with the drawer's button (epic `mockup` I35).
+ * - `groups="headings"`:  a group is a small heading over its pages, no well, always open, a click on it doing nothing;
+ *   its pages in line with the rest, and a page's own pages beside a guide line (epic `old-console-redo` I35:  the
+ *   Harbor console's sidebar).  Its `icon` isn't drawn:  a heading has none, and collapsed it's a thin line.
+ * - Its `start` slot shows above its pages (a logo, a picker), its `end` slot at its foot, pushed to the bottom of the
+ *   box it fills (a row of buttons):  each drawn only while something's in it.
  * - `collapsed`:  only the icons, each row's title its tooltip (`:state(collapsed)`), all in one column, no step in;
  *   a page with no icon shows its title's first letter, as `<ui-menu>`'s icons-only look does,
  *   and a group with no icon is a thin line.
@@ -123,6 +128,15 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
   // ## Open pages
   ////////////////
 
+  /** `groups="headings"`:  its groups are headings, always open (`isOpen()`), a click on one doing nothing. */
+  @E.cssState("headings")
+  get groupsAreHeadings(): boolean {
+    return this.groups === HEADINGS
+  }
+
+  /** Which of its slots have content:  `start` and `end` are drawn only while they do. */
+  readonly slots = new E.SlotContent(this.domElement)
+
   /** Pages the person opened (`true`) or closed (`false`), by key:  over `currentPath`'s. */
   @E.state accessor openedByPerson: ReadonlyMap<string, boolean> = new Map()
 
@@ -132,6 +146,7 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
    */
   isOpen(page: SiteNavPage): boolean {
     if (page.open !== undefined) return page.open
+    if (page.band === GROUP && this.groupsAreHeadings) return true
     const key = UISiteNav.keyOf(page)
     if (page.band === GROUP && this.currentPath.has(key)) return true
     return this.openedByPerson.get(key) ?? this.currentPath.has(key)
@@ -163,6 +178,11 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
     const key = (event.target as HTMLElement).getAttribute(DATA_KEY)
     const page = this.pageForKey(key)
     if (key === null || !page) return
+    // a heading stays open, and goes nowhere
+    if (page.band === GROUP && this.groupsAreHeadings) {
+      event.preventDefault()
+      return
+    }
     const { originalEvent } = event.detail
     // a group holding the page shown stays open:  a click on it goes to its first page instead
     if (page.band === GROUP && !isOpening && this.currentPath.has(key)) {
@@ -264,6 +284,25 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
 
   render(): JSX.Element {
     return (
+      <>
+        <Show when={this.slots.hasContent(this.slotForName(START))}>
+          <div class={START} part={this.partForName(START)}>
+            <slot name={this.slotForName(START)} />
+          </div>
+        </Show>
+        {this.drawNav()}
+        <Show when={this.slots.hasContent(this.slotForName(END))}>
+          <div class={END} part={this.partForName(END)}>
+            <slot name={this.slotForName(END)} />
+          </div>
+        </Show>
+      </>
+    )
+  }
+
+  /** The navigation landmark, round the tree of pages. */
+  private drawNav(): JSX.Element {
+    return (
       <nav
         part={this.partForName("nav")}
         aria-label={this.label ?? this.translationForKey("label")}
@@ -293,11 +332,13 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
      * - A group with no icon keeps the room beside groups with one, so the labels line up;
      *   `collapsed`, it's a thin line instead (epic `mockup` I20).
      */
+    /** Its icon:  none for a heading (`groups="headings"`). */
+    const icon = () => (page().band === GROUP && this.groupsAreHeadings ? undefined : page().icon)
     const showsLetter = () => {
-      const { icon, band } = page()
-      if (icon) return false
+      const { band } = page()
+      if (icon()) return false
       const besideIcons = siblings().some((each) => !!each.icon)
-      if (band === GROUP) return !this.collapsed && besideIcons
+      if (band === GROUP) return !this.collapsed && besideIcons && !this.groupsAreHeadings
       return !band && (this.collapsed || besideIcons)
     }
     return (
@@ -306,7 +347,7 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
         data-current={this.isCurrent(page()) ? "" : undefined}
         label={page().title}
         value={page().href ?? UISiteNav.keyOf(page())}
-        icon={page().icon}
+        icon={icon()}
         band={page().band}
         count={page().count === undefined ? undefined : String(page().count)}
         badge={page().badge}
@@ -420,6 +461,13 @@ const GROUP = "group"
 
 /** What stands for a page with no icon, while `collapsed`:  its title's first letter or digit (`<ui-item>`'s too). */
 const LETTER_OR_DIGIT = /[\p{L}\p{N}]/u
+
+/** `groups="headings"`:  its groups drawn as headings. */
+const HEADINGS = "headings"
+
+/** Its slots, and the boxes round them:  above its pages, and at its foot. */
+const START = "start"
+const END = "end"
 
 /** A star's icons:  starred, and not. */
 const STAR = "star"

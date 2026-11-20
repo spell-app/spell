@@ -513,6 +513,7 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
    * Its inline style:
    * - the compact column's kept width, while it's open over the page, moving, or about to widen
    * - the menu's height, for the navigations in the drawer to line their first row up with it (`menuHeight`)
+   * - the height of the box it scrolls in, when that isn't the window (`viewHeight`):  the drawer's least and most
    */
   get layoutStyle(): Record<string, string | undefined> {
     const isHeld = (this.isCompact && !this.isNarrow && (this.isOpen || this.isMoving)) || this.isWidening
@@ -520,7 +521,8 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
     const menuHeight = this.has("menu") ? this.menuHeight : undefined
     return {
       [COMPACT_WIDTH]: width === undefined ? undefined : `${width}px`,
-      [NAV_BAR_HEIGHT]: menuHeight ? `${menuHeight}px` : undefined
+      [NAV_BAR_HEIGHT]: menuHeight ? `${menuHeight}px` : undefined,
+      [VIEW_HEIGHT]: this.viewHeight ? `${this.viewHeight}px` : undefined
     }
   }
 
@@ -532,12 +534,15 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
   @E.whileConnected
   protected watchWidth() {
     if (isServer) return
+    const scroller = UIPageLayout.scrollerAround(this.domElement)
     const resized = new ResizeObserver(() => {
       this.isNarrow = this.isNarrowByStyle(NARROW_FLAG)
       this.isSidesNarrow = this.isNarrowByStyle(SIDES_NARROW_FLAG)
       this.measureMenu()
+      this.viewHeight = scroller?.clientHeight
     })
     resized.observe(this.domElement)
+    if (scroller) resized.observe(scroller)
     if (this.drawerColumn) resized.observe(this.drawerColumn)
     if (this.menuBox) resized.observe(this.menuBox)
     this.resized = resized
@@ -545,6 +550,24 @@ export class UIPageLayout extends E.UIComponent<typeof pageLayoutVocabulary> {
       resized.disconnect()
       this.resized = undefined
     }
+  }
+
+  /**
+   * The height of the box it scrolls in, in pixels, when that's a box on the page (an editor's pane), not the window:
+   * the drawer is as tall as what's seen of it, its foot at the bottom (epic old-console-redo I35);  `100dvh` overshot
+   * by the room above the pane.
+   */
+  @E.state accessor viewHeight: number | undefined = undefined
+
+  /** The nearest box around `element` that scrolls, across shadow roots;  none for the window's own. */
+  private static scrollerAround(element: Element): HTMLElement | undefined {
+    const above = (at: Element): Element | undefined =>
+      at.parentElement ?? (at.getRootNode() as Partial<ShadowRoot>).host ?? undefined
+    for (let at = above(element); at; at = above(at)) {
+      if (at === document.scrollingElement || at === document.body) return undefined
+      if (at instanceof HTMLElement && /(auto|scroll)/.test(getComputedStyle(at).overflowY)) return at
+    }
+    return undefined
   }
 
   /** What watches its box, the drawer's column and the menu for a new size, while connected. */
@@ -762,6 +785,9 @@ const MENU = "menu"
 
 /** `<ui-site-nav>`'s token for the height of the bar beside its top:  the menu's, set on the layout's box. */
 const NAV_BAR_HEIGHT = "--ui-site-nav-bar-height"
+
+/** The height of the box it scrolls in, when that's not the window (`viewHeight`):  its drawer's least and most. */
+const VIEW_HEIGHT = "--_page-layout-view-height"
 
 /**
  * How long, in seconds, the pointer rests on the compact drawer before it opens:  long enough that passing over it

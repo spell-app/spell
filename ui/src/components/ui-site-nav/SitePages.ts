@@ -94,10 +94,14 @@ export class SitePages {
     return () => observer.disconnect()
   }
 
-  /** The `<ui-site-nav>` of the nearest box around `element` that has one of its own, across shadow roots. */
+  /**
+   * The `<ui-site-nav>` of the nearest box around `element` that has one of its own, across shadow roots:  a child of
+   * it, or inside what's in its drawer slot (a page layout's drawer drawn round its navigation, epic old-console-redo
+   * I35).
+   */
   private static navAround(element: Element): Element | undefined {
-    const box = E.closestAcrossShadow(element, `:has(> ${SITE_NAV})`)
-    return box?.querySelector(`:scope > ${SITE_NAV}`) ?? undefined
+    const box = E.closestAcrossShadow(element, `:has(> ${SITE_NAV}, > [slot="drawer"] ${SITE_NAV})`)
+    return box?.querySelector(`:scope > ${SITE_NAV}, :scope > [slot="drawer"] ${SITE_NAV}`) ?? undefined
   }
 
   /** The titles in `value`, a list of text:  any else left out. */

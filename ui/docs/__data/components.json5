@@ -40959,6 +40959,16 @@
           "description": "`nav`:  the docs site's look, its pages a tree with `appearance=\"nav\"`:  taller rows, the page shown a rounded box in the primary colour, and `band` pages as heading bands."
         },
         {
+          "name": "groups",
+          "kind": "enum",
+          "values": [
+            "wells",
+            "headings"
+          ],
+          "default": "wells",
+          "description": "How a group (`band` `group`) looks.  `wells` (the default):  an open group a slight inset well, its pages a step in from its label, folding as the person opens and closes it.  `headings`:  a small heading over its pages, always open, its pages in line with the rest, and a page's own pages beside a guide line."
+        },
+        {
           "name": "collapsed",
           "kind": "keyOnly",
           "description": "Only the icons, in one column:  each row's title its tooltip, a page with no icon its title's first letter, and a group with no icon a thin line.  None:  the titles beside the icons."
@@ -41135,7 +41145,16 @@
           "description": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for."
         }
       ],
-      "slots": [],
+      "slots": [
+        {
+          "name": "start",
+          "description": "Above its pages:  a logo, a picker."
+        },
+        {
+          "name": "end",
+          "description": "At its foot, below its pages, pushed to the bottom of the box it fills:  a row of buttons."
+        }
+      ],
       "events": [
         {
           "name": "ui-navigating",
@@ -41169,12 +41188,24 @@
         {
           "name": "tree",
           "description": "The `<ui-tree>` of pages."
+        },
+        {
+          "name": "start",
+          "description": "The box around the `start` slot."
+        },
+        {
+          "name": "end",
+          "description": "The box around the `end` slot, at its foot."
         }
       ],
       "states": [
         {
           "name": "collapsed",
           "description": "`collapsed`:  only the icons."
+        },
+        {
+          "name": "headings",
+          "description": "`groups=\"headings\"`:  its groups are headings."
         },
         {
           "name": "disabled",
@@ -68477,6 +68508,12 @@
           "name": "--ui-table-cell-padding-inline",
           "default": "0.785714em",
           "type": "length"
+        },
+        {
+          "name": "--ui-table-link-underline",
+          "default": "none",
+          "description": "A link in a cell: not underlined until it's hovered, as a console's tables draw one (epic old-console-redo I37).",
+          "type": "other"
         },
         {
           "name": "--ui-table-header-padding-block",

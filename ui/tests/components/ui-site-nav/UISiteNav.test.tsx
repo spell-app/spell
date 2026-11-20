@@ -278,6 +278,48 @@ describe("<ui-site-nav> pages' extras", () => {
     expect(went).toHaveLength(2)
   })
 
+  it('`groups="headings"`:  each group a plain heading, always open, going nowhere;  no well, no icon, its pages in line (old-console-redo I35)', async () => {
+    const withIcon: SiteNavPage[] = [{ ...GROUPS[0]!, icon: "palette" }, GROUPS[1]!]
+    const host = await navOf(withIcon, { current: "#/explore", appearance: "nav" })
+    host.setAttribute("groups", "headings")
+    await ShadowTree.settle(host)
+    expect(host.matches(":state(headings)")).toBe(true)
+    // both open, though only Design holds the page shown
+    expect(row(host, "Design").hasAttribute("open")).toBe(true)
+    expect(row(host, "Run").hasAttribute("open")).toBe(true)
+    expect(row(host, "Design").hasAttribute("icon")).toBe(false)
+    const went = vi.fn((event: Event) => event.preventDefault())
+    host.addEventListener("ui-navigating", went)
+    click(host, "Run")
+    await ElementFixture.settle()
+    expect(went).not.toHaveBeenCalled()
+    expect(row(host, "Run").hasAttribute("open")).toBe(true)
+    // no well round a group, and its pages where a top row's would be
+    expect(getComputedStyle(row(host, "Design")).outlineStyle).toBe("none")
+    const page = getComputedStyle(row(host, "Explore").shadowRoot!.querySelector<HTMLElement>('[part~="row"]')!)
+    // a top row's 0.75em at its 14px text, no step in
+    expect(parseFloat(page.paddingInlineStart)).toBe(0.75 * parseFloat(page.fontSize))
+  })
+
+  it("its `start` slot above its pages, its `end` slot at its foot, each drawn only with something in it (old-console-redo I35)", async () => {
+    const box = (await ElementFixture.render(
+      `<div style="display: flex; flex-direction: column; height: 600px"><ui-site-nav appearance="nav"></ui-site-nav></div>`
+    )) as HTMLElement
+    const host = box.querySelector<HTMLElement>("ui-site-nav")!
+    host.setAttribute("pages", JSON.stringify(GROUPS))
+    await ShadowTree.settle(host)
+    expect(host.shadowRoot!.querySelector('[part~="start"]')).toBeNull()
+    expect(host.shadowRoot!.querySelector('[part~="end"]')).toBeNull()
+    host.insertAdjacentHTML("afterbegin", '<b slot="start">Logo</b><b slot="end">Buttons</b>')
+    await ShadowTree.settle(host)
+    const start = host.shadowRoot!.querySelector<HTMLElement>('[part~="start"]')!
+    const end = host.shadowRoot!.querySelector<HTMLElement>('[part~="end"]')!
+    const nav = host.shadowRoot!.querySelector<HTMLElement>('[part~="nav"]')!
+    expect(start.getBoundingClientRect().bottom).toBeLessThanOrEqual(nav.getBoundingClientRect().top)
+    // at the bottom of the 600px box it fills
+    expect(Math.round(end.getBoundingClientRect().bottom - box.getBoundingClientRect().top)).toBe(600)
+  })
+
   it("a page with no icon beside pages with one keeps an icon's room;  `collapsed` shows its first letter", async () => {
     const host = await navOf(GROUPS, { current: "#/explore", appearance: "nav" })
     await ShadowTree.settle(host)

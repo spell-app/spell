@@ -44787,6 +44787,17 @@ export interface UISiteNavAttributes {
    */
   "prop:appearance"?: "nav"
   /**
+   * How a group (`band` `group`) looks.  `wells` (the default):  an open group a slight inset well, its pages a step in from its label, folding as the person opens and closes it.  `headings`:  a small heading over its pages, always open, its pages in line with the rest, and a page's own pages beside a guide line.
+   * - takes:  `wells` · `headings`
+   * - default:  `wells`
+   */
+  groups?: "wells" | "headings"
+  /**
+   * `groups`, as the DOM element's property.
+   * @deprecated write `groups` -- `prop:` stays only for compiled spell
+   */
+  "prop:groups"?: "wells" | "headings"
+  /**
    * Only the icons, in one column:  each row's title its tooltip, a page with no icon its title's first letter, and a group with no icon a thin line.  None:  the titles beside the icons.
    * - takes:  flag (present / absent)
    */
@@ -61496,6 +61507,9 @@ declare module "@solidjs/web/types/jsx.js" {
       /**
        * `<ui-site-nav>`:  A site nav lists a site's pages as a tree, the page shown marked;  a click goes to a page.
        * - also known as:  site navigation, side navigation, sidebar menu, nav menu, site map, page tree
+       * - slots:
+       *   - `start`:  Above its pages:  a logo, a picker.
+       *   - `end`:  At its foot, below its pages, pushed to the bottom of the box it fills:  a row of buttons.
        * - events:  `ui-navigating`, `ui-opening`, `ui-closing`, `ui-starred`
        */
       "ui-site-nav": UISiteNavJSXAttributes

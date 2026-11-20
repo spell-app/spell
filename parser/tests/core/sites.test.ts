@@ -149,6 +149,13 @@ class MainLayout extends PageLayout {
   }
 }
 
+/** A layout drawing its own drawer round the site's navigation (old-console-redo I35):  a logo above it, its groups headings. */
+class DrawerLayout extends PageLayout {
+  drawDrawer(): Drawing {
+    return h("ui-site-nav", { groups: "headings" }, h("b", { slot: "start" }, "Logo")) as unknown as Drawing
+  }
+}
+
 /** Another layout:  only a footer, its drawer the site's navigation. */
 class BareLayout extends PageLayout {
   drawFooter(): Drawing {
@@ -325,6 +332,27 @@ describe("a running site", () => {
         ]
       }
     ])
+  })
+
+  test("for a navigation of headings, a group of one page keeps its heading (old-console-redo I35)", () => {
+    const [home, inbox] = new Lobby().navPages({ headings: true })
+    expect(home).toMatchObject({ title: "Home", band: "group", pages: [{ title: "Home", href: "/" }] })
+    expect(inbox).toMatchObject({ title: "Mine", band: "group", pages: [{ title: "Inbox", href: "/inbox" }] })
+  })
+
+  test("leaves out a page `, not in the navigation`, and a group with no page left;  shown, it's below what's marked (old-console-redo I35)", async () => {
+    class Quiet extends Site {
+      static pages = [
+        { name: "films", page: "FilmsPage", address: "/films", title: "Films", group: "Films" },
+        { name: "settings", page: "FilmsPage", address: "/settings", title: "Settings", group: "Mine", unlisted: true },
+        { name: "patterns", page: "FilmsPage", address: "/patterns", title: "Patterns", group: "Mine", unlisted: true }
+      ]
+    }
+    const site = new Quiet()
+    expect(site.navPages({ headings: true }).map((page) => page.title)).toEqual(["Films"])
+    await site.showAddress("/settings")
+    expect(site.navCurrent()).toBe("")
+    expect(site.navShownBelow()).toEqual(["Settings"])
   })
 
   test("lists its links out among its pages, each where its line is, in its group (old-console-redo I6)", () => {
@@ -605,6 +633,30 @@ describe("a running site", () => {
       ]) {
         expect(part?.closest(".spell-site-frame")).toBe(frame)
       }
+    })
+
+    test("a layout drawing its drawer:  the `<ui-site-nav>` in it is the site's navigation, its own attributes kept (old-console-redo I35)", async () => {
+      new DrawerLayout()
+      class Drawn extends Site {
+        static pages = StarCharts.pages
+        static mainLayout = "DrawerLayout"
+      }
+      dispose?.()
+      const drawn = new Drawn()
+      dispose = render(() => core.drawThing(drawn) as never, element)
+      await drawn.showAddress("/films")
+      expect(await shown()).toContain("Films")
+      const nav = layout("DrawerLayout")?.querySelector(':scope > [slot="drawer"] ui-site-nav')
+      expect(nav?.getAttribute("groups")).toBe("headings")
+      expect(nav?.getAttribute("appearance")).toBe("nav")
+      expect(nav?.getAttribute("current")).toBe("/films")
+      // a group of one page keeps its heading, for a navigation of headings
+      expect(JSON.parse(nav?.getAttribute("pages") ?? "[]")[0]).toMatchObject({ title: "Archive", band: "group" })
+      expect(nav?.querySelector('[slot="start"]')?.textContent).toBe("Logo")
+      // a page picked in it is shown here
+      nav!.dispatchEvent(new CustomEvent("ui-navigating", { cancelable: true, detail: { href: "/films/a-new-hope" } }))
+      expect(await shown()).toContain("A New Hope")
+      expect(nav?.getAttribute("current")).toBe("/films")
     })
 
     test("no flash:  a page in the same layout redraws only the page, its menu and navigation the same elements", async () => {

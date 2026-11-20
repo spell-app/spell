@@ -59,6 +59,17 @@ export const siteNavVocabulary = {
         "rounded box in the primary colour, and `band` pages as heading bands."
     },
     {
+      name: "groups",
+      group: "appearance",
+      kind: "enum",
+      values: ["wells", "headings"],
+      default: "wells",
+      description:
+        "How a group (`band` `group`) looks.  `wells` (the default):  an open group a slight inset well, its pages a " +
+        "step in from its label, folding as the person opens and closes it.  `headings`:  a small heading over its " +
+        "pages, always open, its pages in line with the rest, and a page's own pages beside a guide line."
+    },
+    {
       name: "collapsed",
       group: "appearance",
       kind: "keyOnly",
@@ -104,12 +115,20 @@ export const siteNavVocabulary = {
         "nav its pages again with the new `starred`."
     }
   ],
-  slots: [],
+  slots: [
+    { name: "start", description: "Above its pages:  a logo, a picker." },
+    { name: "end", description: "At its foot, below its pages, pushed to the bottom of the box it fills:  a row of buttons." }
+  ],
   parts: [
     { name: "nav", description: "The navigation landmark around the tree." },
-    { name: "tree", description: "The `<ui-tree>` of pages." }
+    { name: "tree", description: "The `<ui-tree>` of pages." },
+    { name: "start", description: "The box around the `start` slot." },
+    { name: "end", description: "The box around the `end` slot, at its foot." }
   ],
-  states: [{ name: "collapsed", description: "`collapsed`:  only the icons." }],
+  states: [
+    { name: "collapsed", description: "`collapsed`:  only the icons." },
+    { name: "headings", description: '`groups="headings"`:  its groups are headings.' }
+  ],
   texts: [
     { key: "label", text: "Site", description: "What a screen reader calls the navigation, without `label`." },
     { key: "star", text: "Add {title} to favourites", description: "A page's star, not starred." },

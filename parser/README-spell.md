@@ -977,6 +977,8 @@ galaxy guide is a site
 
 - A page listed before any file declares it waits:  it runs as its title, and a line saying it isn't made yet.
 - `live=` is the real page it stands for:  its card in the site editor opens it.
+- `, not in the navigation` keeps a page out of the navigation:  it's reached by its address and the links to it
+  (a settings page behind a gear button).
 
 A site's navigation can also link OUT of the site, to a docs site or another app.
 The line is written like a page's, with an address in place of the page:
@@ -1013,6 +1015,9 @@ print page is a page, in the bare layout
 - Its slots:  `app menu` (the top bar), `page menu` (a row under it:  the page's family as tabs, unless it draws
   something else), `drawer` (the site's navigation, unless it draws its own), `left sidebar`, `right sidebar`, `footer`.
   A slot nothing draws takes no room.
+- A drawer it draws itself holds the site's navigation where it writes `<site-nav />`, its pages filled in;
+  around them, its own:  a logo in its `start` slot, a row of buttons in its `end` slot, at the drawer's foot.
+  `<site-nav groups="headings">` draws each group as a plain heading over its pages, always open.
 - Every page is in the `main layout`;  a page picks another, or none, at the end of its own line.
 - A page may draw a slot itself, `to draw its right sidebar`:  its own shows while it's shown.
 - A layout can build on another, `wide layout is a main layout`, drawing one slot again.

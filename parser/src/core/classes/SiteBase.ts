@@ -1,5 +1,5 @@
 import h from "@solidjs/h"
-import { For, createMemo } from "solid-js"
+import { For, createEffect, createMemo } from "solid-js"
 
 import { PrefStore, schemaOf } from "spell/util"
 import { waitUntil } from "spell/util/timing"
@@ -335,7 +335,9 @@ export class SiteBase extends App {
    * - Its page layout:  Spell UI's `<ui-page-layout>`, its slots drawn by the layout the page is in
    *   (`layoutNameFor()`):  its app menu, page menu, drawer, side bars and footer;  the page in its middle.
    *   - Its drawer holds the site's navigation, `<ui-site-nav>`, its pages the site's, nested as its lines nest them
-   *     (`navPages()`), unless the layout draws its drawer itself.
+   *     (`navPages()`), unless the layout draws its drawer itself:  then a `<site-nav>` in what it draws is the
+   *     site's navigation, its pages filled in (`fillNav()`), and what's around it the layout's own (a logo above
+   *     it, a row of buttons in its `end` slot;  epic old-console-redo I35).
    *   - A slot the page shown draws itself (`to draw its right sidebar`) is the page's while it's shown.
    * - Drawn ONCE per layout, and kept:  going to a page in the same layout redraws only the page, so nothing around
    *   it flashes;  a page in another layout shows that one, and the first is kept, hidden, as it was left.
@@ -449,7 +451,7 @@ export class SiteBase extends App {
       },
       layout?.drawDrawer === PageLayout.prototype.drawDrawer || !layout
         ? this.drawNav()
-        : this.drawSlot(layout, "drawDrawer", "drawer"),
+        : this.drawSlot(layout, "drawDrawer", "drawer", (drawing) => this.fillNavsIn(drawing)),
       layout && this.drawSlot(layout, "drawAppMenu", "menu"),
       layout && this.drawSlot(layout, "drawPageMenu", "page-menu"),
       layout && this.drawSlot(layout, "drawLeftSidebar", "left"),
@@ -467,7 +469,7 @@ export class SiteBase extends App {
    * - And when an edit changes the type of who draws it (`followsEditsOf()`):  a part added to the layout's footer
    *   shows at once (epic `editor` P35).
    */
-  private drawSlot(layout: PageLayout, slot: LayoutSlot, region: string): unknown {
+  private drawSlot(layout: PageLayout, slot: LayoutSlot, region: string, drawn?: (drawing: unknown) => void): unknown {
     const drawer = createMemo(() => {
       const showing = this.getState<Showing>("showing")
       const page =
@@ -477,6 +479,7 @@ export class SiteBase extends App {
     return () => {
       followsEditsOf(drawer())
       const drawing = made((drawer() as unknown as Record<LayoutSlot, () => unknown>)[slot]())
+      drawn?.(drawing)
       return drawing == null ? null : h("div", { slot: region, class: "spell-site-slot" }, drawing)
     }
   }
@@ -489,21 +492,66 @@ export class SiteBase extends App {
       appearance: "nav",
       remember: this.constructor.name,
       // functions:  `h()` reads a function on a dashed tag as a live value
-      // JSON text, which the attribute takes:  where Spell UI isn't loaded, a list would be written `[object Object]`
-      pages: () => JSON.stringify(this.navPages()),
+      ...this.navValues(),
+      // a listener, not an `on-ui-navigating` attribute:  Solid warns about a function on an attribute
+      ref: (element: Element) => this.followNav(element)
+    })
+  }
+
+  /**
+   * The live attributes of the site's navigation:  its pages, the one shown, and the pages below it it doesn't list.
+   * - JSON text, which the attribute takes:  where Spell UI isn't loaded, a list would be written `[object Object]`.
+   */
+  private navValues(headings = false): Record<string, () => string | undefined> {
+    return {
+      pages: () => JSON.stringify(this.navPages({ headings })),
       current: () => this.navCurrent(),
       // the pages it doesn't list, below `current`, for `<ui-site-breadcrumbs>` (epic old-console-redo I29)
-      "data-shown": () => JSON.stringify(this.navShownBelow()),
-      // a listener, not an `on-ui-navigating` attribute:  Solid warns about a function on an attribute
-      ref: (element: Element) =>
-        element.addEventListener(NAVIGATING, (event) => {
-          event.preventDefault()
-          const { href } = (event as CustomEvent<{ href: string }>).detail
-          // a link out of the site (`- it has a link to ...`):  a new tab, the site left as it is
-          if (SiteBase.isOwnAddress(href)) this.navigate(href)
-          else globalThis.open?.(href, "_blank", "noopener")
-        })
+      "data-shown": () => JSON.stringify(this.navShownBelow())
+    }
+  }
+
+  /** Go where `nav` goes:  one of the site's own pages shown here, a link out of the site in a new tab. */
+  private followNav(nav: Element): void {
+    nav.addEventListener(NAVIGATING, (event) => {
+      event.preventDefault()
+      const { href } = (event as CustomEvent<{ href: string }>).detail
+      // a link out of the site (`- it has a link to ...`):  a new tab, the site left as it is
+      if (SiteBase.isOwnAddress(href)) this.navigate(href)
+      else globalThis.open?.(href, "_blank", "noopener")
     })
+  }
+
+  /**
+   * Each `<ui-site-nav>` a layout's own drawer draws with no `pages` (`<site-nav groups="headings">`):  the site's
+   * navigation (`fillNav()`).  A navigation with its own `pages` is left as it is.
+   */
+  private fillNavsIn(drawing: unknown): void {
+    const elements = (Array.isArray(drawing) ? drawing.flat(Infinity) : [drawing]).filter(
+      (each): each is Element => typeof Element !== "undefined" && each instanceof Element
+    )
+    for (const element of elements) {
+      const navs = element.localName === SITE_NAV ? [element] : [...element.querySelectorAll(SITE_NAV)]
+      for (const nav of navs) if (!nav.hasAttribute("pages")) this.fillNav(nav)
+    }
+  }
+
+  /**
+   * Make `nav`, drawn by a layout, the site's navigation, as `drawNav()` draws it:  its live pages and the one shown,
+   * going to a page when one's picked, and kept open as each person leaves it;  its own attributes kept
+   * (`groups`, `appearance` ...).
+   * - Its effects belong to the drawing of the drawer:  drawn again, they go with it.
+   */
+  private fillNav(nav: Element): void {
+    nav.classList.add("spell-site-nav")
+    if (!nav.hasAttribute("appearance")) nav.setAttribute("appearance", "nav")
+    if (!nav.hasAttribute("remember")) nav.setAttribute("remember", this.constructor.name)
+    for (const [name, value] of Object.entries(this.navValues(nav.getAttribute("groups") === "headings")))
+      createEffect(value, (text) => {
+        if (text === undefined) nav.removeAttribute(name)
+        else nav.setAttribute(name, text)
+      })
+    this.followNav(nav)
   }
 
   /**
@@ -549,10 +597,16 @@ export class SiteBase extends App {
    * Its pages as its navigation lists them:  each one's title (its name without one), address and tags, its pages under it.
    * - A page with a parameter (`/films/:film`) isn't listed:  it's reached from a page, with a film to show.
    * - Its links out (`static links`, a page's `links`) among them, each where its line is (epic `old-console-redo` I6).
+   * - `headings`:  for a navigation whose groups are headings (`<site-nav groups="headings">`, I35), a group of one
+   *   page keeps its heading;  else it's that page alone (`underGroups()`).
    */
-  navPages(): SiteNavPage[] {
+  navPages({ headings = false }: { headings?: boolean } = {}): SiteNavPage[] {
     const listed = (pages: SitePageEntry[] | undefined, links: SiteLinkEntry[] | undefined): SiteNavPage[] =>
-      SiteBase.underGroups(SiteBase.withLinks(pages ?? [], links ?? []), (entry) => listed(entry.pages, entry.links))
+      SiteBase.underGroups(
+        SiteBase.withLinks(pages ?? [], links ?? []),
+        (entry) => listed(entry.pages, entry.links),
+        headings
+      )
     return listed(this.siteClass.pages, this.siteClass.links)
   }
 
@@ -581,7 +635,11 @@ export class SiteBase extends App {
    *   whatever its name, with no group's header over it (epic `mockup` I35, C2):  the page's own icon, else the group's.
    * - `listed` reads the rows under a page.
    */
-  private static underGroups(entries: NavEntry[], listed: (entry: SitePageEntry) => SiteNavPage[]): SiteNavPage[] {
+  private static underGroups(
+    entries: NavEntry[],
+    listed: (entry: SitePageEntry) => SiteNavPage[],
+    keepsLoneGroups = false
+  ): SiteNavPage[] {
     if (!entries.some((entry) => entry.group)) return SiteBase.navRows(entries, listed)
     const rows: SiteNavPage[] = []
     for (let at = 0; at < entries.length;) {
@@ -592,8 +650,12 @@ export class SiteBase extends App {
       const pages = SiteBase.navRows(run, listed)
       const [only] = pages
       if (!group) rows.push(...pages)
-      // a group of one listed page, whatever its name:  that page alone, no header (I35, C2)
-      else if (pages.length === 1 && only) {
+      // a group with no page listed (each `, not in the navigation`):  nothing (old-console-redo I35)
+      else if (!pages.length) {
+        // nothing
+      }
+      // a group of one listed page, whatever its name:  that page alone, no header (I35, C2);  a heading kept over it
+      else if (pages.length === 1 && only && !keepsLoneGroups) {
         rows.push({ ...only, ...(!only.icon && groupIcon && { icon: groupIcon }) })
       } else {
         // a group of links out only never holds the page shown, so never opens by itself:  it starts open (old-console-redo I26)
@@ -612,10 +674,13 @@ export class SiteBase extends App {
     return rows
   }
 
-  /** `entries` as navigation rows, each page with its pages:  one with a parameter isn't listed. */
+  /**
+   * `entries` as navigation rows, each page with its pages:  one with a parameter isn't listed, nor one whose line
+   * says `, not in the navigation` (`unlisted`).
+   */
   private static navRows(entries: NavEntry[], listed: (entry: SitePageEntry) => SiteNavPage[]): SiteNavPage[] {
     return entries
-      .filter((entry) => "link" in entry || !entry.params?.length)
+      .filter((entry) => "link" in entry || (!entry.params?.length && !entry.unlisted))
       .map((entry) => {
         // a link out:  its address, picked as any row is (the drawer opens it in a new tab)
         if ("link" in entry) {
@@ -646,7 +711,7 @@ export class SiteBase extends App {
    * (a film's page marks Films);  `""` for the not found and error pages.
    */
   navCurrent(): string {
-    const listed = this.shownPath().filter((entry) => !entry.params?.length)
+    const listed = this.shownPath().filter((entry) => !entry.params?.length && !entry.unlisted)
     return listed.at(-1)?.address ?? ""
   }
 
@@ -657,7 +722,7 @@ export class SiteBase extends App {
   navShownBelow(): string[] {
     const path = this.shownPath()
     let listed = path.length
-    while (listed > 0 && path[listed - 1]!.params?.length) listed--
+    while (listed > 0 && (path[listed - 1]!.params?.length || path[listed - 1]!.unlisted)) listed--
     return path.slice(listed).map((entry) => entry.title ?? entry.name)
   }
 
@@ -881,6 +946,9 @@ const TOGGLE = "ui-toggle"
 
 /** What `<ui-site-nav>` sends when a page is picked:  cancelled, the site shows it itself. */
 const NAVIGATING = "ui-navigating"
+
+/** The site navigation's tag:  the one SiteBase draws, or a layout's own drawer does (`fillNavsIn()`). */
+const SITE_NAV = "ui-site-nav"
 
 /** A page layout's slot drawings, each a method of the layout, or of a page that draws that slot itself. */
 type LayoutSlot = "drawDrawer" | "drawAppMenu" | "drawPageMenu" | "drawLeftSidebar" | "drawRightSidebar" | "drawFooter"

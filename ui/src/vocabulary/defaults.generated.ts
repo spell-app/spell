@@ -1577,6 +1577,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "current", kind: "string", group: "content" },
     { name: "label", kind: "string", group: "content" },
     { name: "appearance", kind: "valueOnly", group: "appearance", values: ["nav"] },
+    { name: "groups", kind: "enum", group: "appearance", values: ["wells", "headings"] },
     { name: "collapsed", kind: "keyOnly", group: "appearance" },
     { name: "remember", kind: "string", group: "behaviour" }
   ],
