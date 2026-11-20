@@ -446,7 +446,8 @@ const THE_ONE: readonly string[] = ["page", "overview"]
 const KIND_NAMES: Readonly<Record<string, string>> = {
   overview: "Overview",
   prose: "paragraph",
-  code: "code block"
+  code: "code block",
+  note: "note box"
 }
 
 /** Whether `written` and `name` are one name:  the same words, any case, spaces trimmed (as `epic whois` matches). */

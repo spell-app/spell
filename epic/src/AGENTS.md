@@ -2692,6 +2692,16 @@ the epic page shown in both tabs).
       - its `epic inbox wait feedback` hears every such page's Send (`PageInboxes.unowned()`)
       - its old name, `guide-changes`, is read as `feedback`:
         `epicNamed()`, for the `epic` commands, `comments gather --epic` and `comments list`
+  - NOTE BOXES (epic `epic-engine` T101):  an `<epic-text-box>` written in a guide's section is a comment on that
+    section, so the same Send hands its words to the same epic, with the bullhorns' comments.
+    - its section:  the one its `for` names, else the one around it;  the comment's kind is `note` ("note box")
+    - saved as typed (`add`, `edit`, emptied `delete`), its words not saved yet kept in this browser
+      (`spell-note-box:<path>#<anchor>`);  a Send saves them first
+    - the box shows its comment until Claude answers it, so no thread is drawn meanwhile;  answered, the box empties,
+      the thread shows, and the next words are a new comment
+    - the docs runtime's `drawNoteBoxes()` ([spell-doc-comments.js](tools/_assets/spell-doc-comments.js));
+      a details page's boxes stay its answer's (`AnswerForm`)
+    - before T101 a guide's box registered with the page's `AnswerForm`, and its words went nowhere
   - A click:  `POST /api/docs/comments/send`;  the comments waiting are sent (`GuideInbox` `sent`).
   - The epic's `epic inbox wait <name>` wakes on it, and prints each comment under its page.
     - The session answers each with `epic comments working` / `answer` (below), one at a time.
