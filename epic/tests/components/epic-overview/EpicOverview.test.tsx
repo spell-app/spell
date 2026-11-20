@@ -120,7 +120,7 @@ describe("<epic-overview> actions slot", () => {
     // the chevron at the row's start (Owen, 2026-10-25:  "put it on the left"), the page's buttons at its end
     expect(chevron.getBoundingClientRect().right).toBeLessThanOrEqual(button.getBoundingClientRect().left + 0.5)
     // its title in full, folded or open:  no tooltip (Owen, 2026-10-19;  J183's tooltip before)
-    expect(host.shadowRoot!.querySelector(".header")!.hasAttribute("title")).toBe(false)
+    expect(host.shadowRoot!.querySelector(".header")!.hasAttribute("data-tooltip")).toBe(false)
     button.click()
     await ElementFixture.tick()
     expect(host.matches(":state(open)")).toBe(false)

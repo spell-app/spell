@@ -3,15 +3,6 @@
 		Shape
 		<header>A shape is a three dimensional object displayed on a two dimensional plane.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#invoker-commands">Invoker commands</>
-			<item link="#methods-and-events">Methods and events</>
-			<item link="#accessibility">Accessibility</>
-			<item link="#framework-usage">Framework usage</>
-		</>
-	</>
 
 	<!-- USAGE:  how to use it (sides, flips, commands, methods, events), accessibility, framework snippets. -->
 	<section label="Using it">

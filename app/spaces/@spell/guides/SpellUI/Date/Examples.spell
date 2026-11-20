@@ -3,12 +3,6 @@
 		Date
 		<header>A date says when something happened, inline and small inside a feed event.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#owners">Owners</>
-			<item link="#content">Content</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  `<ui-date>` in each owner that gives it a look (from the owners' own pages and

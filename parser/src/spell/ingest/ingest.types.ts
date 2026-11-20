@@ -370,8 +370,16 @@ export type ServerTakes = {
   sortedWith?: string
   /** The question naming the fields it should give:  `fields`. */
   fieldsNamedIn?: string
-  /** What it calls how many and where from, for a list it says nothing of paging:  `limit` and `offset`. */
-  pagesWith?: { limit: string; offset: string }
+  /**
+   * What it calls how many and where from, for a list it says nothing of paging:  `limit` and `offset`.
+   * - Or what its OpenAPI description's lists take (epic `data` I140).
+   */
+  pagesWith?: {
+    limit: string
+    offset: string
+    /** The most it gives at a time, when its OpenAPI description says (its limit's `maximum`):  `it gives up to 500 at a time`. */
+    most?: number
+  }
 }
 
 /** The writes a look tried, one of each kind, because the person said it may (`--try-writes`;  epic `data` P30). */

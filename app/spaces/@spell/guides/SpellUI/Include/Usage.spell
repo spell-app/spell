@@ -4,17 +4,6 @@
 		<header>An include shows part of another page from this site in this one, loaded at once, when idle or when
               scrolled into view.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#the-included-markup">The included markup</>
-			<item link="#editing-and-saving">Editing and saving</>
-			<item link="#events">Events</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-		</>
-	</>
-
 	<!-- USAGE:  from the old Astro page's Behaviour, plus the vocabulary's events and the element's a11y. -->
 	<section label="Using it">
 		<markdown>

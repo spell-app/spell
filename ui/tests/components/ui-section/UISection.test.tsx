@@ -481,6 +481,28 @@ describe("<ui-section> sticky", () => {
     await expect.poll(() => outer.matches(":state(stuck)")).toBe(false)
   })
 
+  // epic `mockup` T55 (Owen:  "fade the white in as the heading scrolls up to the very top ... not a hard switch")
+  // - These tests run with reduced motion, so no fade:  none of the fill until it's stuck.  The fade itself (none of it
+  //   3em below, half of it half way, all of it stuck) was measured in Spell UI's Spell site, headless.
+  it("`--ui-section-sticky-fill: fade`:  plain in the flow;  stuck, all of its fill", async () => {
+    const scroller = await ElementFixture.render(
+      `<div style="height: 200px; overflow: auto; --ui-section-sticky-fill: fade; --ui-section-sticky-background: rgb(0 0 255)">` +
+        `<div style="height: 300px"></div>` +
+        `<ui-section id="faded" label="Faded" sticky><p style="height: 600px; margin: 0">A</p></ui-section>` +
+        `<div style="height: 600px"></div></div>`
+    )
+    const section = scroller.querySelector<SectionElement>("#faded")!
+    await ElementFixture.settle(scroller)
+    const { title } = parts(section)
+    expect(matchMedia("(prefers-reduced-motion: reduce)").matches).toBe(true)
+    scroller.scrollTop = 290
+    await nextFrame()
+    expect(getComputedStyle(title).backgroundColor).toBe("rgba(0, 0, 0, 0)")
+    scroller.scrollTop = 400
+    await expect.poll(() => section.matches(":state(stuck)")).toBe(true)
+    await expect.poll(() => getComputedStyle(title).backgroundColor).toBe("rgb(0, 0, 255)")
+  })
+
   it("stacks a nested sticky title just below its parent's", async () => {
     const { scroller, outer, inner } = await frame()
     scroller.scrollTop = 300

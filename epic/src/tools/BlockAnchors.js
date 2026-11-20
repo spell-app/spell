@@ -233,20 +233,40 @@ export function offsetIn(block, node, offset) {
 /**
  * Where `quote` is in `block`:  `{ start: [node, offset], end: [node, offset] }` for a DOM range, or `null`.
  * - white space matched loosely (a run of it is one space);  of several copies, the one nearest `offset`
+ * - a quote running across an inline element is found too:  `<code>&lt;ui-input&gt;</code>'s action` is quoted
+ *   "<ui-input>'s action", with no space where the code ends (epic `epic-engine` T107:  such a comment's thread went
+ *   to the bottom of its block, its quote never found);  the space `textRuns()` puts after each element is tried
+ *   first, then left out
  */
 export function quoteIn(block, quote, offset = 0) {
   const wanted = squash(quote)
   if (!wanted) return null
-  // the block's text squashed, each character's node and offset beside it
+  // the block's text squashed, each character's node and offset beside it;  the space after an element has no node
   const chars = []
   let space = true
   for (const run of textRuns(block))
     for (let at = 0; at < run.text.length; at++) {
       const isSpace = /\s/.test(run.text[at])
-      if (isSpace && space) continue
+      if (isSpace && space) {
+        // the text's own space after an element's:  that space is the text's, so it stays when those are left out
+        if (run.node && chars.at(-1) && !chars.at(-1).node) chars[chars.length - 1] = { char: " ", node: run.node, at }
+        continue
+      }
       chars.push({ char: isSpace ? " " : run.text[at], node: run.node, at })
       space = isSpace
     }
+  const textOnly = chars.filter((each) => each.node)
+  const found = nearestCopy(chars, wanted, offset) ?? nearestCopy(textOnly, wanted, offset)
+  if (!found) return null
+  const { first, last } = found
+  return { start: [first.node, first.at], end: [last.node, last.at + 1] }
+}
+
+/**
+ * Of `chars` (`quoteIn()`'s), the copy of `wanted` nearest `offset`:  its first and last characters;  `null` for none,
+ * or one starting or ending on an element's space
+ */
+function nearestCopy(chars, wanted, offset) {
   const text = chars.map((each) => each.char).join("")
   let best = -1
   for (let found = text.indexOf(wanted); found >= 0; found = text.indexOf(wanted, found + 1))
@@ -254,7 +274,7 @@ export function quoteIn(block, quote, offset = 0) {
   if (best < 0) return null
   const first = chars[best]
   const last = chars[best + wanted.length - 1]
-  return { start: [first.node, first.at], end: [last.node, last.at + 1] }
+  return first.node && last.node ? { first, last } : null
 }
 
 /** `block`'s text nodes, in order:  `{ node, text }`, a space after each element's;  added content skipped. */

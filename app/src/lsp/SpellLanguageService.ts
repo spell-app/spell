@@ -36,6 +36,7 @@ import { withoutAccents } from "spell/util/string"
 import { P } from "spell/parser/parser"
 import { MD, type InlineNode } from "spell/parser/markdown"
 import { SP } from "spell/parser/spell"
+import { BuiltInSounds } from "spell/ui/sounds"
 import { LSP } from "spell/app/lsp"
 
 /**
@@ -1871,6 +1872,7 @@ export class SpellLanguageService {
       this.tagItems(file, offset, typedLine, afterCaret) ??
       this.actionItems(file, offset, position, typedLine) ??
       this.attributeValueItems(file, offset, position, typedTag) ??
+      this.soundItems(file, offset, position, typedLine) ??
       this.attributeItems(file, offset, typedTag, afterCaret)
     if (tagItems) return { isIncomplete: false, items: tagItems }
     const atStatementStart = /^\s*[\p{L}\p{M}\d_-]*$/u.test(lineText)
@@ -1990,6 +1992,57 @@ export class SpellLanguageService {
         ...LSP.CompletionShapes.attribute(help, afterCaret, this.picksValues)
       }
     })
+  }
+
+  /**
+   * Spell's built-in sounds, as one's name is typed in quotes after `play`, `stop` or `load` (epic `mockup` P28):
+   * `play "card s` => `card slide`, `card shove` ... -- `undefined` anywhere else.
+   * - The words are the file's language's, read off its rules (`play_sound`, `stop_sound`, `load_sound`):
+   *   `reproducir "` too, its names Spanish (`deslizar carta`);  either language's name plays the sound.
+   * - First, in the app's code editor, "Pick a sound…":  it opens the sound picker at the caret, to listen first
+   *   (`PICK_VALUE_COMMAND`;  the editor says it runs it, `picksValues`).
+   * - Each replaces what's typed inside the quotes.
+   */
+  private soundItems(
+    file: SP.SpellFile,
+    offset: number,
+    position: Position,
+    lineText: string
+  ): CompletionItem[] | undefined {
+    const typing = SOUND_NAME_TYPED.exec(lineText)
+    if (!typing) return undefined
+    const [, verb, typed] = typing as unknown as [string, string, string]
+    const scope = this.scopeAt(file, offset)
+    const parser = scope.parser
+    if (!parser) return undefined
+    const verbs = SOUND_RULES.flatMap((name) => {
+      const rule = parser.rules[name]
+      return rule ? SpellLanguageService.firstWords(rule, { parser }) : []
+    })
+    if (!verbs.some((word) => word.toLowerCase() === verb.toLowerCase())) return undefined
+    const spanish = file.language.lang === "es"
+    const names = BuiltInSounds.all.map((sound) => (spanish ? sound.es : sound.name))
+    const range = { start: { line: position.line, character: position.character - typed.length }, end: position }
+    const texts = LSP.LspTexts.of(scope)
+    const items: CompletionItem[] = BuiltInSounds.all.map((sound, order) => ({
+      label: names[order]!,
+      kind: CompletionItemKind.Value,
+      detail: texts.text("builtInSound"),
+      sortText: String(order + 1).padStart(3, "0"),
+      textEdit: { range, newText: names[order]! }
+    }))
+    if (!this.picksValues) return items
+    const pick: CompletionItem = {
+      label: texts.text("pickSound"),
+      kind: CompletionItemKind.Event,
+      sortText: "000",
+      filterText: typed,
+      preselect: true,
+      insertText: typed,
+      textEdit: { range, newText: typed },
+      command: { title: "", command: PICK_VALUE_COMMAND, arguments: [{ kind: "sound" }, names] }
+    }
+    return [pick, ...items]
   }
 
   /**
@@ -3289,13 +3342,22 @@ const JSX_TAG_TYPED = /(?:(?:^|[\s>({])<\p{Ll}[\p{L}\p{M}\d_-]*|(?:^\s*|[>({])<)
  */
 const ATTRIBUTE_TYPED = /<(\p{L}[\p{L}\p{M}\d-]*)(\s[^<>]*?)?\s+[\p{L}-]*$/u
 
-/** An attribute's quoted value being typed at the end of a line:  its tag, its attribute, then what's typed, `<button color="pr`. */
 /**
  * The command a value's Pick row runs (epic `editor` T61):  the app's code editor opens the picker at the caret
  * (`ValuePopups`), handed the attribute's `SP.ComponentValuePicker` and its words.
  */
 export const PICK_VALUE_COMMAND = "spell.pickValue"
 
+/**
+ * A sound's name being typed in quotes after a word at the end of a line:  the word, then what's typed,
+ * `play "card s`;  `soundItems()` checks the word is one of the sound rules'.
+ */
+const SOUND_NAME_TYPED = /(?:^|\s)([\p{L}\p{M}]+)\s+"([^"]*)$/u
+
+/** The rules whose quoted value is a sound's name:  `play`, `stop`, `load` (`UI.en.ts`). */
+const SOUND_RULES = ["play_sound", "stop_sound", "load_sound"]
+
+/** An attribute's quoted value being typed at the end of a line:  its tag, its attribute, then what's typed, `<button color="pr`. */
 const ATTRIBUTE_VALUE_TYPED = /<(\p{L}[\p{L}\p{M}\d-]*)\s(?:[^<>]*\s)?([\p{L}\p{M}\d-]+)="([^"]*)$/u
 
 /** How far back `openTagBefore()` looks for its tag's `<`. */

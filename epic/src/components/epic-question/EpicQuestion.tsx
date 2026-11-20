@@ -5,7 +5,6 @@ import { E } from "spell/element"
 import { epicQuestionVocabulary } from "./EpicQuestion.en"
 
 import questionCSS from "./EpicQuestion.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicQuestion`
@@ -20,7 +19,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 export class EpicQuestion extends E.UIComponent<typeof epicQuestionVocabulary> {
   @E.proto static vocabulary = epicQuestionVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-question": questionCSS },
+    styleSheets: { "epic-question": questionCSS },
     // `disabled`:  only a look (the sheet dims it), so the text stays findable;  `loading`:  the shared spinner
     disabled: "its own",
     loading: "loader"

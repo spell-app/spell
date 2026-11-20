@@ -3,13 +3,6 @@
 		Container
 		<header>A container limits content to a maximum width.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#variations">Variations</>
-			<item link="#in-layouts">In layouts</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's container page, in its order (Types, Variations, then its Examples tab as "In layouts"),

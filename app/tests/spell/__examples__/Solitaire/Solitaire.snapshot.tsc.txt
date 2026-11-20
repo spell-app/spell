@@ -1,6 +1,6 @@
-686:13 TS2339 Property 'spacer' does not exist on type 'JSX.IntrinsicElements'.
-699:11 TS2339 Property 'spacer' does not exist on type 'JSX.IntrinsicElements'.
-808:24 TS2352 Conversion of type 'List<unknown> | undefined' to type 'boolean' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
-815:16 TS2339 Property 'removeWhere' does not exist on type 'boolean'.
-815:29 TS7006 Parameter 'card' implicitly has an 'any' type.
-817:24 TS2488 Type 'boolean' must have a '[Symbol.iterator]()' method that returns an iterator.
+689:13 TS2339 Property 'spacer' does not exist on type 'JSX.IntrinsicElements'.
+702:11 TS2339 Property 'spacer' does not exist on type 'JSX.IntrinsicElements'.
+811:24 TS2352 Conversion of type 'List<unknown> | undefined' to type 'boolean' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+818:16 TS2339 Property 'removeWhere' does not exist on type 'boolean'.
+818:29 TS7006 Parameter 'card' implicitly has an 'any' type.
+820:24 TS2488 Type 'boolean' must have a '[Symbol.iterator]()' method that returns an iterator.

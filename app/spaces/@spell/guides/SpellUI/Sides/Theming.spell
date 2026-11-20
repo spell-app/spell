@@ -3,12 +3,6 @@
 		Sides
 		<header>Sides edit four lengths at once, top, left, right and bottom, as a margin or a padding:  a number box per side.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#tokens">Tokens</>
-			<item link="#themes">Themes</>
-		</>
-	</>
 
 	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
 	<section label="Tokens">

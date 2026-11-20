@@ -3,11 +3,6 @@
 		Keys
 		<header>Keys show a keyboard shortcut as key caps, the way the reader's own keyboard writes it.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,

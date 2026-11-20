@@ -3,14 +3,6 @@
 		Search
 		<header>A search module allows a user to query for results from a selection of data.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#states">States</>
-			<item link="#variations">Variations</>
-			<item link="#more-examples">More Examples</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's search page, its Definition tab section by section (Types, States, Variations), then its

@@ -364,7 +364,15 @@ describe("the core contract:  a page draws a Python game as javascript does", ()
             input: `${JSON.stringify(click)}\n`
           })
           expect(session.status, `${name}'s session:\n${session.stderr}`).toBe(0)
-          expect(JSON.parse(session.stdout.trimEnd().split("\n").at(-1)!)).toBeInstanceOf(Array)
+          // what it answers, after its tests' lines:  its state, then the page's patches;
+          // and the sounds Auto Play asks the page to play, its cards moving (epic `mockup` P28)
+          const answered = session.stdout
+            .trimEnd()
+            .split("\n")
+            .filter((line) => /^[[{]/.test(line))
+            .map((line) => JSON.parse(line) as unknown)
+          expect(answered.some((message) => Array.isArray(message))).toBe(true)
+          expect(answered).toContainEqual(expect.objectContaining({ ui: "play" }))
         } finally {
           rmSync(folder, { recursive: true, force: true })
         }

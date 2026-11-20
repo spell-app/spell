@@ -1,0 +1,49 @@
+{
+  "spellVersion": "0.8.0",
+  "languages": [
+    "es"
+  ],
+  "provides": [
+    "CuentaAtrás"
+  ],
+  "statements": [
+    {
+      "type": "CuentaAtrás",
+      "superType": "App",
+      "defined": "/CuentaAtras.es.spell:135-1375"
+    },
+    {
+      "property": "hora",
+      "of": "CuentaAtrás",
+      "datatype": "date",
+      "defined": "/CuentaAtras.es.spell:167-272"
+    },
+    {
+      "syntax": "{operator:is_or_is_not} fin de semana",
+      "output": "es_fin_de_semana",
+      "rule": "method_postfix",
+      "of": "CuentaAtrás",
+      "kind": "method",
+      "name": "\"es fin de semana\"",
+      "returns": "choice",
+      "defined": "/CuentaAtras.es.spell:312-368"
+    },
+    {
+      "property": "tiempo_restante",
+      "asWritten": "tiempo restante",
+      "of": "CuentaAtrás",
+      "datatype": "number",
+      "measure": {
+        "dimension": "Duration",
+        "unit": "second"
+      },
+      "defined": "/CuentaAtras.es.spell:449-507"
+    }
+  ],
+  "codeLines": [
+    8,
+    12,
+    22,
+    27
+  ]
+}

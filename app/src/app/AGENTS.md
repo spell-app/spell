@@ -187,7 +187,7 @@ and in the app's build folder, `app/` at the app folder's root.
     and nothing of the look is in `codemirror.css`.
     - Spell:  [CodeMirrorBubbly](ui/codemirror/CodeMirrorBubbly.ts), from the parser's `SP.BubblyLayout`;
       a head's description at its band's right end, cut short there with a `…` when it doesn't fit
-      (`DescriptionRoom`, epic `codemirror` P7);  a drawing's tags as HTML's.
+      (`DescriptionRoom`, epic `codemirror` P7), its whole text then in Spell UI's tooltip (T20);  a drawing's tags as HTML's.
       - Every line one line tall (epic `codemirror` P7):  a block's feet drawn over the lines, in the blank line under it
         or along the bottom of its last line (`FeetWidget`), a row of HTML end tags one line tall;
         so CodeMirror's guess at a line it hasn't drawn is right, and a file's height never changes as it scrolls.
@@ -303,9 +303,11 @@ and in the app's build folder, `app/` at the app folder's root.
   - Suggestions show by themselves only where they help (epic `editor` P28):  a tag after `<`, an attribute inside a tag,
     a property after `its` / `'s` / `of`, ONE list, `SUGGEST_WHERE_IT_HELPS` in `codePopups.ts`;
     "Settings…" › "Suggest as you type" makes it everywhere, or never.
-    - What shows by itself as you type (the list, signature help) waits for the typing to pause, `HOVER_DELAY` (800 msec,
-      the page's `--ui-hover-delay`), each key starting the wait again (epic `codemirror` I22);
+    - What shows by itself as you type (the list, signature help) waits for the typing to pause, `hoverDelay()`
+      (the page's `--ui-hover-delay`, read live, 800 msec by default), each key starting the wait again (epic `codemirror` I22);
       Ctrl+Space, ⇧⌘Space and ⌥↓ show at once.
+      - Settings… › "Popup delay" (Short, Standard, Long) sets `--ui-hover-delay` on the page, so every hover, popup and
+        tooltip follows;  CodeMirror's own waits are made again as it changes (`CodeMirrorPopups.waiting()`;  epic `codemirror` T19).
     - Settings… drives the editors live:
       `codeMirrorOptionsFor()`, in a compartment ([CodeMirrorPopups](ui/codemirror/CodeMirrorPopups.ts)), following `codeChoices`, which `CodeSettings` sets.
     - Spell UI's tags and attributes say what each is, as listed and on hover:  the language service reads them

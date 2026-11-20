@@ -3,13 +3,6 @@
 		Site nav button
 		<header>A site nav button shows or hides the side navigation of the page layout around it:  its icons only and back on a wide page, slid in and out on a narrow one.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-		</>
-	</>
 
 	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
 	<section label="Using it">
@@ -18,7 +11,10 @@
 			it finds the layout around it, across shadow roots, and calls its `toggleDrawer()`.
 			A Spell site's page layout writes a bare `<site-nav-button slot="start" />` in its app menu.
 
-			- It takes no attributes of its own:  an item's, for its look in a menu
+			- `toggles="right"` (or `left`):  it shows and hides that side bar of the layout instead, `toggleSidebar()`,
+			  and says so in its words;  narrow, the layout hides that side bar behind it.
+			  Spell UI's own site puts one at its app menu's end, and one with `icon="close"` in the contents' header.
+			- Its other attributes are an item's, for its look in a menu
 			  (its `icon`, `aria-label` and `title` replace its own).
 			- With one inside it, the layout draws no menu button of its own at a narrow width.
 			- Outside a menu, it's a small basic button with the same icon.

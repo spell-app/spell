@@ -3,16 +3,6 @@
 		Dimmer
 		<header>A dimmer hides distractions to focus attention on particular content.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#showing-and-hiding">Showing and hiding</>
-			<item link="#events">Events</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-			<item link="#framework-usage">Framework usage</>
-		</>
-	</>
 
 	<!-- USAGE:  element vs page dimmer, `visible`, `closedby`, events, invokers, keyboard, accessibility, frameworks. -->
 	<section label="Using it">

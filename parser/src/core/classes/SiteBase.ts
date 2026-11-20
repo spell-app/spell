@@ -413,8 +413,9 @@ export class SiteBase extends App {
    * Layout `name`, drawn once:  `<ui-page-layout>`, each of its slots drawn by the layout, or the page shown when it
    * draws that slot itself, and the page in its middle while it's the layout shown.
    * - Hidden while another layout is shown, as it was left.
-   * - Its drawer's choice of only its icons (`drawer="compact"`) is remembered for each person, for each site and
-   *   layout (`isCompact()`).
+   * - Its drawer's choice of only its icons (`drawer="compact"`), or of none (`drawer="hidden"`), and its side bars
+   *   hidden (`right="hidden"`), are remembered for each person, for each site and layout (`regionState()`,
+   *   epic `mockup` T55).
    */
   private drawLayout(name: string): unknown {
     const isShown = () => this.shownLayoutName === name
@@ -428,12 +429,16 @@ export class SiteBase extends App {
         class: "spell-site",
         "data-layout": name || undefined,
         hidden: () => (isShown() ? undefined : ""),
-        drawer: () => (this.isCompact(name) ? COMPACT : undefined),
+        drawer: () => this.regionState(name, DRAWER),
+        left: () => this.regionState(name, LEFT),
+        right: () => this.regionState(name, RIGHT),
         // a listener, not an `on-ui-toggle` attribute:  Solid warns about a function on an attribute
         ref: (element: Element) =>
-          element.addEventListener(TOGGLE, (event) =>
-            this.rememberCompact(name, (event as CustomEvent<{ newState: string }>).detail.newState === COMPACT)
-          )
+          element.addEventListener(TOGGLE, (event) => {
+            const { region = DRAWER, newState } = (event as CustomEvent<{ region?: string; newState: string }>).detail
+            if (LAYOUT_REGIONS.includes(region as LayoutRegion))
+              this.rememberState(name, region as LayoutRegion, newState)
+          })
       },
       layout?.drawDrawer === PageLayout.prototype.drawDrawer || !layout
         ? this.drawNav()
@@ -491,23 +496,41 @@ export class SiteBase extends App {
 
   /**
    * Does layout `name`'s drawer show only its icons (`drawer="compact"`)?  Its `<ui-site-nav-button>` switches it.
-   * - Remembered for each person, for each site and layout, across pages and visits
-   *   (`PrefStore`, `spell-sites:<Site>.<Layout>.compact`).
+   * - `regionState()`'s, for the drawer.
    */
   isCompact(name: string): boolean {
-    const set = this.getState<boolean>(`compact:${name}`)
-    return set ?? PrefStore.getAt(this.compactKey(name)) === true
+    return this.regionState(name, DRAWER) === COMPACT
   }
 
-  /** Remember that layout `name`'s drawer shows only its icons, or all of it:  what its `ui-toggle` says. */
-  private rememberCompact(name: string, compact: boolean): void {
-    this.setState(`compact:${name}`, compact)
-    PrefStore.setAt(this.compactKey(name), compact || undefined)
+  /**
+   * How layout `name`'s region `region` is left, its attribute on `<ui-page-layout>`:  the drawer `compact` or
+   * `hidden`, a side bar `hidden`;  `undefined` while it's all there.  Its buttons switch it (`ui-toggle`).
+   * - Remembered for each person, for each site and layout, across pages and visits
+   *   (`PrefStore`, `spell-sites:<Site>.<Layout>.drawer`, `.right` ...).
+   * - A drawer left compact before there were other states:  `.compact`, `true`.
+   */
+  regionState(name: string, region: LayoutRegion): string | undefined {
+    const set = this.getState<string | null>(`${region}:${name}`)
+    if (set !== undefined) return set ?? undefined
+    const kept = PrefStore.getAt(this.regionKey(name, region))
+    if (typeof kept === "string") return kept
+    return region === DRAWER && PrefStore.getAt(this.regionKey(name, OLD_COMPACT_KEY)) === true ? COMPACT : undefined
   }
 
-  /** Where it remembers layout `name`'s `isCompact()`:  `spell-sites:<Site>.<Layout>.compact`. */
-  private compactKey(name: string): string {
-    return `${SITES_PREFS}:${this.constructor.name}.${name || BUILT_IN_KEY}.compact`
+  /**
+   * Remember layout `name`'s region `region` as its `ui-toggle` left it:  `newState`, or nothing while it's all there
+   * (`full`, `shown`).
+   */
+  private rememberState(name: string, region: LayoutRegion, newState: string): void {
+    const state = ALL_THERE.includes(newState) ? undefined : newState
+    this.setState(`${region}:${name}`, state ?? null)
+    PrefStore.setAt(this.regionKey(name, region), state)
+    if (region === DRAWER) PrefStore.setAt(this.regionKey(name, OLD_COMPACT_KEY), undefined)
+  }
+
+  /** Where it remembers layout `name`'s `region`:  `spell-sites:<Site>.<Layout>.<region>`. */
+  private regionKey(name: string, region: string): string {
+    return `${SITES_PREFS}:${this.constructor.name}.${name || BUILT_IN_KEY}.${region}`
   }
 
   /**
@@ -566,7 +589,9 @@ export class SiteBase extends App {
           id: entry.name,
           ...(entry.icon && { icon: entry.icon }),
           ...(entry.tab && { tab: entry.tab }),
-          ...(entry.tags && { tags: entry.tags })
+          ...(entry.tags && { tags: entry.tags }),
+          // the real page it stands for, which `<ui-site-links>` links to (epic `mockup` T55)
+          ...(entry.live && { live: entry.live })
         }
         return pages.length ? { ...page, pages } : page
       })
@@ -758,11 +783,12 @@ type SiteNavPage = {
   icon?: string
   tab?: string
   tags?: string[]
+  live?: string
   band?: "group"
   pages?: SiteNavPage[]
 }
 
-/** The store a site keeps what each person chose in:  `spell-sites:<Site>.<Layout>.compact`. */
+/** The store a site keeps what each person chose in:  `spell-sites:<Site>.<Layout>.drawer` ... */
 const SITES_PREFS = "spell-sites"
 
 /** The built-in frame's key in it:  a site with no main layout. */
@@ -776,6 +802,20 @@ const JUST_THE_PAGE = "-"
 
 /** `<ui-page-layout drawer>`'s word for a drawer that shows only its icons, and `ui-toggle`'s. */
 const COMPACT = "compact"
+
+/** The regions of `<ui-page-layout>` that close, each an attribute of it, and `ui-toggle`'s `region`. */
+const DRAWER = "drawer"
+const LEFT = "left"
+const RIGHT = "right"
+const LAYOUT_REGIONS = [DRAWER, LEFT, RIGHT] as const
+/** A region of `<ui-page-layout>` that closes. */
+export type LayoutRegion = (typeof LAYOUT_REGIONS)[number]
+
+/** `ui-toggle`'s words for a region all there:  nothing to remember. */
+const ALL_THERE = ["full", "shown"]
+
+/** Where a drawer left compact was remembered before the other states (`regionState()`). */
+const OLD_COMPACT_KEY = "compact"
 
 /** What `<ui-page-layout>` sends when its drawer switches between its icons only and all of it. */
 const TOGGLE = "ui-toggle"

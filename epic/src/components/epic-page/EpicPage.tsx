@@ -88,7 +88,6 @@ import collapseAllCSS from "spell/epic/components/epic-item/CollapseAll.css?inli
 import chipsCSS from "spell/epic/components/epic-section/StateChips.css?inline"
 import pageCSS from "./EpicPage.css?inline"
 import crumbsCSS from "./Crumbs.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicPage`
@@ -224,7 +223,6 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   @E.proto static vocabulary = epicPageVocabulary
   @E.protoMerged static elementSetup = {
     styleSheets: {
-      "epic-tooltip": tooltipCSS,
       "epic-page": pageCSS,
       "epic-crumbs": crumbsCSS,
       "epic-collapse-all": collapseAllCSS,
@@ -760,7 +758,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                 <span class="see-also-kind">
                   {this.translationForKey(SEE_ALSO_KINDS[page.kind]?.key ?? "seeAlsoDetails")}
                 </span>
-                <time datetime={page.updated} title={new Date(page.updated).toLocaleString()}>
+                <time datetime={page.updated} data-tooltip={new Date(page.updated).toLocaleString()}>
                   {PlanDates.formatDate(new Date(page.updated), false)}
                 </time>
               </li>
@@ -781,7 +779,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
             <button
               type="button"
               class={HEADING_COPY}
-              title={this.translationForKey("copyHeading", {
+              data-tooltip={this.translationForKey("copyHeading", {
                 name: this.isSaga ? (this.saga ?? "") : (this.epic ?? ""),
                 command: this.headingCommand()
               })}
@@ -803,7 +801,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                   appearance="basic"
                   color="violet"
                   icon="bed"
-                  title={this.translationForKey("bedtimeTip", { phases: phases() })}
+                  data-tooltip={this.translationForKey("bedtimeTip", { phases: phases() })}
                 >
                   <span class="bedtime">{this.translationForKey("bedtime", { phases: phases() })}</span>
                 </ui-label>
@@ -827,7 +825,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                     color={pillColorOf(step().color)}
                     icon={this.isStepTurning() ? undefined : step().icon}
                     link={step().href}
-                    title={this.stepTip()}
+                    data-tooltip={this.stepTip()}
                   >
                     {/* the phase building:  its circle turns, Spell UI's loading icon, as Send's while busy (I316) */}
                     <Show when={this.isStepTurning()}>
@@ -990,7 +988,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
           <a
             href={known()?.href ?? sagaHref(id)}
             target={`saga-${id}`}
-            title={known() ? this.translationForKey("sagaTip", { purpose: known()!.purpose }) : undefined}
+            data-tooltip={known() ? this.translationForKey("sagaTip", { purpose: known()!.purpose }) : undefined}
           >
             {known()?.title ?? id}
           </a>
@@ -1133,7 +1131,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
           type="button"
           class={[PILL, { flash: this.isCopied }]}
           part={this.partForName("pill")}
-          title={this.translationForKey("copyWait")}
+          data-tooltip={this.translationForKey("copyWait")}
           onClick={() => void this.copyWait()}
         >
           {idle()} <code>{this.waitCommand()}</code>
@@ -1144,7 +1142,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         type="button"
         class={[PILL, { airplane: isAirplane(), flash: this.isCopied }]}
         part={this.partForName("pill")}
-        title={this.translationForKey(isAirplane() ? "copyCommand" : "startReview")}
+        data-tooltip={this.translationForKey(isAirplane() ? "copyCommand" : "startReview")}
         onClick={() => void this.copyCommand()}
       >
         <Show
@@ -1193,7 +1191,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         type="button"
         class={[REVIEW_LINE, { flash: this.isCopied }]}
         part={this.partForName("review-line")}
-        title={this.translationForKey("copyCommand")}
+        data-tooltip={this.translationForKey("copyCommand")}
         onClick={() => void this.copyCommand()}
       >
         {this.icon(this.icons.copy)}
@@ -1201,7 +1199,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
           {this.translationForKey(isAirplane() ? "reviewLineAirplane" : "reviewLine")} <code>{this.command()}</code>
           <Show when={this.marks()?.listener}>
             {(words) => (
-              <span class={LISTENER} title={this.translationForKey("listeningTitle")}>
+              <span class={LISTENER} data-tooltip={this.translationForKey("listeningTitle")}>
                 {words()}
               </span>
             )}
@@ -1285,7 +1283,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
           class={GEAR}
           part={this.partForName("gear")}
           aria-label={this.translationForKey("gearTip")}
-          title={this.translationForKey("gearTip")}
+          data-tooltip={this.translationForKey("gearTip")}
         >
           {this.icon(this.icons.gear)}
         </button>
@@ -1308,7 +1306,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                   part={this.partForName("gear-row")}
                   role="menuitem"
                   value={FOCUS_ROW}
-                  title={this.translationForKey("focusModeTip")}
+                  data-tooltip={this.translationForKey("focusModeTip")}
                   tabindex="-1"
                   onClick={() => this.openFocus()}
                 >
@@ -1577,7 +1575,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   private hungNotice(): JSX.Element {
     return (
       <details class={HUNG} part={this.partForName("hung")}>
-        <summary title={this.translationForKey("hungTip")}>
+        <summary data-tooltip={this.translationForKey("hungTip")}>
           <span class="chevron" aria-hidden="true">
             {this.icons.chevron.svg}
           </span>

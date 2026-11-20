@@ -3,15 +3,6 @@
 		Zoom
 		<header>A zoom shows something small in the page, and full size over it on a click.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#attributes">Attributes</>
-			<item link="#slots">Slots</>
-			<item link="#parts">Parts</>
-			<item link="#states">States</>
-			<item link="#texts">Texts</>
-		</>
-	</>
 
 	<!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
 	<section label="Attributes">

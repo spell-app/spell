@@ -3,16 +3,6 @@
 		Flyout
 		<header>A flyout is a modal that slides in from a side of the page.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#opening-it">Opening it</>
-			<item link="#events">Events</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-			<item link="#framework-usage">Framework usage</>
-		</>
-	</>
 
 	<!-- USAGE:  what a flyout is, opening, dismissal, events, keyboard, accessibility, frameworks. -->
 	<section label="Using it">

@@ -13,7 +13,6 @@ import {
 import { epicSendVocabulary } from "./EpicSend.en"
 
 import sendCSS from "./EpicSend.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicSend`
@@ -40,7 +39,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 export class EpicSend extends E.UIComponent<typeof epicSendVocabulary> {
   @E.proto static vocabulary = epicSendVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-send": sendCSS },
+    styleSheets: { "epic-send": sendCSS },
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
 
@@ -130,7 +129,7 @@ export class EpicSend extends E.UIComponent<typeof epicSendVocabulary> {
             {this.stateLine.text}
           </span>
           <Show when={this.draftLine.text && !this.draftLine.isError}>
-            <span class={DRAFT} part={this.partForName("draft")} title={this.draftLine.text}>
+            <span class={DRAFT} part={this.partForName("draft")} data-tooltip={this.draftLine.text}>
               {this.draftLine.text}
             </span>
           </Show>
@@ -147,7 +146,7 @@ export class EpicSend extends E.UIComponent<typeof epicSendVocabulary> {
               class={WHO}
               part={this.partForName("who")}
               data-listening={this.listenLine.isListening ? "" : undefined}
-              title={this.listenLine.title}
+              data-tooltip={this.listenLine.title}
             >
               {this.listenLine.text}
             </span>

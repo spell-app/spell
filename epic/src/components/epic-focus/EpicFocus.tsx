@@ -430,7 +430,7 @@ export class EpicFocus extends E.UIComponent<EpicFocusVocabulary> {
               size="mini"
               icon="xmark"
               aria-label={this.translationForKey("closeTip")}
-              title={this.translationForKey("closeTip")}
+              data-tooltip={this.translationForKey("closeTip")}
               onClick={() => this.close()}
             />
           </div>
@@ -465,7 +465,7 @@ export class EpicFocus extends E.UIComponent<EpicFocusVocabulary> {
               class="back"
               part={this.partForName("back")}
               appearance="basic"
-              title={this.translationForKey("backTip")}
+              data-tooltip={this.translationForKey("backTip")}
               disabled={this.atEnd(-1) ? "" : undefined}
               onClick={() => this.move(-1)}
             >
@@ -478,7 +478,7 @@ export class EpicFocus extends E.UIComponent<EpicFocusVocabulary> {
               appearance="primary"
               icon="chevron right"
               icon-position="right"
-              title={this.translationForKey("nextTip")}
+              data-tooltip={this.translationForKey("nextTip")}
               disabled={this.atEnd(1) ? "" : undefined}
               onClick={() => this.move(1)}
             >
@@ -511,7 +511,7 @@ export class EpicFocus extends E.UIComponent<EpicFocusVocabulary> {
                 <ui-item
                   data-kind={look.kind}
                   selected={this.tab === look.kind ? "" : undefined}
-                  title={this.translationForKey("tabTip", { tab: name(), count: count() })}
+                  data-tooltip={this.translationForKey("tabTip", { tab: name(), count: count() })}
                   onClick={() => this.pickTab(look.kind)}
                 >
                   <ui-icon name={look.icon} />

@@ -3,17 +3,6 @@
 		Form
 		<header>A form displays a set of related user input fields in a structured way.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#content">Content</>
-			<item link="#form-states">Form States</>
-			<item link="#field-states">Field States</>
-			<item link="#form-variations">Form Variations</>
-			<item link="#field-variations">Field Variations</>
-			<item link="#group-variations">Group Variations</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's form page, section by section, in its order (Types, Content, Form States, Field States, Form

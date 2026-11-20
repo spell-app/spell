@@ -1,4 +1,4 @@
-import { after, TopLayerTip, type CancelablePromise } from "spell/ui/util"
+import { after, cssSecondsFor, flatParentFor, TopLayerTip, type CancelablePromise } from "spell/ui/util"
 
 import type { Browser } from "./Browser"
 
@@ -13,6 +13,8 @@ import type { Browser } from "./Browser"
  * - The bubble and a box over the target live at the end of `<body>`:
  *   an anchor name only reaches its own tree, and a target may be in a shadow root.
  * - A target with no box of its own (`display: contents`, a `<ui-item>`) shows it at its drawn boxes (`boxOf()`).
+ * - A target partly cut off by a box around it (`overflow: hidden`, a text cut short with a `…`) shows it at the part
+ *   that shows (`visiblePartOf()`).
  * - It takes the target's `--ui-tooltip-*` values as they resolve there, so a theme around the target still shows.
  * - When it shows:
  *   - the pointer on a target:  after `--ui-tooltip-delay` (by default `--ui-hover-delay`)
@@ -33,6 +35,8 @@ export class DataTooltips {
   private box: HTMLElement | undefined
   /** The target the bubble's showing. */
   private shown: Element | undefined
+  /** The innermost element the pointer was last over (`onPointerMove()`). */
+  private pointedAt: EventTarget | undefined
   /** The target under the pointer. */
   private hovered: Element | undefined
   /** The target holding keyboard focus. */
@@ -56,6 +60,7 @@ export class DataTooltips {
     if (!popover || !anchorPositioning) return
     document.documentElement.setAttribute(STAND_DOWN, "")
     document.addEventListener("pointerover", this.onPointerOver, true)
+    document.addEventListener("pointermove", this.onPointerMove, { capture: true, passive: true })
     document.addEventListener("pointerout", this.onPointerOut, true)
     document.addEventListener("focusin", this.onFocusIn, true)
     document.addEventListener("focusout", this.onFocusOut, true)
@@ -69,13 +74,25 @@ export class DataTooltips {
   ////////////////
 
   private readonly onPointerOver = (event: Event) => {
+    this.pointedAt = event.composedPath()[0]
     this.hovered = tooltipTargetIn(event)
     this.update()
+  }
+
+  /**
+   * The pointer moved onto another element with no `pointerover` saying so:  Chromium sometimes sends none, on an
+   * epic page's sticky header (headless Chromium, 2026-11-19;  `:hover` moved, the boundary events didn't).
+   * - Only when the innermost element under it changed:  a move inside one element costs a comparison.
+   */
+  private readonly onPointerMove = (event: Event) => {
+    if (event.composedPath()[0] === this.pointedAt) return
+    this.onPointerOver(event)
   }
 
   /** The pointer left the window:  no `pointerover` comes to say so. */
   private readonly onPointerOut = (event: Event) => {
     if ((event as PointerEvent).relatedTarget) return
+    this.pointedAt = undefined
     this.hovered = undefined
     this.update()
   }
@@ -250,13 +267,13 @@ const ARROW_TOKEN = "--ui-tooltip-arrow-at"
 const ARROW_INSET = 12
 
 /**
- * Where `target` is drawn, in the window.
+ * Where `target` is drawn, in the window:  the part of it that shows (`visiblePartOf()`).
  * - A target with no box of its own (`display: contents`:  a `<ui-item>`) is where its shadow root's boxes are,
  *   else its children's, all together.
  */
 function boxOf(target: Element): DOMRect {
   const own = target.getBoundingClientRect()
-  if (own.width || own.height || getComputedStyle(target).display !== CONTENTS) return own
+  if (own.width || own.height || getComputedStyle(target).display !== CONTENTS) return visiblePartOf(target, own)
   const parts = [...(target.shadowRoot?.children ?? []), ...target.children]
     .map((part) => part.getBoundingClientRect())
     .filter((rect) => rect.width || rect.height)
@@ -267,6 +284,34 @@ function boxOf(target: Element): DOMRect {
   const bottom = Math.max(...parts.map((rect) => rect.bottom))
   return new DOMRect(left, top, right - left, bottom - top)
 }
+
+/**
+ * The part of `box`, `target`'s, that the boxes around it don't cut off, across shadow roots:
+ * e.g. a description cut short with a `…` (the editor's code, epic `codemirror` T20), whose text runs on unseen.
+ * - Only boxes that clip (`overflow` other than `visible`), each way on its own.
+ * - Nothing of it shows:  `box` as it is.
+ */
+function visiblePartOf(target: Element, box: DOMRect): DOMRect {
+  let { left, top, right, bottom } = box
+  for (let around = flatParentFor(target); around; around = flatParentFor(around)) {
+    const { overflowX, overflowY } = getComputedStyle(around)
+    if (overflowX === VISIBLE && overflowY === VISIBLE) continue
+    const clip = around.getBoundingClientRect()
+    if (overflowX !== VISIBLE) {
+      left = Math.max(left, clip.left)
+      right = Math.min(right, clip.right)
+    }
+    if (overflowY !== VISIBLE) {
+      top = Math.max(top, clip.top)
+      bottom = Math.min(bottom, clip.bottom)
+    }
+  }
+  if (right <= left || bottom <= top) return box
+  return new DOMRect(left, top, right - left, bottom - top)
+}
+
+/** `overflow` of a box that cuts nothing off. */
+const VISIBLE = "visible"
 
 /** `display` of a target with no box of its own. */
 const CONTENTS = "contents"
@@ -294,9 +339,5 @@ function tooltipTargetIn(event: Event): Element | undefined {
 
 /** How long a hover on `target` waits, in seconds:  `--ui-tooltip-delay`, else `--ui-hover-delay`:  `800ms`, `2s`. */
 function delayOf(target: Element): number {
-  const style = getComputedStyle(target)
-  const value = (style.getPropertyValue("--ui-tooltip-delay") || style.getPropertyValue("--ui-hover-delay")).trim()
-  const seconds = parseFloat(value)
-  if (Number.isNaN(seconds)) return 0
-  return value.endsWith("ms") ? seconds / 1000 : seconds
+  return cssSecondsFor(target, "--ui-tooltip-delay", "--ui-hover-delay") ?? 0
 }

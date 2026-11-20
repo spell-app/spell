@@ -13,6 +13,7 @@ import {
   CODE_POPUP_DEFAULTS,
   codeHover,
   codeMirrorOptionsFor,
+  hoverDelay,
   type CodePopupChoices
 } from "spell/app/app/ui/codePopups"
 import { CodeMirrorPopups } from "spell/app/app/ui/codemirror"
@@ -393,6 +394,40 @@ describe("CodeSettings", () => {
     flush()
     expect(host.querySelector(".CodeSettingsPanel")).toBeNull()
   })
+
+  test("Popup delay:  Short, Standard, Long;  it sets the page's hover delay, every popup's and tooltip's, and is remembered", async () => {
+    setEditor("file", fakeFile("test-project/one.js", "one\n"))
+    const host = await mount(() => <InputRoot />)
+    await waitForInputEditor(host)
+    CodeSettings.toggleShowing(true)
+    cleanups.push(() => CodeSettings.toggleShowing(false))
+    flush()
+    await ElementFixture.settle(host)
+    const delay = host.querySelector<HTMLElement & { value: string }>(
+      ".CodeSettingsPanel ui-select#CodeSettings-popupDelay"
+    )!
+    expect(delay.value).toBe("standard")
+    expect([...delay.querySelectorAll("ui-item")].map(text)).toEqual([
+      "Short:  0.4 seconds",
+      "Standard:  0.8 seconds",
+      "Long:  1.5 seconds"
+    ])
+    const root = document.documentElement
+    expect(root.style.getPropertyValue("--ui-hover-delay")).toBe("")
+
+    cleanups.push(forgetChoices)
+    delay.dispatchEvent(new CustomEvent("ui-changed", { detail: { value: "long" } }))
+    flush()
+    expect(root.style.getPropertyValue("--ui-hover-delay")).toBe("1.5s")
+    expect(hoverDelay()).toBe(1.5)
+    expect(editorPrefs.get("codePopupDelay")).toBe("long")
+
+    delay.dispatchEvent(new CustomEvent("ui-changed", { detail: { value: "standard" } }))
+    flush()
+    // the page's own again:  its theme's, 800 msec
+    expect(root.style.getPropertyValue("--ui-hover-delay")).toBe("")
+    expect(hoverDelay()).toBe(0.8)
+  })
 })
 
 ////////////////
@@ -410,7 +445,8 @@ function forgetChoices() {
   for (const [key, value] of Object.entries(CODE_POPUP_DEFAULTS)) {
     CodeSettings.choose(key as keyof CodePopupChoices, value as never)
   }
-  for (const pref of ["codeHover", "codeSuggest", "codeSuggestDetails", "codeParameterHints"]) editorPrefs.forget(pref)
+  for (const pref of ["codeHover", "codeSuggest", "codeSuggestDetails", "codeParameterHints", "codePopupDelay"])
+    editorPrefs.forget(pref)
 }
 
 /**

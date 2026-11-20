@@ -3,13 +3,6 @@
 		Textarea
 		<header>A textarea is a multi-line field used to elicit a longer response.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#states">States</>
-			<item link="#variations">Variations</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  `<ui-textarea>`, moved here from the input page when it got its own page (epic ui-docs-rework

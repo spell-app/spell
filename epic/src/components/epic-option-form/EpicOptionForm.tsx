@@ -10,7 +10,6 @@ import type { DOMTextBoxElement } from "spell/epic/components/epic-text-box/Epic
 import { epicOptionFormVocabulary } from "./EpicOptionForm.en"
 
 import formCSS from "./EpicOptionForm.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `<epic-option-form>`
@@ -40,7 +39,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 export class EpicOptionForm extends E.UIComponent<typeof epicOptionFormVocabulary> {
   @E.proto static vocabulary = epicOptionFormVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-option-form": formCSS },
+    styleSheets: { "epic-option-form": formCSS },
     // the form's box takes the focus itself
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
@@ -107,11 +106,16 @@ export class EpicOptionForm extends E.UIComponent<typeof epicOptionFormVocabular
           (label) => this.removePicture(label)
         )}
         <span class="actions" part={this.partForName("actions")}>
-          <button type="submit" data-color="green" disabled={this.isSaving} title={this.translationForKey("saveTip")}>
+          <button
+            type="submit"
+            data-color="green"
+            disabled={this.isSaving}
+            data-tooltip={this.translationForKey("saveTip")}
+          >
             <ui-icon name="check" />
             {this.submit ?? this.translationForKey("save")}
           </button>
-          <button type="button" title={this.translationForKey("cancelTip")} onClick={() => this.cancel()}>
+          <button type="button" data-tooltip={this.translationForKey("cancelTip")} onClick={() => this.cancel()}>
             {this.translationForKey("cancel")}
           </button>
           {/* VS Code's side bar never lets a dragged file reach the page:  a chooser does */}
@@ -120,7 +124,7 @@ export class EpicOptionForm extends E.UIComponent<typeof epicOptionFormVocabular
             class="choose"
             part={this.partForName("choose")}
             aria-label={this.translationForKey("choose")}
-            title={this.translationForKey("choose")}
+            data-tooltip={this.translationForKey("choose")}
             onClick={(event: MouseEvent) =>
               (event.currentTarget as HTMLElement).parentElement
                 ?.querySelector<HTMLInputElement>("input[type=file]")

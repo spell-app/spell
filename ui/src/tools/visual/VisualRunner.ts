@@ -101,6 +101,9 @@ export class VisualRunner {
   /** Run `playwright test` with `env`;  resolves with its exit code. */
   private playwright(env: NodeJS.ProcessEnv): Promise<number> {
     const args = [
+      // Through `tsx`:  the config and spec import by package name, with no extension, which plain node can't find
+      "--import",
+      "tsx",
       `${NodePackage.need("@playwright/test")}/cli.js`,
       "test",
       "--config",

@@ -53,7 +53,7 @@ describe("<epic-comment-pane>", () => {
     const fresh = await pane(undefined)
     expect({
       headline: part(fresh, "header").textContent,
-      tip: part(fresh, "header").title,
+      tip: part(fresh, "header").dataset.tooltip,
       buttons: fresh.shadowRoot!.querySelectorAll("ui-button").length,
       floppy: !!fresh.shadowRoot!.querySelector(".floppy"),
       role: (fresh as unknown as { internals: ElementInternals }).internals.role,
@@ -75,7 +75,7 @@ describe("<epic-comment-pane>", () => {
     const floppy = saved.shadowRoot!.querySelector<HTMLElement>(".floppy")!
     expect([
       saved.shadowRoot!.querySelectorAll("ui-button").length,
-      floppy.title,
+      floppy.dataset.tooltip,
       floppy.hasAttribute("data-failed")
     ]).toEqual([2, "Not saved:  offline (kept in this browser)", true])
     saved.remove()

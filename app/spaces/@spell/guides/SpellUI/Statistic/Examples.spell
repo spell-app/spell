@@ -3,13 +3,6 @@
 		Statistic
 		<header>A statistic emphasizes the current value of an attribute.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#content">Content</>
-			<item link="#variations">Variations</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's statistic page, section by section, in its order (Types, Content, Variations).

@@ -3,19 +3,6 @@
 		Dropdown
 		<header>A dropdown allows a user to select a value from a series of options.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#content">Content</>
-			<item link="#states">States</>
-			<item link="#variations">Variations</>
-			<item link="#selection-dropdowns">Selection Dropdowns</>
-			<item link="#remote-content">Remote Content</>
-			<item link="#menus">Menus</>
-			<item link="#adjusting-actions">Adjusting Actions</>
-			<item link="#coupling">Coupling</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's dropdown page, section by section, in its order (Types, Content, States, Variations, then

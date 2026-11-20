@@ -4,16 +4,6 @@
 		<header>A rail is used to show accompanying content outside the boundaries of the main view of a
               site.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#when-to-use">When to use</>
-			<item link="#adjusting-sizes">Adjusting sizes</>
-			<item link="#using-it">Using it</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-		</>
-	</>
-
 	<!-- USAGE:  when to use a rail, how it's positioned, accessibility. -->
 	<section label="When to use">
 		<markdown>

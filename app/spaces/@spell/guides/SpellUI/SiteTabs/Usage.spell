@@ -3,13 +3,6 @@
 		Site tabs
 		<header>Site tabs show the page's family as a row of tabs:  the parent page first, the page shown selected, each a link.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-		</>
-	</>
 
 	<section label="Using it">
 		<markdown>
@@ -17,6 +10,9 @@
 			it follows the navigation around it, its pages and the page it marks shown. In a Spell site its page layout draws
 			them, in the row under its app menu (its `page menu`), so no page writes them.
 
+			- `appearance="header"`:  a switch for an app menu's middle, the look of the editor's Run | Edit,
+			  as wide as its tabs.  Spell UI's own site draws it there, `<site-tabs appearance="header" />`,
+			  with no row of tabs under the menu.
 			- Elsewhere, hand it the same `pages` you hand `<ui-site-nav>`.
 
 			- `pages`: each page's `title` and `href`, its `pages` under it.

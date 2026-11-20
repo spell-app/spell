@@ -287,7 +287,8 @@ these are the verbs under it.
 | `epic requests <epic>` | lists every request sent to an epic, and where each one went |
 | `epic file <epic>#P3 <rN>` | files a request into a phase:  its words, context and screenshots into the phase's Requests field, the request marked filed there |
 | `epic file <epic>#T5 <rN>` | files a request into a todo:  its words and context at the end of the todo's text, its screenshots as the todo's pictures, the todo marked requested (light orange once done) |
-| `epic file <epic> <rN> "same as T12"` | only for a duplicate:  marks the request, naming the todo or phase it duplicates;  every other request becomes a todo or a phase |
+| `epic file <epic>#I5 <rN>` | files a bug report into an issue, as into a todo |
+| `epic file <epic> <rN> "same as T12"` | only for a duplicate:  marks the request, naming the todo or phase it duplicates;  every other request becomes an issue, a todo or a phase |
 | `epic home [<epic>]` | prints the tooling home, the epic that requests about the tooling itself go to;  with an epic, sets it |
 | `epic merge <epic> [--ditch] [--as <agent>]` | puts a standing epic's phase onto `main` at once, fast-forward only, in each repo its branch has commits in, taking `main` into the branch first when it moved;  it works on the main checkout from anywhere.  A stray snapshot or generated file there is moved aside first;  `--ditch` moves up to 3 others too, once you agree;  `--as`:  the agent merging, whose own claimed files never block it.  A merge that changed a lockfile or a `package.json` installs the packages there, then restarts its page server and editor;  a failed install leaves the merge in, and says what to run.  One merge at a time on the machine (`epic turns`).  Refuses, in one line, where `main` takes only pull requests |
 

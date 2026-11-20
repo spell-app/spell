@@ -4,14 +4,6 @@
 		<header>A root loads the components inside it on demand, sets their theme, size, icons and emoji, and shows
               them once they're ready.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#while-loading">While loading</>
-			<item link="#icons-and-emoji">Icons and emoji</>
-		</>
-	</>
-
 	<!--
 		EXAMPLES:  ours only, no Fomantic page.  The old Astro page's examples, restyled.  This page itself runs inside a
 		`<ui-root display="immediately">`, which loads every example's components;  the roots below are NESTED in it.

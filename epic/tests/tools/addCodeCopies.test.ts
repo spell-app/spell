@@ -25,7 +25,7 @@ afterEach(() => {
 
 // Owen, 2026-10-29 (epic `epic-engine` I182), on epic-friend's M1:  "this should have a copy icon on the left"
 describe("addCodeCopies():  a copy button at the left of every code block", () => {
-  test("a `<pre><code>` gets one, first in the pre:  a mini circular Spell UI button, titled Copy", () => {
+  test("a `<pre><code>` gets one, first in the pre:  a mini circular Spell UI button, its tooltip Copy", () => {
     const main = mainOf(`<epic-field label="Step">1. In Terminal:<pre><code>${COMMAND}</code></pre></epic-field>`)
     addCodeCopies(main)
     const [button] = buttonsIn(main)
@@ -36,7 +36,7 @@ describe("addCodeCopies():  a copy button at the left of every code block", () =
       appearance: "circular basic",
       size: "mini",
       icon: "copy",
-      title: "Copy",
+      "data-tooltip": "Copy",
       "aria-label": "Copy",
       "data-spell-added": ""
     }))

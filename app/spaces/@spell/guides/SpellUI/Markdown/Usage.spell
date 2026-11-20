@@ -4,16 +4,6 @@
 		<header>Markdown renders GitHub-flavoured markdown -- tables, task lists, code blocks -- from the element's
               own text or a file on this site.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#rendering">Rendering</>
-			<item link="#events">Events</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-		</>
-	</>
-
 	<!-- USAGE:  from the old Astro page's Behaviour, plus the vocabulary's events and the shadow markup's a11y. -->
 	<section label="Using it">
 		<markdown>

@@ -54,6 +54,7 @@ export class Calculadora extends App {
   }
 
   borrar() {
+    core.play("toque")
     this.entrada = ""
     this.izquierdo = ""
     this.operador = ""
@@ -62,6 +63,7 @@ export class Calculadora extends App {
 
   /** Igual:  el total pasa a ser el número izquierdo, listo para el siguiente operador */
   terminar() {
+    core.play("toque")
     if (!this.derecho) return
     this.izquierdo = `${this.total}`
     this.operador = ""
@@ -71,6 +73,7 @@ export class Calculadora extends App {
 
   /** Un dígito, o el punto decimal:  al final del número que se escribe, el izquierdo hasta que haya un operador */
   pulsarDígito(dígito) {
+    core.play("toque")
     if (dígito === ".") {
       if (!this.entrada) this.entrada = "0."
       else if (!this.entrada.includes(".")) this.entrada = `${this.entrada}.`
@@ -81,6 +84,7 @@ export class Calculadora extends App {
 
   /** Un operador:  tras una cuenta completa, el total pasa a ser el número izquierdo de la siguiente cuenta */
   aplicarTecla(tecla) {
+    core.play("toque")
     if (this.derecho) this.terminar()
     this.operador = tecla
     this.entrada = ""

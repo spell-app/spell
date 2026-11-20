@@ -32,6 +32,7 @@ import {
   ITEM_STATUSES,
   KINDS,
   REQUESTED_ID,
+  ISSUE_ID,
   TODO_ID,
   OBSOLETE_ID,
   PROMISED_CARD,
@@ -801,19 +802,21 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * Request `requestId` (`r3`) filed into todo `id` (`epic file <epic>#T5 r3`, epic `epic-engine` T88):  `html`, the
-   * request as `Requests.html()` writes it, less its screenshots (their words quoted, the context, a link to its
-   * `request.md`), then its pictures, goes at the end of the todo's text, and the todo is marked `requested`;
-   * returns its title.
+   * Request `requestId` (`r3`) filed into todo or issue `id` (`epic file <epic>#T5 r3`, epic `epic-engine` T88;
+   * an issue since T108, `#I5`):  `html`, the request as `Requests.html()` writes it, less its screenshots (their
+   * words quoted, the context, a link to its `request.md`), then its pictures, goes at the end of the item's text, and
+   * it is marked `requested`;  returns its title.
    * - the quote `add --start` gave it (`Owen:  “...”`) goes, when the request's words hold it:  said once, in full
    * - `undefined` when the todo has the request already (its `request.md` linked):  nothing changes
    * - stamped (`changed`) and flagged UPDATE, as `setDetails()` is;  logged
-   * - throws for an item that isn't a todo (a limit included):  a request becomes a todo or a phase
+   * - throws for any other item (a limit included):  a bug report becomes an issue, a feature a todo, bigger a phase
    */
   addItemRequest(id: string, requestId: string, html: string): string | undefined {
     const item = this.item(id)
-    if (!TODO_ID.test(item.id) || item.hasAttribute("limit"))
-      throw new PlanDocError(`${item.id.toUpperCase()} isn't a todo:  a request is filed into a todo or a phase`)
+    if (!(TODO_ID.test(item.id) || ISSUE_ID.test(item.id)) || item.hasAttribute("limit"))
+      throw new PlanDocError(
+        `${item.id.toUpperCase()} isn't a todo or an issue:  a request is filed into an issue, a todo or a phase`
+      )
     // its link, as given or as the writer roots it (`/epics/<epic>/requests/r3/request.md`)
     const link = `requests/${requestId}/request.md`
     if (item.querySelector(`a[href="${link}"], a[href$="/${link}"]`)) return undefined
@@ -1194,6 +1197,9 @@ export class PlanDoc extends PlanReader {
    * - a question moves to its place (`placeQuestion()`);  stamped (`stamp()`)
    * - TAKEN UP (`taken-in`, epic `epic-engine` I128):  an issue or todo closed done while a phase is active is taken
    *   in that phase (`PhaseTakes`);  reopened or canceled, it's taken in none
+   * - closed (done or canceled):  every status card still underway finishes (`finishUnderway()`), so it never stays
+   *   blue, "Claude is working on it" (epic `epic-engine` I355).  Every way an item closes comes through here:
+   *   `epic update ... done`, `epic close`, `epic cancel`, a phase closing its items, an approve, `epic complete`
    * - throws on any other status, or an id the doc doesn't have
    */
   setItem(id: string, status: string): string {
@@ -1213,6 +1219,8 @@ export class PlanDoc extends PlanReader {
     // closed, it's neither wanted nor waiting for review any more (I232)
     if (status !== "open")
       Markup.set<"epic-item">(item, { fixed: undefined, ...(CALM_ID.test(item.id) && { urgent: undefined }) })
+    // closed, nobody is on it any more:  every card still underway finishes (epic `epic-engine` I355)
+    if (status !== "open") this.finishUnderway(item, status === "done" ? "done" : "noted")
     if (status !== "done") Markup.set<"epic-item">(item, { takenIn: undefined })
     else if (PhaseTakes.isWork(item) && !item.hasAttribute("taken-in")) {
       const active = this.phaseElements.find((phase) => phase.getAttribute("status") === "active")
@@ -2257,19 +2265,23 @@ export class PlanDoc extends PlanReader {
    * Item `id`'s work is finished (or an Overview sub-section's ...):  its LATEST underway status card turns
    * `done` (work was done:  an answer written, code changed, a phase built), or `noted` (Claude only RECORDED what
    * Owen chose), stamped `done-at`, its reading kept.  Returns its title.
+   * - an EARLIER card still underway finishes with it (`finishUnderway()`):  a "Taken up at once:  agent X is on it"
+   *   card, then the agent's own, left the first underway, so the item stayed blue (epic `epic-engine` I355)
    * - `summary` (HTML, as `addStatus()`'s reading) goes under the reading, `slot="summary"`,
    *   when there's something worth saying
+   * - an item CLOSED with its card still underway (`epic close`, then `epic update ... done "<summary>"`):  closing
+   *   finished the card (`setItem()`), so `summary` goes under it, the latest finished card, never an error
    * - throws when it has no underway card:  `addStatus()` first, or a card born noted (`noteStatus()`)
    */
   finishStatus(id: string, summary?: string, { state = "done" }: { state?: FinishedState } = {}): string {
     const host = this.statusHost(id)
-    const card = this.underwayCard(host)
+    const card = this.underwayCard(host) ?? this.closedCard(host)
     if (!card)
       throw new PlanDocError(
         `${id.toUpperCase()} has no underway status card:  \`epic update <name>#${id} underway "<reading>"\` first ` +
           `(or \`epic update <name>#${id} noted "<what was recorded>"\` when you only recorded the person's choice)`
       )
-    Markup.set<"epic-status">(card, { state, doneAt: PlanTime.clockTime(this.now) })
+    this.finishUnderway(host, state)
     for (const block of this.statusBlocks(summary ?? "")) {
       block.setAttribute("slot", SUMMARY_SLOT)
       card.append(block)
@@ -2479,6 +2491,49 @@ export class PlanDoc extends PlanReader {
   nextStepWords(): string {
     const phase = this.phases.find((each) => each.status === "todo")
     return phase ? `waiting for the next phase, P${phase.number} · ${phase.name}` : "waiting for a phase to take it up"
+  }
+
+  /**
+   * Every status card on `host` still underway turns `state`, stamped `done-at` now;  returns how many.
+   * - the ONE place a card stops being underway:  `finishStatus()`, and `setItem()` closing an item, so nothing that
+   *   finishes or closes an item leaves it blue, "Claude is working on it" (epic `epic-engine` I355)
+   */
+  private finishUnderway(host: Element, state: FinishedState): number {
+    const cards = Array.from(host.querySelectorAll(UNDERWAY_CARD))
+    const doneAt = PlanTime.clockTime(this.now)
+    for (const card of cards) Markup.set<"epic-status">(card, { state, doneAt })
+    return cards.length
+  }
+
+  /**
+   * The items left BLUE by a card still underway though their work is finished (epic `epic-engine` I355):
+   * an underway card followed by a finished one.  `epic lint` reports them, its `--fix` finishes them.
+   * - before I355, `finishStatus()` finished only the latest underway card:  an item taken up at once ("Taken up at
+   *   once:  agent X is on it"), then the agent's own card, kept the first underway (codemirror's I8-I11, I26)
+   * - NOT a closed item whose LATEST card is underway:  a revisit of it is work too (`itemState()`)
+   */
+  staleUnderway(): Element[] {
+    return this.allItems.filter((item) => {
+      const cards = Array.from(item.querySelectorAll(":scope > epic-status"))
+      const last = cards.at(-1)
+      return Boolean(last) && last!.getAttribute("state") !== "underway" && Boolean(item.querySelector(UNDERWAY_CARD))
+    })
+  }
+
+  /** Finish the cards `staleUnderway()` finds, each the state of the item's last card;  returns their items' ids. */
+  finishStaleUnderway(): string[] {
+    return this.staleUnderway().map((item) => {
+      const last = Array.from(item.querySelectorAll(":scope > epic-status")).at(-1)!
+      this.finishUnderway(item, last.getAttribute("state") === "noted" ? "noted" : "done")
+      this.log(`${item.id.toUpperCase()}:  a status card left underway finished (I355)`)
+      return item.id
+    })
+  }
+
+  /** A CLOSED item's latest finished status card, which closing it may have finished (`finishStatus()`), if any. */
+  private closedCard(host: Element): Element | undefined {
+    if (host.localName !== "epic-item" || !CLOSED.has(host.getAttribute("status") ?? "")) return undefined
+    return Array.from(host.querySelectorAll(FINISHED_CARD)).at(-1)
   }
 
   /** `host`'s latest underway status card, if any. */
@@ -3907,6 +3962,9 @@ function filedDid({ id, hasFix }: FiledFollowUp): string {
 
 /** A Done status card, among an item's children. */
 const DONE_CARD = ':scope > epic-status[state="done"]'
+
+/** A status card that's finished:  done or noted. */
+const FINISHED_CARD = ':scope > epic-status:not([state="underway"])'
 
 /** How long Owen's ask keeps an item from closing as obsolete (`recentAsk()`). */
 const RECENT_ASK_DAYS = 14

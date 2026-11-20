@@ -59,22 +59,53 @@ export function kitFileFrom(from: string): string | undefined {
   }
 }
 
-/** Why `kit` can't run `binPath`, in words:  no checkout of spell there, no such bin, not installed;  else `undefined`. */
-export function kitProblem(kit: string, binPath = "bin/spell.mjs"): string | undefined {
+/**
+ * Why `kit` can't run `binPath`, in words;  else `undefined`:
+ * - no checkout of spell there, no such bin, not installed
+ * - older than `installed`, the version the project installs from npm:  it'd miss what the project relies on
+ *   (2026-11-19:  a checkout from before 0.8.15 refused `spell server local` in a project outside the kit)
+ */
+export function kitProblem(kit: string, binPath = "bin/spell.mjs", installed?: string): string | undefined {
   const manifest = join(kit, "package.json")
   if (!existsSync(manifest)) return `no package.json in ${kit}`
-  if ((JSON.parse(readFileSync(manifest, "utf8")) as { name?: string }).name !== "spell") {
-    return `${kit} isn't a checkout of spell (its package.json isn't named spell)`
-  }
+  const { name, version } = JSON.parse(readFileSync(manifest, "utf8")) as { name?: string; version?: string }
+  if (name !== "spell") return `${kit} isn't a checkout of spell (its package.json isn't named spell)`
   if (!existsSync(join(kit, binPath))) return `${kit} has no ${binPath}`
   if (!existsSync(join(kit, "node_modules", "tsx"))) return `${kit} isn't installed yet:  run yarn install there`
+  if (installed && version && isOlder(version, installed)) {
+    return (
+      `that checkout is spell ${version}, older than the ${installed} this project installs:  ` +
+      `update it (cd ${kit} && git pull && yarn install)`
+    )
+  }
   return undefined
+}
+
+/** Whether version `a` comes before `b`:  their numbers compared in turn (`0.8.9` before `0.8.15`);  a tag ignored. */
+export function isOlder(a: string, b: string): boolean {
+  const numbers = (version: string) => version.split(/[-+]/)[0]!.split(".").map(Number)
+  const [left, right] = [numbers(a), numbers(b)]
+  for (let i = 0; i < Math.max(left.length, right.length); i++) {
+    const difference = (left[i] ?? 0) - (right[i] ?? 0)
+    if (difference) return difference < 0
+  }
+  return false
+}
+
+/** The version of the package `self` (a bin's `import.meta.url`) is in:  its nearest `package.json`'s;  else `undefined`. */
+function versionOf(self: string): string | undefined {
+  for (let dir = dirname(fileURLToPath(self)); ; dir = dirname(dir)) {
+    const manifest = join(dir, "package.json")
+    if (existsSync(manifest)) return (JSON.parse(readFileSync(manifest, "utf8")) as { version?: string }).version
+    if (dirname(dir) === dir) return undefined
+  }
 }
 
 /**
  * The checkout's own bin `binPath` (`bin/spell.mjs`) to run instead, as a URL to import, when `kitSetting()` names a
  * checkout other than the one `self` (a built bin's `import.meta.url`) is in;  else `undefined`, to run this copy.
- * - throws when the checkout named can't run, saying why (`kitProblem()`) and what named it.
+ * - throws when the checkout named can't run, or is older than the package `self` is in, saying why (`kitProblem()`)
+ *   and what named it.
  *   Never runs the npm copy instead:  you'd think you had your checkout's.
  */
 export function kitCheckoutBin(
@@ -86,7 +117,7 @@ export function kitCheckoutBin(
   const named = kitSetting(from, env)
   if (!named) return undefined
   if (existsSync(named.kit) && isInside(fileURLToPath(self), realpathSync(named.kit))) return undefined
-  const problem = kitProblem(named.kit, binPath)
+  const problem = kitProblem(named.kit, binPath, versionOf(self))
   if (problem) {
     const off = named.namedBy === SPELL_KIT ? `unset ${SPELL_KIT}` : `run spell local off`
     throw new Error(

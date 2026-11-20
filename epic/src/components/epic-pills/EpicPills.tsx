@@ -176,7 +176,7 @@ export class EpicPills extends E.UIComponent<typeof epicPillsVocabulary> {
         appearance="tinted"
         color="blue"
         size="small"
-        title={this.tipOf(epic())}
+        data-tooltip={this.tipOf(epic())}
       >
         <span class={NAME}>{epic().name}</span>
         <span class={FACTS}>

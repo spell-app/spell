@@ -33,7 +33,6 @@ import {
 } from "./EpicChoices.types"
 
 import choicesCSS from "./EpicChoices.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicChoices`
@@ -67,7 +66,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 export class EpicChoices extends E.UIComponent<typeof epicChoicesVocabulary> {
   @E.proto static vocabulary = epicChoicesVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-choices": choicesCSS },
+    styleSheets: { "epic-choices": choicesCSS },
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
 
@@ -375,7 +374,7 @@ export class EpicChoices extends E.UIComponent<typeof epicChoicesVocabulary> {
             type="button"
             class={ADD}
             part={this.partForName("add")}
-            title={this.translationForKey("addTip")}
+            data-tooltip={this.translationForKey("addTip")}
             onClick={() => (this.isAdding = true)}
           >
             <ui-icon name="plus" />
@@ -414,7 +413,7 @@ export class EpicChoices extends E.UIComponent<typeof epicChoicesVocabulary> {
             part={this.partForName("switch")}
             role="switch"
             aria-checked={this.isMultiple ? "true" : "false"}
-            title={this.translationForKey(this.isMultiple ? "switchToOneTip" : "switchToAnyTip")}
+            data-tooltip={this.translationForKey(this.isMultiple ? "switchToOneTip" : "switchToAnyTip")}
             onClick={() => this.change((fields, state) => SetChange.flip(fields, state))}
           >
             <span class={KNOB} aria-hidden="true" />
@@ -469,7 +468,7 @@ export class EpicChoices extends E.UIComponent<typeof epicChoicesVocabulary> {
                 type="button"
                 class={[CHOOSE, { [SENT]: this.isSent }]}
                 aria-pressed={picked() ? "true" : "false"}
-                title={this.translationForKey(picked() ? "tipNewPicked" : "tipNewChoose")}
+                data-tooltip={this.translationForKey(picked() ? "tipNewPicked" : "tipNewChoose")}
                 onClick={() => this.change((fields, state) => SetChange.toggle(fields, state, option.key))}
               >
                 {this.translationForKey(picked() ? (this.isSent ? "chosenSent" : "chosenNotSent") : "choose")}
@@ -485,7 +484,7 @@ export class EpicChoices extends E.UIComponent<typeof epicChoicesVocabulary> {
                     class={THUMB}
                     src={shot()}
                     alt={option.title}
-                    title={this.translationForKey("zoomTip")}
+                    data-tooltip={this.translationForKey("zoomTip")}
                     onClick={(event: MouseEvent) => EpicChoices.zoom(event)}
                   />
                 )}
@@ -512,7 +511,7 @@ export class EpicChoices extends E.UIComponent<typeof epicChoicesVocabulary> {
           size="mini"
           icon="pen"
           aria-label={this.translationForKey("editTip", { letter: name })}
-          title={this.translationForKey("editTip", { letter: name })}
+          data-tooltip={this.translationForKey("editTip", { letter: name })}
           onClick={(event: MouseEvent) => {
             event.stopPropagation()
             edit()
@@ -523,7 +522,7 @@ export class EpicChoices extends E.UIComponent<typeof epicChoicesVocabulary> {
           size="mini"
           icon="xmark"
           aria-label={this.translationForKey("removeTip", { letter: name })}
-          title={this.translationForKey("removeTip", { letter: name })}
+          data-tooltip={this.translationForKey("removeTip", { letter: name })}
           onClick={(event: MouseEvent) => {
             event.stopPropagation()
             remove()

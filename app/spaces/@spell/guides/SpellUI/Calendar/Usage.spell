@@ -3,18 +3,6 @@
 		Calendar
 		<header>A calendar lets a user pick a date, a time, or both.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#values">Values</>
-			<item link="#forms">Forms</>
-			<item link="#events">Events</>
-			<item link="#disabled-days">Disabled days</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-			<item link="#framework-usage">Framework usage</>
-		</>
-	</>
 
 	<!-- USAGE:  views, values, typing, forms, events, disabled days, keyboard, accessibility, frameworks. -->
 	<section label="Using it">

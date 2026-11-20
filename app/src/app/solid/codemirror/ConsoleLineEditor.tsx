@@ -6,8 +6,7 @@ import { SymbolKind } from "vscode-languageserver"
 
 import type { SP } from "spell/parser/spell"
 
-import { SpellCodeMirror } from "spell/app/app/ui/codemirror"
-import { HOVER_DELAY } from "spell/app/app/ui/codePopups"
+import { CodeMirrorPopups, SpellCodeMirror } from "spell/app/app/ui/codemirror"
 import { CodeMirrorEditor } from "./CodeMirrorEditor"
 
 /****************
@@ -30,10 +29,9 @@ export function ConsoleLineEditor(props: ConsoleLineEditorProps) {
     SpellCodeMirror.snippetExtensions(),
     placeholder(hint),
     EditorView.contentAttributes.of({ "aria-label": label }),
-    autocompletion({
-      override: [(context) => suggestions(context, props.project())],
-      activateOnTypingDelay: HOVER_DELAY * 1000
-    }),
+    autocompletion({ override: [(context) => suggestions(context, props.project())] }),
+    // the list, shown by itself, waits the page's popup delay:  CodeMirror merges it with the line above
+    CodeMirrorPopups.waiting((msec) => autocompletion({ activateOnTypingDelay: msec })),
     // over the base setup's keys, under the suggestion list's (`Prec.highest`), which take them while it's open
     Prec.high(
       keymap.of([

@@ -13,7 +13,6 @@ import { BODY, BODY_ID, EMPTY, HEADER, HEADING_SEPARATOR, LABEL_ID, TITLE_ID } f
 
 import answerCSS from "./EpicAnswer.css?inline"
 import foldCSS from "spell/epic/components/epic-item/Fold.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicAnswer`
@@ -35,7 +34,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 export class EpicAnswer extends E.UIComponent<typeof epicAnswerVocabulary> {
   @E.proto static vocabulary = epicAnswerVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-fold-button": foldCSS, "epic-answer": answerCSS },
+    styleSheets: { "epic-fold-button": foldCSS, "epic-answer": answerCSS },
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
 

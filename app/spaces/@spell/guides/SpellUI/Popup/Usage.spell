@@ -3,19 +3,6 @@
 		Popup
 		<header>A popup displays additional information on top of a page.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#triggers">Triggers</>
-			<item link="#positioning">Positioning</>
-			<item link="#invoker-commands">Invoker commands</>
-			<item link="#events">Events</>
-			<item link="#css-only-tooltips">CSS-only tooltips</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-			<item link="#framework-usage">Framework usage</>
-		</>
-	</>
 
 	<!-- USAGE:  targets, triggers, invoker commands, events, the CSS-only tooltip, keyboard, accessibility, frameworks. -->
 	<section label="Using it">

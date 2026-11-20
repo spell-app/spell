@@ -34,8 +34,10 @@
 @layer ui.components.theme-menu.types, ui.components.theme-menu.content, ui.components.theme-menu.variations, ui.components.theme-menu.states;
 
 @layer ui.components.theme-menu.types {
+  /* centred where it's a row's item (an app menu's end, which stretches its items to the bar's height;  epic `mockup` T55) */
   :host {
     display: inline-block;
+    align-self: center;
     vertical-align: middle;
   }
 

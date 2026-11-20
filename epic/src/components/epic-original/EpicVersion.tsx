@@ -8,7 +8,6 @@ import { PlanDates } from "spell/epic/dates"
 import { epicVersionVocabulary } from "./EpicVersion.en"
 
 import originalCSS from "./EpicOriginal.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicVersion`
@@ -21,7 +20,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 export class EpicVersion extends E.UIComponent<typeof epicVersionVocabulary> {
   @E.proto static vocabulary = epicVersionVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-original": originalCSS },
+    styleSheets: { "epic-original": originalCSS },
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
 

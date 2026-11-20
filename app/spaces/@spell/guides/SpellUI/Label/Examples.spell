@@ -3,15 +3,6 @@
 		Label
 		<header>A label displays content classification.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#content">Content</>
-			<item link="#states">States</>
-			<item link="#variations">Variations</>
-			<item link="#groups">Groups</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's label page, section by section, in its order (Types, Content, States, Variations, Groups),

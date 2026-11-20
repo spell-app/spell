@@ -11,7 +11,6 @@ import { EpicAddress, PageTargets } from "spell/epic/links"
 import { epicCommitVocabulary } from "./EpicCommit.en"
 
 import commitCSS from "./EpicCommit.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicCommit`
@@ -40,7 +39,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 export class EpicCommit extends E.UIComponent<typeof epicCommitVocabulary> {
   @E.proto static vocabulary = epicCommitVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-commit": commitCSS },
+    styleSheets: { "epic-commit": commitCSS },
     // a container:  a click on its text must not jump to the sha's link
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
@@ -141,7 +140,7 @@ export class EpicCommit extends E.UIComponent<typeof epicCommitVocabulary> {
                 part={this.partForName("sha")}
                 href={this.href}
                 target={LINK_TARGET}
-                title={this.translationForKey("open", { sha: this.shortSha })}
+                data-tooltip={this.translationForKey("open", { sha: this.shortSha })}
               >
                 {this.shortSha}
               </a>
@@ -153,12 +152,12 @@ export class EpicCommit extends E.UIComponent<typeof epicCommitVocabulary> {
                   <Show
                     when={chip.href}
                     fallback={
-                      <span class={`${REF} ${REF_GONE}`} part={this.partForName("ref")} title={chip.tip}>
+                      <span class={`${REF} ${REF_GONE}`} part={this.partForName("ref")} data-tooltip={chip.tip}>
                         {chip.label}
                       </span>
                     }
                   >
-                    <a class={REF} part={this.partForName("ref")} href={chip.href} title={chip.tip}>
+                    <a class={REF} part={this.partForName("ref")} href={chip.href} data-tooltip={chip.tip}>
                       {chip.label}
                     </a>
                   </Show>
@@ -171,7 +170,7 @@ export class EpicCommit extends E.UIComponent<typeof epicCommitVocabulary> {
               role={this.isLong ? "button" : undefined}
               tabindex={this.isLong ? "0" : undefined}
               aria-expanded={this.isLong ? (this.isUnfolded ? "true" : "false") : undefined}
-              title={this.isLong ? this.translationForKey(this.isUnfolded ? "foldTip" : "unfoldTip") : undefined}
+              data-tooltip={this.isLong ? this.translationForKey(this.isUnfolded ? "foldTip" : "unfoldTip") : undefined}
               onKeyDown={(event: KeyboardEvent) => this.onSentenceKey(event)}
             >
               <slot />

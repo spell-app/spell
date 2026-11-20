@@ -66,7 +66,7 @@ function step(host: Element) {
     color: label.getAttribute("color"),
     href: label.getAttribute("link") ?? undefined,
     // its first line:  the state's why follows on the next
-    tip: label.getAttribute("title")?.split("\n")[0]
+    tip: label.getAttribute("data-tooltip")?.split("\n")[0]
   }
 }
 
@@ -144,7 +144,9 @@ describe("<epic-page>", () => {
     )
     const shadow = host.shadowRoot!
     expect(shadow.querySelector("h1 button")!.textContent).toBe("epics")
-    expect(shadow.querySelector("h1 button")!.getAttribute("title")).toBe("epics:  copy /epic review SAGA:/epics")
+    expect(shadow.querySelector("h1 button")!.getAttribute("data-tooltip")).toBe(
+      "epics:  copy /epic review SAGA:/epics"
+    )
     const crumbs = Array.from(shadow.querySelectorAll("ui-breadcrumb"), (crumb) => [
       crumb.textContent,
       crumb.getAttribute("link")
@@ -316,7 +318,7 @@ describe("<epic-page>", () => {
     expect([
       mark(busy)?.dataset.state,
       mark(busy)?.getAttribute("color"),
-      mark(busy)?.title.split("\n").at(-1)
+      mark(busy)?.dataset.tooltip!.split("\n").at(-1)
     ]).toEqual(["progress", "grey", `in progress:  1/2 phases done, updated ${today}`])
     busy.remove()
     // a phase active, but nobody on it for days:  paused, in grey;  the icon the PHASE's own (P33:  as its row draws it)
@@ -332,7 +334,7 @@ describe("<epic-page>", () => {
     expect([
       mark(loud)?.dataset.state,
       mark(loud)?.getAttribute("color"),
-      mark(loud)?.title.split("\n").at(-1)
+      mark(loud)?.dataset.tooltip!.split("\n").at(-1)
     ]).toEqual(["errors", "red", "errors:  every phase done, but 1 question need you"])
     loud.querySelector("#q1")!.setAttribute("state", "recent")
     await ElementFixture.tick()
@@ -433,7 +435,7 @@ describe("<epic-page>", () => {
     const named = await render(page(`saga="epics"`, ["todo"]))
     const namedLink = () => named.shadowRoot!.querySelector<HTMLAnchorElement>('[part~="meta"] li.saga a')!
     await vi.waitFor(() => expect(namedLink().textContent).toBe("Epic Tooling"))
-    expect(namedLink().getAttribute("title")).toBe("Saga:  Epics")
+    expect(namedLink().getAttribute("data-tooltip")).toBe("Saga:  Epics")
     const none = await render(page("", ["todo"]))
     expect(none.shadowRoot!.querySelector('[part~="meta"] li.saga')).toBeNull()
     fetched.mockRestore()
@@ -542,7 +544,7 @@ async function adoptClient(routes: FakeRoutes, { served = true } = {}) {
 function headerButtons(host: Element) {
   const group = host.shadowRoot!.querySelector<HTMLElement>('[part~="send"]')
   const plane = group?.shadowRoot?.querySelector<HTMLButtonElement>('[part~="send"]')
-  return { send: group ? [group.getAttribute("state"), plane?.title] : null }
+  return { send: group ? [group.getAttribute("state"), plane?.dataset.tooltip] : null }
 }
 
 /** The plane's tooltip just after a send (I352):  the owner's words, then when it went. */
@@ -654,7 +656,7 @@ describe("<epic-page> Send and its countdown", () => {
       expect(pill.textContent!.replace(/\s+/g, " ").trim()).toBe(
         "Bob's Codex isn't listening: ask it to run epic inbox wait demo"
       )
-      expect(pill.title).toBe("Copy the command")
+      expect(pill.dataset.tooltip).toBe("Copy the command")
       pill.click()
       await ElementFixture.tick()
       // nothing woken:  no POST at all (the Claude pill's click starts a review)
@@ -704,7 +706,7 @@ describe("<epic-page> Send and its countdown", () => {
     await client.refresh()
     await ElementFixture.tick()
     expect(pill()!.textContent).toBe(message)
-    expect(pill()!.title).toBe("Start the review in this epic's session")
+    expect(pill()!.dataset.tooltip).toBe("Start the review in this epic's session")
     routes.inbox.listening = { session: "s1", since: at, seen: at }
     await client.refresh()
     await ElementFixture.tick()
@@ -763,7 +765,7 @@ describe("<epic-page> Send and its countdown", () => {
     expect(host.shadowRoot!.querySelector('[part~="new-button"]')).toBeNull()
     expect(host.shadowRoot!.querySelector('[part~="toggle-all"]')).not.toBeNull()
     const button = todos.shadowRoot!.querySelector<HTMLButtonElement>('[part~="new-button"]')!
-    expect(button.title).toBe("New Todo")
+    expect(button.dataset.tooltip).toBe("New Todo")
     expect(button.closest('[part~="tools"]')).not.toBeNull()
     expect(button.querySelector("ui-icon")!.getAttribute("name")).toBe("comment dots")
     // nothing waiting:  there, grey (so it's always in the same place), and no pill
@@ -981,7 +983,7 @@ describe("<epic-page> toolbar", () => {
 function markedBadge(host: Element): [string, string] | null {
   const filter = host.shadowRoot!.querySelector('[part~="filter"] epic-state-filter')
   const badge = filter?.shadowRoot?.querySelector<HTMLElement>('[part~="marked"]')
-  return badge ? [badge.textContent!, badge.title] : null
+  return badge ? [badge.textContent!, badge.dataset.tooltip!] : null
 }
 
 // Owen, 2026-10-25:  "if any in that section have been actioned in this pass, remove from the red/green/etc and put in
@@ -1106,7 +1108,7 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     await ElementFixture.tick()
     await ElementFixture.tick()
     await vi.waitFor(() => expect(status().querySelector(".icon.working > svg")).not.toBeNull())
-    expect(status().title).toBe("Claude is writing its plan")
+    expect(status().dataset.tooltip).toBe("Claude is writing its plan")
     expect(p2.matches(":state(working)")).toBe(true)
     expect(host.querySelector("#p1")!.shadowRoot!.querySelector(".icon.working > svg")).toBeNull()
     // the Phases section's one blue badge:  p2 under way, p3 scheduled (I260);  the toolbar's counts only p2
@@ -1116,7 +1118,7 @@ describe("<epic-page> live badges (epic `epic-engine` P43)", () => {
     // its plan accepted:  Claude is working on it, no longer writing the plan
     p2.setAttribute("plan", "accepted")
     await ElementFixture.tick()
-    expect(status().title).toBe("Claude is working on it")
+    expect(status().dataset.tooltip).toBe("Claude is working on it")
     routes.inbox.working = {}
     await client.refresh()
     await ElementFixture.tick()
@@ -1262,7 +1264,7 @@ describe("<epic-page> Agents running", () => {
     const host = await renderWithAgents()
     const button = agentsRoot(host).querySelector<HTMLButtonElement>(".agents-button")!
     // the count and the robot, never the words (Owen, 2026-10-25):  they're its name and tooltip
-    expect([button.textContent!.trim(), button.getAttribute("aria-label"), button.title]).toEqual([
+    expect([button.textContent!.trim(), button.getAttribute("aria-label"), button.dataset.tooltip]).toEqual([
       "2",
       "2 agents running",
       "2 agents running"
@@ -1275,7 +1277,7 @@ describe("<epic-page> Agents running", () => {
       send.getAttribute("icon"),
       send.getAttribute("color"),
       send.getAttribute("aria-label"),
-      send.getAttribute("title")
+      send.getAttribute("data-tooltip")
     ]).toEqual(["", "paper plane", "blue", "Send your note to demo-aaa", "Send your note to demo-aaa"])
     expect(agentsRoot(host).querySelector(".agents-pop")!.getAttribute("aria-label")).toBe("Agents running")
     // no panel above the blocks any more:  the button is the header's pill's last part (Owen, 2026-10-25)
@@ -1405,7 +1407,7 @@ describe("<epic-page> what Claude is doing", () => {
     await vi.waitFor(() => expect(turning()).not.toBeNull())
     // the pill says only `P1`;  the phase's name and what Claude is doing are its tooltip
     expect(step(host)?.words).toBe("P1")
-    expect(label().title.split("\n").at(-1)).toBe("Claude:  Building P1")
+    expect(label().dataset.tooltip!.split("\n").at(-1)).toBe("Claude:  Building P1")
     // nothing of it in the header's middle, nor anywhere but the agents' button
     expect(host.shadowRoot!.querySelector('[part~="centre"] epic-agents')).toBeNull()
     expect(host.shadowRoot!.querySelectorAll("epic-agents")).toHaveLength(1)
@@ -1430,7 +1432,7 @@ describe("<epic-page> what Claude is doing", () => {
     await client.refresh()
     await ElementFixture.tick()
     expect(turning()).toBeNull()
-    expect(label().title).not.toContain("Claude:")
+    expect(label().dataset.tooltip).not.toContain("Claude:")
     expect(send().hasAttribute("working")).toBe(false)
   })
 
@@ -1512,14 +1514,16 @@ describe("<epic-page> the header (P53)", () => {
     expect(box(heading).right).toBeLessThanOrEqual(planeBox().left)
     expect(planeBox().right).toBeLessThanOrEqual(box(host.shadowRoot!.querySelector('[part~="status"]')!).left)
     // the name cut short, its whole name in its tooltip
-    expect(host.shadowRoot!.querySelector("h1 button")!.getAttribute("title")).toBe("demo:  copy /epic resume demo")
+    expect(host.shadowRoot!.querySelector("h1 button")!.getAttribute("data-tooltip")).toBe(
+      "demo:  copy /epic resume demo"
+    )
   })
 
   test("with a mark unsent and 2 minutes:  the ring round the plane;  a press sends at once (not `now`)", async () => {
     const { host, routes } = await reviewedPage("2m")
     expect(sendGroup(host).hasAttribute("countdown")).toBe(true)
     await vi.waitFor(() => expect(sendGroup(host).shadowRoot!.querySelector('[part~="ring"]')).not.toBeNull())
-    expect(plane(host).title).toMatch(/^Send 1 mark to Claude · sends itself in [12]:\d\d, or now$/)
+    expect(plane(host).dataset.tooltip).toMatch(/^Send 1 mark to Claude · sends itself in [12]:\d\d, or now$/)
     plane(host).click()
     await vi.waitFor(() => expect(routes.posts.at(-1)).toEqual(["send", { page: "/epics/demo/demo.plan.html" }]))
   })
@@ -1558,7 +1562,7 @@ describe("<epic-page> the header (P53)", () => {
   test("the gear:  Auto Send · 2 minutes and Theme · <theme>;  a pick in Auto Send's sub-menu is the countdown's;  axe", async () => {
     const { host, countdown } = await reviewedPage("2m")
     const it = gear(host)
-    expect(it.button.title).toBe("Settings")
+    expect(it.button.dataset.tooltip).toBe("Settings")
     it.button.click()
     await vi.waitFor(() => expect(it.menu.matches(":popover-open")).toBe(true))
     await vi.waitFor(() => expect(it.words()[1]).toMatch(/^Theme · \w+$/))
@@ -1755,7 +1759,7 @@ describe("<epic-page> stages", () => {
     expect(step(host)?.words).toBe("OVERVIEW")
     // none on the Phases section:  the page isn't agreeing its phases yet
     expect(stageButtonOf(host.querySelector('epic-section[kind="phases"]')!)).toBeUndefined()
-    expect(accept()!.title).toBe(
+    expect(accept()!.dataset.tooltip).toBe(
       "Agree the Overview:  Claude writes the phases next · 2 questions open · " + "sent 5 minutes after a press"
     )
     expect(accept()!.querySelector("ui-icon")!.getAttribute("name")).toBe("thumbs up")
@@ -1772,12 +1776,12 @@ describe("<epic-page> stages", () => {
     // counting:  the ring round the thumbs up, how long is left in its tooltip;  nothing sent
     await vi.waitFor(() => expect(accept()!.dataset.state).toBe("counting"))
     expect(accept()!.querySelector('[part~="ring"]')).not.toBeNull()
-    expect(accept()!.title).toMatch(/sends in [45]:\d\d:  press again to stop$/)
+    expect(accept()!.dataset.tooltip).toMatch(/sends in [45]:\d\d:  press again to stop$/)
     // run out (its `at` passed):  the page sends it
     routes.inbox.marks.stage = { action: "accept", stage: "overview", countdown: true, at }
     await vi.waitFor(async () => expect(await ReviewClient.forPage().refresh()).toBe(true))
     await vi.waitFor(() => expect(routes.posts.map(([route]) => route)).toEqual(["mark", "send"]), { timeout: 3000 })
-    await vi.waitFor(() => expect(accept()!.title).toBe("Accepted:  Claude writes the phases next"))
+    await vi.waitFor(() => expect(accept()!.dataset.tooltip).toBe("Accepted:  Claude writes the phases next"))
     expect(accept()!.dataset.state).toBe("accepted")
     expect(getComputedStyle(accept()!).borderTopColor).not.toBe(grey)
     expect(getComputedStyle(accept()!).borderTopColor).toBe(getComputedStyle(accept()!).color)
@@ -1830,7 +1834,7 @@ describe("<epic-page> stages", () => {
     accept()!.click()
     await vi.waitFor(() => expect(accept()!.dataset.state).toBe("counting"))
     // the header's Send counts only the approve:  the held accept is the stage button's till its time
-    await vi.waitFor(() => expect(plane(host).title).toMatch(/1 mark/))
+    await vi.waitFor(() => expect(plane(host).dataset.tooltip).toMatch(/1 mark/))
     plane(host).click()
     await vi.waitFor(() => expect(routes.posts.map(([route]) => route)).toEqual(["mark", "send"]))
     const client = ReviewClient.forPage()
@@ -1856,7 +1860,7 @@ describe("<epic-page> stages", () => {
     const again = await render(stagedPage("phases"))
     const reloaded = () => stageButtonOf(again.querySelector('epic-section[kind="phases"]')!)
     await vi.waitFor(() => expect(reloaded()?.dataset.state).toBe("counting"))
-    expect(reloaded()!.title).toMatch(/sends in (3:00|2:5\d):/)
+    expect(reloaded()!.dataset.tooltip).toMatch(/sends in (3:00|2:5\d):/)
     const done = reloaded()!.querySelector<SVGCircleElement>('[part~="ring"] .done')!
     expect(Number.parseFloat(done.style.strokeDasharray)).toBeCloseTo(40, 0)
     const sends = routes.posts.filter(([route]) => route === "send").length
@@ -1886,7 +1890,7 @@ describe("<epic-page> stages", () => {
     // no green Accept:  the plane alone, no stage words, no wand
     expect(plane(host).querySelector("ui-icon")!.getAttribute("name")).toBe("paper plane")
     expect(sendGroup(host).shadowRoot!.querySelector('[part~="countdown"]')).toBeNull()
-    expect(plane(host).title).toBe("2 plans wait for your Accept:  P1, P3 · Send 1 mark to Claude")
+    expect(plane(host).dataset.tooltip).toBe("2 plans wait for your Accept:  P1, P3 · Send 1 mark to Claude")
     const base = sendGroup(host).shadowRoot!.querySelector<HTMLElement>('[part~="base"]')!
     expect([getComputedStyle(base).borderTopStyle, getComputedStyle(base).borderTopWidth]).toEqual(["solid", "2px"])
     // a press is a plain Send:  no accept marks
@@ -1919,11 +1923,11 @@ describe("<epic-page> stages", () => {
           `<p><epic-change id="ch1" item="q1">changed</epic-change></p></epic-section>`
       )
     const host = await render(html)
-    await vi.waitFor(() => expect(plane(host).title).toBeTruthy())
+    await vi.waitFor(() => expect(plane(host).dataset.tooltip).toBeTruthy())
     expect(host.shadowRoot!.querySelector('[part~="changes"]')).toBeNull()
-    expect(plane(host).title).not.toMatch(/to accept/)
-    await vi.waitFor(() => expect(stageButtonOf(host.querySelector("epic-overview")!)?.title).toBeTruthy())
-    expect(stageButtonOf(host.querySelector("epic-overview")!)!.title).not.toMatch(/to accept/)
+    expect(plane(host).dataset.tooltip).not.toMatch(/to accept/)
+    await vi.waitFor(() => expect(stageButtonOf(host.querySelector("epic-overview")!)?.dataset.tooltip).toBeTruthy())
+    expect(stageButtonOf(host.querySelector("epic-overview")!)!.dataset.tooltip).not.toMatch(/to accept/)
   })
 
   test("phases:  an open phase's pills are Looks good and Defer;  a done one's, and every one once building, the usual", async () => {

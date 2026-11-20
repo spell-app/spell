@@ -3,13 +3,6 @@
 		Grid
 		<header>A grid is used to harmonize negative space in a layout.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#responsive-grids">Responsive grids</>
-			<item link="#accessibility">Accessibility</>
-		</>
-	</>
 
 	<!-- USAGE:  grid / row / column, widths, responsive behaviour, accessibility. -->
 	<section label="Using it">

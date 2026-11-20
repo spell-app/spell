@@ -29,7 +29,7 @@ import {
   type VerbArgs
 } from "./command.types"
 import { EpicCheckout } from "./EpicCheckout"
-import { parseTarget, phaseLabel, phaseOf, TODO_REF } from "./epicArgs"
+import { parseTarget, phaseLabel, phaseOf, ITEM_REF } from "./epicArgs"
 import { EpicTools } from "./EpicTools"
 import { MainMerge } from "./MainMerge"
 import { Sessions } from "./Sessions"
@@ -54,13 +54,14 @@ import { Worktrees } from "./Worktrees"
  *     - no `<epic>`:  the tooling home's
  *   - `requests <epic> [--json]`:  every request sent to `<epic>`, and where each went
  *     - one filed into a phase:  that phase's number TODAY (`shown()`), so a phase inserted ahead of it moves it along
- *   - EVERY request becomes a todo or a phase (epic `epic-engine` T88;  Owen:  "When an epic gets requests from other
+ *   - EVERY request becomes an issue, a todo or a phase (T108:  a bug report an issue, a feature a todo, bigger a phase;
+ *     epic `epic-engine` T88;  Owen:  "When an epic gets requests from other
  *     epics, it should make them a Todo or a phase")
  *   - `file <epic>#P7 <id>`:  file a request into phase P7:
  *     his words and screenshots in its Requests field (the `epic` tool's `request`), the request marked filed,
  *     `P7 · Its Title`, and the phase's stable id kept (`phase:  p-its-title`;  epic `epic-engine` I4)
- *   - `file <epic>#T5 <id>`:  file it into todo T5 (T88):  his words, the context and a link to `request.md` at the end
- *     of its text, his screenshots copied in as its pictures, the todo marked `requested`, the request filed `T5`
+ *   - `file <epic>#T5 <id>`, `file <epic>#I5 <id>`:  file it into todo T5 (T88), or issue I5 (T108):  his words, the context and a link to `request.md` at the end
+ *     of its text, his screenshots copied in as its pictures, the item marked `requested`, the request filed `T5`
  *     - `file <epic> <id> "<where>"`, no phase or todo:  only for a DUPLICATE of a todo or phase the epic has, which
  *       `where` names (`"same as T12"`, `"done in P3"`);  only marked filed, saying where it went
  *     - `--from` and `--file` (the request as html):  taken as given rather than read from the epic's `requests/`
@@ -196,7 +197,7 @@ export class Requests {
   /**
    * `epic file <epic>#P7 <id>`:  request `id` into the phase's Requests field, by the `epic` tool,
    * then marked filed there.
-   * - `epic file <epic>#T5 <id>`:  into todo T5 instead (`fileIntoTodo()`, epic `epic-engine` T88)
+   * - `epic file <epic>#T5 <id>`:  into todo T5 instead (`fileIntoItem()`, epic `epic-engine` T88);  `#I5`, issue I5 (T108)
    * - `epic file <epic> <id> "<where>"`:  only marked filed, saying where it went;  `where` MUST name the todo or
    *   phase it duplicates (`T12`, `P3`):  every request becomes one or the other (T88)
    * - `--from` and `--file`:  the request as given;  marked filed only if `requests/` has it
@@ -211,15 +212,15 @@ export class Requests {
         throw new EpicCommandError(`file:  epic file ${epic}#${phaseLabel(phase)} ${id}  (the phase goes after a #)`)
       if (!DUPLICATE_OF.test(where))
         throw new EpicCommandError(
-          `file:  "${where}"?  a request becomes a todo or a phase:  epic file ${epic}#T<n> ${id}, ` +
-            `epic file ${epic}#P<n> ${id};  "<where>" only for a duplicate, naming its todo or phase ("same as T12")`
+          `file:  "${where}"?  a request becomes an issue, a todo or a phase:  ` +
+            `epic file ${epic}#I<n> ${id}, epic file ${epic}#T<n> ${id}, epic file ${epic}#P<n> ${id};  "<where>" only for a duplicate, naming its todo or phase ("same as T12")`
         )
       CLI.out(requestLine(this.file(epic, id, where)))
       await this.markItemsRequested(epic, where)
       return EXIT.OK
     }
     if (!id || where !== undefined) throw new EpicCommandError(`file:  ${FILE_USAGE}`)
-    if (TODO_REF.test(ref)) return this.fileIntoTodo(epic, ref.toUpperCase(), id)
+    if (ITEM_REF.test(ref)) return this.fileIntoItem(epic, ref.toUpperCase(), id)
     const request = this.list(epic).find((it) => it.id === id)
     let html = stringFlag(flags.file)
     let from = stringFlag(flags.from)
@@ -238,22 +239,23 @@ export class Requests {
   }
 
   /**
-   * `epic file <epic>#T5 <id>`:  request `id` into todo `todo` (epic `epic-engine` T88), by the `epic` tool:
+   * `epic file <epic>#T5 <id>`:  request `id` into todo `item` (epic `epic-engine` T88), or issue (`#I5`, T108), by the
+   * `epic` tool:
    * their words, the context and a link to `request.md` (`Requests.html()`, no screenshots) at the end of its text,
-   * each screenshot copied in as one of its pictures (`--picture`, deletable on the page), the todo marked
+   * each screenshot copied in as one of its pictures (`--picture`, deletable on the page), the item marked
    * `requested`;  then the request marked filed, `T5`.
-   * - throws for a request the epic doesn't have;  the tool refuses an item that isn't a todo
+   * - throws for a request the epic doesn't have;  the tool refuses an item that isn't a todo or an issue
    */
-  private async fileIntoTodo(epic: string, todo: string, id: string): Promise<number> {
+  private async fileIntoItem(epic: string, item: string, id: string): Promise<number> {
     const request = this.list(epic).find((it) => it.id === id)
     if (!request) throw new EpicCommandError(`no request '${id}' in epic '${epic}'`)
     const html = join(mkdtempSync(join(tmpdir(), "epic-request-")), `${id}.html`)
     writeFileSync(html, Requests.html({ ...request, images: [] }))
     const folder = join(this.epics, epic, "requests", id)
     const pictures = request.images.flatMap((name) => ["--picture", join(folder, name)])
-    const exitCode = await EpicTools.runPlanDoc(["file", `${epic}#${todo}`, id, "--file", html, ...pictures])
+    const exitCode = await EpicTools.runPlanDoc(["file", `${epic}#${item}`, id, "--file", html, ...pictures])
     if (exitCode !== EXIT.OK) return exitCode
-    CLI.out(requestLine(this.file(epic, id, todo)))
+    CLI.out(requestLine(this.file(epic, id, item)))
     return EXIT.OK
   }
 
@@ -873,7 +875,7 @@ const DUPLICATE_OF = /\b[TP]\d+\b/
 
 /** How `file` is called, for its errors. */
 const FILE_USAGE =
-  'epic file <epic>#P3 <request id>  |  epic file <epic>#T5 <request id>  |  epic file <epic> <request id> "same as T12"'
+  'epic file <epic>#P3 <request id>  |  epic file <epic>#T5 <request id>  |  epic file <epic>#I5 <request id>  |  epic file <epic> <request id> "same as T12"'
 
 /** A content block of a prompt, as a transcript holds it:  text, an image ... */
 type PromptBlock = {

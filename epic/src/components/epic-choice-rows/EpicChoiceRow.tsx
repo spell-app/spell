@@ -261,7 +261,7 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
           type="button"
           class={COPY}
           part={this.partForName("copy")}
-          title={this.translationForKey("copyTip")}
+          data-tooltip={this.translationForKey("copyTip")}
           onClick={this.onCopy}
         >
           <code>{this.current}</code>
@@ -293,7 +293,7 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
             class={RESET}
             part={this.partForName("reset")}
             aria-label={this.translationForKey(this.layout.blank ? "clear" : "reset")}
-            title={
+            data-tooltip={
               this.layout.blank
                 ? this.translationForKey("clear")
                 : this.translationForKey("resetTip", { recommended: this.recommended ?? "" })
@@ -332,7 +332,7 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
           class={MOVE}
           part={this.partForName("up")}
           aria-label={this.translationForKey("up")}
-          title={this.translationForKey("up")}
+          data-tooltip={this.translationForKey("up")}
           disabled={this.place === 1}
           onClick={this.onUp}
         >
@@ -343,7 +343,7 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
           class={MOVE}
           part={this.partForName("down")}
           aria-label={this.translationForKey("down")}
-          title={this.translationForKey("down")}
+          data-tooltip={this.translationForKey("down")}
           disabled={this.isLast}
           onClick={this.onDown}
         >
@@ -362,7 +362,7 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
         <a
           class={LINK}
           href={this.fileUrl}
-          title={this.translationForKey("openTip", { file, line: String(this.line ?? 1) })}
+          data-tooltip={this.translationForKey("openTip", { file, line: String(this.line ?? 1) })}
           onClick={this.onOpenFile}
         >
           {file.slice(slash + 1)}

@@ -3,11 +3,6 @@
 		Site nav button
 		<header>A site nav button shows or hides the side navigation of the page layout around it:  its icons only and back on a wide page, slid in and out on a narrow one.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-		</>
-	</>
 
 	<section label="Types">
 		<section label="In a top bar" sticky="stack" collapsible dividing>

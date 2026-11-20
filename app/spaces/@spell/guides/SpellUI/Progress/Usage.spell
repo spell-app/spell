@@ -3,17 +3,6 @@
 		Progress
 		<header>A progress bar shows the progression of a task.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#task-completion">Task completion</>
-			<item link="#custom-labels">Custom labels</>
-			<item link="#events">Events</>
-			<item link="#behaviors">Behaviors</>
-			<item link="#accessibility">Accessibility</>
-			<item link="#framework-usage">Framework usage</>
-		</>
-	</>
 
 	<!-- USAGE:  how to use it (numbers, labels, events), Fomantic's usage tab translated, accessibility, frameworks. -->
 	<section label="Using it">

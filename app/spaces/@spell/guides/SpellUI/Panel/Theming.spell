@@ -3,12 +3,6 @@
 		Panel
 		<header>A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#tokens">Tokens</>
-			<item link="#themes">Themes</>
-		</>
-	</>
 
 	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
 	<section label="Tokens">

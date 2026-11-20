@@ -26,7 +26,6 @@ import { ICON } from "./EpicPhase.types"
 
 import foldCSS from "spell/epic/components/epic-section/EpicFold.css?inline"
 import phaseCSS from "./EpicPhase.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicPhase`
@@ -91,7 +90,6 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
   @E.proto static vocabulary = epicPhaseVocabulary
   @E.protoMerged static elementSetup = {
     styleSheets: {
-      "epic-tooltip": tooltipCSS,
       "epic-fold": foldCSS,
       "epic-phase": phaseCSS
     }
@@ -376,7 +374,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
             data-state={this.drawnState}
             role="img"
             aria-label={this.workingText}
-            title={this.workingText}
+            data-tooltip={this.workingText}
           >
             {this.glyph.svg}
           </span>
@@ -392,7 +390,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
               <span
                 class={UNMERGED}
                 part={this.partForName("unmerged")}
-                title={this.translationForKey("unmergedTip", { branch: branch() })}
+                data-tooltip={this.translationForKey("unmergedTip", { branch: branch() })}
               >
                 {this.translationForKey("unmerged")}
               </span>
@@ -403,7 +401,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
               <span
                 class={[ESTIMATE, { [TOOK]: !!this.tookShown }]}
                 part={this.partForName("estimate")}
-                title={this.tookTip}
+                data-tooltip={this.tookTip}
               >
                 {shown()}
               </span>
@@ -504,7 +502,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
               part={this.partForName("changed")}
               role="img"
               aria-label={this.translationForKey("changedTip", { count: count() })}
-              title={this.translationForKey("changedTip", { count: count() })}
+              data-tooltip={this.translationForKey("changedTip", { count: count() })}
             >
               {this.changedGlyph.svg}
               {count()}
@@ -518,7 +516,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
             appearance="circular basic"
             size="mini"
             icon="check"
-            title={this.translationForKey("seenAllTip", { count: this.newUpdates.length })}
+            data-tooltip={this.translationForKey("seenAllTip", { count: this.newUpdates.length })}
             aria-label={this.translationForKey("seenAllTip", { count: this.newUpdates.length })}
             onClick={(event: MouseEvent) => this.seeAll(event)}
           />

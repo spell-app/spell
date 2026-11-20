@@ -1,7 +1,11 @@
 /**
- * Check that every control the `<epic-*>` elements draw shows a browser tooltip (epic `airplane`):
- * the `title` the browser would show when the pointer rests on it.
+ * Check that every control the `<epic-*>` elements draw shows a tooltip (epic `airplane`):
+ * Spell UI's (`data-tooltip`), or the `title` the browser would show when the pointer rests on it.
  * - Owen (2026-10-10):  "The buttons don't have browser tooltips -- unclear what they do."
+ * - The rule now (Owen, 2026-11-19, epic `from-console` C10, r80):  Spell UI's tooltip, with the standard delay.
+ *   - A `data-tooltip` on the element under the pointer, or on any element around it, passes:
+ *     the runtime's `DataTooltips` finds it up the event's path, so no Electron quirk hides it.
+ *   - A `title` left from before is held to the strict case below.
  * - What shows is NOT "has the control a `title`":
  *   - the browser hit-tests the pointer to the innermost element under it
  *     (through shadow roots:  `<ui-button>`'s inner `<button>`, an icon's `<svg>`)
@@ -10,8 +14,10 @@
  *   - VS Code's side bar does NOT:  Electron 38 and later, on macOS, shows a `title` only while that innermost
  *     element carries it itself (electron/electron#49843, open), so an icon inside a titled button shows nothing
  * - So this checks the strict case, at each control's centre:  the innermost element there must carry the `title`.
- *   - the fix it holds the pack to:  `Tooltip.css` (in `epic-item/`) lets the pointer through a titled control's insides
- *   - it fails on a control whose centre has no `title` of its own, or is covered by something else
+ *   - it fails on a control whose centre has no `title` of its own and no `data-tooltip` around it,
+ *     or is covered by something else (but not by a box the element carrying its `data-tooltip` draws over it)
+ *   - since epic `epic-engine` T106 the pack draws no `title` tooltips:  `Tooltip.css`, which let the pointer through
+ *     a titled control's insides, is gone
  *
  * Usage (from the repo root):
  *   node src/demo/check-tooltips-epics.mjs [--doc <name>] [--list] [--bundle <spell-ui.js>]
@@ -236,9 +242,13 @@ function survey() {
       const x = box.left + box.width / 2
       const y = box.top + box.height / 2
       const hit = deepHit(x, y)
-      const covered = !hit || !composedContains(host, hit)
-      // strict (VS Code's side bar):  the element under the pointer's own `title`;  Chrome's walk, for the report
-      const tip = covered ? "" : (hit.getAttribute("title") ?? "").trim()
+      // covered, unless what covers it is drawn by the element carrying its tooltip (a `<ui-dropdown>`'s trigger box over
+      // its slotted `<ui-button>`):  the pointer's path still reaches that `data-tooltip`
+      const holder = hit && tooltipHolderOf(hit)
+      const covered = !hit || (!composedContains(host, hit) && !(holder && composedContains(holder, host)))
+      // Spell UI's `data-tooltip`, anywhere up the pointer's path;  else, strict (VS Code's side bar):
+      // the element under the pointer's own `title`.  Chrome's walk, for the report
+      const tip = covered ? "" : dataTooltipOf(hit) || (hit.getAttribute("title") ?? "").trim()
       const chromeTip = covered ? "" : (tooltipOf(hit) ?? "")
       found.push({
         element: owner,
@@ -263,6 +273,23 @@ function survey() {
       hit = inner
     }
     return hit
+  }
+
+  /** Spell UI's tooltip for `node`:  the first non-empty `data-tooltip` up its composed path (`DataTooltips`);  else `""`. */
+  function dataTooltipOf(node) {
+    return (tooltipHolderOf(node)?.getAttribute("data-tooltip") ?? "").trim()
+  }
+
+  /** The element whose `data-tooltip` `DataTooltips` shows for `node`:  the first non-empty one up its composed path. */
+  function tooltipHolderOf(node) {
+    for (
+      let it = node;
+      it;
+      it = it.assignedSlot ?? (it.parentNode instanceof ShadowRoot ? it.parentNode.host : it.parentNode)
+    ) {
+      if (it.nodeType === Node.ELEMENT_NODE && (it.getAttribute("data-tooltip") ?? "").trim()) return it
+    }
+    return undefined
   }
 
   /** Chrome's tooltip for `node`:  the first `title` up the flat tree;  `""` when an empty one stops it. */

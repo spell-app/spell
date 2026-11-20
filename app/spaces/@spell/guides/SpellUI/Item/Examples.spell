@@ -3,14 +3,6 @@
 		Item
 		<header>One item for dropdowns, lists and menus, rendered by whatever holds it.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#content">Content</>
-			<item link="#states">States</>
-			<item link="#variations">Variations</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  ours only (Fomantic shares one `.item` between dropdowns, lists, menus and the Items view, and documents

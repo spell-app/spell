@@ -3,12 +3,6 @@
 		Toolbar
 		<header>A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#fitting-titles">Fitting titles</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,

@@ -12,6 +12,11 @@ export const siteNavButtonEs = {
   tag: "ui-site-nav-button",
   name: "boton-de-navegacion",
   aka: ["botón de barra lateral", "botón del cajón", "hamburguesa", "alternar navegación"],
-  attributes: { flag: "bandera" },
-  texts: { label: "Mostrar u ocultar la barra lateral", menuLabel: "Mostrar u ocultar el menú" }
+  attributes: { flag: "bandera", toggles: "alterna" },
+  texts: {
+    label: "Mostrar u ocultar la barra lateral",
+    leftLabel: "Mostrar u ocultar la barra lateral izquierda",
+    rightLabel: "Mostrar u ocultar la barra lateral derecha",
+    menuLabel: "Mostrar u ocultar el menú"
+  }
 } as const satisfies E.TagDictionary

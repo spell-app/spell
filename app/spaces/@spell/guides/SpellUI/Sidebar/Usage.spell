@@ -3,17 +3,6 @@
 		Sidebar
 		<header>A sidebar hides additional content beside a page.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#page-structure">Page structure</>
-			<item link="#modal-and-persistent">Modal and persistent</>
-			<item link="#commands-and-events">Commands and events</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-			<item link="#framework-usage">Framework usage</>
-		</>
-	</>
 
 	<!-- USAGE:  page structure, the two kinds, commands and events, keyboard, accessibility, framework snippets. -->
 	<section label="Using it">

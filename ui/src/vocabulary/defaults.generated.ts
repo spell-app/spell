@@ -385,6 +385,22 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "name", kind: "string", group: "content" },
     { name: "resizable", kind: "string", group: "behaviour" }
   ],
+  "ui-dial": [
+    { name: "label", kind: "string", group: "name" },
+    { name: "size", kind: "size", group: "appearance" },
+    { name: "color", kind: "color", group: "appearance" },
+    { name: "ticks", kind: "string", group: "appearance" },
+    { name: "unit", kind: "string", group: "appearance" },
+    { name: "disabled", kind: "keyOnly", group: "states" },
+    { name: "readonly", kind: "keyOnly", group: "form" },
+    { name: "min", kind: "number", group: "form" },
+    { name: "max", kind: "number", group: "form" },
+    { name: "step", kind: "number", group: "form" },
+    { name: "value", kind: "number", group: "form" },
+    { name: "name", kind: "string", group: "name" },
+    { name: "parameter", kind: "string", group: "form" },
+    { name: "required", kind: "boolean", group: "form" }
+  ],
   "ui-dimension": [
     { name: "value", kind: "number", group: "content" },
     { name: "dimension", kind: "string", group: "content" },
@@ -1000,7 +1016,13 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "fixed", kind: "boolean", group: "layout" },
     { name: "pure", kind: "boolean", group: "advanced" }
   ],
-  "ui-page-layout": [{ name: "drawer", kind: "valueOnly", group: "appearance", values: ["compact"] }],
+  "ui-page-layout": [
+    { name: "drawer", kind: "valueOnly", group: "appearance", values: ["compact", "hidden"] },
+    { name: "drawer-hides", kind: "keyOnly", group: "behaviour" },
+    { name: "left", kind: "valueOnly", group: "appearance", values: ["hidden"] },
+    { name: "right", kind: "valueOnly", group: "appearance", values: ["hidden"] },
+    { name: "floating", kind: "keyOnly", group: "appearance" }
+  ],
   "ui-panel": [
     { name: "label", kind: "string", group: "name" },
     { name: "hint", kind: "string", group: "form" },
@@ -1516,6 +1538,11 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "current", kind: "string", group: "content" },
     { name: "label", kind: "string", group: "content" }
   ],
+  "ui-site-links": [
+    { name: "pages", kind: "json", group: "content" },
+    { name: "current", kind: "string", group: "content" },
+    { name: "report", kind: "string", group: "link" }
+  ],
   "ui-site-nav": [
     { name: "pages", kind: "json", group: "content" },
     { name: "current", kind: "string", group: "content" },
@@ -1539,11 +1566,13 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "disabled", kind: "keyOnly", group: "states" },
     { name: "selected", kind: "keyOnly", group: "states" },
     { name: "padding", kind: "valueOnly", group: "layout", values: ["none", "none-x", "none-y"] },
-    { name: "kind", kind: "enum", group: "content", values: ["item", "header", "divider"] }
+    { name: "kind", kind: "enum", group: "content", values: ["item", "header", "divider"] },
+    { name: "toggles", kind: "valueOnly", group: "behaviour", values: ["drawer", "left", "right"] }
   ],
   "ui-site-tabs": [
     { name: "pages", kind: "json", group: "content" },
     { name: "current", kind: "string", group: "content" },
+    { name: "appearance", kind: "valueOnly", group: "appearance", values: ["header"] },
     { name: "label", kind: "string", group: "content" }
   ],
   "ui-slider": [

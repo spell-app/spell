@@ -11,7 +11,6 @@ import "spell/epic/components/epic-text-box"
 import { epicChoicesBarVocabulary } from "./EpicChoicesBar.en"
 
 import barCSS from "./EpicChoicesBar.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicChoicesBar`
@@ -31,7 +30,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 export class EpicChoicesBar extends E.UIComponent<typeof epicChoicesBarVocabulary> {
   @E.proto static vocabulary = epicChoicesBarVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-choices-bar": barCSS },
+    styleSheets: { "epic-choices-bar": barCSS },
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
 
@@ -102,7 +101,7 @@ export class EpicChoicesBar extends E.UIComponent<typeof epicChoicesBarVocabular
             appearance="circular"
             icon="paper plane"
             loading={this.isSending ? "" : undefined}
-            title={this.sendTip}
+            data-tooltip={this.sendTip}
             onClick={this.onSend}
           >
             {this.translationForKey("doIt")}
@@ -120,7 +119,7 @@ export class EpicChoicesBar extends E.UIComponent<typeof epicChoicesBarVocabular
             size="mini"
             appearance="basic circular"
             icon={this.clipboard.isCopied ? "check" : "copy"}
-            title={this.translationForKey(this.isCopyRefused ? "copyFailed" : "copyTip")}
+            data-tooltip={this.translationForKey(this.isCopyRefused ? "copyFailed" : "copyTip")}
             onClick={this.onCopy}
           >
             {this.translationForKey(this.clipboard.isCopied ? "copied" : "copyAnswers")}

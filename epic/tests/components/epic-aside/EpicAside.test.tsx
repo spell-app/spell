@@ -107,7 +107,7 @@ describe("<epic-aside> heading, folded and open", () => {
     const button = host.querySelector<HTMLElement>("button[slot=actions]")!
     const lineHeight = parseFloat(getComputedStyle(heading).lineHeight)
     const folded = { top: heading.getBoundingClientRect().top, button: button.getBoundingClientRect() }
-    expect([heading.getBoundingClientRect().height > lineHeight * 1.5, heading.hasAttribute("title")]).toEqual([
+    expect([heading.getBoundingClientRect().height > lineHeight * 1.5, heading.hasAttribute("data-tooltip")]).toEqual([
       true,
       false
     ])
@@ -115,7 +115,7 @@ describe("<epic-aside> heading, folded and open", () => {
     part(host, "toggle").click()
     await ElementFixture.tick()
     expect(heading.getBoundingClientRect().height).toBeGreaterThan(lineHeight * 1.5)
-    expect(heading.hasAttribute("title")).toBe(false)
+    expect(heading.hasAttribute("data-tooltip")).toBe(false)
     expect(heading.getBoundingClientRect().top).toBeCloseTo(folded.top, 0)
     expect(button.getBoundingClientRect().left).toBeCloseTo(folded.button.left, 0)
     expect(button.getBoundingClientRect().top).toBeCloseTo(folded.button.top, 0)

@@ -24,7 +24,8 @@ import { absoluteImports } from "spell/app/app/runner"
  * - And `spell-runtime.js` holds no Solid or `spell-ui`:  compiled spell draws with the APP's Solid, from a
  *   shared chunk (epic `output-targets` P10).  Only `@solidjs/h` is its own, a thin layer over that Solid.
  * - No React anywhere:  not in the app's chunks (P9), nor in what programs run on (epic `output-targets` P11).
- * - `ui`'s icon packs beside the chunk holding `BuiltInPacks`, where it looks (`appConfig({ iconPacks })`).
+ * - `ui`'s icon packs and sounds beside the chunks holding `BuiltInPacks` and `BuiltInSounds`, where they look
+ *   (`appConfig({ builtInFiles })`).
  * - Built with `--sourcemap` (the config writes none):  what a chunk holds comes from its map's `sources`.
  */
 describe("production build", () => {
@@ -43,7 +44,7 @@ describe("production build", () => {
 
   afterAll(() => rmSync(outDir, { recursive: true, force: true }))
 
-  test("keeps rule class names, lowers decorators, keeps `core` in `spell-runtime.js`, emits icon packs", () => {
+  test("keeps rule class names, lowers decorators, keeps `core` in `spell-runtime.js`, emits icon packs and sounds", () => {
     {
       const assets = join(outDir, "assets")
       const files = readdirSync(assets).filter((file) => file.endsWith(".js"))
@@ -81,6 +82,12 @@ describe("production build", () => {
       for (const pack of ["fa7-free", "fa7-brands", "fomantic"]) {
         expect(existsSync(join(packs, pack, "pack.js")), pack).toBe(true)
       }
+      // the built-in sounds where `BuiltInSounds` looks:  beside its own chunk (epic `mockup` P28)
+      const soundCode = files.filter((file) =>
+        sources(join(assets, file)).some((source) => BUILT_IN_SOUNDS.test(source))
+      )
+      expect(soundCode).toHaveLength(1)
+      expect(existsSync(join(assets, dirname(soundCode[0]!), "sound-library", "card-slide.ogg"))).toBe(true)
     }
   })
 
@@ -250,6 +257,9 @@ const REACT = /\/node_modules\/(react|react-dom|scheduler|semantic-ui-react)\//
 
 /** `ui`'s `BuiltInPacks`, which looks for the packs beside its own chunk. */
 const BUILT_IN_PACKS = /\/ui\/src\/icons\/BuiltInPacks\.ts$/
+
+/** `ui`'s `BuiltInSounds`, which looks for the sounds beside its own chunk. */
+const BUILT_IN_SOUNDS = /\/ui\/src\/sounds\/BuiltInSounds\.ts$/
 
 /** Source modules javascript file `file` was built from, from its sourcemap;  none for a chunk without one (a facade). */
 function sources(file: string): string[] {

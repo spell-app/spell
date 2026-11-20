@@ -74,7 +74,8 @@ export const spellViewerVocabulary = {
       kind: "string",
       description:
         "Where Semantic UI, Lato, `spell-app.css` and the icon packs (`icon-packs/`) are;  default, beside its " +
-        "script.  Semantic UI's sheets are read as it joins the page."
+        "script.  Semantic UI's sheets are read as it joins the page.  Spell's built-in sounds always stay beside " +
+        "its script (`ui/sound-library/`)."
     },
     {
       name: "display",

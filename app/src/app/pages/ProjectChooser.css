@@ -25,7 +25,7 @@
   flex-direction: column;
   gap: 28px;
   /* the page has no room of its own, as the top bar runs to its edges */
-  padding: 28px 14px 32px;
+  padding: 28px 14px 32px 14px;
   color: var(--ui-text-color);
 
   /* a box:  the hero (a card's is `TileCard.css`'s) */
@@ -260,9 +260,48 @@
   }
 }
 .Home .RearrangeFoot {
-  display: flex;
-  justify-content: center;
   opacity: 0.8;
+}
+
+/*
+ * The page's foot (`<HomeFooter>`, epic `mockup` T55):  quiet, no box of its own.
+ * - Spell UI's site on the left, its name then a muted line;  "Rearrange Home Screen" on the right.
+ * - Its sides line up with the cards' edges.
+ * - Narrow:  one under the other, centred.
+ */
+.Home .HomeFooter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  padding: 8px 0 0 0;
+  color: var(--ui-text-muted);
+  font-size: 13px;
+
+  .SpellUILink {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+    color: inherit;
+    text-decoration: none;
+
+    ui-icon {
+      align-self: center;
+    }
+    .name {
+      font-weight: 600;
+      color: var(--Home-accent);
+    }
+    &:hover .name,
+    &:focus-visible .name {
+      text-decoration: underline;
+    }
+  }
+
+  @media (--ui-mobile) {
+    flex-direction: column;
+  }
 }
 .Home.rearranging .TileCard[draggable="true"] {
   cursor: grab;

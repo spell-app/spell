@@ -10,7 +10,6 @@ import { epicNoteVocabulary } from "./EpicNote.en"
 
 import noteCSS from "./EpicNote.css?inline"
 import foldCSS from "spell/epic/components/epic-item/Fold.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicNote`
@@ -29,7 +28,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 export class EpicNote extends E.UIComponent<typeof epicNoteVocabulary> {
   @E.proto static vocabulary = epicNoteVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-fold-button": foldCSS, "epic-note": noteCSS },
+    styleSheets: { "epic-fold-button": foldCSS, "epic-note": noteCSS },
     delegatesFocus: false,
     // `disabled`:  only a look (the sheet dims it), so the text stays findable;  `loading`:  the shared spinner
     disabled: "its own",

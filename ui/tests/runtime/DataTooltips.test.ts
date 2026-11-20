@@ -76,6 +76,20 @@ describe("DataTooltips", () => {
     expect(bubble().getAttribute("data-position")).toBe(position)
   })
 
+  it("a target cut short by the box around it:  shows at the part that shows, not its whole text", async () => {
+    const box = Fixture.render(
+      `<div style="position: fixed; left: 100px; top: 300px; width: 80px; overflow: hidden; white-space: pre"><span data-tooltip="A playing card, face up or face down">A playing card, face up or face down</span></div>`
+    )
+    const target = box.querySelector("span")!
+    const seen = box.getBoundingClientRect()
+    expect(target.getBoundingClientRect().right).toBeGreaterThan(seen.right + 50)
+    await userEvent.hover(box)
+    await expect.poll(isShowing).toBe(true)
+    const placed = document.querySelector<HTMLElement>(".ui-tooltip-target")!.getBoundingClientRect()
+    expect(placed.left).toBeCloseTo(seen.left, 0)
+    expect(placed.right).toBeCloseTo(seen.right, 0)
+  })
+
   it("flips to stay in the window, and says so for its arrow", async () => {
     const frame = Fixture.render(
       `<button aria-label="target" style="position: fixed; left: 300px; top: 0; height: 24px" data-tooltip="Near the top">x</button>`
@@ -158,6 +172,16 @@ describe("DataTooltips", () => {
     expect(bubble().textContent).toBe("Inside")
     button.setAttribute("data-tooltip", "Changed")
     await expect.poll(() => bubble().textContent).toBe("Changed")
+  })
+
+  it("shows on a pointer move onto a target with no `pointerover` before it (Chromium sends none at times)", async () => {
+    const host = Fixture.render(`<div><button aria-label="target" data-tooltip="Moved onto">x</button></div>`)
+    const button = host.querySelector("button")!
+    button.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, composed: true }))
+    await expect.poll(isShowing).toBe(true)
+    expect(bubble().textContent).toBe("Moved onto")
+    button.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, composed: true }))
+    expect(bubble().textContent).toBe("Moved onto")
   })
 
   it("takes the colours the target resolves, so a theme around it still shows", async () => {

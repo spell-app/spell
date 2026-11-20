@@ -67,7 +67,6 @@ import {
 } from "./EpicItem.types"
 
 import itemCSS from "./EpicItem.css?inline"
-import tooltipCSS from "./Tooltip.css?inline"
 
 /****************
  * ### `EpicItem`
@@ -147,7 +146,7 @@ import tooltipCSS from "./Tooltip.css?inline"
 export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   @E.proto static vocabulary = epicItemVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-item": itemCSS },
+    styleSheets: { "epic-item": itemCSS },
     DOMElement: E.DOMLoadableBodyElement,
     // a container:  a click on its text must not jump to the fold button or a link inside
     delegatesFocus: false
@@ -610,7 +609,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
                 data-color={this.chipMark()?.color}
                 data-fill={this.chipMark()?.fill}
                 data-marked={this.isMarkedInPass() ? "" : undefined}
-                title={this.chipTip()}
+                data-tooltip={this.chipTip()}
               >
                 {this.label()}
               </a>
@@ -625,7 +624,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
               data-marked={this.isMarkedInPass() ? "" : undefined}
               aria-pressed={this.itemState() === "attention" ? "true" : "false"}
               data-unsent={this.reviewState.urgency()?.sent === false ? "" : undefined}
-              title={this.chipTip()}
+              data-tooltip={this.chipTip()}
               onClick={this.flipUrgency}
             >
               {this.label()}
@@ -671,7 +670,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
             part={this.partForName("overnight")}
             role="img"
             aria-label={this.translationForKey("madeOvernight")}
-            title={this.translationForKey("madeOvernight")}
+            data-tooltip={this.translationForKey("madeOvernight")}
           >
             {this.bedGlyph.svg}
           </span>
@@ -680,7 +679,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
         <Show when={this.hasCommits()}>{this.gitButton()}</Show>
         <Show when={!this.reviewState.reviewing() && this.review()}>
           {(review) => (
-            <span class={[REVIEW, review().look]} part={this.partForName("review")} title={review().tip}>
+            <span class={[REVIEW, review().look]} part={this.partForName("review")} data-tooltip={review().tip}>
               {review().words}
             </span>
           )}
@@ -709,7 +708,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
         appearance="basic"
         color="red"
         link={issue() ? `#${issue()}` : undefined}
-        title={this.translationForKey(issue() ? "failedTip" : "failedTipNone", { id: issue().toUpperCase() })}
+        data-tooltip={this.translationForKey(issue() ? "failedTip" : "failedTipNone", { id: issue().toUpperCase() })}
       >
         {this.translationForKey(issue() ? "failedMark" : "failedMarkNone", { id: issue().toUpperCase() })}
       </ui-label>
@@ -750,7 +749,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
         size="mini"
         appearance="basic"
         link={`#${phaseId()}`}
-        title={`${this.translationForKey(this.handled ? "handledTip" : "takenTip", { phase: phase().full })}\n${this.translationForKey("phasePillTip", { phase: phase().short })}`}
+        data-tooltip={`${this.translationForKey(this.handled ? "handledTip" : "takenTip", { phase: phase().full })}\n${this.translationForKey("phasePillTip", { phase: phase().short })}`}
         onClick={(event: MouseEvent) => {
           if (!event.altKey) return
           event.preventDefault()
@@ -789,7 +788,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
         size="mini"
         appearance="basic"
         link={`#${this.donePill}`}
-        title={`${this.translationForKey("takenTip", { phase: phase().full })}\n${this.translationForKey("donePillTip", { phase: phase().short })}`}
+        data-tooltip={`${this.translationForKey("takenTip", { phase: phase().full })}\n${this.translationForKey("donePillTip", { phase: phase().short })}`}
       >
         {this.translationForKey("handledIn", { phase: phase().short })}
       </ui-label>
@@ -831,7 +830,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
         part={this.partForName("git")}
         aria-pressed={this.showCommits ? "true" : "false"}
         aria-label={words()}
-        title={words()}
+        data-tooltip={words()}
         onClick={this.flipCommits}
       >
         {this.gitGlyph.svg}

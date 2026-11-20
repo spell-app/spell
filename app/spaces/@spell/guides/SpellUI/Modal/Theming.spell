@@ -4,13 +4,6 @@
 		<header>A modal displays content that temporarily blocks interactions with the main view of a
               site.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#tokens">Tokens</>
-			<item link="#themes">Themes</>
-		</>
-	</>
-
 	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
 	<section label="Tokens">
 		<markdown>

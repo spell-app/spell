@@ -393,7 +393,7 @@ export const ISSUE_ID = /^i\d+$/
 
 /**
  * An item that may be marked `requested`, filed from the person's own words:  an issue or a todo
- * (a todo since epic `epic-engine` T88:  a request from another epic becomes a todo or a phase).
+ * (a todo since epic `epic-engine` T88:  a request from another epic becomes an issue, a todo or a phase;  an issue since T108).
  */
 export const REQUESTED_ID = /^[it]\d+$/
 

@@ -3,13 +3,6 @@
 		Example
 		<header>An example shows its own markup live, under a heading and description, with the same markup as code a button shows and hides.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-		</>
-	</>
 
 	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
 	<section label="Using it">

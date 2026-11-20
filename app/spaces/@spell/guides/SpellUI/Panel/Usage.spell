@@ -3,14 +3,6 @@
 		Panel
 		<header>A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#loading-a-band-from-a-file">Loading a band from a file</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-		</>
-	</>
 
 	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
 	<section label="Using it">

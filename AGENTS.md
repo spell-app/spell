@@ -155,6 +155,9 @@ yarn kit:review       # the finishing pass:  ts, lint:fix, format, test
   - Every big folder adds its own commands to it, named in its `package.json`'s `"spell": { "commands" }`;
     `spell help` lists them, grouped by folder.
   - A word two folders both want goes under each one's short name (`spell parser check`, `spell app check`).
+- ONE session pushes to GitHub and publishes to npm:  epic `epic-engine`'s, the tooling home (Owen, 2026-11-19).
+  - Every other session merges into `main` as usual, then asks it:  `/send epic-engine "release <what>"`.
+    Never `git push` or `spell publish` itself.
 - Before any push to GitHub or publish to npm, the dependencies are checked and fixed (Owen, 2026-11-09;  epic `epic-engine` P67):
   - `spell deps check`:  the lockfile;  a git hook runs it before a push to `main` (`tools/pre-push.ts`, written by `yarn install`)
   - `spell publish`, on its scratch installs:  what someone outside gets, which the lockfile can't show

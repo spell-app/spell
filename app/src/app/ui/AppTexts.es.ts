@@ -131,6 +131,8 @@ const APP_TEXTS_ES: AppTextPack = {
   // los ajustes del panel de código, `<CodeSettingsPanel>` (épica `debut`)
   // Spell › About Spell (epic `editor` I94)
   aboutSpell: "Acerca de Spell…",
+  // Spell › Spell UI, and the home page's footer:  Spell UI's site, in the editor (epic `mockup` T55)
+  spellUI: "Spell UI",
   codeSettings: "Ajustes del editor de código…",
   codeSettingsHeader: "Editor de código",
   codeSettingsClose: "Cerrar los ajustes del editor de código",
@@ -148,6 +150,10 @@ const APP_TEXTS_ES: AppTextPack = {
   codeCompilerWords: "Detalles del compilador en la información",
   codeBubbly: "Aspecto de burbujas",
   codeWrapLines: "Ajustar las líneas largas",
+  codePopupDelay: "Espera de las ventanas emergentes",
+  codePopupDelayShort: "Corta:  0,4 segundos",
+  codePopupDelayStandard: "Normal:  0,8 segundos",
+  codePopupDelayLong: "Larga:  1,5 segundos",
   // la página de un cuaderno, `<NotebookPage>` (épica `elemental-spell` P16)
   notebookPageLock: "Bloquearlo:  mientras esté bloqueado no se guarda nada",
   notebookPageUnlock: "Desbloquearlo:  los cambios se guardan",
@@ -690,6 +696,7 @@ const APP_TEXTS_ES: AppTextPack = {
   // the section of the projects written in Spanish:  in Spanish whatever the editor's language (epic `mockup` I46)
   homeSpanishTitle: "En español",
   homeSpanishLine: "Ejemplos y guías escritos en español.",
+  homeSpellUILine: "Los botones, menús y otras piezas de las que están hechas tus apps.",
   homeRearrange: "Reorganizar la pantalla de inicio",
   homeRearrangeDone: "Listo",
   homeRearrangeReset: "Restablecer",
@@ -964,6 +971,24 @@ const APP_TEXTS_ES: AppTextPack = {
   // una dirección web en el código
   codeLinkTipMac: "⌘-clic para abrir",
   codeLinkTip: "Ctrl-clic para abrir",
+
+  ////////////////
+  // ## The sound picker
+  ////////////////
+
+  soundPicker: "Sonidos",
+  soundPickerHint: "Pulsa ▶ para oír un sonido.\nPulsa su nombre para usarlo.",
+  soundListen: "Oír \u00ab{sound}\u00bb",
+  soundKindInterface: "Clics e interruptores",
+  soundKindCards: "Cartas",
+  soundKindCasino: "Dados, fichas y monedas",
+  soundKindPieces: "Piezas de tablero",
+  soundKindImpacts: "Golpes",
+  soundKindFootsteps: "Pasos",
+  soundKindThings: "Puertas, libros y cosas",
+  soundKindDigital: "Pitidos y chispazos",
+  soundKindJingles: "Melodías cortas",
+
   // el depurador paso a paso
   debugContinue: "Continuar:  seguir hasta el próximo punto rojo",
   debugStepOver: "Siguiente línea:  ejecutar esta línea y detenerse en la siguiente",

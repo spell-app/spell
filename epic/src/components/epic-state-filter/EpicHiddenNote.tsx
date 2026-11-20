@@ -5,7 +5,6 @@ import { E } from "spell/ui/core"
 import { epicHiddenNoteVocabulary } from "./EpicHiddenNote.en"
 import { SHOW_ALL } from "./EpicStateFilter.types"
 
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 import noteCSS from "./EpicHiddenNote.css?inline"
 
 /****************
@@ -19,7 +18,7 @@ import noteCSS from "./EpicHiddenNote.css?inline"
 export class EpicHiddenNote extends E.UIComponent<typeof epicHiddenNoteVocabulary> {
   @E.proto static vocabulary = epicHiddenNoteVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-hidden-note": noteCSS }
+    styleSheets: { "epic-hidden-note": noteCSS }
   } satisfies Partial<E.ElementSetup>
 
   render(): JSX.Element {
@@ -28,7 +27,7 @@ export class EpicHiddenNote extends E.UIComponent<typeof epicHiddenNoteVocabular
         type="button"
         class={this.rootClass}
         part={this.partForName("base")}
-        title={this.translationForKey("hiddenTip")}
+        data-tooltip={this.translationForKey("hiddenTip")}
         onClick={() => this.send(SHOW_ALL, {})}
       >
         {this.translationForKey("hiddenNote", { count: this.count ?? 0 })}

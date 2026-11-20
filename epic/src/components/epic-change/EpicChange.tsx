@@ -12,7 +12,6 @@ import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 import { epicChangeVocabulary } from "./EpicChange.en"
 
 import changeCSS from "./EpicChange.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `<epic-change>`
@@ -44,7 +43,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 export class EpicChange extends E.UIComponent<typeof epicChangeVocabulary> {
   @E.proto static vocabulary = epicChangeVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-change": changeCSS },
+    styleSheets: { "epic-change": changeCSS },
     // inline text:  a click on its words must not jump to the chip
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
@@ -175,7 +174,7 @@ export class EpicChange extends E.UIComponent<typeof epicChangeVocabulary> {
             part={this.partForName("chip")}
             aria-expanded={this.unfolded ? "true" : "false"}
             aria-controls={QA_ID}
-            title={this.translationForKey(this.chipTip, { item: this.itemLabel })}
+            data-tooltip={this.translationForKey(this.chipTip, { item: this.itemLabel })}
             onClick={(event: MouseEvent) => this.toggle(event)}
           >
             {this.itemLabel}

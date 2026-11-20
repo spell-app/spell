@@ -1,9 +1,11 @@
-import { E } from "spell/ui/core"
+import { E, UIT } from "spell/ui/core"
 
 /****************
  * ### `SliderScale`
- * The number line of a slider:  `min` ... `max` in `step`s -- snapping, ratios along the track, and which steps get
- * a label.  Pure arithmetic (no DOM;  of the core, only `E.clamp()`), so it's tested on its own.
+ * The number line of a slider:  `min` ... `max` in `step`s -- snapping, ratios along the track, which steps get
+ * a label, and where a key moves a value.
+ * - Pure arithmetic (no DOM;  of the core, only `E.clamp()` and `UIT.Key`), so it's tested on its own.
+ * - `<ui-slider>`'s and `<ui-dial>`'s:  a dial is the same number line, bent round.
  * - Snapping keeps to the step grid from `min`, like a native `<input type=range>`:  a `max` off the grid is never
  *   reached (the last step below it is).  `step` `0` allows any value.
  * - Floating point:  results are rounded to the step's own decimals, so `0.1` steps give `0.3`, not
@@ -66,6 +68,35 @@ export class SliderScale {
     return this.snap(value + steps * unit)
   }
 
+  /**
+   * The value key `key` moves `value` to, or `undefined` for a key that moves nothing:
+   * - arrows step the way they point (Fomantic's `keyMovement`), so on a `reversed` or `vertical` track they follow
+   *   the thumb, not "right / up increases";  the other arrow pair steps too, up / right increasing
+   * - PageUp / PageDown take `PAGE_MULTIPLIER` steps (Fomantic's `pageMultiplier`)
+   * - Home / End go to `low` / `high` (default `min` / `max`:  a range's thumb passes its own bounds)
+   * - The result is snapped, but not bounded by `low` / `high` for the step keys:  the caller clamps.
+   */
+  valueForKey(key: string, value: number, options: KeyMoveOptions = {}): number | undefined {
+    const { low = this.min, high = this.max } = options
+    if (key === UIT.Key.home) return low
+    if (key === UIT.Key.end) return high
+    const steps = SliderScale.stepsForKey(key, options)
+    return steps ? this.move(value, steps) : undefined
+  }
+
+  /** Steps key `key` takes on a track laid out as `options` say;  `0` for keys that don't step. */
+  private static stepsForKey(key: string, { vertical = false, reversed = false }: KeyMoveOptions): number {
+    // the value grows downward on a vertical slider (min at the top) and leftward on a reversed horizontal one
+    const { arrowUp, arrowDown, arrowLeft, arrowRight, pageUp, pageDown } = UIT.Key
+    const grows = vertical ? (reversed ? arrowUp : arrowDown) : reversed ? arrowLeft : arrowRight
+    const shrinks = vertical ? (reversed ? arrowDown : arrowUp) : reversed ? arrowRight : arrowLeft
+    if (key === grows || (!vertical && key === arrowUp) || (vertical && key === arrowRight)) return 1
+    if (key === shrinks || (!vertical && key === arrowDown) || (vertical && key === arrowLeft)) return -1
+    if (key === pageUp) return PAGE_MULTIPLIER
+    if (key === pageDown) return -PAGE_MULTIPLIER
+    return 0
+  }
+
   /** Number of intervals between labels:  one per `tickStep` (per unit, with no step). */
   get intervals(): number {
     return Math.max(1, Math.round((this.max - this.min) / (this.tickStep || 1)))
@@ -104,6 +135,9 @@ export class SliderScale {
   }
 }
 
+/** Fomantic's `pageMultiplier`:  steps per PageUp / PageDown. */
+const PAGE_MULTIPLIER = 2
+
 /** Constructor props for `SliderScale`. */
 export type SliderScaleProps = {
   /** lowest value;  not finite ~== `0` */
@@ -114,4 +148,16 @@ export type SliderScaleProps = {
   step: number
   /** labels / ticks every this much;  absent or `<= 0` ~== every step */
   tickStep?: number
+}
+
+/** How `SliderScale.valueForKey()` reads a key. */
+export type KeyMoveOptions = {
+  /** lowest value Home goes to;  default `min` */
+  low?: number
+  /** highest value End goes to;  default `max` */
+  high?: number
+  /** the track runs upright, min at the top */
+  vertical?: boolean
+  /** the track runs from the right (or, `vertical`, from the bottom) */
+  reversed?: boolean
 }

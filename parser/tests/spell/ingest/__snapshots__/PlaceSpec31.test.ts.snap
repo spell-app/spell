@@ -1,0 +1,50 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`spell place ingest --spec, of a FastAPI 3.1 description > English:  every field typed, and the file parses clean 1`] = `
+"acme jobs is a web server at "https://jobs.acme.test"
+	its rows are its "items"
+	it gives up to 500 at a time
+	check it every 30 seconds
+	its next page is asked for with "limit" and "offset"
+	it writes names like "created_at"
+	it searches everything with "q"
+	jobs live at "/api/jobs"
+	searches are searched at "/api/search"
+	to complete a job is at "/api/jobs/{job_id}/complete"
+	a job's created is its "created at"
+
+a "job" is a thing
+	it lives in acme jobs
+	this type is unverified
+	its "name" is required text, with maximum length 200
+	its "description" is text
+	its "priority" is a number
+	its "retries" is a number
+	its "status" as one of queued, running, done or failed
+	its "stage" as one of build, test or deploy
+	its "owner" is an owner
+	its "steps" is a list of steps
+	its "labels" is a list of text
+	its "created at" is a required date
+	its "finished at" is a date
+	its "source" as one of api
+	its "log" is text
+
+a "search" is a thing
+	it lives in acme jobs
+	this type is unverified
+	enabled operations are read
+	its "title" is required text
+	its "score" is a required number
+	its "snippet" is text
+
+an "owner" is a thing
+	its "number" is a required number, stored as "id"
+	its "email" is required text
+	its "team" is text
+
+a "step" is a thing
+	its "name" is required text
+	its "seconds" is a number
+"
+`;

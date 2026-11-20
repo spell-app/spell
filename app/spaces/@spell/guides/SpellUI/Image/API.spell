@@ -3,16 +3,6 @@
 		Image
 		<header>An image is a graphic representation of something.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#tags">Tags</>
-			<item link="#attributes">Attributes</>
-			<item link="#slots">Slots</>
-			<item link="#parts">Parts</>
-			<item link="#states">States</>
-			<item link="#texts">Texts</>
-		</>
-	</>
 
 	<section label="Tags">
 		<html>
