@@ -1144,6 +1144,26 @@ export const HELP_TABLE: Readonly<
         "An application menubar (`role=menubar`): one Tab stop, arrow keys between items, every item a `menuitem`."
     }
   },
+  "ui-mermaid-diagram": {
+    description:
+      "A Mermaid diagram draws a flowchart, a sequence, a timeline or any other kind of diagram Mermaid knows, from the element's own text or a file on this site.",
+    empty: true,
+    attributes: {
+      source: "URL of the file to show, relative to the page; same origin only (another site's URL shows an error).",
+      load: "When to fetch `source`: `eager` (at once), `visible` (once scrolled into view) or `idle` (when the browser has nothing else to do).",
+      theme: "The colours.",
+      scheme:
+        "Light or dark for this drawing alone: `auto` follows the page; `light` and `dark` hold it there, whatever the page does.",
+      look: "The drawing style: plain lines (`classic`), sketched by hand (`hand-drawn`), or flatter and softer (`neo`).",
+      layout:
+        "How the boxes are placed: `auto` lets Mermaid pick for each kind of diagram (ELK for flowcharts, state, class and ER diagrams); any other asks for that engine, where Mermaid has it for the kind.",
+      seed: "For `hand-drawn`: the same seed draws the same wobbles every time, so it doesn't wobble as it redraws.",
+      controls:
+        "A small menu button in the drawing's corner, shown on hover or keyboard focus, so a reader can change its colours and light or dark.",
+      remember: "The name a reader's picks from the menu are kept under, across reloads and visits.",
+      label: "What a screen reader says for the drawing."
+    }
+  },
   "ui-message": {
     description: "A message displays information that explains nearby content.",
     attributes: {

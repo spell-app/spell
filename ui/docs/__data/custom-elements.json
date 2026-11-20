@@ -23798,6 +23798,386 @@
     },
     {
       "kind": "javascript-module",
+      "path": "src/components/ui-mermaid-diagram/index.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "name": "UIMermaidDiagram",
+          "tagName": "ui-mermaid-diagram",
+          "customElement": true,
+          "summary": "A Mermaid diagram draws a flowchart, a sequence, a timeline or any other kind of diagram Mermaid knows, from the element's own text or a file on this site.",
+          "description": "A Mermaid diagram draws a flowchart, a sequence, a timeline or any other kind of diagram Mermaid knows, from the element's own text or a file on this site.\n\nAlso known as:  mermaid, diagram, flowchart, chart, sequence diagram, gantt chart, mind map, timeline, diagram as code, text to diagram.",
+          "attributes": [
+            {
+              "name": "source",
+              "description": "URL of the file to show, relative to the page;  same origin only (another site's URL shows an error).  Changing it loads the new file.  Without it, the element shows its own content.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "source"
+            },
+            {
+              "name": "load",
+              "description": "When to fetch `source`:  `eager` (at once), `visible` (once scrolled into view) or `idle` (when the browser has nothing else to do).  Like Astro's `client:visible` / `client:idle`.",
+              "type": {
+                "text": "\"eager\" | \"visible\" | \"idle\""
+              },
+              "default": "\"eager\"",
+              "fieldName": "load"
+            },
+            {
+              "name": "theme",
+              "description": "The colours.  `spell`, the default:  Spell UI's own, read from the page, light or dark.  Mermaid's:  `default` (soft blue and grey), `neutral` (greys, for print), `dark`, `forest` (greens), `neo` and `neo-dark` (flat, soft shadows), `redux` and `redux-dark` (black outlines, no fill), `redux-color` and `redux-dark-color` (outlines with bold colours).  On a dark page a light one draws as its dark twin (`default` as `dark`, `neo` as `neo-dark`, `redux` as `redux-dark`, `redux-color` as `redux-dark-color`).  A theme set in the diagram's own text wins.",
+              "type": {
+                "text": "\"spell\" | \"default\" | \"neutral\" | \"dark\" | \"forest\" | \"neo\" | \"neo-dark\" | \"redux\" | \"redux-color\" | \"redux-dark\" | \"redux-dark-color\""
+              },
+              "default": "\"spell\"",
+              "fieldName": "theme"
+            },
+            {
+              "name": "scheme",
+              "description": "Light or dark for this drawing alone:  `auto` follows the page;  `light` and `dark` hold it there, whatever the page does.",
+              "type": {
+                "text": "\"auto\" | \"light\" | \"dark\""
+              },
+              "default": "\"auto\"",
+              "fieldName": "scheme"
+            },
+            {
+              "name": "look",
+              "description": "The drawing style:  plain lines (`classic`), sketched by hand (`hand-drawn`), or flatter and softer (`neo`).",
+              "type": {
+                "text": "\"classic\" | \"hand-drawn\" | \"neo\""
+              },
+              "default": "\"classic\"",
+              "fieldName": "look"
+            },
+            {
+              "name": "layout",
+              "description": "How the boxes are placed:  `auto` lets Mermaid pick for each kind of diagram (ELK for flowcharts, state, class and ER diagrams);  any other asks for that engine, where Mermaid has it for the kind.",
+              "type": {
+                "text": "\"auto\" | \"elk\" | \"dagre\" | \"cose-bilkent\" | \"swimlane\""
+              },
+              "default": "\"auto\"",
+              "fieldName": "layout"
+            },
+            {
+              "name": "seed",
+              "description": "For `hand-drawn`:  the same seed draws the same wobbles every time, so it doesn't wobble as it redraws.",
+              "type": {
+                "text": "number"
+              },
+              "default": "1",
+              "fieldName": "seed"
+            },
+            {
+              "name": "controls",
+              "description": "A small menu button in the drawing's corner, shown on hover or keyboard focus, so a reader can change its colours and light or dark.  Their pick is remembered (`remember`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "controls"
+            },
+            {
+              "name": "remember",
+              "description": "The name a reader's picks from the menu are kept under, across reloads and visits.  None:  a name made from the page and the drawing's `id`, else its `source`, else its place on the page.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "remember"
+            },
+            {
+              "name": "label",
+              "description": "What a screen reader says for the drawing.  None:  the title in the diagram's own text (`accTitle`, or a `title`), else its kind (\"Flowchart\").",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "label"
+            },
+            {
+              "name": "disabled",
+              "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "disabled"
+            },
+            {
+              "name": "loading",
+              "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "loading"
+            },
+            {
+              "name": "visible",
+              "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "visible"
+            },
+            {
+              "name": "animation",
+              "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.",
+              "type": {
+                "text": "\"fade\" | \"fade up\" | \"fade down\" | \"fade left\" | \"fade right\" | \"scale\" | \"zoom\" | \"drop\" | \"browse\" | \"browse right\" | \"fly\" | \"fly up\" | \"fly down\" | \"fly left\" | \"fly right\" | \"slide\" | \"slide up\" | \"slide down\" | \"slide left\" | \"slide right\" | \"swing\" | \"swing up\" | \"swing down\" | \"swing left\" | \"swing right\" | \"horizontal flip\" | \"vertical flip\" | \"flash\" | \"shake\" | \"bounce\" | \"tada\" | \"pulse\" | \"jiggle\" | \"glow\" | \"coin\" | \"none\""
+              },
+              "fieldName": "animation"
+            },
+            {
+              "name": "link",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "link"
+            },
+            {
+              "name": "target",
+              "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "target"
+            },
+            {
+              "name": "font",
+              "description": "How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "font"
+            },
+            {
+              "name": "shadow",
+              "description": "A hard shadow behind its letters, down and to the right, in a hue:  `shadow=\"yellow\"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em).",
+              "type": {
+                "text": "\"primary\" | \"secondary\" | \"red\" | \"orange\" | \"yellow\" | \"olive\" | \"green\" | \"teal\" | \"blue\" | \"violet\" | \"purple\" | \"pink\" | \"brown\" | \"grey\" | \"black\" | \"positive\" | \"negative\""
+              },
+              "fieldName": "shadow"
+            },
+            {
+              "name": "width",
+              "description": "Its box's own width where it sits, any CSS length:  `width=\"10em\"`, `\"50%\"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "width"
+            },
+            {
+              "name": "min-width",
+              "description": "The narrowest its box gets, any CSS length:  `min-width=\"16em\"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "minWidth"
+            },
+            {
+              "name": "max-width",
+              "description": "The widest its box gets, any CSS length:  `max-width=\"36em\"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "maxWidth"
+            },
+            {
+              "name": "tooltip",
+              "description": "Its tooltip:  the browser's own, written as the element's `title`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "tooltip"
+            },
+            {
+              "name": "movable",
+              "description": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "movable"
+            },
+            {
+              "name": "resizable",
+              "description": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "resizable"
+            },
+            {
+              "name": "on-platform",
+              "description": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onPlatform"
+            }
+          ],
+          "members": [],
+          "events": [
+            {
+              "name": "ui-loaded",
+              "description": "Content arrived:  fetched from `source`, or read from the element's own content.",
+              "type": {
+                "text": "CustomEvent<{ source?: string, content: string }>"
+              }
+            },
+            {
+              "name": "ui-changed",
+              "description": "The `content` property was set:  the element shows the new text, and is `dirty` until saved.",
+              "type": {
+                "text": "CustomEvent<{ content: string }>"
+              }
+            },
+            {
+              "name": "ui-saving",
+              "description": "`host.save()` is about to save:  `preventDefault()` to save it yourself (an editor posting elsewhere).  Cancelable:  `preventDefault()` vetoes it.",
+              "type": {
+                "text": "CustomEvent<{ source?: string, content: string, etag?: string }>"
+              }
+            },
+            {
+              "name": "ui-saved",
+              "description": "Saved;  `etag` is the file's new version.",
+              "type": {
+                "text": "CustomEvent<{ source?: string, etag?: string }>"
+              }
+            },
+            {
+              "name": "ui-error",
+              "description": "Loading, showing or saving failed;  `kind` says why.  Load and render failures show an error message unless cancelled;  save failures keep the content as it is.  Cancelable:  `preventDefault()` vetoes it.",
+              "type": {
+                "text": "CustomEvent<{ kind: 'load' | 'cross-origin' | 'file-protocol' | 'save' | 'conflict' | 'no-saver' | 'render', source?: string, error: unknown }>"
+              }
+            },
+            {
+              "name": "ui-drawn",
+              "description": "Drawn;  `diagramType` is what Mermaid read the text as (`flowchart-v2`, `sequence` ...).",
+              "type": {
+                "text": "CustomEvent<{ diagramType: string }>"
+              }
+            }
+          ],
+          "slots": [],
+          "cssParts": [
+            {
+              "name": "loader",
+              "description": "The `<ui-loader>` shown while `source` loads."
+            },
+            {
+              "name": "error",
+              "description": "The `<ui-message>` shown when loading or showing failed."
+            },
+            {
+              "name": "drawing",
+              "description": "The box holding the drawn `<svg>`."
+            },
+            {
+              "name": "controls",
+              "description": "The menu (`<ui-dropdown>`) in the corner, with `controls`."
+            }
+          ],
+          "cssStates": [
+            {
+              "name": "loading",
+              "description": "Fetching `source`."
+            },
+            {
+              "name": "error",
+              "description": "Loading or showing failed:  the error message shows."
+            },
+            {
+              "name": "saving",
+              "description": "`save()` is in progress."
+            },
+            {
+              "name": "dirty",
+              "description": "`content` changed since it was loaded or saved."
+            },
+            {
+              "name": "drawing",
+              "description": "A drawing is on its way:  the last one stays until it comes."
+            },
+            {
+              "name": "dark",
+              "description": "It's drawn dark:  its `scheme`, the reader's pick, or the page's."
+            },
+            {
+              "name": "disabled",
+              "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+            },
+            {
+              "name": "busy",
+              "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+            },
+            {
+              "name": "dimmed",
+              "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+            },
+            {
+              "name": "hidden",
+              "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+            },
+            {
+              "name": "still",
+              "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+            },
+            {
+              "name": "hiding",
+              "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+            },
+            {
+              "name": "pending",
+              "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+            },
+            {
+              "name": "ready",
+              "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "on-platform",
+              "description": "`on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
+            }
+          ],
+          "cssProperties": [
+            {
+              "name": "--ui-mermaid-diagram-padding",
+              "default": "0"
+            },
+            {
+              "name": "--ui-mermaid-diagram-stale-opacity",
+              "default": "0.32"
+            },
+            {
+              "name": "--ui-mermaid-diagram-held-padding",
+              "default": "0.75em"
+            }
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "UIMermaidDiagram",
+          "declaration": {
+            "name": "UIMermaidDiagram",
+            "module": "src/components/ui-mermaid-diagram/index.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-mermaid-diagram",
+          "declaration": {
+            "name": "UIMermaidDiagram",
+            "module": "src/components/ui-mermaid-diagram/index.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
       "path": "src/components/ui-message/index.ts",
       "declarations": [
         {

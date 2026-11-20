@@ -231,7 +231,7 @@ Every family, by group, A-Z inside each.
 
 <!-- components:start -->
 
-93 families, 145 tags;  4 families in progress.
+96 families, 149 tags;  4 families in progress.
 
 ### Elements
 
@@ -288,6 +288,7 @@ Ways to present a kind of content.
 |  | [Graph](docs/ui-graph.html) *(In progress)* | `<ui-graph>` | A graph draws nodes joined by edges, laid out left to right.  A node may hold a graph of its own, opened in place, in a modal, or in its stead. | graph, node graph, network diagram, flow chart |
 |  | [Item](docs/ui-item.html) | `<ui-item>` | An item of a dropdown, list, menu or Items view. | list item, media object, row |
 | <img src="docs/images/components/ui-items.png" alt="Items, its first example" width="144" height="96"> | [Items](docs/ui-items.html) | `<ui-items>` | A group of items:  site content, each an image beside its header, meta, description and extra. | item list, media list, product list, results |
+|  | [Mermaid diagram](docs/ui-mermaid-diagram.html) | `<ui-mermaid-diagram>` | A Mermaid diagram draws a flowchart, a sequence, a timeline or any other kind of diagram Mermaid knows, from the element's own text or a file on this site. | mermaid, diagram, flowchart, chart |
 | <img src="docs/images/components/ui-statistic.png" alt="Statistic, its first example" width="175" height="80"> | [Statistic](docs/ui-statistic.html) | `<ui-statistic>` `<ui-statistics>` | A statistic emphasizes the current value of an attribute. | stat, kpi, metric, counter |
 | <img src="docs/images/components/ui-tree-diagram.png" alt="Tree diagram, its first example" width="167" height="96"> | [Tree diagram](docs/ui-tree-diagram.html) | `<ui-tree-diagram>` `<ui-tree-node>` | A tree diagram draws a tree:  a box for each node, a line to each of its children.  Write it as nested tags or as JSON. | tree, tree chart, hierarchy, hierarchy diagram |
 
@@ -321,6 +322,7 @@ Elements with behaviour:  they open, pick, move.
 |  | [Sticky](docs/ui-sticky.html) | `<ui-sticky>` | Sticky content stays fixed to the viewport while its container is on screen. | affix, pinned, fixed header, sticky header |
 |  | [Tab](docs/ui-tab.html) | `<ui-tab>` `<ui-tabs>` | A tab pane:  the content shown while its tab is selected. | tab panel, pane |
 |  | [Toast](docs/ui-toast.html) | `<ui-toast>` | A toast gives people a short, non-blocking notification. | snackbar, notification, growl, flash message |
+|  | [Tour](docs/ui-tour.html) | `<ui-tour>` `<ui-tour-step>` | A tour leads someone through a feature one numbered step at a time, pointing at what each step is about. | quick tour, product tour, walkthrough, guided tour |
 | <img src="docs/images/components/ui-transition.png" alt="Transition, its first example" width="62" height="96"> | [Transition](docs/ui-transition.html) | `<ui-transition>` | A transition is an animation used to show or hide content, or to draw attention to it. | animate, fade, slide, motion |
 |  | [Visibility](docs/ui-visibility.html) | `<ui-visibility>` | Visibility provides a set of callbacks for when content appears in the viewport. | scroll spy, in view, intersection, lazy load |
 
@@ -366,6 +368,7 @@ Elements with no Fomantic counterpart.
 |  | [Theme Editor](docs/ui-theme-editor.html) *(In progress)* | `<ui-theme-editor>` `<ui-color-chip>` `<ui-theme-token>` | A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, or set any token by hand, watch real pages follow in light and dark, then copy the theme file or keep it in the browser. | theme editor, theme builder, theme bench, theme creator |
 |  | [Theme Menu](docs/ui-theme-menu.html) | `<ui-theme-menu>` | A theme menu switches the page between light and dark, and picks its theme from Spell's own, and remembers both for the next page. | theme picker, theme switcher, dark mode toggle, colour scheme |
 |  | [Tree](docs/ui-tree.html) | `<ui-tree>` `<ui-tree-item>` | A tree shows rows nested in rows, which open and close, and can be selected one or many at a time. | tree view, outline, hierarchy, file tree |
+|  | [Uploader](docs/ui-uploader.html) | `<ui-uploader>` | An uploader takes files someone picks or drops on it, or whole folders, then posts them to its `destination`, or hands them to its `action`. | file upload, file uploader, upload, dropzone |
 |  | [Zoom](docs/ui-zoom.html) | `<ui-zoom>` | A zoom shows something full size, over the page.  Round any content it shows it shrunk, within a width and height, and full size on a click;  with `src` it shows that image full size.  Escape, a click outside it or its close button close it. | lightbox, zoom, full size, image viewer |
 
 <details>

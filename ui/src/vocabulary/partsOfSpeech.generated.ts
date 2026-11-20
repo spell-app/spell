@@ -73,6 +73,7 @@ export const PARTS_OF_SPEECH: Readonly<Record<string, PartOfSpeech>> = {
   "ui-loader": "property",
   "ui-markdown": "property",
   "ui-menu": "structure",
+  "ui-mermaid-diagram": "thing",
   "ui-message": "structure",
   "ui-meta": "property",
   "ui-modal": "structure",

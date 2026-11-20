@@ -877,6 +877,11 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     ],
     formControl: true
   },
+  "ui-mermaid-diagram": {
+    folder: "ui-mermaid-diagram",
+    skeleton: { height: "14em" },
+    attributes: ["source", "load", "theme", "scheme", "look", "layout", "seed", "controls", "remember", "label"]
+  },
   "ui-message": {
     folder: "ui-message",
     skeleton: { parts: [{ shape: "header" }, { shape: "line", length: "long" }] },

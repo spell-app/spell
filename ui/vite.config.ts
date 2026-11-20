@@ -126,6 +126,7 @@ export const COMPONENTS = [
   "ui-example",
   "ui-toc",
   "ui-markdown",
+  "ui-mermaid-diagram",
   "ui-tree-diagram",
   "ui-diagram",
   "ui-graph",

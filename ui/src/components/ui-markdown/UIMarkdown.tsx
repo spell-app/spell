@@ -3,6 +3,7 @@ import type { JSX } from "@solidjs/web"
 
 import { E, UI } from "spell/ui/core"
 import type { codeVocabulary } from "spell/ui/components/ui-code/UICode.en"
+import type { mermaidDiagramVocabulary } from "spell/ui/components/ui-mermaid-diagram/UIMermaidDiagram.en"
 import { PrefStore } from "spell/util/persist/PrefStore"
 import { MarkdownBox, type BoxView } from "./MarkdownBox"
 import { MarkdownFormats, type Shape } from "./MarkdownFormats"
@@ -63,6 +64,8 @@ export class DOMMarkdownElement extends E.DOMLoadableElement<UIMarkdown> {
  *   set it for text you didn't write.
  * - After rendering:
  *   - each fenced code block becomes a `<ui-code language="x" copy>` (one highlighter, one palette)
+ *   - each ````mermaid```` block becomes a `<ui-mermaid-diagram>`, drawn as GitHub draws it;
+ *     its family loads with the first one (`MarkdownRenderer.loadMermaid()`)
  *   - each short inline code span is marked `short`, kept on one line (`keepShortCode()`)
  *   - each task-list checkbox is named by its item's text (marked leaves it unlabelled)
  *   - relative `href` / `src` resolve against `source`, so a README's links and images work where it's shown
@@ -654,12 +657,22 @@ export class UIMarkdown extends E.LoadableComponent<typeof markdownVocabulary> {
     }
   }
 
-  /** Each `<pre><code class="language-x">` in `fragment` becomes a `<ui-code language="x" copy>` with its text. */
+  /**
+   * Each `<pre><code class="language-x">` in `fragment` becomes a `<ui-code language="x" copy>` with its text;
+   * a `mermaid` one a `<ui-mermaid-diagram>`, its family loaded.
+   */
   private upgradeCode(fragment: DocumentFragment) {
     for (const code of fragment.querySelectorAll(CODE_BLOCK)) {
       const pre = code.parentElement!
-      const block = this.domElement.ownerDocument.createElement(CODE_TAG)
       const language = LANGUAGE_CLASS.exec(code.className)?.[1]
+      if (language === MERMAID_LANGUAGE) {
+        const diagram = this.domElement.ownerDocument.createElement(MERMAID_TAG)
+        diagram.textContent = (code.textContent ?? "").replace(/\n$/, "")
+        pre.replaceWith(diagram)
+        void MarkdownRenderer.loadMermaid()
+        continue
+      }
+      const block = this.domElement.ownerDocument.createElement(CODE_TAG)
       if (language) block.setAttribute(LANGUAGE, language)
       block.setAttribute(COPY, "")
       block.textContent = (code.textContent ?? "").replace(/\n$/, "")
@@ -879,6 +892,12 @@ const LANGUAGE_CLASS = /\blanguage-(\S+)/
 
 /** Tag a fenced code block becomes. */
 const CODE_TAG: (typeof codeVocabulary)["tag"] = "ui-code"
+
+/** A fenced block's language that draws as a diagram. */
+const MERMAID_LANGUAGE = "mermaid"
+
+/** Tag a `mermaid` block becomes. */
+const MERMAID_TAG: (typeof mermaidDiagramVocabulary)["tag"] = "ui-mermaid-diagram"
 
 /** `<ui-code>`'s highlighting language. */
 const LANGUAGE: E.AttributeName<typeof codeVocabulary> = "language"

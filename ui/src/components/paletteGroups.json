@@ -151,7 +151,8 @@
         "ui-diagram-node",
         "ui-graph",
         "ui-tree-diagram",
-        "ui-tree-node"
+        "ui-tree-node",
+        "ui-mermaid-diagram"
       ]
     },
     {

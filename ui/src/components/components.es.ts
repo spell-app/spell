@@ -72,6 +72,7 @@ import { labelsEs } from "spell/ui/components/ui-label/UILabels.es"
 import { listEs } from "spell/ui/components/ui-list/UIList.es"
 import { loaderEs } from "spell/ui/components/ui-loader/UILoader.es"
 import { markdownEs } from "spell/ui/components/ui-markdown/UIMarkdown.es"
+import { mermaidDiagramEs } from "spell/ui/components/ui-mermaid-diagram/UIMermaidDiagram.es"
 import { menuEs } from "spell/ui/components/ui-menu/UIMenu.es"
 import { submenuEs } from "spell/ui/components/ui-menu/UISubmenu.es"
 import { messageEs } from "spell/ui/components/ui-message/UIMessage.es"
@@ -747,6 +748,7 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   listEs,
   loaderEs,
   markdownEs,
+  mermaidDiagramEs,
   menuEs,
   submenuEs,
   messageEs,

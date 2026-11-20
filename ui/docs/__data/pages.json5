@@ -293,6 +293,11 @@
         }
       }
     },
+    "ui-mermaid-diagram": {
+      "title": "Mermaid diagram",
+      "summary": "A Mermaid diagram draws a flowchart, a sequence, a timeline or any other kind of diagram Mermaid knows, from the element's own text or a file on this site.",
+      "status": "done"
+    },
     "ui-message": {
       "title": "Message",
       "summary": "A message displays information that explains nearby content.",
