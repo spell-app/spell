@@ -254,6 +254,28 @@ describe("RestPlace, a collection searched at its own address", () => {
 describe("RestPlace paging, the shapes servers come in (epic `data` I35)", () => {
   afterEach(() => void vi.unstubAllGlobals())
 
+  test("FastAPI's:  `{ items, total, limit, offset }` by offset, and a search's `{ results }` beside it (epic `data` I140)", async () => {
+    const asked = fakeServer((query, url) => {
+      if (url.pathname === "/api/search") return { results: [{ id: "s-1" }], total_count: 1 }
+      const [limit, offset] = [Number(query.get("limit")), Number(query.get("offset"))]
+      return { items: FIVE_ROWS.slice(offset, offset + limit), total: 5, limit, offset }
+    })
+    const place = shapedPlace({
+      can: { page: "offset" },
+      pageSize: 2,
+      collections: {
+        recipes: { path: "/api/recipes{/id}", rowsAt: "items" },
+        searches: { path: "/api/search{/id}", rowsAt: "items" }
+      },
+      searches: { param: "q", fields: [] }
+    })
+    expect(await everyRow(place)).toEqual(ALL_IDS)
+    expect(asked).toHaveLength(3)
+    const found = await place.list("searches", { search: { "*": "nightly" } }, {})
+    expect(found.rows).toEqual([{ id: "s-1" }])
+    expect(asked.at(-1)).toBe("https://shapes.test/api/search?q=nightly&limit=2&offset=0")
+  })
+
   test.each([
     ["take", "skip"],
     ["count", "start"],

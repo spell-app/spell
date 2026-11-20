@@ -1,0 +1,419 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Acme Jobs",
+    "description": "A made-up job runner, in the shape FastAPI writes:  lists of items with a total, a search, errors as detail.",
+    "version": "0.4.2"
+  },
+  "paths": {
+    "/api/jobs": {
+      "get": {
+        "tags": ["jobs"],
+        "summary": "List Jobs",
+        "operationId": "list_jobs_api_jobs_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "maximum": 500, "minimum": 1, "default": 50, "title": "Limit" }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "minimum": 0, "default": 0, "title": "Offset" }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": { "anyOf": [{ "$ref": "#/components/schemas/JobStatus" }, { "type": "null" }], "title": "Status" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Page_Job_" } } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HTTPValidationError" } } }
+          }
+        }
+      },
+      "post": {
+        "tags": ["jobs"],
+        "summary": "Create Job",
+        "operationId": "create_job_api_jobs_post",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/JobCreate" } } }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Job" } } }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/HTTPValidationError" } } }
+          }
+        }
+      }
+    },
+    "/api/jobs/{job_id}": {
+      "get": {
+        "tags": ["jobs"],
+        "summary": "Get Job",
+        "operationId": "get_job_api_jobs__job_id__get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Job Id" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Job" } } }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorDetail" } } }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["jobs"],
+        "summary": "Update Job",
+        "operationId": "update_job_api_jobs__job_id__patch",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Job Id" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/JobUpdate" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Job" } } }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["jobs"],
+        "summary": "Delete Job",
+        "operationId": "delete_job_api_jobs__job_id__delete",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Job Id" }
+          }
+        ],
+        "responses": { "204": { "description": "Successful Response" } }
+      }
+    },
+    "/api/jobs/{job_id}/complete": {
+      "post": {
+        "tags": ["jobs"],
+        "summary": "Complete Job",
+        "operationId": "complete_job_api_jobs__job_id__complete_post",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Job Id" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/JobCompletion" } } }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Job" } } }
+          }
+        }
+      }
+    },
+    "/api/jobs/{job_id}/steps": {
+      "get": {
+        "tags": ["jobs"],
+        "summary": "List Steps",
+        "operationId": "list_steps_api_jobs__job_id__steps_get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Job Id" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Step" },
+                  "title": "Response List Steps"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/jobs/{job_id}/steps/{step_id}/retry": {
+      "post": {
+        "tags": ["jobs"],
+        "summary": "Retry Step",
+        "operationId": "retry_step_api_jobs__job_id__steps__step_id__retry_post",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Job Id" }
+          },
+          { "name": "step_id", "in": "path", "required": true, "schema": { "type": "integer", "title": "Step Id" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Step" } } }
+          }
+        }
+      }
+    },
+    "/api/jobs-archive/{archive_id}": {
+      "get": {
+        "tags": ["archive"],
+        "summary": "Get Archived Job",
+        "operationId": "get_archived_job_api_jobs_archive__archive_id__get",
+        "parameters": [
+          {
+            "name": "archive_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Archive Id" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Job" } } }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["archive"],
+        "summary": "Purge Archived Job",
+        "operationId": "purge_archived_job_api_jobs_archive__archive_id__delete",
+        "parameters": [
+          {
+            "name": "archive_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid", "title": "Archive Id" }
+          }
+        ],
+        "responses": { "204": { "description": "Successful Response" } }
+      }
+    },
+    "/api/search": {
+      "get": {
+        "tags": ["search"],
+        "summary": "Search",
+        "operationId": "search_api_search_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "minLength": 1, "title": "Q" },
+            "examples": ["nightly"]
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 20, "title": "Limit" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/SearchResults" } } }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Page_Job_": {
+        "properties": {
+          "items": { "items": { "$ref": "#/components/schemas/Job" }, "type": "array", "title": "Items" },
+          "total": { "type": "integer", "title": "Total" },
+          "limit": { "type": "integer", "title": "Limit" },
+          "offset": { "type": "integer", "title": "Offset" }
+        },
+        "type": "object",
+        "required": ["items", "total", "limit", "offset"],
+        "title": "Page[Job]"
+      },
+      "SearchResults": {
+        "properties": {
+          "results": { "items": { "$ref": "#/components/schemas/SearchHit" }, "type": "array", "title": "Results" },
+          "total_count": { "type": "integer", "title": "Total Count" }
+        },
+        "type": "object",
+        "required": ["results", "total_count"],
+        "title": "SearchResults"
+      },
+      "SearchHit": {
+        "properties": {
+          "id": { "type": "string", "format": "uuid", "title": "Id" },
+          "title": { "type": "string", "title": "Title" },
+          "score": { "type": "number", "title": "Score" },
+          "snippet": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Snippet" }
+        },
+        "type": "object",
+        "required": ["id", "title", "score", "snippet"],
+        "title": "SearchHit"
+      },
+      "JobStatus": {
+        "type": "string",
+        "enum": ["queued", "running", "done", "failed"],
+        "title": "JobStatus"
+      },
+      "JobStage": {
+        "type": "string",
+        "enum": ["build", "test", "deploy"],
+        "title": "JobStage"
+      },
+      "Owner": {
+        "properties": {
+          "id": { "type": "integer", "title": "Id" },
+          "email": { "type": "string", "format": "email", "title": "Email", "examples": ["alice@acme.test"] },
+          "team": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Team" }
+        },
+        "type": "object",
+        "required": ["id", "email"],
+        "title": "Owner"
+      },
+      "Step": {
+        "properties": {
+          "name": { "type": "string", "title": "Name" },
+          "seconds": { "anyOf": [{ "type": "number" }, { "type": "null" }], "title": "Seconds" }
+        },
+        "type": "object",
+        "required": ["name"],
+        "title": "Step"
+      },
+      "Job": {
+        "properties": {
+          "id": { "type": "string", "format": "uuid", "title": "Id" },
+          "name": { "type": "string", "maxLength": 200, "title": "Name", "examples": ["nightly build"] },
+          "description": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Description" },
+          "priority": {
+            "anyOf": [{ "type": "integer", "maximum": 10, "minimum": 0 }, { "type": "null" }],
+            "title": "Priority"
+          },
+          "retries": { "type": ["integer", "null"], "title": "Retries" },
+          "status": { "$ref": "#/components/schemas/JobStatus" },
+          "stage": { "anyOf": [{ "$ref": "#/components/schemas/JobStage" }, { "type": "null" }] },
+          "owner": { "anyOf": [{ "$ref": "#/components/schemas/Owner" }, { "type": "null" }] },
+          "steps": { "items": { "$ref": "#/components/schemas/Step" }, "type": "array", "title": "Steps" },
+          "labels": { "items": { "type": "string" }, "type": "array", "title": "Labels" },
+          "created_at": { "type": "string", "format": "date-time", "title": "Created At" },
+          "finished_at": {
+            "anyOf": [{ "type": "string", "format": "date-time" }, { "type": "null" }],
+            "title": "Finished At"
+          },
+          "source": { "const": "api", "type": "string", "title": "Source" },
+          "log": { "type": "string", "contentMediaType": "text/plain", "title": "Log" },
+          "window": {
+            "type": "array",
+            "prefixItems": [{ "type": "integer" }, { "type": "integer" }],
+            "title": "Window"
+          },
+          "result": { "anyOf": [{ "type": "integer" }, { "type": "string" }, { "type": "null" }], "title": "Result" }
+        },
+        "type": "object",
+        "required": ["id", "name", "description", "status", "created_at"],
+        "title": "Job"
+      },
+      "JobCreate": {
+        "properties": {
+          "name": { "type": "string", "maxLength": 200, "title": "Name" },
+          "description": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Description" },
+          "priority": { "anyOf": [{ "type": "integer" }, { "type": "null" }], "title": "Priority" },
+          "owner_id": { "anyOf": [{ "type": "integer" }, { "type": "null" }], "title": "Owner Id" }
+        },
+        "type": "object",
+        "required": ["name"],
+        "title": "JobCreate"
+      },
+      "JobUpdate": {
+        "properties": {
+          "name": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Name" },
+          "stage": { "anyOf": [{ "$ref": "#/components/schemas/JobStage" }, { "type": "null" }] }
+        },
+        "type": "object",
+        "title": "JobUpdate"
+      },
+      "JobCompletion": {
+        "properties": {
+          "succeeded": { "type": "boolean", "title": "Succeeded" },
+          "note": { "anyOf": [{ "type": "string" }, { "type": "null" }], "title": "Note" }
+        },
+        "type": "object",
+        "required": ["succeeded"],
+        "title": "JobCompletion"
+      },
+      "ErrorDetail": {
+        "properties": { "detail": { "type": "string", "title": "Detail" } },
+        "type": "object",
+        "required": ["detail"],
+        "title": "ErrorDetail"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": { "items": { "$ref": "#/components/schemas/ValidationError" }, "type": "array", "title": "Detail" }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": { "anyOf": [{ "type": "string" }, { "type": "integer" }] },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": { "type": "string", "title": "Message" },
+          "type": { "type": "string", "title": "Error Type" }
+        },
+        "type": "object",
+        "required": ["loc", "msg", "type"],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

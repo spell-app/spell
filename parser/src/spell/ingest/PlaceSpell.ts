@@ -130,8 +130,10 @@ export function spellPartsFor(
   const isSheet = kind === "sheet" || kind === "google sheet"
   if (sameId && (isSheet || sameId !== USUAL_ID)) placeLines.push({ key: "id", text: `its id is its "${sameId}"` })
   // what's said of lists is said of those that list:  one found by name is read a thing at a time
+  // a search answers its own way, its one list wherever it is (`RestPlace`):  FastAPI's `results`, beside its lists' `items`
   const lists = every.filter(({ at }) => !isFoundByNameAt(at))
-  const rowsAt = sameOfEvery(lists, (collection) => collection.rowsAt)
+  const notSearches = lists.filter(({ searchedOnly }) => !searchedOnly)
+  const rowsAt = sameOfEvery(notSearches.length ? notSearches : lists, (collection) => collection.rowsAt)
   if (rowsAt) placeLines.push({ key: "rows", text: `its rows are ${fieldInWords(rowsAt)}` })
   const nextAt = kind === "web server" ? sameOfEvery(lists, (collection) => collection.nextAt) : undefined
   if (nextAt) placeLines.push({ key: "next", text: `its next page is ${fieldInWords(nextAt)}` })
@@ -146,6 +148,9 @@ export function spellPartsFor(
   const most = Math.max(...paged.map(({ rowsItSays }) => rowsItSays ?? Infinity))
   if (kind === "web server" && paged.length && paged.every(({ takesLimit }) => takesLimit) && most <= MOST_AT_A_TIME) {
     placeLines.push({ key: "size", text: `it gives up to ${Math.ceil(most / 1000) * 1000} at a time` })
+  } else if (kind === "web server" && serverTakes?.pagesWith?.most !== undefined && !nextAt && !paging.size) {
+    // its OpenAPI description says the most its lists give:  a read asking for more would be refused (epic `data` I140)
+    placeLines.push({ key: "size", text: `it gives up to ${serverTakes.pagesWith.most} at a time` })
   }
   // every list gives only a little of each row:  what any of them gives, or its id when none gives more
   if (kind === "web server" && every.length && every.every(({ listsGive }) => listsGive)) {
@@ -482,13 +487,14 @@ function typesInside(
       }
       const lines = Object.entries(inside).flatMap(([name, about]) => {
         if (about.leftOut || (!about.inside && !about.isItsOwner && !SPELL_TYPES[about.type])) return []
-        const what = typeWordsFor(about, collections, words, own, place)
-        return [
-          {
-            key: `inside:${words}:${about.words}`,
-            text: `its "${about.words}" is ${what}${storedAsFor(name, about)}${commentFor(about, collections)}`
-          }
-        ]
+        // what its schema says of it too, as a collection's own field:  `required text` (epic `data` I140);
+        // NOT its choices:  one type inside stands for every field holding it, NetBox's `status` with each its own
+        const what = schemaWordsFor(
+          { ...about, choices: undefined },
+          typeWordsFor(about, collections, words, own, place)
+        )
+        const line = `its "${about.words}" ${verbBefore(what)} ${what}${nothingWordsFor(about)}${storedAsFor(name, about)}`
+        return [{ key: `inside:${words}:${about.words}`, text: `${line}${commentFor(about, collections)}` }]
       })
       const header = `${articled(words).replace(words, `"${words}"`)} is a thing`
       types.set(words, { collection, header, lines, isInside: true, insideFields: inside, heldBy: [{ owner, field }] })
