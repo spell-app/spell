@@ -142,10 +142,22 @@ The skills write two kinds of text:  pages for people (READMEs, guides), and tex
 Each kind follows a VOICE, a Markdown file of rules the skills read before they write.
 
 - Pages for people:  the plugin's own `readme` voice, unless you name yours.
-- Text in the code:  YOUR house style.  The plugin ships none for it, and `epic init` names none.
-  - Until you do, `epic voice code` says "no such voice here", and the skills fall back to what your `AGENTS.md` says.
+- Text in the code:  YOUR house style, the `code` voice.
 
-Name your file in `.epic/config.json5`, from the repo's root:
+`epic init` offers you a starter:  "Add a short file of writing rules ...?", yes suggested.
+- Yes writes `.epic/house-style.md`, beside the config, and names it there:
+
+  ```json5
+  "voices": { "code": ".epic/house-style.md" }
+  ```
+
+- It's a short page of rules for comments, docstrings and docs, with `<placeholders>` for your own:
+  edit it as you like.  `epic init` never writes it again.
+- `--house-style` / `--no-house-style` answer the question;  with no terminal to ask in, it's yes.
+- A config that names a `code` voice already isn't asked;  a `.epic/house-style.md` there already is kept, only named.
+- Without one, `epic voice code` says "no such voice here", and the skills fall back to what your `AGENTS.md` says.
+
+Your own file somewhere else:  name it in `.epic/config.json5`, from the repo's root:
 
 ```json5
 "voices": { "code": "docs/STYLE.md" }

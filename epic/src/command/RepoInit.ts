@@ -19,6 +19,7 @@ import { DataFile } from "spell/server/DataFile"
 import { Git } from "spell/server/Git"
 import { CLI } from "spell/cli"
 import { Editor } from "spell/epic/config/Editor"
+import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 import { EpicConfig, type EpicSettings } from "spell/epic/config/EpicConfig"
 import { EpicHome } from "spell/epic/config/EpicHome"
 import { CodeHost, type CodeHostClient, type CodeHostKind } from "spell/epic/config/CodeHost"
@@ -36,7 +37,8 @@ import type { SyncReport } from "./SharedSync"
 /****************
  * ### `RepoInit`
  * `epic init [--local] [--name <name>] [--color <colour>] [--install <command>] [--content-repo <name> | --remote <address> | --no-remote]
- * [--public] [--host github|gitlab] [--protected-base] [--superpowers] [--no-plugin] [--no-server] [--dry-run] [--json]`:
+ * [--public] [--host github|gitlab] [--protected-base] [--superpowers] [--house-style | --no-house-style] [--no-plugin]
+ * [--no-server] [--dry-run] [--json]`:
  * set a repo up for epics (epic `epic-eject` P9), from any folder of its main checkout or a worktree of it;  the ONE
  * command a new repo, and each teammate joining it, runs (epic `epic-friend` P13:  `npx spell@next epic init`).
  *
@@ -86,6 +88,13 @@ import type { SyncReport } from "./SharedSync"
  *    - asked in a terminal when superpowers is turned on for this repo, in any settings layer;  `--superpowers` without
  *      asking;  a block there already is kept current with the guide;  never `--local`
  *    - committed with the other two files, only when init changed it
+ * 4c. a starter HOUSE STYLE, named as the repo's `code` voice (`houseStyleChoice()`, `houseStyleStep()`;  epic
+ *    `epic-engine` T97):  `.epic/house-style.md`, from the plugin's `templates/house-style.md`, and
+ *    `"voices": { "code": ".epic/house-style.md" }` in the config, so `epic voice code` prints it
+ *    - asked in a terminal, `y` suggested;  no terminal, yes;  `--house-style` / `--no-house-style` answer it
+ *    - `--local` asks too:  the file sits in `.epic/`, which local mode lists in `.git/info/exclude` already
+ *    - not asked when the config names a `code` voice already;  a file there already is kept, only named
+ *    - committed with the config, only when init wrote it
  * 5. keeps the name this machine's person goes by on the epics (`EpicHome.keepPerson()`;  epic `epic-friend` P1)
  *    - `--name <name>`;  else, with no name kept yet, asks "What do you want to be called?" in a terminal,
  *      suggesting their GitHub login, else git's `user.name` (`CLI.ask()`, `EpicHome.refreshGithub()`);
@@ -287,7 +296,9 @@ export class RepoInit {
       "noCommit",
       "protectedBase",
       "local",
-      "superpowers"
+      "superpowers",
+      "houseStyle",
+      "noHouseStyle"
     ])
     const demo = this.demo !== undefined
     // `--demo` asked for here, outside `demo()` (a test's `run()`):  the demo of this folder
@@ -333,6 +344,7 @@ export class RepoInit {
       color,
       install: stringFlag(flags.install),
       superpowers: flags.superpowers === true,
+      houseStyle: flags.noHouseStyle === true ? false : flags.houseStyle === true ? true : undefined,
       remote,
       contentRepo,
       visibility: flags.public === true ? "public" : undefined,
@@ -356,6 +368,7 @@ export class RepoInit {
       color: answers.color,
       install: answers.install,
       superpowers: answers.superpowers,
+      houseStyle: answers.houseStyle,
       cloned: answers.cloned,
       codeHost: answers.codeHost,
       protectedBase: flags.protectedBase === true,
@@ -398,6 +411,8 @@ export class RepoInit {
    *     (`cloned`;  `init()` reports it)
    * - the epic repo's name and private or public, only when `init()` will make it on the code host (`willMakeRepo()`)
    * - which command gets a new worktree ready (`installChoice()`), unless the config names one;  `install` answers it
+   * - whether to add a starter house style (`houseStyleChoice()`), unless the config names a `code` voice;
+   *   `houseStyle` answers it
    * - no terminal (`ask` off):  nothing asked;  the plan says what the flags and the suggestions come to
    * - SIDE EFFECT:  the clone, for a teammate joining (not `dryRun`)
    */
@@ -409,6 +424,7 @@ export class RepoInit {
     color,
     install,
     superpowers,
+    houseStyle,
     remote,
     contentRepo,
     visibility,
@@ -453,6 +469,7 @@ export class RepoInit {
     }
     answers.install = await RepoInit.installChoice({ main, install, ask })
     answers.superpowers = await RepoInit.superpowersChoice({ main, flag: superpowers, local: isLocal, ask })
+    answers.houseStyle = await RepoInit.houseStyleChoice({ settings, flag: houseStyle, ask })
     const stays = noRemote || (isLocal && !contentRepo && !remote && !settings.contentRemote && !repoPlan)
     answers.plan = {
       name: person,
@@ -464,6 +481,7 @@ export class RepoInit {
           : remote || address || undefined,
       install: answers.install,
       ...(answers.superpowers && { superpowers: true }),
+      ...(answers.houseStyle && { houseStyle: HOUSE_STYLE_FILE }),
       ...(isLocal && { local: true })
     }
     return answers
@@ -523,6 +541,43 @@ export class RepoInit {
     if (!Superpowers.isOn({ project: main })) return false
     const answer = ask ? await CLI.ask(SUPERPOWERS_QUESTION, { suggestion: "y" }) : "y"
     return !/^n/i.test(answer.trim())
+  }
+
+  /**
+   * Whether `epic init` adds a starter house style, named as the repo's `code` voice (epic `epic-engine` T97).
+   * - `settings` name a `code` voice already (`"voices": { "code": ... }`):  no, asking nothing;  theirs stays
+   * - `flag` (`--house-style`, `--no-house-style`):  that, asking nothing
+   * - else asked in a terminal, `y` suggested;  no terminal, yes
+   */
+  static async houseStyleChoice({
+    settings,
+    flag,
+    ask
+  }: {
+    settings: Pick<EpicSettings, "voices">
+    flag?: boolean
+    ask: boolean
+  }): Promise<boolean> {
+    if (settings.voices[CODE_VOICE]) return false
+    if (flag !== undefined) return flag
+    const answer = ask ? await CLI.ask(HOUSE_STYLE_QUESTION, { suggestion: "y" }) : "y"
+    return !/^n/i.test(answer.trim())
+  }
+
+  /**
+   * The starter house style in checkout `main` (`HOUSE_STYLE_FILE`), from the plugin's template:  what it did, or
+   * would with `dryRun`.
+   * - `written` (`would write`):  a new file;  `kept`:  a file there already, left as it is
+   * - naming it in the config is `init()`'s (`settings.voices`)
+   * - SIDE EFFECT (not `dryRun`):  writes the file
+   */
+  static houseStyleStep({ main, dryRun = false }: { main: string; dryRun?: boolean }): HouseStyleReport {
+    const file = join(main, HOUSE_STYLE_FILE)
+    if (existsSync(file)) return { file, action: "kept" }
+    if (dryRun) return { file, action: "would write" }
+    mkdirSync(dirname(file), { recursive: true })
+    copyFileSync(EngineFiles.path(HOUSE_STYLE_TEMPLATE), file)
+    return { file, action: "written" }
   }
 
   /** The install command the config at `main` writes out, or `undefined` when it has no config or leaves it out. */
@@ -596,6 +651,7 @@ export class RepoInit {
     color,
     install,
     superpowers = false,
+    houseStyle = false,
     plugin = false,
     server = false,
     commit = false,
@@ -618,11 +674,14 @@ export class RepoInit {
     const protection = RepoInit.protectionStep({ main, configFile, hadConfig, settings: withHost, protectedBase })
     // the install command:  the answer, else the config's, else the suggestion (`installChoice()`, asking nothing)
     const installing = install ?? (await RepoInit.installChoice({ main, ask: false }))
+    // a starter house style:  named as the `code` voice, unless the config names one already
+    const namingStyle = houseStyle && !withHost.voices[CODE_VOICE]
     const settings = {
       ...withHost,
       baseBranchProtected: protection.on,
       localSetup: local,
-      ...(!hadConfig && { installCommand: installing.command, installOnCreate: Boolean(installing.command) })
+      ...(!hadConfig && { installCommand: installing.command, installOnCreate: Boolean(installing.command) }),
+      ...(namingStyle && { voices: { ...withHost.voices, [CODE_VOICE]: HOUSE_STYLE_FILE } })
     }
     if (!hadConfig && !dryRun) {
       mkdirSync(dirname(configFile), { recursive: true })
@@ -633,6 +692,8 @@ export class RepoInit {
       RepoInit.keepProtected(configFile)
     if (hadConfig && !dryRun && (hosted.source === "flag" || hosted.source === "asked"))
       RepoInit.keepCodeHost(configFile, hosted.kind)
+    if (hadConfig && !dryRun && namingStyle)
+      DataFile.edit<Record<string, unknown>>(configFile, (written) => ({ ...written, voices: settings.voices }))
     // a config that left it out:  the answer written into it
     if (hadConfig && installing.source !== EpicConfig.FILE) {
       settings.installCommand = installing.command
@@ -657,6 +718,7 @@ export class RepoInit {
       codeHost: hosted,
       install: installing,
       person: RepoInit.personStep({ dryRun, name }),
+      ...(namingStyle && { houseStyle: RepoInit.houseStyleStep({ main, dryRun }) }),
       ...(pluginReport && { plugin: pluginReport })
     }
     const config = { main, dir: content, worktrees: [], links: folders }
@@ -1096,12 +1158,12 @@ export class RepoInit {
   }
 
   /**
-   * The files `epic init` changed in the repo, still to commit:  the config, `.gitignore`, and `AGENTS.md` when it
-   * wrote superpowers' words there.
+   * The files `epic init` changed in the repo, still to commit:  the config, `.gitignore`, `AGENTS.md` when it
+   * wrote superpowers' words there, and the starter house style when it wrote it.
    * - a dry run wrote nothing:  the ones it would have count too
    * - `AGENTS.md` only when it changed it now:  someone's own edits to it are never swept into the commit
    */
-  static changedFiles({ main, dryRun, config, gitignore, agents }: ChangedFilesInput): string[] {
+  static changedFiles({ main, dryRun, config, gitignore, agents, houseStyle }: ChangedFilesInput): string[] {
     const wouldWrite = (file: string) =>
       dryRun && (file === EpicConfig.FILE ? config?.action === "written" : gitignore?.action !== "ok")
     const files = [EpicConfig.FILE, ".gitignore"].filter(
@@ -1110,6 +1172,9 @@ export class RepoInit {
     const agentsFile = agents && relative(main, agents.file)
     if (agentsFile && agents.action !== "ok" && (dryRun || Git.out(["status", "--porcelain", "--", agentsFile], main)))
       files.push(agentsFile)
+    // the starter house style:  only when this run wrote it
+    if (houseStyle && (houseStyle.action === "written" || houseStyle.action === "would write"))
+      files.push(relative(main, houseStyle.file))
     return files
   }
 
@@ -1687,7 +1752,10 @@ export class RepoInit {
   "repoTemplates": ${value("repoTemplates")},
   // the VS Code window files (\`epic window\`), each machine's own:  git-ignored in the epic repo
   // ("":  the epic folder's windows/)
-  "windowsFolder": ${value("windowsFolder")}
+  "windowsFolder": ${value("windowsFolder")},
+  // the repo's own voices, a name to a file from this repo's root:  "code" is its house style, the rules for its
+  // comments, docstrings and docs (\`epic voice code\` prints it);  a name the plugin ships too ("readme") replaces it
+  "voices": ${value("voices")}
   // and the repo's app, which the docs' App tab opens through the epic server (started there when it isn't up):
   // "app": { "path": "/editor/", "url": "http://localhost:3000/", "start": "npm run dev" }
   // and fixes every checkout gets at once, the worktrees behind main too (\`epic worktree patch\`):  main's file
@@ -1765,6 +1833,7 @@ export class RepoInit {
             : remote.address,
       install: report.install,
       ...(report.agents && { superpowers: true }),
+      ...(report.houseStyle && { houseStyle: relative(report.main, report.houseStyle.file) }),
       ...(report.local && { local: true })
     }
   }
@@ -1773,7 +1842,7 @@ export class RepoInit {
    * The summary under the questions:  `> Your name  :  owenoak`, the values bold, the colour in its colour;  local mode
    * says so first.
    */
-  static summaryLines({ name, color, sharedRepo, install, superpowers, local }: Plan): string[] {
+  static summaryLines({ name, color, sharedRepo, install, superpowers, houseStyle, local }: Plan): string[] {
     return [
       ...(local ? [`> Setup:  ${chalk.bold(LOCAL_SETUP)}`] : []),
       ...(name ? [`> Your name  :  ${chalk.bold(name)}`] : []),
@@ -1782,7 +1851,8 @@ export class RepoInit {
       ...(install && (install.command || install.source)
         ? [`> Install command:  ${RepoInit.installWords(install)}`]
         : []),
-      ...(superpowers ? [`> superpowers:  ${chalk.bold("its stand-aside words in AGENTS.md")}`] : [])
+      ...(superpowers ? [`> superpowers:  ${chalk.bold("its stand-aside words in AGENTS.md")}`] : []),
+      ...(houseStyle ? [`> House style:  ${chalk.bold(houseStyle)}  (epic voice code prints it)`] : [])
     ]
   }
 
@@ -1903,6 +1973,13 @@ export class RepoInit {
             ? would("wrote", "would write")
             : would(action, "would update")
       rows.push([done, `${file}  (superpowers' stand-aside words)`])
+    }
+    if (report.houseStyle) {
+      const { action, file } = report.houseStyle
+      rows.push([
+        action === "kept" ? "already present" : would("wrote", "would write"),
+        `${file}  (your house style:  epic voice code)`
+      ])
     }
     if (person.action === "kept" || person.action === "would keep")
       rows.push([would("saved", "would save"), `${EpicHome.personFile()}  (your name)`])
@@ -2035,6 +2112,8 @@ export class RepoInit {
         `committed ${commit.files.join(" and ")} on ${commit.branch}, and pushed them`,
       commit?.action === "would branch" &&
         `put ${commit.files.join(" and ")} on a new branch, and opened a ${words.pullRequest}`,
+      report.houseStyle?.action === "would write" &&
+        `written a starter house style for Claude to follow:  ${HOUSE_STYLE_FILE}, yours to edit`,
       server?.action === "would start" && "started the epic server, and shown its address"
     ].filter((step): step is string => typeof step === "string" && step !== "")
     return [
@@ -2317,6 +2396,8 @@ export type InitReport = {
   exclude?: ExcludeReport
   /** superpowers' stand-aside words in the repo's `AGENTS.md` (`Superpowers.agentsStep()`);  none when not asked */
   agents?: AgentsReport
+  /** the starter house style, named as the `code` voice (`houseStyleStep()`);  none when not asked for */
+  houseStyle?: HouseStyleReport
   /** local mode:  a setup pull or merge request an earlier run left open (`openSetupRequest()`) */
   setupRequest?: SetupRequestReport
   /** whether the base branch takes only pull requests, and how that's known (`protectionStep()`) */
@@ -2386,14 +2467,20 @@ export type CodeHostReport = {
   address?: string
 }
 
+/**
+ * What `epic init` did about the starter house style (`RepoInit.houseStyleStep()`):  `written` (`would write`), or
+ * `kept`, a file there already
+ */
+export type HouseStyleReport = { file: string; action: "written" | "would write" | "kept" }
+
 /** What `RepoInit.changedFiles()` reads off the report. */
 export type ChangedFilesInput = Pick<InitReport, "main"> &
-  Partial<Pick<InitReport, "dryRun" | "config" | "gitignore" | "agents">>
+  Partial<Pick<InitReport, "dryRun" | "config" | "gitignore" | "agents" | "houseStyle">>
 
 /** What `epic init`'s questions came to (`RepoInit.questions()`):  `init()`'s answers, and the summary. */
 export type Answers = Pick<
   InitOptions,
-  "name" | "color" | "contentRepo" | "visibility" | "cloned" | "codeHost" | "install" | "superpowers"
+  "name" | "color" | "contentRepo" | "visibility" | "cloned" | "codeHost" | "install" | "superpowers" | "houseStyle"
 > & {
   /** what the summary under the questions says */
   plan: Plan
@@ -2411,6 +2498,8 @@ export type Plan = {
   install?: InstallChoice
   /** superpowers' stand-aside words go in the repo's `AGENTS.md` */
   superpowers?: boolean
+  /** the starter house style's file, from the repo's root, named as the `code` voice */
+  houseStyle?: string
   /** set up locally:  nothing in the repo */
   local?: boolean
 }
@@ -2431,6 +2520,8 @@ export type QuestionOptions = Pick<
   install?: string
   /** put superpowers' stand-aside words in `AGENTS.md` without asking (`--superpowers`) */
   superpowers?: boolean
+  /** add a starter house style, or not, without asking (`--house-style`, `--no-house-style`);  none:  asked */
+  houseStyle?: boolean
   /** ask in a terminal:  off for `--json` and `--dry-run` */
   ask: boolean
   /** only say what it would do:  nothing cloned */
@@ -2636,6 +2727,11 @@ export type InitOptions = {
    * never in local mode;  default `false`
    */
   superpowers?: boolean
+  /**
+   * add a starter house style, `.epic/house-style.md`, named as the repo's `code` voice (`houseStyleStep()`), unless
+   * the config names one already;  default `false`
+   */
+  houseStyle?: boolean
   /** install the epic plugin when Claude Code doesn't have it (`--no-plugin` turns it off);  default `false` */
   plugin?: boolean
   /** start the epic server, serving the repo, last (`--no-server` turns it off);  default `false` */
@@ -2690,6 +2786,20 @@ const REPO_QUESTION = "What should the shared epics repo be called?"
 const VISIBILITY_QUESTION = "Private or public?"
 
 /** Asked when superpowers is turned on for the repo (`superpowersChoice()`). */
+/** The starter house style's file, from the repo's root:  beside the config, so `--local`'s exclude covers it too. */
+const HOUSE_STYLE_FILE = ".epic/house-style.md"
+
+/** Its template, in the plugin's folder (`EngineFiles.path()`). */
+const HOUSE_STYLE_TEMPLATE = "templates/house-style.md"
+
+/** The voice a house style is:  the repo's rules for text in its code (`EpicConfig`'s `pageVoices`). */
+const CODE_VOICE = "code"
+
+/** Checked cold:  `epic voice check --text "..."`, a pass (epic `epic-engine` T97). */
+const HOUSE_STYLE_QUESTION =
+  "Add a short file of writing rules, like tone and wording, for Claude to follow in this project?  " +
+  "You can change it any time."
+
 const SUPERPOWERS_QUESTION =
   "superpowers is on here:  put its stand-aside words (epic guide superpowers) in AGENTS.md, for every session?"
 

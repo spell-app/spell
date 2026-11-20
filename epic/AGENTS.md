@@ -61,7 +61,9 @@ a folder of the kit `spell`.
   - The last three are named by no kind of page yet (`"pageVoices"`):  ask for one by name, `epic voice blog`
     (epic `readme` P15).
   - `code`:  docstrings, comments, `AGENTS.md` files, epic pages:  each repo's own house style (Spell's:  WWOD §6),
-    so the plugin ships no file for it.
+    so the plugin ships no voice for it.
+    - `epic init` offers a starter (epic `epic-engine` T97):  [templates/house-style.md](templates/house-style.md),
+      copied to the repo's `.epic/house-style.md` and named its `code` voice (`RepoInit.houseStyleStep()`).
   - Configurable (epic `readme` P13):  a repo's `.epic/config.json5` names its own voices (`"voices"`, a name to a
     file) and which voice each kind of page takes (`"pageVoices"`);  a repo whose settings name a top
     (spell-brand's name the kit) takes the top's.
