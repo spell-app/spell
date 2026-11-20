@@ -31,6 +31,8 @@
  * - Action buttons (`<ui-button slot="action">`) are FLEX ITEMS of the root (a slot is `display: contents`).
  *   - The input squares their joined corners through UIButton.css's group corner tokens (`--_ui-buttons-ss` ...):
  *     a joined action is a one-sided button group.
+ *   - Their outer corners take the field's radius (`--_buttons-outer-radius`),
+ *     and their outline the field's border (`--_button-edge`).
  *   - `:first-child` / `:last-child` are the DOM element's own children.
  * - States:  `state="error|info|success|warning"` is a colour remap (`colors.css`);
  *   one rule set reads `--ui-color-background` / `-border` / `-text`.
@@ -507,11 +509,25 @@
     --_input-pad-end: var(--_ui-input-labeled-margin);
   }
 
-  /* Action:  joined buttons, square at the seam (slotted elements;  `.button` children in static markup). */
+  /*
+   * Action:  joined buttons, square at the seam (slotted elements;  `.button` children in static markup).
+   * - Each takes the field's border and, on its outer corners, the field's radius,
+   *   so field and buttons read as one box (epic `from-console` Q13).
+   * - Through the button's private plumbing, never its public tokens:
+   *   `--_button-edge` (its outline;  a `basic` or `inverted` button keeps its own)
+   *   and `--_buttons-outer-radius` (an outer corner's radius, as in a group).
+   */
   .ui.action.input > ::slotted(*),
   .ui.action.input > .ui.button {
+    --_button-edge: inset 0 0 0 var(--_ui-input-border-width)
+      var(--_ui-field-state-border, var(--_ui-input-border-color));
+    --_buttons-outer-radius: var(--_ui-input-radius);
     flex: 0 0 auto;
     margin: 0;
+  }
+  .ui.action.input:is(.error, .info, .success, .warning) > ::slotted(*),
+  .ui.action.input:is(.error, .info, .success, .warning) > .ui.button {
+    --_button-edge: inset 0 0 0 var(--_ui-input-border-width) var(--ui-color-border);
   }
   .ui.action.input:not([class*="left action"]) > :is(input, textarea) {
     border-start-end-radius: 0;
