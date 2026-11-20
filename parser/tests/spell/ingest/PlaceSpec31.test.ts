@@ -26,6 +26,8 @@ import type { IngestFiles, PlaceDescription } from "spell/parser/spell/ingest/in
  *   - its runs are answered only for a team, `?team=infra`, its example
  *   - a job's steps are read from under it, and a step is retried at `/api/jobs/{job_id}/steps/{step_id}/retry`
  *   - its archived jobs, `/api/jobs-archive`, a name whose first word is plural already, in Spanish (I141)
+ * - And a list asked for by a question its rows leave out (epic `from-console` P15):
+ *   its stacks are answered only for a system, `?system=alpha`, and a stack has no `system`
  */
 
 const ACME = "https://jobs.acme.test"
@@ -81,6 +83,7 @@ describe("PlaceSpec, an OpenAPI 3.1 description as FastAPI writes it", () => {
       "jobs-archive",
       "runs",
       "search",
+      "stacks",
       "steps"
     ])
     expect(jobs).toMatchObject({ at: "/api/jobs", rowsAt: "items", takesLimit: true })
@@ -100,6 +103,15 @@ describe("PlaceSpec, an OpenAPI 3.1 description as FastAPI writes it", () => {
   test("a list answered only for a team is asked for by it, with its example (epic `data` P56)", () => {
     expect(named("runs")).toMatchObject({ at: "/api/runs", askedBy: { team: "infra" } })
     expect(named("runs").searchedOnly).toBeUndefined()
+  })
+
+  test("a list asked for by a question its rows leave out has a field for it, typed by the question (epic `from-console` P15)", () => {
+    const stacks = named("stacks")
+    expect(stacks).toMatchObject({ at: "/api/stacks", askedBy: { system: "alpha" } })
+    expect(stacks.fields!.system).toMatchObject({ words: "system", type: "text" })
+    expect(stacks.fields!.system!.isRequired).toBeUndefined()
+    // a field its rows have already is theirs:  a run's team
+    expect(named("runs").fields!.team).toMatchObject({ schemaAt: "#/components/schemas/Run/properties/team" })
   })
 
   test("a search needing its question is searched only, for its example, never a plain list", () => {
@@ -284,6 +296,9 @@ describe("spell place ingest --spec, of a FastAPI 3.1 description", () => {
     )
     // a list answered only for a team, a where on it sent
     expect(spell).toMatch(/^\truns are asked for by their team$/m)
+    // and for a system its rows leave out:  the field, and the line naming it (epic `from-console` P15)
+    expect(spell).toMatch(/^a "stack" is a thing\n[^]*?\tits "system" is text$/m)
+    expect(spell).toMatch(/^\tstacks are asked for by their system$/m)
     // a job's steps, read from under it, and a step's action
     expect(spell).toMatch(/^\ta job's steps live at "\/api\/jobs\/\{id\}\/steps"$/m)
     expect(spell).not.toMatch(/steps are found at/)
@@ -308,6 +323,9 @@ describe("spell place ingest --spec, of a FastAPI 3.1 description", () => {
     expect(spell).toMatch(/^\t\tsu página siguiente se pide con "take" y "skip"\n\t\tda hasta 100 a la vez$/m)
     expect(spell).toMatch(/^\tlos jobs archive están en "\/api\/jobs-archive"$/m)
     expect(spell).not.toMatch(/jobses/)
+    // a list asked for by a question its rows leave out:  the field, and the line naming it (epic `from-console` P15)
+    expect(spell).toMatch(/^un "stack" es una cosa\n[^]*?\tsu "system" es texto$/m)
+    expect(spell).toMatch(/^\tlos stackes se piden por su system$/m)
     const { files } = parseSpellProject([{ path: "/AcmeJobs.api.es.spell", contents: spell }])
     expect(files[0]!.errors).toEqual([])
   })
@@ -332,6 +350,12 @@ describe("spell place verify, of a FastAPI service", () => {
       return Response.json({ items: [{ id: 1, team: "infra", state: "done" }], total: 1 })
     if (url.pathname === "/api/runs")
       return Response.json({ detail: [{ loc: ["query", "team"], msg: "Field required" }] }, { status: 422 })
+    // a 400 without its system, as a server that needs one but whose description may not say so
+    if (url.pathname === "/api/stacks")
+      return url.searchParams.get("system") === "alpha"
+        ? Response.json({ items: [{ id: 7, name: "top" }], total: 1 })
+        : Response.json({ detail: "Provide a `system`" }, { status: 400 })
+    if (url.pathname === "/api/stacks/7") return Response.json({ id: 7, name: "top" })
     if (url.pathname === "/api/runs/1") return Response.json({ id: 1, team: "infra", state: "done" })
     if (url.pathname === "/api/jobs/6f1c/steps") return Response.json([{ id: 3, name: "build", seconds: 12 }])
     if (url.pathname === "/api/jobs/6f1c") return Response.json(JOB)
@@ -363,6 +387,8 @@ describe("spell place verify, of a FastAPI service", () => {
     const { collections } = descriptions.get("AcmeJobs.api.json5")!
     expect(collections.runs!.state).toMatchObject({ is: "verified", status: 200, rows: 1 })
     expect(collections.steps!.state).toMatchObject({ is: "verified", status: 200, rows: 1 })
+    // and its stacks for their example system, which the server won't answer without (epic `from-console` P15)
+    expect(collections.stacks!.state).toMatchObject({ is: "verified", status: 200, rows: 1 })
   })
 
   test("a refusal says FastAPI's own message:  `detail`, a list of what was wrong", async () => {
