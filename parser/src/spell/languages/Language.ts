@@ -592,6 +592,12 @@ export type LanguageWords = {
    */
   abilityLines?: Record<string, string>
   /**
+   * The line an authenticated place says now, by its rule's name, its braces filled from the old line
+   * (epic `from-console` P14):  `it is authenticated with the secret "{name}"`.
+   * - What a place line's warning for the old words (`its key is the secret ...`) says to write.
+   */
+  authenticationLines?: Record<string, string>
+  /**
    * Its words for a PAGE (epic `language` P47):  its head, `"button api" is a notebook page`, and the tags its body
    * draws with -- see `PageWords`.
    * - None:  a page in this language reads English's.

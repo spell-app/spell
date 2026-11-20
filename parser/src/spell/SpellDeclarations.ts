@@ -921,9 +921,18 @@ export class SpellDeclarations {
     const { placeName, placeKind, placeAt, declaredBy } = type
     if (!placeName) return undefined
     const rule = declaredBy?.rule.constructor as
-      | { importedDetailsOf?(place: P.TypeScope): P.ImportedPlaceDetails | undefined }
+      | {
+          importedDetailsOf?(place: P.TypeScope): P.ImportedPlaceDetails | undefined
+          servedDetailsOf?(place: P.TypeScope): SP.ServedPlace | undefined
+        }
       | undefined
-    return definedOnly({ name: placeName, kind: placeKind, at: placeAt, details: rule?.importedDetailsOf?.(type) })
+    return definedOnly({
+      name: placeName,
+      kind: placeKind,
+      at: placeAt,
+      details: rule?.importedDetailsOf?.(type),
+      served: rule?.servedDetailsOf?.(type)
+    })
   }
 
   /**

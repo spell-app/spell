@@ -7,9 +7,10 @@ import { PlaceDetail, textIn, type PlaceDetailValue } from "./PlaceDetail"
 const QUESTION_NAME = /^[A-Za-z0-9_.~-]+$/
 
 /**
- * `key_goes_in_address` rule:  the question a server wants its key asked as, in the address (epic `data` T73).
- * - e.g. `- its key goes in the address as "api_key"`:  `?api_key=...`, Google's `?key=` and the like
- * - Only the question's name is ever written:  the key is `its key is the secret "..."`'s, added on a server side.
+ * `key_goes_in_address` rule:  the question a server wants its secret asked as, in the address (epic `data` T73).
+ * - e.g. `- its secret goes in the address as "api_key"`:  `?api_key=...`, Google's `?key=` and the like
+ * - The old words, `its key goes in the address as "..."`, still read, with a warning (`OLD_KEY_GOES_IN_ADDRESS`).
+ * - Only the question's name is ever written:  the secret is `it is authenticated with the secret "..."`'s, added on a server side.
  * - It's hidden from every message and log that names the address (`keyHidden()`).
  * - A name no question can have won't compile.
  */
@@ -26,3 +27,6 @@ export class KeyGoesInAddress extends PlaceDetail<"type|name"> {
     return { keyGoes: { inAddress: textIn(match.groups.name) } }
   }
 }
+
+/** `key_goes_in_address` in its old words, `its key goes in the address as "..."`:  the same, with a warning. */
+export const OLD_KEY_GOES_IN_ADDRESS = KeyGoesInAddress.specialize({ oldWords: true })

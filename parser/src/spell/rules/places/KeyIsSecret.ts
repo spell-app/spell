@@ -10,10 +10,13 @@ const SECRET_NAME = /^[\p{Lu}][\p{Lu}\p{N}_]*$/u
 const LONGEST_SECRET_NAME = 40
 
 /**
- * `key_is_secret` rule:  the NAME of the key a place needs, never the key (epic `data` Q11).
- * - e.g. `- its key is the secret "COOKBOOK_KEY"`
+ * `key_is_secret` rule:  the NAME of the secret an authenticated place needs, never the secret (epic `data` Q11).
+ * - e.g. `- it is authenticated with the secret "COOKBOOK_KEY"`
+ * - The old words, `its key is the secret "..."`, still read, with a warning naming the new line
+ *   (`OLD_KEY_IS_SECRET`, epic `from-console` P14).
  * - What looks like the key itself, rather than a name, won't compile.
  * - A browser program can't read one:  the place needs a small server side, and it says so.
+ *   Spell's page server is one:  it reads the place for the page, adding the secret (epic `from-console` P14).
  */
 export class KeyIsSecret extends PlaceDetail<"type|name"> {
   /** A browser can't go without it, so the place needs a server side:  said as a warning.  See `KeyIfSet`. */
@@ -35,3 +38,6 @@ export class KeyIsSecret extends PlaceDetail<"type|name"> {
     return { keyNamed: textIn(match.groups.name) }
   }
 }
+
+/** `key_is_secret` in its old words, `its key is the secret "..."`:  the same, with a warning. */
+export const OLD_KEY_IS_SECRET = KeyIsSecret.specialize({ oldWords: true })

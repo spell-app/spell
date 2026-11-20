@@ -195,7 +195,7 @@ describe("a place's line", () => {
       '\t- recipes live at "Recipes"',
       '\t- a recipe\'s title is its "Title"',
       '\t- its id is its "Spell id"',
-      '\t- its key is the secret "AIRTABLE_KEY"',
+      '\t- it is authenticated with the secret "AIRTABLE_KEY"',
       "\t- check it every 30 seconds",
       RECIPE_AIRTABLE
     ]
@@ -225,7 +225,7 @@ describe("a place's line", () => {
     })
 
     it("a key written into the program won't compile", () => {
-      const { errors } = compiled(['x is an airtable at "appX":', '\t- its key is "patAbc.123"'])
+      const { errors } = compiled(['x is an airtable at "appX":', '\t- it is authenticated with "patAbc.123"'])
       expect(errors.join()).toContain("can be read by anyone")
     })
 

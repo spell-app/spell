@@ -452,7 +452,7 @@ describe("GitHub's way (epic `data` P28)", () => {
 
   const LINES = [
     `github is a web server at "${HOST}":`,
-    `\t- its optional key is the secret "GITHUB_TOKEN"`,
+    `\t- it is optionally authenticated with the secret "GITHUB_TOKEN"`,
     `\t- its next page is in its "Link" header`,
     `\t- contributors live at "/repos/solidjs/solid/contributors"`,
     `a "contributor" is a thing:`,
@@ -478,7 +478,7 @@ describe("GitHub's way (epic `data` P28)", () => {
     expect(compiled).toContain(`nextPageInLink: true`)
     const es = [
       `github es un servidor web en "${HOST}":`,
-      `\t- su clave opcional es el secreto "GITHUB_TOKEN"`,
+      `\t- se autentica opcionalmente con el secreto "GITHUB_TOKEN"`,
       `\t- su página siguiente está en su cabecera "Link"`
     ]
     const spanish = parseSpellProject([{ path: "/G.es.spell", contents: `${es.join("\n")}\n` }]).files[0]!
@@ -494,36 +494,74 @@ describe("GitHub's way (epic `data` P28)", () => {
     }
     const en = (line: string, key = true) => [
       `cookbook is a web server at "${HOST}":`,
-      ...(key ? [`\t- its key is the secret "COOKBOOK_KEY"`] : []),
+      ...(key ? [`\t- it is authenticated with the secret "COOKBOOK_KEY"`] : []),
       `\t- ${line}`
     ]
-    expect(compiled(en(`its key goes in its "X-Api-Key" header`)).compiled).toContain(
+    expect(compiled(en(`its secret goes in its "X-Api-Key" header`)).compiled).toContain(
       `keyGoes: { header: "X-Api-Key" }`
     )
-    expect(compiled(en(`its key goes in the address as "api_key"`)).compiled).toContain(
+    expect(compiled(en(`its secret goes in the address as "api_key"`)).compiled).toContain(
       `keyGoes: { inAddress: "api_key" }`
     )
-    expect(compiled(en(`its key goes in its "Not a header" header`)).errors).toMatch(/can't be a header's name/)
-    expect(compiled(en(`its key goes in the address as "two words"`)).errors).toMatch(/can't be asked in an address/)
-    expect(compiled(en(`its key goes in its "X-Api-Key" header`, false)).warnings).toMatch(/no line names one/)
+    expect(compiled(en(`its secret goes in its "Not a header" header`)).errors).toMatch(/can't be a header's name/)
+    expect(compiled(en(`its secret goes in the address as "two words"`)).errors).toMatch(/can't be asked in an address/)
+    expect(compiled(en(`its secret goes in its "X-Api-Key" header`, false)).warnings).toMatch(/no line names one/)
     const es = (line: string) => [
       `recetario es un servidor web en "${HOST}":`,
-      `\t- su clave es el secreto "CLAVE"`,
+      `\t- se autentica con el secreto "CLAVE"`,
       `\t- ${line}`
     ]
-    expect(compiled(es(`su clave va en su cabecera "X-Api-Key"`), "/G.es.spell").compiled).toContain(
+    expect(compiled(es(`su secreto va en su cabecera "X-Api-Key"`), "/G.es.spell").compiled).toContain(
       `keyGoes: { header: "X-Api-Key" }`
     )
-    expect(compiled(es(`su clave va en la dirección como "api_key"`), "/G.es.spell").compiled).toContain(
+    expect(compiled(es(`su secreto va en la dirección como "api_key"`), "/G.es.spell").compiled).toContain(
       `keyGoes: { inAddress: "api_key" }`
     )
+  })
+
+  test("the old words still read, the same, with a warning naming the new line, in either language (epic `from-console` P14)", () => {
+    const compiled = (lines: string[], path = "/G.spell") => {
+      const { compiled, errors, warnings } = parseSpellProject([{ path, contents: `${lines.join("\n")}\n` }]).files[0]!
+      return { compiled, errors: errors.join("\n"), warnings: warnings.join("\n") }
+    }
+    const place = (path: string, head: string, old: string, now: string) => {
+      const was = compiled([head, `\t- ${old}`], path)
+      const is = compiled([head, `\t- ${now}`], path)
+      expect(was.errors).toBe("")
+      // where it was declared aside:  the old line is a different length
+      const placed = (code: string) => code.replace(/defined: "[^"]*"/g, "")
+      expect(placed(was.compiled)).toBe(placed(is.compiled))
+      expect(was.warnings).toContain(`"${now}"`)
+      expect(is.warnings).not.toContain(old)
+    }
+    const en = `cookbook is a web server at "${HOST}":`
+    place("/G.spell", en, `its key is the secret "COOKBOOK_KEY"`, `it is authenticated with the secret "COOKBOOK_KEY"`)
+    place(
+      "/G.spell",
+      en,
+      `its optional key is the secret "COOKBOOK_KEY"`,
+      `it is optionally authenticated with the secret "COOKBOOK_KEY"`
+    )
+    place(
+      "/G.spell",
+      en,
+      `its token comes from "https://auth.acme.test/token", made with the secret "ACME_API_KEY"`,
+      `it is authenticated with a token from "https://auth.acme.test/token", made with the secret "ACME_API_KEY"`
+    )
+    place("/G.spell", en, `its key goes in its "X-Api-Key" header`, `its secret goes in its "X-Api-Key" header`)
+    place("/G.spell", en, `its key goes in the address as "api_key"`, `its secret goes in the address as "api_key"`)
+    expect(compiled([en, `\t- its key is "sk_live_abc"`]).errors).toMatch(/authenticated with the secret/)
+    expect(compiled([en, `\t- it is authenticated with "sk_live_abc"`]).errors).toMatch(/authenticated with the secret/)
+    const es = `recetario es un servidor web en "${HOST}":`
+    place("/G.es.spell", es, `su clave es el secreto "CLAVE"`, `se autentica con el secreto "CLAVE"`)
+    place("/G.es.spell", es, `su clave va en su cabecera "X-Api-Key"`, `su secreto va en su cabecera "X-Api-Key"`)
   })
 
   test("a next page in any other header won't compile, saying so;  a key it can't do without still needs a server side", () => {
     const lines = [`github is a web server at "${HOST}":`, `\t- its next page is in its "X-Next" header`]
     const { errors } = parseSpellProject([{ path: "/G.spell", contents: `${lines.join("\n")}\n` }]).files[0]!
     expect(errors.join("\n")).toMatch(/said in a "Link" header, not "X-Next"/)
-    const needed = [`github is a web server at "${HOST}":`, `\t- its key is the secret "GITHUB_TOKEN"`]
+    const needed = [`github is a web server at "${HOST}":`, `\t- it is authenticated with the secret "GITHUB_TOKEN"`]
     const { warnings } = parseSpellProject([{ path: "/G.spell", contents: `${needed.join("\n")}\n` }]).files[0]!
     expect(String(warnings)).toMatch(/needs a small server side/)
   })
@@ -544,7 +582,7 @@ describe("GitHub's way (epic `data` P28)", () => {
     core.resetRuntime().keyFrom = (name) => (name === "GITHUB_TOKEN" ? "t0ken" : undefined)
     const { Contributor } = runSpell([
       `${LINES[0]}`,
-      `\t- its key goes in the address as "api_key"`,
+      `\t- its secret goes in the address as "api_key"`,
       ...LINES.slice(1)
     ])("Contributor")
     expect((await read(Contributor)).map(({ login }) => login)).toEqual(["ryansolid"])

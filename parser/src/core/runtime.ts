@@ -27,7 +27,7 @@ export class SpellRuntime extends Eventful() {
   /** The program's pages, in the order they were made (`Page`'s constructor):  each hears what `trigger()` sends. */
   readonly pages: object[] = []
   /**
-   * Finds a place's key by its name (`its key is the secret "GITHUB_TOKEN"`), for a run on a server side:
+   * Finds a place's key by its name (`it is authenticated with the secret "GITHUB_TOKEN"`), for a run on a server side:
    * a test, or a runner in node, hands in the environment's.
    * - A page never sets it:  nothing in a browser holds a key, so a place that needs one refuses there (`WebPlace`).
    */

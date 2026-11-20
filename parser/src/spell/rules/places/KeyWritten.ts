@@ -6,8 +6,8 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
 
 /**
  * `key_written` rule:  a key written into a program, which won't compile (epic `data` Q11).
- * - e.g. `- its key is "sk_live_123"`
- * - Anyone can read a browser program:  it says to name the key, `its key is the secret "..."`.
+ * - e.g. `- it is authenticated with "sk_live_123"`, and the old words, `- its key is "sk_live_123"`
+ * - Anyone can read a browser program:  it says to name the secret, `it is authenticated with the secret "..."`.
  */
 export class KeyWritten extends SpellStatement<"type|key"> {
   @proto static alias = "statement"

@@ -21,11 +21,11 @@ import { FieldCalled } from "./FieldCalled"
 import { FirstFewWhere } from "./FirstFewWhere"
 import { HelpfulWord } from "./HelpfulWord"
 import { IdColumn } from "./IdColumn"
-import { KeyGoesInAddress } from "./KeyGoesInAddress"
-import { KeyGoesInHeader } from "./KeyGoesInHeader"
-import { KeyIfSet } from "./KeyIfSet"
-import { KeyIsSecret } from "./KeyIsSecret"
-import { TokenFrom } from "./TokenFrom"
+import { KeyGoesInAddress, OLD_KEY_GOES_IN_ADDRESS } from "./KeyGoesInAddress"
+import { KeyGoesInHeader, OLD_KEY_GOES_IN_HEADER } from "./KeyGoesInHeader"
+import { KeyIfSet, OLD_KEY_IF_SET } from "./KeyIfSet"
+import { KeyIsSecret, OLD_KEY_IS_SECRET } from "./KeyIsSecret"
+import { TokenFrom, OLD_TOKEN_FROM } from "./TokenFrom"
 import { DataIsPrivate } from "./DataIsPrivate"
 import { KeyWritten } from "./KeyWritten"
 import { ListsUnder } from "./ListsUnder"
@@ -424,16 +424,16 @@ places.addRule(PictureAt, {
 })
 places.addRule(FieldCalled, { syntax: "(a|an) {owner:known_type}'s {property:member_words} is its? {name:text}" })
 places.addRule(FieldCalled, { syntax: "(a|an) {owner:known_type}'s {property:quoted_member} is its? {name:text}" })
-places.addRule(KeyIfSet, { syntax: "{type:subject_its} optional key is the secret {name:text}" })
-places.addRule(KeyIsSecret, { syntax: "{type:subject_its} key is the secret {name:text}" })
+places.addRule(KeyIfSet, { syntax: "{type:subject_it} is optionally authenticated with the secret {name:text}" })
+places.addRule(KeyIsSecret, { syntax: "{type:subject_it} is authenticated with the secret {name:text}" })
 places.addRule(TokenFrom, {
-  syntax: "{type:subject_its} token comes from {address:text} ,? made with the secret {name:text}",
+  syntax: "{type:subject_it} is authenticated with a token from {address:text} ,? made with the secret {name:text}",
   tests: [
     {
       compileAs: "block",
       tests: [
         [
-          'acme is a web server at "https://acme.test"\n\tits token comes from "https://auth.acme.test/api-keys/{key id}/token", made with the secret "ACME_API_KEY"',
+          'acme is a web server at "https://acme.test"\n\tit is authenticated with a token from "https://auth.acme.test/api-keys/{key id}/token", made with the secret "ACME_API_KEY"',
           [
             "export class Acme extends Place {}",
             "export const acme = core.place(new Acme(), {",
@@ -483,15 +483,22 @@ places.addRule(DataIsPrivate, {
     }
   ]
 })
+// the old words (epic `from-console` P14):  each still reads, with a warning naming the new line
+places.addRule(OLD_KEY_IF_SET, { syntax: "{type:subject_its} optional key is the secret {name:text}" })
+places.addRule(OLD_KEY_IS_SECRET, { syntax: "{type:subject_its} key is the secret {name:text}" })
+places.addRule(OLD_TOKEN_FROM, {
+  syntax: "{type:subject_its} token comes from {address:text} ,? made with the secret {name:text}"
+})
+places.addRule(KeyWritten, { syntax: "{type:subject_it} is authenticated with {key:text}" })
 places.addRule(KeyWritten, { syntax: "{type:subject_its} key is {key:text}" })
 places.addRule(KeyGoesInHeader, {
-  syntax: "{type:subject_its} key goes in its {name:text} header",
+  syntax: "{type:subject_its} secret goes in its {name:text} header",
   tests: [
     {
       compileAs: "block",
       tests: [
         [
-          'cookbook is a web server at "https://example.com"\n\t- its key goes in its "X-Api-Key" header',
+          'cookbook is a web server at "https://example.com"\n\t- its secret goes in its "X-Api-Key" header',
           [
             "export class Cookbook extends Place {}",
             "export const cookbook = core.place(new Cookbook(), {",
@@ -506,14 +513,15 @@ places.addRule(KeyGoesInHeader, {
     }
   ]
 })
+places.addRule(OLD_KEY_GOES_IN_HEADER, { syntax: "{type:subject_its} key goes in its {name:text} header" })
 places.addRule(KeyGoesInAddress, {
-  syntax: "{type:subject_its} key goes in the address as {name:text}",
+  syntax: "{type:subject_its} secret goes in the address as {name:text}",
   tests: [
     {
       compileAs: "block",
       tests: [
         [
-          'cookbook is a web server at "https://example.com"\n\t- its key goes in the address as "api_key"',
+          'cookbook is a web server at "https://example.com"\n\t- its secret goes in the address as "api_key"',
           [
             "export class Cookbook extends Place {}",
             "export const cookbook = core.place(new Cookbook(), {",
@@ -528,6 +536,7 @@ places.addRule(KeyGoesInAddress, {
     }
   ]
 })
+places.addRule(OLD_KEY_GOES_IN_ADDRESS, { syntax: "{type:subject_its} key goes in the address as {name:text}" })
 places.addRule(CheckedEvery, { syntax: "check {type:subject_it} every {interval:measure_literal}" })
 places.addRule(CheckedEvery, { syntax: "check {type:subject_it} every {number}" })
 places.addRule(CheckedEvery, { syntax: "check {type:subject_it} every {unit:unit_words}" })

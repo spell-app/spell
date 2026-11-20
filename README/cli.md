@@ -916,9 +916,9 @@ spell place update StarWars.api.spell
 | `--kind <kind>` | `web server`, `graphql server`, `sheet` (a CSV file, or an Excel `.xlsx`, one collection per sheet), `google sheet`.  With none, it reads the address, then asks the address itself, then asks you;  with no one to ask, it stops, naming those it tried |
 | `--into <file>` | the `.spell` file, one server to a file:  `StarWars.api.spell`.  With none, it asks;  with no one to ask, it stops |
 | `--name <words>` | what the program calls the place |
-| `--key-secret <NAME>` | the NAME of the key it needs, read from the environment, never written down;  the Spell says `its key is the secret "NAME"` |
-| `--key-header <name>` | the header its key goes in, as it is:  `X-Api-Key`.  With none, `Authorization: Bearer`.  The Spell says `its key goes in its "X-Api-Key" header` |
-| `--key-in-address <name>` | the question its key goes in the address as:  `api_key`, hidden from every message.  The Spell says `its key goes in the address as "api_key"` |
+| `--key-secret <NAME>` | the NAME of the key it needs, read from the environment, never written down;  the Spell says `it is authenticated with the secret "NAME"` |
+| `--key-header <name>` | the header its key goes in, as it is:  `X-Api-Key`.  With none, `Authorization: Bearer`.  The Spell says `its secret goes in its "X-Api-Key" header` |
+| `--key-in-address <name>` | the question its key goes in the address as:  `api_key`, hidden from every message.  The Spell says `its secret goes in the address as "api_key"` |
 | `--docs <address>` | where its docs are, over those it finds by itself |
 | `--collections <paths>` | its collections' paths, comma-separated, for a source that doesn't list them.  `name=path` names one;  a name in braces is found by name, with no list (`"wiki pages=/page/summary/{name}"`);  one asked with a search is searched (`"books=/search.json?q=dune"`) |
 | `--samples <names>` | names to read a collection found by name by:  `Tatooine,Hoth`;  `name=sample` for one collection's own (`authors=OL79034A`) |

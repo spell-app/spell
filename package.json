@@ -1457,7 +1457,7 @@
   "pageServer": {
     "routes": [
       "src/server/test/recipeServersRoutes.ts",
-      "src/server/places/airtableRoutes.ts"
+      "src/server/places/placeRoutes.ts"
     ],
     "cacheLimit": "200MB"
   },

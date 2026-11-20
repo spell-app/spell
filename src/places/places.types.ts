@@ -957,6 +957,25 @@ export const PLACES_PREFIX = "/api/places"
  */
 export const SPACE_FOLDERS_PREFIX = `${PLACES_PREFIX}/spaces`
 
+/**
+ * Where the page server reads each project's authenticated places for its pages, adding the secret (epic `from-console` P14):
+ * `jobs is a web server at "..."`, `it is authenticated with the secret "JOBS_TOKEN"`, in `@acme/jobs`, is
+ * `/api/places/projects/@acme/jobs/jobs`;  a request's path after it goes on to the place's own address.
+ * - The kit's `AuthenticatedPlaces` answers there;  `authenticatedPlaceAddress()` makes one.
+ */
+export const AUTHENTICATED_PLACES_PREFIX = `${PLACES_PREFIX}/projects`
+
+/** Where the page server reads `place` of project `projectId` (`@acme/jobs`) for a page:  see `AUTHENTICATED_PLACES_PREFIX`. */
+export function authenticatedPlaceAddress(projectId: string, place: string): string {
+  return `${AUTHENTICATED_PLACES_PREFIX}/${projectId}/${place}`
+}
+
+/**
+ * The header on an answer the page server made ITSELF for an authenticated place, a refusal (a secret that isn't set,
+ * a write to a read-only place), rather than one passed on from the place:  a page says its words (`WebPlace`).
+ */
+export const PAGE_SERVER_ANSWER_HEADER = "x-spell-page-server"
+
 /** What stands for the asker's own space, in a project data folder's address:  `personal "recipes"` is `personal/recipes`. */
 export const PERSONAL_FOLDERS = "personal"
 

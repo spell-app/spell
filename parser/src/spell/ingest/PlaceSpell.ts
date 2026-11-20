@@ -35,8 +35,8 @@ const USUAL_ID = "id"
 /** The line saying where a key goes. */
 function keyGoesLine(goes: KeyGoes): string {
   return "header" in goes
-    ? `its key goes in its "${goes.header}" header`
-    : `its key goes in the address as "${goes.inAddress}"`
+    ? `its secret goes in its "${goes.header}" header`
+    : `its secret goes in the address as "${goes.inAddress}"`
 }
 
 /** The most rows a list can say it has and still be read in one request, `it gives up to 2000 at a time`. */
@@ -116,10 +116,16 @@ export function spellPartsFor(
   const placeLines: SpellLine[] = []
   // a data folder's, a file's, a room's key is the server's run token:  no line of a program says it
   if (withKey && keySecret && tokenFrom !== undefined && KINDS_WITH_KEY_LINES.has(kind)) {
-    placeLines.push({ key: "key", text: `its token comes from "${tokenFrom}", made with the secret "${keySecret}"` })
+    placeLines.push({
+      key: "key",
+      text: `it is authenticated with a token from "${tokenFrom}", made with the secret "${keySecret}"`
+    })
     if (keyGoes) placeLines.push({ key: "key goes", text: keyGoesLine(keyGoes) })
   } else if (withKey && keySecret && KINDS_WITH_KEY_LINES.has(kind)) {
-    placeLines.push({ key: "key", text: `its ${keyIfSet ? "optional " : ""}key is the secret "${keySecret}"` })
+    placeLines.push({
+      key: "key",
+      text: `it is ${keyIfSet ? "optionally " : ""}authenticated with the secret "${keySecret}"`
+    })
     if (keyGoes) placeLines.push({ key: "key goes", text: keyGoesLine(keyGoes) })
   }
   // its real rows stay on this machine:  every later ingest, update and verify keeps to it

@@ -551,7 +551,7 @@ export const getIndex = async (
   )
 
   // return manifest and imports
-  const { title, version, exports, targets, listsStartAt, development } = importsFile
+  const { title, version, exports, targets, listsStartAt, development, places } = importsFile
   const buildFolder = buildFolderInBuild(projectId)
   // its names dictionaries, beside its project file:  so a compile asks for no other (epic `editor` I68)
   const namesLanguages = [...SP.Language.all.keys()].filter((lang) =>
@@ -567,7 +567,8 @@ export const getIndex = async (
     listsStartAt,
     development,
     buildFolder,
-    ...(namesLanguages.length > 0 && { namesLanguages })
+    ...(namesLanguages.length > 0 && { namesLanguages }),
+    ...(places && { places })
   }
 }
 

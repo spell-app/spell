@@ -392,7 +392,7 @@ The `@spell` space's built-in projects, and the tests that read them (epic `cont
 ### the details under a place
 
 - **Say:**  `recipes live at "/dishes"`, `its version is its? "version"`, `its id is its? "id"`,
-  `check it every 30 seconds`, `its key is the secret "COOKBOOK_KEY"`;
+  `check it every 30 seconds`, `it is authenticated with the secret "COOKBOOK_KEY"`;
   a web server's whole answer:  `its rows are its? "results"`, `its next page is its? "next"` (epic `data` P18).
   - A field finds the server's spelling by its WORDS:  `its "hair color" is text` reads `hair_color`, `hairColor`, `Hair Color`
     (epic `data` P23).  Only a name that really differs says so, on the field's own line:  `its "title" is text, stored as "dish_name"`.

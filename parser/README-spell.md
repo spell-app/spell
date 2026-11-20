@@ -1444,9 +1444,12 @@ recipe box is an app
   - A field holding another thing may be nothing, and the X of nothing is nothing:
     `the name of its homeworld`, with no homeworld, is nothing, not a throw.
 - What a real server is like, a line each under it, which the ingest writes when it finds it:
-  - a key it can go without:  `its optional key is the secret "GITHUB_TOKEN"`
+  - a secret it can't go without:  `it is authenticated with the secret "JOBS_TOKEN"`;
+    a page reads it through Spell's page server, which adds the secret from its environment and never sends it back
+    (the old words, `its key is the secret "..."`, still read, with a warning naming the new line)
+  - a key it can go without:  `it is optionally authenticated with the secret "GITHUB_TOKEN"`
   - a key it wants anywhere but `Authorization: Bearer`:
-    `its key goes in its "X-Api-Key" header`, or `its key goes in the address as "api_key"`
+    `its secret goes in its "X-Api-Key" header`, or `its secret goes in the address as "api_key"`
   - paging by a header:  `its next page is in its "Link" header`
   - how many at a time, when that isn't its `limit`:  `it gives up to 100 at a time, asked for with "per_page"`
   - lists of names only, each thing reading the rest from its own address:  `its lists give only each one's "name"`
@@ -1481,7 +1484,7 @@ recipe box is an app
   - `add a new recipe with cook = them`
 - A place can't do what it can't do, and the compiler says so at that line:
   - a write to a sheet won't compile
-  - a key written into a program won't compile:  name it, `its key is the secret "COOKBOOK_KEY"`, and keep it on a server side
+  - a key written into a program won't compile:  name it, `it is authenticated with the secret "COOKBOOK_KEY"`, and keep it on a server side
   - a web server can't announce what changed, so it warns until a line says how often to ask
   - an airtable warns that the last save wins, of fields it works out, and of a missing id column or key;  its key stays on a server side
 - There's no save step:  changing a recipe keeps it.  `a draft of the recipe`, then `save the draft`, is for an Edit screen with a Cancel button.

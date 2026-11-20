@@ -4,7 +4,7 @@ import { afterEach, describe, expect, test, vi } from "vite-plus/test"
 import { PlaceError, RemotePlace, writeAnswerFor, type PlaceChange } from "spell/places"
 import { SRV } from "spell/server"
 import { AirtablePlace, PlaceKeys, PlaceServer, RateQueue, Referee, type RateClock } from "spell/server/places"
-import { serveAirtableBase } from "spell/server/places/airtableRoutes"
+import { serveAirtableBase } from "spell/server/places/placeRoutes"
 import { AIRTABLE_STUB_TOKEN, AirtableStub } from "spell/server/test/airtableStub"
 
 /** What every test closes. */

@@ -203,6 +203,15 @@ export const englishWords: SP.LanguageWords = {
     clickable: "it is clickable"
   },
 
+  /** An authenticated place's line, by its rule:  what the warning for the old words (`its key is ...`) says to write. */
+  authenticationLines: {
+    key_is_secret: 'it is authenticated with the secret "{name}"',
+    key_if_set: 'it is optionally authenticated with the secret "{name}"',
+    token_from: 'it is authenticated with a token from "{address}", made with the secret "{name}"',
+    key_goes_in_header: 'its secret goes in its "{name}" header',
+    key_goes_in_address: 'its secret goes in the address as "{name}"'
+  },
+
   /** A page's words (epic `language` P47):  its head, `"button api" is a notebook page`, and its body's tags. */
   page: {
     prefix: "spell",

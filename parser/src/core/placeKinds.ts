@@ -61,13 +61,19 @@ export type PlaceDetails = {
   >
   /** The NAME of the key it needs:  never the key. */
   keyNamed?: string
-  /** Where its key's token is made, from the secret `keyNamed`:  `its token comes from "..."` (epic `data` P49). */
+  /**
+   * Where a page reads it through its own page server, which adds the key (epic `from-console` P14):
+   * `/api/places/projects/@acme/jobs/jobs`.
+   * - The compiler's, for an authenticated web or graphql server in a project with an address:  see `readThroughPageServer()`.
+   */
+  servedAt?: string
+  /** Where its key's token is made, from the secret `keyNamed`:  `it is authenticated with a token from "..."` (epic `data` P49). */
   tokenFrom?: string
-  /** It goes without its key where nothing holds it, a browser:  `its optional key is the secret "GITHUB_TOKEN"`. */
+  /** It goes without its key where nothing holds it, a browser:  `it is optionally authenticated with the secret "GITHUB_TOKEN"`. */
   keyIfSet?: boolean
   /** On this device, it's kept for this tab only:  `scratch is stored on this device, for each tab`. */
   forEachTab?: boolean
-  /** Where its key goes on a request, when that isn't `Authorization: Bearer`:  `its key goes in its "X-Api-Key" header`. */
+  /** Where its key goes on a request, when that isn't `Authorization: Bearer`:  `its secret goes in its "X-Api-Key" header`. */
   keyGoes?: PlacesFolder.KeyGoes
   /** How often it's asked what changed, in seconds. */
   checkedEvery?: number
@@ -264,7 +270,7 @@ export function limitOperations(behind: PlaceBehind, { folder, collection, Class
 const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) => PlaceBehind> = {
   "web server": ({ details, collection, Class, keyFrom, deviceCopy }, folder) =>
     new folder.RestPlace({
-      url: details.at!,
+      url: addressOf(details, keyFrom),
       collections: restCollections(details, collection, storedAsIn(Class)),
       ...(details.namesLike !== undefined && { namesLike: folder.nameStyleLike(details.namesLike) }),
       ...(details.searches && { searches: details.searches }),
@@ -279,7 +285,7 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
     }),
   "graphql server": (making, folder) =>
     new folder.GraphPlace({
-      url: making.details.at!,
+      url: addressOf(making.details, making.keyFrom),
       collections: graphCollections(making),
       ...(making.details.versionsIn !== undefined && { versions: { field: making.details.versionsIn } }),
       ...keyLinesOf(making.details, making.keyFrom, folder)
@@ -431,16 +437,36 @@ const KINDS: Record<string, (making: PlaceMaking, folder: typeof PlacesFolder) =
 }
 
 /**
- * What a place's lines say of its key, for a place on a server:  nothing without one named.
- * - `its token comes from "...", made with the secret "..."` (epic `data` P49):  the key sent is a token made from the
- *   secret, kept, and made again before it runs out (`PlaceToken`).
+ * Where a web or graphql server's requests go:  its own address, or, read through this page's own server, that
+ * server's address for it (`readThroughPageServer()`).
  */
-function keyLinesOf(
-  { keyNamed, keyIfSet, keyGoes, tokenFrom }: PlaceDetails,
-  keyFrom: PlaceMaking["keyFrom"],
-  folder: typeof PlacesFolder
-) {
+function addressOf(details: PlaceDetails, keyFrom: PlaceMaking["keyFrom"]): string {
+  return readThroughPageServer(details, keyFrom) ? details.servedAt! : details.at!
+}
+
+/**
+ * Is it read through this page's own server, which adds its key (epic `from-console` P14)?
+ * - Only where nothing holds its key, a page, for a key it can't go without, and where the compiler said its address
+ *   there (`servedAt`).
+ * - Anywhere a key is found (`spell run`, a test), it's asked straight, with the key.
+ */
+function readThroughPageServer(
+  { keyNamed, keyIfSet, servedAt }: PlaceDetails,
+  keyFrom: PlaceMaking["keyFrom"]
+): boolean {
+  return keyNamed !== undefined && !keyIfSet && !keyFrom && servedAt !== undefined
+}
+
+/**
+ * What a place's lines say of its key, for a place on a server:  nothing without one named.
+ * - `it is authenticated with a token from "...", made with the secret "..."` (epic `data` P49):  the key sent is a
+ *   token made from the secret, kept, and made again before it runs out (`PlaceToken`).
+ * - Read through this page's own server:  no key here at all;  that server adds it (`throughPageServer`).
+ */
+function keyLinesOf(details: PlaceDetails, keyFrom: PlaceMaking["keyFrom"], folder: typeof PlacesFolder) {
+  const { keyNamed, keyIfSet, keyGoes, tokenFrom } = details
   if (keyNamed === undefined) return {}
+  if (readThroughPageServer(details, keyFrom)) return { throughPageServer: true }
   const token =
     keyFrom && tokenFrom !== undefined
       ? new folder.PlaceToken({ keyNamed, keyFrom, mint: folder.tokenServiceMint(tokenFrom) })

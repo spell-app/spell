@@ -75,197 +75,197 @@
         "placeType": "Github",
         "collection": "issues"
       },
-      "defined": "/GitHub.api.spell:1678-2730"
+      "defined": "/GitHub.api.spell:1694-2746"
     },
     {
       "property": "url",
       "of": "Issue",
       "datatype": "Issue",
-      "defined": "/GitHub.api.spell:1721-1742"
+      "defined": "/GitHub.api.spell:1737-1758"
     },
     {
       "property": "repository_url",
       "asWritten": "repository url",
       "of": "Issue",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:1744-1772"
+      "defined": "/GitHub.api.spell:1760-1788"
     },
     {
       "property": "labels_url",
       "asWritten": "labels url",
       "of": "Issue",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:1789-1813"
+      "defined": "/GitHub.api.spell:1805-1829"
     },
     {
       "property": "comments_url",
       "asWritten": "comments url",
       "of": "Issue",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:1830-1856"
+      "defined": "/GitHub.api.spell:1846-1872"
     },
     {
       "property": "events_url",
       "asWritten": "events url",
       "of": "Issue",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:1873-1897"
+      "defined": "/GitHub.api.spell:1889-1913"
     },
     {
       "property": "html_url",
       "asWritten": "html url",
       "of": "Issue",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:1914-1936"
+      "defined": "/GitHub.api.spell:1930-1952"
     },
     {
       "property": "node_id",
       "asWritten": "node id",
       "of": "Issue",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:1953-1974"
+      "defined": "/GitHub.api.spell:1969-1990"
     },
     {
       "property": "number",
       "of": "Issue",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:1976-2000"
+      "defined": "/GitHub.api.spell:1992-2016"
     },
     {
       "property": "title",
       "of": "Issue",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:2002-2021"
+      "defined": "/GitHub.api.spell:2018-2037"
     },
     {
       "property": "user",
       "of": "Issue",
       "datatype": "IssueUser",
-      "defined": "/GitHub.api.spell:2023-2050"
+      "defined": "/GitHub.api.spell:2039-2066"
     },
     {
       "property": "labels",
       "of": "Issue",
       "datatype": "list of labels",
-      "defined": "/GitHub.api.spell:2052-2084"
+      "defined": "/GitHub.api.spell:2068-2100"
     },
     {
       "property": "state",
       "of": "Issue",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:2086-2105"
+      "defined": "/GitHub.api.spell:2102-2121"
     },
     {
       "property": "locked",
       "of": "Issue",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:2107-2132"
+      "defined": "/GitHub.api.spell:2123-2148"
     },
     {
       "property": "assignees",
       "of": "Issue",
       "datatype": "list of assignees",
-      "defined": "/GitHub.api.spell:2134-2172"
+      "defined": "/GitHub.api.spell:2150-2188"
     },
     {
       "property": "comments",
       "of": "Issue",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:2174-2200"
+      "defined": "/GitHub.api.spell:2190-2216"
     },
     {
       "property": "created_at",
       "asWritten": "created at",
       "of": "Issue",
       "datatype": "date",
-      "defined": "/GitHub.api.spell:2202-2228"
+      "defined": "/GitHub.api.spell:2218-2244"
     },
     {
       "property": "updated_at",
       "asWritten": "updated at",
       "of": "Issue",
       "datatype": "date",
-      "defined": "/GitHub.api.spell:2230-2256"
+      "defined": "/GitHub.api.spell:2246-2272"
     },
     {
       "property": "author_association",
       "asWritten": "author association",
       "of": "Issue",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:2258-2290"
+      "defined": "/GitHub.api.spell:2274-2306"
     },
     {
       "property": "issue_field_values",
       "asWritten": "issue field values",
       "of": "Issue",
       "datatype": "list of texts",
-      "defined": "/GitHub.api.spell:2292-2334"
+      "defined": "/GitHub.api.spell:2308-2350"
     },
     {
       "property": "sub_issues_summary",
       "asWritten": "sub issues summary",
       "of": "Issue",
       "datatype": "SubIssuesSummary",
-      "defined": "/GitHub.api.spell:2336-2384"
+      "defined": "/GitHub.api.spell:2352-2400"
     },
     {
       "property": "issue_dependencies_summary",
       "asWritten": "issue dependencies summary",
       "of": "Issue",
       "datatype": "IssueDependenciesSummary",
-      "defined": "/GitHub.api.spell:2386-2451"
+      "defined": "/GitHub.api.spell:2402-2467"
     },
     {
       "property": "body",
       "of": "Issue",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:2453-2471"
+      "defined": "/GitHub.api.spell:2469-2487"
     },
     {
       "property": "reactions",
       "of": "Issue",
       "datatype": "Reaction",
-      "defined": "/GitHub.api.spell:2473-2502"
+      "defined": "/GitHub.api.spell:2489-2518"
     },
     {
       "property": "timeline_url",
       "asWritten": "timeline url",
       "of": "Issue",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:2504-2530"
+      "defined": "/GitHub.api.spell:2520-2546"
     },
     {
       "property": "performed_via_github_app",
       "asWritten": "performed via github app",
       "of": "Issue",
       "datatype": "PerformedViaGithubApp",
-      "defined": "/GitHub.api.spell:2547-2607"
+      "defined": "/GitHub.api.spell:2563-2623"
     },
     {
       "property": "state_reason",
       "asWritten": "state reason",
       "of": "Issue",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:2609-2635"
+      "defined": "/GitHub.api.spell:2625-2651"
     },
     {
       "property": "draft",
       "of": "Issue",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:2637-2661"
+      "defined": "/GitHub.api.spell:2653-2677"
     },
     {
       "property": "pull_request",
       "asWritten": "pull request",
       "of": "Issue",
       "datatype": "PullRequest",
-      "defined": "/GitHub.api.spell:2663-2699"
+      "defined": "/GitHub.api.spell:2679-2715"
     },
     {
       "property": "assignee",
       "of": "Issue",
       "datatype": "Assignee",
-      "defined": "/GitHub.api.spell:2701-2730"
+      "defined": "/GitHub.api.spell:2717-2746"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -288,136 +288,136 @@
         "placeType": "Github",
         "collection": "contributors"
       },
-      "defined": "/GitHub.api.spell:2732-3492"
+      "defined": "/GitHub.api.spell:2748-3508"
     },
     {
       "property": "login",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:2780-2799"
+      "defined": "/GitHub.api.spell:2796-2815"
     },
     {
       "property": "node_id",
       "asWritten": "node id",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:2801-2822"
+      "defined": "/GitHub.api.spell:2817-2838"
     },
     {
       "property": "avatar_url",
       "asWritten": "avatar url",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:2824-2848"
+      "defined": "/GitHub.api.spell:2840-2864"
     },
     {
       "property": "gravatar_id",
       "asWritten": "gravatar id",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:2865-2890"
+      "defined": "/GitHub.api.spell:2881-2906"
     },
     {
       "property": "url",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:2892-2909"
+      "defined": "/GitHub.api.spell:2908-2925"
     },
     {
       "property": "html_url",
       "asWritten": "html url",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:2926-2948"
+      "defined": "/GitHub.api.spell:2942-2964"
     },
     {
       "property": "followers_url",
       "asWritten": "followers url",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:2965-2992"
+      "defined": "/GitHub.api.spell:2981-3008"
     },
     {
       "property": "following_url",
       "asWritten": "following url",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3009-3036"
+      "defined": "/GitHub.api.spell:3025-3052"
     },
     {
       "property": "gists_url",
       "asWritten": "gists url",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3053-3076"
+      "defined": "/GitHub.api.spell:3069-3092"
     },
     {
       "property": "starred_url",
       "asWritten": "starred url",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3093-3118"
+      "defined": "/GitHub.api.spell:3109-3134"
     },
     {
       "property": "subscriptions_url",
       "asWritten": "subscriptions url",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3135-3166"
+      "defined": "/GitHub.api.spell:3151-3182"
     },
     {
       "property": "organizations_url",
       "asWritten": "organizations url",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3183-3214"
+      "defined": "/GitHub.api.spell:3199-3230"
     },
     {
       "property": "repos_url",
       "asWritten": "repos url",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3231-3254"
+      "defined": "/GitHub.api.spell:3247-3270"
     },
     {
       "property": "events_url",
       "asWritten": "events url",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3271-3295"
+      "defined": "/GitHub.api.spell:3287-3311"
     },
     {
       "property": "received_events_url",
       "asWritten": "received events url",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3312-3345"
+      "defined": "/GitHub.api.spell:3328-3361"
     },
     {
       "property": "kind",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3362-3398"
+      "defined": "/GitHub.api.spell:3378-3414"
     },
     {
       "property": "user_view_type",
       "asWritten": "user view type",
       "of": "Contributor",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3400-3428"
+      "defined": "/GitHub.api.spell:3416-3444"
     },
     {
       "property": "site_admin",
       "asWritten": "site admin",
       "of": "Contributor",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:3430-3459"
+      "defined": "/GitHub.api.spell:3446-3475"
     },
     {
       "property": "contributions",
       "of": "Contributor",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:3461-3492"
+      "defined": "/GitHub.api.spell:3477-3508"
     },
     {
       "type": "User",
@@ -427,219 +427,219 @@
         "placeType": "Github",
         "collection": "users"
       },
-      "defined": "/GitHub.api.spell:3494-4608"
+      "defined": "/GitHub.api.spell:3510-4624"
     },
     {
       "property": "login",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3535-3554"
+      "defined": "/GitHub.api.spell:3551-3570"
     },
     {
       "property": "number",
       "of": "User",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:3556-3596"
+      "defined": "/GitHub.api.spell:3572-3612"
     },
     {
       "property": "node_id",
       "asWritten": "node id",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3598-3619"
+      "defined": "/GitHub.api.spell:3614-3635"
     },
     {
       "property": "avatar_url",
       "asWritten": "avatar url",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3621-3645"
+      "defined": "/GitHub.api.spell:3637-3661"
     },
     {
       "property": "gravatar_id",
       "asWritten": "gravatar id",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3662-3687"
+      "defined": "/GitHub.api.spell:3678-3703"
     },
     {
       "property": "url",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3689-3706"
+      "defined": "/GitHub.api.spell:3705-3722"
     },
     {
       "property": "html_url",
       "asWritten": "html url",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3723-3745"
+      "defined": "/GitHub.api.spell:3739-3761"
     },
     {
       "property": "followers_url",
       "asWritten": "followers url",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3762-3789"
+      "defined": "/GitHub.api.spell:3778-3805"
     },
     {
       "property": "following_url",
       "asWritten": "following url",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3806-3833"
+      "defined": "/GitHub.api.spell:3822-3849"
     },
     {
       "property": "gists_url",
       "asWritten": "gists url",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3850-3873"
+      "defined": "/GitHub.api.spell:3866-3889"
     },
     {
       "property": "starred_url",
       "asWritten": "starred url",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3890-3915"
+      "defined": "/GitHub.api.spell:3906-3931"
     },
     {
       "property": "subscriptions_url",
       "asWritten": "subscriptions url",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3932-3963"
+      "defined": "/GitHub.api.spell:3948-3979"
     },
     {
       "property": "organizations_url",
       "asWritten": "organizations url",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:3980-4011"
+      "defined": "/GitHub.api.spell:3996-4027"
     },
     {
       "property": "repos_url",
       "asWritten": "repos url",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4028-4051"
+      "defined": "/GitHub.api.spell:4044-4067"
     },
     {
       "property": "events_url",
       "asWritten": "events url",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4068-4092"
+      "defined": "/GitHub.api.spell:4084-4108"
     },
     {
       "property": "received_events_url",
       "asWritten": "received events url",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4109-4142"
+      "defined": "/GitHub.api.spell:4125-4158"
     },
     {
       "property": "kind",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4159-4195"
+      "defined": "/GitHub.api.spell:4175-4211"
     },
     {
       "property": "user_view_type",
       "asWritten": "user view type",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4197-4225"
+      "defined": "/GitHub.api.spell:4213-4241"
     },
     {
       "property": "site_admin",
       "asWritten": "site admin",
       "of": "User",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:4227-4256"
+      "defined": "/GitHub.api.spell:4243-4272"
     },
     {
       "property": "name",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4258-4276"
+      "defined": "/GitHub.api.spell:4274-4292"
     },
     {
       "property": "company",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4278-4299"
+      "defined": "/GitHub.api.spell:4294-4315"
     },
     {
       "property": "blog",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4301-4319"
+      "defined": "/GitHub.api.spell:4317-4335"
     },
     {
       "property": "location",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4336-4358"
+      "defined": "/GitHub.api.spell:4352-4374"
     },
     {
       "property": "email",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4360-4379"
+      "defined": "/GitHub.api.spell:4376-4395"
     },
     {
       "property": "twitter_username",
       "asWritten": "twitter username",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4381-4411"
+      "defined": "/GitHub.api.spell:4397-4427"
     },
     {
       "property": "public_repos",
       "asWritten": "public repos",
       "of": "User",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:4413-4443"
+      "defined": "/GitHub.api.spell:4429-4459"
     },
     {
       "property": "public_gists",
       "asWritten": "public gists",
       "of": "User",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:4445-4475"
+      "defined": "/GitHub.api.spell:4461-4491"
     },
     {
       "property": "followers",
       "of": "User",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:4477-4504"
+      "defined": "/GitHub.api.spell:4493-4520"
     },
     {
       "property": "following",
       "of": "User",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:4506-4533"
+      "defined": "/GitHub.api.spell:4522-4549"
     },
     {
       "property": "created_at",
       "asWritten": "created at",
       "of": "User",
       "datatype": "date",
-      "defined": "/GitHub.api.spell:4535-4561"
+      "defined": "/GitHub.api.spell:4551-4577"
     },
     {
       "property": "updated_at",
       "asWritten": "updated at",
       "of": "User",
       "datatype": "date",
-      "defined": "/GitHub.api.spell:4563-4589"
+      "defined": "/GitHub.api.spell:4579-4605"
     },
     {
       "property": "bio",
       "of": "User",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4591-4608"
+      "defined": "/GitHub.api.spell:4607-4624"
     },
     {
       "syntax": "look at {thisArg:expression}",
@@ -687,642 +687,642 @@
     {
       "type": "IssueUser",
       "superType": "Thing",
-      "defined": "/GitHub.api.spell:4610-5359"
+      "defined": "/GitHub.api.spell:4626-5375"
     },
     {
       "property": "login",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4638-4657"
+      "defined": "/GitHub.api.spell:4654-4673"
     },
     {
       "property": "number",
       "of": "IssueUser",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:4659-4699"
+      "defined": "/GitHub.api.spell:4675-4715"
     },
     {
       "property": "node_id",
       "asWritten": "node id",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4701-4722"
+      "defined": "/GitHub.api.spell:4717-4738"
     },
     {
       "property": "avatar_url",
       "asWritten": "avatar url",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4724-4748"
+      "defined": "/GitHub.api.spell:4740-4764"
     },
     {
       "property": "gravatar_id",
       "asWritten": "gravatar id",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4765-4790"
+      "defined": "/GitHub.api.spell:4781-4806"
     },
     {
       "property": "url",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4792-4809"
+      "defined": "/GitHub.api.spell:4808-4825"
     },
     {
       "property": "html_url",
       "asWritten": "html url",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4826-4848"
+      "defined": "/GitHub.api.spell:4842-4864"
     },
     {
       "property": "followers_url",
       "asWritten": "followers url",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4865-4892"
+      "defined": "/GitHub.api.spell:4881-4908"
     },
     {
       "property": "following_url",
       "asWritten": "following url",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4909-4936"
+      "defined": "/GitHub.api.spell:4925-4952"
     },
     {
       "property": "gists_url",
       "asWritten": "gists url",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4953-4976"
+      "defined": "/GitHub.api.spell:4969-4992"
     },
     {
       "property": "starred_url",
       "asWritten": "starred url",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:4993-5018"
+      "defined": "/GitHub.api.spell:5009-5034"
     },
     {
       "property": "subscriptions_url",
       "asWritten": "subscriptions url",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5035-5066"
+      "defined": "/GitHub.api.spell:5051-5082"
     },
     {
       "property": "organizations_url",
       "asWritten": "organizations url",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5083-5114"
+      "defined": "/GitHub.api.spell:5099-5130"
     },
     {
       "property": "repos_url",
       "asWritten": "repos url",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5131-5154"
+      "defined": "/GitHub.api.spell:5147-5170"
     },
     {
       "property": "events_url",
       "asWritten": "events url",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5171-5195"
+      "defined": "/GitHub.api.spell:5187-5211"
     },
     {
       "property": "received_events_url",
       "asWritten": "received events url",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5212-5245"
+      "defined": "/GitHub.api.spell:5228-5261"
     },
     {
       "property": "kind",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5262-5298"
+      "defined": "/GitHub.api.spell:5278-5314"
     },
     {
       "property": "user_view_type",
       "asWritten": "user view type",
       "of": "IssueUser",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5300-5328"
+      "defined": "/GitHub.api.spell:5316-5344"
     },
     {
       "property": "site_admin",
       "asWritten": "site admin",
       "of": "IssueUser",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:5330-5359"
+      "defined": "/GitHub.api.spell:5346-5375"
     },
     {
       "type": "Label",
       "superType": "Thing",
-      "defined": "/GitHub.api.spell:5361-5576"
+      "defined": "/GitHub.api.spell:5377-5592"
     },
     {
       "property": "number",
       "of": "Label",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:5383-5423"
+      "defined": "/GitHub.api.spell:5399-5439"
     },
     {
       "property": "node_id",
       "asWritten": "node id",
       "of": "Label",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5425-5446"
+      "defined": "/GitHub.api.spell:5441-5462"
     },
     {
       "property": "url",
       "of": "Label",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5448-5465"
+      "defined": "/GitHub.api.spell:5464-5481"
     },
     {
       "property": "name",
       "of": "Label",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5482-5500"
+      "defined": "/GitHub.api.spell:5498-5516"
     },
     {
       "property": "color",
       "of": "Label",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5502-5521"
+      "defined": "/GitHub.api.spell:5518-5537"
     },
     {
       "property": "default",
       "of": "Label",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:5523-5549"
+      "defined": "/GitHub.api.spell:5539-5565"
     },
     {
       "property": "description",
       "of": "Label",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5551-5576"
+      "defined": "/GitHub.api.spell:5567-5592"
     },
     {
       "type": "SubIssuesSummary",
       "superType": "Thing",
-      "defined": "/GitHub.api.spell:5578-5702"
+      "defined": "/GitHub.api.spell:5594-5718"
     },
     {
       "property": "total",
       "of": "SubIssuesSummary",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:5613-5636"
+      "defined": "/GitHub.api.spell:5629-5652"
     },
     {
       "property": "completed",
       "of": "SubIssuesSummary",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:5638-5665"
+      "defined": "/GitHub.api.spell:5654-5681"
     },
     {
       "property": "percent_completed",
       "asWritten": "percent completed",
       "of": "SubIssuesSummary",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:5667-5702"
+      "defined": "/GitHub.api.spell:5683-5718"
     },
     {
       "type": "IssueDependenciesSummary",
       "superType": "Thing",
-      "defined": "/GitHub.api.spell:5704-5874"
+      "defined": "/GitHub.api.spell:5720-5890"
     },
     {
       "property": "blocked_by",
       "asWritten": "blocked by",
       "of": "IssueDependenciesSummary",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:5748-5776"
+      "defined": "/GitHub.api.spell:5764-5792"
     },
     {
       "property": "total_blocked_by",
       "asWritten": "total blocked by",
       "of": "IssueDependenciesSummary",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:5778-5812"
+      "defined": "/GitHub.api.spell:5794-5828"
     },
     {
       "property": "blocking",
       "of": "IssueDependenciesSummary",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:5814-5840"
+      "defined": "/GitHub.api.spell:5830-5856"
     },
     {
       "property": "total_blocking",
       "asWritten": "total blocking",
       "of": "IssueDependenciesSummary",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:5842-5874"
+      "defined": "/GitHub.api.spell:5858-5890"
     },
     {
       "type": "Reaction",
       "superType": "Thing",
-      "defined": "/GitHub.api.spell:5876-6118"
+      "defined": "/GitHub.api.spell:5892-6134"
     },
     {
       "property": "url",
       "of": "Reaction",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:5901-5918"
+      "defined": "/GitHub.api.spell:5917-5934"
     },
     {
       "property": "total_count",
       "asWritten": "total count",
       "of": "Reaction",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:5935-5964"
+      "defined": "/GitHub.api.spell:5951-5980"
     },
     {
       "property": "laugh",
       "of": "Reaction",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:5966-5989"
+      "defined": "/GitHub.api.spell:5982-6005"
     },
     {
       "property": "hooray",
       "of": "Reaction",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:5991-6015"
+      "defined": "/GitHub.api.spell:6007-6031"
     },
     {
       "property": "confused",
       "of": "Reaction",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:6017-6043"
+      "defined": "/GitHub.api.spell:6033-6059"
     },
     {
       "property": "heart",
       "of": "Reaction",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:6045-6068"
+      "defined": "/GitHub.api.spell:6061-6084"
     },
     {
       "property": "rocket",
       "of": "Reaction",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:6070-6094"
+      "defined": "/GitHub.api.spell:6086-6110"
     },
     {
       "property": "eyes",
       "of": "Reaction",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:6096-6118"
+      "defined": "/GitHub.api.spell:6112-6134"
     },
     {
       "type": "PerformedViaGithubApp",
       "superType": "Thing",
-      "defined": "/GitHub.api.spell:6120-6546"
+      "defined": "/GitHub.api.spell:6136-6562"
     },
     {
       "property": "number",
       "of": "PerformedViaGithubApp",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:6161-6201"
+      "defined": "/GitHub.api.spell:6177-6217"
     },
     {
       "property": "client_id",
       "asWritten": "client id",
       "of": "PerformedViaGithubApp",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6203-6226"
+      "defined": "/GitHub.api.spell:6219-6242"
     },
     {
       "property": "slug",
       "of": "PerformedViaGithubApp",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6228-6246"
+      "defined": "/GitHub.api.spell:6244-6262"
     },
     {
       "property": "node_id",
       "asWritten": "node id",
       "of": "PerformedViaGithubApp",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6248-6269"
+      "defined": "/GitHub.api.spell:6264-6285"
     },
     {
       "property": "owner",
       "of": "PerformedViaGithubApp",
       "datatype": "Owner",
-      "defined": "/GitHub.api.spell:6271-6294"
+      "defined": "/GitHub.api.spell:6287-6310"
     },
     {
       "property": "name",
       "of": "PerformedViaGithubApp",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6296-6314"
+      "defined": "/GitHub.api.spell:6312-6330"
     },
     {
       "property": "description",
       "of": "PerformedViaGithubApp",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6316-6341"
+      "defined": "/GitHub.api.spell:6332-6357"
     },
     {
       "property": "external_url",
       "asWritten": "external url",
       "of": "PerformedViaGithubApp",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6343-6369"
+      "defined": "/GitHub.api.spell:6359-6385"
     },
     {
       "property": "html_url",
       "asWritten": "html url",
       "of": "PerformedViaGithubApp",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6386-6408"
+      "defined": "/GitHub.api.spell:6402-6424"
     },
     {
       "property": "created_at",
       "asWritten": "created at",
       "of": "PerformedViaGithubApp",
       "datatype": "date",
-      "defined": "/GitHub.api.spell:6425-6451"
+      "defined": "/GitHub.api.spell:6441-6467"
     },
     {
       "property": "updated_at",
       "asWritten": "updated at",
       "of": "PerformedViaGithubApp",
       "datatype": "date",
-      "defined": "/GitHub.api.spell:6453-6479"
+      "defined": "/GitHub.api.spell:6469-6495"
     },
     {
       "property": "permissions",
       "of": "PerformedViaGithubApp",
       "datatype": "Permission",
-      "defined": "/GitHub.api.spell:6481-6514"
+      "defined": "/GitHub.api.spell:6497-6530"
     },
     {
       "property": "events",
       "of": "PerformedViaGithubApp",
       "datatype": "list of texts",
-      "defined": "/GitHub.api.spell:6516-6546"
+      "defined": "/GitHub.api.spell:6532-6562"
     },
     {
       "type": "Owner",
       "superType": "Thing",
-      "defined": "/GitHub.api.spell:6548-7292"
+      "defined": "/GitHub.api.spell:6564-7308"
     },
     {
       "property": "login",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6571-6590"
+      "defined": "/GitHub.api.spell:6587-6606"
     },
     {
       "property": "number",
       "of": "Owner",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:6592-6632"
+      "defined": "/GitHub.api.spell:6608-6648"
     },
     {
       "property": "node_id",
       "asWritten": "node id",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6634-6655"
+      "defined": "/GitHub.api.spell:6650-6671"
     },
     {
       "property": "avatar_url",
       "asWritten": "avatar url",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6657-6681"
+      "defined": "/GitHub.api.spell:6673-6697"
     },
     {
       "property": "gravatar_id",
       "asWritten": "gravatar id",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6698-6723"
+      "defined": "/GitHub.api.spell:6714-6739"
     },
     {
       "property": "url",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6725-6742"
+      "defined": "/GitHub.api.spell:6741-6758"
     },
     {
       "property": "html_url",
       "asWritten": "html url",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6759-6781"
+      "defined": "/GitHub.api.spell:6775-6797"
     },
     {
       "property": "followers_url",
       "asWritten": "followers url",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6798-6825"
+      "defined": "/GitHub.api.spell:6814-6841"
     },
     {
       "property": "following_url",
       "asWritten": "following url",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6842-6869"
+      "defined": "/GitHub.api.spell:6858-6885"
     },
     {
       "property": "gists_url",
       "asWritten": "gists url",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6886-6909"
+      "defined": "/GitHub.api.spell:6902-6925"
     },
     {
       "property": "starred_url",
       "asWritten": "starred url",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6926-6951"
+      "defined": "/GitHub.api.spell:6942-6967"
     },
     {
       "property": "subscriptions_url",
       "asWritten": "subscriptions url",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:6968-6999"
+      "defined": "/GitHub.api.spell:6984-7015"
     },
     {
       "property": "organizations_url",
       "asWritten": "organizations url",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7016-7047"
+      "defined": "/GitHub.api.spell:7032-7063"
     },
     {
       "property": "repos_url",
       "asWritten": "repos url",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7064-7087"
+      "defined": "/GitHub.api.spell:7080-7103"
     },
     {
       "property": "events_url",
       "asWritten": "events url",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7104-7128"
+      "defined": "/GitHub.api.spell:7120-7144"
     },
     {
       "property": "received_events_url",
       "asWritten": "received events url",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7145-7178"
+      "defined": "/GitHub.api.spell:7161-7194"
     },
     {
       "property": "kind",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7195-7231"
+      "defined": "/GitHub.api.spell:7211-7247"
     },
     {
       "property": "user_view_type",
       "asWritten": "user view type",
       "of": "Owner",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7233-7261"
+      "defined": "/GitHub.api.spell:7249-7277"
     },
     {
       "property": "site_admin",
       "asWritten": "site admin",
       "of": "Owner",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:7263-7292"
+      "defined": "/GitHub.api.spell:7279-7308"
     },
     {
       "type": "Permission",
       "superType": "Thing",
-      "defined": "/GitHub.api.spell:7294-7687"
+      "defined": "/GitHub.api.spell:7310-7703"
     },
     {
       "property": "actions",
       "of": "Permission",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7321-7342"
+      "defined": "/GitHub.api.spell:7337-7358"
     },
     {
       "property": "administration",
       "of": "Permission",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7344-7372"
+      "defined": "/GitHub.api.spell:7360-7388"
     },
     {
       "property": "checks",
       "of": "Permission",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7374-7394"
+      "defined": "/GitHub.api.spell:7390-7410"
     },
     {
       "property": "contents",
       "of": "Permission",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7396-7418"
+      "defined": "/GitHub.api.spell:7412-7434"
     },
     {
       "property": "discussions",
       "of": "Permission",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7420-7445"
+      "defined": "/GitHub.api.spell:7436-7461"
     },
     {
       "property": "issues",
       "of": "Permission",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7447-7467"
+      "defined": "/GitHub.api.spell:7463-7483"
     },
     {
       "property": "members",
       "of": "Permission",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7469-7490"
+      "defined": "/GitHub.api.spell:7485-7506"
     },
     {
       "property": "merge_queues",
       "asWritten": "merge queues",
       "of": "Permission",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7492-7518"
+      "defined": "/GitHub.api.spell:7508-7534"
     },
     {
       "property": "metadata",
       "of": "Permission",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7520-7542"
+      "defined": "/GitHub.api.spell:7536-7558"
     },
     {
       "property": "pull_requests",
       "asWritten": "pull requests",
       "of": "Permission",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7544-7571"
+      "defined": "/GitHub.api.spell:7560-7587"
     },
     {
       "property": "repository_hooks",
       "asWritten": "repository hooks",
       "of": "Permission",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7573-7603"
+      "defined": "/GitHub.api.spell:7589-7619"
     },
     {
       "property": "statuses",
       "of": "Permission",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7605-7627"
+      "defined": "/GitHub.api.spell:7621-7643"
     },
     {
       "property": "workflows",
       "of": "Permission",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7629-7652"
+      "defined": "/GitHub.api.spell:7645-7668"
     },
     {
       "property": "repository_creation",
       "asWritten": "repository creation",
       "of": "Permission",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7654-7687"
+      "defined": "/GitHub.api.spell:7670-7703"
     },
     {
       "type": "PullRequest",
       "superType": "Thing",
-      "defined": "/GitHub.api.spell:7689-7868"
+      "defined": "/GitHub.api.spell:7705-7884"
     },
     {
       "property": "url",
       "of": "PullRequest",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7718-7735"
+      "defined": "/GitHub.api.spell:7734-7751"
     },
     {
       "property": "html_url",
       "asWritten": "html url",
       "of": "PullRequest",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7752-7774"
+      "defined": "/GitHub.api.spell:7768-7790"
     },
     {
       "property": "diff_url",
       "asWritten": "diff url",
       "of": "PullRequest",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7791-7813"
+      "defined": "/GitHub.api.spell:7807-7829"
     },
     {
       "property": "patch_url",
       "asWritten": "patch url",
       "of": "PullRequest",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7830-7853"
+      "defined": "/GitHub.api.spell:7846-7869"
     },
     {
       "type": "Repository",
@@ -1332,549 +1332,549 @@
         "placeType": "Github",
         "collection": "repositories"
       },
-      "defined": "/GitHub.api.spell:7870-11016"
+      "defined": "/GitHub.api.spell:7886-11032"
     },
     {
       "property": "node_id",
       "asWritten": "node id",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7917-7938"
+      "defined": "/GitHub.api.spell:7933-7954"
     },
     {
       "property": "name",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7940-7958"
+      "defined": "/GitHub.api.spell:7956-7974"
     },
     {
       "property": "full_name",
       "asWritten": "full name",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:7960-7983"
+      "defined": "/GitHub.api.spell:7976-7999"
     },
     {
       "property": "private",
       "of": "Repository",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:7985-8011"
+      "defined": "/GitHub.api.spell:8001-8027"
     },
     {
       "property": "owner",
       "of": "Repository",
       "datatype": "Owner",
-      "defined": "/GitHub.api.spell:8013-8036"
+      "defined": "/GitHub.api.spell:8029-8052"
     },
     {
       "property": "html_url",
       "asWritten": "html url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8038-8060"
+      "defined": "/GitHub.api.spell:8054-8076"
     },
     {
       "property": "description",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8077-8102"
+      "defined": "/GitHub.api.spell:8093-8118"
     },
     {
       "property": "fork",
       "of": "Repository",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:8104-8127"
+      "defined": "/GitHub.api.spell:8120-8143"
     },
     {
       "property": "url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8129-8146"
+      "defined": "/GitHub.api.spell:8145-8162"
     },
     {
       "property": "forks_url",
       "asWritten": "forks url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8163-8186"
+      "defined": "/GitHub.api.spell:8179-8202"
     },
     {
       "property": "keys_url",
       "asWritten": "keys url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8203-8225"
+      "defined": "/GitHub.api.spell:8219-8241"
     },
     {
       "property": "collaborators_url",
       "asWritten": "collaborators url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8242-8273"
+      "defined": "/GitHub.api.spell:8258-8289"
     },
     {
       "property": "teams_url",
       "asWritten": "teams url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8290-8313"
+      "defined": "/GitHub.api.spell:8306-8329"
     },
     {
       "property": "hooks_url",
       "asWritten": "hooks url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8330-8353"
+      "defined": "/GitHub.api.spell:8346-8369"
     },
     {
       "property": "issue_events_url",
       "asWritten": "issue events url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8370-8400"
+      "defined": "/GitHub.api.spell:8386-8416"
     },
     {
       "property": "events_url",
       "asWritten": "events url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8417-8441"
+      "defined": "/GitHub.api.spell:8433-8457"
     },
     {
       "property": "assignees_url",
       "asWritten": "assignees url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8458-8485"
+      "defined": "/GitHub.api.spell:8474-8501"
     },
     {
       "property": "branches_url",
       "asWritten": "branches url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8502-8528"
+      "defined": "/GitHub.api.spell:8518-8544"
     },
     {
       "property": "tags_url",
       "asWritten": "tags url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8545-8567"
+      "defined": "/GitHub.api.spell:8561-8583"
     },
     {
       "property": "blobs_url",
       "asWritten": "blobs url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8584-8607"
+      "defined": "/GitHub.api.spell:8600-8623"
     },
     {
       "property": "git_tags_url",
       "asWritten": "git tags url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8624-8650"
+      "defined": "/GitHub.api.spell:8640-8666"
     },
     {
       "property": "git_refs_url",
       "asWritten": "git refs url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8667-8693"
+      "defined": "/GitHub.api.spell:8683-8709"
     },
     {
       "property": "trees_url",
       "asWritten": "trees url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8710-8733"
+      "defined": "/GitHub.api.spell:8726-8749"
     },
     {
       "property": "statuses_url",
       "asWritten": "statuses url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8750-8776"
+      "defined": "/GitHub.api.spell:8766-8792"
     },
     {
       "property": "languages_url",
       "asWritten": "languages url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8793-8820"
+      "defined": "/GitHub.api.spell:8809-8836"
     },
     {
       "property": "stargazers_url",
       "asWritten": "stargazers url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8837-8865"
+      "defined": "/GitHub.api.spell:8853-8881"
     },
     {
       "property": "contributors_url",
       "asWritten": "contributors url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8882-8912"
+      "defined": "/GitHub.api.spell:8898-8928"
     },
     {
       "property": "subscribers_url",
       "asWritten": "subscribers url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8929-8958"
+      "defined": "/GitHub.api.spell:8945-8974"
     },
     {
       "property": "subscription_url",
       "asWritten": "subscription url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:8975-9005"
+      "defined": "/GitHub.api.spell:8991-9021"
     },
     {
       "property": "commits_url",
       "asWritten": "commits url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9022-9047"
+      "defined": "/GitHub.api.spell:9038-9063"
     },
     {
       "property": "git_commits_url",
       "asWritten": "git commits url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9064-9093"
+      "defined": "/GitHub.api.spell:9080-9109"
     },
     {
       "property": "comments_url",
       "asWritten": "comments url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9110-9136"
+      "defined": "/GitHub.api.spell:9126-9152"
     },
     {
       "property": "issue_comment_url",
       "asWritten": "issue comment url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9153-9184"
+      "defined": "/GitHub.api.spell:9169-9200"
     },
     {
       "property": "contents_url",
       "asWritten": "contents url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9201-9227"
+      "defined": "/GitHub.api.spell:9217-9243"
     },
     {
       "property": "compare_url",
       "asWritten": "compare url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9244-9269"
+      "defined": "/GitHub.api.spell:9260-9285"
     },
     {
       "property": "merges_url",
       "asWritten": "merges url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9286-9310"
+      "defined": "/GitHub.api.spell:9302-9326"
     },
     {
       "property": "archive_url",
       "asWritten": "archive url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9327-9352"
+      "defined": "/GitHub.api.spell:9343-9368"
     },
     {
       "property": "downloads_url",
       "asWritten": "downloads url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9369-9396"
+      "defined": "/GitHub.api.spell:9385-9412"
     },
     {
       "property": "issues_url",
       "asWritten": "issues url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9413-9437"
+      "defined": "/GitHub.api.spell:9429-9453"
     },
     {
       "property": "pulls_url",
       "asWritten": "pulls url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9454-9477"
+      "defined": "/GitHub.api.spell:9470-9493"
     },
     {
       "property": "milestones_url",
       "asWritten": "milestones url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9494-9522"
+      "defined": "/GitHub.api.spell:9510-9538"
     },
     {
       "property": "notifications_url",
       "asWritten": "notifications url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9539-9570"
+      "defined": "/GitHub.api.spell:9555-9586"
     },
     {
       "property": "labels_url",
       "asWritten": "labels url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9587-9611"
+      "defined": "/GitHub.api.spell:9603-9627"
     },
     {
       "property": "releases_url",
       "asWritten": "releases url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9628-9654"
+      "defined": "/GitHub.api.spell:9644-9670"
     },
     {
       "property": "deployments_url",
       "asWritten": "deployments url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9671-9700"
+      "defined": "/GitHub.api.spell:9687-9716"
     },
     {
       "property": "created_at",
       "asWritten": "created at",
       "of": "Repository",
       "datatype": "date",
-      "defined": "/GitHub.api.spell:9717-9743"
+      "defined": "/GitHub.api.spell:9733-9759"
     },
     {
       "property": "updated_at",
       "asWritten": "updated at",
       "of": "Repository",
       "datatype": "date",
-      "defined": "/GitHub.api.spell:9745-9771"
+      "defined": "/GitHub.api.spell:9761-9787"
     },
     {
       "property": "pushed_at",
       "asWritten": "pushed at",
       "of": "Repository",
       "datatype": "date",
-      "defined": "/GitHub.api.spell:9773-9798"
+      "defined": "/GitHub.api.spell:9789-9814"
     },
     {
       "property": "git_url",
       "asWritten": "git url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9800-9821"
+      "defined": "/GitHub.api.spell:9816-9837"
     },
     {
       "property": "ssh_url",
       "asWritten": "ssh url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9823-9844"
+      "defined": "/GitHub.api.spell:9839-9860"
     },
     {
       "property": "clone_url",
       "asWritten": "clone url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9846-9869"
+      "defined": "/GitHub.api.spell:9862-9885"
     },
     {
       "property": "svn_url",
       "asWritten": "svn url",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9886-9907"
+      "defined": "/GitHub.api.spell:9902-9923"
     },
     {
       "property": "homepage",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:9924-9946"
+      "defined": "/GitHub.api.spell:9940-9962"
     },
     {
       "property": "size",
       "of": "Repository",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:9948-9970"
+      "defined": "/GitHub.api.spell:9964-9986"
     },
     {
       "property": "stargazers_count",
       "asWritten": "stargazers count",
       "of": "Repository",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:9972-10006"
+      "defined": "/GitHub.api.spell:9988-10022"
     },
     {
       "property": "watchers_count",
       "asWritten": "watchers count",
       "of": "Repository",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:10008-10040"
+      "defined": "/GitHub.api.spell:10024-10056"
     },
     {
       "property": "language",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:10042-10064"
+      "defined": "/GitHub.api.spell:10058-10080"
     },
     {
       "property": "issues",
       "of": "Repository",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:10066-10115"
+      "defined": "/GitHub.api.spell:10082-10131"
     },
     {
       "property": "projects",
       "of": "Repository",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:10117-10170"
+      "defined": "/GitHub.api.spell:10133-10186"
     },
     {
       "property": "downloads",
       "of": "Repository",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:10172-10227"
+      "defined": "/GitHub.api.spell:10188-10243"
     },
     {
       "property": "wiki",
       "of": "Repository",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:10229-10274"
+      "defined": "/GitHub.api.spell:10245-10290"
     },
     {
       "property": "pages",
       "of": "Repository",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:10276-10323"
+      "defined": "/GitHub.api.spell:10292-10339"
     },
     {
       "property": "discussions",
       "of": "Repository",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:10325-10384"
+      "defined": "/GitHub.api.spell:10341-10400"
     },
     {
       "property": "forks_count",
       "asWritten": "forks count",
       "of": "Repository",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:10386-10415"
+      "defined": "/GitHub.api.spell:10402-10431"
     },
     {
       "property": "archived",
       "of": "Repository",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:10417-10444"
+      "defined": "/GitHub.api.spell:10433-10460"
     },
     {
       "property": "disabled",
       "of": "Repository",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:10446-10473"
+      "defined": "/GitHub.api.spell:10462-10489"
     },
     {
       "property": "open_issues_count",
       "asWritten": "open issues count",
       "of": "Repository",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:10475-10510"
+      "defined": "/GitHub.api.spell:10491-10526"
     },
     {
       "property": "license",
       "of": "Repository",
       "datatype": "License",
-      "defined": "/GitHub.api.spell:10512-10538"
+      "defined": "/GitHub.api.spell:10528-10554"
     },
     {
       "property": "allow_forking",
       "asWritten": "allow forking",
       "of": "Repository",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:10540-10572"
+      "defined": "/GitHub.api.spell:10556-10588"
     },
     {
       "property": "template",
       "of": "Repository",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:10574-10626"
+      "defined": "/GitHub.api.spell:10590-10642"
     },
     {
       "property": "web_commit_signoff_required",
       "asWritten": "web commit signoff required",
       "of": "Repository",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:10628-10674"
+      "defined": "/GitHub.api.spell:10644-10690"
     },
     {
       "property": "pull_requests",
       "asWritten": "pull requests",
       "of": "Repository",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:10676-10739"
+      "defined": "/GitHub.api.spell:10692-10755"
     },
     {
       "property": "pull_request_creation_policy",
       "asWritten": "pull request creation policy",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:10741-10783"
+      "defined": "/GitHub.api.spell:10757-10799"
     },
     {
       "property": "topics",
       "of": "Repository",
       "datatype": "list of users",
-      "defined": "/GitHub.api.spell:10785-10816"
+      "defined": "/GitHub.api.spell:10801-10832"
     },
     {
       "property": "visibility",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:10818-10842"
+      "defined": "/GitHub.api.spell:10834-10858"
     },
     {
       "property": "forks",
       "of": "Repository",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:10844-10867"
+      "defined": "/GitHub.api.spell:10860-10883"
     },
     {
       "property": "open_issues",
       "asWritten": "open issues",
       "of": "Repository",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:10869-10898"
+      "defined": "/GitHub.api.spell:10885-10914"
     },
     {
       "property": "watchers",
       "of": "Repository",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:10900-10926"
+      "defined": "/GitHub.api.spell:10916-10942"
     },
     {
       "property": "default_branch",
       "asWritten": "default branch",
       "of": "Repository",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:10928-10956"
+      "defined": "/GitHub.api.spell:10944-10972"
     },
     {
       "property": "permissions",
       "of": "Repository",
       "datatype": "Permission",
-      "defined": "/GitHub.api.spell:10958-10991"
+      "defined": "/GitHub.api.spell:10974-11007"
     },
     {
       "property": "score",
       "of": "Repository",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:10993-11016"
+      "defined": "/GitHub.api.spell:11009-11032"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -1892,173 +1892,173 @@
     {
       "type": "Assignee",
       "superType": "Thing",
-      "defined": "/GitHub.api.spell:11018-11765"
+      "defined": "/GitHub.api.spell:11034-11781"
     },
     {
       "property": "login",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11044-11063"
+      "defined": "/GitHub.api.spell:11060-11079"
     },
     {
       "property": "number",
       "of": "Assignee",
       "datatype": "number",
-      "defined": "/GitHub.api.spell:11065-11105"
+      "defined": "/GitHub.api.spell:11081-11121"
     },
     {
       "property": "node_id",
       "asWritten": "node id",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11107-11128"
+      "defined": "/GitHub.api.spell:11123-11144"
     },
     {
       "property": "avatar_url",
       "asWritten": "avatar url",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11130-11154"
+      "defined": "/GitHub.api.spell:11146-11170"
     },
     {
       "property": "gravatar_id",
       "asWritten": "gravatar id",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11171-11196"
+      "defined": "/GitHub.api.spell:11187-11212"
     },
     {
       "property": "url",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11198-11215"
+      "defined": "/GitHub.api.spell:11214-11231"
     },
     {
       "property": "html_url",
       "asWritten": "html url",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11232-11254"
+      "defined": "/GitHub.api.spell:11248-11270"
     },
     {
       "property": "followers_url",
       "asWritten": "followers url",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11271-11298"
+      "defined": "/GitHub.api.spell:11287-11314"
     },
     {
       "property": "following_url",
       "asWritten": "following url",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11315-11342"
+      "defined": "/GitHub.api.spell:11331-11358"
     },
     {
       "property": "gists_url",
       "asWritten": "gists url",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11359-11382"
+      "defined": "/GitHub.api.spell:11375-11398"
     },
     {
       "property": "starred_url",
       "asWritten": "starred url",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11399-11424"
+      "defined": "/GitHub.api.spell:11415-11440"
     },
     {
       "property": "subscriptions_url",
       "asWritten": "subscriptions url",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11441-11472"
+      "defined": "/GitHub.api.spell:11457-11488"
     },
     {
       "property": "organizations_url",
       "asWritten": "organizations url",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11489-11520"
+      "defined": "/GitHub.api.spell:11505-11536"
     },
     {
       "property": "repos_url",
       "asWritten": "repos url",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11537-11560"
+      "defined": "/GitHub.api.spell:11553-11576"
     },
     {
       "property": "events_url",
       "asWritten": "events url",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11577-11601"
+      "defined": "/GitHub.api.spell:11593-11617"
     },
     {
       "property": "received_events_url",
       "asWritten": "received events url",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11618-11651"
+      "defined": "/GitHub.api.spell:11634-11667"
     },
     {
       "property": "kind",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11668-11704"
+      "defined": "/GitHub.api.spell:11684-11720"
     },
     {
       "property": "user_view_type",
       "asWritten": "user view type",
       "of": "Assignee",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11706-11734"
+      "defined": "/GitHub.api.spell:11722-11750"
     },
     {
       "property": "site_admin",
       "asWritten": "site admin",
       "of": "Assignee",
       "datatype": "choice",
-      "defined": "/GitHub.api.spell:11736-11765"
+      "defined": "/GitHub.api.spell:11752-11781"
     },
     {
       "type": "License",
       "superType": "Thing",
-      "defined": "/GitHub.api.spell:11767-11908"
+      "defined": "/GitHub.api.spell:11783-11924"
     },
     {
       "property": "key",
       "of": "License",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11791-11808"
+      "defined": "/GitHub.api.spell:11807-11824"
     },
     {
       "property": "name",
       "of": "License",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11810-11828"
+      "defined": "/GitHub.api.spell:11826-11844"
     },
     {
       "property": "spdx_id",
       "asWritten": "spdx id",
       "of": "License",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11830-11851"
+      "defined": "/GitHub.api.spell:11846-11867"
     },
     {
       "property": "url",
       "of": "License",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11853-11870"
+      "defined": "/GitHub.api.spell:11869-11886"
     },
     {
       "property": "node_id",
       "asWritten": "node id",
       "of": "License",
       "datatype": "text",
-      "defined": "/GitHub.api.spell:11887-11908"
+      "defined": "/GitHub.api.spell:11903-11924"
     },
     {
       "type": "Github",
@@ -2095,7 +2095,7 @@
           }
         }
       },
-      "defined": "/GitHub.api.spell:1139-1676"
+      "defined": "/GitHub.api.spell:1139-1692"
     },
     {
       "type": "GithubPage",

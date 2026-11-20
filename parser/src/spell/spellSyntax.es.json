@@ -8570,7 +8570,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 121,
+          "line": 123,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -8900,7 +8900,7 @@
           "ruleNames": ["create_place"],
           "internal": false,
           "file": "src/spell/rules/places/CreatePlace.ts",
-          "line": 91,
+          "line": 95,
           "purpose": "A program's data lives here (epic `data` P11, Q2).",
           "syntaxes": [
             {
@@ -9094,12 +9094,12 @@
           "ruleNames": ["token_from"],
           "internal": false,
           "file": "src/spell/rules/places/TokenFrom.ts",
-          "line": 15,
+          "line": 16,
           "purpose": "A place's key is a short-lived token, made from a secret at a token service (epic `data` P49, Q50 A).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_its} token viene de {address:text} ,? hecho con el secreto {name:text}",
-              "example": "acme es un servidor web en \"https://acme.test\"\n\tsu token viene de \"https://auth.acme.test/api-keys/{key id}/token\", hecho con el secreto \"ACME_API_KEY\"",
+              "syntax": "{type:subject_implied} se autentica con un token de {address:text} ,? hecho con el secreto {name:text}",
+              "example": "acme es un servidor web en \"https://acme.test\"\n\tse autentica con un token de \"https://auth.acme.test/api-keys/{key id}/token\", hecho con el secreto \"ACME_API_KEY\"",
               "outputs": {
                 "js": {
                   "code": "export class Acme extends Place {}\nexport const acme = core.place(new Acme(), {\n  name: \"acme\",\n  kind: \"web server\",\n  at: \"https://acme.test\",\n  keyNamed: \"ACME_API_KEY\",\n  tokenFrom: \"https://auth.acme.test/api-keys/{key id}/token\",\n  unclearNumbers: \",\"\n})"
@@ -9111,6 +9111,9 @@
                   "code": "class Acme(Place):\n    pass\n\nacme = core.place(\n    Acme(),\n    {\n        \"name\": \"acme\",\n        \"kind\": \"web server\",\n        \"at\": \"https://acme.test\",\n        \"key_named\": \"ACME_API_KEY\",\n        \"token_from\": \"https://auth.acme.test/api-keys/{key id}/token\",\n        \"unclear_numbers\": \",\",\n    },\n)"
                 }
               }
+            },
+            {
+              "syntax": "{type:subject_its} token viene de {address:text} ,? hecho con el secreto {name:text}"
             }
           ],
           "aliases": ["statement"]
@@ -9146,12 +9149,12 @@
           "ruleNames": ["key_goes_in_header"],
           "internal": false,
           "file": "src/spell/rules/places/KeyGoesInHeader.ts",
-          "line": 16,
-          "purpose": "The header a server wants its key in, as it is (epic `data` T73).",
+          "line": 17,
+          "purpose": "The header a server wants its secret in, as it is (epic `data` T73).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_its} clave va en su cabecera {name:text}",
-              "example": "recetario es un servidor web en \"https://example.com\"\n\t- su clave va en su cabecera \"X-Api-Key\"",
+              "syntax": "{type:subject_its} secreto va en su cabecera {name:text}",
+              "example": "recetario es un servidor web en \"https://example.com\"\n\t- su secreto va en su cabecera \"X-Api-Key\"",
               "outputs": {
                 "js": {
                   "code": "export class Recetario extends Place {}\nexport const recetario = core.place(new Recetario(), {\n  name: \"recetario\",\n  kind: \"web server\",\n  at: \"https://example.com\",\n  keyGoes: { header: \"X-Api-Key\" },\n  unclearNumbers: \",\"\n})"
@@ -9163,6 +9166,9 @@
                   "code": "class Recetario(Place):\n    pass\n\nrecetario = core.place(\n    Recetario(),\n    {\n        \"name\": \"recetario\",\n        \"kind\": \"web server\",\n        \"at\": \"https://example.com\",\n        \"key_goes\": {\"header\": \"X-Api-Key\"},\n        \"unclear_numbers\": \",\",\n    },\n)"
                 }
               }
+            },
+            {
+              "syntax": "{type:subject_its} clave va en su cabecera {name:text}"
             }
           ],
           "aliases": ["statement"]
@@ -9172,12 +9178,12 @@
           "ruleNames": ["key_goes_in_address"],
           "internal": false,
           "file": "src/spell/rules/places/KeyGoesInAddress.ts",
-          "line": 16,
-          "purpose": "The question a server wants its key asked as, in the address (epic `data` T73).",
+          "line": 17,
+          "purpose": "The question a server wants its secret asked as, in the address (epic `data` T73).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_its} clave va en la dirección como {name:text}",
-              "example": "recetario es un servidor web en \"https://example.com\"\n\t- su clave va en la dirección como \"api_key\"",
+              "syntax": "{type:subject_its} secreto va en la dirección como {name:text}",
+              "example": "recetario es un servidor web en \"https://example.com\"\n\t- su secreto va en la dirección como \"api_key\"",
               "outputs": {
                 "js": {
                   "code": "export class Recetario extends Place {}\nexport const recetario = core.place(new Recetario(), {\n  name: \"recetario\",\n  kind: \"web server\",\n  at: \"https://example.com\",\n  keyGoes: { inAddress: \"api_key\" },\n  unclearNumbers: \",\"\n})"
@@ -9189,6 +9195,9 @@
                   "code": "class Recetario(Place):\n    pass\n\nrecetario = core.place(\n    Recetario(),\n    {\n        \"name\": \"recetario\",\n        \"kind\": \"web server\",\n        \"at\": \"https://example.com\",\n        \"key_goes\": {\"in_address\": \"api_key\"},\n        \"unclear_numbers\": \",\",\n    },\n)"
                 }
               }
+            },
+            {
+              "syntax": "{type:subject_its} clave va en la dirección como {name:text}"
             }
           ],
           "aliases": ["statement"]
@@ -9916,9 +9925,12 @@
           "ruleNames": ["key_if_set"],
           "internal": false,
           "file": "src/spell/rules/places/KeyIfSet.ts",
-          "line": 13,
+          "line": 14,
           "purpose": "The NAME of a key a place takes when it's set, and goes without when it isn't (epic `data` P28, Q26).",
           "syntaxes": [
+            {
+              "syntax": "{type:subject_implied} se autentica opcionalmente con el secreto {name:text}"
+            },
             {
               "syntax": "{type:subject_its} clave opcional es el secreto {name:text}"
             }
@@ -9930,9 +9942,12 @@
           "ruleNames": ["key_is_secret"],
           "internal": false,
           "file": "src/spell/rules/places/KeyIsSecret.ts",
-          "line": 18,
-          "purpose": "The NAME of the key a place needs, never the key (epic `data` Q11).",
+          "line": 21,
+          "purpose": "The NAME of the secret an authenticated place needs, never the secret (epic `data` Q11).",
           "syntaxes": [
+            {
+              "syntax": "{type:subject_implied} se autentica con el secreto {name:text}"
+            },
             {
               "syntax": "{type:subject_its} clave es el secreto {name:text}"
             }
@@ -9947,6 +9962,9 @@
           "line": 12,
           "purpose": "A key written into a program, which won't compile (epic `data` Q11).",
           "syntaxes": [
+            {
+              "syntax": "{type:subject_implied} se autentica con {key:text}"
+            },
             {
               "syntax": "{type:subject_its} clave es {key:text}"
             }

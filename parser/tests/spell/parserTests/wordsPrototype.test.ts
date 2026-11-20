@@ -219,12 +219,12 @@ const LINES: Line[] = [
     en: `family cookbook is a web server at "https://api.example.com/v1":
 	- recipes live at "/dishes"
 	- a recipe's title is its "dish_name"
-	- its key is the secret "COOKBOOK_KEY"
+	- it is authenticated with the secret "COOKBOOK_KEY"
 	- check it every 30 seconds`,
     es: `recetario familiar es un servidor web en "https://api.example.com/v1":
 	- las recetas están en "/platos"
 	- el título de una receta se llama "nombre_plato"
-	- su clave es el secreto "CLAVE_RECETARIO"
+	- se autentica con el secreto "CLAVE_RECETARIO"
 	- se revisa cada 30 segundos`,
     at: "top",
     today: "compiles",
