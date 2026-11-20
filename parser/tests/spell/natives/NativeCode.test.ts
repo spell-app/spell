@@ -8,7 +8,12 @@ import { core } from "spell/parser/core"
 import { P } from "spell/parser/parser"
 import { PY } from "spell/parser/py"
 import { SP } from "spell/parser/spell"
-import { compiledSpellProject, parseSpellProject, type SpellSourceFile } from "spell/parser/spell/test"
+import {
+  compiledSpellProject,
+  incrementalSpellProject,
+  parseSpellProject,
+  type SpellSourceFile
+} from "spell/parser/spell/test"
 import { copied, copyText, shout } from "./clipboard/clipboard"
 
 /**
@@ -194,6 +199,25 @@ describe("use", () => {
       { natives }
     ).code
     expect(used).toContain('import { shout } from "@spell/native/test-project/loud.ts"')
+  })
+
+  test("deleting a use line takes it away at once:  the call reads every code file again (from-console I23)", () => {
+    const natives = [
+      ...NATIVES,
+      { path: "/loud.ts", contents: "export function shout(text: string): string { return text }\n" }
+    ]
+    const steps = "to yell (a as text)\n\tcall native shout with a\n"
+    // listed before the file parses:  it starts empty
+    const project = incrementalSpellProject([{ path: "/Test.spell", contents: "" }])
+    SP.NativeCode.listIn(project.scope, SP.NativeCode.of(natives, "test-project"))
+    project.update("/Test.spell", `use shout from loud.ts\n\n${steps}`)
+    /** The code file the file's `call native shout` calls, as it's parsed now. */
+    const calledFile = () => SP.NativeCode.importsIn(project.files[0]!.parse!.match.AST, "js")[0]?.module
+    expect(calledFile()).toBe("@spell/native/test-project/loud.ts")
+    project.update("/Test.spell", steps)
+    expect(calledFile()).toBe("@spell/native/test-project/clipboard.ts")
+    project.update("/Test.spell", `use shout from loud.ts\n\n${steps}`)
+    expect(calledFile()).toBe("@spell/native/test-project/loud.ts")
   })
 
   test("a file the project file doesn't list is refused", () => {

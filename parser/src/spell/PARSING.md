@@ -2717,7 +2717,8 @@ sidebars any of them opens.
     - `ScopeList.add()` / `.replace()`, which swap in a NEW items array
     - `Parser.addRule()`, for `#ownRules`
     - `P.ParseJournal.assign()`, for fields set on a record that's there already (a type's `claim()`, a method's `returns`)
-    - a few of their own:  a type's names ahead (`declarePropertyAhead()`), the names its things are given
+    - a few of their own:  a type's names ahead (`declarePropertyAhead()`), the names its things are given,
+      a file's `use` lines (`SP.NativeCode.useIn()`)
   - `mark()` a point
   - `rewindTo(mark)` undoes everything after it
   - `replay()` puts it back, marks included

@@ -185,15 +185,27 @@ export class NativeCode {
   /**
    * SIDE EFFECT:  the Spell file `scope` is in takes `names` from `code`, as its `use` line says --
    * `all` for every name `code` exports.
-   * - NOTE:  kept until the file is parsed again from scratch;  an edit dropping the line keeps it until then.
+   * - Journaled (`P.ParseJournal`), as every change a line makes to what later lines see:
+   *   an edit that takes the line out takes this away too, and the lines after it look their names up again.
+   * - Each change makes a new record, never changing the one there:  undone, the old one's back as it was.
    */
   static useIn(scope: P.Scope, names: string[] | "all", code: NativeCode): void {
     const fileScope = NativeCode.fileScopeOf(scope)
     if (!fileScope) return
-    let uses = USES.get(fileScope)
-    if (!uses) USES.set(fileScope, (uses = { named: new Map(), all: [] }))
-    if (names === "all") uses.all.push(code)
-    else for (const name of names) uses.named.set(name, code)
+    let previous = USES.get(fileScope)
+    // redone, onto the file's uses as they are then (epic `language` P59):  see `P.JournalChange.redo`
+    const redo = () => {
+      previous = USES.get(fileScope)
+      const named = new Map(previous?.named)
+      if (names !== "all") for (const name of names) named.set(name, code)
+      USES.set(fileScope, { named, all: names === "all" ? [...(previous?.all ?? []), code] : (previous?.all ?? []) })
+    }
+    redo()
+    scope.parser?.journal?.record({
+      undo: () => (previous ? USES.set(fileScope, previous) : USES.delete(fileScope)),
+      redo,
+      change: { kind: "note", target: fileScope, value: `use ${names === "all" ? "all" : names.join(", ")}` }
+    })
   }
 
   /**
