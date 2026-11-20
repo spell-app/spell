@@ -1933,8 +1933,11 @@ A NEW session takes this session's epic on, in this window, from its page;  this
 (epic `epic-engine` T110;  Owen, 2026-11-19:  "can you do this automatically?  Can we make a command for it?").
 - Why:  every turn re-reads the session's whole conversation, so a long-running epic's session pays for it again and
   again.  The new one starts from the epic page, "8. Resume".
-- The prompt hook suggests it ONCE, in one line, when the session's conversation passes `freshHintMB` (8 MB;  the
-  repo's `.epic/config.json5`):  a hint, never a move (`FreshHint`).  Say the line to the person;  don't move.
+- A hint suggests it, in one line, once the session's conversation passes `freshHintMB` (8 MB;  the repo's
+  `.epic/config.json5`):  a hint, never a move (`FreshHint`).  Say the line to the person;  don't move.
+  - first from the prompt hook;  then again at a break point (Owen, 2026-11-19:  "ok to show it again at the end of a
+    phase, significant chunk of work, after a merge"):  `epic phase ... done`, `epic merge` and `epic agents done`
+    print it last, at most once every 30 minutes;  an agent that sees it passes it on in its report
 - In Codex:  nothing to hand off:  start a new Codex session in the epic's worktree, run `epic guide`, then
   `$epic resume <name>`.
 

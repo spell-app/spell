@@ -11,6 +11,7 @@ import { EpicCheckout } from "spell/epic/command/EpicCheckout"
 import { EpicGuide } from "spell/epic/command/EpicGuide"
 import { EXIT, EpicCommandError, flagName } from "spell/epic/command/command.types"
 import { EpicTools, type EpicToolName } from "spell/epic/command/EpicTools"
+import { FreshHint } from "spell/epic/command/FreshHint"
 import { Hub } from "spell/epic/command/Hub"
 import { LinesOfCode } from "spell/epic/command/LinesOfCode"
 import { Parking } from "spell/epic/command/Parking"
@@ -1093,6 +1094,8 @@ export class EpicProgram {
  * Run verb `typed` (`epic ask create`):  its `args` checked against its flags (`EpicProgram.checkFlags()`), then
  * handed to `run`;  the process exits with what it resolves to, once its output is out (`CLI.runCommand()`).
  * - an `EpicCommandError` prints just its message, in red;  anything else is a crash, and prints its stack
+ * - a verb that ends a piece of work (a phase done, a merge, an agent back) prints the `/epic fresh` hint last, when
+ *   the session's conversation has grown big (`FreshHint.atBreak()`, epic `epic-engine` T110)
  */
 function runVerb(
   typed: string,
@@ -1101,7 +1104,12 @@ function runVerb(
   run: (args: string[]) => Promise<number>,
   accepted: readonly string[] = []
 ): Promise<never> {
-  return CLI.runCommand(async () => run([...EpicProgram.checkFlags(typed, flags, args, accepted)]))
+  return CLI.runCommand(async () => {
+    const code = await run([...EpicProgram.checkFlags(typed, flags, args, accepted)])
+    const hint = code === EXIT.OK ? new FreshHint().atBreak(typed, args) : null
+    if (hint) process.stdout.write(`${hint}\n`)
+    return code
+  })
 }
 
 /**
