@@ -427,8 +427,9 @@ Name it as you'd name one of Spell UI's:
 galaxy guide is a site with theme "harbor"
 ```
 
-- Spell UI's themes come first.
-  A name Spell UI hasn't got is looked for beside the site's Spell, as `harbor.theme.json5`.
+- The project's own come first:  the name is looked for beside the site's Spell, as `harbor.theme.json5`;
+  none there, it's one of Spell UI's.
+  So a project's own `matrix.theme.json5` wins over Spell UI's Matrix, for its site:  the editor keeps Spell UI's.
 - It's a theme file like Spell UI's own, with the same names, checked the same way:
   a name the theme tree hasn't got is an error naming the file.
 - Start it from one of Spell UI's themes, and set only what differs:
@@ -441,7 +442,8 @@ galaxy guide is a site with theme "harbor"
   }
   ```
 
-  - It can extend another of the project's themes too.
+  - It can extend another of the project's themes too:  the project's first, as for the site's theme.
+    A theme extending its own name, `matrix` extending `"matrix"`, builds on Spell UI's.
   - No `palette` and no `rules`:  those are files in Spell UI's themes folder.
     What a value can't say stays the base theme's.
 - The site wears it, and the page around the site keeps its own theme.

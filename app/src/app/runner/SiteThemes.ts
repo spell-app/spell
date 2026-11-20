@@ -7,13 +7,16 @@ import { fetchText } from "./fetchFresh"
  * ### `SiteThemes`
  * The theme a running site wears, `galaxy guide is a site with theme "mockup"`, as its host gives it
  * (`SiteHost.themeTokens()`):  the editor's Run (`RunSite`) and a page's `<spell-viewer>` (`SpellAppRunner`).
- * - One of Spell UI's own (`UI.themes`), else the PROJECT's own:
- *   `<name>.theme.json5` in the running program's folder, beside its Spell.
- *   - Spell UI's first:  a project's theme is defined into the page's one registry, and can't replace one of
- *     Spell UI's (`UI.themes.define()`);  the editor around the site wears those too.
+ * - The PROJECT's own first, `<name>.theme.json5` in the running program's folder, beside its Spell;
+ *   else one of Spell UI's own (`UI.themes`).
+ *   - So a project's `matrix.theme.json5` wins over Spell UI's Matrix, for its site.
+ *   - A project's theme is defined into the page's ONE registry, which the editor around the site wears too:
+ *     one named like Spell UI's is defined under a name of its own (`matrix@project`, `sheetName()`), as
+ *     `UI.themes.define()` refuses Spell UI's names;  so the editor keeps Spell UI's.
  * - A project's theme file is a theme file as Spell UI's are (`ThemeFile`, `theme.schema.json`):  its names checked
  *   against the theme tree, a mistake thrown naming the file.
- *   - `extends`:  one of Spell UI's themes, or another of the project's;  its sheet goes first, its own values after.
+ *   - `extends`:  another of the project's themes, else one of Spell UI's, as a site's theme is looked for;
+ *     its own name (`matrix` extending `"matrix"`) is Spell UI's.  Its sheet goes first, its own values after.
  *   - No `palette` or `rules`:  those are files of Spell UI's themes folder (`ThemeFile.standaloneCss()`).
  * - Read afresh each time a site starts, so an edit to the file shows on the next run.
  * - No Solid, no editor:  both hosts use it.
@@ -34,9 +37,12 @@ export class SiteThemes {
   static async tokens(name: string, projectFolder: string | undefined): Promise<string> {
     const { UI } = await import("spell/ui")
     await UI.load()
-    if (!UI.themes.isBuiltIn(name)) await SiteThemes.defineFromProject(name, projectFolder)
-    const [scoped, sheet] = await Promise.all([UI.themes.scopedTokens(name, SITE_SCOPE), UI.themes.load(name)])
-    SiteThemes.addFontsOf(name, sheet)
+    const sheetName = await SiteThemes.sheetFor(name, projectFolder)
+    const [scoped, sheet] = await Promise.all([
+      UI.themes.scopedTokens(sheetName, SITE_SCOPE),
+      UI.themes.load(sheetName)
+    ])
+    SiteThemes.addFontsOf(sheetName, sheet)
     const rules = new CSSStyleSheet()
     rules.replaceSync(scoped)
     return [...rules.cssRules]
@@ -51,12 +57,25 @@ export class SiteThemes {
    * The project themes read from folder `projectFolder` so far (`tokens()`), each with the theme of Spell UI's it
    * builds on, through any of the project's it extends:  what the editor's theme menu offers
    * (`EditorTheme.offerProjectThemes()`).
+   * - `name`:  its name in `UI.themes`;  `file`, its file's name, only when that differs (`matrix@project`, `matrix`).
    * - `base`:  `undefined` for one that extends nothing.
    */
-  static readIn(projectFolder: string): { name: string; title?: string; base?: string }[] {
+  static readIn(projectFolder: string): { name: string; file?: string; title?: string; base?: string }[] {
     return Object.entries(PROJECT_THEMES)
       .filter(([name]) => PROJECT_FOLDERS[name] === projectFolder)
-      .map(([name, data]) => ({ name, ...(data.title && { title: data.title }), ...SiteThemes.baseOf(name) }))
+      .map(([name, data]) => ({
+        name,
+        ...(FILE_NAMES[name] !== name && { file: FILE_NAMES[name] }),
+        ...(data.title && { title: data.title }),
+        ...SiteThemes.baseOf(name)
+      }))
+  }
+
+  /**
+   * The name in `UI.themes` of project theme `name`:  itself, or, named like one of Spell UI's, `<name>@project`.
+   */
+  private static sheetName(name: string, isBuiltIn: boolean): string {
+    return isBuiltIn ? `${name}${PROJECT_SUFFIX}` : name
   }
 
   /** The theme of Spell UI's project theme `name` builds on, through the project's it extends:  `{ base }`, or `{}`. */
@@ -71,45 +90,70 @@ export class SiteThemes {
   }
 
   /**
-   * Read theme `name` from the project's folder, and define it in `UI.themes`:  what it extends first, when that's
-   * the project's too.
+   * The name in `UI.themes` of theme `name` for a site in `projectFolder`:  the project's own first, read from its
+   * folder and defined (`sheetName()`), what it extends before it;  else Spell UI's.
    * - `seen`:  the themes on the way here, so one extending itself is said, not followed forever.
    * - Rejects as `tokens()` does.
    */
-  private static async defineFromProject(
+  private static async sheetFor(
     name: string,
     projectFolder: string | undefined,
     seen: readonly string[] = []
-  ): Promise<void> {
+  ): Promise<string> {
     const { UI } = await import("spell/ui")
     if (seen.includes(name)) {
       throw new TypeError(`SiteThemes:  theme \`${name}\` extends itself, through ${[...seen, name].join(" > ")}`)
     }
     const fileName = `${name}.theme.json5`
-    const url = projectFolder && `${projectFolder}/${fileName}`
+    const url = projectFolder ? `${projectFolder}/${fileName}` : undefined
     const text = url ? await SiteThemes.fileText(url) : undefined
-    if (text === undefined) {
-      const inProject = url ? `no \`${url}\`` : "no project folder to look in"
-      throw new TypeError(
-        `SiteThemes:  no theme \`${name}\`:  Spell UI has none of that name (${UI.themes.own.join(", ")}), ` +
-          `and the project has ${inProject};  make \`${fileName}\` beside the site's Spell, or name one of Spell UI's`
-      )
+    if (projectFolder && text !== undefined) {
+      const data = parseJSON5(text, fileName) as ThemeData
+      return SiteThemes.defineFromProject(name, data, projectFolder, seen)
     }
-    const data = parseJSON5(text, fileName) as ThemeData
-    const base = data.extends
-    if (base && !UI.themes.isBuiltIn(base)) await SiteThemes.defineFromProject(base, projectFolder, [...seen, name])
-    // what it extends, for `ThemeFile`'s checks:  Spell UI's files, and the project's read so far
+    if (UI.themes.isBuiltIn(name)) return name
+    const inProject = url ? `no \`${url}\`` : "no project folder to look in"
+    throw new TypeError(
+      `SiteThemes:  no theme \`${name}\`:  the project has ${inProject}, ` +
+        `and Spell UI has none of that name (${UI.themes.own.join(", ")});  ` +
+        `make \`${fileName}\` beside the site's Spell, or name one of Spell UI's`
+    )
+  }
+
+  /**
+   * Define project theme `name`, its file's `data`, in `UI.themes`:  what it extends first (`sheetFor()`);
+   * its name there back.
+   * - Extending its own name:  Spell UI's theme of that name (a project's `matrix` built on Spell UI's).
+   */
+  private static async defineFromProject(
+    name: string,
+    data: ThemeData,
+    projectFolder: string,
+    seen: readonly string[]
+  ): Promise<string> {
+    const { UI } = await import("spell/ui")
+    const extended = data.extends
+    const base =
+      extended === name && UI.themes.isBuiltIn(name)
+        ? name
+        : extended && (await SiteThemes.sheetFor(extended, projectFolder, [...seen, name]))
+    // what it extends, for `ThemeFile`'s checks:  Spell UI's files, and the project's read so far, by their names in
+    // `UI.themes`, so a project's `matrix` never hides Spell UI's
     // - imported as it's needed, not with the host:  only a project's theme needs the theme tree
     // - directly:  the `spell/ui/styles` barrel carries every foundation sheet as text, which a host never needs
     const [{ ThemeFile }, { ThemeTokens }] = await Promise.all([
       import("spell/ui/styles/ThemeFile"),
       import("spell/ui/components/ui-theme-editor/ThemeTokens")
     ])
+    const sheetData: ThemeData = base ? { ...data, extends: base } : data
     const themes = { ...(await ThemeTokens.load()).themes, ...PROJECT_THEMES }
-    const file = new ThemeFile({ name, data, themes })
-    UI.themes.define(name, file.standaloneCss(base ? await UI.themes.load(base) : ""))
-    PROJECT_THEMES[name] = data
-    PROJECT_FOLDERS[name] = projectFolder!
+    const file = new ThemeFile({ name, data: sheetData, themes })
+    const sheetName = SiteThemes.sheetName(name, UI.themes.isBuiltIn(name))
+    UI.themes.define(sheetName, file.standaloneCss(base ? await UI.themes.load(base) : ""))
+    PROJECT_THEMES[sheetName] = sheetData
+    PROJECT_FOLDERS[sheetName] = projectFolder
+    FILE_NAMES[sheetName] = name
+    return sheetName
   }
 
   /** The text at `url`;  `undefined` when nothing's there.  Any other failure rejects. */
@@ -143,8 +187,17 @@ const FONT_FACE = /@font-face\s*\{[^}]*\}/g
 /** The themes whose fonts the page has. */
 const FONTS_ADDED = new Set<string>()
 
-/** The project themes read so far, by name:  what a later one may extend, for `ThemeFile`'s checks. */
+/**
+ * The project themes read so far, by their names in `UI.themes`:  what a later one may extend, for `ThemeFile`'s
+ * checks;  each `extends` that name too.
+ */
 const PROJECT_THEMES: Record<string, ThemeData> = {}
 
-/** The folder each project theme was read from, by name (`readIn()`). */
+/** The folder each project theme was read from, by its name in `UI.themes` (`readIn()`). */
 const PROJECT_FOLDERS: Record<string, string> = {}
+
+/** Each project theme's file name, `matrix`, by its name in `UI.themes`, `matrix@project` (`readIn()`). */
+const FILE_NAMES: Record<string, string> = {}
+
+/** What a project theme named like one of Spell UI's is called in `UI.themes`, after its name (`sheetName()`). */
+const PROJECT_SUFFIX = "@project"

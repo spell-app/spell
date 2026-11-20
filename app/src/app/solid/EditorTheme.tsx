@@ -131,9 +131,9 @@ export class EditorTheme {
         import("spell/app/app/runner/SiteThemes"),
         import("spell/ui/components/components.types")
       ])
-      const themes = SiteThemes.readIn(projectFolder).map(({ name, title, base }) => ({
+      const themes = SiteThemes.readIn(projectFolder).map(({ name, file, title, base }) => ({
         name,
-        title: title ?? ThemeNames.titleOf(name),
+        title: title ?? ThemeNames.titleOf(file ?? name),
         ...(base && { base })
       }))
       offeredFor = project.path
