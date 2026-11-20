@@ -150,7 +150,20 @@ describe("<ui-table> classes, mirrored onto the table", () => {
 
   it("registers UITable.css as a page sheet", async () => {
     await table()
-    expect(document.adoptedStyleSheets).toContain(UI.styles.sheet("table"))
+    expect(document.adoptedStyleSheets).toContain(UI.styles.sheet("table:page"))
+  })
+
+  it("leaves the :host rules out of the page sheet, so a view that adopts it keeps its own box", async () => {
+    await table()
+    const texts = (rules: CSSRuleList): string[] =>
+      Array.from(rules).flatMap((rule) => [
+        rule instanceof CSSStyleRule ? rule.selectorText : "",
+        ..."cssRules" in rule ? texts((rule as CSSGroupingRule).cssRules) : []
+      ])
+    const page = texts(UI.styles.sheet("table:page")!.cssRules)
+    expect(page.some((selector) => selector.includes(".ui.table"))).toBe(true)
+    expect(page.filter((selector) => selector.includes(":host"))).toEqual([])
+    expect(texts(UI.styles.sheet("table")!.cssRules).some((selector) => selector.includes(":host"))).toBe(true)
   })
 
   it("styles the light-DOM table from the page sheet", async () => {

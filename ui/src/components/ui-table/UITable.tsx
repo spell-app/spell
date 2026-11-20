@@ -162,12 +162,16 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
 
   /**
    * Register the family's sheets as PAGE sheets too:  their class-grammar rules style the light-DOM table.
+   * - A copy of each, without its `:host` rules (`lightRulesOf()`), as `<name>:page`:  a page sheet is adopted into
+   *   the shadow root of every Spell view that draws `ui-*` elements (`UI.styles.adoptPageSheetsInto()`), where
+   *   `:host` is that VIEW, which took the table's own box:  a size container, so a view in a row shrank to nothing
+   *   (epic `old-console-redo` P4).
    * - Idempotent (`UI.styles.register`);  re-registering new text (hot reload) updates them in place.
    */
   private registerPageSheets() {
     if (isServer) return
     for (const [name, css] of Object.entries(this.elementSetup.styleSheets))
-      UI.styles.register(name, css, { page: true })
+      UI.styles.register(`${name}${PAGE_COPY}`, lightRulesOf(css), { page: true })
   }
 
   /**
@@ -1274,3 +1278,36 @@ const TICK = "cell-tick"
 
 /** A row's delete button's class. */
 const DELETE_ROW = "delete-row"
+
+/** What a table sheet's page copy is registered as, after its own name:  `table` => `table:page`. */
+export const PAGE_COPY = ":page"
+
+/** `lightRulesOf()`'s answers, by the text it was given. */
+const lightRules = new Map<string, string>()
+
+/**
+ * `css` without its `:host` rules, at any depth (in `@layer`, `@media`, a nested rule):  what styles the light DOM.
+ * - For the page copy of a table sheet (`registerPageSheets()`):  `:host` there would match whatever shadow root
+ *   adopts it, a Spell view's.
+ * - Each text worked out once.
+ * - Where there's no `CSSStyleSheet` to read it with, `css` as it is.
+ */
+export function lightRulesOf(css: string): string {
+  const known = lightRules.get(css)
+  if (known !== undefined) return known
+  if (typeof CSSStyleSheet === "undefined") return css
+  const sheet = new CSSStyleSheet()
+  sheet.replaceSync(css)
+  const prune = (owner: CSSStyleSheet | CSSGroupingRule | CSSStyleRule) => {
+    const rules = owner.cssRules
+    for (let at = rules.length - 1; at >= 0; at--) {
+      const rule = rules[at]!
+      if (rule instanceof CSSStyleRule && rule.selectorText.includes(":host")) owner.deleteRule(at)
+      else if (rule instanceof CSSGroupingRule || rule instanceof CSSStyleRule) prune(rule)
+    }
+  }
+  prune(sheet)
+  const light = Array.from(sheet.cssRules, (rule) => rule.cssText).join("\n")
+  lightRules.set(css, light)
+  return light
+}

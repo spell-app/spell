@@ -42,6 +42,13 @@
       ui-table.ui.table {
         color: inherit;
       }
+      /* ... and paints it white, with a black border, on itself:  a table built of rows (`<for ... as="table">`,
+         a `rows` table) has no inner `<table>` for the rule below, so it stayed white on a dark page (epic
+         `old-console-redo` P4).  Spell UI's own background and border, which follow the theme. */
+      ui-table.ui.table {
+        background: revert-layer;
+        border: revert-layer;
+      }
       /* ... and its table and cells too:  `semantic.min.css` paints them white (`#fff`, its header cells `#f9fafb`)
          with black text and borders, unlayered, so it beat Spell UI's table look and every table stayed white on a
          dark page (epic `data` J282).  Each falls back to Spell UI's own, which follows the theme. */
