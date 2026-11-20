@@ -62,7 +62,8 @@ Notes on reading them:
   - Look for:  text cut with an ellipsis (a title, a file name, a table cell).
   - Fix:  the whole text in a tooltip or an expanded view;  a hover shot should show it.
     The skill adds:  a hover-only `title` doesn't reach keyboard or touch people;  an expand control or detail view does.
-    (House rule:  tooltips are `title`.  So a truncated value people NEED also gets another way to it.)
+    (House rule:  tooltips are Spell UI's, `data-tooltip`, which keyboard focus shows too;  touch still doesn't.
+    So a truncated value people NEED also gets another way to it.)
   - Source:  [CS] https://interfaces.dev/cheat-sheet ("Typography");  [layout] G/better-layout/spacing-and-adaptivity.md
 - **C7  An empty view says what belongs there**
   - Look for:  a blank list, table or panel with nothing in it, or only "No items".

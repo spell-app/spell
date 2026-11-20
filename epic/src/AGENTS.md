@@ -1776,12 +1776,15 @@ In `tools/`:
       page or in a control the runtime or a tool draws (see "Layout" › `spell-doc-runtime.js`).
       - Its icon centred by the component:  no CSS of ours sizing or moving the icon.
       - A block's own controls share its one actions row, the bullhorn first (`addBlockAction()`).
-  - TOOLTIPS are the browser's own:  a `title` attribute.
-    - Never a `<ui-tooltip>`, nor a `<ui-popup>` used as one.
-    - The person's standing rule, 2026-10-10:  a styled one only when they ask for "a ui-tooltip with ...".
-    - One still has a `<ui-popup inverted size="mini">` tooltip:  the runtime's heading fold button on the goal sets'
-      pages ("Fold / unfold", epic `epic-engine` I32).  Turn it into a `title` when touching that code.
-      - `goals-live.js`' own buttons have `title`s since epic `epic-engine` P3.
+  - TOOLTIPS are Spell UI's own, with the standard delay (`--ui-tooltip-delay`, by default `--ui-hover-delay`):
+    - `data-tooltip="..."` on any element:  the runtime (`DataTooltips`) shows it in the top layer
+    - a richer one:  `<ui-tooltip>`, or a component's own `TopLayerTip`
+    - `aria-label` on icon-only controls, as well
+    - The person's standing rule (Owen, 2026-11-19, epic `from-console` C10, r80), now Spell UI's tooltips work:
+      it replaces the 2026-10-10 one, "the browser's own `title`, never a `<ui-tooltip>`".
+    - A `title` tooltip left from before becomes a `data-tooltip` when that code is touched.
+      - Still on the old rule:  `goals-live.js`' buttons (`title`s since epic `epic-engine` P3), and the runtime's
+        heading fold button on the goal sets' pages, a `<ui-popup inverted size="mini">` (epic `epic-engine` I32).
     - `basic` for quiet tools (sidebars, toolbars);  `primary` for the one main action in a dialog.
   - An icon a page uses must be in `ICONS`, in [bundle-spell-ui.js](tools/bundle-spell-ui.js)
     (then `epic pages update`):  any other name draws nothing.
@@ -2647,8 +2650,11 @@ the epic page shown in both tabs).
     no ring, a tint under the pointer.
     - `<ui-button appearance="circular basic" size="mini">`s, plain through the component's tokens (`.tool` in
       `EpicThread.css` / `EpicCommentPane.css`;  epic `epic-engine` I26)
-  - TOOLTIPS:  the browser's own (`title`), a few words each;  the longer wording is the `aria-label`.
+  - TOOLTIPS:  a few words each;  the longer wording is the `aria-label`.
     - 2026-10-10:  "The buttons don't have browser tooltips -- unclear what they do".
+    - Today they're the browser's own (`title`), below;  the rule now is Spell UI's tooltip (`data-tooltip`),
+      with the standard delay (above, "TOOLTIPS are Spell UI's own";  Owen, 2026-11-19, epic `from-console` C10, r80):
+      they convert when this code is next touched.
     - Each button's:
       - ✓ "That's good:  done"
       - Revisit "Reply"
