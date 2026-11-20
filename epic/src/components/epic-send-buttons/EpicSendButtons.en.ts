@@ -109,6 +109,12 @@ export const epicSendButtonsVocabulary = {
       description: "The badge on the plane:  how many things a press sends."
     },
     {
+      name: "label",
+      description:
+        "The words' cell beside the plane, both wordings stacked in it.  Hidden, Send is the plane alone, its words " +
+        "still its tooltip:  a phone's page header (epic `from-console` I7)."
+    },
+    {
       name: "words",
       description:
         'The words beside the plane, "Send to Claude" (I305);  "Sent to Claude" for 5 seconds after a send (I352).'

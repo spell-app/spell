@@ -403,8 +403,23 @@
   .site-main > .site-masthead > .spell-comment-mark.at-page {
     grid-area: head;
   }
+  /* Send's real width, its words "Send to Claude" included (epic `epic-engine` I305):  the plane's round end,
+     the words (12px, the wider of "Send" and "Sent to Claude") and their end padding;  3.5em, the plane alone,
+     let the words spill over the title (epic `from-console` I7) */
   .site-masthead:has(> [data-head-tool="send"]) {
-    --_site-send-width: 3.5em;
+    --_site-send-width: 132px;
+  }
+  /* phones:  Send is the plane alone, its words its tooltip, so the title keeps the room */
+  @media (--ui-mobile) {
+    .site-masthead:has(> [data-head-tool="send"]) {
+      --_site-send-width: 28px;
+    }
+    .site-masthead epic-send-buttons::part(label) {
+      display: none;
+    }
+    .site-masthead epic-send-buttons::part(send) {
+      padding-inline-end: 0;
+    }
   }
   .site-masthead:has(> .spell-comment-mark.at-page) {
     /* the bullhorn and a little air before the pill's end, no more (Owen:  "Too much space to right of bullhorn") */

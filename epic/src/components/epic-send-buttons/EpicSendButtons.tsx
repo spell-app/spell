@@ -241,7 +241,7 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
             <Show when={this.isWorking}>{CountdownRing.turning(this.partForName("working"))}</Show>
           </span>
           {/* both words stacked in one cell, the hidden ones keeping its width:  "Sent" never moves the header */}
-          <span class={LABEL}>
+          <span class={LABEL} part={this.partForName("label")}>
             <span class={WORDS} part={this.partForName("words")}>
               {this.words}
             </span>
