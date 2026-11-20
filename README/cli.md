@@ -53,6 +53,8 @@ It's a link, not a copy:  `spell` runs [bin/spell.mjs](../bin/spell.mjs) in this
 | a file that isn't a link is in the way | it replaces nothing, says so, and exits 1 |
 | you moved the checkout, or linked `spell` from an older one | run it again:  the link holds a full path |
 | you'd rather install nothing | `node ~/www/spell/bin/spell.mjs --help`, or `yarn spell --help` at the kit's root |
+| you run your checkout in a project ([below](#your-checkout-in-a-project-that-installs-spell-from-npm)) | `spell local on` there links `spell` the same way, and `spell local off` takes it away again |
+| you run `spell` in a project that installs `spell` from npm, and runs no checkout | it hands off to the project's own install, so you get the version it installed |
 | `spell` runs something else | a shell alias or function named `spell` hides it:  `type -a spell`, in a login shell, says which runs |
 
 - It links `spell` only, and never through `npm link`, which would run an npm install over this yarn project.
@@ -69,14 +71,26 @@ One command, in the project, makes its `spell` run your checkout instead, for yo
 
 ```sh
 cd ~/work/acme-spell
-yarn spell local on ~/www/spell     # or npx spell ...;  spell ... when it's on your PATH
+yarn spell local on ~/www/spell     # the first time:  yarn spell (or npx spell), spell isn't on your PATH yet
+spell local                         # from then on, plain spell, here and in ~/www/spell
 yarn start                          # the page server and editor from ~/www/spell, the org still acme's
 ```
 
 - It writes the project's `.spell/kit.json5`, naming your checkout, and adds `/.spell/` to its `.gitignore` when git
   doesn't leave it out already:  everyone else runs npm's copy, and nothing committed changes.
+- It puts `spell` on your `PATH` too, linked to that checkout, as `yarn cli:install` does ([above](#setting-it-up)):
+  - a link to that checkout already there:  it changes nothing
+  - a link to another checkout:  it points it at this one, and `spell local off` points it back
+  - a file that isn't a link:  it leaves it alone, and says so
+  - its folder not on your `PATH`:  a `NOTE:` says which folder to add
+  - `~/.spell/path-link.json` records that `spell local` made it, and which projects use it
+- `spell local off` takes that link away once no project still runs a checkout (a project's `.spell/kit.json5` gone
+  counts as off);  a link you made yourself, with `yarn cli:install`, it never removes.
+- A release from before 0.8.17 doesn't link `spell`:  run `yarn spell local on` a second time, and your checkout,
+  now running, does it.
 - With no checkout named:  the one this `spell` runs from, else `~/www/spell`.
-- `spell local` alone says which Spell runs here, and why;  `spell local off` goes back to npm's.
+- `spell local` alone says which Spell runs here, and why, and where `spell` on your `PATH` leads;
+  `spell local off` goes back to npm's.
 - Your checkout runs from its own install:  `yarn install` there first, or nothing is written.
 - For every project on the machine:  `export SPELL_KIT=~/www/spell`, in your shell profile.
   It wins over a project's file, so one command can try another checkout.

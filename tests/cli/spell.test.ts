@@ -20,9 +20,13 @@ const TSX_SETTINGS = join(KIT, "tsconfig.tsx.json")
 // each run starts node and `tsx`;  slower under the load of every test file at once
 vi.setConfig({ testTimeout: 30_000 })
 
-/** Run `spell ...args` from `cwd`. */
-function spell(args: string[], cwd = process.cwd()) {
-  const { status, stdout, stderr } = spawnSync(process.execPath, [SPELL, ...args], { cwd, encoding: "utf8" })
+/** Run `spell ...args` from `cwd`, with `env` added to the environment. */
+function spell(args: string[], cwd = process.cwd(), env: NodeJS.ProcessEnv = {}) {
+  const { status, stdout, stderr } = spawnSync(process.execPath, [SPELL, ...args], {
+    cwd,
+    encoding: "utf8",
+    env: { ...process.env, INIT_CWD: undefined, SPELL_KIT: undefined, ...env }
+  })
   return { status, stdout, stderr }
 }
 
@@ -201,5 +205,51 @@ describe("spell in another checkout of the kit:  that checkout's own bin runs", 
     const { status, stdout } = spell(["pony", "hi"], INSIDE)
     expect(status).toBe(0)
     expect(stdout).toContain(" < hi >")
+  })
+})
+
+// the `PATH`'s `spell` is a checkout's:  in a project that installs spell from npm, the project's version runs
+// (epic `repo-split` T71)
+describe("spell in a project that installs spell from npm", () => {
+  const temp = realpathSync(mkdtempSync(join(tmpdir(), "spell-project-")))
+  const PROJECT = join(temp, "app")
+  afterAll(() => rmSync(temp, { recursive: true, force: true }))
+  beforeAll(() => {
+    mkdirSync(join(PROJECT, "node_modules", "spell", "bin"), { recursive: true })
+    writeFileSync(join(PROJECT, "package.json"), `{ "name": "app" }`)
+    writeFileSync(join(PROJECT, "node_modules", "spell", "package.json"), `{ "name": "spell", "type": "module" }`)
+    writeFileSync(
+      join(PROJECT, "node_modules", "spell", "bin", "spell.mjs"),
+      `console.log(JSON.stringify({ bin: import.meta.filename, args: process.argv.slice(2) }))\n`
+    )
+  })
+
+  test("running no checkout:  the project's own installed bin, the arguments verbatim", () => {
+    const { status, stdout } = spell(["pony", "hi"], join(PROJECT, "node_modules"))
+    expect(status).toBe(0)
+    expect(JSON.parse(stdout)).toEqual({
+      bin: join(PROJECT, "node_modules", "spell", "bin", "spell.mjs"),
+      args: ["pony", "hi"]
+    })
+  })
+
+  test("SPELL_KIT set:  this checkout runs", () => {
+    expect(spell(["pony", "hi"], PROJECT, { SPELL_KIT: KIT }).stdout).toContain(" < hi >")
+  })
+
+  test("spell local on and off:  the project's file, and spell on the PATH, made and taken away", () => {
+    const home = join(temp, "home")
+    const binDir = join(temp, "bin")
+    const env = { HOME: home, SPELL_BIN_DIR: binDir, PATH: `${binDir}:${process.env.PATH}` }
+    mkdirSync(join(PROJECT, ".spell"), { recursive: true })
+    writeFileSync(join(PROJECT, ".spell", "kit.json5"), `{ kit: ${JSON.stringify(KIT)} }`)
+    const on = spell(["local", "on", KIT], PROJECT, env)
+    expect(on.stderr).toBe("")
+    expect(on.stdout).toContain("- typing spell runs your checkout now, from any folder (")
+    expect(realpathSync(join(binDir, "spell"))).toBe(realpathSync(SPELL))
+    expect(spell(["local"], PROJECT, env).stdout).toContain("spell local added it)")
+    const off = spell(["local", "off"], PROJECT, env)
+    expect(off.stdout).toContain("- removed the spell command spell local added (")
+    expect(spell(["local"], PROJECT, env).stdout).not.toContain("spell local added it)")
   })
 })

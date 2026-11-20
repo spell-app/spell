@@ -12,6 +12,9 @@
  * - It runs every installed repo's source (spell-parser's, spell-app's ...), each file imported by its package name
  *   (epic `repo-split` P14):  no alias hook.
  * - Every repo's commands:  `main.ts` reads each one's list (`"spell": { "commands" }` in its `package.json`).
+ * - Run inside a PROJECT that installs `spell` from npm and doesn't run a checkout (no `.spell/kit.json5`, no
+ *   `SPELL_KIT`), it hands off to that project's own `node_modules/spell` (epic `repo-split` T71):  the `PATH`'s
+ *   `spell` is a checkout's, but the project gets the version it installed.
  * - Install on your `PATH` with `yarn cli:install`, at the kit's root -- see `scripts/install-cli.mjs`.
  * - NOTE: a symlink to this file works:  node runs the real path, so `import.meta.url` is in the kit.
  */
@@ -22,8 +25,12 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 /** The kit's root:  this file is in its `bin/`. */
 const kitRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 
-const handoff = checkoutBin(process.cwd())
+/** Set by this bin before it hands off to another `spell`:  that one runs itself, never handing back. */
+const HANDED_OFF = Symbol.for("spell.bin.handedOff")
+
+const handoff = globalThis[HANDED_OFF] ? undefined : checkoutBin(process.cwd())
 if (handoff) {
+  globalThis[HANDED_OFF] = true
   await import(pathToFileURL(handoff).href)
 } else {
   const { register } = await import("tsx/esm/api")
@@ -40,16 +47,25 @@ if (handoff) {
  *   `spell-ui` ..., is skipped).
  * - Only once it's installed (`node_modules/tsx`):  a fresh worktree, before its `yarn install`, runs this
  *   checkout's, which has its packages (`epic window` works there).
+ * - Or, in a project:  the `spell` it installs from npm (`node_modules/spell`, not a link to a checkout), when the
+ *   project runs no checkout:  no `.spell/kit.json5` from `folder` up, no `SPELL_KIT`.
+ *   With one, this checkout runs, as `spell local on` linked it (`PathLink`).
  * - NEVER throws:  anything unreadable runs this checkout's.
  */
 function checkoutBin(folder) {
   try {
+    const runsCheckout = !!process.env.SPELL_KIT?.trim()
     for (let dir = resolve(folder); ; dir = dirname(dir)) {
       const manifest = join(dir, "package.json")
       if (existsSync(manifest) && JSON.parse(readFileSync(manifest, "utf8")).name === "spell") {
         const bin = join(dir, "bin", "spell.mjs")
         const isOther = realpathSync(dir) !== realpathSync(kitRoot)
         return isOther && existsSync(bin) && existsSync(join(dir, "node_modules", "tsx")) ? bin : undefined
+      }
+      if (existsSync(join(dir, ".spell", "kit.json5"))) return undefined
+      const installed = join(dir, "node_modules", "spell")
+      if (!runsCheckout && existsSync(join(installed, "bin", "spell.mjs")) && !existsSync(join(installed, "src"))) {
+        return join(installed, "bin", "spell.mjs")
       }
       if (dirname(dir) === dir) return undefined
     }

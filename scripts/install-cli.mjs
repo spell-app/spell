@@ -1,91 +1,29 @@
 /**
  * `yarn cli:install`, at the kit's root:  put `spell` on your `PATH`, as a symlink to `bin/spell.mjs` in this
- * checkout (the kit's `bin`, in its `package.json`:  `src/cli/` is a folder of the kit since epic `repo-split` P13;
- * spell-app's until then).
+ * checkout (the kit's `bin`, in its `package.json`).
+ * - The work is `PathLink.link()` (`spell/cli/PathLink`), which `spell local on` shares:
+ *   where it links, what it never replaces.
  * - ONLY `spell`:  the kit's other bins (`spell-pack`, `spell-types`) are for yarn scripts, through
- *   `node_modules/.bin`.
- * - NOT `epic`:  spell-epic's own (its `bin/epic`;  its README's "Install"), since epic `epic-eject` I5.
- * - Links into the first of these that's on your `PATH` and writable:
- *   - `~/.local/bin`
- *   - npm's global `bin` (`npm prefix -g`) -- NOT on `PATH` under volta, which only puts its shims there
- *   - `/usr/local/bin`, `/opt/homebrew/bin`
- * - None of them:  `~/.local/bin`, with a note to add it to `PATH`.
+ *   `node_modules/.bin`;  NOT `epic`, spell-epic's own (its `bin/epic`;  its README's "Install").
  * - `SPELL_BIN_DIR=/some/dir yarn cli:install` links there instead.
+ * - A link made here is yours:  `spell local off` never removes it.
  * - NOT `npm link`:  that runs an npm install over this yarn project.
  * - Run it again after moving this checkout:  each link holds its full path.
  */
-import { execSync } from "node:child_process"
-import {
-  accessSync,
-  chmodSync,
-  constants,
-  existsSync,
-  lstatSync,
-  mkdirSync,
-  readFileSync,
-  readlinkSync,
-  symlinkSync,
-  unlinkSync
-} from "node:fs"
-import { homedir } from "node:os"
-import { delimiter, dirname, resolve } from "node:path"
+import { readFileSync } from "node:fs"
+import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
+
+import { PathLink } from "spell/cli/PathLink.ts"
 
 /** The kit's root, the `spell` package:  this file is in its `scripts/`. */
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..")
-const onPath = (process.env.PATH ?? "").split(delimiter)
-const localBin = resolve(homedir(), ".local", "bin")
-const binDir = process.env.SPELL_BIN_DIR ?? chooseBinDir()
+const { bin } = JSON.parse(readFileSync(resolve(packageRoot, "package.json"), "utf8"))
 
-/** The commands to link, by name:  `spell`, from the package's `bin`, `{ spell: "./bin/spell.mjs" }`. */
-const COMMANDS = { spell: JSON.parse(readFileSync(resolve(packageRoot, "package.json"), "utf8")).bin.spell }
-
-mkdirSync(binDir, { recursive: true })
-for (const [name, file] of Object.entries(COMMANDS)) linkCommand(name, resolve(packageRoot, file))
-if (!onPath.includes(binDir)) {
-  console.log(`NOTE: ${binDir} isn't on your PATH -- add it to use \`spell\`.`)
+const { link, target, outcome, isOnPath } = new PathLink().link(resolve(packageRoot, bin.spell))
+if (outcome === "blocked") {
+  console.error(`${link} exists and isn't a symlink -- not replacing it.`)
+  process.exit(1)
 }
-
-/**
- * Link command `name` in `binDir` to script `target`, replacing an older link.
- * - exits 1 when something that isn't a symlink is in the way:  never replaced
- */
-function linkCommand(name, target) {
-  const link = resolve(binDir, name)
-  chmodSync(target, 0o755)
-  if (existsSync(link) || isSymlink(link)) {
-    if (!isSymlink(link)) {
-      console.error(`${link} exists and isn't a symlink -- not replacing it.`)
-      process.exit(1)
-    }
-    unlinkSync(link)
-  }
-  symlinkSync(target, link)
-  console.log(`Linked ${link} -> ${target}`)
-}
-
-/** First folder we can link into that's on `PATH` -- see the header. */
-function chooseBinDir() {
-  const npmBin = resolve(execSync("npm prefix -g", { encoding: "utf8" }).trim(), "bin")
-  const candidates = [localBin, npmBin, "/usr/local/bin", "/opt/homebrew/bin"]
-  return candidates.find((dir) => onPath.includes(dir) && isWritable(dir)) ?? localBin
-}
-
-/** Can we write into folder `dir`? */
-function isWritable(dir) {
-  try {
-    accessSync(dir, constants.W_OK)
-    return true
-  } catch {
-    return false
-  }
-}
-
-/** Is there a symlink at `path`, even a broken one? */
-function isSymlink(path) {
-  try {
-    return lstatSync(path).isSymbolicLink() && !!readlinkSync(path)
-  } catch {
-    return false
-  }
-}
+console.log(`Linked ${link} -> ${target}`)
+if (!isOnPath) console.log(`NOTE: ${dirname(link)} isn't on your PATH -- add it to use \`spell\`.`)

@@ -5,6 +5,7 @@ import { dirname, join, relative, resolve } from "node:path"
 
 import { CLI } from "spell/cli"
 import { KIT_FILE, kitProblem, kitSetting, SPELL_KIT } from "spell/cli/kitCheckout"
+import { PathLink, type PathLinkResult, type PathUnlinkResult } from "spell/cli/PathLink"
 
 /**
  * `spell local [status | on [checkout] | off]`:  run your own Spell checkout in a project that installs `spell` from
@@ -15,7 +16,12 @@ import { KIT_FILE, kitProblem, kitSetting, SPELL_KIT } from "spell/cli/kitChecko
  * - The checkout:  `checkout`, else the one this `spell` runs from when it's a checkout, else `~/www/spell`;
  *   it must be installed (`yarn install` there), or nothing is written.
  * - Keeps the file out of git:  adds `/.spell/` to the project's `.gitignore` when git doesn't ignore it yet.
- * - `off`:  removes the file;  `status` (the default):  says which Spell runs here, and why, changing nothing.
+ * - Puts `spell` on your `PATH` too, linked to the checkout, as `yarn cli:install` does (`PathLink.linkFor()`,
+ *   epic `repo-split` T71):  so you type `spell`, not `yarn spell`, here and in the checkout.
+ * - `off`:  removes the file, and the `PATH` link once no project runs a checkout, when `spell local` made it
+ *   (`PathLink.unlinkFor()`);  a link you made yourself stays.
+ * - `status` (the default):  says which Spell runs here, and why, and where `spell` on your `PATH` leads;
+ *   changes nothing.
  * - Throws `CliError` for a checkout that can't run, a checkout named to `off` or `status`, or another verb.
  */
 export async function localCommand(
@@ -32,9 +38,13 @@ export async function localCommand(
   if (verb === "off") {
     const had = existsSync(file)
     rmSync(file, { force: true })
-    if (options.json) CLI.out(JSON.stringify({ project, off: true, removed: had ? file : undefined }, null, 2))
-    else
+    const path = new PathLink().unlinkFor(project)
+    if (options.json) CLI.out(JSON.stringify({ project, off: true, removed: had ? file : undefined, path }, null, 2))
+    else {
       CLI.out(had ? `npm's spell runs here again:  removed ${CLI.relativePath(file)}` : "npm's spell runs here already")
+      const line = unlinkLine(path, had)
+      if (line) CLI.out(line)
+    }
     warnVariable()
     return CLI.EXIT.OK
   }
@@ -44,11 +54,13 @@ export async function localCommand(
   mkdirSync(dirname(file), { recursive: true })
   writeFileSync(file, kitFileText(kit))
   const ignored = keepOutOfGit(project)
-  if (options.json) CLI.out(JSON.stringify({ project, kit, file, ignored }, null, 2))
+  const path = new PathLink().linkFor(project, join(kit, CHECKOUT_BIN))
+  if (options.json) CLI.out(JSON.stringify({ project, kit, file, ignored, path }, null, 2))
   else {
     CLI.out(`Here, spell runs your checkout now:  ${shortPath(kit)}`)
     CLI.out(`- written:  ${CLI.relativePath(file)}, yours alone`)
     if (ignored) CLI.out(`- added /.spell/ to ${CLI.relativePath(ignored)}, so git leaves it out`)
+    for (const line of linkLines(path)) CLI.out(line)
     CLI.out("- back to npm's spell:  spell local off")
   }
   warnVariable()
@@ -58,18 +70,70 @@ export async function localCommand(
 /** `spell local`'s verbs, the default first. */
 const LOCAL_VERBS = ["status", "on", "off"]
 
+/** A checkout's `spell`, from its root:  what the `PATH` link leads to. */
+const CHECKOUT_BIN = "bin/spell.mjs"
+
 /** `status`:  which Spell runs in `project`, and what said so. */
 function report(project: string, options: CLI.LocalOptions): number {
   const named = kitSetting(project)
   const problem = named && kitProblem(named.kit)
-  if (options.json) CLI.out(JSON.stringify({ project, ...named, problem }, null, 2))
-  else if (!named) CLI.out("Here, spell runs npm's copy:  no .spell/kit.json5, and SPELL_KIT isn't set")
+  const path = new PathLink().status()
+  if (options.json) CLI.out(JSON.stringify({ project, ...named, problem, path }, null, 2))
   else {
-    const by = named.namedBy === SPELL_KIT ? SPELL_KIT : CLI.relativePath(named.namedBy)
-    CLI.out(`Here, spell runs your checkout:  ${shortPath(named.kit)} (named by ${by})`)
-    if (problem) CLI.out(`- but it can't run:  ${problem}`)
+    if (!named) CLI.out("Here, spell runs npm's copy:  no .spell/kit.json5, and SPELL_KIT isn't set")
+    else {
+      const by = named.namedBy === SPELL_KIT ? SPELL_KIT : CLI.relativePath(named.namedBy)
+      CLI.out(`Here, spell runs your checkout:  ${shortPath(named.kit)} (named by ${by})`)
+      if (problem) CLI.out(`- but it can't run:  ${problem}`)
+    }
+    if (!path) CLI.out("- typing spell alone finds nothing yet:  type yarn spell, or run spell local on")
+    else {
+      const who = !path.isLink ? "a file, not a link" : path.madeByLocal ? "spell local added it" : "you added it"
+      CLI.out(`- typing spell runs ${checkoutOf(path.target)} (${shortPath(path.link)};  ${who})`)
+    }
   }
   return problem ? CLI.EXIT.ERRORS : CLI.EXIT.OK
+}
+
+/** What `on` did to `spell` on the `PATH`, in lines:  the novice voice (`epic voice check`). */
+function linkLines(path: PathLinkResult): string[] {
+  const link = shortPath(path.link)
+  const lines =
+    path.outcome === "blocked"
+      ? [`- left ${link} as it is:  something else put that file there, so you still type yarn spell`]
+      : path.outcome === "kept"
+        ? ["- typing spell ran your checkout already"]
+        : path.outcome === "repointed"
+          ? [
+              `- typing spell runs your checkout now, from any folder (${link})`,
+              `- before, it ran ${checkoutOf(path.before!)};  spell local off goes back to that`
+            ]
+          : /* if (path.outcome === "linked") */ [`- typing spell runs your checkout now, from any folder (${link})`]
+  if (path.outcome !== "blocked" && !path.isOnPath) {
+    lines.push(
+      `NOTE:  your terminal can't find spell yet.  Add ${shortPath(dirname(path.link))} to your PATH setting;`,
+      "  until then, type yarn spell."
+    )
+  }
+  return lines
+}
+
+/** What `off` did to `spell` on the `PATH`, in a line;  `undefined` to say nothing.  The novice voice. */
+function unlinkLine(path: PathUnlinkResult, had: boolean): string | undefined {
+  if (path.outcome === "removed") return `- removed the spell command spell local added (${shortPath(path.link!)})`
+  if (path.outcome === "restored") return `- typing spell runs ${checkoutOf(path.target!)} again, as before spell local`
+  if (!had) return undefined
+  if (path.outcome === "in-use") {
+    const count = path.projects!.length
+    return `- left the spell command in place:  ${count} other project${count === 1 ? "" : "s"} still use your checkout`
+  }
+  if (path.outcome === "not-ours") return "- left the spell command in place:  it was there before spell local"
+  return undefined
+}
+
+/** The checkout a `bin/spell.mjs` is in, short;  any other file as it is. */
+function checkoutOf(bin: string): string {
+  return shortPath(bin.endsWith(CHECKOUT_BIN) ? dirname(dirname(bin)) : bin)
 }
 
 /** The checkout to name:  `checkout`, else the one this `spell` runs from when it's a checkout, else `~/www/spell`. */

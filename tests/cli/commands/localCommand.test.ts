@@ -34,6 +34,9 @@ beforeEach(() => {
   vi.spyOn(CLI, "out").mockImplementation((text) => void printed.push(text))
   vi.stubEnv("INIT_CWD", project)
   vi.stubEnv("SPELL_KIT", "")
+  // NEVER the real ~/.local/bin or ~/.spell/:  `spell local on` links `spell` there (`PathLink`)
+  vi.stubEnv("HOME", join(root, "home"))
+  vi.stubEnv("SPELL_BIN_DIR", join(root, "bin"))
 })
 
 describe("spell local", () => {
@@ -43,6 +46,8 @@ describe("spell local", () => {
     expect(readFileSync(join(project, ".gitignore"), "utf8")).toContain("\n/.spell/\n")
     expect(spawnSync("git", ["check-ignore", "-q", ".spell/kit.json5"], { cwd: project }).status).toBe(0)
     expect(printed[0]).toContain("Here, spell runs your checkout now")
+    expect(realpathSync(join(root, "bin", "spell"))).toBe(join(checkout, "bin", "spell.mjs"))
+    expect(printed).toContain(`- typing spell runs your checkout now, from any folder (${join(root, "bin", "spell")})`)
   })
 
   test("run again:  .gitignore left as it is", async () => {
@@ -67,8 +72,9 @@ describe("spell local", () => {
     expect(await localCommand("off")).toBe(CLI.EXIT.OK)
     expect(existsSync(join(project, ".spell", "kit.json5"))).toBe(false)
     expect(kitSetting(project, {})).toBeUndefined()
+    expect(existsSync(join(root, "bin", "spell"))).toBe(false)
     await localCommand("status")
-    expect(printed.at(-1)).toContain("npm's copy")
+    expect(printed.join("\n")).toContain("npm's copy")
   })
 
   test("a checkout named to off, or another verb:  a mistake", async () => {
