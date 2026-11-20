@@ -345,8 +345,9 @@ describe("runner builds", () => {
 const PACKAGES = {
   solid: /\/node_modules\/(solid-js|@solidjs\/(web|signals))\//,
   // its generated data and the built-in sounds' names aside, plain tables bundled where they're read
-  // (`vite.shared.ts`'s `UI_DATA`)
-  ui: /\/ui\/src\/(?!.*\.generated\.ts$|sounds\/)/,
+  // (`vite.shared.ts`'s `UI_DATA`);  and its plain-DOM leaves, bundled the same way (`BUNDLED_UI_LEAVES`:  a desktop
+  // drop's reading, epic `language` P67)
+  ui: /\/ui\/src\/(?!.*\.generated\.ts$|sounds\/|components\/ui-uploader\/DroppedFiles\.ts$)/,
   codemirror: /\/node_modules\/@codemirror\//
 }
 

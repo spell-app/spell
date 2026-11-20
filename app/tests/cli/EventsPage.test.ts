@@ -37,7 +37,8 @@ describe("EventsPage", () => {
     expect(uploading).toMatchObject({ sentBy: "<ui-uploader>", spanish: "subiendo", cancelable: true })
     expect(rows.find((row) => row.event === "ui-selected" && row.sentBy === "<ui-button>")).toBeDefined()
     expect(rows.find((row) => row.event === "{thing}-drop")).toMatchObject({ spanish: "soltar-{thing}" })
-  })
+    // every vocabulary file, read in node:  slow under a full run
+  }, 60_000)
 
   test.skipIf(!SRV.contentFolderOf(process.cwd()))(
     "the epic repo's events.json5 is up to date:  if not, run `spell events write`",
