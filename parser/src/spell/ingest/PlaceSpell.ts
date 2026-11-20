@@ -490,6 +490,7 @@ function typeInside(words: string): string {
 
 /**
  * The type holding the objects a field of `owner` holds:  `thumbnail` for `thumbnail`, `stat` for a list of `stats`.
+ * - What a person called it first, `insideType`, when it's free:  an asset's `meta` that they named `asset meta`.
  * - Its schema's name first, when its description gives it one (epic `data` I106):  NetBox's module bay's
  *   `module_bay_types`, each a `BriefModuleBayType`, are each a `module bay type summary`,
  *   one type for every list holding them, as the description has it.
@@ -499,10 +500,14 @@ function typeInside(words: string): string {
  * - Never more words than a type's name holds (`SpellType.MAX_NAME_WORDS`, 4):  `module bay module bay type` is five,
  *   so a module bay's `module bay types`, written in place, are each a `module bay type entry`.
  */
-function insideTypeFor({ words, insideSchemaAt }: FieldDescription, owner: string, own: ReadonlySet<string>): string {
+function insideTypeFor(
+  { words, insideSchemaAt, insideType }: FieldDescription,
+  owner: string,
+  own: ReadonlySet<string>
+): string {
   const one = typeInside(words)
   const owned = `${owner} ${one}`
-  const names = [typeOfSchema(insideSchemaAt, own), one, owned, `${owned} entry`, `${one} entry`]
+  const names = [insideType, typeOfSchema(insideSchemaAt, own), one, owned, `${owned} entry`, `${one} entry`]
   // none free:  the line can't be read, and the field holding it is left out
   return names.find((name) => name !== undefined && isFreeTypeName(name, own)) ?? owned
 }

@@ -538,6 +538,12 @@ export type FieldDescription = {
    * - Names the type inside, `module bay type summary`:  never the owner's name and the field's.
    */
   insideSchemaAt?: string
+  /**
+   * What a person called the type its `inside` holds, in the place's Spell:  `asset meta` for an asset's `meta`.
+   * - Its name before any the writer would choose, so a later write keeps it (epic `ingest-harbor-api` T13).
+   * - Kept only when it's free:  not a collection's type, nor one of Spell's own.
+   */
+  insideType?: string
 }
 
 /**
