@@ -191,6 +191,8 @@ export class UIExample extends E.UIComponent<typeof exampleVocabulary> {
             appearance={this.demoIsFramed ? undefined : "basic"}
             attach-to={this.demoIsFramed ? UIT.TOP : undefined}
           >
+            {/* first, so what sits beside the code button makes room for it (`UIExample.css`, "CLEAR OF THE CODE BUTTON") */}
+            <div class={CODE_ROOM_CLASS} aria-hidden="true" />
             <slot />
           </ui-segment>
           <Show when={this.isCodeShown}>
@@ -227,6 +229,9 @@ const CLOSE_SECONDS = 0.3
 
 /** Class word of the frame:  the live example, the code pane, and the code button over their top right corner. */
 const FRAME_CLASS = "frame"
+
+/** Class word of the empty block in the demo's top right corner, under the code button:  what's beside it makes room. */
+const CODE_ROOM_CLASS = "code-room"
 
 /** Class word of the row of the page's own buttons (the `tools` slot), just left of the code button. */
 const TOOLS_CLASS = "tools"

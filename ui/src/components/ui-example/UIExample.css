@@ -235,6 +235,25 @@
   .ui.bare.example [part~="demo"]::part(segment) {
     padding: 0;
   }
+  /*
+   * CLEAR OF THE CODE BUTTON:  an empty block floated into the demo's top right corner, under the code button
+   * - what's beside it (a full-width input, a row of buttons, a line of text) ends just left of the button;
+   *   what's below it runs full width, and there's no empty band above the example
+   * - it reached under the button:  at a phone's width, every full-width input on the input page
+   *   (epic `from-console` I32)
+   * - its size:  the button's corner, less the frame's own padding (`--ui-example-frame-padding`'s default,
+   *   0.75em 1em), plus the tools row's gap on its left
+   * - a bare example has none:  its button sits further in, over an unframed example
+   */
+  .code-room {
+    display: none;
+  }
+  .ui.example:not(.bare) .code-room {
+    display: block;
+    float: inline-end;
+    width: calc(var(--_ui-example-toggle-corner) + var(--_ui-example-toggle-size) + var(--_ui-example-tools-gap) - 1em);
+    height: calc(var(--_ui-example-toggle-corner) + var(--_ui-example-toggle-size) - 0.75em);
+  }
   /* Floated example content stays inside the frame (Fomantic's `.example` clears its floats too). */
   [part~="demo"]::part(segment) {
     display: flow-root;
