@@ -529,6 +529,10 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         - it COMMITS the two files it wrote and PUSHES them (`commitStep()`:  the config and `.gitignore`, only those,
           on the base branch, asking first in a terminal, `y` suggested;  pushed to the branch's upstream, else
           `origin`, else nowhere, `pushTarget()`;  on another branch it says so and commits nothing;  `--no-commit`)
+        - a starter HOUSE STYLE (epic `epic-engine` T97):  asked, `y` suggested (`houseStyleChoice()`;
+          `--house-style` / `--no-house-style`), the plugin's `templates/house-style.md` copied to `.epic/house-style.md`
+          and named the repo's `code` voice (`houseStyleStep()`);  not asked once the config names one;  a file there
+          kept, only named;  committed with the config
         - `--local` (epic `epic-engine` P69):  nothing in the repo, ever:  no commit, no `.gitignore` lines;  the config
           and links in `.git/info/exclude` (the kit's `Git.exclude()`, the ONE writer of that file);  `localSetup` in
           the config keeps it so;  nothing made on the code host unless `--content-repo`
