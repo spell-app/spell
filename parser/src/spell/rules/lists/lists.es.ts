@@ -701,11 +701,11 @@ listsEs.addRule(ListFilter, {
         scope.variables?.add("my-list")
       },
       tests: [
-        [`palabras en "a word list" donde`, 'core.filter("a word list", () => {})'],
+        [`palabras en "a word list" donde`, 'core.filter(core.valuesOf("a word list"), () => {})'],
         [
           `palabras en "a word list" donde palabra empieza con "a"`,
-          'core.filter("a word list", (palabra) => core.startsWith(palabra, "a"))',
-          'core.filter("a word list", (palabra: string) => core.startsWith(palabra, "a"))'
+          'core.filter(core.valuesOf("a word list"), (palabra) => core.startsWith(palabra, "a"))',
+          'core.filter(core.valuesOf("a word list"), (palabra: string) => core.startsWith(palabra, "a"))'
         ],
         ["los items en my-list donde el id del item > 1", "core.filter(myList, (item) => item.id > 1)"],
         ["los items en my-list donde su id > 1", "core.filter(myList, (item) => item.id > 1)"],

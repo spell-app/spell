@@ -28,6 +28,7 @@ exports[`testing spell module classes > rule group specs > match snapshot -- if 
   "every_thing_where": "type|where|body?",
   "every_thing_with": "type|filters|where?|body?",
   "field_value_filter": "field|value",
+  "first_thing_where": "type|where|body?",
   "has_slots": "type|slots",
   "it_is_value": "value",
   "items_reordered": "type|seconds?|now?",

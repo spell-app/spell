@@ -57,6 +57,17 @@ export function itemsAcrossDatatype(across: ItemsAcross | undefined): P.Datatype
   return typeof items === "string" ? P.listOf(items) : undefined
 }
 
+/**
+ * The items a `where` looks through:  `itemsAcrossAST()`, and a TEXT's characters as a list, `core.valuesOf(text)`
+ * (by code point, as `the first character of` reads them).
+ * - So `the characters of its path where it is "."` filters its characters:  `core.filter()` of the text itself threw.
+ */
+export function itemsToFilterAST(match: P.Match, list: P.Match, across: ItemsAcross | undefined): P.ASTExpression {
+  const items = itemsAcrossAST(match, list, across)
+  if (list.datatype !== "text") return items
+  return new P.ASTCoreMethodInvocation(match, { methodName: "valuesOf", args: [items] })
+}
+
 /** `list`'s AST, its lists merged into one when `isAcross()`:  `core.mergeLists(list)`. */
 export function itemsAcrossAST(match: P.Match, list: P.Match, across: ItemsAcross | undefined): P.ASTExpression {
   const ast = P.matchAST<P.ASTExpression>(list)

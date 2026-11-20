@@ -36,6 +36,7 @@ import { MenuBar } from "./MenuBar"
 import { EveryThing } from "./EveryThing"
 import { EachThing } from "./EachThing"
 import { EveryThingWhere } from "./EveryThingWhere"
+import { FirstThingWhere } from "./FirstThingWhere"
 import { EveryThingWith, TheSavedThingsWith } from "./EveryThingWith"
 import { ItsQuotedProperty } from "./ItsQuotedProperty"
 import { KindValues } from "./KindValues"
@@ -3287,6 +3288,28 @@ classes.addRule(EveryThingWhere, {
 
 classes.addRule(EveryThingWhere, {
   syntax: "(all|the)? {type:plural_type} (where:where|which|that|who) {inline_expression}?"
+})
+
+classes.addRule(FirstThingWhere, {
+  syntax: "the first {type:known_type} (where:where|which|that|who) {inline_expression}?",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(["a suite record is a thing", "a suite record has a rank as number"].join("\n"), "block")
+      },
+      tests: [
+        [
+          "the first suite record where its rank is 1",
+          "core.getItemAt(core.filter(core.everyThing(SuiteRecord), (suiterecord) => suiterecord.rank === 1), 0)"
+        ],
+        [
+          "the first suite record which is not 1",
+          "core.getItemAt(core.filter(core.everyThing(SuiteRecord), (suiterecord) => suiterecord !== 1), 0)"
+        ]
+      ]
+    }
+  ]
 })
 
 classes.addRule(TheThings, { syntax: "all {type:plural_type}" })

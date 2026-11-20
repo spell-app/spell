@@ -6,7 +6,7 @@ import { SpellExpression } from "spell/parser/spell/rules/expressions"
 import {
   getWhereScope,
   getWhereMethod,
-  itemsAcrossAST,
+  itemsToFilterAST,
   itemsAcrossDatatype,
   itemsAcrossOf,
   type ItemsAcross
@@ -53,7 +53,7 @@ export class ListFilter extends SpellExpression<"arg|list|where|body?", { across
     const filter = getWhereMethod(match, arg, this.getBody(match))
     return new P.ASTCoreMethodInvocation(match, {
       methodName: "filter",
-      args: [itemsAcrossAST(match, list, match.data.across), filter]
+      args: [itemsToFilterAST(match, list, match.data.across), filter]
     })
   }
 }
