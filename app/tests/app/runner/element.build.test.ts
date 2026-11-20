@@ -328,9 +328,13 @@ describe("runner builds", () => {
     expect(builtIns).toEqual(["spell-solid.js"])
   })
 
-  test("the built-in sounds beside the chunk holding `BuiltInSounds` (epic `mockup` P28)", () => {
+  test("the built-in sounds beside each chunk holding `BuiltInSounds` (epic `mockup` P28)", () => {
+    // `spell-editor.js` bundles its own copy too, for the sounds' NAMES alone (`vite.shared.ts`'s `UI_DATA`):
+    // where their files are is the page's runtime's to say, the copy in the shared files
     for (const dir of [element, runner]) {
-      const soundCode = chunks(dir).filter((file) => sources(dir, file).some((source) => BUILT_IN_SOUNDS.test(source)))
+      const soundCode = chunks(dir).filter(
+        (file) => file !== "spell-editor.js" && sources(dir, file).some((source) => BUILT_IN_SOUNDS.test(source))
+      )
       expect(soundCode, dir).toHaveLength(1)
       expect(existsSync(join(dir, dirname(soundCode[0]!), "sound-library", "card-slide.ogg")), dir).toBe(true)
     }
@@ -340,8 +344,9 @@ describe("runner builds", () => {
 /** Modules of each package a test asks about, as they appear in a sourcemap's `sources`. */
 const PACKAGES = {
   solid: /\/node_modules\/(solid-js|@solidjs\/(web|signals))\//,
-  // its generated data aside, plain tables bundled where they're read (`vite.shared.ts`'s `UI_DATA`)
-  ui: /\/ui\/src\/(?!.*\.generated\.ts$)/,
+  // its generated data and the built-in sounds' names aside, plain tables bundled where they're read
+  // (`vite.shared.ts`'s `UI_DATA`)
+  ui: /\/ui\/src\/(?!.*\.generated\.ts$|sounds\/)/,
   codemirror: /\/node_modules\/@codemirror\//
 }
 

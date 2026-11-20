@@ -312,7 +312,9 @@ describe("Spell's built-in sounds, and tests (epic `mockup` P28)", () => {
     const key = Symbol.for("spell-ui:runtime")
     const sounds = { url: (name: string) => (name === "door knock" ? "https://example.com/door-knock.ogg" : undefined) }
     ;(globalThis as Record<symbol, unknown>)[key] = { sounds }
-    onTestFinished(() => delete (globalThis as Record<symbol, unknown>)[key])
+    onTestFinished(() => {
+      delete (globalThis as Record<symbol, unknown>)[key]
+    })
     const warn = vi.spyOn(core.console, "warn").mockImplementation(() => {})
     void core.play("door knock")
     expect(FakeAudio.made[0]).toMatchObject({ src: "https://example.com/door-knock.ogg" })

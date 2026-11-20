@@ -83,7 +83,7 @@ They're two groups in Spell's own space:
 and whose two libraries are for other projects to import.
 Every example but Counter has a guide that takes it apart:  [guides](#guides--programs-that-read-as-prose), below.
 Six of them make sounds:  Solitaire and Solitario's cards, Checkers' pieces, and the clicks of Counter and both calculators.
-Each is one line, `play "card slide"`, naming a sound that comes with Spell ([Sounds](https://github.com/spell-app/spell/blob/main/parser/README-spell.md#sounds)).
+Each is one line, `play "card slide"`, naming a sound that comes with Spell ([Sounds](https://github.com/spell-app/spell/blob/main/parser/README-spell.md#built-in-sounds)).
 Every Spell UI component page is a notebook too, in one site, `@spell/guides/SpellUI`:
 a folder per component, a page for each of its tabs, the site's tab row drawn by the site itself.
 
