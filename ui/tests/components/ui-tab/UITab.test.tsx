@@ -1,6 +1,8 @@
 import { userEvent } from "vite-plus/test/browser"
 import { Keys } from "spell/ui/test-helpers/Keys"
 import { afterEach, describe, expect, it, onTestFinished, vi } from "vite-plus/test"
+import { OBSERVE } from "solid-js"
+import { attribution } from "solid-js/attribution"
 
 import { expectAccessible } from "spell/test-helpers/A11y"
 
@@ -515,6 +517,30 @@ describe("<ui-tabs> transitions", () => {
     await userEvent.click(buttons[1]!)
     await expect.poll(() => shown(panes)).toEqual([1])
     expect(start).toHaveBeenCalledTimes(UI.browser.supports.viewTransitions ? 1 : 0)
+  })
+
+  it("draws each pane against the selection it shows:  no `EFFECT_RELAY_TEAR` (epic `old-console-redo` I45)", async () => {
+    // the relay detector lives in Solid's attribution engine (dev only)
+    attribution.enable()
+    const events = OBSERVE!.diagnostics.capture()
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    const info = vi.spyOn(console, "info").mockImplementation(() => {})
+    try {
+      const { host, panes } = await tabs()
+      vi.spyOn(UI.browser, "isReducedMotion", "get").mockReturnValue(true)
+      await ElementFixture.settle()
+      host.value = "third"
+      await ElementFixture.tick()
+      host.value = "second"
+      await ElementFixture.tick()
+      expect(shown(panes)).toEqual([1])
+      const tears = events.stop().filter((event) => event.code === "EFFECT_RELAY_TEAR")
+      expect(tears.map((event) => event.message)).toEqual([])
+    } finally {
+      attribution.disable()
+      warn.mockRestore()
+      info.mockRestore()
+    }
   })
 
   it("swaps at once for reduced motion", async () => {

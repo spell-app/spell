@@ -57,7 +57,7 @@ import tabCSS from "./UITab.css?inline"
  *   - the pane is a `tabpanel` named by its label (it can't point back into this shadow root)
  * - The swap:  a View Transition (`document.startViewTransition`) when `UI.browser.supports.viewTransitions`
  *   and the person doesn't prefer reduced motion, else instant.
- *   - The tab list follows the selection at once;  the panes swap inside the transition (`shownValue`).
+ *   - The tab list follows the selection at once;  the panes swap inside the transition (`displayedValue`).
  * - `parameter` / `history`:  the selected value kept in the page's address, a query parameter or the hash
  *   (`AddressParameter`;  see the vocabulary).
  * - SIDE EFFECTS:
@@ -196,12 +196,28 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
   // ## The pane on screen
   ////////////////
 
-  /** Value of the pane ON SCREEN:  follows `selectedValue`, inside a View Transition when there is one. */
-  @E.state accessor shownValue: string | undefined = undefined
+  /** The value a View Transition's swap has let onto the screen (its callback writes it);  see `displayedValue`. */
+  @E.state private accessor swappedValue: string | undefined = undefined
 
-  /** The pane on screen:  `shownValue`, else the selected one (before the first swap). */
+  /** What `displayedValue` last answered:  the pane on screen when the selection changes. */
+  private onScreen: string | undefined = undefined
+
+  /**
+   * Value of the pane ON SCREEN:  `selectedValue`, except while a View Transition swaps to it.
+   * - Another pane was showing, and the swap can be animated (`canTransition`):  that pane stays,
+   *   until the transition's callback lets the selected one through (`swappedValue`, written by `show()`).
+   * - Worked out here, in the same read as the selection, not copied into a member by the selection's effect:
+   *   a copy would show each pane one frame against the stale value (Solid's `EFFECT_RELAY_TEAR`, epic
+   *   `old-console-redo` I45).
+   * - SIDE EFFECT:  remembers its answer (`onScreen`), the pane a later change swaps away from.
+   */
+  @E.derived
   get displayedValue(): string | undefined {
-    return this.shownValue ?? this.selectedValue
+    const selected = this.selectedValue
+    const swapped = this.swappedValue
+    const before = this.onScreen
+    const isHeld = before !== undefined && before !== selected && swapped !== selected && this.canTransition
+    return (this.onScreen = isHeld ? before : selected)
   }
 
   /**
@@ -239,21 +255,18 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
   }
 
   /**
-   * Put the pane for `value` on screen:  inside a View Transition when the browser has them,
-   * the person doesn't prefer reduced motion and another pane was showing;  else at once.
-   * - Runs in an effect's APPLY function (a write is allowed there).
+   * Put the pane for `value` on screen, when `displayedValue` held the one before it:  inside a View Transition.
+   * - Shown at once (no transition:  reduced motion, no browser support, nothing showing before):
+   *   `displayedValue` is `value` already, and there's nothing to do.
+   * - Runs in an effect's APPLY function.
    * - The transition's callback runs later, outside any owner,
    *   and flushes so the new panes are in the DOM when it returns.
    */
   @E.untracked
   private show(value: string | undefined) {
-    const before = this.shownValue
-    if (before === undefined || before === value || !this.canTransition) {
-      this.shownValue = value
-      return
-    }
+    if (this.displayedValue === value) return
     const transition = this.domElement.ownerDocument.startViewTransition(() => {
-      this.shownValue = value
+      this.swappedValue = value
       flush()
     })
     // a newer swap skips this one, which rejects `ready`:  expected, not an error

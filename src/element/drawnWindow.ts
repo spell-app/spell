@@ -30,7 +30,7 @@
  *     It lived in the parser's core until epic `from-console` P8 moved it here.
  */
 import { createComponent, type JSX } from "@solidjs/web"
-import { For, createEffect, createMemo, createSignal, onCleanup } from "solid-js"
+import { For, createEffect, createMemo, createSignal, onCleanup, untrack } from "solid-js"
 
 import { flatParentFor } from "spell/util/dom"
 
@@ -287,6 +287,29 @@ export function drawnInWindow<Item>({
   // with nothing more to come, only the list:  exactly what a plain `<For>` draws
   return (() => (hasMore() ? [drawing, moreBelow] : drawing)) as unknown as JSX.Element
 }
+
+/**
+ * A `<For>` row:  `draw`'s drawing of it, given its position only when `draw` takes one (`takesPosition`).
+ * - `<For>`'s position changes as rows are added, removed or moved, and its row function reads nothing reactive
+ *   (Solid's `STRICT_READ_UNTRACKED`:  read there, it's read once and never followed;  epic `old-console-redo` I45).
+ * - Takes it:  read in the row's own tracked scope, so the row draws again when it moves;
+ *   everything else its drawing reads is read once (`untrack()`), as every row's is.
+ * - Doesn't (`(job) => ...`, nearly every row):  never read, and the row is drawn once.
+ */
+export function rowAt(
+  position: () => number,
+  takesPosition: boolean,
+  draw: (position: number) => JSX.Element
+): JSX.Element {
+  if (!takesPosition) return draw(NO_POSITION)
+  return (() => {
+    const at = position()
+    return untrack(() => draw(at))
+  }) as unknown as JSX.Element
+}
+
+/** What `rowAt()` hands a drawing that takes no position:  never read. */
+const NO_POSITION = -1
 
 ////////////////
 // ## Scrolling
