@@ -291,7 +291,7 @@ export function drawnInWindow<Item>({
 /**
  * A `<For>` row:  `draw`'s drawing of it, given its position only when `draw` takes one (`takesPosition`).
  * - `<For>`'s position changes as rows are added, removed or moved, and its row function reads nothing reactive
- *   (Solid's `STRICT_READ_UNTRACKED`:  read there, it's read once and never followed;  epic `old-console-redo` I45).
+ *   (Solid's `STRICT_READ_UNTRACKED`:  read there, it's read once and never followed).
  * - Takes it:  read in the row's own tracked scope, so the row draws again when it moves;
  *   everything else its drawing reads is read once (`untrack()`), as every row's is.
  * - Doesn't (`(job) => ...`, nearly every row):  never read, and the row is drawn once.

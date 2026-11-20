@@ -207,8 +207,7 @@ export class UITabs extends E.UIComponent<typeof tabsVocabulary> implements TabO
    * - Another pane was showing, and the swap can be animated (`canTransition`):  that pane stays,
    *   until the transition's callback lets the selected one through (`swappedValue`, written by `show()`).
    * - Worked out here, in the same read as the selection, not copied into a member by the selection's effect:
-   *   a copy would show each pane one frame against the stale value (Solid's `EFFECT_RELAY_TEAR`, epic
-   *   `old-console-redo` I45).
+   *   a copy would show each pane one frame against the stale value (Solid's `EFFECT_RELAY_TEAR`).
    * - SIDE EFFECT:  remembers its answer (`onScreen`), the pane a later change swaps away from.
    */
   @E.derived

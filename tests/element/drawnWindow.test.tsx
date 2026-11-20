@@ -199,7 +199,7 @@ describe("a long list draws what fits", () => {
   })
 })
 
-describe("a row's position (`rowAt()`, epic `old-console-redo` I45)", () => {
+describe("a row's position (`rowAt()`)", () => {
   /** `rows` drawn by `drawnInWindow()`, each row its item and, when it takes one, its position:  `b@1`. */
   function drawnAt(rows: () => readonly string[], takesPosition: boolean, reads = { count: 0 }) {
     box = document.createElement("div")

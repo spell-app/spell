@@ -519,7 +519,7 @@ describe("<ui-tabs> transitions", () => {
     expect(start).toHaveBeenCalledTimes(UI.browser.supports.viewTransitions ? 1 : 0)
   })
 
-  it("draws each pane against the selection it shows:  no `EFFECT_RELAY_TEAR` (epic `old-console-redo` I45)", async () => {
+  it("draws each pane against the selection it shows:  no `EFFECT_RELAY_TEAR`", async () => {
     // the relay detector lives in Solid's attribution engine (dev only)
     attribution.enable()
     const events = OBSERVE!.diagnostics.capture()
