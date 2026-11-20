@@ -315,6 +315,12 @@ export const PARSER_MESSAGES = {
   "say-is-able": 'Say "{line}":  "{old}" stops working in a later release',
   /** A list's rule's old `if:`, `- it can take a card if: ...` (epic `debut` P27, Q42). */
   "say-when": 'Say "when:":  "if:" here stops working in a later release',
+  /** A note after a line's code, `load its sound  // so it plays at once` (epic `language` T166). */
+  "line-end-comment":
+    'A note after "//" at the end of a line will stop working in a later release.  Put it on the line under this one, starting with "--".',
+  /** `choose a card` with no `from`, for a type with no values of its own (epic `language` P66). */
+  "choose-from-what":
+    'This line doesn\'t say which {things} to choose from.  Name them after "from", like this:  choose {thing} from the {things}',
   /** `tableau T1` when two tableaus are named `T1`. */
   "named-twice": 'More than one {type} is named "{name}":  this finds the first one made',
   /** `the position of x`, with no list, where `x` isn't one of a value kind's values. */

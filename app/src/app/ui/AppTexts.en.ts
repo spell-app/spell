@@ -177,7 +177,7 @@ export const APP_TEXTS = {
   codeCompilerWords: "Compiler details in hover",
   codeBubbly: "Bubbly look",
   codeWrapLines: "Wrap long lines",
-  codePopupDelay: "Popup delay",
+  codePopupDelay: "Delay before showing help",
   codePopupDelayShort: "Short:  0.4 seconds",
   codePopupDelayStandard: "Standard:  0.8 seconds",
   codePopupDelayLong: "Long:  1.5 seconds",

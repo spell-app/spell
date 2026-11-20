@@ -6,4 +6,5 @@ my favourites is stored on this device
 a "favourite" is a thing
 	it lives in my favourites
 	its "name" is text
-	its "address" is text  // the pokemon's own, at PokéAPI
+	its "address" is text
+		-- the pokemon's own, at PokéAPI

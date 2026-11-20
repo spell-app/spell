@@ -13,5 +13,5 @@ export const modalEs = {
   aka: ["modal", "diálogo", "ventana emergente", "confirmación", "cuadro de diálogo"],
   values: { closedby: { none: "none" } },
   parts: { modal: "modal" },
-  texts: { close: "Cerrar", ok: "Aceptar", cancel: "Cancelar" }
+  texts: { close: "Cerrar", ok: "Aceptar", cancel: "Cancelar", search: "Buscar" }
 } as const satisfies E.TagDictionary

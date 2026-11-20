@@ -487,7 +487,7 @@ class PickerPopup {
 /**
  * How long the caret rests in a value, nothing typed, before its words show, in seconds:  Owen's "can wait 1s".
  * - A quarter longer than the page's popup delay (`hoverDelay()`):  a second at the standard 800 msec,
- *   so Settings… › "Popup delay" moves it too.
+ *   so Settings… › "Delay before showing help" moves it too.
  */
 function restDelay(): number {
   return hoverDelay() * 1.25

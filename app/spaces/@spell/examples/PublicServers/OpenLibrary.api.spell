@@ -28,7 +28,8 @@ a "book" is a thing
 	its "author name" is a list of text
 	its "cover edition" is an edition, stored as "cover_edition_key"
 	its "cover height" is a number
-	its "cover i" is text  // a picture's address
+	its "cover i" is text
+		-- a picture's address
 	its "cover width" is a number
 	its "ebook access" is text
 	its "edition count" is a number
@@ -90,7 +91,8 @@ an "edition" is a thing
 
 a "link" is a thing
 	its "title" is text
-	its "url" is text  // an address
+	its "url" is text
+		-- an address
 	its "kind" is a kind, stored as "type"
 
 a "kind" is a thing

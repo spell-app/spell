@@ -27,8 +27,10 @@ a "background task" is a thing
 a "data source" is a thing
 	it lives in netbox
 	this type is unverified
-	its "url" is text  // an address
-	its "display url" is text  // an address
+	its "url" is text
+		-- an address
+	its "display url" is text
+		-- an address
 	its "display" is text
 	its "name" is required text, with maximum length 100
 	its "kind" is a kind, stored as "type"
@@ -50,8 +52,10 @@ a "job" is a thing
 	it lives in netbox
 	this type is unverified
 	enabled operations are read
-	its "url" is text  // an address
-	its "display url" is text  // an address
+	its "url" is text
+		-- an address
+	its "display url" is text
+		-- an address
 	its "display" is text
 	its "object type" is text
 	its "object id" is a number
@@ -72,8 +76,10 @@ a "job" is a thing
 a "contact" is a thing
 	it lives in netbox
 	this type is unverified
-	its "url" is text  // an address
-	its "display url" is text  // an address
+	its "url" is text
+		-- an address
+	its "display url" is text
+		-- an address
 	its "display" is text
 	its "groups" is a list of contact group summaries
 	its "name" is required text, with maximum length 100
@@ -90,8 +96,10 @@ a "contact" is a thing
 a "tenant group" is a thing
 	it lives in netbox
 	this type is unverified
-	its "url" is text  // an address
-	its "display url" is text  // an address
+	its "url" is text
+		-- an address
+	its "display url" is text
+		-- an address
 	its "display" is text
 	its "name" is required text, with maximum length 100
 	its "slug" is required text, with maximum length 100
@@ -108,8 +116,10 @@ a "tenant group" is a thing
 a "tenant" is a thing
 	it lives in netbox
 	this type is unverified
-	its "url" is text  // an address
-	its "display url" is text  // an address
+	its "url" is text
+		-- an address
+	its "display url" is text
+		-- an address
 	its "display" is text
 	its "name" is required text, with maximum length 100
 	its "slug" is required text, with maximum length 100
@@ -140,15 +150,18 @@ a "status" is a thing
 
 an "owner summary" is a thing
 	its "number" is a number, stored as "id"
-	its "url" is text  // an address
+	its "url" is text
+		-- an address
 	its "display" is text
 	its "name" is required text, with maximum length 100
 	its "description" is text, with maximum length 200
 
 a "tag summary" is a thing
 	its "number" is a number, stored as "id"
-	its "url" is text  // an address
-	its "display url" is text  // an address
+	its "url" is text
+		-- an address
+	its "display url" is text
+		-- an address
 	its "display" is text
 	its "name" is required text, with maximum length 100
 	its "slug" is required text, with maximum length 100
@@ -156,7 +169,8 @@ a "tag summary" is a thing
 
 a "user summary" is a thing
 	its "number" is a number, stored as "id"
-	its "url" is text  // an address
+	its "url" is text
+		-- an address
 	its "display" is text
 	its "username" is required text, with maximum length 150
 
@@ -166,7 +180,8 @@ a "notification" is a thing
 
 a "contact group summary" is a thing
 	its "number" is a number, stored as "id"
-	its "url" is text  // an address
+	its "url" is text
+		-- an address
 	its "display" is text
 	its "name" is required text, with maximum length 100
 	its "slug" is required text, with maximum length 100

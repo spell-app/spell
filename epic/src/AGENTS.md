@@ -1713,12 +1713,26 @@ In `tools/`:
       Escape puts it back, Home / End go to its ends
       - saved by `HtmlBlocks` ([HtmlBlocks.js](tools/HtmlBlocks.js)):  the nearest element with an id the file has is
         read, the block found there by its tag and place among the same tags, its words checked against the page's,
-        and only its inside swapped (the file's spacing at its ends kept);  a mismatch refuses, saying to reload
+        and only its inside swapped (the file's spacing at its ends kept)
+        - no element with an id around it in the file (a guide's opening paragraphs, epic `epic-engine` T86):  the
+          whole file is read (`readElement()` with no id), the block found inside its `<main>`, and the file written
+          back whole (`saveFile()`)
+        - found by its place when the page has as many of its tag as the file, else by its words alone
+          (`HtmlBlocks.locate()`);  words the file hasn't got, or the same words in two places it can't tell apart:
+          refused, saying why, never guessed at
+      - a TABLE's cell being edited shows a bar above it (T86):  `<ui-button>`s adding an empty row below, removing
+        the row, adding an empty column to the right, removing the column, each with its tooltip
+        - written into the table in the file (`HtmlBlocks.withRow()`, `withColumn()`):  a copy of the row or cell
+          beside it, emptied, its ids dropped, on lines of its own;  a header row gives a row of plain cells
+        - then made the same on the page, which never reloads;  an added row's or column's cell opens to type in
+        - refused:  a table with merged cells or another table inside it, its last row or column
+        - one change at a time, in order (`inTurn()`)
       - not:  an epic page, a body loaded from another file (`source`), what the runtime added, a block holding other
-        blocks (an item with a list), a block with no element with an id around it in the file
-      - adding or removing a table's rows and columns, and a pencil to turn plain-click editing on:  not built (a todo)
+        blocks (an item with a list), a table in a `<ui-markdown>` (its rows and columns)
+      - a pencil to turn plain-click editing on:  left until ⌥-click turns out too hidden (T86's judgement call)
     - the toolbar bullhorn's tooltip says "⌥-click text to edit it";  `editable="tabs"` (Write / Preview) is left alone
-    - [check-edit-in-place.mjs](demo/check-edit-in-place.mjs) checks it, on a copy of a guide in `pages/`
+    - [check-edit-in-place.mjs](demo/check-edit-in-place.mjs) checks it, on a copy of a guide in `pages/`;
+      `--engine-here` checks a worktree's change on main's page server
 - Copy buttons (epic `epic-engine` I182;  2026-10-29:  "this should have a copy icon on the left"):
     every `<pre><code>` gets a `<ui-button appearance="circular basic" size="mini" icon="copy">` first in it, centred
     on its first line, "Copied" in the page's notices (`addCodeCopies()`, at start and after every body or patch);

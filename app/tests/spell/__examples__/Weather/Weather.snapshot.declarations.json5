@@ -94,7 +94,7 @@
     {
       "type": "Current",
       "superType": "Thing",
-      "defined": "/Weather.api.spell:1724-1927"
+      "defined": "/Weather.api.spell:1724-1928"
     },
     {
       "property": "time",
@@ -127,18 +127,18 @@
       "asWritten": "weather code",
       "of": "Current",
       "datatype": "number",
-      "defined": "/Weather.api.spell:1881-1911"
+      "defined": "/Weather.api.spell:1881-1928"
     },
     {
       "type": "Hour",
       "superType": "Thing",
-      "defined": "/Weather.api.spell:1929-2089"
+      "defined": "/Weather.api.spell:1930-2091"
     },
     {
       "property": "time",
       "of": "Hour",
       "datatype": "date",
-      "defined": "/Weather.api.spell:1951-1971"
+      "defined": "/Weather.api.spell:1952-1972"
     },
     {
       "property": "temperature",
@@ -148,14 +148,14 @@
         "dimension": "Temperature",
         "unit": "celsius"
       },
-      "defined": "/Weather.api.spell:1973-2041"
+      "defined": "/Weather.api.spell:1974-2042"
     },
     {
       "property": "weather_code",
       "asWritten": "weather code",
       "of": "Hour",
       "datatype": "number",
-      "defined": "/Weather.api.spell:2043-2073"
+      "defined": "/Weather.api.spell:2044-2091"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -318,24 +318,24 @@
     103,
     108,
     114,
-    120,
     121,
-    126,
-    132,
-    137,
-    146,
-    165,
-    180,
-    205,
-    206,
-    211,
-    216,
-    222,
-    225,
-    231,
-    236,
-    260,
-    265,
-    270
+    122,
+    127,
+    133,
+    139,
+    148,
+    167,
+    182,
+    207,
+    208,
+    213,
+    218,
+    224,
+    227,
+    233,
+    238,
+    262,
+    267,
+    272
   ]
 }

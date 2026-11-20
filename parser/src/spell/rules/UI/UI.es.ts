@@ -38,6 +38,7 @@ import { MediaTime } from "./MediaTime"
 import { MediaVolume } from "./MediaVolume"
 import { StopAllMedia } from "./StopAllMedia"
 import { Prompt } from "./Prompt"
+import { Choose, ChooseSeveral } from "./Choose"
 import { MEDIA_KINDS, TEXT_SIZES } from "./UI.shared"
 import { Warn } from "./Warn"
 
@@ -503,6 +504,107 @@ UIEs.addRule(Prompt, {
           `preguntar "Nombre del archivo:" con "Sin título"`,
           `const it = await core.prompt("Nombre del archivo:", "Sin título")`
         ]
+      ]
+    }
+  ]
+})
+
+// Las cláusulas de `elegir` tras aquello de lo que elige:  la pregunta, y cuántas filas se ven antes de desplazarse
+const CLAUSULAS_ELEGIR = "(con el mensaje {message:expression})? (,? mostrando {shown:number} a la vez)?"
+
+/** Las pruebas de `elegir`:  una carta es una cosa con un palo;  `mazo` es una lista de cartas, y `niveles` una lista. */
+function prepararElegir(): Pick<P.RuleTestBlock, "compileAs" | "beforeEach"> {
+  return {
+    compileAs: "statement",
+    beforeEach(scope: P.Scope) {
+      scope.compile(
+        ["una carta es una cosa", "una carta tiene un palo como uno de tréboles, diamantes, corazones, picas"].join(
+          "\n"
+        ),
+        "block"
+      )
+      const { variables } = scope as P.RootScope
+      variables.add({ name: "mazo", datatype: "list of cartas" })
+      variables.add("niveles")
+    }
+  }
+}
+
+UIEs.addRule(Choose, {
+  syntax: `elegir (article:un|una) ({type:known_type}|{arg:singular_identifier}) de {list:expression} ${CLAUSULAS_ELEGIR}`,
+  tests: [
+    {
+      ...prepararElegir(),
+      tests: [
+        ["elegir una carta de mazo", 'const it = await core.choose(mazo, { thing: "una carta" })'],
+        [
+          'elegir una carta de mazo con el mensaje "¿Qué carta?"',
+          'const it = await core.choose(mazo, { thing: "una carta", prompt: "¿Qué carta?" })'
+        ],
+        [
+          "elegir una carta de mazo, mostrando 10 a la vez",
+          'const it = await core.choose(mazo, { thing: "una carta", shown: 10 })'
+        ],
+        ["elegir un nivel de niveles", 'const it = await core.choose(niveles, { thing: "un nivel" })']
+      ]
+    }
+  ]
+})
+
+UIEs.addRule(Choose, {
+  syntax: `elegir (one:una|uno) de {list:expression} ${CLAUSULAS_ELEGIR}`,
+  tests: [
+    {
+      ...prepararElegir(),
+      tests: [
+        [
+          'elegir una de ["fácil", "normal", "difícil"]',
+          'const it = await core.choose(["fácil", "normal", "difícil"], { thing: "una" })'
+        ],
+        [
+          'elegir uno de niveles con el mensaje "¿Qué tan difícil?"',
+          'const it = await core.choose(niveles, { thing: "uno", prompt: "¿Qué tan difícil?" })'
+        ]
+      ]
+    }
+  ]
+})
+
+UIEs.addRule(Choose, {
+  syntax: `elegir (article:un|una) {type:known_type} ${CLAUSULAS_ELEGIR}`,
+  tests: [
+    {
+      ...prepararElegir(),
+      tests: [["elegir un palo de carta", 'const it = await core.choose(Carta.Palos, { thing: "un palo de carta" })']]
+    }
+  ]
+})
+
+UIEs.addRule(Choose, {
+  syntax: `elegir (article:un|una) (color:color) ${CLAUSULAS_ELEGIR}`,
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [["elegir un color", 'const it = await core.chooseColor({ thing: "un color" })']]
+    }
+  ]
+})
+
+UIEs.addRule(ChooseSeveral, {
+  syntax:
+    "elegir ((many:muchas|muchos)|hasta {most:number}|entre {least:number} y {most:number})?" +
+    ` ({type:plural_type}|{arg:plural_identifier}) de {list:expression} ${CLAUSULAS_ELEGIR}`,
+  tests: [
+    {
+      ...prepararElegir(),
+      tests: [
+        ["elegir cartas de mazo", 'const it = await core.choose(mazo, { things: "cartas" })'],
+        ["elegir muchas cartas de mazo", 'const it = await core.choose(mazo, { things: "cartas" })'],
+        ["elegir hasta 2 cartas de mazo", 'const it = await core.choose(mazo, { things: "cartas", most: 2 })'],
+        {
+          input: "elegir entre 2 y 4 cartas de mazo",
+          js: [`const it = await core.choose(mazo, {`, `  things: "cartas",`, `  least: 2,`, `  most: 4`, `})`]
+        }
       ]
     }
   ]

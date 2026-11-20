@@ -64,6 +64,9 @@ export const LSP_TEXTS = {
   makeItCode: "Make it code",
   makeItText: "Make it text",
 
+  // a note after a line's code, `// ...`, moved to the line under it, `-- ...` (`SP.LineEndComments`, epic `language` T166)
+  moveLineEndNote: 'Move the note below, changing "//" to "--"',
+
   ////////////////
   // ## The Template Explorer's tree (`ScopeExplorer`)
   ////////////////

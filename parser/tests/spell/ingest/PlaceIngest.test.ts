@@ -133,7 +133,8 @@ a "person" is a thing
 	its "mass" is a number
 	its "hair color" is text
 	its "homeworld" is a planet
-	its "films" is a list of text  // each an address
+	its "films" is a list of text
+		-- each an address
 	its "created" is a date
 
 a "planet" is a thing
@@ -366,7 +367,7 @@ describe("adding a source", () => {
     expect(spell).toContain(`authors are found at "/authors/{name}.json"`)
     expect(spell).toContain(`its "authors" is a list of authors, stored as "author_key"`)
     expect(spell).toContain(`a book's "cover i" is a picture at "${COVERS}"`)
-    expect(spell).toContain(`its "cover i" is text  // a picture's address`)
+    expect(spell).toContain(`its "cover i" is text\n\t\t-- a picture's address`)
     const { collections, about } = descriptions.get("/L.json5")!
     expect(collections.books).toMatchObject({
       searchedOnly: true,
@@ -464,7 +465,7 @@ describe("adding a source", () => {
     expect(spell).toContain(`its "temperature" is a temperature in °C, stored as "temperature_2m"`)
     expect(spell).toContain(`its "precipitation" is a length in mm`)
     // a unit Spell has no dimension for is said beside it
-    expect(spell).toContain(`its "relative humidity" is a number, stored as "relative_humidity_2m"  // in %`)
+    expect(spell).toContain(`its "relative humidity" is a number, stored as "relative_humidity_2m"\n\t\t-- in %`)
     expect(spell).not.toContain(`hourly units`)
     const { collections, spellCantSay } = descriptions.get("/W.json5")!
     expect(collections.forecasts).toMatchObject({
@@ -569,7 +570,7 @@ describe("adding a source", () => {
     expect(spell).toContain(`its "types" is a list of pokemon types`)
     expect(spell).toContain(`its "kind" is a type, stored as "type"`)
     expect(spell).toContain(`its "hidden" is yes or no, stored as "is_hidden"`)
-    expect(spell).toContain(`its "location area encounters" is text  // an address`)
+    expect(spell).toContain(`its "location area encounters" is text\n\t\t-- an address`)
     expect(spell).not.toMatch(/generation i/)
     const pokemon = descriptions.get("/P.json5")!.collections.pokemon!
     expect(pokemon).toMatchObject({ idField: "url", listsGive: ["name"] })
@@ -598,10 +599,10 @@ describe("adding a source", () => {
     expect(spell).toContain(`its "color" is a poke api name\n`)
     expect(spell).toContain(`its "forms" is a list of poke api names\n`)
     // a plain address inside a row says so, as one at the top does
-    expect(spell).toContain(`its "chart" is text  // an address`)
+    expect(spell).toContain(`its "chart" is text\n\t\t-- an address`)
     // ONE type for the whole place
     expect(spell.match(/^a "poke api name" is a thing$/gm)).toHaveLength(1)
-    expect(spell).toContain(`\tits "name" is text\n\tits "address" is text, stored as "url"  // never read`)
+    expect(spell).toContain(`\tits "name" is text\n\tits "address" is text, stored as "url"\n\t\t-- never read`)
     // read through it, the pair is held whole:  its name, and its address still there
     const { core } = await import("spell/parser/core")
     const { runSpellFiles } = await import("spell/parser/spell/test/runSpell")

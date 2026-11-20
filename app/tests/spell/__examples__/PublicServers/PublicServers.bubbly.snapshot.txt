@@ -32,15 +32,20 @@
 |   [property define_property_has L1]
 |   | its «"url"» is an **issue**
 |   [property define_property_has L1]
-|   | its «"repository url"» is **text**  ⟦// an address⟧
+|   | its «"repository url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"labels url"» is **text**  ⟦// an address⟧
+|   | its «"labels url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"comments url"» is **text**  ⟦// an address⟧
+|   | its «"comments url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"events url"» is **text**  ⟦// an address⟧
+|   | its «"events url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"html url"» is **text**  ⟦// an address⟧
+|   | its «"html url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"node id"» is **text**
 |   [property define_property_has L1]
@@ -76,7 +81,8 @@
 |   [property define_property_has L1]
 |   | its «"reactions"» is a **reaction**
 |   [property define_property_has L1]
-|   | its «"timeline url"» is **text**  ⟦// an address⟧
+|   | its «"timeline url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"performed via github app"» is a **performed via github app**
 |   [property define_property_has L1]
@@ -96,31 +102,43 @@
 |   [property define_property_has L1]
 |   | its «"node id"» is **text**
 |   [property define_property_has L1]
-|   | its «"avatar url"» is **text**  ⟦// an address⟧
+|   | its «"avatar url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"gravatar id"» is **text**
 |   [property define_property_has L1]
-|   | its «"url"» is **text**  ⟦// an address⟧
+|   | its «"url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"html url"» is **text**  ⟦// an address⟧
+|   | its «"html url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"followers url"» is **text**  ⟦// an address⟧
+|   | its «"followers url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"following url"» is **text**  ⟦// an address⟧
+|   | its «"following url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"gists url"» is **text**  ⟦// an address⟧
+|   | its «"gists url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"starred url"» is **text**  ⟦// an address⟧
+|   | its «"starred url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"subscriptions url"» is **text**  ⟦// an address⟧
+|   | its «"subscriptions url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"organizations url"» is **text**  ⟦// an address⟧
+|   | its «"organizations url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"repos url"» is **text**  ⟦// an address⟧
+|   | its «"repos url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"events url"» is **text**  ⟦// an address⟧
+|   | its «"events url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"received events url"» is **text**  ⟦// an address⟧
+|   | its «"received events url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"kind"» is **text**, stored as «"type"»
 |   [property define_property_has L1]
@@ -140,31 +158,43 @@
 |   [property define_property_has L1]
 |   | its «"node id"» is **text**
 |   [property define_property_has L1]
-|   | its «"avatar url"» is **text**  ⟦// an address⟧
+|   | its «"avatar url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"gravatar id"» is **text**
 |   [property define_property_has L1]
-|   | its «"url"» is **text**  ⟦// an address⟧
+|   | its «"url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"html url"» is **text**  ⟦// an address⟧
+|   | its «"html url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"followers url"» is **text**  ⟦// an address⟧
+|   | its «"followers url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"following url"» is **text**  ⟦// an address⟧
+|   | its «"following url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"gists url"» is **text**  ⟦// an address⟧
+|   | its «"gists url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"starred url"» is **text**  ⟦// an address⟧
+|   | its «"starred url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"subscriptions url"» is **text**  ⟦// an address⟧
+|   | its «"subscriptions url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"organizations url"» is **text**  ⟦// an address⟧
+|   | its «"organizations url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"repos url"» is **text**  ⟦// an address⟧
+|   | its «"repos url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"events url"» is **text**  ⟦// an address⟧
+|   | its «"events url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"received events url"» is **text**  ⟦// an address⟧
+|   | its «"received events url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"kind"» is **text**, stored as «"type"»
 |   [property define_property_has L1]
@@ -176,7 +206,8 @@
 |   [property define_property_has L1]
 |   | its «"company"» is **text**
 |   [property define_property_has L1]
-|   | its «"blog"» is **text**  ⟦// an address⟧
+|   | its «"blog"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"location"» is **text**
 |   [property define_property_has L1]
@@ -207,31 +238,43 @@
 |   [property define_property_has L1]
 |   | its «"node id"» is **text**
 |   [property define_property_has L1]
-|   | its «"avatar url"» is **text**  ⟦// an address⟧
+|   | its «"avatar url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"gravatar id"» is **text**
 |   [property define_property_has L1]
-|   | its «"url"» is **text**  ⟦// an address⟧
+|   | its «"url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"html url"» is **text**  ⟦// an address⟧
+|   | its «"html url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"followers url"» is **text**  ⟦// an address⟧
+|   | its «"followers url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"following url"» is **text**  ⟦// an address⟧
+|   | its «"following url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"gists url"» is **text**  ⟦// an address⟧
+|   | its «"gists url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"starred url"» is **text**  ⟦// an address⟧
+|   | its «"starred url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"subscriptions url"» is **text**  ⟦// an address⟧
+|   | its «"subscriptions url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"organizations url"» is **text**  ⟦// an address⟧
+|   | its «"organizations url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"repos url"» is **text**  ⟦// an address⟧
+|   | its «"repos url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"events url"» is **text**  ⟦// an address⟧
+|   | its «"events url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"received events url"» is **text**  ⟦// an address⟧
+|   | its «"received events url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"kind"» is **text**, stored as «"type"»
 |   [property define_property_has L1]
@@ -246,7 +289,8 @@
 |   [property define_property_has L1]
 |   | its «"node id"» is **text**
 |   [property define_property_has L1]
-|   | its «"url"» is **text**  ⟦// an address⟧
+|   | its «"url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"name"» is **text**
 |   [property define_property_has L1]
@@ -279,7 +323,8 @@
 [thing create_type L0]
 | a «"reaction"» is a **thing**
 |   [property define_property_has L1]
-|   | its «"url"» is **text**  ⟦// an address⟧
+|   | its «"url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"total count"» is a **number**
 |   [property define_property_has L1]
@@ -312,9 +357,11 @@
 |   [property define_property_has L1]
 |   | its «"description"» is **text**
 |   [property define_property_has L1]
-|   | its «"external url"» is **text**  ⟦// an address⟧
+|   | its «"external url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"html url"» is **text**  ⟦// an address⟧
+|   | its «"html url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"created at"» is a **date**
 |   [property define_property_has L1]
@@ -333,31 +380,43 @@
 |   [property define_property_has L1]
 |   | its «"node id"» is **text**
 |   [property define_property_has L1]
-|   | its «"avatar url"» is **text**  ⟦// an address⟧
+|   | its «"avatar url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"gravatar id"» is **text**
 |   [property define_property_has L1]
-|   | its «"url"» is **text**  ⟦// an address⟧
+|   | its «"url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"html url"» is **text**  ⟦// an address⟧
+|   | its «"html url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"followers url"» is **text**  ⟦// an address⟧
+|   | its «"followers url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"following url"» is **text**  ⟦// an address⟧
+|   | its «"following url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"gists url"» is **text**  ⟦// an address⟧
+|   | its «"gists url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"starred url"» is **text**  ⟦// an address⟧
+|   | its «"starred url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"subscriptions url"» is **text**  ⟦// an address⟧
+|   | its «"subscriptions url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"organizations url"» is **text**  ⟦// an address⟧
+|   | its «"organizations url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"repos url"» is **text**  ⟦// an address⟧
+|   | its «"repos url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"events url"» is **text**  ⟦// an address⟧
+|   | its «"events url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"received events url"» is **text**  ⟦// an address⟧
+|   | its «"received events url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"kind"» is **text**, stored as «"type"»
 |   [property define_property_has L1]
@@ -399,13 +458,17 @@
 [thing create_type L0]
 | a «"pull request"» is a **thing**
 |   [property define_property_has L1]
-|   | its «"url"» is **text**  ⟦// an address⟧
+|   | its «"url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"html url"» is **text**  ⟦// an address⟧
+|   | its «"html url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"diff url"» is **text**  ⟦// an address⟧
+|   | its «"diff url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"patch url"» is **text**  ⟦// an address⟧
+|   | its «"patch url"» is **text**
+|   |   ⟦-- an address⟧
 
 [thing create_type L0]
 | a «"repository"» is a **thing**
@@ -421,85 +484,123 @@
 |   [property define_property_has L1]
 |   | its «"owner"» is an **owner**
 |   [property define_property_has L1]
-|   | its «"html url"» is **text**  ⟦// an address⟧
+|   | its «"html url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"description"» is **text**
 |   [property define_property_has L1]
 |   | its «"fork"» is yes or no
 |   [property define_property_has L1]
-|   | its «"url"» is **text**  ⟦// an address⟧
+|   | its «"url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"forks url"» is **text**  ⟦// an address⟧
+|   | its «"forks url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"keys url"» is **text**  ⟦// an address⟧
+|   | its «"keys url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"collaborators url"» is **text**  ⟦// an address⟧
+|   | its «"collaborators url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"teams url"» is **text**  ⟦// an address⟧
+|   | its «"teams url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"hooks url"» is **text**  ⟦// an address⟧
+|   | its «"hooks url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"issue events url"» is **text**  ⟦// an address⟧
+|   | its «"issue events url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"events url"» is **text**  ⟦// an address⟧
+|   | its «"events url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"assignees url"» is **text**  ⟦// an address⟧
+|   | its «"assignees url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"branches url"» is **text**  ⟦// an address⟧
+|   | its «"branches url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"tags url"» is **text**  ⟦// an address⟧
+|   | its «"tags url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"blobs url"» is **text**  ⟦// an address⟧
+|   | its «"blobs url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"git tags url"» is **text**  ⟦// an address⟧
+|   | its «"git tags url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"git refs url"» is **text**  ⟦// an address⟧
+|   | its «"git refs url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"trees url"» is **text**  ⟦// an address⟧
+|   | its «"trees url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"statuses url"» is **text**  ⟦// an address⟧
+|   | its «"statuses url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"languages url"» is **text**  ⟦// an address⟧
+|   | its «"languages url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"stargazers url"» is **text**  ⟦// an address⟧
+|   | its «"stargazers url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"contributors url"» is **text**  ⟦// an address⟧
+|   | its «"contributors url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"subscribers url"» is **text**  ⟦// an address⟧
+|   | its «"subscribers url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"subscription url"» is **text**  ⟦// an address⟧
+|   | its «"subscription url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"commits url"» is **text**  ⟦// an address⟧
+|   | its «"commits url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"git commits url"» is **text**  ⟦// an address⟧
+|   | its «"git commits url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"comments url"» is **text**  ⟦// an address⟧
+|   | its «"comments url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"issue comment url"» is **text**  ⟦// an address⟧
+|   | its «"issue comment url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"contents url"» is **text**  ⟦// an address⟧
+|   | its «"contents url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"compare url"» is **text**  ⟦// an address⟧
+|   | its «"compare url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"merges url"» is **text**  ⟦// an address⟧
+|   | its «"merges url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"archive url"» is **text**  ⟦// an address⟧
+|   | its «"archive url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"downloads url"» is **text**  ⟦// an address⟧
+|   | its «"downloads url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"issues url"» is **text**  ⟦// an address⟧
+|   | its «"issues url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"pulls url"» is **text**  ⟦// an address⟧
+|   | its «"pulls url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"milestones url"» is **text**  ⟦// an address⟧
+|   | its «"milestones url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"notifications url"» is **text**  ⟦// an address⟧
+|   | its «"notifications url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"labels url"» is **text**  ⟦// an address⟧
+|   | its «"labels url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"releases url"» is **text**  ⟦// an address⟧
+|   | its «"releases url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"deployments url"» is **text**  ⟦// an address⟧
+|   | its «"deployments url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"created at"» is a **date**
 |   [property define_property_has L1]
@@ -511,9 +612,11 @@
 |   [property define_property_has L1]
 |   | its «"ssh url"» is **text**
 |   [property define_property_has L1]
-|   | its «"clone url"» is **text**  ⟦// an address⟧
+|   | its «"clone url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"svn url"» is **text**  ⟦// an address⟧
+|   | its «"svn url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"homepage"» is **text**
 |   [property define_property_has L1]
@@ -582,31 +685,43 @@
 |   [property define_property_has L1]
 |   | its «"node id"» is **text**
 |   [property define_property_has L1]
-|   | its «"avatar url"» is **text**  ⟦// an address⟧
+|   | its «"avatar url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"gravatar id"» is **text**
 |   [property define_property_has L1]
-|   | its «"url"» is **text**  ⟦// an address⟧
+|   | its «"url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"html url"» is **text**  ⟦// an address⟧
+|   | its «"html url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"followers url"» is **text**  ⟦// an address⟧
+|   | its «"followers url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"following url"» is **text**  ⟦// an address⟧
+|   | its «"following url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"gists url"» is **text**  ⟦// an address⟧
+|   | its «"gists url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"starred url"» is **text**  ⟦// an address⟧
+|   | its «"starred url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"subscriptions url"» is **text**  ⟦// an address⟧
+|   | its «"subscriptions url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"organizations url"» is **text**  ⟦// an address⟧
+|   | its «"organizations url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"repos url"» is **text**  ⟦// an address⟧
+|   | its «"repos url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"events url"» is **text**  ⟦// an address⟧
+|   | its «"events url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"received events url"» is **text**  ⟦// an address⟧
+|   | its «"received events url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"kind"» is **text**, stored as «"type"»
 |   [property define_property_has L1]
@@ -623,7 +738,8 @@
 |   [property define_property_has L1]
 |   | its «"spdx id"» is **text**
 |   [property define_property_has L1]
-|   | its «"url"» is **text**  ⟦// an address⟧
+|   | its «"url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"node id"» is **text**
 
@@ -838,7 +954,8 @@
 |   [property define_property_has L1]
 |   | its «"cover height"» is a **number**
 |   [property define_property_has L1]
-|   | its «"cover i"» is **text**  ⟦// a picture's address⟧
+|   | its «"cover i"» is **text**
+|   |   ⟦-- a picture's address⟧
 |   [property define_property_has L1]
 |   | its «"cover width"» is a **number**
 |   [property define_property_has L1]
@@ -957,7 +1074,8 @@
 |   [property define_property_has L1]
 |   | its «"title"» is **text**
 |   [property define_property_has L1]
-|   | its «"url"» is **text**  ⟦// an address⟧
+|   | its «"url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"kind"» is a **kind**, stored as «"type"»
 
@@ -1566,9 +1684,11 @@
 |   [property define_property_has L1]
 |   | its «"public domain"» is yes or no, stored as «"isPublicDomain"»
 |   [property define_property_has L1]
-|   | its «"primary image"» is **text**  ⟦// an address⟧
+|   | its «"primary image"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"primary image small"» is **text**  ⟦// an address⟧
+|   | its «"primary image small"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"additional images"» is a list of **text**
 |   [property define_property_has L1]
@@ -1610,9 +1730,11 @@
 |   [property define_property_has L1]
 |   | its «"artist gender"» is **text**
 |   [property define_property_has L1]
-|   | its «"artist wikidata url"» is **text**  ⟦// an address⟧
+|   | its «"artist wikidata url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"artist ulan url"» is **text**  ⟦// an address⟧
+|   | its «"artist ulan url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"object date"» is **text**
 |   [property define_property_has L1]
@@ -1660,11 +1782,13 @@
 |   [property define_property_has L1]
 |   | its «"repository"» is **text**
 |   [property define_property_has L1]
-|   | its «"object url"» is **text**, stored as «"objectURL"»  ⟦// an address⟧
+|   | its «"object url"» is **text**, stored as «"objectURL"»
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"tags"» is a list of **tags**
 |   [property define_property_has L1]
-|   | its «"object wikidata url"» is **text**  ⟦// an address⟧
+|   | its «"object wikidata url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"timeline work"» is yes or no, stored as «"isTimelineWork"»
 |   [property define_property_has L1]
@@ -1679,9 +1803,11 @@
 |   [property define_property_has L1]
 |   | its «"name"» is **text**
 |   [property define_property_has L1]
-|   | its «"constituent ulan url"» is **text**  ⟦// an address⟧
+|   | its «"constituent ulan url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"constituent wikidata url"» is **text**  ⟦// an address⟧
+|   | its «"constituent wikidata url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"gender"» is **text**
 
@@ -1710,9 +1836,11 @@
 |   [property define_property_has L1]
 |   | its «"term"» is **text**
 |   [property define_property_has L1]
-|   | its «"aat url"» is **text**  ⟦// an address⟧
+|   | its «"aat url"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"wikidata url"» is **text**  ⟦// an address⟧
+|   | its «"wikidata url"» is **text**
+|   |   ⟦-- an address⟧
 
 ==== /MetMuseum.spell
 ⟪# The Met Museum⟫
@@ -1958,7 +2086,8 @@
 |   [property define_property_has L1]
 |   | its «"region"» is **text**
 |   [property define_property_has L1]
-|   | its «"language"» is **text**  ⟦// its language's code, as REST Countries keys its names:  `fra`, `spa`, `deu`, `jpn`⟧
+|   | its «"language"» is **text**
+|   |   ⟦-- its language's code, as REST Countries keys its names:  `fra`, `spa`, `deu`, `jpn`⟧
 |   [action create_hook L1]
 |   | when «creating a rest countries page»    ‾value(a rest countries page) bold(rest countries page)
 |   |   set its **region** to _"Europe"_    ‾value(its region)

@@ -22,8 +22,18 @@
  *     file, the page unmoved and not reloaded
  *   - a code block of the page's own (T66):  ⌥-click, End, a new line typed, ⌘Enter:  that block's text alone changed,
  *     escaped
+ *   - the guide's opening paragraph (T86), with no element with an id around it in the file:  ⌥-click, End, typing
+ *     and Enter change it alone, the whole file read and written back
+ *   - a table of the page's own (T86):  ⌥-click a cell shows the bar of row and column buttons above it;  "Row" (+)
+ *     adds an empty row below in the file and the page, its first cell open;  typed in and kept;  "Column" (+) adds
+ *     an empty column;  "Row" (-) and "Column" (-) remove them again:  the file back as it was
  *   - no page errors
- * - a screenshot of the table:  `edit-in-place.png` in outDir (default a temporary folder)
+ * - `--engine-here`:  the page server is another checkout's (main's, on 4747), which serves its own docs bundle and
+ *   live client under every address:  this checkout's are sent instead (`spell-ui.js`, `spell-doc.css`,
+ *   `/api/server/live.js`), so
+ *   a worktree's change is checked before it merges
+ * - screenshots:  `edit-in-place.png` (the LOE table) and `table-edit.png` (the table bar) in outDir (default a
+ *   temporary folder)
  * - exits 1 on any miss
  */
 import { execFileSync } from "node:child_process"
@@ -42,6 +52,7 @@ const flag = (name) => {
   const at = args.indexOf(name)
   return at < 0 ? undefined : args.splice(at, 2)[1]
 }
+const engineHere = args.includes("--engine-here") && Boolean(args.splice(args.indexOf("--engine-here"), 1))
 const base = flag("--base") ?? serverBase()
 const guide = flag("--guide") ?? "guides/atmosphere/spaces-and-spell.html"
 const outDir = args[0] ?? mkdtempSync(join(tmpdir(), "edit-in-place-"))
@@ -62,6 +73,7 @@ const check = (isOk, what) => {
 const browser = await chromium.launch()
 try {
   const page = await browser.newPage({ viewport: { width: 1100, height: 900 } })
+  if (engineHere) await useThisEngine(page)
   const errors = []
   page.on("pageerror", (error) => errors.push(error.message))
   page.on("console", (message) => message.type() === "warning" && console.log(`      (page:  ${message.text()})`))
@@ -298,6 +310,126 @@ try {
   }
 
   await page.locator("#loe").screenshot({ path: join(outDir, "edit-in-place.png") })
+
+  ////////////////
+  // ## The opening paragraph, no id around it (T86)
+  ////////////////
+
+  await page.setViewportSize({ width: 1100, height: 900 })
+  const lede = await page.evaluate(() => {
+    const found = document.querySelector("main > p.lede")
+    if (!found || found.parentElement.closest("[id]") !== null) return undefined
+    found.setAttribute("data-check-lede", "")
+    return found.textContent.trim()
+  })
+  check(!!lede, "the guide opens with a paragraph that has no element with an id around it")
+  if (lede) {
+    await page.evaluate(() => scrollTo(0, 0))
+    await page.waitForTimeout(400)
+    const spot = await page.evaluate(() => {
+      const box = document.querySelector("[data-check-lede]").getBoundingClientRect()
+      return { x: box.left + 8, y: box.top + 8 }
+    })
+    const ledeBefore = readFileSync(file, "utf8")
+    await altClick(page, spot)
+    await page.keyboard.press("End")
+    await page.keyboard.type(" Opening checked.")
+    await page.keyboard.press("Enter")
+    const ledeAfter = await fileChange(ledeBefore)
+    check(
+      ledeAfter.includes(" Opening checked.") && ledeAfter.replace(" Opening checked.", "") === ledeBefore,
+      "the opening paragraph alone changed in the file"
+    )
+  }
+
+  ////////////////
+  // ## A table's rows and columns (T86)
+  ////////////////
+
+  const table = await page.evaluate(() => {
+    const cell = [...document.querySelectorAll("main ui-section[id] td")].find(
+      (each) => !each.closest("ui-markdown, [data-spell-added], [source]") && each.textContent.trim().length > 2
+    )
+    if (!cell) return undefined
+    for (let section = cell.closest("ui-section"); section; section = section.parentElement?.closest("ui-section"))
+      section.setAttribute("open", "")
+    cell.setAttribute("data-check-cell", "")
+    cell.closest("table").setAttribute("data-check-table", "")
+    return {
+      cell: cell.textContent.trim(),
+      rows: cell.closest("table").rows.length,
+      columns: cell.parentElement.cells.length
+    }
+  })
+  check(!!table, "the guide has a table of its own")
+  if (table) {
+    await page.waitForTimeout(600)
+    await page.evaluate(() => document.querySelector("[data-check-table]").scrollIntoView({ block: "center" }))
+    await page.waitForTimeout(400)
+    const tableBefore = readFileSync(file, "utf8")
+    await altClick(page, await spotOf(page, "[data-check-cell]"))
+    const bar = await page.evaluate(() => {
+      const box = document.querySelector(".spell-table-edit")?.getBoundingClientRect()
+      const cell = document.querySelector("[data-check-cell]").getBoundingClientRect()
+      const buttons = [...document.querySelectorAll(".spell-table-edit ui-button")].map((each) => each.dataset.tooltip)
+      return box && { bottom: box.bottom, left: box.left, cellTop: cell.top, cellLeft: cell.left, buttons }
+    })
+    check(
+      bar?.buttons.length === 4 && bar.bottom <= bar.cellTop + 1 && bar.cellTop - bar.bottom < 24,
+      `the cell's bar sits just above it (${bar?.bottom} vs ${bar?.cellTop}, left ${bar?.left} vs ${bar?.cellLeft}), ` +
+        `with its 4 buttons (${bar?.buttons.join(" / ")})`
+    )
+    await clickBar(page, "Add an empty row below this one")
+    const rowAdded = await fileChange(tableBefore)
+    const facts = await page.evaluate(() => {
+      const editing = document.querySelector("[data-spell-editing]")
+      return { rows: document.querySelector("[data-check-table]").rows.length, empty: editing?.textContent === "" }
+    })
+    check(facts.rows === table.rows + 1, `a row was added on the page (${table.rows} -> ${facts.rows})`)
+    check(facts.empty, "the new row's first cell is open to type in")
+    const newRow = /\n\s*<tr>(\s*<td><\/td>)+\s*<\/tr>/.exec(rowAdded)?.[0]
+    check(
+      !!newRow && rowAdded.replace(newRow, "") === tableBefore && newRow.split("\n").length === table.columns + 3,
+      `the file gained an empty row, a line for each of its parts (${JSON.stringify(newRow)})`
+    )
+    await page.keyboard.type("Typed")
+    await page.keyboard.press("Enter")
+    const typed = await fileChange(rowAdded)
+    check(typed === rowAdded.replace("<td></td>", "<td>Typed</td>"), "typing in the new cell saved it there")
+
+    await altClick(page, await spotOf(page, "[data-check-cell]"))
+    await clickBar(page, "Add an empty column to the right of this one")
+    const columnAdded = await fileChange(typed)
+    // its icons load as they are first drawn
+    await page.waitForTimeout(1000)
+    await page.locator("[data-check-table]").screenshot({ path: join(outDir, "table-edit.png") })
+    const columns = await page.evaluate(() =>
+      [...document.querySelector("[data-check-table]").rows].map((row) => row.cells.length)
+    )
+    check(new Set(columns).size === 1, `a column was added to every row on the page (${columns.join(", ")})`)
+    check(columnAdded.length > typed.length, "and in the file")
+    await page.keyboard.press("Escape")
+
+    // the added column (right of the checked cell) and the added row (holding "Typed") go again
+    await altClick(page, await spotOf(page, "[data-check-cell] + *", true))
+    await clickBar(page, "Remove this column")
+    const columnGone = await fileChange(columnAdded)
+    check(columnGone === typed, "removing the column put the file back as it was before it")
+    await page.evaluate(() =>
+      [...document.querySelectorAll("[data-check-table] td")]
+        .find((each) => each.textContent === "Typed")
+        .setAttribute("data-check-typed", "")
+    )
+    await altClick(page, await spotOf(page, "[data-check-typed]"))
+    await clickBar(page, "Remove this row")
+    const rowGone = await fileChange(columnGone)
+    check(rowGone === tableBefore, "removing the row put the file back as it was before the table changed")
+    check(
+      (await page.evaluate(() => document.querySelector("[data-check-table]").rows.length)) === table.rows,
+      "and the page's table too"
+    )
+    check(await page.evaluate(() => window.__notReloaded === true), "the page never reloaded")
+  }
   check(!errors.length, `no page errors${errors.length ? `:  ${errors.join(" / ")}` : ""}`)
 } finally {
   await browser.close()
@@ -310,6 +442,59 @@ process.exit(misses.length ? 1 : 0)
 ////////////////
 // ## Helpers
 ////////////////
+
+/** The file, once it differs from `before`:  waits up to 5 seconds. */
+async function fileChange(before) {
+  let after = before
+  for (let wait = 0; wait < 25 && after === before; wait++) {
+    await new Promise((done) => setTimeout(done, 200))
+    after = readFileSync(file, "utf8")
+  }
+  return after
+}
+
+/** Where to click in the element `selector` names:  near its top left (`empty`:  its middle, for an empty cell). */
+async function spotOf(page, selector, empty = false) {
+  return page.evaluate(
+    ([selector, empty]) => {
+      const element = document.querySelector(selector)
+      element.scrollIntoView({ block: "center" })
+      const box = element.getBoundingClientRect()
+      return empty ? { x: box.left + box.width / 2, y: box.top + box.height / 2 } : { x: box.left + 6, y: box.top + 6 }
+    },
+    [selector, empty]
+  )
+}
+
+/** Press the table bar's button whose tooltip is `tip`. */
+async function clickBar(page, tip) {
+  await page.locator(`.spell-table-edit ui-button[data-tooltip="${tip}"]`).click()
+}
+
+/** This checkout's docs bundle and live client, in place of the page server's (`--engine-here`). */
+async function useThisEngine(page) {
+  const bundle = readFileSync(join(KIT, "epic/src/tools/_assets/spell-ui.js"))
+  const live = execFileSync(
+    process.execPath,
+    [
+      "--import",
+      "tsx",
+      "-e",
+      "import('spell/server/liveClient').then((m) => process.stdout.write(m.liveClientScript()))"
+    ],
+    { cwd: KIT, encoding: "utf8" }
+  )
+  await page.route("**/_epic/assets/spell-ui.js", (route) =>
+    route.fulfill({ body: bundle, contentType: "text/javascript; charset=utf-8" })
+  )
+  const sheet = readFileSync(join(KIT, "epic/src/tools/_assets/spell-doc.css"))
+  await page.route("**/_epic/assets/spell-doc.css", (route) =>
+    route.fulfill({ body: sheet, contentType: "text/css; charset=utf-8" })
+  )
+  await page.route("**/api/server/live.js", (route) =>
+    route.fulfill({ body: live, contentType: "text/javascript; charset=utf-8" })
+  )
+}
 
 /** This checkout's page server, from `spell server status`. */
 function serverBase() {

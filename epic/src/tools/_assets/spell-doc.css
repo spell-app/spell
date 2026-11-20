@@ -1658,3 +1658,24 @@ main [data-spell-editing] {
 main [data-spell-saving] {
   opacity: 0.6;
 }
+
+/* a table cell being edited:  the bar of row and column changes above it (epic `epic-engine` T86), anchored to the
+   cell;  it lives at the end of `<body>`, outside `main` */
+main :is(td, th)[data-spell-editing] {
+  anchor-name: --spell-table-cell;
+}
+.spell-table-edit {
+  position: absolute;
+  position-anchor: --spell-table-cell;
+  bottom: anchor(top);
+  left: anchor(left);
+  position-try-fallbacks: flip-block;
+  z-index: 10;
+  display: flex;
+  gap: 4px;
+  margin: 0 0 8px 0;
+  padding: 4px;
+  border-radius: 8px;
+  background: var(--spell-card);
+  box-shadow: var(--ui-shadow-floating);
+}
