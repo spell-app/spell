@@ -375,8 +375,10 @@ const SPELL = "spell"
  * The most the lean install may hold, as `du` and npm's own lockfile count it.
  * - 140 MB since 0.8.10:  the built editor ships in it (about 20 MB, epic `repo-split` P26),
  *   so `spell server` runs from an npm install;  it measured 131 MB then.
+ * - 150 MB since 0.8.16 (Owen, 2026-11-19):  it measured 141 MB, the epic docs' pictures and the bundles grown;
+ *   trimming it is epic `epic-engine` T109.
  */
-const LEAN_LIMITS = { packages: 40, megabytes: 140 }
+const LEAN_LIMITS = { packages: 40, megabytes: 150 }
 
 /**
  * A definition of the element base class in built JavaScript, as esbuild or Rolldown write it, minified or not:

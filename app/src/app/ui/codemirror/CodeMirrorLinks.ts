@@ -12,7 +12,7 @@ import {
 
 import { after, type CancelablePromise } from "spell/util/timing"
 import { CodeEditorFeatures } from "spell/app/app/ui/CodeEditorFeatures"
-import { HOVER_DELAY } from "spell/app/app/ui/codePopups"
+import { hoverDelay } from "spell/app/app/ui/codePopups"
 
 /****************
  * ### `CodeMirrorLinks`
@@ -24,7 +24,7 @@ import { HOVER_DELAY } from "spell/app/app/ui/codePopups"
  * - ⌘-click on the address opens it (Ctrl-click off a Mac), ahead of the editor's own ⌘-click, go to definition
  *   (`SpellCodeMirror`):  this one's handler is `Prec.highest`
  * - with ⌘ held over one, it's underlined and the pointer shows a hand;
- *   a plain hover says how ("⌘-click to open") once it rests `HOVER_DELAY`, as the hover does
+ *   a plain hover says how ("⌘-click to open") once it rests `hoverDelay()`, as the hover does
  * - Where the addresses are, the key and the tip's words:  `CodeEditorFeatures`.
  * - Any editor of a project file:  Spell and HTML alike (`FileStates`).
  * - Its position in the import graph:  CodeMirror, the app's code settings and `CodeEditorFeatures`.
@@ -137,7 +137,7 @@ const ICONS = ViewPlugin.fromClass(
   class {
     /** The icons, after each address in the lines shown. */
     decorations: DecorationSet
-    /** Shows the tip, once the mouse has rested `HOVER_DELAY`. */
+    /** Shows the tip, once the mouse has rested `hoverDelay()`. */
     private timer: CancelablePromise<void> | undefined
 
     constructor(readonly view: EditorView) {
@@ -158,7 +158,7 @@ const ICONS = ViewPlugin.fromClass(
       window.removeEventListener("keyup", this.keyChanged, true)
     }
 
-    /** The mouse moved:  the address under it, marked while ⌘ is held;  the tip after `HOVER_DELAY`. */
+    /** The mouse moved:  the address under it, marked while ⌘ is held;  the tip after `hoverDelay()`. */
     moved(event: MouseEvent): void {
       const isOnIcon = (event.target as Element | null)?.closest?.(`.${ICON_CLASS}`)
       const address = isOnIcon ? undefined : addressAtPoint(this.view, event.clientX, event.clientY)
@@ -166,7 +166,7 @@ const ICONS = ViewPlugin.fromClass(
       const isSame = address?.from === under.address?.from && address?.to === under.address?.to
       if (!isSame) {
         this.timer?.cancel()
-        if (address) this.timer = after(HOVER_DELAY, () => this.set({ ...this.under, showsTip: true }))
+        if (address) this.timer = after(hoverDelay(), () => this.set({ ...this.under, showsTip: true }))
       }
       this.set({
         address,

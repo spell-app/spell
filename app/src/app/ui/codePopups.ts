@@ -1,3 +1,4 @@
+import { cssSecondsFor, isBrowser } from "spell/util/dom"
 import type { LSP } from "spell/app/lsp"
 
 /**
@@ -37,6 +38,28 @@ export type SuggestMode = (typeof SUGGEST_MODES)[number]
  */
 export const SUGGEST_MODES_RENAMED: Readonly<Record<string, SuggestMode>> = { asYouType: "everywhere" }
 
+/**
+ * How long a popup waits for the mouse to rest, or the typing to pause, before it shows by itself, shortest first:
+ * a short wait, the page's standard one (`--ui-hover-delay`, 800 msec), the default, or a long one.
+ * - Settings… › "Popup delay" (Owen, 2026-11-19, epic `codemirror` T19):  every popup and tooltip on the page follows.
+ */
+export const POPUP_DELAYS = ["short", "standard", "long"] as const
+/** How long popups wait:  one of `POPUP_DELAYS`. */
+export type PopupDelay = (typeof POPUP_DELAYS)[number]
+
+/**
+ * The page's `--ui-hover-delay` for each popup delay;  `undefined`:  the page's own, as its theme says (800 msec).
+ * - Set on `<html>`, so it's the whole page's:  Spell UI's tooltips and popups read it too.
+ */
+export const POPUP_DELAY_TIMES: Readonly<Record<PopupDelay, string | undefined>> = {
+  standard: undefined,
+  short: "400ms",
+  long: "1.5s"
+}
+
+/** The page's hover delay, a Spell UI token (`styles.en.ts`'s `hoverDelay`). */
+const HOVER_DELAY_TOKEN = "--ui-hover-delay"
+
 /** What someone chose for the code editor's popups. */
 export type CodePopupChoices = {
   /** When hover info shows. */
@@ -58,6 +81,8 @@ export type CodePopupChoices = {
    * - Off unless someone turns it on:  a line stays one line, and scrolls sideways (Owen, epic `editor` I110).
    */
   wrapLines: boolean
+  /** How long popups wait before they show by themselves:  the code's, and every popup and tooltip on the page. */
+  popupDelay: PopupDelay
 }
 
 /**
@@ -72,7 +97,8 @@ export const CODE_POPUP_DEFAULTS: CodePopupChoices = {
   pinnedLines: false,
   compilerWords: false,
   bubbly: true,
-  wrapLines: false
+  wrapLines: false,
+  popupDelay: "standard"
 }
 
 /**
@@ -137,15 +163,25 @@ export function suggestsByItself(before: string): boolean {
 }
 
 /**
- * How long the mouse rests on a word before its hover shows, in seconds:  the page's own wait, `--ui-hover-delay`.
+ * How long the mouse rests on a word before its hover shows, in seconds:  the page's own wait, `--ui-hover-delay`,
+ * read live from `<html>` (Settings… › "Popup delay" sets it;  800 msec unless a theme says otherwise).
  * - Every code editor's hover waits this long (epic `codemirror` P1).
  * - So does every popup that shows by itself as you type, once the typing pauses (epic `codemirror` I22):
  *   the suggestion list, signature help;  each key typed starts the wait again.
  *   - Owen:  "the auto-help pops up waayy too fast":  the list showed 20-30 msec after a key, mid-word.
  *   - Not what's asked for by name:  Ctrl+Space, ⇧⌘Space and ⌥↓ show at once.
- *   - The words strip under an attribute's value waits longer, a second (`ValuePopups`' `REST_DELAY`).
+ *   - The words strip under an attribute's value waits a little longer (`ValuePopups`' `restDelay()`).
+ * - CodeMirror's own waits are set as an editor is made:  `CodeMirrorPopups.waiting()` makes them again as the
+ *   choice changes.
+ * - No page (node):  the standard 800 msec.
  */
-export const HOVER_DELAY = 0.8
+export function hoverDelay(): number {
+  if (!isBrowser()) return STANDARD_HOVER_DELAY
+  return cssSecondsFor(document.documentElement, HOVER_DELAY_TOKEN) ?? STANDARD_HOVER_DELAY
+}
+
+/** Spell UI's standard hover delay, in seconds:  what `hoverDelay()` says when the page doesn't. */
+const STANDARD_HOVER_DELAY = 0.8
 
 /** How much the hover says for `choices`. */
 export function hoverDetailFor(choices: CodePopupChoices): LSP.HoverDetail {
@@ -181,12 +217,13 @@ export const codeChoices: { now: CodePopupChoices; followers: Set<() => void> } 
 
 /**
  * Make `choices` the page's:  how much the hover says (`codeHover`), the look (`showBubbly()`),
- * and `codeChoices`' followers told.
+ * how long popups wait (`--ui-hover-delay`), and `codeChoices`' followers told.
  * - `CodeSettings` calls it as each choice changes, and as the page starts.
  */
 export function showCodeChoices(choices: CodePopupChoices): void {
   codeHover.detail = hoverDetailFor(choices)
   showBubbly(choices.bubbly)
+  showPopupDelay(choices.popupDelay)
   if (codeChoices.now === choices) return
   codeChoices.now = choices
   for (const follower of codeChoices.followers) follower()
@@ -197,6 +234,18 @@ export function showBubbly(isBubbly: boolean): void {
   if (codeLook.isBubbly === isBubbly) return
   codeLook.isBubbly = isBubbly
   for (const follower of codeLook.followers) follower()
+}
+
+/**
+ * Make `delay` the page's popup delay:  `--ui-hover-delay` on `<html>`, or none, for the page's own.
+ * - Before `codeChoices`' followers hear of it, so the code editors read the new wait (`hoverDelay()`).
+ */
+function showPopupDelay(delay: PopupDelay): void {
+  if (!isBrowser()) return
+  const time = POPUP_DELAY_TIMES[delay]
+  const { style } = document.documentElement
+  if (time) style.setProperty(HOVER_DELAY_TOKEN, time)
+  else style.removeProperty(HOVER_DELAY_TOKEN)
 }
 
 /** The class on an editor's container that hides the docs pane beside its suggestions. */

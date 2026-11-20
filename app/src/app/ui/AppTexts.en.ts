@@ -147,6 +147,10 @@ export const APP_TEXTS = {
   codeCompilerWords: "Compiler details in hover",
   codeBubbly: "Bubbly look",
   codeWrapLines: "Wrap long lines",
+  codePopupDelay: "Popup delay",
+  codePopupDelayShort: "Short:  0.4 seconds",
+  codePopupDelayStandard: "Standard:  0.8 seconds",
+  codePopupDelayLong: "Long:  1.5 seconds",
   // a notebook's page, `<NotebookPage>` (epic `elemental-spell` P16)
   notebookPageLock: "Lock it:  nothing is saved while it's locked",
   notebookPageUnlock: "Unlock it:  changes are saved",
