@@ -7,18 +7,26 @@ import { Processes } from "spell/server/Processes"
  * - Why:  removing a worktree leaves its page server (and the editor's vite server, its child) running,
  *   and nothing else ever stops them:  their `.spell-server.json` went with the folder.
  * - So they're found by PROCESS, not by pid file:
- *   - `ps` lists the page servers (`.../src/server/page/cli.ts serve`, the kit's;  `.../server/src/...` before epic `repo-split` P14, `.../packages/server/...` before P9)
- *     and the vite dev servers (`.../node_modules/vite.../ dev`)
+ *   - `ps` lists the page servers (`.../src/server/page/cli.ts serve`, the kit's;  `.../dist/server/page/cli.js serve`,
+ *     an npm install's;  `.../server/src/...` before epic `repo-split` P14, `.../packages/server/...` before P9),
+ *     the epic servers (`.../epic/bin/epic hub serve`, `.../epicMain.js hub serve`;  epic `repo-split` T72) and the
+ *     vite dev servers (`.../node_modules/vite.../ dev`)
  *   - `Processes` gives each one's working folder, and the port it listens on (`lsof`, `/proc`, or PowerShell)
  * - A server is an orphan when its checkout AND its working folder are both gone:
  *   one whose checkout exists is NEVER stopped (`orphanServers()`).
  */
 
-/** What runs a page server:  its entry point, run with `serve`;  the kit's `src/server/`, or its old `server/src/`. */
-const PAGE_SERVER = /\/(?:(?:packages\/)?server\/src|src\/server)\/page\/cli\.ts\s+serve\b/
+/**
+ * What runs a page server:  its entry point, run with `serve`;  the kit's `src/server/`, an npm install's built
+ * `dist/server/`, or its old `server/src/`.
+ */
+export const PAGE_SERVER = /\/(?:(?:packages\/)?server\/src|(?:src|dist)\/server)\/page\/cli\.[jt]s\s+serve\b/
+
+/** What runs the machine's epic server (`epic hub serve`):  the `epic` bin, or its entry, a checkout's or an install's. */
+export const EPIC_SERVER = /\/(?:bin\/epic|epicMain\.[jt]s)\s+hub\s+serve\b/
 
 /** What runs a vite dev server, through Vite+ or vite itself. */
-const VITE_SERVER =
+export const VITE_SERVER =
   /(?:^|[\s/])node_modules\/(?:vite-plus\/bin\/vp|vite\/bin\/vite\.js|vite\/dist\/vite\/node\/cli\.js|\.bin\/vite|\.bin\/vp)\s+dev\b/
 
 /** A web server, as `ps` and `lsof` show it. */
@@ -32,7 +40,7 @@ export type ServerProcess = {
 }
 
 /** The kinds of server `prune` looks for. */
-export const SERVER_KINDS = ["page", "vite"] as const
+export const SERVER_KINDS = ["page", "epic", "vite"] as const
 
 /** One of `SERVER_KINDS`. */
 export type ServerKind = (typeof SERVER_KINDS)[number]
@@ -66,8 +74,9 @@ export function orphanServers(processes: ServerProcess[], exists: (path: string)
 }
 
 /** `command`'s kind of server, or `undefined` for anything else. */
-function kindOf(command: string): ServerKind | undefined {
+export function kindOf(command: string): ServerKind | undefined {
   if (PAGE_SERVER.test(command)) return "page"
+  if (EPIC_SERVER.test(command)) return "epic"
   if (VITE_SERVER.test(command)) return "vite"
   return undefined
 }
@@ -81,7 +90,7 @@ function checkoutOf({ command, cwd }: ServerProcess): string | undefined {
 }
 
 /**
- * Every page server and vite dev server running on this machine, with its folder and port.
+ * Every page server, epic server and vite dev server running on this machine, with its folder and port.
  * - SIDE EFFECT:  asks the system (`Processes`), on macOS, Linux and Windows
  * - NEVER throws:  a tool that's missing or fails gives what it could
  */

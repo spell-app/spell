@@ -26,7 +26,7 @@ import { SessionMoves } from "./SessionMoves"
 
 /****************
  * ### `PluginInstall`
- * `epic plugin install [--kit <folder>] [--dry-run] [--json]`:  the epic plugin installed for Claude Code as
+ * `epic plugin install [--kit <folder>] [--no-bin] [--no-extension] [--dry-run] [--json]`:  the epic plugin installed for Claude Code as
  * `epic@spell`, run in place from the kit's `epic/` folder (epic `epic-engine` P49, Q45).
  *
  * It does what the kit's README/agents.md once listed as five commands to type, in order, each step skipped when it's
@@ -49,6 +49,8 @@ import { SessionMoves } from "./SessionMoves"
  *   and its test runs it against a scratch Claude folder.
  * - Claude Code reads them as a session starts:  `/reload-plugins` (or a new session) after it.
  * - `--dry-run`:  says what it would do, and writes nothing;  `--json`:  the report as JSON
+ * - `--no-bin`, `--no-extension`:  leave out step 6, step 7 (epic `repo-split` T72:  `spell local` keeps the `PATH`'s
+ *   `epic` itself, and never puts back an older extension)
  * - `--kit`:  the kit's checkout to install from;  default the MAIN checkout of the repo this code is in,
  *   never a worktree's, which goes away
  * - Run from the PUBLISHED `spell` (`npx spell@next epic init`), the kit is that installed package, with no marketplace
@@ -103,6 +105,8 @@ export class PluginInstall {
   readonly editor: Editor
   /** runs the editor's command (`code`, `cursor`):  its output, or `undefined` when it can't run or fails */
   readonly code: (args: string[]) => string | undefined
+  /** the home folder the editor keeps its extensions in (`Editor.extensionsFolder()`) */
+  readonly editorHome: string
 
   constructor({
     home = ClaudeHome.home(),
@@ -113,7 +117,8 @@ export class PluginInstall {
     agentsHome = CodexHome.agentsHome(),
     platform = process.platform,
     editor = Editor.of(),
-    code = (args) => runEditor(editor, args)
+    code = (args) => runEditor(editor, args),
+    editorHome = homedir()
   }: PluginInstallProps = {}) {
     this.home = home
     this.kit = kit
@@ -125,6 +130,7 @@ export class PluginInstall {
     this.platform = platform
     this.editor = editor
     this.code = code
+    this.editorHome = editorHome
   }
 
   /**
@@ -165,7 +171,7 @@ export class PluginInstall {
 
   /** Run `epic plugin <args>`;  resolves to the exit code.  Throws `EpicCommandError` for a bad command line. */
   async run(args: string[]): Promise<number> {
-    const { positional, flags } = parseVerbArgs(args, ["dryRun", "json", "codex"])
+    const { positional, flags } = parseVerbArgs(args, ["dryRun", "json", "codex", "noBin", "noExtension"])
     const [verb] = positional
     if (verb !== "install") throw new EpicCommandError(`unknown verb '${verb ?? ""}':  epic plugin install`)
     const kit = stringFlag(flags.kit)
@@ -175,11 +181,18 @@ export class PluginInstall {
           kit: resolve(kit),
           bin: this.bin,
           codexHome: this.codexHome,
-          agentsHome: this.agentsHome
+          agentsHome: this.agentsHome,
+          now: this.now,
+          platform: this.platform,
+          editor: this.editor,
+          code: this.code,
+          editorHome: this.editorHome
         })
       : this
     const dryRun = flags.dryRun === true
-    const report = flags.codex ? installer.installCodex({ dryRun }) : installer.install({ dryRun })
+    const report = flags.codex
+      ? installer.installCodex({ dryRun })
+      : installer.install({ dryRun, bin: flags.noBin !== true, extension: flags.noExtension !== true })
     if (flags.json) CLI.out(JSON.stringify(report, null, 2))
     else for (const line of PluginInstall.lines(report)) CLI.out(line)
     return EXIT.OK
@@ -201,10 +214,15 @@ export class PluginInstall {
 
   /**
    * Install the plugin (the class's steps);  what it changed, or would with `dryRun`.
+   * - `bin`, `extension`:  `false` leaves out step 6, step 7
    * - SIDE EFFECT (not `dryRun`):  writes Claude Code's settings and lists, and the links
    * - throws `EpicCommandError` when the kit has no plugin, or a list won't parse
    */
-  install({ dryRun = false }: { dryRun?: boolean } = {}): PluginInstallReport {
+  install({
+    dryRun = false,
+    bin = true,
+    extension = true
+  }: { dryRun?: boolean; bin?: boolean; extension?: boolean } = {}): PluginInstallReport {
     const { plugin, marketplace } = this.names()
     const version = this.version()
     const report: PluginInstallReport = {
@@ -220,8 +238,8 @@ export class PluginInstall {
     this.installedPlugins(`${plugin}@${marketplace}`, version, { dryRun, change })
     this.cache(plugin, marketplace, version, { dryRun, change })
     this.linkSkills(join(this.home, "skills"), "skills", { dryRun, change })
-    this.binLink({ dryRun, change })
-    this.extension({ dryRun, change })
+    if (bin) this.binLink({ dryRun, change })
+    if (extension) this.extension({ dryRun, change })
     return report
   }
 
@@ -547,15 +565,18 @@ export class PluginInstall {
       if (this.link(at, join(own, name), step)) moved.push(name)
     }
     if (moved.length) step.change(`${label}:  ${moved.length} linked to ${own}:  ${moved.join(", ")}`)
-    // a link to an older folder of the plugin's skill the plugin no longer has:  it leads nowhere
+    // a link to a skill of the plugin's this copy doesn't have:  in an older folder of the plugin's, gone, or in
+    // another copy of it (an npx cache, a project's install:  epic `repo-split` T72), which runs that copy's
     if (!existsSync(folder)) return
     for (const entry of readdirSync(folder, { withFileTypes: true })) {
       const at = join(folder, entry.name)
-      if (!entry.isSymbolicLink() || existsSync(at)) continue
+      if (!entry.isSymbolicLink() || names.includes(entry.name)) continue
       const target = readlinkSync(at)
       if (!OLD_SKILL.test(target)) continue
+      const gone = !existsSync(at)
+      if (!gone && !OTHER_COPY.test(target)) continue
       if (!step.dryRun) rmSync(at)
-      step.change(`${label}:  ${at} removed (it led to ${target}, gone)`)
+      step.change(`${label}:  ${at} removed (it led to ${target}, ${gone ? "gone" : "another copy of the plugin"})`)
     }
   }
 
@@ -592,7 +613,8 @@ export class PluginInstall {
   /**
    * Step 7:  the epic VS Code extension (its Review tab, the window moves), from the plugin's
    * `vscode/spell-epic.vsix`, with `code --install-extension` (epic `epic-friend` P15);  skipped when the editor has
-   * that version already.
+   * that version already, unless the `.vsix` was built after the editor's copy was installed (epic `repo-split` T72:
+   * a checkout rebuilds it without a new version)
    * - into the editor `Editor` names (P16):  VS Code, or Cursor (`cursor --install-extension`, the same flags)
    * - no `.vsix` (a checkout that hasn't built one:  `yarn vscode:package`):  nothing, and no change said
    * - no editor command (`code`, `cursor`):  one line saying so
@@ -611,7 +633,8 @@ export class PluginInstall {
       )
       return
     }
-    if (listed.split(/\r?\n/).some((line) => line.trim().toLowerCase() === `${id}@${version}`.toLowerCase())) return
+    const same = listed.split(/\r?\n/).some((line) => line.trim().toLowerCase() === `${id}@${version}`.toLowerCase())
+    if (same && !this.isRebuilt(vsix, `${id}-${version}`.toLowerCase())) return
     if (!step.dryRun && this.code(["--install-extension", vsix, "--force"]) === undefined) {
       step.change(
         `${editorName}:  \`${command} --install-extension ${vsix}\` failed;  in ${editorName}:  Install from VSIX...`
@@ -619,6 +642,12 @@ export class PluginInstall {
       return
     }
     step.change(`${editorName}:  extension ${id} ${version} installed;  then:  Developer:  Reload Window`)
+  }
+
+  /** Whether `vsix` was built after the editor installed its copy, folder `installed` in its extensions folder. */
+  private isRebuilt(vsix: string, installed: string): boolean {
+    const copy = statSync(join(this.editor.extensionsFolder(this.editorHome), installed), { throwIfNoEntry: false })
+    return !!copy && statSync(vsix).mtimeMs > copy.mtimeMs
   }
 
   /**
@@ -660,6 +689,8 @@ export type PluginInstallProps = {
   editor?: Editor
   /** runs the editor's command;  default the real one (`Editor.run()`), a test hands in a stand-in */
   code?: (args: string[]) => string | undefined
+  /** the home folder holding the editor's extensions folder;  default `os.homedir()` */
+  editorHome?: string
 }
 
 /** What `install()` did, or would do. */
@@ -737,6 +768,9 @@ const NEW_TEMPLATES = "epic/templates/epics/"
 
 /** A skill link's target in an older folder of the plugin's:  `.../spell-epic/skills/epic`, `.../epic/skills/epic`. */
 const OLD_SKILL = /(?:^|\/)(?:spell-)?epic\/skills\/[^/]+\/?$/
+
+/** A folder npm or npx installed:  a skill link into one runs another copy of the plugin. */
+const OTHER_COPY = /\/node_modules\/|\/_npx\//
 
 /** The VS Code extension's package, in the plugin's `vscode/`:  `yarn vscode:package` writes it. */
 const VSIX = "spell-epic.vsix"

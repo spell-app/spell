@@ -4,6 +4,8 @@ import { dirname, join, resolve } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 import JSON5 from "json5"
 
+import { KIT_FILE, kitFileAt } from "./projectBin"
+
 /**
  * Running your own kit checkout in a project that installs `spell` from npm (epic `repo-split` T69, T70):
  * one person runs Spell from their checkout, everyone else from npm, and nothing the project commits changes.
@@ -14,12 +16,13 @@ import JSON5 from "json5"
  *   - Both set:  the variable wins, so one command can try another checkout.
  * - Each published bin asks first (`checkoutToRun()`, `PublishedPackage`'s `writeBins()`), and runs the checkout's
  *   own bin instead;  the checkout's own bin never asks, so it never hands off twice.
- * - Imports only node's own modules and `json5`:  it runs before anything else of the package.
+ * - A project's git worktrees follow its main checkout's file (`kitFileAt()`, epic `repo-split` T72).
+ * - Imports only node's own modules, `json5` and the bins' own `projectBin`:  it runs before anything else of the
+ *   package.
  */
 export const SPELL_KIT = "SPELL_KIT"
 
-/** A project's file naming the checkout it runs, from its root:  each person's own, never committed. */
-export const KIT_FILE = ".spell/kit.json5"
+export { KIT_FILE }
 
 /** Where the checkout to run is named, when it is:  `kitSetting()`. */
 export type KitSetting = {
@@ -51,10 +54,14 @@ export function kitSetting(
   return { kit: resolveKit(kit.trim(), dirname(dirname(file))), namedBy: file, setting: kit.trim() }
 }
 
-/** The nearest `KIT_FILE` from `from` up, as a full path;  else `undefined`. */
+/**
+ * The nearest `KIT_FILE` from `from` up, as a full path;  else `undefined`.
+ * - in a git worktree, its main checkout's counts at each folder (`kitFileAt()`)
+ */
 export function kitFileFrom(from: string): string | undefined {
   for (let dir = resolve(from); ; dir = dirname(dir)) {
-    if (existsSync(join(dir, KIT_FILE))) return join(dir, KIT_FILE)
+    const file = kitFileAt(dir)
+    if (file) return file
     if (dirname(dir) === dir) return undefined
   }
 }

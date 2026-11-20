@@ -150,11 +150,13 @@ export default function kitCommands(spell: Command): void {
     .command("local")
     .description(
       "run your own Spell checkout in this project instead of npm's spell, for you alone:  " +
-        "on writes the project's .spell/kit.json5, never committed;  off removes it"
+        "on writes the project's .spell/kit.json5, never committed, and switches spell and epic on your PATH, " +
+        "Claude Code's epic plugin and skills, and VS Code's extension;  off puts them back"
     )
     .argument("[verb]", "status (default):  which Spell runs here, and why;  on [checkout];  off")
     .argument("[checkout]", "on:  your checkout of Spell (default:  the one this spell runs from, else ~/www/spell)")
     .option("--json", "print what it found (and did) as JSON")
+    .option("--stop", "on:  also stop Spell's servers running another copy, and start the epic server from yours")
     .action((verb: string | undefined, checkout: string | undefined, options: CLI.LocalOptions) =>
       CLI.runCommand(async () =>
         (await import("spell/cli/commands/localCommand")).localCommand(verb, checkout, options)

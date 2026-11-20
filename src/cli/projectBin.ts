@@ -1,5 +1,7 @@
 import { existsSync, readFileSync, realpathSync } from "node:fs"
-import { dirname, join, resolve } from "node:path"
+import { dirname, join, relative, resolve } from "node:path"
+
+import { checkoutOf } from "spell/server/checkout"
 
 /**
  * The project's own npm install of a command, for a checkout's bin on the `PATH` to hand off to (epic `repo-split`
@@ -12,7 +14,8 @@ import { dirname, join, resolve } from "node:path"
  *   - a kit checkout is found first (a `package.json` named `spell`):  its own bin decides
  *   - no install is found
  * - An install is one whose real path is in a `node_modules`:  a `portal:` or a link to a checkout isn't.
- * - Imports only node's own modules, in TypeScript plain node runs:  the bins load it before `tsx`.
+ * - Imports only node's own modules and the kit's `checkoutOf()` (node's own too), in TypeScript plain node runs:
+ *   the bins load it before `tsx`.
  * - NEVER throws:  anything unreadable runs the checkout.
  */
 export function projectBin(
@@ -23,13 +26,36 @@ export function projectBin(
   if (env.SPELL_KIT?.trim()) return undefined
   try {
     for (let dir = resolve(folder); ; dir = dirname(dir)) {
-      if (existsSync(join(dir, ".spell", "kit.json5")) || isKitCheckout(dir)) return undefined
+      if (kitFileAt(dir) || isKitCheckout(dir)) return undefined
       for (const install of installs) {
         const bin = join(dir, install)
         if (existsSync(bin) && realpathSync(bin).includes("/node_modules/")) return bin
       }
       if (dirname(dir) === dir) return undefined
     }
+  } catch {
+    return undefined
+  }
+}
+
+/** A project's file naming the checkout it runs, from its root:  each person's own, never committed. */
+export const KIT_FILE = ".spell/kit.json5"
+
+/**
+ * The `KIT_FILE` in folder `dir`, as a full path;  else, in a git WORKTREE, the one at the same place in its main
+ * checkout (epic `repo-split` T72);  else `undefined`.
+ * - Why:  the file is git-ignored, so a project's worktrees never get it;  they follow the main checkout's
+ *   (`spell local on` there), as `git rev-parse --git-common-dir` finds it, with no `git` run (`checkoutOf()`)
+ * - NEVER throws
+ */
+export function kitFileAt(dir: string): string | undefined {
+  const own = join(dir, KIT_FILE)
+  if (existsSync(own)) return own
+  try {
+    const checkout = checkoutOf(dir)
+    if (!checkout?.worktree) return undefined
+    const inMain = join(checkout.main, relative(checkout.root, dir), KIT_FILE)
+    return existsSync(inMain) ? inMain : undefined
   } catch {
     return undefined
   }

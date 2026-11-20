@@ -91,6 +91,8 @@ export type WwodOptions = GlobalOptions & {
 /** `spell local`'s flags (epic `repo-split` T70). */
 export type LocalOptions = GlobalOptions & {
   json?: boolean
+  /** `on`:  also stop Spell's servers running another copy of Spell, and start the epic server again (T72) */
+  stop?: boolean
 }
 
 /** `spell deps`'s flags. */
