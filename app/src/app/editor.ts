@@ -880,6 +880,7 @@ export class EditorStore extends Observable {
       keepThings,
       onRestartNeeded: (reason) => editor.noteRestartNeeded(reason),
       loadImport: fetchCompiled,
+      loadNative: fetchCodeFile,
       messages: lang ? SP.SpellWords.messagesFor(lang) : undefined,
       projectId: project.projectId,
       sourceMap,
@@ -945,7 +946,12 @@ export class EditorStore extends Observable {
       const { runtime, coreUrl } = await testsCopy
       const lang = project.wordsLanguages[0]
       const messages = lang ? SP.SpellWords.messagesFor(lang) : undefined
-      return await runtime.testApp(compiled, { coreUrl, loadImport: fetchCompiled, messages })
+      return await runtime.testApp(compiled, {
+        coreUrl,
+        loadImport: fetchCompiled,
+        loadNative: fetchCodeFile,
+        messages
+      })
     } catch (problem) {
       testsCopy = undefined
       return { problem: problem instanceof Error ? problem.message : String(problem), results: [] }
@@ -2846,4 +2852,15 @@ async function fetchCompiled(projectId: string): Promise<string> {
   const { projectName } = new SP.SpellLocation(projectId)
   const url = SP.SpellUrls.fileUrl(SP.SpellLocation.join(projectId, `${projectName}${SP.COMPILED_JS_SUFFIX}`))
   return $fetch<string>({ url, cache: "no-cache" })
+}
+
+/**
+ * Javascript of the code file a program imports as `module`, for `call native` (epic `from-console` P10):
+ * `@spell/native/owen@spell/clipboard/clipboard.ts` => `/spaces/owen@spell/clipboard/clipboard.ts?as=javascript`,
+ * which the page server answers with its types taken out.
+ * - Fetched afresh each run, so an edit to it shows on the next.
+ */
+async function fetchCodeFile(module: string): Promise<string> {
+  const path = decodeURI(module.slice(SP.SPELL_NATIVE_MODULE.length))
+  return $fetch<string>({ url: `${SP.SpellUrls.fileUrl(path)}?as=javascript`, cache: "no-cache" })
 }

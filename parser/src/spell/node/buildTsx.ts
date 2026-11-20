@@ -36,3 +36,18 @@ export async function buildTsx(
   })
   return drawn.code
 }
+
+/**
+ * A project's code file (`call native`, epic `from-console` P10) as javascript a browser runs:
+ * a `.ts` or `.mts` with its types taken out, by esbuild;  anything else as it is.
+ * - What the editor's runner imports for `@spell/native/<project>/clipboard.ts`:
+ *   spaces' `GET /spaces/<project>/clipboard.ts?as=javascript`.
+ * - `filename`:  its name, for the ending and for error messages, e.g. `clipboard.ts`.
+ * - throws esbuild's error when `code` isn't valid TypeScript.
+ * - NODE-ONLY.
+ */
+export async function codeFileAsJavascript(code: string, { filename }: { filename: string }): Promise<string> {
+  if (!/\.m?ts$/.test(filename)) return code
+  const built = await transform(code, { loader: "ts", target: "es2022", format: "esm", sourcefile: filename })
+  return built.code
+}

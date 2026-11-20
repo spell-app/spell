@@ -1,6 +1,8 @@
 /**
  * Running compiled spell javascript -- in every runner:  the app, the VS Code runner's webview, and `<spell-viewer>`.
  * - Compiled spell `import`s `@spell/core`, and any projects it imports as `@spell/project/<projectId>`.
+ *   - And the project's code files its Spell calls, `call native copyText`, as `@spell/native/<project>/clipboard.ts`
+ *     (epic `from-console` P10):  a `blob:` URL each, of the javascript the runner's `loadNative()` hands back.
  *   - Compiled TypeScript's element classes also import `@spell/elements` (epic `drawable-thing` P10):
  *     the runtime exports that too.
  *   - We rewrite them onto URLs -- the runtime's own, and a `blob:` URL per project -- see `linkModule()`.
@@ -32,6 +34,9 @@ import { LiveEdit, type ProgramText } from "./LiveEdit"
  * - Each project it imports comes from `options.loadImport()`, linked onto its own `blob:` URL:
  *   once per run, however many import it, deepest first.
  *   Without `loadImport`, a project which imports another won't run.
+ * - Each code file it calls (`call native`) comes from `options.loadNative()`, linked onto a `blob:` URL of its own:
+ *   kept while the program runs, so a live edit links onto the same module.
+ *   Without `loadNative`, a program which calls one won't run.
  * - `runTests`:  then the tests it didn't run itself, as `spell test` does.
  * - `projectId`:  its remembered props come back from its last run, read before it starts (`core.remember()`).
  * - SIDE EFFECT:  hands its top-level things to `core.things`, for the Thing Explorer --
@@ -64,6 +69,11 @@ export async function runCompiled(compiled: string, options: RunCompiledOptions)
   if (!loadImport && projectImportsOf(compiled).length) {
     return "This project imports another, which this runner can't load."
   }
+  const { loadNative } = options
+  const nativeModules = nativeImportsOf(compiled)
+  if (!loadNative && nativeModules.length) {
+    return `This program calls code from ${nativeModules.map(codeFileOf).join(", ")}, which this runner can't load yet.`
+  }
   const { coreUrl } = options
   // blob URL of each project linked this run, by id
   const linked = new Map<string, Promise<string>>()
@@ -71,6 +81,8 @@ export async function runCompiled(compiled: string, options: RunCompiledOptions)
   const importTexts = new Map<string, string>()
   const linkedInOrder: string[] = []
   const urls: string[] = []
+  // blob URL of each code file the program calls, by module:  kept for live edits, so never revoked with `urls`
+  const natives: Record<string, string> = {}
   try {
     // before it's imported:  importing it starts its app, which may read them
     if (options.projectId) await core.remember(options.projectId)
@@ -109,7 +121,8 @@ export async function runCompiled(compiled: string, options: RunCompiledOptions)
     if (previous) carryOver(previous, program)
     lastCompiled = compiled
     keepImportUrls(imports, urls)
-    lastProgram = { compiled, stamped: stampedFrom(compiled, options), exports: program, imports }
+    for (const url of Object.values(lastProgram?.natives ?? {})) URL.revokeObjectURL(url)
+    lastProgram = { compiled, stamped: stampedFrom(compiled, options), exports: program, imports, natives }
     return undefined
   } catch (error) {
     // the next recompile carries the last good run's things over, not this broken one's
@@ -124,7 +137,7 @@ export async function runCompiled(compiled: string, options: RunCompiledOptions)
 
   /**
    * `blob:` URL of `source`, linked:  its `@spell/core` onto `coreUrl`, each project it imports onto its own.
-   * - Each project it imports is linked first.
+   * - Each project it imports is linked first;  each code file it calls, once per run.
    * - `chain`:  the projects we're linking this for, to catch projects importing each other.
    */
   async function link(source: string, chain: string[]): Promise<string> {
@@ -143,10 +156,13 @@ export async function runCompiled(compiled: string, options: RunCompiledOptions)
       }
       imports[projectId] = await url
     }
+    for (const module of nativeImportsOf(source)) {
+      natives[module] ??= blobUrl(await loadNative!(module))
+    }
     // the program itself carries its source map inline:  a `blob:` URL can't reach the map file beside it
     const stamped = !chain.length && options.placesFrom ? SourceMarks.stamped(source, options.placesFrom) : source
     const linkedSource = SourceMarks.inline(
-      linkModule(stamped, coreUrl, imports),
+      linkModule(stamped, coreUrl, imports, natives),
       chain.length ? undefined : options.sourceMap
     )
     const url = URL.createObjectURL(new Blob([linkedSource], { type: "text/javascript" }))
@@ -237,6 +253,8 @@ async function takeEdit(compiled: string, options: RunCompiledOptions): Promise<
   const last = lastProgram
   if (!last || !appIsMounted()) return undefined
   const importIds = projectImportsOf(compiled)
+  // a code file the last run didn't link:  it runs again, linking it
+  if (nativeImportsOf(compiled).some((module) => !last.natives[module])) return undefined
   // each project it imports, read again and weighed as the program is:  deepest first (epic `editor`, Live Edit Everywhere)
   const importEdits: Array<{ projectId: string; text: string; edit: LiveEdit }> = []
   if (importIds.length) {
@@ -278,7 +296,7 @@ async function takeEdit(compiled: string, options: RunCompiledOptions): Promise<
     for (const { projectId, text, edit: taken } of importEdits) {
       if (taken.kind !== "live") continue
       const running = imports.get(projectId)!
-      const url = blobUrl(linkModule(taken.text, options.coreUrl, urlsOf(imports)))
+      const url = blobUrl(linkModule(taken.text, options.coreUrl, urlsOf(imports), last.natives))
       const exports = await core.loadOverRunning(
         running.exports,
         () => import(/* @vite-ignore */ url) as Promise<Record<string, unknown>>
@@ -292,7 +310,7 @@ async function takeEdit(compiled: string, options: RunCompiledOptions): Promise<
     let program = last.exports
     if (edit.kind === "live") {
       const url = blobUrl(
-        SourceMarks.inline(linkModule(edit.text, options.coreUrl, urlsOf(imports)), options.sourceMap)
+        SourceMarks.inline(linkModule(edit.text, options.coreUrl, urlsOf(imports), last.natives), options.sourceMap)
       )
       try {
         program = await core.loadOverRunning(
@@ -306,7 +324,7 @@ async function takeEdit(compiled: string, options: RunCompiledOptions): Promise<
       core.things.setTopLevel(program)
       followDrawing(edit)
     }
-    lastProgram = { compiled, stamped, exports: program, imports }
+    lastProgram = { compiled, stamped, exports: program, imports, natives: last.natives }
     lastCompiled = compiled
     // the old modules' URLs:  their modules are retired, so nothing imports them again
     urls.forEach((url) => URL.revokeObjectURL(url))
@@ -367,7 +385,9 @@ function stampedFrom(compiled: string, options: RunCompiledOptions): string {
 }
 
 /** The program running now, to take an edit as it runs -- see `takeEdit()`. */
-let lastProgram: (ProgramText & { exports: Record<string, unknown>; imports: RunningImports }) | undefined
+let lastProgram:
+  | (ProgramText & { exports: Record<string, unknown>; imports: RunningImports; natives: Record<string, string> })
+  | undefined
 
 /** Each project the running program imports, by id, deepest first:  the text it ran, its module's URL, what it exports. */
 type RunningImports = Map<string, { compiled: string; url: string; exports: Record<string, unknown> }>
@@ -388,6 +408,12 @@ export type RunCompiledOptions = {
   coreUrl: string
   /** Compiled javascript of project `projectId`, which the program imports. */
   loadImport?: (projectId: string) => Promise<string>
+  /**
+   * Javascript of the code file the program imports as `module`, for `call native` (epic `from-console` P10):
+   * `@spell/native/owen@spell/clipboard/clipboard.ts` => `clipboard.ts` as javascript, its types taken out.
+   * - None:  a program that calls one won't run, and says so.
+   */
+  loadNative?: (module: string) => Promise<string>
   /**
    * The program's project, e.g. `@spell/examples/solitaire`:  what its remembered props are kept under.
    * - Kept in the browser's storage, from run to run (`core.remember()`, epic `prefs-and-undo` P8):
@@ -559,14 +585,37 @@ export function appIsMounted(): boolean {
  * `source` with its imports pointed at URLs:
  * `@spell/core` at `coreUrl`, and each `@spell/project/<projectId>` at `imports[projectId]`.
  * - `@spell/elements` at `coreUrl` too:  the runtime copy exports `SpellElement` (`spellRuntime.ts`).
- * - Pure.  A project not in `imports` is left as it was.
+ * - Each code file it calls, `@spell/native/...`, at `natives[module]`.
+ * - Pure.  A project not in `imports`, or a code file not in `natives`, is left as it was.
  */
-export function linkModule(source: string, coreUrl: string, imports: Record<string, string> = {}): string {
+export function linkModule(
+  source: string,
+  coreUrl: string,
+  imports: Record<string, string> = {},
+  natives: Record<string, string> = {}
+): string {
   return source.replace(SPELL_IMPORT, (whole, from: string, specifier: string) => {
     const isRuntime = specifier === SPELL_CORE_MODULE || specifier === SPELL_ELEMENTS_MODULE
-    const url = isRuntime ? coreUrl : imports[specifier.slice(PROJECT_MODULE.length)]
+    const url = isRuntime
+      ? coreUrl
+      : specifier.startsWith(NATIVE_MODULE)
+        ? natives[specifier]
+        : imports[specifier.slice(PROJECT_MODULE.length)]
     return url ? `${from}"${url}"` : whole
   })
+}
+
+/** The code files `source` imports, by module, each once:  `@spell/native/owen@spell/clipboard/clipboard.ts`. */
+export function nativeImportsOf(source: string): string[] {
+  const modules = [...source.matchAll(SPELL_IMPORT)]
+    .map(([, , specifier]) => specifier!)
+    .filter((specifier) => specifier.startsWith(NATIVE_MODULE))
+  return [...new Set(modules)]
+}
+
+/** A code file's name, from the module it's imported as:  `clipboard.ts`. */
+function codeFileOf(module: string): string {
+  return module.slice(module.lastIndexOf("/") + 1)
 }
 
 /** Ids of the projects `source` imports, each once, in order -- e.g. `@spell/examples/Solitaire`. */
@@ -586,6 +635,12 @@ const SPELL_IMPORT = /(\bfrom\s*)"(@spell\/[^"]+)"/g
  * - NOTE: a copy, NOT imported:  `spell/parser/spell` would pull the whole parser into the runner bundle.
  */
 const PROJECT_MODULE = "@spell/project/"
+
+/**
+ * Start of the specifier compiled spell imports a code file by -- `SP.SPELL_NATIVE_MODULE`.
+ * - NOTE: a copy, NOT imported:  `spell/parser/spell` would pull the whole parser into the runner bundle.
+ */
+const NATIVE_MODULE = "@spell/native/"
 
 /** The app's mount point, with the mounted app `App.start()` leaves on it. */
 type AppElement = HTMLElement & { spellRoot?: { app?: object; unmount(): void } }

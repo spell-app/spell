@@ -8,7 +8,7 @@
  *   and sets this machine's person and their org's groups (`thisMachinesPerson()`).
  */
 import { existsSync, readFileSync } from "fs"
-import { stat } from "fs/promises"
+import { readFile, stat } from "fs/promises"
 import escapeRegExp from "lodash/escapeRegExp"
 import { basename, dirname, extname, relative, resolve, sep } from "path"
 
@@ -660,6 +660,8 @@ export function fileOrOldName(serverPath: string): string {
  * - A file spell BUILDS (`Solitaire.spell.js`, `.scopes.js` ...) is served from the project's build folder
  *   (`serverPath`):  its URL sits beside its source's.
  * - Returns:  raw file body via `SRV.Reply.sendFile()`, `{ dotfiles: "allow" }`, so dotfiles can be fetched too.
+ * - `?as=javascript`, for a javascript or TypeScript code file (`clipboard.ts`, for `call native`):
+ *   its javascript, the types taken out (`codeFileAsJavascript()`), for the editor's runner to import.
  *   - Its mime type is set from its extension, `.js` as javascript:
  *     so a runner imports a compiled project from here, and `<spell-viewer>` loads its scope pack.
  * - Failure:
@@ -683,6 +685,14 @@ export const request_getFile = async (request: Request, response: Response) => {
     const drafts =
       isDraftable(location) || isBuiltFile(location) ? await draftsFor(request, location.projectId) : undefined
     const draft = isDraftable(location) ? await drafts!.read(location.filePath!) : undefined
+    // a code file `call native` calls, as javascript the editor's runner imports (epic `from-console` P10)
+    if (request.query.as === "javascript" && SP.NativeCode.languageOf(location.serverPath) === "js") {
+      const code = draft ?? (await readFile(location.serverPath, "utf8"))
+      const filename = basename(location.serverPath)
+      // loaded when asked:  its file brings esbuild and Solid's compiler, which nothing else here needs
+      const { codeFileAsJavascript } = await import("spell/parser/spell/node/buildTsx")
+      return response.type(".js").send(await codeFileAsJavascript(code, { filename }))
+    }
     // its own type, by its extension:  a `.js` draft still imports as a script
     if (draft !== undefined) return response.type(extname(location.serverPath) || "txt").send(draft)
     // what spell built from your drafts is yours, never the shared build (`ProjectDrafts`, "Your build")

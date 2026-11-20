@@ -295,6 +295,14 @@ describe("GET /spaces/<project>/<file>", () => {
     expect(reply.text).toBe("hello")
   })
 
+  it("`?as=javascript`:  a TypeScript code file as javascript, its types taken out (from-console I21)", async () => {
+    writeFixture("user/Proj/clipboard.ts", "export function copyText(text: string): void {}\n")
+    const reply = await request("GET", `${FILES}clipboard.ts?as=javascript`)
+    expect(reply.status).toBe(200)
+    expect(reply.contentType).toMatch(/javascript/)
+    expect(reply.text).toMatch(/function copyText\(text\) {[\s\S]*export {\s*copyText\s*}/)
+  })
+
   it("missing file => 404 JSON { errors: [{ message, trace }] }", async () => {
     const reply = await request("GET", `${FILES}nope.spell`)
     expect(reply.status).toBe(404)

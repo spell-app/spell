@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test"
 
-import { linkModule, projectImportsOf, startChanged } from "spell/app/app/runner"
+import { linkModule, nativeImportsOf, projectImportsOf, startChanged } from "spell/app/app/runner"
 
 const COMPILED = `/*! SPELL: PROJECT { spellVersion: "0.8.0" } */
 import { core, Thing, List, App } from "@spell/core"
@@ -47,6 +47,32 @@ describe("linkModule()", () => {
 
   test('handles minified `from"..."`', () => {
     expect(linkModule(`import{core}from"@spell/core"`, "blob:core")).toBe(`import{core}from"blob:core"`)
+  })
+
+  test("points each code file `call native` calls at its URL, and leaves one it has none for alone (from-console I21)", () => {
+    const source = [
+      `import { copyText } from "@spell/native/owen@spell/clipboard/clipboard.ts"`,
+      `import { shout } from "@spell/native/owen@spell/clipboard/shout.js"`
+    ].join("\n")
+    const linked = linkModule(
+      source,
+      "blob:core",
+      {},
+      { "@spell/native/owen@spell/clipboard/clipboard.ts": "blob:clip" }
+    )
+    expect(linked).toContain(`import { copyText } from "blob:clip"`)
+    expect(linked).toContain(`from "@spell/native/owen@spell/clipboard/shout.js"`)
+  })
+})
+
+describe("nativeImportsOf()", () => {
+  test("lists each code file a program imports once, by module", () => {
+    const source = [
+      `import { core } from "@spell/core"`,
+      `import { copyText } from "@spell/native/owen@spell/clipboard/clipboard.ts"`,
+      `import { pasteText } from "@spell/native/owen@spell/clipboard/clipboard.ts"`
+    ].join("\n")
+    expect(nativeImportsOf(source)).toEqual(["@spell/native/owen@spell/clipboard/clipboard.ts"])
   })
 })
 
