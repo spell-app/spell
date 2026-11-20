@@ -3612,7 +3612,7 @@
           "ruleNames": ["list_length"],
           "internal": false,
           "file": "src/spell/rules/lists/ListLength.ts",
-          "line": 31,
+          "line": 30,
           "purpose": "Return length of a list, e.g. `number of items in my-list` => `core.itemCountOf(myList)`.",
           "syntaxes": [
             {
@@ -4040,13 +4040,13 @@
               "example": "words in \"a word list\" where",
               "outputs": {
                 "js": {
-                  "code": "core.filter(core.valuesOf(\"a word list\"), () => {})"
+                  "code": "core.filter(\"a word list\", () => {})"
                 },
                 "ts": {
-                  "code": "core.filter(core.valuesOf(\"a word list\"), () => {})"
+                  "code": "core.filter(\"a word list\", () => {})"
                 },
                 "py": {
-                  "code": "core.filter(core.values_of(\"a word list\"), _each_1)"
+                  "code": "core.filter(\"a word list\", _each_1)"
                 }
               }
             }
@@ -6366,32 +6366,6 @@
           "aliases": ["expression"]
         },
         {
-          "className": "FirstThingWhere",
-          "ruleNames": ["first_thing_where"],
-          "internal": false,
-          "file": "src/spell/rules/classes/FirstThingWhere.ts",
-          "line": 14,
-          "purpose": "The first thing of a type that fits, or nothing: `every_thing_where`'s first.",
-          "syntaxes": [
-            {
-              "syntax": "the first {type:known_type} (where:where|which|that|who) {inline_expression}?",
-              "example": "the first suite record where its rank is 1",
-              "outputs": {
-                "js": {
-                  "code": "core.getItemAt(core.filter(core.everyThing(SuiteRecord), (suiterecord) => suiterecord.rank === 1), 0)"
-                },
-                "ts": {
-                  "code": "core.getItemAt(core.filter(core.everyThing(SuiteRecord), (suiterecord) => suiterecord.rank === 1), 0)"
-                },
-                "py": {
-                  "code": "core.get_item_at(\n    core.filter(core.every_thing(SuiteRecord), lambda suiterecord: suiterecord.rank == 1),\n    0,\n)"
-                }
-              }
-            }
-          ],
-          "aliases": ["expression"]
-        },
-        {
           "className": "TheThings",
           "ruleNames": ["the_things"],
           "internal": false,
@@ -6640,11 +6614,11 @@
           "ruleNames": ["create_one_of_a_kind"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateOneOfAKind.ts",
-          "line": 32,
+          "line": 29,
           "purpose": "`solitaire is an app` -- declares an app AND its one instance (epic `outline-spell` P21).",
           "syntaxes": [
             {
-              "syntax": "{type:type_words} is (a|an) ([ability:{draggable_or_droppable} ,?] ,?)? {superType:type} (, aka {aka:quoted_type})? (, in the {layout:type_words}|, (no_layout:no layout))? (, (fills_window:filling the window))? {with_nested_statements}?",
+              "syntax": "{type:type_words} is (a|an) ([ability:{draggable_or_droppable} ,?] ,?)? {superType:type} (, aka {aka:quoted_type})? (, in the {layout:type_words}|, (no_layout:no layout))? {with_nested_statements}?",
               "example": "solitaire is an app",
               "outputs": {
                 "js": {
@@ -8293,7 +8267,7 @@
           "ruleNames": ["drag_handler"],
           "internal": false,
           "file": "src/spell/rules/classes/DragHandler.ts",
-          "line": 43,
+          "line": 52,
           "purpose": "What a list does on the page as a thing is dragged over it, out of it, or dropped on it.",
           "syntaxes": [
             {
@@ -10932,7 +10906,7 @@
           "ruleNames": ["create_site"],
           "internal": false,
           "file": "src/spell/rules/sites/CreateSite.ts",
-          "line": 39,
+          "line": 30,
           "purpose": "A SITE, and its one instance (epic `mockup` P1).",
           "syntaxes": [
             {
@@ -10954,35 +10928,6 @@
           "aliases": ["statement"]
         },
         {
-          "className": "SiteLink",
-          "ruleNames": ["site_link"],
-          "internal": false,
-          "file": "src/spell/rules/sites/SiteLink.ts",
-          "line": 22,
-          "purpose": "A link out of a site, in its navigation among its pages.",
-          "syntaxes": [
-            {
-              "syntax": "{type:subject_it} has (a|an) link to {address:text} (, named {title:text})? (, icon {icon:text})?",
-              "example": "a \"home page\" is a page\ngalaxy guide is a site in the cloud:\n\tit has a home page at \"/\", named \"Home\"\n\tgroup \"Help\", icon \"book\"\n\tit has a link to \"https://docs.example.com\", named \"Help\", icon \"book\"",
-              "outputs": {
-                "js": {
-                  "code": "export class HomePage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\nexport class GalaxyGuide extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"home page\",\n    page: \"HomePage\",\n    address: \"/\",\n    title: \"Home\"\n  }]\n  static links = [{\n    link: \"https://docs.example.com\",\n    title: \"Help\",\n    icon: \"book\",\n    group: \"Help\",\n    groupIcon: \"book\",\n    at: 1\n  }]\n  static livesAt = \"cloud\"\n}\nexport const galaxyGuide = new GalaxyGuide()"
-                },
-                "ts": {
-                  "code": "export class HomePage extends Page {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n}\n\nexport class HomePageElement extends SpellElement<HomePage> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-home-page\", \"home page\", [])\n}\ncore.useElement(HomePage, HomePageElement)\nexport class GalaxyGuide extends Site {\n  static elementTag = core.defineElement(this, \"syntax_block\")\n  static pages = [{\n    name: \"home page\",\n    page: \"HomePage\",\n    address: \"/\",\n    title: \"Home\"\n  }]\n  static links = [{\n    link: \"https://docs.example.com\",\n    title: \"Help\",\n    icon: \"book\",\n    group: \"Help\",\n    groupIcon: \"book\",\n    at: 1\n  }]\n  static livesAt = \"cloud\"\n}\n\nexport class GalaxyGuideElement extends SpellElement<GalaxyGuide> {\n  @E.proto static vocabulary = SpellElement.vocabularyFor(\"syntax-block-galaxy-guide\", \"galaxy guide\", [])\n}\ncore.useElement(GalaxyGuide, GalaxyGuideElement)\nexport const galaxyGuide = new GalaxyGuide()"
-                },
-                "py": {
-                  "code": "class HomePage(Page):\n    element_tag = \"syntax-block-home-page\"\n\nclass GalaxyGuide(Site):\n    element_tag = \"syntax-block-galaxy-guide\"\n    pages = [{\"name\": \"home page\", \"page\": \"HomePage\", \"address\": \"/\", \"title\": \"Home\"}]\n    links = [\n        {\n            \"link\": \"https://docs.example.com\",\n            \"title\": \"Help\",\n            \"icon\": \"book\",\n            \"group\": \"Help\",\n            \"group_icon\": \"book\",\n            \"at\": 1,\n        },\n    ]\n    lives_at = \"cloud\"\n\ngalaxy_guide = GalaxyGuide()"
-                }
-              }
-            },
-            {
-              "syntax": "{type:subject_implied} has (a|an) link to {address:text} (, named {title:text})? (, icon {icon:text})?"
-            }
-          ],
-          "aliases": ["statement"]
-        },
-        {
           "className": "SitePage",
           "ruleNames": ["site_page"],
           "internal": false,
@@ -10991,16 +10936,16 @@
           "purpose": "One of a site's pages, and its address (epic `mockup` P1).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_it} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, icon {icon:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, (no_top_bar:no top bar))? (, (unlisted:not in the navigation))? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
+              "syntax": "{type:subject_it} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, icon {icon:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, (no_top_bar:no top bar))? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, icon {icon:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, (no_top_bar:no top bar))? (, (unlisted:not in the navigation))? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
+              "syntax": "{type:subject_implied} has (a|an) {part:site_part_words} at {address:text} (, named {title:text})? (, icon {icon:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, (no_top_bar:no top bar))? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
             },
             {
-              "syntax": "{type:subject_it} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, icon {icon:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, (no_top_bar:no top bar))? (, (unlisted:not in the navigation))? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
+              "syntax": "{type:subject_it} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, icon {icon:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, (no_top_bar:no top bar))? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
             },
             {
-              "syntax": "{type:subject_implied} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, icon {icon:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, (no_top_bar:no top bar))? (, (unlisted:not in the navigation))? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
+              "syntax": "{type:subject_implied} has (a|an) {part:quoted_member} at {address:text} (, named {title:text})? (, icon {icon:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, (no_top_bar:no top bar))? (, in row {row:number} column {column:number})? (, (colored|coloured) {color:site_card_color})? {with_nested_statements}?"
             }
           ],
           "aliases": ["statement"]
@@ -12298,8 +12243,8 @@
           "ruleNames": ["call_native"],
           "internal": false,
           "file": "src/spell/rules/methods/CallNative.ts",
-          "line": 22,
-          "purpose": "In an action's steps, call a function from one of the project's code files.",
+          "line": 23,
+          "purpose": "In an action's steps, call a function from one of the project's code files (epic `from-console` P10, Q9).",
           "syntaxes": [
             {
               "syntax": "call native {name:identifier} (with [{args:expression} ,])?"
@@ -12313,7 +12258,7 @@
           "internal": false,
           "file": "src/spell/rules/methods/UseNatives.ts",
           "line": 22,
-          "purpose": "At the top of a Spell file, say which code file the functions its `call native` lines call come from.",
+          "purpose": "At the top of a Spell file, say which code file the functions its `call native` lines call come from (epic `from-console` P10, Q15).",
           "syntaxes": [
             {
               "syntax": "use ((all:all)|[{names:identifier} ,]) from {file:identifier} \\. {ending:identifier}"
