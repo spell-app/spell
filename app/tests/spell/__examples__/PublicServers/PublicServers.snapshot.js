@@ -1960,8 +1960,7 @@ export class GithubPage extends Thing {
     )
   }
 
-  static drawsWaiting = true
-  drawFound() {
+  drawFound() { return core.drawWaiting(() => {
     // Someone's own page, while one is picked;  else what the search finds
     if (this.showing) return core.drawRead(async () => (await core.savedThingWithId(User, (await core.answerOf(this, "showing"))?.login)).drawPage(), undefined, { waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "found" }, "Asking GitHub") })
     else {
@@ -1986,7 +1985,7 @@ export class GithubPage extends Thing {
         )
       )
     }
-  }
+  }) }
 }
 core.describeAction(GithubPage, "tryWords", { title: "Try Words", undoneAs: "Try Words" })
 
@@ -2208,14 +2207,13 @@ export class Book extends Thing {
     )
   }
 
-  static drawsWaiting = true
-  drawWriting() {
+  drawWriting() { return core.drawWaiting(() => {
     if (this.writer) return this.writer.drawCard()
     core.readRider("waiting", () => h("ui-loader", { visible: true, inline: true, text: true, part: "writing" },
       "Asking Open Library who wrote it"
     ))
     core.readRider("failed", () => h("ui-text", { part: "writing" }, "Open Library can't say who wrote it just now."))
-  }
+  }) }
 
   static savedIn = {
     place: "open_library",
@@ -2687,12 +2685,11 @@ export class OpenLibraryPage extends Thing {
     )
   }
 
-  static drawsWaiting = true
-  drawShelf() {
+  drawShelf() { return core.drawWaiting(() => {
     // A book's own page, while one is open;  else what the search finds
     if (this.showing) return this.showing.drawPage()
     else return this.drawBookList()
-  }
+  }) }
 
   drawBookList() {
     return core.drawRead(() => this.found, (book) => core.drawThing(book), {
@@ -3065,10 +3062,9 @@ export class JsonplaceholderPage extends Thing {
     )
   }
 
-  static drawsWaiting = true
   drawChecklist() {
     return h("ui-stack", { spacing: "sm", part: "checklist" },
-      h("ui-form", { "prop:value": () => this.newTodo },
+      () => core.drawWaiting(() => h("ui-form", { "prop:value": () => this.newTodo },
         h("ui-input", {
           name: "title",
           placeholder: "Water the plants",
@@ -3076,15 +3072,15 @@ export class JsonplaceholderPage extends Thing {
           fluid: true,
           action: true
         },
-          h("ui-button", {
+          () => core.drawWaiting(() => h("ui-button", {
             slot: "action",
             color: "primary",
             disabled: () => this.newTodo.title === "",
             onClick: core.pressed(this, async () => await this.addTheNewTodo()),
             style: "cursor:var(--ui-control-cursor,pointer);user-select:none"
-          }, "Add")
+          }, "Add"))
         )
-      ),
+      )),
       () => this.drawTodoList()
     )
   }
@@ -3320,8 +3316,7 @@ export class OpenMeteoPage extends Thing {
     )
   }
 
-  static drawsWaiting = true
-  drawForecastTable() {
+  drawForecastTable() { return core.drawWaiting(() => {
     if (this.forecast) {
       return h("ui-stack", { spacing: "sm", part: "forecast_table" },
         h("ui-text", { color: "grey" },
@@ -3336,7 +3331,7 @@ export class OpenMeteoPage extends Thing {
       "Asking Open-Meteo"
     ))
     core.readRider("failed", () => h("ui-text", { part: "forecast_table" }, "Open-Meteo can't be reached just now."))
-  }
+  }) }
 }
 
 core.heading("A city")

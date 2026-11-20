@@ -127,7 +127,7 @@ export class Character extends Thing {
     ]
   }
 
-  drawLinks() {
+  drawLinks() { return core.drawWaiting(() => {
     return [
       core.drawThing(new Section({ heading: "Home", single: this.homeworld })),
       core.drawThing(new Section({ heading: "Films", things: this.films })),
@@ -135,7 +135,7 @@ export class Character extends Thing {
       core.drawThing(new Section({ heading: "What they fly", things: this.starships })),
       core.drawThing(new Section({ heading: "What they drive", things: this.vehicles }))
     ]
-  }
+  }) }
 
   static savedIn = {
     place: "star_wars",
@@ -247,12 +247,12 @@ export class Planet extends Thing {
     ]
   }
 
-  drawLinks() {
+  drawLinks() { return core.drawWaiting(() => {
     return [
       core.drawThing(new Section({ heading: "Who's from here", things: this.residents })),
       core.drawThing(new Section({ heading: "Seen in", things: this.films }))
     ]
-  }
+  }) }
 
   static savedIn = {
     place: "star_wars",
@@ -363,13 +363,13 @@ export class Film extends Thing {
     ]
   }
 
-  drawLinks() {
+  drawLinks() { return core.drawWaiting(() => {
     return [
       core.drawThing(new Section({ heading: "Who's in it", things: this.characters })),
       core.drawThing(new Section({ heading: "Where it happens", things: this.planets })),
       core.drawThing(new Section({ heading: "What they fly", things: this.starships }))
     ]
-  }
+  }) }
 
   drawCrawl() {
     return (
@@ -502,12 +502,12 @@ export class Species extends Thing {
     ]
   }
 
-  drawLinks() {
+  drawLinks() { return core.drawWaiting(() => {
     return [
       core.drawThing(new Section({ heading: "Home", single: this.homeworld })),
       core.drawThing(new Section({ heading: "Who's one", things: this.people }))
     ]
-  }
+  }) }
 
   static savedIn = {
     place: "star_wars",
@@ -610,12 +610,12 @@ export class Vehicle extends Thing {
     ]
   }
 
-  drawLinks() {
+  drawLinks() { return core.drawWaiting(() => {
     return [
       core.drawThing(new Section({ heading: "Who flew it", things: this.pilots })),
       core.drawThing(new Section({ heading: "Seen in", things: this.films }))
     ]
-  }
+  }) }
 
   static savedIn = {
     place: "star_wars",
@@ -726,12 +726,12 @@ export class Starship extends Thing {
     ]
   }
 
-  drawLinks() {
+  drawLinks() { return core.drawWaiting(() => {
     return [
       core.drawThing(new Section({ heading: "Who flew it", things: this.pilots })),
       core.drawThing(new Section({ heading: "Seen in", things: this.films }))
     ]
-  }
+  }) }
 
   static savedIn = {
     place: "star_wars",
@@ -1054,14 +1054,14 @@ export class Card extends Thing {
     )
   }
 
-  drawPortrait() {
+  drawPortrait() { return core.drawWaiting(() => {
     return core.drawThing(new Portrait({
       name: this.label,
       hue: this.hue,
       shape: this.shape,
       species: this.species
     }))
-  }
+  }) }
 
   drawTop() {
     return (
@@ -1095,16 +1095,16 @@ export class WikiNote extends Thing {
     return core.drawRead(() => <slot name="words">{this.drawWords()}</slot>, undefined, { waiting: () => <ui-text color="grey">Asking Wikipedia</ui-text>, failed: () => <ui-text color="grey">Wikipedia can't be reached just now.</ui-text> })
   }
 
-  drawWords() {
+  drawWords() { return core.drawWaiting(() => {
     if (this.page && this.page.fits) {
       return (
         <ui-text paragraph={true} part="words">
           {core.whileWaiting(() => this.page?.summary)}
-          <ui-link link={this.page?.contentUrls?.desktop?.page} target="_blank">Read the rest on Wikipedia</ui-link>
+          {core.drawWaiting(() => <ui-link link={this.page?.contentUrls?.desktop?.page} target="_blank">Read the rest on Wikipedia</ui-link>)}
         </ui-text>
       )
     }
-  }
+  }) }
 }
 
 export class Fact extends Thing {
@@ -1609,12 +1609,12 @@ export class Portrait extends Thing {
     )
   }
 
-  drawPhoto() {
+  drawPhoto() { return core.drawWaiting(() => {
     // Waiting for it, or if Wikipedia can't be reached, the initial stays
     if (this.picture !== "") return <ui-image src={this.picture} alt="" crop="top" part="photo" />
     core.readRider("waiting", () => <ui-space part="photo" />)
     core.readRider("failed", () => <ui-space part="photo" />)
-  }
+  }) }
 }
 // -----------
 core.heading("A species")

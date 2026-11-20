@@ -190,7 +190,6 @@ export class ChatPage extends App {
     this.newMessage = new Message()
   }
 
-  static drawsWaiting = true
   @drawn draw() {
     return (
       <ui-stack class="org-chat" spacing="none">
@@ -204,7 +203,7 @@ export class ChatPage extends App {
         </ui-toolbar>
         <ui-stack class="workspace" direction="horizontal" spacing="none">
           <ui-stack class="sidebar" spacing="none">{this.drawThreadList()}</ui-stack>
-          <ui-stack class="main" spacing="none" hidden={this.picked ? undefined : true}>
+          {core.drawWaiting(() => <ui-stack class="main" spacing="none" hidden={this.picked ? undefined : true}>
             <ui-stack class="thread-name">
               <ui-header size="small">{core.whileWaiting(() => this.threadName)}</ui-header>
             </ui-stack>
@@ -219,13 +218,13 @@ export class ChatPage extends App {
             </ui-stack>
             <ui-form class="composer" prop:value={this.newMessage}>
               <ui-stack direction="horizontal" spacing="sm" align="end">
-                <ui-textarea name="text" fluid={true} grow={true} max-rows={8} send-on-enter={true} placeholder={this.boxWords} aria-label="Your message" on-ui-send={async () => await this.send()} />
+                {core.drawWaiting(() => <ui-textarea name="text" fluid={true} grow={true} max-rows={8} send-on-enter={true} placeholder={this.boxWords} aria-label="Your message" on-ui-send={async () => await this.send()} />)}
                 <ui-button class="send" color="primary" disabled={this.newMessage.text === ""} onClick={core.pressed(this, async () => await this.send())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
                   Send
                 </ui-button>
               </ui-stack>
             </ui-form>
-          </ui-stack>
+          </ui-stack>)}
         </ui-stack>
         <ui-flyout class="threads-drawer" visible={this.drawerOpen} position="left" width="thin" on-ui-closed={() => this.closeTheDrawer()}>
           {this.drawThreadList()}

@@ -213,7 +213,6 @@ export class ChatPage extends App {
     this.newMessage = new Message()
   }
 
-  static drawsWaiting = true
   draw() {
     return h("ui-stack", { class: "org-chat", spacing: "none" },
       h("ui-toolbar", { class: "top-bar", appearance: "text", "aria-label": "Chat" },
@@ -235,7 +234,7 @@ export class ChatPage extends App {
       ),
       h("ui-stack", { class: "workspace", direction: "horizontal", spacing: "none" },
         h("ui-stack", { class: "sidebar", spacing: "none" }, () => this.drawThreadList()),
-        h("ui-stack", { class: "main", spacing: "none", hidden: () => this.picked ? undefined : true },
+        () => core.drawWaiting(() => h("ui-stack", { class: "main", spacing: "none", hidden: () => this.picked ? undefined : true },
           h("ui-stack", { class: "thread-name" },
             h("ui-header", { size: "small" }, () => core.whileWaiting(() => this.threadName))
           ),
@@ -250,7 +249,7 @@ export class ChatPage extends App {
           ),
           h("ui-form", { class: "composer", "prop:value": () => this.newMessage },
             h("ui-stack", { direction: "horizontal", spacing: "sm", align: "end" },
-              h("ui-textarea", {
+              () => core.drawWaiting(() => h("ui-textarea", {
                 name: "text",
                 fluid: true,
                 grow: true,
@@ -259,7 +258,7 @@ export class ChatPage extends App {
                 placeholder: () => this.boxWords,
                 "aria-label": "Your message",
                 "on-ui-send": () => async () => await this.send()
-              }),
+              })),
               h("ui-button", {
                 class: "send",
                 color: "primary",
@@ -269,7 +268,7 @@ export class ChatPage extends App {
               }, "Send")
             )
           )
-        )
+        ))
       ),
       h("ui-flyout", {
         class: "threads-drawer",

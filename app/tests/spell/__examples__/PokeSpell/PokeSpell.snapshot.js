@@ -242,11 +242,10 @@ export class Pokemon extends Thing {
     ]
   }
 
-  static drawsWaiting = true
-  drawFamily() {
+  drawFamily() { return core.drawWaiting(() => {
     // Its evolutions in a row, from the first:  each one's own part, as each reads PokéAPI
     return core.drawThing(this.evolutions)
-  }
+  }) }
 
   drawEvolution() {
     // Its place in its family:  a round picture, its name, number and kinds;  a click opens its page
@@ -279,8 +278,7 @@ export class Pokemon extends Thing {
     return core.drawRead(() => this.types, (type) => core.drawThing(type), { items: () => h("ui-labels", { size: "small", part: "pills" }) })
   }
 
-  static drawsWaiting = true
-  drawHeart() {
+  drawHeart() { return core.drawWaiting(() => {
     // Full and red when it's a favourite;  press it to change
     if (this.loved) {
       return h("ui-button", {
@@ -306,7 +304,7 @@ export class Pokemon extends Thing {
         part: "heart"
       })
     }
-  }
+  }) }
 
   drawKinds() {
     // Its kinds, big:  a group of labels sizes them all
@@ -1666,7 +1664,7 @@ export class Guess extends Thing {
     if (this.hiding) {
       return [
         h("ui-segment", { class: () => this.look, align: "center" },
-          h("ui-image", { class: "art", align: "center", src: () => this.hiding?.picture, alt: "A Pokémon, hiding" })
+          () => core.drawWaiting(() => h("ui-image", { class: "art", align: "center", src: () => this.hiding?.picture, alt: "A Pokémon, hiding" }))
         ),
         h("slot", { name: "answer" }, () => this.drawAnswer())
       ]
@@ -1684,8 +1682,7 @@ export class Guess extends Thing {
     }
   }
 
-  static drawsWaiting = true
-  drawAnswer() {
+  drawAnswer() { return core.drawWaiting(() => {
     if (this.foundOut) {
       return [
         this.right ? h("ui-header", { class: "said", size: "huge", align: "center", font: "title-caps", part: "answer" },
@@ -1712,7 +1709,7 @@ export class Guess extends Thing {
         h("slot", { name: "choice_buttons" }, () => this.drawChoiceButtons())
       )
     }
-  }
+  }) }
 
   drawChoiceButtons() {
     return core.drawRead(() => this.choices, (choice) => h("ui-button", {
@@ -1872,8 +1869,7 @@ export class Pokedex extends App {
     ]
   }
 
-  static drawsWaiting = true
-  drawShelf() {
+  drawShelf() { return core.drawWaiting(() => {
     // What shows under the tabs:  only the tab that's open reads anything
     if (this.showing && this.search === "") {
       return [
@@ -1904,10 +1900,9 @@ export class Pokedex extends App {
         items: () => h("ui-cards", { columns: "4", doubling: true, part: "shelf" })
       })
     }
-  }
+  }) }
 
-  static drawsWaiting = true
-  drawKinds() {
+  drawKinds() { return core.drawWaiting(() => {
     // A button for every kind, and the Pokémon of the one you pick
     return [
       h("ui-stack", { direction: "horizontal", wrap: true, justify: "center", part: "kinds" },
@@ -1927,7 +1922,7 @@ export class Pokedex extends App {
         "Pick a kind, and see who's that kind."
       )
     ]
-  }
+  }) }
 
   drawKindButtons() {
     return core.drawRead(() => this.kindsToPick, (type) => core.drawThing(type))

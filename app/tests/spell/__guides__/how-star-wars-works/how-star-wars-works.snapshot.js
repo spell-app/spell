@@ -78,15 +78,14 @@ export class Film extends Thing {
     return known
   }
 
-  static drawsWaiting = true
-  drawPage() {
+  drawPage() { return core.drawWaiting(() => {
     return [
       this.card.drawTop(),
       core.drawThing(new FactTable({ facts: this.facts })),
       core.drawThing(new Section({ heading: "Who's in it", things: this.characters })),
       core.drawRead(() => core.drawThing(new Section({ heading: "Where it happens", things: this.planets })), undefined, { waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "page" }, "Following the links") })
     ]
-  }
+  }) }
 
   ////////////////////////////////////////////////////
   // ## The types:  a field each, and a link is a type
@@ -159,15 +158,14 @@ export class Character extends Thing {
     return known
   }
 
-  static drawsWaiting = true
-  drawPage() {
+  drawPage() { return core.drawWaiting(() => {
     return [
       this.card.drawTop(),
       core.drawThing(new FactTable({ facts: this.facts })),
       core.drawThing(new Section({ heading: "Home", single: this.homeworld })),
       core.drawRead(() => core.drawThing(new Section({ heading: "Films", things: this.films })), undefined, { waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "page" }, "Following the links") })
     ]
-  }
+  }) }
 
   static savedIn = {
     place: "star_wars",
@@ -232,15 +230,14 @@ export class Planet extends Thing {
     return known
   }
 
-  static drawsWaiting = true
-  drawPage() {
+  drawPage() { return core.drawWaiting(() => {
     return [
       this.card.drawTop(),
       core.drawThing(new FactTable({ facts: this.facts })),
       core.drawThing(new Section({ heading: "Who's from here", things: this.residents })),
       core.drawRead(() => core.drawThing(new Section({ heading: "Seen in", things: this.films })), undefined, { waiting: () => h("ui-loader", { visible: true, inline: true, text: true, part: "page" }, "Following the links") })
     ]
-  }
+  }) }
 
   static savedIn = {
     place: "star_wars",

@@ -94,7 +94,6 @@ export class PersonFact extends View {
   get person() { return core.linked(this, "person", Character) }
   set person(value) { this.setProp("person", value) }
 
-  static drawsWaiting = true
   draw() {
     return h("ui-table", { appearance: "definition", celled: true, unstackable: true },
       h("ui-row",
@@ -114,9 +113,9 @@ export class PersonFact extends View {
       h("ui-row",
         h("ui-cell", "Home"),
         h("ui-cell",
-          h("ui-link", { link: () => core.siteAddressOf("planet page", this.person?.homeworld) },
+          () => core.drawWaiting(() => h("ui-link", { link: () => core.siteAddressOf("planet page", this.person?.homeworld) },
             () => core.whileWaiting(() => this.person?.homeworld?.name)
-          )
+          ))
         )
       )
     )

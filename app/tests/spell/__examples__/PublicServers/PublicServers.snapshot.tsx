@@ -1670,7 +1670,7 @@ export class GithubPage extends Thing {
     )
   }
 
-  drawFound() {
+  drawFound() { return core.drawWaiting(() => {
     // Someone's own page, while one is picked;  else what the search finds
     if (this.showing) return core.drawRead(async () => (await core.savedThingWithId(User, (await core.answerOf(this, "showing"))?.login!)).drawPage(), undefined, { waiting: () => <ui-loader visible={true} inline={true} text={true} part="found">Asking GitHub</ui-loader> })
     else {
@@ -1697,7 +1697,7 @@ export class GithubPage extends Thing {
         </ui-stack>
       )
     }
-  }
+  }) }
 }
 core.describeAction(GithubPage, "tryWords", { title: "Try Words", undoneAs: "Try Words" })
 
@@ -1887,11 +1887,11 @@ export class Book extends Thing {
     )
   }
 
-  drawWriting() {
+  drawWriting() { return core.drawWaiting(() => {
     if (this.writer) return this.writer.drawCard()
     core.readRider("waiting", () => <ui-loader visible={true} inline={true} text={true} part="writing">Asking Open Library who wrote it</ui-loader>)
     core.readRider("failed", () => <ui-text part="writing">Open Library can't say who wrote it just now.</ui-text>)
-  }
+  }) }
 
   static savedIn = {
     place: "open_library",
@@ -2296,11 +2296,11 @@ export class OpenLibraryPage extends Thing {
     )
   }
 
-  drawShelf() {
+  drawShelf() { return core.drawWaiting(() => {
     // A book's own page, while one is open;  else what the search finds
     if (this.showing) return this.showing.drawPage()
     else return this.drawBookList()
-  }
+  }) }
 
   drawBookList() {
     return core.drawRead(() => this.found, (book: Book) => core.drawThing(book), {
@@ -2639,13 +2639,13 @@ export class JsonplaceholderPage extends Thing {
   drawChecklist() {
     return (
       <ui-stack spacing="sm" part="checklist">
-        <ui-form prop:value={this.newTodo}>
+        {core.drawWaiting(() => <ui-form prop:value={this.newTodo}>
           <ui-input name="title" placeholder="Water the plants" aria-label="Something to do" fluid={true} action={true}>
-            <ui-button slot="action" color="primary" disabled={this.newTodo.title === ""} onClick={core.pressed(this, async () => await this.addTheNewTodo())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
+            {core.drawWaiting(() => <ui-button slot="action" color="primary" disabled={this.newTodo.title === ""} onClick={core.pressed(this, async () => await this.addTheNewTodo())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
               Add
-            </ui-button>
+            </ui-button>)}
           </ui-input>
-        </ui-form>
+        </ui-form>)}
         {this.drawTodoList()}
       </ui-stack>
     )
@@ -2857,7 +2857,7 @@ export class OpenMeteoPage extends Thing {
     )
   }
 
-  drawForecastTable() {
+  drawForecastTable() { return core.drawWaiting(() => {
     if (this.forecast) {
       return (
         <ui-stack spacing="sm" part="forecast_table">
@@ -2872,7 +2872,7 @@ export class OpenMeteoPage extends Thing {
     }
     core.readRider("waiting", () => <ui-loader visible={true} inline={true} text={true} part="forecast_table">Asking Open-Meteo</ui-loader>)
     core.readRider("failed", () => <ui-text part="forecast_table">Open-Meteo can't be reached just now.</ui-text>)
-  }
+  }) }
 }
 
 core.heading("A city")

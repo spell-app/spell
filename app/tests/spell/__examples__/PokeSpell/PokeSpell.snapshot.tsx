@@ -205,10 +205,10 @@ export class Pokemon extends Thing {
     ]
   }
 
-  drawFamily() {
+  drawFamily() { return core.drawWaiting(() => {
     // Its evolutions in a row, from the first:  each one's own part, as each reads PokéAPI
     return core.drawThing(this.evolutions)
-  }
+  }) }
 
   drawEvolution() {
     // Its place in its family:  a round picture, its name, number and kinds;  a click opens its page
@@ -229,11 +229,11 @@ export class Pokemon extends Thing {
     return core.drawRead(() => this.types, (type: PokemonType) => core.drawThing(type), { items: () => <ui-labels size="small" part="pills" /> })
   }
 
-  drawHeart() {
+  drawHeart() { return core.drawWaiting(() => {
     // Full and red when it's a favourite;  press it to change
     if (this.loved) return <ui-button color="red" appearance="circular" size="massive" icon="heart" onClick={core.pressed(this, async () => await this.love())} title="One of my favourites" aria-label="One of my favourites" style="cursor:var(--ui-control-cursor,pointer);user-select:none" part="heart" />
     else return <ui-button appearance="circular" size="massive" icon="heart outline" onClick={core.pressed(this, async () => await this.love())} title="Keep it as a favourite" aria-label="Keep it as a favourite" style="cursor:var(--ui-control-cursor,pointer);user-select:none" part="heart" />
-  }
+  }) }
 
   drawKinds() {
     // Its kinds, big:  a group of labels sizes them all
@@ -1415,7 +1415,7 @@ export class Guess extends Thing {
     if (this.hiding) {
       return [
         <ui-segment class={this.look} align="center">
-          <ui-image class="art" align="center" src={this.hiding?.picture} alt="A Pokémon, hiding" />
+          {core.drawWaiting(() => <ui-image class="art" align="center" src={this.hiding?.picture} alt="A Pokémon, hiding" />)}
         </ui-segment>,
         <slot name="answer">{this.drawAnswer()}</slot>
       ]
@@ -1431,7 +1431,7 @@ export class Guess extends Thing {
     }
   }
 
-  drawAnswer() {
+  drawAnswer() { return core.drawWaiting(() => {
     if (this.foundOut) {
       return [
         this.right ? <ui-header class="said" size="huge" align="center" font="title-caps" part="answer">
@@ -1456,7 +1456,7 @@ export class Guess extends Thing {
         </ui-stack>
       )
     }
-  }
+  }) }
 
   drawChoiceButtons() {
     return core.drawRead(() => this.choices, (choice: Pokemon) => <ui-button color="yellow" size="huge" appearance="pill raised" font="title-caps" onClick={core.pressed(this, async () => (this.guessed = choice))} style="cursor:var(--ui-control-cursor,pointer);user-select:none" part="choice_buttons">
@@ -1588,7 +1588,7 @@ export class Pokedex extends App {
     ]
   }
 
-  drawShelf() {
+  drawShelf() { return core.drawWaiting(() => {
     // What shows under the tabs:  only the tab that's open reads anything
     if (this.showing && this.search === "") {
       return [
@@ -1614,9 +1614,9 @@ export class Pokedex extends App {
         items: () => <ui-cards columns="4" doubling={true} part="shelf" />
       })
     }
-  }
+  }) }
 
-  drawKinds() {
+  drawKinds() { return core.drawWaiting(() => {
     // A button for every kind, and the Pokémon of the one you pick
     return [
       <ui-stack direction="horizontal" wrap={true} justify="center" part="kinds">
@@ -1634,7 +1634,7 @@ export class Pokedex extends App {
         })
       ] : <ui-header size="small" align="center" part="kinds">Pick a kind, and see who's that kind.</ui-header>
     ]
-  }
+  }) }
 
   drawKindButtons() {
     return core.drawRead(() => this.kindsToPick, (type: Type) => core.drawThing(type))

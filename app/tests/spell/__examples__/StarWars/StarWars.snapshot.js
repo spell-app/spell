@@ -136,8 +136,7 @@ export class Character extends Thing {
     ]
   }
 
-  static drawsWaiting = true
-  drawLinks() {
+  drawLinks() { return core.drawWaiting(() => {
     return [
       core.drawThing(new Section({ heading: "Home", single: this.homeworld })),
       core.drawThing(new Section({ heading: "Films", things: this.films })),
@@ -145,7 +144,7 @@ export class Character extends Thing {
       core.drawThing(new Section({ heading: "What they fly", things: this.starships })),
       core.drawThing(new Section({ heading: "What they drive", things: this.vehicles }))
     ]
-  }
+  }) }
 
   static savedIn = {
     place: "star_wars",
@@ -269,13 +268,12 @@ export class Planet extends Thing {
     ]
   }
 
-  static drawsWaiting = true
-  drawLinks() {
+  drawLinks() { return core.drawWaiting(() => {
     return [
       core.drawThing(new Section({ heading: "Who's from here", things: this.residents })),
       core.drawThing(new Section({ heading: "Seen in", things: this.films }))
     ]
-  }
+  }) }
 
   static savedIn = {
     place: "star_wars",
@@ -399,14 +397,13 @@ export class Film extends Thing {
     ]
   }
 
-  static drawsWaiting = true
-  drawLinks() {
+  drawLinks() { return core.drawWaiting(() => {
     return [
       core.drawThing(new Section({ heading: "Who's in it", things: this.characters })),
       core.drawThing(new Section({ heading: "Where it happens", things: this.planets })),
       core.drawThing(new Section({ heading: "What they fly", things: this.starships }))
     ]
-  }
+  }) }
 
   drawCrawl() {
     return h("ui-modal", {
@@ -560,13 +557,12 @@ export class Species extends Thing {
     ]
   }
 
-  static drawsWaiting = true
-  drawLinks() {
+  drawLinks() { return core.drawWaiting(() => {
     return [
       core.drawThing(new Section({ heading: "Home", single: this.homeworld })),
       core.drawThing(new Section({ heading: "Who's one", things: this.people }))
     ]
-  }
+  }) }
 
   static savedIn = {
     place: "star_wars",
@@ -683,13 +679,12 @@ export class Vehicle extends Thing {
     ]
   }
 
-  static drawsWaiting = true
-  drawLinks() {
+  drawLinks() { return core.drawWaiting(() => {
     return [
       core.drawThing(new Section({ heading: "Who flew it", things: this.pilots })),
       core.drawThing(new Section({ heading: "Seen in", things: this.films }))
     ]
-  }
+  }) }
 
   static savedIn = {
     place: "star_wars",
@@ -816,13 +811,12 @@ export class Starship extends Thing {
     ]
   }
 
-  static drawsWaiting = true
-  drawLinks() {
+  drawLinks() { return core.drawWaiting(() => {
     return [
       core.drawThing(new Section({ heading: "Who flew it", things: this.pilots })),
       core.drawThing(new Section({ heading: "Seen in", things: this.films }))
     ]
-  }
+  }) }
 
   static savedIn = {
     place: "star_wars",
@@ -1194,15 +1188,14 @@ export class Card extends Thing {
     )
   }
 
-  static drawsWaiting = true
-  drawPortrait() {
+  drawPortrait() { return core.drawWaiting(() => {
     return core.drawThing(new Portrait({
       name: this.label,
       hue: this.hue,
       shape: this.shape,
       species: this.species
     }))
-  }
+  }) }
 
   drawTop() {
     return [
@@ -1238,17 +1231,16 @@ export class WikiNote extends Thing {
     return core.drawRead(() => h("slot", { name: "words" }, () => this.drawWords()), undefined, { waiting: () => h("ui-text", { color: "grey" }, "Asking Wikipedia"), failed: () => h("ui-text", { color: "grey" }, "Wikipedia can't be reached just now.") })
   }
 
-  static drawsWaiting = true
-  drawWords() {
+  drawWords() { return core.drawWaiting(() => {
     if (this.page && this.page.fits) {
       return h("ui-text", { paragraph: true, part: "words" },
         () => core.whileWaiting(() => this.page?.summary),
-        h("ui-link", { link: () => this.page?.contentUrls?.desktop?.page, target: "_blank" },
+        () => core.drawWaiting(() => h("ui-link", { link: () => this.page?.contentUrls?.desktop?.page, target: "_blank" },
           "Read the rest on Wikipedia"
-        )
+        ))
       )
     }
-  }
+  }) }
 }
 
 export class Fact extends Thing {
@@ -1745,13 +1737,12 @@ export class Portrait extends Thing {
     )
   }
 
-  static drawsWaiting = true
-  drawPhoto() {
+  drawPhoto() { return core.drawWaiting(() => {
     // Waiting for it, or if Wikipedia can't be reached, the initial stays
     if (this.picture !== "") return h("ui-image", { src: () => this.picture, alt: "", crop: "top", part: "photo" })
     core.readRider("waiting", () => h("ui-space", { part: "photo" }))
     core.readRider("failed", () => h("ui-space", { part: "photo" }))
-  }
+  }) }
 }
 // -----------
 core.heading("A species")
