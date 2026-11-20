@@ -4,7 +4,7 @@
  * - A short Quart app, every route spelled out, for a Python programmer to read and grow:
  *   - `/`:  the page, which loads the javascript core and the program's drawing half, `<Project>.elements.spell.js`
  *   - `/<Project>.elements.spell.js`, and each imported project's:  served from beside the program
- *   - `/spell/...`:  the javascript core, Solid, Spell UI and Semantic UI (`spell_quart.assets_folder()`)
+ *   - `/spell/...`:  the javascript core, Solid and Spell UI (`spell_quart.assets_folder()`)
  *   - `/ws`:  the WebSocket:  a click up, the state and what changed down;  a game per visitor
  *   - a place for their own routes
  * - The app is committed beside the project's source.
@@ -93,7 +93,7 @@ async def elements(name: str):
 
 @app.get(f"{ASSETS_URL}/<path:path>")
 async def assets(path: str):
-    """The javascript core, Solid, Spell UI and Semantic UI."""
+    """The javascript core, Solid and Spell UI."""
     return fresh(await send_from_directory(assets_folder(), path))
 
 

@@ -60,7 +60,6 @@
     "**/_assets/**": true,
     "**/_data/**": true,
     "**/graphify-out/**": true,
-    "app/app/static/semantic-ui-css/**": true,
     "yarn.lock": true
   },
 

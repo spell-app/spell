@@ -27,8 +27,5 @@ vscode/themes/*.json                                          linguist-generated
 # the bubbly look's settings as plain values, for VS Code (`yarn tsx scripts/bubbly-values.ts`, epic `language` P49)
 src/app/components/spell-code/bubbly.values.json              linguist-generated merge=binary
 
-# vendored Fomantic build
-app/static/semantic-ui-css/**                                 linguist-vendored -diff
-
 # spell:  its compiled libraries, the `ts/lib` target (`spell compile @library`)
 spaces/@spell/library/**/*.lib.ts                             linguist-generated merge=binary

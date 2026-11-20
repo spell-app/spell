@@ -116,7 +116,7 @@ describe("runner builds", () => {
     }
   })
 
-  test("<spell-viewer>:  its files, its CSS without the code editor's, the built-ins' pack and Semantic UI beside it", () => {
+  test("<spell-viewer>:  its files, its CSS without the code editor's, the built-ins' pack beside it", () => {
     expect(chunks(element)).toEqual(
       expect.arrayContaining([
         "spell-viewer.js",
@@ -128,7 +128,6 @@ describe("runner builds", () => {
     )
     expect(readFileSync(join(element, "spell-app.css"), "utf8")).not.toMatch(CODE_EDITOR_CSS)
     expect(existsSync(join(element, "core.scopes.js"))).toBe(true)
-    expect(existsSync(join(element, "semantic-ui-css", "semantic.min.css"))).toBe(true)
   })
 
   test("<spell-editor>:  CodeMirror loaded lazily, in its own chunk, no worker;  its own CSS", () => {
@@ -414,12 +413,12 @@ function build(outDir: string, ...configs: string[]) {
 
 /**
  * Javascript the builds wrote into `dir`, as paths relative to it:  every chunk, `ui/` included.
- * - NOT `semantic-ui-css/` (copied from `static/`) or the icon packs' `pack.js` indexes.
+ * - NOT the icon packs' `pack.js` indexes.
  */
 function chunks(dir: string): string[] {
   return readdirSync(dir, { recursive: true, encoding: "utf8" })
     .map((file) => file.split("\\").join("/"))
-    .filter((file) => file.endsWith(".js") && !/(^|\/)(semantic-ui-css|icon-packs)\//.test(file))
+    .filter((file) => file.endsWith(".js") && !/(^|\/)(icon-packs)\//.test(file))
     .sort()
 }
 

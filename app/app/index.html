@@ -4,7 +4,6 @@
   <head>
     <meta charset="UTF-8" />
     <title>Spell.app</title>
-    <link rel="stylesheet" type="text/css" href="../static/semantic-ui-css/semantic.min.css" />
     <link rel="stylesheet" type="text/css" href="../static/lato/index.css" />
     <!-- Spell's favicon:  copies the kit's `yarn favicon` writes;  vite bundles them into `dist/` -->
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon/favicon-32.png" />
@@ -25,44 +24,33 @@
       } catch (e) {}
     </script>
     <style>
-      /* The page shows the theme's background (Fruity's wallpaper), not `semantic.min.css`'s white:
-         that sheet is for running programs.  Text in the theme's colour, on light and dark. */
+      /* The page shows the theme's background (Fruity's wallpaper), its text in the theme's colour, on light and dark. */
+      *,
+      :after,
+      :before {
+        box-sizing: inherit;
+      }
+      [hidden] {
+        display: none !important;
+      }
       html {
-        min-height: 100%;
+        box-sizing: border-box;
+        height: 100%;
+        font-size: 14px;
         background-color: var(--ui-background);
         color: var(--ui-text-color);
       }
       body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        min-width: 320px;
+        overflow-x: hidden;
+        line-height: 1.4285em;
+        font-size: 14px;
         font-family: var(--ui-font-family, Lato, Arial, sans-serif);
         background: transparent;
         color: inherit;
-      }
-      /* A `<ui-table>` carries its class words on itself (`ui ... table`), which `semantic.min.css` colours black:
-         its cells' text is the page's, so a table reads on a dark page too. */
-      ui-table.ui.table {
-        color: inherit;
-      }
-      /* ... and paints it white, with a black border, on itself:  a table built of rows (`<for ... as="table">`,
-         a `rows` table) has no inner `<table>` for the rule below, so it stayed white on a dark page.
-         Spell UI's own background and border, which follow the theme. */
-      ui-table.ui.table {
-        background: revert-layer;
-        border: revert-layer;
-      }
-      /* ... and its table and cells too:  `semantic.min.css` paints them white (`#fff`, its header cells `#f9fafb`)
-         with black text and borders, unlayered, so it beat Spell UI's table look and every table stayed white on a
-         dark page (epic `data` J282).  Each falls back to Spell UI's own, which follows the theme. */
-      ui-table > table.ui.ui.table,
-      ui-table > table.ui.ui.table > * > tr > :is(th, td) {
-        background: revert-layer;
-        color: revert-layer;
-        border: revert-layer;
-      }
-      /* ... and sets its width, `auto` when `collapsing`, which fills a block:  its width is Spell UI's,
-         so a collapsing table hugs its columns (epic `data` I91). */
-      ui-table.ui.table,
-      ui-table.ui.collapsing.table {
-        width: revert-layer;
       }
       /* Spell's wordmark, "Spell" beside the hat:  ONE look, the loading screen's and the top bar's (`EditorTheme.css`,
          `.AppMarkLabel`;  epic `editor` T93:  "Make Spell bolder (same as loading screen)") */
@@ -273,8 +261,7 @@
       })()
     </script>
     <!-- `icons`:  the app's icon names are Fomantic's, for every `<ui-*>` in the page (see `src/app/solid/loadUI.ts`);
-         Font Awesome's logos too (the Program panel's `python`, `js`), and its own names where Fomantic has none.
-         `semantic.min.css` above is for running PROGRAMS, which draw with Semantic UI's React kit. -->
+         Font Awesome's logos too (the Program panel's `python`, `js`), and its own names where Fomantic has none. -->
     <ui-root app icons="fa7-brands, fomantic"><div id="app-root"></div></ui-root>
     <script type="module" src="../src/app/index.tsx"></script>
   </body>

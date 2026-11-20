@@ -104,7 +104,6 @@ The Spell Parser is a sophisticated parsing and compilation system for the Spell
 
 #### Static Assets
 
-- **Semantic UI** (`static/semantic-ui-css/`): UI framework components
 - **Fonts** (`static/lato/`): Typography assets
 - **Projects** (`projects/`): every spell project, by owner -- see `SpellSetup.projectRoots`:
   - `system/examples/` (`@spell/examples`):  Calculator, FizzBuzz, Solitaire (with Card.spell example),

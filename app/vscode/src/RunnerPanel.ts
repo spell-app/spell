@@ -1,7 +1,7 @@
 /**
  * "Run Project":  runs a spell project in a webview beside its code, re-running each time the project compiles.
  * - The webview's code is `app`'s runner bundle (`yarn build:runner` => `dist-runner/`,
- *   from `src/app/runner/`), with Semantic UI + Lato straight from its `static/`.
+ *   from `src/app/runner/`), with Lato straight from its `static/`.
  * - Server compiles, NOT us:  `spell/compileProject`, answered by `spell/projectCompiled` with the javascript.
  * - Also re-runs when the project's `<Project>.spell.js` changes on disk, e.g. compiled by the web app.
  * - Sends its words with each run, `<Project>.en.js` beside its source:  the Thing Explorer's labels,
@@ -381,8 +381,8 @@ export class RunnerPanel {
   }
 
   /**
-   * Webview HTML:  Semantic UI + Lato from `statics`, then the runner bundle from `runner`.
-   * - The runner draws in Solid on `spell-ui`;  programs still draw with React + Semantic UI, so its CSS stays.
+   * Webview HTML:  Lato from `statics`, then the runner bundle from `runner`.
+   * - The runner and the programs draw in Solid on `spell-ui`.
    * - `<ui-root icons="fomantic">` around `#runner-root`:
    *   the runner's icon names are Fomantic's (as the web app's `index.html`).
    *   Its packs load from `runner`'s `icon-packs/`, beside `spell-ui`'s chunks.
@@ -393,7 +393,6 @@ export class RunnerPanel {
    *   - fetching:  the runtime's source, for its copy, and the icons' SVG files
    *   - inline styles:  `core.installStyles()` adds them, and `<ui-*>` elements set inline styles
    *     (their sheets are constructable, adopted by their shadow roots)
-   * - NOTE: `semantic.min.css` `@import`s Lato from Google, which the CSP blocks -- harmless, we load our own.
    */
   static html(webview: vscode.Webview, runner: vscode.Uri, statics: vscode.Uri): string {
     const source = webview.cspSource
@@ -411,7 +410,6 @@ export class RunnerPanel {
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="Content-Security-Policy" content="${csp}" />
-    <link rel="stylesheet" href="${url(statics, "semantic-ui-css/semantic.min.css")}" />
     <link rel="stylesheet" href="${url(statics, "lato/index.css")}" />
     <link rel="stylesheet" href="${url(runner, "runner.css")}" />
     <style>

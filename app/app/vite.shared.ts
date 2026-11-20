@@ -76,9 +76,8 @@ export function appConfig({ builtInFiles }: { builtInFiles?: boolean } = {}) {
       lightningcss: {
         targets: CSS_TARGETS,
         drafts: { customMedia: true },
-        // drop a rule Lightning CSS can't parse, with a warning, as a browser drops it:
-        // `semantic.min.css` (linked from `index.html`) has selectors like `:before.ui`
-        // that would otherwise fail the whole sheet
+        // drop a rule Lightning CSS can't parse, with a warning, as a browser drops it,
+        // rather than failing the whole sheet
         errorRecovery: true
       }
     }

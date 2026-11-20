@@ -13,7 +13,7 @@ import { appConfig, sharedSolid } from "./vite.shared.ts"
  *   - As `vite.element.config.ts`, which builds `<spell-viewer>`.
  * - Solid and `spell-ui` come from `spell-solid.js` / `spell-ui.js` beside it (`sharedSolid()`), as in
  *   `dist-element/`:  one layout, one pin.
- * - Semantic UI + Lato are NOT bundled:  the webview loads them straight from `static/`.
+ * - Lato is NOT bundled:  the webview loads it straight from `static/`.
  * - Plugins, dedupe and CSS:  `appConfig()`, as `vite.config.ts`.  `keepNames` MUST stay on --
  *   see `parser/build.test.ts`.
  */

@@ -129,7 +129,7 @@ Where it stops:
 | `toolbar` | shows the toolbar:  its name, Restart, Debug |
 | `debug` | opens the debug pane to start, on `explorer`, `things` or `console` |
 | `width`, `height` | `fluid`, the default, or a CSS length (`50%`, `30em`), set as its inline style;  a fluid height is the app's, plus the debug pane if it's open |
-| `assets` | where Semantic UI, Lato, `spell-app.css` and the icon packs are;  default, beside its script |
+| `assets` | where Lato, `spell-app.css` and the icon packs are;  default, beside its script |
 | `display` | while its widgets load, as `<ui-root>`'s:  `immediately`, the default, draws them as they arrive;  `when-ready` keeps the space empty till they're all in;  `skeleton` draws placeholders |
 | `icons` | the icon packs for everything inside it;  default `fomantic`, the names its toolbar and panes use.  The page's own icons, outside it, keep theirs |
 | `run(compiled)` | runs code pushed to it, a `SpellCompiled`:  `{ projectId, compiled }`, and the scope pack, declarations and words if you have them.  Pushed code wins over `project` and `src`, and works before the element joins the page |

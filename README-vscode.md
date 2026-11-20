@@ -439,7 +439,7 @@ that folder is one of the window's top-level folders.
 | (no Markdown) | the format settings skip `**/*.md`:  the `AGENTS.md` files and the READMEs are wrapped by hand |
 | `files.associations`:  `*.json5` as `jsonc` | VS Code has no JSON5 mode, and checks a file against a schema only in its JSON modes |
 | `json.schemas` | a person's `__me.json5` and an org's `__org.json5`, checked against the people library's types;  `spell compile` writes `Person.schema.json` and `Org.schema.json` into app's build folder, so they're missing until it has run |
-| `search.exclude` | Quick Open and Find in Files skip `__snapshots__/`, `_assets/` (the icons), `_data/`, `graphify-out/`, `app/app/static/semantic-ui-css/` and `yarn.lock`;  Explorer still shows them |
+| `search.exclude` | Quick Open and Find in Files skip `__snapshots__/`, `_assets/` (the icons), `_data/`, `graphify-out/` and `yarn.lock`;  Explorer still shows them |
 | `js/ts.experimental.useTsgo: false` | the editor's TypeScript stays the JavaScript one, not the native preview |
 | `markdown.preview.openMarkdownLinks: "inEditor"` | a link in the Markdown preview opens its file in the editor |
 | `vetur.validation.script: false` | a leftover, for Vue's Vetur extension |

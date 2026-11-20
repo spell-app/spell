@@ -1,5 +1,5 @@
 /**
- * Styles for our elements' shadow roots -- `<spell-viewer>`'s:  Semantic UI, and the bundle's own `spell-app.css`.
+ * Styles for our elements' shadow roots -- `<spell-viewer>`'s:  the bundle's own `spell-app.css`.
  * - `<spell-editor>` names its own files, e.g. `spell-editor.css`.
  * - A shadow root sees only its own styles, so each adopts these -- one `CSSStyleSheet` each, built ONCE per
  *   page and shared by every element.
@@ -11,7 +11,7 @@ import { $fetch } from "spell/util"
 
 /**
  * Stylesheets for a shadow root:  CSS `files` of `assets` -- where they are, and Lato.
- * - Default `files`, `<spell-viewer>`'s:  Semantic UI and `spell-app.css`.
+ * - Default `files`, `<spell-viewer>`'s:  `spell-app.css`.
  */
 export function shadowStyles(assets: string, files = SPELL_APP_CSS): Promise<CSSStyleSheet[]> {
   const key = JSON.stringify([assets, files])
@@ -35,7 +35,7 @@ export async function adoptShadowStyles(root: ShadowRoot, assets: string, files?
 }
 
 /** `<spell-viewer>`'s CSS files -- see `shadowStyles()`. */
-const SPELL_APP_CSS = ["semantic-ui-css/semantic.min.css", "spell-app.css"]
+const SPELL_APP_CSS = ["spell-app.css"]
 
 /** Sheets built, by `assets` URL and files. */
 const built = new Map<string, Promise<CSSStyleSheet[]>>()
@@ -49,7 +49,7 @@ async function buildSheets(assets: string, names: string[]): Promise<CSSStyleShe
   )
   return files.map(({ rules }) => {
     const sheet = new CSSStyleSheet()
-    // NOTE: `@import`s are dropped -- Semantic's Google Fonts one included, as we bring our own Lato
+    // NOTE: `@import`s are dropped -- a Google Fonts one included, as we bring our own Lato
     sheet.replaceSync(rules)
     return sheet
   })

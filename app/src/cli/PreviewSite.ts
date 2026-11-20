@@ -120,7 +120,7 @@ export class PreviewSite {
   }
 
   /**
-   * The editor page's links into the app's `static/` folder (Semantic UI's sheet, Lato), which Vite leaves as they
+   * The editor page's links into the app's `static/` folder (Lato, the icon), which Vite leaves as they
    * are:  copied in, and linked from the site's root, so every page of the editor finds them.
    */
   private fixStaticLinks(): void {
@@ -252,11 +252,10 @@ const VIEWER_FOLDER = "element"
 /**
  * What `buildViewer({ withEditor })` leaves out of the element's build, by path in it:  what the page never loads.
  * - source maps
- * - Semantic UI's sources and scripts:  the viewer adopts only its one sheet, `semantic.min.css`, and its `themes/`
  * - NOT `<spell-code>` (`spell-code.js`):  a site's page shows its own Spell with it, in the bubbly look
  *   (spell.app's sample, epic `repo-split` P25);  its parser chunk loads only when one is on the page
  */
-const EDITOR_LEAVES_OUT = [/\.map$/, /^\/semantic-ui-css\/(components\/|semantic\.(css|js|min\.js)$)/]
+const EDITOR_LEAVES_OUT = [/\.map$/]
 
 /**
  * What `buildViewer()` leaves out with no editor:  `EDITOR_LEAVES_OUT`, and `<spell-editor>`, CodeMirror among it --
@@ -280,7 +279,7 @@ const EDITOR_ROUTES = ["/edit/*", "/design/*", "/run/*"]
 const FILE_PREFIXES = ["/api/", "/spaces/", "/assets/", "/static/"]
 
 /** Folders of the app's `static/` the editor links:  its page's sheets and fonts, and Spell's icon. */
-const STATIC_ASSETS = ["semantic-ui-css", "lato", "favicon"]
+const STATIC_ASSETS = ["lato", "favicon"]
 
 /** `spell app preview serve`'s port, unless told one:  beside the page server's 4747. */
 export const PREVIEW_PORT = 4848

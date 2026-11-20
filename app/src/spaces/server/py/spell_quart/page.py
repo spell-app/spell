@@ -7,7 +7,7 @@ page_html("Solitaire", elements="/Solitaire.elements.spell.js")
 - The javascript core, Solid and Spell UI come from `/spell/`:  the built page side (`assets_folder()`).
   - `spell-page.js` is the page's `@spell/core`, by an import map:  the drawing half imports from it.
 - The program's drawing half, `<Project>.elements.spell.js`, and those of the projects it imports (`projects`).
-- Semantic UI's CSS, which spell's drawings use (`ui button`), and the program's own, in its drawing half.
+- The program's own CSS, in its drawing half.
 - Its app draws into `<div id="spell-app-root">`, as `App.start()` draws.
 - Until it does, a "Loading <title>" block with a spinner (`LOADING`).
   - Plain HTML and CSS, so it shows the moment the page arrives, before any script has loaded.
@@ -52,7 +52,6 @@ def page_html(
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{html.escape(title)}</title>
     <link rel="icon" type="image/svg+xml" href="{ASSETS_URL}/favicon/favicon.svg" />
-    <link rel="stylesheet" href="{ASSETS_URL}/semantic-ui-css/semantic.min.css" />
     <script type="importmap">{json.dumps({"imports": imports})}</script>
   </head>
   <body>
@@ -112,7 +111,7 @@ def fresh(response: Any) -> Any:
 
 # What the page shows until its app draws:  a card with a spinner, "Loading <title>".
 # - Plain HTML and CSS, in the page itself, ahead of every script:  it shows the moment the page arrives.
-# - Its own names (`spell-loading`), so neither Semantic UI nor the program's styles touch it.
+# - Its own names (`spell-loading`), so the program's styles don't touch it.
 LOADING = """<style>
       #spell-loading {
         position: fixed;

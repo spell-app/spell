@@ -348,7 +348,7 @@ and in the app's build folder, `app/` at the app folder's root.
       P5), which CodeMirror runs by its commands (`UIT.CodeEditorHandle`).
 - `index.html` wraps the app in `<ui-root icons="fomantic">`.
   - So the app's icon names are Fomantic's ([loadUI.ts](solid/loadUI.ts)).
-  - It still links `semantic.min.css`:  running programs draw with Semantic UI's class words.
+  - It links no Semantic UI sheet:  programs draw with Solid and Spell UI (epic `solid-2-final` T6).
 - `runner/` runs compiled spell:  the pieces every runner shares.
   - the runners:
     - the web app's editor
@@ -369,7 +369,6 @@ and in the app's build folder, `app/` at the app folder's root.
     - A runner hands it `appRoot`, a `<div>` drawn once and never touched again.
     - An app is a view:  it mounts as its own element, `<solitaire-app>`, its drawing that element's children
       (epic `elemental-spell` Q62), so the project's `.css` still reaches it.
-    - Semantic UI's CSS stays wherever programs draw.
     - Each drawn thing has its own error boundary:  a stand-in, a `ui-error`, and the rest keeps drawing.
   - Programs run on `spell-runtime.js`, NEVER the page's own `core`.
     - It's built from [spellRuntime.ts](runner/spellRuntime.ts).

@@ -21,7 +21,7 @@ import type { DOMSpellViewerElement } from "spell/app/app/components/spell-viewe
  *     vite's imports are root-relative, which a `blob:` URL can't resolve.
  * - The program draws with Solid, into the runner's app root:  `h()` from `@spell/core`.
  *   As compiled spell writes it, a value that can change is a function (`() => this.count`).
- * - `adoptShadowStyles()` is stubbed:  the test server doesn't serve `static/` (Semantic UI, Lato).
+ * - `adoptShadowStyles()` is stubbed:  the test server doesn't serve `static/` (Lato).
  */
 vi.mock("spell/app/app/runner/loadRuntime", async (importOriginal) => {
   const original = await importOriginal<typeof import("spell/app/app/runner/loadRuntime")>()

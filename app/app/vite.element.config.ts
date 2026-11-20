@@ -22,7 +22,7 @@ import { appConfig, sharedSolid } from "./vite.shared.ts"
  *     (compiled spell draws with Solid), never `spell-ui.js`.
  * - Fixed names, no hashes:  the element finds the runtime, styles and scope packs beside itself.
  * - One `spell-app.css`, which the element puts in each shadow root -- see `shadowStyles.ts`.
- * - `static/` is copied in, so Semantic UI and Lato sit beside the bundle --
+ * - `static/` is copied in, so Lato sits beside the bundle --
  *   and the built-in types' scope pack, `core.scopes.js`, see `builtInsPack()`.
  * - And the component pack of both elements, `spell.pack.js`:  see `componentPack()`.
  * - Plugins, dedupe and CSS:  `appConfig()`, as `vite.config.ts`.

@@ -1,4 +1,4 @@
-/* The element itself:  a block, in Semantic's font -- `body`'s styles don't reach into a shadow root. */
+/* The element itself:  a block, in Lato -- `body`'s styles don't reach into a shadow root. */
 :host {
   display: block;
   position: relative;
@@ -8,6 +8,17 @@
   line-height: 1.4285em;
   color: rgba(0, 0, 0, 0.87);
   background: white;
+}
+
+/* Semantic UI's reset, which a program in the shadow root counted on:  boxes measure as the host's do. */
+*,
+:after,
+:before {
+  box-sizing: inherit;
+}
+
+[hidden] {
+  display: none !important;
 }
 
 :host([hidden]) {
