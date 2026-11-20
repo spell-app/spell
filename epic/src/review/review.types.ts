@@ -573,6 +573,40 @@ export function isInstantDue(id: string, mark: InstantCandidate & { at: string }
   return now - Date.parse(mark.at) >= INSTANT_GRACE_MS
 }
 
+/**
+ * The marks that want a CANCELED item back:  Do this and Make Todo (`todo`), a todo's plane (`next`), Revisit.
+ * - NOT the ✓:  on a finished item it's Saw it, which leaves it closed (`PlanDoc.approve()`)
+ */
+const REOPENING_ACTIONS: ReadonlySet<string> = new Set(["todo", "next", "revisit"])
+
+/**
+ * Is `mark` one that wants its item back, open (`REOPENING_ACTIONS`:  Do this, Make Todo, a todo's plane, Revisit)?
+ * - on an item held closed after his instant x (`ReviewClient.isClosing()`), it takes the close's place at once
+ */
+export function wantsBack(mark: { action: string } | null | undefined): boolean {
+  return !!mark && REOPENING_ACTIONS.has(mark.action)
+}
+
+/**
+ * Does `mark` undo the cancel of an item at `status`, last changed at `changed` (epic `epic-engine` I359)?
+ * - canceled, and Owen pressed Do this, Make Todo, a todo's plane or Revisit on it since (`REOPENING_ACTIONS`)
+ *   - Owen, 2026-11-20:  his x closed I31, then his Do this a few seconds later left it struck through, as if it
+ *     hadn't taken
+ * - NOT when it was canceled AFTER he marked it (`changed` later than the mark's `at`):  that close is newer
+ * - the ONE rule:  the page draws such an item open at once (not struck), and `inbox apply` reopens it first
+ *   (`PlanDoc.applyMark()`)
+ */
+export function reopensCanceled(
+  status: string | null | undefined,
+  changed: string | null | undefined,
+  mark: { action: string; at?: string } | null | undefined
+): boolean {
+  if (status !== "canceled" || !mark || !wantsBack(mark)) return false
+  const closed = Date.parse(changed ?? "")
+  const marked = Date.parse(mark.at ?? "")
+  return !(Number.isFinite(closed) && Number.isFinite(marked) && closed > marked)
+}
+
 /** What `isInstant()` reads of a mark. */
 export type InstantCandidate = PickFields & { action: string; note?: string; comments?: string[]; shot?: string }
 

@@ -1007,3 +1007,34 @@ describe("ReviewClient:  an instant ✓ or x held in view till Send", () => {
     expect(client.isHeldInView("q1")).toBe(false)
   })
 })
+
+// epic `epic-engine` I359:  Owen's x closed I31;  his Do this a few seconds later still drew it struck and grey
+describe("ReviewClient:  his Do this after his x lets the close go", () => {
+  test("applied by the server and held in view:  Do this lets go of the hold, the item no longer closing", async () => {
+    const { client, server } = await started()
+    client.press("i1", "drop")
+    await vi.waitFor(() => expect(Object.keys(server.inbox.forPage().marks)).toEqual(["i1"]))
+    server.inbox.setMark("i1", null)
+    await vi.waitFor(async () => {
+      await client.refresh()
+      expect(client.markOf("i1")).toBeUndefined()
+    })
+    expect(client.closingAs("i1")).toBe("drop")
+    client.press("i1", "todo")
+    expect([client.isHeldInView("i1"), client.isClosing("i1"), client.closingAs("i1")]).toEqual([
+      false,
+      false,
+      undefined
+    ])
+    await vi.waitFor(() => expect(client.markOf("i1")?.action).toBe("todo"))
+    expect(client.unsentMarkCount).toBe(1)
+  })
+
+  test("inside the x's grace:  the Do this takes its place, nothing closing", async () => {
+    const { client } = await started()
+    client.press("i1", "drop")
+    expect(client.closingAs("i1")).toBe("drop")
+    client.press("i1", "todo")
+    expect([client.isClosing("i1"), client.closingAs("i1")]).toEqual([false, undefined])
+  })
+})

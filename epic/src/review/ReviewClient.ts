@@ -30,6 +30,7 @@ import {
   pickFieldsOf,
   pickOf,
   setPicksOf,
+  wantsBack,
   withSetPick,
   type Inbox,
   type InboxDoing,
@@ -294,6 +295,8 @@ export class ReviewClient extends PageStore {
   isClosing(id: string): boolean {
     const mark = this.inbox.marks[id]
     if (mark && isInstant(id, mark)) return !this.failedInstant.has(`${id}@${mark.at}`)
+    // his Do this (or Make Todo, Revisit) after his x wants it back (epic `epic-engine` I359):  no longer closing
+    if (wantsBack(mark)) return false
     if (this.heldInView.has(id)) return true
     const until = this.closedHere.get(id)
     return until !== undefined && until > Date.now()
@@ -587,6 +590,8 @@ export class ReviewClient extends PageStore {
     }
     const input = { action, ...(CARRIES_PICK.has(action) && pickOf(mark)) }
     if (isInstant(id, input)) this.keepInstant(id, action)
+    // his Do this after his x (epic `epic-engine` I359):  the x's close lets go, so the item draws open at once
+    else if (wantsBack(input)) this.letGoOfClose(id)
     void this.save(id, input)
     return "chosen"
   }
@@ -607,6 +612,16 @@ export class ReviewClient extends PageStore {
     this.closedHere.delete(id)
     this.changed()
     await this.post("undo", { id })
+  }
+
+  /**
+   * Let go of item `id`'s close held in view after his instant ✓ or x (`heldInView`, `closedHere`):  a newer mark of
+   * his wants it back (`wantsBack()`, epic `epic-engine` I359), and that mark is what Send now counts.
+   */
+  private letGoOfClose(id: string) {
+    this.heldInView.delete(id)
+    this.closedHere.delete(id)
+    this.stopTimer(`hold:${id}`)
   }
 
   /** His instant `action` on `id`, just made:  kept in view till Send (T80). */

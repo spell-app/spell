@@ -17,7 +17,7 @@ import { Markup, type MarkupContent } from "spell/epic/markup"
 import { PageStages, PhaseIds, PhaseStatuses, type PageStage } from "spell/epic/phases"
 import { ThreadFacts } from "spell/epic/comments"
 // Import directly:  the page client's pure helpers, never its barrel (the browser's `ReviewClient`)
-import { parseSetLetter, setPicksOf } from "spell/epic/review/review.types"
+import { parseSetLetter, reopensCanceled, setPicksOf } from "spell/epic/review/review.types"
 // the words' pictures alone:  the review barrel is the browser client's
 import { Pictures } from "spell/epic/review/Pictures"
 import { EXCERPT_LENGTH } from "spell/epic/tools/BlockAnchors.js"
@@ -1542,12 +1542,27 @@ export class PlanDoc extends PlanReader {
     // skipping a todo IS dropping it (its own note box's x is Drop It;  a skip comes from a page drawn before)
     const todoSkip = mark.action === "skip" && PlanItem.kindOfItem(item) === "todo"
     const applied = todoSkip ? { ...mark, action: "drop" as const } : mark
-    const result = withCommentsToFold(this.applyAction(item, applied), mark)
+    // his Do this, Make Todo or Revisit on it canceled (epic `epic-engine` I359):  reopened first, as the page drew it
+    const reopened = this.reopenForMark(item, mark)
+    const result = withReopened(withCommentsToFold(this.applyAction(item, applied), mark), reopened)
     if (result.applied) {
       this.log(`${item.id.toUpperCase()} ${result.did}`)
       this.reviewedAs(item, applied.action === "pick" ? "approve" : applied.action)
     }
     return result
+  }
+
+  /**
+   * Reopen `item` when it's canceled and `mark` wants it back (`reopensCanceled()`:  Do this, Make Todo, a todo's
+   * plane, Revisit, made since it was canceled;  epic `epic-engine` I359);  did it?
+   * - Owen, 2026-11-20:  his x canceled I31, his Do this a few seconds later stayed struck through on the page
+   * - logs its own line (`I31 reopened:  ...`);  the mark then applies as on an open item
+   */
+  private reopenForMark(item: Element, mark: PlanMark): boolean {
+    if (!reopensCanceled(item.getAttribute("status"), item.getAttribute("changed"), mark)) return false
+    const title = this.setItem(item.id, "open")
+    this.log(`${item.id.toUpperCase()} reopened:  ${title} -- ${AuthorWords.wantedBack(this.person)}`)
+    return true
   }
 
   /**
@@ -3997,6 +4012,15 @@ function withoutSetChange(mark: PlanMark): PlanMark {
  * `plan accepted:  build it, with comments to fold in:  C4, C5`.
  * - any other mark, or none carried:  `result` as it is
  */
+/**
+ * `result`, saying the item was reopened first (`reopened`, epic `epic-engine` I359):  `reopened;  <did>`, or the
+ * left mark's `reopened` set, so `inbox apply` writes the doc for it and says so.
+ */
+function withReopened(result: MarkResult, reopened: boolean): MarkResult {
+  if (!reopened) return result
+  return result.applied ? { ...result, did: `reopened;  ${result.did}` } : { ...result, reopened: true }
+}
+
 function withCommentsToFold(result: MarkResult, mark: PlanMark): MarkResult {
   if (!result.applied || mark.action !== "approve" || !mark.comments?.length) return result
   const ids = mark.comments.map(CommentList.label).join(", ")

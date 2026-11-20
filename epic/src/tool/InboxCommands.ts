@@ -619,6 +619,8 @@ export class InboxCommands {
    *   - a change mark's (`ch3`, epic `epic-engine` P30):  `accept` makes it `accepted` (no orange, the chip stays),
    *     `reopen` reopens the question it names (the words stay orange)
    *   - and the sent urgency (an id chip clicked:  `PlanDoc.setCalm()`)
+   *   - a Do this, Make Todo, todo's plane or Revisit on a CANCELED item reopens it first (`reopensCanceled()`, epic
+   *     `epic-engine` I359):  its line says `reopened;  ...`, a left Revisit's too
    * - a dry run on a parsed copy first:  the doc is written (`edit()`, its lock) only when something applies
    * - marks cleared under the inbox's lock, only while still the ones applied (`clearApplied()`, `clearUrgency()`);
    *   marks of items gone from the doc are dropped too
@@ -642,7 +644,7 @@ export class InboxCommands {
     const dry = this.owner.read(file)
     const planned: Applied[] = marks.map((mark) => ({ mark, ...dry.applyMark(mark) }))
     const plannedUrgency = urgency.map((entry) => urgencyOn(dry, entry))
-    const changes = planned.some((each) => each.applied) || plannedUrgency.some((each) => each.changed)
+    const changes = planned.some((each) => each.applied || each.reopened) || plannedUrgency.some((each) => each.changed)
     const { results, calmed } = changes
       ? await this.owner.edit(file, (plan) => ({
           results: marks.map((mark): Applied => ({ mark, ...plan.applyMark(mark) })),
@@ -670,7 +672,10 @@ export class InboxCommands {
     const left = results.filter((result) => !result.applied)
     if (left.length) lines.push("left:")
     for (const each of left)
-      if (!each.applied) lines.push(`  ${each.mark.id.toUpperCase()}  ${each.mark.action}:  ${each.left}`)
+      if (!each.applied)
+        lines.push(
+          `  ${each.mark.id.toUpperCase()}  ${each.mark.action}:  ${each.reopened ? "reopened;  " : ""}${each.left}`
+        )
     for (const id of want ?? [])
       if (!marks.some((mark) => mark.id === id) && !urgency.some((entry) => entry.id === id))
         lines.push(`  ${id.toUpperCase()}:  no sent mark`)

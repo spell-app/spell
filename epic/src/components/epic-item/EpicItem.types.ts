@@ -4,6 +4,7 @@
  */
 
 import type { ReviewButtonSpec, ReviewColor, ReviewFill } from "spell/epic/components/epic-review/EpicReview.types"
+import { reopensCanceled } from "spell/epic/review/review.types"
 
 import type { epicItemVocabulary } from "./EpicItem.en"
 
@@ -140,6 +141,12 @@ export type LiveReview = {
    */
   closingAs?: string
   /**
+   * his mark on it, sent or not, until `inbox apply` takes it (`ReviewClient.markOf()`):  its action and when;  a Do
+   * this, Make Todo or Revisit on a canceled item draws it open at once (`reopensCanceled()`, epic `epic-engine`
+   * I359);  missing:  none
+   */
+  mark?: { action: string; at?: string }
+  /**
    * his turn on a comment in it:  Claude spoke last on its thread (`ReviewClient.hasRepliedComments()`, epic
    * `epic-engine` I284);  missing:  none
    */
@@ -162,6 +169,8 @@ export const NO_LIVE_REVIEW: LiveReview = { workedOn: false, approved: false }
  * - his check pressed, not applied yet:  a green one grey at once
  * - his ✓ or x the page server applies by itself (`closing`, epic `epic-engine` I306):  grey (`old`) at once,
  *   whatever it was, so its section folds it away with the greys
+ * - canceled, and his Do this, Make Todo or Revisit on it waiting (`reopensCanceled()`, epic `epic-engine` I359):
+ *   drawn open at once, as `inbox apply` will leave it, the `state` the tool wrote for it canceled not read
  * - NEVER reads the page:  the caller hands it the fields and the live review, tracked or not
  */
 export class DrawnState {
@@ -170,10 +179,11 @@ export class DrawnState {
     if (live.closing) return "old"
     if (live.workedOn) return "progress"
     if (live.urgency && DrawnState.canCalm(fields)) return live.urgency.calm ? DrawnState.calmState() : "attention"
-    const state = fields.state
+    const reopening = DrawnState.isReopening(fields, live)
+    const state = reopening ? undefined : fields.state
     const written = state && (ITEM_STATES as readonly string[]).includes(state) ? (state as ItemState) : undefined
     const shown = ItemAge.shown(
-      written ?? STATUS_STATES[fields.status ?? ""] ?? "open",
+      written ?? STATUS_STATES[reopening ? "open" : (fields.status ?? "")] ?? "open",
       fields.changed,
       fields.reviewed,
       now
@@ -181,6 +191,14 @@ export class DrawnState {
     // his turn on a comment in it:  orange, whatever it is, but red (needs him anyway) or blue (Claude at it)
     if (live.commentsReplied && shown !== "attention" && shown !== "progress") return "replied"
     return (shown === "recent" || shown === "requested") && live.approved ? "old" : shown
+  }
+
+  /**
+   * Is `fields`'s item canceled, with his mark undoing it waiting (`live.mark`:  Do this, Make Todo, Revisit;
+   * `reopensCanceled()`, epic `epic-engine` I359)?  Then it draws as `inbox apply` will leave it:  open, not struck.
+   */
+  static isReopening(fields: StateFields, live: LiveReview): boolean {
+    return reopensCanceled(fields.status, fields.changed, live.mark)
   }
 
   /**

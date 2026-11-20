@@ -61,3 +61,25 @@ describe("DrawnState.of():  a todo flagged red", () => {
     expect(buttonsForItem(todo.id, { status: "open" })).toBe("todo")
   })
 })
+
+// epic `epic-engine` I359:  Owen's x canceled I31;  his Do this a few seconds later left it struck through, grey
+describe("DrawnState:  a canceled item with his Do this, Make Todo or Revisit waiting draws open", () => {
+  const CANCELED_AT = "2026-11-15T11:35:05-05:00"
+  const canceled = { id: "i31", state: "old", status: "canceled", changed: CANCELED_AT }
+  const marked = (action: string, at = "2026-11-15T11:35:15-05:00") => ({ ...NO_LIVE_REVIEW, mark: { action, at } })
+
+  test("Do this, Make Todo, a todo's plane, Revisit:  reopening, drawn as an open item (yellow), not as written", () => {
+    for (const action of ["todo", "next", "revisit"]) {
+      expect(DrawnState.isReopening(canceled, marked(action))).toBe(true)
+      expect(DrawnState.of(canceled, marked(action), NOW)).toBe("open")
+    }
+  })
+
+  test("NOT the ✓ (Saw it), nor a mark made before it was canceled, nor a done item, nor no mark", () => {
+    expect(DrawnState.isReopening(canceled, marked("approve"))).toBe(false)
+    expect(DrawnState.isReopening(canceled, marked("todo", "2026-11-15T11:34:00-05:00"))).toBe(false)
+    expect(DrawnState.isReopening({ ...canceled, status: "done" }, marked("todo"))).toBe(false)
+    expect(DrawnState.isReopening(canceled, NO_LIVE_REVIEW)).toBe(false)
+    expect(DrawnState.of(canceled, NO_LIVE_REVIEW, NOW)).toBe("old")
+  })
+})

@@ -140,7 +140,8 @@ export class ReviewState {
 
   /**
    * What the inbox says of item `itemId` (its own id when none) for its drawn state (`DrawnState.of()`):
-   * worked on, Owen's urgency, his check pressed, closing at his ✓ or x (I306) and held in view till his Send (T80), his turn on a comment in it.
+   * worked on, Owen's urgency, his check pressed, closing at his ✓ or x (I306) and held in view till his Send (T80), his
+   * mark's action and time (I359), his turn on a comment in it.
    * - the page's inbox, so any element reads it for any item:  a section counts its items by it, as their chips draw
    */
   readonly liveOf = (itemId?: string): LiveReview =>
@@ -157,6 +158,8 @@ export class ReviewState {
         closing: client.isClosing(id),
         heldInView: client.isHeldInView(id),
         closingAs: client.closingAs(id),
+        // his Do this on a canceled item draws it open at once (I359):  `DrawnState.isReopening()`
+        mark: markWhen(client.markOf(id)),
         commentsReplied: client.hasRepliedComments(id)
       }
     }) ?? NO_LIVE_REVIEW
@@ -321,4 +324,9 @@ export class ReviewState {
     client.subscribe(mark)
     client.onNotice((message) => PageNotices.show(message, { ms: NOTICE_MS }))
   }
+}
+
+/** Mark `mark`'s action and time, for `LiveReview.mark`, or none:  an immediate request (Do Now) is none. */
+function markWhen(mark: InboxMark | undefined): LiveReview["mark"] {
+  return mark && !isImmediate(mark) ? { action: mark.action, at: mark.at } : undefined
 }

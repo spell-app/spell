@@ -14,12 +14,13 @@ describe("AuthorWords.rename()", () => {
       `Q3 ${AuthorWords.picked("Ana", "B")}:  Bananas`,
       `T4 made from the page:  ${AuthorWords.newItem("Ana", "todo")}`,
       `canceled:  ${AuthorWords.droppedBy("Ana")}`,
+      `I31 reopened:  Not needed -- ${AuthorWords.wantedBack("Ana")}`,
       `J1 urgent ${AuthorWords.fromChip("Ana")}`,
       `<p>${AuthorWords.said("Ana")}  after the flight</p>`,
       `<p>${AuthorWords.noteLead("Ana", "2026-10-01 09:10", "revisit soon")}  why?</p>`
     ].join("\n")
     const { text, count } = AuthorWords.rename(written, "Ana", "Ana Lima")
-    expect(count).toBe(9)
+    expect(count).toBe(10)
     expect(text).toBe(written.replaceAll("Ana", "Ana Lima"))
   })
 

@@ -3394,3 +3394,59 @@ describe("PlanDoc test answers:  Owen's test run", () => {
     expect(problems(plan)).toEqual([])
   })
 })
+
+// epic `epic-engine` I359:  Owen's x canceled I31;  his Do this a few seconds later stayed struck through
+describe("applyMark():  a Do this, Make Todo or Revisit on a canceled item reopens it first", () => {
+  const later = new Date(NOW.getTime() + 15_000).toISOString()
+  const earlier = new Date(NOW.getTime() - 15_000).toISOString()
+
+  test("Do this on a canceled issue:  reopened, then wanted as on an open one;  its line and the log say so", () => {
+    const plan = freshPlan()
+    plan.addItem("issue", "close it, not needed")
+    plan.applyMark({ id: "i1", action: "drop" })
+    expect(el(plan, "i1").getAttribute("status")).toBe("canceled")
+    const result = plan.applyMark({ id: "i1", action: "todo", at: later }) as { did: string }
+    expect(result.did).toMatch(/^reopened;  /)
+    expect(el(plan, "i1").getAttribute("status")).toBe("open")
+    expect(el(plan, "i1").hasAttribute("urgent")).toBe(true)
+    const log = Array.from(plan.document.querySelectorAll("#log > epic-event")).map((event) => event.textContent)
+    expect(log).toContain("I1 reopened:  close it, not needed -- wanted back by Owen in review")
+  })
+
+  test("Make Todo on a canceled question:  reopened, and its todo made", () => {
+    const plan = freshPlan()
+    plan.addItem("question", "which way?")
+    plan.setItem("q1", "canceled")
+    const result = plan.applyMark({ id: "q1", action: "todo", at: later }) as { did: string }
+    expect(result.did).toMatch(/^reopened;  /)
+    expect(el(plan, "q1").getAttribute("status")).toBe("open")
+    expect(plan.document.querySelectorAll('epic-item[id^="t"]').length).toBe(1)
+  })
+
+  test("Revisit on a canceled issue:  reopened, the revisit still left for Claude (`reopened` set)", () => {
+    const plan = freshPlan()
+    plan.addItem("issue", "talk it over")
+    plan.setItem("i1", "canceled")
+    const result = plan.applyMark({ id: "i1", action: "revisit", when: "soon", note: "wait", at: later })
+    expect(result).toMatchObject({ applied: false, reopened: true })
+    expect(el(plan, "i1").getAttribute("status")).toBe("open")
+  })
+
+  test("NOT when it was canceled after the mark, nor at the ✓ (Saw it), nor a done item", () => {
+    const plan = freshPlan()
+    plan.addItem("issue", "closed since")
+    plan.addItem("issue", "saw it")
+    plan.addItem("issue", "done")
+    plan.setItem("i1", "canceled")
+    plan.setItem("i2", "canceled")
+    plan.setItem("i3", "done")
+    const early = plan.applyMark({ id: "i1", action: "revisit", when: "soon", at: earlier })
+    expect(early).not.toHaveProperty("reopened")
+    expect(el(plan, "i1").getAttribute("status")).toBe("canceled")
+    plan.applyMark({ id: "i2", action: "approve", at: later })
+    expect(el(plan, "i2").getAttribute("status")).toBe("canceled")
+    const done = plan.applyMark({ id: "i3", action: "revisit", when: "soon", at: later })
+    expect(done).not.toHaveProperty("reopened")
+    expect(el(plan, "i3").getAttribute("status")).toBe("done")
+  })
+})

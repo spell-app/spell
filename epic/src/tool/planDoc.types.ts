@@ -880,6 +880,11 @@ export type MarkResult =
       left: string
       /** the doc has no such item:  the caller drops its mark */
       gone?: true
+      /**
+       * left, but the item was reopened first (a Revisit on it canceled, epic `epic-engine` I359):  the doc changed,
+       * so the caller writes it
+       */
+      reopened?: true
       /** never set:  declared so `result.did` reads without narrowing */
       did?: undefined
     }

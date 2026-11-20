@@ -443,6 +443,23 @@ describe("<epic-item>", () => {
     }
   })
 
+  // epic `epic-engine` I359:  Owen's x canceled I31;  his Do this a few seconds later stayed struck through
+  test("canceled, his Do this waiting:  not struck, an open issue's buttons, as Claude's apply will leave it", async () => {
+    const markOf = vi
+      .spyOn(ReviewClient.prototype, "markOf")
+      .mockReturnValue({ action: "todo", at: "2026-11-20T16:35:15.000Z" })
+    try {
+      const { host } = await item(
+        `<epic-item id="i31" title="Not needed" status="canceled" state="old" changed="2026-11-20T16:35:05.000Z"></epic-item>`
+      )
+      const base = () => host.shadowRoot!.querySelector("[part~='base']")!.className
+      const buttonsOf = () => (host as unknown as { component: { buttonsKind: string } }).component.buttonsKind
+      expect([base(), buttonsOf()]).toEqual(["open item", "issue-open"])
+    } finally {
+      markOf.mockRestore()
+    }
+  })
+
   test("buttonsForItem():  a todo in a phase draws no plane;  anything else as before", () => {
     expect(buttonsForItem("t1", { inPhase: true })).toBe("todo-in-phase")
     expect(buttonsForItem("t1")).toBe("todo")

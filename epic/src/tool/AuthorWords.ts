@@ -40,6 +40,11 @@ export class AuthorWords {
     return `dropped by ${person} in review`
   }
 
+  /** A canceled item's reopen at a Do this, Make Todo or Revisit, in its log line:  `wanted back by Ana in review`. */
+  static wantedBack(person: string): string {
+    return `wanted back by ${person} in review`
+  }
+
   /** An urgency set from an item's id chip, in its log line:  `(Ana, from its id chip)`. */
   static fromChip(person: string): string {
     return `(${person}, from its id chip)`
@@ -85,7 +90,7 @@ const NAME = "{name}"
 const PHRASES: readonly string[] = [
   String.raw`(?<before>\b)${NAME}(?<after>'s (?:run|test run|screenshot|new \w+)\b)`,
   String.raw`(?<before>\b)${NAME}(?<after> picked [A-Z]\b)`,
-  String.raw`(?<before>\bdropped by )${NAME}(?<after> in review\b)`,
+  String.raw`(?<before>\b(?:dropped|wanted back) by )${NAME}(?<after> in review\b)`,
   String.raw`(?<before>\()${NAME}(?<after>, from its id chip\))`,
   String.raw`(?<before><b>)${NAME}(?<after>:</b>)`,
   String.raw`(?<before><b>)${NAME}(?<after> · [^<]*:</b>)`

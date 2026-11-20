@@ -252,6 +252,14 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
    */
   readonly itemState = createMemo((): ItemState => DrawnState.of(this.stateFields(), this.reviewState.liveOf()))
 
+  /**
+   * Is it canceled, with his Do this, Make Todo or Revisit on it waiting (`DrawnState.isReopening()`, epic
+   * `epic-engine` I359)?  It draws open:  not struck, the open item's buttons, its state as an open item's.
+   */
+  private get isReopening(): boolean {
+    return DrawnState.isReopening(this.stateFields(), this.reviewState.liveOf())
+  }
+
   /** A manual test orange because its phase isn't done (`PlanReader.manualTestState()`):  its tooltip says so. */
   private get isWaitingTest(): boolean {
     return MANUAL_TEST.test(this.domElement.id) && this.itemState() === "replied"
@@ -489,9 +497,12 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
    * - Of the statuses only `canceled` looks different (struck through), so only it is a word here.
    *   - struck at his x's click too (`closingAs`, epic `epic-engine` I308), before the server cancels it:  so its
    *     update lands with nothing left to change on screen
+   *   - NOT struck once his Do this, Make Todo or Revisit wants it back (`isReopening`, epic `epic-engine` I359):
+   *     drawn as `inbox apply` will leave it, from the click
    */
   protected get extraClass(): string | undefined {
-    const canceled = this.status === CANCELED || this.reviewState.liveOf().closingAs === "drop"
+    const live = this.reviewState.liveOf()
+    const canceled = (this.status === CANCELED && !this.isReopening) || live.closingAs === "drop"
     return [
       this.itemState(),
       canceled && CANCELED,
@@ -866,7 +877,8 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     this.keptButtons = buttonsForItem(this.id, {
       limit: this.limit,
       inPhase: !!(this.handled || this.takenIn),
-      status: this.status,
+      // his Do this on it canceled (I359):  the open item's buttons, his pressed, as `inbox apply` will leave it
+      status: this.isReopening ? "open" : this.status,
       fixed: !!this.fixed
     })
     return this.keptButtons
