@@ -1,0 +1,44 @@
+/*
+ * `UI.modals.choose()`'s rows (`ChoiceRows`):  a PAGE sheet, since the rows are light DOM in the dialog's
+ * `<ui-content>` (`UI.styles.register("choice-rows", css, { page: true })`, as `<ui-table>`'s is).
+ * - `.ui-choices`:  the rows under the message, and the search box above a long list
+ * - `.ui-choice-rows`:  the buttons, in as many columns as fit, each column `--_choice-width` wide or more
+ *   (the longest row's words, set on the box), one column on a phone when the words are long
+ *   - `.scrolls`:  the buttons or the long list, `shown` rows tall (an inline `max-height`), scrolling past that
+ * - `.ui-choice`:  one row's `<ui-button>`, its words and color chip at its start, so chips and words line up
+ *   down each column;  restyled through its `button` part, never its public tokens
+ * - Every space a multiple of 4px (`--ui-space-*`, rounded to `--ui-grid`).
+ */
+@layer ui.components {
+  .ui-choices {
+    display: grid;
+    gap: var(--ui-space-xs);
+    margin-block-start: var(--ui-space-m);
+  }
+
+  .ui-choice-rows {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--_choice-width, 8em)), 1fr));
+    gap: var(--ui-space-xs);
+  }
+
+  /* padding keeps a focused row's ring inside the scroll box;  the negative margin keeps the rows where they were */
+  .ui-choices > .scrolls {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: var(--ui-space-2xs);
+    margin: calc(-1 * var(--ui-space-2xs));
+  }
+
+  .ui-choice::part(button) {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    gap: var(--ui-space-xs);
+    text-align: start;
+  }
+
+  .ui-choice-chip {
+    flex: none;
+  }
+}

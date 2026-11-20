@@ -60,11 +60,14 @@ export class ModalDialogs implements E.ModalProvider {
    * (epic `language` P66).
    * - One:  a row picks itself, and the dialog closes;  no OK button.
    * - Several:  each row turns on and off;  OK stays off until as many as `least` to `most` are on.
-   * - More than `BUTTON_ROWS` rows:  the list family is imported first, for its `<ui-list>`.
+   * - More than `BUTTON_ROWS` rows:  the list and input families are imported first, for the `<ui-list>`
+   *   and its search box.
    * - A row with a color:  the theme editor's family is imported first, for its `<ui-color-chip>`.
    */
   async choose(options: E.ChooseModalOptions): Promise<number[] | undefined> {
-    if (options.rows.length > BUTTON_ROWS) await import("spell/ui/components/ui-list")
+    if (options.rows.length > BUTTON_ROWS) {
+      await Promise.all([import("spell/ui/components/ui-list"), import("spell/ui/components/ui-input")])
+    }
     if (options.rows.some((row) => row.color)) await import("spell/ui/components/ui-theme-editor")
     const rows = new ChoiceRows({ document: this.document, options, tagFor: ModalDialogs.tagFor })
     return this.run(options, { canDeny: true, rows }, (isApproved) =>

@@ -796,13 +796,13 @@ describe("UI.modals.choose() (epic `language` P66)", () => {
     const rows = Array.from({ length: 30 }, (_, index) => ({ title: `Card ${index + 1}` }))
     const answer = UI.modals.choose({ message: "Which card?", rows, shown: 5 })
     const host = await current()
-    const search = host.querySelector<HTMLInputElement>("input[type=search]")!
+    const search = host.querySelector<HTMLElement>("ui-input[type=search]")!
     const list = host.querySelector<HTMLElement>("ui-list")!
     const items = [...list.querySelectorAll<HTMLElement>("ui-item")]
     expect(items).toHaveLength(30)
     expect(list.parentElement!.style.maxHeight).toBe("11em")
-    search.value = "card 2"
-    search.dispatchEvent(new Event("input"))
+    await ElementFixture.settle(search)
+    await userEvent.type(search.shadowRoot!.querySelector("input")!, "card 2")
     expect(items.filter((item) => !item.hidden).map((item) => item.textContent)).toEqual([
       "Card 2",
       ...Array.from({ length: 10 }, (_, index) => `Card ${20 + index}`)
@@ -810,6 +810,26 @@ describe("UI.modals.choose() (epic `language` P66)", () => {
     await ElementFixture.settle(items[24]!)
     items[24]!.shadowRoot!.querySelector<HTMLElement>("button")!.click()
     expect(await answer).toEqual([24])
+  })
+
+  it("buttons sit in columns, each row's chip and words at its start (I165)", async () => {
+    await import("spell/ui/components/ui-theme-editor")
+    const rows = ["Red", "Orange", "Yellow", "Olive"].map((title) => ({ title, color: title.toLowerCase() }))
+    const answer = UI.modals.choose({ message: "Your color?", rows })
+    const host = await current()
+    const buttons = rowButtons(host)
+    await Promise.all(buttons.map((button) => ElementFixture.settle(button)))
+    const box = buttons[0]!.parentElement!
+    expect(getComputedStyle(box).display).toBe("grid")
+    expect(getComputedStyle(box).gridTemplateColumns.split(" ").length).toBeGreaterThan(1)
+    // every chip the same distance from its button's start edge
+    const insets = buttons.map(
+      (button) =>
+        button.querySelector("ui-color-chip")!.getBoundingClientRect().left - button.getBoundingClientRect().left
+    )
+    expect(new Set(insets.map(Math.round)).size).toBe(1)
+    await userEvent.keyboard("{Escape}")
+    expect(await answer).toBeUndefined()
   })
 
   it("a row with a color:  a read-only chip of it before its words", async () => {

@@ -1,17 +1,22 @@
 import { E, UI, UIT } from "spell/ui/core"
 
+import choiceRowsCSS from "./ChoiceRows.css?inline"
+
 /****************
  * ### `ChoiceRows`
  * The rows of `UI.modals.choose()`'s dialog, and which of them are picked (epic `language` P66).
- * - Up to `BUTTON_ROWS` rows:  a `<ui-button>` each, one under another.
- * - More:  a `<ui-list selection>` of `<ui-item>`s that scrolls, with a search box above it, which hides the rows
- *   whose words don't hold what's typed.
+ * - Up to `BUTTON_ROWS` rows:  a `<ui-button>` each, in as many columns as fit (I165),
+ *   each button's color chip and words at its start, so they line up down a column.
+ * - More:  a `<ui-list selection>` of `<ui-item>`s that scrolls, with a `<ui-input>` search box above it,
+ *   which hides the rows whose words don't hold what's typed.
  * - `shown`:  how many rows show before the rows scroll;  default every button, or `LIST_ROWS` of a list.
  * - One:  a row picks itself (`onPicked()`), and the dialog closes.
  * - Several:  each row turns on and off;  `onCountChanged()` says whether OK may pick them (`fits`).
  * - A row with a `color`:  a `<ui-color-chip>` before its words, read-only, so the row around it is what's picked;
  *   `ModalDialogs.choose()` imports the chip's family first.
  * - Plain DOM, built with `createElement` / `textContent`, as `ModalDialogs` is:  never `innerHTML` with caller text.
+ * - Its look is a PAGE sheet, `ChoiceRows.css`, registered as the rows are first made:
+ *   the rows are light DOM in the dialog, which no shadow sheet reaches.
  * - Other families' tags are found by class noun (`tagFor`), as `ModalDialogs` finds them.
  ****************/
 export class ChoiceRows {
@@ -36,8 +41,9 @@ export class ChoiceRows {
     this.several = several
     this.least = least
     this.most = most
+    UI.styles.register(SHEET, choiceRowsCSS, { page: true })
     this.element = document.createElement("div")
-    this.element.style.cssText = ROWS_LAYOUT
+    this.element.className = CHOICES_CLASS
     if (rows.length > BUTTON_ROWS) this.drawList(rows, tagFor, shown ?? LIST_ROWS)
     else this.drawButtons(rows, tagFor, shown)
   }
@@ -56,11 +62,17 @@ export class ChoiceRows {
   // ## Buttons, up to `BUTTON_ROWS`
   ////////////////
 
-  /** A `<ui-button>` per row, one under another;  a `toggle` button each, for several. */
+  /**
+   * A `<ui-button>` per row, in columns as wide as the longest row's words;  a `toggle` button each, for several.
+   * - Across, then down:  the rows read in their order along each line of columns.
+   */
   private drawButtons(rows: readonly E.ChoiceRow[], tagFor: TagFor, shown: number | undefined): void {
     const box = this.scroller(shown, rows.some((row) => row.color) ? CHIP_ROW_HEIGHT : BUTTON_ROW_HEIGHT)
+    box.classList.add(BUTTONS_CLASS)
+    box.style.setProperty(CHOICE_WIDTH, ChoiceRows.columnWidth(rows))
     rows.forEach((row, position) => {
       const button = this.document.createElement(tagFor(UIT.BUTTON))
+      button.className = CHOICE_CLASS
       button.toggleAttribute(FLUID, true)
       button.setAttribute(APPEARANCE, BASIC)
       button.append(...this.words(row, tagFor))
@@ -78,14 +90,15 @@ export class ChoiceRows {
   // ## A list, past `BUTTON_ROWS`
   ////////////////
 
-  /** A search box, then a `<ui-list selection>` of the rows, `shown` of them tall. */
+  /** A `<ui-input>` search box, then a `<ui-list selection>` of the rows, `shown` of them tall. */
   private drawList(rows: readonly E.ChoiceRow[], tagFor: TagFor, shown: number): void {
-    const search = this.document.createElement("input")
-    search.type = "search"
-    search.className = NATIVE_LOOK
-    search.autofocus = true
+    const search = this.document.createElement(tagFor(INPUT))
+    search.setAttribute(TYPE, SEARCH_TYPE)
+    search.setAttribute(ICON, SEARCH_ICON)
+    search.toggleAttribute(FLUID, true)
+    search.toggleAttribute("autofocus", true)
     search.setAttribute("aria-label", UI.i18n.t(SEARCH))
-    search.placeholder = UI.i18n.t(SEARCH)
+    search.setAttribute(PLACEHOLDER, UI.i18n.t(SEARCH))
     const box = this.scroller(shown, LIST_ROW_HEIGHT)
     const list = this.document.createElement(tagFor(LIST))
     list.toggleAttribute(SELECTION, true)
@@ -105,8 +118,9 @@ export class ChoiceRows {
       item.toggleAttribute(SELECTED, isOn)
       this.turn(position, isOn)
     })
-    search.addEventListener("input", () => {
-      const typed = search.value.trim().toLocaleLowerCase()
+    search.addEventListener(TYPED_EVENT, (event) => {
+      const { value } = (event as CustomEvent<{ value: string }>).detail
+      const typed = value.trim().toLocaleLowerCase()
       for (const { item, words } of items) item.hidden = !!typed && !words.includes(typed)
     })
     box.append(list)
@@ -120,8 +134,22 @@ export class ChoiceRows {
   /** A box `shown` rows of `rowHeight` tall, that scrolls past that;  none:  as tall as its rows. */
   private scroller(shown: number | undefined, rowHeight: number): HTMLElement {
     const box = this.document.createElement("div")
-    box.style.cssText = shown ? `${SCROLLER_LAYOUT};max-height:${shown * rowHeight}em` : STACK_LAYOUT
+    if (shown) {
+      box.classList.add(SCROLLS_CLASS)
+      box.style.maxHeight = `${shown * rowHeight}em`
+    }
     return box
+  }
+
+  /**
+   * The narrowest a column of buttons may be:  the longest row's words, the button's padding,
+   * and a chip's room when a row has one.
+   * - In `ch`, the width of a digit:  near enough an average letter's that a row's words fit on one line.
+   */
+  private static columnWidth(rows: readonly E.ChoiceRow[]): string {
+    const longest = Math.max(...rows.map((row) => row.title.length))
+    const chip = rows.some((row) => row.color) ? CHIP_ROOM : 0
+    return `calc(${longest}ch + ${BUTTON_PADDING + chip}em)`
   }
 
   /** A row's words, and its color's chip before them. */
@@ -132,7 +160,7 @@ export class ChoiceRows {
     chip.setAttribute(COLOR, HUES.has(color) ? `var(--ui-${color})` : color)
     // the row's words say it:  the chip is only its picture
     chip.setAttribute("aria-hidden", "true")
-    chip.style.marginInlineEnd = CHIP_GAP
+    chip.className = CHIP_CLASS
     return [chip, words]
   }
 
@@ -179,31 +207,39 @@ const CHIP_ROW_HEIGHT = 3.125
 /** A list row's height, in ems. */
 const LIST_ROW_HEIGHT = 2.2
 
-/** The rows under the message, and the search box above a list. */
-const ROWS_LAYOUT = "display: grid; gap: 0.5em; margin-top: 1em"
+/** A button's padding, both sides, and a chip with the gap after it, in ems:  `columnWidth()`. */
+const BUTTON_PADDING = 3.5
+const CHIP_ROOM = 2
 
-/** Buttons one under another, a little apart. */
-const STACK_LAYOUT = "display: grid; gap: 0.25em"
+/** The page sheet's name (`UI.styles`). */
+const SHEET = "choice-rows"
 
-/**
- * The same, scrolling past its height.
- * - Its padding keeps a focused row's ring inside the box, and the negative margin keeps the rows where they were.
- */
-const SCROLLER_LAYOUT = `${STACK_LAYOUT};overflow-y:auto;overscroll-behavior:contain;padding:4px;margin:-4px`
+/** `ChoiceRows.css`'s classes:  the rows box, the buttons' box, one that scrolls, a row, its chip. */
+const CHOICES_CLASS = "ui-choices"
+const BUTTONS_CLASS = "ui-choice-rows"
+const SCROLLS_CLASS = "scrolls"
+const CHOICE_CLASS = "ui-choice"
+const CHIP_CLASS = "ui-choice-chip"
 
-/** Between a chip and its words. */
-const CHIP_GAP = "0.5em"
+/** `ChoiceRows.css`'s narrowest column, set on the buttons' box. */
+const CHOICE_WIDTH = "--_choice-width"
 
 /** Spell UI's hue names:  a row's `color` that's one is its token, `var(--ui-red)`. */
 const HUES = new Set<string>(UIT.ThemeHues)
 
-/** `native.css`'s opt-in class, for the search box. */
-const NATIVE_LOOK = "ui-native"
+/** `<ui-input>`'s attributes and values (canonical names) for the search box, and its event as letters are typed. */
+const TYPE = "type"
+const SEARCH_TYPE = "search"
+const ICON = "icon"
+const SEARCH_ICON = "search"
+const PLACEHOLDER = "placeholder"
+const TYPED_EVENT = "ui-typed"
 
 /** Text key of the search box's placeholder and label. */
 const SEARCH = "search"
 
-/** Class nouns of the list, its items and the color chip. */
+/** Class nouns of the search box, the list, its items and the color chip. */
+const INPUT = "input"
 const LIST = "list"
 const ITEM = "item"
 const COLOR_CHIP = "colour chip"
