@@ -9,6 +9,7 @@ import {
   type LocalizedVocabulary
 } from "spell/ui/vocabulary"
 import { DEFAULTS_TABLE } from "spell/ui/vocabulary/defaults.generated"
+import { HOOKS_TABLE } from "spell/ui/vocabulary/hooks.generated"
 import { es } from "spell/ui/components/components.es"
 
 /** The attribute kinds written by their name alone, `fluid`, `disabled`:  they take no value. */
@@ -124,6 +125,45 @@ export class SpellUIDefaults {
         const picker = pickerFor(spec.kind, set)
         return { name, values, ...(description && { description }), ...(bare && { bare }), ...(picker && { picker }) }
       })
+  }
+
+  /**
+   * Spell UI's tag `tag` as a Spell type is built on it, in `language` (the pack's `viewBaseFor()`, epic
+   * `from-console` P11):  `<ui-tree>` for `a "netlist column" is a ui tree view`.
+   * - `tag` as `canonicalTagFor()` takes it, `tree`, `árbol`.
+   * - Its own attributes, each by the name and words `language` writes on it, with Spell UI's own when they differ:
+   *   Spanish's `apariencia`, `columnas` => `appearance`, `columns`.
+   * - Its hooks (`hooks.generated.ts`), in `language`'s words:  its dictionary's, else English's.
+   * - `undefined` for a tag Spell UI doesn't have.
+   */
+  static viewBaseFor(tag: string, language: string): SP.ComponentViewBase | undefined {
+    const canonical = SpellUIDefaults.canonicalTagFor(tag, language)
+    if (!canonical) return undefined
+    const localized = SpellUIDefaults.localizedFor(canonical, language)
+    const english = SpellUIDefaults.registry.localizedFor(canonical)!
+    const attributes = english.vocabulary.attributes.map((spec): SP.ComponentViewAttribute => {
+      const name = localized.names.attributes.get(spec.name) ?? spec.name
+      const words = localized.names.values.get(spec.name)
+      const values = Array.isArray(spec.values) ? (spec.values as readonly string[]) : undefined
+      const written = values?.map((value) => words?.get(value) ?? value)
+      // only where the language's words differ from Spell UI's own
+      const differs = values?.some((value, index) => written![index] !== value)
+      const valueOutputs = differs
+        ? Object.fromEntries(values!.map((value, index) => [written![index], value]))
+        : undefined
+      return {
+        name,
+        ...(name !== spec.name && { output: spec.name }),
+        ...(written && { values: written }),
+        ...(valueOutputs && { valueOutputs })
+      }
+    })
+    const translated = language === es.lang ? es.components?.[canonical]?.hooks : undefined
+    const hooks = (HOOKS_TABLE[canonical] ?? []).map(({ name, words }) => ({
+      name,
+      words: translated?.[name] ?? words
+    }))
+    return { tag: canonical, attributes, hooks }
   }
 
   /** Each of Spell UI's tags in `language`, bare as a drawing writes it (`button`, `botón`), with its canonical tag. */

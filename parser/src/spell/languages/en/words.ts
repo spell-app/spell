@@ -276,6 +276,7 @@ export const englishWords: SP.LanguageWords = {
 
   /** The kind of a property's values:  `card suit`, from a card's `its "suit" is one of ...`. */
   propertyKindName: "{type} {property}",
+  uiViewName: "ui {noun} view",
 
   /** How a file's raw text declares things, found before it's parsed -- see `SP.DeclarationPatterns`. */
   declarations: {

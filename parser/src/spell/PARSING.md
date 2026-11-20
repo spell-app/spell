@@ -1529,6 +1529,14 @@ plain Spell.
   - A two sided view's:  its slots front and back, `its "direction" is down or up` (a new one starts face down, J36),
     `it "is face (direction)"`, `turn it face up / down`, `turn it over`, and `to draw it` drawing both slots,
     back to back, its own `<css>` turning it over in 3D (a view type's style sheet, `static css`).
+- A SPELL UI ELEMENT's VIEW:  `a "netlist column" is a ui tree view` (epic `from-console` P11;  [UIViews.ts](UIViews.ts)).
+  - Its words, the language's (`LanguageWords.uiViewName`:  `ui {noun} view`, `vista ui de {noun}`), name a type
+    `SpellType` reads by itself (`parseUIView()`), its noun any element of the project's packs.
+  - The type, `UiTreeView`, is made the first time a line names it, in the project's scope, from the pack's
+    `viewBaseFor()`:  a view with a property per attribute of the element, loaded as declarations are.
+  - A type built on it compiles `extends View`, naming its element, `static uiElement = "ui-tree"` (`CreateType`).
+  - A `to` line in its body in a hook's words (`to give the row class of (an item)`) is that hook, under the
+    element's name, `rowClass(item)`, never an action (`MethodDefinition.uiHookOf()`).
 
 
 ## Pages:  `"button api" is a notebook page` (epic `language` P45, P47)

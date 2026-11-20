@@ -210,18 +210,19 @@ export class Vocabulary {
         if (!localized.attributes.has(alias)) localized.attributes.set(alias, spec)
       }
     }
-    for (const spec of vocabulary.events) {
+    // a small vocabulary written in JavaScript may leave a list out (epic `from-console` P11)
+    for (const spec of vocabulary.events ?? []) {
       const translated = component.events?.[spec.name] ?? dictionary.events?.[spec.name]
       const name = Vocabulary.eventName(spec.name, prefix, translated)
       Vocabulary.claim({ map: localized.events, name, value: spec, what: `${where} event` })
       names.events.set(spec.name, name)
     }
-    for (const spec of vocabulary.slots) {
+    for (const spec of vocabulary.slots ?? []) {
       const name = spec.name && (component.slots?.[spec.name] ?? dictionary.slots?.[spec.name] ?? spec.name)
       Vocabulary.claim({ map: localized.slots, name, value: spec, what: `${where} slot` })
       names.slots.set(spec.name, name)
     }
-    for (const spec of vocabulary.parts) {
+    for (const spec of vocabulary.parts ?? []) {
       const name = component.parts?.[spec.name] ?? dictionary.parts?.[spec.name] ?? spec.name
       Vocabulary.claim({ map: localized.parts, name, value: spec, what: `${where} part` })
       names.parts.set(spec.name, name)
