@@ -39,6 +39,15 @@ import { type MethodBody } from "./classes.shared"
  *   `whileCardDraggedOver(card)`;  `whenThingDroppedOn(thing)` for `something`.
  * - Its syntaxes for `while` have no `moment`, but `over`:  the same words (`drag_moment`), only ever `dragged over`.
  * - `when a card is dropped`, with no `on it`, is `dropped on it` (Spanish `cuando una carta se suelta`;  epic `language` I100).
+ * - A FILE or a FOLDER dragged in from the desktop (epic `language` P67, Q78):  the same lines, no new grammar.
+ *   - `when a file is dragged over it:`, `dragged out of it`, `dropped on it`, `while a file is dragged over it:`;
+ *     `when a folder is dropped on it:` (a browser can't tell a folder until it's dropped, so only `dropped on it`).
+ *   - Spanish:  `cuando un archivo se suelta sobre ella:`, `cuando una carpeta se suelta sobre ella:`.
+ *   - On any view, list or not:  the page hears the browser's own drag of files there (app's `SpellElement`).
+ *   - `the file` is the browser's own `File`;  `the folder`, the dropped folder's entry.
+ *   - The method is `whenFileDroppedOn`, `whenFolderDroppedOn` in every language (`LanguageWords.desktopFileWords`).
+ *   - A program's own `file` type wins, with a warning:  its own things dragged about, not the desktop's.
+ *   - `something` never hears desktop files.
  */
 export class DragHandler extends SpellStatement<"item?|moment?|body?|over?"> {
   @proto static priority = Priority.declaration
@@ -56,6 +65,11 @@ export class DragHandler extends SpellStatement<"item?|moment?|body?|over?"> {
     // `while` is only ever `dragged over`
     const { over } = match.groups
     if (over && Wording.meaningOf(over) !== "dragged_over") return undefined
+    const { item } = match.groups
+    const language = SP.Language.of(scope)
+    const word = item && `${item.value}`.toLowerCase()
+    if (word && language.words.desktopFileWords[word] && scope.getType(SP.typeName(word)))
+      SP.SpellWarnings.note(match, language.parserMessage("own-file-type", { word }))
     return match
   }
 
@@ -97,16 +111,35 @@ export class DragHandler extends SpellStatement<"item?|moment?|body?|over?"> {
     })
   }
 
-  /** The item's type, e.g. `Card` for `when a card is ...`;  `Thing` for `something`. */
+  /**
+   * The item's type, e.g. `Card` for `when a card is ...`;  `Thing` for `something`.
+   * - A file or a folder from the desktop (`desktopFileWords`):  `File` or `Folder` in every language,
+   *   so a Spanish `cuando un archivo se suelta sobre ella:` is `whenFileDroppedOn` too, as the page calls it.
+   *   A program's own type of that name wins.
+   */
   private static itemTypeOf(match: P.MatchFor<DragHandler>): string {
     const { item } = match.groups
-    return item ? SP.typeName(`${item.value}`) : "Thing"
+    if (!item) return "Thing"
+    return DragHandler.desktopItemOf(match) ?? SP.typeName(`${item.value}`)
   }
 
-  /** What the body calls the item, e.g. `card` for `the card`;  for `something`, the language's word for a thing. */
+  /** `File` or `Folder` for a desktop file's words (`a file`, `una carpeta`), unless the program has its own such type. */
+  static desktopItemOf(match: P.MatchFor<DragHandler>): "File" | "Folder" | undefined {
+    const { item } = match.groups
+    const word = item && `${item.value}`.toLowerCase()
+    const desktop = word ? SP.Language.of(match.scope).words.desktopFileWords[word] : undefined
+    return desktop && !match.scope.getType(SP.typeName(word!)) ? desktop : undefined
+  }
+
+  /**
+   * What the body calls the item, e.g. `card` for `the card`;  for `something`, the language's word for a thing.
+   * - A desktop file is called as it's written:  `the file`, Spanish `el archivo`.
+   */
   private static itemNameOf(match: P.MatchFor<DragHandler>): string {
     const { item } = match.groups
-    return item ? P.instanceCase(DragHandler.itemTypeOf(match)) : SP.Language.of(match.scope).wordFor("thing")
+    if (!item) return SP.Language.of(match.scope).wordFor("thing")
+    if (DragHandler.desktopItemOf(match)) return P.instanceCase(SP.typeName(`${item.value}`))
+    return P.instanceCase(DragHandler.itemTypeOf(match))
   }
 
   /** The method the page calls, e.g. `whenCardDroppedOn`, `whileCardDraggedOver` -- see `DRAG_MOMENTS`. */

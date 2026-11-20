@@ -317,6 +317,12 @@ export const PARSER_MESSAGES = {
   "not-a-property-body-line":
     "Only a property's rules and aliases go under it:  this line still works, but write it after the property, not under it",
   /**
+   * A drag line about a `file` or `folder`, in a program with its own type of that name (epic `language` P67, Q78):
+   * the line is about the program's own things, never a file dragged in from the computer.
+   */
+  "own-file-type":
+    'Your program makes its own kind of thing called "{word}".  So this line reacts when one of those is dragged, not a file dragged in from your computer.  To take files from your computer, rename your own kind of thing.',
+  /**
    * Old words that still read:  `{line}` is the new.
    * - An ability's, `- it can be dragged` for `it is draggable` (epic `debut` P27).
    * - An authenticated place's, `its key is the secret "X"` for `it is authenticated with the secret "X"`.

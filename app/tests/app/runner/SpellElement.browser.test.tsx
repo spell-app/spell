@@ -778,6 +778,138 @@ describe("SpellElement", () => {
       }
     })
 
+    test("a drag sends the page ui-dragged-over, ui-dragged-out and ui-dropped, the thing and the list in each (epic `language` P67)", async () => {
+      const token = new Token("a")
+      core.append(trays[0]!, token)
+      const { root, done } = await drawTrays()
+      const heard: Array<{ type: string; thing: unknown; list: unknown }> = []
+      const names = ["ui-dragged-over", "ui-dragged-out", "ui-dropped"]
+      const listen = (event: Event) => {
+        const { thing, list } = (event as CustomEvent).detail
+        heard.push({ type: event.type, thing, list })
+      }
+      for (const name of names) root.addEventListener(name, listen)
+      try {
+        await drag(root.querySelector("game-token") as HTMLElement, root.querySelectorAll<HTMLElement>("game-tray")[1]!)
+        expect(heard[0]).toEqual({ type: "ui-dragged-over", thing: token, list: trays[1] })
+        expect(heard.at(-1)).toEqual({ type: "ui-dropped", thing: token, list: trays[1] })
+        expect(heard.some((each) => each.type === "ui-dragged-out")).toBe(false)
+        // a drop the tray won't take:  it left
+        heard.length = 0
+        const to = trays[0]! as Tray & Record<string, unknown>
+        to.canTake = () => false
+        await drag(root.querySelector("game-token") as HTMLElement, root.querySelectorAll<HTMLElement>("game-tray")[0]!)
+        delete to.canTake
+        expect(heard.map((each) => each.type)).toEqual(["ui-dragged-over", "ui-dragged-out"])
+      } finally {
+        for (const name of names) root.removeEventListener(name, listen)
+        done()
+      }
+    })
+
+    test("a fast drag over a tray sends ui-dragged-over at once, then at most one every 100ms, with the last place (P67, Q77)", async () => {
+      const token = new Token("a")
+      core.append(trays[0]!, token)
+      const { root, done } = await drawTrays()
+      const overs: number[] = []
+      const listen = (event: Event) => overs.push((event as CustomEvent).detail.x)
+      root.addEventListener("ui-dragged-over", listen)
+      try {
+        const element = root.querySelector("game-token") as HTMLElement
+        const target = root.querySelectorAll<HTMLElement>("game-tray")[1]!
+        const box = target.getBoundingClientRect()
+        const from = element.getBoundingClientRect()
+        const send = (on: EventTarget, type: string, x: number, y: number) =>
+          on.dispatchEvent(
+            new PointerEvent(type, { bubbles: true, composed: true, pointerId: 3, clientX: x, clientY: y })
+          )
+        send(element, "pointerdown", from.x + 5, from.y + 5)
+        const y = box.y + box.height / 2
+        // 20 moves over the tray, one after another
+        for (let step = 0; step < 20; step++) send(window, "pointermove", box.x + 5 + step, y)
+        expect(overs).toHaveLength(1)
+        await new Promise((resolve) => setTimeout(resolve, 150))
+        expect(overs).toEqual([overs[0], box.x + 5 + 19])
+        send(window, "pointerup", box.x + 24, y)
+        core.flush()
+        await ElementFixture.settle(document.body)
+      } finally {
+        root.removeEventListener("ui-dragged-over", listen)
+        done()
+      }
+    })
+
+    test("a file dragged in from the desktop runs a view's file lines and sends ui-file-*;  the browser never opens it (P67, Q78)", async () => {
+      /** `a drop area is a view` with `when a file is dropped on it:` and the rest, as compiled. */
+      class DropArea extends View {
+        static elementTag = core.defineElement(this, "Game")
+        heard: string[] = []
+        draw(): ReturnType<View["draw"]> {
+          return (h("i", {}, "drop here") as unknown as () => ReturnType<View["draw"]>)()
+        }
+        whenFileDraggedOver() {
+          this.heard.push("over")
+        }
+        whenFileDraggedOutOf() {
+          this.heard.push("out")
+        }
+        whenFileDroppedOn(file: File) {
+          this.heard.push(`dropped ${file.name}`)
+        }
+      }
+      const area = new DropArea()
+      const root = document.createElement("div")
+      document.body.append(root)
+      const mounted = core.mountApp({ draw: () => core.drawThing(area) }, root)
+      flush()
+      await ElementFixture.settle(root)
+      const events: string[] = []
+      const listen = (event: Event) => events.push(event.type)
+      const names = ["ui-file-dragged-over", "ui-file-dragged-out", "ui-file-dropped"]
+      for (const name of names) root.addEventListener(name, listen)
+      const element = root.querySelector("game-drop-area") as HTMLElement
+      const files = () => {
+        const transfer = new DataTransfer()
+        transfer.items.add(new File(["hello"], "notes.txt", { type: "text/plain" }))
+        return transfer
+      }
+      const send = (type: string) => {
+        const event = new DragEvent(type, { bubbles: true, composed: true, cancelable: true, dataTransfer: files() })
+        element.dispatchEvent(event)
+        return event
+      }
+      try {
+        expect(send("dragenter").defaultPrevented).toBe(true)
+        send("dragover")
+        await ElementFixture.settle(root)
+        expect(element.matches(":state(accepting-drop)")).toBe(true)
+        send("dragleave")
+        await new Promise((resolve) => setTimeout(resolve, 150))
+        expect(area.heard).toEqual(["over", "out"])
+        send("dragenter")
+        // leaving and coming back within 100ms is never having left
+        send("dragleave")
+        send("dragover")
+        await new Promise((resolve) => setTimeout(resolve, 150))
+        expect(send("drop").defaultPrevented).toBe(true)
+        await vi.waitFor(() => expect(area.heard).toContain("dropped notes.txt"))
+        expect(area.heard).toEqual(["over", "out", "over", "dropped notes.txt"])
+        // each dragover asked for one more, 100ms later
+        expect(events).toEqual([
+          "ui-file-dragged-over",
+          "ui-file-dragged-over",
+          "ui-file-dragged-out",
+          "ui-file-dragged-over",
+          "ui-file-dragged-over",
+          "ui-file-dropped"
+        ])
+      } finally {
+        for (const name of names) root.removeEventListener(name, listen)
+        mounted.unmount()
+        root.remove()
+      }
+    })
+
     test("a click selects a thing in its list;  command adds or takes one away, shift selects a range (outline-spell P29)", async () => {
       /** A token people may select:  `a bead can be selected`. */
       class Bead extends Token {

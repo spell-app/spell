@@ -164,6 +164,8 @@ export const spanishWords: SP.LanguageWords = {
   /** The word between a list and what it holds:  `lista de cartas`. */
   listOfWord: "de",
   savedTimeWords: { created: "creado", modified: "modificado" },
+  // a file or folder dragged in from the desktop, for a drag line (`drag_handler`, epic `language` P67)
+  desktopFileWords: { archivo: "File", carpeta: "Folder" },
   // `cerrando`, `abriendo`:  an event still happening, which a handler can cancel (`send`, epic `elemental-spell` P9)
   ongoingEventName: /(ando|iendo|yendo)$/,
   // las acciones de la propia aplicación, como las nombra un menú (`define_menu`, épica `elemental-spell` P10)

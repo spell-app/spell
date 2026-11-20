@@ -2,6 +2,7 @@ import { For, Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
 import { E, UI } from "spell/ui/core"
+import { DroppedFiles, type Arrival as DropArrival, type Taken, type TakenFolder } from "./DroppedFiles"
 import { uploaderVocabulary } from "./UIUploader.en"
 
 import uploaderCSS from "./UIUploader.css?inline"
@@ -254,7 +255,7 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
 
     const taken: Taken[] = []
     for (const [index, folder] of folders.entries()) {
-      const detail = { ...UIUploader.folderDetail(folder, via) }
+      const detail = { ...DroppedFiles.folderDetail(folder, via) }
       if (!this.multiple && index > 0) {
         const refusal = this.refusal("oneOnly", "oneOnlyLong")
         detail.reason = refusal.reason
@@ -270,7 +271,7 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
     // each file, before and after
     const rows: FileRow[] = []
     for (const file of taken) {
-      const detail = UIUploader.fileDetail(file, via)
+      const detail = DroppedFiles.fileDetail(file, via)
       if (!this.send("ui-file-dropping", detail)) {
         if (!file.reason) kept--
         continue
@@ -294,25 +295,6 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
   /** A folder turned away by a plain uploader, as a file for its row. */
   private static folderAsFile(folder: TakenFolder): Taken {
     return { file: new File([], folder.name), path: folder.path, entry: folder.entry, handle: folder.handle }
-  }
-
-  /** A file's events' detail. */
-  private static fileDetail({ file, path, entry, handle, reason }: Taken, via: Via) {
-    const { name, size, type, lastModified } = file
-    return { file, name, path, size, type, lastModified, via, reason, entry, handle }
-  }
-
-  /** A folder's events' detail. */
-  private static folderDetail({ name, path, files, entry, handle }: TakenFolder, via: Via) {
-    return {
-      name,
-      path,
-      files: files.map((each) => each.file),
-      via,
-      reason: undefined as string | undefined,
-      entry,
-      handle
-    }
   }
 
   ////////////////
@@ -526,7 +508,7 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
   /** Files are dragged over it:  allow the drop, and say so. */
   @E.on("dragover")
   protected onDragOver(event: DragEvent) {
-    if (!UIUploader.hasFiles(event) || this.isDisabled) return
+    if (!DroppedFiles.hasFiles(event) || this.isDisabled) return
     HANDLED.add(event)
     this.draggedOver(event, DROP)
   }
@@ -534,7 +516,7 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
   /** Files dropped on it. */
   @E.on("drop")
   protected onDrop(event: DragEvent) {
-    if (!UIUploader.hasFiles(event) || this.isDisabled) return
+    if (!DroppedFiles.hasFiles(event) || this.isDisabled) return
     HANDLED.add(event)
     this.dropped(event, DROP)
   }
@@ -551,7 +533,7 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
     this.dragEnd = E.after(DRAG_LINGER, () => this.dragOver(via))
     this.isOverZone = via === ZONE
     if (this.isDraggedOver) return
-    const detail = UIUploader.dragDetail(event, via)
+    const detail = DroppedFiles.dragDetail(event, via)
     this.isDraggedOver = true
     this.draggedCount = detail.count
     this.send(this.folder ? "ui-folder-dragged-over" : "ui-file-dragged-over", detail)
@@ -575,76 +557,10 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
     event.preventDefault()
     this.dragOver(via, true)
     // the items must be read now, while the drop event lasts
-    const pending = UIUploader.itemsOf(event.dataTransfer)
-    void UIUploader.arrivalFromDrop(pending, via)
+    const pending = DroppedFiles.itemsOf(event.dataTransfer)
+    void DroppedFiles.arrivalFromDrop(pending, via)
       .then((arrival) => this.take(arrival))
       .catch((error) => E.Warnings.warn("<ui-uploader>", "couldn't read what was dropped", error))
-  }
-
-  /** Does the drag hold files? */
-  static hasFiles(event: DragEvent): boolean {
-    return !!event.dataTransfer?.types.includes("Files")
-  }
-
-  /** A drag's detail:  how many files, and their kinds;  a browser shows no names or sizes until the drop. */
-  private static dragDetail(event: DragEvent, via: typeof DROP | typeof ZONE) {
-    const items = [...(event.dataTransfer?.items ?? [])].filter((item) => item.kind === "file")
-    return { count: items.length, kinds: items.map((item) => item.type), via }
-  }
-
-  /**
-   * The drop's items, read while its event lasts:  each one's file, entry and handle (the handle a promise).
-   * - `getAsFileSystemHandle()` is Chrome's and Edge's only;  `webkitGetAsEntry()` every browser's.
-   */
-  private static itemsOf(transfer: DataTransfer | null): DroppedItem[] {
-    if (!transfer) return []
-    const items = [...transfer.items].filter((item) => item.kind === "file")
-    if (!items.length) return [...transfer.files].map((file) => ({ file }))
-    return items.map((item) => {
-      const withHandle = item as DataTransferItem & { getAsFileSystemHandle?: () => Promise<FileSystemHandle | null> }
-      return {
-        file: item.getAsFile() ?? undefined,
-        entry: item.webkitGetAsEntry?.() ?? undefined,
-        handle: withHandle.getAsFileSystemHandle?.().catch(() => null)
-      }
-    })
-  }
-
-  /** What a drop gave:  its files, and its folders walked, each file with its path in its folder. */
-  private static async arrivalFromDrop(items: DroppedItem[], via: Via): Promise<Arrival> {
-    const arrival: Arrival = { via, files: [], folders: [] }
-    for (const item of items) {
-      const handle = (await item.handle) ?? undefined
-      const { entry } = item
-      if (entry?.isDirectory) {
-        const files = await UIUploader.filesIn(entry as FileSystemDirectoryEntry)
-        arrival.folders.push({ name: entry.name, path: entry.name, files, entry, handle })
-      } else if (item.file) {
-        arrival.files.push({ file: item.file, path: item.file.name, entry, handle })
-      }
-    }
-    return arrival
-  }
-
-  /** Every file in a dropped folder, and its folders, each with its path from the folder dropped. */
-  private static async filesIn(folder: FileSystemDirectoryEntry): Promise<Taken[]> {
-    const files: Taken[] = []
-    const reader = folder.createReader()
-    // `readEntries()` gives a batch at a time, until an empty one
-    for (;;) {
-      const batch = await new Promise<FileSystemEntry[]>((resolve, reject) => reader.readEntries(resolve, reject))
-      if (!batch.length) break
-      for (const entry of batch) {
-        if (entry.isDirectory) files.push(...(await UIUploader.filesIn(entry as FileSystemDirectoryEntry)))
-        else {
-          const file = await new Promise<File>((resolve, reject) =>
-            (entry as FileSystemFileEntry).file(resolve, reject)
-          )
-          files.push({ file, path: entry.fullPath.replace(/^\//, ""), entry })
-        }
-      }
-    }
-    return files
   }
 
   ////////////////
@@ -1201,32 +1117,11 @@ export type FileRow = {
   why?: string
 }
 
-/** A file taken in, before it's checked. */
-type Taken = {
-  file: File
-  path: string
-  entry?: FileSystemEntry
-  handle?: FileSystemHandle
-  /** why it's turned away, once checked:  short, for its row */
-  reason?: string
-  /** why it's turned away, in a full sentence */
-  why?: string
-}
-
 /** Why a file is turned away:  short, for its row, and in full, for its tooltip. */
 type Refusal = { reason: string; why: string }
 
 /** The words a refusal reads. */
 type RefusalKey = Parameters<UIUploader["translationForKey"]>[0]
-
-/** A folder taken in, with its files. */
-type TakenFolder = {
-  name: string
-  path: string
-  files: Taken[]
-  entry?: FileSystemEntry
-  handle?: FileSystemHandle
-}
 
 /** The hidden `<ui-input type="file">`:  the members of its DOM element the uploader uses (`DOMInputElement`). */
 type FileInputElement = HTMLElement & {
@@ -1239,14 +1134,7 @@ type FileInputElement = HTMLElement & {
 }
 
 /** Everything that came in at once. */
-type Arrival = { via: Via; files: Taken[]; folders: TakenFolder[] }
-
-/** A drop's item, read while its event lasted. */
-type DroppedItem = {
-  file?: File
-  entry?: FileSystemEntry
-  handle?: Promise<FileSystemHandle | null>
-}
+type Arrival = DropArrival<Via>
 
 ////////////////
 // ## Constants
@@ -1359,7 +1247,7 @@ export class DropZones {
 
   /** The uploader a drag event over the page goes to:  the closest zone round where it is. */
   private static uploaderFor(event: DragEvent): UIUploader | undefined {
-    if (HANDLED.has(event) || !UIUploader.hasFiles(event)) return undefined
+    if (HANDLED.has(event) || !DroppedFiles.hasFiles(event)) return undefined
     for (const node of event.composedPath()) {
       const uploader = DropZones.zones.get(node as Element)?.[0]
       if (uploader && !uploader.isDisabled) return uploader

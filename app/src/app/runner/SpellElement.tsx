@@ -7,6 +7,8 @@ import { RootLoader } from "spell/ui/components/ui-root"
 // By file:  a click's rule is all this needs
 import { Dragging } from "spell/util/Dragging"
 import { ListSelection } from "spell/util/ListSelection"
+// By file:  plain DOM, the uploader's own reading of a desktop drop;  its family's barrel defines `<ui-uploader>`
+import { DroppedFiles, type Arrival } from "spell/ui/components/ui-uploader/DroppedFiles"
 import type { ElementApi, Core, MenuItem } from "spell/parser/core"
 import { spellElementVocabulary } from "./SpellElement.en"
 import { Glides } from "./Glides"
@@ -482,11 +484,13 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
 
   @E.on("dragenter")
   protected onDragEnter(event: DragEvent) {
+    if (this.takesFiles(event)) return this.filesCameOver(event)
     if (event.target !== this.domElement) return
     this.isAcceptingDrop = this.takesDrag()
     const thing = this.dragOffer()
     if (!thing) return
     this.draggedOver = thing
+    this.sendPageEvent("dragged-over-event", this.overDetail(thing, event))
     this.whileRunning = this.handlerFor("while", "DraggedOver", thing)
     if (this.whileRunning)
       this.runHandler(() => this.entry!.core.startWhile(this.currentThing!, this.whileRunning!, thing))
@@ -496,6 +500,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
 
   @E.on("dragleave")
   protected onDragLeave(event: DragEvent) {
+    if (this.takesFiles(event)) return this.filesWentOut()
     if (event.target !== this.domElement) return
     this.isAcceptingDrop = false
     this.endDragOver("left")
@@ -507,6 +512,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
    */
   @E.on("drop")
   protected onDrop(event: DragEvent) {
+    if (this.takesFiles(event)) return this.filesDropped(event)
     if (event.target !== this.domElement) return
     this.endDragOver(this.isAcceptingDrop ? "taken" : "left")
     this.isAcceptingDrop = false
@@ -528,8 +534,10 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     const thing = this.draggedOver
     const list = this.currentThing
     const ending = this.whileRunning
-    this.draggedOver = this.whileRunning = undefined
+    this.draggedOver = this.whileRunning = this.lastOver = undefined
+    this.overAgain.cancel()
     if (!thing || !list) return
+    if (how === "left") this.sendPageEvent("dragged-out-event", { thing, list })
     if (ending) this.runHandler(() => this.entry!.core.endWhile(list, ending))
     const out = how === "left" && this.handlerFor("when", "DraggedOutOf", thing)
     if (out) this.runHandler(() => this.entry!.core.runHandler(list, out, thing))
@@ -592,6 +600,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
    *   the list's `when a task is dropped on it:` runs for each item it put in place (`heardPlaced()`), and that's all.
    * - Only when the list takes it (`takesDrag()`):  else it slides back, and our thing hears `- on drag cancelled:`
    *   (Q47);  the program hears nothing else of it.
+   * - Taken, the list's element sends the page `ui-dropped` first, whichever way the program hears it (P67).
    * - The list's `when a card is dropped on it:` runs, if it has one (`handlerFor()`).
    * - Else the program hears `<thing>-drop`, e.g. `card-drop`,
    *   in its own language (core's `drop-event` message):  a Spanish program hears `soltar-carta`.
@@ -608,6 +617,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     const { entry } = this
     if (!list) return this.sendToThing("drag-cancelled")
     if (!thing || !entry) return
+    ;(component as SpellElement).sendPageEvent("dropped-event", { thing, list })
     const dropped = (component as SpellElement).handlerFor("when", "DroppedOn", thing)
     if (dropped) return entry.core.runPressed(list, dropped, () => entry.core.runHandler(list, dropped, thing))
     const name = SpellElement.instanceName(thing.constructor)
@@ -625,6 +635,181 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
       const heard = entry.core.trigger(event, details)
       return heard.length ? Promise.all(heard) : entry.core.move(thing, list)
     })
+  }
+
+  ////////////////
+  // ## Page events (epic `language` P67)
+  ////////////////
+
+  /**
+   * Tell the page, in the program's language:  `ui-dragged-over`, Spanish `arrastrado-sobre` (core's messages).
+   * - Out of our shadow root, bubbling, so a page script hears it on any element around us.
+   * - Never cancelable:  like the program's handlers, they tell, they never decide.
+   */
+  private sendPageEvent(key: PageEventKey, detail: object) {
+    const core = this.entry?.core
+    if (!core) return
+    this.domElement.dispatchEvent(new CustomEvent(core.message(key), { bubbles: true, composed: true, detail }))
+  }
+
+  /** `ui-dragged-over`'s detail:  the thing, our list, and where the pointer is on the page. */
+  private overDetail(thing: object, event: DragEvent): OverDetail {
+    return { thing, list: this.currentThing!, x: event.clientX, y: event.clientY }
+  }
+
+  /** The latest move over us, for the next `ui-dragged-over`. */
+  private lastOver: DragEvent | undefined
+
+  /**
+   * One more `ui-dragged-over` while the thing moves over us, 100ms after the move that asks:
+   * however many moves come in between, ONE, with the latest place (Q77).
+   * - A leave or a drop cancels a pending one (`endDragOver()`), so nothing comes after `ui-dragged-out`.
+   */
+  private readonly overAgain = new E.Queued({ when: afterTheLimit, run: () => this.sendOverAgain() })
+
+  private sendOverAgain() {
+    const thing = this.draggedOver
+    if (thing && this.lastOver) this.sendPageEvent("dragged-over-event", this.overDetail(thing, this.lastOver))
+  }
+
+  ////////////////
+  // ## Files from the desktop (epic `language` P67, Q78)
+  ////////////////
+
+  /**
+   * Are files from the desktop dragged over us, and do we take them?
+   * - Only a view with a file or folder line (`when a file is dropped on it:` ...):
+   *   anywhere else the page is left alone, and the browser does what it always does.
+   * - Never one of Spell's own drags, which hold no files.
+   * - The innermost view that takes them, of views inside each other:  the browser's events bubble out to the rest.
+   */
+  private takesFiles(event: DragEvent): boolean {
+    if (FILES_HEARD.has(event) || !DroppedFiles.hasFiles(event) || !this.currentThing) return false
+    const takes = FILE_HANDLERS.some(([timing, item, moment]) => this.fileHandlerFor(timing, item, moment))
+    if (takes) FILES_HEARD.add(event)
+    return takes
+  }
+
+  /**
+   * Our view's handler for a desktop file or folder, e.g. `whenFileDroppedOn` -- `undefined` if it has none.
+   * - The parser names it `File` or `Folder` in every language (`DragHandler`).
+   * - Never `when something ...`:  `something` doesn't hear desktop files.
+   */
+  private fileHandlerFor(timing: "when" | "while", item: "File" | "Folder", moment: DragMoment): string | undefined {
+    const method = `${timing}${item}${moment}`
+    return typeof (this.currentThing as Record<string, unknown> | undefined)?.[method] === "function"
+      ? method
+      : undefined
+  }
+
+  /** Are files from the desktop over us now?  We glow while they are (`STATES_CSS`), as for a card. */
+  private filesOver: DragEvent | undefined
+
+  /** Ends the files' visit when they've been gone 100ms:  coming back sooner counts as never having left (Q77). */
+  private filesGone: E.CancelablePromise<void> | undefined
+
+  /**
+   * Files come over us, or move:  the browser is told we want the drop, so it never opens the file in the tab.
+   * - The first time:  `while a file is dragged over it:`, `when a file is dragged over it:`, `ui-file-dragged-over`.
+   * - After that:  `ui-file-dragged-over` again, at most every 100ms (`overAgain`).
+   */
+  private filesCameOver(event: DragEvent) {
+    event.preventDefault()
+    if (event.dataTransfer) event.dataTransfer.dropEffect = "copy"
+    this.filesGone?.cancel()
+    this.filesGone = undefined
+    const wasOver = !!this.filesOver
+    this.filesOver = event
+    if (wasOver) return this.filesOverAgain.ask()
+    this.isAcceptingDrop = true
+    const view = this.currentThing!
+    const files = DroppedFiles.dragDetail(event, FILE_VIA)
+    this.filesWhile = this.fileHandlerFor("while", "File", "DraggedOver")
+    if (this.filesWhile) this.runHandler(() => this.entry!.core.startWhile(view, this.filesWhile!, files))
+    const over = this.fileHandlerFor("when", "File", "DraggedOver")
+    if (over) this.runHandler(() => this.entry!.core.runHandler(view, over, files))
+    this.sendPageEvent("file-dragged-over-event", files)
+  }
+
+  /** Our `while a file is dragged over it:` running, put back as the files leave or land. */
+  private filesWhile: string | undefined
+
+  /** One more `ui-file-dragged-over` while files move over us, with the latest place. */
+  private readonly filesOverAgain = new E.Queued({
+    when: afterTheLimit,
+    run: () => this.filesOver && this.sendPageEvent("file-dragged-over-event", this.fileDragDetail(this.filesOver))
+  })
+
+  /** A file drag's detail, as `<ui-uploader>`'s:  how many, their kinds, and where the pointer is. */
+  private fileDragDetail(event: DragEvent) {
+    return { ...DroppedFiles.dragDetail(event, FILE_VIA), x: event.clientX, y: event.clientY }
+  }
+
+  /** The browser says the files left us, or a thing inside us:  over, unless they come back within 100ms. */
+  private filesWentOut() {
+    if (!this.filesOver) return
+    this.filesGone?.cancel()
+    this.filesGone = E.after(FILES_LINGER, () => this.endFilesOver("left"))
+  }
+
+  /**
+   * The files' visit is over:  what `while a file is dragged over it` set goes back;
+   * `left`, `when a file is dragged out of it:` runs and the page hears `ui-file-dragged-out`.
+   */
+  private endFilesOver(how: "left" | "taken") {
+    const event = this.filesOver
+    const ending = this.filesWhile
+    const view = this.currentThing
+    this.filesOver = this.filesWhile = undefined
+    this.filesGone?.cancel()
+    this.filesGone = undefined
+    this.filesOverAgain.cancel()
+    this.isAcceptingDrop = false
+    if (!event || !view) return
+    if (ending) this.runHandler(() => this.entry!.core.endWhile(view, ending))
+    if (how !== "left") return
+    const files = { count: 0, kinds: [], via: FILE_VIA }
+    const out = this.fileHandlerFor("when", "File", "DraggedOutOf")
+    if (out) this.runHandler(() => this.entry!.core.runHandler(view, out, files))
+    this.sendPageEvent("file-dragged-out-event", files)
+  }
+
+  /**
+   * Files dropped on us:  read while the drop lasts, folders walked, then each heard (`heardDrop()`).
+   * - The browser never opens them in the tab.
+   */
+  private filesDropped(event: DragEvent) {
+    event.preventDefault()
+    this.endFilesOver("taken")
+    const items = DroppedFiles.itemsOf(event.dataTransfer)
+    void DroppedFiles.arrivalFromDrop(items, FILE_VIA)
+      .then((arrival) => this.heardDrop(arrival))
+      .catch((error) => E.Warnings.warn(this.domElement.localName, "couldn't read what was dropped", error))
+  }
+
+  /**
+   * What a drop gave, heard by our lines and sent to the page, as `<ui-uploader>` sends it (`DroppedFiles`):
+   * - each folder:  `when a folder is dropped on it:` with `the folder` (its name, path, files, entry), and
+   *   `ui-folder-dropped`;  then each file in it, as below, unless the folder's line took it
+   * - each file:  `when a file is dropped on it:` with `the file`, the browser's own, and `ui-file-dropped`
+   */
+  private heardDrop({ files, folders }: Arrival<typeof FILE_VIA>) {
+    const view = this.currentThing
+    const core = this.entry?.core
+    if (!view || !core) return
+    const fileLine = this.fileHandlerFor("when", "File", "DroppedOn")
+    const folderLine = this.fileHandlerFor("when", "Folder", "DroppedOn")
+    const each = [...files]
+    for (const folder of folders) {
+      const detail = DroppedFiles.folderDetail(folder, FILE_VIA)
+      this.sendPageEvent("folder-dropped-event", detail)
+      if (folderLine) core.runPressed(view, folderLine, () => core.runHandler(view, folderLine, detail))
+      else each.push(...folder.files)
+    }
+    for (const file of each) {
+      this.sendPageEvent("file-dropped-event", DroppedFiles.fileDetail(file, FILE_VIA))
+      if (fileLine) core.runPressed(view, fileLine, () => core.runHandler(view, fileLine, file.file))
+    }
   }
 
   ////////////////
@@ -700,10 +885,19 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     return ours || this.takesDrag() ? things : undefined
   }
 
-  /** The pointer moved over us:  where would the dragged items go?  A new place restarts the wait. */
+  /**
+   * The pointer moved over us:  where would the dragged items go?  A new place restarts the wait.
+   * - The thing the program heard come over us:  `ui-dragged-over` again, at most every 100ms (`overAgain`, P67).
+   * - Files from the desktop:  their own (`filesCameOver()`).
+   */
   @E.on("dragover")
   protected onDragOver(event: DragEvent) {
+    if (this.takesFiles(event)) return this.filesCameOver(event)
     if (event.target !== this.domElement) return
+    if (this.draggedOver) {
+      this.lastOver = event
+      this.overAgain.ask()
+    }
     const things = this.placeOffer
     if (!things) return this.stopPlacing()
     // where the dragged item would be, held where it was pressed:  not the pointer itself
@@ -2003,3 +2197,52 @@ function drawsInItsChildren(Class: Function): boolean {
  * - spell-parser's `DragHandler` names them the same.
  */
 type DragMoment = "DraggedOver" | "DraggedOutOf" | "DroppedOn"
+
+/** The page events a drag sends, by their key in core's messages:  each language names them (epic `language` P67). */
+type PageEventKey =
+  | "dragged-over-event"
+  | "dragged-out-event"
+  | "dropped-event"
+  | "file-dragged-over-event"
+  | "file-dragged-out-event"
+  | "file-dropped-event"
+  | "folder-dropped-event"
+
+/** `ui-dragged-over`'s detail:  the same keys for every type, so a page script needs none of the program's names. */
+type OverDetail = {
+  /** what's dragged, e.g. the card */
+  thing: object
+  /** the list it's over, e.g. the pile */
+  list: object
+  /** where the pointer is, from the window's left */
+  x: number
+  /** where the pointer is, from the window's top */
+  y: number
+}
+
+/** How long a moving drag's page events wait between two:  at most one every 100ms (Q77). */
+const DRAG_EVENT_LIMIT = 0.1
+
+/** A `Queued`'s moment for the limit:  100ms from the ask. */
+function afterTheLimit(run: () => void): () => void {
+  const wait = E.after(DRAG_EVENT_LIMIT, run)
+  return () => wait.cancel()
+}
+
+/** How long files from the desktop may be gone before they've left:  the browser's flicker inside us (Q77). */
+const FILES_LINGER = 0.1
+
+/** The browser's file drag events a view has taken:  a view around it leaves them alone. */
+const FILES_HEARD = new WeakSet<Event>()
+
+/** `via` in a desktop drop's detail, as `<ui-uploader>`'s word for a drop on it. */
+const FILE_VIA = "drop"
+
+/** Every line that makes a view take desktop files:  its timing, item and moment (`fileHandlerFor()`). */
+const FILE_HANDLERS: ReadonlyArray<["when" | "while", "File" | "Folder", DragMoment]> = [
+  ["when", "File", "DraggedOver"],
+  ["when", "File", "DraggedOutOf"],
+  ["when", "File", "DroppedOn"],
+  ["while", "File", "DraggedOver"],
+  ["when", "Folder", "DroppedOn"]
+]

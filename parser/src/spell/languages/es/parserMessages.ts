@@ -21,6 +21,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     "Encanto no sabe qué campo nombra esto, así que {what} se lee entero:  nombra el campo con palabras si puedes",
   "read-whole-element-reads-it": "Encanto no ve qué lee de ello este elemento, así que {what} se lee entero",
   "read-whole-library-reads-it": "Encanto no ve qué lee esta biblioteca, así que {what} se lee entero",
+  "own-file-type":
+    'Tu programa crea su propio tipo de cosa llamado "{word}".  Así que esta línea reacciona cuando se arrastra uno de esos, no un archivo arrastrado desde tu computadora.  Para recibir archivos de tu computadora, cambia el nombre de tu propio tipo de cosa.',
   "say-is-able": 'Di "{line}":  "{old}" deja de funcionar en una versión próxima',
   "say-when": 'Di "cuando:":  aquí "si:" deja de funcionar en una versión próxima',
   "choose-from-what":

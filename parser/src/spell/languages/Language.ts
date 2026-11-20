@@ -461,6 +461,13 @@ export type LanguageWords = {
   /** What a saved type's two times are called in this language:  `creado`.  Its rows say `created` and `modified` in every one. */
   savedTimeWords: { created: string; modified: string }
   /**
+   * What a drag line calls a file or a folder dragged in from the desktop (epic `language` P67, Q78):
+   * `when a file is dropped on it:`, Spanish's `cuando un archivo se suelta sobre ella:`.
+   * - Each word => `File` or `Folder`, the method's name the page calls in every language:  `whenFileDroppedOn`.
+   * - A program's own type of that name wins:  see `DragHandler`.
+   */
+  desktopFileWords: Readonly<Record<string, "File" | "Folder">>
+  /**
    * How an event still HAPPENING is named, which a handler can cancel (epic `elemental-spell` P9, Q27):
    * English's `-ing` (`closing`), Spanish's gerund (`cerrando`) -- see `send`'s rule.
    */

@@ -163,3 +163,41 @@ function normalized(compiled: string): string {
     .map((line) => line.replace(/^(\s+)return /, "$1"))
     .join("\n")
 }
+
+describe("files and folders dragged in from the desktop:  the drag lines, `file` or `folder` their thing (epic `language` P67, Q78)", () => {
+  /** A drop area with `lines` in its outline:  its code and its warnings. */
+  function dropArea(lines: string[], before = ""): { code: string; warnings: string[] } {
+    const contents = `${before}a drop area is a view where:\n${lines.map((line) => `\t${line}`).join("\n")}`
+    const { files } = parseSpellProject([{ path: "/test.spell", contents }])
+    const file = files[0]!
+    expect(file.errors.map((error) => JSON.stringify(error))).toEqual([])
+    return { code: normalized(file.compiled), warnings: describeWarnings(file.match) }
+  }
+
+  test("the four lines Q78 OK'd, and the one from-console asked for:  `File` or `Folder` in the method the page calls", () => {
+    const { code, warnings } = dropArea([
+      "- when a file is dragged over it:",
+      "\tprint 1",
+      "- when a file is dragged out of it:",
+      "\tprint 2",
+      "- when a file is dropped on it:",
+      "\tprint the file",
+      "- while a file is dragged over it:",
+      "\tprint 3",
+      "- when a folder is dropped on it:",
+      "\tprint the folder"
+    ])
+    expect(warnings).toEqual([])
+    expect(code).toMatch(/whenFileDraggedOver\(file\)/)
+    expect(code).toMatch(/whenFileDraggedOutOf\(file\)/)
+    expect(code).toMatch(/whenFileDroppedOn\(file\) \{\s+core\.console\.log\(file\)/)
+    expect(code).toMatch(/whileFileDraggedOver\(file\)/)
+    expect(code).toMatch(/whenFolderDroppedOn\(folder\) \{\s+core\.console\.log\(folder\)/)
+  })
+
+  test("a program's own `file` type wins, with a warning:  its own files, not the desktop's", () => {
+    const { code, warnings } = dropArea(["- when a file is dropped on it:", "\tprint the file"], "a file is a thing\n")
+    expect(code).toMatch(/whenFileDroppedOn\(file\)/)
+    expect(warnings).toEqual([expect.stringContaining('Your program makes its own kind of thing called "file"')])
+  })
+})

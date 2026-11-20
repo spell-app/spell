@@ -146,6 +146,28 @@ describe("testing spell module classes, in Spanish", () => {
       expect(code).toMatch(/whenThingDroppedOn\(cosa\) \{\s+core\.console\.log\(cosa\)/)
     })
 
+    test("un archivo y una carpeta del escritorio:  `whenFileDroppedOn(archivo)`, como en inglés (epic `language` P67, Q78)", () => {
+      const { code, errors } = compiled("drag-files", [
+        "una zona es una vista:",
+        "\t- cuando un archivo se arrastra sobre ella:",
+        "\t\timprimir 1",
+        "\t- cuando un archivo se arrastra fuera de ella:",
+        "\t\timprimir 2",
+        "\t- cuando un archivo se suelta sobre ella:",
+        "\t\timprimir el archivo",
+        "\t- mientras un archivo se arrastra sobre ella:",
+        "\t\timprimir 3",
+        "\t- cuando una carpeta se suelta sobre ella:",
+        "\t\timprimir la carpeta"
+      ])
+      expect(errors).toEqual([])
+      expect(code).toMatch(/whenFileDraggedOver\(archivo\)/)
+      expect(code).toMatch(/whenFileDraggedOutOf\(archivo\)/)
+      expect(code).toMatch(/whenFileDroppedOn\(archivo\) \{\s+core\.console\.log\(archivo\)/)
+      expect(code).toMatch(/whileFileDraggedOver\(archivo\)/)
+      expect(code).toMatch(/whenFolderDroppedOn\(carpeta\) \{\s+core\.console\.log\(carpeta\)/)
+    })
+
     test("`- sus elementos se pueden reordenar (después de 1 segundo)`:  English's `its items can be reordered` (outline-spell P30)", () => {
       const { code, errors } = compiled("reorder", [
         "una tarea es una vista",
