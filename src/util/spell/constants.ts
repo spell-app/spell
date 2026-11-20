@@ -18,6 +18,27 @@ export const NONE = "NONE"
  */
 export const PACKAGE_VERSION: string = typeof __PACKAGE_VERSION__ === "string" ? __PACKAGE_VERSION__ : "unknown"
 
+/**
+ * Spell UI's colors, by their hue names:  what a Spell program's color words mean (epic `language` P66).
+ * - `notify ... in red` takes them (spell's `toast_color`), and `choose a color` offers them (core's `chooseColor()`).
+ * - The theme editor's hues are the same 13 (Spell UI's `ThemeHues`).
+ */
+export const SPELL_COLORS = [
+  "red",
+  "orange",
+  "yellow",
+  "olive",
+  "green",
+  "teal",
+  "blue",
+  "violet",
+  "purple",
+  "pink",
+  "brown",
+  "grey",
+  "black"
+] as const
+
 /** Task status -- used by `Task`/`TaskList`. */
 export const TaskStatus = {
   UNSTARTED: "UNSTARTED",

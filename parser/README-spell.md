@@ -213,7 +213,7 @@ Each row below is one rule's own test:  a line it reads, and the JavaScript that
 | math | arithmetic, biggest and smallest, rounding, `a random number between 1 and 6` | 11 | `largest of the prices` | `core.largestOf(prices)` |
 | properties | `the ... of ...`, `its ...`, `the ...` in an action, `the ...'s ...`, object literals | 20 | `the short rank of the card` | `card.shortRank` |
 | lists | positions, ranges, adding, removing, `for`, `where` | 50 | `remove last card of deck` | `core.removeItemAt(deck, -1)` |
-| UI | `print`, notices, alerts and prompts, `scroll to the top`, `open printing`, sounds and videos (a file, [one of Spell's own](#built-in-sounds), naming one, `play`, `stop`, `pause`, `resume`, asking about one), styles | 25 | `prompt "Name for the new baby?"` | `const it = await core.prompt("Name for the new baby?")` |
+| UI | `print`, notices, alerts and prompts, picking from a list (`choose a card from the cards`), `scroll to the top`, `open printing`, sounds and videos (a file, [one of Spell's own](#built-in-sounds), naming one, `play`, `stop`, `pause`, `resume`, asking about one), styles | 25 | `prompt "Name for the new baby?"` | `const it = await core.prompt("Name for the new baby?")` |
 | classes | templates, properties, aliases, saving, versions | 78 | `a card is a thing` | `export class Card extends Thing {}` |
 | async | waiting, pauses, processes | 8 | `pause for 2 seconds` | `await core.pauseFor(2, "seconds")` |
 | draw | drawing a list's items | 3 | `draw each card in the deck` | `core.drawItems(deck)` |
@@ -567,6 +567,29 @@ print 2' 3 1/2" in cm
   - Each unit is said in a unit named above it.
     One that doesn't start at the same place says where it does:  `one "fahrenheit", aka "°F", is 5/9 °C, starting at 32`.
 - A unit of another dimension is an error naming both:  `its height in kg`.
+
+### Asking the person:  `prompt` and `choose`
+
+A program asks with a dialog, HyperTalk's way:
+what the person typed or picked is `it`, and the button that closed the dialog is `the result`, `ok` or `cancel`.
+
+```spell
+choose a card from the cards with prompt "Which card?"
+if the result is ok, turn it over
+```
+
+- `prompt "Your name?"`:  `it` is the text typed.
+- `choose a card from the cards`:  `it` is the card picked;  each row shows its title, label or name.
+  - `choose one of ["easy", "medium", "hard"]`:  a list of words.
+  - From a record, its keys are the rows, and `it` is the value under the key picked.
+  - A kind's own values need no `from`:  `choose a card suit`.
+  - `choose a color`:  Spell UI's 13 colors, each a chip beside its name;  `it` is its name, `red`.
+  - Several:  `choose cards`, `choose many cards`, `choose up to 2 cards`, `choose between 2 and 4 cards`;
+    `it` is a list.
+  - Up to 20 rows are buttons;  more, a list with a search box.
+    `, showing 10 at a time` sets how many rows show before it scrolls.
+  - An empty list asks nothing:  `the result` is `cancel`.
+- In Spanish:  `elegir una carta de las cartas con el mensaje "¿Qué carta?", mostrando 10 a la vez`.
 
 ### Drawing
 

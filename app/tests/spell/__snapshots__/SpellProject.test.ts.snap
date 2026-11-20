@@ -544,13 +544,13 @@ export function testANewDeck() {
     "compiled": "/** The cards not played yet, face down. */
 /*! SPELL: DECLARES {
   type: "StockPile", superType: "Pile",
-  defined: "/Solitaire.spell:4764-5001",
+  defined: "/Solitaire.spell:4819-5056",
 } */
 export class StockPile extends Pile {
   static elementTag = core.defineElement(this, "test-project")
   /*! SPELL: DECLARES {
     property: "layout", of: "StockPile", datatype: "text",
-    defined: "/Solitaire.spell:4794-4810",
+    defined: "/Solitaire.spell:4849-4865",
   } */
   get layout() {
     return "stacked"
@@ -576,13 +576,13 @@ export class StockPile extends Pile {
 /** Where the stock's cards go as they're turned over */
 /*! SPELL: DECLARES {
   type: "DiscardPile", superType: "Pile",
-  defined: "/Solitaire.spell:5003-5186",
+  defined: "/Solitaire.spell:5058-5241",
 } */
 export class DiscardPile extends Pile {
   static elementTag = core.defineElement(this, "test-project")
   /*! SPELL: DECLARES {
     property: "layout", of: "DiscardPile", datatype: "text",
-    defined: "/Solitaire.spell:5035-5051",
+    defined: "/Solitaire.spell:5090-5106",
   } */
   get layout() {
     return "stacked"
@@ -602,13 +602,13 @@ export class DiscardPile extends Pile {
 /** Where a suit is built up, ace to king, one card at a time */
 /*! SPELL: DECLARES {
   type: "Foundation", superType: "Pile",
-  defined: "/Solitaire.spell:5188-5597",
+  defined: "/Solitaire.spell:5243-5652",
 } */
 export class Foundation extends Pile {
   static elementTag = core.defineElement(this, "test-project")
   /*! SPELL: DECLARES {
     property: "layout", of: "Foundation", datatype: "text",
-    defined: "/Solitaire.spell:5218-5234",
+    defined: "/Solitaire.spell:5273-5289",
   } */
   get layout() {
     return "stacked"
@@ -616,7 +616,7 @@ export class Foundation extends Pile {
 
   /*! SPELL: DECLARES {
     property: "suit", of: "Foundation", datatype: "CardSuit",
-    defined: "/Solitaire.spell:5298-5323",
+    defined: "/Solitaire.spell:5353-5378",
   } */
   // - its "suit" is a card suit
   static { this.declareProp("suit", { oneOf: () => Card.Suits }) }
@@ -642,13 +642,13 @@ export class Foundation extends Pile {
 /** A column, built down from king to ace, red and black in turn */
 /*! SPELL: DECLARES {
   type: "Column", superType: "Pile",
-  defined: "/Solitaire.spell:5599-5908",
+  defined: "/Solitaire.spell:5654-5963",
 } */
 export class Column extends Pile {
   static elementTag = core.defineElement(this, "test-project")
   /*! SPELL: DECLARES {
     property: "layout", of: "Column", datatype: "text",
-    defined: "/Solitaire.spell:5625-5642",
+    defined: "/Solitaire.spell:5680-5697",
   } */
   get layout() {
     return "vertical"
@@ -670,7 +670,7 @@ export class Column extends Pile {
 /** A fully playable game in 300 lines of code! */
 /*! SPELL: DECLARES {
   type: "Solitaire", superType: "App",
-  defined: "/Solitaire.spell:0-4461",
+  defined: "/Solitaire.spell:0-4516",
 } */
 export class Solitaire extends App {
   static elementTag = core.defineElement(this, "test-project", "App")
@@ -915,7 +915,7 @@ export class Solitaire extends App {
     syntax: "auto play (of {thisArg:expression})?", output: "auto_play", rule: "method_call",
     of: "Solitaire", alias: ["statement", "expression"], group: "Game Play", kind: "method",
     name: "auto play", returns: "nothing", waits: true,
-    defined: "/Solitaire.spell:3223-3939",
+    defined: "/Solitaire.spell:3264-3980",
   } */
   async autoPlay() {
     const candidates = core.mergeLists([
@@ -945,7 +945,7 @@ export class Solitaire extends App {
     syntax: "cheat {thisArg:expression}?", output: "cheat", rule: "method_call", of: "Solitaire",
     alias: ["statement", "expression"], group: "Game Play", kind: "method", name: "cheat",
     returns: "nothing",
-    defined: "/Solitaire.spell:3943-4219",
+    defined: "/Solitaire.spell:3984-4260",
   } */
   cheat() {
     const card = core.randomItemOf(core.filter(core.mergeLists(core.everyThing(Column)), (card) => card.isFaceDirection("down")))
@@ -956,7 +956,10 @@ export class Solitaire extends App {
   }
 
   async onScoreChange(event) {
-    if (core.itemCountOf(core.mergeLists(core.everyThing(Foundation))) === 52) await core.showDrawn("you won")
+    if (core.itemCountOf(core.mergeLists(core.everyThing(Foundation))) === 52) {
+      core.play("win")
+      await core.showDrawn("you won")
+    }
   }
 }
 export const solitaire = new Solitaire()
@@ -970,11 +973,13 @@ core.describeAction(Solitaire, "cheat", { title: "Cheat", shortcuts: ["C"], icon
   syntax: "play {thisArg:expression}", output: "play", rule: "method_call", of: "Card",
   alias: ["statement", "expression"], group: "Game Play", kind: "method", name: "play a card",
   returns: "choice", waits: true,
-  defined: "/Solitaire.spell:2726-2963",
+  defined: "/Solitaire.spell:2726-2984",
 } */
 Card.prototype.play = async function () {
-  if (this.pile === solitaire.stock) await solitaire.turnOverTheNextCard()
-  else {
+  if (this.pile === solitaire.stock) {
+    core.play("card slide")
+    await solitaire.turnOverTheNextCard()
+  } else {
     const endPile = core.filter(core.everyThing(Pile), (pile) => core.canTake(pile, this)).firstItem
     if (endPile === undefined) return false
     return this.moveToPile(endPile)
@@ -985,9 +990,10 @@ Card.prototype.play = async function () {
 /*! SPELL: DECLARES {
   kind: "method", name: "moving a card to a pile", params: [{ name: "pile", datatype: "Pile" }],
   returns: "nothing",
-  defined: "/Solitaire.spell:2966-3220",
+  defined: "/Solitaire.spell:2987-3261",
 } */
 Card.prototype.afterMoveToPile = function (pile) {
+  core.play("card place")
   solitaire.score = solitaire.score + this.thePointsForCardOnPile(pile)
   const it2 = this.lastPile
   if (it2 instanceof Column && !it2.isEmpty) it2.lastItem?.turnFaceUp()
@@ -1000,7 +1006,7 @@ core.addAfterHook(Card, "moveToPile", { hook: "afterMoveToPile" })
   alias: ["statement", "expression"], group: "Game Play", kind: "method",
   name: "the points for a card on a pile", params: [{ name: "pile", datatype: "Pile" }],
   returns: "number",
-  defined: "/Solitaire.spell:4222-4368",
+  defined: "/Solitaire.spell:4263-4409",
 } */
 Card.prototype.thePointsForCardOnPile = function (pile) {
   if (pile instanceof Foundation) return 10
@@ -1024,7 +1030,7 @@ core.heading("Different kinds of piles")
 /*! SPELL: DECLARES {
   syntax: "test the moves", output: "test_the_moves", rule: "method_call", alias: "statement",
   kind: "function", name: "the moves",
-  defined: "/Solitaire.spell:5910-7263",
+  defined: "/Solitaire.spell:5965-7318",
 } */
 export function testTheMoves() {
   return core.test("test the moves", function testTheMoves() {

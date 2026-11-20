@@ -3,6 +3,8 @@
 exports[`testing spell module UI > rule group specs > match snapshot -- if this fails, update rule's \`Groups\` type argument, then the snapshot 1`] = `
 {
   "alert": "message|title?|size?|okButton?",
+  "choose": "article?|type?|arg?|list?|message?|shown?|one?|color?",
+  "choose_several": "many?|most?|least?|type?|arg?|list|message?|shown?",
   "confirm": "message|title?|size?|okButton?|cancelButton?",
   "define_media": "type|kind|property|path",
   "load_sound": "sound",

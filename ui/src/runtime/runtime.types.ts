@@ -482,7 +482,7 @@ export type ToastProvider = {
   dismiss(id: string): void
 }
 
-/** Options for `UI.modals.confirm/alert/prompt()`. */
+/** Options for `UI.modals.confirm/alert/prompt/choose()`. */
 export type ModalOptions = {
   /** header text */
   title?: string
@@ -514,6 +514,31 @@ export type ModalOptions = {
   closable?: boolean
 }
 
+/**
+ * Options for `UI.modals.choose()`:  a dialog's, and its rows (epic `language` P66).
+ * - Up to 20 rows:  a button each.  More:  a list that scrolls, with a search box above it.
+ */
+export type ChooseModalOptions = ModalOptions & {
+  /** what's picked from, one row each */
+  rows: readonly ChoiceRow[]
+  /** pick several:  each row turns on and off, and OK picks them;  else a row picks itself, and the dialog closes */
+  several?: boolean
+  /** several:  the fewest that may be picked;  default 1 */
+  least?: number
+  /** several:  the most that may be picked;  default every row */
+  most?: number
+  /** how many rows show before the rows scroll;  default every button, or 10 of a list */
+  shown?: number
+}
+
+/** One row of `UI.modals.choose()`. */
+export type ChoiceRow = {
+  /** its words */
+  title: string
+  /** a color to draw as a chip before them, Spell UI's hue name (`red`) or any CSS color */
+  color?: string
+}
+
 /** What the modal component registers as `Modals.provider`. */
 export type ModalProvider = {
   /** resolves `true` on approve, `false` on deny / dismiss */
@@ -522,6 +547,8 @@ export type ModalProvider = {
   alert(options: ModalOptions): Promise<void>
   /** resolves with the entered text, or `undefined` on deny / dismiss */
   prompt(options: ModalOptions): Promise<string | undefined>
+  /** resolves with the positions of the rows picked, or `undefined` on deny / dismiss */
+  choose(options: ChooseModalOptions): Promise<number[] | undefined>
 }
 
 ////////////////

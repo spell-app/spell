@@ -7,9 +7,11 @@ await core.alert("You won!", "New game")           # a dialog, until it's closed
 await core.alert("You won!", {"title": "Solitaire", "size": "big"})  # `alert ... titled "Solitaire" in big text`
 if await core.confirm("Deal again?"): ...          # yes or no
 name = await core.prompt("Your name?", "Ann")      # the text typed, or `None` if cancelled
+card = await core.choose(cards, {"thing": "a card"})  # the card picked, or `None` if cancelled
 ```
 
-- What spell's `rules/UI/` compile to:  `notify`, `alert`, `warn`, `confirm`, `prompt`;  and `open_printing`;
+- What spell's `rules/UI/` compile to:  `notify`, `alert`, `warn`, `confirm`, `prompt`;
+  `choose`, `choose_color`;  and `open_printing`;
   `play`, `stop` and `load_sound` (`play "card slide"`), which the page plays;
   and `show_drawn`, `hide_drawn` (`show "you won"`), which the page carries out.
   - Each takes what the JavaScript core's takes, in the same order, and answers as it does.
@@ -29,8 +31,8 @@ name = await core.prompt("Your name?", "Ann")      # the text typed, or `None` i
 import asyncio
 import re
 import sys
-from collections.abc import Awaitable, Callable, Generator
-from typing import TYPE_CHECKING, Any
+from collections.abc import Awaitable, Callable, Generator, Iterable
+from typing import TYPE_CHECKING, Any, NamedTuple
 
 if TYPE_CHECKING:
     from spell_core.console import SpellConsole
@@ -43,6 +45,27 @@ YES_TYPED = ("y", "yes", "")
 
 # A dialog's options, by the JavaScript core's names (`DialogOptions`):  `title`, `size`, `okText`, `cancelText`
 DialogOptions = dict[str, Any]
+
+# What `choose` takes after what it picks from, by the JavaScript core's names (`ChooseOptions`):
+# `thing` or `things`, `prompt`, `shown`, `least`, `most`
+ChooseOptions = dict[str, Any]
+
+# Spell UI's colors, by their hue names:  what `choose a color` offers (`spell/util`'s `SPELL_COLORS`)
+SPELL_COLORS = (
+    "red",
+    "orange",
+    "yellow",
+    "olive",
+    "green",
+    "teal",
+    "blue",
+    "violet",
+    "purple",
+    "pink",
+    "brown",
+    "grey",
+    "black",
+)
 
 # A Python name's `_x`, which javascript writes `X`:  `ok_text` is `okText`
 SNAKE_WORD = re.compile(r"_([a-z])")
@@ -216,6 +239,57 @@ class UIMethods:
         asked = await self.ask_page("prompt", _args(message, value))
         self._result = CANCEL if asked is None else OK
         return "" if asked is None else str(asked)
+
+    async def choose(self, items: object, options: "ChooseOptions | None" = None) -> object:
+        """Ask the person to pick from `items` in a dialog:  the thing picked -- into a new `it` (epic `language` P66).
+
+        - Compiled from `choose a card from the cards`:  `it = await core.choose(self.cards, {"thing": "a card"})`.
+        - `items`:  a list, each item a row named by its title, label or name, else itself as text (`title_of_thing()`);
+          or a record (a dict), its keys the rows and its values what's picked
+        - `options`, by the JavaScript core's names (`ChooseOptions`):  `thing` or `things` (several, `it` a list),
+          `prompt`, `shown`, `least`, `most`
+        - As `prompt`:  `the result` is `ok` or `cancel`;  cancelled, it's `None` (several:  an empty list).
+        - An empty list:  no dialog;  `cancel`, and nothing.
+        - The page shows it, with rows this core names (`choosePositions`);  no page:  the first row, printed.
+        """
+        return await self._choose_from(_choices_of(items), options or {})
+
+    async def choose_color(self, options: "ChooseOptions | None" = None) -> object:
+        """Ask the person to pick one of Spell UI's colors, each drawn as a chip:  its hue name, `red`.
+
+        - Compiled from `choose a color`.  Each row says the color's name in the program's language (`color-names`).
+        - As `choose()` otherwise.
+        """
+        names = [name.strip() for name in self.message("color-names").split(",")]
+        choices = [
+            Choice(names[index] if index < len(names) and names[index] else color, color, color)
+            for index, color in enumerate(SPELL_COLORS)
+        ]
+        return await self._choose_from(choices, options or {})
+
+    async def _choose_from(self, choices: "list[Choice]", options: "ChooseOptions") -> object:
+        """`choose()` and `choose_color()`, once their rows are made:  ask the page which rows, then what was picked."""
+        several = options.get("things") is not None
+        nothing: object = [] if several else None
+        if not choices:
+            self._result = CANCEL
+            return nothing
+        message = _choose_message(self.message, options)
+        rows = [{"title": choice.title, **({"color": choice.color} if choice.color else {})} for choice in choices]
+        counts = {key: options[key] for key in ("least", "most", "shown") if options.get(key) is not None}
+        if self.ask_page is None:
+            self.console.info(f"{message} ({choices[0].title})")
+            picked = min(max(int(options.get("least") or 1), 1), len(choices)) if several else 1
+            positions: list[int] | None = list(range(picked))
+        else:
+            asked = await self.ask_page("choosePositions", [message, rows, {"several": several, **counts}])
+            positions = None if asked is None else [int(position) for position in asked]
+        if positions is None:
+            self._result = CANCEL
+            return nothing
+        self._result = OK
+        values = [choices[position].value for position in positions if 0 <= position < len(choices)]
+        return values if several else (values[0] if values else None)
 
     async def show_drawn(self, name: str, thing: object = None) -> object:
         """Show what the program drew and named `name`, and wait until it closes:  compiled from `show "you won"`.
@@ -414,6 +488,49 @@ def _page_options(options: "str | DialogOptions | None") -> "str | DialogOptions
     if not isinstance(options, dict):
         return options
     return {SNAKE_WORD.sub(lambda match: match.group(1).upper(), key): value for key, value in options.items()}
+
+
+class Choice(NamedTuple):
+    """A row of `choose`'s dialog:  its words, what picking it gives back, and its color's hue name for a color."""
+
+    title: str
+    value: object
+    color: str | None = None
+
+
+def _choices_of(items: object) -> list[Choice]:
+    """The rows of what `choose` picks from:  a record's keys (its values picked), else each item of a list."""
+    if isinstance(items, dict):
+        return [Choice(str(key), value) for key, value in items.items()]
+    if isinstance(items, (str, bytes)) or not isinstance(items, Iterable):
+        return []
+    return [Choice(title_of_thing(item), item) for item in items]
+
+
+def title_of_thing(thing: object) -> str:
+    """What a list's item says it's called:  its `title`, else its `label`, else its `name`, else itself as text.
+
+    - A record (a dict) by its keys;  a thing by its properties.  As the JavaScript core's `titleOfThing()`.
+    """
+    for key in ("title", "label", "name"):
+        named = thing.get(key) if isinstance(thing, dict) else getattr(thing, key, None)
+        if isinstance(named, str):
+            return named
+    return str(thing)
+
+
+def _choose_message(message: Callable[..., str], options: "ChooseOptions") -> str:
+    """`choose`'s question:  the one written, else from the words written, in the program's language."""
+    if options.get("prompt") is not None:
+        return str(options["prompt"])
+    things, least, most = options.get("things"), options.get("least"), options.get("most")
+    if things is None:
+        return message("choose-thing", thing=options.get("thing", ""))
+    if least is not None and most is not None:
+        return message("choose-between", least=least, most=most, things=things)
+    if most is not None:
+        return message("choose-up-to", most=most, things=things)
+    return message("choose-things", things=things)
 
 
 def _drawn_id(name: str) -> str:

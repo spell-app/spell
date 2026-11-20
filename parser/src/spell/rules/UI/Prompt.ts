@@ -15,6 +15,7 @@ import { AssignmentStatement } from "spell/parser/spell/rules/assignment"
  * - Its message is Markdown, as `alert`'s is:  `prompt "Your **name**?"`.
  * - Compiles to `const it = await core.prompt("Name?")`.
  * - TODO: `as number`, `as date`, etc?
+ * - Picking from a list instead:  `choose` (`Choose.ts`).
  */
 export class Prompt extends SpellStatement<"message|defaultValue?", PromptMatchData> {
   @proto static alias = "statement"
@@ -45,23 +46,3 @@ type PromptMatchData = {
   /** The NEW `it` the typed text goes in -- see `AssignmentStatement.declareIt()`. */
   itVar?: P.ScopeVariable
 }
-
-// Chose one or more items from `collection` (of strings???)
-// Returns a promise which `resolve()`s if they "OK" with a value, `reject()`s if they "cancel".
-// TODO
-//     {
-//       name: "choose_one",
-//       alias: "statement",
-//       syntax: "choose ((a|an)? {singular_identifier} (from|of)|one of) {collection:expression} with (prompt|message)? {message:expression}",
-//          => `await core.chooseOne(message, list, defaultValue)`
-//     },
-
-// Chose one or more items from `collection` (of strings???)
-// Returns a promise which `resolve()`s if they "OK" with a value, `reject()`s if they "cancel".
-// TODO
-//     {
-//       name: "choose_multiple",
-//       alias: "statement",
-//       syntax: "choose multiple {plural_identifier} (of|from) {collection:expression} with (prompt|message)? {message:expression}",
-//          => `await core.chooseMultiple(message, list, defaultValues)`
-//     }

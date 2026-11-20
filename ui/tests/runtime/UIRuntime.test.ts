@@ -73,7 +73,12 @@ describe("UIRuntime.toast() / modals", () => {
   it("modals.ready() imports the family the first time, and not once a provider is there", async () => {
     const ui = new UIRuntime()
     const load = vi.fn(async () => {
-      Modals.provider = { confirm: async () => true, alert: async () => {}, prompt: async () => undefined }
+      Modals.provider = {
+        confirm: async () => true,
+        alert: async () => {},
+        prompt: async () => undefined,
+        choose: async () => undefined
+      }
     })
     ui.modals.loadFamilyWith(load)
     try {
@@ -92,7 +97,8 @@ describe("UIRuntime.toast() / modals", () => {
     Modals.provider = {
       confirm: async ({ message }) => message === "sure?",
       alert: async () => {},
-      prompt: async ({ value }) => value
+      prompt: async ({ value }) => value,
+      choose: async () => [0]
     }
     Toasts.provider = { show: ({ id = "t1" }) => ({ id, closed: Promise.resolve() }), dismiss: () => {} }
     try {

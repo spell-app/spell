@@ -30,7 +30,7 @@ import { defineCoreModule } from "./core.types"
 import { describedMethods, type ActionDescription } from "./described"
 import { chainOf, waitOf } from "./sending"
 import { ActionCanceled, runActing, type ActionInfo } from "./undoing"
-import { drawnMenuItemsOf } from "./ui"
+import { drawnMenuItemsOf, titleOfThing } from "./ui"
 
 /** The ways an action is run, for whoever listens:  a key, a click on a button or menu item, or code. */
 export type ActionWay = "key" | "click" | "menu" | "code"
@@ -516,14 +516,6 @@ function listItems(holder: object, { each, action }: MenuDescription): MenuItem[
     isSelected: false,
     run: (way: ActionWay = "menu") => actingMethods.runAction(holder, action!, way, [it])
   }))
-}
-
-/** What a list's item says it's called:  its `title`, else its `name`, else itself as text. */
-function titleOfThing(thing: unknown): string {
-  const named = thing as { title?: unknown; name?: unknown } | undefined
-  if (typeof named?.title === "string") return named.title
-  if (typeof named?.name === "string") return named.name
-  return String(thing)
 }
 
 /** Menu `name`'s title on `holder`:  its live title, its written one, else its name in words -- as an action's. */

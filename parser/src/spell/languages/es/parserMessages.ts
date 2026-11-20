@@ -23,6 +23,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "read-whole-library-reads-it": "Encanto no ve qué lee esta biblioteca, así que {what} se lee entero",
   "say-is-able": 'Di "{line}":  "{old}" deja de funcionar en una versión próxima',
   "say-when": 'Di "cuando:":  aquí "si:" deja de funcionar en una versión próxima',
+  "choose-from-what":
+    'Esta línea no dice de qué {things} elegir.  Escríbelo después de "de", así:  elegir {thing} de tus {things}',
   "line-end-comment":
     'Una nota con "//" al final de una línea dejará de funcionar en una próxima versión.  Ponla en la línea de abajo, empezando con "--".',
   "untyped-parameter": 'Di qué es "{name}", p. ej. "({name} como {type})"',

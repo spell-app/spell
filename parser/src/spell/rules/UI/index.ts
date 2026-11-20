@@ -1,5 +1,5 @@
 /**
- * The `UI` rule module:  user-facing I/O statements -- `print`, `notify`, `alert`, `warn`, `confirm`, `prompt` --
+ * The `UI` rule module:  user-facing I/O statements -- `print`, `notify`, `alert`, `warn`, `confirm`, `prompt`, `choose` --
  * `scroll to the top`, `open printing`, sounds and videos (naming one, `play`, `stop`, `pause`, `resume`, asking about one),
  * plus inline `css` string installation, and an app's widget defaults (`<ui-defaults>`).
  * - One rule class per file;  `UI.en.ts` registers them on `UI` (`UI.parser.ts`),
@@ -37,5 +37,6 @@ export * from "./Alert"
 export * from "./Warn"
 export * from "./Confirm"
 export * from "./Prompt"
+export * from "./Choose"
 export * from "./CSSStyles"
 export * from "./UIDefaults"

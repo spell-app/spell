@@ -57,6 +57,7 @@ export type PageQuestion = { ui: (typeof QUESTIONS)[number]; args: unknown[]; as
 
 /**
  * The core's methods a program running elsewhere may ask its page to run:  its dialogs and toasts, and printing;
+ * `choose`'s dialog, with the rows it named itself (`choosePositions`, epic `language` P66);
  * showing or hiding what it drew and named, `show "you won"` (epic `language` P61);
  * and its sounds, `play "card slide"` (epic `mockup` P28).
  */
@@ -66,6 +67,7 @@ const QUESTIONS = [
   "warn",
   "confirm",
   "prompt",
+  "choosePositions",
   "openPrinting",
   "showDrawn",
   "hideDrawn",

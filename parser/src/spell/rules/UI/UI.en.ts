@@ -36,6 +36,7 @@ import { MediaTime } from "./MediaTime"
 import { MediaVolume } from "./MediaVolume"
 import { StopAllMedia } from "./StopAllMedia"
 import { Prompt } from "./Prompt"
+import { Choose, ChooseSeveral } from "./Choose"
 import { MEDIA_KINDS, TEXT_SIZES } from "./UI.shared"
 import { Warn } from "./Warn"
 
@@ -491,6 +492,118 @@ UI.addRule(Prompt, {
       tests: [
         [`prompt "Name for the new baby?"`, `const it = await core.prompt("Name for the new baby?")`],
         [`prompt "File name:" with "Untitled"`, `const it = await core.prompt("File name:", "Untitled")`]
+      ]
+    }
+  ]
+})
+
+// `choose`'s clauses after what it picks from:  the question, and how many rows show before the list scrolls
+const CHOOSE_CLAUSES = "(with prompt {message:expression})? (,? showing {shown:number} at a time)?"
+
+/** `choose`'s tests:  a card is a thing with a suit;  `deck` is a list of cards, and `levels` a list. */
+export function setupChoose(): Pick<P.RuleTestBlock, "compileAs" | "beforeEach"> {
+  return {
+    compileAs: "statement",
+    beforeEach(scope: P.Scope) {
+      scope.compile(
+        ["a card is a thing", "a card has a suit as one of clubs, diamonds, hearts, spades"].join("\n"),
+        "block"
+      )
+      const { variables } = scope as P.RootScope
+      variables.add({ name: "deck", datatype: "list of cards" })
+      variables.add("levels")
+    }
+  }
+}
+
+UI.addRule(Choose, {
+  syntax: `choose (article:a|an) ({type:known_type}|{arg:singular_identifier}) (from|of) {list:expression} ${CHOOSE_CLAUSES}`,
+  tests: [
+    {
+      ...setupChoose(),
+      tests: [
+        ["choose a card from deck", 'const it = await core.choose(deck, { thing: "a card" })'],
+        [
+          'choose a card from deck with prompt "Which card?"',
+          'const it = await core.choose(deck, { thing: "a card", prompt: "Which card?" })'
+        ],
+        [
+          "choose a card from deck, showing 10 at a time",
+          'const it = await core.choose(deck, { thing: "a card", shown: 10 })'
+        ],
+        ["choose a level from levels", 'const it = await core.choose(levels, { thing: "a level" })']
+      ]
+    }
+  ]
+})
+
+UI.addRule(Choose, {
+  syntax: `choose (one:one) of {list:expression} ${CHOOSE_CLAUSES}`,
+  tests: [
+    {
+      ...setupChoose(),
+      tests: [
+        [
+          'choose one of ["easy", "medium", "hard"]',
+          'const it = await core.choose(["easy", "medium", "hard"], { thing: "one" })'
+        ],
+        [
+          'choose one of levels with prompt "How hard?"',
+          'const it = await core.choose(levels, { thing: "one", prompt: "How hard?" })'
+        ]
+      ]
+    }
+  ]
+})
+
+UI.addRule(Choose, {
+  syntax: `choose (article:a|an) {type:known_type} ${CHOOSE_CLAUSES}`,
+  tests: [
+    {
+      ...setupChoose(),
+      tests: [
+        ["choose a card suit", 'const it = await core.choose(Card.Suits, { thing: "a card suit" })'],
+        [
+          'choose a card suit with prompt "Trumps?"',
+          'const it = await core.choose(Card.Suits, { thing: "a card suit", prompt: "Trumps?" })'
+        ]
+      ]
+    }
+  ]
+})
+
+UI.addRule(Choose, {
+  syntax: `choose (article:a|an) (color:color|colour) ${CHOOSE_CLAUSES}`,
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [
+        ["choose a color", 'const it = await core.chooseColor({ thing: "a color" })'],
+        [
+          'choose a color with prompt "Your color?"',
+          'const it = await core.chooseColor({ thing: "a color", prompt: "Your color?" })'
+        ]
+      ]
+    }
+  ]
+})
+
+UI.addRule(ChooseSeveral, {
+  syntax:
+    "choose ((many:many)|up to {most:number}|between {least:number} and {most:number})?" +
+    ` ({type:plural_type}|{arg:plural_identifier}) (from|of) {list:expression} ${CHOOSE_CLAUSES}`,
+  tests: [
+    {
+      ...setupChoose(),
+      tests: [
+        ["choose cards from deck", 'const it = await core.choose(deck, { things: "cards" })'],
+        ["choose many cards from deck", 'const it = await core.choose(deck, { things: "cards" })'],
+        ["choose up to 2 cards from deck", 'const it = await core.choose(deck, { things: "cards", most: 2 })'],
+        {
+          input: "choose between 2 and 4 cards from deck",
+          js: [`const it = await core.choose(deck, {`, `  things: "cards",`, `  least: 2,`, `  most: 4`, `})`]
+        },
+        ["choose levels from levels", 'const it = await core.choose(levels, { things: "levels" })']
       ]
     }
   ]

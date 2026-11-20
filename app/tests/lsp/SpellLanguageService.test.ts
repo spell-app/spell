@@ -950,10 +950,12 @@ describe("SpellLanguageService", () => {
       await fixes("set x to 1  // so it runs", async (titles, fixed) => {
         expect(titles).toEqual(['Move the note below, changing "//" to "--"'])
         expect(fixed).toMatch(/\nset x to 1\n\t-- so it runs$/)
-        const warned = service.diagnostics(solitaire).filter((it) => it.message.startsWith('A note after "//"'))
+        const warned = service.diagnostics(solitaire).filter((it) => String(it.message).startsWith('A note after "//"'))
         expect(warned).toHaveLength(1)
         await workspace.update(solitaireUri, fixed!)
-        expect(service.diagnostics(solitaire).filter((it) => it.message.startsWith('A note after "//"'))).toEqual([])
+        expect(
+          service.diagnostics(solitaire).filter((it) => String(it.message).startsWith('A note after "//"'))
+        ).toEqual([])
       })
     })
 

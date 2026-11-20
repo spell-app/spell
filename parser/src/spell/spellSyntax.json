@@ -5735,7 +5735,7 @@
           "ruleNames": ["prompt"],
           "internal": false,
           "file": "src/spell/rules/UI/Prompt.ts",
-          "line": 19,
+          "line": 20,
           "purpose": "Ask the person for some text, in a dialog, with `message` and its starting text, `defaultValue`.",
           "syntaxes": [
             {
@@ -5750,6 +5750,103 @@
                 },
                 "py": {
                   "code": "it = await core.prompt(\"Name for the new baby?\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "Choose",
+          "ruleNames": ["choose"],
+          "internal": false,
+          "file": "src/spell/rules/UI/Choose.ts",
+          "line": 28,
+          "purpose": "Ask the person to pick one thing from a list, in a dialog (epic `language` P66).",
+          "syntaxes": [
+            {
+              "syntax": "choose (article:a|an) ({type:known_type}|{arg:singular_identifier}) (from|of) {list:expression} (with prompt {message:expression})? (,? showing {shown:number} at a time)?",
+              "example": "choose a card from deck",
+              "outputs": {
+                "js": {
+                  "code": "const it = await core.choose(deck, { thing: \"a card\" })"
+                },
+                "ts": {
+                  "code": "const it = await core.choose(deck, { thing: \"a card\" })"
+                },
+                "py": {
+                  "code": "it = await core.choose(deck, {\"thing\": \"a card\"})"
+                }
+              }
+            },
+            {
+              "syntax": "choose (one:one) of {list:expression} (with prompt {message:expression})? (,? showing {shown:number} at a time)?",
+              "example": "choose one of [\"easy\", \"medium\", \"hard\"]",
+              "outputs": {
+                "js": {
+                  "code": "const it = await core.choose([\"easy\", \"medium\", \"hard\"], { thing: \"one\" })"
+                },
+                "ts": {
+                  "code": "const it = await core.choose([\"easy\", \"medium\", \"hard\"], { thing: \"one\" })"
+                },
+                "py": {
+                  "code": "it = await core.choose([\"easy\", \"medium\", \"hard\"], {\"thing\": \"one\"})"
+                }
+              }
+            },
+            {
+              "syntax": "choose (article:a|an) {type:known_type} (with prompt {message:expression})? (,? showing {shown:number} at a time)?",
+              "example": "choose a card suit",
+              "outputs": {
+                "js": {
+                  "code": "const it = await core.choose(Card.Suits, { thing: \"a card suit\" })"
+                },
+                "ts": {
+                  "code": "const it = await core.choose(Card.Suits, { thing: \"a card suit\" })"
+                },
+                "py": {
+                  "code": "it = await core.choose(Card.SUITS, {\"thing\": \"a card suit\"})"
+                }
+              }
+            },
+            {
+              "syntax": "choose (article:a|an) (color:color|colour) (with prompt {message:expression})? (,? showing {shown:number} at a time)?",
+              "example": "choose a color",
+              "outputs": {
+                "js": {
+                  "code": "const it = await core.chooseColor({ thing: \"a color\" })"
+                },
+                "ts": {
+                  "code": "const it = await core.chooseColor({ thing: \"a color\" })"
+                },
+                "py": {
+                  "code": "it = await core.choose_color({\"thing\": \"a color\"})"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ChooseSeveral",
+          "ruleNames": ["choose_several"],
+          "internal": false,
+          "file": "src/spell/rules/UI/Choose.ts",
+          "line": 118,
+          "purpose": "Ask the person to pick several things from a list, in a dialog (epic `language` P66, Q74).",
+          "syntaxes": [
+            {
+              "syntax": "choose ((many:many)|up to {most:number}|between {least:number} and {most:number})? ({type:plural_type}|{arg:plural_identifier}) (from|of) {list:expression} (with prompt {message:expression})? (,? showing {shown:number} at a time)?",
+              "example": "choose cards from deck",
+              "outputs": {
+                "js": {
+                  "code": "const it = await core.choose(deck, { things: \"cards\" })"
+                },
+                "ts": {
+                  "code": "const it = await core.choose(deck, { things: \"cards\" })"
+                },
+                "py": {
+                  "code": "it = await core.choose(deck, {\"things\": \"cards\"})"
                 }
               }
             }
