@@ -222,7 +222,7 @@ describe("UIDropdown.css in a shadow root", () => {
       </div>`
     const dropdown = shadow.querySelector<HTMLElement>(".ui.dropdown")!
     const menu = open(dropdown)
-    expect(getComputedStyle(host).display).toBe("inline-block")
+    expect(getComputedStyle(host).display).toBe("inline-flex")
     expect(menu.getBoundingClientRect().top).toBeGreaterThanOrEqual(dropdown.getBoundingClientRect().bottom)
     expect(Math.abs(menu.getBoundingClientRect().left - dropdown.getBoundingClientRect().left)).toBeLessThan(1)
   })

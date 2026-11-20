@@ -70,9 +70,13 @@
 *******************************/
 
 @layer ui.components.dropdown.types {
-  /* The DOM element:  layout only;  the look lives on the root inside. */
+  /*
+   * The DOM element:  layout only;  the look lives on the root inside.
+   * - a flex box, as `<ui-button>`'s:  stretched in a row (an input's `action` slot), its root fills it
+   *   (epic `from-console` I25:  a joined `button` dropdown stood 27px in a 40.5px field)
+   */
   :host {
-    display: inline-block;
+    display: inline-flex;
     vertical-align: baseline;
   }
   :host(:state(fluid)) {
@@ -379,7 +383,27 @@
     padding-block: var(--_ui-dropdown-padding-block);
     padding-inline: var(--_ui-dropdown-padding-inline) var(--_ui-dropdown-icon-distance);
     border: var(--ui-border-width) solid var(--_ui-dropdown-border-color);
-    border-radius: var(--_ui-dropdown-radius);
+    /*
+     * each corner as a button's in a group or an input's `action` slot (`UIButton.css`'s corner factors,
+     * `--_ui-buttons-ss` ...:  1 an outer corner, 0 a joined one);  alone, its own radius
+     * (epic `from-console` I25:  joined to a field, its round corners left a notch at the seam)
+     */
+    border-start-start-radius: calc(
+      var(--_buttons-outer-radius, var(--_ui-dropdown-radius)) * var(--_ui-buttons-ss, 1) +
+        var(--_buttons-joint-radius, 0px) * (1 - var(--_ui-buttons-ss, 1))
+    );
+    border-start-end-radius: calc(
+      var(--_buttons-outer-radius, var(--_ui-dropdown-radius)) * var(--_ui-buttons-se, 1) +
+        var(--_buttons-joint-radius, 0px) * (1 - var(--_ui-buttons-se, 1))
+    );
+    border-end-start-radius: calc(
+      var(--_buttons-outer-radius, var(--_ui-dropdown-radius)) * var(--_ui-buttons-es, 1) +
+        var(--_buttons-joint-radius, 0px) * (1 - var(--_ui-buttons-es, 1))
+    );
+    border-end-end-radius: calc(
+      var(--_buttons-outer-radius, var(--_ui-dropdown-radius)) * var(--_ui-buttons-ee, 1) +
+        var(--_buttons-joint-radius, 0px) * (1 - var(--_ui-buttons-ee, 1))
+    );
     background: var(--_ui-dropdown-background);
     color: var(--_ui-dropdown-color);
     line-height: 1em;
@@ -523,6 +547,8 @@
   /* Button:  `.ui.dropdown.button` is styled by `UIButton.css`;  only overflow and the icon need adjusting. */
   .ui.dropdown.button {
     overflow: visible;
+    /* stretched to a row's height (an input's `action` slot), its words stay mid-box */
+    align-content: center;
   }
   .ui.dropdown.icon.button > .dropdown.icon {
     margin: 0;

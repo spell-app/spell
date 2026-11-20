@@ -34,6 +34,8 @@
  *   - Their outer corners take the field's radius (`--_buttons-outer-radius`),
  *     and their outline the field's border (`--_button-edge`).
  *   - `:first-child` / `:last-child` are the DOM element's own children.
+ *   - A slotted `<ui-dropdown>` joins the same way:  its sheet reads the same corner tokens, and its box fills the
+ *     row (epic `from-console` I25).
  * - States:  `state="error|info|success|warning"` is a colour remap (`colors.css`);
  *   one rule set reads `--ui-color-background` / `-border` / `-text`.
  *   - An owner field hands its state down as INHERITED, already resolved tokens
