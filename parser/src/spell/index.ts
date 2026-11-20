@@ -72,6 +72,7 @@ export {
 } from "./rules"
 
 export * from "./SpellDeclarations"
+export * from "./NativeCode"
 export * from "./SpellWords"
 export * from "./SpellWarnings"
 export * from "./hoistClassMembers"

@@ -475,6 +475,14 @@ export const getIndex = async (
     if (!fileNames.includes(name) && isManifestFile(basename(name), location.projectName)) fileNames.push(name)
   }
 
+  // a code file the project file names, `clipboard.ts`, which its Spell calls (`call native`, epic `from-console` P10):
+  // only when named, so a `.lib.ts`, `.app.py` or snapshot beside a project never becomes one of its files
+  for (const { path } of (await loadProjectFile(projectId)).imports) {
+    if (SP.SpellLocation.isAddress(path) || !SP.NativeCode.languageOf(path)) continue
+    const name = path.replace(/^\/+/, "")
+    if (!fileNames.includes(name) && inside.includes(name)) fileNames.push(name)
+  }
+
   // HACKY: make sure we have at least one valid file by creating a default file
   if (!fileNames.length) {
     await createFile(projectId, DEFAULT_FILE.filePath, DEFAULT_FILE.contents)

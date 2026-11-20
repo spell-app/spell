@@ -8,6 +8,9 @@
 import type { LanguageCommands } from "spell/parser/cli"
 import { CLI } from "spell/app/cli"
 
+// a project's TypeScript code files read by the kit's TypeScript reader, for `call native` (epic `from-console` P10)
+import "spell/parser/spell/node/nativeExports"
+
 /** spell-parser's commands, each on a new `CliSession` with the command's flags. */
 export const languageCommands: LanguageCommands = {
   compile: (args, options) => CLI.compileCommand(session(options), args, options),

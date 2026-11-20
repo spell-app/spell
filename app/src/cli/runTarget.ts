@@ -71,12 +71,16 @@ export async function runTarget(
     const extension = target.suffix.slice(target.suffix.lastIndexOf("."))
     const code = project.outputFileFor(target).contents ?? ""
     const projects = Object.fromEntries(Object.entries(imports).map(([id, it]) => [id, it.url]))
+    // the code files its Spell calls (`call native`):  javascript's by module;  Python's folders on its import path
+    const natives = CLI.nativeFilesOf(project, target.writer.nativeLanguage)
+    if (target.writer.nativeLanguage === "py") Object.assign(projects, natives)
     const sourceMap = project.sourceMapFileFor(target).contents ?? undefined
     const env = pageServerEnv()
     const { exitCode, skipped } = await CLI.runCode("run", name, code, {
       ...options,
       extension,
       projects,
+      natives,
       sourceMap,
       env
     })

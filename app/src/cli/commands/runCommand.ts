@@ -219,6 +219,7 @@ export async function runCompiled(
     ...options,
     ...(deployments && { deployments }),
     projects: importedOutputs(project),
+    natives: nativeFilesOf(project, "js"),
     capture,
     messages,
     reports,
@@ -248,6 +249,7 @@ export async function runCode(
   {
     extension = ".mjs",
     projects = {},
+    natives,
     capture = false,
     dom,
     pauses,
@@ -261,6 +263,8 @@ export async function runCode(
   }: CLI.TestOptions & {
     extension?: string
     projects?: Record<string, string>
+    /** the code files its Spell calls (`call native`), by module -- see `nativeFilesOf()` */
+    natives?: Record<string, string>
     capture?: boolean
     dom?: boolean
     pauses?: boolean
@@ -292,6 +296,7 @@ export async function runCode(
       name,
       entry: pathToFileURL(entry).href,
       projects,
+      ...(natives && { natives }),
       core: pathToFileURL(sourceOrBuilt(resolve(environment.coreDir, "index.ts"))).href,
       verbose: options.verbose,
       filter: options.name,
@@ -341,6 +346,29 @@ export function importedOutputs(
     importedOutputs(imported, outputs)
   }
   return outputs
+}
+
+/**
+ * The code files `project`'s Spell calls with `call native`, and those of each project it imports, in `language`:
+ * by the module compiled code imports each as, each its file's URL (epic `from-console` P10).
+ * - javascript:  `@spell/native/owen@spell/clipboard/clipboard.ts` => `file:///.../clipboard.ts`
+ * - Python:  the same key, its `.py` file's URL:  its folder goes on Python's import path
+ */
+export function nativeFilesOf(
+  project: SP.SpellProject,
+  language: "js" | "py",
+  found: Record<string, string> = {},
+  seen = new Set<string>()
+): Record<string, string> {
+  if (seen.has(project.projectId)) return found
+  seen.add(project.projectId)
+  for (const { file } of project.codeFiles) {
+    const path = file.location.filePath ?? ""
+    if (SP.NativeCode.languageOf(path) !== language) continue
+    found[SP.NativeCode.moduleFor(project.projectId, path)] = pathToFileURL(file.location.serverPath).href
+  }
+  for (const imported of LSP.ScopeExplorer.importedProjects(project)) nativeFilesOf(imported, language, found, seen)
+  return found
 }
 
 /**

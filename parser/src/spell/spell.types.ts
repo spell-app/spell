@@ -226,6 +226,14 @@ export function namesSuffixFor(lang: string): string {
  */
 export const SPELL_PROJECT_MODULE = "@spell/project/"
 
+/**
+ * Start of the ES module specifier for one of a project's code files, e.g. `@spell/native/owen@spell/clipboard/clipboard.ts`
+ * (epic `from-console` P10):  what `call native` imports its function from.
+ * - A runner points it at the file, as it points `SPELL_PROJECT_MODULE` at a project's compiled code.
+ * - See `SP.NativeCode.moduleIn()`.
+ */
+export const SPELL_NATIVE_MODULE = "@spell/native/"
+
 /** JSON5 shape of a project's index file, as read/written by the server. */
 export type ProjectManifestJSON5 = {
   /** All manifest-eligible files in project, keyed by `path`. */
@@ -302,6 +310,11 @@ export type ProjectManifestImport = {
   version?: string
   /** Another project:  `true` to parse its `.spell` files ahead of ours, rather than its compiled declarations. */
   source?: boolean
+  /**
+   * A code file (`/clipboard.ts`) only a browser can run:  `"browser"` -- Python refuses its functions while compiling
+   * (epic `from-console` P10, `SP.NativeCode`).
+   */
+  only?: "browser"
 }
 
 /** Another project a project imports -- see `SpellProject.projectImports`. */

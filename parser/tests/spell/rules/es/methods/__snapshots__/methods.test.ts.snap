@@ -7,6 +7,7 @@ exports[`testing spell module methods, in Spanish > rule group specs > match sna
   "after_hook": "signature|body?",
   "bare_type_arg": "type",
   "before_hook": "signature|body?",
+  "call_native": "name",
   "cancel_this_action": "when?|condition?",
   "create_animation": "signature|body?",
   "create_hook": "signature|body?",
@@ -15,6 +16,7 @@ exports[`testing spell module methods, in Spanish > rule group specs > match sna
   "to_do_something": "asTest?|signature|modifiers?|body?",
   "type_method_arg": "type",
   "typed_method_arg": "identifier|type",
+  "use_natives": "all?|file|ending",
   "valued_var_method_arg": "identifier|value",
   "while_hook": "signature|body?",
 }

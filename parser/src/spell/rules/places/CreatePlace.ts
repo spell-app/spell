@@ -138,6 +138,10 @@ export class CreatePlace extends TypeDeclaration<
       if (!(scopeType instanceof P.TypeScope) || !scopeType.isA("Place")) return undefined
     }
     const language = SP.Language.of(scope)
+    // `call native ...` calls the project's code, so `native` can't name a place (epic `from-console` P10)
+    if (/^native$/i.test(`${match.groups.type.raw ?? match.groups.type.value}`.trim())) {
+      return SpellStatement.refuse(match, language.parserMessage("place-named-native"))
+    }
     // Owen, 2026-11-09 (epic `language` P40):  "Let's not have `file` mean `json-file`, make it explicit"
     if (match.groups.kind && Wording.meaningOf(match.groups.kind) === "plain_file") {
       return SpellStatement.refuse(match, language.parserMessage("say-json-file"))
