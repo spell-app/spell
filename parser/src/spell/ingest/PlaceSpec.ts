@@ -25,6 +25,9 @@ const MAP_BY_NAME = "Its schema says it's a map by name, each key its own:  read
 /** Why something too far inside others is left out. */
 const TOO_DEEP = "It's too far inside others:  read it by hand, a type of its own."
 
+/** Why a field that may hold one of several kinds is left out:  `anyOf: [{ type: "integer" }, { type: "string" }]`. */
+const SEVERAL_KINDS = "Its schema says it holds one of several kinds:  read it by hand, a type of its own."
+
 /****************
  * ### `PlaceSpec`
  * An OpenAPI description, read whole as a look at a place (epic `data` P49, J250, J253):
@@ -46,6 +49,9 @@ const TOO_DEEP = "It's too far inside others:  read it by hand, a type of its ow
  *   (`recordsUnder()`, epic `from-console` P16).
  * - A reference into another file or address is named in the notes, and its field left untyped:  only local ones are
  *   followed, by a small reader of its own (no dependency).
+ * - 3.0's and 3.1's ways to say a field may hold nothing read the same (epic `data` I109):
+ *   `nullable: true`, `type: ["string", "null"]`, and FastAPI's `anyOf: [{ $ref }, { type: "null" }]`
+ *   are each the one kind, never required.
  * - Plain data:  it reads nothing, so a test hands it a saved description.
  ****************/
 export class PlaceSpec {
@@ -155,7 +161,8 @@ export class PlaceSpec {
 
   /** Where an item's schema is, when it's a reference:  `{ schemaAt: "#/components/schemas/Tenant" }`. */
   private itemAt(item: Schema): { schemaAt?: string } {
-    return item.$ref && LOCAL_REF.test(item.$ref) ? { schemaAt: item.$ref } : {}
+    const ref = this.refOf(item)
+    return ref && LOCAL_REF.test(ref) ? { schemaAt: ref } : {}
   }
 
   /** The schema of an operation's answer, 200 or the first 2xx, as JSON. */
@@ -299,7 +306,8 @@ export class PlaceSpec {
     for (const [name, field] of Object.entries(this.propertiesOf(one))) {
       if (!this.resolved(field)?.readOnly) params[name] = kindOfSchema(this.resolved(field)) ?? "inside"
     }
-    const bodyAt = one?.$ref && LOCAL_REF.test(one.$ref) ? one.$ref : undefined
+    const ref = one && this.refOf(one)
+    const bodyAt = ref && LOCAL_REF.test(ref) ? ref : undefined
     return {
       method,
       at,
@@ -338,14 +346,14 @@ export class PlaceSpec {
     depth: number,
     seen: ReadonlySet<string>
   ): FieldDescription {
-    const pointer = schema.$ref ?? schema.allOf?.find((each) => each.$ref)?.$ref
+    const pointer = this.refOf(schema)
     const schemaAt = pointer && LOCAL_REF.test(pointer) ? pointer : at
     const field = this.resolved(schema) ?? {}
     const words = wordsFor(name)
     const said: Partial<FieldDescription> = {
       schemaAt,
       ...(field.readOnly && { isReadOnly: true }),
-      ...(isRequired && !field.readOnly && { isRequired: true }),
+      ...(isRequired && !field.readOnly && !field.nullable && { isRequired: true }),
       ...(field.example !== undefined && typeof field.example !== "object" && { example: field.example }),
       ...(field.format !== undefined && { format: field.format }),
       ...(field.minLength !== undefined && { minLetters: field.minLength }),
@@ -372,7 +380,13 @@ export class PlaceSpec {
     if (ref && seen.has(ref))
       return { words, type: "inside", ...said, isItsOwner: true, ...(isList && { isListInside: true }) }
     if (!Object.keys(this.propertiesOf(inside)).length) {
-      const leftOut = this.resolved(inside)?.additionalProperties !== undefined ? MAP_BY_NAME : TOO_DEEP
+      const resolvedInside = this.resolved(inside)
+      const leftOut =
+        resolvedInside?.additionalProperties !== undefined
+          ? MAP_BY_NAME
+          : isSeveralKinds(resolvedInside)
+            ? SEVERAL_KINDS
+            : TOO_DEEP
       return { words, type: "inside", ...said, leftOut }
     }
     if (depth >= DEEPEST_INSIDE) return { words, type: "inside", ...said, leftOut: TOO_DEEP }
@@ -401,9 +415,17 @@ export class PlaceSpec {
     return (this.resolved(schema)?.allOf ?? []).flatMap((part) => this.resolved(part)?.required ?? [])
   }
 
-  /** The local reference a schema is, or an `allOf` of one:  what says a schema holds itself. */
+  /**
+   * The reference a schema is:  its own, or an `allOf` of one, or an `anyOf` / `oneOf` of one and nothing else
+   * (FastAPI's `anyOf: [{ $ref }, { type: "null" }]`).
+   * - What names the type inside, and says a schema holds itself.
+   */
   private refOf(schema: Schema): string | undefined {
-    return schema.$ref ?? schema.allOf?.find((each) => each.$ref)?.$ref
+    if (schema.$ref) return schema.$ref
+    const allOf = schema.allOf?.find((each) => each.$ref)?.$ref
+    if (allOf) return allOf
+    const others = (schema.anyOf ?? schema.oneOf)?.filter((each) => !isNothing(each))
+    return others?.length === 1 ? others[0]!.$ref : undefined
   }
 
   ////////////////
@@ -413,6 +435,8 @@ export class PlaceSpec {
   /**
    * `value` with its local `$ref` followed, as deep as it goes;  one `allOf` of a single reference too
    * (`{ allOf: [{ $ref }], nullable: true }`, NetBox's).
+   * - An `anyOf` / `oneOf` of one kind and nothing (FastAPI's `Optional[...]`) is that kind, `nullable`;
+   *   and its 3.1 forms are read as 3.0's (`plainSchema()`):  a type list, `const`, `examples`.
    * - A reference into another file, or one that isn't there:  `undefined`, said in the notes.
    */
   resolved<Value extends { $ref?: string }>(value: Value | undefined): Value | undefined {
@@ -426,12 +450,25 @@ export class PlaceSpec {
       if (found === undefined) this.notes.push(`${each.$ref} isn't in the description.`)
       each = found
     }
-    const single = (each as Schema | undefined)?.allOf
-    if (single?.length === 1 && !(each as Schema).properties) {
-      const { allOf: _one, ...rest } = each as Schema
-      return { ...(this.resolved(single[0]) as object), ...rest } as Value
+    const schema = each as Schema | undefined
+    if (!schema || typeof schema !== "object") return each
+    const single = schema.allOf
+    if (single?.length === 1 && !schema.properties) {
+      const { allOf: _one, ...rest } = schema
+      return plainSchema({ ...(this.resolved(single[0]) as object), ...rest }) as Value
     }
-    return each
+    const others = schema.anyOf ?? schema.oneOf
+    const kinds = others?.filter((other) => !isNothing(this.resolved(other)))
+    if (others && kinds?.length === 1 && !schema.properties) {
+      const { anyOf: _any, oneOf: _one, ...rest } = schema
+      const mayBeNothing = kinds.length < others.length
+      return plainSchema({
+        ...(this.resolved(kinds[0]) as object),
+        ...rest,
+        ...(mayBeNothing && { nullable: true })
+      }) as Value
+    }
+    return plainSchema(schema) as Value
   }
 
   /** What the agent reads of it:  a summary, never the whole description (J248). */
@@ -459,14 +496,15 @@ function jsonSchemaIn(content: Record<string, { schema?: Schema }> | undefined):
 }
 
 /** What a plain schema holds, in a field's words:  `undefined` for an object, or a list of them. */
-function kindOfSchema(schema: Schema | undefined): FieldKind | undefined {
-  if (!schema) return undefined
-  const { type, format, items } = schema
+function kindOfSchema(_schema: Schema | undefined): FieldKind | undefined {
+  if (!_schema) return undefined
+  const { type, format, items } = plainSchema(_schema)
   if (type === "string" && (format === "date" || format === "date-time")) return "date"
   if (type === "string" && (format === "uri" || format === "url")) return "link"
   if (type === "string") return "text"
   if (type === "integer" || type === "number") return "number"
   if (type === "boolean") return "yes or no"
+  if (type === "null") return "nothing"
   if (type === "array" && items) {
     const item = kindOfSchema(items.$ref ? undefined : items)
     if (item === "link") return "list of links"
@@ -488,6 +526,43 @@ function withSpellsOwnWordsApart(
   if (depth && fields.id && !taken("number")) fields.id.words = "number"
   if (fields.type && !taken("kind")) fields.type.words = "kind"
   return fields
+}
+
+/**
+ * `schema` in 3.0's words, for what OpenAPI 3.1 (JSON Schema's) says otherwise (epic `data` I109):
+ * - a type list with `"null"` in it:  the one type left, `nullable`;  several left stay a list, read by hand
+ * - `const`:  an `enum` of its one value
+ * - `examples`, a list:  its first is the `example`
+ * - The same object back when there's nothing to change:  pure, so the free helpers use it too.
+ */
+function plainSchema(schema: Schema): Schema {
+  const { type } = schema
+  const types = Array.isArray(type) ? type.filter((each) => each !== "null") : undefined
+  const isNullable = Array.isArray(type) && types!.length < type.length
+  const hasConst = schema.const !== undefined && schema.enum === undefined
+  const hasExamples = Array.isArray(schema.examples) && schema.example === undefined && schema.examples.length > 0
+  if (!types && !hasConst && !hasExamples) return schema
+  return {
+    ...schema,
+    ...(types && { type: types.length === 1 ? types[0] : types.length ? types : "null" }),
+    ...(isNullable && { nullable: true }),
+    ...(hasConst && { enum: [schema.const] }),
+    ...(hasExamples && { example: (schema.examples as unknown[])[0] })
+  }
+}
+
+/** Is `schema` the one that says "nothing":  `{ type: "null" }`, `{ const: null }`, `{ enum: [null] }`? */
+function isNothing(schema: Schema | undefined): boolean {
+  if (!schema) return false
+  const { type } = schema
+  if (type === "null" || (Array.isArray(type) && type.every((each) => each === "null"))) return true
+  if (schema.const === null) return true
+  return Array.isArray(schema.enum) && schema.enum.length > 0 && schema.enum.every((each) => each === null)
+}
+
+/** Does `schema` hold one of several kinds:  an `anyOf` / `oneOf` left, or a type list of two or more? */
+function isSeveralKinds(schema: Schema | undefined): boolean {
+  return Boolean(schema?.anyOf ?? schema?.oneOf) || Array.isArray(schema?.type)
 }
 
 /** Is there a thing by id under `path`:  `/background-tasks/{id}/`? */
@@ -553,19 +628,24 @@ function pointedAt(document: unknown, pointer: string): unknown {
 /** A schema, as far as it's read:  JSON Schema's, as OpenAPI 3.0 and 3.1 have it. */
 export type Schema = {
   $ref?: string
-  type?: string
+  /** One type, or 3.1's list of them:  `["string", "null"]`. */
+  type?: string | string[]
   format?: string
   properties?: Record<string, Schema>
   additionalProperties?: unknown
   items?: Schema
   required?: string[]
   enum?: unknown[]
+  /** 3.1's one legal value. */
+  const?: unknown
   allOf?: Schema[]
   oneOf?: Schema[]
   anyOf?: Schema[]
   readOnly?: boolean
   nullable?: boolean
   example?: unknown
+  /** 3.1's examples, a list. */
+  examples?: unknown
   minLength?: number
   maxLength?: number
   minimum?: number
