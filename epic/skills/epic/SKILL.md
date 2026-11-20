@@ -1,7 +1,7 @@
 ---
 name: epic
-description: Run an epic -- a piece of work planned and built against its live epic page, `epics/<name>/<name>.plan.html`, in its own worktree.  `/epic <name> [what to plan]` plans one (or "make this a plan doc" about this session's work);  `/epic review [<name>]` takes the person's marks, comments and Sends from the page ("review the seo epic", "go through its todos");  `/epic resume [<name>]` picks one back up where its page says it stopped;  `/epic future <name> [idea]` saves an idea as a future epic;  `/epic phase [ids] [name]` adds a phase;  `/epic start <P1 | ids>` works a phase or items now;  `/epic request <epic> [<rN>]` takes up a `/send` request;  `/epic tidy [<epic>]` closes items other work made obsolete;  `/epic fresh` hands this epic to a new session in this window;  `/epic done` is `/isolate done`.
-argument-hint: <name> [what to plan] | demo [pasted text] | done | review [<name>] | resume [<name>] | future <name> [idea] | phase [ids] [name] | start <P1 | ids> | request <epic> [<rN>] | tidy [<epic>] | fresh [--force] | color <look>
+description: Run an epic -- a piece of work planned and built against its live epic page, `epics/<name>/<name>.plan.html`, in its own worktree.  `/epic <name> [what to plan]` plans one (or "make this a plan doc" about this session's work);  `/epic review [<name>]` takes the person's marks, comments and Sends from the page ("review the seo epic", "go through its todos");  `/epic resume [<name>]` picks one back up where its page says it stopped;  `/epic future <name> [idea]` saves an idea as a future epic;  `/epic phase [ids] [name]` adds a phase;  `/epic start <P1 | ids>` works a phase or items now;  `/epic request <epic> [<rN>]` takes up a `/send` request;  `/epic tidy [<epic>]` closes items other work made obsolete;  `/epic fresh` hands this epic to a new session in this window (`all`:  every running epic session, each at its next clear moment);  `/epic done` is `/isolate done`.
+argument-hint: <name> [what to plan] | demo [pasted text] | done | review [<name>] | resume [<name>] | future <name> [idea] | phase [ids] [name] | start <P1 | ids> | request <epic> [<rN>] | tidy [<epic>] | fresh [all | --force] | color <look>
 ---
 
 # /epic
@@ -123,6 +123,8 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
     epic `epic-engine` T88, T108).
   - `fresh`:  `/epic fresh [--force]` hands THIS session's epic to a new session in this window, which picks it up
     from the page:  NOT a new epic.  Go to "16. Fresh" (epic `epic-engine` T110).
+    - `/epic fresh all`, typed in ANY session:  every running epic session does, each at its next clear moment.
+      Go to "16. Fresh", "All epics" (epic `epic-engine` T113).
   - `demo`:  `/epic demo [pasted text]` runs the STAGED DEMO when its step files are ready (`epic demo check`):
     NOT a new epic.  Go to "15. Staged demo", and skip everything else here (epic `epic-engine` P77).
   - `done`:  `/epic done` is `/isolate done`, word for word.
@@ -1933,8 +1935,11 @@ A NEW session takes this session's epic on, in this window, from its page;  this
 (epic `epic-engine` T110;  Owen, 2026-11-19:  "can you do this automatically?  Can we make a command for it?").
 - Why:  every turn re-reads the session's whole conversation, so a long-running epic's session pays for it again and
   again.  The new one starts from the epic page, "8. Resume".
-- The prompt hook suggests it ONCE, in one line, when the session's conversation passes `freshHintMB` (8 MB;  the
-  repo's `.epic/config.json5`):  a hint, never a move (`FreshHint`).  Say the line to the person;  don't move.
+- A hint suggests it, in one line, once the session's conversation passes `freshHintMB` (8 MB;  the repo's
+  `.epic/config.json5`):  a hint, never a move (`FreshHint`).  Say the line to the person;  don't move.
+  - first from the prompt hook;  then again at a break point (Owen, 2026-11-19:  "ok to show it again at the end of a
+    phase, significant chunk of work, after a merge"):  `epic phase ... done`, `epic merge` and `epic agents done`
+    print it last, at most once every 15 minutes;  an agent that sees it passes it on in its report
 - In Codex:  nothing to hand off:  start a new Codex session in the epic's worktree, run `epic guide`, then
   `$epic resume <name>`.
 
@@ -1958,6 +1963,35 @@ A NEW session takes this session's epic on, in this window, from its page;  this
    - the `Stop` hook ([handoff.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/handoff.mjs)) opens a NEW Claude tab in this window,
      types `/epic resume <name>` into it (not sent), and closes this tab
    - the new session is home already ("8. Resume", step 0, "Already home"):  it asks neither which epic nor which window
+
+### All epics:  `/epic fresh all`
+
+Every running epic session hands itself to a fresh session, each at its next CLEAR MOMENT (epic `epic-engine` T113;
+Owen, 2026-11-19:  "anything not actively working or interacting with me ... does it immediately, others do it on
+their next clear moment").
+- Typed in ANY session:  an epic's, a worktree's, or none.
+- Clear:  none of its epic's agents running, not mid-turn, no question from it waiting on the person, and no prompt from
+  them in the last 5 minutes (they may be typing to it).
+  - The person working on its epic PAGE is no reason to wait:  their marks and Sends sit in the inbox, and the new
+    session reads them.
+- Each session's own end-of-turn hook watches for that moment
+  ([fresh-wait.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/fresh-wait.mjs)), then wakes it with a line saying to run `/epic fresh`.
+
+1. `epic fresh all`.
+   - It marks every running epic session as waiting to go fresh, this one too when it's an epic's (it goes LAST:  after
+     the others, or 10 minutes on), and prints:
+     - a `TELL:` line for each other session (`to 🚧 seo:  /epic fresh all:  ...`)
+     - `now:` the sessions clear already;  `later:` the rest, each with why (agents running, mid-turn ...)
+2. Send each `TELL:` line, as is, to the session it names:  `SendMessage`, `to` its address, one each.
+   - In Codex:  Codex can't message another session:  print each line for the person to paste;  a session not told
+     goes at no moment, so say which.
+3. Reply ONE line:  "fresh now:  <epics>;  later:  <epic> (<why>), ...".
+4. A session that receives the line:  nothing to reply.  Finish what you're on, and end your turn.
+   - The wake comes as a hook's line, "/epic fresh all:  this session is clear now ...":  run "16. Fresh" above, from
+     step 0.
+   - Refused there (no window, the end-of-turn hook won't run):  `epic fresh drop`, so it isn't woken again, and say why
+     in one line.
+- `epic fresh status`:  the sessions still waiting, and why each waits.
 
 ## Migrations:  bringing epic pages up to today's markup
 

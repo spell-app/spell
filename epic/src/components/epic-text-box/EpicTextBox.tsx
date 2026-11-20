@@ -64,6 +64,9 @@ export class DOMTextBoxElement extends E.DOMElement<EpicTextBox> {
  *     `other`:  question `for`'s Other
  *   - those three register with the page's `AnswerForm` while connected:  gathered for Send, and shown again from
  *     the answer sent (`gatherInto()`, `showAnswer()`)
+ *   - on a GUIDE (any docs page with the comments' own Send, no `<epic-send>`), a `comment` box is a comment on its
+ *     section instead, kind `note`, which the page's Send hands to the guide's epic (the docs runtime's
+ *     `drawNoteBoxes()`, epic `epic-engine` T101);  its `AnswerForm` there sends nothing
  *   - `feedback`:  a choice page's, which its `<epic-choices-bar>` reads itself (`value`);  `note`:  likewise, the
  *     element drawing it reads it (`<epic-option-form>`'s, `<epic-new-item>`'s)
  * - Its `input` events are the native `<textarea>`'s own:  they bubble out of both shadow roots, so the element that

@@ -24,7 +24,9 @@ describe("<es-cargador-archivos>", () => {
 
     const names: string[] = []
     uploader.addEventListener("es-archivo-soltado", (event) => names.push(event.type))
-    const input = uploader.shadowRoot!.querySelector<HTMLInputElement>('input[type="file"]')!
+    // the native input inside its hidden `<ui-input type="file">`
+    const fileInput = uploader.shadowRoot!.querySelector('ui-input[type="file"]')!
+    const input = fileInput.shadowRoot!.querySelector<HTMLInputElement>('input[type="file"]')!
     const transfer = new DataTransfer()
     transfer.items.add(new File(["{}"], "a.json", { type: "application/json" }))
     input.files = transfer.files

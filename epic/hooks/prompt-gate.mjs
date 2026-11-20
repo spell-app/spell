@@ -21,7 +21,7 @@
  *   - a move promised last turn and never started (the end-of-turn hook didn't run):  said, to the person and Claude,
  *     and its record cleared (`missedMove()`)
  *   - "last turn":  the session wasn't busy when the prompt came;  a busy one's record may be this turn's own
- * - And last, once per session, the hint to `/epic fresh` when an epic's session has grown past the repo's
+ * - And last, the first time only, the hint to `/epic fresh` when an epic's session has grown past the repo's
  *   `freshHintMB`, by its transcript's size (`FreshHint`, epic `epic-engine` T110):  a line, never a move.
  * - Never fails a prompt:  any error exits 0, the prompt untouched.
  * - Its tests:  `tests/src/command/PromptGate.test.ts`, which runs this file as the hook too.

@@ -151,10 +151,15 @@ A teammate joining has the team's plans cloned before the colour question, so th
   Asked only when the superpowers plugin is turned on for this repo, in any of your settings.
   - It suggests yes, and with no terminal to ask in, takes yes;  `--superpowers` answers it;  `--local` never asks.
   - What the words say:  [With superpowers](README-superpowers.md).
+- **Add a short file of writing rules, like tone and wording, for Claude to follow in this project?**
+  Your house style, the rules Claude and the skills follow for comments, docstrings and docs.
+  - It suggests yes, and with no terminal to ask in, takes yes;  `--house-style` / `--no-house-style` answer it.
+  - `--local` asks too:  the file goes in `.epic/`, which stays on your machine.
+  - Not asked when your config names a house style already:  [Your house style](README-config.md#your-house-style).
 - **Commit and push .epic/config.json5 and .gitignore on main?**  Asked last, after the files.
   - It suggests yes, and with no terminal to ask in, takes yes;  `--no-commit` leaves them for you.
   - It pushes to the branch's upstream, else `origin`.
-  - `AGENTS.md` joins the list when this run changed it.
+  - `AGENTS.md` and `.epic/house-style.md` join the list when this run wrote them.
 
 Then, in order, each step under a bold heading, the files in a gray table, a gray line before each slow step:
 1. Installs the epic plugin for Claude Code, when it isn't there yet:  once per machine.
@@ -186,10 +191,13 @@ Then, in order, each step under a bold heading, the files in a gray table, a gra
    The block starts `# shared:start` and ends `# shared:end`.
 7. With superpowers on and your yes, writes its stand-aside words into `AGENTS.md`, in a marked block of their own;
    a block there already is kept current with `epic guide superpowers`.
+   With your yes to the house style, writes the starter, `.epic/house-style.md`, and names it in the config
+   (`"voices": { "code": ... }`);  `epic voice code` prints it.
 8. Keeps your name, in `~/.spell-epic/person.json5`.
 9. Keeps your colour WITH THE PLANS, `people/<name>.json5` in the epic repo, and pushes it:
    your teammates see it, and nobody commits anything in the code repo for it.
-10. Commits the config and the `.gitignore` on the base branch, and `AGENTS.md` when step 7 changed it,
+10. Commits the config and the `.gitignore` on the base branch, and `AGENTS.md` and the house style when step 7
+    wrote them,
     nothing else, and pushes them:  every new worktree branches from there.
     On another branch it commits nothing, and says so.
 11. Starts the epic server, serving your repo, and ends with where to see the epics:  its address, a link in a

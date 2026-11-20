@@ -661,7 +661,7 @@ export class EpicConfig {
   }
 
   /**
-   * the size, in MB, past which a session's transcript gets the prompt hook's one-line hint to `/epic fresh`
+   * the size, in MB, past which a session's transcript gets the one-line hint to `/epic fresh`
    * (`FreshHint`, epic `epic-engine` T110):  `freshHintMB`;  `0`:  never
    */
   get freshHintMB(): number {
@@ -1380,7 +1380,7 @@ export type EpicOldLayout = { carryOn: string; commitMaps: string; oldClones: st
  *   - each repo's own:  a multi-repo top's patches are the top's checkouts', each child repo's its own
  * - `promptAck`:  whether the prompt hook shows a line, "On it:  <what Owen asked, in a sentence>", for a message
  *   sent while the session is busy (`PromptAck`, epic `epic-engine` P18);  on (the default), `false` turns it off
- * - `freshHintMB`:  the size, in MB, past which a session's transcript gets the prompt hook's one line suggesting
+ * - `freshHintMB`:  the size, in MB, past which a session's transcript gets the one line suggesting
  *   `/epic fresh` (`FreshHint`, epic `epic-engine` T110);  `8` (the default);  `0`:  never
  * - `editor`:  the editor the tools drive when neither this machine (`$SPELL_EPIC_EDITOR`) nor the window says,
  *   `code` (VS Code) or `cursor` (`Editor`, epic `epic-friend` P16);  `""` (the default):  VS Code

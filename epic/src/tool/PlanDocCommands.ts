@@ -37,6 +37,7 @@ import { EpicOwners, type PathOwners } from "./EpicOwners"
 import { EpicParts } from "./EpicParts"
 import { EpicTargets } from "./EpicTargets"
 import { FocusCommands } from "./FocusCommands"
+import { FreshCommands } from "./FreshCommands"
 import { InboxCommands } from "./InboxCommands"
 import { ItemPicker } from "./ItemPicker"
 import { ItemPictures, type PastedReader } from "./ItemPictures"
@@ -65,7 +66,7 @@ import { TestCommands } from "./TestCommands"
  * Used by the `/epic` skill and its agents.
  * - what's data:  `PLAN-DOC.md` beside this;  the elements:  `spell/epic/definitions`
  * - Commands:  `create`, `add-phase`, `phase`, `rename`, `estimate`, `add`, `calm`, `failed`, `decide`, `choose`, `option`, `close`, `stale`,
- *   `cancel`, `reopen`, `commit`, `commits`, `log`, `bedtime`, `focus`, `prompt`, `summary`, `docs`, `decisions`,
+ *   `cancel`, `reopen`, `commit`, `commits`, `log`, `bedtime`, `focus`, `fresh`, `prompt`, `summary`, `docs`, `decisions`,
  *   `owns`, `lint`, `open`, `migrate`, `split`, `join`, `inbox`, `details`, `summarize`, `status`, `original`
  *   (with no command, `yarn plan-doc` in spell-epic lists them:  `USAGE`).
  * - `docs`, `decisions` (`EpicDocs`, for `/docs-check`):
@@ -116,6 +117,8 @@ export class PlanDocCommands {
 
   /** the `focus` command (epic `epic-engine` T93):  focus mode, and what each running epic session is told */
   readonly focus: FocusCommands
+  /** the `fresh` command (epic `epic-engine` T113):  `/epic fresh all`, every running epic session handed on */
+  readonly fresh: FreshCommands
 
   /**
    * how long Claude worked on a phase while it was active, in minutes (`phase ... done`, `phase ... took`;  epic
@@ -151,6 +154,7 @@ export class PlanDocCommands {
     this.tests = new TestCommands(this)
     this.options = new OptionCommands(this)
     this.focus = new FocusCommands(this)
+    this.fresh = new FreshCommands(this)
   }
 
   ////////////////
@@ -184,6 +188,8 @@ export class PlanDocCommands {
       return this.bedtimeAll(name === "status" ? ["status", ...rest] : rest, flags)
     // `focus on | off | status | summary`:  every running epic at once (`FocusCommands`, epic `epic-engine` T93)
     if (command === "focus") return this.focus.run(positional.slice(1), flags)
+    // `fresh all | status | drop`:  every running epic session to a fresh one (`FreshCommands`, epic `epic-engine` T113)
+    if (command === "fresh") return this.fresh.run(positional.slice(1), flags)
     if (command === "backfill") return this.backfill(name, flags)
     if (command === "migrate") return this.migrator.run(positional.slice(1), flags)
     // `saga page`:  a saga's page (`SagaPage`);  every other `saga` verb is the list's (`SagaCommands`)
@@ -1791,6 +1797,9 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
   focus on [--why "..."] | off | status | summary [<name>] [--since <t>] [--json]
                                                    focus mode (/focus, /back):  on and off print a TELL: line for
                                                    each running epic session;  summary:  what happened since
+  fresh all | status | drop [<session id>] [--json]
+                                                   /epic fresh all:  every running epic session marked to go to
+                                                   a fresh session at its next clear moment;  TELL: lines
   prompt <name> "text" | --file path               set the prompt that started the plan ("" removes it)
   summary <name> [--json] [--all]                  open questions, issues, todos, limits, manual tests;  the next phase;
                                                    finished phases and grey items only counted, unless --all

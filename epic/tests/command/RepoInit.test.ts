@@ -23,6 +23,9 @@ import { EpicHome } from "spell/epic/config/EpicHome"
 import { PeopleColors } from "spell/epic/config/PeopleColors"
 import { VoiceColor } from "spell/epic/config/VoiceColor"
 
+/** The starter house style `epic init` writes, from the repo's root (epic `epic-engine` T97). */
+const HOUSE_STYLE = ".epic/house-style.md"
+
 /** A throwaway repo `try` on branch `trunk`:  a README, nothing set up for epics yet. */
 const TEMP = realpathSync(mkdtempSync(join(tmpdir(), "repo-init-")))
 const MAIN = join(TEMP, "try")
@@ -375,7 +378,7 @@ describe("epic init:  its words and its commit (Owen, 2026-10-29)", () => {
 })
 
 describe("epic init:  superpowers' words in AGENTS.md (epic-engine I318)", () => {
-  test("--superpowers:  the block in AGENTS.md, said, and committed with the other two files", async () => {
+  test("--superpowers:  the block in AGENTS.md, said, and committed with the other files", async () => {
     const app = codeRepo("sp-flag")
     writeFileSync(join(app, "AGENTS.md"), "# Our rules\n")
     git(app, "add", "AGENTS.md")
@@ -388,6 +391,7 @@ describe("epic init:  superpowers' words in AGENTS.md (epic-engine I318)", () =>
     expect(agents).toMatch("never `npm install`")
     expect(git(app, "show", "--name-only", "--format=", "HEAD").trim().split("\n").sort()).toEqual([
       ".epic/config.json5",
+      ".epic/house-style.md",
       ".gitignore",
       "AGENTS.md"
     ])
@@ -421,6 +425,78 @@ describe("epic init:  superpowers' words in AGENTS.md (epic-engine I318)", () =>
     const localReport = await offline(local).init({ name: "Bo", noRemote: true, local: true, superpowers: true })
     expect(localReport.agents).toBeUndefined()
     expect(existsSync(join(local, "AGENTS.md"))).toBe(false)
+  })
+})
+
+describe("epic init:  a starter house style, the repo's code voice (epic-engine T97)", () => {
+  test("no terminal:  yes;  the file from the template, named in the config, said, and committed", async () => {
+    const app = codeRepo("hs-yes")
+    const said = await printed(() => offline(app).run(["--name", "Bo", "--no-remote", "--no-server"]))
+    expect(said).toContain(`> House style:  ${HOUSE_STYLE}  (epic voice code prints it)`)
+    expect(
+      said.some((line) => /wrote +.*\.epic\/house-style\.md {2}\(your house style:  epic voice code\)$/.test(line))
+    ).toBe(true)
+    expect(readFileSync(join(app, HOUSE_STYLE), "utf8")).toMatch(/^# House style\n/)
+    const config = new EpicConfig(app)
+    expect(config.settings.voices).toEqual({ code: HOUSE_STYLE })
+    expect(config.voiceFile("code")).toBe(join(app, HOUSE_STYLE))
+    expect(config.voiceNames).toContain("code")
+    expect(git(app, "show", "--name-only", "--format=", "HEAD").trim().split("\n")).toContain(HOUSE_STYLE)
+    expect(git(app, "status", "--porcelain")).toBe("")
+    // run again:  the config names it, so nothing is asked or written;  the person's edits stay
+    writeFileSync(join(app, HOUSE_STYLE), "# Ours\n")
+    git(app, "-c", "commit.gpgsign=false", "commit", "-q", "-am", "ours")
+    const again = await printed(() => offline(app).run(["--no-remote", "--no-server"]))
+    expect(again.join("\n")).not.toMatch(/House style|house-style/)
+    expect(readFileSync(join(app, HOUSE_STYLE), "utf8")).toBe("# Ours\n")
+    expect(git(app, "status", "--porcelain")).toBe("")
+  })
+
+  test("a file there already is kept, only named;  a code voice named already is left alone", async () => {
+    const app = codeRepo("hs-kept")
+    mkdirSync(join(app, ".epic"))
+    writeFileSync(join(app, HOUSE_STYLE), "# Ours\n")
+    const report = await offline(app).init({ name: "Bo", noRemote: true, houseStyle: true })
+    expect(report.houseStyle).toEqual({ file: join(app, HOUSE_STYLE), action: "kept" })
+    expect(readFileSync(join(app, HOUSE_STYLE), "utf8")).toBe("# Ours\n")
+    expect(new EpicConfig(app).settings.voices).toEqual({ code: HOUSE_STYLE })
+    // a config naming its own:  not asked, not written, its setting as it was
+    const named = codeRepo("hs-named")
+    await offline(named).init({ name: "Bo", noRemote: true })
+    DataFile.edit<Record<string, unknown>>(join(named, EpicConfig.FILE), (written) => ({
+      ...written,
+      voices: { code: "docs/STYLE.md" }
+    }))
+    const settings = new EpicConfig(named).settings
+    expect(await RepoInit.houseStyleChoice({ settings, ask: false })).toBe(false)
+    const namedReport = await offline(named).init({ name: "Bo", noRemote: true, houseStyle: true })
+    expect(namedReport.houseStyle).toBeUndefined()
+    expect(existsSync(join(named, HOUSE_STYLE))).toBe(false)
+    expect(new EpicConfig(named).settings.voices).toEqual({ code: "docs/STYLE.md" })
+  })
+
+  test("--no-house-style:  none;  the flags answer the question;  --local:  in .epic/, so nothing shows in git", async () => {
+    const none = codeRepo("hs-no")
+    await printed(() => offline(none).run(["--name", "Bo", "--no-remote", "--no-server", "--no-house-style"]))
+    expect(existsSync(join(none, HOUSE_STYLE))).toBe(false)
+    expect(new EpicConfig(none).settings.voices).toEqual({})
+    const voices = { voices: {} }
+    expect(await RepoInit.houseStyleChoice({ settings: voices, flag: false, ask: true })).toBe(false)
+    expect(await RepoInit.houseStyleChoice({ settings: voices, flag: true, ask: true })).toBe(true)
+    expect(await RepoInit.houseStyleChoice({ settings: voices, ask: false })).toBe(true)
+    const local = codeRepo("hs-local")
+    const report = await offline(local).init({ name: "Bo", noRemote: true, local: true, houseStyle: true })
+    expect(report.houseStyle?.action).toBe("written")
+    expect(git(local, "status", "--porcelain")).toBe("")
+  })
+
+  test("--dry-run:  would write, and writes nothing", async () => {
+    const app = codeRepo("hs-dry")
+    const report = await offline(app).init({ dryRun: true, name: "Bo", noRemote: true, houseStyle: true })
+    expect(report.houseStyle).toEqual({ file: join(app, HOUSE_STYLE), action: "would write" })
+    expect(said(report).some((line) => /would write +.*house-style\.md/.test(line))).toBe(true)
+    expect(RepoInit.changedFiles(report)).toContain(HOUSE_STYLE)
+    expect(existsSync(join(app, ".epic"))).toBe(false)
   })
 })
 
@@ -1323,7 +1399,8 @@ describe("epic init --demo:  what a newcomer sees, nothing changed (epic-engine,
     const { lines, code } = await demo(app, ["--no-remote"])
     expect(code).toBe(0)
     expect(tableOf(lines)[0]).toBe(`  would write            ${join(app, EpicConfig.FILE)}`)
-    expect(lines).toContain(`> would commit ${EpicConfig.FILE} and .gitignore on main, and push it`)
+    expect(lines).toContain(`> would commit ${EpicConfig.FILE} and .gitignore and ${HOUSE_STYLE} on main, and push it`)
+    expect(lines).toContain(`- written a starter house style for Claude to follow:  ${HOUSE_STYLE}, yours to edit`)
     expect([contentsOf(app), contentsOf(join(dirname(app), "demo-set-up.epics"))]).toEqual(before)
     expect(git(app, "status", "--porcelain")).toBe(status)
     expect(git(app, "rev-parse", "HEAD")).toBe(head)

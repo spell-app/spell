@@ -19,6 +19,8 @@ import sendButtonsCSS from "./EpicSendButtons.css?inline"
  *   at the top is what should say `send to claude`");  an item's own plane stays the icon alone
  *   - "Sent to Claude" for 5 seconds after a send (`SENT_SECONDS`;  epic `epic-engine` I352, Owen:  "Should say
  *     `Sent to Claude` for 5 seconds after send"), by a press or by Auto Send;  its tooltip says when
+ *   - the pill GREEN for those 5 seconds, its words and plane white (`:state(just-sent)`;  I352 revisited, Owen:
+ *     "make it green for those 5 seconds")
  *   - a send:  asked for here, then `state` leaving `unsent`;  a mark taken back with no ask is no send
  *   - something new marked meanwhile (`unsent` again):  "Send to Claude" at once, as that's what a press does now
  *   - the words keep the width of the longer of the two, so nothing beside the pill moves
@@ -126,7 +128,8 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
   /** Ends the "Sent to Claude" words, `SENT_SECONDS` after a send. */
   private sentTimer?: E.CancelablePromise<unknown>
 
-  /** Sent in the last `SENT_SECONDS`, with nothing new to send since:  the words say "Sent to Claude". */
+  /** Sent in the last `SENT_SECONDS`, with nothing new to send since:  the words say "Sent to Claude", the pill green. */
+  @E.cssState("just-sent")
   get isJustSent(): boolean {
     return this.sentAt !== undefined && !this.isUnsent
   }

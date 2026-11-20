@@ -244,6 +244,24 @@ test("Send with nobody listening wakes the page's epic, and says what that did; 
   expect(answer.wake.message).toEqual(expect.any(String))
 })
 
+// epic `epic-engine` T101:  a guide's NOTE BOX (`<epic-text-box>` in a section) is a comment of kind `note` on that
+// section (the docs runtime's `drawNoteBoxes()`), so the page's Send hands it to the guide's epic, as a bullhorn's
+test("a guide's note box:  a `note` comment on its section, edited as typed;  Send hands it to the guide's epic", async () => {
+  const page = "/guides/py.html"
+  removeInbox("guides/py.html")
+  ReviewInbox.update(join(root, "epics/py/py.inbox.json5"), (box) => box.setListening("session-1"))
+  const place = { anchor: "model", kind: "note", label: "1. The model", excerpt: "Body." }
+  const added = await post({ page, action: "add", ...place, text: "First words" })
+  expect(added.answer.send).toMatchObject({ epic: "py", unsent: [added.answer.id], waiting: [added.answer.id] })
+  await post({ page, action: "edit", id: added.answer.id, text: "Said again, longer" })
+  await ask(port, "POST", "/api/docs/comments/send", { body: JSON.stringify({ page }), headers: headers() })
+  // what `epic inbox wait py` takes from the guide (`InboxCommands`):  the note, with its section
+  const taken = GuideInbox.update(join(root, "guides/py.inbox.json5"), (_comments, inbox) => inbox.takeSent())
+  expect(taken?.comments).toEqual([
+    expect.objectContaining({ id: added.answer.id, ...place, text: "Said again, longer", status: "new" })
+  ])
+})
+
 // epic `epic-engine` M9 (J7):  a page no epic owns sends to the STANDING epic `feedback`, and wakes it as an owned
 // page's Send wakes its epic;  before `feedback` is made, its comments wait for /airplane land's sweep (no wake)
 test("a page no epic owns:  Send goes to feedback;  nobody listening wakes feedback once it's made", async () => {
