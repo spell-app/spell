@@ -817,6 +817,24 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
     }
   }
 
+  /**
+   * The rows on screen, while it roves:  a row opened, closed or filtered changes them.
+   * - A NEW list on each change, so `onRowsShownChanged()` runs on every one.
+   */
+  protected get rowsShown(): readonly UITreeItem[] {
+    void this.rowsVersion
+    return this.canRove ? this.rowsOnScreen : []
+  }
+
+  /**
+   * Rows came on screen, or left it:  each one shown gets its `tabindex`, so a page's script can `focus()` it.
+   * - The tab stop stays on its row (`RovingTabindex.refresh()`).
+   */
+  @E.onChange("rowsShown", { defer: true })
+  protected onRowsShownChanged() {
+    this.roving?.refresh()
+  }
+
   /** Right, left, Enter and Space;  the rest are `UI.focus.roving()`'s. */
   @E.on("keydown")
   protected onKeyDown(event: KeyboardEvent) {

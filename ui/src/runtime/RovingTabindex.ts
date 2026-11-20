@@ -69,6 +69,9 @@ export class RovingTabindex {
   }
   private _activeIndex = 0
 
+  /** The current tab stop as an element:  `refresh()` keeps it the tab stop while it's still an item. */
+  private activeElement: HTMLElement | undefined
+
   /** The current tab stop, if any items exist. */
   get activeItem(): HTMLElement | undefined {
     return this.items[this._activeIndex]
@@ -82,11 +85,18 @@ export class RovingTabindex {
     item.focus()
   }
 
-  /** Re-apply `tabindex`es, e.g. after items were added or removed;  none with `tabindex: "left alone"`. */
+  /**
+   * Re-apply `tabindex`es, e.g. after items were added, removed or shown;  none with `tabindex: "left alone"`.
+   * - The tab stop stays on the same item while it's still there, wherever it moved to;
+   *   else on the same index, or the last item.
+   */
   refresh() {
     if (this.tabindex === "left alone") return
     const items = this.items
-    if (this._activeIndex >= items.length) this._activeIndex = Math.max(0, items.length - 1)
+    const kept = this.activeElement ? items.indexOf(this.activeElement) : -1
+    if (kept >= 0) this._activeIndex = kept
+    else if (this._activeIndex >= items.length) this._activeIndex = Math.max(0, items.length - 1)
+    this.activeElement = items[this._activeIndex]
     items.forEach((item, index) => item.setAttribute("tabindex", index === this._activeIndex ? "0" : "-1"))
   }
 
@@ -169,6 +179,7 @@ export class RovingTabindex {
   /** Make `index` the tab stop and tell `onChange`. */
   private setActive(index: number) {
     this._activeIndex = index
+    this.activeElement = this.items[index]
     this.refresh()
     const item = this.items[index]
     if (item) this.onChange?.(item, index)

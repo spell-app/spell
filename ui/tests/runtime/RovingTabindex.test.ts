@@ -74,4 +74,21 @@ describe("RovingTabindex.attach()", () => {
     expect(roving.items[1]!.tabIndex).toBe(0)
     roving.detach()
   })
+
+  it("refresh() keeps the tab stop on its item wherever it moved, else on its index", () => {
+    const container = list()
+    const roving = RovingTabindex.attach({ container, items: "li:not([hidden])" })
+    const [a, b, , d] = roving.items
+    b!.focus()
+    a!.hidden = true
+    roving.refresh()
+    expect(roving.activeItem).toBe(b)
+    expect(roving.activeIndex).toBe(0)
+    // the tab stop's own item leaves:  the item now at its index takes it
+    b!.hidden = true
+    roving.refresh()
+    expect(roving.activeItem!.textContent).toBe("c")
+    expect(d!.tabIndex).toBe(-1)
+    roving.detach()
+  })
 })

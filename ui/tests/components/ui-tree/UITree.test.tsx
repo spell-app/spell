@@ -1696,6 +1696,32 @@ describe("<ui-tree> opening to a depth, and `filter` through the whole tree", ()
     await ElementFixture.settle()
   }
 
+  it("from markup, a page's script can focus a row in a column just opened, or just filtered", async () => {
+    const host = await columns()
+    click(host, "Acme")
+    await ElementFixture.settle()
+    // the tree stays one tab stop:  Acme, the pick
+    expect(["Acme", "Menu", "Site"].map((label) => row(host, label).getAttribute("tabindex"))).toEqual([
+      "0",
+      "-1",
+      "-1"
+    ])
+    row(host, "Menu").focus()
+    expect(focused()).toBe(row(host, "Menu"))
+    // a filter that keeps the tab stop's row keeps it the tab stop
+    host.setAttribute("filter", "e")
+    await ElementFixture.settle()
+    expect(["Menu", "Site"].map((label) => row(host, label).getAttribute("tabindex"))).toEqual(["0", "-1"])
+    row(host, "Site").focus()
+    expect(focused()).toBe(row(host, "Site"))
+    // one that hides it:  the tab stop moves to the row now at its place, Books
+    host.setAttribute("filter", "men")
+    await ElementFixture.settle()
+    expect(["Menu", "Books"].map((label) => row(host, label).getAttribute("tabindex"))).toEqual(["-1", "0"])
+    row(host, "Menu").focus()
+    expect(focused()).toBe(row(host, "Menu"))
+  })
+
   /** The words of the match elsewhere that has the focus. */
   function focusedMatch(): string | undefined {
     const active = focused()
