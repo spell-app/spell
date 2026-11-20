@@ -213,6 +213,7 @@ the rest of `/api/` is the editor's:  spell-app's module is listed last, and see
   its output, in `.spell-server.log`.
 - The editor spell-app's module starts records its address in `.spell-server.editor.json`, at the kit's root too;
   its output goes to `.spell-server.editor.log`.
+  A page server with its own `--spaces` names both by them (`.spell-server.editor.<folder>-<hash>.json`):  one editor each.
 - Old addresses get no redirect:  they answer "not found".
 - The docs home comes from the epic folder, which someone new hasn't got:
   start at `/components/ui/`, Spell UI's pages, which need nothing but the repo.

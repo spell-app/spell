@@ -3,7 +3,7 @@ import "spell/parser/spell/node/packageVersion.node"
 
 import { existsSync, readFileSync } from "fs"
 import JSON5 from "json5"
-import { join } from "path"
+import { basename, join } from "path"
 import { fileURLToPath } from "url"
 
 import { PREF_SAVED_EVENT } from "spell/util"
@@ -23,7 +23,7 @@ import { SpaceFolders } from "spell/app/spaces/server/node/places/SpaceFolders"
 import { onPrefSaved } from "spell/app/spaces/server/node/prefs/prefsRoutes"
 import { api, compileCache, projectBuild, spaceFiles } from "./api"
 import { spacesDailyRound } from "./DailyRound"
-import { APP_DIR, EDITOR_FILE, EditorServer } from "./EditorServer"
+import { APP_DIR, EditorServer } from "./EditorServer"
 import { LocalSiteServer } from "./LocalSiteServer"
 
 /** Spell's terms page:  what it keeps, leaving with a space, deleting, backups, limits (epic `atmosphere` P7, T5). */
@@ -70,7 +70,8 @@ const TERMS_FILE = fileURLToPath(new URL("../places/terms.html", import.meta.url
  *   - `/hello` -- liveness
  *   - `/element/...` -- `<spell-viewer>` / `<spell-editor>`'s bundles, `dist-element/` (`yarn build:element`)
  *     - for the demo pages, `/demo/spell-viewer.html` on the editor:  vite passes `/element` on to us, as it does `/api`
- *   - `/editor` -- the site header's "Editor":  redirects to the editor, from its record (`EDITOR_FILE`)
+ *   - `/editor` -- the site header's "Editor":  redirects to the editor, from its record (`EditorServer.recordFile`,
+ *     this page server's spaces' own)
  *     - not up yet (vite takes seconds) or not running:  says so
  * - The editor UI (`EditorServer`):  vite's dev server, started once the page server listens and stopped with it.
  *   The page server and the editor are ONE thing to start.
@@ -152,14 +153,14 @@ const appRoutes: RouteModule = {
     router.get("/hello", (_request, reply) => reply.json({ message: "Hello from the API!" }))
     router.use(new SRV.StaticHandler({ mounts: [{ prefix: "/element", dir: ELEMENT_DIR }] }).handle)
     router.get("/editor", async (_request, reply) => {
-      const url = await editorUrl(root)
+      const url = await editorUrl(editor.recordFile)
       if (url) return void reply.redirect(url)
       reply
         .status(503)
         .type("text/html")
         .send(
           `<!doctype html><title>Editor</title><p>The editor isn't up:  it starts with the page server, and takes a few ` +
-            `seconds -- reload.  Still not?  See <code>.spell-server.editor.log</code>.</p>`
+            `seconds -- reload.  Still not?  See <code>${basename(editor.logFile)}</code>.</p>`
         )
     })
   }
@@ -170,9 +171,8 @@ export default appRoutes
 /** `yarn build:element`'s output, in the app's build folder:  `app/dist-element/`. */
 const ELEMENT_DIR = join(APP_DIR, "dist-element")
 
-/** The running editor's URL, from `EDITOR_FILE`, if it answers. */
-async function editorUrl(root: string): Promise<string | undefined> {
-  const file = join(root, EDITOR_FILE)
+/** The running editor's URL, from its record `file`, if it answers. */
+async function editorUrl(file: string): Promise<string | undefined> {
   if (!existsSync(file)) return undefined
   try {
     const { url } = JSON.parse(readFileSync(file, "utf8")) as { url: string }

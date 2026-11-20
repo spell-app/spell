@@ -57,6 +57,9 @@ Address by address, with its one check and the builds behind it:
   - The editor's record, `{ url, pid }`, goes in `.spell-server.editor.json` at the KIT's root, the page server's
     root, once it answers:  that's what `/editor` and `spell server start all` read.
   - Its output goes to `.spell-server.editor.log`, beside it.
+  - A page server with its own `--spaces` (a project's checkout, on the kit) names both by them,
+    `.spell-server.editor.<folder>-<hash>.json`:  each checkout gets its own editor, on its own port, and starting
+    one never stops another's (epic `old-console-redo` I9).
 
 ## Running it
 

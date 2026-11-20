@@ -1,18 +1,18 @@
 import { readFileSync } from "fs"
-import { join } from "path"
 
 import { waitUntil } from "spell/util/timing"
 import { SRV } from "spell/server"
 import { PageServer, pageServerRoot } from "spell/server/page"
 import environment from "spell/app/spaces/server/node/environment"
+import { editorRecordFile } from "spell/app/spaces/server/node/routes/EditorServer"
 import { SP } from "spell/parser/spell"
 import { CLI } from "spell/app/cli"
 
 /** The page server's root:  the kit this checkout is in (`pageServerRoot()`, epic `repo-split` P16), else this checkout. */
 const SERVER_ROOT = pageServerRoot(environment.repoDir)
 
-/** Where the page server records its editor (`app`'s `EditorServer.ts` `EDITOR_FILE`):  at its root. */
-const EDITOR_FILE = join(SERVER_ROOT, ".spell-server.editor.json")
+/** Where the page server records its editor:  at its root, named by its spaces (`editorRecordFile()`, epic `old-console-redo` I9). */
+const EDITOR_FILE = editorRecordFile(SERVER_ROOT)
 
 /** How long to wait for the editor to answer:  vite may be building its dependency cache. */
 const START_TIMEOUT_MS = 90_000

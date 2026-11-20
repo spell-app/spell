@@ -1,6 +1,19 @@
+import { spawn } from "node:child_process"
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
+
 import { describe, expect, test, vi } from "vite-plus/test"
 
-import { EditorServer, steadyPort } from "spell/app/spaces/server/node/routes/EditorServer"
+import { SRV } from "spell/server"
+import {
+  EDITOR_FILE,
+  EditorServer,
+  editorFileName,
+  editorRecordFile,
+  steadyPort
+} from "spell/app/spaces/server/node/routes/EditorServer"
+import { defaultSpellSpacesDir } from "spell/app/spaces/server/node/spellSpacesDir"
 
 /** A port check where `held` ports are taken. */
 const freeExcept =
@@ -43,6 +56,40 @@ describe("EditorServer.portPicked:  what the house site waits for before writing
       expect(await editor.portPicked).toBeUndefined()
     } finally {
       vi.unstubAllEnvs()
+    }
+  })
+})
+
+describe("one editor per page server's spaces:  starting one never stops another's (epic `old-console-redo` I9)", () => {
+  test("the default spell.spaces keeps the plain names;  any other is named by its folder and path", () => {
+    expect(editorFileName(defaultSpellSpacesDir)).toBe(EDITOR_FILE)
+    const main = editorFileName("/x/harbor-spell/spaces")
+    const worktree = editorFileName("/x/harbor-spell.worktrees/old-console-redo/spaces")
+    expect(main).toMatch(/^\.spell-server\.editor\.harbor-spell-[0-9a-f]{8}\.json$/)
+    expect(worktree).toMatch(/^\.spell-server\.editor\.old-console-redo-[0-9a-f]{8}\.json$/)
+    expect(editorFileName("/x/harbor-spell/spaces", ".spell-server.editor.log")).toBe(main.replace(/\.json$/, ".log"))
+    expect(editorRecordFile("/kit", "/x/harbor-spell/spaces")).toBe(join("/kit", main))
+  })
+
+  test("a vite whose page server still runs, and isn't this one, is left running", async () => {
+    const root = mkdtempSync(join(tmpdir(), "editor-"))
+    const vite = spawn("sleep", ["30"], { detached: true, stdio: "ignore" })
+    const otherServer = spawn("sleep", ["30"], { stdio: "ignore" })
+    try {
+      const editor = new EditorServer(root, "/x/harbor-spell/spaces")
+      writeFileSync(
+        editor.recordFile,
+        JSON.stringify({ url: "http://localhost:1/", pid: vite.pid, pagePort: 4747, server: otherServer.pid })
+      )
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+      const kept = await editor["adopt"](4760, {} as never, { thisMachineOnly: false })
+      warn.mockRestore()
+      expect(kept).toBeUndefined()
+      expect(SRV.isProcessAlive(vite.pid!)).toBe(true)
+    } finally {
+      vite.kill()
+      otherServer.kill()
+      rmSync(root, { recursive: true, force: true })
     }
   })
 })

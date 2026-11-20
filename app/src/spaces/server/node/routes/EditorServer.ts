@@ -1,4 +1,5 @@
 import { spawn, type ChildProcess } from "node:child_process"
+import { createHash } from "node:crypto"
 import {
   closeSync,
   existsSync,
@@ -11,12 +12,13 @@ import {
   writeFileSync
 } from "node:fs"
 import { createRequire } from "node:module"
-import { dirname, join } from "node:path"
+import { basename, dirname, join, resolve } from "node:path"
 import { setTimeout as sleep } from "node:timers/promises"
 import { stripVTControlCharacters } from "node:util"
 
 import { SRV } from "spell/server"
 import environment from "spell/app/spaces/server/node/environment"
+import { defaultSpellSpacesDir, spellSpacesDir } from "spell/app/spaces/server/node/spellSpacesDir"
 import {
   PAGE_SERVER_PREFIXES,
   SERVER_TOKEN_HEADER,
@@ -31,6 +33,12 @@ import {
  * - Port:  `SPELL_EDITOR_PORT`, else `VITE_PORT`, else 3000, if free;  taken (another checkout's editor):  any free
  *   one.  The real URL goes in `<root>/.spell-server.editor.json` (`EDITOR_FILE`) once it answers, where `/editor`
  *   and `spell app serve` find it.
+ * - ONE editor per page server's spaces (`--spaces`, `SPELL_SPACES_DIR`;  epic `old-console-redo` I9):  its record and
+ *   log are named by them (`editorFileName()`), so two projects whose page servers run on one kit (two checkouts of
+ *   harbor-spell, each with its own `spaces/`) each get their own vite, on its own port.
+ *   - Why:  the record was one per kit, and the second page server took the first one's vite for the last page
+ *     server's, on another port, and stopped it:  the main checkout's editor went away.
+ *   - And a vite whose page server is still running, and isn't this one, is never stopped (`adopt()`):  it's another's.
  * - It reaches the page server's `/api` through vite's proxy, by IP:  `localhost` may be ::1 first, where the page
  *   server doesn't listen.
  * - Its output goes to `<root>/.spell-server.editor.log`, straight from vite:  the record is written when vite itself
@@ -80,14 +88,23 @@ export class EditorServer {
   /** `stop()` was called:  a start under way picks no more ports */
   private isStopped = false
 
-  constructor(root: string) {
+  /** the spaces the page server serves:  what names the record (`editorFileName()`) */
+  readonly spaces: string
+
+  constructor(root: string, spaces = spellSpacesDir) {
     this.root = root
+    this.spaces = spaces
     this.portPicked = new Promise((resolve) => (this.pickedPort = resolve))
   }
 
-  /** `<root>/.spell-server.editor.json`:  `{ url, pid }` of the running editor */
+  /** `<root>/.spell-server.editor.json`, or this page server's spaces' (`editorFileName()`):  `{ url, pid }` of the running editor */
   get recordFile(): string {
-    return join(this.root, EDITOR_FILE)
+    return editorRecordFile(this.root, this.spaces)
+  }
+
+  /** vite's output:  `<root>/.spell-server.editor.log`, or this page server's spaces' (`editorFileName()`) */
+  get logFile(): string {
+    return join(this.root, editorFileName(this.spaces, EDITOR_LOG))
   }
 
   /**
@@ -105,7 +122,7 @@ export class EditorServer {
     if (isBuiltEditor()) return this.pickedPort(await this.serveBuilt(pagePort, guard, { thisMachineOnly }))
     const kept = await this.adopt(pagePort, guard, { thisMachineOnly })
     if (kept) return this.pickedPort(kept)
-    const log = join(this.root, EDITOR_LOG)
+    const log = this.logFile
     const taken: number[] = []
     for (let tries = 0; tries < PORT_TRIES && !this.isStopped; tries++) {
       const port = await editorPort({ thisMachineOnly, taken })
@@ -163,7 +180,14 @@ export class EditorServer {
         ready = true
         clearInterval(looking)
         if (this.child !== child) return
-        this.record({ url: `http://localhost:${port}/`, pid: child.pid!, pagePort, thisMachineOnly, packages: stamp })
+        this.record({
+          url: `http://localhost:${port}/`,
+          pid: child.pid!,
+          pagePort,
+          server: process.pid,
+          thisMachineOnly,
+          packages: stamp
+        })
         settle("ready")
       }, READY_LOOK_MS)
       child.on("exit", () => {
@@ -183,6 +207,8 @@ export class EditorServer {
    * - fits:  alive, answering its address, for the same page server port and address, on the same packages
    *   (`packagesStamp()`)
    * - one that doesn't fit is stopped first, so its port is free for the new one
+   * - one whose page server (`server`) still runs, and isn't this one, is left alone:  another page server's
+   *   (epic `old-console-redo` I9);  this one starts its own beside it
    * - NEVER throws
    */
   private async adopt(
@@ -192,6 +218,12 @@ export class EditorServer {
   ): Promise<number | undefined> {
     const kept = this.readRecord()
     if (!kept?.pid || !SRV.isProcessAlive(kept.pid)) return undefined
+    if (kept.server && kept.server !== process.pid && SRV.isProcessAlive(kept.server)) {
+      console.warn(
+        `editor:  vite (pid ${kept.pid}) is page server ${kept.server}'s:  left running, and one of our own started`
+      )
+      return undefined
+    }
     const fits =
       kept.pagePort === pagePort &&
       kept.thisMachineOnly === thisMachineOnly &&
@@ -305,6 +337,8 @@ type EditorRecord = {
   pid: number
   /** the page server's port vite passes requests on to */
   pagePort?: number
+  /** the pid of the page server that started it:  while that runs, no other page server stops it (`adopt()`) */
+  server?: number
   /** listens on this machine alone */
   thisMachineOnly?: boolean
   /** the packages it started on:  `packagesStamp()` */
@@ -384,6 +418,26 @@ export const EDITOR_FILE = ".spell-server.editor.json"
 
 /** vite's output, relative to the checkout. */
 const EDITOR_LOG = ".spell-server.editor.log"
+
+/**
+ * The name of the editor's file `name` (`EDITOR_FILE`, `EDITOR_LOG`) for a page server serving `spaces`
+ * (epic `old-console-redo` I9):
+ * - the default spell.spaces:  `name` itself, `.spell-server.editor.json`
+ * - any other:  with its folder's name and a hash of its path, `.spell-server.editor.old-console-redo-1a2b3c4d.json`,
+ *   from `.../old-console-redo/spaces`:  the folder holding `spaces/` when that's its name, so it reads as the checkout
+ */
+export function editorFileName(spaces: string = spellSpacesDir, name: string = EDITOR_FILE): string {
+  const folder = resolve(spaces)
+  if (folder === defaultSpellSpacesDir) return name
+  const named = basename(folder) === "spaces" ? basename(dirname(folder)) : basename(folder)
+  const tag = `${named.replace(/[^\w.-]+/g, "-")}-${createHash("sha256").update(folder).digest("hex").slice(0, 8)}`
+  return name.replace(/(\.\w+)$/, `.${tag}$1`)
+}
+
+/** Where the editor of a page server on `root` serving `spaces` is recorded:  read by `/editor` and `spell app serve`. */
+export function editorRecordFile(root: string, spaces: string = spellSpacesDir): string {
+  return join(root, editorFileName(spaces))
+}
 
 /** How often `launch()` looks in the log for vite saying it's ready. */
 const READY_LOOK_MS = 100

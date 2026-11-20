@@ -45,3 +45,6 @@ const mainRepoDir = checkoutOf(repoDir)?.main ?? repoDir
 export const spellSpacesDir = process.env.SPELL_SPACES_DIR
   ? resolve(process.env.SPELL_SPACES_DIR)
   : resolve(dirname(mainRepoDir), "spell.spaces")
+
+/** spell.spaces when `SPELL_SPACES_DIR` doesn't set it:  beside the main checkout. */
+export const defaultSpellSpacesDir = resolve(dirname(mainRepoDir), "spell.spaces")
