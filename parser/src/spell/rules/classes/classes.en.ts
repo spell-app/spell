@@ -446,7 +446,7 @@ classes.addRule(DimensionUnit, {
 })
 
 // a page's layout, on its line (epic `mockup` T39):  `systems is a page, in the bare layout`, `login is a page, no layout`;
-// then whether it fills the window, sharing its height out (epic `old-console-redo` T27):  `home is a page, filling the window`
+// then whether it fills the window, sharing its height out:  `home is a page, filling the window`
 const PAGE_LAYOUT = "(, in the {layout:type_words}|, (no_layout:no layout))? (, (fills_window:filling the window))?"
 
 classes.addRule(CreateOneOfAKind, {
@@ -3264,7 +3264,7 @@ classes.addRule(EveryThingWhere, {
       ]
     },
     {
-      // a type of several words, none of them a type by itself (epic old-console-redo I18, I23)
+      // a type of several words, none of them a type by itself
       compileAs: "expression",
       beforeEach(scope: P.Scope) {
         scope.compile(["a suite record is a thing", "a suite record has a rank as number"].join("\n"), "block")

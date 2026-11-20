@@ -63,7 +63,7 @@ export class DOMJsonElement extends E.DOMLoadableElement<UIJson> {
 /****************
  * ### `<ui-json>`
  * The component behind `<ui-json>`:  JSON data held in a page, drawn as an indented outline whose objects and arrays
- * open and close (epic `elemental-spell` P31;  the outline from epic `from-console` P3).
+ * open and close (epic `elemental-spell` P31).
  *
  * - Where it comes from is `LoadableComponent`'s:  `source` through `UI.sources`, else its own text.
  *   So `load`, `reload()`, `loaded`, `save()` and `ui-error` are the same as `<ui-code>`'s.

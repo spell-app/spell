@@ -8,7 +8,7 @@ import { PlaceSpec, type OpenApiDocument } from "spell/parser/spell/ingest/Place
 import type { IngestFiles, PlaceDescription } from "spell/parser/spell/ingest/ingest.types"
 
 /**
- * ONE thing under each thing of a collection, read from an OpenAPI description (epic `from-console` P16):
+ * ONE thing under each thing of a collection, read from an OpenAPI description:
  * a system's deployment status and its snapshot, each a `GET` under an instance by id that answers one object.
  * - A small description, made up in the shape of a lab's systems API:  not anyone's.
  * - One record's path is under its list's address (`/instances/{id}/status`);  the others are elsewhere, named for the

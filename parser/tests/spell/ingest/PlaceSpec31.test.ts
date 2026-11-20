@@ -26,7 +26,7 @@ import type { IngestFiles, PlaceDescription } from "spell/parser/spell/ingest/in
  *   - its runs are answered only for a team, `?team=infra`, its example
  *   - a job's steps are read from under it, and a step is retried at `/api/jobs/{job_id}/steps/{step_id}/retry`
  *   - its archived jobs, `/api/jobs-archive`, a name whose first word is plural already, in Spanish (I141)
- * - And a list asked for by a question its rows leave out (epic `from-console` P15):
+ * - And a list asked for by a question its rows leave out:
  *   its stacks are answered only for a system, `?system=alpha`, and a stack has no `system`
  */
 
@@ -105,7 +105,7 @@ describe("PlaceSpec, an OpenAPI 3.1 description as FastAPI writes it", () => {
     expect(named("runs").searchedOnly).toBeUndefined()
   })
 
-  test("a list asked for by a question its rows leave out has a field for it, typed by the question (epic `from-console` P15)", () => {
+  test("a list asked for by a question its rows leave out has a field for it, typed by the question", () => {
     const stacks = named("stacks")
     expect(stacks).toMatchObject({ at: "/api/stacks", askedBy: { system: "alpha" } })
     expect(stacks.fields!.system).toMatchObject({ words: "system", type: "text" })
@@ -296,7 +296,7 @@ describe("spell place ingest --spec, of a FastAPI 3.1 description", () => {
     )
     // a list answered only for a team, a where on it sent
     expect(spell).toMatch(/^\truns are asked for by their team$/m)
-    // and for a system its rows leave out:  the field, and the line naming it (epic `from-console` P15)
+    // and for a system its rows leave out:  the field, and the line naming it
     expect(spell).toMatch(/^a "stack" is a thing\n[^]*?\tits "system" is text$/m)
     expect(spell).toMatch(/^\tstacks are asked for by their system$/m)
     // a job's steps, read from under it, and a step's action
@@ -323,7 +323,7 @@ describe("spell place ingest --spec, of a FastAPI 3.1 description", () => {
     expect(spell).toMatch(/^\t\tsu página siguiente se pide con "take" y "skip"\n\t\tda hasta 100 a la vez$/m)
     expect(spell).toMatch(/^\tlos jobs archive están en "\/api\/jobs-archive"$/m)
     expect(spell).not.toMatch(/jobses/)
-    // a list asked for by a question its rows leave out:  the field, and the line naming it (epic `from-console` P15)
+    // a list asked for by a question its rows leave out:  the field, and the line naming it
     expect(spell).toMatch(/^un "stack" es una cosa\n[^]*?\tsu "system" es texto$/m)
     expect(spell).toMatch(/^\tlos stackes se piden por su system$/m)
     const { files } = parseSpellProject([{ path: "/AcmeJobs.api.es.spell", contents: spell }])
@@ -387,7 +387,7 @@ describe("spell place verify, of a FastAPI service", () => {
     const { collections } = descriptions.get("AcmeJobs.api.json5")!
     expect(collections.runs!.state).toMatchObject({ is: "verified", status: 200, rows: 1 })
     expect(collections.steps!.state).toMatchObject({ is: "verified", status: 200, rows: 1 })
-    // and its stacks for their example system, which the server won't answer without (epic `from-console` P15)
+    // and its stacks for their example system, which the server won't answer without
     expect(collections.stacks!.state).toMatchObject({ is: "verified", status: 200, rows: 1 })
   })
 

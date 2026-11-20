@@ -36,7 +36,7 @@
   }
   /*
    * a pane that draws no box of its own (`display: contents`:  `<ui-segment>`, a view's `<slot>`), marked by the
-   * component:  given one, a single cell what's in it fills;  else its `flex` sizes nothing (epic `old-console-redo` I13)
+   * component:  given one, a single cell what's in it fills;  else its `flex` sizes nothing
    */
   ::slotted([data-split-box]) {
     display: grid;

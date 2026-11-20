@@ -86,7 +86,7 @@ export class ThemeFile {
   }
 
   /**
-   * The theme's sheet WHOLE, for a theme outside Spell UI's themes folder (a project's own, epic `old-console-redo` P1):
+   * The theme's sheet WHOLE, for a theme outside Spell UI's themes folder (a project's own):
    * `base`, the CSS text of the sheet it extends, then its own values, as `css()` writes them;  no `@import`.
    * - Why:  `css()` imports what it extends by its file beside it, and a project's theme has none beside it.
    *   The caller hands over the base's text instead (`UI.themes.load()`), so the result is one sheet, as Vite makes

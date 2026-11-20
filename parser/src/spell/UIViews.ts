@@ -3,7 +3,7 @@ import { SP } from "spell/parser/spell"
 
 /****************
  * ### `UIViews`
- * A type built on a Spell UI element, its line naming the element (epic `from-console` P11):
+ * A type built on a Spell UI element, its line naming the element:
  * `a "netlist column" is a ui tree view` is a view whose element is a `<ui-tree>` of its own.
  *
  * ```spell

@@ -2048,7 +2048,7 @@ methodsEs.addRule(FailureHook, {
   ]
 })
 
-// `llamar al código nativo copyText con texto`:  English's `call native ...` (epic `from-console` P10)
+// `llamar al código nativo copyText con texto`:  English's `call native ...`
 methodsEs.addRule(CallNative, {
   syntax: "llamar al código nativo {name:identifier} (con [{args:expression} ,])?",
   tests: [

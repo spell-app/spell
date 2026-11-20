@@ -236,7 +236,7 @@ describe("<for>'s attributes and slots read as the drawing does", () => {
   })
 })
 
-describe("a <for> drawn by another loop's item follows its list (epic `old-console-redo` I32)", () => {
+describe("a <for> drawn by another loop's item follows its list", () => {
   beforeAll(registerTestComponentPack)
 
   /** A wall of shelves whose drawing is `lines`, each on a line of its own. */

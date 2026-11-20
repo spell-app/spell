@@ -2885,7 +2885,7 @@
           "name": "Class"
         }
       ],
-      "description": "The Spell UI element view class `Class` is built on, e.g. `ui-tree` for `a \"netlist column\" is a ui tree view` (epic `from-console` P11) -- `undefined` for a view drawn as its own."
+      "description": "The Spell UI element view class `Class` is built on, e.g. `ui-tree` for `a \"netlist column\" is a ui tree view`, or `undefined` for a view drawn as its own."
     },
     {
       "kind": "method",

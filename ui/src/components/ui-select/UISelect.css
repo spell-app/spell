@@ -185,7 +185,7 @@
 
   /* Option pieces a plain picker ignores (it shows the text only).
      - the chosen one's icon too (`selectedcontent`, the customizable select):  unsized, it drew nothing
-       (epic `old-console-redo` I43) */
+       */
   .ui.select .item > .icon,
   .ui.select selectedcontent > .icon {
     display: inline-block;

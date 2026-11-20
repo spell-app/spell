@@ -40,7 +40,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - when the page server says a file changed (`spell-server:changed`)
       - when the page shows, and on a poll
       - held off while the server is down
-      - who:  spell-epic's `ServerLink.watch()` wraps it;  the editor's open file (epic `from-console` P17)
+      - who:  spell-epic's `ServerLink.watch()` wraps it;  the editor's open file
   - `addressPattern.ts` -- the ONE grammar for an address with parameters (`/films/:film`, `:rest*`):
     `compilePattern()` matches one, `filledPattern()` writes one;  the server's router and a running Spell site
     both match with it (epic `mockup` P2).  Taken by file, in no barrel

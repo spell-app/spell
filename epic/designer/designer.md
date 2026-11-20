@@ -452,7 +452,7 @@ Sources, short names used below:
   - Before it, 2026-10-10:  "Standing rule:  Tooltips should not be <ui-tooltip>, use the browser tooltip instead."
   - "The buttons don't have browser tooltips -- unclear what they do."
   - "No tooltip on those same buttons"
-- Source:  epic `from-console` C10, r80 (Owen, 2026-11-19), which replaced memory `feedback_browser_tooltips.md`
+- Source:  Owen, 2026-11-19, which replaced memory `feedback_browser_tooltips.md`
   (2026-10-10);  epic `airplane` J63;  spell-epic AGENTS (thread buttons).
 
 #### T45 · A styled tooltip, when one is asked for, is a slow dark-glass pill

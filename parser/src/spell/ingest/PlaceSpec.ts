@@ -63,7 +63,7 @@ const SEVERAL_KINDS = "Its schema says it holds one of several kinds:  read it b
  *   action route under a thing by id, by its last word (`/background-tasks/{id}/enqueue/` is `enqueue`).
  * - ONE thing under each of a collection's things, a `GET` answering one object (`/instances/{id}/snapshot`):
  *   a collection of its own, by its last word too, read as part of its owner
- *   (`recordsUnder()`, epic `from-console` P16).
+ *   (`recordsUnder()`).
  * - A reference into another file or address is named in the notes, and its field left untyped:  only local ones are
  *   followed, by a small reader of its own (no dependency).
  * - 3.0's and 3.1's ways to say a field may hold nothing read the same (epic `data` I109):
@@ -288,7 +288,7 @@ export class PlaceSpec {
   }
 
   /**
-   * `fields`, with one for each question a list is asked for by that its rows leave out (epic `from-console` P15):
+   * `fields`, with one for each question a list is asked for by that its rows leave out:
    * layer stacks asked for by `?system=`, with no `system` in a stack, get `its "system" is text`.
    * - Typed by the question's own schema.
    * - So `layer stacks are asked for by their system` names a field, and a read's `where its system is "x"` holds
@@ -326,7 +326,7 @@ export class PlaceSpec {
 
   /**
    * What's kept under each thing of a collection, at an address of its own:  a `GET` under a thing by id.
-   * - ONE thing, answering one object, `/instances/{id}/snapshot` (epic `from-console` P16, `ListUnderSeen.isOne`).
+   * - ONE thing, answering one object, `/instances/{id}/snapshot` (`ListUnderSeen.isOne`).
    * - Or a list of them, `/jobs/{job_id}/steps` (epic `data` P56):  a job's steps, `a job's steps live at "..."`.
    *   - A field of its owner's holding them inside its row, by the same name, gives way to it:  read from there.
    * - Each is a collection of its own:

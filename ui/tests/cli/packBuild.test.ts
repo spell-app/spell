@@ -162,7 +162,7 @@ function spell(...args: string[]) {
   // `--no-deprecation`:  node's deprecation warnings aren't the command's output.  tsx 4.20's `register()`, which
   // `bin/spell.mjs` runs the kit through, calls node's `module.register()` (DEP0205 since node 26);  tsx 4.23 calls
   // `module.registerHooks()`, but breaks the kit's imports of a folder by its package name (`spell/parser/...`), so
-  // tsx stays where it is for now (epic `old-console-redo` I8)
+  // tsx stays where it is for now
   const run = spawnSync(process.execPath, ["--no-deprecation", SPELL, "pack", ...args], { cwd: PACK, encoding: "utf8" })
   return { status: run.status, out: run.stdout + run.stderr }
 }

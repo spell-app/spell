@@ -1700,7 +1700,7 @@ export const LIVE_VERSIONS = `${SERVER_API}/versions`
 
 /**
  * Join the page server's live channel from a page it didn't serve, which reaches its `/api` through a proxy:
- * the editor, served by vite (epic `from-console` P17).
+ * the editor, served by vite.
  * - Then the page hears `spell-server:changed`, `spell-server:down` and `spell-server:up` as a served page does,
  *   so it can watch files with `watchServerFiles()` (spell/util's polling) rather than ask every few seconds.
  * - How:  it sets `window.SPELL_SERVER` itself, and loads the live client (`LIVE_SCRIPT`), both through the proxy.

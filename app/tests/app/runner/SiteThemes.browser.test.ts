@@ -5,16 +5,19 @@ import { SiteThemes } from "spell/app/app/runner/SiteThemes"
 import { ViewerSiteHost } from "spell/app/app/runner/ViewerSiteHost"
 
 /**
- * A running site's theme, as its host gives it (epic `old-console-redo` P1):  one of Spell UI's, else the project's
- * own, `<name>.theme.json5` beside its Spell.
- * - The project:  `themedProject/`, beside this file, as the test server serves it.
+ * A running site's theme, as its host gives it:  the project's own, `<name>.theme.json5` beside its Spell, else
+ * one of Spell UI's.
+ * - The projects:  `themedProject/` and `shadowingProject/`, beside this file, as the test server serves them.
  */
 
 /** The fixture project's folder, as the test server serves it. */
 const PROJECT = "/tests/app/runner/themedProject"
 
+/** A fixture project with its own `matrix.theme.json5`, named like Spell UI's Matrix. */
+const SHADOWING = "/tests/app/runner/shadowingProject"
+
 describe("SiteThemes.tokens()", () => {
-  test("one of Spell UI's themes:  its tokens, never a look in the project", async () => {
+  test("a project with no theme of that name:  Spell UI's", async () => {
     const tokens = await SiteThemes.tokens("matrix", "/nowhere")
     expect(tokens).toContain("--matrix-accent")
   })
@@ -38,6 +41,22 @@ describe("SiteThemes.tokens()", () => {
     expect(tokens).toMatch(/--matrix-accent: light-dark\(#0a6f8f, #7fd6f0\)/)
   })
 
+  test("the project's own theme named like one of Spell UI's:  the project's wins, for its site alone", async () => {
+    const tokens = await SiteThemes.tokens("matrix", SHADOWING)
+    // Spell UI's Matrix under it, the project's own values after, so they win
+    const ours = tokens.lastIndexOf("--matrix-accent: #c0392b")
+    expect(ours).toBeGreaterThan(tokens.lastIndexOf("--matrix-accent: light-dark(#0b7552"))
+    // defined under a name of its own:  the registry's `matrix`, which the editor wears, is still Spell UI's
+    expect(UI.themes.has("matrix@project")).toBe(true)
+    expect(await UI.themes.load("matrix")).not.toContain("#c0392b")
+  })
+
+  test("a project theme extending a name the project has:  the project's, not Spell UI's", async () => {
+    const tokens = await SiteThemes.tokens("lighthouse", SHADOWING)
+    expect(tokens).toContain("--lighthouse-rail: #123456")
+    expect(tokens).toContain("--matrix-accent: #c0392b")
+  })
+
   test("a name the theme tree doesn't have is refused, naming the file", async () => {
     await expect(SiteThemes.tokens("mistyped", PROJECT)).rejects.toThrow(/mistyped\.theme\.json5.*radii\.medium/)
   })
@@ -57,6 +76,13 @@ describe("SiteThemes.readIn()", () => {
     expect(read).toContainEqual({ name: "harbor", base: "matrix" })
     expect(read).toContainEqual({ name: "harbor-night", base: "matrix" })
     expect(SiteThemes.readIn("/nowhere")).toEqual([])
+  })
+
+  test("one named like Spell UI's:  its name in `UI.themes`, and its file's", async () => {
+    await SiteThemes.tokens("lighthouse", SHADOWING)
+    const read = SiteThemes.readIn(SHADOWING)
+    expect(read).toContainEqual({ name: "matrix@project", file: "matrix", base: "matrix" })
+    expect(read).toContainEqual({ name: "lighthouse", base: "matrix" })
   })
 })
 

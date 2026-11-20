@@ -27,7 +27,7 @@ import {
  * - Gathers what the lines under it say into its class, for whatever shows its pages:
  *   - `static pages`, nested as its lines nest (`site_page`), each under the `<group>` above it, if any,
  *     with the icon that group's line names (`groupIcon`, epic `mockup` I20)
- *   - `static links`, its links out of the site (`site_link`, epic `old-console-redo` I6), each with its place among
+ *   - `static links`, its links out of the site (`site_link`), each with its place among
  *     the pages beside it and its `<group>`;  a link under a page is in that page's `links`
  *   - `static dialogs` and `static sidebars` (`site_overlay`)
  *   - `static notFoundPage` and `static errorPage`, when it lists them (`site_overlay`, epic `mockup` P2)

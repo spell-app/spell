@@ -40,7 +40,7 @@ export const PARSER_MESSAGES = {
   "error-name-unknown": '"{name}" isn\'t a kind of error:  say one of {names}',
   "failure-word-outside":
     '"{text}" goes in the steps for a failure, under "if completing a job fails" or "when any server call fails"',
-  // `call native copyText with text` and its `use` line (epic `from-console` P10, `SP.NativeCode`)
+  // `call native copyText with text` and its `use` line (`SP.NativeCode`)
   "place-named-native":
     '"native" can\'t name a place:  "call native ..." calls the project\'s code.  Pick another name',
   "native-outside-to":
@@ -233,7 +233,7 @@ export const PARSER_MESSAGES = {
   "stories-not-tags": "A page's stories are tags:  <story \"S1\">words</story>, one for each;  this isn't one:  {text}",
   /** A site's page whose address doesn't start with `/`. */
   "site-address-not-a-path": 'A page\'s address starts with "/", from the site\'s root:  "/{address}", not "{address}"',
-  /** A site's link out whose address is one of the site's own, from its root (epic `old-console-redo` I6). */
+  /** A site's link out whose address is one of the site's own, from its root. */
   "site-link-not-outside":
     'A link goes outside the site, to a whole address like "https://example.com";  "{address}" is the site\'s own:  list its page, - it has a help page at "{address}"',
   /** A parameter in a page's address that the page has no property for:  `/films/:film` on a page with no film. */
@@ -250,7 +250,7 @@ export const PARSER_MESSAGES = {
   /** A layout picked on a line that's not a page's (epic `mockup` T39):  `solitaire is an app, no layout`. */
   "layout-not-on-a-page":
     "Only a page has a page layout:  say it on a page's line, e.g. systems is a page, in the bare layout",
-  /** `, filling the window` on a line that's not a page's (epic `old-console-redo` T27):  `solitaire is an app, filling the window`. */
+  /** `, filling the window` on a line that's not a page's:  `solitaire is an app, filling the window`. */
   "fills-window-not-on-a-page":
     "Only a page fills the window:  say it on a page's line, e.g. home is a page, filling the window",
   /** A page's layout that the program doesn't declare:  `, in the bare layout` with no `bare layout is a page layout`. */
@@ -319,7 +319,7 @@ export const PARSER_MESSAGES = {
   /**
    * Old words that still read:  `{line}` is the new.
    * - An ability's, `- it can be dragged` for `it is draggable` (epic `debut` P27).
-   * - An authenticated place's, `its key is the secret "X"` for `it is authenticated with the secret "X"` (epic `from-console` P14).
+   * - An authenticated place's, `its key is the secret "X"` for `it is authenticated with the secret "X"`.
    */
   "say-is-able": 'Say "{line}":  "{old}" stops working in a later release',
   /** A list's rule's old `if:`, `- it can take a card if: ...` (epic `debut` P27, Q42). */

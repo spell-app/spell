@@ -13,7 +13,7 @@ export const treeVocabulary = {
   tag: "ui-tree",
   icon: "sitemap",
   topics: ["lists", "navigation"],
-  // the shared `height`, `min-height` and `max-height` (epic `old-console-redo` P2)
+  // the shared `height`, `min-height` and `max-height`
   heights: true,
   aka: ["tree view", "outline", "hierarchy", "file tree", "nested list", "folder list"],
   noun: "tree",

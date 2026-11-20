@@ -488,7 +488,7 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 ### A long list, drawn as you scroll
 
 - **It is:**  `drawnInWindow()`, in `spell/element/drawnWindow`.
-  - Epic `data` T76;  the parser's core's until epic `from-console` P8.
+  - Epic `data` T76;  the parser's core's until an epic moved it to the kit.
   - It draws the first lot of items (`MOST_AT_ONCE`), then more as a sentinel nears the view,
     reading a place's next page.
   - What's drawn stays drawn.

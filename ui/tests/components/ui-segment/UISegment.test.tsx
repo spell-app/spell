@@ -50,7 +50,7 @@ describe("<ui-segment> classes", () => {
     ['align="center"', "ui center aligned segment"],
     ['attach-to="top" seamless', "ui top attached seamless segment"],
     ["loading disabled", "ui disabled loading segment"],
-    // `resizable` is the shared one, no class word:  `:state(resizable-height)` (epic `old-console-redo` P2)
+    // `resizable` is the shared one, no class word:  `:state(resizable-height)`
     ['scrolling="long" resizable', "ui long scrolling segment"]
   ])("<ui-segment %s>", async (attributes, classes) => {
     const { root } = await render(`<ui-segment ${attributes}>x</ui-segment>`)

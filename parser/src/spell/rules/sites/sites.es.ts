@@ -784,7 +784,7 @@ sitesEs.addRule(SitePage, {
 sitesEs.addRule(SiteOverlay, { syntax: `{type:subject_it} tiene ${A} {part:quoted_member} ${CARD_DETAILS}` })
 sitesEs.addRule(SiteOverlay, { syntax: `{type:subject_implied} tiene ${A} {part:quoted_member} ${CARD_DETAILS}` })
 
-// un enlace fuera del sitio, en su navegación entre sus páginas (épica `old-console-redo` I6):
+// un enlace fuera del sitio, en su navegación entre sus páginas:
 // `- tiene un enlace a "https://docs.example.com", llamado "Ayuda", icono "book"`
 sitesEs.addRule(SiteLink, {
   syntax: `{type:subject_it} tiene ${A} enlace a {address:text} (, (llamada|llamado) {title:text})? (, icono {icon:text})?`,

@@ -464,7 +464,7 @@ export type SitePageEntry = {
   groupIcon?: string
   /**
    * its line says `, not in the navigation`:  the navigation doesn't list it, nor the pages under it;  it's reached by
-   * its address and the links to it (epic old-console-redo I35)
+   * its address and the links to it
    */
   unlisted?: boolean
   /** the pages under it, as the lines under its line list them */
@@ -474,7 +474,7 @@ export type SitePageEntry = {
 }
 
 /**
- * One link out of a site, in its navigation among its pages (epic `old-console-redo` I6):  what its line compiled to.
+ * One link out of a site, in its navigation among its pages:  what its line compiled to.
  * - e.g. `- it has a link to "https://docs.example.com", named "Help", icon "book"`, after two pages =>
  *   `{ link: "https://docs.example.com", title: "Help", icon: "book", at: 2 }`
  */
@@ -534,7 +534,7 @@ export type SiteHost = {
    * (`--ui-*` tokens:  colours, fonts, line widths, corners), so every page, dialog and sidebar inside inherits them.
    * - What a site's `- its "theme" is "mockup"` asks for (epic `mockup` P8).
    * - `projectFolder`:  where the running program's files are (`core.projectFolder`), for a theme of its own,
-   *   `<name>.theme.json5` there (epic `old-console-redo` P1);  none:  Spell UI's themes only.
+   *   `<name>.theme.json5` there;  none:  Spell UI's themes only.
    * - None:  the site wears the page's theme.
    * - Rejects on a theme the host doesn't have.
    */

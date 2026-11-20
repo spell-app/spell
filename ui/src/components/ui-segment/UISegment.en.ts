@@ -21,7 +21,7 @@ export const segmentVocabulary = {
   icon: "square outline",
   snippet: "<ui-segment>A box for things</ui-segment>",
   topics: ["containers", "layout", "basic", "elements"],
-  // the shared `height`, `min-height` and `max-height` (epic `old-console-redo` P2)
+  // the shared `height`, `min-height` and `max-height`
   heights: true,
   aka: ["panel", "box", "section", "well", "paper", "card"],
   skeleton: "header, paragraph",

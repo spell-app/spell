@@ -285,7 +285,7 @@ const UI_DATA = /^spell\/ui\/(.+\.generated|sounds)$/
 /**
  * `spell/element`'s leaves that hold no state a page must share,
  * so each build bundles its own copy, as any plain module is.
- * - Today one:  `drawnWindow`, every long list's drawing (epic `from-console` P8), which the parser's core draws with.
+ * - Today one:  `drawnWindow`, every long list's drawing, which the parser's core draws with.
  * - It imports only Solid and util's generic files, which come from the shared files as usual.
  */
 const BUNDLED_ELEMENT_LEAVES = new Set(["spell/element/drawnWindow"])

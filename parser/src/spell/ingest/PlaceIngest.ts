@@ -343,7 +343,7 @@ export class PlaceIngest {
       }
     }
     // ONE thing under each, or a list, read under its owner's first thing:
-    // once its owner's list has rows (epic `from-console` P16, epic `data` P56)
+    // once its owner's list has rows (epic `data` P56)
     for (const [name, collection] of Object.entries(description.collections)) {
       if (!isUnderAnother(name, description) || collection.leftOut || collection.state?.is === "disabled") continue
       // a list of its own as well, read as one above:  JSONPlaceholder's comments
@@ -454,7 +454,7 @@ export class PlaceIngest {
 
   /**
    * One thing under each of another collection's things, `name`, tried under the first one `read` found:
-   * a system's snapshot, at `/instances/7/snapshot` (epic `from-console` P16);
+   * a system's snapshot, at `/instances/7/snapshot`;
    * or a list there, a job's steps, at `/jobs/6f1c/steps` (epic `data` P56).
    * - `undefined` when no owner's list read a thing to try it under:  it stays as it was.
    * - NEVER throws for an answer, or none:  that's `failed`;  but `IngestStopped` past the reader's limits

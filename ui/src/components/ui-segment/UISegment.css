@@ -229,14 +229,14 @@
   }
   /*
    * A split panel's pane (`<ui-split-panel>` gives it a box, `data-split-box`):  none at all, so the panes' tops line
-   * up, and the panel's bar is the room between them (epic `old-console-redo` I13).
+   * up, and the panel's bar is the room between them.
    */
   :host([data-split-box]) > .ui.segment {
     --_segment-margin-top: 0;
     --_segment-margin-bottom: 0;
   }
   /*
-   * `height="fluid"` (epic `old-console-redo` T27):  the segment takes what's left of its parent's height
+   * `height="fluid"`:  the segment takes what's left of its parent's height
    * (`SharedHeights.css`), and lays its own content in a column, so a fluid child shares what's left of it in turn.
    */
   :host(:state(fluid-height)) > .ui.segment {

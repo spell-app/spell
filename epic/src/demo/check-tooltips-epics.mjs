@@ -2,7 +2,7 @@
  * Check that every control the `<epic-*>` elements draw shows a tooltip (epic `airplane`):
  * Spell UI's (`data-tooltip`), or the `title` the browser would show when the pointer rests on it.
  * - Owen (2026-10-10):  "The buttons don't have browser tooltips -- unclear what they do."
- * - The rule now (Owen, 2026-11-19, epic `from-console` C10, r80):  Spell UI's tooltip, with the standard delay.
+ * - The rule now (Owen, 2026-11-19):  Spell UI's tooltip, with the standard delay.
  *   - A `data-tooltip` on the element under the pointer, or on any element around it, passes:
  *     the runtime's `DataTooltips` finds it up the event's path, so no Electron quirk hides it.
  *   - A `title` left from before is held to the strict case below.

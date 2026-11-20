@@ -124,7 +124,7 @@ export class MethodDefinition<
   }
 
   /**
-   * `signature` as the hook of a Spell UI element it overrides, in a type built on one (epic `from-console` P11):
+   * `signature` as the hook of a Spell UI element it overrides, in a type built on one:
    * `to give the row class of (an item)` in a `ui tree view`'s body is `rowClass(item)`, the type's own method.
    * - Its arguments stay arguments, whatever their type:  the element calls it with them.
    *   One of a type the program doesn't have, `(an item)`, holds the element's own data, typed as nothing.

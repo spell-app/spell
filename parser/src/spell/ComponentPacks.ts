@@ -138,7 +138,7 @@ export class ComponentPacks {
 
   /**
    * The component bare `noun` names in `language`, as a Spell type is built on it, from the first of `packNames` that
-   * has it (epic `from-console` P11):  `("tree", "en")` => `<ui-tree>`, its attributes and its hooks.
+   * has it:  `("tree", "en")` => `<ui-tree>`, its attributes and its hooks.
    * - What `a "netlist column" is a ui tree view` reads (`SP.UIViews`).
    * - `undefined` when no pack registered has it.
    */
@@ -217,7 +217,7 @@ export type ComponentPack = {
 }
 
 /**
- * A pack's component as a Spell type is built on it, in one language (`ComponentPack.viewBaseFor()`, epic `from-console` P11):
+ * A pack's component as a Spell type is built on it, in one language (`ComponentPack.viewBaseFor()`):
  * `a "netlist column" is a ui tree view` is built on `<ui-tree>`.
  */
 export type ComponentViewBase = {

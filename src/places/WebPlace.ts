@@ -50,7 +50,7 @@ const LONGEST_WAIT_MS = 15_000
  *   - `keyNamed` says a place needs one, by name;
  *     with `keyIfSet`, it takes one when it's there, and goes without when it isn't, GitHub's way.
  *   - In a browser nothing can hold it, so every request refuses, saying so:  the program reaches it through a server side.
- *   - `throughPageServer` (epic `from-console` P14):  its address is this page's own server's
+ *   - `throughPageServer`:  its address is this page's own server's
  *     (`AUTHENTICATED_PLACES_PREFIX`), which adds the key:  each request carries the page's write token, and a refusal
  *     the page server made itself says its own words (`PAGE_SERVER_ANSWER_HEADER`), the secret it needs that isn't set.
  *   - On a server side, `keyFrom` finds it by that name (`PlaceKeys`, in `spell/server/places`), and it goes on each request.
@@ -334,7 +334,7 @@ export type WebPlaceProps = {
   /** Where the key goes on a request;  default `Authorization: Bearer <key>`.  SEE:  `KeyGoes`. */
   keyGoes?: KeyGoes
   /**
-   * Its address is this page's own server's, which adds its key (epic `from-console` P14):  each request carries the
+   * Its address is this page's own server's, which adds its key:  each request carries the
    * page's write token.  See the class.
    */
   throughPageServer?: boolean

@@ -512,7 +512,7 @@
   /*
    * Action:  joined buttons, square at the seam (slotted elements;  `.button` children in static markup).
    * - Each takes the field's border and, on its outer corners, the field's radius,
-   *   so field and buttons read as one box (epic `from-console` Q13).
+   *   so field and buttons read as one box.
    * - Through the button's private plumbing, never its public tokens:
    *   `--_button-edge` (its outline;  a `basic` or `inverted` button keeps its own)
    *   and `--_buttons-outer-radius` (an outer corner's radius, as in a group).

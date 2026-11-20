@@ -105,7 +105,7 @@ describe("a list under each thing", () => {
     expect(spell).toContain(`\ta post's comments live at "/posts/{id}/comments"`)
     expect(spell).toContain(`\ta user's posts live at "/users/{id}/posts"`)
     expect(spell).not.toContain("a comment's posts")
-    // kept under each post AND at an address of its own:  both lines (epic `ingest-harbor-api` I6)
+    // kept under each post AND at an address of its own:  both lines
     expect(spell).toContain(`\tcomments live at "/comments"`)
     expect(spell).toContain(`\tposts live at "/posts"`)
     expect(spell).toMatch(/a "post" is a thing[^]*?\tits "comments" is a list of comments\n/)

@@ -1,6 +1,6 @@
 /*
  * ### SharedHeights.css
- * The shared `height`, `min-height` and `max-height` (`SharedVocabulary`;  epic `old-console-redo` P2):
+ * The shared `height`, `min-height` and `max-height` (`SharedVocabulary`):
  * its box's own height, drawn as `reset.css` draws the shared widths.
  * - OPT-IN:  only the tags whose vocabulary says `heights: true` take them, and each of their families adopts this
  *   sheet first (`styleSheets: { heights: heightsCSS, ... }`):  tree, table, segment, card, graph, code, JSON,
@@ -15,7 +15,7 @@
  *   a page's own rules still win.
  * - Here, not in `reset.css` beside the widths:  only these families adopt it, so every other tag's sheet stays as
  *   it was.
- * - `height="fluid"` (`:state(fluid-height)`;  epic `old-console-redo` T27), Fomantic's `fluid`, the container's full
+ * - `height="fluid"` (`:state(fluid-height)`), Fomantic's `fluid`, the container's full
  *   size:  it takes what's left of its parent's height, beside its siblings, and scrolls what doesn't fit.
  *   - Its parent must be a column of boxes:  a stack, a `stretched` grid's column, a fluid segment, a fluid grid's
  *     rows, a page filling the window (`<ui-page-layout page-height="fluid">`).  Anywhere else, it's as tall as its

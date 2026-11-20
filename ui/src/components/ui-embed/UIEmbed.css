@@ -188,7 +188,7 @@
 }
 
 /*
- * Sized (epic `old-console-redo` P2):  with a `height` or `max-height` (`SharedHeights.css`), or while people may drag
+ * Sized:  with a `height` or `max-height` (`SharedHeights.css`), or while people may drag
  * its height (`resizable`), the frame fills the element's box:  its ratio is only where it starts.
  */
 @layer ui.components.embed.variations {

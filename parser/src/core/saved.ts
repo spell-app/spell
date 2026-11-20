@@ -1167,8 +1167,7 @@ class SavedRead {
   /**
    * Read it for the first time.
    * - It checks again as its line says (`startPolling()`) whether this read is answered or fails:  a place that
-   *   failed (a server not up yet) is asked again, and what's drawn shows it once it answers (`refresh()`;  epic
-   *   `old-console-redo` T28).
+   *   failed (a server not up yet) is asked again, and what's drawn shows it once it answers (`refresh()`).
    * - throws what the read threw
    */
   private async start(): Promise<void> {
@@ -1443,7 +1442,7 @@ export const savedMethods = defineCoreModule({
    *   `- a post's comments live at "/posts/{id}/comments"`:
    *   read from there, the first time something reads it (epic `data` P30).
    *   - A field of ONE thing there, `- a system's snapshot lives at "..."`:
-   *     that list's one row (epic `from-console` P16).
+   *     that list's one row.
    * - An address or `{ name, url }`.  A thing is the thing, so a field set to one reads at once.
    * - Waits as a value does:  in a drawing, the nearest "…" or `while waiting:`.  Once it's known, it answers at once.
    * - Each read of it holds what it follows, so a drawing leaving stops its requests.
@@ -1463,7 +1462,7 @@ export const savedMethods = defineCoreModule({
       return now.items.flatMap((item) => addressIn(item) ?? [])
     }
     // a list the place keeps under this thing, at an address of its own:  a post's comments;
-    // or ONE thing there, the list's one row:  a system's snapshot (epic `from-console` P16)
+    // or ONE thing there, the list's one row:  a system's snapshot
     const under = program.addressUnder(owner, name)
     if (under !== undefined) {
       const info = schemaOf(owner.constructor as SavedClass).info(name)

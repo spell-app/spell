@@ -60,15 +60,15 @@ describe("EditorServer.portPicked:  what the house site waits for before writing
   })
 })
 
-describe("one editor per page server's spaces:  starting one never stops another's (epic `old-console-redo` I9)", () => {
+describe("one editor per page server's spaces:  starting one never stops another's", () => {
   test("the default spell.spaces keeps the plain names;  any other is named by its folder and path", () => {
     expect(editorFileName(defaultSpellSpacesDir)).toBe(EDITOR_FILE)
-    const main = editorFileName("/x/harbor-spell/spaces")
-    const worktree = editorFileName("/x/harbor-spell.worktrees/old-console-redo/spaces")
-    expect(main).toMatch(/^\.spell-server\.editor\.harbor-spell-[0-9a-f]{8}\.json$/)
-    expect(worktree).toMatch(/^\.spell-server\.editor\.old-console-redo-[0-9a-f]{8}\.json$/)
-    expect(editorFileName("/x/harbor-spell/spaces", ".spell-server.editor.log")).toBe(main.replace(/\.json$/, ".log"))
-    expect(editorRecordFile("/kit", "/x/harbor-spell/spaces")).toBe(join("/kit", main))
+    const main = editorFileName("/x/my-project/spaces")
+    const worktree = editorFileName("/x/my-project.worktrees/my-feature/spaces")
+    expect(main).toMatch(/^\.spell-server\.editor\.my-project-[0-9a-f]{8}\.json$/)
+    expect(worktree).toMatch(/^\.spell-server\.editor\.my-feature-[0-9a-f]{8}\.json$/)
+    expect(editorFileName("/x/my-project/spaces", ".spell-server.editor.log")).toBe(main.replace(/\.json$/, ".log"))
+    expect(editorRecordFile("/kit", "/x/my-project/spaces")).toBe(join("/kit", main))
   })
 
   test("a vite whose page server still runs, and isn't this one, is left running", async () => {
@@ -76,7 +76,7 @@ describe("one editor per page server's spaces:  starting one never stops another
     const vite = spawn("sleep", ["30"], { detached: true, stdio: "ignore" })
     const otherServer = spawn("sleep", ["30"], { stdio: "ignore" })
     try {
-      const editor = new EditorServer(root, "/x/harbor-spell/spaces")
+      const editor = new EditorServer(root, "/x/my-project/spaces")
       writeFileSync(
         editor.recordFile,
         JSON.stringify({ url: "http://localhost:1/", pid: vite.pid, pagePort: 4747, server: otherServer.pid })

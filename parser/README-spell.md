@@ -962,7 +962,7 @@ galaxy guide is a site at "owen@spell/galaxy"
 - Every site lists a not found page and an error page.
 - A `:name` the page has no property for, or two pages at one address, is refused at its line.
 - A site wears a theme, named on its line:  `galaxy guide is a site with theme "mockup"`.
-  - One of Spell UI's, or the project's own, a `mockup.theme.json5` beside the site's Spell
+  - The project's own, a `mockup.theme.json5` beside the site's Spell, else one of Spell UI's
     ([Spell UI's themes page](https://github.com/spell-app/spell/blob/main/ui/README-themes.md#6-a-projects-own-theme)).
   - Its line takes its own values the way a type's does, several joined by commas.
   - `its "theme" is "mockup"`, under the site, says the same.

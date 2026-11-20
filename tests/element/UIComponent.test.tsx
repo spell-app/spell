@@ -251,7 +251,7 @@ describe("UIComponent.mount() Solid roots", () => {
 type LinkFollower = { followLink(link: string, target: string | undefined): void }
 
 describe("UIComponent.define()", () => {
-  test("a vocabulary that leaves its lists out defines, each list empty (epic `from-console` P11)", async () => {
+  test("a vocabulary that leaves its lists out defines, each list empty", async () => {
     const tag = nextTag("small")
     const vocabulary = Object.freeze({ tag, noun: "small", attributes: [] })
     /** A subclass's small vocabulary, as a project writes one in JavaScript. */

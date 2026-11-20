@@ -49,7 +49,7 @@ import "./SpellAppRunner.css"
  * - Its `<ui-*>` tags are the caller's to define, with Fomantic's icon names:
  *   `<spell-viewer>` is a root that loads them as they appear;  the VS Code runner imports `spell/app/app/solid/loadUI`.
  * - A site it runs keeps its own address, and wears its theme:  one of Spell UI's, or its project's own
- *   (`ViewerSiteHost`, epic `old-console-redo` P1).
+ *   (`ViewerSiteHost`).
  * - NEVER imports `spell/parser/core`:  it'd land in the bundle's shared chunk, so every app would share it.
  *   Everything of spell's comes from this app's copy of the runtime.
  ****************/

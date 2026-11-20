@@ -69,7 +69,7 @@ export type MethodSignatureData = {
   testOf?: string
   /**
    * The Spell UI element's hook it overrides, e.g. `rowClass` for `to give the row class of (an item)` in a
-   * `ui tree view`'s body (epic `from-console` P11):  never an action.
+   * `ui tree view`'s body:  never an action.
    * - Set by `MethodDefinition.processSignature()`.
    */
   uiHook?: string

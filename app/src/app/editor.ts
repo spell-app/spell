@@ -1967,7 +1967,7 @@ export class EditorStore extends Observable {
    * Watch the open file for a change from OUTSIDE the editor (another window, an agent, git),
    * and hand a changed one to `reloadFiles()`.
    * - The page server tells the editor when one of the open project's files changes, over its live channel
-   *   (`watchServerFiles()`;  epic `from-console` P17).
+   *   (`watchServerFiles()`).
    *   The file is read again only then, and when the page shows again.
    *   - The editor joins that channel through vite's proxy (`joinLiveChannel()`):
    *     vite serves its page, not the page server, so nothing else puts the live client on it.

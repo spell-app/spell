@@ -16,7 +16,7 @@ import splitPanelCSS from "./UISplitPanel.css?inline"
  *
  * - Each child is a pane, written anywhere:  `<ui-panel parent="its id">` joins it, as a section joins a section.
  *   - A child that draws no box of its own (`display: contents`:  `<ui-segment>`, `<ui-card>`, a view's `<slot>`) is
- *     given one, marked `data-split-box` (`giveBoxes()`, epic `old-console-redo` I13):  else its size lands on nothing,
+ *     given one, marked `data-split-box` (`giveBoxes()`):  else its size lands on nothing,
  *     and what's in it sits in the row as wide as its words.
  *   - A child with `hidden` isn't a pane:  the others share its room, and nothing in it is redrawn.
  * - A pane is never moved or redrawn as panes come and go or bars drag:  the sizes are its inline `flex`,

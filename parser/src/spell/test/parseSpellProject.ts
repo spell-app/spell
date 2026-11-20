@@ -31,7 +31,7 @@ export function parseSpellProject(
     projectPath?: string
     /**
      * Its code files, `/clipboard.ts` and `/clipboard.py` with their text:  what `call native` calls
-     * (epic `from-console` P10, `SP.NativeCode`).  Default:  none.
+     * (`SP.NativeCode`).  Default:  none.
      */
     natives?: SP.NativeSource[]
   } = {}

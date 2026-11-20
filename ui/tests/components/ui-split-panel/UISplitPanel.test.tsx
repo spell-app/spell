@@ -301,7 +301,7 @@ describe("<ui-split-panel>", () => {
     expect(widths(host).slice(1)).toEqual([between, last])
   })
 
-  it("a pane that draws no box of its own (`<ui-segment>`) is given one, and fills its size (epic `old-console-redo` I13)", async () => {
+  it("a pane that draws no box of its own (`<ui-segment>`) is given one, and fills its size", async () => {
     const host = await panel(
       'columns="16em,*" resizable',
       "<ui-segment>a list</ui-segment><ui-segment>what's chosen</ui-segment>"

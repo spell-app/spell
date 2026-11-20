@@ -216,7 +216,7 @@
 }
 
 /*
- * Sized (epic `old-console-redo` P2):  with a `height` or `max-height` (`SharedHeights.css`), or while people may drag
+ * Sized:  with a `height` or `max-height` (`SharedHeights.css`), or while people may drag
  * its height (`resizable`), the graph fills the element's box instead of its own `--ui-graph-height`.
  */
 @layer ui.components.graph.variations {

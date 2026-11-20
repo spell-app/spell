@@ -17,7 +17,7 @@ export const stackVocabulary = {
   tag: "ui-stack",
   icon: "layer group",
   topics: ["layout", "basic"],
-  // the shared `height`, `min-height` and `max-height`:  `height="fluid"` shares a page's height out (epic `old-console-redo` T27)
+  // the shared `height`, `min-height` and `max-height`:  `height="fluid"` shares a page's height out
   heights: true,
   aka: ["stack", "cluster", "flex box", "row", "column", "hbox", "vbox", "spacer"],
   noun: "stack",

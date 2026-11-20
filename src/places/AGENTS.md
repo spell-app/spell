@@ -65,9 +65,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       With `keyIfSet`, it goes without where nothing holds it (GitHub's 60 requests an hour;  epic `data` P28).
       With `keyGoes`, it goes in a header of its own, or the address (`KeyGoes`, [keyGoes.ts](keyGoes.ts);  epic `data` T73),
       hidden from every message.
-      - A program's line:  `it is authenticated with the secret "..."` (never "keyed";  epic `from-console` P14).
-      - In a page, an authenticated place is read through the page server, which adds the key (`throughPageServer`,
-        epic `from-console` P14):  its address is the page server's for it (`AUTHENTICATED_PLACES_PREFIX`), each request
+      - A program's line:  `it is authenticated with the secret "..."` (never "keyed").
+      - In a page, an authenticated place is read through the page server, which adds the key (`throughPageServer`):  its address is the page server's for it (`AUTHENTICATED_PLACES_PREFIX`), each request
         carries the page's write token, and a refusal the page server made itself says its words
         (`PAGE_SERVER_ANSWER_HEADER`).  The server's half is `AuthenticatedPlaces`, in `spell/server/places`.
     - A limit a server names (`retry-after`, or a rate limit with none left) is waited out (epic `data` T110):

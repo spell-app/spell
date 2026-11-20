@@ -24,7 +24,7 @@ import gridCSS from "./UIGrid.css?inline"
  ****************/
 export abstract class GridPart<V extends E.ComponentVocabulary = E.ComponentVocabulary> extends E.UIComponent<V> {
   @E.protoMerged static elementSetup: Partial<E.ElementSetup> = {
-    // the shared heights first, for the grid and its rows (`heights`;  epic old-console-redo T27):  the grid's own win
+    // the shared heights first, for the grid and its rows (`heights`):  the grid's own win
     styleSheets: { heights: heightsCSS, grid: gridCSS },
     delegatesFocus: false
   }

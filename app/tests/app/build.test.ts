@@ -19,8 +19,8 @@ import { absoluteImports } from "spell/app/app/runner"
  * - Standard decorators MUST be lowered by `vite.decorators.ts` -- vite's own transformer passes them
  *   through raw, which no browser can run.
  * - `core` MUST be in `spell-runtime.js` alone -- the runtime programs run on -- NOT in the app's chunks.
- *   - Nor in any chunk it loads:  a copy of it (`loadRuntime()`) shares those, and would share `core` with them
- *     (epic `from-console` P13).  A browser loads the runtime and a copy to check.
+ *   - Nor in any chunk it loads:  a copy of it (`loadRuntime()`) shares those, and would share `core` with them.
+ *     A browser loads the runtime and a copy to check.
  * - And `spell-runtime.js` holds no Solid or `spell-ui`:  compiled spell draws with the APP's Solid, from a
  *   shared chunk (epic `output-targets` P10).  Only `@solidjs/h` is its own, a thin layer over that Solid.
  * - No React anywhere:  not in the app's chunks (P9), nor in what programs run on (epic `output-targets` P11).
@@ -100,7 +100,7 @@ describe("production build", () => {
   })
 
   /**
-   * The runtime and a copy of it, as `loadRuntime()` makes one, in a real browser (epic `from-console` P13):
+   * The runtime and a copy of it, as `loadRuntime()` makes one, in a real browser:
    * - each has its OWN `core`, so the copy loaded last can't take over the first one's `defineElement()`
    * - both draw on the page's ONE Spell UI element core, and the Solid under it:  `E`'s decorators are its
    *   - not `h`:  `@solidjs/h` is a thin layer each runtime bundles, over that Solid
@@ -173,7 +173,7 @@ describe("production build", () => {
  * - `index.html` loads `../src/app/index.tsx`;  the dev server asks for it as `/src/app/index.tsx`,
  *   outside its root, so `vite.config.ts`'s `repoSourceInDev()` finds it in the repo's `src/` (epic `spanish` J94).
  * - A copy of the runtime (`?layout-copy`) imports its own `core` and runner, and the page's Solid and Spell UI
- *   (`runtimeCopyInDev()`;  epic `from-console` P13).
+ *   (`runtimeCopyInDev()`).
  */
 describe("dev server", () => {
   test("serves the editor's page, `/edit/...`, and its entry, from the repo's `src/`;  a runtime copy's own `core`", async () => {

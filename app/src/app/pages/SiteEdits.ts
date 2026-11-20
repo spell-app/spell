@@ -493,7 +493,7 @@ function codePartsIn(text: string, start: number): SitePart[] {
       top.push(group)
       continue
     }
-    // a link out of the site (epic `old-console-redo` I6):  the navigation's, no card of the board's
+    // a link out of the site:  the navigation's, no card of the board's
     if (CODE_LINK.test(line.text)) continue
     const written = CODE_PART.exec(line.text)
     if (!written) continue

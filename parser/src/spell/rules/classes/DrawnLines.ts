@@ -251,7 +251,7 @@ export class DrawnLines {
    * How many loops' items are being gathered, around the lines `gather()` is on now.
    * - An item is drawn once, and nothing follows what its drawing read:  so a loop it draws, over a list that can
    *   change (`<for film in its films>` in a shelf's item), is a read, `core.drawRead(() => shelf.films, ...)`,
-   *   which follows its list as the row's fields arrive (epic `old-console-redo` I32).
+   *   which follows its list as the row's fields arrive.
    */
   private static itemsDrawing = 0
 

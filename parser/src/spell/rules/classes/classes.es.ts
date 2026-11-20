@@ -451,7 +451,7 @@ classesEs.addRule(DimensionUnit, {
 })
 
 // el diseño de una página, en su línea (épica `mockup` T39):  `sistemas es una página, en el diseño sencillo`,
-// `entrar es una página, sin diseño`;  luego si llena la ventana (épica `old-console-redo` T27):
+// `entrar es una página, sin diseño`;  luego si llena la ventana:
 // `inicio es una página, llenando la ventana`
 const PAGE_LAYOUT = "(, en el {layout:type_words}|, (no_layout:sin diseño))? (, (fills_window:llenando la ventana))?"
 

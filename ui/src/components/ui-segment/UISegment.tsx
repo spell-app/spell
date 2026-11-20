@@ -23,7 +23,7 @@ import heightsCSS from "spell/ui/elements/SharedHeights.css?inline"
  * - `:state(piled)` (`appearance="piled"`):  the element becomes the stacking context the rotated sheets sit behind.
  * - `scrolling`:  the box is a keyboard stop (`tabindex=0`), as every scrollable region must be.
  * - `resizable`:  the shared one (`MoveAndResize`), on its box;  bare, its height (`elementSetup.resizable`),
- *   as its own keyOnly `resizable` was until epic `old-console-redo` P2.
+ *   as its own keyOnly `resizable` was once.
  * - `loading`:  `aria-busy` (through `internals`) and a visually hidden `role=status` "Loading…".
  * - `disabled`:  unusable, the base class's way (`elementSetup.disabled`):
  *   faded, its content inert, `aria-disabled`.

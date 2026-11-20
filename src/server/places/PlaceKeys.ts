@@ -26,8 +26,7 @@ export class PlaceKeys {
   }
 
   /**
-   * The names it was asked for that aren't set, in their order:  what the page server says as it starts
-   * (epic `from-console` P14).
+   * The names it was asked for that aren't set, in their order:  what the page server says as it starts.
    * - Only names:  never a value.
    */
   missing(): string[] {

@@ -1,5 +1,5 @@
 /**
- * End to end (epic `from-console` P14):  a program's authenticated web server, read by a PAGE through the page server,
+ * End to end:  a program's authenticated web server, read by a PAGE through the page server,
  * which adds the secret;  the secret never reaches the page;  a secret that isn't set is named at startup, and the
  * page's read refused in those words.
  * - The program is compiled here, in a project with an address, and its declarations written where the page server

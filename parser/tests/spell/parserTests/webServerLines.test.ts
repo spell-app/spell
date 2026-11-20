@@ -519,7 +519,7 @@ describe("GitHub's way (epic `data` P28)", () => {
     )
   })
 
-  test("the old words still read, the same, with a warning naming the new line, in either language (epic `from-console` P14)", () => {
+  test("the old words still read, the same, with a warning naming the new line, in either language", () => {
     const compiled = (lines: string[], path = "/G.spell") => {
       const { compiled, errors, warnings } = parseSpellProject([{ path, contents: `${lines.join("\n")}\n` }]).files[0]!
       return { compiled, errors: errors.join("\n"), warnings: warnings.join("\n") }

@@ -9973,7 +9973,7 @@
       "name": "--ui-table-link-underline",
       "description": {
         "kind": "markdown",
-        "value": "A link in a cell: not underlined until it's hovered, as a console's tables draw one (epic old-console-redo I37).\n\n`<ui-table>`'s token.  Default:  `none`"
+        "value": "A link in a cell: not underlined until it's hovered, as a console's tables draw one.\n\n`<ui-table>`'s token.  Default:  `none`"
       }
     },
     {

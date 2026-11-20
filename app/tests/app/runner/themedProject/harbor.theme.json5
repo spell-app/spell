@@ -1,4 +1,4 @@
-// Harbor, a project's own theme (epic `old-console-redo` P1):  Matrix's ops console, its accent a cyan.
+// Harbor, a project's own theme:  Matrix's ops console, its accent a cyan.
 // - Read by `SiteThemes` from the project's folder, beside its Spell:  `Harbor is a site with theme "harbor"`.
 {
   "extends": "matrix",

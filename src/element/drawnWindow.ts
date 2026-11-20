@@ -1,6 +1,6 @@
 /**
  * A long list draws what fits, and more as you scroll:  every long list Spell draws stands on it
- * (epic `data` T76, T43;  a column of `<ui-tree>`, epic `from-console` P8).
+ * (epic `data` T76, T43;  a column of `<ui-tree>`).
  * - In a Spell program no one says so, or writes a Show more:
  *   `for each ... draw`, `draw each card in the deck` and a read of a place all come here.
  * - A program can say how many at a time:  `show them 12 at a time` (`atOnce`);  else `MOST_AT_ONCE`.
@@ -27,7 +27,7 @@
  *   - It imports only Solid and util's generic `dom.ts`:  it knows nothing of Things, places or Spell UI.
  *   - Spell's core hands it what's Spell's own:
  *     its `Cell` to say the count changed (`changes`), and `scroll to the top`.
- *     It lived in the parser's core until epic `from-console` P8 moved it here.
+ *     It lived in the parser's core until an epic moved it here.
  */
 import { createComponent, type JSX } from "@solidjs/web"
 import { For, createEffect, createMemo, createSignal, onCleanup } from "solid-js"

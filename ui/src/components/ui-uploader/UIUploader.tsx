@@ -30,7 +30,7 @@ export class DOMUploaderElement extends E.DOMElement<UIUploader> {
 /****************
  * ### `<ui-uploader>`
  * The component behind `<ui-uploader>`:  takes files someone picks or drops, or whole folders,
- * then posts them to its `destination`, or hands them to its `action` (epic `from-console` P9).
+ * then posts them to its `destination`, or hands them to its `action`.
  *
  * - What happens when files come in, picked in the file dialog or dropped (`take()`):
  *   1. Each is checked:  a kind it doesn't take, too big, or past the count is turned away, with its reason.
@@ -821,7 +821,7 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
 
   /**
    * The `button` look shows its popup for a moment as an upload starts, then only on hover or focus,
-   * so it never sits over the page while files post (epic `from-console` P9).
+   * so it never sits over the page while files post.
    */
   @E.onChange("isUploading")
   protected onUploadingChanged(isUploading: boolean) {

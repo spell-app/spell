@@ -19,7 +19,7 @@ describe("SiteEdits", () => {
     )
   })
 
-  test("a link out of the site is no part:  no card, and its line stays as it is (old-console-redo I6)", () => {
+  test("a link out of the site is no part:  no card, and its line stays as it is", () => {
     const code =
       's is a site:\n\tit has a home page at "/"\n\tit has a link to "https://docs.example.com", named "Help", icon "book"\n'
     expect(SiteEdits.partsIn(code)!.map((part) => part.name)).toEqual(["home page"])

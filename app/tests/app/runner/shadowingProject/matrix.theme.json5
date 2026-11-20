@@ -1,0 +1,7 @@
+// A project's own Matrix:  named like Spell UI's, which it builds on.
+// - Its site wears it, not Spell UI's (`SiteThemes`);  the editor around the site keeps Spell UI's.
+{
+  "extends": "matrix",
+  "radii": { "m": "7px" },
+  "own": { "matrix-accent": "#c0392b" }
+}

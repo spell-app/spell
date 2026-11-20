@@ -32,7 +32,7 @@ const ONE_PER_ROUTER = new WeakMap<SRV.Router, AuthenticatedPlaces>()
 
 /****************
  * ### `AuthenticatedPlaces`
- * The page server reading a project's authenticated places for its pages, adding the secret (epic `from-console` P14):
+ * The page server reading a project's authenticated places for its pages, adding the secret:
  *
  * ```text
  * page → page server (adds the secret) → the place's own server

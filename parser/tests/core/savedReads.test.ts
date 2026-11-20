@@ -232,7 +232,7 @@ describe("a field the compiler left out", () => {
   })
 })
 
-describe("a place checked every so often:  `check it every 1 second` (epic `old-console-redo` T28)", () => {
+describe("a place checked every so often:  `check it every 1 second`", () => {
   test("a first read that failed is asked again as the line says, and shows the place's answer by itself", async () => {
     const { document, window } = parseHTML("<!doctype html><html><body></body></html>")
     Object.assign(globalThis, { document, window, Node: window.Node, Element: window.Element })

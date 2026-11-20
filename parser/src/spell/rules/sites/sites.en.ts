@@ -16,8 +16,8 @@ import { SitePartWords } from "./SitePartWords"
 /**
  * What a page's line may say after its address:  what the navigation calls it, its icon there, its tab, its tags,
  * how far along it is, its picture, the real page it stands for, that it's drawn without the site's top bar, and that
- * its navigation doesn't list it (`, not in the navigation`:  reached by its address and links alone, epic
- * old-console-redo I35).
+ * its navigation doesn't list it (`, not in the navigation`:
+ * reached by its address and links alone).
  */
 const PAGE_DETAILS =
   "(, named {title:text})? (, icon {icon:text})? (, tab {tab:text})? (, tagged {tags:text})? (, {state:site_page_state})? (, thumbnail {thumbnail:text})? (, live {live:text})? (, (no_top_bar:no top bar))? (, (unlisted:not in the navigation))?"
@@ -616,7 +616,7 @@ sites.addRule(CreateSite, {
           ]
         },
         {
-          title: "a page not in the navigation:  reached by its address alone (old-console-redo I35)",
+          title: "a page not in the navigation:  reached by its address alone",
           input: [
             'a "settings page" is a page',
             "galaxy guide is a site in the cloud:",
@@ -1005,7 +1005,7 @@ sites.addRule(SitePage, {
 sites.addRule(SiteOverlay, { syntax: `{type:subject_it} has (a|an) {part:quoted_member} ${CARD_DETAILS}` })
 sites.addRule(SiteOverlay, { syntax: `{type:subject_implied} has (a|an) {part:quoted_member} ${CARD_DETAILS}` })
 
-// a link out of the site, in its navigation among its pages (epic `old-console-redo` I6):
+// a link out of the site, in its navigation among its pages:
 // `- it has a link to "https://docs.example.com", named "Help", icon "book"`
 sites.addRule(SiteLink, {
   syntax: `{type:subject_it} has (a|an) link to {address:text} (, named {title:text})? (, icon {icon:text})?`,

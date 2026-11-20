@@ -1,0 +1,5 @@
+// A project theme extending `matrix`:  the project's own Matrix, beside it, not Spell UI's.
+{
+  "extends": "matrix",
+  "own": { "lighthouse-rail": "#123456" }
+}

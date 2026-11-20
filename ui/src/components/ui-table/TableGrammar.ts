@@ -7,7 +7,7 @@ import { tableVocabulary } from "./UITable.en"
  * - Scroller:  `ClassBuilder` over the table vocabulary's scroller-shaped attributes
  *   (`attach-to`, `scrolling`, `overflowing`) with the noun `scroller` and no `ui`,
  *   e.g. `top attached short scrolling scroller`.
- *   - Not `resizable`:  the shared one since epic `old-console-redo` P2, its state (`:state(resizable-height)`).
+ *   - Not `resizable`:  the shared one, its state (`:state(resizable-height)`).
  *   Same grammar as the table, so `UITable.css` keys the scroller on the same phrases (`[class*="very short"]`).
  * - Cell:  a `TableColumn`'s `textAlign` / `width` as Fomantic's cell classes (`right aligned four wide`).
  * - Plain functions of their input, no DOM.

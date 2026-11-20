@@ -20,6 +20,6 @@ class Site(App):
     # - its "current address" is a text starting at "/"
     current_address = prop(type="text", default="/")
 
-    # the theme its pages wear, e.g. "mockup":  `harbor is a site with theme "mockup"`
+    # the theme its pages wear, e.g. "mockup":  `galaxy guide is a site with theme "mockup"`
     # - its "theme" is a text
     theme = prop(type="text")

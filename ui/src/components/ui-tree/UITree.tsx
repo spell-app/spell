@@ -91,7 +91,7 @@ export class DOMTreeElement extends E.DOMElement<UITree> {
  *   - Its rows can be DATA instead:  `items`, a `TreeItemData` list, drawn in its shadow root ("Columns from data").
  *     For big trees:  a `children` function runs the first time its item opens, and only the open path is drawn.
  *     Each column draws its first rows, then more as its end scrolls near (`drawnInWindow()`, `itemRows()`):
- *     5,000 rows open as fast as 300 (epic `from-console` P8).
+ *     5,000 rows open as fast as 300.
  *     Rows from markup draw themselves, as in every tree:  none builds a shadow root it doesn't show.
  * - `ui-settled`:  `ui-changed`'s detail again, once what's selected has stayed put for a moment (the arrow keys stopped).
  * - For subclasses (a `<netlist-columns>` built on it):
@@ -1796,7 +1796,7 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
   /**
    * The pointer moved onto a column:  a narrow one widens while it's there.  Its line, after it, changes nothing.
    * - Heard on the shadow root:  a move between two of its own boxes never reaches the tree's element, as both ends
-   *   of it are the element there (the rows from `items` stayed peeking, epic `from-console` P7).
+   *   of it are the element there (the rows from `items` stayed peeking).
    *   Rows from markup pass through it too, by their slots.
    */
   @E.on("pointerover", { target: "renderRoot" })
@@ -2920,7 +2920,7 @@ const PATH_KEY = "path:"
 /** From markup:  rows the page marked as picked, so it set a path of its own. */
 const MARKED_ROWS = "ui-tree-item[open], ui-tree-item[selected]"
 
-/** Where the widths were kept before (epic `from-console` P5):  a list of widths under each tree's `id`, moved over once. */
+/** Where the widths were kept before:  a list of widths under each tree's `id`, moved over once. */
 const OLD_WIDTHS_STORE = "ui-tree-column-widths"
 
 /** What `1em` and `1rem` come to before they're measured, in px. */

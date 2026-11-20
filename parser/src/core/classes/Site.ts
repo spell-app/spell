@@ -16,7 +16,7 @@ export class Site extends SiteBase {
   @prop({ type: "text", init: () => "/" })
   accessor currentAddress!: string
 
-  /** the theme its pages wear, e.g. "mockup":  `harbor is a site with theme "mockup"` */
+  /** the theme its pages wear, e.g. "mockup":  `galaxy guide is a site with theme "mockup"` */
   // - its "theme" is a text
   @prop({ type: "text" })
   accessor theme!: string

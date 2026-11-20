@@ -5,7 +5,7 @@ import { TableGrammar } from "spell/ui/components/ui-table/TableGrammar"
 describe("TableGrammar.scroller()", () => {
   test("phrases the scroller-shaped attributes in the table's grammar, noun `scroller`, no `ui`", () => {
     const values: Record<string, unknown> = { resizable: true, "attach-to": "top", scrolling: "short", celled: true }
-    // not `resizable`:  the shared one, a state (epic `old-console-redo` P2)
+    // not `resizable`:  the shared one, a state
     expect(TableGrammar.scroller((name) => values[name])).toBe("top attached short scrolling scroller")
   })
 

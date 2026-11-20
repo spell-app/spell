@@ -1,7 +1,7 @@
 # The epic demo:  showing epics to your team
 
 ![An epic page's Questions section, opened from the toolbar's Questions button with its red 2:  Q1 "When should
-Harbor read the morning briefing?" and Q2 "Which Jira and Confluence links should the briefing mention?", each with
+Juno read the morning briefing?" and Q2 "Which Jira and Confluence links should the briefing mention?", each with
 three option cards, the recommended one marked with a thumbs up, and a note box under it.](docs/images/demo/questions.png)
 
 _Two minutes in:  Claude's questions, on the page instead of in the chat, each with options and a pick._
@@ -11,7 +11,7 @@ You ask for a feature in one line, Claude plans it on a page you both edit,
 you agree the plan with two presses, it builds a phase,
 and you come back to a summary of what happened.
 
-The feature:  a Morning Briefing for Harbor, a voice assistant.
+The feature:  a Morning Briefing for Juno, a voice assistant.
 Say "good morning", hear your meetings, the Jira and Confluence links worth checking, the weather and a joke.
 
 **Running it in your repo:**  you run the same ask for real, with `/epic morning-briefing`.
@@ -52,12 +52,12 @@ Most of the time is you talking;  Claude's part is the waits.
 <summary>The ask to paste</summary>
 
 ````text
-Harbor should give me a morning briefing.  When I say "good morning", read me one short spoken paragraph:  my upcoming meetings, the Jira and Confluence links worth checking, today's weather, and a joke to start the day.
+Juno should give me a morning briefing.  When I say "good morning", read me one short spoken paragraph:  my upcoming meetings, the Jira and Confluence links worth checking, today's weather, and a joke to start the day.
 
 Here's where the wake phrase is handled today, and the shape I have in mind.  Only the joke is real so far:  meetings, Jira / Confluence and weather are stubs.
 
 ```ts
-// harbor/src/skills/greetings.ts
+// juno/src/skills/greetings.ts
 export async function onWakePhrase(phrase: string, ctx: SkillContext) {
   if (/good morning/i.test(phrase)) {
     await ctx.speak(`Good morning, ${ctx.user.firstName}.`)
@@ -65,7 +65,7 @@ export async function onWakePhrase(phrase: string, ctx: SkillContext) {
   }
 }
 
-// harbor/src/briefing/BriefingSource.ts
+// juno/src/briefing/BriefingSource.ts
 /** One part of the morning briefing:  gathers what it needs, and says it in a sentence or two. */
 export interface BriefingSource {
   title: string
@@ -144,7 +144,7 @@ The Morning Briefing epic page opens beside the chat.
 Click it, and unfold Q1, then Q2.  Don't answer yet.
 
 **They see:**  the picture at the top of this page.
-Q1, "When should Harbor read the morning briefing?";  Q2, "Which Jira and Confluence links should the briefing mention?".
+Q1, "When should Juno read the morning briefing?";  Q2, "Which Jira and Confluence links should the briefing mention?".
 Three option cards each, one recommended, each with why and what it costs.
 A real run words its own questions:  yours will differ.
 
@@ -215,7 +215,7 @@ Open 3. Questions:  new ones came up mid-build.
 Pick an answer on each, then press **Send**, the paper plane at the top.
 
 ![The epic page while P4 A Joke is built:  the phase pill at the top right turning on P4, and the Questions section
-with the new Q3 "What kind of jokes should Harbor tell?" and Q4 "What happens when you don't laugh?", each with three
+with the new Q3 "What kind of jokes should Juno tell?" and Q4 "What happens when you don't laugh?", each with three
 option cards;  Q1 and Q2 answered, folded below.](docs/images/demo/building.png)
 
 _P4 · A Joke under way, the pill turning, and two questions that came up mid-build._

@@ -64,7 +64,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `LIVE_EVENTS`, `LIVE_SCRIPT`
       - `LIVE_VERSIONS`
     - A page the page server didn't serve joins through its proxy with `joinLiveChannel()`:
-      the editor, served by vite (epic `from-console` P17).
+      the editor, served by vite.
       - Browser code takes it by file, `spell/server/liveClient`, never the `spell/server` barrel.
       - It sets `window.SPELL_SERVER` itself (no write token, no `run`), and loads the client.
       - `isLiveChannelOpen()` says whether its socket is open:
@@ -278,7 +278,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         (`CONTENT_SETTINGS`;  the folder `contentFolderOf()` names):  the site's tabs, the writable folders, `gone`.
       - The kit's own part (its `package.json`'s `"pageServer"`):  two route modules:  the recipe box demo's servers' start and stop
         (`spell/server/test/recipeServersRoutes`, epic `data` I21);  it registers nothing where the demo's script isn't there.
-        And `spell/server/places/placeRoutes` (epic `data` P19;  epic `from-console` P14):  the authenticated places'
+        And `spell/server/places/placeRoutes` (epic `data` P19):  the authenticated places'
         routes (`AuthenticatedPlaces`, below), the Airtable base when its environment names one and its key, and, as the
         server starts, a line for each secret a place needs that isn't set.
       - `pageServerSettings(root)` merges them (`settingsParts()`):
@@ -582,7 +582,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `placeRoutes.ts`:  a route module:  with `AIRTABLE_BASE` and `AIRTABLE_KEY` in its environment, the page server serves that one base at `/api/places/<base>`;
         one case of the authenticated places (below)
       - its tests run against `spell/server/test/airtableStub`, a fair stub, whose guesses say so
-    - `AuthenticatedPlaces`:  a project's authenticated places, read for its pages with the secret added (epic `from-console` P14)
+    - `AuthenticatedPlaces`:  a project's authenticated places, read for its pages with the secret added
       - page → page server (adds the secret) → the place's own server, at `/api/places/projects/<project>/<place>/...`
         (`AUTHENTICATED_PLACES_PREFIX`):  the rest of the path, its question and its body go on;  a pass-through that keeps
         nothing, as `DirectReads`' read through is

@@ -1,5 +1,5 @@
 /**
- * A made-up clipboard helper, the javascript side of the Clipboard test project (epic `from-console` P10):
+ * A made-up clipboard helper, the javascript side of the Clipboard test project:
  * what its Spell calls with `call native`.
  * - Keeps what it's handed instead of touching a real clipboard, so a test can read it back.
  */

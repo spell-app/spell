@@ -79,7 +79,7 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
   }
 
   /**
-   * A Spell UI element's view, from the first token, e.g. `ui tree view` (epic `from-console` P11):
+   * A Spell UI element's view, from the first token, e.g. `ui tree view`:
    * the type `SP.UIViews` makes for it, `UiTreeView`.
    * - Only when the first word is the language's first for one (`ui`, Spanish's `vista`):  most names aren't.
    */

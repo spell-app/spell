@@ -38,7 +38,7 @@ export type ModuleImport = {
   /** What it imports from there, each `name` or `name as localName`. */
   names: string[]
   /**
-   * `native`:  one of the project's code files, whose functions `call native` calls (epic `from-console` P10):
+   * `native`:  one of the project's code files, whose functions `call native` calls:
    * - javascript:  `import { copyText } from "@spell/native/<project>/clipboard.ts"`
    * - Python:  `from clipboard import copy_text`, its file beside the program
    * - Default:  spell's runtime, or another project's compiled code.

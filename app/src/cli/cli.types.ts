@@ -167,7 +167,7 @@ export type NewOptions = GlobalOptions & {
  *   (epic `spanish` P25:  `spell translate`'s fix-ups)
  * - `offline`:  no server is ever asked, each answer a failed connection -- see `noNetwork()` in `runProject.ts`
  * - `natives`:  each code file `call native` reaches, by the module compiled code imports it as, its file's URL:
- *   `@spell/native/owen@spell/clipboard/clipboard.ts` => `file:///.../clipboard.ts` (epic `from-console` P10)
+ *   `@spell/native/owen@spell/clipboard/clipboard.ts` => `file:///.../clipboard.ts`
  */
 export type RunSpec = {
   mode: "run" | "test"

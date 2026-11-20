@@ -6,7 +6,7 @@
  * - `FilePlace`:  one file as a place.
  * - `PlaceServer`:  any place over HTTP, on the kit's router, behind `Guard`;  `PlaceKeys`, what it holds.
  * - `AuthenticatedPlaces`:  every project's authenticated places read for its pages, the secret added here and never
- *   sent back;  each secret that isn't set said as the page server starts (epic `from-console` P14, `placeRoutes.ts`).
+ *   sent back;  each secret that isn't set said as the page server starts (`placeRoutes.ts`).
  * - `PlaceSessions`:  the sessions kept after signing in to a place in a browser (epic `mockup` P12).
  * - `DirectReads`:  a space's files read straight, apart from the server that writes them, with a credential for the
  *   whole space (epic `atmosphere` P5).

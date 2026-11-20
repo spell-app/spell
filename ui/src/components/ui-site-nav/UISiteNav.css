@@ -16,7 +16,7 @@
  * - Beside a bar (`--ui-site-nav-bar-height`, a `<ui-page-layout>`'s menu):  its first row's middle on the bar's,
  *   so the first page's icon lines up with the drawer's button (epic `mockup` I35).
  * - `groups="headings"`:  a group a plain heading over its pages, no well, its pages in line with the rest;  a page's
- *   own pages beside a faint guide line down from its icon (epic `old-console-redo` I35, the Harbor console's sidebar).
+ *   own pages beside a faint guide line down from its icon (a console's sidebar).
  * - Its `start` slot above its pages, its `end` slot at its foot:  it fills the box it's in, a column, so the foot is
  *   at the box's bottom (I35).
  * - `collapsed` (`:state(collapsed)`):  each row its icon alone, reached through the rows' parts, all in one column;
@@ -202,7 +202,7 @@
     padding: 0;
     background: linear-gradient(var(--ui-border-color), var(--ui-border-color)) center / 60% 1px no-repeat;
   }
-  /* `groups="headings"`:  a heading a gap, no line (old-console-redo I41:  the console's icon rail, its groups apart
+  /* `groups="headings"`:  a heading a gap, no line (a console's icon rail, its groups apart
      by room alone) */
   :host(:state(collapsed):state(headings)) ui-tree-item[band="group"]::part(row) {
     background: none;

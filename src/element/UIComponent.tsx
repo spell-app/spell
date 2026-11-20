@@ -455,7 +455,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
 
   /**
    * The shared `width`, `min-width` and `max-width`, and `height`, `min-height` and `max-height` where the
-   * vocabulary takes them (`heights`;  epic `old-console-redo` P2):  any CSS lengths, by name;  each `undefined`
+   * vocabulary takes them (`heights`):  any CSS lengths, by name;  each `undefined`
    * without one.
    * - A new record each time:  only the six attributes are read, so `onSizesChanged()` runs only when one changes.
    */
@@ -469,7 +469,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
    *   `reset.css` draws:  on the element itself where it draws a box, else on its shadow root's top-level boxes
    *   (`:state(sized-inside)`).
    * - Which it is, the element's computed `display`:  so only once its sheets are in (`isReady`).
-   * - `height="fluid"` (epic `old-console-redo` T27):  no length, but `:state(fluid-height)`, which `SharedHeights.css`
+   * - `height="fluid"`:  no length, but `:state(fluid-height)`, which `SharedHeights.css`
    *   draws as taking what's left of its parent's height (Fomantic's `fluid`, a container's full size).
    * - SIDE EFFECT:  writes them in the element's `style` and states;  removes them again once they're gone.
    * - Not on a server:  the static render draws no sizes.
@@ -555,7 +555,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
   // Two more shared attributes (`SharedVocabulary`;  epic `mockup` P14, J35):  `movable` and `resizable`
   // (`MoveAndResize`).
   // - `movable`:  bare or `both`, `horizontally`, `vertically`.
-  // - `resizable` (epic `old-console-redo` P2):  the sizes people drag, `width`, `height` or `width, height`;
+  // - `resizable`:  the sizes people drag, `width`, `height` or `width, height`;
   //   bare, the family's own (`elementSetup.resizable`:  a segment's and a table's, their height).
   //   - ONE resize for every family:  the browser's grip on its box, the element's own or, for a
   //     `display: contents` element, its shadow root's top box (`resizeBox`).
@@ -1489,7 +1489,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
 
   /**
    * Give `Class`'s vocabulary an empty list for each list it leaves out:  `events`, `slots`, `parts`, `states`, `texts`.
-   * - So a subclass's small vocabulary, written by hand or in JavaScript, defines (epic `from-console` P11):
+   * - So a subclass's small vocabulary, written by hand or in JavaScript, defines:
    *   one with no `slots` crashed `Vocabulary.resolve()` ("vocabulary.slots is not iterable").
    * - SIDE EFFECT:  fills them in on the vocabulary itself;  a frozen one is copied onto `Class` instead.
    */
@@ -1617,7 +1617,7 @@ const SHADOW_COLOR_TOKEN = "--_ui-shadow-color"
  * - The heights only where the vocabulary takes them (`heights`).
  */
 const SIZES = ["width", "min-width", "max-width", "height", "min-height", "max-height"] as const
-/** `height="fluid"`:  takes what's left of its parent's height, drawn under `:state(fluid-height)` (epic `old-console-redo` T27). */
+/** `height="fluid"`:  takes what's left of its parent's height, drawn under `:state(fluid-height)`. */
 const FLUID = "fluid"
 const FLUID_HEIGHT_STATE = "fluid-height"
 /** The state saying the shared sizes go on the shadow root's top-level boxes:  the element is `display: contents`. */

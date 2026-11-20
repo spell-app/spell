@@ -2,7 +2,7 @@
  * The English vocabulary of `<ui-json>`:  every name the tag uses.
  * - Its tag, attributes, events, parts, states and texts.
  *   The shape is `E.ComponentVocabulary` (`spell/ui/vocabulary`).
- * - Ours, not Fomantic's (epic `elemental-spell` P31;  the outline from epic `from-console` P3).
+ * - Ours, not Fomantic's (epic `elemental-spell` P31).
  * - The source pieces (`source`, `load`, `ui-loaded` ... `ui-error`, the loader and error parts, the states and texts)
  *   are shared with `<ui-code>` and `<ui-markdown>`:  `UIT.Source*`, which `LoadableComponent` reads.
  *   - Its `ui-changed` is its own, with the parsed `value`.
@@ -24,7 +24,7 @@ export const jsonVocabulary = {
   tag: "ui-json",
   icon: "code",
   topics: ["data display", "modules"],
-  // the shared `height`, `min-height` and `max-height` (epic `old-console-redo` P2)
+  // the shared `height`, `min-height` and `max-height`
   heights: true,
   aka: [
     "data",

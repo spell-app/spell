@@ -35,7 +35,7 @@ import type { Styles } from "./Styles"
  *       nested groups;  its sheet here is GENERATED from it (`ThemeFile`, `yarn gen:styles`), so this class still
  *       reads only sheets
  *     - a theme kept under an old name (`studio`, `spell-brand`):  `RENAMED`
- * - And a project's own theme, defined as the page runs (`define()`, epic `old-console-redo` P1):  a site's
+ * - And a project's own theme, defined as the page runs (`define()`):  a site's
  *   `<name>.theme.json5`, beside its Spell, made into one sheet by the site's host.
  *   - Treated as a sheet of the folder:  `has()`, `load()`, `apply()`, `scopedTokens()`.
  *   - Listed by no picker:  it's the project's, not Spell UI's.
@@ -108,7 +108,7 @@ export class Themes {
   }
 
   /**
-   * Make `css` sheet `name`, as if it were in the themes folder:  a project's own theme (epic `old-console-redo` P1).
+   * Make `css` sheet `name`, as if it were in the themes folder:  a project's own theme.
    * - The WHOLE sheet:  `classic` goes under it as under any theme, but what it extends must be in it already
    *   (`ThemeFile.standaloneCss()`):  no `@import`, as there's no file beside it to import.
    * - Defining it again replaces it:  the file was edited, or another project has one of that name.

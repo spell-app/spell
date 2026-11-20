@@ -985,8 +985,7 @@ export class ASTCoreMethodInvocation extends ASTScopedMethodInvocation {
 export type NativeLanguage = "js" | "py"
 
 /**
- * NativeCall:  a call of a function from one of the project's code files, `call native copyText with text`
- * (epic `from-console` P10).
+ * NativeCall:  a call of a function from one of the project's code files, `call native copyText with text`.
  * - `methodName`:  the function's name as its code file says it, `copyText`.
  *   Python's writer writes it in Python's case, `copy_text`.
  * - `modules`:  the module each language imports it from;  none for a language the project has no code file in.
