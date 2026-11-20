@@ -65,6 +65,8 @@ export class CompileCache {
       }
     }
     parts.push(...(await textsOf(project.activeImports)))
+    // and our code files, which `call native` reads what each exports from (epic `from-console` P10)
+    parts.push(...(await textsOf(project.codeFiles.map(({ file }) => file as SP.CompilableSpellFile))))
     return sha256(parts.join("\u0000"))
   }
 

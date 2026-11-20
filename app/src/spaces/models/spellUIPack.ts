@@ -14,6 +14,8 @@ import { SpellUIDefaults } from "./SpellUIDefaults"
  *   project draws with unless its project file says otherwise:  spell-parser never imports Spell UI.
  * - It says what each tag and attribute is, for the editors' completions and hovers (`help()`, epic `editor` P28),
  *   from Spell UI's help table, loaded the first time it's asked.
+ * - A Spell type built on one of its tags, `a "netlist column" is a ui tree view` (`viewBaseFor()`, epic `from-console`
+ *   P11):  its attributes and hooks, in the file's language.
  * - It reads an app's widget defaults too, `<ui-defaults>`, into Spell UI's own names (`SpellUIDefaults`, epic
  *   `language` P29);  and the Spanish attributes on an `<acción>`'s button (P53).
  * - Loaded by spaces' barrel, as every program that compiles a project loads it;  NOT by `<spell-viewer>`, which runs
@@ -28,6 +30,8 @@ export const SPELL_UI_PACK: SP.ComponentPack = {
   readDefault: (sample, language) => SpellUIDefaults.read(sample, language),
   readAttribute: (sample, language) => SpellUIDefaults.readAttribute(sample, language),
   attributeNameFor: (tag, attribute, language) => SpellUIDefaults.attributeNameFor(tag, attribute, language),
+  // a type built on one of its tags, `a ui tree view`:  its noun of several words as its tag's (`property-editor`)
+  viewBaseFor: (noun, language) => SpellUIDefaults.viewBaseFor(noun.replace(/\s+/g, "-"), language),
   help(language) {
     if (!helpTable) {
       loadHelp()

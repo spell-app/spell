@@ -40,6 +40,16 @@ export const PARSER_MESSAGES = {
   "error-name-unknown": '"{name}" isn\'t a kind of error:  say one of {names}',
   "failure-word-outside":
     '"{text}" goes in the steps for a failure, under "if completing a job fails" or "when any server call fails"',
+  // `call native copyText with text` and its `use` line (epic `from-console` P10, `SP.NativeCode`)
+  "place-named-native":
+    '"native" can\'t name a place:  "call native ..." calls the project\'s code.  Pick another name',
+  "native-outside-to":
+    '"{text}" calls a function from the project\'s code:  it goes in an action\'s steps, under "to ..."',
+  "native-no-code-files": '"{name}" isn\'t in any code file:  list one in the project file first, e.g. "/clipboard.ts"',
+  "native-not-found":
+    "\"{name}\" isn't a function in the project's code files ({files}):  check its name, or export it there",
+  "native-not-in-file": '"{file}" has no function "{name}":  check its name, or export it there',
+  "native-file-not-listed": "\"{file}\" isn't one of the project's code files:  list it in the project file first",
   "call-outside-wrapper":
     '"{text}" goes in an action that wraps a server\'s own:  "to complete a job", its steps around "call the server"',
   "the-server-outside-api":
@@ -301,6 +311,12 @@ export const PARSER_MESSAGES = {
   "say-is-able": 'Say "{line}":  "{old}" stops working in a later release',
   /** A list's rule's old `if:`, `- it can take a card if: ...` (epic `debut` P27, Q42). */
   "say-when": 'Say "when:":  "if:" here stops working in a later release',
+  /** A note after a line's code, `load its sound  // so it plays at once` (epic `language` T166). */
+  "line-end-comment":
+    'A note after "//" at the end of a line will stop working in a later release.  Put it on the line under this one, starting with "--".',
+  /** `choose a card` with no `from`, for a type with no values of its own (epic `language` P66). */
+  "choose-from-what":
+    'This line doesn\'t say which {things} to choose from.  Name them after "from", like this:  choose {thing} from the {things}',
   /** `tableau T1` when two tableaus are named `T1`. */
   "named-twice": 'More than one {type} is named "{name}":  this finds the first one made',
   /** `the position of x`, with no list, where `x` isn't one of a value kind's values. */

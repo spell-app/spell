@@ -67,6 +67,12 @@ export type MethodSignatureData = {
    * - Then its `it` is a new one of the template, and it runs as every test does, not as a method of a thing.
    */
   testOf?: string
+  /**
+   * The Spell UI element's hook it overrides, e.g. `rowClass` for `to give the row class of (an item)` in a
+   * `ui tree view`'s body (epic `from-console` P11):  never an action.
+   * - Set by `MethodDefinition.processSignature()`.
+   */
+  uiHook?: string
 }
 
 /**

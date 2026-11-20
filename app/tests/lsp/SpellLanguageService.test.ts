@@ -946,6 +946,19 @@ describe("SpellLanguageService", () => {
       await fixes("set y to", (titles) => expect(titles).toEqual([]))
     })
 
+    test("a note after a line's code, `// ...`:  moved to the line under it, as `--`, with its warning (epic `language` T166)", async () => {
+      await fixes("set x to 1  // so it runs", async (titles, fixed) => {
+        expect(titles).toEqual(['Move the note below, changing "//" to "--"'])
+        expect(fixed).toMatch(/\nset x to 1\n\t-- so it runs$/)
+        const warned = service.diagnostics(solitaire).filter((it) => String(it.message).startsWith('A note after "//"'))
+        expect(warned).toHaveLength(1)
+        await workspace.update(solitaireUri, fixed!)
+        expect(
+          service.diagnostics(solitaire).filter((it) => String(it.message).startsWith('A note after "//"'))
+        ).toEqual([])
+      })
+    })
+
     test("a drawing's attribute value:  Make it code, or Make it text, its words kept (epic `editor` T74)", () => {
       const lines = cardText.split("\n")
       /** The one action at `word` of the line holding `marker`, and the text with it applied. */

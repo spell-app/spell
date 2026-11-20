@@ -887,6 +887,7 @@ A kind that says so is saved in a file of its own.
      - a page's head or tag line is read as its code-spell twin from here on (`SP.PageTwin`;  "Pages", below),
        and what the page tokenizer found wrong on it is the line's error
   2. pop the trailing comments:  usually one
+     - one written `//` after code is warned about (`line-end-comment`):  `SP.LineEndComments`, below
   3. parse the rest as `"statement"`;  leftovers become a `parse_error`
      - a statement its rule REFUSED is a `parse_error` already, saying why (`SpellStatement.refuse()`):
        the line's error, never committed
@@ -1529,6 +1530,14 @@ plain Spell.
   - A two sided view's:  its slots front and back, `its "direction" is down or up` (a new one starts face down, J36),
     `it "is face (direction)"`, `turn it face up / down`, `turn it over`, and `to draw it` drawing both slots,
     back to back, its own `<css>` turning it over in 3D (a view type's style sheet, `static css`).
+- A SPELL UI ELEMENT's VIEW:  `a "netlist column" is a ui tree view` (epic `from-console` P11;  [UIViews.ts](UIViews.ts)).
+  - Its words, the language's (`LanguageWords.uiViewName`:  `ui {noun} view`, `vista ui de {noun}`), name a type
+    `SpellType` reads by itself (`parseUIView()`), its noun any element of the project's packs.
+  - The type, `UiTreeView`, is made the first time a line names it, in the project's scope, from the pack's
+    `viewBaseFor()`:  a view with a property per attribute of the element, loaded as declarations are.
+  - A type built on it compiles `extends View`, naming its element, `static uiElement = "ui-tree"` (`CreateType`).
+  - A `to` line in its body in a hook's words (`to give the row class of (an item)`) is that hook, under the
+    element's name, `rowClass(item)`, never an action (`MethodDefinition.uiHookOf()`).
 
 
 ## Pages:  `"button api" is a notebook page` (epic `language` P45, P47)
@@ -2936,7 +2945,7 @@ sidebars any of them opens.
 - A DECLARATION's docstring compiles as one `/** ... */`, in place of its `//` lines.
   - See `getDocComments()`, in [Block.ts](rules/Block.ts).
   - Its description is the first line under it, when that's a comment (epic `language` P48):
-    `its "state" is`, then `// Its short name`, then its lines.
+    `its "state" is`, then `-- Its short name`, then its lines.
     - Its body's first line:  `SpellStatement.parseNestedBlock()` marks the body `describes`, and its `getAST()`
       leaves that line out, as it's written above the declaration.
     - Else the first line of a block indented under it that no line took:  a line with its body on it
@@ -2946,6 +2955,13 @@ sidebars any of them opens.
     - A group's description too (`groupOpenedBy()`), which its first member's declaration carries.
   - Else, as before:  the comment-only lines directly above it, else the comments on its own line
     (one in code spell).  So a file written before still compiles as it did.
+  - A `//` note after a line's code is the OLD way (epic `language` T166;  Owen, 2026-11-18):
+    `BlockLine` warns about it (`line-end-comment`), as it pops the line's comment.
+    - Its place now:  the first line inside the line, `-- ...`, at the indent of the lines under it, else one deeper.
+    - `SP.LineEndComments` finds them (a plain `CommentToken` written `//`, after code, on a line with no markup)
+      and works out the move:  the language server's quick fix and `spell lint --fix` make it.
+    - A `--` at a line's end stays:  a drawing's description (`to draw its placeholder  -- a grey ace`) and a type
+      line's.
   - It goes above the `SPELL: DECLARES` comment:  after any `/* SPELL: added rule ... */` notes the statement makes.
   - A `##` heading is part of it only if DIRECTLY above.
     One followed by a regular comment compiles as a `// ## heading` banner.

@@ -4,7 +4,7 @@
  *   - defines `<ui-modal>`, the owner of the `header`, `content`, `description` and `actions` parts,
  *     and those parts and `<ui-button>` too (`UI.modals.*` builds its dialogs from them)
  *   - registers `ModalDialogs` as `UI.modals`' provider once the runtime has loaded,
- *     so `UI.modals.confirm()` / `alert()` / `prompt()` work
+ *     so `UI.modals.confirm()` / `alert()` / `prompt()` / `choose()` work
  * - Also exports `DialogComponent`, the base `<ui-flyout>` (`spell/ui/components/ui-flyout`) builds on.
  * - Also the library's `spell/ui/ui-modal` entry (its size is in `notes/report.md`).
  */

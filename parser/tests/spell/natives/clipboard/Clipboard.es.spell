@@ -1,0 +1,4 @@
+usar todo de clipboard.ts
+
+para copiar (texto como texto) al portapapeles
+	llamar al código nativo copyText con texto

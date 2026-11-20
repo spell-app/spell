@@ -38,6 +38,17 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - [kitCheckout.ts](kitCheckout.ts) -- `kitSetting()`, `kitCheckoutBin()`, `checkoutToRun()`:  a published bin runs
     the checkout `SPELL_KIT` or the project's `.spell/kit.json5` names instead (epic `repo-split` T69, T70);
     `spell local on` writes that file ([localCommand.ts](commands/localCommand.ts))
+  - [PathLink.ts](PathLink.ts) -- `PathLink`, a command on your `PATH` (`spell`, `epic`):  `yarn cli:install` links
+    `spell` by hand (`link()`), `spell local on` / `off` add and take away their own (`linkFor()`, `unlinkFor()`,
+    recorded in `~/.spell/path-links.json`;  epic `repo-split` T71)
+    - node's modules only, in TypeScript plain node runs:  `scripts/install-cli.mjs` imports it as
+      `spell/cli/PathLink.ts`
+  - [projectBin.ts](projectBin.ts) -- `projectBin()`:  [the `spell` bin](../../bin/spell.mjs) and
+    [the `epic` bin](../../epic/bin/epic) hand off to a project's own npm install when that project runs no checkout;
+    node's modules only, loaded by plain node before `tsx`
+    - the `spell` bin hands off to another kit checkout the current folder is in first (`checkoutBin()`)
+  - [commands/localTools.ts](commands/localTools.ts) -- `localTools()`:  every way Spell runs in a project, and whether
+    it follows the checkout, for `spell local status`;  reads Claude Code's list of plugins, never writes it
   - [cli.types.ts](cli.types.ts) -- `EXIT`, `CliError`, the flags' types, `CommandList`, `HookList`, `SpellRepo`
 - The kit's own commands:  [commands.ts](commands.ts) is their list, [commands/](commands/) their work.
 
@@ -108,6 +119,8 @@ As WWOD §20, plus:
 - [program.test.ts](../../tests/cli/program.test.ts):  the clash rule, on made-up repos
   (two repos both naming `check`).
 - [repos.test.ts](../../tests/cli/repos.test.ts):  finding repos and hooks in a made-up kit.
+- [PathLink.test.ts](../../tests/cli/PathLink.test.ts):  a made-up home and bin folder (`home`, `SPELL_BIN_DIR`),
+  never the real `~/.local/bin` or `~/.spell/`.
 - [publish/](../../tests/cli/publish/):  `PackageBuild` and `PublishedPackage` on a made-up repo.
   - The real five packages and the scratch install:  `spell publish --dry-run`, too slow for a unit test.
 - [coherence/](../../tests/cli/coherence/):  the catalog's Score lines read, the counts over a made-up checkout of

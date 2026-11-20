@@ -245,12 +245,19 @@ export class Styles {
     root.adoptedStyleSheets = [...new Set(sheets)]
   }
 
-  /** Re-push every live root;  drops collected ones. */
+  /**
+   * Re-push every live root;  drops collected ones.
+   * - Skips a root out of the page's document for the moment:  its element being moved through a detached template's
+   *   (Solid inserts a child before the new parent is on the page), where the browser refuses the page's sheets
+   *   ("Sharing constructed stylesheets in multiple documents is not allowed";  epic `editor` P37).
+   *   Its own sheets came when it was made;  it keeps them.
+   */
   private refreshRoots() {
+    const page = typeof document === "undefined" ? undefined : document
     for (const ref of this.roots) {
       const root = ref.deref()
-      if (root) this.push(root)
-      else this.roots.delete(ref)
+      if (!root) this.roots.delete(ref)
+      else if (!page || root.ownerDocument === page) this.push(root)
     }
   }
 

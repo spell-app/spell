@@ -41,7 +41,8 @@ export const SUGGEST_MODES_RENAMED: Readonly<Record<string, SuggestMode>> = { as
 /**
  * How long a popup waits for the mouse to rest, or the typing to pause, before it shows by itself, shortest first:
  * a short wait, the page's standard one (`--ui-hover-delay`, 800 msec), the default, or a long one.
- * - Settings… › "Popup delay" (Owen, 2026-11-19, epic `codemirror` T19):  every popup and tooltip on the page follows.
+ * - Settings… › "Delay before showing help" (Owen, 2026-11-19, epic `codemirror` T19):
+ *   every popup and tooltip on the page follows.
  */
 export const POPUP_DELAYS = ["short", "standard", "long"] as const
 /** How long popups wait:  one of `POPUP_DELAYS`. */
@@ -164,7 +165,7 @@ export function suggestsByItself(before: string): boolean {
 
 /**
  * How long the mouse rests on a word before its hover shows, in seconds:  the page's own wait, `--ui-hover-delay`,
- * read live from `<html>` (Settings… › "Popup delay" sets it;  800 msec unless a theme says otherwise).
+ * read live from `<html>`:  Settings… › "Delay before showing help" sets it;  800 msec unless a theme says otherwise.
  * - Every code editor's hover waits this long (epic `codemirror` P1).
  * - So does every popup that shows by itself as you type, once the typing pauses (epic `codemirror` I22):
  *   the suggestion list, signature help;  each key typed starts the wait again.

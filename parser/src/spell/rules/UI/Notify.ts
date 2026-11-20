@@ -1,4 +1,4 @@
-import { proto } from "spell/util"
+import { proto, SPELL_COLORS } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 // Import directly to avoid circular import
@@ -96,21 +96,7 @@ const INVERTED = "inverted"
 export const NOTIFY_KINDS = ["info", "success", "warning", "error"]
 
 /** The colours a toast may be, Spell UI's hue names:  `toast_color`'s meanings. */
-export const TOAST_COLORS = [
-  "red",
-  "orange",
-  "yellow",
-  "olive",
-  "green",
-  "teal",
-  "blue",
-  "violet",
-  "purple",
-  "pink",
-  "brown",
-  "grey",
-  "black"
-]
+export const TOAST_COLORS: string[] = [...SPELL_COLORS]
 
 /** Where a toast may go, Spell UI's `position` with `_` for its space:  `toast_position`'s meanings. */
 export const TOAST_POSITIONS = [

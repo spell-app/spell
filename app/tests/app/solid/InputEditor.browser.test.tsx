@@ -395,7 +395,7 @@ describe("CodeSettings", () => {
     expect(host.querySelector(".CodeSettingsPanel")).toBeNull()
   })
 
-  test("Popup delay:  Short, Standard, Long;  it sets the page's hover delay, every popup's and tooltip's, and is remembered", async () => {
+  test("Delay before showing help:  Short, Standard, Long;  it sets the page's hover delay, every popup's and tooltip's, and is remembered", async () => {
     setEditor("file", fakeFile("test-project/one.js", "one\n"))
     const host = await mount(() => <InputRoot />)
     await waitForInputEditor(host)

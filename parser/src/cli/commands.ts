@@ -48,6 +48,7 @@ export default function languageCommands(spell: Command): void {
       "--fix",
       "put right what it can:  retired words (parts => slots), old spellings in a page " +
         "(<notebook> => <page notebook>, a description before an example => its description=), " +
+        "a note after a line's code moved to the line under it (// x => -- x), " +
         "and the editor pages (gone properties, new ones, controls that don't fit)"
     )
     .addHelpText("after", PROJECT_HELP)

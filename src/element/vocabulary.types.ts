@@ -325,6 +325,25 @@ export type TextSpec = {
   description?: string
 }
 
+/**
+ * A method a subclass overrides to change how the element draws, with the words Spell says it in
+ * (epic `from-console` P11, Q11):  `<ui-tree>`'s `rowClass(item)`, `to give the row class of (an item)`.
+ * - A Spell type built on the element (`a "netlist column" is a ui tree view`) overrides it with a `to` line in
+ *   those words, as a card overrides `to draw its front`;  its element calls the type's method in its place.
+ * - A translation gives its own words (`ComponentDictionary.hooks`).
+ */
+export type HookSpec = {
+  /** The method's name, as the component class has it, e.g. `rowClass`. */
+  name: string
+  /**
+   * Its words, as a `to` line says them, each argument in brackets with its type:
+   * `give the row class of (an item)`.
+   */
+  words: string
+  /** What it gives back, and when it's called, for docs. */
+  description?: string
+}
+
 ////////////////
 // ## Component vocabulary
 ////////////////
@@ -378,6 +397,8 @@ export type ComponentVocabulary = {
   states: readonly StateSpec[]
   /** Text it shows people (`UI.i18n`). */
   texts: readonly TextSpec[]
+  /** The methods a subclass overrides, with their Spell words (`HookSpec`);  none:  left out. */
+  hooks?: readonly HookSpec[]
   /**
    * Nouns of the generic content parts this component styles by context, e.g. card:
    * `header`, `meta`, `description`, `content`, `extra`.
@@ -633,6 +654,8 @@ export type ComponentDictionary = {
   aka?: readonly string[]
   /** Text key => text people read, for this component only (`UI.i18n`), e.g. `{ loading: "Cargando…" }`. */
   texts?: NameMap
+  /** Hook name => its words in this language (`HookSpec`), e.g. `{ rowClass: "dar la clase de fila de (un elemento)" }`. */
+  hooks?: NameMap
 }
 
 /**

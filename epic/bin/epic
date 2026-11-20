@@ -11,12 +11,33 @@
  *   of a second.
  * - Every verb runs THIS copy's code, on the caller's checkout's data (`EpicCheckout.nearest()`, `EPIC_CHECKOUT`).
  * - Plain ESM with no extension:  `"type": "module"` in spell-epic's `package.json` makes node read it so.
+ * - Run inside a project that installs `spell-epic` or `spell` from npm and runs no checkout (no `.spell/kit.json5`,
+ *   no `SPELL_KIT`), it hands off to that install's `epic` (`projectBin()`, epic `repo-split` T71).
  * - NOTE: a symlink to this file works:  node runs the real path, so `import.meta.url` is in spell-epic.
  */
 import { dirname, resolve } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
-import { register } from "tsx/esm/api"
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), "..")
-register({ tsconfig: resolve(root, "tsconfig.json") })
-await import(pathToFileURL(resolve(root, "src/cli/epicMain.ts")).href)
+const handoff = await installedEpic(process.cwd())
+if (handoff) {
+  await import(pathToFileURL(handoff).href)
+} else {
+  const { register } = await import("tsx/esm/api")
+  const root = resolve(dirname(fileURLToPath(import.meta.url)), "..")
+  register({ tsconfig: resolve(root, "tsconfig.json") })
+  await import(pathToFileURL(resolve(root, "src/cli/epicMain.ts")).href)
+}
+
+/**
+ * In a project that installs `epic` from npm and runs no checkout:  that install's (`spell-epic`'s, else `spell`'s
+ * own);  else `undefined`.
+ * - NEVER throws:  without `spell/...` linked yet, `undefined`
+ */
+async function installedEpic(folder) {
+  try {
+    const { projectBin } = await import("spell/cli/projectBin.ts")
+    return projectBin(folder, ["node_modules/spell-epic/bin/epic", "node_modules/spell/epic/bin/epic"])
+  } catch {
+    return undefined
+  }
+}

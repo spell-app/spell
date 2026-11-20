@@ -26047,12 +26047,17 @@
         {
           "key": "ok",
           "text": "OK",
-          "description": "Approve button of `UI.modals.confirm()` / `alert()` / `prompt()`."
+          "description": "Approve button of `UI.modals.confirm()` / `alert()` / `prompt()`, and `choose()` picking several."
         },
         {
           "key": "cancel",
           "text": "Cancel",
-          "description": "Deny button of `UI.modals.confirm()` / `prompt()`."
+          "description": "Deny button of `UI.modals.confirm()` / `prompt()` / `choose()`."
+        },
+        {
+          "key": "search",
+          "text": "Search",
+          "description": "Search box above a long list of `UI.modals.choose()`."
         }
       ],
       "mainTag": "ui-modal",

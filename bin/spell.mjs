@@ -12,6 +12,9 @@
  * - It runs every installed repo's source (spell-parser's, spell-app's ...), each file imported by its package name
  *   (epic `repo-split` P14):  no alias hook.
  * - Every repo's commands:  `main.ts` reads each one's list (`"spell": { "commands" }` in its `package.json`).
+ * - Run inside a PROJECT that installs `spell` from npm and doesn't run a checkout (no `.spell/kit.json5`, no
+ *   `SPELL_KIT`), it hands off to that project's own `node_modules/spell` (epic `repo-split` T71):  the `PATH`'s
+ *   `spell` is a checkout's, but the project gets the version it installed.
  * - Install on your `PATH` with `yarn cli:install`, at the kit's root -- see `scripts/install-cli.mjs`.
  * - NOTE: a symlink to this file works:  node runs the real path, so `import.meta.url` is in the kit.
  */
@@ -22,8 +25,12 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 /** The kit's root:  this file is in its `bin/`. */
 const kitRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 
-const handoff = checkoutBin(process.cwd())
+/** Set by this bin before it hands off to another `spell`:  that one runs itself, never handing back. */
+const HANDED_OFF = Symbol.for("spell.bin.handedOff")
+
+const handoff = globalThis[HANDED_OFF] ? undefined : (checkoutBin(process.cwd()) ?? (await installedBin(process.cwd())))
 if (handoff) {
+  globalThis[HANDED_OFF] = true
   await import(pathToFileURL(handoff).href)
 } else {
   const { register } = await import("tsx/esm/api")
@@ -53,6 +60,20 @@ function checkoutBin(folder) {
       }
       if (dirname(dir) === dir) return undefined
     }
+  } catch {
+    return undefined
+  }
+}
+
+/**
+ * In a project that installs `spell` from npm and runs no checkout:  that install's bin (`projectBin()`);
+ * else `undefined`.
+ * - NEVER throws:  before this checkout's `yarn install` links `spell/...`, `undefined`
+ */
+async function installedBin(folder) {
+  try {
+    const { projectBin } = await import("spell/cli/projectBin.ts")
+    return projectBin(folder, ["node_modules/spell/bin/spell.mjs"])
   } catch {
     return undefined
   }

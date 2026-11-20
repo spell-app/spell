@@ -38,267 +38,273 @@ export class Artwork extends Thing {
 
   /** an address */
   // - its "primary image" is text
-  static { this.declareProp("primaryImage", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 1841, end: 1868 } }) }
+  //   -- an address
+  static { this.declareProp("primaryImage", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 1841, end: 1884 } }) }
   get primaryImage() { return this.getProp("primaryImage") }
   set primaryImage(value) { this.setProp("primaryImage", value) }
 
   /** an address */
   // - its "primary image small" is text
-  static { this.declareProp("primaryImageSmall", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 1885, end: 1918 } }) }
+  //   -- an address
+  static { this.declareProp("primaryImageSmall", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 1886, end: 1935 } }) }
   get primaryImageSmall() { return this.getProp("primaryImageSmall") }
   set primaryImageSmall(value) { this.setProp("primaryImageSmall", value) }
 
   // - its "additional images" is a list of text
-  static { this.declareProp("additionalImages", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/MetArtworks.api.spell", start: 1935, end: 1976 } }) }
+  static { this.declareProp("additionalImages", { itemType: "text", init: () => new List({ instanceType: "text" }), declaredAt: { path: "/MetArtworks.api.spell", start: 1937, end: 1978 } }) }
   get additionalImages() { return this.getProp("additionalImages") }
   set additionalImages(value) { this.setProp("additionalImages", value) }
 
   // - its "constituents" is a list of constituents
-  static { this.declareProp("constituents", { itemType: "Constituent", init: () => new List({ instanceType: "Constituent" }), declaredAt: { path: "/MetArtworks.api.spell", start: 1978, end: 2022 } }) }
+  static { this.declareProp("constituents", { itemType: "Constituent", init: () => new List({ instanceType: "Constituent" }), declaredAt: { path: "/MetArtworks.api.spell", start: 1980, end: 2024 } }) }
   get constituents() { return this.getProp("constituents") }
   set constituents(value) { this.setProp("constituents", value) }
 
   // - its "department" is text
-  static { this.declareProp("department", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2024, end: 2048 } }) }
+  static { this.declareProp("department", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2026, end: 2050 } }) }
   get department() { return this.getProp("department") }
   set department(value) { this.setProp("department", value) }
 
   // - its "object name" is text
-  static { this.declareProp("objectName", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2050, end: 2075 } }) }
+  static { this.declareProp("objectName", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2052, end: 2077 } }) }
   get objectName() { return this.getProp("objectName") }
   set objectName(value) { this.setProp("objectName", value) }
 
   // - its "title" is text
-  static { this.declareProp("title", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2077, end: 2096 } }) }
+  static { this.declareProp("title", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2079, end: 2098 } }) }
   get title() { return this.getProp("title") }
   set title(value) { this.setProp("title", value) }
 
   // - its "culture" is text
-  static { this.declareProp("culture", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2098, end: 2119 } }) }
+  static { this.declareProp("culture", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2100, end: 2121 } }) }
   get culture() { return this.getProp("culture") }
   set culture(value) { this.setProp("culture", value) }
 
   // - its "period" is text
-  static { this.declareProp("period", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2121, end: 2141 } }) }
+  static { this.declareProp("period", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2123, end: 2143 } }) }
   get period() { return this.getProp("period") }
   set period(value) { this.setProp("period", value) }
 
   // - its "dynasty" is text
-  static { this.declareProp("dynasty", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2143, end: 2164 } }) }
+  static { this.declareProp("dynasty", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2145, end: 2166 } }) }
   get dynasty() { return this.getProp("dynasty") }
   set dynasty(value) { this.setProp("dynasty", value) }
 
   // - its "reign" is text
-  static { this.declareProp("reign", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2166, end: 2185 } }) }
+  static { this.declareProp("reign", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2168, end: 2187 } }) }
   get reign() { return this.getProp("reign") }
   set reign(value) { this.setProp("reign", value) }
 
   // - its "portfolio" is text
-  static { this.declareProp("portfolio", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2187, end: 2210 } }) }
+  static { this.declareProp("portfolio", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2189, end: 2212 } }) }
   get portfolio() { return this.getProp("portfolio") }
   set portfolio(value) { this.setProp("portfolio", value) }
 
   // - its "artist role" is text
-  static { this.declareProp("artistRole", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2212, end: 2237 } }) }
+  static { this.declareProp("artistRole", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2214, end: 2239 } }) }
   get artistRole() { return this.getProp("artistRole") }
   set artistRole(value) { this.setProp("artistRole", value) }
 
   // - its "artist prefix" is text
-  static { this.declareProp("artistPrefix", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2239, end: 2266 } }) }
+  static { this.declareProp("artistPrefix", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2241, end: 2268 } }) }
   get artistPrefix() { return this.getProp("artistPrefix") }
   set artistPrefix(value) { this.setProp("artistPrefix", value) }
 
   // - its "artist display name" is text
-  static { this.declareProp("artistDisplayName", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2268, end: 2301 } }) }
+  static { this.declareProp("artistDisplayName", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2270, end: 2303 } }) }
   get artistDisplayName() { return this.getProp("artistDisplayName") }
   set artistDisplayName(value) { this.setProp("artistDisplayName", value) }
 
   // - its "artist display bio" is text
-  static { this.declareProp("artistDisplayBio", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2303, end: 2335 } }) }
+  static { this.declareProp("artistDisplayBio", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2305, end: 2337 } }) }
   get artistDisplayBio() { return this.getProp("artistDisplayBio") }
   set artistDisplayBio(value) { this.setProp("artistDisplayBio", value) }
 
   // - its "artist suffix" is text
-  static { this.declareProp("artistSuffix", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2337, end: 2364 } }) }
+  static { this.declareProp("artistSuffix", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2339, end: 2366 } }) }
   get artistSuffix() { return this.getProp("artistSuffix") }
   set artistSuffix(value) { this.setProp("artistSuffix", value) }
 
   // - its "artist alpha sort" is text
-  static { this.declareProp("artistAlphaSort", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2366, end: 2397 } }) }
+  static { this.declareProp("artistAlphaSort", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2368, end: 2399 } }) }
   get artistAlphaSort() { return this.getProp("artistAlphaSort") }
   set artistAlphaSort(value) { this.setProp("artistAlphaSort", value) }
 
   // - its "artist nationality" is text
-  static { this.declareProp("artistNationality", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2399, end: 2431 } }) }
+  static { this.declareProp("artistNationality", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2401, end: 2433 } }) }
   get artistNationality() { return this.getProp("artistNationality") }
   set artistNationality(value) { this.setProp("artistNationality", value) }
 
   // - its "artist begin date" is a number
-  static { this.declareProp("artistBeginDate", { type: "number", declaredAt: { path: "/MetArtworks.api.spell", start: 2433, end: 2468 } }) }
+  static { this.declareProp("artistBeginDate", { type: "number", declaredAt: { path: "/MetArtworks.api.spell", start: 2435, end: 2470 } }) }
   get artistBeginDate() { return this.getProp("artistBeginDate") }
   set artistBeginDate(value) { this.setProp("artistBeginDate", value) }
 
   // - its "artist end date" is a number
-  static { this.declareProp("artistEndDate", { type: "number", declaredAt: { path: "/MetArtworks.api.spell", start: 2470, end: 2503 } }) }
+  static { this.declareProp("artistEndDate", { type: "number", declaredAt: { path: "/MetArtworks.api.spell", start: 2472, end: 2505 } }) }
   get artistEndDate() { return this.getProp("artistEndDate") }
   set artistEndDate(value) { this.setProp("artistEndDate", value) }
 
   // - its "artist gender" is text
-  static { this.declareProp("artistGender", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2505, end: 2532 } }) }
+  static { this.declareProp("artistGender", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2507, end: 2534 } }) }
   get artistGender() { return this.getProp("artistGender") }
   set artistGender(value) { this.setProp("artistGender", value) }
 
   /** an address */
   // - its "artist wikidata url" is text
-  static { this.declareProp("artistWikidataUrl", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2534, end: 2567 } }) }
+  //   -- an address
+  static { this.declareProp("artistWikidataUrl", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2536, end: 2585 } }) }
   get artistWikidataUrl() { return this.getProp("artistWikidataUrl") }
   set artistWikidataUrl(value) { this.setProp("artistWikidataUrl", value) }
 
   /** an address */
   // - its "artist ulan url" is text
-  static { this.declareProp("artistUlanUrl", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2584, end: 2613 } }) }
+  //   -- an address
+  static { this.declareProp("artistUlanUrl", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2587, end: 2632 } }) }
   get artistUlanUrl() { return this.getProp("artistUlanUrl") }
   set artistUlanUrl(value) { this.setProp("artistUlanUrl", value) }
 
   // - its "object date" is text
-  static { this.declareProp("objectDate", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2630, end: 2655 } }) }
+  static { this.declareProp("objectDate", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2634, end: 2659 } }) }
   get objectDate() { return this.getProp("objectDate") }
   set objectDate(value) { this.setProp("objectDate", value) }
 
   // - its "object begin date" is a number
-  static { this.declareProp("objectBeginDate", { type: "number", declaredAt: { path: "/MetArtworks.api.spell", start: 2657, end: 2692 } }) }
+  static { this.declareProp("objectBeginDate", { type: "number", declaredAt: { path: "/MetArtworks.api.spell", start: 2661, end: 2696 } }) }
   get objectBeginDate() { return this.getProp("objectBeginDate") }
   set objectBeginDate(value) { this.setProp("objectBeginDate", value) }
 
   // - its "object end date" is a number
-  static { this.declareProp("objectEndDate", { type: "number", declaredAt: { path: "/MetArtworks.api.spell", start: 2694, end: 2727 } }) }
+  static { this.declareProp("objectEndDate", { type: "number", declaredAt: { path: "/MetArtworks.api.spell", start: 2698, end: 2731 } }) }
   get objectEndDate() { return this.getProp("objectEndDate") }
   set objectEndDate(value) { this.setProp("objectEndDate", value) }
 
   // - its "medium" is text
-  static { this.declareProp("medium", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2729, end: 2749 } }) }
+  static { this.declareProp("medium", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2733, end: 2753 } }) }
   get medium() { return this.getProp("medium") }
   set medium(value) { this.setProp("medium", value) }
 
   // - its "dimensions" is text
-  static { this.declareProp("dimensions", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2751, end: 2775 } }) }
+  static { this.declareProp("dimensions", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2755, end: 2779 } }) }
   get dimensions() { return this.getProp("dimensions") }
   set dimensions(value) { this.setProp("dimensions", value) }
 
   // - its "measurements" is a list of measurements
-  static { this.declareProp("measurements", { itemType: "Measurement", init: () => new List({ instanceType: "Measurement" }), declaredAt: { path: "/MetArtworks.api.spell", start: 2777, end: 2821 } }) }
+  static { this.declareProp("measurements", { itemType: "Measurement", init: () => new List({ instanceType: "Measurement" }), declaredAt: { path: "/MetArtworks.api.spell", start: 2781, end: 2825 } }) }
   get measurements() { return this.getProp("measurements") }
   set measurements(value) { this.setProp("measurements", value) }
 
   // - its "credit line" is text
-  static { this.declareProp("creditLine", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2823, end: 2848 } }) }
+  static { this.declareProp("creditLine", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2827, end: 2852 } }) }
   get creditLine() { return this.getProp("creditLine") }
   set creditLine(value) { this.setProp("creditLine", value) }
 
   // - its "geography type" is text
-  static { this.declareProp("geographyType", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2850, end: 2878 } }) }
+  static { this.declareProp("geographyType", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2854, end: 2882 } }) }
   get geographyType() { return this.getProp("geographyType") }
   set geographyType(value) { this.setProp("geographyType", value) }
 
   // - its "city" is text
-  static { this.declareProp("city", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2880, end: 2898 } }) }
+  static { this.declareProp("city", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2884, end: 2902 } }) }
   get city() { return this.getProp("city") }
   set city(value) { this.setProp("city", value) }
 
   // - its "state" is text
-  static { this.declareProp("state", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2900, end: 2919 } }) }
+  static { this.declareProp("state", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2904, end: 2923 } }) }
   get state() { return this.getProp("state") }
   set state(value) { this.setProp("state", value) }
 
   // - its "county" is text
-  static { this.declareProp("county", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2921, end: 2941 } }) }
+  static { this.declareProp("county", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2925, end: 2945 } }) }
   get county() { return this.getProp("county") }
   set county(value) { this.setProp("county", value) }
 
   // - its "country" is text
-  static { this.declareProp("country", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2943, end: 2964 } }) }
+  static { this.declareProp("country", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2947, end: 2968 } }) }
   get country() { return this.getProp("country") }
   set country(value) { this.setProp("country", value) }
 
   // - its "region" is text
-  static { this.declareProp("region", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2966, end: 2986 } }) }
+  static { this.declareProp("region", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2970, end: 2990 } }) }
   get region() { return this.getProp("region") }
   set region(value) { this.setProp("region", value) }
 
   // - its "subregion" is text
-  static { this.declareProp("subregion", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2988, end: 3011 } }) }
+  static { this.declareProp("subregion", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2992, end: 3015 } }) }
   get subregion() { return this.getProp("subregion") }
   set subregion(value) { this.setProp("subregion", value) }
 
   // - its "locale" is text
-  static { this.declareProp("locale", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3013, end: 3033 } }) }
+  static { this.declareProp("locale", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3017, end: 3037 } }) }
   get locale() { return this.getProp("locale") }
   set locale(value) { this.setProp("locale", value) }
 
   // - its "locus" is text
-  static { this.declareProp("locus", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3035, end: 3054 } }) }
+  static { this.declareProp("locus", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3039, end: 3058 } }) }
   get locus() { return this.getProp("locus") }
   set locus(value) { this.setProp("locus", value) }
 
   // - its "excavation" is text
-  static { this.declareProp("excavation", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3056, end: 3080 } }) }
+  static { this.declareProp("excavation", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3060, end: 3084 } }) }
   get excavation() { return this.getProp("excavation") }
   set excavation(value) { this.setProp("excavation", value) }
 
   // - its "river" is text
-  static { this.declareProp("river", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3082, end: 3101 } }) }
+  static { this.declareProp("river", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3086, end: 3105 } }) }
   get river() { return this.getProp("river") }
   set river(value) { this.setProp("river", value) }
 
   // - its "classification" is text
-  static { this.declareProp("classification", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3103, end: 3131 } }) }
+  static { this.declareProp("classification", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3107, end: 3135 } }) }
   get classification() { return this.getProp("classification") }
   set classification(value) { this.setProp("classification", value) }
 
   // - its "rights and reproduction" is text
-  static { this.declareProp("rightsAndReproduction", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3133, end: 3170 } }) }
+  static { this.declareProp("rightsAndReproduction", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3137, end: 3174 } }) }
   get rightsAndReproduction() { return this.getProp("rightsAndReproduction") }
   set rightsAndReproduction(value) { this.setProp("rightsAndReproduction", value) }
 
   // - its "link resource" is text
-  static { this.declareProp("linkResource", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3172, end: 3199 } }) }
+  static { this.declareProp("linkResource", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3176, end: 3203 } }) }
   get linkResource() { return this.getProp("linkResource") }
   set linkResource(value) { this.setProp("linkResource", value) }
 
   // - its "metadata date" is a date
-  static { this.declareProp("metadataDate", { type: "date", declaredAt: { path: "/MetArtworks.api.spell", start: 3201, end: 3230 } }) }
+  static { this.declareProp("metadataDate", { type: "date", declaredAt: { path: "/MetArtworks.api.spell", start: 3205, end: 3234 } }) }
   get metadataDate() { return this.getProp("metadataDate") }
   set metadataDate(value) { this.setProp("metadataDate", value) }
 
   // - its "repository" is text
-  static { this.declareProp("repository", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3232, end: 3256 } }) }
+  static { this.declareProp("repository", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3236, end: 3260 } }) }
   get repository() { return this.getProp("repository") }
   set repository(value) { this.setProp("repository", value) }
 
   /** an address */
   // - its "object url" is text, stored as "objectURL"
-  static { this.declareProp("objectUrl", { type: "text", storedAs: "objectURL", declaredAt: { path: "/MetArtworks.api.spell", start: 3258, end: 3305 } }) }
+  //   -- an address
+  static { this.declareProp("objectUrl", { type: "text", storedAs: "objectURL", declaredAt: { path: "/MetArtworks.api.spell", start: 3262, end: 3325 } }) }
   get objectUrl() { return this.getProp("objectUrl") }
   set objectUrl(value) { this.setProp("objectUrl", value) }
 
   // - its "tags" is a list of tags
-  static { this.declareProp("tags", { itemType: "Tag", init: () => new List({ instanceType: "Tag" }), declaredAt: { path: "/MetArtworks.api.spell", start: 3322, end: 3350 } }) }
+  static { this.declareProp("tags", { itemType: "Tag", init: () => new List({ instanceType: "Tag" }), declaredAt: { path: "/MetArtworks.api.spell", start: 3327, end: 3355 } }) }
   get tags() { return this.getProp("tags") }
   set tags(value) { this.setProp("tags", value) }
 
   /** an address */
   // - its "object wikidata url" is text
-  static { this.declareProp("objectWikidataUrl", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3352, end: 3385 } }) }
+  //   -- an address
+  static { this.declareProp("objectWikidataUrl", { type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3357, end: 3406 } }) }
   get objectWikidataUrl() { return this.getProp("objectWikidataUrl") }
   set objectWikidataUrl(value) { this.setProp("objectWikidataUrl", value) }
 
   // - its "timeline work" is yes or no, stored as "isTimelineWork"
-  static { this.declareProp("timelineWork", { type: "choice", storedAs: "isTimelineWork", declaredAt: { path: "/MetArtworks.api.spell", start: 3402, end: 3462 } }) }
+  static { this.declareProp("timelineWork", { type: "choice", storedAs: "isTimelineWork", declaredAt: { path: "/MetArtworks.api.spell", start: 3408, end: 3468 } }) }
   get timelineWork() { return this.getProp("timelineWork") }
   set timelineWork(value) { this.setProp("timelineWork", value) }
 
   // - its "gallery number" is a number
-  static { this.declareProp("galleryNumber", { type: "number", declaredAt: { path: "/MetArtworks.api.spell", start: 3464, end: 3496 } }) }
+  static { this.declareProp("galleryNumber", { type: "number", declaredAt: { path: "/MetArtworks.api.spell", start: 3470, end: 3502 } }) }
   get galleryNumber() { return this.getProp("galleryNumber") }
   set galleryNumber(value) { this.setProp("galleryNumber", value) }
 
@@ -372,12 +378,14 @@ export class Constituent extends Thing {
 
   /** an address */
   // - its "constituent ulan url" is text
+  //   -- an address
   static { this.declareProp("constituentUlanUrl", { type: "text" }) }
   get constituentUlanUrl() { return this.getProp("constituentUlanUrl") }
   set constituentUlanUrl(value) { this.setProp("constituentUlanUrl", value) }
 
   /** an address */
   // - its "constituent wikidata url" is text
+  //   -- an address
   static { this.declareProp("constituentWikidataUrl", { type: "text" }) }
   get constituentWikidataUrl() { return this.getProp("constituentWikidataUrl") }
   set constituentWikidataUrl(value) { this.setProp("constituentWikidataUrl", value) }
@@ -435,12 +443,14 @@ export class Tag extends Thing {
 
   /** an address */
   // - its "aat url" is text
+  //   -- an address
   static { this.declareProp("aatUrl", { type: "text" }) }
   get aatUrl() { return this.getProp("aatUrl") }
   set aatUrl(value) { this.setProp("aatUrl", value) }
 
   /** an address */
   // - its "wikidata url" is text
+  //   -- an address
   static { this.declareProp("wikidataUrl", { type: "text" }) }
   get wikidataUrl() { return this.getProp("wikidataUrl") }
   set wikidataUrl(value) { this.setProp("wikidataUrl", value) }

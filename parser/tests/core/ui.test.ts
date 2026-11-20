@@ -225,3 +225,86 @@ describe("a modal's buttons, and `the result` (epic `language` T155)", () => {
     expect(core.result()).toBe(3)
   })
 })
+
+describe("core.choose() / chooseColor():  `choose a card from the cards` (epic `language` P66)", () => {
+  /** A stand-in for the page's Spell UI runtime, whose choose dialog picks `positions`:  what it was asked for. */
+  function stubChooseDialog(positions: number[] | undefined) {
+    const asked: unknown[] = []
+    const modals = { choose: (options: unknown) => (asked.push(options), Promise.resolve(positions)) }
+    const page = { load: () => Promise.resolve(page), modals }
+    const key = Symbol.for("spell-ui:runtime")
+    ;(globalThis as Record<symbol, unknown>)[key] = page
+    core.resetRuntime()
+    onTestFinished(() => {
+      delete (globalThis as Record<symbol, unknown>)[key]
+      core.resetRuntime()
+    })
+    return asked
+  }
+
+  test("each row is its title, label or name, else itself as text;  `it` is the thing picked, `the result` ok", async () => {
+    const things = [{ title: "Ace" }, { label: "King" }, { name: "Queen" }, 7]
+    const asked = stubChooseDialog([1])
+    expect(await core.choose(things, { thing: "a card", shown: 10 })).toBe(things[1])
+    expect(core.result()).toBe("ok")
+    expect(asked).toEqual([
+      {
+        message: "Choose a card",
+        markdown: true,
+        rows: [{ title: "Ace" }, { title: "King" }, { title: "Queen" }, { title: "7" }],
+        several: false,
+        least: undefined,
+        most: undefined,
+        shown: 10
+      }
+    ])
+  })
+
+  test("a record:  its keys are the rows, and `it` the value under the key picked (Q73)", async () => {
+    const asked = stubChooseDialog([1])
+    expect(await core.choose({ Easy: 1, Hard: 3 }, { thing: "a level", prompt: "How hard?" })).toBe(3)
+    expect(asked[0]).toMatchObject({ message: "How hard?", rows: [{ title: "Easy" }, { title: "Hard" }] })
+  })
+
+  test("several:  `it` is a list, and the question says the count (Q74)", async () => {
+    const asked = stubChooseDialog([0, 2])
+    expect(await core.choose(["a", "b", "c"], { things: "letters", least: 2, most: 3 })).toEqual(["a", "c"])
+    expect(asked[0]).toMatchObject({ message: "Choose 2 to 3 letters", several: true, least: 2, most: 3 })
+    stubChooseDialog([0])
+    await core.choose(["a"], { things: "letters", most: 2 })
+    stubChooseDialog(undefined)
+    expect(await core.choose(["a"], { things: "letters" })).toEqual([])
+    expect(core.result()).toBe("cancel")
+  })
+
+  test("an empty list:  no dialog;  `the result` is cancel, and `it` nothing", async () => {
+    const asked = stubChooseDialog([0])
+    expect(await core.choose([], { thing: "a card" })).toBeUndefined()
+    expect(core.result()).toBe("cancel")
+    expect(asked).toEqual([])
+  })
+
+  test("cancelled:  `it` is nothing, `the result` cancel", async () => {
+    stubChooseDialog(undefined)
+    expect(await core.choose(["easy"], { thing: "one" })).toBeUndefined()
+    expect(core.result()).toBe("cancel")
+  })
+
+  test("`choose a color`:  Spell UI's 13 colors, each row marked as a color;  `it` is the hue name", async () => {
+    const asked = stubChooseDialog([12])
+    expect(await core.chooseColor({ thing: "a color" })).toBe("black")
+    const { rows } = asked[0] as { rows: { title: string; color: string }[] }
+    expect(rows).toHaveLength(13)
+    expect(rows[0]).toEqual({ title: "Red", color: "red" })
+  })
+
+  test("no Spell UI:  the question printed, and the first row picked", async () => {
+    vi.stubGlobal("document", undefined)
+    const info = vi.spyOn(core.console, "info").mockImplementation(() => undefined)
+    core.resetRuntime()
+    expect(await core.choose(["easy", "hard"], { thing: "one" })).toBe("easy")
+    expect(core.result()).toBe("ok")
+    expect(await core.choose(["a", "b", "c"], { things: "letters", least: 2 })).toEqual(["a", "b"])
+    expect(info).toHaveBeenCalledWith("Choose one (easy)")
+  })
+})

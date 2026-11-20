@@ -20,7 +20,7 @@ import type { PropertyOrigin } from "spell/ui/components/ui-property-editor/UIPr
 import { ListSelection, type ListClick } from "spell/util/ListSelection"
 import { appTexts, renameRefusal, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import { ClassSchemas } from "spell/app/app/ui/ClassSchemas"
-import { EDITOR_OWN } from "spell/app/app/ui/ui.types"
+import { EDITOR_FRAME, EDITOR_OWN } from "spell/app/app/ui/ui.types"
 import { isEditable } from "spell/app/app/pages/editorHotkeys"
 // Import directly, NOT through the runner barrel, which brings the runners themselves
 import { DRAG_START_PX } from "spell/util/Dragging"
@@ -780,8 +780,11 @@ export class Inspector {
    * - Or an element of a component built on Spell UI's, its vocabulary its own:  a notebook's `<spell-example>`.
    * - Or any other tag the drawing writes, a `<spacer />` (`isWrittenTag()`;  epic `editor` I169).
    * - An arrow:  handed on as it is (`NotebookController.cellAt()`).
+   * - Never a box the editor draws round parts (`EDITOR_FRAME`):  Design's device.
    */
   static isPart = (element: Element): boolean => {
+    // a box the editor draws round parts (Design's device) is looked through
+    if (element.hasAttribute(EDITOR_FRAME)) return false
     return !!SpellElement.thingOf(element) || isUIElement(element) || isWrittenTag(element)
   }
 
@@ -2724,6 +2727,7 @@ class PartSelector {
     for (const target of path) {
       if (target === area) return undefined
       if (!(target instanceof Element)) continue
+      if (target.hasAttribute(EDITOR_FRAME)) continue
       const host = (target.getRootNode() as ShadowRoot).host
       if (host?.localName.startsWith(UI_PREFIX)) continue
       const spacer = PartSelector.spacerAt(target, event as MouseEvent)

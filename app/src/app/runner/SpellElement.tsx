@@ -12,6 +12,7 @@ import { spellElementVocabulary } from "./SpellElement.en"
 import { Glides } from "./Glides"
 import { ActionMenus } from "./ActionMenus"
 import { LONG_PRESS_EVENT, LongPress } from "./LongPress"
+import { UIViewElements } from "./UIViewElements"
 
 // Above the class:  its `elementSetup` reads it while the class is defined
 /**
@@ -1456,6 +1457,8 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
    *   - so both targets' tags have the same attributes, and behave the same
    * - Its methods are its type's (`addMethods()`).
    * - Its sheet is its type's (`sheetFor()`).
+   * - A class built on a Spell UI element (`core.uiElementOf()`, `a ui tree view`) is that element's instead:
+   *   `UIViewElements`.
    * - Again (a program run again after an edit, or another `<spell-viewer>` running the same project):
    *   the platform can't define a tag twice, so it stays, and what's behind it is swapped (epic `drawable-thing` P7):
    *   - it draws with the latest `core` from then on (`SPELL_ELEMENTS`)
@@ -1463,6 +1466,9 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
    *   - what it draws comes from its `thing`, so a program run again draws its new things with their new `draw()`
    */
   static defineFor(tag: string, Class: Function, core: Core): void {
+    // built on a Spell UI element, `a "netlist column" is a ui tree view`:  that element's, not ours
+    const uiElement = core.uiElementOf(Class)
+    if (uiElement) return UIViewElements.defineFor(tag, Class, core, uiElement)
     SPELL_ELEMENTS.set(tag, { Class, core })
     // on a phone, a finger held on a view opens its right-click menu (epic `language` P62)
     LongPress.listen(SpellElement.isOnAView)

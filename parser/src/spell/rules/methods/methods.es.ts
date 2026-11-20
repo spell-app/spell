@@ -33,6 +33,8 @@ import { ShortcutKeys } from "./ShortcutKeys"
 import { ToDoSomething } from "./ToDoSomething"
 import { TypedMethodArg } from "./TypedMethodArg"
 import { TypeMethodArg } from "./TypeMethodArg"
+import { CallNative } from "./CallNative"
+import { UseNatives } from "./UseNatives"
 import { ValuedVarMethodArg } from "./ValuedVarMethodArg"
 import { VarMethodArg } from "./VarMethodArg"
 import { WithPropsArg } from "./WithPropsArg"
@@ -2040,6 +2042,40 @@ methodsEs.addRule(FailureHook, {
             'core.describeAction(Trabajo, "completar", { title: "Completar Trabajo", undoneAs: "Completar Trabajo" })',
             'core.addActionHook(Trabajo, "completar", { moment: "failed", hook: "failedCompletar", level: "app" })'
           ]
+        }
+      ]
+    }
+  ]
+})
+
+// `llamar al código nativo copyText con texto`:  English's `call native ...` (epic `from-console` P10)
+methodsEs.addRule(CallNative, {
+  syntax: "llamar al código nativo {name:identifier} (con [{args:expression} ,])?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "rechazado fuera de los pasos de una acción",
+          input: ["llamar al código nativo copyText con 1"],
+          js: '/* PARSE ERROR: "llamar al código nativo copyText con 1" llama a una función del código del proyecto:  va en los pasos de una acción, bajo "para ..." */'
+        }
+      ]
+    }
+  ]
+})
+
+// `usar copyText de clipboard.ts`, `usar todo de clipboard.ts`:  English's `use ... from ...`
+methodsEs.addRule(UseNatives, {
+  syntax: "usar ((all:todo)|[{names:identifier} ,]) de {file:identifier} \\. {ending:identifier}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "un proyecto sin ese archivo de código:  dice que lo añadas",
+          input: ["usar copyText de clipboard.ts"],
+          js: '/* PARSE ERROR: "clipboard.ts" no es uno de los archivos de código del proyecto:  añádelo primero al archivo del proyecto */'
         }
       ]
     }

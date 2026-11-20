@@ -55,7 +55,8 @@
 |   [property define_property_has L1]
 |   | its «"held items"» is a list of **text**
 |   [property define_property_has L1]
-|   | its «"location area encounters"» is **text**  ⟦// an address⟧
+|   | its «"location area encounters"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
 |   | its «"moves"» is a list of **pokemon moves**
 |   [property define_property_has L1]
@@ -310,13 +311,17 @@
 |   [property define_property_has L1]
 |   | its «"other"» is an **other**
 |   [property define_property_has L1]
-|   | its «"back shiny"» is **text**  ⟦// an address⟧
+|   | its «"back shiny"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"front shiny"» is **text**  ⟦// an address⟧
+|   | its «"front shiny"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"back default"» is **text**  ⟦// an address⟧
+|   | its «"back default"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"front default"» is **text**  ⟦// an address⟧
+|   | its «"front default"» is **text**
+|   |   ⟦-- an address⟧
 
 [thing create_type L0]
 | an «"other"» is a **thing**
@@ -332,39 +337,50 @@
 [thing create_type L0]
 | a «"home"» is a **thing**
 |   [property define_property_has L1]
-|   | its «"front shiny"» is **text**  ⟦// an address⟧
+|   | its «"front shiny"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"front default"» is **text**  ⟦// an address⟧
+|   | its «"front default"» is **text**
+|   |   ⟦-- an address⟧
 
 [thing create_type L0]
 | a «"showdown"» is a **thing**
 |   [property define_property_has L1]
-|   | its «"back shiny"» is **text**  ⟦// an address⟧
+|   | its «"back shiny"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"front shiny"» is **text**  ⟦// an address⟧
+|   | its «"front shiny"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"back default"» is **text**  ⟦// an address⟧
+|   | its «"back default"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"front default"» is **text**  ⟦// an address⟧
+|   | its «"front default"» is **text**
+|   |   ⟦-- an address⟧
 
 [thing create_type L0]
 | a «"dream world"» is a **thing**
 |   [property define_property_has L1]
-|   | its «"front default"» is **text**  ⟦// an address⟧
+|   | its «"front default"» is **text**
+|   |   ⟦-- an address⟧
 
 [thing create_type L0]
 | an «"official artwork"» is a **thing**
 |   [property define_property_has L1]
-|   | its «"front shiny"» is **text**  ⟦// an address⟧
+|   | its «"front shiny"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"front default"» is **text**  ⟦// an address⟧
+|   | its «"front default"» is **text**
+|   |   ⟦-- an address⟧
 
 [thing create_type L0]
 | a «"cry"» is a **thing**
 |   [property define_property_has L1]
-|   | its «"latest"» is **text**  ⟦// an address⟧
+|   | its «"latest"» is **text**
+|   |   ⟦-- an address⟧
 |   [property define_property_has L1]
-|   | its «"legacy"» is **text**  ⟦// an address⟧
+|   | its «"legacy"» is **text**
+|   |   ⟦-- an address⟧
 
 [thing create_type L0]
 | a «"stat"» is a **thing**
@@ -543,7 +559,8 @@
 |   [property define_property_has L1]
 |   | its «"name"» is **text**
 |   [property define_property_has L1]
-|   | its «"address"» is **text**, stored as «"url"»  ⟦// never read:  its collection wasn't asked for⟧
+|   | its «"address"» is **text**, stored as «"url"»
+|   |   ⟦-- never read:  its collection wasn't asked for⟧
 
 ==== /Favourites.api.spell
 ⟪## Your favourites:  kept on this device⟫
@@ -558,7 +575,8 @@
 |   [property define_property_has L1]
 |   | its «"name"» is **text**
 |   [property define_property_has L1]
-|   | its «"address"» is **text**  ⟦// the pokemon's own, at PokéAPI⟧
+|   | its «"address"» is **text**
+|   |   ⟦-- the pokemon's own, at PokéAPI⟧
 
 ==== /Pokemon.spell
 ⟪# A Pokémon:  its card, its own page, and its family⟫
@@ -605,11 +623,13 @@
 |   |   |   return
 |   |   [control if L2]
 |   |   | if the **pokedex's showing**    ‾value(the pokedex's showing)
-|   |   |   stop the **pokedex's showing's sound**  ⟦// the last one's cry ends with its page⟧    ‾value(the pokedex's showing's sound)
+|   |   |   stop the **pokedex's showing's sound**    ‾value(the pokedex's showing's sound)
+|   |   |     ⟦-- the last one's cry ends with its page⟧
 |   |   |   add the **pokedex's showing** to the **pokedex's trail**    ‾value(the pokedex's showing) ‾value(the pokedex's trail)
 |   |   set the **pokedex's search** to _""_    ‾value(the pokedex's search)
 |   |   set the **pokedex's showing** to it    ‾value(the pokedex's showing) ‾value(it)
-|   |   load its **sound**  ⟦// so Hear it plays it at once⟧    ‾value(its sound)
+|   |   load its **sound**    ‾value(its sound)
+|   |     ⟦-- so Hear it plays it at once⟧
 |   |   scroll to the top
 
 |   [action to_do_something L1]

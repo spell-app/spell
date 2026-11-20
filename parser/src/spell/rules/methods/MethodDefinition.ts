@@ -84,6 +84,8 @@ export class MethodDefinition<
    * - In a type's outline body, a signature that names no type is the type's own:  see `takeSubject()`.
    */
   processSignature(groups: P.MatchGroups, signature: MethodSignatureData, scope: P.Scope): MethodSignatureData {
+    const uiHook = this.inlineInitialType ? MethodDefinition.uiHookOf(signature, scope) : undefined
+    if (uiHook) return uiHook
     const initialType = signature.types.find((type) => !type.isSimple)
     const subject = this.inlineInitialType && !initialType ? P.SubjectScope.of(scope)?.subjectType : undefined
     if (subject && (groups as { asTest?: P.Match }).asTest) {
@@ -118,6 +120,30 @@ export class MethodDefinition<
       signature.methodBits.unshift("test")
       signature.syntaxBits.unshift(`${asTest.raw ?? asTest.value}`.toLowerCase())
     }
+    return signature
+  }
+
+  /**
+   * `signature` as the hook of a Spell UI element it overrides, in a type built on one (epic `from-console` P11):
+   * `to give the row class of (an item)` in a `ui tree view`'s body is `rowClass(item)`, the type's own method.
+   * - Its arguments stay arguments, whatever their type:  the element calls it with them.
+   *   One of a type the program doesn't have, `(an item)`, holds the element's own data, typed as nothing.
+   * - `undefined` outside such a type's body, or for words that aren't one of its hooks (`SP.UIViews.hookFor()`).
+   * - SIDE EFFECT:  names `signature`'s method for the hook, on the type.
+   */
+  private static uiHookOf(signature: MethodSignatureData, scope: P.Scope): MethodSignatureData | undefined {
+    const subject = P.SubjectScope.of(scope)?.subjectType
+    const hook = subject && SP.UIViews.hookFor(subject, signature)
+    if (!subject || !hook) return undefined
+    signature.instanceType = subject.name
+    signature.methodBits = [hook.name]
+    signature.uiHook = hook.name
+    // what the element hands it is the element's own data:  `(an item)` names no type of the program's
+    signature.args = signature.args.map((arg) =>
+      arg.datatype && !scope.getType(`${arg.datatype}`)
+        ? new P.ASTVariableExpression(arg.match, { name: arg.name, type: arg.type })
+        : arg
+    )
     return signature
   }
 
@@ -941,6 +967,8 @@ export class MethodDefinition<
    */
   private isUndoableByDefault(match: P.MatchFor<this>, methodName: string): boolean {
     if (!this.undoableByDefault || HOOKS.some(({ hook }) => hook === methodName)) return false
+    // an element's hook, `rowClass`, is asked as it draws:  never an undo step
+    if (this.getSignature(match)?.uiHook) return false
     const signature = (match.groups as { signature?: P.Match }).signature
     if (`${signature?.inputText ?? ""}`.trim().replace(/"$/, "").endsWith("?")) return false
     // an action that may `cancel` gives back yes or no, and is still an action

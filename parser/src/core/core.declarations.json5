@@ -2197,6 +2197,57 @@
     },
     {
       "kind": "method",
+      "name": "choose",
+      "of": "core",
+      "module": "ui",
+      "waits": true,
+      "params": [
+        {
+          "name": "list"
+        },
+        {
+          "name": "options"
+        }
+      ],
+      "section": "Talking to the person",
+      "description": "Ask the person to pick from `list` in a dialog:  the thing picked -- compiled from `choose a card from the cards` (`await`ed), into a new `it` (spell's `choose` rule;  epic `language` P66)."
+    },
+    {
+      "kind": "method",
+      "name": "chooseColor",
+      "of": "core",
+      "module": "ui",
+      "waits": true,
+      "params": [
+        {
+          "name": "options"
+        }
+      ],
+      "section": "Talking to the person",
+      "description": "Ask the person to pick one of Spell UI's colors, each drawn as a chip:  its hue name, `red` -- compiled from `choose a color` (epic `language` P66)."
+    },
+    {
+      "kind": "method",
+      "name": "choosePositions",
+      "of": "core",
+      "module": "ui",
+      "waits": true,
+      "params": [
+        {
+          "name": "message"
+        },
+        {
+          "name": "rows"
+        },
+        {
+          "name": "options"
+        }
+      ],
+      "section": "Talking to the person",
+      "description": "The page's dialog behind `choose()`:  which rows were picked, by position, or `undefined` if cancelled."
+    },
+    {
+      "kind": "method",
       "name": "showDrawn",
       "of": "core",
       "module": "ui",
@@ -2823,6 +2874,18 @@
         }
       ],
       "description": "The element class handed for view class `Class` (`useElement()`) -- `undefined` if none was."
+    },
+    {
+      "kind": "method",
+      "name": "uiElementOf",
+      "of": "core",
+      "module": "elements",
+      "params": [
+        {
+          "name": "Class"
+        }
+      ],
+      "description": "The Spell UI element view class `Class` is built on, e.g. `ui-tree` for `a \"netlist column\" is a ui tree view` (epic `from-console` P11) -- `undefined` for a view drawn as its own."
     },
     {
       "kind": "method",

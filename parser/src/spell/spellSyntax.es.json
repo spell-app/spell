@@ -5735,7 +5735,7 @@
           "ruleNames": ["prompt"],
           "internal": false,
           "file": "src/spell/rules/UI/Prompt.ts",
-          "line": 19,
+          "line": 20,
           "purpose": "Ask the person for some text, in a dialog, with `message` and its starting text, `defaultValue`.",
           "syntaxes": [
             {
@@ -5750,6 +5750,103 @@
                 },
                 "py": {
                   "code": "it = await core.prompt(\"¿Nombre para el bebé?\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "Choose",
+          "ruleNames": ["choose"],
+          "internal": false,
+          "file": "src/spell/rules/UI/Choose.ts",
+          "line": 28,
+          "purpose": "Ask the person to pick one thing from a list, in a dialog (epic `language` P66).",
+          "syntaxes": [
+            {
+              "syntax": "elegir (article:un|una) ({type:known_type}|{arg:singular_identifier}) de {list:expression} (con el mensaje {message:expression})? (,? mostrando {shown:number} a la vez)?",
+              "example": "elegir una carta de mazo",
+              "outputs": {
+                "js": {
+                  "code": "const it = await core.choose(mazo, { thing: \"una carta\" })"
+                },
+                "ts": {
+                  "code": "const it = await core.choose(mazo, { thing: \"una carta\" })"
+                },
+                "py": {
+                  "code": "it = await core.choose(mazo, {\"thing\": \"una carta\"})"
+                }
+              }
+            },
+            {
+              "syntax": "elegir (one:una|uno) de {list:expression} (con el mensaje {message:expression})? (,? mostrando {shown:number} a la vez)?",
+              "example": "elegir una de [\"fácil\", \"normal\", \"difícil\"]",
+              "outputs": {
+                "js": {
+                  "code": "const it = await core.choose([\"fácil\", \"normal\", \"difícil\"], { thing: \"una\" })"
+                },
+                "ts": {
+                  "code": "const it = await core.choose([\"fácil\", \"normal\", \"difícil\"], { thing: \"una\" })"
+                },
+                "py": {
+                  "code": "it = await core.choose([\"fácil\", \"normal\", \"difícil\"], {\"thing\": \"una\"})"
+                }
+              }
+            },
+            {
+              "syntax": "elegir (article:un|una) {type:known_type} (con el mensaje {message:expression})? (,? mostrando {shown:number} a la vez)?",
+              "example": "elegir un palo de carta",
+              "outputs": {
+                "js": {
+                  "code": "const it = await core.choose(Carta.Palos, { thing: \"un palo de carta\" })"
+                },
+                "ts": {
+                  "code": "const it = await core.choose(Carta.Palos, { thing: \"un palo de carta\" })"
+                },
+                "py": {
+                  "code": "it = await core.choose(Carta.PALOS, {\"thing\": \"un palo de carta\"})"
+                }
+              }
+            },
+            {
+              "syntax": "elegir (article:un|una) (color:color) (con el mensaje {message:expression})? (,? mostrando {shown:number} a la vez)?",
+              "example": "elegir un color",
+              "outputs": {
+                "js": {
+                  "code": "const it = await core.chooseColor({ thing: \"un color\" })"
+                },
+                "ts": {
+                  "code": "const it = await core.chooseColor({ thing: \"un color\" })"
+                },
+                "py": {
+                  "code": "it = await core.choose_color({\"thing\": \"un color\"})"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ChooseSeveral",
+          "ruleNames": ["choose_several"],
+          "internal": false,
+          "file": "src/spell/rules/UI/Choose.ts",
+          "line": 118,
+          "purpose": "Ask the person to pick several things from a list, in a dialog (epic `language` P66, Q74).",
+          "syntaxes": [
+            {
+              "syntax": "elegir ((many:muchas|muchos)|hasta {most:number}|entre {least:number} y {most:number})? ({type:plural_type}|{arg:plural_identifier}) de {list:expression} (con el mensaje {message:expression})? (,? mostrando {shown:number} a la vez)?",
+              "example": "elegir cartas de mazo",
+              "outputs": {
+                "js": {
+                  "code": "const it = await core.choose(mazo, { things: \"cartas\" })"
+                },
+                "ts": {
+                  "code": "const it = await core.choose(mazo, { things: \"cartas\" })"
+                },
+                "py": {
+                  "code": "it = await core.choose(mazo, {\"things\": \"cartas\"})"
                 }
               }
             }
@@ -6345,7 +6442,7 @@
           "ruleNames": ["create_type"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateType.ts",
-          "line": 29,
+          "line": 31,
           "purpose": "`a card is a thing` -- declares `type` as a new class extending `superType`.",
           "syntaxes": [
             {
@@ -9701,7 +9798,7 @@
           "ruleNames": ["wrapper_action"],
           "internal": false,
           "file": "src/spell/rules/places/WrapperAction.ts",
-          "line": 32,
+          "line": 35,
           "purpose": "A second `to complete a job`, for a server's action, wraps it (epic `data` P50, Q83, I104).",
           "syntaxes": [
             {
@@ -10354,7 +10451,7 @@
           "ruleNames": ["call_the_server"],
           "internal": false,
           "file": "src/spell/rules/places/WrapperAction.ts",
-          "line": 99,
+          "line": 102,
           "purpose": "In an action that wraps a server's own, run what it wraps (epic `data` P50, Q83, J266).",
           "syntaxes": [
             {
@@ -11872,6 +11969,34 @@
                   "code": "class Trabajo(Thing):\n    estado = prop(type=\"text\")\n\n    def completar(self) -> None:\n        self.estado = \"hecho\"\n\n    def failed_completar(self, error: Any) -> Any:\n        if core.error_is(error, \"not found\"):\n            return\n        elif core.error_is(error, \"offline\"):\n            return core.pass_the_error()\n        return core.pass_the_error()\n\ncore.describe_action(Trabajo, \"completar\", {\"title\": \"Completar Trabajo\", \"undone_as\": \"Completar Trabajo\"})\ncore.add_action_hook(Trabajo, \"completar\", {\"moment\": \"failed\", \"hook\": \"failed_completar\", \"level\": \"app\"})"
                 }
               }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "CallNative",
+          "ruleNames": ["call_native"],
+          "internal": false,
+          "file": "src/spell/rules/methods/CallNative.ts",
+          "line": 23,
+          "purpose": "In an action's steps, call a function from one of the project's code files (epic `from-console` P10, Q9).",
+          "syntaxes": [
+            {
+              "syntax": "llamar al código nativo {name:identifier} (con [{args:expression} ,])?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "UseNatives",
+          "ruleNames": ["use_natives"],
+          "internal": false,
+          "file": "src/spell/rules/methods/UseNatives.ts",
+          "line": 22,
+          "purpose": "At the top of a Spell file, say which code file the functions its `call native` lines call come from (epic `from-console` P10, Q15).",
+          "syntaxes": [
+            {
+              "syntax": "usar ((all:todo)|[{names:identifier} ,]) de {file:identifier} \\. {ending:identifier}"
             }
           ],
           "aliases": ["statement"]

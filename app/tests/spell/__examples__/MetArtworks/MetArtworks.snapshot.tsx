@@ -35,216 +35,222 @@ export class Artwork extends Thing {
 
   /** an address */
   // - its "primary image" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 1841, end: 1868 } })
+  //   -- an address
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 1841, end: 1884 } })
   accessor primaryImage!: string
 
   /** an address */
   // - its "primary image small" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 1885, end: 1918 } })
+  //   -- an address
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 1886, end: 1935 } })
   accessor primaryImageSmall!: string
 
   // - its "additional images" is a list of text
-  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/MetArtworks.api.spell", start: 1935, end: 1976 } })
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/MetArtworks.api.spell", start: 1937, end: 1978 } })
   accessor additionalImages!: List<string>
 
   // - its "constituents" is a list of constituents
-  @prop({ itemType: "Constituent", init: () => new List<Constituent>({ instanceType: "Constituent" }), declaredAt: { path: "/MetArtworks.api.spell", start: 1978, end: 2022 } })
+  @prop({ itemType: "Constituent", init: () => new List<Constituent>({ instanceType: "Constituent" }), declaredAt: { path: "/MetArtworks.api.spell", start: 1980, end: 2024 } })
   accessor constituents!: List<Constituent>
 
   // - its "department" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2024, end: 2048 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2026, end: 2050 } })
   accessor department!: string
 
   // - its "object name" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2050, end: 2075 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2052, end: 2077 } })
   accessor objectName!: string
 
   // - its "title" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2077, end: 2096 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2079, end: 2098 } })
   accessor title!: string
 
   // - its "culture" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2098, end: 2119 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2100, end: 2121 } })
   accessor culture!: string
 
   // - its "period" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2121, end: 2141 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2123, end: 2143 } })
   accessor period!: string
 
   // - its "dynasty" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2143, end: 2164 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2145, end: 2166 } })
   accessor dynasty!: string
 
   // - its "reign" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2166, end: 2185 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2168, end: 2187 } })
   accessor reign!: string
 
   // - its "portfolio" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2187, end: 2210 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2189, end: 2212 } })
   accessor portfolio!: string
 
   // - its "artist role" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2212, end: 2237 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2214, end: 2239 } })
   accessor artistRole!: string
 
   // - its "artist prefix" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2239, end: 2266 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2241, end: 2268 } })
   accessor artistPrefix!: string
 
   // - its "artist display name" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2268, end: 2301 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2270, end: 2303 } })
   accessor artistDisplayName!: string
 
   // - its "artist display bio" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2303, end: 2335 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2305, end: 2337 } })
   accessor artistDisplayBio!: string
 
   // - its "artist suffix" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2337, end: 2364 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2339, end: 2366 } })
   accessor artistSuffix!: string
 
   // - its "artist alpha sort" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2366, end: 2397 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2368, end: 2399 } })
   accessor artistAlphaSort!: string
 
   // - its "artist nationality" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2399, end: 2431 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2401, end: 2433 } })
   accessor artistNationality!: string
 
   // - its "artist begin date" is a number
-  @prop({ type: "number", declaredAt: { path: "/MetArtworks.api.spell", start: 2433, end: 2468 } })
+  @prop({ type: "number", declaredAt: { path: "/MetArtworks.api.spell", start: 2435, end: 2470 } })
   accessor artistBeginDate!: number
 
   // - its "artist end date" is a number
-  @prop({ type: "number", declaredAt: { path: "/MetArtworks.api.spell", start: 2470, end: 2503 } })
+  @prop({ type: "number", declaredAt: { path: "/MetArtworks.api.spell", start: 2472, end: 2505 } })
   accessor artistEndDate!: number
 
   // - its "artist gender" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2505, end: 2532 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2507, end: 2534 } })
   accessor artistGender!: string
 
   /** an address */
   // - its "artist wikidata url" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2534, end: 2567 } })
+  //   -- an address
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2536, end: 2585 } })
   accessor artistWikidataUrl!: string
 
   /** an address */
   // - its "artist ulan url" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2584, end: 2613 } })
+  //   -- an address
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2587, end: 2632 } })
   accessor artistUlanUrl!: string
 
   // - its "object date" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2630, end: 2655 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2634, end: 2659 } })
   accessor objectDate!: string
 
   // - its "object begin date" is a number
-  @prop({ type: "number", declaredAt: { path: "/MetArtworks.api.spell", start: 2657, end: 2692 } })
+  @prop({ type: "number", declaredAt: { path: "/MetArtworks.api.spell", start: 2661, end: 2696 } })
   accessor objectBeginDate!: number
 
   // - its "object end date" is a number
-  @prop({ type: "number", declaredAt: { path: "/MetArtworks.api.spell", start: 2694, end: 2727 } })
+  @prop({ type: "number", declaredAt: { path: "/MetArtworks.api.spell", start: 2698, end: 2731 } })
   accessor objectEndDate!: number
 
   // - its "medium" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2729, end: 2749 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2733, end: 2753 } })
   accessor medium!: string
 
   // - its "dimensions" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2751, end: 2775 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2755, end: 2779 } })
   accessor dimensions!: string
 
   // - its "measurements" is a list of measurements
-  @prop({ itemType: "Measurement", init: () => new List<Measurement>({ instanceType: "Measurement" }), declaredAt: { path: "/MetArtworks.api.spell", start: 2777, end: 2821 } })
+  @prop({ itemType: "Measurement", init: () => new List<Measurement>({ instanceType: "Measurement" }), declaredAt: { path: "/MetArtworks.api.spell", start: 2781, end: 2825 } })
   accessor measurements!: List<Measurement>
 
   // - its "credit line" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2823, end: 2848 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2827, end: 2852 } })
   accessor creditLine!: string
 
   // - its "geography type" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2850, end: 2878 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2854, end: 2882 } })
   accessor geographyType!: string
 
   // - its "city" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2880, end: 2898 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2884, end: 2902 } })
   accessor city!: string
 
   // - its "state" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2900, end: 2919 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2904, end: 2923 } })
   accessor state!: string
 
   // - its "county" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2921, end: 2941 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2925, end: 2945 } })
   accessor county!: string
 
   // - its "country" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2943, end: 2964 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2947, end: 2968 } })
   accessor country!: string
 
   // - its "region" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2966, end: 2986 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2970, end: 2990 } })
   accessor region!: string
 
   // - its "subregion" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2988, end: 3011 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 2992, end: 3015 } })
   accessor subregion!: string
 
   // - its "locale" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3013, end: 3033 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3017, end: 3037 } })
   accessor locale!: string
 
   // - its "locus" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3035, end: 3054 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3039, end: 3058 } })
   accessor locus!: string
 
   // - its "excavation" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3056, end: 3080 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3060, end: 3084 } })
   accessor excavation!: string
 
   // - its "river" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3082, end: 3101 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3086, end: 3105 } })
   accessor river!: string
 
   // - its "classification" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3103, end: 3131 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3107, end: 3135 } })
   accessor classification!: string
 
   // - its "rights and reproduction" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3133, end: 3170 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3137, end: 3174 } })
   accessor rightsAndReproduction!: string
 
   // - its "link resource" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3172, end: 3199 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3176, end: 3203 } })
   accessor linkResource!: string
 
   // - its "metadata date" is a date
-  @prop({ type: "date", declaredAt: { path: "/MetArtworks.api.spell", start: 3201, end: 3230 } })
+  @prop({ type: "date", declaredAt: { path: "/MetArtworks.api.spell", start: 3205, end: 3234 } })
   accessor metadataDate!: Date
 
   // - its "repository" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3232, end: 3256 } })
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3236, end: 3260 } })
   accessor repository!: string
 
   /** an address */
   // - its "object url" is text, stored as "objectURL"
-  @prop({ type: "text", storedAs: "objectURL", declaredAt: { path: "/MetArtworks.api.spell", start: 3258, end: 3305 } })
+  //   -- an address
+  @prop({ type: "text", storedAs: "objectURL", declaredAt: { path: "/MetArtworks.api.spell", start: 3262, end: 3325 } })
   accessor objectUrl!: string
 
   // - its "tags" is a list of tags
-  @prop({ itemType: "Tag", init: () => new List<Tag>({ instanceType: "Tag" }), declaredAt: { path: "/MetArtworks.api.spell", start: 3322, end: 3350 } })
+  @prop({ itemType: "Tag", init: () => new List<Tag>({ instanceType: "Tag" }), declaredAt: { path: "/MetArtworks.api.spell", start: 3327, end: 3355 } })
   accessor tags!: List<Tag>
 
   /** an address */
   // - its "object wikidata url" is text
-  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3352, end: 3385 } })
+  //   -- an address
+  @prop({ type: "text", declaredAt: { path: "/MetArtworks.api.spell", start: 3357, end: 3406 } })
   accessor objectWikidataUrl!: string
 
   // - its "timeline work" is yes or no, stored as "isTimelineWork"
-  @prop({ type: "choice", storedAs: "isTimelineWork", declaredAt: { path: "/MetArtworks.api.spell", start: 3402, end: 3462 } })
+  @prop({ type: "choice", storedAs: "isTimelineWork", declaredAt: { path: "/MetArtworks.api.spell", start: 3408, end: 3468 } })
   accessor timelineWork!: boolean
 
   // - its "gallery number" is a number
-  @prop({ type: "number", declaredAt: { path: "/MetArtworks.api.spell", start: 3464, end: 3496 } })
+  @prop({ type: "number", declaredAt: { path: "/MetArtworks.api.spell", start: 3470, end: 3502 } })
   accessor galleryNumber!: number
 
   @drawn draw() {
@@ -316,11 +322,13 @@ export class Constituent extends Thing {
 
   /** an address */
   // - its "constituent ulan url" is text
+  //   -- an address
   @prop({ type: "text" })
   accessor constituentUlanUrl!: string
 
   /** an address */
   // - its "constituent wikidata url" is text
+  //   -- an address
   @prop({ type: "text" })
   accessor constituentWikidataUrl!: string
 
@@ -368,11 +376,13 @@ export class Tag extends Thing {
 
   /** an address */
   // - its "aat url" is text
+  //   -- an address
   @prop({ type: "text" })
   accessor aatUrl!: string
 
   /** an address */
   // - its "wikidata url" is text
+  //   -- an address
   @prop({ type: "text" })
   accessor wikidataUrl!: string
 }

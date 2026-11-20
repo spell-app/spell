@@ -696,6 +696,11 @@ The top bar's Run | Edit | Design | Site tabs pick how much of the editor shows:
   - What it draws takes the palette's drops, moves, cut, copy and paste, written into the view's file or its
     property editor's (`Card.editor.spell`).
   - A page picked shows in the app itself, the site going to it;  Site's page form has Design too.
+  - Its Gallery (epic `editor` P38) draws a view's samples side by side:  the ones saved in `Card.samples.spell`,
+    beside `Card.spell`, else ones made from its choices (each suit, face up and down).
+    Save Sample names the selected one and writes it there, one step Undo takes back.
+  - Its sizes, under the list:  Fit, Phone, Tablet, Desktop (Spell UI's `<ui-device>`, with its own Rotate), or a
+    width you type;  a site's page takes the size as the app's width.
 
 - Run is a page of its own, with its own address.
 - A phone only runs:  no Edit, for now.
@@ -868,7 +873,7 @@ A Spanish browser gets "Guardar" where an English one gets "Save":
 - ⌘F opens a compact find bar like VS Code's, over the code's top right, its Replace row showing until you fold it
   ([CodeMirrorFind](src/app/ui/codemirror/CodeMirrorFind.ts)).
 - The popups that show by themselves (suggestions, signature help, hovers) wait for typing to pause,
-  as long as Settings… › Popup delay says ([CodeMirrorPopups](src/app/ui/codemirror/CodeMirrorPopups.ts)):
+  as long as Settings… › "Delay before showing help" says ([CodeMirrorPopups](src/app/ui/codemirror/CodeMirrorPopups.ts)):
   Short 0.4 s, Standard 0.8 s, Long 1.5 s.
 - Drawn bubbly, every line is 25px, and a block's feet sit in the blank line under it, so scrolling never changes
   the file's height.

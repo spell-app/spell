@@ -7,6 +7,8 @@
  *   - The page plugs in through `core.elementDefiner`, which app's `SpellElement.tsx` fills in.
  *   - Why:  core never imports Spell UI.
  *   - No definer (a runner without Spell UI, a test):  the tag is named, nothing is defined.
+ * - A view built on a Spell UI element names it, `static uiElement = "ui-tree"` (`core.uiElementOf()`):
+ *   the page builds its tag on that element (epic `from-console` P11).
  * - Compiled TypeScript also writes each type's element class, and hands it over (P10):
  *   `core.useElement(Card, CardElement)`.
  *   The page builds the tag on that class.
@@ -150,6 +152,17 @@ export const elementsMethods = defineCoreModule({
    */
   elementClassOf(Class: Function): Function | undefined {
     return Object.getOwnPropertyDescriptor(Class, ELEMENT_CLASS)?.value as Function | undefined
+  },
+
+  /**
+   * The Spell UI element view class `Class` is built on, e.g. `ui-tree` for `a "netlist column" is a ui tree view`
+   * (epic `from-console` P11) -- `undefined` for a view drawn as its own.
+   * - Compiled spell says it in the class:  `static uiElement = "ui-tree"`;  a sub-class inherits it.
+   * - The page's `elementDefiner` builds the class's tag on that element (app's `SpellElement.defineFor()`).
+   */
+  uiElementOf(Class: Function): string | undefined {
+    const { uiElement } = Class as { uiElement?: unknown }
+    return typeof uiElement === "string" ? uiElement : undefined
   },
 
   /**
