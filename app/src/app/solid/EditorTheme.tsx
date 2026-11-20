@@ -31,6 +31,10 @@ import "./EditorTheme.css"
  *     Glass and Fruity share the glass chrome, Merlot's panels meet edge to edge, Spell's bar has no fill or line.
  * - A theme made with Spell UI's theme editor and saved by name is one of My themes (`SavedTheme`, epic `debut`
  *   P25):  picked in the menu like any theme, its base worn, then its sheet.
+ * - The open project's own themes (`<name>.theme.json5` beside its site, epic `old-console-redo` P1) are offered
+ *   first in the menu, under the project's title, once its site has worn one (`offerProjectThemes()`, I36):
+ *   picked like any theme, kept as `project:<name>`;  another project open, they're offered no more.
+ *   - The chrome is keyed on the theme of Spell's it builds on (Harbor:  `matrix`).
  * - The code's colours are the theme's own (epic `debut` P22):  the code editor reads them off the page,
  *   light or dark, its `--ui-code-<role>` colours (`CodeRules`), and follows each change by itself.
  * - Loads lazily, as `loadUI()` does:  Spell UI's half is its own chunk, off the app's first paint.
@@ -113,6 +117,43 @@ export class EditorTheme {
   }
 
   /**
+   * Offer the open project's own themes in the theme menu, first (epic `old-console-redo` I36):  those read from
+   * `projectFolder` so far (`SiteThemes.readIn()`), as its site starts and wears one (`RunSite.themeTokens()`).
+   * - Only while that project is the one open:  `<ThemeMenu>` takes them back when another opens.
+   * - NEVER throws:  a failure is said on the console.
+   */
+  static async offerProjectThemes(projectFolder: string): Promise<void> {
+    try {
+      const project = editor.project
+      if (!project || SPACES_FOLDER + encodeURI(project.projectId) !== projectFolder) return
+      const [{ ThemePreference }, { SiteThemes }, { ThemeNames }] = await Promise.all([
+        import("spell/ui/components/ui-theme-menu/ThemePreference"),
+        import("spell/app/app/runner/SiteThemes"),
+        import("spell/ui/components/components.types")
+      ])
+      const themes = SiteThemes.readIn(projectFolder).map(({ name, title, base }) => ({
+        name,
+        title: title ?? ThemeNames.titleOf(name),
+        ...(base && { base })
+      }))
+      offeredFor = project.path
+      await ThemePreference.offer(themes.length ? { title: project.title, themes } : undefined)
+    } catch (error) {
+      console.error("EditorTheme.offerProjectThemes():  couldn't offer the project's themes", error)
+    }
+  }
+
+  /**
+   * The project open is no longer the one whose themes are offered:  offer none (`<ThemeMenu>`, as the project changes).
+   */
+  static async forgetProjectThemes(projectPath: string | undefined): Promise<void> {
+    if (offeredFor === undefined || offeredFor === projectPath) return
+    offeredFor = undefined
+    const { ThemePreference } = await import("spell/ui/components/ui-theme-menu/ThemePreference")
+    await ThemePreference.offer(undefined)
+  }
+
+  /**
    * Wear theme `name`, previewed by Spell UI's theme editor:
    * marked on `<html>` as a chosen one is, but never remembered (`ThemePreference.wear()`).
    * - NEVER throws:  `PageBridge.listen()` catches and logs.
@@ -157,21 +198,32 @@ export class EditorTheme {
 
   /**
    * Theme `theme` is chosen:  mark `<html>` with its name, which the editor's chrome is keyed on;
-   * one of My themes (`mine:<id>`), the theme it builds on.
+   * one of My themes (`mine:<id>`), the theme it builds on;  one of the project's (`project:<name>`), the theme of
+   * Spell's it builds on, or while it isn't offered, the default the page wears.
    * - My themes themselves are worn by `ThemePreference` (epic `debut` P25).
    */
   private static follow(theme: string | undefined): void {
     chosenTheme = theme
     void Promise.all([
       import("spell/ui/components/ui-theme-editor/SavedTheme"),
-      import("spell/ui/components/components.types")
+      import("spell/ui/components/components.types"),
+      import("spell/ui/components/ui-theme-menu/ThemePreference")
     ])
-      .then(([{ SavedTheme }, { ThemeNames }]) => {
+      .then(([{ SavedTheme }, { ThemeNames }, { ThemePreference }]) => {
         const mine = SavedTheme.picked(theme)
-        const shown = mine?.choices.base ?? theme
+        const isProjects = theme?.startsWith(PROJECT_PREFIX)
+        const offered = ThemePreference.offeredTheme(theme)
+        const shown = isProjects
+          ? offered
+            ? (offered.base ?? ThemePreference.defaultTheme)
+            : ThemePreference.defaultTheme
+          : (mine?.choices.base ?? theme)
         if (shown) document.documentElement.dataset.spellTheme = shown
         else delete document.documentElement.dataset.spellTheme
-        setChosenTitle(mine?.name ?? (theme ? ThemeNames.titleOf(theme) : ""))
+        const projectTitle = isProjects
+          ? (offered?.title ?? ThemeNames.titleOf(theme!.slice(PROJECT_PREFIX.length)))
+          : undefined
+        setChosenTitle(mine?.name ?? projectTitle ?? (theme ? ThemeNames.titleOf(theme) : ""))
       })
       .catch((error: unknown) => console.error("EditorTheme:  couldn't mark the theme", error))
   }
@@ -189,6 +241,11 @@ export class EditorTheme {
  *   server;  none when built), then "Edit theme...":  the theme editor's page (`<ThemeEditorPage>`, epic `debut` P6).
  ****************/
 export function ThemeMenu(): JSX.Element {
+  // another project open:  the last one's themes are offered no more
+  createEffect(
+    () => editor.project?.path,
+    (path) => void EditorTheme.forgetProjectThemes(path)
+  )
   return (
     <ui-item class="ThemeMenu">
       <ui-theme-menu size="small" bench={import.meta.env.DEV ? String(import.meta.env.SPELL_PAGE_SERVER) : "none"}>
@@ -262,6 +319,15 @@ const [chosenTitle, setChosenTitle] = createSignal("")
  * what the theme bench opens in.  Not reactive:  read on a click.
  */
 let chosenTheme: string | undefined
+
+/** The path of the project whose themes the menu offers (`EditorTheme.offerProjectThemes()`);  `undefined`:  none. */
+let offeredFor: string | undefined
+
+/** Where a project's folder is served:  `/spaces/<project id>`, as the running site's `core.projectFolder`. */
+const SPACES_FOLDER = "/spaces/"
+
+/** The prefix of a project's theme as it's chosen (`OFFERED_PREFIX`;  data, so it's here too). */
+const PROJECT_PREFIX = "project:"
 
 /** The theme bench's page the editor opens it on:  the app's. */
 const BENCH_PAGE = "app"

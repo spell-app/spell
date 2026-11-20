@@ -4,7 +4,7 @@ import { isServer, type JSX } from "@solidjs/web"
 import { E, UI, UIT } from "spell/ui/core"
 // Import directly:  the theme editor's barrel would load the editor
 import { BenchAddress } from "spell/ui/components/ui-theme-editor/BenchAddress"
-import { ThemeMenu } from "./ThemeMenu"
+import { ThemeMenu, type ThemeMenuEntry } from "./ThemeMenu"
 import { ThemePreference } from "./ThemePreference"
 import { HueDropdown } from "./HueDropdown"
 // Import directly:  My themes, without the editor
@@ -36,7 +36,8 @@ import themeMenuCSS from "./UIThemeMenu.css?inline"
  *       - Light | Dark | Auto, a segmented `<ui-menu part="schemes">` of `<ui-item part="scheme-option">`s,
  *         as every other row of a few buttons in Spell UI:  the scheme the viewer CHOSE, Auto while it follows the OS
  *       - the theme list (`role=menu` of `menuitemradio`s, the chosen one checked):
- *         Spell's own themes (`UI.themes.own`), each with its one-line description (`ThemeMenu`)
+ *         Spell's own themes (`UI.themes.own`), each with its one-line description (`ThemeMenu`);  above them, the
+ *         themes the page offers (a project's, `ThemePreference.offer()`) under a dashed divider, then My themes
  *       - under a divider, "Theme bench" (`<a part="bench">`):  the theme bench, in a new window, in the theme
  *         chosen (`bench`;  Owen:  "Add \"theme bench\" link to theme dropdown, opens in new window")
  *       - the `end` slot's rows, the page's own (the Spell editor's palette:  "Edit theme...")
@@ -230,12 +231,13 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
   readonly texts: ThemeMenuText = (key, params) => this.translationForKey(key, params)
 
   /**
-   * What the list / dropdown shows:  Spell's own themes (`UI.themes.own`).
+   * What the list / dropdown shows:  Spell's own themes (`UI.themes.own`), after the page's offered ones and My themes.
    * - Read only once the runtime has loaded (`render()` waits for it):  `UI.themes` exists only then.
    */
   @E.derived
   get themeMenu(): ThemeMenu {
-    return new ThemeMenu({ themes: UI.themes.own, text: this.texts, mine: this.myThemes })
+    const offered = isServer ? undefined : ThemePreference.offered
+    return new ThemeMenu({ themes: UI.themes.own, text: this.texts, mine: this.myThemes, offered })
   }
 
   /**
@@ -244,7 +246,7 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
    *   and every row was drawn again as the vocabulary or My themes were read again (epic `editor` I66).
    */
   @E.derived({ equals: isSameEntries })
-  private get entries(): E.MenuEntry[] {
+  private get entries(): ThemeMenuEntry[] {
     return this.themeMenu.entries
   }
 
@@ -492,11 +494,14 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
     if (scheme) this.chooseScheme(scheme, event)
   }
 
-  /** One row of the overlay's list:  a theme (or a divider or a header, which `ThemeMenu` lists none of today). */
-  private entry(entry: E.MenuEntry): JSX.Element {
+  /**
+   * One row of the overlay's list:  a theme, a group's header, or a divider (`dashed`:  the one closing the page's
+   * offered themes).
+   */
+  private entry(entry: ThemeMenuEntry): JSX.Element {
     if ("type" in entry) {
       return entry.type === "divider" ? (
-        <div class={DIVIDER_CLASS} role="separator" />
+        <div class={[DIVIDER_CLASS, { [DASHED_CLASS]: !!entry.dashed }]} role="separator" />
       ) : (
         <div class={UIT.HEADER}>{entry.text}</div>
       )
@@ -800,6 +805,9 @@ const MENU_CLASS = "menu"
 /** Class word of a divider in the overlay. */
 const DIVIDER_CLASS = "divider"
 
+/** Class word of the dashed divider closing the page's offered themes (a project's). */
+const DASHED_CLASS = "dashed"
+
 /** Class word of the overlay's scheme control. */
 const SCHEMES_CLASS = "schemes"
 
@@ -813,6 +821,6 @@ const OPTION_CLASS = "option"
 const CHECK_CLASS = "check"
 
 /** Do `a` and `b` list the same entries, each saying the same?  Entries are plain data. */
-function isSameEntries(a: readonly E.MenuEntry[], b: readonly E.MenuEntry[]): boolean {
+function isSameEntries(a: readonly ThemeMenuEntry[], b: readonly ThemeMenuEntry[]): boolean {
   return a.length === b.length && a.every((entry, index) => JSON.stringify(entry) === JSON.stringify(b[index]))
 }

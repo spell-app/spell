@@ -26,6 +26,26 @@ describe("ThemeMenu.entries", () => {
     const menu = new ThemeMenu({ themes: ["my-theme"], text: keyText })
     expect(menu.entries).toEqual([{ value: "my-theme", text: "My Theme" }])
   })
+
+  test("the page's offered themes (a project's) come first, under its title, then a dashed divider", () => {
+    const menu = new ThemeMenu({
+      themes: ["spell"],
+      text: keyText,
+      offered: { title: "Harbor Clone", themes: [{ name: "harbor", title: "Harbor", base: "matrix" }] }
+    })
+    expect(menu.entries).toEqual([
+      { type: "header", text: "Harbor Clone" },
+      { value: "project:harbor", text: "Harbor", description: "Matrix" },
+      { type: "divider", text: "", dashed: true },
+      { value: "spell", text: "Spell", description: "spellDescription" }
+    ])
+    expect(menu.titleFor("project:harbor")).toBe("Harbor")
+  })
+
+  test("offering no themes lists none", () => {
+    const menu = new ThemeMenu({ themes: ["spell"], text: keyText, offered: { title: "Empty", themes: [] } })
+    expect(menu.entries).toEqual([{ value: "spell", text: "Spell", description: "spellDescription" }])
+  })
 })
 
 describe("ThemeMenu.labelFor()", () => {

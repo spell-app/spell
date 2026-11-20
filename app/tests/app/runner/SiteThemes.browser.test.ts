@@ -50,6 +50,16 @@ describe("SiteThemes.tokens()", () => {
   })
 })
 
+describe("SiteThemes.readIn()", () => {
+  test("the project themes read from a folder, each with the theme of Spell UI's it builds on, through the project's", async () => {
+    await SiteThemes.tokens("harbor-night", PROJECT)
+    const read = SiteThemes.readIn(PROJECT)
+    expect(read).toContainEqual({ name: "harbor", base: "matrix" })
+    expect(read).toContainEqual({ name: "harbor-night", base: "matrix" })
+    expect(SiteThemes.readIn("/nowhere")).toEqual([])
+  })
+})
+
 describe("ViewerSiteHost", () => {
   test("the site keeps its address:  `/` to start, then where it last went;  its theme as Run gives it", async () => {
     const host = new ViewerSiteHost()

@@ -186,9 +186,17 @@ export class RunSite implements SiteHost {
    * Theme `name`'s look for the running site alone (epic `mockup` P8):  its tokens as one block of declarations, worn
    * inline by the site's frame, so the editor around it keeps its own theme (`SiteThemes.tokens()`).
    * - One of Spell UI's, else the project's own, `<name>.theme.json5` in `projectFolder` (epic `old-console-redo` P1).
+   *   - The project's own are then offered in the editor's theme menu, first (I36, `EditorTheme.offerProjectThemes()`).
    * - Rejects on a theme in neither.
    */
-  themeTokens = (name: string, projectFolder?: string): Promise<string> => SiteThemes.tokens(name, projectFolder)
+  themeTokens = async (name: string, projectFolder?: string): Promise<string> => {
+    const tokens = await SiteThemes.tokens(name, projectFolder)
+    if (projectFolder) {
+      const { EditorTheme } = await import("spell/app/app/solid/EditorTheme")
+      void EditorTheme.offerProjectThemes(projectFolder)
+    }
+    return tokens
+  }
 
   /** The editor's Run URL of a site's `address`, in project `projectPath`:  `/run/<project>/films/4`. */
   static runUrlFor(projectPath: string, address: string): string {

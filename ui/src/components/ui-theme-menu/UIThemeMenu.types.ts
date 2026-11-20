@@ -58,13 +58,37 @@ export type ShownScheme = Exclude<SchemeChoice, "system">
 
 /** The theme, its tint and the scheme chosen now (`ThemePreference.chosen`). */
 export type ThemeAndScheme = {
-  /** a `UI.themes` name, one of `UI.themes.own` (`spell`, `fruity` ...) */
+  /** a `UI.themes` name, one of `UI.themes.own` (`spell`, `fruity` ...), `mine:<id>`, or `project:<name>` */
   readonly theme: string
   /** the chosen scheme;  `system` follows the OS */
   readonly scheme: SchemeChoice
   /** the theme's tint (epic `debut` P23):  one of Spell UI's colours;  none:  the theme as it is */
   readonly tint?: UIT.ThemeHue
 }
+
+/**
+ * The themes a page offers besides Spell's own (`ThemePreference.offer()`, epic `old-console-redo` I36):  a project's,
+ * `<name>.theme.json5` beside its site, which the page has defined in `UI.themes` (`UI.themes.define()`).
+ */
+export type OfferedThemes = {
+  /** whose they are, the heading over them in the menu:  the project's title (`Harbor Clone`) */
+  readonly title: string
+  /** the themes, in the menu's order */
+  readonly themes: readonly OfferedTheme[]
+}
+
+/** One theme a page offers (`OfferedThemes`). */
+export type OfferedTheme = {
+  /** its name in `UI.themes`, as defined (`harbor`) */
+  readonly name: string
+  /** its title for people (`Harbor`) */
+  readonly title: string
+  /** the theme of Spell's it builds on, if any (`matrix`):  its description, and the editor's chrome */
+  readonly base?: string
+}
+
+/** The prefix of a theme a page offers, as it's chosen and kept:  `project:harbor` (`ThemePreference.offer()`). */
+export const OFFERED_PREFIX = "project:"
 
 /**
  * The tints a theme leaves out of its row, by theme:  each a colour that can't read on it, light or dark, as its

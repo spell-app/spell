@@ -331,6 +331,37 @@ describe("ThemePreference.wear()", () => {
   })
 })
 
+describe("ThemePreference.offer():  a project's themes (epic `old-console-redo` I36)", () => {
+  const offered = { title: "Harbor Clone", themes: [{ name: "test-project", title: "Test Project", base: "matrix" }] }
+
+  beforeEach(() => {
+    if (!UI.themes.has("test-project")) UI.themes.define("test-project", ":root { --test-project: 1; }")
+  })
+
+  test("an offered theme is chosen as `project:<name>`, worn, and kept", async () => {
+    await ThemePreference.offer(offered)
+    expect(ThemePreference.offered).toBe(offered)
+    await ThemePreference.setTheme("project:test-project")
+    expect(ThemePreference.chosen.theme).toBe("project:test-project")
+    expect(localStorage.getItem(THEME_KEYS.theme)).toBe("project:test-project")
+    expect(UI.themes.current).toBe("test-project")
+    expect(ThemePreference.tintsFor("project:test-project")).toEqual([])
+  })
+
+  test("not offered (yet, or any more):  the default is worn, the choice kept;  offered again, it's worn", async () => {
+    localStorage.setItem(THEME_KEYS.theme, "project:test-project")
+    ThemePreference.reset()
+    await ThemePreference.restore()
+    expect(ThemePreference.chosen.theme).toBe("project:test-project")
+    expect(UI.themes.current).toBe(DEFAULT_THEME)
+    await ThemePreference.offer(offered)
+    expect(UI.themes.current).toBe("test-project")
+    await ThemePreference.offer(undefined)
+    expect(UI.themes.current).toBe(DEFAULT_THEME)
+    expect(ThemePreference.chosen.theme).toBe("project:test-project")
+  })
+})
+
 describe("ThemePreference:  the address's ?theme= and ?scheme=", () => {
   /** Load this page at `search`, as a page opened at an address with it, until the test ends. */
   function at(search: string) {

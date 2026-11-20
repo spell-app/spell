@@ -1,6 +1,6 @@
 import { type E, UIT } from "spell/ui/core"
 import type { MyTheme } from "spell/ui/components/ui-theme-editor/SavedTheme"
-import type { ThemeMenuText, ThemeMenuTextKey } from "./UIThemeMenu.types"
+import { OFFERED_PREFIX, type OfferedThemes, type ThemeMenuText, type ThemeMenuTextKey } from "./UIThemeMenu.types"
 
 /****************
  * ### `ThemeMenu`
@@ -9,6 +9,9 @@ import type { ThemeMenuText, ThemeMenuTextKey } from "./UIThemeMenu.types"
  *   each with its one-line description.
  *   - Nothing else since epic `debut` P17:  no Plain, no Classic, no Fomantic theme
  *     (those are archived, `src/styles/themes/archive/`).
+ * - Above them all, the themes the page offers, a project's (`ThemePreference.offered`, epic `old-console-redo` I36),
+ *   under its title, then My themes, each group closed by a divider:  the project's DASHED, as the editor's right-click
+ *   menu marks where the program's own items end and the editor's begin (`ThemeMenuEntry.dashed`).
  * - Titles:  `UIT.ThemeNames.titleOf()`, the theme editor's Start from's too.
  * - One per state of its inputs:  the element remakes it when they change.
  ****************/
@@ -22,33 +25,64 @@ export class ThemeMenu {
   /** My themes, the ones the person saved (`SavedTheme.list`), listed first. */
   readonly mine: readonly MyTheme[]
 
-  constructor({ themes, text, mine = [] }: ThemeMenuProps) {
+  /** The themes the page offers, a project's (`ThemePreference.offered`):  listed before everything. */
+  readonly offered: OfferedThemes | undefined
+
+  constructor({ themes, text, mine = [], offered }: ThemeMenuProps) {
     this.themes = themes
     this.text = text
     this.mine = mine
+    this.offered = offered?.themes.length ? offered : undefined
   }
 
   /**
    * The list's entries:  My themes first, under their heading, when there's one (epic `debut` P25, Owen's C6:
    * "My themes, above spell's");  then one per theme of Spell's, its title and description.
    * - One of My themes is `mine:<id>`, described by the theme it builds on.
+   * - Before them, the page's offered themes (a project's), under its title, then a DASHED divider (epic
+   *   `old-console-redo` I36, Owen:  "at the top above the spell themes, with a dashed-border separator"):
+   *   each `project:<name>`, described by the theme it builds on.
    */
-  get entries(): E.MenuEntry[] {
-    const spells: E.MenuEntry[] = this.themes.map((name) => {
+  get entries(): ThemeMenuEntry[] {
+    const spells: ThemeMenuEntry[] = this.themes.map((name) => {
       const key = DESCRIPTIONS[name]
       return { value: name, text: this.titleFor(name), ...(key && { description: this.text(key) }) }
     })
-    if (!this.mine.length) return spells
-    const mine: E.MenuEntry[] = this.mine.map((theme) => ({
-      value: `${MINE_PREFIX}${theme.id}`,
-      text: theme.name,
-      description: this.pickTitleFor(theme.choices.base, theme.choices.primary)
-    }))
-    return [{ type: "header", text: this.text("myThemes") }, ...mine, { type: "divider", text: "" }, ...spells]
+    const mine: ThemeMenuEntry[] = this.mine.length
+      ? [
+          { type: "header", text: this.text("myThemes") },
+          ...this.mine.map((theme) => ({
+            value: `${MINE_PREFIX}${theme.id}`,
+            text: theme.name,
+            description: this.pickTitleFor(theme.choices.base, theme.choices.primary)
+          })),
+          { type: "divider", text: "" }
+        ]
+      : []
+    const offered: ThemeMenuEntry[] = this.offered
+      ? [
+          { type: "header", text: this.offered.title },
+          ...this.offered.themes.map(({ name, title, base }) => ({
+            value: `${OFFERED_PREFIX}${name}`,
+            text: title,
+            ...(base && { description: this.titleFor(base) })
+          })),
+          { type: "divider", text: "", dashed: true }
+        ]
+      : []
+    return [...offered, ...mine, ...spells]
   }
 
-  /** Display title of theme `name`:  `merlot` => `Merlot`;  one of My themes (`mine:<id>`), its name. */
+  /**
+   * Display title of theme `name`:  `merlot` => `Merlot`;  one of My themes (`mine:<id>`), its name;  one the page
+   * offers (`project:<name>`), its title.
+   */
   titleFor(name: string): string {
+    if (name.startsWith(OFFERED_PREFIX)) {
+      const bare = name.slice(OFFERED_PREFIX.length)
+      const theme = this.offered?.themes.find((each) => each.name === bare)
+      return theme?.title ?? UIT.ThemeNames.titleOf(bare)
+    }
     if (name.startsWith(MINE_PREFIX)) {
       const theme = this.mine.find((kept) => `${MINE_PREFIX}${kept.id}` === name)
       if (theme) return theme.name
@@ -76,7 +110,15 @@ export type ThemeMenuProps = {
   text: ThemeMenuText
   /** My themes (`SavedTheme.list`):  listed first;  none, by default */
   mine?: readonly MyTheme[]
+  /** the themes the page offers (`ThemePreference.offered`):  listed before My themes;  none, by default */
+  offered?: OfferedThemes
 }
+
+/**
+ * One row of the list:  a menu entry (`E.MenuEntry`), a divider maybe `dashed`:  the one closing the page's offered
+ * themes (a project's), drawn as the editor's right-click menu's line between the program's items and its own.
+ */
+export type ThemeMenuEntry = E.MenuOption | (E.MenuSeparator & { dashed?: boolean })
 
 /** The prefix of one of My themes' names in the list:  `mine:<id>` (`SavedTheme.PREFIX`;  data, so it's here too). */
 const MINE_PREFIX = "mine:"

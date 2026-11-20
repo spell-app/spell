@@ -16,12 +16,15 @@ import { E, UI, UIT, type Themes } from "spell/ui/core"
 import { SavedTheme } from "spell/ui/components/ui-theme-editor/SavedTheme"
 import {
   DEFAULT_THEME,
+  OFFERED_PREFIX,
   OLD_THEME_KEYS,
   SCHEME_SWITCHING,
   TINTS_LEFT_OUT,
   SchemeChoices,
   THEME_KEYS,
   THEME_STORE,
+  type OfferedTheme,
+  type OfferedThemes,
   type SchemeChoice,
   type ShownScheme,
   type ThemeAndScheme,
@@ -58,6 +61,8 @@ const ADDRESS_PARAMS = { theme: "theme", scheme: "scheme" } as const
  * - Theme:  `DEFAULT_THEME` (Glass, epic `debut` Q39) until the person picks another,
  *   one of Spell's own themes (`UI.themes.own`), in a tint (`glass:pink`, P23), or one of My themes (`mine:<id>`,
  *   `SavedTheme`, P25):  its base, then its sheet;  one deleted since:  the default.
+ *   - Or one the page offers, a project's (`project:harbor`, `offer()`, epic `old-console-redo` I36):  worn while
+ *     it's offered;  while it isn't (another project open, or none yet), the default is worn and the choice kept.
  *   - A theme remembered under its old name comes back as its new one (`studio` as `merlot`, `UIT.ThemeNames`).
  *   - Any other name no longer in the set (Plain, Classic, a Fomantic theme, before epic `debut` P17):
  *     the default, and forgotten.
@@ -159,6 +164,33 @@ export class ThemePreference {
   }
 
   /**
+   * The themes this page offers besides Spell's own (`offer()`):  a project's;  `undefined`:  none.  Reactive.
+   */
+  static get offered(): OfferedThemes | undefined {
+    return ThemePreference.offeredNow
+  }
+
+  /**
+   * Offer `offered` besides Spell's own themes, listed first in every menu (epic `old-console-redo` I36):  the themes
+   * of the project the page shows, which it has defined in `UI.themes` (`UI.themes.define()`);  `undefined`:  none.
+   * - Each is chosen and kept as `project:<name>` (`OFFERED_PREFIX`), so a page that doesn't offer it yet keeps it.
+   * - The theme chosen being one of them, it's worn now, or, no longer offered, the default instead (still chosen).
+   */
+  static async offer(offered: OfferedThemes | undefined): Promise<void> {
+    ThemePreference.offeredNow = offered
+    const { theme } = ThemePreference.chosen
+    ThemePreference.tell(ThemePreference.chosen)
+    if (theme.startsWith(OFFERED_PREFIX)) await ThemePreference.applyTheme(theme)
+  }
+
+  /** Theme `name`, chosen as `project:<name>`, if the page offers it now (`offer()`);  else `undefined`. */
+  static offeredTheme(name: string | undefined): OfferedTheme | undefined {
+    if (!name?.startsWith(OFFERED_PREFIX)) return undefined
+    const bare = name.slice(OFFERED_PREFIX.length)
+    return ThemePreference.offeredNow?.themes.find((theme) => theme.name === bare)
+  }
+
+  /**
    * Choose tint `tint` for the theme chosen (`undefined`:  none, the theme as it is):  remember it with the theme as
    * one name (`glass:pink`), tell subscribers, wear it (epic `debut` P23).
    * - A tint the theme leaves out (`ThemePreference.tintsFor()`):  none.
@@ -179,6 +211,8 @@ export class ThemePreference {
   static tintsFor(theme: string): readonly UIT.ThemeHue[] {
     // one of My themes:  its colours are its own (epic `debut` P25)
     if (theme.startsWith(SavedTheme.PREFIX)) return []
+    // a project's:  its colours are its own too
+    if (theme.startsWith(OFFERED_PREFIX)) return []
     const leftOut = TINTS_LEFT_OUT[theme] ?? []
     return UIT.ThemeHues.filter((hue) => !leftOut.includes(hue))
   }
@@ -193,7 +227,7 @@ export class ThemePreference {
 
   /** A kept pick's theme and tint:  `glass:pink` => `{ theme: "glass", tint: "pink" }`;  a tint that isn't one, none. */
   static pickOf(text: string): { theme: string; tint?: UIT.ThemeHue } {
-    if (text.startsWith(SavedTheme.PREFIX)) return { theme: text }
+    if (text.startsWith(SavedTheme.PREFIX) || text.startsWith(OFFERED_PREFIX)) return { theme: text }
     const [theme = "", tint] = text.split(TINT_SEPARATOR)
     return UIT.ThemeHues.includes(tint as UIT.ThemeHue) ? { theme, tint: tint as UIT.ThemeHue } : { theme }
   }
@@ -324,6 +358,7 @@ export class ThemePreference {
     ThemePreference.addressed = undefined
     ThemePreference.kept = undefined
     ThemePreference.spaced = undefined
+    ThemePreference.offeredNow = undefined
     ColorScheme.rereadAddress()
   }
 
@@ -343,6 +378,9 @@ export class ThemePreference {
     const params = new URLSearchParams(typeof location === "undefined" ? "" : location.search)
     return (ThemePreference.addressed = { theme: params.get(ADDRESS_PARAMS.theme) || undefined })
   }
+
+  /** The themes the page offers besides Spell's (`offer()`). */
+  @E.state private static accessor offeredNow: OfferedThemes | undefined = undefined
 
   /** One of My themes' sheets is on the page, put there by `applyTheme()`:  taken off when another theme's chosen. */
   private static isWearingMine = false
@@ -520,6 +558,9 @@ export class ThemePreference {
       ThemePreference.isWearingMine = false
       SavedTheme.putOnPage("")
     }
+    // one the page offers (`project:harbor`):  it, while it's offered;  else the default, the choice kept
+    if (!ThemePreference.worn && name.startsWith(OFFERED_PREFIX))
+      return themes.apply(ThemePreference.offeredTheme(name)?.name ?? ThemePreference.defaultTheme)
     const { tint } = ThemePreference.chosen
     if (ThemePreference.worn || !tint) return themes.apply(ThemePreference.worn ?? name)
     const { ThemeDraft } = await import("spell/ui/components/ui-theme-editor/ThemeDraft")
@@ -545,7 +586,7 @@ export class ThemePreference {
    * or, no longer a theme (`classic`, a Fomantic theme), the default theme.
    */
   private static knownName(themes: Themes, name: string): string {
-    if (SavedTheme.picked(name)) return name
+    if (SavedTheme.picked(name) || name.startsWith(OFFERED_PREFIX)) return name
     const now = UIT.ThemeNames.nameNow(themes, name)
     return themes.own.includes(now) ? now : ThemePreference.defaultTheme
   }

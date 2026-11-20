@@ -196,6 +196,15 @@
     margin: 0.375em 0.5em;
     background: var(--ui-border-color);
   }
+  /*
+   * the divider closing the page's offered themes, a project's (epic `old-console-redo` I36):  the editor's right-click
+   * menu's line between the program's items and its own (the app's `MenuBar.css`, I102), 2px dashed, a shade darker
+   */
+  .divider.dashed {
+    height: 0;
+    background: none;
+    border-top: 2px dashed var(--ui-border-color-strong);
+  }
   /* Theme bench, then the `end` slot's rows, the page's own:  a theme's row each, the first under a divider. */
   .panel > .bench,
   .panel > slot::slotted(*) {

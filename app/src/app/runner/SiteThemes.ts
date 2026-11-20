@@ -48,6 +48,29 @@ export class SiteThemes {
   }
 
   /**
+   * The project themes read from folder `projectFolder` so far (`tokens()`), each with the theme of Spell UI's it
+   * builds on, through any of the project's it extends:  what the editor's theme menu offers (epic `old-console-redo`
+   * I36, `EditorTheme.offerProjectThemes()`).
+   * - `base`:  `undefined` for one that extends nothing.
+   */
+  static readIn(projectFolder: string): { name: string; title?: string; base?: string }[] {
+    return Object.entries(PROJECT_THEMES)
+      .filter(([name]) => PROJECT_FOLDERS[name] === projectFolder)
+      .map(([name, data]) => ({ name, ...(data.title && { title: data.title }), ...SiteThemes.baseOf(name) }))
+  }
+
+  /** The theme of Spell UI's project theme `name` builds on, through the project's it extends:  `{ base }`, or `{}`. */
+  private static baseOf(name: string): { base?: string } {
+    const seen = new Set<string>()
+    let base = PROJECT_THEMES[name]?.extends
+    while (base && PROJECT_THEMES[base] && !seen.has(base)) {
+      seen.add(base)
+      base = PROJECT_THEMES[base]!.extends
+    }
+    return base && !PROJECT_THEMES[base] ? { base } : {}
+  }
+
+  /**
    * Read theme `name` from the project's folder, and define it in `UI.themes`:  what it extends first, when that's
    * the project's too.
    * - `seen`:  the themes on the way here, so one extending itself is said, not followed forever.
@@ -86,6 +109,7 @@ export class SiteThemes {
     const file = new ThemeFile({ name, data, themes })
     UI.themes.define(name, file.standaloneCss(base ? await UI.themes.load(base) : ""))
     PROJECT_THEMES[name] = data
+    PROJECT_FOLDERS[name] = projectFolder!
   }
 
   /** The text at `url`;  `undefined` when nothing's there.  Any other failure rejects. */
@@ -121,3 +145,6 @@ const FONTS_ADDED = new Set<string>()
 
 /** The project themes read so far, by name:  what a later one may extend, for `ThemeFile`'s checks. */
 const PROJECT_THEMES: Record<string, ThemeData> = {}
+
+/** The folder each project theme was read from, by name (`readIn()`). */
+const PROJECT_FOLDERS: Record<string, string> = {}
