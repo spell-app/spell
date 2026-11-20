@@ -846,7 +846,8 @@ Until a `/back:  ...` message (or `epic focus status` says off):
      time waiting on the person.  Beside it, `span`:  how long it was under way by the clock, from the log
      (epic `epic-engine` I127).  The title row then shows `21m / 4h`, the rest in its tooltip.
      A phase done before:  `epic phase <name>#P<N> took` writes both.
-   - Then `epic summary <name>`.
+   - Then `epic summary <name>`:  the phases left and the loose ends;  done phases and grey items are only counted
+     (`--all` lists them).
    - With the phase's items, this runs in a background `<name>-plan-doc` agent ("4. Fill the doc"),
      while the reply below goes out.
    - Done:  what was BUILT, ordered by what the person asks about first:
@@ -1532,7 +1533,7 @@ A NEW session picks up an epic whose own session is gone (closed, crashed, compa
    - Neither:  say so, and ask before starting the epic over.
 4. Catch up, in the checkout:
    - What's done, what's half done:
-     - `epic summary <name>`
+     - `epic summary <name>`:  what's left;  done phases and grey items only counted (`--all` lists them)
      - the active phase's part file, and the newest review lines:  `epic log <name> --last 20`
        (the page's Log shows only commits since epic `epic-engine` P52)
      - `git status --short` and `git log --oneline -5`

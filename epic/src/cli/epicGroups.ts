@@ -1439,7 +1439,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   delete: {},
   change: { "--for <item>": "the item of the change marks that name none" },
   list: { "--json": "print them as JSON" },
-  summary: { "--json": "print it as JSON" },
+  summary: { "--json": "print it as JSON", "--all": "list finished phases and grey items too, not only counted" },
   stale: {
     "--json": "print them as JSON",
     "--underway": "the open items whose Underway card went stale, and whether their work is on main (T78)",
@@ -1447,11 +1447,12 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--hours <n>": "with --underway:  how old an Underway card must be (default 3)",
     "--quiet": "with --apply:  say nothing when nothing changed"
   },
-  summaries: {},
+  summaries: { "--all": "every phase and grey item, as summary --all" },
   items: {
     "--section <section>": "only that section:  questions, judgements, todos, issues or tests",
     "--filter <filter>": "unreviewed (the default), open, reviewed, queued or all",
     "--json": "print them as JSON",
+    "--all": "grey items too (limits, handled, canceled):  left out and counted without it",
     "--spec <file>": "write the review's item picker there:  a details page's questions"
   },
   docs: { "--json": "print them as JSON" },

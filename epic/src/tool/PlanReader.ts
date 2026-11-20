@@ -14,6 +14,7 @@ import {
   MANUAL_TEST_ID,
   OLD_DECISION,
   OPEN_KINDS,
+  QUIET_STATES,
   PlanDocError,
   QUESTION_ID,
   REVIEW_FILTERS,
@@ -35,7 +36,8 @@ import {
   type ReviewItem,
   type ReviewSection,
   type ReviewState,
-  type ReviewStatus
+  type ReviewStatus,
+  type SummaryScope
 } from "./planDoc.types"
 
 import type { Comment } from "./CommentList"
@@ -269,17 +271,34 @@ export abstract class PlanReader {
    * What needs attention:  the phases, the next one to do, and the open questions / issues / todos / limits / manual tests.
    * - and the option sets:  the Choices section's standing sets, each phase's open ones (epic `epic-engine` P50)
    * - feeds the end-of-phase reply and its AskUserQuestion options
+   * - `scope` `open`:  leaves out what the page shows grey (finished phases, `QUIET_STATES` items), counted in
+   *   `done` and `quiet`;  `all` (the default here) lists them too (epic `epic-engine` T111)
    */
-  summary(): PlanSummary {
-    const phases = this.phases
+  summary(scope: SummaryScope = "all"): PlanSummary {
+    const every = this.phases
+    const unfinished = every.filter((phase) => !PhaseStatuses.isFinished(phase.status))
+    let quiet = 0
     const open = Object.fromEntries(
-      OPEN_KINDS.map((kind) => [kind, this.items(kind).filter((item) => item.status === "open")])
+      OPEN_KINDS.map((kind) => {
+        const items: ItemSummary[] = []
+        for (const item of this.itemsOf(kind)) {
+          const { id, title, status } = this.facts(item)
+          if (status !== "open") continue
+          const isQuiet = QUIET_STATES.includes(this.itemState(item))
+          if (isQuiet) quiet++
+          if (!isQuiet || scope === "all") items.push({ id, title, status })
+        }
+        return [kind, items]
+      })
     ) as Record<OpenKind, ItemSummary[]>
+    const phases = scope === "all" ? every : unfinished
     return {
       title: this.title,
       phases,
-      active: phases.find((phase) => phase.status === "active"),
-      next: phases.find((phase) => phase.status === "todo"),
+      done: every.length - unfinished.length,
+      quiet,
+      active: every.find((phase) => phase.status === "active"),
+      next: every.find((phase) => phase.status === "todo"),
       estimate: this.estimate,
       bedtime: this.bedtimeRun,
       future: this.future,
