@@ -851,9 +851,19 @@ A Spanish browser gets "Guardar" where an English one gets "Save":
   `DiffView` (Publish's diff), in [their folder](src/app/solid/codemirror/).
 - CodeMirror loads lazily, after the program has compiled and run:
   through `LazyCodeMirror` in the app, and `loadCodeMirror()` in `<spell-editor>`.
-- **Not yet:**  `<spell-editor>` has no right-click menu or Find All References list (both are the app's),
-  and no editor has a peek view:  Go to Definition jumps to the declaration,
-  and nothing shows another file's lines inline under the code.
+- Peek Definition (⌥F12) and Peek References (⇧⌥F12) open a box under the caret's line, showing the other file's
+  lines, drawn bubbly, with the uses listed beside them ([CodeMirrorPeek](src/app/ui/codemirror/CodeMirrorPeek.ts)):
+  plain DOM, so `<spell-editor>` has it too.
+- ⌘F opens a compact find bar like VS Code's, over the code's top right, its Replace row showing until you fold it
+  ([CodeMirrorFind](src/app/ui/codemirror/CodeMirrorFind.ts)).
+- The popups that show by themselves (suggestions, signature help, hovers) wait for typing to pause, as long as
+  Settings… › Popup delay says:  Short 0.4 s, Standard 0.8 s, Long 1.5 s
+  ([CodeMirrorPopups](src/app/ui/codemirror/CodeMirrorPopups.ts)).
+- Drawn bubbly, every line is 25px, and a block's feet sit in the blank line under it, so scrolling never changes
+  the file's height.
+  The bubbly marks are made only for the lines on screen ([CodeMirrorRelayout](src/app/ui/codemirror/CodeMirrorRelayout.ts)):
+  a keystroke in a 2,668-line file costs 68 ms, measured headless.
+- **Not yet:**  `<spell-editor>` has no right-click menu or Find All References list (both are the app's).
 
 </details>
 
