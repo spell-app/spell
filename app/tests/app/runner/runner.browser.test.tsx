@@ -820,7 +820,7 @@ card.turnOver()
     await waitFor(() => columns()[6]?.children.length === 7 && discards().children.length >= 1, 10_000)
     await ElementFixture.settle(host)
     expect(columns().map((pile) => pile.children.length)).toEqual([1, 2, 3, 4, 5, 6, 7])
-    expect(consoleText()).not.toContain("failed")
+    expect(consoleTextBesidesSounds()).not.toContain("failed")
   })
 
   test('`Solitaire`\'s "you won" modal:  New game deals again, then closes it (epic `language` T155)', async () => {
@@ -847,7 +847,7 @@ card.turnOver()
     await waitFor(() => !modal.visible, 10_000)
     expect(discards().children.length).toBe(1)
     expect(columns().map((pile) => pile.children.length)).toEqual([1, 2, 3, 4, 5, 6, 7])
-    expect(consoleText()).not.toContain("failed")
+    expect(consoleTextBesidesSounds()).not.toContain("failed")
   })
 
   test("`Solitaire` played, then a line at its top level edited, in a runner with no way to say Restart:  the game's kept (epic `editor`)", async () => {
@@ -1195,6 +1195,15 @@ function consoleText(): string {
   const textOf = (lines: Line[]): string[] =>
     lines.flatMap((line) => [(line.message ?? []).map(String).join(" "), ...textOf(line.lines ?? [])])
   return textOf(testCore!.console.lines as Line[]).join("\n")
+}
+
+/**
+ * The console's text, less the sounds the browser wouldn't play.
+ * - A test's clicks are no person's, so Chrome refuses a sound (`play:  can't play ... play() failed`):
+ *   Solitaire's card slides, places and win (epic `mockup` P28).
+ */
+function consoleTextBesidesSounds(): string {
+  return consoleText().replace(/^play:  can't play .*$/gm, "")
 }
 
 /** Names of the things the running program made at its top level, e.g. `tally`:  what a recompile carries over. */
