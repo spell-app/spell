@@ -1164,17 +1164,26 @@ class SavedRead {
     while (this.nextPage !== undefined) await this.readPage()
   }
 
-  /** Read it for the first time. */
+  /**
+   * Read it for the first time.
+   * - It checks again as its line says (`startPolling()`) whether this read is answered or fails:  a place that
+   *   failed (a server not up yet) is asked again, and what's drawn shows it once it answers (`refresh()`;  epic
+   *   `old-console-redo` T28).
+   * - throws what the read threw
+   */
   private async start(): Promise<void> {
     const timesLeft = this.timesLeft
     await this.program.load()
     const { query, Class } = this
     const result = (this.result ??= this.program.newResult(Class, query))
-    await (result.contents ? result.reload() : result.load())
-    // given up on while it waited:  what came is a read cut short, even if a newer reader holds it now
-    if (this.timesLeft !== timesLeft) return
-    this.fill(this.inOrder(await this.withOtherPages(result, this.readsPagesWhenDrawn ? 1 : Infinity)))
-    this.startPolling()
+    try {
+      await (result.contents ? result.reload() : result.load())
+      // given up on while it waited:  what came is a read cut short, even if a newer reader holds it now
+      if (this.timesLeft !== timesLeft) return
+      this.fill(this.inOrder(await this.withOtherPages(result, this.readsPagesWhenDrawn ? 1 : Infinity)))
+    } finally {
+      if (this.timesLeft === timesLeft) this.startPolling()
+    }
   }
 
   /**

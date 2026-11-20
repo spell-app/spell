@@ -35,10 +35,22 @@ class BatchingPlace extends CountingPlace {
   }
 }
 
+/** One whose first `failures` reads fail:  a server that isn't up yet. */
+class FlakyPlace extends CountingPlace {
+  failures = 0
+  tries = 0
+
+  list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer> {
+    this.tries++
+    if (this.failures-- > 0) return Promise.reject(new Error("Not up yet"))
+    return super.list(collection, query, context)
+  }
+}
+
 /** The classes of one program, as compiled spell writes them, and the place behind them. */
 function program(
   behind: CountingPlace,
-  { select, firstReads = false }: { select?: string[]; firstReads?: boolean } = {}
+  { select, firstReads = false, checkedEvery }: { select?: string[]; firstReads?: boolean; checkedEvery?: number } = {}
 ) {
   core.resetRuntime()
   class Recipe extends Thing {
@@ -81,7 +93,8 @@ function program(
   }
   core.place(new Cookbook(), {
     name: "cookbook",
-    ...(firstReads && { firstReads: () => [[Recipe], [Tag]] as Array<[Function]> })
+    ...(firstReads && { firstReads: () => [[Recipe], [Tag]] as Array<[Function]> }),
+    ...(checkedEvery && { checkedEvery })
   })
   return { Recipe, Tag }
 }
@@ -216,6 +229,41 @@ describe("a field the compiler left out", () => {
     const [recipe] = (await core.savedThings(Recipe)).items as Array<InstanceType<typeof Recipe>>
     expect(place.requests[0]![0]!.query.select).toBeUndefined()
     expect(recipe!.notes).toBe("Salt it")
+  })
+})
+
+describe("a place checked every so often:  `check it every 1 second` (epic `old-console-redo` T28)", () => {
+  test("a first read that failed is asked again as the line says, and shows the place's answer by itself", async () => {
+    const { document, window } = parseHTML("<!doctype html><html><body></body></html>")
+    Object.assign(globalThis, { document, window, Node: window.Node, Element: window.Element })
+    const place = filled(new FlakyPlace({ capabilities: WITH_IDS }))
+    place.failures = 1
+    const { Recipe } = program(place, { checkedEvery: 1 })
+    const container = document.createElement("div")
+    document.body.append(container)
+    const leave = render(
+      () =>
+        core.drawRead(
+          async () => await core.savedThings(Recipe),
+          (item) => (item as InstanceType<typeof Recipe>).title as never,
+          { failed: () => "Failed", paging: () => "all" } as never
+        ) as never,
+      container
+    )
+    await vi.waitFor(() => {
+      flush()
+      expect(container.textContent).toBe("Failed")
+    })
+    await vi.waitFor(
+      () => {
+        flush()
+        expect(container.textContent).toBe("Soup")
+      },
+      { timeout: 3000 }
+    )
+    // the failed read, then the one the check made
+    expect(place.tries).toBe(2)
+    leave()
   })
 })
 
