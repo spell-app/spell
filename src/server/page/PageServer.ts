@@ -85,7 +85,7 @@ export class PageServer {
   /** the web server underneath */
   readonly web: SRV.WebServer
 
-  /** `<root>/.spell-server.json` */
+  /** `<root>/.spell-server.json`;  a project's spaces' own (`SRV.PidFile.forPageServer()`) */
   readonly pidFile: SRV.PidFile
 
   /** what `/api/server` answers;  `port` is set by `start()` */
@@ -145,13 +145,15 @@ export class PageServer {
 
   constructor({ root, token }: { root: string; token?: string }) {
     this.root = resolve(root)
-    this.pidFile = new SRV.PidFile(this.root)
+    // its spaces' own record (`--spaces`, `SPELL_SPACES_DIR`)
+    this.pidFile = SRV.PidFile.forPageServer(this.root)
     this.info = {
       pid: process.pid,
       port: 0,
       root: this.root,
       started: new Date().toISOString(),
-      ...checkoutInfo(this.root)
+      ...checkoutInfo(this.root),
+      ...(this.pidFile.spaces && { spaces: this.pidFile.spaces })
     }
     const settings = this.settings()
     const { writable, pageScripts = [], siteTabs, localCopies = {}, gone = [] } = settings
@@ -243,7 +245,7 @@ export class PageServer {
    * - `pidFile`:  write `.spell-server.json` (default `true`)
    */
   async start({ port = DEFAULT_PORT, routes = true, pidFile = true }: StartOptions = {}): Promise<this> {
-    const wanted = portFor(this.root, port)
+    const wanted = portFor(this.root, port, this.pidFile.spaces)
     if (wanted && !(await SRV.isFree(wanted)))
       throw new Error(
         `page server:  port ${wanted} is taken, and ${this.root}'s server runs only there:  ` +
@@ -294,6 +296,8 @@ export class PageServer {
    *   with the kit's node settings (`tsconfig.node.json`, `TSX_TSCONFIG_PATH`);  the route modules it loads
    *   (each repo's) import by package name, as everything does
    * - its output goes to `<root>/.spell-server.log`
+   * - a project's spaces (`--spaces`, `SPELL_SPACES_DIR`):  its own record, token and
+   *   log (`SRV.PidFile.forPageServer()`), any free port for `DEFAULT_PORT` (`portFor()`), and the server told them
    * - what `spell server start`, the goals tools and the openers call
    * - throws a `TypeError` when `root` isn't a kit's root:  the page server starts from the kit's root only
    *   (`kitRootOf()`, epic `repo-split` P16)
@@ -310,7 +314,9 @@ export class PageServer {
     // the kit's OWN code, never the caller's (epic `epic-engine` I287):  a worktree's code restarting main's server
     // ran its Router over main's route modules, and every `/api` answered 500 "handler is not a function"
     const code = PageServer.codeFor(root)
-    return new SRV.PidFile(root).ensure({
+    // the spaces it serves name its record:  the new server is told them too
+    const pidFile = SRV.PidFile.forPageServer(root)
+    return pidFile.ensure({
       command: [
         process.execPath,
         "--import",
@@ -322,11 +328,12 @@ export class PageServer {
         "--root",
         resolve(root),
         "--port",
-        String(port)
+        String(port),
+        ...(pidFile.spaces ? ["--spaces", pidFile.spaces] : [])
       ],
       env: { TSX_TSCONFIG_PATH: code.tsconfig },
       sources: [code.source, ...new Set(routes)],
-      port: portFor(root, port) || undefined
+      port: portFor(root, port, pidFile.spaces) || undefined
     })
   }
 
@@ -338,7 +345,8 @@ export class PageServer {
    */
   static stop(_root: string, { port = DEFAULT_PORT, restart = false }: { port?: number; restart?: boolean } = {}) {
     const root = kitRootOf(_root)
-    return new SRV.PidFile(root).stop({ restart, port: portFor(root, port) || undefined })
+    const pidFile = SRV.PidFile.forPageServer(root)
+    return pidFile.stop({ restart, port: portFor(root, port, pidFile.spaces) || undefined })
   }
 
   /**
@@ -699,15 +707,17 @@ export const DEFAULT_PORT = Number(process.env.SPELL_SERVER_PORT) || 4747
 
 /**
  * The port the page server of checkout `root` asks for, when `wanted` is asked:  `wanted`, but never
- * `DEFAULT_PORT` in a worktree (0:  any free one).
+ * `DEFAULT_PORT` in a worktree, nor for a project's `spaces` (0:  any free one).
  * - `DEFAULT_PORT` is the MAIN checkout's:  the Review side bar, `spell server url` and the openers expect main's
  *   pages there, and a worktree's are served under main's `/worktrees/<w>/` too
  * - before (epic `epic-engine` I276):  every checkout asked for it first, so a worktree's server started while main's
  *   was down took it, and kept it:  the side bar showed that worktree's pages, its `⎇ language` chip in the header
+ * - a project's page server on the kit (`spaces`, not the kit's own):  4747 is Spell's
  * - another port asked for by hand (`--port 5000`) is kept, in a worktree too
  */
-export function portFor(root: string, wanted: number): number {
+export function portFor(root: string, wanted: number, spaces?: string): number {
   if (wanted !== DEFAULT_PORT) return wanted
+  if (spaces !== undefined) return 0
   const checkout = SRV.checkoutOf(root)
   return checkout?.worktree && checkout.root === resolve(root) ? 0 : wanted
 }

@@ -56,7 +56,8 @@ async function main(args: string[]): Promise<void> {
   const port = Number(flag(rest, "--port") ?? DEFAULT_PORT)
   const spaces = flag(rest, "--spaces")
   if (spaces) process.env.SPELL_SPACES_DIR = resolve(spaces)
-  const pidFile = new SRV.PidFile(root)
+  // the record of the spaces it serves (`--spaces`, above):  a project's is its own
+  const pidFile = SRV.PidFile.forPageServer(root)
 
   switch (command) {
     case "local":

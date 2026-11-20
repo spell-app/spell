@@ -1,5 +1,4 @@
 import { spawn, type ChildProcess } from "node:child_process"
-import { createHash } from "node:crypto"
 import {
   closeSync,
   existsSync,
@@ -12,7 +11,7 @@ import {
   writeFileSync
 } from "node:fs"
 import { createRequire } from "node:module"
-import { basename, dirname, join, resolve } from "node:path"
+import { dirname, join, resolve } from "node:path"
 import { setTimeout as sleep } from "node:timers/promises"
 import { stripVTControlCharacters } from "node:util"
 
@@ -102,6 +101,11 @@ export class EditorServer {
     return editorRecordFile(this.root, this.spaces)
   }
 
+  /** its page server's pid file, by the spaces they serve (`SRV.PidFile.forPageServer()`) */
+  get pageServerFile(): SRV.PidFile {
+    return SRV.PidFile.forPageServer(this.root, this.spaces)
+  }
+
   /** vite's output:  `<root>/.spell-server.editor.log`, or this page server's spaces' (`editorFileName()`) */
   get logFile(): string {
     return join(this.root, editorFileName(this.spaces, EDITOR_LOG))
@@ -155,7 +159,8 @@ export class EditorServer {
       PORT: String(pagePort),
       API_SERVER: "127.0.0.1",
       SPELL_SERVER_TOKEN: guard.token,
-      SPELL_SERVER_TOKEN_FILE: new SRV.PidFile(this.root).tokenFile,
+      // its page server's, by the spaces they serve:  another project's on this kit has its own
+      SPELL_SERVER_TOKEN_FILE: this.pageServerFile.tokenFile,
       ...(thisMachineOnly && { SPELL_EDITOR_THIS_MACHINE_ONLY: "1" })
     }
     // its output straight to the log, not through a pipe to us:  it outlives a restart of ours (`adopt()`)
@@ -300,7 +305,7 @@ export class EditorServer {
     if (built) await built.close().catch(() => {})
     const pid = this.child?.pid ?? this.adoptedPid
     // a restart:  vite stays up, and its record, for the next page server to take over (`adopt()`)
-    if (pid && new SRV.PidFile(this.root).isRestarting()) {
+    if (pid && this.pageServerFile.isRestarting()) {
       this.child?.unref()
       this.child = undefined
       return
@@ -421,17 +426,15 @@ const EDITOR_LOG = ".spell-server.editor.log"
 
 /**
  * The name of the editor's file `name` (`EDITOR_FILE`, `EDITOR_LOG`) for a page server serving `spaces`
- * (epic `old-console-redo` I9):
+ * (one per spaces):
  * - the default spell.spaces:  `name` itself, `.spell-server.editor.json`
- * - any other:  with its folder's name and a hash of its path, `.spell-server.editor.old-console-redo-1a2b3c4d.json`,
- *   from `.../old-console-redo/spaces`:  the folder holding `spaces/` when that's its name, so it reads as the checkout
+ * - any other:  with its folder's name and a hash of its path, `.spell-server.editor.my-app-1a2b3c4d.json`,
+ *   from `.../my-app/spaces`:  the folder holding `spaces/` when that's its name, so it reads as the checkout
+ * - the page server's own record is named the same way (`SRV.spacesFileName()`)
  */
 export function editorFileName(spaces: string = spellSpacesDir, name: string = EDITOR_FILE): string {
   const folder = resolve(spaces)
-  if (folder === defaultSpellSpacesDir) return name
-  const named = basename(folder) === "spaces" ? basename(dirname(folder)) : basename(folder)
-  const tag = `${named.replace(/[^\w.-]+/g, "-")}-${createHash("sha256").update(folder).digest("hex").slice(0, 8)}`
-  return name.replace(/(\.\w+)$/, `.${tag}$1`)
+  return SRV.spacesFileName(name, folder === defaultSpellSpacesDir ? undefined : folder)
 }
 
 /** Where the editor of a page server on `root` serving `spaces` is recorded:  read by `/editor` and `spell app serve`. */

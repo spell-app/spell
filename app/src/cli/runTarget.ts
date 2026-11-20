@@ -283,7 +283,8 @@ function newestIn(folder: string): number {
  * - No page server running:  neither;  the program says why it can't reach its places, if it has any.
  */
 export function pageServerEnv(): Record<string, string> {
-  const pidFile = new SRV.PidFile(pageServerRoot(environment.repoDir))
+  // the page server of the spaces this runs in (`SPELL_SPACES_DIR`):  a project's has its own
+  const pidFile = SRV.PidFile.forPageServer(pageServerRoot(environment.repoDir), environment.spellSpacesDir)
   const info = pidFile.read()
   const token = pidFile.readToken()
   if (!info || token === undefined) return {}

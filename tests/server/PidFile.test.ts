@@ -14,7 +14,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test"
 
-import { SRV } from "spell/server"
+import { SRV, type ServerInfo } from "spell/server"
 import { serveHandler } from "spell/server/test/serve"
 
 describe("serverAt():  what the server at an address says of itself", () => {
@@ -60,6 +60,73 @@ describe("PidFile's write token (epic `data` P40)", () => {
       expect(pidFile.readToken()).toBeUndefined()
     } finally {
       rmSync(root, { recursive: true, force: true })
+    }
+  })
+})
+
+describe("PidFile.forPageServer():  one record per spaces on a kit", () => {
+  let root: string
+  beforeEach(() => {
+    root = realpathSync(mkdtempSync(join(tmpdir(), "pid-spaces-")))
+  })
+  afterEach(() => rmSync(root, { recursive: true, force: true }))
+
+  /** a server answering `SERVER_API` with `info`, its port filled in */
+  async function serving(info: Omit<ServerInfo, "port">) {
+    let port = 0
+    const server = await serveHandler(
+      new SRV.Router().get(SRV.SERVER_API, (_request, reply) => reply.json({ ...info, port })).handle
+    )
+    port = Number(new URL(server.base).port)
+    return { ...server, info: { ...info, port } }
+  }
+
+  it("the kit's own spaces:  .spell-server.json;  a project's:  its own file, token and log, named by its folder", () => {
+    const spaces = join(root, "my-app", "spaces")
+    const spell = SRV.PidFile.forPageServer(root, undefined)
+    expect(spell.file).toBe(join(root, ".spell-server.json"))
+    expect(spell.spaces).toBeUndefined()
+    expect(SRV.PidFile.forPageServer(root, SRV.defaultSpacesOf(root)).file).toBe(spell.file)
+    const project = SRV.PidFile.forPageServer(root, spaces)
+    expect(project.spaces).toBe(spaces)
+    expect(project.file).toMatch(/\/\.spell-server\.my-app-[0-9a-f]{8}\.json$/)
+    expect(project.tokenFile).toBe(project.file.replace(/\.json$/, ".token.json"))
+    // the same rule as the editor's record:  one name for one spaces
+    expect(SRV.spacesFileName(".spell-server.editor.json", spaces)).toBe(
+      project.file.slice(root.length + 1).replace(".spell-server.", ".spell-server.editor.")
+    )
+  })
+
+  it("two page servers on one kit keep their own write tokens", () => {
+    const spell = SRV.PidFile.forPageServer(root, undefined)
+    const project = SRV.PidFile.forPageServer(root, join(root, "my-app", "spaces"))
+    spell.writeToken("spell's")
+    project.writeToken("the project's")
+    expect(spell.readToken()).toBe("spell's")
+    expect(project.readToken()).toBe("the project's")
+  })
+
+  // the bug:  a project's page server wrote over the kit's record, and `spell server start all` stopped it
+  it("a server serving other spaces is never the kit's own, even named by the kit's record", async () => {
+    const started = new Date().toISOString()
+    const spaces = join(root, "my-app", "spaces")
+    const spellServer = await serving({ pid: process.pid, root, started })
+    const projectServer = await serving({ pid: process.pid, root, started, spaces })
+    const spell = SRV.PidFile.forPageServer(root, undefined)
+    const project = SRV.PidFile.forPageServer(root, spaces)
+    try {
+      spell.write(spellServer.info)
+      project.write(projectServer.info)
+      expect((await spell.status())?.port).toBe(spellServer.info.port)
+      expect((await project.status())?.port).toBe(projectServer.info.port)
+      // the project's server in the kit's record (as before this fix):  not the kit's, so not one to stop
+      spell.write(projectServer.info)
+      expect(await spell.status()).toBeUndefined()
+      expect(await spell.ourServerOn(projectServer.info.port)).toBeUndefined()
+      expect(await spell.stop()).toBe(false)
+    } finally {
+      await spellServer.close()
+      await projectServer.close()
     }
   })
 })
