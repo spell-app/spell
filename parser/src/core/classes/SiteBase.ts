@@ -223,7 +223,7 @@ export class SiteBase extends App {
       this.showNow({ kind: "waiting", entry: found.entry })
       return
     }
-    // its parameters' things are read first:  meanwhile its layout, a spinner in the page's room (old-console-redo T35)
+    // its parameters' things are read first:  meanwhile its layout, a spinner in the page's room
     if (Object.keys(found.params).some((param) => !(propertyFor(param) in known)))
       this.showNow({ kind: "loading", page, entry: found.entry })
     try {

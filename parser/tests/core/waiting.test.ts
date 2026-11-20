@@ -158,7 +158,7 @@ describe("a value that waits, in a drawing", () => {
   })
 })
 
-describe("an element whose attributes wait, in a spot of its own (epic old-console-redo T35)", () => {
+describe("an element whose attributes wait, in a spot of its own", () => {
   test("a spinner in its spot, the rest drawn at once;  then the element", async () => {
     const game = new PaneGame()
     draw(game)
@@ -199,7 +199,7 @@ describe("a whole thing held", () => {
   test("an `if` reading it:  a spinner for the thing, then its drawing, then drawn again as it changes", async () => {
     const game = new HeldGame()
     draw(game)
-    // a "…" before epic old-console-redo T35, which read as a blank page:  Spell UI's spinner now
+    // a "…" once, which read as a blank page:  Spell UI's spinner now
     expect(container.querySelector("ui-loader")).not.toBeNull()
     await game.work.answer(1)
     expect(shown()).toBe("small")

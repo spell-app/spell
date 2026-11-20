@@ -528,8 +528,8 @@ export function drawn<This extends object, Draw extends (this: This) => Drawing>
  *   an `if`, or an attribute of the drawing's outermost element, has no spot of its own for one, and with no
  *   `<Loading>` at all the program stays blank.
  *   - Meanwhile a spinner (`waitingLoader()`);  a page's (or an app's), a bigger one in the middle of its room
- *     (`pageWaitingLoader()`), its layout's menus drawn round it (epic `old-console-redo` T35:  a "…" before, which
- *     read as a blank page).
+ *     (`pageWaitingLoader()`), its layout's menus drawn round it (a "…" before,
+ *     which read as a blank page).
  *   Inside the boundary:  a `<Loading>` outside a view's element doesn't cover what's inside it (epic `language` P8).
  */
 function drawInBoundary(thing: object, draw: () => Drawing): Drawing {

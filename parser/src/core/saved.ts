@@ -1754,10 +1754,10 @@ export const savedMethods = defineCoreModule({
 
   /**
    * An element whose attributes read what waits, `<activity-grid runs={its recent jobs} />`, in its own place:
-   * the rest of the drawing shows at once (epic `old-console-redo` T35).
+   * the rest of the drawing shows at once.
    * - Waiting:  a spinner where it goes (`waitingLoader()`), as a list shows.
    * - Failed:  a message there, and Try again, as a list's;  the page around it stays.
-   * - What the writers write for one:  `core.drawWaiting(() => h("harbor-console-activity-grid", ...))`.
+   * - What the writers write for one:  `core.drawWaiting(() => h("my-site-activity-grid", ...))`.
    */
   drawWaiting(element: () => Drawing): Drawing {
     return savedMethods.drawRead(element, null, { waiting: waitingLoader })

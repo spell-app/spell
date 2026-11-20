@@ -4558,7 +4558,7 @@
           "name": "element"
         }
       ],
-      "description": "An element whose attributes read what waits, `<activity-grid runs={its recent jobs} />`, in its own place: the rest of the drawing shows at once (epic `old-console-redo` T35)."
+      "description": "An element whose attributes read what waits, `<activity-grid runs={its recent jobs} />`, in its own place: the rest of the drawing shows at once."
     },
     {
       "kind": "method",

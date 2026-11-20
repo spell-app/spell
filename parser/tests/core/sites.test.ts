@@ -622,7 +622,7 @@ describe("a running site", () => {
       expect(layout("MainLayout")?.querySelector(':scope > ui-site-nav[slot="drawer"]')).toBeTruthy()
     })
 
-    test("a page whose parameter's thing is still being read:  its layout at once, a spinner where the page goes (old-console-redo T35)", async () => {
+    test("a page whose parameter's thing is still being read:  its layout at once, a spinner where the page goes", async () => {
       const going = charts.showAddress("/films/a-new-hope")
       core.flush()
       flush()

@@ -105,8 +105,8 @@ export const waitingMethods = defineCoreModule({
 
   /**
    * `read`'s drawing, or a "…" until its first answer:  a value in a drawing that waits, `{the total}`.
-   * - Failed:  a small "⚠" in its place, saying why when pointed at;  the drawing around it stays (epic
-   *   `old-console-redo` T35:  one failed read took the whole page down to the site's error page).
+   * - Failed:  a small "⚠" in its place, saying why when pointed at;  the drawing around it stays
+   *   (one failed read once took the whole page down to the site's error page).
    */
   whileWaiting(read: () => Drawing): Drawing {
     return createComponent(Errored, {
@@ -166,7 +166,7 @@ export function waitingLoader(): Drawing {
 
 /**
  * What a page shows while its whole drawing waits:  a bigger spinner, in the middle of the page's room under its
- * layout's menus, which drew at once (epic `old-console-redo` T35).
+ * layout's menus, which drew at once.
  */
 export function pageWaitingLoader(): Drawing {
   return h(

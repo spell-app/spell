@@ -152,7 +152,7 @@ export class WriterProject {
   readonly spotsThatWait = new WeakSet<P.ASTNode>()
   /**
    * A drawing's elements, inside another, whose attributes read what waits:  each in a spot of its own, a spinner
-   * there while it waits (`core.drawWaiting()`), so the rest of the drawing shows at once (epic `old-console-redo` T35).
+   * there while it waits (`core.drawWaiting()`), so the rest of the drawing shows at once.
    */
   readonly elementsThatWait = new WeakSet<P.ASTJSXElement>()
   /** Drawings that read what waits somewhere with no spot of its own, an `if` or the outermost element's attribute:  held whole. */

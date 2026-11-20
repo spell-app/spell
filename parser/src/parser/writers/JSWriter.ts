@@ -1464,7 +1464,7 @@ export class JSWriter extends ProgramWriter {
   /**
    * `method`, a drawing of a part of its thing (`to draw its devices`) that reads what waits with no spot of its own
    * (an `if`), as `name`:  drawn in a spot of its own, `core.drawWaiting()`, so only that part waits, a spinner in its
-   * place, never its whole thing (epic `old-console-redo` T35:  the whole page was held, `drawsWaiting`).
+   * place, never its whole thing (the whole page was once held, `drawsWaiting`).
    * - `drawDevices() { return core.drawWaiting(() => {...}) }`
    */
   partDrawingThatWaits(method: P.ASTMethodDefinition, name: string, thisType?: string): string {
