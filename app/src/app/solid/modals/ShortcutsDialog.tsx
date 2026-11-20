@@ -1,7 +1,7 @@
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { render } from "@solidjs/web"
 
-import { UI as SpellUI, UIKeys } from "spell/ui"
+import { UI as SpellUI, UIKeys, type Chord } from "spell/ui"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import type { AppTextKey } from "spell/app/app/ui/AppTexts.en"
 import { uiReady } from "spell/app/app/solid/loadUI"
@@ -21,7 +21,8 @@ import "./ShortcutsDialog.css"
  *   - ⌘ ⇧ ⌥ on a Mac, Ctrl, Shift and Alt elsewhere;  a key that's another on a Mac (`mac`) shows that one there.
  *   - Several keys that do the same thing (Delete:  ⌫ or ⌦) each on a line of its own, "or" before the next.
  * - A search field in its title bar, beside its title, focused as it opens (I268):
- *   it narrows the rows to those whose name, heading or keys as drawn match ("save", "debug", "F5", "⌘S", "Ctrl S");
+ *   it narrows the rows to those whose name, heading or keys match ("save", "debug", "F5", "⌘S", "Ctrl S", "Cmd S");
+ *   a key, only as a whole chord (J225);
  *   nothing found, it says so.
  * - Its rows on the page's plain surface, not the dialog's see-through glass, so they read easily (I268).
  * - A list to read:  no key changes here (Q48;  epic `editor` T112 holds that).
@@ -36,7 +37,8 @@ export function ShortcutsDialog(props: ShortcutsDialogProps) {
   /** The groups with a row matching what's typed, each with just those rows. */
   const shown = createMemo(() => {
     const query = searchText(words())
-    return groupsOf(rows().filter((row) => !query || matches(row, query, isApple())))
+    const chord = typedChord(query, isApple())
+    return groupsOf(rows().filter((row) => !query || matches(row, query, chord, isApple())))
   })
   let search: HTMLElement | undefined
   return (
@@ -202,24 +204,63 @@ function groupsOf(rows: readonly ShortcutRow[]): { group: HotkeyGroup; rows: Sho
  * - Words:  anywhere in its name or heading, in the page's language.
  * - Keys as drawn, a whole chord:  its caps run together (`⌘S`), a space apart (`Ctrl S`) or joined by `+`
  *   (`Ctrl+S`);  whole, so "Ctrl S" isn't Ctrl Shift R's too.
+ * - Or keys named either way (`chord`, `typedChord()`'s):  "Cmd S" is ⌘S, "Option Cmd N" ⌥⌘N, "Shift Ctrl R"
+ *   Ctrl Shift R, in any order;  still the whole chord.
  */
-function matches(row: ShortcutRow, query: string, isApple: boolean): boolean {
+function matches(row: ShortcutRow, query: string, chord: Chord | undefined, isApple: boolean): boolean {
   const words = [appTexts.text(row.name), appTexts.text(HOTKEY_GROUPS[row.group])]
   if (words.some((text) => searchText(text).includes(query))) return true
-  return row.shortcuts.flatMap((shortcut) => capsTexts(shortcut, isApple)).some((text) => searchText(text) === query)
+  return row.shortcuts.some((shortcut) =>
+    chordsOf(shortcut, isApple).some(
+      (it) =>
+        capsTexts(it, isApple).some((text) => searchText(text) === query) ||
+        (chord !== undefined && sameChord(it, chord))
+    )
+  )
 }
 
-/** `shortcut`'s chords as their caps are drawn:  `mod+S` => `⌘S`, `⌘ S`, `⌘+S` on a Mac. */
-function capsTexts(shortcut: string, isApple: boolean): string[] {
+/** `shortcut`'s chords, read for a Mac (`isApple`) or another keyboard:  `"mod+alt+ArrowUp mod+alt+ArrowDown"` => two. */
+function chordsOf(shortcut: string, isApple: boolean): Chord[] {
   return shortcut
     .split(/\s+/)
     .filter(Boolean)
-    .flatMap((text) => {
-      const chord = SpellUI.keyboard.chord(text, { isApple })
-      const caps = UIKeys.capsOf(chord, isApple, (word) => SpellUI.i18n.t(word, undefined, KEYS_TAG))
-      return [caps.join(""), caps.join(" "), caps.join("+")]
-    })
+    .map((text) => SpellUI.keyboard.chord(text, { isApple }))
 }
+
+/** `chord` as its caps are drawn:  `mod+S` => `⌘S`, `⌘ S`, `⌘+S` on a Mac. */
+function capsTexts(chord: Chord, isApple: boolean): string[] {
+  const caps = UIKeys.capsOf(chord, isApple, (word) => SpellUI.i18n.t(word, undefined, KEYS_TAG))
+  return [caps.join(""), caps.join(" "), caps.join("+")]
+}
+
+/**
+ * What's typed (`searchText()`'s), read as a chord:  "cmd s", "⌥⌘N", "ctrl + shift + r";  `undefined` when it isn't one.
+ * - Modifiers as words a chord reads (Ctrl, Control, Cmd, Command, Alt, Option, Shift, Mod) or as a Mac's symbols,
+ *   a space or `+` between them.
+ * - NEVER throws.
+ */
+function typedChord(query: string, isApple: boolean): Chord | undefined {
+  if (!query) return undefined
+  const spaced = query.replace(/[⌘⌥⇧⌃]/g, (symbol) => ` ${MODIFIER_SYMBOLS[symbol]} `)
+  const parts = spaced.split(/[\s+]+/).filter(Boolean)
+  if (!parts.length) return undefined
+  try {
+    return SpellUI.keyboard.chord(parts.join("+"), { isApple })
+  } catch {
+    // not a chord:  words only
+    return undefined
+  }
+}
+
+/** Are `a` and `b` the same keys:  the same key, with the same modifiers in any order? */
+function sameChord(a: Chord, b: Chord): boolean {
+  return (
+    a.key === b.key && a.modifiers.length === b.modifiers.length && a.modifiers.every((it) => b.modifiers.includes(it))
+  )
+}
+
+/** A Mac's modifier symbols, as the modifiers a chord reads. */
+const MODIFIER_SYMBOLS: Readonly<Record<string, string>> = { "⌘": "meta", "⌥": "alt", "⇧": "shift", "⌃": "ctrl" }
 
 /** What's typed or shown, for matching:  lower case, its spaces one each. */
 function searchText(text: string): string {

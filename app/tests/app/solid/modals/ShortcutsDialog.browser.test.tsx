@@ -115,6 +115,50 @@ describe("<ShortcutsDialog>", () => {
     await expect.poll(() => names(modal)).toEqual(["Save"])
   })
 
+  test("a key matches only as a whole chord, written any of the ways it's drawn or named (J225)", async () => {
+    void openShortcuts({ platform: "other" })
+    const modal = await current()
+    // "Ctrl S" is Save alone:  not Ctrl Shift R, nor the fold keys (Ctrl Shift [ and ])
+    for (const typed of ["Ctrl S", "Ctrl+S", "ctrl s", "Control S", "ctrl + s"]) {
+      await type(modal, typed)
+      await expect.poll(() => names(modal), typed).toEqual(["Save"])
+    }
+    for (const typed of ["Ctrl Shift R", "Shift Ctrl R", "shift+ctrl+r"]) {
+      await type(modal, typed)
+      await expect.poll(() => names(modal), typed).toEqual(["Discard Changes"])
+    }
+    await type(modal, "Ctrl Shift")
+    await expect.poll(() => modal.querySelector(".ShortcutsNone")).not.toBeNull()
+  })
+
+  test("a Mac's keys named in words:  Cmd S, Command S, Option Cmd N", async () => {
+    void openShortcuts({ platform: "apple" })
+    const modal = await current()
+    for (const typed of ["Cmd S", "command+s", "⌘ S"]) {
+      await type(modal, typed)
+      await expect.poll(() => names(modal), typed).toEqual(["Save"])
+    }
+    const newFile = APP_TEXTS.newSpellFile
+    for (const typed of ["⌥⌘N", "⌘⌥N", "Option Cmd N", "alt+cmd+n"]) {
+      await type(modal, typed)
+      await expect.poll(() => names(modal), typed).toEqual([newFile])
+    }
+  })
+
+  test("words match anywhere in a name;  the list keeps its height as search narrows it", async () => {
+    void openShortcuts({ platform: "other" })
+    const modal = await current()
+    const list = modal.querySelector<HTMLElement>(".ShortcutsList")!
+    const height = list.getBoundingClientRect().height
+    expect(height).toBeGreaterThan(0)
+    await type(modal, "efinition")
+    await expect.poll(() => names(modal)).toEqual([APP_TEXTS.cmGoToDefinition, APP_TEXTS.cmPeekDefinition])
+    expect(list.getBoundingClientRect().height).toBe(height)
+    await type(modal, "zebra")
+    await expect.poll(() => modal.querySelector(".ShortcutsNone")).not.toBeNull()
+    expect(list.getBoundingClientRect().height).toBe(height)
+  })
+
   test("Escape closes it, and so does its ✕", async () => {
     const closing = openShortcuts()
     await current()
