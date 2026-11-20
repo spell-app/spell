@@ -104,16 +104,21 @@
     white-space: pre-line;
   }
 
-  /* A link in running text (`link`), or in a paragraph:  the page's link colour, unless it has a hue;  underlined. */
+  /*
+   * A link in running text (`link`), or in a paragraph, or a `<ui-link>` a click acts on (`:state(action)`, no `link`):
+   * the page's link colour, unless it has a hue;  underlined.
+   */
   a.ui.text,
-  p.ui.text > a {
+  p.ui.text > a,
+  :host(:state(action)) > span.ui.text {
     color: var(--ui-color-text, var(--_ui-text-link-color));
     text-decoration-line: underline;
     text-decoration-thickness: 0.06em;
     text-underline-offset: 0.15em;
   }
   a.ui.text:hover,
-  p.ui.text > a:hover {
+  p.ui.text > a:hover,
+  :host(:state(action)) > span.ui.text:hover {
     color: var(--ui-color-text, var(--_ui-text-link-hover-color));
   }
   /*

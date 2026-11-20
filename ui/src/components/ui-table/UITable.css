@@ -1692,6 +1692,16 @@
   .ui.table:state(rows) > :is(ui-row, es-fila):state(header) + ui-row > :is(ui-cell, es-celda) {
     border-block-start: none;
   }
+  /*
+   * The table's `vertical-align`:  a cell box fills its row's height (its border spans the row), so its content moves
+   * in it, `align-content` (epic old-console-redo T11);  a cell's own `vertical-align` moves the box (`UICell`).
+   */
+  .ui.table[class*="middle aligned"]:state(rows) > :is(ui-row, es-fila) > :is(ui-cell, es-celda) {
+    align-content: center;
+  }
+  .ui.table[class*="bottom aligned"]:state(rows) > :is(ui-row, es-fila) > :is(ui-cell, es-celda) {
+    align-content: end;
+  }
 
   /* Header row:  the column headers. */
   .ui.table:state(rows) > :is(ui-row, es-fila):state(header) > :is(ui-cell, es-celda) {
