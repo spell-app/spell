@@ -131,7 +131,7 @@ describe.skipIf(!SERVING)("dragging a card in Solitaire with a finger, on a phon
     const context = await browser.newContext({ ...devices["iPhone 13"] })
     page = await context.newPage()
     const cdp = await context.newCDPSession(page)
-    const touch = (type: "touchStart" | "touchMove" | "touchEnd", x = 0, y = 0) =>
+    const touch = (type: "touchStart" | "touchMove" | "touchEnd" | "touchCancel", x = 0, y = 0) =>
       cdp.send("Input.dispatchTouchEvent", { type, touchPoints: type === "touchEnd" ? [] : [{ x, y }] })
     swipe = async ({ x, y }, by) => {
       await touch("touchStart", x, y)

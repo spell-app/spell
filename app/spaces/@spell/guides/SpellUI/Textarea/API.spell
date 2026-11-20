@@ -3,15 +3,6 @@
 		Textarea
 		<header>A textarea is a multi-line field used to elicit a longer response.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#attributes">Attributes</>
-			<item link="#properties">Properties</>
-			<item link="#events">Events</>
-			<item link="#parts">Parts</>
-			<item link="#states">States</>
-		</>
-	</>
 
 	<!-- API:  `<ui-textarea>`'s tables (`docs/__data/components.json5`);  the whole family's are on the input page. -->
 	<section label="Attributes">

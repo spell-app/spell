@@ -98,7 +98,6 @@ import {
   noteToast,
   readJSON,
   restoreEpicFolds,
-  titleInside,
   writeJSON
 } from "./spell-doc-helpers.js"
 import {
@@ -459,7 +458,7 @@ function drawReadingTime(main) {
     ? `${words.toLocaleString()} words, ${code.toLocaleString()} of them code`
     : `${words.toLocaleString()} words`
   if (chip.textContent !== `${minutes} min read`) chip.textContent = `${minutes} min read`
-  if (chip.title !== counted) chip.title = counted
+  if (chip.dataset.tooltip !== counted) chip.dataset.tooltip = counted
 }
 
 /**
@@ -507,10 +506,10 @@ function wireTableWidths(main) {
     toggle.hidden = roomWidth(box, main) <= (narrow.get(box) ?? 0) + MIN_WIDE_GAIN
     const wide = isWide(box) && !toggle.hidden
     toggle.toggleAttribute("selected", wide)
-    toggle.title = wide ? "Back into the column · ⌥-click:  every table" : "Full page width · ⌥-click:  every table"
-    toggle.setAttribute("aria-label", toggle.title)
+    const tip = wide ? "Back into the column · ⌥-click:  every table" : "Full page width · ⌥-click:  every table"
+    toggle.dataset.tooltip = tip
+    toggle.setAttribute("aria-label", tip)
     toggle.setAttribute("icon", wide ? "arrows left right to line" : "arrows left right")
-    titleInside(toggle)
     if (!wide) {
       for (const each of [box, row]) each.style.removeProperty("margin-inline-start")
       for (const each of [box, row]) each.style.removeProperty("width")
@@ -1832,7 +1831,7 @@ function countItems(outline) {
     label.className = "spell-count"
     label.setAttribute("size", "tiny")
     label.setAttribute("appearance", "basic")
-    label.title = `${open} open of ${items.length}`
+    label.dataset.tooltip = `${open} open of ${items.length}`
     label.textContent = `${open}/${items.length}`
     element.append(label)
   }
@@ -1927,7 +1926,7 @@ function markItemStates(main) {
   for (const item of main.querySelectorAll(STATE_ITEMS)) {
     item.dataset.spellState = stateOf(item)
     const chip = item.querySelector(".plan-id")
-    if (chip) chip.title = stateTip(item)
+    if (chip) chip.dataset.tooltip = stateTip(item)
   }
 }
 
@@ -2247,9 +2246,8 @@ function addFoldAll(main, folds) {
   const show = () => {
     const tip = anyFolded() ? "Expand all" : "Collapse all"
     item.setAttribute("icon", anyFolded() ? "angles down" : "angles up")
-    item.title = tip
+    item.dataset.tooltip = tip
     item.setAttribute("aria-label", tip)
-    titleInside(item)
   }
   item.addEventListener("click", () => folds.foldAll(!anyFolded()))
   new MutationObserver(show).observe(main, { attributes: true, attributeFilter: ["open"], subtree: true })
@@ -2406,11 +2404,17 @@ function wireFolds(main, outline, kept) {
       const section = sticky.parentElement
       const button = document.createElement("ui-button")
       button.className = "spell-fold"
-      // its tooltip the browser's own, on the button the pointer lands on ("TOOLTIPS";  a `<ui-popup>` before I32)
+      // its tooltip Spell UI's, after the standard delay ("TOOLTIPS";  a `title` before T106, a `<ui-popup>` before I32)
       const tip = "Fold / unfold"
-      const attributes = { circular: "", basic: "", size: "mini", icon: "chevron down", title: tip, "aria-label": tip }
+      const attributes = {
+        circular: "",
+        basic: "",
+        size: "mini",
+        icon: "chevron down",
+        "data-tooltip": tip,
+        "aria-label": tip
+      }
       for (const [name, value] of Object.entries(attributes)) button.setAttribute(name, value)
-      titleInside(button)
       heading.prepend(button)
       heading.classList.add("spell-foldable")
       if (kept && heading.id in kept) setFolded(section, !kept[heading.id])
@@ -3445,15 +3449,14 @@ function wireNewEpic(main) {
   if (!ServerLink.isServed()) return
   const head = main.querySelector(".spell-page-head")
   if (!head || head.querySelector(".spell-new-epic")) return
-  // the browser's own tooltip, a `title` (Owen, 2026-10-10:  never a `<ui-popup>` as a tooltip)
+  // Spell UI's tooltip, after the standard delay (TOOLTIPS;  Owen, 2026-11-19, r80)
   const tip = "Save an idea as a future epic"
   const button = el(
     "ui-button",
-    { appearance: "circular basic", size: "tiny", icon: "seedling", title: tip },
+    { appearance: "circular basic", size: "tiny", icon: "seedling", "data-tooltip": tip },
     "New epic"
   )
   button.addEventListener("click", openNewEpicBox)
-  titleInside(button)
   addHeadTool(head, el("span", { class: "spell-new-epic", "data-spell-added": true }, button), "page")
 }
 

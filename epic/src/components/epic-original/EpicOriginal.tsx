@@ -7,7 +7,6 @@ import { Fold } from "spell/epic/components/epic-item/Fold"
 import { epicOriginalVocabulary } from "./EpicOriginal.en"
 
 import originalCSS from "./EpicOriginal.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicOriginal`
@@ -18,7 +17,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 export class EpicOriginal extends E.UIComponent<typeof epicOriginalVocabulary> {
   @E.proto static vocabulary = epicOriginalVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-original": originalCSS },
+    styleSheets: { "epic-original": originalCSS },
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
 

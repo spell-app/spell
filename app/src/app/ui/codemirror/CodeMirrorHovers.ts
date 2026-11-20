@@ -2,7 +2,6 @@ import { type Diagnostic, forEachDiagnostic, linter } from "@codemirror/lint"
 import type { Extension } from "@codemirror/state"
 import { type EditorView, hoverTooltip, type Tooltip, ViewPlugin } from "@codemirror/view"
 
-import { HOVER_DELAY } from "spell/app/app/ui/codePopups"
 import { CodeMirrorPopups } from "./CodeMirrorPopups"
 
 /****************
@@ -12,8 +11,8 @@ import { CodeMirrorPopups } from "./CodeMirrorPopups"
  * - ⌥ (Alt) followed:  `isAltHeld(view)`, as of the mouse's last move or the last key;
  *   the hover's info shows by `CodeEditorFeatures.showsHoverInfo()` with it (`CodeMirrorLanguage`)
  * - ⌥ pressed while the mouse rests on a word:  the info hover comes up without moving the mouse
- *   (a mouse move replayed where it rests);  it waits `HOVER_DELAY` as any hover does
- * - errors, warnings and notes under the mouse:  each its own row, once the mouse rests `HOVER_DELAY`
+ *   (a mouse move replayed where it rests);  it waits `hoverDelay()` as any hover does
+ * - errors, warnings and notes under the mouse:  each its own row, once the mouse rests `hoverDelay()`
  *   - in EVERY hover mode:  where the hover shows them alone (`CodeEditorFeatures.showsErrorsAlone()`) or in its own
  *     hover with the info, CodeMirror's hovers show together in one popup, the errors a section of it
  *   - so the rule needs no asking here:  the info's section comes and goes by it, the errors' stays
@@ -29,7 +28,9 @@ export class CodeMirrorHovers {
       ALT,
       // CodeMirror's own problems popup, empty:  its rows are `errorsAt()`'s
       linter(null, { tooltipFilter: () => [] }),
-      hoverTooltip((view, pos, side) => errorsAt(view, pos, side), { hoverTime: HOVER_DELAY * 1000 })
+      CodeMirrorPopups.waiting((msec) =>
+        hoverTooltip((view, pos, side) => errorsAt(view, pos, side), { hoverTime: msec })
+      )
     ]
   }
 

@@ -70,7 +70,7 @@ describe("<epic-thread>", () => {
     expect({
       id: part(host, "id").textContent,
       headline: part(host, "headline").textContent,
-      tip: part(host, "fold").title,
+      tip: part(host, "fold").dataset.tooltip,
       expanded: part(host, "fold").getAttribute("aria-expanded"),
       body: !!part(host, "body")
     }).toEqual({
@@ -231,7 +231,7 @@ describe("<epic-thread>", () => {
       messages: messages(host).length,
       slotted: !!box.assignedSlot,
       pen: !!host.shadowRoot!.querySelector("ui-button.edit"),
-      floppy: floppy.title
+      floppy: floppy.dataset.tooltip
     }).toEqual({ messages: 0, slotted: true, pen: false, floppy: "Saved 14:02 · waiting for Claude" })
   })
 

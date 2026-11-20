@@ -69,7 +69,7 @@ so nothing flashes unstyled.
 That's one more round trip, which `<ui-root>` covers with skeletons;  every element after the first finds the
 runtime already there.
 
-## Eighteen services, one field each
+## Nineteen services, one field each
 
 Each service is a class, built when the runtime is, and held as one of its fields.
 Your own code reads them the way the elements do, once the runtime is in:
@@ -99,6 +99,7 @@ i18n.register("es", { close: "Cerrar" }) // every family's "Close", in Spanish
 | `UI.modals` | dialogs from code that return a promise (`<ui-modal>` provides them) |
 | `UI.api` | `fetch` with URL templates, throttling and abort, after Fomantic's API behaviour |
 | `UI.icons` | the page's icon packs and the SVG cache |
+| `UI.sounds` | Spell's 139 built-in sounds, by name:  `UI.sounds.url("card slide")` is where its file is ([Sounds](#sounds), below) |
 | `UI.sources` | the same-origin text files `<ui-include>`, `<ui-code>` and `<ui-markdown>` load and save |
 | `UI.code` | languages `<ui-code>` colours beyond its own:  `UI.code.register()` |
 | `UI.propertyControls` | what `<ui-property-editor>` draws, by name:  control kinds, choice sources, rules |
@@ -412,6 +413,30 @@ What it will add:
 - a pack chosen per element, not only per root
 
 None of it is built;  today a set gets in as a folder of SVGs (above).
+
+## Sounds
+
+```js
+const { sounds } = await UI.load()
+new Audio(sounds.url("card slide")).play()
+```
+
+_Plays a card sliding across a table:  one of the 139 sounds that come with Spell UI._
+
+Spell UI carries a library of short sounds, each by a plain name, in English and in Spanish:
+`card slide` / `deslizar carta`, `click` / `clic`, `win` / `ganar`.
+A Spell program plays one by its name, `play "card slide"`, with nothing to download or host.
+- Nine kinds:  clicks and switches, cards, dice, chips and coins, board pieces, knocks and hits, footsteps,
+  doors and books, beeps and zaps, short tunes.
+  The editor's sound picker lists them that way:  type `play "` and pick "Pick a sound…".
+- A name finds its sound in any case, with or without accents or dashes:  `Card-Slide`, `deslizar carta`.
+- `url()` answers `undefined` for a name Spell has no sound for.
+- The files are Ogg Vorbis, 1.5 MB in all, beside the code that plays them:
+  `sound-library/`, next to Spell UI's own chunk, in every build.
+  - Safari plays Ogg only from version 18.4.
+- The sounds are [Kenney](https://kenney.nl)'s, from seven of his free packs:
+  CC0, public domain, so no credit is needed;  we give it gladly.
+  Which pack and file each came from:  [LICENSE.md](src/sounds/LICENSE.md).
 
 ## Styles
 

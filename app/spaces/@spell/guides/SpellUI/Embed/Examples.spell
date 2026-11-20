@@ -4,13 +4,6 @@
 		<header>An embed displays content from other websites, like YouTube videos, loaded only when asked
               for.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#variations">Variations</>
-		</>
-	</>
-
 	<!--
 		EXAMPLES:  Fomantic's embed page, section by section, in its order (Types, Variations), plus our extra (Placeholder
 		content).  Nothing third-party loads on this page until a reader clicks a play button.

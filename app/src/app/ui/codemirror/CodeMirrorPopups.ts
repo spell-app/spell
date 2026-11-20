@@ -4,6 +4,7 @@ import { EditorView, ViewPlugin } from "@codemirror/view"
 import {
   codeChoices,
   codeMirrorOptionsFor,
+  hoverDelay,
   SUGGEST_DETAILS_HIDDEN,
   type CodeMirrorPopupOptions
 } from "spell/app/app/ui/codePopups"
@@ -19,6 +20,8 @@ import { CodeMirrorPinned } from "./CodeMirrorPinned"
  * - What CodeMirror does itself (wrapping, the suggestions' details) is in the compartment too.
  * - The view showing a state follows the choices as they change;  a state shown again takes the ones it missed,
  *   as `CodeMirrorLook` does with the look.
+ * - CodeMirror's own popup waits (a hover's `hoverTime`, the suggestion list's `activateOnTypingDelay`) are set as an
+ *   extension is made:  `waiting()` makes them again, the page's `hoverDelay()`, as the choices change.
  * - Its position in the import graph:  CodeMirror, and the page's code settings.
  ****************/
 export class CodeMirrorPopups {
@@ -31,22 +34,33 @@ export class CodeMirrorPopups {
       if (sameOptions(CodeMirrorPopups.of(view.state), wanted)) return
       view.dispatch({ effects: popups.reconfigure(CodeMirrorPopups.extensionFor(wanted)) })
     }
-    const follower = ViewPlugin.define((view) => {
-      let isDestroyed = false
-      const now = () => {
-        if (!isDestroyed) follow(view)
-      }
-      codeChoices.followers.add(now)
-      // shown again after the choices changed:  in a microtask, never inside the view's own update
-      queueMicrotask(now)
-      return {
-        destroy: () => {
-          isDestroyed = true
-          codeChoices.followers.delete(now)
-        }
-      }
-    })
-    return [popups.of(CodeMirrorPopups.extensionFor(codeMirrorOptionsFor(codeChoices.now))), follower]
+    return [popups.of(CodeMirrorPopups.extensionFor(codeMirrorOptionsFor(codeChoices.now))), followingChoices(follow)]
+  }
+
+  /**
+   * What `make` makes for the page's popup wait now, in msec (`hoverDelay()`);  made again as it changes.
+   * - For what CodeMirror waits by itself, set as it's made:
+   *   `CodeMirrorPopups.waiting((msec) => hoverTooltip(source, { hoverTime: msec }))`.
+   * - Followed through Settings… (`codeChoices`), which sets the wait (`--ui-hover-delay`) before it tells them;
+   *   a theme changing it otherwise is taken at the next change of the choices.
+   * - The code's own timers read `hoverDelay()` as they start instead.
+   */
+  static waiting(make: (msec: number) => Extension): Extension {
+    const wait = new Compartment()
+    /** Each extension made, to the wait it was made for. */
+    const madeFor = new WeakMap<object, number>()
+    const madeNow = () => {
+      const msec = hoverDelay() * 1000
+      const made = [make(msec)]
+      madeFor.set(made, msec)
+      return made
+    }
+    const follow = (view: EditorView) => {
+      const made = wait.get(view.state)
+      if (made && madeFor.get(made) === hoverDelay() * 1000) return
+      view.dispatch({ effects: wait.reconfigure(madeNow()) })
+    }
+    return [wait.of(madeNow()), followingChoices(follow)]
   }
 
   /** The options `state` follows now:  the defaults' until its compartment says. */
@@ -72,6 +86,27 @@ export class CodeMirrorPopups {
 const OPTIONS = Facet.define<CodeMirrorPopupOptions, CodeMirrorPopupOptions>({
   combine: (values) => values.at(-1) ?? codeMirrorOptionsFor(codeChoices.now)
 })
+
+/**
+ * A plugin calling `follow` with its view as the page's code choices change (`codeChoices`), and once as it starts.
+ * - As it starts:  in a microtask, never inside the view's own update;  a state shown again takes what it missed.
+ */
+function followingChoices(follow: (view: EditorView) => void): Extension {
+  return ViewPlugin.define((view) => {
+    let isDestroyed = false
+    const now = () => {
+      if (!isDestroyed) follow(view)
+    }
+    codeChoices.followers.add(now)
+    queueMicrotask(now)
+    return {
+      destroy: () => {
+        isDestroyed = true
+        codeChoices.followers.delete(now)
+      }
+    }
+  })
+}
 
 /** Do `a` and `b` say the same? */
 function sameOptions(a: CodeMirrorPopupOptions, b: CodeMirrorPopupOptions): boolean {

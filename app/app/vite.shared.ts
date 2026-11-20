@@ -7,7 +7,7 @@ import type { Plugin, PluginOption, ProxyOptions, UserConfig } from "vite"
 import { standardDecorators } from "spell/toolchain/decorators"
 import { packageVersion } from "spell/toolchain/packageVersion"
 import { CSS_TARGETS, DEV_SERVER_SETTINGS, SOLID_DEDUPE, cssBuildTarget } from "spell/element-tools/elementConfig"
-import { emitIconPacks } from "spell/ui/vite.config.ts"
+import { emitIconPacks, emitSoundLibrary } from "spell/ui/vite.config.ts"
 import {
   PAGE_SERVER_PREFIXES,
   SERVER_TOKEN_HEADER,
@@ -49,14 +49,14 @@ export const TOP_REPO = (() => {
  * - `standardDecorators()` FIRST:  it and the Solid plugin are both `enforce: "pre"`,
  *   and the Solid compiler must see decorator-free code.
  * - `compiledSpell()`:  every config, so a test or a build that reaches `<FileTabs>` reads its `.spell`.
- * - `iconPacks`:  a BUILD that bundles `spell-ui` emits its built-in icon packs
- *   beside the chunk that loads them (`iconPacksBesideBuiltIns()`).
+ * - `builtInFiles`:  a BUILD that bundles `spell-ui` emits its built-in icon packs and sounds
+ *   beside the chunks that load them (`builtInFilesBesideTheirCode()`).
  *   Omit for `vitest`, and for builds that import `ui` from `spell-ui.js`.
  * - Lightning CSS with the kit's `CSS_TARGETS`, and every build's CSS minify with the same browsers
  *   (`cssBuildTarget()`), as Spell UI's own:  Vite's default targets lower `light-dark()` and break `ui-dark`
  *   subtrees and shadow roots (see `spell/element-tools/elementConfig`).
  */
-export function appConfig({ iconPacks }: { iconPacks?: boolean } = {}) {
+export function appConfig({ builtInFiles }: { builtInFiles?: boolean } = {}) {
   const plugins: PluginOption[] = [
     standardDecorators(),
     packageVersion(import.meta.dirname),
@@ -64,7 +64,7 @@ export function appConfig({ iconPacks }: { iconPacks?: boolean } = {}) {
     compiledSpell(),
     cssBuildTarget()
   ]
-  if (iconPacks) plugins.push(iconPacksBesideBuiltIns())
+  if (builtInFiles) plugins.push(builtInFilesBesideTheirCode())
   return {
     plugins,
     // every import a package name, found through `package.json`s' `exports` (epic `repo-split` P14):  no aliases
@@ -275,10 +275,12 @@ export const SHARED_DEFAULTS: Readonly<Record<string, string>> = { [H_PACKAGE]: 
 const SHARED_H = "\0spell-shared-h"
 
 /**
- * `ui`'s generated DATA, plain tables with no Solid in them (`spell/ui/vocabulary/partsOfSpeech.generated`, which
- * the bubbly look reads):  bundled where it's used, as any plain module is.
+ * `ui`'s plain DATA, tables with no Solid in them:  bundled where it's used, as any plain module is.
+ * - its generated tables (`spell/ui/vocabulary/partsOfSpeech.generated`, which the bubbly look reads)
+ * - the built-in sounds' names (`spell/ui/sounds`, which the language service lists;  epic `mockup` P28):
+ *   where their FILES are is the page's runtime's to say (`UI.sounds`), never this copy's
  */
-const UI_DATA = /^spell\/ui\/.+\.generated$/
+const UI_DATA = /^spell\/ui\/(.+\.generated|sounds)$/
 
 /**
  * `spell/element`'s leaves that hold no state a page must share,
@@ -333,39 +335,54 @@ export function sharedSolid(): Plugin {
 }
 
 ////////////////
-// ## Icon packs
+// ## Built-in files:  icon packs and sounds
 ////////////////
 
-/** `ui`'s `BuiltInPacks`, which looks for the packs beside ITS chunk (`import.meta.url`). */
-const BUILT_IN_PACKS = /\/ui\/src\/icons\/BuiltInPacks\.ts$/
+/**
+ * Spell UI's built-in files, each set beside the module that looks for it (`import.meta.url`).
+ * - `BuiltInPacks` => `icon-packs/` (`emitIconPacks()`)
+ * - `BuiltInSounds` => `sound-library/` (`emitSoundLibrary()`), Spell's built-in sounds
+ */
+const BUILT_IN_FILES = [
+  { module: /\/ui\/src\/icons\/BuiltInPacks\.ts$/, name: "BuiltInPacks", dir: "icon-packs", emit: emitIconPacks },
+  {
+    module: /\/ui\/src\/sounds\/BuiltInSounds\.ts$/,
+    name: "BuiltInSounds",
+    dir: "sound-library",
+    emit: emitSoundLibrary
+  }
+]
 
 /**
- * `spell-ui`'s built-in icon packs, emitted to `icon-packs/` beside whichever chunk holds `BuiltInPacks` --
- * where it looks for them.
- * `ui`'s `emitIconPacks()` does the copying.
+ * `spell-ui`'s built-in icon packs and sounds, each emitted beside whichever chunk holds the module that looks for
+ * them (`BUILT_IN_FILES`).
+ * `ui`'s `emitIconPacks()` and `emitSoundLibrary()` do the copying.
  * - FOUND in the bundle, not configured:  which chunk holds it is the bundler's call
  *   (`assets/UIRuntime-<hash>.js` in the app, `spell-ui.js` in `vite.solid.config.ts`).
- *   Packs in the wrong folder fail quietly:  blank icons.
- * - A build error when no chunk holds it:  a build that asks for packs and doesn't bundle `ui` is misconfigured.
- * - All three packs, ~2.3 MB in ~2,170 files (the "8.7 MB" is `du`'s, in 4 kB disk blocks).
+ *   Files in the wrong folder fail quietly:  blank icons, silent sounds.
+ * - A build error when no chunk holds one:  a build that asks for them and doesn't bundle `ui` is misconfigured.
+ * - All three icon packs, ~2.3 MB in ~2,170 files (the "8.7 MB" is `du`'s, in 4 kB disk blocks).
  *   - The app's icons need `fa7-free` (the default pack, always fetched) and `fomantic`,
  *     whose names point INTO both Font Awesome folders (448 brands).
  *   - So leaving `fa7-brands` out would save ~0.2 MB, with a filter `emitIconPacks()` doesn't have.
+ * - The sounds:  139 files, 1.5 MB (epic `mockup` P28).
  */
-function iconPacksBesideBuiltIns(): Plugin {
+function builtInFilesBesideTheirCode(): Plugin {
   return {
-    name: "spell-icon-packs-beside-built-ins",
+    name: "spell-built-in-files-beside-their-code",
     apply: "build",
     generateBundle(options, bundle, isWrite) {
       if (this.environment.name !== "client") return
-      const chunk = Object.values(bundle).find(
-        (file) => file.type === "chunk" && file.moduleIds.some((id) => BUILT_IN_PACKS.test(id))
-      )
-      if (!chunk) return this.error("`iconPacks`:  no chunk holds `spell-ui`'s `BuiltInPacks`")
-      const dir = path.posix.join(path.posix.dirname(chunk.fileName), "icon-packs")
-      // `as unknown`:  spell-ui has its own `vite` in its `node_modules` (I59), so its `Plugin` type is a different one
-      const emit = emitIconPacks(dir) as unknown as { generateBundle(this: unknown, ...args: unknown[]): void }
-      emit.generateBundle.call(this, options, bundle, isWrite)
+      for (const { module, name, dir, emit } of BUILT_IN_FILES) {
+        const chunk = Object.values(bundle).find(
+          (file) => file.type === "chunk" && file.moduleIds.some((id) => module.test(id))
+        )
+        if (!chunk) return this.error(`\`builtInFiles\`:  no chunk holds \`spell-ui\`'s \`${name}\``)
+        const folder = path.posix.join(path.posix.dirname(chunk.fileName), dir)
+        // `as unknown`:  spell-ui has its own `vite` in its `node_modules` (I59), so its `Plugin` type is a different one
+        const plugin = emit(folder) as unknown as { generateBundle(this: unknown, ...args: unknown[]): void }
+        plugin.generateBundle.call(this, options, bundle, isWrite)
+      }
     }
   }
 }

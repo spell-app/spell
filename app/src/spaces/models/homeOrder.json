@@ -27,6 +27,8 @@
   "@spell/examples": [
     "fizzbuzz",
     "Counter",
+    "WeekendCountdown",
+    "CuentaAtras",
     "calculator",
     "Calculadora",
     "flash-cards",

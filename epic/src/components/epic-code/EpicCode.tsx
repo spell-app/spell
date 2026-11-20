@@ -9,7 +9,6 @@ import { epicCodeVocabulary } from "./EpicCode.en"
 
 import panelCSS from "spell/epic/components/epic-aside/EpicPanel.css?inline"
 import codeCSS from "./EpicCode.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicCode`
@@ -27,7 +26,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 export class EpicCode extends EpicPanel<typeof epicCodeVocabulary> {
   @E.proto static vocabulary = epicCodeVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-panel": panelCSS, "epic-code": codeCSS },
+    styleSheets: { "epic-panel": panelCSS, "epic-code": codeCSS },
     // `disabled`:  unusable, its fold and copy buttons too;  `loading`:  the shared spinner
     disabled: "unusable",
     loading: "loader"

@@ -37,6 +37,16 @@ export const siteTabsVocabulary = {
         "Which page is shown:  its `href` or its `id`.  None:  the page whose `href` is the browser's address."
     },
     {
+      name: "appearance",
+      group: "appearance",
+      kind: "valueOnly",
+      values: ["header"],
+      description:
+        "`header`:  a switch for an app menu's middle, the look of the editor's Run | Edit:  the row as wide as its " +
+        "tabs, on the bar's own fill, the page shown on the thumb.  None:  a segmented row of its own, each tab an " +
+        "equal share of it."
+    },
+    {
       name: "label",
       group: "content",
       kind: "string",
@@ -55,6 +65,9 @@ export const siteTabsVocabulary = {
   ],
   slots: [],
   parts: [{ name: "tabs", description: "The `<ui-toolbar>`'s row, which holds the tabs." }],
-  states: [{ name: "empty", description: "The shown page has no family, so no tabs are drawn:  it takes no room." }],
+  states: [
+    { name: "empty", description: "The shown page has no family, so no tabs are drawn:  it takes no room." },
+    { name: "header", description: '`appearance="header"`:  a switch for an app menu\'s middle.' }
+  ],
   texts: []
 } as const satisfies E.ComponentVocabulary

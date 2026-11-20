@@ -1,6 +1,6 @@
 {
   "name": "spell",
-  "version": "0.8.15",
+  "version": "0.8.16",
   "private": true,
   "description": "Spell's kit:  the layer every repo stands on (util, toolchain, server, element, its tools and test helpers, the spell command), the house style, and the ONE install over the child repos",
   "license": "MIT",
@@ -717,10 +717,20 @@
       "types": "./ui/dist-types/src/components/ui-site-breadcrumbs/index.d.ts",
       "default": "./ui/src/components/ui-site-breadcrumbs/index.ts"
     },
+    "./ui/components/ui-site-links": {
+      "spell-source": "./ui/src/components/ui-site-links/index.ts",
+      "types": "./ui/dist-types/src/components/ui-site-links/index.d.ts",
+      "default": "./ui/src/components/ui-site-links/index.ts"
+    },
     "./ui/components/ui-site-nav-button": {
       "spell-source": "./ui/src/components/ui-site-nav-button/index.ts",
       "types": "./ui/dist-types/src/components/ui-site-nav-button/index.d.ts",
       "default": "./ui/src/components/ui-site-nav-button/index.ts"
+    },
+    "./ui/components/ui-dial": {
+      "spell-source": "./ui/src/components/ui-dial/index.ts",
+      "types": "./ui/dist-types/src/components/ui-dial/index.d.ts",
+      "default": "./ui/src/components/ui-dial/index.ts"
     },
     "./ui/components/ui-device": {
       "spell-source": "./ui/src/components/ui-device/index.ts",
@@ -741,6 +751,11 @@
       "spell-source": "./ui/src/components/ui-tree-diagram/index.ts",
       "types": "./ui/dist-types/src/components/ui-tree-diagram/index.d.ts",
       "default": "./ui/src/components/ui-tree-diagram/index.ts"
+    },
+    "./ui/components/ui-uploader": {
+      "spell-source": "./ui/src/components/ui-uploader/index.ts",
+      "types": "./ui/dist-types/src/components/ui-uploader/index.d.ts",
+      "default": "./ui/src/components/ui-uploader/index.ts"
     },
     "./ui/components/ui-video": {
       "spell-source": "./ui/src/components/ui-video/index.ts",
@@ -816,6 +831,11 @@
       "spell-source": "./ui/src/property/index.ts",
       "types": "./ui/dist-types/src/property/index.d.ts",
       "default": "./ui/src/property/index.ts"
+    },
+    "./ui/sounds": {
+      "spell-source": "./ui/src/sounds/index.ts",
+      "types": "./ui/dist-types/src/sounds/index.d.ts",
+      "default": "./ui/src/sounds/index.ts"
     },
     "./ui/runtime": {
       "spell-source": "./ui/src/runtime/index.ts",

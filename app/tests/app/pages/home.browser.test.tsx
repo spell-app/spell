@@ -19,6 +19,7 @@ import { HomeArrangement } from "spell/app/app/pages/HomeArrangement"
  * - the examples and guides written in Spanish:  a section of their own, "En español", after the English ones (I46)
  * - a "..." menu on each of your own projects' cards, and nobody else's (T47);  each item the editor's action on THAT
  *   project, never opening it
+ * - The footer (T55):  Spell UI's site, opened in the editor.
  * - "Rearrange Home Screen" (T51):  only then do cards and sections drag, and their words change where they are;
  *   with no server here, a person's own changes, on this device, with Reset to Default
  *
@@ -259,6 +260,25 @@ describe("Rearrange Home Screen (T51)", () => {
     expect(cardsIn(host, "start")).toEqual(["To-do list", "Converter", "Counter", "Blank"])
     drag(host.querySelector<HTMLElement>("#guides > header")!, host.querySelector<HTMLElement>("#start")!)
     expect(rowIds(host)).toEqual(["guides", "start", "examples", "spanish"])
+  })
+})
+
+describe("the home page's footer (T55)", () => {
+  test("links Spell UI's site, opening it in the editor;  Rearrange Home Screen beside it, gone while it's on", async () => {
+    const host = await mountHome()
+    const link = host.querySelector<HTMLAnchorElement>(".HomeFooter a.SpellUILink")!
+    expect(link.querySelector(".name")?.textContent).toBe("Spell UI")
+    expect(link.querySelector(".line")?.textContent).toMatch(/buttons, menus and other parts/)
+    // the editor's address for the site, so a new tab opens it too
+    expect(link.getAttribute("href")).toBe(`/edit/${SPACES.SPELL_UI_SITE_PROJECT}`)
+    const shown = vi.spyOn(editor, "showEditor").mockImplementation(() => {})
+    link.click()
+    expect(shown).toHaveBeenCalledWith(SPACES.SPELL_UI_SITE_PROJECT)
+    shown.mockRestore()
+    expect(host.querySelector(".HomeFooter .RearrangeFoot")).not.toBeNull()
+    await rearrange(host)
+    expect(host.querySelector(".HomeFooter .RearrangeFoot")).toBeNull()
+    expect(host.querySelector(".HomeFooter a.SpellUILink")).not.toBeNull()
   })
 })
 

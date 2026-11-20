@@ -369,6 +369,7 @@
 |   |   |   deshacible como _"Jugar carta"_
 |   |   |   [control if L3]
 |   |   |   | si la **carta** está en la **reserva**    ‾value(la carta) ‾value(la reserva)
+|   |   |   |   reproducir _"deslizar carta"_
 |   |   |   |   robar de la reserva    ‾call(robar de la reserva)
 |   |   |   [control else L3]
 |   |   |   | de lo contrario
@@ -379,6 +380,7 @@
 |   |   [action after_hook L2]
 |   |   | después de «mover una carta a una pila»    ‾value(una carta) ‾value(una pila) bold(carta) bold(pila)
 |   |   |   ⟦// El movimiento suma puntos;  la columna que dejó voltea su nueva última carta⟧
+|   |   |   reproducir _"poner carta"_
 |   |   |   agregar (los puntos por la **carta** en la **pila**) a la **puntuación** del **solitario**    ‾call(los puntos por la carta en la pila) ‾value(la puntuación del solitario)
 |   |   |   [control if L3]
 |   |   |   | si la **última pila** de la **carta** es una **columna** y no está vacía    ‾question(la última pila de la carta es una columna) ‾value(la última pila de la carta)
@@ -441,6 +443,7 @@
 |   |   | cuando su **puntuación** cambia
 |   |   |   [control if L3]
 |   |   |   | si el número de **cartas** en las **fundaciones** es _52_    ‾value(el número de cartas en las fundaciones)
+|   |   |   |   reproducir _"ganar"_
 |   |   |   |   mostrar _"ganaste"_
 
 [thing reopen_type L0]

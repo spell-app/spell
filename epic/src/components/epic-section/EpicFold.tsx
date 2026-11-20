@@ -546,7 +546,7 @@ export abstract class EpicFold<V extends E.ComponentVocabulary> extends E.UIComp
         class={GEAR}
         part={this.partForName("gear" as never)}
         direction="left"
-        title={gear.title()}
+        data-tooltip={gear.title()}
         aria-label={gear.title()}
         on-ui-changed={(event: CustomEvent<{ value: string | string[] }>) => this.onGearPick(event, gear)}
       >

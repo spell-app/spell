@@ -96,6 +96,11 @@ export type AttributeSpec = {
   widthClass?: string
   /** `kind: "width"` only:  accept `"equal"` => `equal width`. */
   canEqual?: boolean
+  /**
+   * `kind: "string"` only:  a number is welcome too (`<ui-statistic value={3}>`), shown as its text.
+   * - Its JSX type takes `string | number`;  the component still reads text (`"3"`).
+   */
+  canBeNumber?: boolean
   /** Reflect property changes back to the attribute.  Default:  true for primitives, never for `json`. */
   reflect?: boolean
   /** JS property name, when it isn't `camelCase(name)`. */

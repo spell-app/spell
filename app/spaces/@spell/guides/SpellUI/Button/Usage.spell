@@ -3,18 +3,6 @@
 		Button
 		<header>A button indicates a possible user action.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#events">Events</>
-			<item link="#state-texts">State texts</>
-			<item link="#invoker-commands">Invoker commands</>
-			<item link="#forms">Forms</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-			<item link="#framework-usage">Framework usage</>
-		</>
-	</>
 
 	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
 	<section label="Using it">

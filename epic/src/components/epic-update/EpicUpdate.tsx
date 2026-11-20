@@ -13,7 +13,6 @@ import { epicUpdateVocabulary } from "./EpicUpdate.en"
 
 import updateCSS from "./EpicUpdate.css?inline"
 import foldCSS from "spell/epic/components/epic-item/Fold.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicUpdate`
@@ -52,7 +51,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 export class EpicUpdate extends E.UIComponent<typeof epicUpdateVocabulary> {
   @E.proto static vocabulary = epicUpdateVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-fold-button": foldCSS, "epic-update": updateCSS },
+    styleSheets: { "epic-fold-button": foldCSS, "epic-update": updateCSS },
     // a container:  a click on its text must not jump to the fold button
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
@@ -178,7 +177,7 @@ export class EpicUpdate extends E.UIComponent<typeof epicUpdateVocabulary> {
                   />
                 </Show>
                 <Show when={this.date}>
-                  <time class={TIME} part={this.partForName("time")} datetime={this.at} title={this.dateTip}>
+                  <time class={TIME} part={this.partForName("time")} datetime={this.at} data-tooltip={this.dateTip}>
                     {this.date}
                   </time>
                 </Show>
@@ -222,7 +221,7 @@ export class EpicUpdate extends E.UIComponent<typeof epicUpdateVocabulary> {
         <span
           class={LABEL}
           part={this.partForName("label")}
-          title={this.phase === undefined ? undefined : this.translationForKey("tip", { phase: this.phase })}
+          data-tooltip={this.phase === undefined ? undefined : this.translationForKey("tip", { phase: this.phase })}
         >
           {this.labelText}
         </span>
@@ -231,7 +230,7 @@ export class EpicUpdate extends E.UIComponent<typeof epicUpdateVocabulary> {
             <span
               class={UNMERGED}
               part={this.partForName("unmerged")}
-              title={this.translationForKey("unmergedTip", { branch: branch() })}
+              data-tooltip={this.translationForKey("unmergedTip", { branch: branch() })}
             >
               {this.translationForKey("unmerged")}
             </span>

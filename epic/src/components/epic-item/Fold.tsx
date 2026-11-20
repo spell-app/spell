@@ -118,7 +118,7 @@ export class Fold implements Opener {
         aria-controls={options.controls}
         aria-labelledby={options.labelledBy}
         aria-label={options.labelledBy || options.label !== undefined ? undefined : tip()}
-        title={Fold.withDeepTip(tip(), opener.isOpen())}
+        data-tooltip={Fold.withDeepTip(tip(), opener.isOpen())}
         onClick={options.clicks ? (event: MouseEvent) => Fold.toggleFrom(opener, event) : undefined}
         onKeyDown={(event: KeyboardEvent) => Fold.deepKey(event) && Fold.toggleFrom(opener, event)}
       >
@@ -158,7 +158,7 @@ export class Fold implements Opener {
         class={COLLAPSE_ALL}
         part={part}
         aria-label={label()}
-        title={label()}
+        data-tooltip={label()}
         aria-pressed={expanded() ? "true" : "false"}
         onClick={onToggle}
       >

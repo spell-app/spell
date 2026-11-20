@@ -1,0 +1,10 @@
+{
+  "title": "Weekend Countdown",
+  "description": "How long until the weekend, ticking down every second:  a date's parts, `is a weekend day`, `the next weekend`, `as two digits` and an `every second` timer, drawn as statistics",
+  "imports": [
+    {
+      "path": "/WeekendCountdown.spell",
+      "active": true
+    }
+  ]
+}

@@ -7,7 +7,9 @@
 a "counter" is a view
 	its "count" is a number starting at 0
 		// How many times it's been clicked:  a new counter starts at 0
-	to count up: set the count to the count + 1
+	to count up
+		set the count to the count + 1
+		play "click"
 
 	to draw it
 		// A button saying how many times it's been clicked:  a click counts up

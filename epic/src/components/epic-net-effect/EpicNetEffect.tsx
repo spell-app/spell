@@ -6,7 +6,6 @@ import { E } from "spell/element"
 import { epicNetEffectVocabulary } from "./EpicNetEffect.en"
 
 import netEffectCSS from "./EpicNetEffect.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicNetEffect`
@@ -22,7 +21,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 export class EpicNetEffect extends E.UIComponent<typeof epicNetEffectVocabulary> {
   @E.proto static vocabulary = epicNetEffectVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-net-effect": netEffectCSS },
+    styleSheets: { "epic-net-effect": netEffectCSS },
     // `disabled`:  only a look (the sheet dims it), so the text stays findable;  `loading`:  the shared spinner
     disabled: "its own",
     loading: "loader"

@@ -39,6 +39,20 @@
  *   - reduced motion, or `animation="none"` round it (`--ui-motion: none`):  none of it
  * - Below 40em of its own box (a container query):  one column, and the drawer slides over the page from the
  *   start, shown by `:state(open)`;  reduced motion, no slide.
+ * - `drawer="hidden"` (`:state(drawer-hidden)`, epic `mockup` T55):  the column narrows to nothing, what's in it
+ *   clipped at its full width, then out of sight;  the page's side no box of its own, as with no drawer.
+ * - The side bars:  `right="hidden"` / `left="hidden"` take one away;  below 64em of its own box, one with a button in
+ *   the layout (`:state(right-closable)`) hides behind it, and shows over the page from its side while open
+ *   (`:state(right-open)`), so the page keeps its room.
+ * - `floating` (`:state(floating)`, T55):  the drawer's box and the side bars are cards over the page's own ground,
+ *   Spell UI's docs site's look:
+ *   - each rounded (`--ui-panel-radius`), on the surface's fill, with the page's soft shadow, room round it
+ *     (`--ui-page-layout-float-room`, 12px), stuck at the top as the page scrolls, scrolling by itself
+ *   - the drawer's column and the page's side no fill of their own, no box:  the menu a bar on the page's ground,
+ *     as far down as the drawer's card, so the navigation's first row still lines up with it
+ * - More tokens:
+ *   | `--ui-page-layout-float-room` | `floating`:  the room round each card |
+ *   | `--ui-page-layout-sidebar-width` | `floating`:  a side bar's width |
  */
 @layer ui.components {
   :host {
@@ -57,6 +71,9 @@
     --_ui-page-layout-end-room: var(--ui-page-layout-end-room, round(0.5em, var(--ui-grid, 4px)));
     /* all of the drawer:  its column, its open box, and what it holds while it moves */
     --_page-layout-drawer-width: 16em;
+    /* `floating`:  the room round each card, and a side bar's width */
+    --_ui-page-layout-float-room: var(--ui-page-layout-float-room, 12px);
+    --_ui-page-layout-sidebar-width: var(--ui-page-layout-sidebar-width, 16em);
     /* its own width decides narrow:  a site drawn in a narrow box is narrow */
     container-type: inline-size;
     display: flex;
@@ -224,8 +241,186 @@
     min-inline-size: var(--_page-layout-drawer-width);
   }
 
+  /* ## `drawer="hidden"`:  the column narrows to nothing, what's in it clipped at its full width, then hidden */
+  :host(:state(drawer-hidden)) .drawer {
+    inline-size: 0;
+    overflow: clip;
+    visibility: hidden;
+    transition:
+      inline-size var(--_ui-page-layout-duration) var(--ui-ease, ease),
+      visibility 0s var(--_ui-page-layout-duration) allow-discrete;
+  }
+  :host(:state(drawer-hidden)) .drawer-box {
+    min-inline-size: var(--_page-layout-drawer-width);
+  }
+  /* ... and the page's side no box of its own:  the menu its own bar again, its shadow below it, as with no drawer */
+  :host(:state(drawer-hidden):not(:state(floating))) .layout:has(> .drawer) > .body {
+    background: none;
+  }
+  :host(:state(drawer-hidden):not(:state(floating))) .layout:has(> .drawer) > .body > .under-menu {
+    margin-inline-end: 0;
+    padding-inline-start: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+  :host(:state(drawer-hidden):not(:state(floating))) .layout:has(> .drawer) > .body > .menu {
+    --ui-menu-header-bar-background: initial;
+    --ui-menu-header-bar-filter: initial;
+    position: relative;
+    z-index: 1;
+    box-shadow: var(--_ui-page-layout-shadow);
+    clip-path: inset(0 0 -2em 0);
+  }
+
+  /* ## A side bar hidden */
+  :host(:state(left-hidden)) .left,
+  :host(:state(right-hidden)) .right {
+    display: none;
+  }
+
+  /* ## `floating`:  the drawer's box and the side bars cards over the page's ground, room round each */
+  :host(:state(floating)) .drawer {
+    background: none;
+  }
+  :host(:state(floating)) .drawer-box,
+  :host(:state(floating)) :is(.left, .right) {
+    box-sizing: border-box;
+    inset-block-start: var(--_ui-page-layout-float-room);
+    max-block-size: calc(100dvh - 2 * var(--_ui-page-layout-float-room));
+    overflow: auto;
+    border-radius: var(--_page-layout-flyout-radius);
+    background: var(--ui-surface, Canvas);
+    box-shadow: var(--_ui-page-layout-shadow);
+  }
+  :host(:state(floating)) .drawer-box {
+    margin: var(--_ui-page-layout-float-room);
+  }
+  /*
+   * a table of contents in a floating side bar is headed as the editor's panels are (epic `mockup` T55, Owen:  "Make
+   * this feel like the Inspector panel in terms of header/bg"):  a 40px band, the primary's wash over the muted fill,
+   * stuck at the card's top as it scrolls, the links on the card's own fill under it
+   */
+  :host(:state(floating)) :is(.left, .right) {
+    --ui-toc-head-background: color-mix(
+      in oklab,
+      var(--ui-primary-background, transparent) 60%,
+      var(--ui-surface-muted, Canvas)
+    );
+    --ui-toc-head-padding: 0 4px 0 12px;
+    --ui-toc-head-height: 40px;
+    --ui-toc-head-gap: 8px;
+    --ui-toc-head-position: sticky;
+    --ui-toc-padding: 0 12px 12px 12px;
+    position: sticky;
+    align-self: flex-start;
+    inline-size: var(--_ui-page-layout-sidebar-width);
+    margin-block-end: var(--_ui-page-layout-float-room);
+  }
+  :host(:state(floating)) .right {
+    margin-inline-end: var(--_ui-page-layout-float-room);
+  }
+  /* the menu as far down as the drawer's card:  the navigation's first row still lines up with its middle */
+  :host(:state(floating)) .menu {
+    margin-block-start: var(--_ui-page-layout-float-room);
+  }
+  /*
+   * the page its own stacking context:  what sticks in it (a section's stuck title, which reaches past its column)
+   * goes under the cards beside it, never over them
+   */
+  :host(:state(floating)) .page {
+    isolation: isolate;
+  }
+  /* the page's side no fill and no box:  the page's own ground round the cards */
+  :host(:state(floating)) .layout:has(> .drawer) > .body {
+    background: none;
+  }
+  :host(:state(floating)) .layout:has(> .drawer) > .body > .under-menu {
+    margin-inline-end: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+  /* ... the drawer's card's own room is the gap before the page, with the drawer hidden too */
+  :host(:state(floating)) .layout > .body > .under-menu {
+    padding-inline-start: var(--_page-layout-room);
+  }
+  /* ... and the same room at its end, with no right side bar there */
+  :host(:state(floating)) .page:last-child,
+  :host(:state(floating):state(right-hidden)) .page {
+    margin-inline-end: var(--_page-layout-room);
+  }
+
+  /*
+   * ## Below 64em:  a side bar with its button hides behind it, and shows over the page while it's open
+   * - so the page keeps its room at a middling width too, not only a narrow one (`:state(sides-narrow)`)
+   * - its box no width in the row, stuck at the top as the page scrolls;  the card hangs from it at its side,
+   *   faded and a step aside while closed, so nothing past the page's edge makes it scroll sideways
+   */
+  @container (width < 64em) {
+    .layout {
+      --_page-layout-sides-narrow: 1;
+    }
+    :host(:state(left-closable)) .left,
+    :host(:state(right-closable)) .right {
+      display: block;
+      position: sticky;
+      inset-block-start: var(--_ui-page-layout-float-room);
+      z-index: var(--ui-z-popup, 1000);
+      align-self: flex-start;
+      flex: 0 0 0;
+      inline-size: 0;
+      margin: 0;
+      overflow: visible;
+      border-radius: 0;
+      background: none;
+      box-shadow: none;
+    }
+    :host(:state(left-closable)) .left > slot,
+    :host(:state(right-closable)) .right > slot {
+      display: block;
+      position: absolute;
+      inset-block-start: 0;
+      box-sizing: border-box;
+      inline-size: min(var(--_ui-page-layout-sidebar-width), 85cqi);
+      max-block-size: calc(100dvh - 2 * var(--_ui-page-layout-float-room));
+      overflow: auto;
+      border-radius: var(--_page-layout-flyout-radius);
+      background: linear-gradient(var(--ui-surface, Canvas), var(--ui-surface, Canvas)) Canvas;
+      box-shadow: var(--ui-shadow-floating, 0 4px 16px rgb(0 0 0 / 0.2));
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        translate var(--_ui-page-layout-duration),
+        opacity var(--_ui-page-layout-duration),
+        visibility var(--_ui-page-layout-duration);
+    }
+    :host(:state(left-closable)) .left > slot {
+      inset-inline-start: 0;
+      translate: -1em;
+    }
+    :host(:state(right-closable)) .right > slot {
+      inset-inline-end: var(--_ui-page-layout-float-room);
+      translate: 1em;
+    }
+    :host(:state(left-closable):state(left-open)) .left > slot,
+    :host(:state(right-closable):state(right-open)) .right > slot {
+      translate: 0;
+      opacity: 1;
+      visibility: visible;
+    }
+    /* ... the page its end room again, with that side bar out of the row */
+    :host(:state(floating):state(right-closable)) .page {
+      margin-inline-end: var(--_page-layout-room);
+    }
+  }
+
   /* ## Narrow:  one column, the drawer slid over the page from the start */
   @container (width < 40em) {
+    /* what the component reads to know it's narrow (`isNarrowByStyle()`):  the width decided here alone */
+    .layout {
+      --_page-layout-narrow: 1;
+    }
     .layout:has(> .drawer) {
       grid-template-columns: minmax(0, 1fr);
     }
@@ -277,6 +472,40 @@
       box-shadow: var(--_ui-page-layout-shadow);
       clip-path: inset(0 0 -2em 0);
     }
+    /* the drawer hidden on a wide page is the slid-out drawer here:  its button slides it in */
+    :host(:state(drawer-hidden)) .drawer {
+      inline-size: min(16em, 85%);
+      overflow: auto;
+    }
+    :host(:state(drawer-hidden):state(open)) .drawer {
+      visibility: visible;
+    }
+    :host(:state(drawer-hidden)) .drawer-box {
+      min-inline-size: 0;
+    }
+    /* floating:  the slid-in drawer is the card, on the page's own fill */
+    :host(:state(floating)) .drawer {
+      background: linear-gradient(var(--ui-background, Canvas), var(--ui-background, Canvas)) Canvas;
+    }
+    :host(:state(floating)) .drawer-box {
+      margin: 0;
+      border-radius: 0;
+      background: none;
+      box-shadow: none;
+      max-block-size: none;
+    }
+    :host(:state(floating)) .menu {
+      margin-block-start: 0;
+    }
+    :host(:state(floating)) .layout > .body > .under-menu {
+      padding-inline-start: 0;
+    }
+    :host(:state(floating)) .page:last-child,
+    :host(:state(floating):state(right-hidden)) .page,
+    :host(:state(floating):state(right-closable)) .page {
+      margin-inline-end: 0;
+    }
+
     /* its own menu button 32px tall, 8px above what's under it:  the page starts 40px down, as under a menu (I36) */
     .menu-button {
       --ui-button-padding-block: 8px;
@@ -289,6 +518,8 @@
 
   /* no motion:  nothing waits either */
   @media (prefers-reduced-motion: reduce) {
+    :is(.left, .right) > slot,
+    :host(:state(drawer-hidden)) .drawer,
     .drawer,
     :host(:state(compact)) .drawer,
     :host(:state(compact):not(:state(narrow))) .drawer-box,
@@ -297,6 +528,8 @@
     }
   }
   @container style(--ui-motion: none) {
+    :is(.left, .right) > slot,
+    :host(:state(drawer-hidden)) .drawer,
     .drawer,
     :host(:state(compact)) .drawer,
     :host(:state(compact):not(:state(narrow))) .drawer-box,

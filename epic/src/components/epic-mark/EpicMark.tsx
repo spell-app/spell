@@ -111,7 +111,7 @@ export class EpicMark extends E.UIComponent<typeof epicMarkVocabulary> {
             class={[this.rootClass, CHIP]}
             part={this.partForName("base")}
             data-state={this.state}
-            title={this.tooltip}
+            data-tooltip={this.tooltip}
           >
             {id()}
           </span>
@@ -122,7 +122,7 @@ export class EpicMark extends E.UIComponent<typeof epicMarkVocabulary> {
           part={this.partForName("base")}
           data-state={this.state}
           href={`#${this.landing?.id ?? (this.item ?? "").toLowerCase()}`}
-          title={this.tooltip}
+          data-tooltip={this.tooltip}
         >
           {id()}
         </a>

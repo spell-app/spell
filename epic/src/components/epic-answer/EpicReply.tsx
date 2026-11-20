@@ -29,7 +29,6 @@ import { SeenReplies } from "./SeenReplies"
 
 import answerCSS from "./EpicAnswer.css?inline"
 import foldCSS from "spell/epic/components/epic-item/Fold.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicReply`
@@ -61,7 +60,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 export class EpicReply extends E.UIComponent<typeof epicReplyVocabulary> {
   @E.proto static vocabulary = epicReplyVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-fold-button": foldCSS, "epic-answer": answerCSS },
+    styleSheets: { "epic-fold-button": foldCSS, "epic-answer": answerCSS },
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
 
@@ -226,7 +225,7 @@ export class EpicReply extends E.UIComponent<typeof epicReplyVocabulary> {
             {this.who}
           </span>
           <Show when={this.isNew}>
-            <span class={NEW_TAG} part={this.partForName("new")} title={this.translationForKey("newTip")}>
+            <span class={NEW_TAG} part={this.partForName("new")} data-tooltip={this.translationForKey("newTip")}>
               {this.translationForKey("new")}
             </span>
           </Show>

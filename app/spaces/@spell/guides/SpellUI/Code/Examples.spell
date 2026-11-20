@@ -4,13 +4,6 @@
 		<header>Code shows a block of source code coloured by its language, from the element's own text or a file on
               this site.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#variations">Variations</>
-		</>
-	</>
-
 	<!--
 		EXAMPLES:  ours only, no Fomantic page.  The old Astro page's examples (Types, Variations), restyled, plus a markup
 		example.  Files shown:  `site/examples/` (`../examples/sample.json`).

@@ -1,0 +1,22 @@
+/*
+ * `<ui-site-links>` (`UISiteLinks.tsx`):  the page shown's own links, small tertiary icon buttons in a row.
+ * - In an app menu's end, beside its other buttons:  4px apart, centred in the bar.
+ * - Nothing to show (`:state(empty)`):  no room at all.
+ */
+@layer ui.components {
+  :host {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+  }
+
+  :host(:state(empty)) {
+    display: none;
+  }
+
+  .links {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+}

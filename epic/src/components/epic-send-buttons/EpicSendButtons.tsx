@@ -9,7 +9,6 @@ import { epicSendButtonsVocabulary } from "./EpicSendButtons.en"
 import { SEND_ASKED, type SendAskedDetail } from "./EpicSendButtons.types"
 import { CountdownRing } from "./CountdownRing"
 
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 import ringCSS from "./CountdownRing.css?inline"
 import sendButtonsCSS from "./EpicSendButtons.css?inline"
 
@@ -60,7 +59,7 @@ import sendButtonsCSS from "./EpicSendButtons.css?inline"
 export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabulary> {
   @E.proto static vocabulary = epicSendButtonsVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-countdown-ring": ringCSS, "epic-send-buttons": sendButtonsCSS },
+    styleSheets: { "epic-countdown-ring": ringCSS, "epic-send-buttons": sendButtonsCSS },
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
 
@@ -230,7 +229,7 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
           data-state={this.groupState}
           aria-busy={this.busy ? "true" : undefined}
           aria-label={this.sendTitle}
-          title={this.sendTitle}
+          data-tooltip={this.sendTitle}
           onClick={() => this.askToSend(false)}
         >
           <span class={GLYPH}>

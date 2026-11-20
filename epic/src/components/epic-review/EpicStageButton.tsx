@@ -11,7 +11,6 @@ import { CountdownRing } from "spell/epic/components/epic-send-buttons/Countdown
 import { epicStageButtonVocabulary } from "./EpicStageButton.en"
 import { ReviewState } from "./ReviewState"
 
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 import ringCSS from "spell/epic/components/epic-send-buttons/CountdownRing.css?inline"
 import stageButtonCSS from "./EpicStageButton.css?inline"
 
@@ -45,7 +44,7 @@ import stageButtonCSS from "./EpicStageButton.css?inline"
 export class EpicStageButton extends E.UIComponent<typeof epicStageButtonVocabulary> {
   @E.proto static vocabulary = epicStageButtonVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-countdown-ring": ringCSS, "epic-stage-button": stageButtonCSS }
+    styleSheets: { "epic-countdown-ring": ringCSS, "epic-stage-button": stageButtonCSS }
   } satisfies Partial<E.ElementSetup>
 
   /** Its view of the page's review inbox, keyed `stage`. */
@@ -135,7 +134,7 @@ export class EpicStageButton extends E.UIComponent<typeof epicStageButtonVocabul
         class={this.rootClass}
         part={this.partForName("base")}
         data-state={this.buttonState}
-        title={this.tip}
+        data-tooltip={this.tip}
         aria-label={this.tip}
         onClick={(event: MouseEvent) => {
           // a title row's tool:  not a click on the title, which would fold it

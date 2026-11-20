@@ -86,8 +86,8 @@ function isSameRun(a: readonly unknown[] | undefined, b: readonly unknown[] | un
  * - `:state(changed)`:  its edit is held, not saved yet (the editor says, `markChanged()`).
  * - Its look in its editor (epic `debut` P31):
  *   - `:state(half)`:  half a row on the editor's grid, by its control's kind (a number, a select) or its `width`
- *   - in a `compact` editor (`:state(compact)`):  a yes or no on one line, the box then its label;  its hint at the
- *     label row's end
+ *   - in a `compact` editor (`:state(compact)`):
+ *     a yes or no on one line, the box then its label;  its hint at the label row's end
  *   - `:state(set)`:  its value isn't its default (`default`, else the schema's);  bold under `show-defaults`
  *   - where its value comes from, when its editor says (`PropertyOrigin`):  `:state(here)`, nothing drawn;
  *     `:state(inherited)`, a quieter label;  `worked out`, read only;  its label's tooltip says where, and a small

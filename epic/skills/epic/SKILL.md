@@ -119,7 +119,8 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
   - `tidy`:  `/epic tidy [<epic>]` closes the items other work made obsolete, with a reason on each.
     Go to "14. Tidy" (epic `epic-engine` Q69).
   - `request`:  `/epic request <epic> [<rN>...]` takes up a request the person sent from another session:
-    it becomes a todo or a phase.  Go to "12. Request" (epic `epic-workflow`;  epic `epic-engine` T88).
+    a bug report becomes an issue, a feature a todo, bigger a phase.  Go to "12. Request" (epic `epic-workflow`;
+    epic `epic-engine` T88, T108).
   - `demo`:  `/epic demo [pasted text]` runs the STAGED DEMO when its step files are ready (`epic demo check`):
     NOT a new epic.  Go to "15. Staged demo", and skip everything else here (epic `epic-engine` P77).
   - `done`:  `/epic done` is `/isolate done`, word for word.
@@ -542,10 +543,12 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
       T78;  Owen, 2026-11-15:  "you should start the issue and show it appropriately"):
       `epic add <epic>#I "<title>" --requested --start "<their words>" --agent <full name>`, after `epic agents add`
       - their words become its body, quoted;  an Underway card names the agent;  the spinner goes on
-      - a request from another session (`/send`, "12. Request") is a TODO, never an issue (epic `epic-engine` T88):
-        `epic add <epic>#T "<title>" --requested --start "<their words>" --agent <full name>`, then
-        `epic file <epic>#T<n> <rN>`:  its words, its Context and its screenshots go into the todo, and the request is
-        marked filed there, so the item never sits at "What it says on the tin" (I292:  I287, filed from r70 with no body)
+      - a request from another session (`/send`, "12. Request"):  a bug report an ISSUE, a feature a TODO
+        (epic `epic-engine` T88, T108):
+        `epic add <epic>#I "<title>" --requested --start "<their words>" --agent <full name>` (`#T` for a feature), then
+        `epic file <epic>#I<n> <rN>` (`#T<n>`):  its words, its Context and its screenshots go into the item, and the
+        request is marked filed there, so the item never sits at "What it says on the tin" (I292:  I287, filed from r70
+        with no body)
       - a picture they pasted with it goes in too, never described in words instead (epic `epic-engine` T87):
         `--pasted <n>`, as the guide's "build" says (`epic guide build`)
       - the agent's `epic update <epic>#I<n> fixed "..."` turns it orange for their review
@@ -1727,16 +1730,18 @@ A REQUEST is something the person asked for in another session, sent here instea
 1. `epic requests <epic> --json`:  the request(s), status `new`.
    - Read each `request.md`, and look at each screenshot (`Read` on the image).
 2. One line, at once:  "taking r3 (from `🚧 python`):  <their first words>".
-EVERY request becomes a TODO or a PHASE (epic `epic-engine` T88;  Owen, 2026-11-16:  "When an epic gets requests from
-other epics, it should make them a Todo or a phase"):  never only a note on the request ("fixed as I282").
-- SMALL, one agent's work (a fix, a tweak, one file or two):  a todo, taken up at once as "The session answers;
-  agents build" says:
-  `epic agents add <name> ...`, then `epic add <epic>#T "<title>" --requested --start "<their words>" --agent <full name>`,
-  then `epic file <epic>#T<n> <rN>`
-  - the file puts their words, the Context and the screenshots into the todo (its pictures, deletable on the page),
-    marks it `requested` (light orange once done, until they look), and marks the request filed `T<n>`
-  - the agent builds it, and closes it with `epic update <epic>#T<n> fixed "..."`;  one line back:
-    "r3:  T41 · <title>, agent `<epic>-<name>` on it"
+EVERY request becomes an ISSUE, a TODO or a PHASE (epic `epic-engine` T88, T108;  Owen, 2026-11-16:  "When an epic gets
+requests from other epics, it should make them a Todo or a phase"):  never only a note on the request ("fixed as I282").
+- A BUG REPORT (something broken):  an issue;  a FEATURE (something new):  a todo;  BIGGER:  a phase (below).
+- SMALL, one agent's work (a fix, a tweak, one file or two):  an issue or a todo, taken up at once as "The session
+  answers;  agents build" says:
+  `epic agents add <name> ...`, then
+  `epic add <epic>#I "<title>" --requested --start "<their words>" --agent <full name>` (a feature:  `#T`),
+  then `epic file <epic>#I<n> <rN>` (`#T<n>`)
+  - the file puts their words, the Context and the screenshots into the item (its pictures, deletable on the page),
+    marks it `requested` (light orange once done, until they look), and marks the request filed `I<n>` (`T<n>`)
+  - the agent builds it, and closes it with `epic update <epic>#I<n> fixed "..."`;  one line back:
+    "r3:  I41 · <title>, agent `<epic>-<name>` on it"
 - BIGGER, or about the same thing as a to-do phase:  a phase, steps 3 and 4.
 - A true DUPLICATE of a todo or phase the epic already has:  `epic file <epic> <rN> "same as T12"`, and say so.
   - `where` MUST name that todo or phase (`T12`, `P7`):  the command refuses anything else.
@@ -1768,7 +1773,7 @@ other epics, it should make them a Todo or a phase"):  never only a note on the 
      "Start P<N> · <Name>" first
      - In Codex:  in the chat.
    - a phase under way:  no modal;  the new work waits its turn.
-- A request with neither todo nor phase:  only a duplicate, `epic file <epic> r3 "same as T12"` (above);
+- A request with no issue, todo or phase:  only a duplicate, `epic file <epic> r3 "same as T12"` (above);
   one already done by other work is a todo too, closed at once with what did it.
 
 ## 13. Summarize:  condense an item after a lot of back and forth
@@ -1962,6 +1967,7 @@ updated <name>#P<N> "<p>what changed</p>" [--summary ".."] [--for <ids>]   phase
                                                     cause:  <epic-update>, after Goal;  nothing when marks say it
 file <name>#P<N> <rN>                               a request into phase N's Requests field, marked filed there
 file <name>#T<n> <rN>                               a request into todo n:  words, context, pictures;  marked requested (T88)
+file <name>#I<n> <rN>                               a bug report into issue n, the same way (T108)
 file <name> <rN> "same as T12"                      a duplicate:  only marked;  must name the todo or phase (T88)
 update <name>#P<N> --estimate "1-2h"                change a phase's estimate;  the Overview's total follows
 phase <name>#P<N> todo|active|done [--no-open]      done drops UPDATE labels / prose updates;  reloads the tab

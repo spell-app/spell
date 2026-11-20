@@ -127,7 +127,7 @@ export class EpicPicture extends E.UIComponent<typeof epicPictureVocabulary> {
             size="mini"
             icon="xmark"
             part={this.partForName("remove")}
-            title={this.removeTip}
+            data-tooltip={this.removeTip}
             aria-label={this.removeTip}
             onClick={this.remove}
           />
@@ -138,7 +138,7 @@ export class EpicPicture extends E.UIComponent<typeof epicPictureVocabulary> {
             size="mini"
             icon="trash can"
             part={this.partForName("delete")}
-            title={this.translationForKey("deleteTip")}
+            data-tooltip={this.translationForKey("deleteTip")}
             aria-label={this.translationForKey("deleteTip")}
             onClick={this.delete}
           />

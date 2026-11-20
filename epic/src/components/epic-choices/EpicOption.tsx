@@ -22,7 +22,6 @@ import { ITEM_TAG, ORIGINAL_TAG, TOGGLE, type CardSet } from "./EpicChoices.type
 import { SetChange } from "./SetChange"
 
 import choicesCSS from "./EpicChoices.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 import picturesCSS from "./EpicOption.pictures.css?inline"
 
 /****************
@@ -85,7 +84,7 @@ import picturesCSS from "./EpicOption.pictures.css?inline"
 export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
   @E.proto static vocabulary = epicOptionVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-choices": choicesCSS },
+    styleSheets: { "epic-choices": choicesCSS },
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
 
@@ -449,7 +448,12 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
       <p class={DRAFT_LINE} part={this.partForName("change")}>
         {this.translationForKey(key())}
         <Show when={this.choices?.isReviewed}>
-          <button type="button" class={UNDO} title={this.translationForKey("undoTip")} onClick={() => this.onUndo()}>
+          <button
+            type="button"
+            class={UNDO}
+            data-tooltip={this.translationForKey("undoTip")}
+            onClick={() => this.onUndo()}
+          >
             {this.translationForKey("undo")}
           </button>
         </Show>
@@ -510,7 +514,7 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
               part={this.partForName("more")}
               aria-pressed={this.wantsMore ? "true" : "false"}
               aria-label={this.translationForKey("moreTip")}
-              title={this.translationForKey("moreTip")}
+              data-tooltip={this.translationForKey("moreTip")}
               onClick={this.onMore}
             >
               {this.moreGlyph.svg}
@@ -523,7 +527,7 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
               data-color={this.stateColor ?? "grey"}
               role="img"
               aria-label={this.stateLabel ?? this.stateIcon}
-              title={this.stateLabel}
+              data-tooltip={this.stateLabel}
             >
               {this.stateGlyph.svg}
             </span>
@@ -538,7 +542,9 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
             aria-checked={this.isTicked ? "true" : "false"}
             aria-label={`${this.translationForKey(this.isTicked ? "chosen" : "choose")}:  ${this.shownLetter}${LETTER_SEPARATOR}${this.title ?? ""}`}
             tabindex={this.tickTabIndex}
-            title={this.translationForKey(this.isTicked ? "tipTicked" : "tipChoose", { letter: this.shownLetter })}
+            data-tooltip={this.translationForKey(this.isTicked ? "tipTicked" : "tipChoose", {
+              letter: this.shownLetter
+            })}
             onClick={this.onTick}
           >
             {this.translationForKey(this.isTicked ? "chosen" : "choose")}
@@ -558,7 +564,7 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
           part={this.partForName("recommended")}
           role="img"
           aria-label={this.translationForKey("recommended")}
-          title={this.translationForKey("recommended")}
+          data-tooltip={this.translationForKey("recommended")}
         >
           {this.thumbsUp.svg}
         </span>
@@ -663,7 +669,7 @@ export class EpicOption extends E.UIComponent<typeof epicOptionVocabulary> {
           part={this.partForName("choose")}
           aria-pressed={pill().picked ? "true" : "false"}
           aria-disabled={pill().applied ? "true" : undefined}
-          title={this.pillTip(pill())}
+          data-tooltip={this.pillTip(pill())}
           onClick={this.onChoose}
         >
           {this.translationForKey(pillLabel(pill()))}

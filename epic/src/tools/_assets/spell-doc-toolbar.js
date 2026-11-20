@@ -15,7 +15,7 @@ import { nextFrame } from "spell/util/dom"
 import { clamp } from "spell/util/number"
 import { withoutAccents } from "spell/util/string"
 import { commentsOnPage, firstWords } from "./spell-doc-comments.js"
-import { FIELDS, el, titleInside } from "./spell-doc-helpers.js"
+import { FIELDS, el } from "./spell-doc-helpers.js"
 import { ThreadFacts } from "spell/epic/comments"
 
 ////////////////
@@ -265,9 +265,7 @@ function takesKeys(element) {
  * `mark`, a `slot="icon"` element), its `title` when the toolbar is titled (a plain `<span>` in the item:  a
  * shrinkable menu's item draws it in its title box, and cuts it there), its `badges` (`[kind, number, words]`:  `<ui-label slot="badge">`s, over
  * the mark's top right on an epic page), `state` (`data-state`, a details page's question's colour).
- * - its tooltip `tip` on the link inside, where the pointer lands (`titleInside()`):  its mark, title and badges let
- *   the pointer through (`spell-toolbar.css`), so it shows in VS Code too;  the badges say theirs in it, and to a
- *   screen reader
+ * - its tooltip `tip`, Spell UI's (`data-tooltip`):  the badges say theirs in it, and to a screen reader
  */
 export function toolbarItem({ id, tip, glyph, mark, title, letter, state, badges }) {
   const said = [tip, ...badges.map(([, , words]) => words)].join(" · ")
@@ -278,9 +276,8 @@ export function toolbarItem({ id, tip, glyph, mark, title, letter, state, badges
       link: `#${id}`,
       "data-rail": id,
       icon: glyph,
-      // an item with an access letter says it in the toolbar's own tooltip (`wireKeyTips()`), not the browser's:
-      // an empty one, so the menu draws none either, with the icons only
-      title: letter ? "" : said,
+      // an item with an access letter says it in the toolbar's own tooltip (`wireKeyTips()`), so none here
+      "data-tooltip": letter ? undefined : said,
       "aria-label": said,
       "aria-keyshortcuts": letter?.toUpperCase(),
       "data-key": letter,
@@ -291,7 +288,6 @@ export function toolbarItem({ id, tip, glyph, mark, title, letter, state, badges
     title && el("span", {}, ...titleWithKey(title, letter)),
     ...badgeLabels(badges)
   )
-  titleInside(item, "item")
   return item
 }
 
@@ -526,13 +522,12 @@ function jumpWaitingList(pick) {
     const tip = `${ThreadFacts.aboutTip({ id: comment.id, place: comment })}\n(Jump there)`
     const line = el(
       "ui-item",
-      { class: "spell-jump-thread", title: tip },
+      { class: "spell-jump-thread", "data-tooltip": tip },
       el("b", {}, label),
       " · ",
       el("span", {}, firstWords(comment.text))
     )
     line.addEventListener("click", () => pick(label))
-    titleInside(line, "item")
     return line
   })
   return el(

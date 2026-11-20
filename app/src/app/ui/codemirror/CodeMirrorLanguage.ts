@@ -31,7 +31,7 @@ import { after, waitUntil, type CancelablePromise } from "spell/util/timing"
 import type { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
 import { CodeEditorFeatures } from "spell/app/app/ui/CodeEditorFeatures"
-import { HOVER_DELAY, suggestsByItself, type SuggestMode } from "spell/app/app/ui/codePopups"
+import { hoverDelay, suggestsByItself, type SuggestMode } from "spell/app/app/ui/codePopups"
 import { RenameRefusedError } from "spell/app/app/ui/ui.types"
 import { CodeMirrorHovers } from "./CodeMirrorHovers"
 import { CodeMirrorPopups } from "./CodeMirrorPopups"
@@ -140,13 +140,13 @@ export class CodeMirrorLanguage {
   }
 
   /**
-   * The suggestion list, shown by itself, waits for the typing to pause `HOVER_DELAY` (epic `codemirror` I22):
+   * The suggestion list, shown by itself, waits for the typing to pause `hoverDelay()` (epic `codemirror` I22):
    * each key starts CodeMirror's wait again (`activateOnTypingDelay`), so it never shows between quick keys.
    * - Ctrl+Space shows it at once all the same:  CodeMirror waits 50 msec for what's asked for.
    * - Only the wait:  `FileStates` gives CodeMirror the rest of the list's settings, which it merges with this.
    */
   private suggestionsWait(): Extension {
-    return autocompletion({ activateOnTypingDelay: HOVER_DELAY * 1000 })
+    return CodeMirrorPopups.waiting((msec) => autocompletion({ activateOnTypingDelay: msec }))
   }
 
   ////////////////
@@ -154,26 +154,28 @@ export class CodeMirrorLanguage {
   ////////////////
 
   /**
-   * What a word is, and its docstring, on a hover that rests `HOVER_DELAY`, saying as much as the settings ask.
+   * What a word is, and its docstring, on a hover that rests `hoverDelay()`, saying as much as the settings ask.
    * - Only when Settings… says (`CodeEditorFeatures.showsHoverInfo()`):
    *   with ⌥ held (`CodeMirrorHovers.isAltHeld()`), always, or never.
    * - An error's message shows on a plain hover all the same (`CodeMirrorHovers`).
    * - Its markdown drawn by Spell UI's `<ui-markdown>`.
    */
   private hover(): Extension {
-    return hoverTooltip(
-      async (view, pos): Promise<Tooltip | null> => {
-        const { hoverInfo } = CodeMirrorPopups.of(view.state)
-        if (!CodeEditorFeatures.showsHoverInfo(hoverInfo, CodeMirrorHovers.isAltHeld(view))) return null
-        const { doc } = view.state
-        const file = await this.fileReady(doc)
-        const hover = file && CodeEditorFeatures.hover(this.service, file, LspToCodeMirror.lspPosition(doc, pos))
-        if (!hover) return null
-        const { from, to, text } = LspToCodeMirror.hover(doc, hover, pos)
-        return { pos: from, end: to, above: true, create: () => ({ dom: markdownDom(text, HOVER_CLASS) }) }
-      },
-      // CodeMirror's own wait, in msec
-      { hoverTime: HOVER_DELAY * 1000 }
+    return CodeMirrorPopups.waiting((msec) =>
+      hoverTooltip(
+        async (view, pos): Promise<Tooltip | null> => {
+          const { hoverInfo } = CodeMirrorPopups.of(view.state)
+          if (!CodeEditorFeatures.showsHoverInfo(hoverInfo, CodeMirrorHovers.isAltHeld(view))) return null
+          const { doc } = view.state
+          const file = await this.fileReady(doc)
+          const hover = file && CodeEditorFeatures.hover(this.service, file, LspToCodeMirror.lspPosition(doc, pos))
+          if (!hover) return null
+          const { from, to, text } = LspToCodeMirror.hover(doc, hover, pos)
+          return { pos: from, end: to, above: true, create: () => ({ dom: markdownDom(text, HOVER_CLASS) }) }
+        },
+        // CodeMirror's own wait, in msec
+        { hoverTime: msec }
+      )
     )
   }
 
@@ -435,7 +437,7 @@ export class CodeMirrorLanguage {
   /**
    * The words of the call being typed, the argument at the caret in bold, over the line (`<ui-markdown>`):
    * VS Code's parameter hints.
-   * - Once a space is typed and the typing pauses `HOVER_DELAY`, while Settings… › "Show parameter hints" is on
+   * - Once a space is typed and the typing pauses `hoverDelay()`, while Settings… › "Show parameter hints" is on
    *   (`CodeMirrorPopups`):  each key starts the wait again (epic `codemirror` I22);
    *   ⇧⌘Space (Ctrl+Shift+Space off a Mac) shows it at once, in every mode.
    * - Asked again as the text or caret changes while it shows;  it goes where there's no call, or at Esc.
@@ -471,7 +473,7 @@ export class CodeMirrorLanguage {
             if (!isWaiting && !(typedSpace && CodeMirrorPopups.of(update.state).signatureHelp)) return
             // each key starts the wait again
             wait?.cancel()
-            wait = after(HOVER_DELAY, () => {
+            wait = after(hoverDelay(), () => {
               wait = undefined
               void this.showSignature(view)
             })

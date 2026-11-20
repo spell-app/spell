@@ -23,6 +23,7 @@ export class Counter extends View {
 
   countUp() {
     this.count = this.count + 1
+    core.play("click")
   }
 
   /** A button saying how many times it's been clicked:  a click counts up */

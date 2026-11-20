@@ -3,14 +3,6 @@
 		Dimmer
 		<header>A dimmer hides distractions to focus attention on particular content.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#states">States</>
-			<item link="#variations">Variations</>
-			<item link="#examples">Examples</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's dimmer page, section by section, in its order (Types, States, Variations, then its Examples

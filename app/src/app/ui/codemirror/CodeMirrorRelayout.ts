@@ -252,8 +252,8 @@ export class CodeMirrorRelayout {
 /**
  * An effect keeping `view`'s caret's line where it is on screen through the transaction it goes in, as its lines
  * above change height;  `null` when the editor hasn't the keyboard, or the caret's off screen.
- * - CodeMirror's own scroll snapshot, anchored on the caret's line instead of the top one:  applied once the new
- *   heights are measured, before anything's painted.
+ * - CodeMirror's own scroll snapshot, anchored on the caret's line instead of the top one:
+ *   applied once the new heights are measured, before anything's painted.
  * - SIDE EFFECT:  reads the scroll position, and the layout if it's due:  once a layout, never at every key.
  */
 function keepCaretLine(view: EditorView): { effects: StateEffect<unknown> } | null {

@@ -3,11 +3,6 @@
 		Description
 		<header>A description is the text of a card, item, modal, list item, step or comment.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#owners">Owners</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  `<ui-description>` in each owner that gives it a look (from the owners' own pages and

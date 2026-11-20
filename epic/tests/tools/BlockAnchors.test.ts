@@ -158,6 +158,19 @@ describe("offsetIn() and quoteIn()", () => {
     expect(quoteIn(paragraph, "not there", 0)).toBeNull()
     expect(textOf(main.querySelector("ui-section"))).toBe("the inbox file, then the inbox file again")
   })
+
+  // epic `epic-engine` T107:  a quote running out of a `<code>` had no space there, and was never found
+  test("a quote across inline elements, as a selection gives it:  no space where an element ends", () => {
+    const main = mainOf(
+      `<main><ul><li><b><code>&lt;ui-input&gt;</code>'s <code>action</code></b>: an attribute</li></ul></main>`
+    )
+    const item = main.querySelector("li")!
+    const [first, second] = Array.from(main.querySelectorAll("code"), (code) => code.firstChild!)
+    const found = quoteIn(item, "<ui-input>'s action", 0)!
+    expect([found.start[0], found.start[1], found.end[0], found.end[1]]).toEqual([first, 0, second, 6])
+    // a real space after an element stays a space:  never "inputs" from "input s"
+    expect(quoteIn(item, "<ui-input>'saction", 0)).toBeNull()
+  })
 })
 
 describe("targetOf()", () => {

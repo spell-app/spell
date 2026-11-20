@@ -28,7 +28,6 @@ import { epicStatusVocabulary } from "./EpicStatus.en"
 import answerCSS from "spell/epic/components/epic-answer/EpicAnswer.css?inline"
 import foldCSS from "spell/epic/components/epic-item/Fold.css?inline"
 import statusCSS from "./EpicStatus.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 import textPageCSS from "./EpicStatus.text.css?inline"
 
 /****************
@@ -66,7 +65,6 @@ export class EpicStatus extends E.UIComponent<typeof epicStatusVocabulary> {
   @E.proto static vocabulary = epicStatusVocabulary
   @E.protoMerged static elementSetup = {
     styleSheets: {
-      "epic-tooltip": tooltipCSS,
       "epic-fold-button": foldCSS,
       "epic-answer": answerCSS,
       "epic-status": statusCSS
@@ -272,7 +270,7 @@ export class EpicStatus extends E.UIComponent<typeof epicStatusVocabulary> {
             <span
               class={UNMERGED}
               part={this.partForName("unmerged")}
-              title={this.translationForKey("unmergedTip", { branch: branch() })}
+              data-tooltip={this.translationForKey("unmergedTip", { branch: branch() })}
             >
               {this.translationForKey("unmerged")}
             </span>
@@ -316,7 +314,7 @@ export class EpicStatus extends E.UIComponent<typeof epicStatusVocabulary> {
             {this.translationForKey(this.isDone ? "done" : this.isNoted ? "noted" : "underway", { who: this.who })}
           </span>
           <Show when={this.date}>
-            <time class={DATE} part={this.partForName("date")} datetime={this.when} title={this.dateTip}>
+            <time class={DATE} part={this.partForName("date")} datetime={this.when} data-tooltip={this.dateTip}>
               {this.date}
             </time>
           </Show>

@@ -62,7 +62,7 @@ export class EpicThreadMessage extends E.UIComponent<typeof epicThreadMessageVoc
               <span class={ROOM} aria-hidden="true">
                 {stamp()}
               </span>
-              <time class={WHEN} part={this.partForName("time")} datetime={this.at} title={this.localTime}>
+              <time class={WHEN} part={this.partForName("time")} datetime={this.at} data-tooltip={this.localTime}>
                 {stamp()}
               </time>
             </>

@@ -479,33 +479,17 @@ export class UISlider extends F.FormComponent<typeof sliderVocabulary> {
   /** Keys on a thumb, see the class doc. */
   @E.untracked
   private onKeyDown(thumb: Thumb, event: KeyboardEvent) {
-    const scale = this.scale
-    const current = this.thumbValue(thumb)
-    let next: number | undefined
-    const steps = this.keySteps(event.key)
-    if (steps) next = scale.move(current, steps)
-    else if (event.key === UIT.Key.home) next = this.bounds(thumb)[0]
-    else if (event.key === UIT.Key.end) next = this.bounds(thumb)[1]
+    const [low, high] = this.bounds(thumb)
+    const next = this.scale.valueForKey(event.key, this.thumbValue(thumb), {
+      low,
+      high,
+      vertical: this.isVertical,
+      reversed: this.isReversed
+    })
     if (next === undefined) return
     event.preventDefault()
     if (!this.isInteractive) return
-    const value = next
-    if (this.move(thumb, value, event)) this.send("ui-changed", this.detail(thumb, value, event))
-  }
-
-  /** Steps key `key` takes:  arrows the way they point (Fomantic's `keyMovement`), pages 2;  `0` for other keys. */
-  @E.untracked
-  private keySteps(key: string): number {
-    const [vertical, reversed] = [this.isVertical, this.isReversed]
-    // the value grows downward on a vertical slider (min at the top) and leftward on a reversed horizontal one
-    const { arrowUp, arrowDown, arrowLeft, arrowRight, pageUp, pageDown } = UIT.Key
-    const grows = vertical ? (reversed ? arrowUp : arrowDown) : reversed ? arrowLeft : arrowRight
-    const shrinks = vertical ? (reversed ? arrowDown : arrowUp) : reversed ? arrowRight : arrowLeft
-    if (key === grows || (!vertical && key === arrowUp) || (vertical && key === arrowRight)) return 1
-    if (key === shrinks || (!vertical && key === arrowDown) || (vertical && key === arrowLeft)) return -1
-    if (key === pageUp) return PAGE_MULTIPLIER
-    if (key === pageDown) return -PAGE_MULTIPLIER
-    return 0
+    if (this.move(thumb, next, event)) this.send("ui-changed", this.detail(thumb, next, event))
   }
 
   /** A click aimed at the DOM element itself (its `<label for>`) focuses the first thumb. */
@@ -528,9 +512,6 @@ const SECOND: Thumb = 1
 
 /** Fomantic's `labelDistance`:  least px between full labels. */
 const LABEL_DISTANCE = 100
-
-/** Fomantic's `pageMultiplier`:  steps per PageUp / PageDown. */
-const PAGE_MULTIPLIER = 2
 
 /** Class of the inner box:  track, fill, thumbs. */
 const INNER = "inner"

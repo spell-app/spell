@@ -261,8 +261,4 @@
   .floppy[data-failed] {
     color: var(--ui-red, #db2828);
   }
-  /* the floppy's tooltip shows on it, not on its icon (VS Code's side bar:  `Tooltip.css`) */
-  .floppy > * {
-    pointer-events: none;
-  }
 }

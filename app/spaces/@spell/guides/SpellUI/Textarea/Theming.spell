@@ -3,12 +3,6 @@
 		Textarea
 		<header>A textarea is a multi-line field used to elicit a longer response.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#tokens">Tokens</>
-			<item link="#themes">Themes</>
-		</>
-	</>
 
 	<!-- THEMING:  the input family's tokens a textarea reads, live. -->
 	<section label="Tokens">

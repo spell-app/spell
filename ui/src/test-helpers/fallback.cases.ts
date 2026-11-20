@@ -83,6 +83,11 @@ export const FAMILY_FALLBACKS: readonly { family: string; html: string; root: st
     root: "input[type=range][part~=thumb]"
   },
   {
+    family: "ui-dial",
+    html: `<ui-dial value="40" label="Fallback dial"></ui-dial>`,
+    root: "[part~=dial] input[type=range][part~=control]"
+  },
+  {
     family: "ui-calendar",
     html: `<ui-calendar type="date" value="2026-09-30" placeholder="Fallback date"></ui-calendar>`,
     root: "[part~=calendar] input[type=date][part~=control]"

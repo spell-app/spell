@@ -4,16 +4,6 @@
 		<header>Headers, content, descriptions, metas and the other generic parts that cards, items, modals and
               messages share.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#content">Content</>
-			<item link="#states">States</>
-			<item link="#variations">Variations</>
-			<item link="#parts">Parts</>
-		</>
-	</>
-
 	<!--
 		EXAMPLES:  Fomantic's header page, section by section, in its order (Types, Content, States, Variations), plus our
 		extras (Fitted, Link), then the generic content parts (Parts), from the part sections of Fomantic's card, item,

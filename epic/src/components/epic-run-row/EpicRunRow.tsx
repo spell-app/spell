@@ -140,7 +140,7 @@ export class EpicRunRow extends E.UIComponent<typeof epicRunRowVocabulary> {
             <p
               class={CHANGED_AFTER_TAKEN}
               part={this.partForName("changed-after-taken")}
-              title={this.translationForKey("changedAfterTakenTip")}
+              data-tooltip={this.translationForKey("changedAfterTakenTip")}
             >
               {this.translationForKey("changedAfterTaken")}
             </p>
@@ -177,7 +177,7 @@ export class EpicRunRow extends E.UIComponent<typeof epicRunRowVocabulary> {
             class={RESET}
             part={this.partForName("reset")}
             aria-label={this.translationForKey("reset")}
-            title={this.translationForKey("resetTip", { value: this.runRow.value })}
+            data-tooltip={this.translationForKey("resetTip", { value: this.runRow.value })}
             onClick={this.onReset}
           >
             <ui-icon name="clock rotate left" />
@@ -187,7 +187,7 @@ export class EpicRunRow extends E.UIComponent<typeof epicRunRowVocabulary> {
           <span
             class={TAKEN}
             part={this.partForName("taken")}
-            title={this.translationForKey("takenTip", { time: clockOf(this.taken) })}
+            data-tooltip={this.translationForKey("takenTip", { time: clockOf(this.taken) })}
           >
             <ui-icon name="check" />
             {this.translationForKey("taken")}
@@ -211,7 +211,7 @@ export class EpicRunRow extends E.UIComponent<typeof epicRunRowVocabulary> {
             <label
               class={[PICK, { proposed: index === 0 }]}
               part={this.partForName("pick")}
-              title={index === 0 ? this.translationForKey("proposed") : undefined}
+              data-tooltip={index === 0 ? this.translationForKey("proposed") : undefined}
             >
               <input
                 type="radio"

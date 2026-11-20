@@ -461,6 +461,28 @@ export const HELP_TABLE: Readonly<
         "People can drag its corner to resize it, and the box and its lines follow: bare or `both`, `horizontally` or `vertically`."
     }
   },
+  "ui-dial": {
+    description: "A dial lets people pick a number by turning it, with its value in the middle and its label under it.",
+    empty: true,
+    attributes: {
+      label:
+        "The words under the dial; also its name for screen readers, unless `aria-label` or a `<label for>` names it.",
+      size: "Size of the whole dial, `mini` ...",
+      color: "Hue of the arc and the handle; uncoloured, the theme's primary colour.",
+      ticks: 'Dots round the inside of the ring: `ticks` alone draws 9 (8 gaps), `ticks="10"` that many gaps.',
+      unit: 'Written right after the number: `unit="%"` shows `98%`, `unit=" px"` shows `16 px`.',
+      disabled: "Can't be used: dimmed, not focusable, left out of the form.",
+      readonly: "Shows its value but can't be changed; still focusable and submitted.",
+      min: "Lowest value, at the ring's start.",
+      max: "Highest value, at the ring's end.",
+      step: "Values snap to multiples of it from `min`; `0`: any.",
+      value: "The value, default `min`.",
+      name: "Form field name.",
+      parameter:
+        'Keep the value in the page\'s address, as this query parameter (`parameter="s"` => `?s=van+gogh`): each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.',
+      required: "Form validation: a value must be chosen, by the page (`value`) or by turning the dial."
+    }
+  },
   "ui-dimension": {
     description: "A dimension shows one measure in the reader's own units: 5 ft 8 in in the US, 172 cm elsewhere.",
     empty: true,
@@ -1213,7 +1235,14 @@ export const HELP_TABLE: Readonly<
       "A page layout puts what stays on screen around a page: a menu across the top, a drawer of side navigation down the start, side bars either side of the page, and a footer.",
     attributes: {
       drawer:
-        "`compact`: the drawer shows only its icons (its `<ui-site-nav>`s `collapsed`), and opens over the page while the pointer rests on it."
+        "`compact`: the drawer shows only its icons (its `<ui-site-nav>`s `collapsed`), and opens over the page while the pointer rests on it.",
+      "drawer-hides":
+        'The drawer\'s button hides the whole drawer (`drawer="hidden"`) and shows it again, never switching it to its icons: for a navigation with no icons.',
+      left: "`hidden`: the left side bar isn't shown, until its button shows it again.",
+      right:
+        '`hidden`: the right side bar isn\'t shown, until its button (`<ui-site-nav-button toggles="right">`) shows it again.',
+      floating:
+        "The drawer and the side bars float: rounded cards with a soft shadow and room round them, over the page's own ground."
     }
   },
   "ui-panel": {
@@ -1815,6 +1844,18 @@ export const HELP_TABLE: Readonly<
       label: "What a screen reader calls the trail."
     }
   },
+  "ui-site-links": {
+    description:
+      "Site links are the page shown's own links, for an app menu's end: the real page it stands for (its `live` link, Fomantic UI's original for Spell UI's pages), and a way to report a problem with it.",
+    empty: true,
+    attributes: {
+      pages:
+        "The site's pages, nested as the side navigation nests them: the same `pages` `<ui-site-nav>` takes, each `{ title, href, id?, live?, pages?",
+      current: "Which page is shown: its `href` or its `id`.",
+      report:
+        "Where to report a problem with the page shown: an address, `{title}` in it standing for the title of the page at the top of its family, e.g."
+    }
+  },
   "ui-site-nav": {
     description: "A site nav lists a site's pages as a tree, the page shown marked; a click goes to a page.",
     empty: true,
@@ -1831,7 +1872,7 @@ export const HELP_TABLE: Readonly<
   },
   "ui-site-nav-button": {
     description:
-      "A site nav button shows or hides the side navigation of the page layout around it: its icons only and back on a wide page, slid in and out on a narrow one.",
+      "A site nav button shows or hides the side navigation of the page layout around it: its icons only and back on a wide page, slid in and out on a narrow one; or one of its side bars (`toggles`).",
     attributes: {
       color: "Menu: hue of the item while selected (`red active item`).",
       position: "Menu: `right` pushes the item (and what follows) to the far end.",
@@ -1847,7 +1888,9 @@ export const HELP_TABLE: Readonly<
       disabled: "Can't be chosen or followed.",
       selected: "Chosen: the dropdown's value, the list's / menu's current item (`aria-current`).",
       padding: "Menu: `none`, no padding; `none-x` / `none-y` drop only the left and right, or top and bottom.",
-      kind: "An item, a group `header` (dropdown, menu), or a `divider`: a line between two groups (dropdown, menu, toolbar; upright in a row)."
+      kind: "An item, a group `header` (dropdown, menu), or a `divider`: a line between two groups (dropdown, menu, toolbar; upright in a row).",
+      toggles:
+        "What it shows and hides: the layout's `drawer` (its side navigation), or its `left` or `right` side bar."
     }
   },
   "ui-site-tabs": {
@@ -1858,6 +1901,8 @@ export const HELP_TABLE: Readonly<
       pages:
         "The site's pages, nested as the side navigation nests them: the same `pages` `<ui-site-nav>` takes, each `{ title, href, id?, pages?, tab?",
       current: "Which page is shown: its `href` or its `id`.",
+      appearance:
+        "`header`: a switch for an app menu's middle, the look of the editor's Run | Edit: the row as wide as its tabs, on the bar's own fill, the page shown on the thumb.",
       label: "What a screen reader calls the row of tabs."
     }
   },
@@ -2389,6 +2434,31 @@ export const HELP_TABLE: Readonly<
       color: "The box's colour: its fill and border, in that hue.",
       kind: "A word for what sort of node it is, for a page's own style: its box is also part `kind-<word>`, so `::part(kind-call)` reaches every node of that kind.",
       folded: "Starts folded: the nodes under it don't show."
+    }
+  },
+  "ui-uploader": {
+    description:
+      "An uploader takes files someone picks or drops on it, or whole folders, then posts them to its `destination`, or hands them to its `action`.",
+    empty: true,
+    attributes: {
+      appearance:
+        "How it looks: `hero` -- a big drop area with an icon, a line of help and a Choose files button, a row per file under it; `button` -- just a button, its files in a popup from it; `input` -- a form field with a Browse button, its files listed under it; `compact` -- a one-line drop area, one line of status and one progress bar.",
+      destination:
+        "A URL each file is posted to, as form data (`file`, its path as its file name), one request per file.",
+      action:
+        "A function called with the files kept, `(files: File[]) => unknown`, instead of posting them: in Spell, an action (`action={read the netlist}`).",
+      extensions: "The kinds of file it takes, a comma list of extensions (`json, csv`); any other is turned away.",
+      multiple: "Takes more than one file at a time.",
+      folder:
+        "Takes folders instead of files, each with its files and their paths in it; its events are `ui-folder-*` for the drag and the folder itself, then `ui-file-dropped` for each file.",
+      "max-size": "The largest file it takes: `2 MB`, `500 KB`, `1.5 GB`, or a number of bytes.",
+      "max-files": "The most files it takes in one go; the rest are turned away.",
+      "drop-zone":
+        "Where else a drop counts as a drop on it: `page` -- anywhere on the page; a selector (`#editor`, `ui-section`), looked for first among the elements around it, then on the page; or, as a property, the element itself.",
+      message: "Its line of help (`Drop .json files here, or`); a `button` uploader's label.",
+      "drop-message": "What it says while files are dragged over it: `{count}` is how many.",
+      "uploading-message": "What it says while it posts: `{done}` is how many are done, `{count}` how many in all.",
+      "done-message": "What it says once they're all posted: `{count}` is how many."
     }
   },
   "ui-value": {

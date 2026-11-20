@@ -109,13 +109,13 @@ describe("<epic-code> heading, folded and open", () => {
     const host = wrap.querySelector("epic-code")!
     const heading = part(host, "heading")
     const lineHeight = parseFloat(getComputedStyle(heading).lineHeight)
-    expect([heading.getBoundingClientRect().height > lineHeight * 1.5, heading.hasAttribute("title")]).toEqual([
+    expect([heading.getBoundingClientRect().height > lineHeight * 1.5, heading.hasAttribute("data-tooltip")]).toEqual([
       true,
       false
     ])
     part(host, "toggle").click()
     await ElementFixture.tick()
-    expect([heading.getBoundingClientRect().height > lineHeight * 1.5, heading.hasAttribute("title")]).toEqual([
+    expect([heading.getBoundingClientRect().height > lineHeight * 1.5, heading.hasAttribute("data-tooltip")]).toEqual([
       true,
       false
     ])

@@ -9,9 +9,9 @@ const PIECE = "cm-selectionBackground"
 
 /****************
  * ### `CodeMirrorSelection`
- * The selection in the bubbly look, on the bands and pills:  each line's part of it as tall as a band, in the middle
- * of its line, as the bands are (epic `language` I124:  Owen, "move codemirrors selection bar down so it's centered
- * in the pill").
+ * The selection in the bubbly look, on the bands and pills:
+ * each line's part of it as tall as a band, in the middle of its line, as the bands are
+ * (epic `language` I124:  Owen, "move codemirrors selection bar down so it's centered in the pill").
  * - CodeMirror's own is drawn from the letters, which sit at a band's top:  it stood high, and short of the band's
  *   bottom;  a whole line's reached lower again, from the tabs before the words, which aren't lifted with them.
  * - Drawn in place of CodeMirror's own (`cm-selectionLayer`, still made by `drawSelection()`, hidden by the sheet):
@@ -23,8 +23,8 @@ const PIECE = "cm-selectionBackground"
  * - And the caret at a line's first word always drawn AT that word (`wordsSide`;  epic `language` I141).
  * - And a click on something drawn as one step for the caret, a comment's `--` drawn as one dash,
  *   puts the caret at its nearer end, as seen (`atomicPresses`;  epic `codemirror` I25).
- * - Its position in the import graph:  CodeMirror alone;  the bubbly look's extensions add it
- *   (`CodeMirrorBubbly`, `CodeMirrorMarkup`).
+ * - Its position in the import graph:  CodeMirror alone;
+ *   the bubbly look's extensions add it (`CodeMirrorBubbly`, `CodeMirrorMarkup`).
  ****************/
 export class CodeMirrorSelection {
   /**

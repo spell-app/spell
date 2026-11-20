@@ -3,13 +3,6 @@
 		Flag
 		<header>A flag is used to represent a political state.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#tokens">Tokens</>
-			<item link="#a-flag-font">A flag font</>
-			<item link="#themes">Themes</>
-		</>
-	</>
 
 	<section label="Tokens">
 		<markdown>

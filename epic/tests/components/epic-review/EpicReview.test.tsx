@@ -238,7 +238,7 @@ describe("<epic-item> review controls", () => {
       actions(host).map((action) => [
         button(host, action).getAttribute("icon"),
         button(host, action).dataset.color,
-        button(host, action).title
+        button(host, action).dataset.tooltip
       ])
     ).toEqual([
       ["paper plane", "green", "Start it now:  An agent takes it at once"],
@@ -361,7 +361,7 @@ describe("<epic-item> review controls", () => {
     expect([approved.fill, approved.color, approved.border]).toEqual(["dashed", undefined, "dotted"])
     expect(approved.chip.hasAttribute("data-marked")).toBe(true)
     expect([approved.button?.dataset.fill, approved.button?.dataset.color]).toEqual(["dashed", "green"])
-    expect(approved.chip.title).toMatch(/you chose Approve · not sent yet/)
+    expect(approved.chip.dataset.tooltip).toMatch(/you chose Approve · not sent yet/)
     const revisited = await look(`<epic-item id="j8" title="Talk" status="open" state="attention"></epic-item>`)
     expect([revisited.fill, revisited.color, revisited.border]).toEqual(["outline", undefined, "dotted"])
     // the ring the same blue whatever the item's state;  an unmarked chip keeps its solid state colour
@@ -369,7 +369,7 @@ describe("<epic-item> review controls", () => {
     expect(getComputedStyle(revisited.chip).borderTopColor).toBe(getComputedStyle(approved.chip).borderTopColor)
     expect(solid.chip.hasAttribute("data-marked")).toBe(false)
     const picked = await look(`<epic-item id="q9" title="Which?" status="open" state="attention"></epic-item>`)
-    expect([picked.fill, picked.color, picked.chip.title]).toEqual([
+    expect([picked.fill, picked.color, picked.chip.dataset.tooltip]).toEqual([
       "outline",
       undefined,
       expect.stringMatching(/you chose pick B · sent/)
@@ -635,7 +635,7 @@ describe("<epic-item> review controls", () => {
       [undefined, undefined, false]
     ])
     // its tooltip still says where it stands and what's to do
-    expect(queued.shadowRoot!.querySelector<HTMLElement>("[part~='id']")!.title).toMatch(/to do:  P9 · Build/)
+    expect(queued.shadowRoot!.querySelector<HTMLElement>("[part~='id']")!.dataset.tooltip).toMatch(/to do:  P9 · Build/)
   })
 
   test("a pick Claude took off the inbox, the doc's `chosen` not here yet:  the chip stays green, outlined", async () => {
@@ -739,13 +739,15 @@ describe("<epic-item> review controls", () => {
       `<epic-item id="j5" title="A call" status="open" reviewed="2026-10-07"><p>Text</p></epic-item>`
     )
     expect(deep(host).querySelector("[part~='review']")).toBeNull()
-    expect(button(host, "approve").getAttribute("title")).toBe("Approve:  Fine as it is · reviewed 10/7/26")
+    expect(button(host, "approve").getAttribute("data-tooltip")).toBe("Approve:  Fine as it is · reviewed 10/7/26")
     // a judgement call's first button is Do this (I232)
-    expect(button(host, "todo").getAttribute("title")).toBe("Do this:  Fix it now, then I'll review · reviewed 10/7/26")
+    expect(button(host, "todo").getAttribute("data-tooltip")).toBe(
+      "Do this:  Fix it now, then I'll review · reviewed 10/7/26"
+    )
     const question = await render(
       `<epic-item id="q5" title="A question" status="decided" reviewed="2026-10-07"><p>Text</p></epic-item>`
     )
-    expect(button(question, "todo").getAttribute("title")).toBe("Make Todo:  Follow up later · reviewed 10/7/26")
+    expect(button(question, "todo").getAttribute("data-tooltip")).toBe("Make Todo:  Follow up later · reviewed 10/7/26")
   })
 
   test("an open judgement call's id chip:  urgent (red) <-> not urgent (yellow, I275), through the inbox", async () => {
@@ -754,7 +756,7 @@ describe("<epic-item> review controls", () => {
     const chip = () => deep(host).querySelector<HTMLElement>("[part~='id']")!
     const box = () => deep(host).querySelector("[part~='base']")!
     expect(chip().localName).toBe("button")
-    expect(chip().title).toMatch(/Mark not urgent$/)
+    expect(chip().dataset.tooltip).toMatch(/Mark not urgent$/)
     chip().click()
     await settle()
     expect(routes.inbox.urgency.j6?.calm).toBe(true)
@@ -892,7 +894,7 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
     // the icon alone, its name the tooltip:  the words are the page's Send's, at the top (I305;  Owen, 2026-11-15:
     // "The item plane should be just the plane")
     expect(button(host, "todo").hasAttribute("label")).toBe(false)
-    expect(button(host, "todo").title).toBe("Do this:  Build this phase")
+    expect(button(host, "todo").dataset.tooltip).toBe("Do this:  Build this phase")
     expect(deep(host).querySelector("[part~='note-box'] >>> ui-textarea >>> textarea")).not.toBeNull()
     expect(noteButtons(host)).toEqual(["note-pick"])
     button(host, "todo").click()
@@ -913,7 +915,7 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
     expect(check.parentElement!.firstElementChild).toBe(check)
     expect(check.dataset).toMatchObject({ color: "green", fill: "outline" })
     expect(check.getAttribute("icon")).toBe("thumbs up")
-    expect(check.title).toBe("Plan accepted:  Ready to build;  a press holds it")
+    expect(check.dataset.tooltip).toBe("Plan accepted:  Ready to build;  a press holds it")
     // the ring is a WAITING plan's alone
     expect(deep(host).querySelector(".review-group")!.hasAttribute("data-asks")).toBe(false)
     // a click un-clicks it:  a hold mark, the thumbs up plain and dashed till sent;  it never folds the phase
@@ -924,7 +926,7 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
     expect(routes.inbox.marks.p2?.action).toBe("hold")
     const held = deep(host).querySelector<HTMLElement>('ui-button[data-action="hold"]')!
     expect(held.dataset).toMatchObject({ state: "held", fill: "dashed" })
-    expect(held.title).toBe("On hold:  Not built till you accept again;  a press undoes it")
+    expect(held.dataset.tooltip).toBe("On hold:  Not built till you accept again;  a press undoes it")
     expect(host.matches(":state(open)")).toBe(true)
     // a second click takes it back
     held.click()
@@ -966,7 +968,7 @@ describe("<epic-phase> and <epic-overview> review controls", () => {
     ]
     await adoptClient()
     const host = await render(`<epic-phase id="p2" title="Themes as Data" status="todo" plan="accepted"></epic-phase>`)
-    expect(button(host, "revisit").title).toBe("Revisit:  Talk it over:  your comments (C1, C3) are the note")
+    expect(button(host, "revisit").dataset.tooltip).toBe("Revisit:  Talk it over:  your comments (C1, C3) are the note")
     button(host, "revisit").click()
     await settle()
     expect(routes.inbox.marks.p2).toMatchObject({
@@ -1092,7 +1094,7 @@ describe("<epic-review> note pictures", () => {
     await adoptClient()
     const host = await render(`<epic-item id="m4" title="A test" status="open" open><p>Step</p></epic-item>`)
     const pick = deep(host).querySelector<HTMLButtonElement>("[part~='details'] [part~='note-box'] >>> .note-pick")!
-    expect(pick.title).toMatch(/^Add pictures:  paste/)
+    expect(pick.dataset.tooltip).toMatch(/^Add pictures:  paste/)
   })
 })
 
@@ -1214,7 +1216,7 @@ describe("<epic-section kind=todos | questions> new items", () => {
     await adoptClient()
     const host = await render(`<epic-section id="todos" kind="todos" open></epic-section>`)
     expect(cards(host)).toEqual([["pack", "dashed"]])
-    deep(host).querySelector<HTMLButtonElement>("[part~='new-list'] button[title='Edit']")!.click()
+    deep(host).querySelector<HTMLButtonElement>("[part~='new-list'] button[data-tooltip='Edit']")!.click()
     await ElementFixture.tick()
     const form = deep(host).querySelector<HTMLFormElement>("[part~='new-item'] >>> [part~='form']")!
     const title = form.querySelector<HTMLInputElement>("[data-field='title']")!
@@ -1229,7 +1231,7 @@ describe("<epic-section kind=todos | questions> new items", () => {
       { page: PAGE, id: "new1", entry: { kind: "todo", title: "pack chargers" } }
     ])
     await vi.waitFor(() => expect(cards(host)).toEqual([["pack chargers", "dashed"]]))
-    deep(host).querySelector<HTMLButtonElement>("[part~='new-list'] button[title='Remove']")!.click()
+    deep(host).querySelector<HTMLButtonElement>("[part~='new-list'] button[data-tooltip='Remove']")!.click()
     await settle()
     expect(routes.posts.at(-1)).toEqual(["new", { page: PAGE, id: "new1", entry: null }])
     expect(cards(host)).toEqual([])

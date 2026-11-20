@@ -99,6 +99,16 @@ describe("<ui-statistic> content", () => {
     expect(value.getBoundingClientRect().bottom).toBeLessThanOrEqual(label.getBoundingClientRect().top + 1)
   })
 
+  it("shows a number value as its text, 0 too (`value={0}` in JSX sets the property)", async () => {
+    const { host, root } = await render(`<ui-statistic label="Days"></ui-statistic>`)
+    ;(host as DOMElement & { value: unknown }).value = 3
+    await ElementFixture.tick()
+    expect(root.querySelector("[part=value]")!.textContent).toBe("3")
+    ;(host as DOMElement & { value: unknown }).value = 0
+    await ElementFixture.tick()
+    expect(root.querySelector("[part=value]")!.textContent).toBe("0")
+  })
+
   it("updates the shorthands", async () => {
     const { host, root } = await render(`<ui-statistic value="1"></ui-statistic>`)
     host.setAttribute("value", "2")

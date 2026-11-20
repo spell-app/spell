@@ -1,0 +1,2 @@
+
+<div id="spell-app-root"><test-project-app><es-contenedor ancho="32em"><es-segmento relleno="lg"><es-encabezado hidden>¡Es fin de semana!</es-encabezado><es-texto color="gris">El fin de semana empieza en</es-texto><es-estadisticas igual="" tamano="pequeño"><es-estadistica etiqueta="Días"></es-estadistica><es-estadistica etiqueta="Hr"></es-estadistica><es-estadistica etiqueta="Min"></es-estadistica><es-estadistica etiqueta="Seg"></es-estadistica></es-estadisticas></es-segmento></es-contenedor></test-project-app></div>

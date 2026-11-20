@@ -13,17 +13,6 @@ a "gone in a second" is a view:
 		<header>A toast allows users to receive a short, non-blocking notification.</>
 	</>
 
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#variations">Variations</>
-			<item link="#actions">Actions</>
-			<item link="#examples">Examples</>
-			<item link="#create-from-dom">Create from DOM</>
-			<item link="#interaction">Interaction</>
-		</>
-	</>
-
 	<!--
 		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
 		Groups ...).  Rules, the class-grammar mappings, gaps:  packages/docs/content/epics/spell-ui-pages/PAGES.md.

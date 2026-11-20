@@ -2030,6 +2030,31 @@
               </ui-example>
             </ui-section>
 
+            <ui-section id="modules-dial" label="Dial" sticky="stack" collapsible dividing>
+              <ui-example>
+                <p slot="description">
+                  A dial lets people pick a number by turning it, with its value in the middle and its label under it.
+                  <a href="ui-dial.html">Dial page</a>
+                </p>
+                <div class="ui-cluster" style="gap: 24px">
+                  <ui-dial
+                    size="small"
+                    label="Weight"
+                    color="orange"
+                    min="100"
+                    max="900"
+                    value="777"
+                    ticks
+                    style="--ui-dial-value-font-weight: 777"
+                  ></ui-dial>
+                  <ui-dial size="small" label="Roundness" color="teal" value="50"></ui-dial>
+                  <ui-dial size="small" label="Size" color="blue" max="250" value="104"></ui-dial>
+                  <ui-dial size="small" label="Line height" color="red" min="80" max="200" value="98" unit="%"></ui-dial>
+                  <ui-dial size="small" label="Spacing" color="yellow" min="-20" max="50" value="0" unit="%"></ui-dial>
+                </div>
+              </ui-example>
+            </ui-section>
+
             <ui-section id="modules-dimmer" label="Dimmer" sticky="stack" collapsible dividing>
               <ui-example>
                 <p slot="description">
@@ -3052,6 +3077,20 @@
               </ui-example>
             </ui-section>
 
+            <ui-section id="spell-ui-s-own-site-links" label="Site links" sticky="stack" collapsible dividing>
+              <ui-example>
+                <p slot="description">
+                  Site links are the page shown&#39;s own links, for an app menu&#39;s end:  the real page it stands for (its live link, Fomantic UI&#39;s original for Spell UI&#39;s pages), and a way to report a problem with it.
+                  <a href="ui-site-links.html">Site links page</a>
+                </p>
+                <ui-site-links
+                  current="#api"
+                  report="https://github.com/spell-app/spell-ui/issues/new?title={title}"
+                  pages='[{ "title": "Button", "href": "#usage", "live": "https://fomantic-ui.com/elements/button.html", "pages": [{ "title": "API", "href": "#api" }] }]'
+                ></ui-site-links>
+              </ui-example>
+            </ui-section>
+
             <ui-section id="spell-ui-s-own-site-nav-button" label="Site nav button" sticky="stack" collapsible dividing>
               <ui-example>
                 <p slot="description">
@@ -3236,6 +3275,16 @@
                     <ui-tree-item label="Catalogue" icon="folder"></ui-tree-item>
                   </ui-tree-item>
                 </ui-tree>
+              </ui-example>
+            </ui-section>
+
+            <ui-section id="spell-ui-s-own-uploader" label="Uploader" sticky="stack" collapsible dividing>
+              <ui-example>
+                <p slot="description">
+                  An uploader takes files someone picks or drops on it, or whole folders, then posts them, or hands them to an action.
+                  <a href="ui-uploader.html">Uploader page</a>
+                </p>
+                <ui-uploader extensions="json" multiple max-files="5" max-size="2 MB"></ui-uploader>
               </ui-example>
             </ui-section>
 

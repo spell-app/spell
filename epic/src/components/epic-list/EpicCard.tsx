@@ -20,7 +20,6 @@ import {
   type FavoriteDetail
 } from "./EpicList.types"
 
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 import cardCSS from "./EpicCard.css?inline"
 
 /****************
@@ -53,7 +52,7 @@ import cardCSS from "./EpicCard.css?inline"
 export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
   @E.proto static vocabulary = epicCardVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-card": cardCSS },
+    styleSheets: { "epic-card": cardCSS },
     // a card of links:  a click on its words must not jump to its first link
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
@@ -111,7 +110,7 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
                 size="mini"
                 appearance="basic"
                 icon="bullseye"
-                title={this.sagaPurpose ?? ""}
+                data-tooltip={this.sagaPurpose}
               >
                 {this.sagaTitle || this.saga}
               </ui-label>
@@ -125,7 +124,7 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
                 appearance="basic"
                 icon="bed"
                 link={this.awayLink}
-                title={this.translationForKey("awayTip")}
+                data-tooltip={this.translationForKey("awayTip")}
               >
                 {this.translationForKey("away")}
               </ui-label>
@@ -139,7 +138,12 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
         {this.menu()}
         <Show when={shortDay(this.worked)}>
           {(day) => (
-            <time class={WORKED} part={this.partForName("worked")} datetime={this.worked} title={this.workedTip()}>
+            <time
+              class={WORKED}
+              part={this.partForName("worked")}
+              datetime={this.worked}
+              data-tooltip={this.workedTip()}
+            >
               {day()}
             </time>
           )}
@@ -164,7 +168,8 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
             part={this.partForName("mark")}
             name={state().icon}
             color={state().color}
-            title={state().tip}
+            label={state().tip}
+            data-tooltip={state().tip}
           />
         }
       >
@@ -174,7 +179,7 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
           size="mini"
           color="blue"
           appearance="basic"
-          title={state().tip}
+          data-tooltip={state().tip}
         >
           {state().count || this.translationForKey("planning")}
         </ui-label>
@@ -196,7 +201,7 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
         appearance="tertiary"
         size="small"
         icon={this.favorite ? "star" : "star outline"}
-        title={tip()}
+        data-tooltip={tip()}
         aria-label={this.translationForKey(this.favorite ? "unstar" : "star", { epic: epic() })}
         disabled={this.canStar ? undefined : ""}
         onClick={this.onStar}
@@ -214,7 +219,7 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
         class={MENU}
         part={this.partForName("menu")}
         direction="left"
-        title={title()}
+        data-tooltip={title()}
         aria-label={title()}
         disabled={this.canStar && !this.isActing ? undefined : ""}
         on-ui-changed={this.onMenuPick}

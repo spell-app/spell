@@ -13,7 +13,7 @@
  * - Opened from disk (`file://`):  the same buttons explain how to start the server, and link to the page on it.
  * - Classic script, no imports:  `file://` pages can't load modules.  `window.SpellUI.UI` is the bundle's `UI`.
  * - The buttons follow the docs' rule:  pills with an icon and text, or circles with an icon and an `aria-label`;
- *   each with the browser's own tooltip, a `title`, on the button the pointer lands on too (`titleInside()`)
+ *   each with Spell UI's tooltip, a `data-tooltip`, after the standard delay
  *   - `<ui-button>`s built as elements, never markup in strings (epic `epic-engine` P3);  before it, a `<ui-popup>`
  *     after each was its tooltip, against the docs' rule (`src/AGENTS.md`, TOOLTIPS)
  */
@@ -145,11 +145,10 @@
         ...(primary ? { color: "primary" } : {}),
         size: "tiny",
         icon,
-        title: tip
+        "data-tooltip": tip
       },
       ...words
     )
-    titleInside(button)
     return button
   }
 
@@ -160,10 +159,9 @@
       appearance: "circular basic",
       size: "mini",
       icon,
-      title: tip,
+      "data-tooltip": tip,
       "aria-label": label
     })
-    titleInside(button)
     return button
   }
 
@@ -197,8 +195,8 @@
     <p class="goals-modal-hint">⌘ Enter saves.  Saved thoughts appear on the page, marked new.</p>
   </ui-content>
   <ui-actions>
-    <ui-button class="deny" circular basic icon="xmark">Cancel</ui-button>
-    <ui-button class="goals-save" circular primary icon="paper plane">Save thought</ui-button>
+    <ui-button class="deny" appearance="circular basic" icon="xmark">Cancel</ui-button>
+    <ui-button class="goals-save" appearance="circular" color="primary" icon="paper plane">Save thought</ui-button>
   </ui-actions>
 </ui-modal>`)
     const field = modal.querySelector("textarea")
@@ -265,32 +263,32 @@
   <ui-content>
     <p>Talking a topic through runs <b>Claude Code</b>, Anthropic's assistant for working in a project, in a terminal
       window.  It reads these pages, asks you questions, and writes your answers back here.  Two steps, once:</p>
-    <ui-steps class="goals-setup-steps" vertical ordered size="mini">
-      <ui-step data-step="install" header="Install Claude Code"
+    <ui-steps class="goals-setup-steps" direction="vertical" ordered size="mini">
+      <ui-step data-step="install" heading="Install Claude Code"
         description="One command in a terminal.  Needs a Claude subscription or an Anthropic API account."></ui-step>
-      <ui-step data-step="login" header="Log in"
+      <ui-step data-step="login" heading="Log in"
         description="Opens your browser to sign in to your Claude account."></ui-step>
-      <ui-step data-step="talk" header="Talk"
+      <ui-step data-step="talk" heading="Talk"
         description="Back here:  every speech-bubble button starts a session."></ui-step>
     </ui-steps>
     <div class="goals-setup goals-setup-install">
       <pre><code>curl -fsSL https://claude.ai/install.sh | bash</code></pre>
       <div class="goals-setup-buttons">
-        <ui-button class="goals-copy" circular basic size="small" icon="copy">Copy command</ui-button>
-        <ui-button circular basic size="small" icon="up right from square"
-          href="https://docs.claude.com/en/docs/claude-code/setup" target="ext-claude-code-setup">Install guide</ui-button>
+        <ui-button class="goals-copy" appearance="circular basic" size="small" icon="copy">Copy command</ui-button>
+        <ui-button appearance="circular basic" size="small" icon="up right from square"
+          link="https://docs.claude.com/en/docs/claude-code/setup" target="ext-claude-code-setup">Install guide</ui-button>
       </div>
     </div>
     <div class="goals-setup goals-setup-login">
       <div class="goals-setup-buttons">
-        <ui-button class="goals-login" circular primary size="small" icon="right to bracket">Log in, in a terminal</ui-button>
+        <ui-button class="goals-login" appearance="circular" color="primary" size="small" icon="right to bracket">Log in, in a terminal</ui-button>
       </div>
       <p class="goals-modal-hint">Runs <code>claude auth login</code>.  Finish in your browser, then come back and check again.</p>
     </div>
   </ui-content>
   <ui-actions>
-    <ui-button class="deny" circular basic icon="xmark">Later</ui-button>
-    <ui-button class="goals-recheck" circular primary icon="arrows rotate">Check again</ui-button>
+    <ui-button class="deny" appearance="circular basic" icon="xmark">Later</ui-button>
+    <ui-button class="goals-recheck" appearance="circular" color="primary" icon="arrows rotate">Check again</ui-button>
   </ui-actions>
 </ui-modal>`)
     modal
@@ -389,12 +387,12 @@
     <p class="goals-modal-about"></p>
     <pre><code class="goals-command"></code></pre>
     <div class="goals-setup-buttons">
-      <ui-button class="goals-copy" circular basic size="small" icon="copy">Copy command</ui-button>
-      <ui-button class="goals-served" circular basic size="small" icon="up right from square" target="_self"
+      <ui-button class="goals-copy" appearance="circular basic" size="small" icon="copy">Copy command</ui-button>
+      <ui-button class="goals-served" appearance="circular basic" size="small" icon="up right from square" target="_self"
         >Open this page from the server</ui-button>
     </div>
   </ui-content>
-  <ui-actions><ui-button class="approve" circular primary icon="check">OK</ui-button></ui-actions>
+  <ui-actions><ui-button class="approve" appearance="circular" color="primary" icon="check">OK</ui-button></ui-actions>
 </ui-modal>`)
     modal
       .querySelector(".goals-copy")
@@ -486,19 +484,6 @@
     for (const [name, value] of Object.entries(attributes)) node.setAttribute(name, value)
     node.append(...children)
     return node
-  }
-
-  /**
-   * `host`'s `title` (a `<ui-button>`'s) on the button inside it too, once drawn:  the element the pointer lands on
-   * carries the tooltip (VS Code's side bar shows only that one's), as `spell-doc-helpers.js`' `titleInside()` does.
-   */
-  function titleInside(host) {
-    void customElements.whenDefined(host.localName).then(() =>
-      requestAnimationFrame(() => {
-        const inner = host.shadowRoot?.querySelector('[part~="button"]')
-        if (inner) inner.title = host.title
-      })
-    )
   }
 
   /** One element from HTML:  the parked dialogs' (`thoughtModal()` ...), unused until goals is rebuilt. */

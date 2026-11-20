@@ -32,6 +32,8 @@ const OWENS_ROWS: [string[], string[][]][] = [
     ["file", "seo#t5", "r3", "--file", "r3.html", "--picture", "a.png"],
     [["request", "seo", "T5", "r3", "--file", "r3.html", "--picture", "a.png"]]
   ],
+  // `epic file seo#i5 r3`, into an issue (epic `epic-engine` T108)
+  [["file", "seo#i5", "r3", "--file", "r3.html"], [["request", "seo", "I5", "r3", "--file", "r3.html"]]],
   [["commit", "seo#p3", "abc123", "what it did"], [["commit", "seo", "abc123", "what it did", "--phase", "3"]]],
   [["add", "seo#J", "Title", "--details", "<p>d</p>"], [["add", "seo", "judgement", "Title", "--details", "<p>d</p>"]]],
   // epic `epic-engine` P4:  a test's fields;  the test run, at a test or every epic's

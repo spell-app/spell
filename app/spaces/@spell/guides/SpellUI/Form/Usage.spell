@@ -34,19 +34,6 @@ a "task list" is a view:
 		<header>A form displays a set of related user input fields in a structured way.</>
 	</>
 
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#submission">Submission</>
-			<item link="#validation">Validation</>
-			<item link="#binding">Binding</>
-			<item link="#events">Events</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-			<item link="#framework-usage">Framework usage</>
-		</>
-	</>
-
 	<!-- USAGE:  the native form, submission, validation, events, keyboard, accessibility, frameworks. -->
 	<section label="Using it">
 		<markdown>
