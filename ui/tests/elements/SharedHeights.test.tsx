@@ -37,7 +37,10 @@ const WIDGETS: readonly (readonly [tag: string, inside: string, attributes?: str
 ]
 
 /** Render one widget with `attributes`;  returns it, and the box it sizes (its own, or its shadow root's top box). */
-async function render([tag, inside, own = ""]: (typeof WIDGETS)[number], attributes: string) {
+/** One row of `WIDGETS`:  `it.each()` spreads it into loose arguments, so the tests gather it back. */
+type Widget = (typeof WIDGETS)[number]
+
+async function render([tag, inside, own = ""]: Widget, attributes: string) {
   const host = await ElementFixture.render<DOMElement>(`<${tag} ${own} ${attributes}>${inside}</${tag}>`)
   await ElementFixture.settle()
   const box =
@@ -51,7 +54,7 @@ describe("height, min-height, max-height", () => {
   it.each(WIDGETS)(
     "<%s height>:  its box is that tall;  max-height caps it, min-height holds it",
     async (...widget) => {
-      const { host, box } = await render(widget, 'height="123px"')
+      const { host, box } = await render(widget as unknown as Widget, 'height="123px"')
       expect(host.matches(":state(height)")).toBe(true)
       expect(box.getBoundingClientRect().height).toBeCloseTo(123, 0)
       host.setAttribute("max-height", "80px")
@@ -78,7 +81,7 @@ describe("height, min-height, max-height", () => {
 
 describe("resizable", () => {
   it.each(WIDGETS)("<%s resizable>:  only the sizes it names", async (...widget) => {
-    const { host, box: own } = await render(widget, 'resizable="height"')
+    const { host, box: own } = await render(widget as unknown as Widget, 'resizable="height"')
     // a table resizes its scroller (below)
     const box = host.shadowRoot!.querySelector<HTMLElement>(".scroller") ?? own
     expect([
