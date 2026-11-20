@@ -1332,7 +1332,33 @@ placesEs.addRule(DraftOf, {
   syntax: "un borrador de {thing:operand}",
   tests: [{ compileAs: "expression", tests: [["un borrador de cosa", undefined]] }]
 })
-placesEs.addRule(SaveDraft, { syntax: "guardar {draft:known_type}" })
+placesEs.addRule(SaveDraft, {
+  syntax: "guardar {draft:known_type}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: ["recetario familiar es un archivo json que eliges", "para guardarlo", "\tguardar recetario familiar"],
+          js: [
+            "export class RecetarioFamiliar extends Place {}",
+            "export const recetarioFamiliar = core.place(new RecetarioFamiliar(), {",
+            '  name: "recetario_familiar",',
+            '  kind: "file",',
+            "  picked: true,",
+            '  unclearNumbers: ","',
+            "})",
+            "export async function guardarlo() {",
+            '  return core.asAction({ undoneAs: "Guardarlo" }, async () => {',
+            '    await core.savePickedFile("recetario_familiar")',
+            "  })",
+            "}"
+          ]
+        }
+      ]
+    }
+  ]
+})
 placesEs.addRule(SaveDraft, { syntax: "guardar {draft:expression}" })
 placesEs.addRule(PickFileFor, {
   syntax: "elige un archivo para {place:known_type}",

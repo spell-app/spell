@@ -60,7 +60,7 @@
 |   |   pick a file for **cookbook file**
 
 |   [action to_do_something L1]
-|   | to «"save the file"» with title «"Save"», icon «"save"», can't be undone
+|   | to «"save the file"» with title «"Save"», icon «"save"», shortcut «"S"», can't be undone
 |   |   save **cookbook file**
 
 |   [action to_do_something L1]

@@ -243,7 +243,24 @@ places.addRule(CreatePlace, {
 places.addRule(CreatePlace, {
   syntax: "{type:type_words} is (a|an) {superType:type} (at|from) {address:text} {with_nested_statements}?"
 })
-places.addRule(CreatePlace, { syntax: "{type:type_words} is (a|an) {kind:place_kind_here} {with_nested_statements}?" })
+places.addRule(CreatePlace, {
+  syntax: "{type:type_words} is (a|an) {kind:place_kind_here} {with_nested_statements}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        // the browser's own database:  never a file a person picks, though both say "on this device" (epic `editor` P41)
+        [
+          "family cookbook is a database on this device",
+          [
+            "export class FamilyCookbook extends Place {}",
+            'export const familyCookbook = core.place(new FamilyCookbook(), { name: "family_cookbook", kind: "database on this device" })'
+          ]
+        ]
+      ]
+    }
+  ]
+})
 places.addRule(CreatePlace, {
   syntax: "{type:type_words} is (a|an) {kind:place_kind} {picked:picked_file} {with_nested_statements}?",
   tests: [

@@ -183,12 +183,14 @@ export class PickedFilePlace implements Place {
    * - NEVER throws:  what went wrong is `status`.
    */
   save(): Promise<void> {
-    const asked = this.kept?.handle && this.ask()
+    // asked before anything waits, while the click still counts;  not loaded yet, asked as soon as it is
+    let asked = this.kept?.handle ? this.ask() : undefined
     return this.inTurn(async () => {
       await this.loaded()
       if (this.kept?.data === undefined) return
       if (!this.kept.handle && this.browser.canPickHandles) return this.writeToNewFile()
       if (!this.kept.handle) return this.download()
+      asked ??= this.ask()
       if ((await asked) === "granted") await this.writeChecked()
       else this.setStatus("needs permission")
     }).catch((error: unknown) => this.failed("save()", error))

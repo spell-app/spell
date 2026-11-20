@@ -35,7 +35,7 @@ cookbook is an app
 	to "open a file" with title "Open", icon "folder open", can't be undone
 		pick a file for cookbook file
 
-	to "save the file" with title "Save", icon "save", can't be undone
+	to "save the file" with title "Save", icon "save", shortcut "S", can't be undone
 		save cookbook file
 
 	to add the new recipe

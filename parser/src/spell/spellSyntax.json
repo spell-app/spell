@@ -9094,6 +9094,21 @@
               }
             },
             {
+              "syntax": "{type:type_words} is (a|an) {kind:place_kind_here} {with_nested_statements}?",
+              "example": "family cookbook is a database on this device",
+              "outputs": {
+                "js": {
+                  "code": "export class FamilyCookbook extends Place {}\nexport const familyCookbook = core.place(new FamilyCookbook(), { name: \"family_cookbook\", kind: \"database on this device\" })"
+                },
+                "ts": {
+                  "code": "export class FamilyCookbook extends Place {}\nexport const familyCookbook = core.place(new FamilyCookbook(), { name: \"family_cookbook\", kind: \"database on this device\" })"
+                },
+                "py": {
+                  "code": "class FamilyCookbook(Place):\n    pass\n\nfamily_cookbook = core.place(\n    FamilyCookbook(),\n    {\"name\": \"family_cookbook\", \"kind\": \"database on this device\"},\n)"
+                }
+              }
+            },
+            {
               "syntax": "{type:type_words} is (a|an) {kind:place_kind} {picked:picked_file} {with_nested_statements}?",
               "example": "family cookbook is a json file you pick",
               "outputs": {
@@ -9110,9 +9125,6 @@
             },
             {
               "syntax": "{type:type_words} is (a|an) {superType:type} (at|from) {address:text} {with_nested_statements}?"
-            },
-            {
-              "syntax": "{type:type_words} is (a|an) {kind:place_kind_here} {with_nested_statements}?"
             },
             {
               "syntax": "{type:type_words} is (a|an) {kind:place_kind_each_person} ((at|from) {address:text})? {with_nested_statements}?"

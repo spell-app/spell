@@ -176,7 +176,7 @@ export class CookbookElement extends SpellElement<Cookbook> {
 core.useElement(Cookbook, CookbookElement)
 export const cookbook = new Cookbook()
 core.describeAction(Cookbook, "openAFile", { title: "Open", icon: "folder open", cantBeUndone: "keeps history" })
-core.describeAction(Cookbook, "saveTheFile", { title: "Save", icon: "save", cantBeUndone: "keeps history" })
+core.describeAction(Cookbook, "saveTheFile", { title: "Save", shortcuts: ["S"], icon: "save", cantBeUndone: "keeps history" })
 core.describeAction(Cookbook, "addTheNewRecipe", { title: "Add the New Recipe", undoneAs: "Add the New Recipe" })
 // -----------
 if (!core.isCarryingOver) cookbook.start()
