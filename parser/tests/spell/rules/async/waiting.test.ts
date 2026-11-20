@@ -531,6 +531,32 @@ ${drawing}
     expect(compiled(GAME(`		<div class={the total}>x</div>`), "ts/solid")).toContain("static drawsWaiting = true")
   })
 
+  test("an element inside another whose attribute waits has a spot of its own:  the rest draws at once", () => {
+    const js = compiled(GAME(`		<div>\n			<span class={the total}>x</span>\n		</div>`))
+    expect(js).toContain('() => core.drawWaiting(() => h("span", { class: () => this.total }, "x"))')
+    expect(js).not.toContain("drawsWaiting")
+    const ts = compiled(GAME(`		<div>\n			<span class={the total}>x</span>\n		</div>`), "ts/solid")
+    expect(ts).toContain("{core.drawWaiting(() => <span")
+    expect(ts).not.toContain("drawsWaiting")
+  })
+
+  test("a part's drawing with an `if` that waits waits in its own spot, never holding its whole thing", () => {
+    const spell = `a game is a thing:
+	- its "total" is:
+		pause for 1 sec
+		return 1
+	- to draw it:
+		<div>{its badge}</div>
+	- to draw its badge:
+		if the total is 1
+			<span>one</span>`
+    for (const target of ["js/solid", "ts/solid"]) {
+      const code = compiled(spell, target)
+      expect(code).toContain("return core.drawWaiting(() => {")
+      expect(code).not.toContain("drawsWaiting")
+    }
+  })
+
   test("a drawing that reads nothing that waits is as it was", () => {
     const js = compiled(GAME(`		<div class={the score}>{the score}</div>`))
     expect(js).not.toContain("whileWaiting")

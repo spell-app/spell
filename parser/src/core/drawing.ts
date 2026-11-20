@@ -36,7 +36,7 @@ import type { ContextMenuItem, MenuItem } from "./acting"
 import { List } from "./classes/List"
 import { ViewableList } from "./classes/ViewableList"
 import { SPELL_WINDOW, closeDialogOf, listenForTableEdits, listenForUndoKeys, shownIn } from "./ui"
-import { standInFor } from "./waiting"
+import { pageWaitingLoader, standInFor, waitingLoader } from "./waiting"
 
 /**
  * Solid's own `h()`, what compiled JavaScript draws with:  `import { h } from "@spell/core"`.
@@ -524,8 +524,12 @@ export function drawn<This extends object, Draw extends (this: This) => Drawing>
  *   - a small stand-in, unless that event was cancelled:  made once, even as the drawing around it changes
  *     (`<Errored>` builds its fallback once since Solid rc.15;  `drawing.test.ts` pins it)
  *   - The rest of the drawing keeps working;  the boundary heals when the thing draws again.
- * - A thing whose class `drawsWaiting` holds its whole drawing in a "…" until a value it reads answers:
- *   an `if` or an attribute has no spot of its own for one, and with no `<Loading>` at all the program stays blank.
+ * - A thing whose class `drawsWaiting` holds its whole drawing until a value it reads answers:
+ *   an `if`, or an attribute of the drawing's outermost element, has no spot of its own for one, and with no
+ *   `<Loading>` at all the program stays blank.
+ *   - Meanwhile a spinner (`waitingLoader()`);  a page's (or an app's), a bigger one in the middle of its room
+ *     (`pageWaitingLoader()`), its layout's menus drawn round it (epic `old-console-redo` T35:  a "…" before, which
+ *     read as a blank page).
  *   Inside the boundary:  a `<Loading>` outside a view's element doesn't cover what's inside it (epic `language` P8).
  */
 function drawInBoundary(thing: object, draw: () => Drawing): Drawing {
@@ -541,8 +545,9 @@ function drawInBoundary(thing: object, draw: () => Drawing): Drawing {
           return withPartsOwner(boundary, () => madeOnce(draw()))
         }) as unknown as Drawing
       if (!drawsWaiting(thing)) return drawing()
-      if (drawsInItsChildren(thing)) warnOfWholeAppHeld(thing)
-      return standInFor(drawing)
+      if (!drawsInItsChildren(thing)) return standInFor(drawing, waitingLoader)
+      warnOfWholeAppHeld(thing)
+      return standInFor(drawing, pageWaitingLoader)
     }
   })
 }

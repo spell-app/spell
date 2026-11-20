@@ -686,6 +686,7 @@ export class TSWriter extends JSWriter {
       const drawing = `@drawn ${this.drawMethod(node.method!)}`
       return this.project.heldDrawings.has(node) ? `${DRAWS_WAITING}${jsText.NEWLINE}${drawing}` : drawing
     }
+    if (this.project.heldDrawings.has(node)) return this.partDrawingThatWaits(node.method!, name)
     return this.methodNamed(node.method!, name)
   }
 
@@ -1435,6 +1436,9 @@ export class TSWriter extends JSWriter {
       return /[{}<>\n]|\s\s/.test(child.value) ? `{${JSON.stringify(child.value)}}` : child.value
     }
     // an action's button, a context menu:  calls, in braces
+    // its attributes wait:  a spot of its own, a spinner there meanwhile (`WriterProject.elementsThatWait`)
+    if (child instanceof P.ASTJSXElement && this.project.elementsThatWait.has(child))
+      return `{core.drawWaiting(() => ${this.write(child)})}`
     if (child instanceof P.ASTJSXElement) return isCoreDrawn(child) ? `{${this.write(child)}}` : this.write(child)
     const expression = child instanceof P.ASTJSXExpression ? child.output : child
     if (!expression) return ""

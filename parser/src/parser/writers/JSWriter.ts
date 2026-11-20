@@ -1456,8 +1456,21 @@ export class JSWriter extends ProgramWriter {
       return [this.workedOutDeclaration(node, "this"), this.methodNamed(node.get, `get ${name}`)]
         .filter(Boolean)
         .join(jsText.NEWLINE)
+    if (this.project.heldDrawings.has(node) && name !== "draw") return this.partDrawingThatWaits(node.method!, name)
     const method = this.methodNamed(node.method!, name)
     return this.project.heldDrawings.has(node) ? `${DRAWS_WAITING}${jsText.NEWLINE}${method}` : method
+  }
+
+  /**
+   * `method`, a drawing of a part of its thing (`to draw its devices`) that reads what waits with no spot of its own
+   * (an `if`), as `name`:  drawn in a spot of its own, `core.drawWaiting()`, so only that part waits, a spinner in its
+   * place, never its whole thing (epic `old-console-redo` T35:  the whole page was held, `drawsWaiting`).
+   * - `drawDevices() { return core.drawWaiting(() => {...}) }`
+   */
+  partDrawingThatWaits(method: P.ASTMethodDefinition, name: string, thisType?: string): string {
+    const error = method.error ? ` ${this.write(method.error)}` : ""
+    const drawing = `core.drawWaiting(() => ${this.write(method.body)})`
+    return `${name}${this.params(method, thisType)} ${jsText.Block({ children: `return ${drawing}` })}${error}`
   }
 
   /**
@@ -1805,10 +1818,13 @@ export class JSWriter extends ProgramWriter {
    *   `core.drawPart(this, () => h(...))` (epic `notebook` P4).
    *   - So is whatever holds one (a section around its examples), so a move elsewhere leaves it in place (epic
    *     `notebook` I6).
+   * - One inside another whose attributes read what waits is a live value, drawn by `core.drawWaiting()`:
+   *   `() => core.drawWaiting(() => h(...))`.
    */
   ASTJSXElement(node: P.ASTJSXElement): string {
-    if (!isDrawnApart(node)) return this.jsxElement(node)
-    return `core.drawPart(this, () => ${this.jsxElement(node)})`
+    const element = isDrawnApart(node) ? `core.drawPart(this, () => ${this.jsxElement(node)})` : this.jsxElement(node)
+    // its attributes wait:  a spot of its own, a spinner there meanwhile (`WriterProject.elementsThatWait`)
+    return this.project.elementsThatWait.has(node) ? `() => core.drawWaiting(() => ${element})` : element
   }
 
   /**

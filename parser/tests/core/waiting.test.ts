@@ -83,6 +83,15 @@ class HeldGame extends Game {
   }
 }
 
+/** Its body's attribute reads it:  a spot of its own, as compiled javascript writes one (`core.drawWaiting()`). */
+class PaneGame extends Game {
+  override draw(): Drawing {
+    return h("div", h("h1", "Heading"), () =>
+      core.drawWaiting(() => h("p", { title: () => String(this.total) }, "body") as unknown as Drawing)
+    ) as unknown as Drawing
+  }
+}
+
 /** Waits for promises, and the page's staged writes. */
 async function settled(): Promise<void> {
   for (let turns = 0; turns < 5; turns++) {
@@ -149,11 +158,49 @@ describe("a value that waits, in a drawing", () => {
   })
 })
 
+describe("an element whose attributes wait, in a spot of its own (epic old-console-redo T35)", () => {
+  test("a spinner in its spot, the rest drawn at once;  then the element", async () => {
+    const game = new PaneGame()
+    draw(game)
+    expect(shown()).toBe("Heading")
+    expect(container.querySelector("ui-loader")).not.toBeNull()
+    await game.work.answer(10)
+    expect(container.querySelector("p")?.getAttribute("title")).toBe("11")
+    expect(container.querySelector("ui-loader")).toBeNull()
+  })
+
+  test("a failure shows a message and Try again in its spot:  the rest stays", async () => {
+    const game = new PaneGame()
+    draw(game)
+    await game.work.fail(new Error("no answer"))
+    expect(shown()).toContain("Heading")
+    expect(shown()).toContain("no answer")
+    expect(container.querySelector("ui-message ui-button")).not.toBeNull()
+  })
+})
+
+describe("a value that fails", () => {
+  test("a small ⚠ where it goes, why in its tooltip:  the rest stays", async () => {
+    const game = new Game()
+    const logged = core.console.error
+    core.console.error = () => {}
+    try {
+      draw(game)
+      await game.work.fail(new Error("no answer"))
+      expect(shown()).toBe("moves 0 total ⚠")
+      expect(container.querySelector(".spell-draw-error")?.getAttribute("title")).toBe("no answer")
+    } finally {
+      core.console.error = logged
+    }
+  })
+})
+
 describe("a whole thing held", () => {
-  test('an `if` reading it:  a "…" for the thing, then its drawing, then drawn again as it changes', async () => {
+  test("an `if` reading it:  a spinner for the thing, then its drawing, then drawn again as it changes", async () => {
     const game = new HeldGame()
     draw(game)
-    expect(shown()).toBe("…")
+    // a "…" before epic old-console-redo T35, which read as a blank page:  Spell UI's spinner now
+    expect(container.querySelector("ui-loader")).not.toBeNull()
     await game.work.answer(1)
     expect(shown()).toBe("small")
     game.rank = 9

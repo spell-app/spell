@@ -622,6 +622,17 @@ describe("a running site", () => {
       expect(layout("MainLayout")?.querySelector(':scope > ui-site-nav[slot="drawer"]')).toBeTruthy()
     })
 
+    test("a page whose parameter's thing is still being read:  its layout at once, a spinner where the page goes (old-console-redo T35)", async () => {
+      const going = charts.showAddress("/films/a-new-hope")
+      core.flush()
+      flush()
+      expect(region("MainLayout", "menu")?.textContent).toBe("Share")
+      expect(layout("MainLayout")?.querySelector(".spell-page-waiting ui-loader")).toBeTruthy()
+      await going
+      expect(await shown()).toContain("A New Hope")
+      expect(layout("MainLayout")?.querySelector(".spell-page-waiting")).toBeNull()
+    })
+
     test("wears its `theme` on a layout too:  the drawer, app menu, page menu and page all inside its themed frame (I29)", async () => {
       Object.defineProperty(charts, "theme", { value: "mockup" })
       core.siteHost = {

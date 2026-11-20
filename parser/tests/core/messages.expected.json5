@@ -8,6 +8,7 @@
     "test-threw": "Error in test {test}:",
     "cant-draw": "⚠ {type} can't draw",
     "waiting": "…",
+    "value-failed": "⚠",
     "confirm-default": "{question} (yes)",
     "dialog-ok": "OK",
     "dialog-cancel": "Cancel",

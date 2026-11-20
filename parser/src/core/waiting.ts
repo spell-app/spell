@@ -15,8 +15,9 @@
  * - Part of `core`:  imported by `spell/parser/core`'s barrel for its side effect.
  */
 
+import h from "@solidjs/h"
 import { createComponent } from "@solidjs/web"
-import { Loading, createDeferred, createRoot, getObserver, getOwner, runWithOwner } from "solid-js"
+import { Errored, Loading, createDeferred, createRoot, getObserver, getOwner, runWithOwner } from "solid-js"
 
 import { core } from "./core"
 import { defineCoreModule } from "./core.types"
@@ -102,9 +103,18 @@ export const waitingMethods = defineCoreModule({
     return key
   },
 
-  /** `read`'s drawing, or a "…" until its first answer:  a value in a drawing that waits, `{the total}`. */
+  /**
+   * `read`'s drawing, or a "…" until its first answer:  a value in a drawing that waits, `{the total}`.
+   * - Failed:  a small "⚠" in its place, saying why when pointed at;  the drawing around it stays (epic
+   *   `old-console-redo` T35:  one failed read took the whole page down to the site's error page).
+   */
   whileWaiting(read: () => Drawing): Drawing {
-    return standInFor(read)
+    return createComponent(Errored, {
+      fallback: (error: () => unknown) => valueFailed(error()),
+      get children() {
+        return standInFor(read)
+      }
+    })
   },
 
   /**
@@ -131,14 +141,54 @@ export function forgetWaitedValue(thing: object, name: string): void {
   WAITED_VALUES.get(thing)?.delete(name)
 }
 
-/** `read`'s drawing, or the "…" until its first answer. */
-export function standInFor(read: () => Drawing): Drawing {
+/**
+ * `read`'s drawing, or a stand-in until its first answer:  the "…" a value shows, unless `shows` makes another.
+ * - `shows`:  made each time the stand-in shows, e.g. `waitingLoader`, for a part of a page that waits.
+ */
+export function standInFor(read: () => Drawing, shows?: () => Drawing): Drawing {
   return createComponent(Loading, {
-    fallback: core.message("waiting"),
+    get fallback() {
+      return shows ? shows() : core.message("waiting")
+    },
     get children() {
       return read()
     }
   })
+}
+
+/**
+ * What a part of a drawing shows while it waits, when nothing said what to:  Spell UI's spinner, in the text's flow.
+ * - A list's (`<for>` with no `loading`), an element whose attributes wait, a view whose whole drawing waits.
+ */
+export function waitingLoader(): Drawing {
+  return h("ui-loader", { visible: true, inline: true }) as unknown as Drawing
+}
+
+/**
+ * What a page shows while its whole drawing waits:  a bigger spinner, in the middle of the page's room under its
+ * layout's menus, which drew at once (epic `old-console-redo` T35).
+ */
+export function pageWaitingLoader(): Drawing {
+  return h(
+    "div",
+    { class: "spell-page-waiting", role: "presentation" },
+    h("ui-loader", { visible: true, inline: true, align: "center", size: "large" })
+  ) as unknown as Drawing
+}
+
+/**
+ * What a value that failed shows, `whileWaiting()`'s:  "⚠", why in its tooltip, and on the program's console.
+ * - Nothing for an `AbortError`:  a read given up on as its drawing went away, as `drawingFailed()` says.
+ */
+function valueFailed(error: unknown): Drawing {
+  if ((error as Error | undefined)?.name === "AbortError") return null as unknown as Drawing
+  const why = error instanceof Error ? error.message : String(error)
+  core.console.error("A value couldn't be read:", error)
+  return h(
+    "span",
+    { class: "spell-draw-error", title: why, role: "alert" },
+    core.message("value-failed")
+  ) as unknown as Drawing
 }
 
 /** A new value, owned for good:  see `WAITING_OWNER`. */
