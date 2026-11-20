@@ -37,6 +37,20 @@ describe("orphanServers()", () => {
     ])
   })
 
+  test("an npm install's page server and epic server, in a project worktree that's gone (repo-split T72)", () => {
+    const install = `${TREES}/gone/node_modules/spell`
+    const processes = [
+      { pid: 7, command: `${NODE} ${install}/dist/epic/cli/epicMain.js hub serve --port 4848` },
+      { pid: 8, command: `${NODE} ${install}/dist/server/page/cli.js serve --port 4747` },
+      { pid: 9, command: `${NODE} /repo/epic/bin/epic hub serve --port 4848`, cwd: "/repo" }
+    ]
+    const orphans = orphanServers(processes, (path) => EXISTING.has(path))
+    expect(orphans.map(({ pid, kind, checkout }) => ({ pid, kind, checkout }))).toEqual([
+      { pid: 8, kind: "page", checkout: `${TREES}/gone` },
+      { pid: 7, kind: "epic", checkout: `${TREES}/gone` }
+    ])
+  })
+
   test("a server whose working folder still exists is NOT an orphan, whatever its command says", () => {
     const moved = pageServer(1, `${TREES}/gone`, `${TREES}/live`)
     expect(orphanServers([moved], (path) => EXISTING.has(path))).toEqual([])

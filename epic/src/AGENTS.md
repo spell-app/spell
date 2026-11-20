@@ -642,10 +642,13 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
     - `PluginInstall`:  `epic plugin install`, the plugin installed in Claude Code as `epic@spell`, in place from the
       kit's `epic/` (epic `epic-engine` P49, Q45):  Claude Code's three lists, the cache link, the skill links,
       `~/.local/bin/epic`, the old `spell-epic@spell-epic` taken out;  writes the files itself, safe to run again
+      - a skill link into ANOTHER copy of the plugin (an `npx` cache, a project's install) for a skill this copy
+        hasn't got is removed;  `--no-bin` and `--no-extension` leave out the `PATH` link and the extension, for the
+        kit's `spell local` (epic `repo-split` T72), which runs it to switch the plugin to a checkout and back
       - off macOS (epic `epic-friend` P15):  links through the kit's `Links` (a folder a junction on Windows), and on
         Windows `epic.cmd` instead of the `epic` link (Windows runs no file without an extension);  and step 7, the VS
         Code extension from `vscode/spell-epic.vsix` (`code --install-extension`, skipped when VS Code has that
-        version), which `spell publish` ships in `spell-epic`;  `epic init` runs the install every time, for it
+        version, unless the `.vsix` was built after VS Code installed it:  `Editor.extensionsFolder()`, T72), which `spell publish` ships in `spell-epic`;  `epic init` runs the install every time, for it
       - `--codex` (epic `epic-friend` P11):  the plugin's Codex hooks ([codex-hooks.json](../hooks/codex-hooks.json))
         written into Codex's own `~/.codex/hooks.json` (`$CODEX_HOME`), by the kit's full path, the person's other
         hooks kept;  not the plugin's own hooks, which Codex's docs promise only for its desktop app
