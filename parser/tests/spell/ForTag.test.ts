@@ -235,3 +235,43 @@ describe("<for>'s attributes and slots read as the drawing does", () => {
     expect(file!.compiled).toContain('h("ui-text", () => this.heading)')
   })
 })
+
+describe("a <for> drawn by another loop's item follows its list (epic `old-console-redo` I32)", () => {
+  beforeAll(registerTestComponentPack)
+
+  /** A wall of shelves whose drawing is `lines`, each on a line of its own. */
+  function drawn(...lines: string[]) {
+    const contents = [
+      'a "film" is a thing:',
+      '\tits "title" is text',
+      "\tto draw it: <text>{its title}</text>",
+      'a "shelf" is a thing:',
+      '\tits "films" is a list of films',
+      'a "wall" is a view:',
+      '\tits "shelves" is a list of shelves',
+      "\tto draw it:",
+      ...lines.map((line) => `\t\t${line}`)
+    ].join("\n")
+    const [file] = parseSpellProject([{ path: "/Wall.spell", contents }]).files
+    return { code: file!.compiled, errors: file!.errors }
+  }
+
+  test("its list is read in a function, as the row's fields arrive", () => {
+    const { code, errors } = drawn(
+      '<for shelf in its shelves loading="Reading">',
+      "\t<for film in its films>",
+      "\t\t<text>{its title}</text>",
+      "\t</for>",
+      "</for>"
+    )
+    expect(errors).toEqual([])
+    expect(code).toContain('core.drawRead(() => shelf.films, (film) => h("ui-text", () => film.title))')
+    expect(code).not.toContain("core.drawEach(shelf.films")
+  })
+
+  test("so is one under a plain loop", () => {
+    const { code, errors } = drawn("<for shelf in its shelves>", "\t<for its films />", "</for>")
+    expect(errors).toEqual([])
+    expect(code).toContain("core.drawRead(() => shelf.films, (film) => core.drawThing(film))")
+  })
+})

@@ -127,7 +127,8 @@ export class DrawnLines {
   }
 
   /**
-   * `unit`, with its riders, or a loop of things saved in a place or of `everyone here`, as a read:  `core.drawRead(() => list, (item) => ..., { riders })`.
+   * `unit`, with its riders, or a loop of things saved in a place, of `everyone here`, or drawn by another loop's item
+   * (`itemsDrawing`), as a read:  `core.drawRead(() => list, (item) => ..., { riders })`.
    * - So it has its own "…", its own Try again, and its items are kept by identity:  typing in one doesn't draw them all again.
    * - A drawn line with riders:  `core.drawRead(() => value, null, { riders })`.
    * - Its function is named as a drawing is:  a drawing never waits, it shows what it has (`P.DRAWING_NAME`).
@@ -147,7 +148,8 @@ export class DrawnLines {
       const { itemType } = (loop.match?.data ?? {}) as { itemType?: P.TypeScope }
       const [list, each] = loop.args!.args!
       const isPeopleHere = list instanceof P.ASTCoreMethodInvocation && list.methodName === "peopleHere"
-      if (!riders?.length && !itemType?.savedPlace() && !isPeopleHere) return
+      const followsItem = unit.draws && DrawnLines.itemsDrawing > 0 && !DrawnLines.isFixed(list as P.ASTExpression)
+      if (!riders?.length && !itemType?.savedPlace() && !isPeopleHere && !followsItem) return
       DrawnLines.gatherLoop(loop)
       const read = DrawnLines.readAsDrawn(list as P.ASTExpression)
       unit.lines = [DrawnLines.drawRead(loop.match, read, each as P.ASTExpression, riders)]
@@ -236,7 +238,26 @@ export class DrawnLines {
     const body = DrawnLines.callbackOf(loop)?.body
     // asked first:  gathered, its lines are `return`s
     if (DrawnLines.draws(body?.statements)) loop.methodName = "drawEach"
-    if (body?.statements) body.statements = DrawnLines.gather(body.statements)
+    if (!body?.statements) return
+    DrawnLines.itemsDrawing++
+    try {
+      body.statements = DrawnLines.gather(body.statements)
+    } finally {
+      DrawnLines.itemsDrawing--
+    }
+  }
+
+  /**
+   * How many loops' items are being gathered, around the lines `gather()` is on now.
+   * - An item is drawn once, and nothing follows what its drawing read:  so a loop it draws, over a list that can
+   *   change (`<for film in its films>` in a shelf's item), is a read, `core.drawRead(() => shelf.films, ...)`,
+   *   which follows its list as the row's fields arrive (epic `old-console-redo` I32).
+   */
+  private static itemsDrawing = 0
+
+  /** Is `list` one that never changes:  written out in the code, a literal (`[1, 2, 3]`)? */
+  private static isFixed(list: P.ASTExpression): boolean {
+    return list instanceof P.ASTLiteral
   }
 
   /** A branch of an `if` chain, gathered:  its body returns its drawing. */
