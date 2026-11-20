@@ -2306,7 +2306,7 @@ methods.addRule(FailureHook, {
   ]
 })
 
-// a function from one of the project's code files, in an action's steps (epic `from-console` P10):
+// a function from one of the project's code files, in an action's steps:
 // `call native copyText with text` -- see `SP.NativeCode`
 methods.addRule(CallNative, {
   syntax: "call native {name:identifier} (with [{args:expression} ,])?",
@@ -2338,7 +2338,7 @@ methods.addRule(CallNative, {
   ]
 })
 
-// which code file a Spell file's natives come from, at its top (epic `from-console` P10, Q15):
+// which code file a Spell file's natives come from, at its top:
 // `use copyText from clipboard.ts`, `use a, b from clipboard.ts`, `use all from clipboard.ts`
 methods.addRule(UseNatives, {
   syntax: "use ((all:all)|[{names:identifier} ,]) from {file:identifier} \\. {ending:identifier}",

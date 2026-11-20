@@ -31,10 +31,10 @@ import "./EditorTheme.css"
  *     Glass and Fruity share the glass chrome, Merlot's panels meet edge to edge, Spell's bar has no fill or line.
  * - A theme made with Spell UI's theme editor and saved by name is one of My themes (`SavedTheme`, epic `debut`
  *   P25):  picked in the menu like any theme, its base worn, then its sheet.
- * - The open project's own themes (`<name>.theme.json5` beside its site, epic `old-console-redo` P1) are offered
+ * - The open project's own themes (`<name>.theme.json5` beside its site) are offered
  *   first in the menu, under the project's title, once its site has worn one (`offerProjectThemes()`, I36):
  *   picked like any theme, kept as `project:<name>`;  another project open, they're offered no more.
- *   - The chrome is keyed on the theme of Spell's it builds on (Harbor:  `matrix`).
+ *   - The chrome is keyed on the theme of Spell's it builds on (a project's `harbor`:  `matrix`).
  * - The code's colours are the theme's own (epic `debut` P22):  the code editor reads them off the page,
  *   light or dark, its `--ui-code-<role>` colours (`CodeRules`), and follows each change by itself.
  * - Loads lazily, as `loadUI()` does:  Spell UI's half is its own chunk, off the app's first paint.
@@ -117,7 +117,7 @@ export class EditorTheme {
   }
 
   /**
-   * Offer the open project's own themes in the theme menu, first (epic `old-console-redo` I36):  those read from
+   * Offer the open project's own themes in the theme menu, first:  those read from
    * `projectFolder` so far (`SiteThemes.readIn()`), as its site starts and wears one (`RunSite.themeTokens()`).
    * - Only while that project is the one open:  `<ThemeMenu>` takes them back when another opens.
    * - NEVER throws:  a failure is said on the console.

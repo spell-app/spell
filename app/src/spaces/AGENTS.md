@@ -827,7 +827,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         (`SpellAccounts.didForHandle()`)
       - a handle's host is let in for that path alone:  no page, no write
       - its hosts reach it through a wildcard DNS record, once it has a real address (the mail and hosting guide)
-  - AUTHENTICATED PLACES ([ProjectPlaces.ts](server/node/places/ProjectPlaces.ts), epic `from-console` P14):  every
+  - AUTHENTICATED PLACES ([ProjectPlaces.ts](server/node/places/ProjectPlaces.ts)):  every
     project's authenticated places, the kit's `AuthenticatedPlaces`' source, so a page reads them through the page
     server, which adds the secret.
     - Read from what each project compiled to, its declarations (`SP.DeclaredPlace.served`):  its address, kind and

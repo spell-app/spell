@@ -1,6 +1,5 @@
 /**
- * The functions a Python code file defines, read from its text:  each top-level `def` and `async def`
- * (epic `from-console` P10).
+ * The functions a Python code file defines, read from its text:  each top-level `def` and `async def`.
  * - So Spell can call one, `call native copyText with text`:  `SP.NativeCode` looks it up here by Python's name,
  *   `copy_text`.
  * - Plain TypeScript:  no Python tooling, so it reads in a browser too.

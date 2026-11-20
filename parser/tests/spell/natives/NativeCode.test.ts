@@ -12,7 +12,7 @@ import { compiledSpellProject, parseSpellProject, type SpellSourceFile } from "s
 import { copied, copyText, shout } from "./clipboard/clipboard"
 
 /**
- * Calling a project's own code from Spell, `call native copyText with text` (epic `from-console` P10):
+ * Calling a project's own code from Spell, `call native copyText with text`:
  * the Clipboard test project beside this file, its `clipboard.ts` and `clipboard.py`, compiled to javascript and to
  * Python, and both RUN.
  */

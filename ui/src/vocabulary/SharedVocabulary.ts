@@ -11,12 +11,11 @@ import type { AttributeSpec, ComponentVocabulary, SharedDictionary, StateSpec } 
  *   where a click goes, how its letters look, the browser's tooltip, its accessible name
  * - `shadow`, and `width`, `min-width` and `max-width` (epic `language` P35, I63):
  *   a hard shadow behind its letters, and how wide its box is where it sits
- * - `height`, `min-height` and `max-height` (epic `old-console-redo` P2):  how tall its box is;  OPT-IN, only on a
+ * - `height`, `min-height` and `max-height`:  how tall its box is;  OPT-IN, only on a
  *   tag whose vocabulary says `heights: true` (a tree, a table, a segment, a card, a graph, code, JSON, a flyout,
  *   a modal, an embed, markdown), where a height means something
  * - `movable` and `resizable` (epic `mockup` P14, J35):  people drag it to a new place, or its corner to resize it
  *   (`MoveAndResize`, in `spell/element`);  `resizable` names the sizes they drag, `width`, `height` or both
- *   (epic `old-console-redo` P2)
  * - `on-platform` (epic `mockup` T53):  shown only on the devices it names, `phone`, `tablet`, `desktop`
  *   (`spell/util/platform`);  `reset.css` hides it everywhere else
  * - `UIComponent` reads them ("Shared states", "Shown or hidden"):

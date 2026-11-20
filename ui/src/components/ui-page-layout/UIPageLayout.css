@@ -110,7 +110,7 @@
     max-block-size: var(--_page-layout-view-height, 100dvh);
     overflow: auto;
     /* a column at least as tall as the drawer it can see:  so a navigation's foot (`<ui-site-nav>`'s `end` slot)
-       sits at the bottom (epic old-console-redo I35) */
+       sits at the bottom */
     display: flex;
     flex-direction: column;
     min-block-size: min(100%, var(--_page-layout-view-height, 100dvh));
@@ -195,7 +195,7 @@
   }
 
   /*
-   * ## `page-height="fluid"` (epic `old-console-redo` T27):  as tall as what's seen of the window or its pane, never
+   * ## `page-height="fluid"`:  as tall as what's seen of the window or its pane, never
    * scrolling it.  Each box down to the page takes what's left and may shrink (`min-block-size: 0`);  the page is a
    * column, its element too, so its `height="fluid"` children share what's left (`SharedHeights.css`).
    * - The page scrolls itself only when what can't shrink doesn't fit.

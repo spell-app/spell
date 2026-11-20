@@ -96,8 +96,8 @@ export class SitePages {
 
   /**
    * The `<ui-site-nav>` of the nearest box around `element` that has one of its own, across shadow roots:  a child of
-   * it, or inside what's in its drawer slot (a page layout's drawer drawn round its navigation, epic old-console-redo
-   * I35).
+   * it, or inside what's in its drawer slot (a page layout's drawer drawn round its
+   * navigation).
    */
   private static navAround(element: Element): Element | undefined {
     const box = E.closestAcrossShadow(element, `:has(> ${SITE_NAV}, > [slot="drawer"] ${SITE_NAV})`)
@@ -122,8 +122,7 @@ export class SitePages {
   /**
    * `href`'s path and hash, against the page's address:  `films/1` on `/guide/` => `/guide/films/1`.
    * - With its hash:  else every hash link (`#/films`) on one page would be the page shown.
-   * - Another site's address whole:  else a link out to `https://docs.example.com` would be the page shown at `/`
-   *   (epic old-console-redo I25).
+   * - Another site's address whole:  else a link out to `https://docs.example.com` would be the page shown at `/`.
    */
   private static pathOf(href: string): string {
     try {
@@ -166,7 +165,7 @@ export type FollowedSiteNav = {
   current: string | undefined
   /**
    * the titles of the pages shown below `current` that it doesn't list (a page with a parameter, `/films/:film`), top
-   * first:  a Spell site writes them in its navigation's `data-shown` (epic old-console-redo I29)
+   * first:  a Spell site writes them in its navigation's `data-shown`
    */
   shownBelow?: readonly string[]
 }

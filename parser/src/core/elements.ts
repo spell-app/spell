@@ -8,7 +8,7 @@
  *   - Why:  core never imports Spell UI.
  *   - No definer (a runner without Spell UI, a test):  the tag is named, nothing is defined.
  * - A view built on a Spell UI element names it, `static uiElement = "ui-tree"` (`core.uiElementOf()`):
- *   the page builds its tag on that element (epic `from-console` P11).
+ *   the page builds its tag on that element.
  * - Compiled TypeScript also writes each type's element class, and hands it over (P10):
  *   `core.useElement(Card, CardElement)`.
  *   The page builds the tag on that class.
@@ -155,8 +155,8 @@ export const elementsMethods = defineCoreModule({
   },
 
   /**
-   * The Spell UI element view class `Class` is built on, e.g. `ui-tree` for `a "netlist column" is a ui tree view`
-   * (epic `from-console` P11) -- `undefined` for a view drawn as its own.
+   * The Spell UI element view class `Class` is built on, e.g. `ui-tree` for `a "netlist column" is a ui tree view`,
+   * or `undefined` for a view drawn as its own.
    * - Compiled spell says it in the class:  `static uiElement = "ui-tree"`;  a sub-class inherits it.
    * - The page's `elementDefiner` builds the class's tag on that element (app's `SpellElement.defineFor()`).
    */
@@ -376,7 +376,7 @@ function tellDefiner(Class: Function, tag: string): void {
 /**
  * Is `value` a class of views:  `View`, `ViewableList`, or below them?
  * - A view class of ANOTHER copy of the runtime, below its own `View`, isn't:
- *   `method` warns about it, as its element will never be defined (epic `from-console` P13).
+ *   `method` warns about it, as its element will never be defined.
  *   It's how a program run on one copy and linked to another fails;  silent, it drew as plain unknown tags.
  */
 function isViewClass(value: unknown, method: string): value is Function {

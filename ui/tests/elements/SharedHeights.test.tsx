@@ -21,7 +21,7 @@ import "spell/ui/components/ui-page-layout"
 
 /****************
  * The shared `height`, `min-height` and `max-height`, and `resizable`'s sizes, on each of the eleven widgets that
- * take them (`SharedHeights.css`, `MoveAndResize`;  epic `old-console-redo` P2).
+ * take them (`SharedHeights.css`, `MoveAndResize`).
  ****************/
 
 /** Each widget's tag, and what goes inside it;  `visible` for the ones that start hidden. */
@@ -122,7 +122,7 @@ describe("resizable", () => {
 })
 
 /****************
- * `height="fluid"` (epic `old-console-redo` T27):  what's left of its parent's height, shared;  and a `stretched` grid's
+ * `height="fluid"`:  what's left of its parent's height, shared;  and a `stretched` grid's
  * column growing a segment's own box (T26).
  ****************/
 /** The box `host` draws:  its own, or its shadow root's top one. */

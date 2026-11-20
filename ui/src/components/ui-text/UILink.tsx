@@ -15,7 +15,7 @@ import textCSS from "./UIText.css?inline"
  * - Its shadow DOM is one `<a class="ui … text" part="text" href>` around a slot, in `<ui-text>`'s look:
  *   `<ui-text>`'s own inline box (`UIText.inlineBox()`).
  *   - Without a `link`, or while `disabled`:  a span, faded when disabled;  without a `link` but enabled, it still
- *     looks a link (`:state(action)`):  what a click on it does is its `onClick`'s (epic old-console-redo I30).
+ *     looks a link (`:state(action)`):  what a click on it does is its `onClick`'s.
  * - `font` words draw their elements inside it, as `<ui-text>`'s do.
  * - The element is `display: contents`:  the link IS the inline box, flowing with the sentence.
  * - Holding only an icon (`:state(icon-only)`, a header's "octocat [GitHub icon]"):  it never wraps alone onto a line
@@ -49,7 +49,7 @@ export class UILink extends E.UIComponent<typeof linkVocabulary> {
 
   /**
    * It has no `link`, but isn't `disabled`:  a link a click acts on (`onClick={show the asset sidebar ...}`), drawn as
-   * any link is (`:state(action)`, epic old-console-redo I30).
+   * any link is (`:state(action)`).
    */
   @E.cssState("action")
   get isAction(): boolean {

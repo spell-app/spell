@@ -68617,7 +68617,7 @@
         {
           "name": "--ui-table-link-underline",
           "default": "none",
-          "description": "A link in a cell: not underlined until it's hovered, as a console's tables draw one (epic old-console-redo I37).",
+          "description": "A link in a cell: not underlined until it's hovered, as a console's tables draw one.",
           "type": "other"
         },
         {

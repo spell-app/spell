@@ -244,8 +244,8 @@ export function namesSuffixFor(lang: string): string {
 export const SPELL_PROJECT_MODULE = "@spell/project/"
 
 /**
- * Start of the ES module specifier for one of a project's code files, e.g. `@spell/native/owen@spell/clipboard/clipboard.ts`
- * (epic `from-console` P10):  what `call native` imports its function from.
+ * Start of the ES module specifier for one of a project's code files, e.g. `@spell/native/owen@spell/clipboard/clipboard.ts`:
+ * what `call native` imports its function from.
  * - A runner points it at the file, as it points `SPELL_PROJECT_MODULE` at a project's compiled code.
  * - See `SP.NativeCode.moduleIn()`.
  */
@@ -342,7 +342,7 @@ export type ProjectManifestImport = {
   source?: boolean
   /**
    * A code file (`/clipboard.ts`) only a browser can run:  `"browser"` -- Python refuses its functions while compiling
-   * (epic `from-console` P10, `SP.NativeCode`).
+   * (`SP.NativeCode`).
    */
   only?: "browser"
 }
@@ -759,7 +759,7 @@ export type DeclaredPlace = {
   details?: P.ImportedPlaceDetails
   /**
    * An authenticated place a page reads through Spell's page server:  what that server needs to read it, adding the
-   * secret (epic `from-console` P14).  Never the secret, only its name.
+   * secret.  Never the secret, only its name.
    * - Only for the project that says it:  a project importing this one reads none of it.
    */
   served?: ServedPlace

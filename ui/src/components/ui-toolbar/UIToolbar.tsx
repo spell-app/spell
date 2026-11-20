@@ -399,7 +399,7 @@ export class UIToolbar extends UIMenu {
    * - Put away at once, never animated out (`--ui-motion: none` on it while it's away):
    *   an item animating out still takes its room, so the thumb, the titles' fit and the scroll measured the row
    *   with every item in it, and nothing measured again once it went (epic `mockup` I38, I39:
-   *   HarborNew's 8 tabs scrolled 5,700px off, the thumb drawn past them;  titles cut with room to spare).
+   *   a big site's 8 tabs scrolled 5,700px off, the thumb drawn past them;  titles cut with room to spare).
    */
   private showInRow(item: HTMLElement, isShown: boolean) {
     if (isShown) {

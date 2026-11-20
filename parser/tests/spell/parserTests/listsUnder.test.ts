@@ -2,7 +2,7 @@
  * A web server's lists under each of its things, and its writes (epic `data` P30):  compiled spell, on `core`, reading a fake
  * server shaped like JSONPlaceholder.
  * - `- a post's comments live at "/posts/{id}/comments"`:  reading a post's comments reads there, the first time it's read.
- * - `- a system's snapshot lives at "/systems/{id}/snapshot"`:  ONE thing there, its answer's one row (epic `from-console` P16).
+ * - `- a system's snapshot lives at "/systems/{id}/snapshot"`:  ONE thing there, its answer's one row.
  * - Adding, changing and removing a thing send a `POST`, a `PATCH` and a `DELETE`;  a thing added takes the id the server answers with.
  */
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
@@ -108,7 +108,7 @@ describe("a list under each thing", () => {
   })
 })
 
-describe("one thing under each (epic `from-console` P16)", () => {
+describe("one thing under each", () => {
   const SYSTEMS = [
     `acme is a web server at "${HOST}":`,
     `\t- systems live at "/systems"`,

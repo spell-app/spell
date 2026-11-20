@@ -336,7 +336,7 @@ export function importedOutputs(
 
 /**
  * The code files `project`'s Spell calls with `call native`, and those of each project it imports, in `language`:
- * by the module compiled code imports each as, each its file's URL (epic `from-console` P10).
+ * by the module compiled code imports each as, each its file's URL.
  * - javascript:  `@spell/native/owen@spell/clipboard/clipboard.ts` => `file:///.../clipboard.ts`
  * - Python:  the same key, its `.py` file's URL:  its folder goes on Python's import path
  */

@@ -117,7 +117,7 @@ export abstract class ProgramWriter extends Writer {
   debugSteps: DebugSteps | undefined
 
   /**
-   * The language of the project's code files we call, `call native copyText` (epic `from-console` P10):
+   * The language of the project's code files we call, `call native copyText`:
    * `js` for javascript and TypeScript (`clipboard.ts`), `py` for Python (`clipboard.py`) -- see `P.ASTNativeCall`.
    */
   readonly nativeLanguage: P.NativeLanguage = "js"

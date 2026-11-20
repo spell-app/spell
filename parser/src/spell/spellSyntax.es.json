@@ -10896,7 +10896,7 @@
           "internal": false,
           "file": "src/spell/rules/sites/SiteLink.ts",
           "line": 22,
-          "purpose": "A link out of a site, in its navigation among its pages (epic `old-console-redo` I6).",
+          "purpose": "A link out of a site, in its navigation among its pages.",
           "syntaxes": [
             {
               "syntax": "{type:subject_it} tiene (un|una) enlace a {address:text} (, (llamada|llamado) {title:text})? (, icono {icon:text})?",
@@ -12231,8 +12231,8 @@
           "ruleNames": ["call_native"],
           "internal": false,
           "file": "src/spell/rules/methods/CallNative.ts",
-          "line": 23,
-          "purpose": "In an action's steps, call a function from one of the project's code files (epic `from-console` P10, Q9).",
+          "line": 22,
+          "purpose": "In an action's steps, call a function from one of the project's code files.",
           "syntaxes": [
             {
               "syntax": "llamar al código nativo {name:identifier} (con [{args:expression} ,])?"
@@ -12246,7 +12246,7 @@
           "internal": false,
           "file": "src/spell/rules/methods/UseNatives.ts",
           "line": 22,
-          "purpose": "At the top of a Spell file, say which code file the functions its `call native` lines call come from (epic `from-console` P10, Q15).",
+          "purpose": "At the top of a Spell file, say which code file the functions its `call native` lines call come from.",
           "syntaxes": [
             {
               "syntax": "usar ((all:todo)|[{names:identifier} ,]) de {file:identifier} \\. {ending:identifier}"

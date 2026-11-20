@@ -616,7 +616,7 @@ function noteListsUnder(
     const description = collections[named(owner)]
     if (!description || !known.has(list) || !collections[named(list)]) continue
     description.listsUnder = { ...description.listsUnder, [named(list)]: at }
-    // ONE thing under each:  a system's snapshot (epic `from-console` P16)
+    // ONE thing under each:  a system's snapshot
     if (isOne) collections[named(list)]!.isOneUnder = true
   }
 }

@@ -18,8 +18,11 @@ import { EDITOR, SERVING } from "./runningEditor"
 /** A site of 3 files:  every tab fits. */
 const SITE = "@spell/examples/StarWarsSite"
 
-/** Owen's own site, of 59 files, where he closed tabs (I39):  skipped where there's no such project. */
-const OWENS_SITE = "owen@spell/harbor-new"
+/**
+ * Owen's own site, of 59 files, where he closed tabs (I39):  its id in `SPELL_TABS_SITE`, `<owner>/<project>`.
+ * - Skipped where it isn't set, or there's no such project.
+ */
+const OWENS_SITE = process.env.SPELL_TABS_SITE ?? ""
 
 /** A project of 13 files:  more than the bar's 8 tabs. */
 const MANY_FILES = "@spell/examples/PublicServers"
@@ -194,6 +197,7 @@ describe.skipIf(!SERVING)("Site mode and back, with tabs open", { timeout: 180_0
   test("closing tabs, from the end and the middle, the row measures again:  a › only while they overflow (I39)", async (context) => {
     // Owen:  "Happened again after closing tabs.  The arrow is not getting the notice that the tab is closed"
     // His site, as he saw it:  no built-in project's names left the closed tab's thumb past the row's new end
+    if (!OWENS_SITE) context.skip()
     await page.setViewportSize({ width: 1400, height: 860 })
     await page.goto(`${EDITOR}edit/${OWENS_SITE}`)
     await page.locator(".FileTabs ui-toolbar").first().waitFor({ timeout: 30_000 })

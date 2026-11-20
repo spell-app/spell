@@ -11,7 +11,7 @@ import { CLI } from "spell/app/cli"
 /** The page server's root:  the kit this checkout is in (`pageServerRoot()`, epic `repo-split` P16), else this checkout. */
 const SERVER_ROOT = pageServerRoot(environment.repoDir)
 
-/** Where the page server records its editor:  at its root, named by its spaces (`editorRecordFile()`, epic `old-console-redo` I9). */
+/** Where the page server records its editor:  at its root, named by its spaces (`editorRecordFile()`). */
 const EDITOR_FILE = editorRecordFile(SERVER_ROOT)
 
 /** How long to wait for the editor to answer:  vite may be building its dependency cache. */

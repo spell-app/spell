@@ -1,5 +1,5 @@
 /**
- * Node's reader of a project's javascript or TypeScript code file, for `call native` (epic `from-console` P10):
+ * Node's reader of a project's javascript or TypeScript code file, for `call native`:
  * its exported functions, read from its syntax tree by the kit's TypeScript reader (`readTypeScript()`).
  * - SIDE EFFECT:  importing it puts `exportedFunctionsIn()` in as `SP.NativeCode.readers.js`,
  *   in place of the browser's reading of `export function` lines.

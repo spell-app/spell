@@ -24,7 +24,7 @@ export const tableVocabulary = {
   tag: "ui-table",
   icon: "table",
   topics: ["tables", "data display", "basic", "collections"],
-  // the shared `height`, `min-height` and `max-height` (epic `old-console-redo` P2)
+  // the shared `height`, `min-height` and `max-height`
   heights: true,
   aka: ["data table", "data grid", "grid", "spreadsheet"],
   skeleton: "long line, 4 line paragraph",

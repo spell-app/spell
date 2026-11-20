@@ -61,7 +61,7 @@ describe("<ui-site-nav>", () => {
     expect(row(host, "Film").hasAttribute("selected")).toBe(true)
   })
 
-  it("a link out to another site is never the page shown, whatever its path (old-console-redo I25)", async () => {
+  it("a link out to another site is never the page shown, whatever its path", async () => {
     const host = (await ElementFixture.render(
       `<ui-site-nav current="${location.pathname}" style="width: 300px"></ui-site-nav>`
     )) as HTMLElement
@@ -278,7 +278,7 @@ describe("<ui-site-nav> pages' extras", () => {
     expect(went).toHaveLength(2)
   })
 
-  it('`groups="headings"`:  each group a plain heading, always open, going nowhere;  no well, no icon, its pages in line (old-console-redo I35)', async () => {
+  it('`groups="headings"`:  each group a plain heading, always open, going nowhere;  no well, no icon, its pages in line', async () => {
     const withIcon: SiteNavPage[] = [{ ...GROUPS[0]!, icon: "palette" }, GROUPS[1]!]
     const host = await navOf(withIcon, { current: "#/explore", appearance: "nav" })
     host.setAttribute("groups", "headings")
@@ -301,7 +301,7 @@ describe("<ui-site-nav> pages' extras", () => {
     expect(parseFloat(page.paddingInlineStart)).toBe(0.75 * parseFloat(page.fontSize))
   })
 
-  it("its `start` slot above its pages, its `end` slot at its foot, each drawn only with something in it (old-console-redo I35)", async () => {
+  it("its `start` slot above its pages, its `end` slot at its foot, each drawn only with something in it", async () => {
     const box = (await ElementFixture.render(
       `<div style="display: flex; flex-direction: column; height: 600px"><ui-site-nav appearance="nav"></ui-site-nav></div>`
     )) as HTMLElement
@@ -320,7 +320,7 @@ describe("<ui-site-nav> pages' extras", () => {
     expect(Math.round(end.getBoundingClientRect().bottom - box.getBoundingClientRect().top)).toBe(600)
   })
 
-  it("`collapsed`, its `collapsed-start` and `collapsed-end` slots show in place of `start` and `end` (old-console-redo I41)", async () => {
+  it("`collapsed`, its `collapsed-start` and `collapsed-end` slots show in place of `start` and `end`", async () => {
     const host = await navOf(GROUPS, { appearance: "nav" })
     host.setAttribute("groups", "headings")
     host.insertAdjacentHTML(

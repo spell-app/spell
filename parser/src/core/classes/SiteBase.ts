@@ -36,8 +36,8 @@ export class SiteBase extends App {
   static pages: SitePageEntry[] = []
 
   /**
-   * Its links out, among its pages in its navigation:  `- it has a link to "https://docs.example.com"`
-   * (epic `old-console-redo` I6).  A page's own are in its entry's `links`.
+   * Its links out, among its pages in its navigation:  `- it has a link to "https://docs.example.com"`.
+   * A page's own are in its entry's `links`.
    */
   static links: SiteLinkEntry[] = []
 
@@ -317,7 +317,7 @@ export class SiteBase extends App {
 
   /**
    * Ask the host for its theme's look, worn by its frame alone (`SiteHost.themeTokens()`):  one of Spell UI's, or the
-   * project's own, in its folder (epic `old-console-redo` P1).
+   * project's own, in its folder.
    * - NEVER throws:  a theme the host can't give leaves the page's, said on the console.
    */
   private wearTheme(): void {
@@ -337,7 +337,7 @@ export class SiteBase extends App {
    *   - Its drawer holds the site's navigation, `<ui-site-nav>`, its pages the site's, nested as its lines nest them
    *     (`navPages()`), unless the layout draws its drawer itself:  then a `<site-nav>` in what it draws is the
    *     site's navigation, its pages filled in (`fillNav()`), and what's around it the layout's own (a logo above
-   *     it, a row of buttons in its `end` slot;  epic old-console-redo I35).
+   *     it, a row of buttons in its `end` slot).
    *   - A slot the page shown draws itself (`to draw its right sidebar`) is the page's while it's shown.
    * - Drawn ONCE per layout, and kept:  going to a page in the same layout redraws only the page, so nothing around
    *   it flashes;  a page in another layout shows that one, and the first is kept, hidden, as it was left.
@@ -396,8 +396,8 @@ export class SiteBase extends App {
   }
 
   /**
-   * Does the page shown fill the window:  its line says `, filling the window` (`static fillsWindow`;  epic
-   * `old-console-redo` T27).  Its layout is then exactly the window's height (`<ui-page-layout page-height="fluid">`),
+   * Does the page shown fill the window:  its line says `, filling the window` (`static fillsWindow`).
+   * Its layout is then exactly the window's height (`<ui-page-layout page-height="fluid">`),
    * and the page's `height="fluid"` boxes share out what's left under its menus.
    */
   get shownFillsWindow(): boolean {
@@ -449,7 +449,7 @@ export class SiteBase extends App {
         class: "spell-site",
         "data-layout": name || undefined,
         hidden: () => (isShown() ? undefined : ""),
-        // the page shown fills the window, its height shared out:  its line says `, filling the window` (old-console-redo T27)
+        // the page shown fills the window, its height shared out:  its line says `, filling the window`
         "page-height": () => (isShown() && this.shownFillsWindow ? "fluid" : undefined),
         drawer: () => this.regionState(name, DRAWER),
         left: () => this.regionState(name, LEFT),
@@ -519,7 +519,7 @@ export class SiteBase extends App {
     return {
       pages: () => JSON.stringify(this.navPages({ headings })),
       current: () => this.navCurrent(),
-      // the pages it doesn't list, below `current`, for `<ui-site-breadcrumbs>` (epic old-console-redo I29)
+      // the pages it doesn't list, below `current`, for `<ui-site-breadcrumbs>`
       "data-shown": () => JSON.stringify(this.navShownBelow())
     }
   }
@@ -609,7 +609,7 @@ export class SiteBase extends App {
   /**
    * Its pages as its navigation lists them:  each one's title (its name without one), address and tags, its pages under it.
    * - A page with a parameter (`/films/:film`) isn't listed:  it's reached from a page, with a film to show.
-   * - Its links out (`static links`, a page's `links`) among them, each where its line is (epic `old-console-redo` I6).
+   * - Its links out (`static links`, a page's `links`) among them, each where its line is.
    * - `headings`:  for a navigation whose groups are headings (`<site-nav groups="headings">`, I35), a group of one
    *   page keeps its heading;  else it's that page alone (`underGroups()`).
    */
@@ -663,7 +663,7 @@ export class SiteBase extends App {
       const pages = SiteBase.navRows(run, listed)
       const [only] = pages
       if (!group) rows.push(...pages)
-      // a group with no page listed (each `, not in the navigation`):  nothing (old-console-redo I35)
+      // a group with no page listed (each `, not in the navigation`):  nothing
       else if (!pages.length) {
         // nothing
       }
@@ -671,7 +671,7 @@ export class SiteBase extends App {
       else if (pages.length === 1 && only && !keepsLoneGroups) {
         rows.push({ ...only, ...(!only.icon && groupIcon && { icon: groupIcon }) })
       } else {
-        // a group of links out only never holds the page shown, so never opens by itself:  it starts open (old-console-redo I26)
+        // a group of links out only never holds the page shown, so never opens by itself:  it starts open
         const linksOnly = run.every((entry) => "link" in entry)
         rows.push({
           title: group,
@@ -730,7 +730,7 @@ export class SiteBase extends App {
 
   /**
    * The titles of the pages shown below `navCurrent()`, which the navigation doesn't list, top first:  a film's page,
-   * `["Film"]`, below Films (epic old-console-redo I29).  `<ui-site-breadcrumbs>` ends its trail with them.
+   * `["Film"]`, below Films.  `<ui-site-breadcrumbs>` ends its trail with them.
    */
   navShownBelow(): string[] {
     const path = this.shownPath()

@@ -2,7 +2,7 @@
 import type { HookSpec } from "spell/element/vocabulary.types"
 
 /**
- * Each tag's hooks, the methods a subclass overrides, with their English words (epic `from-console` P11):
+ * Each tag's hooks, the methods a subclass overrides, with their English words:
  * what a Spell type built on the tag overrides, `a "netlist column" is a ui tree view`.
  * - Read by the app's Spell UI pack, as Spell compiles;  each language's words are its dictionary's (`hooks`).
  */

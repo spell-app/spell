@@ -3,8 +3,7 @@ import { SiteThemes } from "./SiteThemes"
 
 /****************
  * ### `ViewerSiteHost`
- * A running site's host in a page's `<spell-viewer>` (`SpellAppRunner`):  its theme, and nothing else of the page's
- * (epic `old-console-redo` P1).
+ * A running site's host in a page's `<spell-viewer>` (`SpellAppRunner`):  its theme, and nothing else of the page's.
  * - The site keeps its address itself, as with no host:  it starts at `/`, and a page going to another changes nothing
  *   outside it.  The page's own URL stays the page's.
  * - Its theme, `galaxy guide is a site with theme "harbor"`, as the editor's Run gives it (`SiteThemes`):  one of

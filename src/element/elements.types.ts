@@ -201,7 +201,7 @@ export type ComponentRegistry = {
   /**
    * The component class of every defined tag, by tag:  `UITree` for `ui-tree`.
    * - What a class built on a tag's component starts from, knowing only its tag:
-   *   a Spell type built on a Spell UI element (the app's `SpellElement`, epic `from-console` P11).
+   *   a Spell type built on a Spell UI element (the app's `SpellElement`).
    */
   readonly components: Map<string, UIComponentClass>
   /** The vocabularies already handed to the runtime (`UIComponent.register()`), so each is handed over once. */
@@ -405,8 +405,8 @@ export type ElementSetup = {
   link: LinkMeaning
 
   /**
-   * What a bare `resizable` drags, for this family (every element takes it:  `SharedVocabulary`;
-   * epic `old-console-redo` P2):  `"both"` (the default), `"vertically"` (its height:  a segment, a table), or
+   * What a bare `resizable` drags, for this family (every element takes it:  `SharedVocabulary`):
+   * `"both"` (the default), `"vertically"` (its height:  a segment, a table), or
    * `"horizontally"`.
    * - `resizable="width"`, `"height"` or `"width, height"` names it outright, whatever this says.
    */

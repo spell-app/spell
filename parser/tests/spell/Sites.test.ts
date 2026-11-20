@@ -257,7 +257,7 @@ describe("a site", () => {
     })
   })
 
-  test("`, filling the window` on a page's line:  `static fillsWindow`, after its layout;  Spanish's too (old-console-redo T27)", () => {
+  test("`, filling the window` on a page's line:  `static fillsWindow`, after its layout;  Spanish's too", () => {
     const filling = compiled(
       [
         "main layout is a page layout",
@@ -363,13 +363,13 @@ describe("going to a site's pages", () => {
     expect(code).toContain('core.siteAddressOf("about page")')
   })
 
-  test("a page with a parameter, whatever its last word, is named in a file read before its own (old-console-redo I16)", () => {
+  test("a page with a parameter, whatever its last word, is named in a file read before its own", () => {
     const files = parseSpellProject([
       {
         path: "/Site.spell",
         contents: [
           'a "session" is a thing',
-          "harbor is a site:",
+          "galaxy guide is a site:",
           '\t- it has a Session Screen at "/sessions/:session"'
         ].join("\n")
       },

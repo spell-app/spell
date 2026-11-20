@@ -48,7 +48,7 @@ const TERMS_FILE = fileURLToPath(new URL("../places/terms.html", import.meta.url
  *     `family cookbook is a data folder at "owen@spell/recipes"`, behind the page server's guard, as the Airtable
  *     routes are
  *   - `/api/places/projects/<project>/<place>/...` -- every project's authenticated places, read for its pages with
- *     the secret added (`ProjectPlaces`, the kit's `AuthenticatedPlaces`;  epic `from-console` P14)
+ *     the secret added (`ProjectPlaces`, the kit's `AuthenticatedPlaces`)
  *   - `/api/reads/spaces/<address>/...` -- a space's own folder, read direct with a credential for the whole space,
  *     apart from where it's written (`SpaceFolders`, epic `atmosphere` P5)
  *   - `/api/rooms/spaces/<address>/<collection>` -- a space's own folder shared live, a websocket room per collection,
@@ -133,13 +133,13 @@ const appRoutes: RouteModule = {
     // a person's pref saved (their theme):  every open page hears it, and follows (`ThemePreference`)
     onStop(onPrefSaved((saved) => live.send(PREF_SAVED_EVENT, saved)))
     // a project file changed on disk (another window, an agent, git):  every open page hears it at its address,
-    // so the editor shows it at once, with no poll (epic `from-console` P17)
+    // so the editor shows it at once, with no poll
     onStop(watchSpaceFiles(live))
     // before `/api`'s own routes, whose last answers every path it doesn't know
     // and their live rooms, each write as its page's person (epic `atmosphere` T38)
     folders.route({ router, guard, upgrade: (prefix, handle) => web.upgrade(prefix, handle), signIn })
     onStop(() => folders.close())
-    // every project's authenticated places, read for its pages with the secret added (epic `from-console` P14):
+    // every project's authenticated places, read for its pages with the secret added:
     // the kit's route module made their routes, and says the secrets that aren't set as the server starts
     AuthenticatedPlaces.for({ router, guard }).addSource(new ProjectPlaces())
     router.get(TERMS_PATH, (_request, reply) => reply.sendFile(TERMS_FILE))

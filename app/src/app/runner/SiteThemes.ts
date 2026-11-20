@@ -7,7 +7,7 @@ import { fetchText } from "./fetchFresh"
  * ### `SiteThemes`
  * The theme a running site wears, `galaxy guide is a site with theme "mockup"`, as its host gives it
  * (`SiteHost.themeTokens()`):  the editor's Run (`RunSite`) and a page's `<spell-viewer>` (`SpellAppRunner`).
- * - One of Spell UI's own (`UI.themes`), else the PROJECT's own (epic `old-console-redo` P1):
+ * - One of Spell UI's own (`UI.themes`), else the PROJECT's own:
  *   `<name>.theme.json5` in the running program's folder, beside its Spell.
  *   - Spell UI's first:  a project's theme is defined into the page's one registry, and can't replace one of
  *     Spell UI's (`UI.themes.define()`);  the editor around the site wears those too.
@@ -49,8 +49,8 @@ export class SiteThemes {
 
   /**
    * The project themes read from folder `projectFolder` so far (`tokens()`), each with the theme of Spell UI's it
-   * builds on, through any of the project's it extends:  what the editor's theme menu offers (epic `old-console-redo`
-   * I36, `EditorTheme.offerProjectThemes()`).
+   * builds on, through any of the project's it extends:  what the editor's theme menu offers
+   * (`EditorTheme.offerProjectThemes()`).
    * - `base`:  `undefined` for one that extends nothing.
    */
   static readIn(projectFolder: string): { name: string; title?: string; base?: string }[] {

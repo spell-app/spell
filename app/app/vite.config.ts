@@ -138,8 +138,7 @@ const DYNAMIC_IMPORT = /\bimport\(\s*(["'])([^"'`\n]+)\1\s*\)/g
  * its `core`, and what runs on it.
  * - `loadRuntime()` copies that ONE file, from a `blob:` URL, and the copy shares the chunks it imports.
  *   With `core` in a chunk the editor shares, every copy shared ONE `core`, each with its own `View`:
- *   the last copy loaded took `core.defineElement()` over, and an app's elements were never defined
- *   (epic `from-console` P13).
+ *   the last copy loaded took `core.defineElement()` over, and an app's elements were never defined.
  * - So, as `runtimeCopyInDev()` does in dev, the runtime's imports into `PER_COPY` get modules of their own,
  *   marked `RUNTIME_OWN`, followed from module to module:
  *   only the runtime imports them, so they're bundled into it, never into a chunk the editor shares.

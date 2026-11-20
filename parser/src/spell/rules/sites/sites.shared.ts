@@ -47,7 +47,7 @@ export type SitePageEntry = {
 }
 
 /**
- * One link out of a site, in its navigation among its pages (epic `old-console-redo` I6), as the site's class lists it
+ * One link out of a site, in its navigation among its pages, as the site's class lists it
  * (`static links`, or a page's `links`).
  * - e.g. `- it has a link to "https://docs.example.com", named "Help", icon "book"`, after two pages =>
  *   `{ link: "https://docs.example.com", title: "Help", icon: "book", at: 2 }`
@@ -257,8 +257,7 @@ export function namesSitePage(scope: P.Scope, words: string): boolean {
 
 /**
  * Does a site already parsed list a page named `words`?  A site file read before its pages' files names every page,
- * so `go to the Datasets Screen` reads in a file before the one declaring it, whatever its last word
- * (epic old-console-redo P7).
+ * so `go to the Datasets Screen` reads in a file before the one declaring it, whatever its last word.
  */
 function listedPage(scope: P.Scope, words: string): boolean {
   const wanted = sameWords(words)

@@ -28,7 +28,7 @@ describe("SPELL_UI_PACK", () => {
     expect(file!.compiled).toContain('h("ui-button", "Go")')
   })
 
-  test("a type built on one of its tags (epic `from-console` P11):  its attributes and hooks, in each language", () => {
+  test("a type built on one of its tags:  its attributes and hooks, in each language", () => {
     const tree = SPACES.SPELL_UI_PACK.viewBaseFor!("tree", "en")!
     expect(tree.tag).toBe("ui-tree")
     expect(tree.attributes).toContainEqual({ name: "appearance", values: ["nav", "columns"] })

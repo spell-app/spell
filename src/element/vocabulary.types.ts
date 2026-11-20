@@ -326,8 +326,8 @@ export type TextSpec = {
 }
 
 /**
- * A method a subclass overrides to change how the element draws, with the words Spell says it in
- * (epic `from-console` P11, Q11):  `<ui-tree>`'s `rowClass(item)`, `to give the row class of (an item)`.
+ * A method a subclass overrides to change how the element draws, with the words Spell says it in:
+ * `<ui-tree>`'s `rowClass(item)`, `to give the row class of (an item)`.
  * - A Spell type built on the element (`a "netlist column" is a ui tree view`) overrides it with a `to` line in
  *   those words, as a card overrides `to draw its front`;  its element calls the type's method in its place.
  * - A translation gives its own words (`ComponentDictionary.hooks`).
@@ -442,7 +442,7 @@ export type ComponentVocabulary = {
   skeleton?: string
   /**
    * Does it take the shared `height`, `min-height` and `max-height` (Spell UI's `SharedVocabulary`):  `true`, else
-   * left out (epic `old-console-redo` P2).
+   * left out.
    * - Opt-in, unlike the shared widths:  only a box whose height means something (a tree, a table, a segment, a
    *   graph ...) takes them;  a button or a list doesn't.
    */

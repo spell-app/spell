@@ -68,14 +68,14 @@ export class DOMSiteNavElement extends E.DOMElement<UISiteNav> {
  * - Beside a bar (`--ui-site-nav-bar-height`, which `<ui-page-layout>` sets to its menu's height):  its first row's
  *   middle on the bar's, so the first page's icon lines up with the drawer's button (epic `mockup` I35).
  * - `groups="headings"`:  a group is a small heading over its pages, no well, always open, a click on it doing nothing;
- *   its pages in line with the rest, and a page's own pages beside a guide line (epic `old-console-redo` I35:  the
- *   Harbor console's sidebar).  Its `icon` isn't drawn:  a heading has none, and collapsed it's a thin line.
+ *   its pages in line with the rest, and a page's own pages beside a guide line (a console's
+ *   sidebar).  Its `icon` isn't drawn:  a heading has none, and collapsed it's a thin line.
  * - Its `start` slot shows above its pages (a logo, a picker), its `end` slot at its foot, pushed to the bottom of the
  *   box it fills (a row of buttons):  each drawn only while something's in it.
  * - `collapsed`:  only the icons, each row's title its tooltip (`:state(collapsed)`), all in one column, no step in;
  *   a page with no icon shows its title's first letter, as `<ui-menu>`'s icons-only look does,
  *   and a group with no icon is a thin line.
- *   - `groups="headings"`:  a heading is a gap, no line (epic `old-console-redo` I41:  the console's icon rail).
+ *   - `groups="headings"`:  a heading is a gap, no line (a console's icon rail).
  *   - Its `collapsed-start` and `collapsed-end` slots, when they have content, show in place of `start` and `end`
  *     (I41):  the rail's own head and foot, a logo square, buttons stacked, so the rail is as narrow as its icons.
  ****************/

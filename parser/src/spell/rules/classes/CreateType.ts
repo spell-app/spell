@@ -17,7 +17,7 @@ import { TypeDeclaration } from "./TypeDeclaration"
  * - Compiles to an exported class declaration, e.g. `a card is a thing` => `export class Card extends Thing {}`.
  *   - A view defines its element in it -- see `TypeDeclaration.elementMember()`.
  *   - Another project reaches it by `import`ing it -- no globals.
- * - Built on a Spell UI element, `a "netlist column" is a ui tree view` (epic `from-console` P11):
+ * - Built on a Spell UI element, `a "netlist column" is a ui tree view`:
  *   it extends `View`, naming its element, `static uiElement = "ui-tree"`;  see `SP.UIViews`.
  * - Its own values for properties its super-type has, on its line (epic `language` P55):
  *   `a "column" is a pile with layout "vertical"` (or `layout = vertical`), several joined by commas, as on a new thing.
@@ -154,7 +154,7 @@ export class CreateType extends TypeDeclaration<
   }
 
   /**
-   * `static uiElement = "ui-tree"`:  the Spell UI element a type built on one draws as (epic `from-console` P11).
+   * `static uiElement = "ui-tree"`:  the Spell UI element a type built on one draws as.
    * - The core reads it, `core.uiElementOf()`, and the page builds the type's tag on that element.
    */
   private static uiElementMember(match: P.Match, type: P.ASTTypeExpression, tag: string): P.ASTClassMember {

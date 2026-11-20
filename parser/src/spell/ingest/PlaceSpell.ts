@@ -248,7 +248,7 @@ export function spellPartsFor(
     }
   }
   // a list under each thing, at its own address:  `a post's comments live at "/posts/{id}/comments"`;
-  // or one thing:  `a system's snapshot lives at "/instances/{id}/snapshot"` (epic `from-console` P16)
+  // or one thing:  `a system's snapshot lives at "/instances/{id}/snapshot"`
   for (const [collection, description] of shown) {
     for (const [list, at] of listsUnderShown(description, collections)) {
       const { type, isOneUnder } = collections[list]!
@@ -652,7 +652,7 @@ function typeLines(
     lines.push({ key: `field:${collection}:${field}`, text: line, note: noteFor(about, collections) })
   }
   // each list it keeps under this one, read from there:  `its "comments" is a list of comments`;
-  // or one thing:  `its "snapshot" is a snapshot` (epic `from-console` P16)
+  // or one thing:  `its "snapshot" is a snapshot`
   for (const [list] of listsUnderShown(description, collections)) {
     const { type, isOneUnder } = collections[list]!
     const words = collectionWords(collections[list]!)

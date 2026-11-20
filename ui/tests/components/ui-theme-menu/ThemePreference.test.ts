@@ -331,8 +331,8 @@ describe("ThemePreference.wear()", () => {
   })
 })
 
-describe("ThemePreference.offer():  a project's themes (epic `old-console-redo` I36)", () => {
-  const offered = { title: "Harbor Clone", themes: [{ name: "test-project", title: "Test Project", base: "matrix" }] }
+describe("ThemePreference.offer():  a project's themes", () => {
+  const offered = { title: "Harbor Console", themes: [{ name: "test-project", title: "Test Project", base: "matrix" }] }
 
   beforeEach(() => {
     if (!UI.themes.has("test-project")) UI.themes.define("test-project", ":root { --test-project: 1; }")

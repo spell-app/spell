@@ -493,7 +493,7 @@ placesEs.addRule(DataIsPrivate, {
     }
   ]
 })
-// las palabras viejas (épica `from-console` P14):  cada una se sigue leyendo, con un aviso que nombra la línea nueva
+// las palabras viejas:  cada una se sigue leyendo, con un aviso que nombra la línea nueva
 placesEs.addRule(OLD_KEY_IF_SET, { syntax: "{type:subject_its} clave opcional es el secreto {name:text}" })
 placesEs.addRule(OLD_KEY_IS_SECRET, { syntax: "{type:subject_its} clave es el secreto {name:text}" })
 placesEs.addRule(OLD_TOKEN_FROM, {

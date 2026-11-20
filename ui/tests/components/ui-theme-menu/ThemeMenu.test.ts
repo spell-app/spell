@@ -31,10 +31,10 @@ describe("ThemeMenu.entries", () => {
     const menu = new ThemeMenu({
       themes: ["spell"],
       text: keyText,
-      offered: { title: "Harbor Clone", themes: [{ name: "harbor", title: "Harbor", base: "matrix" }] }
+      offered: { title: "Harbor Console", themes: [{ name: "harbor", title: "Harbor", base: "matrix" }] }
     })
     expect(menu.entries).toEqual([
-      { type: "header", text: "Harbor Clone" },
+      { type: "header", text: "Harbor Console" },
       { value: "project:harbor", text: "Harbor", description: "Matrix" },
       { type: "divider", text: "", appearance: "dashed" },
       { value: "spell", text: "Spell", description: "spellDescription" }

@@ -129,7 +129,7 @@ class PrintPage extends Page {
   }
 }
 
-/** A page filling the window, its line saying `, filling the window` (epic `old-console-redo` T27). */
+/** A page filling the window, its line saying `, filling the window`. */
 class DashPage extends Page {
   static fillsWindow = true
   draw(): Drawing {
@@ -157,7 +157,7 @@ class MainLayout extends PageLayout {
   }
 }
 
-/** A layout drawing its own drawer round the site's navigation (old-console-redo I35):  a logo above it, its groups headings. */
+/** A layout drawing its own drawer round the site's navigation:  a logo above it, its groups headings. */
 class DrawerLayout extends PageLayout {
   drawDrawer(): Drawing {
     return h("ui-site-nav", { groups: "headings" }, h("b", { slot: "start" }, "Logo")) as unknown as Drawing
@@ -193,7 +193,7 @@ class Lobby extends Site {
 }
 
 /**
- * A site with links out among its pages (epic `old-console-redo` I6):  one in a group of its own, one after the last
+ * A site with links out among its pages:  one in a group of its own, one after the last
  * page with no title, one under a page.
  */
 class Portal extends Site {
@@ -213,7 +213,7 @@ class Portal extends Site {
   ]
 }
 
-/** A site with a group of two links out (epic `old-console-redo` I26). */
+/** A site with a group of two links out. */
 class Monitored extends Site {
   static pages = [{ name: "home", page: "FilmsPage", address: "/", title: "Home" }]
   static links = [
@@ -317,7 +317,7 @@ describe("a running site", () => {
     ])
     await site.showAddress("/films/a-new-hope")
     expect(site.navCurrent()).toBe("/films")
-    // the page it doesn't list, for the breadcrumbs (old-console-redo I29)
+    // the page it doesn't list, for the breadcrumbs
     expect(site.navShownBelow()).toEqual(["film page"])
     await site.showAddress("/planets")
     expect(site.navCurrent()).toBe("")
@@ -343,13 +343,13 @@ describe("a running site", () => {
     ])
   })
 
-  test("for a navigation of headings, a group of one page keeps its heading (old-console-redo I35)", () => {
+  test("for a navigation of headings, a group of one page keeps its heading", () => {
     const [home, inbox] = new Lobby().navPages({ headings: true })
     expect(home).toMatchObject({ title: "Home", band: "group", pages: [{ title: "Home", href: "/" }] })
     expect(inbox).toMatchObject({ title: "Mine", band: "group", pages: [{ title: "Inbox", href: "/inbox" }] })
   })
 
-  test("leaves out a page `, not in the navigation`, and a group with no page left;  shown, it's below what's marked (old-console-redo I35)", async () => {
+  test("leaves out a page `, not in the navigation`, and a group with no page left;  shown, it's below what's marked", async () => {
     class Quiet extends Site {
       static pages = [
         { name: "films", page: "FilmsPage", address: "/films", title: "Films", group: "Films" },
@@ -364,7 +364,7 @@ describe("a running site", () => {
     expect(site.navShownBelow()).toEqual(["Settings"])
   })
 
-  test("lists its links out among its pages, each where its line is, in its group (old-console-redo I6)", () => {
+  test("lists its links out among its pages, each where its line is, in its group", () => {
     expect(new Portal().navPages()).toEqual([
       {
         title: "Home",
@@ -379,7 +379,7 @@ describe("a running site", () => {
     ])
   })
 
-  test("a group of links out only starts open:  it never holds the page shown (old-console-redo I26)", () => {
+  test("a group of links out only starts open:  it never holds the page shown", () => {
     expect(new Monitored().navPages()).toEqual([
       { title: "Home", href: "/", id: "home" },
       {
@@ -395,7 +395,7 @@ describe("a running site", () => {
     ])
   })
 
-  test("a link out, picked in its navigation, opens in a new tab;  the site stays where it is (old-console-redo I6)", async () => {
+  test("a link out, picked in its navigation, opens in a new tab;  the site stays where it is", async () => {
     const open = vi.fn()
     // not `vi.stubGlobal()`:  unstubbing would take the fake page's globals with it
     const was = globalThis.open
@@ -530,7 +530,7 @@ describe("a running site", () => {
     expect(frame.getAttribute("style")).toContain("--ui-font-family: mockup")
   })
 
-  test("asks its host for its theme with the program's folder, where a theme of its own is (epic `old-console-redo` P1)", async () => {
+  test("asks its host for its theme with the program's folder, where a theme of its own is", async () => {
     Object.defineProperty(site, "theme", { value: "harbor" })
     const asked: Array<[string, string | undefined]> = []
     core.projectFolder = "/spaces/@spell/examples/Harbor"
@@ -645,7 +645,7 @@ describe("a running site", () => {
       }
     })
 
-    test("a layout drawing its drawer:  the `<ui-site-nav>` in it is the site's navigation, its own attributes kept (old-console-redo I35)", async () => {
+    test("a layout drawing its drawer:  the `<ui-site-nav>` in it is the site's navigation, its own attributes kept", async () => {
       new DrawerLayout()
       class Drawn extends Site {
         static pages = StarCharts.pages
@@ -715,7 +715,7 @@ describe("a running site", () => {
       expect(element.querySelector("ui-page-layout:not([hidden])")).toBeNull()
     })
 
-    test('`, filling the window`:  its layout is `page-height="fluid"` while it\'s shown, and only then (old-console-redo T27)', async () => {
+    test('`, filling the window`:  its layout is `page-height="fluid"` while it\'s shown, and only then', async () => {
       await charts.showAddress("/dash")
       expect(await shown()).toContain("Dash")
       expect(layout("MainLayout")?.getAttribute("page-height")).toBe("fluid")

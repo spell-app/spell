@@ -475,7 +475,7 @@ export const getIndex = async (
     if (!fileNames.includes(name) && isManifestFile(basename(name), location.projectName)) fileNames.push(name)
   }
 
-  // a code file the project file names, `clipboard.ts`, which its Spell calls (`call native`, epic `from-console` P10):
+  // a code file the project file names, `clipboard.ts`, which its Spell calls (`call native`):
   // only when named, so a `.lib.ts`, `.app.py` or snapshot beside a project never becomes one of its files
   for (const { path } of (await loadProjectFile(projectId)).imports) {
     if (SP.SpellLocation.isAddress(path) || !SP.NativeCode.languageOf(path)) continue

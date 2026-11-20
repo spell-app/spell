@@ -1090,7 +1090,7 @@ describe("RestPlace, what a FastAPI service asks for (epic `data` P56)", () => {
     expect(asked).toEqual(["https://shapes.test/api/runs?team=infra"])
   })
 
-  test("a list asked for by a field its rows leave out:  each row holds the value it was asked for (epic `from-console` P15)", async () => {
+  test("a list asked for by a field its rows leave out:  each row holds the value it was asked for", async () => {
     const asked: string[] = []
     // answers 400 without its `system`, and its rows never say which system they're for
     vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {

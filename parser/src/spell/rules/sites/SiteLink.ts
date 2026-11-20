@@ -8,7 +8,7 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import { siteOf, type SiteLinkEntry } from "./sites.shared"
 
 /**
- * `site_link` rule:  a link out of a site, in its navigation among its pages (epic `old-console-redo` I6).
+ * `site_link` rule:  a link out of a site, in its navigation among its pages.
  * - e.g. `- it has a link to "https://docs.example.com", named "Help", icon "book"`, in a site's body
  * - For what the site isn't:  a docs site, a monitoring app, anything at an address of its own.
  * - Written as a page's line is, its title and icon too, but with no page and no address of the site's:

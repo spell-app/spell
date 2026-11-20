@@ -38,7 +38,7 @@ export function pollWhileVisible(seconds: number, fn: () => unknown, { at }: { a
  *   - when the page server says a file it cares about changed
  *   - when the page becomes visible
  *   - every `every` ms while visible
- * - Epic `coherence` C9;  moved down from spell-epic's `ServerLink.watch()`, which wraps it, by epic `from-console` P17.
+ * - Epic `coherence` C9;  moved down from spell-epic's `ServerLink.watch()`, which wraps it.
  * - Changes come from the page's live client, as `spell-server:changed`:
  *   spell/server's `liveClient()`, or `joinLiveChannel()` for a page the server didn't serve.
  *   - never a connection of our own:  each holds one of Chrome's 6 per host

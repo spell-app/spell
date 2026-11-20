@@ -8,7 +8,7 @@
  * - So they MUST hold nothing a copy keeps of its own:  `core`, and the runner.
  *   Every build puts those in `spell-runtime.js` alone
  *   (the editor's:  `runtimeOwnCoreInBuild()`, in `vite.config.ts`).
- *   - In a shared chunk, every copy shared ONE `core`, and the last loaded took it over (epic `from-console` P13).
+ *   - In a shared chunk, every copy shared ONE `core`, and the last loaded took it over.
  *   - Pinned by `build.test.ts` and `element.build.test.ts`.
  */
 import { $fetch } from "spell/util"

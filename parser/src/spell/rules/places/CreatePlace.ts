@@ -154,7 +154,7 @@ export class CreatePlace extends TypeDeclaration<
       if (!(scopeType instanceof P.TypeScope) || !scopeType.isA("Place")) return undefined
     }
     const language = SP.Language.of(scope)
-    // `call native ...` calls the project's code, so `native` can't name a place (epic `from-console` P10)
+    // `call native ...` calls the project's code, so `native` can't name a place
     if (/^native$/i.test(`${match.groups.type.raw ?? match.groups.type.value}`.trim())) {
       return SpellStatement.refuse(match, language.parserMessage("place-named-native"))
     }
@@ -426,7 +426,7 @@ export class CreatePlace extends TypeDeclaration<
   }
 
   /**
-   * What Spell's page server needs to read place `type` for a page, adding its secret (epic `from-console` P14):
+   * What Spell's page server needs to read place `type` for a page, adding its secret:
    * `undefined` for a place a page doesn't read through it (`servedAtFor()`).
    * - Written into the project's declarations, which the page server reads (`SP.DeclaredPlace.served`).
    */
@@ -499,7 +499,7 @@ export class CreatePlace extends TypeDeclaration<
   }
 
   /**
-   * Where a page reads this place through Spell's page server, which adds its secret (epic `from-console` P14):
+   * Where a page reads this place through Spell's page server, which adds its secret:
    * `/api/places/projects/@acme/jobs/jobs`.
    * - Only a web or graphql server authenticated with a secret it can't go without, in a project with an address.
    */

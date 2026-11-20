@@ -210,7 +210,7 @@ export class Vocabulary {
         if (!localized.attributes.has(alias)) localized.attributes.set(alias, spec)
       }
     }
-    // a small vocabulary written in JavaScript may leave a list out (epic `from-console` P11)
+    // a small vocabulary written in JavaScript may leave a list out
     for (const spec of vocabulary.events ?? []) {
       const translated = component.events?.[spec.name] ?? dictionary.events?.[spec.name]
       const name = Vocabulary.eventName(spec.name, prefix, translated)

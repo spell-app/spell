@@ -32,7 +32,7 @@ describe("DefaultsTable.output()", () => {
     expect(readFileSync(file, "utf8") === text, file).toBe(true)
   })
 
-  test("...each tag's hooks and their words (epic `from-console` P11):  `<ui-tree>`'s `rowClass`", () => {
+  test("...each tag's hooks and their words:  `<ui-tree>`'s `rowClass`", () => {
     expect(HOOKS_TABLE["ui-tree"]).toEqual([{ name: "rowClass", words: "give the row class of (an item)" }])
     expect(HOOKS_TABLE["ui-button"]).toBeUndefined()
   })

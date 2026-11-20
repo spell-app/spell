@@ -25,7 +25,7 @@ import { CreateType } from "./CreateType"
  *   `static layout = "BareLayout"`;  `login is a page, no layout` => `static layout = false`, just the page.
  *   - Said nothing, it's in the site's main layout, when the program has one (`static mainLayout`, `create_site`).
  *   - Refused on anything but a page, and when the words name a type that isn't a page layout.
- * - And whether it fills the window (epic `old-console-redo` T27):  `home is a page, filling the window` =>
+ * - And whether it fills the window:  `home is a page, filling the window` =>
  *   `static fillsWindow = true`;  its site draws its layout `page-height="fluid"`, exactly the window's height, and
  *   the page's `height="fluid"` boxes share what's left.  Refused on anything but a page.
  */

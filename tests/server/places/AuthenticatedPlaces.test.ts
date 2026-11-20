@@ -1,6 +1,6 @@
 /**
  * `AuthenticatedPlaces`:  a page's reads of an authenticated place, passed on by the page server with the secret added,
- * and never sent back (epic `from-console` P14).
+ * and never sent back.
  * - A stand-in server that answers only with the secret, and says it back, so a test sees it scrubbed.
  */
 import { createServer, type IncomingMessage } from "node:http"

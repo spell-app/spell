@@ -14,7 +14,7 @@ const RUNS = 7
 const SIZES = [300, 5_000]
 
 /**
- * A column from `items` opens as fast with 5,000 rows as with 300 (epic `from-console` P8):
+ * A column from `items` opens as fast with 5,000 rows as with 300:
  * it draws the first rows, and more as you scroll (`drawnInWindow()`).
  * - Timed from setting `items` until the tree has settled and painted;  the median is the number to quote.
  * - SIDE EFFECT:  writes `results/tree-perf.json` (browser-mode `console.log` doesn't reach the terminal).

@@ -730,8 +730,8 @@ describe("<ui-theme-menu> tints", () => {
 // ## My themes (epic `debut` P25)
 ////////////////
 
-describe("<ui-theme-menu> a project's themes (epic `old-console-redo` I36, T22)", () => {
-  const offered = { title: "Harbor Clone", themes: [{ name: "test-project", title: "Test Project", base: "matrix" }] }
+describe("<ui-theme-menu> a project's themes", () => {
+  const offered = { title: "Harbor Console", themes: [{ name: "test-project", title: "Test Project", base: "matrix" }] }
   afterEach(() => ThemePreference.offer(undefined))
 
   it("closes them with Spell UI's dashed divider:  `<ui-divider appearance=\"dashed\">`, the panel's others plain", async () => {

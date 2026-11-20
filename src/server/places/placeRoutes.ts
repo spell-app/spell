@@ -1,5 +1,5 @@
 /**
- * The page server's authenticated places, a ROUTE MODULE of the kit's page server (epic `data` P19;  epic `from-console` P14):
+ * The page server's authenticated places, a ROUTE MODULE of the kit's page server (epic `data` P19):
  * the ONE place a secret a place needs is held, and said missing.
  * - Every project's authenticated places, read for its pages with the secret added:  `AuthenticatedPlaces`, at
  *   `/api/places/projects/<project>/<place>`.  Its routes are made here;  the app's route module hands in the projects.

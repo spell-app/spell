@@ -560,7 +560,7 @@ places.addRule(DataIsPrivate, {
     }
   ]
 })
-// the old words (epic `from-console` P14):  each still reads, with a warning naming the new line
+// the old words:  each still reads, with a warning naming the new line
 places.addRule(OLD_KEY_IF_SET, { syntax: "{type:subject_its} optional key is the secret {name:text}" })
 places.addRule(OLD_KEY_IS_SECRET, { syntax: "{type:subject_its} key is the secret {name:text}" })
 places.addRule(OLD_TOKEN_FROM, {

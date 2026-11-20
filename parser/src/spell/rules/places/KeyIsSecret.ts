@@ -13,10 +13,10 @@ const LONGEST_SECRET_NAME = 40
  * `key_is_secret` rule:  the NAME of the secret an authenticated place needs, never the secret (epic `data` Q11).
  * - e.g. `- it is authenticated with the secret "COOKBOOK_KEY"`
  * - The old words, `its key is the secret "..."`, still read, with a warning naming the new line
- *   (`OLD_KEY_IS_SECRET`, epic `from-console` P14).
+ *   (`OLD_KEY_IS_SECRET`).
  * - What looks like the key itself, rather than a name, won't compile.
  * - A browser program can't read one:  the place needs a small server side, and it says so.
- *   Spell's page server is one:  it reads the place for the page, adding the secret (epic `from-console` P14).
+ *   Spell's page server is one:  it reads the place for the page, adding the secret.
  */
 export class KeyIsSecret extends PlaceDetail<"type|name"> {
   /** A browser can't go without it, so the place needs a server side:  said as a warning.  See `KeyIfSet`. */

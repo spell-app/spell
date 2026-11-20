@@ -7,7 +7,7 @@ import { installSpellElements } from "spell/app/app/runner/SpellElement"
 import "spell/app/app/solid/cellsBridge"
 
 /**
- * A Spell type built on a Spell UI element (epic `from-console` P11):  `a "netlist column" is a ui tree view`,
+ * A Spell type built on a Spell UI element:  `a "netlist column" is a ui tree view`,
  * compiled as the parser's test pins it (`uiViews.test.ts`), draws as a `<ui-tree>` of its own.
  */
 describe("UIViewElements", () => {

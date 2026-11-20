@@ -164,8 +164,7 @@ export class UITable extends E.UIComponent<typeof tableVocabulary> {
    * Register the family's sheets as PAGE sheets too:  their class-grammar rules style the light-DOM table.
    * - A copy of each, without its `:host` rules (`lightRulesOf()`), as `<name>:page`:  a page sheet is adopted into
    *   the shadow root of every Spell view that draws `ui-*` elements (`UI.styles.adoptPageSheetsInto()`), where
-   *   `:host` is that VIEW, which took the table's own box:  a size container, so a view in a row shrank to nothing
-   *   (epic `old-console-redo` P4).
+   *   `:host` is that VIEW, which took the table's own box:  a size container, so a view in a row shrank to nothing.
    * - Idempotent (`UI.styles.register`);  re-registering new text (hot reload) updates them in place.
    */
   private registerPageSheets() {

@@ -9,7 +9,7 @@ import { OFFERED_PREFIX, type OfferedThemes, type ThemeMenuText, type ThemeMenuT
  *   each with its one-line description.
  *   - Nothing else since epic `debut` P17:  no Plain, no Classic, no Fomantic theme
  *     (those are archived, `src/styles/themes/archive/`).
- * - Above them all, the themes the page offers, a project's (`ThemePreference.offered`, epic `old-console-redo` I36),
+ * - Above them all, the themes the page offers, a project's (`ThemePreference.offered`),
  *   under its title, then My themes, each group closed by a divider:  the project's DASHED, as the editor's right-click
  *   menu marks where the program's own items end and the editor's begin (`appearance: "dashed"`, Spell UI's dashed divider).
  * - Titles:  `UIT.ThemeNames.titleOf()`, the theme editor's Start from's too.
@@ -39,8 +39,8 @@ export class ThemeMenu {
    * The list's entries:  My themes first, under their heading, when there's one (epic `debut` P25, Owen's C6:
    * "My themes, above spell's");  then one per theme of Spell's, its title and description.
    * - One of My themes is `mine:<id>`, described by the theme it builds on.
-   * - Before them, the page's offered themes (a project's), under its title, then a DASHED divider (epic
-   *   `old-console-redo` I36, Owen:  "at the top above the spell themes, with a dashed-border separator"):
+   * - Before them, the page's offered themes (a project's), under its title, then a DASHED divider (Owen:
+   *   "at the top above the spell themes, with a dashed-border separator"):
    *   each `project:<name>`, described by the theme it builds on.
    */
   get entries(): E.MenuEntry[] {

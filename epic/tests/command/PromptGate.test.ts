@@ -378,12 +378,12 @@ describe("the staged demo (epic `epic-engine` P77)", () => {
 
   test("/epic demo with the step files there:  let through, titled, sent to the Staged demo, its text saved", () => {
     const repo = stagedRepo()
-    const answer = gate({ prompt: "/epic demo Harbor should brief me", cwd: repo }, OTHER_WINDOW)
+    const answer = gate({ prompt: "/epic demo Juno should brief me", cwd: repo }, OTHER_WINDOW)
     expect(answer?.decision).toBeUndefined()
     expect(answer?.hookSpecificOutput?.sessionTitle).toBe("🚧 demo")
     expect(answer?.hookSpecificOutput?.additionalContext).toMatch(/Staged demo/)
     expect(answer?.hookSpecificOutput?.additionalContext).toMatch(/no EnterWorktree/)
-    expect(readFileSync(join(prompts, "demo.md"), "utf8").trim()).toBe("Harbor should brief me")
+    expect(readFileSync(join(prompts, "demo.md"), "utf8").trim()).toBe("Juno should brief me")
     rmSync(repo, { recursive: true, force: true })
   })
 

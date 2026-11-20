@@ -514,7 +514,7 @@ export type LanguageWords = {
    */
   propertyKindName: string
   /**
-   * How a type's line names a Spell UI element it's built on, its `{noun}` filled in (epic `from-console` P11):
+   * How a type's line names a Spell UI element it's built on, its `{noun}` filled in:
    * English's `ui {noun} view`, `a "netlist column" is a ui tree view`;  Spanish's `vista ui de {noun}`,
    * `una "columna de netlist" es una vista ui de árbol`.
    * - The noun is the element's, bare, as a drawing names it (`<tree>`, `<árbol>`).
@@ -592,8 +592,8 @@ export type LanguageWords = {
    */
   abilityLines?: Record<string, string>
   /**
-   * The line an authenticated place says now, by its rule's name, its braces filled from the old line
-   * (epic `from-console` P14):  `it is authenticated with the secret "{name}"`.
+   * The line an authenticated place says now, by its rule's name, its braces filled from the old line:
+   * `it is authenticated with the secret "{name}"`.
    * - What a place line's warning for the old words (`its key is the secret ...`) says to write.
    */
   authenticationLines?: Record<string, string>

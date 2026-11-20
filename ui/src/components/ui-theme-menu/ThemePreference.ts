@@ -61,7 +61,7 @@ const ADDRESS_PARAMS = { theme: "theme", scheme: "scheme" } as const
  * - Theme:  `DEFAULT_THEME` (Glass, epic `debut` Q39) until the person picks another,
  *   one of Spell's own themes (`UI.themes.own`), in a tint (`glass:pink`, P23), or one of My themes (`mine:<id>`,
  *   `SavedTheme`, P25):  its base, then its sheet;  one deleted since:  the default.
- *   - Or one the page offers, a project's (`project:harbor`, `offer()`, epic `old-console-redo` I36):  worn while
+ *   - Or one the page offers, a project's (`project:harbor`, `offer()`):  worn while
  *     it's offered;  while it isn't (another project open, or none yet), the default is worn and the choice kept.
  *   - A theme remembered under its old name comes back as its new one (`studio` as `merlot`, `UIT.ThemeNames`).
  *   - Any other name no longer in the set (Plain, Classic, a Fomantic theme, before epic `debut` P17):
@@ -171,7 +171,7 @@ export class ThemePreference {
   }
 
   /**
-   * Offer `offered` besides Spell's own themes, listed first in every menu (epic `old-console-redo` I36):  the themes
+   * Offer `offered` besides Spell's own themes, listed first in every menu:  the themes
    * of the project the page shows, which it has defined in `UI.themes` (`UI.themes.define()`);  `undefined`:  none.
    * - Each is chosen and kept as `project:<name>` (`OFFERED_PREFIX`), so a page that doesn't offer it yet keeps it.
    * - The theme chosen being one of them, it's worn now, or, no longer offered, the default instead (still chosen).

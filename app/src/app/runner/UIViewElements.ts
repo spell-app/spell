@@ -6,7 +6,7 @@ import { SpellElement } from "./SpellElement"
 
 /****************
  * ### `UIViewElements`
- * The element of a Spell type built on a Spell UI element (epic `from-console` P11):
+ * The element of a Spell type built on a Spell UI element:
  * `a "netlist column" is a ui tree view` in a project called Harbor draws as `<harbor-netlist-column>`,
  * a `<ui-tree>` of its own.
  *

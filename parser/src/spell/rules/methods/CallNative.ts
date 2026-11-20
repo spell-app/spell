@@ -6,8 +6,7 @@ import { SpellStatement } from "spell/parser/spell/rules/Statement"
 import { ToDoSomething } from "./ToDoSomething"
 
 /**
- * `call_native` rule:  in an action's steps, call a function from one of the project's code files
- * (epic `from-console` P10, Q9).
+ * `call_native` rule:  in an action's steps, call a function from one of the project's code files.
  * - e.g. `call native copyText with text`:  `await copyText(text)`, imported from the project's `clipboard.ts`
  * - Several inputs with commas, no parentheses:  `call native readNetlist with source, options`.
  * - Spanish:  `llamar al código nativo copyText con texto`.

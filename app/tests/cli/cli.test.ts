@@ -239,7 +239,7 @@ describe("spell app serve", () => {
 })
 
 describe("call native", () => {
-  // a project whose Spell calls its own code files (epic `from-console` P10):  the parser folder's Clipboard test project
+  // a project whose Spell calls its own code files:  the parser folder's Clipboard test project
   test("runs as javascript and as Python, each calling its own code file", () => {
     const clipboard = resolve(SPELL_PARSER_TESTS, "spell/natives/clipboard")
     const folder = resolve(TEMP, "Clip")

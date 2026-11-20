@@ -4,8 +4,7 @@ import { SP } from "spell/parser/spell"
 
 /****************
  * ### `NativeCode`
- * One of a project's CODE FILES:  plain TypeScript, javascript or Python whose functions Spell can call
- * (epic `from-console` P10).
+ * One of a project's CODE FILES:  plain TypeScript, javascript or Python whose functions Spell can call.
  *
  * ```spell
  * use copyText from clipboard.ts

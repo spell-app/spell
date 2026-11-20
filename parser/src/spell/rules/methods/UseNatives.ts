@@ -7,7 +7,7 @@ import { CallNative } from "./CallNative"
 
 /**
  * `use_natives` rule:  at the top of a Spell file, say which code file the functions its `call native` lines call
- * come from (epic `from-console` P10, Q15).
+ * come from.
  * - e.g. `use copyText from clipboard.ts`
  * - e.g. `use copyText, pasteText from clipboard.ts`:  several, with commas
  * - e.g. `use all from clipboard.ts`:  every function it exports

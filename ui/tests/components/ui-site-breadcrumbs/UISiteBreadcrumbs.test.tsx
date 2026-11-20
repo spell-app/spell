@@ -92,7 +92,7 @@ describe("<ui-site-breadcrumbs>", () => {
     expect(crumbs(host)).toEqual([{ title: "Films", shown: true }])
   })
 
-  test("following a Spell site, ends with the pages shown below the one its navigation marks (old-console-redo I29)", async () => {
+  test("following a Spell site, ends with the pages shown below the one its navigation marks", async () => {
     const site = await ElementFixture.render(
       `<div><ui-site-nav current="/films"></ui-site-nav><header><ui-site-breadcrumbs></ui-site-breadcrumbs></header></div>`
     )

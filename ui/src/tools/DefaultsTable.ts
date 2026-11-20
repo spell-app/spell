@@ -23,7 +23,7 @@ import type { GeneratedOutput } from "spell/element-tools/generatedFiles"
  * - And beside it, what each tag and attribute IS, `src/vocabulary/help.generated.ts` (`helpOutput()`, epic `editor`
  *   P28):  the first sentence of each description, for the spell editor's completions and hovers on a drawing's tags.
  *   A file of its own, so only an editor that asks loads it.
- * - And each tag's hooks, `src/vocabulary/hooks.generated.ts` (`hooksOutput()`, epic `from-console` P11):
+ * - And each tag's hooks, `src/vocabulary/hooks.generated.ts` (`hooksOutput()`):
  *   the methods a Spell type built on the tag overrides, with their words.
  * - And each tag's part of speech, `src/vocabulary/partsOfSpeech.generated.ts` (`partsOfSpeechOutput()`, epic
  *   `language` T124):  its band's colour in the bubbly look, which docs pages and the editor draw without Spell UI.
@@ -145,7 +145,7 @@ export class DefaultsTable {
       'import type { HookSpec } from "spell/element/vocabulary.types"',
       "",
       "/**",
-      " * Each tag's hooks, the methods a subclass overrides, with their English words (epic `from-console` P11):",
+      " * Each tag's hooks, the methods a subclass overrides, with their English words:",
       ' * what a Spell type built on the tag overrides, `a "netlist column" is a ui tree view`.',
       " * - Read by the app's Spell UI pack, as Spell compiles;  each language's words are its dictionary's (`hooks`).",
       " */",

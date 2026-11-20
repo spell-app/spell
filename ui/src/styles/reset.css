@@ -28,7 +28,7 @@
   }
 
   /*
-   * A child a `stretched` grid's column grows (epic `old-console-redo` T26):  its box grows to the column's height.
+   * A child a `stretched` grid's column grows:  its box grows to the column's height.
    * - The column marks its direct children (`--_ui-grown: 1`, `UIGrid.css`):  a `display: contents` element's (a
    *   `<ui-segment>`'s, a `<ui-card>`'s) own box is its shadow's top box, which a `flex-grow` on the element never
    *   reaches.  As with `--_ui-stacked`, the top boxes reset the mark and ask their host.

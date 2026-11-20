@@ -63,7 +63,7 @@ export type PlaceDetails = {
   /** The NAME of the key it needs:  never the key. */
   keyNamed?: string
   /**
-   * Where a page reads it through its own page server, which adds the key (epic `from-console` P14):
+   * Where a page reads it through its own page server, which adds the key:
    * `/api/places/projects/@acme/jobs/jobs`.
    * - The compiler's, for an authenticated web or graphql server in a project with an address:  see `readThroughPageServer()`.
    */
@@ -476,7 +476,7 @@ function addressOf(details: PlaceDetails, keyFrom: PlaceMaking["keyFrom"]): stri
 }
 
 /**
- * Is it read through this page's own server, which adds its key (epic `from-console` P14)?
+ * Is it read through this page's own server, which adds its key?
  * - Only where nothing holds its key, a page, for a key it can't go without, and where the compiler said its address
  *   there (`servedAt`).
  * - Anywhere a key is found (`spell run`, a test), it's asked straight, with the key.

@@ -4,7 +4,7 @@
  * people drag the element to a new place inside its container, or drag its corner to resize it.
  *
  * - Which way, as `movable` writes it:  bare or `both`, `horizontally`, `vertically` (`MoveAndResize.wayOf()`).
- * - Which way, as `resizable` writes it (epic `old-console-redo` P2):  the sizes people drag, a comma list,
+ * - Which way, as `resizable` writes it:  the sizes people drag, a comma list,
  *   `width`, `height` or `width, height`;  bare, the family's own default (`both`, a segment's `height`);
  *   the move words still mean the same (`MoveAndResize.resizeWayOf()`).
  * - Resizing:  the browser's own grip in the bottom right corner (CSS `resize`), so plain CSS limits it:

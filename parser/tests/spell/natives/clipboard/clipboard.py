@@ -1,4 +1,4 @@
-"""A made-up clipboard helper, the Python side of the Clipboard test project (epic `from-console` P10)."""
+"""A made-up clipboard helper, the Python side of the Clipboard test project."""
 
 import asyncio
 

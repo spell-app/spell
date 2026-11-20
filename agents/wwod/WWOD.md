@@ -99,7 +99,7 @@ Read the spoke(s) for what you're touching BEFORE writing code or text:
   `spell/util` first (above).
 - **Spell UI for ABSOLUTELY EVERYTHING possible:**  a component, a page, a docs page, an epic page, a mockup is built
   from `<ui-*>` elements wherever one exists -- buttons, inputs, menus, loaders, messages, sections -- never a native
-  element or a hand-styled copy of one.  (Owen, 2026-11-19, epic `from-console`.)
+  element or a hand-styled copy of one.  (Owen, 2026-11-19.)
   - Inside a component's shadow root too:  `<ui-button size="mini" appearance="basic">`, not `<button>`.
   - Restyle one through its parts and private tokens, never by setting its public tokens from outside
     (`componentTokens.test.ts` fails that).

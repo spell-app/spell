@@ -12,7 +12,7 @@ const NOT_A_PROJECTS_BUILD = /(^|\/)__draft(\/|$)/
 
 /****************
  * ### `ProjectPlaces`
- * Every project's authenticated places, for the page server to read for its pages (epic `from-console` P14):
+ * Every project's authenticated places, for the page server to read for its pages:
  * a source of the kit's `AuthenticatedPlaces`.
  * - Read from what each project compiled to, its declarations (`SP.DeclaredPlace.served`):  the place's address,
  *   kind, and the NAME of its secret.  The page server parses nothing, and a page can say none of it.

@@ -205,7 +205,7 @@ export class EveryThing extends SpellExpression<"type"> {
 
   /**
    * Does a known type's name start within `reach` words of `start`, for a rule's quick test?  One word (`books`) or
-   * several (`suite records`, `maintenance event`), up to `TYPE_WORDS` (epic old-console-redo I18, I23).
+   * several (`suite records`, `maintenance event`), up to `TYPE_WORDS`.
    */
   static typeNear(scope: P.Scope, tokens: P.Token[], start: number, reach: number): boolean {
     for (let index = start; index < start + reach && tokens[index] instanceof P.WordToken; index++) {

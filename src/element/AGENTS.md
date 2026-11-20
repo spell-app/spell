@@ -76,7 +76,7 @@ then [ui's AGENTS.md](../../ui/AGENTS.md), "Solid authoring":  how an element is
     - who draws with it:
       - every loop in a Spell drawing (the parser's core:  `drawing.ts`, `saved.ts`)
       - a `<ui-tree>` column drawn from its items list (Spell UI's `UITree`)
-    - the parser's core's until epic `from-console` P8 moved it here, so Spell UI could use it too
+    - the parser's core's until an epic moved it here, so Spell UI could use it too
     - Spell's own parts are handed in:
       - its `Cell`, to say the count changed (`changes`)
       - `scroll to the top` (`isGoingToTheTop`)

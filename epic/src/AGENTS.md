@@ -1801,7 +1801,7 @@ In `tools/`:
     - `data-tooltip="..."` on any element:  the runtime (`DataTooltips`) shows it in the top layer
     - a richer one:  `<ui-tooltip>`, or a component's own `TopLayerTip`
     - `aria-label` on icon-only controls, as well
-    - The person's standing rule (Owen, 2026-11-19, epic `from-console` C10, r80), now Spell UI's tooltips work:
+    - The person's standing rule (Owen, 2026-11-19), now Spell UI's tooltips work:
       it replaces the 2026-10-10 one, "the browser's own `title`, never a `<ui-tooltip>`".
     - The epic pages, the comments, the docs runtime and `goals-live.js` were converted by epic `epic-engine` T106.
       - Still `title`s:  the core reference and the syntax page (`titleInside()`), and Spell UI's own components
@@ -2674,7 +2674,7 @@ the epic page shown in both tabs).
   - TOOLTIPS:  a few words each;  the longer wording is the `aria-label`.
     - 2026-10-10:  "The buttons don't have browser tooltips -- unclear what they do".
     - Spell UI's tooltip (`data-tooltip`), with the standard delay (above, "TOOLTIPS are Spell UI's own";
-      Owen, 2026-11-19, epic `from-console` C10, r80;  the browser's own `title` until epic `epic-engine` T106).
+      Owen, 2026-11-19;  the browser's own `title` until epic `epic-engine` T106).
     - Each button's:
       - ✓ "That's good:  done"
       - Revisit "Reply"

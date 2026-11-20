@@ -561,7 +561,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   /**
    * Each place's deployment named `deployment`, from our project file's `places`, by the place's name as compiled code
    * names it:  `{ netbox: { at: "...", readOnly: true } }` (epic `data` P49).
-   * - `spell run` and the page server both pick this way (epic `from-console` P14), by `SP.DEPLOYMENT_VARIABLE`.
+   * - `spell run` and the page server both pick this way, by `SP.DEPLOYMENT_VARIABLE`.
    * - A place that lists no such deployment runs as its line says.
    * - throws `TypeError` for a deployment no place in the project file has:  a mistake, named
    */
@@ -1638,7 +1638,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
 
   /**
    * Our CODE FILES, from our project file:  TypeScript, javascript and Python whose functions our Spell may call,
-   * `call native copyText` (epic `from-console` P10) -- see `SP.NativeCode`.
+   * `call native copyText` -- see `SP.NativeCode`.
    * - e.g. `{ path: "/clipboard.ts", active: true }`, `{ path: "/clipboard.py", only: "browser" }`
    * - Active or not:  a code file is never compiled, only called.
    */

@@ -5,7 +5,7 @@ import { SiteThemes } from "spell/app/app/runner/SiteThemes"
 import { ViewerSiteHost } from "spell/app/app/runner/ViewerSiteHost"
 
 /**
- * A running site's theme, as its host gives it (epic `old-console-redo` P1):  one of Spell UI's, else the project's
+ * A running site's theme, as its host gives it:  one of Spell UI's, else the project's
  * own, `<name>.theme.json5` beside its Spell.
  * - The project:  `themedProject/`, beside this file, as the test server serves it.
  */

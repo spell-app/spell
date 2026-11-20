@@ -761,7 +761,7 @@
   }
 
   /* Stretched:  columns fill the line's height, and their children grow to fill the column:  a segment's or a card's
-     own box too (`--_ui-grown`, epic old-console-redo T26). */
+     own box too (`--_ui-grown`). */
   .ui.stretched:is(.grid, .row) {
     --_grid-stretched: 1;
   }
@@ -780,12 +780,12 @@
   .ui.column:not(.grid, .row) > *,
   .ui.column:not(.grid, .row) > ::slotted(*) {
     flex-grow: 1;
-    /* and a `display: contents` child's own box (a segment's, a card's), from `reset.css` (epic old-console-redo T26) */
+    /* and a `display: contents` child's own box (a segment's, a card's), from `reset.css` */
     --_ui-grown: 1;
   }
 
   /*
-   * `height="fluid"` (epic old-console-redo T27):  the grid takes what's left of its parent's height
+   * `height="fluid"`:  the grid takes what's left of its parent's height
    * (`SharedHeights.css`) and lays its rows top to bottom, so a row with `height="fluid"` takes what's left of the
    * grid's.  A fluid grid's cells go in rows:  loose columns would each take a line.
    */
@@ -1468,7 +1468,7 @@
 }
 
 /*
- * Unlayered, after `SharedHeights.css` (epic old-console-redo T27):  a grid with a height never scrolls itself.
+ * Unlayered, after `SharedHeights.css`:  a grid with a height never scrolls itself.
  * Its box reaches out past its own by half a gutter each side (its negative margins), which a scroller would cut
  * off;  a fluid row scrolls instead.  A fluid grid cuts off what's below it, its last row's empty half spacing:
  * else the page around it would scroll by that much.

@@ -1530,7 +1530,7 @@ plain Spell.
   - A two sided view's:  its slots front and back, `its "direction" is down or up` (a new one starts face down, J36),
     `it "is face (direction)"`, `turn it face up / down`, `turn it over`, and `to draw it` drawing both slots,
     back to back, its own `<css>` turning it over in 3D (a view type's style sheet, `static css`).
-- A SPELL UI ELEMENT's VIEW:  `a "netlist column" is a ui tree view` (epic `from-console` P11;  [UIViews.ts](UIViews.ts)).
+- A SPELL UI ELEMENT's VIEW:  `a "netlist column" is a ui tree view` ([UIViews.ts](UIViews.ts)).
   - Its words, the language's (`LanguageWords.uiViewName`:  `ui {noun} view`, `vista ui de {noun}`), name a type
     `SpellType` reads by itself (`parseUIView()`), its noun any element of the project's packs.
   - The type, `UiTreeView`, is made the first time a line names it, in the project's scope, from the pack's
@@ -2365,11 +2365,11 @@ sidebars any of them opens.
     epic `mockup` I30):  `galaxy guide is a site with theme "mockup"`;  Spanish `con tema "mockup"`.
 - The lines under it compile to nothing by themselves;  `create_site` gathers them, walking its body (`CreateSite.partsOf()`):
   - `- it has a film page at "/films/:film", named "Film"` (`site_page`):  a page, at its address;  the lines under it, its pages
-    - `, not in the navigation` (Spanish `, fuera de la navegacion`, epic `old-console-redo` I35):  its entry's
+    - `, not in the navigation` (Spanish `, fuera de la navegacion`):  its entry's
       `unlisted`, so the navigation lists neither it nor its pages;  it's reached by its address and links alone
   - `- it has a settings dialog`, `- it has a film sidebar` (`site_overlay`):  by its last word, the language's
     `site_dialog` and `site_sidebar` (Spanish's first:  `diálogo de ajustes`)
-  - `- it has a link to "https://docs.example.com", named "Help", icon "book"` (`site_link`, epic `old-console-redo` I6):
+  - `- it has a link to "https://docs.example.com", named "Help", icon "book"` (`site_link`):
     a link out of the site, in its navigation where its line is;  Spanish `- tiene un enlace a "...", llamado "Ayuda"`
     - no page, no route:  `static links` (a page's `links`), each with its `<group>` and `at`, its place among the
       pages beside it;  an address from the site's root (`/help`) is refused, as a page's

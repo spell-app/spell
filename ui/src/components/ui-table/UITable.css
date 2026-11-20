@@ -152,7 +152,7 @@
     --_ui-table-cell-border: var(--ui-table-cell-border, var(--ui-border-width) solid var(--ui-border-color-internal));
     --_ui-table-cell-padding-block: var(--ui-table-cell-padding-block, 0.785714em);
     --_ui-table-cell-padding-inline: var(--ui-table-cell-padding-inline, 0.785714em);
-    /* A link in a cell:  not underlined until it's hovered, as a console's tables draw one (epic old-console-redo I37). */
+    /* A link in a cell:  not underlined until it's hovered, as a console's tables draw one. */
     --_ui-table-link-underline: var(--ui-table-link-underline, none);
     --_ui-table-header-padding-block: var(--ui-table-header-padding-block, 0.928571em);
     --_ui-table-header-background: var(--ui-table-header-background, var(--ui-surface-muted));
@@ -1698,7 +1698,7 @@
   }
   /*
    * The table's `vertical-align`:  a cell box fills its row's height (its border spans the row), so its content moves
-   * in it, `align-content` (epic old-console-redo T11);  a cell's own `vertical-align` moves the box (`UICell`).
+   * in it, `align-content`;  a cell's own `vertical-align` moves the box (`UICell`).
    */
   .ui.table[class*="middle aligned"]:state(rows) > :is(ui-row, es-fila) > :is(ui-cell, es-celda) {
     align-content: center;

@@ -46,7 +46,7 @@ describe("views' elements", () => {
     expect(core.elementTagOf(new Note())).toBeUndefined()
   })
 
-  test("a view of another copy of the runtime gets no tag, and a warning says why (epic `from-console` P13)", () => {
+  test("a view of another copy of the runtime gets no tag, and a warning says why", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
     try {
       // another copy's `View`:  marked as one, but not this copy's

@@ -287,7 +287,7 @@ export class ServerLink {
    *   code writes that (epic `epic-workflow` P21)
    * - `every`:  `0` for no poll;  `polls`:  poll only while it answers true (a docs page's Send, while it shows)
    * - the server down:  no poll until it's back, then one look at once (epic `epic-engine` I294)
-   * - a thin wrapper over the kit's `watchServerFiles()` (spell/util's polling;  epic `from-console` P17):
+   * - a thin wrapper over the kit's `watchServerFiles()` (spell/util's polling):
    *   this adds the data files' old names, and the epic pages' poll
    * - the one poll of every page (epic `coherence` C9):  a page that polls writes none of its own
    */

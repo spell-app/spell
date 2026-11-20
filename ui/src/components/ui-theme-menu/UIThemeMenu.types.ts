@@ -67,11 +67,11 @@ export type ThemeAndScheme = {
 }
 
 /**
- * The themes a page offers besides Spell's own (`ThemePreference.offer()`, epic `old-console-redo` I36):  a project's,
+ * The themes a page offers besides Spell's own (`ThemePreference.offer()`):  a project's,
  * `<name>.theme.json5` beside its site, which the page has defined in `UI.themes` (`UI.themes.define()`).
  */
 export type OfferedThemes = {
-  /** whose they are, the heading over them in the menu:  the project's title (`Harbor Clone`) */
+  /** whose they are, the heading over them in the menu:  the project's title (`Harbor Console`) */
   readonly title: string
   /** the themes, in the menu's order */
   readonly themes: readonly OfferedTheme[]

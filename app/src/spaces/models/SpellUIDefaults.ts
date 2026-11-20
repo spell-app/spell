@@ -128,8 +128,8 @@ export class SpellUIDefaults {
   }
 
   /**
-   * Spell UI's tag `tag` as a Spell type is built on it, in `language` (the pack's `viewBaseFor()`, epic
-   * `from-console` P11):  `<ui-tree>` for `a "netlist column" is a ui tree view`.
+   * Spell UI's tag `tag` as a Spell type is built on it, in `language` (the pack's `viewBaseFor()`):
+   * `<ui-tree>` for `a "netlist column" is a ui tree view`.
    * - `tag` as `canonicalTagFor()` takes it, `tree`, `árbol`.
    * - Its own attributes, each by the name and words `language` writes on it, with Spell UI's own when they differ:
    *   Spanish's `apariencia`, `columnas` => `appearance`, `columns`.

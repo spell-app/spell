@@ -336,7 +336,7 @@ export class RestPlace extends WebPlace implements Place {
     // and a search beside lists, its rows not where theirs are:  FastAPI's `{ results, total_count }` (epic `data` I140);
     // or a plain list beside lists whose rows are wrapped:  FastAPI's steps under a job (epic `data` P56);
     // ONE thing under a thing is that list's one row:
-    // a system's snapshot, its own lists inside it (epic `from-console` P16)
+    // a system's snapshot, its own lists inside it
     const rows =
       held === null
         ? []
@@ -704,7 +704,7 @@ export class RestPlace extends WebPlace implements Place {
   /**
    * Is each of `collection`'s things found at an address holding its owner's id, with no list of its own:
    * `snapshots are found at "/instances/{id}/snapshot"`?
-   * Then what's under a thing there is one of them (epic `from-console` P16).
+   * Then what's under a thing there is one of them.
    */
   private isFoundAtItsOwner(collection: string): boolean {
     return HOLDS_AN_ID.test(this.mappingOf(collection).path ?? "")
@@ -866,8 +866,8 @@ export type RestCollection = {
    * - A filter on those fields goes as the query, and is taken as done:  its answer is for that place,
    *   whatever latitude it says it's for (`52.5126`, the nearest it has).
    * - Its answer may be one thing, not a list:  that's its one row.
-   * - Each row it answers holds the value it was asked for, where the server leaves that field out
-   *   (epic `from-console` P15):  layer stacks asked for by their system, `?system=alpha`, each have `system: "alpha"`,
+   * - Each row it answers holds the value it was asked for, where the server leaves that field out:
+   *   layer stacks asked for by their system, `?system=alpha`, each have `system: "alpha"`,
    *   so a read's `where its system is "alpha"` holds here too.
    */
   askedBy?: readonly string[]
@@ -953,7 +953,7 @@ function askedValuesIn(
 }
 
 /**
- * `row`, holding each value it was asked for where the server left that field out (epic `from-console` P15).
+ * `row`, holding each value it was asked for where the server left that field out.
  * - A value the server gave stands:  Open-Meteo's `52.5126`, the nearest it has to `52.52`.
  * - SIDE EFFECT:  changes `row`.
  */

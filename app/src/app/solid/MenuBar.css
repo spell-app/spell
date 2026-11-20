@@ -163,7 +163,7 @@ ui-popup[data-spell-action-menu] > ui-menu::part(menu),
 
 /*
  * the line after a program's own right-click menu, before the editor's items (epic `editor` I76):
- * - Spell UI's dashed divider (`appearance="dashed"`:  2px dashed, a shade darker;  I102, epic `old-console-redo` T22)
+ * - Spell UI's dashed divider (`appearance="dashed"`:  2px dashed, a shade darker;  I102)
  * - the ONE line that runs edge to edge, through the popup's 4px padding (I85)
  */
 ui-menu.BarMenuItems > ui-action[kind="divider"][appearance~="dashed"]::part(item) {

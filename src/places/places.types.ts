@@ -958,7 +958,7 @@ export const PLACES_PREFIX = "/api/places"
 export const SPACE_FOLDERS_PREFIX = `${PLACES_PREFIX}/spaces`
 
 /**
- * Where the page server reads each project's authenticated places for its pages, adding the secret (epic `from-console` P14):
+ * Where the page server reads each project's authenticated places for its pages, adding the secret:
  * `jobs is a web server at "..."`, `it is authenticated with the secret "JOBS_TOKEN"`, in `@acme/jobs`, is
  * `/api/places/projects/@acme/jobs/jobs`;  a request's path after it goes on to the place's own address.
  * - The kit's `AuthenticatedPlaces` answers there;  `authenticatedPlaceAddress()` makes one.

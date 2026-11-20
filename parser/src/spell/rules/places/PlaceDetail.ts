@@ -117,7 +117,7 @@ export type ProjectionLines = {
  * A line under a place, saying something about it:  the base of each one (epic `data` P11).
  * - They compile to nothing by themselves:  `create_place` gathers what they say into its own `core.place()`.
  * - Only under a place:  each is plain words anywhere else.
- * - A line's old words still read, with a warning naming the new line (`oldWords`, epic `from-console` P14):
+ * - A line's old words still read, with a warning naming the new line (`oldWords`):
  *   `its key is the secret "X"` says to write `it is authenticated with the secret "X"`.
  */
 export abstract class PlaceDetail<Groups extends string> extends SpellStatement<Groups> {
