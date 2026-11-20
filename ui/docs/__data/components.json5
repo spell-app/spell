@@ -656,9 +656,10 @@
           "kind": "multiple",
           "values": [
             "link",
-            "circular"
+            "circular",
+            "dashed"
           ],
-          "description": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance=\"circular\">` is.  Its old name was the bare `link` switch."
+          "description": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance=\"circular\">` is.  `dashed` -- a `kind=\"divider\"` (menu, dropdown):  a dashed line, 2px, a shade darker, where one kind of item ends and another begins, as `<ui-divider appearance=\"dashed\">`.  Its old name was the bare `link` switch."
         },
         {
           "name": "disabled",
@@ -12129,6 +12130,14 @@
           "description": "For dark backgrounds."
         },
         {
+          "name": "appearance",
+          "kind": "multiple",
+          "values": [
+            "dashed"
+          ],
+          "description": "The look:  `dashed` -- a dashed line, 2px, a shade darker (`--ui-divider-dashed-width`, `--ui-divider-dashed-color`):  where one kind of thing ends and another begins, as a menu's `<ui-item kind=\"divider\" appearance=\"dashed\">` draws it."
+        },
+        {
           "name": "align",
           "kind": "textAlign",
           "values": [
@@ -20752,9 +20761,10 @@
           "kind": "multiple",
           "values": [
             "link",
-            "circular"
+            "circular",
+            "dashed"
           ],
-          "description": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance=\"circular\">` is.  Its old name was the bare `link` switch."
+          "description": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance=\"circular\">` is.  `dashed` -- a `kind=\"divider\"` (menu, dropdown):  a dashed line, 2px, a shade darker, where one kind of item ends and another begins, as `<ui-divider appearance=\"dashed\">`.  Its old name was the bare `link` switch."
         },
         {
           "name": "disabled",
@@ -41369,9 +41379,10 @@
           "kind": "multiple",
           "values": [
             "link",
-            "circular"
+            "circular",
+            "dashed"
           ],
-          "description": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance=\"circular\">` is.  Its old name was the bare `link` switch."
+          "description": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance=\"circular\">` is.  `dashed` -- a `kind=\"divider\"` (menu, dropdown):  a dashed line, 2px, a shade darker, where one kind of item ends and another begins, as `<ui-divider appearance=\"dashed\">`.  Its old name was the bare `link` switch."
         },
         {
           "name": "disabled",
@@ -61355,6 +61366,16 @@
           "name": "--ui-divider-icon-size",
           "default": "1em",
           "type": "length"
+        },
+        {
+          "name": "--ui-divider-dashed-width",
+          "default": "2px",
+          "type": "length"
+        },
+        {
+          "name": "--ui-divider-dashed-color",
+          "default": "var(--ui-border-color-strong)",
+          "type": "color"
         }
       ]
     },
@@ -65257,6 +65278,16 @@
           "name": "--ui-menu-item-transform",
           "default": "none",
           "type": "other"
+        },
+        {
+          "name": "--ui-menu-dashed-divider-width",
+          "default": "2px",
+          "type": "length"
+        },
+        {
+          "name": "--ui-menu-dashed-divider-color",
+          "default": "var(--ui-border-color-strong)",
+          "type": "color"
         },
         {
           "name": "--ui-menu-header-padding",

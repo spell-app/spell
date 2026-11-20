@@ -730,6 +730,24 @@ describe("<ui-theme-menu> tints", () => {
 // ## My themes (epic `debut` P25)
 ////////////////
 
+describe("<ui-theme-menu> a project's themes (epic `old-console-redo` I36, T22)", () => {
+  const offered = { title: "Harbor Clone", themes: [{ name: "test-project", title: "Test Project", base: "matrix" }] }
+  afterEach(() => ThemePreference.offer(undefined))
+
+  it("closes them with Spell UI's dashed divider:  `<ui-divider appearance=\"dashed\">`, the panel's others plain", async () => {
+    await ThemePreference.offer(offered)
+    const host = await render(`<ui-theme-menu show="menu"></ui-theme-menu>`)
+    const dividers = [...host.shadowRoot!.querySelectorAll("ui-divider")]
+    expect(dividers.map((each) => each.getAttribute("appearance"))).toContain("dashed")
+    const dashed = host.shadowRoot!.querySelector('.menu > ui-divider[appearance="dashed"]')!
+    const line = getComputedStyle(dashed.shadowRoot!.querySelector("[part~=divider]")!)
+    expect([line.borderTopStyle, line.borderTopWidth]).toEqual(["dashed", "2px"])
+    const plain = host.shadowRoot!.querySelector(".panel > ui-divider")!
+    expect(plain.hasAttribute("appearance")).toBe(false)
+    expect(getComputedStyle(plain.shadowRoot!.querySelector("[part~=divider]")!).borderTopStyle).toBe("solid")
+  })
+})
+
 describe("<ui-theme-menu> My themes", () => {
   afterEach(() => localStorage.removeItem("spell-ui:themes"))
 

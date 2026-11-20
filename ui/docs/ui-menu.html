@@ -221,6 +221,22 @@
                 </ui-example>
               </ui-section>
 
+              <ui-section id="examples-types-dashed-divider" label="Dashed Divider" sticky="stack" collapsible dividing>
+                <ui-example
+                  description="A divider item can be dashed, `appearance=&quot;dashed&quot;`:  2px, a shade darker, where one kind of item ends and another begins -- a program's own right-click items, then the editor's;  a project's themes, then Spell's."
+                >
+                  <ui-menu direction="vertical" aria-label="Card" style="max-width: 240px">
+                    <ui-action>Auto Play</ui-action>
+                    <ui-action>Deal the Cards</ui-action>
+                    <ui-action kind="divider" appearance="dashed"></ui-action>
+                    <ui-action>Cut</ui-action>
+                    <ui-action>Copy</ui-action>
+                    <ui-action kind="divider"></ui-action>
+                    <ui-action>Show in Code</ui-action>
+                  </ui-menu>
+                </ui-example>
+              </ui-section>
+
               <ui-section id="examples-types-pointing" label="Pointing" sticky="stack" collapsible dividing>
                 <ui-example
                   description="A menu can point to show its relationship to nearby content.  With `secondary` too, the active item is underlined."

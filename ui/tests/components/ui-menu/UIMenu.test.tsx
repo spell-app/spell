@@ -288,6 +288,22 @@ describe("<ui-menu> owner tokens reach the items", () => {
     expect(getComputedStyle(boxOf(items[0]!), "::before").display).toBe("none")
   })
 
+  it('a dashed divider item (`appearance="dashed"`):  2px dashed, the strong border colour, across a column, upright in a row', async () => {
+    const items = `<ui-item>A</ui-item><ui-item kind="divider" appearance="dashed"></ui-item><ui-item kind="divider"></ui-item><ui-item>B</ui-item>`
+    const column = await menu('direction="vertical"', items)
+    const [dashed, plain] = [styleOf(column.items[1]!), styleOf(column.items[2]!)]
+    expect([dashed.borderTopStyle, dashed.borderTopWidth, dashed.height]).toEqual(["dashed", "2px", "0px"])
+    expect(dashed.borderTopColor).not.toBe(plain.backgroundColor)
+    expect(plain.borderTopStyle).toBe("none")
+    const row = await menu("", items)
+    const upright = styleOf(row.items[1]!)
+    expect([upright.borderInlineStartStyle, upright.borderInlineStartWidth, upright.width]).toEqual([
+      "dashed",
+      "2px",
+      "0px"
+    ])
+  })
+
   it("underlines the active item of a secondary pointing menu", async () => {
     const { items } = await menu('appearance="secondary pointing"')
     expect(styleOf(items[1]!).borderBottomWidth).toBe("2px")

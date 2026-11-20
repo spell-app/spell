@@ -573,6 +573,8 @@ export type MenuSeparator = {
   type: "header" | "divider"
   /** header text */
   text: string
+  /** a divider's look:  `dashed`, where one kind of row ends and another begins (`<ui-item appearance="dashed">`) */
+  appearance?: "dashed"
 }
 
 /** One row of a dropdown menu, in order:  an option or a separator. */

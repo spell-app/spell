@@ -564,7 +564,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
         (menu) =>
           [...document.querySelectorAll(`${menu} ui-menu > :is(ui-action, ui-item, ui-submenu)`)].map((row) =>
             row.getAttribute("kind") === "divider"
-              ? row.classList.contains("ProgramMenuEnd")
+              ? row.matches("[appearance~=dashed]")
                 ? "="
                 : "-"
               : ((row as { action?: { title: string } }).action?.title ??
@@ -594,9 +594,9 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     ])
     const thickness = await other.evaluate(() => {
       const line = document
-        .querySelector(".PartMenu ui-action.ProgramMenuEnd")!
+        .querySelector(".PartMenu ui-action[kind=divider][appearance~=dashed]")!
         .shadowRoot!.querySelector("[part~=item]")!
-      const hairline = document.querySelector(".PartMenu ui-action[kind=divider]:not(.ProgramMenuEnd)")!
+      const hairline = document.querySelector(".PartMenu ui-action[kind=divider]:not([appearance~=dashed])")!
       return [line, hairline.shadowRoot!.querySelector("[part~=item]")!].map(
         (one) => getComputedStyle(one).borderTopWidth
       )
@@ -925,7 +925,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
       other.evaluate(() =>
         [...document.querySelector("ui-popup.PartMenu ui-menu")!.children].map((element) => {
           if (element.getAttribute("kind") === "divider") {
-            return element.classList.contains("ProgramMenuEnd") ? "=====" : "---"
+            return element.matches("[appearance~=dashed]") ? "=====" : "---"
           }
           const { action } = element as Element & { action?: { title: string } }
           const title = action?.title ?? element.getAttribute("label") ?? element.textContent!.trim()

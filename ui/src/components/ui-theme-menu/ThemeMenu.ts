@@ -11,7 +11,7 @@ import { OFFERED_PREFIX, type OfferedThemes, type ThemeMenuText, type ThemeMenuT
  *     (those are archived, `src/styles/themes/archive/`).
  * - Above them all, the themes the page offers, a project's (`ThemePreference.offered`, epic `old-console-redo` I36),
  *   under its title, then My themes, each group closed by a divider:  the project's DASHED, as the editor's right-click
- *   menu marks where the program's own items end and the editor's begin (`ThemeMenuEntry.dashed`).
+ *   menu marks where the program's own items end and the editor's begin (`appearance: "dashed"`, Spell UI's dashed divider).
  * - Titles:  `UIT.ThemeNames.titleOf()`, the theme editor's Start from's too.
  * - One per state of its inputs:  the element remakes it when they change.
  ****************/
@@ -43,12 +43,12 @@ export class ThemeMenu {
    *   `old-console-redo` I36, Owen:  "at the top above the spell themes, with a dashed-border separator"):
    *   each `project:<name>`, described by the theme it builds on.
    */
-  get entries(): ThemeMenuEntry[] {
-    const spells: ThemeMenuEntry[] = this.themes.map((name) => {
+  get entries(): E.MenuEntry[] {
+    const spells: E.MenuEntry[] = this.themes.map((name) => {
       const key = DESCRIPTIONS[name]
       return { value: name, text: this.titleFor(name), ...(key && { description: this.text(key) }) }
     })
-    const mine: ThemeMenuEntry[] = this.mine.length
+    const mine: E.MenuEntry[] = this.mine.length
       ? [
           { type: "header", text: this.text("myThemes") },
           ...this.mine.map((theme) => ({
@@ -59,7 +59,7 @@ export class ThemeMenu {
           { type: "divider", text: "" }
         ]
       : []
-    const offered: ThemeMenuEntry[] = this.offered
+    const offered: E.MenuEntry[] = this.offered
       ? [
           { type: "header", text: this.offered.title },
           ...this.offered.themes.map(({ name, title, base }) => ({
@@ -67,7 +67,7 @@ export class ThemeMenu {
             text: title,
             ...(base && { description: this.titleFor(base) })
           })),
-          { type: "divider", text: "", dashed: true }
+          { type: "divider", text: "", appearance: "dashed" }
         ]
       : []
     return [...offered, ...mine, ...spells]
@@ -113,12 +113,6 @@ export type ThemeMenuProps = {
   /** the themes the page offers (`ThemePreference.offered`):  listed before My themes;  none, by default */
   offered?: OfferedThemes
 }
-
-/**
- * One row of the list:  a menu entry (`E.MenuEntry`), a divider maybe `dashed`:  the one closing the page's offered
- * themes (a project's), drawn as the editor's right-click menu's line between the program's items and its own.
- */
-export type ThemeMenuEntry = E.MenuOption | (E.MenuSeparator & { dashed?: boolean })
 
 /** The prefix of one of My themes' names in the list:  `mine:<id>` (`SavedTheme.PREFIX`;  data, so it's here too). */
 const MINE_PREFIX = "mine:"

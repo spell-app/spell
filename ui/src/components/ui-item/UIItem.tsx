@@ -21,7 +21,8 @@ import itemCSS from "./UIItem.css?inline"
  *   it asks the owner's component for an `ItemContext` (`ItemOwner.itemContext()`, tracked) and draws the item box:
  *   - `<a class="[color] [position] [keyOnly ...] item" part="item" href>` with `href`,
  *     a `<button type="button">` with `link` (or when the owner says its items are interactive), else a `<div>`;
- *   - a `type="header"` item is a `<div class="item header">`, a `divider` a `<div class="divider" role="separator">`;
+ *   - a `type="header"` item is a `<div class="item header">`, a `divider` a `<div class="divider" role="separator">`
+ *     (`divider dashed` with `appearance="dashed"`);
  *   - inside the box:
  *     the `image` shorthand's `<img class="ui avatar image" part="image" alt="">`,
  *     the icon box (the `icon` shorthand or the `icon` slot), then the default slot,
@@ -190,9 +191,17 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
 
   /** `appearance` holds `link`:  interactive without a `link` to go to, a `<button>` with the link hover. */
   get looksLikeALink(): boolean {
-    return String(this.appearance ?? "")
-      .split(" ")
-      .includes(LINK_LOOK)
+    return this.looks.includes(LINK_LOOK)
+  }
+
+  /** A divider whose `appearance` holds `dashed`:  where one kind of item ends and another begins (`UIMenu.css`). */
+  get isDashed(): boolean {
+    return this.kind === DIVIDER && this.looks.includes(DASHED_LOOK)
+  }
+
+  /** The words of `appearance`. */
+  private get looks(): string[] {
+    return String(this.appearance ?? "").split(" ")
   }
 
   /** The rendered item box, while owned. */
@@ -375,7 +384,9 @@ export class UIItem extends E.UIComponent<typeof itemVocabulary> implements E.Co
       <Show when={this.itemContext} fallback={this.unowned()}>
         <Show
           when={this.kind !== DIVIDER}
-          fallback={<div class={DIVIDER} part={this.partForName("item")} role="separator" />}
+          fallback={
+            <div class={[DIVIDER, { [DASHED_LOOK]: this.isDashed }]} part={this.partForName("item")} role="separator" />
+          }
         >
           {this.box()}
         </Show>
@@ -515,6 +526,8 @@ const DIVIDER = "divider"
 const TICK = "tick"
 /** The `appearance` word for an interactive item with the link hover. */
 const LINK_LOOK = "link"
+/** The `appearance` word for a dashed divider, and its class. */
+const DASHED_LOOK = "dashed"
 
 /** Classes of the `image` shorthand, unless the owner says otherwise:  an avatar, as in Fomantic's list examples. */
 const IMAGE_CLASS = "ui avatar image"

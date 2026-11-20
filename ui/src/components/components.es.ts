@@ -228,6 +228,7 @@ export const sharedEs = {
     parameter: "parametro",
     horizontal: "horizontal",
     raised: "elevado",
+    dashed: "discontinuo",
     link: "enlace",
     header: "encabezado",
     heading: "encabezado",

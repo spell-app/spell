@@ -125,7 +125,11 @@ export class SlottedItems {
       SlottedItems.valueFor(element, definition, name)
     const type = read("kind")
     const text = (read("label") as string | undefined) ?? element.textContent?.trim() ?? ""
-    if (type === "header" || type === "divider") return { type, text } satisfies E.MenuSeparator
+    if (type === "header") return { type, text } satisfies E.MenuSeparator
+    if (type === "divider") {
+      const dashed = ((read("appearance") as string | undefined) ?? "").split(" ").includes("dashed")
+      return { type, text, ...(dashed && { appearance: "dashed" }) } satisfies E.MenuSeparator
+    }
     return {
       value: (read("value") as string | undefined) ?? text,
       text,

@@ -1899,6 +1899,20 @@
       }
     },
     {
+      "name": "--ui-divider-dashed-width",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-divider>`'s token.  Default:  `2px`"
+      }
+    },
+    {
+      "name": "--ui-divider-dashed-color",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-divider>`'s token.  Default:  `var(--ui-border-color-strong)`"
+      }
+    },
+    {
       "name": "--ui-dropdown-radius",
       "description": {
         "kind": "markdown",
@@ -6554,6 +6568,20 @@
       }
     },
     {
+      "name": "--ui-menu-dashed-divider-width",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-menu>`'s token.  Default:  `2px`"
+      }
+    },
+    {
+      "name": "--ui-menu-dashed-divider-color",
+      "description": {
+        "kind": "markdown",
+        "value": "`<ui-menu>`'s token.  Default:  `var(--ui-border-color-strong)`"
+      }
+    },
+    {
       "name": "--ui-menu-header-padding",
       "description": {
         "kind": "markdown",
@@ -9939,6 +9967,13 @@
       "description": {
         "kind": "markdown",
         "value": "`<ui-table>`'s token.  Default:  `0.785714em`"
+      }
+    },
+    {
+      "name": "--ui-table-link-underline",
+      "description": {
+        "kind": "markdown",
+        "value": "A link in a cell: not underlined until it's hovered, as a console's tables draw one (epic old-console-redo I37).\n\n`<ui-table>`'s token.  Default:  `none`"
       }
     },
     {

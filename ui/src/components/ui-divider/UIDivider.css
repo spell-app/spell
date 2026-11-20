@@ -59,6 +59,8 @@
     --_ui-divider-text-gap: var(--ui-divider-text-gap, 1em);
     --_ui-divider-vertical-gap: var(--ui-divider-vertical-gap, 1em);
     --_ui-divider-icon-size: var(--ui-divider-icon-size, 1em);
+    --_ui-divider-dashed-width: var(--ui-divider-dashed-width, 2px);
+    --_ui-divider-dashed-color: var(--ui-divider-dashed-color, var(--ui-border-color-strong));
   }
 
   /* Divider:  a hairline with space around it. */
@@ -189,6 +191,22 @@
   /* Section:  more space, between sections. */
   .ui.section.divider {
     margin-block: var(--_ui-divider-section-margin);
+  }
+
+  /*
+   * Dashed (`appearance="dashed"`):  where one kind of thing ends and another begins -- 2px dashed, a shade darker;
+   * the look of a menu's dashed divider item (`UIMenu.css`) and the dropdown's (`UIDropdown.css`).  No highlight line.
+   */
+  .ui.dashed.divider:not(.vertical, .horizontal),
+  .ui.dashed.horizontal.divider::before,
+  .ui.dashed.horizontal.divider::after {
+    border-top: var(--_ui-divider-dashed-width) dashed var(--ui-color, var(--_ui-divider-dashed-color));
+    border-bottom: none;
+  }
+  .ui.dashed.vertical.divider::before,
+  .ui.dashed.vertical.divider::after {
+    border-left: var(--_ui-divider-dashed-width) dashed var(--ui-color, var(--_ui-divider-dashed-color));
+    border-right: none;
   }
 
   /* Hidden:  the space without the line;  last, so it beats colours and `inverted`. */

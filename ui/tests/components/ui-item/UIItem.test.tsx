@@ -159,6 +159,13 @@ describe("<ui-item> owned", () => {
     expect(items[1]!.matches(":state(disabled)")).toBe(true)
   })
 
+  it('a `kind="divider"` with `appearance="dashed"` is a `divider dashed`', async () => {
+    const { items } = await owned(
+      `<ui-item kind="divider" appearance="dashed"></ui-item><ui-item kind="divider"></ui-item>`
+    )
+    expect(items.map((item) => item.shadowRoot!.firstElementChild!.className)).toEqual(["divider dashed", "divider"])
+  })
+
   it("renders a divider, the value as data-value, the image and icon shorthands, the DOM element's aria-label", async () => {
     const { items } = await owned(
       `<ui-item kind="divider"></ui-item>` +

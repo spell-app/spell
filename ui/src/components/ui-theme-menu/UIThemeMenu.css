@@ -9,9 +9,9 @@
  *     - the overlay's slotted `.panel`:
  *       - `<ui-menu class="schemes" appearance="segmented">` of three `<ui-item>`s:  Light | Dark | Auto,
  *         drawn by the menu's own sheet
- *       - a `.divider`, then `.heading`
+ *       - a `.divider` (`<ui-divider>`, each one), then `.heading`
  *       - a `.menu` of `<button class="option [checked]" role="menuitemradio">` rows
- *         (`.check`, `.name`, `.description`), with `.header` / `.divider` rows
+ *         (`.check`, `.name`, `.description`), with `.header` / `.divider` rows (a project's themes closed by a `dashed` one)
  *       - a `.divider`, then Tint:  a `.heading` over `.tints`, ONE `<ui-dropdown class="hue-dropdown" part="tints">`
  *         of the colours, each a dot and its name, None first (epic `debut` P23, I94;  its dots:  `HueDropdown.css`)
  *       - a `.divider`, then `<a class="bench" part="bench">` (Theme bench), unless `bench="none"`
@@ -190,20 +190,10 @@
     overscroll-behavior: contain;
     scrollbar-width: thin;
   }
-  .divider {
+  /* a divider:  Spell UI's `<ui-divider>` (`dashed`:  the one closing the page's offered themes), inset and spaced */
+  .divider::part(divider) {
     flex: none;
-    height: 1px;
     margin: 0.375em 0.5em;
-    background: var(--ui-border-color);
-  }
-  /*
-   * the divider closing the page's offered themes, a project's (epic `old-console-redo` I36):  the editor's right-click
-   * menu's line between the program's items and its own (the app's `MenuBar.css`, I102), 2px dashed, a shade darker
-   */
-  .divider.dashed {
-    height: 0;
-    background: none;
-    border-top: 2px dashed var(--ui-border-color-strong);
   }
   /* Theme bench, then the `end` slot's rows, the page's own:  a theme's row each, the first under a divider. */
   .panel > .bench,

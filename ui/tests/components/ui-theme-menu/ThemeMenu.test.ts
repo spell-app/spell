@@ -36,7 +36,7 @@ describe("ThemeMenu.entries", () => {
     expect(menu.entries).toEqual([
       { type: "header", text: "Harbor Clone" },
       { value: "project:harbor", text: "Harbor", description: "Matrix" },
-      { type: "divider", text: "", dashed: true },
+      { type: "divider", text: "", appearance: "dashed" },
       { value: "spell", text: "Spell", description: "spellDescription" }
     ])
     expect(menu.titleFor("project:harbor")).toBe("Harbor")

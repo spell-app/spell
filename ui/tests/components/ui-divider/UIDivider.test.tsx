@@ -51,6 +51,19 @@ describe("<ui-divider> classes and markup", () => {
     expect(plain.hasAttribute("aria-orientation")).toBe(false)
   })
 
+  it('`appearance="dashed"`:  a dashed line, 2px, the strong border colour;  a horizontal one\'s rules too', async () => {
+    const { root } = await divider(`<ui-divider appearance="dashed"></ui-divider>`)
+    expect(root.className).toBe("ui dashed divider")
+    const line = getComputedStyle(root)
+    expect([line.borderTopStyle, line.borderTopWidth, line.borderBottomStyle]).toEqual(["dashed", "2px", "none"])
+    const { root: plain } = await divider(`<ui-divider></ui-divider>`)
+    expect(getComputedStyle(plain).borderTopStyle).toBe("solid")
+    const { root: titled } = await divider(`<ui-divider direction="horizontal" appearance="dashed">Or</ui-divider>`)
+    expect(getComputedStyle(titled).borderTopStyle).toBe("none")
+    expect(getComputedStyle(titled, "::before").borderTopStyle).toBe("dashed")
+    expect(getComputedStyle(titled, "::after").borderTopStyle).toBe("dashed")
+  })
+
   it("renders the `icon` shorthand's box before the text", async () => {
     const { root } = await divider(`<ui-divider direction="horizontal" icon="tag">Description</ui-divider>`)
     const box = root.firstElementChild!

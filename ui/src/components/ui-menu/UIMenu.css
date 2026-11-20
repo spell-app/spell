@@ -77,6 +77,7 @@
  * | `--ui-menu-divider`                 | divider colour (`transparent` hides)  | borderless, inverted, coloured       |
  * | `--ui-menu-divider-display` / `-first-display` / `-last-display` | which dividers show | secondary, text, tabular, pagination, compact, floated, equal width, wrapping |
  * | `--_ui-menu-divider-side` (switch)  | `right` / `left` edge of the divider  | right sub-menus, wrapping            |
+ * | `--ui-menu-dashed-divider-width` / `-color` | a dashed divider item (`appearance="dashed"`):  2px, `--ui-border-color-strong` | -- |
  * | `--ui-menu-hover-background` / `-color`   | link / button item hover        | secondary, pointing, tabular, text, inverted |
  * | `--ui-menu-pressed-background` / `-color` | pressed item                    | same                                 |
  * | `--ui-menu-active-background` / `-color` / `-weight` / `-border-color` / `-border-width` / `-margin` / `-radius` | active item | every type |
@@ -413,6 +414,17 @@
     margin: 0.5em 0.375em;
     background: var(--ui-border-color);
   }
+  /*
+   * A dashed divider item (`appearance="dashed"`):  where one kind of item ends and another begins (a program's own
+   * right-click menu, then the editor's;  a project's themes, then Spell's) -- 2px dashed, a shade darker,
+   * as `<ui-divider appearance="dashed">`;  upright in a row, across a column
+   */
+  :host(:state(in-menu)) > .divider.dashed {
+    width: 0;
+    background: none;
+    border-inline-start: var(--ui-menu-dashed-divider-width, 2px) dashed
+      var(--ui-menu-dashed-divider-color, var(--ui-border-color-strong));
+  }
   /* Right items / a right sub-menu's items:  the divider moves to the start edge. */
   :host(:state(in-menu)) > .right.item::before,
   .ui.menu .right.item::before {
@@ -568,6 +580,12 @@
       width: auto;
       height: var(--ui-border-width);
       margin: 0.25em 0;
+    }
+    :host(:state(in-menu)) > .divider.dashed {
+      height: 0;
+      border-inline-start: none;
+      border-top: var(--ui-menu-dashed-divider-width, 2px) dashed
+        var(--ui-menu-dashed-divider-color, var(--ui-border-color-strong));
     }
     /*
      * A `<button>` item (a `link` menu's) shrinks to its text even as a block,

@@ -546,7 +546,7 @@
             },
             {
               "name": "appearance",
-              "description": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance=\"circular\">` is.  Its old name was the bare `link` switch.",
+              "description": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance=\"circular\">` is.  `dashed` -- a `kind=\"divider\"` (menu, dropdown):  a dashed line, 2px, a shade darker, where one kind of item ends and another begins, as `<ui-divider appearance=\"dashed\">`.  Its old name was the bare `link` switch.",
               "type": {
                 "text": "string"
               },
@@ -9268,6 +9268,14 @@
               "fieldName": "inverted"
             },
             {
+              "name": "appearance",
+              "description": "The look:  `dashed` -- a dashed line, 2px, a shade darker (`--ui-divider-dashed-width`, `--ui-divider-dashed-color`):  where one kind of thing ends and another begins, as a menu's `<ui-item kind=\"divider\" appearance=\"dashed\">` draws it.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "appearance"
+            },
+            {
               "name": "align",
               "description": "With `direction=\"horizontal\"`:  where the text sits;  `left` / `right` drop the rule on that side.  Its old name was `text-align`.",
               "type": {
@@ -9520,6 +9528,14 @@
             {
               "name": "--ui-divider-icon-size",
               "default": "1em"
+            },
+            {
+              "name": "--ui-divider-dashed-width",
+              "default": "2px"
+            },
+            {
+              "name": "--ui-divider-dashed-color",
+              "default": "var(--ui-border-color-strong)"
             }
           ]
         }
@@ -18972,7 +18988,7 @@
             },
             {
               "name": "appearance",
-              "description": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance=\"circular\">` is.  Its old name was the bare `link` switch.",
+              "description": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance=\"circular\">` is.  `dashed` -- a `kind=\"divider\"` (menu, dropdown):  a dashed line, 2px, a shade darker, where one kind of item ends and another begins, as `<ui-divider appearance=\"dashed\">`.  Its old name was the bare `link` switch.",
               "type": {
                 "text": "string"
               },
@@ -23614,6 +23630,14 @@
             {
               "name": "--ui-menu-item-transform",
               "default": "none"
+            },
+            {
+              "name": "--ui-menu-dashed-divider-width",
+              "default": "2px"
+            },
+            {
+              "name": "--ui-menu-dashed-divider-color",
+              "default": "var(--ui-border-color-strong)"
             },
             {
               "name": "--ui-menu-header-padding",
@@ -42057,7 +42081,7 @@
             },
             {
               "name": "appearance",
-              "description": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance=\"circular\">` is.  Its old name was the bare `link` switch.",
+              "description": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance=\"circular\">` is.  `dashed` -- a `kind=\"divider\"` (menu, dropdown):  a dashed line, 2px, a shade darker, where one kind of item ends and another begins, as `<ui-divider appearance=\"dashed\">`.  Its old name was the bare `link` switch.",
               "type": {
                 "text": "string"
               },

@@ -71,6 +71,17 @@ export const dividerVocabulary = {
     },
     { name: "inverted", group: "appearance", kind: "keyOnly", description: "For dark backgrounds." },
     {
+      name: "appearance",
+      group: "appearance",
+      kind: "multiple",
+      values: ["dashed"],
+      classes: {},
+      description:
+        "The look:  `dashed` -- a dashed line, 2px, a shade darker (`--ui-divider-dashed-width`, " +
+        "`--ui-divider-dashed-color`):  where one kind of thing ends and another begins, " +
+        'as a menu\'s `<ui-item kind="divider" appearance="dashed">` draws it.'
+    },
+    {
       name: "align",
       group: "layout",
       kind: "textAlign",

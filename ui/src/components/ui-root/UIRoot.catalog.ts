@@ -379,7 +379,19 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "ui-divider": {
     folder: "ui-divider",
     skeleton: { height: "0.25em" },
-    attributes: ["size", "color", "direction", "spacer", "padding", "clearing", "section", "inverted", "align", "icon"]
+    attributes: [
+      "size",
+      "color",
+      "direction",
+      "spacer",
+      "padding",
+      "clearing",
+      "section",
+      "inverted",
+      "appearance",
+      "align",
+      "icon"
+    ]
   },
   "ui-docs-api": {
     folder: "ui-docs-api",

@@ -139,6 +139,21 @@ describe("<ui-dropdown> markup", () => {
     expect(getComputedStyle(root).anchorName).toBe(anchor)
     expect(getComputedStyle(menu).positionAnchor).toBe(anchor)
   })
+
+  it('a dashed divider (`<ui-item kind="divider" appearance="dashed">`):  a `divider dashed` row, 2px dashed', async () => {
+    const { menu, combobox } = await dropdown(
+      `<ui-dropdown selection placeholder="File"><ui-item>Open</ui-item>` +
+        `<ui-item kind="divider" appearance="dashed"></ui-item><ui-item kind="divider"></ui-item>` +
+        `<ui-item>Quit</ui-item></ui-dropdown>`
+    )
+    combobox.click()
+    await ElementFixture.tick()
+    const [dashed, plain] = [...menu.querySelectorAll<HTMLElement>(".divider")]
+    expect([dashed!.className, plain!.className]).toEqual(["divider dashed", "divider"])
+    const line = getComputedStyle(dashed!)
+    expect([line.borderTopStyle, line.borderTopWidth]).toEqual(["dashed", "2px"])
+    expect(getComputedStyle(plain!).borderTopStyle).toBe("solid")
+  })
 })
 
 ////////////////

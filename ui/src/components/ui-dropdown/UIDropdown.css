@@ -700,6 +700,10 @@
     border: 0;
     border-top: var(--ui-border-width) solid var(--_ui-dropdown-item-divider-color);
   }
+  /* a dashed divider (`appearance="dashed"`):  2px dashed, a shade darker, as `<ui-divider appearance="dashed">` */
+  .ui.dropdown .menu > .divider.dashed {
+    border-top: 2px dashed var(--ui-border-color-strong);
+  }
   .ui.dropdown .menu > .message {
     padding: var(--_ui-dropdown-item-padding-block) var(--_ui-dropdown-item-padding-inline);
     color: var(--_ui-dropdown-message-color);

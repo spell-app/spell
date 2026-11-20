@@ -977,7 +977,8 @@ export function PartMenuItems(props: { whyNot?: (action: PartAction) => string |
  * - Inspect names what it inspects, "Inspect Card";
  *   Inspect Other Views lists every part under the mouse (`<InspectRow>`).
  * - The program's own right-click menu there comes first, if it has one (`<context-menu>`, `context-menu=`),
- *   drawn as Run draws it (`ActionMenus.itemsFor()`), then a dashed line, then ours (epic `editor` I76, Owen's pick).
+ *   drawn as Run draws it (`ActionMenus.itemsFor()`), then a dashed line, then ours (epic `editor` I76, Owen's pick):
+ *   Spell UI's dashed divider, `<ui-action kind="divider" appearance="dashed">`, edge to edge (`MenuBar.css`).
  * - Drawn as every right click's menu is, `<MenuPopup>`:  at once, inside the window, with arrow keys, Enter and Esc.
  * - What can't be done is greyed, and its tooltip says why (`PartEdits.whyNot()`).
  * - `PartEdits.openMenu()` opens it:  what was clicked is selected once the menu is on the screen.
@@ -1000,7 +1001,7 @@ export function PartMenu(): JSX.Element {
     return (
       <>
         {ActionMenus.itemsFor(items)}
-        <ui-action kind="divider" class={PROGRAM_MENU_END} />
+        <ui-action kind="divider" appearance="dashed" />
       </>
     )
   }
@@ -1220,9 +1221,6 @@ const MENU_POPUP = "MenuPopup"
 
 /** The class of the part menu's popup. */
 const PART_MENU = "PartMenu"
-
-/** The class of the dashed line, edge to edge, between the program's own right-click menu and ours (`MenuBar.css`). */
-const PROGRAM_MENU_END = "ProgramMenuEnd"
 
 /**
  * Why `action` can't be done, for the menu opened at `_at`:  read again each time it opens somewhere new,

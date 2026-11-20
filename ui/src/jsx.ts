@@ -657,8 +657,8 @@ export interface UIActionAttributes {
    */
   "prop:target"?: string
   /**
-   * The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance="circular">` is.  Its old name was the bare `link` switch.
-   * - takes:  space-separated:  `link` · `circular`
+   * The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance="circular">` is.  `dashed` -- a `kind="divider"` (menu, dropdown):  a dashed line, 2px, a shade darker, where one kind of item ends and another begins, as `<ui-divider appearance="dashed">`.  Its old name was the bare `link` switch.
+   * - takes:  space-separated:  `link` · `circular` · `dashed`
    */
   appearance?: string
   /**
@@ -13391,6 +13391,16 @@ export interface UIDividerAttributes {
    */
   "prop:inverted"?: boolean | ""
   /**
+   * The look:  `dashed` -- a dashed line, 2px, a shade darker (`--ui-divider-dashed-width`, `--ui-divider-dashed-color`):  where one kind of thing ends and another begins, as a menu's `<ui-item kind="divider" appearance="dashed">` draws it.
+   * - takes:  space-separated:  `dashed`
+   */
+  appearance?: string
+  /**
+   * `appearance`, as the DOM element's property.
+   * @deprecated write `appearance` -- `prop:` stays only for compiled spell
+   */
+  "prop:appearance"?: string
+  /**
    * With `direction="horizontal"`:  where the text sits;  `left` / `right` drop the rule on that side.  Its old name was `text-align`.
    * - takes:  `left` · `center` · `right`
    */
@@ -23081,8 +23091,8 @@ export interface UIItemAttributes {
    */
   "prop:target"?: string
   /**
-   * The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance="circular">` is.  Its old name was the bare `link` switch.
-   * - takes:  space-separated:  `link` · `circular`
+   * The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance="circular">` is.  `dashed` -- a `kind="divider"` (menu, dropdown):  a dashed line, 2px, a shade darker, where one kind of item ends and another begins, as `<ui-divider appearance="dashed">`.  Its old name was the bare `link` switch.
+   * - takes:  space-separated:  `link` · `circular` · `dashed`
    */
   appearance?: string
   /**
@@ -45241,8 +45251,8 @@ export interface UISiteNavButtonAttributes {
    */
   "prop:target"?: string
   /**
-   * The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance="circular">` is.  Its old name was the bare `link` switch.
-   * - takes:  space-separated:  `link` · `circular`
+   * The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance="circular">` is.  `dashed` -- a `kind="divider"` (menu, dropdown):  a dashed line, 2px, a shade darker, where one kind of item ends and another begins, as `<ui-divider appearance="dashed">`.  Its old name was the bare `link` switch.
+   * - takes:  space-separated:  `link` · `circular` · `dashed`
    */
   appearance?: string
   /**

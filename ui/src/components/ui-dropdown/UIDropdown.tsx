@@ -655,10 +655,10 @@ export class UIDropdown extends F.FormComponent<typeof dropdownVocabulary> {
     )
   }
 
-  /** Header or divider row. */
+  /** Header or divider row (`divider dashed`:  a dashed one). */
   private separator(entry: E.MenuSeparator): JSX.Element {
     return entry.type === DIVIDER ? (
-      <hr class={DIVIDER} role="presentation" />
+      <hr class={[DIVIDER, { [DASHED]: entry.appearance === DASHED }]} role="presentation" />
     ) : (
       <div class={UIT.HEADER} role="presentation">
         {entry.text}
@@ -873,6 +873,8 @@ const ADDITION = "addition"
 
 /** Class words of a divider row;  also `<ui-item kind="divider">`. */
 const DIVIDER = "divider"
+/** A divider row's dashed look (`appearance="dashed"`), and its class word. */
+const DASHED = "dashed"
 
 /** Class word of the covering trigger button. */
 const TRIGGER = "trigger"

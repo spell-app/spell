@@ -4,7 +4,7 @@ import { isServer, type JSX } from "@solidjs/web"
 import { E, UI, UIT } from "spell/ui/core"
 // Import directly:  the theme editor's barrel would load the editor
 import { BenchAddress } from "spell/ui/components/ui-theme-editor/BenchAddress"
-import { ThemeMenu, type ThemeMenuEntry } from "./ThemeMenu"
+import { ThemeMenu } from "./ThemeMenu"
 import { ThemePreference } from "./ThemePreference"
 import { HueDropdown } from "./HueDropdown"
 // Import directly:  My themes, without the editor
@@ -73,8 +73,8 @@ import themeMenuCSS from "./UIThemeMenu.css?inline"
  *   - Shift+Tab reaches the scheme control's one tab stop, the chosen scheme:
  *     ← → Home End move AND choose, as in any radio group
  *   - Escape closes the overlay, and focus goes back to the palette button (`UI.overlays`).
- * - Its shadow DOM is built of `<ui-popup>`, `<ui-icon>`, `<ui-dropdown>`, `<ui-menu>` and `<ui-item>`,
- *   which its barrel imports.
+ * - Its shadow DOM is built of `<ui-popup>`, `<ui-icon>`, `<ui-dropdown>`, `<ui-menu>`, `<ui-item>` and
+ *   `<ui-divider>`, which its barrel imports.
  * - Reads the themes and their titles from Spell UI's theme list (`UI.themes`), never a site's data:
  *   so it works on any page.
  ****************/
@@ -246,7 +246,7 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
    *   and every row was drawn again as the vocabulary or My themes were read again (epic `editor` I66).
    */
   @E.derived({ equals: isSameEntries })
-  private get entries(): ThemeMenuEntry[] {
+  private get entries(): E.MenuEntry[] {
     return this.themeMenu.entries
   }
 
@@ -364,7 +364,7 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
     return (
       <div class={PANEL_CLASS}>
         {this.schemes()}
-        <div class={DIVIDER_CLASS} role="separator" />
+        {this.divider()}
         <div class={HEADING_CLASS} id={IDS.heading}>
           {this.translationForKey("themeName")}
         </div>
@@ -377,12 +377,10 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
         >
           <For each={this.entries}>{(entry) => this.entry(entry)}</For>
         </div>
-        <Show when={ThemePreference.tintsFor(this.chosenTheme).length}>
-          <div class={DIVIDER_CLASS} role="separator" />
-        </Show>
+        <Show when={ThemePreference.tintsFor(this.chosenTheme).length}>{this.divider()}</Show>
         {this.tints()}
         <Show when={this.benchAddress}>
-          <div class={DIVIDER_CLASS} role="separator" />
+          {this.divider()}
           <a
             class={BENCH_CLASS}
             part={this.partForName("bench")}
@@ -495,16 +493,21 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
   }
 
   /**
-   * One row of the overlay's list:  a theme, a group's header, or a divider (`dashed`:  the one closing the page's
-   * offered themes).
+   * A divider between the panel's parts or the list's groups:  Spell UI's own, `<ui-divider>`;  `dashed`, the one
+   * closing the page's offered themes (a project's), as the editor's right-click menu marks where the program's own
+   * items end.  Inset and spaced by the sheet (`.divider::part(divider)`).
    */
-  private entry(entry: ThemeMenuEntry): JSX.Element {
+  private divider(appearance?: E.MenuSeparator["appearance"]): JSX.Element {
+    return <ui-divider class={DIVIDER_CLASS} appearance={appearance} />
+  }
+
+  /**
+   * One row of the overlay's list:  a theme, a group's header, or a divider (`appearance="dashed"`:  the one closing
+   * the page's offered themes).
+   */
+  private entry(entry: E.MenuEntry): JSX.Element {
     if ("type" in entry) {
-      return entry.type === "divider" ? (
-        <div class={[DIVIDER_CLASS, { [DASHED_CLASS]: !!entry.dashed }]} role="separator" />
-      ) : (
-        <div class={UIT.HEADER}>{entry.text}</div>
-      )
+      return entry.type === "divider" ? this.divider(entry.appearance) : <div class={UIT.HEADER}>{entry.text}</div>
     }
     const isChecked = () => this.chosenTheme === entry.value
     return (
@@ -565,7 +568,9 @@ export class UIThemeMenu extends E.UIComponent<ThemeMenuVocabulary> {
         <For each={this.entries}>
           {(entry) =>
             "type" in entry ? (
-              <ui-item kind={entry.type}>{entry.text}</ui-item>
+              <ui-item kind={entry.type} appearance={"appearance" in entry ? entry.appearance : undefined}>
+                {entry.text}
+              </ui-item>
             ) : (
               <ui-item value={entry.value} description={entry.description}>
                 {entry.text}
@@ -805,9 +810,6 @@ const MENU_CLASS = "menu"
 /** Class word of a divider in the overlay. */
 const DIVIDER_CLASS = "divider"
 
-/** Class word of the dashed divider closing the page's offered themes (a project's). */
-const DASHED_CLASS = "dashed"
-
 /** Class word of the overlay's scheme control. */
 const SCHEMES_CLASS = "schemes"
 
@@ -821,6 +823,6 @@ const OPTION_CLASS = "option"
 const CHECK_CLASS = "check"
 
 /** Do `a` and `b` list the same entries, each saying the same?  Entries are plain data. */
-function isSameEntries(a: readonly ThemeMenuEntry[], b: readonly ThemeMenuEntry[]): boolean {
+function isSameEntries(a: readonly E.MenuEntry[], b: readonly E.MenuEntry[]): boolean {
   return a.length === b.length && a.every((entry, index) => JSON.stringify(entry) === JSON.stringify(b[index]))
 }

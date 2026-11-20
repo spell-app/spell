@@ -522,6 +522,8 @@ export const HELP_TABLE: Readonly<
       clearing: "Clears floated content above it.",
       section: "More space, to divide sections of content.",
       inverted: "For dark backgrounds.",
+      appearance:
+        'The look: `dashed` -- a dashed line, 2px, a shade darker (`--ui-divider-dashed-width`, `--ui-divider-dashed-color`): where one kind of thing ends and another begins, as a menu\'s `<ui-item kind="divider" appearance="dashed">` draws it.',
       align: 'With `direction="horizontal"`: where the text sits; `left` / `right` drop the rule on that side.',
       icon: "Icon name, shown before the text."
     }

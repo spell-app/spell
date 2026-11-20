@@ -85,7 +85,7 @@ export const itemVocabulary = {
       name: "appearance",
       group: "appearance",
       kind: "multiple",
-      values: ["link", "circular"],
+      values: ["link", "circular", "dashed"],
       // its words are Fomantic's classes as they are
       classes: {},
       replaces: [{ from: "link", value: "link" }],
@@ -93,6 +93,8 @@ export const itemVocabulary = {
         "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  " +
         "`circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), " +
         'its hover, chosen and pressed surrounds round, as `<ui-button appearance="circular">` is.  ' +
+        '`dashed` -- a `kind="divider"` (menu, dropdown):  a dashed line, 2px, a shade darker, where one kind of ' +
+        'item ends and another begins, as `<ui-divider appearance="dashed">`.  ' +
         "Its old name was the bare `link` switch."
     },
     { name: "disabled", group: "states", kind: "keyOnly", description: "Can't be chosen or followed." },
