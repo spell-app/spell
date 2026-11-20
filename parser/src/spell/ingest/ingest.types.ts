@@ -540,7 +540,7 @@ export type FieldDescription = {
   insideSchemaAt?: string
   /**
    * What a person called the type its `inside` holds, in the place's Spell:  `asset meta` for an asset's `meta`.
-   * - Its name before any the writer would choose, so a later write keeps it (epic `ingest-harbor-api` T13).
+   * - Its name before any the writer would choose, so a later write keeps it.
    * - Kept only when it's free:  not a collection's type, nor one of Spell's own.
    */
   insideType?: string

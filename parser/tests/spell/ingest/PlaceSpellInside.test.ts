@@ -10,7 +10,7 @@ void SP
 /** A place with one list, `assets`, whose rows hold `meta` (one thing) and `tags` (a list of things). */
 function placeWith(meta: Partial<FieldDescription>, tags: Partial<FieldDescription> = {}): PlaceDescription {
   return {
-    about: { name: "harbor", kind: "web server", address: "https://harbor.test/api" },
+    about: { name: "console", kind: "web server", address: "https://console.test/api" },
     canDo: {},
     collections: {
       assets: {
@@ -36,7 +36,7 @@ function placeWith(meta: Partial<FieldDescription>, tags: Partial<FieldDescripti
   } as unknown as PlaceDescription
 }
 
-describe("spellPartsFor(), a type inside a row a person named (`insideType`, epic `ingest-harbor-api` T13)", () => {
+describe("spellPartsFor(), a type inside a row a person named (`insideType`)", () => {
   it("names the type inside from its field's words when nobody named it", () => {
     const text = spellTextOf(spellPartsFor(placeWith({})))
     expect(text).toMatch(/its "meta" is a meta\n/)

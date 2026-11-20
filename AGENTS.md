@@ -10,11 +10,12 @@ ONE repo, its own `src/` and its folders `parser/`, `ui/`, `epic/` and `app/` (e
 - A rule lives in exactly ONE place:  this file holds what's about the kit and what's ACROSS its folders;
   each big folder's, what's about it;  each sub-folder's, what's local to it.
 
-**Never name any one customer project anywhere in this repo (the ops console whose epics fed Spell UI first of all);
-epic docs outside it may.**
-- Code, tests, fixtures, comments, READMEs, docs data, commit messages:  say "a project's", "an outside API",
-  "the console", "an example project" instead (Owen, 2026-11-20).
-- So the rule itself names none:  `git grep -il <its name>` prints nothing.
+**This repo names no customer project or company -- this holds for commit messages and branch names too
+(the ops console whose epics fed Spell UI first of all, and the company it's for);  epic docs outside it may.**
+- Code, tests, fixtures, comments, READMEs, docs data, commit messages, branch names:
+  say "a project's", "an outside API", "the console", "an example project" instead (Owen, 2026-11-20).
+- So the rule itself names neither:  `git grep -il` for either name prints nothing,
+  and neither does `git log --all`.
 
 **If working with Solid (2.0):  READ [the Solid 2 rules](agents/solid/solid-2.md) IN FULL FIRST.**
 - Solid work is any of:
