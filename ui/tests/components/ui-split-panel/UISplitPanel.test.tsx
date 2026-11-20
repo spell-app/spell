@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vite-plus/test"
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import "spell/ui/components/ui-panel"
+import "spell/ui/components/ui-segment"
 import "spell/ui/components/ui-split-panel"
 
 /** A split panel in the page, 600 by 200, with three `<div>` panes unless told otherwise. */
@@ -298,5 +299,20 @@ describe("<ui-split-panel>", () => {
     host.style.width = "700px"
     await vi.waitFor(() => expect(widths(host)[0]).toBe(app + 100))
     expect(widths(host).slice(1)).toEqual([between, last])
+  })
+
+  it("a pane that draws no box of its own (`<ui-segment>`) is given one, and fills its size (epic `old-console-redo` I13)", async () => {
+    const host = await panel(
+      'columns="16em,*" resizable',
+      "<ui-segment>a list</ui-segment><ui-segment>what's chosen</ui-segment>"
+    )
+    const [list, chosen] = [...host.children] as HTMLElement[]
+    await vi.waitFor(() => expect(list.hasAttribute("data-split-box")).toBe(true))
+    const box = (pane: HTMLElement) => pane.shadowRoot!.querySelector('[part="segment"]')!.getBoundingClientRect()
+    // 16em, and every px the bar leaves to the "*" pane:  not as wide as their words
+    expect(Math.round(box(list).width)).toBe(Math.round(16 * parseFloat(getComputedStyle(host).fontSize)))
+    expect(Math.round(box(list).width + box(chosen).width + bars(host)[0].getBoundingClientRect().width)).toBe(600)
+    // side by side, their tops level:  a pane's segment keeps no margin
+    expect(box(chosen).top).toBe(box(list).top)
   })
 })

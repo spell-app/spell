@@ -227,6 +227,14 @@
   :host(:not(:last-child)) > .ui.segment {
     --_segment-margin-bottom: initial;
   }
+  /*
+   * A split panel's pane (`<ui-split-panel>` gives it a box, `data-split-box`):  none at all, so the panes' tops line
+   * up, and the panel's bar is the room between them (epic `old-console-redo` I13).
+   */
+  :host([data-split-box]) > .ui.segment {
+    --_segment-margin-top: 0;
+    --_segment-margin-bottom: 0;
+  }
 
   /*
    * What the segment hands its content:  none of its own or its group's layout tokens
