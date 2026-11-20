@@ -3,6 +3,7 @@
 import { Api } from "spell/util/Api"
 import { proto, Warnings } from "spell/ui/util"
 import { Vocabulary } from "spell/ui/vocabulary"
+import { BuiltInSounds } from "spell/ui/sounds"
 import {
   animationsCSS,
   colorsCSS,
@@ -104,6 +105,11 @@ export class UIRuntime {
   readonly api = new Api()
   /** the page's icon packs (`<ui-root icons>` adds child sets) and the SVG cache */
   readonly icons = new IconPacks()
+  /**
+   * Spell's built-in sounds, by name:  `url("card slide")` is where its file is.
+   * - What a Spell program's `play "card slide"` asks (core's `play()`), as core never imports Spell UI.
+   */
+  readonly sounds = BuiltInSounds
   /** same-origin text files elements load and save (`<ui-include>`, `<ui-code>`, `<ui-markdown>`) */
   readonly sources = new Sources()
   /** languages `<ui-code>` highlights beyond its own:  `register()`, e.g. spell */

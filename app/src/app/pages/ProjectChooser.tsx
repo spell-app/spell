@@ -37,7 +37,8 @@ import "./ProjectChooser.css"
  *   (Owen, epic `mockup` I46:  "Split the english and Spanish into two sections");  `<LanguageCards>`.
  * - Its sections in Spell's own order, `SPACES.homeSections()`:
  *   your own projects first, under the hero, and only while you have some (epic `mockup` I40).
- * - "Rearrange Home Screen", at its foot, turns on a mode where everything moves, and its words change
+ * - Its footer, quiet (`<HomeFooter>`):  a link to Spell UI's site, and "Rearrange Home Screen".
+ * - "Rearrange Home Screen" turns on a mode where everything moves, and its words change
  *   (epic `mockup` T51, `HomeArrangement`):  cards drag among their section's, sections by their headers;
  *   a card's title and tagline, a section's header and line, are typed in where they are.
  *   - `@spell`'s people change everyone's;  anyone else, their own, with "Reset to Default".
@@ -81,7 +82,7 @@ export function ProjectChooser() {
         <RearrangeBar />
         <Hero examples={exampleList()} guides={guideList()} />
         <For each={sections()}>{(section) => sectionFor(section)}</For>
-        <RearrangeButton />
+        <HomeFooter />
       </div>
     </SpellPage>
   )
@@ -993,6 +994,34 @@ function RearrangeBar() {
   )
 }
 
+/****************
+ * ### `<HomeFooter>`
+ * The home page's foot, quiet:  Spell UI's site on the left, "Rearrange Home Screen" on the right
+ * (Owen, 2026-11-17, epic `mockup` T55:  "make a link to SpellUI in the Home page somewhere (footer?)").
+ * - The link opens the site in the editor, at its home page, as the Spell menu's Spell UI does
+ *   (`editor.showSpellUI()`);  its address is the editor's, so a new tab works too.
+ * - On a narrow window, one under the other, centred.
+ ****************/
+function HomeFooter() {
+  return (
+    <footer class="HomeFooter">
+      <a
+        class="SpellUILink"
+        href={editor.spellUIUrl}
+        onClick={(event) => {
+          event.preventDefault()
+          editor.showSpellUI()
+        }}
+      >
+        <ui-icon name="book" />
+        <span class="name">{appTexts.text("spellUI")}</span>
+        <span class="line">{appTexts.text("homeSpellUILine")}</span>
+      </a>
+      <RearrangeButton />
+    </footer>
+  )
+}
+
 /**
  * At the home page's foot, quiet:  "Rearrange Home Screen", which turns the mode on (epic `mockup` T51).
  * - Not while it's on:  the bar's Done turns it off.
@@ -1000,16 +1029,15 @@ function RearrangeBar() {
 function RearrangeButton() {
   return (
     <Show when={!HomeArrangement.isRearranging}>
-      <div class="RearrangeFoot">
-        <ui-button
-          appearance="basic"
-          size="small"
-          icon="arrows alternate"
-          onClick={() => HomeArrangement.rearrange(true)}
-        >
-          {appTexts.text("homeRearrange")}
-        </ui-button>
-      </div>
+      <ui-button
+        class="RearrangeFoot"
+        appearance="basic"
+        size="small"
+        icon="arrows alternate"
+        onClick={() => HomeArrangement.rearrange(true)}
+      >
+        {appTexts.text("homeRearrange")}
+      </ui-button>
     </Show>
   )
 }

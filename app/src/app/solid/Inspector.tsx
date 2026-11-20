@@ -698,8 +698,8 @@ export class Inspector {
   /**
    * The app's parts under `element`, in document order, each with its depth;  what isn't a part is looked through.
    * - Never the editor's own, round the program (`EDITOR_OWN`):  a notebook's contents, its examples' code editors.
-   * - A view drawn in Design (`DESIGNED`):  its own drawing too, in its shadow root, as it's what's being edited
-   *   (epic `editor` P35, P37).
+   * - A view drawn in Design (`DESIGNED`):
+   *   its own drawing too, in its shadow root, as it's what's being edited (epic `editor` P35, P37).
    */
   static partsIn(element: Element | ShadowRoot, depth = 0): PartRow[] {
     return [...element.children].flatMap((child) => {
@@ -999,8 +999,9 @@ export class Inspector {
   }
 
   /**
-   * The type whose events, actions and tests show as cards of their own (`TYPE_PANES`):  `typeEdited`,
-   * except a one of a kind's (the app), whose code is the one Code card a column's is (epic `editor` I186).
+   * The type whose events, actions and tests show as cards of their own (`TYPE_PANES`):
+   * `typeEdited`, except a one of a kind's (the app),
+   * whose code is the one Code card a column's is (epic `editor` I186).
    * - Owen:  "merge them back in like when a column is selected, with `add event` and `add action`".
    */
   static get typeWithCards(): object | undefined {
@@ -3441,8 +3442,8 @@ const SCOPE_PREF = "scope"
 
 /****************
  * ### `<ScopeSwitch>`
- * `Card | All Cards`:  the whole of the properties card's header for a thing (Q32;  epic `editor` I200),
- * so it costs no height.
+ * `Card | All Cards`:  the whole of the properties card's header for a thing,
+ * so it costs no height (Q32;  epic `editor` I200).
  * - Says what a change to its fields applies to (`Inspector.scopeOf()`).
  * - Only for a thing:  a Spell UI element has no type of its own to change.
  * - Never for a one of a kind, the app among them (`InspectorWrites.isOneOfAKind()`):  its changes go to its type.

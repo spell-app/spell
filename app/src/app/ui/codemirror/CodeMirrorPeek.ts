@@ -20,8 +20,8 @@ import "./CodeMirrorPeek.css"
  *   a click on a row shows it, ↑ ↓ move through them.
  * - Enter, a double-click on the code, or a double-click on a row:  goes there, as Go to Definition does;
  *   Esc, or ✕:  closes the box, the caret back in the code.
- * - One box per editor at a time;  showing another file closes it, as it's part of what the editor adds to its file's
- *   state (`SpellCodeMirror`'s host).
+ * - One box per editor at a time;  showing another file closes it,
+ *   as it's part of what the editor adds to its file's state (`SpellCodeMirror`'s host).
  * - Its position in the import graph:  CodeMirror, the app's texts, the folder's setup and converter;
  *   never the editor page (`<spell-editor>`'s chunk has it), never Solid:  plain DOM in a CodeMirror widget.
  ****************/
@@ -36,8 +36,8 @@ export class CodeMirrorPeek {
   }
 
   /**
-   * Peek at `locations` under the caret's line of `peek.view`:  the first one shown, the rest listed when `kind` is
-   * `"references"`.
+   * Peek at `locations` under the caret's line of `peek.view`:
+   * the first one shown, the rest listed when `kind` is `"references"`.
    * - Shows in place of a box already open there.
    */
   static open(peek: PeekProps): void {
@@ -60,8 +60,8 @@ export class CodeMirrorPeek {
   }
 
   /**
-   * A place, as a row of a list of uses says it:  its file's name and line, then the line's words,
-   * `Card.spell:12  its value is 12`.
+   * A place, as a row of a list of uses says it:
+   * its file's name and line, then the line's words, `Card.spell:12  its value is 12`.
    * - `project`:  where its file is, for the line's words;  a file it doesn't have is named alone.
    */
   static placeWords(project: SP.SpellProject, { path, range }: CodeMirrorLocation): string {

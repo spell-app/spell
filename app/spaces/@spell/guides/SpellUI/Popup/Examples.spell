@@ -3,13 +3,6 @@
 		Popup
 		<header>A popup displays additional information on top of a page.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#states">States</>
-			<item link="#variations">Variations</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's popup page, section by section, in its order (Types:  JavaScript, then No JavaScript;  States;

@@ -541,6 +541,7 @@ export class ElementManifests {
   /**
    * An attribute's TypeScript type, as text:  `boolean` for a key-only flag, a string union for a value set,
    * `boolean | "left" | "right"` for one that's either, `string` / `number` otherwise.
+   * - `canBeNumber`:  `string | number`, text that may be a number (`<ui-statistic value>`).
    */
   static typeText(attribute: SiteAttribute): string {
     const values = ElementManifests.values(attribute).map((value) => JSON.stringify(value))
@@ -559,7 +560,7 @@ export class ElementManifests {
       case "width":
         return values.length ? [...values, "string"].join(" | ") : "string"
       default:
-        return values.length ? values.join(" | ") : "string"
+        return attribute.canBeNumber ? "string | number" : values.length ? values.join(" | ") : "string"
     }
   }
 
@@ -593,7 +594,7 @@ export class ElementManifests {
       case "number":
         return "number"
       default:
-        return values.length ? values.join(" · ") : "text"
+        return attribute.canBeNumber ? "text or a number" : values.length ? values.join(" · ") : "text"
     }
   }
 
@@ -702,7 +703,7 @@ const JSX_DETAIL_TYPES: Readonly<Record<string, string>> = {
 
 /** The DOM's and TypeScript's own type names, which a `detail` text may name as they are (`jsxDetailType()`). */
 const JSX_GLOBAL_TYPE =
-  /^(?:Element|Event|Node|DocumentFragment|File|Blob|(?:HTML|SVG)\w*Element|\w+Event|Record|Readonly|Partial|Array)$/
+  /^(?:Element|Event|Node|DocumentFragment|File|Blob|FileSystem(?:Entry|Handle)|Error|(?:HTML|SVG)\w*Element|\w+Event|Record|Readonly|Partial|Array)$/
 
 /** The JSX types' header (`jsxTypes()`):  what the file is, and how a program uses it. */
 const JSX_HEADER = [

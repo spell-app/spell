@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Uploader | Spell UI</title>
+    <meta
+      name="description"
+      content="An uploader takes files someone picks or drops on it, or whole folders, then posts them, or hands them to an action."
+    />
+    <!-- Before first paint:  the viewer's colour scheme (`ThemePreference.HEAD_SCRIPT`, as oxfmt lays it out).  The theme itself is restored by site.js. -->
+    <script>
+      try {
+        var l = localStorage,
+          d = document.documentElement,
+          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
+        if (s === "light" || s === "dark") {
+          d.classList.add("ui-" + s)
+          d.style.colorScheme = s
+        }
+      } catch (e) {}
+    </script>
+    <link rel="stylesheet" href="/components/ui/_assets/site.css" />
+    <script type="module" src="/components/ui/_assets/site.js"></script>
+    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
+    <script defer src="/_epic/assets/spell-comments.js"></script>
+  </head>
+  <body class="ui-typography">
+    <main id="main" class="site-main" data-toc-header="Uploader">
+      <ui-segment appearance="vertical" class="site-masthead">
+        <ui-container>
+          <ui-menu icon class="site-page-links" aria-label="About this page">
+            <ui-item
+              link="https://github.com/spell-app/spell-app/issues/new?title=ui-uploader%3A%20%20"
+              target="_blank"
+              icon="bug"
+              aria-label="Report a bug"
+              title="Report a bug"
+            ></ui-item>
+          </ui-menu>
+          <ui-header level="1" class="site-title">
+            Uploader
+            <ui-header>An uploader takes files someone picks or drops on it, or whole folders, then posts them, or hands them to an action.</ui-header>
+          </ui-header>
+          <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
+        </ui-container>
+      </ui-segment>
+
+      <ui-container class="site-body">
+        <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
+          <ui-tab value="examples" label="Examples">
+            <!--
+              EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+              Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
+              - A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>` around
+                its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
+              - An example:  its own nested section (`label` = the example's name) around
+                `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+                description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
+                `.another.example`:  a second `<ui-example>` in the same section.
+              - Or write it flat (`<ui-header level="2">`, `<ui-example heading>`) and run `yarn site:sections`:
+                it nests it and writes the ids (and fixes them after a title changes).
+              - A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
+                shows in its code).
+            -->
+            <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
+              <ui-section id="examples-types-hero" label="Hero" sticky="stack" collapsible dividing>
+                <ui-example description="The default look, `appearance=&quot;hero&quot;`:  a big drop area with an icon, a line of help, a Choose files button and its limits.  Pick or drop `.json` files on it:  a row per file shows under it, each with its size, then a tick, or the reason it was turned away.  With no `destination` or `action`, it only holds them.">
+                  <ui-uploader extensions="json" multiple max-files="5" max-size="2 MB"></ui-uploader>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-types-button" label="Button" sticky="stack" collapsible dividing>
+                <ui-example description="`appearance=&quot;button&quot;`:  just a button, for a toolbar or a card&#x27;s corner.  A click opens the file dialog, and files can be dropped on it.  Its limits are its tooltip;  its file rows show in a popup from it for a moment as an upload starts, then on hover or focus.">
+                  <ui-uploader appearance="button" extensions="json" multiple max-files="5" max-size="2 MB"></ui-uploader>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-types-input" label="Input" sticky="stack" collapsible dividing>
+                <ui-example description="`appearance=&quot;input&quot;`:  a field with a Browse button, to line up with the other fields of a form.  The field says how many files it holds;  the rows list under it, smaller.">
+                  <ui-uploader appearance="input" extensions="json" multiple aria-label="Netlists" style="max-width: 480px"></ui-uploader>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-types-compact" label="Compact" sticky="stack" collapsible dividing>
+                <ui-example description="`appearance=&quot;compact&quot;`:  a one-line drop area with a small Choose button, for a side bar or a narrow panel.  Under it, one line of status and one progress bar for every file.">
+                  <ui-uploader appearance="compact" extensions="json" multiple style="max-width: 360px"></ui-uploader>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+            <ui-section id="examples-content" label="Content" sticky="stack" collapsible dividing>
+              <ui-section id="examples-content-its-own-words" label="Its own words" sticky="stack" collapsible dividing>
+                <ui-example description="Slots for a page&#x27;s own icon, message and button (`slot=&quot;icon&quot;`, `slot=&quot;message&quot;`, `slot=&quot;button&quot;`);  each falls back to the uploader&#x27;s own.  A click on a slotted button opens the file dialog too.  The words it shows while busy are attributes:  `drop-message`, `uploading-message` and `done-message`, with `{count}` and `{done}` filled in.">
+                  <ui-uploader extensions="json" multiple drop-message="Let go to bring in {count} netlists">
+                    <ui-icon slot="icon" name="microchip" size="big"></ui-icon>
+                    <ui-header slot="message" size="small">
+                      Bring in your netlists
+                      <ui-header>Drag the .json files from your chip tools here</ui-header>
+                    </ui-header>
+                    <ui-button slot="button" color="violet">Pick netlists…</ui-button>
+                  </ui-uploader>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-content-restyled" label="Restyled" sticky="stack" collapsible dividing>
+                <ui-example description="Its look from `--ui-uploader-*` tokens, set on the element or anywhere above it:  the drop area&#x27;s border, background and corners, its padding, the icon&#x27;s colour.">
+                  <ui-uploader
+                    extensions="json"
+                    style="
+                      --ui-uploader-border-style: solid;
+                      --ui-uploader-border-width: 1px;
+                      --ui-uploader-border-color: oklch(0.6 0.15 300 / 0.45);
+                      --ui-uploader-background: linear-gradient(160deg, oklch(0.6 0.15 300 / 0.12), oklch(0.6 0.15 250 / 0.1));
+                      --ui-uploader-radius: 16px;
+                      --ui-uploader-padding: 32px 24px;
+                      --ui-uploader-icon-color: oklch(0.55 0.18 300);
+                    "
+                  ></ui-uploader>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+            <ui-section id="examples-behaviour" label="Behaviour" sticky="stack" collapsible dividing>
+              <ui-section id="examples-behaviour-folders" label="Folders" sticky="stack" collapsible dividing>
+                <ui-example description="`folder`:  it takes whole folders, each with its files and their paths in it.  Its events say folder:  `ui-folder-dropping`, `ui-folder-dropped`, then `ui-file-dropped` for each file.  A plain file dropped on it is turned away.">
+                  <ui-uploader folder multiple></ui-uploader>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-behaviour-a-drop-zone" label="A drop zone" sticky="stack" collapsible dividing>
+                <ui-example description="`drop-zone`:  a drop anywhere in its zone counts as a drop on it.  Here the zone is the box around it (`drop-zone=&quot;ui-segment&quot;`, the nearest segment round it);  `page` is the whole page, and `#id` any element.  The zone shows a light overlay while files are dragged over it.">
+                  <div style="max-width: 480px">
+                    <ui-segment>
+                      <p>Drop a .json file anywhere in this box.</p>
+                      <ui-uploader appearance="compact" extensions="json" drop-zone="ui-segment"></ui-uploader>
+                    </ui-segment>
+                  </div>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-behaviour-an-action" label="An action" sticky="stack" collapsible dividing>
+                <ui-example description="`action`, a property:  a function called with the files kept, instead of posting them.  Here it reads each file and says how many lines it holds.  `destination` posts them instead, one request per file, each row showing its own progress.">
+                  <ui-uploader id="line-counter" appearance="compact" multiple></ui-uploader>
+                  <script>
+                    document.getElementById("line-counter").action = async (files) => {
+                      for (const file of files) console.log(file.name, (await file.text()).split("\n").length, "lines")
+                    }
+                  </script>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+            <ui-section id="examples-states" label="States" sticky="stack" collapsible dividing>
+              <ui-section id="examples-states-disabled" label="Disabled" sticky="stack" collapsible dividing>
+                <ui-example description="`disabled`:  greyed, in every look;  it takes no files, picked or dropped.">
+                  <ui-uploader appearance="compact" disabled style="max-width: 360px"></ui-uploader>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="usage" label="Usage">
+            <!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+            <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  - Write `<ui-uploader extensions="json" multiple>`, and pick a look with `appearance`:
+                    `hero` (the default), `button`, `input` or `compact`.
+                  - Where the files go:
+                    - `destination`:  a URL each file is posted to, as form data, one request per file
+                    - `action`:  a function called with the files instead;  in Spell, an action
+                    - neither:  it only holds them, and the page reads them from its events or `files`
+                  - What it takes:  `extensions`, `max-size` (`2 MB`), `max-files`, `multiple`, `folder`.
+                    A file it doesn't take still gets a row, with the reason.
+                  - Its events, the same for a pick as for a drop (`detail.via` says which), each before, while or after:
+                    - `ui-file-dragged-over` / `-out`:  how many files, and their kinds
+                    - `ui-file-dropping`, cancelable:  leaves that file out;  then `ui-file-dropped`, with the file,
+                      its path, size, kind, and the reason when it's turned away
+                    - `ui-uploading`, cancelable:  takes the upload over
+                    - `ui-upload-progress`, then `ui-uploaded` or `ui-upload-failed`, per file
+                    - a `folder` uploader's drags and folders are `ui-folder-*`
+                  - Read a file in a handler with `event.detail.file.text()`.
+                </script>
+              </ui-markdown>
+              <ui-code language="js">
+                <script type="text/plain">
+                  const uploader = document.querySelector("ui-uploader")
+                  uploader.addEventListener("ui-file-dropped", async (event) => {
+                    if (event.detail.reason) return console.log(event.detail.name, "turned away:", event.detail.reason)
+                    console.log(event.detail.path, JSON.parse(await event.detail.file.text()))
+                  })
+                  // take the upload over:  nothing is posted
+                  uploader.addEventListener("ui-uploading", (event) => event.preventDefault())
+                </script>
+              </ui-code>
+            </ui-section>
+            <ui-section id="usage-keyboard" label="Keyboard" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  - Tab reaches its button (or the `input` look's field);  Enter or Space opens the file dialog.
+                  - Each row's Remove is a button too.
+                </script>
+              </ui-markdown>
+            </ui-section>
+            <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  - Its button is a real button, named by its words;  the file rows are a list, named "Files".
+                  - Each progress bar is named "Uploading";  compact's line of status is a live `status` region.
+                  - Dropping needs a pointer:  every look also opens the file dialog from the keyboard.
+                  - The `input` look's field takes the uploader's `aria-label`, else its line of help.
+                </script>
+              </ui-markdown>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="api" label="API">
+            <!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
+            <ui-section id="api-attributes" label="Attributes" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-uploader" only="attributes"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-properties" label="Properties" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-uploader" only="properties"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-uploader" only="events"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-slots" label="Slots" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-uploader" only="slots"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-uploader" only="parts"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-uploader" only="states"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-texts" label="Texts" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-uploader" only="texts"></ui-docs-api>
+            </ui-section>
+          </ui-tab>
+
+          <ui-tab value="theming" label="Theming">
+            <!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
+            <ui-section id="theming-tokens" label="Tokens" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  Set a public `--ui-*` token on the element, any ancestor or `:root`; it inherits into the shadow
+                  root. Edit a value below to try it.
+                </script>
+              </ui-markdown>
+              <ui-docs-tokens family="ui-uploader" playground>
+                <!-- playground:start  (yarn site:kitchen:  the family's main example) -->
+                <ui-uploader extensions="json" multiple max-files="5" max-size="2 MB"></ui-uploader>
+                <!-- playground:end -->
+              </ui-docs-tokens>
+            </ui-section>
+            <ui-section id="theming-themes" label="Themes" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  The theme menu above picks the theme for every page of the site:  Spell, Glass, Fruity or Merlot,
+                  each restyling this component through its tokens.
+                </script>
+              </ui-markdown>
+            </ui-section>
+          </ui-tab>
+        </ui-tabs>
+
+      </ui-container>
+    </main>
+  </body>
+</html>

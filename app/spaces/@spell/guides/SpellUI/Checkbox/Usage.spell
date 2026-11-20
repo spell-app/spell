@@ -3,19 +3,6 @@
 		Checkbox
 		<header>A checkbox allows a user to select a value from a small set of options, often binary.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#forms">Forms</>
-			<item link="#two-values">Two values</>
-			<item link="#events">Events</>
-			<item link="#vetoing-a-change">Vetoing a change</>
-			<item link="#grouped-checkboxes">Grouped checkboxes</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-			<item link="#framework-usage">Framework usage</>
-		</>
-	</>
 
 	<!-- USAGE:  forms, `selected` / `checked`, events, keyboard, accessibility, frameworks;  radios:  ui-radio.html. -->
 	<section label="Using it">

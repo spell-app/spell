@@ -3,14 +3,6 @@
 		Icon
 		<header>An icon is a glyph used to represent something else.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#states">States</>
-			<item link="#variations">Variations</>
-			<item link="#groups">Groups</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's icon page (its Definition tab:  States, Variations, Groups), after our own Types (solid,

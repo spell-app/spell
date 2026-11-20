@@ -4,13 +4,6 @@
 		<header>An include shows part of another page from this site in this one, loaded at once, when idle or when
               scrolled into view.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#tokens">Tokens</>
-			<item link="#themes">Themes</>
-		</>
-	</>
-
 	<!-- THEMING:  no tokens of its own;  what reaches the included markup instead. -->
 	<section label="Tokens">
 		<markdown>

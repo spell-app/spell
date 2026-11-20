@@ -3,12 +3,6 @@
 		Detail
 		<header>A detail is a label's dimmer second value, such as a count.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#owners">Owners</>
-			<item link="#variations">Variations</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  `<ui-detail>` in each owner that gives it a look (from the owners' own pages and

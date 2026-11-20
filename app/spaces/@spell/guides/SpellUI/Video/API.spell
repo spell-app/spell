@@ -3,16 +3,6 @@
 		Video
 		<header>A video plays a video file in the browser's own player.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#tags">Tags</>
-			<item link="#attributes">Attributes</>
-			<item link="#events">Events</>
-			<item link="#parts">Parts</>
-			<item link="#states">States</>
-			<item link="#texts">Texts</>
-		</>
-	</>
 
 	<!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
 	<section label="Tags">

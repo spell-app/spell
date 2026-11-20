@@ -9,7 +9,7 @@ import type { KeyGoes } from "spell/places/keyGoes"
 import { BUILT_IN_DIMENSIONS } from "spell/util/measures/dimensions.generated"
 import { PROPORTION } from "spell/util/measures/Dimension"
 
-import type { CollectionDescription, FieldDescription, PlaceDescription, ServerTakes } from "./ingest.types"
+import type { CollectionDescription, FieldDescription, PagesWith, PlaceDescription, ServerTakes } from "./ingest.types"
 import { isSpellsOwnType, wordsFor } from "./PlaceShape"
 import { PlaceWords } from "./PlaceWords"
 
@@ -169,8 +169,9 @@ export function spellPartsFor(
     placeLines.push({ key: "pace", text: `it takes up to ${mostPerSecond} requests a second` })
   }
   // what it was seen to do when it was asked, and what it says of itself:  asked of it, not done here
-  if (kind === "web server")
-    placeLines.push(...linesOfWhatItTakes(serverTakes, every, canDo.write, !!nextAt || paging.size > 0))
+  const hasPaging = !!nextAt || paging.size > 0
+  if (kind === "web server") placeLines.push(...linesOfWhatItTakes(serverTakes, every, canDo.write, hasPaging))
+  const placePages = kind === "web server" && !hasPaging ? serverTakes?.pagesWith : undefined
   // how it spells a name and writes a number, when that isn't ours:  for a save, or a field it hasn't sent yet
   const namesLike = kind === "web server" || kind === "graphql server" ? nameExampleOf(every) : undefined
   if (namesLike) placeLines.push({ key: "names", text: `it writes names like "${namesLike}"` })
@@ -182,8 +183,12 @@ export function spellPartsFor(
   if (fieldsShown.some(({ decimalComma }) => decimalComma)) {
     placeLines.push({ key: "numbers", text: '- it writes numbers like "1.200,5"' })
   }
+  // a list under each thing says where it is on its owner's line, `a job's steps live at "..."`:  it has no other
+  const listedUnder = new Set(
+    every.flatMap(({ listsUnder = {} }) => Object.keys(listsUnder)).filter((list) => !collections[list]?.isOneUnder)
+  )
   for (const [collection, description] of shown) {
-    if (isSheet || !description.at || description.at === collection) continue
+    if (isSheet || !description.at || description.at === collection || listedUnder.has(collection)) continue
     // found by name, with no list:  where its name goes, `wiki pages are found at "/page/summary/{name}"`
     // answering only a search:  `books are searched at "/search.json"`
     const where = isFoundByNameAt(description.at)
@@ -198,6 +203,8 @@ export function spellPartsFor(
         key: `at:${collection}`,
         text: `${collectionWords(description)} ${where} "${description.at}"`
       })
+      // paging its own way, one step in under its line, wins for it (epic `data` P56)
+      if (kind === "web server") placeLines.push(...ownPagingLines(collection, description, placePages))
     }
     if (searchedApart && description.searchedBy) {
       const at = searchAddressOf(description)
@@ -340,6 +347,32 @@ function linesOfWhatItTakes(
   if (fieldsNamedIn) lines.push({ key: "fields", text: `it gives only the fields named in "${fieldsNamedIn}"` })
   if (/read only/.test(write)) lines.push({ key: "read only", text: "it is read only" })
   return lines
+}
+
+/**
+ * The lines one step in under a collection's `live at` line that say how it pages, when that isn't the place's way
+ * (epic `data` P56):  `its next page is asked for with "take" and "skip"`, `it gives up to 100 at a time`.
+ * - `place`:  how the place's own line says every list pages;  `undefined` when it says none by position.
+ * - Nothing for a list that pages as the place does, or by no position its description says,
+ *   or whose answer says where its next page is.
+ */
+function ownPagingLines(
+  collection: string,
+  { pagesWith, nextAt }: CollectionDescription,
+  place: PagesWith | undefined
+): SpellLine[] {
+  // its answer says where its next page is:  NetBox's `next`, which it follows instead
+  if (!pagesWith || nextAt !== undefined) return []
+  if (place && place.limit === pagesWith.limit && place.offset === pagesWith.offset) return []
+  return [
+    {
+      key: `pages:${collection}`,
+      text: `\tits next page is asked for with "${pagesWith.limit}" and "${pagesWith.offset}"`
+    },
+    ...(pagesWith.most !== undefined
+      ? [{ key: `size:${collection}`, text: `\tit gives up to ${pagesWith.most} at a time` }]
+      : [])
+  ]
 }
 
 /** `words` as a list in a line:  `latitude and longitude`, `a, b and c`. */

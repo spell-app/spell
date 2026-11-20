@@ -32,7 +32,8 @@ import { CodeMirrorSelection } from "./CodeMirrorSelection"
  * - Everything is a REAL element in the text's own lines, laid out by the browser:
  *   - each declaration's head on a band:  a mark round its words (`cmb-band`), in its part of speech's colour;
  *     a head's description, `-- A playing card`, at the band's right end, the band reaching the editor's edge (Owen);
- *     one that doesn't fit there is cut short with a `…`, so the head stays one line (`DescriptionRoom`)
+ *     one that doesn't fit there is cut short with a `…`, so the head stays one line, its whole text in a tooltip
+ *     (`DescriptionRoom`)
  *   - its body's rail:  a line decoration on every line under it, a stripe per enclosing block (`--cmb-rails`)
  *   - its foot:  drawn in the line under its last line, taking no room of its own (`FeetWidget`):  every line is one
  *     line tall, so CodeMirror's guess at the height of lines it hasn't drawn is always right (epic `codemirror` P7)
@@ -812,36 +813,49 @@ const GROUP_HEAD = "cmb-group-head"
  * - So it's measured as drawn:  a head line whose description doesn't fit gets the room it has, after the head's words
  *   (`--cmb-description-room`, `cmb-description-cut` in `bubbly.css`), and is cut short there.
  *   - Measured again as the editor changes:  a wider one shows it whole again.
+ * - A description cut short shows its whole text in Spell UI's tooltip (`data-tooltip`) once the mouse rests on it,
+ *   the page's popup delay (Owen, 2026-11-19, epic `codemirror` T20);  one shown whole has none.
  * - Before, it took rows of its own under the head (epic `language` I120):  a head line two or three lines tall,
  *   which CodeMirror guessed as one until it was drawn, so the file's height changed as it scrolled.
  * - Only lines on screen are measured;  the rest keep the room they had, moved with the text.
  * - Its position in the import graph:  CodeMirror alone.
  ****************/
 class DescriptionRoom {
-  /** The room for each cut description, by where its head line starts, set as they're measured. */
-  private static readonly measured = StateEffect.define<Map<number, number>>()
+  /** Each cut description, by where its head line starts, set as they're measured. */
+  private static readonly measured = StateEffect.define<Map<number, DescriptionCut>>()
 
-  /** The room for each cut description, in pixels, by where its head line starts:  only lines that cut one. */
-  private static readonly rooms = StateField.define<Map<number, number>>({
+  /** Each cut description, by where its head line starts:  only lines that cut one. */
+  private static readonly rooms = StateField.define<Map<number, DescriptionCut>>({
     create: () => new Map(),
     update(rooms, transaction) {
       for (const effect of transaction.effects) if (effect.is(DescriptionRoom.measured)) return effect.value
       if (!transaction.docChanged || !rooms.size) return rooms
-      const moved = new Map<number, number>()
-      for (const [from, room] of rooms) moved.set(transaction.changes.mapPos(from), room)
+      const { changes } = transaction
+      const moved = new Map<number, DescriptionCut>()
+      for (const [from, cut] of rooms)
+        moved.set(changes.mapPos(from), { ...cut, from: changes.mapPos(cut.from), to: changes.mapPos(cut.to, 1) })
       return moved
     },
     provide: (it) =>
       EditorView.decorations.compute([it], (state) =>
         Decoration.set(
           [...state.field(it)]
-            .filter(([from]) => from <= state.doc.length)
-            .map(([from, room]) =>
+            .filter(([from, cut]) => from <= state.doc.length && cut.to <= state.doc.length)
+            .flatMap(([from, cut]) => [
               Decoration.line({
                 class: DescriptionRoom.CUT,
-                attributes: { style: `--cmb-description-room: ${room}px` }
-              }).range(state.doc.lineAt(from).from)
-            ),
+                attributes: { style: `--cmb-description-room: ${cut.room}px` }
+              }).range(state.doc.lineAt(from).from),
+              // its whole text, in Spell UI's tooltip, without the `--` that starts it;
+              // split round the description's own marks (its `--`'s), each piece showing the same
+              ...(cut.to > cut.from
+                ? [
+                    Decoration.mark({
+                      attributes: { "data-tooltip": state.sliceDoc(cut.from, cut.to).replace(/^--\s*/, "") }
+                    }).range(cut.from, cut.to)
+                  ]
+                : [])
+            ]),
           true
         )
       )
@@ -869,9 +883,9 @@ class DescriptionRoom {
             if (view.state !== state) return
             const known = state.field(DescriptionRoom.rooms)
             const next = new Map(known)
-            for (const [from, room] of rooms) {
-              if (room === undefined) next.delete(from)
-              else next.set(from, room)
+            for (const [from, cut] of rooms) {
+              if (cut === undefined) next.delete(from)
+              else next.set(from, cut)
             }
             if (sameRooms(known, next)) return
             // not inside CodeMirror's own update:  once it's done
@@ -888,11 +902,10 @@ class DescriptionRoom {
   static readonly extension: Extension = [DescriptionRoom.rooms, DescriptionRoom.measure]
 
   /**
-   * Each line on screen's room for its description, in pixels:  `undefined` for one with none, or whose description
-   * fits whole on its band.
+   * Each line on screen's cut description:  `undefined` for one with none, or whose description fits whole on its band.
    */
-  private static roomsOnScreen(view: EditorView): Map<number, number | undefined> {
-    const rooms = new Map<number, number | undefined>()
+  private static roomsOnScreen(view: EditorView): Map<number, DescriptionCut | undefined> {
+    const rooms = new Map<number, DescriptionCut | undefined>()
     const scale = view.scaleX || 1
     for (const line of view.contentDOM.querySelectorAll<HTMLElement>(".cm-line")) {
       const from = view.posAtDOM(line, 0)
@@ -910,7 +923,15 @@ class DescriptionRoom {
       // its whole width, though it's cut:  its text's
       const width = description.scrollWidth * scale
       const room = (end - wordsEnd) / scale - DESCRIPTION_GAP
-      rooms.set(from, wordsEnd + width <= end + 0.5 ? undefined : Math.max(0, Math.floor(room)))
+      if (wordsEnd + width <= end + 0.5) {
+        rooms.set(from, undefined)
+        continue
+      }
+      rooms.set(from, {
+        room: Math.max(0, Math.floor(room)),
+        from: view.posAtDOM(description, 0),
+        to: view.posAtDOM(description, description.childNodes.length)
+      })
     }
     return rooms
   }
@@ -919,10 +940,23 @@ class DescriptionRoom {
 /** The room kept between a head's words and its description cut short, in pixels. */
 const DESCRIPTION_GAP = 12
 
-/** Do `a` and `b` give the same lines the same room? */
-function sameRooms(a: Map<number, number>, b: Map<number, number>): boolean {
+/** A head's description cut short:  the room it has, and where it is in the text. */
+type DescriptionCut = {
+  /** the room after the head's words, in pixels */
+  room: number
+  /** where the description starts in the text, its `--` */
+  from: number
+  /** where it ends */
+  to: number
+}
+
+/** Do `a` and `b` cut the same lines' descriptions the same way? */
+function sameRooms(a: Map<number, DescriptionCut>, b: Map<number, DescriptionCut>): boolean {
   if (a.size !== b.size) return false
-  for (const [from, room] of a) if (b.get(from) !== room) return false
+  for (const [from, cut] of a) {
+    const other = b.get(from)
+    if (other?.room !== cut.room || other.from !== cut.from || other.to !== cut.to) return false
+  }
   return true
 }
 

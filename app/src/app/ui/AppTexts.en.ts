@@ -136,6 +136,8 @@ export const APP_TEXTS = {
   // the code pane's settings, `<CodeSettingsPanel>` (epic `debut`)
   // Spell › About Spell (epic `editor` I94)
   aboutSpell: "About Spell…",
+  // Spell › Spell UI, and the home page's footer:  Spell UI's site, in the editor (epic `mockup` T55)
+  spellUI: "Spell UI",
   codeSettings: "Code Editor Settings…",
   codeSettingsHeader: "Code editor",
   codeSettingsClose: "Close the code editor's settings",
@@ -153,6 +155,10 @@ export const APP_TEXTS = {
   codeCompilerWords: "Compiler details in hover",
   codeBubbly: "Bubbly look",
   codeWrapLines: "Wrap long lines",
+  codePopupDelay: "Popup delay",
+  codePopupDelayShort: "Short:  0.4 seconds",
+  codePopupDelayStandard: "Standard:  0.8 seconds",
+  codePopupDelayLong: "Long:  1.5 seconds",
   // a notebook's page, `<NotebookPage>` (epic `elemental-spell` P16)
   notebookPageLock: "Lock it:  nothing is saved while it's locked",
   notebookPageUnlock: "Unlock it:  changes are saved",
@@ -603,6 +609,7 @@ export const APP_TEXTS = {
   // the section of the projects written in Spanish:  in Spanish whatever the editor's language (epic `mockup` I46)
   homeSpanishTitle: "En español",
   homeSpanishLine: "Ejemplos y guías escritos en español.",
+  homeSpellUILine: "The buttons, menus and other parts your apps are made of.",
   homeRearrange: "Rearrange Home Screen",
   homeRearrangeDone: "Done",
   homeRearrangeReset: "Reset to Default",
@@ -1011,6 +1018,24 @@ export const APP_TEXTS = {
   // a web address in the code, its tip on a plain hover (`CodeEditorFeatures.linkTip()`)
   codeLinkTipMac: "⌘-click to open",
   codeLinkTip: "Ctrl-click to open",
+
+  ////////////////
+  // ## The sound picker (`ValuePopups`, epic `mockup` P28):  "Pick a sound…" in `play "|"`
+  ////////////////
+
+  soundPicker: "Sounds",
+  soundPickerHint: "Click ▶ to hear a sound.\nClick its name to use it.",
+  soundListen: "Hear \u201c{sound}\u201d",
+  soundKindInterface: "Clicks and switches",
+  soundKindCards: "Cards",
+  soundKindCasino: "Dice, chips and coins",
+  soundKindPieces: "Board pieces",
+  soundKindImpacts: "Knocks and hits",
+  soundKindFootsteps: "Footsteps",
+  soundKindThings: "Doors, books and things",
+  soundKindDigital: "Beeps and zaps",
+  soundKindJingles: "Short tunes",
+
   // the step debugger (`<Debugger>`, epic `editor` P33):  its bar's buttons, each said in full on hover
   debugContinue: "Continue:  run on to the next red dot",
   debugStepOver: "Step Over:  run this line, then pause on the next",

@@ -18,7 +18,7 @@ import { after } from "spell/util/timing"
 import type { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
-import { HOVER_DELAY } from "spell/app/app/ui/codePopups"
+import { hoverDelay } from "spell/app/app/ui/codePopups"
 import { FileStates } from "./FileStates"
 import { LspToCodeMirror } from "./LspToCodeMirror"
 
@@ -38,7 +38,7 @@ import { LspToCodeMirror } from "./LspToCodeMirror"
  * - `group `, `its `, `a ` ... at a line's start open a name's quotes, the caret between;
  *   one undo leaves `group ` again, and a `"` typed after the name steps over the closing one.
  * - A space after a tag's name writes the rest of the tag, the caret where its next words go:
- *   `<action ` => `<action "|" />`, the program's actions listed once the typing pauses `HOVER_DELAY`
+ *   `<action ` => `<action "|" />`, the program's actions listed once the typing pauses `hoverDelay()`
  *   (`LSP.CompletionShapes.spaceAfterTag()`;  epic `codemirror` I22);
  *   one undo leaves `<action `.
  * - A paste takes the indent where it lands, ⌘V and the right-click menu's Paste alike (`paste()`);
@@ -502,12 +502,12 @@ function scopeOf(file: SP.SpellFile | undefined, lang: string): P.Scope {
 }
 
 /**
- * Show the suggestion list in `view` once the typing pauses `HOVER_DELAY`, as the list shown by itself does
+ * Show the suggestion list in `view` once the typing pauses `hoverDelay()`, as the list shown by itself does
  * (epic `codemirror` I22);  never if a key is typed before then:  that key's own wait takes over.
  */
 function suggestOncePaused(view: EditorView): void {
   const { doc } = view.state
-  void after(HOVER_DELAY, () => {
+  void after(hoverDelay(), () => {
     if (view.state.doc === doc && view.hasFocus) startCompletion(view)
   }).catch((error) => console.error("CodeMirrorTyping:  the suggestion list didn't show", error))
 }

@@ -1,0 +1,288 @@
+/*
+ * The style sheet of `<ui-uploader>`:  ours, not Fomantic's.
+ * - It styles the component's shadow DOM, a look per `appearance` (its `:host(:state(<look>))`):
+ *   - `hero` and `compact`:  a placeholder `<ui-segment class="drop-area">`, restyled through its `segment` part
+ *     as a dashed drop area;  `.hero` (stacked, centred) or `.line` (one row) inside it
+ *   - `button`:  a `<ui-button class="choose">`, then a `<ui-popup>` holding `.popup-rows`
+ *     (a `<ui-text class="popup-summary">`, then the rows)
+ *   - `input`:  a read-only `<ui-input class="field">` with a `<ui-button slot="action">`
+ *   - then, but in `compact`:  `<ui-list class="files">`, a `<ui-item class="file">` per file,
+ *     laid out through its `item` part:
+ *     a glyph, `.name`, a `<ui-text class="size">`, then a `<ui-progress>` or a `<ui-text class="status">`,
+ *     and a `<ui-button class="remove">`
+ *   - `compact`:  `.summary`, one line of status and one `<ui-progress>`
+ *   - `.zone`:  the overlay over its `drop-zone` while files are dragged over it, in the top layer
+ * - Inner `<ui-*>` elements are restyled through their parts (`::part(segment)`, `::part(button)`), never by setting
+ *   their public tokens.
+ * - Public tokens are NEVER declared here:  each is read through its private alias.
+ */
+
+@import "../../styles/media.css";
+
+@layer ui.components.uploader.types, ui.components.uploader.states;
+
+@layer ui.components.uploader.types {
+  :host {
+    --_ui-uploader-border-width: var(--ui-uploader-border-width, 2px);
+    --_ui-uploader-border-style: var(--ui-uploader-border-style, dashed);
+    --_ui-uploader-border-color: var(
+      --ui-uploader-border-color,
+      var(--ui-border-color, oklch(from var(--ui-ink) l c h / 0.2))
+    );
+    --_ui-uploader-background: var(--ui-uploader-background, transparent);
+    --_ui-uploader-lit-color: var(--ui-uploader-lit-color, var(--ui-blue));
+    --_ui-uploader-radius: var(--ui-uploader-radius, var(--ui-radius-l, 8px));
+    --_ui-uploader-padding: var(--ui-uploader-padding, 24px 16px);
+    --_ui-uploader-icon-color: var(--ui-uploader-icon-color, var(--ui-text-muted));
+    --_ui-uploader-row-height: var(--ui-uploader-row-height, 44px);
+    --_ui-uploader-row-gap: var(--ui-uploader-row-gap, 8px);
+    --_ui-uploader-popup-width: var(--ui-uploader-popup-width, 360px);
+
+    display: block;
+  }
+
+  :host(:state(button)) {
+    display: inline-block;
+  }
+
+  /* The drop area:  the segment's box, dashed, at its content's height */
+  .drop-area {
+    display: block;
+    margin: 0;
+  }
+  .drop-area::part(segment) {
+    min-height: 0;
+    margin: 0;
+    padding: var(--_ui-uploader-padding);
+    border: var(--_ui-uploader-border-width) var(--_ui-uploader-border-style) var(--_ui-uploader-border-color);
+    border-radius: var(--_ui-uploader-radius);
+    background: var(--_ui-uploader-background);
+    box-shadow: none;
+    transition:
+      border-color 120ms,
+      background-color 120ms;
+  }
+
+  .hero {
+    display: grid;
+    gap: 8px;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .icon {
+    display: inline-flex;
+    color: var(--_ui-uploader-icon-color);
+  }
+
+  .choose-slot {
+    display: contents;
+  }
+
+  /* compact:  one row */
+  :host(:state(compact)) .drop-area::part(segment) {
+    padding: 8px 12px;
+    border-width: 1px;
+  }
+  .line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+  }
+  .line .choose {
+    margin: 0;
+  }
+
+  .summary {
+    display: grid;
+    gap: 4px;
+    margin-top: 8px;
+    font-size: 0.9em;
+  }
+
+  /* The rows:  a `<ui-list>`, each `<ui-item>`'s box a grid */
+  .files::part(list) {
+    display: grid;
+    gap: var(--_ui-uploader-row-gap);
+    margin: 12px 0 0;
+    padding: 0;
+  }
+  .file::part(item) {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr) 72px minmax(96px, 220px) 32px;
+    gap: 12px;
+    align-items: center;
+    min-height: var(--_ui-uploader-row-height);
+    box-sizing: border-box;
+    margin: 0;
+    padding: 4px 4px 4px 12px;
+    border-radius: var(--ui-radius-l, 8px);
+    box-shadow: 0 0 0 1px var(--ui-border-color, oklch(from var(--ui-ink) l c h / 0.12));
+  }
+  .file::part(item)::after {
+    content: none;
+  }
+  .glyph {
+    color: var(--ui-text-muted);
+  }
+  .name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* a `<ui-text>` has no box of its own:  its `text` part is the grid's cell */
+  .size::part(text) {
+    text-align: end;
+    font-variant-numeric: tabular-nums;
+  }
+  /* its icon on the words' line:  the list hands its items' icons a table cell of their own */
+  .status {
+    --_ui-icon-owner-display: inline-flex;
+    --_ui-icon-owner-margin: 0 4px 0 0;
+    --_ui-icon-owner-align: -0.125em;
+  }
+  .status::part(text) {
+    min-width: 0;
+  }
+  .file ui-progress,
+  .summary ui-progress {
+    display: block;
+    margin: 0;
+  }
+  .file ui-progress::part(progress),
+  .summary ui-progress::part(progress) {
+    margin: 0;
+  }
+
+  /* Remove:  a bare glyph, a tint on hover */
+  .remove {
+    margin: 0;
+  }
+  .remove::part(button) {
+    box-sizing: border-box;
+    width: 28px;
+    height: 28px;
+    margin: 0;
+    padding: 0;
+    justify-content: center;
+    border-radius: var(--ui-radius-s, 4px);
+    background: transparent;
+    box-shadow: none;
+  }
+  .remove::part(button):hover {
+    background: oklch(from var(--ui-ink) l c h / 0.08);
+  }
+
+  /* the input look's rows, smaller, with no box each;  the popup's, without Remove */
+  .files.small {
+    font-size: 0.9em;
+  }
+  .files.small::part(list) {
+    gap: 4px;
+    margin-top: 8px;
+  }
+  .files.popup::part(list) {
+    gap: 6px;
+    margin: 0;
+  }
+  .files.small .file::part(item),
+  .files.popup .file::part(item) {
+    grid-template-columns: minmax(0, 1fr) 64px minmax(120px, max-content) 28px;
+    min-height: 0;
+    padding: 0;
+    box-shadow: none;
+  }
+  .files.popup .file::part(item) {
+    grid-template-columns: minmax(0, 1fr) 64px minmax(120px, max-content);
+  }
+
+  /* the button look's popup:  hidden while its button is scrolled out of view, so it never comes loose */
+  ui-popup {
+    position-visibility: anchors-visible;
+  }
+  .popup-rows {
+    display: grid;
+    gap: 6px;
+    min-width: min(var(--_ui-uploader-popup-width), calc(100vw - 32px));
+  }
+  :host(:state(button)) .choose {
+    margin: 0;
+  }
+
+  /* the zone's overlay, over another element, in the top layer */
+  .zone {
+    position: fixed;
+    inset: auto;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 8px;
+    border: none;
+    background: transparent;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .zone:not(:popover-open) {
+    display: none;
+  }
+  .zone ui-segment {
+    display: block;
+    height: 100%;
+    margin: 0;
+  }
+  .zone ui-segment::part(segment) {
+    box-sizing: border-box;
+    height: 100%;
+    min-height: 0;
+    margin: 0;
+    align-items: center;
+    gap: 8px;
+    border: var(--_ui-uploader-border-width) var(--_ui-uploader-border-style) var(--_ui-uploader-lit-color);
+    border-radius: var(--_ui-uploader-radius);
+    /* opaque, so nothing under it (an example's code toggle) shows through */
+    background: color-mix(in oklab, var(--_ui-uploader-lit-color) 12%, var(--ui-background, Canvas));
+    box-shadow: none;
+  }
+  .zone ui-icon {
+    color: var(--_ui-uploader-lit-color);
+  }
+
+  /* at phone width:  the rows' status and progress under the name, close to it;  the rows further apart */
+  @media (--ui-mobile) {
+    .file::part(item) {
+      grid-template-columns: 20px minmax(0, 1fr) auto 32px;
+      row-gap: 2px;
+    }
+    .file > .status::part(text),
+    .file > ui-progress {
+      grid-column: 2 / 4;
+      grid-row: 2;
+    }
+    .files.small::part(list),
+    .files.popup::part(list) {
+      gap: 12px;
+    }
+    .files.small .file::part(item),
+    .files.popup .file::part(item) {
+      grid-template-columns: minmax(0, 1fr) auto 28px;
+    }
+    .files.small .file > .status::part(text),
+    .files.small .file > ui-progress,
+    .files.popup .file > .status::part(text),
+    .files.popup .file > ui-progress {
+      grid-column: 1 / 3;
+    }
+  }
+}
+
+@layer ui.components.uploader.states {
+  /* lit while files are dragged over it */
+  :host(:state(dragged-over)) .drop-area::part(segment) {
+    border-color: var(--_ui-uploader-lit-color);
+    background: color-mix(in oklab, var(--_ui-uploader-lit-color) 10%, transparent);
+  }
+  :host(:state(dragged-over)) .icon {
+    color: var(--_ui-uploader-lit-color);
+  }
+}

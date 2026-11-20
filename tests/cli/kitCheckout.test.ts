@@ -4,7 +4,7 @@ import { join } from "node:path"
 import { pathToFileURL } from "node:url"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
-import { checkoutToRun, kitCheckoutBin, kitSetting } from "spell/cli/kitCheckout"
+import { checkoutToRun, isOlder, kitCheckoutBin, kitSetting } from "spell/cli/kitCheckout"
 
 /** A made-up checkout (`bin/spell.mjs`, installed) and an npm install of spell beside it, in a temporary folder. */
 const root = realpathSync(mkdtempSync(join(tmpdir(), "kit-checkout-")))
@@ -63,6 +63,34 @@ describe("kitCheckoutBin()", () => {
     expect(run(binless)).toThrow("has no bin/spell.mjs")
     expect(run(fresh)).toThrow("isn't installed yet:  run yarn install there")
     expect(run(other)).toThrow("unset SPELL_KIT to run the installed spell")
+  })
+
+  test("a checkout older than the installed spell throws, saying to update it;  the same or newer runs", () => {
+    const bin = { "bin/spell.mjs": "", "node_modules/tsx/package.json": "{}" }
+    const versioned = (name: string, version: string) =>
+      folderWith(name, { "package.json": JSON.stringify({ name: "spell", version }), ...bin })
+    const installed = folderWith("versioned/node_modules/spell", {
+      "package.json": JSON.stringify({ name: "spell", version: "0.8.15" }),
+      "bin/spell.mjs": ""
+    })
+    const self = pathToFileURL(join(installed, "bin", "spell.mjs")).href
+    const run = (kit: string) => () => kitCheckoutBin("bin/spell.mjs", self, root, { SPELL_KIT: kit })
+    const old = versioned("old", "0.8.14")
+    expect(run(old)).toThrow(
+      `that checkout is spell 0.8.14, older than the 0.8.15 this project installs:  update it (cd ${old} && git pull`
+    )
+    expect(run(versioned("same", "0.8.15"))()).toContain("/same/bin/spell.mjs")
+    expect(run(versioned("newer", "0.9.0"))()).toContain("/newer/bin/spell.mjs")
+  })
+})
+
+describe("isOlder()", () => {
+  test("numbers compared in turn, not as text;  a tag ignored", () => {
+    expect(isOlder("0.8.9", "0.8.15")).toBe(true)
+    expect(isOlder("0.8.15", "0.8.9")).toBe(false)
+    expect(isOlder("0.8.15", "0.8.15")).toBe(false)
+    expect(isOlder("0.8", "0.8.1")).toBe(true)
+    expect(isOlder("1.0.0-beta.2", "1.0.0")).toBe(false)
   })
 })
 

@@ -249,9 +249,10 @@ export class EpicProgram {
     ).usage("[--json]")
     this.page(
       epic.command("summary"),
-      "an epic's phases, the next one, its open questions, issues, todos and manual tests",
+      "an epic's phases left, the next one, its open questions, issues, todos and manual tests;  finished phases and " +
+        "grey items (limits, handled) only counted, unless --all",
       "epic summary seo"
-    ).usage("<epic> [--json]")
+    ).usage("<epic> [--json] [--all]")
     this.page(
       epic.command("stale"),
       "the facts for judging which open calls, issues and todos have gone stale:  age, phase, whether the files and " +
@@ -260,14 +261,16 @@ export class EpicProgram {
     ).usage("<epic> [--json]")
     this.page(
       epic.command("summaries"),
-      "`summary --json` of each page, by path (worktrees' too), for /epics",
+      "`summary --json` of each page, by path (worktrees' too), for /epics;  --all as summary's",
       "epic summaries epics/seo/seo.plan.html"
-    ).usage("<file.html>...")
+    ).usage("<file.html>... [--all]")
     this.page(
       epic.command("items"),
       "what a review walks:  sections, counts, items, the queue",
       "epic items seo --filter unreviewed"
-    ).usage("<epic> [--section issues] [--filter unreviewed | open | reviewed | queued | all] [--json] [--spec <file>]")
+    ).usage(
+      "<epic> [--section issues] [--filter unreviewed | open | reviewed | queued | all] [--all] [--json] [--spec <file>]"
+    )
     this.page(
       epic.command("docs"),
       "the docs an epic wrote besides its page, and its changelog entry (for /docs-check)",

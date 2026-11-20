@@ -4,17 +4,6 @@
 		<header>A root loads the components inside it on demand, sets their theme, size, icons and emoji, and shows
               them once they're ready.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#loading">Loading</>
-			<item link="#component-packs">Component packs</>
-			<item link="#events">Events</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-		</>
-	</>
-
 	<!-- USAGE:  from the old Astro page's Behaviour and Accessibility, plus the vocabulary's events. -->
 	<section label="Using it">
 		<markdown>

@@ -3,15 +3,6 @@
 		Menu
 		<header>A menu displays grouped navigation actions.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#content">Content</>
-			<item link="#states">States</>
-			<item link="#variations">Variations</>
-			<item link="#fitting-titles">Fitting titles</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's menu page, section by section, in its order (Types, Content, States, Variations), plus our

@@ -19,8 +19,8 @@ import { CodeMirrorSetup } from "./CodeMirrorSetup"
  *   SHAPE drawn on the text itself, not in a layer behind it:
  *   - a tag in a line:  its mark a small pill, its ends pointed (`cmb-tag-pill`)
  *   - a tag alone on its line, a block's start tag:  a band, its ends pointed (`cmb-tag-band`)
- *   - a start tag over several lines, an attribute on each:  ONE block round them all, its `>` at its right edge
- *     (`cmb-tag-block`, `CodeMirrorMarkup.tagBlocks`)
+ *   - a start tag over several lines, an attribute on each:  ONE block round them all,
+ *     its `>` at its right edge (`cmb-tag-block`, `CodeMirrorMarkup.tagBlocks`)
  *   - a block's body:  a rail on each line (`--cmb-rails`);  its end tag on its own line a foot, its rail turning out
  *     at a tag's slant into a small pill pointed at both ends, end tags on lines one after another ONE row of feet
  *     (`cmb-tag-foot`, `cmb-feet-row`;  epic `language` I132)
@@ -257,14 +257,14 @@ class MarkupShapes {
    *   `shrinkable>`, as Enter lays it out;  epic `language` I133, I135):  ONE block of its colour round them all
    *   (Owen:  "show in a block pill"), drawn as a row on each line (`cmb-tag-block`):
    *   - its first line its band, `classes`;  on each line under it, a row round that line's words, never its indent
-   *   - its first attribute drawn on its name's line, `⟨ toolbar class="GameBar"` (I139;  Owen:  "`class` should be
-   *     on the same line as `toolbar`"):  the line break and indent between them hidden (`TagJoinWidget`),
-   *     the file unchanged
-   *   - every other attribute's words lined up under that first one's (`--cmb-reach-in`;  Owen:  "other attributes
-   *     should be indented as much as `class`")
+   *   - its first attribute drawn on its name's line, `⟨ toolbar class="GameBar"`:
+   *     the line break and indent between them hidden (`TagJoinWidget`), the file unchanged
+   *     (I139;  Owen:  "`class` should be on the same line as `toolbar`")
+   *   - every other attribute's words lined up under that first one's (`--cmb-reach-in`;
+   *     Owen:  "other attributes should be indented as much as `class`")
    *   - every row from the block's left edge, its band's, to its right edge, past its widest row:
    *     how far each reaches past its words is measured once it's drawn (`tagBlocks`)
-   *   - its `>` or `/>` on its last attribute's line, 4px past that attribute's ink (`TagPointWidget`;  I139),
+   *   - its `>` or `/>` on its last attribute's line, 4px past that attribute's ink (`TagPointWidget`;  I139):
    *     alone on the line under it too, the line break before it hidden (I144)
    */
   private tagOn(place: number, classes: string[], partOfSpeech: string) {
@@ -514,8 +514,8 @@ export class CodeMirrorDecorations {
   /**
    * A decoration drawn whatever's on screen, kept in the editor's state (`build("whole")`):
    * - a line break hidden, which CodeMirror must know of to guess the height of lines it hasn't drawn
-   * - feet, a blank line's room and caret's place:  read and moved as a blank line's typed on, far from the screen
-   *   (`CodeMirrorBubbly`'s `blankLinesDrawn()`)
+   * - feet, a blank line's room and caret's place:
+   *   read and moved as a blank line's typed on, far from the screen (`CodeMirrorBubbly`'s `blankLinesDrawn()`)
    */
   wholeFile(range: Range<Decoration>): void {
     if (this.part !== "marks") this.whole.push(range)
@@ -669,8 +669,8 @@ export class CodeMirrorDecorations {
       const lineClasses = [...classes, ...(innermost ? hueOf(innermost.partOfSpeech) : [])]
       const styles = rails.length ? [railsStyle(rails, stopped, ended)] : []
       if (feet) styles.push(`--cmb-feet: ${feet}`)
-      // inside a drawing's tags:  its first tag pulled left a step for each (`.cmb-tag-nested`);  a row of feet places
-      // each foot itself
+      // inside a drawing's tags:  its first tag pulled left a step for each (`.cmb-tag-nested`);
+      // a row of feet places each foot itself
       const nest = rails.filter((rail) => rail.nest !== undefined).length
       if (nest && !classes.has("cmb-feet-row")) {
         lineClasses.push("cmb-tag-nested")
@@ -975,11 +975,11 @@ class FeetJoinWidget extends WidgetType {
  * The line break, and the next line's indent, between a laid-out tag's name and its first attribute, drawn as the
  * space between them (epic `language` I139;  Owen:  "`class` should be on the same line as `toolbar`"):
  * `⟨ toolbar class="GameBar"`, the file still `<toolbar`, then `class="GameBar"` on a line of its own.
- * - One step for the caret, as the feet's join (`FeetJoinWidget`):  before it, after the name;  after it, before
- *   the attribute
+ * - One step for the caret, as the feet's join (`FeetJoinWidget`):
+ *   before it, after the name;  after it, before the attribute
  * - Also the line break and indent before a `>` alone on the line under the last attribute, drawn as nothing,
- *   so the `>` is on that attribute's line (epic `language` I144;  Owen:  "End `>` is supposed to be on same line
- *   as `shrinkable`")
+ *   so the `>` is on that attribute's line
+ *   (epic `language` I144;  Owen:  "End `>` is supposed to be on same line as `shrinkable`")
  ****************/
 class TagJoinWidget extends WidgetType {
   /**
@@ -1029,8 +1029,8 @@ class TagJoinWidget extends WidgetType {
  * A tag laid out over lines' `>` or `/>`, drawn on its last attribute's line, its `⟩` 4px past that attribute's ink
  * (epic `language` I139;  Owen:  "put the `>` on the same line as the last attribute, 4px to the right of the end
  * of the last attribute";  at the block's right edge under I135).
- * - Shown IN PLACE of the file's `>`, which stays right after the last attribute:  the room before it,
- *   `--cmb-reach-point`, is measured from the letters' ink (`CodeMirrorMarkup.tagBlocks`).
+ * - Shown IN PLACE of the file's `>`, which stays right after the last attribute:
+ *   the room before it, `--cmb-reach-point`, is measured from the letters' ink (`CodeMirrorMarkup.tagBlocks`).
  * - Its pieces the marks the `>` had (`bubbly-angle-close` ...), so the sheet draws it as it draws every tag's.
  * - The caret before it stands at the words' end, where a letter typed goes;  after it, past its point.
  ****************/

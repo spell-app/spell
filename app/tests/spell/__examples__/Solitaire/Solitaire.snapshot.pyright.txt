@@ -1,1 +1,1 @@
-562 reportReturnType Type "list[Element]" is not assignable to return type "Element"
+564 reportReturnType Type "list[Element]" is not assignable to return type "Element"

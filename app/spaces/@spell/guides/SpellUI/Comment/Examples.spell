@@ -3,14 +3,6 @@
 		Comment
 		<header>A comment displays user feedback to site content.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#content">Content</>
-			<item link="#states">States</>
-			<item link="#variations">Variations</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's comment page, section by section, in its order (Types, Content, States, Variations), plus

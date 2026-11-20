@@ -28,6 +28,8 @@ export const spanishInflector = new P.Inflector({
  *   only where it agrees with it, ending as it does (epic `spanish` P28):
  *   - `cuentas-bancarias` => `cuenta-bancaria`:  `-as` and `-as`, an adjective
  *   - `gestor-tareas`, `gestorTareas` stay as they are:  `gestor` is one already, and `tareas` is what it handles
+ * - Making it plural, a later word changes only where the first does, so the singular finds the name again
+ *   (epic `data` I141):  `jobs archive`, the first word plural already, stays `jobs archive`, never `jobses archives`.
  */
 function eachWord(words: string, inflect: (word: string) => string, rule?: "agreeing with the first"): string {
   // a type's name is in PascalCase by then, `PilaDeDescartes`:  its words split where each is capitalized
@@ -42,19 +44,24 @@ function eachWord(words: string, inflect: (word: string) => string, rule?: "agre
         linked = true
         return part
       }
-      if (index > 0 && rule && (inflect(first) === first || ending(part) !== ending(first))) return part
+      if (index > 0 && inflect(first) === first) return part
+      if (index > 0 && rule && ending(part) !== ending(first)) return part
       return inflect(part)
     })
     .join("")
 }
+
+/** A word borrowed in its plural, an -s after a consonant:  `jobs`, `steps`;  not Spanish's `bíceps`, which never changes either. */
+const BORROWED_PLURAL = /[^aeiouáéíóúlnrdjxyz\s]s$/iu
 
 /** Words after which the rest of a name is left alone:  `carta de juego`. */
 const LINKING_WORDS = new Set(["de", "del", "con", "para", "en", "a", "al", "sin", "por"])
 
 /** `word` made plural, its case kept:  `carta` => `cartas`, `corazón` => `corazones`, `luz` => `luces`. */
 export function pluralOf(word: string): string {
-  // a plural already stays as it is:  `cartas`, `corazones`
-  if (singularOf(word) !== word) return word
+  // a plural already stays as it is:  `cartas`, `corazones`;
+  // and a word borrowed plural, an -s after a consonant no Spanish word ends in:  `jobs`, `steps` (epic `data` I141)
+  if (singularOf(word) !== word || BORROWED_PLURAL.test(word)) return word
   const lower = word.toLowerCase()
   if (!lower || UNCHANGING.has(lower) || INVARIANT_ENDING.test(lower)) return word
   const irregular = IRREGULAR_PLURALS.get(lower)

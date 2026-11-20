@@ -3,12 +3,6 @@
 		Sticky
 		<header>Sticky content stays fixed to the viewport while its container is on screen.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#introduction">Introduction</>
-			<item link="#examples">Examples</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's sticky page (its first tab is Examples:  Introduction, then the examples).  Scroll the PAGE:

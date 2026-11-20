@@ -231,7 +231,7 @@ Every family, by group, A-Z inside each.
 
 <!-- components:start -->
 
-91 families, 143 tags;  4 families in progress.
+93 families, 145 tags;  4 families in progress.
 
 ### Elements
 
@@ -301,6 +301,7 @@ Elements with behaviour:  they open, pick, move.
 |  | [Calendar](docs/ui-calendar.html) | `<ui-calendar>` | A calendar lets a person pick a date, a time, or both. | date picker, datepicker, time picker, datetime |
 | <img src="docs/images/components/ui-checkbox.png" alt="Checkbox, its first example" width="200" height="30"> | [Checkbox](docs/ui-checkbox.html) | `<ui-checkbox>` [`<ui-radio>`](docs/ui-radio.html) | A checkbox lets people choose a value from a small set of options, often on or off. | check box, toggle, switch, tick box |
 |  | [Components](docs/ui-components.html) | `<ui-components>` | Components name a pack of another package's elements, which the root around them loads on demand, once per page. | component pack, plugin, extension, custom elements |
+|  | [Dial](docs/ui-dial.html) | `<ui-dial>` | A dial lets people pick a number by turning it, with its value in the middle and its label under it. | knob, rotary knob, radial slider, circular slider |
 |  | [Dimmer](docs/ui-dimmer.html) | `<ui-dimmer>` | A dimmer hides distractions to focus attention on particular content. | overlay, backdrop, scrim, mask |
 | <img src="docs/images/components/ui-dropdown.png" alt="Dropdown, its first example" width="64" height="26"> | [Dropdown](docs/ui-dropdown.html) | `<ui-dropdown>` | A dropdown lets people choose a value from a series of options. | select, combobox, picker, autocomplete |
 | <img src="docs/images/components/ui-embed.png" alt="Embed, its first example" width="171" height="96"> | [Embed](docs/ui-embed.html) | `<ui-embed>` | An embed displays content from other websites, like YouTube videos, loaded only when asked for. | iframe, video, youtube, vimeo |
@@ -354,8 +355,9 @@ Elements with no Fomantic counterpart.
 | <img src="docs/images/components/ui-section.png" alt="Section, its first example" width="200" height="21"> | [Section](docs/ui-section.html) *(In progress)* | `<ui-section>` `<ui-sections>` | A section is a titled block of content that can close and keep its title in view. | section, panel, collapsible, disclosure |
 |  | [Sides](docs/ui-sides.html) | `<ui-sides>` | Sides edit four lengths at once, top, left, right and bottom, as a margin or a padding:  a number box per side. | margin, padding, box model, spacing |
 |  | [Site breadcrumbs](docs/ui-site-breadcrumbs.html) | `<ui-site-breadcrumbs>` | Site breadcrumbs say where you are in a site:  the group, the pages above the page shown, then the page (Hardware › Systems), each page above a link. | breadcrumb trail, you are here, location, page path |
+|  | [Site links](docs/ui-site-links.html) | `<ui-site-links>` | Site links are the page shown's own links, for an app menu's end:  the real page it stands for (its `live` link, Fomantic UI's original for Spell UI's pages), and a way to report a problem with it. | page links, page actions, report a bug, original page |
 |  | [Site nav](docs/ui-site-nav.html) | `<ui-site-nav>` | A site nav lists a site's pages as a tree, the page shown marked;  a click goes to a page. | site navigation, side navigation, sidebar menu, nav menu |
-|  | [Site nav button](docs/ui-site-nav-button.html) | `<ui-site-nav-button>` | A site nav button shows or hides the side navigation of the page layout around it:  its icons only and back on a wide page, slid in and out on a narrow one.  It's an item, for an app menu. | side bar button, drawer button, hamburger, menu button |
+|  | [Site nav button](docs/ui-site-nav-button.html) | `<ui-site-nav-button>` | A site nav button shows or hides the side navigation of the page layout around it:  its icons only and back on a wide page, slid in and out on a narrow one;  or one of its side bars (`toggles`).  It's an item, for an app menu. | side bar button, drawer button, hamburger, menu button |
 |  | [Site tabs](docs/ui-site-tabs.html) | `<ui-site-tabs>` | Site tabs show the page's family as a row of tabs:  the parent page first, the page shown selected, each a link. | page tabs, section tabs, sub navigation, secondary navigation |
 |  | [Space](docs/ui-space.html) | `<ui-space>` | A space is a gap between things.  Bare, it is a line break;  `inline`, a gap inside the line;  `fluid`, it takes the room left in its row or column.  It has no look of its own. | spacer, gap, line break, br |
 |  | [Split Panel](docs/ui-split-panel.html) | `<ui-split-panel>` | A split panel lays its children out side by side or one above the other, with bars to resize them. | split view, split pane, resizable panes, panes |

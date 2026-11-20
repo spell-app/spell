@@ -106,6 +106,7 @@ class Card(TwoSidedView):
 
     async def play(self) -> Any:
         if self.pile == solitaire.stock:
+            core.play("card slide")
             await solitaire.turn_over_the_next_card()
         else:
             end_pile = core.filter(core.every_thing(Pile), lambda pile: core.can_take(pile, self)).first_item
@@ -115,6 +116,7 @@ class Card(TwoSidedView):
 
     def after_move_to_pile(self, pile: Pile) -> None:
         """The move scores;  the column it left turns its new last card face up"""
+        core.play("card place")
         solitaire.score = solitaire.score + self.the_points_for_card_on_pile(pile)
         it_2 = self.last_pile
         if isinstance(it_2, Column) and (it_2):
@@ -726,6 +728,7 @@ class Solitaire(App):
 
     async def on_score_change(self, event: ScoreChangeEvent) -> None:
         if core.item_count_of(core.merge_lists(core.every_thing(Foundation))) == 52:
+            core.play("win")
             await core.show_drawn("you won")
 
 

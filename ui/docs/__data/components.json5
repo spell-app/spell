@@ -10962,6 +10962,401 @@
       "href": "ui-diagram.html#ui-diagram-node"
     },
     {
+      "tag": "ui-dial",
+      "name": "Dial",
+      "folder": "ui-dial",
+      "topics": [
+        "inputs",
+        "forms",
+        "controls",
+        "modules"
+      ],
+      "aka": [
+        "knob",
+        "rotary knob",
+        "radial slider",
+        "circular slider",
+        "gauge",
+        "arc slider"
+      ],
+      "description": "A dial lets people pick a number by turning it, with its value in the middle and its label under it.",
+      "noun": "dial",
+      "attributes": [
+        {
+          "name": "label",
+          "kind": "string",
+          "description": "The words under the dial;  also its name for screen readers, unless `aria-label` or a `<label for>` names it."
+        },
+        {
+          "name": "size",
+          "kind": "size",
+          "values": [
+            "mini",
+            "tiny",
+            "small",
+            "medium",
+            "large",
+            "big",
+            "huge",
+            "massive"
+          ],
+          "valueSet": "sizes",
+          "description": "Size of the whole dial, `mini` ... `massive`."
+        },
+        {
+          "name": "color",
+          "kind": "color",
+          "values": [
+            "primary",
+            "secondary",
+            "red",
+            "orange",
+            "yellow",
+            "olive",
+            "green",
+            "teal",
+            "blue",
+            "violet",
+            "purple",
+            "pink",
+            "brown",
+            "grey",
+            "black",
+            "positive",
+            "negative"
+          ],
+          "valueSet": "hues",
+          "description": "Hue of the arc and the handle;  uncoloured, the theme's primary colour."
+        },
+        {
+          "name": "ticks",
+          "kind": "string",
+          "description": "Dots round the inside of the ring:  `ticks` alone draws 9 (8 gaps), `ticks=\"10\"` that many gaps.  Only a look:  values still snap to `step`."
+        },
+        {
+          "name": "unit",
+          "kind": "string",
+          "description": "Written right after the number:  `unit=\"%\"` shows `98%`, `unit=\" px\"` shows `16 px`."
+        },
+        {
+          "name": "disabled",
+          "kind": "keyOnly",
+          "description": "Can't be used:  dimmed, not focusable, left out of the form."
+        },
+        {
+          "name": "readonly",
+          "kind": "keyOnly",
+          "property": "readOnly",
+          "description": "Shows its value but can't be changed;  still focusable and submitted."
+        },
+        {
+          "name": "min",
+          "kind": "number",
+          "default": 0,
+          "description": "Lowest value, at the ring's start."
+        },
+        {
+          "name": "max",
+          "kind": "number",
+          "default": 100,
+          "description": "Highest value, at the ring's end."
+        },
+        {
+          "name": "step",
+          "kind": "number",
+          "default": 1,
+          "description": "Values snap to multiples of it from `min`;  `0`:  any."
+        },
+        {
+          "name": "value",
+          "kind": "number",
+          "reflect": false,
+          "description": "The value, default `min`.  Attribute:  the starting (and reset) value;  property:  the live one."
+        },
+        {
+          "name": "name",
+          "kind": "string",
+          "description": "Form field name."
+        },
+        {
+          "name": "parameter",
+          "kind": "string",
+          "description": "Keep the value in the page's address, as this query parameter (`parameter=\"s\"` => `?s=van+gogh`):  each change it settles on is a new history entry, so Back and Forward step through them, and a page opened on the address starts with that value.  Other parameters are kept;  an empty value takes its own out."
+        },
+        {
+          "name": "required",
+          "kind": "boolean",
+          "description": "Form validation:  a value must be chosen, by the page (`value`) or by turning the dial.  Unset, the handle rests at `min` but counts as no value (`valueMissing`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "coin",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "heavy",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript",
+            "all-caps",
+            "title-caps",
+            "headline",
+            "subhead",
+            "serif",
+            "sans-serif",
+            "typewriter"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone."
+        },
+        {
+          "name": "shadow",
+          "kind": "enum",
+          "values": [
+            "primary",
+            "secondary",
+            "red",
+            "orange",
+            "yellow",
+            "olive",
+            "green",
+            "teal",
+            "blue",
+            "violet",
+            "purple",
+            "pink",
+            "brown",
+            "grey",
+            "black",
+            "positive",
+            "negative"
+          ],
+          "valueSet": "hues",
+          "shared": true,
+          "description": "A hard shadow behind its letters, down and to the right, in a hue:  `shadow=\"yellow\"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em)."
+        },
+        {
+          "name": "width",
+          "kind": "string",
+          "shared": true,
+          "description": "Its box's own width where it sits, any CSS length:  `width=\"10em\"`, `\"50%\"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns."
+        },
+        {
+          "name": "min-width",
+          "kind": "string",
+          "shared": true,
+          "description": "The narrowest its box gets, any CSS length:  `min-width=\"16em\"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower."
+        },
+        {
+          "name": "max-width",
+          "kind": "string",
+          "shared": true,
+          "description": "The widest its box gets, any CSS length:  `max-width=\"36em\"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        },
+        {
+          "name": "movable",
+          "kind": "string",
+          "shared": true,
+          "description": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered."
+        },
+        {
+          "name": "resizable",
+          "kind": "string",
+          "shared": true,
+          "description": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height)."
+        },
+        {
+          "name": "on-platform",
+          "kind": "string",
+          "shared": true,
+          "description": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for."
+        }
+      ],
+      "slots": [],
+      "events": [
+        {
+          "name": "ui-moved",
+          "detail": "{ value: number, originalEvent?: Event }",
+          "description": "The handle moved (each drag step, key or wheel turn).  A handler that re-sets `value` wins."
+        },
+        {
+          "name": "ui-changed",
+          "detail": "{ value: number, originalEvent?: Event }",
+          "description": "A change was committed:  on a key or wheel turn, or when a drag ends somewhere new."
+        }
+      ],
+      "parts": [
+        {
+          "name": "dial",
+          "description": "The root box:  the ring, then the label."
+        },
+        {
+          "name": "control",
+          "description": "The round control itself (`role=slider`), which takes focus."
+        },
+        {
+          "name": "track",
+          "description": "The empty ring."
+        },
+        {
+          "name": "track-fill",
+          "description": "The coloured arc, from the start to the value."
+        },
+        {
+          "name": "handle",
+          "description": "The round handle, at the arc's end."
+        },
+        {
+          "name": "disc",
+          "description": "The disc in the middle."
+        },
+        {
+          "name": "ticks",
+          "description": "The tick dots (`ticks`)."
+        },
+        {
+          "name": "value",
+          "description": "The value, written in the disc."
+        },
+        {
+          "name": "label",
+          "description": "The words under the dial (`label`)."
+        }
+      ],
+      "states": [
+        {
+          "name": "disabled",
+          "description": "Can't be used."
+        },
+        {
+          "name": "dragging",
+          "description": "The handle is being dragged."
+        },
+        {
+          "name": "invalid",
+          "description": "Fails validation (`required`), once a person has interacted."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        },
+        {
+          "name": "on-platform",
+          "description": "`on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
+        }
+      ],
+      "texts": [],
+      "mainTag": "ui-dial",
+      "main": true,
+      "page": true,
+      "href": "ui-dial.html"
+    },
+    {
       "tag": "ui-dimension",
       "name": "Dimension",
       "folder": "ui-dimension",
@@ -26804,9 +27199,36 @@
           "name": "drawer",
           "kind": "valueOnly",
           "values": [
-            "compact"
+            "compact",
+            "hidden"
           ],
-          "description": "`compact`:  the drawer shows only its icons (its `<ui-site-nav>`s `collapsed`), and opens over the page while the pointer rests on it.  None:  the whole drawer.  `toggleDrawer()` switches it, and says so with `ui-toggle`."
+          "description": "`compact`:  the drawer shows only its icons (its `<ui-site-nav>`s `collapsed`), and opens over the page while the pointer rests on it.  `hidden`:  no drawer at all, until its button shows it again.  None:  the whole drawer.  `toggleDrawer()` switches it, and says so with `ui-toggle`."
+        },
+        {
+          "name": "drawer-hides",
+          "kind": "keyOnly",
+          "description": "The drawer's button hides the whole drawer (`drawer=\"hidden\"`) and shows it again, never switching it to its icons:  for a navigation with no icons."
+        },
+        {
+          "name": "left",
+          "kind": "valueOnly",
+          "values": [
+            "hidden"
+          ],
+          "description": "`hidden`:  the left side bar isn't shown, until its button shows it again.  `toggleSidebar(\"left\")` switches it, and says so with `ui-toggle`."
+        },
+        {
+          "name": "right",
+          "kind": "valueOnly",
+          "values": [
+            "hidden"
+          ],
+          "description": "`hidden`:  the right side bar isn't shown, until its button (`<ui-site-nav-button toggles=\"right\">`) shows it again.  `toggleSidebar(\"right\")` switches it, and says so with `ui-toggle`.  Below 64em, a side bar with such a button is hidden behind it, and shows over the page while open."
+        },
+        {
+          "name": "floating",
+          "kind": "keyOnly",
+          "description": "The drawer and the side bars float:  rounded cards with a soft shadow and room round them, over the page's own ground.  None:  the drawer a column of its own fill, the page's side a box beside it."
         },
         {
           "name": "disabled",
@@ -27014,8 +27436,8 @@
       "events": [
         {
           "name": "ui-toggle",
-          "detail": "{ newState: \"compact\" | \"full\", oldState: \"compact\" | \"full\" }",
-          "description": "The drawer switched between its icons only (`compact`) and all of it (`full`), from `toggleDrawer()` (a `<ui-site-nav-button>`'s click):  a site keeps each person's choice, and sets `drawer` again next time."
+          "detail": "{ region: \"drawer\" | \"left\" | \"right\", newState: \"compact\" | \"hidden\" | \"full\" | \"shown\", oldState: \"compact\" | \"hidden\" | \"full\" | \"shown\" }",
+          "description": "The drawer switched between its icons only (`compact`), hidden (`hidden`) and all of it (`full`), from `toggleDrawer()`;  or a side bar between `hidden` and `shown`, from `toggleSidebar()` (a `<ui-site-nav-button>`'s click):  a site keeps each person's choice, and sets `drawer`, `left` or `right` again next time."
         }
       ],
       "parts": [
@@ -27072,6 +27494,42 @@
         {
           "name": "narrow",
           "description": "Below 40em of its own box:  one column, the drawer slid out of the way."
+        },
+        {
+          "name": "sides-narrow",
+          "description": "Below 64em of its own box:  a side bar with its button hides behind it, and shows over the page while open."
+        },
+        {
+          "name": "drawer-hidden",
+          "description": "`drawer=\"hidden\"`:  no drawer, on a wide page."
+        },
+        {
+          "name": "floating",
+          "description": "`floating`:  the drawer and the side bars are cards floating over the page."
+        },
+        {
+          "name": "left-hidden",
+          "description": "`left=\"hidden\"`:  no left side bar, on a wide page."
+        },
+        {
+          "name": "right-hidden",
+          "description": "`right=\"hidden\"`:  no right side bar, on a wide page."
+        },
+        {
+          "name": "left-closable",
+          "description": "A `<ui-site-nav-button toggles=\"left\">` is in it:  narrow, the left side bar hides behind it."
+        },
+        {
+          "name": "right-closable",
+          "description": "A `<ui-site-nav-button toggles=\"right\">` is in it:  narrow, the right side bar hides behind it."
+        },
+        {
+          "name": "left-open",
+          "description": "The left side bar is slid over a narrow page, from its button."
+        },
+        {
+          "name": "right-open",
+          "description": "The right side bar is slid over a narrow page, from its button."
         },
         {
           "name": "disabled",
@@ -39494,6 +39952,293 @@
       "href": "ui-site-breadcrumbs.html"
     },
     {
+      "tag": "ui-site-links",
+      "name": "Site links",
+      "folder": "ui-site-links",
+      "topics": [
+        "navigation",
+        "menus"
+      ],
+      "aka": [
+        "page links",
+        "page actions",
+        "report a bug",
+        "original page",
+        "edit this page",
+        "external links"
+      ],
+      "description": "Site links are the page shown's own links, for an app menu's end:  the real page it stands for (its `live` link, Fomantic UI's original for Spell UI's pages), and a way to report a problem with it.",
+      "noun": "site links",
+      "attributes": [
+        {
+          "name": "pages",
+          "kind": "json",
+          "reflect": false,
+          "description": "The site's pages, nested as the side navigation nests them:  the same `pages` `<ui-site-nav>` takes, each `{ title, href, id?, live?, pages? }`, e.g. `[{ \"title\": \"Button\", \"href\": \"/button\", \"live\": \"https://fomantic-ui.com/elements/button.html\" }]`.  `live` is the real page a page stands for:  the page shown's own, else the nearest one above it."
+        },
+        {
+          "name": "current",
+          "kind": "string",
+          "description": "Which page is shown:  its `href` or its `id`.  None:  the page whose `href` is the browser's address."
+        },
+        {
+          "name": "report",
+          "kind": "string",
+          "description": "Where to report a problem with the page shown:  an address, `{title}` in it standing for the title of the page at the top of its family, e.g. `https://github.com/spell-app/spell-ui/issues/new?title={title}`.  None:  no report link."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "coin",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "heavy",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript",
+            "all-caps",
+            "title-caps",
+            "headline",
+            "subhead",
+            "serif",
+            "sans-serif",
+            "typewriter"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone."
+        },
+        {
+          "name": "shadow",
+          "kind": "enum",
+          "values": [
+            "primary",
+            "secondary",
+            "red",
+            "orange",
+            "yellow",
+            "olive",
+            "green",
+            "teal",
+            "blue",
+            "violet",
+            "purple",
+            "pink",
+            "brown",
+            "grey",
+            "black",
+            "positive",
+            "negative"
+          ],
+          "valueSet": "hues",
+          "shared": true,
+          "description": "A hard shadow behind its letters, down and to the right, in a hue:  `shadow=\"yellow\"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em)."
+        },
+        {
+          "name": "width",
+          "kind": "string",
+          "shared": true,
+          "description": "Its box's own width where it sits, any CSS length:  `width=\"10em\"`, `\"50%\"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns."
+        },
+        {
+          "name": "min-width",
+          "kind": "string",
+          "shared": true,
+          "description": "The narrowest its box gets, any CSS length:  `min-width=\"16em\"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower."
+        },
+        {
+          "name": "max-width",
+          "kind": "string",
+          "shared": true,
+          "description": "The widest its box gets, any CSS length:  `max-width=\"36em\"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "shared": true,
+          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        },
+        {
+          "name": "movable",
+          "kind": "string",
+          "shared": true,
+          "description": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered."
+        },
+        {
+          "name": "resizable",
+          "kind": "string",
+          "shared": true,
+          "description": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height)."
+        },
+        {
+          "name": "on-platform",
+          "kind": "string",
+          "shared": true,
+          "description": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for."
+        }
+      ],
+      "slots": [],
+      "events": [],
+      "parts": [
+        {
+          "name": "links",
+          "description": "The row of links."
+        },
+        {
+          "name": "original",
+          "description": "The link to the real page the page shown stands for (its `live`)."
+        },
+        {
+          "name": "report",
+          "description": "The link to report a problem with the page shown."
+        }
+      ],
+      "states": [
+        {
+          "name": "empty",
+          "description": "No link to draw for the page shown:  it takes no room."
+        },
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        },
+        {
+          "name": "on-platform",
+          "description": "`on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
+        }
+      ],
+      "texts": [
+        {
+          "key": "original",
+          "text": "The original page",
+          "description": "The original's name, its tooltip and its name for a screen reader."
+        },
+        {
+          "key": "report",
+          "text": "Report a bug",
+          "description": "The report link's name, its tooltip and its name for a screen reader."
+        }
+      ],
+      "mainTag": "ui-site-links",
+      "main": true,
+      "page": true,
+      "href": "ui-site-links.html"
+    },
+    {
       "tag": "ui-site-nav",
       "name": "Site nav",
       "folder": "ui-site-nav",
@@ -39834,7 +40579,7 @@
         "navigation toggle",
         "sidebar toggle"
       ],
-      "description": "A site nav button shows or hides the side navigation of the page layout around it:  its icons only and back on a wide page, slid in and out on a narrow one.  It's an item, for an app menu.",
+      "description": "A site nav button shows or hides the side navigation of the page layout around it:  its icons only and back on a wide page, slid in and out on a narrow one;  or one of its side bars (`toggles`).  It's an item, for an app menu.",
       "noun": "item",
       "attributes": [
         {
@@ -39950,6 +40695,17 @@
           ],
           "default": "item",
           "description": "An item, a group `header` (dropdown, menu), or a `divider`:  a line between two groups (dropdown, menu, toolbar;  upright in a row).  Its old name was `type`."
+        },
+        {
+          "name": "toggles",
+          "kind": "valueOnly",
+          "values": [
+            "drawer",
+            "left",
+            "right"
+          ],
+          "default": "drawer",
+          "description": "What it shows and hides:  the layout's `drawer` (its side navigation), or its `left` or `right` side bar.  With one for a side bar, a narrow layout hides that side bar behind it."
         },
         {
           "name": "loading",
@@ -40194,6 +40950,16 @@
           "description": "What it's called, its tooltip and its name for a screen reader, without `aria-label`."
         },
         {
+          "key": "leftLabel",
+          "text": "Show or hide the left side bar",
+          "description": "What it's called with `toggles=\"left\"`, without `aria-label`."
+        },
+        {
+          "key": "rightLabel",
+          "text": "Show or hide the right side bar",
+          "description": "What it's called with `toggles=\"right\"`, without `aria-label`."
+        },
+        {
           "key": "menuLabel",
           "text": "Show or hide the menu",
           "description": "What it's called at a narrow width, where the drawer is hidden until it slides in:  its icon the menu's (`bars`)."
@@ -40233,6 +40999,14 @@
           "name": "current",
           "kind": "string",
           "description": "Which page is shown:  its `href` or its `id`.  None:  the page whose `href` is the browser's address."
+        },
+        {
+          "name": "appearance",
+          "kind": "valueOnly",
+          "values": [
+            "header"
+          ],
+          "description": "`header`:  a switch for an app menu's middle, the look of the editor's Run | Edit:  the row as wide as its tabs, on the bar's own fill, the page shown on the thumb.  None:  a segmented row of its own, each tab an equal share of it."
         },
         {
           "name": "label",
@@ -40425,6 +41199,10 @@
         {
           "name": "empty",
           "description": "The shown page has no family, so no tabs are drawn:  it takes no room."
+        },
+        {
+          "name": "header",
+          "description": "`appearance=\"header\"`:  a switch for an app menu's middle."
         },
         {
           "name": "disabled",
@@ -41899,6 +42677,7 @@
         {
           "name": "value",
           "kind": "string",
+          "canBeNumber": true,
           "description": "Shorthand for a `<ui-value>`:  the number (or word) shown."
         },
         {
@@ -49689,17 +50468,17 @@
           "name": "for",
           "kind": "string",
           "property": "htmlFor",
-          "description": "Id of the element whose headings to list.  A `<ui-tabs>`:  its SHOWN pane, followed as the tabs switch.  Default:  the page's `<main>`, else `<body>`."
+          "description": "Id of the element whose headings to list.  A `<ui-tabs>`:  its SHOWN pane, followed as the tabs switch.  Default:  inside a `<ui-page-layout>` (a side bar of it), the layout's page, followed as the site shows another;  else the page's `<main>`, else `<body>`."
         },
         {
           "name": "scroller",
           "kind": "string",
-          "description": "Id of the element whose scroll it follows, when the content scrolls inside a box of its own (a pane) rather than the window.  Its reading line is then that box's top.  Default:  the window."
+          "description": "Id of the element whose scroll it follows, when the content scrolls inside a box of its own (a pane) rather than the window.  Its reading line is then that box's top.  Default:  inside a `<ui-page-layout>`, the box the layout scrolls in;  else the window."
         },
         {
           "name": "heading",
           "kind": "string",
-          "description": "Title above the links, e.g. the page's name (Fomantic's `Button`).  Its old name was `header`."
+          "description": "Title above the links, e.g. the page's name (Fomantic's `Button`).  Default:  inside a `<ui-page-layout>`, the title of the layout's page (its level 1 heading).  Its old name was `header`."
         },
         {
           "name": "size",
@@ -52517,6 +53296,712 @@
       "main": false,
       "page": false,
       "href": "ui-tree-diagram.html#ui-tree-node"
+    },
+    {
+      "tag": "ui-uploader",
+      "name": "Uploader",
+      "folder": "ui-uploader",
+      "topics": [
+        "forms",
+        "inputs",
+        "controls",
+        "progress"
+      ],
+      "aka": [
+        "file upload",
+        "file uploader",
+        "upload",
+        "dropzone",
+        "drop zone",
+        "file drop",
+        "file picker",
+        "drag and drop",
+        "attachment"
+      ],
+      "description": "An uploader takes files someone picks or drops on it, or whole folders, then posts them to its `destination`, or hands them to its `action`.",
+      "noun": "uploader",
+      "attributes": [
+        {
+          "name": "appearance",
+          "kind": "enum",
+          "values": [
+            "hero",
+            "button",
+            "input",
+            "compact"
+          ],
+          "default": "hero",
+          "description": "How it looks:  `hero` -- a big drop area with an icon, a line of help and a Choose files button, a row per file under it;  `button` -- just a button, its files in a popup from it;  `input` -- a form field with a Browse button, its files listed under it;  `compact` -- a one-line drop area, one line of status and one progress bar.  All four take the same attributes and send the same events."
+        },
+        {
+          "name": "destination",
+          "kind": "string",
+          "description": "A URL each file is posted to, as form data (`file`, its path as its file name), one request per file.  `action` wins when both are set."
+        },
+        {
+          "name": "action",
+          "kind": "json",
+          "description": "A function called with the files kept, `(files: File[]) => unknown`, instead of posting them:  in Spell, an action (`action={read the netlist}`).  Not a URL, as a form's `action` is:  that's `destination`."
+        },
+        {
+          "name": "extensions",
+          "kind": "string",
+          "description": "The kinds of file it takes, a comma list of extensions (`json, csv`);  any other is turned away.  None:  any file."
+        },
+        {
+          "name": "multiple",
+          "kind": "boolean",
+          "description": "Takes more than one file at a time."
+        },
+        {
+          "name": "folder",
+          "kind": "boolean",
+          "description": "Takes folders instead of files, each with its files and their paths in it;  its events are `ui-folder-*` for the drag and the folder itself, then `ui-file-dropped` for each file.  A plain file dropped on it is turned away."
+        },
+        {
+          "name": "max-size",
+          "kind": "string",
+          "description": "The largest file it takes:  `2 MB`, `500 KB`, `1.5 GB`, or a number of bytes."
+        },
+        {
+          "name": "max-files",
+          "kind": "number",
+          "description": "The most files it takes in one go;  the rest are turned away."
+        },
+        {
+          "name": "drop-zone",
+          "kind": "json",
+          "description": "Where else a drop counts as a drop on it:  `page` -- anywhere on the page;  a selector (`#editor`, `ui-section`), looked for first among the elements around it, then on the page;  or, as a property, the element itself.  The zone shows `drop-message` while files are dragged over it."
+        },
+        {
+          "name": "message",
+          "kind": "string",
+          "description": "Its line of help (`Drop .json files here, or`);  a `button` uploader's label.  None:  its own, naming the kinds it takes.  The `message` slot wins over it."
+        },
+        {
+          "name": "drop-message",
+          "kind": "string",
+          "description": "What it says while files are dragged over it:  `{count}` is how many.  None:  `Drop to add {count} files`."
+        },
+        {
+          "name": "uploading-message",
+          "kind": "string",
+          "description": "What it says while it posts:  `{done}` is how many are done, `{count}` how many in all.  None:  `Uploading {done} of {count}`."
+        },
+        {
+          "name": "done-message",
+          "kind": "string",
+          "description": "What it says once they're all posted:  `{count}` is how many.  None:  `{count} files uploaded`."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "coin",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "heavy",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript",
+            "all-caps",
+            "title-caps",
+            "headline",
+            "subhead",
+            "serif",
+            "sans-serif",
+            "typewriter"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone."
+        },
+        {
+          "name": "shadow",
+          "kind": "enum",
+          "values": [
+            "primary",
+            "secondary",
+            "red",
+            "orange",
+            "yellow",
+            "olive",
+            "green",
+            "teal",
+            "blue",
+            "violet",
+            "purple",
+            "pink",
+            "brown",
+            "grey",
+            "black",
+            "positive",
+            "negative"
+          ],
+          "valueSet": "hues",
+          "shared": true,
+          "description": "A hard shadow behind its letters, down and to the right, in a hue:  `shadow=\"yellow\"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em)."
+        },
+        {
+          "name": "width",
+          "kind": "string",
+          "shared": true,
+          "description": "Its box's own width where it sits, any CSS length:  `width=\"10em\"`, `\"50%\"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns."
+        },
+        {
+          "name": "min-width",
+          "kind": "string",
+          "shared": true,
+          "description": "The narrowest its box gets, any CSS length:  `min-width=\"16em\"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower."
+        },
+        {
+          "name": "max-width",
+          "kind": "string",
+          "shared": true,
+          "description": "The widest its box gets, any CSS length:  `max-width=\"36em\"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "shared": true,
+          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        },
+        {
+          "name": "movable",
+          "kind": "string",
+          "shared": true,
+          "description": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered."
+        },
+        {
+          "name": "resizable",
+          "kind": "string",
+          "shared": true,
+          "description": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height)."
+        },
+        {
+          "name": "on-platform",
+          "kind": "string",
+          "shared": true,
+          "description": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for."
+        }
+      ],
+      "slots": [
+        {
+          "name": "icon",
+          "description": "Its icon, in place of its own cloud."
+        },
+        {
+          "name": "message",
+          "description": "Its line of help, in place of `message`."
+        },
+        {
+          "name": "button",
+          "description": "Its button (Choose files, Browse), in place of its own:  a click opens the file dialog."
+        }
+      ],
+      "events": [
+        {
+          "name": "ui-file-dragged-over",
+          "detail": "{ count: number, kinds: string[], via: \"drop\" | \"zone\" }",
+          "description": "Files are dragged over it, or over its `drop-zone`:  how many, and their kinds."
+        },
+        {
+          "name": "ui-file-dragged-out",
+          "detail": "{ count: number, kinds: string[], via: \"drop\" | \"zone\" }",
+          "description": "The files dragged over it left without being dropped."
+        },
+        {
+          "name": "ui-folder-dragged-over",
+          "detail": "{ count: number, kinds: string[], via: \"drop\" | \"zone\" }",
+          "description": "With `folder`:  `ui-file-dragged-over`'s twin.  While dragging, a browser can't tell a folder from a file."
+        },
+        {
+          "name": "ui-folder-dragged-out",
+          "detail": "{ count: number, kinds: string[], via: \"drop\" | \"zone\" }",
+          "description": "With `folder`:  `ui-file-dragged-out`'s twin."
+        },
+        {
+          "name": "ui-file-dropping",
+          "detail": "{ file: File, name: string, path: string, size: number, type: string, lastModified: number, via: \"dialog\" | \"drop\" | \"zone\", reason?: string, entry?: FileSystemEntry, handle?: FileSystemHandle }",
+          "cancelable": true,
+          "description": "A file picked or dropped is about to be taken:  cancel it to leave it out.  `reason` says why it'll be turned away, when it will be."
+        },
+        {
+          "name": "ui-file-dropped",
+          "detail": "{ file: File, name: string, path: string, size: number, type: string, lastModified: number, via: \"dialog\" | \"drop\" | \"zone\", reason?: string, entry?: FileSystemEntry, handle?: FileSystemHandle }",
+          "description": "A file was taken, kept or turned away (`reason`), the same for a pick (`via: \"dialog\"`) as for a drop.  `file.text()` reads it.  `entry` and `handle` are there when the browser gives them:  an entry on any drop, a handle on a drop in Chrome and Edge."
+        },
+        {
+          "name": "ui-folder-dropping",
+          "detail": "{ name: string, path: string, files: File[], via: \"dialog\" | \"drop\" | \"zone\", reason?: string, entry?: FileSystemEntry, handle?: FileSystemHandle }",
+          "cancelable": true,
+          "description": "With `folder`:  a folder is about to be taken, with its files:  cancel it to leave it all out."
+        },
+        {
+          "name": "ui-folder-dropped",
+          "detail": "{ name: string, path: string, files: File[], via: \"dialog\" | \"drop\" | \"zone\", reason?: string, entry?: FileSystemEntry, handle?: FileSystemHandle }",
+          "description": "With `folder`:  a folder was taken;  a `ui-file-dropped` follows for each file in it."
+        },
+        {
+          "name": "ui-uploading",
+          "detail": "{ files: File[] }",
+          "cancelable": true,
+          "description": "The files kept are about to be posted to `destination`, or handed to `action`:  cancel it to take the upload over, and nothing is posted or called."
+        },
+        {
+          "name": "ui-upload-progress",
+          "detail": "{ file: File, sent: number, size: number }",
+          "description": "While a file posts:  how many bytes have gone, of its size."
+        },
+        {
+          "name": "ui-uploaded",
+          "detail": "{ file: File, response: unknown }",
+          "description": "A file was posted:  `response` is the server's answer, as JSON when it says so, else text;  with `action`, what the action returned."
+        },
+        {
+          "name": "ui-upload-failed",
+          "detail": "{ file: File, error: Error }",
+          "description": "A file couldn't be posted, or the `action` threw:  `error` says why."
+        }
+      ],
+      "parts": [
+        {
+          "name": "drop-area",
+          "description": "The area files are dropped on:  the hero's and compact's dashed box."
+        },
+        {
+          "name": "button",
+          "description": "The button that opens the file dialog:  a `<ui-button>`."
+        },
+        {
+          "name": "input",
+          "description": "With `appearance=\"input\"`:  the field, a `<ui-input>`."
+        },
+        {
+          "name": "files",
+          "description": "The list of files taken."
+        },
+        {
+          "name": "file",
+          "description": "A file's row."
+        },
+        {
+          "name": "name",
+          "description": "A file's name."
+        },
+        {
+          "name": "size",
+          "description": "A file's size."
+        },
+        {
+          "name": "progress",
+          "description": "A file's progress bar, a `<ui-progress>`;  compact's one bar for all."
+        },
+        {
+          "name": "status",
+          "description": "A file's status:  a tick, or the reason it failed;  compact's line of status."
+        },
+        {
+          "name": "remove",
+          "description": "A file's Remove button."
+        },
+        {
+          "name": "popup",
+          "description": "With `appearance=\"button\"`:  the popup of file rows, a `<ui-popup>`."
+        },
+        {
+          "name": "zone",
+          "description": "The light overlay over its `drop-zone` while files are dragged over it."
+        }
+      ],
+      "states": [
+        {
+          "name": "dragged-over",
+          "description": "Files are dragged over it, or its `drop-zone`."
+        },
+        {
+          "name": "uploading",
+          "description": "It's posting files, or its `action` is running."
+        },
+        {
+          "name": "hero",
+          "description": "It's `appearance=\"hero\"`."
+        },
+        {
+          "name": "button",
+          "description": "It's `appearance=\"button\"`."
+        },
+        {
+          "name": "input",
+          "description": "It's `appearance=\"input\"`."
+        },
+        {
+          "name": "compact",
+          "description": "It's `appearance=\"compact\"`."
+        },
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        },
+        {
+          "name": "on-platform",
+          "description": "`on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
+        }
+      ],
+      "texts": [
+        {
+          "key": "message",
+          "text": "Drop {kinds} files here, or",
+          "description": "The hero's line of help:  `{kinds}`, `.json`."
+        },
+        {
+          "key": "messageAny",
+          "text": "Drop files here, or",
+          "description": "The hero's line of help, taking any file."
+        },
+        {
+          "key": "messageFolders",
+          "text": "Drop folders here, or",
+          "description": "The hero's line of help, with `folder`."
+        },
+        {
+          "key": "compactMessage",
+          "text": "Drop {kinds} files, or",
+          "description": "compact's line of help."
+        },
+        {
+          "key": "compactMessageAny",
+          "text": "Drop files, or",
+          "description": "compact's line of help, taking any file."
+        },
+        {
+          "key": "compactMessageFolders",
+          "text": "Drop folders, or",
+          "description": "compact's line of help, with `folder`."
+        },
+        {
+          "key": "buttonLabel",
+          "text": "Upload {kinds} files",
+          "description": "A `button` uploader's label."
+        },
+        {
+          "key": "buttonLabelAny",
+          "text": "Upload files",
+          "description": "A `button` uploader's label, taking any file."
+        },
+        {
+          "key": "buttonLabelFolders",
+          "text": "Upload folders",
+          "description": "A `button` uploader's label, with `folder`."
+        },
+        {
+          "key": "choose",
+          "text": "Choose files…",
+          "description": "The hero's button."
+        },
+        {
+          "key": "chooseFolders",
+          "text": "Choose folders…",
+          "description": "The hero's button, with `folder`."
+        },
+        {
+          "key": "chooseShort",
+          "text": "Choose",
+          "description": "compact's small button."
+        },
+        {
+          "key": "browse",
+          "text": "Browse…",
+          "description": "The `input` look's button."
+        },
+        {
+          "key": "noFiles",
+          "text": "No files chosen",
+          "description": "The `input` look's field, empty."
+        },
+        {
+          "key": "fileCount",
+          "text": "{count} files",
+          "description": "The `input` look's field:  how many files."
+        },
+        {
+          "key": "fileCountDone",
+          "text": "{count} files:  {done} uploaded",
+          "description": "The `input` look's field, once some are up."
+        },
+        {
+          "key": "dropMessage",
+          "text": "Drop to add {count} files",
+          "description": "While files are dragged over it."
+        },
+        {
+          "key": "dropMessageOne",
+          "text": "Drop to add 1 file",
+          "description": "While one file is dragged over it."
+        },
+        {
+          "key": "uploadingMessage",
+          "text": "Uploading {done} of {count}",
+          "description": "While it posts."
+        },
+        {
+          "key": "doneMessage",
+          "text": "{count} files uploaded",
+          "description": "Once they're all posted."
+        },
+        {
+          "key": "doneMessageOne",
+          "text": "1 file uploaded",
+          "description": "Once the one file is posted."
+        },
+        {
+          "key": "limitsFiles",
+          "text": "Up to {count} files",
+          "description": "Its limits:  the count."
+        },
+        {
+          "key": "limitsBoth",
+          "text": "Up to {count} files, {size} each",
+          "description": "Its limits:  the count and the size."
+        },
+        {
+          "key": "limitsSizeOnly",
+          "text": "Up to {size}",
+          "description": "Its limits:  the size alone."
+        },
+        {
+          "key": "turnedAway",
+          "text": "{count} files not added",
+          "description": "How many were turned away."
+        },
+        {
+          "key": "turnedAwayOne",
+          "text": "1 file not added",
+          "description": "One was turned away."
+        },
+        {
+          "key": "uploaded",
+          "text": "Uploaded",
+          "description": "A row's status, posted."
+        },
+        {
+          "key": "taken",
+          "text": "Done",
+          "description": "A row's status, handed to the `action`."
+        },
+        {
+          "key": "held",
+          "text": "Ready",
+          "description": "A row's status, held:  no `destination` or `action`."
+        },
+        {
+          "key": "uploading",
+          "text": "Uploading",
+          "description": "What a screen reader calls a row's progress bar."
+        },
+        {
+          "key": "failed",
+          "text": "Failed:  {reason}",
+          "description": "A row's status, failed."
+        },
+        {
+          "key": "serverError",
+          "text": "server error {status}",
+          "description": "Why a post failed:  the server's answer."
+        },
+        {
+          "key": "noConnection",
+          "text": "no connection",
+          "description": "Why a post failed:  nothing answered."
+        },
+        {
+          "key": "tooBig",
+          "text": "Too big",
+          "description": "Why a file was turned away:  its size, in its row."
+        },
+        {
+          "key": "tooBigLong",
+          "text": "This file is too big, so it wasn't added. Choose a file that's {size} or smaller.",
+          "description": "Why a file was turned away:  its size, in full (its row's tooltip)."
+        },
+        {
+          "key": "wrongKind",
+          "text": "Not a {kinds} file",
+          "description": "Why a file was turned away:  its kind, in its row."
+        },
+        {
+          "key": "wrongKindLong",
+          "text": "Only {kinds} files can be uploaded. Choose a file that ends in {kinds}.",
+          "description": "Why a file was turned away:  its kind, in full (its row's tooltip)."
+        },
+        {
+          "key": "tooMany",
+          "text": "Too many files",
+          "description": "Why a file was turned away:  the count, in its row."
+        },
+        {
+          "key": "tooManyLong",
+          "text": "This file wasn't added: up to {count} files can be added at once. Remove one, then add this file again.",
+          "description": "Why a file was turned away:  the count, in full (its row's tooltip)."
+        },
+        {
+          "key": "oneOnly",
+          "text": "Only one file",
+          "description": "Why a second file was turned away, without `multiple`, in its row."
+        },
+        {
+          "key": "oneOnlyLong",
+          "text": "This file wasn't added: one file can be added at a time. Remove the other file, then add this one again.",
+          "description": "Why a second file was turned away, without `multiple`, in full (its row's tooltip)."
+        },
+        {
+          "key": "notAFolder",
+          "text": "Not a folder",
+          "description": "Why a plain file was turned away by a `folder` uploader, in its row."
+        },
+        {
+          "key": "notAFolderLong",
+          "text": "Only folders can be added here. Choose a folder.",
+          "description": "Why a plain file was turned away by a `folder` uploader, in full (its row's tooltip)."
+        },
+        {
+          "key": "aFolder",
+          "text": "A folder",
+          "description": "Why a folder was turned away by a plain uploader, in its row."
+        },
+        {
+          "key": "aFolderLong",
+          "text": "Folders can't be added here. Choose files instead.",
+          "description": "Why a folder was turned away by a plain uploader, in full (its row's tooltip)."
+        },
+        {
+          "key": "remove",
+          "text": "Remove",
+          "description": "A row's Remove button's name and tooltip."
+        },
+        {
+          "key": "files",
+          "text": "Files",
+          "description": "What a screen reader calls the list of files."
+        }
+      ],
+      "mainTag": "ui-uploader",
+      "main": true,
+      "page": true,
+      "href": "ui-uploader.html"
     },
     {
       "tag": "ui-value",
@@ -58236,6 +59721,89 @@
         }
       ]
     },
+    "ui-dial": {
+      "folder": "ui-dial",
+      "mainTag": "ui-dial",
+      "title": "Dial",
+      "summary": "A dial lets people pick a number by turning it, with its value in the middle and its label under it.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "ui-dial"
+      ],
+      "tokens": [
+        {
+          "name": "--ui-dial-size",
+          "default": "round(10em, var(--ui-grid, 4px))",
+          "type": "length"
+        },
+        {
+          "name": "--ui-dial-track-width",
+          "default": "4.5",
+          "type": "length"
+        },
+        {
+          "name": "--ui-dial-track-color",
+          "default": "oklch(from var(--ui-ink) l c h / 0.16)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-dial-fill-color",
+          "default": "var(--ui-primary)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-dial-disc-color",
+          "default": "oklch(from var(--ui-ink) l c h / 0.07)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-dial-tick-color",
+          "default": "oklch(from var(--ui-ink) l c h / 0.4)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-dial-value-color",
+          "default": "var(--ui-text-color)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-dial-value-font-size",
+          "default": "15cqi",
+          "type": "length"
+        },
+        {
+          "name": "--ui-dial-value-font-weight",
+          "default": "400",
+          "type": "number"
+        },
+        {
+          "name": "--ui-dial-label-color",
+          "default": "var(--ui-text-color)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-dial-label-gap",
+          "default": "round(0.75em, var(--ui-grid, 4px))",
+          "type": "length"
+        },
+        {
+          "name": "--ui-dial-focus-width",
+          "default": "2",
+          "type": "length"
+        },
+        {
+          "name": "--ui-dial-focus-color",
+          "default": "var(--ui-focus-color)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-dial-disabled-opacity",
+          "default": "0.45",
+          "type": "number"
+        }
+      ]
+    },
     "ui-dimension": {
       "folder": "ui-dimension",
       "mainTag": "ui-dimension",
@@ -62797,6 +64365,17 @@
           "default": "round(0.5em, var(--ui-grid, 4px))",
           "description": "the muted strip down the page's end side, beside its top-right corner (I219)",
           "type": "length"
+        },
+        {
+          "name": "--ui-page-layout-float-room",
+          "default": "12px",
+          "description": "`floating`: the room round each card, and a side bar's width",
+          "type": "length"
+        },
+        {
+          "name": "--ui-page-layout-sidebar-width",
+          "default": "16em",
+          "type": "length"
         }
       ]
     },
@@ -64855,6 +66434,18 @@
         }
       ]
     },
+    "ui-site-links": {
+      "folder": "ui-site-links",
+      "mainTag": "ui-site-links",
+      "title": "Site links",
+      "summary": "Site links are the page shown's own links, for an app menu's end:  the real page it stands for (its `live` link, Fomantic UI's original for Spell UI's pages), and a way to report a problem with it.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "ui-site-links"
+      ],
+      "tokens": []
+    },
     "ui-site-nav": {
       "folder": "ui-site-nav",
       "mainTag": "ui-site-nav",
@@ -66105,6 +67696,38 @@
           "default": "var(--ui-primary-background)",
           "description": "The toggle's background under the pointer.",
           "type": "color"
+        },
+        {
+          "name": "--ui-toc-head-background",
+          "default": "none",
+          "description": "The head's band (epic `mockup` T55: a page layout's floating side bar heads it as the editor's panels are): its fill, its padding, its least height, the room under it, and whether it sticks as the toc scrolls in its box.",
+          "type": "color"
+        },
+        {
+          "name": "--ui-toc-head-padding",
+          "default": "0",
+          "type": "length"
+        },
+        {
+          "name": "--ui-toc-head-height",
+          "default": "1.75em",
+          "type": "length"
+        },
+        {
+          "name": "--ui-toc-head-gap",
+          "default": "var(--ui-font-size)",
+          "type": "length"
+        },
+        {
+          "name": "--ui-toc-head-position",
+          "default": "static",
+          "type": "other"
+        },
+        {
+          "name": "--ui-toc-padding",
+          "default": "0",
+          "description": "Room round the links, under the head: the menu's margin.",
+          "type": "length"
         }
       ]
     },
@@ -66399,6 +68022,74 @@
           "name": "--ui-tree-diagram-focus-color",
           "default": "var(--ui-primary)",
           "type": "color"
+        }
+      ]
+    },
+    "ui-uploader": {
+      "folder": "ui-uploader",
+      "mainTag": "ui-uploader",
+      "title": "Uploader",
+      "summary": "An uploader takes files someone picks or drops on it, or whole folders, then posts them, or hands them to an action.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "ui-uploader"
+      ],
+      "tokens": [
+        {
+          "name": "--ui-uploader-border-width",
+          "default": "2px",
+          "type": "length"
+        },
+        {
+          "name": "--ui-uploader-border-style",
+          "default": "dashed",
+          "type": "other"
+        },
+        {
+          "name": "--ui-uploader-border-color",
+          "default": "var(--ui-border-color, oklch(from var(--ui-ink) l c h / 0.2))",
+          "type": "color"
+        },
+        {
+          "name": "--ui-uploader-background",
+          "default": "transparent",
+          "type": "color"
+        },
+        {
+          "name": "--ui-uploader-lit-color",
+          "default": "var(--ui-blue)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-uploader-radius",
+          "default": "var(--ui-radius-l, 8px)",
+          "type": "length"
+        },
+        {
+          "name": "--ui-uploader-padding",
+          "default": "24px 16px",
+          "type": "length"
+        },
+        {
+          "name": "--ui-uploader-icon-color",
+          "default": "var(--ui-text-muted)",
+          "type": "color"
+        },
+        {
+          "name": "--ui-uploader-row-height",
+          "default": "44px",
+          "type": "length"
+        },
+        {
+          "name": "--ui-uploader-row-gap",
+          "default": "8px",
+          "type": "length"
+        },
+        {
+          "name": "--ui-uploader-popup-width",
+          "default": "360px",
+          "type": "length"
         }
       ]
     },

@@ -50,3 +50,19 @@ describe("SliderScale.labelValue()", () => {
     expect(fallback.intervals).toBe(5)
   })
 })
+
+describe("SliderScale.valueForKey()", () => {
+  test("arrows step the way they point, pages take 2, Home / End go to the bounds;  other keys move nothing", () => {
+    const scale = new SliderScale({ min: 0, max: 20, step: 1 })
+    const keys = ["ArrowRight", "ArrowUp", "ArrowLeft", "ArrowDown", "PageUp", "PageDown", "Home", "End", "a"]
+    expect(keys.map((key) => scale.valueForKey(key, 10))).toEqual([11, 11, 9, 9, 12, 8, 0, 20, undefined])
+    expect(scale.valueForKey("End", 10, { low: 5, high: 15 })).toBe(15)
+  })
+
+  test("follows the thumb on a reversed or vertical track", () => {
+    const scale = new SliderScale({ min: 0, max: 20, step: 1 })
+    expect(scale.valueForKey("ArrowLeft", 10, { reversed: true })).toBe(11)
+    expect(scale.valueForKey("ArrowDown", 10, { vertical: true })).toBe(11)
+    expect(scale.valueForKey("ArrowUp", 10, { vertical: true, reversed: true })).toBe(11)
+  })
+})

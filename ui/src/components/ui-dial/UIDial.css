@@ -1,0 +1,191 @@
+/*
+ * The style sheet of `<ui-dial>`:  ours, not Fomantic's (it has no dial).
+ * - The shadow markup it expects:
+ *
+ *     <div class="ui [size color] [disabled read-only] dial" part="dial">
+ *       <div class="control" part="control" role="slider" tabindex="0" …>
+ *         <svg class="ring" viewBox="0 0 100 100">                    (100 by 100 drawing units)
+ *           <path class="track" part="track"/>                        (the 270° ring, its gap at the bottom)
+ *           <path class="track-fill" part="track-fill"/>              (start ... value)
+ *           <circle class="disc" part="disc"/>
+ *           <g class="ticks" part="ticks"><circle/>…</g>              (`ticks` only)
+ *           <circle class="focus-ring"/>                              (keyboard focus only)
+ *           <circle class="handle" part="handle"/>
+ *         </svg>
+ *         <span class="value" part="value">98%</span>               (over the disc, centred)
+ *       </div>
+ *       <div class="label" part="label">Line height</div>          (`label` only)
+ *     </div>
+ *
+ * - Where things are is the component's (`DialArc`, in drawing units);  how they look is this sheet's:
+ *   colours, the ring's width, the type.
+ * - The DOM element:  `display: inline-block`, as wide as the dial.
+ * - Colours by remap:  the arc and the handle take `--ui-color`;  uncoloured, the theme's primary colour.
+ *   The ring, disc and ticks are the ink at low alpha, so they follow the scheme (light / dark).
+ * - Sizes:  `--ui-scale` (from `sizes.css`) scales the whole dial;  `--ui-dial-size` sets its width outright.
+ *   Its width, the label's gap and line are rounded to the 4px grid (`--ui-grid`), so the dial's box is too.
+ *   The value's type follows the dial's width (container units), so a small dial keeps it in its disc.
+ * - Focus:  keyboard focus rings the handle (`:focus-visible`), for WCAG 2.4.7.
+ * - Public tokens (`--ui-dial-*`) are NEVER declared here:  the token block reads each through a private alias
+ *   (`--_ui-dial-size: var(--ui-dial-size, 10em)`), so a value set on `:root`, an ancestor, the DOM element or
+ *   `::part(dial)` reaches the box (`notes/theming.md` "Component tokens").
+ */
+
+@layer ui.components.dial.types, ui.components.dial.content, ui.components.dial.variations, ui.components.dial.states;
+
+/*******************************
+            Dial
+*******************************/
+
+@layer ui.components.dial.types {
+  :host {
+    display: inline-block;
+    vertical-align: top;
+  }
+  /* `delegatesFocus`:  the handle draws the focus ring, never the DOM element. */
+  :host(:focus-visible) {
+    outline: none;
+  }
+
+  /* Tokens:  each the private alias of its public token (never declare the public one:  it would block inherited values). */
+  .ui.dial {
+    --_ui-dial-size: var(--ui-dial-size, round(10em, var(--ui-grid, 4px)));
+    --_ui-dial-track-width: var(--ui-dial-track-width, 4.5);
+    --_ui-dial-track-color: var(--ui-dial-track-color, oklch(from var(--ui-ink) l c h / 0.16));
+    --_ui-dial-fill-color: var(--ui-dial-fill-color, var(--ui-primary));
+    --_ui-dial-disc-color: var(--ui-dial-disc-color, oklch(from var(--ui-ink) l c h / 0.07));
+    --_ui-dial-tick-color: var(--ui-dial-tick-color, oklch(from var(--ui-ink) l c h / 0.4));
+    --_ui-dial-value-color: var(--ui-dial-value-color, var(--ui-text-color));
+    --_ui-dial-value-font-size: var(--ui-dial-value-font-size, 15cqi);
+    --_ui-dial-value-font-weight: var(--ui-dial-value-font-weight, 400);
+    --_ui-dial-label-color: var(--ui-dial-label-color, var(--ui-text-color));
+    --_ui-dial-label-gap: var(--ui-dial-label-gap, round(0.75em, var(--ui-grid, 4px)));
+    --_ui-dial-focus-width: var(--ui-dial-focus-width, 2);
+    --_ui-dial-focus-color: var(--ui-dial-focus-color, var(--ui-focus-color));
+    --_ui-dial-disabled-opacity: var(--ui-dial-disabled-opacity, 0.45);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--_ui-dial-label-gap);
+    box-sizing: border-box;
+    width: var(--_ui-dial-size);
+    font-family: var(--ui-font-family);
+    font-size: calc(var(--ui-font-size) * var(--ui-scale, 1));
+    line-height: 1.25;
+  }
+
+  /* The control:  a square, the drawing filling it, the value over its middle. */
+  .ui.dial .control {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 100%;
+    aspect-ratio: 1;
+    container-type: inline-size;
+    border-radius: 50%;
+    outline: none;
+    touch-action: none;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .ui.dial .ring {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .ui.dial .track,
+  .ui.dial .track-fill {
+    fill: none;
+    stroke-width: var(--_ui-dial-track-width);
+    stroke-linecap: round;
+  }
+
+  .ui.dial .track {
+    stroke: var(--_ui-dial-track-color);
+  }
+
+  .ui.dial .track-fill {
+    stroke: var(--ui-color, var(--_ui-dial-fill-color));
+  }
+
+  .ui.dial .handle {
+    fill: var(--ui-color, var(--_ui-dial-fill-color));
+  }
+
+  .ui.dial .disc {
+    fill: var(--_ui-dial-disc-color);
+  }
+
+  .ui.dial .ticks {
+    fill: var(--_ui-dial-tick-color);
+  }
+
+  .ui.dial .focus-ring {
+    fill: none;
+    stroke: var(--_ui-dial-focus-color);
+    stroke-width: var(--_ui-dial-focus-width);
+    visibility: hidden;
+  }
+
+  /* The value:  centred on the disc, in tabular figures so it doesn't shift as it turns. */
+  .ui.dial .value {
+    position: relative;
+    max-width: 58%;
+    overflow: hidden;
+    color: var(--_ui-dial-value-color);
+    font-size: var(--_ui-dial-value-font-size);
+    font-weight: var(--_ui-dial-value-font-weight);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Its line on the 4px grid, so the whole dial is too. */
+  .ui.dial .label {
+    max-width: 100%;
+    line-height: round(1.25em, var(--ui-grid, 4px));
+    color: var(--_ui-dial-label-color);
+    text-align: center;
+  }
+
+  /* Native fallback:  the browser's range input, then the label. */
+  .ui.dial > input[type="range"] {
+    width: 100%;
+    margin: 0;
+    accent-color: var(--ui-color, var(--_ui-dial-fill-color));
+  }
+}
+
+/*******************************
+            States
+*******************************/
+
+@layer ui.components.dial.states {
+  .ui.dial .control:focus-visible .focus-ring {
+    visibility: visible;
+  }
+
+  :host(:state(dragging)) .ui.dial .control {
+    cursor: grabbing;
+  }
+
+  .ui.read-only.dial .control {
+    cursor: default;
+  }
+
+  .ui.disabled.dial {
+    opacity: var(--_ui-dial-disabled-opacity);
+  }
+
+  .ui.disabled.dial .control {
+    cursor: default;
+  }
+}

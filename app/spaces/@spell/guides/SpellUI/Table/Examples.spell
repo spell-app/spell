@@ -3,14 +3,6 @@
 		Table
 		<header>A table displays a collection of data grouped into rows.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#content">Content</>
-			<item link="#states">States</>
-			<item link="#variations">Variations</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's table page, section by section, in its order (Types, States, Variations), plus our own

@@ -122,38 +122,21 @@
 }
 
 /*
- * A card with a "..." menu (`menu`, the home page's own projects;  epic `mockup` T47, I49):
- * the card, and its menu at the left end of the card's text, the title and tagline moved over to make room.
+ * A card with a "..." menu (`menu`, the home page's own projects;  epic `mockup` T47, I49, T56):
+ * the card, and its menu in the card's bottom right corner, over the card's text, which keeps its full width.
+ * - Owen, 2026-11-17:  "It will hardly ever overlap anything there."
  * - The menu is the card's sibling, laid over it, so a click on it never opens the card's project.
- * - Its button is 24px, lined up with the text's inset;  its centre on the title line's (24px tall here too).
- *   - a banner:  under the picture, 12px down and 16px in, as the text is;
- *     the picture's height worked out from the card's width (`cqw`), as the picture's own `aspect-ratio` does
- *   - beside a tile:  where the text starts, 12px past the tile, on the title line;
- *     the tile and text start at the top, so the title line is at a known place
- *   - each 1px further for the card's border
+ * - Its button is 24px, 12px in from the card's right and bottom edges, 1px further for the card's border.
  */
 .TileCardHolder {
   --TileCard-menu-size: 24px;
-  /* the menu's room before the text:  its button and 8px */
-  --TileCard-menu-room: calc(var(--TileCard-menu-size) + 8px);
   position: relative;
   display: grid;
-  container-type: inline-size;
 
   /* the card fills its place in the grid, as it would on its own */
   > .TileCard {
     min-width: 0;
     align-items: flex-start;
-
-    .text {
-      padding-inline-start: var(--TileCard-menu-room);
-    }
-    .title {
-      line-height: var(--TileCard-menu-size);
-    }
-    &.banner .text {
-      padding-inline-start: calc(16px + var(--TileCard-menu-room));
-    }
   }
   /* it rises with the card on hover */
   &:has(> .TileCard:hover) > .TileCardMenu {
@@ -163,15 +146,9 @@
 .TileCardMenu {
   position: absolute;
   z-index: 1;
-  /* beside a tile:  past the tile (40px) and the gap (12px), on the title line */
-  top: calc(1px + 16px);
-  left: calc(1px + 16px + 40px + 12px);
+  right: calc(1px + 12px);
+  bottom: calc(1px + 12px);
   transition: transform var(--ui-duration-fast, 0.15s) var(--ui-ease-out, ease-out);
-}
-/* under a banner's picture:  the card's border, the picture (16:9 of the card's inside, its own border in it), the text's 12px */
-.TileCardHolder:has(> .TileCard.banner) > .TileCardMenu {
-  top: calc(1px + (100cqw - 2px) * 9 / 16 + 12px);
-  left: calc(1px + 16px);
 }
 
 /*

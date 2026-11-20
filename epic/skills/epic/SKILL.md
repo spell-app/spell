@@ -1,7 +1,7 @@
 ---
 name: epic
-description: Run an epic -- a piece of work planned and built against its live epic page, `epics/<name>/<name>.plan.html`, in its own worktree.  `/epic <name> [what to plan]` plans one (or "make this a plan doc" about this session's work);  `/epic review [<name>]` takes the person's marks, comments and Sends from the page ("review the seo epic", "go through its todos");  `/epic resume [<name>]` picks one back up where its page says it stopped;  `/epic future <name> [idea]` saves an idea as a future epic;  `/epic phase [ids] [name]` adds a phase;  `/epic start <P1 | ids>` works a phase or items now;  `/epic request <epic> [<rN>]` takes up a `/send` request;  `/epic tidy [<epic>]` closes items other work made obsolete;  `/epic done` is `/isolate done`.
-argument-hint: <name> [what to plan] | demo [pasted text] | done | review [<name>] | resume [<name>] | future <name> [idea] | phase [ids] [name] | start <P1 | ids> | request <epic> [<rN>] | tidy [<epic>] | color <look>
+description: Run an epic -- a piece of work planned and built against its live epic page, `epics/<name>/<name>.plan.html`, in its own worktree.  `/epic <name> [what to plan]` plans one (or "make this a plan doc" about this session's work);  `/epic review [<name>]` takes the person's marks, comments and Sends from the page ("review the seo epic", "go through its todos");  `/epic resume [<name>]` picks one back up where its page says it stopped;  `/epic future <name> [idea]` saves an idea as a future epic;  `/epic phase [ids] [name]` adds a phase;  `/epic start <P1 | ids>` works a phase or items now;  `/epic request <epic> [<rN>]` takes up a `/send` request;  `/epic tidy [<epic>]` closes items other work made obsolete;  `/epic fresh` hands this epic to a new session in this window;  `/epic done` is `/isolate done`.
+argument-hint: <name> [what to plan] | demo [pasted text] | done | review [<name>] | resume [<name>] | future <name> [idea] | phase [ids] [name] | start <P1 | ids> | request <epic> [<rN>] | tidy [<epic>] | fresh [--force] | color <look>
 ---
 
 # /epic
@@ -121,6 +121,8 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
   - `request`:  `/epic request <epic> [<rN>...]` takes up a request the person sent from another session:
     a bug report becomes an issue, a feature a todo, bigger a phase.  Go to "12. Request" (epic `epic-workflow`;
     epic `epic-engine` T88, T108).
+  - `fresh`:  `/epic fresh [--force]` hands THIS session's epic to a new session in this window, which picks it up
+    from the page:  NOT a new epic.  Go to "16. Fresh" (epic `epic-engine` T110).
   - `demo`:  `/epic demo [pasted text]` runs the STAGED DEMO when its step files are ready (`epic demo check`):
     NOT a new epic.  Go to "15. Staged demo", and skip everything else here (epic `epic-engine` P77).
   - `done`:  `/epic done` is `/isolate done`, word for word.
@@ -844,7 +846,8 @@ Until a `/back:  ...` message (or `epic focus status` says off):
      time waiting on the person.  Beside it, `span`:  how long it was under way by the clock, from the log
      (epic `epic-engine` I127).  The title row then shows `21m / 4h`, the rest in its tooltip.
      A phase done before:  `epic phase <name>#P<N> took` writes both.
-   - Then `epic summary <name>`.
+   - Then `epic summary <name>`:  the phases left and the loose ends;  done phases and grey items are only counted
+     (`--all` lists them).
    - With the phase's items, this runs in a background `<name>-plan-doc` agent ("4. Fill the doc"),
      while the reply below goes out.
    - Done:  what was BUILT, ordered by what the person asks about first:
@@ -1530,7 +1533,7 @@ A NEW session picks up an epic whose own session is gone (closed, crashed, compa
    - Neither:  say so, and ask before starting the epic over.
 4. Catch up, in the checkout:
    - What's done, what's half done:
-     - `epic summary <name>`
+     - `epic summary <name>`:  what's left;  done phases and grey items only counted (`--all` lists them)
      - the active phase's part file, and the newest review lines:  `epic log <name> --last 20`
        (the page's Log shows only commits since epic `epic-engine` P52)
      - `git status --short` and `git log --oneline -5`
@@ -1540,6 +1543,8 @@ A NEW session picks up an epic whose own session is gone (closed, crashed, compa
    - No `node_modules/`:  the install command (`epic config installCommand`;  empty:  nothing to install).
    - `epic open <name> --review`.
      In a new window:  after the handoff, as "2. Session", step 5.
+   - `epic inbox wait <name>` in the background again ("7. Review", "This session LISTENS"):  a session started by
+     `/epic fresh` (or a restart) has none running.
 5. Reply, for someone who remembers nothing:  three lines at most.
    - What the epic is, where it stopped, and what's waiting on the person (open questions, issues, tests).
    - Uncommitted work in bold.
@@ -1921,6 +1926,38 @@ The steps, each turn as short as it can be:
   `demo`, the saved paste);  only when the person asks.
 - Rehearsing with nobody watching:  `epic demo run <step> --quiet` (nothing shown in VS Code), and
   `node src/demo/shoot-staged-demo.mjs overview|phases|away|items` from `epic/` for pictures of the page.
+
+## 16. Fresh:  `/epic fresh [--force]`
+
+A NEW session takes this session's epic on, in this window, from its page;  this session's tab closes
+(epic `epic-engine` T110;  Owen, 2026-11-19:  "can you do this automatically?  Can we make a command for it?").
+- Why:  every turn re-reads the session's whole conversation, so a long-running epic's session pays for it again and
+  again.  The new one starts from the epic page, "8. Resume".
+- The prompt hook suggests it ONCE, in one line, when the session's conversation passes `freshHintMB` (8 MB;  the
+  repo's `.epic/config.json5`):  a hint, never a move (`FreshHint`).  Say the line to the person;  don't move.
+- In Codex:  nothing to hand off:  start a new Codex session in the epic's worktree, run `epic guide`, then
+  `$epic resume <name>`.
+
+0. Which epic:  this session's, its title (`🚧 <name>`), else its worktree's (`epic worktree path <name>`).
+   None:  say so, and stop.
+1. Agents:  `epic agents`.  Any listed:  refuse, in one line naming them;  closing this tab would cut them off.
+   - Wait for their notices, then `/epic fresh` again;  or the person types `/epic fresh --force`.
+   - Background waits (`epic inbox wait`, `epic agents wait`) don't count:  the new session starts its own.
+2. Write down what's open but NOT on the page yet:  the new session knows only the page.
+   - a question asked of the person and not answered yet (in the chat, or on a details page):  a Q item,
+     `epic add <name>#Q "<the question>" --details "<options, context>"`;  a choice made alone:  `#J ... --calm`
+   - a promise made ("I'll release once X lands", "merge after T3"):  a Noted card on the item it's about,
+     `epic update <name>#<id> noted "Promised:  <what, and when>"`;  about no item:  a todo saying so
+   - work this session itself started and didn't finish (not an agent's):  committed by path, or a Noted card on its
+     item saying where it stopped, and the uncommitted files by name
+   - agents still running (only with `--force`):  a Noted card on each one's item, "Cut off by /epic fresh"
+3. `epic window fresh <name> [--force]`:  records the handoff.
+   - Exit 1 (agents, the end-of-turn hook won't run, no window):  say why, and stop.
+4. Reply in one line:  "a new session takes `<name>` on in this window, `/epic resume <name>` typed in:  press Enter
+   there".  Then END THE TURN, at once, as `/isolate` does after `handoff`:
+   - the `Stop` hook ([handoff.mjs](${CLAUDE_PLUGIN_ROOT}/hooks/handoff.mjs)) opens a NEW Claude tab in this window,
+     types `/epic resume <name>` into it (not sent), and closes this tab
+   - the new session is home already ("8. Resume", step 0, "Already home"):  it asks neither which epic nor which window
 
 ## Migrations:  bringing epic pages up to today's markup
 

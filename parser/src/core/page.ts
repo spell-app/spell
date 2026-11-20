@@ -57,9 +57,22 @@ export type PageQuestion = { ui: (typeof QUESTIONS)[number]; args: unknown[]; as
 
 /**
  * The core's methods a program running elsewhere may ask its page to run:  its dialogs and toasts, and printing;
- * and showing or hiding what it drew and named, `show "you won"` (epic `language` P61).
+ * showing or hiding what it drew and named, `show "you won"` (epic `language` P61);
+ * and its sounds, `play "card slide"` (epic `mockup` P28).
  */
-const QUESTIONS = ["notify", "alert", "warn", "confirm", "prompt", "openPrinting", "showDrawn", "hideDrawn"] as const
+const QUESTIONS = [
+  "notify",
+  "alert",
+  "warn",
+  "confirm",
+  "prompt",
+  "openPrinting",
+  "showDrawn",
+  "hideDrawn",
+  "play",
+  "stop",
+  "loadSound"
+] as const
 
 /** A thing in a page's message:  by reference, `"Card#ace-of-hearts"`, else by its id, `{ "$id": "3" }`. */
 export type PageMessageThing = string | { [ID_KEY]: string }

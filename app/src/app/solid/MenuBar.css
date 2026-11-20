@@ -176,7 +176,7 @@ ui-submenu::part(chevron) {
   color: var(--ui-text-muted);
 }
 
-/* the Spell menu (`<SpellBarMenu>`):  Home and About Spell, then the group's projects under them, New Example last,
+/* the Spell menu (`<SpellBarMenu>`):  Home, Spell UI and About Spell, then the group's projects under them, New Example last,
    the projects' width */
 .SpellMenuPanel {
   --SpellMenu-column-gap: 24px;
@@ -187,7 +187,7 @@ ui-submenu::part(chevron) {
     min-width: 0;
     width: 100%;
   }
-  /* Home's, About Spell's and New Example's icons as wide as a project's, the same room after them:
+  /* Home's, Spell UI's, About Spell's and New Example's icons as wide as a project's, the same room after them:
      their titles start where the projects' do */
   & > ui-menu.SpellMenuHome ui-action::part(icon),
   & > ui-menu.ProjectsSubMenu > ui-action::part(icon) {
@@ -196,13 +196,13 @@ ui-submenu::part(chevron) {
   }
 }
 
-/* Home and About Spell on one row, each over a column of projects, once the projects take columns
-   (Owen, 2026-11-14, I78, I114);  the line under them across the menu */
+/* Home, Spell UI and About Spell on one row, each over a column of projects, once the projects take columns
+   (Owen, 2026-11-14, I78, I114;  epic `mockup` T55);  the line under them across the menu */
 .SpellMenuPanel.wide > ui-menu.SpellMenuHome::part(menu) {
   display: grid;
   /* a column each, as wide as the projects' columns;  the rest of the menu's width after them, for the line to cross */
-  grid-template-columns: minmax(180px, max-content) minmax(180px, max-content) 1fr;
-  /* the projects' gap between columns, so Home and About Spell stay over theirs */
+  grid-template-columns: repeat(3, minmax(180px, max-content)) 1fr;
+  /* the projects' gap between columns, so Home, Spell UI and About Spell stay over theirs */
   column-gap: var(--SpellMenu-column-gap);
 }
 .SpellMenuPanel.wide > ui-menu.SpellMenuHome > ui-action[kind="divider"],

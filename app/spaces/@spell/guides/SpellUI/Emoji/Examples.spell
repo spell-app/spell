@@ -3,14 +3,6 @@
 		Emoji
 		<header>An emoji is a glyph used to represent something else.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#types">Types</>
-			<item link="#states">States</>
-			<item link="#variations">Variations</>
-			<item link="#fomantic-s-names">Fomantic's names</>
-		</>
-	</>
 
 	<!--
 		EXAMPLES:  Fomantic's emoji page (its Definition tab:  General, States, Variations), plus our own extras (In text,

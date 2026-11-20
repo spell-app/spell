@@ -3,18 +3,6 @@
 		Transition
 		<header>A transition is an animation used to show or hide content, or to draw attention to it.</>
 	</>
-	<section>
-		<toolbar class="ui-docs-section-tabs" appearance="segmented" aria-label="Sections">
-			<item link="#using-it">Using it</>
-			<item link="#methods-and-commands">Methods and commands</>
-			<item link="#queuing-animations">Queuing animations</>
-			<item link="#events">Events</>
-			<item link="#animating-any-element">Animating any element</>
-			<item link="#keyboard">Keyboard</>
-			<item link="#accessibility">Accessibility</>
-			<item link="#framework-usage">Framework usage</>
-		</>
-	</>
 
 	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
 	<section label="Using it">

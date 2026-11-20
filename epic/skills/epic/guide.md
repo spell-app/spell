@@ -36,7 +36,7 @@ When it goes off, post `epic focus summary <epic>` in your reply, `## Waiting on
 
 ```sh
 epic list                         # every epic:  status, where it runs
-epic summary <epic>               # its phases, the next one, open questions, issues, todos, manual tests
+epic summary <epic>               # its phases left, the next one, open questions, issues, todos, manual tests;  --all:  done ones too
 epic items <epic> --json          # where each item stands
 epic config contentFolder         # where the pages are
 epic pages link <page> --show     # the page's links, to give the person
