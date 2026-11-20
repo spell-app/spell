@@ -9738,7 +9738,7 @@
           "ruleNames": ["wrapper_action"],
           "internal": false,
           "file": "src/spell/rules/places/WrapperAction.ts",
-          "line": 32,
+          "line": 35,
           "purpose": "A second `to complete a job`, for a server's action, wraps it (epic `data` P50, Q83, I104).",
           "syntaxes": [
             {
@@ -10391,7 +10391,7 @@
           "ruleNames": ["call_the_server"],
           "internal": false,
           "file": "src/spell/rules/places/WrapperAction.ts",
-          "line": 99,
+          "line": 102,
           "purpose": "In an action that wraps a server's own, run what it wraps (epic `data` P50, Q83, J266).",
           "syntaxes": [
             {
