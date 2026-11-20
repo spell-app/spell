@@ -128,7 +128,8 @@ export class Cookbook extends App {
           core.drawAction(this, "openAFile"),
           core.drawAction(this, "saveTheFile"),
           core.drawAction(this, "undo")
-        )
+        ),
+        h("ui-uploader", { for: "cookbook file", extensions: "json", appearance: "compact" })
       ),
       h("ui-cards",
         h("ui-card", { class: "new" },
@@ -165,7 +166,7 @@ export class Cookbook extends App {
 }
 export const cookbook = new Cookbook()
 core.describeAction(Cookbook, "openAFile", { title: "Open", icon: "folder open", cantBeUndone: "keeps history" })
-core.describeAction(Cookbook, "saveTheFile", { title: "Save", shortcuts: ["S"], icon: "save", cantBeUndone: "keeps history" })
+core.describeAction(Cookbook, "saveTheFile", { title: "Save", shortcuts: ["meta+S"], icon: "save", cantBeUndone: "keeps history" })
 core.describeAction(Cookbook, "addTheNewRecipe", { title: "Add the New Recipe", undoneAs: "Add the New Recipe" })
 // -----------
 if (!core.isCarryingOver) cookbook.start()

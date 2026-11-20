@@ -197,7 +197,28 @@ placesEs.addRule(CreatePlace, {
 placesEs.addRule(CreatePlace, {
   syntax: `{type:type_words} es ${A} {superType:type} (en|desde) {address:text} {with_nested_statements}?`
 })
-placesEs.addRule(CreatePlace, { syntax: `{type:type_words} es ${A} {kind:place_kind_here} {with_nested_statements}?` })
+placesEs.addRule(CreatePlace, {
+  syntax: `{type:type_words} es ${A} {kind:place_kind_here} {with_nested_statements}?`,
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        // la base de datos del navegador:  nunca un archivo que se elige, aunque los dos digan "en este dispositivo"
+        [
+          "recetario familiar es una base de datos en este dispositivo",
+          [
+            "export class RecetarioFamiliar extends Place {}",
+            "export const recetarioFamiliar = core.place(new RecetarioFamiliar(), {",
+            '  name: "recetario_familiar",',
+            '  kind: "database on this device",',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ]
+      ]
+    }
+  ]
+})
 placesEs.addRule(CreatePlace, {
   syntax: `{type:type_words} es ${A} {kind:place_kind} {picked:picked_file} {with_nested_statements}?`,
   tests: [

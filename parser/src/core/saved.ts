@@ -38,6 +38,7 @@ import { Errored, For, Loading, createDeferred, createEffect, createMemo, getOwn
 
 import { msUntil, pollWhileVisible } from "spell/util/polling"
 import { rateLimitLeft, rateLimitResetAt, retryAfter } from "spell/util/retrying"
+import { snakeCase } from "spell/util"
 import { after } from "spell/util/timing"
 
 import { Cell, getProp, isOnlyShowing, schemaOf, untrackCells } from "spell/util/reactive"
@@ -54,6 +55,7 @@ import { CLASSES_DECLARED, core, isWhileReading, whileReading } from "./core"
 import { defineCoreModule } from "./core.types"
 import { SPELL_WINDOW, nameTableColumns } from "./ui"
 import type { Drawing } from "./drawing"
+import { listenForDroppedFiles } from "./pickedFiles"
 import { knowCollection, limitOperations, placeBehind, type PlaceDetails } from "./placeKinds"
 import { PlaceThings, addressOfLinked, heldBy, rememberLinkedList } from "./places"
 import type { PlaceDeployment } from "./runtime"
@@ -240,7 +242,11 @@ class ProgramPlaces {
     this.places.onRows((change) => this.rowsChanged(change))
     for (const [name, { details }] of this.declared) {
       // a file a person picks shows its line as the program starts:  "Open a file", "Reopen" (epic `editor` P41)
-      if (details.picked && typeof document !== "undefined") this.pickedFile(name)
+      if (details.picked && typeof document !== "undefined") {
+        this.pickedFile(name)
+        // an uploader naming it hands it what's dropped:  `<uploader for="cookbook file" />` (Q75's B)
+        this.stopDrops ??= listenForDroppedFiles((words) => this.pickedFile(snakeCase(words.trim())))
+      }
       if (!KINDS_WITH_SIGN_IN.has(details.kind ?? "")) continue
       const behind = this.places.placeFor(name) ?? this.placeNeedingNoClass(details)
       if (!this.places.placeFor(name)) this.places.add(name, behind)
@@ -263,6 +269,9 @@ class ProgramPlaces {
     }
     return behind instanceof this.folder!.PickedFilePlace ? behind : undefined
   }
+
+  /** Stops handing files dropped on an uploader to the place it names:  set once a picked file is declared. */
+  private stopDrops: (() => void) | undefined
 
   /** The places whose sign-in's followed:  whoever signs in there is who's at this page. */
   private readonly signingIn = new Set<PlaceBehind>()

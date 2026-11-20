@@ -9057,6 +9057,21 @@
               }
             },
             {
+              "syntax": "{type:type_words} es (un|una) {kind:place_kind_here} {with_nested_statements}?",
+              "example": "recetario familiar es una base de datos en este dispositivo",
+              "outputs": {
+                "js": {
+                  "code": "export class RecetarioFamiliar extends Place {}\nexport const recetarioFamiliar = core.place(new RecetarioFamiliar(), {\n  name: \"recetario_familiar\",\n  kind: \"database on this device\",\n  unclearNumbers: \",\"\n})"
+                },
+                "ts": {
+                  "code": "export class RecetarioFamiliar extends Place {}\nexport const recetarioFamiliar = core.place(new RecetarioFamiliar(), {\n  name: \"recetario_familiar\",\n  kind: \"database on this device\",\n  unclearNumbers: \",\"\n})"
+                },
+                "py": {
+                  "code": "class RecetarioFamiliar(Place):\n    pass\n\nrecetario_familiar = core.place(\n    RecetarioFamiliar(),\n    {\n        \"name\": \"recetario_familiar\",\n        \"kind\": \"database on this device\",\n        \"unclear_numbers\": \",\",\n    },\n)"
+                }
+              }
+            },
+            {
               "syntax": "{type:type_words} es (un|una) {kind:place_kind} {picked:picked_file} {with_nested_statements}?",
               "example": "recetario familiar es un archivo json que eliges",
               "outputs": {
@@ -9073,9 +9088,6 @@
             },
             {
               "syntax": "{type:type_words} es (un|una) {superType:type} (en|desde) {address:text} {with_nested_statements}?"
-            },
-            {
-              "syntax": "{type:type_words} es (un|una) {kind:place_kind_here} {with_nested_statements}?"
             },
             {
               "syntax": "{type:type_words} es (un|una) {kind:place_kind_each_person} ((en|desde) {address:text})? {with_nested_statements}?"

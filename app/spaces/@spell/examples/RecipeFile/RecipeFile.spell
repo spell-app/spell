@@ -35,7 +35,7 @@ cookbook is an app
 	to "open a file" with title "Open", icon "folder open", can't be undone
 		pick a file for cookbook file
 
-	to "save the file" with title "Save", icon "save", shortcut "S", can't be undone
+	to "save the file" with title "Save", icon "save", shortcut "meta+S", can't be undone
 		save cookbook file
 
 	to add the new recipe
@@ -54,6 +54,8 @@ cookbook is an app
 					<action "save the file" />
 					<action "undo" />
 				</stack>
+				// a recipes file dropped here, or picked, is the one the app saves to
+				<uploader for="cookbook file" extensions="json" appearance="compact" />
 			</stack>
 			<cards>
 				<card class="new">

@@ -67,7 +67,7 @@
     {
       "type": "Cookbook",
       "superType": "App",
-      "defined": "/RecipeFile.spell:1032-2743"
+      "defined": "/RecipeFile.spell:1032-2899"
     },
     {
       "property": "new_recipe",
@@ -106,7 +106,7 @@
       "returns": "nothing",
       "waits": true,
       "title": "Save",
-      "defined": "/RecipeFile.spell:1206-1307"
+      "defined": "/RecipeFile.spell:1206-1312"
     },
     {
       "syntax": "add the new recipe (of {thisArg:expression})?",
@@ -120,7 +120,7 @@
       "kind": "method",
       "name": "add the new recipe",
       "returns": "nothing",
-      "defined": "/RecipeFile.spell:1310-1422"
+      "defined": "/RecipeFile.spell:1315-1427"
     },
     {
       "syntax": "draw {thisArg:expression}",
@@ -133,7 +133,7 @@
       ],
       "kind": "method",
       "name": "draw it",
-      "defined": "/RecipeFile.spell:1425-2743"
+      "defined": "/RecipeFile.spell:1430-2899"
     }
   ],
   "codeLines": [

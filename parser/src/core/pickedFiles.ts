@@ -7,6 +7,8 @@
  *   - changed by someone else, nothing unsaved here:  "recipes.json changed.  Read it again?" (Q74)
  *   - the first download, where the browser can't save back to a file:  where it went, and why (Q71)
  * - A save that finds someone else's change asks in a dialog:  keep theirs, keep yours, or keep both (Q72).
+ * - A file dropped on an uploader that names the place, `<uploader for="cookbook file" />`, becomes its file
+ *   (`listenForDroppedFiles()`, Q75's B).
  * - Every word is the core's messages (`file-*`), in the program's language.
  * - Core never imports Spell UI:  it reaches the page's runtime where Spell UI keeps it, as `ui.ts` does.
  * - Imports `spell/places` as a TYPE only:  `placeKinds.ts` hands the place in.
@@ -25,6 +27,37 @@ export function showPickedFileLines(place: PickedFilePlace): void {
   place.onStatus((status) => void lines.show(status))
   void place.list("").then(() => lines.show(place.status))
 }
+
+/**
+ * SIDE EFFECT:  a file dropped or picked on an uploader that names a place, `<uploader for="cookbook file" />`,
+ * becomes that place's file, as `pick a file for cookbook file` would make it (Owen, 2026-11-19, Q75's B).
+ * - `placeNamed()`:  the place the words name, a file a person picks;  `undefined` for anything else, and the drop is
+ *   the uploader's own.
+ * - Its handle where the browser gives one (a drop in Chrome and Edge), so a save goes back to it;  else the plain file.
+ * - Once per page:  returns what stops it.
+ */
+export function listenForDroppedFiles(placeNamed: (words: string) => PickedFilePlace | undefined): () => void {
+  if (typeof window === "undefined") return () => {}
+  const dropped = (event: Event) => {
+    const uploader = event.composedPath()[0]
+    const words = uploader instanceof Element ? uploader.getAttribute("for") : null
+    const place = words ? placeNamed(words) : undefined
+    const { file, handle, reason } = (event as CustomEvent<DroppedFile>).detail ?? {}
+    if (!place || reason || !file) return
+    const handed = handle?.kind === "file" ? (handle as unknown as Parameters<PickedFilePlace["use"]>[0]) : file
+    place
+      .use(handed)
+      .catch((error: unknown) => core.console.error(`a file dropped for "${words}" can't be read`, error))
+  }
+  window.addEventListener(FILE_DROPPED, dropped, true)
+  return () => window.removeEventListener(FILE_DROPPED, dropped, true)
+}
+
+/** What `<ui-uploader>` sends for each file it took:  its `ui-file-dropped` detail, the part used here. */
+type DroppedFile = { file?: File; handle?: { kind: string }; reason?: string }
+
+/** `<ui-uploader>`'s event for a file it took, picked or dropped. */
+const FILE_DROPPED = "ui-file-dropped"
 
 /****************
  * ### `PickedFileLines`

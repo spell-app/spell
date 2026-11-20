@@ -60,7 +60,7 @@
 |   |   pick a file for **cookbook file**
 
 |   [action to_do_something L1]
-|   | to «"save the file"» with title «"Save"», icon «"save"», shortcut «"S"», can't be undone
+|   | to «"save the file"» with title «"Save"», icon «"save"», shortcut «"meta+S"», can't be undone
 |   |   save **cookbook file**
 
 |   [action to_do_something L1]
@@ -81,6 +81,8 @@
 |   |         <⟨action⟩ «"save the file"» />
 |   |         <⟨action⟩ «"undo"» />
 |   |       </⟨stack⟩>
+|   |       // a recipes file dropped here, or picked, is the one the app saves to
+|   |       <⟨uploader⟩ for=«"cookbook file"» extensions=«"json"» appearance=«"compact"» />
 |   |     </⟨stack⟩>
 |   |     <⟨cards⟩>
 |   |       <⟨card⟩ class=«"new"»>
