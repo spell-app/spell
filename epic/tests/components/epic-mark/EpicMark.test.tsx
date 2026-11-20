@@ -32,7 +32,7 @@ describe("<epic-mark>", () => {
     const mark = root.querySelector("epic-mark")!
     const chip = chipOf(mark)
     expect(chip.localName).toBe("a")
-    expect([chip.textContent, chip.getAttribute("href"), chip.title]).toEqual(["J9", "#j9", "Which colours?"])
+    expect([chip.textContent, chip.getAttribute("href"), chip.dataset.tooltip]).toEqual(["J9", "#j9", "Which colours?"])
     await expectAccessible(mark)
   })
 
@@ -76,7 +76,7 @@ describe("<epic-mark>", () => {
     const mark = root.querySelector("epic-mark")!
     expect(mark.matches(":state(missing)")).toBe(true)
     expect(chipOf(mark).dataset.state).toBeUndefined()
-    expect(chipOf(mark).title).toBe("Not on this page:  T4")
+    expect(chipOf(mark).dataset.tooltip).toBe("Not on this page:  T4")
   })
 })
 

@@ -13,7 +13,7 @@
  * - Opened from disk (`file://`):  the same buttons explain how to start the server, and link to the page on it.
  * - Classic script, no imports:  `file://` pages can't load modules.  `window.SpellUI.UI` is the bundle's `UI`.
  * - The buttons follow the docs' rule:  pills with an icon and text, or circles with an icon and an `aria-label`;
- *   each with the browser's own tooltip, a `title`, on the button the pointer lands on too (`titleInside()`)
+ *   each with Spell UI's tooltip, a `data-tooltip`, after the standard delay
  *   - `<ui-button>`s built as elements, never markup in strings (epic `epic-engine` P3);  before it, a `<ui-popup>`
  *     after each was its tooltip, against the docs' rule (`src/AGENTS.md`, TOOLTIPS)
  */
@@ -145,11 +145,10 @@
         ...(primary ? { color: "primary" } : {}),
         size: "tiny",
         icon,
-        title: tip
+        "data-tooltip": tip
       },
       ...words
     )
-    titleInside(button)
     return button
   }
 
@@ -160,10 +159,9 @@
       appearance: "circular basic",
       size: "mini",
       icon,
-      title: tip,
+      "data-tooltip": tip,
       "aria-label": label
     })
-    titleInside(button)
     return button
   }
 
@@ -486,19 +484,6 @@
     for (const [name, value] of Object.entries(attributes)) node.setAttribute(name, value)
     node.append(...children)
     return node
-  }
-
-  /**
-   * `host`'s `title` (a `<ui-button>`'s) on the button inside it too, once drawn:  the element the pointer lands on
-   * carries the tooltip (VS Code's side bar shows only that one's), as `spell-doc-helpers.js`' `titleInside()` does.
-   */
-  function titleInside(host) {
-    void customElements.whenDefined(host.localName).then(() =>
-      requestAnimationFrame(() => {
-        const inner = host.shadowRoot?.querySelector('[part~="button"]')
-        if (inner) inner.title = host.title
-      })
-    )
   }
 
   /** One element from HTML:  the parked dialogs' (`thoughtModal()` ...), unused until goals is rebuilt. */

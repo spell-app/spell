@@ -17,7 +17,6 @@ import {
 import { epicStateFilterVocabulary } from "./EpicStateFilter.en"
 import { STATE_PICK, type StatePickDetail } from "./EpicStateFilter.types"
 
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 import filterCSS from "./EpicStateFilter.css?inline"
 
 /****************
@@ -43,7 +42,7 @@ import filterCSS from "./EpicStateFilter.css?inline"
 export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabulary> {
   @E.proto static vocabulary = epicStateFilterVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-state-filter": filterCSS }
+    styleSheets: { "epic-state-filter": filterCSS }
   } satisfies Partial<E.ElementSetup>
 
   ////////////////
@@ -172,7 +171,7 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
                   data-state={MARKED_SHOWS_AS}
                   aria-pressed={this.blueShowing ? "true" : "false"}
                   aria-label={words()}
-                  title={words()}
+                  data-tooltip={words()}
                   onClick={(event: MouseEvent) => this.pick(MARKED_SHOWS_AS, event.altKey ? "only" : "click")}
                 >
                   {count()}
@@ -192,7 +191,7 @@ export class EpicStateFilter extends E.UIComponent<typeof epicStateFilterVocabul
                   data-color={state.color}
                   aria-pressed={this.pressedOf(state.state)}
                   aria-label={words()}
-                  title={words()}
+                  data-tooltip={words()}
                   onClick={(event: MouseEvent) => this.pick(state.state, event.altKey ? "only" : "click")}
                 >
                   {this.chipCount(state.state)}

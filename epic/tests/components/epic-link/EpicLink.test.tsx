@@ -17,7 +17,7 @@ function shown(element: Element) {
   const text = slot.assignedNodes().length ? element.textContent : slot.textContent
   return {
     href: link.getAttribute("href"),
-    title: link.getAttribute("title"),
+    title: link.getAttribute("data-tooltip"),
     text,
     broken: (element as HTMLElement & { matches(s: string): boolean }).matches(":state(broken)")
   }
@@ -65,7 +65,7 @@ describe("<epic-link>", () => {
     )
     vi.stubGlobal("fetch", fetched)
     const link = await ElementFixture.render(`<epic-link saga="spell-ui" epic="seo" item="J3"></epic-link>`)
-    await vi.waitFor(() => expect(linkOf(link).getAttribute("title")).toBe("Titles from the page"))
+    await vi.waitFor(() => expect(linkOf(link).getAttribute("data-tooltip")).toBe("Titles from the page"))
     expect((fetched.mock.calls[0] as unknown[])[0]).toBe("/api/epics/target?saga=spell-ui&epic=seo&item=J3")
     expect(shown(link)).toMatchObject({ href: `${location.origin}/epics/seo/seo.plan.html#j3`, text: "seo J3" })
     expect(linkOf(link).getAttribute("target")).toBe("seo")

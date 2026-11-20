@@ -21,7 +21,6 @@ import {
 } from "./EpicNewItem.types"
 
 import newItemCSS from "./EpicNewItem.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicNewItem`
@@ -42,7 +41,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 export class EpicNewItem extends E.UIComponent<EpicNewItemVocabulary> {
   @E.proto static vocabulary = epicNewItemVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-new-item": newItemCSS },
+    styleSheets: { "epic-new-item": newItemCSS },
     // the form's fields take the focus themselves
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
@@ -87,7 +86,7 @@ export class EpicNewItem extends E.UIComponent<EpicNewItemVocabulary> {
         part={this.partForName("button")}
         data-words=""
         aria-expanded={this.isOpen ? "true" : "false"}
-        title={words()}
+        data-tooltip={words()}
         onClick={() => (this.isOpen = !this.isOpen)}
       >
         <ui-icon name="plus" />
@@ -146,7 +145,7 @@ export class EpicNewItem extends E.UIComponent<EpicNewItemVocabulary> {
                 type="button"
                 data-kind={each}
                 aria-pressed={this.formKind === each ? "true" : "false"}
-                title={this.translationForKey(NEW_KIND_LOOKS[each].tip)}
+                data-tooltip={this.translationForKey(NEW_KIND_LOOKS[each].tip)}
                 onClick={() => (this.formKind = each)}
               >
                 <ui-icon name={NEW_KIND_LOOKS[each].icon} />
@@ -191,12 +190,12 @@ export class EpicNewItem extends E.UIComponent<EpicNewItemVocabulary> {
             type="submit"
             data-color="green"
             disabled={this.isSaving}
-            title={this.translationForKey(item ? "newSaveTip" : "newAddTip")}
+            data-tooltip={this.translationForKey(item ? "newSaveTip" : "newAddTip")}
           >
             <ui-icon name="check" />
             {this.translationForKey(item ? "newSave" : "newAdd")}
           </button>
-          <button type="button" title={this.translationForKey("newCancelTip")} onClick={() => this.close()}>
+          <button type="button" data-tooltip={this.translationForKey("newCancelTip")} onClick={() => this.close()}>
             {this.translationForKey("newCancel")}
           </button>
         </span>

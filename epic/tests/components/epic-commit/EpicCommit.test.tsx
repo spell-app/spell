@@ -70,8 +70,8 @@ describe("<epic-commit>", () => {
       ["a", "P1", "#p-commit-log"],
       ["span", "p-gone", null]
     ])
-    expect(chips[0]!.title).toBe("Go to P1:  Commit Log")
-    expect(chips[1]!.title).toBe("p-gone isn't on this page any more")
+    expect(chips[0]!.dataset.tooltip).toBe("Go to P1:  Commit Log")
+    expect(chips[1]!.dataset.tooltip).toBe("p-gone isn't on this page any more")
     // chips first (J184):  after the sha, before the sentence
     const sha = shadow.querySelector('[part~="sha"]')!
     const sentence = shadow.querySelector('[part~="sentence"]')!

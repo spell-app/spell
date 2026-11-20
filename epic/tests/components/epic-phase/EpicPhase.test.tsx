@@ -112,13 +112,17 @@ describe("<epic-phase>", () => {
     )
     const pill = (phase: Element) => phase.shadowRoot!.querySelector('[part~="estimate"]')!
     const done = pill(host)
-    expect({ text: done.textContent, tip: done.getAttribute("title"), took: done.classList.contains("took") }).toEqual({
+    expect({
+      text: done.textContent,
+      tip: done.getAttribute("data-tooltip"),
+      took: done.classList.contains("took")
+    }).toEqual({
       text: "21m",
       tip: "~3-4h",
       took: true
     })
     const [, untimed, open] = Array.from(host.parentElement!.children)
-    expect([pill(untimed!).textContent, pill(untimed!).getAttribute("title")]).toEqual(["2h", null])
+    expect([pill(untimed!).textContent, pill(untimed!).getAttribute("data-tooltip")]).toEqual(["2h", null])
     expect([pill(open!).textContent, pill(open!).classList.contains("took")]).toEqual(["1h", false])
   })
 
@@ -135,7 +139,7 @@ describe("<epic-phase>", () => {
     )
     const shown = Array.from(host.parentElement!.children).map((phase) => {
       const pill = phase.shadowRoot!.querySelector('[part~="estimate"]')!
-      return [pill.textContent, pill.getAttribute("title")]
+      return [pill.textContent, pill.getAttribute("data-tooltip")]
     })
     expect(shown).toEqual([
       ["34m / 4h", "34m of work over 4h, estimated ~3-4h"],
@@ -157,7 +161,7 @@ describe("<epic-phase>", () => {
     )
     const shown = Array.from(host.parentElement!.children).map((phase) => {
       const pill = phase.shadowRoot!.querySelector('[part~="unmerged"]')
-      return pill && [pill.textContent, pill.getAttribute("title")]
+      return pill && [pill.textContent, pill.getAttribute("data-tooltip")]
     })
     expect(shown).toEqual([["not on main", "Done on editor, not merged yet"], null, null])
   })
@@ -269,7 +273,7 @@ describe("<epic-phase> while Claude works on it", () => {
       const phase = section.querySelector("#p-one-repo")!
       const status = () => phase.shadowRoot!.querySelector<HTMLElement>('[part~="status"]')!
       await vi.waitFor(() => expect(status().matches(".working") && status().querySelector("svg")).toBeTruthy())
-      expect([status().title, status().getAttribute("aria-label")]).toEqual([
+      expect([status().dataset.tooltip, status().getAttribute("aria-label")]).toEqual([
         "Claude is writing its plan",
         "Claude is writing its plan"
       ])
@@ -353,7 +357,7 @@ describe("<epic-phase> plan changes (Owen, 2026-10-11:  no Plan changes surround
     const mark = host.shadowRoot!.querySelector('[part~="changed"]')!
     expect(mark.textContent).toBe("2")
     await vi.waitFor(() => expect(mark.querySelector("svg")).not.toBeNull())
-    expect(mark.getAttribute("title")).toContain("2 new updates")
+    expect(mark.getAttribute("data-tooltip")).toContain("2 new updates")
     host.setAttribute("status", "done")
     await ElementFixture.tick()
     expect(host.shadowRoot!.querySelector('[part~="changed"]')).toBeNull()
@@ -370,8 +374,8 @@ describe("<epic-phase> plan changes (Owen, 2026-10-11:  no Plan changes surround
       let host = await render(`<epic-phase id="p2" title="Two" status="active" to-see="${toSee}"></epic-phase>`)
       const pen = () => host.shadowRoot!.querySelector<HTMLElement>('[part~="changed"]')
       expect(pen()!.textContent).toBe("2")
-      expect(pen()!.title).toContain("✓ Seen")
-      expect(pen()!.title).toContain("3 days")
+      expect(pen()!.dataset.tooltip).toContain("✓ Seen")
+      expect(pen()!.dataset.tooltip).toContain("3 days")
       // not reviewed:  no ✓
       expect(host.shadowRoot!.querySelector('[part~="seen-all"]')).toBeNull()
       // reviewed (the client adopted before it draws, as on a page):  the ✓ marks every new one Seen;  the pen goes
@@ -382,7 +386,7 @@ describe("<epic-phase> plan changes (Owen, 2026-10-11:  no Plan changes surround
         expect(button).not.toBeNull()
         return button!
       })
-      expect(all.title).toBe("Mark all 2 updates seen")
+      expect(all.dataset.tooltip).toBe("Mark all 2 updates seen")
       all.click()
       await vi.waitFor(() => expect(Object.keys(routes.inbox.marks).sort()).toEqual(["up2", "up3"]))
       await vi.waitFor(() => expect(pen()).toBeNull())
@@ -444,7 +448,7 @@ describe("<epic-field>", () => {
     const shown = () =>
       Array.from(section.querySelectorAll("epic-field"), (field) => getComputedStyle(field).display !== "none")
     const oneGear = await gearOf(one!)
-    expect(oneGear.title).toBe("Settings for this phase")
+    expect(oneGear.dataset.tooltip).toBe("Settings for this phase")
     expect(oneGear.closest('[part~="tools"]')!.lastElementChild).toBe(oneGear)
     expect(gearEntries(oneGear)).toEqual(["Show this phase's files:  off", "Show this phase's checks:  off"])
     // this phase alone
@@ -661,7 +665,7 @@ describe("<epic-phase> title, folded and open", () => {
     const folded = { top: firstLineTop(words), button: button.getBoundingClientRect() }
     expect(header.getBoundingClientRect().height).toBeGreaterThan(lineHeight * 1.5)
     expect(words.scrollWidth).toBeLessThanOrEqual(words.clientWidth)
-    expect(header.hasAttribute("title")).toBe(false)
+    expect(header.hasAttribute("data-tooltip")).toBe(false)
     // the pen:  whole, inside the title's box, after the words, on their first line
     const [penBox, headerBox, wordsBox] = [pen, header, words].map((each) => each.getBoundingClientRect())
     expect([
@@ -674,7 +678,7 @@ describe("<epic-phase> title, folded and open", () => {
     await ElementFixture.tick()
     expect(host.matches(":state(open)")).toBe(true)
     expect(header.getBoundingClientRect().height).toBeGreaterThan(lineHeight * 1.5)
-    expect(header.hasAttribute("title")).toBe(false)
+    expect(header.hasAttribute("data-tooltip")).toBe(false)
     // open, a drawer (I115):  nothing moves, room only below it (Owen, 2026-10-25)
     expect(firstLineTop(words) - folded.top).toBeCloseTo(0, 0)
     // collapse-all shows only while open (as before P25), so the slot's button keeps its height, not its x

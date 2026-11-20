@@ -130,7 +130,7 @@ export class EpicKickoff extends E.UIComponent<typeof epicKickoffVocabulary> {
             type="button"
             class="choose"
             part={this.partForName("choose")}
-            title={this.translationForKey("choose")}
+            data-tooltip={this.translationForKey("choose")}
             aria-label={this.translationForKey("choose")}
             onClick={(event: MouseEvent) =>
               (event.currentTarget as HTMLElement).parentElement

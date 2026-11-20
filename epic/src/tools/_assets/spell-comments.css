@@ -181,9 +181,9 @@ ui-button.spell-comment-float::part(button) {
  * titled element ITSELF, not on its icon inside (electron/electron#49843).  So the icons inside a comment's buttons
  * take no pointer:  it lands on the button, which carries the `title` (a `<ui-button>`'s, its inner button:
  * `titleInside()`).  A plain browser shows them either way.
- * - ONE rule for every titled `<ui-button>` the runtime and the comments draw (epic `epic-engine` I26), the table's
- *   expand button and Send's pill too
- * - the threads' and the pane's own buttons:  their sheets (`Tooltip.css`, in the epics pack)
+ * - Only the `title`s left from before:  the core reference and the syntax page.  The runtime, the comments and the
+ *   epics pack show Spell UI's tooltip (`data-tooltip`, epic `epic-engine` T106), which finds its element up the
+ *   pointer's path, so needs none of this
  */
 ui-button[title]::part(icon) {
   pointer-events: none;

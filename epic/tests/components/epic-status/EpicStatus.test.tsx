@@ -47,7 +47,7 @@ describe("<epic-status>", () => {
       who: part(host, "who")!.textContent,
       date: part(host, "date")!.textContent,
       datetime: part(host, "date")!.getAttribute("datetime"),
-      tip: part(host, "date")!.title,
+      tip: part(host, "date")!.dataset.tooltip,
       base: part(host, "base")!.className,
       summaryShown: getComputedStyle(part(host, "summary")!).display !== "none",
       states: [host.matches(":state(underway)"), host.matches(":state(done)")]
@@ -55,7 +55,7 @@ describe("<epic-status>", () => {
       who: "Claude • Underway",
       date: "10/8/26 14:20",
       datetime: "2026-10-08 14:20",
-      tip: "",
+      tip: undefined,
       base: "underway status",
       summaryShown: false,
       states: [true, false]
@@ -70,7 +70,7 @@ describe("<epic-status>", () => {
     expect({
       who: part(host, "who")!.textContent,
       date: part(host, "date")!.textContent,
-      tip: part(host, "date")!.title,
+      tip: part(host, "date")!.dataset.tooltip,
       base: part(host, "base")!.className,
       summarySlot: summary.assignedSlot!.name,
       summaryShown: getComputedStyle(part(host, "summary")!).display !== "none",
@@ -91,11 +91,11 @@ describe("<epic-status>", () => {
     const host = await ElementFixture.render(
       `<epic-status state="done" at="2026-10-08 15:02"><p>Fixed the fold.</p></epic-status>`
     )
-    expect([part(host, "date")!.textContent, part(host, "date")!.title, part(host, "summary")!.offsetHeight]).toEqual([
-      "10/8/26 15:02",
-      "",
-      0
-    ])
+    expect([
+      part(host, "date")!.textContent,
+      part(host, "date")!.dataset.tooltip,
+      part(host, "summary")!.offsetHeight
+    ]).toEqual(["10/8/26 15:02", undefined, 0])
   })
 
   test("noted (a pick `inbox apply` recorded):  `Claude • Noted`, never read as Done;  no fill, a green outline;  passes axe", async () => {

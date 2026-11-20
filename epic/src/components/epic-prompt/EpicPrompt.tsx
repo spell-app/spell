@@ -5,7 +5,6 @@ import { E } from "spell/ui/core"
 import { epicPromptVocabulary } from "./EpicPrompt.en"
 
 import promptCSS from "./EpicPrompt.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicPrompt`
@@ -21,7 +20,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 export class EpicPrompt extends E.UIComponent<typeof epicPromptVocabulary> {
   @E.proto static vocabulary = epicPromptVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-prompt": promptCSS },
+    styleSheets: { "epic-prompt": promptCSS },
     // a container:  a click on its text must not jump to the `<summary>`
     delegatesFocus: false,
     // `disabled`:  unusable, its fold too;  `loading`:  the shared spinner
@@ -35,7 +34,7 @@ export class EpicPrompt extends E.UIComponent<typeof epicPromptVocabulary> {
   render(): JSX.Element {
     return (
       <details class={this.rootClass} part={this.partForName("base")}>
-        <summary class={TITLE} part={this.partForName("title")} title={this.translationForKey("toggleTip")}>
+        <summary class={TITLE} part={this.partForName("title")} data-tooltip={this.translationForKey("toggleTip")}>
           <span class={CHEVRON} aria-hidden="true">
             {this.chevron.svg}
           </span>

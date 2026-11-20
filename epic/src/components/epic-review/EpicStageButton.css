@@ -70,10 +70,6 @@
     height: var(--_ring);
     font-size: 9px;
   }
-  /* the icon takes no pointer:  the titled button gets it, so its tooltip shows (the pack's `Tooltip.css`) */
-  ui-icon {
-    pointer-events: none;
-  }
   ui-icon::part(icon) {
     width: auto;
     margin: 0;

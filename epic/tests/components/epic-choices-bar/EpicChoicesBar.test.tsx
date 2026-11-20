@@ -65,7 +65,7 @@ describe("<epic-choices-bar>", () => {
     const row = root.querySelector("epic-choice-row")!
     await vi.waitFor(() => expect((part(bar, "feedback") as HTMLElement & { value: string }).value).toBe("so far"))
     expect(row.shadowRoot!.querySelector("ui-textarea")!.shadowRoot!.querySelector("textarea")!.value).toBe("mine")
-    expect(part(bar, "send")!.title).toBe("Send 1 of 1 changed, and the feedback")
+    expect(part(bar, "send")!.dataset.tooltip).toBe("Send 1 of 1 changed, and the feedback")
     expect(getComputedStyle(bar).position).toBe("sticky")
     await expectAccessible(bar)
   })
@@ -105,7 +105,7 @@ describe("<epic-choices-bar>", () => {
     const { fetch } = adoptForm()
     const root = await ElementFixture.render(PAGE)
     const bar = root.querySelector("epic-choices-bar")!
-    await vi.waitFor(() => expect(part(bar, "send")!.title).toMatch(/^Send 1 of/))
+    await vi.waitFor(() => expect(part(bar, "send")!.dataset.tooltip).toMatch(/^Send 1 of/))
     part(bar, "send")!.click()
     await vi.waitFor(() => expect(part(bar, "sent")?.textContent).toMatch(/^Sent to Claude at \d\d:\d\d:  1 changed/))
     const [url, init] = fetch.mock.calls.at(-1)!

@@ -187,7 +187,7 @@ describe("<epic-choice-rows>, <epic-choice-row>", () => {
     const headLeft = part(table, "head")!.children[0]!.getBoundingClientRect().left
     expect(part(row, "pick")!.getBoundingClientRect().left).toBeCloseTo(headLeft, 0)
     expect(part(row, "copy")!.textContent).toBe("this.open")
-    expect(part(row, "copy")!.title).toBe("Copy into the box")
+    expect(part(row, "copy")!.dataset.tooltip).toBe("Copy into the box")
     expect(part<HTMLTextAreaElement>(row, "box")!.value).toBe("")
     expect(part(other, "purpose")!.textContent).not.toContain("stays")
     expect(root.getAttribute("badge")).toBe("2 commands · 0 changed")
@@ -205,7 +205,7 @@ describe("<epic-choice-rows>, <epic-choice-row>", () => {
     expect(row.matches(":state(changed)")).toBe(true)
     expect(root.getAttribute("badge")).toBe("2 commands · 1 changed")
     expect(ChoicesForm.forPage().collect()).toEqual({ "q1-A-7": "this.isOpen" })
-    expect(part(row, "reset")!.title).toBe("Clear the box")
+    expect(part(row, "reset")!.dataset.tooltip).toBe("Clear the box")
     part(row, "reset")!.click()
     await ElementFixture.settle()
     expect([box.value, row.matches(":state(changed)")]).toEqual(["", false])

@@ -144,10 +144,6 @@
     font-variant-numeric: tabular-nums;
     text-align: center;
   }
-  /* the icons take no pointer:  the titled button gets it, so its tooltip shows (the pack's `Tooltip.css`) */
-  ui-icon {
-    pointer-events: none;
-  }
   /* centred in its round end:  no icon margin or fixed width of its own */
   ui-icon::part(icon) {
     width: auto;

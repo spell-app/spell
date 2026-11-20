@@ -134,7 +134,7 @@ describe("<epic-change>", () => {
     expect([words.localName, words.querySelector("slot") !== null]).toEqual(["mark", true])
     expect(getComputedStyle(words).backgroundColor).not.toMatch(/^rgba\(0, 0, 0, 0\)$|^transparent$/)
     // no tooltip:  the popup says it, on a click (I160)
-    expect([words.hasAttribute("title"), isOpen(host)]).toEqual([false, false])
+    expect([words.hasAttribute("data-tooltip"), isOpen(host)]).toEqual([false, false])
     const chip = part(host, "chip")
     expect([chip.textContent, chip.getAttribute("aria-expanded"), part(host, "qa").hidden]).toEqual([
       "Q16",
@@ -181,7 +181,7 @@ describe("<epic-change>", () => {
     expect(button(host, "accept")).toBeNull()
     const reopen = button(host, "reopen")!
     expect(reopen.dataset.color).toBe("blue")
-    expect(part(host, "words").hasAttribute("title")).toBe(false)
+    expect(part(host, "words").hasAttribute("data-tooltip")).toBe(false)
     reopen.click()
     await vi.waitFor(() => expect(routes.inbox.marks.ch3?.action).toBe("reopen"))
   })
@@ -248,7 +248,7 @@ describe("<epic-change>", () => {
       `<p>${NEW.replace(`item="q16"`, `item="c2"`).replace(`answer="One list, Caveats"`, `answer="Fold the todos in"`)}</p>`
     ).then((p) => p.querySelector("epic-change")!)
     const chip = part(host, "chip")
-    expect([chip.textContent, chip.title]).toEqual(["C2", "C2:  show the comment"])
+    expect([chip.textContent, chip.dataset.tooltip]).toEqual(["C2", "C2:  show the comment"])
     chip.click()
     await ElementFixture.settle()
     expect(part(host, "qa").textContent).toBe("Fold the todos in")

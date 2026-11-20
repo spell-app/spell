@@ -53,7 +53,6 @@ import {
   growField,
   noteToast,
   readJSON,
-  titleInside,
   writeJSON
 } from "./spell-doc-helpers.js"
 
@@ -547,7 +546,7 @@ class PageComments {
     button.addEventListener(SEND_ASKED, () => void this.sendNow())
     const who = el(
       "span",
-      { class: "spell-send-who", "data-listening": send.listening ? "yes" : "no", title: whoWords(send) },
+      { class: "spell-send-who", "data-listening": send.listening ? "yes" : "no", "data-tooltip": whoWords(send) },
       whoLabel(send)
     )
     // the header's tools row, first (`addHeadTool()`)
@@ -752,9 +751,8 @@ class PageComments {
     const badge = bullhorn.querySelector(".spell-toolbar-count")
     badge.textContent = String(count)
     badge.hidden = !count
-    bullhorn.title = tip
+    bullhorn.dataset.tooltip = tip
     bullhorn.setAttribute("aria-label", tip)
-    if (bullhorn.localName === "ui-item") titleInside(bullhorn, "item")
     // a guide's titles share the row with it:  its menu fits them again (`<ui-toolbar shrinkable>`)
     bullhorn.hidden = !open
   }
@@ -838,7 +836,7 @@ class PageComments {
     const id = `C${ThreadFacts.numberOf(comment.id)}`
     const row = el(
       "button",
-      { type: "button", class: `${PROMOTED}-row`, title: `${id}:  show this comment` },
+      { type: "button", class: `${PROMOTED}-row`, "data-tooltip": `${id}:  show this comment` },
       el("ui-icon", { name: "bullhorn" }),
       el("b", {}, id),
       el("span", {}, ThreadFacts.headline(comment))
@@ -1715,6 +1713,7 @@ class PageComments {
         void close()
       })
     })
+    holdFocusIn(pane, field)
     pane.addEventListener("epic-comment-removing", () => void (open.discard ? open.discard() : this.remove(open.id)))
   }
 
@@ -1968,12 +1967,11 @@ const UNDO_MS = 6000
 /**
  * A control the comments draw (epic `epic-engine` I26;  Owen, 2026-10-19:  "Why are we not using <ui-xxxx> ...
  * components for these pages?"):  a `<ui-button appearance="circular basic" size="mini">` with `icon`, never a raw `<button>`, so
- * the component centres its icon;  `tip` its tooltip and name, on the inner button too (`titleInside()`).
+ * the component centres its icon;  `tip` its tooltip (Spell UI's) and name.
  * - `size`:  another size (Send's pill:  `tiny`, as the New epic pill)
  */
 export function iconButton(icon, tip, { size = "mini" } = {}) {
-  const button = el("ui-button", { appearance: "circular basic", size, icon, title: tip, "aria-label": tip })
-  titleInside(button)
+  const button = el("ui-button", { appearance: "circular basic", size, icon, "data-tooltip": tip, "aria-label": tip })
   return button
 }
 
@@ -2004,6 +2002,19 @@ function placeAt(box, child, at) {
 function setOrDrop(element, name, value) {
   if (value === undefined) element.removeAttribute(name)
   else if (element.getAttribute(name) !== value) element.setAttribute(name, value)
+}
+
+/**
+ * A press anywhere in comment pane `pane` but its `field` (the header:  its trash, its ×, its grip) leaves the focus in
+ * the field (epic `epic-engine` I354:  "can't delete comment").
+ * - why:  Safari and Firefox on macOS give a clicked button no focus;  the focus went to the page, the pane closed
+ *   itself (its `focusout`), and the trash's click never came
+ * - the click itself still comes:  only the focus move is stopped
+ */
+export function holdFocusIn(pane, field) {
+  pane.addEventListener("mousedown", (event) => {
+    if (event.target !== field) event.preventDefault()
+  })
 }
 
 /** Resolves once `element` (one of the pack's) is defined and has drawn.  NEVER rejects. */
