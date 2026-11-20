@@ -3261,6 +3261,25 @@ classes.addRule(EveryThingWhere, {
           "core.filter(core.everyThing(Card), (card: Card) => card !== 1)"
         ]
       ]
+    },
+    {
+      // a type of several words, none of them a type by itself (epic old-console-redo I18, I23)
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(["a suite record is a thing", "a suite record has a rank as number"].join("\n"), "block")
+      },
+      tests: [
+        [
+          "every suite record where its rank is 1",
+          "core.filter(core.everyThing(SuiteRecord), (suiterecord) => suiterecord.rank === 1)",
+          "core.filter(core.everyThing(SuiteRecord), (suiterecord: SuiteRecord) => suiterecord.rank === 1)"
+        ],
+        [
+          "all suite records where its rank is 1",
+          "core.filter(core.everyThing(SuiteRecord), (suiterecord) => suiterecord.rank === 1)",
+          "core.filter(core.everyThing(SuiteRecord), (suiterecord: SuiteRecord) => suiterecord.rank === 1)"
+        ]
+      ]
     }
   ]
 })

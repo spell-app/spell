@@ -203,12 +203,32 @@ export class EveryThing extends SpellExpression<"type"> {
     })
   }
 
+  /**
+   * Does a known type's name start within `reach` words of `start`, for a rule's quick test?  One word (`books`) or
+   * several (`suite records`, `maintenance event`), up to `TYPE_WORDS` (epic old-console-redo I18, I23).
+   */
+  static typeNear(scope: P.Scope, tokens: P.Token[], start: number, reach: number): boolean {
+    for (let index = start; index < start + reach && tokens[index] instanceof P.WordToken; index++) {
+      if (scope.getType(`${tokens[index]!.value}`)) return true
+      // several words are named as a type is everywhere:  dashed, then class-cased, `suite-records` => `SuiteRecord`
+      let dashed = `${tokens[index]!.value}`
+      for (let end = index + 1; end < index + TYPE_WORDS && tokens[end] instanceof P.WordToken; end++) {
+        dashed += `-${tokens[end]!.value}`
+        if (scope.getType(P.classCase(SP.typeName(dashed)))) return true
+      }
+    }
+    return false
+  }
+
   /** The type record a type match found while parsing, if any -- see `SP.SpellType`'s `data.scopeType`. */
   static kindOf(type: P.Match): P.TypeScope | undefined {
     const { scopeType } = type.data as { scopeType?: unknown }
     return scopeType instanceof P.TypeScope ? scopeType : undefined
   }
 }
+
+/** The most words a type's name is taken to have, by `EveryThing.typeNear()`:  `home maintenance event organizer`. */
+const TYPE_WORDS = 5
 
 /** A field's words, from its name:  `windSpeed` => `wind speed`. */
 function wordsOfField(field: string): string {

@@ -30,13 +30,10 @@ export class EveryThingWhere extends SpellExpression<"type|where|body?", { own?:
     return P.listOf(SP.typeName(`${match.groups.type.value}`))
   }
 
-  /** Quick test:  a known type, up to two words in:  it can start with a type's plural alone, and this runs on every expression. */
+  /** Quick test:  a known type, of one word or several, up to two words in:  it can start with a type's plural alone, and this runs on every expression. */
   test(scope: P.Scope, tokens: P.Token[], start = 0) {
     if (super.test(scope, tokens, start) === false) return false
-    for (let index = start; index < start + WORDS_TO_THE_TYPE && tokens[index]; index++) {
-      if (tokens[index] instanceof P.WordToken && scope.getType(`${tokens[index]!.value}`)) return true
-    }
-    return false
+    return EveryThing.typeNear(scope, tokens, start, WORDS_TO_THE_TYPE)
   }
 
   /** Nested scope for the predicate:  the type's name (`the recipe`) and `it` are the current item. */
