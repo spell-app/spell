@@ -193,7 +193,18 @@ describe("<epic-send-buttons>, just sent", () => {
   /** The words beside the plane. */
   const words = (group: Element) => part(group, "words")!.textContent
 
-  test("a press that sends:  `Sent to Claude` for 5 seconds, in the same width, its tooltip saying when;  then back", async () => {
+  /** Spell UI's green, as the browser draws it. */
+  const spellUIGreen = () => {
+    const probe = document.body.appendChild(document.createElement("div"))
+    probe.style.background = "var(--ui-green, #21ba45)"
+    const green = getComputedStyle(probe).backgroundColor
+    probe.remove()
+    return green
+  }
+  /** The pill's fill:  `rgba(0, 0, 0, 0)` when it has none. */
+  const fill = (group: Element) => getComputedStyle(part(group, "send")!).backgroundColor
+
+  test("a press that sends:  `Sent to Claude` for 5 seconds, green, in the same width, its tooltip saying when;  then back", async () => {
     adoptCountdown()
     const group = await ElementFixture.render(
       `<epic-send-buttons state="unsent" send-tip="Send 1 mark" countdown></epic-send-buttons>`
@@ -206,6 +217,9 @@ describe("<epic-send-buttons>, just sent", () => {
     group.setAttribute("send-tip", "Sent:  waiting for Claude")
     await ElementFixture.settle()
     expect(words(group)).toBe("Sent to Claude")
+    // green for its 5 seconds (I352 revisited, Owen:  "make it green for those 5 seconds")
+    expect(group.matches(":state(just-sent)")).toBe(true)
+    expect(fill(group)).toBe(spellUIGreen())
     // nothing beside it moves:  the pill keeps its width, the words their place
     expect(group.getBoundingClientRect().width).toBe(width)
     expect(part(group, "words")!.getBoundingClientRect().left).toBe(left)
@@ -216,6 +230,8 @@ describe("<epic-send-buttons>, just sent", () => {
     vi.advanceTimersByTime(100)
     await ElementFixture.settle()
     expect(words(group)).toBe("Send to Claude")
+    expect(group.matches(":state(just-sent)")).toBe(false)
+    expect(fill(group)).toBe("rgba(0, 0, 0, 0)")
     expect(part(group, "send")!.dataset.tooltip).toBe("Sent:  waiting for Claude")
     expect(group.getBoundingClientRect().width).toBe(width)
   })
