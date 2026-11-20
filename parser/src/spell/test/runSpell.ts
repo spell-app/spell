@@ -45,9 +45,9 @@ export function runSpell(lines: string[]): (names: string) => Record<string, unk
  */
 export function runSpellFiles(
   sources: Array<{ path: string; contents: string }>,
-  { registered = false, debugging = false }: RunOptions = {}
+  { registered = false, debugging = false, projectPath }: RunOptions = {}
 ): (names: string) => Record<string, unknown> {
-  const { scope, files } = parseSpellProject(sources)
+  const { scope, files } = parseSpellProject(sources, projectPath === undefined ? {} : { projectPath })
   const errors = files.flatMap((file) => file.errors)
   if (errors.length) throw new Error(`parse errors:\n${JSON.stringify(errors, null, 2)}`)
   const parts = files.map(({ match, compiled }) => (match?.AST instanceof P.ASTStatementGroup ? match.AST : compiled))
@@ -86,4 +86,6 @@ export type RunOptions = {
   registered?: boolean
   /** `true`:  its debugging build, each line of an action asking `core._stepper` first (`P.DebugSteps`).  Default:  not. */
   debugging?: boolean
+  /** The project's address, for a line that reads it:  `@acme/jobs`.  Default:  none (`parseSpellProject()`). */
+  projectPath?: string
 }

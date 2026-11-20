@@ -1,3 +1,4 @@
+import { SPELL_COLORS } from "spell/util/spell/constants"
 import { after, soon } from "spell/util/timing"
 import { Cell, schemaOf, type Schema } from "spell/util/reactive"
 import type { DrawnWindow } from "spell/element/drawnWindow"
@@ -32,7 +33,7 @@ export const SPELL_WINDOW = {
  * Assembled `core` UI-interaction methods:
  * - time (`pauseFor`)
  * - talking to the person running the program, on Spell UI's toasts and dialogs:
- *   `notify`, `alert`, `confirm`, `prompt` (spell's `rules/UI/`)
+ *   `notify`, `alert`, `confirm`, `prompt`, `choose` (spell's `rules/UI/`)
  * - Sounds and videos are `media.ts`.
  * - stylesheet installation (`installStyles`)
  * - printing the app alone (`openPrinting`, `printing.ts`)
@@ -199,6 +200,63 @@ export const uiMethods = defineCoreModule({
     return typed ?? ""
   },
 
+  /**
+   * Ask the person to pick from `list` in a dialog:  the thing picked -- compiled from `choose a card from the cards`
+   * (`await`ed), into a new `it` (spell's `choose` rule;  epic `language` P66).
+   * - `list`:  a list, each item a row named by its title, label or name, else itself as text (`titleOfThing()`);
+   *   or a record, its keys the rows and its values what's picked (`choicesOf()`)
+   * - `options`:  the words written, the question, the counts:  `ChooseOptions`
+   * - Several (`options.things`):  a list of what was picked.
+   * - Typed as the item (or a list of them) for compiled TypeScript to read it;
+   *   cancelled, it's really nothing, as a program says `if the result is ok` first.
+   * - HyperTalk's way, as `prompt`'s:  `the result` is `ok` or `cancel`;  cancelled, it's nothing (several:  an empty list).
+   * - An empty list:  no dialog;  `cancel`, and nothing.
+   * - No Spell UI:  the question printed, and the first row picked (several:  as few as it takes).
+   */
+  choose<T, Options extends ChooseOptions = ChooseOptions>(
+    list: Iterable<T> | Readonly<Record<string, T>> | undefined,
+    options?: Options
+  ): Promise<Chosen<T, Options>> {
+    return chooseFrom(choicesOf(list), options ?? {}) as Promise<Chosen<T, Options>>
+  },
+
+  /**
+   * Ask the person to pick one of Spell UI's colors, each drawn as a chip:  its hue name, `red` -- compiled from
+   * `choose a color` (epic `language` P66).
+   * - Each row says the color's name in the program's language (`color-names`), and gives back its hue name,
+   *   which any color setting takes (`notify ... in red`).
+   * - As `choose()` otherwise.
+   */
+  chooseColor(options: ChooseOptions = {}): Promise<string> {
+    const names = core.message("color-names").split(",")
+    const choices = SPELL_COLORS.map((color, index) => ({
+      title: names[index]?.trim() || color,
+      value: color as unknown,
+      color: color as string
+    }))
+    return chooseFrom(choices, options) as Promise<string>
+  },
+
+  /**
+   * The page's dialog behind `choose()`:  which rows were picked, by position, or `undefined` if cancelled.
+   * - `rows`:  each row's words, and a color to draw as a chip beside them
+   * - A program running elsewhere (Python's) asks its page for this, as it has the rows' words itself.
+   * - No Spell UI:  the question printed, and the first rows picked.
+   */
+  async choosePositions(
+    message: unknown,
+    rows: readonly ChoiceRow[],
+    options: ChoosePositionsOptions = {}
+  ): Promise<number[] | undefined> {
+    core.RUNTIME?.actions.throwIfCanceled()
+    const ui = pageUI()
+    if (!ui) {
+      core.console.info(`${String(message)} (${rows[0]?.title ?? ""})`)
+      return firstPositions(rows.length, options)
+    }
+    return (await ui.load()).modals.choose({ ...dialogFor(message), rows: [...rows], ...options })
+  },
+
   ////////////////
   // ## Drawn things, by name
   ////////////////
@@ -250,7 +308,7 @@ export const uiMethods = defineCoreModule({
   /**
    * What closed the last dialog:  what `the result` compiles to (epic `language` T155).
    * - A modal's (`showDrawn()`):  `ok`, `cancel`, or its button's action's name, `save the thing`
-   * - `alert`, `warn`:  `ok`;  `confirm`, `prompt`:  `ok` or `cancel` (`prompt`'s text is `it`, epic `language` P64)
+   * - `alert`, `warn`:  `ok`;  `confirm`, `prompt`, `choose`:  `ok` or `cancel` (their answer is `it`, epic `language` P64, P66)
    * - What an action gives back, when it runs as a statement (`deal the cards`, P64;  `keepResult()`)
    * - Nothing, before any has closed.
    */
@@ -919,6 +977,117 @@ function isTypedIn(target: EventTarget | undefined): boolean {
 }
 
 /**
+ * What `choose` takes after what it picks from (epic `language` P66):  the words written, and its clauses.
+ * - `thing` or `things` say what's picked, for the question when none is written:  `Choose a card`.
+ */
+export type ChooseOptions = {
+  /** one, as written:  `"a card"`, `"one"` */
+  thing?: string
+  /** several, as written:  `"cards"`;  `it` is a list */
+  things?: string
+  /** `with prompt "Which card?"`:  the question */
+  prompt?: string
+  /** `showing 10 at a time`:  how many rows show before the list scrolls */
+  shown?: number
+  /** `between 2 and 4 cards`:  the fewest that may be picked */
+  least?: number
+  /** `up to 2 cards`:  the most that may be picked */
+  most?: number
+}
+
+/** What `choose()` gives back:  one of `list`'s items, or a list of them when several are picked (`things`). */
+export type Chosen<T, Options extends ChooseOptions> = Options extends { things: string } ? T[] : T
+
+/** One row of `choose`'s dialog:  its words, and its color's hue name when it's a color (`chooseColor()`). */
+export type ChoiceRow = { title: string; color?: string }
+
+/** A row and what picking it gives back. */
+type Choice = ChoiceRow & { value: unknown }
+
+/** How many rows `choosePositions()` may pick, and how many show at once. */
+export type ChoosePositionsOptions = {
+  /** pick several:  checks, then ok */
+  several?: boolean
+  /** the fewest */
+  least?: number
+  /** the most */
+  most?: number
+  /** how many rows show before the list scrolls */
+  shown?: number
+}
+
+/**
+ * `choose()` and `chooseColor()`, once their rows are made:  ask, then what was picked, and `the result`.
+ * - See `choose()`.
+ */
+async function chooseFrom(choices: Choice[], options: ChooseOptions): Promise<unknown> {
+  core.RUNTIME?.actions.throwIfCanceled()
+  const several = options.things !== undefined
+  const nothing = several ? [] : undefined
+  if (!choices.length) return (keepResult(CANCEL), nothing)
+  const { least, most, shown } = options
+  const rows = choices.map(({ title, color }) => (color ? { title, color } : { title }))
+  const positions = await core.choosePositions(chooseMessage(options), rows, { several, least, most, shown })
+  if (!positions) return (keepResult(CANCEL), nothing)
+  keepResult(OK)
+  const picked = positions.map((position) => choices[position]?.value)
+  return several ? picked : picked[0]
+}
+
+/**
+ * The rows of what `choose` picks from, and what each gives back.
+ * - A list (or anything listed:  a `Set`):  each item, named by `titleOfThing()`
+ * - A record, or a `Map`:  its keys the rows, its values what's picked (Q73)
+ * - Anything else:  none.
+ */
+function choicesOf(list: unknown): Choice[] {
+  if (list instanceof Map) return [...list].map(([key, value]) => ({ title: String(key), value }))
+  if (Array.isArray(list) || (typeof list === "object" && list !== null && Symbol.iterator in list)) {
+    return [...(list as Iterable<unknown>)].map((value) => ({ title: titleOfThing(value), value }))
+  }
+  if (isRecord(list)) return Object.entries(list).map(([title, value]) => ({ title, value }))
+  return []
+}
+
+/** Is `value` a plain record, `{ "Easy": 1 }`, and not a thing? */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  if (typeof value !== "object" || value === null) return false
+  const prototype = Object.getPrototypeOf(value)
+  return prototype === Object.prototype || prototype === null
+}
+
+/**
+ * What a list's item says it's called:  its `title`, else its `label`, else its `name`, else itself as text.
+ * - How a menu filled from a list names its items too (`acting.ts`), and `choose`'s rows.
+ */
+export function titleOfThing(thing: unknown): string {
+  const named = thing as { title?: unknown; label?: unknown; name?: unknown } | undefined
+  if (typeof named?.title === "string") return named.title
+  if (typeof named?.label === "string") return named.label
+  if (typeof named?.name === "string") return named.name
+  return String(thing)
+}
+
+/**
+ * `choose`'s question:  the one written, else from the words written, in the program's language:
+ * `Choose a card`, `Choose up to 2 cards`.
+ */
+function chooseMessage({ prompt, thing = "", things, least, most }: ChooseOptions): string {
+  if (prompt !== undefined) return prompt
+  if (things === undefined) return core.message("choose-thing", { thing })
+  if (least !== undefined && most !== undefined) return core.message("choose-between", { least, most, things })
+  if (most !== undefined) return core.message("choose-up-to", { most, things })
+  return core.message("choose-things", { things })
+}
+
+/** With no Spell UI:  the first row, or as many of the first as `least` asks. */
+function firstPositions(count: number, { several, least = 1 }: ChoosePositionsOptions): number[] | undefined {
+  if (!count) return undefined
+  const picked = several ? Math.min(Math.max(least, 1), count) : 1
+  return Array.from({ length: picked }, (_, position) => position)
+}
+
+/**
  * What core uses of the page's Spell UI runtime (`UI`, `spell-ui`):  typed here, as core never imports `ui`.
  * - Its `modals` work once the `ui-modal` family is defined:  a runner's page defines every family.
  */
@@ -934,6 +1103,7 @@ type PageUI = {
     alert(options: PageDialog): Promise<void>
     confirm(options: PageDialog): Promise<boolean>
     prompt(options: PageDialog & { value?: string }): Promise<string | undefined>
+    choose(options: PageDialog & ChoosePositionsOptions & { rows: ChoiceRow[] }): Promise<number[] | undefined>
   }
   /** the page's keyboard shortcuts:  `UI.keyboard`;  `register()` answers how to stop */
   keyboard: {

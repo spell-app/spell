@@ -138,15 +138,17 @@ class PickedFileLines {
     this.isAsking = true
     try {
       const file = this.place.fileName ?? ""
-      const choice = await page.modals.choose({
+      const answers = ["theirs", "both", "yours"] as const
+      const picked = await page.modals.choose({
         title: core.message("file-conflict-title", { file }),
         message: core.message("file-conflict", { file }),
-        choices: [
-          { value: "theirs", text: core.message("file-keep-theirs") },
-          { value: "both", text: core.message("file-keep-both") },
-          { value: "yours", text: core.message("file-keep-yours"), color: "primary" }
+        rows: [
+          { title: core.message("file-keep-theirs") },
+          { title: core.message("file-keep-both") },
+          { title: core.message("file-keep-yours") }
         ]
       })
+      const choice = picked?.[0] === undefined ? undefined : answers[picked[0]]
       if (choice === "theirs") await this.place.keepTheirs()
       else if (choice === "yours") await this.place.keepYours()
       else if (choice === "both") await this.place.saveAsNew()
@@ -174,13 +176,9 @@ type PageUI = {
   toast(options: PageLine & { markdown: boolean; displayTime: number | "auto" }): { id: string }
   /** toasts:  `ready()` once one can show;  `dismiss()` takes one away */
   toasts: { ready(): Promise<void>; dismiss(id: string): void }
-  /** `UI.modals.choose()`:  the picked choice's value, `undefined` for Cancel */
+  /** `UI.modals.choose()`:  the positions of the rows picked, `undefined` for Cancel (epic `language` P66) */
   modals: {
-    choose<T extends string>(options: {
-      title: string
-      message: string
-      choices: { value: T; text: string; color?: string }[]
-    }): Promise<T | undefined>
+    choose(options: { title: string; message: string; rows: { title: string }[] }): Promise<number[] | undefined>
   }
 }
 

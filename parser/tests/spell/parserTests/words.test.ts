@@ -134,11 +134,11 @@ describe("what compiles", () => {
 
   it("a key written won't compile;  a key named warns, and a plain web server does", () => {
     const place = 'family cookbook is a web server at "https://x.example/v1"'
-    expect(compiled(`${place}:`, '\t- its key is "sk_live_abc"').errors.join()).toContain("named".slice(0, 0))
-    expect(compiled(`${place}:`, '\t- its key is "sk_live_abc"').errors).toHaveLength(1)
-    expect(compiled(`${place}:`, '\t- its key is the secret "sk_live_abc"').errors).toHaveLength(1)
+    expect(compiled(`${place}:`, '\t- it is authenticated with "sk_live_abc"').errors.join()).toContain("named".slice(0, 0))
+    expect(compiled(`${place}:`, '\t- it is authenticated with "sk_live_abc"').errors).toHaveLength(1)
+    expect(compiled(`${place}:`, '\t- it is authenticated with the secret "sk_live_abc"').errors).toHaveLength(1)
     expect(compiled('family cookbook is a web server at "https://x.example/v1?key=abc"').errors).toHaveLength(1)
-    const named = compiled(`${place}:`, '\t- its key is the secret "COOKBOOK_KEY"', "\t- check it every 30 seconds")
+    const named = compiled(`${place}:`, '\t- it is authenticated with the secret "COOKBOOK_KEY"', "\t- check it every 30 seconds")
     expect(named.errors).toEqual([])
     expect(named.warnings.join()).toContain("server side")
     expect(compiled(place).warnings.join()).toContain("check it every 30 seconds")

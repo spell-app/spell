@@ -22,6 +22,10 @@
       "names": ["waitedValue", "waitedValueKeyFor", "whileWaiting"]
     },
     {
+      "why": "choose's dialog on a page (epic language P66):  Python's choose() names its rows itself, and asks its page for this",
+      "names": ["choosePositions"]
+    },
+    {
       "why": "The person menu, drawn on a page (epic atmosphere T56):  a program in Python has no toolbar of its own to put it in yet",
       "names": ["signInMenu"]
     },
@@ -79,6 +83,7 @@
         "listShown",
         "useElement",
         "elementClassOf",
+        "uiElementOf",
         "css"
       ]
     },

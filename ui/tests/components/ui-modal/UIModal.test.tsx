@@ -605,29 +605,6 @@ describe("UI.modals", () => {
     expect(await escaped).toBe(false)
   })
 
-  it("choose():  a button per answer after Cancel;  the picked value, or undefined on Cancel or Escape", async () => {
-    const choices = [
-      { value: "theirs", text: "Keep theirs" },
-      { value: "yours", text: "Keep yours", color: "primary" }
-    ] as const
-    const picked = UI.modals.choose({ title: "Changed", message: "It changed.", choices })
-    let host = await current()
-    const buttons = [...host.querySelectorAll<HTMLElement>("ui-button")]
-    expect(buttons.map((button) => button.textContent)).toEqual(["Cancel", "Keep theirs", "Keep yours"])
-    expect(buttons[2]!.getAttribute("color")).toBe("primary")
-    buttons[1]!.click()
-    expect(await picked).toBe("theirs")
-    expect(host.isConnected).toBe(false)
-    const canceled = UI.modals.choose({ message: "Again?", choices })
-    host = await current()
-    host.querySelector<HTMLElement>(".cancel")!.click()
-    expect(await canceled).toBeUndefined()
-    const escaped = UI.modals.choose({ message: "Again?", choices })
-    await current()
-    await userEvent.keyboard("{Escape}")
-    expect(await escaped).toBeUndefined()
-  })
-
   it("confirm() focuses the least destructive choice, Cancel", async () => {
     const answer = UI.modals.confirm("Sure?")
     const host = await current()
@@ -756,5 +733,94 @@ describe("UI.modals", () => {
     } finally {
       UI.i18n.locale = locale
     }
+  })
+})
+
+describe("UI.modals.choose() (epic `language` P66)", () => {
+  /** The dialog `UI.modals` put in the body, once it shows. */
+  async function current() {
+    await expect.poll(() => document.querySelector<Modal>("body > ui-modal")?.visible).toBe(true)
+    const host = document.querySelector<Modal>("body > ui-modal")!
+    await ElementFixture.settle(host)
+    return host
+  }
+
+  /** The buttons of the rows, in `host`. */
+  const rowButtons = (host: Element) => [...host.querySelectorAll<HTMLElement>("ui-content ui-button")]
+
+  it("up to 20 rows:  a button each;  a click picks it and closes, with no OK button", async () => {
+    const answer = UI.modals.choose({ message: "Which card?", rows: [{ title: "Ace" }, { title: "King" }] })
+    const host = await current()
+    expect(rowButtons(host).map((button) => button.textContent)).toEqual(["Ace", "King"])
+    expect(host.querySelector(".approve")).toBeNull()
+    rowButtons(host)[1]!.click()
+    expect(await answer).toEqual([1])
+    expect(host.isConnected).toBe(false)
+  })
+
+  it("Cancel and Escape answer undefined", async () => {
+    let answer = UI.modals.choose({ message: "Which?", rows: [{ title: "Ace" }] })
+    let host = await current()
+    host.querySelector<HTMLElement>(".cancel")!.click()
+    expect(await answer).toBeUndefined()
+    answer = UI.modals.choose({ message: "Which?", rows: [{ title: "Ace" }] })
+    host = await current()
+    await userEvent.keyboard("{Escape}")
+    expect(await answer).toBeUndefined()
+  })
+
+  it("several:  each row turns on and off;  OK stays off until the count fits", async () => {
+    const answer = UI.modals.choose({
+      message: "Pick two",
+      rows: [{ title: "a" }, { title: "b" }, { title: "c" }],
+      several: true,
+      least: 2,
+      most: 2
+    })
+    const host = await current()
+    const approve = host.querySelector<HTMLElement>(".approve")!
+    const [a, b, c] = rowButtons(host)
+    expect(approve.hasAttribute("disabled")).toBe(true)
+    a!.click()
+    c!.click()
+    await expect.poll(() => approve.hasAttribute("disabled")).toBe(false)
+    b!.click()
+    await expect.poll(() => approve.hasAttribute("disabled")).toBe(true)
+    b!.click()
+    await expect.poll(() => approve.hasAttribute("disabled")).toBe(false)
+    approve.click()
+    expect(await answer).toEqual([0, 2])
+  })
+
+  it("past 20 rows:  a list with a search box, `shown` rows tall;  a row picks itself", async () => {
+    const rows = Array.from({ length: 30 }, (_, index) => ({ title: `Card ${index + 1}` }))
+    const answer = UI.modals.choose({ message: "Which card?", rows, shown: 5 })
+    const host = await current()
+    const search = host.querySelector<HTMLInputElement>("input[type=search]")!
+    const list = host.querySelector<HTMLElement>("ui-list")!
+    const items = [...list.querySelectorAll<HTMLElement>("ui-item")]
+    expect(items).toHaveLength(30)
+    expect(list.parentElement!.style.maxHeight).toBe("11em")
+    search.value = "card 2"
+    search.dispatchEvent(new Event("input"))
+    expect(items.filter((item) => !item.hidden).map((item) => item.textContent)).toEqual([
+      "Card 2",
+      ...Array.from({ length: 10 }, (_, index) => `Card ${20 + index}`)
+    ])
+    await ElementFixture.settle(items[24]!)
+    items[24]!.shadowRoot!.querySelector<HTMLElement>("button")!.click()
+    expect(await answer).toEqual([24])
+  })
+
+  it("a row with a color:  a read-only chip of it before its words", async () => {
+    // the chip's family loads with the first color row:  loaded here, so the poll doesn't wait on the dev server
+    await import("spell/ui/components/ui-theme-editor")
+    const answer = UI.modals.choose({ message: "Your color?", rows: [{ title: "Red", color: "red" }] })
+    const host = await current()
+    const chip = rowButtons(host)[0]!.querySelector("ui-color-chip")!
+    expect(chip.getAttribute("color")).toBe("var(--ui-red)")
+    expect(chip.getAttribute("aria-hidden")).toBe("true")
+    rowButtons(host)[0]!.click()
+    expect(await answer).toEqual([0])
   })
 })

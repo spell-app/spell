@@ -3,6 +3,8 @@
 exports[`testing spell module UI, in Spanish > rule group specs > match snapshot -- if this fails, update rule's \`Groups\` type argument, then the snapshot 1`] = `
 {
   "alert": "message|title?|size?|okButton?",
+  "choose": "article?|type?|arg?|list?|message?|shown?|one?|color?",
+  "choose_several": "many?|most?|least?|type?|arg?|list|message?|shown?",
   "confirm": "message|title?|size?|okButton?|cancelButton?",
   "define_media": "type|kind|property|path",
   "load_sound": "sound",
@@ -14,7 +16,6 @@ exports[`testing spell module UI, in Spanish > rule group specs > match snapshot
   "media_speed": "speed?|word?",
   "media_time": "number[]",
   "media_volume": "volume?|quiet?|muted?",
-  "move_tour_step": "next?",
   "notify": "kind?|message|title?|color?|inverted?|position?|time?|unit?|untilClicked?|progress?|sideBySide?|keepRunning?|okButton?|wait?",
   "play_sound": "sound|speed?|from?|volume?|loop?|place?|wait?",
   "print": "operator?|expressions",
@@ -22,8 +23,6 @@ exports[`testing spell module UI, in Spanish > rule group specs > match snapshot
   "show_dates_as": "style",
   "show_drawn": "hide?|name",
   "show_drawn_with": "name|thing",
-  "show_tour_step": "step",
-  "start_tour": "name",
   "stop_all_media": "kind",
   "stop_sound": "sound",
   "warn": "message|title?|size?|okButton?",

@@ -941,16 +941,23 @@ export class SpellParser extends P.Parser {
     return item.is(SP.BlockLine) ? item.data.bodyMark : undefined
   }
 
-  /** Re-parse a top-level `line`'s nested body -- see `BlockLine.reparseBody()`. */
+  /**
+   * Re-parse a top-level `line`'s nested body -- see `BlockLine.reparseBody()`.
+   * - With us in play (`inPlay()`), as a full parse is:  our language's inflector names its types,
+   *   so a Spanish `cuenta atrás` stays `CuentaAtrás`, never English's singular `CuentaAtrá`.
+   */
   reparseBody(item: P.Match, body: P.BlockToken): P.Match | undefined {
-    return item.is(SP.BlockLine) ? item.rule.reparseBody(item, body) : undefined
+    return item.is(SP.BlockLine) ? this.inPlay(() => item.rule.reparseBody(item, body)) : undefined
   }
 
-  /** Re-parse the innermost body an edit changed inside a top-level `line`'s body -- see `BlockLine.reparseInnerBody()`. */
+  /**
+   * Re-parse the innermost body an edit changed inside a top-level `line`'s body -- see `BlockLine.reparseInnerBody()`.
+   * - With us in play, as `reparseBody()` is.
+   */
   reparseInnerBody(item: P.Match, body: P.BlockToken, texts: { oldText: string; text: string }): P.Match | undefined {
     const { journal } = this
     if (!journal || !item.is(SP.BlockLine)) return undefined
-    return item.rule.reparseInnerBody(item, body, { ...texts, journal })
+    return this.inPlay(() => item.rule.reparseInnerBody(item, body, { ...texts, journal }))
   }
 
   /** File match from its top-level item matches, as `Block.parse()` builds it -- see `Block.assembleBlock()`. */

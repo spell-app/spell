@@ -129,6 +129,71 @@ def test_a_prompt_cancelled_on_the_page_answers_empty_text_and_the_result_is_can
     assert a_core.result() == "cancel"
 
 
+################
+# ## choose (epic `language` P66)
+################
+
+
+class Card:
+    """A thing with a title, as a Spell thing has its properties."""
+
+    def __init__(self, title: str) -> None:
+        self.title = title
+
+
+def test_choose_asks_the_page_with_each_rows_words_and_gives_back_what_was_picked() -> None:
+    cards = [Card("Ace"), Card("King")]
+    a_core, asked = asking({"choosePositions": [1]})
+    assert asyncio.run(a_core.choose(cards, {"thing": "a card", "shown": 10})) is cards[1]
+    assert a_core.result() == "ok"
+    assert asked == [
+        ("choosePositions", ["Choose a card", [{"title": "Ace"}, {"title": "King"}], {"several": False, "shown": 10}])
+    ]
+
+
+def test_choose_from_a_record_shows_its_keys_and_gives_back_the_value_picked() -> None:
+    a_core, asked = asking({"choosePositions": [1]})
+    assert asyncio.run(a_core.choose({"Easy": 1, "Hard": 3}, {"thing": "a level", "prompt": "How hard?"})) == 3
+    assert asked[0][1][:2] == ["How hard?", [{"title": "Easy"}, {"title": "Hard"}]]
+
+
+def test_choose_several_gives_back_a_list_and_says_the_count_in_its_question() -> None:
+    a_core, asked = asking({"choosePositions": [0, 2]})
+    picked = asyncio.run(a_core.choose(["a", "b", "c"], {"things": "letters", "least": 2, "most": 3}))
+    assert picked == ["a", "c"]
+    assert asked[0][1][0] == "Choose 2 to 3 letters"
+    assert asked[0][1][2] == {"several": True, "least": 2, "most": 3}
+
+
+def test_choose_from_an_empty_list_asks_nothing_and_the_result_is_cancel() -> None:
+    a_core, asked = asking({})
+    assert asyncio.run(a_core.choose([], {"thing": "a card"})) is None
+    assert asyncio.run(a_core.choose([], {"things": "cards"})) == []
+    assert a_core.result() == "cancel"
+    assert asked == []
+
+
+def test_choose_cancelled_on_the_page_gives_back_nothing() -> None:
+    a_core, _ = asking({"choosePositions": None})
+    assert asyncio.run(a_core.choose(["a"], {"thing": "one"})) is None
+    assert a_core.result() == "cancel"
+
+
+def test_choose_with_no_page_prints_the_question_and_picks_the_first_row() -> None:
+    a_core, out = printing()
+    assert asyncio.run(a_core.choose(["easy", "hard"], {"thing": "one"})) == "easy"
+    assert asyncio.run(a_core.choose(["a", "b", "c"], {"things": "letters", "least": 2})) == ["a", "b"]
+    assert out.getvalue() == "Choose one (easy)\nChoose letters (a)\n"
+
+
+def test_choose_color_offers_spell_uis_colors_as_chips_and_gives_back_the_hue_name() -> None:
+    a_core, asked = asking({"choosePositions": [12]})
+    assert asyncio.run(a_core.choose_color({"thing": "a color"})) == "black"
+    rows = asked[0][1][1]
+    assert len(rows) == 13
+    assert rows[0] == {"title": "Red", "color": "red"}
+
+
 def test_a_toast_on_the_page_goes_on_by_itself_and_and_wait_waits_for_it() -> None:
     a_core, asked = asking({})
 

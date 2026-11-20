@@ -5873,7 +5873,7 @@
           "ruleNames": ["prompt"],
           "internal": false,
           "file": "src/spell/rules/UI/Prompt.ts",
-          "line": 19,
+          "line": 20,
           "purpose": "Ask the person for some text, in a dialog, with `message` and its starting text, `defaultValue`.",
           "syntaxes": [
             {
@@ -5888,6 +5888,103 @@
                 },
                 "py": {
                   "code": "it = await core.prompt(\"Name for the new baby?\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "Choose",
+          "ruleNames": ["choose"],
+          "internal": false,
+          "file": "src/spell/rules/UI/Choose.ts",
+          "line": 28,
+          "purpose": "Ask the person to pick one thing from a list, in a dialog (epic `language` P66).",
+          "syntaxes": [
+            {
+              "syntax": "choose (article:a|an) ({type:known_type}|{arg:singular_identifier}) (from|of) {list:expression} (with prompt {message:expression})? (,? showing {shown:number} at a time)?",
+              "example": "choose a card from deck",
+              "outputs": {
+                "js": {
+                  "code": "const it = await core.choose(deck, { thing: \"a card\" })"
+                },
+                "ts": {
+                  "code": "const it = await core.choose(deck, { thing: \"a card\" })"
+                },
+                "py": {
+                  "code": "it = await core.choose(deck, {\"thing\": \"a card\"})"
+                }
+              }
+            },
+            {
+              "syntax": "choose (one:one) of {list:expression} (with prompt {message:expression})? (,? showing {shown:number} at a time)?",
+              "example": "choose one of [\"easy\", \"medium\", \"hard\"]",
+              "outputs": {
+                "js": {
+                  "code": "const it = await core.choose([\"easy\", \"medium\", \"hard\"], { thing: \"one\" })"
+                },
+                "ts": {
+                  "code": "const it = await core.choose([\"easy\", \"medium\", \"hard\"], { thing: \"one\" })"
+                },
+                "py": {
+                  "code": "it = await core.choose([\"easy\", \"medium\", \"hard\"], {\"thing\": \"one\"})"
+                }
+              }
+            },
+            {
+              "syntax": "choose (article:a|an) {type:known_type} (with prompt {message:expression})? (,? showing {shown:number} at a time)?",
+              "example": "choose a card suit",
+              "outputs": {
+                "js": {
+                  "code": "const it = await core.choose(Card.Suits, { thing: \"a card suit\" })"
+                },
+                "ts": {
+                  "code": "const it = await core.choose(Card.Suits, { thing: \"a card suit\" })"
+                },
+                "py": {
+                  "code": "it = await core.choose(Card.SUITS, {\"thing\": \"a card suit\"})"
+                }
+              }
+            },
+            {
+              "syntax": "choose (article:a|an) (color:color|colour) (with prompt {message:expression})? (,? showing {shown:number} at a time)?",
+              "example": "choose a color",
+              "outputs": {
+                "js": {
+                  "code": "const it = await core.chooseColor({ thing: \"a color\" })"
+                },
+                "ts": {
+                  "code": "const it = await core.chooseColor({ thing: \"a color\" })"
+                },
+                "py": {
+                  "code": "it = await core.choose_color({\"thing\": \"a color\"})"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "ChooseSeveral",
+          "ruleNames": ["choose_several"],
+          "internal": false,
+          "file": "src/spell/rules/UI/Choose.ts",
+          "line": 118,
+          "purpose": "Ask the person to pick several things from a list, in a dialog (epic `language` P66, Q74).",
+          "syntaxes": [
+            {
+              "syntax": "choose ((many:many)|up to {most:number}|between {least:number} and {most:number})? ({type:plural_type}|{arg:plural_identifier}) (from|of) {list:expression} (with prompt {message:expression})? (,? showing {shown:number} at a time)?",
+              "example": "choose cards from deck",
+              "outputs": {
+                "js": {
+                  "code": "const it = await core.choose(deck, { things: \"cards\" })"
+                },
+                "ts": {
+                  "code": "const it = await core.choose(deck, { things: \"cards\" })"
+                },
+                "py": {
+                  "code": "it = await core.choose(deck, {\"things\": \"cards\"})"
                 }
               }
             }
@@ -6476,7 +6573,7 @@
           "ruleNames": ["create_type"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateType.ts",
-          "line": 29,
+          "line": 31,
           "purpose": "`a card is a thing` -- declares `type` as a new class extending `superType`.",
           "syntaxes": [
             {
@@ -8745,7 +8842,7 @@
           "ruleNames": [],
           "internal": true,
           "file": "src/spell/rules/places/PlaceDetail.ts",
-          "line": 121,
+          "line": 123,
           "purpose": "A line under a place, saying something about it: the base of each one (epic `data` P11).",
           "syntaxes": [],
           "aliases": ["statement"]
@@ -9075,7 +9172,7 @@
           "ruleNames": ["create_place"],
           "internal": false,
           "file": "src/spell/rules/places/CreatePlace.ts",
-          "line": 99,
+          "line": 103,
           "purpose": "A program's data lives here (epic `data` P11, Q2).",
           "syntaxes": [
             {
@@ -9296,12 +9393,12 @@
           "ruleNames": ["token_from"],
           "internal": false,
           "file": "src/spell/rules/places/TokenFrom.ts",
-          "line": 15,
+          "line": 16,
           "purpose": "A place's key is a short-lived token, made from a secret at a token service (epic `data` P49, Q50 A).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_its} token comes from {address:text} ,? made with the secret {name:text}",
-              "example": "acme is a web server at \"https://acme.test\"\n\tits token comes from \"https://auth.acme.test/api-keys/{key id}/token\", made with the secret \"ACME_API_KEY\"",
+              "syntax": "{type:subject_it} is authenticated with a token from {address:text} ,? made with the secret {name:text}",
+              "example": "acme is a web server at \"https://acme.test\"\n\tit is authenticated with a token from \"https://auth.acme.test/api-keys/{key id}/token\", made with the secret \"ACME_API_KEY\"",
               "outputs": {
                 "js": {
                   "code": "export class Acme extends Place {}\nexport const acme = core.place(new Acme(), {\n  name: \"acme\",\n  kind: \"web server\",\n  at: \"https://acme.test\",\n  keyNamed: \"ACME_API_KEY\",\n  tokenFrom: \"https://auth.acme.test/api-keys/{key id}/token\"\n})"
@@ -9313,6 +9410,9 @@
                   "code": "class Acme(Place):\n    pass\n\nacme = core.place(\n    Acme(),\n    {\n        \"name\": \"acme\",\n        \"kind\": \"web server\",\n        \"at\": \"https://acme.test\",\n        \"key_named\": \"ACME_API_KEY\",\n        \"token_from\": \"https://auth.acme.test/api-keys/{key id}/token\",\n    },\n)"
                 }
               }
+            },
+            {
+              "syntax": "{type:subject_its} token comes from {address:text} ,? made with the secret {name:text}"
             }
           ],
           "aliases": ["statement"]
@@ -9348,12 +9448,12 @@
           "ruleNames": ["key_goes_in_header"],
           "internal": false,
           "file": "src/spell/rules/places/KeyGoesInHeader.ts",
-          "line": 16,
-          "purpose": "The header a server wants its key in, as it is (epic `data` T73).",
+          "line": 17,
+          "purpose": "The header a server wants its secret in, as it is (epic `data` T73).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_its} key goes in its {name:text} header",
-              "example": "cookbook is a web server at \"https://example.com\"\n\t- its key goes in its \"X-Api-Key\" header",
+              "syntax": "{type:subject_its} secret goes in its {name:text} header",
+              "example": "cookbook is a web server at \"https://example.com\"\n\t- its secret goes in its \"X-Api-Key\" header",
               "outputs": {
                 "js": {
                   "code": "export class Cookbook extends Place {}\nexport const cookbook = core.place(new Cookbook(), {\n  name: \"cookbook\",\n  kind: \"web server\",\n  at: \"https://example.com\",\n  keyGoes: { header: \"X-Api-Key\" }\n})"
@@ -9365,6 +9465,9 @@
                   "code": "class Cookbook(Place):\n    pass\n\ncookbook = core.place(\n    Cookbook(),\n    {\n        \"name\": \"cookbook\",\n        \"kind\": \"web server\",\n        \"at\": \"https://example.com\",\n        \"key_goes\": {\"header\": \"X-Api-Key\"},\n    },\n)"
                 }
               }
+            },
+            {
+              "syntax": "{type:subject_its} key goes in its {name:text} header"
             }
           ],
           "aliases": ["statement"]
@@ -9374,12 +9477,12 @@
           "ruleNames": ["key_goes_in_address"],
           "internal": false,
           "file": "src/spell/rules/places/KeyGoesInAddress.ts",
-          "line": 16,
-          "purpose": "The question a server wants its key asked as, in the address (epic `data` T73).",
+          "line": 17,
+          "purpose": "The question a server wants its secret asked as, in the address (epic `data` T73).",
           "syntaxes": [
             {
-              "syntax": "{type:subject_its} key goes in the address as {name:text}",
-              "example": "cookbook is a web server at \"https://example.com\"\n\t- its key goes in the address as \"api_key\"",
+              "syntax": "{type:subject_its} secret goes in the address as {name:text}",
+              "example": "cookbook is a web server at \"https://example.com\"\n\t- its secret goes in the address as \"api_key\"",
               "outputs": {
                 "js": {
                   "code": "export class Cookbook extends Place {}\nexport const cookbook = core.place(new Cookbook(), {\n  name: \"cookbook\",\n  kind: \"web server\",\n  at: \"https://example.com\",\n  keyGoes: { inAddress: \"api_key\" }\n})"
@@ -9391,6 +9494,9 @@
                   "code": "class Cookbook(Place):\n    pass\n\ncookbook = core.place(\n    Cookbook(),\n    {\n        \"name\": \"cookbook\",\n        \"kind\": \"web server\",\n        \"at\": \"https://example.com\",\n        \"key_goes\": {\"in_address\": \"api_key\"},\n    },\n)"
                 }
               }
+            },
+            {
+              "syntax": "{type:subject_its} key goes in the address as {name:text}"
             }
           ],
           "aliases": ["statement"]
@@ -9958,7 +10064,7 @@
           "ruleNames": ["wrapper_action"],
           "internal": false,
           "file": "src/spell/rules/places/WrapperAction.ts",
-          "line": 32,
+          "line": 35,
           "purpose": "A second `to complete a job`, for a server's action, wraps it (epic `data` P50, Q83, I104).",
           "syntaxes": [
             {
@@ -10173,9 +10279,12 @@
           "ruleNames": ["key_if_set"],
           "internal": false,
           "file": "src/spell/rules/places/KeyIfSet.ts",
-          "line": 13,
+          "line": 14,
           "purpose": "The NAME of a key a place takes when it's set, and goes without when it isn't (epic `data` P28, Q26).",
           "syntaxes": [
+            {
+              "syntax": "{type:subject_it} is optionally authenticated with the secret {name:text}"
+            },
             {
               "syntax": "{type:subject_its} optional key is the secret {name:text}"
             }
@@ -10187,9 +10296,12 @@
           "ruleNames": ["key_is_secret"],
           "internal": false,
           "file": "src/spell/rules/places/KeyIsSecret.ts",
-          "line": 18,
-          "purpose": "The NAME of the key a place needs, never the key (epic `data` Q11).",
+          "line": 21,
+          "purpose": "The NAME of the secret an authenticated place needs, never the secret (epic `data` Q11).",
           "syntaxes": [
+            {
+              "syntax": "{type:subject_it} is authenticated with the secret {name:text}"
+            },
             {
               "syntax": "{type:subject_its} key is the secret {name:text}"
             }
@@ -10204,6 +10316,9 @@
           "line": 12,
           "purpose": "A key written into a program, which won't compile (epic `data` Q11).",
           "syntaxes": [
+            {
+              "syntax": "{type:subject_it} is authenticated with {key:text}"
+            },
             {
               "syntax": "{type:subject_its} key is {key:text}"
             }
@@ -10597,7 +10712,7 @@
           "ruleNames": ["call_the_server"],
           "internal": false,
           "file": "src/spell/rules/places/WrapperAction.ts",
-          "line": 99,
+          "line": 102,
           "purpose": "In an action that wraps a server's own, run what it wraps (epic `data` P50, Q83, J266).",
           "syntaxes": [
             {
@@ -12119,6 +12234,34 @@
                   "code": "class Job(Thing):\n    status = prop(type=\"text\")\n\n    def complete(self) -> None:\n        self.status = \"done\"\n\n    def failed_complete(self, error: Any) -> Any:\n        if core.error_is(error, \"not found\"):\n            return\n        elif core.error_is(error, \"offline\"):\n            return core.pass_the_error()\n        return core.pass_the_error()\n\ncore.describe_action(Job, \"complete\", {\"title\": \"Complete Job\", \"undone_as\": \"Complete Job\"})\ncore.add_action_hook(Job, \"complete\", {\"moment\": \"failed\", \"hook\": \"failed_complete\", \"level\": \"app\"})"
                 }
               }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "CallNative",
+          "ruleNames": ["call_native"],
+          "internal": false,
+          "file": "src/spell/rules/methods/CallNative.ts",
+          "line": 23,
+          "purpose": "In an action's steps, call a function from one of the project's code files (epic `from-console` P10, Q9).",
+          "syntaxes": [
+            {
+              "syntax": "call native {name:identifier} (with [{args:expression} ,])?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "UseNatives",
+          "ruleNames": ["use_natives"],
+          "internal": false,
+          "file": "src/spell/rules/methods/UseNatives.ts",
+          "line": 22,
+          "purpose": "At the top of a Spell file, say which code file the functions its `call native` lines call come from (epic `from-console` P10, Q15).",
+          "syntaxes": [
+            {
+              "syntax": "use ((all:all)|[{names:identifier} ,]) from {file:identifier} \\. {ending:identifier}"
             }
           ],
           "aliases": ["statement"]

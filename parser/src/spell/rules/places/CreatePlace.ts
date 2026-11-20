@@ -6,6 +6,7 @@ import {
   SPACE_FOLDERS_PREFIX,
   SPACE_ROOMS_PREFIX,
   airtableBaseIn,
+  authenticatedPlaceAddress,
   isPlaceServerAddress
 } from "spell/places/places.types"
 import { P } from "spell/parser/parser"
@@ -22,6 +23,9 @@ import { COLLECTION_NAME, PLACE_KIND_ABILITIES, isPlaceTypeReadOnly, placeKindWo
 
 /** The kinds a person can pick a file of:  `a json file you pick`, `a csv file ...`, `an excel file ...`. */
 export const PICKED_FILE_KINDS = new Set(["file", "sheet", "excel file"])
+
+/** The kinds of place a page reads through its page server when they're authenticated:  see `servedAtFor()`. */
+const READ_THROUGH_PAGE_SERVER = new Set(["web server", "graphql server"])
 
 /** A key in an address, which anyone reading a browser program can read:  `?key=...`, `user:secret@`. */
 const KEY_IN_ADDRESS = /[?&](?:api[_-]?key|key|token|secret|access[_-]?token)=|\/\/[^/@\s]+:[^/@\s]+@/i
@@ -104,6 +108,8 @@ export class CreatePlace extends TypeDeclaration<
     picked?: boolean
     /** A project data folder's address on the page server, as `folderAddressFor()` worked it out. */
     folderAt?: string
+    /** The address of the project it.s in, `@acme/jobs`, looked up while parsing:  for `servedAtFor()`. */
+    projectAt?: string
   }
 > {
   @proto static priority = Priority.declaration + 1
@@ -148,6 +154,10 @@ export class CreatePlace extends TypeDeclaration<
       if (!(scopeType instanceof P.TypeScope) || !scopeType.isA("Place")) return undefined
     }
     const language = SP.Language.of(scope)
+    // `call native ...` calls the project's code, so `native` can't name a place (epic `from-console` P10)
+    if (/^native$/i.test(`${match.groups.type.raw ?? match.groups.type.value}`.trim())) {
+      return SpellStatement.refuse(match, language.parserMessage("place-named-native"))
+    }
     // Owen, 2026-11-09 (epic `language` P40):  "Let's not have `file` mean `json-file`, make it explicit"
     if (match.groups.kind && Wording.meaningOf(match.groups.kind) === "plain_file") {
       return SpellStatement.refuse(match, language.parserMessage("say-json-file"))
@@ -172,6 +182,8 @@ export class CreatePlace extends TypeDeclaration<
     }
     const folderAt = this.folderAddressOf(match)
     if (folderAt) match.data.folderAt = folderAt
+    const projectAt = projectAddressOf(match.scope)
+    if (projectAt) match.data.projectAt = projectAt
     const refused = this.refuseTakenNames(match)
     if (refused !== match) return refused
     const notAnAddress = this.refuseAtmosphereAddress(match) ?? this.refuseAirtableAddress(match)
@@ -413,6 +425,30 @@ export class CreatePlace extends TypeDeclaration<
     return Object.keys(details).length ? details : undefined
   }
 
+  /**
+   * What Spell's page server needs to read place `type` for a page, adding its secret (epic `from-console` P14):
+   * `undefined` for a place a page doesn't read through it (`servedAtFor()`).
+   * - Written into the project's declarations, which the page server reads (`SP.DeclaredPlace.served`).
+   */
+  static servedDetailsOf(type: P.TypeScope): SP.ServedPlace | undefined {
+    const { declaredBy } = type
+    if (!declaredBy?.is(CreatePlace)) return undefined
+    const match = declaredBy as P.MatchFor<CreatePlace>
+    const details = CreatePlace.detailsOf(match)
+    const servedAt = CreatePlace.servedAtFor(match, details)
+    if (!servedAt) return undefined
+    const { keyNamed, keyGoes, tokenFrom } = details
+    return definedProps({
+      servedAt,
+      at: textIn(match.groups.address),
+      kind: match.data.placeKind!,
+      keyNamed: keyNamed!,
+      keyGoes,
+      tokenFrom,
+      readOnly: isPlaceTypeReadOnly(type) || undefined
+    })
+  }
+
   /** Everything the lines under `match` say, merged. */
   static detailsOf(match: P.Match): PlaceDetailValue & { operations?: Record<string, string> } {
     const details: PlaceDetailValue & { operations?: Record<string, string> } = {}
@@ -441,19 +477,37 @@ export class CreatePlace extends TypeDeclaration<
     return details
   }
 
-  /** What `core.place()` is handed:  its name, kind and address, then everything its lines say. */
+  /**
+   * What `core.place()` is handed:  its name, kind and address, then everything its lines say;
+   * and, for an authenticated place, where a page reads it through its page server (`servedAt`).
+   */
   protected descriptionOf(match: P.MatchFor<this>): Record<string, unknown> {
     const { address } = match.groups
     const { placeKind, folderAt, picked } = match.data
+    const details = CreatePlace.detailsOf(match)
+    const servedAt = CreatePlace.servedAtFor(match, details)
     return {
       name: CreatePlace.placeNameOf(match),
       ...(placeKind && { kind: placeKind }),
       ...(picked && { picked }),
       ...((address || folderAt) && { at: folderAt ?? textIn(address) }),
       ...checkedByDefault(placeKind),
-      ...CreatePlace.detailsOf(match),
+      ...details,
+      ...(servedAt && { servedAt }),
       ...unclearNumbersOf(match.scope)
     }
+  }
+
+  /**
+   * Where a page reads this place through Spell's page server, which adds its secret (epic `from-console` P14):
+   * `/api/places/projects/@acme/jobs/jobs`.
+   * - Only a web or graphql server authenticated with a secret it can't go without, in a project with an address.
+   */
+  static servedAtFor(match: P.MatchFor<CreatePlace>, { keyNamed, keyIfSet }: PlaceDetailValue): string | undefined {
+    if (keyNamed === undefined || keyIfSet || !READ_THROUGH_PAGE_SERVER.has(match.data.placeKind ?? ""))
+      return undefined
+    const project = match.data.projectAt
+    return project && authenticatedPlaceAddress(SP.SpellUrls.encodeAddress(project), CreatePlace.placeNameOf(match))
   }
 
   /** Its class, then `core.place()`, as one instance:  `export const familyCookbook = core.place(new FamilyCookbook(), {...})`. */

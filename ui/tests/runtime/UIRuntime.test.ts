@@ -98,7 +98,7 @@ describe("UIRuntime.toast() / modals", () => {
       confirm: async ({ message }) => message === "sure?",
       alert: async () => {},
       prompt: async ({ value }) => value,
-      choose: async ({ choices }) => choices[0]?.value
+      choose: async () => [0]
     }
     Toasts.provider = { show: ({ id = "t1" }) => ({ id, closed: Promise.resolve() }), dismiss: () => {} }
     try {

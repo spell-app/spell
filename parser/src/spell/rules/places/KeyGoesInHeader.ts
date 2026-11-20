@@ -7,9 +7,10 @@ import { PlaceDetail, textIn, type PlaceDetailValue } from "./PlaceDetail"
 const HEADER_NAME = /^[A-Za-z0-9!#$%&'*+.^_`|~-]+$/
 
 /**
- * `key_goes_in_header` rule:  the header a server wants its key in, as it is (epic `data` T73).
- * - e.g. `- its key goes in its "X-Api-Key" header`
- * - Says only where it goes, its name is `its key is the secret "..."`'s:  with neither line, nothing's sent.
+ * `key_goes_in_header` rule:  the header a server wants its secret in, as it is (epic `data` T73).
+ * - e.g. `- its secret goes in its "X-Api-Key" header`
+ * - The old words, `its key goes in its "..." header`, still read, with a warning (`OLD_KEY_GOES_IN_HEADER`).
+ * - Says only where it goes, its name is `it is authenticated with the secret "..."`'s:  with neither line, nothing's sent.
  * - Without this line, or `KeyGoesInAddress`, a key goes as `Authorization: Bearer`.
  * - A name no header can have won't compile.
  */
@@ -26,3 +27,6 @@ export class KeyGoesInHeader extends PlaceDetail<"type|name"> {
     return { keyGoes: { header: textIn(match.groups.name) } }
   }
 }
+
+/** `key_goes_in_header` in its old words, `its key goes in its "..." header`:  the same, with a warning. */
+export const OLD_KEY_GOES_IN_HEADER = KeyGoesInHeader.specialize({ oldWords: true })

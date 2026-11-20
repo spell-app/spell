@@ -48,7 +48,8 @@
 |   [property define_property_has L1]
 |   | its «"temperature"» is a **temperature** in °C, stored as «"temperature_2m"»
 |   [property define_property_has L1]
-|   | its «"weather code"» is a **number**  ⟦// in wmo code⟧
+|   | its «"weather code"» is a **number**
+|   |   ⟦-- in wmo code⟧
 
 [thing create_type L0]
 | an «"hour"» is a **thing**
@@ -57,7 +58,8 @@
 |   [property define_property_has L1]
 |   | its «"temperature"» is a **temperature** in °C, stored as «"temperature_2m"»
 |   [property define_property_has L1]
-|   | its «"weather code"» is a **number**  ⟦// in wmo code⟧
+|   | its «"weather code"» is a **number**
+|   |   ⟦-- in wmo code⟧
 
 ==== /Sky.spell
 ⟪## The sky:  what a weather code looks like⟫

@@ -65,6 +65,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       With `keyIfSet`, it goes without where nothing holds it (GitHub's 60 requests an hour;  epic `data` P28).
       With `keyGoes`, it goes in a header of its own, or the address (`KeyGoes`, [keyGoes.ts](keyGoes.ts);  epic `data` T73),
       hidden from every message.
+      - A program's line:  `it is authenticated with the secret "..."` (never "keyed";  epic `from-console` P14).
+      - In a page, an authenticated place is read through the page server, which adds the key (`throughPageServer`,
+        epic `from-console` P14):  its address is the page server's for it (`AUTHENTICATED_PLACES_PREFIX`), each request
+        carries the page's write token, and a refusal the page server made itself says its words
+        (`PAGE_SERVER_ANSWER_HEADER`).  The server's half is `AuthenticatedPlaces`, in `spell/server/places`.
     - A limit a server names (`retry-after`, or a rate limit with none left) is waited out (epic `data` T110):
       a few seconds waited for;  longer, `TooSoonError` says when, and a drawing tries again then.
     - What a web server can do is what its lines say (`restAbilitiesIn()`, in the parser's core;  epic `data` I35):
@@ -78,7 +83,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - Their tests run in node, against [the recipe servers](../server/test/recipeServers.ts).
     - `keyFrom` can wait, for a key that's a token made from another:  [PlaceToken](PlaceToken.ts), the ONE token
       keeper (epic `data` P49), made again a minute before it runs out;  how a token is made is handed in, a token
-      service's (`tokenServiceMint()`, `its token comes from "..."`) or Google's (`GoogleToken`).
+      service's (`tokenServiceMint()`, `it is authenticated with a token from "..."`) or Google's (`GoogleToken`).
   - [DeviceCopy](DeviceCopy.ts):  a copy, in the browser's database, of every answer a web place gives,
     only for a place whose line says `- keep a copy on this device` (epic `data` P36).
     - Fresh until the place's next check:  `WebPlace` answers from it with no request;  stale, at once, reading the

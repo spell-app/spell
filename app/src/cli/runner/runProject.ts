@@ -28,7 +28,7 @@ if (spec.dom) await fakeDom()
 else headless()
 // a fresh state bag + event hub for the project, e.g. for `on card-click` -- as the app's runners do
 core.resetRuntime()
-// a place's key, `its key is the secret "GITHUB_TOKEN"`, from the environment:  this run is a server side (epic `data` T111)
+// a place's key, `it is authenticated with the secret "GITHUB_TOKEN"`, from the environment:  this run is a server side (epic `data` T111)
 core.RUNTIME.keyFrom = (name) => process.env[name] || undefined
 // each place on the deployment picked for this run, `--deployment` or `SPELL_DEPLOYMENT` (epic `data` P49)
 if (spec.deployments) core.RUNTIME.deployments = spec.deployments

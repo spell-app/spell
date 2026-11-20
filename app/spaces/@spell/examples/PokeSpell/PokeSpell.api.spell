@@ -39,7 +39,8 @@ a "pokemon" is a thing
 	its "forms" is a list of poke api names
 	its "game indices" is a list of game indices
 	its "held items" is a list of text
-	its "location area encounters" is text  // an address
+	its "location area encounters" is text
+		-- an address
 	its "moves" is a list of pokemon moves
 	its "species" is a pokemon species
 	its "sprites" is a sprite
@@ -176,10 +177,14 @@ a "version group detail" is a thing
 
 a "sprite" is a thing
 	its "other" is an other
-	its "back shiny" is text  // an address
-	its "front shiny" is text  // an address
-	its "back default" is text  // an address
-	its "front default" is text  // an address
+	its "back shiny" is text
+		-- an address
+	its "front shiny" is text
+		-- an address
+	its "back default" is text
+		-- an address
+	its "front default" is text
+		-- an address
 
 an "other" is a thing
 	its "home" is a home
@@ -188,25 +193,36 @@ an "other" is a thing
 	its "official artwork" is an official artwork
 
 a "home" is a thing
-	its "front shiny" is text  // an address
-	its "front default" is text  // an address
+	its "front shiny" is text
+		-- an address
+	its "front default" is text
+		-- an address
 
 a "showdown" is a thing
-	its "back shiny" is text  // an address
-	its "front shiny" is text  // an address
-	its "back default" is text  // an address
-	its "front default" is text  // an address
+	its "back shiny" is text
+		-- an address
+	its "front shiny" is text
+		-- an address
+	its "back default" is text
+		-- an address
+	its "front default" is text
+		-- an address
 
 a "dream world" is a thing
-	its "front default" is text  // an address
+	its "front default" is text
+		-- an address
 
 an "official artwork" is a thing
-	its "front shiny" is text  // an address
-	its "front default" is text  // an address
+	its "front shiny" is text
+		-- an address
+	its "front default" is text
+		-- an address
 
 a "cry" is a thing
-	its "latest" is text  // an address
-	its "legacy" is text  // an address
+	its "latest" is text
+		-- an address
+	its "legacy" is text
+		-- an address
 
 a "stat" is a thing
 	its "base stat" is a number
@@ -306,4 +322,5 @@ a "chain" is a thing
 
 a "poke api name" is a thing
 	its "name" is text
-	its "address" is text, stored as "url"  // never read:  its collection wasn't asked for
+	its "address" is text, stored as "url"
+		-- never read:  its collection wasn't asked for

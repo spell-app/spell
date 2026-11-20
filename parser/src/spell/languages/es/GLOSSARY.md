@@ -66,8 +66,8 @@ Names people choose keep their accents.
 | x is an atmosphere space at "..." | `x es un espacio de atmosphere en "..."` |
 | it (is saved\|lives) in the place | `(se guarda\|vive) en el lugar` (and `su propio archivo` keeps its meaning) |
 | recipes live at "...", a recipe's title is its? "..." | `las recetas están en "..."`, `el título de una receta se llama "..."` |
-| its key is the secret "...", check it every 30 seconds | `su clave es el secreto "..."`, `se revisa cada 30 segundos` |
-| its optional key is the secret "..." | `su clave opcional es el secreto "..."` |
+| it is authenticated with the secret "...", check it every 30 seconds | `se autentica con el secreto "..."`, `se revisa cada 30 segundos` |
+| it is optionally authenticated with the secret "..." | `se autentica opcionalmente con el secreto "..."` |
 | show them 12 at a time, page-size="12" | `mostrarlos de 12 en 12`, `tamaño-de-página="12"` |
 | as a date and time, dates and times | `como fecha y hora`, `fechas y horas` |
 | its version is its? "...", its id is its? "..." | `su versión está en "..."`, `su identificador está en "..."` |

@@ -4,12 +4,9 @@ import { tmpdir } from "os"
 import { delimiter, dirname, resolve } from "path"
 import { fileURLToPath, pathToFileURL } from "url"
 
-import { snakeCase } from "spell/util"
-import { readJSON5File } from "spell/util/node/json5"
 import environment from "spell/app/spaces/server/node/environment"
 import { P } from "spell/parser/parser"
 import { buildTsx } from "spell/parser/spell/node/buildTsx"
-import { projectFileIn } from "spell/parser/spell/node/projectFile"
 import { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
 import { CLI } from "spell/app/cli"
@@ -168,27 +165,16 @@ function checkSeed(seed: number | undefined): void {
 }
 
 /**
- * Each place's deployment named `deployment`, from `project`'s file, `"places"`, by the place's name as compiled code
- * names it (epic `data` P49):  `{ netbox: { at: "...", readOnly: true } }`.
- * - A place that lists no such deployment runs as its line says;  a deployment no place lists is a mistake.
+ * Each place's deployment named `deployment`:  `SP.SpellProject.deploymentsPicked()`, the page server's way too.
  * - throws `CliError` for a deployment no place in the project's file has
  */
 function deploymentsPicked(project: SP.SpellProject, deployment: string): NonNullable<CLI.RunSpec["deployments"]> {
-  const file = projectFileIn(new SP.SpellLocation(project.projectId).serverPath)
-  const places = file ? (readJSON5File<{ places?: Record<string, Record<string, Deployment>> }>(file).places ?? {}) : {}
-  const picked = Object.entries(places).flatMap(([place, deployments]) =>
-    deployments[deployment] ? [[snakeCase(place), deployments[deployment]] as const] : []
-  )
-  if (!picked.length) {
-    throw new CLI.CliError(
-      `no place in ${project.projectId}'s project file has a deployment named "${deployment}":  list it under "places"`
-    )
+  try {
+    return project.deploymentsPicked(deployment)
+  } catch (error) {
+    throw new CLI.CliError((error as Error).message)
   }
-  return Object.fromEntries(picked)
 }
-
-/** One deployment of a place, as a project's file lists it. */
-type Deployment = NonNullable<CLI.RunSpec["deployments"]>[string]
 
 /** The largest seed `core.seedRandom()` takes:  one under its generator's modulus, 2 ** 31 - 1. */
 const LARGEST_SEED = 2147483646
@@ -213,12 +199,13 @@ export async function runCompiled(
   // in the language it speaks:  its app's file's, else its first file's (`SP.SpellDeclarations.speakingFirst()`)
   const messages = SP.SpellWords.messagesFor(project.wordsLanguages[0]!)
   const sourceMap = project.sourceMapFileFor(SP.targetFor(SP.RUNNING_TARGET)).contents ?? undefined
-  const deployment = (options as CLI.RunOptions).deployment ?? (process.env.SPELL_DEPLOYMENT || undefined)
+  const deployment = (options as CLI.RunOptions).deployment ?? (process.env[SP.DEPLOYMENT_VARIABLE] || undefined)
   const deployments = deployment === undefined ? undefined : deploymentsPicked(project, deployment)
   return runCode(mode, name, code, {
     ...options,
     ...(deployments && { deployments }),
     projects: importedOutputs(project),
+    natives: nativeFilesOf(project, "js"),
     capture,
     messages,
     reports,
@@ -248,6 +235,7 @@ export async function runCode(
   {
     extension = ".mjs",
     projects = {},
+    natives,
     capture = false,
     dom,
     pauses,
@@ -261,6 +249,8 @@ export async function runCode(
   }: CLI.TestOptions & {
     extension?: string
     projects?: Record<string, string>
+    /** the code files its Spell calls (`call native`), by module -- see `nativeFilesOf()` */
+    natives?: Record<string, string>
     capture?: boolean
     dom?: boolean
     pauses?: boolean
@@ -292,6 +282,7 @@ export async function runCode(
       name,
       entry: pathToFileURL(entry).href,
       projects,
+      ...(natives && { natives }),
       core: pathToFileURL(sourceOrBuilt(resolve(environment.coreDir, "index.ts"))).href,
       verbose: options.verbose,
       filter: options.name,
@@ -341,6 +332,29 @@ export function importedOutputs(
     importedOutputs(imported, outputs)
   }
   return outputs
+}
+
+/**
+ * The code files `project`'s Spell calls with `call native`, and those of each project it imports, in `language`:
+ * by the module compiled code imports each as, each its file's URL (epic `from-console` P10).
+ * - javascript:  `@spell/native/owen@spell/clipboard/clipboard.ts` => `file:///.../clipboard.ts`
+ * - Python:  the same key, its `.py` file's URL:  its folder goes on Python's import path
+ */
+export function nativeFilesOf(
+  project: SP.SpellProject,
+  language: "js" | "py",
+  found: Record<string, string> = {},
+  seen = new Set<string>()
+): Record<string, string> {
+  if (seen.has(project.projectId)) return found
+  seen.add(project.projectId)
+  for (const { file } of project.codeFiles) {
+    const path = file.location.filePath ?? ""
+    if (SP.NativeCode.languageOf(path) !== language) continue
+    found[SP.NativeCode.moduleFor(project.projectId, path)] = pathToFileURL(file.location.serverPath).href
+  }
+  for (const imported of LSP.ScopeExplorer.importedProjects(project)) nativeFilesOf(imported, language, found, seen)
+  return found
 }
 
 /**

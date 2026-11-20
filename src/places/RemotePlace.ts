@@ -25,7 +25,7 @@ import {
   type WriteQuestion
 } from "./places.types"
 import { WebChunks } from "./WebChunks"
-import { jsonIn, WebPlace } from "./WebPlace"
+import { jsonIn, pageToken, TOKEN_HEADER, WebPlace } from "./WebPlace"
 
 /** What it assumes a place on a server side does:  it's told what's done on each answer, in `handled`. */
 const REMOTE_CAPABILITIES: PlaceCapabilities = {
@@ -47,9 +47,6 @@ type WithVersions = {
   /** Each thing's version, by id. */
   versions?: Record<string, string>
 }
-
-/** The header `Guard` checks. */
-const TOKEN_HEADER = "x-server-token"
 
 /** What a server side's guard answers with a stale token:  the server restarted, so it's no answer about the change. */
 const GUARD_STATUS = 403
@@ -404,9 +401,4 @@ function withChanges(
   }
   for (const id of gone) delete versions[id]
   return { ...was, rows: kept, version: token, versions }
-}
-
-/** The write token of the server that served this page. */
-function pageToken(): string | undefined {
-  return (globalThis as { SPELL_SERVER?: { token?: string } }).SPELL_SERVER?.token
 }

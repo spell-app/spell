@@ -1,6 +1,6 @@
 {
   "name": "spell",
-  "version": "0.8.16",
+  "version": "0.8.17",
   "private": true,
   "description": "Spell's kit:  the layer every repo stands on (util, toolchain, server, element, its tools and test helpers, the spell command), the house style, and the ONE install over the child repos",
   "license": "MIT",
@@ -1462,7 +1462,7 @@
   "pageServer": {
     "routes": [
       "src/server/test/recipeServersRoutes.ts",
-      "src/server/places/airtableRoutes.ts"
+      "src/server/places/placeRoutes.ts"
     ],
     "cacheLimit": "200MB"
   },

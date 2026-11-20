@@ -53,7 +53,7 @@ export const modalVocabulary = {
       kind: "keyOnly",
       description:
         "See-through:  no box, no shadow, no padding, drawn as written.  Its text keeps its colour " +
-        "(`appearance=\"basic\"` turns it light).  In Spell, a modal naming none of its parts is laid out " +
+        '(`appearance="basic"` turns it light).  In Spell, a modal naming none of its parts is laid out ' +
         "for you, unless it says `transparent`."
     },
     { name: "fullscreen", group: "appearance", kind: "keyOnly", description: "Nearly the whole viewport wide." },
@@ -168,8 +168,13 @@ export const modalVocabulary = {
   states: [],
   texts: [
     { key: "close", text: "Close", description: "Accessible name of the close icon." },
-    { key: "ok", text: "OK", description: "Approve button of `UI.modals.confirm()` / `alert()` / `prompt()`." },
-    { key: "cancel", text: "Cancel", description: "Deny button of `UI.modals.confirm()` / `prompt()`." }
+    {
+      key: "ok",
+      text: "OK",
+      description: "Approve button of `UI.modals.confirm()` / `alert()` / `prompt()`, and `choose()` picking several."
+    },
+    { key: "cancel", text: "Cancel", description: "Deny button of `UI.modals.confirm()` / `prompt()` / `choose()`." },
+    { key: "search", text: "Search", description: "Search box above a long list of `UI.modals.choose()`." }
   ],
   ownsParts: ["header", "content", "description", "actions"]
 } as const satisfies E.ComponentVocabulary

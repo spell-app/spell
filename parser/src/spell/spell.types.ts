@@ -8,6 +8,7 @@
 
 import type { PropRule } from "spell/util"
 import type { P } from "spell/parser/parser"
+import type { PlaceDeployment } from "spell/parser/core/runtime"
 import type { SpellLocation } from "./SpellLocation"
 import type { SpellFile } from "./SpellFile"
 import type { SpellJSFile } from "./SpellJSFile"
@@ -242,6 +243,14 @@ export function namesSuffixFor(lang: string): string {
  */
 export const SPELL_PROJECT_MODULE = "@spell/project/"
 
+/**
+ * Start of the ES module specifier for one of a project's code files, e.g. `@spell/native/owen@spell/clipboard/clipboard.ts`
+ * (epic `from-console` P10):  what `call native` imports its function from.
+ * - A runner points it at the file, as it points `SPELL_PROJECT_MODULE` at a project's compiled code.
+ * - See `SP.NativeCode.moduleIn()`.
+ */
+export const SPELL_NATIVE_MODULE = "@spell/native/"
+
 /** JSON5 shape of a project's index file, as read/written by the server. */
 export type ProjectManifestJSON5 = {
   /** All manifest-eligible files in project, keyed by `path`. */
@@ -279,7 +288,20 @@ export type ProjectManifestJSON5 = {
    * - What a compile reads its action titles in other languages from:  see `SpellProject.titleLanguages`.
    */
   namesLanguages?: string[]
+  /**
+   * Each place's deployments, from its project file, by the place's name as written, then the deployment's:
+   * `{ "netbox": { dev: { at: "...", key: "NETBOX_DEV_TOKEN" }, prod: { at: "...", readOnly: true } } }`
+   * (epic `data` P49).
+   * - Which one a run uses:  `SpellProject.deploymentsPicked()`, by `SPELL_DEPLOYMENT`.
+   */
+  places?: Record<string, Record<string, PlaceDeployment>>
 }
+
+/**
+ * The environment variable naming the deployment of each place a run uses, `dev` or `prod` (epic `data` P49):
+ * `spell run` and the page server both read it (`SpellProject.deploymentsPicked()`).
+ */
+export const DEPLOYMENT_VARIABLE = "SPELL_DEPLOYMENT"
 
 /** A single entry in `contents.manifest`, augmented with `path`/`location`/`file` once loaded. */
 export type ProjectManifestEntry = {
@@ -318,6 +340,11 @@ export type ProjectManifestImport = {
   version?: string
   /** Another project:  `true` to parse its `.spell` files ahead of ours, rather than its compiled declarations. */
   source?: boolean
+  /**
+   * A code file (`/clipboard.ts`) only a browser can run:  `"browser"` -- Python refuses its functions while compiling
+   * (epic `from-console` P10, `SP.NativeCode`).
+   */
+  only?: "browser"
 }
 
 /** Another project a project imports -- see `SpellProject.projectImports`. */
@@ -730,6 +757,30 @@ export type DeclaredPlace = {
   at?: string
   /** What the compiler asks about its lines, when they say anything:  see `P.ImportedPlaceDetails`. */
   details?: P.ImportedPlaceDetails
+  /**
+   * An authenticated place a page reads through Spell's page server:  what that server needs to read it, adding the
+   * secret (epic `from-console` P14).  Never the secret, only its name.
+   * - Only for the project that says it:  a project importing this one reads none of it.
+   */
+  served?: ServedPlace
+}
+
+/** What Spell's page server needs to read an authenticated place for a page:  see `DeclaredPlace.served`. */
+export type ServedPlace = {
+  /** Where a page reads it, on the page server:  `/api/places/projects/@acme/jobs/jobs`. */
+  servedAt: string
+  /** Its own address, as its line says. */
+  at: string
+  /** Its kind's word:  `web server`. */
+  kind: string
+  /** The NAME of its secret. */
+  keyNamed: string
+  /** Where its secret goes on a request, when that isn't `Authorization: Bearer`. */
+  keyGoes?: { header: string } | { inAddress: string }
+  /** Where a token is made from its secret. */
+  tokenFrom?: string
+  /** It takes no writes. */
+  readOnly?: boolean
 }
 
 /** Where a type is saved, as a project's declarations say it -- see `SpellDeclaration.savedIn`. */

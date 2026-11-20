@@ -133,5 +133,27 @@ export const graphVocabulary = {
     { key: "graphFit", text: "Fit", description: "The button that fits the drawing to the view." },
     { key: "graphTop", text: "Top", description: "The first breadcrumb, the graph itself." },
     { key: "graphLoading", text: "Loading …", description: "A node whose children are loading." }
+  ],
+  hooks: [
+    {
+      name: "nodeLabel",
+      words: "give the label of (a node)",
+      description: "A node's text;  by default its `label`, else its id."
+    },
+    {
+      name: "nodeClass",
+      words: "give the class of (a node)",
+      description: "Extra class names on a node, for the subclass's own sheet."
+    },
+    {
+      name: "edgeLabel",
+      words: "give the label of (an edge)",
+      description: "An edge's text, at its middle;  none:  no text."
+    },
+    {
+      name: "edgeClass",
+      words: "give the class of (an edge)",
+      description: "Extra class names on an edge, for the subclass's own sheet."
+    }
   ]
 } as const satisfies ComponentVocabulary

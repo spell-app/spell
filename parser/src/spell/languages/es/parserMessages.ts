@@ -23,10 +23,25 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "read-whole-library-reads-it": "Encanto no ve qué lee esta biblioteca, así que {what} se lee entero",
   "say-is-able": 'Di "{line}":  "{old}" deja de funcionar en una versión próxima',
   "say-when": 'Di "cuando:":  aquí "si:" deja de funcionar en una versión próxima',
+  "choose-from-what":
+    'Esta línea no dice de qué {things} elegir.  Escríbelo después de "de", así:  elegir {thing} de tus {things}',
+  "line-end-comment":
+    'Una nota con "//" al final de una línea dejará de funcionar en una próxima versión.  Ponla en la línea de abajo, empezando con "--".',
   "untyped-parameter": 'Di qué es "{name}", p. ej. "({name} como {type})"',
   "untyped-property": 'Di qué es "{name}", p. ej. "{line} como {type}"',
   "untyped-list-property": 'Di qué contiene "{name}", p. ej. "{line} como una nueva lista de {items}"',
   "action-without-a-name": '"{text}" no nombra una acción:  di qué hace, como en "para barajarlo"',
+  "place-named-native":
+    '"native" no puede nombrar un lugar:  "llamar al código nativo ..." llama al código del proyecto.  Elige otro nombre',
+  "native-outside-to":
+    '"{text}" llama a una función del código del proyecto:  va en los pasos de una acción, bajo "para ..."',
+  "native-no-code-files":
+    '"{name}" no está en ningún archivo de código:  añade uno al archivo del proyecto, p. ej. "/clipboard.ts"',
+  "native-not-found":
+    '"{name}" no es una función de los archivos de código del proyecto ({files}):  revisa el nombre, o expórtala allí',
+  "native-not-in-file": '"{file}" no tiene la función "{name}":  revisa el nombre, o expórtala allí',
+  "native-file-not-listed":
+    '"{file}" no es uno de los archivos de código del proyecto:  añádelo primero al archivo del proyecto',
   "cancel-outside-an-action": '"{text}" cancela una acción:  va en sus pasos, bajo "para ..." o "después de ..."',
   "hook-names-no-action":
     '"{text}" se ejecuta con una acción, pero ninguna acción antes se lee así:  como en "antes de completar un trabajo", para "para completar un trabajo"',
@@ -79,9 +94,9 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "nothing-the-same":
     'Aquí nada se llama "{field}" para comparar con él:  ponlo antes, p. ej. "poner {field} a ...", o di el valor, p. ej. "cada {thing} con {field} "...""',
   "key-written":
-    'Una clave escrita aquí la puede leer cualquiera con el programa:  nómbrala, p. ej. "su clave es el secreto "CLAVE_RECETARIO"", y guárdala en un servidor',
+    'Una clave escrita aquí la puede leer cualquiera con el programa:  nómbrala, p. ej. "se autentica con el secreto "CLAVE_RECETARIO"", y guárdala en un servidor',
   "key-not-a-name":
-    '"{name}" parece una clave, no su nombre:  una clave nunca se escribe aquí.  Nómbrala en mayúsculas, p. ej. "su clave es el secreto "CLAVE_RECETARIO""',
+    '"{name}" parece una clave, no su nombre:  una clave nunca se escribe aquí.  Nómbrala en mayúsculas, p. ej. "se autentica con el secreto "CLAVE_RECETARIO""',
   "key-needs-server-side":
     'Un programa en el navegador no puede leer "{name}":  este lugar necesita un pequeño servidor, que guarde la clave y responda por ella',
   "key-goes-bad-header":
@@ -89,7 +104,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "key-goes-bad-question":
     '"{name}" no puede ir en una dirección:  es una palabra de letras, dígitos, guiones y guiones bajos, p. ej. "api_key"',
   "key-goes-with-no-key":
-    'Esto dice dónde va su clave, y ninguna línea la nombra:  agrega "su clave es el secreto "CLAVE_RECETARIO""',
+    'Esto dice dónde va su clave, y ninguna línea la nombra:  agrega "se autentica con el secreto "CLAVE_RECETARIO""',
   "place-cant-announce":
     'Un lugar de tipo "{kind}" no puede avisar de lo que cambió, así que los cambios de otras personas no se ven hasta que esta página vuelva a leer:  agrega "se revisa cada 30 segundos" debajo',
   "change-not-saved":
@@ -189,7 +204,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "airtable-no-id-column":
     'Airtable crea sus propios ids, así que una fila nueva enviada otra vez tras perderse la respuesta sería una segunda fila:  agrega una columna de texto para los ids de Encanto, y "su id es su "id encanto"" debajo',
   "airtable-needs-key":
-    'Airtable no responde a nadie sin una clave:  agrega "su clave es el secreto "CLAVE_AIRTABLE"" debajo, y guarda la clave en un servidor',
+    'Airtable no responde a nadie sin una clave:  agrega "se autentica con el secreto "CLAVE_AIRTABLE"" debajo, y guarda la clave en un servidor',
   "never-both": 'Una cosa nunca puede ser las dos a la vez, así que esto no encuentra nada:  ¿querías decir "o"?',
   "where-field-unknown":
     '{AType} no tiene "{field}":  decláralo allí, o di "el {field} es esa persona" si es el del programa',

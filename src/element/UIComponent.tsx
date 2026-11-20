@@ -1390,6 +1390,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
   /** What the whole page has defined, like `customElements`:  ONE record, for every component class. */
   static readonly registry: E.ComponentRegistry = {
     definitions: new Map(),
+    components: new Map(),
     vocabularies: new WeakSet()
   }
 
@@ -1413,6 +1414,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
       E.SpellSolid.whenInstalled(() => void UIComponent.define.call(this, tag, dictionary))
       return undefined
     }
+    UIComponent.completeVocabulary(this)
     const definition = new E.ElementDefinition(this.prototype.vocabulary, { tag, dictionary })
     const existing = customElements.get(definition.tag)
     // defined early by a root, its family loading now:  attach it ("Defined early", `DOMElement`)
@@ -1436,6 +1438,24 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
     const Class = DOMElement.subclassForTag(this.prototype.elementSetup.DOMElement, tagSetup)
     customElements.define(definition.tag, Class)
     return Class
+  }
+
+  /**
+   * Give `Class`'s vocabulary an empty list for each list it leaves out:  `events`, `slots`, `parts`, `states`, `texts`.
+   * - So a subclass's small vocabulary, written by hand or in JavaScript, defines (epic `from-console` P11):
+   *   one with no `slots` crashed `Vocabulary.resolve()` ("vocabulary.slots is not iterable").
+   * - SIDE EFFECT:  fills them in on the vocabulary itself;  a frozen one is copied onto `Class` instead.
+   */
+  private static completeVocabulary(Class: E.UIComponentClass): void {
+    const vocabulary = Class.prototype.vocabulary as Partial<Record<(typeof VOCABULARY_LISTS)[number], unknown[]>>
+    const missing = VOCABULARY_LISTS.filter((list) => !vocabulary[list])
+    if (!missing.length) return
+    const lists = Object.fromEntries(missing.map((list) => [list, []]))
+    if (!Object.isFrozen(vocabulary)) Object.assign(vocabulary, lists)
+    else {
+      const value = { ...Class.prototype.vocabulary, ...lists }
+      Object.defineProperty(Class.prototype, "vocabulary", { value, configurable: true, writable: true })
+    }
   }
 
   /**
@@ -1463,6 +1483,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
   static register(this: E.UIComponentClass, definition: E.ElementDefinition) {
     const { vocabulary } = this.prototype
     UIComponent.registry.definitions.set(definition.tag, definition)
+    UIComponent.registry.components.set(definition.tag, this)
     if (this.prototype.elementSetup.root) UIComponent.rootTags.add(definition.tag)
     E.PartContext.define({
       vocabulary,
@@ -1556,6 +1577,9 @@ const MOVABLE = "movable"
 /** The shared `resizable`:  people drag its corner to resize it. */
 const RESIZABLE = "resizable"
 const LABEL = "label"
+/** The lists a vocabulary may leave out, each filled in empty as its tag is defined (`completeVocabulary()`). */
+const VOCABULARY_LISTS = ["events", "slots", "parts", "states", "texts"] as const
+
 /** The shared `on-platform`, and the state saying it's set. */
 const ON_PLATFORM = "on-platform"
 

@@ -117,10 +117,16 @@ export type ProjectionLines = {
  * A line under a place, saying something about it:  the base of each one (epic `data` P11).
  * - They compile to nothing by themselves:  `create_place` gathers what they say into its own `core.place()`.
  * - Only under a place:  each is plain words anywhere else.
+ * - A line's old words still read, with a warning naming the new line (`oldWords`, epic `from-console` P14):
+ *   `its key is the secret "X"` says to write `it is authenticated with the secret "X"`.
  */
 export abstract class PlaceDetail<Groups extends string> extends SpellStatement<Groups> {
   @proto static alias = "statement"
   @proto static priority = Priority.declaration
+  /** What `specialize()` takes:  whether its words are the old ones. */
+  declare static readonly SpecializeWith: { oldWords: boolean }
+  /** Are its words the old ones, which still read with a warning naming the new line (`authenticationLines`)? */
+  @proto static oldWords = false
 
   /**
    * Only under a place.
@@ -140,7 +146,21 @@ export abstract class PlaceDetail<Groups extends string> extends SpellStatement<
         return SpellStatement.refuse(match, message)
       }
     }
+    if (this.oldWords) this.noteOldWords(match)
     return match
+  }
+
+  /** SIDE EFFECT:  a warning on `match`, saying the line to write now, from its language's `authenticationLines`. */
+  private noteOldWords(match: P.Match): void {
+    const language = SP.Language.of(match.scope)
+    const lines = language.words.authenticationLines ?? SP.Language.default.words.authenticationLines
+    const line = this.name === undefined ? undefined : lines?.[this.name]
+    if (!line) return
+    const groups = match.groups as Record<string, P.Match | P.Match[] | undefined>
+    const filled = line.replace(/\{(\w+)\}/g, (_all: string, group: string) =>
+      textIn(groups[group] as P.Match | undefined)
+    )
+    SP.SpellWarnings.note(match, language.parserMessage("say-is-able", { line: filled, old: match.inputText.trim() }))
   }
 
   /** What this line says. */
@@ -150,6 +170,11 @@ export abstract class PlaceDetail<Groups extends string> extends SpellStatement<
   getAST(match: P.MatchFor<this>): P.ASTStatementGroup {
     return new P.ASTStatementGroup(match, { statements: [] })
   }
+}
+
+/** Declared, so a `specialize()`d instance reads its own. */
+export interface PlaceDetail<Groups extends string> {
+  oldWords: boolean
 }
 
 /** The groups that name a field of the place's answer. */

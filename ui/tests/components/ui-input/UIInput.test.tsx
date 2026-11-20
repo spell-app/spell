@@ -644,6 +644,43 @@ describe("<ui-textarea send-on-enter>", () => {
 })
 
 ////////////////
+// ## Joined buttons
+////////////////
+
+describe("<ui-input> joined buttons", () => {
+  /** The first `<ui-button>`'s drawn box, and the field's native control, as painted. */
+  async function joined(html: string) {
+    const { host, control } = await input(html)
+    const buttons = [...host.querySelectorAll("ui-button")]
+    await Promise.all(buttons.map((button) => (button as unknown as { ready: Promise<unknown> }).ready))
+    const boxes = buttons.map((button) => getComputedStyle(button.shadowRoot!.querySelector("[part~=button]")!))
+    return { field: getComputedStyle(control), boxes }
+  }
+
+  it("takes the field's border, and its radius on the outer corners only", async () => {
+    const { field, boxes } = await joined(
+      `<ui-input style="--ui-input-radius: 10px" aria-label="A"><ui-button slot="action">Go</ui-button></ui-input>`
+    )
+    const [box] = boxes
+    expect(box.borderTopLeftRadius).toBe("0px")
+    expect(box.borderBottomLeftRadius).toBe("0px")
+    expect(box.borderTopRightRadius).toBe("10px")
+    expect(box.borderBottomRightRadius).toBe("10px")
+    expect(box.boxShadow).toContain(`${field.borderTopColor} 0px 0px 0px ${field.borderTopWidth} inset`)
+  })
+
+  it('`action="left"` turns it round;  several buttons are square between them', async () => {
+    const { boxes } = await joined(
+      `<ui-input action="left" style="--ui-input-radius: 10px" aria-label="A"
+        ><ui-button slot="action">A</ui-button><ui-button slot="action">B</ui-button></ui-input>`
+    )
+    const [first, last] = boxes
+    expect([first.borderTopLeftRadius, first.borderTopRightRadius]).toEqual(["10px", "0px"])
+    expect([last.borderTopLeftRadius, last.borderTopRightRadius]).toEqual(["0px", "0px"])
+  })
+})
+
+////////////////
 // ## Tokens from outside
 ////////////////
 

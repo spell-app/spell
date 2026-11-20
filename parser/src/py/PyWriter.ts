@@ -112,6 +112,13 @@ export class PyWriter extends PyBaseWriter {
     return this.project.awaited.has(node) ? `await core.answer_of(${args})` : `core.answer_now(${args})`
   }
 
+  /** `await copy_text(text)` for a code file's `async def`, inside a function that waits. */
+  ASTNativeCall(node: P.ASTNativeCall): string {
+    const written = super.ASTNativeCall(node)
+    const waits = this.project.hasFoundWaiting ? this.project.awaited.has(node) : !!node.waitsIn.py
+    return waits ? `await ${written}` : written
+  }
+
   /** `await name(args)` for a function that waits. */
   ASTMethodInvocation(node: P.ASTMethodInvocation): string {
     const written = super.ASTMethodInvocation(node)

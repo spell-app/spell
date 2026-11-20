@@ -186,6 +186,8 @@ export class WriterProject {
       coreCallWaits: (call: P.ASTScopedMethodInvocation) => boolean
       /** Does "not yet" pass through a plain getter over a value that waits? */
       readsThroughSolid: boolean
+      /** The language of the code files a native call reaches:  it waits if its function there does (`P.ASTNativeCall`). */
+      nativeLanguage?: P.NativeLanguage
       /**
        * Does every action and handler wait, so it can be held between its lines?  A debugging build's, see `P.DebugSteps`.
        * - Getters, drawings, `create()` and tests still answer at once:  `canWait` says so.
@@ -222,6 +224,7 @@ export class WriterProject {
     }
     const callWaits = (node: P.ASTNode) => {
       if (!(node instanceof P.ASTMethodInvocation)) return false
+      if (node instanceof P.ASTNativeCall) return !!node.waitsIn[how.nativeLanguage ?? "js"]
       if (isCoreCall(node)) return how.coreCallWaits(node as P.ASTScopedMethodInvocation)
       return this.waitingNames.has(node.methodName)
     }

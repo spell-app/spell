@@ -12,7 +12,7 @@
 // People and organizations are both users here:  their "kind" says which.
 
 github is a web server at "https://api.github.com"
-	its optional key is the secret "GITHUB_TOKEN"
+	it is optionally authenticated with the secret "GITHUB_TOKEN"
 	its next page is in its "Link" header
 	it gives up to 100 at a time, asked for with "per_page"
 	check it every 40 minutes
@@ -27,11 +27,16 @@ github is a web server at "https://api.github.com"
 an "issue" is a thing
 	it lives in github
 	its "url" is an issue
-	its "repository url" is text  // an address
-	its "labels url" is text  // an address
-	its "comments url" is text  // an address
-	its "events url" is text  // an address
-	its "html url" is text  // an address
+	its "repository url" is text
+		-- an address
+	its "labels url" is text
+		-- an address
+	its "comments url" is text
+		-- an address
+	its "events url" is text
+		-- an address
+	its "html url" is text
+		-- an address
 	its "node id" is text
 	its "number" is a number
 	its "title" is text
@@ -49,7 +54,8 @@ an "issue" is a thing
 	its "issue dependencies summary" is an issue dependencies summary
 	its "body" is text
 	its "reactions" is a reaction
-	its "timeline url" is text  // an address
+	its "timeline url" is text
+		-- an address
 	its "performed via github app" is a performed via github app
 	its "state reason" is text
 	its "draft" is yes or no
@@ -60,19 +66,31 @@ a "contributor" is a thing
 	it lives in github
 	its "login" is text
 	its "node id" is text
-	its "avatar url" is text  // an address
+	its "avatar url" is text
+		-- an address
 	its "gravatar id" is text
-	its "url" is text  // an address
-	its "html url" is text  // an address
-	its "followers url" is text  // an address
-	its "following url" is text  // an address
-	its "gists url" is text  // an address
-	its "starred url" is text  // an address
-	its "subscriptions url" is text  // an address
-	its "organizations url" is text  // an address
-	its "repos url" is text  // an address
-	its "events url" is text  // an address
-	its "received events url" is text  // an address
+	its "url" is text
+		-- an address
+	its "html url" is text
+		-- an address
+	its "followers url" is text
+		-- an address
+	its "following url" is text
+		-- an address
+	its "gists url" is text
+		-- an address
+	its "starred url" is text
+		-- an address
+	its "subscriptions url" is text
+		-- an address
+	its "organizations url" is text
+		-- an address
+	its "repos url" is text
+		-- an address
+	its "events url" is text
+		-- an address
+	its "received events url" is text
+		-- an address
 	its "kind" is text, stored as "type"
 	its "user view type" is text
 	its "site admin" is yes or no
@@ -83,25 +101,38 @@ a "user" is a thing
 	its "login" is text
 	its "number" is a number, stored as "id"
 	its "node id" is text
-	its "avatar url" is text  // an address
+	its "avatar url" is text
+		-- an address
 	its "gravatar id" is text
-	its "url" is text  // an address
-	its "html url" is text  // an address
-	its "followers url" is text  // an address
-	its "following url" is text  // an address
-	its "gists url" is text  // an address
-	its "starred url" is text  // an address
-	its "subscriptions url" is text  // an address
-	its "organizations url" is text  // an address
-	its "repos url" is text  // an address
-	its "events url" is text  // an address
-	its "received events url" is text  // an address
+	its "url" is text
+		-- an address
+	its "html url" is text
+		-- an address
+	its "followers url" is text
+		-- an address
+	its "following url" is text
+		-- an address
+	its "gists url" is text
+		-- an address
+	its "starred url" is text
+		-- an address
+	its "subscriptions url" is text
+		-- an address
+	its "organizations url" is text
+		-- an address
+	its "repos url" is text
+		-- an address
+	its "events url" is text
+		-- an address
+	its "received events url" is text
+		-- an address
 	its "kind" is text, stored as "type"
 	its "user view type" is text
 	its "site admin" is yes or no
 	its "name" is text
 	its "company" is text
-	its "blog" is text  // an address
+	its "blog" is text
+		-- an address
 	its "location" is text
 	its "email" is text
 	its "twitter username" is text
@@ -117,19 +148,31 @@ an "issue user" is a thing
 	its "login" is text
 	its "number" is a number, stored as "id"
 	its "node id" is text
-	its "avatar url" is text  // an address
+	its "avatar url" is text
+		-- an address
 	its "gravatar id" is text
-	its "url" is text  // an address
-	its "html url" is text  // an address
-	its "followers url" is text  // an address
-	its "following url" is text  // an address
-	its "gists url" is text  // an address
-	its "starred url" is text  // an address
-	its "subscriptions url" is text  // an address
-	its "organizations url" is text  // an address
-	its "repos url" is text  // an address
-	its "events url" is text  // an address
-	its "received events url" is text  // an address
+	its "url" is text
+		-- an address
+	its "html url" is text
+		-- an address
+	its "followers url" is text
+		-- an address
+	its "following url" is text
+		-- an address
+	its "gists url" is text
+		-- an address
+	its "starred url" is text
+		-- an address
+	its "subscriptions url" is text
+		-- an address
+	its "organizations url" is text
+		-- an address
+	its "repos url" is text
+		-- an address
+	its "events url" is text
+		-- an address
+	its "received events url" is text
+		-- an address
 	its "kind" is text, stored as "type"
 	its "user view type" is text
 	its "site admin" is yes or no
@@ -137,7 +180,8 @@ an "issue user" is a thing
 a "label" is a thing
 	its "number" is a number, stored as "id"
 	its "node id" is text
-	its "url" is text  // an address
+	its "url" is text
+		-- an address
 	its "name" is text
 	its "color" is text
 	its "default" is yes or no
@@ -155,7 +199,8 @@ an "issue dependencies summary" is a thing
 	its "total blocking" is a number
 
 a "reaction" is a thing
-	its "url" is text  // an address
+	its "url" is text
+		-- an address
 	its "total count" is a number
 	its "laugh" is a number
 	its "hooray" is a number
@@ -172,8 +217,10 @@ a "performed via github app" is a thing
 	its "owner" is an owner
 	its "name" is text
 	its "description" is text
-	its "external url" is text  // an address
-	its "html url" is text  // an address
+	its "external url" is text
+		-- an address
+	its "html url" is text
+		-- an address
 	its "created at" is a date
 	its "updated at" is a date
 	its "permissions" is a permission
@@ -183,19 +230,31 @@ an "owner" is a thing
 	its "login" is text
 	its "number" is a number, stored as "id"
 	its "node id" is text
-	its "avatar url" is text  // an address
+	its "avatar url" is text
+		-- an address
 	its "gravatar id" is text
-	its "url" is text  // an address
-	its "html url" is text  // an address
-	its "followers url" is text  // an address
-	its "following url" is text  // an address
-	its "gists url" is text  // an address
-	its "starred url" is text  // an address
-	its "subscriptions url" is text  // an address
-	its "organizations url" is text  // an address
-	its "repos url" is text  // an address
-	its "events url" is text  // an address
-	its "received events url" is text  // an address
+	its "url" is text
+		-- an address
+	its "html url" is text
+		-- an address
+	its "followers url" is text
+		-- an address
+	its "following url" is text
+		-- an address
+	its "gists url" is text
+		-- an address
+	its "starred url" is text
+		-- an address
+	its "subscriptions url" is text
+		-- an address
+	its "organizations url" is text
+		-- an address
+	its "repos url" is text
+		-- an address
+	its "events url" is text
+		-- an address
+	its "received events url" is text
+		-- an address
 	its "kind" is text, stored as "type"
 	its "user view type" is text
 	its "site admin" is yes or no
@@ -217,10 +276,14 @@ a "permission" is a thing
 	its "repository creation" is text
 
 a "pull request" is a thing
-	its "url" is text  // an address
-	its "html url" is text  // an address
-	its "diff url" is text  // an address
-	its "patch url" is text  // an address
+	its "url" is text
+		-- an address
+	its "html url" is text
+		-- an address
+	its "diff url" is text
+		-- an address
+	its "patch url" is text
+		-- an address
 
 a "repository" is a thing
 	it lives in github
@@ -229,53 +292,93 @@ a "repository" is a thing
 	its "full name" is text
 	its "private" is yes or no
 	its "owner" is an owner
-	its "html url" is text  // an address
+	its "html url" is text
+		-- an address
 	its "description" is text
 	its "fork" is yes or no
-	its "url" is text  // an address
-	its "forks url" is text  // an address
-	its "keys url" is text  // an address
-	its "collaborators url" is text  // an address
-	its "teams url" is text  // an address
-	its "hooks url" is text  // an address
-	its "issue events url" is text  // an address
-	its "events url" is text  // an address
-	its "assignees url" is text  // an address
-	its "branches url" is text  // an address
-	its "tags url" is text  // an address
-	its "blobs url" is text  // an address
-	its "git tags url" is text  // an address
-	its "git refs url" is text  // an address
-	its "trees url" is text  // an address
-	its "statuses url" is text  // an address
-	its "languages url" is text  // an address
-	its "stargazers url" is text  // an address
-	its "contributors url" is text  // an address
-	its "subscribers url" is text  // an address
-	its "subscription url" is text  // an address
-	its "commits url" is text  // an address
-	its "git commits url" is text  // an address
-	its "comments url" is text  // an address
-	its "issue comment url" is text  // an address
-	its "contents url" is text  // an address
-	its "compare url" is text  // an address
-	its "merges url" is text  // an address
-	its "archive url" is text  // an address
-	its "downloads url" is text  // an address
-	its "issues url" is text  // an address
-	its "pulls url" is text  // an address
-	its "milestones url" is text  // an address
-	its "notifications url" is text  // an address
-	its "labels url" is text  // an address
-	its "releases url" is text  // an address
-	its "deployments url" is text  // an address
+	its "url" is text
+		-- an address
+	its "forks url" is text
+		-- an address
+	its "keys url" is text
+		-- an address
+	its "collaborators url" is text
+		-- an address
+	its "teams url" is text
+		-- an address
+	its "hooks url" is text
+		-- an address
+	its "issue events url" is text
+		-- an address
+	its "events url" is text
+		-- an address
+	its "assignees url" is text
+		-- an address
+	its "branches url" is text
+		-- an address
+	its "tags url" is text
+		-- an address
+	its "blobs url" is text
+		-- an address
+	its "git tags url" is text
+		-- an address
+	its "git refs url" is text
+		-- an address
+	its "trees url" is text
+		-- an address
+	its "statuses url" is text
+		-- an address
+	its "languages url" is text
+		-- an address
+	its "stargazers url" is text
+		-- an address
+	its "contributors url" is text
+		-- an address
+	its "subscribers url" is text
+		-- an address
+	its "subscription url" is text
+		-- an address
+	its "commits url" is text
+		-- an address
+	its "git commits url" is text
+		-- an address
+	its "comments url" is text
+		-- an address
+	its "issue comment url" is text
+		-- an address
+	its "contents url" is text
+		-- an address
+	its "compare url" is text
+		-- an address
+	its "merges url" is text
+		-- an address
+	its "archive url" is text
+		-- an address
+	its "downloads url" is text
+		-- an address
+	its "issues url" is text
+		-- an address
+	its "pulls url" is text
+		-- an address
+	its "milestones url" is text
+		-- an address
+	its "notifications url" is text
+		-- an address
+	its "labels url" is text
+		-- an address
+	its "releases url" is text
+		-- an address
+	its "deployments url" is text
+		-- an address
 	its "created at" is a date
 	its "updated at" is a date
 	its "pushed at" is a date
 	its "git url" is text
 	its "ssh url" is text
-	its "clone url" is text  // an address
-	its "svn url" is text  // an address
+	its "clone url" is text
+		-- an address
+	its "svn url" is text
+		-- an address
 	its "homepage" is text
 	its "size" is a number
 	its "stargazers count" is a number
@@ -310,19 +413,31 @@ an "assignee" is a thing
 	its "login" is text
 	its "number" is a number, stored as "id"
 	its "node id" is text
-	its "avatar url" is text  // an address
+	its "avatar url" is text
+		-- an address
 	its "gravatar id" is text
-	its "url" is text  // an address
-	its "html url" is text  // an address
-	its "followers url" is text  // an address
-	its "following url" is text  // an address
-	its "gists url" is text  // an address
-	its "starred url" is text  // an address
-	its "subscriptions url" is text  // an address
-	its "organizations url" is text  // an address
-	its "repos url" is text  // an address
-	its "events url" is text  // an address
-	its "received events url" is text  // an address
+	its "url" is text
+		-- an address
+	its "html url" is text
+		-- an address
+	its "followers url" is text
+		-- an address
+	its "following url" is text
+		-- an address
+	its "gists url" is text
+		-- an address
+	its "starred url" is text
+		-- an address
+	its "subscriptions url" is text
+		-- an address
+	its "organizations url" is text
+		-- an address
+	its "repos url" is text
+		-- an address
+	its "events url" is text
+		-- an address
+	its "received events url" is text
+		-- an address
 	its "kind" is text, stored as "type"
 	its "user view type" is text
 	its "site admin" is yes or no
@@ -331,5 +446,6 @@ a "license" is a thing
 	its "key" is text
 	its "name" is text
 	its "spdx id" is text
-	its "url" is text  // an address
+	its "url" is text
+		-- an address
 	its "node id" is text

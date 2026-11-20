@@ -278,7 +278,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         (`CONTENT_SETTINGS`;  the folder `contentFolderOf()` names):  the site's tabs, the writable folders, `gone`.
       - The kit's own part (its `package.json`'s `"pageServer"`):  two route modules:  the recipe box demo's servers' start and stop
         (`spell/server/test/recipeServersRoutes`, epic `data` I21);  it registers nothing where the demo's script isn't there.
-        And `spell/server/places/airtableRoutes` (epic `data` P19), which registers nothing without a base and key in its environment.
+        And `spell/server/places/placeRoutes` (epic `data` P19;  epic `from-console` P14):  the authenticated places'
+        routes (`AuthenticatedPlaces`, below), the Airtable base when its environment names one and its key, and, as the
+        server starts, a line for each secret a place needs that isn't set.
       - `pageServerSettings(root)` merges them (`settingsParts()`):
         the kit's, the epic repo's, each big folder's (the kit's `workspaces`, lowest first:  `kitFolders()`),
         each peer `repos.json5` names that's there (`peerRepos()`:  spell-brand, beside the MAIN checkout;  the ONE
@@ -577,8 +579,21 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - one read, however many tabs, for a window (`checkedEvery`);  `watch()` shares it, on one `every()`
       - an id column and an upsert, so a new row sent twice is one row;  with none, Airtable makes the id, and a line warns of doubling
       - no version check:  the last save wins a field.  A `Referee` can sit in front, and each of its steps then waits for Airtable
-      - `airtableRoutes.ts`:  a route module:  with `AIRTABLE_BASE` and `AIRTABLE_KEY` in its environment, the page server serves that one base at `/api/places/<base>`
+      - `placeRoutes.ts`:  a route module:  with `AIRTABLE_BASE` and `AIRTABLE_KEY` in its environment, the page server serves that one base at `/api/places/<base>`;
+        one case of the authenticated places (below)
       - its tests run against `spell/server/test/airtableStub`, a fair stub, whose guesses say so
+    - `AuthenticatedPlaces`:  a project's authenticated places, read for its pages with the secret added (epic `from-console` P14)
+      - page → page server (adds the secret) → the place's own server, at `/api/places/projects/<project>/<place>/...`
+        (`AUTHENTICATED_PLACES_PREFIX`):  the rest of the path, its question and its body go on;  a pass-through that keeps
+        nothing, as `DirectReads`' read through is
+      - the secret from the environment, by its name;  a token made from it at its token service (`PlaceToken`);
+        both scrubbed from every answer, and the place's own address made this one
+      - read only when its lines or its deployment say so:  a write refused, a graphql server's mutation too
+      - a secret that isn't set:  refused in words naming it and the place, `PAGE_SERVER_ANSWER_HEADER` on the answer,
+        which the page says;  and said as the server starts (`sayMissing()`), never a value
+      - ONE per page server (`AuthenticatedPlaces.for()`):  `placeRoutes.ts` makes it;  its places come from SOURCES, the
+        app's `ProjectPlaces` (every project's, from what it compiled to) and the Airtable base
+      - behind `Guard`, reads too, as `PlaceServer` is
     - `SpacesHost`:  Spell's own AT Protocol Spaces host, both sides, as Bluesky's alpha answers (epic `atmosphere` P13, Q14 B)
       - why:  a member's own host has to run Spaces (T35), and an ordinary Bluesky account's doesn't yet
       - spaces, member lists, records, delegation tokens and credentials (real ES256 JWTs), signed reads, MACs, the

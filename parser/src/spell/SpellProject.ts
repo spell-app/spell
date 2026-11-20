@@ -1,9 +1,10 @@
-import { JSON5File, TaskList, Task, getDier } from "spell/util"
+import { JSON5File, TaskList, Task, getDier, snakeCase } from "spell/util"
 import { P } from "spell/parser/parser"
 import { PY } from "spell/parser/py"
 // Import directly, NOT through the `spell/parser/core` barrel:  a project MUST NOT load `core` itself --
 // each runner runs its own copy.  See `spellRuntime.ts`.
 import { SPELL_CORE_MODULE, SPELL_CORE_NAMES } from "spell/parser/core/core.types"
+import type { PlaceDeployment } from "spell/parser/core/runtime"
 import { SP } from "spell/parser/spell"
 // Import directly:  these two helpers, not the rules' barrel
 import { overlayViewNamed, pageNamed } from "spell/parser/spell/rules/sites/sites.shared"
@@ -558,6 +559,38 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   targetsThisRun: string[] | undefined
 
   /**
+   * Each place's deployment named `deployment`, from our project file's `places`, by the place's name as compiled code
+   * names it:  `{ netbox: { at: "...", readOnly: true } }` (epic `data` P49).
+   * - `spell run` and the page server both pick this way (epic `from-console` P14), by `SP.DEPLOYMENT_VARIABLE`.
+   * - A place that lists no such deployment runs as its line says.
+   * - throws `TypeError` for a deployment no place in the project file has:  a mistake, named
+   */
+  deploymentsPicked(deployment: string): Record<string, PlaceDeployment> {
+    return SpellProject.deploymentsIn(this.contents?.places, deployment, this.projectId)
+  }
+
+  /**
+   * Each place's deployment named `deployment`, from `places`, a project file's:  see `deploymentsPicked()`.
+   * - For a reader that has the project file but no project:  the page server.
+   * - throws `TypeError` for a deployment no place in it has
+   */
+  static deploymentsIn(
+    places: SP.ProjectManifestJSON5["places"],
+    deployment: string,
+    projectId: string
+  ): Record<string, PlaceDeployment> {
+    const picked = Object.entries(places ?? {}).flatMap(([place, deployments]) =>
+      deployments[deployment] ? [[snakeCase(place), deployments[deployment]] as const] : []
+    )
+    if (!picked.length) {
+      throw new TypeError(
+        `no place in ${projectId}'s project file has a deployment named "${deployment}":  list it under "places"`
+      )
+    }
+    return Object.fromEntries(picked)
+  }
+
+  /**
    * Targets we compile to, in order:
    * - `js/solid` first, always (`SP.RUNNING_TARGET`), as it's what everything runs
    * - then the rest of the project file's `targets`, or the running `compile()`'s
@@ -784,6 +817,8 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
             name: `Parsing imports`,
             run: async () => {
               try {
+                // our code files first:  a `call native` line looks its name up in them as it parses
+                await this.loadNativeCode()
                 if (!this.incremental) this.parseImports()
                 this.parsePagesInPlay()
                 for (const file of this.activeImports) {
@@ -858,6 +893,15 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                       message: `'${this.projectName}' keeps things in a ${refusedKind}, which target '${target.name}' can't:  not in ${target.name === "py" ? "Python" : target.name} yet.`,
                       activity: "SpellProject.compile",
                       params: { target: target.name, kind: refusedKind }
+                    })
+                  }
+                  // a function from our code files, `call native copyText`, that this target has no file for
+                  const nativeRefusal = SP.NativeCode.refusalFor(target.writer.nativeLanguage, parts)
+                  if (nativeRefusal) {
+                    throw new P.ParserError({
+                      message: `'${this.projectName}', for target '${target.name}':  ${nativeRefusal}`,
+                      activity: "SpellProject.compile",
+                      params: { target: target.name }
                     })
                   }
                   const header = this.importHeader(target.writer)
@@ -1161,6 +1205,12 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     // an imported type we subclass is imported by another name, its class's:  `Card as CardsCard`
     if (header && subclassed.names.length) {
       header = projectWriter.importsHeader(SpellProject.importsOf(scope, subclassed.names))
+    }
+    // what `call native` calls, from our code files:  `import { copyText } from "@spell/native/.../clipboard.ts"`
+    const natives = SP.NativeCode.importsIn(hoisted, projectWriter.nativeLanguage)
+    if (natives.length) {
+      const imports = header ? SpellProject.importsOf(scope, subclassed.names) : []
+      header = projectWriter.importsHeader([...imports, ...natives])
     }
     // every file sets itself up before any file's steps run, so a file's order doesn't change what runs
     const { setUp, runs } = SP.runningCodeLast(hoisted)
@@ -1587,6 +1637,39 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   }
 
   /**
+   * Our CODE FILES, from our project file:  TypeScript, javascript and Python whose functions our Spell may call,
+   * `call native copyText` (epic `from-console` P10) -- see `SP.NativeCode`.
+   * - e.g. `{ path: "/clipboard.ts", active: true }`, `{ path: "/clipboard.py", only: "browser" }`
+   * - Active or not:  a code file is never compiled, only called.
+   */
+  get codeFiles(): Array<{ file: SP.AnySpellFile; only?: "browser" }> {
+    const found: Array<{ file: SP.AnySpellFile; only?: "browser" }> = []
+    for (const { path, only } of this.contents?.imports ?? []) {
+      if (SP.SpellLocation.isAddress(path) || !SP.NativeCode.languageOf(path)) continue
+      const file = this.manifest[SP.SpellLocation.getFileLocation(this.projectId, path).path]?.file
+      if (file) found.push({ file, ...(only && { only }) })
+    }
+    return found
+  }
+
+  /**
+   * SIDE EFFECT:  loads our code files (`codeFiles`), and lists what each exports in our scope, for `call native`.
+   * - Again each parse:  an edit to `clipboard.ts` is seen at once.
+   * - A file that can't be loaded is left out, so a call of it says it's not found.
+   */
+  async loadNativeCode(): Promise<void> {
+    if (!this.scope) return
+    const sources: SP.NativeSource[] = []
+    for (const { file, only } of this.codeFiles) {
+      await file.load(undefined).catch((error) => console.error(error))
+      const contents = (file as { contents?: string }).contents
+      const path = file.location.filePath ?? ""
+      if (typeof contents === "string") sources.push({ path, contents, ...(only && { only }) })
+    }
+    SP.NativeCode.listIn(this.scope, SP.NativeCode.of(sources, this.projectId))
+  }
+
+  /**
    * Spell files we parse:  our active `.spell` imports, in order -- see `activeImports`.
    * - After any `source` project imports' files, which parse first -- see `sourceImportFiles`.
    */
@@ -1754,6 +1837,11 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
       ".css": SP.SpellCSSFile,
       ".js": SP.SpellJSFile,
       ".jsx": SP.SpellJSFile,
+      // a code file our Spell calls (`call native`):  text we read, never compiled -- see `SP.NativeCode`
+      ".ts": SP.SpellJSFile,
+      ".mts": SP.SpellJSFile,
+      ".mjs": SP.SpellJSFile,
+      ".py": SP.SpellJSFile,
       // a property editor page:  any text file, never compiled
       [SP.EDITOR_PAGE_SUFFIX]: SP.SpellJSFile
     }

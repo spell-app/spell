@@ -514,6 +514,14 @@ export type LanguageWords = {
    */
   propertyKindName: string
   /**
+   * How a type's line names a Spell UI element it's built on, its `{noun}` filled in (epic `from-console` P11):
+   * English's `ui {noun} view`, `a "netlist column" is a ui tree view`;  Spanish's `vista ui de {noun}`,
+   * `una "columna de netlist" es una vista ui de árbol`.
+   * - The noun is the element's, bare, as a drawing names it (`<tree>`, `<árbol>`).
+   * - See `SP.UIViews`.
+   */
+  uiViewName: string
+  /**
    * Words which name `it` as an OBJECT -- the thing a method runs on, or the last `get` -- e.g. Spanish's `eso`.
    * - None:  `it` itself, as English writes it (`print it`), the `it` variable's own name.
    * - A variable a person named the same word wins:  this is only a second name for `it`.
@@ -583,6 +591,12 @@ export type LanguageWords = {
    * - What `DragAndDrop`'s warning for the old words (`can be dragged`) says to write.
    */
   abilityLines?: Record<string, string>
+  /**
+   * The line an authenticated place says now, by its rule's name, its braces filled from the old line
+   * (epic `from-console` P14):  `it is authenticated with the secret "{name}"`.
+   * - What a place line's warning for the old words (`its key is the secret ...`) says to write.
+   */
+  authenticationLines?: Record<string, string>
   /**
    * Its words for a PAGE (epic `language` P47):  its head, `"button api" is a notebook page`, and the tags its body
    * draws with -- see `PageWords`.

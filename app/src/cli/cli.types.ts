@@ -166,12 +166,15 @@ export type NewOptions = GlobalOptions & {
  * - `reports`:  `test` also sends how each test went (`TestsReport`) over IPC, for the lines its failures are on
  *   (epic `spanish` P25:  `spell translate`'s fix-ups)
  * - `offline`:  no server is ever asked, each answer a failed connection -- see `noNetwork()` in `runProject.ts`
+ * - `natives`:  each code file `call native` reaches, by the module compiled code imports it as, its file's URL:
+ *   `@spell/native/owen@spell/clipboard/clipboard.ts` => `file:///.../clipboard.ts` (epic `from-console` P10)
  */
 export type RunSpec = {
   mode: "run" | "test"
   name: string
   entry: string
   projects: Record<string, string>
+  natives?: Record<string, string>
   core: string
   verbose?: boolean
   filter?: string

@@ -65,40 +65,41 @@ export class Pokemon extends Thing {
 
   /** an address */
   // - its "location area encounters" is text
-  @prop({ type: "text", declaredAt: { path: "/PokeSpell.api.spell", start: 1697, end: 1735 } })
+  //   -- an address
+  @prop({ type: "text", declaredAt: { path: "/PokeSpell.api.spell", start: 1697, end: 1751 } })
   accessor locationAreaEncounters!: string
 
   // - its "moves" is a list of pokemon moves
-  @prop({ itemType: "PokemonMove", init: () => new List<PokemonMove>({ instanceType: "PokemonMove" }), declaredAt: { path: "/PokeSpell.api.spell", start: 1752, end: 1790 } })
+  @prop({ itemType: "PokemonMove", init: () => new List<PokemonMove>({ instanceType: "PokemonMove" }), declaredAt: { path: "/PokeSpell.api.spell", start: 1753, end: 1791 } })
   accessor moves!: List<PokemonMove>
 
   // - its "species" is a pokemon species
-  static { this.declareProp("species", { type: "PokemonSpecies", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 1792, end: 1826 } }) }
+  static { this.declareProp("species", { type: "PokemonSpecies", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 1793, end: 1827 } }) }
   get species(): PokemonSpecies { return core.linked(this, "species", PokemonSpecies) as PokemonSpecies }
   set species(value: PokemonSpecies) { this.setProp("species", value) }
 
   // - its "sprites" is a sprite
-  @prop({ type: "Sprite", declaredAt: { path: "/PokeSpell.api.spell", start: 1828, end: 1853 } })
+  @prop({ type: "Sprite", declaredAt: { path: "/PokeSpell.api.spell", start: 1829, end: 1854 } })
   accessor sprites!: Sprite
 
   // - its "cries" is a cry
-  @prop({ type: "Cry", declaredAt: { path: "/PokeSpell.api.spell", start: 1855, end: 1875 } })
+  @prop({ type: "Cry", declaredAt: { path: "/PokeSpell.api.spell", start: 1856, end: 1876 } })
   accessor cries!: Cry
 
   // - its "stats" is a list of stats
-  @prop({ itemType: "Stat", init: () => new List<Stat>({ instanceType: "Stat" }), declaredAt: { path: "/PokeSpell.api.spell", start: 1877, end: 1907 } })
+  @prop({ itemType: "Stat", init: () => new List<Stat>({ instanceType: "Stat" }), declaredAt: { path: "/PokeSpell.api.spell", start: 1878, end: 1908 } })
   accessor stats!: List<Stat>
 
   // - its "past stats" is a list of past stats
-  @prop({ itemType: "PastStat", init: () => new List<PastStat>({ instanceType: "PastStat" }), declaredAt: { path: "/PokeSpell.api.spell", start: 1909, end: 1949 } })
+  @prop({ itemType: "PastStat", init: () => new List<PastStat>({ instanceType: "PastStat" }), declaredAt: { path: "/PokeSpell.api.spell", start: 1910, end: 1950 } })
   accessor pastStats!: List<PastStat>
 
   // - its "types" is a list of pokemon types
-  @prop({ itemType: "PokemonType", init: () => new List<PokemonType>({ instanceType: "PokemonType" }), declaredAt: { path: "/PokeSpell.api.spell", start: 1951, end: 1989 } })
+  @prop({ itemType: "PokemonType", init: () => new List<PokemonType>({ instanceType: "PokemonType" }), declaredAt: { path: "/PokeSpell.api.spell", start: 1952, end: 1990 } })
   accessor types!: List<PokemonType>
 
   // - its "past types" is a list of text
-  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 1991, end: 2025 } })
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 1992, end: 2026 } })
   accessor pastTypes!: List<string>
 
   /** Its big picture, the official artwork */
@@ -139,14 +140,14 @@ export class Pokemon extends Thing {
   async open() {
     if ((await core.answerOf(pokedex, "showing")) === this) return
     if (await core.answerOf(pokedex, "showing")) {
-      // the last one's cry ends with its page
       core.stop((await core.answerOf(pokedex, "showing"))?.sound!)
+      // the last one's cry ends with its page
       core.append(await core.answerOf(pokedex, "trail"), (await core.answerOf(pokedex, "showing"))!)
     }
     pokedex.search = ""
     pokedex.showing = this
-    // so Hear it plays it at once
     core.loadSound(this.sound)
+    // so Hear it plays it at once
     core.scrollToTop()
   }
 
@@ -263,118 +264,118 @@ core.describeAction(Pokemon, "love", { title: "Love It", undoneAs: "Love It" })
 
 export class PokemonSpecies extends Thing {
   // - its "number" is a number, stored as "id"
-  @prop({ type: "number", storedAs: "id", declaredAt: { path: "/PokeSpell.api.spell", start: 2081, end: 2121 } })
+  @prop({ type: "number", storedAs: "id", declaredAt: { path: "/PokeSpell.api.spell", start: 2082, end: 2122 } })
   accessor number!: number
 
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/PokeSpell.api.spell", start: 2123, end: 2141 } })
+  @prop({ type: "text", declaredAt: { path: "/PokeSpell.api.spell", start: 2124, end: 2142 } })
   accessor name!: string
 
   // - its "order" is a number
-  @prop({ type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 2143, end: 2166 } })
+  @prop({ type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 2144, end: 2167 } })
   accessor order!: number
 
   // - its "gender rate" is a number
-  @prop({ type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 2168, end: 2197 } })
+  @prop({ type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 2169, end: 2198 } })
   accessor genderRate!: number
 
   // - its "capture rate" is a number
-  @prop({ type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 2199, end: 2229 } })
+  @prop({ type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 2200, end: 2230 } })
   accessor captureRate!: number
 
   // - its "base happiness" is a number
-  @prop({ type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 2231, end: 2263 } })
+  @prop({ type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 2232, end: 2264 } })
   accessor baseHappiness!: number
 
   // - its "baby" is yes or no, stored as "is_baby"
-  @prop({ type: "choice", storedAs: "is_baby", declaredAt: { path: "/PokeSpell.api.spell", start: 2265, end: 2309 } })
+  @prop({ type: "choice", storedAs: "is_baby", declaredAt: { path: "/PokeSpell.api.spell", start: 2266, end: 2310 } })
   accessor baby!: boolean
 
   // - its "legendary" is yes or no, stored as "is_legendary"
-  @prop({ type: "choice", storedAs: "is_legendary", declaredAt: { path: "/PokeSpell.api.spell", start: 2311, end: 2365 } })
+  @prop({ type: "choice", storedAs: "is_legendary", declaredAt: { path: "/PokeSpell.api.spell", start: 2312, end: 2366 } })
   accessor legendary!: boolean
 
   // - its "mythical" is yes or no, stored as "is_mythical"
-  @prop({ type: "choice", storedAs: "is_mythical", declaredAt: { path: "/PokeSpell.api.spell", start: 2367, end: 2419 } })
+  @prop({ type: "choice", storedAs: "is_mythical", declaredAt: { path: "/PokeSpell.api.spell", start: 2368, end: 2420 } })
   accessor mythical!: boolean
 
   // - its "hatch counter" is a number
-  @prop({ type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 2421, end: 2452 } })
+  @prop({ type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 2422, end: 2453 } })
   accessor hatchCounter!: number
 
   // - its "gender differences" is yes or no, stored as "has_gender_differences"
-  @prop({ type: "choice", storedAs: "has_gender_differences", declaredAt: { path: "/PokeSpell.api.spell", start: 2454, end: 2527 } })
+  @prop({ type: "choice", storedAs: "has_gender_differences", declaredAt: { path: "/PokeSpell.api.spell", start: 2455, end: 2528 } })
   accessor genderDifferences!: boolean
 
   // - its "forms switchable" is yes or no
-  @prop({ type: "choice", declaredAt: { path: "/PokeSpell.api.spell", start: 2529, end: 2564 } })
+  @prop({ type: "choice", declaredAt: { path: "/PokeSpell.api.spell", start: 2530, end: 2565 } })
   accessor formsSwitchable!: boolean
 
   // - its "growth rate" is a poke api name
-  @prop({ type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 2566, end: 2602 } })
+  @prop({ type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 2567, end: 2603 } })
   accessor growthRate!: PokeApiName
 
   // - its "pokedex numbers" is a list of pokedex numbers
-  @prop({ itemType: "PokedexNumber", init: () => new List<PokedexNumber>({ instanceType: "PokedexNumber" }), declaredAt: { path: "/PokeSpell.api.spell", start: 2604, end: 2654 } })
+  @prop({ itemType: "PokedexNumber", init: () => new List<PokedexNumber>({ instanceType: "PokedexNumber" }), declaredAt: { path: "/PokeSpell.api.spell", start: 2605, end: 2655 } })
   accessor pokedexNumbers!: List<PokedexNumber>
 
   // - its "egg groups" is a list of poke api names
-  @prop({ itemType: "PokeApiName", init: () => new List<PokeApiName>({ instanceType: "PokeApiName" }), declaredAt: { path: "/PokeSpell.api.spell", start: 2656, end: 2700 } })
+  @prop({ itemType: "PokeApiName", init: () => new List<PokeApiName>({ instanceType: "PokeApiName" }), declaredAt: { path: "/PokeSpell.api.spell", start: 2657, end: 2701 } })
   accessor eggGroups!: List<PokeApiName>
 
   // - its "color" is a poke api name
-  @prop({ type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 2702, end: 2732 } })
+  @prop({ type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 2703, end: 2733 } })
   accessor color!: PokeApiName
 
   // - its "shape" is a poke api name
-  @prop({ type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 2734, end: 2764 } })
+  @prop({ type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 2735, end: 2765 } })
   accessor shape!: PokeApiName
 
   // - its "evolves from species" is a pokemon species
-  static { this.declareProp("evolvesFromSpecies", { type: "PokemonSpecies", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 2766, end: 2813 } }) }
+  static { this.declareProp("evolvesFromSpecies", { type: "PokemonSpecies", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 2767, end: 2814 } }) }
   get evolvesFromSpecies(): PokemonSpecies { return core.linked(this, "evolvesFromSpecies", PokemonSpecies) as PokemonSpecies }
   set evolvesFromSpecies(value: PokemonSpecies) { this.setProp("evolvesFromSpecies", value) }
 
   // - its "evolution chain" is an evolution chain
-  static { this.declareProp("evolutionChain", { type: "EvolutionChain", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 2815, end: 2858 } }) }
+  static { this.declareProp("evolutionChain", { type: "EvolutionChain", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 2816, end: 2859 } }) }
   get evolutionChain(): EvolutionChain { return core.linked(this, "evolutionChain", EvolutionChain) as EvolutionChain }
   set evolutionChain(value: EvolutionChain) { this.setProp("evolutionChain", value) }
 
   // - its "habitat" is a poke api name
-  @prop({ type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 2860, end: 2892 } })
+  @prop({ type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 2861, end: 2893 } })
   accessor habitat!: PokeApiName
 
   // - its "generation" is a generation
-  static { this.declareProp("generation", { type: "Generation", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 2894, end: 2926 } }) }
+  static { this.declareProp("generation", { type: "Generation", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 2895, end: 2927 } }) }
   get generation(): Generation { return core.linked(this, "generation", Generation) as Generation }
   set generation(value: Generation) { this.setProp("generation", value) }
 
   // - its "names" is a list of names
-  @prop({ itemType: "Name", init: () => new List<Name>({ instanceType: "Name" }), declaredAt: { path: "/PokeSpell.api.spell", start: 2928, end: 2958 } })
+  @prop({ itemType: "Name", init: () => new List<Name>({ instanceType: "Name" }), declaredAt: { path: "/PokeSpell.api.spell", start: 2929, end: 2959 } })
   accessor names!: List<Name>
 
   // - its "pal park encounters" is a list of pal park encounters
-  @prop({ itemType: "PalParkEncounter", init: () => new List<PalParkEncounter>({ instanceType: "PalParkEncounter" }), declaredAt: { path: "/PokeSpell.api.spell", start: 2960, end: 3018 } })
+  @prop({ itemType: "PalParkEncounter", init: () => new List<PalParkEncounter>({ instanceType: "PalParkEncounter" }), declaredAt: { path: "/PokeSpell.api.spell", start: 2961, end: 3019 } })
   accessor palParkEncounters!: List<PalParkEncounter>
 
   // - its "form descriptions" is a list of text
-  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3020, end: 3061 } })
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3021, end: 3062 } })
   accessor formDescriptions!: List<string>
 
   // - its "flavor text entries" is a list of flavor text entries
-  @prop({ itemType: "FlavorTextEntry", init: () => new List<FlavorTextEntry>({ instanceType: "FlavorTextEntry" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3063, end: 3121 } })
+  @prop({ itemType: "FlavorTextEntry", init: () => new List<FlavorTextEntry>({ instanceType: "FlavorTextEntry" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3064, end: 3122 } })
   accessor flavorTextEntries!: List<FlavorTextEntry>
 
   // - its "genera" is a list of genera
-  @prop({ itemType: "Genus", init: () => new List<Genus>({ instanceType: "Genus" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3123, end: 3155 } })
+  @prop({ itemType: "Genus", init: () => new List<Genus>({ instanceType: "Genus" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3124, end: 3156 } })
   accessor genera!: List<Genus>
 
   // - its "varieties" is a list of varieties
-  @prop({ itemType: "Variety", init: () => new List<Variety>({ instanceType: "Variety" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3157, end: 3195 } })
+  @prop({ itemType: "Variety", init: () => new List<Variety>({ instanceType: "Variety" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3158, end: 3196 } })
   accessor varieties!: List<Variety>
 
   /** The Pokémon it is, as the games show it first */
-  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spell", start: 7417, end: 7540 }, readsFrom: ["poke_api", "my_favourites"] }) }
+  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spell", start: 7422, end: 7545 }, readsFrom: ["poke_api", "my_favourites"] }) }
   get pokemon() { return core.waitedValue(this, "pokemon", async () => {
     return await core.answerOf(core.getItemAt(this.varieties, 0), "pokemon")
   }, () => [this.varieties]) }
@@ -390,65 +391,65 @@ export class PokemonSpecies extends Thing {
     times: ["created", "modified"], select: ["number", "name", "evolutionChain", "varieties"] }
 
   // - it lives in poke api
-  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 2059, end: 2079 } })
+  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 2060, end: 2080 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in poke api
-  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 2059, end: 2079 } })
+  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 2060, end: 2080 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 export class Type extends Thing {
   // - its "number" is a number, stored as "id"
-  @prop({ type: "number", storedAs: "id", declaredAt: { path: "/PokeSpell.api.spell", start: 3240, end: 3280 } })
+  @prop({ type: "number", storedAs: "id", declaredAt: { path: "/PokeSpell.api.spell", start: 3241, end: 3281 } })
   accessor number!: number
 
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/PokeSpell.api.spell", start: 3282, end: 3300 } })
+  @prop({ type: "text", declaredAt: { path: "/PokeSpell.api.spell", start: 3283, end: 3301 } })
   accessor name!: string
 
   // - its "damage relations" is a damage relation
-  @prop({ type: "DamageRelation", declaredAt: { path: "/PokeSpell.api.spell", start: 3302, end: 3345 } })
+  @prop({ type: "DamageRelation", declaredAt: { path: "/PokeSpell.api.spell", start: 3303, end: 3346 } })
   accessor damageRelations!: DamageRelation
 
   // - its "past damage relations" is a list of text
-  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3347, end: 3392 } })
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3348, end: 3393 } })
   accessor pastDamageRelations!: List<string>
 
   // - its "game indices" is a list of game indices
-  @prop({ itemType: "GameIndex", init: () => new List<GameIndex>({ instanceType: "GameIndex" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3394, end: 3438 } })
+  @prop({ itemType: "GameIndex", init: () => new List<GameIndex>({ instanceType: "GameIndex" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3395, end: 3439 } })
   accessor gameIndices!: List<GameIndex>
 
   // - its "generation" is a generation
-  static { this.declareProp("generation", { type: "Generation", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 3440, end: 3472 } }) }
+  static { this.declareProp("generation", { type: "Generation", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 3441, end: 3473 } }) }
   get generation(): Generation { return core.linked(this, "generation", Generation) as Generation }
   set generation(value: Generation) { this.setProp("generation", value) }
 
   // - its "move damage class" is a poke api name
-  @prop({ type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 3474, end: 3516 } })
+  @prop({ type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 3475, end: 3517 } })
   accessor moveDamageClass!: PokeApiName
 
   // - its "names" is a list of names
-  @prop({ itemType: "Name", init: () => new List<Name>({ instanceType: "Name" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3518, end: 3548 } })
+  @prop({ itemType: "Name", init: () => new List<Name>({ instanceType: "Name" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3519, end: 3549 } })
   accessor names!: List<Name>
 
   // - its "pokemon" is a list of type pokemon
-  @prop({ itemType: "TypePokemon", init: () => new List<TypePokemon>({ instanceType: "TypePokemon" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3550, end: 3589 } })
+  @prop({ itemType: "TypePokemon", init: () => new List<TypePokemon>({ instanceType: "TypePokemon" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3551, end: 3590 } })
   accessor pokemon!: List<TypePokemon>
 
   // - its "moves" is a list of moves
-  static { this.declareProp("moves", { itemType: "Move", init: () => new List<Move>({ instanceType: "Move" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3591, end: 3621 } }) }
+  static { this.declareProp("moves", { itemType: "Move", init: () => new List<Move>({ instanceType: "Move" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3592, end: 3622 } }) }
   get moves(): List<Move> { return core.linked(this, "moves", Move) as List<Move> }
   set moves(value: List<Move>) { this.setProp("moves", value) }
 
   /** Two kinds no Pokémon is:  only in the games' code */
-  static { this.declareProp("isReal", { declaredAt: { path: "/Pokemon.spell", start: 5119, end: 5280 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("isReal", { declaredAt: { path: "/Pokemon.spell", start: 5124, end: 5285 }, readsFrom: ["poke_api"] }) }
   get isReal() {
     return this.name !== "unknown" && this.name !== "shadow" && this.name !== "stellar"
   }
 
   /** Each kind's colour, as the games paint it */
-  static { this.declareProp("colour", { declaredAt: { path: "/Pokemon.spell", start: 5283, end: 5976 }, readsFrom: ["poke_api"] }) }
+  static { this.declareProp("colour", { declaredAt: { path: "/Pokemon.spell", start: 5288, end: 5981 }, readsFrom: ["poke_api"] }) }
   get colour() {
     if (this.name === "fire") return "red"
     if (this.name === "water" || this.name === "ice") return "blue"
@@ -485,51 +486,51 @@ export class Type extends Thing {
     times: ["created", "modified"], select: ["number", "name", "pokemon"] }
 
   // - it lives in poke api
-  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 3218, end: 3238 } })
+  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 3219, end: 3239 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in poke api
-  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 3218, end: 3238 } })
+  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 3219, end: 3239 } })
   accessor modified!: any /* spell: type unknown */
 }
 core.describeAction(Type, "pick", { title: "Pick It", undoneAs: "Pick It" })
 
 export class Ability extends Thing {
   // - its "number" is a number, stored as "id"
-  @prop({ type: "number", storedAs: "id", declaredAt: { path: "/PokeSpell.api.spell", start: 3670, end: 3710 } })
+  @prop({ type: "number", storedAs: "id", declaredAt: { path: "/PokeSpell.api.spell", start: 3671, end: 3711 } })
   accessor number!: number
 
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/PokeSpell.api.spell", start: 3712, end: 3730 } })
+  @prop({ type: "text", declaredAt: { path: "/PokeSpell.api.spell", start: 3713, end: 3731 } })
   accessor name!: string
 
   // - its "main series" is yes or no, stored as "is_main_series"
-  @prop({ type: "choice", storedAs: "is_main_series", declaredAt: { path: "/PokeSpell.api.spell", start: 3732, end: 3790 } })
+  @prop({ type: "choice", storedAs: "is_main_series", declaredAt: { path: "/PokeSpell.api.spell", start: 3733, end: 3791 } })
   accessor mainSeries!: boolean
 
   // - its "generation" is a generation
-  static { this.declareProp("generation", { type: "Generation", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 3792, end: 3824 } }) }
+  static { this.declareProp("generation", { type: "Generation", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 3793, end: 3825 } }) }
   get generation(): Generation { return core.linked(this, "generation", Generation) as Generation }
   set generation(value: Generation) { this.setProp("generation", value) }
 
   // - its "names" is a list of names
-  @prop({ itemType: "Name", init: () => new List<Name>({ instanceType: "Name" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3826, end: 3856 } })
+  @prop({ itemType: "Name", init: () => new List<Name>({ instanceType: "Name" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3827, end: 3857 } })
   accessor names!: List<Name>
 
   // - its "effect entries" is a list of effect entries
-  @prop({ itemType: "EffectEntry", init: () => new List<EffectEntry>({ instanceType: "EffectEntry" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3858, end: 3906 } })
+  @prop({ itemType: "EffectEntry", init: () => new List<EffectEntry>({ instanceType: "EffectEntry" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3859, end: 3907 } })
   accessor effectEntries!: List<EffectEntry>
 
   // - its "effect changes" is a list of effect changes
-  @prop({ itemType: "EffectChange", init: () => new List<EffectChange>({ instanceType: "EffectChange" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3908, end: 3956 } })
+  @prop({ itemType: "EffectChange", init: () => new List<EffectChange>({ instanceType: "EffectChange" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3909, end: 3957 } })
   accessor effectChanges!: List<EffectChange>
 
   // - its "flavor text entries" is a list of flavor text entries
-  @prop({ itemType: "FlavorTextEntry", init: () => new List<FlavorTextEntry>({ instanceType: "FlavorTextEntry" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3958, end: 4016 } })
+  @prop({ itemType: "FlavorTextEntry", init: () => new List<FlavorTextEntry>({ instanceType: "FlavorTextEntry" }), declaredAt: { path: "/PokeSpell.api.spell", start: 3959, end: 4017 } })
   accessor flavorTextEntries!: List<FlavorTextEntry>
 
   // - its "pokemon" is a list of ability pokemon
-  @prop({ itemType: "AbilityPokemon", init: () => new List<AbilityPokemon>({ instanceType: "AbilityPokemon" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4018, end: 4060 } })
+  @prop({ itemType: "AbilityPokemon", init: () => new List<AbilityPokemon>({ instanceType: "AbilityPokemon" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4019, end: 4061 } })
   accessor pokemon!: List<AbilityPokemon>
 
   static savedIn = {
@@ -538,107 +539,107 @@ export class Ability extends Thing {
     times: ["created", "modified"], select: ["number", "name", "pokemon"] }
 
   // - it lives in poke api
-  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 3648, end: 3668 } })
+  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 3649, end: 3669 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in poke api
-  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 3648, end: 3668 } })
+  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 3649, end: 3669 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 export class Move extends Thing {
   // - its "number" is a number, stored as "id"
-  @prop({ type: "number", storedAs: "id", declaredAt: { path: "/PokeSpell.api.spell", start: 4105, end: 4145 } })
+  @prop({ type: "number", storedAs: "id", declaredAt: { path: "/PokeSpell.api.spell", start: 4106, end: 4146 } })
   accessor number!: number
 
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/PokeSpell.api.spell", start: 4147, end: 4165 } })
+  @prop({ type: "text", declaredAt: { path: "/PokeSpell.api.spell", start: 4148, end: 4166 } })
   accessor name!: string
 
   // - its "accuracy" is a number
-  @prop({ type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 4167, end: 4193 } })
+  @prop({ type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 4168, end: 4194 } })
   accessor accuracy!: number
 
   // - its "pp" is a number
-  @prop({ type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 4195, end: 4215 } })
+  @prop({ type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 4196, end: 4216 } })
   accessor pp!: number
 
   // - its "priority" is a number
-  @prop({ type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 4217, end: 4243 } })
+  @prop({ type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 4218, end: 4244 } })
   accessor priority!: number
 
   // - its "power" is a number
-  @prop({ type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 4245, end: 4268 } })
+  @prop({ type: "number", declaredAt: { path: "/PokeSpell.api.spell", start: 4246, end: 4269 } })
   accessor power!: number
 
   // - its "contest combos" is a contest combo
-  @prop({ type: "ContestCombo", declaredAt: { path: "/PokeSpell.api.spell", start: 4270, end: 4309 } })
+  @prop({ type: "ContestCombo", declaredAt: { path: "/PokeSpell.api.spell", start: 4271, end: 4310 } })
   accessor contestCombos!: ContestCombo
 
   // - its "contest type" is a poke api name
-  @prop({ type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 4311, end: 4348 } })
+  @prop({ type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 4312, end: 4349 } })
   accessor contestType!: PokeApiName
 
   // - its "contest effect" is a poke api name
-  @prop({ type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 4350, end: 4389 } })
+  @prop({ type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 4351, end: 4390 } })
   accessor contestEffect!: PokeApiName
 
   // - its "damage class" is a poke api name
-  @prop({ type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 4391, end: 4428 } })
+  @prop({ type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 4392, end: 4429 } })
   accessor damageClass!: PokeApiName
 
   // - its "effect entries" is a list of effect entries
-  @prop({ itemType: "EffectEntry", init: () => new List<EffectEntry>({ instanceType: "EffectEntry" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4430, end: 4478 } })
+  @prop({ itemType: "EffectEntry", init: () => new List<EffectEntry>({ instanceType: "EffectEntry" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4431, end: 4479 } })
   accessor effectEntries!: List<EffectEntry>
 
   // - its "effect changes" is a list of text
-  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4480, end: 4518 } })
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4481, end: 4519 } })
   accessor effectChanges!: List<string>
 
   // - its "generation" is a generation
-  static { this.declareProp("generation", { type: "Generation", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 4520, end: 4552 } }) }
+  static { this.declareProp("generation", { type: "Generation", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 4521, end: 4553 } }) }
   get generation(): Generation { return core.linked(this, "generation", Generation) as Generation }
   set generation(value: Generation) { this.setProp("generation", value) }
 
   // - its "meta" is a meta
-  @prop({ type: "Meta", declaredAt: { path: "/PokeSpell.api.spell", start: 4554, end: 4574 } })
+  @prop({ type: "Meta", declaredAt: { path: "/PokeSpell.api.spell", start: 4555, end: 4575 } })
   accessor meta!: Meta
 
   // - its "names" is a list of names
-  @prop({ itemType: "Name", init: () => new List<Name>({ instanceType: "Name" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4576, end: 4606 } })
+  @prop({ itemType: "Name", init: () => new List<Name>({ instanceType: "Name" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4577, end: 4607 } })
   accessor names!: List<Name>
 
   // - its "past values" is a list of past values
-  @prop({ itemType: "PastValue", init: () => new List<PastValue>({ instanceType: "PastValue" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4608, end: 4650 } })
+  @prop({ itemType: "PastValue", init: () => new List<PastValue>({ instanceType: "PastValue" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4609, end: 4651 } })
   accessor pastValues!: List<PastValue>
 
   // - its "stat changes" is a list of text
-  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4652, end: 4688 } })
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4653, end: 4689 } })
   accessor statChanges!: List<string>
 
   // - its "super contest effect" is a poke api name
-  @prop({ type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 4690, end: 4735 } })
+  @prop({ type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 4691, end: 4736 } })
   accessor superContestEffect!: PokeApiName
 
   // - its "target" is a poke api name
-  @prop({ type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 4737, end: 4768 } })
+  @prop({ type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 4738, end: 4769 } })
   accessor target!: PokeApiName
 
   // - its "kind" is a type, stored as "type"
-  static { this.declareProp("kind", { type: "Type", storedAs: "type", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 4770, end: 4808 } }) }
+  static { this.declareProp("kind", { type: "Type", storedAs: "type", link: true, declaredAt: { path: "/PokeSpell.api.spell", start: 4771, end: 4809 } }) }
   get kind(): Type { return core.linked(this, "kind", Type) as Type }
   set kind(value: Type) { this.setProp("kind", value) }
 
   // - its "machines" is a list of text
-  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4810, end: 4842 } })
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4811, end: 4843 } })
   accessor machines!: List<string>
 
   // - its "flavor text entries" is a list of flavor text entries
-  @prop({ itemType: "FlavorTextEntry", init: () => new List<FlavorTextEntry>({ instanceType: "FlavorTextEntry" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4844, end: 4902 } })
+  @prop({ itemType: "FlavorTextEntry", init: () => new List<FlavorTextEntry>({ instanceType: "FlavorTextEntry" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4845, end: 4903 } })
   accessor flavorTextEntries!: List<FlavorTextEntry>
 
   // - its "learned by pokemon" is a list of pokemon
-  static { this.declareProp("learnedByPokemon", { itemType: "Pokemon", init: () => new List<Pokemon>({ instanceType: "Pokemon" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4904, end: 4949 } }) }
+  static { this.declareProp("learnedByPokemon", { itemType: "Pokemon", init: () => new List<Pokemon>({ instanceType: "Pokemon" }), declaredAt: { path: "/PokeSpell.api.spell", start: 4905, end: 4950 } }) }
   get learnedByPokemon(): List<Pokemon> { return core.linked(this, "learnedByPokemon", Pokemon) as List<Pokemon> }
   set learnedByPokemon(value: List<Pokemon>) { this.setProp("learnedByPokemon", value) }
 
@@ -648,21 +649,21 @@ export class Move extends Thing {
     times: ["created", "modified"], select: ["number", "name", "kind"] }
 
   // - it lives in poke api
-  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 4083, end: 4103 } })
+  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 4084, end: 4104 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in poke api
-  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 4083, end: 4103 } })
+  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 4084, end: 4104 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 export class EvolutionChain extends Thing {
   // - its "number" is a number, stored as "id"
-  @prop({ type: "number", storedAs: "id", declaredAt: { path: "/PokeSpell.api.spell", start: 5006, end: 5046 } })
+  @prop({ type: "number", storedAs: "id", declaredAt: { path: "/PokeSpell.api.spell", start: 5007, end: 5047 } })
   accessor number!: number
 
   // - its "chain" is a chain
-  @prop({ type: "Chain", declaredAt: { path: "/PokeSpell.api.spell", start: 5048, end: 5070 } })
+  @prop({ type: "Chain", declaredAt: { path: "/PokeSpell.api.spell", start: 5049, end: 5071 } })
   accessor chain!: Chain
 
   static savedIn = {
@@ -671,52 +672,52 @@ export class EvolutionChain extends Thing {
     times: ["created", "modified"], select: ["number", "chain"] }
 
   // - it lives in poke api
-  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 4984, end: 5004 } })
+  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 4985, end: 5005 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in poke api
-  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 4984, end: 5004 } })
+  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 4985, end: 5005 } })
   accessor modified!: any /* spell: type unknown */
 }
 
 export class Generation extends Thing {
   // - its "number" is a number, stored as "id"
-  @prop({ type: "number", storedAs: "id", declaredAt: { path: "/PokeSpell.api.spell", start: 5121, end: 5161 } })
+  @prop({ type: "number", storedAs: "id", declaredAt: { path: "/PokeSpell.api.spell", start: 5122, end: 5162 } })
   accessor number!: number
 
   // - its "name" is text
-  @prop({ type: "text", declaredAt: { path: "/PokeSpell.api.spell", start: 5163, end: 5181 } })
+  @prop({ type: "text", declaredAt: { path: "/PokeSpell.api.spell", start: 5164, end: 5182 } })
   accessor name!: string
 
   // - its "abilities" is a list of text
-  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5183, end: 5216 } })
+  @prop({ itemType: "text", init: () => new List<string>({ instanceType: "text" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5184, end: 5217 } })
   accessor abilities!: List<string>
 
   // - its "main region" is a poke api name
-  @prop({ type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 5218, end: 5254 } })
+  @prop({ type: "PokeApiName", declaredAt: { path: "/PokeSpell.api.spell", start: 5219, end: 5255 } })
   accessor mainRegion!: PokeApiName
 
   // - its "moves" is a list of moves
-  static { this.declareProp("moves", { itemType: "Move", init: () => new List<Move>({ instanceType: "Move" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5256, end: 5286 } }) }
+  static { this.declareProp("moves", { itemType: "Move", init: () => new List<Move>({ instanceType: "Move" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5257, end: 5287 } }) }
   get moves(): List<Move> { return core.linked(this, "moves", Move) as List<Move> }
   set moves(value: List<Move>) { this.setProp("moves", value) }
 
   // - its "names" is a list of names
-  @prop({ itemType: "Name", init: () => new List<Name>({ instanceType: "Name" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5288, end: 5318 } })
+  @prop({ itemType: "Name", init: () => new List<Name>({ instanceType: "Name" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5289, end: 5319 } })
   accessor names!: List<Name>
 
   // - its "pokemon species" is a list of pokemon species
-  static { this.declareProp("pokemonSpecies", { itemType: "PokemonSpecies", init: () => new List<PokemonSpecies>({ instanceType: "PokemonSpecies" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5320, end: 5370 } }) }
+  static { this.declareProp("pokemonSpecies", { itemType: "PokemonSpecies", init: () => new List<PokemonSpecies>({ instanceType: "PokemonSpecies" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5321, end: 5371 } }) }
   get pokemonSpecies(): List<PokemonSpecies> { return core.linked(this, "pokemonSpecies", PokemonSpecies) as List<PokemonSpecies> }
   set pokemonSpecies(value: List<PokemonSpecies>) { this.setProp("pokemonSpecies", value) }
 
   // - its "types" is a list of types
-  static { this.declareProp("types", { itemType: "Type", init: () => new List<Type>({ instanceType: "Type" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5372, end: 5402 } }) }
+  static { this.declareProp("types", { itemType: "Type", init: () => new List<Type>({ instanceType: "Type" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5373, end: 5403 } }) }
   get types(): List<Type> { return core.linked(this, "types", Type) as List<Type> }
   set types(value: List<Type>) { this.setProp("types", value) }
 
   // - its "version groups" is a list of poke api names
-  @prop({ itemType: "PokeApiName", init: () => new List<PokeApiName>({ instanceType: "PokeApiName" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5404, end: 5452 } })
+  @prop({ itemType: "PokeApiName", init: () => new List<PokeApiName>({ instanceType: "PokeApiName" }), declaredAt: { path: "/PokeSpell.api.spell", start: 5405, end: 5453 } })
   accessor versionGroups!: List<PokeApiName>
 
   static savedIn = {
@@ -725,11 +726,11 @@ export class Generation extends Thing {
     times: ["created", "modified"], select: ["number", "name", "types"] }
 
   // - it lives in poke api
-  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 5099, end: 5119 } })
+  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 5100, end: 5120 } })
   accessor created!: any /* spell: type unknown */
 
   // - it lives in poke api
-  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 5099, end: 5119 } })
+  @prop({ type: "date", declaredAt: { path: "/PokeSpell.api.spell", start: 5100, end: 5120 } })
   accessor modified!: any /* spell: type unknown */
 }
 
@@ -815,21 +816,25 @@ export class Sprite extends Thing {
 
   /** an address */
   // - its "back shiny" is text
+  //   -- an address
   @prop({ type: "text" })
   accessor backShiny!: string
 
   /** an address */
   // - its "front shiny" is text
+  //   -- an address
   @prop({ type: "text" })
   accessor frontShiny!: string
 
   /** an address */
   // - its "back default" is text
+  //   -- an address
   @prop({ type: "text" })
   accessor backDefault!: string
 
   /** an address */
   // - its "front default" is text
+  //   -- an address
   @prop({ type: "text" })
   accessor frontDefault!: string
 }
@@ -855,11 +860,13 @@ export class Other extends Thing {
 export class Home extends Thing {
   /** an address */
   // - its "front shiny" is text
+  //   -- an address
   @prop({ type: "text" })
   accessor frontShiny!: string
 
   /** an address */
   // - its "front default" is text
+  //   -- an address
   @prop({ type: "text" })
   accessor frontDefault!: string
 }
@@ -867,21 +874,25 @@ export class Home extends Thing {
 export class Showdown extends Thing {
   /** an address */
   // - its "back shiny" is text
+  //   -- an address
   @prop({ type: "text" })
   accessor backShiny!: string
 
   /** an address */
   // - its "front shiny" is text
+  //   -- an address
   @prop({ type: "text" })
   accessor frontShiny!: string
 
   /** an address */
   // - its "back default" is text
+  //   -- an address
   @prop({ type: "text" })
   accessor backDefault!: string
 
   /** an address */
   // - its "front default" is text
+  //   -- an address
   @prop({ type: "text" })
   accessor frontDefault!: string
 }
@@ -889,6 +900,7 @@ export class Showdown extends Thing {
 export class DreamWorld extends Thing {
   /** an address */
   // - its "front default" is text
+  //   -- an address
   @prop({ type: "text" })
   accessor frontDefault!: string
 }
@@ -896,11 +908,13 @@ export class DreamWorld extends Thing {
 export class OfficialArtwork extends Thing {
   /** an address */
   // - its "front shiny" is text
+  //   -- an address
   @prop({ type: "text" })
   accessor frontShiny!: string
 
   /** an address */
   // - its "front default" is text
+  //   -- an address
   @prop({ type: "text" })
   accessor frontDefault!: string
 }
@@ -908,11 +922,13 @@ export class OfficialArtwork extends Thing {
 export class Cry extends Thing {
   /** an address */
   // - its "latest" is text
+  //   -- an address
   @prop({ type: "text" })
   accessor latest!: string
 
   /** an address */
   // - its "legacy" is text
+  //   -- an address
   @prop({ type: "text" })
   accessor legacy!: string
 }
@@ -1247,6 +1263,7 @@ export class PokeApiName extends Thing {
 
   /** never read:  its collection wasn't asked for */
   // - its "address" is text, stored as "url"
+  //   -- never read: its collection wasn't asked for
   @prop({ type: "text", storedAs: "url" })
   accessor address!: string
 }
@@ -1287,10 +1304,11 @@ export class Favourite extends Thing {
 
   /** the pokemon's own, at PokéAPI */
   // - its "address" is text
-  @prop({ type: "text", declaredAt: { path: "/Favourites.api.spell", start: 327, end: 348 } })
+  //   -- the pokemon's own, at PokéAPI
+  @prop({ type: "text", declaredAt: { path: "/Favourites.api.spell", start: 327, end: 383 } })
   accessor address!: string
 
-  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spell", start: 7670, end: 7722 }, readsFrom: ["poke_api", "my_favourites"] }) }
+  static { this.declareProp("pokemon", { declaredAt: { path: "/Pokemon.spell", start: 7675, end: 7727 }, readsFrom: ["poke_api", "my_favourites"] }) }
   get pokemon() { return core.waitedValue(this, "pokemon", async () => {
     return await core.savedThingWithId(Pokemon, this.address)
   }, () => [this.address]) }

@@ -113,6 +113,8 @@ export class PublishedPackage {
    * A folder's own commands, each where the folder's `package.json` has it (`epic/bin/epic`), importing its built
    * module:  so `spell` alone is enough to run `epic`, as a link on the `PATH` or from `spell epic` (epic `epic-engine`
    * P66).  A command the checkout has no `bin` entry for isn't written.
+   * - It runs the checkout's own instead when `SPELL_KIT` or the project's `.spell/kit.json5` names one
+   *   (`checkoutToRun()`, as `writeBins()`;  epic `repo-split` T71:  `epic` from npm's `spell` ignored the file).
    */
   private writeFolderBins(folder: PublishedRepo, folderStage: string): void {
     const own = (folder.manifest.bin ?? {}) as Record<string, string>
@@ -121,10 +123,15 @@ export class PublishedPackage {
       const file = join(folderStage, own[name])
       const built = join(this.stageDir, DIST, basename(folder.root), `${module}.js`)
       mkdirSync(dirname(file), { recursive: true })
+      const fromBin = (path: string) => relative(dirname(file), path).split(sep).join("/")
+      const kitCheckout = join(this.stageDir, DIST, "cli", "kitCheckout.js")
+      const ownPath = posix.join(basename(folder.root), posix.normalize(own[name]))
       writeFileSync(
         file,
-        `#!/usr/bin/env node\n// \`${name}\`:  runs the built \`${module}\` (written by \`spell publish\`)\n` +
-          `await import("${relative(dirname(file), built).split(sep).join("/")}")\n`
+        `#!/usr/bin/env node\n// \`${name}\`:  runs the built \`${module}\` (written by \`spell publish\`);\n` +
+          "// a checkout of spell's instead, when SPELL_KIT or the project's .spell/kit.json5 names one\n" +
+          `import { checkoutToRun } from "${fromBin(kitCheckout)}"\n` +
+          `await import(checkoutToRun(${JSON.stringify(ownPath)}, import.meta.url) ?? "${fromBin(built)}")\n`
       )
       chmodSync(file, 0o755)
     }

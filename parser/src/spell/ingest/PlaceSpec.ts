@@ -141,7 +141,7 @@ export class PlaceSpec {
           ...(search.example !== undefined && { searchedFor: search.example })
         }),
         idAt: "id",
-        fields: this.fieldsOf(rows.item, rows.schemaAt ?? path),
+        fields: this.withAskedFields(this.fieldsOf(rows.item, rows.schemaAt ?? path), item.get, askedBy, path),
         operations: this.operationsOf(path, at, paths)
       }
       collections.push(collection)
@@ -285,6 +285,30 @@ export class PlaceSpec {
       )
     }
     return askedBy
+  }
+
+  /**
+   * `fields`, with one for each question a list is asked for by that its rows leave out (epic `from-console` P15):
+   * layer stacks asked for by `?system=`, with no `system` in a stack, get `its "system" is text`.
+   * - Typed by the question's own schema.
+   * - So `layer stacks are asked for by their system` names a field, and a read's `where its system is "x"` holds
+   *   for what it reads:  the place writes the asked value onto each row (`RestCollection.askedBy`).
+   * - Not for a list no schema typed:  a read fills its fields.
+   * - SIDE EFFECT:  changes `fields`.
+   */
+  private withAskedFields(
+    fields: Record<string, FieldDescription>,
+    operation: OpenApiOperation,
+    askedBy: Record<string, string> | undefined,
+    path: string
+  ): Record<string, FieldDescription> {
+    if (!askedBy || !Object.keys(fields).length) return fields
+    for (const param of this.queryParamsOf(operation)) {
+      const name = param.name!
+      if (!(name in askedBy) || name in fields) continue
+      fields[name] = this.fieldOf(name, param.schema ?? {}, `${path}?${name}`, false, 0, new Set())
+    }
+    return withSpellsOwnWordsApart(fields, 0)
   }
 
   /** What a parameter's description says to ask with:  its `example`, its first `examples`, or its schema's. */

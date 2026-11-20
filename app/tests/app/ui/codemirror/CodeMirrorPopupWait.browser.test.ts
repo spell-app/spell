@@ -15,7 +15,7 @@ import { CodeMirrorSetup } from "spell/app/app/ui/codemirror/CodeMirrorSetup"
  * I22, Owen:  "the auto-help pops up waayy too fast"):  the suggestion list, signature help.
  * - Keys typed 80 msec apart, as a quick typist's:  nothing shows between them.
  * - What's asked for by name (Ctrl+Space) shows at once.
- * - Settings… › "Popup delay" changes the wait, in editors already open too (T19).
+ * - Settings… › "Delay before showing help" changes the wait, in editors already open too (T19).
  * - A real `CodeMirrorLanguage`, its language service and file stand-ins:  no project, no parse.
  */
 describe("popups wait for a pause in the typing (I22)", () => {
@@ -104,7 +104,7 @@ describe("popups wait for a pause in the typing (I22)", () => {
     expect(await showsAfter(SUGGESTIONS, asked)).toBeLessThan(WAIT / 2)
   })
 
-  test('Popup delay "Short":  the page\'s hover delay 400 msec, and the list waits that, in an editor already open', async () => {
+  test('Delay before showing help "Short":  the page\'s hover delay 400 msec, and the list waits that, in an editor already open', async () => {
     const code = await editorOf("\t")
     showCodeChoices({ ...codeChoices.now, popupDelay: "short" })
     try {
@@ -122,7 +122,7 @@ describe("popups wait for a pause in the typing (I22)", () => {
     expect(hoverDelay()).toBe(0.8)
   })
 
-  test('Popup delay "Long":  1.5 seconds;  nothing shows before', async () => {
+  test('Delay before showing help "Long":  1.5 seconds;  nothing shows before', async () => {
     const code = await editorOf("\t")
     showCodeChoices({ ...codeChoices.now, popupDelay: "long" })
     try {

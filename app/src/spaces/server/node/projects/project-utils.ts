@@ -475,6 +475,14 @@ export const getIndex = async (
     if (!fileNames.includes(name) && isManifestFile(basename(name), location.projectName)) fileNames.push(name)
   }
 
+  // a code file the project file names, `clipboard.ts`, which its Spell calls (`call native`, epic `from-console` P10):
+  // only when named, so a `.lib.ts`, `.app.py` or snapshot beside a project never becomes one of its files
+  for (const { path } of (await loadProjectFile(projectId)).imports) {
+    if (SP.SpellLocation.isAddress(path) || !SP.NativeCode.languageOf(path)) continue
+    const name = path.replace(/^\/+/, "")
+    if (!fileNames.includes(name) && inside.includes(name)) fileNames.push(name)
+  }
+
   // HACKY: make sure we have at least one valid file by creating a default file
   if (!fileNames.length) {
     await createFile(projectId, DEFAULT_FILE.filePath, DEFAULT_FILE.contents)
@@ -543,7 +551,7 @@ export const getIndex = async (
   )
 
   // return manifest and imports
-  const { title, version, exports, targets, listsStartAt, development } = importsFile
+  const { title, version, exports, targets, listsStartAt, development, places } = importsFile
   const buildFolder = buildFolderInBuild(projectId)
   // its names dictionaries, beside its project file:  so a compile asks for no other (epic `editor` I68)
   const namesLanguages = [...SP.Language.all.keys()].filter((lang) =>
@@ -559,7 +567,8 @@ export const getIndex = async (
     listsStartAt,
     development,
     buildFolder,
-    ...(namesLanguages.length > 0 && { namesLanguages })
+    ...(namesLanguages.length > 0 && { namesLanguages }),
+    ...(places && { places })
   }
 }
 

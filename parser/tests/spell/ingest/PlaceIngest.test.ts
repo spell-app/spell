@@ -133,7 +133,8 @@ a "person" is a thing
 	its "mass" is a number
 	its "hair color" is text
 	its "homeworld" is a planet
-	its "films" is a list of text  // each an address
+	its "films" is a list of text
+		-- each an address
 	its "created" is a date
 
 a "planet" is a thing
@@ -366,7 +367,7 @@ describe("adding a source", () => {
     expect(spell).toContain(`authors are found at "/authors/{name}.json"`)
     expect(spell).toContain(`its "authors" is a list of authors, stored as "author_key"`)
     expect(spell).toContain(`a book's "cover i" is a picture at "${COVERS}"`)
-    expect(spell).toContain(`its "cover i" is text  // a picture's address`)
+    expect(spell).toContain(`its "cover i" is text\n\t\t-- a picture's address`)
     const { collections, about } = descriptions.get("/L.json5")!
     expect(collections.books).toMatchObject({
       searchedOnly: true,
@@ -464,7 +465,7 @@ describe("adding a source", () => {
     expect(spell).toContain(`its "temperature" is a temperature in °C, stored as "temperature_2m"`)
     expect(spell).toContain(`its "precipitation" is a length in mm`)
     // a unit Spell has no dimension for is said beside it
-    expect(spell).toContain(`its "relative humidity" is a number, stored as "relative_humidity_2m"  // in %`)
+    expect(spell).toContain(`its "relative humidity" is a number, stored as "relative_humidity_2m"\n\t\t-- in %`)
     expect(spell).not.toContain(`hourly units`)
     const { collections, spellCantSay } = descriptions.get("/W.json5")!
     expect(collections.forecasts).toMatchObject({
@@ -569,7 +570,7 @@ describe("adding a source", () => {
     expect(spell).toContain(`its "types" is a list of pokemon types`)
     expect(spell).toContain(`its "kind" is a type, stored as "type"`)
     expect(spell).toContain(`its "hidden" is yes or no, stored as "is_hidden"`)
-    expect(spell).toContain(`its "location area encounters" is text  // an address`)
+    expect(spell).toContain(`its "location area encounters" is text\n\t\t-- an address`)
     expect(spell).not.toMatch(/generation i/)
     const pokemon = descriptions.get("/P.json5")!.collections.pokemon!
     expect(pokemon).toMatchObject({ idField: "url", listsGive: ["name"] })
@@ -598,10 +599,10 @@ describe("adding a source", () => {
     expect(spell).toContain(`its "color" is a poke api name\n`)
     expect(spell).toContain(`its "forms" is a list of poke api names\n`)
     // a plain address inside a row says so, as one at the top does
-    expect(spell).toContain(`its "chart" is text  // an address`)
+    expect(spell).toContain(`its "chart" is text\n\t\t-- an address`)
     // ONE type for the whole place
     expect(spell.match(/^a "poke api name" is a thing$/gm)).toHaveLength(1)
-    expect(spell).toContain(`\tits "name" is text\n\tits "address" is text, stored as "url"  // never read`)
+    expect(spell).toContain(`\tits "name" is text\n\tits "address" is text, stored as "url"\n\t\t-- never read`)
     // read through it, the pair is held whole:  its name, and its address still there
     const { core } = await import("spell/parser/core")
     const { runSpellFiles } = await import("spell/parser/spell/test/runSpell")
@@ -869,7 +870,7 @@ describe("a key", () => {
     const { ingest, asked, texts, descriptions } = ingestOf(echoing, { keyNamed: () => KEY, claude })
     const { description } = await ingest.add({ address: API, into: "/K.spell", name: "stuff", keySecret: "STUFF_KEY" })
     expect(asked[0]!.headers.get("authorization")).toBe(`Bearer ${KEY}`)
-    expect(texts.get("/K.spell")).toContain(`its optional key is the secret "STUFF_KEY"`)
+    expect(texts.get("/K.spell")).toContain(`it is optionally authenticated with the secret "STUFF_KEY"`)
     const written = [texts.get("/K.spell"), JSON.stringify(descriptions.get("/K.json5")), prompts.join("")].join("\n")
     expect(written).not.toContain(KEY)
     expect(description.about.keySecret).toBe("STUFF_KEY")
@@ -919,7 +920,7 @@ describe("GitHub's way (epic `data` P28)", () => {
   test("a key it answers without is taken when it's set;  a Link header pages;  what Spell can't read inside a row is left out", async () => {
     const { ingest, asked, descriptions } = ingestOf(ROUTES, { keyNamed: () => "k3y" })
     const { spell, description } = await ingest.add(ASK)
-    expect(spell).toContain(`its optional key is the secret "GH_KEY"`)
+    expect(spell).toContain(`it is optionally authenticated with the secret "GH_KEY"`)
     expect(spell).toContain(`its next page is in its "Link" header`)
     expect(spell).toContain(`a "user" is a thing`)
     expect(spell).toContain(`a user's id is its "login"`)
@@ -937,12 +938,12 @@ describe("GitHub's way (epic `data` P28)", () => {
   test("a key that goes elsewhere (T73):  it's sent there, the line says so, and looking again keeps both", async () => {
     const { ingest, asked, texts, descriptions } = ingestOf(ROUTES, { keyNamed: () => "k3y" })
     const { spell } = await ingest.add({ ...ASK, keyGoes: { header: "X-Api-Key" } })
-    expect(spell).toContain(`its key goes in its "X-Api-Key" header`)
+    expect(spell).toContain(`its secret goes in its "X-Api-Key" header`)
     expect(asked[0]!.headers.get("x-api-key")).toBe("k3y")
     expect(asked[0]!.headers.get("authorization")).toBeNull()
     expect(descriptions.get("/G.json5")!.about.keyGoes).toEqual({ header: "X-Api-Key" })
     await ingest.update("/G.spell")
-    expect(texts.get("/G.spell")).toContain(`its key goes in its "X-Api-Key" header`)
+    expect(texts.get("/G.spell")).toContain(`its secret goes in its "X-Api-Key" header`)
   })
 
   test("looking again leaves out what it left out before", async () => {

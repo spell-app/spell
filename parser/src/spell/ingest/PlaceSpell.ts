@@ -35,8 +35,8 @@ const USUAL_ID = "id"
 /** The line saying where a key goes. */
 function keyGoesLine(goes: KeyGoes): string {
   return "header" in goes
-    ? `its key goes in its "${goes.header}" header`
-    : `its key goes in the address as "${goes.inAddress}"`
+    ? `its secret goes in its "${goes.header}" header`
+    : `its secret goes in the address as "${goes.inAddress}"`
 }
 
 /** The most rows a list can say it has and still be read in one request, `it gives up to 2000 at a time`. */
@@ -51,6 +51,11 @@ export type SpellLine = {
   key: string
   /** The line, without its tab. */
   text: string
+  /**
+   * What a person should know of it, written as the first line inside it, `-- an address`:  the field's description
+   * (epic `language` T166, never `// ...` after the line any more).
+   */
+  note?: string
 }
 
 /** A type's lines. */
@@ -116,10 +121,16 @@ export function spellPartsFor(
   const placeLines: SpellLine[] = []
   // a data folder's, a file's, a room's key is the server's run token:  no line of a program says it
   if (withKey && keySecret && tokenFrom !== undefined && KINDS_WITH_KEY_LINES.has(kind)) {
-    placeLines.push({ key: "key", text: `its token comes from "${tokenFrom}", made with the secret "${keySecret}"` })
+    placeLines.push({
+      key: "key",
+      text: `it is authenticated with a token from "${tokenFrom}", made with the secret "${keySecret}"`
+    })
     if (keyGoes) placeLines.push({ key: "key goes", text: keyGoesLine(keyGoes) })
   } else if (withKey && keySecret && KINDS_WITH_KEY_LINES.has(kind)) {
-    placeLines.push({ key: "key", text: `its ${keyIfSet ? "optional " : ""}key is the secret "${keySecret}"` })
+    placeLines.push({
+      key: "key",
+      text: `it is ${keyIfSet ? "optionally " : ""}authenticated with the secret "${keySecret}"`
+    })
     if (keyGoes) placeLines.push({ key: "key goes", text: keyGoesLine(keyGoes) })
   }
   // its real rows stay on this machine:  every later ingest, update and verify keeps to it
@@ -527,7 +538,7 @@ function typesInside(
           typeWordsFor(about, collections, words, own, place)
         )
         const line = `its "${about.words}" ${verbBefore(what)} ${what}${nothingWordsFor(about)}${storedAsFor(name, about)}`
-        return [{ key: `inside:${words}:${about.words}`, text: `${line}${commentFor(about, collections)}` }]
+        return [{ key: `inside:${words}:${about.words}`, text: line, note: noteFor(about, collections) }]
       })
       const header = `${articled(words).replace(words, `"${words}"`)} is a thing`
       types.set(words, { collection, header, lines, isInside: true, insideFields: inside, heldBy: [{ owner, field }] })
@@ -584,7 +595,8 @@ function namedLinkTypes(
         { key: `inside:${words}:name`, text: `its "name" is text` },
         {
           key: `inside:${words}:address`,
-          text: `its "address" is text, stored as "url"  // never read:  its collection wasn't asked for`
+          text: `its "address" is text, stored as "url"`,
+          note: "never read:  its collection wasn't asked for"
         }
       ],
       isInside: true,
@@ -631,7 +643,7 @@ function typeLines(
     if (isLeftOut(field, description, about.leftOut, about.type, about)) continue
     const what = schemaWordsFor(about, typeWordsFor(about, collections, description.type, own, place))
     const line = `its "${about.words}" ${verbBefore(what)} ${what}${nothingWordsFor(about)}${storedAsFor(field, about)}`
-    lines.push({ key: `field:${collection}:${field}`, text: `${line}${commentFor(about, collections)}` })
+    lines.push({ key: `field:${collection}:${field}`, text: line, note: noteFor(about, collections) })
   }
   // each list it keeps under this one, read from there:  `its "comments" is a list of comments`;
   // or one thing:  `its "snapshot" is a snapshot` (epic `from-console` P16)
@@ -785,19 +797,27 @@ function nothingWordsFor({ type, noNumberWords }: FieldDescription): string {
   return words.map((word) => ` or "${word}"`).join("")
 }
 
-/** What a person should know, on the line:  what Spell reads differently from what's there. */
-function commentFor(
+/**
+ * What a person should know of a field, its line's `note`:  what Spell reads differently from what's there.
+ * - `undefined` for nothing to say.
+ */
+function noteFor(
   { type, linksTo, pictureAt, isNamedLink, unit }: FieldDescription,
   collections: Readonly<Record<string, CollectionDescription>>
-): string {
-  if (pictureAt) return "  // a picture's address"
-  if (type === "number" && unit !== undefined && !measureIn(unit)) return `  // in ${unit}`
+): string | undefined {
+  if (pictureAt) return "a picture's address"
+  if (type === "number" && unit !== undefined && !measureIn(unit)) return `in ${unit}`
   const target = linksTo === undefined ? undefined : collections[linksTo]
   // a link to one of its own types, or a name type holding its address:  nothing reads as an address by surprise
-  if ((isNamedLink || (target && !target.leftOut)) && (type === "link" || type === "list of links")) return ""
-  if (type === "link") return "  // an address"
-  if (type === "list of links") return "  // each an address"
-  return ""
+  if ((isNamedLink || (target && !target.leftOut)) && (type === "link" || type === "list of links")) return undefined
+  if (type === "link") return "an address"
+  if (type === "list of links") return "each an address"
+  return undefined
+}
+
+/** `line` as a file's lines under its header, at `indent`:  the line, then its note, one deeper, `-- an address`. */
+function fileLinesOf({ text, note }: SpellLine, indent = "\t"): string[] {
+  return note ? [`${indent}${text}`, `${indent}\t-- ${note}`] : [`${indent}${text}`]
 }
 
 /** The one value of `read` every collection has:  `undefined` when they differ, or any has none. */
@@ -843,11 +863,11 @@ export function spellLinesOf({ header, placeLines, types }: SpellParts): Written
     for (const line of text.split("\n")) written.push({ text: line, ...about })
   }
   add(header, {})
-  for (const { key, text } of placeLines) add(`\t${text}`, { key })
+  for (const line of placeLines) add(fileLinesOf(line).join("\n"), { key: line.key })
   for (const type of types) {
     written.push({ text: "" })
     add(type.header, { type })
-    for (const { key, text } of type.lines) add(`\t${text}`, { key, type })
+    for (const line of type.lines) add(fileLinesOf(line).join("\n"), { key: line.key, type })
   }
   return written
 }
@@ -951,7 +971,7 @@ export function mergedSpell(
       // one blank line before it, whatever the file ended with
       while (lines.at(-1) === "") lines.pop()
       const mark = markOf("new")
-      lines.push("", type.header, ...(mark ? [`\t-- ${mark}`] : []), ...type.lines.map((line) => `\t${line.text}`))
+      lines.push("", type.header, ...(mark ? [`\t-- ${mark}`] : []), ...type.lines.flatMap((line) => fileLinesOf(line)))
       merge.changed.push(
         type.isInside
           ? `New type inside:  "${type.header}".`
@@ -994,11 +1014,14 @@ const OLD_FIELD_NAME_LINE = /^(?:- )?an? .+?'s "?.+?"? is its "[^"]+"$/
 function inTodaysWords(lines: string[], written: readonly string[], after: SpellParts, merge: SpellMerge): void {
   const wrote = new Set(written.map((line) => line.trim().replace(/^- /, "")))
   const today = new Set(allLines(after).map(({ text }) => text))
-  const blocks = new Map<string, Map<string, string>>([[after.header, new Map()]])
+  const blocks = new Map<string, Map<string, SpellLine>>([[after.header, new Map()]])
   for (const type of after.types) {
-    blocks.set(type.header, new Map(type.lines.flatMap(({ text }) => (wordsIn(text) ? [[wordsIn(text)!, text]] : []))))
+    blocks.set(
+      type.header,
+      new Map(type.lines.flatMap((line) => (wordsIn(line.text) ? [[wordsIn(line.text)!, line]] : [])))
+    )
   }
-  let block: Map<string, string> | undefined
+  let block: Map<string, SpellLine> | undefined
   for (let at = 0; at < lines.length; at++) {
     const line = lines[at]!
     if (!line.startsWith("\t")) {
@@ -1007,13 +1030,17 @@ function inTodaysWords(lines: string[], written: readonly string[], after: Spell
     }
     const text = line.trim().replace(/^- /, "")
     if (!block || !wrote.has(text) || today.has(text)) continue
-    const now = block.get(wordsIn(text) ?? "")
-    if (now && /^(?:- )?its "/.test(text)) {
-      // today's line may be in already, added at the block's end as new:  it takes the old one's place
+    const todays = block.get(wordsIn(text) ?? "")
+    if (todays && /^(?:- )?its "/.test(text)) {
+      const now = todays.text
+      // today's line may be in already, added at the block's end as new:  it takes the old one's place, its note too
       const added = otherInBlock(lines, at, `\t${now}`)
+      const addedNote = added !== undefined && todays.note && lines[added + 1] === `\t\t-- ${todays.note}` ? 1 : 0
+      if (added !== undefined) lines.splice(added, 1 + addedNote)
+      if (added !== undefined && added < at) at -= 1 + addedNote
       lines[at] = `\t${now}`
-      if (added !== undefined) lines.splice(added, 1)
-      if (added !== undefined && added < at) at--
+      // its note, written after the line once (`// an address`), now the first line inside it (epic `language` T166)
+      if (todays.note && lines[at + 1] !== `\t\t-- ${todays.note}`) lines.splice(at + 1, 0, `\t\t-- ${todays.note}`)
       merge.changed.push(`In today's words:  ${now}`)
     } else if (OLD_FIELD_NAME_LINE.test(text)) {
       lines.splice(at--, 1)
@@ -1070,7 +1097,7 @@ function mergeBlock({ lines, blockAt, before, after, merge, own, usesOf, markOf 
       // a person wrote it already, word for word:  nothing to add
       if (lineAt(lines, blockAt, line.text) >= 0) continue
       const mark = isFieldLine(line.text) ? markOf("new") : undefined
-      lines.splice(endOfBlock(lines, blockAt), 0, `\t${line.text}`, ...(mark ? [`\t\t-- ${mark}`] : []))
+      lines.splice(endOfBlock(lines, blockAt), 0, ...fileLinesOf(line), ...(mark ? [`\t\t-- ${mark}`] : []))
       merge.changed.push(`Added:  ${line.text}`)
       continue
     }

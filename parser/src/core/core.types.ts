@@ -209,6 +209,9 @@ export type TestCheck = {
  * | `waiting` | the stand-in on the page for a value that hasn't answered yet | |
  * | `confirm-default` | `confirm` with no Spell UI, e.g. `spell run`:  the question and its answer | `question` |
  * | `dialog-ok`, `dialog-cancel` | a modal's button that just closes it, `<action ok />` (epic `language` T155) | |
+ * | `choose-thing`, `choose-things` | `choose`'s question when none is written:  `Choose a card` (epic `language` P66) | `thing`, `things` |
+ * | `choose-up-to`, `choose-between` | the same, for a count:  `Choose up to 2 cards` | `most`, `least`, `things` |
+ * | `color-names` | `choose a color`'s rows:  Spell UI's 13 colors, red to black, by commas | |
  * | `drop-event` | the event a page sends as a thing is dragged onto a list, e.g. `card-drop` | `thing` |
  * | `undo`, `redo` | an app's Edit menu with nothing to undo or redo (`App.undoTitle`, `undoing.ts`) | |
  * | `undo-step`, `redo-step` | an app's Edit menu, naming the step:  `Undo Turn Card` | `step` |
@@ -277,6 +280,11 @@ export const CORE_MESSAGES = {
   "confirm-default": "{question} (yes)",
   "dialog-ok": "OK",
   "dialog-cancel": "Cancel",
+  "choose-thing": "Choose {thing}",
+  "choose-things": "Choose {things}",
+  "choose-up-to": "Choose up to {most} {things}",
+  "choose-between": "Choose {least} to {most} {things}",
+  "color-names": "Red, Orange, Yellow, Olive, Green, Teal, Blue, Violet, Purple, Pink, Brown, Grey, Black",
   "drop-event": "{thing}-drop",
   undo: "Undo",
   "undo-step": "Undo {step}",

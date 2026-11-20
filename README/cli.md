@@ -53,6 +53,8 @@ It's a link, not a copy:  `spell` runs [bin/spell.mjs](../bin/spell.mjs) in this
 | a file that isn't a link is in the way | it replaces nothing, says so, and exits 1 |
 | you moved the checkout, or linked `spell` from an older one | run it again:  the link holds a full path |
 | you'd rather install nothing | `node ~/www/spell/bin/spell.mjs --help`, or `yarn spell --help` at the kit's root |
+| you run your checkout in a project ([below](#your-checkout-in-a-project-that-installs-spell-from-npm)) | `spell local on` there links `spell` and `epic` the same way, and `spell local off` takes them away again |
+| you run `spell` or `epic` in a project that installs `spell` from npm, and runs no checkout | it hands off to the project's own install, so you get the version it installed |
 | `spell` runs something else | a shell alias or function named `spell` hides it:  `type -a spell`, in a login shell, says which runs |
 
 - It links `spell` only, and never through `npm link`, which would run an npm install over this yarn project.
@@ -69,14 +71,54 @@ One command, in the project, makes its `spell` run your checkout instead, for yo
 
 ```sh
 cd ~/work/acme-spell
-yarn spell local on ~/www/spell     # or npx spell ...;  spell ... when it's on your PATH
+yarn spell local on ~/www/spell     # the first time:  yarn spell (or npx spell), spell isn't on your PATH yet
+spell local                         # from then on, plain spell, here and in ~/www/spell
 yarn start                          # the page server and editor from ~/www/spell, the org still acme's
 ```
 
 - It writes the project's `.spell/kit.json5`, naming your checkout, and adds `/.spell/` to its `.gitignore` when git
   doesn't leave it out already:  everyone else runs npm's copy, and nothing committed changes.
+- It puts `spell` and `epic` on your `PATH` too, each linked to that checkout, as `yarn cli:install` does
+  ([above](#setting-it-up)):
+  - a link to that checkout already there:  it changes nothing
+  - a link to another checkout:  it points it at this one, and `spell local off` points it back
+  - a file that isn't a link:  it leaves it alone, and says so
+  - its folder not on your `PATH`:  a `NOTE:` says which folder to add
+  - `~/.spell/path-links.json` records which links `spell local` made, and which projects use them
+- `spell local off` takes those links away once no project still runs a checkout (a project's `.spell/kit.json5` gone
+  counts as off);  a link you made yourself, with `yarn cli:install` or `epic plugin install`, it never removes.
+- A release from before 0.8.17 doesn't link them:  run `yarn spell local on` a second time, and your checkout,
+  now running, does it.
+- Claude Code's `epic@spell` plugin is its own copy, which `spell local` never switches:
+  that rewrites Claude Code's settings, for every project at once.
+  `spell local on` says when it runs another copy, and prints the command that switches it
+  (`epic plugin install --kit ~/www/spell`, then `/reload-plugins`);  `off` prints the one back (`yarn spell epic plugin install`).
+- The project's own code that imports `spell/...` always runs the copy npm installed:  nothing can point an import at
+  your checkout without changing the project's committed files.
+- In a project that doesn't run your checkout, the `spell` and `epic` on your `PATH` hand off to the project's own npm
+  install when it has one, so you get the version it installed.
 - With no checkout named:  the one this `spell` runs from, else `~/www/spell`.
-- `spell local` alone says which Spell runs here, and why;  `spell local off` goes back to npm's.
+- `spell local` alone says which Spell runs here, and why, then every way Spell runs here, each marked
+  `[your checkout]` or `[NOT your checkout]`, with what to type when it isn't:
+
+  <details><summary>What it printed</summary>
+
+  ```text
+  Here, spell runs your checkout:  ~/www/spell (named by .spell/kit.json5)
+  - spell, typed in a terminal:  ~/www/spell  [your checkout]
+    ~/.local/bin/spell:  spell local added it
+  - epic, typed in a terminal:  ~/www/spell  [your checkout]
+    ~/.local/bin/epic:  spell local added it
+  - yarn spell, npx spell:  ~/www/spell  [your checkout]
+  - Claude Code's epic plugin:  ~/.claude/plugins/cache/spell/epic/0.8.9  [NOT your checkout]
+    to switch it, type epic plugin install --kit ~/www/spell here;  then /reload-plugins in Claude Code
+  - this project's code that imports spell:  ~/work/acme-spell/node_modules/spell (0.8.16)  [NOT your checkout]
+    that's normal:  your project's own code always uses the copy npm installed
+  ```
+
+  </details>
+
+- `spell local off` goes back to npm's.
 - Your checkout runs from its own install:  `yarn install` there first, or nothing is written.
 - For every project on the machine:  `export SPELL_KIT=~/www/spell`, in your shell profile.
   It wins over a project's file, so one command can try another checkout.
@@ -482,7 +524,7 @@ They're `spell-parser`'s, but their work is `spell-app`'s for now, through its `
 | `spell compile --force` | recompiles the projects it imports too, even those already compiled |
 | `spell compile --stale` | only the projects that are out of date, and the same for what they import;  the rest say "up to date" |
 | `spell lint --json` | the errors as a JSON list |
-| `spell lint --fix` | puts right what it can:  each retired word (`parts` => `slots`);  a page's `<text>` just before an example => its `description=`, which plain `spell lint` warns of as `description-before-example`;  and the editor pages (drops gone properties, adds new ones, fixes controls that don't fit) |
+| `spell lint --fix` | puts right what it can:  each retired word (`parts` => `slots`);  a page's `<text>` just before an example => its `description=`, which plain `spell lint` warns of as `description-before-example`;  a note after a line's code, `// x`, moved to the line under it, `-- x`;  and the editor pages (drops gone properties, adds new ones, fixes controls that don't fit) |
 | `spell watch --check-only` | re-checks instead of recompiling:  writes nothing |
 | `spell watch --test` | runs each project's tests after each rebuild with no errors |
 | `spell watch --name <text>` | with `--test`:  only tests whose names contain it |
@@ -916,9 +958,9 @@ spell place update StarWars.api.spell
 | `--kind <kind>` | `web server`, `graphql server`, `sheet` (a CSV file, or an Excel `.xlsx`, one collection per sheet), `google sheet`.  With none, it reads the address, then asks the address itself, then asks you;  with no one to ask, it stops, naming those it tried |
 | `--into <file>` | the `.spell` file, one server to a file:  `StarWars.api.spell`.  With none, it asks;  with no one to ask, it stops |
 | `--name <words>` | what the program calls the place |
-| `--key-secret <NAME>` | the NAME of the key it needs, read from the environment, never written down;  the Spell says `its key is the secret "NAME"` |
-| `--key-header <name>` | the header its key goes in, as it is:  `X-Api-Key`.  With none, `Authorization: Bearer`.  The Spell says `its key goes in its "X-Api-Key" header` |
-| `--key-in-address <name>` | the question its key goes in the address as:  `api_key`, hidden from every message.  The Spell says `its key goes in the address as "api_key"` |
+| `--key-secret <NAME>` | the NAME of the key it needs, read from the environment, never written down;  the Spell says `it is authenticated with the secret "NAME"` |
+| `--key-header <name>` | the header its key goes in, as it is:  `X-Api-Key`.  With none, `Authorization: Bearer`.  The Spell says `its secret goes in its "X-Api-Key" header` |
+| `--key-in-address <name>` | the question its key goes in the address as:  `api_key`, hidden from every message.  The Spell says `its secret goes in the address as "api_key"` |
 | `--docs <address>` | where its docs are, over those it finds by itself |
 | `--collections <paths>` | its collections' paths, comma-separated, for a source that doesn't list them.  `name=path` names one;  a name in braces is found by name, with no list (`"wiki pages=/page/summary/{name}"`);  one asked with a search is searched (`"books=/search.json?q=dune"`) |
 | `--samples <names>` | names to read a collection found by name by:  `Tatooine,Hoth`;  `name=sample` for one collection's own (`authors=OL79034A`) |

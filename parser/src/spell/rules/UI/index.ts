@@ -1,5 +1,5 @@
 /**
- * The `UI` rule module:  user-facing I/O statements -- `print`, `notify`, `alert`, `warn`, `confirm`, `prompt` --
+ * The `UI` rule module:  user-facing I/O statements -- `print`, `notify`, `alert`, `warn`, `confirm`, `prompt`, `choose` --
  * `scroll to the top`, `open printing`, sounds and videos (naming one, `play`, `stop`, `pause`, `resume`, asking about one),
  * a page's tour (`start tour "x"`, `stop the tour`, `show step 3`, `go to the next step`, `go back a step`),
  * plus inline `css` string installation, and an app's widget defaults (`<ui-defaults>`).
@@ -42,5 +42,6 @@ export * from "./Alert"
 export * from "./Warn"
 export * from "./Confirm"
 export * from "./Prompt"
+export * from "./Choose"
 export * from "./CSSStyles"
 export * from "./UIDefaults"

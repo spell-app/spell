@@ -145,7 +145,7 @@ describe("an airtable", { timeout: 30_000 }, () => {
     const { description, spell } = await ingest.add({ address: stub.base, into: "/Air.spell", keySecret: "AIRTABLE" })
     expect(description.about).toMatchObject({ kind: "airtable", name: "airtable base" })
     expect(spell).toContain(`airtable base is an airtable at "${stub.base}"`)
-    expect(spell).toContain(`its key is the secret "AIRTABLE"`)
+    expect(spell).toContain(`it is authenticated with the secret "AIRTABLE"`)
     expect(spell).toContain(`recipes live at "Recipes"`)
     expect(spell).toContain(`its "dish name" is text`)
     expect(description.collections.recipes!.state).toMatchObject({ is: "verified", rows: 2, readByTheLook: true })

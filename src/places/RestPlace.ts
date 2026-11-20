@@ -370,7 +370,11 @@ export class RestPlace extends WebPlace implements Place {
       collection,
       lastRow: kept.at(-1)
     })
-    const read = (kept as unknown[]).map((row) => this.noted(collection, this.rowOf(collection, row)))
+    // what it was asked for, sent as the query, each row holds
+    const askedValues = handled.filter ? askedValuesIn(askedBy, query.filter) : undefined
+    const read = (kept as unknown[]).map((row) =>
+      withAsked(this.noted(collection, this.rowOf(collection, row)), askedValues)
+    )
     if (query.under) this.noteReadUnder(collection, query.under, read)
     return {
       rows: read,
@@ -862,6 +866,9 @@ export type RestCollection = {
    * - A filter on those fields goes as the query, and is taken as done:  its answer is for that place,
    *   whatever latitude it says it's for (`52.5126`, the nearest it has).
    * - Its answer may be one thing, not a list:  that's its one row.
+   * - Each row it answers holds the value it was asked for, where the server leaves that field out
+   *   (epic `from-console` P15):  layer stacks asked for by their system, `?system=alpha`, each have `system: "alpha"`,
+   *   so a read's `where its system is "alpha"` holds here too.
    */
   askedBy?: readonly string[]
   /**
@@ -933,6 +940,26 @@ function soleListIn(body: unknown): unknown[] | undefined {
   if (!isOneRow(body)) return undefined
   const lists = Object.values(body).filter((value) => Array.isArray(value))
   return lists.length === 1 ? (lists[0] as unknown[]) : undefined
+}
+
+/** The values of `filter` for the fields a list is asked for by (`RestCollection.askedBy`):  none, `undefined`. */
+function askedValuesIn(
+  askedBy: readonly string[] | undefined,
+  filter: Record<string, unknown> | undefined
+): PlaceRow | undefined {
+  if (!askedBy?.length || !filter) return undefined
+  const asked = Object.entries(filter).filter(([field]) => askedBy.includes(field))
+  return asked.length ? Object.fromEntries(asked) : undefined
+}
+
+/**
+ * `row`, holding each value it was asked for where the server left that field out (epic `from-console` P15).
+ * - A value the server gave stands:  Open-Meteo's `52.5126`, the nearest it has to `52.52`.
+ * - SIDE EFFECT:  changes `row`.
+ */
+function withAsked(row: PlaceRow, asked: PlaceRow | undefined): PlaceRow {
+  if (asked) for (const [field, value] of Object.entries(asked)) if (row[field] === undefined) row[field] = value
+  return row
 }
 
 /** Is `filtering` only fields it's asked for by:  `RestCollection.askedBy`? */

@@ -6,6 +6,7 @@ import { clockTime } from "spell/util/time"
 import type { DeviceCopy, KeptCopy } from "./DeviceCopy"
 import { keyHidden, putKeyOn, type KeyGoes } from "./keyGoes"
 import {
+  PAGE_SERVER_ANSWER_HEADER,
   PlaceError,
   TooSoonError,
   type PlaceCapabilities,
@@ -16,6 +17,9 @@ import {
 
 /** The header a change's id goes in, unless the place says otherwise:  a server that remembers them makes it once. */
 export const CHANGE_ID_HEADER = "Idempotency-Key"
+
+/** The header the page server's `Guard` checks:  this page's write token, `window.SPELL_SERVER.token`. */
+export const TOKEN_HEADER = "x-server-token"
 
 /** The answers that mean "ask again later", though a server sent them:  so they count as no answer, and it resends. */
 const TRY_AGAIN_STATUSES = new Set([408, 425, 429])
@@ -45,7 +49,10 @@ const LONGEST_WAIT_MS = 15_000
  * - A KEY is named, never written (epic `data`, Q11):
  *   - `keyNamed` says a place needs one, by name;
  *     with `keyIfSet`, it takes one when it's there, and goes without when it isn't, GitHub's way.
- *   - In a browser nothing can hold it, so every request refuses, saying so:  the program reaches it through `RemotePlace`.
+ *   - In a browser nothing can hold it, so every request refuses, saying so:  the program reaches it through a server side.
+ *   - `throughPageServer` (epic `from-console` P14):  its address is this page's own server's
+ *     (`AUTHENTICATED_PLACES_PREFIX`), which adds the key:  each request carries the page's write token, and a refusal
+ *     the page server made itself says its own words (`PAGE_SERVER_ANSWER_HEADER`), the secret it needs that isn't set.
  *   - On a server side, `keyFrom` finds it by that name (`PlaceKeys`, in `spell/server/places`), and it goes on each request.
  *   - There's no `headers` setting, so there's nowhere to write one.
  *   - It goes as `Authorization: Bearer`, or where `keyGoes` says (epic `data` T73):  a header of its own, or the address.
@@ -80,6 +87,8 @@ export abstract class WebPlace {
   private readonly deviceCopy: DeviceCopy | undefined
   /** The addresses being read behind their stale copies:  one request each. */
   private readonly readingBehind = new Set<string>()
+  /** Its address is this page's own server's, which adds its key:  see the class. */
+  private readonly throughPageServer: boolean
 
   constructor({
     url,
@@ -89,7 +98,8 @@ export abstract class WebPlace {
     keyGoes,
     changeIdHeader = CHANGE_ID_HEADER,
     mostPerSecond,
-    deviceCopy
+    deviceCopy,
+    throughPageServer = false
   }: WebPlaceProps) {
     this.url = url.replace(/\/+$/, "")
     this.keyNamed = keyNamed
@@ -99,6 +109,7 @@ export abstract class WebPlace {
     this.changeIdHeader = changeIdHeader
     this.mostPerSecond = mostPerSecond
     this.deviceCopy = deviceCopy
+    this.throughPageServer = throughPageServer
   }
 
   /** What it says it can do:  see each subclass. */
@@ -173,6 +184,8 @@ export abstract class WebPlace {
     const headers = new Headers(request.headers)
     const url = key === undefined ? request.url : this.urlWithKey(request, headers, key)
     if (changeId !== undefined && this.changeIdHeader) headers.set(this.changeIdHeader, changeId)
+    const token = this.throughPageServer ? pageToken() : undefined
+    if (token !== undefined) headers.set(TOKEN_HEADER, token)
     await this.waitOutLimit(signal)
     await this.waitForTurn()
     try {
@@ -192,7 +205,7 @@ export abstract class WebPlace {
       if (error.response) this.noteLimit(error.response)
       if (!this.isAnAnswer(error.status) || isOutOfRequests(error)) throw error
       const kind = this.errorKindFor(error.status!)
-      const message = await this.messageOf(error)
+      const message = (await this.pageServerSaid(error)) ?? (await this.messageOf(error))
       const whyNot =
         kind !== "refused" ? undefined : error.status === UNAUTHORIZED ? "signed out" : await this.whyNotOf(error)
       const needs = kind === "refused" ? await this.needsOf(error) : undefined
@@ -250,6 +263,16 @@ export abstract class WebPlace {
     const turn = Math.max(now, this.nextTurn)
     this.nextTurn = turn + 1000 / this.mostPerSecond
     if (turn > now) await new Promise((resolve) => setTimeout(resolve, turn - now))
+  }
+
+  /** What the page server said of a refusal it made itself, for a place read through it:  see the class. */
+  private async pageServerSaid(error: ApiError): Promise<string | undefined> {
+    if (!this.throughPageServer || !error.response?.headers.get(PAGE_SERVER_ANSWER_HEADER)) return undefined
+    const said = await error.response
+      .clone()
+      .json()
+      .catch(() => undefined)
+    return (said as { error?: string } | undefined)?.error
   }
 
   /** What to say of a failure that means something.  A subclass that knows why says that. */
@@ -310,6 +333,11 @@ export type WebPlaceProps = {
   keyFrom?: (name: string) => string | undefined | Promise<string | undefined>
   /** Where the key goes on a request;  default `Authorization: Bearer <key>`.  SEE:  `KeyGoes`. */
   keyGoes?: KeyGoes
+  /**
+   * Its address is this page's own server's, which adds its key (epic `from-console` P14):  each request carries the
+   * page's write token.  See the class.
+   */
+  throughPageServer?: boolean
   /** The header a change's id goes in;  default `CHANGE_ID_HEADER`;  `false`:  send none. */
   changeIdHeader?: string | false
   /**
@@ -353,4 +381,9 @@ function askAgainAtIn(response: Response): number | undefined {
 function isOutOfRequests(error: ApiError): boolean {
   const headers = error.response?.headers
   return !!headers && rateLimitLeft(headers) === 0
+}
+
+/** This page's write token, from the server that served it:  `undefined` outside a page it served. */
+export function pageToken(): string | undefined {
+  return (globalThis as { SPELL_SERVER?: { token?: string } }).SPELL_SERVER?.token
 }

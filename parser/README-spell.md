@@ -175,10 +175,20 @@ a "card" is a draggable two sided view, aka "playing card"
 
 - `a "card" is a draggable two sided view`:  an ability is a word before the template.
   `clickable`, `selectable` and `droppable` are the others;  `it is draggable` under it says the same.
-- A declaration's description is the first comment inside its body, `// Its shorthand`:
+- A declaration's description is the first comment inside its body, `-- Its shorthand`:
   hovered in an editor, and written above it in the code, `/** Its shorthand ... */`.
-  - A line with no body takes one holding just the comment:  `its "hint" is text`, then `// Said beside the score`.
+  - A line with no body takes one holding just the comment:  `its "hint" is text`, then `-- Said beside the score`.
   - A comment right above a declaration still describes it, when nothing under it does.
+- A note goes on a line of its own, never after a line's code:
+  a `//` note at a line's end still reads, with a warning, and `spell lint --fix` moves it to the line under it,
+  as `--`.
+
+  ```spell
+  its "primary image" is text
+  	-- an address
+  ```
+
+  - A `--` at the end of a drawing's line or a type's line stays:  `to draw its placeholder  -- a grey ace`.
 - The line that declares a thing can say more about it, after a comma:
   - a template's short name, `, aka "playing card"`
   - a property's start, `, starting at -1`, and a list's first value, `, with default down`
@@ -203,7 +213,7 @@ Each row below is one rule's own test:  a line it reads, and the JavaScript that
 | math | arithmetic, biggest and smallest, rounding, `a random number between 1 and 6` | 11 | `largest of the prices` | `core.largestOf(prices)` |
 | properties | `the ... of ...`, `its ...`, `the ...` in an action, `the ...'s ...`, object literals | 20 | `the short rank of the card` | `card.shortRank` |
 | lists | positions, ranges, adding, removing, `for`, `where` | 50 | `remove last card of deck` | `core.removeItemAt(deck, -1)` |
-| UI | `print`, notices, alerts and prompts, `scroll to the top`, `open printing`, sounds and videos (a file, [one of Spell's own](#built-in-sounds), naming one, `play`, `stop`, `pause`, `resume`, asking about one), styles | 25 | `prompt "Name for the new baby?"` | `const it = await core.prompt("Name for the new baby?")` |
+| UI | `print`, notices, alerts and prompts, picking from a list (`choose a card from the cards`), `scroll to the top`, `open printing`, sounds and videos (a file, [one of Spell's own](#built-in-sounds), naming one, `play`, `stop`, `pause`, `resume`, asking about one), styles | 25 | `prompt "Name for the new baby?"` | `const it = await core.prompt("Name for the new baby?")` |
 | classes | templates, properties, aliases, saving, versions | 78 | `a card is a thing` | `export class Card extends Thing {}` |
 | async | waiting, pauses, processes | 8 | `pause for 2 seconds` | `await core.pauseFor(2, "seconds")` |
 | draw | drawing a list's items | 3 | `draw each card in the deck` | `core.drawItems(deck)` |
@@ -557,6 +567,29 @@ print 2' 3 1/2" in cm
   - Each unit is said in a unit named above it.
     One that doesn't start at the same place says where it does:  `one "fahrenheit", aka "°F", is 5/9 °C, starting at 32`.
 - A unit of another dimension is an error naming both:  `its height in kg`.
+
+### Asking the person:  `prompt` and `choose`
+
+A program asks with a dialog, HyperTalk's way:
+what the person typed or picked is `it`, and the button that closed the dialog is `the result`, `ok` or `cancel`.
+
+```spell
+choose a card from the cards with prompt "Which card?"
+if the result is ok, turn it over
+```
+
+- `prompt "Your name?"`:  `it` is the text typed.
+- `choose a card from the cards`:  `it` is the card picked;  each row shows its title, label or name.
+  - `choose one of ["easy", "medium", "hard"]`:  a list of words.
+  - From a record, its keys are the rows, and `it` is the value under the key picked.
+  - A kind's own values need no `from`:  `choose a card suit`.
+  - `choose a color`:  Spell UI's 13 colors, each a chip beside its name;  `it` is its name, `red`.
+  - Several:  `choose cards`, `choose many cards`, `choose up to 2 cards`, `choose between 2 and 4 cards`;
+    `it` is a list.
+  - Up to 20 rows are buttons;  more, a list with a search box.
+    `, showing 10 at a time` sets how many rows show before it scrolls.
+  - An empty list asks nothing:  `the result` is `cancel`.
+- In Spanish:  `elegir una carta de las cartas con el mensaje "¿Qué carta?", mostrando 10 a la vez`.
 
 ### Drawing
 
@@ -1465,9 +1498,12 @@ recipe box is an app
   - A field holding another thing may be nothing, and the X of nothing is nothing:
     `the name of its homeworld`, with no homeworld, is nothing, not a throw.
 - What a real server is like, a line each under it, which the ingest writes when it finds it:
-  - a key it can go without:  `its optional key is the secret "GITHUB_TOKEN"`
+  - a secret it can't go without:  `it is authenticated with the secret "JOBS_TOKEN"`;
+    a page reads it through Spell's page server, which adds the secret from its environment and never sends it back
+    (the old words, `its key is the secret "..."`, still read, with a warning naming the new line)
+  - a key it can go without:  `it is optionally authenticated with the secret "GITHUB_TOKEN"`
   - a key it wants anywhere but `Authorization: Bearer`:
-    `its key goes in its "X-Api-Key" header`, or `its key goes in the address as "api_key"`
+    `its secret goes in its "X-Api-Key" header`, or `its secret goes in the address as "api_key"`
   - paging by a header:  `its next page is in its "Link" header`
   - how many at a time, when that isn't its `limit`:  `it gives up to 100 at a time, asked for with "per_page"`
   - lists of names only, each thing reading the rest from its own address:  `its lists give only each one's "name"`
@@ -1502,7 +1538,7 @@ recipe box is an app
   - `add a new recipe with cook = them`
 - A place can't do what it can't do, and the compiler says so at that line:
   - a write to a sheet won't compile
-  - a key written into a program won't compile:  name it, `its key is the secret "COOKBOOK_KEY"`, and keep it on a server side
+  - a key written into a program won't compile:  name it, `it is authenticated with the secret "COOKBOOK_KEY"`, and keep it on a server side
   - a web server can't announce what changed, so it warns until a line says how often to ask
   - an airtable warns that the last save wins, of fields it works out, and of a missing id column or key;  its key stays on a server side
 - There's no save step:  changing a recipe keeps it.  `a draft of the recipe`, then `save the draft`, is for an Edit screen with a Cancel button.

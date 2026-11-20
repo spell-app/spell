@@ -977,6 +977,49 @@ export class ASTCoreMethodInvocation extends ASTScopedMethodInvocation {
   }
 }
 
+/**
+ * A language a project's code files are written in, for `ASTNativeCall`:
+ * - `js`:  javascript or TypeScript, `clipboard.ts`, for every javascript-family target
+ * - `py`:  Python, `clipboard.py`
+ */
+export type NativeLanguage = "js" | "py"
+
+/**
+ * NativeCall:  a call of a function from one of the project's code files, `call native copyText with text`
+ * (epic `from-console` P10).
+ * - `methodName`:  the function's name as its code file says it, `copyText`.
+ *   Python's writer writes it in Python's case, `copy_text`.
+ * - `modules`:  the module each language imports it from;  none for a language the project has no code file in.
+ *   - javascript:  `@spell/native/<project>/clipboard.ts`, which a runner points at the file
+ *   - Python:  `clipboard`, the `.py` file beside the program
+ * - `waitsIn`:  does it give back a promise (javascript) or is it `async def` (Python)?  Then it's awaited.
+ * - `browserOnly`:  its code file is marked as one only a browser can run (`only: "browser"`).
+ * - `words`:  the action whose steps call it, as its line says it, for an error:  `to copy (text) to the clipboard`.
+ * - `codeFile`:  its code file's name without its ending, `clipboard`, for an error.
+ * - Which targets can't write one is worked out before writing:  `SP.NativeCode.refusalFor()`.
+ */
+export type ASTNativeCallProps = Prettify<
+  ASTMethodInvocationProps & {
+    modules: Partial<Record<NativeLanguage, string>>
+    waitsIn: Partial<Record<NativeLanguage, boolean>>
+    browserOnly?: boolean
+    words?: string
+    codeFile: string
+  }
+>
+
+export class ASTNativeCall extends ASTMethodInvocation {
+  declare modules: Partial<Record<NativeLanguage, string>>
+  declare waitsIn: Partial<Record<NativeLanguage, boolean>>
+  declare browserOnly?: boolean
+  declare words?: string
+  declare codeFile: string
+  constructor(match: P.AnyMatch, props: ASTNativeCallProps) {
+    super(match, props)
+    this.assertType("codeFile", "string")
+  }
+}
+
 /** ExpectMethodInvocation:  `core.expect(...)` -- used to assert a value in generated test output.
  *  - `expression` is expression AST being tested.
  *  - `expressionString` is string for spell code used to generate `expression`, shown in assertion output.
@@ -2346,6 +2389,8 @@ export const CORE_CALLS_THAT_WAIT = new Set([
   "warn",
   "confirm",
   "prompt",
+  "choose",
+  "chooseColor",
   "savedThings",
   "savedThingAt",
   "savedThingWithId",

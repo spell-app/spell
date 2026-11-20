@@ -1,10 +1,12 @@
 import { E, UI, UIT } from "spell/ui/core"
 import { modalVocabulary } from "./UIModal.en"
+import { BUTTON_ROWS, ChoiceRows } from "./ChoiceRows"
 import { type Vocabulary } from "./UIModal.types"
 
 /****************
  * ### `ModalDialogs`
- * The dialogs behind `UI.modals.confirm()` / `alert()` / `prompt()` (Fomantic's `$.modal('confirm', …)`):
+ * The dialogs behind `UI.modals.confirm()` / `alert()` / `prompt()` (Fomantic's `$.modal('confirm', …)`),
+ * and `choose()`'s pick from a list (its rows:  `ChoiceRows`):
  * a `<ui-modal>` built for the call, appended to `<body>`, shown (`visible`), and removed once hidden.
  *
  * - Markup:  `<ui-modal size="tiny" closedby="closerequest" closable heading="title">` holding
@@ -15,7 +17,7 @@ import { type Vocabulary } from "./UIModal.types"
  *       its family imported the first time one is needed;
  *       the dialog shows once it has drawn, so it never opens on a half-drawn message
  *   - `<ui-actions>`:  a deny button (`cancel`, first:  it takes the initial focus, the least destructive choice)
- *     and a primary approve button;  for `choose()`, a button per answer in place of the approve button.
+ *     and a primary approve button.
  * - Escape denies (`closedby="closerequest"`:  no dimmer clicks, so a stray click can't answer).
  * - So does its close ✕ (`closable`), on unless `options.closable` is `false`.
  * - The promise settles once the modal is HIDDEN (`ui-closed`), so a caller can open the next dialog straight away.
@@ -54,13 +56,20 @@ export class ModalDialogs implements E.ModalProvider {
   }
 
   /**
-   * Ask a question with more answers than yes and no, each a button after Cancel:
-   * resolves with the picked one's `value`, `undefined` on Cancel, the close ✕ or Escape.
+   * Ask the person to pick from `options.rows`:  resolves with the positions picked, `undefined` on deny or Escape
+   * (epic `language` P66).
+   * - One:  a row picks itself, and the dialog closes;  no OK button.
+   * - Several:  each row turns on and off;  OK stays off until as many as `least` to `most` are on.
+   * - More than `BUTTON_ROWS` rows:  the list family is imported first, for its `<ui-list>`.
+   * - A row with a color:  the theme editor's family is imported first, for its `<ui-color-chip>`.
    */
-  choose<T extends string>(options: E.ChooseOptions<T>): Promise<T | undefined> {
-    let picked: T | undefined
-    const pick = (value: string) => (picked = value as T)
-    return this.run(options, { canDeny: true, choices: options.choices, pick }, () => picked)
+  async choose(options: E.ChooseModalOptions): Promise<number[] | undefined> {
+    if (options.rows.length > BUTTON_ROWS) await import("spell/ui/components/ui-list")
+    if (options.rows.some((row) => row.color)) await import("spell/ui/components/ui-theme-editor")
+    const rows = new ChoiceRows({ document: this.document, options, tagFor: ModalDialogs.tagFor })
+    return this.run(options, { canDeny: true, rows }, (isApproved) =>
+      isApproved || (!rows.several && rows.picked.size) ? rows.positions : undefined
+    )
   }
 
   /**
@@ -81,7 +90,7 @@ export class ModalDialogs implements E.ModalProvider {
    */
   private open<T>(
     options: E.ModalOptions,
-    { canDeny, input, choices, pick }: DialogFlags,
+    { canDeny, input, rows }: DialogFlags,
     result: (isApproved: boolean, value: string) => T,
     message?: HTMLElement
   ): Promise<T> {
@@ -94,12 +103,14 @@ export class ModalDialogs implements E.ModalProvider {
     const content = this.document.createElement(ModalDialogs.tagFor(UIT.CONTENT))
     const field = input === undefined ? undefined : this.input(input)
     content.append(field ? this.label(options.message, field, message) : (message ?? this.paragraph(options)))
+    if (rows) content.append(rows.element)
     const actions = this.document.createElement(ModalDialogs.tagFor(ACTIONS))
     if (canDeny) actions.append(this.button(options.cancelText ?? UI.i18n.t(CANCEL), CANCEL))
     const approve = this.button(options.okText ?? UI.i18n.t(OK), APPROVE_CLASS)
     approve.setAttribute(COLOR, options.okColor ?? PRIMARY)
-    if (choices) actions.append(...choices.map((choice) => this.choiceButton(choice, modal, pick!)))
-    else actions.append(approve)
+    // one row picked closes it by itself:  OK only for several
+    if (!rows || rows.several) actions.append(approve)
+    if (rows) this.answerWith(rows, modal, approve)
     modal.append(content, actions)
     field?.addEventListener("keydown", (event) => {
       if (event.key === UIT.Key.enter) approve.click()
@@ -120,6 +131,16 @@ export class ModalDialogs implements E.ModalProvider {
         { once: true }
       )
     })
+  }
+
+  /**
+   * SIDE EFFECT:  `rows` answer `modal`:  a row picked hides it;  several keep `approve` off until the count fits.
+   */
+  private answerWith(rows: ChoiceRows, modal: HTMLElement & { visible: boolean }, approve: HTMLElement): void {
+    rows.onPicked = () => (modal.visible = false)
+    const updateApprove = () => approve.toggleAttribute(DISABLED, !rows.fits)
+    rows.onCountChanged = updateApprove
+    updateApprove()
   }
 
   /**
@@ -204,21 +225,6 @@ export class ModalDialogs implements E.ModalProvider {
     return label
   }
 
-  /** One of `choose()`'s buttons:  a click notes its value, then hides the dialog, which settles the call. */
-  private choiceButton(
-    { value, text, color }: E.ModalChoice,
-    modal: HTMLElement & { visible: boolean },
-    pick: (value: string) => void
-  ): HTMLElement {
-    const button = this.button(text, CHOICE_CLASS)
-    if (color) button.setAttribute(COLOR, color)
-    button.addEventListener("click", () => {
-      pick(value)
-      modal.visible = false
-    })
-    return button
-  }
-
   /** A `<ui-button>` with Fomantic's action class (`approve` / `cancel`). */
   private button(text: string, actionClass: string): HTMLElement {
     const button = this.document.createElement(ModalDialogs.tagFor(UIT.BUTTON))
@@ -241,16 +247,8 @@ export class ModalDialogs implements E.ModalProvider {
   }
 }
 
-/**
- * How `run()` builds a dialog:  a deny button or not;  `prompt()`'s input and its starting text;
- * `choose()`'s answers, in place of the approve button, and what notes the one picked.
- */
-type DialogFlags = {
-  canDeny: boolean
-  input?: string
-  choices?: readonly E.ModalChoice[]
-  pick?: (value: string) => void
-}
+/** How `run()` builds a dialog:  a deny button or not;  `prompt()`'s input and its starting text;  `choose()`'s rows. */
+type DialogFlags = { canDeny: boolean; input?: string; rows?: ChoiceRows }
 
 /** Constructor props for `ModalDialogs`. */
 export type ModalDialogsProps = {
@@ -266,6 +264,9 @@ const HIDE_EVENT: E.EventName<Vocabulary> = "ui-closed"
 
 /** `<ui-modal>` width attribute (canonical name). */
 const SIZE = "size"
+
+/** `<ui-button>`'s disabled state (a shared state). */
+const DISABLED = "disabled"
 
 /** `<ui-modal>`'s close ✕ attribute (canonical name). */
 const CLOSABLE = "closable"
@@ -308,9 +309,6 @@ const COLOR = "color"
 
 /** Fomantic's approve class of a button. */
 const APPROVE_CLASS = "approve"
-
-/** A `choose()` answer's button:  neither approve nor deny, so the dialog's own actions leave it alone. */
-const CHOICE_CLASS = "choice"
 
 /** Fomantic's deny class of a button, and the text key of its label. */
 const CANCEL = "cancel"
