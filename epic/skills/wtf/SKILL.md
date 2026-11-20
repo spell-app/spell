@@ -48,7 +48,8 @@ The person has lost the thread:  hand it back in one screen.
   - ONE shared doc, in `epics/<name>/` of every checkout (a link into the epic folder).
   - A branch from before 2026-10-02 still has it under `plans/<name>/`.
   - `epic summary <name> --json`:
-    phases with status, next phase, open questions / issues / todos / manual tests
+    the phases left with status (`done`:  how many are finished), next phase,
+    open questions / issues / todos / manual tests;  `--all` for every phase and the grey items
   - its links:  `epic pages link <ABSOLUTE path> --hash <id>`:  the side bar link, then `• 🌐` (browser)
 - A `/bedtime` run:  the summary's `bedtime` field (`epic summary`, above).
   - The phases it's running (`P3-P6`) while it goes;  `null` once it's over.
@@ -64,7 +65,7 @@ The person has lost the thread:  hand it back in one screen.
 Plain words, no jargon;  coined names defined in a few words.
 - Every plan item named is a link:
   - the epic page's URL, plus its id, lower-case:  `<url>#q1`, `<url>#i3`
-  - a phase:  its stable id, `<url>#p-short-name`, from `epic summary <name> --json`
+  - a phase:  its stable id, `<url>#p-short-name`, from `epic summary <name> --json` (a done one:  `--all`)
     - or its number, `<url>#p2`, which lands on P2
   - text as the doc shows it:  `P2 · Short Name`, `Q1`
 - Sections with nothing in them are left out.

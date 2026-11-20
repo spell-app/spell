@@ -85,6 +85,15 @@ describe("Spanish's inflector", () => {
     expect(spanishInflector.typeCase("gestores-tareas")).toBe("GestorTareas")
   })
 
+  test("a name whose first word is a borrowed plural keeps every word, so its plural is found again (epic `data` I141)", () => {
+    expect(spanishInflector.pluralize("jobs archive")).toBe("jobs archive")
+    expect(spanishInflector.singularize("jobs archive")).toBe("jobs archive")
+    expect(spanishInflector.pluralize("jobs")).toBe("jobs")
+    // a Spanish word ending in -s after a consonant it ends in still grows:  `vals`
+    expect(spanishInflector.pluralize("vals")).toBe("valses")
+    expect(spanishInflector.pluralize("step")).toBe("stepes")
+  })
+
   test("a name of several words keeps its number after a linking word, in PascalCase too (J96)", () => {
     expect(spanishInflector.typeCase("pila-de-descartes")).toBe("PilaDeDescartes")
     expect(spanishInflector.typeCase("pilas-de-descartes")).toBe("PilaDeDescartes")

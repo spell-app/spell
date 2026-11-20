@@ -102,6 +102,8 @@ const IS_PATH_WITH_QUERY = /^\/[^?]*\?|^\?/
  * - What it does for itself is what `can` says, and every list says so (`handled`):  the engine does the rest.
  * - Reads:  `list()` a page, `getMany()` one `GET` per id.
  *   A list under one thing is read at its own address (`ListQuery.under`):  a post's comments, `/posts/1/comments`.
+ * - Paging:  the place's way, unless a collection says its own (`RestCollection.paging`, epic `data` P56).
+ * - A named operation's braces:  from what's sent, else from where the thing was read (`call()`).
  * - Writes:  `POST`, `PATCH` (or `PUT`, the whole record:  `update`), `DELETE`, one at a time, in order.
  *   Each carries its `changeId` in a header, and `keepalive` when the page is going away.
  * - With `versions`, an update says what it was made from, in `If-Match`:
@@ -128,18 +130,12 @@ export class RestPlace extends WebPlace implements Place {
   private readonly updateMethod: "PATCH" | "PUT"
   /** What each part of a query is called. */
   private readonly params: RestParams
-  /** How many rows it asks for at a time. */
-  private readonly pageSize: number
-  /** It was told how many to ask for, so a server that pages by its own next link is asked for that many too. */
-  private readonly asksForPageSize: boolean
-  /** A place that pages by offset counts pages, not rows, from this number:  `pageNumbers`. */
-  private readonly firstPageNumber: number | undefined
-  /** It's never told how many to give:  `sendsNoCount`. */
-  private readonly sendsNoCount: boolean
-  /** Its next page is asked for by the last row's id:  `pagesByLastId`. */
-  private readonly pagesByLastId: { moreAt?: string } | undefined
+  /** How every collection pages, unless it says its own way:  `pagingOf()`. */
+  private readonly paging: Paging
   /** Each thing's version, as last read or written, by collection and id. */
   private readonly seenVersions = new Map<string, string>()
+  /** Where each thing read under another was read, by collection and id:  `/jobs/6f1c/steps`, for `call()`'s braces. */
+  private readonly readUnder = new Map<string, string>()
   /** Each named operation's address. */
   private readonly operations: Readonly<Record<string, string | RestOperation>>
   /** Each collection's enabled operations, by its line (`limitOperations()`):  a collection not here takes every one. */
@@ -170,9 +166,6 @@ export class RestPlace extends WebPlace implements Place {
     ...rest
   }: RestPlaceProps) {
     super(rest)
-    this.firstPageNumber = pageNumbers?.first
-    this.sendsNoCount = sendsNoCount
-    this.pagesByLastId = pagesByLastId
     this.namesLike = namesLike
     this.searches = searches
     this.operations = operations ?? {}
@@ -181,8 +174,17 @@ export class RestPlace extends WebPlace implements Place {
     this.versions = versions
     this.updateMethod = update
     this.params = { ...REST_PARAMS, ...params }
-    this.pageSize = pageSize ?? REST_PAGE_SIZE
-    this.asksForPageSize = pageSize !== undefined
+    this.paging = {
+      page: can?.page ?? REST_CAPABILITIES.page,
+      limit: this.params.limit,
+      offset: this.params.offset,
+      cursor: this.params.cursor,
+      size: pageSize ?? REST_PAGE_SIZE,
+      asksForSize: pageSize !== undefined,
+      firstPageNumber: pageNumbers?.first,
+      sendsNoCount,
+      pagesByLastId
+    }
     this.capabilities = {
       ...REST_CAPABILITIES,
       ...can,
@@ -233,6 +235,9 @@ export class RestPlace extends WebPlace implements Place {
    * Send a named operation:  what the server answers.
    * - Its address's braces are filled from the thing sent (`Api.url()`):  `/jobs/{id}/complete` from its id, any
    *   other name from its field by that name, the server's (epic `data` P49, Q48).
+   * - A brace nothing sent fills is filled from where the thing is (epic `data` P56):  its address, word by word, under
+   *   the operation's.  So `/jobs/{job_id}/complete` takes the job's id, and a step read at `/jobs/6f1c/steps`
+   *   fills `/jobs/{job_id}/steps/{step_id}/retry` with its job's and its own.
    * - Its own method, `POST` unless its description said another.
    * - A row of `collection` goes in the server's own names, as a write does.
    * - throws `TypeError` for an operation it wasn't told of;  `PlaceError` `"refused"` for one its collection's
@@ -247,10 +252,22 @@ export class RestPlace extends WebPlace implements Place {
     const { at, method = "POST" } = typeof operation === "string" ? { at: operation } : operation
     const data = collection && input ? this.onTheWire(collection, input as PlaceRow) : input
     const id = isOneRow(input) ? input.id : undefined
-    const urlData = isOneRow(data) ? { ...data, ...(id !== undefined && { id }) } : {}
+    const sent = isOneRow(data) ? { ...data, ...(id !== undefined && { id }) } : {}
+    const where = collection && id !== undefined ? this.addressOfThing(collection, `${id as string}`) : undefined
+    const urlData = { ...(where && bracesFrom(at, where)), ...sent }
     const url = IS_ADDRESS.test(at) ? at : `${this.url}${at}`
     const response = await this.answerTo({ url, urlData: urlData as never, method, data: data as never }, context)
     return jsonIn(response)
+  }
+
+  /**
+   * Where the thing `id` of `collection` is, under the place's address:  `/jobs/6f1c/steps/3`, read under its job;
+   * `/jobs/6f1c`, at its collection's own.
+   */
+  private addressOfThing(collection: string, id: string): string {
+    const under = this.readUnder.get(versionKey(collection, id))
+    const list = under ?? (this.mappingOf(collection).path ?? `/${collection}{/id}`).replace(/\{\/?id\}$/, "")
+    return `${list.replace(/\/+$/, "")}/${encodeURIComponent(id)}`
   }
 
   /** Does `collection` take `operation`? */
@@ -287,24 +304,25 @@ export class RestPlace extends WebPlace implements Place {
    */
   async list(collection: string, query: ListQuery, context: PlaceContext): Promise<ListAnswer> {
     this.refuseUnlessEnabled(collection, READ_OPERATION)
-    const { page, at, size } = this.pageOf(query)
+    const paging = this.pagingOf(collection)
+    const { page, at, size } = this.pageOf(query, paging)
     const handled: ListHandled = {}
     // a next page's whole address carries the query its first page was asked with:  what that one did, this one did
     const asked = this.paramsFor(collection, query, handled)
     // a last row's id may look like an address, and still isn't where the next page is
-    const nextAddress = page === "cursor" && !this.pagesByLastId && at && IS_ADDRESS.test(at) ? at : undefined
+    const nextAddress = page === "cursor" && !paging.pagesByLastId && at && IS_ADDRESS.test(at) ? at : undefined
     const data = nextAddress ? {} : asked
     if (page === "offset") {
-      if (!this.sendsNoCount) data[this.params.limit] = size
-      data[this.params.offset] = Number(at ?? this.firstPageNumber ?? 0)
+      if (!paging.sendsNoCount) data[paging.limit] = size
+      data[paging.offset] = Number(at ?? paging.firstPageNumber ?? 0)
     }
     if (page === "cursor") {
       // its next link says the rest, the size asked for included:  PokéAPI's `?offset=2000&limit=2000`
-      if (this.pagesByLastId) {
-        if (!this.sendsNoCount) data[this.params.limit] = size
-      } else if (query.page?.size !== undefined) data[this.params.limit] = query.page.size
-      else if (this.asksForPageSize && !at) data[this.params.limit] = this.pageSize
-      if (at && !nextAddress) data[this.params.cursor] = at
+      if (paging.pagesByLastId) {
+        if (!paging.sendsNoCount) data[paging.limit] = size
+      } else if (query.page?.size !== undefined) data[paging.limit] = query.page.size
+      else if (paging.asksForSize && !at) data[paging.limit] = paging.size
+      if (at && !nextAddress) data[paging.cursor] = at
     }
     const url = nextAddress ?? (query.under ? this.addressUnder(query.under) : this.listAddress(collection, handled))
     const response = await this.answerTo({ url, urlData: {}, data }, context)
@@ -316,6 +334,7 @@ export class RestPlace extends WebPlace implements Place {
     // a search at its own address answers its own way:  GitHub's `{ total_count, items: [...] }`;
     // so does a list under a thing:  Open Library's `{ links, size, entries: [...] }` (epic `data` T114);
     // and a search beside lists, its rows not where theirs are:  FastAPI's `{ results, total_count }` (epic `data` I140);
+    // or a plain list beside lists whose rows are wrapped:  FastAPI's steps under a job (epic `data` P56);
     // ONE thing under a thing is that list's one row:
     // a system's snapshot, its own lists inside it (epic `from-console` P16)
     const rows =
@@ -325,7 +344,7 @@ export class RestPlace extends WebPlace implements Place {
           ? [held]
           : !Array.isArray(held) &&
               (query.under || this.isSearchAddress(collection, url) || (held === undefined && rowsAt !== undefined))
-            ? (soleListIn(body) ?? (query.under && isOneRow(held) ? [held] : held))
+            ? ((Array.isArray(body) ? body : soleListIn(body)) ?? (query.under && isOneRow(held) ? [held] : held))
             : held
     if (!Array.isArray(rows)) {
       throw new TypeError(
@@ -335,10 +354,11 @@ export class RestPlace extends WebPlace implements Place {
     // told no count, it gives what it gives:  a read asking for fewer takes the first of them;
     // and what's more than this place keeps at once (the Met Museum's every id) is cut, saying so (epic `data` T123)
     const { rows: mostRows } = { ...DEFAULT_CEILING, ...this.capabilities.ceiling }
-    const wanted = this.sendsNoCount && query.page?.size !== undefined ? rows.slice(0, query.page.size) : rows
+    const wanted = paging.sendsNoCount && query.page?.size !== undefined ? rows.slice(0, query.page.size) : rows
     const kept = wanted.length > mostRows ? wanted.slice(0, mostRows) : wanted
-    const sizeIsKnown = this.asksForPageSize || query.page?.size !== undefined
+    const sizeIsKnown = paging.asksForSize || query.page?.size !== undefined
     const nextPage = this.nextPageOf({
+      paging,
       page,
       at,
       size,
@@ -350,8 +370,10 @@ export class RestPlace extends WebPlace implements Place {
       collection,
       lastRow: kept.at(-1)
     })
+    const read = (kept as unknown[]).map((row) => this.noted(collection, this.rowOf(collection, row)))
+    if (query.under) this.noteReadUnder(collection, query.under, read)
     return {
-      rows: (kept as unknown[]).map((row) => this.noted(collection, this.rowOf(collection, row))),
+      rows: read,
       ...(nextPage !== undefined && { nextPage }),
       ...(kept.length < wanted.length && {
         notes: [
@@ -559,9 +581,43 @@ export class RestPlace extends WebPlace implements Place {
     return { [this.wireName(collection, idOf)]: row }
   }
 
-  /** How to page this query. */
-  private pageOf({ page }: ListQuery): { page: PageKind; at: string | undefined; size: number } {
-    return { page: this.capabilities.page, at: page?.at, size: page?.size ?? this.pageSize }
+  /** How to page this query, `paging`'s way. */
+  private pageOf({ page }: ListQuery, paging: Paging): { page: PageKind; at: string | undefined; size: number } {
+    return { page: paging.page, at: page?.at, size: page?.size ?? paging.size }
+  }
+
+  /**
+   * How `collection` pages:  its own way, when it says one (`RestCollection.paging`, epic `data` P56), else the place's.
+   * - Its own kind of paging is whole:  the names it asks with are its own, or the usual `limit`, `offset` and `cursor`.
+   * - Only how many it gives:  the place's way, that many at a time.
+   */
+  private pagingOf(collection: string): Paging {
+    const own = this.mappingOf(collection).paging
+    if (!own) return this.paging
+    const size = own.pageSize === undefined ? {} : { size: own.pageSize, asksForSize: true }
+    if (own.page === undefined)
+      return { ...this.paging, ...size, ...(own.params?.limit && { limit: own.params.limit }) }
+    return {
+      page: own.page,
+      limit: own.params?.limit ?? REST_PARAMS.limit,
+      offset: own.params?.offset ?? REST_PARAMS.offset,
+      cursor: own.params?.cursor ?? REST_PARAMS.cursor,
+      size: this.paging.size,
+      asksForSize: this.paging.asksForSize,
+      ...size,
+      firstPageNumber: own.pageNumbers?.first,
+      sendsNoCount: own.sendsNoCount ?? false,
+      pagesByLastId: own.pagesByLastId
+    }
+  }
+
+  /** SIDE EFFECT:  each of `rows` remembers where it was read, `under`, for a named operation's braces (`call()`). */
+  private noteReadUnder(collection: string, under: string, rows: readonly PlaceRow[]): void {
+    const at = IS_ADDRESS.test(under) ? under.slice(this.url.length) : under
+    for (const row of rows) {
+      const id = idOfRow(row, this.capabilities.idOf)
+      if (id !== undefined) this.readUnder.set(versionKey(collection, id), at.split("?")[0]!)
+    }
   }
 
   /**
@@ -574,13 +630,13 @@ export class RestPlace extends WebPlace implements Place {
    * - throws `TypeError` for a page that goes on from a last row with no id
    */
   private nextPageOf(ask: NextPageAsk): string | undefined {
-    const { page, at, size, sizeIsKnown, count, body, nextAt, response } = ask
-    if (this.pagesByLastId) return this.nextByLastId(ask, this.pagesByLastId.moreAt)
+    const { paging, page, at, size, sizeIsKnown, count, body, nextAt, response } = ask
+    if (paging.pagesByLastId) return this.nextByLastId(ask, paging.pagesByLastId.moreAt)
     if (page === "offset") {
-      const isFull = this.sendsNoCount ? (sizeIsKnown ? count >= size : count > 0) : count === size
+      const isFull = paging.sendsNoCount ? (sizeIsKnown ? count >= size : count > 0) : count === size
       if (!isFull) return undefined
-      if (this.firstPageNumber !== undefined) return String(Number(at ?? this.firstPageNumber) + 1)
-      return String(Number(at ?? 0) + (this.sendsNoCount ? count : size))
+      if (paging.firstPageNumber !== undefined) return String(Number(at ?? paging.firstPageNumber) + 1)
+      return String(Number(at ?? 0) + (paging.sendsNoCount ? count : size))
     }
     if (page !== "cursor") return undefined
     const named = valueAt(body, nextAt)
@@ -814,6 +870,44 @@ export type RestCollection = {
    * - `users are searched with "q" at "/search/users"`
    */
   searches?: RestSearch
+  /**
+   * How this collection pages, when it isn't the place's way (epic `data` P56):
+   * a FastAPI list asked with `?take=&skip=` beside lists asked with `?limit=&offset=`.
+   * - `jobs live at "/api/events"`, then one step in, `its next page is asked for with "take" and "skip"`.
+   */
+  paging?: RestPaging
+}
+
+/**
+ * How one collection pages, its own way (`RestCollection.paging`):  the place's props of the same names, for it alone.
+ * - `page`:  its kind of paging;  left out, the place's, and only its size is its own.
+ */
+export type RestPaging = Pick<RestPlaceProps, "pageSize" | "pageNumbers" | "sendsNoCount" | "pagesByLastId"> & {
+  page?: "offset" | "cursor"
+  /** What it calls how many, where from, and the cursor:  each left out, `limit`, `offset` and `cursor`. */
+  params?: Partial<Pick<RestParams, "limit" | "offset" | "cursor">>
+}
+
+/** How a list is paged, worked out:  the place's (`RestPlace.paging`), or a collection's own (`pagingOf()`). */
+type Paging = {
+  /** Its kind. */
+  page: PageKind
+  /** What it calls how many. */
+  limit: string
+  /** What it calls where from. */
+  offset: string
+  /** What it calls a cursor. */
+  cursor: string
+  /** How many it asks for at a time. */
+  size: number
+  /** It was told how many to ask for, so a server that pages by its own next link is asked for that many too. */
+  asksForSize: boolean
+  /** It counts pages, not rows, from this number:  `RestPlaceProps.pageNumbers`. */
+  firstPageNumber: number | undefined
+  /** It's never told how many to give:  `RestPlaceProps.sendsNoCount`. */
+  sendsNoCount: boolean
+  /** Its next page is asked for by the last row's id:  `RestPlaceProps.pagesByLastId`. */
+  pagesByLastId: { moreAt?: string } | undefined
 }
 
 /** A name as words:  `tenant_groups` => `tenant groups`, `renderConfig` => `render config`. */
@@ -844,6 +938,23 @@ function soleListIn(body: unknown): unknown[] | undefined {
 /** Is `filtering` only fields it's asked for by:  `RestCollection.askedBy`? */
 function isAskedBy(askedBy: readonly string[] | undefined, filtering: readonly string[]): boolean {
   return !!askedBy?.length && filtering.every((field) => askedBy.includes(field))
+}
+
+/**
+ * The braces of `template` that `address` fills, word by word from its start:  `/jobs/{job_id}/complete` and
+ * `/jobs/6f1c` give `{ job_id: "6f1c" }`.
+ * - Stops at the first word that differs, or where `address` ends.
+ */
+function bracesFrom(template: string, address: string): Record<string, string> {
+  const words = template.split("?")[0]!.split("/")
+  const said = address.split("/")
+  const filled: Record<string, string> = {}
+  for (let at = 0; at < Math.min(words.length, said.length); at++) {
+    const brace = /^\{([^{}/]+)\}$/.exec(words[at]!)?.[1]
+    if (brace) filled[brace] = decodeURIComponent(said[at]!)
+    else if (words[at] !== said[at]) break
+  }
+  return filled
 }
 
 /** Is this one thing's row, not a list:  a plain object? */
@@ -894,6 +1005,8 @@ export type RestParams = {
 
 /** What `nextPageOf()` looks at. */
 type NextPageAsk = {
+  /** How its list pages. */
+  paging: Paging
   /** How it pages. */
   page: PageKind
   /** Where this page started. */

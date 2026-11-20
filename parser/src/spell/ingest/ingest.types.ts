@@ -327,6 +327,11 @@ export type CollectionLook = {
   operations?: Record<string, OperationDescription>
   /** The tag its description files it under:  `tenancy`. */
   tag?: string
+  /**
+   * How it pages by position, as its OpenAPI description says (epic `data` P56):  a list that pages unlike the place
+   * says so one step in under its `live at` line.
+   */
+  pagesWith?: PagesWith
 }
 
 /** Everything a look at a place found. */
@@ -374,12 +379,20 @@ export type ServerTakes = {
    * What it calls how many and where from, for a list it says nothing of paging:  `limit` and `offset`.
    * - Or what its OpenAPI description's lists take (epic `data` I140).
    */
-  pagesWith?: {
-    limit: string
-    offset: string
-    /** The most it gives at a time, when its OpenAPI description says (its limit's `maximum`):  `it gives up to 500 at a time`. */
-    most?: number
-  }
+  pagesWith?: PagesWith
+}
+
+/**
+ * How a list pages by a row's position, as its OpenAPI description says (epic `data` I140):
+ * `its next page is asked for with "limit" and "offset"`.
+ */
+export type PagesWith = {
+  /** What it calls how many:  `limit`. */
+  limit: string
+  /** What it calls where from:  `offset`. */
+  offset: string
+  /** The most it gives at a time, when its OpenAPI description says (its limit's `maximum`):  `it gives up to 500 at a time`. */
+  most?: number
 }
 
 /** The writes a look tried, one of each kind, because the person said it may (`--try-writes`;  epic `data` P30). */
@@ -636,6 +649,11 @@ export type CollectionDescription = {
   tag?: string
   /** What else can be done to it, by name:  `add`, `change`, `delete`, and each action route's verb, `enqueue`. */
   operations?: Record<string, OperationDescription>
+  /**
+   * How it pages by position, as its OpenAPI description says (epic `data` P56):
+   * where it isn't the place's way, its own line says it, under its `live at` line.
+   */
+  pagesWith?: PagesWith
   /** Each field, by the source's name for it. */
   fields: Record<string, FieldDescription>
 }

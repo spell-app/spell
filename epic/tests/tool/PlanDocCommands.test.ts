@@ -855,3 +855,55 @@ describe("PlanDocCommands add --start", () => {
     expect(warned.join("\n")).toMatch(/--start needs the person's words/)
   })
 })
+
+// epic `epic-engine` T111:  a session loading an epic skips what the page shows grey
+describe("PlanDocCommands summary / items:  finished phases and grey items left out, unless --all", () => {
+  test("summary:  a count line for the done phases and the grey items;  --all lists them", async () => {
+    const owner = commands()
+    await owner.run(["add", "x", "limit", "Only on macOS"])
+    await owner.run(["add", "x", "issue", "It breaks"])
+    printed = []
+    expect(await owner.run(["summary", "x"])).toBe(0)
+    const lean = printed.join("\n")
+    expect(lean).toContain("  1 phase done  (--all lists them)")
+    expect(lean).not.toContain("P1 · One")
+    expect(lean).toContain("P2 · Two")
+    expect(lean).toContain("It breaks")
+    expect(lean).not.toContain("Only on macOS")
+    expect(lean).toContain("1 grey item left out:  limits, handled  (--all)")
+    printed = []
+    expect(await owner.run(["summary", "--all", "x"])).toBe(0)
+    const all = printed.join("\n")
+    expect(all).toContain("[x] P1 · One")
+    expect(all).toContain("Only on macOS")
+    expect(all).not.toContain("left out")
+  })
+
+  test("summary --json:  `done` and `quiet` count them;  `next` and `active` whichever the scope", async () => {
+    const owner = commands()
+    await owner.run(["add", "x", "limit", "Only on macOS"])
+    printed = []
+    await owner.run(["summary", "x", "--json"])
+    const lean = JSON.parse(printed[0]!)
+    expect(lean.phases.map((phase: { number: string }) => phase.number)).toEqual(["2", "3"])
+    expect([lean.done, lean.quiet, lean.next.number, lean.open.limit]).toEqual([1, 1, "2", []])
+    printed = []
+    await owner.run(["summary", "x", "--json", "--all"])
+    const all = JSON.parse(printed[0]!)
+    expect(all.phases).toHaveLength(3)
+    expect([all.done, all.quiet, all.open.limit.length]).toEqual([1, 1, 1])
+  })
+
+  test("items:  grey items counted per section;  --all lists them", async () => {
+    const owner = commands()
+    await owner.run(["add", "x", "limit", "Only on macOS"])
+    printed = []
+    await owner.run(["items", "x", "--json"])
+    const limits = JSON.parse(printed[0]!).sections.find((s: { kind: string }) => s.kind === "limit")
+    expect([limits.items.length, limits.quiet]).toEqual([0, 1])
+    printed = []
+    await owner.run(["items", "x", "--json", "--all"])
+    const every = JSON.parse(printed[0]!).sections.find((s: { kind: string }) => s.kind === "limit")
+    expect([every.items.length, every.quiet]).toEqual([1, undefined])
+  })
+})

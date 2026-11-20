@@ -21,6 +21,11 @@ import type { IngestFiles, PlaceDescription } from "spell/parser/spell/ingest/in
  *   - its lists page by `?limit=&offset=`, the most 500;  its search needs `q`
  *   - a nested model's required fields;  a list and an action under each job's steps
  *   - `/api/jobs-archive/{archive_id}`, whose path starts like `/api/jobs`, but isn't under it
+ * - And what was left (epic `data` P56):
+ *   - its events page by `?take=&skip=`, the most 100, unlike every other list
+ *   - its runs are answered only for a team, `?team=infra`, its example
+ *   - a job's steps are read from under it, and a step is retried at `/api/jobs/{job_id}/steps/{step_id}/retry`
+ *   - its archived jobs, `/api/jobs-archive`, a name whose first word is plural already, in Spanish (I141)
  */
 
 const ACME = "https://jobs.acme.test"
@@ -70,7 +75,14 @@ describe("PlaceSpec, an OpenAPI 3.1 description as FastAPI writes it", () => {
   const fields = jobs.fields!
 
   test("its paged list and its search are collections, their rows under `items` and `results`", () => {
-    expect(look.collections.map(({ name }) => name).sort()).toEqual(["jobs", "search"])
+    expect(look.collections.map(({ name }) => name).sort()).toEqual([
+      "events",
+      "jobs",
+      "jobs-archive",
+      "runs",
+      "search",
+      "steps"
+    ])
     expect(jobs).toMatchObject({ at: "/api/jobs", rowsAt: "items", takesLimit: true })
     expect(jobs.schemaAt).toBe("#/components/schemas/Job")
     expect(named("search")).toMatchObject({ at: "/api/search", rowsAt: "results" })
@@ -80,6 +92,14 @@ describe("PlaceSpec, an OpenAPI 3.1 description as FastAPI writes it", () => {
   test("its lists page by offset, as their questions say, up to their limit's maximum", () => {
     expect(look.serverTakes).toEqual({ pagesWith: { limit: "limit", offset: "offset", most: 500 } })
     expect(jobs.paging).toBe("none")
+    // the one that pages unlike the rest keeps its own way (epic `data` P56)
+    expect(named("events").pagesWith).toEqual({ limit: "take", offset: "skip", most: 100 })
+    expect(jobs.pagesWith).toEqual({ limit: "limit", offset: "offset", most: 500 })
+  })
+
+  test("a list answered only for a team is asked for by it, with its example (epic `data` P56)", () => {
+    expect(named("runs")).toMatchObject({ at: "/api/runs", askedBy: { team: "infra" } })
+    expect(named("runs").searchedOnly).toBeUndefined()
   })
 
   test("a search needing its question is searched only, for its example, never a plain list", () => {
@@ -91,11 +111,23 @@ describe("PlaceSpec, an OpenAPI 3.1 description as FastAPI writes it", () => {
     expect(jobs.searchedOnly).toBeUndefined()
   })
 
-  test("what's deeper under a job is said, to read by hand;  a path that only starts like it isn't its", () => {
-    expect(look.notes).toEqual([
-      "POST /api/jobs/{job_id}/steps/{step_id}/retry acts on something inside a job:  read it by hand.",
-      "/api/jobs/{job_id}/steps answers a list under each job:  read it by hand."
-    ])
+  test("a job's steps are a list under each job, and retrying one a step's action;  a path that only starts like it isn't its", () => {
+    expect(look.notes).toEqual([])
+    expect(look.listsUnder).toEqual([{ owner: "jobs", list: "steps", at: "/api/jobs/{id}/steps" }])
+    const steps = named("steps")
+    expect(steps).toMatchObject({ at: "/api/jobs/{id}/steps", schemaAt: "#/components/schemas/Step", idAt: "id" })
+    // its braces as written:  the place fills them from the step, and from where it read it
+    expect(steps.operations).toEqual({
+      retry: {
+        method: "POST",
+        at: "/api/jobs/{job_id}/steps/{step_id}/retry",
+        params: { job_id: "text", step_id: "number" },
+        state: { is: "unverified" }
+      }
+    })
+    // the job's own copy of its steps, inside its row, gives way to the list under it
+    expect(fields.steps).toBeUndefined()
+    expect(named("jobs-archive").fields!.steps).toMatchObject({ type: "inside", isListInside: true })
     expect(Object.values(jobs.operations!).map(({ at }) => at)).not.toContain("/api/jobs-archive/{archive_id}")
   })
 
@@ -119,7 +151,11 @@ describe("PlaceSpec, an OpenAPI 3.1 description as FastAPI writes it", () => {
     }
     const other = new PlaceSpec(document, SPEC_AT).lookAt(ACME)
     expect(other.collections.map(({ name }) => name)).toEqual(["reports"])
-    expect(other.notes).toContain('/api/reports can\'t be read without "team":  read it by hand.')
+    // asked for by it, with nothing to try it with
+    expect(other.collections[0]!.askedBy).toEqual({ team: "" })
+    expect(other.notes).toContain(
+      '/api/reports can\'t be read without "team", and its description gives no example to try:  verify skips it.'
+    )
     expect(other.serverTakes).toBeUndefined()
   })
 
@@ -153,12 +189,10 @@ describe("PlaceSpec, an OpenAPI 3.1 description as FastAPI writes it", () => {
     })
     expect(fields.owner!.inside!.email).toMatchObject({ type: "text", example: "alice@acme.test", format: "email" })
     expect(fields.owner!.inside!.team).toMatchObject({ type: "text" })
-    expect(fields.steps).toMatchObject({
-      type: "inside",
-      isListInside: true,
-      insideSchemaAt: "#/components/schemas/Step"
-    })
-    expect(fields.steps!.inside!.seconds).toMatchObject({ type: "number" })
+    // an archived job's steps are its own, inside it:  no list of them is under it
+    const steps = named("jobs-archive").fields!.steps!
+    expect(steps).toMatchObject({ type: "inside", isListInside: true, insideSchemaAt: "#/components/schemas/Step" })
+    expect(steps.inside!.seconds).toMatchObject({ type: "number" })
     expect(fields.labels).toMatchObject({ type: "list of text" })
   })
 
@@ -244,7 +278,21 @@ describe("spell place ingest --spec, of a FastAPI 3.1 description", () => {
     expect(spell).toMatch(
       /^an "owner" is a thing\n\tits "number" is a required number, stored as "id"\n\tits "email" is required text$/m
     )
-    expect(spell).toMatch(/^a "step" is a thing\n\tits "name" is required text$/m)
+    // a list paging its own way, one step in under its line (epic `data` P56)
+    expect(spell).toMatch(
+      /^\tevents live at "\/api\/events"\n\t\tits next page is asked for with "take" and "skip"\n\t\tit gives up to 100 at a time$/m
+    )
+    // a list answered only for a team, a where on it sent
+    expect(spell).toMatch(/^\truns are asked for by their team$/m)
+    // a job's steps, read from under it, and a step's action
+    expect(spell).toMatch(/^\ta job's steps live at "\/api\/jobs\/\{id\}\/steps"$/m)
+    expect(spell).not.toMatch(/steps are found at/)
+    expect(spell).toMatch(/^\tto retry a step is at "\/api\/jobs\/\{job_id\}\/steps\/\{step_id\}\/retry"$/m)
+    expect(spell).toMatch(/^a "job" is a thing\n[^]*?\tits "steps" is a list of steps$/m)
+    expect(spell).toMatch(
+      /^a "step" is a thing\n\tit lives in acme jobs\n\tthis type is unverified\n\tenabled operations are read, retry\n\tits "name" is required text$/m
+    )
+    expect(spell).toMatch(/^\tjobs archives live at "\/api\/jobs-archive"$/m)
     const { files } = parseSpellProject([{ path: "/AcmeJobs.api.spell", contents: spell }])
     expect(files[0]!.errors).toEqual([])
     expect(spell).toMatchSnapshot()
@@ -256,6 +304,10 @@ describe("spell place ingest --spec, of a FastAPI 3.1 description", () => {
     expect(spell).toMatch(/^\tsu página siguiente se pide con "limit" y "offset"$/m)
     expect(spell).toMatch(/^\tlos searches se buscan en "\/api\/search"$/m)
     expect(spell).toMatch(/^\tsu "email" es texto obligatorio$/m)
+    // its own paging stays one step in;  a name whose first word is plural already keeps every word (I141)
+    expect(spell).toMatch(/^\t\tsu página siguiente se pide con "take" y "skip"\n\t\tda hasta 100 a la vez$/m)
+    expect(spell).toMatch(/^\tlos jobs archive están en "\/api\/jobs-archive"$/m)
+    expect(spell).not.toMatch(/jobses/)
     const { files } = parseSpellProject([{ path: "/AcmeJobs.api.es.spell", contents: spell }])
     expect(files[0]!.errors).toEqual([])
   })
@@ -270,9 +322,18 @@ describe("spell place verify, of a FastAPI service", () => {
     created_at: "2026-11-19T12:00:00Z"
   }
 
-  /** FastAPI's answers:  a page of jobs, one by id, and a search that refuses to be asked without `q`. */
+  /**
+   * FastAPI's answers:  a page of jobs, one by id, a search that refuses to be asked without `q`,
+   * runs that refuse to be asked without a team, and a job's steps.
+   */
   function fastApi(url: URL): Response {
     if (url.pathname === "/api/jobs") return Response.json({ items: [JOB], total: 1, limit: 50, offset: 0 })
+    if (url.pathname === "/api/runs" && url.searchParams.get("team") === "infra")
+      return Response.json({ items: [{ id: 1, team: "infra", state: "done" }], total: 1 })
+    if (url.pathname === "/api/runs")
+      return Response.json({ detail: [{ loc: ["query", "team"], msg: "Field required" }] }, { status: 422 })
+    if (url.pathname === "/api/runs/1") return Response.json({ id: 1, team: "infra", state: "done" })
+    if (url.pathname === "/api/jobs/6f1c/steps") return Response.json([{ id: 3, name: "build", seconds: 12 }])
     if (url.pathname === "/api/jobs/6f1c") return Response.json(JOB)
     if (url.pathname === "/api/search" && url.searchParams.get("q"))
       return Response.json({
@@ -294,6 +355,14 @@ describe("spell place verify, of a FastAPI service", () => {
     expect(collections.searches!.state).toMatchObject({ is: "verified", status: 200, rows: 1 })
     expect(collections.jobs!.state).toMatchObject({ is: "verified", status: 200, rows: 1 })
     expect(result.changes).toContain("searches:  unverified => verified.")
+  })
+
+  test("its runs are asked for their example team, and a job's steps under its first job (epic `data` P56)", async () => {
+    const { ingest, descriptions } = await ingestOf("AcmeJobs.api.spell", fastApi)
+    await ingest.verify("AcmeJobs.api.spell")
+    const { collections } = descriptions.get("AcmeJobs.api.json5")!
+    expect(collections.runs!.state).toMatchObject({ is: "verified", status: 200, rows: 1 })
+    expect(collections.steps!.state).toMatchObject({ is: "verified", status: 200, rows: 1 })
   })
 
   test("a refusal says FastAPI's own message:  `detail`, a list of what was wrong", async () => {

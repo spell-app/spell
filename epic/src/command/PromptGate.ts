@@ -29,13 +29,15 @@ import { Transcript } from "spell/epic/config/Transcript.ts"
  *   - `/isolate <name>`, not `/isolate done`
  *   - `/epic <name> [plan]`, not `/epic review ...` or `/epic done` (which is `/isolate done`)
  *   - `/epic resume <name>` and `/unpark <name>`
- *   - `review`, `resume`, `color`, `future`, `phase`, `start` and `request` are reserved epic ids:
+ *   - `review`, `resume`, `color`, `future`, `phase`, `start`, `fresh` and `request` are reserved epic ids:
  *     - a review runs from any window, and keeps the session's name
  *     - a resume, like `/unpark`, is only renamed (it picks its window itself)
  *     - `/epic color <look>` recolours the window it's typed in:  nothing to gate
  *     - `/epic future <name> ...` writes an idea down as a future epic (no worktree):  only renamed, `📅 <name>`
  *     - `/epic phase [ids] ...` adds a phase to THIS session's epic, `/epic start <phase | ids> ...` works one
  *       (epic `skillz` P4):  nothing to gate, no rename
+ *     - `/epic fresh` hands THIS session's epic to a new session in this window (epic `epic-engine` T110):  nothing to
+ *       gate, no rename (the old tab is found by its title)
  *     - `/epic request <epic> <rN>` takes up a request sent from another session (epic `epic-workflow`):
  *       only renamed, `🚧 <epic>`, as a resume is;  refused in a session titled for another epic (step 0)
  *   - A look right after the name (`/epic x -purple`, epic `windows-and-review` P5) is the window's, not the plan's:
@@ -250,6 +252,9 @@ export class PromptGate {
     // `/epic phase [ids] ...` / `/epic start <phase | ids> ...` act on THIS session's epic (epic `skillz` P4):
     // it's already named, isolated and planned:  nothing to gate, no rename
     if (skill === "epic" && (name === "phase" || name === "start")) return null
+    // `/epic fresh [--force]` hands THIS session's epic to a new session in this window (epic `epic-engine` T110):
+    // nothing to gate, and NO rename:  its old tab is found by the title it has
+    if (skill === "epic" && name === "fresh") return null
     // `/epic future <name> ...` writes an idea down, from any window, no worktree:
     // renamed `📅 <name>`, never blocked
     // `/epic request <epic> <rN>`:  a request sent from another session (epic `epic-workflow`):

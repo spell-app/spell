@@ -52,6 +52,11 @@ export type PlaceDetails = {
       searches?: { param: string; fields: string[]; at?: string }
       /** What it lets be done to all of them, by the line under its own:  `enabled operations are read, add` (epic `data` P49). */
       operations?: string[]
+      /**
+       * How it pages, by the place's paging lines one step in under its own, when it isn't the place's way (epic `data` P56):
+       * `its next page is asked for with "take" and "skip"`.
+       */
+      paging?: PagingDetails
     }
   >
   /** The NAME of the key it needs:  never the key. */
@@ -172,6 +177,19 @@ export type PlaceDetails = {
    */
   firstReads?: () => Array<[Function, ListQuery?]>
 }
+
+/** What the place's paging lines say:  for every collection, or for one alone, under its `live at` line. */
+export type PagingDetails = Pick<
+  PlaceDetails,
+  | "pagesByOffset"
+  | "pagesByNumber"
+  | "pagesByLastId"
+  | "nextPageIn"
+  | "nextPageInLink"
+  | "nextPageSentAs"
+  | "pageSize"
+  | "pageSizeAskedWith"
+>
 
 /** What a kind needs to make its place. */
 export type PlaceMaking = {
@@ -524,7 +542,7 @@ function pathTemplateOf(at: string): string {
 function restCollections({ collections = {} }: PlaceDetails, collection: string, storedAs: Record<string, string>) {
   const named = { ...collections, [collection]: { ...collections[collection] } }
   return Object.fromEntries(
-    Object.entries(named).map(([name, { at, fields, pictures, askedBy, searches }]) => {
+    Object.entries(named).map(([name, { at, fields, pictures, askedBy, searches, paging }]) => {
       const all = name === collection ? { ...fields, ...storedAs } : fields
       return [
         name,
@@ -533,7 +551,9 @@ function restCollections({ collections = {} }: PlaceDetails, collection: string,
           ...(all && Object.keys(all).length && { fields: all }),
           ...(pictures && { pictures }),
           ...(askedBy && { askedBy }),
-          ...(searches && { searches })
+          ...(searches && { searches }),
+          ...(paging?.nextPageIn !== undefined && { nextAt: paging.nextPageIn }),
+          ...(paging && { paging: restPagingOf(paging) })
         }
       ]
     })
@@ -567,6 +587,23 @@ function restLinesForEveryCollection({ idColumn, rowsIn, nextPageIn }: PlaceDeta
 }
 
 /**
+ * How one collection pages, its own way, from the paging lines under its `live at` line (epic `data` P56):
+ * `RestPlace`'s `RestCollection.paging`.
+ * - Its kind only when a line says one:  `it gives up to 100 at a time` alone keeps the place's way.
+ */
+function restPagingOf(paging: PagingDetails) {
+  const { can, params, pageNumbers, sendsNoCount, pagesByLastId } = restAbilitiesIn(paging)
+  return {
+    ...(can?.page && { page: can.page }),
+    ...(params && { params }),
+    ...(paging.pageSize !== undefined && { pageSize: paging.pageSize }),
+    ...(pageNumbers && { pageNumbers }),
+    ...(sendsNoCount && { sendsNoCount }),
+    ...(pagesByLastId && { pagesByLastId })
+  }
+}
+
+/**
  * What a web server's lines say it can do, and what it calls each question it's asked (epic `data` I35).
  * - Its next page in a field or its `Link` header:  it pages by cursor, as `RestPlace` reads that field or header then.
  */
@@ -583,7 +620,7 @@ function restAbilitiesIn({
   sortedWith,
   fieldsNamedIn,
   readOnly
-}: PlaceDetails) {
+}: Partial<PlaceDetails>) {
   const position = pagesByOffset ?? (pagesByNumber && { limit: pagesByNumber.limit, offset: pagesByNumber.page })
   const page = position ? "offset" : nextPageIn !== undefined || nextPageInLink || pagesByLastId ? "cursor" : undefined
   const count = position ?? pagesByLastId

@@ -174,7 +174,12 @@
  *   - needs `$CLAUDE_CODE_SESSION_ID` (Claude sets it in a session's commands)
  *   - the end-of-turn hook won't run (`moveProblem()`):  nothing recorded;  exits 1, saying why, the fix, and
  *     `launch <name>` (a new session there) as what works
- * - `open`, `launch`, `close` and `handoff` say first, on stderr (`sayBefore()`;  epic `epic-engine` P26):
+ * - `fresh <epic> [--force]`:  hand epic `<epic>` to a NEW session in THIS window when this turn ends, `/epic resume
+ *   <epic>` typed into its tab, this session's tab closed (`/epic fresh`, epic `epic-engine` T110)
+ *   - why:  a long session re-reads its whole transcript every turn;  a new one starts from the epic page
+ *   - refused while the epic's agents run (`epic agents`):  closing the tab would cut them off;  `--force` anyway
+ *   - the same record and end-of-turn hook as `handoff`, marked `fresh`
+ * - `open`, `launch`, `close`, `handoff` and `fresh` say first, on stderr (`sayBefore()`;  epic `epic-engine` P26):
  *   - this session's move promised earlier that now can't happen (`SessionMoves.missedMove()`), its record cleared
  *   - that the checkout is a BROKEN worktree, one git no longer knows:  its settings come from the main checkout
  *     (`checkoutOf()` finds it from the gone git folder's path), and the fix is `git worktree repair`
@@ -193,6 +198,7 @@ import { spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { homedir } from "node:os"
 import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path"
+import JSON5 from "json5"
 
 import { escapeRegExp } from "spell/util/string.ts"
 import { findUp } from "spell/util/node/findUp"
@@ -915,6 +921,56 @@ export class Window {
   }
 
   /**
+   * `fresh`:  record that epic `epic` goes to a NEW session in THIS window when session `sessionId`'s turn ends
+   * (`/epic fresh`, epic `epic-engine` T110);  returns the record.
+   * - why:  a long session re-reads its whole transcript every turn;  a new one starts from the epic page
+   * - the record is `handoff()`'s, `fresh: true`:  `resume()` opens a NEW session (no session id) in window `from`,
+   *   `/epic resume <epic>` typed in, then closes this session's tab
+   * - throws, writing nothing:
+   *   - no session, or nothing would carry the move out (`moveProblem()`, as `handoff()`)
+   *   - no window:  the extension's bridge isn't running in this session's window
+   *   - the epic's agents are running (`runningAgents()`):  closing this tab would cut them off;  `force`:  anyway
+   */
+  static fresh(epic, sessionId, { force = false } = {}) {
+    if (!SESSION_ID.test(sessionId ?? "")) throw new Error("no session:  $CLAUDE_CODE_SESSION_ID isn't set")
+    const refused = Window.moveProblem(sessionId)
+    if (refused) throw new Error(`this session can't hand ${epic} on:  ${refused.problem};  ${refused.fix}`)
+    const running = force ? [] : Window.runningAgents(epic)
+    if (running.length) {
+      throw new Error(
+        `${epic}'s agents are still running, and closing this tab would cut them off:  ${running.join(", ")};  ` +
+          "wait for them (`epic agents`), or `--force`"
+      )
+    }
+    const from = Window.current()
+    if (!from) throw new Error("no window:  the spell-epic extension's bridge isn't running in this session's window")
+    const handoff = {
+      sessionId,
+      to: from.workspaceFile ?? null,
+      from: from.pid,
+      close: "tab",
+      remove: null,
+      show: null,
+      prompt: `/epic resume ${epic}`,
+      fresh: true
+    }
+    mkdirSync(Window.handoffs, { recursive: true, mode: 0o700 })
+    writeFileSync(Window.handoffFile(sessionId), `${JSON.stringify(handoff, null, 2)}\n`, { mode: 0o600 })
+    return handoff
+  }
+
+  /**
+   * The names of epic `epic`'s agents still running:  its running-agents list, `epics/<epic>/agents.json5` in the epic
+   * folder (`AgentList`'s file, read here as plain JSON5:  this script runs in plain `node`);  `[]` when there's none.
+   */
+  static runningAgents(epic) {
+    const file = join(EpicConfig.contentOf(ROOT), "epics", epic, AGENTS_FILE)
+    if (!existsSync(file)) return []
+    const agents = JSON5.parse(readFileSync(file, "utf8"))
+    return Array.isArray(agents) ? agents.map((agent) => agent?.name).filter(Boolean) : []
+  }
+
+  /**
    * Why session `sessionId` can't move to another window as its turn ends, `{ problem, fix }`, or `null` when it can.
    * - the move is the plugin's end-of-turn hook's (`hooks/handoff.mjs`):  `SessionMoves.hookProblem()` says when
    *   Claude Code won't run it, from its plugin lists and this session's own mark (its prompt hook ran)
@@ -969,9 +1025,10 @@ export class Window {
    * - the doc failing to show never stops the move:  `shown` is `false` (no doc:  `undefined`)
    */
   static async resume(handoff, titles) {
-    const { sessionId, to, from, close, remove, show, prompt } = handoff
+    const { sessionId, to, from, close, remove, show, prompt, fresh } = handoff
     titles = [titles ?? []].flat().filter(Boolean)
     if (!SESSION_ID.test(sessionId ?? "")) throw new Error(`bad session id '${sessionId}'`)
+    if (fresh) return Window.resumeFresh(handoff, titles)
     if (!Window.windowOf(to)) CONFIG.editor.run([real(to)], { env: codeEnv() })
     const window = await Window.waitFor(to)
     await Window.request("open-session", prompt ? { sessionId, prompt } : { sessionId }, window)
@@ -993,6 +1050,22 @@ export class Window {
     }
     if (remove) rmSync(remove, { force: true })
     return { opened: true, closed, matches, shown }
+  }
+
+  /**
+   * `resume()` for a `fresh()` record:  a NEW session in window `from` (the session's own), `prompt` typed in, then
+   * the old session's tab there closed by `titles`;  returns what happened, as `resume()`.
+   * - the new tab is opened first, so the window is never left without one
+   * - its prompt is typed, not sent:  the new tab has no title of its own yet, so it never matches the old one's
+   * - `from` gone:  throws, nothing opened
+   */
+  static async resumeFresh({ from, prompt }, titles) {
+    const window = from ? Window.entries().get(Number(from)) : undefined
+    if (!window) throw new Error(`window ${from} is gone:  no new session opened`)
+    await Window.request("open-session", prompt ? { prompt } : {}, window)
+    if (!titles.length) return { opened: true, closed: false, matches: undefined, shown: undefined }
+    const { closed, matches } = await Window.request("close-session-tab", { titles }, window)
+    return { opened: true, closed, matches, shown: undefined }
   }
 
   /**
@@ -1185,7 +1258,7 @@ export class Window {
       else console.log([`recommend ${advice.recommend}`, ...advice.reasons.map((reason) => `- ${reason}`)].join("\n"))
       return 0
     }
-    if (["open", "launch", "close", "handoff", "resume"].includes(command)) {
+    if (["open", "launch", "close", "handoff", "fresh", "resume"].includes(command)) {
       if (command !== "resume") sayBefore(process.env.CLAUDE_CODE_SESSION_ID)
       return Window.worktreeCommand(command, target, flags, lists)
     }
@@ -1309,6 +1382,12 @@ export class Window {
         if (!handoff.from) console.log("  (this session's window not found:  its old tab stays open)")
         return 0
       }
+      if (command === "fresh") {
+        const handoff = Window.fresh(name, process.env.CLAUDE_CODE_SESSION_ID, { force: flags.force === true })
+        console.log(`a new session takes ${name} on in this window when this turn ends:  ${handoff.prompt}`)
+        console.log("  this tab closes then:  end the turn now")
+        return 0
+      }
       if (command === "resume") {
         const handoff = JSON.parse(readFileSync(name, "utf8"))
         rmSync(name, { force: true })
@@ -1374,12 +1453,16 @@ const COMMANDS = [
   "launch",
   "close",
   "handoff",
+  "fresh",
   "resume",
   "should-stay",
   "hooks",
   "color",
   "stay"
 ]
+
+/** An epic's running-agents list, beside its page:  `AgentList`'s `LIST_FILE`. */
+const AGENTS_FILE = "agents.json5"
 
 /** Usage, printed for a bad command. */
 const USAGE = `usage:  epic window <command>
@@ -1416,6 +1499,9 @@ const USAGE = `usage:  epic window <command>
                                move this session to <name>'s window when this turn ends
                                (--back:  from it to its package's window, then close it;
                                --prompt:  typed into the new tab)
+  fresh <epic> [--force]       hand epic <epic> to a NEW session in this window when this turn ends,
+                               /epic resume <epic> typed into its tab, this tab closed;  refused while
+                               the epic's agents run (epic agents), unless --force
   resume <record> [--title <title>]...
                                the move itself (the Stop hook runs it)
   should-stay [--epic] [--json]
