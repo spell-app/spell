@@ -5542,11 +5542,11 @@
           "ruleNames": ["start_tour"],
           "internal": false,
           "file": "src/spell/rules/UI/StartTour.ts",
-          "line": 15,
+          "line": 20,
           "purpose": "Start one of the page's tours, by its name (epic `editor` P40).",
           "syntaxes": [
             {
-              "syntax": "(empieza|inicia) el recorrido {name:text}",
+              "syntax": "(empieza|inicia) el recorrido {name:text} (en el paso {step:expression})?",
               "example": "empieza el recorrido \"primera partida\"",
               "outputs": {
                 "js": {
@@ -5561,7 +5561,7 @@
               }
             },
             {
-              "syntax": "(empezar|iniciar) el recorrido {name:text}",
+              "syntax": "(empezar|iniciar) el recorrido {name:text} (en el paso {step:expression})?",
               "example": "iniciar el recorrido \"primera partida\"",
               "outputs": {
                 "js": {

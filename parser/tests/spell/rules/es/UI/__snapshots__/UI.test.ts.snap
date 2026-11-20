@@ -25,7 +25,7 @@ exports[`testing spell module UI, in Spanish > rule group specs > match snapshot
   "show_drawn": "hide?|name",
   "show_drawn_with": "name|thing",
   "show_tour_step": "step",
-  "start_tour": "name",
+  "start_tour": "name|step?",
   "stop_all_media": "kind",
   "stop_sound": "sound",
   "warn": "message|title?|size?|okButton?",

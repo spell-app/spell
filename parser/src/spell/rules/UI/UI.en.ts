@@ -326,13 +326,31 @@ UI.addRule(StopAllMedia, {
 })
 
 // a page's tour, Spell UI's `<ui-tour>` (epic `editor` P40)
+// at a given step too (epic `editor` T128):  `start tour "first game" at step 3`
 UI.addRule(StartTour, {
-  syntax: "start tour {name:text}",
-  tests: [{ compileAs: "statement", tests: [[`start tour "first game"`, `core.startTour("first game")`]] }]
+  syntax: "start tour {name:text} (at step {step:expression})?",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [
+        [`start tour "first game"`, `core.startTour("first game")`],
+        [`start tour "first game" at step 3`, `core.startTour("first game", 3)`],
+        [`start tour "first game" at step "drag"`, `core.startTour("first game", "drag")`]
+      ]
+    }
+  ]
 })
 UI.addRule(StartTour, {
-  syntax: "start the {name:text} tour",
-  tests: [{ compileAs: "statement", tests: [[`start the "first game" tour`, `core.startTour("first game")`]] }]
+  syntax: "start the {name:text} tour (at step {step:expression})?",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [
+        [`start the "first game" tour`, `core.startTour("first game")`],
+        [`start the "first game" tour at step 3`, `core.startTour("first game", 3)`]
+      ]
+    }
+  ]
 })
 
 UI.addRule(StopTour, {

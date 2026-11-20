@@ -268,6 +268,50 @@ describe("testing spell module UI", () => {
       expect(compiled).toContain('core.cancelActions(this, "deal")')
     })
 
+    test("every tour line in a handler, and a tour started at a step (epic `editor` T128)", () => {
+      const { compiled, errors } = parsed(`my game is an app:
+	- to draw it:
+		<ui-button onClick={start tour "first game"}>Tour</ui-button>
+		<ui-button onClick={start the "first game" tour at step 3}>From step 3</ui-button>
+		<ui-button onClick={start tour "first game" at step "drag"}>From drag</ui-button>
+		<ui-button onClick={show step 2}>Step 2</ui-button>
+		<ui-button onClick={go to the next step}>Next</ui-button>
+		<ui-button onClick={go back a step}>Back</ui-button>
+		<ui-button onClick={stop the tour}>Done</ui-button>
+`)
+      expect(errors).toEqual([])
+      expect(compiled).toContain('onClick: core.pressed(this, () => core.startTour("first game"))')
+      expect(compiled).toContain('onClick: core.pressed(this, () => core.startTour("first game", 3))')
+      expect(compiled).toContain('onClick: core.pressed(this, () => core.startTour("first game", "drag"))')
+      expect(compiled).toContain("onClick: core.pressed(this, () => core.showTourStep(2))")
+      expect(compiled).toContain("onClick: core.pressed(this, () => core.nextTourStep())")
+      expect(compiled).toContain("onClick: core.pressed(this, () => core.previousTourStep())")
+      expect(compiled).toContain("onClick: core.pressed(this, () => core.stopTour())")
+    })
+
+    test("and in Spanish:  `en el paso 3`", () => {
+      const { compiled, errors } = parsed(
+        `mi juego es una app:
+	- para empezar:
+		empieza el recorrido "primera partida" en el paso 3
+	- para dibujarlo:
+		<ui-button onClick={inicia el recorrido "primera partida" en el paso "arrastrar"}>Recorrido</ui-button>
+		<ui-button onClick={muestra el paso 2}>Paso 2</ui-button>
+		<ui-button onClick={ve al siguiente paso}>Siguiente</ui-button>
+		<ui-button onClick={retrocede un paso}>Atrás</ui-button>
+		<ui-button onClick={para el recorrido}>Listo</ui-button>
+`,
+        "/Juego.es.spell"
+      )
+      expect(errors).toEqual([])
+      expect(compiled).toContain('core.startTour("primera partida", 3)')
+      expect(compiled).toContain('onClick: core.pressed(this, () => core.startTour("primera partida", "arrastrar"))')
+      expect(compiled).toContain("onClick: core.pressed(this, () => core.showTourStep(2))")
+      expect(compiled).toContain("onClick: core.pressed(this, () => core.nextTourStep())")
+      expect(compiled).toContain("onClick: core.pressed(this, () => core.previousTourStep())")
+      expect(compiled).toContain("onClick: core.pressed(this, () => core.stopTour())")
+    })
+
     test('the neighbouring lines read as before:  `show "help"`, `stop its sound`, a `go back` method', () => {
       const { compiled, errors } = parsed(`a pokemon is a thing:
 	- it has a sound as text

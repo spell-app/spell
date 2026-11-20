@@ -825,6 +825,7 @@ A page's tour, Spell UI's `<ui-tour>`, walks a person through a feature one step
 | Spell | JavaScript |
 | --- | --- |
 | `start tour "first game"`, `start the "first game" tour` | `core.startTour("first game")` |
+| `start tour "first game" at step 3`, `start the "first game" tour at step "drag"` | `core.startTour("first game", 3)` |
 | `stop tour`, `stop the tour` | `core.stopTour()` |
 | `show step 3`, `show the tour step 3`, `show step "drag"` | `core.showTourStep(3)`, `core.showTourStep("drag")` |
 | `go to the next step`, `show the next step of the tour` | `core.nextTourStep()` |
@@ -833,10 +834,11 @@ A page's tour, Spell UI's `<ui-tour>`, walks a person through a feature one step
 - The quoted name is the tour's:  `start the "first game" tour` never reads as a property.
 - "The tour" is always the tour showing now:  `stop the tour` beats an action of the program's named `tour`.
 - A bare `go back` is not a step back.
+- Each line works in a handler too:  `<ui-button onClick={go to the next step}>Next</ui-button>`.
 - No tours on the page, or none of that name:  the program's console says so, and the program goes on.
 - The tour itself is written in the page's HTML, as a `<ui-tour>`, for now.
-- Spanish:  `empieza el recorrido "primera partida"`, `para el recorrido`, `muestra el paso 3`, `ve al siguiente paso`,
-  `retrocede un paso`.
+- Spanish:  `empieza el recorrido "primera partida"`, `... en el paso 3`, `para el recorrido`, `muestra el paso 3`,
+  `ve al siguiente paso`, `retrocede un paso`.
 - A program compiled to Python doesn't drive tours yet.
 
 ### Tests, in English

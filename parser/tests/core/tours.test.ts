@@ -28,12 +28,21 @@ describe("a page's tours (epic `editor` P40)", () => {
   test("each line reaches the page's tours, through the global symbol", () => {
     const calls = fakeTours()
     core.startTour("first game")
+    core.startTour("first game", 3)
     core.showTourStep(3)
     core.showTourStep("drag")
     core.nextTourStep()
     core.previousTourStep()
     core.stopTour()
-    expect(calls).toEqual([["start", "first game"], ["show", 3], ["show", "drag"], ["next"], ["back"], ["stop"]])
+    expect(calls).toEqual([
+      ["start", "first game"],
+      ["start", "first game", 3],
+      ["show", 3],
+      ["show", "drag"],
+      ["next"],
+      ["back"],
+      ["stop"]
+    ])
   })
 
   test("a tour the page hasn't got is said on the program's console;  nothing throws", () => {

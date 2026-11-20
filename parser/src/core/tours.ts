@@ -1,6 +1,8 @@
 /**
  * Tours (epic `editor` P40):  what compiled spell calls to drive a page's tour, a `<ui-tour>` of Spell UI's.
- * - `start tour "first game"` => `core.startTour("first game")`;  `stop the tour` => `core.stopTour()`
+ * - `start tour "first game"` => `core.startTour("first game")`,
+ *   `start tour "first game" at step 3` => `core.startTour("first game", 3)`
+ * - `stop the tour` => `core.stopTour()`
  * - `show step 3`, `show step "drag"` => `core.showTourStep(3)`, `core.showTourStep("drag")`
  * - `go to the next step` => `core.nextTourStep()`;  `go back a step` => `core.previousTourStep()`
  * - Core never imports Spell UI:  its tours put ONE control object on the page, by a global symbol,
@@ -32,11 +34,13 @@ type PageTours = {
 export const tourMethods = defineCoreModule({
   /**
    * Start the page's tour `name`:  what `start tour "first game"` and `start the "first game" tour` compile to.
+   * - At `step`, by its number (from 1) or its name, when given:  `start tour "first game" at step 3`
    * - NEVER throws:  no tours on the page, or none of that name, says so on the console.
    */
-  startTour(name: string): void {
+  startTour(name: string, step?: number | string): void {
     const tours = pageTours(`start tour "${name}"`)
-    if (tours && !tours.start(name)) core.console.warn(`start tour "${name}":  this page has no tour of that name`)
+    if (tours && !(step === undefined ? tours.start(name) : tours.start(name, step)))
+      core.console.warn(`start tour "${name}":  this page has no tour of that name`)
   },
 
   /**

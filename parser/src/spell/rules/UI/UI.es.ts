@@ -319,17 +319,34 @@ UIEs.addRule(StopAllMedia, {
 })
 
 // a page's tour, Spell UI's `<ui-tour>` (epic `editor` P40):  `empieza el recorrido "primera partida"`, `para el recorrido`
+// at a given step too (epic `editor` T128):  `empieza el recorrido "primera partida" en el paso 3`
 UIEs.addRule(StartTour, {
-  syntax: "(empieza|inicia) el recorrido {name:text}",
+  syntax: "(empieza|inicia) el recorrido {name:text} (en el paso {step:expression})?",
   tests: [
-    { compileAs: "statement", tests: [[`empieza el recorrido "primera partida"`, `core.startTour("primera partida")`]] }
+    {
+      compileAs: "statement",
+      tests: [
+        [`empieza el recorrido "primera partida"`, `core.startTour("primera partida")`],
+        [`empieza el recorrido "primera partida" en el paso 3`, `core.startTour("primera partida", 3)`],
+        [
+          `inicia el recorrido "primera partida" en el paso "arrastrar"`,
+          `core.startTour("primera partida", "arrastrar")`
+        ]
+      ]
+    }
   ]
 })
 // English's second form, `start the "first game" tour`:  Spanish names it after `recorrido` either way
 UIEs.addRule(StartTour, {
-  syntax: "(empezar|iniciar) el recorrido {name:text}",
+  syntax: "(empezar|iniciar) el recorrido {name:text} (en el paso {step:expression})?",
   tests: [
-    { compileAs: "statement", tests: [[`iniciar el recorrido "primera partida"`, `core.startTour("primera partida")`]] }
+    {
+      compileAs: "statement",
+      tests: [
+        [`iniciar el recorrido "primera partida"`, `core.startTour("primera partida")`],
+        [`empezar el recorrido "primera partida" en el paso 2`, `core.startTour("primera partida", 2)`]
+      ]
+    }
   ]
 })
 

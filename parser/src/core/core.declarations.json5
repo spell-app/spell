@@ -4772,6 +4772,9 @@
       "params": [
         {
           "name": "name"
+        },
+        {
+          "name": "step"
         }
       ],
       "description": "Start the page's tour `name`:  what `start tour \"first game\"` and `start the \"first game\" tour` compile to."
