@@ -65,19 +65,24 @@ It's a link, not a copy:  `spell` runs [bin/spell.mjs](../bin/spell.mjs) in this
 ### Your checkout, in a project that installs Spell from npm
 
 A project that depends on `spell` runs the npm copy.
-Set `SPELL_KIT` on your machine, and its `spell` runs your checkout instead:
+One command, in the project, makes its `spell` run your checkout instead, for you alone:
 
 ```sh
-export SPELL_KIT=~/www/spell     # in your shell profile
 cd ~/work/acme-spell
-yarn start                       # the page server and editor from ~/www/spell, the org still acme's
+yarn spell local on ~/www/spell     # or npx spell ...;  spell ... when it's on your PATH
+yarn start                          # the page server and editor from ~/www/spell, the org still acme's
 ```
 
-- The project changes nothing:  everyone else, without the variable, runs npm's copy.
-- Your checkout runs from its own install:  `yarn install` there first.
-- A `SPELL_KIT` that can't run (no checkout there, not installed) stops with one line saying why,
-  never npm's copy instead.
-- It covers `spell` and the commands under it (`spell epic` ...), and `spell-pack`;  not `spell-types`.
+- It writes the project's `.spell/kit.json5`, naming your checkout, and adds `/.spell/` to its `.gitignore` when git
+  doesn't leave it out already:  everyone else runs npm's copy, and nothing committed changes.
+- With no checkout named:  the one this `spell` runs from, else `~/www/spell`.
+- `spell local` alone says which Spell runs here, and why;  `spell local off` goes back to npm's.
+- Your checkout runs from its own install:  `yarn install` there first, or nothing is written.
+- For every project on the machine:  `export SPELL_KIT=~/www/spell`, in your shell profile.
+  It wins over a project's file, so one command can try another checkout.
+- A checkout named that can't run stops `spell` with one line saying why, never npm's copy instead.
+- It covers `spell` and the commands under it (`spell epic` ...), `epic` from npm's `spell-epic`, and `spell-pack`;
+  not `spell-types`.
 - Only from a release that has it:  0.8.13 or later.
 - The other way, `"spell": "portal:../spell"` in the project's `package.json`, changes its committed files.
 

@@ -104,16 +104,19 @@ describe("<ui-json> outline", () => {
 
   test("the quotes button turns quotes off and on", async () => {
     const element = await json(`<ui-json>{ "name": "a" }</ui-json>`)
-    const quotes = element.shadowRoot!.querySelector<HTMLButtonElement>("button.quotes")!
-    expect(quotes.getAttribute("aria-pressed")).toBe("true")
+    const quotes = element.shadowRoot!.querySelector<HTMLElement>("ui-button.quotes")!
+    // its inner button says whether it's pressed:  a `toggle`
+    const pressed = () => quotes.shadowRoot!.querySelector("button")!.getAttribute("aria-pressed")
+    expect(pressed()).toBe("true")
     quotes.click()
     await ElementFixture.settle()
     expect(element.getAttribute("quotes")).toBe("no")
-    expect(quotes.getAttribute("aria-pressed")).toBe("false")
+    expect(pressed()).toBe("false")
     expect(lines(element)[1]).toBe('name: "a"')
     quotes.click()
     await ElementFixture.settle()
     expect(element.hasAttribute("quotes")).toBe(false)
+    expect(pressed()).toBe("true")
   })
 
   test("nothing to show:  says so", async () => {

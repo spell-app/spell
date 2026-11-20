@@ -1,7 +1,7 @@
 /*
  * The style sheet of `<ui-json>`:  ours, not Fomantic's.
  * - It styles the component's shadow DOM:  `<div class="ui json" part="viewer">`, holding
- *   - its `<div class="header">`:  two `<button class="tool">`s
+ *   - its `<div class="header">`:  two `<ui-button class="tool">`s
  *   - its `<div class="body">`:  a `<div class="row" style="--level: n">` per line
  *   - An object's or array's line is also `.container`,
  *     with a `<button class="toggle">` (a chevron `<ui-icon>`) in the gutter and, closed, `<span class="preview">`.
@@ -101,35 +101,41 @@
     font-family: var(--ui-font-family, system-ui);
   }
 
-  /* Copy and quotes:  plain icons, an example's code button's size;  a background on hover, a fill while pressed */
+  /*
+   * Copy and quotes:  mini basic buttons with no ring, an example's code button's size;
+   * a background on hover, a fill while the quotes toggle is pressed (not the toggle's positive colour).
+   */
   .tool {
-    all: unset;
-    box-sizing: border-box;
-    display: inline-grid;
-    place-items: center;
-    width: var(--_json-tool-size);
-    height: var(--_json-tool-size);
-    border-radius: var(--ui-radius-s, 4px);
-    color: var(--_ui-json-muted-color);
-    cursor: pointer;
-  }
-  .tool ui-icon {
     margin: 0;
   }
-  .tool:hover {
+  /* through the inner button's part, never ui-button's public tokens:  this sheet sets none of another tag's */
+  .tool::part(button) {
+    box-sizing: border-box;
+    width: var(--_json-tool-size);
+    min-width: 0;
+    min-height: var(--_json-tool-size);
+    padding: 0;
+    margin: 0;
+    justify-content: center;
+    border-radius: var(--ui-radius-s, 4px);
+    color: var(--_ui-json-muted-color);
+    background: transparent;
+    box-shadow: none;
+  }
+  .tool::part(button):hover {
     color: var(--_ui-json-color);
-    background: color-mix(in srgb, currentColor 8%, transparent);
+    background: oklch(from var(--ui-ink) l c h / 0.08);
   }
-  .tool[aria-pressed="true"] {
+  .tool::part(button):active {
+    background: oklch(from var(--ui-ink) l c h / 0.14);
+  }
+  /* the quotes toggle while on:  a neutral fill, not the toggle's positive colour */
+  .tool:state(active)::part(button) {
     color: var(--_ui-json-color);
-    background: color-mix(in srgb, currentColor 14%, transparent);
+    background: oklch(from var(--ui-ink) l c h / 0.14);
   }
-  .tool[aria-pressed="true"]:hover {
-    background: color-mix(in srgb, currentColor 18%, transparent);
-  }
-  .tool:focus-visible {
-    outline: 2px solid var(--_ui-json-focus-color);
-    outline-offset: -2px;
+  .tool:state(active)::part(button):hover {
+    background: oklch(from var(--ui-ink) l c h / 0.18);
   }
   /* the quotes glyph, as text:  two straight quotes in the code font, at the icon's size */
   .tool .glyph {

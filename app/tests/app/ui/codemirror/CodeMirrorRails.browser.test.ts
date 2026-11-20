@@ -211,10 +211,10 @@ describe("a body's rail under the caret", () => {
     expect(outerBox.left).toBeGreaterThan(innerBox.right)
     const outerBar = getComputedStyle(outer!, "::before")
     expect(Number.parseFloat(outerBar.right)).toBeGreaterThan(0)
-    // the row one foot tall, on whole pixels, so the lines under it start on one, as the lines above it do
+    // the row one line tall, as every line is (epic `codemirror` P7):  the lines under it start on whole pixels
     const contentTop = view.contentDOM.getBoundingClientRect().top
     const rowBox = row.getBoundingClientRect()
-    expect(rowBox.height).toBe(21)
+    expect(rowBox.height).toBe(25)
     // each end tag half as tall again as a block's tiny foot, 10px at the editor's size (Owen, I138), its bar
     // meeting it in its middle
     expect(innerBox.height).toBeCloseTo(1.5 * 10 * 0.9375, 2)
@@ -883,12 +883,13 @@ describe("a body's rail under the caret", () => {
         expect(topRail(lineElement(view, line!)), `${scheme}:  ${start}`).toBe(backgroundOf(card!))
       }
       // the groups' feet the group's band's colour, the one it shares with the card's at the end too;  the others theirs
+      // (each line's feet outermost first:  the group's, then the block inside it ending there too)
       const feet = [...view.dom.querySelectorAll(".cmb-foot")].map(backgroundOf)
       expect(feet, scheme).toEqual([
+        groupBand,
         backgroundOf(view.dom.querySelector(".bubbly-property.cmb-band-open")!),
         groupBand,
-        backgroundOf(view.dom.querySelector(".bubbly-action.cmb-band-open")!),
-        groupBand
+        backgroundOf(view.dom.querySelector(".bubbly-action.cmb-band-open")!)
       ])
       view.dom.parentElement?.remove()
       view.destroy()

@@ -1683,6 +1683,88 @@ describe("<ui-tree> opening to a depth, and `filter` through the whole tree", ()
     expect(row(host, "menu.pdf").matches(":state(unmatched)")).toBe(false)
   })
 
+  /** What has the focus, inside shadow roots too. */
+  function focused(): Element | null {
+    let active = document.activeElement
+    while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement
+    return active
+  }
+
+  /** `key` pressed on what has the focus, inside shadow roots too. */
+  async function pressFocused(key: string) {
+    focused()!.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, composed: true, cancelable: true }))
+    await ElementFixture.settle()
+  }
+
+  /** The words of the match elsewhere that has the focus. */
+  function focusedMatch(): string | undefined {
+    const active = focused()
+    return active?.classList.contains("match") ? active.querySelector(".words")!.textContent! : undefined
+  }
+
+  it("from markup, the keys go on from the filtered column's last row into the matches elsewhere, and back;  Enter opens one's path", async () => {
+    const host = await columns()
+    click(host, "Acme")
+    await ElementFixture.settle()
+    host.setAttribute("filter", "u")
+    await ElementFixture.settle()
+    expect(matches(row(host, "Acme").shadowRoot!)).toEqual(["Catalogue (Books)", "menu.pdf (Acme › Menu)"])
+    const boxes = [...row(host, "Acme").shadowRoot!.querySelectorAll(".match")]
+    // a screen reader hears each with its path;  the tree stays one tab stop
+    expect(boxes.map((box) => box.getAttribute("aria-label"))).toEqual([
+      "Catalogue, in Books",
+      "menu.pdf, in Acme › Menu"
+    ])
+    expect(boxes.map((box) => box.getAttribute("tabindex"))).toEqual(["-1", "-1"])
+    // the right key goes into Acme's column, onto Menu, its only row, and picks it
+    await pressFocused("ArrowRight")
+    expect(focused()).toBe(row(host, "Menu"))
+    await pressFocused("ArrowDown")
+    expect(focusedMatch()).toBe("Catalogue")
+    // moving onto a match picks nothing
+    expect(selected(host)).toEqual(["Menu"])
+    await pressFocused("ArrowDown")
+    expect(focusedMatch()).toBe("menu.pdf")
+    await pressFocused("ArrowDown")
+    expect(focusedMatch()).toBe("menu.pdf")
+    await pressFocused("Home")
+    expect(focusedMatch()).toBe("Catalogue")
+    // up from the first match:  back to the last row, still the pick
+    await pressFocused("ArrowUp")
+    expect(focused()).toBe(row(host, "Menu"))
+    expect(selected(host)).toEqual(["Menu"])
+    await pressFocused("ArrowDown")
+    await pressFocused("Enter")
+    expect(chain(host)).toEqual(["Books", "Catalogue"])
+    expect(selected(host)).toEqual(["Catalogue"])
+    expect(focused()).toBe(row(host, "Catalogue"))
+  })
+
+  it("from `items`, the keys go on from the filtered column's last row into the matches elsewhere, and back;  Enter opens one's path", async () => {
+    const host = await dataTree()
+    host.path = ["acme"]
+    await ElementFixture.settle()
+    host.filter = "e"
+    await ElementFixture.settle()
+    const column = host.shadowRoot!.querySelector('ul[data-depth="1"]')!
+    expect(matches(column).slice(0, 2)).toEqual(["Acme", "Catalogue (Books)"])
+    expect(column.querySelector('.match[data-match="1"]')!.getAttribute("aria-label")).toBe("Catalogue, in Books")
+    column.querySelector<HTMLElement>('.column-row[data-id="site"]')!.focus()
+    await pressFocused("ArrowDown")
+    expect(focusedMatch()).toBe("Acme")
+    expect(host.path).toEqual(["acme"])
+    // up from the first match:  back to the last row, picked
+    await pressFocused("ArrowUp")
+    expect(host.path).toEqual(["acme", "site"])
+    expect(focused()?.getAttribute("data-id")).toBe("site")
+    await pressFocused("ArrowDown")
+    await pressFocused("ArrowDown")
+    expect(focusedMatch()).toBe("Catalogue")
+    await pressFocused(" ")
+    expect(host.path).toEqual(["books", "catalogue"])
+    expect(focused()?.getAttribute("data-id")).toBe("catalogue")
+  })
+
   it("from `items`, looks through a tree the netlist sample's size fast, listing the first 200", async () => {
     // about the sample's shape:  7,800 nodes 4 levels deep (12 x 10 x 8 x 8), 5 ports on each of the deepest
     let nodes = 0

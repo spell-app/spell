@@ -79,11 +79,11 @@ describe("CodeMirrorMarkup", () => {
       if (to > from && PAGE.slice(from, to).includes("\n"))
         joins.push({ text: PAGE.slice(from, to), isAtomic: !!spec.atomic })
     })
-    // `</head>` alone:  a row of one foot, room under it before `<body>`'s band (T141);  `</body>` and `</html>`:  one row
+    // `</head>` alone:  a row of one foot, no room under it before `<body>`'s band, every line one tall (epic `codemirror`
+    // P7);  `</body>` and `</html>`:  one row
     expect([...rows.keys()]).toEqual(["  </head>", "  </body>"])
-    expect(rows.get("  </head>")!.classes).toContain("cmb-feet-above-band")
+    expect(rows.get("  </head>")!.classes).not.toContain("cmb-feet-above-band")
     expect(rows.get("  </head>")!.style).toContain("--cmb-feet: 1")
-    expect(rows.get("  </body>")!.classes).not.toContain("cmb-feet-above-band")
     expect(rows.get("  </body>")!.style).toContain("--cmb-feet: 2")
     // the blocks' own rails end in the row:  each foot draws its own
     expect(rows.get("  </body>")!.style).toContain("--cmb-rail-sizes: 0 0, 0 0")

@@ -129,89 +129,135 @@ a "pile" is a list
     expect(shapes.railedLines).toContain("\t\t<segment inverted>")
   })
 
-  test("bodies ending on one line:  each foot under the one inside it, as far down as their rails are apart across (I125)", () => {
+  test("bodies ending on one line:  their feet side by side, each at its rail's column, innermost first (P7)", () => {
     const text = `to deal
 \tfor row from 1 to 7
 \t\tif row is 1
 \t\t\tsay row
 \tsay "done"
 `
-    // the `if`'s, then the `for`'s a tab lower;  the action's under its own last line
+    // the `if`'s and the `for`'s along the bottom of their last line, words under it;  the action's in the blank line
     expect(feetOf(text)).toEqual([
-      { line: "\t\t\tsay row", column: 2, partOfSpeech: "control", drop: 1, dropsAbove: 0, ended: [] },
-      { line: "\t\t\tsay row", column: 1, partOfSpeech: "control", drop: 0, dropsAbove: 1, ended: [] },
-      { line: '\tsay "done"', column: 0, partOfSpeech: "action", drop: 0, dropsAbove: 0, ended: [] }
+      {
+        under: "\t\t\tsay row",
+        placement: "above",
+        feet: [
+          { column: 2, partOfSpeech: "control", isGroup: false },
+          { column: 1, partOfSpeech: "control", isGroup: false }
+        ]
+      },
+      { under: '\tsay "done"', placement: "blank", feet: [{ column: 0, partOfSpeech: "action", isGroup: false }] }
     ])
   })
 
-  test("a group ending its type's body:  ONE foot, the group's, its type's rail ending beside it (I125)", () => {
+  test("a group ending its type's body:  ONE foot for both, the group's, in its type's hue (I125)", () => {
     const text = `a "card" is a view
 \tgroup "Drawing"
 \tto draw it
 \t\tsay "hi"
 `
-    // the action's foot, then the group's a tab lower, where the card's would be, in the card's rail's hue:
-    // the card's rail (0) ends there
+    // the action's foot, then the group's at the card's column, in the card's rail's hue:  the card's own is the group's
     expect(feetOf(text)).toEqual([
-      { line: '\t\tsay "hi"', column: 1, partOfSpeech: "action", drop: 1, dropsAbove: 0, ended: [] },
-      { line: '\t\tsay "hi"', column: 0, partOfSpeech: "thing", drop: 0, dropsAbove: 1, ended: [0] }
+      {
+        under: '\t\tsay "hi"',
+        placement: "blank",
+        feet: [
+          { column: 1, partOfSpeech: "action", isGroup: false },
+          { column: 0, partOfSpeech: "thing", isGroup: true }
+        ]
+      }
     ])
+  })
+
+  test("a block's rail stops short on its last line, for its foot's corner;  every rail ending there (P7)", () => {
+    const text = `to deal
+\tfor row from 1 to 7
+\t\tif row is 1
+\t\t\tsay row
+\tsay "done"
+`
+    // the action's, the `for`'s and the `if`'s rails:  the two ending on `say row` stop short there, not the action's
+    expect(stoppedRailsOf(text).get("\t\t\tsay row")).toBe("100% 100%, STOPPED, STOPPED")
   })
 })
 
-describe("CodeMirrorBubbly's room between blocks (T141)", () => {
-  test("a foot right above a band has room under it;  not above a plain line, a blank line, or under a band's own body", () => {
+describe("CodeMirrorBubbly's feet take no room (P7)", () => {
+  test("in the blank line under their block;  over the line under it when it has words;  in the file's last line", () => {
     const text = `a "card" is a view
 \tits "color" is
 \t\tblue if it is face down
 \tits "picture" is
 \t\tsay "hi"
+
 \tto turn it over
 \t\tif it is face up
 \t\t\tsay "down"
-\t\tsay "flipped"
-
-\tits "rank" is a number
-`
-    expect(feetOf(text).map(({ line, isAboveBand = false }) => ({ line, isAboveBand }))).toEqual([
+\t\tsay "flipped"`
+    expect(feetOf(text).map(({ under, placement }) => ({ under, placement }))).toEqual([
       // `its "picture" is` right under it
-      { line: "\t\tblue if it is face down", isAboveBand: true },
-      // `to turn it over` right under it
-      { line: '\t\tsay "hi"', isAboveBand: true },
-      // a plain line under it, then a blank line
-      { line: '\t\t\tsay "down"', isAboveBand: false },
-      { line: '\t\tsay "flipped"', isAboveBand: false },
-      // the end of the file
-      { line: '\tits "rank" is a number', isAboveBand: false }
+      { under: "\t\tblue if it is face down", placement: "above" },
+      // a blank line under it
+      { under: '\t\tsay "hi"', placement: "blank" },
+      // a plain line under it
+      { under: '\t\t\tsay "down"', placement: "above" },
+      // the end of the file:  the action's and the card's, from the last line itself
+      { under: '\t\tsay "flipped"', placement: "end" }
     ])
+  })
+
+  test("no block widget, nothing with a height of its own:  every line one line tall", () => {
+    const text = `to deal
+\tif it is face up
+\t\tsay "down"
+\tsay "done"
+`
+    let blocks = 0
+    CodeMirrorBubbly.decorationsOf(EditorState.create({ doc: text })).between(0, text.length, (_from, _to, value) => {
+      if ((value.spec as { block?: boolean }).block) blocks++
+    })
+    expect(blocks).toBe(0)
   })
 })
 
 /**
- * Each foot `text` draws, in order:  the line it's under, its rail's column, and how its stack is laid out;
- * `isAboveBand` only when it is.
+ * Each line's feet `text` draws, in order:  the last line of the blocks they end (`under`), where they're drawn, and
+ * each foot, innermost first.
  */
 function feetOf(text: string) {
   const state = EditorState.create({ doc: text })
-  const feet: Array<Record<string, unknown>> = []
+  const feet: Array<{ under: string; placement: string; feet: readonly Foot[] }> = []
   CodeMirrorBubbly.decorationsOf(state).between(0, text.length, (from, _to, decoration) => {
-    const spec = decoration.spec as { block?: boolean; widget?: Foot }
-    if (!spec.block || !spec.widget) return
-    const { column, partOfSpeech, drop, dropsAbove, ended, isAboveBand } = spec.widget
-    const foot = { line: state.doc.lineAt(from).text, column, partOfSpeech, drop, dropsAbove, ended: [...ended] }
-    feet.push(isAboveBand ? { ...foot, isAboveBand } : foot)
+    const widget = (decoration.spec as { widget?: FeetWidget }).widget
+    if (!widget || !("placement" in widget)) return
+    const line = state.doc.lineAt(from)
+    const under = widget.placement === "end" ? line : state.doc.line(line.number - 1)
+    feet.push({ under: under.text, placement: widget.placement, feet: widget.feet })
   })
   return feet
 }
 
-/** What a foot's widget says of itself. */
-type Foot = {
-  column: number
-  partOfSpeech: string
-  drop: number
-  dropsAbove: number
-  ended: Set<number>
-  isAboveBand: boolean
+/** What a feet widget says of itself. */
+type FeetWidget = { feet: readonly Foot[]; placement: string }
+
+/** A foot, as a feet widget lists it. */
+type Foot = { column: number; partOfSpeech: string; isGroup: boolean }
+
+/** Each line's rail sizes, outermost first, by its text:  `STOPPED` for one stopping short. */
+function stoppedRailsOf(text: string): Map<string, string> {
+  const state = EditorState.create({ doc: text })
+  const sizes = new Map<string, string>()
+  CodeMirrorBubbly.decorationsOf(state).between(0, text.length, (from, to, decoration) => {
+    const style = (decoration.spec as { attributes?: Record<string, string> }).attributes?.style ?? ""
+    const rails = /--cmb-rail-sizes: (.*)$/.exec(style)?.[1]
+    if (from !== to || !rails) return
+    // in the stripes' order, innermost first
+    const outermostFirst = [...rails.matchAll(/100% 100%|100% max|0 0/g)].map(([size]) => size).reverse()
+    sizes.set(
+      state.doc.lineAt(from).text,
+      outermostFirst.map((size) => (size === "100% max" ? "STOPPED" : size)).join(", ")
+    )
+  })
+  return sizes
 }
 
 /** `text`'s state, the block whose head is on line `line` folded, as a click on its arrow folds it. */
@@ -237,9 +283,9 @@ function shapesOf(state: EditorState) {
   let feet = 0
   let tagFeet = 0
   CodeMirrorBubbly.decorationsOf(state).between(0, text.length, (from, to, decoration) => {
-    const spec = decoration.spec as { class?: string; block?: boolean; attributes?: Record<string, string> }
+    const spec = decoration.spec as { class?: string; widget?: FeetWidget; attributes?: Record<string, string> }
     const classes = spec.class?.split(" ") ?? []
-    if (spec.block) feet++
+    if (spec.widget && "placement" in spec.widget) feet += spec.widget.feet.length
     else if (from === to && spec.attributes?.style?.startsWith("--cmb-rails"))
       railedLines.push(state.doc.lineAt(from).text)
     else if (classes.includes("cmb-band")) bands.push({ text: text.slice(from, to), classes })
@@ -274,9 +320,9 @@ function columnsOf(text: string, slice: { from: number; to: number; hiddenIndent
     0,
     text.length,
     (from, to, decoration) => {
-      const spec = decoration.spec as { class?: string; widget?: Foot; attributes?: Record<string, string> }
+      const spec = decoration.spec as { class?: string; widget?: FeetWidget; attributes?: Record<string, string> }
       const style = spec.attributes?.style ?? ""
-      if (spec.widget && "column" in spec.widget) feet.push(spec.widget.column)
+      if (spec.widget && "placement" in spec.widget) feet.push(...spec.widget.feet.map((foot) => foot.column))
       else if (from === to && style.startsWith("--cmb-rails"))
         rails.push(
           [...new Set([...style.matchAll(/--cmb-line-pad\) \+ (\d+) \* var\(--cmb-indent\)/g)].map((m) => m[1]))].join()

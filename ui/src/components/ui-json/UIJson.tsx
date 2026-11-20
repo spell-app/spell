@@ -73,7 +73,7 @@ export class DOMJsonElement extends E.DOMLoadableElement<UIJson> {
  *
  * The outline:
  * - Two spaces per level, monospace, coloured by the theme's code tokens (`--ui-code-attr`, `--ui-code-string` ...).
- * - A header (part `header`;  `no-header` hides it), of plain icon buttons:
+ * - A header (part `header`;  `no-header` hides it), of mini `<ui-button>`s with no ring:
  *   Copy, and a toggle for the quotes round keys (`quotes`).
  * - Each object and array has a toggle in the gutter just before its own indent:
  *   a real `<button aria-expanded>` (part `toggle`) holding a chevron;  Alt-click opens or closes its branch.
@@ -267,27 +267,30 @@ export class UIJson extends E.LoadableComponent<typeof jsonVocabulary> {
   }
 
   /**
-   * Copy and the quotes toggle:  plain icon buttons, as big as an example's code button.
-   * - Native `<button>`s, not `<ui-button>`s:  no ring at rest, a background only on hover, a fill while pressed.
-   * - The quotes toggle draws its glyph as text, `""`:  the icon set has no outline quote mark.
+   * Copy and the quotes toggle:  mini basic `<ui-button>`s, as big as an example's code button.
+   * - The sheet takes their ring off:  a background only on hover, a fill while the quotes toggle is pressed.
+   * - The quotes toggle is a `toggle`, so its inner button says `aria-pressed`;  `selected` follows `quotes`.
+   * - It draws its glyph as text, `""`:  the icon set has no outline quote mark.
    */
   private header(): JSX.Element {
     const copyLabel = () => this.translationForKey(this.clipboard.isCopied ? "jsonCopied" : "jsonCopy")
     return (
       <div class="header" part={this.partForName("header")}>
-        <button
-          type="button"
+        <ui-button
           class="tool copy"
+          size="mini"
+          appearance="basic"
+          icon={this.clipboard.isCopied ? COPIED_ICON : COPY_ICON}
           aria-label={copyLabel()}
           title={copyLabel()}
           onClick={() => void this.copy()}
-        >
-          <ui-icon name={this.clipboard.isCopied ? COPIED_ICON : COPY_ICON} />
-        </button>
-        <button
-          type="button"
+        />
+        <ui-button
           class="tool quotes"
-          aria-pressed={this.quotes ? "true" : "false"}
+          size="mini"
+          appearance="basic"
+          toggle=""
+          selected={this.quotes ? "" : undefined}
           aria-label={this.translationForKey("jsonQuotes")}
           title={this.translationForKey(this.quotes ? "jsonQuotesOff" : "jsonQuotesOn")}
           onClick={() => this.setQuotes(!this.quotes)}
@@ -295,7 +298,7 @@ export class UIJson extends E.LoadableComponent<typeof jsonVocabulary> {
           <span class="glyph" aria-hidden="true">
             ""
           </span>
-        </button>
+        </ui-button>
       </div>
     )
   }

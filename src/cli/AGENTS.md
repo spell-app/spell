@@ -35,13 +35,14 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - in an npm install of `spell` (no `src/`), `runTool()` runs a tool's BUILT `.js` under plain node (`builtTool()`;
       epic `repo-split` P26):  `spell server` from a project depending on `spell`
   - [findCheckout.ts](findCheckout.ts) -- `findCheckout()`, `KIT_ROOT`, `KIT_MARKER`
-  - [kitCheckout.ts](kitCheckout.ts) -- `kitCheckoutBin()`, `checkoutToRun()`:
-    a published bin runs the checkout `SPELL_KIT` names instead (epic `repo-split` T69);  node built-ins only
+  - [kitCheckout.ts](kitCheckout.ts) -- `kitSetting()`, `kitCheckoutBin()`, `checkoutToRun()`:  a published bin runs
+    the checkout `SPELL_KIT` or the project's `.spell/kit.json5` names instead (epic `repo-split` T69, T70);
+    `spell local on` writes that file ([localCommand.ts](commands/localCommand.ts))
   - [cli.types.ts](cli.types.ts) -- `EXIT`, `CliError`, the flags' types, `CommandList`, `HookList`, `SpellRepo`
 - The kit's own commands:  [commands.ts](commands.ts) is their list, [commands/](commands/) their work.
 
   ```
-  server  bundle  commands  wwod  deps  readme  map  coherence  publish  epic  pony  (help is the program's own)
+  server  bundle  commands  wwod  local  deps  readme  map  coherence  publish  epic  pony  (help is the program's own)
   ```
 
 - `spell publish`'s work is a folder of its own, [publish/](publish/) (`spell/cli/publish`), with its own barrel:

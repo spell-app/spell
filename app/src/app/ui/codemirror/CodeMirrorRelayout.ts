@@ -1,5 +1,6 @@
 import { foldEffect, unfoldEffect } from "@codemirror/language"
 import {
+  type ChangeSet,
   EditorSelection,
   EditorState,
   type Extension,
@@ -10,9 +11,10 @@ import {
   StateField,
   type Transaction
 } from "@codemirror/state"
-import { type Decoration, type DecorationSet, EditorView, ViewPlugin, type ViewUpdate } from "@codemirror/view"
+import { Decoration, type DecorationSet, EditorView, ViewPlugin, type ViewUpdate } from "@codemirror/view"
 
 import { after, type CancelablePromise } from "spell/util/timing"
+import type { Region } from "./CodeMirrorMarkup"
 import { CodeMirrorSetup } from "./CodeMirrorSetup"
 
 /****************
@@ -42,6 +44,14 @@ import { CodeMirrorSetup } from "./CodeMirrorSetup"
  *   then back again 50ms later as the parse came (epic `codemirror` I21);  it waits for that parse,
  *   or `AWAIT_PARSE_MSEC` at the most.
  * - In the editor's state, not a view plugin's, so its decorations may be block widgets.
+ * - A layout may keep its marks out of the state (`LaidOut.marksIn()`;  epic `codemirror` P7):
+ *   a view plugin draws them only for the lines CodeMirror draws, the screen and a margin round it (`view.viewport`),
+ *   again as they change, from the same layout.
+ *   - Typing moves them with the text, as the state's (`marksTyped()`, if given);
+ *     a stretch scrolled to before the next layout is marked from the last one, through the edits since.
+ *   - CodeMirror runs the plugin before it draws, so a line never comes on screen plain.
+ *   - The state's part keeps what changes a line's height or is read far off screen:  CodeMirror must know a hidden line
+ *     break to guess the height of the lines it hasn't drawn.
  * - A decoration whose spec says `atomic: true` is one step for the caret (`EditorView.atomicRanges`):
  *   e.g. the line breaks hidden between a row of feet (`CodeMirrorDecorations.feetRow()`;  epic `language` I132)
  * - Drawn at the lowest precedence:  CodeMirror draws a lower source's marks OUTSIDE a higher's,
@@ -65,33 +75,101 @@ export class CodeMirrorRelayout {
    * - `decorationsOf()` MUST NOT throw:  it's called from CodeMirror's update.
    */
   static extension(
-    decorationsOf: (state: EditorState) => DecorationSet,
+    decorationsOf: (state: EditorState) => DecorationSet | LaidOut,
     msec: number,
-    { isAwaitingParse = () => false, isParseOnItsWay = () => false, drawnAtOnce }: RelayoutOptions = {}
+    { isAwaitingParse = () => false, isParseOnItsWay = () => false, drawnAtOnce, marksTyped }: RelayoutOptions = {}
   ): Extension {
     /** each view on this extension, so a transaction can find its own and keep its caret's line still */
     const views = new Set<EditorView>()
-    const laidOut = StateEffect.define<DecorationSet>()
-    const field = StateField.define<DecorationSet>({
-      create: (state) => decorationsOf(state),
-      update(decorations, transaction) {
+    const laidOut = StateEffect.define<Layout>()
+    const layoutOf = (state: EditorState): Layout => {
+      const made = decorationsOf(state)
+      return "decorations" in made ? made : { decorations: made }
+    }
+    const field = StateField.define<Layout>({
+      create: (state) => layoutOf(state),
+      update(layout, transaction) {
         for (const effect of transaction.effects) if (effect.is(laidOut)) return effect.value
         if (
           transaction.effects.some(
             (effect) => effect.is(foldEffect) || effect.is(unfoldEffect) || effect.is(CodeMirrorSetup.PARSED)
           )
         ) {
-          return decorationsOf(transaction.state)
+          return layoutOf(transaction.state)
         }
-        if (!transaction.docChanged) return decorations
-        const moved = decorations.map(transaction.changes)
-        return drawnAtOnce ? drawnAtOnce(moved, transaction) : moved
+        if (!transaction.docChanged) return layout
+        const moved = layout.decorations.map(transaction.changes)
+        return {
+          ...layout,
+          decorations: drawnAtOnce ? drawnAtOnce(moved, transaction) : moved,
+          // the edits since the layout, for marks made from it
+          editsSince: layout.marksIn
+            ? (layout.editsSince?.compose(transaction.changes) ?? transaction.changes)
+            : undefined
+        }
       },
       provide: (it) => [
-        Prec.lowest(EditorView.decorations.from(it)),
-        EditorView.atomicRanges.of((view) => atomicIn(view.state.field(it)))
+        Prec.lowest(EditorView.decorations.from(it, (layout) => layout.decorations)),
+        EditorView.atomicRanges.of((view) => atomicIn(view.state.field(it).decorations))
       ]
     })
+    const onScreen = ViewPlugin.fromClass(
+      class {
+        /** The marks drawn, for `region`. */
+        marks: DecorationSet = Decoration.none
+        /** The stretch of the text `marks` were made for, moved with the text since. */
+        private region: Region | undefined
+        /** The layout they were made from. */
+        private layout: Layout
+
+        constructor(readonly view: EditorView) {
+          this.layout = view.state.field(field)
+          this.mark()
+        }
+
+        update(update: ViewUpdate) {
+          const layout = update.state.field(field)
+          const isNew = layout.marksIn !== this.layout.marksIn
+          this.layout = layout
+          if (isNew) return this.mark()
+          if (update.docChanged) {
+            for (const transaction of update.transactions) {
+              if (!transaction.docChanged) continue
+              const moved = this.marks.map(transaction.changes)
+              this.marks = marksTyped ? marksTyped(moved, transaction) : moved
+            }
+            if (this.region) {
+              this.region = {
+                from: update.changes.mapPos(this.region.from, -1),
+                to: update.changes.mapPos(this.region.to, 1)
+              }
+            }
+          }
+          const { from, to } = update.view.viewport
+          if (!this.region || from < this.region.from || to > this.region.to) this.mark()
+        }
+
+        /** Mark the lines CodeMirror draws now, from the layout, through the edits since. */
+        private mark() {
+          const { marksIn, editsSince } = this.layout
+          const { from, to } = this.view.viewport
+          this.region = { from, to }
+          if (!marksIn) {
+            this.marks = Decoration.none
+            return
+          }
+          const back = editsSince?.invertedDesc
+          const marks = marksIn(back ? { from: back.mapPos(from, -1), to: back.mapPos(to, 1) } : { from, to })
+          this.marks = editsSince ? marks.map(editsSince) : marks
+        }
+      },
+      {
+        provide: (plugin) => [
+          Prec.lowest(EditorView.decorations.of((view) => view.plugin(plugin)?.marks ?? Decoration.none)),
+          EditorView.atomicRanges.of((view) => atomicIn(view.plugin(plugin)?.marks ?? Decoration.none))
+        ]
+      }
+    )
     const relayout = ViewPlugin.fromClass(
       class {
         private timer: CancelablePromise<void> | undefined
@@ -118,7 +196,7 @@ export class CodeMirrorRelayout {
           this.timer = after(wait / 1000, () => {
             const { state } = this.view
             if (wait === msec && isParseOnItsWay(state)) return this.relayoutSoon(CodeMirrorRelayout.AWAIT_PARSE_MSEC)
-            this.view.dispatch({ effects: laidOut.of(decorationsOf(state)) })
+            this.view.dispatch({ effects: laidOut.of(layoutOf(state)) })
           })
         }
 
@@ -167,7 +245,7 @@ export class CodeMirrorRelayout {
       }
       return null
     })
-    return [field, relayout, awaitingParse, caretLineStill]
+    return [field, onScreen, relayout, awaitingParse, caretLineStill]
   }
 }
 
@@ -191,6 +269,17 @@ function keepCaretLine(view: EditorView): { effects: StateEffect<unknown> } | nu
   return { effects: snapshot }
 }
 
+/**
+ * A text laid out, split in two (epic `codemirror` P7):
+ * - `decorations`:  the whole file's, kept in the editor's state
+ * - `marksIn(region)`:  the rest, for the lines in `region` of the text laid out, as a view draws them
+ *   - MUST NOT throw
+ */
+export type LaidOut = { decorations: DecorationSet; marksIn?: ((region: Region) => DecorationSet) | undefined }
+
+/** A layout as the editor's state keeps it:  `editsSince`, the edits made since it, which its marks are moved through. */
+type Layout = LaidOut & { editsSince?: ChangeSet | undefined }
+
 /** What else `CodeMirrorRelayout.extension()` takes. */
 export type RelayoutOptions = {
   /**
@@ -211,6 +300,11 @@ export type RelayoutOptions = {
    * - MUST NOT throw.
    */
   drawnAtOnce?: (decorations: DecorationSet, transaction: Transaction) => DecorationSet
+  /**
+   * The marks on screen (`LaidOut.marksIn()`), moved with `transaction`'s edit, and changed as it needs at once.
+   * - MUST NOT throw.
+   */
+  marksTyped?: (marks: DecorationSet, transaction: Transaction) => DecorationSet
 }
 
 /** The editor's class while its lines wait for their parse:  `codemirror.css` hides them. */

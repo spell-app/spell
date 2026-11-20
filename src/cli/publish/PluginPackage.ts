@@ -56,8 +56,10 @@ export class PluginPackage extends PublishedPackage {
     mkdirSync(dirname(bin), { recursive: true })
     writeFileSync(
       bin,
-      "#!/usr/bin/env node\n// `epic`:  the epic command, from the `spell` this plugin depends on (written by `spell publish`)\n" +
-        'await import("spell/epic/cli/epicMain")\n'
+      "#!/usr/bin/env node\n// `epic`:  the epic command, from the `spell` this plugin depends on (written by `spell publish`);\n" +
+        "// a checkout of spell's instead, when SPELL_KIT or the project's .spell/kit.json5 names one\n" +
+        'import { checkoutToRun } from "spell/cli/kitCheckout"\n' +
+        'await import(checkoutToRun("epic/bin/epic", import.meta.url) ?? "spell/epic/cli/epicMain")\n'
     )
     chmodSync(bin, 0o755)
     writeFileSync(join(this.stageDir, "package.json"), `${JSON.stringify(this.manifest(), null, 2)}\n`)
