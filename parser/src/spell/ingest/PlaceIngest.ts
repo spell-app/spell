@@ -67,6 +67,9 @@ const KEEPS_A_COPY = /keep a copy on this device|guarda una copia en este dispos
 /** An id that's an address of its own:  read where it says, not put in its collection's. */
 const IS_ITS_OWN_ADDRESS = /^https?:\/\//i
 
+/** What `spell place verify` searches a search for, when its description gives nothing to (epic `data` I140). */
+const SEARCH_TRIED = "a"
+
 /** A kind of place, as a person might write it:  `sheet` and `spreadsheet` are one. */
 const KIND_WORDS: Readonly<Record<string, string>> = {
   spreadsheet: "sheet",
@@ -327,7 +330,8 @@ export class PlaceIngest {
     const changes: string[] = []
     const read: CollectionLook[] = []
     for (const [name, collection] of Object.entries(description.collections)) {
-      if (collection.leftOut || collection.state?.is === "disabled" || !isListed(collection)) continue
+      if (collection.leftOut || collection.state?.is === "disabled") continue
+      if (!isListed(collection) && !isSearchToTry(collection)) continue
       // each list its own allowance:  a whole description has hundreds, each read once, a gap between each request
       reader.startAgain()
       const was = collection.state?.is
@@ -401,7 +405,11 @@ export class PlaceIngest {
       state: { is: "failed" as const, ...tried, ...(status !== undefined && { status }), reason },
       rows: []
     })
-    const url = `${address}${collection.at}`
+    // a search is asked something:  what its description says to search for, else a letter (epic `data` I140, J295)
+    const { searchedOnly, searchedBy, searchedFor } = collection
+    const searched =
+      searchedOnly && searchedBy ? `${searchedBy.param}=${encodeURIComponent(searchedFor ?? SEARCH_TRIED)}` : ""
+    const url = `${address}${collection.at}${searched ? `${collection.at.includes("?") ? "&" : "?"}${searched}` : ""}`
     let answer: Awaited<ReturnType<PoliteReader["read"]>>
     try {
       answer = await reader.read(url)
@@ -433,7 +441,8 @@ export class PlaceIngest {
       .map(([field]) => field)
     if (missing.length)
       return failed(`its rows don't hold ${missing.join(", ")}, which its description says each has`, answer.status)
-    const byId = await this.thingById(address, collection, rows[0], reader)
+    // a search's answers are found elsewhere by id, if at all:  nothing says where
+    const byId = searched ? undefined : await this.thingById(address, collection, rows[0], reader)
     if (byId) return failed(byId)
     return { state: { is: "verified", ...tried, status: answer.status, rows: rows.length }, rows }
   }
@@ -1001,6 +1010,14 @@ function refuseWritesOn(deployment: { name: string; readOnly?: boolean } | undef
   )
 }
 
+/**
+ * A search `spell place verify` can try:  one only a search answers, with its question known (epic `data` I140).
+ * - Its address has no braces, and it's asked nothing else.
+ */
+function isSearchToTry({ at, searchedOnly, searchedBy, askedBy, samples }: CollectionDescription): boolean {
+  return !!searchedOnly && !!searchedBy && !/\{[^{}/]*\}/.test(at) && !askedBy && !samples
+}
+
 /** Can a collection be read as a list:  not one found by name, only by a search, or asked for by a query? */
 function isListed({ at, searchedOnly, askedBy, samples }: CollectionDescription): boolean {
   return !/\{[^{}/]*\}/.test(at) && !searchedOnly && !askedBy && !samples
@@ -1009,7 +1026,9 @@ function isListed({ at, searchedOnly, askedBy, samples }: CollectionDescription)
 /** What an error answer says, short:  NetBox's `{ "detail": "..." }`. */
 function detailOf(text: string): string {
   const body = jsonOf(text) as { detail?: unknown; error?: unknown; message?: unknown } | undefined
-  const said = body?.detail ?? body?.error ?? body?.message
+  // FastAPI's refusal of what it was asked:  `{ "detail": [{ "loc": ["query", "q"], "msg": "Field required" }] }`
+  const firstMessage = Array.isArray(body?.detail) ? (body.detail[0] as { msg?: unknown } | undefined)?.msg : undefined
+  const said = firstMessage ?? body?.detail ?? body?.error ?? body?.message
   return typeof said === "string" ? `:  ${said.slice(0, 200).replace(/\.+$/, "")}` : ""
 }
 

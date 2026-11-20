@@ -315,6 +315,7 @@ export class RestPlace extends WebPlace implements Place {
     // asked for by a query, it may answer with one thing, not a list:  Open-Meteo's forecast for one place;
     // a search at its own address answers its own way:  GitHub's `{ total_count, items: [...] }`;
     // so does a list under a thing:  Open Library's `{ links, size, entries: [...] }` (epic `data` T114);
+    // and a search beside lists, its rows not where theirs are:  FastAPI's `{ results, total_count }` (epic `data` I140);
     // ONE thing under a thing is that list's one row:
     // a system's snapshot, its own lists inside it (epic `from-console` P16)
     const rows =
@@ -322,7 +323,8 @@ export class RestPlace extends WebPlace implements Place {
         ? []
         : (askedBy || (query.under && this.isFoundAtItsOwner(collection))) && isOneRow(held)
           ? [held]
-          : !Array.isArray(held) && (query.under || this.isSearchAddress(collection, url))
+          : !Array.isArray(held) &&
+              (query.under || this.isSearchAddress(collection, url) || (held === undefined && rowsAt !== undefined))
             ? (soleListIn(body) ?? (query.under && isOneRow(held) ? [held] : held))
             : held
     if (!Array.isArray(rows)) {

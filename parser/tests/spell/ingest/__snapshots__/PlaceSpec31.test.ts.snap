@@ -2,10 +2,14 @@
 
 exports[`spell place ingest --spec, of a FastAPI 3.1 description > English:  every field typed, and the file parses clean 1`] = `
 "acme jobs is a web server at "https://jobs.acme.test"
+	its rows are its "items"
+	it gives up to 500 at a time
 	check it every 30 seconds
+	its next page is asked for with "limit" and "offset"
 	it writes names like "created_at"
+	it searches everything with "q"
 	jobs live at "/api/jobs"
-	searches live at "/api/search"
+	searches are searched at "/api/search"
 	to complete a job is at "/api/jobs/{job_id}/complete"
 	a job's created is its "created at"
 
@@ -35,12 +39,12 @@ a "search" is a thing
 	its "snippet" is text
 
 an "owner" is a thing
-	its "number" is a number, stored as "id"
-	its "email" is text
+	its "number" is a required number, stored as "id"
+	its "email" is required text
 	its "team" is text
 
 a "step" is a thing
-	its "name" is text
+	its "name" is required text
 	its "seconds" is a number
 "
 `;
