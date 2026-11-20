@@ -377,8 +377,9 @@ const SPELL = "spell"
  *   so `spell server` runs from an npm install;  it measured 131 MB then.
  * - 150 MB since 0.8.16 (Owen, 2026-11-19):  it measured 141 MB, the epic docs' pictures and the bundles grown;
  *   trimming it is epic `epic-engine` T109.
+ * - 200 MB since 0.8.18 (Owen, 2026-11-20:  "200 MB is fine"):  it measured 159 MB, with the Mermaid and ELK diagram engines.
  */
-const LEAN_LIMITS = { packages: 40, megabytes: 150 }
+const LEAN_LIMITS = { packages: 40, megabytes: 200 }
 
 /**
  * A definition of the element base class in built JavaScript, as esbuild or Rolldown write it, minified or not:
