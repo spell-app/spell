@@ -4,6 +4,7 @@ import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "nod
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
 import { PassThrough } from "node:stream"
+import { stripVTControlCharacters } from "node:util"
 import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from "vite-plus/test"
 
 import { SRV } from "spell/server"
@@ -30,6 +31,17 @@ class FakeChild extends EventEmitter {
 /** A `spawn` stub handing out `child`. */
 function spawnOf(child: FakeChild) {
   return vi.fn(() => child as unknown as ChildProcess)
+}
+
+/** Silence the build's log:  every `console` method it writes with;  returns the spies, by method. */
+function quiet() {
+  const spy = (method: "log" | "info" | "warn" | "error") => vi.spyOn(console, method).mockImplementation(() => {})
+  return { log: spy("log"), info: spy("info"), warn: spy("warn"), error: spy("error") }
+}
+
+/** The lines `spy` was called with, without their colours or the blank lines between groups. */
+function linesOf(spy: ReturnType<typeof quiet>["log"]): string[] {
+  return spy.mock.calls.map(([line]) => stripVTControlCharacters(String(line))).filter(Boolean)
 }
 
 /** Write `text` at `path` under `root`, making folders. */
@@ -93,7 +105,7 @@ describe("BundleBuild", () => {
   afterAll(() => rmSync(root, { recursive: true, force: true }))
 
   test("runs the checkout's OWN `spell`, the kit's (`spell bundle --stale`), in a process group of its own", () => {
-    vi.spyOn(console, "log").mockImplementation(() => {})
+    quiet()
     const spawn = spawnOf(new FakeChild())
     new BundleBuild({ root, spawn }).start()
     expect(spawn).toHaveBeenCalledWith(
@@ -115,7 +127,7 @@ describe("BundleBuild", () => {
 
   test("a request for a MISSING bundle file waits for the build;  a file that's there, or any other, doesn't", async () => {
     const port = await serve()
-    vi.spyOn(console, "log").mockImplementation(() => {})
+    quiet()
     build.start()
     let answered = false
     const waiting = ask(port, "GET", "/components/ui/_assets/site.js").then((answer) => ((answered = true), answer))
@@ -130,33 +142,47 @@ describe("BundleBuild", () => {
 
   test("a wait gives up after `timeout` ms:  the request is answered as it stands", async () => {
     const port = await serve(20)
-    vi.spyOn(console, "log").mockImplementation(() => {})
+    quiet()
     build.start()
     expect((await ask(port, "GET", "/spell-brand/_assets/ui/missing-chunk.js")).status).toBe(404)
     expect(build.isBuilding).toBe(true)
   })
 
-  test("logs the build's output, each line prefixed;  and a failed build", async () => {
+  // epic `epic-engine` T118:  the check, "current" and every file's size were most of the log
+  test("logs the build's output, each line prefixed:  what was built shown, the chatter debug;  and a failed build", async () => {
     await serve()
-    const log = vi.spyOn(console, "log").mockImplementation(() => {})
-    const error = vi.spyOn(console, "error").mockImplementation(() => {})
+    const spies = quiet()
     build.start()
+    child.stdout.write("ui-root:  current\n-- tools/_assets/commands.js  63.1 KB  (gzip 22.0 KB)\n")
     child.stdout.write("built brand in 1.5s\n")
-    child.stderr.write("building ui-site ...\n")
-    await vi.waitFor(() => expect(log).toHaveBeenCalledTimes(3))
-    expect(log.mock.calls.map(([line]) => line)).toEqual([
-      "bundles:  checking (spell bundle --stale)",
-      "bundles:  built brand in 1.5s",
-      "bundles:  building ui-site ..."
-    ])
+    child.stderr.write("building ui-site ...\n  site.js  4.4 KB  gz 1.2 KB\n!! import.meta is empty\n")
+    await vi.waitFor(() => expect(linesOf(spies.warn)).toHaveLength(1))
+    expect(linesOf(spies.info)).toEqual(["bundles:  built brand in 1.5s", "bundles:  building ui-site ..."])
+    expect(linesOf(spies.warn)).toEqual(["bundles:  !! import.meta is empty"])
+    expect(linesOf(spies.log)).toEqual([])
     child.exit(1)
     expect(await build.untilBuilt()).toBe(true)
-    expect(error).toHaveBeenCalledWith("bundles:  the build failed (exit 1);  see above")
+    expect(linesOf(spies.error)).toEqual(["bundles:  the build failed (exit 1);  see above"])
+  })
+
+  test("SPELL_DEBUG=server:bundles shows the chatter too", async () => {
+    await serve()
+    const spies = quiet()
+    vi.stubEnv("SPELL_DEBUG", "server:bundles")
+    try {
+      const debugged = new BundleBuild({ root, spawn: spawnOf(child) })
+      debugged.start()
+      child.stdout.write("ui-root:  current\n")
+      await vi.waitFor(() => expect(linesOf(spies.log)).toHaveLength(2))
+      expect(linesOf(spies.log)).toEqual(["bundles:  checking (spell bundle --stale)", "bundles:  ui-root:  current"])
+    } finally {
+      vi.unstubAllEnvs()
+    }
   })
 
   // epic `epic-engine`, 2026-10-25:  a merge after the last build left every components page on the old code
   test("watch():  a source changed builds again once quiet;  while a build runs, once it ends", async () => {
-    vi.spyOn(console, "log").mockImplementation(() => {})
+    quiet()
     put(root, "sources/a.ts", "1")
     vi.spyOn(SRV.Bundle, "specs").mockReturnValue([SRV.BUNDLES[0]!])
     vi.spyOn(SRV.Bundle.prototype, "sourceRoots").mockReturnValue([join(root, "sources")])
@@ -175,7 +201,7 @@ describe("BundleBuild", () => {
 
   // epic `epic-engine` P54:  pages reporting a stale catalog while a build runs make ONE more run
   test("checkAgain():  now, or once the running build ends;  however many ask meanwhile, one more run", async () => {
-    vi.spyOn(console, "log").mockImplementation(() => {})
+    quiet()
     const first = new FakeChild()
     const spawn = spawnOf(first)
     const bundles = new BundleBuild({ root, spawn }).start()
@@ -195,7 +221,7 @@ describe("BundleBuild", () => {
 
   test("stop() ends the build's whole process group", async () => {
     await serve()
-    vi.spyOn(console, "log").mockImplementation(() => {})
+    quiet()
     const kill = vi.spyOn(process, "kill").mockImplementation(() => true)
     build.start().stop()
     expect(kill).toHaveBeenCalledWith(-4242, "SIGTERM")

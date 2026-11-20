@@ -699,7 +699,8 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 
 ### Logging
 
-- **It is:**  `Logger` (`spell/util`)
+- **It is:**  `Logger` (`spell/util`);  `SPELL_DEBUG` read by `Logger.levelIn()`;  the page server's lines, and its
+  children's, through `SRV.ServerLog` (`src/server/ServerLog.ts`):  colours, groups, `childLine()`
 - **Use it when:**  WWOD §19:  any logging a person can turn on.
 - **Flag:**  `console\.(log|debug)\(`
 - **Copies:**  `--`

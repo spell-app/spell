@@ -64,7 +64,10 @@ describe("ProjectBuild", () => {
   const projectId = locationForDiskPath(join(projectFolder, SP.PROJECT_FILE))!.projectId
   const compiled = SP.SpellLocation.getFileLocation(projectId, `Built${SP.COMPILED_JS_SUFFIX}`)
 
-  beforeEach(() => vi.spyOn(console, "log").mockImplementation(() => {}))
+  beforeEach(() => {
+    vi.spyOn(console, "log").mockImplementation(() => {})
+    vi.spyOn(console, "info").mockImplementation(() => {})
+  })
   afterEach(() => {
     vi.restoreAllMocks()
     rmSync(compiled.serverPath, { force: true })

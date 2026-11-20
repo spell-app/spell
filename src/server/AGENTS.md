@@ -178,6 +178,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - who beats:  a command run's wait, `epic ask wait`, `epic inbox wait`, `spell app changes wait`
     - beside it, the ONE process check:  `isProcessAlive(pid)`, `endProcess(pid, wait)` (`PidFile` re-exports them)
     - plain `node` loads it by its own name, `spell/server/Heartbeat`
+  - `ServerLog` -- the page server's log (epic `epic-engine` T118):  a `Logger` (`spell/util/spell/Logger`, by file)
+    whose lines a person reads in `.spell-server.log`
+    - one per part, its prefix starting each line (`page server`, `bundles`, `projects`), its `SPELL_DEBUG`
+      name `server:<prefix>`;  `INFO` by default, so its `debug()` lines are the chatter
+    - `childLine(line, rules)`:  a child's line (`spell bundle --stale`, `spell compile`) at the level its rules
+      say, then `CHILD_LINES`:  an error, a warning;  the rest `INFO`
+    - colours (`chalk`):  the prefix dimmed, errors red, warnings yellow, addresses cyan;  `gap()` / `groupNext()`
+      put a blank line between groups;  the background server is started with `FORCE_COLOR`, so its log is in
+      colour too;  never with `NO_COLOR` (`colorsFor()`)
   - `FolderWatch` -- a folder watched, the ONE way every tool watches files (epic `coherence` P28):
     `new FolderWatch(dir, { ignore, only, quiet }, onChange)`, `close()`
     - skips dot files, `node_modules`, lock files and editors' temp files;  `quiet` reports a burst once, after it
@@ -243,13 +252,13 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - `effort`, read fresh before each pass
 - It's a LEAF of the kit:
   - its packages:  node, `json5`, linkedom (`Linker`) and oxfmt (`formatHTML()`, loaded when it's first called);
-    esbuild comes in as a hook
+    esbuild comes in as a hook;  `chalk`, for `ServerLog`'s colours
   - of the kit, only:
     - util's json5
     - util's `persist/`, for the site header's preferences:
       `spell/util/persist`, never the `spell/util` barrel, which would bundle lodash into every page
     - util's generic small helpers, by file for the same reason:  `spell/util/string` (slugs, escaping),
-      `spell/util/time` (a run's stamp)
+      `spell/util/time` (a run's stamp);  and `spell/util/spell/Logger`, which `ServerLog` extends
     - the toolchain's format settings
   - So anything node-side may import it:
     ui's tools and site, spaces' node server, cli, app, epics, goals, the VS Code extension.

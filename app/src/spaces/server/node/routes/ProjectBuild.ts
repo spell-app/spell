@@ -4,8 +4,9 @@ import { createRequire } from "module"
 import { dirname, join } from "path"
 import { createInterface } from "readline"
 
+import { Logger } from "spell/util/spell/Logger"
 import { within } from "spell/util/timing"
-import type { SRV } from "spell/server"
+import { SRV } from "spell/server"
 import environment from "spell/app/spaces/server/node/environment"
 import * as projectUtils from "spell/app/spaces/server/node/projects/project-utils"
 import { SP } from "spell/parser/spell"
@@ -28,7 +29,9 @@ import { hasProjectFile } from "spell/parser/spell/node/projectFile"
  * - A child process, the checkout's OWN `spell` CLI, never this one:
  *   - it compiles exactly as `spell compile` does:  every target, the scope pack, the checks
  *   - the page server runs the API in its own process, and keeps serving pages while it compiles
- * - Its output goes to the server's log, each line prefixed `projects:  `.
+ * - Its output goes to the server's log, each line prefixed `projects:  ` (`SRV.ServerLog`, `server:projects`):
+ *   - shown:  each project compiled, with how many warnings, and every error;  each run a group of its own
+ *   - debug (`SPELL_DEBUG=server:projects`):  the command, the projects up to date, each warning, the files written
  * - NEVER throws.
  */
 export class ProjectBuild {
@@ -46,6 +49,9 @@ export class ProjectBuild {
 
   /** each project's compile, by project id, while it runs */
   private compiles = new Map<string, Promise<void>>()
+
+  /** its lines in the server's log */
+  readonly log = new SRV.ServerLog({ prefix: "projects" })
 
   /** every child still running, for `stop()` */
   private children = new Set<ChildProcess>()
@@ -143,7 +149,9 @@ export class ProjectBuild {
   private run(args: string[]): Promise<void> {
     const cli = this.cli
     if (!cli || !existsSync(cli)) return Promise.resolve()
-    console.log(`projects:  spell ${args.join(" ")}`)
+    // each run its own group, from its first line shown
+    this.log.groupNext()
+    this.log.debug(`spell ${args.join(" ")}`)
     let child: ChildProcess
     try {
       child = this.spawn(process.execPath, [cli, ...args], {
@@ -154,28 +162,39 @@ export class ProjectBuild {
         detached: true
       })
     } catch (error) {
-      console.error("projects:  couldn't start the compile:", error)
+      this.log.error("couldn't start the compile:", error)
       return Promise.resolve()
     }
     this.children.add(child)
     for (const stream of [child.stdout, child.stderr]) {
-      if (stream) createInterface({ input: stream }).on("line", (line) => console.log(`projects:  ${line}`))
+      if (stream) createInterface({ input: stream }).on("line", (line) => this.log.childLine(line, COMPILE_LINES))
     }
     return new Promise((done) => {
       child.once("error", (error) => {
-        console.error("projects:  the compile failed to run:", error)
+        this.log.error("the compile failed to run:", error)
         this.children.delete(child)
         done()
       })
       child.once("exit", (code, signal) => {
         // 1:  a project had errors, listed above;  its files are written all the same
-        if (code !== 0 && code !== 1) console.error(`projects:  the compile failed (${signal ?? `exit ${code}`})`)
+        if (code !== 0 && code !== 1) this.log.error(`the compile failed (${signal ?? `exit ${code}`})`)
         this.children.delete(child)
         done()
       })
     })
   }
 }
+
+/**
+ * How `spell compile`'s lines are logged, before `SRV.ServerLog.CHILD_LINES` (errors, warnings);  the rest are shown.
+ * - debug:  a project up to date;  each warning under a project, which its line counts (`18 warnings`)
+ * - a project compiled:  shown without the files it wrote (`· wrote build/...`)
+ */
+const COMPILE_LINES: SRV.LineRule[] = [
+  { line: /^✓ \S+ {2}up to date$/, level: Logger.DEBUG },
+  { line: /^\s+\S.*\bwarning:/, level: Logger.DEBUG },
+  { line: /^✓ .* · wrote /, level: Logger.INFO, shown: (line) => line.replace(/ · wrote .*$/, "") }
+]
 
 /** The built-in projects `start()` compiles:  what the demo pages and App UI's component pages run. */
 export const STARTUP_PROJECTS = ["@spell/examples", "@spell/library"]

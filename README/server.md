@@ -211,6 +211,13 @@ the rest of `/api/` is the editor's:  spell-app's module is listed last, and see
 - The port:  `SPELL_SERVER_PORT`, else 4747 if it's free, else any free port.
 - The running server's facts go in `.spell-server.json`, at the kit's root, where the openers find them;
   its output, in `.spell-server.log`.
+- That log holds what you need to read, in colour:  `tail -f .spell-server.log` or `less -R` shows it.
+  - where it listens, each bundle and project built, warnings in yellow, errors in red, a blank line between groups
+  - the rest is debug, hidden:  the checks, "current" and "up to date", the files and sizes each build wrote,
+    each compile warning under its project
+  - to see it, start the server with `SPELL_DEBUG`:  `server` for all of it, `server:bundles` or
+    `server:projects` for one part (`spell server stop` first, or it keeps running as it was)
+  - `NO_COLOR=1` writes it without colour
 - The editor spell-app's module starts records its address in `.spell-server.editor.json`, at the kit's root too;
   its output goes to `.spell-server.editor.log`.
   A page server with its own `--spaces` names both by them (`.spell-server.editor.<folder>-<hash>.json`):  one editor each.
@@ -548,7 +555,8 @@ The page server builds the stale ones itself, as it starts
   A start with nothing changed builds nothing.
 - It runs the kit's OWN `spell`, as the kit's install finds it, never the one on your PATH:
   so a worktree's server builds with the worktree's code.
-- Its output goes to the server's log, each line starting `bundles:  `.
+- Its output goes to the server's log, each line starting `bundles:  `:
+  each bundle it builds and what failed;  the rest only with `SPELL_DEBUG=server:bundles`.
 - A request for a bundle's file that isn't there yet waits for the build, up to two minutes.
   Then it's answered as things stand:  a 404, if the file is still missing.
   A file that's there is served at once.

@@ -107,6 +107,9 @@ export class PageServer {
   /** the bundles' build as it starts (`BundleBuild`):  `start()` begins it, `stop()` ends it */
   readonly bundles: BundleBuild
 
+  /** its own lines in its log (`SPELL_DEBUG` name `server`):  where it listens, a route module that failed */
+  readonly log = new SRV.ServerLog({ prefix: "page server", name: "server" })
+
   /** run once listening, from route modules */
   private listenings: (() => unknown)[] = []
 
@@ -275,7 +278,7 @@ export class PageServer {
     }
     for (const start of this.listenings)
       await Promise.resolve(start()).catch((error: unknown) => {
-        console.error("page server:  a route module's onListening failed:", error)
+        this.log.error("a route module's onListening failed:", error)
       })
     return this
   }
@@ -295,7 +298,7 @@ export class PageServer {
    * - runs `page/cli.ts serve` under `tsx`, whatever the caller's folder,
    *   with the kit's node settings (`tsconfig.node.json`, `TSX_TSCONFIG_PATH`);  the route modules it loads
    *   (each repo's) import by package name, as everything does
-   * - its output goes to `<root>/.spell-server.log`
+   * - its output goes to `<root>/.spell-server.log`, in colour unless `NO_COLOR` is set (`SRV.ServerLog`)
    * - a project's spaces (`--spaces`, `SPELL_SPACES_DIR`):  its own record, token and
    *   log (`SRV.PidFile.forPageServer()`), any free port for `DEFAULT_PORT` (`portFor()`), and the server told them
    * - what `spell server start`, the goals tools and the openers call
@@ -331,7 +334,8 @@ export class PageServer {
         String(port),
         ...(pidFile.spaces ? ["--spaces", pidFile.spaces] : [])
       ],
-      env: { TSX_TSCONFIG_PATH: code.tsconfig },
+      // its log in colour (`SRV.ServerLog`), read in a terminal (`tail -f`, `less -R`);  never with `NO_COLOR`
+      env: { TSX_TSCONFIG_PATH: code.tsconfig, ...(process.env.NO_COLOR ? {} : { FORCE_COLOR: "1" }) },
       sources: [code.source, ...new Set(routes)],
       port: portFor(root, port, pidFile.spaces) || undefined
     })
@@ -573,7 +577,7 @@ export class PageServer {
     try {
       build = new BundleBuild({ root })
     } catch (error) {
-      console.error(`bundles:  can't read worktree ${name}'s settings:`, error)
+      this.bundles.log.error(`can't read worktree ${name}'s settings:`, error)
       return undefined
     }
     this.worktreeBuilds.set(root, build)
@@ -582,7 +586,7 @@ export class PageServer {
       if (!isBeside(set.dir)) this.web.live?.watch(join(root, set.dir), { servedAt: at })
       if (!isBeside(set.assets)) this.web.live?.watch(join(root, set.assets), { servedAt: `${at}/${SET_ASSETS}` })
     }
-    console.log(`bundles:  worktree ${name}`)
+    build.log.debug(`worktree ${name}`)
     return build.start().watch()
   }
 
@@ -604,7 +608,7 @@ export class PageServer {
     const build = isWorktree ? this.worktreeBuildFor(at) : this.bundles
     const what =
       typeof tag === "string" ? `<${tag}>${Array.isArray(missing) ? ` (no ${missing.join(", ")})` : ""}` : "a page"
-    console.log(`bundles:  ${at || "a page"} found its catalog stale, at ${what}:  checking again`)
+    this.bundles.log.info(`${at || "a page"} found its catalog stale, at ${what}:  checking again`)
     // a build begun just now checks them anyway
     if (build && !isNew) build.checkAgain()
     reply.json({ checking: build !== undefined })
@@ -627,7 +631,7 @@ export class PageServer {
       const module = (await import(pathToFileURL(join(this.root, path)).href)) as { default: RouteModule }
       await module.default.setup(this.routeContext())
     } catch (error) {
-      console.error(`page server:  route module ${path} failed to load:`, error)
+      this.log.error(`route module ${path} failed to load:`, error)
     }
   }
 

@@ -1,5 +1,7 @@
 import chalk from "chalk"
 
+import { commaList } from "spell/util/string"
+
 ////////////////
 // ## Debug states
 ////////////////
@@ -8,6 +10,9 @@ import chalk from "chalk"
 const DEBUG_LEVELS = ["OFF", "ERROR", "WARN", "INFO", "DEBUG"] as const
 /** One of `Logger`'s level names, e.g. `"WARN"`. */
 export type DebugLevel = (typeof DEBUG_LEVELS)[number]
+
+/** The `console` method a `Logger` writes a message with. */
+type ConsoleMethod = "log" | "info" | "warn" | "error" | "group"
 
 /**
  * Create a `logger` instance with its own level/prefix/color, so different subsystems can be tuned
@@ -57,14 +62,45 @@ export class Logger {
   /** Close a `console.group()` -- NOTE: not level-gated, so always call it if you called `group()`. */
   public groupEnd = () => console.groupEnd()
 
-  /** Shared implementation for `debug`/`info`/`warn`/`error`/`group` -- drops message if too verbose for `level`. */
-  private output(outputLevel: DebugLevel, consoleMethod: "log" | "info" | "warn" | "error" | "group", args: any[]) {
-    const loggerLevel = DEBUG_LEVELS.indexOf(this.level)
-    const messageLevel = DEBUG_LEVELS.indexOf(outputLevel)
-    if (messageLevel > loggerLevel) return
+  /** Would a message at `level` be shown, at this logger's `level`? */
+  shows(level: DebugLevel): boolean {
+    return level !== Logger.OFF && DEBUG_LEVELS.indexOf(level) <= DEBUG_LEVELS.indexOf(this.level)
+  }
 
+  /** Shared implementation for `debug`/`info`/`warn`/`error`/`group` -- drops message if too verbose for `level`. */
+  protected output(outputLevel: DebugLevel, consoleMethod: ConsoleMethod, args: any[]) {
+    if (this.shows(outputLevel)) this.write(outputLevel, consoleMethod, args)
+  }
+
+  /**
+   * Write a message `output()` let through:  `prefix` in its colour, then `args`, through `console`.
+   * - A subclass changes how its lines look here (the page server's `SRV.ServerLog`).
+   */
+  protected write(_level: DebugLevel, consoleMethod: ConsoleMethod, args: any[]) {
     if (this.prefix) args.unshift(chalk.hex(this.color)(this.prefix))
     console[consoleMethod](...args)
+  }
+
+  /**
+   * The level `setting` gives the logger named `name`, or `undefined` when it doesn't name it.
+   * - `setting`:  `SPELL_DEBUG`'s format (WWOD §19), comma-separated names, each with an optional level:
+   *   `tokenizer,server:INFO`;  a bare name means `DEBUG`
+   * - a name covers its own children:  `server` names `server:bundles` too;  `*` names every logger
+   * - the most specific wins:  `server:INFO,server:bundles` is `DEBUG` for `server:bundles`
+   * - Browser-safe:  it takes the setting as text;  a node package reads the variable itself
+   */
+  static levelIn(setting: string | undefined, name: string): DebugLevel | undefined {
+    let found: { level: DebugLevel; length: number } | undefined
+    for (const entry of commaList(setting)) {
+      const colon = entry.lastIndexOf(":")
+      const named = entry.slice(colon + 1).toUpperCase() as DebugLevel
+      const hasLevel = colon > 0 && DEBUG_LEVELS.includes(named)
+      const entryName = hasLevel ? entry.slice(0, colon) : entry
+      const covers = entryName === "*" || entryName === name || name.startsWith(`${entryName}:`)
+      const length = entryName === "*" ? 0 : entryName.length
+      if (covers && (!found || length >= found.length)) found = { level: hasLevel ? named : Logger.DEBUG, length }
+    }
+    return found?.level
   }
 
   /** No output at all. */

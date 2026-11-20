@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
+import { stripVTControlCharacters } from "node:util"
 import { afterAll, beforeAll, describe, expect, it } from "vite-plus/test"
 
 import { SRV } from "spell/server"
@@ -423,14 +424,14 @@ describe("PageServer", () => {
     let checks = 0
     build.checkAgain = () => void checks++
     const logs: string[] = []
-    const log = console.log
-    console.log = (line: string) => void logs.push(line)
+    const info = console.info
+    console.info = (line: string) => void logs.push(stripVTControlCharacters(line))
     try {
       const answer = await ask(port, "POST", "/api/server/stale", { headers, body })
       expect(answer.status).toBe(200)
       expect(JSON.parse(answer.text)).toEqual({ checking: true })
     } finally {
-      console.log = log
+      console.info = info
     }
     expect(checks).toBe(1)
     expect(logs).toContain(

@@ -21,6 +21,7 @@
  * - `--spaces <dir>`:  where people's and orgs' spaces are kept (default:  spell.spaces, in the kit):
  *   it sets `SPELL_SPACES_DIR`, which spaces' route modules read, and a background server inherits
  *   (epic `people-and-orgs` P8)
+ * - Its log (`SRV.ServerLog`):  where it listens, builds and failures;  `SPELL_DEBUG=server` shows the rest
  * - Runs under `tsx` with the kit's node settings (`tsconfig.node.json`).
  *   A background server is started the same way (`TSX_TSCONFIG_PATH`), whatever folder it's started from.
  */
@@ -74,7 +75,10 @@ async function main(args: string[]): Promise<void> {
         return
       }
       const server = await new PageServer({ root }).start({ port })
-      console.log(`page server:  ${server.web.url}/  (root ${root})`)
+      // a group of its own, so each start stands out in the log
+      server.log.gap()
+      server.log.info(`${server.web.url}/  (root ${root})`)
+      server.log.gap()
       await SRV.untilInterrupted(server.web.server, () => server.stop())
       return
     }

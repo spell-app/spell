@@ -4,6 +4,7 @@ import { createRequire } from "node:module"
 import { basename, dirname, join } from "node:path"
 import { createInterface } from "node:readline"
 
+import { Logger } from "spell/util/spell/Logger"
 import { within } from "spell/util/timing"
 import { SRV, type Handler } from "spell/server"
 import {
@@ -26,7 +27,9 @@ import {
  *   install resolves it)
  *   - it builds only the bundles whose sources changed since their last build (the logic:  `spell/server` `Bundle`)
  *   - so a start with nothing changed builds nothing
- * - its output goes to the server's log, each line prefixed `bundles:  `
+ * - its output goes to the server's log, each line prefixed `bundles:  ` (`SRV.ServerLog`, `server:bundles`)
+ *   - shown:  each bundle built, and what failed;  each build a group of its own
+ *   - debug (`SPELL_DEBUG=server:bundles`):  the checks, "current", the files and sizes each build wrote
  * - `wait`:  while it runs, a request for a MISSING file in a bundle's folder waits for it to end,
  *   at most `timeout` ms, then is served as usual;  a file that's there is served at once
  * - when it ends, live reload reloads the open pages that load a bundle:  the page server watches both folders
@@ -58,6 +61,9 @@ export class BundleBuild {
 
   /** resolves when the build ends, however it ends */
   private ended: Promise<void> = Promise.resolve()
+
+  /** its lines in the server's log */
+  readonly log = new SRV.ServerLog({ prefix: "bundles" })
 
   /** the sources' watchers (`watch()`) */
   private watchers: SRV.FolderWatch[] = []
@@ -96,7 +102,9 @@ export class BundleBuild {
     const cli = this.cli
     if (this.child || !cli || !existsSync(cli)) return this
     const args = [cli, "bundle", "--stale"]
-    console.log(`bundles:  checking (spell bundle --stale)`)
+    // each run its own group, from its first line shown
+    this.log.groupNext()
+    this.log.debug("checking (spell bundle --stale)")
     let child: ChildProcess
     try {
       child = this.spawn(process.execPath, args, {
@@ -107,21 +115,21 @@ export class BundleBuild {
         detached: true
       })
     } catch (error) {
-      console.error("bundles:  couldn't start the build:", error)
+      this.log.error("couldn't start the build:", error)
       return this
     }
     this.child = child
     for (const stream of [child.stdout, child.stderr]) {
-      if (stream) createInterface({ input: stream }).on("line", (line) => console.log(`bundles:  ${line}`))
+      if (stream) createInterface({ input: stream }).on("line", (line) => this.log.childLine(line, BUNDLE_LINES))
     }
     this.ended = new Promise((done) => {
       child.once("error", (error) => {
-        console.error("bundles:  the build failed to run:", error)
+        this.log.error("the build failed to run:", error)
         this.child = undefined
         done()
       })
       child.once("exit", (code, signal) => {
-        if (code !== 0) console.error(`bundles:  the build failed (${signal ?? `exit ${code}`});  see above`)
+        if (code !== 0) this.log.error(`the build failed (${signal ?? `exit ${code}`});  see above`)
         this.child = undefined
         done()
         if (this.again) {
@@ -144,7 +152,7 @@ export class BundleBuild {
     try {
       specs = SRV.Bundle.specs(this.root)
     } catch (error) {
-      console.error("bundles:  can't watch the sources:", error)
+      this.log.error("can't watch the sources:", error)
       return this
     }
     // one quiet time for every source:  a merge touching several builds once
@@ -182,7 +190,7 @@ export class BundleBuild {
       this.again = true
       return
     }
-    console.log(`bundles:  ${why}`)
+    this.log.debug(why)
     this.start()
   }
 
@@ -242,6 +250,21 @@ export class BundleBuild {
     return join(this.root, folder, served.slice(folderUrl(folder).length))
   }
 }
+
+/**
+ * How `spell bundle --stale`'s lines are logged, before `SRV.ServerLog.CHILD_LINES` (errors, warnings);  the rest
+ * are shown.
+ * - debug:  `ui-root:  current`, a file `unchanged`, the sizes a build lists (`-- tools/_assets/...`, indented
+ *   tables), the bundler's own summary (`brand bundle (1.5s):  _assets/ui/`, said again by `built brand in 1.5s`)
+ * - `building ui-site ...`:  shown, a group of its own
+ */
+const BUNDLE_LINES: SRV.LineRule[] = [
+  { line: /^\S+:  current$/, level: Logger.DEBUG },
+  { line: /^building /, level: Logger.INFO, starts: true },
+  { line: /\bunchanged\b/, level: Logger.DEBUG },
+  { line: /^-- |^\s/, level: Logger.DEBUG },
+  { line: /^\S+ bundle \([\d.]+m?s\):/, level: Logger.DEBUG }
+]
 
 /** How long a bundle's sources must be quiet before it's checked again, in ms (`BundleBuild.watch()`):  a merge writes many files. */
 const REBUILD_QUIET_MS = 3000
