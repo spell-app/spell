@@ -910,6 +910,58 @@ describe("SpellElement", () => {
       }
     })
 
+    test("a file dropped on a view in a list that isn't one, and isn't droppable, runs its file line, not the list's;  every ui-file-dragged-over has x / y (language I174)", async () => {
+      /** `a stamp is a token` with `when a file is dropped on it:`:  no list, never `can be dropped on`. */
+      class Stamp extends Token {
+        static elementTag = core.defineElement(this, "Game")
+        static draggable = false
+        heard: string[] = []
+        whenFileDroppedOn(file: File) {
+          this.heard.push(`dropped ${file.name}`)
+        }
+      }
+      const stamp = new Stamp("s")
+      core.append(trays[0]!, stamp)
+      const trayHeard: string[] = []
+      const trayLine = (file: File) => trayHeard.push(`dropped ${file.name}`)
+      Object.assign(trays[0]!, { whenFileDroppedOn: trayLine })
+      const { root, done } = await drawTrays()
+      const overs: CustomEvent[] = []
+      const listen = (event: Event) => overs.push(event as CustomEvent)
+      root.addEventListener("ui-file-dragged-over", listen)
+      const element = root.querySelector("game-stamp") as HTMLElement
+      const box = element.getBoundingClientRect()
+      const send = (type: string) => {
+        const transfer = new DataTransfer()
+        transfer.items.add(new File(["hi"], "stamp.png", { type: "image/png" }))
+        const event = new DragEvent(type, {
+          bubbles: true,
+          composed: true,
+          cancelable: true,
+          dataTransfer: transfer,
+          clientX: box.x + 2,
+          clientY: box.y + 3
+        })
+        element.dispatchEvent(event)
+        return event
+      }
+      try {
+        expect(send("dragenter").defaultPrevented).toBe(true)
+        send("dragover")
+        await new Promise((resolve) => setTimeout(resolve, 150))
+        expect(send("drop").defaultPrevented).toBe(true)
+        await vi.waitFor(() => expect(stamp.heard).toEqual(["dropped stamp.png"]))
+        // the innermost view takes it:  the tray around it hears nothing
+        expect(trayHeard).toEqual([])
+        expect(overs.length).toBeGreaterThanOrEqual(2)
+        for (const over of overs) expect(over.detail).toMatchObject({ x: box.x + 2, y: box.y + 3 })
+      } finally {
+        root.removeEventListener("ui-file-dragged-over", listen)
+        Reflect.deleteProperty(trays[0]!, "whenFileDroppedOn")
+        done()
+      }
+    })
+
     test("a Spell UI element's events reach the view's program:  `cancel uploading` cancels the page's, `while uploading` puts back (P67, r32)", async () => {
       /** `a photo box is a view` with the uploader's lines, as compiled. */
       class PhotoBox extends View {

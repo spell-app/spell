@@ -726,7 +726,7 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     if (wasOver) return this.filesOverAgain.ask()
     this.isAcceptingDrop = true
     const view = this.currentThing!
-    const files = DroppedFiles.dragDetail(event, FILE_VIA)
+    const files = this.fileDragDetail(event)
     this.filesWhile = this.fileHandlerFor("while", "File", "DraggedOver")
     if (this.filesWhile) this.runHandler(() => this.entry!.core.startWhile(view, this.filesWhile!, files))
     const over = this.fileHandlerFor("when", "File", "DraggedOver")
@@ -743,7 +743,10 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     run: () => this.filesOver && this.sendPageEvent("file-dragged-over-event", this.fileDragDetail(this.filesOver))
   })
 
-  /** A file drag's detail, as `<ui-uploader>`'s:  how many, their kinds, and where the pointer is. */
+  /**
+   * A file drag's detail, as `<ui-uploader>`'s:  how many, their kinds, and where the pointer is.
+   * - The same shape every time, the first `ui-file-dragged-over` and the repeats alike.
+   */
   private fileDragDetail(event: DragEvent) {
     return { ...DroppedFiles.dragDetail(event, FILE_VIA), x: event.clientX, y: event.clientY }
   }
