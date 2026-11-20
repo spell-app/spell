@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
+import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { compiledSpellProject, parseSpellProject } from "spell/parser/spell/test"
 
@@ -122,6 +123,16 @@ describe("SP.UIViews", () => {
     expect(code).toContain('export class ColumnaDeNetlist extends View {\n  static uiElement = "ui-tree"')
     expect(code).toContain('  get appearance() {\n    return "columns"')
     expect(code).toContain("  rowClass(elemento) {")
+  })
+
+  test("TypeScript writes no element class for it, nor for a type below it:  the page builds its tag on the element", () => {
+    const contents = ['a "netlist column" is a ui tree view', 'a "port column" is a netlist column'].join("\n")
+    const { code } = compiledSpellProject([{ path: "/Harbor.spell", contents }], { writer: P.TSWriter.instance })
+    expect(code).toContain('export class NetlistColumn extends View {\n  static uiElement = "ui-tree"')
+    expect(code).not.toContain("SpellElement")
+    expect(code).not.toContain("core.useElement")
+    // its tag is still declared for the JSX
+    expect(code).toContain('"test-project-netlist-column": HTMLAttributes<HTMLElement>')
   })
 
   test("an element no pack has names no type", () => {

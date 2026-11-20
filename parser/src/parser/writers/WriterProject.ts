@@ -36,6 +36,11 @@ export class WriterProject {
   /** Each class's super-type, by name, e.g. `Pile` for `Tableau`. */
   readonly superTypes = new Map<string, string>()
   /**
+   * Each class that names the Spell UI element it draws as, `static uiElement = "ui-tree"` (epic `from-console` P11):
+   * by name, its element's tag.  See `uiElementOf()`.
+   */
+  readonly uiElements = new Map<string, string>()
+  /**
    * What each class declares, by name:  its properties, getters and methods, by spell's names.
    * - Ours, an imported one's (`importedMembers`), and what it gets for TypeScript only (`undeclared`).
    * - See `isInherited()`.
@@ -669,6 +674,19 @@ export class WriterProject {
     return undefined
   }
 
+  /**
+   * The Spell UI element class `typeName` draws as, its own or a super-type's, e.g. `ui-tree` for a netlist column --
+   * `undefined` for a view drawn as its own element.
+   * - As the core reads it, `core.uiElementOf()`:  a sub-class inherits it.
+   */
+  uiElementOf(typeName: string | undefined): string | undefined {
+    for (let type = typeName; type; type = this.superTypes.get(type)) {
+      const tag = this.uiElements.get(type)
+      if (tag) return tag
+    }
+    return undefined
+  }
+
   /** Is `typeName` a class the project declares or imports, e.g. `Tableau`? */
   isClass(typeName: string): boolean {
     return this.members.has(typeName) || this.importedMembers.has(typeName)
@@ -800,6 +818,11 @@ export class WriterProject {
     for (const member of members) {
       if (member instanceof P.ASTStaticDefinition && isListLiteral(member.value)) {
         this.staticLists.add(`${declaration.type.name}.${member.name}`)
+      }
+      if (member instanceof P.ASTStaticDefinition && member.name === "uiElement") {
+        // `CreateType` writes its tag quoted, as code:  `"ui-tree"`
+        const { value } = member
+        if (value instanceof P.ASTStringLiteral) this.uiElements.set(declaration.type.name, value.value.replace(/^"|"$/g, ""))
       }
       if (member instanceof P.ASTStaticDefinition && member.name === "instanceType") {
         if (member.value instanceof P.ASTTypeExpression) this.itemTypes.set(declaration.type.name, member.value.name)

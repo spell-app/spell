@@ -122,7 +122,8 @@ export class TSWriter extends JSWriter {
     if (events) code = `${code.replace(/\n*$/, "")}\n\n${events}\n`
     code = super.writeModule(code)
     if (this.elementTags.size) {
-      code = this.withElementsImport(code)
+      // only for an element class written:  a type built on a Spell UI element has none (`elementClassFor()`)
+      if (code.includes(" extends SpellElement<")) code = this.withElementsImport(code)
       code = `${code.replace(/\n*$/, "")}\n\n${this.elementTagsDeclaration()}`
     }
     // what this project gives a class it imports, for TypeScript only (Q25):  declared in that project's module
@@ -888,6 +889,9 @@ export class TSWriter extends JSWriter {
    * - What it leaves out, e.g. a super-type's properties, the page adds, as it does for javascript:
    *   both targets draw the same element.
    * - Javascript writes none:  the page makes its element from the class.
+   * - Nor for a type built on a Spell UI element, `a "netlist column" is a ui tree view`, or one below it
+   *   (epic `from-console` P11, I17):  the page builds its tag on that element (`core.uiElementOf()`),
+   *   so a class here would never be used.  Its tag is still declared for the JSX.
    */
   elementClassFor(node: P.ASTClassDeclaration): string | undefined {
     const project = elementProjectOf(node)
@@ -897,6 +901,7 @@ export class TSWriter extends JSWriter {
     // the type's own name, not the class's (`STOCK_PILE`, a naming map's):  as a drawing names its tag, `<stock-pile>`
     const tag = elementTagFor(project, elementNameOf(node) ?? node.type.name)
     this.elementTags.set(name, tag)
+    if (this.project.uiElementOf(node.type.name)) return undefined
     const words = wordsOf(typeName)
     const attributes = this.elementAttributes(node)
     const vocabulary = attributes.length
