@@ -727,6 +727,87 @@ test("handoff():  records the move, keyed by session;  needs a session and the w
   }
 })
 
+test("fresh():  a NEW session in this window, /epic resume typed in;  refused while the epic's agents run", async () => {
+  const epic = `fresh-${process.pid}`
+  const agents = join(dirname(repo), "spell-app-dev", "epics", epic, "agents.json5")
+  mkdirSync(dirname(agents), { recursive: true })
+  assert.throws(() => Window.fresh(epic, undefined), /no session/)
+  sawHooks(SESSION)
+  try {
+    // no window:  nothing recorded
+    assert.throws(() => Window.fresh(epic, SESSION), /no window/)
+    const window = { pid: process.ppid, port: 1, token: "t", folders: [], workspaceFile: "/w/seo.code-workspace" }
+    writeFileSync(join(dir, `${process.ppid}.json`), JSON.stringify(window))
+    // an agent running:  closing the tab would cut it off
+    writeFileSync(agents, `[{ name: "${epic}-docs", task: "docs", status: "active", started: "2026-11-19" }]`)
+    assert.throws(() => Window.fresh(epic, SESSION), new RegExp(`agents are still running.*${epic}-docs.*--force`))
+    assert.equal(existsSync(Window.handoffFile(SESSION)), false)
+    const refused = await mainWith(["fresh", epic])
+    assert.equal(refused.code, 1)
+    assert.match(refused.err, /still running/)
+    // --force:  anyway
+    const forced = await mainWith(["fresh", epic, "--force"])
+    assert.equal(forced.code, 0)
+    assert.match(forced.out, new RegExp(`a new session takes ${epic} on in this window when this turn ends`))
+    const record = {
+      sessionId: SESSION,
+      to: "/w/seo.code-workspace",
+      from: process.ppid,
+      close: "tab",
+      remove: null,
+      show: null,
+      prompt: `/epic resume ${epic}`,
+      fresh: true
+    }
+    assert.deepEqual(JSON.parse(readFileSync(Window.handoffFile(SESSION), "utf8")), record)
+    // none running:  no --force needed
+    rmSync(agents)
+    assert.deepEqual(Window.fresh(epic, SESSION), record)
+  } finally {
+    rmSync(Window.handoffFile(SESSION), { force: true })
+    rmSync(dirname(agents), { recursive: true, force: true })
+  }
+})
+
+test("resume():  a fresh record opens a NEW session in its own window, then closes the old tab there", async () => {
+  const seen = []
+  const server = createServer((request, response) => {
+    let body = ""
+    request.on("data", (chunk) => (body += chunk))
+    request.on("end", () => {
+      seen.push([request.url, JSON.parse(body)])
+      response.writeHead(200, { "Content-Type": "application/json" })
+      response.end(JSON.stringify({ ok: true, closed: true }))
+    })
+  })
+  await new Promise((done) => server.listen(0, "127.0.0.1", done))
+  // the session's own window:  never opened again (no `code`), its file not needed
+  const own = { pid: sleeper.pid, port: server.address().port, token: "t", folders: [], workspaceFile: null }
+  writeFileSync(join(dir, `${sleeper.pid}.json`), JSON.stringify(own))
+  try {
+    const record = { sessionId: SESSION, to: null, from: sleeper.pid, close: "tab", prompt: "/epic resume seo" }
+    const fresh = { ...record, fresh: true }
+    assert.deepEqual(await Window.resume(fresh, ["🚧 seo"]), {
+      opened: true,
+      closed: true,
+      matches: undefined,
+      shown: undefined
+    })
+    assert.deepEqual(seen.splice(0), [
+      ["/open-session", { prompt: "/epic resume seo" }],
+      ["/close-session-tab", { titles: ["🚧 seo"] }]
+    ])
+    // no title:  the old tab can't be found, so stays
+    assert.equal((await Window.resume(fresh)).closed, false)
+    assert.deepEqual(seen.splice(0), [["/open-session", { prompt: "/epic resume seo" }]])
+    // its window gone:  nothing opened
+    await assert.rejects(Window.resume({ ...fresh, from: dead }), /is gone/)
+    assert.deepEqual(seen, [])
+  } finally {
+    server.close()
+  }
+})
+
 test("show():  while a move is pending, the doc waits for the target window;  the last one wins", async () => {
   const record = { sessionId: SESSION, to: "/repo/workspaces/ongoing/seo.code-workspace", show: null }
   mkdirSync(Window.handoffs, { recursive: true })

@@ -104,6 +104,7 @@ It's ONE file per repo, `.epic/config.json5` in the main checkout, read by
 | `voices` | not written | the repo's own voices, a name to a file from the main checkout (`"code": "agents/wwod/writing.md"`), over the engine's `voices/<name>.md` (`epic voice`) |
 | `pageVoices` | not written | the voice each kind of page is written in, over the defaults:  `readme` for READMEs and guides, `code` for code and epic pages |
 | `promptAck` | not written | whether the prompt hook shows an "On it:  ..." line for a message sent while the session is busy;  on unless `false` |
+| `freshHintMB` | not written:  `8` | the size, in MB, past which an epic's session gets ONE line from the prompt hook suggesting `/epic fresh`, a new session that picks the epic up from its page (every turn re-reads the conversation, so a big one costs each turn);  `0`:  never |
 | `localSetup` | `true` with `--local`, else not written | the repo was set up on this machine only ([`--local`](README-setup.md#nothing-in-your-repo)):  `epic init` run again stays local |
 | `top` | not written | a PEER repo's kit, its main checkout (`{ top: "../spell" }`):  the peer takes the kit's epic folder, windows, shared folders, engine and voices for each key it leaves out, and keeps its own worktrees, install, base branch and app.  A multi-repo child finds its top as the folder above instead;  `epic config top` prints either |
 | `renamedRepos` | not written | the repo's old GitHub addresses, each to the one it was renamed to, so an epic page that recorded the old address is still this repo's |

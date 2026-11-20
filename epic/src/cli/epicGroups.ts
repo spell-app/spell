@@ -916,6 +916,17 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       }
     },
     {
+      name: "fresh",
+      usage: "<epic> [--force]",
+      description:
+        "hand <epic> to a NEW session in this window when this turn ends, /epic resume <epic> typed in, this tab " +
+        "closed (/epic fresh);  refused while the epic's agents run",
+      example: "epic window fresh seo",
+      flags: {
+        "--force": "even with the epic's agents running (closing this tab cuts them off)"
+      }
+    },
+    {
       name: "resume",
       usage: "<record> [--title <title>]...",
       description: "the move itself:  the Stop hook runs it",

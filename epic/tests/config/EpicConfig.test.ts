@@ -89,6 +89,7 @@ describe("EpicConfig", () => {
       "pageVoices.epic-page": "code",
       checkoutPatches: "",
       promptAck: true,
+      freshHintMB: 8,
       editor: "code",
       renamedRepos: "{}",
       colors: '{"people":{},"agents":{}}',

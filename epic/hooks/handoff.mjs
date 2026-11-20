@@ -5,11 +5,13 @@
  * - `/isolate` arms it with `epic window handoff <name>` (`--back`:  no skill uses it now),
  *   which writes the move to `<registry>/handoffs/<session id>.json`.
  *   See `src/window.mjs`, "A worktree's window".
+ * - `/epic fresh` arms it too, with `epic window fresh <epic>`:  a record marked `fresh`, carried out by the same
+ *   `resume`, which opens a NEW session in this window instead, and closes this session's tab (epic `epic-engine` T110)
  * - stdin `{ session_id, transcript_path, cwd, ... }`.
  * - No pending move for this session (every other turn):  exits at once.
  * - A pending move:
  *   - renames the record to `<session id>.running.json`, so the next turn won't move it again
- *   - queues the session's own title (its last `custom-title`) for its next prompt, unless one is queued:
+ *   - queues the session's own title (not for `fresh`) (its last `custom-title`) for its next prompt, unless one is queued:
  *     resumed in the new window, its tab may show Claude Code's own title instead (epic `epic-engine` r2), and the
  *     `continue` typed there puts it back (`SessionFolders.requeueTitle()`)
  *   - starts `window.mjs resume` on it, DETACHED, its output in `<registry>/handoffs/<session id>.log`
@@ -42,7 +44,8 @@ try {
   if (file && existsSync(file)) {
     const running = join(Window.handoffs, `${sessionId}.running.json`)
     renameSync(file, running)
-    await requeueTitle(sessionId)
+    // a fresh record leaves this session behind:  its title is the new session's, by its own `/epic resume`
+    if (!JSON.parse(readFileSync(running, "utf8")).fresh) await requeueTitle(sessionId)
     const args = [SCRIPT, "resume", running]
     for (const title of await sessionTitles(transcript)) args.push("--title", title)
     const log = openSync(join(Window.handoffs, `${sessionId}.log`), "a", 0o600)
