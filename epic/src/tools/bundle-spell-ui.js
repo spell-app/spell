@@ -720,11 +720,34 @@ function checkClassicScript(file = OUTFILE) {
  */
 async function writeLazyScripts() {
   // built beside it, and swapped in whole:  a run stopped halfway left only `code-engine.js`, so `<ui-markdown>`'s 404'd
-  const building = `${LAZY_OUT}.building`
+  // - in a folder of THIS run's (`lazyBuildingFolder()`):  two runs at once (a page server's rebuild, another by hand)
+  //   shared one, each emptying the other's, and the folder swapped in held only the last two engines;
+  //   with no `code-engine.js`, every `<epic-code>` 404'd (epic `epic-engine` I361)
+  const building = lazyBuildingFolder()
   rmSync(building, { recursive: true, force: true })
   mkdirSync(building, { recursive: true })
+  try {
+    await buildLazyScripts(building)
+    rmSync(LAZY_OUT, { recursive: true, force: true })
+    renameSync(building, LAZY_OUT)
+  } finally {
+    rmSync(building, { recursive: true, force: true })
+  }
+}
+
+/**
+ * Where this run builds the lazy scripts before swapping them in:  `_assets/.lazy-building-<pid>`.
+ * - its own per process, so a second run at the same time never touches it
+ * - a dot folder:  never a bundle's source (`spell/server` `Bundle`'s `SKIPPED`), so it starts no rebuild
+ */
+function lazyBuildingFolder() {
+  return join(dirname(LAZY_OUT), `.lazy-building-${process.pid}`)
+}
+
+/** Builds each of `LAZY` into `folder`, checked like the bundle, its size printed. */
+async function buildLazyScripts(folder) {
   for (const { name, global, source } of LAZY) {
-    const outfile = join(building, `${name}.js`)
+    const outfile = join(folder, `${name}.js`)
     await build({
       entryPoints: [source],
       outfile,
@@ -749,8 +772,6 @@ async function writeLazyScripts() {
       `-- ${relative(DOCS, join(LAZY_OUT, `${name}.js`))}  ${kb(code.length)}  (gzip ${kb(gzipSync(code).length)})`
     )
   }
-  rmSync(LAZY_OUT, { recursive: true, force: true })
-  renameSync(building, LAZY_OUT)
 }
 
 /**
