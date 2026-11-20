@@ -306,8 +306,8 @@ and in the app's build folder, `app/` at the app folder's root.
     - What shows by itself as you type (the list, signature help) waits for the typing to pause, `hoverDelay()`
       (the page's `--ui-hover-delay`, read live, 800 msec by default), each key starting the wait again (epic `codemirror` I22);
       Ctrl+Space, ⇧⌘Space and ⌥↓ show at once.
-      - Settings… › "Popup delay" (Short, Standard, Long) sets `--ui-hover-delay` on the page, so every hover, popup and
-        tooltip follows;  CodeMirror's own waits are made again as it changes (`CodeMirrorPopups.waiting()`;  epic `codemirror` T19).
+      - Settings… › "Delay before showing help" (Short, Standard, Long) sets `--ui-hover-delay` on the page,
+        so every hover, popup and tooltip follows;  CodeMirror's own waits are made again as it changes (`CodeMirrorPopups.waiting()`;  epic `codemirror` T19).
     - Settings… drives the editors live:
       `codeMirrorOptionsFor()`, in a compartment ([CodeMirrorPopups](ui/codemirror/CodeMirrorPopups.ts)), following `codeChoices`, which `CodeSettings` sets.
     - Spell UI's tags and attributes say what each is, as listed and on hover:  the language service reads them

@@ -873,7 +873,7 @@ A Spanish browser gets "Guardar" where an English one gets "Save":
 - ⌘F opens a compact find bar like VS Code's, over the code's top right, its Replace row showing until you fold it
   ([CodeMirrorFind](src/app/ui/codemirror/CodeMirrorFind.ts)).
 - The popups that show by themselves (suggestions, signature help, hovers) wait for typing to pause,
-  as long as Settings… › Popup delay says ([CodeMirrorPopups](src/app/ui/codemirror/CodeMirrorPopups.ts)):
+  as long as Settings… › "Delay before showing help" says ([CodeMirrorPopups](src/app/ui/codemirror/CodeMirrorPopups.ts)):
   Short 0.4 s, Standard 0.8 s, Long 1.5 s.
 - Drawn bubbly, every line is 25px, and a block's feet sit in the blank line under it, so scrolling never changes
   the file's height.
