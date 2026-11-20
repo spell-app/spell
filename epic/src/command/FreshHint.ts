@@ -177,7 +177,7 @@ export type HookAnswer =
 const MARKS_FOLDER = "fresh-hints"
 
 /** The least time between two hints at break points:  a burst of them (a merge, an agent back, its phase) says it once. */
-const BREAK_GAP_MS = 30 * 60 * 1000
+const BREAK_GAP_MS = 15 * 60 * 1000
 
 /** Bytes in a MB, as `freshHintMB` counts them. */
 const MEGABYTE = 1024 * 1024

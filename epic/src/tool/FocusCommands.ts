@@ -128,8 +128,9 @@ export class FocusCommands {
    * Every running epic session, as `{ epic, session }`:  `others`, to tell;  `self`, the one running this command
    * (`CLAUDE_CODE_SESSION_ID`), told nothing.
    * - only epics in progress:  a done one has nothing in flight
+   * - `epic fresh all` asks it too (`FreshCommands`, epic `epic-engine` T113)
    */
-  private async runningSessions(): Promise<{ others: EpicSession[]; self: EpicSession[] }> {
+  async runningSessions(): Promise<{ others: EpicSession[]; self: EpicSession[] }> {
     const finder = this.owner.migrator.sessionsOf
     if (!finder) throw new PlanDocError("focus:  needs the running sessions, which only the `epic` command can see")
     const me = process.env.CLAUDE_CODE_SESSION_ID
@@ -137,7 +138,7 @@ export class FocusCommands {
     const self: EpicSession[] = []
     for (const listing of this.inProgress())
       for (const session of await finder(listing.name)) {
-        const found = { epic: listing.name, session: session.name }
+        const found = { epic: listing.name, session: session.name, sessionId: session.sessionId }
         if (session.sessionId === me) self.push(found)
         else others.push(found)
       }
@@ -200,4 +201,4 @@ function stringOf(value: Flags[string]): string | undefined {
 }
 
 /** A running epic session:  its epic, and its address (`SendMessage`'s `to`). */
-type EpicSession = { epic: string; session: string }
+export type EpicSession = { epic: string; session: string; sessionId: string }
