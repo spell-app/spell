@@ -149,6 +149,54 @@ export function alignBlockActions(root) {
   })
 }
 
+/**
+ * Run a table's box (`box`, its `<ui-table>` or the bare table) and its actions row (`row`) across `room`
+ * (`roomFor()`'s window x's):  the expand button's wide layout (`wireTableWidths()`, in the runtime).
+ * - SIDE EFFECT:  sets their `width` and `margin-inline-start` (and the box's `max-width: none`) inline
+ * - its new start margin is measured from where its margin STARTS, the box's left less its own start margin:
+ *   - in the reading column, that margin is what centres it (`--spell-column-inset`), and the new margin replaces it;
+ *     measured from the box's own left instead, the inset was counted twice:  a table widened at 1420px started
+ *     270px left of the window, its left columns cut off (epic `epic-engine` I367;  Owen, 2026-11-20:  "it pins the
+ *     left side and cuts off the right side")
+ *   - never from its light-DOM parent:  a table slotted into an element is laid out in the element's shadow boxes (an
+ *     `<epic-field>`'s padded `.text`), so the parent put it 51px off (I315)
+ */
+export function widenTable(box, row, room) {
+  box.style.removeProperty("margin-inline-start")
+  const marginStart = parseFloat(getComputedStyle(box).marginLeft) || 0
+  const start = `${room.left - (box.getBoundingClientRect().left - marginStart)}px`
+  box.style.maxWidth = "none"
+  box.style.width = `${room.right - room.left}px`
+  box.style.marginInlineStart = start
+  row.style.width = box.style.width
+  row.style.marginInlineStart = start
+}
+
+/**
+ * How far a widened table `box` may run, as window x's `{ left, right }`:
+ * `main`'s width less its gutter (`--spell-gutter`) on both sides,
+ * cut to every ancestor between them that clips its overflow (`overflow-x` not `visible`), at its inner edges.
+ * - up through slots and shadow roots:
+ *   a table in an `<epic-*>` element's light DOM is laid out in its shadow root's boxes
+ */
+export function roomFor(box, main) {
+  const page = main.getBoundingClientRect()
+  const gutter = parseFloat(getComputedStyle(main).getPropertyValue("--spell-gutter")) || 16
+  const room = { left: page.left + gutter, right: page.right - gutter }
+  for (let el = layoutParent(box); el && el !== main; el = layoutParent(el)) {
+    if (getComputedStyle(el).overflowX === "visible") continue
+    const left = el.getBoundingClientRect().left + el.clientLeft
+    room.left = Math.max(room.left, left)
+    room.right = Math.min(room.right, left + el.clientWidth)
+  }
+  return room
+}
+
+/** The box `el` is laid out in:  its slot when it's slotted, else its parent, else its shadow root's host. */
+function layoutParent(el) {
+  return el.assignedSlot ?? el.parentElement ?? el.getRootNode().host ?? null
+}
+
 /** `value` px as CSS, to the hundredth. */
 function pixels(value) {
   return `${Math.round(value * 100) / 100}px`

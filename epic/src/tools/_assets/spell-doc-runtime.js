@@ -98,6 +98,8 @@ import {
   noteToast,
   readJSON,
   restoreEpicFolds,
+  roomFor,
+  widenTable,
   writeJSON
 } from "./spell-doc-helpers.js"
 import {
@@ -517,17 +519,7 @@ function wireTableWidths(main) {
       return alignBlockActions(row)
     }
     if (!parent.getClientRects().length) return
-    const room = roomFor(box, main)
-    // where the table starts in its column, read off the table itself with its own offset taken off:  its light-DOM
-    // parent is NOT where it's laid out when it's slotted (an `<epic-field>`'s table sits in the field's padded
-    // `.text` box), so measuring the parent put it 51px off, cut off at the phase's clipping edge (I315, r72)
-    box.style.removeProperty("margin-inline-start")
-    const start = `${room.left - box.getBoundingClientRect().left}px`
-    box.style.maxWidth = "none"
-    box.style.width = `${room.right - room.left}px`
-    box.style.marginInlineStart = start
-    row.style.width = box.style.width
-    row.style.marginInlineStart = start
+    widenTable(box, row, roomFor(box, main))
     alignBlockActions(row)
   }
   const flip = (box) => {
@@ -925,26 +917,6 @@ function tableKey(box, main) {
   return `${name}#${own}${nth > 1 ? `-${nth}` : ""}`
 }
 
-/**
- * How far a widened table `box` may run, as window x's `{ left, right }`:
- * `main`'s width less its gutter (`--spell-gutter`) on both sides,
- * cut to every ancestor between them that clips its overflow (`overflow-x` not `visible`), at its inner edges.
- * - up through slots and shadow roots:
- *   a table in an `<epic-*>` element's light DOM is laid out in its shadow root's boxes
- */
-function roomFor(box, main) {
-  const page = main.getBoundingClientRect()
-  const gutter = parseFloat(getComputedStyle(main).getPropertyValue("--spell-gutter")) || 16
-  const room = { left: page.left + gutter, right: page.right - gutter }
-  for (let el = layoutParent(box); el && el !== main; el = layoutParent(el)) {
-    if (getComputedStyle(el).overflowX === "visible") continue
-    const left = el.getBoundingClientRect().left + el.clientLeft
-    room.left = Math.max(room.left, left)
-    room.right = Math.min(room.right, left + el.clientWidth)
-  }
-  return room
-}
-
 /** How wide `roomFor()` lets `box` run. */
 function roomWidth(box, main) {
   const room = roomFor(box, main)
@@ -953,11 +925,6 @@ function roomWidth(box, main) {
 
 /** The least a widened table must gain on its column (px) for the expand button to show. */
 const MIN_WIDE_GAIN = 24
-
-/** The box `el` is laid out in:  its slot when it's slotted, else its parent, else its shadow root's host. */
-function layoutParent(el) {
-  return el.assignedSlot ?? el.parentElement ?? el.getRootNode().host ?? null
-}
 
 /**
  * The tables in `root`, each by its BOX:  its `<ui-table>` host, else the bare table.  Never a pinned header's copy

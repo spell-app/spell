@@ -1368,6 +1368,9 @@ In `tools/`:
         into the column forgets them all, the reset (epic `epic-engine` I315)
       - the runtime's `wireTableWidths()` measures how far in a table starts,
         so one inside a list item or an epic item's details goes out to the gutter too
+        - from where its start margin begins (`widenTable()`, the docs helpers):  the column's centring margin is
+          replaced, never counted twice (epic `epic-engine` I367:  widened at 1420px, a table started 270px off the
+          window);  `widenTable.browser.test.ts` checks it at five widths, in a list, slotted and narrow
       - no button at phone width:  the column is the page already
       - its HEADER ROW sticks under the stuck titles while its rows scroll past
         (2026-10-19:  "make the table headers sticky";  epic `epic-engine` r4)
