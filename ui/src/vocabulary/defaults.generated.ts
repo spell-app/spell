@@ -1924,6 +1924,20 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "all-items-icon", kind: "icon", group: "content" },
     { name: "all-items-at-end", kind: "boolean", group: "layout" }
   ],
+  "ui-tour": [
+    { name: "name", kind: "string", group: "name" },
+    { name: "summary", kind: "string", group: "content" },
+    { name: "dim", kind: "boolean", group: "appearance" },
+    { name: "remember", kind: "string", group: "behaviour" },
+    { name: "offer", kind: "enum", group: "behaviour", values: ["ask", "start", "dot"] }
+  ],
+  "ui-tour-step": [
+    { name: "name", kind: "string", group: "name" },
+    { name: "target", kind: "string", group: "behaviour" },
+    { name: "placement", kind: "enum", group: "layout", values: ["bottom", "top", "left", "right"] },
+    { name: "dim", kind: "boolean", group: "appearance" },
+    { name: "wait-for", kind: "string", group: "behaviour" }
+  ],
   "ui-transition": [
     { name: "duration", kind: "string", group: "behaviour" },
     { name: "interrupt", kind: "boolean", group: "advanced" },

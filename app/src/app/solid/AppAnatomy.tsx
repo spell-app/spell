@@ -249,6 +249,7 @@ export function AnatomyButton(): JSX.Element {
       icon={ANATOMY_ICON}
       appearance="circular"
       class={["AnatomyButton", { showing: AppAnatomy.isShowing }]}
+      data-tour="anatomy"
       label={appTexts.text("anatomy")}
       aria-pressed={AppAnatomy.isShowing ? "true" : "false"}
       {...barTooltip(appTexts.text(AppAnatomy.isShowing ? "anatomyStopTip" : "anatomyTip"))}

@@ -752,6 +752,11 @@
       "types": "./ui/dist-types/src/components/ui-tree-diagram/index.d.ts",
       "default": "./ui/src/components/ui-tree-diagram/index.ts"
     },
+    "./ui/components/ui-tour": {
+      "spell-source": "./ui/src/components/ui-tour/index.ts",
+      "types": "./ui/dist-types/src/components/ui-tour/index.d.ts",
+      "default": "./ui/src/components/ui-tour/index.ts"
+    },
     "./ui/components/ui-uploader": {
       "spell-source": "./ui/src/components/ui-uploader/index.ts",
       "types": "./ui/dist-types/src/components/ui-uploader/index.d.ts",

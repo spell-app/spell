@@ -652,6 +652,11 @@
       "summary": "A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way.",
       "status": "done"
     },
+    "ui-tour": {
+      "title": "Tour",
+      "summary": "A tour leads someone through a feature one numbered step at a time, pointing at what each step is about.",
+      "status": "done"
+    },
     "ui-transition": {
       "title": "Transition",
       "summary": "A transition is an animation used to show or hide content, or to draw attention to it.",

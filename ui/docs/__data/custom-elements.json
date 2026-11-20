@@ -50512,6 +50512,571 @@
     },
     {
       "kind": "javascript-module",
+      "path": "src/components/ui-tour/index.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "name": "UITour",
+          "tagName": "ui-tour",
+          "customElement": true,
+          "summary": "A tour leads someone through a feature one numbered step at a time, pointing at what each step is about.",
+          "description": "A tour leads someone through a feature one numbered step at a time, pointing at what each step is about.\n\nAlso known as:  quick tour, product tour, walkthrough, guided tour, onboarding, coach marks.",
+          "attributes": [
+            {
+              "name": "name",
+              "description": "The tour's name:  shown at the top of each step, in the Help menu and the tours list.  Spell starts it by this name:  `start tour \"first game\"`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "name"
+            },
+            {
+              "name": "summary",
+              "description": "One line about the tour, under its name in the tours list and the offer to take it.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "summary"
+            },
+            {
+              "name": "dim",
+              "description": "Every step darkens the rest of the page, all but what it points at;  a step can say `dim=\"false\"`.  Off by default.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "dim"
+            },
+            {
+              "name": "remember",
+              "description": "Remembers that the tour was taken (finished or closed), so it isn't offered again.  `remember` alone:  in this browser.  `remember=\"on server\"`:  with the person's account, on every machine.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "remember"
+            },
+            {
+              "name": "offer",
+              "description": "How it offers itself when it starts by itself (`offer()`):  `ask`, a small note asking first;  `start`, straight away;  `dot`, a pulsing dot on the first step's target, which starts it when clicked.",
+              "type": {
+                "text": "\"ask\" | \"start\" | \"dot\""
+              },
+              "default": "\"ask\"",
+              "fieldName": "offer"
+            },
+            {
+              "name": "disabled",
+              "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "disabled"
+            },
+            {
+              "name": "loading",
+              "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "loading"
+            },
+            {
+              "name": "visible",
+              "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "visible"
+            },
+            {
+              "name": "animation",
+              "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.",
+              "type": {
+                "text": "\"fade\" | \"fade up\" | \"fade down\" | \"fade left\" | \"fade right\" | \"scale\" | \"zoom\" | \"drop\" | \"browse\" | \"browse right\" | \"fly\" | \"fly up\" | \"fly down\" | \"fly left\" | \"fly right\" | \"slide\" | \"slide up\" | \"slide down\" | \"slide left\" | \"slide right\" | \"swing\" | \"swing up\" | \"swing down\" | \"swing left\" | \"swing right\" | \"horizontal flip\" | \"vertical flip\" | \"flash\" | \"shake\" | \"bounce\" | \"tada\" | \"pulse\" | \"jiggle\" | \"glow\" | \"coin\" | \"none\""
+              },
+              "fieldName": "animation"
+            },
+            {
+              "name": "link",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "link"
+            },
+            {
+              "name": "target",
+              "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "target"
+            },
+            {
+              "name": "font",
+              "description": "How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "font"
+            },
+            {
+              "name": "shadow",
+              "description": "A hard shadow behind its letters, down and to the right, in a hue:  `shadow=\"yellow\"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em).",
+              "type": {
+                "text": "\"primary\" | \"secondary\" | \"red\" | \"orange\" | \"yellow\" | \"olive\" | \"green\" | \"teal\" | \"blue\" | \"violet\" | \"purple\" | \"pink\" | \"brown\" | \"grey\" | \"black\" | \"positive\" | \"negative\""
+              },
+              "fieldName": "shadow"
+            },
+            {
+              "name": "width",
+              "description": "Its box's own width where it sits, any CSS length:  `width=\"10em\"`, `\"50%\"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "width"
+            },
+            {
+              "name": "min-width",
+              "description": "The narrowest its box gets, any CSS length:  `min-width=\"16em\"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "minWidth"
+            },
+            {
+              "name": "max-width",
+              "description": "The widest its box gets, any CSS length:  `max-width=\"36em\"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "maxWidth"
+            },
+            {
+              "name": "tooltip",
+              "description": "Its tooltip:  the browser's own, written as the element's `title`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "tooltip"
+            },
+            {
+              "name": "label",
+              "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "label"
+            },
+            {
+              "name": "movable",
+              "description": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "movable"
+            },
+            {
+              "name": "resizable",
+              "description": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "resizable"
+            },
+            {
+              "name": "on-platform",
+              "description": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onPlatform"
+            }
+          ],
+          "members": [],
+          "events": [
+            {
+              "name": "ui-starting",
+              "description": "About to start, at `step`;  `preventDefault()` keeps it from starting.  Cancelable:  `preventDefault()` vetoes it.",
+              "type": {
+                "text": "CustomEvent<{ step: number }>"
+              }
+            },
+            {
+              "name": "ui-started",
+              "description": "Started:  its first step shows.",
+              "type": {
+                "text": "CustomEvent<{ step: number }>"
+              }
+            },
+            {
+              "name": "ui-stepped",
+              "description": "Moved from step `from` to step `to` (named `name`, or `\"\"`);  `0` is no step.",
+              "type": {
+                "text": "CustomEvent<{ from: number, to: number, name: string }>"
+              }
+            },
+            {
+              "name": "ui-ended",
+              "description": "Ended:  `done` after its last step, `closed` by its ✕ or Escape, `stopped` by code (`stop()`, `stop tour`).",
+              "type": {
+                "text": "CustomEvent<{ reason: \"done\" | \"closed\" | \"stopped\" }>"
+              }
+            }
+          ],
+          "slots": [
+            {
+              "name": "",
+              "description": "Its steps:  `<ui-tour-step>`s, in order."
+            }
+          ],
+          "cssParts": [
+            {
+              "name": "box",
+              "description": "The box of the step showing, beside what it points at."
+            },
+            {
+              "name": "ring",
+              "description": "The ring round what the step points at."
+            },
+            {
+              "name": "close",
+              "description": "The box's close icon."
+            },
+            {
+              "name": "offer",
+              "description": "The note offering the tour (`offer=\"ask\"`)."
+            },
+            {
+              "name": "dot",
+              "description": "The pulsing dot offering the tour (`offer=\"dot\"`)."
+            }
+          ],
+          "cssStates": [
+            {
+              "name": "running",
+              "description": "Started, and not ended:  a step shows."
+            },
+            {
+              "name": "seen",
+              "description": "Taken before, and remembered (`remember`)."
+            },
+            {
+              "name": "disabled",
+              "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+            },
+            {
+              "name": "loading",
+              "description": "`loading` is set."
+            },
+            {
+              "name": "busy",
+              "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+            },
+            {
+              "name": "dimmed",
+              "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+            },
+            {
+              "name": "hidden",
+              "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+            },
+            {
+              "name": "still",
+              "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+            },
+            {
+              "name": "hiding",
+              "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+            },
+            {
+              "name": "pending",
+              "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+            },
+            {
+              "name": "ready",
+              "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "on-platform",
+              "description": "`on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
+            }
+          ],
+          "cssProperties": [
+            {
+              "name": "--ui-tour-top",
+              "default": "16px"
+            },
+            {
+              "name": "--ui-tour-dim",
+              "default": "oklch(0 0 0 / 0.5)"
+            },
+            {
+              "name": "--ui-tour-width",
+              "default": "320px"
+            }
+          ]
+        },
+        {
+          "kind": "class",
+          "name": "UITourStep",
+          "tagName": "ui-tour-step",
+          "customElement": true,
+          "summary": "One step of a tour:  what it says, and what it points at.",
+          "description": "One step of a tour:  what it says, and what it points at.\n\nAlso known as:  tour stop, coach mark, hotspot.",
+          "attributes": [
+            {
+              "name": "name",
+              "description": "Optional:  a step can be shown by its name as well as its number (`show step \"drag\"`).",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "name"
+            },
+            {
+              "name": "target",
+              "description": "What it points at:  the name of a part of the app (its `id`), a `data-tour` name, or a CSS selector;  an element set by script.  None:  its box shows near the top of the screen.  A target that isn't on the page skips the step.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "target"
+            },
+            {
+              "name": "placement",
+              "description": "Which side of its target the box goes;  it moves to the other side when there's no room.",
+              "type": {
+                "text": "\"bottom\" | \"top\" | \"left\" | \"right\""
+              },
+              "default": "\"bottom\"",
+              "fieldName": "placement"
+            },
+            {
+              "name": "dim",
+              "description": "Darkens the rest of the page, all but its target;  `dim=\"false\"` turns the tour's `dim` off here.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "dim"
+            },
+            {
+              "name": "wait-for",
+              "description": "Waits for the person to do something to its target, an event's name (`click`, `input`, `ui-opened`):  the rest of the page can't be clicked, Next is hidden, and the tour goes on when it happens.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "waitFor"
+            },
+            {
+              "name": "disabled",
+              "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "disabled"
+            },
+            {
+              "name": "loading",
+              "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "loading"
+            },
+            {
+              "name": "visible",
+              "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "visible"
+            },
+            {
+              "name": "animation",
+              "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.",
+              "type": {
+                "text": "\"fade\" | \"fade up\" | \"fade down\" | \"fade left\" | \"fade right\" | \"scale\" | \"zoom\" | \"drop\" | \"browse\" | \"browse right\" | \"fly\" | \"fly up\" | \"fly down\" | \"fly left\" | \"fly right\" | \"slide\" | \"slide up\" | \"slide down\" | \"slide left\" | \"slide right\" | \"swing\" | \"swing up\" | \"swing down\" | \"swing left\" | \"swing right\" | \"horizontal flip\" | \"vertical flip\" | \"flash\" | \"shake\" | \"bounce\" | \"tada\" | \"pulse\" | \"jiggle\" | \"glow\" | \"coin\" | \"none\""
+              },
+              "fieldName": "animation"
+            },
+            {
+              "name": "link",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "link"
+            },
+            {
+              "name": "font",
+              "description": "How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "font"
+            },
+            {
+              "name": "shadow",
+              "description": "A hard shadow behind its letters, down and to the right, in a hue:  `shadow=\"yellow\"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em).",
+              "type": {
+                "text": "\"primary\" | \"secondary\" | \"red\" | \"orange\" | \"yellow\" | \"olive\" | \"green\" | \"teal\" | \"blue\" | \"violet\" | \"purple\" | \"pink\" | \"brown\" | \"grey\" | \"black\" | \"positive\" | \"negative\""
+              },
+              "fieldName": "shadow"
+            },
+            {
+              "name": "width",
+              "description": "Its box's own width where it sits, any CSS length:  `width=\"10em\"`, `\"50%\"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "width"
+            },
+            {
+              "name": "min-width",
+              "description": "The narrowest its box gets, any CSS length:  `min-width=\"16em\"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "minWidth"
+            },
+            {
+              "name": "max-width",
+              "description": "The widest its box gets, any CSS length:  `max-width=\"36em\"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "maxWidth"
+            },
+            {
+              "name": "tooltip",
+              "description": "Its tooltip:  the browser's own, written as the element's `title`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "tooltip"
+            },
+            {
+              "name": "label",
+              "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "label"
+            },
+            {
+              "name": "movable",
+              "description": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "movable"
+            },
+            {
+              "name": "resizable",
+              "description": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "resizable"
+            },
+            {
+              "name": "on-platform",
+              "description": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onPlatform"
+            }
+          ],
+          "members": [],
+          "events": [],
+          "slots": [
+            {
+              "name": "",
+              "description": "What the step says."
+            }
+          ],
+          "cssParts": [],
+          "cssStates": [
+            {
+              "name": "disabled",
+              "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+            },
+            {
+              "name": "loading",
+              "description": "`loading` is set."
+            },
+            {
+              "name": "busy",
+              "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+            },
+            {
+              "name": "dimmed",
+              "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+            },
+            {
+              "name": "hidden",
+              "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+            },
+            {
+              "name": "still",
+              "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+            },
+            {
+              "name": "hiding",
+              "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+            },
+            {
+              "name": "pending",
+              "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+            },
+            {
+              "name": "ready",
+              "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "on-platform",
+              "description": "`on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
+            }
+          ],
+          "cssProperties": []
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "UITour",
+          "declaration": {
+            "name": "UITour",
+            "module": "src/components/ui-tour/index.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-tour",
+          "declaration": {
+            "name": "UITour",
+            "module": "src/components/ui-tour/index.ts"
+          }
+        },
+        {
+          "kind": "js",
+          "name": "UITourStep",
+          "declaration": {
+            "name": "UITourStep",
+            "module": "src/components/ui-tour/index.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-tour-step",
+          "declaration": {
+            "name": "UITourStep",
+            "module": "src/components/ui-tour/index.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
       "path": "src/components/ui-transition/index.ts",
       "declarations": [
         {

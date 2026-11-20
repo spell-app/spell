@@ -1,0 +1,13 @@
+/* Look of <ToursDialog> (ToursDialog.tsx):  Help › Tours…, a card per tour in one column, its tick after its name. */
+.ToursDialog {
+  --ui-modal-width: min(480px, 95vw);
+
+  .ToursCards {
+    margin: 0;
+    padding: 4px 20px 20px;
+  }
+
+  .TourTaken {
+    margin-left: 8px;
+  }
+}

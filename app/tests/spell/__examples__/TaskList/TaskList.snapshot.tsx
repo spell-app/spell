@@ -221,7 +221,7 @@ core.heading("The app")
 /////////////
 // ## The app
 /////////////
-// A header saying how many are left, the new task's field, then the list.
+// A header saying how many are left, the new task's field, then the list;  and a tour of them, its Tour button in the header.
 
 @thing
 export class TaskList extends App {
@@ -236,7 +236,7 @@ export class TaskList extends App {
   @prop({ type: "text" })
   accessor draft!: string
 
-  static { this.declareProp("activeCount", { declaredAt: { path: "/TaskList.spell", start: 523, end: 602 }, readsFrom: ["my_tasks"] }) }
+  static { this.declareProp("activeCount", { declaredAt: { path: "/TaskList.spell", start: 575, end: 654 }, readsFrom: ["my_tasks"] }) }
   @derived get activeCount() {
     return this.checklist.filter((task) => task.isActive).length
   }
@@ -273,19 +273,27 @@ export class TaskList extends App {
     this.draft = ""
   }
 
+  /** A few steps through the app, pointing at each part */
+  takeTheTour() {
+    core.startTour("Task List")
+  }
+
   @drawn draw() {
     return (
       <ui-container>
         <ui-stack>
           <ui-stack direction="horizontal" justify="between">
             <ui-header level="2">Task List</ui-header>
-            <ui-text color="grey">
-              <span hidden={this.activeCount === 0 ? undefined : "until-found"}>All done</span>
-              <span hidden={!(this.activeCount === 0) ? undefined : "until-found"}>{this.activeCount} to do</span>
-            </ui-text>
+            <ui-stack direction="horizontal" spacing="sm">
+              <ui-text color="grey">
+                <span hidden={this.activeCount === 0 ? undefined : "until-found"}>All done</span>
+                <span hidden={!(this.activeCount === 0) ? undefined : "until-found"}>{this.activeCount} to do</span>
+              </ui-text>
+              {core.drawAction(this, "takeTheTour", { appearance: "tertiary" })}
+            </ui-stack>
           </ui-stack>
           <ui-form prop:value={this}>
-            <ui-input name="draft" placeholder="Something to do" aria-label="New task" fluid={true} action={true}>
+            <ui-input id="new task" name="draft" placeholder="Something to do" aria-label="New task" fluid={true} action={true}>
               <ui-button slot="action" color="primary" disabled={this.draft === ""} onClick={core.pressed(this, () => this.addTheDraft())} style="cursor:var(--ui-control-cursor,pointer);user-select:none">
                 Add
               </ui-button>
@@ -293,6 +301,12 @@ export class TaskList extends App {
           </ui-form>
           {core.drawThing(this.checklist)}
         </ui-stack>
+        <ui-tour name="Task List" summary="Add your tasks, tick them off and put them in order.">
+          <ui-tour-step target="new task">Type something to do here, then press Add.</ui-tour-step>
+          <ui-tour-step target="checklist">Your tasks are here. Tick one off when it's done.</ui-tour-step>
+          <ui-tour-step target="checklist">Drag a task by its handle to move it.</ui-tour-step>
+          <ui-tour-step>That's it. Your tasks stay on this device for next time.</ui-tour-step>
+        </ui-tour>
       </ui-container>
     )
   }
@@ -325,12 +339,17 @@ export class TaskListElement extends SpellElement<TaskList> {
   addTheDraft() {
     return this.currentThing?.addTheDraft()
   }
+
+  takeTheTour() {
+    return this.currentThing?.takeTheTour()
+  }
 }
 core.useElement(TaskList, TaskListElement)
 export const taskList = new TaskList()
 core.describeAction(TaskList, "fillTheChecklist", { title: "Fill the Checklist", undoneAs: "Fill the Checklist" })
 core.describeAction(TaskList, "addTheTaskTitle", { title: "Add the Task Title", undoneAs: "Add the Task Title" })
 core.describeAction(TaskList, "addTheDraft", { title: "Add the Draft", undoneAs: "Add the Draft" })
+core.describeAction(TaskList, "takeTheTour", { title: "Tour", icon: "map signs", undoneAs: "Tour" })
 // -----------
 core.installStyles(undefined, `/* File styles.css:  what Spell UI's tags can't say yet.¬   - Each task is an element of its own inside the list, <task-list-checklist>:  <task-list-task>.¬   - Its title's field fills the row by itself:  it's \`fluid\`, in a row of a \`<stack>\`. */¬¬/* done:  it fades */¬task-list-checklist > [done] {¬  opacity: 0.6;¬}¬`)
 // -----------

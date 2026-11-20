@@ -141,6 +141,8 @@ export const PARTS_OF_SPEECH: Readonly<Record<string, PartOfSpeech>> = {
   "ui-toast": "structure",
   "ui-toc": "structure",
   "ui-toolbar": "structure",
+  "ui-tour": "structure",
+  "ui-tour-step": "structure",
   "ui-transition": "structure",
   "ui-tree": "structure",
   "ui-tree-diagram": "structure",

@@ -205,6 +205,7 @@ function ModeTab(props: { mode: Mode; current: Mode }): JSX.Element {
     <ui-item
       icon={look().icon}
       selected={props.current === props.mode}
+      data-tour={props.mode}
       {...barTooltip(appTexts.text(modeTipFor(props.mode, props.current)))}
       onClick={() => EditorMode.show(props.mode)}
     >

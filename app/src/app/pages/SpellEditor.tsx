@@ -335,7 +335,7 @@ export function AppPane() {
   let pane: HTMLDivElement | undefined
   onSettled(() => Inspector.watch(body!))
   return (
-    <div class="AppPane" ref={(element: HTMLDivElement) => (pane = element)}>
+    <div class="AppPane" data-tour="app" ref={(element: HTMLDivElement) => (pane = element)}>
       <Show when={notebookPage()} keyed>
         {(page) => <NotebookHeader controller={page} icon={root().icon ?? PROJECT_ICON} title={title()} />}
       </Show>
