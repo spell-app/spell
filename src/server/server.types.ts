@@ -104,6 +104,11 @@ export type ServerInfo = {
    * is (`PageServer.serveContent()`, epic `epic-eject` P12):  epics, guides, pages, sagas, brand ...
    */
   contentFolder?: string
+  /**
+   * the spaces it serves, when they aren't the kit's own spell.spaces:  a project's page server on the kit
+   * (`--spaces`), whose record is its own (`PidFile.forPageServer()`)
+   */
+  spaces?: string
 }
 
 ////////////////

@@ -511,6 +511,7 @@ export class SpellParser extends P.Parser {
    * - Its type's name, as `P.typeName()` reads its words:  `TwoSidedView` for `a "card" is a draggable two sided view`,
    *   its abilities left out (`abilityWord`);  `Thing` for Spanish's `cosa`.
    * - Only a line with an article, as `create_type` reads it:  `klondike is a card game` declares a one-of-a-kind.
+   *   - But a one-of-a-kind of an app or a page itself, `Session Screen is a page`:  `Page`, its kind.
    * - None for a list type, `a "deck" is a list of cards`, nor a value's, `a "score" is a number`:
    *   their lines say what they are when they parse.
    * - A comment after it, `-- A playing card`, isn't part of its kind.
@@ -522,8 +523,17 @@ export class SpellParser extends P.Parser {
     const dashed = (words: string[]) => words.join("-")
     const found = new Map<string, string>()
     const uncommented = text.replace(TRAILING_COMMENT, "")
+    let onlyOnes: string[] | undefined
     for (const [, article, name, kind] of uncommented.matchAll(kindDeclaration)) {
-      if (!article) continue
+      if (!article) {
+        // a one-of-a-kind straight of an app or a page, `Session Screen is a page`:  that's its kind, so a link to it
+        // in a file read before both its own and the site's knows it's a page (`namesSitePage()`)
+        const datatype = P.typeName(kind!.trim().split(/[ \t]+/)[0]!, language.typeWords)
+        const onlyOne = dashed(name!.trim().split(/[ \t]+/))
+        if (ONE_OF_A_KIND_DATATYPES.has(datatype) && (onlyOnes ??= this.oneOfAKindsIn(text)).includes(onlyOne))
+          found.set(onlyOne, P.classCase(datatype))
+        continue
+      }
       const words = kind!
         .trim()
         .split(/[ \t]+/)

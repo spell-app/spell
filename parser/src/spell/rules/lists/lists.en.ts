@@ -703,11 +703,11 @@ lists.addRule(ListFilter, {
         scope.variables?.add("my-list")
       },
       tests: [
-        [`words in "a word list" where`, 'core.filter("a word list", () => {})'],
+        [`words in "a word list" where`, 'core.filter(core.valuesOf("a word list"), () => {})'],
         [
           `words in "a word list" where word starts with "a"`,
-          'core.filter("a word list", (word) => core.startsWith(word, "a"))',
-          'core.filter("a word list", (word: string) => core.startsWith(word, "a"))'
+          'core.filter(core.valuesOf("a word list"), (word) => core.startsWith(word, "a"))',
+          'core.filter(core.valuesOf("a word list"), (word: string) => core.startsWith(word, "a"))'
         ],
         ["the items in my-list where the id of the item > 1", "core.filter(myList, (item) => item.id > 1)"],
         ["the items in my-list where the id of it > 1", "core.filter(myList, (item) => item.id > 1)"],

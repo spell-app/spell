@@ -250,7 +250,8 @@ export function namesSitePart(scope: P.Scope, words: string): boolean {
  * - What `the address of the ...` takes (epic `mockup` P8):  a dialog or a sidebar has no address.
  */
 export function namesSitePage(scope: P.Scope, words: string): boolean {
-  if (pageNamed(scope, words) || specialPageOf(scope, words) || listedPage(scope, words)) return true
+  if (pageNamed(scope, words) || specialPageOf(scope, words) || listedPage(scope, words) || pageAhead(scope, words))
+    return true
   const all = words.trim().split(/\s+/)
   return all.length > 1 && (SP.typeName(all.at(-1)!) === "page" || SP.typeName(all[0]!) === "page")
 }
@@ -265,6 +266,16 @@ function listedPage(scope: P.Scope, words: string): boolean {
     (type) =>
       !type.stub && type.isA("Site") && Object.values(type.sitePages ?? {}).some((part) => sameWords(part) === wanted)
   )
+}
+
+/**
+ * Is `words` a page declared in a file not read yet, `Session Screen is a page`, by the project's scan of its
+ * declarations (`SP.SpellParser.declaredSuperTypes()`):  so a link to it reads in a file read before both its own and
+ * the site's, whatever its last word.
+ */
+function pageAhead(scope: P.Scope, words: string): boolean {
+  const type = scope.getType(classFor(words))
+  return type instanceof P.TypeScope && !!type.stub && type.isA("Page")
 }
 
 /** Which kind of part `word` says, in the scope's language:  `dialog`, `sidebar`, or neither. */

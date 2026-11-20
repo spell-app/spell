@@ -1,9 +1,11 @@
 import { spawn } from "node:child_process"
+import { createHash } from "node:crypto"
 import { existsSync, openSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs"
-import { join, resolve } from "node:path"
+import { basename, dirname, join, resolve } from "node:path"
 
 import { waitUntil } from "spell/util/timing"
 import type { ServerInfo } from "spell/server"
+import { checkoutOf } from "./checkout"
 import { endProcess, isProcessAlive } from "./Heartbeat"
 import { SERVER_API } from "./liveClient"
 import { LoadedCode } from "./LoadedCode"
@@ -27,6 +29,13 @@ export { endProcess, isProcessAlive } from "./Heartbeat"
  * - a FIXED `port` (the main checkout's page server, 4747):  `ensure()` and `stop()` also stop this root's server
  *   holding it when the file names another, and `ensure()` starts the new one only once the port is free
  *   (epic `epic-engine` I332)
+ * - ONE page server per SPACES on a kit:  `forPageServer()`.
+ *   A project running its page server on the kit (`spell server local --spaces spaces`) has a record of
+ *   its own, `.spell-server.<folder>-<hash>.json` (`spacesFileName()`), and its own write token, restart note and log
+ *   beside it;  and a server counts as this file's only when it serves the same spaces (`ServerInfo.spaces`).
+ *   - Why:  a project's page server wrote over the kit's own record;  Spell's editor then sent the
+ *     project's write token, and `spell server start all` took the project's server for Spell's, off its port, and
+ *     stopped it.
  * - From the goals tools' `launch.js` (`ensureServer`, `serverStatus`, `stopServer`).
  */
 export class PidFile {
@@ -36,9 +45,35 @@ export class PidFile {
   /** the pid file */
   readonly file: string
 
-  constructor(root: string, name = ".spell-server.json") {
+  /**
+   * the spaces its server serves, when they aren't the kit's own (`forPageServer()`):  a project's;
+   * `undefined`:  the kit's spell.spaces, or a server with no spaces (the epic server)
+   */
+  readonly spaces?: string
+
+  constructor(root: string, name = PAGE_SERVER_FILE, spaces?: string) {
     this.root = resolve(root)
     this.file = join(this.root, name)
+    this.spaces = spaces === undefined ? undefined : resolve(spaces)
+  }
+
+  /**
+   * The page server's pid file at kit `root`, for the page server serving `spaces`.
+   * - `spaces`:  default `SPELL_SPACES_DIR` (the page server's `--spaces`), as the page server itself reads them
+   * - the kit's own spell.spaces (`defaultSpacesOf()`), or none:  `.spell-server.json`, as always
+   * - any other, a project's:  its own file, `.spell-server.my-app-1a2b3c4d.json` (`spacesFileName()`)
+   */
+  static forPageServer(root: string, spaces: string | undefined = process.env.SPELL_SPACES_DIR): PidFile {
+    const own = spaces === undefined || resolve(spaces) === defaultSpacesOf(root) ? undefined : resolve(spaces)
+    return new PidFile(root, spacesFileName(PAGE_SERVER_FILE, own), own)
+  }
+
+  /**
+   * Does `info`, a server's answer at `SERVER_API`, say it's this file's:  this root, these spaces?
+   * - a server from before `ServerInfo.spaces`, or one with none:  the kit's own spaces
+   */
+  isServing(info: ServerInfo | undefined): boolean {
+    return info?.root === this.root && (info.spaces === undefined ? undefined : resolve(info.spaces)) === this.spaces
   }
 
   /** the file's info, or `undefined` if missing or unreadable */
@@ -122,7 +157,7 @@ export class PidFile {
     if (!info) return undefined
     const base = `http://127.0.0.1:${info.port}`
     const answer = await serverAt(base)
-    return answer?.root === this.root ? { ...answer, base } : undefined
+    return answer && this.isServing(answer) ? { ...answer, base } : undefined
   }
 
   /**
@@ -134,13 +169,13 @@ export class PidFile {
   async ourServerOn(port: number): Promise<RunningServer | undefined> {
     const base = `http://127.0.0.1:${port}`
     const answer = await serverAt(base)
-    return answer?.root === this.root ? { ...answer, base } : undefined
+    return answer && this.isServing(answer) ? { ...answer, base } : undefined
   }
 
   /**
    * The running server, started in the background first if none runs.
    * - `command`:  argv that runs it in the foreground, e.g. `[node, --import, tsx, cli.ts, serve]`
-   * - `log`:  file for its output (default `<root>/.spell-server.log`)
+   * - `log`:  file for its output (default:  the pid file's, `.log` for `.json`:  `<root>/.spell-server.log`)
    * - waits up to `timeout` ms (15s) for it to answer
    * - `port`:  the port it MUST hold (the main checkout's page server, 4747;  epic `epic-engine` I332)
    *   - a running one on another port is restarted, and this root's server holding `port` is stopped with it
@@ -170,7 +205,7 @@ export class PidFile {
     if (running || holder) await this.stop({ restart: true, port })
     else await this.stopUnanswering()
     if (port) await this.takePort(port)
-    const out = openSync(log ?? join(this.root, ".spell-server.log"), "a")
+    const out = openSync(log ?? this.file.replace(/\.json$/, ".log"), "a")
     const [program, ...args] = command
     spawn(program!, args, {
       cwd: this.root,
@@ -231,7 +266,7 @@ export class PidFile {
     const isPortFree = () => isFree(port)
     if (await waitUntil(isPortFree, { timeout: PORT_WAIT_MS / 1000 })) return
     const holder = await serverAt(`http://127.0.0.1:${port}`)
-    if (holder?.root === this.root) {
+    if (holder && this.isServing(holder)) {
       await endProcess(holder.pid, STOP_WAIT_MS)
       if (await waitUntil(isPortFree, { timeout: PORT_WAIT_MS / 1000 })) return
     }
@@ -248,12 +283,12 @@ export class PidFile {
    * - That's this checkout's server on code from before its calls moved under `/api/` (epic `people-and-orgs` P16),
    *   which `status()` can't see.
    *   Left running, it would keep the port, and every page, on the old code.
-   * - only the pid the file names, for THIS root, while something answers HTTP on its port
+   * - only the pid the file names, for THIS root and spaces, while something answers HTTP on its port
    * - NEVER throws
    */
   private async stopUnanswering(): Promise<void> {
     const info = this.read()
-    if (!info || resolve(info.root) !== this.root || !isProcessAlive(info.pid)) return
+    if (!info || !this.isServing({ ...info, root: resolve(info.root) }) || !isProcessAlive(info.pid)) return
     try {
       await fetch(`http://127.0.0.1:${info.port}/`, { signal: AbortSignal.timeout(1000), redirect: "manual" })
     } catch {
@@ -279,6 +314,32 @@ export async function serverAt(base: string): Promise<ServerInfo | undefined> {
   } catch {
     return undefined
   }
+}
+
+/** The page server's record at the kit's root, for the kit's own spaces:  a project's is named by its (`spacesFileName()`). */
+export const PAGE_SERVER_FILE = ".spell-server.json"
+
+/**
+ * The name of a server's file `name` (`.spell-server.json`, `.spell-server.editor.log`) for a server serving `spaces`
+ * (the editor's and the page server's):
+ * - `spaces` `undefined`:  the kit's own spell.spaces:  `name` itself
+ * - any other:  with its folder's name and a hash of its path, `.spell-server.my-app-1a2b3c4d.json`, from
+ *   `.../my-app/spaces`:  the folder holding `spaces/` when that's its name, so it reads as the checkout
+ */
+export function spacesFileName(name: string, spaces: string | undefined): string {
+  if (spaces === undefined) return name
+  const folder = resolve(spaces)
+  const named = basename(folder) === "spaces" ? basename(dirname(folder)) : basename(folder)
+  const tag = `${named.replace(/[^\w.-]+/g, "-")}-${createHash("sha256").update(folder).digest("hex").slice(0, 8)}`
+  return name.replace(/(\.\w+)$/, `.${tag}$1`)
+}
+
+/**
+ * The kit's own spaces, spell.spaces, for a kit at `root`:  beside its MAIN checkout, so every worktree shares them
+ * (as spell-app's `defaultSpellSpacesDir`).
+ */
+export function defaultSpacesOf(root: string): string {
+  return resolve(dirname(checkoutOf(resolve(root))?.main ?? resolve(root)), "spell.spaces")
 }
 
 /** How long `stop()` lets a server end by itself before `SIGKILL`, in ms. */

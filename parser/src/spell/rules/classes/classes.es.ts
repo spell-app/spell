@@ -45,6 +45,7 @@ import { MenuBar } from "./MenuBar"
 import { EveryThing } from "./EveryThing"
 import { EachThing } from "./EachThing"
 import { EveryThingWhere } from "./EveryThingWhere"
+import { FirstThingWhere } from "./FirstThingWhere"
 import { EveryThingWith, TheSavedThingsWith } from "./EveryThingWith"
 import { ItsQuotedProperty } from "./ItsQuotedProperty"
 import { KindValues } from "./KindValues"
@@ -2979,6 +2980,28 @@ classesEs.addRule(EveryThingWhere, {
 
 classesEs.addRule(EveryThingWhere, {
   syntax: "((todos|todas) (los|las)?|los|las)? {type:plural_type} (where:donde|que) {inline_expression}?"
+})
+
+classesEs.addRule(FirstThingWhere, {
+  syntax: "(el|la) (primer|primero|primera) {type:known_type} (where:donde|que) {inline_expression}?",
+  tests: [
+    {
+      compileAs: "expression",
+      beforeEach(scope: P.Scope) {
+        scope.compile(["una receta es una cosa", 'una receta tiene un "minutos" como número'].join("\n"), "block")
+      },
+      tests: [
+        [
+          "la primera receta donde sus minutos es 5",
+          "core.getItemAt(core.filter(core.everyThing(Receta), (receta) => receta.minutos === 5), 0)"
+        ],
+        [
+          "el primer receta que no es 5",
+          "core.getItemAt(core.filter(core.everyThing(Receta), (receta) => receta !== 5), 0)"
+        ]
+      ]
+    }
+  ]
 })
 
 classesEs.addRule(TheThings, { syntax: "(todos|todas) (los|las)? {type:plural_type}" })

@@ -3612,7 +3612,7 @@
           "ruleNames": ["list_length"],
           "internal": false,
           "file": "src/spell/rules/lists/ListLength.ts",
-          "line": 30,
+          "line": 31,
           "purpose": "Return length of a list, e.g. `number of items in my-list` => `core.itemCountOf(myList)`.",
           "syntaxes": [
             {
@@ -4040,13 +4040,13 @@
               "example": "words in \"a word list\" where",
               "outputs": {
                 "js": {
-                  "code": "core.filter(\"a word list\", () => {})"
+                  "code": "core.filter(core.valuesOf(\"a word list\"), () => {})"
                 },
                 "ts": {
-                  "code": "core.filter(\"a word list\", () => {})"
+                  "code": "core.filter(core.valuesOf(\"a word list\"), () => {})"
                 },
                 "py": {
-                  "code": "core.filter(\"a word list\", _each_1)"
+                  "code": "core.filter(core.values_of(\"a word list\"), _each_1)"
                 }
               }
             }
@@ -6366,6 +6366,32 @@
           "aliases": ["expression"]
         },
         {
+          "className": "FirstThingWhere",
+          "ruleNames": ["first_thing_where"],
+          "internal": false,
+          "file": "src/spell/rules/classes/FirstThingWhere.ts",
+          "line": 14,
+          "purpose": "The first thing of a type that fits, or nothing: `every_thing_where`'s first.",
+          "syntaxes": [
+            {
+              "syntax": "the first {type:known_type} (where:where|which|that|who) {inline_expression}?",
+              "example": "the first suite record where its rank is 1",
+              "outputs": {
+                "js": {
+                  "code": "core.getItemAt(core.filter(core.everyThing(SuiteRecord), (suiterecord) => suiterecord.rank === 1), 0)"
+                },
+                "ts": {
+                  "code": "core.getItemAt(core.filter(core.everyThing(SuiteRecord), (suiterecord) => suiterecord.rank === 1), 0)"
+                },
+                "py": {
+                  "code": "core.get_item_at(\n    core.filter(core.every_thing(SuiteRecord), lambda suiterecord: suiterecord.rank == 1),\n    0,\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "TheThings",
           "ruleNames": ["the_things"],
           "internal": false,
@@ -6614,11 +6640,11 @@
           "ruleNames": ["create_one_of_a_kind"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateOneOfAKind.ts",
-          "line": 29,
+          "line": 32,
           "purpose": "`solitaire is an app` -- declares an app AND its one instance (epic `outline-spell` P21).",
           "syntaxes": [
             {
-              "syntax": "{type:type_words} is (a|an) ([ability:{draggable_or_droppable} ,?] ,?)? {superType:type} (, aka {aka:quoted_type})? (, in the {layout:type_words}|, (no_layout:no layout))? {with_nested_statements}?",
+              "syntax": "{type:type_words} is (a|an) ([ability:{draggable_or_droppable} ,?] ,?)? {superType:type} (, aka {aka:quoted_type})? (, in the {layout:type_words}|, (no_layout:no layout))? (, (fills_window:filling the window))? {with_nested_statements}?",
               "example": "solitaire is an app",
               "outputs": {
                 "js": {

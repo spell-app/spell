@@ -3623,7 +3623,7 @@
           "ruleNames": ["list_length"],
           "internal": false,
           "file": "src/spell/rules/lists/ListLength.ts",
-          "line": 30,
+          "line": 31,
           "purpose": "Return length of a list, e.g. `number of items in my-list` => `core.itemCountOf(myList)`.",
           "syntaxes": [
             {
@@ -4040,13 +4040,13 @@
               "example": "palabras en \"a word list\" donde",
               "outputs": {
                 "js": {
-                  "code": "core.filter(\"a word list\", () => {})"
+                  "code": "core.filter(core.valuesOf(\"a word list\"), () => {})"
                 },
                 "ts": {
-                  "code": "core.filter(\"a word list\", () => {})"
+                  "code": "core.filter(core.valuesOf(\"a word list\"), () => {})"
                 },
                 "py": {
-                  "code": "core.filter(\"a word list\", _each_1)"
+                  "code": "core.filter(core.values_of(\"a word list\"), _each_1)"
                 }
               }
             }
@@ -6373,6 +6373,32 @@
           "aliases": ["expression"]
         },
         {
+          "className": "FirstThingWhere",
+          "ruleNames": ["first_thing_where"],
+          "internal": false,
+          "file": "src/spell/rules/classes/FirstThingWhere.ts",
+          "line": 14,
+          "purpose": "The first thing of a type that fits, or nothing: `every_thing_where`'s first.",
+          "syntaxes": [
+            {
+              "syntax": "(el|la) (primer|primero|primera) {type:known_type} (where:donde|que) {inline_expression}?",
+              "example": "la primera receta donde sus minutos es 5",
+              "outputs": {
+                "js": {
+                  "code": "core.getItemAt(core.filter(core.everyThing(Receta), (receta) => receta.minutos === 5), 0)"
+                },
+                "ts": {
+                  "code": "core.getItemAt(core.filter(core.everyThing(Receta), (receta) => receta.minutos === 5), 0)"
+                },
+                "py": {
+                  "code": "core.get_item_at(\n    core.filter(core.every_thing(Receta), lambda receta: receta.minutos == 5),\n    0,\n)"
+                }
+              }
+            }
+          ],
+          "aliases": ["expression"]
+        },
+        {
           "className": "TheThings",
           "ruleNames": ["the_things"],
           "internal": false,
@@ -6621,11 +6647,11 @@
           "ruleNames": ["create_one_of_a_kind"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateOneOfAKind.ts",
-          "line": 29,
+          "line": 32,
           "purpose": "`solitaire is an app` -- declares an app AND its one instance (epic `outline-spell` P21).",
           "syntaxes": [
             {
-              "syntax": "{type:type_words} es (un|una) {superType:type} (,? [ability:{draggable_or_droppable} ,?])? (, alias {aka:quoted_type})? (, en el {layout:type_words}|, (no_layout:sin diseño))? {with_nested_statements}?",
+              "syntax": "{type:type_words} es (un|una) {superType:type} (,? [ability:{draggable_or_droppable} ,?])? (, alias {aka:quoted_type})? (, en el {layout:type_words}|, (no_layout:sin diseño))? (, (fills_window:llenando la ventana))? {with_nested_statements}?",
               "example": "solitaire es una aplicación",
               "outputs": {
                 "js": {

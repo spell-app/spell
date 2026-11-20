@@ -400,6 +400,71 @@ describe("going to a site's pages", () => {
     expect(files[2]!.compiled).toContain('core.siteAddressOf("Session Screen", this.session)')
   })
 
+  test("a page whatever its last word, named in a file read before both its own and the site's", () => {
+    const files = parseSpellProject([
+      {
+        path: "/List.spell",
+        contents: [
+          'a "session" is a thing',
+          'a "session row" is a view where:',
+          "\t- it has a session",
+          '\t- its "link" is the address of the Session Screen for its session',
+          "\t- to open:",
+          "\t\tgo to the Session Screen for its session",
+          "\t- to look:",
+          "\t\tgo to the Overview Screen"
+        ].join("\n")
+      },
+      {
+        path: "/Site.spell",
+        contents: [
+          "galaxy is a site:",
+          '\t- it has an Overview Screen at "/"',
+          '\t- it has a Session Screen at "/sessions/:session"'
+        ].join("\n")
+      },
+      {
+        path: "/Screens.spell",
+        contents: [
+          "Overview Screen is a page, filling the window",
+          "Session Screen is a page",
+          '\tits "session" is a session'
+        ].join("\n")
+      }
+    ]).files
+    for (const file of files) expect(file.errors.map(String)).toEqual([])
+    expect(files[0]!.compiled).toContain('core.siteAddressOf("Session Screen", this.session)')
+    expect(files[0]!.compiled).toContain('core.showSitePart("Session Screen", this.session)')
+    expect(files[0]!.compiled).toContain('core.showSitePart("Overview Screen")')
+  })
+
+  test("a page's parameter may be named for a type:  `:design`, beside a type `design`", () => {
+    const [file] = parseSpellProject([
+      {
+        path: "/Site.spell",
+        contents: [
+          'a "design" is a thing where:',
+          '\t- its "name" is text',
+          'a "design netlist" is a thing where:',
+          '\t- its "name" is text',
+          '\t- its "design" is text',
+          "galaxy is a site:",
+          '\t- it has a Netlist Screen at "/design/explore/:design"',
+          'a "netlist row" is a view where:',
+          "\t- it has a design netlist",
+          '\t- its "link" is the address of the Netlist Screen for its design netlist\'s name',
+          "Netlist Screen is a page",
+          '\tits "design" is text',
+          '\tits "netlist" is the first design netlist where its name is the design',
+          '\tits "mine" is every design netlist where its design is the design'
+        ].join("\n")
+      }
+    ]).files
+    expect(file!.errors.map(String)).toEqual([])
+    expect(file!.compiled).toContain("(designnetlist) => designnetlist.name === this.design")
+    expect(file!.compiled).toContain("(designnetlist) => designnetlist.design === this.design")
+  })
+
   test("`go to the ...` naming no page, dialog or sidebar isn't ours", () => {
     const { errors } = compiled([...CODE, "to wander:", "\tgo to the kitchen"], "/Galaxy.spell")
     expect(errors).not.toEqual([])

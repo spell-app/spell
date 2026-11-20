@@ -7,6 +7,7 @@ import {
   getWhereScope,
   getWhereMethod,
   itemsAcrossAST,
+  itemsToFilterAST,
   itemsAcrossDatatype,
   itemsAcrossOf,
   type ItemsAcross
@@ -50,10 +51,12 @@ export class ListLength extends SpellExpression<"arg|list|where?|body?", { acros
   getAST(match: P.MatchFor<this>): P.ASTCoreMethodInvocation {
     const { arg, list } = match.groups
     const body = this.getBody(match)
-    const all = itemsAcrossAST(match, list, match.data.across)
     const items = body
-      ? new P.ASTCoreMethodInvocation(match, { methodName: "filter", args: [all, getWhereMethod(match, arg, body)] })
-      : all
+      ? new P.ASTCoreMethodInvocation(match, {
+          methodName: "filter",
+          args: [itemsToFilterAST(match, list, match.data.across), getWhereMethod(match, arg, body)]
+        })
+      : itemsAcrossAST(match, list, match.data.across)
     return new P.ASTCoreMethodInvocation(match, { methodName: "itemCountOf", args: [items] })
   }
 }

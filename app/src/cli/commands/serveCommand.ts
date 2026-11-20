@@ -46,7 +46,7 @@ export async function serveCommand(
     // the port is ours to choose only for a page server we're about to start;
     // free on IPv4 AND IPv6:  on macOS `::` binds even while another process holds `0.0.0.0:<port>`
     const free = (await SRV.isFree(port, "0.0.0.0")) && (await SRV.isFree(port, "::"))
-    if (!(await new SRV.PidFile(SERVER_ROOT).status()) && !free) {
+    if (!(await SRV.PidFile.forPageServer(SERVER_ROOT).status()) && !free) {
       throw new CLI.CliError(`Port ${port} is in use -- \`spell app serve --port <another>\``)
     }
     // a page server started below inherits it:  `PageServer.ensure()` passes our environment on
@@ -74,7 +74,7 @@ export async function serveCommand(
       : "the page server was already running without one -- restart it:  `yarn server stop`, then `spell app serve`"
     status.done(row, "failed", `the editor didn't answer:  ${why}`)
     status.finish()
-    if (page.launched) await new SRV.PidFile(SERVER_ROOT).stop()
+    if (page.launched) await SRV.PidFile.forPageServer(SERVER_ROOT).stop()
     return CLI.EXIT.ERRORS
   }
   status.done(row, "ok", `${editor}  (/api on the page server)`)
@@ -96,7 +96,7 @@ export async function serveCommand(
     process.once("SIGTERM", () => done())
   })
   clearInterval(keepAlive)
-  if (page.launched) await new SRV.PidFile(SERVER_ROOT).stop()
+  if (page.launched) await SRV.PidFile.forPageServer(SERVER_ROOT).stop()
   return CLI.EXIT.OK
 }
 

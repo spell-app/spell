@@ -59,8 +59,9 @@ export default function kitCommands(spell: Command): void {
   passThrough(server.command("stop"))
     .description("stop the page server -- all:  and the app's editor with it, even one left running")
     .argument("[which]", "local (default):  the page server;  all:  every web server of the checkout")
+    // a flag first (`stop --spaces spaces`, a project's page server) names no `which`
     .action((which: string | undefined) =>
-      which === "all" || (which && which !== "local")
+      which === "all" || (which && which !== "local" && !which.startsWith("-"))
         ? CLI.runCommand(async () => (await serverCommand()).stopServers(which))
         : pageServer("stop", ["local"])
     )

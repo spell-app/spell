@@ -8,7 +8,7 @@ import {
   getWhereMethod,
   getWhereScope,
   itemOfItemsAcross,
-  itemsAcrossAST,
+  itemsToFilterAST,
   itemsAcrossDatatype,
   itemsAcrossOf,
   type ItemsAcross
@@ -55,7 +55,7 @@ export class OrdinalWhereExpression extends SpellExpression<"ordinal|arg|list|wh
   getAST(match: P.MatchFor<this>): P.ASTCoreMethodInvocation {
     const { ordinal, arg, list } = match.groups
     const body = this.getBody(match)
-    const items = itemsAcrossAST(match, list, match.data.across)
+    const items = itemsToFilterAST(match, list, match.data.across)
     const condition = getWhereMethod(match, arg, body)
     // asks an action (`can play the card`, which plays it):  one item at a time, stopping at the answer
     if (body && CanDo.isIn(body)) {

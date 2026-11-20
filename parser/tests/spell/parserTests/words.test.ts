@@ -47,6 +47,7 @@ recipe box is an app:
 	- its "quick" is every recipe where its minutes is the minutesWanted
 	- its "first of them" is the first recipe
 	- its "few" is the first 1 recipes where its minutes is 5
+	- its "first quick" is the first recipe where its minutes is 5
 	- its "how many" is the number of recipes where its minutes is 5
 	- to add stew:
 		add (a new recipe with title = "stew", minutes = 90) to the recipes
@@ -134,11 +135,17 @@ describe("what compiles", () => {
 
   it("a key written won't compile;  a key named warns, and a plain web server does", () => {
     const place = 'family cookbook is a web server at "https://x.example/v1"'
-    expect(compiled(`${place}:`, '\t- it is authenticated with "sk_live_abc"').errors.join()).toContain("named".slice(0, 0))
+    expect(compiled(`${place}:`, '\t- it is authenticated with "sk_live_abc"').errors.join()).toContain(
+      "named".slice(0, 0)
+    )
     expect(compiled(`${place}:`, '\t- it is authenticated with "sk_live_abc"').errors).toHaveLength(1)
     expect(compiled(`${place}:`, '\t- it is authenticated with the secret "sk_live_abc"').errors).toHaveLength(1)
     expect(compiled('family cookbook is a web server at "https://x.example/v1?key=abc"').errors).toHaveLength(1)
-    const named = compiled(`${place}:`, '\t- it is authenticated with the secret "COOKBOOK_KEY"', "\t- check it every 30 seconds")
+    const named = compiled(
+      `${place}:`,
+      '\t- it is authenticated with the secret "COOKBOOK_KEY"',
+      "\t- check it every 30 seconds"
+    )
     expect(named.errors).toEqual([])
     expect(named.warnings.join()).toContain("server side")
     expect(compiled(place).warnings.join()).toContain("check it every 30 seconds")
@@ -339,6 +346,8 @@ describe("what runs, on a place in memory", () => {
     expect(await titlesOf("quick")).toEqual(["Soup", "Toast"])
     expect(((await core.answerOf(box, "firstOfThem")) as { title: string }).title).toBe("stew")
     expect(await titlesOf("few")).toHaveLength(1)
+    // `the first X where`, with no number:  one, the place asked for one
+    expect(((await core.answerOf(box, "firstQuick")) as { title: string }).title).toBe("Soup")
     expect(await core.answerOf(box, "howMany")).toBe(2)
   })
 
