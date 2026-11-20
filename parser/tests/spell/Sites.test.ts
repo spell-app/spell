@@ -341,6 +341,43 @@ describe("going to a site's pages", () => {
     expect(code).toContain('core.siteAddressOf("about page")')
   })
 
+  test("a page with a parameter, whatever its last word, is named in a file read before its own (old-console-redo I16)", () => {
+    const files = parseSpellProject([
+      {
+        path: "/Site.spell",
+        contents: [
+          'a "session" is a thing',
+          "harbor is a site:",
+          '\t- it has a Session Screen at "/sessions/:session"'
+        ].join("\n")
+      },
+      {
+        path: "/List.spell",
+        contents: [
+          'a "session row" is a view where:',
+          "\t- it has a session",
+          '\t- its "link" is the address of the Session Screen for its session',
+          "\t- to open:",
+          "\t\tgo to the Session Screen for its session"
+        ].join("\n")
+      },
+      {
+        path: "/Screen.spell",
+        contents: [
+          'a "session card" is a view where:',
+          "\t- it has a session",
+          '\t- its "link" is the address of the Session Screen for its session',
+          "Session Screen is a page",
+          '\tits "session" is a session'
+        ].join("\n")
+      }
+    ]).files
+    for (const file of files) expect(file.errors.map(String)).toEqual([])
+    expect(files[1]!.compiled).toContain('core.siteAddressOf("Session Screen", this.session)')
+    expect(files[1]!.compiled).toContain('core.showSitePart("Session Screen", this.session)')
+    expect(files[2]!.compiled).toContain('core.siteAddressOf("Session Screen", this.session)')
+  })
+
   test("`go to the ...` naming no page, dialog or sidebar isn't ours", () => {
     const { errors } = compiled([...CODE, "to wander:", "\tgo to the kitchen"], "/Galaxy.spell")
     expect(errors).not.toEqual([])
