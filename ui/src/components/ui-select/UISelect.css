@@ -242,6 +242,20 @@
      Customizable select
 *******************************/
 
+/*
+ * The picker's last tries, when it fits whole neither below nor above (as `UIDropdown.css`'s menu):
+ * - `--ui-select-picker-roomier-side`:  as tall as the room on the side with more room, less its offset each side;
+ *   its `min-height` is half of what the control leaves of the window, so it fits only there
+ * - `--ui-select-picker-in-room`:  as tall as the room on its own side (a rounding miss)
+ */
+@position-try --ui-select-picker-roomier-side {
+  min-height: calc(50dvh - anchor-size(height) / 2 - 2 * var(--_ui-select-picker-offset));
+  max-height: min(var(--_ui-select-picker-max-height), calc(100% - 2 * var(--_ui-select-picker-offset)));
+}
+@position-try --ui-select-picker-in-room {
+  max-height: min(var(--_ui-select-picker-max-height), calc(100% - 2 * var(--_ui-select-picker-offset)));
+}
+
 @supports (appearance: base-select) {
   @layer ui.components.select.types {
     .ui.select:not(.multiple),
@@ -293,11 +307,10 @@
       box-sizing: border-box;
       min-width: anchor-size(width);
       /*
-       * Never taller than the room beside the select:  `100%` is that room (its `position-area`), less its offset
-       * from the select and as much again from the window's edge;  a longer list scrolls.
-       * `--ui-select-picker-max-height` caps it lower (a length;  `100dvh`:  only the room).
+       * `--ui-select-picker-max-height` caps it (a length;  `100dvh`:  only the room);  a longer list scrolls.
+       * Never taller than the room beside the select, once it fits whole on neither side (the tries above).
        */
-      max-height: min(var(--_ui-select-picker-max-height), calc(100% - 2 * var(--_ui-select-picker-offset)));
+      max-height: var(--_ui-select-picker-max-height);
       margin: var(--_ui-select-picker-offset) 0;
       padding: 0;
       overflow: hidden auto;
@@ -311,9 +324,14 @@
       /* the menu's words upright, whatever the closed box shows (a placeholder's `font-style`) */
       font-style: normal;
       position-area: block-end span-inline-end;
-      position-try-fallbacks: flip-block, flip-inline;
-      /* below or above, whichever has more room */
-      position-try-order: most-block-size;
+      /* below whenever it fits whole, else above, else it scrolls on the side with more room (the tries above) */
+      position-try-fallbacks:
+        flip-inline,
+        flip-block,
+        flip-block flip-inline,
+        --ui-select-picker-roomier-side,
+        --ui-select-picker-roomier-side flip-block,
+        --ui-select-picker-in-room;
       opacity: 0;
       transition-property: opacity, display, overlay;
       transition-duration: var(--_ui-select-duration);

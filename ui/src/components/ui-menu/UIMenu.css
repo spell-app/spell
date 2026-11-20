@@ -1767,6 +1767,20 @@
   }
 }
 
+/*
+ * The overflow menu's last tries, when it fits whole neither below nor above its button (as `UIDropdown.css`'s menu):
+ * - `--ui-menu-overflow-roomier-side`:  as tall as the room on the side with more room, less its offset each side;
+ *   its `min-height` is half of what the button leaves of the window, so it fits only there
+ * - `--ui-menu-overflow-in-room`:  as tall as the room on its own side (a rounding miss)
+ */
+@position-try --ui-menu-overflow-roomier-side {
+  min-height: calc(50dvh - anchor-size(height) / 2 - 0.5em);
+  max-height: calc(100% - 0.5em);
+}
+@position-try --ui-menu-overflow-in-room {
+  max-height: calc(100% - 0.5em);
+}
+
 @layer ui.components.menu.types {
   /* the overflow button:  an item of the menu's own, shown once the items fold into it */
   .ui.menu > .overflow.item {
@@ -1813,7 +1827,8 @@
     opacity: 0.8;
   }
 
-  /* the overflow button's menu:  a raised panel under the button (above it, without the room), a row per item */
+  /* the overflow button's menu:  a raised panel under the button (above it, without the room), a row per item
+     - below whenever it fits whole, else above, else it scrolls on the side with more room (the tries above) */
   .overflow-menu {
     display: none;
   }
@@ -1822,8 +1837,13 @@
     --_ui-menu-radius: var(--ui-menu-radius, var(--ui-radius));
     position: fixed;
     position-area: block-end span-inline-end;
-    position-try-fallbacks: flip-block, flip-inline;
-    position-try-order: most-block-size;
+    position-try-fallbacks:
+      flip-inline,
+      flip-block,
+      flip-block flip-inline,
+      --ui-menu-overflow-roomier-side,
+      --ui-menu-overflow-roomier-side flip-block,
+      --ui-menu-overflow-in-room;
     inset: auto;
     display: flex;
     flex-direction: column;
@@ -1831,7 +1851,6 @@
     min-width: max(anchor-size(width), 10em);
     /* never past the window's edge:  `100%` is the room its `position-area` gives it;  a long title is cut */
     max-width: 100%;
-    max-height: calc(100% - 0.5em);
     margin: 0.25em 0;
     padding: 0.25em 0;
     overflow-y: auto;
@@ -1856,8 +1875,9 @@
     position-try-fallbacks:
       block-end span-inline-start,
       block-end span-all;
-    position-try-order: normal;
     max-width: calc(100vw - 1em);
+    /* never past the window's edge:  `100%` is the room below its button */
+    max-height: calc(100% - 0.5em);
     overflow: auto;
   }
   .overflow-menu[data-columns] > .row {

@@ -28,8 +28,8 @@
  *     the stuck one sits over the rows box's top row, taking no room (its negative margin)
  * - Positioning:  POPOVER + ANCHOR, no JS.  The field is the anchor:  its name, and the panel hung from it, are
  *   inline, per element (the component's `PopoverPanel`);
- *   the panel sits below it, or above when there's more room there,
- *   never taller than that room:  its grid scrolls.
+ *   the panel sits below it whenever it fits, else above,
+ *   never taller than the room on the side with more room:  its grid scrolls.
  * - The DOM element:  `inline-flex`, `:state(fluid)` block-level.
  * - Public tokens (`--ui-icon-picker-*`) are NEVER declared here:  each is read through a private alias.
  *   - The field's box falls back to `<ui-input>`'s public tokens, then the global ones,
@@ -41,6 +41,20 @@
 /*******************************
             Icon picker
 *******************************/
+
+/*
+ * The panel's last tries, when it fits whole neither below nor above (as `UIDropdown.css`'s menu):
+ * - `--ui-icon-picker-panel-roomier-side`:  as tall as the room on the side with more room, less its offset each side;
+ *   its `min-block-size` is half of what the field leaves of the window, so it fits only there
+ * - `--ui-icon-picker-panel-in-room`:  as tall as the room on its own side (a rounding miss)
+ */
+@position-try --ui-icon-picker-panel-roomier-side {
+  min-block-size: calc(50dvh - anchor-size(height) / 2 - 2 * var(--_ui-icon-picker-panel-offset));
+  max-block-size: min(var(--_ui-icon-picker-panel-max-height), calc(100% - 2 * var(--_ui-icon-picker-panel-offset)));
+}
+@position-try --ui-icon-picker-panel-in-room {
+  max-block-size: min(var(--_ui-icon-picker-panel-max-height), calc(100% - 2 * var(--_ui-icon-picker-panel-offset)));
+}
 
 @layer ui.components.icon-picker.types {
   /* The DOM element:  layout only;  the look lives on the field inside. */
@@ -190,15 +204,20 @@
   .panel[popover] {
     position: fixed;
     position-area: block-end span-inline-end;
-    position-try-fallbacks: flip-block, flip-inline;
-    /* below or above, whichever has more room */
-    position-try-order: most-block-size;
+    /* below whenever it fits whole, else above, else it scrolls on the side with more room (the tries above) */
+    position-try-fallbacks:
+      flip-inline,
+      flip-block,
+      flip-block flip-inline,
+      --ui-icon-picker-panel-roomier-side,
+      --ui-icon-picker-panel-roomier-side flip-block,
+      --ui-icon-picker-panel-in-room;
     inset: auto;
     inline-size: max(anchor-size(width), var(--_ui-icon-picker-panel-width));
     max-inline-size: calc(100% - 2 * var(--_ui-icon-picker-panel-offset));
     margin: var(--_ui-icon-picker-panel-offset) 0;
-    /* never taller than the room beside the field (`100%`, its `position-area`), less its offset each side */
-    max-block-size: min(var(--_ui-icon-picker-panel-max-height), calc(100% - 2 * var(--_ui-icon-picker-panel-offset)));
+    /* never taller than the room beside the field, once it fits whole on neither side (the tries above) */
+    max-block-size: var(--_ui-icon-picker-panel-max-height);
     overflow: hidden;
   }
   /* shown only while open:  `[popover]` alone must stay the browser's `display: none` */

@@ -641,6 +641,61 @@ describe("<ui-dropdown> menu placement", () => {
     await ElementFixture.tick()
     await expect.poll(() => menu.getBoundingClientRect().top - host.getBoundingClientRect().bottom).toBeGreaterThan(-1)
   })
+
+  /**
+   * Open `html`'s dropdown with its top `top` px down the window (fixed), its menu's box and the room on each side.
+   * - `top` may be a function of the dropdown's height and its menu's natural height, measured first at the top
+   */
+  async function openedAt(html: string, top: (sizes: { height: number; menuHeight: number }) => number) {
+    const wrapper = await ElementFixture.render<HTMLElement>(
+      `<div style="position: fixed; top: 0; left: 20px; width: 200px">${html}</div>`
+    )
+    const host = wrapper.querySelector<Dropdown>("ui-dropdown")!
+    const { menu } = parts(host)
+    host.open = true
+    await ElementFixture.tick()
+    await expect.poll(() => menu.getBoundingClientRect().height).toBeGreaterThan(0)
+    const sizes = { height: host.getBoundingClientRect().height, menuHeight: menu.scrollHeight }
+    host.open = false
+    await ElementFixture.tick()
+    wrapper.style.top = `${top(sizes)}px`
+    host.open = true
+    await ElementFixture.tick()
+    const box = () => {
+      const [root, list] = [host.getBoundingClientRect(), menu.getBoundingClientRect()]
+      return { isBelow: list.top >= root.bottom - 1, roomBelow: innerHeight - root.bottom, roomAbove: root.top, list }
+    }
+    await expect.poll(() => box().list.height).toBeGreaterThan(0)
+    return { menu, box, sizes }
+  }
+
+  it("opens below whenever its menu fits there, though there's more room above (it opened on the roomier side)", async () => {
+    const { box } = await openedAt(GENDER, ({ height, menuHeight }) => innerHeight - height - menuHeight - 20)
+    expect(box().roomAbove).toBeGreaterThan(box().roomBelow)
+    expect(box().isBelow).toBe(true)
+  })
+
+  it("opens above when its menu doesn't fit below", async () => {
+    const { box } = await openedAt(GENDER, ({ height }) => innerHeight - height - 10)
+    expect(box().isBelow).toBe(false)
+    expect(box().list.bottom).toBeLessThanOrEqual(box().roomAbove)
+  })
+
+  it("too tall for either side:  scrolls, as tall as the room on the side with more room", async () => {
+    const items = Array.from({ length: 80 }, (_, index) => `<ui-item value="${index}">Item ${index}</ui-item>`).join("")
+    const tall = `<ui-dropdown selection limit="none" placeholder="Many">${items}</ui-dropdown>`
+    for (const [share, isBelow] of [
+      [0.35, true],
+      [0.6, false]
+    ] as const) {
+      const { box, menu } = await openedAt(tall, () => innerHeight * share)
+      const { isBelow: opensBelow, list, roomBelow, roomAbove } = box()
+      expect(opensBelow).toBe(isBelow)
+      expect(menu.scrollHeight).toBeGreaterThan(menu.clientHeight)
+      // the menu's offset each side of it:  a few px
+      expect(isBelow ? roomBelow - list.height : roomAbove - list.height).toBeLessThan(20)
+    }
+  })
 })
 
 ////////////////

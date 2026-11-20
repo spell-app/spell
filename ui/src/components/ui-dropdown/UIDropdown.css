@@ -51,12 +51,31 @@
  *   - the "connecting border" (square corners where a selection menu meets its box):  a flipped menu can't
  *     tell CSS it flipped, so every menu floats a hair away with its own radius
  *   - Fomantic's per-breakpoint menu heights:  one `--ui-dropdown-menu-max-height`, and the menu never grows
- *     past the space its `position-area` leaves
+ *     past the space its `position-area` leaves (it opens below when it fits, else above, else it scrolls)
  *   - `scrollhint` (a touch-only scroll animation), `label` dropdowns (`.ui.label.dropdown`),
  *     `<select>` fallback styling (`select.ui.dropdown`), and coupling with `ui menu` / `labeled input`
  */
 
 @layer ui.components.dropdown.types, ui.components.dropdown.content, ui.components.dropdown.variations, ui.components.dropdown.states;
+
+/*
+ * The menu's last tries, when it fits whole neither below nor above its root (`.menu[popover]`'s fallbacks):
+ * - `--ui-dropdown-roomier-side`:  as tall as the room on the side with more room, less its offset each side;
+ *   a longer list scrolls
+ *   - Its `min-height` is half of what the root leaves of the window, so it fits only on the roomier side.
+ *   - Why not `position-try-order: most-block-size`:  it picks the roomier side even when the menu fits below.
+ * - `--ui-dropdown-in-room`:  as tall as the room on its own side, wherever that is (a pointing menu, a rounding miss)
+ * - Their `max-height` beats the menu height variations (`short`, `long` ...), but only where the menu is taller
+ *   than the room anyway.
+ * - HACK:  no `--x flip-inline` try beside a plain `flip-inline`:  Chromium (2026-11) then skips the custom tries.
+ */
+@position-try --ui-dropdown-roomier-side {
+  min-height: calc(50dvh - anchor-size(height) / 2 - 2 * var(--_ui-dropdown-menu-offset));
+  max-height: calc(100% - 2 * var(--_ui-dropdown-menu-offset));
+}
+@position-try --ui-dropdown-in-room {
+  max-height: calc(100% - 2 * var(--_ui-dropdown-menu-offset));
+}
 
 /* Loader spin, shared by `loading` dropdowns. */
 @keyframes ui-dropdown-spin {
@@ -236,17 +255,20 @@
   .ui.dropdown > .menu[popover] {
     position: fixed;
     position-area: block-end span-inline-end;
-    position-try-fallbacks: flip-block, flip-inline;
-    /* below or above, whichever has more room:  capped to it (`max-height`), the menu always fits */
-    position-try-order: most-block-size;
+    /*
+     * Below whenever it fits whole, like a Mac's popup menus;  else above;  else, too tall for either side, it scrolls
+     * on the side with more room (the tries at the top of this sheet).  No sub-menus to clip (above).
+     */
+    position-try-fallbacks:
+      flip-inline,
+      flip-block,
+      flip-block flip-inline,
+      --ui-dropdown-roomier-side,
+      --ui-dropdown-roomier-side flip-block,
+      --ui-dropdown-in-room;
     inset: auto;
     min-width: anchor-size(width);
     margin: var(--_ui-dropdown-menu-offset) 0;
-    /*
-     * Never taller than the room beside its root:  `100%` is that room (its `position-area`), less its offset from
-     * the root and as much again from the window's edge;  a longer list scrolls.  No sub-menus to clip (above).
-     */
-    max-height: calc(100% - 2 * var(--_ui-dropdown-menu-offset));
     overflow-y: auto;
     overscroll-behavior: contain;
     opacity: 0;
@@ -934,7 +956,8 @@
   }
   .ui.pointing.dropdown > .menu[popover] {
     position-area: block-end center;
-    position-try-fallbacks: none;
+    /* where it points, never flipped:  only made shorter, to the room there */
+    position-try-fallbacks: --ui-dropdown-in-room;
   }
   .ui.pointing.dropdown > .menu:not([popover]) {
     margin-top: var(--_ui-dropdown-menu-offset);

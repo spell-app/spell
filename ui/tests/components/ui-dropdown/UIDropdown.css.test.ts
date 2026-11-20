@@ -135,7 +135,8 @@ describe("UIDropdown.css examples", () => {
     const menu = open(pointing)
     expect(menu.getBoundingClientRect().left).toBeGreaterThan(pointing.getBoundingClientRect().right)
     expect(getComputedStyle(menu, "::after").content).toBe('""')
-    expect(getComputedStyle(menu).positionTryFallbacks).toBe("none")
+    // never flipped:  only made shorter, to the room where it points
+    expect(getComputedStyle(menu).positionTryFallbacks).toBe("--ui-dropdown-in-room")
   })
 
   it("shows a static menu on an active root, below it", () => {
