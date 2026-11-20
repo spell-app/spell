@@ -1405,7 +1405,10 @@ class PageComments {
     if (!toggle) return spot
     const code = toggle.getBoundingClientRect()
     const covers =
-      spot.left < code.right && spot.left + spot.width > code.left && spot.top < code.bottom && spot.top + spot.height > code.top
+      spot.left < code.right &&
+      spot.left + spot.width > code.left &&
+      spot.top < code.bottom &&
+      spot.top + spot.height > code.top
     if (!covers) return spot
     // the frame the code button sits on the corner of
     const frame = (toggle.parentElement ?? example).getBoundingClientRect()
