@@ -105,6 +105,9 @@ describe("a list under each thing", () => {
     expect(spell).toContain(`\ta post's comments live at "/posts/{id}/comments"`)
     expect(spell).toContain(`\ta user's posts live at "/users/{id}/posts"`)
     expect(spell).not.toContain("a comment's posts")
+    // kept under each post AND at an address of its own:  both lines (epic `ingest-harbor-api` I6)
+    expect(spell).toContain(`\tcomments live at "/comments"`)
+    expect(spell).toContain(`\tposts live at "/posts"`)
     expect(spell).toMatch(/a "post" is a thing[^]*?\tits "comments" is a list of comments\n/)
     expect(description.collections.posts!.listsUnder).toEqual({ comments: "/posts/{id}/comments" })
     // a read through it found nothing to complain of:  a post's comments are read from the post's own address

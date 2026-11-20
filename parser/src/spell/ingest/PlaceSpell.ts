@@ -194,12 +194,18 @@ export function spellPartsFor(
   if (fieldsShown.some(({ decimalComma }) => decimalComma)) {
     placeLines.push({ key: "numbers", text: '- it writes numbers like "1.200,5"' })
   }
-  // a list under each thing says where it is on its owner's line, `a job's steps live at "..."`:  it has no other
-  const listedUnder = new Set(
-    every.flatMap(({ listsUnder = {} }) => Object.keys(listsUnder)).filter((list) => !collections[list]?.isOneUnder)
+  // a list kept only under each thing says where it is on its owner's line, `a job's steps live at "..."`:  its own
+  // address is that one.  One with an address of its own keeps its line too:  `comments live at "/comments"` (I6)
+  const listedUnderAt = new Set(
+    every.flatMap(({ listsUnder = {} }) =>
+      Object.entries(listsUnder)
+        .filter(([list]) => !collections[list]?.isOneUnder)
+        .map(([list, at]) => `${list}\n${bracesUnnamed(at)}`)
+    )
   )
   for (const [collection, description] of shown) {
-    if (isSheet || !description.at || description.at === collection || listedUnder.has(collection)) continue
+    if (isSheet || !description.at || description.at === collection) continue
+    if (listedUnderAt.has(`${collection}\n${bracesUnnamed(description.at)}`)) continue
     // found by name, with no list:  where its name goes, `wiki pages are found at "/page/summary/{name}"`
     // answering only a search:  `books are searched at "/search.json"`
     const where = isFoundByNameAt(description.at)
@@ -700,6 +706,11 @@ function enabledOperationsOf(description: CollectionDescription): string[] | und
   const writes = WRITES.filter((write) => operations[write] && operations[write]!.state?.is !== "disabled")
   if (writes.length === WRITES.length) return undefined
   return ["read", ...writes, ...actionsOf(description).map(([verb]) => verb)]
+}
+
+/** `address` with each brace's name taken out, so `/assets/{asset_id}/ips` is `/assets/{id}/ips`:  `/assets/{}/ips`. */
+function bracesUnnamed(address: string): string {
+  return address.replace(/\{[^}]*\}/g, "{}")
 }
 
 /**
