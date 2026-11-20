@@ -847,18 +847,21 @@ A Spanish browser gets "Guardar" where an English one gets "Save":
   ([FileStates](src/app/ui/codemirror/FileStates.ts)), a view of its file, keeping its own undo, folds and caret
   while another is shown:  the project's files stay the source of truth, and each edit re-parses as little as it can.
 - A rename saves every file it touched.
-- The editors on it are Solid components, `CodeMirrorEditor`, `FileEditor`, `CodeSlice` (the Inspector's code) and
-  `DiffView` (Publish's diff), in [their folder](src/app/solid/codemirror/).
+- The editors on it are Solid components, in [their folder](src/app/solid/codemirror/):
+  - `CodeMirrorEditor` and `FileEditor`, the code pane's
+  - `CodeSlice`, the Inspector's code
+  - `DiffView`, Publish's diff
 - CodeMirror loads lazily, after the program has compiled and run:
-  through `LazyCodeMirror` in the app, and `loadCodeMirror()` in `<spell-editor>`.
+  - in the app, through `LazyCodeMirror`
+  - in `<spell-editor>`, through `loadCodeMirror()`
 - Peek Definition (⌥F12) and Peek References (⇧⌥F12) open a box under the caret's line, showing the other file's
   lines, drawn bubbly, with the uses listed beside them ([CodeMirrorPeek](src/app/ui/codemirror/CodeMirrorPeek.ts)):
   plain DOM, so `<spell-editor>` has it too.
 - ⌘F opens a compact find bar like VS Code's, over the code's top right, its Replace row showing until you fold it
   ([CodeMirrorFind](src/app/ui/codemirror/CodeMirrorFind.ts)).
-- The popups that show by themselves (suggestions, signature help, hovers) wait for typing to pause, as long as
-  Settings… › Popup delay says:  Short 0.4 s, Standard 0.8 s, Long 1.5 s
-  ([CodeMirrorPopups](src/app/ui/codemirror/CodeMirrorPopups.ts)).
+- The popups that show by themselves (suggestions, signature help, hovers) wait for typing to pause,
+  as long as Settings… › Popup delay says ([CodeMirrorPopups](src/app/ui/codemirror/CodeMirrorPopups.ts)):
+  Short 0.4 s, Standard 0.8 s, Long 1.5 s.
 - Drawn bubbly, every line is 25px, and a block's feet sit in the blank line under it, so scrolling never changes
   the file's height.
   The bubbly marks are made only for the lines on screen ([CodeMirrorRelayout](src/app/ui/codemirror/CodeMirrorRelayout.ts)):
