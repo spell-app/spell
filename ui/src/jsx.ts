@@ -22148,7 +22148,7 @@ export interface UIInputEventMap {
    */
   "ui-typed": CustomEvent<{ value: string; originalEvent?: Event }>
   /**
-   * `ui-changed`:  Someone committed a change (blur, Enter, picking a file).
+   * `ui-changed`:  Someone committed a change (blur, Enter, picking a file);  a file input's element holds them in `files`.
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
   "ui-changed": CustomEvent<{ value: string; originalEvent?: Event }>
@@ -22502,6 +22502,16 @@ export interface UIInputAttributes {
    */
   "prop:accept"?: string
   /**
+   * `file`:  picks whole folders instead of files;  `files` holds every file in them, each with its path in its folder (`webkitRelativePath`).
+   * - takes:  flag (present / absent)
+   */
+  folder?: boolean | ""
+  /**
+   * `folder`, as the DOM element's property.
+   * @deprecated write `folder` -- `prop:` stays only for compiled spell
+   */
+  "prop:folder"?: boolean | ""
+  /**
    * Autofill hint, forwarded to the native input.
    * - takes:  text
    */
@@ -22774,7 +22784,7 @@ export interface UIInputAttributes {
    */
   "on-ui-typed"?: (event: UIInputEventMap["ui-typed"]) => void
   /**
-   * `ui-changed`:  Someone committed a change (blur, Enter, picking a file).
+   * `ui-changed`:  Someone committed a change (blur, Enter, picking a file);  a file input's element holds them in `files`.
    * - `event.detail`:  `{ value: string, originalEvent?: Event }`
    */
   "on-ui-changed"?: (event: UIInputEventMap["ui-changed"]) => void

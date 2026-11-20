@@ -55,6 +55,8 @@ export class InputFallback extends E.NativeFallback<Vocabulary> {
           step: this.attr("step"),
           multiple: this.flag("multiple"),
           accept: this.attr("accept"),
+          // `folder`:  the browser calls it `webkitdirectory`
+          webkitdirectory: this.flag("folder"),
           inputmode: this.attr("inputmode")
         })
     this.decorate(control, "control")

@@ -12,7 +12,7 @@ export const inputEs = {
   name: "entrada",
   snippet: '<es-entrada marcador="Escribe aquí"></es-entrada>',
   aka: ["entrada", "campo de texto", "cuadro de texto", "campo de entrada", "cuadro de búsqueda"],
-  attributes: { action: "accion" },
+  attributes: { action: "accion", folder: "carpeta" },
   values: {
     type: { text: "text", date: "date", time: "time", month: "month", percent: "porcentaje" },
     inputmode: { none: "none", text: "text" }

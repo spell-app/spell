@@ -100,7 +100,15 @@
                 </ui-example>
               </ui-section>
 
-              <!-- GAP I95:  no invisible file input that a separate `<label for>` (a button, a placeholder segment) triggers;  left out. -->
+              <ui-section id="examples-types-folder-input" label="Folder Input" sticky="stack" collapsible dividing>
+                <ui-example
+                  description="A folder input:  `folder` on a `file` input picks whole folders.  Its `files` holds every file in them, each with its path in its folder (`webkitRelativePath`)."
+                >
+                  <ui-input type="file" folder aria-label="Upload a folder"></ui-input>
+                </ui-example>
+              </ui-section>
+
+              <!-- GAP I95:  a separate `<label for>` (a button, a placeholder segment) doesn't open a file input's dialog;  script does, with `showPicker()` (from-console J74). -->
               <ui-section id="examples-types-textarea" label="Textarea" sticky="stack" collapsible dividing>
                 <ui-example>
                   <p slot="description">
@@ -426,6 +434,28 @@
                   - **Enter** submits its form.
                 </script>
               </ui-markdown>
+            </ui-section>
+
+            <ui-section id="usage-files-and-folders" label="Files and folders" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  A `type="file"` input picks files, as a native one does.
+
+                  - `accept` limits the kinds (`.json,.csv`), `multiple` takes more than one, and `folder` picks whole folders.
+                  - Its element's `files` holds what was picked;  `ui-changed` says when that changes.
+                  - Setting its `value` to `""` forgets them, so the same file can be picked again.
+                  - `showPicker()` opens its file dialog from script, as a native input's does:
+                    only from a person's click or key, so call it in a click handler.
+                  - [`<ui-uploader>`](ui-uploader.html) is built on one, hidden:  its looks' buttons open it this way.
+                </script>
+              </ui-markdown>
+              <ui-code language="js">
+                <script type="text/plain">
+                  const input = document.querySelector("ui-input[type=file]")
+                  document.querySelector("#choose").addEventListener("click", () => input.showPicker())
+                  input.addEventListener("ui-changed", () => console.log(input.files.map((file) => file.name)))
+                </script>
+              </ui-code>
             </ui-section>
 
             <ui-section id="usage-events" label="Events" sticky="stack" collapsible dividing>

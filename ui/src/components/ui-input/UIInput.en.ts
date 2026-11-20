@@ -185,6 +185,14 @@ export const inputVocabulary = {
     { name: "multiple", group: "form", kind: "boolean", description: "`email` / `file`:  accepts several values." },
     { name: "accept", group: "form", kind: "string", description: "`file`:  accepted file types." },
     {
+      name: "folder",
+      group: "form",
+      kind: "boolean",
+      description:
+        "`file`:  picks whole folders instead of files;  `files` holds every file in them, " +
+        "each with its path in its folder (`webkitRelativePath`)."
+    },
+    {
       name: "autocomplete",
       group: "form",
       kind: "string",
@@ -221,7 +229,8 @@ export const inputVocabulary = {
     {
       name: "ui-changed",
       detail: "{ value: string, originalEvent?: Event }",
-      description: "Someone committed a change (blur, Enter, picking a file)."
+      description:
+        "Someone committed a change (blur, Enter, picking a file);  a file input's element holds them in `files`."
     }
   ],
   slots: [
