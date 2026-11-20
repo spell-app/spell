@@ -799,7 +799,7 @@ describe("SpellElement", () => {
         const to = trays[0]! as Tray & Record<string, unknown>
         to.canTake = () => false
         await drag(root.querySelector("game-token") as HTMLElement, root.querySelectorAll<HTMLElement>("game-tray")[0]!)
-        delete to.canTake
+        Reflect.deleteProperty(to, "canTake")
         expect(heard.map((each) => each.type)).toEqual(["ui-dragged-over", "ui-dragged-out"])
       } finally {
         for (const name of names) root.removeEventListener(name, listen)

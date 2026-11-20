@@ -29,8 +29,8 @@ core.message("cant-draw", type="Carta")  # "⚠ Carta no se puede dibujar"
 | `choose-up-to`, `choose-between` | the same, for a count:  `Choose up to 2 cards` | `most`, `least`, `things` |
 | `color-names` | `choose a color`'s rows:  Spell UI's 13 colors, red to black, by commas | |
 | `drop-event` | the event a page sends as a thing is dropped on a list:  the JavaScript core's, so far | `thing` |
-| `dragged-over-event`, `dragged-out-event`, `dropped-event` | the page events a list's element sends as a thing is dragged over it, out, or dropped on it:  the page's | |
-| `file-dragged-over-event`, `file-dragged-out-event`, `file-dropped-event`, `folder-dropped-event` | the same, for files dragged in from the desktop:  the page's | |
+| `dragged-over-event` ... `dropped-event` | the page events a list's element sends in a drag:  the page's | |
+| `file-dragged-over-event` ... `folder-dropped-event` | the same, for files from the desktop:  the page's | |
 | `undo`, `redo` | an app's Edit menu with nothing to undo or redo | |
 | `undo-step`, `redo-step` | an app's Edit menu, naming the step (`Undo Turn Card`) | `step` |
 | `write-refused` | the notice when a place refuses a change:  the JavaScript core's, so far | `thing` |
