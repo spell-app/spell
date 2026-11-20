@@ -368,6 +368,11 @@
     --_button-icon-height: 100%;
     --_button-icon-pad: calc(var(--_ui-button-padding-block) * var(--_button-density, 1));
     --_button-icon-bg: var(--_ui-button-labeled-icon-background);
+    /* its glyph a plain button's size, centred in the block (below, "Icon") */
+    --_button-glyph-position: absolute;
+    --_button-glyph-width: 1.18em;
+    --_button-glyph-height: 1em;
+    --_button-glyph-margin: auto;
   }
   .ui[class*="right labeled"].icon:is(.button, .buttons) {
     --_button-pad-start: 0em;
@@ -602,12 +607,20 @@
   .ui.button:not(.icon) > .right.icon {
     margin-inline: var(--_ui-button-icon-spacing) calc(var(--_ui-button-icon-spacing) / -2);
   }
+  /*
+   * The glyph fills the icon's box, except in a labeled icon's tinted block:
+   * there it's a plain button's size, 1em tall, centred in the block
+   * (it filled the block:  a copy icon 25 x 28.6px beside 15px words;  epic `from-console` I33)
+   */
   .ui.button .icon svg,
   .ui.button .icon ::slotted(svg),
   .ui.button .icon ::slotted(ui-icon) {
+    position: var(--_button-glyph-position, static);
+    inset: 0;
     display: block;
-    width: 100%;
-    height: 100%;
+    width: var(--_button-glyph-width, 100%);
+    height: var(--_button-glyph-height, 100%);
+    margin: var(--_button-glyph-margin, 0);
     fill: currentColor;
   }
   .ui.animated.button > .content > .icon {
