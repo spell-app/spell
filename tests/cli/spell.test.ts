@@ -218,10 +218,13 @@ describe("spell in a project that installs spell from npm", () => {
     mkdirSync(join(PROJECT, "node_modules", "spell", "bin"), { recursive: true })
     writeFileSync(join(PROJECT, "package.json"), `{ "name": "app" }`)
     writeFileSync(join(PROJECT, "node_modules", "spell", "package.json"), `{ "name": "spell", "type": "module" }`)
-    writeFileSync(
-      join(PROJECT, "node_modules", "spell", "bin", "spell.mjs"),
-      `console.log(JSON.stringify({ bin: import.meta.filename, args: process.argv.slice(2) }))\n`
-    )
+    for (const bin of ["bin/spell.mjs", "epic/bin/epic"]) {
+      mkdirSync(join(PROJECT, "node_modules", "spell", bin, ".."), { recursive: true })
+      writeFileSync(
+        join(PROJECT, "node_modules", "spell", bin),
+        `console.log(JSON.stringify({ bin: import.meta.filename, args: process.argv.slice(2) }))\n`
+      )
+    }
   })
 
   test("running no checkout:  the project's own installed bin, the arguments verbatim", () => {
@@ -233,11 +236,24 @@ describe("spell in a project that installs spell from npm", () => {
     })
   })
 
+  test("epic too:  the project's own installed epic", () => {
+    const { status, stdout } = spawnSync(process.execPath, [join(KIT, "epic", "bin", "epic"), "status"], {
+      cwd: PROJECT,
+      encoding: "utf8",
+      env: { ...process.env, SPELL_KIT: undefined }
+    })
+    expect(status).toBe(0)
+    expect(JSON.parse(stdout)).toEqual({
+      bin: join(PROJECT, "node_modules", "spell", "epic", "bin", "epic"),
+      args: ["status"]
+    })
+  })
+
   test("SPELL_KIT set:  this checkout runs", () => {
     expect(spell(["pony", "hi"], PROJECT, { SPELL_KIT: KIT }).stdout).toContain(" < hi >")
   })
 
-  test("spell local on and off:  the project's file, and spell on the PATH, made and taken away", () => {
+  test("spell local on and off:  the project's file, and spell and epic on the PATH, made and taken away", () => {
     const home = join(temp, "home")
     const binDir = join(temp, "bin")
     const env = { HOME: home, SPELL_BIN_DIR: binDir, PATH: `${binDir}:${process.env.PATH}` }
@@ -246,10 +262,18 @@ describe("spell in a project that installs spell from npm", () => {
     const on = spell(["local", "on", KIT], PROJECT, env)
     expect(on.stderr).toBe("")
     expect(on.stdout).toContain("- typing spell runs your checkout now, from any folder (")
+    expect(on.stdout).toContain("- typing epic runs your checkout now, from any folder (")
     expect(realpathSync(join(binDir, "spell"))).toBe(realpathSync(SPELL))
-    expect(spell(["local"], PROJECT, env).stdout).toContain("spell local added it)")
+    expect(realpathSync(join(binDir, "epic"))).toBe(realpathSync(join(KIT, "epic", "bin", "epic")))
+    const status = spell(["local"], PROJECT, env).stdout
+    expect(status).toContain(
+      `- spell, typed in a terminal:  ${KIT}  [your checkout]\n  ${join(binDir, "spell")}:  spell local added it`
+    )
+    expect(status).toContain(`- epic, typed in a terminal:  ${KIT}  [your checkout]`)
+    expect(status).toMatch(/- this project's code that imports spell:  .*node_modules\/spell  \[NOT your checkout\]/)
     const off = spell(["local", "off"], PROJECT, env)
     expect(off.stdout).toContain("- removed the spell command spell local added (")
-    expect(spell(["local"], PROJECT, env).stdout).not.toContain("spell local added it)")
+    expect(off.stdout).toContain("- removed the epic command spell local added (")
+    expect(spell(["local"], PROJECT, env).stdout).not.toContain("spell local added it")
   })
 })

@@ -154,3 +154,19 @@ describe("status()", () => {
     expect(new PathLink({ home, env }).status()).toMatchObject({ link, target: checkoutA })
   })
 })
+
+describe("more than one command", () => {
+  test("spell and epic each keep their own record, in one file", () => {
+    const project = localProject("app")
+    const epic = fileIn("spell-a/epic/bin/epic")
+    const epicLink = new PathLink({ command: "epic", home, env: { SPELL_BIN_DIR: binDir, PATH: binDir } })
+    pathLink().linkFor(project, checkoutA)
+    expect(epicLink.linkFor(project, epic)).toMatchObject({ link: join(binDir, "epic"), outcome: "linked" })
+    expect(pathLink().record()?.target).toBe(checkoutA)
+    expect(epicLink.record()?.target).toBe(epic)
+    rmSync(join(project, ".spell"), { recursive: true })
+    expect(epicLink.unlinkFor(project).outcome).toBe("removed")
+    expect(pathLink().record()?.target).toBe(checkoutA)
+    expect(pathLink().unlinkFor(project).outcome).toBe("removed")
+  })
+})

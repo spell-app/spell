@@ -194,7 +194,8 @@ describe("what npm doesn't install (epic-engine P66)", () => {
 })
 
 describe("a folder's own commands", () => {
-  test("written where its package.json has them, importing the built module, runnable", async () => {
+  // epic `repo-split` T71:  `epic` from npm's `spell` ran the build alone, ignoring the project's .spell/kit.json5
+  test("written where its package.json has them, runnable:  the checkout the project names, else the build", async () => {
     const root = join(ROOT, "kit")
     const folderRoot = join(root, "tool")
     mkdirSync(join(root, "src"), { recursive: true })
@@ -220,7 +221,10 @@ describe("a folder's own commands", () => {
     )
     await kit.stage()
     const bin = join(stage, "tool", "bin", "tool")
-    expect(readFileSync(bin, "utf8")).toContain('await import("../../dist/tool/cli/toolMain.js")')
+    expect(readFileSync(bin, "utf8")).toContain(
+      'import { checkoutToRun } from "../../dist/cli/kitCheckout.js"\n' +
+        'await import(checkoutToRun("tool/bin/tool", import.meta.url) ?? "../../dist/tool/cli/toolMain.js")\n'
+    )
     expect(statSync(bin).mode & 0o111).toBeTruthy()
   })
 })

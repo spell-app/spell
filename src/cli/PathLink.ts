@@ -19,7 +19,7 @@ import { delimiter, dirname, join, resolve } from "node:path"
 
 /****************
  * ### `PathLink`
- * The `spell` on your `PATH`:  a link to one checkout's `bin/spell.mjs`.
+ * A command on your `PATH`, `spell` or `epic`:  a link to one checkout's own (`bin/spell.mjs`, `epic/bin/epic`).
  * - Made two ways:
  *   - by hand, `yarn cli:install` at a checkout's root (`link()`)
  *   - by `spell local on`, in a project (`linkFor()`), which records that it made it, so `spell local off` can take
@@ -28,19 +28,22 @@ import { delimiter, dirname, join, resolve } from "node:path"
  * - Imports only node's own modules, in TypeScript plain node runs:  `scripts/install-cli.mjs` loads it as it is.
  ****************/
 export class PathLink {
+  /** the command it links:  `spell` (default), `epic` */
+  readonly command: string
   /** the environment:  `PATH`, `SPELL_BIN_DIR` */
   readonly env: NodeJS.ProcessEnv
   /** the home folder:  `~/.local/bin`, and `~/.spell/`, where `spell local`'s record is */
   readonly home: string
 
   constructor(options: PathLinkOptions = {}) {
+    this.command = options.command ?? "spell"
     this.env = options.env ?? process.env
     this.home = options.home ?? homedir()
   }
 
-  /** Where `spell local` records the link it made:  `~/.spell/path-link.json`. */
+  /** Where `spell local` records the links it made, by command:  `~/.spell/path-links.json`. */
   get recordFile(): string {
-    return join(this.home, ".spell", "path-link.json")
+    return join(this.home, ".spell", "path-links.json")
   }
 
   /** The folders on `PATH`, in order. */
@@ -72,10 +75,10 @@ export class PathLink {
    * - `blocked` when something that isn't a link is in the way:  never replaced
    */
   link(target: string): PathLinkResult {
-    const link = join(this.binDir, SPELL)
+    const link = join(this.binDir, this.command)
     const before = linkTarget(link)
     if (isBlocked(link)) return this.result(link, target, "blocked")
-    if (this.record()?.link === link) rmSync(this.recordFile, { force: true })
+    if (this.record()?.link === link) this.writeRecord(undefined)
     makeLink(link, target)
     return this.result(link, target, before === undefined ? "linked" : before === target ? "kept" : "repointed", before)
   }
@@ -92,7 +95,7 @@ export class PathLink {
    */
   linkFor(project: string, target: string): PathLinkResult {
     const record = this.record()
-    const link = record?.link ?? join(this.binDir, SPELL)
+    const link = record?.link ?? join(this.binDir, this.command)
     const before = linkTarget(link)
     if (isBlocked(link)) return this.result(link, target, "blocked")
     if (before !== undefined && sameFile(before, target)) {
@@ -126,7 +129,7 @@ export class PathLink {
       this.writeRecord({ ...record, projects: others })
       return { outcome: "in-use", link: record.link, projects: others }
     }
-    rmSync(this.recordFile, { force: true })
+    this.writeRecord(undefined)
     if (record.previous && existsSync(record.previous)) {
       makeLink(record.link, record.previous)
       return { outcome: "restored", link: record.link, target: record.previous }
@@ -162,7 +165,7 @@ export class PathLink {
   resolvedLink(): string | undefined {
     return this.pathFolders
       .filter((dir) => !YARN_FOLDER.test(dir))
-      .map((dir) => join(dir, SPELL))
+      .map((dir) => join(dir, this.command))
       .find((file) => existsSync(file) || linkTarget(file) !== undefined)
   }
 
@@ -177,7 +180,8 @@ export class PathLink {
    */
   record(): PathLinkRecord | undefined {
     try {
-      const record = JSON.parse(readFileSync(this.recordFile, "utf8")) as PathLinkRecord
+      const record = this.records()[this.command]
+      if (!record) return undefined
       const now = linkTarget(record.link)
       if (now === undefined || !sameFile(now, record.target)) return undefined
       return { ...record, projects: record.projects.filter(usesLocal) }
@@ -186,10 +190,22 @@ export class PathLink {
     }
   }
 
-  /** Write `record`. */
-  private writeRecord(record: PathLinkRecord): void {
+  /** Every command's record, as written.  NEVER throws:  an unreadable file is none. */
+  private records(): Partial<Record<string, PathLinkRecord>> {
+    try {
+      return JSON.parse(readFileSync(this.recordFile, "utf8")) as Record<string, PathLinkRecord>
+    } catch {
+      return {}
+    }
+  }
+
+  /** Write this command's `record`;  `undefined` forgets it, and the file goes once no command has one. */
+  private writeRecord(record: PathLinkRecord | undefined): void {
+    const records = { ...this.records(), [this.command]: record }
+    if (!record) delete records[this.command]
+    if (!Object.keys(records).length) return rmSync(this.recordFile, { force: true })
     mkdirSync(dirname(this.recordFile), { recursive: true })
-    writeFileSync(this.recordFile, JSON.stringify(record, null, 2) + "\n")
+    writeFileSync(this.recordFile, JSON.stringify(records, null, 2) + "\n")
   }
 
   /** A `PathLinkResult`, whether the link's folder is on `PATH` filled in. */
@@ -202,9 +218,6 @@ export class PathLink {
 // ## Types
 ////////////////
 
-/** The command it links. */
-const SPELL = "spell"
-
 /** A folder `yarn` adds to `PATH` while it runs a script. */
 const YARN_FOLDER = /node_modules|\/xfs-[^/]+$/
 
@@ -213,6 +226,8 @@ export const SPELL_BIN_DIR = "SPELL_BIN_DIR"
 
 /** `new PathLink()`'s options:  tests pass their own. */
 export type PathLinkOptions = {
+  /** the command to link, default `spell` */
+  command?: string
   /** default:  `process.env` */
   env?: NodeJS.ProcessEnv
   /** default:  `os.homedir()` */
@@ -265,7 +280,7 @@ export type PathLinkStatus = {
   projects: string[]
 }
 
-/** `spell local`'s record, `~/.spell/path-link.json`. */
+/** `spell local`'s record of one command's link, in `~/.spell/path-links.json`. */
 export type PathLinkRecord = {
   /** the link it made */
   link: string
