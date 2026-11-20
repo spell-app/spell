@@ -5,16 +5,17 @@ import { EditorView } from "@codemirror/view"
 
 import { SP } from "spell/parser/spell"
 import type { LSP } from "spell/app/lsp"
-import { CODE_POPUP_DEFAULTS, codeChoices, HOVER_DELAY } from "spell/app/app/ui/codePopups"
+import { CODE_POPUP_DEFAULTS, codeChoices, hoverDelay, showCodeChoices } from "spell/app/app/ui/codePopups"
 import { CodeMirrorLanguage } from "spell/app/app/ui/codemirror/CodeMirrorLanguage"
 import { CodeMirrorPopups } from "spell/app/app/ui/codemirror/CodeMirrorPopups"
 import { CodeMirrorSetup } from "spell/app/app/ui/codemirror/CodeMirrorSetup"
 
 /**
- * The popups that show by themselves as Spell is typed wait for the typing to pause `HOVER_DELAY` (epic `codemirror`
+ * The popups that show by themselves as Spell is typed wait for the typing to pause `hoverDelay()` (epic `codemirror`
  * I22, Owen:  "the auto-help pops up waayy too fast"):  the suggestion list, signature help.
  * - Keys typed 80 msec apart, as a quick typist's:  nothing shows between them.
  * - What's asked for by name (Ctrl+Space) shows at once.
+ * - Settings… › "Popup delay" changes the wait, in editors already open too (T19).
  * - A real `CodeMirrorLanguage`, its language service and file stand-ins:  no project, no parse.
  */
 describe("popups wait for a pause in the typing (I22)", () => {
@@ -86,7 +87,7 @@ describe("popups wait for a pause in the typing (I22)", () => {
 
   const SUGGESTIONS = ".cm-tooltip-autocomplete"
   const SIGNATURE = ".cmb-signature"
-  const WAIT = HOVER_DELAY * 1000
+  const WAIT = hoverDelay() * 1000
 
   test("the suggestion list:  none between quick keys;  once the typing pauses, after the wait", async () => {
     const code = await editorOf("\t")
@@ -101,6 +102,37 @@ describe("popups wait for a pause in the typing (I22)", () => {
     const asked = performance.now()
     startCompletion(code)
     expect(await showsAfter(SUGGESTIONS, asked)).toBeLessThan(WAIT / 2)
+  })
+
+  test('Popup delay "Short":  the page\'s hover delay 400 msec, and the list waits that, in an editor already open', async () => {
+    const code = await editorOf("\t")
+    showCodeChoices({ ...codeChoices.now, popupDelay: "short" })
+    try {
+      expect(getComputedStyle(document.documentElement).getPropertyValue("--ui-hover-delay").trim()).toBe("400ms")
+      expect(hoverDelay()).toBe(0.4)
+      await sleep(50)
+      const lastKey = await type(code, "<action the card <ac", SUGGESTIONS)
+      const wait = await showsAfter(SUGGESTIONS, lastKey)
+      expect(wait).toBeGreaterThanOrEqual(400 - 100)
+      expect(wait).toBeLessThan(WAIT - 100)
+    } finally {
+      showCodeChoices({ ...codeChoices.now, popupDelay: "standard" })
+    }
+    expect(document.documentElement.style.getPropertyValue("--ui-hover-delay")).toBe("")
+    expect(hoverDelay()).toBe(0.8)
+  })
+
+  test('Popup delay "Long":  1.5 seconds;  nothing shows before', async () => {
+    const code = await editorOf("\t")
+    showCodeChoices({ ...codeChoices.now, popupDelay: "long" })
+    try {
+      await sleep(50)
+      const lastKey = await type(code, "<action the card <ac", SUGGESTIONS)
+      const wait = await showsAfter(SUGGESTIONS, lastKey)
+      expect(wait).toBeGreaterThanOrEqual(1500 - 100)
+    } finally {
+      showCodeChoices({ ...codeChoices.now, popupDelay: "standard" })
+    }
   })
 
   test("signature help:  a space asks for it, but it waits for the typing to pause", async () => {

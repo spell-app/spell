@@ -148,6 +148,10 @@ const APP_TEXTS_ES: AppTextPack = {
   codeCompilerWords: "Detalles del compilador en la información",
   codeBubbly: "Aspecto de burbujas",
   codeWrapLines: "Ajustar las líneas largas",
+  codePopupDelay: "Espera de las ventanas emergentes",
+  codePopupDelayShort: "Corta:  0,4 segundos",
+  codePopupDelayStandard: "Normal:  0,8 segundos",
+  codePopupDelayLong: "Larga:  1,5 segundos",
   // la página de un cuaderno, `<NotebookPage>` (épica `elemental-spell` P16)
   notebookPageLock: "Bloquearlo:  mientras esté bloqueado no se guarda nada",
   notebookPageUnlock: "Desbloquearlo:  los cambios se guardan",

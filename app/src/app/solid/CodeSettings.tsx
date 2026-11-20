@@ -5,6 +5,7 @@ import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 import {
   CODE_POPUP_DEFAULTS,
   HOVER_MODES,
+  POPUP_DELAYS,
   SUGGEST_MODES,
   SUGGEST_MODES_RENAMED,
   showCodeChoices,
@@ -18,7 +19,8 @@ import "./CodeSettings.css"
  * ### `CodeSettings`
  * The code editor's settings, for its popups:  hover info, when suggestions show by themselves, their details, parameter hints,
  * pinned lines and the compiler's words in the hover;  and its look, bubbly or not (epic `language` P50),
- * and whether long lines wrap (epic `editor` I110:  the code pane and the Inspector's code alike).
+ * and whether long lines wrap (epic `editor` I110:  the code pane and the Inspector's code alike);
+ * and how long every popup on the page waits before it shows by itself (epic `codemirror` T19).
  * - Changed in the code pane's "..." menu, "Settings…", which shows `<CodeSettingsPanel>` over the code.
  * - Each change applies at once to every code editor on the page, and the browser remembers it
  *   (`spellEditor:codeHover` ...):  the editors follow `codeChoices`, which it sets (`showCodeChoices()`),
@@ -61,7 +63,8 @@ const PREFS = {
   pinnedLines: "codePinnedLines",
   compilerWords: "codeCompilerWords",
   bubbly: "codeBubbly",
-  wrapLines: "codeWrapLines"
+  wrapLines: "codeWrapLines",
+  popupDelay: "codePopupDelay"
 } as const satisfies Record<keyof CodePopupChoices, string>
 
 editorPrefs
@@ -77,6 +80,7 @@ editorPrefs
   .declare(PREFS.compilerWords, { type: "choice", default: CODE_POPUP_DEFAULTS.compilerWords })
   .declare(PREFS.bubbly, { type: "choice", default: CODE_POPUP_DEFAULTS.bubbly })
   .declare(PREFS.wrapLines, { type: "choice", default: CODE_POPUP_DEFAULTS.wrapLines })
+  .declare(PREFS.popupDelay, { oneOf: [...POPUP_DELAYS], default: CODE_POPUP_DEFAULTS.popupDelay })
 
 /** What's chosen, as remembered:  read now, outside Solid's schedule (`choices()` is the reactive copy). */
 let chosen: CodePopupChoices = {
@@ -87,7 +91,8 @@ let chosen: CodePopupChoices = {
   pinnedLines: editorPrefs.get(PREFS.pinnedLines) as boolean,
   compilerWords: editorPrefs.get(PREFS.compilerWords) as boolean,
   bubbly: editorPrefs.get(PREFS.bubbly) as boolean,
-  wrapLines: editorPrefs.get(PREFS.wrapLines) as boolean
+  wrapLines: editorPrefs.get(PREFS.wrapLines) as boolean,
+  popupDelay: editorPrefs.get(PREFS.popupDelay) as CodePopupChoices["popupDelay"]
 }
 const [choices, setChoices] = createSignal(chosen)
 const [isShowing, setShowing] = createSignal(false)
@@ -98,7 +103,7 @@ showCodeChoices(chosen)
 /****************
  * ### `<CodeSettingsPanel>`
  * The code pane's settings, a small card over the code's top right corner:  `CodeSettings`' choices.
- * - Hover info and suggestions:  a select each;  the rest (`TOGGLES`):  a toggle each.
+ * - Hover info, suggestions and the popup delay:  a select each;  the rest (`TOGGLES`):  a toggle each.
  * - Each change applies as it's made:  no Save.
  * - Its close button, or Escape, hides it.
  ****************/
@@ -154,6 +159,22 @@ export function CodeSettingsPanel() {
             </For>
           </ui-select>
         </ui-field>
+        <ui-field>
+          <label for="CodeSettings-popupDelay">{appTexts.text("codePopupDelay")}</label>
+          <ui-select
+            id="CodeSettings-popupDelay"
+            name="popupDelay"
+            fluid=""
+            value={CodeSettings.choices.popupDelay}
+            ref={on<{ value: string }>("ui-changed", (event) =>
+              CodeSettings.choose("popupDelay", event.detail.value as CodePopupChoices["popupDelay"])
+            )}
+          >
+            <For each={POPUP_DELAYS}>
+              {(delay) => <ui-item value={delay}>{appTexts.text(POPUP_DELAY_TEXTS[delay])}</ui-item>}
+            </For>
+          </ui-select>
+        </ui-field>
         <For each={TOGGLES}>
           {(toggle) => (
             <ui-field>
@@ -198,3 +219,10 @@ const SUGGEST_TEXTS = {
   everywhere: "codeSuggestEverywhere",
   onCtrlSpace: "codeSuggestOnCtrlSpace"
 } as const satisfies Record<CodePopupChoices["suggest"], AppTextKey>
+
+/** Each popup delay's label. */
+const POPUP_DELAY_TEXTS = {
+  short: "codePopupDelayShort",
+  standard: "codePopupDelayStandard",
+  long: "codePopupDelayLong"
+} as const satisfies Record<CodePopupChoices["popupDelay"], AppTextKey>

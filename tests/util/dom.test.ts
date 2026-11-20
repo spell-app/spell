@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, onTestFinished, vi } from "vite-plus/t
 import {
   closestAcrossShadow,
   copyText,
+  cssSecondsFor,
   flatParentFor,
   isBrowser,
   nextFrame,
@@ -39,6 +40,21 @@ describe("nextFrame()", () => {
     await nextFrame(3)
     expect(frame).toHaveBeenCalledTimes(3)
     frame.mockRestore()
+  })
+})
+
+describe("cssSecondsFor()", () => {
+  it("reads the first time set, in seconds;  none, or not a time:  undefined", () => {
+    const element = document.body.appendChild(document.createElement("div"))
+    onTestFinished(() => element.remove())
+    element.style.setProperty("--a", "800ms")
+    element.style.setProperty("--b", "1.5s")
+    element.style.setProperty("--c", "soon")
+    expect(cssSecondsFor(element, "--a")).toBe(0.8)
+    expect(cssSecondsFor(element, "--b")).toBe(1.5)
+    expect(cssSecondsFor(element, "--none", "--b", "--a")).toBe(1.5)
+    expect(cssSecondsFor(element, "--c")).toBeUndefined()
+    expect(cssSecondsFor(element, "--none")).toBeUndefined()
   })
 })
 

@@ -1,6 +1,7 @@
 import { after, type CancelablePromise } from "spell/util/timing"
 import type { SP } from "spell/parser/spell"
 import type { LSP } from "spell/app/lsp"
+import { hoverDelay } from "./codePopups"
 
 import "./ValuePopups.css"
 
@@ -9,7 +10,7 @@ import "./ValuePopups.css"
  * An attribute's value chosen rather than typed, in a popup by the caret, for every code editor:
  * The code editor's (`CodeMirrorValues`) is only wiring onto this.
  * - The choices strip (epic `editor` T70):  an attribute's words, shown quietly under its value once the caret
- *   has rested in it for a second (`REST_DELAY`), the value ticked:  `spacing="x|s"` shows `none  xs  s  m  l  xl`.
+ *   has rested in it for a second (`restDelay()`), the value ticked:  `spacing="x|s"` shows `none  xs  s  m  l  xl`.
  *   - Owen:  "would be cool if there was a way to invoke the menu of options for this attribute when cursor is here
  *     ... It can't get in the way of typing.  Also, can wait 1s before showing, so it doesn't flicker too much."
  *   - Typing, moving the caret, a scroll, the editor losing the keys or its suggestion list showing hides it:
@@ -32,7 +33,8 @@ import "./ValuePopups.css"
  * - Choosing either way writes the word between the quotes as ONE undo step, the caret after the closing quote:
  *   the editor's to do (`CaretValue.write()`).
  * - Both are in the page's `<body>`, placed by the value inside the window:  so no pane clips them.
- * - Its position in the import graph:  plain DOM, and types of the parser and the language service;
+ * - Its position in the import graph:  plain DOM, the page's popup delay (`codePopups`),
+ *   and types of the parser and the language service;
  *   it knows no editor:  what it needs of one is a `ValuePopupHost`.
  *   Where a value is on its line is the language service's (`LSP.SpellTyping.quotedValueAt()`), which each host asks.
  ****************/
@@ -55,7 +57,7 @@ export class ValuePopups {
   /** Hide the strip, and wait again for the caret to rest in a value:  the caret moved, or the code changed. */
   restart(): void {
     this.hide()
-    if (this.host.valueAt("closing-quote")) this.rest = after(REST_DELAY, () => void this.show())
+    if (this.host.valueAt("closing-quote")) this.rest = after(restDelay(), () => void this.show())
   }
 
   /** Hide the strip, and stop waiting to show it. */
@@ -393,8 +395,14 @@ class PickerPopup {
 // ## Types and helpers
 ////////////////
 
-/** How long the caret rests in a value, nothing typed, before its words show, in seconds:  Owen's "can wait 1s". */
-const REST_DELAY = 1
+/**
+ * How long the caret rests in a value, nothing typed, before its words show, in seconds:  Owen's "can wait 1s".
+ * - A quarter longer than the page's popup delay (`hoverDelay()`):  a second at the standard 800 msec,
+ *   so Settings… › "Popup delay" moves it too.
+ */
+function restDelay(): number {
+  return hoverDelay() * 1.25
+}
 
 /** The most words the strip shows:  a longer list (icons ...) is the suggestion list's, Ctrl+Space. */
 const MOST_WORDS = 40

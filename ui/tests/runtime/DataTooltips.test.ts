@@ -76,6 +76,20 @@ describe("DataTooltips", () => {
     expect(bubble().getAttribute("data-position")).toBe(position)
   })
 
+  it("a target cut short by the box around it:  shows at the part that shows, not its whole text", async () => {
+    const box = Fixture.render(
+      `<div style="position: fixed; left: 100px; top: 300px; width: 80px; overflow: hidden; white-space: pre"><span data-tooltip="A playing card, face up or face down">A playing card, face up or face down</span></div>`
+    )
+    const target = box.querySelector("span")!
+    const seen = box.getBoundingClientRect()
+    expect(target.getBoundingClientRect().right).toBeGreaterThan(seen.right + 50)
+    await userEvent.hover(box)
+    await expect.poll(isShowing).toBe(true)
+    const placed = document.querySelector<HTMLElement>(".ui-tooltip-target")!.getBoundingClientRect()
+    expect(placed.left).toBeCloseTo(seen.left, 0)
+    expect(placed.right).toBeCloseTo(seen.right, 0)
+  })
+
   it("flips to stay in the window, and says so for its arrow", async () => {
     const frame = Fixture.render(
       `<button aria-label="target" style="position: fixed; left: 300px; top: 0; height: 24px" data-tooltip="Near the top">x</button>`
