@@ -50828,7 +50828,7 @@
       "name": "ui-site-nav",
       "description": {
         "kind": "markdown",
-        "value": "A site nav lists a site's pages as a tree, the page shown marked;  a click goes to a page.\n\nAlso known as:  site navigation, side navigation, sidebar menu, nav menu, site map, page tree.\n\n**Slots:**  `start`, `end`\n\n**Events:**  `ui-navigating`, `ui-opening`, `ui-closing`, `ui-starred`"
+        "value": "A site nav lists a site's pages as a tree, the page shown marked;  a click goes to a page.\n\nAlso known as:  site navigation, side navigation, sidebar menu, nav menu, site map, page tree.\n\n**Slots:**  `start`, `end`, `collapsed-start`, `collapsed-end`\n\n**Events:**  `ui-navigating`, `ui-opening`, `ui-closing`, `ui-starred`"
       },
       "attributes": [
         {
@@ -50876,7 +50876,7 @@
           "name": "collapsed",
           "description": {
             "kind": "markdown",
-            "value": "Only the icons, in one column:  each row's title its tooltip, a page with no icon its title's first letter, and a group with no icon a thin line.  None:  the titles beside the icons.\n\nTakes:  flag (present / absent)"
+            "value": "Only the icons, in one column:  each row's title its tooltip, a page with no icon its title's first letter, a group with no icon a thin line, and a heading (`groups=\"headings\"`) a gap.  The `collapsed-start` and `collapsed-end` slots show in place of `start` and `end`, when they have content.  None:  the titles beside the icons.\n\nTakes:  flag (present / absent)"
           }
         },
         {

@@ -75,6 +75,9 @@ export class DOMSiteNavElement extends E.DOMElement<UISiteNav> {
  * - `collapsed`:  only the icons, each row's title its tooltip (`:state(collapsed)`), all in one column, no step in;
  *   a page with no icon shows its title's first letter, as `<ui-menu>`'s icons-only look does,
  *   and a group with no icon is a thin line.
+ *   - `groups="headings"`:  a heading is a gap, no line (epic `old-console-redo` I41:  the console's icon rail).
+ *   - Its `collapsed-start` and `collapsed-end` slots, when they have content, show in place of `start` and `end`
+ *     (I41):  the rail's own head and foot, a logo square, buttons stacked, so the rail is as narrow as its icons.
  ****************/
 export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
   @E.proto static vocabulary = siteNavVocabulary
@@ -285,18 +288,28 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
   render(): JSX.Element {
     return (
       <>
-        <Show when={this.slots.hasContent(this.slotForName(START))}>
-          <div class={START} part={this.partForName(START)}>
-            <slot name={this.slotForName(START)} />
-          </div>
-        </Show>
+        {this.drawSlotBox(START)}
         {this.drawNav()}
-        <Show when={this.slots.hasContent(this.slotForName(END))}>
-          <div class={END} part={this.partForName(END)}>
-            <slot name={this.slotForName(END)} />
-          </div>
-        </Show>
+        {this.drawSlotBox(END)}
       </>
+    )
+  }
+
+  /**
+   * The box round slot `name`, `start` or `end`, drawn only while something's in it.
+   * - `collapsed`, its `collapsed-` slot instead while that has content (the icon rail's own head and foot).
+   */
+  private drawSlotBox(name: typeof START | typeof END): JSX.Element {
+    const shown = () => {
+      const collapsedSlot = this.slotForName(name === START ? COLLAPSED_START : COLLAPSED_END)
+      return this.collapsed && this.slots.hasContent(collapsedSlot) ? collapsedSlot : this.slotForName(name)
+    }
+    return (
+      <Show when={this.slots.hasContent(shown())}>
+        <div class={name} part={this.partForName(name)}>
+          <slot name={shown()} />
+        </div>
+      </Show>
     )
   }
 
@@ -468,6 +481,10 @@ const HEADINGS = "headings"
 /** Its slots, and the boxes round them:  above its pages, and at its foot. */
 const START = "start"
 const END = "end"
+
+/** The slots shown in their place while `collapsed`, when they have content. */
+const COLLAPSED_START = "collapsed-start"
+const COLLAPSED_END = "collapsed-end"
 
 /** A star's icons:  starred, and not. */
 const STAR = "star"

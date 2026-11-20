@@ -75,7 +75,9 @@ export const siteNavVocabulary = {
       kind: "keyOnly",
       description:
         "Only the icons, in one column:  each row's title its tooltip, a page with no icon its title's first letter, " +
-        "and a group with no icon a thin line.  None:  the titles beside the icons."
+        "a group with no icon a thin line, and a heading (`groups=\"headings\"`) a gap.  The `collapsed-start` and " +
+        "`collapsed-end` slots show in place of `start` and `end`, when they have content.  " +
+        "None:  the titles beside the icons."
     },
     {
       name: "remember",
@@ -117,7 +119,16 @@ export const siteNavVocabulary = {
   ],
   slots: [
     { name: "start", description: "Above its pages:  a logo, a picker." },
-    { name: "end", description: "At its foot, below its pages, pushed to the bottom of the box it fills:  a row of buttons." }
+    { name: "end", description: "At its foot, below its pages, pushed to the bottom of the box it fills:  a row of buttons." },
+    {
+      name: "collapsed-start",
+      description: "Shown in place of `start` while `collapsed`, when it has content:  the icon rail's head, a logo alone."
+    },
+    {
+      name: "collapsed-end",
+      description:
+        "Shown in place of `end` while `collapsed`, when it has content:  the icon rail's foot, its buttons stacked."
+    }
   ],
   parts: [
     { name: "nav", description: "The navigation landmark around the tree." },

@@ -183,15 +183,19 @@
     display: none;
   }
 
-  /* Option pieces a plain picker ignores (it shows the text only). */
-  .ui.select .item > .icon {
+  /* Option pieces a plain picker ignores (it shows the text only).
+     - the chosen one's icon too (`selectedcontent`, the customizable select):  unsized, it drew nothing
+       (epic `old-console-redo` I43) */
+  .ui.select .item > .icon,
+  .ui.select selectedcontent > .icon {
     display: inline-block;
     flex: none;
     width: 1.18em;
     height: 1em;
     fill: currentColor;
   }
-  .ui.select .item > .icon svg {
+  .ui.select .item > .icon svg,
+  .ui.select selectedcontent > .icon svg {
     display: block;
     width: 100%;
     height: 100%;

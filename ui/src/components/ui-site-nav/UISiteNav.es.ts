@@ -13,7 +13,7 @@ export const siteNavEs = {
   aka: ["navegacion lateral", "menu lateral", "mapa del sitio", "arbol de paginas"],
   attributes: { pages: "paginas", current: "actual", remember: "recordar", groups: "grupos" },
   values: { groups: { wells: "pozos", headings: "titulos" } },
-  slots: { start: "inicio", end: "fin" },
+  slots: { start: "inicio", end: "fin", "collapsed-start": "inicio-plegado", "collapsed-end": "fin-plegado" },
   parts: { nav: "navegacion", tree: "arbol", start: "inicio", end: "fin" },
   events: { "ui-starred": "ui-marcado" },
   texts: { label: "Sitio", star: "Agregar {title} a favoritos", unstar: "Quitar {title} de favoritos" }

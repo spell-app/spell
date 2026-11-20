@@ -20,7 +20,7 @@
  * - Its `start` slot above its pages, its `end` slot at its foot:  it fills the box it's in, a column, so the foot is
  *   at the box's bottom (I35).
  * - `collapsed` (`:state(collapsed)`):  each row its icon alone, reached through the rows' parts, all in one column;
- *   a page with no icon its first letter, a group with no icon a thin line.
+ *   a page with no icon its first letter, a group with no icon a thin line, a heading (`groups="headings"`) a gap.
  */
 @layer ui.components {
   :host {
@@ -201,5 +201,10 @@
     margin-block: 0.25em;
     padding: 0;
     background: linear-gradient(var(--ui-border-color), var(--ui-border-color)) center / 60% 1px no-repeat;
+  }
+  /* `groups="headings"`:  a heading a gap, no line (old-console-redo I41:  the console's icon rail, its groups apart
+     by room alone) */
+  :host(:state(collapsed):state(headings)) ui-tree-item[band="group"]::part(row) {
+    background: none;
   }
 }

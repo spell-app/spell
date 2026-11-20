@@ -44878,7 +44878,7 @@ export interface UISiteNavAttributes {
    */
   "prop:groups"?: "wells" | "headings"
   /**
-   * Only the icons, in one column:  each row's title its tooltip, a page with no icon its title's first letter, and a group with no icon a thin line.  None:  the titles beside the icons.
+   * Only the icons, in one column:  each row's title its tooltip, a page with no icon its title's first letter, a group with no icon a thin line, and a heading (`groups="headings"`) a gap.  The `collapsed-start` and `collapsed-end` slots show in place of `start` and `end`, when they have content.  None:  the titles beside the icons.
    * - takes:  flag (present / absent)
    */
   collapsed?: boolean | ""
@@ -61620,6 +61620,8 @@ declare module "@solidjs/web/types/jsx.js" {
        * - slots:
        *   - `start`:  Above its pages:  a logo, a picker.
        *   - `end`:  At its foot, below its pages, pushed to the bottom of the box it fills:  a row of buttons.
+       *   - `collapsed-start`:  Shown in place of `start` while `collapsed`, when it has content:  the icon rail's head, a logo alone.
+       *   - `collapsed-end`:  Shown in place of `end` while `collapsed`, when it has content:  the icon rail's foot, its buttons stacked.
        * - events:  `ui-navigating`, `ui-opening`, `ui-closing`, `ui-starred`
        */
       "ui-site-nav": UISiteNavJSXAttributes

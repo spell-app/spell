@@ -320,6 +320,26 @@ describe("<ui-site-nav> pages' extras", () => {
     expect(Math.round(end.getBoundingClientRect().bottom - box.getBoundingClientRect().top)).toBe(600)
   })
 
+  it("`collapsed`, its `collapsed-start` and `collapsed-end` slots show in place of `start` and `end` (old-console-redo I41)", async () => {
+    const host = await navOf(GROUPS, { appearance: "nav" })
+    host.setAttribute("groups", "headings")
+    host.insertAdjacentHTML(
+      "afterbegin",
+      '<b slot="start">Logo and name</b><b slot="collapsed-start">Logo</b><b slot="end">Buttons</b>'
+    )
+    await ShadowTree.settle(host)
+    const shown = (part: string) =>
+      host.shadowRoot!.querySelector<HTMLSlotElement>(`[part~="${part}"] slot`)!.assignedElements()[0]?.textContent
+    expect([shown("start"), shown("end")]).toEqual(["Logo and name", "Buttons"])
+    host.toggleAttribute("collapsed", true)
+    await ShadowTree.settle(host)
+    // no `collapsed-end`:  `end` stays
+    expect([shown("start"), shown("end")]).toEqual(["Logo", "Buttons"])
+    // a heading a gap, no line
+    const heading = getComputedStyle(row(host, "Design").shadowRoot!.querySelector('[part~="row"]')!)
+    expect(heading.backgroundImage).toBe("none")
+  })
+
   it("a page with no icon beside pages with one keeps an icon's room;  `collapsed` shows its first letter", async () => {
     const host = await navOf(GROUPS, { current: "#/explore", appearance: "nav" })
     await ShadowTree.settle(host)
