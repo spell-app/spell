@@ -92,4 +92,49 @@ describe("UIViewElements", () => {
       core.remote = undefined
     }
   })
+
+  test("a property the type declares itself is an attribute of its element, kept the same as its thing's", async () => {
+    // what `its "highlight" is text` compiles to, on a type built on a tree
+    class HighlightColumn extends View {
+      static uiElement = "ui-tree"
+      static {
+        this.declareProp("highlight", { type: "text" })
+      }
+      get highlight() {
+        return this.getProp("highlight") as string | undefined
+      }
+      set highlight(value) {
+        this.setProp("highlight", value)
+      }
+    }
+    core.defineElement(HighlightColumn, "Harbor")
+    await Promise.resolve()
+    await customElements.whenDefined("harbor-highlight-column")
+    const definition = customElements.get("harbor-highlight-column") as unknown as { observedAttributes: string[] }
+    expect(definition.observedAttributes).toContain("highlight")
+    // drawn with its thing, as `draw the highlight column` hands it
+    const thing = new HighlightColumn()
+    thing.highlight = "cpu"
+    const element = document.createElement("harbor-highlight-column") as HTMLElement & {
+      highlight?: string
+      thing?: unknown
+    }
+    element.thing = thing
+    document.body.append(element)
+    try {
+      await ElementFixture.settle(element)
+      expect(element.getAttribute("highlight")).toBe("cpu")
+      // the thing changes:  the element follows
+      thing.highlight = "clk"
+      core.flush()
+      await ElementFixture.settle(element)
+      expect(element.getAttribute("highlight")).toBe("clk")
+      // the page changes the element:  the thing follows
+      element.setAttribute("highlight", "rst")
+      await ElementFixture.settle(element)
+      expect(thing.highlight).toBe("rst")
+    } finally {
+      element.remove()
+    }
+  })
 })
