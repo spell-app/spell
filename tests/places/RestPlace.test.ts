@@ -1090,6 +1090,35 @@ describe("RestPlace, what a FastAPI service asks for (epic `data` P56)", () => {
     expect(asked).toEqual(["https://shapes.test/api/runs?team=infra"])
   })
 
+  test("a list asked for by a field its rows leave out:  each row holds the value it was asked for (epic `from-console` P15)", async () => {
+    const asked: string[] = []
+    // answers 400 without its `system`, and its rows never say which system they're for
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+      const address = `${input instanceof Request ? input.url : input}`
+      asked.push(address)
+      const system = new URL(address).searchParams.get("system")
+      const answer = system
+        ? Response.json([
+            { id: "stack-1", name: "top" },
+            { id: "stack-2", name: "bottom", system: "beta" }
+          ])
+        : Response.json({ detail: "Provide either `system` or `instance_id`" }, { status: 400 })
+      return Object.defineProperty(answer, "url", { value: address })
+    })
+    const place = shapedPlace({ collections: { layerStacks: { path: "/layers/stack{/id}", askedBy: ["system"] } } })
+    await expect(place.list("layerStacks", {}, {})).rejects.toBeInstanceOf(PlaceError)
+    const answer = await place.list("layerStacks", { filter: { system: "alpha" } }, {})
+    // a value the server gave stands
+    expect(answer).toMatchObject({
+      rows: [
+        { id: "stack-1", name: "top", system: "alpha" },
+        { id: "stack-2", name: "bottom", system: "beta" }
+      ],
+      handled: { filter: true }
+    })
+    expect(asked).toEqual(["https://shapes.test/layers/stack", "https://shapes.test/layers/stack?system=alpha"])
+  })
+
   test("a list under a thing, a plain list beside wrapped ones;  an action on one, its braces from where it was read", async () => {
     const asked = fakeServer((_query, url) =>
       url.pathname.endsWith("/steps") ? [{ id: 3, name: "build" }] : { ok: 1 }
