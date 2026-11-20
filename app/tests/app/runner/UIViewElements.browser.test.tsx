@@ -64,4 +64,32 @@ describe("UIViewElements", () => {
     expect([...row(element, "cpu").classList]).toContain("node")
     expect(getComputedStyle(row(element, "clk")).color).toBe("rgb(1, 2, 3)")
   })
+
+  test("on a page whose program runs elsewhere (Python's):  the same tree, its hooks answered on the page", async () => {
+    // what the Python target's page file writes (`PY.ElementsWriter`):  the same class, run on the page's core
+    class PortColumn extends NetlistColumn {}
+    const sent: string[] = []
+    core.remote = {
+      run: (_owner, method) => void sent.push(method),
+      startWhile: () => {},
+      endWhile: () => {},
+      set: () => {},
+      trigger: () => {}
+    }
+    try {
+      core.defineElement(PortColumn, "HarborPy")
+      await Promise.resolve()
+      await customElements.whenDefined("harbor-py-port-column")
+      const element = await ElementFixture.render<HTMLElement & { items?: unknown; appearance?: string }>(
+        `<harbor-py-port-column label="Netlist" style="height: 200px; width: 600px"></harbor-py-port-column>`
+      )
+      element.items = NETLIST
+      await ElementFixture.settle()
+      expect(element.appearance).toBe("columns")
+      expect([...row(element, "clk").classList]).toEqual(expect.arrayContaining(["port", "dir-in"]))
+      expect(sent).toEqual([])
+    } finally {
+      core.remote = undefined
+    }
+  })
 })

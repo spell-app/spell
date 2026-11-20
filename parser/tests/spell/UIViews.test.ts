@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 
 import { P } from "spell/parser/parser"
+import { PY } from "spell/parser/py"
 import { SP } from "spell/parser/spell"
 import { compiledSpellProject, parseSpellProject } from "spell/parser/spell/test"
 
@@ -133,6 +134,22 @@ describe("SP.UIViews", () => {
     expect(code).not.toContain("core.useElement")
     // its tag is still declared for the JSX
     expect(code).toContain('"test-project-netlist-column": HTMLAttributes<HTMLElement>')
+  })
+
+  test("Python:  its page file names the element, so the page builds its tag on it;  its hooks stay on the page", () => {
+    const contents = [
+      'a "netlist column" is a ui tree view',
+      "\tits appearance is columns",
+      "\tto give the row class of (an item)",
+      '\t\treturn "port"'
+    ].join("\n")
+    const page = compiledSpellProject([{ path: "/Harbor.spell", contents }], { writer: PY.ElementsWriter.instance }).code
+    expect(page).toContain('export class NetlistColumn extends View {\n  static uiElement = "ui-tree"')
+    // the tree asks it as it draws:  answered on the page, never sent to Python
+    expect(page).toContain('  rowClass(item) {\n    return "port"\n  }')
+    expect(page).not.toContain('sendCall("row_class"')
+    const python = compiledSpellProject([{ path: "/Harbor.spell", contents }], { writer: PY.PyWriter.instance }).code
+    expect(python).toContain('class NetlistColumn(View):\n    ui_element = "ui-tree"')
   })
 
   test("an element no pack has names no type", () => {
