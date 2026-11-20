@@ -33,8 +33,11 @@ function startsWithVowelSound(word: string): boolean {
   return VOWEL_SOUNDS.test(word) || /^[aeiou]/i.test(word)
 }
 
-/** Words which start with a vowel letter, but a consonant sound:  `a one`, `a unicorn`, `a user`, `a euro`. */
-const CONSONANT_SOUNDS = /^(?:one(?![a-z])|once|uni(?!n)|use|usu|uti|ur[il]|eu|ewe)/i
+/**
+ * Words which start with a vowel letter, but a consonant sound:  `a one`, `a unicorn`, `a user`, `a euro`,
+ * `a ui tree view` (said "you eye").
+ */
+const CONSONANT_SOUNDS = /^(?:one(?![a-z])|once|uni(?!n)|use|usu|uti|ur[il]|eu|ewe|ui(?![a-z]))/i
 
 /** Words which start with a consonant letter, but a vowel sound:  `an hour`, `an honest`, `an heir`. */
 const VOWEL_SOUNDS = /^(?:hour|honest|hono(?:u)?r|heir)/i

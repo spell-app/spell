@@ -49,5 +49,6 @@ export const treeEs = {
     lookingElsewhere: "Buscando en el árbol",
     moreMatches: "{count} más, sin listar",
     stoppedLooking: "Dejó de buscar tras {count} filas"
-  }
+  },
+  hooks: { rowClass: "dar la clase de fila de (un elemento)" }
 } as const satisfies E.TagDictionary

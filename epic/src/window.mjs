@@ -179,6 +179,7 @@
  *   - why:  a long session re-reads its whole transcript every turn;  a new one starts from the epic page
  *   - refused while the epic's agents run (`epic agents`):  closing the tab would cut them off;  `--force` anyway
  *   - the same record and end-of-turn hook as `handoff`, marked `fresh`
+ *   - ends this session's wait for a clear moment, when `/epic fresh all` marked it (`FreshAll.drop()`, T113)
  * - `open`, `launch`, `close`, `handoff` and `fresh` say first, on stderr (`sayBefore()`;  epic `epic-engine` P26):
  *   - this session's move promised earlier that now can't happen (`SessionMoves.missedMove()`), its record cleared
  *   - that the checkout is a BROKEN worktree, one git no longer knows:  its settings come from the main checkout
@@ -198,7 +199,6 @@ import { spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { homedir } from "node:os"
 import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path"
-import JSON5 from "json5"
 
 import { escapeRegExp } from "spell/util/string.ts"
 import { findUp } from "spell/util/node/findUp"
@@ -215,6 +215,7 @@ import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
 import { EpicHome } from "spell/epic/config/EpicHome.ts"
 import { SessionFolders } from "spell/epic/config/SessionFolders.ts"
+import { FreshAll } from "spell/epic/command/FreshAll.ts"
 import { SessionMoves } from "spell/epic/command/SessionMoves.ts"
 import { WorktreeGuard } from "spell/epic/command/WorktreeGuard.ts"
 
@@ -956,18 +957,17 @@ export class Window {
     }
     mkdirSync(Window.handoffs, { recursive: true, mode: 0o700 })
     writeFileSync(Window.handoffFile(sessionId), `${JSON.stringify(handoff, null, 2)}\n`, { mode: 0o600 })
+    // handing itself on:  no longer waiting for a clear moment (`/epic fresh all`, epic `epic-engine` T113)
+    FreshAll.drop(sessionId)
     return handoff
   }
 
   /**
    * The names of epic `epic`'s agents still running:  its running-agents list, `epics/<epic>/agents.json5` in the epic
-   * folder (`AgentList`'s file, read here as plain JSON5:  this script runs in plain `node`);  `[]` when there's none.
+   * folder (`AgentList`'s file, read by `FreshAll.runningAgents()`);  `[]` when there's none or it won't read.
    */
   static runningAgents(epic) {
-    const file = join(EpicConfig.contentOf(ROOT), "epics", epic, AGENTS_FILE)
-    if (!existsSync(file)) return []
-    const agents = JSON5.parse(readFileSync(file, "utf8"))
-    return Array.isArray(agents) ? agents.map((agent) => agent?.name).filter(Boolean) : []
+    return FreshAll.runningAgents(epic, ROOT)
   }
 
   /**
@@ -1460,9 +1460,6 @@ const COMMANDS = [
   "color",
   "stay"
 ]
-
-/** An epic's running-agents list, beside its page:  `AgentList`'s `LIST_FILE`. */
-const AGENTS_FILE = "agents.json5"
 
 /** Usage, printed for a bad command. */
 const USAGE = `usage:  epic window <command>

@@ -136,6 +136,24 @@ export class ComponentPacks {
     return undefined
   }
 
+  /**
+   * The component bare `noun` names in `language`, as a Spell type is built on it, from the first of `packNames` that
+   * has it (epic `from-console` P11):  `("tree", "en")` => `<ui-tree>`, its attributes and its hooks.
+   * - What `a "netlist column" is a ui tree view` reads (`SP.UIViews`).
+   * - `undefined` when no pack registered has it.
+   */
+  static viewBaseFor(
+    noun: string,
+    language: string,
+    packNames: readonly string[] = this.DEFAULT
+  ): ComponentViewBase | undefined {
+    for (const name of packNames) {
+      const base = this.packs.get(name)?.viewBaseFor?.(noun, language)
+      if (base) return base
+    }
+    return undefined
+  }
+
   /** `packNames` as an error says what it searched, e.g. `spell-ui`, or `spell-ui (not loaded)`. */
   static searched(packNames: readonly string[] = this.DEFAULT): string {
     return packNames.map((name) => (this.packs.has(name) ? name : `${name} (not loaded)`)).join(", ")
@@ -185,11 +203,50 @@ export type ComponentPack = {
    */
   attributeNameFor?(tag: string, attribute: string, language: string): string | undefined
   /**
+   * The component bare `noun` names in `language`, as a Spell type is built on it (`ComponentPacks.viewBaseFor()`):
+   * `("tree", "en")` => `{ tag: "ui-tree", attributes, hooks }`;  `undefined` for none of the pack's.
+   * - Left out:  no type can be built on the pack's components.
+   */
+  viewBaseFor?(noun: string, language: string): ComponentViewBase | undefined
+  /**
    * What its components are, as `language` writes them in a drawing (`ComponentPacks.help()`).
    * - `undefined` until it has them:  the first call may start loading them, for a later one.
    * - Left out:  the pack can't say.
    */
   help?(language: string): ComponentHelp | undefined
+}
+
+/**
+ * A pack's component as a Spell type is built on it, in one language (`ComponentPack.viewBaseFor()`, epic `from-console` P11):
+ * `a "netlist column" is a ui tree view` is built on `<ui-tree>`.
+ */
+export type ComponentViewBase = {
+  /** Its tag, the pack's own (English), e.g. `ui-tree`:  the element the type's element is built on. */
+  tag: string
+  /** Its attributes, each a property of the type, which its body may give its own value:  `its appearance is columns`. */
+  attributes: readonly ComponentViewAttribute[]
+  /** The methods a type built on it overrides, in this language's words:  `to give the row class of (an item)`. */
+  hooks: readonly ComponentViewHook[]
+}
+
+/** One attribute of a `ComponentViewBase`, as a property of the type. */
+export type ComponentViewAttribute = {
+  /** Its name as the language writes it on the tag, e.g. `apariencia`, `column-titles`. */
+  name: string
+  /** Its name in the pack's own (English) words, e.g. `appearance`, when that differs. */
+  output?: string
+  /** The words it takes, as the language writes them, e.g. `["nav", "columns"]`;  none:  any. */
+  values?: readonly string[]
+  /** Each of `values` in the pack's own words, when they differ:  `{ columnas: "columns" }`. */
+  valueOutputs?: Readonly<Record<string, string>>
+}
+
+/** One hook of a `ComponentViewBase`:  a method a type built on it overrides. */
+export type ComponentViewHook = {
+  /** The method's name, as the element has it, e.g. `rowClass`. */
+  name: string
+  /** Its words in the language, each argument in brackets:  `give the row class of (an item)`. */
+  words: string
 }
 
 /** What a pack's components are, as a drawing in one language writes them:  `ComponentPack.help()`. */

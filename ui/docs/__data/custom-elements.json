@@ -17925,6 +17925,14 @@
               "fieldName": "accept"
             },
             {
+              "name": "folder",
+              "description": "`file`:  picks whole folders instead of files;  `files` holds every file in them, each with its path in its folder (`webkitRelativePath`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "folder"
+            },
+            {
               "name": "autocomplete",
               "description": "Autofill hint, forwarded to the native input.",
               "type": {
@@ -18065,7 +18073,7 @@
             },
             {
               "name": "ui-changed",
-              "description": "Someone committed a change (blur, Enter, picking a file).",
+              "description": "Someone committed a change (blur, Enter, picking a file);  a file input's element holds them in `files`.",
               "type": {
                 "text": "CustomEvent<{ value: string, originalEvent?: Event }>"
               }

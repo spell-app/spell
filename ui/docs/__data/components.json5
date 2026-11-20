@@ -20279,6 +20279,11 @@
           "description": "`file`:  accepted file types."
         },
         {
+          "name": "folder",
+          "kind": "boolean",
+          "description": "`file`:  picks whole folders instead of files;  `files` holds every file in them, each with its path in its folder (`webkitRelativePath`)."
+        },
+        {
           "name": "autocomplete",
           "kind": "string",
           "description": "Autofill hint, forwarded to the native input."
@@ -20483,7 +20488,7 @@
         {
           "name": "ui-changed",
           "detail": "{ value: string, originalEvent?: Event }",
-          "description": "Someone committed a change (blur, Enter, picking a file)."
+          "description": "Someone committed a change (blur, Enter, picking a file);  a file input's element holds them in `files`."
         }
       ],
       "parts": [

@@ -23,11 +23,17 @@ export function parseSpellProject(
   files: SpellSourceFile[],
   {
     parentScope = SP.Language.rootScopeFor(languagesOf(files)),
-    projectPath = "/test-project"
+    projectPath = "/test-project",
+    natives = []
   }: {
     parentScope?: P.Scope
     /** The project's address, for a line that reads it:  `@spell/examples/recipe-box`.  Default:  none. */
     projectPath?: string
+    /**
+     * Its code files, `/clipboard.ts` and `/clipboard.py` with their text:  what `call native` calls
+     * (epic `from-console` P10, `SP.NativeCode`).  Default:  none.
+     */
+    natives?: SP.NativeSource[]
   } = {}
 ): ParsedSpellProject {
   const projectScope = new P.ProjectScope({
@@ -36,6 +42,7 @@ export function parseSpellProject(
     parser: parentScope.parser!.clone({ module: projectPath }),
     parentScope
   })
+  if (natives.length) SP.NativeCode.listIn(projectScope, SP.NativeCode.of(natives, projectPath.replace(/^\//, "")))
   const parsers = files.map(({ path, contents }) => parserFor(projectScope, path, contents))
 
   // every type, one-of-a-kind, method and property the files declare,
@@ -87,22 +94,33 @@ export function compiledSpellProject(
     sourceMap?: boolean
     /** A debugging build's, where each line may stop:  `P.WriterOptions.debugging`, see `P.DebugSteps`. */
     debugging?: boolean
+    /** Its code files, for `call native`:  see `parseSpellProject()`. */
+    natives?: SP.NativeSource[]
+    /** Its writer:  javascript's by default;  `PY.PyWriter.instance` for Python. */
+    writer?: P.ProgramWriter
   } = {}
 ) {
-  const { scope, files: parsed } = parseSpellProject(files, { parentScope: options.parentScope })
+  const { scope, files: parsed } = parseSpellProject(files, {
+    parentScope: options.parentScope,
+    natives: options.natives
+  })
   const parts = parsed.map(({ match, compiled }) => (match?.AST instanceof P.ASTStatementGroup ? match.AST : compiled))
   const sourceMarks = options.sourceMap
     ? new P.SourceMarks(SP.SpellProject.sourcePlaceOf, SP.SpellProject.partPlaceOf)
     : undefined
   // what it imports, as a project's compile has it:  its import lines, and its own class of an imported type
   // - none with no imports, so a built-in template's code lines (`codeLines`) count from its first class
-  const header = scope.parentScope instanceof P.ImportScope ? SP.SpellProject.importHeaderFor(scope) : ""
+  const writer = options.writer ?? P.JSWriter.instance
+  const header = scope.parentScope instanceof P.ImportScope ? SP.SpellProject.importHeaderFor(scope, writer) : ""
   // what its project file says that changes the code, e.g. its `exports` made by name (`writerOptionsFor()`)
   const writerOptions = {
     ...SP.SpellProject.writerOptionsFor(options),
     ...(options.debugging && { debugging: { placeOf: SP.SpellProject.debugPlaceOf } })
   }
-  const combine = () => SP.SpellProject.combineCompiled(parts, P.JSWriter.instance, header, scope, writerOptions)
+  // a function from its code files this target has no file for:  as a project's compile, refused
+  const refusal = SP.NativeCode.refusalFor(writer.nativeLanguage, parts)
+  if (refusal) throw new P.ParserError({ message: refusal, activity: "compiledSpellProject", params: {} })
+  const combine = () => SP.SpellProject.combineCompiled(parts, writer, header, scope, writerOptions)
   const marked = sourceMarks ? P.SourceMarks.during(sourceMarks, combine) : combine()
   const languages = [...new Set(languagesOf(files).map((language) => language.lang))]
   const split = SP.SpellDeclarations.split(marked, scope, { languages, ...options })

@@ -112,6 +112,13 @@ export type ThingOrder = "document" | "type"
 export const EDITOR_OWN = "data-editor-own"
 
 /**
+ * The attribute on a box the editor draws ROUND the app's parts, looked through:  Design's `<ui-device>` (epic `editor`
+ * P38).
+ * - Never a part itself, for the Inspector, its Views tree, or a click;  what's inside it still is.
+ */
+export const EDITOR_FRAME = "data-editor-frame"
+
+/**
  * The group the editor's own Spell is a project of (epic `editor` P22):  `@spell/editor/spell-editor`.
  * - Run in the app pane, its views show as zones, one each (`<EditorZones>`, T63), not as an app.
  */

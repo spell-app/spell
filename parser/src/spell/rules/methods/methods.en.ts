@@ -15,6 +15,7 @@ import { AfterHook } from "./AfterHook"
 import { BeforeHook } from "./BeforeHook"
 import { FailureHook } from "./FailureHook"
 import { WhileHook } from "./WhileHook"
+import { CallNative } from "./CallNative"
 import { CancelThisAction } from "./CancelThisAction"
 import { ActionModifier, ActionModifiers } from "./ActionModifier"
 import { CreateHook } from "./CreateHook"
@@ -27,6 +28,7 @@ import { QuotedTypeExpression } from "./QuotedTypeExpression"
 import { ShortcutKeys } from "./ShortcutKeys"
 import { ToDoSomething } from "./ToDoSomething"
 import { TypedMethodArg } from "./TypedMethodArg"
+import { UseNatives } from "./UseNatives"
 import { TypeMethodArg } from "./TypeMethodArg"
 import { ValuedVarMethodArg } from "./ValuedVarMethodArg"
 import { VarMethodArg } from "./VarMethodArg"
@@ -2298,6 +2300,56 @@ methods.addRule(FailureHook, {
             'core.describeAction(Job, "complete", { title: "Complete Job", undoneAs: "Complete Job" })',
             'core.addActionHook(Job, "complete", { moment: "failed", hook: "failedComplete", level: "app" })'
           ]
+        }
+      ]
+    }
+  ]
+})
+
+// a function from one of the project's code files, in an action's steps (epic `from-console` P10):
+// `call native copyText with text` -- see `SP.NativeCode`
+methods.addRule(CallNative, {
+  syntax: "call native {name:identifier} (with [{args:expression} ,])?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "refused outside an action's steps",
+          input: ["call native copyText with 1"],
+          js: '/* PARSE ERROR: "call native copyText with 1" calls a function from the project\'s code:  it goes in an action\'s steps, under "to ..." */'
+        },
+        {
+          title: "a project with no code files:  it says to list one",
+          input: ["to copy (text as text) to the clipboard", "\tcall native copyText with text"],
+          js: [
+            "export function copyTextToTheClipboard(text) {",
+            '  /* PARSE ERROR: "copyText" isn\'t in any code file:  list one in the project file first, e.g. "/clipboard.ts" */',
+            "}"
+          ],
+          ts: [
+            "export function copyTextToTheClipboard(text: string) {",
+            '  /* PARSE ERROR: "copyText" isn\'t in any code file:  list one in the project file first, e.g. "/clipboard.ts" */',
+            "}"
+          ]
+        }
+      ]
+    }
+  ]
+})
+
+// which code file a Spell file's natives come from, at its top (epic `from-console` P10, Q15):
+// `use copyText from clipboard.ts`, `use a, b from clipboard.ts`, `use all from clipboard.ts`
+methods.addRule(UseNatives, {
+  syntax: "use ((all:all)|[{names:identifier} ,]) from {file:identifier} \\. {ending:identifier}",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          title: "a project with no such code file:  it says to list it",
+          input: ["use copyText from clipboard.ts"],
+          js: "/* PARSE ERROR: \"clipboard.ts\" isn't one of the project's code files:  list it in the project file first */"
         }
       ]
     }

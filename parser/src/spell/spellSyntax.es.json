@@ -6345,7 +6345,7 @@
           "ruleNames": ["create_type"],
           "internal": false,
           "file": "src/spell/rules/classes/CreateType.ts",
-          "line": 29,
+          "line": 31,
           "purpose": "`a card is a thing` -- declares `type` as a new class extending `superType`.",
           "syntaxes": [
             {
@@ -9701,7 +9701,7 @@
           "ruleNames": ["wrapper_action"],
           "internal": false,
           "file": "src/spell/rules/places/WrapperAction.ts",
-          "line": 32,
+          "line": 35,
           "purpose": "A second `to complete a job`, for a server's action, wraps it (epic `data` P50, Q83, I104).",
           "syntaxes": [
             {
@@ -10354,7 +10354,7 @@
           "ruleNames": ["call_the_server"],
           "internal": false,
           "file": "src/spell/rules/places/WrapperAction.ts",
-          "line": 99,
+          "line": 102,
           "purpose": "In an action that wraps a server's own, run what it wraps (epic `data` P50, Q83, J266).",
           "syntaxes": [
             {
@@ -11872,6 +11872,34 @@
                   "code": "class Trabajo(Thing):\n    estado = prop(type=\"text\")\n\n    def completar(self) -> None:\n        self.estado = \"hecho\"\n\n    def failed_completar(self, error: Any) -> Any:\n        if core.error_is(error, \"not found\"):\n            return\n        elif core.error_is(error, \"offline\"):\n            return core.pass_the_error()\n        return core.pass_the_error()\n\ncore.describe_action(Trabajo, \"completar\", {\"title\": \"Completar Trabajo\", \"undone_as\": \"Completar Trabajo\"})\ncore.add_action_hook(Trabajo, \"completar\", {\"moment\": \"failed\", \"hook\": \"failed_completar\", \"level\": \"app\"})"
                 }
               }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "CallNative",
+          "ruleNames": ["call_native"],
+          "internal": false,
+          "file": "src/spell/rules/methods/CallNative.ts",
+          "line": 23,
+          "purpose": "In an action's steps, call a function from one of the project's code files (epic `from-console` P10, Q9).",
+          "syntaxes": [
+            {
+              "syntax": "llamar al código nativo {name:identifier} (con [{args:expression} ,])?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
+          "className": "UseNatives",
+          "ruleNames": ["use_natives"],
+          "internal": false,
+          "file": "src/spell/rules/methods/UseNatives.ts",
+          "line": 22,
+          "purpose": "At the top of a Spell file, say which code file the functions its `call native` lines call come from (epic `from-console` P10, Q15).",
+          "syntaxes": [
+            {
+              "syntax": "usar ((all:todo)|[{names:identifier} ,]) de {file:identifier} \\. {ending:identifier}"
             }
           ],
           "aliases": ["statement"]

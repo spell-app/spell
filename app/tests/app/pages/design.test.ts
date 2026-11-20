@@ -9,14 +9,19 @@ import { CodeEditor, EDITOR, SERVING } from "./runningEditor"
  * - It opens on the drawing the code's cursor is in (Q63 B).
  * - Picking the property editor shows the form, the card small beside it, not the card alone (T116).
  * - A drop on what it draws writes into the right file:  the card's drawing, or its property editor.
+ * - Its gallery (P38):  the card's samples side by side, made from its choices;  Save Sample writes one, Undo takes it
+ *   back;  and the sizes:  a phone, rotated, a width typed.
  * - NOTHING reaches the disk:  every save is answered here, and what it sent is what the next load reads,
  *   so the example can't change.
  * - Needs this checkout's editor running:  `spell server start all`.  Skips itself when it isn't, as in CI.
  * - Headless Playwright, never a real browser window.
  */
 
-/** Solitaire's files a test may write:  the card's and its property editor's. */
-const WRITTEN = /\/Solitaire\/(Card\.spell|Card\.editor\.spell)(\?.*)?$/
+/** Solitaire's files a test may write:  the card's, its property editor's and its samples'. */
+const WRITTEN = /\/Solitaire\/(Card\.spell|Card\.editor\.spell|Card\.samples\.spell)(\?.*)?$/
+
+/** The samples file Save Sample makes, by its path in the project. */
+const SAMPLES = "@spell/examples/Solitaire/Card.samples.spell"
 
 /** What a compile and redraw takes, at most. */
 const SETTLE_MS = 2500
@@ -69,6 +74,11 @@ describe.skipIf(!SERVING)("Design mode", { timeout: 180_000 }, () => {
 
   /** Take back the last change. */
   async function undo(): Promise<void> {
+    // off the code, which takes ⌘Z for its own typing:  a closed menu hands the focus back to it
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+    // a menu left open keeps the keys:  a click on Design's own heading closes it
+    const heading = page.locator(".DesignSizesHeading")
+    if (await heading.count()) await heading.click()
     await page.mouse.move(5, 400)
     await page.keyboard.press("ControlOrMeta+z")
     await page.waitForTimeout(SETTLE_MS)
@@ -118,6 +128,21 @@ describe.skipIf(!SERVING)("Design mode", { timeout: 180_000 }, () => {
   beforeAll(async () => {
     browser = await chromium.launch()
     const context = await browser.newContext({ viewport: { width: 1440, height: 800 } })
+    // making the samples file:  answered here, the project's index with it added, its text kept for the next load
+    await context.route(/\/api\/projects\/create\/file/, async (route) => {
+      const { contents } = JSON.parse(route.request().postData() ?? "{}") as { contents: string }
+      saved.set("Card.samples.spell", contents)
+      const index = await page.evaluate((path) => {
+        const { project } = window as unknown as { project: { contents: { manifest: Record<string, unknown> } } }
+        const copy = JSON.parse(JSON.stringify(project.contents)) as { manifest: Record<string, unknown> }
+        const like = JSON.stringify(copy.manifest["@spell/examples/Solitaire/Card.editor.spell"])
+        copy.manifest[path] = JSON.parse(
+          like.replaceAll("Card.editor.spell", "Card.samples.spell").replaceAll(".editor.spell", ".samples.spell")
+        )
+        return copy
+      }, SAMPLES)
+      return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(index) })
+    })
     await context.route(/\/api\/projects\/file\/|\.(spell)(\?.*)?$/, (route) => {
       const request = route.request()
       if (request.isNavigationRequest()) return route.continue()
@@ -196,5 +221,86 @@ describe.skipIf(!SERVING)("Design mode", { timeout: 180_000 }, () => {
     expect(now.address).toBe("/edit/@spell/examples/Solitaire/Card.spell")
     expect(now.rows).toEqual([])
     expect(now.isAppHidden).toBe(false)
+  })
+
+  ////////////////
+  // ## P38:  the gallery, and sizes
+  ////////////////
+
+  /** The gallery's samples, by name, the chosen one starred. */
+  const samples = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll(".DesignSample")].map(
+        (sample) => `${(sample as HTMLElement).dataset.sample}${sample.classList.contains("chosen") ? "*" : ""}`
+      )
+    )
+
+  test("the gallery shows the card's samples, made from its choices, each drawn", async () => {
+    await page.locator(".ModeTabs ui-item", { hasText: "Design" }).click()
+    await page.waitForTimeout(SETTLE_MS)
+    await pick("drawing:to draw its front")
+    await page.locator(".DesignShowing ui-item", { hasText: "Gallery" }).dispatchEvent("click")
+    await page.waitForTimeout(SETTLE_MS)
+    expect(await samples()).toEqual(["A new card", "direction down", "suit diamonds", "suit hearts", "suit spades"])
+    expect(await page.locator(".DesignSample solitaire-card").count()).toBe(5)
+  })
+
+  test("Save Sample writes the chosen one into Card.samples.spell;  Undo takes it back", async () => {
+    await page.locator('.DesignSample[data-sample="suit hearts"] figcaption').dispatchEvent("click")
+    await page.waitForTimeout(500)
+    await page.locator(".DesignSaveSample").dispatchEvent("click")
+    await page.waitForTimeout(800)
+    const field = page.locator("ui-modal input").first()
+    await field.fill("hearts up")
+    await field.press("Enter")
+    await page.waitForTimeout(SETTLE_MS)
+    const written = await text("Card.samples.spell")
+    expect(written).toContain("card samples is a thing\n")
+    expect(written).toMatch(/\t"hearts up" is a new card whose direction is up and suit is hearts\n/)
+    // a saved one:  the gallery shows the saved ones only
+    expect(await samples()).toEqual(["hearts up*"])
+    // its right-click menu's Delete Sample takes its line out;  Undo puts it back
+    const caption = (await page.locator('.DesignSample[data-sample="hearts up"] figcaption').boundingBox())!
+    await page.mouse.click(caption.x + caption.width / 2, caption.y + caption.height / 2, { button: "right" })
+    await page.waitForTimeout(500)
+    await page.locator("ui-popup ui-item", { hasText: "Delete Sample" }).dispatchEvent("click")
+    await page.waitForTimeout(SETTLE_MS)
+    expect(await text("Card.samples.spell")).not.toContain("hearts up")
+    await undo()
+    expect(await text("Card.samples.spell")).toContain('"hearts up"')
+    await undo()
+    expect(await text("Card.samples.spell")).not.toContain("hearts up")
+  })
+
+  test("a phone, turned on its side, then a width typed, then Fit again", async () => {
+    await page.locator('.DesignSizeMenu ui-item[data-size="phone"]').dispatchEvent("click")
+    await page.waitForTimeout(1000)
+    const device = () =>
+      page.evaluate(() => {
+        const element = document.querySelector(".DesignDevice")
+        return element && { device: element.getAttribute("device"), orientation: element.getAttribute("orientation") }
+      })
+    expect(await device()).toEqual({ device: "phone", orientation: "portrait" })
+    await page
+      .locator(".DesignDevice [part~=rotate]")
+      .first()
+      .click({ force: true })
+      .catch(async () => {
+        await page.evaluate(() =>
+          (document.querySelector(".DesignDevice")!.shadowRoot!.querySelector("[part~=rotate]") as HTMLElement).click()
+        )
+      })
+    await page.waitForTimeout(1000)
+    expect(await device()).toEqual({ device: "phone", orientation: "landscape" })
+    const width = page.locator(".DesignWidthField input").first()
+    await width.fill("500")
+    await width.press("Enter")
+    await page.waitForTimeout(1000)
+    expect(await device()).toBeNull()
+    expect(await page.evaluate(() => document.querySelector(".DesignWidth")?.getBoundingClientRect().width)).toBe(500)
+    await page.locator('.DesignSizeMenu ui-item[data-size="fit"]').dispatchEvent("click")
+    await page.waitForTimeout(1000)
+    expect(await page.evaluate(() => !!document.querySelector(".DesignWidth, .DesignDevice"))).toBe(false)
+    await page.locator(".DesignShowing ui-item", { hasText: "One" }).dispatchEvent("click")
   })
 })

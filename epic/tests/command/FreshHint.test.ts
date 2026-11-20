@@ -90,7 +90,7 @@ test("break points:  a phase done, a merge, an agent back;  nothing else", () =>
   expect(FreshHint.breakOf("epic update", ["seo#T3", "done"])).toBe(false)
 })
 
-test("again at a break point, past the threshold, at most once per half hour;  never at any other verb", () => {
+test("again at a break point, past the threshold, at most once per quarter hour;  never at any other verb", () => {
   const home = join(scratch, "claude")
   const saved = process.env.CLAUDE_CONFIG_DIR
   process.env.CLAUDE_CONFIG_DIR = home
@@ -108,6 +108,9 @@ test("again at a break point, past the threshold, at most once per half hour;  n
     expect(line).toMatch(/conversation is 2 MB.*hands seo to a new session.*an agent passes it on/)
     // and not again ten minutes later, nor at a verb that ends nothing
     expect(hint.atBreak("epic agents done", ["docs"], { env, cwd: repo, now: now + 4_200_000 })).toBeNull()
+    // a quarter of an hour on, said again (it was half an hour before epic-engine T113)
+    expect(hint.atBreak("epic merge", ["seo"], { env, cwd: repo, now: now + 4_440_000 })).toBeNull()
+    expect(hint.atBreak("epic merge", ["seo"], { env, cwd: repo, now: now + 4_560_000 })).not.toBeNull()
     expect(hint.atBreak("epic summary", ["seo"], { env, cwd: repo, now: now + 9_000_000 })).toBeNull()
     // no session:  nothing
     expect(hint.atBreak("epic merge", ["seo"], { env: {}, cwd: repo, now: now + 9_000_000 })).toBeNull()

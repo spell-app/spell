@@ -38,9 +38,15 @@ function transferOf(files: File[]) {
   return transfer
 }
 
+/** The native input inside its hidden `<ui-input type="file">`, which the file dialog fills. */
+function nativePicker(uploader: Element) {
+  const fileInput = uploader.shadowRoot!.querySelector('ui-input[type="file"]')!
+  return fileInput.shadowRoot!.querySelector<HTMLInputElement>('input[type="file"]')!
+}
+
 /** Pick `files` in its file dialog, as a person would. */
 function pick(uploader: Element, files: File[]) {
-  const input = uploader.shadowRoot!.querySelector<HTMLInputElement>('input[type="file"]')!
+  const input = nativePicker(uploader)
   input.files = transferOf(files).files
   input.dispatchEvent(new Event("change", { bubbles: true }))
 }
@@ -132,8 +138,11 @@ describe("<ui-uploader>", () => {
   test.each(APPEARANCES)("%s:  a pick and a drop each take files", async (appearance) => {
     const uploader = await uploaderWith(`appearance="${appearance}" multiple`)
     expect(uploader.matches(`:state(${appearance})`)).toBe(true)
+    const leaked = heard(document.body, ["ui-changed"])
     pick(uploader, [fileOf("a.json")])
     await vi.waitFor(() => expect(uploader.files.map((file) => file.name)).toEqual(["a.json"]))
+    // its file input's own event stays inside it
+    expect(leaked).toEqual([])
     drop(uploader, [fileOf("b.json")])
     await vi.waitFor(() => expect(uploader.files.map((file) => file.name)).toEqual(["a.json", "b.json"]))
     await ShadowTree.settle(uploader)
@@ -254,8 +263,11 @@ describe("<ui-uploader>", () => {
     const uploader = await uploaderWith('destination="/upload"')
     uploader.action = action
     uploader.addEventListener("ui-uploading", (event) => event.preventDefault())
+    const leaked = heard(document.body, ["ui-changed"])
     pick(uploader, [fileOf("a.json")])
-    expect(await rows(uploader, 1)).toEqual([{ name: "a.json", status: "Ready" }])
+    await vi.waitFor(() => expect(uploader.files.map((file) => file.name)).toEqual(["a.json"]))
+    // its file input's own event stays inside it
+    expect(leaked).toEqual([])
     expect(action).not.toHaveBeenCalled()
   })
 
@@ -304,6 +316,41 @@ describe("<ui-uploader>", () => {
     expect(failed.status).toBe(500)
     expect(events.some((event) => event.type === "ui-upload-progress")).toBe(true)
     expect(uploader.shadowRoot!.querySelector('[part~="remove"]')!.getAttribute("aria-label")).toBe("Remove")
+  })
+
+  test.each(APPEARANCES)("%s:  its button opens the file dialog, through a hidden ui-input", async (appearance) => {
+    const uploader = await uploaderWith(`appearance="${appearance}" extensions="json, csv" multiple`)
+    const fileInput = uploader.shadowRoot!.querySelector<HTMLElement>('ui-input[type="file"]')!
+    expect(fileInput.hidden).toBe(true)
+    expect(uploader.shadowRoot!.querySelector(':not(ui-input) > input[type="file"]')).toBeNull()
+    const native = nativePicker(uploader)
+    expect(native.accept).toBe(".json,.csv")
+    expect(native.multiple).toBe(true)
+    const opened: HTMLInputElement[] = []
+    const showPicker = vi.spyOn(HTMLInputElement.prototype, "showPicker").mockImplementation(function (
+      this: HTMLInputElement
+    ) {
+      opened.push(this)
+    })
+    const button = uploader.shadowRoot!.querySelector<HTMLElement>(".choose")!
+    button.click()
+    expect(opened).toEqual([native])
+    showPicker.mockRestore()
+    const leaked = heard(document.body, ["ui-changed"])
+    pick(uploader, [fileOf("a.json")])
+    await vi.waitFor(() => expect(uploader.files.map((file) => file.name)).toEqual(["a.json"]))
+    // its file input's own event stays inside it
+    expect(leaked).toEqual([])
+    // emptied, so the same file can be picked again
+    await vi.waitFor(() => expect(native.value).toBe(""))
+  })
+
+  test.each(APPEARANCES)("%s:  a folder uploader's dialog picks folders", async (appearance) => {
+    const uploader = await uploaderWith(`appearance="${appearance}" folder extensions="json"`)
+    const native = nativePicker(uploader)
+    expect(native.webkitdirectory).toBe(true)
+    expect(native.multiple).toBe(true)
+    expect(native.accept).toBe("")
   })
 
   test.each(APPEARANCES)("%s:  a folder uploader takes folders, and turns a plain file away", async (appearance) => {
@@ -390,10 +437,10 @@ describe("<ui-uploader>", () => {
     )
     const message = uploader.querySelector('[slot="message"]')!
     expect(message.assignedSlot).not.toBeNull()
-    const click = vi.spyOn(HTMLInputElement.prototype, "click").mockImplementation(() => {})
+    const showPicker = vi.spyOn(HTMLInputElement.prototype, "showPicker").mockImplementation(() => {})
     uploader.querySelector<HTMLButtonElement>("#mine")!.click()
-    expect(click).toHaveBeenCalledOnce()
-    click.mockRestore()
+    expect(showPicker).toHaveBeenCalledOnce()
+    showPicker.mockRestore()
     drop(uploader, [fileOf("a.json"), fileOf("b.json"), fileOf("c.json")], { dropIt: false })
     await ShadowTree.settle(uploader)
     expect(uploader.shadowRoot!.textContent).toContain("Let go for 3")

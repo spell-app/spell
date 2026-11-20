@@ -100,9 +100,10 @@ function holdsPageHead(text: string): boolean {
  * - `Card.spell`, `Carta.es.spell`
  * - NOT a project's built output, `Solitaire.spell.js`.
  * - NOT a property editors file, `Card.editor.spell` (`isPropertyEditorsName()`):  it's never compiled.
+ * - NOT a samples file, `Card.samples.spell` (`isSamplesName()`):  nor is it.
  */
 export function isSpellSourceName(name: string | undefined): boolean {
-  return !!name && name.endsWith(SPELL_SUFFIX) && !isPropertyEditorsName(name)
+  return !!name && name.endsWith(SPELL_SUFFIX) && !isPropertyEditorsName(name) && !isSamplesName(name)
 }
 
 /** The end of a property editors file's name:  `.editor.spell`, `.editors.spell`, `.editor.es.spell`, and the old endings. */
@@ -121,6 +122,21 @@ const PROPERTY_EDITORS_NAME = /\.editors?(?:\.[a-z]{2}(?:-[A-Za-z]{2,4})?)?\.spe
  */
 export function isPropertyEditorsName(name: string | undefined): boolean {
   return !!name && PROPERTY_EDITORS_NAME.test(name)
+}
+
+/** The end of a samples file's name:  `.samples.spell`, `.samples.es.spell`. */
+const SAMPLES_NAME = /\.samples(?:\.[a-z]{2}(?:-[A-Za-z]{2,4})?)?\.spell$/
+
+/**
+ * Is `name` (a file's name or path) a SAMPLES file's (epic `editor` P38, Q61 A)?
+ * - `Card.samples.spell`, beside the view it's for, as its property editor is (`Card.editor.spell`)
+ * - It holds the view's samples, each a name and the Spell that makes one, which the editor's Design gallery draws:
+ *   `"queen of spades" is a new card whose rank is queen, suit is spades and direction is down`
+ * - One of a project's own files, which the editor opens and Design reads;
+ *   NEVER compiled, so it's no spell SOURCE file (`isSpellSourceName()`).
+ */
+export function isSamplesName(name: string | undefined): boolean {
+  return !!name && SAMPLES_NAME.test(name)
 }
 
 /**
@@ -226,6 +242,14 @@ export function namesSuffixFor(lang: string): string {
  */
 export const SPELL_PROJECT_MODULE = "@spell/project/"
 
+/**
+ * Start of the ES module specifier for one of a project's code files, e.g. `@spell/native/owen@spell/clipboard/clipboard.ts`
+ * (epic `from-console` P10):  what `call native` imports its function from.
+ * - A runner points it at the file, as it points `SPELL_PROJECT_MODULE` at a project's compiled code.
+ * - See `SP.NativeCode.moduleIn()`.
+ */
+export const SPELL_NATIVE_MODULE = "@spell/native/"
+
 /** JSON5 shape of a project's index file, as read/written by the server. */
 export type ProjectManifestJSON5 = {
   /** All manifest-eligible files in project, keyed by `path`. */
@@ -302,6 +326,11 @@ export type ProjectManifestImport = {
   version?: string
   /** Another project:  `true` to parse its `.spell` files ahead of ours, rather than its compiled declarations. */
   source?: boolean
+  /**
+   * A code file (`/clipboard.ts`) only a browser can run:  `"browser"` -- Python refuses its functions while compiling
+   * (epic `from-console` P10, `SP.NativeCode`).
+   */
+  only?: "browser"
 }
 
 /** Another project a project imports -- see `SpellProject.projectImports`. */

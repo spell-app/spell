@@ -784,6 +784,8 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
             name: `Parsing imports`,
             run: async () => {
               try {
+                // our code files first:  a `call native` line looks its name up in them as it parses
+                await this.loadNativeCode()
                 if (!this.incremental) this.parseImports()
                 this.parsePagesInPlay()
                 for (const file of this.activeImports) {
@@ -858,6 +860,15 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
                       message: `'${this.projectName}' keeps things in a ${refusedKind}, which target '${target.name}' can't:  not in ${target.name === "py" ? "Python" : target.name} yet.`,
                       activity: "SpellProject.compile",
                       params: { target: target.name, kind: refusedKind }
+                    })
+                  }
+                  // a function from our code files, `call native copyText`, that this target has no file for
+                  const nativeRefusal = SP.NativeCode.refusalFor(target.writer.nativeLanguage, parts)
+                  if (nativeRefusal) {
+                    throw new P.ParserError({
+                      message: `'${this.projectName}', for target '${target.name}':  ${nativeRefusal}`,
+                      activity: "SpellProject.compile",
+                      params: { target: target.name }
                     })
                   }
                   const header = this.importHeader(target.writer)
@@ -1161,6 +1172,12 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     // an imported type we subclass is imported by another name, its class's:  `Card as CardsCard`
     if (header && subclassed.names.length) {
       header = projectWriter.importsHeader(SpellProject.importsOf(scope, subclassed.names))
+    }
+    // what `call native` calls, from our code files:  `import { copyText } from "@spell/native/.../clipboard.ts"`
+    const natives = SP.NativeCode.importsIn(hoisted, projectWriter.nativeLanguage)
+    if (natives.length) {
+      const imports = header ? SpellProject.importsOf(scope, subclassed.names) : []
+      header = projectWriter.importsHeader([...imports, ...natives])
     }
     // every file sets itself up before any file's steps run, so a file's order doesn't change what runs
     const { setUp, runs } = SP.runningCodeLast(hoisted)
@@ -1587,6 +1604,39 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   }
 
   /**
+   * Our CODE FILES, from our project file:  TypeScript, javascript and Python whose functions our Spell may call,
+   * `call native copyText` (epic `from-console` P10) -- see `SP.NativeCode`.
+   * - e.g. `{ path: "/clipboard.ts", active: true }`, `{ path: "/clipboard.py", only: "browser" }`
+   * - Active or not:  a code file is never compiled, only called.
+   */
+  get codeFiles(): Array<{ file: SP.AnySpellFile; only?: "browser" }> {
+    const found: Array<{ file: SP.AnySpellFile; only?: "browser" }> = []
+    for (const { path, only } of this.contents?.imports ?? []) {
+      if (SP.SpellLocation.isAddress(path) || !SP.NativeCode.languageOf(path)) continue
+      const file = this.manifest[SP.SpellLocation.getFileLocation(this.projectId, path).path]?.file
+      if (file) found.push({ file, ...(only && { only }) })
+    }
+    return found
+  }
+
+  /**
+   * SIDE EFFECT:  loads our code files (`codeFiles`), and lists what each exports in our scope, for `call native`.
+   * - Again each parse:  an edit to `clipboard.ts` is seen at once.
+   * - A file that can't be loaded is left out, so a call of it says it's not found.
+   */
+  async loadNativeCode(): Promise<void> {
+    if (!this.scope) return
+    const sources: SP.NativeSource[] = []
+    for (const { file, only } of this.codeFiles) {
+      await file.load(undefined).catch((error) => console.error(error))
+      const contents = (file as { contents?: string }).contents
+      const path = file.location.filePath ?? ""
+      if (typeof contents === "string") sources.push({ path, contents, ...(only && { only }) })
+    }
+    SP.NativeCode.listIn(this.scope, SP.NativeCode.of(sources, this.projectId))
+  }
+
+  /**
    * Spell files we parse:  our active `.spell` imports, in order -- see `activeImports`.
    * - After any `source` project imports' files, which parse first -- see `sourceImportFiles`.
    */
@@ -1754,6 +1804,11 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
       ".css": SP.SpellCSSFile,
       ".js": SP.SpellJSFile,
       ".jsx": SP.SpellJSFile,
+      // a code file our Spell calls (`call native`):  text we read, never compiled -- see `SP.NativeCode`
+      ".ts": SP.SpellJSFile,
+      ".mts": SP.SpellJSFile,
+      ".mjs": SP.SpellJSFile,
+      ".py": SP.SpellJSFile,
       // a property editor page:  any text file, never compiled
       [SP.EDITOR_PAGE_SUFFIX]: SP.SpellJSFile
     }
@@ -1764,6 +1819,8 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     const name = location.file ?? ""
     // a property editors file, `Card.editor.spell` (epic `editor` P25):  text the Inspector reads, never compiled
     if (SP.isPropertyEditorsName(name)) return new SP.SpellJSFile(fullPath)
+    // a samples file, `Card.samples.spell` (epic `editor` P38):  text Design reads, never compiled
+    if (SP.isSamplesName(name)) return new SP.SpellJSFile(fullPath)
     const suffix = Object.keys(SpellProject.extensionMap).find((suffix) => name.endsWith(suffix))
     const Constructor = suffix ? SpellProject.extensionMap[suffix] : SP.SpellFile
     return new Constructor(fullPath)

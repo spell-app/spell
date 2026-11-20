@@ -198,6 +198,12 @@ export type ComponentRegistry = {
    *   `UIComponent.registry.definitions.get(child.localName)?.vocabulary.noun`.
    */
   readonly definitions: Map<string, E.ElementDefinition>
+  /**
+   * The component class of every defined tag, by tag:  `UITree` for `ui-tree`.
+   * - What a class built on a tag's component starts from, knowing only its tag:
+   *   a Spell type built on a Spell UI element (the app's `SpellElement`, epic `from-console` P11).
+   */
+  readonly components: Map<string, UIComponentClass>
   /** The vocabularies already handed to the runtime (`UIComponent.register()`), so each is handed over once. */
   readonly vocabularies: WeakSet<E.ComponentVocabulary>
 }

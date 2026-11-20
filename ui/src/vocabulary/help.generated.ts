@@ -927,6 +927,8 @@ export const HELP_TABLE: Readonly<
       maxlength: "Constraint: most characters.",
       multiple: "`email` / `file`: accepts several values.",
       accept: "`file`: accepted file types.",
+      folder:
+        "`file`: picks whole folders instead of files; `files` holds every file in them, each with its path in its folder (`webkitRelativePath`).",
       autocomplete: "Autofill hint, forwarded to the native input.",
       inputmode: "Virtual keyboard hint, forwarded to the native input.",
       rules:

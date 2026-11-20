@@ -134,6 +134,15 @@ const SEND_POLL_MS = 30_000
 /** An epic page's or a saga page's path:  its comments live in the epic's review inbox. */
 const EPIC_PAGE = /\.(plan|saga)\.html$/
 
+/** The kind of block a note box's comment is on (`<epic-text-box>` on a docs page, epic `epic-engine` T101). */
+const NOTE_KIND = "note"
+
+/** The `localStorage` key prefix of a note box's words not saved yet:  `<prefix><page path>#<anchor>`. */
+const NOTE_DRAFT_KEY_PREFIX = "spell-note-box:"
+
+/** The comments route refusing to change a comment Claude has (`CommentList`'s 409):  a note box starts a new one. */
+const CLAUDE_HAS_IT = /Claude has it/
+
 /**
  * The blocks with a title row and an `actions` slot in it (epic `epic-workflow` P25).
  * - their bullhorn goes in that slot, never over their own buttons:
@@ -264,6 +273,7 @@ export async function wireComments(main, { go, pageFolds, signal } = {}) {
   const flush = () => {
     comments.open?.flush?.()
     for (const each of comments.fields()) each.flush?.()
+    for (const note of comments.noteBoxes.values()) void note.drafts.save({ keepalive: true })
   }
   addEventListener("pagehide", flush, listening)
   // the page's layout changing (a width, an item folding) can bring a corner bullhorn over a thread's header
@@ -380,6 +390,14 @@ class PageComments {
     this.seenTimers = new Map()
     /** a docs page's Send, as the server last answered (`keepSend()`);  `null` on an epic page */
     this.send = null
+    /**
+     * each NOTE BOX on a docs page, by its `<epic-text-box>` (`drawNoteBoxes()`, epic `epic-engine` T101):
+     * `{ place, id?, saved, drafts }`
+     * - `place`:  its section's, as a comment on it is saved, of kind `note`
+     * - `id`:  the comment it's writing, while Claude hasn't answered it;  `saved`:  that comment's words
+     * - `drafts`:  its `DraftSaver`
+     */
+    this.noteBoxes = new Map()
   }
 
   /**
@@ -562,6 +580,8 @@ class PageComments {
 
   /** Send, clicked:  every comment waiting so far goes to the page's epic;  a toast says so.  NEVER throws. */
   async sendNow() {
+    // what's typed in a note box and not saved yet goes with this Send (T101)
+    await this.saveNoteBoxes()
     const send = this.send
     if (!send) return
     if (!send.unsent.length) return noteToast("Nothing new to send:  every comment here went with an earlier Send.")
@@ -599,6 +619,7 @@ class PageComments {
    */
   draw() {
     const { main } = this
+    const inBoxes = this.drawNoteBoxes()
     const field = this.fields().find((each) => document.activeElement === each.field)?.field
     const [start, end] = field ? [field.selectionStart, field.selectionEnd] : [0, 0]
     const onFold = [...this.threads.values()].find((each) => each.isFoldFocused)
@@ -622,7 +643,8 @@ class PageComments {
       if (!at) continue
       const quoted = block && comment.quote && quoteIn(block, comment.quote, comment.offset)
       if (quoted) quotes.push({ ...quoted, id: comment.id, waiting: comment.turn === "agent" })
-      if (this.open?.id === comment.id) continue
+      // being written in the pane, or in a note box:  shown there, not as a thread
+      if (this.open?.id === comment.id || inBoxes.has(comment.id)) continue
       const under = quoted ? holderOf(block, quoted) : at
       if (!groups.has(under)) groups.set(under, [])
       groups.get(under).push({ comment, exact: exact && Boolean(block) })
@@ -663,6 +685,162 @@ class PageComments {
   /** Every box in an open thread as tall as its words (`growField()`):  a folded thread's has no height to measure. */
   growFields() {
     for (const replying of this.fields()) if (replying.field.getClientRects().length) growField(replying.field)
+  }
+
+  ////////////////
+  // ## Note boxes
+  ////////////////
+
+  /**
+   * A docs page's NOTE BOXES (epic `epic-engine` T101):  each `<epic-text-box>` written in a guide's section is a
+   * comment on that section, so the page's Send hands its words to the page's epic, with the bullhorns' comments.
+   * - the same comments, inbox and Send as the bullhorns':  never a second way in
+   * - its section:  the one its `for` names, else the one around it;  none:  the page
+   * - what's typed is saved as Owen types (`add`, `edit`;  emptied:  `delete`), of kind `note`, a moment after he
+   *   stops, and as the page goes;  the words not saved yet are kept in this browser
+   * - the box shows its comment while Claude hasn't answered it, sent or not (more words make it unsent again), so
+   *   its thread isn't drawn meanwhile;  once Claude answers, the box empties, and the thread shows under the
+   *   section, as any comment's
+   * - only on a docs page with the comments' own Send:  a details page's boxes are its answer's (`AnswerForm`,
+   *   `send.byPage`), and an epic page's Send is `<epic-page>`'s
+   * - only `type="comment"` boxes (the default):  the others belong to the element that draws them
+   * - returns the ids of the comments the boxes show
+   */
+  drawNoteBoxes() {
+    const showing = new Set()
+    if (!this.send || this.send.byPage || !this.main.querySelector("epic-text-box")) return showing
+    // its `value` is the element's own, once the epics pack defines it:  set before, it would hide that for good
+    if (!customElements.get("epic-text-box")) {
+      this.boxesDefined ??= customElements.whenDefined("epic-text-box").then(() => this.draw())
+      return showing
+    }
+    for (const [box, note] of this.noteBoxes)
+      if (!box.isConnected) {
+        note.drafts.stop()
+        this.noteBoxes.delete(box)
+      }
+    for (const box of this.main.querySelectorAll("epic-text-box")) {
+      if ((box.getAttribute("type") ?? "comment") !== "comment") continue
+      const note = this.noteBoxes.get(box) ?? this.wireNoteBox(box)
+      if (!note) continue
+      this.followNoteBox(box, note)
+      if (note.id) showing.add(note.id)
+    }
+    return showing
+  }
+
+  /** Save what's typed in every note box now;  resolves once each is saved, or failed.  NEVER throws. */
+  async saveNoteBoxes() {
+    await Promise.all([...this.noteBoxes.values()].map((note) => note.drafts.save()))
+  }
+
+  /**
+   * Is `comment` a note box's at `place`, Claude not having answered it:  Owen's own (his Send's `waiting`), on that
+   * section, nothing said on it yet?
+   */
+  isNoteFor(comment, place) {
+    return (
+      comment.kind === NOTE_KIND &&
+      comment.anchor === place.anchor &&
+      comment.status === "new" &&
+      !comment.replies?.length &&
+      !comment.done &&
+      !!this.send?.waiting.includes(comment.id)
+    )
+  }
+
+  /** A note box's comment at `place` no other box shows, if any. */
+  freeNoteFor(place) {
+    const taken = new Set([...this.noteBoxes.values()].map((each) => each.id))
+    return this.list.find((each) => this.isNoteFor(each, place) && !taken.has(each.id))
+  }
+
+  /**
+   * Start keeping `box`'s words as a comment (`drawNoteBoxes()`):  its place, its comment (one already there, sent or
+   * not), its draft;  `undefined` for a box outside `main`.
+   */
+  wireNoteBox(box) {
+    const named = box.getAttribute("for")
+    const section =
+      (named && this.main.ownerDocument.getElementById(named)) ||
+      box.closest("ui-section[id], section[id]") ||
+      pageHeadIn(this.main)
+    if (!section || !this.main.contains(section)) return undefined
+    const place = { ...this.placeOf(section), kind: NOTE_KIND }
+    const comment = this.freeNoteFor(place)
+    const note = { place, id: comment?.id, saved: comment?.text ?? "", drafts: null }
+    note.drafts = new DraftSaver({
+      wait: COMMENT_SAVE_MS,
+      key: `${NOTE_DRAFT_KEY_PREFIX}${location.pathname}#${place.anchor}`,
+      save: (options) => this.saveNoteBox(box, note, options)
+    })
+    this.noteBoxes.set(box, note)
+    const kept = note.drafts.kept()
+    box.value = typeof kept === "string" ? kept : note.saved
+    if (box.value.trim() !== note.saved) note.drafts.changed()
+    // the native field's `input` comes out of both shadow roots (`<epic-text-box>`)
+    box.addEventListener("input", () => {
+      note.drafts.keep(box.value)
+      note.drafts.changed()
+    })
+    box.addEventListener("focusout", () => void note.drafts.save())
+    return note
+  }
+
+  /**
+   * Keep `box` on its comment as the server answers:  one Claude answered (or cleared, or took) lets go, the box
+   * emptied unless Owen is typing in it;  an empty box takes up one written in another window.
+   */
+  followNoteBox(box, note) {
+    const typing = note.drafts.isUnsaved || note.drafts.isPending
+    if (note.id) {
+      const comment = this.list.find((each) => each.id === note.id)
+      if (comment && this.isNoteFor(comment, note.place)) {
+        if (!typing && comment.text !== note.saved) box.value = note.saved = comment.text
+        return
+      }
+      note.id = undefined
+      note.saved = ""
+      if (typing) return
+      box.value = ""
+      note.drafts.drop()
+      return
+    }
+    if (typing || box.value.trim()) return
+    const comment = this.freeNoteFor(note.place)
+    if (!comment) return
+    note.id = comment.id
+    box.value = note.saved = comment.text
+  }
+
+  /**
+   * Save `box`'s words as its comment:  a new one, its words changed, or (emptied) gone;  the page drawn again, its
+   * Send counting it.  Throws why not:  its `DraftSaver` keeps the words, and tries again.
+   */
+  async saveNoteBox(box, note, { keepalive }) {
+    const words = box.value.trim()
+    // Claude answered it meanwhile:  these words are a new comment
+    const current = note.id && this.list.find((each) => each.id === note.id)
+    if (note.id && !(current && this.isNoteFor(current, note.place))) {
+      note.id = undefined
+      note.saved = ""
+    }
+    if (words === note.saved) return note.drafts.drop()
+    const change = !words
+      ? { action: "delete", id: note.id }
+      : note.id
+        ? { action: "edit", id: note.id, text: words }
+        : { action: "add", ...note.place, text: words }
+    const answer = await this.post(change, { keepalive }).catch((error) => {
+      // Claude had it already, and the page hadn't heard yet:  these words are a new comment;  emptied, nothing to do
+      if (change.action === "add" || !CLAUDE_HAS_IT.test(error?.message ?? "")) throw error
+      note.id = undefined
+      return words ? this.post({ action: "add", ...note.place, text: words }, { keepalive }) : {}
+    })
+    note.id = words ? (note.id ?? answer.id) : undefined
+    note.saved = words
+    if (box.value.trim() === words) note.drafts.drop()
+    this.draw()
   }
 
   ////////////////
@@ -936,6 +1114,7 @@ class PageComments {
     this.floating = null
     this.pane?.remove()
     this.pane = null
+    for (const note of this.noteBoxes.values()) note.drafts.stop()
     this.open = null
     document.documentElement.classList.remove("spell-over-quote")
   }

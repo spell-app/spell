@@ -17,6 +17,8 @@ import { TypeDeclaration } from "./TypeDeclaration"
  * - Compiles to an exported class declaration, e.g. `a card is a thing` => `export class Card extends Thing {}`.
  *   - A view defines its element in it -- see `TypeDeclaration.elementMember()`.
  *   - Another project reaches it by `import`ing it -- no globals.
+ * - Built on a Spell UI element, `a "netlist column" is a ui tree view` (epic `from-console` P11):
+ *   it extends `View`, naming its element, `static uiElement = "ui-tree"`;  see `SP.UIViews`.
  * - Its own values for properties its super-type has, on its line (epic `language` P55):
  *   `a "column" is a pile with layout "vertical"` (or `layout = vertical`), several joined by commas, as on a new thing.
  *   - The same as its body's line, `its "layout" is vertical`:  `get layout() { return "vertical" }`.
@@ -28,7 +30,7 @@ import { TypeDeclaration } from "./TypeDeclaration"
  */
 export class CreateType extends TypeDeclaration<
   "type|aka?|superType|defaults?|with_nested_statements?|body?",
-  { elementProject?: string; elementName?: string; defaults?: TypeDefault[] }
+  { elementProject?: string; elementName?: string; defaults?: TypeDefault[]; uiElement?: string }
 > {
   @proto static declares: P.DeclaresSpec = { kind: "type", name: "type", detail: "superType" }
 
@@ -45,6 +47,8 @@ export class CreateType extends TypeDeclaration<
     if (scopeType instanceof P.TypeScope && isViewType(scopeType)) {
       match.data.elementProject = TypeDeclaration.projectNameOf(scope)
       if (scopeType.name === P.classCase(APP_TYPE)) match.data.elementName = APP_ELEMENT_NAME
+      // built on a Spell UI element, `a "netlist column" is a ui tree view`:  its element is that one
+      if (SP.UIViews.isUIView(scopeType)) match.data.uiElement = SP.UIViews.baseOf(scopeType)?.tag
     }
     const refused = CreateType.checkDefaults(match, scopeType)
     return refused ?? this.refuseTakenNames(match)
@@ -126,17 +130,38 @@ export class CreateType extends TypeDeclaration<
   }
   getAST(match: P.MatchFor<this>): P.ASTStatementGroup {
     const { type, superType } = match.groups
+    const { uiElement } = match.data
     const typeAST = P.matchAST<P.ASTTypeExpression>(type)
     const element = this.elementMember(match, typeAST, match.data.elementProject, match.data.elementName)
-    const members = [...(element ? [element] : []), ...CreateType.defaultGetters(match, typeAST)]
+    const members = [
+      ...(uiElement ? [CreateType.uiElementMember(match, typeAST, uiElement)] : []),
+      ...(element ? [element] : []),
+      ...CreateType.defaultGetters(match, typeAST)
+    ]
+    // a Spell UI element's view is a view, naming its element:  `extends View`, `static uiElement = "ui-tree"`
+    const superTypeAST = uiElement
+      ? new P.ASTTypeExpression(superType, { raw: `${superType.raw}`, name: P.BUILT_IN_CLASS_NAMES.view! })
+      : P.matchAST<P.ASTTypeExpression>(superType)
     return new P.ASTStatementGroup(match, {
       statements: [
         new P.ASTClassDeclaration(match, {
           type: typeAST,
-          superType: P.matchAST<P.ASTTypeExpression>(superType),
+          superType: superTypeAST,
           members: members.length ? members : undefined
         })
       ]
+    })
+  }
+
+  /**
+   * `static uiElement = "ui-tree"`:  the Spell UI element a type built on one draws as (epic `from-console` P11).
+   * - The core reads it, `core.uiElementOf()`, and the page builds the type's tag on that element.
+   */
+  private static uiElementMember(match: P.Match, type: P.ASTTypeExpression, tag: string): P.ASTClassMember {
+    return new P.ASTStaticDefinition(match, {
+      type,
+      name: "uiElement",
+      value: new P.ASTStringLiteral(match, JSON.stringify(tag))
     })
   }
 

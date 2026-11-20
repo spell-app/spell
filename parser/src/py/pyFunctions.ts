@@ -1,0 +1,29 @@
+/**
+ * The functions a Python code file defines, read from its text:  each top-level `def` and `async def`
+ * (epic `from-console` P10).
+ * - So Spell can call one, `call native copyText with text`:  `SP.NativeCode` looks it up here by Python's name,
+ *   `copy_text`.
+ * - Plain TypeScript:  no Python tooling, so it reads in a browser too.
+ * - Only lines starting a top-level definition count, at the start of a line:
+ *   a method (indented), a nested function, a `def` inside a string or a comment don't.
+ * - A name starting `_` is private, as Python's own `from x import *` treats it:  left out.
+ * - NEVER throws.
+ */
+export function pyFunctionsOf(text: string): PyFunction[] {
+  const functions: PyFunction[] = []
+  for (const [, isAsync, name] of text.matchAll(TOP_LEVEL_DEF)) {
+    if (!name!.startsWith("_")) functions.push({ name: name!, waits: !!isAsync })
+  }
+  return functions
+}
+
+/** A top-level `def name(` or `async def name(`, at the start of a line. */
+const TOP_LEVEL_DEF = /^(async\s+)?def\s+([A-Za-z_]\w*)\s*\(/gm
+
+/** One function a Python code file defines -- see `pyFunctionsOf()`. */
+export type PyFunction = {
+  /** Its name, as Python says it:  `copy_text`. */
+  name: string
+  /** Is it `async def`?  Then every call of it is awaited. */
+  waits: boolean
+}

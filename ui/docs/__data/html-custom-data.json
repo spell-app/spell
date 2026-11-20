@@ -25818,6 +25818,13 @@
           }
         },
         {
+          "name": "folder",
+          "description": {
+            "kind": "markdown",
+            "value": "`file`:  picks whole folders instead of files;  `files` holds every file in them, each with its path in its folder (`webkitRelativePath`).\n\nTakes:  flag (present / absent)"
+          }
+        },
+        {
           "name": "autocomplete",
           "description": {
             "kind": "markdown",

@@ -63,7 +63,7 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
    * then look up `match.data.scopeType` from `scope.types` by canonical, singular type name.
    */
   parse(scope: P.Scope, tokens: P.Token[]) {
-    const declared = this.parseDeclaredWords(scope, tokens)
+    const declared = this.parseDeclaredWords(scope, tokens) ?? this.parseUIView(scope, tokens)
     if (declared) return declared
     // `super.parse()` is typed for any rule -- we know it's ours.
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
@@ -76,6 +76,21 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
       return this.typeMatch(scope, [tokens[0]!], scopeType)
     match.data.scopeType = scopeType ?? NONE
     return match
+  }
+
+  /**
+   * A Spell UI element's view, from the first token, e.g. `ui tree view` (epic `from-console` P11):
+   * the type `SP.UIViews` makes for it, `UiTreeView`.
+   * - Only when the first word is the language's first for one (`ui`, Spanish's `vista`):  most names aren't.
+   */
+  private parseUIView(scope: P.Scope, tokens: P.Token[]): P.MatchFor<this> | undefined {
+    const first = tokens[0]
+    if (!(first instanceof P.WordToken)) return undefined
+    const lead = SP.Language.of(scope).words.uiViewName.split(" ")[0]!
+    if (`${first.value}`.toLowerCase() !== lead) return undefined
+    const found = SP.UIViews.typeFor(scope, SpellType.lowerWords(tokens, UI_VIEW_MOST_WORDS))
+    if (!found) return undefined
+    return this.typeMatch(scope, tokens.slice(0, found.count), found.type, found.type.name)
   }
 
   ////////////////
@@ -303,6 +318,9 @@ export class SpellType extends P.Pattern<never, TypeMatchData> {
     return new P.ASTTypeExpression(match, { raw, name: value })
   }
 }
+
+/** Most words a Spell UI element's view may take, e.g. 6 for `vista ui de editor de propiedades`. */
+const UI_VIEW_MOST_WORDS = 6
 
 /** What type rules stash on their matches. */
 type TypeMatchData = {
