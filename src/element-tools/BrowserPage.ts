@@ -90,8 +90,9 @@ export class BrowserPage {
   /**
    * Report `page`'s problems to `onProblem` as they happen:  uncaught errors, and console messages of `consoleTypes`.
    * - for a page made elsewhere (a Playwright test's);  `newPage()` calls it
-   * - a console message matching `ignore` isn't one (e.g. `Failed to load resource`, which a response listener
-   *   reports better, with its URL)
+   * - a console message matching `ignore` isn't one
+   * - a file that won't load names itself:  the browser's `Failed to load resource: ... 404 (Not Found)` gets the
+   *   file's URL after it (`withFileUrl()`;  epic `epic-engine` I361:  a 404 nobody could trace to its file)
    */
   static watch(page: Page, { onProblem, consoleTypes = ["error"], ignore }: ProblemProps): void {
     if (!onProblem) return
@@ -99,8 +100,18 @@ export class BrowserPage {
     page.on("console", (message) => {
       const type = message.type()
       if (!consoleTypes.includes(type) || ignore?.test(message.text())) return
-      onProblem(message.text(), `console ${type}`)
+      onProblem(BrowserPage.withFileUrl(message.text(), message.location().url), `console ${type}`)
     })
+  }
+
+  /**
+   * A console message, with the URL of the file it's about when it's the browser's "couldn't load" line.
+   * - Chromium's text names no file (`Failed to load resource: the server responded with a status of 404 (Not Found)`):
+   *   only the message's location does
+   * - `Failed to load resource: ... (Not Found):  http://127.0.0.1:4747/_epic/assets/lazy/code-engine.js`
+   */
+  static withFileUrl(text: string, url: string | undefined): string {
+    return FAILED_LOAD.test(text) && url && !text.includes(url) ? `${text}:  ${url}` : text
   }
 
   /**
@@ -192,3 +203,6 @@ export type SettleProps = { tags?: RegExp; timeout?: number; networkIdle?: numbe
  * - not `spell-*`:  the app's are defined only where its pack loads;  a check that wants them says so (`tags`)
  */
 export const PACK_TAGS = /^(ui|epic|brand)-/
+
+/** The browser's console line for a file that didn't load (a 404, a refused request):  it names no file itself. */
+const FAILED_LOAD = /^Failed to load resource\b/
