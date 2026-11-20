@@ -724,6 +724,7 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "maxlength",
       "multiple",
       "accept",
+      "folder",
       "autocomplete",
       "inputmode",
       "rules"

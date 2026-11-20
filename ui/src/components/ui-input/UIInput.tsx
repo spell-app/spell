@@ -2,6 +2,7 @@ import { Show } from "solid-js"
 import type { JSX } from "@solidjs/web"
 
 import { E, UIT } from "spell/ui/core"
+import { F } from "spell/ui/forms"
 import { inputVocabulary } from "./UIInput.en"
 import { InputFallback } from "./UIInput.fallback"
 import { TextControl } from "./TextControl"
@@ -11,6 +12,29 @@ import labelCSS from "spell/ui/components/ui-label/UILabel.css?inline"
 import inputCSS from "./UIInput.css?inline"
 
 /****************
+ * ### `DOMInputElement`
+ * The `<ui-input>` in the page:  a native input's members its component answers.
+ * - `showPicker()`:  opens the inner native input's picker, as `HTMLInputElement.showPicker()` does.
+ * - `files`:  a `file` input's files.
+ * - Above the component:  its `elementSetup` reads this class while the component is defined.
+ ****************/
+export class DOMInputElement extends F.DOMFormControl<UIInput> {
+  /** A `file` input's chosen files, in the order picked;  empty for any other type. */
+  get files(): readonly File[] {
+    return this.component?.files ?? []
+  }
+
+  /**
+   * Open its picker, as a native input's `showPicker()`:  a `file` input's dialog, a `date`'s calendar ...
+   * - The browser opens it only from a person's click or key, as natively.
+   * - throws as the native one does:  `NotAllowedError` without that click, `InvalidStateError` while disabled
+   */
+  showPicker(): void {
+    this.component?.showPicker()
+  }
+}
+
+/****************
  * ### `UIInput`
  * The component behind `<ui-input>`:  a one-line text field.
  *
@@ -18,7 +42,10 @@ import inputCSS from "./UIInput.css?inline"
  *   with the optional joined label, action buttons and icon box, in the order `UIInput.css` documents.
  * - A form control (see `TextControl`):  its value, native constraints + `rules`, reset, a disabled fieldset.
  * - `type` passes through to the native input.
- *   `file` submits the chosen `File`s (one `FormData` entry each), and script can't set its value, as natively.
+ *   `file` submits the chosen `File`s (one `FormData` entry each), and script can't set its value, as natively;
+ *   `folder` makes it pick whole folders.
+ * - `showPicker()` opens the native input's picker from script (`DOMInputElement`):
+ *   `<ui-uploader>` opens its file dialog that way.
  *   `percent` is ours (epic `language` P34):  a number field for a part of a whole, see `isPercent`.
  * - Enter submits the form, as in a native field ("implicit submission"):
  *   it clicks the form's first submit button, else calls `requestSubmit()`.
@@ -29,6 +56,7 @@ export class UIInput extends TextControl<Vocabulary> {
   @E.protoMerged static elementSetup = {
     styleSheets: { label: labelCSS, input: inputCSS },
     Fallback: InputFallback,
+    DOMElement: DOMInputElement,
     // `loading`:  a spinner in place of its icon
     loading: "its own"
   } satisfies Partial<E.ElementSetup>
@@ -117,6 +145,37 @@ export class UIInput extends TextControl<Vocabulary> {
   /** Files chosen in a `file` input. */
   @E.state accessor files: readonly File[] = []
 
+  /**
+   * Open the native input's picker (`DOMInputElement.showPicker()`).
+   * - A browser with no `showPicker()` gets a click on the input instead, which opens a file dialog.
+   * - throws as the native one does
+   */
+  @E.untracked
+  showPicker() {
+    const control = this.control as HTMLInputElement | undefined
+    if (!control) return
+    if (typeof control.showPicker === "function") control.showPicker()
+    else control.click()
+  }
+
+  /** `folder`:  the native input picks folders (the browser's `webkitdirectory`). */
+  protected get folderMode(): Record<string, unknown> {
+    return this.isFileInput && this.folder ? { webkitdirectory: "" } : {}
+  }
+
+  /** A file input's value set to `""` (by script) forgets its files, as a native one does:  so they can be picked again. */
+  @E.onChange("value")
+  protected onFileValueCleared() {
+    if (this.isFileInput && this.value === "") this.forgetFiles()
+  }
+
+  /** Forget the chosen files, in the native input too, which only script can empty. */
+  @E.untracked
+  private forgetFiles() {
+    if (this.control?.value) this.control.value = ""
+    if (this.files.length) this.files = []
+  }
+
   /** Files submit themselves:  one entry per file. */
   protected formSubmission(value: E.FieldValue, name: string | undefined): string | File | FormData | null {
     if (!this.isFileInput) return super.formSubmission(value, name)
@@ -130,18 +189,21 @@ export class UIInput extends TextControl<Vocabulary> {
   /** Also clears a file input's chosen files, which only script can. */
   onFormReset() {
     super.onFormReset()
-    if (this.control && this.isFileInput) this.control.value = ""
-    this.files = []
+    this.forgetFiles()
   }
 
-  /** `change`:  a file input's value and files arrive here too. */
+  /**
+   * `change`:  a file input's value and files arrive here too.
+   * - A `ui-changed` handler that empties it (`value = ""`, to pick the same file again) forgets them at once:
+   *   the value is back where it started before any effect runs, so `onFileValueCleared()` never sees it change.
+   */
   private readonly onFileOrChange = (event: Event) => {
-    if (this.isFileInput) {
-      const control = event.currentTarget as HTMLInputElement
-      this.files = [...(control.files ?? [])]
-      this.requestChange("value", control.value, () => true)
-    }
+    if (!this.isFileInput) return this.onChange(event)
+    const control = event.currentTarget as HTMLInputElement
+    this.files = [...(control.files ?? [])]
+    this.requestChange("value", control.value, () => true)
     this.onChange(event)
+    if (this.value === "") this.forgetFiles()
   }
 
   ////////////////
@@ -198,6 +260,7 @@ export class UIInput extends TextControl<Vocabulary> {
           readonly={this.readonly}
           aria-busy={this.loading ? "true" : undefined}
           {...this.constraints}
+          {...this.folderMode}
           {...this.controlAria}
           {...this.staticControl}
           onInput={this.onInput}

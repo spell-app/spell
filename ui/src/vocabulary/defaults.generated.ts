@@ -774,6 +774,7 @@ export const DEFAULTS_TABLE: Readonly<
     { name: "maxlength", kind: "number", group: "form" },
     { name: "multiple", kind: "boolean", group: "form" },
     { name: "accept", kind: "string", group: "form" },
+    { name: "folder", kind: "boolean", group: "form" },
     { name: "autocomplete", kind: "string", group: "form" },
     {
       name: "inputmode",

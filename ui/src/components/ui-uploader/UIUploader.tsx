@@ -48,7 +48,8 @@ export class DOMUploaderElement extends E.DOMElement<UIUploader> {
  *   - `input`:  a read-only `<ui-input>` with a Browse `<ui-button>` joined to it, its rows under it
  *   - `compact`:  a one-line drop area, a line of status and one `<ui-progress>` for every file
  * - `drop-zone`:  a drop elsewhere counts too (`page`, a selector, an element);  `DropZones` decides which uploader.
- * - The file dialog is the browser's:  an invisible native file input opens it (`openDialog()`).
+ * - The file dialog is the browser's:  a hidden `<ui-input type="file">` opens it (`openDialog()`),
+ *   for every look, with its `showPicker()`;  its `folder` picks folders.
  * - Posting is `XMLHttpRequest`'s:  `fetch()` can't tell how far an upload has got.
  *   A failure is an `ApiError`, the same shape `UI.api` throws.
  * - NEVER imports Spell's own words:  the bridge into Spell's events is the parser's core's (Q14).
@@ -92,7 +93,7 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
     return this.kinds.map((kind) => `.${kind}`).join(", ")
   }
 
-  /** The native input's `accept`:  `.json,.csv`. */
+  /** The file input's `accept`:  `.json,.csv`. */
   private get accept(): string | undefined {
     return this.kinds.length ? this.kinds.map((kind) => `.${kind}`).join(",") : undefined
   }
@@ -447,14 +448,27 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
   // ## The file dialog
   ////////////////
 
-  /** The invisible native file input that opens the browser's file dialog. */
-  private fileInput: HTMLInputElement | undefined
+  /** The hidden `<ui-input type="file">` that opens the browser's file dialog. */
+  private fileInput: FileInputElement | undefined
 
-  /** Open the file dialog.  The browser opens it only from a person's click or key. */
+  /** The file input drawn:  it tells us what was picked. */
+  private readonly fileInputDrawn = (input: HTMLElement) => {
+    this.fileInput = input as FileInputElement
+    input.addEventListener("ui-changed", this.onPicked)
+  }
+
+  /**
+   * Open the file dialog.  The browser opens it only from a person's click or key.
+   * - NEVER throws:  a dialog the browser won't open (no click) is warned about.
+   */
   @E.untracked
   openDialog() {
     if (this.isDisabled) return
-    this.fileInput?.click()
+    try {
+      this.fileInput?.showPicker()
+    } catch (error) {
+      E.Warnings.warn("<ui-uploader>", "the browser wouldn't open the file dialog", error)
+    }
   }
 
   /** A click on its button, or on a page's own in the `button` slot:  the file dialog. */
@@ -463,11 +477,16 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
     this.openDialog()
   }
 
-  /** Files picked in the dialog:  taken, then the input emptied, so the same file can be picked again. */
+  /**
+   * Files picked in the dialog:  taken, then the input emptied, so the same file can be picked again.
+   * - Its `ui-changed` stops here:  it's composed, and the page hears the uploader's own events instead.
+   */
   @E.untracked
   private readonly onPicked = (event: Event) => {
-    const input = event.currentTarget as HTMLInputElement
-    const picked = [...(input.files ?? [])]
+    event.stopPropagation()
+    const input = event.currentTarget as FileInputElement
+    const picked = [...input.files]
+    if (!picked.length) return
     input.value = ""
     void this.take(UIUploader.arrivalFromDialog(picked, !!this.folder)).catch((error) =>
       E.Warnings.warn("<ui-uploader>", "couldn't take the files picked", error)
@@ -827,17 +846,16 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
   render(): JSX.Element {
     return (
       <>
-        <input
-          ref={(input: HTMLInputElement) => (this.fileInput = input)}
+        <ui-input
+          ref={this.fileInputDrawn}
           class="picker"
           type="file"
-          hidden
+          hidden=""
           tabindex="-1"
           aria-hidden="true"
           accept={this.folder ? undefined : this.accept}
           multiple={!!this.multiple || !!this.folder}
-          {...(this.folder ? { webkitdirectory: "" } : {})}
-          onChange={this.onPicked}
+          folder={!!this.folder}
         />
         <Show when={this.look === BUTTON}>{this.buttonLook()}</Show>
         <Show when={this.look === INPUT}>{this.inputLook()}</Show>
@@ -1208,6 +1226,16 @@ type TakenFolder = {
   files: Taken[]
   entry?: FileSystemEntry
   handle?: FileSystemHandle
+}
+
+/** The hidden `<ui-input type="file">`:  the members of its DOM element the uploader uses (`DOMInputElement`). */
+type FileInputElement = HTMLElement & {
+  /** the files picked */
+  readonly files: readonly File[]
+  /** `""` forgets them */
+  value: string
+  /** opens the file dialog */
+  showPicker(): void
 }
 
 /** Everything that came in at once. */
