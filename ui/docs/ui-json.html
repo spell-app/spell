@@ -7,7 +7,7 @@
     <title>JSON data | Spell UI</title>
     <meta
       name="description"
-      content="JSON data holds data in a page, as its text or from a file:  it draws nothing, and other elements read it."
+      content="JSON data holds data in a page, as its text or from a file, and shows it as an outline that opens and closes."
     />
     <!-- Before first paint:  the viewer's colour scheme (`ThemePreference.HEAD_SCRIPT`, as oxfmt lays it out).  The theme itself is restored by site.js. -->
     <script>
@@ -41,7 +41,7 @@
           </ui-menu>
           <ui-header level="1" class="site-title">
             JSON data
-            <ui-header>JSON data holds data in a page, as its text or from a file:  it draws nothing, and other elements read it.</ui-header>
+            <ui-header>JSON data holds data in a page, as its text or from a file, and shows it as an outline that opens and closes.</ui-header>
           </ui-header>
           <ui-theme-menu show="theme" compact class="site-themes"></ui-theme-menu>
         </ui-container>
@@ -50,10 +50,25 @@
       <ui-container class="site-body">
         <ui-tabs id="site-tabs" class="site-tabs" history appearance="segmented basic" align="fluid" equal>
           <ui-tab value="examples" label="Examples">
-            <!-- EXAMPLES:  it draws nothing, so each example shows it read by a <ui-tree-diagram>. -->
+            <!-- EXAMPLES:  the outline first, then data a diagram reads. -->
             <ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>
-              <ui-section id="examples-types-its-own-text" label="Its own text" sticky="stack" collapsible dividing>
-                <ui-example description="The data is the element's text.  It draws nothing itself:  here a tree diagram reads the `&lt;ui-json&gt;` inside it.">
+              <ui-section id="examples-types-an-outline" label="An outline" sticky="stack" collapsible dividing>
+                <ui-example description="Its text is the data, drawn as an outline.  The top level starts open;  a closed object or array sits on one line.  Alt-click a toggle to open or close everything inside it.">
+                  <ui-json>
+                    { "name": "port-a", "kind": "optical", "lanes": 4, "active": true, "owner": null,
+                      "tags": ["in", "test", "v2"], "bounds": { "x": 0, "y": 12.5, "w": 400, "h": 220 },
+                      "notes": { "text": "A long string that goes on for a while, to show how a closed line is cut short" },
+                      "empty": {}, "none": [] }
+                  </ui-json>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-types-from-a-file" label="From a file" sticky="stack" collapsible dividing>
+                <ui-example description="`source` loads the data from a file on this site:  here a board with 387 ports.  Its ports are one line until opened, then a closed line each.">
+                  <ui-json source="examples/json-ports.json"></ui-json>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-types-a-diagrams-data" label="A diagram's data" sticky="stack" collapsible dividing>
+                <ui-example description="Inside a diagram it's the diagram's data, and doesn't show:  the tree diagram reads the `&lt;ui-json&gt;` inside it.">
                   <ui-tree-diagram>
                     <ui-json>
                       {
@@ -64,22 +79,41 @@
                   </ui-tree-diagram>
                 </ui-example>
               </ui-section>
-              <ui-section id="examples-types-from-a-file" label="From a file" sticky="stack" collapsible dividing>
-                <ui-example description="`source` loads the data from a file on this site, and the tree diagram draws it once it arrives.">
-                  <ui-tree-diagram>
-                    <ui-json source="examples/tree-data.json"></ui-json>
-                  </ui-tree-diagram>
-                </ui-example>
-              </ui-section>
               <ui-section id="examples-types-a-script-child" label="A script child" sticky="stack" collapsible dividing>
                 <ui-example description="A `&lt;script type=&quot;application/json&quot;&gt;` inside it holds text the page must not read as markup, such as a `&lt;`.">
-                  <ui-tree-diagram>
-                    <ui-json>
-                      <script type="application/json">
-                        { "label": "a < b", "children": [{ "label": "a" }, { "label": "b" }] }
-                      </script>
-                    </ui-json>
-                  </ui-tree-diagram>
+                  <ui-json>
+                    <script type="application/json">
+                      { "label": "a < b", "children": [{ "label": "a" }, { "label": "b" }] }
+                    </script>
+                  </ui-json>
+                </ui-example>
+              </ui-section>
+            </ui-section>
+            <ui-section id="examples-variations" label="Variations" sticky="stack" collapsible dividing>
+              <ui-section id="examples-variations-depth" label="Depth" sticky="stack" collapsible dividing>
+                <ui-example description="`depth` says how many levels start open:  `3` here, and `0` closes everything.">
+                  <ui-json depth="3">
+                    { "board": { "name": "demo", "parts": { "a1": { "kind": "switch", "on": false }, "b2": { "kind": "lamp", "watts": 60 } } } }
+                  </ui-json>
+                  <ui-json depth="0" no-header>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]</ui-json>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-variations-no-quotes" label="No quotes" sticky="stack" collapsible dividing>
+                <ui-example description="`quotes=&quot;no&quot;` shows keys without quotes, as JSON5 allows;  the header's quotes button does the same.  Copy always copies JSON.">
+                  <ui-json quotes="no">{ "name": "port-a", "two words": 2, "lanes": [0, 1, 2, 3] }</ui-json>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-variations-editable" label="Editable" sticky="stack" collapsible dividing>
+                <ui-example description="`editable`:  double-click a key or value to edit it.  Each value gets a control that fits it:  a text field, a number field, a date picker, a checkbox.  Enter keeps the edit, Escape drops it.">
+                  <ui-json depth="2" editable>
+                    { "lamp": { "name": "desk", "watts": 60, "on": false, "bought": "2026-11-18", "checked": "2026-11-18T10:00:00Z", "owner": null } }
+                  </ui-json>
+                </ui-example>
+              </ui-section>
+              <ui-section id="examples-variations-hidden" label="Hidden" sticky="stack" collapsible dividing>
+                <ui-example description="`hidden` holds the data without showing it, for script or another element to read.">
+                  <ui-json hidden>{ "kept": "out of sight" }</ui-json>
+                  <ui-text color="grey" italic>Nothing shows:  the data is kept for script.</ui-text>
                 </ui-example>
               </ui-section>
             </ui-section>
@@ -90,19 +124,49 @@
             <ui-section id="usage-using-it" label="Using it" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  `<ui-json>` holds JSON data in a page, and draws nothing.
+                  `<ui-json>` holds JSON data in a page, and shows it as an outline.
 
                   - Its text is the data, or `source` loads it from a file on the same site.
                   - `load` says when:  `eager` (at once), `visible` or `idle`.
-                  - An element that takes JSON reads a `<ui-json>` child by itself.
+                  - `depth` says how many levels start open, `quotes="no"` drops the quotes round keys,
+                    and `no-header` hides the Copy and quotes buttons.
+                  - `hidden` holds the data without showing it.
+                  - An element that takes JSON reads a `<ui-json>` child by itself, and keeps it out of sight.
                     `<ui-tree-diagram>` does, and follows it as it changes.
 
                   A `<script type="application/json">` is the older way of holding data in a page.
                   It works where it did, and inside a `<ui-json>` too.
                   Use one there when the JSON holds a `<`, which a page would read as a tag.
 
+                  JSON as coloured text, with no folding, is `<ui-code language="json">`.
+
                   In Spell it's `<json>`, and its text is kept as written:
                   its `{` and `[` are JSON's, not Spell's.
+                </script>
+              </ui-markdown>
+            </ui-section>
+            <ui-section id="usage-editing" label="Editing" sticky="stack" collapsible dividing>
+              <ui-markdown>
+                <script type="text/markdown">
+                  With `editable`, a double-click on a key or a value edits it, in a control that fits the value:
+
+                  - a string:  a text field, and it stays a string
+                  - a number:  a number field
+                  - a date (`2026-11-18`) or a date and time (`2026-11-18T10:00:00Z`):  a date picker,
+                    and the new date is written the same way
+                  - `true` or `false`:  a checkbox, kept as soon as it's clicked
+                  - a key, or `null`:  a text field, read as JSON if it is, else as a string
+
+                  Enter, or leaving the field, keeps the edit;  Escape drops it.
+                  `value` changes, `ui-changed` says so, and the element is `dirty` until saved.
+
+                  JSON can't say a string comes from a list.
+                  `editors` can, by key, as a property:  a list makes a pick list, and a word names the control.
+
+                  ```js
+                  const data = document.querySelector("ui-json")
+                  data.editors = { direction: ["in", "out", "inout"], made: "date" }
+                  ```
                 </script>
               </ui-markdown>
             </ui-section>
@@ -122,16 +186,33 @@
                   data.value = { label: "New" }
                   ```
 
-                  Text that isn't JSON logs one console warning, sends `ui-error` and sets `:state(error)`.
-                  So does a file that won't load:  nothing draws, so nothing else would show it.
+                  Set `item` to show a thing:  its `data`, else the thing itself, becomes `value`.
+                  So slotted as a tree's `detail`, it shows each pick's data with no code:  the tree sets its `item`.
+
+                  A click on a key or a value sends `ui-navigating`, with where it is:
+                  `path`, the keys from the top down, then `key`, `value` and `part` (`"key"` or `"value"`).
+                  The page decides what it means, such as showing what a value names.
+
+                  ```js
+                  data.addEventListener("ui-navigating", (event) => {
+                    const { path, value } = event.detail
+                    if (path.at(-1) === "id") showThing(value)
+                  })
+                  ```
+
+                  `copy()` puts the data on the clipboard as JSON, as the Copy button does, and sends `ui-copied`.
+
+                  Text that isn't JSON shows why, logs one console warning, sends `ui-error` and sets `:state(error)`.
+                  So does a file that won't load.
                 </script>
               </ui-markdown>
             </ui-section>
             <ui-section id="usage-accessibility" label="Accessibility" sticky="stack" collapsible dividing>
               <ui-markdown>
                 <script type="text/markdown">
-                  JSON data has no role and shows nothing:  screen readers pass over it.
-                  What reads it says what it means:  a tree diagram names itself from the data.
+                  Each object's and array's toggle is a real button:  it says what it opens, and whether it's open.
+                  Each one is a Tab stop;  the arrow keys don't move between lines yet.
+                  A hidden `<ui-json>`, or one a diagram reads, shows nothing, and screen readers pass over it.
                 </script>
               </ui-markdown>
             </ui-section>
@@ -145,6 +226,10 @@
 
             <ui-section id="api-events" label="Events" sticky="stack" collapsible dividing>
               <ui-docs-api family="ui-json" only="events"></ui-docs-api>
+            </ui-section>
+
+            <ui-section id="api-parts" label="Parts" sticky="stack" collapsible dividing>
+              <ui-docs-api family="ui-json" only="parts"></ui-docs-api>
             </ui-section>
 
             <ui-section id="api-states" label="States" sticky="stack" collapsible dividing>

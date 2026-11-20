@@ -3,12 +3,12 @@
  * (VS Code's secondary side bar), beside the editor AND the Claude tab, instead of taking an editor column.
  * spell-epic's own copy (epic `epic-eject` P7), from the spell language extension's:
  * its own view and command ids (`spellEpic.*`), so both extensions run side by side.
- * Three of them, each in its own view container, so the side bar shows them as three tabs, each keeping its own page.
+ * Three of them, each in its own view container, so the side bar shows them as three tabs, each keeping its own page:
+ * one for reading, one for answering, one for the epic tooling's own docs (Owen, 2026-11-19).
  * Which tab a page goes to is ONE rule, from its path (`docViewFor()`, epic `epic-engine` P59), never the command's:
- * - "Epic Docs" (`spellEpic.docView`, a book):  guides, the home page, the list pages
- *   (or Simple Browser, `spellEpic.docPreview.location`:  `beside`):  `/spell-docs`, `epic pages open`
- * - "Review" (`spellEpic.reviewView`, a checklist):  epic pages and saga pages, whatever the command asked
- *   (`epic open`, `/epic review`), and a page asked for with `--review`
+ * - "Review" (`spellEpic.reviewView`, the Spell hat):  epic pages and saga pages (`epic open`, `/epic review`),
+ *   and every other page:  guides, the home page, the list pages (`epic pages open`, `/spell-docs`)
+ *   - the first "Epic Docs" tab held those other pages until Q73;  Review's top bar reaches Guides, Sagas and Epics
  * - "Details" (`spellEpic.detailsView`, a speech bubble):  details, review and choice pages (`epic ask show`,
  *   `epic choices show`, `/details`), so answering one never moves the epic page
  *   - a page still WAITING for Owen's answer (`DetailsPages.isWaiting()`) is never replaced by a show:
@@ -18,6 +18,8 @@
  *     epic's details and choice pages, newest first, the waiting ones red, the pages waiting their turn on top
  *     (`showList()`);  "Other epic..." picks another
  *   - why (request r50):  a choice page Owen was answering vanished, the epic page shown in both other tabs
+ * - "Epic Docs" (`spellEpic.docsView`, a book):  the epic tooling's READMEs, rendered by the page server
+ *   (`/_epic/docs/README-epics.md` and the pages it links to;  spell-epic's `docsRoutes.ts`)
  * - Each is a webview holding ONE iframe of the page's loopback URL, as Simple Browser does.
  *   The page's own live reload runs inside it.
  * - The webview's html is built ONCE, when VS Code resolves the view:
@@ -36,13 +38,18 @@
  * - A window reload keeps each view's page:  the page last in view is remembered per window (the workspace's state),
  *   and shown again when VS Code re-makes the view, if its page server still answers (`remembered()`).
  * - Opened by hand, before anything was shown:
- *   "Epic Docs" shows the default repo's home page on the epic server, else the window's first folder's;
- *   "Review" a line saying how to fill it;  "Details" its list.
- * - Title-bar buttons:  back, forward, reload, restart the page server, open in the browser;
- *   then Inspect (`toggleDevTools()`).
- *   - Home:  the page's own site header (its logo, or "Docs");  VS Code has no clickable view titles.
- *   - `spellEpic.docView.home` stays a palette command, as does "Review:  Home Page" (`spellEpic.reviewView.home`).
- *   - the Review and Epic Docs tabs':  a checklist right of Home, this window's worktree epic page, in the Review tab;
+ *   "Review" shows the default repo's home page on the epic server, else the window's first folder's,
+ *   else a line saying how to fill it;  "Details" its list;  "Epic Docs" the front page for epics, on the same server.
+ * - Title-bar buttons, each tooltip a short plain name (epic `epic-engine` I341):
+ *   - every tab:  Back, Forward, Reload, Open in Browser, Restart Page Server
+ *   - Review:  Epics Home (the docs' home page, a fresh view:  `goHome()`) and This Epic's Page
+ *   - Epic Docs:  Epic Docs Home (the front page for epics, a fresh view)
+ *   - Details:  This Epic's Questions, its list (`showList()`)
+ *   - their titles carry no view name:  each command's `category` (Review, Details, Epic Docs) names it in the
+ *     Command Palette, and VS Code shows only the title as a button's tooltip
+ *   - no Inspect button (Owen, 2026-11-18:  "Remove the inspect button entirely"):  Inspect stays in the right-click menu
+ *   - Home also:  the page's own site header (its logo, or "Docs");  VS Code has no clickable view titles.
+ *   - This Epic's Page, a checklist right of Epics Home:  this window's worktree epic page, in the Review tab;
  *     in the main checkout's window, the epic list (`showWindowEpic()`;  epic `epic-engine` I266)
  * - "Review:  Open Epic..." (`spellEpic.reviewView.openEpic`), a palette command, the button before I266:
  *   pick an epic of ANY registered repo (`~/.spell-epic/repos.json5`), its epic page shows there.
@@ -97,7 +104,9 @@ import { ClipboardImage } from "./ClipboardImage"
 import {
   DOC_VIEWS,
   type DocViewName,
+  docViewFor,
   fileForPath,
+  openingPage,
   planDocsIn,
   planDocsOf,
   samePage,
@@ -117,18 +126,18 @@ const ALLOW = "clipboard-read; clipboard-write"
 
 /** Each doc view by name:  its view id (as in `package.json` `contributes.views`), and what it says when empty. */
 const VIEWS: Record<DocViewName, { id: string; empty: string }> = {
-  docs: {
-    id: "spellEpic.docView",
-    empty: "No docs page yet:  <code>epic hub url &lt;page&gt;</code>, or <code>/spell-docs</code>."
-  },
   review: {
     id: "spellEpic.reviewView",
     empty:
-      "Nothing to review yet:  the list button above (<b>Review:  Open Epic...</b>), or <code>/epic review &lt;name&gt;</code>."
+      "Nothing to review yet:  the checklist button above (<b>This Epic's Page</b>), <code>/epic review &lt;name&gt;</code>, or <code>epic pages open &lt;page&gt;</code>."
   },
   details: {
     id: "spellEpic.detailsView",
     empty: "No details or choice pages yet:  <code>epic ask show &lt;page&gt;</code>, or <code>/details</code>."
+  },
+  docs: {
+    id: "spellEpic.docsView",
+    empty: "No epic docs yet:  start the page server (<code>spell server start</code>), then press Reload above."
   }
 }
 
@@ -209,8 +218,13 @@ export class DocView implements vscode.WebviewViewProvider {
   /** Every doc view, by name:  made by `register()`. */
   static readonly all = new Map<DocViewName, DocView>()
 
-  /** The home page's URL, for the "Epic Docs" view's home and its empty state;  set by `DocPreview`. */
-  static home: (() => Promise<string | undefined>) | undefined
+  /**
+   * The URL view `view` opens with, and its Home button shows;  set by `DocPreview`:
+   * - "Review":  the home page
+   * - "Epic Docs":  the front page for epics (`EPIC_DOCS_HOME`)
+   * - "Details":  none, it opens on its list
+   */
+  static home: ((view: DocViewName) => Promise<string | undefined>) | undefined
 
   /** `file`'s URL on the page server that serves it;  set by `DocPreview` (which imports this file). */
   static urlOf: ((file: string) => Promise<string>) | undefined
@@ -218,7 +232,7 @@ export class DocView implements vscode.WebviewViewProvider {
   /** This window's saved state:  each view's page last in view, so a reload shows it again;  set by `register()`. */
   static memory: vscode.Memento | undefined
 
-  /** Which view:  `docs` or `review`. */
+  /** Which view:  `review`, `details` or `docs`. */
   declare readonly name: DocViewName
 
   /** The view's id, as in `package.json` `contributes.views`. */
@@ -251,7 +265,7 @@ export class DocView implements vscode.WebviewViewProvider {
   }
 
   /**
-   * Register both views and their title-bar commands -- call once, from `DocPreview.register()`.
+   * Register the three views and their title-bar commands -- call once, from `DocPreview.register()`.
    * - every id is `spellEpic.*`, never the spell language extension's `spell.*`:  both register at once
    * - `retainContextWhenHidden`:  switching tabs keeps each view's page as it was, scroll and all
    */
@@ -270,13 +284,11 @@ export class DocView implements vscode.WebviewViewProvider {
       )
     }
     context.subscriptions.push(
-      vscode.commands.registerCommand("spellEpic.docView.home", () => DocView.goHome()),
-      vscode.commands.registerCommand("spellEpic.docView.showWindowEpic", () => DocView.showWindowEpic()),
       vscode.commands.registerCommand("spellEpic.reviewView.showWindowEpic", () => DocView.showWindowEpic()),
       vscode.commands.registerCommand("spellEpic.reviewView.home", () => DocView.goHome("review")),
+      vscode.commands.registerCommand("spellEpic.docsView.home", () => DocView.goHome("docs")),
       vscode.commands.registerCommand("spellEpic.reviewView.openEpic", () => DocView.pickEpic()),
       vscode.commands.registerCommand("spellEpic.detailsView.list", () => DocView.of("details").showList()),
-      vscode.commands.registerCommand("spellEpic.docView.inspect", () => DocView.toggleDevTools()),
       ...MENU.map((item) =>
         vscode.commands.registerCommand(`spellEpic.docMenu.${item}`, (context?: MenuContext) =>
           DocView.withId(context?.webview)?.menuItem(item)
@@ -286,15 +298,15 @@ export class DocView implements vscode.WebviewViewProvider {
   }
 
   /**
-   * The Inspect button, on both views' title bars:
+   * Inspect, in the right-click menu:
    * open the developer tools that hold the page, and close them on the next click
    * (Owen, 2026-10-10:  "can't close the browser console pane, no (x)").
    * - VS Code's "Developer:  Toggle Developer Tools" (`workbench.action.toggleDevTools`):
    *   the window's tools, the same ones "Open Webview Developer Tools" opens in desktop VS Code
    *   (`webviewCommands.ts` calls `nativeHostService.openDevTools()`), but it closes them too
    * - the tools open on the tab last used:  the command takes no tab or mode
-   *   - so the tooltip says what to pick next:  the element picker (Cmd + Shift + C), or the Console tab and the
-   *     page's frame (`127.0.0.1`) in its context menu
+   *   - then Cmd + Shift + C for the element picker, or the Console tab and the page's frame (`127.0.0.1`) in its
+   *     context menu
    * - NOT the page's frame by itself:  VS Code has no way to choose the console's frame, and since webviews became
    *   plain iframes the tools open at `top` (Owen asked, 2026-10-22).  Show Console, a second button opening the same
    *   tools, went then
@@ -332,12 +344,12 @@ export class DocView implements vscode.WebviewViewProvider {
       // which closed the list before Owen could pick (epic `epic-engine` I266)
       { title: "Review an epic", placeHolder: "Which epic page?", matchOnDescription: true, ignoreFocusOut: true }
     )
-    if (picked) await DocView.showFile?.(picked.doc.file, "review")
+    if (picked) await DocView.showFile?.(picked.doc.file)
   }
 
   /**
    * The epic page of this window's worktree epic (`worktreeEpic()`), in the "Review" tab:
-   * the checklist button on the Review and Epic Docs tabs (epic `epic-engine` I243, I266).
+   * the checklist button on the Review tab (epic `epic-engine` I243, I266).
    * - ALWAYS that epic in a worktree's window, whatever the tab showed last
    *   (Owen, 2026-11-13:  "should always just show the [epic page] for the worktree")
    * - no worktree (the main checkout's window):  asks, with the epic list (`pickEpic()`)
@@ -347,7 +359,7 @@ export class DocView implements vscode.WebviewViewProvider {
     const content = root && EpicConfig.contentOf(root)
     const epic = content && worktreeEpic(root, content)
     if (!content || !epic) return DocView.pickEpic()
-    await DocView.showFile?.(join(content, "epics", epic, `${epic}.plan.html`), "review")
+    await DocView.showFile?.(join(content, "epics", epic, `${epic}.plan.html`))
   }
 
   /**
@@ -367,8 +379,14 @@ export class DocView implements vscode.WebviewViewProvider {
     return first ? [...registered, { name: "", content: first }] : registered
   }
 
-  /** Show a docs file in a doc view, from its page server;  set by `DocPreview` (which imports this file). */
-  static showFile: ((file: string, view: DocViewName) => Promise<unknown>) | undefined
+  /**
+   * Show a docs file in the doc view its kind says (`docViewFor()`), from its page server;
+   * set by `DocPreview` (which imports this file).
+   */
+  static showFile: ((file: string) => Promise<unknown>) | undefined
+
+  /** Show a page's URL in doc view `view`, and bring it forward;  set by `DocPreview` (which imports this file). */
+  static showUrl: ((url: string, view: DocViewName) => Promise<void>) | undefined
 
   /**
    * An edit command, done IN the page (epic `windows-and-review` I2).
@@ -409,27 +427,27 @@ export class DocView implements vscode.WebviewViewProvider {
   }
 
   /**
-   * The doc view whose view id is `id` (`spellEpic.docView`, `spellEpic.reviewView`, `spellEpic.detailsView`);
+   * The doc view whose view id is `id` (`spellEpic.reviewView`, `spellEpic.detailsView`, `spellEpic.docsView`);
    * `undefined` for anything else.
    */
   static withId(id: string | undefined): DocView | undefined {
     return [...DocView.all.values()].find((docView) => docView.id === id)
   }
 
-  /** The doc view called `name`;  `docs` for anything else. */
+  /** The doc view called `name`;  `review` for anything else. */
   static of(name: string | undefined): DocView {
-    return DocView.all.get(name as DocViewName) ?? DocView.all.get("docs")!
+    return DocView.all.get(name as DocViewName) ?? DocView.all.get("review")!
   }
 
   /**
-   * Show the home page, in the "Epic Docs" view, or in `view`:
-   * the Home button on both views' title bars, right of Reload (epic `epic-workflow` r2).
+   * Show view `view`'s home (`home()`):  the home page in "Review", the front page for epics in "Epic Docs";
+   * the Home button on its title bar, right of Open in Browser (epic `epic-workflow` r2).
    * - a FRESH view (`rebuild()`), not a navigation:
    *   a page that stopped responding ignores the view's messages, so Home is the way back from it
    *   (Owen, 2026-10-12:  "spell doc's page is wedged")
    */
-  static async goHome(view: DocViewName = "docs"): Promise<void> {
-    const url = await DocView.home?.()
+  static async goHome(view: DocViewName): Promise<void> {
+    const url = await DocView.home?.(view)
     if (!url) return
     const docView = DocView.of(view)
     if (!docView.rebuild(stamped(url))) await docView.show(url)
@@ -449,6 +467,8 @@ export class DocView implements vscode.WebviewViewProvider {
       case "forward":
         return this.go(1)
       case "reload": {
+        // the Details list in view:  drawn afresh, not the page shown before it
+        if (this.isListing) return this.showList()
         // nothing in view yet (a re-made view):  the page this window remembers
         const page = here ?? (await this.remembered())
         return void (page && (await this.show(stamped(page), { reload: true })))
@@ -541,7 +561,7 @@ export class DocView implements vscode.WebviewViewProvider {
     const root = isEpicServer ? ENGINE_ROOT : info?.root
     if (!root) {
       void vscode.window.showWarningMessage(
-        `Epic Docs:  ${page.origin} isn't a page server, so there's nothing to restart.`
+        `Spell Epic:  ${page.origin} isn't a page server, so there's nothing to restart.`
       )
       return
     }
@@ -558,7 +578,7 @@ export class DocView implements vscode.WebviewViewProvider {
     const base = serverBaseIn(output)
     if (!base) {
       void vscode.window.showErrorMessage(
-        `Epic Docs:  the page server for ${root} didn't come back:  ${output.slice(-300)}`
+        `Spell Epic:  the page server for ${root} didn't come back:  ${output.slice(-300)}`
       )
       return
     }
@@ -566,7 +586,10 @@ export class DocView implements vscode.WebviewViewProvider {
   }
 
   /**
-   * VS Code shows the view:  build its html, ONCE, for the page asked for;  else, in "Epic Docs", the home page.
+   * VS Code shows the view:  build its html, ONCE, for the page asked for;  else its home (`home()`):
+   * the home page in "Review", the front page for epics in "Epic Docs".
+   * - the page asked for:  as it is once the remembered page and the home page are known (`openingPage()`),
+   *   so a page asked for while they're looked up is the one shown
    * - MUST `enableScripts`:  without it the webview's frame is sandboxed WITHOUT `allow-scripts`, and the page's
    *   iframe inherits that, so no `ui-*` element ever defines itself
    * - SIDE EFFECT:  the page's `place` reports set `<view id>.canGoBack` / `.canGoForward`,
@@ -596,8 +619,15 @@ export class DocView implements vscode.WebviewViewProvider {
         void vscode.commands.executeCommand("setContext", `${this.id}.canGoForward`, !!message.canGoForward)
       }
     )
-    if (!this.isListing) this.url ??= await this.remembered()
-    if (this.name === "docs") this.url ??= await DocView.home?.()
+    // a page asked for while these are awaited (the checklist button, pressed as the tab opens) wins over them:
+    // `??=` would read `url` BEFORE the wait and replace that ask after it (epic `epic-engine` I341)
+    this.url = await openingPage(
+      () => this.url,
+      [
+        ...(this.isListing ? [] : [() => this.remembered()]),
+        ...(this.name === "details" ? [] : [async () => DocView.home?.(this.name)])
+      ]
+    )
     if (this.name === "details" && !this.url) this.isListing = true
     this.showCount()
     view.webview.html = this.html(this.url)
@@ -939,7 +969,7 @@ export class DocView implements vscode.WebviewViewProvider {
     const count = this.queue.length
     const words = `${count} ${count === 1 ? "page" : "pages"} waiting`
     this.view.description = count ? words : undefined
-    this.view.badge = count ? { value: count, tooltip: `${words}:  the list button shows them` } : undefined
+    this.view.badge = count ? { value: count, tooltip: words } : undefined
   }
 
   /**
@@ -1036,6 +1066,8 @@ export class DocView implements vscode.WebviewViewProvider {
   /**
    * A link the page couldn't follow in the frame (see `followInFrame()` in `liveClient.ts`):
    * - `external`:  in the browser
+   * - `tab`:  a page shown in the tab it belongs to (`docViewFor()`), brought forward:
+   *   the epics home's Epic Documentation card opens the Epic Docs tab
    * - `file`:  a file on the page server, opened in the editor;  a folder, revealed in the Explorer
    *   - where:  the server's `/api/server` says (`fileForPath()`):
    *     the epic server's repos and engine, or a checkout's root and the folder its `/worktrees/<w>/` serves
@@ -1043,6 +1075,7 @@ export class DocView implements vscode.WebviewViewProvider {
   static async open({ url, kind }: OpenLink): Promise<void> {
     if (!url) return
     const target = new URL(url)
+    if (kind === "tab") return DocView.showUrl?.(url, docViewFor(target.pathname))
     if (kind !== "file") return void vscode.env.openExternal(vscode.Uri.parse(url))
     const info = await serverAt(target.origin)
     const path = info && fileForPath(info, target.pathname)
@@ -1052,7 +1085,7 @@ export class DocView implements vscode.WebviewViewProvider {
       (each) => each,
       () => undefined
     )
-    if (!stat) return void vscode.window.showWarningMessage(`Epic Docs:  no file ${file.fsPath}`)
+    if (!stat) return void vscode.window.showWarningMessage(`Spell Epic:  no file ${file.fsPath}`)
     if (stat.type & vscode.FileType.Directory) return void vscode.commands.executeCommand("revealInExplorer", file)
     await vscode.window.showTextDocument(file, { preview: true })
   }
@@ -1114,7 +1147,7 @@ type Ready = { spell: "ready"; url?: string | null }
  * A link the page asks the view to open:  `{ spell: "open", url, kind }`.
  * - `kind`:  `"file"` (on the page server:  the editor) or `"external"` (the browser)
  */
-type OpenLink = { spell: "open"; url?: string; kind?: "file" | "external" }
+type OpenLink = { spell: "open"; url?: string; kind?: "file" | "external" | "tab" }
 
 /** VS Code's edit command on the view (`{ spell: "edit", command }`), for the page:  see `DocView.edit()`. */
 type EditCommand = { spell: "edit"; command: "copy" | "cut" | "paste" | "selectAll" | "undo" | "redo" }

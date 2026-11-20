@@ -1,0 +1,229 @@
+/*
+ * Look of `<spell-reference-page>` (`SpellReferencePage.tsx`, epic `data` P53), in its shadow root:
+ * its line at the top, then a folded section per tag, each list a folded section inside it, its fields and changes
+ * a line each, a person's words under each.
+ * - A readable column, never wider than a line of text wants;  a table scrolls sideways inside it on a phone.
+ * - Each part is a tag of its own, and a `::part()`:  a page restyles one with `spell-reference-page::part(item)`.
+ */
+:host {
+  display: block;
+  color: var(--ui-text-color);
+}
+
+.SpellReferencePage {
+  box-sizing: border-box;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px 48px 16px;
+}
+
+.quiet {
+  color: var(--ui-text-muted);
+  white-space: pre-line;
+}
+
+.line {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+
+  h1 {
+    margin: 0;
+    line-height: 32px;
+    text-transform: capitalize;
+  }
+  p {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    margin: 0;
+    color: var(--ui-text-muted);
+  }
+  code {
+    overflow-wrap: anywhere;
+  }
+  .counts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+spell-reference-section {
+  display: block;
+  margin-bottom: 8px;
+
+  p {
+    margin: 0 0 8px 0;
+  }
+}
+
+/* what's in a fold starts under its title's text, not its chevron:  its hint, its words, the folds inside it */
+.Fold::part(content),
+.Fold::part(subhead) {
+  padding-left: 20px;
+}
+
+/* room under an open fold's last box, so its clip never cuts the box's shadow */
+.Fold:not(:state(collapsed))::part(content) {
+  padding-bottom: 8px;
+}
+
+/* a fold whose badge is a state's label:  the label alone, no second pill around it */
+.Fold.stated::part(badge) {
+  padding: 0;
+  background: transparent;
+}
+
+/* a list's address, under its name:  in the code face, as the header's address is */
+.Fold.list::part(subhead) {
+  font-family: var(--ui-font-family-mono);
+}
+
+/* A table scrolls sideways inside its box on a phone, never squeezed;
+   its edge is the theme's raised shadow, not a border, and its cells keep their lines. */
+.ReferenceTable {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 4px;
+  margin: 0 -4px;
+
+  > table {
+    min-width: 640px;
+    margin: 0 0 8px 0;
+    --ui-table-border-width: 0;
+    box-shadow: var(--ui-shadow-raised);
+  }
+}
+
+code {
+  font-family: var(--ui-font-family-mono);
+  font-size: 0.9em;
+}
+
+/* a list's fields and changes:  a line each, on the theme's raised surface, a shadow between them and the page;
+   on dark paper a light ring too, as a black shadow doesn't show there */
+.items {
+  display: flex;
+  flex-direction: column;
+  margin: 0 0 8px 0;
+  border-radius: 4px;
+  box-shadow:
+    0 0 0 1px light-dark(transparent, rgb(255 255 255 / 0.08)),
+    var(--ui-shadow-raised);
+}
+
+spell-reference-item {
+  display: block;
+  padding: 8px 12px;
+  line-height: 20px;
+
+  & + spell-reference-item {
+    box-shadow: 0 -1px 0 light-dark(rgb(0 0 0 / 0.06), rgb(255 255 255 / 0.08));
+  }
+
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 12px;
+  }
+  .name {
+    font-weight: 600;
+  }
+  /* its state at the row's right end, wherever its facts wrap to */
+  spell-reference-state {
+    margin-left: auto;
+  }
+  .says {
+    color: var(--ui-text-muted);
+    overflow-wrap: anywhere;
+  }
+  .words {
+    margin: 4px 0 0 0;
+  }
+}
+
+spell-reference-state {
+  display: inline-block;
+}
+
+.marks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 8px 0;
+}
+
+/* a person's words:  as written, a line each */
+.words {
+  white-space: pre-line;
+  margin: 0 0 8px 0;
+
+  &.lede {
+    margin-bottom: 24px;
+    font-size: 1.08em;
+  }
+}
+
+:host(:state(editing)) .words {
+  opacity: 0.6;
+}
+
+/* on a phone:  folds set in less, so a list's rows keep their width */
+@media (max-width: 480px) {
+  .Fold::part(content),
+  .Fold::part(subhead) {
+    padding-left: 12px;
+  }
+}
+
+/* the box words are made clearer in:  growing with its words */
+.WordsBox {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 4px 0 8px 0;
+
+  textarea {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 64px;
+    field-sizing: content;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    font: inherit;
+    color: inherit;
+    background: var(--ui-input-background, var(--ui-background));
+    box-shadow: var(--ui-shadow-raised);
+    resize: vertical;
+  }
+  /* 16px on a touch screen, so a phone doesn't zoom in as it's tapped */
+  @media (pointer: coarse) {
+    textarea {
+      font-size: 16px;
+    }
+  }
+  textarea:focus {
+    outline: 2px solid var(--ui-focus-color, var(--ui-primary-color));
+    outline-offset: 0;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .error {
+    margin: 0;
+    color: var(--ui-red, var(--ui-text-color));
+  }
+}
+
+.notes {
+  margin: 0;
+  padding-left: 20px;
+}

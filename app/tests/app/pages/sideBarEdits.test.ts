@@ -21,6 +21,9 @@ const saved = new Map<string, string>()
 
 /** A browser context whose saves go nowhere near the disk. */
 async function contextWithNoSaving(context: BrowserContext): Promise<void> {
+  // AutoSave off:  it keeps an edit as a page closes, and a request sent then can miss the route below,
+  // which left a draft of the edit in Solitaire's `__draft/` for every later test to open
+  await context.addInitScript(() => localStorage.setItem("spellEditor:autoSave", "false"))
   // the one route:  Playwright asks the last one added first, and a second could let a save through
   await context.route(/\/api\/projects\/file\/|\.(spell)(\?.*)?$/, (route) => {
     const request = route.request()

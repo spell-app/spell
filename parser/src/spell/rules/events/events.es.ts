@@ -15,6 +15,7 @@ import { EventWords } from "./EventWords"
 import { ChangedProperty } from "./ChangedProperty"
 import { On } from "./On"
 import { WhenSomeoneElseChanges, WhenThingChanges } from "./WhenChanges"
+import { MEDIA_EVENTS, WhenMedia } from "./WhenMedia"
 import { Trigger } from "./Trigger"
 import { Send } from "./Send"
 import { EventPart } from "./EventPart"
@@ -366,6 +367,25 @@ eventsEs.addRule(WhenThingChanges, {
   ]
 })
 eventsEs.addRule(WhenSomeoneElseChanges, { syntax: "cuando otra persona (lo|la) cambia (:|,)? {statement_body}?" })
+
+// un sonido o un vídeo que termina, empieza o se pausa (epic `language` P65)
+eventsEs.addRule(Wording.specialize({ ruleName: "media_event", meanings: MEDIA_EVENTS }), {
+  syntax: "((ends:termina|acaba)|(starts:empieza a sonar|empieza|comienza)|(pauses:se pausa|se detiene))"
+})
+eventsEs.addRule(WhenMedia, {
+  syntax: "cuando {media:media_named} {happened:media_event} (:|,)? {statement_body}?",
+  tests: [
+    {
+      compileAs: "block",
+      tests: [
+        {
+          input: [`cuando el vídeo "intro" termina`, "\timprimir 1"],
+          js: ['on("intro-video-ends", () => core.console.log(1))']
+        }
+      ]
+    }
+  ]
+})
 
 // `cuando volteada:`, lo mismo que `al volteada:` (Q42)
 eventsEs.addRule(On, { syntax: "cuando {eventName:keyword} {props:with_props_arg}? (:|,)? {statement_body}?" })

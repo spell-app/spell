@@ -87,7 +87,7 @@ describe("<epic-clarify>", () => {
     await vi.waitFor(() => expect(linkOf(clarify)).not.toBeNull())
     const link = linkOf(clarify)!
     expect(link.textContent).toBe("Clarify")
-    expect(link.title).toMatch(/without waiting for Send/)
+    expect(link.dataset.tooltip).toBe("Ask Claude for details now")
     await expectAccessible(clarify)
     link.click()
     await vi.waitFor(() =>
@@ -126,14 +126,14 @@ describe("<epic-clarify>", () => {
     return clarify.shadowRoot!.querySelector<HTMLButtonElement>('button[part~="base"]')
   }
 
-  test("icon (T76):  a circle-question button for `of`;  clicked, the details asked for now, and it stays, turning", async () => {
+  test("icon (T76, T95):  an (i) button for `of`;  clicked, the details asked for now, and it stays, turning", async () => {
     const routes = new FakeRoutes()
     await adoptClient(routes)
     const clarify = await ElementFixture.render(`<epic-clarify of="J182" icon></epic-clarify>`)
     await vi.waitFor(() => expect(buttonOf(clarify)).not.toBeNull())
     const button = buttonOf(clarify)!
-    expect(button.querySelector("ui-icon")?.getAttribute("name")).toBe("circle question")
-    expect(button.title).toMatch(/clarify this now, without waiting for Send/)
+    expect(button.querySelector("ui-icon")?.getAttribute("name")).toBe("info circle")
+    expect(button.dataset.tooltip).toBe("Rewrite it in plainer words, now")
     await expectAccessible(clarify)
     button.click()
     await vi.waitFor(() =>
@@ -142,7 +142,7 @@ describe("<epic-clarify>", () => {
         body: expect.objectContaining({ id: "j182", action: "details" })
       })
     )
-    await vi.waitFor(() => expect(buttonOf(clarify)?.title).toMatch(/call it off/))
+    await vi.waitFor(() => expect(buttonOf(clarify)?.dataset.tooltip).toMatch(/:  stop$/))
     expect((clarify as unknown as { matches(s: string): boolean }).matches(":state(turning)")).toBe(true)
   })
 
@@ -155,7 +155,7 @@ describe("<epic-clarify>", () => {
     await vi.waitFor(() => expect(buttonOf(clarify)).not.toBeNull())
     const turning = () => (clarify as unknown as { matches(s: string): boolean }).matches(":state(turning)")
     expect(turning()).toBe(false)
-    expect(buttonOf(clarify)!.title).toMatch(/clarify this now/)
+    expect(buttonOf(clarify)!.dataset.tooltip).toMatch(/plainer words/)
     buttonOf(clarify)!.click()
     await vi.waitFor(() =>
       expect(routes.posted).toContainEqual({
@@ -178,16 +178,24 @@ describe("<epic-clarify>", () => {
     )
   })
 
-  test("icon in an item:  `<epic-item>` draws it at its body's right while reviewed, a given body's too", async () => {
+  test("icon in an item (T95):  `<epic-item>` draws it last on its LINE while reviewed, folded, on every kind", async () => {
     await adoptClient(new FakeRoutes())
-    const item = await ElementFixture.render(ITEM)
-    // drawn from its first unfolding (epic `epic-engine` I333):  folded, its body is hidden anyway
-    await ElementFixture.tick()
-    expect(item.shadowRoot!.querySelector('[part~="clarify"]')).toBeNull()
-    item.setAttribute("open", "")
-    await vi.waitFor(() => expect(item.shadowRoot!.querySelector('[part~="clarify"]')).not.toBeNull())
-    const icon = item.shadowRoot!.querySelector('[part~="clarify"]')!
-    expect(icon.getAttribute("of")).toBe("t9")
-    await vi.waitFor(() => expect(buttonOf(icon)).not.toBeNull())
+    for (const html of [
+      ITEM,
+      `<epic-item id="i4" title="an issue" status="open"><p>Broken.</p></epic-item>`,
+      `<epic-item id="j5" title="a call" status="open"></epic-item>`,
+      `<epic-item id="q6" title="a question" status="open"></epic-item>`,
+      `<epic-item id="m7" title="a test" status="open"></epic-item>`
+    ]) {
+      const item = await ElementFixture.render(html)
+      // with the line's marks, once near the screen (I333):  never in the details, folded or not
+      await vi.waitFor(() => expect(item.shadowRoot!.querySelector('[part~="clarify"]')).not.toBeNull())
+      const icon = item.shadowRoot!.querySelector('[part~="clarify"]')!
+      expect(icon.closest('[part~="line"]')).not.toBeNull()
+      expect(icon.parentElement!.lastElementChild).toBe(icon)
+      expect(icon.getAttribute("of")).toBe(item.id)
+      expect(item.hasAttribute("open")).toBe(false)
+      await vi.waitFor(() => expect(buttonOf(icon)).not.toBeNull())
+    }
   })
 })

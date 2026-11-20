@@ -203,8 +203,8 @@ Each row below is one rule's own test:  a line it reads, and the JavaScript that
 | math | arithmetic, biggest and smallest, rounding, `a random number between 1 and 6` | 11 | `largest of the prices` | `core.largestOf(prices)` |
 | properties | `the ... of ...`, `its ...`, `the ...` in an action, `the ...'s ...`, object literals | 20 | `the short rank of the card` | `card.shortRank` |
 | lists | positions, ranges, adding, removing, `for`, `where` | 50 | `remove last card of deck` | `core.removeItemAt(deck, -1)` |
-| UI | `print`, notices, alerts and prompts, `scroll to the top`, `open printing`, `play` and `stop` a sound (a file, or [one of Spell's own](#sounds)), styles | 15 | `prompt "Name for the new baby?"` | `const it = await core.prompt("Name for the new baby?")` |
-| classes | templates, properties, aliases, saving, versions | 77 | `a card is a thing` | `export class Card extends Thing {}` |
+| UI | `print`, notices, alerts and prompts, `scroll to the top`, `open printing`, sounds and videos (a file, [one of Spell's own](#built-in-sounds), naming one, `play`, `stop`, `pause`, `resume`, asking about one), styles | 25 | `prompt "Name for the new baby?"` | `const it = await core.prompt("Name for the new baby?")` |
+| classes | templates, properties, aliases, saving, versions | 78 | `a card is a thing` | `export class Card extends Thing {}` |
 | async | waiting, pauses, processes | 8 | `pause for 2 seconds` | `await core.pauseFor(2, "seconds")` |
 | draw | drawing a list's items | 3 | `draw each card in the deck` | `core.drawItems(deck)` |
 | places | where data lives:  a place, what's kept in it, reading and writing it | 77 | `family cookbook is a web server from "https://api.example.com/v1"` | `export class FamilyCookbook extends Place {}` |
@@ -213,7 +213,7 @@ Each row below is one rule's own test:  a line it reads, and the JavaScript that
 | types | type names, singular and plural | 12 | `things` | `Thing` |
 | assignment | `set ... to ...`, `... is ...`, `get`, `return` | 4 | `set unknown-var to yes` | `export const unknownVar = true` |
 | statements | statements with nothing else to say | 2 | `do nothing` | `core.doNothing()` |
-| events | firing and handling events | 13 | `on card click` | `on("card-click")` |
+| events | firing and handling events | 14 | `on card click` | `on("card-click")` |
 | if | `if`, `otherwise`, a value `if ... otherwise` | 6 | `print 1 if bar else 2` | `core.console.log(bar ? 1 : 2)` |
 | methods | `to ...` actions, animations, quoted aliases | 20 | `to start the game` | `export function startTheGame() {}` |
 | tests | `expect`, `should be`, `echo` | 4 | `its rank should be queen` | `core.expect(it.rank, ...)` |
@@ -732,30 +732,57 @@ A thing hears an event when its handler says so, and sends one with `send`:
 
 </details>
 
-### Sounds
+### Sounds and videos
 
-```spell
-to count up
-	set the count to the count + 1
-	play "click"
-```
+A page or the app names a sound or a video once, and plays it by that name from anywhere while it's showing.
 
-_From the Counter example:  each click of its button plays a click._
+| Spell | JavaScript |
+| --- | --- |
+| `sound "card slide" is at "sounds/slide.mp3"`, in the app | `this.declareProp("cardSlide", { init: () => core.media("sound", "sounds/slide.mp3", "card slide"), early: true })` |
+| `its "intro" is a video at "intro.mp4"` | the same, a video |
+| `<video "intro" source="intro.mp4" />`, in its drawing | the same, and drawn right there |
+| `play the card slide sound at double speed` | `core.play(core.mediaNamed("card slide", "sound"), { speed: 2 })` |
+| `play the "intro" video from 0:30 in a new window and wait` | `await core.play(core.mediaNamed("intro", "video"), { from: 30, where: "window" })` |
+| `if the "intro" video is playing` | `if (core.isPlaying(core.mediaNamed("intro", "video")))` |
+| `when the "intro" video ends` | `onIntroVideoEnds(event) { ... }` |
 
-`play` plays a sound;  `stop` stops it, and `load` gets it ready, so a later `play` starts at once.
-- What it plays:  one of Spell's 139 built-in sounds, by its name (`"card slide"`, `"win"`), or a sound file's address.
-  - A name is plain words, no `/` or `.`;  an address always has one (`"cry.ogg"`).
-  - Each sound has an English name and a Spanish one:  `reproducir "deslizar carta"`.
-  - A name Spell has no sound for plays nothing, and the program's console says so.
-- It compiles to `core.play("click")`, and starts in the same moment:
-  so in a click's action, a browser that only lets a click start a sound (Safari, phones) plays it.
-- The built-in sounds are Ogg files, which Safari plays only from version 18.4.
-- A program compiled to Python plays them too:  its page plays each one as the program asks.
+- `video` and `movie` are one word;  Spanish says `sonido`, `vídeo` (or `video`) and `película`.
+- The name becomes a property of the page or app, so `play its card slide` works too.
+- Four ways to play one:  `play sound "card slide"`, `play the "card slide" sound`, the same without quotes when the
+  words are one of the names, and `play "card slide"` alone, which looks for the name first, then plays the file at
+  that address.
+  - A name that starts with one of the program's own words (`card`, `pile`) needs its quotes.
+- After what it plays, each optional, in this order:
+  - speed:  `at 1.5x`, `at half speed`, `at double speed`
+  - where to start:  `from 0:30`, in minutes and seconds
+  - volume:  `at 50% volume`, `quietly`, `muted`
+  - looping:  `over and over`, `looping`
+  - where a video plays:  `in a new window`, `full screen`
+  - `and wait`:  the next line runs once it ends
+- A video plays where the page draws it, if it does;  otherwise in a new window.
+  - `in a new window` always opens one:  a see-through framed window on a desktop, full screen on a phone, with the
+    video's controls.  Closing it stops the video;  the video ending closes it.
+  - `full screen` plays it full screen, on a desktop too.
+- `stop sound "card slide"`, `pause video "intro"`, `resume video "intro"`, `stop all sounds`, `stop all videos`.
+- `the "intro" video is done`, `the length of the "intro" video`, a duration:  `... as a duration` says `2 minutes`.
+- Each one sends events as it plays, so a program can build its own player:  `when the "intro" video ends`,
+  `... starts playing`, `... pauses`;  `on intro video ends` hears the same.
+  - Everyone hears them, as `trigger` sends:  the app and each page by its own handler, then the program's listeners.
+- Spanish, the same lines its own way:  `sonido "deslizar" está en "..."`, `reproducir el vídeo "intro" a 1.5x en una ventana nueva y esperar`,
+  `pausar el vídeo "intro"`, `parar todos los sonidos`, `si el vídeo "intro" está sonando`, `cuando el vídeo "intro" termina`.
+- A program compiled to Python plays sounds too:  its page plays each one as the program asks.
 - While a test runs, nothing plays:  Counter's `to test counting` counts up twice as the program loads.
+
+#### Built-in sounds
+
+`play "click"` plays one of Spell's 139 built-in sounds, by its name, when the program has no sound of that name.
+- Names are plain words (`"card slide"`, `"win"`), each with a Spanish one too:  `reproducir "deslizar carta"`.
+- A name Spell has no sound for plays nothing, and the program's console says so.
 - The editor lists the names as you type `play "`;  its first row, "Pick a sound…", opens the sound picker,
   where ▶ plays each one before you pick it.
 - The examples that play them:  Solitaire and Solitario, Checkers, Counter, Calculator and Calculadora.
-- The sounds are [Kenney](https://kenney.nl)'s, from seven of his free packs, CC0:
+- They're Ogg files, which Safari plays only from version 18.4.
+- They're [Kenney](https://kenney.nl)'s, from seven of his free packs, CC0:
   [Spell UI's runtime page](https://github.com/spell-app/spell/blob/main/ui/README-runtime.md#sounds) says more.
 
 ### Tests, in English

@@ -22,7 +22,8 @@ export const epicKickoffVocabulary = {
   description:
     'The kickoff box (epic `epic-engine` P75;  Owen, 2026-11-17:  "start with an empty-ish epic doc and a field ' +
     'where I can type in what i want to do, rather than typing it in chat"):  drawn by `<epic-overview>` at its top ' +
-    "while the epic has no kickoff prompt and no phases, and the page is reviewed;  never written in a doc.  A lead " +
+    "while the epic has no kickoff prompt and no phases, the page is in its Overview stage and reviewed, and never on a " +
+    "saga page (epic `epic-engine` I349);  never written in a doc.  A lead " +
     "line, then ONE box that grows as it's typed (`<epic-text-box>`), taking several pictures pasted, dropped or " +
     "chosen, each written into the words labelled (`![IMG2](<path>)`) and shown in a strip under the box, with its x.  " +
     "What's typed is saved as typed, a `kickoff` mark in the review inbox;  the header's Send hands it over, and " +
@@ -58,7 +59,7 @@ export const epicKickoffVocabulary = {
         "Nothing is built until you say go.",
       description: "Under the box:  how pictures are named, and what Send does.  A new line splits it."
     },
-    { key: "choose", text: "Add pictures from your computer", description: "The picture button's tooltip and name." },
+    { key: "choose", text: "Add pictures", description: "The picture button's tooltip and name." },
     { key: "saved", text: "Saved {time}", description: "After the hint, once saved:  `{time}`, when." },
     { key: "notSaved", text: "Not saved:  {why}", description: "After the hint, when a save failed:  `{why}`." },
     {

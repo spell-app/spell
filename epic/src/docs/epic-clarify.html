@@ -7,7 +7,7 @@
     <title>epic-clarify</title>
     <meta
       name="description"
-      content="The &lt;epic-clarify&gt; element: Clarify, and the circle-question beside an item's body, asking Claude to clarify it at once."
+      content="The &lt;epic-clarify&gt; element: Clarify, and the (i) button on every item's line, asking Claude to clarify it at once."
     />
     <!-- Before first paint:  the viewer's colour scheme (Spell UI's `ThemePreference.HEAD_SCRIPT`).  The theme itself is restored by site.js. -->
     <script>
@@ -32,7 +32,7 @@
         <ui-container>
           <ui-header level="1" class="site-title">
             &lt;epic-clarify&gt;
-            <ui-header>The &lt;epic-clarify&gt; element: Clarify, and the circle-question beside an item's body, asking Claude to clarify it at once.</ui-header>
+            <ui-header>The &lt;epic-clarify&gt; element: Clarify, and the (i) button on every item's line, asking Claude to clarify it at once.</ui-header>
           </ui-header>
         </ui-container>
       </ui-segment>
@@ -45,9 +45,11 @@
             that asks Claude for the item's details at once, without waiting for Send.
           </p>
           <p>
-            With <code>icon</code>, it's a small circle-question at the right of every item's body, on an epic page being
-            reviewed. A click asks Claude to clarify that text at once; while Claude works on it, the icon turns like a
-            coin.
+            With <code>icon</code>, it's a small (i) button, last on the line of every item, every kind (issues,
+            judgement calls, todos, questions, manual tests), on an epic page being reviewed: found without opening the
+            item. A click asks Claude to clarify that item's text at once; while Claude works on it, the icon turns like
+            a coin. Until epic <code>epic-engine</code> T95 it was a circle-question at the right of an item's body,
+            seen only once the item was opened.
           </p>
           <p>
             Either click leaves the page where it is: the link is a button drawn as a word, never a <code>#</code> link,
@@ -55,7 +57,7 @@
           </p>
           <p class="meta">
             For anyone reviewing an epic page.<br />
-            Status: <ui-label size="mini" color="green">built</ui-label> (epic <code>epic-engine</code> I281;  the icon, T76), its own
+            Status: <ui-label size="mini" color="green">built</ui-label> (epic <code>epic-engine</code> I281;  the icon, T76;  on every item's line, T95), its own
             <a href="/epic/src/components/epic-clarify/" target="src-spell-epic-src-components-epic-clarify"><code title="epic/src/components/epic-clarify/">epic-clarify</code></a> family.<br />
             Its vocabulary: <a href="/epic/src/components/epic-clarify/EpicClarify.en.ts" target="src-spell-epic-src-components-epic-clarify-epicclarify-en-ts"><code title="epic/src/components/epic-clarify/EpicClarify.en.ts">EpicClarify.en.ts</code></a><br />
             Its component: <a href="/epic/src/components/epic-clarify/EpicClarify.tsx" target="src-spell-epic-src-components-epic-clarify-epicclarify-tsx"><code title="epic/src/components/epic-clarify/EpicClarify.tsx">EpicClarify.tsx</code></a>.
@@ -83,7 +85,7 @@
                 >
               </ui-content>
             </ui-accordion>
-            <p>The icon on its own, as <code>&lt;epic-item&gt;</code> draws it beside a body. Not reviewed here, so nothing shows.</p>
+            <p>The icon on its own, as <code>&lt;epic-item&gt;</code> draws it at the end of its line. Not reviewed here, so nothing shows.</p>
             <div><epic-clarify of="t9" icon></epic-clarify></div>
             <ui-accordion class="spell-code" appearance="styled">
               <ui-title>The icon · 1 line</ui-title>
@@ -124,8 +126,10 @@
                 the migration <code>item-bodies</code> brings older bodies up to it on the page's next edit.
               </li>
               <li>
-                <code>&lt;epic-item&gt;</code> draws the icon itself, in its shadow root, beside its body while the page
-                is reviewed (its part <code>clarify</code>).
+                <code>&lt;epic-item&gt;</code> draws the icon itself, in its shadow root, last on its line while the page
+                is reviewed (its part <code>clarify</code>): Spell UI's <code>info circle</code>, a review button's 24px
+                square, centred on the line with the review buttons. Like the rest of the line's marks it's drawn once
+                the line comes near the screen, so a folded section's items carry none.
               </li>
               <li>It holds nothing.</li>
             </ul>
@@ -137,7 +141,7 @@
                   </thead>
                   <tbody>
                     <tr><td><code>of</code></td><td>Its item's id, when it isn't written inside the item.</td></tr>
-                    <tr><td><code>icon</code></td><td>A circle-question button instead of the Clarify link.</td></tr>
+                    <tr><td><code>icon</code></td><td>An (i) button instead of the Clarify link, last on an item's line.</td></tr>
                   </tbody>
                 </table>
               </ui-table>
@@ -150,7 +154,7 @@
                   </thead>
                   <tbody>
                     <tr><td><code>base</code></td><td>The Clarify link, or the icon's button, in the page's link colour (<code>--epic-clarify-color</code>).</td></tr>
-                    <tr><td><code>icon</code></td><td>The circle-question glyph:  it turns while Claude works (<code>:state(turning)</code>).</td></tr>
+                    <tr><td><code>icon</code></td><td>The (i) glyph (<code>info circle</code>):  it turns while Claude works (<code>:state(turning)</code>).</td></tr>
                   </tbody>
                 </table>
               </ui-table>

@@ -26,13 +26,13 @@
  * - Ops:
  *   - `add-folder { path, name? }`:  add `path` as the window's last folder;  already there:  ok, no-op
  *   - `remove-folder { path }`:  remove it;  never folder 0 (the repo root);  not there:  ok, no-op
- *   - `show-doc { file, hash?, view?, query? }`:  `DocPreview.show(file, hash, view, query)`
+ *   - `show-doc { file, hash?, view?, query? }`:  `DocPreview.show(file, hash, query)`
  *     - `hash`:  an id on the page to land on
  *     - `query`:  the page's query, without its `?`:  `test=1` (a test run, `epic test`)
- *     - `view`:  the side bar tab asked for, `"docs"`, `"review"` or `"details"`;  the page's kind decides
- *       (`docViewFor()`:  an epic page always to Review, a details or choice page to Details), and the answer says
- *       which, `{ file, view }`
- *   - `reload-view { view? }`:  rebuild that doc view from scratch, a new iframe at the page in view
+ *     - `view`:  the side bar tab asked for, `"review"`, `"details"` or `"docs"`;
+ *       the page's kind decides, never `view` (`docViewFor()`:  a details or choice page to Details, an epic doc to
+ *       Epic Docs, everything else to Review), and the answer says which, `{ file, view }`
+ *   - `reload-view { view? }`:  rebuild that doc view (Review when none) from scratch, a new iframe at the page in view
  *     (`DocView.rebuild()`);  answers its `url`, `null` when the view was never shown
  *   - `close-window {}`:  close this window, just after answering (`/isolate done` closes the worktree's window)
  *   - `open-session { sessionId?, prompt?, title? }`:  open Claude Code session `sessionId` in an editor tab
@@ -76,7 +76,7 @@ import { SHOWN_TAB_TITLE } from "spell/epic/server/server.types"
 
 import { DocPreview } from "./DocPreview"
 import { DocView } from "./DocView"
-import { folderIndex, isDocView, tabShows, windowsFolder } from "./docUrls"
+import { docViewNamed, folderIndex, tabShows, windowsFolder } from "./docUrls"
 
 /** Largest request body accepted, in bytes:  ops carry a path or two. */
 const MAX_BODY = 64 * 1024
@@ -221,16 +221,16 @@ export class WindowBridge {
       case "show-doc": {
         const file = path(body, "file")
         if (!existsSync(file) || !statSync(file).isFile()) throw new HttpError(404, `no file '${file}'`)
-        if (body.view !== undefined && !isDocView(body.view))
+        if (body.view !== undefined && !docViewNamed(body.view))
           throw new HttpError(400, `bad view ${JSON.stringify(body.view)}`)
         const hash = typeof body.hash === "string" ? body.hash : undefined
         const query = typeof body.query === "string" ? body.query : undefined
-        const view = await DocPreview.show(file, hash, body.view, query)
+        const view = await DocPreview.show(file, hash, query)
         return { file, view }
       }
       case "reload-view": {
-        const view = body.view ?? "docs"
-        if (!isDocView(view)) throw new HttpError(400, `bad view ${JSON.stringify(view)}`)
+        const view = docViewNamed(body.view ?? "review")
+        if (!view) throw new HttpError(400, `bad view ${JSON.stringify(body.view)}`)
         return { view, url: DocView.of(view).rebuild() ?? null }
       }
       case "close-window":

@@ -190,6 +190,9 @@ function buildDeclarations(kit: string, repo: PublishedRepo): void {
  * Run `repo`'s own build of what it ships (`"spellPublish": { "build" }`, a yarn script) in its folder;
  * nothing without one.  Throws `CliError` when it fails:  its files would ship stale, or not at all.
  * - the app's `build`:  the editor, `app/dist/`, which an install serves (epic `repo-split` P26)
+ * - epic's `vscode:package`:  its VS Code extension, `vscode/spell-epic.vsix`, git-ignored, so never stale
+ *   (epic `epic-engine` I353;  `PluginPackage` checks its version)
+ * - dry runs too:  their checks are of what a real publish would ship
  */
 function buildFiles(repo: PublishedRepo, say: (text: string) => void): void {
   const script = repo.settings.build
@@ -198,7 +201,8 @@ function buildFiles(repo: PublishedRepo, say: (text: string) => void): void {
   try {
     execFileSync("yarn", [script], { cwd: repo.root, stdio: "pipe" })
   } catch (error) {
-    const output = (error as { stdout?: Buffer }).stdout?.toString() ?? ""
+    const { stdout, stderr } = error as { stdout?: Buffer; stderr?: Buffer }
+    const output = `${stdout?.toString() ?? ""}${stderr?.toString() ?? ""}`
     throw new CLI.CliError(`${repo.name}'s build failed (yarn ${script}):\n${output.slice(-2000)}`, CLI.EXIT.ERRORS)
   }
 }

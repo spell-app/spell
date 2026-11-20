@@ -777,6 +777,7 @@ so the runtime hands its settings over as it loads (`SpellSolid.install(settings
 | [PartContext.ts](../src/element/PartContext.ts), [OwnerContext.ts](../src/element/OwnerContext.ts) | generic content parts, and the element they belong to |
 | [ShadowEvents.ts](../src/element/ShadowEvents.ts) | Solid's delegated events kept from leaking out of shadow roots |
 | [RichAttributes.ts](../src/element/RichAttributes.ts) | a function or object given to an element's attribute, as Solid hands a plain JSX prop:  `on-ui-change={f}` listens, `options={[...]}` sets the property;  `<ui-root pure>` turns its page-wide patch off |
+| [drawnWindow.ts](../src/element/drawnWindow.ts) | a long list drawn as you scroll, `drawnInWindow()`:  the first rows, then more near the screen, what's drawn kept;  `through` draws up to a given item at once.  Spell's long lists and `<ui-tree>`'s data columns use it (not in the barrel:  `spell/element/drawnWindow`) |
 | [HotDefinitions.ts](../src/element/HotDefinitions.ts) | hot reload, in development only (its own entry) |
 | timing.ts | *(none -- `spell/util/timing`, re-exported by the barrel)*:  when to run something |
 | [SkeletonText.ts](../src/element/SkeletonText.ts) | a vocabulary's one-line skeleton, parsed (node too;  its own entry) |
@@ -788,7 +789,7 @@ so the runtime hands its settings over as it loads (`SpellSolid.install(settings
 
 - Its own entries, besides the barrel:
   `spell/element/elements.types` and `/vocabulary.types` (for node code that mustn't load the framework),
-  `/timing`, `/SkeletonText`, `/HotDefinitions`.
+  `/timing`, `/SkeletonText`, `/HotDefinitions`;  `/drawnWindow` by its path.
 - It may use only Solid and util's generic files, one by one (and the toolchain, for its configs):
   its barrel test pins that, and every export.
 - Four files are derived from Solid's `@solidjs/element` and `component-register`, and carry their MIT notice:

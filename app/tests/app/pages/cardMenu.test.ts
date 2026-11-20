@@ -103,7 +103,7 @@ describe.skipIf(!SERVING)('a home page card\'s "..." menu', { timeout: 240_000 }
       const card = holder.querySelector(".TileCard")!.getBoundingClientRect()
       const dots = holder
         .querySelector("ui-dropdown.CardMenu ui-icon")!
-        .shadowRoot!.querySelector<SVGPathElement>("svg path")!
+        .shadowRoot!.querySelector<SVGGraphicsElement>("svg path")!
       const ink = dots.getBBox()
       const matrix = dots.getScreenCTM()!
       const inkStart = new DOMPoint(ink.x, ink.y).matrixTransform(matrix)

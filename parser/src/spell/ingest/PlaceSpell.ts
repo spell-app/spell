@@ -1,4 +1,4 @@
-import { kindWordsOf, oneOfWords } from "spell/parser/core/schemaWords"
+import { kindWordsOf, oneOfWords, verbBefore } from "spell/parser/core/schemaWords"
 import { P } from "spell/parser/parser"
 import { englishAgreement } from "spell/parser/spell/languages/en/agreement"
 import { checkEveryInWords } from "spell/parser/spell/rules/places/CheckedEvery"
@@ -11,6 +11,7 @@ import { PROPORTION } from "spell/util/measures/Dimension"
 
 import type { CollectionDescription, FieldDescription, PlaceDescription, ServerTakes } from "./ingest.types"
 import { isSpellsOwnType, wordsFor } from "./PlaceShape"
+import { PlaceWords } from "./PlaceWords"
 
 /** What each thing a field can hold is, in a type's line. */
 const SPELL_TYPES: Readonly<Partial<Record<FieldDescription["type"], string>>> = {
@@ -129,8 +130,10 @@ export function spellPartsFor(
   const isSheet = kind === "sheet" || kind === "google sheet"
   if (sameId && (isSheet || sameId !== USUAL_ID)) placeLines.push({ key: "id", text: `its id is its "${sameId}"` })
   // what's said of lists is said of those that list:  one found by name is read a thing at a time
+  // a search answers its own way, its one list wherever it is (`RestPlace`):  FastAPI's `results`, beside its lists' `items`
   const lists = every.filter(({ at }) => !isFoundByNameAt(at))
-  const rowsAt = sameOfEvery(lists, (collection) => collection.rowsAt)
+  const notSearches = lists.filter(({ searchedOnly }) => !searchedOnly)
+  const rowsAt = sameOfEvery(notSearches.length ? notSearches : lists, (collection) => collection.rowsAt)
   if (rowsAt) placeLines.push({ key: "rows", text: `its rows are ${fieldInWords(rowsAt)}` })
   const nextAt = kind === "web server" ? sameOfEvery(lists, (collection) => collection.nextAt) : undefined
   if (nextAt) placeLines.push({ key: "next", text: `its next page is ${fieldInWords(nextAt)}` })
@@ -145,6 +148,9 @@ export function spellPartsFor(
   const most = Math.max(...paged.map(({ rowsItSays }) => rowsItSays ?? Infinity))
   if (kind === "web server" && paged.length && paged.every(({ takesLimit }) => takesLimit) && most <= MOST_AT_A_TIME) {
     placeLines.push({ key: "size", text: `it gives up to ${Math.ceil(most / 1000) * 1000} at a time` })
+  } else if (kind === "web server" && serverTakes?.pagesWith?.most !== undefined && !nextAt && !paging.size) {
+    // its OpenAPI description says the most its lists give:  a read asking for more would be refused (epic `data` I140)
+    placeLines.push({ key: "size", text: `it gives up to ${serverTakes.pagesWith.most} at a time` })
   }
   // every list gives only a little of each row:  what any of them gives, or its id when none gives more
   if (kind === "web server" && every.length && every.every(({ listsGive }) => listsGive)) {
@@ -217,11 +223,16 @@ export function spellPartsFor(
       placeLines.push({ key: `picture:${collection}:${field}`, text: line })
     }
   }
-  // a list under each thing, at its own address:  `a post's comments live at "/posts/{id}/comments"`
+  // a list under each thing, at its own address:  `a post's comments live at "/posts/{id}/comments"`;
+  // or one thing:  `a system's snapshot lives at "/instances/{id}/snapshot"` (epic `from-console` P16)
   for (const [collection, description] of shown) {
     for (const [list, at] of listsUnderShown(description, collections)) {
-      const line = `${articled(description.type)}'s ${collectionWords(collections[list]!)} live at "${at}"`
-      placeLines.push({ key: `under:${collection}:${list}`, text: line })
+      const { type, isOneUnder } = collections[list]!
+      const what = isOneUnder ? `${type} lives` : `${collectionWords(collections[list]!)} live`
+      placeLines.push({
+        key: `under:${collection}:${list}`,
+        text: `${articled(description.type)}'s ${what} at "${at}"`
+      })
     }
   }
   // an action route under a thing, from its description:  `to sync a data source is at "/api/core/data-sources/{id}/sync/"`
@@ -476,13 +487,14 @@ function typesInside(
       }
       const lines = Object.entries(inside).flatMap(([name, about]) => {
         if (about.leftOut || (!about.inside && !about.isItsOwner && !SPELL_TYPES[about.type])) return []
-        const what = typeWordsFor(about, collections, words, own, place)
-        return [
-          {
-            key: `inside:${words}:${about.words}`,
-            text: `its "${about.words}" is ${what}${storedAsFor(name, about)}${commentFor(about, collections)}`
-          }
-        ]
+        // what its schema says of it too, as a collection's own field:  `required text` (epic `data` I140);
+        // NOT its choices:  one type inside stands for every field holding it, NetBox's `status` with each its own
+        const what = schemaWordsFor(
+          { ...about, choices: undefined },
+          typeWordsFor(about, collections, words, own, place)
+        )
+        const line = `its "${about.words}" ${verbBefore(what)} ${what}${nothingWordsFor(about)}${storedAsFor(name, about)}`
+        return [{ key: `inside:${words}:${about.words}`, text: `${line}${commentFor(about, collections)}` }]
       })
       const header = `${articled(words).replace(words, `"${words}"`)} is a thing`
       types.set(words, { collection, header, lines, isInside: true, insideFields: inside, heldBy: [{ owner, field }] })
@@ -585,13 +597,16 @@ function typeLines(
   for (const [field, about] of Object.entries(description.fields)) {
     if (isLeftOut(field, description, about.leftOut, about.type, about)) continue
     const what = schemaWordsFor(about, typeWordsFor(about, collections, description.type, own, place))
-    const line = `its "${about.words}" is ${what}${nothingWordsFor(about)}${storedAsFor(field, about)}`
+    const line = `its "${about.words}" ${verbBefore(what)} ${what}${nothingWordsFor(about)}${storedAsFor(field, about)}`
     lines.push({ key: `field:${collection}:${field}`, text: `${line}${commentFor(about, collections)}` })
   }
-  // each list it keeps under this one, read from there:  `its "comments" is a list of comments`
+  // each list it keeps under this one, read from there:  `its "comments" is a list of comments`;
+  // or one thing:  `its "snapshot" is a snapshot` (epic `from-console` P16)
   for (const [list] of listsUnderShown(description, collections)) {
+    const { type, isOneUnder } = collections[list]!
     const words = collectionWords(collections[list]!)
-    lines.push({ key: `under:${collection}:${list}`, text: `its "${words}" is a list of ${words}` })
+    const text = isOneUnder ? `its "${type}" is ${articled(type)}` : `its "${words}" is a list of ${words}`
+    lines.push({ key: `under:${collection}:${list}`, text })
   }
   return {
     collection,
@@ -621,8 +636,10 @@ function actionsOf({ operations = {} }: CollectionDescription): Array<[string, {
  * What a type read from an API's description says of whether it was tried (Q56, Q62):  `unverified`, `verified`,
  * `failed`;  nothing for a type read from rows, which a read through the Spell has tried.
  */
-function stateWordFor({ state, schemaAt }: CollectionDescription): string | undefined {
-  const isFromDescription = schemaAt !== undefined || state?.is === "unverified" || state?.is === "untyped"
+function stateWordFor({ state, schemaAt, tag }: CollectionDescription): string | undefined {
+  // a list no schema typed is still from the description, filed under its tag:  NetBox's background queues (P55)
+  const isFromDescription =
+    schemaAt !== undefined || tag !== undefined || state?.is === "unverified" || state?.is === "untyped"
   if (!state || state.readByTheLook || !isFromDescription) return undefined
   return state.is === "untyped" ? "unverified" : state.is === "disabled" ? undefined : state.is
 }
@@ -651,7 +668,7 @@ function listsUnderShown(
   const taken = new Set(Object.values(fields).map(({ words }) => words))
   return Object.entries(listsUnder).filter(([list]) => {
     const other = collections[list]
-    return other && !other.leftOut && !taken.has(collectionWords(other))
+    return other && !other.leftOut && !taken.has(other.isOneUnder ? other.type : collectionWords(other))
   })
 }
 
@@ -854,15 +871,23 @@ export type SpellMerge = {
  * - `usesOf`:  where these words are used, in lines the tool didn't write.
  * - `written`:  the lines it wrote last time, as the description keeps them (`PlaceDescription.spell`):
  *   one written by an older version of the tool, in words it no longer writes, is put in today's (`inTodaysWords()`).
+ * - A person's words, the `--` lines right inside a line (`PlaceWords`;  epic `data` P53):
+ *   - kept with their line, however it changes
+ *   - dropped with it when it goes, saying so in a line (Q102)
+ * - `marks`:  the day it looked, `2026-11-18`, and the file's language:  each field and type it finds new gets
+ *   `-- NEW as of <date>`, each it can no longer find and keeps gets `-- APPARENTLY DELETED as of <date>` (Q102).
+ *   Left out, no marks.
  */
 export function mergedSpell(
   text: string,
   before: SpellParts,
   after: SpellParts,
   usesOf: (words: string, own: ReadonlySet<string>) => boolean,
-  written: readonly string[] = []
+  written: readonly string[] = [],
+  marks?: MergeMarks
 ): SpellMerge {
   const merge: SpellMerge = { text, changed: [], couldnt: [] }
+  const markOf = (is: "new" | "gone") => (marks ? PlaceWords.markFor(is, marks.date, marks.lang) : undefined)
   const lines = text.split("\n")
   const own = new Set(allLines(before).map((line) => line.text))
   const placeAt = lines.findIndex((line) => sameHeader(line, before.header))
@@ -876,14 +901,24 @@ export function mergedSpell(
     merge.changed.push(`Moved:  ${after.header}`)
   }
   // the place's lines
-  mergeBlock({ lines, blockAt: placeAt, before: before.placeLines, after: after.placeLines, merge, own, usesOf })
+  mergeBlock({
+    lines,
+    blockAt: placeAt,
+    before: before.placeLines,
+    after: after.placeLines,
+    merge,
+    own,
+    usesOf,
+    markOf
+  })
   // each type, and a new one at the end
   for (const type of after.types) {
     const was = before.types.find((each) => isSameType(each, type))
     if (!was) {
       // one blank line before it, whatever the file ended with
       while (lines.at(-1) === "") lines.pop()
-      lines.push("", type.header, ...type.lines.map((line) => `\t${line.text}`))
+      const mark = markOf("new")
+      lines.push("", type.header, ...(mark ? [`\t-- ${mark}`] : []), ...type.lines.map((line) => `\t${line.text}`))
       merge.changed.push(
         type.isInside
           ? `New type inside:  "${type.header}".`
@@ -896,13 +931,16 @@ export function mergedSpell(
       merge.couldnt.push(`"${was.header}" isn't in the file as it was written, so its lines weren't changed.`)
       continue
     }
-    mergeBlock({ lines, blockAt, before: was.lines, after: type.lines, merge, own, usesOf })
+    mergeBlock({ lines, blockAt, before: was.lines, after: type.lines, merge, own, usesOf, markOf })
   }
   for (const type of before.types) {
     if (type.isInside || after.types.some((each) => isSameType(each, type))) continue
     merge.couldnt.push(
       `The collection "${type.collection}" is gone from the source;  its type stays, for you to remove:  ${type.header}`
     )
+    const blockAt = lines.findIndex((line) => sameHeader(line, type.header))
+    const mark = markOf("gone")
+    if (blockAt >= 0 && mark) markGone(lines, blockAt, "\t", mark)
   }
   inTodaysWords(lines, written, after, merge)
   merge.text = lines.join("\n")
@@ -977,10 +1015,20 @@ type BlockMerge = {
   own: ReadonlySet<string>
   /** See `mergedSpell()`. */
   usesOf: (words: string, own: ReadonlySet<string>) => boolean
+  /** The mark for a line found new, or gone and kept:  `undefined`, none. */
+  markOf: (is: "new" | "gone") => string | undefined
+}
+
+/** The day a look was, and the file's language:  see `mergedSpell()`. */
+export type MergeMarks = {
+  /** When it looked:  `2026-11-18`. */
+  date: string
+  /** The file's language:  `en`, `es`. */
+  lang: string
 }
 
 /** SIDE EFFECT:  one block's lines, added, changed and gone:  see `mergedSpell()`. */
-function mergeBlock({ lines, blockAt, before, after, merge, own, usesOf }: BlockMerge): void {
+function mergeBlock({ lines, blockAt, before, after, merge, own, usesOf, markOf }: BlockMerge): void {
   const wereBy = new Map(before.map((line) => [line.key, line.text]))
   for (const line of after) {
     const was = wereBy.get(line.key)
@@ -988,7 +1036,8 @@ function mergeBlock({ lines, blockAt, before, after, merge, own, usesOf }: Block
     if (was === undefined) {
       // a person wrote it already, word for word:  nothing to add
       if (lineAt(lines, blockAt, line.text) >= 0) continue
-      lines.splice(endOfBlock(lines, blockAt), 0, `\t${line.text}`)
+      const mark = isFieldLine(line.text) ? markOf("new") : undefined
+      lines.splice(endOfBlock(lines, blockAt), 0, `\t${line.text}`, ...(mark ? [`\t\t-- ${mark}`] : []))
       merge.changed.push(`Added:  ${line.text}`)
       continue
     }
@@ -1017,17 +1066,54 @@ function mergeBlock({ lines, blockAt, before, after, merge, own, usesOf }: Block
       merge.couldnt.push(
         `The source no longer has what this line reads, and "${words}" is used, so it stays, for you to change:  ${text}`
       )
+      const mark = markOf("gone")
+      if (mark) markGone(lines, at, "\t\t", mark)
       continue
     }
-    lines.splice(at, 1)
+    // its words go with it:  nothing's left for them to explain
+    const under = linesUnder(lines, at)
+    const dropped = under.filter((line) => !PlaceWords.isMark(line.trim()))
+    lines.splice(at, 1 + under.length)
     merge.changed.push(`Removed:  ${text}`)
+    if (dropped.length)
+      merge.changed.push(
+        `Dropped your words for "${words ?? text}", as it's gone:  ${dropped.map((line) => line.trim()).join(" ")}`
+      )
   }
+}
+
+/** Is `line` a field's line, `its "status" is ...`, in either language? */
+function isFieldLine(line: string): boolean {
+  return /^(?:- )?(?:its|su) "/.test(line)
+}
+
+/** The lines right under line `at`, indented further:  a person's words, and the ingest's marks. */
+function linesUnder(lines: readonly string[], at: number): string[] {
+  const indent = /^\t*/.exec(lines[at]!)![0]
+  const under: string[] = []
+  for (let next = at + 1; next < lines.length && lines[next]!.startsWith(`${indent}\t`); next++)
+    under.push(lines[next]!)
+  return under
+}
+
+/**
+ * SIDE EFFECT:  `mark` (`APPARENTLY DELETED as of ...`) under line `at`, after any words a person wrote there,
+ * unless it says it's gone already.
+ */
+function markGone(lines: string[], at: number, indent: string, mark: string): void {
+  let end = at + 1
+  while (end < lines.length && lines[end]!.startsWith(`${indent}--`)) {
+    if (lines[end]!.includes(mark.slice(0, mark.lastIndexOf(" ")))) return
+    end++
+  }
+  lines.splice(end, 0, `${indent}-- ${mark}`)
 }
 
 /** The words a line is about:  a property's, or what a source's name maps to. */
 function wordsIn(line: string): string | undefined {
   return (
-    /^(?:- )?(?:its|su) "([^"]+)" (?:is|es) /.exec(line)?.[1] ?? /^(?:- )?an? .+?'s "?(.+?)"? is its "/.exec(line)?.[1]
+    /^(?:- )?(?:its|su) "([^"]+)" (?:is|es|as|como) /.exec(line)?.[1] ??
+    /^(?:- )?an? .+?'s "?(.+?)"? is its "/.exec(line)?.[1]
   )
 }
 

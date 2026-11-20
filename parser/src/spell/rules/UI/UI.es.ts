@@ -24,11 +24,21 @@ import { ShowDatesAs } from "./ShowDatesAs"
 import { ShowDrawn, ShowDrawnWith } from "./ShowDrawn"
 import { TheResult } from "./TheResult"
 import { WithoutClosing } from "./WithoutClosing"
-import { PlaySound } from "./PlaySound"
+import { PlaySound, MEDIA_PLACES } from "./PlaySound"
 import { StopSound } from "./StopSound"
 import { LoadSound } from "./LoadSound"
+import { DefineMedia } from "./DefineMedia"
+import { MediaCall } from "./MediaCall"
+import { MediaIs } from "./MediaIs"
+import { MediaLength } from "./MediaLength"
+import { MediaNamed } from "./MediaNamed"
+import { MediaNameWords } from "./MediaNameWords"
+import { MediaSpeed } from "./MediaSpeed"
+import { MediaTime } from "./MediaTime"
+import { MediaVolume } from "./MediaVolume"
+import { StopAllMedia } from "./StopAllMedia"
 import { Prompt } from "./Prompt"
-import { TEXT_SIZES } from "./UI.shared"
+import { MEDIA_KINDS, TEXT_SIZES } from "./UI.shared"
 import { Warn } from "./Warn"
 
 /** Spanish's `UI` rules. */
@@ -200,14 +210,144 @@ UIEs.addRule(OpenPrinting, {
   tests: [{ compileAs: "statement", tests: [["abrir impresión", "core.openPrinting()"]] }]
 })
 
+////////////////
+// ## Sonidos y vídeos (epic `language` P65)
+////////////////
+
+UIEs.addRule(Wording.specialize({ ruleName: "media_kind", meanings: MEDIA_KINDS }), {
+  syntax: "((sound:sonido)|(video:vídeo|video|película))"
+})
+UIEs.addRule(Wording.specialize({ ruleName: "media_kinds", meanings: MEDIA_KINDS }), {
+  syntax: "((sound:sonidos)|(video:vídeos|videos|películas))"
+})
+UIEs.addRule(Wording.specialize({ ruleName: "media_speed_word", meanings: ["half", "normal", "double"] }), {
+  syntax:
+    "((half:media velocidad|la mitad de velocidad)|(normal:velocidad normal)" +
+    "|(double:doble velocidad|doble de velocidad|el doble de velocidad))"
+})
+UIEs.addRule(Wording.specialize({ ruleName: "media_loop", meanings: ["loop"] }), {
+  syntax: "((loop:una y otra vez|en bucle))"
+})
+UIEs.addRule(Wording.specialize({ ruleName: "media_place", meanings: MEDIA_PLACES }), {
+  syntax: "((window:en una ventana nueva|en una nueva ventana)|(full_screen:a pantalla completa|en pantalla completa))"
+})
+
+UIEs.addRule(MediaNameWords, { syntax: "{identifier}" })
+
+UIEs.addRule(MediaNamed, {
+  syntax: "(el|la)? {kind:media_kind} {name:text}",
+  tests: [
+    {
+      compileAs: "expression",
+      tests: [
+        [`el sonido "deslizar"`, `core.mediaNamed("deslizar", "sound")`],
+        [`la película "intro"`, `core.mediaNamed("intro", "video")`]
+      ]
+    }
+  ]
+})
+UIEs.addRule(MediaNamed, {
+  syntax: "(el|la)? {kind:media_kind} (llamado|llamada) {name:text}",
+  tests: [{ compileAs: "expression", tests: [[`el vídeo llamado "intro"`, `core.mediaNamed("intro", "video")`]] }]
+})
+UIEs.addRule(MediaNamed, { syntax: "(el|la) {kind:media_kind} {name:media_name_words}" })
+UIEs.addRule(MediaNamed, { syntax: "{kind:media_kind} {name:media_name_words}" })
+
+UIEs.addRule(MediaTime, { syntax: "{number} : {number}", tests: [{ tests: [["1:05", 65]] }] })
+UIEs.addRule(MediaSpeed, {
+  syntax: "(a|al) ({speed:number} x|{word:media_speed_word})",
+  tests: [
+    {
+      tests: [
+        ["a 1.5x", 1.5],
+        ["a media velocidad", 0.5],
+        ["al doble de velocidad", 2]
+      ]
+    }
+  ]
+})
+UIEs.addRule(MediaVolume, {
+  syntax: "(((a|al) {volume:measure_literal} de volumen)|(quiet:bajito|suavemente)|(muted:en silencio|silenciado))"
+})
+
+UIEs.addRule(DefineMedia, {
+  syntax: "{type:subject_implied} {kind:media_kind} {property:quoted_member} (está|esta) en {path:text}"
+})
+
 UIEs.addRule(PlaySound, {
-  syntax: "reproducir {sound:expression}",
-  tests: [{ compileAs: "statement", tests: [[`reproducir "cry.ogg"`, `core.play("cry.ogg")`]] }]
+  syntax:
+    "reproducir {sound:expression} {speed:media_speed}? (desde {from:media_time})? {volume:media_volume}?" +
+    " {loop:media_loop}? {place:media_place}? (wait:y esperar)?",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [
+        [`reproducir "cry.ogg"`, `core.play("cry.ogg")`],
+        [`reproducir el sonido "deslizar"`, `core.play(core.mediaNamed("deslizar", "sound"))`],
+        [
+          `reproducir el vídeo "intro" a 1.5x en una ventana nueva`,
+          `core.play(core.mediaNamed("intro", "video"), { speed: 1.5, where: "window" })`
+        ],
+        [`reproducir "tema" bajito una y otra vez y esperar`, `await core.play("tema", { volume: 0.3, loop: true })`],
+        [`reproducir "intro" desde 0:30 a pantalla completa`, `core.play("intro", { from: 30, where: "full screen" })`]
+      ]
+    }
+  ]
 })
 
 UIEs.addRule(StopSound, {
   syntax: "parar {sound:expression}",
   tests: [{ compileAs: "statement", tests: [[`parar "cry.ogg"`, `core.stop("cry.ogg")`]] }]
+})
+
+UIEs.addRule(StopAllMedia, {
+  syntax: "parar (todos los|todas las) {kind:media_kinds}",
+  tests: [
+    {
+      compileAs: "statement",
+      tests: [
+        [`parar todos los sonidos`, `core.stopAll("sound")`],
+        [`parar todas las películas`, `core.stopAll("video")`]
+      ]
+    }
+  ]
+})
+
+UIEs.addRule(MediaCall.specialize({ methodName: "pause" }), {
+  syntax: "pausar {media:media_named}",
+  tests: [
+    { compileAs: "statement", tests: [[`pausar el vídeo "intro"`, `core.pause(core.mediaNamed("intro", "video"))`]] }
+  ]
+})
+UIEs.addRule(MediaCall.specialize({ methodName: "resume" }), {
+  syntax: "reanudar {media:media_named}",
+  tests: [
+    { compileAs: "statement", tests: [[`reanudar el vídeo "intro"`, `core.resume(core.mediaNamed("intro", "video"))`]] }
+  ]
+})
+
+UIEs.addRule(MediaIs, {
+  syntax:
+    "{media:media_named} {operator:is_or_is_not} ((playing:sonando|reproduciéndose)|(done:terminado|terminada|acabado|acabada))",
+  tests: [
+    {
+      compileAs: "expression",
+      tests: [
+        [`el vídeo "intro" está sonando`, `core.isPlaying(core.mediaNamed("intro", "video"))`],
+        [`el sonido "deslizar" no está terminado`, `!core.isDone(core.mediaNamed("deslizar", "sound"))`]
+      ]
+    }
+  ]
+})
+
+UIEs.addRule(MediaLength, {
+  syntax: "la (duración|longitud) (del|de) {media:media_named}",
+  tests: [
+    {
+      compileAs: "expression",
+      tests: [[`la duración del vídeo "intro"`, `core.mediaLength(core.mediaNamed("intro", "video"))`]]
+    }
+  ]
 })
 
 UIEs.addRule(LoadSound, {

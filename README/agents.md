@@ -104,18 +104,19 @@ the kit, then the repo and folder it's working in, then the rules for the task a
 
 | # | File | When it's read | What it holds |
 | --- | --- | --- | --- |
-| 1 | the kit's [CLAUDE.md](../CLAUDE.md) | by Claude Code, as every session starts | two `@` imports, of the next two files, then the Claude-only rules (below) |
+| 1 | the kit's [CLAUDE.md](../CLAUDE.md) | by Claude Code, as every session starts | `@` imports of the next two files and of WWOD's §21, the option Spell opts in to, then the Claude-only rules (below) |
 | 2 | the kit's [AGENTS.md](../AGENTS.md) | through `CLAUDE.md`;  Codex reads it itself | the kit, and what's across repos:  installs, imports, tests, CI, worktrees |
 | 3 | WWOD's hub, [WWOD.md](../agents/wwod/WWOD.md) | through `CLAUDE.md` | the seven sections every task needs, and the table of which spoke to read for what |
 | 4 | a big folder's `AGENTS.md`, e.g. [Spell UI's](https://github.com/spell-app/spell/blob/main/ui/AGENTS.md) | when the session first works in that folder | that folder:  its sub-folders, what it may import, its commands, its own conventions |
 | 5 | a folder's `AGENTS.md`, e.g. [the kit server's](../src/server/AGENTS.md) | through the `CLAUDE.md` beside it:  two lines, and an `@AGENTS.md` | what's local to that folder |
 | 6 | WWOD's spoke for the task | as the hub's table says, before writing | one topic's rules:  types, classes, CSS, tests ... (below) |
-| 7 | the Solid 2 rules | IN FULL, before any Solid code;  the `solid-2` skill triggers on Solid work | Solid 2 as it is:  it's neither React nor Solid 1, and guessing from either writes wrong code |
+| 7 | the [Solid 2 rules](../agents/solid/solid-2.md) | IN FULL, before any Solid code;  the `solid-2` skill triggers on Solid work | Solid 2 as it is:  it's neither React nor Solid 1, and guessing from either writes wrong code |
 | 8 | the commands guide | before adding a skill, a `spell` command or a yarn script | where each belongs:  skills keep judgement and dialog, the command line does every repo action, yarn holds each tool's own scripts |
 
 Only the first three load by themselves;  the agent opens the rest when they tell it to.
 The Solid 2 rules are kept out of the `@` imports on purpose:  they're long, and only Solid work needs them.
-Both 7 and 8 live in the epic folder (below, "More in the docs site").
+The Solid 2 rules are in the kit's `agents/solid/`, beside WWOD;
+the commands guide lives in the epic folder (below, "More in the docs site").
 
 Codex reads every `AGENTS.md` from the root down to the folder it starts in;
 Claude Code loads the root's through `CLAUDE.md`, and a folder's when it works there.
@@ -178,7 +179,8 @@ Here's one whole rule, from section 6:
 
 _A bold title to cite it by, `WWOD §6 › "User-facing strings stay inline"`, and the road not taken, kept._
 
-- Every rule is a bullet like that:  about 230 of them, in 20 numbered sections.
+- Every rule is a bullet like that:  about 230 of them, in 20 numbered sections, and one more a project opts in to,
+  §21.
 - A rule lives in exactly ONE place:  the hub or one spoke, never both.
 - A rule chosen AGAINST is kept, as a `NOT:` line under the winner, so nobody proposes it again.
 - ONE copy, in the kit's [`agents/wwod/`](../agents/wwod/), serves every repo:  edit it there.
@@ -200,6 +202,7 @@ Its "Touching / Also read" table sends the agent on to a SPOKE, one file per top
 | [css.md](../agents/wwod/css.md) | 18 | CSS and styling |
 | [logging.md](../agents/wwod/logging.md) | 19 | logging and debug output |
 | [tests.md](../agents/wwod/tests.md) | 20 | tests |
+| [code-is-the-spec.md](../agents/wwod/code-is-the-spec.md) | 21 | OPT-IN:  the code is the spec, and a test that disagrees is rewritten to match it;  the opposite of test-first (TDD) |
 
 `spell wwod check` resolves every citation and repo path in WWOD, every `AGENTS.md` and `CLAUDE.md`, and the
 skills, and exits 1 on a broken one.
@@ -223,6 +226,86 @@ Adding a rule ([WWOD's own README](../agents/wwod/README.md) has the same steps)
   They were merged with Spell's own, translated to Solid 2, and reviewed file by file in October 2026.
 
 </details>
+
+## Using these rules in your own project
+
+```sh
+npx spell@next wwod init
+```
+
+<details>
+<summary>What it printed</summary>
+
+```text
+? Should your coding agents follow WWOD, Spell's house style? Yes
+? Should they follow the Solid 2 rules?  Say yes if this project uses Solid 2. Yes
+? Should they treat the code as the spec, and rewrite a test to match it?  Say no if you write tests first. No
+CLAUDE.md:  created;  added WWOD, the Solid 2 rules
+AGENTS.md:  added WWOD, the Solid 2 rules
+```
+
+</details>
+
+_Three questions, then the rules' lines in your `CLAUDE.md` and `AGENTS.md`._
+
+WWOD and the Solid 2 rules ship in the npm `spell` package, under `agents/`,
+so a project that installs `spell` can hand them to its agents.
+Each is opt-in:  take WWOD, the Solid 2 rules, both, or neither.
+
+- `spell wwod init` writes them in for you:
+  - `CLAUDE.md` gets an `@` line per rule, which Claude Code reads in every session;  it's made when missing.
+  - `AGENTS.md`, which other agents (Codex ...) read, gets the same in plain words, when you have one,
+    under a line saying to skip a rule the tool already loaded:
+    Claude Code reads `AGENTS.md` too, and the rules are long (about 19k tokens), so it reads them once.
+  - In a workspace (a folder whose `package.json` is listed in a `workspaces` above it),
+    it asks which folder gets them:  the workspace's root (the default, and `--yes`'s), or the nearer folder.
+    `--here` takes the nearer folder without asking.
+  - Each file's lines sit in one marked block.
+    Run it again to add or drop a rule:  it changes that block, and never writes a second one.
+  - Without asking:  `--yes`, with `--solid`, `--code-is-the-spec` or `--no-wwod` for what you want.
+    `--dry-run` says what it would change, and writes nothing.
+- They ship from the release after 0.8.10:  the package's `"spellPublish": { "files" }` names `agents/wwod` and
+  `agents/solid`, and nothing else of `agents/`.
+  The logs and the coherence catalog are Spell's own, and stay home.
+- WWOD's hub sends the agent on to its spokes by file name:  they're beside it, in the same folder.
+- By hand, the same lines, in your `CLAUDE.md`:
+
+  ```text
+  @node_modules/spell/agents/wwod/WWOD.md
+
+  @node_modules/spell/agents/solid/solid-2.md
+  ```
+
+  And in plain words, at the top of your `AGENTS.md`:
+
+  ```markdown
+  **READ these rules from the spell package, unless your tool already loaded them** (Claude Code does, through `CLAUDE.md`):
+  - **Before any code:**  `node_modules/spell/agents/wwod/WWOD.md`, the house style (WWOD)
+  - **Before any Solid 2 code:**  `node_modules/spell/agents/solid/solid-2.md`, IN FULL
+  ```
+
+- The limits:
+  - WWOD's examples cite Spell's own files (its editor's `editor.ts` ...):  read them as illustrations.
+  - The Solid 2 rules' "Status" and "Spell's decisions" sections are Spell's;  the rest is Solid 2 itself, pinned to
+    the release Spell runs (rc.21).
+  - A rule in your own `AGENTS.md` wins where it disagrees:  say so there.
+
+### The one rule you choose:  §21, the code is the spec
+
+```text
+@node_modules/spell/agents/wwod/code-is-the-spec.md
+```
+
+_`spell wwod init` asks about it last, and only with WWOD;  `--code-is-the-spec` takes it without asking.
+Spell's own `CLAUDE.md` has this line, as `@agents/wwod/code-is-the-spec.md`._
+
+- In Spell, the source is the spec:  a test that disagrees with the code is rewritten to match it,
+  unless the code is obviously wrong.
+- That's the opposite of test-first (TDD), where a failing test comes first and the tests are the spec:
+  superpowers' test-driven-development skill, for one.
+- So it's its own file, read only by a project that opts in.
+  - Without it, WWOD §1 says only that tests follow the project's own way, as its `AGENTS.md` says.
+  - Say which in your `AGENTS.md`:  test-first, or this line.
 
 ## Do this, not that
 
@@ -419,7 +502,7 @@ spell-app's, in its own [`.claude/skills/`](https://github.com/spell-app/spell/t
 | `/design` | designs with Spell's real `<ui-*>` elements, in Claude Design or in VS Code:  `push`, `pull`, `new`, `page` |
 | `/fussbudget` | rewrites docstrings, comments, READMEs and docs to WWOD's writing rules, left uncommitted |
 | `solid-2` | the Solid 2 rules, loaded by itself before any Solid work |
-| `/spell-docs` | opens the docs in VS Code's Epic Docs tab |
+| `/spell-docs` | opens the docs in VS Code's Review tab |
 | `/spell-serve` | starts this checkout's servers, and says which port each is on |
 
 The hooks are the plugin's [`hooks.json`](https://github.com/spell-app/spell/blob/main/epic/hooks/hooks.json):
@@ -478,7 +561,7 @@ they need a checkout with `spell.epics` beside the repos,
 and the page server running (`spell server start`, then the URL it prints).
 
 - "WWOD:  the agents' house style":  `/guides/wwod.html`
-- "Spell on Solid 2":  `/guides/solid/solid-2.html`;  the rules agents read, `/guides/solid/solid-2.md`
+- "Spell on Solid 2":  `/guides/solid/solid-2.html`;  the rules agents read are the kit's, [agents/solid/solid-2.md](../agents/solid/solid-2.md)
 - "Commands":  `/guides/dev/commands/commands.html`;  the commands guide, `/guides/dev/commands/commands.md`
 - "Background agents:  /bg":  `/guides/background-agents.html`
 - "Details Pages":  `/guides/details.html`

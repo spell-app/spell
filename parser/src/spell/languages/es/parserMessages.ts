@@ -233,6 +233,10 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     '<{tag}> solo tiene sus elementos:  <acción "nombre"/> para una acción, <divisor/> para una línea entre grupos',
   "unknown-menu":
     '<{tag} "{menu}"> no nombra ningún menú de aquí:  dibuja uno con ese nombre, p. ej. <menú "{menu}">, y pon en él sus acciones',
+  "unknown-media":
+    'Nada aquí se llama "{name}":  ponle ese nombre primero, p. ej. sonido "{name}" está en "sonidos/{name}.mp3"',
+  "media-event-name":
+    "El nombre de un manejador debe ir escrito:  di el nombre del sonido o del vídeo entre comillas, sin [ ]",
   "unknown-menu-attribute":
     '{attribute}="{menu}" no nombra ningún menú de aquí:  dibuja uno con ese nombre, p. ej. <menú "{menu}">, o declara uno, su "{menu}" es un menú de ...',
   "context-menu-code":

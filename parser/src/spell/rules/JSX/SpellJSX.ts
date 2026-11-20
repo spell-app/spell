@@ -2,10 +2,13 @@ import { elementTagFor, proto } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 // Through the folder:  read only when called, once the folder has loaded
-import { DrawIt, DrawnLines } from "spell/parser/spell/rules/classes"
+import { DrawIt, DrawnLines, OutlineSpecifierMedia } from "spell/parser/spell/rules/classes"
 import { SpellConstant } from "spell/parser/spell/rules/constants"
 import { QuotedMember } from "spell/parser/spell/rules/properties"
 import { ParseError } from "spell/parser/spell/rules/ParseError"
+import { Wording } from "spell/parser/spell/rules/expressions"
+// Through the folder:  read only when parsing, once the folder has loaded
+import { MEDIA_KINDS, noteMediaName } from "spell/parser/spell/rules/UI"
 import { refuseWriteIfReadOnly } from "spell/parser/spell/rules/places/places.shared"
 import {
   DIVIDER_TAG_MEANING,
@@ -50,6 +53,8 @@ const VIEW_ID_ATTRIBUTE = "id"
 const CONTEXT_MENU_ATTRIBUTE = "context-menu"
 /** Spell UI's modal:  its actions close it, and what it holds goes in its parts (epic `language` T155). */
 const DIALOG_TAG = "ui-modal"
+/** Where a sound or video's tag says its file is:  `source`, and Spanish's `fuente`;  `src` as the web writes it. */
+const MEDIA_SOURCE_ATTRIBUTES = ["source", "fuente", "src"]
 
 /** The scope a named modal's contents are drawn in, where `it` is what it's shown with (epic `language` P64). */
 const SHOWN_SCOPE = "shown"
@@ -196,6 +201,15 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     if (takesShortcuts && !element.attributes?.length && !element.children?.length && !element.quotedWord) {
       match.data.loopItem = SpellJSX.loopItemNamed(scope, element.tagName)
       if (match.data.loopItem) return match
+    }
+    // a sound or video named where it's drawn (epic `language` P65):  `<video "intro" source="..." />`
+    if (
+      takesShortcuts &&
+      element.quotedWord &&
+      !element.children?.length &&
+      SpellJSX.mediaDrawnBy(scope, match, element)
+    ) {
+      return match
     }
     // a value declared where it's drawn (epic `language` P55, Q52):  `<number "score"/>` ~== `"score" is a number`
     if (takesShortcuts && element.quotedWord && !element.children?.length && !element.attributes?.length) {
@@ -347,6 +361,50 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
     )
   }
 
+  /**
+   * SIDE EFFECT:  reads a sound or video's tag with a quoted word into `match.data.media` -- `false` for any other tag
+   * (epic `language` P65).
+   * - `<sound "card slide" source="sounds/slide.mp3" />`, `<video "intro" source="..." />`, `<movie ...>`;
+   *   Spanish `<sonido ...>`, `<vídeo ...>`, `<película ...>`:  the language's `media_kind` words.
+   * - In a thing's own drawing, with a `source` and no member by that name:  it declares one, a property of the page
+   *   or app, as `sound "card slide" is at "..."` does (`match.data.declares`).
+   * - Its name is noted (`noteMediaName()`), so `play the card slide sound` reads.
+   * - Its other attributes are left out:  a video's look is the core's (its controls, framed).
+   */
+  private static mediaDrawnBy(scope: P.Scope, match: P.MatchFor<SpellJSX>, element: P.JSXElementToken): boolean {
+    const kind = MEDIA_KINDS.find((meaning) => Wording.reads(scope, "media_kind", element.tagName, meaning))
+    const name = element.quotedWord && textOf(element.quotedWord.value).trim()
+    if (!kind || !name) return false
+    const attribute = element.attributes?.find((each) => MEDIA_SOURCE_ATTRIBUTES.includes(each.name))
+    const source = attribute ? scope.parser?.parse(attribute, "jsxAttribute", scope) : undefined
+    match.data.media = { kind, name, ...(source && { source }) }
+    noteMediaName(scope, name)
+    const owner = SpellJSX.drawingThingOf(scope)
+    if (owner && source && !owner.getMember(QuotedMember.nameOf(name))) {
+      match.data.declares = { owner: owner.name, name, media: kind, datatype: kind }
+    }
+    return true
+  }
+
+  /**
+   * `core.drawMedia(...)`:  what a sound or video's tag draws, its player (a sound's, nothing).
+   * - Named by its word, `core.mediaNamed("intro", "video")`:  declared here or anywhere else on the page or app.
+   * - Outside a thing's own drawing, with a `source`:  `core.media("video", "...", "intro")`, which names it as it draws.
+   */
+  private static mediaAST(match: P.MatchFor<SpellJSX>, media: NonNullable<JSXMatchData["media"]>): P.ASTJSXElement {
+    const text = (value: string) => new P.ASTStringLiteral(match, { value: JSON.stringify(value) })
+    const source = (media.source?.AST as P.ASTJSXAttribute | undefined)?.value
+    const target =
+      media.source && !match.data.declares && source instanceof P.ASTExpression
+        ? OutlineSpecifierMedia.made(match, media.kind, source, media.name)
+        : new P.ASTCoreMethodInvocation(match, { methodName: "mediaNamed", args: [text(media.name), text(media.kind)] })
+    // a call, as a loop's item's drawing is:  an element holding it puts it in braces (`childAST()`)
+    return new P.ASTCoreMethodInvocation(match, {
+      methodName: "drawMedia",
+      args: [target]
+    }) as unknown as P.ASTJSXElement
+  }
+
   /** Is `match` a tag that draws nothing:  a view it declares, `hidden` (`<deck "deck" hidden/>`, T123)? */
   private static drawsNothing(match: P.Match | undefined): boolean {
     return !!(match?.is(SpellJSX) && match.data.declares?.hidden)
@@ -477,6 +535,8 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
       const attrs = match.data.attributes?.map((attr) => P.asAST<P.ASTJSXAttribute>(attr?.AST)).filter(Boolean) ?? []
       return new P.ASTJSXElement(match, { tagName: MENU_ROW_TAG, attrs: [kind, ...attrs], children: [] })
     }
+    // a sound or video, `<video "intro" />`:  its player, drawn where it is (epic `language` P65)
+    if (match.data.media) return SpellJSX.mediaAST(match, match.data.media)
     // a value declared where it's drawn, `<number "score"/>`:  drawn as `{the score}` is
     const { declares } = match.data
     if (declares?.datatype) {
@@ -782,11 +842,11 @@ export class SpellJSX extends P.TokenType<never, JSXMatchData> {
   /**
    * `child`'s AST, as one of an element's children.
    * - A value that isn't markup goes in braces:  a `<for>`'s loop (I19, I73), and `<film/>`, a loop's item beside
-   *   other markup, `draw the film` (epic `atmosphere` T48).
+   *   other markup, `draw the film` (epic `atmosphere` T48);  a sound or video's player, `<video "intro" />` (P65).
    */
   static childAST(child: P.Match | undefined): P.ASTJSXElementProps["children"][number] | undefined {
     const ast = P.asAST<P.ASTJSXElement | P.ASTJSXEndTag | P.ASTJSXText | P.ASTJSXExpression>(child?.AST)
-    if (ast && child?.is(SpellJSX) && (child.data.loopItem || child.data.loop))
+    if (ast && child?.is(SpellJSX) && (child.data.loopItem || child.data.loop || child.data.media))
       return new P.ASTJSXExpression(child, { expression: ast as unknown as P.ASTExpression })
     return ast
   }

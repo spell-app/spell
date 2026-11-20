@@ -69,7 +69,7 @@ export const epicSendVocabulary = {
   texts: [
     {
       key: "sendTip",
-      text: "Send what's on the page:  a partial answer is fine, send again any time",
+      text: "Send what's on the page;  again any time",
       description: "The plane's tooltip and name (`<epic-send-buttons send-tip>`)."
     }
   ],

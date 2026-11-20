@@ -235,6 +235,10 @@ describe("runner builds", () => {
             folder: "spell-markdown",
             skeleton: expect.any(Object),
             attributes: expect.arrayContaining([])
+          },
+          "spell-reference-page": {
+            folder: "spell-reference-page",
+            attributes: expect.arrayContaining(["src", "editable"])
           }
         },
         define: expect.any(Function)
@@ -242,7 +246,13 @@ describe("runner builds", () => {
     ])
     // each family's module, one that won't load leaving the rest (a warning)
     expect(pack).toContain(".catch(")
-    for (const file of ["spell-viewer.js", "spell-code.js", "spell-editor.js", "spell-markdown.js"]) {
+    for (const file of [
+      "spell-viewer.js",
+      "spell-code.js",
+      "spell-editor.js",
+      "spell-markdown.js",
+      "spell-reference-page.js"
+    ]) {
       expect(pack).toContain(`load(${JSON.stringify(file)})`)
       expect(existsSync(join(element, file)), file).toBe(true)
     }
@@ -251,7 +261,7 @@ describe("runner builds", () => {
   })
 
   test("<spell-code> and <spell-markdown>:  Spell UI's families through `spell-ui-shared.js`;  `spell-language.js` imports none of it up front", () => {
-    for (const entry of ["spell-code.js", "spell-markdown.js"]) {
+    for (const entry of ["spell-code.js", "spell-markdown.js", "spell-reference-page.js"]) {
       const files = staticImports(element, entry)
       expect(files, entry).toEqual(expect.arrayContaining(["spell-solid-shared.js", "spell-ui-shared.js"]))
       expect(files, entry).not.toContain("spell-ui.js")

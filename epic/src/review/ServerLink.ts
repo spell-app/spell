@@ -1,4 +1,5 @@
 import { $fetch } from "spell/util/spell/$fetch"
+import { watchServerFiles } from "spell/util/polling"
 import { backoffFor } from "spell/util/retrying"
 import { MissingResourceError, ResponseError } from "spell/util/spell/ResponseErrors"
 
@@ -17,7 +18,7 @@ import {
  * A page's LINK to the page server:  EVERY read, write and poll of the epic pages and the docs pages goes through one
  * (epic `coherence` C9).
  * - the review inbox's (`ReviewClient`), the running agents' (`AgentsClient`), the answer pages' forms (`AnswerForm`,
- *   `ChoicesForm`, `RunForm`), the epic page's own reads, the docs pages' comments, and the data pages' files
+ *   `ChoicesForm`, `RunForm`), the epic page's own reads, the docs pages' comments, and the reference pages' files
  *   (the commands page, the core reference, the syntax page:  `getFile()`)
  * - served?  `isServed`:  a page the page server served, with its token, never from `file://`;
  *   `ServerLink.isServed()` for a page with no link of its own
@@ -285,9 +286,9 @@ export class ServerLink {
    * - a data file named (`<name>.json5`) by its old name too, `<name>.json` (`dataFileNames()`):  a checkout on older
    *   code writes that (epic `epic-workflow` P21)
    * - `every`:  `0` for no poll;  `polls`:  poll only while it answers true (a docs page's Send, while it shows)
-   * - the server down (`spell-server:down`, the live client's word):  no poll and no look on the page coming into view
-   *   until it's back (`spell-server:up`), then one look at once;  so a restart leaves no failed requests on the
-   *   console (epic `epic-engine` I294)
+   * - the server down:  no poll until it's back, then one look at once (epic `epic-engine` I294)
+   * - a thin wrapper over the kit's `watchServerFiles()` (spell/util's polling;  epic `from-console` P17):
+   *   this adds the data files' old names, and the epic pages' poll
    * - the one poll of every page (epic `coherence` C9):  a page that polls writes none of its own
    */
   static watch(
@@ -296,39 +297,8 @@ export class ServerLink {
     refresh: () => void,
     { every = REVIEW_POLL_MS, polls }: { every?: number; polls?: () => boolean } = {}
   ): () => void {
-    const { document } = window
     const cares = typeof files === "function" ? files : namedFiles(files)
-    // the server down (restarting:  every merge into main does it), as the page's live client hears it:  no poll asks
-    // until it's back, then one does at once (epic `epic-engine` I294)
-    let down = false
-    const timer = every
-      ? window.setInterval(() => {
-          if (!down && document.visibilityState === "visible" && (polls?.() ?? true)) refresh()
-        }, every)
-      : undefined
-    const onVisible = () => {
-      if (!down && document.visibilityState === "visible") refresh()
-    }
-    const onDown = () => (down = true)
-    const onUp = () => {
-      down = false
-      if (document.visibilityState === "visible") refresh()
-    }
-    const onFile = (event: Event) => {
-      const path = (event as CustomEvent<{ path?: string }>).detail?.path
-      if (path && cares(decodeURIComponent(path))) refresh()
-    }
-    document.addEventListener("visibilitychange", onVisible)
-    window.addEventListener("spell-server:changed", onFile)
-    window.addEventListener("spell-server:down", onDown)
-    window.addEventListener("spell-server:up", onUp)
-    return () => {
-      if (timer !== undefined) window.clearInterval(timer)
-      document.removeEventListener("visibilitychange", onVisible)
-      window.removeEventListener("spell-server:changed", onFile)
-      window.removeEventListener("spell-server:down", onDown)
-      window.removeEventListener("spell-server:up", onUp)
-    }
+    return watchServerFiles(window, cares, refresh, { every, polls })
   }
 
   /**

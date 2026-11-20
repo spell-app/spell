@@ -32,14 +32,21 @@ describe("<epic-state-filter>", () => {
     const quiet = await ElementFixture.render(
       `<epic-state-filter counts="handed:2 progress:1 quiet:3 old:1 requested:1"></epic-state-filter>`
     )
-    // One Color Each (epic `epic-engine` P63):  a Do this in the blue badge, calm calls in the grey chip, light orange its own
+    // One Color Each (epic `epic-engine` P63):  a Do this in the blue badge, calm calls in the grey chip;  light orange
+    // drawn as orange (I347:  "Lump the light orange icons in with the orange")
     expect(quiet.shadowRoot!.querySelector(".marked")!.textContent).toBe("3")
     expect(chip(quiet, "old").textContent).toBe("4")
-    expect(chip(quiet, "requested").dataset.color).toBe("light-orange")
+    expect(chip(quiet, "requested").dataset.color).toBe("orange")
+    // with orange too:  ONE orange chip, counting both, led by `replied`
+    const oranges = await ElementFixture.render(
+      `<epic-state-filter counts="replied:4 requested:2 open:8"></epic-state-filter>`
+    )
+    expect(chips(oranges)).toEqual(["replied:6+", "open:8+"])
+    expect(chip(oranges, "replied").dataset.tooltip).toContain("6 ")
     const grey = await ElementFixture.render(`<epic-state-filter counts="old:3 handled:2 open:1"></epic-state-filter>`)
     expect(chips(grey)).toEqual(["open:1+", "old:5+"])
     expect(chip(host, "attention").dataset.color).toBe("red")
-    expect(chip(host, "attention").title).toBe("1 needs attention:  hide these\n⌥-click:  show only these")
+    expect(chip(host, "attention").dataset.tooltip).toBe("1 urgent\nHide these · ⌥-click:  only these")
     expect(host.shadowRoot!.querySelector('[part~="base"]')!.getAttribute("role")).toBe("group")
     await expectAccessible(host)
   })
@@ -56,15 +63,17 @@ describe("<epic-state-filter>", () => {
     expect(looks).toEqual(["red", "orange", "green", "grey"])
     // working and scheduled count in the one blue badge, pressed while they show
     const badge = host.shadowRoot!.querySelector<HTMLElement>(".marked")!
-    expect([badge.textContent, badge.title, badge.getAttribute("aria-pressed")]).toEqual([
+    expect([badge.textContent, badge.dataset.tooltip, badge.getAttribute("aria-pressed")]).toEqual([
       "6",
-      "6 to do:  under way, scheduled, or marked in this pass:  hide these\n⌥-click:  show only these",
+      "6 under way, scheduled or marked\nHide these · ⌥-click:  only these",
       "true"
     ])
-    expect(chip(host, "attention").title).toBe("1 need you:  a choice open:  hide these\n⌥-click:  show only these")
-    expect(chip(host, "updated").title).toBe("3 changed since you looked:  hide these\n⌥-click:  show only these")
-    expect(chip(host, "recent").title).toBe("2 done in the last 3 days:  show these too\n⌥-click:  show only these")
-    expect(chip(host, "old").title).toBe("40 done a while ago:  show these too\n⌥-click:  show only these")
+    expect(chip(host, "attention").dataset.tooltip).toBe("1 blocked on a choice\nHide these · ⌥-click:  only these")
+    expect(chip(host, "updated").dataset.tooltip).toBe("3 changed since you looked\nHide these · ⌥-click:  only these")
+    expect(chip(host, "recent").dataset.tooltip).toBe(
+      "2 done in the last 3 days\nShow these too · ⌥-click:  only these"
+    )
+    expect(chip(host, "old").dataset.tooltip).toBe("40 done a while ago\nShow these too · ⌥-click:  only these")
     // only scheduled phases, none under way:  the badge still counts them, and its click toggles them
     const scheduled = await ElementFixture.render(
       `<epic-state-filter phases counts="scheduled:4 old:2" shown="old"></epic-state-filter>`
@@ -77,7 +86,7 @@ describe("<epic-state-filter>", () => {
     expect(picks).toEqual([["scheduled", "old", "handled", "quiet"]])
     // without `phases`, the same names are an item's:  its own words
     const items = await ElementFixture.render(`<epic-state-filter counts="attention:1 recent:2"></epic-state-filter>`)
-    expect(chip(items, "attention").title).toBe("1 needs attention:  hide these\n⌥-click:  show only these")
+    expect(chip(items, "attention").dataset.tooltip).toBe("1 urgent\nHide these · ⌥-click:  only these")
     await expectAccessible(host)
   })
 
@@ -87,8 +96,8 @@ describe("<epic-state-filter>", () => {
       `<epic-state-filter phases counts="waiting:1 updated:1 recent:1 paused:1 old:71"></epic-state-filter>`
     )
     expect(chips(host)).toEqual(["waiting:2+", "paused:72+", "recent:1+"])
-    expect(chip(host, "waiting").title).toBe(
-      "2 your turn:  a plan to read and accept;  changed since you looked:  hide these\n⌥-click:  show only these"
+    expect(chip(host, "waiting").dataset.tooltip).toBe(
+      "2 with a plan to accept;  changed since you looked\nHide these · ⌥-click:  only these"
     )
     const picks: unknown[] = []
     host.addEventListener("epic-state-changed", (event) => picks.push((event as CustomEvent).detail.shown))
@@ -107,7 +116,7 @@ describe("<epic-state-filter>", () => {
       `<epic-state-filter counts="open:2 recent:1" shown="recent"></epic-state-filter>`
     )
     expect(chips(host)).toEqual(["open:2", "recent:1+"])
-    expect(chip(host, "open").title).toBe("2 open, still undecided:  show everything\n⌥-click:  show only these")
+    expect(chip(host, "open").dataset.tooltip).toBe("2 undecided\nShow everything · ⌥-click:  only these")
     host.setAttribute("shown", "")
     await ElementFixture.settle()
     expect(chips(host)).toEqual(["open:2", "recent:1"])
@@ -115,7 +124,7 @@ describe("<epic-state-filter>", () => {
     expect(empty.shadowRoot!.querySelector("button")).toBeNull()
     // one colour is all there is:  the tooltip doesn't claim to hide it
     const alone = await ElementFixture.render(`<epic-state-filter counts="open:2"></epic-state-filter>`)
-    expect(chip(alone, "open").title).toBe("2 open, still undecided:  nothing else to show\n⌥-click:  show only these")
+    expect(chip(alone, "open").dataset.tooltip).toBe("2 undecided\nNothing else to show · ⌥-click:  only these")
   })
 
   test("a click says what was picked and what should show next, by the one rule;  it filters nothing itself", async () => {
@@ -134,9 +143,7 @@ describe("<epic-state-filter>", () => {
     expect(heard).toHaveBeenLastCalledWith({ state: "attention", shown: ["attention", "open"], how: "click" })
     chip(host, "open").click()
     // the last one showing:  the next one instead
-    expect(chip(host, "open").title).toBe(
-      "2 open, still undecided:  show the next ones instead\n⌥-click:  show only these"
-    )
+    expect(chip(host, "open").dataset.tooltip).toBe("2 undecided\nShow the next ones instead · ⌥-click:  only these")
     expect(heard).toHaveBeenLastCalledWith({ state: "open", shown: ["recent"], how: "click" })
   })
 
@@ -168,9 +175,9 @@ describe("<epic-state-filter>", () => {
     const badge = host.shadowRoot!.querySelector<HTMLButtonElement>('[part~="marked"]')!
     expect(badge.localName).toBe("button")
     expect(badge.parentElement!.firstElementChild).toBe(badge)
-    expect([badge.textContent, badge.title]).toEqual([
+    expect([badge.textContent, badge.dataset.tooltip]).toEqual([
       "3",
-      "3 with Claude (marked in this pass, or being worked on):  hide these\n⌥-click:  show only these"
+      "3 with Claude\nHide these · ⌥-click:  only these"
     ])
     expect(badge.getAttribute("aria-pressed")).toBe("true")
     expect(getComputedStyle(badge).borderTopStyle).toBe("solid")
@@ -204,7 +211,7 @@ describe("<epic-hidden-note>", () => {
   test("`3 hidden · show all`, its tooltip;  a click asks to show all;  axe", async () => {
     const host = await ElementFixture.render(`<epic-hidden-note count="3"></epic-hidden-note>`)
     const button = host.shadowRoot!.querySelector("button")!
-    expect([button.textContent, button.title]).toEqual(["3 hidden · show all", "Show everything:  clear the filter"])
+    expect([button.textContent, button.dataset.tooltip]).toEqual(["3 hidden · show all", "Show everything"])
     const heard = vi.fn()
     host.addEventListener("epic-all-showing", heard)
     button.click()

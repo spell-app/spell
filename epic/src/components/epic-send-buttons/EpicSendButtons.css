@@ -1,6 +1,7 @@
 /*
  * `<epic-send-buttons>` (`EpicSendButtons.tsx`):  Send, the paper plane and its words "Send to Claude" (I305), ONE
  *   pill, the plane in its round end;  its countdown's ring round the plane.
+ * - Just after a send, "Sent to Claude" (I352), in the same width:  both words stacked in one grid cell.
  * - The pill's outline:  `transparent` while inactive, nothing new to send, idle or sent (Owen, 2026-10-25:  "I wanted
  *   no border when this is inactive, use `transparent`"), a grey hairline with something not sent (`state`);  never
  *   dashed (Owen, 2026-10-22:  "Lose the dotted outline around both").
@@ -143,10 +144,6 @@
     font-variant-numeric: tabular-nums;
     text-align: center;
   }
-  /* the icons take no pointer:  the titled button gets it, so its tooltip shows (the pack's `Tooltip.css`) */
-  ui-icon {
-    pointer-events: none;
-  }
   /* centred in its round end:  no icon margin or fixed width of its own */
   ui-icon::part(icon) {
     width: auto;
@@ -165,9 +162,17 @@
     /* the plane a little small for its round end */
     font-size: 13px;
   }
-  /* the words:  a step smaller than the page's text, on one line */
-  .words {
+  /* the words:  a step smaller than the page's text, on one line;  "Send to Claude" and "Sent to Claude" stacked in
+     one cell, the hidden ones keeping it as wide as the longer, so a send never moves the header (I352) */
+  .label {
+    display: inline-grid;
     font: 600 12px/1 var(--ui-font-family, system-ui, sans-serif);
+  }
+  .label > * {
+    grid-area: 1 / 1;
+  }
+  .room {
+    visibility: hidden;
   }
   :host {
     /* the ring:  exactly the element's height, never over its edge (Owen, 2026-10-29:  "ring should still be smaller,

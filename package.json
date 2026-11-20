@@ -1,6 +1,6 @@
 {
   "name": "spell",
-  "version": "0.8.10",
+  "version": "0.8.16",
   "private": true,
   "description": "Spell's kit:  the layer every repo stands on (util, toolchain, server, element, its tools and test helpers, the spell command), the house style, and the ONE install over the child repos",
   "license": "MIT",
@@ -411,6 +411,11 @@
       "spell-source": "./ui/src/components/ui-form/index.ts",
       "types": "./ui/dist-types/src/components/ui-form/index.d.ts",
       "default": "./ui/src/components/ui-form/index.ts"
+    },
+    "./ui/components/ui-graph": {
+      "spell-source": "./ui/src/components/ui-graph/index.ts",
+      "types": "./ui/dist-types/src/components/ui-graph/index.d.ts",
+      "default": "./ui/src/components/ui-graph/index.ts"
     },
     "./ui/components/ui-grid": {
       "spell-source": "./ui/src/components/ui-grid/index.ts",
@@ -1506,7 +1511,9 @@
       "oxfmt": "vite-plus"
     },
     "files": [
-      "repos.json5"
+      "repos.json5",
+      "agents/wwod",
+      "agents/solid"
     ],
     "bin": {
       "spell": "cli/main",

@@ -405,6 +405,16 @@ export default function languageCommands(spell: Command): void {
     )
 
   place
+    .command("check")
+    .description(
+      "check that each place's reference page matches its source:  every list and field its description " +
+        "(<Name>.api.json5) has is in its Spell (<Name>.api.spell), and no words a person wrote there, as -- lines, " +
+        "are about something the source no longer has;  says how many have no words yet.  Exits 1 if one doesn't match"
+    )
+    .argument("<files...>", "each place's .spell file or its description, e.g. StarWars.api.spell")
+    .action((files: string[]) => CLI.runCommand(async () => (await import("./placeCheck")).placeCheck(files)))
+
+  place
     .command("nerd")
     .description(
       "draw a place's NERD, the shape of its data, by the NERD skill's rules:  a box per collection with only its " +

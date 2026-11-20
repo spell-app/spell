@@ -1,17 +1,20 @@
 "json usage" is a notebook page
 	<header level="1">
 		JSON data
-		<header>JSON data holds data in a page, as its text or from a file:  it draws nothing, and other elements read it.</>
+		<header>JSON data holds data in a page, as its text or from a file, and shows it as an outline that opens and closes.</>
 	</>
 
 	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
 	<section label="Using it">
 		<markdown>
-			`<ui-json>` holds JSON data in a page, and draws nothing.
+			`<ui-json>` holds JSON data in a page, and shows it as an outline.
 
 			- Its text is the data, or `source` loads it from a file on the same site.
 			- `load` says when:  `eager` (at once), `visible` or `idle`.
-			- An element that takes JSON reads a `<ui-json>` child by itself.
+			- `depth` says how many levels start open, and `editable` lets people change it,
+			  each value in a control that fits it.
+			- `hidden` holds the data without showing it.
+			- An element that takes JSON reads a `<ui-json>` child by itself, and keeps it out of sight.
 			  `<ui-tree-diagram>` does, and follows it as it changes.
 
 			A `<script type="application/json">` is the older way of holding data in a page.
@@ -38,14 +41,14 @@
 			data.value = { label: "New" }
 			```
 
-			Text that isn't JSON logs one console warning, sends `ui-error` and sets `:state(error)`.
-			So does a file that won't load:  nothing draws, so nothing else would show it.
+			Text that isn't JSON shows why, logs one console warning, sends `ui-error` and sets `:state(error)`.
+			So does a file that won't load.
 		</>
 	</>
 
 	<section label="Accessibility">
 		<markdown>
-			JSON data has no role and shows nothing:  screen readers pass over it.
-			What reads it says what it means:  a tree diagram names itself from the data.
+			Each object's and array's toggle is a real button:  it says what it opens, and whether it's open.
+			A hidden `<ui-json>`, or one a diagram reads, shows nothing, and screen readers pass over it.
 		</>
 	</>

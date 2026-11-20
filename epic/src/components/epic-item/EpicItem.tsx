@@ -43,6 +43,8 @@ import {
   NOTE_OPEN,
   OVERNIGHT,
   FAILED,
+  MARKS,
+  PHASE_ROW,
   HANDLED,
   LIMIT,
   REVIEW,
@@ -65,7 +67,6 @@ import {
 } from "./EpicItem.types"
 
 import itemCSS from "./EpicItem.css?inline"
-import tooltipCSS from "./Tooltip.css?inline"
 
 /****************
  * ### `EpicItem`
@@ -83,6 +84,8 @@ import tooltipCSS from "./Tooltip.css?inline"
  *   - handled in a phase (`handled`, epic `epic-engine` P31):  `in P4`, linking the phase;  the item grey
  *   - taken up in a phase (`taken-in`, epic `epic-engine` I128):  the same `in P4`, the item still green
  *   - the review label (`reviewed 10/6/26`, `deferred`, `to do`) and the review buttons
+ *   - last, while reviewed:  the (i) Clarify button (`<epic-clarify icon>`, epic `epic-engine` T95), the same place
+ *     on every kind;  like the rest of the line's marks, drawn once the line comes near the screen (I333)
  * - `calm`:  an open judgement call or issue not reviewed yet is yellow (`open`), not red (`attention`).
  * - `urgent`:  a todo that asks Owen to act (Make Todo's follow-up, I230):  red until reviewed, as an issue is;
  *   a judgement call or issue Owen wants done (Do this, I232):  red until handled, reviewed or not.
@@ -143,7 +146,7 @@ import tooltipCSS from "./Tooltip.css?inline"
 export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   @E.proto static vocabulary = epicItemVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-item": itemCSS },
+    styleSheets: { "epic-item": itemCSS },
     DOMElement: E.DOMLoadableBodyElement,
     // a container:  a click on its text must not jump to the fold button or a link inside
     delegatesFocus: false
@@ -347,7 +350,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   readonly isOpen = createMemo(() => !!this.isMarkedOpen && this.hasDetails())
 
   /**
-   * Its details' review pieces are drawn:  the clarify icon, the said note, the note box (epic `epic-engine` I333).
+   * Its details' review pieces are drawn:  the said note, the note box (epic `epic-engine` I333).
    * - from the first time it opens, kept from then on:  folded, they'd be hidden anyway
    * - the note's typed text lives in the inbox's client, so a box drawn late shows it all the same
    */
@@ -411,6 +414,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
       !!this.overnight ||
       this.failed !== undefined ||
       !!this.phasePill ||
+      !!this.donePill ||
       this.hasCommits() ||
       !!this.review() ||
       this.reviewState.reviewing()
@@ -446,7 +450,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
       parts.push(this.translationForKey(mark.fill === "dashed" ? "tipMarkUnsent" : "tipMarkSent", { chosen }))
     }
     if (queued) parts.push(this.translationForKey("tipTodo", { work: work || queued }))
-    // finished, its `taken-in` draws `done in P20` where the plane was (J231):  the chip still says where it was done
+    // finished, its `taken-in` draws `in P20` under its buttons (J231, I348):  the chip still says where it was done
     if (this.takenIn && !this.phasePill)
       parts.push(this.translationForKey("takenTip", { phase: this.phaseNamed(this.takenIn).full }))
     if (reviewed) parts.push(this.translationForKey("tipReviewed", { date: PlanDates.format(reviewed) }))
@@ -571,10 +575,6 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
           <div class={FLOW}>
             <slot />
           </div>
-          {/* at the body's right, while reviewed:  asks Claude to clarify it now, turning while it does (T76) */}
-          <Show when={this.reviewState.reviewing() && this.detailsDrawn()}>
-            <epic-clarify of={this.id} icon part={this.partForName("clarify")} />
-          </Show>
         </div>
         {/* last in every item, whatever its state (Owen, 2026-10-07):  what was noted, Claude's status cards under
               it ("under my input", Owen, 2026-10-08, P13), then the box */}
@@ -609,7 +609,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
                 data-color={this.chipMark()?.color}
                 data-fill={this.chipMark()?.fill}
                 data-marked={this.isMarkedInPass() ? "" : undefined}
-                title={this.chipTip()}
+                data-tooltip={this.chipTip()}
               >
                 {this.label()}
               </a>
@@ -624,7 +624,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
               data-marked={this.isMarkedInPass() ? "" : undefined}
               aria-pressed={this.itemState() === "attention" ? "true" : "false"}
               data-unsent={this.reviewState.urgency()?.sent === false ? "" : undefined}
-              title={this.chipTip()}
+              data-tooltip={this.chipTip()}
               onClick={this.flipUrgency}
             >
               {this.label()}
@@ -635,17 +635,32 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
         <span class={TITLE} part={this.partForName("title")}>
           <slot name={this.slotForName("title")}>{this.title}</slot>
         </span>
-        <span class={[CELL, EXTRAS]} part={this.partForName("actions")} hidden={!this.hasExtras()}>
-          {/* the page's own buttons first, then the item's (`CONTROLS`:  a click on one never folds) */}
-          <slot name={this.slotForName("actions")} />
-          {/* the rest once it's near the screen (`hasBeenNear`):  folded away, a Show apiece cost 2 nodes an item (I333) */}
-          <Show when={this.hasBeenNear}>{this.lineMarks()}</Show>
+        <span class={EXTRAS} part={this.partForName("actions")} hidden={!this.hasExtras()}>
+          <span class={[CELL, MARKS]}>
+            {/* the page's own buttons first, then the item's (`CONTROLS`:  a click on one never folds) */}
+            <slot name={this.slotForName("actions")} />
+            {/* the rest once it's near the screen (`hasBeenNear`):  folded away, a Show apiece cost 2 nodes an item (I333) */}
+            <Show when={this.hasBeenNear}>{this.lineMarks()}</Show>
+          </span>
+          {/* its phase, `in P4`, on a small line of its own under the buttons (I348):  the title wraps the same with or
+              without it */}
+          <Show when={this.hasBeenNear && (this.phasePill || this.donePill)}>
+            <span class={PHASE_ROW}>
+              <Show when={this.phasePill} fallback={this.doneMark()}>
+                {this.handledMark()}
+              </Show>
+            </span>
+          </Show>
         </span>
       </div>
     )
   }
 
-  /** The line's own marks and buttons, at its end:  bed, failed, `in P4`, git, `done in P20`, review label or buttons. */
+  /**
+   * The line's own marks and buttons, at its end:  bed, failed, git, review label or buttons,
+   * then the (i) Clarify button (epic `epic-engine` T95:  on every item, its line, so it's found without opening it).
+   * - its phase pill (`in P4`) is under them, on a line of its own (`PHASE_ROW`, I348)
+   */
   private lineMarks(): JSX.Element {
     return (
       <>
@@ -655,24 +670,26 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
             part={this.partForName("overnight")}
             role="img"
             aria-label={this.translationForKey("madeOvernight")}
-            title={this.translationForKey("madeOvernight")}
+            data-tooltip={this.translationForKey("madeOvernight")}
           >
             {this.bedGlyph.svg}
           </span>
         </Show>
         <Show when={this.failed !== undefined}>{this.failedMark()}</Show>
-        <Show when={this.phasePill}>{this.handledMark()}</Show>
         <Show when={this.hasCommits()}>{this.gitButton()}</Show>
-        {/* where the plane was:  a finished item's phase (J231) */}
-        <Show when={this.donePill}>{this.doneMark()}</Show>
         <Show when={!this.reviewState.reviewing() && this.review()}>
           {(review) => (
-            <span class={[REVIEW, review().look]} part={this.partForName("review")} title={review().tip}>
+            <span class={[REVIEW, review().look]} part={this.partForName("review")} data-tooltip={review().tip}>
               {review().words}
             </span>
           )}
         </Show>
-        <Show when={this.reviewState.reviewing()}>{this.reviewControl("buttons", "review-buttons")}</Show>
+        <Show when={this.reviewState.reviewing()}>
+          {this.reviewControl("buttons", "review-buttons")}
+          {/* last on the line, so the same place on every kind:  asks Claude to clarify it now, turning while it does
+              (T76;  on the line since T95, drawn with the line's marks once near the screen) */}
+          <epic-clarify of={this.id} icon part={this.partForName("clarify")} />
+        </Show>
       </>
     )
   }
@@ -691,7 +708,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
         appearance="basic"
         color="red"
         link={issue() ? `#${issue()}` : undefined}
-        title={this.translationForKey(issue() ? "failedTip" : "failedTipNone", { id: issue().toUpperCase() })}
+        data-tooltip={this.translationForKey(issue() ? "failedTip" : "failedTipNone", { id: issue().toUpperCase() })}
       >
         {this.translationForKey(issue() ? "failedMark" : "failedMarkNone", { id: issue().toUpperCase() })}
       </ui-label>
@@ -713,8 +730,8 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   }
 
   /**
-   * Handled in a phase (`handled="p-retry-logic"`, epic `epic-engine` P31):  a quiet grey `in P4` on its line,
-   * linking the phase;  its tooltip names it (`P4 · Retry Logic`).
+   * Handled in a phase (`handled="p-retry-logic"`, epic `epic-engine` P31):  a quiet grey `in P4` under its line's
+   * buttons (I348), linking the phase;  its tooltip names it (`P4 · Retry Logic`).
    * - taken up in a phase (`taken-in`, epic `epic-engine` I128):  the same chip, its tooltip saying it was fixed or
    *   done there;  `handled` wins when an item has both
    * - the phase read from the page when drawn:  a phase moved since shows its old number until the next redraw
@@ -732,7 +749,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
         size="mini"
         appearance="basic"
         link={`#${phaseId()}`}
-        title={`${this.translationForKey(this.handled ? "handledTip" : "takenTip", { phase: phase().full })}\n${this.translationForKey("phasePillTip", { phase: phase().short })}`}
+        data-tooltip={`${this.translationForKey(this.handled ? "handledTip" : "takenTip", { phase: phase().full })}\n${this.translationForKey("phasePillTip", { phase: phase().short })}`}
         onClick={(event: MouseEvent) => {
           if (!event.altKey) return
           event.preventDefault()
@@ -746,11 +763,11 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   }
 
   /**
-   * The phase a FINISHED item was done in (`taken-in`), for its `done in P20` pill, or `""` for none
+   * The phase a FINISHED item was done in (`taken-in`), for its `in P20` pill, or `""` for none
    * (epic `epic-engine` J231;  Owen, 2026-11-15:  "'Done in P20' is good, but ... make it replace the plane when the
    * issue is complete"):
-   * - a finished item draws no plane (`issue-done`, `todo-done`), so the pill stands in its place, last before its
-   *   review buttons
+   * - under its review buttons, as every phase pill (I348;  Owen, 2026-11-18:  "Change to just `in P77` and put it
+   *   under the phase buttons instead"):  `done in P20` beside them made the title wrap differently
    * - `handled` keeps its own `in P4` pill (`phasePill`):  never both
    */
   get donePill(): string {
@@ -759,8 +776,8 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   }
 
   /**
-   * A finished item's `done in P20` pill (`donePill`):  the same quiet grey label as `in P4`, a click going to the
-   * phase;  no ⌥-click start, the work is done.
+   * A finished item's `in P20` pill (`donePill`):  the same quiet grey label as a phase pill still to finish, a click
+   * going to the phase;  no ⌥-click start, the work is done.
    */
   private doneMark(): JSX.Element {
     const phase = () => this.phaseNamed(this.donePill)
@@ -771,9 +788,9 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
         size="mini"
         appearance="basic"
         link={`#${this.donePill}`}
-        title={`${this.translationForKey("takenTip", { phase: phase().full })}\n${this.translationForKey("donePillTip", { phase: phase().short })}`}
+        data-tooltip={`${this.translationForKey("takenTip", { phase: phase().full })}\n${this.translationForKey("donePillTip", { phase: phase().short })}`}
       >
-        {this.translationForKey("doneIn", { phase: phase().short })}
+        {this.translationForKey("handledIn", { phase: phase().short })}
       </ui-label>
     )
   }
@@ -813,7 +830,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
         part={this.partForName("git")}
         aria-pressed={this.showCommits ? "true" : "false"}
         aria-label={words()}
-        title={words()}
+        data-tooltip={words()}
         onClick={this.flipCommits}
       >
         {this.gitGlyph.svg}
@@ -1158,7 +1175,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   }
 }
 
-/** The statuses of a finished item:  its `taken-in` draws `done in P20` (`donePill`, J231), not `in P20` (I307). */
+/** The statuses of a finished item:  its `taken-in` draws its `in P20` pill (`donePill`, J231), never `phasePill`'s (I307). */
 const FINISHED = /^(done|canceled|decided)$/
 
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
@@ -1166,7 +1183,7 @@ export interface EpicItem extends E.AttributeValues<EpicItemVocabulary> {}
 
 /** Class names inside the shadow root:  the light details' block;  the said note's place in the thread. */
 const FLOW = "flow"
-/** The body's row:  its light details, then the clarify icon at their right (T76). */
+/** The body's block:  its light details (the clarify icon at their right from T76 moved to the line in T95). */
 const BODY = "body"
 const IN_THREAD = "in-thread"
 const THREAD_END = "thread-end"

@@ -1,19 +1,20 @@
 /**
- * Shows an `.html` doc (docs pages, epic pages, details pages) rendered:
- * in one of the right side bar's doc views (`DocView`), or in VS Code's Simple Browser beside the editor
- * (setting `spellEpic.docPreview.location`).
+ * Shows an `.html` doc (docs pages, epic pages, details pages) rendered,
+ * in one of the right side bar's three doc views (`DocView`).
  * spell-epic's own copy (epic `epic-eject` P7), from the spell language extension's, which it replaces.
  * - Which view:  the page's kind decides (`docViewFor()`, epic `epic-engine` P59), the ONE rule:
- *   - `review` (the "Review" tab):  epic pages and saga pages, whatever was asked
  *   - `details` (the "Details" tab):  details, review and choice pages
- *   - `docs` (the "Epic Docs" tab):  anything else, unless the caller asked for `review`
- *   - the setting moves only `docs`:  `review` and `details` are ALWAYS the side bar's
- * - Opened by URI:  `vscode://spell-app.spell-epic/doc-preview?file=<absolute path>[&view=review|details|docs]`.
+ *   - `docs` (the "Epic Docs" tab):  the epic tooling's READMEs, `/_epic/docs/...`
+ *   - `review` (the "Review" tab):  everything else -- epic pages, saga pages, guides, the home page, the list pages
+ *   - NOT Simple Browser beside the editor:  its setting, `spellEpic.docPreview.location`, went with the first
+ *     Epic Docs tab, which it moved (epic `epic-engine` Q73)
+ * - Opened by URI:  `vscode://spell-app.spell-epic/doc-preview?file=<absolute path>[&view=review|details|docs]`;
+ *   the page's kind decides over `view`
  *   - what spell-epic's `src/tools/pages.js` `openInVSCode()` opens (`epic open`, `epic phase`)
  * - Or `?url=<http://127.0.0.1:port/...>`:  a page some local server already serves, shown as is.
  *   - loopback URLs only
  *   - with a `file` too, the file is the fallback when the URL isn't loopback
- * - Simple Browser loads only http(s).  For a `file`, the server that serves it, first found of:
+ * - The views load only http(s).  For a `file`, the server that serves it, first found of:
  *   1. the EPIC SERVER, spell-epic's one per machine (`epic hub`),
  *      when it runs and the file is in a registered repo's content (`RepoList.urlPathFor()`):
  *      every repo's pages on one port, from any window
@@ -27,9 +28,8 @@
  *      but no route modules and NO epic folder:  `/epics/...` answers "Not found" there
  * - Served from the ROOT, not the doc's folder:  docs link to source files all over the repo.
  * - Or by `WindowBridge`'s `show-doc`:  a session asks ITS window (not the focused one) to show the doc.
- * - ONE place per view (its side bar tab, or Simple Browser's one tab).
- *   Simple Browser loads the doc afresh on each open (a `?t=` stamp);
- *   a side bar view loads only ANOTHER page, the same one isn't reloaded (`DocView.show()`).
+ * - ONE place per view, its side bar tab:
+ *   a view loads only ANOTHER page, the same one isn't reloaded (`DocView.show()`).
  */
 import { existsSync } from "fs"
 import { dirname, join, resolve, sep } from "path"
@@ -46,7 +46,7 @@ import { RepoList } from "spell/epic/server/RepoList"
 import { ENGINE_ROUTES, PID_FILE } from "spell/epic/server/server.types"
 
 import { DocView, docsIndex, ensurePageServer } from "./DocView"
-import { PREVIEW_PATH, type DocViewName, docViewFor, isDocView, isLoopback, stamped } from "./docUrls"
+import { EPIC_DOCS_HOME, PREVIEW_PATH, type DocViewName, docViewFor, isLoopback, stamped } from "./docUrls"
 
 /****************
  * ### `DocPreview`
@@ -65,23 +65,22 @@ export class DocPreview {
    */
   static register(context: vscode.ExtensionContext): void {
     DocView.register(context)
-    DocView.home = () => DocPreview.homeUrl()
-    DocView.showFile = (file, view) => DocPreview.show(file, undefined, view)
+    DocView.home = (view) => DocPreview.homeUrl(view)
+    DocView.showFile = (file) => DocPreview.show(file)
     DocView.urlOf = (file) => DocPreview.urlOf(file)
+    DocView.showUrl = (url, view) => DocPreview.showUrl(url, view)
     context.subscriptions.push(
       vscode.window.registerUriHandler({
         handleUri: (uri) => {
           if (uri.path !== PREVIEW_PATH) return
           const query = new URLSearchParams(uri.query)
           const url = query.get("url")
-          const asked = query.get("view")
-          const view = isDocView(asked) ? asked : undefined
           const file = query.get("file")
           if (url && isLoopback(url)) {
             const path = file ? resolve(file) : new URL(url).pathname
-            return void DocPreview.showUrl(url, docViewFor(path, view), file ? resolve(file) : undefined)
+            return void DocPreview.showUrl(url, docViewFor(path), file ? resolve(file) : undefined)
           }
-          if (file) void DocPreview.show(resolve(file), undefined, view)
+          if (file) void DocPreview.show(resolve(file))
         }
       }),
       { dispose: () => DocPreview.servers.forEach((server) => void server.then((each) => each.close())) }
@@ -89,32 +88,41 @@ export class DocPreview {
   }
 
   /**
-   * The home page:  the default repo's on the epic server, when it runs;  else the window's first folder's.
-   * - `undefined`:  neither has one
+   * Where view `view` opens:
+   * - `review`:  the home page, the default repo's on the epic server when it runs;  else the window's first folder's
+   * - `docs`:  the front page for epics (`EPIC_DOCS_HOME`), on that same server, under the same worktree's address
+   * - `undefined`:  neither has one;  always for `details`, which opens on its list
    */
-  static async homeUrl(): Promise<string | undefined> {
+  static async homeUrl(view: DocViewName = "review"): Promise<string | undefined> {
+    if (view === "details") return undefined
     const hub = await DocPreview.epicServer()
-    if (hub) return `${hub.base}/pages/index.html`
     const index = docsIndex()
-    return index && existsSync(index) ? DocPreview.urlOf(index) : undefined
+    const home = hub
+      ? `${hub.base}/pages/index.html`
+      : index && existsSync(index)
+        ? await DocPreview.urlOf(index)
+        : undefined
+    if (!home || view === "review") return home
+    const url = new URL(home)
+    const worktree = WORKTREE_ADDRESS.exec(url.pathname)?.[0] ?? ""
+    return new URL(`${worktree}${EPIC_DOCS_HOME}`, url.origin).href
   }
 
   /**
-   * Show `file` in the doc view its kind says (`docViewFor()`, `view` the one asked for), from the server that serves
-   * it;  at id `hash` on it, if given.  Resolves to the view it went to.
+   * Show `file` in the doc view its kind says (`docViewFor()`), from the server that serves it;
+   * at id `hash` on it, if given.  Resolves to the view it went to.
    * - `query`:  the page's query, without its `?` (`test=1`:  a test run, `epic test`);  another query is another page,
    *   so the view loads it (`DocView.show()`)
    */
-  static async show(file: string, hash?: string, asked?: DocViewName, query?: string): Promise<DocViewName> {
-    const view = docViewFor(file, asked)
+  static async show(file: string, hash?: string, query?: string): Promise<DocViewName> {
+    const view = docViewFor(file)
     if (!existsSync(file)) {
       void vscode.window.showErrorMessage(`Spell Epic:  no file '${file}'.`)
       return view
     }
     // finding its server can take a while (one restarting, or started now):  the view says so meanwhile, so a click
     // always shows it was heard (epic `epic-engine` I294)
-    const docView = view === "docs" ? undefined : DocView.of(view)
-    const saying = setTimeout(() => docView?.say(FINDING_SERVER), 800)
+    const saying = setTimeout(() => DocView.of(view).say(FINDING_SERVER), 800)
     const url = new URL(await DocPreview.urlOf(file).finally(() => clearTimeout(saying)))
     if (query) url.search = query
     if (hash) url.hash = hash
@@ -185,22 +193,19 @@ export class DocPreview {
   }
 
   /**
-   * Show `url`, stamped (`?t=`):
-   * - in the right side bar's doc view `view`, where the page already in view isn't reloaded (`DocView.show()`)
-   *   - `details`:  unless the page there still waits for Owen's answer (`DocView.offer()`);  `file`, the page's file
-   * - or, for `docs`, in Simple Browser beside the editor (`spellEpic.docPreview.location`), afresh
+   * Show `url`, stamped (`?t=`), in the right side bar's doc view `view`,
+   * where the page already in view isn't reloaded (`DocView.show()`).
+   * - `details`:  unless the page there still waits for Owen's answer (`DocView.offer()`);  `file`, the page's file
    */
-  static async showUrl(url: string, view: DocViewName = "docs", file?: string): Promise<void> {
+  static async showUrl(url: string, view: DocViewName = "review", file?: string): Promise<void> {
     const fresh = stamped(url)
-    const location = vscode.workspace.getConfiguration("spellEpic").get<string>("docPreview.location")
     if (view === "details") return DocView.of(view).offer(fresh, file)
-    if (view === "review" || location !== "beside") return DocView.of(view).show(fresh)
-    await vscode.commands.executeCommand("simpleBrowser.api.open", vscode.Uri.parse(fresh), {
-      viewColumn: vscode.ViewColumn.Beside,
-      preserveFocus: true
-    })
+    return DocView.of(view).show(fresh)
   }
 }
+
+/** A worktree's address on the main checkout's page server, at a path's start:  `/worktrees/<name>`. */
+const WORKTREE_ADDRESS = /^\/worktrees\/[^/]+/
 
 /** What a side-bar view says while the page server for a page asked for is being found or started. */
 const FINDING_SERVER = "Finding the page server..."

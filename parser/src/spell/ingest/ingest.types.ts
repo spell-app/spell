@@ -370,8 +370,16 @@ export type ServerTakes = {
   sortedWith?: string
   /** The question naming the fields it should give:  `fields`. */
   fieldsNamedIn?: string
-  /** What it calls how many and where from, for a list it says nothing of paging:  `limit` and `offset`. */
-  pagesWith?: { limit: string; offset: string }
+  /**
+   * What it calls how many and where from, for a list it says nothing of paging:  `limit` and `offset`.
+   * - Or what its OpenAPI description's lists take (epic `data` I140).
+   */
+  pagesWith?: {
+    limit: string
+    offset: string
+    /** The most it gives at a time, when its OpenAPI description says (its limit's `maximum`):  `it gives up to 500 at a time`. */
+    most?: number
+  }
 }
 
 /** The writes a look tried, one of each kind, because the person said it may (`--try-writes`;  epic `data` P30). */
@@ -398,6 +406,11 @@ export type ListUnderSeen = {
   list: string
   /** Where it is, the thing's id in braces:  `/posts/{id}/comments`. */
   at: string
+  /**
+   * It's ONE thing under each, not a list:
+   * a system's snapshot, `/instances/{id}/snapshot` (epic `from-console` P16).
+   */
+  isOne?: boolean
 }
 
 /** A source's own word for its version, and where it said so. */
@@ -604,6 +617,12 @@ export type CollectionDescription = {
    * at an address with the thing's id in braces (epic `data` P30):  `{ comments: "/posts/{id}/comments" }`.
    */
   listsUnder?: Record<string, string>
+  /**
+   * Each of its things is ONE thing under a thing of another collection, read from there:
+   * a system's snapshot, with no list of its own (epic `from-console` P16).
+   * - Where:  the owner's `listsUnder`;  its own `at` is that address too, `snapshots are found at "..."`.
+   */
+  isOneUnder?: boolean
   /** Why the Spell leaves it out. */
   leftOut?: string
   /**

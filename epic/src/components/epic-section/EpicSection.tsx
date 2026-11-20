@@ -13,6 +13,7 @@ import type { ReviewShows } from "spell/epic/components/epic-review/EpicReview.t
 import { NEW_KIND_LOOKS } from "spell/epic/components/epic-new-item/EpicNewItem.types"
 import { FOCUS_ASKED, type FocusAsk } from "spell/epic/components/epic-focus/EpicFocus.types"
 import { DrawnState, NEEDS_PERSON, STATUS_SLOT } from "spell/epic/components/epic-item/EpicItem.types"
+import { ScrollAnchor } from "spell/epic/components/epic-item/ScrollAnchor"
 import {
   SHOW_ALL,
   STATE_PICK,
@@ -68,7 +69,6 @@ import foldCSS from "./EpicFold.css?inline"
 import sectionCSS from "./EpicSection.css?inline"
 import runsPageCSS from "./EpicSection.runs.css?inline"
 import chipsCSS from "./StateChips.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `DOMEpicSectionElement`
@@ -228,7 +228,6 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   @E.protoMerged static elementSetup = {
     DOMElement: DOMEpicSectionElement,
     styleSheets: {
-      "epic-tooltip": tooltipCSS,
       "epic-fold": foldCSS,
       "epic-state-chips": chipsCSS,
       "epic-section": sectionCSS
@@ -717,7 +716,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
         class={NEW_HERE}
         part={this.partForName("new-button")}
         aria-label={words()}
-        title={words()}
+        data-tooltip={words()}
         onClick={(event) => {
           // a title's tool:  not a click on the title, which would fold it
           event.stopPropagation()
@@ -803,7 +802,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
         size="mini"
         icon={state().preparing ? "circle notch" : state().prepared ? "bullseye" : "flask"}
         data-busy={state().preparing ? "" : undefined}
-        title={tip()}
+        data-tooltip={tip()}
         onClick={(event: MouseEvent) => {
           // a title's tool:  not a click on the title, which would fold it
           event.stopPropagation()
@@ -1092,14 +1091,18 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
         <ul class={NEW_LIST} part={this.partForName("new-list")}>
           <For each={items()} keyed={(it) => it.id}>
             {(it) => (
-              <li class={NEW_CARD} data-fill={this.isSent(it()) ? "outline" : "dashed"} title={this.cardTip(it())}>
+              <li
+                class={NEW_CARD}
+                data-fill={this.isSent(it()) ? "outline" : "dashed"}
+                data-tooltip={this.cardTip(it())}
+              >
                 <ui-icon name={NEW_KIND_LOOKS[it().kind].icon} />
                 <span class="what">{this.translationForKey(NEW_KIND_LOOKS[it().kind].label)}</span>
                 <span class="title">{it().title}</span>
                 <span class="tools">
                   <button
                     type="button"
-                    title={this.translationForKey("newEdit")}
+                    data-tooltip={this.translationForKey("newEdit")}
                     aria-label={`${this.translationForKey("newEdit")}:  ${it().title}`}
                     onClick={() => this.editNew(it())}
                   >
@@ -1107,7 +1110,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
                   </button>
                   <button
                     type="button"
-                    title={this.translationForKey("newRemove")}
+                    data-tooltip={this.translationForKey("newRemove")}
                     aria-label={`${this.translationForKey("newRemove")}:  ${it().title}`}
                     onClick={() => void this.reviewState.client?.removeNew(it().id)}
                   >
@@ -1173,7 +1176,8 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   @E.on(STATE_PICK, { target: "renderRoot" })
   protected onStatePick(event: CustomEvent<StatePickDetail>) {
     event.stopPropagation()
-    this.pickState(event.detail.state, event.detail.how)
+    // the item at the window's top stays put as its list filters (I350)
+    void ScrollAnchor.keep(() => this.pickState(event.detail.state, event.detail.how))
   }
 
   /** A state chip, clicked:  what shows next, by `StateFilter.nextShown()`'s rule;  ⌥-clicked, only its state. */
@@ -1188,7 +1192,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   @E.on(SHOW_ALL, { target: "renderRoot" })
   protected onShowAll(event: Event) {
     event.stopPropagation()
-    this.showStates(undefined)
+    void ScrollAnchor.keep(() => this.showStates(undefined))
   }
 
   /** The states "0. While you were out" hides, for `EpicFold.css`:  its lines may not be loaded yet, so a rule hides them. */

@@ -39,6 +39,12 @@
       "status": "done",
       "group": "web components"
     },
+    "spell-reference-page": {
+      "title": "<spell-reference-page>",
+      "summary": "A reference page, made from its source, whose words you make clearer with an option-click.",
+      "status": "done",
+      "group": "web components"
+    },
     "SpellPage": {
       "title": "SpellPage",
       "summary": "A whole page's box:  its look, and its children laid out down or across it.",
@@ -59,6 +65,13 @@
       "status": "done",
       "group": "shell",
       "file": "src/app/solid/AppContainer.tsx"
+    },
+    "AppAnatomyView": {
+      "title": "AppAnatomyView",
+      "summary": "Anatomy:  the running app pulled apart into layers, in 3D, one for each view it draws.",
+      "status": "done",
+      "group": "panes",
+      "file": "src/app/solid/AppAnatomy.tsx"
     },
     "chrome": {
       "title": "Chrome",

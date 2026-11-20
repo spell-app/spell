@@ -3,9 +3,8 @@ import { describe, expect, it, vi } from "vite-plus/test"
 
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
-import { UISplitPanel } from "spell/ui/components/ui-split-panel"
-
 import "spell/ui/components/ui-panel"
+import "spell/ui/components/ui-split-panel"
 
 /** A split panel in the page, 600 by 200, with three `<div>` panes unless told otherwise. */
 async function panel(attributes: string, panes = "<div>a</div><div>b</div><div>c</div>") {
@@ -299,18 +298,5 @@ describe("<ui-split-panel>", () => {
     host.style.width = "700px"
     await vi.waitFor(() => expect(widths(host)[0]).toBe(app + 100))
     expect(widths(host).slice(1)).toEqual([between, last])
-  })
-
-  it("reads sizes as it should", () => {
-    expect(UISplitPanel.sizesFor("80%", 2)).toEqual([
-      { value: 80, units: "%" },
-      { value: 20, units: "%" }
-    ])
-    expect(UISplitPanel.sizesFor("*,*,200px", 3)[0]).toEqual({ value: 50, units: "%" })
-    expect(UISplitPanel.sizesFor("2em,auto", 2)).toEqual([
-      { value: 2, units: "em" },
-      { value: 0, units: "auto" }
-    ])
-    expect(UISplitPanel.sizeText(UISplitPanel.sizesFor("60%,40%,auto,8px", 4))).toBe("60%,40%,auto,8px")
   })
 })

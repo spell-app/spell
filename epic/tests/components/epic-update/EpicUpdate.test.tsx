@@ -26,7 +26,7 @@ describe("<epic-update>", () => {
     const root = await ElementFixture.render(`<p>Changed <epic-update phase="5"></epic-update></p>`)
     const update = root.querySelector("epic-update")!
     const label = update.shadowRoot!.querySelector('[part~="label"]')!
-    expect({ text: label.textContent, tip: label.getAttribute("title") }).toEqual({
+    expect({ text: label.textContent, tip: label.getAttribute("data-tooltip") }).toEqual({
       text: "UPDATE",
       tip: "Changed during P5"
     })
@@ -54,8 +54,8 @@ describe("<epic-update>", () => {
     expect({
       label: shadow.querySelector('[part~="label"]')!.textContent,
       pill: pill.textContent,
-      tip: pill.getAttribute("title")
-    }).toEqual({ label: "FIXED", pill: "Not in main", tip: "On branch epic-engine, not merged into main yet" })
+      tip: pill.getAttribute("data-tooltip")
+    }).toEqual({ label: "FIXED", pill: "Not in main", tip: "On epic-engine, not merged yet" })
     // merged:  the pill goes, the words stay
     update.removeAttribute("unmerged")
     await ElementFixture.settle(root)
@@ -76,7 +76,7 @@ describe("<epic-update>", () => {
     expect(shadow.querySelector('[part~="title"]')!.textContent).toBe("Update: Split P7 in two")
     expect(shadow.querySelector('[part~="title"] b')!.textContent).toBe("Update")
     const time = shadow.querySelector('[part~="time"]')!
-    expect({ text: time.textContent, tip: time.getAttribute("title") }).toEqual({
+    expect({ text: time.textContent, tip: time.getAttribute("data-tooltip") }).toEqual({
       text: "10/11/26 14:30",
       tip: "2026-10-11 14:30 · Written during P6"
     })
@@ -186,14 +186,14 @@ describe("<epic-update> title, folded and open", () => {
     const lineHeight =
       parseFloat(getComputedStyle(title).lineHeight) || parseFloat(getComputedStyle(title).fontSize) * 1.2
     const open = { top: firstLineTop(title), time: time.getBoundingClientRect() }
-    expect([title.getBoundingClientRect().height > lineHeight * 1.5, title.hasAttribute("title")]).toEqual([
+    expect([title.getBoundingClientRect().height > lineHeight * 1.5, title.hasAttribute("data-tooltip")]).toEqual([
       true,
       false
     ])
     shadow.querySelector<HTMLElement>('[part~="toggle"]')!.click()
     await ElementFixture.tick()
     expect(update.matches(":state(open)")).toBe(false)
-    expect([title.getBoundingClientRect().height > lineHeight * 1.5, title.hasAttribute("title")]).toEqual([
+    expect([title.getBoundingClientRect().height > lineHeight * 1.5, title.hasAttribute("data-tooltip")]).toEqual([
       true,
       false
     ])
@@ -285,7 +285,7 @@ describe("<epic-update> new, seen, quiet", () => {
     const update = await ElementFixture.render(BLOCK.replace(">", ' seen="2026-10-12 08:00">'))
     await ElementFixture.tick()
     expect([update.matches(":state(quiet)"), update.matches(":state(open)")]).toEqual([true, false])
-    expect(update.shadowRoot!.querySelector('[part~="time"]')!.getAttribute("title")).toBe(
+    expect(update.shadowRoot!.querySelector('[part~="time"]')!.getAttribute("data-tooltip")).toBe(
       "2026-10-11 14:30 · Seen 10/12/26 08:00"
     )
   })
@@ -297,7 +297,7 @@ describe("<epic-update> new, seen, quiet", () => {
     await ElementFixture.settle()
     await vi.waitFor(() => expect(seenButton(update)).not.toBeNull())
     const button = seenButton(update)!
-    expect(button.getAttribute("title")).toContain("fold it to one grey line")
+    expect(button.getAttribute("data-tooltip")).toContain("Fold it to one grey line")
     await expectAccessible(update)
     button.click()
     await vi.waitFor(() => expect(routes.inbox.marks.up3?.action).toBe("seen"))
@@ -339,6 +339,30 @@ describe("<epic-update> bare, its item checked (I285)", () => {
     expect(update.matches(":state(checked)")).toBe(true)
     await client.save("i91", null)
     await vi.waitFor(() => expect(label()?.textContent).toBe("FIXED"))
+  })
+
+  // epic `epic-engine` I348;  Owen, 2026-11-18:  "after you process it, there is still a flicker when you show the
+  // `FIXED` button for a second"
+  test("the server applies his ✓ and clears it from the inbox:  the label stays gone until the page's own update", async () => {
+    const routes = new FakeRoutes()
+    const client = await adoptClient(routes)
+    const root = await ElementFixture.render(
+      `<epic-item id="i91" status="open" fixed><span slot="title">Fixed <epic-update phase="52" became="fixed"></epic-update></span></epic-item>`
+    )
+    const update = root.querySelector("epic-update")!
+    await ElementFixture.settle()
+    const label = () => update.shadowRoot!.querySelector('[part~="label"]')
+    client.press("i91", "approve")
+    await vi.waitFor(() => expect(label()).toBeNull())
+    // the page server applied it:  off the inbox, the page's update not in yet
+    delete routes.inbox.marks.i91
+    await vi.waitFor(async () => {
+      await client.refresh()
+      expect(client.markOf("i91")).toBeUndefined()
+    })
+    await ElementFixture.settle()
+    expect(label()).toBeNull()
+    expect(update.matches(":state(checked)")).toBe(true)
   })
 
   // epic `epic-engine` I302:  the copy on a line of "0. While you were out" follows the line's item

@@ -573,7 +573,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
         selector
       )
     // Solitaire's `<context-menu>`, then ours
-    const program = ["Auto Play", "Cheat", "Restart the Game", "-"]
+    const program = ["Auto Play", "Cheat", "Deal the Cards", "-"]
     await other.mouse.click(card.x, card.y, { button: "right" })
     await other.waitForTimeout(600)
     const shown = await rows(".PartMenu")
@@ -932,7 +932,7 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
           return element.matches(":state(disabled)") ? `${title} (off)` : title
         })
       )
-    const game = ["Auto Play", "Cheat", "Restart the Game", "---"]
+    const game = ["Auto Play", "Cheat", "Deal the Cards", "---"]
 
     for (const at of [pile, card]) {
       await other.mouse.click(at.x, at.y, { button: "right" })
@@ -999,16 +999,18 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
     const popupShows = () =>
       page.evaluate(() => !!document.querySelector<HTMLElement & { visible?: boolean }>(".PalettePopup")?.visible)
 
-    // the bar's Edit tab, then 16px to the code's icons, 1px apart, then 16px to "+ Add a View" (I250, C5)
+    // the bar's Edit tab, then 16px to the code's icons (the code, the compiled code, Inspect app, Anatomy), 1px apart,
+    // then 16px to "+ Add a View" (I250, C5;  Anatomy, P34)
     const modeBar = await page.evaluate(() => {
       const drawn = (selector: string) =>
         document.querySelector(selector)!.shadowRoot!.querySelector("[part~=item]")!.getBoundingClientRect()
       const tabs = [...document.querySelectorAll("ui-menu.ModeTabs > ui-item:not([appearance~=circular])")]
       const edit = tabs.at(-1)!.shadowRoot!.querySelector("[part~=item]")!.getBoundingClientRect()
-      const [code, compiled, inspect, add] = [
+      const [code, compiled, inspect, anatomy, add] = [
         ".CodeToggle",
         ".CompiledCodeToggle",
         ".InspectAppButton",
+        ".AnatomyButton",
         ".AddPartButton"
       ].map((name) => drawn(`ui-menu.ModeTabs ${name}`))
       return {
@@ -1016,12 +1018,13 @@ describe.skipIf(!SERVING)("adding and moving parts", { timeout: 180_000 }, () =>
           code.left - edit.right,
           compiled.left - code.right,
           inspect.left - compiled.right,
-          add.left - inspect.right
+          anatomy.left - inspect.right,
+          add.left - anatomy.right
         ].map(Math.round),
         words: document.querySelector(".AddPartButton")!.textContent!.trim()
       }
     })
-    expect(modeBar).toEqual({ gaps: [16, 1, 1, 16], words: "Add a View" })
+    expect(modeBar).toEqual({ gaps: [16, 1, 1, 1, 16], words: "Add a View" })
 
     await page.locator("#AddPartButton [part~=item]").click()
     await page.waitForTimeout(600)

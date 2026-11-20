@@ -9,13 +9,17 @@ import { SubjectIts } from "spell/parser/spell/rules/types"
 import {
   MustRule,
   OutlineSpecifierEnum,
+  OutlineSpecifierMedia,
   OutlineSpecifierList,
   PropertyBodyMust,
   QuotedPropertyFormula,
+  TypeSpecifierEnum,
   TypeSpecifierTextKind
 } from "spell/parser/spell/rules/classes"
 import { QuotedTypeExpression } from "spell/parser/spell/rules/methods"
 import { QuotedMember } from "spell/parser/spell/rules/properties"
+// Through the folder:  read only when called, once the folder has loaded
+import { noteMediaName } from "spell/parser/spell/rules/UI"
 // Import directly to avoid circular import
 import { SpellStatement } from "spell/parser/spell/rules/Statement"
 
@@ -228,6 +232,8 @@ export class DefinePropertyHas extends SpellStatement<
     const { measure } = (specifier?.data ?? {}) as { measure?: P.Measure }
     typeScope.declareProperty(name, match, { asWritten: property.raw, datatype: specifier?.datatype, measure })
     if (specifierAST instanceof P.ASTNewInstanceExpression) DefinePropertyHas.refuseCircle(match, typeScope)
+    // a sound or a video, by its name:  `play sound "card slide"` finds it (epic `language` P65)
+    if (specifier?.is(OutlineSpecifierMedia)) noteMediaName(scope, `${property.raw ?? property.value}`)
     const lineRules = DefinePropertyHas.lineRulesOf(match)
     if (lineRules.length) typeScope.addPropertyRules(name, lineRules, match)
 
@@ -384,6 +390,10 @@ export class DefinePropertyHas extends SpellStatement<
     const has = { ...params, property: propertyWords, aProperty: language.withArticle("indefinite", propertyWords) }
     const said = specifier?.inputText.trim()
     if (!said) return language.parserMessage("long-form-has", has)
+    // `its "status" as one of ...` (epic `data` J289):  its specifier says its `as` / `como` already
+    if (specifier!.is(TypeSpecifierEnum) && !specifier.is(OutlineSpecifierEnum)) {
+      return language.parserMessage("long-form-has-as", { ...has, specifier: said.replace(/^\S+\s+/, "") })
+    }
     // an enumeration with no `either` / `one of`:  no words before its list
     if (specifier!.is(OutlineSpecifierEnum) && (specifier.groups.enumeration as P.Match).start === specifier.start) {
       return language.parserMessage("long-form-has-one-of", { ...has, values: said })
@@ -403,6 +413,7 @@ export class DefinePropertyHas extends SpellStatement<
     // what its setter warns about -- see `SC.PropCheck`
     const check = new P.ASTObjectLiteral(match)
     let initializer: P.ASTExpression | undefined
+    let early: boolean | undefined
 
     const specifier = match.groups.specifier?.AST
     // Enumerated values as strings/numbers/etc, as a static on the class, e.g. `Card.Suits`
@@ -421,6 +432,12 @@ export class DefinePropertyHas extends SpellStatement<
       initializer = DefinePropertyHas.withMemberId(match, specifier)
       const itemType = DefinePropertyHas.itemTypeOf(specifier)
       if (itemType) check.addProp("itemType", itemType)
+    }
+    // a sound or a video, made with its thing so its name is found at once:  `its "card slide" is a sound at "..."`
+    // (epic `language` P65)
+    else if (match.groups.specifier?.is(OutlineSpecifierMedia)) {
+      initializer = OutlineSpecifierMedia.madeAs(match.groups.specifier, `${property.raw ?? property.value}`)
+      early = true
     }
     // a value kind, e.g. `a suit`:  one of its list, e.g. `Deck.Suits` -- its values are plain text.  Read when set:
     // the list's class names ours (`static instanceType = Card`), so one of the two is defined second
@@ -471,6 +488,7 @@ export class DefinePropertyHas extends SpellStatement<
         property: DefinePropertyHas.propertyName(match),
         check: check.properties.length ? check : undefined,
         initializer,
+        ...(early && { early }),
         ...(linksTo && { linksTo: new P.ASTTypeExpression(match, { name: linksTo }) })
       })
     )

@@ -82,7 +82,7 @@ its page server and editor, and says so;  a FAILED install leaves the merge in, 
 After a restart, agents it started are gone:  start each again from its task, as the epic's running list
 (`epic agents`) names it.
 
-1. `epic phase <epic>#P3 active`, and the page's line:  `epic inbox status <epic> "Building P3"`.
+1. `epic phase <epic>#P3 active`, and say what you're doing:  `epic inbox status <epic> "Building P3"` (the page's step label turns, the words its tooltip).
 2. Check the accepted plan still fits.
    - A small change:  `epic updated <epic>#P3 "<p>what changed</p>" --summary "Plan adjusted:  ..."`.
    - A big one (scope, a choice the person made):  write the plan again (`--plan`) and stop for them.
@@ -100,10 +100,11 @@ After a restart, agents it started are gone:  start each again from its task, as
      on them -- the epic skill's "The session answers;  agents build";
      a picture they pasted with it:  `--pasted <n>`, the n they pasted last into this session's chat, or
      `--picture <file>`, repeatable:  saved beside the page, shown in the item, deletable there, its file too)
-   - a request another session sent (`epic requests <epic>`):  a TODO or a PHASE, never only a note on the request
-     (epic `epic-engine` T88;  the epic skill's "12. Request")
-     - small, one agent's work:  `epic add <epic>#T "title" --requested --start "<their words>"`, then
-       `epic file <epic>#T<n> <rN>`:  its words, Context and screenshots go into the todo, the request filed there
+   - a request another session sent (`epic requests <epic>`):  a bug report an ISSUE, a feature a TODO, bigger a PHASE,
+     never only a note on the request (epic `epic-engine` T88, T108;  the epic skill's "12. Request")
+     - small, one agent's work:  `epic add <epic>#I "title" --requested --start "<their words>"` (a feature:  `#T`),
+       then `epic file <epic>#I<n> <rN>` (`#T<n>`):  its words, Context and screenshots go into the item, the request
+       filed there
      - bigger, or about a to-do phase:  that phase, or a new one, then `epic file <epic>#P<n> <rN>`
      - a true duplicate only:  `epic file <epic> <rN> "same as T12"`, naming the todo or phase it repeats
    - a choice made without the person:  `epic add <epic>#J "<title>" --calm --details "<p>...</p>"`
@@ -154,6 +155,9 @@ Then, for what it printed:
    Work in the item:  no proposed fix yet?  write one first, in its "Proposed fix" field;  then build it, commits named
    `<epic> I3:  ...`.  Done:  `epic update <epic>#I3 fixed "<what changed>"` turns it orange, for the person to review;
    their Approve closes it.  Never `epic close` it yourself.
+   Every card (underway, done, fixed, noted):  a short lead sentence saying what happened, then short paragraphs or
+   `- ` bullets, one idea each (`\n\n` between);  code names and numbers only where the reader needs them;
+   the full story goes in the item's body (`epic details --append`).  The tool refuses a paragraph over 50 words.
    A revisit left "to talk over" (a pick "B, but ...", a picture, their comments in its text):  answer its note into
    the item, as above, then `epic inbox clear <epic>#J3`.
    A plain revisit's note comes as a comment instead ("his revisit note on J3, made a comment"):  step 4.
@@ -215,6 +219,8 @@ These words reach a session two ways:
   the managed settings, or `claude --plugin-dir`
 - the repo's `AGENTS.md`, which every session reads:  `epic init` offers to put them there when superpowers is on
   (`epic init --superpowers` without asking), and keeps them current once they are
+
+The whole story, for people:  the epic plugin's README-superpowers.md (`epic guide --root` prints its folder).
 
 ## tidy -- Close what other work made obsolete
 

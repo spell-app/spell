@@ -79,41 +79,48 @@ export function isLoopback(url: string): boolean {
 // ## Which tab
 ////////////////
 
-/** The side bar's doc views, each its own tab:  "Epic Docs", "Review", "Details". */
-export type DocViewName = "docs" | "review" | "details"
+/**
+ * The side bar's doc views, each its own tab, in its order (Owen, 2026-11-19):
+ * - "Review" (the Spell hat):  epic pages, guides, the home page, the list pages
+ * - "Details" (a speech bubble):  the pages you answer on
+ * - "Epic Docs" (a book):  the epic tooling's READMEs, from the page server's `/_epic/docs/`
+ * - the first "Epic Docs" tab (until epic `epic-engine` Q73) held guides and the home page:  they stay in Review
+ */
+export type DocViewName = "review" | "details" | "docs"
 
 /** Every doc view's name, in the side bar's order. */
-export const DOC_VIEWS: readonly DocViewName[] = ["docs", "review", "details"]
+export const DOC_VIEWS: readonly DocViewName[] = ["review", "details", "docs"]
+
+/** Where the "Epic Docs" tab opens, on any page server:  the front page for epics (spell-epic's `docsRoutes.ts`). */
+export const EPIC_DOCS_HOME = "/_epic/docs/README-epics.md"
 
 /** An epic page's path:  `epics/<id>/<id>.plan.html`. */
 const EPIC_PAGE = /(?:^|\/)epics\/([^/]+)\/\1\.plan\.html$/
 
-/** A saga page's path, or a parked goal set's page. */
-const SAGA_PAGE = /\.(?:saga|goal)\.html$/
-
 /** A details, review or choice page's path:  a page right inside a `details/` folder. */
 const DETAILS_PAGE = /(?:^|\/)details\/[^/]+\.html$/
 
+/** An epic doc's path:  a README under `/_epic/docs/`, under a worktree's address too. */
+const EPIC_DOC = /^(?:\/worktrees\/[^/]+)?\/_epic\/docs\//
+
 /**
  * The tab page `path` goes to (a file path or a URL's path), the ONE rule every show takes (epic `epic-engine` P59):
- * - an epic page (`epics/<id>/<id>.plan.html`) or a saga page (`.saga.html`, the parked `.goal.html`):  `review`,
- *   whatever was `asked`
  * - a details, review or choice page (a page in a `details/` folder, an epic's or `pages/details/`):  `details`
- * - anything else:  the tab `asked` for, else `docs`
- * - why:  each command picked its tab by its own flag, so an epic page landed in Epic Docs as well as Review, and a
- *   choice page still waiting for Owen's answer was replaced (request r50)
+ * - an epic doc (`/_epic/docs/...`, a README the page server renders):  `docs`
+ * - anything else -- epic pages, saga pages, guides, the home page, the list pages:  `review`
+ * - never the tab a command asked for:  each command picked its tab by its own flag, so an epic page landed in two
+ *   tabs, and a choice page still waiting for Owen's answer was replaced (request r50)
  * - the epic page first:  the epic `details` keeps its page in `epics/details/`
  */
-export function docViewFor(path: string, asked?: DocViewName): DocViewName {
+export function docViewFor(path: string): DocViewName {
   const unix = path.split("\\").join("/")
-  if (EPIC_PAGE.test(unix) || SAGA_PAGE.test(unix)) return "review"
-  if (DETAILS_PAGE.test(unix)) return "details"
-  return asked && asked !== "details" ? asked : "docs"
+  if (EPIC_DOC.test(unix)) return "docs"
+  return !EPIC_PAGE.test(unix) && DETAILS_PAGE.test(unix) ? "details" : "review"
 }
 
-/** Whether `name` names a doc view:  what the bridge and the `vscode://` URI take. */
-export function isDocView(name: unknown): name is DocViewName {
-  return DOC_VIEWS.includes(name as DocViewName)
+/** The doc view `name` names, as the bridge and the `vscode://` URI take it;  `undefined` for anything else. */
+export function docViewNamed(name: unknown): DocViewName | undefined {
+  return DOC_VIEWS.includes(name as DocViewName) ? (name as DocViewName) : undefined
 }
 
 ////////////////
@@ -266,3 +273,25 @@ export function silentFrameStep({ serverUp, reloads }: { serverUp: boolean; relo
 
 /** `silentFrameStep()`'s answer. */
 export type SilentFrameStep = "wait" | "reload" | "say"
+
+/**
+ * The page a view opens with, when VS Code first shows it (`DocView.resolveWebviewView()`):
+ * the page asked for (`asked()`), else the first of `fallbacks` that has one, tried in order.
+ * - `asked()` is read again after each fallback:  a fallback can take seconds
+ *   (the page remembered for the window waits up to 10s for its server), and a page asked for meanwhile wins
+ * - why (epic `epic-engine` I341;  Owen:  "Sometimes the 'show this epic's page' button doesn't work the first time"):
+ *   the checklist button, pressed while the Review tab was still opening, set the page to show;
+ *   the remembered page then came back and replaced it, so the first press did nothing
+ * - `undefined`:  nothing asked for, and no fallback had a page
+ */
+export async function openingPage(
+  asked: () => string | undefined,
+  fallbacks: (() => Promise<string | undefined>)[]
+): Promise<string | undefined> {
+  for (const fallback of fallbacks) {
+    if (asked() !== undefined) break
+    const page = await fallback()
+    if (asked() === undefined && page) return page
+  }
+  return asked()
+}

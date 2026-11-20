@@ -4,6 +4,7 @@ import { join } from "node:path"
 import { describe, expect, test } from "vite-plus/test"
 
 import { readThroughSpell } from "spell/parser/cli/placeIngest"
+import { parseSpellProject } from "spell/parser/spell/test"
 import { PlaceIngest } from "spell/parser/spell/ingest/PlaceIngest"
 import { descriptionFromDisk, descriptionOnDisk } from "spell/parser/spell/ingest/PlaceOnDisk"
 import { PlaceSpec, type OpenApiDocument } from "spell/parser/spell/ingest/PlaceSpec"
@@ -259,6 +260,45 @@ describe("spell place verify (epic `data` P49)", () => {
     expect(spell).not.toContain("this type is unverified")
   })
 
+  test("NetBox for real (epic `data` P55):  a list no schema typed reads its wrapped rows;  writes keep its slash", async () => {
+    const QUEUE = { name: "default", url: `${NETBOX}/api/core/background-queues/default/`, jobs: 0 }
+    const asked: string[] = []
+    const fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = `${input instanceof Request ? input.url : input}`
+      asked.push(`${init?.method ?? "GET"} ${url}`)
+      if (url === SPEC_AT) return Response.json(DOCUMENT)
+      const path = url.replace(NETBOX, "").replace(/\?.*$/, "")
+      // its queues are named, and their id is their own address
+      if (path === "/api/core/background-tasks/") return Response.json({ count: 1, next: null, results: [QUEUE] })
+      if (url === QUEUE.url) return Response.json(QUEUE)
+      if (path === "/api/tenancy/tenants/") {
+        if (init?.method === "POST") return Response.json({ ...TENANT, id: 2 }, { status: 201 })
+        return Response.json({ count: 1, next: null, results: [TENANT] })
+      }
+      if (/^\/api\/tenancy\/tenants\/\d+\/$/.test(path)) {
+        return init?.method === "DELETE" ? new Response(null, { status: 204 }) : Response.json(TENANT)
+      }
+      // NetBox answers 404 to an address without its slash
+      if (!path.endsWith("/")) return new Response("Not found", { status: 404 })
+      return Response.json({ count: 0, next: null, results: [] })
+    }) as typeof globalThis.fetch
+    const { ingest, texts, descriptions } = await ingested(fetch)
+    await ingest.verify("NetBox.api.spell", { triesWrites: true })
+    expect(texts.get("NetBox.api.spell")).toMatch(
+      /^a "background task" is a thing\n\tit lives in netbox\n\tthis type is verified$/m
+    )
+    const { collections, canDo } = descriptions.get("NetBox.api.json5")!
+    expect(collections.background_tasks!.state).toMatchObject({ is: "verified", rows: 1 })
+    expect(collections.background_tasks!.rowsAt).toBe("results")
+    expect(asked).toContain(`GET ${QUEUE.url}`)
+    expect(asked.filter((request) => !request.startsWith("GET"))).toEqual([
+      `POST ${NETBOX}/api/tenancy/tenants/`,
+      `PATCH ${NETBOX}/api/tenancy/tenants/1/`,
+      `DELETE ${NETBOX}/api/tenancy/tenants/2/`
+    ])
+    expect(canDo.write).toMatch(/^Yes:  it took a write of each kind, tried on tenants/)
+  })
+
   test("on a deployment from the project's file;  a read only one takes no writes", async () => {
     const STAGING = "https://staging.netbox.test"
     const { fetch, asked } = answering(STAGING)
@@ -343,8 +383,8 @@ describe("NetBox's shapes that broke a whole description (epic `data` I106)", ()
     }
   })
 
-  /** The place NetBox's shapes in `document` make:  its Spell and its description. */
-  async function ingestOf(document: Record<string, unknown>) {
+  /** The place NetBox's shapes in `document` make:  its Spell and its description;  in Spanish for an `.es.spell` file. */
+  async function ingestOf(document: Record<string, unknown>, into = "NetBox.api.spell") {
     const { files, texts, descriptions } = memoryFiles()
     const ingest = new PlaceIngest({
       fetch: (async (input: RequestInfo | URL) =>
@@ -357,8 +397,8 @@ describe("NetBox's shapes that broke a whole description (epic `data` I106)", ()
       sleep: async () => {},
       now: () => new Date("2026-11-17T12:00:00Z")
     })
-    await ingest.add({ address: NETBOX, spec: SPEC_AT, into: "NetBox.api.spell", name: "netbox" })
-    return { spell: texts.get("NetBox.api.spell")!, description: descriptions.get("NetBox.api.json5")! }
+    await ingest.add({ address: NETBOX, spec: SPEC_AT, into, name: "netbox" })
+    return { spell: texts.get(into)!, description: descriptions.get(into.replace(/(\.es)?\.spell$/, ".json5"))! }
   }
 
   test("a type inside is named after its schema:  three lists share one, and none is left out", async () => {
@@ -458,5 +498,28 @@ describe("NetBox's shapes that broke a whole description (epic `data` I106)", ()
     expect(spell).toMatch(/^a "console port speed" is a thing\n\tits "value" is a number\n\tits "label" is text$/m)
     expect(spell).toMatch(/^a "status" is a thing\n\tits "value" is text\n\tits "label" is text$/m)
     expect(description.notes.filter((note) => note.startsWith("Left out"))).toEqual([])
+  })
+
+  describe("a field's choices are written `as one of`, as a sentence says them, and read back (epic `data` J289)", () => {
+    const SITES = {
+      paths: { "/api/dcim/sites/": listOf("Site") },
+      components: {
+        schemas: { Site: thing({ status: { type: "string", enum: ["active", "planned", "retired"], maxLength: 20 } }) }
+      }
+    }
+
+    test("English:  `as one of`", async () => {
+      const { spell } = await ingestOf(SITES)
+      expect(spell).toMatch(/^\tits "status" as one of active, planned or retired, with maximum length 20$/m)
+      const { files } = parseSpellProject([{ path: "/NetBox.api.spell", contents: spell }])
+      expect(files[0]!.errors).toEqual([])
+    })
+
+    test("Spanish:  `como uno de`", async () => {
+      const { spell } = await ingestOf(SITES, "NetBox.api.es.spell")
+      expect(spell).toMatch(/^\tsu "status" como uno de active, planned o retired,? con longitud máxima 20$/m)
+      const { files } = parseSpellProject([{ path: "/NetBox.api.es.spell", contents: spell }])
+      expect(files[0]!.errors).toEqual([])
+    })
   })
 })

@@ -5,9 +5,9 @@
  *   - `.html` and a folder's own page may be left off:  `solid/solid-2` ~== `guides/solid/solid-2.html`,
  *     `server` ~== `guides/server.html`
  * - `--vs`:  in VS Code's right side bar instead (`openInVSCode()`), in the tab the page's kind says (epic
- *   `epic-engine` P59):  an epic page "Review", a details or choice page "Details", anything else "Epic Docs"
- *   (`/spell-docs`).  Not run from VS Code:  Chrome anyway.
- * - `--review`:  asks for the "Review" tab, for a page of no such kind (`/epic review`).  Implies `--vs`.
+ *   `epic-engine` P59):  a details or choice page "Details", anything else "Review" (`/spell-docs`;  epic
+ *   `epic-engine` Q73).  Not run from VS Code:  Chrome anyway.
+ * - `--review`:  the same as `--vs` (`/epic review`):  every page but a details or choice page goes to Review.
  * - `--hash=<id>`:  an id on the page to land on;  `--query=<query>`:  the page's query, `test=1` (`epic test`:  a
  *   test run, epic `epic-engine` P4)
  * - `<page>` may be a command run's folder, `pages/runs/<id>` (epic `epic-engine` P23):  its page, `/runs/<id>/`

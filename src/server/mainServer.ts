@@ -21,7 +21,7 @@ import { componentSetAddressOf, kitOf } from "./page/settings"
 import { PidFile } from "./PidFile"
 import { RealPath, pathInside } from "./RealPath"
 import { type ServerInfo } from "./server.types"
-import { SERVER_API } from "./WebServer"
+import { SERVER_API } from "./liveClient"
 
 /**
  * `file`'s URL on the main checkout's page server;  else `undefined`.

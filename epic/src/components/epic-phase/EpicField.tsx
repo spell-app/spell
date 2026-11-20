@@ -17,7 +17,6 @@ import { ICON, LABEL, TEXT } from "./EpicPhase.types"
 import fieldCSS from "./EpicField.css?inline"
 import requestsPageCSS from "./EpicField.requests.css?inline"
 import foldCSS from "spell/epic/components/epic-item/Fold.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicField`
@@ -54,7 +53,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 export class EpicField extends E.UIComponent<typeof epicFieldVocabulary> {
   @E.proto static vocabulary = epicFieldVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-fold-button": foldCSS, "epic-field": fieldCSS },
+    styleSheets: { "epic-fold-button": foldCSS, "epic-field": fieldCSS },
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
 

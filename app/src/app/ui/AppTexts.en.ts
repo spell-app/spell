@@ -108,7 +108,20 @@ export const APP_TEXTS = {
   partNothingSelected: "Nothing's selected.",
   partBusy: "One moment:  the app is catching up with your last change.",
   partAcrossFiles: "These are written in different files, so they can't be moved together yet.",
-  partNoDrawing: "This program has no drawing to add to:\nadd a <draw> to it first.",
+  partNoDrawing:
+    "There's nowhere to put this part yet:  your app doesn't show anything on screen.\n" +
+    'In the code on the left, add a "to draw" section under your app, saying what it shows.\n' +
+    "Then pick the part again.",
+  // a part added, drawn, but with nothing to see (epic `editor` P35)
+  partAddedEmpty:
+    "What you added is in your app, but it's empty, so you can't see it yet.\n" +
+    "It's selected in the Views list on the right.\n" +
+    "Give it a label, or drag another part into it.",
+  // a view shown on its own, the top bar's switch (epic `editor` P35)
+  viewAlone: "{view} alone",
+  viewAloneTip: "Show just one {view}, with its property editor, to work on it by itself",
+  viewAloneStopTip: "Show the whole app again",
+  viewAloneWaiting: "Waiting for the app to run…",
   partInsideItself: "Something can't go inside itself.",
   lineNumbers: "Line Numbers",
   softWrap: "Soft Wrap",
@@ -255,6 +268,41 @@ export const APP_TEXTS = {
   menuRun: "Run",
   menuHelp: "Help",
   menuAll: "Menus",
+  // Help › Keyboard Shortcuts, its dialog (`<ShortcutsDialog>`, epic `editor` P36):  `{words}`, what was typed
+  shortcuts: "Keyboard Shortcuts",
+  shortcutsSearch: "Search the shortcuts",
+  shortcutsNoMatch: "No shortcut matches “{words}”.\nTry another word.",
+  // between two keys that do the same thing (Delete:  ⌫ or ⌦)
+  shortcutsOr: "or",
+  // its headings:  where the keys work (`HOTKEY_GROUPS`)
+  shortcutsFiles: "Files",
+  shortcutsEditing: "Editing",
+  shortcutsSelection: "What's selected in the app",
+  shortcutsCode: "The code",
+  shortcutsRunning: "Running the app",
+  shortcutsDebugger: "The step debugger",
+  // a row's note, where its key works only some of the time
+  shortcutsWhilePaused: "Only while the app is paused on a line",
+  shortcutsNotInCode: "Not while you're typing in the code",
+  shortcutsNotTyping: "Not while you're typing in the code or a text box",
+  shortcutsWhileInspecting: "Only while you're picking a part of the app",
+  // its rows the menus don't name
+  shortcutFind: "Find and Replace",
+  shortcutShowShortcuts: "Show Keyboard Shortcuts",
+  shortcutChangeThis: "Ask for a Change to What's Selected",
+  shortcutFormat: "Format Document",
+  shortcutExpandSelection: "Expand Selection",
+  shortcutShrinkSelection: "Shrink Selection",
+  shortcutToggleComment: "Comment or Uncomment Lines",
+  shortcutFold: "Hide a Block's Lines (Fold)",
+  shortcutUnfold: "Show a Block's Lines (Unfold)",
+  shortcutMoveLineUp: "Move Line Up",
+  shortcutMoveLineDown: "Move Line Down",
+  shortcutAddCursor: "Type on Several Lines at Once",
+  shortcutContinue: "Continue",
+  shortcutStepOver: "Step Over",
+  shortcutStepInto: "Step Into",
+  shortcutStepOut: "Step Out",
   appMenus: "Menus",
   projectMenu: "{project}:  its menu",
   spellMenu: "{app}:  its menu",
@@ -358,63 +406,6 @@ export const APP_TEXTS = {
   siteDataStartAgain: "Start again",
   siteDataReference: "Reference",
   siteDataReferenceTip: "Every list, field and change this place has, and which ones were tried",
-  // a place's reference page, /place/<its description> (epic `data` P52):  its lists by tag, each one's state
-  placeRefLoading: "Reading the place…",
-  placeRefNotFound:
-    "Spell couldn't find a description of a data source at {path}.\nCheck the address, or run spell place ingest again to read the data source's description.",
-  placeRefVersion: "Version {version}",
-  placeRefLooked: "Looked at {date}",
-  placeRefLists: "Lists",
-  placeRefDeployments: "Where it runs",
-  placeRefDeploymentsNone: "Your project names no other server for it, so Spell uses {address}.",
-  placeRefNotes: "Notes",
-  placeRefVerified: "Verified",
-  placeRefVerifiedWhy: "Spell tested it on the real server, and it answered as its description says.",
-  placeRefFailed: "Failed",
-  placeRefFailedWhy: "Spell tested it on the real server, and it didn't answer as its description says.",
-  placeRefUntyped: "No field types",
-  placeRefUntypedWhy:
-    "The description doesn't say what kind of information each field holds.\nSpell fills this in when it reads the data source.",
-  placeRefDisabled: "Turned off",
-  placeRefDisabledWhy:
-    "Your Spell file switches this list off, so it's never tested.\nRemove that line to turn it back on.",
-  placeRefUnverified: "Not tried yet",
-  placeRefUnverifiedWhy:
-    "Spell has only read about this list, and hasn't tested it on the real server.\nRun spell place verify to test it.",
-  placeRefTried: "tried {date}",
-  placeRefTriedOn: "tried on {deployment}, {date}",
-  placeRefRows: "{count} rows read",
-  placeRefFailed401:
-    "The real server asked for a key, the secret code that lets Spell in.\nAdd it beside this server in your project's __project.json5 file, then try again with spell place verify.",
-  placeRefFailed403:
-    "The real server didn't accept the key, the secret code that lets Spell in.\nCheck the key in your project's __project.json5 file, then try again with spell place verify.",
-  placeRefFailed404:
-    "Spell couldn't find this list on the real server, at the address it was given.\nCheck the address in the place's description, then try again with spell place verify.",
-  placeRefFailed5xx:
-    "Something went wrong on the real server, not in your project.\nWait a few minutes, then try again with spell place verify.",
-  placeRefFailedOther:
-    "The real server's answer wasn't what Spell expected.\nHover over this line to see what it said.",
-  placeRefListLeftOut: "Left out of the Spell:  {why}",
-  placeRefChanges: "What it can change",
-  placeRefFields: "Fields",
-  placeRefName: "Name",
-  placeRefAddress: "Address",
-  placeRefKey: "Key",
-  placeRefReadOnly: "Read only",
-  placeRefYes: "yes",
-  placeRefChange: "Change",
-  placeRefTakes: "Takes",
-  placeRefState: "Tried",
-  placeRefField: "Field",
-  placeRefInSpell: "In Spell",
-  placeRefKind: "Holds",
-  placeRefFieldNotes: "Notes",
-  placeRefIsId: "says which row is which",
-  placeRefLinksTo: "links to {target}",
-  placeRefRequired: "required",
-  placeRefSetByServer: "set by the server",
-  placeRefOneOf: "one of {choices}",
-  placeRefLeftOut: "left out of the Spell",
   inspectorNotSavedCode: "Your program works this out for itself, so a change here won't be kept.",
   inspectorNotSavedRunning: "The app sets this as it runs, so this change won't be saved.",
   inspectorShowCode: "Show the code",
@@ -473,6 +464,42 @@ export const APP_TEXTS = {
   inspectHelp:
     "Click a part of your app to see what it is.\nAlt-click picks a part inside it.\nHold Shift or ⌘ to pick several, or drag across an empty spot.\nPress Esc when you're done.",
   inspectHelpClose: "Close",
+  // Anatomy (epic `editor` P34):  the running app pulled apart into layers, in 3D;  its switch, then its bar
+  anatomy: "Anatomy",
+  anatomyTip: "Spread the app out in 3D, each part of it on a layer of its own",
+  anatomyStopTip: "Put the app back together",
+  // the whole app, the breadcrumbs' first:  "Solitaire in 3D"
+  anatomyWholeApp: "{app} in 3D",
+  // what a click does while it shows:  plays the app, or picks a layer (T117)
+  anatomyClicks: "What a click does",
+  anatomyPlay: "Play",
+  anatomyPlayTip: "Clicks and drags go to your app, so you can play it in 3D.\nDrag anywhere else to turn it.\nHold Option to pick a layer instead.",
+  anatomyInspect: "Inspect",
+  anatomyInspectTip: "A click picks a layer, and a drag turns it.\nHold Option to play your app instead.",
+  anatomyFront: "Front",
+  anatomyFrontTip: "Look at it straight on again",
+  anatomySpacing: "Spacing",
+  // what it shows as layers (I257, T118, T121):  your views, the same with their names, or empty frames of them
+  anatomyShows: "What to show",
+  anatomyViews: "Views",
+  anatomyViewsTip: "A layer for each view your app draws",
+  anatomyNamed: "Named",
+  anatomyNamedTip: "A layer for each view your app draws, with its name",
+  anatomyOutlines: "Outlines",
+  anatomyOutlinesTip: "Draw each view as an empty frame instead of showing what's on it",
+  // over the 3D view in the full window (I260)
+  anatomyEscToClose: "Esc to close",
+  anatomyFullWindow: "Full window",
+  anatomyFullWindowTip: "Show the layers over the whole editor",
+  anatomyClose: "Close",
+  // a layer's tag, when its look cuts off what's inside it, so nothing inside comes apart from it
+  anatomyFlat: "in one piece",
+  anatomyFlatTip: "This part hides anything past its edges, so what's inside it can't come apart from it",
+  anatomyFocusShortcut: "Show the selected layer alone",
+  anatomyBackShortcut: "Go back out of Anatomy",
+  shortcutsWhileAnatomy: "Only while Anatomy shows",
+  anatomyHelp:
+    "Anatomy pulls your app apart into layers, one for each view it draws.\nDrag to turn it. Scroll to zoom. Click a layer to pick it, or double-click to show it alone.\nHold Option to play the app as usual. Press Esc to go back.",
   notSaved: "Not saved",
 
   ////////////////

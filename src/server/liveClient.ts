@@ -96,6 +96,11 @@ export type ServerConfig = {
    * the docs runtime lets its text be edited in place (epic `epic-engine` P60)
    */
   writable?: boolean
+  /**
+   * the live channel is open:  set by `liveClient()` as its socket opens and closes
+   * - a page that falls back on a slow poll polls only while it isn't (`isLiveChannelOpen()`)
+   */
+  connected?: boolean
   editPage?: (edit: PageEdit) => Promise<PageEditResult>
   readElement?: (read: ElementRead) => Promise<ElementReadResult>
   saveFile?: (save: FileSave) => Promise<PageEditResult>
@@ -225,7 +230,7 @@ export type ElementReadResult = { ok: boolean; status: number; html?: string; et
  *     so a restart leaves no row of failed requests on the console
  * - keeps its place across a reload:  the scroll position (`sessionStorage`, when it works);
  *   the docs runtime keeps its folds and comment drafts itself (`localStorage`)
- * - in a frame (VS Code's "Epic Docs" and "Review" views, spell-epic's `vscode/src/DocView.ts`):
+ * - in a frame (VS Code's "Review" and "Details" views, spell-epic's `vscode/src/DocView.ts`):
  *   - posts its place to the parent:  on every load and hash change, and on `spell-doc:scrolled-to`
  *     (the docs runtime moved the address with `history.replaceState()`, which fires no `hashchange`)
  *   - runs `history.go()` when the parent posts `{ spell: "history", go: -1 | 1 }`
@@ -338,7 +343,7 @@ export function liveClient(scrollKey: string): void {
   config.readPage = readPage
   config.reload = reloadQuietly
   config.reloadNow = reload
-  // in a frame (VS Code's "Epic Docs" view):  say where we are, and step back / forward when the frame's parent asks
+  // in a frame (VS Code's side-bar views):  say where we are, and step back / forward when the frame's parent asks
   if (window.parent !== window) {
     reportPlace()
     addEventListener("pageshow", reportPlace)
@@ -467,6 +472,7 @@ export function liveClient(scrollKey: string): void {
     let opened = false
     socket.addEventListener("open", () => {
       opened = true
+      config!.connected = true
       // back after a restart:  the page's polls and requests may go on (`ServerLink.watch()`)
       if (serverDown) dispatchEvent(new Event("spell-server:up"))
       serverDown = false
@@ -488,6 +494,7 @@ export function liveClient(scrollKey: string): void {
       } else if (event === "hello") rememberVersions()
     })
     socket.addEventListener("close", () => {
+      config!.connected = false
       // the server went away (a restart:  every merge into main does it):  the page's polls wait for it, rather than
       // failing every few seconds on the console (`ServerLink.watch()`, epic `epic-engine` I294)
       if (opened && !serverDown) dispatchEvent(new Event("spell-server:down"))
@@ -855,6 +862,9 @@ export function liveClient(scrollKey: string): void {
    *   `{ spell: "open", url, kind: "file" }` to the parent, which opens it in VS Code (a folder:  in the Explorer)
    * - another site, or a link marked `data-spell-open="browser"` (the header's App):
    *   `{ spell: "open", url, kind: "external" }`, opened in the browser
+   * - a link marked `data-spell-open="tab"` (the epics home's Epic Documentation card):
+   *   `{ spell: "open", url, kind: "tab" }`, shown in the side bar tab its page belongs to (spell-epic's `docViewFor()`),
+   *   which comes forward;  outside VS Code it's a plain link
    * - left alone:  a modified click, a download, a `javascript:` / `mailto:` link, a same-page `#id` link
    */
   function followInFrame(event: MouseEvent) {
@@ -871,6 +881,8 @@ export function liveClient(scrollKey: string): void {
     event.preventDefault()
     if (url.origin !== location.origin || link.dataset.spellOpen === "browser")
       return window.parent.postMessage({ spell: "open", url: url.href, kind: "external" }, "*")
+    if (link.dataset.spellOpen === "tab")
+      return window.parent.postMessage({ spell: "open", url: url.href, kind: "tab" }, "*")
     // a source reference (`doc-links.js` names its targets `src-<path>`) that isn't a page:  the editor
     if (!/\.html?$/.test(url.pathname) && link.target.startsWith("src-"))
       return window.parent.postMessage({ spell: "open", url: url.href, kind: "file" }, "*")
@@ -1650,4 +1662,69 @@ export function liveClientScript(): string {
     `(${liveClient.toString()})(${JSON.stringify(SCROLL_KEY)})`,
     ""
   ].join("\n")
+}
+
+////////////////
+// ## The live channel's addresses, and joining it from a page the server didn't serve
+////////////////
+
+/**
+ * The page server's own calls, under `/api/` like every call (epic `people-and-orgs`, P16).
+ * - `GET /api/server`:  the page server's `ServerInfo` (which checkout, branch and port)
+ *   - what the openers ask
+ *   - `PageServer` answers it;  a plain `WebServer` doesn't
+ * - `/api/server/live` (`LIVE_EVENTS`) and `/api/server/live.js` (`LIVE_SCRIPT`):  live reload, on any live `WebServer`
+ * - `/api/server/versions` (`LIVE_VERSIONS`):  what a page's scripts hold now, on any live `WebServer`
+ * - Here, beside the live client, not in `WebServer.ts`:  a page's own code joins the channel by them
+ *   (`joinLiveChannel()`), and must not load the server's node code to do it.
+ */
+export const SERVER_API = "/api/server"
+
+/** Where a live page opens its live-reload websocket (`LiveReload.events`). */
+export const LIVE_EVENTS = `${SERVER_API}/live`
+
+/** Where a live page loads its live client from (`liveClientScript()`). */
+export const LIVE_SCRIPT = `${SERVER_API}/live.js`
+
+/**
+ * Where a live page asks what its scripts hold now (`WebServer.versionsOf()`),
+ * and the server's run and write token (`LiveVersions`):
+ * `GET /api/server/versions?path=/a.js&path=/b.js` => `{ versions: { "/a.js": "<sha1>", "/b.js": null }, run, token }`.
+ * - after the server restarts, a page takes the new token,
+ *   and reloads only when one of ITS scripts changed (epic `epic-engine` I293)
+ * - the token as every page it serves carries it:  a page of another origin can't read the answer,
+ *   and the host check turns away every other host
+ */
+export const LIVE_VERSIONS = `${SERVER_API}/versions`
+
+/**
+ * Join the page server's live channel from a page it didn't serve, which reaches its `/api` through a proxy:
+ * the editor, served by vite (epic `from-console` P17).
+ * - Then the page hears `spell-server:changed`, `spell-server:down` and `spell-server:up` as a served page does,
+ *   so it can watch files with `watchServerFiles()` (spell/util's polling) rather than ask every few seconds.
+ * - How:  it sets `window.SPELL_SERVER` itself, and loads the live client (`LIVE_SCRIPT`), both through the proxy.
+ *   - no write token:  the page saves through its own routes, never the live client's
+ *   - no `run`:  a restart of the page server never reloads it (epic `epic-engine` I329:  the editor outlives one)
+ * - The page's code stays its own:
+ *   every changed script it loaded is taken (`spell-server:scripts-reloading`, `preventDefault()`),
+ *   so the live client never reloads it for new code;  its own dev server does that.
+ * - Not in a frame:  the live client would hand a frame's keys and right-clicks to VS Code.
+ * - Returns whether it joined;  a page already on the channel (a served page) counts.
+ * - SIDE EFFECT:  adds a `<script>` to the page's `<head>`, and a listener on `window`.
+ */
+export function joinLiveChannel(): boolean {
+  const holder = window as unknown as LiveWindow
+  if (holder.SPELL_SERVER || holder.__spellLive) return true
+  if (window.parent !== window) return false
+  holder.SPELL_SERVER = { port: Number(location.port) || 0, token: "", events: LIVE_EVENTS, file: "" }
+  addEventListener("spell-server:scripts-reloading", (event) => event.preventDefault())
+  const script = document.createElement("script")
+  script.src = LIVE_SCRIPT
+  document.head.append(script)
+  return true
+}
+
+/** Is the page's live channel open now (`ServerConfig.connected`)?  `false` with no live client on the page. */
+export function isLiveChannelOpen(): boolean {
+  return !!(window as unknown as LiveWindow).SPELL_SERVER?.connected
 }

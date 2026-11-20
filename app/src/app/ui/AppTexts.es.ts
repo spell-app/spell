@@ -12,6 +12,7 @@
 import type { AppLanguagePack, AppTextPack } from "spell/app/app/ui/AppTexts"
 import { spellViewerEs } from "spell/app/app/components/spell-viewer/SpellViewer.es"
 import { spellEditorEs } from "spell/app/app/components/spell-editor/SpellEditor.es"
+import { spellReferencePageEs } from "spell/app/app/components/spell-reference-page/SpellReferencePage.es"
 
 /** The editor's own texts, in Spanish. */
 const APP_TEXTS_ES: AppTextPack = {
@@ -112,7 +113,18 @@ const APP_TEXTS_ES: AppTextPack = {
   partNothingSelected: "No hay nada seleccionado.",
   partBusy: "Un momento:\nla aplicación se está poniendo al día con tu último cambio.",
   partAcrossFiles: "Están escritos en archivos distintos, así que aún no se pueden mover juntos.",
-  partNoDrawing: "Este programa no tiene un dibujo al que añadir:\nañádele primero un <draw>.",
+  partNoDrawing:
+    "Aún no hay dónde poner esta parte:  tu aplicación no muestra nada en la pantalla.\n" +
+    "En el código de la izquierda, añade una sección «para dibujar» bajo tu aplicación, que diga lo que muestra.\n" +
+    "Luego vuelve a elegir la parte.",
+  partAddedEmpty:
+    "Lo que añadiste ya está en tu aplicación, pero está vacío, así que aún no se ve.\n" +
+    "Está seleccionado en la lista Vistas, a la derecha.\n" +
+    "Dale un texto, o arrastra otra parte dentro.",
+  viewAlone: "Solo {view}",
+  viewAloneTip: "Muestra solo un {view}, con su editor de propiedades, para trabajarlo por sí solo",
+  viewAloneStopTip: "Muestra otra vez la aplicación entera",
+  viewAloneWaiting: "Esperando a que la aplicación se ejecute…",
   partInsideItself: "Algo no puede ir dentro de sí mismo.",
   lineNumbers: "Números de línea",
   softWrap: "Ajuste de línea",
@@ -254,6 +266,36 @@ const APP_TEXTS_ES: AppTextPack = {
   menuRun: "Ejecutar",
   menuHelp: "Ayuda",
   menuAll: "Menús",
+  shortcuts: "Atajos de teclado",
+  shortcutsSearch: "Buscar en los atajos",
+  shortcutsNoMatch: "Ningún atajo coincide con «{words}».\nPrueba con otra palabra.",
+  shortcutsOr: "o",
+  shortcutsFiles: "Archivos",
+  shortcutsEditing: "Edición",
+  shortcutsSelection: "Lo que está seleccionado en la app",
+  shortcutsCode: "El código",
+  shortcutsRunning: "Ejecutar la app",
+  shortcutsDebugger: "El depurador paso a paso",
+  shortcutsWhilePaused: "Solo mientras la app está en pausa en una línea",
+  shortcutsNotInCode: "No mientras escribes en el código",
+  shortcutsNotTyping: "No mientras escribes en el código o en un cuadro de texto",
+  shortcutsWhileInspecting: "Solo mientras eliges una parte de la app",
+  shortcutFind: "Buscar y reemplazar",
+  shortcutShowShortcuts: "Mostrar los atajos de teclado",
+  shortcutChangeThis: "Pedir un cambio en lo seleccionado",
+  shortcutFormat: "Dar formato al documento",
+  shortcutExpandSelection: "Ampliar la selección",
+  shortcutShrinkSelection: "Reducir la selección",
+  shortcutToggleComment: "Comentar o descomentar las líneas",
+  shortcutFold: "Ocultar las líneas de un bloque (plegar)",
+  shortcutUnfold: "Mostrar las líneas de un bloque (desplegar)",
+  shortcutMoveLineUp: "Subir la línea",
+  shortcutMoveLineDown: "Bajar la línea",
+  shortcutAddCursor: "Escribir en varias líneas a la vez",
+  shortcutContinue: "Continuar",
+  shortcutStepOver: "Siguiente línea",
+  shortcutStepInto: "Entrar",
+  shortcutStepOut: "Salir",
   appMenus: "Menús",
   projectMenu: "{project}:  su menú",
   spellMenu: "{app}:  su menú",
@@ -358,62 +400,6 @@ const APP_TEXTS_ES: AppTextPack = {
   siteDataReference: "Referencia",
   siteDataReferenceTip: "Cada lista, campo y cambio de este lugar, y cuáles se probaron",
   // la página de referencia de un lugar, /place/<su descripción> (epic `data` P52)
-  placeRefLoading: "Leyendo el lugar…",
-  placeRefNotFound:
-    "Spell no encontró la descripción de una fuente de datos en {path}.\nRevisa la dirección, o vuelve a ejecutar spell place ingest para leer su descripción.",
-  placeRefVersion: "Versión {version}",
-  placeRefLooked: "Visto el {date}",
-  placeRefLists: "Listas",
-  placeRefDeployments: "Dónde funciona",
-  placeRefDeploymentsNone: "Tu proyecto no indica otro servidor para ella, así que Spell usa {address}.",
-  placeRefNotes: "Notas",
-  placeRefVerified: "Comprobada",
-  placeRefVerifiedWhy: "Spell la probó en el servidor real, y respondió como dice su descripción.",
-  placeRefFailed: "Falló",
-  placeRefFailedWhy: "Spell la probó en el servidor real, y no respondió como dice su descripción.",
-  placeRefUntyped: "Campos sin tipo",
-  placeRefUntypedWhy:
-    "La descripción no dice qué tipo de información guarda cada campo.\nSpell lo completa cuando lee la fuente de datos.",
-  placeRefDisabled: "Desactivada",
-  placeRefDisabledWhy:
-    "Tu archivo de Spell desactiva esta lista, así que nunca se prueba.\nQuita esa línea para volver a activarla.",
-  placeRefUnverified: "Sin probar",
-  placeRefUnverifiedWhy:
-    "Spell solo ha leído sobre esta lista, y no la ha probado en el servidor real.\nEjecuta spell place verify para probarla.",
-  placeRefTried: "probada el {date}",
-  placeRefTriedOn: "probada en {deployment}, el {date}",
-  placeRefRows: "{count} filas leídas",
-  placeRefFailed401:
-    "El servidor real pidió una clave, el código secreto que deja entrar a Spell.\nAgrégala junto a este servidor en el archivo __project.json5 de tu proyecto, y vuelve a probar con spell place verify.",
-  placeRefFailed403:
-    "El servidor real no aceptó la clave, el código secreto que deja entrar a Spell.\nRevisa la clave en el archivo __project.json5 de tu proyecto, y vuelve a probar con spell place verify.",
-  placeRefFailed404:
-    "Spell no encontró esta lista en el servidor real, en la dirección que tenía.\nRevisa la dirección en la descripción del lugar, y vuelve a probar con spell place verify.",
-  placeRefFailed5xx:
-    "Algo falló en el servidor real, no en tu proyecto.\nEspera unos minutos, y vuelve a probar con spell place verify.",
-  placeRefFailedOther:
-    "La respuesta del servidor real no fue la que Spell esperaba.\nPasa el puntero sobre esta línea para ver qué dijo.",
-  placeRefListLeftOut: "Fuera del Spell:  {why}",
-  placeRefChanges: "Qué puede cambiar",
-  placeRefFields: "Campos",
-  placeRefName: "Nombre",
-  placeRefAddress: "Dirección",
-  placeRefKey: "Clave",
-  placeRefReadOnly: "Solo lectura",
-  placeRefYes: "sí",
-  placeRefChange: "Cambio",
-  placeRefTakes: "Recibe",
-  placeRefState: "Probado",
-  placeRefField: "Campo",
-  placeRefInSpell: "En Spell",
-  placeRefKind: "Guarda",
-  placeRefFieldNotes: "Notas",
-  placeRefIsId: "dice qué fila es cuál",
-  placeRefLinksTo: "enlaza con {target}",
-  placeRefRequired: "obligatorio",
-  placeRefSetByServer: "lo pone el servidor",
-  placeRefOneOf: "uno de {choices}",
-  placeRefLeftOut: "fuera del Spell",
   inspectorNotSavedCode: "Tu programa calcula esto por sí mismo, así que un cambio aquí no se guardará.",
   inspectorNotSavedRunning: "La aplicación lo pone mientras corre, así que este cambio no se guardará.",
   inspectorShowCode: "Mostrar el código",
@@ -472,6 +458,37 @@ const APP_TEXTS_ES: AppTextPack = {
   inspectHelp:
     "Haz clic en una parte de tu app para ver qué es.\nAlt y clic elige una parte de dentro.\nMantén Mayús o ⌘ para elegir varias, o arrastra por un espacio vacío.\nPulsa Esc cuando termines.",
   inspectHelpClose: "Cerrar",
+  // Anatomía (epic `editor` P34)
+  anatomy: "Anatomía",
+  anatomyTip: "Despliega la app en 3D, cada parte en una capa propia",
+  anatomyStopTip: "Vuelve a juntar la app",
+  anatomyWholeApp: "{app} en 3D",
+  anatomyClicks: "Qué hace un clic",
+  anatomyPlay: "Jugar",
+  anatomyPlayTip: "Los clics y arrastres van a tu app, para usarla en 3D.\nArrastra en otro sitio para girarla.\nMantén Opción para elegir una capa.",
+  anatomyInspect: "Inspeccionar",
+  anatomyInspectTip: "Un clic elige una capa, y arrastrar la gira.\nMantén Opción para usar tu app.",
+  anatomyFront: "De frente",
+  anatomyFrontTip: "Mírala de frente otra vez",
+  anatomySpacing: "Separación",
+  anatomyShows: "Qué mostrar",
+  anatomyViews: "Vistas",
+  anatomyViewsTip: "Una capa por cada vista que dibuja tu app",
+  anatomyNamed: "Con nombre",
+  anatomyNamedTip: "Una capa por cada vista que dibuja tu app, con su nombre",
+  anatomyOutlines: "Contornos",
+  anatomyOutlinesTip: "Dibuja cada vista como un marco vacío, sin lo que hay en ella",
+  anatomyEscToClose: "Esc para cerrar",
+  anatomyFullWindow: "Pantalla completa",
+  anatomyFullWindowTip: "Muestra las capas sobre todo el editor",
+  anatomyClose: "Cerrar",
+  anatomyFlat: "de una pieza",
+  anatomyFlatTip: "Esta parte oculta lo que pasa de sus bordes, así que lo de dentro no puede separarse de ella",
+  anatomyFocusShortcut: "Muestra sola la capa elegida",
+  anatomyBackShortcut: "Vuelve atrás, fuera de Anatomía",
+  shortcutsWhileAnatomy: "Solo mientras se ve Anatomía",
+  anatomyHelp:
+    "Anatomía separa tu app en capas, una por cada vista que dibuja.\nArrastra para girarla. Desplaza para acercar. Haz clic en una capa para elegirla, o doble clic para verla sola.\nMantén Opción para usar la app como siempre. Pulsa Esc para volver.",
   notSaved: "Sin guardar",
 
   ////////////////
@@ -990,5 +1007,5 @@ const APP_TEXTS_ES: AppTextPack = {
 export const appTextsEs: AppLanguagePack = {
   lang: "es",
   texts: APP_TEXTS_ES,
-  tags: [spellViewerEs, spellEditorEs]
+  tags: [spellViewerEs, spellEditorEs, spellReferencePageEs]
 }

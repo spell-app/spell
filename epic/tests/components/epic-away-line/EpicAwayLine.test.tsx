@@ -80,7 +80,7 @@ describe("<epic-away-line>", () => {
     await ElementFixture.settle()
     await vi.waitFor(() => expect(readButton(line)).not.toBeNull())
     const button = readButton(line)!
-    expect(button.getAttribute("title")).toContain("the rest stays")
+    expect(button.getAttribute("data-tooltip")).toContain("the item stays open")
     await expectAccessible(line)
     button.click()
     await vi.waitFor(() => expect(routes.inbox.marks["away:i205"]?.action).toBe("seen"))

@@ -213,6 +213,8 @@ Everything else stands:
    - go on only with later phases that don't build on this one
    - skip the rest, saying why in the skipped phase's log line:  `log <name> "P<m> skipped:  builds on WIP P<n> (I<k>)"`
 5. `epic phase <name>#P<N> done --done "<ul>...</ul>"`:  what was built, as `/epic` writes it.
+   An item's card (`epic update <name>#<id> fixed "..."`):  a short lead sentence, then short paragraphs or `- `
+   bullets, one idea each;  code names and numbers only where needed;  the full story in the item's body.
    Not for a WIP phase:  it stays `active`.
 6. `epic log <name> "P<n> done|WIP:  <what was built>;  checks:  <results>;  J4, J5"`,
    with the ids of its judgement calls.

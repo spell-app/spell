@@ -1,5 +1,23 @@
-<!-- `<ui-json>`:  data in a page draws nothing, so an example shows it read by a `<ui-tree-diagram>`. -->
+<!-- `<ui-json>`:  JSON drawn as an outline whose objects and arrays open and close;  and data a diagram reads. -->
 <div class="ui-stack">
+  <section>
+    <h4>Its own text</h4>
+    <ui-json>
+      { "name": "port-a", "kind": "optical", "lanes": 4, "active": true, "owner": null, "tags": ["in", "test"],
+      "bounds": { "x": 0, "y": 12.5, "w": 400, "h": 220 } }
+    </ui-json>
+  </section>
+  <section>
+    <h4>Three levels open, editable</h4>
+    <ui-json depth="3" editable>
+      { "board": { "name": "demo", "parts": { "a1": { "kind": "switch", "on": false }, "b2": { "kind": "lamp", "watts":
+      60 } } }, "made": "2026-11-18" }
+    </ui-json>
+  </section>
+  <section>
+    <h4>All closed, no header</h4>
+    <ui-json depth="0" no-header>[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]</ui-json>
+  </section>
   <section>
     <h4>A tree diagram's data</h4>
     <ui-tree-diagram>

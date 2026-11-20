@@ -5,7 +5,7 @@
  * - The reactive ones (`@prop`, `@state`, `@derived`) are shared, in `spell/util/reactive`:  this file adds spell's own.
  * - Here, not beside `@proto` in `../decorators.ts`:  `ui` re-exports that whole file, and this is spell-only.
  * - Compiled spell can't use decorators (it runs from a `blob:` URL, no transpile step), so whatever these do,
- *   compiled classes MUST get the same runtime shape without them.  See `guides/solid/solid-2.md`.
+ *   compiled classes MUST get the same runtime shape without them.  See `agents/solid/solid-2.md`.
  * - NOTE: lowered by esbuild via `vite.decorators.ts`;  a decorator MUST start its line.
  */
 

@@ -4,12 +4,13 @@ import { appConfig, sharedSolid } from "./vite.shared.ts"
 
 /**
  * Build spell's code and markdown elements:  `yarn build:element` => `dist-element/`, after `vite.solid.config.ts`.
- * - Three entries:
+ * - Four entries:
  *   - `spell-code.js`:  `<spell-code>`, and `spell` registered with the page's `UI.code` (`src/app/components/spell-code/`)
  *   - `spell-markdown.js`:  `<spell-markdown>`, spell's markdown engine (`src/app/components/spell-markdown/`)
+ *   - `spell-reference-page.js`:  `<spell-reference-page>`, a reference page (`src/app/components/spell-reference-page/`)
  *   - `spell-language.js`:  ONLY `spell` registered, for a page with Spell UI of its own (`src/app/spellLanguage.ts`):
  *     what the page server adds to the docs pages it serves
- * - The component pack, `spell.pack.js` (`vite.element.config.ts`), imports the first two too.
+ * - The component pack, `spell.pack.js` (`vite.element.config.ts`), imports the first three too.
  * - Its own build, not more entries of `vite.element.config.ts`:
  *   that one puts everything its entries share in ONE chunk (`spell-shared.js`), which `<spell-viewer>` loads up front.
  * - The heavy halves are lazy chunks, `spell-code-*.js`:
@@ -43,6 +44,7 @@ export default defineConfig({
       input: {
         "spell-code": "../src/app/components/spell-code/index.ts",
         "spell-markdown": "../src/app/components/spell-markdown/index.ts",
+        "spell-reference-page": "../src/app/components/spell-reference-page/index.ts",
         "spell-language": "../src/app/spellLanguage.ts"
       },
       output: {

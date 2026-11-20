@@ -8,7 +8,7 @@ when working with code in the kit's `src/element/` (`spell/element`), and its to
 the kit's layout, and the house style every folder shares.
 Only what's local is below;  a section named like a WWOD rule extends it.
 
-**This is Solid work:  READ [the Solid 2 rules](../../spell.epics/guides/solid/solid-2.md) IN FULL FIRST,**
+**This is Solid work:  READ [the Solid 2 rules](../../agents/solid/solid-2.md) IN FULL FIRST,**
 then [ui's AGENTS.md](../../ui/AGENTS.md), "Solid authoring":  how an element is written on this folder's code.
 
 ## This folder:  the kit's `src/element/`
@@ -70,6 +70,16 @@ then [ui's AGENTS.md](../../ui/AGENTS.md), "Solid authoring":  how an element is
     - `afterSolidUpdate()`, `beforeNextPaint()`
     - `soon()`, `after()`, `every()`;  and waiting:  `waitUntil()`, `within()`
     - this folder's until epic `coherence` P19:  util's now, so node code that may not load `spell/element` uses it
+  - [drawnWindow](drawnWindow.ts):  a long list, drawn as you scroll (`drawnInWindow()`):
+    the first 24 items, then 24 more each time its end comes near the view;  what's drawn stays drawn
+    - NOT in the barrel:  reached by path, `spell/element/drawnWindow`
+    - who draws with it:
+      - every loop in a Spell drawing (the parser's core:  `drawing.ts`, `saved.ts`)
+      - a `<ui-tree>` column drawn from its items list (Spell UI's `UITree`)
+    - the parser's core's until epic `from-console` P8 moved it here, so Spell UI could use it too
+    - Spell's own parts are handed in:
+      - its `Cell`, to say the count changed (`changes`)
+      - `scroll to the top` (`isGoingToTheTop`)
   - [SkeletonText](SkeletonText.ts):  a vocabulary's skeleton, written as one line of text, parsed in node
     - NOT in the barrel:  reached by path, `spell/element/SkeletonText`
     - Spell UI's (`src/vocabulary/`) until epic `repo-split` P10
@@ -182,6 +192,9 @@ As WWOD §4, plus:
     - where a set adds its names (below)
     - for node code that mustn't load the element layer (the vocabularies, the epics' definitions)
   - `spell/element/SkeletonText`:  node code that parses skeletons
+  - `spell/element/drawnWindow`:  a long list, drawn as you scroll, for the parser's core and Spell UI's `<ui-tree>`
+    - Bundled by whoever draws with it, a copy each:  it holds nothing a page must share,
+      so the app's element builds bundle it (`BUNDLED_ELEMENT_LEAVES`, [the app's shared build](../../app/app/vite.shared.ts))
   - `spell/element/HotDefinitions`:  the HMR plugin, [HotElements](../element-tools/HotElements.ts), injects it by its file path;
     Spell UI's `PackHotSwap` (its `spell/ui/hot` entry) imports it
 - The element tools and the `spell-pack` bin are node only:
@@ -242,7 +255,7 @@ the family ATTACHES it when it arrives.
 
 - Two copies of `src/element/` on a page would mean two `UIComponent`s and two registries.
   - It fails silently, as two Solids do
-    ([the Solid 2 rules](../../spell.epics/guides/solid/solid-2.md), "One Solid per page").
+    ([the Solid 2 rules](../../agents/solid/solid-2.md), "One Solid per page").
 - So no bundle of ours carries its own:
   - Spell UI's `core` entry carries it, and so everything built on that entry:
     - Spell UI's built `core.js`

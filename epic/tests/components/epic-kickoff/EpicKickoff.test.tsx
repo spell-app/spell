@@ -72,10 +72,13 @@ async function reviewing(routes: FakeRoutes): Promise<ReviewClient> {
   return client
 }
 
-/** A new epic's page:  its Overview, with `inside` (a prompt, say), and `after` (phases, say). */
-async function page(inside = "", after = ""): Promise<HTMLElement> {
+/**
+ * A new epic's page, in its Overview stage:  its Overview, with `inside` (a prompt, say), and `after` (phases, say);
+ * `attributes` in place of `stage="overview"` (a saga page's, say).
+ */
+async function page(inside = "", after = "", attributes = 'epic="sample" stage="overview"'): Promise<HTMLElement> {
   const host = await ElementFixture.render<E.DOMElement>(
-    `<epic-page epic="sample" title="Sample"><epic-overview id="overview">${inside}</epic-overview>${after}</epic-page>`
+    `<epic-page ${attributes} title="Sample"><epic-overview id="overview">${inside}</epic-overview>${after}</epic-page>`
   )
   await ElementFixture.settle()
   return host.querySelector<HTMLElement>("epic-overview")!
@@ -115,6 +118,24 @@ describe("<epic-kickoff>", () => {
     expect(kickoffOf(await page("<epic-prompt><p>Do it</p></epic-prompt>"))).toBe(null)
     const phases = `<epic-section id="phases" kind="phases"><epic-phase id="p-one" title="One" status="todo"></epic-phase></epic-section>`
     expect(kickoffOf(await page("", phases))).toBe(null)
+  })
+
+  // epic `epic-engine` I349:  a saga page showed it, as any page with no prompt and no phases did
+  test("only on an EPIC page in its Overview stage:  never a saga page, nor a page with no stage or a later one", async () => {
+    await reviewing(new FakeRoutes())
+    const fresh = await page()
+    await vi.waitFor(() => expect(kickoffOf(fresh)).not.toBe(null))
+    for (const attributes of [
+      'kind="saga" saga="epics"',
+      'kind="saga" saga="epics" stage="overview"',
+      'epic="sample"',
+      'epic="sample" stage="phases"',
+      'epic="sample" stage="building"'
+    ]) {
+      const overview = await page("", "", attributes)
+      await ElementFixture.settle()
+      expect(kickoffOf(overview), attributes).toBe(null)
+    }
   })
 
   test("three pictures dropped are IMG1-IMG3, saved as a kickoff mark;  taking IMG2 out leaves IMG1 and IMG2", async () => {

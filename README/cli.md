@@ -62,6 +62,30 @@ It's a link, not a copy:  `spell` runs [bin/spell.mjs](../bin/spell.mjs) in this
   After that the base answers in about 0.1 s, and a language command, which loads the parser and Spell's rules,
   in about one:  `spell explain print` and `spell parse` each took 0.9 s here.
 
+### Your checkout, in a project that installs Spell from npm
+
+A project that depends on `spell` runs the npm copy.
+One command, in the project, makes its `spell` run your checkout instead, for you alone:
+
+```sh
+cd ~/work/acme-spell
+yarn spell local on ~/www/spell     # or npx spell ...;  spell ... when it's on your PATH
+yarn start                          # the page server and editor from ~/www/spell, the org still acme's
+```
+
+- It writes the project's `.spell/kit.json5`, naming your checkout, and adds `/.spell/` to its `.gitignore` when git
+  doesn't leave it out already:  everyone else runs npm's copy, and nothing committed changes.
+- With no checkout named:  the one this `spell` runs from, else `~/www/spell`.
+- `spell local` alone says which Spell runs here, and why;  `spell local off` goes back to npm's.
+- Your checkout runs from its own install:  `yarn install` there first, or nothing is written.
+- For every project on the machine:  `export SPELL_KIT=~/www/spell`, in your shell profile.
+  It wins over a project's file, so one command can try another checkout.
+- A checkout named that can't run stops `spell` with one line saying why, never npm's copy instead.
+- It covers `spell` and the commands under it (`spell epic` ...), `epic` from npm's `spell-epic`, and `spell-pack`;
+  not `spell-types`.
+- Only from a release that has it:  0.8.13 or later.
+- The other way, `"spell": "portal:../spell"` in the project's `package.json`, changes its committed files.
+
 ## Naming projects:  a path, an address or a group
 
 Every command is `spell <command> [what] [--flags]`, and `--help` after any of them says the rest.
@@ -211,6 +235,7 @@ If a pony in a wizard hat tells you "Neigh-tive custom elements, at your service
 | `spell bundle check [names...]` | says which bundles are out of date, and why;  exit 1 if any are |
 | `spell commands [list \| check]` | every yarn script, `spell` command, `epic` verb and skill, against the commands page;  `check` exits 1 on a gap |
 | `spell wwod [check] [files...]` | checks every WWOD citation and repo path in WWOD, every `AGENTS.md` and `CLAUDE.md`, and the skills |
+| `spell wwod init` | asks which of the rules the `spell` package ships a project's agents should read, and writes them into its `CLAUDE.md` and `AGENTS.md` ([README/agents.md](agents.md#using-these-rules-in-your-own-project)) |
 | `spell deps [check]` | fails on a deprecated package, or a critical or high advisory not on `deps-known-open.json5`;  runs by itself before a push to `main` |
 | `spell publish [--dry-run] [--tag <tag>]` | builds, packs and checks the npm packages, installs them in a scratch project, then publishes them under the tag `next`, lowest first;  `--dry-run` stops before publishing;  a real one runs in the publish workflow, started from GitHub's Actions tab, with no npm token |
 | `spell map <verb>` | a map of every repo's code, and one of the docs:  what already does this, what uses it, which pages name it ([below](#asking-the-map)) |
@@ -254,9 +279,13 @@ run from any folder of an epic's worktree, `spell server start` starts that work
 | `spell commands list` | the default:  each command, ✓ if the commands page names it |
 | `spell commands check` | only the gaps, exit 1 on any |
 | `spell commands --json` | every command, and the gaps, as JSON |
-| `spell wwod check` | the default, and the only verb |
+| `spell wwod check` | the default verb |
 | `spell wwod check <files...>` | those files too, beyond the default set |
-| `spell wwod --json` | the report as JSON |
+| `spell wwod --json` | the report as JSON;  `init`'s changes |
+| `spell wwod init --solid`, `--code-is-the-spec`, `--no-wwod` | that rule in or out, without asking;  each has its `--no-` / plain twin |
+| `spell wwod init --yes` | asks nothing:  the flags, else what the project has, else the defaults |
+| `spell wwod init --here` | in a workspace, writes in the nearest folder with a `package.json`, not the workspace's root (asked, else the root) |
+| `spell wwod init --dry-run` | says what it would change, and writes nothing |
 | `spell deps --json` | the report as JSON |
 | `spell publish --dry-run` | everything but the publish:  build, pack, check, scratch install |
 | `spell publish --no-scratch` | skips the scratch install, which needs the network |
@@ -278,6 +307,11 @@ run from any folder of an epic's worktree, `spell server start` starts that work
     and that every backticked repo path exists.
   - Where:  WWOD, every `AGENTS.md` and `CLAUDE.md`, the Solid 2 rules, and the skills (citations only).
   - Exits 1 on a broken one.
+- `spell wwod init`:  a project's agents get Spell's rules, from the `spell` it installed.
+  - Three questions:  WWOD, the Solid 2 rules, and §21, the code is the spec.
+  - The defaults:  WWOD yes, Solid 2 when the project depends on `solid-js`, §21 no.
+    It's asked only with WWOD, and stays off unless asked for:  many projects write tests first.
+  - Run again, it suggests what the project has, and changes its block in place:  never a second copy.
 - `spell publish`:  three packages, `spell` first (epic `repo-split` Q65).
   - `spell`:  the ONE package, the kit's `src/` and every folder's, built into `dist/<folder>/`
     (`spell/ui/core` is `dist/ui/core.js`).
@@ -895,6 +929,16 @@ it says what changed, updates both, keeps every line you wrote or changed,
 says what it couldn't change for you, and exits 1 if there's any.
 `--no-ai` works the same as the ingest's.
 
+- Your words about the place, its types and its fields are `--` lines in its Spell file:
+  the place's own under its line, a type's or a field's on the first line inside it.
+  Each look keeps them with their line;  a line that's gone takes its words with it, and says so.
+- What it finds new, or can no longer find, gets a dated line:
+  `-- NEW as of 2026-11-18`, `-- APPARENTLY DELETED as of 2026-11-18`.
+
+`spell place check <file...>` checks that each place's Spell file matches its description,
+as its reference page shows it:
+it exits 1 on a list the Spell has no type for, or on words about something the source no longer has.
+
 `spell place nerd <file>` draws the place's NERD, the shape of its data, from the description beside the file:
 a box per collection showing only its links, solid for what it holds, dashed for what it refers to.
 
@@ -1391,7 +1435,7 @@ If you find yourself writing a second copy of any of these, stop and reuse.
 | [commands/serverCommand.ts](../src/cli/commands/serverCommand.ts) | `spell server`:  the page server's command line, `start all`, `stop` |
 | [commands/bundleCommand.ts](../src/cli/commands/bundleCommand.ts) | `spell bundle`, `spell bundle check` |
 | [commands/commandsCommand.ts](../src/cli/commands/commandsCommand.ts) | `spell commands`:  every command against the commands page |
-| [commands/wwodCommand.ts](../src/cli/commands/wwodCommand.ts) | `spell wwod`;  the check itself is [wwod.ts](../src/cli/commands/wwod.ts) |
+| [commands/wwodCommand.ts](../src/cli/commands/wwodCommand.ts) | `spell wwod`;  the check itself is [wwod.ts](../src/cli/commands/wwod.ts), `init`'s work [wwodInit.ts](../src/cli/commands/wwodInit.ts) |
 | [commands/publishCommand.ts](../src/cli/commands/publishCommand.ts) | `spell publish`:  which repos, the version, the order, the publish |
 | [publish/PackageBuild.ts](../src/cli/publish/PackageBuild.ts) | one repo's `src/` built into the JavaScript its package ships |
 | [publish/PublishedPackage.ts](../src/cli/publish/PublishedPackage.ts) | one package's staging folder, its published `package.json`, `npm pack`, the checks |

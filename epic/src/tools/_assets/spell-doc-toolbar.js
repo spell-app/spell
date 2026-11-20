@@ -15,7 +15,7 @@ import { nextFrame } from "spell/util/dom"
 import { clamp } from "spell/util/number"
 import { withoutAccents } from "spell/util/string"
 import { commentsOnPage, firstWords } from "./spell-doc-comments.js"
-import { FIELDS, el, titleInside } from "./spell-doc-helpers.js"
+import { FIELDS, el } from "./spell-doc-helpers.js"
 import { ThreadFacts } from "spell/epic/comments"
 
 ////////////////
@@ -265,9 +265,7 @@ function takesKeys(element) {
  * `mark`, a `slot="icon"` element), its `title` when the toolbar is titled (a plain `<span>` in the item:  a
  * shrinkable menu's item draws it in its title box, and cuts it there), its `badges` (`[kind, number, words]`:  `<ui-label slot="badge">`s, over
  * the mark's top right on an epic page), `state` (`data-state`, a details page's question's colour).
- * - its tooltip `tip` on the link inside, where the pointer lands (`titleInside()`):  its mark, title and badges let
- *   the pointer through (`spell-toolbar.css`), so it shows in VS Code too;  the badges say theirs in it, and to a
- *   screen reader
+ * - its tooltip `tip`, Spell UI's (`data-tooltip`):  the badges say theirs in it, and to a screen reader
  */
 export function toolbarItem({ id, tip, glyph, mark, title, letter, state, badges }) {
   const said = [tip, ...badges.map(([, , words]) => words)].join(" · ")
@@ -278,9 +276,8 @@ export function toolbarItem({ id, tip, glyph, mark, title, letter, state, badges
       link: `#${id}`,
       "data-rail": id,
       icon: glyph,
-      // an item with an access letter says it in the toolbar's own tooltip (`wireKeyTips()`), not the browser's:
-      // an empty one, so the menu draws none either, with the icons only
-      title: letter ? "" : said,
+      // an item with an access letter says it in the toolbar's own tooltip (`wireKeyTips()`), so none here
+      "data-tooltip": letter ? undefined : said,
       "aria-label": said,
       "aria-keyshortcuts": letter?.toUpperCase(),
       "data-key": letter,
@@ -289,16 +286,43 @@ export function toolbarItem({ id, tip, glyph, mark, title, letter, state, badges
     mark,
     // one box for the title and its access letter:  loose, the item's flex row would part them ("T ypes")
     title && el("span", {}, ...titleWithKey(title, letter)),
-    ...badges.map(([kind, number]) =>
-      el(
-        "ui-label",
-        { class: `spell-toolbar-count ${kind}`, slot: "badge", appearance: "circular", size: "mini" },
-        String(number)
-      )
-    )
+    ...badgeLabels(badges)
   )
-  titleInside(item, "item")
   return item
+}
+
+/**
+ * An item's badges, as `<ui-label slot="badge">`s:  ONE colour, its count badge, the number in it;
+ * SEVERAL colours, ONE circle split into a slice of each, meeting in its centre, with no number
+ * (epic `epic-engine` I347;  Owen, 2026-11-18, of a blue 1 over an orange 1:  "This is kinda confusing.  Maybe when
+ * we have two colors, we just show two half-circles with the colors meeting in the center, with no number").
+ * - two:  halves, the first (the most urgent:  red, then orange, then blue) on the left
+ * - three:  thirds, the first from the bottom round to the top on the left, the rest clockwise (J of I347)
+ * - the counts stay in the item's tooltip and name, in words (`toolbarItem()`)
+ * - the slices' colours:  the kinds' own (`BADGE_COLORS`), one gradient set on the label (`--spell-split`)
+ */
+function badgeLabels(badges) {
+  const label = (kind, style, text) =>
+    el(
+      "ui-label",
+      { class: `spell-toolbar-count ${kind}`, slot: "badge", appearance: "circular", size: "mini", style },
+      text
+    )
+  if (badges.length < 2) return badges.map(([kind, number]) => label(kind, undefined, String(number)))
+  const slice = 100 / badges.length
+  const stops = badges.map(([kind], at) => {
+    const color = `var(${BADGE_COLORS[kind] ?? BADGE_COLORS.replied})`
+    return at === badges.length - 1 ? `${color} 0` : `${color} 0 ${Math.round((at + 1) * slice * 1000) / 1000}%`
+  })
+  const kinds = badges.map(([kind]) => kind).join(" ")
+  return [label(`split ${kinds}`, `--spell-split: conic-gradient(from 180deg, ${stops.join(", ")})`)]
+}
+
+/** Each badge kind's colour, the custom property `spell-toolbar.css` colours its count badge with. */
+const BADGE_COLORS = {
+  urgent: "--spell-state-attention",
+  replied: "--spell-state-replied",
+  running: "--spell-state-progress"
 }
 
 /**
@@ -498,13 +522,12 @@ function jumpWaitingList(pick) {
     const tip = `${ThreadFacts.aboutTip({ id: comment.id, place: comment })}\n(Jump there)`
     const line = el(
       "ui-item",
-      { class: "spell-jump-thread", title: tip },
+      { class: "spell-jump-thread", "data-tooltip": tip },
       el("b", {}, label),
       " · ",
       el("span", {}, firstWords(comment.text))
     )
     line.addEventListener("click", () => pick(label))
-    titleInside(line, "item")
     return line
   })
   return el(

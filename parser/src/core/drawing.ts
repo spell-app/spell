@@ -28,14 +28,14 @@ import { Errored, createMemo, createRoot, getOwner, onCleanup, runWithOwner, unt
 
 import { Cell, initialCaps } from "spell/util"
 import { untrackCells } from "spell/util/reactive"
+import { MOST_AT_ONCE, canDrawInWindows, drawnInWindow } from "spell/element/drawnWindow"
 
 import { core } from "./core"
 import { defineCoreModule, type PartEdit } from "./core.types"
 import type { ContextMenuItem, MenuItem } from "./acting"
 import { List } from "./classes/List"
 import { ViewableList } from "./classes/ViewableList"
-import { MOST_AT_ONCE, canDrawInWindows, drawnInWindow } from "./drawnWindow"
-import { closeDialogOf, listenForTableEdits, listenForUndoKeys, shownIn } from "./ui"
+import { SPELL_WINDOW, closeDialogOf, listenForTableEdits, listenForUndoKeys, shownIn } from "./ui"
 import { standInFor } from "./waiting"
 
 /**
@@ -391,7 +391,12 @@ export const drawingMethods = defineCoreModule({
         : drawEachItem === DEFAULT_DRAW_EACH_ITEM
           ? (item: unknown) => drawEachItem.call(list, item)
           : (item: unknown) => drawInBoundary(list, () => drawEachItem.call(list, item))
-    return drawnInWindow({ items: () => (list as { items: unknown[] }).items, drawItem, key: () => list as object })
+    return drawnInWindow({
+      items: () => (list as { items: unknown[] }).items,
+      drawItem,
+      key: () => list as object,
+      ...SPELL_WINDOW
+    })
   },
 
   /**
@@ -411,7 +416,8 @@ export const drawingMethods = defineCoreModule({
     return drawnInWindow({
       items: () => items() ?? [],
       key: () => list as object,
-      drawItem: (item, position) => madeOnce(each(item, position(), list))
+      drawItem: (item, position) => madeOnce(each(item, position(), list)),
+      ...SPELL_WINDOW
     })
   },
 
@@ -556,6 +562,17 @@ function drawingOfType(name: string): Cell {
   let cell = DRAWINGS_OF_TYPES.get(name)
   if (!cell) DRAWINGS_OF_TYPES.set(name, (cell = new Cell()))
   return cell
+}
+
+/**
+ * Follow the edits to `thing`'s type, as a view's own drawing does:  a drawing that calls this, in a memo, is drawn
+ * again by an edit to that type (`core.drawAgain()`).
+ * - For a drawing made outside `drawThing()`:  a site's layout panes, each drawn by the layout's method itself
+ *   (`SiteBase.drawSlot()`;  epic `editor` P35).
+ */
+export function followsEditsOf(thing: object): void {
+  everyDrawing.read()
+  drawingOfType(thing.constructor.name).read()
 }
 
 /** One part of a drawing, `drawPart()`'s. */

@@ -206,7 +206,7 @@ export const epicItemVocabulary = {
       kind: "boolean",
       description:
         "A judgement call or issue Claude has fixed (`epic update ... fixed`, epic `epic-engine` I232):  `replied` " +
-        "(orange), your turn to review it;  Approve closes it, Do this sends it back."
+        "(orange), your turn to review it;  Accept the fix closes it, Revisit (with a note) sends it back."
     },
     {
       name: "failed",
@@ -335,15 +335,15 @@ export const epicItemVocabulary = {
     {
       name: "handled",
       description:
-        "With `handled`:  a grey `in P4` at its line's end, linking the phase whose text took its answer (epic " +
+        "With `handled`:  a grey `in P4` under its line's buttons (I348), linking the phase whose text took its answer (epic " +
         "`epic-engine` P31);  with `taken-in` (epic `epic-engine` I128), the same `in P1`, linking the phase that " +
         "has it, while the item is still to finish (I307)."
     },
     {
       name: "done-in",
       description:
-        "With `taken-in` on a finished item (done, canceled, decided):  a grey `done in P20` at its line's end, where " +
-        "its plane was, linking the phase it was done in (epic `epic-engine` J231)."
+        "With `taken-in` on a finished item (done, canceled, decided):  a grey `in P20` under its line's buttons, " +
+        "linking the phase it was done in (epic `epic-engine` J231;  `done in P20` beside the buttons until I348)."
     },
     {
       name: "git",
@@ -361,7 +361,8 @@ export const epicItemVocabulary = {
     {
       name: "clarify",
       description:
-        "While reviewed:  the `<epic-clarify icon>` at its body's right, which asks Claude to clarify it now (T76)."
+        "While reviewed:  the `<epic-clarify icon>`, the (i) last on its line on every kind, which asks Claude to " +
+        "clarify it now (T76, T95)."
     },
     { name: "label", description: "`Original question` over an answered question's own text." },
     { name: "error", description: "With `source`:  the line saying the part couldn't be loaded." },
@@ -386,90 +387,89 @@ export const epicItemVocabulary = {
     { key: "reviewTodo", text: "to do", description: "Review label:  a review decided on work (`queued`)." },
     { key: "reviewDeferred", text: "deferred", description: "Review label:  put off (`deferred`)." },
     { key: "reviewed", text: "reviewed {date}", description: "Review label:  `reviewed 10/6/26`." },
-    { key: "stateAttention", text: "Needs attention", description: "Id chip tooltip, `state=attention`." },
+    { key: "stateAttention", text: "Urgent", description: "Id chip tooltip, `state=attention`." },
     {
       key: "stateReplied",
-      text: "Claude answered:  your turn to pick",
+      text: "Answered:  your pick",
       description: "Id chip tooltip, `state=replied`."
     },
-    { key: "stateFixed", text: "Claude fixed it:  your turn to review", description: "Id chip tooltip, `fixed`." },
+    { key: "stateFixed", text: "Fixed:  your review", description: "Id chip tooltip, `fixed`." },
     {
       key: "stateCommentReplied",
-      text: "Claude answered your comment:  your turn (✓ closes it)",
+      text: "Your comment answered:  ✓ closes it",
       description: "Id chip tooltip, orange for a comment in it Claude answered last (epic `epic-engine` I284)."
     },
     {
       key: "stateRequested",
-      text: "Claude finished what you asked:  your turn to see it",
+      text: "Finished as you asked:  take a look",
       description: "Id chip tooltip, `state=requested` (light orange)."
     },
     {
       key: "stateTestWaiting",
-      text: "A test only you can run, its phase not done yet",
+      text: "Your test, once its phase is done",
       description: "Id chip tooltip, a manual test while its phase isn't done (orange)."
     },
     {
       key: "stateHanded",
-      text: "You pressed Do this:  waiting for Claude to start",
+      text: "Waiting for Claude to start",
       description: "Id chip tooltip, `state=handed` (blue outline)."
     },
     {
       key: "stateScheduled",
-      text: "Agreed, not started:  nothing for you to do",
+      text: "Agreed, not started",
       description: "Id chip tooltip, `state=scheduled` (blue dotted)."
     },
     {
       key: "stateQuiet",
-      text: "Open, nothing to think about",
+      text: "Open, nothing to decide",
       description: "Id chip tooltip, `state=quiet` (grey):  a limit."
     },
     { key: "stateProgress", text: "Claude is working on it", description: "Id chip tooltip, `state=progress`." },
-    { key: "stateOpen", text: "Open, still undecided", description: "Id chip tooltip, `state=open`." },
+    { key: "stateOpen", text: "Undecided", description: "Id chip tooltip, `state=open`." },
     { key: "stateRecent", text: "Decided or done", description: "Id chip tooltip, `state=recent`." },
     { key: "stateOld", text: "No longer relevant", description: "Id chip tooltip, `state=old`." },
     {
       key: "stateHandled",
-      text: "Handled in a phase:  its answer is in that phase's text now",
+      text: "Handled in a phase",
       description: "Id chip tooltip, `state=handled` (epic `epic-engine` P31)."
     },
-    { key: "handledIn", text: "in {phase}", description: "Its line's link to the phase that handled it:  `in P4`." },
     {
-      key: "doneIn",
-      text: "done in {phase}",
-      description: "A finished item's link to the phase it was done in, where its plane was:  `done in P20` (J231)."
+      key: "handledIn",
+      text: "in {phase}",
+      description: "Its link to the phase that handled it, took it, or finished it, under its buttons:  `in P4` (I348)."
     },
     {
       key: "donePillTip",
-      text: "Click:  go to {phase}.",
-      description: "The `done in P20` pill's tooltip's second line (epic `epic-engine` J231)."
+      text: "Go to {phase}",
+      description: "A finished item's `in P20` pill's tooltip's second line (epic `epic-engine` J231)."
     },
     {
       key: "handledTip",
-      text: "Handled in {phase}:  rewritten into that phase's text.  Reopen its change mark to talk it over again.",
+      text: "Rewritten into {phase}",
       description: "The phase link's tooltip:  the phase's number and name (`P4 · Retry Logic`)."
     },
     {
       key: "phasePillTip",
-      text: "Click:  go to {phase}.  ⌥-click:  start {phase}.",
+      text: "Go to {phase} · ⌥-click:  start it",
       description: "The phase link's tooltip's second line:  what a click and an ⌥-click do (epic `epic-engine` I271)."
     },
     {
       key: "takenTip",
-      text: "Taken up in {phase}:  fixed or done there",
+      text: "Done in {phase}",
       description: "The phase link's tooltip with `taken-in`:  the phase's number and name (epic `epic-engine` I128)."
     },
     { key: "tipTodo", text: "to do:  {work}", description: "Id chip and review label tooltip:  the queued work." },
     { key: "tipReviewed", text: "reviewed {date}", description: "Id chip tooltip:  reviewed." },
     { key: "tipDeferred", text: "deferred {date}", description: "Id chip and review label tooltip:  deferred." },
-    { key: "tipNotReviewed", text: "not reviewed yet", description: "Id chip tooltip:  open, never reviewed." },
+    { key: "tipNotReviewed", text: "not reviewed", description: "Id chip tooltip:  open, never reviewed." },
     {
       key: "tipMakeCalm",
-      text: "click:  not urgent",
+      text: "Mark not urgent",
       description: "Id chip tooltip while reviewed, an urgent judgement call or issue:  what a click does."
     },
     {
       key: "tipMakeUrgent",
-      text: "click:  urgent",
+      text: "Mark urgent",
       description: "Id chip tooltip while reviewed, a judgement call or issue that isn't urgent:  what a click does."
     },
     {
@@ -496,10 +496,10 @@ export const epicItemVocabulary = {
     { key: "failedMarkNone", text: "failed", description: "The same, with no issue named." },
     {
       key: "failedTip",
-      text: "Failed in your test run:  filed as {id}",
+      text: "Failed your test:  filed as {id}",
       description: "The failed mark's tooltip."
     },
-    { key: "failedTipNone", text: "Failed in your test run", description: "The failed mark's tooltip, no issue." },
+    { key: "failedTipNone", text: "Failed your test", description: "The failed mark's tooltip, no issue." },
     { key: "madeOvernight", text: "made overnight", description: "The bed icon's tooltip (`overnight`)." },
     { key: "sourceLoadError", text: "Couldn't load {source}.", description: "The part's fetch failed." },
     {

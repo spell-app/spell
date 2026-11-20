@@ -105,7 +105,29 @@ describe("<AppBarMenus>", () => {
     expect(popup.visible).toBe(false)
   })
 
-  test("View:  Run, Edit, Site ─ Code, Compiled Code, Inspector, Program Panel ─ Line Numbers, Soft Wrap;  Soft Wrap turns long lines' wrapping on and off, ticked while on, remembered", async () => {
+  test("Help:  Keyboard Shortcuts, its key ?, opens the shortcuts dialog;  then Help (epic `editor` P36)", async () => {
+    const showShortcuts = spyOnEditor("showShortcuts")
+    const host = await mount(() => <AppBarMenus mode="edit" />)
+    const popup = host.querySelector<HTMLElement & { visible: boolean }>("ui-popup[for=HelpBarMenu]")!
+    popup.visible = true
+    flush()
+    const menu = () => popup.querySelector("ui-menu.BarMenuItems")
+    await waitForCondition(() => !!menu()?.children.length)
+    await rowsReady(menu()!)
+    // the editor's own rows, not the Spell's:  their words are their text
+    const rows = [...menu()!.children].map((row) =>
+      `${row.textContent?.trim()} ${row.getAttribute("shortcut") ?? ""}`.trim()
+    )
+    expect(rows).toEqual([`Keyboard Shortcuts ${EDITOR_HOTKEYS.showShortcuts.shortcut}`, "Help"])
+    expect(EDITOR_HOTKEYS.showShortcuts.shortcut).toBe("?")
+    const shortcuts = menu()!.children[0] as HTMLElement
+    shortcuts.shadowRoot!.querySelector<HTMLElement>("[part~=item]")!.click()
+    flush()
+    await waitForCondition(() => showShortcuts.mock.calls.length > 0)
+    expect(popup.visible).toBe(false)
+  })
+
+  test("View:  Run, Edit, Site ─ Code, Compiled Code, Inspector, Anatomy, Program Panel ─ Line Numbers, Soft Wrap;  Soft Wrap turns long lines' wrapping on and off, ticked while on, remembered", async () => {
     const wrappedBefore = CodeSettings.choices.wrapLines
     cleanups.push(() => CodeSettings.choose("wrapLines", wrappedBefore))
     CodeSettings.choose("wrapLines", false)
@@ -118,6 +140,7 @@ describe("<AppBarMenus>", () => {
     await rowsReady(menu()!)
     const rows = [...menu()!.children].map((row) => (row.getAttribute("kind") === "divider" ? "─" : rowText(row)))
     // Owen, epic `editor` T100:  Inspector after Compiled Code, in one group with Program Panel;  Soft Wrap under Line Numbers
+    // Anatomy after the Inspector (P34)
     expect(rows).toEqual([
       "Run",
       "Edit",
@@ -126,6 +149,7 @@ describe("<AppBarMenus>", () => {
       "Code",
       "Compiled Code",
       "Inspector",
+      "Anatomy",
       "Program Panel",
       "─",
       "Line Numbers",

@@ -8,9 +8,11 @@ import { CodeMirrorSetup } from "spell/app/app/ui/codemirror/CodeMirrorSetup"
 import "spell/app/app/components/spell-code/bubbly.css"
 
 /**
- * A head's description in the bubbly look, on a real CodeMirror editor in the browser (epic `language` I120):
- * at its band's right end when it fits there, else in rows of its own under the head, never over the lines below.
- * - It was drawn over the body's first comment (`a "card"`), and behind a group's first member's band.
+ * A head's description in the bubbly look, on a real CodeMirror editor in the browser:
+ * at its band's right end when it fits there, else cut short there with a `…`, the head one line tall (epic `codemirror`
+ * P7), never over the lines below.
+ * - It was drawn over the body's first comment (`a "card"`), and behind a group's first member's band (epic `language`
+ *   I120);  then in rows of its own under the head, which made the head line taller than the others.
  */
 describe("a head's description in the bubbly look", () => {
   let view: EditorView | undefined
@@ -39,12 +41,12 @@ describe("a head's description in the bubbly look", () => {
     return view
   }
 
-  /** Once the editor has measured its descriptions, and drawn the rows they take. */
+  /** Once the editor has measured its descriptions, and cut those that don't fit. */
   async function measured(): Promise<void> {
     for (let frame = 0; frame < 6; frame++) await new Promise((done) => requestAnimationFrame(done))
   }
 
-  /** Each description's head line:  its text, whether the description is under it, how far it is from the next line. */
+  /** Each description's head line:  its text, whether it's cut short, on its band, and the head line's height. */
   function descriptions(view: EditorView) {
     return [...view.contentDOM.querySelectorAll<HTMLElement>(".cmb-description")].map((description) => {
       const line = description.closest<HTMLElement>(".cm-line")!
@@ -52,14 +54,14 @@ describe("a head's description in the bubbly look", () => {
       const box = description.getBoundingClientRect()
       return {
         description: description.textContent,
-        isBelow: line.classList.contains("cmb-head-description-below"),
-        isOnBand: box.top >= band.top - 0.5 && box.bottom <= band.bottom + 0.5,
-        gapToNextLine: line.nextElementSibling!.getBoundingClientRect().top - box.bottom
+        isCut: line.classList.contains("cmb-description-cut") && description.scrollWidth > description.clientWidth,
+        isOnBand: box.top >= band.top - 0.5 && box.bottom <= band.bottom + 0.5 && box.right <= band.right + 0.5,
+        lineHeight: line.getBoundingClientRect().height
       }
     })
   }
 
-  test("too wide for its band:  rows of its own under the head, wrapped, the next line under them", async () => {
+  test("too wide for its band:  cut short at its band's end with a `…`, the head one line tall", async () => {
     const view = editorOf(CARD, 420)
     await measured()
     const drawn = descriptions(view)
@@ -68,26 +70,25 @@ describe("a head's description in the bubbly look", () => {
       "-- Ace is low:  ace = 1 ... king = 13"
     ])
     for (const it of drawn) {
-      expect(it.isBelow).toBe(true)
-      expect(it.isOnBand).toBe(false)
-      // nothing drawn over it:  the next line starts where it ends
-      expect(it.gapToNextLine).toBeGreaterThanOrEqual(-0.5)
+      expect(it.isCut).toBe(true)
+      expect(it.isOnBand).toBe(true)
+      expect(it.lineHeight).toBe(25)
     }
-    // the card's, wrapped, takes two rows under its head
-    const card = view.contentDOM.querySelector<HTMLElement>(".cm-line")!
-    expect(getComputedStyle(card).getPropertyValue("--cmb-description-rows").trim()).toBe("2")
+    const description = view.contentDOM.querySelector<HTMLElement>(".cmb-description")!
+    expect(getComputedStyle(description).textOverflow).toBe("ellipsis")
   })
 
-  test("room for it at its band's end:  there, no rows under the head;  back there when the editor widens", async () => {
+  test("room for it at its band's end:  whole there;  whole again when the editor widens", async () => {
     const view = editorOf(CARD, 420)
     await measured()
-    expect(descriptions(view).every((it) => it.isBelow)).toBe(true)
+    expect(descriptions(view).every((it) => it.isCut)).toBe(true)
     view.dom.parentElement!.style.width = "1600px"
     view.requestMeasure()
     await measured()
     for (const it of descriptions(view)) {
-      expect(it.isBelow).toBe(false)
+      expect(it.isCut).toBe(false)
       expect(it.isOnBand).toBe(true)
+      expect(it.lineHeight).toBe(25)
     }
   })
 })

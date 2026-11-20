@@ -782,7 +782,7 @@ placesEs.addRule(IsReadOnly, {
   ]
 })
 placesEs.addRule(ListsUnder, {
-  syntax: `${THE} {property:member_words} de ${A} {owner:known_type} están en {path:text}`,
+  syntax: `${THE} {property:member_words} de ${A} {owner:known_type} (están|está) en {path:text}`,
   tests: [
     {
       compileAs: "block",
@@ -797,6 +797,19 @@ placesEs.addRule(ListsUnder, {
             '  kind: "web server",',
             '  at: "https://jsonplaceholder.typicode.com",',
             '  listsUnder: { publicaciones: { comentarios: "/posts/{id}/comments" } },',
+            '  unclearNumbers: ","',
+            "})"
+          ]
+        ],
+        [
+          'typicode es un servidor web en "https://jsonplaceholder.typicode.com"\n\t- el resumen de una publicación está en "/posts/{id}/summary"',
+          [
+            "export class Typicode extends Place {}",
+            "export const typicode = core.place(new Typicode(), {",
+            '  name: "typicode",',
+            '  kind: "web server",',
+            '  at: "https://jsonplaceholder.typicode.com",',
+            '  listsUnder: { publicaciones: { resumen: "/posts/{id}/summary" } },',
             '  unclearNumbers: ","',
             "})"
           ]
@@ -817,7 +830,7 @@ placesEs.addRule(ListsUnder, {
   ]
 })
 placesEs.addRule(ListsUnder, {
-  syntax: `${THE} {property:quoted_member} de ${A} {owner:known_type} están en {path:text}`
+  syntax: `${THE} {property:quoted_member} de ${A} {owner:known_type} (están|está) en {path:text}`
 })
 placesEs.addRule(ListsGiveOnly, {
   syntax: "{type:subject_its} listas solo dan {field:text} (y {more:text})? de cada uno"

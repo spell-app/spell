@@ -10,7 +10,7 @@ import {
   rmSync,
   writeFileSync
 } from "node:fs"
-import { tmpdir } from "node:os"
+import { homedir, tmpdir } from "node:os"
 import { dirname, join, relative } from "node:path"
 import { afterAll, describe, expect, test, vi } from "vite-plus/test"
 
@@ -218,7 +218,7 @@ describe("epic init:  one command (epic-friend P13)", () => {
     expect(report.plugin).toEqual({ action: "installed", changes: 3 })
     expect(said(report).slice(1, 5)).toEqual([
       "",
-      "Checking the epic plugin:",
+      "Installing the epic plugin for Claude Code:",
       "> installed epic for Claude Code",
       "> a Claude Code session already open doesn't have it yet:  type /reload-plugins there before /epic;  " +
         "a new session has it"
@@ -834,6 +834,115 @@ describe('epic init:  GitLab refuses the epic repo\'s first push (epic-engine P6
   })
 })
 
+describe("epic init:  what the plugin step says about the machine (epic-engine I345, I346)", () => {
+  /** A scratch machine:  Claude Code's folder, the `PATH` folder `epic` goes in, and a folder with or without `claude`. */
+  function machine(name: string, { claude = false, sessions = false }: { claude?: boolean; sessions?: boolean } = {}) {
+    const root = join(TEMP, "machine", name)
+    const home = join(root, ".claude")
+    const bin = join(root, ".local", "bin")
+    const tools = join(root, "tools")
+    mkdirSync(home, { recursive: true })
+    mkdirSync(tools, { recursive: true })
+    if (sessions) mkdirSync(join(home, "projects"))
+    if (claude) writeFileSync(join(tools, "claude"), "")
+    return { home, bin, tools }
+  }
+
+  test("epic's folder not on the PATH:  one line saying so, and the line for zsh's or bash's profile", async () => {
+    const { home, bin, tools } = machine("off-path", { claude: true })
+    const env = { PATH: `${tools}:/usr/bin`, SHELL: "/bin/zsh" }
+    const report = await new RepoInit({ main: codeRepo("off-path"), plugin: stubPlugin({ home, bin }).make, env }).init(
+      {
+        plugin: true,
+        noRemote: true
+      }
+    )
+    expect(report.plugin).toEqual({
+      action: "installed",
+      changes: 3,
+      notOnPath: { folder: bin, profile: "~/.zshrc", line: `export PATH="${bin}:$PATH"` }
+    })
+    expect(said(report)).toEqual(
+      expect.arrayContaining([
+        "> installed epic for Claude Code",
+        "> Your terminal doesn't know where to find epic yet.",
+        "  To fix it, paste this line at the end of ~/.zshrc, then open a new terminal window:",
+        `    export PATH="${bin}:$PATH"`
+      ])
+    )
+    // on the PATH (a trailing slash too):  nothing said
+    const onPath = { PATH: `${tools}:${bin}/`, SHELL: "/bin/zsh" }
+    const again = await new RepoInit({
+      main: codeRepo("on-path"),
+      plugin: stubPlugin({ home, bin }).make,
+      env: onPath
+    }).init({
+      plugin: true,
+      noRemote: true
+    })
+    expect(again.plugin).toEqual({ action: "installed", changes: 3 })
+  })
+
+  test("the profile line:  ~ for the home folder, bash's own file, and no line for another shell", () => {
+    const bin = join(homedir(), ".local", "bin")
+    expect(RepoInit.pathFix(bin, "/usr/bin/zsh")).toEqual({
+      folder: "~/.local/bin",
+      profile: "~/.zshrc",
+      line: 'export PATH="$HOME/.local/bin:$PATH"'
+    })
+    expect(RepoInit.pathFix(bin, "/bin/bash").profile).toBe(
+      process.platform === "darwin" ? "~/.bash_profile" : "~/.bashrc"
+    )
+    expect(RepoInit.pathFix(bin, "/usr/bin/fish")).toEqual({ folder: "~/.local/bin" })
+    expect(RepoInit.pathLines({ folder: "~/.local/bin" })).toEqual([
+      "> Your terminal doesn't know where to find epic yet.",
+      "  To fix it, add ~/.local/bin to your PATH in your shell's settings, then open a new terminal window"
+    ])
+  })
+
+  test("no Claude Code (no claude on the PATH, no saved sessions):  never 'installed for Claude Code', how to add it later", async () => {
+    const { home, bin, tools } = machine("no-claude")
+    const env = { PATH: `${tools}:${bin}`, SHELL: "/bin/bash" }
+    const report = await new RepoInit({
+      main: codeRepo("no-claude"),
+      plugin: stubPlugin({ home, bin }).make,
+      env
+    }).init({
+      plugin: true,
+      noRemote: true
+    })
+    expect(report.plugin).toEqual({ action: "installed", changes: 3, noClaudeCode: true })
+    const lines = said(report)
+    expect(lines.join("\n")).not.toMatch(/installed epic for Claude Code|reload-plugins/)
+    expect(lines).toEqual(
+      expect.arrayContaining([
+        "> epic works inside Claude Code, and Claude Code isn't on this computer yet.",
+        "  1. Install Claude Code:  https://claude.com/claude-code",
+        "  2. Start a new conversation in it, and type /epic",
+        "  3. No /epic there?  Type this in your terminal, then start a new conversation:  epic plugin install"
+      ])
+    )
+  })
+
+  test("Claude Code there:  a claude on the PATH, or its saved sessions in Claude Code's folder (the VS Code panel's)", async () => {
+    const onPath = machine("claude-on-path", { claude: true })
+    const viaPath = await new RepoInit({
+      main: codeRepo("claude-on-path"),
+      plugin: stubPlugin(onPath).make,
+      env: { PATH: `${onPath.tools}:${onPath.bin}` }
+    }).init({ plugin: true, noRemote: true })
+    expect(viaPath.plugin).toEqual({ action: "installed", changes: 3 })
+    const panel = machine("claude-sessions", { sessions: true })
+    const viaSessions = await new RepoInit({
+      main: codeRepo("claude-sessions"),
+      plugin: stubPlugin(panel).make,
+      env: { PATH: `${panel.tools}:${panel.bin}` }
+    }).init({ plugin: true, noRemote: true })
+    expect(viaSessions.plugin).toEqual({ action: "installed", changes: 3 })
+    expect(said(viaSessions)).toContain("> installed epic for Claude Code")
+  })
+})
+
 describe("epic init:  first epic at work (epic-engine P71)", () => {
   test("the plugin updated, not only installed:  an open session needs /reload-plugins before /epic, a new one has it", async () => {
     const app = codeRepo("plugin-update")
@@ -937,12 +1046,17 @@ const SETUP = "epic-setup"
 function stubPlugin({
   installed = false,
   fails,
-  updates = false
-}: { installed?: boolean; fails?: string; updates?: boolean } = {}) {
+  updates = false,
+  home,
+  bin
+}: { installed?: boolean; fails?: string; updates?: boolean; home?: string; bin?: string } = {}) {
   const calls: string[] = []
   return {
     calls,
     make: () => ({
+      // `home` and `bin` turn on init's checks of the machine (I345, I346)
+      ...(home !== undefined && { home }),
+      ...(bin !== undefined && { bin }),
       isInstalled: () => installed,
       // as `PluginInstall.install()`:  run again, nothing to change
       install: () => {
@@ -1145,3 +1259,79 @@ async function withGh<T>(gh: { command: string }, work: () => Promise<T>): Promi
 function git(cwd: string, ...args: string[]): string {
   return execFileSync("git", args, { cwd, encoding: "utf8" })
 }
+
+describe("epic init --demo:  what a newcomer sees, nothing changed (epic-engine, 2026-11-19)", () => {
+  /** `RepoInit.demo()` in `cwd`, printing caught:  the lines, the exit code and the temporary copy it ran on. */
+  async function demo(cwd: string, args: string[] = []) {
+    const made = vi.spyOn(RepoInit, "demoScratch")
+    let code: number | undefined
+    try {
+      const lines = await printed(async () => {
+        code = await RepoInit.demo(["--demo", ...args], { cwd })
+      })
+      return { lines, code, scratch: made.mock.results[0]!.value as { root: string } }
+    } finally {
+      made.mockRestore()
+    }
+  }
+
+  /** Every file under `folder`, and its contents:  what a run must leave as it was. */
+  function contentsOf(folder: string): string {
+    if (!existsSync(folder)) return "(none)"
+    return execFileSync("find", [folder, "-print"], { encoding: "utf8" }).split("\n").sort().join("\n")
+  }
+
+  test("outside a git repo:  says so once, pretends to be a fresh repo, and changes nothing", async () => {
+    const folder = join(TEMP, "demo-plain")
+    mkdirSync(folder, { recursive: true })
+    writeFileSync(join(folder, "notes.txt"), "hi\n")
+    const claude = process.env.CLAUDE_CONFIG_DIR!
+    const before = [contentsOf(folder), contentsOf(EpicHome.folder()), contentsOf(claude), contentsOf(TEMP)]
+    const { lines, code, scratch } = await demo(folder)
+    expect(code).toBe(0)
+    expect(lines.slice(0, 2)).toEqual(["Demo:  nothing will be changed", `Initializing Epic for repo ${folder}`])
+    expect(lines.filter((line) => /nothing will be changed/.test(line))).toHaveLength(1)
+    expect(tableOf(lines)).toContain(`  would write            ${join(folder, EpicConfig.FILE)}`)
+    expect(lines).toContain("That's it.")
+    expect(lines.at(-1)).toBe("demo:  nothing changed")
+    // never the temporary copy's paths
+    expect(lines.join("\n")).not.toContain(scratch.root)
+    expect(lines.join("\n")).not.toMatch(/epic-demo-/)
+    expect(existsSync(scratch.root)).toBe(false)
+    expect([contentsOf(folder), contentsOf(EpicHome.folder()), contentsOf(claude), contentsOf(TEMP)]).toEqual(before)
+    expect(process.env.SPELL_EPIC_HOME).toBe(EpicHome.folder())
+  })
+
+  test("the plugin step:  as a newcomer sees it, with what it would do, never the machine's Claude Code", async () => {
+    const { lines } = await demo(join(TEMP, "demo-plain"))
+    const at = lines.indexOf("Installing the epic plugin for Claude Code:")
+    expect(at).toBeGreaterThan(0)
+    expect(lines[at + 1]).toBe("> would install epic for Claude Code (epic plugin install)")
+    expect(lines.slice(at + 2).find((line) => /installed_plugins\.json/.test(line))).toMatch(
+      /~\/\.claude\/plugins\/cache/
+    )
+    expect(lines.join("\n")).not.toMatch(/installed already/)
+    expect(lines).toContain("- added the epic plugin to Claude Code")
+  })
+
+  test("a repo set up already:  shown as never set up, its files and branch left as they were", async () => {
+    const app = codeRepo("demo-set-up")
+    await offline(app).init({ commit: true })
+    const status = git(app, "status", "--porcelain")
+    const head = git(app, "rev-parse", "HEAD")
+    const before = [contentsOf(app), contentsOf(join(dirname(app), "demo-set-up.epics"))]
+    const { lines, code } = await demo(app, ["--no-remote"])
+    expect(code).toBe(0)
+    expect(tableOf(lines)[0]).toBe(`  would write            ${join(app, EpicConfig.FILE)}`)
+    expect(lines).toContain(`> would commit ${EpicConfig.FILE} and .gitignore on main, and push it`)
+    expect([contentsOf(app), contentsOf(join(dirname(app), "demo-set-up.epics"))]).toEqual(before)
+    expect(git(app, "status", "--porcelain")).toBe(status)
+    expect(git(app, "rev-parse", "HEAD")).toBe(head)
+  })
+
+  test("run() with --demo:  the demo of its own folder", async () => {
+    const lines = await printed(() => offline(join(TEMP, "demo-plain")).run(["--demo", "--no-remote"]))
+    expect(lines[0]).toBe("Demo:  nothing will be changed")
+    expect(lines.at(-1)).toBe("demo:  nothing changed")
+  })
+})

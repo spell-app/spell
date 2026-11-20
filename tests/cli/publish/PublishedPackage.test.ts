@@ -31,8 +31,13 @@ const MANIFEST = {
   dependencies: { spell: "workspace:*", "vite-plus": "catalog:", lodash: "^4.17.21" },
   devDependencies: { typescript: "^7.0.2" },
   sideEffects: ["./src/things/index.ts", "**/*.css", "./site/x.ts"],
+  bin: { fake: "./bin/fake.mjs", "fake-types": "./bin/fake-types.ts" },
   spell: { commands: "./src/cli/commands.ts", hooks: "./src/cli/hooks.ts" },
-  spellPublish: { bin: { fake: "cli/main" }, files: ["templates"], sideEffects: ["things/setup.ts"] }
+  spellPublish: {
+    bin: { fake: "cli/main", "fake-types": "cli/main" },
+    files: ["templates"],
+    sideEffects: ["things/setup.ts"]
+  }
 }
 
 const REPO: PublishedRepo = {
@@ -47,6 +52,7 @@ write("README.md", "# spell-fake\n")
 write("src/things/index.ts", "export const thing = 1\n")
 write("src/cli/main.ts", 'console.log("fake")\n')
 write("src/cli/commands.ts", "export default () => {}\n")
+write("src/cli/kitCheckout.ts", "export const checkoutToRun = () => undefined\n")
 write("templates/page.html", "<p>page</p>\n")
 
 const pkg = new PublishedPackage(REPO, join(ROOT, "stage"), "2.0.0", { "spell-ui": "2.0.0" }, { "vite-plus": "1.0.0" })
@@ -84,12 +90,21 @@ describe("PublishedPackage.manifest()", () => {
   })
 
   test("bins, files, sideEffects and the spell entry at their published paths", () => {
-    expect(manifest.bin).toEqual({ fake: "./bin/fake.js" })
+    expect(manifest.bin).toEqual({ fake: "./bin/fake.mjs", "fake-types": "./bin/fake-types.js" })
     expect(manifest.files).toEqual(["README.md", "bin", "dist", "templates"])
     expect(manifest.sideEffects).toEqual(["./dist/things/index.js", "**/*.css", "./dist/things/setup.js"])
     // `hooks` names a file that isn't there:  dropped
     expect(manifest.spell).toEqual({ commands: "./dist/cli/commands.js" })
-    expect(readFileSync(join(ROOT, "stage", "bin", "fake.js"), "utf8")).toMatch('await import("../dist/cli/main.js")')
+  })
+
+  // epic `repo-split` T69:  `SPELL_KIT` runs a checkout instead
+  test("a bin node runs in a checkout hands off to SPELL_KIT's;  a .ts one runs the build alone", () => {
+    expect(readFileSync(join(ROOT, "stage", "bin", "fake.mjs"), "utf8")).toContain(
+      'await import(checkoutToRun("bin/fake.mjs", import.meta.url) ?? "../dist/cli/main.js")'
+    )
+    const types = readFileSync(join(ROOT, "stage", "bin", "fake-types.js"), "utf8")
+    expect(types).toContain('await import("../dist/cli/main.js")')
+    expect(types).not.toContain("checkoutToRun")
   })
 
   test("a folder's sideEffects go to its dist/<folder>/:  import \"spell/ui\" isn't dropped (epic repo-split P22)", () => {
@@ -107,8 +122,10 @@ describe("PublishedPackage.pack() / checks()", () => {
     expect(packed).toMatchObject({ name: "spell-fake", version: "2.0.0", tgz: join(ROOT, "spell-fake-2.0.0.tgz") })
     expect(packed.files.sort()).toEqual([
       "README.md",
-      "bin/fake.js",
+      "bin/fake-types.js",
+      "bin/fake.mjs",
       "dist/cli/commands.js",
+      "dist/cli/kitCheckout.js",
       "dist/cli/main.js",
       "dist/things/index.js",
       "package.json",

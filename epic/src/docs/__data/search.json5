@@ -524,7 +524,7 @@
     {
       "path": "epic-clarify.html",
       "title": "<epic-clarify>",
-      "summary": "The <epic-clarify> element: Clarify, and the circle-question beside an item's body, asking Claude to clarify it at once.",
+      "summary": "The <epic-clarify> element: Clarify, and the (i) button on every item's line, asking Claude to clarify it at once.",
       "tag": "epic-clarify",
       "sections": [
         {
@@ -1550,6 +1550,39 @@
           "id": "epic-picture-parts",
           "title": "Parts",
           "parent": 2
+        }
+      ]
+    },
+    {
+      "path": "epic-pills.html",
+      "title": "<epic-pills>",
+      "summary": "The <epic-pills> element: the docs home page's Active epics, a live pill per epic worked on this week.",
+      "tag": "epic-pills",
+      "sections": [
+        {
+          "id": "1-example",
+          "title": "1. Example"
+        },
+        {
+          "id": "2-markup",
+          "title": "2. Markup"
+        },
+        {
+          "id": "3-where-it-goes",
+          "title": "3. Where it goes"
+        },
+        {
+          "id": "epic-pills-parts",
+          "title": "Parts",
+          "parent": 2
+        },
+        {
+          "id": "4-how-it-looks",
+          "title": "4. How it looks"
+        },
+        {
+          "id": "5-written-by",
+          "title": "5. Written by"
         }
       ]
     },

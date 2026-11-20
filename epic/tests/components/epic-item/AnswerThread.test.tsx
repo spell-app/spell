@@ -174,9 +174,9 @@ describe("<epic-item>'s thread, drawn", () => {
     await ElementFixture.settle()
     const done = host.querySelectorAll<HTMLElement>("epic-status")[1]!
     const pill = () => done.shadowRoot!.querySelector<HTMLElement>("[part~='unmerged']")
-    expect([pill()?.textContent, pill()?.title]).toEqual([
+    expect([pill()?.textContent, pill()?.dataset.tooltip]).toEqual([
       "not on main yet",
-      "Done on branch editor, not merged into main yet"
+      "Done on editor, not merged yet"
     ])
     done.removeAttribute("unmerged")
     await ElementFixture.settle()

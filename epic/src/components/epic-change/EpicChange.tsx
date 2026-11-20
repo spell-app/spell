@@ -3,6 +3,7 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "spell/element"
 
+import { ThreadFacts } from "spell/epic/comments"
 import { PlanDates } from "spell/epic/dates"
 import { EpicAddress, PageTargets } from "spell/epic/links"
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
@@ -11,7 +12,6 @@ import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 import { epicChangeVocabulary } from "./EpicChange.en"
 
 import changeCSS from "./EpicChange.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `<epic-change>`
@@ -35,11 +35,15 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *     showed the text under it (Owen:  "Arrow tip doesn't match opacity of the popup")
  * - Quiet (older, or `accepted` on a page from before):  no orange, the chip muted;  the chip stays for good (Q13, B).
  * - Inline, as running text:  the words wrap with the paragraph, the buttons float and never move a line.
+ * - Naming a COMMENT (`item="c2"`, epic `epic-engine` T100):  a comment folded into a plan changed the words.
+ *   - the chip says `C2`;  unfolded, the comment's words (`answer`, copied as the mark was stamped)
+ *   - the popup:  its words too, and a link to its thread, which the page's comments open (`epic-comment-open`)
+ *   - no Reopen:  the person answers on the thread
  ****************/
 export class EpicChange extends E.UIComponent<typeof epicChangeVocabulary> {
   @E.proto static vocabulary = epicChangeVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-change": changeCSS },
+    styleSheets: { "epic-change": changeCSS },
     // inline text:  a click on its words must not jump to the chip
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
@@ -72,19 +76,29 @@ export class EpicChange extends E.UIComponent<typeof epicChangeVocabulary> {
     return PlanDates.isQuiet(this.at, new Date())
   }
 
-  /** Reopen shows:  reviewed, stamped (an id), still new. */
+  /** Reopen shows:  reviewed, stamped (an id), still new;  never for a comment's (its thread is where to disagree). */
   get showsButtons(): boolean {
-    return !this.isQuiet && !!this.id && this.review.reviewing()
+    return !this.isQuiet && !!this.id && !this.isComment && this.review.reviewing()
   }
 
-  /** The question's id as people see it:  `Q16`. */
+  /** Does it name a comment (`c2`, epic `epic-engine` T100), not an item? */
+  get isComment(): boolean {
+    return ThreadFacts.numberOf(this.item ?? "") !== undefined
+  }
+
+  /** The question's id as people see it:  `Q16`;  a comment's `C2`. */
   get itemLabel(): string {
-    return (this.item ?? "").toUpperCase()
+    return this.isComment ? ThreadFacts.label(this.item!) : (this.item ?? "").toUpperCase()
   }
 
-  /** The question's title, from the page it's on;  `""` off an epic page, or when it isn't there. */
+  /** Its comment's thread on the page:  `#comment-c2`, the comments' own anchor;  `""` for an item. */
+  get threadLink(): string {
+    return this.isComment ? `#comment-c${ThreadFacts.numberOf(this.item!)}` : ""
+  }
+
+  /** The question's title, from the page it's on;  `""` off an epic page, or when it isn't there, or a comment. */
   get itemTitle(): string {
-    if (isServer || !this.item) return ""
+    if (isServer || !this.item || this.isComment) return ""
     try {
       return new PageTargets(this.domElement.ownerDocument).find(new EpicAddress({ item: this.item }))?.title ?? ""
     } catch {
@@ -123,6 +137,19 @@ export class EpicChange extends E.UIComponent<typeof epicChangeVocabulary> {
         >
           <span class={TIP_WORDS}>
             <span class={TIP_LINE}>{this.changedBy}</span>
+            <Show when={this.isComment}>
+              <span class={COMMENT}>
+                <Show when={this.answer}>{(words) => <q>{words()}</q>}</Show>
+                <a
+                  class={THREAD}
+                  part={this.partForName("thread")}
+                  href={this.threadLink}
+                  onClick={(event: MouseEvent) => this.openThread(event)}
+                >
+                  {this.translationForKey("openThread", { item: this.itemLabel })}
+                </a>
+              </span>
+            </Show>
             <Show when={this.was}>
               {(was) => (
                 <span class={ORIGINAL}>
@@ -147,7 +174,7 @@ export class EpicChange extends E.UIComponent<typeof epicChangeVocabulary> {
             part={this.partForName("chip")}
             aria-expanded={this.unfolded ? "true" : "false"}
             aria-controls={QA_ID}
-            title={this.translationForKey(this.unfolded ? "foldTip" : "unfoldTip", { item: this.itemLabel })}
+            data-tooltip={this.translationForKey(this.chipTip, { item: this.itemLabel })}
             onClick={(event: MouseEvent) => this.toggle(event)}
           >
             {this.itemLabel}
@@ -162,10 +189,31 @@ export class EpicChange extends E.UIComponent<typeof epicChangeVocabulary> {
               </>
             )}
           </Show>
-          {this.answer || this.translationForKey("noAnswer")}
+          {this.answer || this.translationForKey(this.isComment ? "noWords" : "noAnswer")}
         </span>
       </span>
     )
+  }
+
+  /** The chip's tooltip's key:  folded or not, a question's or a comment's. */
+  get chipTip(): "foldTip" | "unfoldTip" | "foldCommentTip" | "unfoldCommentTip" {
+    if (this.isComment) return this.unfolded ? "foldCommentTip" : "unfoldCommentTip"
+    return this.unfolded ? "foldTip" : "unfoldTip"
+  }
+
+  /**
+   * Its thread link clicked:  asks the page's comments to open the thread (`epic-comment-open`, `{ id }`, bubbling
+   * out of the shadow root);  they cancel it once they have, else the link goes to `#comment-c2` as any link would.
+   */
+  @E.untracked
+  private openThread(event: MouseEvent) {
+    const asked = new CustomEvent("epic-comment-open", {
+      detail: { id: this.item },
+      bubbles: true,
+      composed: true,
+      cancelable: true
+    })
+    if (!this.domElement.dispatchEvent(asked)) event.preventDefault()
   }
 
   /** Enter or Space on the focused words:  as a click, which opens or closes the popup. */
@@ -212,3 +260,7 @@ const WORDS_ID = "words"
 const TIP_WORDS = "tip-words"
 const TIP_LINE = "tip-line"
 const ORIGINAL = "original"
+
+/** Inside the popup, for a comment's mark:  its line (its words, then the link) and the link to its thread. */
+const COMMENT = "comment"
+const THREAD = "thread"

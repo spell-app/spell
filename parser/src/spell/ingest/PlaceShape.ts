@@ -602,6 +602,7 @@ function findIdLinks(
 /**
  * SIDE EFFECT:  each collection says the lists it keeps under each of its things,
  * by the collection each is of (epic `data` P30):  a post's comments, `{ comments: "/posts/{id}/comments" }`.
+ * - And the collection of one thing under each says so, `isOneUnder`:  a system's snapshot.
  */
 function noteListsUnder(
   { collections: looks, listsUnder = [] }: PlaceLook,
@@ -610,10 +611,12 @@ function noteListsUnder(
 ): void {
   const named = (lookName: string) => collectionNameFor(typeWordsFor(lookName, placeName))
   const known = new Set(looks.map(({ name }) => name))
-  for (const { owner, list, at } of listsUnder) {
+  for (const { owner, list, at, isOne } of listsUnder) {
     const description = collections[named(owner)]
     if (!description || !known.has(list) || !collections[named(list)]) continue
     description.listsUnder = { ...description.listsUnder, [named(list)]: at }
+    // ONE thing under each:  a system's snapshot (epic `from-console` P16)
+    if (isOne) collections[named(list)]!.isOneUnder = true
   }
 }
 

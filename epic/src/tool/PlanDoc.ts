@@ -32,12 +32,14 @@ import {
   ITEM_STATUSES,
   KINDS,
   REQUESTED_ID,
+  ISSUE_ID,
   TODO_ID,
   OBSOLETE_ID,
   PROMISED_CARD,
   OLD_DECISION,
   PHASE_FIELDS,
   PHASE_STATUSES,
+  CardText,
   PlanDocError,
   QUESTION_ID,
   REVIEW_AS,
@@ -83,7 +85,7 @@ import {
 
 import { AuthorWords } from "./AuthorWords"
 import { ChangeOriginals } from "./ChangeOriginals"
-import { CommentList, type CommentPlace } from "./CommentList"
+import { CommentList, type Comment, type CommentPlace } from "./CommentList"
 import { IncomingHtml } from "./IncomingHtml"
 import { PhaseTakes } from "./PhaseTakes"
 import { PhaseNumbers } from "./PhaseNumbers"
@@ -723,8 +725,9 @@ export class PlanDoc extends PlanReader {
    * The items whose CHANGE MARKS in phase `n` already say what an Update block `html` would, upper case;  `[]`:  write
    * the block (epic `epic-engine` I159;  Owen, 2026-10-29:  an Update block only when no mark says it).
    * - `forIds` (`updated --for q53,j3`):  the items the change is for;  said when EVERY one has a mark in the phase
-   * - none given:  the item ids `html` names, said when every one has a mark of this pass (`UpdateMarks`:  stamped
-   *   within `SAME_PASS_MINUTES`, or not stamped yet) and `html` names no file (a move the marks can't say)
+   * - none given:  the item ids `html` names, and its comment ids (`C2`, T100),
+   *   said when every one has a mark of this pass (`UpdateMarks`:  stamped within `SAME_PASS_MINUTES`, or not stamped
+   *   yet) and `html` names no file (a move the marks can't say)
    * - names no item:  `[]`, a change no item caused
    */
   marksSay(n: number, html: string, forIds?: readonly string[]): string[] {
@@ -734,7 +737,7 @@ export class PlanDoc extends PlanReader {
       .map((node) => node.textContent ?? "")
       .join(" ")
     if (!given && UpdateMarks.namesFile(text)) return []
-    const ids = given ?? UpdateMarks.idsIn(text)
+    const ids = given ?? [...UpdateMarks.idsIn(text), ...UpdateMarks.commentsIn(text)]
     const marked = UpdateMarks.marked(phase, ids, given ? undefined : this.now)
     return ids.length && marked.length === ids.length ? ids.map((id) => id.toUpperCase()) : []
   }
@@ -799,19 +802,21 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * Request `requestId` (`r3`) filed into todo `id` (`epic file <epic>#T5 r3`, epic `epic-engine` T88):  `html`, the
-   * request as `Requests.html()` writes it, less its screenshots (their words quoted, the context, a link to its
-   * `request.md`), then its pictures, goes at the end of the todo's text, and the todo is marked `requested`;
-   * returns its title.
+   * Request `requestId` (`r3`) filed into todo or issue `id` (`epic file <epic>#T5 r3`, epic `epic-engine` T88;
+   * an issue since T108, `#I5`):  `html`, the request as `Requests.html()` writes it, less its screenshots (their
+   * words quoted, the context, a link to its `request.md`), then its pictures, goes at the end of the item's text, and
+   * it is marked `requested`;  returns its title.
    * - the quote `add --start` gave it (`Owen:  “...”`) goes, when the request's words hold it:  said once, in full
    * - `undefined` when the todo has the request already (its `request.md` linked):  nothing changes
    * - stamped (`changed`) and flagged UPDATE, as `setDetails()` is;  logged
-   * - throws for an item that isn't a todo (a limit included):  a request becomes a todo or a phase
+   * - throws for any other item (a limit included):  a bug report becomes an issue, a feature a todo, bigger a phase
    */
   addItemRequest(id: string, requestId: string, html: string): string | undefined {
     const item = this.item(id)
-    if (!TODO_ID.test(item.id) || item.hasAttribute("limit"))
-      throw new PlanDocError(`${item.id.toUpperCase()} isn't a todo:  a request is filed into a todo or a phase`)
+    if (!(TODO_ID.test(item.id) || ISSUE_ID.test(item.id)) || item.hasAttribute("limit"))
+      throw new PlanDocError(
+        `${item.id.toUpperCase()} isn't a todo or an issue:  a request is filed into an issue, a todo or a phase`
+      )
     // its link, as given or as the writer roots it (`/epics/<epic>/requests/r3/request.md`)
     const link = `requests/${requestId}/request.md`
     if (item.querySelector(`a[href="${link}"], a[href$="/${link}"]`)) return undefined
@@ -1192,6 +1197,9 @@ export class PlanDoc extends PlanReader {
    * - a question moves to its place (`placeQuestion()`);  stamped (`stamp()`)
    * - TAKEN UP (`taken-in`, epic `epic-engine` I128):  an issue or todo closed done while a phase is active is taken
    *   in that phase (`PhaseTakes`);  reopened or canceled, it's taken in none
+   * - closed (done or canceled):  every status card still underway finishes (`finishUnderway()`), so it never stays
+   *   blue, "Claude is working on it" (epic `epic-engine` I355).  Every way an item closes comes through here:
+   *   `epic update ... done`, `epic close`, `epic cancel`, a phase closing its items, an approve, `epic complete`
    * - throws on any other status, or an id the doc doesn't have
    */
   setItem(id: string, status: string): string {
@@ -1211,6 +1219,8 @@ export class PlanDoc extends PlanReader {
     // closed, it's neither wanted nor waiting for review any more (I232)
     if (status !== "open")
       Markup.set<"epic-item">(item, { fixed: undefined, ...(CALM_ID.test(item.id) && { urgent: undefined }) })
+    // closed, nobody is on it any more:  every card still underway finishes (epic `epic-engine` I355)
+    if (status !== "open") this.finishUnderway(item, status === "done" ? "done" : "noted")
     if (status !== "done") Markup.set<"epic-item">(item, { takenIn: undefined })
     else if (PhaseTakes.isWork(item) && !item.hasAttribute("taken-in")) {
       const active = this.phaseElements.find((phase) => phase.getAttribute("status") === "active")
@@ -2196,7 +2206,8 @@ export class PlanDoc extends PlanReader {
    *     (a pick, a todo made or queued, a new item made:  `inbox apply`;  `noteStatus()`)
    *   - `done`, a card born done:  work Claude did, with no underway card first
    * - `reading`:  inline HTML (wrapped in a `<p>`) or blocks (`<p>`, `<ul>` ...);
-   *   plain text goes as it is (`&lt;` for a `<`)
+   *   plain text goes as it is (`&lt;` for a `<`), shaped by `CardText.structured()`:  a blank line a new paragraph,
+   *   `- ` lines bullets (I339)
    * - slotted, so never ordered (`Markup.place()`):  appended;  drawn under Owen's marked note, above the note box
    * - an item is stamped (`changed`), not flagged UPDATE:  a record of a mark, not a change to the item
    * - `quiet`:  not stamped either (`/epic tidy`'s doubtful items)
@@ -2254,19 +2265,23 @@ export class PlanDoc extends PlanReader {
    * Item `id`'s work is finished (or an Overview sub-section's ...):  its LATEST underway status card turns
    * `done` (work was done:  an answer written, code changed, a phase built), or `noted` (Claude only RECORDED what
    * Owen chose), stamped `done-at`, its reading kept.  Returns its title.
+   * - an EARLIER card still underway finishes with it (`finishUnderway()`):  a "Taken up at once:  agent X is on it"
+   *   card, then the agent's own, left the first underway, so the item stayed blue (epic `epic-engine` I355)
    * - `summary` (HTML, as `addStatus()`'s reading) goes under the reading, `slot="summary"`,
    *   when there's something worth saying
+   * - an item CLOSED with its card still underway (`epic close`, then `epic update ... done "<summary>"`):  closing
+   *   finished the card (`setItem()`), so `summary` goes under it, the latest finished card, never an error
    * - throws when it has no underway card:  `addStatus()` first, or a card born noted (`noteStatus()`)
    */
   finishStatus(id: string, summary?: string, { state = "done" }: { state?: FinishedState } = {}): string {
     const host = this.statusHost(id)
-    const card = this.underwayCard(host)
+    const card = this.underwayCard(host) ?? this.closedCard(host)
     if (!card)
       throw new PlanDocError(
         `${id.toUpperCase()} has no underway status card:  \`epic update <name>#${id} underway "<reading>"\` first ` +
           `(or \`epic update <name>#${id} noted "<what was recorded>"\` when you only recorded the person's choice)`
       )
-    Markup.set<"epic-status">(card, { state, doneAt: PlanTime.clockTime(this.now) })
+    this.finishUnderway(host, state)
     for (const block of this.statusBlocks(summary ?? "")) {
       block.setAttribute("slot", SUMMARY_SLOT)
       card.append(block)
@@ -2315,7 +2330,7 @@ export class PlanDoc extends PlanReader {
   /**
    * Claude has fixed issue or judgement call `id`:  ORANGE, Owen's turn to review it
    * (`epic update <name>#<id> fixed ["<what changed>"]`;  epic `epic-engine` I232).  Returns its title.
-   * - stays open;  Owen's Approve closes it (`acceptFix()`), his Do this sends it back, red
+   * - stays open;  Owen's Accept the fix closes it (`acceptFix()`), his Revisit with a note sends it back, red
    * - its latest underway card turns Done with `summary` under it;  no underway card:  `summary` is a Done card
    * - throws on anything but an open issue or call:  a todo's `done` closes it, a question is decided
    */
@@ -2478,6 +2493,49 @@ export class PlanDoc extends PlanReader {
     return phase ? `waiting for the next phase, P${phase.number} · ${phase.name}` : "waiting for a phase to take it up"
   }
 
+  /**
+   * Every status card on `host` still underway turns `state`, stamped `done-at` now;  returns how many.
+   * - the ONE place a card stops being underway:  `finishStatus()`, and `setItem()` closing an item, so nothing that
+   *   finishes or closes an item leaves it blue, "Claude is working on it" (epic `epic-engine` I355)
+   */
+  private finishUnderway(host: Element, state: FinishedState): number {
+    const cards = Array.from(host.querySelectorAll(UNDERWAY_CARD))
+    const doneAt = PlanTime.clockTime(this.now)
+    for (const card of cards) Markup.set<"epic-status">(card, { state, doneAt })
+    return cards.length
+  }
+
+  /**
+   * The items left BLUE by a card still underway though their work is finished (epic `epic-engine` I355):
+   * an underway card followed by a finished one.  `epic lint` reports them, its `--fix` finishes them.
+   * - before I355, `finishStatus()` finished only the latest underway card:  an item taken up at once ("Taken up at
+   *   once:  agent X is on it"), then the agent's own card, kept the first underway (codemirror's I8-I11, I26)
+   * - NOT a closed item whose LATEST card is underway:  a revisit of it is work too (`itemState()`)
+   */
+  staleUnderway(): Element[] {
+    return this.allItems.filter((item) => {
+      const cards = Array.from(item.querySelectorAll(":scope > epic-status"))
+      const last = cards.at(-1)
+      return Boolean(last) && last!.getAttribute("state") !== "underway" && Boolean(item.querySelector(UNDERWAY_CARD))
+    })
+  }
+
+  /** Finish the cards `staleUnderway()` finds, each the state of the item's last card;  returns their items' ids. */
+  finishStaleUnderway(): string[] {
+    return this.staleUnderway().map((item) => {
+      const last = Array.from(item.querySelectorAll(":scope > epic-status")).at(-1)!
+      this.finishUnderway(item, last.getAttribute("state") === "noted" ? "noted" : "done")
+      this.log(`${item.id.toUpperCase()}:  a status card left underway finished (I355)`)
+      return item.id
+    })
+  }
+
+  /** A CLOSED item's latest finished status card, which closing it may have finished (`finishStatus()`), if any. */
+  private closedCard(host: Element): Element | undefined {
+    if (host.localName !== "epic-item" || !CLOSED.has(host.getAttribute("status") ?? "")) return undefined
+    return Array.from(host.querySelectorAll(FINISHED_CARD)).at(-1)
+  }
+
   /** `host`'s latest underway status card, if any. */
   private underwayCard(host: Element): Element | undefined {
     return Array.from(host.querySelectorAll(UNDERWAY_CARD)).at(-1)
@@ -2498,7 +2556,7 @@ export class PlanDoc extends PlanReader {
   private statusBlocks(html: string): Element[] {
     const blocks: Element[] = []
     let paragraph: Element | undefined
-    for (const node of this.incoming(html)) {
+    for (const node of this.incoming(CardText.structured(html))) {
       if (PlanMarkup.isElement(node) && STATUS_BLOCKS.test(node.localName)) {
         blocks.push(node)
         paragraph = undefined
@@ -3552,6 +3610,30 @@ export class PlanDoc extends PlanReader {
     return Array.from(this.document.querySelectorAll(CHANGE_TAG))
   }
 
+  /**
+   * Comment `id` of this epic (`C2`, `c2`), as its review inbox holds it (`readComments`):  what a change mark may name
+   * besides an item (epic `epic-engine` T100);  `undefined` for none.
+   * - `null`:  the comments aren't known here (no `readComments`:  a page parsed off disk, a test)
+   * - read once, then kept
+   */
+  findComment(id: string): Comment | undefined | null {
+    if (!this.readComments) return null
+    this.comments ??= this.readComments()
+    return this.comments[CommentList.idOf(id)]
+  }
+
+  /**
+   * Comment `id`'s id as a change mark names it (`c2`), however typed (`C2`);  throws when the epic hasn't got it.
+   * - comments not known here (`findComment()`):  taken as typed
+   */
+  comment(id: string): string {
+    if (this.findComment(id) === undefined) throw new PlanDocError(`no comment "${CommentList.label(id)}"`)
+    return CommentList.idOf(id)
+  }
+
+  /** The comments `readComments` gave, once read (`findComment()`). */
+  private comments: Record<string, Comment> | undefined
+
   /** The change mark with id `id` (`ch3`, any case), or `null`. */
   findChange(id: string): Element | null {
     const key = String(id).toLowerCase()
@@ -3567,11 +3649,15 @@ export class PlanDoc extends PlanReader {
    *   - `at`:  now
    *   - `answer`:  its question's answer, in short (its `<epic-answer title>`), once it has one:  the chip shows it
    *     months later, whatever the question says by then
+   *     - a mark naming a COMMENT (`item="c2"`, epic `epic-engine` T100):  the comment's words, in short, as Owen
+   *       wrote them (`findComment()`)
    *   - `was`:  the words it replaced, found in the doc's earlier versions (`earlierVersions`, `ChangeOriginals`;
    *     epic `epic-engine` I160), when first stamped;  none for new words, or when no version tells
    *   - inside a PHASE's text, the item it names is HANDLED IN that phase (`handled`, epic `epic-engine` P31;
    *     Q17, A):  grey, quiet in the lists, its line linking the phase;  logged.  Only when first stamped:  a Reopen
    *     takes it off (`applyChange()`), and the mark rewritten after the next answer puts it back
+   *     - a comment's mark changes nothing on its comment (epic `epic-engine` T100):  its thread is answered as
+   *       ever, Claude's reply naming the phase
    * - each body host (an Overview sub-section, a phase, an item, the log) lists the marks inside it still waiting
    *   for Accept, in `to-accept` (`ch3 ch5`;  none:  no attribute)
    *   - the SKELETON's, as `part-ids` is:  the page counts and finds them, and the review routes take their marks
@@ -3627,10 +3713,14 @@ export class PlanDoc extends PlanReader {
     return true
   }
 
-  /** Item `id`'s answer in short (its `<epic-answer title>`, at most `ANSWER_MAX` characters);  `undefined` for none. */
+  /**
+   * Item `id`'s answer in short (its `<epic-answer title>`, at most `ANSWER_MAX` characters);  `undefined` for none.
+   * - a comment's id (`c2`):  its words, in short (`findComment()`, epic `epic-engine` T100)
+   */
   private answerOf(id: string): string | undefined {
-    const item = id ? this.findItem(id) : null
-    const answer = PlanMarkup.squeeze(item?.querySelector(":scope > epic-answer")?.getAttribute("title") ?? "")
+    const words = CommentList.isCommentId(id) ? this.findComment(id)?.text : undefined
+    const item = id && words === undefined ? this.findItem(id) : null
+    const answer = PlanMarkup.squeeze(words ?? item?.querySelector(":scope > epic-answer")?.getAttribute("title") ?? "")
     if (!answer) return undefined
     return answer.length > ANSWER_MAX ? `${answer.slice(0, ANSWER_MAX - 1).trimEnd()}…` : answer
   }
@@ -3676,6 +3766,8 @@ export class PlanDoc extends PlanReader {
   /**
    * What's wrong with the change marks, as `check()` reports it:
    * - one naming no item on the page (`item`)
+   *   - or a comment (`c2`, epic `epic-engine` T100) the epic hasn't got;  taken as it is where the comments aren't
+   *     known (`findComment()`)
    * - one not stamped yet (no id):  written by hand, with no `epic` command since (`epic change <name>` stamps it)
    */
   private changeProblems(): string[] {
@@ -3683,7 +3775,11 @@ export class PlanDoc extends PlanReader {
     for (const change of this.changes) {
       const item = change.getAttribute("item")
       const words = PlanMarkup.squeeze(change.textContent ?? "").slice(0, 40)
-      if (item && !this.findItem(item)) problems.push(`change "${words}" names ${item.toUpperCase()}:  no such item`)
+      if (item && CommentList.isCommentId(item)) {
+        if (this.findComment(item) === undefined)
+          problems.push(`change "${words}" names ${CommentList.label(item)}:  no such comment`)
+      } else if (item && !this.findItem(item))
+        problems.push(`change "${words}" names ${item.toUpperCase()}:  no such item`)
       if (!CHANGE_ID.test(change.id))
         problems.push(`change "${words}" has no id:  \`epic change <name>\` stamps it (any epic edit does)`)
     }
@@ -3867,6 +3963,9 @@ function filedDid({ id, hasFix }: FiledFollowUp): string {
 /** A Done status card, among an item's children. */
 const DONE_CARD = ':scope > epic-status[state="done"]'
 
+/** A status card that's finished:  done or noted. */
+const FINISHED_CARD = ':scope > epic-status:not([state="underway"])'
+
 /** How long Owen's ask keeps an item from closing as obsolete (`recentAsk()`). */
 const RECENT_ASK_DAYS = 14
 
@@ -3942,7 +4041,32 @@ const NEED_PARTS: readonly { key: NeedPart; state: AwayState; title: string }[] 
 
 /** A prompt's text as `<p>`s:  blank lines split paragraphs, single newlines become `<br>`;  `""` for none. */
 function promptHTML(prompt: string | null | undefined): string {
-  return withPictures(PlanMarkup.paragraphs(prompt), prompt ?? "")
+  return withPictures(promptBlocks(prompt ?? ""), prompt ?? "")
+}
+
+/**
+ * A typed prompt as HTML:  its fenced code blocks (```` ```ts ```` ... ```` ``` ````) as code, the rest as paragraphs
+ * (`PlanMarkup.paragraphs()`;  epic `epic-engine` P77:  the demo's pasted code read as one paragraph, its fences and all).
+ * - a code block:  `<pre><code class="language-ts">`, escaped, its lines as typed;  colored and given a Copy button by the
+ *   docs runtime, as every `<pre><code>` on a page
+ * - a fence never closed:  the rest is code
+ */
+function promptBlocks(prompt: string): string {
+  const html: string[] = []
+  let rest = prompt
+  for (;;) {
+    const open = /^\s*```([\w+-]*)[^\n]*\n/m.exec(rest)
+    if (!open) break
+    html.push(PlanMarkup.paragraphs(rest.slice(0, open.index)))
+    const body = rest.slice(open.index + open[0].length)
+    const close = /^\s*```\s*$/m.exec(body)
+    const code = (close ? body.slice(0, close.index) : body).replace(/\n$/, "")
+    const language = open[1] ? ` class="language-${PlanMarkup.attribute(open[1])}"` : ""
+    html.push(`<pre><code${language}>${PlanMarkup.escapeAll(code)}</code></pre>`)
+    rest = close ? body.slice(close.index + close[0].length) : ""
+  }
+  html.push(PlanMarkup.paragraphs(rest))
+  return html.join("")
 }
 
 /**

@@ -62,14 +62,14 @@ export const epicPictureVocabulary = {
   texts: [
     {
       key: "deleteTip",
-      text: "Delete this picture, and its file",
+      text: "Delete the picture and its file",
       description: "The trash's tooltip and name."
     },
     { key: "deleted", text: "Picture deleted", description: "The notice after the trash is clicked." },
     { key: "undo", text: "Undo", description: "The notice's button, which puts the picture back." },
     {
       key: "removeTip",
-      text: "Take {label} out",
+      text: "Remove {label}",
       description: "The x's tooltip and name (`removable`):  `{label}`, its label, else `this picture`."
     },
     { key: "thisPicture", text: "this picture", description: "What the x's tooltip names when it has no label." }

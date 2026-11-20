@@ -17,7 +17,6 @@ import {
 import { epicRunVocabulary } from "./EpicRun.en"
 
 import runCSS from "./EpicRun.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicRun`
@@ -45,7 +44,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 export class EpicRun extends E.UIComponent<typeof epicRunVocabulary> {
   @E.proto static vocabulary = epicRunVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-run": runCSS },
+    styleSheets: { "epic-run": runCSS },
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
 
@@ -195,7 +194,7 @@ export class EpicRun extends E.UIComponent<typeof epicRunVocabulary> {
     return (
       <div class={this.rootClass} part={this.partForName("base")}>
         <Show when={this.whoLine.text} fallback={<p class={WHO}>{this.translationForKey("loading")}</p>}>
-          <p class={WHO} part={this.partForName("who")} title={this.whoLine.title}>
+          <p class={WHO} part={this.partForName("who")} data-tooltip={this.whoLine.title}>
             <Show when={this.isWaiting}>
               <code>{this.form?.page?.command}</code>{" "}
             </Show>

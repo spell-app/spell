@@ -246,7 +246,7 @@ describe("<epic-section>", () => {
     const base = host.shadowRoot!.querySelector<HTMLElement>('[part~="base"]')!
     const gear = await gearOf(host)
     expect(host.shadowRoot!.querySelector("button.toggle")).toBeNull()
-    expect(gear.title).toBe("Settings for every phase")
+    expect(gear.dataset.tooltip).toBe("Settings for every phase")
     expect(gear.closest('[part~="tools"]')!.lastElementChild).toBe(gear)
     expect(gearEntries(gear)).toEqual(["Show each phase's files:  off", "Show each phase's checks:  off"])
     // nothing ticked:  the check's column still kept (Owen, 2026-10-29:  "Menu should have space in the left where the
@@ -454,7 +454,7 @@ describe("<epic-section> counts and state filter", () => {
       host.shadowRoot!.querySelector('[part~="filter"] epic-state-filter')!.shadowRoot!.querySelector("svg")
     ).toBeNull()
     const open = chip(host, "open")
-    expect(open.title).toBe("2 open, still undecided:  hide these\n⌥-click:  show only these")
+    expect(open.dataset.tooltip).toBe("2 undecided\nHide these · ⌥-click:  only these")
     expect(getComputedStyle(open).backgroundColor).not.toMatch(/^rgba\(0, 0, 0, 0\)$|^transparent$/)
     await expectAccessible(host)
   })
@@ -473,10 +473,10 @@ describe("<epic-section> counts and state filter", () => {
     // hidden, outlined:  no fill
     const yellow = chip(host, "open")
     expect(getComputedStyle(yellow).backgroundColor).toMatch(/^rgba\(0, 0, 0, 0\)$|^transparent$/)
-    expect(yellow.title).toBe("2 open, still undecided:  show everything\n⌥-click:  show only these")
+    expect(yellow.dataset.tooltip).toBe("2 undecided\nShow everything · ⌥-click:  only these")
     await click("attention")
     expect(chips(host)).toEqual({ attention: false, open: false, recent: true })
-    expect(yellow.title).toBe("2 open, still undecided:  show these too\n⌥-click:  show only these")
+    expect(yellow.dataset.tooltip).toBe("2 undecided\nShow these too · ⌥-click:  only these")
     // the last one off, and the last in the list:  the first shows instead
     await click("recent")
     expect(chips(host)).toEqual({ attention: true, open: false, recent: false })
@@ -1041,7 +1041,7 @@ describe("<epic-section> title, folded and open", () => {
     const folded = { top: firstLineTop(words), button: button.getBoundingClientRect() }
     expect(header.getBoundingClientRect().height).toBeGreaterThan(lineHeight * 1.5)
     expect(words.scrollWidth).toBeLessThanOrEqual(words.clientWidth)
-    expect([getComputedStyle(words).textOverflow, header.hasAttribute("title")]).toEqual(["clip", false])
+    expect([getComputedStyle(words).textOverflow, header.hasAttribute("data-tooltip")]).toEqual(["clip", false])
     // the slot's button sits on the title's first line, not lower
     expect(button.getBoundingClientRect().top).toBeLessThan(folded.top + lineHeight)
 
@@ -1049,7 +1049,7 @@ describe("<epic-section> title, folded and open", () => {
     await ElementFixture.tick()
     expect(host.matches(":state(open)")).toBe(true)
     expect(header.getBoundingClientRect().height).toBeGreaterThan(lineHeight * 1.5)
-    expect(header.hasAttribute("title")).toBe(false)
+    expect(header.hasAttribute("data-tooltip")).toBe(false)
     expect(firstLineTop(words)).toBeCloseTo(folded.top, 0)
     // collapse-all shows only while open (as before P25), so the slot's button keeps its height, not its x
     expect(button.getBoundingClientRect().top).toBeCloseTo(folded.button.top, 0)

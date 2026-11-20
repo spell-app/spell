@@ -18,6 +18,12 @@ import { worktreeHref } from "spell/server/liveClient"
  *     (`/guides/index.html`), laid under a worktree's address on a worktree's page (`worktreeHref()`)
  *   - its `root` (the path to the repo root, for a page opened from disk) and the bundles' fallback tabs went in P46
  * - Brand:  the hat mark (`LOGO_MARK`), a link to the home page (`SITE_HOME`), which lights no tab.
+ * - The tabs sit in the MIDDLE of the bar, the brand on the left, the tools on the right
+ *   (Owen, 2026-11-18:  "center in the toolbar")
+ *   - centred on the bar's whole width, while both sides fit beside them
+ *   - a side too wide for that (the brand, at the side bar's width):  the tabs sit just after the brand instead,
+ *     and scroll when even that's too narrow
+ *   - how:  a three-column grid, the sides an equal share each (`1fr`), the tabs as wide as they need
  * - Also shows:
  *   - no breadcrumb (Owen, 2026-10-10:  "We don't need the breadcrumb in the spell doc toolbar"):
  *     the lit tab says where the page is, the page's own title what it is
@@ -62,7 +68,8 @@ import { worktreeHref } from "spell/server/liveClient"
  * - Parts, for a page that docks it:
  *   - `bar`:  the row
  *   - `nav`:  its links;  the Spell UI site's top bar keeps them on one line, scrolling sideways
- *   - `brand`:  the hat;  that bar hides it where its own brand already shows the hat
+ *   - `brand`:  the hat and the words "Spell Epic" (`BRAND_NAME`);  that bar hides it where its own brand already shows
+ *     the hat
  * - Re-draws on `spell-site:navigated` (a router swapped the page in place:  new title, new source file).
  * - SIDE EFFECT:  adds a `<style>` to the page:  `--spell-site-header-height`, body padding, scroll padding.
  * - SIDE EFFECT:  adds Spell's favicon (`FAVICON_SVG`, as a `data:` URI) to a page that links no icon:
@@ -224,15 +231,16 @@ export class SiteHeader extends HTMLElement {
         : `<button class="tool" data-action="scheme" title="${schemeLabel}" aria-label="${schemeLabel}">${ICONS[shown]}</button>`
     shadow.innerHTML = `<style>${STYLE}</style>
 <header part="bar">
-  <a class="brand" part="brand" href="${escapeHTML(this.href({ path: SITE_HOME }))}" title="Spell docs" aria-label="Spell docs">${LOGO_MARK}</a>
+  <a class="brand" part="brand" href="${escapeHTML(this.href({ path: SITE_HOME }))}" title="${BRAND_TITLE}" aria-label="${BRAND_TITLE}">${LOGO_MARK}<span class="brand-name">${BRAND_NAME}</span></a>
   <div class="tabs">
     <button class="scroll" data-scroll="-1" tabindex="-1" aria-hidden="true" title="${SCROLL_BACK}">‹</button>
     <nav part="nav" aria-label="Site">${links}</nav>
     <button class="scroll" data-scroll="1" tabindex="-1" aria-hidden="true" title="${SCROLL_ON}">›</button>
   </div>
-  <span class="spacer"></span>
-  ${badge}${edit}${vscode}
-  <slot name="${THEME_SLOT}"></slot>${scheme}
+  <div class="end">
+    ${badge}${edit}${vscode}
+    <slot name="${THEME_SLOT}"></slot>${scheme}
+  </div>
 </header>`
     const schemeButton = shadow.querySelector<HTMLButtonElement>(`[data-action="scheme"]`)
     if (schemeButton) schemeButton.onclick = () => this.flipScheme()
@@ -326,6 +334,18 @@ const THEME_SLOT = "theme"
 const tabPrefs = new PrefStore(SITE_PREFS, { place: "session" })
 
 /** The `‹` / `›` buttons' tooltips. */
+/**
+ * The words beside the hat, a link to the home page with it (Owen, 2026-11-18:  "Next to the hat, in the same bold
+ * font/weight/spacing as in the Editor app menu, have the text 'Spell Epic'").
+ * - drawn as the editor's `<AppMarkLabel>` draws "Spell" (the app's `EditorTheme.css`):  its wordmark tokens
+ *   (`--spell-wordmark-*`) when the page has them, else the editor's own values, at 1.15em
+ * - hidden when docked, and below 480px (a phone):  the hat alone, as the editor does on a phone
+ */
+const BRAND_NAME = "Spell Epic"
+
+/** The hat's tooltip and accessible name. */
+const BRAND_TITLE = "Spell Epic home page"
+
 const SCROLL_BACK = "Scroll the tabs back"
 const SCROLL_ON = "More tabs"
 
@@ -404,7 +424,8 @@ const STYLE = `
 header {
   box-sizing: border-box;
   position: fixed; inset: 0 0 auto 0; z-index: 1000; height: ${SiteHeader.height}px;
-  display: flex; align-items: center; gap: 12px; padding: 0 16px;
+  /* the tabs centred:  the two sides an equal share each, but never narrower than their own content */
+  display: grid; grid-template-columns: 1fr minmax(0, auto) 1fr; align-items: center; gap: 12px; padding: 0 16px;
   font: 500 14px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   color: light-dark(#1d1d22, #ececf1);
   /* the fill under the tabs' ‹ / ›, which hide the tab they sit on:  the page's, else opaque */
@@ -416,10 +437,22 @@ header {
   box-shadow: var(--spell-site-header-shadow, none);
 }
 a { color: inherit; text-decoration: none; }
-.brand { flex: none; display: inline-flex; align-items: center; color: light-dark(#5b3fd0, #b3a2ff); }
+.brand { flex: none; justify-self: start; display: inline-flex; align-items: center; color: light-dark(#5b3fd0, #b3a2ff); }
 .brand svg { display: block; height: 26px; width: auto; }
-nav { display: flex; gap: 2px; }
+/* the words, as the editor's wordmark:  its font, weight, tracking and text colour, the hat alone in the brand colour (the app's index.html, its --spell-wordmark-* tokens) */
+.brand { gap: 4px; }
+.brand-name {
+  font-family: var(--spell-wordmark-font, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Lato, Arial, sans-serif);
+  font-size: 1.15em;
+  font-weight: var(--spell-wordmark-weight, 900);
+  letter-spacing: var(--spell-wordmark-tracking, -0.035em);
+  color: var(--ui-text-color, light-dark(#1d1d22, #ececf1));
+  white-space: nowrap;
+}
+nav { display: flex; gap: 2px; min-width: 0; }
 .tabs { position: relative; display: flex; min-width: 0; }
+/* the checkout, the tools and the theme control, at the bar's end */
+.end { display: flex; align-items: center; justify-content: flex-end; gap: 12px; }
 /* the tabs' ‹ / ›:  over the row's ends, the row fading out under them;  only while there's more that way */
 .scroll {
   position: absolute; inset-block: 0; z-index: 1; display: none; place-items: center; width: 26px; padding: 0;
@@ -438,7 +471,6 @@ nav { display: flex; gap: 2px; }
   background: var(--ui-primary-background, light-dark(#e9e4ff, #33295e));
   color: var(--ui-primary-text, light-dark(#3d2a9e, #d9d0ff));
 }
-.spacer { flex: 1; }
 .badge { flex: none; padding: 4px 9px; border-radius: 999px; font-size: 12px; background: light-dark(#eef0f3, #2a2d33); }
 .badge.worktree { background: light-dark(#fff1d6, #4a3610); color: light-dark(#7a4c00, #ffd48a); }
 .tool {
@@ -453,19 +485,22 @@ nav { display: flex; gap: 2px; }
 /* the page's theme control, at the bar's end */
 ::slotted([slot="${THEME_SLOT}"]) { flex: none; display: inline-flex; align-items: center; }
 /* the icons take no pointer:  it lands on the titled link or button, so Electron shows its tooltip (I43) */
-.brand svg, .tool svg { pointer-events: none; }
+.brand svg, .brand-name, .tool svg { pointer-events: none; }
 .tool:focus-visible, .tab:focus-visible, .brand:focus-visible {
   outline: 2px solid var(--ui-focus-color, light-dark(#5b3fd0, #b3a2ff));
   outline-offset: 2px;
 }
 /* docked:  a compact row in the page's own chrome */
 :host([docked]) header {
-  position: static; height: auto; flex-wrap: wrap; gap: 4px 6px; padding: 0;
+  position: static; height: auto; display: flex; flex-wrap: wrap; gap: 4px 6px; padding: 0;
   font-size: 13px; background: none; border: 0; backdrop-filter: none; -webkit-backdrop-filter: none;
 }
 :host([docked]) nav { flex-wrap: wrap; }
 :host([docked]) .tabs { display: contents; }
+/* the tools still at the row's end, as one group */
+:host([docked]) .end { gap: 4px 6px; margin-inline-start: auto; }
 :host([docked]) .brand svg { height: 20px; }
+:host([docked]) .brand-name { display: none; }
 :host([docked]) .tab { padding: 5px 8px; }
 :host([docked]) .tool { width: 26px; height: 26px; }
 :host([docked]) .tool svg { width: 16px; height: 16px; }
@@ -473,10 +508,12 @@ nav { display: flex; gap: 2px; }
    the pages' own eyebrow crumbs hide at the same width (spell-doc.css, <epic-page>'s Crumbs.css) */
 @media (max-width: 720px) {
   header { gap: 6px; padding: 0 8px; }
-  .tabs { flex: 1; }
+  .end { gap: 6px; }
   nav { overflow-x: auto; flex: 1; scrollbar-width: none; }
-  .spacer { display: none; }
   .tab { padding: 7px 8px; }
   .badge { display: none; }
+}
+@media (max-width: 480px) {
+  .brand-name { display: none; }
 }
 `

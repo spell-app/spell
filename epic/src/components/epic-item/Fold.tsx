@@ -10,7 +10,7 @@ import { ACTIONS_SLOT } from "./Fold.types"
  * The open / folded state of a box an `<epic-*>` element folds by itself, never written to the file.
  * - The boxes that fold by one:
  *   - Choices, an answered question's option panels, More Details, Original Discussion,
- *     an aside or code panel, the Agents running panel
+ *     an aside or code panel
  *   - every card with a heading band:  a reply, the answer, a status card, a note
  *     (Owen, 2026-10-08, "everything in a section box should be collapsible")
  *   - NOT `<epic-item>`:  it folds through its `open` attribute, as links and P9 open it from outside
@@ -118,7 +118,7 @@ export class Fold implements Opener {
         aria-controls={options.controls}
         aria-labelledby={options.labelledBy}
         aria-label={options.labelledBy || options.label !== undefined ? undefined : tip()}
-        title={Fold.withDeepTip(tip(), opener.isOpen())}
+        data-tooltip={Fold.withDeepTip(tip(), opener.isOpen())}
         onClick={options.clicks ? (event: MouseEvent) => Fold.toggleFrom(opener, event) : undefined}
         onKeyDown={(event: KeyboardEvent) => Fold.deepKey(event) && Fold.toggleFrom(opener, event)}
       >
@@ -158,7 +158,7 @@ export class Fold implements Opener {
         class={COLLAPSE_ALL}
         part={part}
         aria-label={label()}
-        title={label()}
+        data-tooltip={label()}
         aria-pressed={expanded() ? "true" : "false"}
         onClick={onToggle}
       >

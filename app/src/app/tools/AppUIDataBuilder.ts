@@ -27,8 +27,8 @@ import { ComponentSource } from "./ComponentSource.ts"
  * - The file is Spell UI's `SiteDataFile`, so the set's pages draw it with Spell UI's docs elements:
  *   `<ui-docs-nav>` lists it, `<ui-docs-api>` draws a page's tables.
  * - Three kinds of entry, one page each, as `__data/pages.json5` (hand-kept, never written) lists them:
- *   - the web components, `<spell-viewer>`, `<spell-editor>`, `<spell-code>` and `<spell-markdown>`:  from their
- *     vocabularies, by Spell UI's own builder
+ *   - the web components, `<spell-viewer>`, `<spell-editor>`, `<spell-code>`, `<spell-markdown>` and
+ *     `<spell-reference-page>`:  from their vocabularies, by Spell UI's own builder
  *     (`SiteDataBuilder`), as Epic UI's elements and the brand elements are
  *   - the view's element (`spell-element`):  its vocabulary too, read from `src/app/runner/`
  *   - a Solid component FILE (`src/app/solid/Inspector.tsx`):  its exported components with a banner, their props

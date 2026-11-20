@@ -17,7 +17,6 @@ import "spell/epic/components/epic-text-box"
 import { epicAskVocabulary } from "./EpicAsk.en"
 
 import askCSS from "./EpicAsk.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /** An option's attributes this reads:  ticked to start with, hidden under Open. */
 const SELECTED = "selected"
@@ -55,7 +54,7 @@ const OPTION_ATTRIBUTES = [SELECTED, DONE, "letter"]
 export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements AskPart {
   @E.proto static vocabulary = epicAskVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-ask": askCSS },
+    styleSheets: { "epic-ask": askCSS },
     // a form:  a click on its words must not jump to its first control
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
@@ -247,7 +246,7 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
           <span
             class={CHIP}
             part={this.partForName("chip")}
-            title={this.translationForKey(`${this.askState}Tip`, { id: this.chipLabel })}
+            data-tooltip={this.translationForKey(`${this.askState}Tip`, { id: this.chipLabel })}
           >
             {this.chipLabel}
           </span>
@@ -257,7 +256,7 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
             part={this.partForName("how")}
             role="switch"
             aria-checked={this.isMultiple ? "true" : "false"}
-            title={this.translationForKey(this.isMultiple ? "toOneTip" : "toSeveralTip")}
+            data-tooltip={this.translationForKey(this.isMultiple ? "toOneTip" : "toSeveralTip")}
             onClick={() => this.flip()}
           >
             <span class={KNOB} aria-hidden="true" />
@@ -283,7 +282,7 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
                   icon="filter"
                   selected={this.showing === "open" ? "" : undefined}
                   aria-pressed={this.showing === "open" ? "true" : "false"}
-                  title={this.translationForKey("openTip")}
+                  data-tooltip={this.translationForKey("openTip")}
                   onClick={() => (this.showing = "open")}
                 >
                   {this.translationForKey("open")}
@@ -294,7 +293,7 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
                   icon="list check"
                   selected={this.showing === "all" ? "" : undefined}
                   aria-pressed={this.showing === "all" ? "true" : "false"}
-                  title={this.translationForKey("allTip")}
+                  data-tooltip={this.translationForKey("allTip")}
                   onClick={() => (this.showing = "all")}
                 >
                   {this.translationForKey("all")}

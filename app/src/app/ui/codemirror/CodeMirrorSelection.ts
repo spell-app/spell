@@ -136,7 +136,7 @@ function reachingCaret(
 
 /**
  * Where each line's band is, in one view, for the selection's pieces:  in the middle of its line, as tall as a band
- * (`--bubbly-pill-height`), or the whole line when that's shorter (a foot's own line).
+ * (`--bubbly-pill-height`), or the whole line when that's shorter.
  */
 class LineBands {
   constructor(private readonly view: EditorView) {

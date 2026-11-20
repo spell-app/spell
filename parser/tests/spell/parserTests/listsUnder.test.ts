@@ -2,6 +2,7 @@
  * A web server's lists under each of its things, and its writes (epic `data` P30):  compiled spell, on `core`, reading a fake
  * server shaped like JSONPlaceholder.
  * - `- a post's comments live at "/posts/{id}/comments"`:  reading a post's comments reads there, the first time it's read.
+ * - `- a system's snapshot lives at "/systems/{id}/snapshot"`:  ONE thing there, its answer's one row (epic `from-console` P16).
  * - Adding, changing and removing a thing send a `POST`, a `PATCH` and a `DELETE`;  a thing added takes the id the server answers with.
  */
 import { afterEach, describe, expect, test, vi } from "vite-plus/test"
@@ -104,6 +105,39 @@ describe("a list under each thing", () => {
       ["second", 1]
     ])
     expect(asked.map(({ url }) => url)).toEqual([`${HOST}/posts`, `${HOST}/posts/1/comments`])
+  })
+})
+
+describe("one thing under each (epic `from-console` P16)", () => {
+  const SYSTEMS = [
+    `acme is a web server at "${HOST}":`,
+    `\t- systems live at "/systems"`,
+    `\t- snapshots are found at "/systems/{id}/snapshot"`,
+    `\t- a system's snapshot lives at "/systems/{id}/snapshot"`,
+    `a "system" is a thing:`,
+    `\t- it lives in acme`,
+    `\t- its "name" is text`,
+    `\t- its "snapshot" is a snapshot`,
+    `a "snapshot" is a thing:`,
+    `\t- it lives in acme`,
+    `\t- its "state" is text`,
+    `\t- its "components" is a list of text`
+  ]
+
+  test("a system's snapshot is read from the system's own address:  its one row, its own list inside it", async () => {
+    const asked = serve({
+      [`${HOST}/systems`]: [{ id: 7, name: "Lab one" }],
+      [`${HOST}/systems/7/snapshot`]: { state: "deployed", components: ["fridge", "laser"] }
+    })
+    core.resetRuntime()
+    const { System, Snapshot } = runSpell(SYSTEMS)("System, Snapshot")
+    // every field of it, as `every()` asks:  not only what's been read
+    delete (Snapshot as { savedIn: { select?: unknown } }).savedIn.select
+    const [one] = await every(System)
+    const snapshot = (await core.answerOf(one, "snapshot")) as { state: string; components: { items: string[] } }
+    expect(snapshot.state).toBe("deployed")
+    expect([...snapshot.components.items]).toEqual(["fridge", "laser"])
+    expect(asked.map(({ url }) => url)).toEqual([`${HOST}/systems`, `${HOST}/systems/7/snapshot`])
   })
 })
 

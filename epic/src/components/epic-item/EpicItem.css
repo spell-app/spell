@@ -244,10 +244,15 @@
 
   /*
    * the end of the line:  the page's own buttons (`slot="actions"`, the bullhorn), the review label, then P9's
-   * buttons;  wraps under the title, at the right, when narrow
+   * buttons (`.marks`, one line tall);  wraps under the title, at the right, when narrow
+   * - its phase pill (`in P4`) on a small line of its own under them (`.phase-row`, epic `epic-engine` I348;  Owen,
+   *   2026-11-18:  "it makes that line wrap differently ... put it under the phase buttons instead")
    */
   .extras {
-    gap: 4px;
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    align-items: flex-end;
     margin-inline-start: auto;
     /* 1px of the line's fill right of the review buttons' ring (Owen, 2026-10-25:  "1px white gap, not 3ish px like now") */
     margin-inline-end: -1.34px;
@@ -255,11 +260,35 @@
        out;  the line's bottom padding 2px more to keep room under it */
     translate: 0 2px;
   }
+  .marks {
+    gap: 4px;
+  }
+  /*
+   * NEVER widens the column (`width: 0`, then `min-width: 100%` of what the buttons make it):  the title's room is the
+   * same with or without the pill, so it wraps the same;  a pill wider than the buttons runs out to the left
+   */
+  .phase-row {
+    display: flex;
+    box-sizing: border-box;
+    justify-content: flex-end;
+    width: 0;
+    min-width: 100%;
+    /* clear of the Clarify button, which stands 2px below the marks' row */
+    margin-block-start: 4px;
+    /* level with the Clarify button's right edge:  the review buttons' -1.34px is for their ring */
+    padding-inline-end: 1.34px;
+  }
   ::slotted([slot="actions"]) {
     flex: none;
   }
   .extras[hidden] {
     display: none;
+  }
+  /* the (i) Clarify button, last on the line (T95):  the same place on every kind, a review button's size */
+  .marks > [part~="clarify"] {
+    flex: none;
+    /* flush with the line's right edge:  the review buttons' -1.34px is for their ring, which it hasn't */
+    margin-inline-end: 1.34px;
   }
   /* the git icon (T17):  a bare icon, as tall as the review label;  the accent while its commits show */
   .git {
@@ -359,23 +388,13 @@
     font-size: 0.9em;
     line-height: 1.45;
   }
-  /*
-   * the body's row:  its light details, then the clarify icon's column at their right, top-aligned with the first line
-   * (T76)
-   * - the text stops as far before the icon as it starts after the drawer's left edge (the indent less the drawer's
-   *   inset), so its margins match (Owen, 2026-11-15:  "unbalanced -- make the left and right margins consistent")
-   */
+  /* the body's block:  its light details (the clarify icon at their right, T76, is on the line since T95) */
   .body {
     display: flex;
     align-items: flex-start;
-    gap: calc(var(--_epic-item-indent) - var(--_epic-drawer-inset));
   }
   .body > .flow {
     flex: 1;
-  }
-  .body > [part~="clarify"] {
-    flex: none;
-    margin-block-start: -1px;
   }
   .flow {
     min-width: 0;

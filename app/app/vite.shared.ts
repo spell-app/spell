@@ -178,7 +178,8 @@ const tokenRead: { token?: string; changed?: number } = {}
  *   the same names, taken from the PAGE when it has them (a docs page's `SpellUI.packModules`), else from `solid`
  * - `ui`:  `spell-ui`'s barrel, `spell-ui`, which the app imports LAZILY (`loadUI.ts`);
  *   its own lazy chunks are in `ui/`
- * - `families`:  what `<spell-code>` and `<spell-markdown>` import instead of Spell UI's families (`SHARED_FAMILIES`),
+ * - `families`:  what `<spell-code>`, `<spell-markdown>` and `<spell-reference-page>` import instead of Spell UI's
+ *   families (`SHARED_FAMILIES`, `DRAWN_FAMILIES`),
  *   written by `vite.solid.config.ts`:  the PAGE's when it has Spell UI of its own, else `ui`'s
  * - Why:  two Solids (or two `UIComponent`s) on one page fail SILENTLY (`solid-2.md`, "One Solid per page").
  *   Pinned by `element.build.test.ts`.
@@ -206,14 +207,23 @@ export const SHARED_FAMILIES: Readonly<Record<string, readonly string[]>> = {
 }
 
 /**
- * Spell UI's families spell's markdown engine DRAWS with (`<spell-markdown>`'s barrel imports them for that):
+ * Spell UI's families the app's elements DRAW with:  spell's markdown engine's (`<spell-markdown>`'s barrel imports
+ * them for that), and `<spell-reference-page>`'s folds, labels, tables and buttons (epic `data` P53):
  * side effects only, so `spell-ui-shared.js` exports nothing of them.
  * - Where the page has Spell UI of its own, its bundle defines every family (the docs bundle;  a set's page before a
  *   pack's `define()`);  else `spell-ui.js` does, as `spell-ui-shared.js` imports it.
  */
-const DRAWN_FAMILIES = ["ui-checkbox", "ui-divider", "ui-list", "ui-parts", "ui-segment", "ui-table"].map(
-  (family) => `spell/ui/components/${family}`
-)
+const DRAWN_FAMILIES = [
+  "ui-button",
+  "ui-checkbox",
+  "ui-divider",
+  "ui-label",
+  "ui-list",
+  "ui-parts",
+  "ui-section",
+  "ui-segment",
+  "ui-table"
+].map((family) => `spell/ui/components/${family}`)
 
 /**
  * Specifiers another bundle takes from `SHARED_SOLID`'s files.
@@ -272,6 +282,14 @@ const SHARED_H = "\0spell-shared-h"
  */
 const UI_DATA = /^spell\/ui\/(.+\.generated|sounds)$/
 
+/**
+ * `spell/element`'s leaves that hold no state a page must share,
+ * so each build bundles its own copy, as any plain module is.
+ * - Today one:  `drawnWindow`, every long list's drawing (epic `from-console` P8), which the parser's core draws with.
+ * - It imports only Solid and util's generic files, which come from the shared files as usual.
+ */
+const BUNDLED_ELEMENT_LEAVES = new Set(["spell/element/drawnWindow"])
+
 /** Any other import from Solid's or `ui`'s packages:  `sharedSolid()` refuses it, as the shared files may lack it. */
 const SOLID_FAMILY = /^(solid-js|@solidjs\/[^/]+|spell\/ui|spell\/element)(\/|$)/
 
@@ -285,7 +303,7 @@ const SOLID_FAMILY = /^(solid-js|@solidjs\/[^/]+|spell\/ui|spell\/element)(\/|$)
  * - Side-effect imports too:  `import "spell/ui/components/ui-table"` becomes `import "./spell-ui-shared.js"`.
  * - Looked up by the import name itself, the key of the maps above and of a page's `SpellUI.packModules`
  *   (`SHARED_SPECIFIERS`;  epic `repo-split` P14, Q45).
- * - `ui`'s plain data (`UI_DATA`) is bundled, as it holds no Solid.
+ * - `ui`'s generated data (`UI_DATA`) is bundled, as it holds no Solid;  so are `BUNDLED_ELEMENT_LEAVES`.
  * - Any other Solid / `ui` specifier (`solid-js/store`, `spell/ui/runtime`) is a build ERROR:
  *   add it to `FROM_SHARED_SOLID` and to what `vite.solid.config.ts` exports, or the shared files won't have its names.
  * - Type-only imports (`@solidjs/web/types/jsx.js`) are gone before this runs.
@@ -302,7 +320,7 @@ export function sharedSolid(): Plugin {
       const file = FROM_SHARED_SOLID.get(source)
       if (file) return { id: `${SHARED_ID}${file}`, external: true }
       if (source.startsWith(SHARED_ID)) return { id: source, external: true }
-      if (UI_DATA.test(source)) return null
+      if (UI_DATA.test(source) || BUNDLED_ELEMENT_LEAVES.has(source)) return null
       if (SOLID_FAMILY.test(source)) {
         this.error(`"${source}" can't come from ${Object.values(SHARED_SOLID).join(" / ")}:  see sharedSolid()`)
       }

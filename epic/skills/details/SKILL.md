@@ -10,7 +10,7 @@ In Codex:  each step that needs a Claude Code tool says what Codex does instead,
 (the long form:  `epic guide claude-only-tools`);  `${CLAUDE_PLUGIN_ROOT}` is the epic plugin's folder, `epic guide --root`.
 
 A DETAILS PAGE:  a small page that explains one decision.
-- It shows in the "Details" tab:  VS Code's right side bar, beside "Epic Docs" and "Review", where the person
+- It shows in the "Details" tab:  VS Code's right side bar, beside "Review", where the person
   answers things (epic `epic-engine` P59).
   - Every details, review and choice page goes there, and only there, whatever command shows it:
     the extension picks the tab from the page's path.  The epic page stays in "Review".

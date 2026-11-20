@@ -18519,6 +18519,393 @@ export interface UIFormAttributes {
 export interface UIFormJSXAttributes
   extends Omit<UIGlobalJSXAttributes<UIHTMLElement<UIFormEventMap>>, keyof UIFormAttributes>, UIFormAttributes {}
 
+/** `<ui-graph>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
+export interface UIGraphEventMap {
+  /**
+   * `ui-selecting`:  A node, edge or port is about to be selected by a click:  cancel it to keep the selection.
+   * - `event.detail`:  `{ kind: 'node' | 'edge' | 'port', id: string, path: string, item: object, originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-selecting": CustomEvent<{
+    kind: "node" | "edge" | "port"
+    id: string
+    path: string
+    item: object
+    originalEvent?: Event
+  }>
+  /**
+   * `ui-changed`:  What's selected changed:  `value` is the new `selected`;  `item` the node, edge or port itself.  ALSO when the graph shown changes by a drill or a breadcrumb:  `{ kind: 'path', path }` (`path` the new `path`), so one listener keeps a page in step with both.
+   * - `event.detail`:  `{ value: { kind: string, id: string, path: string } | undefined, kind?: string, id?: string, path?: string, item?: object, originalEvent?: Event } | { kind: 'path', path: string, originalEvent?: Event }`
+   */
+  "ui-changed": CustomEvent<
+    | {
+        value: { kind: string; id: string; path: string } | undefined
+        kind?: string
+        id?: string
+        path?: string
+        item?: object
+        originalEvent?: Event
+      }
+    | { kind: "path"; path: string; originalEvent?: Event }
+  >
+  /**
+   * `ui-node-toggled`:  A node with children was opened or closed, by a person or by `open()` / `close()`.
+   * - `event.detail`:  `{ node: object, path: string, open: boolean, view: 'inline' | 'modal' | 'drill', originalEvent?: Event }`
+   */
+  "ui-node-toggled": CustomEvent<{
+    node: object
+    path: string
+    open: boolean
+    view: "inline" | "modal" | "drill"
+    originalEvent?: Event
+  }>
+}
+
+/** `<ui-graph>`'s own attributes, from its vocabulary. */
+export interface UIGraphAttributes {
+  /**
+   * The graph to draw, a `GraphData`:  `nodes` (`id`, `label`, `kind`, `ports`, `children`, `data`) and `edges` (`from` / `to` `{ node, port }`).  An end with no `node` is the enclosing node's port.  A JS property (JSON in the attribute);  set a NEW graph to redraw.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  graph?: unknown
+  /**
+   * The graph to draw, a `GraphData`:  `nodes` (`id`, `label`, `kind`, `ports`, `children`, `data`) and `edges` (`from` / `to` `{ node, port }`).  An end with no `node` is the enclosing node's port.  A JS property (JSON in the attribute);  set a NEW graph to redraw.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `graph` -- `prop:` stays only for compiled spell
+   */
+  "prop:graph"?: unknown
+  /**
+   * How a node's children show when it's opened:  `inline`, inside the node, which grows round them;  `modal`, a graph in a modal;  `drill`, the graph replaced by them, with breadcrumbs back.  A node's own `childView` wins.
+   * - takes:  `inline` · `modal` · `drill`
+   * - default:  `inline`
+   */
+  "child-view"?: "inline" | "modal" | "drill"
+  /**
+   * `child-view`, as the DOM element's property.
+   * @deprecated write `child-view` -- `prop:` stays only for compiled spell
+   */
+  "prop:childView"?: "inline" | "modal" | "drill"
+  /**
+   * The node whose child graph is shown, drilled to, by its ids from the top joined by `/` (`cpu/alu`);  `""`:  the top.  Setting it drills there, loading lazy children on the way;  drilling and the breadcrumbs set it back, with `ui-changed` `{ kind: 'path', path }`.
+   * - takes:  text
+   * - default:  ``
+   */
+  path?: string
+  /**
+   * `path`, as the DOM element's property.
+   * @deprecated write `path` -- `prop:` stays only for compiled spell
+   */
+  "prop:path"?: string
+  /**
+   * PROPERTY:  what's selected, `{ kind: 'node' | 'edge' | 'port', id, path }`;  `undefined`:  nothing.  Clicks set it.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  selected?: unknown
+  /**
+   * PROPERTY:  what's selected, `{ kind: 'node' | 'edge' | 'port', id, path }`;  `undefined`:  nothing.  Clicks set it.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `selected` -- `prop:` stays only for compiled spell
+   */
+  "prop:selected"?: unknown
+  /**
+   * PROPERTY:  the enclosing node's ports, drawn as pins on the graph's sides, for edges with no `node`.  Set by a modal's graph;  a page rarely needs it.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  boundary?: unknown
+  /**
+   * PROPERTY:  the enclosing node's ports, drawn as pins on the graph's sides, for edges with no `node`.  Set by a modal's graph;  a page rarely needs it.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `boundary` -- `prop:` stays only for compiled spell
+   */
+  "prop:boundary"?: unknown
+  /**
+   * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
+   * - takes:  flag (present / absent)
+   */
+  disabled?: boolean | ""
+  /**
+   * `disabled`, as the DOM element's property.
+   * @deprecated write `disabled` -- `prop:` stays only for compiled spell
+   */
+  "prop:disabled"?: boolean | ""
+  /**
+   * Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).
+   * - takes:  flag (present / absent)
+   */
+  loading?: boolean | ""
+  /**
+   * `loading`, as the DOM element's property.
+   * @deprecated write `loading` -- `prop:` stays only for compiled spell
+   */
+  "prop:loading"?: boolean | ""
+  /**
+   * Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible="false"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.
+   * - takes:  flag (present / absent)
+   */
+  visible?: boolean | ""
+  /**
+   * `visible`, as the DOM element's property.
+   * @deprecated write `visible` -- `prop:` stays only for compiled spell
+   */
+  "prop:visible"?: boolean | ""
+  /**
+   * How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.
+   * - takes:  `fade` · `fade up` · `fade down` · `fade left` · `fade right` · `scale` · `zoom` · `drop` · `browse` · `browse right` · `fly` · `fly up` · `fly down` · `fly left` · `fly right` · `slide` · `slide up` · `slide down` · `slide left` · `slide right` · `swing` · `swing up` · `swing down` · `swing left` · `swing right` · `horizontal flip` · `vertical flip` · `flash` · `shake` · `bounce` · `tada` · `pulse` · `jiggle` · `glow` · `coin` · `none`
+   */
+  animation?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "coin"
+    | "none"
+  /**
+   * `animation`, as the DOM element's property.
+   * @deprecated write `animation` -- `prop:` stays only for compiled spell
+   */
+  "prop:animation"?:
+    | "fade"
+    | "fade up"
+    | "fade down"
+    | "fade left"
+    | "fade right"
+    | "scale"
+    | "zoom"
+    | "drop"
+    | "browse"
+    | "browse right"
+    | "fly"
+    | "fly up"
+    | "fly down"
+    | "fly left"
+    | "fly right"
+    | "slide"
+    | "slide up"
+    | "slide down"
+    | "slide left"
+    | "slide right"
+    | "swing"
+    | "swing up"
+    | "swing down"
+    | "swing left"
+    | "swing right"
+    | "horizontal flip"
+    | "vertical flip"
+    | "flash"
+    | "shake"
+    | "bounce"
+    | "tada"
+    | "pulse"
+    | "jiggle"
+    | "glow"
+    | "coin"
+    | "none"
+  /**
+   * Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.
+   * - takes:  text
+   */
+  link?: string
+  /**
+   * `link`, as the DOM element's property.
+   * @deprecated write `link` -- `prop:` stays only for compiled spell
+   */
+  "prop:link"?: string
+  /**
+   * Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.
+   * - takes:  text
+   */
+  target?: string
+  /**
+   * `target`, as the DOM element's property.
+   * @deprecated write `target` -- `prop:` stays only for compiled spell
+   */
+  "prop:target"?: string
+  /**
+   * How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font="bold italic"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font="bold serif 10/20"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.
+   * - takes:  space-separated:  `bold` · `heavy` · `italic` · `underline` · `strikethrough` · `code` · `highlight` · `subscript` · `superscript` · `all-caps` · `title-caps` · `headline` · `subhead` · `serif` · `sans-serif` · `typewriter`
+   */
+  font?: string
+  /**
+   * `font`, as the DOM element's property.
+   * @deprecated write `font` -- `prop:` stays only for compiled spell
+   */
+  "prop:font"?: string
+  /**
+   * A hard shadow behind its letters, down and to the right, in a hue:  `shadow="yellow"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em).
+   * - takes:  `primary` · `secondary` · `red` · `orange` · `yellow` · `olive` · `green` · `teal` · `blue` · `violet` · `purple` · `pink` · `brown` · `grey` · `black` · `positive` · `negative`
+   */
+  shadow?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * `shadow`, as the DOM element's property.
+   * @deprecated write `shadow` -- `prop:` stays only for compiled spell
+   */
+  "prop:shadow"?:
+    | "primary"
+    | "secondary"
+    | "red"
+    | "orange"
+    | "yellow"
+    | "olive"
+    | "green"
+    | "teal"
+    | "blue"
+    | "violet"
+    | "purple"
+    | "pink"
+    | "brown"
+    | "grey"
+    | "black"
+    | "positive"
+    | "negative"
+  /**
+   * Its box's own width where it sits, any CSS length:  `width="10em"`, `"50%"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns.
+   * - takes:  text
+   */
+  width?: string
+  /**
+   * `width`, as the DOM element's property.
+   * @deprecated write `width` -- `prop:` stays only for compiled spell
+   */
+  "prop:width"?: string
+  /**
+   * The narrowest its box gets, any CSS length:  `min-width="16em"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower.
+   * - takes:  text
+   */
+  "min-width"?: string
+  /**
+   * `min-width`, as the DOM element's property.
+   * @deprecated write `min-width` -- `prop:` stays only for compiled spell
+   */
+  "prop:minWidth"?: string
+  /**
+   * The widest its box gets, any CSS length:  `max-width="36em"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it.
+   * - takes:  text
+   */
+  "max-width"?: string
+  /**
+   * `max-width`, as the DOM element's property.
+   * @deprecated write `max-width` -- `prop:` stays only for compiled spell
+   */
+  "prop:maxWidth"?: string
+  /**
+   * Its tooltip:  the browser's own, written as the element's `title`.
+   * - takes:  text
+   */
+  tooltip?: string
+  /**
+   * `tooltip`, as the DOM element's property.
+   * @deprecated write `tooltip` -- `prop:` stays only for compiled spell
+   */
+  "prop:tooltip"?: string
+  /**
+   * Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.
+   * - takes:  text
+   */
+  label?: string
+  /**
+   * `label`, as the DOM element's property.
+   * @deprecated write `label` -- `prop:` stays only for compiled spell
+   */
+  "prop:label"?: string
+  /**
+   * People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.
+   * - takes:  text
+   */
+  movable?: string
+  /**
+   * `movable`, as the DOM element's property.
+   * @deprecated write `movable` -- `prop:` stays only for compiled spell
+   */
+  "prop:movable"?: string
+  /**
+   * People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).
+   * - takes:  text
+   */
+  resizable?: string
+  /**
+   * `resizable`, as the DOM element's property.
+   * @deprecated write `resizable` -- `prop:` stays only for compiled spell
+   */
+  "prop:resizable"?: string
+  /**
+   * Shown only on these devices, a comma list:  `on-platform="desktop, tablet"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.
+   * - takes:  text
+   */
+  "on-platform"?: string
+  /**
+   * `on-platform`, as the DOM element's property.
+   * @deprecated write `on-platform` -- `prop:` stays only for compiled spell
+   */
+  "prop:onPlatform"?: string
+  /**
+   * `ui-selecting`:  A node, edge or port is about to be selected by a click:  cancel it to keep the selection.
+   * - `event.detail`:  `{ kind: 'node' | 'edge' | 'port', id: string, path: string, item: object, originalEvent?: Event }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-selecting"?: (event: UIGraphEventMap["ui-selecting"]) => void
+  /**
+   * `ui-changed`:  What's selected changed:  `value` is the new `selected`;  `item` the node, edge or port itself.  ALSO when the graph shown changes by a drill or a breadcrumb:  `{ kind: 'path', path }` (`path` the new `path`), so one listener keeps a page in step with both.
+   * - `event.detail`:  `{ value: { kind: string, id: string, path: string } | undefined, kind?: string, id?: string, path?: string, item?: object, originalEvent?: Event } | { kind: 'path', path: string, originalEvent?: Event }`
+   */
+  "on-ui-changed"?: (event: UIGraphEventMap["ui-changed"]) => void
+  /**
+   * `ui-node-toggled`:  A node with children was opened or closed, by a person or by `open()` / `close()`.
+   * - `event.detail`:  `{ node: object, path: string, open: boolean, view: 'inline' | 'modal' | 'drill', originalEvent?: Event }`
+   */
+  "on-ui-node-toggled"?: (event: UIGraphEventMap["ui-node-toggled"]) => void
+}
+
+/** `<ui-graph>` in JSX:  its own attributes, and HTML's global ones. */
+export interface UIGraphJSXAttributes
+  extends Omit<UIGlobalJSXAttributes<UIHTMLElement<UIGraphEventMap>>, keyof UIGraphAttributes>, UIGraphAttributes {}
+
 /** `<ui-grid>`'s own attributes, from its vocabulary. */
 export interface UIGridAttributes {
   /**
@@ -23168,7 +23555,7 @@ export interface UIJsonEventMap {
    */
   "ui-loaded": CustomEvent<{ source?: string; content: string }>
   /**
-   * `ui-changed`:  The data changed:  loaded from `source`, set through `value` or `content`, or its text edited.  `value` is `undefined` when the text is empty or isn't JSON.
+   * `ui-changed`:  The data changed:  loaded from `source`, set through `value` or `content`, edited in the outline, or its text edited.  `value` is `undefined` when the text is empty or isn't JSON.
    * - `event.detail`:  `{ value: unknown, content: string }`
    */
   "ui-changed": CustomEvent<{ value: unknown; content: string }>
@@ -23193,6 +23580,22 @@ export interface UIJsonEventMap {
     source?: string
     error: unknown
   }>
+  /**
+   * `ui-navigating`:  A key or a value was clicked (not a double-click, nor the end of a text selection).  `path`:  the keys from the top value down to that member (`[]`:  the top value);  `key`:  its key, an array member's index;  `value`:  its value (an object or array too, when its key was clicked);  `part`:  which was clicked.  The page decides what it means (jumping to what a value names) and calls `preventDefault()`.
+   * - `event.detail`:  `{ path: (string | number)[], key: string | number | undefined, value: unknown, part: "key" | "value" }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "ui-navigating": CustomEvent<{
+    path: (string | number)[]
+    key: string | number | undefined
+    value: unknown
+    part: "key" | "value"
+  }>
+  /**
+   * `ui-copied`:  The Copy button copied `content`, as JSON.
+   * - `event.detail`:  `{ content: string }`
+   */
+  "ui-copied": CustomEvent<{ content: string }>
 }
 
 /** `<ui-json>`'s own attributes, from its vocabulary. */
@@ -23218,6 +23621,61 @@ export interface UIJsonAttributes {
    * @deprecated write `load` -- `prop:` stays only for compiled spell
    */
   "prop:load"?: "eager" | "visible" | "idle"
+  /**
+   * How many levels start open:  `1`, the top object or array alone;  `0`, everything closed.  New data opens this way again.
+   * - takes:  number
+   * - default:  `1`
+   */
+  depth?: number | `${number}`
+  /**
+   * `depth`, as the DOM element's property.
+   * @deprecated write `depth` -- `prop:` stays only for compiled spell
+   */
+  "prop:depth"?: number | `${number}`
+  /**
+   * Keys in quotes, as JSON writes them:  `"type": "optical"`.  `quotes="no"`:  `type: "optical"`, as JSON5 allows (a key that isn't a name keeps its quotes).  The header's quotes button sets it.  Copy always copies JSON.
+   * - takes:  flag (present / absent)
+   * - default:  `true`
+   */
+  quotes?: boolean | "" | "false"
+  /**
+   * `quotes`, as the DOM element's property.
+   * @deprecated write `quotes` -- `prop:` stays only for compiled spell
+   */
+  "prop:quotes"?: boolean | "" | "false"
+  /**
+   * Hides the header:  the Copy and quotes buttons.
+   * - takes:  flag (present / absent)
+   * - default:  `false`
+   */
+  "no-header"?: boolean | ""
+  /**
+   * `no-header`, as the DOM element's property.
+   * @deprecated write `no-header` -- `prop:` stays only for compiled spell
+   */
+  "prop:noHeader"?: boolean | ""
+  /**
+   * Double-click a key or a value to edit it, in a control that fits the value:  a text field for a string, a number field for a number, a date picker for an ISO date, a checkbox for `true` / `false`, a pick list for a key `editors` gives choices.  Enter (or leaving it) keeps the edit, Escape drops it.  `value` changes and `ui-changed` is sent;  what's open stays open.
+   * - takes:  flag (present / absent)
+   * - default:  `false`
+   */
+  editable?: boolean | ""
+  /**
+   * `editable`, as the DOM element's property.
+   * @deprecated write `editable` -- `prop:` stays only for compiled spell
+   */
+  "prop:editable"?: boolean | ""
+  /**
+   * With `editable`, the control for each key, as a PROPERTY:  `{ direction: ["in", "out"], when: "date" }`.  A list of strings makes a pick list;  a word names the control:  `text`, `number`, `date`, `datetime`, `boolean` or `json` (a text field read as JSON).  A key it doesn't name gets the control its value's type picks.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  editors?: unknown
+  /**
+   * With `editable`, the control for each key, as a PROPERTY:  `{ direction: ["in", "out"], when: "date" }`.  A list of strings makes a pick list;  a word names the control:  `text`, `number`, `date`, `datetime`, `boolean` or `json` (a text field read as JSON).  A key it doesn't name gets the control its value's type picks.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `editors` -- `prop:` stays only for compiled spell
+   */
+  "prop:editors"?: unknown
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
@@ -23499,7 +23957,7 @@ export interface UIJsonAttributes {
    */
   "on-ui-loaded"?: (event: UIJsonEventMap["ui-loaded"]) => void
   /**
-   * `ui-changed`:  The data changed:  loaded from `source`, set through `value` or `content`, or its text edited.  `value` is `undefined` when the text is empty or isn't JSON.
+   * `ui-changed`:  The data changed:  loaded from `source`, set through `value` or `content`, edited in the outline, or its text edited.  `value` is `undefined` when the text is empty or isn't JSON.
    * - `event.detail`:  `{ value: unknown, content: string }`
    */
   "on-ui-changed"?: (event: UIJsonEventMap["ui-changed"]) => void
@@ -23520,6 +23978,17 @@ export interface UIJsonAttributes {
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-error"?: (event: UIJsonEventMap["ui-error"]) => void
+  /**
+   * `ui-navigating`:  A key or a value was clicked (not a double-click, nor the end of a text selection).  `path`:  the keys from the top value down to that member (`[]`:  the top value);  `key`:  its key, an array member's index;  `value`:  its value (an object or array too, when its key was clicked);  `part`:  which was clicked.  The page decides what it means (jumping to what a value names) and calls `preventDefault()`.
+   * - `event.detail`:  `{ path: (string | number)[], key: string | number | undefined, value: unknown, part: "key" | "value" }`
+   * - cancelable:  `preventDefault()` vetoes it
+   */
+  "on-ui-navigating"?: (event: UIJsonEventMap["ui-navigating"]) => void
+  /**
+   * `ui-copied`:  The Copy button copied `content`, as JSON.
+   * - `event.detail`:  `{ content: string }`
+   */
+  "on-ui-copied"?: (event: UIJsonEventMap["ui-copied"]) => void
 }
 
 /** `<ui-json>` in JSX:  its own attributes, and HTML's global ones. */
@@ -55131,16 +55600,38 @@ export interface UITransitionJSXAttributes
 /** `<ui-tree>`'s events, from its vocabulary:  each one's `CustomEvent`, by name. */
 export interface UITreeEventMap {
   /**
-   * `ui-selecting`:  A row is about to be selected, by a click, or by Enter or Space:  cancel it to decide what's selected yourself, reading the keys held from `originalEvent`.
-   * - `event.detail`:  `{ item: HTMLElement, value: string, originalEvent?: Event }`
+   * `ui-selecting`:  A row is about to be selected, by a click, or by Enter or Space:  cancel it to decide what's selected yourself, reading the keys held from `originalEvent`.  `appearance="columns"`:  the arrow keys select as they move too;  `item` is the `<ui-tree-item>`, or the `items` entry;  `path`, the ids of each column's pick down to it.
+   * - `event.detail`:  `{ item: HTMLElement | TreeItemData, value: string, path?: string[], originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
-  "ui-selecting": CustomEvent<{ item: HTMLElement; value: string; originalEvent?: Event }>
+  "ui-selecting": CustomEvent<{
+    item: HTMLElement | UIT.TreeItemData
+    value: string
+    path?: string[]
+    originalEvent?: Event
+  }>
   /**
-   * `ui-changed`:  What's selected changed:  `value`, the row clicked;  `values`, every selected row in the tree's order (each one's `value`, else its `label`).
-   * - `event.detail`:  `{ value: string, values: string[], originalEvent?: Event }`
+   * `ui-changed`:  What's selected changed:  `value`, the row clicked;  `values`, every selected row in the tree's order (each one's `value`, else its `label`).  `appearance="columns"`:  also `item` and `path`, as `ui-selecting`'s.
+   * - `event.detail`:  `{ value: string, values: string[], item?: HTMLElement | TreeItemData, path?: string[], originalEvent?: Event }`
    */
-  "ui-changed": CustomEvent<{ value: string; values: string[]; originalEvent?: Event }>
+  "ui-changed": CustomEvent<{
+    value: string
+    values: string[]
+    item?: HTMLElement | UIT.TreeItemData
+    path?: string[]
+    originalEvent?: Event
+  }>
+  /**
+   * `ui-settled`:  What's selected has stayed put for a moment:  `ui-changed`'s detail, once the arrow keys stop.  For a page doing heavy work on each pick.
+   * - `event.detail`:  `{ value: string, values: string[], item?: HTMLElement | TreeItemData, path?: string[], originalEvent?: Event }`
+   */
+  "ui-settled": CustomEvent<{
+    value: string
+    values: string[]
+    item?: HTMLElement | UIT.TreeItemData
+    path?: string[]
+    originalEvent?: Event
+  }>
 }
 
 /** `<ui-tree>`'s own attributes, from its vocabulary. */
@@ -55156,7 +55647,7 @@ export interface UITreeAttributes {
    */
   "prop:choose"?: "one" | "many"
   /**
-   * Show only the rows whose words hold this text, whatever its case, and the rows they're inside, opened to show them.  It changes no row's `open`:  clearing it puts the tree back as it was.  A row drawn only once its parent opens can't be found while that's closed.
+   * Show only the rows whose words hold this text, whatever its case, and the rows they're inside, opened to show them.  It changes no row's `open`:  clearing it puts the tree back as it was.  A row drawn only once its parent opens can't be found while that's closed.  `appearance="columns"`:  it filters one column, the last one on screen as the filter starts, until it's cleared;  after that column's rows, it lists the matches elsewhere in the tree, at any depth, each with the rows it's inside;  a click on one opens the path to it, as do Enter and Space, the down key going on into them from the column's last row.  From `items`, it runs each `children` function to look inside, waiting for promised ones, as opening the items would, but opens no column;  it lists the first 200 matches, and stops after 100,000 rows.
    * - takes:  text
    */
   filter?: string
@@ -55165,6 +55656,16 @@ export interface UITreeAttributes {
    * @deprecated write `filter` -- `prop:` stays only for compiled spell
    */
   "prop:filter"?: string
+  /**
+   * A line of buttons above the rows:  Open 2 levels, Open 3 levels and Close all.  Scripts call the same methods:  `openTo(levels)` and `closeAll()`.  `appearance="columns"`:  `openTo(2)` shows two columns, keeping each column's pick, else picking its first row that holds rows.
+   * - takes:  flag (present / absent)
+   */
+  tools?: boolean | ""
+  /**
+   * `tools`, as the DOM element's property.
+   * @deprecated write `tools` -- `prop:` stays only for compiled spell
+   */
+  "prop:tools"?: boolean | ""
   /**
    * What a screen reader calls the tree.
    * - takes:  text
@@ -55196,7 +55697,60 @@ export interface UITreeAttributes {
    */
   "prop:columnTitles"?: string
   /**
-   * While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.  A click on one scrolls to its row, selecting nothing.  It shows only while one of them is scrolled out of sight.
+   * `appearance="columns"`:  the tree as data, given as a property, in place of `<ui-tree-item>`s:  `{ id, label, icon?, which?, count?, children?, data? }[]` (`TreeItemData`), where `children` is a list, or a function run the first time the item opens, which may return a promise (a spinner shows until it comes).  Only the open path's columns are drawn.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  items?: unknown
+  /**
+   * `appearance="columns"`:  the tree as data, given as a property, in place of `<ui-tree-item>`s:  `{ id, label, icon?, which?, count?, children?, data? }[]` (`TreeItemData`), where `children` is a list, or a function run the first time the item opens, which may return a promise (a spinner shows until it comes).  Only the open path's columns are drawn.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `items` -- `prop:` stays only for compiled spell
+   */
+  "prop:items"?: unknown
+  /**
+   * `appearance="columns"`:  the ids of each column's pick, from the top (`string[]`;  a `<ui-tree-item>`'s id is its `value`, else its `label`).  The last one's rows are the next column.  Set it to open a path, its last item selected;  read it as people pick.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   */
+  path?: unknown
+  /**
+   * `appearance="columns"`:  the ids of each column's pick, from the top (`string[]`;  a `<ui-tree-item>`'s id is its `value`, else its `label`).  The last one's rows are the next column.  Set it to open a path, its last item selected;  read it as people pick.
+   * - a JS property (rich data):  an object, array or function, given as it is
+   * @deprecated write `path` -- `prop:` stays only for compiled spell
+   */
+  "prop:path"?: unknown
+  /**
+   * `appearance="columns"`:  each column's width, by level, separated by commas;  the last one sizes every column deeper than the list goes.  Each one a number of px (`240`, `240px`), `em`, a percent of the tree's width (`30%`), `auto` to fit the column to the rows it shows (from 80px to three times `--ui-tree-column-width`), or `*` for `--ui-tree-column-width`.  So `auto` fits every column to its rows, and `12em, auto` keeps the first at 12em.  None:  every column is `--ui-tree-column-width` wide.  A column a person resizes keeps that width instead:  with an `id`, the tree remembers it in this browser.
+   * - takes:  text
+   */
+  size?: string
+  /**
+   * `size`, as the DOM element's property.
+   * @deprecated write `size` -- `prop:` stays only for compiled spell
+   */
+  "prop:size"?: string
+  /**
+   * `appearance="columns"`:  how many columns at the end never narrow.  While the columns don't fit the tree's width, the ones before those narrow, from the first, as few as it takes, each to a strip with its pick's name;  the pointer or the focus on one widens it again, and so does picking it from the path line.  The selected row's column never narrows.
+   * - takes:  number
+   * - default:  `2`
+   */
+  "narrow-before"?: number | `${number}`
+  /**
+   * `narrow-before`, as the DOM element's property.
+   * @deprecated write `narrow-before` -- `prop:` stays only for compiled spell
+   */
+  "prop:narrowBefore"?: number | `${number}`
+  /**
+   * `appearance="columns"`:  which parts each row shows, as words:  `icon which count chevron`;  the label always shows.  None:  `icon which chevron`.  `count` is how many rows a row holds, when it knows.
+   * - takes:  text
+   */
+  show?: string
+  /**
+   * `show`, as the DOM element's property.
+   * @deprecated write `show` -- `prop:` stays only for compiled spell
+   */
+  "prop:show"?: string
+  /**
+   * While the tree scrolls, one line pinned at its top names the open rows the first row in view is inside, `Solitaire › Grid › StockPile`, shortened from the left when it doesn't fit.  A click on one scrolls to its row, selecting nothing.  It shows only while one of them is scrolled out of sight.  `appearance="columns"`:  a line above the columns naming each column's pick, shown once something is picked;  a click on one picks it again, keeping the columns after it, and scrolls its column into view.
    * - takes:  flag (present / absent)
    */
   "sticky-path"?: boolean | ""
@@ -55205,6 +55759,16 @@ export interface UITreeAttributes {
    * @deprecated write `sticky-path` -- `prop:` stays only for compiled spell
    */
   "prop:stickyPath"?: boolean | ""
+  /**
+   * `appearance="columns"` with a `detail` pane:  the pane stays in view at the tree's end while the columns scroll sideways under it.
+   * - takes:  flag (present / absent)
+   */
+  "sticky-detail"?: boolean | ""
+  /**
+   * `sticky-detail`, as the DOM element's property.
+   * @deprecated write `sticky-detail` -- `prop:` stays only for compiled spell
+   */
+  "prop:stickyDetail"?: boolean | ""
   /**
    * Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).
    * - takes:  flag (present / absent)
@@ -55462,16 +56026,21 @@ export interface UITreeAttributes {
    */
   "prop:onPlatform"?: string
   /**
-   * `ui-selecting`:  A row is about to be selected, by a click, or by Enter or Space:  cancel it to decide what's selected yourself, reading the keys held from `originalEvent`.
-   * - `event.detail`:  `{ item: HTMLElement, value: string, originalEvent?: Event }`
+   * `ui-selecting`:  A row is about to be selected, by a click, or by Enter or Space:  cancel it to decide what's selected yourself, reading the keys held from `originalEvent`.  `appearance="columns"`:  the arrow keys select as they move too;  `item` is the `<ui-tree-item>`, or the `items` entry;  `path`, the ids of each column's pick down to it.
+   * - `event.detail`:  `{ item: HTMLElement | TreeItemData, value: string, path?: string[], originalEvent?: Event }`
    * - cancelable:  `preventDefault()` vetoes it
    */
   "on-ui-selecting"?: (event: UITreeEventMap["ui-selecting"]) => void
   /**
-   * `ui-changed`:  What's selected changed:  `value`, the row clicked;  `values`, every selected row in the tree's order (each one's `value`, else its `label`).
-   * - `event.detail`:  `{ value: string, values: string[], originalEvent?: Event }`
+   * `ui-changed`:  What's selected changed:  `value`, the row clicked;  `values`, every selected row in the tree's order (each one's `value`, else its `label`).  `appearance="columns"`:  also `item` and `path`, as `ui-selecting`'s.
+   * - `event.detail`:  `{ value: string, values: string[], item?: HTMLElement | TreeItemData, path?: string[], originalEvent?: Event }`
    */
   "on-ui-changed"?: (event: UITreeEventMap["ui-changed"]) => void
+  /**
+   * `ui-settled`:  What's selected has stayed put for a moment:  `ui-changed`'s detail, once the arrow keys stop.  For a page doing heavy work on each pick.
+   * - `event.detail`:  `{ value: string, values: string[], item?: HTMLElement | TreeItemData, path?: string[], originalEvent?: Event }`
+   */
+  "on-ui-settled"?: (event: UITreeEventMap["ui-settled"]) => void
 }
 
 /** `<ui-tree>` in JSX:  its own attributes, and HTML's global ones. */
@@ -58361,6 +58930,12 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-form": UIFormJSXAttributes
       /**
+       * `<ui-graph>`:  A graph draws nodes joined by edges, laid out left to right.  A node may hold a graph of its own, opened in place, in a modal, or in its stead.
+       * - also known as:  graph, node graph, network diagram, flow chart, dataflow, netlist, schematic, block diagram, DAG
+       * - events:  `ui-selecting`, `ui-changed`, `ui-node-toggled`
+       */
+      "ui-graph": UIGraphJSXAttributes
+      /**
        * `<ui-grid>`:  A grid is used to harmonize negative space in a layout.
        * - also known as:  columns, row, flex grid, layout grid, responsive grid
        * - slots:
@@ -58441,9 +59016,9 @@ declare module "@solidjs/web/types/jsx.js" {
        */
       "ui-items": UIItemsJSXAttributes
       /**
-       * `<ui-json>`:  JSON data holds data in a page, as its text or from a file with `source`.  It draws nothing:  `value` is the parsed data, `ui-changed` says when it changed, and an element it sits inside may read it.
-       * - also known as:  data, data island, json script, application/json, data block, datos
-       * - events:  `ui-loaded`, `ui-changed`, `ui-saving`, `ui-saved`, `ui-error`
+       * `<ui-json>`:  JSON data holds data in a page, as its text or from a file with `source`, and shows it as an outline whose objects and arrays open and close.  `value` is the parsed data, and an element it sits inside may read it.
+       * - also known as:  data, data island, json script, application/json, data block, json viewer, json tree, object inspector, pretty print, datos
+       * - events:  `ui-loaded`, `ui-changed`, `ui-saving`, `ui-saved`, `ui-error`, `ui-navigating`, `ui-copied`
        */
       "ui-json": UIJsonJSXAttributes
       /**
@@ -59057,7 +59632,9 @@ declare module "@solidjs/web/types/jsx.js" {
        * - slots:
        *   - default:  The top rows:  `<ui-tree-item>`s.
        *   - `empty`:  Shown when `filter` matches no row.
-       * - events:  `ui-selecting`, `ui-changed`
+       *   - `tools`:  At the end of the line above the rows, after `tools`' buttons:  a filter field, say.  On a narrow tree it drops to a line of its own;  slotted without `tools`, the line holds it alone.
+       *   - `detail`:  `appearance="columns"`:  a pane after the last column, showing what's picked:  any element, which the tree hands the picked row as its `item` property (the `<ui-tree-item>`, or the `items` entry), and the page can fill from `ui-changed`.  Drawn only while something is slotted and something is picked, tight against the last column, as wide as its content (up to `--ui-tree-detail-max-width`) until its line is dragged.
+       * - events:  `ui-selecting`, `ui-changed`, `ui-settled`
        */
       "ui-tree": UITreeJSXAttributes
       /**
@@ -59160,8 +59737,11 @@ export interface UIEventMap {
   "ui-applied": CustomEvent<unknown>
   "ui-cancelling": CustomEvent<unknown>
   "ui-cancelled": CustomEvent<unknown>
+  "ui-selecting": CustomEvent<unknown>
+  "ui-node-toggled": CustomEvent<unknown>
   "ui-drawing": CustomEvent<unknown>
   "ui-typed": CustomEvent<unknown>
+  "ui-navigating": CustomEvent<unknown>
   "ui-removing": CustomEvent<unknown>
   "ui-chosen": CustomEvent<unknown>
   "ui-drawn": CustomEvent<unknown>
@@ -59171,7 +59751,6 @@ export interface UIEventMap {
   "ui-show-code": CustomEvent<unknown>
   "ui-replied": CustomEvent<unknown>
   "ui-animated": CustomEvent<unknown>
-  "ui-navigating": CustomEvent<unknown>
   "ui-starred": CustomEvent<unknown>
   "ui-stuck": CustomEvent<unknown>
   "ui-unstuck": CustomEvent<unknown>
@@ -59180,8 +59759,7 @@ export interface UIEventMap {
   "ui-send": CustomEvent<unknown>
   "ui-command": CustomEvent<unknown>
   "ui-scrolled-to": CustomEvent<unknown>
-  "ui-selecting": CustomEvent<unknown>
-  "ui-node-toggled": CustomEvent<unknown>
+  "ui-settled": CustomEvent<unknown>
   "ui-in-view": CustomEvent<unknown>
   "ui-out-of-view": CustomEvent<unknown>
   "ui-top-in-view": CustomEvent<unknown>
@@ -59240,6 +59818,7 @@ declare global {
     "ui-flag": HTMLElement
     "ui-flyout": UIHTMLElement<UIFlyoutEventMap>
     "ui-form": UIHTMLElement<UIFormEventMap>
+    "ui-graph": UIHTMLElement<UIGraphEventMap>
     "ui-grid": HTMLElement
     "ui-header": HTMLElement
     "ui-icon": HTMLElement

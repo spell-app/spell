@@ -58,9 +58,9 @@ export function planDocArgs(verb: string, args: string[]): string[][] {
     case "updated":
       return [[verb, ...around(ref === undefined ? [] : [needPhase(verb, args[at]!, ref)])]]
     case "file":
-      // `epic file seo#P7 r3` into the phase, `seo#T5 r3` into the todo (`Requests`, which runs this):  the tool's
-      // `request`;  a todo since epic `epic-engine` T88
-      if (ref !== undefined && TODO_REF.test(ref)) return [["request", ...around([ref.toUpperCase()])]]
+      // `epic file seo#P7 r3` into the phase, `seo#T5 r3` into the todo, `seo#I5 r3` the issue (`Requests`, which runs
+      // this):  the tool's `request`;  a todo since epic `epic-engine` T88, an issue since T108
+      if (ref !== undefined && ITEM_REF.test(ref)) return [["request", ...around([ref.toUpperCase()])]]
       return [["request", ...around(ref === undefined ? [] : [needPhase(verb, args[at]!, ref)])]]
     case "commit": {
       if (ref === undefined) return [["commit", ...args]]
@@ -319,18 +319,22 @@ function updateArgs(args: string[], at: number, target: EpicTarget | undefined):
   return runs
 }
 
+/** The flags a card takes:  `cardArgs()` passes them through. */
+const CARD_FLAGS = ["--filed", "--quiet", "--file"]
+
 /**
  * `epic update seo#J3 underway "<reading>"` (`done ["<summary>"]`, `noted "<what>"`) as the tool's `status` takes it:
  * `status seo J3 underway "<reading>"`.
  * - the id as typed (`J3`, `o3`, `P3`, `summary`):  the tool finds the item, section, phase or summary
- * - `--filed "<what>"` after `done` (the older spelling of `noted`) goes through;  any other flag is a field
+ * - `--filed "<what>"` after `done` (the older spelling of `noted`), `--quiet` and `--file <html>` (a long card, I339)
+ *   go through;  any other flag is a field
  * - throws `EpicCommandError` for no id, or a field beside the card
  */
 function cardArgs(args: string[], at: number, { epic, ref }: EpicTarget, state: string): string[] {
   if (ref === undefined)
     throw new EpicCommandError(`update ${epic} ${state}:  which item?  epic update ${epic}#J3${CARD_EXAMPLES[state]}`)
   const rest = args.slice(at + 1)
-  const fields = rest.filter((arg) => arg.startsWith("--") && arg !== "--filed" && arg !== "--quiet")
+  const fields = rest.filter((arg) => arg.startsWith("--") && !CARD_FLAGS.includes(arg))
   if (fields.length)
     throw new EpicCommandError(
       `update:  a card (${state}) or fields (${fields.join(", ")}), not both:  ` +
@@ -500,8 +504,8 @@ const PHASE_EXAMPLES: Record<string, string> = {
 /** A phase ref by number:  `P3`, `p3`, `3`, a decimal phase's `P11.1`. */
 const PHASE_REF = /^[Pp]?(\d+(?:\.\d+)?)$/
 
-/** A todo's id as typed after the `#`:  `T5`, `t5`. */
-export const TODO_REF = /^[Tt]\d+$/
+/** A todo's or an issue's id as typed after the `#`:  `T5`, `t5`, `I5` (a request filed into it;  epic `epic-engine` T108). */
+export const ITEM_REF = /^[TtIi]\d+$/
 
 /** One part of a bedtime run's phases:  `P3`, `P3-P6`, `3-6`. */
 const PHASE_RANGE = /^[Pp]?(\d+)(?:\s*-\s*[Pp]?(\d+))?$/

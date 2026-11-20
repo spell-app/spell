@@ -1144,7 +1144,7 @@ export class EpicConfig {
   }
 
   /** The repo's own docs `installSuggestionOf()` reads, at its root, in order. */
-  private static readonly INSTALL_DOCS = ["README.md", "AGENTS.md", "CONTRIBUTING.md", "CONTRIBUTING"]
+  static readonly INSTALL_DOCS = ["README.md", "AGENTS.md", "CONTRIBUTING.md", "CONTRIBUTING"]
 
   /**
    * The settings in config text `text` (from `file`, for messages):  each key left out from the repo itself
@@ -1229,7 +1229,7 @@ export class EpicConfig {
    * lock files and the install command each names, first match wins (`installCommandOf()`)
    * - static:  the same for every repo
    */
-  private static readonly INSTALLERS: [file: string, command: string][] = [
+  static readonly INSTALLERS: [file: string, command: string][] = [
     ["yarn.lock", "yarn install"],
     ["pnpm-lock.yaml", "pnpm install"],
     ["bun.lock", "bun install"],

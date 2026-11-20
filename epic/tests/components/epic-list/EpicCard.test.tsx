@@ -7,6 +7,8 @@ import "spell/ui/components/ui-icon"
 import "spell/ui/components/ui-card"
 import "spell/ui/components/ui-label"
 import "spell/ui/components/ui-button"
+import "spell/ui/components/ui-dropdown"
+import "spell/ui/components/ui-item"
 import "spell/epic/components/epic-list"
 
 /** Today, as a card's `updated` writes it. */
@@ -26,7 +28,11 @@ async function render(attributes: string, description = "Meta tags and a site ma
 /** Its state's mark:  `[tag, words or icon, tooltip]`. */
 function mark(host: Element): [string, string, string] {
   const each = host.shadowRoot!.querySelector(".mark")!
-  return [each.localName, each.getAttribute("name") ?? each.textContent!.trim(), each.getAttribute("title") ?? ""]
+  return [
+    each.localName,
+    each.getAttribute("name") ?? each.textContent!.trim(),
+    each.getAttribute("data-tooltip") ?? ""
+  ]
 }
 
 /** Serve the page as the page server does:  a write token. */
@@ -49,12 +55,12 @@ describe("<epic-card>", () => {
     expect(mark(host)).toEqual(["ui-label", "1/3", `in progress:  P2 · Site Map under way, updated ${TODAY}`])
     expect(root.querySelector("ui-description")).toBeTruthy()
     const saga = root.querySelector(".saga")!
-    expect([saga.textContent!.trim(), saga.getAttribute("title")]).toEqual(["Epic Tooling", "Epics & co"])
+    expect([saga.textContent!.trim(), saga.getAttribute("data-tooltip")]).toEqual(["Epic Tooling", "Epics & co"])
     const worked = root.querySelector("time")!
     expect(worked.textContent).toBe(
       `${new Date("2026-10-09T14:34-04:00").getMonth() + 1}/${new Date("2026-10-09T14:34-04:00").getDate()}`
     )
-    expect(worked.getAttribute("title")).toMatch(/^Last worked on \d+\/\d+\/26 \d\d:\d\d$/)
+    expect(worked.getAttribute("data-tooltip")).toMatch(/^Last worked on \d+\/\d+\/26 \d\d:\d\d$/)
     // the title is its own link, in its header
     expect((root.querySelector(".header slot") as HTMLSlotElement).assignedElements()[0]!.localName).toBe("a")
     await expectAccessible(host)
@@ -85,7 +91,7 @@ describe("<epic-card>", () => {
     const host = await render(`phases="active" updated="${TODAY}"`)
     const star = () => host.shadowRoot!.querySelector(".star")!
     expect(star().hasAttribute("disabled")).toBe(true)
-    expect(star().getAttribute("title")).toBe("Starring needs the epic server (epic hub ensure)")
+    expect(star().getAttribute("data-tooltip")).toBe("Needs the page server")
     served()
     // read again as the page is served:  a fresh card
     const card = await render(`phases="active" updated="${TODAY}"`)
@@ -105,7 +111,7 @@ describe("<epic-card>", () => {
     expect(url).toBe("/api/epics/favorite")
     expect(JSON.parse(init!.body as string)).toEqual({ name: "seo", favorite: true })
     await vi.waitFor(() => expect(button.getAttribute("icon")).toBe("star"))
-    expect(button.getAttribute("title")).toBe("A favorite:  listed first.  Click to unstar")
+    expect(button.getAttribute("data-tooltip")).toBe("Unstar")
   })
 
   test("a star the page server refuses goes back as it was, and says why", async () => {
@@ -119,5 +125,21 @@ describe("<epic-card>", () => {
     expect(host.hasAttribute("favorite")).toBe(false)
     await vi.waitFor(() => expect(host.hasAttribute("favorite")).toBe(true))
     expect(said).toHaveBeenCalledWith("Couldn't unstar seo:  no such epic")
+  })
+
+  // epic `epic-engine` T103:  "add a `...` menu in the TR corner, with Resume, Rename Epic..., Complete, Delete Epic..."
+  test("its `...` menu:  the four entries;  a done epic's without Resume and Complete;  disabled from disk", async () => {
+    served()
+    const entries = (host: Element) =>
+      Array.from(host.shadowRoot!.querySelectorAll(".menu ui-item"), (item) => item.getAttribute("value"))
+    const open = await render(`phases="done active"`)
+    expect(entries(open)).toEqual(["resume", "rename", "complete", "delete"])
+    expect(open.shadowRoot!.querySelector(".menu")!.getAttribute("data-tooltip")).toBe("More for seo")
+    expect(open.shadowRoot!.querySelector(".menu")!.hasAttribute("disabled")).toBe(false)
+    const done = await render(`phases="done done"`)
+    expect(entries(done)).toEqual(["rename", "delete"])
+    delete (window as { SPELL_SERVER?: object }).SPELL_SERVER
+    const offline = await render(`phases="done active"`)
+    expect(offline.shadowRoot!.querySelector(".menu")!.hasAttribute("disabled")).toBe(true)
   })
 })

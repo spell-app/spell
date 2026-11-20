@@ -7,7 +7,7 @@ import { compilePattern, filledPattern, type AddressParams } from "spell/util/ad
 
 import { core } from "spell/parser/core/core"
 import type { SiteHost, SiteOverlayEntry, SitePageEntry } from "spell/parser/core/core.types"
-import { isElementThunk, type Drawing } from "spell/parser/core/drawing"
+import { followsEditsOf, isElementThunk, type Drawing } from "spell/parser/core/drawing"
 // Import directly to avoid circular import
 import { App } from "./App"
 import { Page } from "./Page"
@@ -457,6 +457,8 @@ export class SiteBase extends App {
    * layout's;  nothing when neither draws anything, so the region takes no room.
    * - Drawn again only when WHO draws it changes (a memo of that), never on every page change:
    *   so a layout's menu is the same element from page to page.
+   * - And when an edit changes the type of who draws it (`followsEditsOf()`):  a part added to the layout's footer
+   *   shows at once (epic `editor` P35).
    */
   private drawSlot(layout: PageLayout, slot: LayoutSlot, region: string): unknown {
     const drawer = createMemo(() => {
@@ -466,6 +468,7 @@ export class SiteBase extends App {
       return page && typeof (page as unknown as Record<string, unknown>)[slot] === "function" ? page : layout
     })
     return () => {
+      followsEditsOf(drawer())
       const drawing = made((drawer() as unknown as Record<LayoutSlot, () => unknown>)[slot]())
       return drawing == null ? null : h("div", { slot: region, class: "spell-site-slot" }, drawing)
     }

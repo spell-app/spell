@@ -92,7 +92,7 @@ describe("<epic-item>", () => {
     expect(title.textContent).toBe("Which colour names?")
     expect(slotNames(host)).toEqual(["title", "actions", "", "status"])
     expect(host.querySelector("p")!.assignedSlot!.getAttribute("name")).toBeNull()
-    expect(chip.title).toBe("Needs attention · not reviewed yet")
+    expect(chip.dataset.tooltip).toBe("Urgent · not reviewed")
     await expectAccessible(host)
   })
 
@@ -156,7 +156,7 @@ describe("<epic-item>", () => {
       `<epic-item id="j17" title="A call" status="open" state="replied" reviewed="2026-10-09"></epic-item>`
     )
     expect(host.shadowRoot!.querySelector("[part~='base']")!.className).toBe("replied item")
-    expect(chip.title).toBe("Claude answered:  your turn to pick · reviewed 10/9/26")
+    expect(chip.dataset.tooltip).toBe("Answered:  your pick · reviewed 10/9/26")
     const [orange, ink] = [colorOf("var(--ui-orange)"), colorOf("var(--ui-orange-on)")]
     expect(orange).not.toBe(colorOf("transparent"))
     expect([getComputedStyle(chip).backgroundColor, getComputedStyle(chip).color]).toEqual([orange, ink])
@@ -167,19 +167,19 @@ describe("<epic-item>", () => {
       `<epic-item id="i7" title="An issue" status="open" state="replied" fixed></epic-item>`
     )
     expect(host.shadowRoot!.querySelector("[part~='base']")!.className).toBe("replied item")
-    expect(chip.title).toMatch(/^Claude fixed it:  your turn to review/)
+    expect(chip.dataset.tooltip).toMatch(/^Fixed:  your review/)
   })
 
   test("the review label:  `to do` (queued), else `deferred`, else `reviewed 10/6/26`;  none when unmarked", async () => {
     const labels = []
     for (const marks of [`queued="2026-10-06" work="Skip it"`, `deferred="2026-10-05"`, `reviewed="2026-10-06"`, ""]) {
       const { review } = await item(`<epic-item id="j1" title="A" status="open" state="recent" ${marks}></epic-item>`)
-      labels.push(review() ? [review()!.textContent, review()!.className, review()!.title] : null)
+      labels.push(review() ? [review()!.textContent, review()!.className, review()!.dataset.tooltip] : null)
     }
     expect(labels).toEqual([
       ["to do", "review todo", "Skip it"],
       ["deferred", "review deferred", "deferred 10/5/26"],
-      ["reviewed 10/6/26", "review old", ""],
+      ["reviewed 10/6/26", "review old", undefined],
       null
     ])
   })
@@ -196,7 +196,7 @@ describe("<epic-item>", () => {
     expect([
       toggle()!.classList.contains("fold-button"),
       toggle()!.getAttribute("aria-label"),
-      toggle()!.title,
+      toggle()!.dataset.tooltip,
       toggle()!.getAttribute("aria-controls")
     ]).toEqual([true, "Unfold T1", "Unfold T1\n⌥-click:  open everything inside", "details"])
     line.click()
@@ -222,7 +222,7 @@ describe("<epic-item>", () => {
     toggle()!.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true, altKey: true }))
     await ElementFixture.tick()
     expect([host.open, inner.open, asideOpen()]).toEqual([true, true, true])
-    expect(toggle()!.title).toBe("Fold T2\n⌥-click:  fold everything inside")
+    expect(toggle()!.dataset.tooltip).toBe("Fold T2\n⌥-click:  fold everything inside")
     toggle()!.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true, altKey: true }))
     await ElementFixture.tick()
     expect([host.open, inner.open, asideOpen()]).toEqual([false, false, false])
@@ -329,7 +329,7 @@ describe("<epic-item>", () => {
     git()!.click()
     await ElementFixture.tick()
     // its own commits hidden again, the item still open:  the git icon never folds it
-    expect([host.open, shown(), git()!.getAttribute("title")]).toEqual([true, "", "Show this item's commits"])
+    expect([host.open, shown(), git()!.getAttribute("data-tooltip")]).toEqual([true, "", "Show this item's commits"])
     expect(line.contains(git())).toBe(true)
     const bare = await item(`<epic-item id="i3" title="No commits" status="open"><p>Why.</p></epic-item>`)
     expect(bare.host.shadowRoot!.querySelector("[part~='git']")).toBeNull()
@@ -340,7 +340,7 @@ describe("<epic-item>", () => {
   test("made overnight (`overnight`, I3):  a bed icon at the line's end, `made overnight`;  none by day", async () => {
     const { host, line } = await item(`<epic-item id="j8" title="By night" status="open" overnight></epic-item>`)
     const bed = host.shadowRoot!.querySelector<HTMLElement>("[part~='overnight']")!
-    expect([bed.title, bed.getAttribute("aria-label"), line.contains(bed)]).toEqual([
+    expect([bed.dataset.tooltip, bed.getAttribute("aria-label"), line.contains(bed)]).toEqual([
       "made overnight",
       "made overnight",
       true
@@ -359,13 +359,12 @@ describe("<epic-item>", () => {
         `<epic-item id="q4" title="How many retries?" status="decided" state="handled" handled="p-retry"></epic-item>`
       )
       const mark = host.shadowRoot!.querySelector<HTMLElement>("[part~='handled']")!
-      expect([mark.textContent, mark.getAttribute("link"), mark.title]).toEqual([
+      expect([mark.textContent, mark.getAttribute("link"), mark.dataset.tooltip]).toEqual([
         "in P2",
         "#p-retry",
-        "Handled in P2 · Retry Logic:  rewritten into that phase's text.  Reopen its change mark to talk it over again.\n" +
-          "Click:  go to P2.  ⌥-click:  start P2."
+        "Rewritten into P2 · Retry Logic\nGo to P2 · ⌥-click:  start it"
       ])
-      expect(chip.title).toMatch(/^Handled in a phase/)
+      expect(chip.dataset.tooltip).toMatch(/^Handled in a phase/)
       await expectAccessible(host)
     } finally {
       phases.remove()
@@ -508,10 +507,10 @@ describe("<epic-item>", () => {
     try {
       const { host } = await item(`<epic-item id="i1" title="Old numbers" status="open" taken-in="p-fix"></epic-item>`)
       const mark = host.shadowRoot!.querySelector<HTMLElement>("[part~='handled']")!
-      expect([mark.textContent, mark.getAttribute("link"), mark.title]).toEqual([
+      expect([mark.textContent, mark.getAttribute("link"), mark.dataset.tooltip]).toEqual([
         "in P2",
         "#p-fix",
-        "Taken up in P2 · Fix Open Issues:  fixed or done there\nClick:  go to P2.  ⌥-click:  start P2."
+        "Done in P2 · Fix Open Issues\nGo to P2 · ⌥-click:  start it"
       ])
       await expectAccessible(host)
     } finally {
@@ -519,7 +518,7 @@ describe("<epic-item>", () => {
     }
   })
 
-  test("a FINISHED item's `taken-in` draws `done in P2` where the plane was (J231), not `in P2` (I307);  `handled` keeps its pill", async () => {
+  test("a FINISHED item's `taken-in` draws its own `in P2` under its buttons (J231, I348), not `phasePill`'s (I307);  `handled` keeps its pill", async () => {
     const phases = document.createElement("div")
     phases.innerHTML = `<epic-phase id="p-one" title="One"></epic-phase><epic-phase id="p-fix" title="Fix Open Issues"></epic-phase>`
     document.body.append(phases)
@@ -530,9 +529,11 @@ describe("<epic-item>", () => {
         )
         expect(host.shadowRoot!.querySelector("[part~='handled']")).toBeNull()
         const done = host.shadowRoot!.querySelector<HTMLElement>("[part~='done-in']")!
-        expect([done.textContent, done.getAttribute("link")]).toEqual(["done in P2", "#p-fix"])
-        expect(done.title).toBe("Taken up in P2 · Fix Open Issues:  fixed or done there\nClick:  go to P2.")
-        expect(chip.title).toContain("Taken up in P2 · Fix Open Issues:  fixed or done there")
+        expect([done.textContent, done.getAttribute("link")]).toEqual(["in P2", "#p-fix"])
+        // on its own line, under the buttons (I348)
+        expect(done.parentElement!.classList.contains("phase-row")).toBe(true)
+        expect(done.dataset.tooltip).toBe("Done in P2 · Fix Open Issues\nGo to P2")
+        expect(chip.dataset.tooltip).toContain("Done in P2 · Fix Open Issues")
       }
       // still to finish:  its `in P2`, no `done in`
       const open = await item(`<epic-item id="i1" title="Old numbers" status="open" taken-in="p-fix"></epic-item>`)
@@ -549,7 +550,7 @@ describe("<epic-item>", () => {
 
   test("`calm`:  the chip follows the script's `state` (open:  yellow), and stays a link without a review", async () => {
     const { chip } = await item(`<epic-item id="j10" title="Follows WWOD" status="open" state="open" calm></epic-item>`)
-    expect([chip.localName, chip.title]).toEqual(["a", "Open, still undecided · not reviewed yet"])
+    expect([chip.localName, chip.dataset.tooltip]).toEqual(["a", "Undecided · not reviewed"])
   })
 
   test("the chip's colours (Q20):  open yellow with DARK text, progress blue;  both readable (axe's contrast)", async () => {
@@ -679,7 +680,7 @@ describe("<epic-item> title, folded and open", () => {
     }
     expect(title.getBoundingClientRect().height).toBeGreaterThan(lineHeight * 1.5)
     expect(title.scrollWidth).toBeLessThanOrEqual(title.clientWidth)
-    expect([getComputedStyle(title).textOverflow, title.hasAttribute("title")]).toEqual(["clip", false])
+    expect([getComputedStyle(title).textOverflow, title.hasAttribute("data-tooltip")]).toEqual(["clip", false])
     // the buttons:  on the title's first line, at its right
     expect([
       folded.bed.top < folded.top + lineHeight,
@@ -689,7 +690,7 @@ describe("<epic-item> title, folded and open", () => {
     await ElementFixture.tick()
     expect(host.open).toBe(true)
     expect(title.getBoundingClientRect().height).toBeGreaterThan(lineHeight * 1.5)
-    expect(title.hasAttribute("title")).toBe(false)
+    expect(title.hasAttribute("data-tooltip")).toBe(false)
     // nothing moves as it opens:  its room is below it, none above (Owen, 2026-10-25)
     expect(title.getBoundingClientRect().top).toBeCloseTo(folded.top + OPEN_ROOM, 0)
     expect(button.getBoundingClientRect().left).toBeCloseTo(folded.button.left, 0)
@@ -700,9 +701,9 @@ describe("<epic-item> title, folded and open", () => {
       `<div style="width: 320px"><epic-item id="t6" title="A long title that cannot fit on one line of the narrow side bar, so it wraps, folded or open" status="open"></epic-item></div>`
     )
     const bareTitle = bare.querySelector("epic-item")!.shadowRoot!.querySelector<HTMLElement>("[part~='title']")!
-    expect([bareTitle.getBoundingClientRect().height > lineHeight * 1.5, bareTitle.hasAttribute("title")]).toEqual([
-      true,
-      false
-    ])
+    expect([
+      bareTitle.getBoundingClientRect().height > lineHeight * 1.5,
+      bareTitle.hasAttribute("data-tooltip")
+    ]).toEqual([true, false])
   })
 })

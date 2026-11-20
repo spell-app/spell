@@ -1,0 +1,234 @@
+/*
+ * Look of Anatomy (`AppAnatomy.tsx`):  its bar across the top of the app pane, the floors' tags over the turned app,
+ * and the outlines.
+ * - A tag is coloured as a view's band is in the bubbly code, a thing's purple (`bubbly.css`),
+ *   so the drawing and the code read alike.
+ * - The tags and outlines never take the pointer:  Anatomy reads it on the window, before the app.
+ */
+
+.AppPane:has(> .AnatomyBar) {
+  position: relative;
+  --AppAnatomy-view: var(--bubbly-thing, #7c5cd6);
+  /*
+   * the whole of its split pane, not just the app's height, so the turned app is cut off only at the pane's edges (I266)
+   * - the app keeps its own height:  only the room round it grows
+   */
+  height: 100%;
+
+  & > .AppPaneBody > .AppPaneProgram {
+    flex: 0 0 auto;
+  }
+  & > .AppPaneBody {
+    overflow: hidden;
+    perspective-origin: 50% 40%;
+    cursor: grab;
+  }
+  & > .AppPaneBody:active {
+    cursor: grabbing;
+  }
+
+  /*
+   * the bar:  the top bar's glass, over the app's top edge
+   * - three columns:  where it's looking at the left, its controls in the middle, centred on the bar itself (T121),
+   *   the icons at the right
+   */
+  .AnatomyBar {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    z-index: 3;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 8px 16px;
+    padding: 4px 12px;
+    border-radius: 12px;
+    background: var(--spell-menu-bar-fill, color-mix(in srgb, var(--ui-surface, white) 88%, transparent));
+    backdrop-filter: var(--spell-menu-bar-filter, blur(12px));
+    box-shadow: 0 1px 4px rgb(0 0 0 / 0.16);
+    font-size: 13px;
+  }
+  .AnatomyCrumbs,
+  .AnatomyControls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .AnatomyCrumbs {
+    justify-self: start;
+    white-space: nowrap;
+  }
+  /* the middle:  Play | Inspect, Front, Spacing, Views | Named | Outlines, as one group, wrapping in a narrow pane */
+  .AnatomyMiddle {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px 16px;
+    /* no block margin on its menus:  a menu first or last in its box keeps only one, and sits off the middle */
+    --ui-menu-margin: 0;
+  }
+  .AnatomyControls {
+    flex-wrap: wrap;
+    gap: 8px 12px;
+  }
+  .AnatomyCrumb {
+    cursor: pointer;
+    color: var(--ui-link);
+
+    &.current {
+      color: inherit;
+      font-weight: 600;
+      cursor: default;
+    }
+  }
+  .AnatomyCrumbGap {
+    color: var(--ui-text-muted);
+  }
+  .AnatomySlider {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+
+    & ui-slider {
+      width: 96px;
+    }
+  }
+  /* the right end:  icons alone, no surround, 12px apart, as the top bar's */
+  .AnatomyEnd {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-self: end;
+  }
+  .AnatomyEnd > ui-icon {
+    color: var(--ui-text-muted);
+  }
+  .AnatomyHelp {
+    cursor: help;
+  }
+
+  /*
+   * the full window's hint, under the bar at its left (I260):  20px below it, whatever the bar's height,
+   * big, bold and yellow on the dark dim (T121)
+   */
+  .AnatomyEscHint {
+    position: absolute;
+    top: calc(100% + 20px);
+    left: 8px;
+    color: var(--ui-yellow-inverted, #fbbd08);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 20px;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  /* the tags, over the turned app:  in the pane's own pixels, never turned, so they always read */
+  .AnatomyTags {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .AnatomyTags > .AnatomyTag {
+    position: absolute;
+    translate: 0 -100%;
+  }
+  .AnatomyTag {
+    --AppAnatomy-hue: var(--AppAnatomy-view);
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+    height: 16px;
+    padding: 0 6px;
+    border-radius: 4px 4px 4px 0;
+    background: var(--AppAnatomy-hue);
+    color: white;
+    font-size: 11px;
+    line-height: 16px;
+    white-space: nowrap;
+
+    &.hovered,
+    &.selected {
+      box-shadow:
+        0 0 0 2px white,
+        0 0 0 4px var(--AppAnatomy-hue);
+    }
+    .AnatomyFlat {
+      opacity: 0.8;
+      font-style: italic;
+    }
+  }
+
+  /* the outlines:  each floor an empty frame in a view's colour, the app hidden under them */
+  .AnatomyOutlines {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+    perspective-origin: 50% 40%;
+  }
+  .AnatomyOutlinesStage {
+    position: absolute;
+    transform-style: preserve-3d;
+  }
+  .AnatomyFrame {
+    --AppAnatomy-hue: var(--AppAnatomy-view);
+    position: absolute;
+    box-sizing: border-box;
+    border: 1px solid var(--AppAnatomy-hue);
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--AppAnatomy-hue) 6%, transparent);
+    pointer-events: auto;
+
+    &.hovered {
+      background: color-mix(in srgb, var(--AppAnatomy-hue) 20%, transparent);
+      border-width: 2px;
+    }
+    & > .AnatomyTag {
+      position: absolute;
+      top: 0;
+      left: -1px;
+      translate: 0 -100%;
+    }
+  }
+}
+
+/* Full Window (Q43 C):  the pane over the whole editor, the rest dimmed */
+.AppPane.AnatomyFullWindow {
+  position: fixed;
+  inset: 16px;
+  z-index: 900;
+  border-radius: 12px;
+  /*
+   * no surface of its own:  the turned app sits on the dim, inside the pane as round it (I263)
+   * - the dim dark in every theme, 90% opaque, so the editor behind barely shows through (I260, T121, J234)
+   */
+  background: var(--AnatomyFullWindow-dim);
+  box-shadow: 0 0 0 100vmax var(--AnatomyFullWindow-dim);
+  /* its inset decides its height */
+  height: auto;
+  --AnatomyFullWindow-dim: rgb(0 0 0 / 0.9);
+
+  /* nor its body, nor the program's:  the editor's own surfaces would show behind the app */
+  & > .AppPaneBody,
+  & > .AppPaneBody > .AppPaneProgram {
+    background: transparent;
+  }
+}
+
+/* and the split panes holding it lift with it:  their own stacking would keep the editor's other panes on top */
+:is(.SplitPane, ui-split-panel):has(.AppPane.AnatomyFullWindow) {
+  isolation: auto;
+  z-index: 900;
+}
+
+/* the Inspector's flat outline round what's selected:  the floor draws its own while Anatomy shows */
+body.AnatomyShowing > .InspectorSelected {
+  display: none;
+}

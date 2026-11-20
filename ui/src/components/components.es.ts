@@ -165,6 +165,7 @@ import { treeNodeEs } from "spell/ui/components/ui-tree-diagram/UITreeNode.es"
 import { treeDiagramEs } from "spell/ui/components/ui-tree-diagram/UITreeDiagram.es"
 import { diagramEs } from "spell/ui/components/ui-diagram/UIDiagram.es"
 import { diagramNodeEs } from "spell/ui/components/ui-diagram/UIDiagramNode.es"
+import { graphEs } from "spell/ui/components/ui-graph/UIGraph.es"
 import { visibilityEs } from "spell/ui/components/ui-visibility/UIVisibility.es"
 
 /** The Spanish names and texts every tag shares;  each tag's own are in its `UI<Name>.es.ts`. */
@@ -836,6 +837,7 @@ export const es: Dictionary = Vocabulary.dictionaryFrom(sharedEs, [
   treeDiagramEs,
   diagramEs,
   diagramNodeEs,
+  graphEs,
   treeNodeEs,
   visibilityEs
 ])

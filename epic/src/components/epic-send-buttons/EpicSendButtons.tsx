@@ -9,7 +9,6 @@ import { epicSendButtonsVocabulary } from "./EpicSendButtons.en"
 import { SEND_ASKED, type SendAskedDetail } from "./EpicSendButtons.types"
 import { CountdownRing } from "./CountdownRing"
 
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 import ringCSS from "./CountdownRing.css?inline"
 import sendButtonsCSS from "./EpicSendButtons.css?inline"
 
@@ -18,6 +17,11 @@ import sendButtonsCSS from "./EpicSendButtons.css?inline"
  * Send:  the paper plane, and its COUNTDOWN when asked for (`countdown`;  epic `epic-engine` P20, P53).
  * - its WORDS beside the plane, "Send to Claude" (epic `epic-engine` I305;  Owen, 2026-11-15:  "The round plane icon
  *   at the top is what should say `send to claude`");  an item's own plane stays the icon alone
+ *   - "Sent to Claude" for 5 seconds after a send (`SENT_SECONDS`;  epic `epic-engine` I352, Owen:  "Should say
+ *     `Sent to Claude` for 5 seconds after send"), by a press or by Auto Send;  its tooltip says when
+ *   - a send:  asked for here, then `state` leaving `unsent`;  a mark taken back with no ask is no send
+ *   - something new marked meanwhile (`unsent` again):  "Send to Claude" at once, as that's what a press does now
+ *   - the words keep the width of the longer of the two, so nothing beside the pill moves
  * - Owen, 2026-10-29:  "Send works on a 2-minute no interaction timer.  This is integrated into the single send button
  *   ... with the countdown ring.  Pressing it sends immediately."
  * - the PLANE asks its owner to send (`epic-send-saving`, `auto` false)
@@ -55,7 +59,7 @@ import sendButtonsCSS from "./EpicSendButtons.css?inline"
 export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabulary> {
   @E.proto static vocabulary = epicSendButtonsVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-countdown-ring": ringCSS, "epic-send-buttons": sendButtonsCSS },
+    styleSheets: { "epic-countdown-ring": ringCSS, "epic-send-buttons": sendButtonsCSS },
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
 
@@ -106,6 +110,54 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
     return this.state === "unsent"
   }
 
+  ////////////////
+  // ## Just sent
+  ////////////////
+
+  /** When the last send went, `Date.now()`, for `SENT_SECONDS` after it;  `undefined` otherwise. */
+  @E.state accessor sentAt: number | undefined = undefined
+
+  /** A send was asked for, and `state` hasn't changed since:  its leaving `unsent` next is that send landing. */
+  private isSendAsked = false
+
+  /** `state` as last seen, to tell a send landing (`unsent` to anything else) from any other change. */
+  private lastState: string | undefined
+
+  /** Ends the "Sent to Claude" words, `SENT_SECONDS` after a send. */
+  private sentTimer?: E.CancelablePromise<unknown>
+
+  /** Sent in the last `SENT_SECONDS`, with nothing new to send since:  the words say "Sent to Claude". */
+  get isJustSent(): boolean {
+    return this.sentAt !== undefined && !this.isUnsent
+  }
+
+  /** The words beside the plane:  "Send to Claude", or "Sent to Claude" just after a send. */
+  get words(): string {
+    return this.translationForKey(this.isJustSent ? "sentWords" : "words")
+  }
+
+  /** A send landed:  "Sent to Claude" for `SENT_SECONDS`, then the words go back. */
+  @E.untracked
+  private showSent() {
+    this.sentTimer?.cancel()
+    this.sentAt = Date.now()
+    this.sentTimer = E.after(SENT_SECONDS, () => this.clearSent())
+  }
+
+  /** Back to "Send to Claude". */
+  @E.untracked
+  private clearSent() {
+    this.sentTimer?.cancel()
+    this.sentTimer = undefined
+    this.sentAt = undefined
+  }
+
+  /** While connected:  nothing;  disconnected, a "Sent" timer still waiting stops, and the words go back. */
+  @E.whileConnected
+  protected followSent() {
+    return () => this.clearSent()
+  }
+
   /** How much of the wait is left, `0` to `1`:  the ring's length. */
   get fractionLeft(): number {
     void this.version
@@ -133,7 +185,27 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
   /** `state` changed:  the countdown starts while something waits, and stops once nothing does. */
   @E.onChange("state")
   protected onStateChange() {
+    // first:  Auto Send Immediately may ask to send as soon as the countdown hears something waits
+    this.followSendLanding()
     if (!this.isManual) this.pageCountdown?.setPending(this.isUnsent)
+  }
+
+  /**
+   * `state` changed:  `unsent` to anything else, after an ask, is a send landing ("Sent to Claude");
+   * something new to send ends the "Sent" words at once.
+   */
+  @E.untracked
+  private followSendLanding() {
+    const was = this.lastState
+    this.lastState = this.state
+    if (this.isUnsent) {
+      // something new to send:  an ask from before it sent nothing of it
+      if (was !== "unsent") this.isSendAsked = false
+      if (this.sentAt !== undefined) this.clearSent()
+      return
+    }
+    if (this.isSendAsked && was === "unsent") this.showSent()
+    this.isSendAsked = false
   }
 
   ////////////////
@@ -157,7 +229,7 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
           data-state={this.groupState}
           aria-busy={this.busy ? "true" : undefined}
           aria-label={this.sendTitle}
-          title={this.sendTitle}
+          data-tooltip={this.sendTitle}
           onClick={() => this.askToSend(false)}
         >
           <span class={GLYPH}>
@@ -165,8 +237,17 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
             <Show when={this.isCounting}>{CountdownRing.draw(() => this.fractionLeft, this.partForName("ring"))}</Show>
             <Show when={this.isWorking}>{CountdownRing.turning(this.partForName("working"))}</Show>
           </span>
-          <span class={WORDS} part={this.partForName("words")}>
-            {this.translationForKey("words")}
+          {/* both words stacked in one cell, the hidden ones keeping its width:  "Sent" never moves the header */}
+          <span class={LABEL}>
+            <span class={WORDS} part={this.partForName("words")}>
+              {this.words}
+            </span>
+            <span class={ROOM} aria-hidden="true">
+              {this.translationForKey("words")}
+            </span>
+            <span class={ROOM} aria-hidden="true">
+              {this.translationForKey("sentWords")}
+            </span>
           </span>
           <Show when={(this.count ?? 0) > 0}>
             <span class={COUNT} part={this.partForName("count")}>
@@ -188,7 +269,8 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
    * counts, how long is left and that a click sends now;  while it turns, what Claude is working on.
    */
   get sendTitle(): string {
-    const words = this.sendTip || this.translationForKey("send")
+    const tip = this.sendTip || this.translationForKey("send")
+    const words = this.isJustSent ? `${tip} · ${this.translationForKey("sentAt", { time: this.sentTime })}` : tip
     if (this.isWorking) {
       const on = this.workingOn
       return `${words} · ${on ? this.translationForKey("workingOn", { items: on }) : this.translationForKey("working")}`
@@ -201,10 +283,16 @@ export class EpicSendButtons extends E.UIComponent<typeof epicSendButtonsVocabul
     return `${words} · ${when}`
   }
 
+  /** When the last send went, as the clock says it (`14:32`), for the tooltip. */
+  get sentTime(): string {
+    return new Date(this.sentAt ?? Date.now()).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+  }
+
   /** Ask the owner to send (`auto`:  the countdown ran out);  nothing while a send is on its way. */
   @E.untracked
   private askToSend(auto: boolean) {
     if (this.busy) return
+    this.isSendAsked = true
     this.send(SEND_ASKED, { auto } satisfies SendAskedDetail)
   }
 }
@@ -218,3 +306,8 @@ const SEND = "send"
 const COUNT = "count"
 const GLYPH = "glyph"
 const WORDS = "words"
+const LABEL = "label"
+const ROOM = "room"
+
+/** How long Send says "Sent to Claude" after a send (epic `epic-engine` I352). */
+const SENT_SECONDS = 5

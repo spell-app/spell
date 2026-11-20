@@ -5,11 +5,11 @@ import { join, resolve } from "node:path"
 import { waitUntil } from "spell/util/timing"
 import type { ServerInfo } from "spell/server"
 import { endProcess, isProcessAlive } from "./Heartbeat"
+import { SERVER_API } from "./liveClient"
 import { LoadedCode } from "./LoadedCode"
 import { isFree } from "./ports"
 // Import directly:  through the `SRV` barrel, the Linker's HTML parser lands in spell-epic's extension (I58)
 import { HttpError } from "./server.types"
-import { SERVER_API } from "./WebServer"
 
 // The process check, beside the heartbeat since epic `coherence` P28:  re-exported, so `SRV.isProcessAlive()` stays
 export { endProcess, isProcessAlive } from "./Heartbeat"

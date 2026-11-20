@@ -8,7 +8,7 @@
  * - Translated tags (`<es-boton>`) stay loose:  the generated types name the English tags only.
  * - Importing it here puts them in every program that holds the app's Solid code.
  * - Augments `"@solidjs/web/types/jsx.js"`, NOT `"@solidjs/web"`:
- *   that one only re-exports `JSX` (see `guides/solid/solid-2.md`).
+ *   that one only re-exports `JSX` (see `agents/solid/solid-2.md`).
  */
 
 import type { JSX } from "@solidjs/web"

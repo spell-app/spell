@@ -47,8 +47,9 @@
  *   between;  each icon centred by the menu (its icon box has no margin here)
  * - a row too narrow for them all scrolls sideways (never the page);  what the page adds after them (the bullhorn, the
  *   spell syntax guide's Expand all) stays at its right
- * - badges (`<ui-label class="spell-toolbar-count">`):  how many items wait on Owen, red urgent, orange Claude's reply
- *   waiting on his pick;  blue, the phases running now (the Phases button's, P43);  none, no badge
+ * - badges (`<ui-label class="spell-toolbar-count">`):  how many items wait on Owen, red urgent, orange his turn to pick
+ *   or review (light orange with it, I347);  blue, the phases running now (the Phases button's, P43);  none, no badge;
+ *   several colours on an epic page's button, ONE split circle, no number (I347)
  * - EPIC PAGES (no `spell-toolbar-titled`):  slotted into the last row of `<epic-page>`'s sticky header (its `toolbar`
  *   slot), so it sticks with it, and the titles below stick under it;  the row's band, its rule and its tools at the
  *   right are `<epic-page>`'s (`EpicPage.css`, "The toolbar")
@@ -57,8 +58,7 @@
  *   - every button the same width, badge or not (Owen, 2026-10-10:  "Make epic page icons consistent, with badge or
  *     no"):  the badges hang over the icon's top right, a third of a badge on the icon ("Make badge 1/3 way overlap
  *     the icon"), in the row's top padding
- * - the pointer lands on the item's link, which carries its tooltip (`titleInside()`):  everything inside it lets the
- *   pointer through ("TOOLTIPS that show")
+ * - its tooltip is Spell UI's, on the item (`data-tooltip`;  a `title` on its link before epic `epic-engine` T106)
  */
 :is(ui-menu, ui-toolbar).spell-toolbar {
   --ui-menu-secondary-inline-margin: 0;
@@ -212,6 +212,17 @@
   + .spell-toolbar-count
   + .spell-toolbar-count::part(label) {
   left: calc(50% + 7px - var(--_badge) / 3 + 2 * (var(--_badge) - 3px));
+}
+/*
+ * several colours:  ONE circle the size of a badge, a slice of each colour meeting in its centre, no number (epic
+ * `epic-engine` I347;  Owen, 2026-11-18:  "two half-circles with the colors meeting in the center, with no number");
+ * its slices are `toolbarItem()`'s `--spell-split`, the counts its tooltip
+ */
+.spell-toolbar:not(.spell-toolbar-titled) > ui-item > .spell-toolbar-count.split::part(label) {
+  width: var(--_badge);
+  height: var(--_badge);
+  padding: 0;
+  background: var(--spell-split);
 }
 
 /*

@@ -1,7 +1,7 @@
 ---
 name: epic
 description: Run an epic -- a piece of work planned and built against its live epic page, `epics/<name>/<name>.plan.html`, in its own worktree.  `/epic <name> [what to plan]` plans one (or "make this a plan doc" about this session's work);  `/epic review [<name>]` takes the person's marks, comments and Sends from the page ("review the seo epic", "go through its todos");  `/epic resume [<name>]` picks one back up where its page says it stopped;  `/epic future <name> [idea]` saves an idea as a future epic;  `/epic phase [ids] [name]` adds a phase;  `/epic start <P1 | ids>` works a phase or items now;  `/epic request <epic> [<rN>]` takes up a `/send` request;  `/epic tidy [<epic>]` closes items other work made obsolete;  `/epic done` is `/isolate done`.
-argument-hint: <name> [what to plan] | done | review [<name>] | resume [<name>] | future <name> [idea] | phase [ids] [name] | start <P1 | ids> | request <epic> [<rN>] | tidy [<epic>] | color <look>
+argument-hint: <name> [what to plan] | demo [pasted text] | done | review [<name>] | resume [<name>] | future <name> [idea] | phase [ids] [name] | start <P1 | ids> | request <epic> [<rN>] | tidy [<epic>] | color <look>
 ---
 
 # /epic
@@ -18,9 +18,9 @@ An EPIC is a planning session and the work it plans;  its live record is the EPI
 Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole time.
 - The epic page:  `epics/<name>/<name>.plan.html`.
 - It's the user's view of the work:  they read it in the right side bar's REVIEW tab while you work.
-  - That's the checkbox icon;  never the "Epic Docs" tab, the book (rule, 2026-10-07).
+  - That's the checkbox icon (rule, 2026-10-07);  guides open there too (epic `epic-engine` Q73).
   - The extension sends every epic page there by itself, whatever the command asked (epic `epic-engine` P59);
-    details, review and choice pages go to the third tab, "Details" (the speech bubble), so a question never
+    details, review and choice pages go to the other tab, "Details" (the speech bubble), so a question never
     replaces the epic page, and one still waiting for an answer is never replaced either.
   - In Cursor:  the same Review view, wherever the person put it (Cursor keeps its right side bar for its own agent:
     **View: Open View...** › Review finds it;  epic `epic-friend` P16).
@@ -119,7 +119,10 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
   - `tidy`:  `/epic tidy [<epic>]` closes the items other work made obsolete, with a reason on each.
     Go to "14. Tidy" (epic `epic-engine` Q69).
   - `request`:  `/epic request <epic> [<rN>...]` takes up a request the person sent from another session:
-    it becomes a todo or a phase.  Go to "12. Request" (epic `epic-workflow`;  epic `epic-engine` T88).
+    a bug report becomes an issue, a feature a todo, bigger a phase.  Go to "12. Request" (epic `epic-workflow`;
+    epic `epic-engine` T88, T108).
+  - `demo`:  `/epic demo [pasted text]` runs the STAGED DEMO when its step files are ready (`epic demo check`):
+    NOT a new epic.  Go to "15. Staged demo", and skip everything else here (epic `epic-engine` P77).
   - `done`:  `/epic done` is `/isolate done`, word for word.
     - In an epic's session, every prompt and question names it `/epic done`, never `/isolate done` (2026-10-24):
       the close-out modal's "Run `/epic done`", a reply's "`/epic done` when you're ready".
@@ -514,7 +517,8 @@ than just being able to move on").
     (epic `epic-engine` I163;  2026-10-29:  "just incorporate the feedback and auto-approve rather than asking
     me again").  `wait` prints "accepted, with comments to fold in:  C4, C5";  `inbox apply` accepts the plan as usual.
     - Fold them into the plan and KEEP it accepted:  `epic update <name>#P<N> --plan "<ol>...</ol>" --accepted`
-      (no `waiting`, no spinner), then answer each comment on its thread
+      (no `waiting`, no spinner), the words each one changed marked `<epic-change item="c4">` (epic `epic-engine`
+      T100;  never an Update block), then answer each comment on its thread
       (`epic inbox done <name>#C4 --file <answer.html>`:  what changed in the plan).  NO new Accept, no stop.
     - Only a comment that goes against something they decided, or changes the scope a lot, becomes a Q item instead
       (`epic add <name>#Q`, its thread answered with the link);  the rest are still folded in.
@@ -539,10 +543,12 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
       T78;  Owen, 2026-11-15:  "you should start the issue and show it appropriately"):
       `epic add <epic>#I "<title>" --requested --start "<their words>" --agent <full name>`, after `epic agents add`
       - their words become its body, quoted;  an Underway card names the agent;  the spinner goes on
-      - a request from another session (`/send`, "12. Request") is a TODO, never an issue (epic `epic-engine` T88):
-        `epic add <epic>#T "<title>" --requested --start "<their words>" --agent <full name>`, then
-        `epic file <epic>#T<n> <rN>`:  its words, its Context and its screenshots go into the todo, and the request is
-        marked filed there, so the item never sits at "What it says on the tin" (I292:  I287, filed from r70 with no body)
+      - a request from another session (`/send`, "12. Request"):  a bug report an ISSUE, a feature a TODO
+        (epic `epic-engine` T88, T108):
+        `epic add <epic>#I "<title>" --requested --start "<their words>" --agent <full name>` (`#T` for a feature), then
+        `epic file <epic>#I<n> <rN>` (`#T<n>`):  its words, its Context and its screenshots go into the item, and the
+        request is marked filed there, so the item never sits at "What it says on the tin" (I292:  I287, filed from r70
+        with no body)
       - a picture they pasted with it goes in too, never described in words instead (epic `epic-engine` T87):
         `--pasted <n>`, as the guide's "build" says (`epic guide build`)
       - the agent's `epic update <epic>#I<n> fixed "..."` turns it orange for their review
@@ -668,7 +674,8 @@ Until a `/back:  ...` message (or `epic focus status` says off):
 
 1. `epic phase <name>#P<N> active`, then CHECK its accepted build plan ("4b. Build plans") against what's there now.
    - Check the session's name (the isolate skill's "Session name").
-   - The toolbar's line (epic `epic-engine` P35):  `epic inbox status <name> "Building P<N>"`;  `--clear` once it's done.
+   - What you're doing (epic `epic-engine` P35):  `epic inbox status <name> "Building P<N>"`;  `--clear` once it's done.
+     The page's step label turns while it's set, the words its tooltip (I340):  never left set when you stop.
    - Earlier phases, answers and requests may have moved things since it was written.  Adjust, and go on:
      - a SMALL change (a file moved, a step folded into an earlier phase, a name changed):  say what and why with
        `epic updated <name>#P<N> "<p>...</p>" --summary "Plan adjusted:  ..."`;  the plan stays accepted.  NO stop.
@@ -768,7 +775,7 @@ Until a `/back:  ...` message (or `epic focus status` says off):
      It's struck through:  the one struck status (J16 of `review-review`).
    - An item talked through with the person (they answered, accepted, or said leave it):
      `review <name>#<id> "outcome"`, so the next `/epic review` doesn't bring it up again ("7. Review").
-   - Changed a phase's PLAN, for a reason NO ITEM is (something found while building, a file moved, a comment):
+   - Changed a phase's PLAN, for a reason NO ITEM or comment is (something found while building, a file moved):
      - `updated <name>#P<N> "<p>what changed, and why</p>" --summary "..."`:
        an `<epic-update>` block at the end of the phase's description, after Goal:  **Update**: <summary>, dated.
        Never an "Updated" word in the text.
@@ -785,6 +792,9 @@ Until a `/back:  ...` message (or `epic focus status` says off):
    - An ANSWER rewrote the Overview's or a phase's words (epic `epic-engine` P30;  Q13, B):  mark the changed words
      themselves, `<epic-change item="q16">the new words</epic-change>`, as you rewrite them.
      NO `<epic-update>`, and no `epic updated` after `epic change` (I159):  the marks are the whole record.
+   - A COMMENT of theirs rewrote them (folded into a phase or the Overview;  epic `epic-engine` T100):  the same,
+     naming the comment, `<epic-change item="c2">the new words</epic-change>`;  `epic change <name>` stamps it with
+     the comment's words.  NO Update block for it.  Then answer its thread as ever, naming the phase.
      - The words, not the block:  one mark per change, the question's id alone.
      - Then `epic change <name>`:  it stamps each (id `ch3`, time, the answer in short) and lists them;
        `epic lint` fails one not stamped, or naming no item.
@@ -1109,10 +1119,13 @@ epic inbox apply <name> [ids]              approve / pick / Make Todo / Do this 
                                            that phase's plan to it;  on a STANDING set ("...:  act on this round"):
                                            act on the picked options, add new ones as they come (epic-engine P50)
 epic inbox working <name>#<id> on|off      the page's spinner on an item, or a phase (P20)
-epic inbox status <name> "<text>" [--items q3,c2] | --clear   the toolbar's line:  what you're doing, what you answer
+epic inbox status <name> "<text>" [--items q3,c2] | --clear   what you're doing (the step label's tooltip), what you answer
 epic update <name>#<id> underway "<reading>"   Claude's blue status card on an item, spinner on
 epic update <name>#<id> done ["<summary>"]     the item FINISHED:  that card green (Done);  an open issue / todo closes
 epic update <name>#<id> noted "<what>"         a STEP done (choice recorded, answer written):  an outlined Noted card
+                                           a card:  a short lead sentence, then short paragraphs or "- " bullets, one idea
+                                           each ("\n\n" between);  code names and numbers only where the reader needs them;
+                                           the full story in the item's body (details --append);  --file for a long one
 epic details <name>#<id> --file f --more | --append   More Details in place of the unclear text (Add Details) / a reply
 epic summarize <name>#<id> --file f        condense an item:  f replaces what it shows, the rest folded away (13.)
 epic inbox done <name>#<id>  /  clear      an item's request finished  /  marks dropped after a talk
@@ -1204,7 +1217,7 @@ want you to just do it").
      so the person sees it was heard
    - go back to what you were doing, and take the queued ones after it
    - In Codex:  no background `wait`:  just the three steps above.
-0b. The toolbar's line (epic `epic-engine` P35):  `epic inbox status <name> "Responding" --items <the ids
+0b. What you're doing (epic `epic-engine` P35;  Send's ring turns while you answer, I340):  `epic inbox status <name> "Responding" --items <the ids
    taken>`, so the person sees what you're answering;  `epic inbox status <name> --clear` as you arm `wait` again (step 4).
 1. Exit 2 (timeout, nothing happened):  arm `wait` again, and end the turn with one line ("still listening").
 
@@ -1229,8 +1242,8 @@ want you to just do it").
      - and "Prose":  the blocks are ELEMENTS
        - `<epic-code>`, `<epic-aside>`, `<epic-net-effect>`, `<epic-choices>`, `<epic-field label>`
      - never `ui-accordion.spell-code`, or a `<p><b>Net effect:</b></p>` by hand
-   - Add Details (the item's circle-question icon, or a given body's Clarify;  epic `epic-engine` T76):  CLARIFY its
-     text.  Read the item, the code and docs it names, then say plainly what it means, whole:  a new paragraph
+   - Add Details (the (i) button on every item's line, or a given body's Clarify;  epic `epic-engine` T76, T95):
+     CLARIFY its text.  Read the item, the code and docs it names, then say plainly what it means, whole:  a new paragraph
      wherever the context changes (`plan-doc.md`, "Rules").
      - `epic details <name>#<id> --more --file <html>`.
      - Yours REPLACES the unclear text (epic `epic-engine` I301;  2026-11-15:  "When you `clarify` you can remove
@@ -1257,7 +1270,7 @@ want you to just do it").
    - START TESTING (epic `epic-engine` P51, Q53):  the person pressed "Start testing" on the Manual tests section.
      - `wait` prints it under now, keyed `tests` (the section's id, not an item):
        "Start testing:  check the open tests you can, write out the rest".
-     - No status card (it's no item):  `epic inbox status <name> "Preparing tests"`, the toolbar's line;
+     - No status card (it's no item):  `epic inbox status <name> "Preparing tests"` (the step label's tooltip);
        `wait` already marked `<name>#tests` working, so their button says "Preparing tests".
      - Then ONE background agent, which:
        - In Codex:  no background agents:  do these steps yourself, in order, then tell the person the tests are ready.
@@ -1296,7 +1309,8 @@ want you to just do it").
    - Approvals, picks and todos made or queued land in the doc;  it prints each.
    - An Accept that carries their comments in its text ("accepted, with comments to fold in:  C4, C5";  epic
      `epic-engine` I163):  `apply` accepts the plan and leaves the comments.  Fold them into the plan, keeping it
-     accepted (`epic update <name>#P<N> --plan "..." --accepted`), then answer each (`epic inbox done <name>#C4
+     accepted (`epic update <name>#P<N> --plan "..." --accepted`), each change marked `<epic-change item="c4">`
+     (T100, never an Update block), then answer each (`epic inbox done <name>#C4
      --file <answer.html>`).  No new Accept.  Only a comment against something they decided, or a big change of
      scope, becomes a Q item instead ("4b. Build plans").
    - TESTS, answered on the page (epic `epic-engine` P51, Q53;  no test run, no Passed / Failed / Skip / Not now):
@@ -1390,7 +1404,8 @@ want you to just do it").
      - Dropped without an answer:  `inbox working <name>#C3 off`.
      - What they said before it counts as read:  more words of theirs go after it, as a new reply (waiting again).
    - Answer each like a revisit's note:  INTO the item it's on (`details --append`, their comment quoted).
-     On a phase field or Overview prose:  into that phase or part.
+     On a phase field or Overview prose:  into that phase or part, the words it changed marked
+     `<epic-change item="c3">` (epic `epic-engine` T100), never an Update block.
    - Then `epic inbox done <name>#C3 --file <answer.html> [--commit <sha>]`.
      - The answer goes on their thread too (a line or two;  the full one is in the doc):  their turn, the thread opens.
      - `--commit`:  the commit it was built in;  their Done line shows it.
@@ -1715,16 +1730,18 @@ A REQUEST is something the person asked for in another session, sent here instea
 1. `epic requests <epic> --json`:  the request(s), status `new`.
    - Read each `request.md`, and look at each screenshot (`Read` on the image).
 2. One line, at once:  "taking r3 (from `🚧 python`):  <their first words>".
-EVERY request becomes a TODO or a PHASE (epic `epic-engine` T88;  Owen, 2026-11-16:  "When an epic gets requests from
-other epics, it should make them a Todo or a phase"):  never only a note on the request ("fixed as I282").
-- SMALL, one agent's work (a fix, a tweak, one file or two):  a todo, taken up at once as "The session answers;
-  agents build" says:
-  `epic agents add <name> ...`, then `epic add <epic>#T "<title>" --requested --start "<their words>" --agent <full name>`,
-  then `epic file <epic>#T<n> <rN>`
-  - the file puts their words, the Context and the screenshots into the todo (its pictures, deletable on the page),
-    marks it `requested` (light orange once done, until they look), and marks the request filed `T<n>`
-  - the agent builds it, and closes it with `epic update <epic>#T<n> fixed "..."`;  one line back:
-    "r3:  T41 · <title>, agent `<epic>-<name>` on it"
+EVERY request becomes an ISSUE, a TODO or a PHASE (epic `epic-engine` T88, T108;  Owen, 2026-11-16:  "When an epic gets
+requests from other epics, it should make them a Todo or a phase"):  never only a note on the request ("fixed as I282").
+- A BUG REPORT (something broken):  an issue;  a FEATURE (something new):  a todo;  BIGGER:  a phase (below).
+- SMALL, one agent's work (a fix, a tweak, one file or two):  an issue or a todo, taken up at once as "The session
+  answers;  agents build" says:
+  `epic agents add <name> ...`, then
+  `epic add <epic>#I "<title>" --requested --start "<their words>" --agent <full name>` (a feature:  `#T`),
+  then `epic file <epic>#I<n> <rN>` (`#T<n>`)
+  - the file puts their words, the Context and the screenshots into the item (its pictures, deletable on the page),
+    marks it `requested` (light orange once done, until they look), and marks the request filed `I<n>` (`T<n>`)
+  - the agent builds it, and closes it with `epic update <epic>#I<n> fixed "..."`;  one line back:
+    "r3:  I41 · <title>, agent `<epic>-<name>` on it"
 - BIGGER, or about the same thing as a to-do phase:  a phase, steps 3 and 4.
 - A true DUPLICATE of a todo or phase the epic already has:  `epic file <epic> <rN> "same as T12"`, and say so.
   - `where` MUST name that todo or phase (`T12`, `P7`):  the command refuses anything else.
@@ -1756,7 +1773,7 @@ other epics, it should make them a Todo or a phase"):  never only a note on the 
      "Start P<N> · <Name>" first
      - In Codex:  in the chat.
    - a phase under way:  no modal;  the new work waits its turn.
-- A request with neither todo nor phase:  only a duplicate, `epic file <epic> r3 "same as T12"` (above);
+- A request with no issue, todo or phase:  only a duplicate, `epic file <epic> r3 "same as T12"` (above);
   one already done by other work is a todo too, closed at once with what did it.
 
 ## 13. Summarize:  condense an item after a lot of back and forth
@@ -1855,6 +1872,56 @@ Its mechanical half runs BY ITSELF at the end of every turn (epic `epic-engine` 
 3. Reply:  how many closed, how many left noted, how many left alone, every "promised, not delivered" by id with what's
    missing (the person decides those), and the epic page's link pair.
 
+## 15. Staged demo:  `/epic demo`
+
+A demo of the epic tooling for a room, run from PRE-WRITTEN text, so nobody waits for Claude to think
+(epic `epic-engine` P77;  Owen, 2026-11-18:  "pre-seed an epic so that I can do a 'realistic' demo without people
+waiting for you to think").
+- The page and the tools are REAL:  the demo epic, `demo`, is made, filled and moved through its stages by the
+  real `epic` verbs.  Only the thinking is faked.
+- The text:  the STEP FILES in the epic folder's `epics/epic-engine/staged-demo/` (`epic demo check` prints where),
+  `00-paste.md` (what the person pastes) to `07-while-you-were-out.md`, each with its commands and its "Say" text.
+  The person rewrites them between runs;  never improvise past them.
+- The prompt hook says so (`STAGED DEMO:`), titles the session `🚧 demo` and saves the pasted text.
+- NO worktree, no `EnterWorktree`, no window move, no saga question, no install, no agents, no coherence review,
+  no modal.  Everything in THIS session, from where it is.
+  - In Codex:  the same steps;  run each `epic demo wait` in the foreground.
+
+WORKING LINES fill each wait, the person's words:  "phrases like 'I'm confabulating the confabulator' which are even
+more ridiculous than your normal 'Wibbling...' messages ... 3 or 4 per wait".
+- `epic demo lines 4` prints 4 (6 before step 06), picked at random from the step files' `silly-lines.txt`.
+- Write each as its OWN line of reply text, in italics, then `epic demo pause 2`, then the next:  about 10 seconds
+  in all.  Never `sleep`:  Claude Code refuses a foreground one.
+- Nothing else in between:  no narration, no tool output read out.
+
+The steps, each turn as short as it can be:
+1. Prompt `/epic demo ...`:  `epic demo check` (it fails:  say its lines, and stop).  Then working lines, then
+   `epic demo run 01` and `epic demo run 02`, then working lines, then `epic demo run 03`.
+   - Reply with the three "Say" texts, run together as one reply in the order they ran, and nothing else.
+2. Listen:  `epic demo wait` with Bash `run_in_background: true`, and END THE TURN.
+   - In Codex:  run it in the foreground;  it returns when the person acts.
+   - It hears the person's Send or Accept on the page (an Accept goes at once, not after its 5 minutes), applies it
+     (`epic inbox apply demo`) and ends with `NEXT:  <what>`.
+3. Woken (its notice, or a `📬 demo` line:  then `epic demo wait --timeout 5` first):  read its `NEXT:` line.
+   - `NEXT:  wait`:  the person isn't done (picks sent before the Accept, one question of two answered):  one short
+     line ("Got your picks.  Press Accept Overview when it looks right.";  a phase's thumbs up:  "Got your pick.
+     Press Accept Phases when it looks right."), arm `epic demo wait` again, end the turn.
+   - `NEXT:  run 04`, `run 05`:  working lines, the step, its "Say" text, then step 2 again.
+     - The phase built is the one the person PICKED (Looks good on one phase, or Do this):  `epic demo wait` notes
+       it before applying, and the steps name it as `$PICK` (its id;  none picked:  the step's own default).
+       So the demo builds the person's choice, wherever it sits in the list, not always P1.
+   - `NEXT:  run 06`:  6 working lines ("building"), `epic demo run 06`, `epic demo run 07`, then 07's "Say" text,
+     and that's the end:  no more listening.
+   - `NEXT:  done`:  the demo is over:  say so in one line.
+4. Something the person TYPES in chat mid-demo:  answer it in a line or two, in the demo's voice, then go on from
+   `epic demo next`.
+5. A step fails:  say what failed in one line, and `epic demo next` says where things stand.  Never fix the page by
+   hand mid-demo.
+- `epic demo reset` clears it all for the next run (the page, its card, a worktree, branch or window file named
+  `demo`, the saved paste);  only when the person asks.
+- Rehearsing with nobody watching:  `epic demo run <step> --quiet` (nothing shown in VS Code), and
+  `node src/demo/shoot-staged-demo.mjs overview|phases|away|items` from `epic/` for pictures of the page.
+
 ## Migrations:  bringing epic pages up to today's markup
 
 Epic `epic-workflow` P8.  `epic migrate` runs named, dated steps over pages, by page kind
@@ -1900,6 +1967,7 @@ updated <name>#P<N> "<p>what changed</p>" [--summary ".."] [--for <ids>]   phase
                                                     cause:  <epic-update>, after Goal;  nothing when marks say it
 file <name>#P<N> <rN>                               a request into phase N's Requests field, marked filed there
 file <name>#T<n> <rN>                               a request into todo n:  words, context, pictures;  marked requested (T88)
+file <name>#I<n> <rN>                               a bug report into issue n, the same way (T108)
 file <name> <rN> "same as T12"                      a duplicate:  only marked;  must name the todo or phase (T88)
 update <name>#P<N> --estimate "1-2h"                change a phase's estimate;  the Overview's total follows
 phase <name>#P<N> todo|active|done [--no-open]      done drops UPDATE labels / prose updates;  reloads the tab

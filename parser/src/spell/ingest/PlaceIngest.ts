@@ -29,7 +29,8 @@ import {
   kindFoundAt,
   kindReadFrom,
   lookAtPlace,
-  messageOf
+  messageOf,
+  wrappedRows
 } from "./PlaceLook"
 import { checkSecondsWithin, describeLook, fieldsOf, fingerprintOf, idFieldOf, plainNameFor } from "./PlaceShape"
 import { partsInLanguageOf } from "./PlaceInLanguage"
@@ -42,6 +43,7 @@ import {
   spellPartsFor,
   spellLinesOf,
   spellTextOf,
+  type MergeMarks,
   type SpellLine,
   type SpellParts,
   type TypeLines,
@@ -61,6 +63,12 @@ const ERROR_LINE = /^(\d+):\d+ (.*)$/s
 
 /** The line that keeps a copy on this device, in either language:  a person's, if it's in the file. */
 const KEEPS_A_COPY = /keep a copy on this device|guarda una copia en este dispositivo/i
+
+/** An id that's an address of its own:  read where it says, not put in its collection's. */
+const IS_ITS_OWN_ADDRESS = /^https?:\/\//i
+
+/** What `spell place verify` searches a search for, when its description gives nothing to (epic `data` I140). */
+const SEARCH_TRIED = "a"
 
 /** A kind of place, as a person might write it:  `sheet` and `spreadsheet` are one. */
 const KIND_WORDS: Readonly<Record<string, string>> = {
@@ -259,7 +267,14 @@ export class PlaceIngest {
     const written = (await files.read(file)) ?? ""
     const text = written
     const others = await files.otherSpellBeside(file)
-    const merge = mergedSpell(text, before, after, (words, own) => isUsed(words, text, others, own), old.spell)
+    const merge = mergedSpell(
+      text,
+      before,
+      after,
+      (words, own) => isUsed(words, text, others, own),
+      old.spell,
+      this.marksFor(file)
+    )
     const changes = [...saidChanges(old, description), ...merge.changed]
     const warnings = this.checkFileCompiles(text, merge.text, file)
     if (!specAt) await this.readThroughIt(description, reader, keySecret)
@@ -315,13 +330,27 @@ export class PlaceIngest {
     const changes: string[] = []
     const read: CollectionLook[] = []
     for (const [name, collection] of Object.entries(description.collections)) {
-      if (collection.leftOut || collection.state?.is === "disabled" || !isListed(collection)) continue
+      if (collection.leftOut || collection.state?.is === "disabled") continue
+      if (!isListed(collection) && !isSearchToTry(collection)) continue
       // each list its own allowance:  a whole description has hundreds, each read once, a gap between each request
       reader.startAgain()
       const was = collection.state?.is
       const { state, rows } = await this.verifyCollection(address, collection, reader, deployment?.name)
       collection.state = state
       if (rows.length) read.push({ name, at: collection.at, rows, paging: "none", pagesRead: 1, hasMore: false })
+      if (state.is !== was) {
+        changes.push(`${name}:  ${was ?? "never tried"} => ${state.is}${state.reason ? ` -- ${state.reason}` : ""}.`)
+      }
+    }
+    // ONE thing under each, read under its owner's first thing:
+    // once its owner's list has rows (epic `from-console` P16)
+    for (const [name, collection] of Object.entries(description.collections)) {
+      if (!collection.isOneUnder || collection.leftOut || collection.state?.is === "disabled") continue
+      reader.startAgain()
+      const was = collection.state?.is
+      const state = await this.verifyOneUnder(address, name, description, read, reader, deployment?.name)
+      if (!state) continue
+      collection.state = state
       if (state.is !== was) {
         changes.push(`${name}:  ${was ?? "never tried"} => ${state.is}${state.reason ? ` -- ${state.reason}` : ""}.`)
       }
@@ -338,7 +367,14 @@ export class PlaceIngest {
     const after = partsInLanguageOf(file, spellPartsFor(description))
     const text = (await files.read(file)) ?? ""
     const others = await files.otherSpellBeside(file)
-    const merge = mergedSpell(text, before, after, (words, own) => isUsed(words, text, others, own), old.spell)
+    const merge = mergedSpell(
+      text,
+      before,
+      after,
+      (words, own) => isUsed(words, text, others, own),
+      old.spell,
+      this.marksFor(file)
+    )
     const warnings = this.checkFileCompiles(text, merge.text, file)
     await files.write(file, merge.text)
     await this.writeDescription(file, descriptionPath, description)
@@ -369,7 +405,11 @@ export class PlaceIngest {
       state: { is: "failed" as const, ...tried, ...(status !== undefined && { status }), reason },
       rows: []
     })
-    const url = `${address}${collection.at}`
+    // a search is asked something:  what its description says to search for, else a letter (epic `data` I140, J295)
+    const { searchedOnly, searchedBy, searchedFor } = collection
+    const searched =
+      searchedOnly && searchedBy ? `${searchedBy.param}=${encodeURIComponent(searchedFor ?? SEARCH_TRIED)}` : ""
+    const url = `${address}${collection.at}${searched ? `${collection.at.includes("?") ? "&" : "?"}${searched}` : ""}`
     let answer: Awaited<ReturnType<PoliteReader["read"]>>
     try {
       answer = await reader.read(url)
@@ -379,6 +419,9 @@ export class PlaceIngest {
     }
     if (answer.status >= 400) return failed(`it answered ${answer.status}${detailOf(answer.text)}`, answer.status)
     const body = jsonOf(answer.text)
+    // no schema said where its rows are (NetBox's background queues):  a wrapped list says, as a look finds it
+    const wrapped = collection.rowsAt === undefined && !Array.isArray(body) ? wrappedRows(body) : undefined
+    if (wrapped) collection.rowsAt = wrapped.rowsAt
     const list =
       collection.rowsAt === undefined ? body : (body as Record<string, unknown> | undefined)?.[collection.rowsAt]
     if (!Array.isArray(list)) {
@@ -398,9 +441,54 @@ export class PlaceIngest {
       .map(([field]) => field)
     if (missing.length)
       return failed(`its rows don't hold ${missing.join(", ")}, which its description says each has`, answer.status)
-    const byId = await this.thingById(address, collection, rows[0], reader)
+    // a search's answers are found elsewhere by id, if at all:  nothing says where
+    const byId = searched ? undefined : await this.thingById(address, collection, rows[0], reader)
     if (byId) return failed(byId)
     return { state: { is: "verified", ...tried, status: answer.status, rows: rows.length }, rows }
+  }
+
+  /**
+   * One thing under each of another collection's things, `name`, tried under the first one `read` found:
+   * a system's snapshot, at `/instances/7/snapshot` (epic `from-console` P16).
+   * - `undefined` when no owner's list read a thing to try it under:  it stays as it was.
+   * - NEVER throws for an answer, or none:  that's `failed`;  but `IngestStopped` past the reader's limits
+   */
+  private async verifyOneUnder(
+    address: string,
+    name: string,
+    { collections }: PlaceDescription,
+    read: readonly CollectionLook[],
+    reader: PoliteReader,
+    deployment: string | undefined
+  ): Promise<PlaceState | undefined> {
+    const owned = Object.entries(collections).find(([, owner]) => owner.listsUnder?.[name] !== undefined)
+    if (!owned) return undefined
+    const [ownerName, owner] = owned
+    const id = read.find((each) => each.name === ownerName)?.rows[0]?.[owner.idField ?? "id"]
+    if (typeof id !== "string" && typeof id !== "number") return undefined
+    const tried = { at: this.nowISO(), ...(deployment !== undefined && { deployment }) }
+    const under = `under ${owner.type} ${id}`
+    const failed = (reason: string, status?: number): PlaceState => ({
+      is: "failed",
+      ...tried,
+      ...(status !== undefined && { status }),
+      reason
+    })
+    const url = `${address}${owner.listsUnder![name]!.replace("{id}", encodeURIComponent(`${id}`))}`
+    let answer: Awaited<ReturnType<PoliteReader["read"]>>
+    try {
+      answer = await reader.read(url)
+    } catch (error) {
+      if (error instanceof IngestStopped && !reader.hasRoom) throw error
+      return failed(`it didn't answer ${under}:  ${messageOf(error)}`)
+    }
+    if (answer.status >= 400)
+      return failed(`it answered ${answer.status} ${under}${detailOf(answer.text)}`, answer.status)
+    const body = jsonOf(answer.text)
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return failed(`its answer ${under} isn't one thing`, answer.status)
+    }
+    return { is: "verified", ...tried, status: answer.status, rows: 1 }
   }
 
   /** Read `row` again by its id, at its own address:  why it couldn't be, or `undefined` when it could, or has none. */
@@ -414,7 +502,10 @@ export class PlaceIngest {
     if (typeof id !== "string" && typeof id !== "number") return undefined
     const template =
       operations?.change?.at ?? operations?.delete?.at ?? `${at.replace(/\/+$/, "")}/{id}${at.endsWith("/") ? "/" : ""}`
-    const url = `${address}${template.replace(/\{[^{}/]*\}/, encodeURIComponent(`${id}`))}`
+    // an id that's its own address (NetBox's background queues' `url`) is read where it says
+    const url = IS_ITS_OWN_ADDRESS.test(`${id}`)
+      ? `${id}`
+      : `${address}${template.replace(/\{[^{}/]*\}/, encodeURIComponent(`${id}`))}`
     try {
       const { status } = await reader.read(url)
       return status >= 400 ? `its thing ${id}, read by its id at ${url}, answered ${status}` : undefined
@@ -839,6 +930,11 @@ export class PlaceIngest {
     await files.listInProject?.(file, path)
   }
 
+  /** The day it looks, and `file`'s language:  the dated marks a later look writes (`mergedSpell()`, epic `data` P53). */
+  private marksFor(file: string): MergeMarks {
+    return { date: this.nowISO().slice(0, 10), lang: SP.Language.forFile(file).lang }
+  }
+
   /** What time it is, in ISO:  a test's clock. */
   private nowISO(): string {
     return (this.settings.now?.() ?? new Date()).toISOString()
@@ -914,6 +1010,14 @@ function refuseWritesOn(deployment: { name: string; readOnly?: boolean } | undef
   )
 }
 
+/**
+ * A search `spell place verify` can try:  one only a search answers, with its question known (epic `data` I140).
+ * - Its address has no braces, and it's asked nothing else.
+ */
+function isSearchToTry({ at, searchedOnly, searchedBy, askedBy, samples }: CollectionDescription): boolean {
+  return !!searchedOnly && !!searchedBy && !/\{[^{}/]*\}/.test(at) && !askedBy && !samples
+}
+
 /** Can a collection be read as a list:  not one found by name, only by a search, or asked for by a query? */
 function isListed({ at, searchedOnly, askedBy, samples }: CollectionDescription): boolean {
   return !/\{[^{}/]*\}/.test(at) && !searchedOnly && !askedBy && !samples
@@ -922,7 +1026,9 @@ function isListed({ at, searchedOnly, askedBy, samples }: CollectionDescription)
 /** What an error answer says, short:  NetBox's `{ "detail": "..." }`. */
 function detailOf(text: string): string {
   const body = jsonOf(text) as { detail?: unknown; error?: unknown; message?: unknown } | undefined
-  const said = body?.detail ?? body?.error ?? body?.message
+  // FastAPI's refusal of what it was asked:  `{ "detail": [{ "loc": ["query", "q"], "msg": "Field required" }] }`
+  const firstMessage = Array.isArray(body?.detail) ? (body.detail[0] as { msg?: unknown } | undefined)?.msg : undefined
+  const said = firstMessage ?? body?.detail ?? body?.error ?? body?.message
   return typeof said === "string" ? `:  ${said.slice(0, 200).replace(/\.+$/, "")}` : ""
 }
 

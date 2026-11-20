@@ -44,3 +44,66 @@ export type DialogGroups = {
 
 /** The sizes a dialog's message may be, Spell UI's size words:  `text_size`'s meanings. */
 export const TEXT_SIZES = ["small", "big", "huge"]
+
+////////////////
+// ## Sounds and videos, by name (epic `language` P65)
+////////////////
+
+/** What a program plays:  `media_kind`'s meanings, the core's `MediaKind`. */
+export const MEDIA_KINDS = ["sound", "video"]
+
+/**
+ * SIDE EFFECT:  notes that `scope`'s project has a sound or video named `name`, so its words read as that name without
+ * quotes (`play the card slide sound`) and `sound "card slide"` isn't refused (`hasMediaNamed()`).
+ * - Noted where it's named:  `sound "card slide" is at "..."`, `its "card slide" is a sound at "..."`,
+ *   `<sound "card slide" source="..." />`.
+ * - Names only ever join, as menus' do (`noteMenuName()`):  a name renamed in an editor still counts until a fresh parse.
+ */
+export function noteMediaName(scope: P.Scope, name: string): void {
+  const project = projectOf(scope)
+  let names = MEDIA_NAMES.get(project)
+  if (!names) MEDIA_NAMES.set(project, (names = new Set()))
+  names.add(mediaNameKey(name))
+}
+
+/** Has `scope`'s project a sound or video named `name` (`noteMediaName()`)?  Any case or spacing. */
+export function hasMediaNamed(scope: P.Scope, name: string): boolean {
+  return !!MEDIA_NAMES.get(projectOf(scope))?.has(mediaNameKey(name))
+}
+
+/** Every sound and video name `scope`'s project has, as `mediaNameKey()` writes them. */
+export function mediaNamesIn(scope: P.Scope): ReadonlySet<string> {
+  return MEDIA_NAMES.get(projectOf(scope)) ?? new Set()
+}
+
+/**
+ * Each project's sound and video names, as `mediaNameKey()` writes them.
+ * - REFACTOR:  one `ProjectNames` for these and the menus' (`noteMenuName()`, `JSX.shared.ts`), keyed by what they name.
+ */
+const MEDIA_NAMES = new WeakMap<P.Scope, Set<string>>()
+
+/**
+ * A sound or video's name as the core finds it, any case or spacing:  `Card Slide`, `card-slide` => `card slide`.
+ * - The core's own `keyOf()`, in its `media.ts`:  a copy, as spell never imports the core's code.
+ */
+export function mediaNameKey(name: string): string {
+  return `${name}`
+    .trim()
+    .replace(/[\s_-]+/g, " ")
+    .toLowerCase()
+}
+
+/**
+ * The event a sound or video sends, by its name, kind and what happened:  `card-slide-sound-ends`.
+ * - The core's own `mediaEventName()`, in its `media.ts`:  a copy, as spell never imports the core's code.
+ */
+export function mediaEventName(name: string, kind: string, happened: string): string {
+  return `${mediaNameKey(name).replaceAll(" ", "-")}-${kind}-${happened}`
+}
+
+/** The project `scope` is in;  `scope` itself when it's in none (a rule's own test). */
+function projectOf(scope: P.Scope): P.Scope {
+  let at: P.Scope | undefined = scope
+  while (at && !(at instanceof P.ProjectScope)) at = at.parentScope
+  return at ?? scope
+}

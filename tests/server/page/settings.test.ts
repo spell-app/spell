@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs"
+import { existsSync, mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { basename, dirname, join } from "node:path"
 import { afterAll, describe, expect, test } from "vite-plus/test"
@@ -9,6 +9,7 @@ import {
   componentSets,
   kitOf,
   kitRootOf,
+  ownKit,
   pageServerRoot,
   pageServerSettings,
   settingsParts
@@ -163,13 +164,17 @@ describe("pageServerRoot()", () => {
     )
   })
 
-  test("outside a kit:  the git checkout, else the folder itself", () => {
-    const repo = realpathSync(mkdtempSync(join(tmpdir(), "page-settings-repo-")))
-    mkdirSync(join(repo, ".git"))
-    mkdirSync(join(repo, "src"))
-    expect(pageServerRoot(join(repo, "src"))).toBe(repo)
-    expect(kitOf(repo)).toBeUndefined()
-    rmSync(repo, { recursive: true, force: true })
+  // A project linking a kit checkout in (`"spell": "portal:../spell"`), as an npm install's project does
+  test("outside a kit:  the kit this code is from (`ownKit()`), a checkout's as an install's", () => {
+    const project = realpathSync(mkdtempSync(join(tmpdir(), "page-settings-project-")))
+    mkdirSync(join(project, ".git"))
+    mkdirSync(join(project, "src"))
+    const ownRoot = ownKit()
+    expect(ownRoot).toBeDefined()
+    expect(existsSync(join(ownRoot!, "repos.json5"))).toBe(true)
+    expect(pageServerRoot(join(project, "src"))).toBe(ownRoot)
+    expect(kitOf(project)).toBeUndefined()
+    rmSync(project, { recursive: true, force: true })
   })
 })
 

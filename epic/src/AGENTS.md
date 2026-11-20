@@ -219,14 +219,15 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - Served at `/api/epics/agents`, by [agentRoutes.ts](tools/agentRoutes.ts), in the docs tools.
       - `<epic-page>` draws them in its header (epic `epic-engine` P35, P53):  `<epic-agents>`, in its shadow root,
         - in the header's pill:  `2 🤖` (its name "2 agents running"), a button whose popover holds their rows
-        - beside Send, in the header's middle:  the session's line ("Responding", `epic inbox status`, the inbox's
-          `doing`), a bare spinner (`draws="spinner"`, T53), its words beside it (I210), for OTHER work only ("Building
-          P35");  answering a Send (`doing` lists items), it hides, and Send's own ring turns instead (epic
-          `epic-engine` P55, Q62 A)
-        - while a phase is building (the step label names one under way, and the session does other work, or Claude
-          is at work on that phase):  the step label's circle turns, Spell UI's loading icon (`isStepTurning()`), and
-          the line beside Send keeps its words alone (`draws="words"`;  epic `epic-engine` I316, 2026-11-16:  "Don't
-          need both of these indicators.  Just make the one in the pill a loading spinner")
+        - NO line in the header (epic `epic-engine` I340;  2026-11-18:  "This 'Building P72...' is too big -- it cuts
+          off the name of the epic.  Remove it, use the P76 pill instead, don't show the name of the phase"):
+          - while the session does OTHER work than a Send (`epic inbox status`, the inbox's `doing`:  "Building P35"),
+            or Claude is at work on the phase under way:  the step label's circle turns, Spell UI's loading icon
+            (`isStepTurning()`;  I316, 2026-11-16:  "Just make the one in the pill a loading spinner")
+          - the session's words are the label's tooltip's last line, "Claude:  Building P35" (`stepTip()`)
+          - answering a Send (`doing` lists items):  Send's own ring turns instead (epic `epic-engine` P55, Q62 A)
+          - before:  a bare spinner beside Send with its words (`draws="spinner"`, T53, I210), then its words alone
+            (`draws="words"`, I316)
       - Both clients POST and watch through the same code, a `ServerLink` each:
         the token, its one refresh on a 403, the poll and `spell-server:changed`.
     - `ServerLink`:  EVERY epic-page and docs-page read, write and poll goes through it (epic `coherence` C9)
@@ -309,7 +310,7 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - `docs index`:  [index.js](tools/index.js)
     - `RunningEpics`:  the running epics, still in their worktrees, on the main checkout's page server
     - [runningRoutes.ts](list/runningRoutes.ts):  its route module
-      - `GET /api/epics/running`
+      - `GET /api/epics/running`;  `?every`, every epic, running or not:  the home page's `<epic-pills>` (T99)
       - the list page's running cards, as it's served
     - `EpicState` and `EpicCards` load in plain `node` too (`docs index`):  their headers say what that forbids
   - `config/` -- `EpicConfig` (epic `epic-eject` P4):
@@ -1031,22 +1032,27 @@ The shared folders:
 - [pages.js](tools/pages.js) has a constant for each, and `findPages()` walks them.
   - `PAGES`, `GUIDES`, `EPICS`, `TEMPLATES` (the engine's, `templates/...` by `pagePath()`), `REPO_TEMPLATES`
 - [The docs' home page](../../spell.epics/pages/index.html):  a routing page (P5 of `claude-design`).
-  - One card per area, in the top bar's order, each with its count:
-    Guides · Sagas · Epics · Epic/UI · Spell/UI · App · App/UI · Brand · Templates
-    - The person's order (2026-10-11, epic `epic-workflow` J40);  the slashed names are the tabs' labels (J41).
+  - One card per area, each with its count, straight under the lede (no "Areas" section;  Owen, 2026-11-19):
+    Guides · Sagas · Epic Pages · Epic Documentation
+    - Epic Documentation:  the epic tooling's READMEs (`/_epic/docs/README-epics.md`), no count;  in VS Code's side bar
+      it opens the Epic Docs tab (`data-spell-open="tab"`, the kit's live client), in a browser it's a plain link
+    - no Templates card, nor an "About these pages" section:  the templates aren't ready for other people to edit
+    - each card's description on two lines, broken at its first colon (`descriptionLines()`)
+    - the Epic Pages card:  its Active epics, the open epics worked on in the last week, a pill each in two columns:
+      `<epic-pills>`, which draws itself from the page server, live (epic `epic-engine` T99;  J276's generator wrote
+      plain pills into the page, as of the last `epic pages index`)
+      - each pill:  the epic's name, what waits in its toolbar badge colours (red, orange, blue), its phase under way
+        or `Done`, its agents (`🤖 2`);  the tooltip says it in words
+      - its data:  `GET /api/epics/running?every` (`RunningEpics.everyEpic()`:  every epic, running or not, with its
+        `badges` and `agents`), asked again as epic pages or their agents' lists change, and every 30 seconds
+    - the top bar's tab is "Epic Pages" too, and the bar says "Spell Epic" beside the hat (`SiteHeader`)
+    - Spell's own areas left out (2026-11-18, epic `epic-engine` J275:  "Remove anything Spell related in this page
+      permanently.  No longer relevant to Epics"):  Epic/UI, Spell/UI, App, App/UI and Brand had cards, and tabs;
+      their pages are still served at their addresses (`/components/ui/`, `/editor/`, `/brand/`)
+      - the top bar's tabs:  the epic repo's `page-server.json5` `"siteTabs"`, where those five are commented out
     - Sagas was Goals until P15 of `epic-workflow`:  its tab opens the Sagas list page,
       and lights on the saga pages and the parked goal sets (`goals/`) too.
-    - Spell/UI, Epic/UI and App/UI are COMPONENT SETS (each repo's `"pageServer"` `"componentSets"`, merged and read with
-      `componentSets()` in `spell/server/page`), in Spell UI's page shape.
-      Their cards link the sets' addresses:
-
-      ```text
-      ui/docs/          served at  /components/ui/
-      epic/src/docs/    served at  /components/epics/
-      app/app/docs/     served at  /components/app/
-      ```
-
-    - NEVER run `epic pages index` from a branch whose sets' addresses `main` doesn't serve yet:
+    - NEVER run `epic pages index` from a branch whose code `main` doesn't have yet:
       it writes the shared home, which `main`'s page server shows too.
   - `epic pages index` writes the cards, between the `areas:start` / `areas:end` markers.
     Edit only outside the markers.
@@ -1095,7 +1101,7 @@ The shared folders:
       - The page server marks every card by it as it serves the page.
       - From `file://` the stars show, disabled, saying why.
     - The day it was last worked on, bottom right, no year (`10/9`).
-      - Its `title` is the full date and time.
+      - Its tooltip is the full date and time.
       - It's the latest of:
         - the epic page's `updated`
         - its last log line (the `log.html` part)
@@ -1177,8 +1183,8 @@ In `tools/`:
       `spell-doc-helpers.js`, what they share
     - EVERY control it or the comments draw is a Spell UI component, never a raw `<button>` (epic `epic-engine` I26):
       - 2026-10-19:  "Why are we not using <ui-xxxx> or <epic-xxx> components for these pages?"
-      - an icon button (the comments' `iconButton()`), its `title` on the inner button too (`titleInside()`):
-        `<ui-button appearance="circular basic" size="mini" icon="..." title aria-label>`
+      - an icon button (the comments' `iconButton()`), its tooltip Spell UI's:
+        `<ui-button appearance="circular basic" size="mini" icon="..." data-tooltip aria-label>`
       - its icon centred BY THE COMPONENT:  no hand-set icon size, offset or `place-items` on it
         - measured:  within 0.4px of the button's centre, at 1200 and 390px, light and dark
         - the raw `<button>`s it replaced sat 1.3-1.7px off
@@ -1236,8 +1242,9 @@ In `tools/`:
   - `goals.css`, `goals-live.js`:  the parked goal sets' pages, in the epic folder's `goals/`.
     - their look, and their live buttons:  PARKED since 2026-10-11, each says "TODO:  this will ..." (`parked()`)
     - `goals.css` holds every rule the saga pages took from `plan-doc.css`, which they no longer link.
-  - The DATA PAGES' scripts (epic `coherence` C12):  `commands.entry.js` -> `commands.js`,
-    `core-reference.entry.js` -> `core-reference.js`, `spell-syntax.entry.js` -> `spell-syntax.js`.
+  - The REFERENCE PAGES' scripts (epic `coherence` C12;  "data pages" until epic `data` Q104):
+    `commands.entry.js` -> `commands.js`, `core-reference.entry.js` -> `core-reference.js`,
+    `spell-syntax.entry.js` -> `spell-syntax.js`.
     - BUNDLED by [bundle-spell-ui.js](tools/bundle-spell-ui.js) (`--data-pages`:  only them), classic scripts with no
       Spell UI in them, as the comments' own;  edit the entries, NEVER the bundles.
     - They import what exists instead of copying it:  the docs helpers' `el()`, `titleInside()`, notice, section
@@ -1296,6 +1303,13 @@ In `tools/`:
   - The element itself is `spell/server/site`'s `SiteHeader`, bundled into `spell-ui.js`.
   - Its tabs:  the epic repo's `page-server.json5` `"siteTabs"` (epic `repo-split` P16);  the docs bundle gives none
     of its own since P46 (`DOCS_TABS`, for a page opened from disk, went).
+    - The epic server's, when a repo's settings name none:  `DEFAULT_SITE_TABS` ([EpicServer.ts](server/EpicServer.ts)).
+  - The Docs tab (epic `epic-engine`):  the epic tooling's READMEs, rendered, at `/_epic/docs/README-epics.md`
+    ([docsRoutes.ts](tools/docsRoutes.ts), its page [readme-page.html](tools/readme-page.html)).
+    - Every README's address is a page to a navigation, and its Markdown to the page's `<ui-markdown>` (`?raw`):
+      so the READMEs' relative links lead from page to page;  a link to a source file goes to GitHub.
+    - Found through `EngineFiles`:  `README-epics.md` and `epic/README*.md` ship in the `spell` package
+      (`"spellPublish": { "files" }`), beside its `epic/`, as in a checkout.
 - NEVER inline copies of `_assets`:  improve the shared files instead, and every page gets it.
 - Pages are SERVED, never opened from disk (epic `epic-engine` P46;  2026-10-25:  "Opening files is a no-go for
   many reasons"):  their links are ROOT PATHS, which mean something only on the page server.
@@ -1407,7 +1421,7 @@ In `tools/`:
   - A sticky page header above them, on EVERY page (the templates have it), so the title stays on screen:
     `<ui-sticky class="spell-h1"><header class="spell-page-head">` around the h1.
     - The runtime draws it on ONE line, as an epic page's (`oneLineHead()`;  2026-10-13):
-      - a copy of the breadcrumb goes into the h1:  `DOCS / SPELL SYNTAX`
+      - a copy of the breadcrumb goes into the h1:  `SPELL EPIC / SPELL SYNTAX`
       - the title in the crumbs' type (mono capitals), twice their size and bold
       - the breadcrumb above it hides
       - a lighter ivory than the toolbar under it
@@ -1470,12 +1484,18 @@ In `tools/`:
       blue, never red;  2026-10-26:  "badges don't match up")
       - red:  urgent (`state="attention"`);  on the Phases button, the phases drawn red (a plan waiting for their
         Accept, a choice open:  `PhaseState`, epic `epic-engine` I170)
-      - orange:  Claude replied with options for them to pick (`state="replied"`)
+      - orange:  their turn to pick or review (`state="replied"`), light orange with it (`requested`, done, their turn
+        to see it:  every count by colour takes it as orange, the state chips too;  only the item's own chip keeps it;
+        epic `epic-engine` I347, 2026-11-18:  "Lump the light orange icons in with the orange")
       - blue, on the Phases button:  phases under way, or being worked on, and drawn blue:
         one changed since they looked
         is orange first, and not counted (I170)
       - a block's count changing with the inbox alone fires `epic-count-changed`;  the runtime counts them again
-      - both kinds, both badges;  none, none
+      - one colour, its count badge;  none, none
+      - two colours or more:  ONE circle the size of a badge, a slice of each colour meeting in its centre, NO number
+        (red, then orange, then blue:  halves, the first on the left;  three, thirds);  the counts in the button's
+        tooltip (`toolbarItem()`, epic `epic-engine` I347;  2026-11-18:  "Maybe when we have two colors, we just show
+        two half-circles with the colors meeting in the center, with no number")
       - over the icon's top right, a third of a badge on the icon
     - At the row's right, `<epic-page>`'s own tools (see "Overview"):
       the page's state filter, collapse-all, the new item button.
@@ -1563,8 +1583,8 @@ In `tools/`:
       - the page header, three columns (epic `epic-engine` P53):
         - the h1, one line, cut short when narrow (its full name first in its tooltip)
         - in the exact middle (the person's comment C7):
-          Send while reviewed (`<epic-send-buttons countdown>`), and beside it
-          what the session is doing, a bare spinner;  narrow, they follow the title, never over it
+          Send while reviewed (`<epic-send-buttons countdown>`), alone (no session's line since epic `epic-engine`
+          I340);  narrow, it follows the title, never over it
           - while the session answers what was sent, a blue arc TURNS round the plane, the countdown ring's frame
             (`working`, `CountdownRing.turning()`;  epic `epic-engine` P55, the person's r46:  "put the spinning wheel
             cursor around this button (same size as countdown) while you are digesting remarks");  the countdown's
@@ -1610,12 +1630,12 @@ In `tools/`:
     - Running agents (epic `skillz` P3):  `<epic-page>`'s header pill has `2 🤖` ("2 agents running"),
       a button opening their rows in a popover (epic `epic-engine` P35;  the panel above its first section before).
       - It shows while any agent of the epic runs, after the step label, the pill grey (2026-10-25).
-      - Beside Send, in the header's middle, the session's line (P35, P53's T53):  "Responding", "Building P35"
-        (`epic inbox status`), gone when idle or nobody listens;  a bare spinner, no pill or border (2026-10-29:
-        "the spinner is already round, doesn't need to be in a circular border"), its words beside it, small and grey
-        (I210:  bare, it read as "the server is listening").  Answering a
-        Send, it hides:  Send's ring turns instead, its tooltip what it's answering (P55).  The toolbar no longer has it.
-        While a phase builds, the step label's circle turns instead, and the line keeps its words alone (I316).
+      - What the session is doing (`epic inbox status`:  "Responding", "Building P35"):  NO words in the header
+        (epic `epic-engine` I340:  the line beside Send cut off the epic's name).
+        - the step label's circle turns while the session does other work than a Send, or Claude works on the phase
+          under way (I316);  the words are the label's tooltip's last line
+        - answering a Send:  Send's ring turns instead, its tooltip what it's answering (P55)
+        - before:  a bare spinner beside Send with its words (P35, P53's T53, I210), then its words alone (I316)
       - Each agent has a note box that redirects it (see "Overview").
   - Links to any id in `main` land below the stuck titles.
     They unfold what hides the target, and open its panel.
@@ -1756,12 +1776,17 @@ In `tools/`:
       page or in a control the runtime or a tool draws (see "Layout" › `spell-doc-runtime.js`).
       - Its icon centred by the component:  no CSS of ours sizing or moving the icon.
       - A block's own controls share its one actions row, the bullhorn first (`addBlockAction()`).
-  - TOOLTIPS are the browser's own:  a `title` attribute.
-    - Never a `<ui-tooltip>`, nor a `<ui-popup>` used as one.
-    - The person's standing rule, 2026-10-10:  a styled one only when they ask for "a ui-tooltip with ...".
-    - One still has a `<ui-popup inverted size="mini">` tooltip:  the runtime's heading fold button on the goal sets'
-      pages ("Fold / unfold", epic `epic-engine` I32).  Turn it into a `title` when touching that code.
-      - `goals-live.js`' own buttons have `title`s since epic `epic-engine` P3.
+  - TOOLTIPS are Spell UI's own, with the standard delay (`--ui-tooltip-delay`, by default `--ui-hover-delay`):
+    - `data-tooltip="..."` on any element:  the runtime (`DataTooltips`) shows it in the top layer
+    - a richer one:  `<ui-tooltip>`, or a component's own `TopLayerTip`
+    - `aria-label` on icon-only controls, as well
+    - The person's standing rule (Owen, 2026-11-19, epic `from-console` C10, r80), now Spell UI's tooltips work:
+      it replaces the 2026-10-10 one, "the browser's own `title`, never a `<ui-tooltip>`".
+    - The epic pages, the comments, the docs runtime and `goals-live.js` were converted by epic `epic-engine` T106.
+      - Still `title`s:  the core reference and the syntax page (`titleInside()`), and Spell UI's own components
+        (`<ui-section>`'s fold button ...);  a `title` left from before becomes a `data-tooltip` when its code is touched.
+      - A `title` that isn't a tooltip stays:  a component's `title` attribute, the empty `title=""` on a card's
+        shadow wrapper (it stops the element's own `title` showing over all of it), and `<code title="path">`.
     - `basic` for quiet tools (sidebars, toolbars);  `primary` for the one main action in a dialog.
   - An icon a page uses must be in `ICONS`, in [bundle-spell-ui.js](tools/bundle-spell-ui.js)
     (then `epic pages update`):  any other name draws nothing.
@@ -1827,6 +1852,7 @@ Each kind of page has ONE name, written everywhere a person reads it.
 | commands page | which command, skill or script does what | `guides/dev/commands/` | [commands.html](../templates/commands.html) |
 | components page | one element:  its examples, attributes and look | a component set's `docs/`:  spell-ui's `docs/`, spell-epic's `src/docs/`, spell-app's `app/docs/`, spell-brand's `docs/` | [spell-ui-docs.html](../templates/spell-ui-docs.html) |
 | components guide | a component set's pages that aren't one element:  home, getting started, theming, icons | beside its components pages | [component-set-docs.html](../templates/component-set-docs.html) |
+| reference page | made from its source each time, with a person's words about each thing:  a place's (`<spell-reference-page>`, epic `data` P53), the commands pages, the core reference page, the syntax guide | a place's:  the editor's `/place/<description>`;  the others in `guides/` | none:  drawn from its source |
 | brand page | Claude Design's brand pages, and their Spell UI copies | `brand/` | none:  Claude Design's exports |
 | home page | the docs' front page:  a card per area | `pages/index.html` | none:  `epic pages index` writes its cards |
 | list page | a card per page of one area:  each top-bar tab's own page | `<area>/index.html` | none:  `epic pages index` writes it |
@@ -1839,15 +1865,16 @@ Each kind of page has ONE name, written everywhere a person reads it.
 
 ## Which side bar tab
 
-VS Code's right side bar has three tabs, and the PAGE'S KIND picks one, never the command that shows it
+VS Code's right side bar has two tabs, and the PAGE'S KIND picks one, never the command that shows it
 (epic `epic-engine` P59, request r50:  a choice page the person was answering vanished,
 the epic page shown in both tabs).
 - The ONE rule:  `docViewFor()`, in the extension's [docUrls.ts](../vscode/src/docUrls.ts), from the page's path:
-  - an epic page, a saga page:  "Review" (`review`), whatever was asked
   - a details, review or choice page (a page in a `details/` folder):  "Details" (`details`)
-  - anything else:  "Epic Docs" (`docs`), unless the caller asked for "Review" (`--review`, `view=review`)
+  - anything else -- epic pages, saga pages, guides, the home page, the list pages:  "Review" (`review`)
+  - a third tab, "Epic Docs" (`docs`), held guides until epic `epic-engine` Q73 folded it into Review;
+    the bridge still takes `docs` from an older `epic`, as Review (`docViewNamed()`)
 - So the callers pass no tab:  `epic open`, `epic ask show`, `epic choices show`, `epic pages link --show`, the show
-  route (`GET /api/docs/show`), `epic window show`;  `--review` stays, asking for a page of no kind of its own
+  route (`GET /api/docs/show`), `epic window show`;  `--review` stays for old scripts, and changes nothing
   - the bridge's `show-doc` answers which tab it took, `{ file, view }`:  the show route's closing page names it
 - The "Details" tab never replaces a page still WAITING for the person's answer (`DetailsPages.isWaiting()`,
   [DetailsPages.ts](tools/DetailsPages.ts):  no answer for its round now, or a session waiting on it):
@@ -2562,8 +2589,6 @@ the epic page shown in both tabs).
         each button its colour under the pointer.
       - Tooltips (2026-10-10:  "No tooltip on those same buttons"):
         "That's good:  done", "Reply", "Skip it:  done, nothing more to do".
-        - The pointer lands on the titled `<ui-button>` itself (the pack's `Tooltip.css`),
-          as the bullhorn's is.
         - See TOOLTIPS, below.
       - Approve's check (green):  "that's good".  The thread is done:  it folds, a check circle in its header.
       - Revisit's history (blue):  reply.  The cursor goes into the reply box at the thread's end.
@@ -2625,8 +2650,10 @@ the epic page shown in both tabs).
     no ring, a tint under the pointer.
     - `<ui-button appearance="circular basic" size="mini">`s, plain through the component's tokens (`.tool` in
       `EpicThread.css` / `EpicCommentPane.css`;  epic `epic-engine` I26)
-  - TOOLTIPS:  the browser's own (`title`), a few words each;  the longer wording is the `aria-label`.
+  - TOOLTIPS:  a few words each;  the longer wording is the `aria-label`.
     - 2026-10-10:  "The buttons don't have browser tooltips -- unclear what they do".
+    - Spell UI's tooltip (`data-tooltip`), with the standard delay (above, "TOOLTIPS are Spell UI's own";
+      Owen, 2026-11-19, epic `from-console` C10, r80;  the browser's own `title` until epic `epic-engine` T106).
     - Each button's:
       - ✓ "That's good:  done"
       - Revisit "Reply"
@@ -2635,19 +2662,11 @@ the epic page shown in both tabs).
       - the trash "Delete this comment"
       - the pen "Edit your last words"
       - the pane's × "Close"
-    - Why they didn't show in VS Code's side bar:  the pointer was on each button's icon.
+    - Why the `title`s didn't show in VS Code's side bar, before T106:  the pointer was on each button's icon.
       - Electron 38 and up, on macOS, mostly shows a `title`'s tooltip
-        only while the pointer is on the titled element ITSELF, not on a child of it.
-      - [electron/electron#49843](https://github.com/electron/electron/issues/49843), open;
-        VS Code 1.141 runs Electron 43.
-    - So every icon inside a comment's buttons takes no pointer, and the pointer lands on the titled button:
-      - the pill's, the pen, the trash, the fold, the pane's × and floppy, the bullhorn
-      - `pointer-events: none`, in spell-comments.css's "TOOLTIPS that show":
-        ONE rule for every titled `<ui-button>` the runtime draws (`ui-button[title]::part(icon)`)
-        - in the thread and the pane, the pack's `Tooltip.css`
-      - Keep it so for any new comment button.
-    - A plain browser shows them either way.
-      Headless Playwright can't show a native tooltip, only check what's under the pointer.
+        only while the pointer is on the titled element ITSELF, not on a child of it
+        ([electron/electron#49843](https://github.com/electron/electron/issues/49843), open).
+      - Spell UI's tooltip finds its `data-tooltip` up the pointer's path, so an icon inside a button needs nothing.
   - Built for reading offline, with no Claude:  only the page server writes them.
 - SEND on a docs page (epic `epic-workflow` P13), as on an epic page:
   the person comments, presses Send, and the session working the epic the page BELONGS to gets them.
@@ -2934,8 +2953,8 @@ In this order, from `epic/` (a page by its path in the checkout it's in):
   - `page` may be a short address:  `SAGA:/drawable-spell`, `SAGA:/drawable-spell/python-target#T1` (landing on T1)
   - in Chrome, reusing its tab
   - `--vs`:  in VS Code's right side bar, in the tab the page's kind says (see "Which side bar tab");
-    "Epic Docs" for a guide (`/spell-docs`)
-  - `--review`:  asks for its "Review" tab, for a page of no kind of its own (`/epic review`)
+    "Review" for a guide (`/spell-docs`)
+  - `--review`:  the same as `--vs` (`/epic review`)
   - Each tab keeps its own page.
     Showing the page a tab already has doesn't reload it:  the page updates itself.
 - `epic ask` ([details.js](tools/details.js)):  details pages (see "Details pages").
@@ -3127,6 +3146,6 @@ In this order, from `epic/` (a page by its path in the checkout it's in):
 - When agents need a doc's rules, also write a distilled `.md` beside it:  bullets, `ts` code blocks.
   - Point to it from the top of an `AGENTS.md`, with an "if working with X, READ file" line.
   - The package's `AGENTS.md`, or the root's when other packages need it too.
-  - See [solid-2.md](../../spell.epics/guides/solid/solid-2.md), pointed to from the root's.
+  - See [solid-2.md](../../agents/solid/solid-2.md), pointed to from the root's.
 - A doc's rules are about ITS topic (Solid's mechanics, a tool's flags).
   - House style, how we write any code, goes in WWOD (`agents/wwod/`), not in a distilled doc.

@@ -109,18 +109,18 @@ export const NEW_ITEM_TEXTS = [
   { key: "newAdd", text: "Add", description: "The form's button:  a new one." },
   { key: "newSave", text: "Save", description: "The form's button:  one being changed." },
   { key: "newCancel", text: "Cancel", description: "The form's button:  closes it, nothing saved." },
-  { key: "newTodoTip", text: "Make it a todo:  work still to do", description: "Kind button:  its tooltip." },
-  { key: "newQuestionTip", text: "Make it a question", description: "Kind button:  its tooltip." },
-  { key: "newIssueTip", text: "Make it an issue", description: "Kind button:  its tooltip." },
-  { key: "newTestTip", text: "Make it a manual test", description: "Kind button:  its tooltip." },
+  { key: "newTodoTip", text: "A todo", description: "Kind button:  its tooltip." },
+  { key: "newQuestionTip", text: "A question", description: "Kind button:  its tooltip." },
+  { key: "newIssueTip", text: "An issue", description: "Kind button:  its tooltip." },
+  { key: "newTestTip", text: "A manual test", description: "Kind button:  its tooltip." },
   {
     key: "newPhaseTip",
-    text: "Make it a phase:  Claude drafts it from its name and your note, for you to review",
+    text: "A phase:  Claude drafts it",
     description: "Kind button:  its tooltip."
   },
-  { key: "newAddTip", text: "Add:  Claude puts it in the epic page", description: "The form's Add:  its tooltip." },
-  { key: "newSaveTip", text: "Save your changes", description: "The form's Save:  its tooltip." },
-  { key: "newCancelTip", text: "Cancel:  close it, nothing saved", description: "The form's Cancel:  its tooltip." },
+  { key: "newAddTip", text: "Add it to the epic page", description: "The form's Add:  its tooltip." },
+  { key: "newSaveTip", text: "Save", description: "The form's Save:  its tooltip." },
+  { key: "newCancelTip", text: "Cancel", description: "The form's Cancel:  its tooltip." },
   { key: "newNeedsTitle", text: "Give it a title first", description: "Add pressed with no title." }
 ] as const
 

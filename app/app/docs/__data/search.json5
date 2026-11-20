@@ -28,6 +28,17 @@
       ]
     },
     {
+      "path": "AppAnatomyView.html",
+      "title": "AppAnatomyView",
+      "summary": "Anatomy:  the running app pulled apart into layers, in 3D, one for each view it draws.",
+      "sections": [
+        {"id":"1-what-it-looks-like","title":"1. What it looks like"},
+        {"id":"2-using-it","title":"2. Using it"},
+        {"id":"3-props","title":"3. Props, and where it's drawn"},
+        {"id":"4-its-code","title":"4. Its code"}
+      ]
+    },
+    {
       "path": "AppContainer.html",
       "title": "AppContainer",
       "summary": "The box a compiled spell program draws in.",
@@ -262,6 +273,17 @@
       "path": "spell-markdown.html",
       "title": "<spell-markdown>",
       "summary": "Markdown drawn by spell's own engine, in ui-* elements.",
+      "sections": [
+        {"id":"1-example","title":"1. Example"},
+        {"id":"2-using-it","title":"2. Using it"},
+        {"id":"3-api","title":"3. Attributes, events and texts"},
+        {"id":"4-its-code","title":"4. Its code"}
+      ]
+    },
+    {
+      "path": "spell-reference-page.html",
+      "title": "<spell-reference-page>",
+      "summary": "A reference page, made from its source, whose words you make clearer with an option-click.",
       "sections": [
         {"id":"1-example","title":"1. Example"},
         {"id":"2-using-it","title":"2. Using it"},

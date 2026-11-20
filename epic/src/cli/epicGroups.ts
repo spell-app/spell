@@ -407,6 +407,80 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     }
   ],
 
+  demo: [
+    {
+      name: "check",
+      usage: "[--json]",
+      description:
+        "the staged demo (the default verb):  its step files are there, and nothing of an earlier run is left;  " +
+        "exits 1 naming what's wrong",
+      example: "epic demo check",
+      flags: { "--json": "print the report as JSON" }
+    },
+    {
+      name: "run",
+      usage: "<step> [--quiet]",
+      description:
+        "run a step of the staged demo:  its commands on the real demo epic (in the main checkout), then what " +
+        "Claude says;  a step by its number (03) or a word of its file's name (overview)",
+      example: "epic demo run 02",
+      flags: { "--quiet": "a rehearsal:  nothing shown in VS Code (its epic open and --show lines left out)" }
+    },
+    {
+      name: "lines",
+      usage: "[n]",
+      description: "n silly working lines (4 by default), picked at random from the demo's silly-lines.txt",
+      example: "epic demo lines 4",
+      flags: {}
+    },
+    {
+      name: "pause",
+      usage: "[seconds]",
+      description: "wait a moment between working lines (2 seconds by default, 30 at most)",
+      example: "epic demo pause 2",
+      flags: {}
+    },
+    {
+      name: "wait",
+      usage: "[--timeout 55m]",
+      description:
+        "wait for your Send or Accept on the demo page (an Accept goes at once, not after 5 minutes), take it in " +
+        "(inbox apply), and print the step to run next;  run it in the background",
+      example: "epic demo wait",
+      flags: { "--timeout <time>": "how long to wait:  55m (the default), 1h, or seconds" }
+    },
+    {
+      name: "next",
+      usage: "",
+      description: "the demo's next step, read from its page:  run 04, wait (your turn), or done",
+      example: "epic demo next",
+      flags: {}
+    },
+    {
+      name: "overview",
+      usage: "<step>",
+      description: "write a step file's html blocks as the demo page's Overview:  its summary, then each numbered part",
+      example: "epic demo overview 03",
+      flags: {}
+    },
+    {
+      name: "seen",
+      usage: "",
+      description: "mark the demo page's While you were out read, so it counts from now",
+      example: "epic demo seen",
+      flags: {}
+    },
+    {
+      name: "reset",
+      usage: "[--dry-run]",
+      description:
+        "delete the demo epic and everything it made (its page and files, its card, a worktree, branch or window " +
+        "file named demo, the saved prompt), so it can run again;  never another epic",
+      example: "epic demo reset --dry-run",
+      flags: { "--dry-run": "only say what would go" }
+    }
+  ],
+
   focus: [
     {
       name: "status",
@@ -782,20 +856,21 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       name: "show",
       usage: "<file> [--hash <id>] [--review]",
       description:
-        "show an .html page in the window's side bar, in the tab its kind says:  an epic or saga page in Review, a details or choice page in Details, any other in Epic Docs",
+        "show an .html page in the window's side bar, in the tab its kind says:  a details or choice page in Details, any other in Review",
       example: "epic window show epics/seo/seo.plan.html --review",
       flags: {
         "--hash <id>": "land on that id",
-        "--review": "a page of no kind of its own:  in the Review tab"
+        "--review": "kept for old scripts:  every page but a details or choice page shows in the Review tab"
       }
     },
     {
       name: "reload",
-      usage: "[--review]",
-      description: "rebuild the side bar's view from scratch, at the page it shows",
-      example: "epic window reload --review",
+      usage: "[--details]",
+      description: "rebuild the side bar's Review view from scratch, at the page it shows",
+      example: "epic window reload --details",
       flags: {
-        "--review": "the Review tab's view"
+        "--details": "the Details tab's view instead",
+        "--review": "kept for old scripts:  the Review tab's view, the default"
       }
     },
     {
@@ -1161,11 +1236,11 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       name: "open",
       usage: "[<page>] [--vs | --review]",
       description:
-        "show a page in Chrome, or in VS Code's side bar (--vs), in the tab its kind says:  an epic or saga page in Review, a details or choice page in Details, any other in Epic Docs",
+        "show a page in Chrome, or in VS Code's side bar (--vs), in the tab its kind says:  a details or choice page in Details, any other in Review",
       example: "epic pages open epics/seo/seo.plan.html --review",
       flags: {
         "--vs": "in VS Code's side bar",
-        "--review": "in the side bar;  a page of no kind of its own:  in its Review tab"
+        "--review": "in the side bar (as --vs):  every page but a details or choice page shows in its Review tab"
       }
     },
     {
@@ -1260,6 +1335,7 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
  *   `plugin` (`PluginInstall`)
  * - the docs pages' tools:  `pages` (`EpicTools.runPages()`)
  * - the `epic` tool's, every epic at once:  `focus` (`FocusCommands`, epic `epic-engine` T93)
+ * - the staged demo:  `demo` (`StagedDemo`, epic `epic-engine` P77)
  */
 export type GroupName =
   | "ask"
@@ -1269,6 +1345,7 @@ export type GroupName =
   | "agents"
   | "airplane"
   | "focus"
+  | "demo"
   | "worktree"
   | "session"
   | "park"
@@ -1346,6 +1423,9 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--stage <stage>": "the stage it starts in:  overview (the default), phases or building"
   },
   stage: {},
+  rename: {},
+  complete: {},
+  delete: {},
   change: { "--for <item>": "the item of the change marks that name none" },
   list: { "--json": "print them as JSON" },
   summary: { "--json": "print it as JSON" },
@@ -1367,7 +1447,11 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   decisions: { "--json": "print them as JSON" },
   owns: { "--json": "print them as JSON" },
   open: { "--review": "kept for old scripts:  an epic page always shows in the Review tab" },
-  lint: { "--no-browser": "skip the browser check", "--links": "fail on its links' problems too" },
+  lint: {
+    "--no-browser": "skip the browser check",
+    "--links": "fail on its links' problems too",
+    "--fix": "finish status cards left underway on finished items (I355)"
+  },
 
   // an epic page:  phases
   "add-phase": {
@@ -1571,6 +1655,9 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--no-server": "don't start the epic server",
     "--host <github|gitlab>": "where the code is hosted, for an address that doesn't say",
     "--dry-run": "only say what it would do",
+    "--demo":
+      "show it as someone new sees it, every question asked, changing nothing:  for showing epic init to people, in " +
+      "any folder",
     "--json": "print what it did as JSON"
   },
   pr: {
@@ -1583,6 +1670,10 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--json": "print it as JSON"
   },
   whois: { "--json": "print it as JSON" },
+  upgrade: {
+    "--dry-run": "only say what it would do:  asks npm, but installs and changes nothing",
+    "--json": "print the report as JSON"
+  },
   guide: {
     "--list": "the topics, a line each",
     "--path": "the guide's file, for an agent to read",

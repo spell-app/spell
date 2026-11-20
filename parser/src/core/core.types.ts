@@ -4,6 +4,7 @@ import type { collectionOtherMethods } from "./collection-other"
 import type { stringMethods } from "./string"
 import type { dateMethods } from "./dates"
 import type { uiMethods } from "./ui"
+import type { mediaMethods } from "./media"
 import type { drawingMethods } from "./drawing"
 import type { elementsMethods } from "./elements"
 import type { referencesMethods } from "./references"
@@ -79,6 +80,13 @@ export const SPELL_CORE_NAMES = ["core", ...SPELL_CLASSES]
 export const SPELL_BASE_TYPES = ["Object", ...SPELL_CLASSES]
 
 /**
+ * Mark on `View.prototype` and `ViewableList.prototype`, the same in every copy of the runtime:
+ * so `core.defineElement()` can tell a view class from ANOTHER copy's `View`, which it can't define, and say so.
+ * - Only to warn:  a view class is still one that extends this copy's `View` (`instanceof`).
+ */
+export const VIEW_MARK = Symbol.for("spell-parser:view")
+
+/**
  * The type of the `core` singleton:  every module's methods, together.
  * - Built by accretion:  each module below does `Object.assign(core, { ...methods })` at runtime,
  *   so this is the intersection of every module's methods.
@@ -96,6 +104,7 @@ export type Core = typeof coreMethods &
   typeof stringMethods &
   typeof dateMethods &
   typeof uiMethods &
+  typeof mediaMethods &
   typeof drawingMethods &
   typeof elementsMethods &
   typeof referencesMethods &

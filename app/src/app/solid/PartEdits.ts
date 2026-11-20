@@ -66,7 +66,7 @@ export class PartEdits {
       const { file, text } = written[0]!
       const codes = written.map((one) => SourceEdits.codeOf(text, one.element))
       const { text: after, starts } = SourceEdits.writtenAll(text, placeBy(written.at(-1)!, "after"), codes)
-      PartEdits.applyText(file, after, appTexts.text("partStepDuplicate"), starts)
+      PartEdits.applyText(file, after, appTexts.text("partStepDuplicate"), starts, "new")
       return true
     }
     const { file, text } = written[0]!
@@ -117,7 +117,7 @@ export class PartEdits {
     const step = /^\t/m.test(text) ? "\t" : "  "
     const fitted = codes.map((code) => code.replaceAll("\t", step))
     const { text: after, starts } = SourceEdits.writtenAll(text, at, fitted)
-    PartEdits.applyText(at.file, after, title, starts)
+    PartEdits.applyText(at.file, after, title, starts, "new")
   }
 
   /** Move `elements` to `place`, as one step.  NEVER throws:  what can't move is said in a notice. */
@@ -137,16 +137,55 @@ export class PartEdits {
   /**
    * The program's text is now `after`:  one step, the app compiled at once, and what's at `starts` selected once drawn.
    * - Compiled now, not after the usual pause:  a person who just dropped something is looking at the app.
+   * - Once drawn, it's shown (`showDrawn()`):  scrolled into view, or, when it's `new` and draws nothing to see,
+   *   a notice saying so.
    */
-  private static applyText(file: SP.AnySpellFile, after: string, title: string, starts: readonly number[]): void {
+  private static applyText(
+    file: SP.AnySpellFile,
+    after: string,
+    title: string,
+    starts: readonly number[],
+    what: "new" | "moved" = "moved"
+  ): void {
     const before = file.contents ?? ""
     const { span, newText } = SourceEdits.editBetween(before, after)
-    if (starts.length) Inspector.selectWhenDrawn(starts.map((start) => placeKeyAt(file, after, start)))
+    if (starts.length) {
+      const places = starts.map((start) => placeKeyAt(file, after, start))
+      Inspector.selectWhenDrawn(places, (elements) => PartEdits.showDrawn(elements, what))
+    }
     editor.history.change(
       { file, at: span.start, before: before.slice(span.start, span.end), after: newText },
       { title, live: () => compileNow() }
     )
     compileNow()
+  }
+
+  /**
+   * Show `elements`, just drawn and selected:  the last one scrolled into the app's view, its ring showing
+   * (epic `editor` P35:  "clicking to add something ... is often hidden").
+   * - A `new` one that draws nothing to see (an empty box):  a notice says it's there, selected in the Views tree.
+   * - After the next paint:  its box is laid out by then.
+   */
+  private static showDrawn(elements: readonly Element[], what: "new" | "moved"): void {
+    requestAnimationFrame(() => {
+      const last = elements.at(-1)
+      if (!last?.isConnected) return
+      const shown = shownElementOf(last)
+      if (!shown) {
+        if (what === "new") editor.showNotice(appTexts.text("partAddedEmpty"))
+        return
+      }
+      // into the middle, with room for its ring, only when it isn't already in view
+      const area = Inspector.area?.getBoundingClientRect()
+      const box = shown.getBoundingClientRect()
+      const isInView =
+        !!area &&
+        box.top >= area.top + RING_ROOM &&
+        box.bottom <= area.bottom - RING_ROOM &&
+        box.left >= area.left + RING_ROOM &&
+        box.right <= area.right - RING_ROOM
+      if (!isInView) shown.scrollIntoView({ block: "center", inline: "nearest" })
+    })
   }
 
   ////////////////
@@ -250,6 +289,7 @@ export class PartEdits {
    * The end of what the app draws, found from its drawn parts, so plain Spell's `to draw` works as the tag form did
    * (epic `editor` I126):
    * - its outermost parts with a tag of their own, in the first one's file
+   *   - in a site, the page shown's own:  never its layout's panes (`placeableParts()`)
    * - just one, which holds things (a blank app's `<container>`):  inside it, at its end
    * - else after the last of them
    * - `undefined` when nothing written is drawn
@@ -260,7 +300,7 @@ export class PartEdits {
     const outermost: WrittenPart[] = []
     const elements: Element[] = []
     let depth = Infinity
-    for (const row of Inspector.partsIn(area)) {
+    for (const row of PartEdits.placeableParts(area)) {
       if (row.depth > depth) continue
       const written = PartEdits.writtenOf(row.element)
       if ("reason" in written || !("tag" in written.element)) continue
@@ -273,6 +313,24 @@ export class PartEdits {
     if (!last) return undefined
     const isOnlyHolder = outermost.length === 1 && holdsThings(last.element, elements[0]!)
     return { file: last.file, ...placeBy(last, isOnlyHolder ? "inside" : "after") }
+  }
+
+  /**
+   * The app's parts a drop or something new may land in, as `Inspector.partsIn()` walks them:
+   * in a site, the page shown's own (epic `editor` P35).
+   * - A site's layout panes are passed over:  its app menu, page menu, drawer, side bars and footer.
+   *   They're written in the layout's own drawing, so what lands there shows on every page.
+   * - Unless a pane is chosen:  it, or something in it, is selected.
+   *   The Views tree's rows are always there to pick from (`placeInTree()`).
+   * - Never a layout kept hidden while another is shown.
+   */
+  private static placeableParts(area: HTMLElement): PartRow[] {
+    const chosen = new Set(Inspector.allSelected.flatMap((part) => (part.element && paneOf(part.element)) ?? []))
+    return Inspector.partsIn(area).filter((row) => {
+      if (isInHiddenLayout(row.element)) return false
+      const pane = paneOf(row.element)
+      return !pane || chosen.has(pane)
+    })
   }
 
   ////////////////
@@ -380,6 +438,8 @@ export class PartEdits {
    * The place under (`x`, `y`):  over a row of the Views tree, or over the app.
    * - Over a part that holds things, its middle goes inside;  else before or after it, as the things around it lie.
    * - Over nothing written, in the app:  the end of the drawing, the whole app outlined.
+   * - Over a site's layout pane (its menu, drawer, side bars, footer):  as over nothing, unless the pane is chosen
+   *   (`placeableParts()`).
    */
   private static placeAt(x: number, y: number, moving: readonly Element[]): ShownPlace | undefined {
     const inTree = PartEdits.placeInTree(x, y, moving)
@@ -388,7 +448,7 @@ export class PartEdits {
     if (!area || !contains(area.getBoundingClientRect(), x, y)) return undefined
     let best: Element | undefined
     let bestSize = Infinity
-    for (const { element } of Inspector.partsIn(area)) {
+    for (const { element } of PartEdits.placeableParts(area)) {
       const box = boxOf(element)
       if (!contains(box, x, y) || isInside(element, moving) || box.width * box.height >= bestSize) continue
       if (!PartEdits.isWritten(element)) continue
@@ -855,6 +915,48 @@ function isShownPart(element: Element, area: HTMLElement): boolean {
   }
   return false
 }
+
+/**
+ * The element that draws `element`'s box:  itself, else the first inside it with a size, shadow root or not
+ * (one with no box of its own, `display: contents`);  `undefined` when nothing of it has any size.
+ */
+function shownElementOf(element: Element): Element | undefined {
+  const box = element.getBoundingClientRect()
+  if (box.width && box.height) return element
+  for (const child of [...(element.shadowRoot?.children ?? []), ...element.children]) {
+    const shown = shownElementOf(child)
+    if (shown) return shown
+  }
+  return undefined
+}
+
+/**
+ * The site layout's pane `element` is in:  one of the regions a site's `<ui-page-layout>` draws round its page
+ * (`SiteBase.drawLayout()`), each a child slotted by name;  `undefined` in the page itself, or outside any site.
+ */
+function paneOf(element: Element): Element | undefined {
+  for (let at: Element | undefined = element; at; at = composedParentOf(at)) {
+    if (at.matches(LAYOUT_PANE)) return at
+  }
+  return undefined
+}
+
+/** Is `element` in a site's layout kept, hidden, while the page shown is in another (`SiteBase.drawLayout()`)? */
+function isInHiddenLayout(element: Element): boolean {
+  for (let at: Element | undefined = element; at; at = composedParentOf(at)) {
+    if (at.matches(HIDDEN_LAYOUT)) return true
+  }
+  return false
+}
+
+/** A site layout's pane:  what's slotted by name into the site's `<ui-page-layout>`;  its page is the default slot. */
+const LAYOUT_PANE = "ui-page-layout.spell-site > [slot]"
+
+/** A site's layout, or its page drawn alone, kept hidden while another is shown. */
+const HIDDEN_LAYOUT = ":is(ui-page-layout.spell-site, .spell-site-alone)[hidden]"
+
+/** Room round a part shown in view, for its ring (`PartEdits.showDrawn()`), px. */
+const RING_ROOM = 8
 
 /** The tag start of Spell UI's elements:  what's inside one's shadow root is its own. */
 const UI_PREFIX = "ui-"

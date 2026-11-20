@@ -7,6 +7,8 @@ import type { P } from "spell/parser/parser"
  * - e.g. `- a post's comments live at "/posts/{id}/comments"`:  JSONPlaceholder's comments on each post
  * - The type's property names the list, `its "comments" is a list of comments`:  reading it reads that address,
  *   the thing's id in its braces, the first time something reads it.
+ * - Or ONE thing under each, `- a system's snapshot lives at "/instances/{id}/snapshot"` (epic `from-console` P16):
+ *   its property is that one thing, `its "snapshot" is a snapshot`, read from there the same way.
  * - Whatever the braces say, it's the thing's id.
  */
 export class ListsUnder extends PlaceDetail<"owner|property|path"> {

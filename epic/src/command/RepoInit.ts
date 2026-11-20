@@ -1,6 +1,17 @@
-import { existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, rmSync, rmdirSync, writeFileSync } from "node:fs"
-import { tmpdir } from "node:os"
-import { basename, dirname, join, relative } from "node:path"
+import {
+  copyFileSync,
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  rmdirSync,
+  writeFileSync
+} from "node:fs"
+import { homedir, tmpdir } from "node:os"
+import { basename, delimiter, dirname, join, relative, resolve } from "node:path"
 
 import chalk from "chalk"
 
@@ -89,6 +100,14 @@ import type { SyncReport } from "./SharedSync"
  *    skips it
  *
  * - `--dry-run`:  says what it would do, and writes nothing (it asks `gh` whether it could make the epic repo)
+ * - `--demo` (`RepoInit.demo()`):  a dry run that shows what a NEWCOMER sees, for showing `epic init` to people:
+ *   - every question asked, as a first run asks them;  nothing written, made, committed, pushed or started
+ *   - run against a fresh copy of the repo in a temporary folder (`demoScratch()`):  a new git repo with the real one's
+ *     name, base branch, `origin` and the files the install question reads, so a repo set up already, or a folder
+ *     that's no git repo, looks like one never set up;  the folder is deleted at the end
+ *   - the plugin's step against a scratch Claude Code folder:  "Installing the epic plugin", with what it would do
+ *   - the paths printed are the real folder's (`shown()`), never the temporary one's
+ *   - starts "Demo:  nothing will be changed";  ends with what a real run would have done (`demoLines()`)
  * - `--json`:  the report as JSON
  * - a failed plugin install or server start is one line, and init carries on
  * - it commits the files it wrote in the repo (the config and `.gitignore`) on the base branch, asking first in a
@@ -116,23 +135,149 @@ export class RepoInit {
   /** the repo's main checkout:  where the config goes, and the folders are relative to */
   readonly main: string
   /** what installs the epic plugin (`pluginStep()`):  made when the step runs */
-  readonly plugin: () => Pick<PluginInstall, "isInstalled" | "install">
+  readonly plugin: () => PluginInstaller
   /** the machine's epic server (`serverStep()`) */
   readonly hub: () => Pick<Hub, "registerHere" | "addressOf">
+  /** the environment `pluginStep()` reads `PATH` and `SHELL` from */
+  readonly env: NodeJS.ProcessEnv
+  /** `--demo`'s temporary copy of the repo (`demo()`):  how its paths are shown;  none on a real run */
+  readonly demo?: DemoScratch
 
   /**
    * - `main`:  default the main checkout of the repo the current folder is in
    * - `plugin`, `hub`:  default the machine's own (`PluginInstall`, `Hub`);  a test hands in stand-ins
+   * - `env`:  default `process.env`;  a test hands in its own `PATH` and `SHELL`
+   * - `demo`:  `--demo`'s temporary copy (`demo()` makes it)
    */
-  constructor({ main, plugin = () => new PluginInstall(), hub = () => new Hub() }: RepoInitProps = {}) {
+  constructor({
+    main,
+    plugin = () => new PluginInstall(),
+    hub = () => new Hub(),
+    env = process.env,
+    demo
+  }: RepoInitProps = {}) {
     this.main = main ?? RepoInit.mainHere()
     this.plugin = plugin
     this.hub = hub
+    this.env = env
+    this.demo = demo
+  }
+
+  /**
+   * `epic init <args>` from the current folder:  `--demo` anywhere (`demo()`), else in its repo (`run()`).
+   * - throws `EpicCommandError` outside a git repo, but for `--demo`
+   */
+  static runHere(args: string[]): Promise<number> {
+    return args.includes("--demo") ? RepoInit.demo(args) : new RepoInit().run(args)
+  }
+
+  /**
+   * `epic init --demo`:  what a newcomer sees in folder `cwd`, every question asked, and nothing changed.
+   * - run against a temporary copy of the repo (`demoScratch()`), deleted at the end, whatever happens
+   * - the plugin's step against a Claude Code folder and `PATH` folder inside it, the editor's command never run;
+   *   the epic server never started
+   * - the epic home (`$SPELL_EPIC_HOME`) a folder inside it meanwhile:  no name kept yet, as a newcomer's
+   */
+  static async demo(args: string[], { cwd = process.cwd() }: { cwd?: string } = {}): Promise<number> {
+    const scratch = RepoInit.demoScratch(cwd)
+    // the epic home a newcomer has:  none yet, so their name is asked as a first run asks it
+    const home = process.env.SPELL_EPIC_HOME
+    process.env.SPELL_EPIC_HOME = join(scratch.root, ".spell-epic")
+    // Ctrl-C at a question ends the process:  the copy goes then too
+    const removeCopy = () => rmSync(scratch.root, { recursive: true, force: true })
+    const interrupted = () => process.exit(130)
+    process.once("exit", removeCopy)
+    process.once("SIGINT", interrupted)
+    try {
+      const plugin = () =>
+        new PluginInstall({
+          home: scratch.claudeHome,
+          bin: scratch.bin,
+          codexHome: join(scratch.root, ".codex"),
+          agentsHome: join(scratch.root, ".agents"),
+          // the editor's command never runs:  its extension list read as empty, as a newcomer's
+          code: () => ""
+        })
+      const hub = () => {
+        throw new EpicCommandError("epic init --demo:  starts no epic server")
+      }
+      return await new RepoInit({ main: scratch.main, plugin, hub, demo: scratch }).run(args)
+    } finally {
+      if (home === undefined) delete process.env.SPELL_EPIC_HOME
+      else process.env.SPELL_EPIC_HOME = home
+      process.off("exit", removeCopy)
+      process.off("SIGINT", interrupted)
+      removeCopy()
+    }
+  }
+
+  /**
+   * A fresh copy of the repo `cwd` is in, for `--demo`:  a new git repo in a temporary folder, as the repo would be
+   * before `epic init` ever ran.
+   * - its name the repo's (its main checkout's), else the folder's, when `cwd` is in no git repo
+   * - its base branch the repo's, and one empty commit on it;  its `origin` the repo's, as written in `.git/config`
+   * - the files the install question reads:  the docs copied (`EpicConfig.INSTALL_DOCS`, `package.json`), the lock
+   *   files made empty (only being there counts)
+   * - `shown()`:  a path inside it as the real one;  the plugin's folders and the epic home as a newcomer's
+   *   (`~/.claude`, `~/.local/bin`, `~/.spell-epic`)
+   * - SIDE EFFECT:  the temporary folder;  `demo()` deletes it
+   */
+  static demoScratch(cwd: string): DemoScratch {
+    const inRepo = Git.run(["rev-parse", "--git-dir"], cwd).ok
+    const real = inRepo ? Git.mainRoot(cwd) : resolve(cwd)
+    const made = mkdtempSync(join(tmpdir(), "epic-demo-"))
+    const root = realpathSync(made)
+    const main = join(root, basename(real) || "repo")
+    mkdirSync(main)
+    const base = inRepo ? EpicConfig.baseBranchOf(real) : "main"
+    Git.run(["init", "-q", "-b", base], main)
+    const origin = inRepo ? Git.out(["config", "--get", "remote.origin.url"], real) : undefined
+    if (origin) Git.run(["remote", "add", "origin", origin], main)
+    for (const doc of [...EpicConfig.INSTALL_DOCS, "package.json"])
+      if (existsSync(join(real, doc)) && lstatSync(join(real, doc)).isFile())
+        copyFileSync(join(real, doc), join(main, doc))
+    for (const [lock] of EpicConfig.INSTALLERS)
+      if (!existsSync(join(main, lock)) && existsSync(join(real, lock))) writeFileSync(join(main, lock), "")
+    // no hooks of the person's run on it
+    Git.run(
+      [
+        "-c",
+        "user.name=epic demo",
+        "-c",
+        "user.email=demo@example.invalid",
+        "-c",
+        "commit.gpgsign=false",
+        "-c",
+        `core.hooksPath=${join(root, "no-hooks")}`,
+        "commit",
+        "-q",
+        "--allow-empty",
+        "-m",
+        "demo"
+      ],
+      main
+    )
+    const claudeHome = join(root, ".claude")
+    const bin = join(root, ".local-bin")
+    const above = dirname(real)
+    const shown = (text: string) =>
+      // the real path first:  the one `mkdtemp()` gave (`/var/...` on macOS) is inside it (`/private/var/...`)
+      [root, made].reduce(
+        (shown, at) =>
+          shown
+            .replaceAll(join(at, ".claude"), "~/.claude")
+            .replaceAll(join(at, ".local-bin"), "~/.local/bin")
+            .replaceAll(join(at, ".spell-epic"), "~/.spell-epic")
+            .replaceAll(at, above),
+        text
+      )
+    return { root, main, claudeHome, bin, shown }
   }
 
   /** Run `epic init <args>`;  resolves to the exit code.  Throws `EpicCommandError` outside a git repo. */
   async run(args: string[]): Promise<number> {
     const { flags } = parseVerbArgs(args, [
+      "demo",
       "dryRun",
       "json",
       "noRemote",
@@ -144,7 +289,10 @@ export class RepoInit {
       "local",
       "superpowers"
     ])
-    const dryRun = flags.dryRun === true
+    const demo = this.demo !== undefined
+    // `--demo` asked for here, outside `demo()` (a test's `run()`):  the demo of this folder
+    if (flags.demo === true && !demo) return RepoInit.demo(args, { cwd: this.main })
+    const dryRun = flags.dryRun === true || demo
     const local = flags.local === true
     const remote = stringFlag(flags.remote)
     const contentRepo = stringFlag(flags.contentRepo)
@@ -165,14 +313,16 @@ export class RepoInit {
       throw new EpicCommandError(
         `epic init:  --color ${color} isn't a colour:  one of ${VoiceColor.NAMES.join(", ")}, or a CSS colour`
       )
-    // asked only when it'd be kept, and never into JSON's output
-    const ask = !dryRun && !flags.json
+    // asked only when it'd be kept, or for the demo, and never into JSON's output
+    const ask = (!dryRun || demo) && !flags.json
+    const shown = this.demo?.shown ?? ((text: string) => text)
     const print = (lines: string[]) => {
-      if (!flags.json) for (const line of lines) CLI.out(line)
+      if (!flags.json) for (const line of lines) CLI.out(shown(line))
     }
     const say = (text: string) => print([chalk.gray(text)])
     // a setup already committed can't go local:  refused before anything is asked or written
     if (local) RepoInit.refuseCommittedSetup(this.main)
+    if (demo) print([chalk.yellow.bold(DEMO_HEAD)])
     print([chalk.cyan.bold(`Initializing Epic for repo ${this.main}`)])
     // every question first, then what they come to
     const answers = await this.questions({
@@ -212,6 +362,7 @@ export class RepoInit {
       say
     })
     if (plugin) report.plugin = plugin
+    if (demo) report.demo = true
     print([...RepoInit.fileLines(report, { head: false }), ...RepoInit.noteLines(report)])
     // local:  nothing committed, ever
     if (report.local) {
@@ -233,7 +384,7 @@ export class RepoInit {
       if (!dryRun) say("starting the epic server…")
       report.server = await this.serverStep({ dryRun })
     }
-    if (flags.json) CLI.out(JSON.stringify(report, null, 2))
+    if (flags.json) CLI.out(shown(JSON.stringify(report, null, 2)))
     else print(RepoInit.doneLines(report))
     return EXIT.OK
   }
@@ -638,11 +789,12 @@ export class RepoInit {
     if (!files.length) return { action: "none", files, branch: base }
     const branch = Git.out(["rev-parse", "--abbrev-ref", "HEAD"], main) ?? ""
     if (branch !== base) return { action: "other branch", files, branch }
-    if (dryRun) return { action: "would commit", files, branch }
     const pushable = !!RepoInit.pushTarget(main, branch)
     const question = `${pushable ? "Commit and push" : "Commit"} ${files.join(" and ")} on ${branch}?`
+    // a dry run asks only for the demo (`ask` is off for `--dry-run`)
     const answer = ask ? await CLI.ask(question, { suggestion: "y" }) : "y"
     if (/^n/i.test(answer.trim())) return { action: "declined", files, branch }
+    if (dryRun) return { action: "would commit", files, branch }
     const added = Git.run(["add", "--", ...files], main)
     const done = added.ok ? Git.run(["commit", "-m", COMMIT_MESSAGE, "--", ...files], main) : added
     if (!done.ok) return { action: "failed", files, branch, error: done.err || `git exited ${done.code}` }
@@ -680,12 +832,13 @@ export class RepoInit {
     const files = RepoInit.changedFiles(report)
     if (!files.length) return { action: "none", files, branch: base, ...via }
     if (branch !== base) return { action: "other branch", files, branch, ...via }
-    if (dryRun) return { action: "would branch", files, branch: SETUP_BRANCH, ...via }
     const question =
       `Put ${files.join(" and ")} on a new branch ${SETUP_BRANCH}, push it, and open a ` +
       `${RepoInit.wordsOf(report).pullRequest}?`
+    // a dry run asks only for the demo (`ask` is off for `--dry-run`)
     const answer = ask ? await CLI.ask(question, { suggestion: "y" }) : "y"
     if (/^n/i.test(answer.trim())) return { action: "declined", files, branch, ...via }
+    if (dryRun) return { action: "would branch", files, branch: SETUP_BRANCH, ...via }
     try {
       RepoInit.commitOnSetupBranch(main, base, files)
       RepoInit.restoreBase(main, files, report.config.settings.sharedFolders)
@@ -1009,14 +1162,73 @@ export class RepoInit {
     try {
       const installer = this.plugin()
       const installed = installer.isInstalled()
+      // the demo:  what the install would do, line by line, and the `PATH` line a newcomer would need
+      if (dryRun && this.demo && !installed)
+        return {
+          action: "would install",
+          planned: installer.install({ dryRun: true }).changes.map((line) => this.demo!.shown(line)),
+          ...this.machineFacts({ bin: join(homedir(), ".local", "bin") })
+        }
       if (dryRun) return { action: installed ? "already" : "would install" }
       const changes = installer.install().changes
       const notes = changes.filter((change) => EDITOR_NOTE.test(change))
-      if (installed && changes.length === notes.length) return { action: "already", ...(notes.length && { notes }) }
-      return { action: installed ? "updated" : "installed", changes: changes.length, ...(notes.length && { notes }) }
+      const machine = this.machineFacts(installer)
+      if (installed && changes.length === notes.length)
+        return { action: "already", ...(notes.length && { notes }), ...machine }
+      return {
+        action: installed ? "updated" : "installed",
+        changes: changes.length,
+        ...(notes.length && { notes }),
+        ...machine
+      }
     } catch (error) {
       return { action: "failed", error: (error as Error).message }
     }
+  }
+
+  /**
+   * What the plugin step says about this machine, beyond the install itself (epic `epic-engine` I345, I346):
+   * - `noClaudeCode`:  no Claude Code here:  no `claude` on the `PATH`, and no saved sessions in Claude Code's folder
+   *   (`projects/`, which the install never writes:  it does write the folder's settings and lists)
+   * - `notOnPath`:  the folder the install linked `epic` into isn't on the `PATH`, and the line that puts it there
+   * - a stand-in installer without `home` / `bin` (the tests'):  neither is checked
+   * - NEVER throws
+   */
+  machineFacts({
+    home,
+    bin
+  }: Partial<Pick<PluginInstall, "home" | "bin">>): Pick<PluginReport, "noClaudeCode" | "notOnPath"> {
+    const folders = (this.env.PATH ?? "").split(delimiter).filter(Boolean)
+    const facts: Pick<PluginReport, "noClaudeCode" | "notOnPath"> = {}
+    if (home !== undefined) {
+      const names = process.platform === "win32" ? ["claude.exe", "claude.cmd", "claude"] : ["claude"]
+      const onPath = folders.some((folder) => names.some((name) => existsSync(join(folder, name))))
+      if (!onPath && !existsSync(join(home, "projects"))) facts.noClaudeCode = true
+    }
+    if (bin !== undefined && !folders.some((folder) => folder.replace(/[\\/]+$/, "") === bin.replace(/[\\/]+$/, "")))
+      facts.notOnPath = RepoInit.pathFix(bin, this.env.SHELL)
+    return facts
+  }
+
+  /**
+   * How to put `bin` on the `PATH`:  the folder as people read it (`~/.local/bin`), and the line for the shell's
+   * profile, bash's or zsh's (from `$SHELL`);  any other shell, no profile, the folder alone.
+   */
+  static pathFix(bin: string, shell = ""): NonNullable<PluginReport["notOnPath"]> {
+    const home = homedir()
+    const inHome = bin === home || bin.startsWith(home + "/")
+    const folder = inHome ? "~" + bin.slice(home.length) : bin
+    const line = `export PATH="${inHome ? "$HOME" + bin.slice(home.length) : bin}:$PATH"`
+    const name = basename(shell)
+    const profile =
+      name === "zsh"
+        ? "~/.zshrc"
+        : name === "bash"
+          ? process.platform === "darwin"
+            ? "~/.bash_profile"
+            : "~/.bashrc"
+          : undefined
+    return { folder, ...(profile && { profile, line }) }
   }
 
   /**
@@ -1592,11 +1804,19 @@ export class RepoInit {
   /** The epic plugin's section:  installed, there already, or why not;  the VS Code extension's lines under it. */
   static pluginLines(plugin: PluginReport): string[] {
     const said = (() => {
+      if (
+        plugin.noClaudeCode &&
+        (plugin.action === "installed" || plugin.action === "updated" || plugin.action === "already")
+      )
+        return NO_CLAUDE_CODE
       switch (plugin.action) {
         case "already":
           return ["> epic is installed for Claude Code already"]
         case "would install":
-          return ["> would install epic for Claude Code (epic plugin install)"]
+          return [
+            "> would install epic for Claude Code (epic plugin install)",
+            ...(plugin.planned ?? []).map((line) => chalk.gray(`  ${line}`))
+          ]
         case "installed":
         case "updated":
           return [
@@ -1611,7 +1831,22 @@ export class RepoInit {
           ]
       }
     })()
-    return ["", chalk.bold("Checking the epic plugin:"), ...said, ...(plugin.notes ?? []).map((note) => `> ${note}`)]
+    const installing = plugin.action === "would install" || plugin.action === "installed"
+    return [
+      "",
+      chalk.bold(installing ? "Installing the epic plugin for Claude Code:" : "Checking the epic plugin:"),
+      ...said,
+      ...(plugin.notes ?? []).map((note) => `> ${note}`),
+      ...(plugin.notOnPath ? RepoInit.pathLines(plugin.notOnPath) : [])
+    ]
+  }
+
+  /** What to do when `epic` isn't on the `PATH` (epic `epic-engine` I345):  the line for the shell's profile. */
+  static pathLines({ folder, profile, line }: NonNullable<PluginReport["notOnPath"]>): string[] {
+    const fix = profile
+      ? [`  To fix it, paste this line at the end of ${profile}, then open a new terminal window:`, `    ${line}`]
+      : [`  To fix it, add ${folder} to your PATH in your shell's settings, then open a new terminal window`]
+    return ["> Your terminal doesn't know where to find epic yet.", ...fix]
   }
 
   /**
@@ -1670,7 +1905,7 @@ export class RepoInit {
       rows.push([done, `${file}  (superpowers' stand-aside words)`])
     }
     if (person.action === "kept" || person.action === "would keep")
-      rows.push([would("kept", "would keep"), `${EpicHome.personFile()}  (your name)`])
+      rows.push([would("saved", "would save"), `${EpicHome.personFile()}  (your name)`])
     if ((color?.action === "kept" || color?.action === "would keep") && color.file) {
       // no "at your next turn" while no push can go through (a refused first push)
       const later = remote.refusal ? ", shared once the epic repo takes a push" : ", pushed at your next turn"
@@ -1741,6 +1976,7 @@ export class RepoInit {
    * - local mode:  that nothing was added to the repo, what's on this machine only, and what each teammate runs
    */
   static doneLines(report: InitReport): string[] {
+    if (report.demo) return RepoInit.demoLines(report)
     if (report.dryRun) return ["", "dry run:  nothing changed"]
     if (report.content.action === "missing") return []
     const unshared = unsharedLines(report)
@@ -1771,6 +2007,43 @@ export class RepoInit {
       ...(SHOW_README.has(report.remote.action) ? [`More on sharing the epics:  ${README_EPICS}`] : []),
       ...(report.local ? localLines(report) : []),
       ...(unshared.length ? ["", ...unshared] : [])
+    ]
+  }
+
+  /**
+   * `--demo`'s last lines:  "That's it", what a real run would have done, a line a step, and that nothing changed.
+   * - pure:  read off the dry run's `report`
+   */
+  static demoLines(report: InitReport): string[] {
+    const { plugin, config, content, remote, commit, server, person, color } = report
+    const words = RepoInit.wordsOf(report)
+    const files = [
+      config.action === "written" && ".epic/config.json5",
+      report.gitignore.action !== "ok" && ".gitignore"
+    ]
+    const wrote = files.filter(Boolean).join(" and ")
+    const steps = [
+      plugin?.action === "would install" && "added the epic plugin to Claude Code",
+      wrote && `saved its settings in ${report.main}  (${wrote})`,
+      content.action === "created" && `made a folder for your plans beside it:  ${content.folder}`,
+      content.action === "would clone" && `copied your team's plans into ${content.folder}`,
+      remote.action === "would make" &&
+        `made ${remote.repo} on ${words.name}, ${remote.visibility}, so your team shares the plans`,
+      person.action === "would keep" &&
+        `kept your name, ${person.name}${color?.action === "would keep" ? `, and your colour, ${color.color}` : ""}`,
+      commit?.action === "would commit" &&
+        `committed ${commit.files.join(" and ")} on ${commit.branch}, and pushed them`,
+      commit?.action === "would branch" &&
+        `put ${commit.files.join(" and ")} on a new branch, and opened a ${words.pullRequest}`,
+      server?.action === "would start" && "started the epic server, and shown its address"
+    ].filter((step): step is string => typeof step === "string" && step !== "")
+    return [
+      "",
+      chalk.green.bold("That's it."),
+      ...(steps.length ? ["A real run would have:", ...steps.map((step) => `- ${step}`)] : []),
+      "To do it for real:  the same command, without --demo",
+      "",
+      DEMO_DONE
     ]
   }
 }
@@ -2022,6 +2295,8 @@ function terminalLink(url: string): string {
 export type InitReport = {
   main: string
   dryRun: boolean
+  /** `--demo`:  a dry run shown as a newcomer sees it (`RepoInit.demo()`) */
+  demo?: boolean
   /** set up locally (`--local`, or the config's `localSetup`):  nothing of epics committed in the repo */
   local: boolean
   config: { file: string; action: "written" | "kept"; settings: EpicSettings }
@@ -2170,11 +2445,28 @@ export type PluginReport = {
   action: "installed" | "updated" | "already" | "would install" | "failed"
   /** what `PluginInstall.install()` changed */
   changes?: number
+  /** `--demo`:  what the install would do, a line each (`PluginInstall`'s changes) */
+  planned?: string[]
   /** its lines about the editor's extension (`PluginInstall`'s step 7):  installed, or why not */
   notes?: string[]
   /** why it failed */
   error?: string
+  /** no Claude Code on this machine (`RepoInit.machineFacts()`):  the plugin waits for it */
+  noClaudeCode?: true
+  /** the folder `epic` was linked into isn't on the `PATH`:  how to put it there */
+  notOnPath?: {
+    /** the folder, as people read it:  `~/.local/bin` */
+    folder: string
+    /** the shell's profile the line goes in:  `~/.zshrc`, `~/.bashrc`;  none for another shell */
+    profile?: string
+    /** the line to add there:  `export PATH="$HOME/.local/bin:$PATH"` */
+    line?: string
+  }
 }
+
+/** What `RepoInit` asks of the plugin's installer:  `home` and `bin` for its checks, which a stand-in may leave out. */
+export type PluginInstaller = Pick<PluginInstall, "isInstalled" | "install"> &
+  Partial<Pick<PluginInstall, "home" | "bin">>
 
 /**
  * What `epic init` did about the person's colour (`RepoInit.colorStep()`):
@@ -2222,9 +2514,27 @@ export type RepoInitProps = {
   /** the repo's main checkout;  default the one the current folder is in */
   main?: string
   /** what installs the epic plugin;  default the machine's `PluginInstall` */
-  plugin?: () => Pick<PluginInstall, "isInstalled" | "install">
+  plugin?: () => PluginInstaller
   /** the machine's epic server;  default its `Hub` */
   hub?: () => Pick<Hub, "registerHere" | "addressOf">
+  /** where `PATH` and `SHELL` are read from;  default `process.env` */
+  env?: NodeJS.ProcessEnv
+  /** `--demo`'s temporary copy of the repo (`RepoInit.demo()`) */
+  demo?: DemoScratch
+}
+
+/** `--demo`'s temporary copy of the repo (`RepoInit.demoScratch()`). */
+export type DemoScratch = {
+  /** the temporary folder, deleted at the end */
+  root: string
+  /** the copy's main checkout:  the repo's name, inside `root` */
+  main: string
+  /** the plugin step's Claude Code folder, inside `root` */
+  claudeHome: string
+  /** the plugin step's folder for the `epic` command, inside `root` */
+  bin: string
+  /** `text` with every path inside `root` as the real one (`~/.claude`, `~/.local/bin` for the plugin's) */
+  shown: (text: string) => string
 }
 
 /** What `RepoInit.colorStep()` takes. */
@@ -2406,6 +2716,12 @@ const README_EPICS = "https://github.com/spell-app/spell/blob/main/README-epics.
 /** `epic init`'s line, in colour, once the repo is set up. */
 const DONE = "Epics initialized!"
 
+/** `--demo`'s first line, before anything else (`RepoInit.demo()`). */
+const DEMO_HEAD = "Demo:  nothing will be changed"
+
+/** `--demo`'s last line (`demoLines()`). */
+const DEMO_DONE = "demo:  nothing changed"
+
 /** `epic init`'s line, in colour, when what's left is a request to merge. */
 function doneOnceMerged(pullRequest: string): string {
   return `Epics are set up, and start here once that ${pullRequest} is merged.`
@@ -2472,6 +2788,14 @@ const TERMINAL_COLORS: Readonly<Record<string, string>> = {
 
 /** A CSS hex colour (`#2f9e6e`):  the one kind of CSS colour a terminal can draw. */
 const CSS_HEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i
+
+/** The plugin's section when Claude Code isn't on the machine (epic `epic-engine` I346):  it's ready for it. */
+const NO_CLAUDE_CODE = [
+  "> epic works inside Claude Code, and Claude Code isn't on this computer yet.",
+  "  1. Install Claude Code:  https://claude.com/claude-code",
+  "  2. Start a new conversation in it, and type /epic",
+  "  3. No /epic there?  Type this in your terminal, then start a new conversation:  epic plugin install"
+]
 
 /** `PluginInstall`'s lines about the editor's extension (its step 7):  "VS Code:  extension ...", "Cursor:  ...". */
 const EDITOR_NOTE = /^(?:VS Code|Cursor):  /

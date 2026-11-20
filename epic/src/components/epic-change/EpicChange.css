@@ -105,6 +105,16 @@
   .original i {
     color: var(--ui-text-muted, GrayText);
   }
+  /* a comment's mark (T100):  its words, then the link to its thread */
+  .comment {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: var(--ui-text-color, inherit);
+  }
+  .thread {
+    color: var(--ui-link-color, LinkText);
+  }
 
   /* ## The question and its answer, unfolded */
   .qa {

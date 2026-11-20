@@ -71,9 +71,10 @@ export class CodeMirrorLanguage {
   private readonly parseNow: () => void
 
   /**
-   * Every extension:  hover, folding, signature help and accent fixes;  a Spell UI tag's help, Format Document and
-   * expand selection;  the suggestions' wait for a pause in the typing
+   * Every extension:  hover, folding, signature help and accent fixes;  a Spell UI tag's help;
+   * the suggestions' wait for a pause in the typing
    * (suggestions go through `completions`, problems through `FileStates`).
+   * - Format Document and Expand / Shrink Selection run by the page's keys:  `format()`, `expandSelection()`.
    */
   extensions(): Extension {
     return [
@@ -82,8 +83,7 @@ export class CodeMirrorLanguage {
       this.folding(),
       this.signatureHelp(),
       this.accentFixes(),
-      this.helpShown(),
-      this.moreKeys()
+      this.helpShown()
     ]
   }
 
@@ -359,26 +359,8 @@ export class CodeMirrorLanguage {
   // ## Format Document, expand selection
   ////////////////
 
-  /**
-   * Keys of VS Code's the editor has, beyond the page's list (`EDITOR_HOTKEYS`):
-   * - ⇧⌥F (Shift+Alt+F):  Format Document (`format()`)
-   * - ⌃⇧⌘→ / ⌃⇧⌘← (Shift+Alt+→ / ← off a Mac):  expand and shrink the selection (`expandSelection()`)
-   */
-  private moreKeys(): Extension {
-    return keymap.of([
-      { key: "Shift-Alt-f", run: (view) => (void this.format(view), true), preventDefault: true },
-      {
-        key: "Shift-Alt-ArrowRight",
-        mac: "Ctrl-Shift-Mod-ArrowRight",
-        run: (view) => (void this.expandSelection(view, "expand"), true)
-      },
-      {
-        key: "Shift-Alt-ArrowLeft",
-        mac: "Ctrl-Shift-Mod-ArrowLeft",
-        run: (view) => (void this.expandSelection(view, "shrink"), true)
-      }
-    ])
-  }
+  // Their keys are the page's one list's (`EDITOR_HOTKEYS`:  ⇧⌥F;  ⌃⇧⌘→ / ⌃⇧⌘←, Shift+Alt+→ / ← off a Mac),
+  // which the editor runs by its commands (`SpellCodeMirror.run()`):  written once, and listed in the shortcuts dialog
 
   /**
    * Format Document:  the file's whitespace as the language service lays it out, tabs for its indent,

@@ -487,10 +487,16 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 
 ### A long list, drawn as you scroll
 
-- **It is:**  `drawnInWindow()` (`spell/parser/core`'s `drawnWindow.ts`, epic `data` T76):  draws `MOST_AT_ONCE` items,
-  then more as a sentinel nears the view, reading a place's next page;  what's drawn stays drawn.
+- **It is:**  `drawnInWindow()`, in `spell/element/drawnWindow`.
+  - Epic `data` T76;  the parser's core's until epic `from-console` P8.
+  - It draws the first lot of items (`MOST_AT_ONCE`), then more as a sentinel nears the view,
+    reading a place's next page.
+  - What's drawn stays drawn.
+  - An item the caller needs (`through`:  a pick, a key's target) is drawn at once.
   - In Spell it's every loop in a drawing, and `<for>` (epic `data` P22) adds the loader, Try again, the empty message,
     pages and a title.
+  - In Spell UI it's each `<ui-tree>` column drawn from its items list (`UITree.itemRows()`):
+    5,000 rows open in 33 ms, as 300 do.
 - **Use it when:**  a list a page draws could be long.  Never a scroll listener or a list's own paging.
 
 ### Remembering a preference
@@ -615,7 +621,7 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **It is:**  `ServerLink` (`epic/src/review/ServerLink.ts`):  the page's token, a stale token's retry,
   and every read, write and poll
   - `isServed()`, `canRead()`, `get()` (on `$fetch()`, JSON or its text), `post()`, `forPage()`
-  - a data page's file (the commands page's, the core reference's, the syntax page's):  `getFile()`, by its name now or
+  - a reference page's file (the commands page's, the core reference's, the syntax page's):  `getFile()`, by its name now or
     its old one, `.json` for `.json5` (`dataFileNames()`:  the ONE old-name rule, reading and watching alike);
     its `file://` notice is `drawThenBoot()`'s, in the docs helpers (epic `coherence` P22)
   - the static `watch(window, files, refresh, { every, polls })`, with a path test:
@@ -623,7 +629,7 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **Use it when:**  an epic element, form or docs page reads or writes through the page server.
 - **Flag:**  `SPELL_SERVER\?\.token|protocol !== "file:"`
 - **Score:**  `SPELL_SERVER\?\.token|protocol !== "file:"` · home `epic/src/review/ServerLink.ts`
-- **Copies:**  `--` since epic `coherence` P9 (the data pages' reads since P22);  only the parked `goals-live.js` keeps
+- **Copies:**  `--` since epic `coherence` P9 (the reference pages' reads since P22);  only the parked `goals-live.js` keeps
   its own
 
 ### A page's store the elements follow
@@ -982,6 +988,17 @@ One press, past a few pixels, with Escape to cancel and the closed hand over the
   - Left:  the comments' toolbar (`spell-comments.entry.js` `currentSection()`):  it bundles no Spell UI
   - the runtime's `EPIC_LAND_GAP` is its own since P22, no mirror:  `EpicFold`'s `LAND_GAP` went in P18
   - Left:  the site sections' sticking, in the site (the finding's "later":  into Spell UI's own code)
+
+### Keeping the reader's place while much of the page folds or hides
+
+- **It is:**  `ScrollAnchor.keep(change, root?)` (`epic/src/components/epic-item/ScrollAnchor.ts`;  epic `epic-engine`
+  I350):  notes the section, phase or item at the window's top (below the stuck titles, `--epic-stack`), makes the
+  change, then puts that one back in its spot every frame for 1.2s;  hidden by the change, the nearest one before it
+- **Use it when:**  a click hides, folds or opens many boxes of an epic page at once:  the state chips, "show all",
+  expand-all / collapse-all.  One box folded by its own title keeps its title put instead (`keepTitlePut()`,
+  `keepLinePut()`)
+- **Flag:**  `scrollBy\(\{ top: moved`
+- **Copies:**  `--` since I350 (the page's toolbar chips and toggle-all, a section's chips and "show all")
 
 ### Copying, with VS Code's side bar
 

@@ -7,7 +7,6 @@ import { E } from "spell/element"
 import { epicCommentPaneVocabulary } from "./EpicCommentPane.en"
 
 import paneCSS from "./EpicCommentPane.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 import savedMarkCSS from "spell/epic/components/epic-review/SavedMark.css?inline"
 import { SAVED_MARK } from "spell/epic/components/epic-review/EpicReview.types"
 
@@ -30,7 +29,7 @@ import { SAVED_MARK } from "spell/epic/components/epic-review/EpicReview.types"
 export class EpicCommentPane extends E.UIComponent<typeof epicCommentPaneVocabulary> {
   @E.proto static vocabulary = epicCommentPaneVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-comment-pane": paneCSS, "epic-saved-mark": savedMarkCSS },
+    styleSheets: { "epic-comment-pane": paneCSS, "epic-saved-mark": savedMarkCSS },
     aria: { role: "dialog" },
     // its field takes the focus;  a click on its header starts a drag, never focuses ×
     delegatesFocus: false
@@ -60,7 +59,7 @@ export class EpicCommentPane extends E.UIComponent<typeof epicCommentPaneVocabul
           ref={(header) => (this.header = header)}
           class={HEADER}
           part={this.partForName("header")}
-          title={`${this.about ?? ""}\n${this.translationForKey("dragTip")}`}
+          data-tooltip={`${this.about ?? ""}\n${this.translationForKey("dragTip")}`}
           onPointerDown={this.onGrab}
           onPointerMove={this.onDrag}
           onPointerUp={this.onDrop}
@@ -69,7 +68,13 @@ export class EpicCommentPane extends E.UIComponent<typeof epicCommentPaneVocabul
           <ui-icon name="bullhorn" />
           <span class={HEADLINE}>{this.headline}</span>
           <Show when={this.saved}>
-            <span class={`${FLOPPY} ${SAVED_MARK}`} title={this.saved} data-failed={this.failed ? "" : undefined}>
+            <span
+              class={`${FLOPPY} ${SAVED_MARK}`}
+              role="img"
+              aria-label={this.saved}
+              data-tooltip={this.saved}
+              data-failed={this.failed ? "" : undefined}
+            >
               <ui-icon name="floppy disk outline" />
             </span>
           </Show>
@@ -79,7 +84,7 @@ export class EpicCommentPane extends E.UIComponent<typeof epicCommentPaneVocabul
               appearance="circular basic"
               size="mini"
               icon="trash can"
-              title={this.translationForKey("deleteTitle")}
+              data-tooltip={this.translationForKey("deleteTitle")}
               aria-label={this.translationForKey("deleteLabel")}
               onClick={() => this.send("epic-comment-removing", {})}
             />
@@ -89,7 +94,7 @@ export class EpicCommentPane extends E.UIComponent<typeof epicCommentPaneVocabul
             appearance="circular basic"
             size="mini"
             icon="xmark"
-            title={this.translationForKey("closeTitle")}
+            data-tooltip={this.translationForKey("closeTitle")}
             aria-label={this.translationForKey("closeLabel")}
             onClick={() => this.send("epic-comment-closing", {})}
           />

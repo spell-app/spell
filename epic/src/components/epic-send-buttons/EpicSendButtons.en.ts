@@ -20,7 +20,9 @@ export const epicSendButtonsVocabulary = {
   noun: "send-buttons",
   ui: false,
   description:
-    'Send, the paper plane, its words "Send to Claude" beside it.  With `countdown` (an epic page\'s header;  epic `epic-engine` P53), Auto Send too:  with ' +
+    'Send, the paper plane, its words "Send to Claude" beside it;  "Sent to Claude" for 5 seconds after a send, a ' +
+    "press or Auto Send's, in the same width.  With `countdown` (an epic page's header;  epic `epic-engine` P53), " +
+    "Auto Send too:  with " +
     "something not sent, a ring round the plane, set apart from it with rounded ends, drains clockwise over the wait " +
     "the page header's gear chose (2 minutes by default, or 5), starting again at every key, click or scroll on the " +
     "page and held full while a note box is typed in;  at the end the owner is asked to send, as a press would.  " +
@@ -106,7 +108,11 @@ export const epicSendButtonsVocabulary = {
       name: "count",
       description: "The badge on the plane:  how many things a press sends."
     },
-    { name: "words", description: 'The words beside the plane, "Send to Claude" (I305).' },
+    {
+      name: "words",
+      description:
+        'The words beside the plane, "Send to Claude" (I305);  "Sent to Claude" for 5 seconds after a send (I352).'
+    },
     {
       name: "working",
       description: "The turning ring round the plane:  a blue arc going round, only while the session works on a Send."
@@ -135,8 +141,19 @@ export const epicSendButtonsVocabulary = {
         'The words beside the plane (I305;  Owen, 2026-11-15:  "The round plane icon at the top is what should say `send to claude`").'
     },
     {
+      key: "sentWords",
+      text: "Sent to Claude",
+      description:
+        'The words beside the plane for 5 seconds after a send (I352;  Owen:  "Should say `Sent to Claude` for 5 seconds after send").'
+    },
+    {
+      key: "sentAt",
+      text: "sent at {time}",
+      description: "After the plane's words for 5 seconds after a send;  `{time}` like `14:32`."
+    },
+    {
       key: "counting",
-      text: "sends by itself in {time};  click to send now",
+      text: "sends itself in {time}, or now",
       description: "After the plane's words while the ring counts;  `{time}` like `1:42`."
     },
     {
@@ -151,7 +168,7 @@ export const epicSendButtonsVocabulary = {
     },
     {
       key: "held",
-      text: "sends by itself once you leave the note box;  click to send now",
+      text: "sends itself when you leave the note box, or now",
       description: "After the plane's words while a note box with words has the focus:  the ring stays full."
     }
   ],

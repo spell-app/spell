@@ -23,7 +23,6 @@ import {
   type SortDetail
 } from "./EpicList.types"
 
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 import listCSS from "./EpicList.css?inline"
 
 /****************
@@ -48,8 +47,7 @@ import listCSS from "./EpicList.css?inline"
 export class EpicList extends E.UIComponent<typeof epicListVocabulary> {
   @E.proto static vocabulary = epicListVocabulary
   @E.protoMerged static elementSetup = {
-    // a chip's tooltip on the chip, never its count (`epic-tooltip`)
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-list": listCSS },
+    styleSheets: { "epic-list": listCSS },
     // a list of links:  a click on a card's words must not jump to its first link
     delegatesFocus: false
   } satisfies Partial<E.ElementSetup>
@@ -187,7 +185,7 @@ export class EpicList extends E.UIComponent<typeof epicListVocabulary> {
                     part={this.partForName("chip")}
                     data-saga={chip().id}
                     aria-pressed={on() ? "true" : "false"}
-                    title={this.chipTip(chip(), on())}
+                    data-tooltip={this.chipTip(chip(), on())}
                     onClick={() => this.pickSaga(chip().id)}
                   >
                     {chip().title} <span class={COUNT}>{chip().count}</span>
@@ -223,7 +221,7 @@ export class EpicList extends E.UIComponent<typeof epicListVocabulary> {
 
   /** A chip's tooltip:  its saga's purpose, then what a click does. */
   private chipTip(chip: SagaChip, on: boolean): string {
-    const does = this.translationForKey(on ? "showOnly" : "showToo", { saga: chip.title })
+    const does = this.translationForKey(on ? "showOnly" : "showToo", { saga: chip.title, count: chip.count })
     return chip.tip ? `${chip.tip}\n${does}` : does
   }
 

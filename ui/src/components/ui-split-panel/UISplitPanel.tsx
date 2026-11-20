@@ -20,7 +20,8 @@ import splitPanelCSS from "./UISplitPanel.css?inline"
  *   and its place is its inline `order`, between the bars'.  So a running program in one keeps running.
  *   - The price:  Tab reaches the bars after every pane, not between them.
  * - The sizes aren't remembered here:  `ui-changed` hands over `sizes`, to keep and give back as `columns` or `rows`.
- * - Sizes, in `columns` or `rows`:  a comma list, one for each pane (`"20%,*,380px"`).
+ * - Sizes, in `columns` or `rows`:  a comma list, one for each pane (`"20%, *, 380px"`), read by `E.PaneSizes`,
+ *   as `<ui-tree>` reads its columns' `size`.
  *   - a number, `px` or `em`:  fixed
  *   - `%`:  that share of what the fixed panes leave
  *   - `*`, or missing:  an equal share of the percent left
@@ -55,7 +56,7 @@ export class UISplitPanel extends E.UIComponent<typeof splitPanelVocabulary> {
   @E.state({ equals: E.isSameList }) accessor barPlaces: number[] = []
 
   /** Sizes now, one per pane.  NOT a reactive member:  a drag rewrites them on every move. */
-  private sizes: PaneSize[] = []
+  private sizes: E.PaneSize[] = []
 
   /** What a drag works from, measured when it starts. */
   private dragged: BarDrag | undefined
@@ -137,7 +138,7 @@ export class UISplitPanel extends E.UIComponent<typeof splitPanelVocabulary> {
   /** Size the panes once drawn, and again when their number or the sizes given change. */
   @E.onChange("panes", "sizesGiven", { writesDOMElement: true })
   protected onPanesChanged(panes: HTMLElement[], sizesGiven: string) {
-    this.apply(UISplitPanel.sizesFor(sizesGiven, panes.length))
+    this.apply(E.PaneSizes.sizesFor(sizesGiven, panes.length, { source: "<ui-split-panel>" }))
     // measured once laid out, after this update:  the bars read the places, so a write now would draw them twice
     if (!isServer) E.beforeNextPaint(() => this.findBarPlaces())
   }
@@ -155,7 +156,7 @@ export class UISplitPanel extends E.UIComponent<typeof splitPanelVocabulary> {
   }
 
   /** Make `sizes` the sizes:  each pane's inline `order` and `flex`. */
-  private apply(sizes: PaneSize[]) {
+  private apply(sizes: E.PaneSize[]) {
     this.sizes = sizes
     // beside a growing pane, a fixed pane still gives way once that one is as small as it gets
     const fixedShrink = this.growingPane === undefined ? 0 : 1
@@ -216,7 +217,7 @@ export class UISplitPanel extends E.UIComponent<typeof splitPanelVocabulary> {
 
   /** Say the sizes now, in the form `columns` and `rows` take. */
   private sendSizes() {
-    this.send("ui-changed", { sizes: UISplitPanel.sizeText(this.sizes), panes: this.panes })
+    this.send("ui-changed", { sizes: E.PaneSizes.sizeText(this.sizes), panes: this.panes })
   }
 
   /**
@@ -370,39 +371,6 @@ export class UISplitPanel extends E.UIComponent<typeof splitPanelVocabulary> {
   ////////////////
 
   /**
-   * One `PaneSize` per pane from `spec`, in the form `columns` and `rows` take.
-   * - Cut or padded to `count`:  a missing or unreadable entry counts as `*`.
-   * - `*` entries share the percent the `%` entries leave, equally (at least 1% each).
-   */
-  static sizesFor(spec: string, count: number): PaneSize[] {
-    const given = spec ? spec.split(",").slice(0, count) : []
-    while (given.length < count) given.push(STAR)
-    let stars = 0
-    let percents = 0
-    const sizes = given.map((text): { value: number | typeof STAR; units: string } => {
-      const size = text.trim()
-      if (size === AUTO) return { value: 0, units: AUTO }
-      const match = NUMBER_WITH_UNITS.exec(size)
-      if (match) {
-        const units = match[2] || "px"
-        const value = parseFloat(match[1])
-        if (units === "%") percents += value
-        return { value, units }
-      }
-      if (size !== STAR) console.warn(`<ui-split-panel>:  the size "${size}" isn't one;  it shares what's left`)
-      stars++
-      return { value: STAR, units: "%" }
-    })
-    const perStar = Math.max(1, (100 - percents) / Math.max(stars, 1))
-    return sizes.map(({ value, units }) => ({ value: value === STAR ? perStar : value, units }))
-  }
-
-  /** `sizes` in the form `columns` and `rows` take:  `"60%,40%"`. */
-  static sizeText(sizes: PaneSize[]): string {
-    return sizes.map(({ value, units }) => (units === AUTO ? AUTO : `${value}${units}`)).join(",")
-  }
-
-  /**
    * The least and most `pane` may be dragged to, px:  its own `min-` and `max-height` (`-width` side by side).
    * - Its least:  only px count;  `auto` is 0.
    * - Its most:  whatever its `max-height` says, `max-content` or a percent too, found by asking for far more
@@ -439,14 +407,6 @@ export class UISplitPanel extends E.UIComponent<typeof splitPanelVocabulary> {
 
 export interface UISplitPanel extends E.AttributeValues<typeof splitPanelVocabulary> {}
 
-/** One pane's size, e.g. `{ value: 20, units: "%" }`. */
-export type PaneSize = {
-  /** How much, in `units`. */
-  value: number
-  /** `px`, `em`, `%` or `auto` (its `value` unused). */
-  units: string
-}
-
 /** The least and most a pane may be dragged to, px, from its own CSS:  the same, and it can't be resized. */
 type PaneBounds = {
   /** Its `min-height` (`min-width`), else 0. */
@@ -464,7 +424,7 @@ type BarDrag = {
   /** Every pane's least and most, px, `min-size` included. */
   bounds: PaneBounds[]
   /** The sizes given as it started:  each pane's kind of size, which it goes back to when let go. */
-  sizes: PaneSize[]
+  sizes: E.PaneSize[]
   /** Every pane's size now, px, once the bar has moved. */
   moved?: number[]
   /** Index of the pane before the bar. */
@@ -485,10 +445,8 @@ type BarDrag = {
   minPixels: number
 }
 
-/** A pane as big as its content:  its units, and how a spec says it. */
+/** A pane as big as its content:  its units (`E.PaneSizes`). */
 const AUTO = "auto"
-/** A size that shares what's left. */
-const STAR = "*"
 /** The attribute an `auto` pane carries, for what it holds to lay out in it rather than over it. */
 const FIT_ATTRIBUTE = "data-split-fit"
 /** A bar's place before the panes are measured. */

@@ -36,6 +36,11 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `timing.ts` -- when to run something (epic `coherence` P19, from `spell/element`, which re-exports it):
     `afterSolidUpdate()`, `beforeNextPaint()`, `soon()`, `after()`, `every()`;  and waiting:  `waitUntil()`, `within()`
   - `polling.ts` -- `pollWhileVisible()`, on `every()`:  the ONE way to poll.  Taken by file, in no barrel
+    - and `watchServerFiles()`, the ONE watch of every page, which refreshes:
+      - when the page server says a file changed (`spell-server:changed`)
+      - when the page shows, and on a poll
+      - held off while the server is down
+      - who:  spell-epic's `ServerLink.watch()` wraps it;  the editor's open file (epic `from-console` P17)
   - `addressPattern.ts` -- the ONE grammar for an address with parameters (`/films/:film`, `:rest*`):
     `compilePattern()` matches one, `filledPattern()` writes one;  the server's router and a running Spell site
     both match with it (epic `mockup` P2).  Taken by file, in no barrel
@@ -160,7 +165,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     (caveat C12 of `output-targets`;  epic `spell-element`, which that waited on, is in `main`).
 - Its files import each other as peers.
   - Spell's utilities (`spell/`) import it as `spell/util/reactive`, never through the barrel.
-- It's Solid work:  READ [the Solid 2 rules](../../spell.epics/guides/solid/solid-2.md) IN FULL first.
+- It's Solid work:  READ [the Solid 2 rules](../../agents/solid/solid-2.md) IN FULL first.
 
 ## Kept values (`persist/`)
 

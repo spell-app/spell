@@ -53,7 +53,7 @@ describe("<epic-comment-pane>", () => {
     const fresh = await pane(undefined)
     expect({
       headline: part(fresh, "header").textContent,
-      tip: part(fresh, "header").title,
+      tip: part(fresh, "header").dataset.tooltip,
       buttons: fresh.shadowRoot!.querySelectorAll("ui-button").length,
       floppy: !!fresh.shadowRoot!.querySelector(".floppy"),
       role: (fresh as unknown as { internals: ElementInternals }).internals.role,
@@ -61,7 +61,7 @@ describe("<epic-comment-pane>", () => {
       slotted: !!fresh.querySelector("textarea")!.assignedSlot
     }).toEqual({
       headline: "“2. Context”",
-      tip: "On a section in “2. Context”\n(Drag to move)",
+      tip: "On a section in “2. Context”\nDrag to move",
       buttons: 1,
       floppy: false,
       role: "dialog",
@@ -75,7 +75,7 @@ describe("<epic-comment-pane>", () => {
     const floppy = saved.shadowRoot!.querySelector<HTMLElement>(".floppy")!
     expect([
       saved.shadowRoot!.querySelectorAll("ui-button").length,
-      floppy.title,
+      floppy.dataset.tooltip,
       floppy.hasAttribute("data-failed")
     ]).toEqual([2, "Not saved:  offline (kept in this browser)", true])
     saved.remove()

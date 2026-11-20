@@ -165,7 +165,11 @@ export class SpellCodeMirror implements CodeEditorHandle {
       findReferences: () => this.findReferences(head),
       peekDefinition: () => this.peek(head, "definition"),
       peekReferences: () => this.peek(head, "references"),
-      rename: () => this.rename()
+      rename: () => this.rename(),
+      // the language service's:  nothing in a file of another language (CSS)
+      format: () => this.language?.format(view),
+      expandSelection: () => this.language?.expandSelection(view, "expand"),
+      shrinkSelection: () => this.language?.expandSelection(view, "shrink")
     }
     void Promise.resolve(commands[command]()).catch((error: unknown) =>
       console.error(`SpellCodeMirror.run():  ${command} failed`, error)
@@ -377,14 +381,19 @@ export class SpellCodeMirror implements CodeEditorHandle {
    * The editor page's shortcuts as `editor`'s keys:
    * each code-editor command (`codeEditorCommand`) runs in it;  each other key the page runs (`run`) runs, but those
    * the code never takes (`outsideCode`:  Esc, the parts' Cut and Copy).
-   * - Its own Undo, Redo and Find too, through `run()`:  the same as CodeMirror's.
+   * - Its own Undo, Redo and Find too, through `run()`:  the same as CodeMirror's;
+   *   and the language service's Format Document and Expand / Shrink Selection.
+   * - A key that's another on a Mac (`mac`) is CodeMirror's `mac` key.
+   * - A key only listed (no `run`, no command) is CodeMirror's own, already in its keymap:  nothing added.
    */
   static keymapFor(editor: SpellCodeMirror, hotkeys: Readonly<Record<string, Hotkey>>): KeyBinding[] {
-    return Object.values(hotkeys).flatMap(({ shortcut, run, codeEditorCommand, outsideCode }): KeyBinding[] => {
-      const key = codeMirrorKey(shortcut)
-      if (codeEditorCommand) return [{ key, run: () => (editor.run(codeEditorCommand), true), preventDefault: true }]
+    return Object.values(hotkeys).flatMap(({ shortcut, mac, run, codeEditorCommand, outsideCode }): KeyBinding[] => {
+      const keys = { key: codeMirrorKey(shortcut), mac: mac ? codeMirrorKey(mac) : undefined }
+      if (codeEditorCommand) {
+        return [{ ...keys, run: () => (editor.run(codeEditorCommand), true), preventDefault: true }]
+      }
       if (!run || outsideCode) return []
-      return [{ key, run: () => (void run(), true), preventDefault: true }]
+      return [{ ...keys, run: () => (void run(), true), preventDefault: true }]
     })
   }
 

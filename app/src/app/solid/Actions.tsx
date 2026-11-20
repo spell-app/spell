@@ -165,6 +165,16 @@ export const Actions = {
   showHelp: (props: ActionProps) => (
     <Action title={appTexts.text("help")} icon="help circle" onClick={() => editor.showHelp()} {...props} />
   ),
+  /** Help › Keyboard Shortcuts:  every key the editor has, in a dialog (epic `editor` P36);  the static build's too. */
+  showShortcuts: (props: ActionProps) => (
+    <Action
+      title={appTexts.text("shortcuts")}
+      icon="keyboard outline"
+      shortcut={EDITOR_HOTKEYS.showShortcuts.shortcut}
+      onClick={() => editor.showShortcuts()}
+      {...props}
+    />
+  ),
   /**
    * The person, as their avatar:  their name's first letter in a circle, the "You" panel on a click.
    * - Drawn by its sheet (`.YouAvatar`, `chrome.css`) in the theme's primary colours, until people have pictures

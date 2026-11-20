@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
+
 import chalk from "chalk"
 import { Command, Help, Option } from "commander"
 
@@ -23,6 +26,7 @@ import { Shared } from "spell/epic/command/Shared"
 import { Stock } from "spell/epic/command/Stock"
 import { TurnEnd } from "spell/epic/command/TurnEnd"
 import { Turns } from "spell/epic/command/Turns"
+import { Upgrade } from "spell/epic/command/Upgrade"
 import { VoiceCheck } from "spell/epic/command/VoiceCheck"
 import { Worktrees } from "spell/epic/command/Worktrees"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
@@ -54,6 +58,7 @@ import { GROUP_VERBS, VERB_FLAGS, type GroupName, type VerbFlags } from "./epicG
  *   - `init`:  a repo set up for epics (`RepoInit`, epic `epic-eject` P9)
  *   - `plugin install`:  the epic plugin installed in Claude Code, `epic@spell` (`PluginInstall`, epic `epic-engine` P49);
  *     `--codex`:  for Codex, its hooks, skills and custom agents (epic `epic-friend` P11, P12)
+ *   - `upgrade`:  the plugin brought up to the newest `spell@next` on npm (`Upgrade`, epic `epic-engine`)
  *   - `guide`, `turn end`:  the workflow for ANY agent, and the step that ends its turn (`EpicGuide`, `TurnEnd`;  epic
  *     `epic-friend` P11)
  *   - `turns`:  work that takes turns on the machine, a full test run (`Turns`, epic `epic-engine` T77)
@@ -151,10 +156,12 @@ export class EpicProgram {
 
     requests(epic.command("file"))
       .description(
-        "file a request into a phase or a todo:  your words and screenshots into its Requests field, or the todo's " +
-          'text and pictures;  or, a duplicate, mark which:  "same as T12"'
+        "file a request into a phase, a todo or an issue:  your words and screenshots into its Requests field, or the " +
+          'item\'s text and pictures;  or, a duplicate, mark which:  "same as T12"'
       )
-      .usage('<epic>#P3 <request id>  |  <epic>#T5 <request id>  |  <epic> <request id> "same as T12"')
+      .usage(
+        '<epic>#P3 <request id>  |  <epic>#T5 <request id>  |  <epic>#I5 <request id>  |  <epic> <request id> "same as T12"'
+      )
       .addHelpText("after", FILE_HELP)
 
     requests(epic.command("home"))
@@ -198,6 +205,30 @@ export class EpicProgram {
     ).usage(
       '<epic> [--title "Title"] [--prompt "text" | --prompt-file <file>] [--future] [--saga <id>] [--stage <stage>]'
     )
+    // a whole epic, as its card's menu on the Epics page does (`EpicLifecycle`, epic `epic-engine` T103)
+    const lifecycle = (verb: Command) =>
+      this.verb(verb, async (args) => {
+        const { EpicLifecycle } = await import("spell/epic/tool/EpicLifecycle")
+        return new EpicLifecycle({ root: EpicCheckout.nearest() }).run([verb.name(), ...args])
+      })
+    lifecycle(epic.command("rename"))
+      .description(
+        "rename an epic:  its folder, its files and the links to it follow;  refused while it has a worktree, or a " +
+          "branch with work not merged"
+      )
+      .usage("<epic> <new-name>")
+      .addHelpText("after", example("epic rename seo docs-seo"))
+    lifecycle(epic.command("complete"))
+      .description("mark an epic complete:  its phases left dropped, the items waiting on you canceled, standing off")
+      .usage("<epic>")
+      .addHelpText("after", example("epic complete seo"))
+    lifecycle(epic.command("delete"))
+      .description(
+        "delete an epic's folder from the epic repo, its history keeping it;  refused while it has a worktree, or a " +
+          "branch with work not merged"
+      )
+      .usage("<epic>")
+      .addHelpText("after", example("epic delete seo"))
     this.page(
       epic.command("stage"),
       "set the page's stage, which decides what it shows:  overview (the Overview, Questions and Todos), phases (the " +
@@ -262,7 +293,7 @@ export class EpicProgram {
       epic.command("lint"),
       "ids, #id links, phases, parts;  its links;  then the browser check",
       "epic lint seo --no-browser"
-    ).usage("<epic> [--no-browser] [--links]")
+    ).usage("<epic> [--no-browser] [--links] [--fix]")
 
     ////////////////
     // ## Epic page:  phases
@@ -472,6 +503,13 @@ export class EpicProgram {
         "on and off print a TELL: line for each running epic session;  summary:  what happened since",
       (args) => EpicTools.planDoc(["focus", ...args])
     )
+    this.group(
+      epic.command("demo"),
+      "the staged demo (/epic demo):  the real epic page and tools, run from pre-written text;  " +
+        "reset clears it to run again",
+      // loaded when run:  the epic tool's files stay out of every other verb's start
+      async (args) => new (await import("spell/epic/command/StagedDemo")).StagedDemo().run(args)
+    )
     this.page(
       epic.command("backfill"),
       "items you already went through in past sessions:  a dry run unless --apply",
@@ -653,7 +691,7 @@ export class EpicProgram {
   // ## The repo's settings
   ////////////////
 
-  /** `config`, `voice`, `init`, `whoami`, `whois`, `plugin`. */
+  /** `config`, `voice`, `init`, `whoami`, `whois`, `plugin`, `upgrade`. */
   private addSettingsVerbs(): void {
     const epic = this.epic
     epic.commandsGroup("The repo's settings:")
@@ -678,7 +716,7 @@ export class EpicProgram {
       )
       .addHelpText("after", VOICE_HELP)
 
-    this.verb(epic.command("init"), (args) => new RepoInit().run(args))
+    this.verb(epic.command("init"), (args) => RepoInit.runHere(args))
       .description(
         "set this repo up for epics, the one command to start (npx spell@next epic init):  the plugin, its " +
           ".epic/config.json5, the epic repo beside it (made, or cloned from the team's), shared on GitHub or GitLab, the " +
@@ -687,7 +725,7 @@ export class EpicProgram {
       .usage(
         "[--local] [--name <name>] [--color <colour>] [--install <command>] [--content-repo <name> | --remote <address> | --no-remote] " +
           "[--public] [--host github|gitlab] [--protected-base] [--superpowers] [--no-plugin] [--no-commit] [--no-server] " +
-          "[--dry-run] " +
+          "[--dry-run | --demo] " +
           "[--json]"
       )
       .addHelpText("after", INIT_HELP)
@@ -712,6 +750,14 @@ export class EpicProgram {
         "install --codex:  its hooks, skills and custom agents for Codex",
       (args) => new PluginInstall().run(args)
     )
+
+    this.verb(epic.command("upgrade"), (args) => new Upgrade().run(args))
+      .description(
+        "bring the epic plugin up to the newest spell on npm (spell@next):  installs it in ~/.spell-epic/versions, " +
+          "points Claude Code's plugin, its skills and the epic command at it;  in Spell's own checkout, says to git pull"
+      )
+      .usage("[--dry-run] [--json]")
+      .addHelpText("after", example("epic upgrade --dry-run"))
   }
 
   ////////////////
@@ -978,12 +1024,26 @@ export class EpicProgram {
 
   /**
    * `epic --version`:  the code this `epic` runs, `<short sha> (<branch>) <checkout>`.
+   * - an npm install of `spell` has no git:  `epic 0.8.10 (npm) <folder>`, the package's version
+   *   (it said `epic ? (detached)` before epic `epic-engine` I343)
    * - static:  this code's checkout, whoever calls
    */
   static version(): string {
-    const sha = Git.run(["rev-parse", "--short", "HEAD"], EpicCheckout.CODE_ROOT).out || "?"
+    const sha = Git.run(["rev-parse", "--short", "HEAD"], EpicCheckout.CODE_ROOT).out
+    if (!sha) return `epic ${EpicProgram.packageVersion()} (npm) ${EpicCheckout.CODE_ROOT}`
     const branch = Git.run(["branch", "--show-current"], EpicCheckout.CODE_ROOT).out || "detached"
     return `epic ${sha} (${branch}) ${EpicCheckout.CODE_ROOT}`
+  }
+
+  /** The `spell` package's version, from its `package.json`;  `?` if it can't be read.  NEVER throws. */
+  static packageVersion(): string {
+    try {
+      return (
+        (JSON.parse(readFileSync(join(CLI.KIT_ROOT, "package.json"), "utf8")) as { version?: string }).version ?? "?"
+      )
+    } catch {
+      return "?"
+    }
   }
 
   /**
@@ -1264,9 +1324,15 @@ A config naming one keeps it, asking nothing.  Change it later in .epic/config.j
 without it, epic init asks in a terminal, suggesting your GitHub login (else git's user.name), and takes that
 anywhere else.
 
+--dry-run says what epic init would do, asking nothing, and changes nothing.
+--demo shows epic init as someone new sees it, to show it to people:  it asks every question and shows every step,
+but changes nothing:  no files, no epic repo, no commit, no plugin install, no epic server.  It works in any folder,
+a repo set up already too:  it runs against a fresh copy of the repo in a temporary folder, deleted at the end.
+
 Examples:
   npx spell@next epic init        the same, before anything is installed
   epic init --dry-run
+  npx spell@next epic init --demo   show it to people, changing nothing
   epic init --name Ana --color green
   epic init --install "uv sync --all-packages --all-extras"
   epic init --content-repo my-app.epics
@@ -1292,15 +1358,17 @@ Examples:
 
 /** After `epic file --help`. */
 const FILE_HELP = `
-Every request becomes a todo or a phase (epic-engine T88).
+Every request becomes an issue (a bug report), a todo (a feature) or a phase (bigger;  epic-engine T88, T108).
 Into a phase, the request's words, context and screenshots go into its Requests field, and the request is marked
 filed there (P3).  Into a todo, they go at the end of its text, the screenshots as its pictures (deletable on the
-page), the todo marked requested (light orange once done), and the request filed there (T5).
+page), the todo marked requested (light orange once done), and the request filed there (T5).  Into an issue, the
+same (I5).
 With neither, it's only marked, saying where it went:  only for a duplicate, naming the todo or phase it duplicates.
 
 Examples:
   epic file seo#P3 r3
   epic file seo#T5 r3
+  epic file seo#I5 r3
   epic file seo r3 "same as T12"`
 
 /** After `epic update --help`. */
@@ -1326,6 +1394,10 @@ word after the target, never with fields:
                                                           until Approve closes it;  a Do this's done means this too
   noted "<what>"                                          a STEP done, the item not finished:  your choice
                                                           recorded, an answer or details written:  a Noted card
+  A card's text:  a short lead sentence, then short paragraphs or bullets, one idea each:
+    a blank line (or "\\n\\n") starts a paragraph, "- " lines are bullets;  a paragraph or
+    bullet over 50 words is refused;  --file <html> for a long one;  the full story goes in
+    the item's body (epic details <epic>#<id> --append)
 
 Examples:
   epic update seo#P3 --goal "<p>...</p>" --estimate 2h
@@ -1334,6 +1406,7 @@ Examples:
   epic update epic-workflow --standing
   epic update seo#I3 underway "Reading the routes"
   epic update seo#I3 done "Fixed;  one test skipped"
+  epic update seo#I3 done "Sitemap written on build\\n\\n- one per locale\\n- 2 tests added"
   epic update seo#I3 fixed "Writes the file on build now"
   epic update seo#J3 noted "Answered his note:  options A and B"`
 

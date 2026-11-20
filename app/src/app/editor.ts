@@ -1,9 +1,10 @@
 import type { ViewUpdate } from "@codemirror/view"
 
 import { $fetch, UIError, Observable, prop, setDebugGlobal, LoadableFile } from "spell/util"
-import { pollWhileVisible } from "spell/util/polling"
+import { watchServerFiles } from "spell/util/polling"
 import { after, type CancelablePromise } from "spell/util/timing"
 
+import { isLiveChannelOpen, joinLiveChannel } from "spell/server/liveClient"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { SPACES } from "spell/app/spaces"
@@ -177,6 +178,17 @@ export class EditorStore extends Observable {
   /** Show help. TODO: not yet implemented. */
   showHelp(): void {
     console.warn("TODO: editor.showHelp() not yet implemented")
+  }
+  /**
+   * Show the Keyboard Shortcuts dialog (`openShortcuts()`, epic `editor` P36):  every key of the editor's one list,
+   * grouped by where it works, with a search field.
+   * - Help › Keyboard Shortcuts, and ? outside the code and the fields.
+   * - NEVER throws:  an error loading the dialog shows as the editor's error.
+   */
+  showShortcuts(): void {
+    void dialogs()
+      .then((modals) => modals.openShortcuts())
+      .catch((error: unknown) => editor.showError(error))
   }
   /**
    * Show the "You" panel (`openYouPanel()`, epic `people-and-orgs` P9):
@@ -1933,8 +1945,17 @@ export class EditorStore extends Observable {
   }
 
   /**
-   * Watch the open file for a change from OUTSIDE the editor (another window, an agent, git):
-   * read it every `FILE_POLL` seconds while the page shows, and hand a changed one to `reloadFiles()`.
+   * Watch the open file for a change from OUTSIDE the editor (another window, an agent, git),
+   * and hand a changed one to `reloadFiles()`.
+   * - The page server tells the editor when one of the open project's files changes, over its live channel
+   *   (`watchServerFiles()`;  epic `from-console` P17).
+   *   The file is read again only then, and when the page shows again.
+   *   - The editor joins that channel through vite's proxy (`joinLiveChannel()`):
+   *     vite serves its page, not the page server, so nothing else puts the live client on it.
+   *   - The page server says so for every project's files (the app's route module, `watchSpaceFiles()`).
+   * - While the channel isn't open (not yet, or in a frame, which joins none):
+   *   read every `FILE_FALLBACK_POLL` seconds.
+   *   It replaced a read every 2 seconds, whatever happened.
    * - Any open project file (epic `notebook` P3:  a notebook page's own watch, lifted here).
    * - The running app takes it as any edit (`LiveEdit`):  a notebook page draws again where it changed.
    * - Never a file with edits not saved, or one being saved:  ours wins until it's saved, as ever.
@@ -1943,7 +1964,13 @@ export class EditorStore extends Observable {
    */
   watchOpenFile(): () => void {
     if (isStaticBuild) return () => undefined
-    return pollWhileVisible(FILE_POLL, () => editor.readOpenFile())
+    joinLiveChannel()
+    const isOpenProjects = (path: string) =>
+      !!editor.project && path.startsWith(`${SP.SpellUrls.SPACES}${editor.project.path}/`)
+    return watchServerFiles(window, isOpenProjects, () => void editor.readOpenFile(), {
+      every: FILE_FALLBACK_POLL * 1000,
+      polls: () => !isLiveChannelOpen()
+    })
   }
 
   /** Read the open file again, and reload it if someone else changed it:  see `watchOpenFile()`.  NEVER throws. */
@@ -2473,8 +2500,11 @@ let scopeExplorer: LSP.ScopeExplorer | undefined
  */
 const EDIT_COMPILE_DELAY = 2
 
-/** How often the open file is read for a change from outside, seconds:  see `editor.watchOpenFile()`. */
-const FILE_POLL = 2
+/**
+ * How often the open file is read for a change from outside, seconds, while the live channel isn't open:
+ * see `editor.watchOpenFile()`.
+ */
+const FILE_FALLBACK_POLL = 30
 
 /** The preference that remembers AutoSave. */
 const AUTO_SAVE_PREF = "autoSave"

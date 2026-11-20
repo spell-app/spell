@@ -135,7 +135,7 @@ describe("<spell-site-header>'s icon buttons (I43)", () => {
       })
     })
     expect(buttons.map(({ title }) => title)).toEqual([
-      "Spell docs",
+      "Spell Epic home page",
       "Edit sections in place",
       "Open the source in VS Code",
       expect.stringMatching(/^(Light|Dark)/)
@@ -206,6 +206,38 @@ describe("<spell-site-header>'s tabs (I4)", () => {
       { name: "Kit", href: "/components/kit/", lit: false, target: null },
       { name: "Tool", href: "/tool/", lit: false, target: "spell-tool" }
     ])
+    await page.close()
+  })
+})
+
+// epic `epic-engine` (Owen, 2026-11-18):  "center in the toolbar"
+describe("<spell-site-header>'s tabs, centred", () => {
+  /** the bar's, the brand's, the tabs' and the tools' left and right edges, px */
+  function edges(page: Page) {
+    return page.evaluate(() => {
+      const shadow = document.querySelector("spell-site-header")!.shadowRoot!
+      const box = (selector: string) => {
+        const rect = shadow.querySelector(selector)!.getBoundingClientRect()
+        return { left: rect.left, right: rect.right }
+      }
+      return { bar: box("header"), brand: box(".brand"), tabs: box("nav"), end: box(".end") }
+    })
+  }
+
+  it("wide:  the tabs' middle is the bar's middle", async () => {
+    const page = await opened("/guides/guide.html")
+    await page.setViewportSize({ width: 1280, height: 600 })
+    const { bar, tabs } = await edges(page)
+    expect(Math.abs((tabs.left + tabs.right) / 2 - (bar.left + bar.right) / 2)).toBeLessThanOrEqual(1)
+    await page.close()
+  })
+
+  it("the side bar's width:  nothing overlaps", async () => {
+    const page = await opened("/guides/guide.html")
+    await page.setViewportSize({ width: 520, height: 600 })
+    const { brand, tabs, end } = await edges(page)
+    expect(tabs.left).toBeGreaterThanOrEqual(brand.right)
+    expect(end.left).toBeGreaterThanOrEqual(tabs.right)
     await page.close()
   })
 })

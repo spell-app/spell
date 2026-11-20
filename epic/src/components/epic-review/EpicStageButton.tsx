@@ -11,7 +11,6 @@ import { CountdownRing } from "spell/epic/components/epic-send-buttons/Countdown
 import { epicStageButtonVocabulary } from "./EpicStageButton.en"
 import { ReviewState } from "./ReviewState"
 
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 import ringCSS from "spell/epic/components/epic-send-buttons/CountdownRing.css?inline"
 import stageButtonCSS from "./EpicStageButton.css?inline"
 
@@ -28,7 +27,9 @@ import stageButtonCSS from "./EpicStageButton.css?inline"
  * - a press STARTS A 5-MINUTE COUNTDOWN (`press()`;  epic `epic-engine` I181;  Owen, 2026-10-29:  "make 'accept
  *   overview' and 'accept phases' 5 minute countdown"):  always 5 minutes (`STAGE_COUNTDOWN_MS`), whatever Auto Send says
  *   - its mark goes in the inbox at once, HELD:  `{ action: "accept", stage, countdown: true }`, dated when it goes
- *     (`ReviewInbox.stamped()`), so a Send before then never carries it, and a reload finds the countdown where it was
+ *     (`ReviewInbox.stamped()`), so a reload finds the countdown where it was
+ *   - a Send PRESSED before then carries it along, the countdown cut short (epic `epic-engine` I222);
+ *     only Auto Send leaves it to run out
  *   - Send's own ring round the icon (`CountdownRing`), green, filling in as the 5 minutes go (`:state(counting)`);
  *     its tooltip says how long is left, and that a click calls it off
  *   - nothing typed on the page starts it again:  it's a decision, not a pause in the work (Auto Send's is)
@@ -43,7 +44,7 @@ import stageButtonCSS from "./EpicStageButton.css?inline"
 export class EpicStageButton extends E.UIComponent<typeof epicStageButtonVocabulary> {
   @E.proto static vocabulary = epicStageButtonVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-tooltip": tooltipCSS, "epic-countdown-ring": ringCSS, "epic-stage-button": stageButtonCSS }
+    styleSheets: { "epic-countdown-ring": ringCSS, "epic-stage-button": stageButtonCSS }
   } satisfies Partial<E.ElementSetup>
 
   /** Its view of the page's review inbox, keyed `stage`. */
@@ -133,7 +134,7 @@ export class EpicStageButton extends E.UIComponent<typeof epicStageButtonVocabul
         class={this.rootClass}
         part={this.partForName("base")}
         data-state={this.buttonState}
-        title={this.tip}
+        data-tooltip={this.tip}
         aria-label={this.tip}
         onClick={(event: MouseEvent) => {
           // a title row's tool:  not a click on the title, which would fold it

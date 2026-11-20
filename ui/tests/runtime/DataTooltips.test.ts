@@ -160,6 +160,16 @@ describe("DataTooltips", () => {
     await expect.poll(() => bubble().textContent).toBe("Changed")
   })
 
+  it("shows on a pointer move onto a target with no `pointerover` before it (Chromium sends none at times)", async () => {
+    const host = Fixture.render(`<div><button aria-label="target" data-tooltip="Moved onto">x</button></div>`)
+    const button = host.querySelector("button")!
+    button.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, composed: true }))
+    await expect.poll(isShowing).toBe(true)
+    expect(bubble().textContent).toBe("Moved onto")
+    button.dispatchEvent(new PointerEvent("pointermove", { bubbles: true, composed: true }))
+    expect(bubble().textContent).toBe("Moved onto")
+  })
+
   it("takes the colours the target resolves, so a theme around it still shows", async () => {
     const wrapper = Fixture.render(
       `<div><button aria-label="target" data-tooltip="Red" data-variation="red">x</button></div>`

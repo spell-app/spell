@@ -51,7 +51,8 @@ once an epic page is in the `<epic-*>` markup (epic `epic-components`, P8).
   - the crumbs (`Docs › Epics › <title>`), the h1, the meta lines
   - the step label:  active phase, DONE, next, FUTURE
   - the bedtime label
-  - while reviewed, Send in the header's exact middle, with what the session is doing (a bare spinner) beside it
+  - while reviewed, Send in the header's exact middle;  while the session works, the step label's icon turns, what it
+    says it's doing (`epic inbox status`) in the label's tooltip, no words in the header (epic `epic-engine` I340)
   - the gear, last in the header:  Auto Send (Immediately, 2 minutes, 5 minutes, Off) and Theme (epic `epic-engine`
     P53, where the git toggle was:  the Log lists every commit)
   - the "Plan hung?" notice (while there's no phase), and a future epic's notice
@@ -656,7 +657,8 @@ As `plan-doc.md`, "Ids":
     - a code accordion holding a `<ui-code>`, or two blocks
     - a note headed `DEFERRED`
 - A rewrite never drops text:  `details --file`, `decide` again, `details --more`, `summarize`.
-  - `details --more` (Add Details, Clarify;  epic `epic-engine` I301):  the HTML REPLACES the item's unclear text, in
+  - `details --more` (Add Details, Clarify:  the (i) button on every item's line, any kind, since epic `epic-engine` T95;
+    I301):  the HTML REPLACES the item's unclear text, in
     an `<epic-more>` headed "More Details" that never folds;  the given "_What it says on the tin._" body goes for good,
     the item's own prose moves into its Original Discussion;  Owen's quoted words (`PlanItem.isOwenQuote()`) and every
     `<epic-*>` card stay
@@ -705,7 +707,8 @@ As `plan-doc.md`, "Ids":
     ORANGE, on their list to review again.
   - Sent back, and its note handed on to another item (a Noted card naming it:  "Your C2 is being fixed as I148"):
     fixed again by itself once that one is fixed or done (`HandedOnFixes`, epic `epic-engine` I317)
-  - Their Approve closes it;  their Do this sends it back, red;  closing it takes off `urgent` and `fixed`.
+  - Its buttons are Revisit and Accept the fix (epic `epic-engine` I299, J231):  Accept the fix closes it;  Revisit,
+    with a note saying what's still wrong, sends it back, red (I303);  closing it takes off `urgent` and `fixed`.
   - A mark already sent with `todo` applies the same way.
   - Parts that aren't items (the summary, an Overview sub-section) still make a todo, through `followUp()`.
 - NEW items from the page (epic `airplane` P2).
@@ -778,6 +781,13 @@ Two kinds of finished card, so a card for one STEP never reads as the item finis
 </epic-status>
 ```
 
+- A card's text (epic `epic-engine` I339;  2026-11-18, of a 150-word Done card:  "please stop doing this.  Break into
+  paragraphs"):  a short lead sentence saying what happened, then short paragraphs or bullets, one idea each;
+  code names and numbers only where the reader needs them;  the full story goes in the item's body.
+  - written as text, `CardText` (`planDoc.types.ts`) shapes it:  a blank line (or a shell's `\n\n`) starts a
+    paragraph, `- ` lines are bullets, `1. ` lines and a run-in `(1) … (2) …` a numbered list
+  - `epic update` refuses a paragraph or bullet over 50 words (`CardText.MOST_WORDS`);  `--file <html>` for a long card
+  - cards already on pages stay as they are
 - Drawn, a band:
   - on its left, the kind:
     - `Claude • Underway`:  blue fill
@@ -841,7 +851,7 @@ Drawn, never written:  one meaning per colour on every element (decision Q20, 20
 | violet | a person's voice                         | their reply cards, the note box, the forms and kept text of their own words |
 | terracotta | an agent's voice (Claude's, Codex's) | their reply cards' mark and name;  "recommended", a thumbs-up with no word |
 | ivory  | the page's warm ground               | the toolbar, the rail, a comment thread's ground                       |
-| light orange | what they asked for is finished, their turn to see it | `requested` chips (DARK text) |
+| light orange | what they asked for is finished, their turn to see it | `requested` chips (DARK text);  only the item's own:  every COUNT by colour takes it as orange (the page's and a section's state chips, the toolbar's badges, the Epics list page's chips;  epic `epic-engine` I347, Owen, 2026-11-18:  "Lump the light orange icons in with the orange") |
 | grey   | no longer relevant, inactive, not chosen, nothing to think about | `quiet` chips (a calm call, a limit);  `old` chips (canceled);  a todo's x (drop it);  the note box's x (skip this);  a phase to do;  FUTURE;  buttons at rest |
 
 The FILL, on every button, pill and chip with a lifecycle.
@@ -906,7 +916,8 @@ EVERYTHING boxed in a section folds (2026-10-08):  every card with a heading ban
   an `<epic-update>` block,
   an older doc's `<epic-updated>` fence, an open question's option card.
 - As these already did:
-  More Details, Choices, an aside, a code block, Original Discussion, Agents running.
+  More Details, Choices, an aside, a code block, Original Discussion.
+  (The Agents running panel folded too, until it became the header's `2 🤖` popover:  epic `epic-engine` P35.)
 - Open to start with:  the text being read.
   - An item and an aside start folded.
   - Page state, never written.
@@ -1008,10 +1019,13 @@ text itself, where an `<epic-update>` only said a block changed.
   from an answer:  in a part file, or in the HTML a command takes (`update ... --changes`, `details --file`).
   - the words, not the paragraph (Q13's option C lost):  one mark per change
   - `item`:  the question (or any item) whose answer made it, any case;  `check` fails one naming no item
+  - or the COMMENT folded in (`item="c2"`, epic `epic-engine` T100;  r79:  a comment's changes went in unmarked, with an
+    Update block):  `check` fails one naming a comment the epic's review inbox hasn't got (`PlanDoc.findComment()`,
+    the inbox read only when a mark names one;  a page parsed off disk takes it as it is)
 - The tool STAMPS it on every edit (`PlanDoc.updateChanges()`, from `updateStates()`):
   - `id`:  the next free `ch<N>`, never reused;  its inbox key, and a link's target (`#ch3`)
   - `at`:  now;  `answer`:  the item's answer in short (its `<epic-answer title>`, 160 characters at most), once it
-    has one, so the chip still says why months later
+    has one, so the chip still says why months later;  a comment's mark:  the comment's words in short
   - `was`:  the words it REPLACED, plain text, 300 characters at most (epic `epic-engine` I160;  2026-10-29:
     "Should say original text for comparison"), when first stamped (`ChangeOriginals`):
     - found by the tool, never written by hand:  the mark's block (its nearest ancestor with an id) lined up word by
@@ -1021,7 +1035,7 @@ text itself, where an `<epic-update>` only said a block changed.
     - none:  new words, words the mark only wrapped, or no version tells;  a `was` written by hand is kept
     - marks from before I160 have none, and keep none:  no migration step, the attribute is optional
   - `change <name> [--for q16]`:  an edit that does only that, after a hand edit of a part, then lists the marks;
-    `--for`:  the marks with no `item` take that one.  `check` fails one not stamped yet.
+    `--for`:  the marks with no `item` take that one (`--for c2`, a comment).  `check` fails one not stamped yet.
 - Each body host (an Overview sub-section, a phase, an item, the log) lists the marks inside it not `accepted`, in the
   skeleton:  `to-accept="ch1 ch3"` (the name from when marks waited for an Accept).  The page counts and finds them with the body not loaded;  the review routes take
   their marks from it (`ReviewInbox.itemIds()`).
@@ -1034,15 +1048,21 @@ text itself, where an `<epic-update>` only said a block changed.
     `{ action: "reopen" }`;  `inbox apply` reopens the item (an answered question back to open, red;  its answer
     kept):  answered again, Claude rewrites the words with a new mark
   - an Accept mark from before (`{ action: "accept" }`) still applies:  `accepted="2026-10-24 19:02"`, quiet
+  - a COMMENT's mark:  the chip says `C2`, unfolded the comment's words;  the popup shows them too, and "Open C2's
+    thread", which the page's comments open (`epic-comment-open`, else a plain link to `#comment-c2`);  NO Reopen:
+    the person disagrees on the thread
+    - it changes nothing on the comment (calm J of T100):  not handled, not taken;  Claude answers its thread as
+      ever, naming the phase (`epic inbox done <name>#C2 --file ...`)
 - The marks are the WHOLE record of an answer's change:  no `<epic-update>` block beside them (epic `epic-engine`
   I159;  2026-10-29, on P51's orange "Update:  No answer buttons ..." under its Q53 marks:  "Do we still need
   the orange update section like this?", then picked "only when no mark says it").
   - `updated` writes nothing when the marks say it (`PlanDoc.marksSay()`, `UpdateMarks`), printing
     `P51:  no Update block, the change marks say it (Q53)`:
-    - `--for q53,j3`:  every item given has a mark in the phase
-    - without it:  every item id its text names has a mark in the phase stamped this pass (within 15 minutes, or not
-      stamped yet), and it names no file
+    - `--for q53,j3`:  every item given has a mark in the phase (`--for c2`, a comment's)
+    - without it:  every item id its text names (and comment id, `C2`) has a mark in the phase stamped this pass
+      (within 15 minutes, or not stamped yet), and it names no file
   - a change no item caused still gets its block:  a plan adjusted while building, a file moved
+  - a COMMENT folded into a phase is marked too, `<epic-change item="c2">` (T100):  no Update block for it
   - the blocks written before beside their marks:  the migration `updates-said-by-marks` drops those the marks say
     ("Migrations")
 
@@ -1055,6 +1075,7 @@ answer lives in the phase now.
   (`PlanDoc.markHandled()`):  `<epic-item handled="p-retry-logic">`, the item stamped, the log saying
   `Q13 handled in P4`.
   - a mark in the Overview, an item or the log:  not handled;  only a phase takes an answer into its work
+  - a comment's mark (`item="c2"`):  nothing;  a comment is no item (T100)
 - Its state is `handled` (`itemState()`, before `recent`):  grey, as quiet as canceled, a chip of its own in the
   section's filter, never in "what needs you";  its line says `in P4`, linking the phase.
 - Reopen on the mark takes `handled` off (`applyChange()`):  the item is back in the lists, red;  rewritten after its next

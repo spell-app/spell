@@ -314,14 +314,18 @@ export class RestPlace extends WebPlace implements Place {
     // nothing at all where its rows would be is no rows:  the Met's `objectIDs: null`, when a search finds nothing;
     // asked for by a query, it may answer with one thing, not a list:  Open-Meteo's forecast for one place;
     // a search at its own address answers its own way:  GitHub's `{ total_count, items: [...] }`;
-    // so does a list under a thing:  Open Library's `{ links, size, entries: [...] }` (epic `data` T114)
+    // so does a list under a thing:  Open Library's `{ links, size, entries: [...] }` (epic `data` T114);
+    // and a search beside lists, its rows not where theirs are:  FastAPI's `{ results, total_count }` (epic `data` I140);
+    // ONE thing under a thing is that list's one row:
+    // a system's snapshot, its own lists inside it (epic `from-console` P16)
     const rows =
       held === null
         ? []
-        : askedBy && isOneRow(held)
+        : (askedBy || (query.under && this.isFoundAtItsOwner(collection))) && isOneRow(held)
           ? [held]
-          : !Array.isArray(held) && (query.under || this.isSearchAddress(collection, url))
-            ? (soleListIn(body) ?? held)
+          : !Array.isArray(held) &&
+              (query.under || this.isSearchAddress(collection, url) || (held === undefined && rowsAt !== undefined))
+            ? (soleListIn(body) ?? (query.under && isOneRow(held) ? [held] : held))
             : held
     if (!Array.isArray(rows)) {
       throw new TypeError(
@@ -637,6 +641,15 @@ export class RestPlace extends WebPlace implements Place {
     return IS_ADDRESS.test(under) ? under : `${this.url}${under}`
   }
 
+  /**
+   * Is each of `collection`'s things found at an address holding its owner's id, with no list of its own:
+   * `snapshots are found at "/instances/{id}/snapshot"`?
+   * Then what's under a thing there is one of them (epic `from-console` P16).
+   */
+  private isFoundAtItsOwner(collection: string): boolean {
+    return HOLDS_AN_ID.test(this.mappingOf(collection).path ?? "")
+  }
+
   /** `collection`'s address template. */
   private pathOf(collection: string): string {
     return `${this.url}${this.mappingOf(collection).path ?? `/${collection}{/id}`}`
@@ -837,6 +850,9 @@ function isAskedBy(askedBy: readonly string[] | undefined, filtering: readonly s
 function isOneRow(value: unknown): value is PlaceRow {
   return !!value && typeof value === "object" && !Array.isArray(value)
 }
+
+/** A name in braces inside an address, not its own id's place at the end (`{/id}`):  `/instances/{id}/snapshot`. */
+const HOLDS_AN_ID = /\{[^{}/]+\}/
 
 /** A name in braces, where a picture's id goes in its address. */
 const PICTURE_ID = /\{[^{}]*\}/

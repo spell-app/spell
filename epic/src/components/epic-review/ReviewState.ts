@@ -151,7 +151,9 @@ export class ReviewState {
       return {
         workedOn: client.isWorkedOn(id),
         urgency: urgency && { calm: urgency.calm },
-        approved: client.markOf(id)?.action === "approve",
+        // his ✓ stays pressed after the server applied it, until the page's own update lands (I348):  else the
+        // item's `FIXED` label came back for the moment between the inbox clearing and the page catching up
+        approved: client.markOf(id)?.action === "approve" || client.closingAs(id) === "approve",
         closing: client.isClosing(id),
         heldInView: client.isHeldInView(id),
         closingAs: client.closingAs(id),
@@ -247,7 +249,7 @@ export class ReviewState {
   }
 
   /**
-   * Its details asked for now (Clarify, the ? icon;  `ReviewClient.askNow()`), or that ask called off while it's on
+   * Its details asked for now (Clarify, the (i) button;  `ReviewClient.askNow()`), or that ask called off while it's on
    * its way or being answered (`cancel()`).
    * - NOT the Add Details button's `press()`:  that calls off whatever work spins on the item, an agent's at work on
    *   it included (epic `epic-engine` I295);  this calls off only Owen's own ask

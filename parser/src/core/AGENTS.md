@@ -50,6 +50,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - Compiled by the same `yarn core:gen:templates` into the kit's `spell/util/measures/dimensions.generated.ts`
     (what [dimensions.ts](dimensions.ts), Spell UI and the compiler read) and Python's `spell_core/dimensions_generated.py`.
     NEVER edit those:  edit the source, run that.
+- Sounds and videos are [media.ts](media.ts)'s (epic `data` T145, epic `language` P65):  one player per sound or video,
+  a named one found by its name (`core.mediaNamed()`), played with its speed, start, volume and looping, a video where
+  it's drawn or in a window (Spell UI's `ui-modal`, by its tag), each named one sending its events by `trigger()`.
 - Random numbers come from the core's own generator, [`ParkMiller`](ParkMiller.ts), NEVER `Math.random()`:
   - `core.seedRandom(n)` makes everything random after it repeat;  unseeded, each run differs.
   - `core.shuffled()` is lodash's shuffle, step for step.
@@ -68,7 +71,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `resetRuntime()` forgets what it held of the last run.
 - Depends only on `spell/util`.
   NEVER import `spell/parser/spell` / `spell/parser/parser`, or anything above.
-- Drawing code here is Solid work:  READ [the Solid 2 rules](../../../spell.epics/guides/solid/solid-2.md) IN FULL first.
+- Drawing code here is Solid work:  READ [the Solid 2 rules](../../../agents/solid/solid-2.md) IN FULL first.
   - That's [drawing.ts](drawing.ts):
     - drawing a thing or a list's items:  `drawThing()`, `drawItems()`
     - the `@drawn` decorator, and the error boundary it shares with `drawThing()`
@@ -79,8 +82,15 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - `h()` returns a thunk:  the error boundary makes it, once, and a throw while it's made shows the stand-in.
     - `core.element()`, what it called before, is gone (epic `output-targets` P22):
       every committed example is recompiled, and a program compiled before P20 no longer draws.
-- A long list draws what fits, and more as you scroll ([drawnWindow.ts](drawnWindow.ts), epic `data` T76):
-  every loop in a drawing (`core.drawEach()`), `draw each ...` (`drawItems()`) and a read of a place (`drawRead()`).
+- A long list draws what fits, and more as you scroll (`drawnInWindow()`, epic `data` T76).
+  Every long list comes there:
+  - every loop in a drawing (`core.drawEach()`)
+  - `draw each ...` (`drawItems()`)
+  - a read of a place (`drawRead()`)
+  - It's the kit's, [spell/element/drawnWindow](../../../src/element/drawnWindow.ts), since epic `from-console` P8,
+    so Spell UI's `<ui-tree>` draws its columns with it too;  this folder's until then.
+  - Each call spreads in `SPELL_WINDOW` ([ui.ts](ui.ts)):
+    a spell cell says how many are drawn, and `scroll to the top` keeps a list coming back at the top.
   - Up to 24 items it's a plain drawing, no different;  past that, 24 at a time, as the end of the list comes near the view.
   - What it drew last took no room (items still reading, or drawing nothing):  it waits a second before more,
     so a list of the Met's artworks, read one by one, isn't read all at once (epic `mockup` T42).

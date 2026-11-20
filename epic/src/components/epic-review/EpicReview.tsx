@@ -53,7 +53,6 @@ import {
 import ringCSS from "spell/epic/components/epic-send-buttons/CountdownRing.css?inline"
 import reviewCSS from "./EpicReview.css?inline"
 import savedMarkCSS from "./SavedMark.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicReview`
@@ -95,7 +94,6 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
   @E.proto static vocabulary = epicReviewVocabulary
   @E.protoMerged static elementSetup = {
     styleSheets: {
-      "epic-tooltip": tooltipCSS,
       "epic-countdown-ring": ringCSS,
       "epic-review": reviewCSS,
       "epic-saved-mark": savedMarkCSS
@@ -187,7 +185,13 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
         aria-label={this.translationForKey("reviewControls", { id: this.name })}
       >
         <Show when={this.noteWords}>
-          <span class={REVIEW_NOTED} data-sent={this.isNoteSent ? "" : undefined} title={this.noteTip}>
+          <span
+            class={REVIEW_NOTED}
+            data-sent={this.isNoteSent ? "" : undefined}
+            role="img"
+            aria-label={this.noteTip}
+            data-tooltip={this.noteTip}
+          >
             <ui-icon name={this.review.draft() ? "comment outline" : "comment"} />
           </span>
         </Show>
@@ -197,7 +201,9 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
             <span
               class={REVIEW_PICK}
               data-fill={this.review.isSent() ? "outline" : "dashed"}
-              title={this.translationForKey(this.review.isSent() ? "pickedSent" : "pickedUnsent", { letter: pick() })}
+              data-tooltip={this.translationForKey(this.review.isSent() ? "pickedSent" : "pickedUnsent", {
+                letter: pick()
+              })}
             >
               {/* a pick-any set's several (`A C +1`, epic `epic-engine` P50):  one tight word, `AC+1`;
                   letters with a set's number stay apart:  `B3,A3` */}
@@ -254,7 +260,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
                 icon={spec.icon}
                 data-act={spec.act}
                 data-color={spec.color}
-                title={this.translationForKey(spec.title)}
+                data-tooltip={this.translationForKey(spec.title)}
                 aria-label={`${this.translationForKey(spec.label)}:  ${this.translationForKey(spec.tip)}`}
                 onClick={(event: MouseEvent) => this.answer(event, spec)}
               />
@@ -295,7 +301,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
         data-action={ACCEPTED_CHECK.action}
         data-color={ACCEPTED_CHECK.color}
         data-fill={held() ? (this.review.isSent() ? "none" : "dashed") : "outline"}
-        title={tip()}
+        data-tooltip={tip()}
         aria-label={tip()}
         onClick={(event: MouseEvent) => {
           event.preventDefault()
@@ -318,7 +324,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
         data-tone={this.tone ? "" : undefined}
         data-fill={this.fillOf(spec)}
         data-busy={isWorkedOn() ? "" : undefined}
-        title={
+        data-tooltip={
           busy() ? this.translationForKey("callOff", { label: this.translationForKey(spec.label) }) : this.tipOf(spec)
         }
         aria-label={`${this.translationForKey(spec.label)} · ${this.stateOf(spec)}`}
@@ -477,7 +483,9 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
                 class={`${NOTE_SAVED} ${SAVED_MARK}`}
                 hidden={!this.saved}
                 data-failed={this.saved && !this.saved.ok ? "" : undefined}
-                title={this.savedTip}
+                role="img"
+                aria-label={this.savedTip}
+                data-tooltip={this.savedTip}
               >
                 <ui-icon name="floppy disk outline" />
               </span>
@@ -647,7 +655,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
         <button
           type="button"
           class={NOTE_PICK}
-          title={this.translationForKey("pictureAdd")}
+          data-tooltip={this.translationForKey("pictureAdd")}
           aria-label={this.translationForKey("pictureAdd")}
           onClick={(event: MouseEvent) =>
             (event.currentTarget as HTMLElement).parentElement?.querySelector<HTMLInputElement>("input")?.click()
@@ -673,12 +681,12 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
         <img
           src={src()}
           alt={this.translationForKey("pictureZoom")}
-          title={this.translationForKey("pictureZoom")}
+          data-tooltip={this.translationForKey("pictureZoom")}
           onClick={(event: MouseEvent) => EpicReview.zoom(event)}
         />
         <button
           type="button"
-          title={this.translationForKey("pictureRemove")}
+          data-tooltip={this.translationForKey("pictureRemove")}
           aria-label={this.translationForKey("pictureRemove")}
           onClick={() => void this.review.client?.attachShot(this.review.id(), undefined)}
         >
@@ -803,7 +811,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
           <div
             class={[SAID, SAID_TAKEN]}
             part={this.partForName("taken")}
-            title={this.translationForKey("saidTakenTip")}
+            data-tooltip={this.translationForKey("saidTakenTip")}
             aria-label={this.translationForKey("you")}
           >
             <span class={SAID_WHO}>{this.translationForKey("saidTaken", { time: clockOf(mark().at) })} ·</span>
@@ -815,7 +823,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
                   class={SAID_PICTURE}
                   src={shot()}
                   alt={this.translationForKey("pictureZoom")}
-                  title={this.translationForKey("pictureZoom")}
+                  data-tooltip={this.translationForKey("pictureZoom")}
                   onClick={(event: MouseEvent) => EpicReview.zoom(event)}
                 />
               )}
@@ -841,7 +849,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
                   class={SAID_PICTURE}
                   src={shot()}
                   alt={this.translationForKey("pictureZoom")}
-                  title={this.translationForKey("pictureZoom")}
+                  data-tooltip={this.translationForKey("pictureZoom")}
                   onClick={(event: MouseEvent) => EpicReview.zoom(event)}
                 />
               )}
@@ -850,7 +858,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
             <button
               type="button"
               class={SAID_EDIT}
-              title={this.translationForKey("editTip")}
+              data-tooltip={this.translationForKey("editTip")}
               aria-label={this.translationForKey("edit")}
               onClick={() => this.takeToNote(this.review.mark()?.note)}
             >

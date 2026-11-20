@@ -114,6 +114,15 @@
     pointer-events: none;
   }
 
+  /* its first showing on the page, under the top bar already drawn:  a short fade and slide down (I255) */
+  &.arriving {
+    animation: palette-strip-arrives var(--ui-duration-normal, 200ms) var(--ui-ease-out, ease-out) both;
+
+    @media (prefers-reduced-motion: reduce) {
+      animation: none;
+    }
+  }
+
   /* its pin, Add a View, then the names:  they shrink and scroll in a narrow window, never the search */
   & .PaletteStripAdd {
     display: flex;
@@ -351,4 +360,12 @@ ui-menu.BarMenuItems ui-submenu.InspectRow > ui-action::part(item) {
  */
 ui-menu.BarMenuItems ui-submenu.InspectRow::part(flyout) {
   position-try-order: most-height;
+}
+
+/* `.PaletteStrip.arriving`:  in from just under the top bar */
+@keyframes palette-strip-arrives {
+  from {
+    opacity: 0;
+    translate: 0 -8px;
+  }
 }

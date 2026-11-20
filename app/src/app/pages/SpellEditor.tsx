@@ -2,6 +2,7 @@ import { useBeforeLeave, type BeforeLeaveEventArgs, type RouteSectionProps } fro
 import { Match, Show, Switch, createEffect, createSignal, onCleanup, onSettled, untrack } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
+import { beforeNextPaint } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
 import {
   Actions,
@@ -16,6 +17,11 @@ import {
   InspectorPane,
   InspectHelp,
   AddPartButton,
+  AnatomyButton,
+  AppAnatomy,
+  AppAnatomyView,
+  ViewAloneButton,
+  ViewAloneStage,
   InspectAppButton,
   Palette,
   PaletteStrip,
@@ -184,7 +190,8 @@ export function SpellEditor(props: { mode: Mode }) {
   return (
     <SpellPage id="SpellEditor" fillWindow dark rows>
       <EditorToolbar mode={mode()} />
-      <Show when={!isRunning() && Palette.isPinned}>
+      {/* never before the top bar:  on a cold start it waits for the bar's menus to be drawn (I255);  hidden while Anatomy shows (I263) */}
+      <Show when={isBarDrawn() && !isRunning() && Palette.isPinned && !AppAnatomy.isShowing}>
         <PaletteStrip />
       </Show>
       <PartMenu />
@@ -305,6 +312,10 @@ function drawnView(
  *     menu.
  * - The editor's own project (the group `@spell/editor`, epic `editor` P22, P29) shows each view of its Spell in a zone
  *   of its own, drawn as it's typed (`<EditorZones>`, T63):  the editor you're using runs the published Spell.
+ * - Anatomy, while it shows, pulls the program apart into floors in place, its bar over the pane's top
+ *   (`<AppAnatomyView>`, epic `editor` P34).
+ * - A view's file open, the view can show alone, one thing drawn with its property editor beside it, the app hidden
+ *   behind it (`<ViewAloneStage>`, epic `editor` P35).
  ****************/
 export function AppPane() {
   const root = trackProjectRoot(() => undefined)
@@ -320,9 +331,11 @@ export function AppPane() {
   let program: HTMLDivElement | undefined
   // the body, watched while it's drawn:  `onSettled()`, as a ref callback has no owner to clean up with
   let body: HTMLDivElement | undefined
+  // the pane itself:  Anatomy's Full Window lifts it over the editor
+  let pane: HTMLDivElement | undefined
   onSettled(() => Inspector.watch(body!))
   return (
-    <div class="AppPane">
+    <div class="AppPane" ref={(element: HTMLDivElement) => (pane = element)}>
       <Show when={notebookPage()} keyed>
         {(page) => <NotebookHeader controller={page} icon={root().icon ?? PROJECT_ICON} title={title()} />}
       </Show>
@@ -331,6 +344,7 @@ export function AppPane() {
         <Show when={isEditorPiece()}>
           <EditorZones />
         </Show>
+        <ViewAloneStage program={() => program} />
         <div
           class={[
             "AppPaneProgram",
@@ -361,6 +375,7 @@ export function AppPane() {
           </Show>
         </div>
       </div>
+      <AppAnatomyView pane={() => pane} body={() => body} program={() => program} />
     </div>
   )
 }
@@ -572,7 +587,13 @@ export function EditorToolbar(props: { mode: Mode }) {
         <ModeButtons
           current={props.mode}
           compiled={<CompiledCodeButton />}
-          inspect={<InspectAppButton id={INSPECT_APP_ID} />}
+          inspect={
+            <>
+              <InspectAppButton id={INSPECT_APP_ID} />
+              <AnatomyButton />
+              <ViewAloneButton />
+            </>
+          }
           add={<AddPartButton />}
         />
       )
@@ -592,8 +613,16 @@ export function EditorToolbar(props: { mode: Mode }) {
     you: { draw: () => <Actions.you /> }
   } satisfies EditorParts
   const bar = drawnView((app) => app.editorBar, parts)
+  let place: HTMLDivElement | undefined
+  // drawn, or its plain stand-in:  the bar's menus, once ready, and the hero gone, tell the page (`isBarDrawn`)
+  createEffect(
+    () => !!bar.thing() || bar.isBroken(),
+    (isDrawn) => {
+      if (isDrawn) beforeNextPaint(() => whenBarReady(place))
+    }
+  )
   return (
-    <div class="EditorBarPlace">
+    <div class="EditorBarPlace" ref={(element: HTMLDivElement) => (place = element)}>
       {bar.drawing()}
       {/* no Spell:  every menu still, in a plain row, so a person can go on */}
       <Show when={bar.isBroken()}>
@@ -613,6 +642,27 @@ export function EditorToolbar(props: { mode: Mode }) {
       </Show>
     </div>
   )
+}
+
+/**
+ * Has the top bar been drawn, its menus ready, since the page loaded?
+ * - What waits for the bar to show itself reads it:  the palette kept open (`<PaletteStrip>`), which drew before the
+ *   bar on a cold start, the bar still waiting for the editor's Spell (epic `editor` I255).
+ * - For the page's life:  a later visit to the editor draws the bar from the Spell already loaded, in the same paint,
+ *   so nothing waits again.
+ */
+const [isBarDrawn, setBarDrawn] = createSignal(false)
+
+/**
+ * Note the bar drawn once its menus (`<ui-app-menu>`) are ready, and the page's hero has gone:
+ * so what waits for it shows on a bar people can see.
+ * - NEVER throws.
+ */
+function whenBarReady(place: HTMLElement | undefined) {
+  const menu = place?.querySelector<HTMLElement & { ready?: Promise<void> }>("ui-app-menu")
+  void (menu?.ready ?? Promise.resolve())
+    .then(() => PageLoading.whenGone(() => setBarDrawn(true)))
+    .catch((error: unknown) => console.error("the top bar didn't get ready", error))
 }
 
 /** Inspect app's button's id:  its help popup's target. */

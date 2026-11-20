@@ -605,6 +605,16 @@ describe("PlanDoc phases", () => {
     expect(later.marksSay(1, "<p>Owen answered Q1</p>", ["q1"])).toEqual(["Q1"])
   })
 
+  // epic `epic-engine` T100:  a comment folded into a phase is its marks alone too
+  test('marksSay (T100):  a comment\'s marks (`item="c2"`) say it, by `--for c2` or the text naming C2', () => {
+    const plan = freshPlan()
+    plan.addPhase("One", { symptom: "s", changes: '<p><epic-change item="c2">the new words</epic-change></p>' })
+    plan.updateStates()
+    expect(plan.marksSay(1, "<p>anything</p>", ["c2"])).toEqual(["C2"])
+    expect(plan.marksSay(1, "<p>Folded in Owen's comment C2.</p>")).toEqual(["C2"])
+    expect(plan.marksSay(1, "<p>Folded in C2 and C3.</p>")).toEqual([])
+  })
+
   // epic `epic-engine` I179 (Owen, 2026-10-29:  "If its 'accepting the update' I shouldn't have to do that if you are
   // doing what I said")
   test("Owen's own answer (I179):  an Update block carrying it out is written seen, out of `to-see`, logged", () => {
@@ -2781,14 +2791,13 @@ describe("PlanDoc status cards (P13)", () => {
     expect(problems(plan)).toEqual([])
   })
 
-  test("done:  the LATEST underway card turns violet, `done-at` stamped, the reading kept, the summary slotted under it", () => {
+  test("done:  EVERY underway card turns violet (I355), `done-at` stamped, the reading kept, the summary under the latest", () => {
     const first = freshPlan()
     first.addItem("issue", "it breaks")
     first.addStatus("i1", "Find what breaks.")
     first.addStatus("i1", "Fix it, with a test.")
     const plan = PlanDoc.parse(first.toString(), LATER)
     plan.finishStatus("i1", "Fixed;  <b>one</b> test skipped:  it needs a browser.")
-    plan.finishStatus("i1")
     expect(cards(el(plan, "i1"))).toEqual([
       {
         state: "done",
@@ -2931,8 +2940,77 @@ describe("PlanDoc status cards (P13)", () => {
     expect(log.slice(-2)).toEqual(["I1 closed:  it breaks", "T1 closed:  build it"])
     plan.updateStates()
     expect(["i1", "t1"].map((id) => el(plan, id).getAttribute("state"))).toEqual(["recent", "recent"])
-    expect(() => plan.finishWork("i1")).toThrow(/I1 has no underway status card/)
+    // closed, a second done:  its summary goes under the Done card, nothing reopens (I355)
+    expect(plan.finishWork("i1", "and more").closed).toBe(false)
+    expect(cards(el(plan, "i1")).at(-1)!.summary).toBe('<p slot="summary">and more</p>')
     expect(problems(plan)).toEqual([])
+  })
+
+  describe("finished, never left blue (epic-engine I355)", () => {
+    /** An item with a "Taken up at once" card and then the agent's own, both underway:  codemirror's I8. */
+    function takenUp(plan: PlanDoc, kind: "issue" | "todo" | "judgement", title: string): string {
+      const id = plan.addItem(kind, title)
+      plan.addStatus(id, "Taken up at once:  agent x is on it.")
+      plan.addStatus(id, "Building it.")
+      return id
+    }
+
+    /** Each status card's state, and the item's own after the edit's whole-doc pass. */
+    function after(plan: PlanDoc, id: string) {
+      plan.updateStates()
+      return { cards: cards(el(plan, id)).map((card) => card.state), state: el(plan, id).getAttribute("state") }
+    }
+
+    test("done (`epic update ... done`):  both cards done, the item green", () => {
+      const plan = freshPlan()
+      const id = takenUp(plan, "issue", "it breaks")
+      plan.finishWork(id, "fixed")
+      expect(after(plan, id)).toEqual({ cards: ["done", "done"], state: "recent" })
+    })
+
+    test("fixed for review:  both cards done, the item orange", () => {
+      const plan = freshPlan()
+      const id = takenUp(plan, "issue", "it breaks")
+      plan.fixedForReview(id, "fixed")
+      expect(after(plan, id)).toEqual({ cards: ["done", "done"], state: "replied" })
+    })
+
+    test("noted:  both cards noted", () => {
+      const plan = freshPlan()
+      const id = takenUp(plan, "judgement", "which")
+      plan.noteStatus(id, "recorded")
+      expect(after(plan, id).cards).toEqual(["noted", "noted"])
+    })
+
+    test("closed (`epic close`, a phase closing it, an approve):  done, and a later done's summary lands", () => {
+      const plan = freshPlan()
+      const id = takenUp(plan, "todo", "build it")
+      plan.setItem(id, "done")
+      expect(after(plan, id)).toEqual({ cards: ["done", "done"], state: "recent" })
+      plan.finishStatus(id, "built")
+      expect(cards(el(plan, id)).at(-1)!.summary).toBe('<p slot="summary">built</p>')
+    })
+
+    test("canceled (`epic cancel`, `epic complete`):  noted, the item grey", () => {
+      const plan = freshPlan()
+      const id = takenUp(plan, "issue", "moot")
+      plan.setItem(id, "canceled")
+      expect(after(plan, id)).toEqual({ cards: ["noted", "noted"], state: "old" })
+    })
+
+    test("obsolete (`epic close --why`):  refused while underway, as before", () => {
+      const plan = freshPlan()
+      const id = takenUp(plan, "issue", "moot")
+      expect(plan.closeRefusal(id)).toBe("being worked on")
+    })
+
+    test("reopened and taken up again:  blue once more, its new card underway", () => {
+      const plan = freshPlan()
+      const id = takenUp(plan, "todo", "build it")
+      plan.setItem(id, "done")
+      plan.addStatus(id, "Again.")
+      expect(after(plan, id)).toEqual({ cards: ["done", "done", "underway"], state: "progress" })
+    })
   })
 
   test("what comes next, for a Noted card:  the first phase still to do;  none, a phase to take it up", () => {

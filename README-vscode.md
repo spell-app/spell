@@ -455,8 +455,9 @@ else a checkout's own (4747 for the main checkout).
 
 Three tabs, and the page decides which one it opens in, whatever command showed it:
 
-- **Review** (`spellEpic.reviewView`, the checklist):  epic pages and saga pages (`epic open <epic>`,
-  `/epic review <name>`), and test runs.
+- **Review** (`spellEpic.reviewView`, the Spell hat):  epic pages and saga pages (`epic open <epic>`,
+  `/epic review <name>`), test runs, and every other guide or docs page, reloading as it changes
+  (`epic pages open <page> --vs`, `/spell-docs`).
   You mark items on it, and a listening Claude session acts on your marks
   ([the review loop](https://github.com/spell-app/spell/blob/main/epic/README-pages.md)).
   "Review:  Open Epic..." picks any registered repo's epic, from any window.
@@ -466,11 +467,9 @@ Three tabs, and the page decides which one it opens in, whatever command showed 
     "2 pages waiting", and it shows once you've answered.
   - Opened with nothing shown, or by its list button:  every details and choice page of the window's epic,
     newest first, the ones waiting for you in red.
-- **Epic Docs** (`spellEpic.docView`, the hat):  any other guide or docs page, reloading as it changes
-  (`epic pages open <page> --vs`, `/spell-docs`).
-  Its one setting, `spellEpic.docPreview.location`, can move it to VS Code's Simple Browser
-  (`beside`;  the default is `sidebar`);  an epic page never opens there.
-- A page that stopped answering:  Reload, Restart Page Server, or Home Page, a fresh view at the docs' home page
+- **Epic Docs** (`spellEpic.docsView`, a book):  the epic tooling's READMEs, rendered by the page server
+  (`/_epic/docs/README-epics.md`);  the epics home's Epic Documentation card opens it too.
+- A page that stopped answering:  Reload, Restart Page Server, or Home, a fresh view at the tab's first page
   (in Details, its list button).
 
 It also runs the WINDOW BRIDGE, which the windows below lean on.
@@ -568,7 +567,7 @@ A window the session stayed in gets its title and colours back (`epic window sta
 
 - `/airplane` before a flight readies the pages for working with no Claude;
   `/airplane land` afterwards gathers everything you left on them.
-- The Review, Details and Epic Docs tabs keep working offline, against the laptop's page server:
+- The Review and Details tabs keep working offline, against the laptop's page server:
   "Review:  Open Epic..." reaches any epic page with no terminal.
 - It needs the main checkout's page server running and Spell Epic installed from `main`;
   `epic airplane check --fix` fixes what it can.

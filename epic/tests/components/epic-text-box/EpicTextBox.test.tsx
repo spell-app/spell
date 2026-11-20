@@ -80,7 +80,7 @@ describe("<epic-text-box>", () => {
     const kept = box.shadowRoot!.querySelector<HTMLElement>('[part~="kept"]')!
     expect(kept.querySelector(".kept-head")!.textContent).toBe("Kept from before the page changed")
     const label = kept.querySelector<HTMLElement>(".kept-label")!
-    expect([label.textContent, label.title, kept.querySelector(".kept-text")!.textContent]).toEqual([
+    expect([label.textContent, label.dataset.tooltip, kept.querySelector(".kept-text")!.textContent]).toEqual([
       "Q3 · Gone",
       "It was under q3",
       "picked B · Blue"

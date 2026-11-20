@@ -6,7 +6,9 @@ import { UI } from "spell/ui/core"
 import type { DOMJsonElement } from "spell/ui/components/ui-json"
 
 import "spell/ui/components/ui-json"
+import "spell/ui/components/ui-tree"
 import "spell/ui/components/ui-tree-diagram"
+import "spell/ui/components/ui-diagram"
 
 /** Element-markup examples, by path. */
 const EXAMPLES = import.meta.glob<string>("/src/components/ui-json/examples/elements/*.html", {
@@ -46,11 +48,17 @@ beforeEach(async () => {
 })
 
 describe("<ui-json> value", () => {
-  test("parses its own text;  draws nothing", async () => {
+  test("parses its own text, and draws it as an outline", async () => {
     const element = await json(`<ui-json>{ "a": [1, 2, { "b": "[not a fill-in]" }] }</ui-json>`)
     expect(element.value).toEqual({ a: [1, 2, { b: "[not a fill-in]" }] })
+    expect(getComputedStyle(element).display).toBe("block")
+    expect(element.shadowRoot!.querySelector("[part~=viewer]")).not.toBeNull()
+  })
+
+  test("`hidden` shows nothing", async () => {
+    const element = await json(`<ui-json hidden>{ "a": 1 }</ui-json>`)
     expect(getComputedStyle(element).display).toBe("none")
-    expect(element.shadowRoot!.childElementCount).toBe(0)
+    expect(element.value).toEqual({ a: 1 })
   })
 
   test("reads a script child too:  the safe way to hold a `<` in a page", async () => {
@@ -75,6 +83,32 @@ describe("<ui-json> value", () => {
     expect(changed).toHaveBeenCalledTimes(1)
     expect(changed.mock.calls[0]![0].value).toEqual({ a: 2 })
     expect(element.dirty).toBe(true)
+  })
+
+  test("`item` shows a thing:  its `data`, else the thing itself;  an element without `data`, nothing", async () => {
+    const element = await json(`<ui-json></ui-json>`)
+    element.item = { id: "acme", data: { client: "Acme" } }
+    await ElementFixture.settle()
+    expect(element.value).toEqual({ client: "Acme" })
+    expect((element.item as { id: string }).id).toBe("acme")
+    element.item = { id: "books" }
+    await ElementFixture.settle()
+    expect(element.value).toEqual({ id: "books" })
+    element.item = document.createElement("div")
+    await ElementFixture.settle()
+    expect(element.value).toBeUndefined()
+  })
+
+  test("slotted as a `<ui-tree>`'s `detail`, it shows each pick's data with no page code", async () => {
+    const tree = (await ElementFixture.render(
+      `<ui-tree appearance="columns" label="Work" style="height: 200px; width: 900px">
+        <ui-json slot="detail"></ui-json>
+      </ui-tree>`
+    )) as HTMLElement & { items: unknown[]; path: string[] }
+    tree.items = [{ id: "acme", label: "Acme", data: { client: "Acme" } }]
+    tree.path = ["acme"]
+    await ElementFixture.settle()
+    expect(tree.querySelector<DOMJsonElement>("ui-json")!.value).toEqual({ client: "Acme" })
   })
 
   test("follows its text as the page changes it", async () => {
@@ -107,7 +141,7 @@ describe("<ui-json> errors", () => {
     expect(element.matches(":state(error)")).toBe(false)
   })
 
-  test("a `source` that fails warns too:  nothing else would show it", async () => {
+  test("a `source` that fails warns too:  a `<ui-json>` is often unseen", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
     onTestFinished(() => warn.mockRestore())
     const element = await ElementFixture.render<DOMJsonElement>(`<ui-json source="/no/such/file.json"></ui-json>`)
@@ -133,6 +167,14 @@ describe("<ui-json> source", () => {
 })
 
 describe("<ui-tree-diagram> reading a <ui-json> child", () => {
+  test("its data child stays unseen", async () => {
+    const diagram = await ElementFixture.render(
+      `<ui-tree-diagram><ui-json>{ "label": "Data" }</ui-json></ui-tree-diagram>`
+    )
+    await ElementFixture.settle()
+    expect(diagram.querySelector("ui-json")!.checkVisibility()).toBe(false)
+  })
+
   test("draws its text, and follows it", async () => {
     const diagram = await ElementFixture.render(
       `<ui-tree-diagram><ui-json>{ "label": "Before" }</ui-json></ui-tree-diagram>`
@@ -162,6 +204,16 @@ describe("<ui-tree-diagram> reading a <ui-json> child", () => {
     diagram.querySelector<DOMJsonElement>("ui-json")!.value = { label: "Set" }
     await ElementFixture.settle()
     expect(labels(diagram)).toEqual(["Set"])
+  })
+})
+
+describe("<ui-diagram> reading a <ui-json> child", () => {
+  test("its data child stays unseen", async () => {
+    const diagram = await ElementFixture.render(
+      `<ui-diagram><ui-json>{ "nodes": [{ "id": "a" }] }</ui-json></ui-diagram>`
+    )
+    await ElementFixture.settle()
+    expect(diagram.querySelector("ui-json")!.checkVisibility()).toBe(false)
   })
 })
 

@@ -65,3 +65,40 @@ describe("Dragging with a finger", () => {
     letGo()
   })
 })
+
+describe("Dragging on a turned board", () => {
+  /** A card on a board, `board` its transform:  the card already lifted 48px off it, as Anatomy lifts its floors. */
+  const cardOn = (board: string) => {
+    const holder = document.body.appendChild(document.createElement("div"))
+    holder.style.cssText = `position: absolute; left: 100px; top: 100px; width: 400px; height: 400px; transform: ${board}; transform-style: preserve-3d`
+    const card = holder.appendChild(document.createElement("div"))
+    card.style.cssText = "width: 50px; height: 70px"
+    card.style.translate = "0px 0px 48px"
+    return { holder, card }
+  }
+  /** Drag `card` 30px across and 20px down the screen;  its `translate` mid-drag. */
+  const draggedBy30And20 = (card: HTMLElement) => {
+    const at = { clientX: 10, clientY: 10, pointerId: 3, pointerType: "mouse", bubbles: true }
+    new Dragging(card, new PointerEvent("pointerdown", at), { carried: [card], onDrop: () => {} })
+    window.dispatchEvent(new PointerEvent("pointermove", { ...at, clientX: 40, clientY: 30 }))
+    const translate = card.style.translate
+    window.dispatchEvent(new PointerEvent("pointerup", { ...at, clientX: 40, clientY: 30 }))
+    return translate
+  }
+  afterEach(() => cover()?.remove())
+
+  test("flat:  the pointer's move as it is, keeping the card's depth", () => {
+    const { holder, card } = cardOn("none")
+    expect(draggedBy30And20(card)).toBe("30px 20px 48px")
+    holder.remove()
+  })
+
+  test("at half size:  twice the move in the board's plane, so the card stays under the pointer (T120)", () => {
+    const { holder, card } = cardOn("scale(0.5)")
+    const [x, y, depth] = draggedBy30And20(card).split(" ")
+    expect(Number.parseFloat(x!)).toBeCloseTo(60, 0)
+    expect(Number.parseFloat(y!)).toBeCloseTo(40, 0)
+    expect(depth).toBe("48px")
+    holder.remove()
+  })
+})

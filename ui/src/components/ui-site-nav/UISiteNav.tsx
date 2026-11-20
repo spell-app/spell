@@ -1,7 +1,7 @@
 import { For, Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E } from "spell/ui/core"
+import { E, type UIT } from "spell/ui/core"
 // Import directly:  in `core`'s util barrel it cost every page 1.9 kB (as `NavPreferences` says)
 import { PrefStore } from "spell/util/persist/PrefStore"
 import { SitePages } from "./SitePages"
@@ -198,9 +198,11 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
    * A row was picked:  the tree's own selecting is cancelled (`current` says what's selected), and a page with an
    * `href` is gone to, unless `ui-navigating` is cancelled.
    */
-  private onSelecting(event: CustomEvent<{ item: HTMLElement; originalEvent?: Event }>) {
+  private onSelecting(event: CustomEvent<{ item: HTMLElement | UIT.TreeItemData; originalEvent?: Event }>) {
     event.preventDefault()
-    const page = this.pageForKey(event.detail.item.getAttribute(DATA_KEY))
+    // its rows are `<ui-tree-item>`s, never `items` data:  so always an element
+    const item = event.detail.item as HTMLElement
+    const page = this.pageForKey(item.getAttribute(DATA_KEY))
     if (!page?.href) return
     const { originalEvent } = event.detail
     // a middle or modified click on its link:  the browser opens it, as with any link
@@ -271,7 +273,7 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
           part={this.partForName("tree")}
           appearance={this.appearance}
           label={this.label ?? this.translationForKey("label")}
-          on-ui-selecting={(event: CustomEvent<{ item: HTMLElement }>) => this.onSelecting(event)}
+          on-ui-selecting={(event: CustomEvent<{ item: HTMLElement | UIT.TreeItemData }>) => this.onSelecting(event)}
           on-ui-opening={(event: CustomEvent<{ open: boolean }>) => this.onOpening(event, true)}
           on-ui-closing={(event: CustomEvent<{ open: boolean }>) => this.onOpening(event, false)}
         >

@@ -24,6 +24,7 @@ import {
 import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 // the fold and filter pieces the blocks share:  their files, not their families' barrels (which would define them here)
 import { Fold, expandAllUnder, foldAllUnder } from "spell/epic/components/epic-item/Fold"
+import { ScrollAnchor } from "spell/epic/components/epic-item/ScrollAnchor"
 import { StateFilter, type ChipPick } from "spell/epic/components/epic-section/StateFilter"
 import { STATE_PICK, type StatePickDetail } from "spell/epic/components/epic-state-filter/EpicStateFilter.types"
 import { FILTER, FILTER_STATES, type StateFilterEntry } from "spell/epic/components/epic-section/EpicSection.types"
@@ -87,7 +88,6 @@ import collapseAllCSS from "spell/epic/components/epic-item/CollapseAll.css?inli
 import chipsCSS from "spell/epic/components/epic-section/StateChips.css?inline"
 import pageCSS from "./EpicPage.css?inline"
 import crumbsCSS from "./Crumbs.css?inline"
-import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
 
 /****************
  * ### `EpicPage`
@@ -101,7 +101,7 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *       less, where the side bar is too narrow for them (`Crumbs.css`)
  *     - the epic's title isn't drawn:  the name says it (the page's `<title>` and the Epics list still show it)
  *     - one line, cut short with its full name as the tooltip when the header is too narrow (epic `epic-engine` P53)
- *     in its MIDDLE, while reviewed, Send, and beside it the session's spinner (P53;  Owen's comment C7, T53);
+ *     in its MIDDLE, while reviewed, Send alone (P53;  Owen's comment C7;  no session's line since I340);
  *     at its right the bedtime label, the step label (the state's icon in it) and the gear (P53, where the git toggle
  *     was;  Owen, 2026-10-10:  "Right items:  (=>P14) (whatever the half-filled circle is) (git icon, but bigger)";
  *     then the state went into the step label:  "Into the pill")
@@ -183,9 +183,10 @@ import tooltipCSS from "spell/epic/components/epic-item/Tooltip.css?inline"
  *     page in the epic's folder changes (`spell-server:changed`):  a page made or linked a moment ago shows
  *   - none, or not served (`file://`):  no box
  *   - open, folding (a `<details>`):  short, and it's how to get to them
- * - WHAT CLAUDE IS DOING (epic `epic-engine` P35):  the session's line, a bare spinner beside Send, its words the
- *   tooltip (P53, T53);  the running agents (epic `skillz` P3) in the step label's pill, a popover
- *   (`<epic-agents>`);  no "Agents running" panel above its blocks any more.
+ * - WHAT CLAUDE IS DOING (epic `epic-engine` P35):  the step label's icon turns (`isStepTurning()`), the session's
+ *   words (`epic inbox status`) its tooltip's last line (I340:  no line in the header, which cut off the epic's name);
+ *   the running agents (epic `skillz` P3) in the step label's pill, a popover (`<epic-agents>`);  no "Agents running"
+ *   panel above its blocks any more.
  *   - only while the page is served with a token, the epic's list answers (`AgentsClient`) and an agent runs
  *   - each row a note box that redirects that agent
  *   - in the shadow root:  not a section, so the rail and counts never see it
@@ -222,7 +223,6 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   @E.proto static vocabulary = epicPageVocabulary
   @E.protoMerged static elementSetup = {
     styleSheets: {
-      "epic-tooltip": tooltipCSS,
       "epic-page": pageCSS,
       "epic-crumbs": crumbsCSS,
       "epic-collapse-all": collapseAllCSS,
@@ -437,19 +437,33 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   })
 
   /**
-   * Does the step label's icon TURN?  While it names a phase under way, and that phase is building
-   * (epic `epic-engine` I316;  Owen, 2026-11-16:  "Don't need both of these indicators.  Just make the one in the pill
-   * a loading spinner"):
-   * - the session is at work on something other than a Send (`epic inbox status`:  "Building P26"), whose line beside
-   *   Send then keeps only its words
-   * - or Claude is at work on the phase itself (`epic inbox working <epic>#P26 on`), as its row's spinner says
+   * Does the step label's icon TURN?  The ONE sign in the header that Claude is at work (epic `epic-engine` I316,
+   * I340;  Owen, 2026-11-18:  "This 'Building P72...' is too big -- it cuts off the name of the epic.  Remove it, use
+   * the P76 pill instead"):
+   * - the session is at work on something other than a Send (`epic inbox status`:  "Building P26"), whatever the pill
+   *   names:  its words go in the pill's tooltip (`stepTip()`), never in the header
+   * - or Claude is at work on the phase under way (`epic inbox working <epic>#P26 on`), as its row's spinner says
    * - answering a Send, Send's own ring turns instead (P55)
    */
   readonly isStepTurning = createMemo((): boolean => {
-    if (this.step()?.icon !== ACTIVE_ICON) return false
+    if (!this.step()) return false
     const doing = this.review.doing()
     if (doing && !doing.items?.length) return true
+    if (this.step()?.icon !== ACTIVE_ICON) return false
     return this.phases().some((phase) => phase.status === ACTIVE && this.review.liveOf(phase.id).workedOn)
+  })
+
+  /**
+   * The step label's tooltip:  its own (the phase's name, the epic's state), then what the session is doing, when it
+   * says (`epic inbox status`:  "Claude:  Building P72 · Superpowers";  epic `epic-engine` I340, J-recorded):
+   * - a `title` only:  the header itself carries no words of it
+   */
+  readonly stepTip = createMemo((): string | undefined => {
+    const tip = this.step()?.tip ?? this.step()?.words
+    const doing = this.review.doing()
+    if (!doing?.text) return tip
+    const line = this.translationForKey("stepDoing", { doing: doing.text })
+    return tip ? `${tip}\n${line}` : line
   })
 
   /** The page's stage (`stage`):  `building` for none (`PageStages.read()`);  a saga page is always building. */
@@ -744,7 +758,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                 <span class="see-also-kind">
                   {this.translationForKey(SEE_ALSO_KINDS[page.kind]?.key ?? "seeAlsoDetails")}
                 </span>
-                <time datetime={page.updated} title={new Date(page.updated).toLocaleString()}>
+                <time datetime={page.updated} data-tooltip={new Date(page.updated).toLocaleString()}>
                   {PlanDates.formatDate(new Date(page.updated), false)}
                 </time>
               </li>
@@ -765,7 +779,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
             <button
               type="button"
               class={HEADING_COPY}
-              title={this.translationForKey("copyHeading", {
+              data-tooltip={this.translationForKey("copyHeading", {
                 name: this.isSaga ? (this.saga ?? "") : (this.epic ?? ""),
                 command: this.headingCommand()
               })}
@@ -774,14 +788,10 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
               {this.isSaga ? this.saga : this.epic}
             </button>
           </h1>
-          {/* the header's middle (Owen's comment C7):  Send, then what the session is doing, a bare spinner (T53) */}
+          {/* the header's middle (Owen's comment C7):  Send alone;  what the session is doing turns the pill (I340) */}
           <span class={CENTRE} part={this.partForName("centre")}>
             {/* in Focus mode's bar while it's open:  one Send, one countdown */}
             <Show when={this.isFocusOpen ? undefined : this.marks()}>{(marks) => this.sendButtons(marks)}</Show>
-            {/* its words alone while the step label turns for it (I316):  one spinner, the pill's */}
-            {this.isSaga ? undefined : (
-              <epic-agents draws={this.isStepTurning() ? "words" : "spinner"} part={this.partForName("spinner")} />
-            )}
           </span>
           <span class={STATUS} part={this.partForName("status")}>
             <Show when={this.bedtime}>
@@ -791,7 +801,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                   appearance="basic"
                   color="violet"
                   icon="bed"
-                  title={this.translationForKey("bedtimeTip", { phases: phases() })}
+                  data-tooltip={this.translationForKey("bedtimeTip", { phases: phases() })}
                 >
                   <span class="bedtime">{this.translationForKey("bedtime", { phases: phases() })}</span>
                 </ui-label>
@@ -815,7 +825,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                     color={pillColorOf(step().color)}
                     icon={this.isStepTurning() ? undefined : step().icon}
                     link={step().href}
-                    title={step().tip}
+                    data-tooltip={this.stepTip()}
                   >
                     {/* the phase building:  its circle turns, Spell UI's loading icon, as Send's while busy (I316) */}
                     <Show when={this.isStepTurning()}>
@@ -978,7 +988,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
           <a
             href={known()?.href ?? sagaHref(id)}
             target={`saga-${id}`}
-            title={known() ? this.translationForKey("sagaTip", { purpose: known()!.purpose }) : undefined}
+            data-tooltip={known() ? this.translationForKey("sagaTip", { purpose: known()!.purpose }) : undefined}
           >
             {known()?.title ?? id}
           </a>
@@ -991,7 +1001,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
    * The sticky bar's last row, the TOOLBAR (epic `airplane` P8), in its order:
    * - the docs runtime's section buttons (`slot="toolbar"`)
    * - at the right:  the page's state filter (`pageFilter()`), then expand-all and collapse-all
-   *   - what Claude is doing went up to the header, a spinner beside Send (epic `epic-engine` P53, T53)
+   *   - what Claude is doing went up to the header (epic `epic-engine` P53):  the step label turns (I340)
    * - no new item button:  each item section has its own, on its title
    *   (Owen, 2026-10-13:  "Remove "comment" icon from top header -- add it to question/todo/issue/test headers")
    */
@@ -1009,8 +1019,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
             expanded: () => this.allOpen,
             onToggle: () => {
               this.allOpen = !this.allOpen
-              if (this.allOpen) this.expandAll()
-              else this.collapseAll()
+              // what's at the window's top stays put as everything opens or folds (I350)
+              void ScrollAnchor.keep(() => (this.allOpen ? this.expandAll() : this.collapseAll()), this.domElement)
             }
           })}
         </span>
@@ -1061,7 +1071,8 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   @E.on(STATE_PICK, { target: "renderRoot" })
   protected onStatePick(event: CustomEvent<StatePickDetail>) {
     event.stopPropagation()
-    this.pickState(event.detail.state, event.detail.how)
+    // the item at the window's top stays put, however much hides above and below it (I350)
+    void ScrollAnchor.keep(() => this.pickState(event.detail.state, event.detail.how), this.domElement)
   }
 
   /**
@@ -1069,7 +1080,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
    * - the plane by the fill rule (Q20), its tooltip what a press sends, or why it sends nothing
    * - a press, or the countdown running out:  `onSendAsked()`
    * - while the session answers what was sent (the inbox's `doing` lists items), the plane's ring turns (`working`,
-   *   epic `epic-engine` P55);  the spinner beside it hides then (`<epic-agents draws="spinner">`)
+   *   epic `epic-engine` P55);  the step label doesn't turn for it then
    */
   private sendButtons(marks: () => HeaderMarks): JSX.Element {
     const plans = () => this.plansWaiting()
@@ -1120,7 +1131,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
           type="button"
           class={[PILL, { flash: this.isCopied }]}
           part={this.partForName("pill")}
-          title={this.translationForKey("copyWait")}
+          data-tooltip={this.translationForKey("copyWait")}
           onClick={() => void this.copyWait()}
         >
           {idle()} <code>{this.waitCommand()}</code>
@@ -1131,7 +1142,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         type="button"
         class={[PILL, { airplane: isAirplane(), flash: this.isCopied }]}
         part={this.partForName("pill")}
-        title={this.translationForKey(isAirplane() ? "copyCommand" : "startReview")}
+        data-tooltip={this.translationForKey(isAirplane() ? "copyCommand" : "startReview")}
         onClick={() => void this.copyCommand()}
       >
         <Show
@@ -1180,7 +1191,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
         type="button"
         class={[REVIEW_LINE, { flash: this.isCopied }]}
         part={this.partForName("review-line")}
-        title={this.translationForKey("copyCommand")}
+        data-tooltip={this.translationForKey("copyCommand")}
         onClick={() => void this.copyCommand()}
       >
         {this.icon(this.icons.copy)}
@@ -1188,7 +1199,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
           {this.translationForKey(isAirplane() ? "reviewLineAirplane" : "reviewLine")} <code>{this.command()}</code>
           <Show when={this.marks()?.listener}>
             {(words) => (
-              <span class={LISTENER} title={this.translationForKey("listeningTitle")}>
+              <span class={LISTENER} data-tooltip={this.translationForKey("listeningTitle")}>
                 {words()}
               </span>
             )}
@@ -1272,7 +1283,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
           class={GEAR}
           part={this.partForName("gear")}
           aria-label={this.translationForKey("gearTip")}
-          title={this.translationForKey("gearTip")}
+          data-tooltip={this.translationForKey("gearTip")}
         >
           {this.icon(this.icons.gear)}
         </button>
@@ -1295,7 +1306,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
                   part={this.partForName("gear-row")}
                   role="menuitem"
                   value={FOCUS_ROW}
-                  title={this.translationForKey("focusModeTip")}
+                  data-tooltip={this.translationForKey("focusModeTip")}
                   tabindex="-1"
                   onClick={() => this.openFocus()}
                 >
@@ -1564,7 +1575,7 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   private hungNotice(): JSX.Element {
     return (
       <details class={HUNG} part={this.partForName("hung")}>
-        <summary title={this.translationForKey("hungTip")}>
+        <summary data-tooltip={this.translationForKey("hungTip")}>
           <span class="chevron" aria-hidden="true">
             {this.icons.chevron.svg}
           </span>
@@ -1668,13 +1679,13 @@ export class EpicPage extends E.UIComponent<EpicPageVocabulary> {
   }
 
   /**
-   * The toolbar's collapse-all:  every block, item, card and panel on the page folded (`foldAllUnder()`),
-   * then the page back at its top, where the folded blocks now all show (Owen, 2026-10-10).
+   * The toolbar's collapse-all:  every block, item, card and panel on the page folded (`foldAllUnder()`).
+   * - the toggle keeps what was at the window's top in its spot, or the block it folded into (`ScrollAnchor`, I350);
+   *   it scrolled the page back to its top before (Owen, 2026-10-10), the reader's place lost
    */
   @E.untracked
   private collapseAll() {
     foldAllUnder(this.domElement)
-    window.scrollTo({ top: 0, behavior: "instant" })
   }
 
   /** The toolbar's toggle-all, its last use:  everything opened. */

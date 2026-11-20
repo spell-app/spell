@@ -59,6 +59,16 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - `LiveReload` + [liveClient.ts](liveClient.ts) -- live reload over a websocket, and the page-side client.
     - The client:  `/api/server/live.js` (`editPage()`).
     - Its websocket:  `/api/server/live`.
+    - Its addresses are in liveClient.ts, not `WebServer`:  a page joins the channel by them.
+      - `SERVER_API`
+      - `LIVE_EVENTS`, `LIVE_SCRIPT`
+      - `LIVE_VERSIONS`
+    - A page the page server didn't serve joins through its proxy with `joinLiveChannel()`:
+      the editor, served by vite (epic `from-console` P17).
+      - Browser code takes it by file, `spell/server/liveClient`, never the `spell/server` barrel.
+      - It sets `window.SPELL_SERVER` itself (no write token, no `run`), and loads the client.
+      - `isLiveChannelOpen()` says whether its socket is open:
+        for a page that polls slowly only while it isn't.
     - [webSocket.ts](webSocket.ts) -- the server's half of one (node built-ins):  accept, send, ping;  and read what a page sends
       (`onText`, for a `Referee`), which live reload doesn't ask for, so its pages stay as they were.
     - NEVER an `EventSource`, or any other request held open:
@@ -76,7 +86,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - its own file is also the file at its ADDRESS:  a component set's page is reported where it's served
           (`/components/ui/ui-button.html`), not as its file in the checkout (P40)
       - a stylesheet it uses:  swapped in place, no reload
-        - in VS Code's side-bar views too (spell-epic's Epic Docs and Review):  the live client runs inside their frame,
+        - in VS Code's side-bar views too (spell-epic's Review and Details):  the live client runs inside their frame,
           with its own socket (the frame is cross-origin to the view)
         - nothing caches a stale one:  every answer is `Cache-Control: no-store`, `_assets/` included,
           so a reload always fetches the stylesheet as it is now
@@ -251,8 +261,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - `--root` naming any other folder is an error naming the kit (`kitRootOf()`),
           and so is `PageServer.ensure()` given one
       - I62's `--root spell-app`, added by the kit's `spell server` from outside spell-app, is gone
-      - outside any kit, run from an npm install of `spell`:  the installed package is the kit (`installedKit()`,
-        epic `repo-split` P26), so a project depending on `spell` runs `spell server local --spaces <dir>`
+      - outside any kit:  the kit the running code is from (`ownKit()`), so a project depending on `spell`
+        runs `spell server local --spaces <dir>`
+        - an npm install of `spell` (epic `repo-split` P26), or a kit checkout linked in (`"spell": "portal:../spell"`)
     - page edits:  `PageEditor`, `/api/pages`
     - its info:  `/api/server`
     - THE PAGE SERVER'S SETTINGS (epic `repo-split` P16):  every folder's own PART, merged.

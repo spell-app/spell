@@ -1,6 +1,6 @@
 /**
  * Property types:  a schema per class, saying what each property holds.
- * - DECLARED props:  both of these land HERE, in the same runtime shape (`guides/solid/solid-2.md`).
+ * - DECLARED props:  both of these land HERE, in the same runtime shape (`agents/solid/solid-2.md`).
  *   - compiled spell's `static { this.declareProp("suit", { type: "text" }) }`
  *   - a hand-written class's `@prop({ type: "text" })`
  *   - Declared types win.

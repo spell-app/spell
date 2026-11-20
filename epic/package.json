@@ -1,6 +1,6 @@
 {
   "name": "spell-epic",
-  "version": "0.8.10",
+  "version": "0.8.16",
   "private": true,
   "description": "spell-epic:  the epic tooling -- epic pages and their <epic-*> component pack, the epic command, worktrees and windows, the review loop, and every docs page's tooling -- as a Claude Code plugin, loaded in place",
   "license": "MIT",
@@ -88,7 +88,8 @@
       "src/tools/agentRoutes.ts",
       "src/tools/showRoutes.ts",
       "src/tools/airplaneRoutes.ts",
-      "src/tools/personRoutes.ts"
+      "src/tools/personRoutes.ts",
+      "src/tools/docsRoutes.ts"
     ],
     "watch": [
       "src/tools/_assets",
@@ -119,6 +120,7 @@
     "dir": "src"
   },
   "spellPublish": {
+    "build": "vscode:package",
     "exclude": [
       "demo/**"
     ],
@@ -141,6 +143,18 @@
       "src/AGENTS.md",
       "src/tool/PLAN-DOC.md",
       "README-vscode.md",
+      "README-cli.md",
+      "README-config.md",
+      "README-demo.md",
+      "README-faq.md",
+      "README-how-it-works.md",
+      "README-pages.md",
+      "README-setup.md",
+      "README-skills.md",
+      "README-superpowers.md",
+      "README-teams.md",
+      "README.md",
+      "docs/images",
       "vscode/package.json",
       "vscode/spell-epic.vsix"
     ],

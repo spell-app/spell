@@ -568,6 +568,16 @@ const EDITOR_TAGS = ["property-editor", "editor-de-propiedades", "editor-propied
  * - `undefined` if it has none.
  */
 function namedEditorIn(source: string, name: string): string | undefined {
+  const block = namedEditorBlock(source, name)
+  return block && dedent(source.slice(block.start, block.end).split("\n")).trim()
+}
+
+/**
+ * Where the markup of the property editor for type `name` is in `source`, as `namedEditorIn()` reads it:
+ * from the line after its head to the next line at the file's left edge;  empty for `<property-editor "card"/>`.
+ * - `undefined` if it has none.
+ */
+function namedEditorBlock(source: string, name: string): { start: number; end: number } | undefined {
   const quoted = `"${escapeForRegExp(name)}"`
   const heads = [
     ...PLAIN_EDITOR_HEADS.map((head) => `${quoted}[ \\t]+${head.split(" ").map(escapeForRegExp).join("[ \\t]+")}`),
@@ -576,14 +586,42 @@ function namedEditorIn(source: string, name: string): string | undefined {
   for (const head of heads) {
     const opening = new RegExp(`^${head}[ \\t]*$`, "imu").exec(source)
     if (!opening) continue
-    if (opening.groups?.empty) return ""
-    const lines = source.slice(opening.index + opening[0].length + 1).split("\n")
+    const start = Math.min(opening.index + opening[0].length + 1, source.length)
+    if (opening.groups?.empty) return { start, end: start }
     // its markup ends at the next line at the file's left edge:  a tag's own end tag, `</>`, or what comes next
-    const end = lines.findIndex((line) => line.trim() && !/^[ \t]/.test(line))
-    return dedent(lines.slice(0, end < 0 ? undefined : end)).trim()
+    const edge = /^[^ \t\n]/m.exec(source.slice(start))
+    return { start, end: edge ? start + edge.index : source.length }
   }
   return undefined
 }
+
+/**
+ * Where each element of the property editor a type was written with starts, in its file, in the order written:
+ * what the editor marks its drawn elements with, so a drop on one writes beside it (epic `editor` P35).
+ * - As `propertyEditorInSource()` finds it:  the type's own words first, then those it inherits.
+ * - Each place counts from 0, its line and column, as a drawn part's place does (`SourceMarks`).
+ * - `undefined` if none of them has one.
+ */
+export function propertyEditorTagsIn(
+  typeNames: readonly string[],
+  editors: readonly SourceFile[]
+): { path: string; places: { line: number; column: number }[] } | undefined {
+  for (const name of typeNames) {
+    for (const { path, text } of editors) {
+      const block = namedEditorBlock(text, name)
+      if (!block) continue
+      const places = [...text.slice(block.start, block.end).matchAll(START_TAG)].map((match) => {
+        const before = text.slice(0, block.start + match.index).split("\n")
+        return { line: before.length - 1, column: before.at(-1)!.length }
+      })
+      return { path, places }
+    }
+  }
+  return undefined
+}
+
+/** An element's start tag:  `<ui-property`, never an end tag, a comment or `<>`. */
+const START_TAG = /<[a-z][\w-]*/gi
 
 /** One of a type's events or abilities, as written:  `on click`, its code `play it`. */
 export type WrittenEvent = {

@@ -148,6 +148,7 @@
         "ui-tree-item",
         "ui-diagram",
         "ui-diagram-node",
+        "ui-graph",
         "ui-tree-diagram",
         "ui-tree-node"
       ]

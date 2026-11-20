@@ -11,7 +11,7 @@
  *   - every method takes the short name or the full one
  * - writers:
  *   - `epic agents` (`agents.ts`):  sessions and their helpers, at the same time
- *   - the page server's route (`agentRoutes.ts`):  Owen's redirect notes from the epic page's Agents box
+ *   - the page server's route (`agentRoutes.ts`):  Owen's redirect notes from the epic page's agents popover
  *   - Every write is under the file's lock (`SRV.FileLock`), and atomic (a temp file renamed over it),
  *     as the review inbox's (`ReviewInbox`).
  * - REDIRECTS:  a note Owen sends a running agent from the page waits in its entry, untold,
@@ -239,7 +239,7 @@ export class AgentList {
   }
 
   /**
-   * Owen's `note` for agent `name`, from the epic page's Agents box (`agentRoutes.ts`):
+   * Owen's `note` for agent `name`, from the epic page's agents popover (`agentRoutes.ts`):
    * added to its `redirects`, untold;  returns the list after.
    * - through the page server's one safe write (`SRV.FileOperations.save()`):
    *   read and written under the list's lock, all at once
@@ -355,7 +355,7 @@ export type RunningAgent = {
   taskId?: string
   /** the files it's changing, from the checkout's root:  a file, a folder or a glob each (`claim()`) */
   files?: string[]
-  /** Owen's notes to steer it, from the epic page's Agents box, oldest first */
+  /** Owen's notes to steer it, from the epic page's agents popover, oldest first */
   redirects?: Redirect[]
 }
 

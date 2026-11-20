@@ -63,22 +63,22 @@ export const epicStageButtonVocabulary = {
     { key: "acceptPhases", text: "Accept Phases", description: "Its words, ending the `phases` stage." },
     {
       key: "acceptOverviewTip",
-      text: "The Overview is agreed:  Claude writes the phases next",
+      text: "Agree the Overview:  Claude writes the phases next",
       description: "Its tooltip, Overview stage:  what a press does."
     },
     {
       key: "acceptPhasesTip",
-      text: "The phases and their build plans are agreed:  Claude starts building",
+      text: "Agree the phases and plans:  Claude starts building",
       description: "Its tooltip, Phases stage:  what a press does."
     },
     {
       key: "acceptedOverview",
-      text: "Overview accepted:  waiting for Claude to write the phases",
+      text: "Accepted:  Claude writes the phases next",
       description: "Its tooltip once pressed, Overview stage."
     },
     {
       key: "acceptedPhases",
-      text: "Phases accepted:  waiting for Claude to start building",
+      text: "Accepted:  Claude starts building next",
       description: "Its tooltip once pressed, Phases stage."
     },
     { key: "openQuestionsOne", text: "1 question open", description: "Its tooltip:  what's open." },
@@ -90,17 +90,17 @@ export const epicStageButtonVocabulary = {
     { key: "nothingOpen", text: "no questions open", description: "Its tooltip:  nothing open." },
     {
       key: "waits",
-      text: "goes to Claude 5 minutes after a press, unless you press again",
+      text: "sent 5 minutes after a press",
       description: "Its tooltip, before a press:  the countdown (I181)."
     },
     {
       key: "counting",
-      text: "goes to Claude in {time}:  click to call it off",
+      text: "sends in {time}:  press again to stop",
       description: "Its tooltip while it counts;  `{time}` like `4:12`."
     },
     {
       key: "acceptSends",
-      text: "and sends {count} unsent with it",
+      text: "sends {count} unsent with it",
       description: "Its tooltip:  the marks and comments a press sends along."
     }
   ],

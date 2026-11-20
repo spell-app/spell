@@ -1,0 +1,2181 @@
+{
+  "name": "board-62",
+  "attrs": {
+    "interface": {
+      "name": "edge",
+      "version": "62"
+    }
+  },
+  "ports": {
+    "p000": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {
+        "lane": 0,
+        "pitch_um": 127
+      }
+    },
+    "p001": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p002": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p003": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p004": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p005": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {
+        "lane": 5,
+        "pitch_um": 127
+      }
+    },
+    "p006": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p007": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p008": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p009": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p010": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {
+        "lane": 10,
+        "pitch_um": 127
+      }
+    },
+    "p011": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p012": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p013": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p014": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p015": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {
+        "lane": 15,
+        "pitch_um": 127
+      }
+    },
+    "p016": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p017": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p018": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p019": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p020": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {
+        "lane": 20,
+        "pitch_um": 127
+      }
+    },
+    "p021": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p022": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p023": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p024": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p025": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {
+        "lane": 25,
+        "pitch_um": 127
+      }
+    },
+    "p026": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p027": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p028": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p029": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p030": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {
+        "lane": 30,
+        "pitch_um": 127
+      }
+    },
+    "p031": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p032": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p033": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p034": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p035": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {
+        "lane": 35,
+        "pitch_um": 127
+      }
+    },
+    "p036": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p037": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p038": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p039": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p040": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {
+        "lane": 40,
+        "pitch_um": 127
+      }
+    },
+    "p041": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p042": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p043": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p044": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p045": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {
+        "lane": 45,
+        "pitch_um": 127
+      }
+    },
+    "p046": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p047": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p048": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p049": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p050": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {
+        "lane": 50,
+        "pitch_um": 127
+      }
+    },
+    "p051": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p052": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p053": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p054": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p055": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {
+        "lane": 55,
+        "pitch_um": 127
+      }
+    },
+    "p056": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p057": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p058": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p059": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p060": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {
+        "lane": 60,
+        "pitch_um": 127
+      }
+    },
+    "p061": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p062": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p063": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p064": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p065": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {
+        "lane": 65,
+        "pitch_um": 127
+      }
+    },
+    "p066": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p067": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p068": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p069": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p070": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {
+        "lane": 70,
+        "pitch_um": 127
+      }
+    },
+    "p071": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p072": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p073": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p074": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p075": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {
+        "lane": 75,
+        "pitch_um": 127
+      }
+    },
+    "p076": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p077": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p078": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p079": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p080": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {
+        "lane": 80,
+        "pitch_um": 127
+      }
+    },
+    "p081": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p082": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p083": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p084": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p085": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {
+        "lane": 85,
+        "pitch_um": 127
+      }
+    },
+    "p086": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p087": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p088": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p089": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p090": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {
+        "lane": 90,
+        "pitch_um": 127
+      }
+    },
+    "p091": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p092": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p093": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p094": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p095": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {
+        "lane": 95,
+        "pitch_um": 127
+      }
+    },
+    "p096": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p097": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p098": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p099": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p100": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {
+        "lane": 100,
+        "pitch_um": 127
+      }
+    },
+    "p101": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p102": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p103": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p104": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p105": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {
+        "lane": 105,
+        "pitch_um": 127
+      }
+    },
+    "p106": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p107": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p108": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p109": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p110": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {
+        "lane": 110,
+        "pitch_um": 127
+      }
+    },
+    "p111": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p112": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p113": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p114": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p115": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {
+        "lane": 115,
+        "pitch_um": 127
+      }
+    },
+    "p116": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p117": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p118": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p119": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p120": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {
+        "lane": 120,
+        "pitch_um": 127
+      }
+    },
+    "p121": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p122": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p123": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p124": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p125": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {
+        "lane": 125,
+        "pitch_um": 127
+      }
+    },
+    "p126": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p127": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p128": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p129": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p130": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {
+        "lane": 130,
+        "pitch_um": 127
+      }
+    },
+    "p131": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p132": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p133": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p134": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p135": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {
+        "lane": 135,
+        "pitch_um": 127
+      }
+    },
+    "p136": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p137": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p138": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p139": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p140": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {
+        "lane": 140,
+        "pitch_um": 127
+      }
+    },
+    "p141": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p142": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p143": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p144": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p145": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {
+        "lane": 145,
+        "pitch_um": 127
+      }
+    },
+    "p146": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p147": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p148": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p149": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p150": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {
+        "lane": 150,
+        "pitch_um": 127
+      }
+    },
+    "p151": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p152": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p153": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p154": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p155": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {
+        "lane": 155,
+        "pitch_um": 127
+      }
+    },
+    "p156": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p157": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p158": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p159": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p160": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {
+        "lane": 160,
+        "pitch_um": 127
+      }
+    },
+    "p161": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p162": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p163": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p164": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p165": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {
+        "lane": 165,
+        "pitch_um": 127
+      }
+    },
+    "p166": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p167": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p168": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p169": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p170": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {
+        "lane": 170,
+        "pitch_um": 127
+      }
+    },
+    "p171": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p172": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p173": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p174": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p175": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {
+        "lane": 175,
+        "pitch_um": 127
+      }
+    },
+    "p176": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p177": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p178": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p179": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p180": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {
+        "lane": 180,
+        "pitch_um": 127
+      }
+    },
+    "p181": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p182": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p183": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p184": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p185": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {
+        "lane": 185,
+        "pitch_um": 127
+      }
+    },
+    "p186": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p187": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p188": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p189": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p190": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {
+        "lane": 190,
+        "pitch_um": 127
+      }
+    },
+    "p191": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p192": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p193": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p194": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p195": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {
+        "lane": 195,
+        "pitch_um": 127
+      }
+    },
+    "p196": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p197": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p198": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p199": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p200": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {
+        "lane": 200,
+        "pitch_um": 127
+      }
+    },
+    "p201": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p202": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p203": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p204": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p205": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {
+        "lane": 205,
+        "pitch_um": 127
+      }
+    },
+    "p206": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p207": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p208": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p209": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p210": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {
+        "lane": 210,
+        "pitch_um": 127
+      }
+    },
+    "p211": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p212": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p213": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p214": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p215": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {
+        "lane": 215,
+        "pitch_um": 127
+      }
+    },
+    "p216": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p217": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p218": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p219": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p220": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {
+        "lane": 220,
+        "pitch_um": 127
+      }
+    },
+    "p221": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p222": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p223": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p224": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p225": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {
+        "lane": 225,
+        "pitch_um": 127
+      }
+    },
+    "p226": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p227": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p228": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p229": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p230": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {
+        "lane": 230,
+        "pitch_um": 127
+      }
+    },
+    "p231": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p232": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p233": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p234": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p235": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {
+        "lane": 235,
+        "pitch_um": 127
+      }
+    },
+    "p236": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p237": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p238": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p239": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p240": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {
+        "lane": 240,
+        "pitch_um": 127
+      }
+    },
+    "p241": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p242": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p243": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p244": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p245": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {
+        "lane": 245,
+        "pitch_um": 127
+      }
+    },
+    "p246": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p247": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p248": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p249": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p250": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {
+        "lane": 250,
+        "pitch_um": 127
+      }
+    },
+    "p251": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p252": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p253": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p254": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p255": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {
+        "lane": 255,
+        "pitch_um": 127
+      }
+    },
+    "p256": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p257": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p258": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p259": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p260": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {
+        "lane": 260,
+        "pitch_um": 127
+      }
+    },
+    "p261": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p262": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p263": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p264": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p265": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {
+        "lane": 265,
+        "pitch_um": 127
+      }
+    },
+    "p266": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p267": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p268": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p269": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p270": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {
+        "lane": 270,
+        "pitch_um": 127
+      }
+    },
+    "p271": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p272": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p273": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p274": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p275": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {
+        "lane": 275,
+        "pitch_um": 127
+      }
+    },
+    "p276": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p277": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p278": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p279": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p280": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {
+        "lane": 280,
+        "pitch_um": 127
+      }
+    },
+    "p281": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p282": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p283": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p284": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p285": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {
+        "lane": 285,
+        "pitch_um": 127
+      }
+    },
+    "p286": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p287": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p288": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p289": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p290": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {
+        "lane": 290,
+        "pitch_um": 127
+      }
+    },
+    "p291": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p292": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p293": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p294": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p295": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {
+        "lane": 295,
+        "pitch_um": 127
+      }
+    },
+    "p296": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p297": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p298": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p299": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p300": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {
+        "lane": 300,
+        "pitch_um": 127
+      }
+    },
+    "p301": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p302": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p303": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p304": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p305": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {
+        "lane": 305,
+        "pitch_um": 127
+      }
+    },
+    "p306": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p307": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p308": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p309": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p310": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {
+        "lane": 310,
+        "pitch_um": 127
+      }
+    },
+    "p311": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p312": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p313": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p314": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p315": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {
+        "lane": 315,
+        "pitch_um": 127
+      }
+    },
+    "p316": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p317": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p318": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p319": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p320": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {
+        "lane": 320,
+        "pitch_um": 127
+      }
+    },
+    "p321": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p322": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p323": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p324": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p325": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {
+        "lane": 325,
+        "pitch_um": 127
+      }
+    },
+    "p326": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p327": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p328": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p329": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p330": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {
+        "lane": 330,
+        "pitch_um": 127
+      }
+    },
+    "p331": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p332": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p333": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p334": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p335": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {
+        "lane": 335,
+        "pitch_um": 127
+      }
+    },
+    "p336": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p337": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p338": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p339": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p340": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {
+        "lane": 340,
+        "pitch_um": 127
+      }
+    },
+    "p341": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p342": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p343": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p344": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p345": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {
+        "lane": 345,
+        "pitch_um": 127
+      }
+    },
+    "p346": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p347": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p348": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p349": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p350": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {
+        "lane": 350,
+        "pitch_um": 127
+      }
+    },
+    "p351": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p352": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p353": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p354": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p355": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {
+        "lane": 355,
+        "pitch_um": 127
+      }
+    },
+    "p356": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p357": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p358": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p359": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p360": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {
+        "lane": 360,
+        "pitch_um": 127
+      }
+    },
+    "p361": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p362": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p363": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p364": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p365": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {
+        "lane": 365,
+        "pitch_um": 127
+      }
+    },
+    "p366": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p367": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p368": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p369": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p370": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {
+        "lane": 370,
+        "pitch_um": 127
+      }
+    },
+    "p371": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p372": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p373": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p374": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p375": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {
+        "lane": 375,
+        "pitch_um": 127
+      }
+    },
+    "p376": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p377": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p378": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p379": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p380": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {
+        "lane": 380,
+        "pitch_um": 127
+      }
+    },
+    "p381": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p382": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {}
+    },
+    "p383": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    },
+    "p384": {
+      "kind": "optical",
+      "direction": "in",
+      "attrs": {}
+    },
+    "p385": {
+      "kind": "electrical",
+      "direction": "out",
+      "attrs": {
+        "lane": 385,
+        "pitch_um": 127
+      }
+    },
+    "p386": {
+      "kind": "signal",
+      "direction": "inout",
+      "attrs": {}
+    }
+  },
+  "connections": []
+}

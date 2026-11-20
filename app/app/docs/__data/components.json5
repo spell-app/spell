@@ -810,6 +810,566 @@
       "href": "spell-markdown.html"
     },
     {
+      "tag": "spell-reference-page",
+      "name": "<spell-reference-page>",
+      "folder": "spell-reference-page",
+      "topics": [
+        "web components"
+      ],
+      "aka": [
+        "reference",
+        "api reference",
+        "place reference",
+        "data source reference"
+      ],
+      "description": "A reference page, made from its source each time it's shown:  a place's lists by tag, each with its fields, what it can change and how trying it went, and a person's words about each, kept in the place's Spell file as `--` lines.  Every section starts folded.  With `editable`, an option-click on something makes its words clearer, saved by the page around it (`spell-reference-edit`).",
+      "noun": "reference",
+      "attributes": [
+        {
+          "name": "src",
+          "kind": "string",
+          "description": "The description of a place, as `spell place ingest` wrote it:  `@spell/examples/StarWars/StarWars.api.json5`.  Its words are read from its Spell file beside it, `StarWars.api.spell`."
+        },
+        {
+          "name": "editable",
+          "kind": "boolean",
+          "description": "An option-click on something opens its words to make them clearer;  the page saves them, through `spell-reference-edit`."
+        },
+        {
+          "name": "disabled",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`)."
+        },
+        {
+          "name": "loading",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`)."
+        },
+        {
+          "name": "visible",
+          "kind": "boolean",
+          "shared": true,
+          "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins."
+        },
+        {
+          "name": "animation",
+          "kind": "enum",
+          "values": [
+            "fade",
+            "fade up",
+            "fade down",
+            "fade left",
+            "fade right",
+            "scale",
+            "zoom",
+            "drop",
+            "browse",
+            "browse right",
+            "fly",
+            "fly up",
+            "fly down",
+            "fly left",
+            "fly right",
+            "slide",
+            "slide up",
+            "slide down",
+            "slide left",
+            "slide right",
+            "swing",
+            "swing up",
+            "swing down",
+            "swing left",
+            "swing right",
+            "horizontal flip",
+            "vertical flip",
+            "flash",
+            "shake",
+            "bounce",
+            "tada",
+            "pulse",
+            "jiggle",
+            "glow",
+            "coin",
+            "none"
+          ],
+          "shared": true,
+          "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on."
+        },
+        {
+          "name": "link",
+          "kind": "string",
+          "shared": true,
+          "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`."
+        },
+        {
+          "name": "target",
+          "kind": "string",
+          "shared": true,
+          "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`."
+        },
+        {
+          "name": "font",
+          "kind": "multiple",
+          "values": [
+            "bold",
+            "heavy",
+            "italic",
+            "underline",
+            "strikethrough",
+            "code",
+            "highlight",
+            "subscript",
+            "superscript",
+            "all-caps",
+            "title-caps",
+            "headline",
+            "subhead",
+            "serif",
+            "sans-serif",
+            "typewriter"
+          ],
+          "shared": true,
+          "description": "How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone."
+        },
+        {
+          "name": "shadow",
+          "kind": "enum",
+          "values": [
+            "primary",
+            "secondary",
+            "red",
+            "orange",
+            "yellow",
+            "olive",
+            "green",
+            "teal",
+            "blue",
+            "violet",
+            "purple",
+            "pink",
+            "brown",
+            "grey",
+            "black",
+            "positive",
+            "negative"
+          ],
+          "valueSet": "hues",
+          "shared": true,
+          "description": "A hard shadow behind its letters, down and to the right, in a hue:  `shadow=\"yellow\"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em)."
+        },
+        {
+          "name": "width",
+          "kind": "string",
+          "shared": true,
+          "description": "Its box's own width where it sits, any CSS length:  `width=\"10em\"`, `\"50%\"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns."
+        },
+        {
+          "name": "min-width",
+          "kind": "string",
+          "shared": true,
+          "description": "The narrowest its box gets, any CSS length:  `min-width=\"16em\"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower."
+        },
+        {
+          "name": "max-width",
+          "kind": "string",
+          "shared": true,
+          "description": "The widest its box gets, any CSS length:  `max-width=\"36em\"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it."
+        },
+        {
+          "name": "tooltip",
+          "kind": "string",
+          "shared": true,
+          "description": "Its tooltip:  the browser's own, written as the element's `title`."
+        },
+        {
+          "name": "label",
+          "kind": "string",
+          "shared": true,
+          "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own."
+        },
+        {
+          "name": "movable",
+          "kind": "string",
+          "shared": true,
+          "description": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered."
+        },
+        {
+          "name": "resizable",
+          "kind": "string",
+          "shared": true,
+          "description": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height)."
+        },
+        {
+          "name": "on-platform",
+          "kind": "string",
+          "shared": true,
+          "description": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for."
+        }
+      ],
+      "slots": [],
+      "events": [
+        {
+          "name": "spell-reference-edit",
+          "detail": "{ file: string, key: string, words: string, editIn(text: string): { start, end, newText }, waitUntil(saving: Promise<string>): void }",
+          "description": "A person changed some words:  the page saves them in `file`, making `editIn(text)` on the file's text, and hands the saving to `waitUntil()`, resolving with the file's text once saved.  None does, and nothing's saved:  the element says so."
+        }
+      ],
+      "parts": [
+        {
+          "name": "base",
+          "description": "The whole page:  its line, then its sections."
+        },
+        {
+          "name": "header",
+          "description": "Its line at the top:  its title, what and where it is, its counts."
+        },
+        {
+          "name": "section",
+          "description": "Each `<spell-reference-section>`:  a folded section, a tag's or a list's."
+        },
+        {
+          "name": "item",
+          "description": "Each `<spell-reference-item>`:  a field, or a change a list can make."
+        },
+        {
+          "name": "state",
+          "description": "Each `<spell-reference-state>`:  how trying something went, as a label."
+        },
+        {
+          "name": "words",
+          "description": "A person's words about something."
+        },
+        {
+          "name": "edit",
+          "description": "The box words are made clearer in."
+        }
+      ],
+      "states": [
+        {
+          "name": "editing",
+          "description": "Some words are open to be made clearer."
+        },
+        {
+          "name": "disabled",
+          "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+        },
+        {
+          "name": "loading",
+          "description": "`loading` is set."
+        },
+        {
+          "name": "busy",
+          "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+        },
+        {
+          "name": "dimmed",
+          "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+        },
+        {
+          "name": "hidden",
+          "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+        },
+        {
+          "name": "still",
+          "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+        },
+        {
+          "name": "hiding",
+          "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+        },
+        {
+          "name": "pending",
+          "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+        },
+        {
+          "name": "ready",
+          "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+        },
+        {
+          "name": "on-platform",
+          "description": "`on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
+        }
+      ],
+      "texts": [
+        {
+          "key": "loading",
+          "text": "Reading the place…",
+          "description": "While the place's description loads."
+        },
+        {
+          "key": "notFound",
+          "text": "Spell couldn't find a description of a data source at {path}.\nCheck the address, or run spell place ingest again to read the data source's description.",
+          "description": "No description at `src`."
+        },
+        {
+          "key": "version",
+          "text": "Version {version}",
+          "description": "The place's version, on its line."
+        },
+        {
+          "key": "looked",
+          "text": "Looked at {date}",
+          "description": "When the place was last looked at."
+        },
+        {
+          "key": "lists",
+          "text": "Lists",
+          "description": "How many lists the place has;  the section of a place's lists with no tag."
+        },
+        {
+          "key": "deployments",
+          "text": "Where it runs",
+          "description": "The section of the servers a project names for it."
+        },
+        {
+          "key": "deploymentsNone",
+          "text": "Your project names no other server for it, so Spell uses {address}.",
+          "description": "No deployments listed."
+        },
+        {
+          "key": "notes",
+          "text": "Notes",
+          "description": "What the last look found worth saying."
+        },
+        {
+          "key": "agentNotes",
+          "text": "Good to know",
+          "description": "What the agent that read the place said people should know."
+        },
+        {
+          "key": "verified",
+          "text": "Verified",
+          "description": "A state:  tried, and it worked."
+        },
+        {
+          "key": "verifiedWhy",
+          "text": "Spell tested it on the real server, and it answered as its description says.",
+          "description": "Why it's verified."
+        },
+        {
+          "key": "failed",
+          "text": "Failed",
+          "description": "A state:  tried, and it didn't work."
+        },
+        {
+          "key": "failedWhy",
+          "text": "Spell tested it on the real server, and it didn't answer as its description says.",
+          "description": "Why it failed."
+        },
+        {
+          "key": "untyped",
+          "text": "No field types",
+          "description": "A state:  its fields don't say what they hold."
+        },
+        {
+          "key": "untypedWhy",
+          "text": "The description doesn't say what kind of information each field holds.\nSpell fills this in when it reads the data source.",
+          "description": "Why it has no field types."
+        },
+        {
+          "key": "disabled",
+          "text": "Turned off",
+          "description": "A state:  the Spell file turns it off."
+        },
+        {
+          "key": "disabledWhy",
+          "text": "Your Spell file switches this list off, so it's never tested.\nRemove that line to turn it back on.",
+          "description": "Why it's turned off."
+        },
+        {
+          "key": "unverified",
+          "text": "Not tried yet",
+          "description": "A state:  never tried."
+        },
+        {
+          "key": "unverifiedWhy",
+          "text": "Spell knows this list only from the data source's description:  it hasn't been tested on the real server yet.\nTo test it, run spell place verify in your terminal.",
+          "description": "Why it's not tried yet."
+        },
+        {
+          "key": "tried",
+          "text": "tried {date}",
+          "description": "When it was tried."
+        },
+        {
+          "key": "triedOn",
+          "text": "tried on {deployment}, {date}",
+          "description": "When and where it was tried."
+        },
+        {
+          "key": "rows",
+          "text": "{count} rows read",
+          "description": "What a verified list read."
+        },
+        {
+          "key": "failed401",
+          "text": "The real server asked for a key, the secret code that lets Spell in.\nAdd it beside this server in your project's __project.json5 file, then try again with spell place verify.",
+          "description": "A failure:  the server asked for a key."
+        },
+        {
+          "key": "failed403",
+          "text": "The real server didn't accept the key, the secret code that lets Spell in.\nCheck the key in your project's __project.json5 file, then try again with spell place verify.",
+          "description": "A failure:  the server refused the key."
+        },
+        {
+          "key": "failed404",
+          "text": "Spell couldn't find this list on the real server, at the address it was given.\nCheck the address in the place's description, then try again with spell place verify.",
+          "description": "A failure:  not there."
+        },
+        {
+          "key": "failed5xx",
+          "text": "Something went wrong on the real server, not in your project.\nWait a few minutes, then try again with spell place verify.",
+          "description": "A failure:  the server broke."
+        },
+        {
+          "key": "failedOther",
+          "text": "The real server's answer wasn't what Spell expected.\nHover over this line to see what it said.",
+          "description": "A failure of another kind."
+        },
+        {
+          "key": "listLeftOut",
+          "text": "Left out of the Spell:  {why}",
+          "description": "A list the Spell leaves out, and why."
+        },
+        {
+          "key": "changes",
+          "text": "What it can change",
+          "description": "A list's writes and actions."
+        },
+        {
+          "key": "fields",
+          "text": "Fields",
+          "description": "A list's fields."
+        },
+        {
+          "key": "name",
+          "text": "Name",
+          "description": "A deployment's name, a column."
+        },
+        {
+          "key": "address",
+          "text": "Address",
+          "description": "A deployment's address, a column."
+        },
+        {
+          "key": "key",
+          "text": "Key",
+          "description": "A deployment's key, a column."
+        },
+        {
+          "key": "readOnly",
+          "text": "Read only",
+          "description": "A deployment that's only read, a column."
+        },
+        {
+          "key": "yes",
+          "text": "yes",
+          "description": "A deployment that's only read."
+        },
+        {
+          "key": "takes",
+          "text": "takes {params}",
+          "description": "What a change takes."
+        },
+        {
+          "key": "calledInSpell",
+          "text": "called {words} in Spell",
+          "description": "A field's name in Spell, when it differs."
+        },
+        {
+          "key": "isId",
+          "text": "says which row is which",
+          "description": "A list's id field."
+        },
+        {
+          "key": "linksTo",
+          "text": "links to {target}",
+          "description": "A field holding another list's row."
+        },
+        {
+          "key": "required",
+          "text": "required",
+          "description": "A field every row must have."
+        },
+        {
+          "key": "setByServer",
+          "text": "set by the server",
+          "description": "A field nobody writes."
+        },
+        {
+          "key": "oneOf",
+          "text": "one of {choices}",
+          "description": "A field's choices."
+        },
+        {
+          "key": "leftOut",
+          "text": "left out of the Spell",
+          "description": "A field the Spell leaves out."
+        },
+        {
+          "key": "markNew",
+          "text": "New since {date}",
+          "description": "Something the last look found new."
+        },
+        {
+          "key": "markNewWhy",
+          "text": "This appeared in the data source when Spell last looked, on {date}.",
+          "description": "Why it's marked new."
+        },
+        {
+          "key": "markGone",
+          "text": "Gone since {date}",
+          "description": "Something the last look couldn't find."
+        },
+        {
+          "key": "markGoneWhy",
+          "text": "This is no longer in the data source (checked {date}).\nYour program still uses it, so it stays here until you remove it from your program.",
+          "description": "Why it's marked gone."
+        },
+        {
+          "key": "editTip",
+          "text": "Option-click to edit its description",
+          "description": "The tooltip of something whose words can be edited."
+        },
+        {
+          "key": "editLabel",
+          "text": "Description of {name}",
+          "description": "The edit box's name, for a screen reader."
+        },
+        {
+          "key": "save",
+          "text": "Save",
+          "description": "Saves the words."
+        },
+        {
+          "key": "cancel",
+          "text": "Cancel",
+          "description": "Closes the box, keeping the words as they were."
+        },
+        {
+          "key": "editKeys",
+          "text": "Press ⌘-Enter to save, or Esc to cancel.",
+          "description": "Under the edit box."
+        },
+        {
+          "key": "notSaved",
+          "text": "Your text wasn't saved, because this page can only be read.\nTo edit it, open this page from the Data tab in the editor, then try again.",
+          "description": "Nothing on the page saves words."
+        },
+        {
+          "key": "saveFailed",
+          "text": "Your text wasn't saved.\n{error}",
+          "description": "Saving the words failed."
+        }
+      ],
+      "mainTag": "spell-reference-page",
+      "main": true,
+      "page": true,
+      "href": "spell-reference-page.html"
+    },
+    {
       "tag": "spell-viewer",
       "name": "<spell-viewer>",
       "folder": "spell-viewer",
@@ -1279,6 +1839,101 @@
       "href": "Actions.html"
     },
     {
+      "tag": "AnatomyButton",
+      "name": "AnatomyButton",
+      "folder": "AppAnatomyView",
+      "mainTag": "AppAnatomyView",
+      "main": false,
+      "page": false,
+      "topics": [
+        "panes"
+      ],
+      "aka": [],
+      "description": "Anatomy's switch, in the top bar's Run | Edit group right after Inspect app (Q43 A):  pressed while it shows.",
+      "noun": "AnatomyButton",
+      "attributes": [],
+      "slots": [],
+      "events": [],
+      "parts": [],
+      "states": [],
+      "texts": [],
+      "usedIn": [
+        {
+          "name": "EditorToolbar",
+          "file": "src/app/pages/SpellEditor.tsx"
+        }
+      ],
+      "href": "AppAnatomyView.html#AnatomyButton"
+    },
+    {
+      "tag": "AppAnatomy",
+      "name": "AppAnatomy",
+      "folder": "AppAnatomyView",
+      "mainTag": "AppAnatomyView",
+      "main": false,
+      "page": false,
+      "topics": [
+        "panes"
+      ],
+      "aka": [],
+      "description": "The running app pulled apart into floors, in 3D (epic `editor` P34, after React Anatomy): each view it draws lifted over the view that holds it, labelled with its type.",
+      "noun": "AppAnatomy",
+      "attributes": [],
+      "slots": [],
+      "events": [],
+      "parts": [],
+      "states": [],
+      "texts": [],
+      "href": "AppAnatomyView.html#AppAnatomy"
+    },
+    {
+      "tag": "AppAnatomyView",
+      "name": "AppAnatomyView",
+      "folder": "AppAnatomyView",
+      "mainTag": "AppAnatomyView",
+      "main": true,
+      "page": true,
+      "topics": [
+        "panes"
+      ],
+      "aka": [],
+      "description": "Anatomy over the app pane, while it shows:  its bar, the floors' tags, the outlines, and the app turned and lifted.",
+      "noun": "AppAnatomyView",
+      "attributes": [],
+      "slots": [],
+      "events": [],
+      "parts": [],
+      "states": [],
+      "texts": [],
+      "props": [
+        {
+          "name": "pane",
+          "type": "() => HTMLElement | undefined",
+          "required": true,
+          "description": ""
+        },
+        {
+          "name": "body",
+          "type": "() => HTMLElement | undefined",
+          "required": true,
+          "description": ""
+        },
+        {
+          "name": "program",
+          "type": "() => HTMLElement | undefined",
+          "required": true,
+          "description": ""
+        }
+      ],
+      "usedIn": [
+        {
+          "name": "AppPane",
+          "file": "src/app/pages/SpellEditor.tsx"
+        }
+      ],
+      "href": "AppAnatomyView.html"
+    },
+    {
       "tag": "AppBarMenus",
       "name": "AppBarMenus",
       "folder": "MenuBar",
@@ -1302,7 +1957,7 @@
           "name": "mode",
           "type": "Mode",
           "required": true,
-          "description": "### `<AppBarMenus>` The top bar's app menus, after the project's:  File · Edit · View · Run · Help, quieter than its name. - File, Edit, View and Run are Spell, `SpellEditor.spell`'s `bar menu`s (epic `editor` P29):  each a Spell UI menu of the app's actions, its rows drawn, greyed and ticked by the Spell, each title in the page's language; each menu's title, the bar's word for it, the Spell's too. - What each row does is the editor's, handed over by its name (`handOverActions()`). - Rows that are lists or follow the editor are the editor's own, drawn in the Spell's place for them: Undo and Redo (their titles the step), the selection's part actions, View's Inspector cards. - File:  New Spell File, New CSS File, ─, Save, Discard Changes, AutoSave, ─, Duplicate File. - Edit:  the code editor's Undo, Redo, ─, the selection's part actions, ─, Find, ─, Code Editor Settings…. - View:  Run, Edit, Site (a site's editor, epic `mockup` P4), ─, Code, Compiled Code, Inspector, Program Panel, ─, Line Numbers, Soft Wrap (Code Editor Settings…' Wrap long lines;  epic `editor` T100);  each ticked while on. - Run:  Compile and Run, Restart, ─, Inspect App, Stop Inspecting, ─, Clear Console. - Help:  Help, which does nothing yet;  none in the static build.  A menu of one item:  still the editor's own. - `mode`:  the page's, ticked in View. - SIDE EFFECT:  keeps the editor's Spell in step with the editor, for what greys and ticks its rows."
+          "description": "### `<AppBarMenus>` The top bar's app menus, after the project's:  File · Edit · View · Run · Help, quieter than its name. - File, Edit, View and Run are Spell, `SpellEditor.spell`'s `bar menu`s (epic `editor` P29):  each a Spell UI menu of the app's actions, its rows drawn, greyed and ticked by the Spell, each title in the page's language; each menu's title, the bar's word for it, the Spell's too. - What each row does is the editor's, handed over by its name (`handOverActions()`). - Rows that are lists or follow the editor are the editor's own, drawn in the Spell's place for them: Undo and Redo (their titles the step), the selection's part actions, View's Inspector cards. - File:  New Spell File, New CSS File, ─, Save, Discard Changes, AutoSave, ─, Duplicate File. - Edit:  the code editor's Undo, Redo, ─, the selection's part actions, ─, Find, ─, Code Editor Settings…. - View:  Run, Edit, Site (a site's editor, epic `mockup` P4), ─, Code, Compiled Code, Inspector, Anatomy (epic `editor` P34), Program Panel, ─, Line Numbers, Soft Wrap (Code Editor Settings…' Wrap long lines;  epic `editor` T100);  each ticked while on. - Run:  Compile and Run, Restart, ─, Inspect App, Stop Inspecting, ─, Clear Console. - Help:  Keyboard Shortcuts (epic `editor` P36), then Help, which does nothing yet;  the editor's own, not the Spell's. - The static build shows it too, with just Keyboard Shortcuts (Q49):  its Help draws nothing there. - `mode`:  the page's, ticked in View. - SIDE EFFECT:  keeps the editor's Spell in step with the editor, for what greys and ticks its rows."
         }
       ],
       "usedIn": [
@@ -3699,6 +4354,18 @@
       ],
       "tokens": []
     },
+    "spell-reference-page": {
+      "folder": "spell-reference-page",
+      "mainTag": "spell-reference-page",
+      "title": "<spell-reference-page>",
+      "summary": "A reference page, made from its source, whose words you make clearer with an option-click.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "spell-reference-page"
+      ],
+      "tokens": []
+    },
     "SpellPage": {
       "folder": "SpellPage",
       "mainTag": "SpellPage",
@@ -3733,6 +4400,20 @@
       "docs": false,
       "tags": [
         "AppContainer"
+      ],
+      "tokens": []
+    },
+    "AppAnatomyView": {
+      "folder": "AppAnatomyView",
+      "mainTag": "AppAnatomyView",
+      "title": "AppAnatomyView",
+      "summary": "Anatomy:  the running app pulled apart into layers, in 3D, one for each view it draws.",
+      "status": "done",
+      "docs": false,
+      "tags": [
+        "AppAnatomyView",
+        "AppAnatomy",
+        "AnatomyButton"
       ],
       "tokens": []
     },

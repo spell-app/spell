@@ -285,6 +285,7 @@ export class PlanDocFiles {
    * The epic page at `file`, parsed:  a `PlanDoc`.  `options` as its constructor's;  its `person` this machine's
    * (`EpicHome.personName()`) unless they say.
    * - a SPLIT doc comes back WHOLE:  every part read into its host;  `plan.parts` says how it was stored
+   * - its comments read from its review inbox when first asked (`readComments`):  a change mark may name one
    * - throws a `PlanDocError` for a doc in the old markup
    * - SIDE EFFECT:  names each missing part on stderr
    */
@@ -300,6 +301,8 @@ export class PlanDocFiles {
       ...options
     })
     plan.parts = assembleEpic(plan.document, file)
+    // the epic's comments, for a change mark naming one (epic `epic-engine` T100):  read only when one does
+    plan.readComments = () => ReviewInbox.read(ReviewInbox.pathFor(file)).comments
     for (const id of plan.parts.missing)
       process.stderr.write(
         `epic:  ${relative(this.content, PlanParts.partFile(file, id))} is missing:  #${id} has no body\n`

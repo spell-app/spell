@@ -33,6 +33,8 @@ export class DataTooltips {
   private box: HTMLElement | undefined
   /** The target the bubble's showing. */
   private shown: Element | undefined
+  /** The innermost element the pointer was last over (`onPointerMove()`). */
+  private pointedAt: EventTarget | undefined
   /** The target under the pointer. */
   private hovered: Element | undefined
   /** The target holding keyboard focus. */
@@ -56,6 +58,7 @@ export class DataTooltips {
     if (!popover || !anchorPositioning) return
     document.documentElement.setAttribute(STAND_DOWN, "")
     document.addEventListener("pointerover", this.onPointerOver, true)
+    document.addEventListener("pointermove", this.onPointerMove, { capture: true, passive: true })
     document.addEventListener("pointerout", this.onPointerOut, true)
     document.addEventListener("focusin", this.onFocusIn, true)
     document.addEventListener("focusout", this.onFocusOut, true)
@@ -69,13 +72,25 @@ export class DataTooltips {
   ////////////////
 
   private readonly onPointerOver = (event: Event) => {
+    this.pointedAt = event.composedPath()[0]
     this.hovered = tooltipTargetIn(event)
     this.update()
+  }
+
+  /**
+   * The pointer moved onto another element with no `pointerover` saying so:  Chromium sometimes sends none, on an
+   * epic page's sticky header (headless Chromium, 2026-11-19;  `:hover` moved, the boundary events didn't).
+   * - Only when the innermost element under it changed:  a move inside one element costs a comparison.
+   */
+  private readonly onPointerMove = (event: Event) => {
+    if (event.composedPath()[0] === this.pointedAt) return
+    this.onPointerOver(event)
   }
 
   /** The pointer left the window:  no `pointerover` comes to say so. */
   private readonly onPointerOut = (event: Event) => {
     if ((event as PointerEvent).relatedTarget) return
+    this.pointedAt = undefined
     this.hovered = undefined
     this.update()
   }

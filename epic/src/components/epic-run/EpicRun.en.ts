@@ -85,7 +85,7 @@ export const epicRunVocabulary = {
     },
     {
       key: "waitingTip",
-      text: "Send hands it your answers, and it carries on",
+      text: "Send hands it your answers",
       description: "The waiting line's tooltip."
     },
     {
@@ -110,7 +110,7 @@ export const epicRunVocabulary = {
     },
     {
       key: "notRunningTip",
-      text: "Your answers are saved as you give them;  the command reads them when it next waits",
+      text: "Saved as you go;  the command reads them when it next waits",
       description: "The not-running line's tooltip."
     },
     { key: "progress", text: "Progress · {count}", description: "The progress lines' fold:  how many." },
@@ -132,7 +132,7 @@ export const epicRunVocabulary = {
     { key: "saved", text: "saved {time}", description: "The last save, beside Send." },
     {
       key: "sendTip",
-      text: "Send your answers:  the waiting command carries on with them;  send again any time",
+      text: "Send your answers;  again any time",
       description: "The plane's tooltip and name (`<epic-send-buttons send-tip>`)."
     },
     { key: "loading", text: "Reading the run…", description: "Before the run is read." }

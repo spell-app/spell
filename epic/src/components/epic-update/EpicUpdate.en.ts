@@ -137,7 +137,7 @@ export const epicUpdateVocabulary = {
     { key: "unmerged", text: "Not in main", description: "The pill after the label while its work isn't merged." },
     {
       key: "unmergedTip",
-      text: "On branch {branch}, not merged into main yet",
+      text: "On {branch}, not merged yet",
       description: "That pill's tooltip."
     }
   ],

@@ -85,7 +85,7 @@ export const epicOverviewVocabulary = {
       name: "kickoff",
       description:
         "The kickoff box (`<epic-kickoff>`, epic `epic-engine` P75), first in its body:  only while the page is " +
-        "reviewed and the epic has no Kickoff prompt and no phases.  What the epic should do, typed on its page, " +
+        "reviewed, an EPIC page (never a saga page) in its Overview stage, with no Kickoff prompt and no phases.  What the epic should do, typed on its page, " +
         "pictures and all;  Send makes it the Kickoff prompt."
     },
     {

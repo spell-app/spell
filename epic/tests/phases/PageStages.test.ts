@@ -88,6 +88,17 @@ describe("PageStages", () => {
     expect(PageStages.hides(bare)).toBe(false)
   })
 
+  // epic `epic-engine` I349
+  test("`takesKickoff()`:  an epic page in its Overview stage, never a saga page", () => {
+    expect(PageStages.takesKickoff({ stage: "overview" })).toBe(true)
+    expect(PageStages.takesKickoff({ kind: null, stage: "overview" })).toBe(true)
+    expect(PageStages.takesKickoff({ kind: "saga", stage: "overview" })).toBe(false)
+    expect(PageStages.takesKickoff({ kind: "saga" })).toBe(false)
+    expect(PageStages.takesKickoff({})).toBe(false)
+    expect(PageStages.takesKickoff({ stage: "phases" })).toBe(false)
+    expect(PageStages.takesKickoff({ stage: "building" })).toBe(false)
+  })
+
   test("every kind with a New button is one `TAKES_NEW` names, and the other way", () => {
     expect(
       Object.values(NEW_KIND_LOOKS)

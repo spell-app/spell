@@ -1,6 +1,7 @@
 import { spawnSync } from "node:child_process"
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
-import { dirname, join, relative, resolve } from "node:path"
+import { createRequire } from "node:module"
+import { basename, dirname, join, relative, resolve } from "node:path"
 
 import { SRV } from "spell/server"
 import { duration, parseVerbArgs, stringFlag } from "spell/epic/command/command.types"
@@ -11,11 +12,13 @@ import { Markup } from "spell/epic/markup"
 import { PageStages, PhaseStatuses } from "spell/epic/phases"
 import { fromTemplate } from "spell/epic/tools/pages.js"
 import {
+  CardText,
   OPEN_KINDS,
   PlanDocError,
   REVIEW_SECTIONS,
   ShortTitle,
   TITLE_PREFIX,
+  ISSUE_ID,
   TODO_ID,
   type CommitHistory,
   type Phase,
@@ -24,6 +27,7 @@ import {
 } from "./planDoc.types"
 
 import { BedtimeAll } from "./BedtimeAll"
+import { CommentList } from "./CommentList"
 import { CommitRemap } from "./CommitRemap"
 import { EpicDocs, GROUPS, type EpicDecisions, type EpicDocList } from "./EpicDocs"
 import { EpicOwners, type PathOwners } from "./EpicOwners"
@@ -300,24 +304,25 @@ export class PlanDocCommands {
           plan.setStanding(value === "on")
         })
       case "request": {
-        // into a todo (epic `epic-engine` T88):  its text, its pictures copied in as the person's, marked requested
-        if (TODO_ID.test(need(rest[0], "a phase or a todo").toLowerCase())) {
+        // into a todo (epic `epic-engine` T88) or an issue (T108):  its text, its pictures copied in as the person's,
+        // marked requested
+        const into = need(rest[0], "a phase, a todo or an issue").toLowerCase()
+        if (TODO_ID.test(into) || ISSUE_ID.test(into)) {
           const pictures = ItemPictures.fromFiles(lists.picture ?? [])
           const html = readFileSync(need(stringFlag(flags.file), "--file (the request as html)"), "utf8")
-          const todo = rest[0]!.toLowerCase()
           const requestId = need(rest[1], "a request id")
           const filed = await this.edit(file, (plan) => {
-            const named = pictures.length ? ItemPictures.named(file, todo, pictures) : []
-            // labelled on from the todo's own pictures (epic `epic-engine` P75):  IMG3 after its IMG2
-            const first = ItemPictures.nextNumber(plan.findItem(todo))
-            const title = plan.addItemRequest(todo, requestId, `${html}${ItemPictures.html(named, first)}`)
+            const named = pictures.length ? ItemPictures.named(file, into, pictures) : []
+            // labelled on from the item's own pictures (epic `epic-engine` P75):  IMG3 after its IMG2
+            const first = ItemPictures.nextNumber(plan.findItem(into))
+            const title = plan.addItemRequest(into, requestId, `${html}${ItemPictures.html(named, first)}`)
             return { title, named: title === undefined ? [] : named }
           })
           ItemPictures.save(file, filed.named)
           return this.print(
             filed.title === undefined
-              ? `${requestId} is in ${todo.toUpperCase()} already`
-              : `${requestId} filed into ${todo.toUpperCase()} · ${filed.title}`
+              ? `${requestId} is in ${into.toUpperCase()} already`
+              : `${requestId} filed into ${into.toUpperCase()} · ${filed.title}`
           )
         }
         return this.edit(file, (plan) =>
@@ -479,6 +484,10 @@ export class PlanDocCommands {
       case "decisions":
         return this.printDecisions(new EpicDocs({ files: this.files, name }).decisions(), Boolean(flags.json))
       case "lint":
+        if (flags.fix) {
+          const fixed = await this.edit(file, (plan) => plan.finishStaleUnderway())
+          for (const id of fixed) this.print(`FIXED:  ${id.toUpperCase()}:  its status card left underway finished`)
+        }
         return this.lint(file, flags)
       case "open":
         return this.open(file)
@@ -857,6 +866,7 @@ export class PlanDocCommands {
    * wrote them by hand into the Overview's or a phase's text (a part, or a command's HTML).
    * - stamps them, as every edit does (`PlanDoc.updateChanges()`):  each new one's id (`ch3`), time and answer
    * - `--for q13`:  first, the marks that name no item take that one;  refused for an id the doc has no item for
+   *   - or a comment, `--for c2` (epic `epic-engine` T100):  refused for one the epic hasn't got
    * - then prints each, new first:  `CH3  Q13  new  "todos fold into it" (Q13)  in o2`, and how many are new (3
    *   days, orange on the page;  no approval:  Owen, 2026-10-25)
    */
@@ -865,7 +875,7 @@ export class PlanDocCommands {
     const item = given === undefined ? undefined : need(given === true ? undefined : given, "--for <item id>")
     const named = await this.edit(file, (plan) => {
       if (!item) return 0
-      const id = plan.item(item).id
+      const id = CommentList.isCommentId(item) ? plan.comment(item) : plan.item(item).id
       const bare = plan.changes.filter((change) => !change.getAttribute("item"))
       for (const change of bare) Markup.set<"epic-change">(change, { item: id })
       if (bare.length)
@@ -927,7 +937,7 @@ export class PlanDocCommands {
    *   - an issue or judgement call Owen asked for with Do this is never closed by it:  `fixed`, below
    * - `fixed`:  an issue or judgement call fixed, for Owen to review (epic `epic-engine` I232):  ORANGE, still open
    *   - its latest underway card turns green, the summary under it;  with no underway card, a Done card of the summary
-   *   - his Approve closes it;  his Do this sends it back, red (`PlanDoc.fixedForReview()`)
+   *   - his Accept the fix closes it;  his Revisit with a note sends it back, red (`PlanDoc.fixedForReview()`)
    *   - the spinner off
    * - `noted`:  a STEP done that doesn't finish the item:  Claude RECORDED what Owen chose (Owen, 2026-10-10), or
    *   answered, added details, condensed it, called a request off
@@ -936,18 +946,26 @@ export class PlanDocCommands {
    *   - the spinner off
    *   - `inbox apply` writes these itself for picks, todos and new items (Q19)
    *   - `done --filed "<what>"`, the older spelling, means `noted` too:  what was filed is a record
-   * - reading, summary:  HTML, as `updated` takes (plain text works as it is)
+   * - reading, summary:  HTML, as `updated` takes (plain text works as it is), or `--file <html>` for a long one
+   *   - in short paragraphs or bullets (`CardText`, I339):  a blank line starts a paragraph, `- ` lines are bullets;
+   *     a paragraph or bullet over `CardText.MOST_WORDS` words is refused
    * - `promised`:  `/epic tidy`'s:  the item waits on finished work and the promised thing never came
    *   (`PlanDoc.promiseUnkept()`):  its card starts `Promised, not delivered:`, and it's back on Owen's list
    * - `--quiet`, on a noted card:  the item's change stamp left alone (`/epic tidy`'s doubtful items)
    * - NOT logged:  the mark it answers already is (`inbox apply`, `details`)
    */
-  private async status(file: string, [id, state, text]: string[], flags: Flags): Promise<void> {
+  private async status(file: string, [id, state, given]: string[], flags: Flags): Promise<void> {
     const quiet = Boolean(flags.quiet)
     if (quiet && state !== "noted") throw new PlanDocError("--quiet goes with a noted card")
     need(id, "an item id")
     const filed = flags.filed
     if (filed === true) throw new PlanDocError(`--filed needs what was filed ("Chose B · Keep one file per template")`)
+    // a long card from a file (I339);  either way, in short paragraphs or bullets (`CardText`)
+    const fromFile = stringFlag(flags.file)
+    if (fromFile !== undefined && given !== undefined) throw new PlanDocError("the card's text, or --file:  not both")
+    const text = fromFile === undefined ? given : readFileSync(fromFile, "utf8")
+    for (const words of [text, typeof filed === "string" ? filed : undefined])
+      if (words !== undefined) CardText.check(CardText.structured(words))
     let title: string
     let said = state
     if (state === "underway")
@@ -1207,7 +1225,10 @@ export class PlanDocCommands {
    *   - a missing one is a problem
    *   - a note:  a host with content of its own besides its part (moved into the part on the next edit),
    *     or a part file nothing loads
-   * - the browser check:  `src/tools/check-spell.js`, a child `node` (its stderr passed on)
+   * - an item finished with a status card still underway (`PlanDoc.staleUnderway()`, epic `epic-engine` I355);
+   *   `--fix` finishes those first (`finishStaleUnderway()`), saved, then checks
+   * - the browser check:  `src/tools/check-spell.js`, a child `node` (its stderr passed on);
+   *   skipped, saying so, where Playwright isn't installed (`hasPlaywright()`)
    */
   private lint(file: string, { noBrowser, links: strictLinks }: Flags): number | void {
     const { files } = this
@@ -1240,6 +1261,13 @@ export class PlanDocCommands {
     for (const orphan of orphans) this.print(`NOTE:  ${PARTS_DIR}/${orphan}:  nothing loads it`)
     // one question, one choice set (I88, epic `epic-engine` P33):  said, failing nothing
     for (const asks of plan.choiceSetProblems()) this.print(`ASKS:  ${asks}`)
+    // finished, yet a card still underway draws it blue (I355):  `--fix` finishes it
+    const name = basename(file).replace(/\.plan\.html$/, "")
+    for (const item of plan.staleUnderway())
+      problems.push(
+        `${item.id.toUpperCase()}:  its work is finished, but an earlier status card is still underway, so it shows blue:  ` +
+          `epic lint ${name} --fix`
+      )
     // run-together details (T74):  said, failing nothing
     for (const dense of plan.denseParagraphs()) this.print(`DENSE:  ${dense}`)
     for (const problem of problems) this.warn(`PROBLEM:  ${problem}`)
@@ -1248,7 +1276,12 @@ export class PlanDocCommands {
         `${relative(files.content, file)}:  structure ok${parts.split ? ` (${parts.hosts.length} parts)` : ""}`
       )
     let browserOk = true
-    if (!noBrowser) {
+    if (!noBrowser && !PlanDocCommands.hasPlaywright())
+      this.print(
+        "check-spell:  skipped -- the browser check needs Playwright, which the basic install leaves out " +
+          "(npm install playwright, then npx playwright install chromium)"
+      )
+    else if (!noBrowser) {
       const run = spawnSync("node", [join(files.docsTools, "check-spell.js"), relative(files.docsPackage, file)], {
         cwd: files.docsPackage,
         encoding: "utf8",
@@ -1262,9 +1295,23 @@ export class PlanDocCommands {
   }
 
   /**
+   * Can the browser check load Playwright?  An npm install of `spell` leaves it out (an optional peer):
+   * `epic lint` crashed there on its first browser check (epic `epic-engine` I342).
+   * - NEVER throws
+   */
+  static hasPlaywright(): boolean {
+    try {
+      createRequire(import.meta.url).resolve("playwright")
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  /**
    * `open <name>`:  show the doc in VS Code's side bar's Review tab, reusing it (`openInVSCode()`)
-   * - an epic page always goes there, by its kind (epic `epic-engine` P59):  never the Epic Docs tab, whatever was
-   *   asked;  `--docs`, Owen's 2026-10-12 rule until then, is accepted and does nothing
+   * - an epic page always goes there, by its kind (epic `epic-engine` P59), whatever was asked;
+   *   `--docs`, Owen's 2026-10-12 rule for a third tab (gone since epic `epic-engine` Q73), is accepted and does nothing
    */
   private open(file: string): void {
     this.read(file)

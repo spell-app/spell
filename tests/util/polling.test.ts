@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
-import { msUntil, pollWhileVisible } from "spell/util/polling"
+import { msUntil, pollWhileVisible, watchServerFiles } from "spell/util/polling"
 
 beforeEach(() => vi.useFakeTimers())
 afterEach(() => vi.useRealTimers())
@@ -134,6 +134,49 @@ describe("once a day at a time (`check it once a day at 5am`)", () => {
     pageIs("hidden")
     pageIs("visible")
     expect(look).toHaveBeenCalledTimes(1)
+    stop()
+  })
+})
+
+describe("watchServerFiles()", () => {
+  /** A page of its own:  a `window` and a `document` that show, and hear events. */
+  function fakePage() {
+    return Object.assign(new EventTarget(), {
+      document: Object.assign(new EventTarget(), { visibilityState: "visible" }),
+      setInterval: (run: () => void, ms: number) => setInterval(run, ms),
+      clearInterval: (timer: ReturnType<typeof setInterval>) => clearInterval(timer)
+    }) as unknown as Window
+  }
+
+  /** The page's live client says `path` changed. */
+  function changed(window: Window, path: string) {
+    window.dispatchEvent(new CustomEvent("spell-server:changed", { detail: { path } }))
+  }
+
+  test("refreshes when a file it cares about changes, its path decoded;  never for another;  no poll by default", () => {
+    const window = fakePage()
+    const refresh = vi.fn()
+    const stop = watchServerFiles(window, (path) => path.startsWith("/spaces/@spell/examples/Solitaire/"), refresh)
+    changed(window, "/spaces/%40spell/examples/Solitaire/Card.spell")
+    expect(refresh).toHaveBeenCalledTimes(1)
+    changed(window, "/spaces/%40spell/examples/FizzBuzz/FizzBuzz.spell")
+    vi.advanceTimersByTime(60_000)
+    expect(refresh).toHaveBeenCalledTimes(1)
+    stop()
+    changed(window, "/spaces/%40spell/examples/Solitaire/Card.spell")
+    expect(refresh).toHaveBeenCalledTimes(1)
+  })
+
+  test("polls every `every` ms only while `polls` says so", () => {
+    const window = fakePage()
+    const refresh = vi.fn()
+    let isOpen = false
+    const stop = watchServerFiles(window, undefined, refresh, { every: 1000, polls: () => !isOpen })
+    vi.advanceTimersByTime(1000)
+    expect(refresh).toHaveBeenCalledTimes(1)
+    isOpen = true
+    vi.advanceTimersByTime(5000)
+    expect(refresh).toHaveBeenCalledTimes(1)
     stop()
   })
 })
