@@ -20279,6 +20279,11 @@
           "description": "`file`:  accepted file types."
         },
         {
+          "name": "folder",
+          "kind": "boolean",
+          "description": "`file`:  picks whole folders instead of files;  `files` holds every file in them, each with its path in its folder (`webkitRelativePath`)."
+        },
+        {
           "name": "autocomplete",
           "kind": "string",
           "description": "Autofill hint, forwarded to the native input."
@@ -20483,7 +20488,7 @@
         {
           "name": "ui-changed",
           "detail": "{ value: string, originalEvent?: Event }",
-          "description": "Someone committed a change (blur, Enter, picking a file)."
+          "description": "Someone committed a change (blur, Enter, picking a file);  a file input's element holds them in `files`."
         }
       ],
       "parts": [
@@ -53889,8 +53894,13 @@
         },
         {
           "key": "turnedAway",
-          "text": "{count} turned away",
+          "text": "{count} files not added",
           "description": "How many were turned away."
+        },
+        {
+          "key": "turnedAwayOne",
+          "text": "1 file not added",
+          "description": "One was turned away."
         },
         {
           "key": "uploaded",
@@ -53929,33 +53939,63 @@
         },
         {
           "key": "tooBig",
-          "text": "Too big (over {size})",
-          "description": "Why a file was turned away:  its size."
+          "text": "Too big",
+          "description": "Why a file was turned away:  its size, in its row."
+        },
+        {
+          "key": "tooBigLong",
+          "text": "This file is too big, so it wasn't added. Choose a file that's {size} or smaller.",
+          "description": "Why a file was turned away:  its size, in full (its row's tooltip)."
         },
         {
           "key": "wrongKind",
           "text": "Not a {kinds} file",
-          "description": "Why a file was turned away:  its kind."
+          "description": "Why a file was turned away:  its kind, in its row."
+        },
+        {
+          "key": "wrongKindLong",
+          "text": "Only {kinds} files can be uploaded. Choose a file that ends in {kinds}.",
+          "description": "Why a file was turned away:  its kind, in full (its row's tooltip)."
         },
         {
           "key": "tooMany",
-          "text": "Over {count} files",
-          "description": "Why a file was turned away:  the count."
+          "text": "Too many files",
+          "description": "Why a file was turned away:  the count, in its row."
+        },
+        {
+          "key": "tooManyLong",
+          "text": "This file wasn't added: up to {count} files can be added at once. Remove one, then add this file again.",
+          "description": "Why a file was turned away:  the count, in full (its row's tooltip)."
         },
         {
           "key": "oneOnly",
-          "text": "Only one at a time",
-          "description": "Why a second file was turned away, without `multiple`."
+          "text": "Only one file",
+          "description": "Why a second file was turned away, without `multiple`, in its row."
+        },
+        {
+          "key": "oneOnlyLong",
+          "text": "This file wasn't added: one file can be added at a time. Remove the other file, then add this one again.",
+          "description": "Why a second file was turned away, without `multiple`, in full (its row's tooltip)."
         },
         {
           "key": "notAFolder",
           "text": "Not a folder",
-          "description": "Why a plain file was turned away by a `folder` uploader."
+          "description": "Why a plain file was turned away by a `folder` uploader, in its row."
+        },
+        {
+          "key": "notAFolderLong",
+          "text": "Only folders can be added here. Choose a folder.",
+          "description": "Why a plain file was turned away by a `folder` uploader, in full (its row's tooltip)."
         },
         {
           "key": "aFolder",
-          "text": "A folder:  only files",
-          "description": "Why a folder was turned away by a plain uploader."
+          "text": "A folder",
+          "description": "Why a folder was turned away by a plain uploader, in its row."
+        },
+        {
+          "key": "aFolderLong",
+          "text": "Folders can't be added here. Choose files instead.",
+          "description": "Why a folder was turned away by a plain uploader, in full (its row's tooltip)."
         },
         {
           "key": "remove",

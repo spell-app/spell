@@ -51,9 +51,12 @@ export function partsInLanguageOf(file: string, parts: SpellParts): SpellParts {
   const lines = translated.lines.filter((line) => line.trim()).map((line) => line.trim())
   let at = 0
   const next = (english: string) => withQuotedAsWritten(lines[at++]!, english)
-  // a line's note is the line after it, `-- cada una una dirección`
-  const line = ({ key, text, note }: SpellLine): SpellLine =>
-    note ? { key, text: next(text), note: lines[at++]!.replace(/^--\s*/, "") } : { key, text: next(text) }
+  // a line's note is the line after it, `-- cada una una dirección`;
+  // a line one step in under another, a collection's own paging (epic `data` P56), stays in
+  const line = ({ key, text, note }: SpellLine): SpellLine => {
+    const written = `${/^\t*/.exec(text)![0]}${next(text)}`
+    return note ? { key, text: written, note: lines[at++]!.replace(/^--\s*/, "") } : { key, text: written }
+  }
   // its first words are the place's name, as written:  `stars`, which the language's plural rules would change
   const header = next(parts.header).replace(
     /^.+? (?=(?:is|es) )/,

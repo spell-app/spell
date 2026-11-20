@@ -94,6 +94,8 @@ describe("parseCommand()", () => {
     ignored.push("/epic review", "/epic review seo", "/epic Review seo", "/epic resume", "/epic resume ?")
     // this session's epic:  a phase added or started
     ignored.push("/epic phase", "/epic phase J1 J5, t3\nfrom these", "/epic start P2", "/epic start J3 J4 T6 go")
+    // this session's epic, to a new session:  never renamed
+    ignored.push("/epic fresh", "/epic fresh --force", "/epic fresh all")
     for (const prompt of ignored) expect(PromptGate.parseCommand(prompt), prompt).toBeNull()
   })
 

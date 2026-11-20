@@ -1,0 +1,7 @@
+use copyText, shout from clipboard.ts
+
+to copy (text as text) to the clipboard
+	call native copyText with text
+
+to shout (text as text)
+	call native shout with text

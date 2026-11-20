@@ -563,6 +563,15 @@ export class JSWriter extends ProgramWriter {
     return `${this.writesAwait(node) ? "await " : ""}${this.nameOf(node.methodName)}${this.argsOf(node)}`
   }
 
+  /**
+   * `name(args)`, a function from one of the project's code files, by its own name:  `await copyText(text)`.
+   * - Awaited when it gives back a promise, inside a function that waits -- see `P.ASTNativeCall`.
+   */
+  ASTNativeCall(node: P.ASTNativeCall): string {
+    const waits = this.project.hasFoundWaiting ? this.project.awaited.has(node) : !!node.waitsIn.js
+    return `${waits ? "await " : ""}${node.methodName}${this.argsOf(node)}`
+  }
+
   /** A call's `(args)`, for a method or function of the program's own. */
   argsOf(node: P.ASTMethodInvocation): string {
     return String(this.write(node.args))

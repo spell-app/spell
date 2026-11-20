@@ -162,10 +162,10 @@ describe.skipIf(!SERVING)("the site editor", { timeout: 180_000 }, () => {
     await page.setViewportSize({ width: 1400, height: 860 })
   })
 
-  test("the bar's Run | Edit | Site:  Site chosen here, and only for a site", async () => {
+  test("the bar's Run | Edit | Design | Site:  Site chosen here, and only for a site", async () => {
     const modes = page.locator("ui-menu.ModeTabs > ui-item")
-    expect(await modes.count()).toBe(3)
-    expect(await modes.nth(2).getAttribute("selected")).not.toBeNull()
+    expect(await modes.count()).toBe(4)
+    expect(await modes.nth(3).getAttribute("selected")).not.toBeNull()
   })
 
   test("a page's title changed in its form:  written into its line", async () => {

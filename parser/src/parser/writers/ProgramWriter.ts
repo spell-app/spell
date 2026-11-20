@@ -117,6 +117,12 @@ export abstract class ProgramWriter extends Writer {
   debugSteps: DebugSteps | undefined
 
   /**
+   * The language of the project's code files we call, `call native copyText` (epic `from-console` P10):
+   * `js` for javascript and TypeScript (`clipboard.ts`), `py` for Python (`clipboard.py`) -- see `P.ASTNativeCall`.
+   */
+  readonly nativeLanguage: P.NativeLanguage = "js"
+
+  /**
    * Is a new `typeName` made by name, as the running program's class (`core.classToMake()`), not as ours?
    * - Only one of our own classes, which the project lets others extend (`extendable`).
    * - Never its app or a place, with no list naming them:  nobody replaces those.
@@ -156,6 +162,7 @@ export abstract class ProgramWriter extends Writer {
       canWait: (name, isGetter) => writer.canWait(name, isGetter),
       coreCallWaits: (call) => writer.coreCallWaits(call),
       readsThroughSolid: writer.readsThroughSolid,
+      nativeLanguage: writer.nativeLanguage,
       actionsWait: !!options?.debugging
     })
     // a debugging build's:  where its lines stop, once what waits is known

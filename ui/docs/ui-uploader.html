@@ -71,13 +71,13 @@
                 </ui-example>
               </ui-section>
               <ui-section id="examples-types-button" label="Button" sticky="stack" collapsible dividing>
-                <ui-example description="`appearance=&quot;button&quot;`:  just a button, for a toolbar or a card&#x27;s corner.  A click opens the file dialog, and files can be dropped on it.  Its limits are its tooltip;  its file rows show in a popup from it while it posts, and on hover after.">
+                <ui-example description="`appearance=&quot;button&quot;`:  just a button, for a toolbar or a card&#x27;s corner.  A click opens the file dialog, and files can be dropped on it.  Its limits are its tooltip;  its file rows show in a popup from it for a moment as an upload starts, then on hover or focus.">
                   <ui-uploader appearance="button" extensions="json" multiple max-files="5" max-size="2 MB"></ui-uploader>
                 </ui-example>
               </ui-section>
               <ui-section id="examples-types-input" label="Input" sticky="stack" collapsible dividing>
                 <ui-example description="`appearance=&quot;input&quot;`:  a field with a Browse button, to line up with the other fields of a form.  The field says how many files it holds;  the rows list under it, smaller.">
-                  <ui-uploader appearance="input" extensions="json" multiple aria-label="Netlists"></ui-uploader>
+                  <ui-uploader appearance="input" extensions="json" multiple aria-label="Netlists" style="max-width: 480px"></ui-uploader>
                 </ui-example>
               </ui-section>
               <ui-section id="examples-types-compact" label="Compact" sticky="stack" collapsible dividing>
@@ -91,7 +91,10 @@
                 <ui-example description="Slots for a page&#x27;s own icon, message and button (`slot=&quot;icon&quot;`, `slot=&quot;message&quot;`, `slot=&quot;button&quot;`);  each falls back to the uploader&#x27;s own.  A click on a slotted button opens the file dialog too.  The words it shows while busy are attributes:  `drop-message`, `uploading-message` and `done-message`, with `{count}` and `{done}` filled in.">
                   <ui-uploader extensions="json" multiple drop-message="Let go to bring in {count} netlists">
                     <ui-icon slot="icon" name="microchip" size="big"></ui-icon>
-                    <span slot="message"><strong>Bring in your netlists</strong><br />Drag the .json files from your chip tools here</span>
+                    <ui-header slot="message" size="small">
+                      Bring in your netlists
+                      <ui-header>Drag the .json files from your chip tools here</ui-header>
+                    </ui-header>
                     <ui-button slot="button" color="violet">Pick netlists…</ui-button>
                   </ui-uploader>
                 </ui-example>
@@ -121,10 +124,12 @@
               </ui-section>
               <ui-section id="examples-behaviour-a-drop-zone" label="A drop zone" sticky="stack" collapsible dividing>
                 <ui-example description="`drop-zone`:  a drop anywhere in its zone counts as a drop on it.  Here the zone is the box around it (`drop-zone=&quot;ui-segment&quot;`, the nearest segment round it);  `page` is the whole page, and `#id` any element.  The zone shows a light overlay while files are dragged over it.">
-                  <ui-segment>
-                    <p>Drop a .json file anywhere in this box.</p>
-                    <ui-uploader appearance="compact" extensions="json" drop-zone="ui-segment"></ui-uploader>
-                  </ui-segment>
+                  <div style="max-width: 480px">
+                    <ui-segment>
+                      <p>Drop a .json file anywhere in this box.</p>
+                      <ui-uploader appearance="compact" extensions="json" drop-zone="ui-segment"></ui-uploader>
+                    </ui-segment>
+                  </div>
                 </ui-example>
               </ui-section>
               <ui-section id="examples-behaviour-an-action" label="An action" sticky="stack" collapsible dividing>

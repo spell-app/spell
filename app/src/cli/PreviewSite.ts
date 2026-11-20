@@ -274,7 +274,7 @@ const BUILT_DATA_SUFFIX = ".json"
 const PAGE = "index.html"
 
 /** The editor's routes, for `_redirects`:  the app's `ROUTES` (`routes.tsx`). */
-const EDITOR_ROUTES = ["/edit/*", "/run/*"]
+const EDITOR_ROUTES = ["/edit/*", "/design/*", "/run/*"]
 
 /** Where the build's files are:  a path under one of these, not there, is a 404, never the editor's page. */
 const FILE_PREFIXES = ["/api/", "/spaces/", "/assets/", "/static/"]

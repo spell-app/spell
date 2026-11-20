@@ -297,6 +297,7 @@ export const spanishWords: SP.LanguageWords = {
    * - Its plural is its first word's, `palos de carta`, as for any name with `de` in it.
    */
   propertyKindName: "{property} de {type}",
+  uiViewName: "vista ui de {noun}",
 
   /**
    * Words which name `it` as an object:  `imprimir eso`, `obtener su nombre`, then `imprimir eso`.

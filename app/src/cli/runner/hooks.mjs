@@ -3,6 +3,8 @@
  * they do the job of the browser's import map, so compiled spell runs under node.
  * - `@spell/core` => spell's runtime, `core`'s `src/index.ts` -- run through `tsx`, which loads first.
  * - `@spell/project/<id>` => that project's compiled javascript, for a project which imports another.
+ * - `@spell/native/<id>/<file>` => one of a project's code files, which its Spell calls with `call native`
+ *   (epic `from-console` P10):  its `.ts` runs through `tsx`, as ours does.
  * - `@spell/elements` => a stand-in, `spellElements.mjs` (epic `drawable-thing` P10):
  *   what compiled TypeScript's element classes build on, with no Spell UI, which can't load here.
  * - Solid's packages => their browser builds, which the runtime draws with (`SOLID`).
@@ -35,6 +37,8 @@ export async function resolve(specifier, context, next) {
   }
   if (specifier === "@spell/core") return next(spec.core, context)
   if (specifier === "@spell/elements") return { url: SPELL_ELEMENTS, shortCircuit: true }
+  const native = specifier.startsWith("@spell/native/") && spec.natives?.[specifier]
+  if (native) return { url: native, shortCircuit: true }
   const project = specifier.startsWith("@spell/project/") && spec.projects?.[decodeURI(specifier.slice(15))]
   return project ? { url: project, shortCircuit: true } : next(specifier, context)
 }

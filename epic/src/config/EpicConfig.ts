@@ -98,6 +98,7 @@ export class EpicConfig {
     pageVoices: { readme: "readme", guide: "readme", code: "code", "epic-page": "code" },
     checkoutPatches: [],
     promptAck: true,
+    freshHintMB: 8,
     editor: "",
     renamedRepos: {},
     colors: { people: {}, agents: {} },
@@ -660,6 +661,14 @@ export class EpicConfig {
   }
 
   /**
+   * the size, in MB, past which a session's transcript gets the one-line hint to `/epic fresh`
+   * (`FreshHint`, epic `epic-engine` T110):  `freshHintMB`;  `0`:  never
+   */
+  get freshHintMB(): number {
+    return this.settings.freshHintMB
+  }
+
+  /**
    * The editor the tools drive, VS Code or Cursor (`Editor`, epic `epic-friend` P16):  this machine's
    * (`$SPELL_EPIC_EDITOR`), else the window's, else the repo's `editor`, else VS Code
    */
@@ -977,6 +986,7 @@ export class EpicConfig {
       ),
       checkoutPatches: this.checkoutPatches.map((patch) => patch.id).join(","),
       promptAck: this.promptAck,
+      freshHintMB: this.freshHintMB,
       editor: this.editor.id,
       renamedRepos: JSON.stringify(this.renamedRepos),
       colors: JSON.stringify(this.colors),
@@ -1199,6 +1209,7 @@ export class EpicConfig {
       pageVoices: { ...defaults.pageVoices, ...namesTo(given, "pageVoices", {}, file) },
       checkoutPatches: patchesOf(given, defaults.checkoutPatches, file),
       promptAck: valueOf(given, "promptAck", defaults.promptAck, file),
+      freshHintMB: sizeOf(given, "freshHintMB", defaults.freshHintMB, file),
       editor: editorOf(given, defaults.editor, file),
       renamedRepos: urlsTo(given, "renamedRepos", defaults.renamedRepos, file),
       colors: colorsOf(given, defaults.colors, file),
@@ -1369,6 +1380,8 @@ export type EpicOldLayout = { carryOn: string; commitMaps: string; oldClones: st
  *   - each repo's own:  a multi-repo top's patches are the top's checkouts', each child repo's its own
  * - `promptAck`:  whether the prompt hook shows a line, "On it:  <what Owen asked, in a sentence>", for a message
  *   sent while the session is busy (`PromptAck`, epic `epic-engine` P18);  on (the default), `false` turns it off
+ * - `freshHintMB`:  the size, in MB, past which a session's transcript gets the one line suggesting
+ *   `/epic fresh` (`FreshHint`, epic `epic-engine` T110);  `8` (the default);  `0`:  never
  * - `editor`:  the editor the tools drive when neither this machine (`$SPELL_EPIC_EDITOR`) nor the window says,
  *   `code` (VS Code) or `cursor` (`Editor`, epic `epic-friend` P16);  `""` (the default):  VS Code
  * - `renamedRepos`:  the repo's OLD GitHub addresses, each to the address it was renamed to
@@ -1412,6 +1425,7 @@ export type EpicSettings = {
   pageVoices: Record<string, string>
   checkoutPatches: CheckoutPatch[]
   promptAck: boolean
+  freshHintMB: number
   editor: string
   renamedRepos: Record<string, string>
   colors: EpicColors
@@ -1521,11 +1535,6 @@ function warnOnce(message: string): void {
 }
 
 /**
- * `given[key]`, of the same kind as `fallback`;  `fallback` when it's left out.
- * - throws `TypeError` naming the file and the key (`prefix` + `key`) when it's another kind, an empty string (unless
- *   `empty`), or a number that isn't more than 0
- */
-/**
  * The `codeHost` setting of file `file`'s `given`;  left out, `fallback`.
  * - throws a `TypeError` for anything but `github` or `gitlab`
  */
@@ -1537,6 +1546,23 @@ function codeHostOf(given: Record<string, unknown>, fallback: CodeHostKind, file
   return value
 }
 
+/**
+ * `given[key]`, a size, `0` or more;  `fallback` when it's left out.
+ * - throws `TypeError` naming the file and the key when it isn't such a number
+ */
+function sizeOf(given: Record<string, unknown>, key: string, fallback: number, file: string): number {
+  const value = given[key]
+  if (value === undefined) return fallback
+  if (typeof value !== "number" || !(value >= 0))
+    throw new TypeError(`EpicConfig:  ${file}'s "${key}" must be a number, 0 or more, not ${JSON.stringify(value)}`)
+  return value
+}
+
+/**
+ * `given[key]`, of the same kind as `fallback`;  `fallback` when it's left out.
+ * - throws `TypeError` naming the file and the key (`prefix` + `key`) when it's another kind, an empty string (unless
+ *   `empty`), or a number that isn't more than 0
+ */
 function valueOf<T extends string | boolean | number>(
   given: Record<string, unknown>,
   key: string,

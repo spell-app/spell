@@ -200,6 +200,33 @@
         }
       }
     },
+    "/api/jobs-archive": {
+      "get": {
+        "tags": ["archive"],
+        "summary": "List Archived Jobs",
+        "operationId": "list_archived_jobs_api_jobs_archive_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "maximum": 500, "minimum": 1, "default": 50, "title": "Limit" }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "minimum": 0, "default": 0, "title": "Offset" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Page_Job_" } } }
+          }
+        }
+      }
+    },
     "/api/jobs-archive/{archive_id}": {
       "get": {
         "tags": ["archive"],
@@ -262,6 +289,55 @@
           }
         }
       }
+    },
+    "/api/events": {
+      "get": {
+        "tags": ["events"],
+        "summary": "List Events",
+        "operationId": "list_events_api_events_get",
+        "parameters": [
+          {
+            "name": "take",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "maximum": 100, "minimum": 1, "default": 20, "title": "Take" }
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "minimum": 0, "default": 0, "title": "Skip" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Page_Event_" } } }
+          }
+        }
+      }
+    },
+    "/api/runs": {
+      "get": {
+        "tags": ["runs"],
+        "summary": "List Runs",
+        "operationId": "list_runs_api_runs_get",
+        "parameters": [
+          {
+            "name": "team",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "title": "Team" },
+            "example": "infra"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Page_Run_" } } }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -297,16 +373,8 @@
         "required": ["id", "title", "score", "snippet"],
         "title": "SearchHit"
       },
-      "JobStatus": {
-        "type": "string",
-        "enum": ["queued", "running", "done", "failed"],
-        "title": "JobStatus"
-      },
-      "JobStage": {
-        "type": "string",
-        "enum": ["build", "test", "deploy"],
-        "title": "JobStage"
-      },
+      "JobStatus": { "type": "string", "enum": ["queued", "running", "done", "failed"], "title": "JobStatus" },
+      "JobStage": { "type": "string", "enum": ["build", "test", "deploy"], "title": "JobStage" },
       "Owner": {
         "properties": {
           "id": { "type": "integer", "title": "Id" },
@@ -319,11 +387,12 @@
       },
       "Step": {
         "properties": {
+          "id": { "type": "integer", "title": "Id" },
           "name": { "type": "string", "title": "Name" },
           "seconds": { "anyOf": [{ "type": "number" }, { "type": "null" }], "title": "Seconds" }
         },
         "type": "object",
-        "required": ["name"],
+        "required": ["id", "name"],
         "title": "Step"
       },
       "Job": {
@@ -413,6 +482,44 @@
         "type": "object",
         "required": ["loc", "msg", "type"],
         "title": "ValidationError"
+      },
+      "Event": {
+        "properties": {
+          "id": { "type": "integer", "title": "Id" },
+          "kind": { "type": "string", "title": "Kind" },
+          "happened_at": { "type": "string", "format": "date-time", "title": "Happened At" }
+        },
+        "type": "object",
+        "required": ["id", "kind", "happened_at"],
+        "title": "Event"
+      },
+      "Run": {
+        "properties": {
+          "id": { "type": "integer", "title": "Id" },
+          "team": { "type": "string", "title": "Team" },
+          "state": { "type": "string", "title": "State" }
+        },
+        "type": "object",
+        "required": ["id", "team", "state"],
+        "title": "Run"
+      },
+      "Page_Event_": {
+        "properties": {
+          "items": { "items": { "$ref": "#/components/schemas/Event" }, "type": "array", "title": "Items" },
+          "total": { "type": "integer", "title": "Total" }
+        },
+        "type": "object",
+        "required": ["items", "total"],
+        "title": "Page[Event]"
+      },
+      "Page_Run_": {
+        "properties": {
+          "items": { "items": { "$ref": "#/components/schemas/Run" }, "type": "array", "title": "Items" },
+          "total": { "type": "integer", "title": "Total" }
+        },
+        "type": "object",
+        "required": ["items", "total"],
+        "title": "Page[Run]"
       }
     }
   }

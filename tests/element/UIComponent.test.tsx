@@ -250,6 +250,25 @@ describe("UIComponent.mount() Solid roots", () => {
 /** `UIComponent`'s protected `followLink()` hook, as a test spies on it. */
 type LinkFollower = { followLink(link: string, target: string | undefined): void }
 
+describe("UIComponent.define()", () => {
+  test("a vocabulary that leaves its lists out defines, each list empty (epic `from-console` P11)", async () => {
+    const tag = nextTag("small")
+    const vocabulary = Object.freeze({ tag, noun: "small", attributes: [] })
+    /** A subclass's small vocabulary, as a project writes one in JavaScript. */
+    class SmallElement extends UIComponent {
+      render(): JSX.Element {
+        return <b>small</b>
+      }
+    }
+    Object.defineProperty(SmallElement.prototype, "vocabulary", { value: vocabulary, configurable: true })
+    ;(SmallElement as unknown as UIComponentClass & typeof UIComponent).define()
+    const element = await ElementFixture.render(`<${tag}></${tag}>`)
+    expect(element.shadowRoot!.textContent).toBe("small")
+    const completed = SmallElement.prototype.vocabulary as ComponentVocabulary
+    expect([completed.slots, completed.texts, completed.events]).toEqual([[], [], []])
+  })
+})
+
 describe("UIComponent shared words", () => {
   /** Render `<tag ...>` (`attributes`:  its attribute text) and wait for it. */
   async function shown(attributes: string, draw: (component: TestComponent) => JSX.Element = () => <span>text</span>) {

@@ -783,6 +783,8 @@ export type ReviewSection = {
   notReviewed: number
   /** its items, filtered */
   items: ReviewItem[]
+  /** how many grey items (`QUIET_STATES`) `epic items` left out of `items`, without `--all` (epic `epic-engine` T111) */
+  quiet?: number
 }
 
 /** Where reviews stand (`PlanReader.reviewStatus()`), for someone who remembers nothing. */
@@ -1006,12 +1008,30 @@ export type ParsedCommit = {
 // ## Summary
 ////////////////
 
-/** What needs attention (`PlanReader.summary()`):  the end-of-phase reply and its AskUserQuestion options. */
+/**
+ * What `PlanReader.summary()` lists (epic `epic-engine` T111):
+ * - `open`:  what's left, skipping what the page shows grey (finished phases, quiet and handled items)
+ * - `all`:  everything
+ */
+export type SummaryScope = "open" | "all"
+
+/** The grey states (`STATE_COLORS`) an open item can be in:  `summary` leaves them out unless asked for all. */
+export const QUIET_STATES: readonly ItemState[] = ["quiet", "handled", "old"]
+
+/**
+ * What needs attention (`PlanReader.summary()`):  the end-of-phase reply and its AskUserQuestion options.
+ * - scope `open` (`epic summary`'s default) leaves out what the page shows grey, so a session loads less:
+ *   finished phases, and open items that need nobody (limits, ones handled in a phase);  `done` and `quiet` count them
+ */
 export type PlanSummary = {
   /** the epic's title, without `Epic: ` */
   title: string
-  /** every phase, in order */
+  /** the phases, in order:  every one, or (scope `open`) the unfinished ones */
   phases: Phase[]
+  /** how many phases are finished (done or dropped), whichever the scope */
+  done: number
+  /** how many open items the page shows grey (`QUIET_STATES`), whichever the scope */
+  quiet: number
   /** the phase in progress */
   active: Phase | undefined
   /** the next phase to do */
@@ -1026,7 +1046,7 @@ export type PlanSummary = {
   standing: boolean
   /** the saga it serves, its id (epic `epic-workflow` P15);  `null` for none */
   saga: string | null
-  /** each kind's open items, in `OPEN_KINDS`' order */
+  /** each kind's open items, in `OPEN_KINDS`' order:  every one, or (scope `open`) the ones not grey */
   open: Record<OpenKind, ItemSummary[]>
   /** the option sets (epic `epic-engine` P50):  the Choices section's standing sets, each phase's open ones */
   choices: ChoicesSummary

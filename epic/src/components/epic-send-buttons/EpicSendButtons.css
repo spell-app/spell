@@ -2,6 +2,8 @@
  * `<epic-send-buttons>` (`EpicSendButtons.tsx`):  Send, the paper plane and its words "Send to Claude" (I305), ONE
  *   pill, the plane in its round end;  its countdown's ring round the plane.
  * - Just after a send, "Sent to Claude" (I352), in the same width:  both words stacked in one grid cell.
+ *   - the pill filled GREEN for those 5 seconds, words and plane white (`:state(just-sent)`;  Owen:  "make it green
+ *     for those 5 seconds"):  Spell UI's own green, `--ui-green`
  * - The pill's outline:  `transparent` while inactive, nothing new to send, idle or sent (Owen, 2026-10-25:  "I wanted
  *   no border when this is inactive, use `transparent`"), a grey hairline with something not sent (`state`);  never
  *   dashed (Owen, 2026-10-22:  "Lose the dotted outline around both").
@@ -35,6 +37,8 @@
     --_rule: var(--epic-send-buttons-rule, var(--ui-border-color, rgb(34 36 38 / 0.15)));
     --_muted: var(--epic-send-buttons-muted, var(--ui-text-muted, GrayText));
     --_light: color-mix(in oklab, var(--_tint) 55%, white);
+    --_green: var(--ui-green, #21ba45);
+    --_green-on: var(--ui-green-on, #fff);
     display: inline-flex;
     flex: none;
     vertical-align: middle;
@@ -126,6 +130,17 @@
   }
   :host(:state(waiting)) .send:hover {
     background: color-mix(in oklab, var(--_tint) 85%, black);
+  }
+  /* just sent (I352):  the pill GREEN for its 5 seconds, words and plane white */
+  :host(:state(just-sent)) .send {
+    background: var(--_green);
+    color: var(--_green-on);
+  }
+  :host(:state(just-sent)) .send .glyph {
+    background: none;
+  }
+  :host(:state(just-sent)) .send:hover {
+    background: color-mix(in oklab, var(--_green) 85%, black);
   }
   .send[aria-busy="true"] {
     cursor: progress;

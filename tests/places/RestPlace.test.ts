@@ -1016,3 +1016,99 @@ describe("enabled operations, and action routes (epic `data` P49)", () => {
     await expect(place.call("publish", { id: "r-1" }, {}, "recipes")).resolves.toEqual({ published: 1 })
   })
 })
+
+////////////////
+// ## A FastAPI service's leftovers
+////////////////
+
+describe("RestPlace, what a FastAPI service asks for (epic `data` P56)", () => {
+  afterEach(() => void vi.unstubAllGlobals())
+
+  test("a collection paging its own way wins for it alone:  `take` and `skip` beside the place's `limit` and `offset`", async () => {
+    const asked = fakeServer((query, url) => {
+      if (url.pathname === "/api/events") {
+        const from = Number(query.get("skip"))
+        return { items: FIVE_ROWS.slice(from, from + Number(query.get("take"))) }
+      }
+      const [limit, offset] = [Number(query.get("limit")), Number(query.get("offset"))]
+      return { items: FIVE_ROWS.slice(offset, offset + limit) }
+    })
+    const place = shapedPlace({
+      can: { page: "offset" },
+      pageSize: 4,
+      allCollections: { rowsAt: "items" },
+      collections: {
+        recipes: { path: "/api/recipes{/id}" },
+        events: {
+          path: "/api/events{/id}",
+          paging: { page: "offset", params: { limit: "take", offset: "skip" }, pageSize: 2 }
+        }
+      }
+    })
+    expect(await everyRow(place)).toEqual(ALL_IDS)
+    const events: string[] = []
+    for (let at: string | undefined, reads = 0; reads < 5; reads++) {
+      const answer = await place.list("events", at === undefined ? {} : { page: { at } }, {})
+      events.push(...answer.rows.map(({ id }) => `${id as string}`))
+      at = answer.nextPage
+      if (at === undefined) break
+    }
+    expect(events).toEqual(ALL_IDS)
+    expect(asked.map((url) => url.slice("https://shapes.test".length))).toEqual([
+      "/api/recipes?limit=4&offset=0",
+      "/api/recipes?limit=4&offset=4",
+      "/api/events?take=2&skip=0",
+      "/api/events?take=2&skip=2",
+      "/api/events?take=2&skip=4"
+    ])
+  })
+
+  test("only how many it gives:  the place's way, that many at a time", async () => {
+    const asked = fakeServer((query) => {
+      const offset = Number(query.get("offset"))
+      return FIVE_ROWS.slice(offset, offset + Number(query.get("limit")))
+    })
+    const place = shapedPlace({
+      can: { page: "offset" },
+      pageSize: 2,
+      collections: { recipes: { path: "/recipes{/id}", paging: { pageSize: 5 } } }
+    })
+    expect(await everyRow(place)).toEqual(ALL_IDS)
+    expect(asked).toEqual([
+      "https://shapes.test/recipes?limit=5&offset=0",
+      "https://shapes.test/recipes?limit=5&offset=5"
+    ])
+  })
+
+  test("a list the server answers only for a team:  a filter on it goes as the question, and is taken as done", async () => {
+    const asked = fakeServer((query) =>
+      query.get("team") ? [{ id: "run-1", team: query.get("team") }] : { detail: [{ msg: "Field required" }] }
+    )
+    const place = shapedPlace({ collections: { runs: { path: "/api/runs{/id}", askedBy: ["team"] } } })
+    const answer = await place.list("runs", { filter: { team: "infra" } }, {})
+    expect(answer).toMatchObject({ rows: [{ id: "run-1", team: "infra" }], handled: { filter: true } })
+    expect(asked).toEqual(["https://shapes.test/api/runs?team=infra"])
+  })
+
+  test("a list under a thing, a plain list beside wrapped ones;  an action on one, its braces from where it was read", async () => {
+    const asked = fakeServer((_query, url) =>
+      url.pathname.endsWith("/steps") ? [{ id: 3, name: "build" }] : { ok: 1 }
+    )
+    const place = shapedPlace({
+      allCollections: { rowsAt: "items" },
+      collections: { jobs: { path: "/api/jobs{/id}" } },
+      operations: {
+        complete: "/api/jobs/{job_id}/complete",
+        retry: "/api/jobs/{job_id}/steps/{step_id}/retry"
+      }
+    })
+    const steps = await place.list("steps", { under: "/api/jobs/6f1c/steps" }, {})
+    expect(steps.rows).toEqual([{ id: 3, name: "build" }])
+    await place.call("retry", { id: 3, name: "build" }, {}, "steps")
+    await place.call("complete", { id: "6f1c" }, {}, "jobs")
+    expect(asked.slice(1)).toEqual([
+      "https://shapes.test/api/jobs/6f1c/steps/3/retry",
+      "https://shapes.test/api/jobs/6f1c/complete"
+    ])
+  })
+})

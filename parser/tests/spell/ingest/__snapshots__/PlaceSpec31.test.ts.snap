@@ -9,9 +9,18 @@ exports[`spell place ingest --spec, of a FastAPI 3.1 description > English:  eve
 	it writes names like "created_at"
 	it searches everything with "q"
 	jobs live at "/api/jobs"
+	jobs archives live at "/api/jobs-archive"
 	searches are searched at "/api/search"
+	events live at "/api/events"
+		its next page is asked for with "take" and "skip"
+		it gives up to 100 at a time
+	runs live at "/api/runs"
+	runs are asked for by their team
+	a job's steps live at "/api/jobs/{id}/steps"
 	to complete a job is at "/api/jobs/{job_id}/complete"
+	to retry a step is at "/api/jobs/{job_id}/steps/{step_id}/retry"
 	a job's created is its "created at"
+	a jobs archive's created is its "created at"
 
 a "job" is a thing
 	it lives in acme jobs
@@ -23,7 +32,25 @@ a "job" is a thing
 	its "status" as one of queued, running, done or failed
 	its "stage" as one of build, test or deploy
 	its "owner" is an owner
+	its "labels" is a list of text
+	its "created at" is a required date
+	its "finished at" is a date
+	its "source" as one of api
+	its "log" is text
 	its "steps" is a list of steps
+
+a "jobs archive" is a thing
+	it lives in acme jobs
+	this type is unverified
+	enabled operations are read, delete
+	its "name" is required text, with maximum length 200
+	its "description" is text
+	its "priority" is a number
+	its "retries" is a number
+	its "status" as one of queued, running, done or failed
+	its "stage" as one of build, test or deploy
+	its "owner" is an owner
+	its "steps" is a list of jobs archive steps
 	its "labels" is a list of text
 	its "created at" is a required date
 	its "finished at" is a date
@@ -38,12 +65,34 @@ a "search" is a thing
 	its "score" is a required number
 	its "snippet" is text
 
+an "event" is a thing
+	it lives in acme jobs
+	this type is unverified
+	enabled operations are read
+	its "kind" is required text
+	its "happened at" is a required date
+
+a "run" is a thing
+	it lives in acme jobs
+	this type is unverified
+	enabled operations are read
+	its "team" is required text
+	its "state" is required text
+
+a "step" is a thing
+	it lives in acme jobs
+	this type is unverified
+	enabled operations are read, retry
+	its "name" is required text
+	its "seconds" is a number
+
 an "owner" is a thing
 	its "number" is a required number, stored as "id"
 	its "email" is required text
 	its "team" is text
 
-a "step" is a thing
+a "jobs archive step" is a thing
+	its "number" is a required number, stored as "id"
 	its "name" is required text
 	its "seconds" is a number
 "

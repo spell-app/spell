@@ -9,6 +9,9 @@ import { OperationAt } from "./OperationAt"
 /** What a wrapping action calls what it wraps:  `call the server` compiles to a call of it. */
 export const SERVER_CALL = "server_call"
 
+/** The word `call native ...` starts with, which `call {place}` never takes as a place's name (epic `from-console` P10). */
+const NATIVE_WORD = "native"
+
 /**
  * `wrapper_action` rule:  a second `to complete a job`, for a server's action, wraps it (epic `data` P50, Q83, I104).
  *
@@ -105,6 +108,8 @@ export class CallTheServer extends SpellStatement<"place?"> {
   parse(scope: P.Scope, tokens: P.Token[]): P.Match | undefined {
     const match = super.parse(scope, tokens) as P.MatchFor<this> | undefined
     if (!match) return undefined
+    // `call native ...` calls the project's code (`call_native`):  no place is called `native` (epic `from-console` P10)
+    if (`${match.groups.place?.value ?? ""}` === NATIVE_WORD) return undefined
     const language = SP.Language.of(scope)
     const wrapper = CallTheServer.wrapperOf(scope)
     if (!wrapper) {

@@ -342,10 +342,12 @@ export class PlaceIngest {
         changes.push(`${name}:  ${was ?? "never tried"} => ${state.is}${state.reason ? ` -- ${state.reason}` : ""}.`)
       }
     }
-    // ONE thing under each, read under its owner's first thing:
-    // once its owner's list has rows (epic `from-console` P16)
+    // ONE thing under each, or a list, read under its owner's first thing:
+    // once its owner's list has rows (epic `from-console` P16, epic `data` P56)
     for (const [name, collection] of Object.entries(description.collections)) {
-      if (!collection.isOneUnder || collection.leftOut || collection.state?.is === "disabled") continue
+      if (!isUnderAnother(name, description) || collection.leftOut || collection.state?.is === "disabled") continue
+      // a list of its own as well, read as one above:  JSONPlaceholder's comments
+      if (!collection.isOneUnder && isListed(collection)) continue
       reader.startAgain()
       const was = collection.state?.is
       const state = await this.verifyOneUnder(address, name, description, read, reader, deployment?.name)
@@ -405,11 +407,14 @@ export class PlaceIngest {
       state: { is: "failed" as const, ...tried, ...(status !== undefined && { status }), reason },
       rows: []
     })
-    // a search is asked something:  what its description says to search for, else a letter (epic `data` I140, J295)
-    const { searchedOnly, searchedBy, searchedFor } = collection
+    // a search is asked something:  what its description says to search for, else a letter (epic `data` I140, J295);
+    // a list asked for by a query, what its description's example says (epic `data` P56)
+    const { searchedOnly, searchedBy, searchedFor, askedBy = {} } = collection
     const searched =
       searchedOnly && searchedBy ? `${searchedBy.param}=${encodeURIComponent(searchedFor ?? SEARCH_TRIED)}` : ""
-    const url = `${address}${collection.at}${searched ? `${collection.at.includes("?") ? "&" : "?"}${searched}` : ""}`
+    const asked = Object.entries(askedBy).map(([param, value]) => `${param}=${encodeURIComponent(value)}`)
+    const query = [...(searched ? [searched] : []), ...asked].join("&")
+    const url = `${address}${collection.at}${query ? `${collection.at.includes("?") ? "&" : "?"}${query}` : ""}`
     let answer: Awaited<ReturnType<PoliteReader["read"]>>
     try {
       answer = await reader.read(url)
@@ -449,7 +454,8 @@ export class PlaceIngest {
 
   /**
    * One thing under each of another collection's things, `name`, tried under the first one `read` found:
-   * a system's snapshot, at `/instances/7/snapshot` (epic `from-console` P16).
+   * a system's snapshot, at `/instances/7/snapshot` (epic `from-console` P16);
+   * or a list there, a job's steps, at `/jobs/6f1c/steps` (epic `data` P56).
    * - `undefined` when no owner's list read a thing to try it under:  it stays as it was.
    * - NEVER throws for an answer, or none:  that's `failed`;  but `IngestStopped` past the reader's limits
    */
@@ -485,6 +491,12 @@ export class PlaceIngest {
     if (answer.status >= 400)
       return failed(`it answered ${answer.status} ${under}${detailOf(answer.text)}`, answer.status)
     const body = jsonOf(answer.text)
+    const { isOneUnder, rowsAt } = collections[name]!
+    if (!isOneUnder) {
+      const list = Array.isArray(body) ? body : (body as Record<string, unknown> | undefined)?.[rowsAt ?? ""]
+      if (!Array.isArray(list)) return failed(`its answer ${under} holds no list`, answer.status)
+      return { is: "verified", ...tried, status: answer.status, rows: list.length }
+    }
     if (!body || typeof body !== "object" || Array.isArray(body)) {
       return failed(`its answer ${under} isn't one thing`, answer.status)
     }
@@ -1018,9 +1030,18 @@ function isSearchToTry({ at, searchedOnly, searchedBy, askedBy, samples }: Colle
   return !!searchedOnly && !!searchedBy && !/\{[^{}/]*\}/.test(at) && !askedBy && !samples
 }
 
-/** Can a collection be read as a list:  not one found by name, only by a search, or asked for by a query? */
+/**
+ * Can a collection be read as a list:  not one found by name, nor only by a search?
+ * - One asked for by a query is, with what its description gave to ask (epic `data` P56);  not with nothing to ask.
+ */
 function isListed({ at, searchedOnly, askedBy, samples }: CollectionDescription): boolean {
-  return !/\{[^{}/]*\}/.test(at) && !searchedOnly && !askedBy && !samples
+  const canAsk = !askedBy || Object.values(askedBy).every((value) => value !== "")
+  return !/\{[^{}/]*\}/.test(at) && !searchedOnly && canAsk && !samples
+}
+
+/** Is collection `name` kept under each thing of another, one thing or a list:  read only from there? */
+function isUnderAnother(name: string, { collections }: PlaceDescription): boolean {
+  return Object.values(collections).some(({ listsUnder }) => listsUnder?.[name] !== undefined)
 }
 
 /** What an error answer says, short:  NetBox's `{ "detail": "..." }`. */

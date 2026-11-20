@@ -295,5 +295,14 @@ export const treeVocabulary = {
       description:
         '`appearance="columns"` with a `filter`:  the look through the tree went through that many rows, and stopped.'
     }
+  ],
+  hooks: [
+    {
+      name: "rowClass",
+      words: "give the row class of (an item)",
+      description:
+        "Class names for a row drawn from `items`, which the subclass's own sheet styles;  none by default.  " +
+        "Read once, as the row is drawn."
+    }
   ]
 } as const satisfies E.ComponentVocabulary

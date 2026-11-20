@@ -3125,6 +3125,10 @@
           "file": "src/app/solid/ConsoleViewer.tsx"
         },
         {
+          "name": "DesignPicker",
+          "file": "src/app/solid/Design.tsx"
+        },
+        {
           "name": "TreeToolbar",
           "file": "src/app/solid/TreeViewer.tsx"
         }

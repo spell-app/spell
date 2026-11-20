@@ -28,6 +28,9 @@ export class PyBaseWriter extends P.ProgramWriter {
   /** PEP 8's names, a keyword stepping aside with a trailing `_` -- see `Naming.PYTHON`. */
   naming = new P.Naming(P.Naming.PYTHON, P.Naming.PYTHON_CLASHES)
 
+  /** Our code files are Python's, `clipboard.py`:  see `P.ProgramWriter.nativeLanguage`. */
+  readonly nativeLanguage: P.NativeLanguage = "py"
+
   /** Between each source file's code:  a comment line, two blank lines either side, as PEP 8 spaces top-level code. */
   readonly fileSeparator = "\n\n\n# -----------\n\n\n"
 
@@ -43,7 +46,9 @@ export class PyBaseWriter extends P.ProgramWriter {
   importsHeader(imports: P.ModuleImport[]): string {
     const lines = imports
       .filter(({ names }) => names.length)
-      .map(({ module, names }) => {
+      .map(({ module, names, kind }) => {
+        // one of the project's code files, beside the program:  its module is its file's name (`clipboard`)
+        if (kind === "native") return `from ${module} import ${names.join(", ")}`
         const from = module === "@spell/core" ? "spell_core" : PyBaseWriter.projectModule(module)
         return `from ${from} import ${names.join(", ")}`
       })
@@ -459,6 +464,20 @@ export class PyBaseWriter extends P.ProgramWriter {
   /** `name(args)`, by our name:  `play_fizzbuzz()`;  one argument a line when it's long -- see `pyText.call()`. */
   ASTMethodInvocation(node: P.ASTMethodInvocation): string {
     return pyText.call(this.nameOf(node.methodName), this.items(node.args.args))
+  }
+
+  /** A function from one of the project's code files, in Python's case:  `copyText` => `copy_text(text)`. */
+  ASTNativeCall(node: P.ASTNativeCall): string {
+    return pyText.call(PyBaseWriter.nativeName(node.methodName), this.items(node.args.args))
+  }
+
+  /**
+   * A code file's function, as Python names it:  its name in Python's case, through the writers' shared naming,
+   * `copyText` => `copy_text`.
+   * - What `call native` says, written in Python;  and what a `.py` file is looked up by (`SP.NativeCode`).
+   */
+  static nativeName(name: string): string {
+    return PYTHON_NAMING.nameOf(name, "method")
   }
 
   /**
@@ -1886,6 +1905,9 @@ function collapseBlankLines(text: string, topLevel: boolean): string {
 }
 
 /** `spell_core`'s functions imported only when the code CALLS them:  a variable may be named `position` too. */
+/** Python's names, PEP 8's:  what a native call's name is written in -- see `PyBaseWriter.nativeName()`. */
+const PYTHON_NAMING = new P.Naming(P.Naming.PYTHON, P.Naming.PYTHON_CLASHES)
+
 const CALLED = new Set(["position", "spell_position", "end_position", "with_spell_positions"])
 
 /** Text written with javascript's escapes, as a template's part is (`a\nb`), read:  the text itself. */

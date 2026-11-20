@@ -40,6 +40,16 @@ export const PARSER_MESSAGES = {
   "error-name-unknown": '"{name}" isn\'t a kind of error:  say one of {names}',
   "failure-word-outside":
     '"{text}" goes in the steps for a failure, under "if completing a job fails" or "when any server call fails"',
+  // `call native copyText with text` and its `use` line (epic `from-console` P10, `SP.NativeCode`)
+  "place-named-native":
+    '"native" can\'t name a place:  "call native ..." calls the project\'s code.  Pick another name',
+  "native-outside-to":
+    '"{text}" calls a function from the project\'s code:  it goes in an action\'s steps, under "to ..."',
+  "native-no-code-files": '"{name}" isn\'t in any code file:  list one in the project file first, e.g. "/clipboard.ts"',
+  "native-not-found":
+    "\"{name}\" isn't a function in the project's code files ({files}):  check its name, or export it there",
+  "native-not-in-file": '"{file}" has no function "{name}":  check its name, or export it there',
+  "native-file-not-listed": "\"{file}\" isn't one of the project's code files:  list it in the project file first",
   "call-outside-wrapper":
     '"{text}" goes in an action that wraps a server\'s own:  "to complete a job", its steps around "call the server"',
   "the-server-outside-api":

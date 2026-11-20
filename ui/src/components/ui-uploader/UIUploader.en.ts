@@ -290,7 +290,8 @@ export const uploaderVocabulary = {
       description: "Its limits:  the count and the size."
     },
     { key: "limitsSizeOnly", text: "Up to {size}", description: "Its limits:  the size alone." },
-    { key: "turnedAway", text: "{count} turned away", description: "How many were turned away." },
+    { key: "turnedAway", text: "{count} files not added", description: "How many were turned away." },
+    { key: "turnedAwayOne", text: "1 file not added", description: "One was turned away." },
     { key: "uploaded", text: "Uploaded", description: "A row's status, posted." },
     { key: "taken", text: "Done", description: "A row's status, handed to the `action`." },
     { key: "held", text: "Ready", description: "A row's status, held:  no `destination` or `action`." },
@@ -298,20 +299,50 @@ export const uploaderVocabulary = {
     { key: "failed", text: "Failed:  {reason}", description: "A row's status, failed." },
     { key: "serverError", text: "server error {status}", description: "Why a post failed:  the server's answer." },
     { key: "noConnection", text: "no connection", description: "Why a post failed:  nothing answered." },
-    { key: "tooBig", text: "Too big (over {size})", description: "Why a file was turned away:  its size." },
-    { key: "wrongKind", text: "Not a {kinds} file", description: "Why a file was turned away:  its kind." },
-    { key: "tooMany", text: "Over {count} files", description: "Why a file was turned away:  the count." },
+    { key: "tooBig", text: "Too big", description: "Why a file was turned away:  its size, in its row." },
+    {
+      key: "tooBigLong",
+      text: "This file is too big, so it wasn't added. Choose a file that's {size} or smaller.",
+      description: "Why a file was turned away:  its size, in full (its row's tooltip)."
+    },
+    { key: "wrongKind", text: "Not a {kinds} file", description: "Why a file was turned away:  its kind, in its row." },
+    {
+      key: "wrongKindLong",
+      text: "Only {kinds} files can be uploaded. Choose a file that ends in {kinds}.",
+      description: "Why a file was turned away:  its kind, in full (its row's tooltip)."
+    },
+    { key: "tooMany", text: "Too many files", description: "Why a file was turned away:  the count, in its row." },
+    {
+      key: "tooManyLong",
+      text: "This file wasn't added: up to {count} files can be added at once. Remove one, then add this file again.",
+      description: "Why a file was turned away:  the count, in full (its row's tooltip)."
+    },
     {
       key: "oneOnly",
-      text: "Only one at a time",
-      description: "Why a second file was turned away, without `multiple`."
+      text: "Only one file",
+      description: "Why a second file was turned away, without `multiple`, in its row."
+    },
+    {
+      key: "oneOnlyLong",
+      text: "This file wasn't added: one file can be added at a time. Remove the other file, then add this one again.",
+      description: "Why a second file was turned away, without `multiple`, in full (its row's tooltip)."
     },
     {
       key: "notAFolder",
       text: "Not a folder",
-      description: "Why a plain file was turned away by a `folder` uploader."
+      description: "Why a plain file was turned away by a `folder` uploader, in its row."
     },
-    { key: "aFolder", text: "A folder:  only files", description: "Why a folder was turned away by a plain uploader." },
+    {
+      key: "notAFolderLong",
+      text: "Only folders can be added here. Choose a folder.",
+      description: "Why a plain file was turned away by a `folder` uploader, in full (its row's tooltip)."
+    },
+    { key: "aFolder", text: "A folder", description: "Why a folder was turned away by a plain uploader, in its row." },
+    {
+      key: "aFolderLong",
+      text: "Folders can't be added here. Choose files instead.",
+      description: "Why a folder was turned away by a plain uploader, in full (its row's tooltip)."
+    },
     { key: "remove", text: "Remove", description: "A row's Remove button's name and tooltip." },
     { key: "files", text: "Files", description: "What a screen reader calls the list of files." }
   ]

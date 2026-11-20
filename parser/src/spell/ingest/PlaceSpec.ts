@@ -1,7 +1,15 @@
 import { P } from "spell/parser/parser"
 import { oneOfWords } from "spell/parser/core/schemaWords"
 
-import type { CollectionLook, FieldDescription, FieldKind, OperationDescription, PlaceLook } from "./ingest.types"
+import type {
+  CollectionLook,
+  FieldDescription,
+  FieldKind,
+  ListUnderSeen,
+  OperationDescription,
+  PagesWith,
+  PlaceLook
+} from "./ingest.types"
 import { wordsFor } from "./PlaceShape"
 
 /** The names a list's rows usually go under, in a wrapped answer:  NetBox's `results`. */
@@ -61,11 +69,15 @@ const SEVERAL_KINDS = "Its schema says it holds one of several kinds:  read it b
  * - 3.0's and 3.1's ways to say a field may hold nothing read the same (epic `data` I109):
  *   `nullable: true`, `type: ["string", "null"]`, and FastAPI's `anyOf: [{ $ref }, { type: "null" }]`
  *   are each the one kind, never required.
- * - What FastAPI services say, in a place's existing words (epic `data` I140):
+ * - What FastAPI services say, in a place's existing words (epic `data` I140, P56):
  *   - a list taking `limit` and `offset` pages by offset, `its next page is asked for with "limit" and "offset"`,
- *     up to its limit's `maximum` at a time
+ *     up to its limit's `maximum` at a time;  the way most lists do it is the place's, and a list that pages its own
+ *     way keeps its own (`pagesWith`), said one step in under its `live at` line
  *   - a list needing its `q` is searched only, `searches are searched at "/api/search"`
- *   - what's deeper under a thing (a list under each, an action on something inside one) is said in the notes
+ *   - a list needing another question is asked for by it, `runs are asked for by their team`, as Open-Meteo's
+ *     forecasts are:  its example is what a verify asks with
+ *   - a list under each thing, `/jobs/{job_id}/steps`, is a collection read from there, `a job's steps live at "..."`;
+ *     an action on one of those, `/jobs/{job_id}/steps/{step_id}/retry`, is its type's action
  * - Plain data:  it reads nothing, so a test hands it a saved description.
  ****************/
 export class PlaceSpec {
@@ -97,7 +109,7 @@ export class PlaceSpec {
     const paths = this.document.paths ?? {}
     const collections: CollectionLook[] = []
     const specPaths = new Map<CollectionLook, string>()
-    const paged: OffsetPaging[] = []
+    const paged: PagesWith[] = []
     for (const [path, item] of Object.entries(paths)) {
       if (HAS_BRACE.test(path) || !item?.get) continue
       // no list in its answer's schema, but things by id under it:  a collection all the same, untyped till a read fills it
@@ -105,9 +117,9 @@ export class PlaceSpec {
       if (!rows) continue
       const at = underPlace(path, prefix)
       const search = this.searchOf(item.get)
-      this.noteAskedFor(path, item.get, search?.param)
-      const pages = this.offsetPagingOf(item.get, rows.answer)
-      if (pages && !search) paged.push(pages)
+      const askedBy = this.askedByOf(path, item.get, search?.param)
+      const pages = search ? undefined : this.offsetPagingOf(item.get, rows.answer)
+      if (pages) paged.push(pages)
       const collection: CollectionLook = {
         name: lastWordOf(path),
         at,
@@ -118,6 +130,8 @@ export class PlaceSpec {
         ...(rows.rowsAt !== undefined && { rowsAt: rows.rowsAt }),
         ...(rows.nextAt !== undefined && { nextAt: rows.nextAt }),
         ...(this.takesLimit(item) && { takesLimit: true }),
+        ...(pages && { pagesWith: pages }),
+        ...(askedBy && { askedBy }),
         ...(rows.schemaAt !== undefined && { schemaAt: rows.schemaAt }),
         ...(item.get.tags?.[0] !== undefined && { tag: item.get.tags[0] }),
         // a search needing its question:  `searches are searched at "/api/search"`, never read as a plain list
@@ -136,6 +150,7 @@ export class PlaceSpec {
     const pagesWith = pagesWithOf(paged)
     const records = this.recordsUnder(paths, prefix, specPaths)
     collections.push(...records.map(({ record }) => record))
+    this.actionsDeeper(paths, prefix, records)
     nameApart(collections)
     for (const collection of collections) {
       if (!("id" in (collection.fields ?? {}))) delete collection.idAt
@@ -147,11 +162,11 @@ export class PlaceSpec {
       docs: this.summary(collections),
       writesOffered: [...new Set(collections.flatMap(({ operations }) => Object.keys(operations ?? {})))],
       ...(records.length && {
-        listsUnder: records.map(({ owner, record }) => ({
+        listsUnder: records.map(({ owner, record, isOne }): ListUnderSeen => ({
           owner: owner.name,
           list: record.name,
           at: record.at,
-          isOne: true
+          ...(isOne && { isOne })
         }))
       }),
       docsAt: this.at,
@@ -220,7 +235,7 @@ export class PlaceSpec {
    * - `most`:  its limit's schema's `maximum`, so a read never asks for more than it gives (a 422).
    * - `undefined`:  it doesn't, as far as its description says.
    */
-  private offsetPagingOf(operation: OpenApiOperation, answer: Schema | undefined): OffsetPaging | undefined {
+  private offsetPagingOf(operation: OpenApiOperation, answer: Schema | undefined): PagesWith | undefined {
     const params = this.queryParamsOf(operation)
     const limit = params.find(({ name }) => LIMIT_NAMES.test(name!))
     const offset = params.find(({ name }) => OFFSET_NAMES.test(name!))
@@ -242,19 +257,43 @@ export class PlaceSpec {
   private searchOf(operation: OpenApiOperation): { param: string; example?: string } | undefined {
     const param = this.queryParamsOf(operation).find(({ name, required }) => required && SEARCH_NAMES.test(name!))
     if (!param) return undefined
+    const example = this.exampleOf(param)
+    return { param: param.name!, ...(example !== undefined && { example }) }
+  }
+
+  /**
+   * What a list is asked for by, each question it can't be answered without besides its search's (epic `data` P56):
+   * `GET /api/runs?team=infra`, `team` required.
+   * - Its value:  the example its description gives, which a verify asks with;  `""` for none, said in the notes.
+   * - Written as Open-Meteo's forecasts are (epic `data` P33, J191):  `runs are asked for by their team`, so a `where`
+   *   on that field goes to the server.
+   * - `undefined` for a list that needs nothing.
+   */
+  private askedByOf(
+    path: string,
+    operation: OpenApiOperation,
+    search: string | undefined
+  ): Record<string, string> | undefined {
+    const needed = this.queryParamsOf(operation).filter(({ name, required }) => required && name !== search)
+    if (!needed.length) return undefined
+    const askedBy: Record<string, string> = {}
+    for (const param of needed) askedBy[param.name!] = this.exampleOf(param) ?? ""
+    const unsaid = needed.filter(({ name }) => askedBy[name!] === "").map(({ name }) => `"${name}"`)
+    if (unsaid.length) {
+      this.notes.push(
+        `${path} can't be read without ${unsaid.join(" and ")}, and its description gives no example to try:  verify skips it.`
+      )
+    }
+    return askedBy
+  }
+
+  /** What a parameter's description says to ask with:  its `example`, its first `examples`, or its schema's. */
+  private exampleOf(param: OpenApiParameter): string | undefined {
     const schema = this.resolved(param.schema)
     const example = [param.example, ...(Array.isArray(param.examples) ? param.examples : []), schema?.example].find(
       (each) => typeof each === "string" || typeof each === "number"
     )
-    return { param: param.name!, ...(example !== undefined && { example: `${example}` }) }
-  }
-
-  /** SIDE EFFECT:  a list that needs a question besides its search's is said in the notes:  a read without it fails. */
-  private noteAskedFor(path: string, operation: OpenApiOperation, search: string | undefined): void {
-    const needed = this.queryParamsOf(operation)
-      .filter(({ name, required }) => required && name !== search)
-      .map(({ name }) => `"${name}"`)
-    if (needed.length) this.notes.push(`${path} can't be read without ${needed.join(" and ")}:  read it by hand.`)
+    return example === undefined ? undefined : `${example}`
   }
 
   ////////////////
@@ -262,58 +301,102 @@ export class PlaceSpec {
   ////////////////
 
   /**
-   * ONE thing under each thing of a collection, at an address of its own (epic `from-console` P16):
-   * a `GET` under a thing by id that answers one object, `/instances/{id}/snapshot`.
+   * What's kept under each thing of a collection, at an address of its own:  a `GET` under a thing by id.
+   * - ONE thing, answering one object, `/instances/{id}/snapshot` (epic `from-console` P16, `ListUnderSeen.isOne`).
+   * - Or a list of them, `/jobs/{job_id}/steps` (epic `data` P56):  a job's steps, `a job's steps live at "..."`.
+   *   - A field of its owner's holding them inside its row, by the same name, gives way to it:  read from there.
    * - Each is a collection of its own:
-   *   - named by its last word, as an action is (`snapshot`)
+   *   - named by its last word, as an action is (`snapshot`, `steps`)
    *   - its fields from its schema, found at that address
-   *   - its owner keeps it under each of its things (`ListUnderSeen.isOne`)
    * - Its owner:  the collection whose address it's under,
    *   else the one its brace or the word before it names (`/systems/instance/{instance_id}/snapshot` is under `instances`).
    * - One with no owner found is said in the notes, and left out.
+   * - `path`:  where its description has it, braces as written, for an action deeper under it (`actionsDeeper()`).
    */
   private recordsUnder(
     paths: Readonly<Record<string, OpenApiPathItem | undefined>>,
     prefix: string,
     specPaths: ReadonlyMap<CollectionLook, string>
-  ): Array<{ owner: CollectionLook; record: CollectionLook }> {
-    const found: Array<{ owner: CollectionLook; record: CollectionLook }> = []
+  ): RecordUnder[] {
+    const found: RecordUnder[] = []
     for (const [path, item] of Object.entries(paths)) {
       const words = path.replace(/^\/+|\/+$/g, "").split("/")
       const get = item?.get
       if (!get || words.filter((word) => HAS_BRACE.test(word)).length !== 1 || !HAS_BRACE.test(words.at(-2) ?? ""))
         continue
       const answer = this.answerOf(get)
-      if (!this.isOneThing(answer)) {
-        // a list under each, `/jobs/{job_id}/steps`:  said, so it's read by hand (epic `data` I140)
-        const under = ownerOf(words, specPaths)
-        const each = under ? P.singularize(wordsFor(under.name)) : "one of another"
-        if (this.rowsOf(get)) this.notes.push(`${path} answers a list under each ${each}:  read it by hand.`)
-        continue
-      }
+      const isOne = this.isOneThing(answer)
+      const list = isOne ? undefined : this.rowsOf(get)
+      if (!isOne && !list) continue
       const owner = ownerOf(words, specPaths)
       if (!owner) {
-        this.notes.push(`${path} answers one thing under another, but no list of those is described:  read it by hand.`)
+        const what = isOne ? "one thing" : "a list"
+        this.notes.push(`${path} answers ${what} under another, but no list of those is described:  read it by hand.`)
         continue
       }
-      const { schemaAt } = this.itemAt(answer!)
+      const schema = list ? list.item : answer!
+      const { schemaAt } = list ?? this.itemAt(answer!)
+      const name = lastWordOf(path)
+      const fields = this.fieldsOf(schema, schemaAt ?? path)
+      // a list under each:  its owner's own copy inside its row, by the same name, is read from there instead
+      if (list && owner.fields?.[name]?.inside) delete owner.fields[name]
       found.push({
         owner,
+        path,
+        isOne,
         record: {
-          name: lastWordOf(path),
+          name,
           at: underPlace(path, prefix).replace(HAS_BRACE, "{id}"),
           rows: [],
           paging: "none",
           pagesRead: 0,
           hasMore: false,
+          ...(list?.rowsAt !== undefined && { rowsAt: list.rowsAt }),
           ...(schemaAt !== undefined && { schemaAt }),
           ...(get.tags?.[0] !== undefined && { tag: get.tags[0] }),
-          idAt: "id",
-          fields: this.fieldsOf(answer!, schemaAt ?? path)
+          ...("id" in fields && { idAt: "id" }),
+          fields
         }
       })
     }
     return found
+  }
+
+  /**
+   * SIDE EFFECT:  each action on something in a list under a thing, by its last word, is that list's type's
+   * (epic `data` P56):  `POST /jobs/{job_id}/steps/{step_id}/retry` is a step's `retry`.
+   * - Its braces stay as written:  the place fills each from the step, and from where it read the step
+   *   (`RestPlace.call()`), so `{job_id}` is its job's.
+   * - One under nothing read as a list is said in the notes, to read by hand.
+   */
+  private actionsDeeper(
+    paths: Readonly<Record<string, OpenApiPathItem | undefined>>,
+    prefix: string,
+    records: readonly RecordUnder[]
+  ): void {
+    for (const [path, item] of Object.entries(paths)) {
+      const words = path.replace(/^\/+|\/+$/g, "").split("/")
+      if (!item || words.filter((word) => HAS_BRACE.test(word)).length < 2 || !HAS_BRACE.test(words.at(-2) ?? ""))
+        continue
+      const under = `/${words.slice(0, -2).join("/")}`
+      const list = records.find(({ path: at, isOne }) => !isOne && at.replace(/\/+$/, "") === under)
+      for (const method of WRITE_METHODS) {
+        const operation = item[method]
+        if (!operation) continue
+        if (!list) {
+          const owner = words.filter((word) => !HAS_BRACE.test(word)).at(-2) ?? ""
+          this.notes.push(
+            `${method.toUpperCase()} ${path} acts on something inside ${articledWords(owner)}:  read it by hand.`
+          )
+          continue
+        }
+        const verb = wordsFor(words.at(-1)!)
+        const operations = (list.record.operations ??= {})
+        const name = verb in operations ? `${verb} ${method}` : verb
+        operations[name] = this.operationFor(method.toUpperCase(), underPlace(path, prefix), operation, path)
+        break
+      }
+    }
   }
 
   /** Is `answer` one object with fields, not a list, nor one wrapped under a name a list's rows go under? */
@@ -362,16 +445,9 @@ export class PlaceSpec {
         if (item.delete) operations.delete = this.operationFor("DELETE", under(other), item.delete, other)
         continue
       }
-      // deeper:  an action on something inside a thing, `/{job_id}/steps/{step_id}/retry`, said so it's read by hand
-      if (rest.length > 2) {
-        for (const method of WRITE_METHODS) {
-          if (item[method])
-            this.notes.push(
-              `${method.toUpperCase()} ${other} acts on something inside ${articledWords(lastWordOf(path))}:  read it by hand.`
-            )
-        }
-        continue
-      }
+      // deeper:  an action on something inside a thing, `/{job_id}/steps/{step_id}/retry`, is that thing's
+      // (`actionsDeeper()`)
+      if (rest.length > 2) continue
       // an action route under a thing by id, by its last word:  `/{id}/enqueue/`, NOT a list under it (a `GET`)
       if (rest.length !== 2) continue
       const verb = wordsFor(rest[1]!)
@@ -680,7 +756,7 @@ function articledWords(collection: string): string {
 }
 
 /** How every list that pages by offset pages, the way most of them do:  `undefined` for none. */
-function pagesWithOf(paged: readonly OffsetPaging[]): OffsetPaging | undefined {
+function pagesWithOf(paged: readonly PagesWith[]): PagesWith | undefined {
   const counts = new Map<string, number>()
   for (const { limit, offset } of paged) counts.set(`${limit} ${offset}`, (counts.get(`${limit} ${offset}`) ?? 0) + 1)
   const [usual] = [...counts.entries()].sort(([, a], [, b]) => b - a)[0] ?? []
@@ -777,8 +853,17 @@ export type Schema = {
 /** Where a list is:  its rows' schema, and where they are in a wrapped answer. */
 type ListAt = { item: Schema; answer?: Schema; rowsAt?: string; nextAt?: string; schemaAt?: string }
 
-/** How one list pages by offset:  its two questions' names, and the most it gives at a time, when its schema says. */
-type OffsetPaging = { limit: string; offset: string; most?: number }
+/** One thing or list under each thing of a collection:  see `PlaceSpec.recordsUnder()`. */
+type RecordUnder = {
+  /** The collection whose things it's under. */
+  owner: CollectionLook
+  /** It, a collection of its own. */
+  record: CollectionLook
+  /** Where its description has it, braces as written:  `/api/jobs/{job_id}/steps`. */
+  path: string
+  /** ONE thing under each, not a list. */
+  isOne: boolean
+}
 
 /** A parameter, as far as it's read. */
 type OpenApiParameter = {

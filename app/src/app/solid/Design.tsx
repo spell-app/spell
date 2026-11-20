@@ -1,0 +1,903 @@
+import { For, Show, createEffect, createMemo, createSignal, onSettled, untrack } from "solid-js"
+import type { JSX } from "@solidjs/web"
+
+import { setDebugGlobal } from "spell/util"
+import { SP } from "spell/parser/spell"
+import { editor, runtimeCore } from "spell/app/app/editor"
+import { editorPrefs } from "spell/app/app/editorPrefs"
+import { SiteEdits, type SitePart } from "spell/app/app/pages/SiteEdits"
+import { SiteWrites } from "spell/app/app/pages/SiteWrites"
+import { runSite } from "spell/app/app/pages/RunSite"
+import { appTexts } from "spell/app/app/ui/AppTexts"
+import { EDITOR_FRAME, EDITOR_OWN } from "spell/app/app/ui/ui.types"
+import { SpellElement } from "spell/app/app/runner/SpellElement"
+import { MenuHeader } from "./chrome"
+import { DesignSamples, type Sample } from "./DesignSamples"
+import { DESIGNED, Inspector, OwnEditorPage, SCALED_UP } from "./Inspector"
+import { on } from "./on"
+import { MenuPopup, Palette, type OwnView } from "./Palette"
+
+import "./Design.css"
+
+/****************
+ * ### `Design`
+ * The editor's Design mode (epic `editor` P37;  Q58, Q59, Q60, Q63, Q64):  pick a bit of a view, or a site's page,
+ * and see it large on its own, to drag parts into it.
+ * - Its tab is in the top bar, Run | Edit | Design | Site;  its address `/design/<file>` (`editor.isDesigning`).
+ * - The bits, down the left of the app pane (`<DesignStage>`):
+ *   - each `to draw ...` of the open file's view:  `to draw its front`, `to draw its back`
+ *   - the view's property editor, when it has one (`Card.editor.spell`)
+ *   - a site's pages, and the project's other views, which open their own files here
+ * - What it shows first (Q63):  the bit the code's cursor is in;  else the one last picked for the file;
+ *   else the view's first drawing.
+ * - Plain state here;  `<DesignStage>` draws it in the app pane.
+ * - It took the place of Card alone (`ViewAlone`, epic `editor` P35, T116), which showed the card itself when
+ *   Owen wanted its property editor.
+ ****************/
+export class Design {
+  /** Is the editor page in Design (reactive)? */
+  static get isShowing(): boolean {
+    return editor.isDesigning && editor.projectPage === "editor"
+  }
+
+  /** Has the project something to design (reactive):  a view of its own, or a site's pages?  Its tab shows then. */
+  static get canShow(): boolean {
+    return Palette.ownViews.length > 0 || !!SiteWrites.siteFile()
+  }
+
+  /** Show `path` (default:  the open file) in Design. */
+  static show(path?: string): void {
+    editor.showEditor(path, undefined, "design")
+  }
+
+  /**
+   * Show site page `name` in Design, its own file open, so the app draws it (Q64 A):  Site's page form's Design.
+   * - NEVER throws:  a page no file declares yet opens as Site's Open in Edit does, making its file.
+   */
+  static showPage(name: string): void {
+    const file = SiteWrites.declaringFile(name)
+    if (!file) return void SiteWrites.openPart(name).catch(editor.showError)
+    remember(file.path, `page:${name}`)
+    Design.show(file.path)
+  }
+
+  /**
+   * The view the open file writes (reactive):  the one named like the file (`Card.spell`'s card), else its first;
+   * `undefined` for a file that writes none, or off the editor page.
+   */
+  static get view(): OwnView | undefined {
+    const file = editor.file
+    if (!file || editor.projectPage !== "editor") return undefined
+    const name = file.path.split("/").at(-1) ?? ""
+    const own = Palette.ownViews.filter((view) => view.file === name)
+    const named = name.split(".")[0]!.toLowerCase()
+    return own.find((view) => view.classNames[0]!.toLowerCase() === named) ?? own[0]
+  }
+
+  /** The open view's drawings, each `to draw ...` of its type in its file, in order (reactive). */
+  static get drawings(): DesignBit[] {
+    const view = Design.view
+    if (!view) return []
+    return drawingsIn(editor.file?.contents ?? "", view)
+  }
+
+  /** The site's pages, in its order (reactive):  none for a project that isn't a site. */
+  static get pages(): DesignBit[] {
+    const parts = SiteWrites.parts() ?? []
+    return SiteEdits.allParts(parts)
+      .filter((part) => part.kind === "page")
+      .map((part) => ({
+        kind: "page",
+        key: `page:${part.name}`,
+        label: pageTitleOf(part),
+        name: part.name,
+        address: part.address
+      }))
+  }
+
+  /** The project's views but the open file's, each opening its own file here (reactive). */
+  static get otherViews(): OwnView[] {
+    const view = Design.view
+    return Palette.ownViews.filter((each) => each.file !== view?.file)
+  }
+
+  /**
+   * The bit showing (reactive), as Q63 says:  the one picked for the open file, which the code's cursor picks as it
+   * moves into a drawing;  else the view's first drawing.
+   * - A page picked for the file (`showPage()`);  a site's page file:  its page.
+   * - `editor` (its property editor) is picked only while the view has one (`<DesignStage>` knows).
+   */
+  static get picked(): DesignBit | undefined {
+    const path = editor.file?.path
+    const drawings = Design.drawings
+    const key = path ? pickedKeys()[path] : undefined
+    if (key === EDITOR_KEY && drawings.length) return EDITOR_BIT
+    // a page picked, in a file that writes a view too:  the site's file, say
+    const page = key?.startsWith("page:") ? Design.pages.find((each) => each.key === key) : undefined
+    if (page) return page
+    const found = drawings.find((bit) => bit.key === key)
+    if (found ?? drawings[0]) return found ?? drawings[0]
+    return Design.pages.find((page) => path && SiteWrites.declaringFile(page.name!)?.path === path)
+  }
+
+  /**
+   * The drawing the code's cursor is in, in the open file (reactive):  `undefined` while it's in none.
+   * - Lines from 0, as `editor.followed` has them.
+   */
+  static get atCursor(): DesignBit | undefined {
+    const followed = editor.followed
+    const file = editor.file
+    if (!followed || !(file instanceof SP.SpellFile)) return undefined
+    if (followed.path !== SP.SpellProject.sourceNameOf(file.path)) return undefined
+    return Design.drawings.find(({ lines }) => lines && followed.line >= lines.start && followed.line <= lines.end)
+  }
+
+  /** Show `bit`:  one of the open view's, remembered for its file;  a page or another view opens its file. */
+  static pick(bit: DesignBit): void {
+    if (bit.kind === "page") return Design.showPage(bit.name!)
+    if (bit.kind === "view") return Design.show(fileOfView(bit.name!))
+    const path = editor.file?.path
+    if (path) remember(path, bit.key)
+  }
+
+  /** How the open file's view shows (reactive):  one drawing, or its gallery of samples (P38);  remembered for the file. */
+  static get showing(): DesignShowing {
+    const path = editor.file?.path
+    return (path && showingByFile()[path]) || "one"
+  }
+
+  /** Show the open file's view as one drawing, or its gallery;  remembered for the file. */
+  static setShowing(showing: DesignShowing): void {
+    const path = editor.file?.path
+    if (!path) return
+    const next = { ...showingByFile(), [path]: showing }
+    setShowingByFile(next)
+    editorPrefs.set(SHOWING_PREF, next)
+  }
+
+  /** The size Design draws at (reactive, Q65 C):  to fit the pane, a device's, or a width typed;  remembered per file. */
+  static get size(): DesignSize {
+    const path = editor.file?.path
+    return (path && sizeByFile()[path]) || FIT
+  }
+
+  /** Draw at `size`;  remembered for the open file. */
+  static setSize(size: DesignSize): void {
+    const path = editor.file?.path
+    if (!path) return
+    const next = { ...sizeByFile(), [path]: size }
+    setSizeByFile(next)
+    editorPrefs.set(SIZE_PREF, next)
+  }
+
+  /** The width `size` draws at, px:  a device's, turned on its side or not, or the width typed;  none to fit. */
+  static widthOf(size: DesignSize): number | undefined {
+    if (size.device === "fit") return size.width
+    const { width, height } = DEVICE_SIZES[size.device]
+    return size.isLandscape ? height : width
+  }
+}
+
+setDebugGlobal({ Design })
+
+/** One bit Design can show, a row of its picker. */
+export type DesignBit = {
+  /**
+   * What it is:
+   * - `drawing`:  one `to draw ...` of the open view
+   * - `editor`:  the view's property editor
+   * - `page`:  a site's page, drawn by the app
+   * - `view`:  another of the project's views:  picking it opens its file
+   */
+  kind: "drawing" | "editor" | "page" | "view"
+  /** Who it is, the same each time, remembered for its file:  `drawing:to draw its front`, `editor`, `page:films page`. */
+  key: string
+  /** What its row says:  `Front`, `Property editor`, `Films`. */
+  label: string
+  /** A drawing:  its line as written, `to draw its front`, its row's tooltip. */
+  written?: string
+  /** A drawing:  its lines in its file, from 0, its first line and its last. */
+  lines?: { start: number; end: number }
+  /** A drawing of a two sided view's side:  `front` turns it face up, `back` face down. */
+  side?: string
+  /** A page's name (`films page`);  a view's type (`Card`). */
+  name?: string
+  /** A page's address in its site:  `/films/:film`. */
+  address?: string
+}
+
+/** How Design shows a view:  one drawing, or its gallery of samples side by side (Q62:  "Gallery"). */
+export type DesignShowing = "one" | "gallery"
+
+/**
+ * The size Design draws at (Q65 C):
+ * - `device`:  `fit`, as large as the pane holds;  or a phone's, a tablet's, a desktop's, in Spell UI's `<ui-device>`
+ * - `isLandscape`:  a device turned on its side, by its own Rotate
+ * - `width`:  with `fit`, a width of your own, px, to see where a layout changes;  none:  the pane's
+ */
+export type DesignSize = {
+  device: "fit" | "phone" | "tablet" | "desktop"
+  isLandscape?: boolean
+  width?: number
+}
+
+/** Drawn to fit the pane, the size Design starts at. */
+const FIT: DesignSize = { device: "fit" }
+
+/** Each device's screen, upright, px:  `<ui-device>`'s own. */
+const DEVICE_SIZES = {
+  phone: { width: 390, height: 844 },
+  tablet: { width: 820, height: 1180 },
+  desktop: { width: 1280, height: 800 }
+} as const
+
+/** The prefs remembering, for each file by its path, how its view shows and at what size. */
+const SHOWING_PREF = "designShowing"
+const SIZE_PREF = "designSize"
+editorPrefs.declare(SHOWING_PREF, { type: "object", default: {} })
+editorPrefs.declare(SIZE_PREF, { type: "object", default: {} })
+const [showingByFile, setShowingByFile] = createSignal<Readonly<Record<string, DesignShowing>>>(
+  (editorPrefs.get(SHOWING_PREF) as Record<string, DesignShowing> | undefined) ?? {}
+)
+const [sizeByFile, setSizeByFile] = createSignal<Readonly<Record<string, DesignSize>>>(
+  (editorPrefs.get(SIZE_PREF) as Record<string, DesignSize> | undefined) ?? {}
+)
+
+/** The sample last picked in the gallery, by its name:  one drawing shows it too.  Forgotten with its file. */
+const [chosenSample, setChosenSample] = createSignal<{ path: string; name: string }>()
+
+/** The property editor's key and row. */
+const EDITOR_KEY = "editor"
+const EDITOR_BIT: DesignBit = { kind: "editor", key: EDITOR_KEY, label: "" }
+
+/** The pref remembering the bit picked for each file, by its path:  `{ "@spell/.../Card.spell": "editor" }`. */
+const PICKED_PREF = "designPicked"
+editorPrefs.declare(PICKED_PREF, { type: "object", default: {} })
+// Card alone's, from epic `editor` P35:  gone with it
+editorPrefs.forget("viewAlone")
+
+/** The bit picked for each file, by its path (`PICKED_PREF`). */
+const [pickedKeys, setPickedKeys] = createSignal<Readonly<Record<string, string>>>(
+  (editorPrefs.get(PICKED_PREF) as Record<string, string> | undefined) ?? {}
+)
+
+/** Remember `key` as the bit picked for the file at `path`. */
+function remember(path: string, key: string): void {
+  const keys = { ...pickedKeys(), [path]: key }
+  setPickedKeys(keys)
+  editorPrefs.set(PICKED_PREF, keys)
+}
+
+/** The file `view` (a type's name) is written in, by its path in the project. */
+function fileOfView(typeName: string): string | undefined {
+  const view = Palette.ownViews.find((each) => each.classNames[0] === typeName)
+  const project = editor.project
+  return view && project?.files.find((file) => file.path.split("/").at(-1) === view.file)?.path
+}
+
+/** A page's row:  its title, else its name. */
+function pageTitleOf(part: SitePart): string {
+  return part.title ?? part.name
+}
+
+/**
+ * The drawings of `view` in its file's `text`:  each `to draw ...` line of its type's block, with the lines under it.
+ * - Its type's block:  from the top-level line naming it (`a "card" is a ...`) to the next top-level line;
+ *   no such line, every `to draw ...` in the file.
+ * - Read from the text, as the site's parts are (`SiteEdits`):  English only, as the palette's views are.
+ */
+function drawingsIn(text: string, view: OwnView): DesignBit[] {
+  const lines = text.split("\n")
+  const words = view.snippet.replace(/^\{draw an? new (.*)\}$/, "$1")
+  const typeLine = new RegExp(`^(?:an?\\s+)?"?${escapeRegExp(words)}"?\\s+(?:\\(.*\\)\\s+)?is\\b`, "i")
+  const isTop = (line: string) => /^\S/.test(line) && !/^(?:#|--|\/\/)/.test(line)
+  const start = lines.findIndex((line) => isTop(line) && typeLine.test(line))
+  const end = start < 0 ? lines.length : lines.findIndex((line, at) => at > start && isTop(line))
+  const isTwoSided = view.classNames.includes(TWO_SIDED)
+  const found: DesignBit[] = []
+  for (let at = Math.max(start, 0); at < (end < 0 ? lines.length : end); at++) {
+    const match = DRAW_LINE.exec(lines[at]!)
+    if (!match) continue
+    const indent = match[1]!.length
+    let last = at
+    for (let next = at + 1; next < lines.length; next++) {
+      const line = lines[next]!
+      if (!line.trim()) continue
+      if (/^\s*/.exec(line)![0].length <= indent) break
+      last = next
+    }
+    const written = `to draw ${match[2]!.trim()}`
+    const side = /^its\s+(\w+)$/.exec(match[2]!.trim())?.[1]
+    found.push({
+      kind: "drawing",
+      key: `drawing:${written}`,
+      label: side ? upperFirst(side) : appTexts.text("designDrawing"),
+      written,
+      lines: { start: at, end: last },
+      side: isTwoSided ? side : undefined,
+      name: view.classNames[0]
+    })
+  }
+  return found
+}
+
+/** A drawing's line:  its indent, then what it draws, `its front`;  any comment after it left out. */
+const DRAW_LINE = /^(\s+)to draw\s+(.*?)\s*:?\s*(?:--.*|\/\/.*)?$/
+
+/** The built-in a view with a front and a back extends. */
+const TWO_SIDED = "TwoSidedView"
+
+/** `words` with its first letter a capital. */
+function upperFirst(words: string): string {
+  return words.charAt(0).toUpperCase() + words.slice(1)
+}
+
+/** `text` matching itself in a regular expression. */
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+}
+
+/****************
+ * ### `<DesignStage>`
+ * Design, in the app pane:  its picker down the left, the bit picked drawn large beside it.
+ * - A drawing:  one thing of the view, drawn on its own, large, scaled to fit (`<FitInside>`), face up for its
+ *   front and down for its back (Q59 A).
+ * - The property editor:  drawn large, as the Inspector draws it (`<OwnEditorPage>`), the thing drawn small beside it,
+ *   drawn again as it changes (Q58 C).
+ * - A site's page:  the app itself, showing that page, as its own links would (`runSite`;  Q64 A);
+ *   a page whose address takes a value shows the first one, `/films/1` for `/films/:film`.
+ * - Drawn on the programs' runtime, as the editor's zones are (`runtimeCore()`):  a live edit draws it again in place,
+ *   and the Inspector's changes to its thing redraw it.
+ * - Its thing:  a new one, made with the settings of the one selected in the app, else with its starting values;
+ *   never added to the app, so the game never sees it.  A new one again when the app restarts.
+ * - The thing is selected in the Inspector as it's drawn, so its settings can be changed there.
+ * - Its own drawing and its editor's elements are the Inspector's parts (`DESIGNED`, `<OwnEditorPage>`):
+ *   the palette's drops and clicks, moves, cut, copy and paste write into the view's file and its editor's.
+ * - `program`:  the app's own drawing, hidden while a view's bit shows, and none of the Inspector's parts (`EDITOR_OWN`).
+ ****************/
+export function DesignStage(props: { program: () => HTMLElement | undefined }): JSX.Element {
+  const picked = createMemo(() => (Design.isShowing ? Design.picked : undefined))
+  const showsView = createMemo(() => Design.isShowing && picked()?.kind !== "page")
+  createEffect(showsView, (isHidden) => {
+    props.program()?.toggleAttribute(EDITOR_OWN, isHidden)
+  })
+  // a page's size is the app's own width (Q65):  a device's, or the width typed
+  const pageWidth = createMemo(() => (Design.isShowing && !showsView() ? Design.widthOf(Design.size) : undefined))
+  createEffect(pageWidth, (width) => {
+    const program = props.program()
+    if (!program) return
+    program.style.maxWidth = width ? `${width}px` : ""
+    program.style.marginInline = width ? "auto" : ""
+    return () => {
+      program.style.maxWidth = ""
+      program.style.marginInline = ""
+    }
+  })
+  // the code's cursor moving into a drawing picks it (Q63 B)
+  const atCursor = createMemo(() => (Design.isShowing ? Design.atCursor?.key : undefined))
+  createEffect(atCursor, (key) => {
+    const bit = key && untrack(() => Design.drawings.find((each) => each.key === key))
+    if (bit) Design.pick(bit)
+  })
+  // a page picked:  the running site shows it, as its own links would (Q64 A)
+  const pageAddress = createMemo(() => {
+    const bit = picked()
+    if (bit?.kind !== "page" || !bit.address || !editor.isRunningSite) return undefined
+    return `${addressToShow(bit.address)}#${editor.programRuns}`
+  })
+  createEffect(pageAddress, (shown) => {
+    if (shown) runSite.heard(shown.replace(/#\d+$/, ""))
+  })
+  const viewClass = createMemo(() => {
+    void editor.programRuns
+    const view = showsView() ? Design.view : undefined
+    return view && (runtimeCore()?.things.classNamed(view.classNames[0]!) as ViewClass | undefined)
+  })
+  // the gallery's samples (P38, Q61):  the saved ones, else made from the view's choices
+  const samples = createMemo((): Sample[] => {
+    const view = Design.view
+    const Class = viewClass()
+    const path = editor.file?.path
+    if (!view || !Class || !path) return []
+    const saved = DesignSamples.saved(view, path, Class)
+    // a two sided view's made ones start face up:  each suit shows
+    const start = view.classNames.includes(TWO_SIDED) ? { direction: "up" } : {}
+    return saved.length
+      ? saved
+      : DesignSamples.made(Class, start, appTexts.text("designSampleStart", { view: view.name.toLowerCase() }))
+  })
+  const chosen = createMemo(() => {
+    const sample = chosenSample()
+    return sample?.path === editor.file?.path ? samples().find((each) => each.name === sample?.name) : undefined
+  })
+  // a new one for each frame (`showing`, `size`):  a drawing moved to another box is drawn afresh there
+  const thing = createMemo(() => {
+    const Class = viewClass()
+    // the property editor's card, beside it, face up too (Q59 A)
+    const side = picked()?.side ?? (Design.view?.classNames.includes(TWO_SIDED) ? "front" : undefined)
+    const settings = chosen()?.settings
+    void Design.showing
+    void Design.size
+    return Class ? untrack(() => thingFor(Class, side, settings)) : undefined
+  })
+  const drawn = createMemo(() => {
+    const shown = thing()
+    const core = runtimeCore()
+    if (!shown || !core) return undefined
+    const element = untrack(() => core.drawThing(shown)) as unknown as Element | null
+    element?.setAttribute(DESIGNED, "")
+    return element ?? undefined
+  })
+  const hasEditor = createMemo(() => {
+    void editor.edits
+    const shown = thing()
+    return !!shown && !!Inspector.ownEditorOf(shown)
+  })
+  const isEditorPicked = () => picked()?.kind === "editor" && hasEditor()
+  const isGallery = () => Design.showing === "gallery" && !isEditorPicked()
+  // selected as it's drawn:  the Inspector changes its thing
+  createEffect(
+    () => (isGallery() ? undefined : drawn()),
+    (element) => {
+      if (element) requestAnimationFrame(() => element.isConnected && Inspector.select(element))
+    }
+  )
+  return (
+    <Show when={Design.isShowing}>
+      <div class={["DesignStage", { page: !showsView() }]}>
+        <div class="DesignSide" {...{ [EDITOR_OWN]: "" }}>
+          <DesignPicker picked={picked()} hasEditor={hasEditor()} />
+          <DesignSizes />
+        </div>
+        <Show when={showsView()}>
+          <div class="DesignMain">
+            <Show when={Design.view && viewClass() && !isEditorPicked()}>
+              <DesignBar
+                saveable={() => selectedOf(viewClass()) ?? thing()}
+                onSaved={(name) => setChosenSample({ path: editor.file!.path, name })}
+              />
+            </Show>
+            <div class={["DesignCanvas", { editing: isEditorPicked(), gallery: isGallery() }]}>
+              <Show
+                when={Design.view && (isGallery() ? viewClass() : drawn())}
+                fallback={<p class="DesignWaiting">{appTexts.text(Design.view ? "designWaiting" : "designNothing")}</p>}
+              >
+                <Show
+                  when={isGallery()}
+                  fallback={
+                    <>
+                      <Show when={isEditorPicked()}>
+                        <div class="DesignEditor">
+                          <OwnEditorPage element={drawn()!} thing={thing()!} />
+                        </div>
+                      </Show>
+                      <div class="DesignDrawing">
+                        <SizedFrame scalesUp>
+                          <div class="DesignView">{drawn()}</div>
+                        </SizedFrame>
+                      </div>
+                    </>
+                  }
+                >
+                  <SizedFrame scalesUp={false}>
+                    <DesignGallery
+                      samples={samples()}
+                      Class={viewClass()!}
+                      chosen={chosen()?.name}
+                      onChosen={(name) => setChosenSample({ path: editor.file!.path, name })}
+                    />
+                  </SizedFrame>
+                </Show>
+              </Show>
+            </div>
+          </div>
+        </Show>
+      </div>
+    </Show>
+  )
+}
+
+/** A view's class in the running program:  made new with its settings. */
+type ViewClass = new (settings?: Record<string, unknown>) => object
+
+/** The thing of `Class` selected in the app, the gallery or Design's canvas, if one is:  what Save Sample saves. */
+function selectedOf(Class: ViewClass | undefined): object | undefined {
+  if (!Class) return undefined
+  return Inspector.allSelected
+    .map((part) => part.element && part.element.isConnected && SpellElement.thingOf(part.element))
+    .find((value): value is object => !!value && value instanceof Class)
+}
+
+/****************
+ * ### `<SizedFrame>`
+ * What Design draws, at the size picked (`Design.size`, Q65 C):
+ * - Fit:  as large as the pane holds (`<FitInside>`) when it `scalesUp`, one drawing;  the gallery as it is
+ * - a phone, tablet or desktop:  in Spell UI's `<ui-device>`, at its screen's size, its own Rotate turning it
+ * - a width typed:  in a box that wide, the pane's height
+ ****************/
+function SizedFrame(props: { scalesUp: boolean; children: JSX.Element }): JSX.Element {
+  const size = () => Design.size
+  return (
+    <Show
+      when={size().device !== "fit" ? size() : undefined}
+      fallback={
+        <Show when={size().width} fallback={props.scalesUp ? <FitInside>{props.children}</FitInside> : props.children}>
+          {(width) => (
+            <div class="DesignWidth" style={{ width: `${width()}px` }}>
+              {props.children}
+            </div>
+          )}
+        </Show>
+      }
+    >
+      {(device) => (
+        <ui-device
+          class="DesignDevice"
+          device={device().device as "phone" | "tablet" | "desktop"}
+          orientation={device().isLandscape ? "landscape" : "portrait"}
+          controls="rotate"
+          {...{ [EDITOR_FRAME]: "" }}
+          ref={on<{ orientation: string }>("ui-changed", (event) =>
+            Design.setSize({ ...untrack(size), isLandscape: event.detail.orientation === "landscape" })
+          )}
+        >
+          <div class="DesignScreen">{props.children}</div>
+        </ui-device>
+      )}
+    </Show>
+  )
+}
+
+/****************
+ * ### `<DesignBar>`
+ * Over a view's drawing:  One | Gallery, how it shows (Q62), then Save Sample.
+ * - Save Sample asks for a name, then saves the selected one's settings as a sample (`DesignSamples.save()`):
+ *   one step of the editor's history, so Undo takes it back.
+ * - `saveable()`:  what Save Sample saves;  `onSaved`:  told the new sample's name, once written.
+ ****************/
+function DesignBar(props: { saveable: () => object | undefined; onSaved: (name: string) => void }): JSX.Element {
+  const save = async () => {
+    const view = Design.view
+    const path = editor.file?.path
+    const thing = props.saveable()
+    if (!view || !path || !thing) return
+    const name = await editor.prompt({
+      header: appTexts.text("designSaveSample"),
+      message: appTexts.text("designSampleNameAsk"),
+      defaultValue: (thing as { name?: unknown }).name?.toString() ?? ""
+    })
+    if (!name?.trim()) return
+    await DesignSamples.save(view, path, thing, name.trim())
+    props.onSaved(name.trim())
+  }
+  return (
+    <div class="DesignBar" {...{ [EDITOR_OWN]: "" }}>
+      <ui-menu
+        appearance="segmented"
+        size="small"
+        class="DesignShowing"
+        aria-label={appTexts.text("designShowingLabel")}
+      >
+        <ui-item selected={Design.showing === "one"} onClick={() => Design.setShowing("one")}>
+          {appTexts.text("designOne")}
+        </ui-item>
+        <ui-item selected={Design.showing === "gallery"} onClick={() => Design.setShowing("gallery")}>
+          {appTexts.text("designGallery")}
+        </ui-item>
+      </ui-menu>
+      <ui-button
+        size="small"
+        appearance="basic"
+        icon="save outline"
+        class="DesignSaveSample"
+        title={appTexts.text("designSaveSampleTip")}
+        onClick={() => void save().catch(editor.showError)}
+      >
+        {appTexts.text("designSaveSample")}
+      </ui-button>
+    </div>
+  )
+}
+
+/****************
+ * ### `<DesignSizes>`
+ * Under the picker:  the size Design draws at (Q65 C), remembered for the file.
+ * - Fit, Phone, Tablet, Desktop;  a device's Rotate is its own, in its bottom edge.
+ * - Then a width of your own, px, to see where a layout changes:  drawn to fit, at that width.
+ * - A site's page:  the app itself, at that width.
+ ****************/
+function DesignSizes(): JSX.Element {
+  const pick = (device: DesignSize["device"]) => Design.setSize(device === "fit" ? FIT : { device })
+  return (
+    <div class="DesignSizes">
+      <div class="DesignSizesHeading">{appTexts.text("designSizeLabel")}</div>
+      <ui-menu
+        direction="vertical"
+        appearance="secondary pointing"
+        size="small"
+        class="DesignSizeMenu"
+        aria-label={appTexts.text("designSizeLabel")}
+      >
+        <For each={SIZE_ROWS}>
+          {(row) => (
+            <ui-item
+              icon={row.icon}
+              data-size={row.device}
+              selected={Design.size.device === row.device && !(row.device === "fit" && Design.size.width)}
+              onClick={() => pick(row.device)}
+            >
+              {appTexts.text(row.text)}
+            </ui-item>
+          )}
+        </For>
+      </ui-menu>
+      <ui-input
+        type="number"
+        size="small"
+        labeled="right"
+        label="px"
+        min="120"
+        max="4000"
+        class="DesignWidthField"
+        placeholder={appTexts.text("designWidth")}
+        aria-label={appTexts.text("designWidth")}
+        title={appTexts.text("designWidthTip")}
+        value={Design.size.device === "fit" && Design.size.width ? String(Design.size.width) : ""}
+        ref={on<{ value: string }>("ui-changed", (event) => {
+          const width = Math.round(Number(event.detail.value))
+          Design.setSize(width >= MIN_WIDTH ? { device: "fit", width } : FIT)
+        })}
+      />
+    </div>
+  )
+}
+
+/** The size picker's rows:  each device, its icon (Fomantic's) and its name's text key. */
+const SIZE_ROWS = [
+  { device: "fit", icon: "expand", text: "designSizeFit" },
+  { device: "phone", icon: "mobile alternate", text: "designSizePhone" },
+  { device: "tablet", icon: "tablet alternate", text: "designSizeTablet" },
+  { device: "desktop", icon: "desktop", text: "designSizeDesktop" }
+] as const
+
+/** The narrowest width typed that's taken, px:  less goes back to fitting the pane. */
+const MIN_WIDTH = 120
+
+/****************
+ * ### `<DesignGallery>`
+ * The view's samples side by side (P38, Q61, Q62), each drawn on its own, its name under it.
+ * - A click on one selects it, for the Inspector to change, and one drawing shows it too (`onChosen`).
+ * - A saved one's right-click menu:  Rename…, Delete, each one step of the editor's history.
+ * - Each is a new thing made with its settings, never one in the app;  drawn again when the program runs again.
+ ****************/
+function DesignGallery(props: {
+  samples: readonly Sample[]
+  Class: ViewClass
+  chosen: string | undefined
+  onChosen: (name: string) => void
+}): JSX.Element {
+  const [menu, setMenu] = createSignal<{ x: number; y: number; sample: Sample }>()
+  // the sample the menu is for, kept as it closes:  a row chosen closes the menu before its click runs
+  let menuSample: Sample | undefined
+  return (
+    <div class="DesignGallery">
+      <For each={props.samples} keyed={(sample) => `${sample.name}:${JSON.stringify(sample.settings)}`}>
+        {(sample) => {
+          const element = createMemo(() => {
+            void editor.programRuns
+            const core = runtimeCore()
+            if (!core) return undefined
+            const made = untrack(() => core.drawThing(new props.Class(sample().settings))) as unknown as Element | null
+            made?.setAttribute(DESIGNED, "")
+            return made ?? undefined
+          })
+          const choose = () => {
+            const drawnSample = element()
+            if (drawnSample) Inspector.select(drawnSample)
+            props.onChosen(sample().name)
+          }
+          return (
+            <figure
+              class={["DesignSample", { chosen: props.chosen === sample().name }]}
+              data-sample={sample().name}
+              onClick={choose}
+              onContextMenu={(event: MouseEvent) => {
+                if (sample().line === undefined) return
+                event.preventDefault()
+                menuSample = sample()
+                setMenu({ x: event.clientX, y: event.clientY, sample: sample() })
+              }}
+            >
+              <div class="DesignSampleDrawing">
+                <FitInside>{element()}</FitInside>
+              </div>
+              <figcaption {...{ [EDITOR_OWN]: "" }}>{sample().name}</figcaption>
+            </figure>
+          )
+        }}
+      </For>
+      {/* the editor's own:  the Inspector never takes a click on its rows for a part */}
+      <Show when={menu()}>
+        {(open) => (
+          <div class="DesignSampleMenu" {...{ [EDITOR_OWN]: "" }}>
+            <MenuPopup at={open()} label={open().sample.name} onClose={() => setMenu(undefined)}>
+              <ui-item icon="pencil" onClick={() => menuSample && void renameSample(menuSample)}>
+                {appTexts.text("designRenameSample")}
+              </ui-item>
+              <ui-item icon="trash alternate outline" onClick={() => menuSample && deleteSample(menuSample)}>
+                {appTexts.text("designDeleteSample")}
+              </ui-item>
+            </MenuPopup>
+          </div>
+        )}
+      </Show>
+    </div>
+  )
+}
+
+/** Ask for `sample`'s new name, then rename it.  NEVER throws:  a failure shows in the error banner. */
+async function renameSample(sample: Sample): Promise<void> {
+  try {
+    const path = editor.file?.path
+    const name = await editor.prompt({
+      header: appTexts.text("designRenameSample"),
+      message: appTexts.text("designSampleNameAsk"),
+      defaultValue: sample.name
+    })
+    if (path && name?.trim() && name.trim() !== sample.name) DesignSamples.rename(path, sample, name.trim())
+  } catch (error) {
+    editor.showError(error)
+  }
+}
+
+/** Delete `sample`:  Undo brings it back. */
+function deleteSample(sample: Sample): void {
+  const path = editor.file?.path
+  if (path) DesignSamples.remove(path, sample)
+}
+
+/**
+ * The address to show a page at:  its own, each value it takes filled with `1`, its first record's in most places.
+ * - `/films/:film` => `/films/1`
+ */
+function addressToShow(address: string): string {
+  return address.replace(/:[^/]+/g, "1")
+}
+
+/**
+ * A thing of `Class` for Design to draw:  a new one, made with `settings` (a sample's), else with the settings of the
+ * one selected in the app, else its starting values;  put in nothing, so the game never sees it.
+ * - `side`:  a two sided view's, `front` face up, `back` face down.
+ */
+function thingFor(Class: ViewClass, side: string | undefined, settings?: Record<string, unknown>): object {
+  const selected = settings ? undefined : selectedOf(Class)
+  const made = { ...(settings ?? (selected ? settingsOf(selected) : {})) }
+  if (side === "front") made.direction = "up"
+  else if (side === "back") made.direction = "down"
+  return new Class(made)
+}
+
+/** `thing`'s settings, each of its own keys and its value:  `{ rank: "queen", suit: "spades", direction: "down" }`. */
+function settingsOf(thing: object): Record<string, unknown> {
+  const keys = (thing as { keys?: () => string[] }).keys?.() ?? []
+  return Object.fromEntries(keys.map((key) => [key, (thing as Record<string, unknown>)[key]]))
+}
+
+/****************
+ * ### `<DesignPicker>`
+ * Design's list of what can be designed, down the left of the app pane:  the bit showing is chosen.
+ * - The open view's:  its drawings, then its property editor, when it has one (`hasEditor`).
+ * - A site's pages;  the project's other views.
+ * - In the editor's own column (`EDITOR_OWN`):  none of the Inspector's parts, so a click on a row picks it,
+ *   inspecting or not.
+ ****************/
+function DesignPicker(props: { picked: DesignBit | undefined; hasEditor: boolean }): JSX.Element {
+  const viewBits = createMemo((): DesignBit[] => {
+    const drawings = Design.drawings
+    if (!drawings.length || !props.hasEditor) return drawings
+    return [...drawings, { ...EDITOR_BIT, label: appTexts.text("designPropertyEditor") }]
+  })
+  const others = createMemo((): DesignBit[] =>
+    Design.otherViews.map((view) => ({
+      kind: "view",
+      key: `view:${view.classNames[0]}`,
+      label: view.name,
+      name: view.classNames[0]
+    }))
+  )
+  return (
+    <ui-menu
+      direction="vertical"
+      appearance="secondary pointing"
+      size="small"
+      class="DesignPicker"
+      aria-label={appTexts.text("designPickerLabel")}
+    >
+      <Show when={Design.view}>
+        {(view) => (
+          <>
+            <MenuHeader>{view().name}</MenuHeader>
+            <PickerRows bits={viewBits()} picked={props.picked} />
+          </>
+        )}
+      </Show>
+      <Show when={Design.pages.length}>
+        <MenuHeader>{appTexts.text("designPages")}</MenuHeader>
+        <PickerRows bits={Design.pages} picked={props.picked} />
+      </Show>
+      <Show when={others().length}>
+        <MenuHeader>{appTexts.text(Design.view ? "designOtherViews" : "designViews")}</MenuHeader>
+        <PickerRows bits={others()} picked={props.picked} />
+      </Show>
+    </ui-menu>
+  )
+}
+
+/** A group of the picker's rows:  a click shows its bit. */
+function PickerRows(props: { bits: readonly DesignBit[]; picked: DesignBit | undefined }): JSX.Element {
+  return (
+    <For each={props.bits} keyed={(bit) => bit.key}>
+      {(bit) => (
+        <ui-item
+          class="DesignBitRow"
+          data-bit={bit().key}
+          selected={props.picked?.key === bit().key}
+          title={bit().written}
+          onClick={() => Design.pick(bit())}
+        >
+          {bit().label}
+        </ui-item>
+      )}
+    </For>
+  )
+}
+
+/****************
+ * ### `<FitInside>`
+ * What it holds, scaled up to fit the box it's in, never smaller than it is:  a card one letter high drawn large.
+ * - Measured as it's drawn and each time it or its box changes size.
+ * - A CSS `scale`, not `zoom`:  with `zoom`, the Inspector's ants round a turned card were drawn half size in its
+ *   corner;  a drop finds the parts under the pointer either way.
+ * - Marked `SCALED_UP`, so the ants are a box of their own, not a ring the scale would thicken.
+ ****************/
+function FitInside(props: { children: JSX.Element }): JSX.Element {
+  let box: HTMLDivElement | undefined
+  let content: HTMLDivElement | undefined
+  onSettled(() => {
+    let frame = 0
+    const fit = () => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => {
+        if (!box || !content) return
+        // its own size, as laid out:  a transform leaves it as it was
+        const width = content.offsetWidth
+        const height = content.offsetHeight
+        if (!width || !height) return
+        const room = box.getBoundingClientRect()
+        const fits = Math.min((room.width - FIT_MARGIN) / width, (room.height - FIT_MARGIN) / height)
+        const scale = Math.max(1, Math.min(MAX_SCALE, Math.floor(fits * 4) / 4))
+        content.style.scale = String(scale)
+      })
+    }
+    const watcher = new ResizeObserver(fit)
+    watcher.observe(box!)
+    watcher.observe(content!)
+    return () => {
+      cancelAnimationFrame(frame)
+      watcher.disconnect()
+    }
+  })
+  return (
+    <div class="DesignFit" ref={(element: HTMLDivElement) => (box = element)}>
+      <div class="DesignFitContent" {...{ [SCALED_UP]: "" }} ref={(element: HTMLDivElement) => (content = element)}>
+        {props.children}
+      </div>
+    </div>
+  )
+}
+
+/** The room `<FitInside>` leaves round what it holds, px. */
+const FIT_MARGIN = 64
+
+/** The most `<FitInside>` scales up. */
+const MAX_SCALE = 12

@@ -35,7 +35,7 @@ const DOCUMENT: OpenApiDocument = {
     "/api/instance-netlists/{instance_id}/reservation-surface": answering(ref("ReservationSurface")),
     // its one list inside is its own, not its rows:  the components, as deployed
     "/api/systems/instance/{instance_id}/snapshot": answering(ref("Snapshot")),
-    // a list under each, which isn't one thing:  still skipped
+    // a list under each, which isn't one thing:  a list read from there (epic `data` P56)
     "/api/registry/instances/{id}/events": answering({
       type: "object",
       properties: { results: { type: "array", items: ref("Status") } }
@@ -116,7 +116,13 @@ describe("PlaceSpec:  one thing under each", () => {
   const look = new PlaceSpec(DOCUMENT, SPEC_AT).lookAt(ACME)
 
   test("each is a collection by its last word, found at its address, its fields from its schema", () => {
-    expect(look.collections.map(({ name }) => name)).toEqual(["instances", "status", "reservation-surface", "snapshot"])
+    expect(look.collections.map(({ name }) => name)).toEqual([
+      "instances",
+      "status",
+      "reservation-surface",
+      "snapshot",
+      "events"
+    ])
     const snapshot = look.collections.find(({ name }) => name === "snapshot")!
     expect(snapshot.at).toBe("/api/systems/instance/{id}/snapshot")
     expect(snapshot.schemaAt).toBe("#/components/schemas/Snapshot")
@@ -133,7 +139,9 @@ describe("PlaceSpec:  one thing under each", () => {
         at: "/api/instance-netlists/{id}/reservation-surface",
         isOne: true
       },
-      { owner: "instances", list: "snapshot", at: "/api/systems/instance/{id}/snapshot", isOne: true }
+      { owner: "instances", list: "snapshot", at: "/api/systems/instance/{id}/snapshot", isOne: true },
+      // a list under each, read from there (epic `data` P56)
+      { owner: "instances", list: "events", at: "/api/registry/instances/{id}/events" }
     ])
     expect(look.notes).toContain(
       "/api/widgets/{widget_id}/summary answers one thing under another, but no list of those is described:  read it by hand."

@@ -42,11 +42,14 @@ export class DOMUploaderElement extends E.DOMElement<UIUploader> {
  * - The events are the same for a pick as for a drop:  their detail's `via` says which.
  * - Four looks, `appearance`, each drawn from Spell UI's own elements:
  *   - `hero`:  a placeholder `<ui-segment>` as its drop area, a row per file under it
- *   - `button`:  a `<ui-button>`, its file rows in a `<ui-popup>` that shows while it posts, and on hover after
+ *     (a `<ui-list>`, a `<ui-item>` per file)
+ *   - `button`:  a `<ui-button>`, its file rows in a `<ui-popup>`:  a glimpse as an upload starts,
+ *     then on hover or focus
  *   - `input`:  a read-only `<ui-input>` with a Browse `<ui-button>` joined to it, its rows under it
  *   - `compact`:  a one-line drop area, a line of status and one `<ui-progress>` for every file
  * - `drop-zone`:  a drop elsewhere counts too (`page`, a selector, an element);  `DropZones` decides which uploader.
- * - The file dialog is the browser's:  an invisible native file input opens it (`openDialog()`).
+ * - The file dialog is the browser's:  a hidden `<ui-input type="file">` opens it (`openDialog()`),
+ *   for every look, with its `showPicker()`;  its `folder` picks folders.
  * - Posting is `XMLHttpRequest`'s:  `fetch()` can't tell how far an upload has got.
  *   A failure is an `ApiError`, the same shape `UI.api` throws.
  * - NEVER imports Spell's own words:  the bridge into Spell's events is the parser's core's (Q14).
@@ -90,7 +93,7 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
     return this.kinds.map((kind) => `.${kind}`).join(", ")
   }
 
-  /** The native input's `accept`:  `.json,.csv`. */
+  /** The file input's `accept`:  `.json,.csv`. */
   private get accept(): string | undefined {
     return this.kinds.length ? this.kinds.map((kind) => `.${kind}`).join(",") : undefined
   }
@@ -101,16 +104,21 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
   }
 
   /** Why `file` would be turned away, before the count:  its kind or its size;  `undefined`, it's fine. */
-  private reasonFor(file: File): string | undefined {
+  private reasonFor(file: File): Refusal | undefined {
     const { kinds, largest } = this
     const extension = /\.([^./]+)$/.exec(file.name)?.[1]?.toLowerCase()
     if (kinds.length && (!extension || !kinds.includes(extension))) {
-      return this.translationForKey("wrongKind", { kinds: this.kindsText })
+      return this.refusal("wrongKind", "wrongKindLong", { kinds: this.kindsText })
     }
     if (largest !== undefined && file.size > largest) {
-      return this.translationForKey("tooBig", { size: this.maxSizeText })
+      return this.refusal("tooBig", "tooBigLong", { size: this.maxSizeText })
     }
     return undefined
+  }
+
+  /** Why a file is turned away:  its row's short words, and the full sentence for its tooltip. */
+  private refusal(short: RefusalKey, full: RefusalKey, params?: Record<string, string | number>): Refusal {
+    return { reason: this.translationForKey(short, params), why: this.translationForKey(full, params) }
   }
 
   /** `max-size` for people:  `2 MB`. */
@@ -216,12 +224,15 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
     const { via } = arrival
     const isFolderUploader = !!this.folder
     if (!this.multiple) this.clear()
-    const turnedAway = (taken: Taken, reason: string): Taken => ({ ...taken, reason })
+    const turnedAway = (taken: Taken, refusal: Refusal): Taken => ({ ...taken, ...refusal })
     const folders = isFolderUploader ? arrival.folders : []
     const files: Taken[] = []
     // a plain file on a folder uploader, a folder on a plain one:  turned away
     for (const stray of isFolderUploader ? arrival.files : arrival.folders.map(UIUploader.folderAsFile)) {
-      files.push(turnedAway(stray, this.translationForKey(isFolderUploader ? "notAFolder" : "aFolder")))
+      const refusal = isFolderUploader
+        ? this.refusal("notAFolder", "notAFolderLong")
+        : this.refusal("aFolder", "aFolderLong")
+      files.push(turnedAway(stray, refusal))
     }
     if (!isFolderUploader) files.unshift(...arrival.files)
 
@@ -229,11 +240,13 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
     let kept = this.keptRows.length
     const checked = (taken: Taken): Taken => {
       if (taken.reason) return taken
-      const reason = this.reasonFor(taken.file)
-      if (reason) return turnedAway(taken, reason)
-      if (!this.multiple && !isFolderUploader && kept >= 1) return turnedAway(taken, this.translationForKey("oneOnly"))
+      const refusal = this.reasonFor(taken.file)
+      if (refusal) return turnedAway(taken, refusal)
+      if (!this.multiple && !isFolderUploader && kept >= 1) {
+        return turnedAway(taken, this.refusal("oneOnly", "oneOnlyLong"))
+      }
       if (this.maxFiles && kept >= this.maxFiles) {
-        return turnedAway(taken, this.translationForKey("tooMany", { count: this.maxFiles }))
+        return turnedAway(taken, this.refusal("tooMany", "tooManyLong", { count: this.maxFiles }))
       }
       kept++
       return taken
@@ -243,8 +256,9 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
     for (const [index, folder] of folders.entries()) {
       const detail = { ...UIUploader.folderDetail(folder, via) }
       if (!this.multiple && index > 0) {
-        detail.reason = this.translationForKey("oneOnly")
-        for (const file of folder.files) taken.push(turnedAway(file, detail.reason))
+        const refusal = this.refusal("oneOnly", "oneOnlyLong")
+        detail.reason = refusal.reason
+        for (const file of folder.files) taken.push(turnedAway(file, refusal))
         continue
       }
       if (!this.send("ui-folder-dropping", detail)) continue
@@ -268,7 +282,8 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
         path: file.path,
         status: file.reason ? TURNED_AWAY : WAITING,
         sent: 0,
-        reason: file.reason
+        reason: file.reason,
+        why: file.why
       })
     }
     if (!rows.length) return
@@ -433,14 +448,27 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
   // ## The file dialog
   ////////////////
 
-  /** The invisible native file input that opens the browser's file dialog. */
-  private fileInput: HTMLInputElement | undefined
+  /** The hidden `<ui-input type="file">` that opens the browser's file dialog. */
+  private fileInput: FileInputElement | undefined
 
-  /** Open the file dialog.  The browser opens it only from a person's click or key. */
+  /** The file input drawn:  it tells us what was picked. */
+  private readonly fileInputDrawn = (input: HTMLElement) => {
+    this.fileInput = input as FileInputElement
+    input.addEventListener("ui-changed", this.onPicked)
+  }
+
+  /**
+   * Open the file dialog.  The browser opens it only from a person's click or key.
+   * - NEVER throws:  a dialog the browser won't open (no click) is warned about.
+   */
   @E.untracked
   openDialog() {
     if (this.isDisabled) return
-    this.fileInput?.click()
+    try {
+      this.fileInput?.showPicker()
+    } catch (error) {
+      E.Warnings.warn("<ui-uploader>", "the browser wouldn't open the file dialog", error)
+    }
   }
 
   /** A click on its button, or on a page's own in the `button` slot:  the file dialog. */
@@ -449,11 +477,16 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
     this.openDialog()
   }
 
-  /** Files picked in the dialog:  taken, then the input emptied, so the same file can be picked again. */
+  /**
+   * Files picked in the dialog:  taken, then the input emptied, so the same file can be picked again.
+   * - Its `ui-changed` stops here:  it's composed, and the page hears the uploader's own events instead.
+   */
   @E.untracked
   private readonly onPicked = (event: Event) => {
-    const input = event.currentTarget as HTMLInputElement
-    const picked = [...(input.files ?? [])]
+    event.stopPropagation()
+    const input = event.currentTarget as FileInputElement
+    const picked = [...input.files]
+    if (!picked.length) return
     input.value = ""
     void this.take(UIUploader.arrivalFromDialog(picked, !!this.folder)).catch((error) =>
       E.Warnings.warn("<ui-uploader>", "couldn't take the files picked", error)
@@ -739,7 +772,8 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
   /** How many were turned away, for people;  empty for none. */
   get turnedAwayText(): string {
     const count = this.turnedAwayCount
-    return count ? this.translationForKey("turnedAway", { count }) : ""
+    if (!count) return ""
+    return count === 1 ? this.translationForKey("turnedAwayOne") : this.translationForKey("turnedAway", { count })
   }
 
   /** A row's status, for people. */
@@ -775,30 +809,34 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
   /** The popup of file rows, once drawn. */
   private popupElement: HTMLElement | undefined
 
-  /** Hides the popup a moment after the posts end, so the last ticks can be read. */
+  /** Hides the popup at the end of its glimpse. */
   private popupHide: E.CancelablePromise<void> | undefined
 
-  /** The popup was drawn:  aimed at the button, and shown at once if it's posting. */
+  /** The popup was drawn:  aimed at the button, and a glimpse of it if it's posting. */
   private popupDrawn(popup: HTMLElement & { target?: Element }, button: HTMLElement | undefined) {
     this.popupElement = popup
     if (button) popup.target = button
-    if (this.isUploading) popup.hidden = false
+    if (this.isUploading) this.glimpse(popup)
   }
 
   /**
-   * The `button` look shows its popup while it posts, then hides it a moment after:
-   * hovering or focusing the button shows it again.
+   * The `button` look shows its popup for a moment as an upload starts, then only on hover or focus,
+   * so it never sits over the page while files post (epic `from-console` P9).
    */
   @E.onChange("isUploading")
   protected onUploadingChanged(isUploading: boolean) {
     const popup = this.popupElement
-    if (this.look !== BUTTON || !popup) return
+    if (this.look !== BUTTON || !popup || !isUploading) return
+    this.glimpse(popup)
+  }
+
+  /** Show the popup, then hide it after `POPUP_GLIMPSE`, unless the pointer or the focus is on it, or its button. */
+  private glimpse(popup: HTMLElement) {
     this.popupHide?.cancel()
-    if (isUploading) popup.hidden = false
-    else
-      this.popupHide = E.after(POPUP_LINGER, () => {
-        popup.hidden = true
-      })
+    popup.hidden = false
+    this.popupHide = E.after(POPUP_GLIMPSE, () => {
+      if (!this.domElement.matches(":hover, :focus-within")) popup.hidden = true
+    })
   }
 
   ////////////////
@@ -808,17 +846,16 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
   render(): JSX.Element {
     return (
       <>
-        <input
-          ref={(input: HTMLInputElement) => (this.fileInput = input)}
+        <ui-input
+          ref={this.fileInputDrawn}
           class="picker"
           type="file"
-          hidden
+          hidden=""
           tabindex="-1"
           aria-hidden="true"
           accept={this.folder ? undefined : this.accept}
           multiple={!!this.multiple || !!this.folder}
-          {...(this.folder ? { webkitdirectory: "" } : {})}
-          onChange={this.onPicked}
+          folder={!!this.folder}
         />
         <Show when={this.look === BUTTON}>{this.buttonLook()}</Show>
         <Show when={this.look === INPUT}>{this.inputLook()}</Show>
@@ -850,7 +887,7 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
         >
           <ui-segment appearance="placeholder" color="blue">
             <ui-icon name="cloud upload" size="big" />
-            <strong>{this.dropText}</strong>
+            <ui-text bold="">{this.dropText}</ui-text>
           </ui-segment>
         </div>
       </>
@@ -873,14 +910,23 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
                 <ui-icon name={this.folder ? "folder outline" : "cloud upload"} size="big" />
               </slot>
             </span>
-            <Show when={!this.isDraggedOver} fallback={<strong class="message">{this.dropText}</strong>}>
+            <Show
+              when={!this.isDraggedOver}
+              fallback={
+                <ui-text class="message" bold="">
+                  {this.dropText}
+                </ui-text>
+              }
+            >
               <span class="message">
                 <slot name={this.slotForName("message")}>{this.messageText}</slot>
               </span>
               {this.chooseButton(this.translationForKey(this.folder ? "chooseFolders" : "choose"))}
             </Show>
             <Show when={this.limitsText}>
-              <span class="limits">{this.limitsText}</span>
+              <ui-text class="limits" color="grey" size="small">
+                {this.limitsText}
+              </ui-text>
             </Show>
           </div>
         </ui-segment>
@@ -906,7 +952,14 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
                 <ui-icon name={this.folder ? "folder outline" : "cloud upload"} />
               </slot>
             </span>
-            <Show when={!this.isDraggedOver} fallback={<strong class="message">{this.dropText}</strong>}>
+            <Show
+              when={!this.isDraggedOver}
+              fallback={
+                <ui-text class="message" bold="">
+                  {this.dropText}
+                </ui-text>
+              }
+            >
               <span class="message">
                 <slot name={this.slotForName("message")}>{this.messageText}</slot>
               </span>
@@ -919,7 +972,9 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
             <span>
               <Show when={this.statusText}>{this.statusText}</Show>
               <Show when={this.statusText && this.turnedAwayText}>{" · "}</Show>
-              <span class="turned-away-count">{this.turnedAwayText}</span>
+              <ui-text class="turned-away-count" state="error">
+                {this.turnedAwayText}
+              </ui-text>
             </span>
             <Show when={this.isUploading}>
               <ui-progress
@@ -949,6 +1004,7 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
             icon={this.folder ? "folder outline" : "cloud upload"}
             color={this.isDraggedOver || this.isUploading ? "blue" : undefined}
             appearance={this.isUploading ? "basic" : undefined}
+            disabled={this.isDisabled ? "" : undefined}
             data-tooltip={this.limitsText || undefined}
           >
             {this.buttonText}
@@ -963,11 +1019,11 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
             flowing=""
           >
             <div class="popup-rows">
-              <div class="popup-summary">
+              <ui-text class="popup-summary" color="grey" size="small">
                 <Show when={this.statusText}>{this.statusText}</Show>
-                <Show when={this.statusText && this.turnedAwayText}>{", "}</Show>
+                <Show when={this.statusText && this.turnedAwayText}>{". "}</Show>
                 {this.turnedAwayText}
-              </div>
+              </ui-text>
               {this.fileRows("popup")}
             </div>
           </ui-popup>
@@ -1018,14 +1074,18 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
     )
   }
 
-  /** A row per file:  its glyph, name, size, then its progress or status, and Remove. */
+  /** A row per file, an item of a `<ui-list>`:  its glyph, name, size, then its progress or status, and Remove. */
   private fileRows(variant?: "popup" | "small"): JSX.Element {
     return (
       <Show when={this.rows.length}>
-        <ul class={["files", variant]} part={this.partForName("files")} aria-label={this.translationForKey("files")}>
+        <ui-list
+          class={["files", variant]}
+          part={this.partForName("files")}
+          aria-label={this.translationForKey("files")}
+        >
           <For each={this.rows} keyed={(row) => row.id}>
             {(row) => (
-              <li class={["file", row().status.replace(" ", "-")]} part={this.partForName("file")}>
+              <ui-item class={["file", row().status.replace(" ", "-")]} part={this.partForName("file")}>
                 <Show when={!variant}>
                   <ui-icon class="glyph" name="file outline" />
                 </Show>
@@ -1036,18 +1096,24 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
                 >
                   {row().file.name}
                 </span>
-                <span class="size" part={this.partForName("size")}>
+                <ui-text class="size" part={this.partForName("size")} color="grey">
                   {this.sizeText(row().file.size)}
-                </span>
+                </ui-text>
                 <Show
                   when={row().status === UPLOADING}
                   fallback={
-                    <span class={["status", STATUS_LOOKS[row().status]]} part={this.partForName("status")}>
+                    <ui-text
+                      class="status"
+                      part={this.partForName("status")}
+                      state={STATUS_LOOKS[row().status]?.state}
+                      color={STATUS_LOOKS[row().status]?.color}
+                      data-tooltip={row().why}
+                    >
                       <Show when={STATUS_ICONS[row().status]}>
                         <ui-icon name={STATUS_ICONS[row().status]} />
                       </Show>
                       {this.statusOf(row())}
-                    </span>
+                    </ui-text>
                   }
                 >
                   <ui-progress
@@ -1070,10 +1136,10 @@ export class UIUploader extends E.UIComponent<typeof uploaderVocabulary> {
                     onClick={() => this.remove(row().id)}
                   />
                 </Show>
-              </li>
+              </ui-item>
             )}
           </For>
-        </ul>
+        </ui-list>
       </Show>
     )
   }
@@ -1129,8 +1195,10 @@ export type FileRow = {
   status: UploadStatus
   /** bytes posted so far */
   sent: number
-  /** why it was turned away, or failed */
+  /** why it was turned away, or failed:  short, for its row */
   reason?: string
+  /** why it was turned away, in a full sentence:  its row's tooltip */
+  why?: string
 }
 
 /** A file taken in, before it's checked. */
@@ -1139,9 +1207,17 @@ type Taken = {
   path: string
   entry?: FileSystemEntry
   handle?: FileSystemHandle
-  /** why it's turned away, once checked */
+  /** why it's turned away, once checked:  short, for its row */
   reason?: string
+  /** why it's turned away, in a full sentence */
+  why?: string
 }
+
+/** Why a file is turned away:  short, for its row, and in full, for its tooltip. */
+type Refusal = { reason: string; why: string }
+
+/** The words a refusal reads. */
+type RefusalKey = Parameters<UIUploader["translationForKey"]>[0]
 
 /** A folder taken in, with its files. */
 type TakenFolder = {
@@ -1150,6 +1226,16 @@ type TakenFolder = {
   files: Taken[]
   entry?: FileSystemEntry
   handle?: FileSystemHandle
+}
+
+/** The hidden `<ui-input type="file">`:  the members of its DOM element the uploader uses (`DOMInputElement`). */
+type FileInputElement = HTMLElement & {
+  /** the files picked */
+  readonly files: readonly File[]
+  /** `""` forgets them */
+  value: string
+  /** opens the file dialog */
+  showPicker(): void
 }
 
 /** Everything that came in at once. */
@@ -1187,18 +1273,20 @@ const DONE = new Set<UploadStatus>([UPLOADED, TAKEN])
 
 /** A status's icon. */
 const STATUS_ICONS: Partial<Record<UploadStatus, string>> = {
+  held: "circle outline",
   uploaded: "check circle",
   taken: "check circle",
   failed: "exclamation triangle",
   "turned away": "exclamation circle"
 }
 
-/** A status's colour class in the sheet. */
-const STATUS_LOOKS: Partial<Record<UploadStatus, string>> = {
-  uploaded: "ok",
-  taken: "ok",
-  failed: "bad",
-  "turned away": "bad"
+/** A status's colour:  `<ui-text>`'s `state`, or `color` for a muted one. */
+const STATUS_LOOKS: Partial<Record<UploadStatus, { state?: "success" | "error"; color?: "grey" }>> = {
+  held: { color: "grey" },
+  uploaded: { state: "success" },
+  taken: { state: "success" },
+  failed: { state: "error" },
+  "turned away": { state: "error" }
 }
 
 /** The form field each file is posted in. */
@@ -1207,8 +1295,8 @@ const FORM_FIELD = "file"
 /** How long a drag lingers after its last `dragover`, in seconds:  a browser sends one every 50ms or so. */
 const DRAG_LINGER = 0.25
 
-/** How long the `button` look's popup stays after the posts end, in seconds. */
-const POPUP_LINGER = 3
+/** How long the `button` look's popup shows as an upload starts, in seconds:  then only on hover or focus. */
+const POPUP_GLIMPSE = 2
 
 /** Bytes in a KB and an MB. */
 const KB = 1024

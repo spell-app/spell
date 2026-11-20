@@ -4,9 +4,12 @@
  *   - `hero` and `compact`:  a placeholder `<ui-segment class="drop-area">`, restyled through its `segment` part
  *     as a dashed drop area;  `.hero` (stacked, centred) or `.line` (one row) inside it
  *   - `button`:  a `<ui-button class="choose">`, then a `<ui-popup>` holding `.popup-rows`
+ *     (a `<ui-text class="popup-summary">`, then the rows)
  *   - `input`:  a read-only `<ui-input class="field">` with a `<ui-button slot="action">`
- *   - then, but in `compact`:  `<ul class="files">`, a `<li class="file">` per file:
- *     a glyph, `.name`, `.size`, then a `<ui-progress>` or `.status`, and a `<ui-button class="remove">`
+ *   - then, but in `compact`:  `<ui-list class="files">`, a `<ui-item class="file">` per file,
+ *     laid out through its `item` part:
+ *     a glyph, `.name`, a `<ui-text class="size">`, then a `<ui-progress>` or a `<ui-text class="status">`,
+ *     and a `<ui-button class="remove">`
  *   - `compact`:  `.summary`, one line of status and one `<ui-progress>`
  *   - `.zone`:  the overlay over its `drop-zone` while files are dragged over it, in the top layer
  * - Inner `<ui-*>` elements are restyled through their parts (`::part(segment)`, `::part(button)`), never by setting
@@ -34,8 +37,6 @@
     --_ui-uploader-row-height: var(--ui-uploader-row-height, 44px);
     --_ui-uploader-row-gap: var(--ui-uploader-row-gap, 8px);
     --_ui-uploader-popup-width: var(--ui-uploader-popup-width, 360px);
-    --_uploader-ok: var(--ui-green-text);
-    --_uploader-bad: var(--ui-red-text);
 
     display: block;
   }
@@ -74,11 +75,6 @@
     color: var(--_ui-uploader-icon-color);
   }
 
-  .limits {
-    color: var(--ui-text-muted);
-    font-size: 0.9em;
-  }
-
   .choose-slot {
     display: contents;
   }
@@ -106,24 +102,27 @@
     font-size: 0.9em;
   }
 
-  /* The rows */
-  .files {
+  /* The rows:  a `<ui-list>`, each `<ui-item>`'s box a grid */
+  .files::part(list) {
     display: grid;
     gap: var(--_ui-uploader-row-gap);
     margin: 12px 0 0;
     padding: 0;
-    list-style: none;
   }
-  .file {
+  .file::part(item) {
     display: grid;
     grid-template-columns: 20px minmax(0, 1fr) 72px minmax(96px, 220px) 32px;
     gap: 12px;
     align-items: center;
     min-height: var(--_ui-uploader-row-height);
     box-sizing: border-box;
+    margin: 0;
     padding: 4px 4px 4px 12px;
     border-radius: var(--ui-radius-l, 8px);
     box-shadow: 0 0 0 1px var(--ui-border-color, oklch(from var(--ui-ink) l c h / 0.12));
+  }
+  .file::part(item)::after {
+    content: none;
   }
   .glyph {
     color: var(--ui-text-muted);
@@ -133,23 +132,19 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .size {
-    color: var(--ui-text-muted);
+  /* a `<ui-text>` has no box of its own:  its `text` part is the grid's cell */
+  .size::part(text) {
     text-align: end;
     font-variant-numeric: tabular-nums;
   }
+  /* its icon on the words' line:  the list hands its items' icons a table cell of their own */
   .status {
-    display: inline-flex;
-    gap: 6px;
-    align-items: center;
+    --_ui-icon-owner-display: inline-flex;
+    --_ui-icon-owner-margin: 0 4px 0 0;
+    --_ui-icon-owner-align: -0.125em;
+  }
+  .status::part(text) {
     min-width: 0;
-  }
-  .status.ok {
-    color: var(--_uploader-ok);
-  }
-  .status.bad,
-  .turned-away-count {
-    color: var(--_uploader-bad);
   }
   .file ui-progress,
   .summary ui-progress {
@@ -180,36 +175,37 @@
     background: oklch(from var(--ui-ink) l c h / 0.08);
   }
 
-  /* the input look's rows, smaller, with no box each */
+  /* the input look's rows, smaller, with no box each;  the popup's, without Remove */
   .files.small {
-    gap: 4px;
-    margin-top: 8px;
     font-size: 0.9em;
   }
-  .files.small .file,
-  .files.popup .file {
+  .files.small::part(list) {
+    gap: 4px;
+    margin-top: 8px;
+  }
+  .files.popup::part(list) {
+    gap: 6px;
+    margin: 0;
+  }
+  .files.small .file::part(item),
+  .files.popup .file::part(item) {
     grid-template-columns: minmax(0, 1fr) 64px minmax(120px, max-content) 28px;
     min-height: 0;
     padding: 0;
     box-shadow: none;
   }
-  .files.popup {
-    gap: 6px;
-    margin: 0;
-  }
-  .files.popup .file {
+  .files.popup .file::part(item) {
     grid-template-columns: minmax(0, 1fr) 64px minmax(120px, max-content);
   }
 
-  /* the button look's popup */
+  /* the button look's popup:  hidden while its button is scrolled out of view, so it never comes loose */
+  ui-popup {
+    position-visibility: anchors-visible;
+  }
   .popup-rows {
     display: grid;
     gap: 6px;
     min-width: min(var(--_ui-uploader-popup-width), calc(100vw - 32px));
-  }
-  .popup-summary {
-    color: var(--ui-text-muted);
-    font-size: 0.9em;
   }
   :host(:state(button)) .choose {
     margin: 0;
@@ -244,27 +240,36 @@
     gap: 8px;
     border: var(--_ui-uploader-border-width) var(--_ui-uploader-border-style) var(--_ui-uploader-lit-color);
     border-radius: var(--_ui-uploader-radius);
-    background: color-mix(in oklab, var(--_ui-uploader-lit-color) 12%, var(--ui-background, Canvas) 80%);
+    /* opaque, so nothing under it (an example's code toggle) shows through */
+    background: color-mix(in oklab, var(--_ui-uploader-lit-color) 12%, var(--ui-background, Canvas));
     box-shadow: none;
   }
+  .zone ui-icon {
+    color: var(--_ui-uploader-lit-color);
+  }
 
-  /* at phone width:  the rows' status and progress under the name */
+  /* at phone width:  the rows' status and progress under the name, close to it;  the rows further apart */
   @media (--ui-mobile) {
-    .file {
+    .file::part(item) {
       grid-template-columns: 20px minmax(0, 1fr) auto 32px;
+      row-gap: 2px;
     }
-    .file > .status,
+    .file > .status::part(text),
     .file > ui-progress {
       grid-column: 2 / 4;
       grid-row: 2;
     }
-    .files.small .file,
-    .files.popup .file {
+    .files.small::part(list),
+    .files.popup::part(list) {
+      gap: 12px;
+    }
+    .files.small .file::part(item),
+    .files.popup .file::part(item) {
       grid-template-columns: minmax(0, 1fr) auto 28px;
     }
-    .files.small .file > .status,
+    .files.small .file > .status::part(text),
     .files.small .file > ui-progress,
-    .files.popup .file > .status,
+    .files.popup .file > .status::part(text),
     .files.popup .file > ui-progress {
       grid-column: 1 / 3;
     }

@@ -52,6 +52,12 @@ const SERVER_ROOT = pageServerRoot(REPO_ROOT)
 const SOLITAIRE = fixtureFolder("@spell/examples/Solitaire")
 
 /** Temp folder holding `tempProject()`s -- its REAL path:  on macOS `tmpdir()` is a symlink, and spell reports real paths. */
+/** The parser folder's tests:  its Clipboard test project, for `call native`. */
+const SPELL_PARSER_TESTS = resolve(
+  dirname(createRequire(import.meta.url).resolve("spell/package.json")),
+  "parser/tests"
+)
+
 const TEMP = realpathSync(mkdtempSync(resolve(tmpdir(), "spell-cli-")))
 afterAll(() => rmSync(TEMP, { recursive: true, force: true }))
 
@@ -229,6 +235,27 @@ describe("spell app serve", () => {
     busy.close()
     expect(status).toBe(2)
     expect(stderr).toContain(`Port ${port} is in use`)
+  })
+})
+
+describe("call native", () => {
+  // a project whose Spell calls its own code files (epic `from-console` P10):  the parser folder's Clipboard test project
+  test("runs as javascript and as Python, each calling its own code file", () => {
+    const clipboard = resolve(SPELL_PARSER_TESTS, "spell/natives/clipboard")
+    const folder = resolve(TEMP, "Clip")
+    mkdirSync(folder)
+    for (const name of ["clipboard.ts", "clipboard.py", "Clipboard.spell"]) {
+      writeFileSync(resolve(folder, name), readFileSync(resolve(clipboard, name), "utf8"))
+    }
+    writeFileSync(resolve(folder, "Program.spell"), 'copy "hello" to the clipboard\nprint shout "hi"\n')
+    const imports = ["/clipboard.ts", "/clipboard.py", "/Clipboard.spell", "/Program.spell"]
+    writeFileSync(
+      resolve(folder, SP.PROJECT_FILE),
+      JSON.stringify({ imports: imports.map((path) => ({ path, active: true })) })
+    )
+    // the program's top-level step that waits is held till the first draw:  its line comes last in javascript
+    expect(spell(["run"], folder).stdout).toBe("HI\ncopied hello\n")
+    expect(spell(["run", "--target", "py"], folder).stdout).toBe("copied hello\nHI\n")
   })
 })
 

@@ -1,6 +1,7 @@
-import { describe, expect, it, onTestFinished } from "vite-plus/test"
+import { describe, expect, it, onTestFinished, vi } from "vite-plus/test"
 import { userEvent } from "vite-plus/test/browser"
 
+import type { DOMInputElement } from "spell/ui/components/ui-input/UIInput"
 import type { DOMFormControl } from "spell/ui/elements"
 import { expectAccessible } from "spell/test-helpers/A11y"
 
@@ -231,6 +232,49 @@ describe("<ui-input> forms", () => {
     form.reset()
     await ElementFixture.tick()
     expect(new FormData(form).has("upload")).toBe(false)
+  })
+
+  it("a file input:  its element holds the files picked, and an empty value forgets them", async () => {
+    const { host, control } = await input(
+      `<ui-input type="file" multiple accept=".json" aria-label="Upload"></ui-input>`
+    )
+    const fileInput = host as unknown as DOMInputElement & Input
+    expect(control.accept).toBe(".json")
+    expect(control.multiple).toBe(true)
+    expect(control.webkitdirectory).toBe(false)
+    const changed = record(host, "ui-changed")
+    const transfer = new DataTransfer()
+    transfer.items.add(new File(["a"], "a.json"))
+    transfer.items.add(new File(["b"], "b.json"))
+    control.files = transfer.files
+    control.dispatchEvent(new Event("change", { bubbles: true }))
+    await ElementFixture.tick()
+    expect(changed).toHaveLength(1)
+    expect(fileInput.files.map((file) => file.name)).toEqual(["a.json", "b.json"])
+    fileInput.value = ""
+    await ElementFixture.tick()
+    expect(fileInput.files).toEqual([])
+    expect(control.value).toBe("")
+  })
+
+  it("a file input's `folder` picks folders;  `showPicker()` opens the native input's picker", async () => {
+    const { host, control } = await input(`<ui-input type="file" folder aria-label="Upload a folder"></ui-input>`)
+    expect(control.webkitdirectory).toBe(true)
+    host.removeAttribute("folder")
+    await ElementFixture.tick()
+    expect(control.webkitdirectory).toBe(false)
+    const opened: HTMLInputElement[] = []
+    const showPicker = vi.spyOn(HTMLInputElement.prototype, "showPicker").mockImplementation(function (
+      this: HTMLInputElement
+    ) {
+      opened.push(this)
+    })
+    onTestFinished(() => showPicker.mockRestore())
+    ;(host as unknown as DOMInputElement).showPicker()
+    expect(opened).toEqual([control])
+    // `folder` means nothing on a text input
+    const text = await input(`<ui-input folder aria-label="Name"></ui-input>`)
+    expect(text.control.hasAttribute("webkitdirectory")).toBe(false)
   })
 
   it("Enter submits the form (implicit submission);  a textarea's Enter types a newline", async () => {

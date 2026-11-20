@@ -5,6 +5,7 @@ import { describe, expect, test } from "vite-plus/test"
 import { DefaultsTable } from "spell/ui/tools/DefaultsTable"
 import { DEFAULTS_TABLE } from "spell/ui/vocabulary/defaults.generated"
 import { HELP_TABLE, SHARED_HELP } from "spell/ui/vocabulary/help.generated"
+import { HOOKS_TABLE } from "spell/ui/vocabulary/hooks.generated"
 import { PARTS_OF_SPEECH } from "spell/ui/vocabulary/partsOfSpeech.generated"
 
 /** Spell UI's folder. */
@@ -24,6 +25,16 @@ describe("DefaultsTable.output()", () => {
   test("its parts of speech are current too (else run `yarn site:data`)", async () => {
     const [file, text] = await DefaultsTable.partsOfSpeechOutput(UI, `${UI}src/components`)
     expect(readFileSync(file, "utf8") === text, file).toBe(true)
+  })
+
+  test("its hooks are current too (else run `yarn site:data`)", async () => {
+    const [file, text] = await DefaultsTable.hooksOutput(UI, `${UI}src/components`)
+    expect(readFileSync(file, "utf8") === text, file).toBe(true)
+  })
+
+  test("...each tag's hooks and their words (epic `from-console` P11):  `<ui-tree>`'s `rowClass`", () => {
+    expect(HOOKS_TABLE["ui-tree"]).toEqual([{ name: "rowClass", words: "give the row class of (an item)" }])
+    expect(HOOKS_TABLE["ui-button"]).toBeUndefined()
   })
 
   test("...each tag's band colour, as its vocabulary says (epic `language` T124)", () => {

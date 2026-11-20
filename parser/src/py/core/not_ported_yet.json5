@@ -75,6 +75,7 @@
         "listShown",
         "useElement",
         "elementClassOf",
+        "uiElementOf",
         "css"
       ]
     },

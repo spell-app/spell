@@ -393,7 +393,7 @@ each explorer reads something the program or its compile left behind.
 - The **Type Explorer** reads the project's scope pack, `<Project>.scopes.js`.
   - In a `<spell-viewer>` it's read-only, and a link in it sends `spell-open`.
   - The editor shows none:  its Reference tab reads the same tree from the language service in the page, which has
-    the parser at hand ([the Program panel](#run-and-edit--the-app-and-the-program-panel)).
+    the parser at hand ([the Program panel](#run-edit-and-design--the-app-and-the-program-panel)).
   - Who writes the packs, and what's in one:
     [scope packs](README-lsp.md#scope-packs--the-type-explorer-without-a-parser).
 
@@ -680,14 +680,27 @@ Click a line of the code, a line of compiled code, a row of the Views tree or a 
 
 `P.SourceMapLines` reads the one map back, and `editor.followed` holds the place in focus.
 
-### Run and Edit:  the app, and the Program panel
+### Run, Edit and Design:  the app, and the Program panel
 
-The top bar's Run | Edit buttons pick how much of the editor shows:
+The top bar's Run | Edit | Design | Site tabs pick how much of the editor shows:
 
 | Mode | What shows |
 | --- | --- |
 | Run | the app alone, the whole window:  the same page without its code column, `/run/<address>` |
 | Edit | the code on the left, the app to its right;  the Program panel under the code, while it shows |
+| Design | the code on the left, then one bit of a view drawn large on its own, picked from a list:  a drawing (`to draw its front`), its property editor, or a site's page;  `/design/<address>` |
+| Site | a site's pages, as a board of cards, and the picked page's form;  only for a site, `/site/<project>` |
+
+- Design (epic `editor` P37, [Design.tsx](src/app/solid/Design.tsx)) shows for a project with a view or a site.
+  - It opens on the drawing the code's cursor is in, else the bit last picked for the file.
+  - What it draws takes the palette's drops, moves, cut, copy and paste, written into the view's file or its
+    property editor's (`Card.editor.spell`).
+  - A page picked shows in the app itself, the site going to it;  Site's page form has Design too.
+  - Its Gallery (epic `editor` P38) draws a view's samples side by side:  the ones saved in `Card.samples.spell`,
+    beside `Card.spell`, else ones made from its choices (each suit, face up and down).
+    Save Sample names the selected one and writes it there, one step Undo takes back.
+  - Its sizes, under the list:  Fit, Phone, Tablet, Desktop (Spell UI's `<ui-device>`, with its own Rotate), or a
+    width you type;  a site's page takes the size as the app's width.
 
 - Run is a page of its own, with its own address.
 - A phone only runs:  no Edit, for now.
@@ -724,7 +737,7 @@ The top bar, left to right ([MenuBar.tsx](src/app/solid/MenuBar.tsx)):
 - File · Edit · View · Run · Help, each item showing its key
   - File:  New Spell File (⌥⌘N:  ⌘N is the browser's New Window), New CSS File, ─, Save, AutoSave, ─,
     Duplicate File, Revert Changes to the file
-- Run | Edit, in the middle, then in Edit the code's `</>`, the compiled code's button (its language's icon),
+- Run | Edit | Design | Site, in the middle, then in Edit and Design the code's `</>`, the compiled code's button (its language's icon),
   Inspect app's crosshairs and the `+` that adds a part
 - at the right, one group of icons:  Restart, the theme menu, a palette, and you, as an avatar
   - no Inspector button:  View › Inspector shows or hides it

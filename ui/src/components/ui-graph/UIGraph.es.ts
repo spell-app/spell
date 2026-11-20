@@ -34,5 +34,11 @@ export const graphEs = {
     graphFit: "Ajustar",
     graphTop: "Inicio",
     graphLoading: "Cargando …"
+  },
+  hooks: {
+    nodeLabel: "dar la etiqueta de (un nodo)",
+    nodeClass: "dar la clase de (un nodo)",
+    edgeLabel: "dar la etiqueta de (una arista)",
+    edgeClass: "dar la clase de (una arista)"
   }
 } as const satisfies E.TagDictionary

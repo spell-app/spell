@@ -1,7 +1,7 @@
 # The `epic` command
 
 ```sh
-epic summary readme
+epic summary readme --all
 ```
 
 <details>
@@ -30,6 +30,11 @@ open issues:
 The plan for the pages you're reading came back in about a second:
 sixteen phases, `[x]` for each one done (a phase under way shows `[~]`), and the loose ends.
 P11 is the rewrite this page came out of.
+
+Without `--all`, `summary` lists only what's left:
+the done phases are one line, `16 phases done`, and the items the page shows grey (limits, ones handled in a phase)
+are a count at the end.
+That's what Claude reads when it picks an epic back up.
 
 `epic` read that from one HTML file, the epic page, in a git repo beside the checkout.
 It reads and writes the page directly:  no database, no API, no server that has to be up.
@@ -309,10 +314,10 @@ Every verb here only reads, but `create`, `rename`, `complete`, `delete`, `stage
 | `epic stage <epic> overview \| phases \| building` | sets the page's stage, which decides what it shows:  `overview` (the Overview, Questions and Todos), `phases` (the Phases and Issues too) or `building` (everything);  a new epic starts in `overview`, a page with none reads as `building` |
 | `epic change <epic> [--for <item>]` | stamps the change marks written by hand (`<epic-change item="q13">words</epic-change>`) with their id, time, answer and the words they replaced, then lists them;  `--for`:  the item of the marks that name none;  any epic edit stamps them too |
 | `epic list [--json]` | lists every epic once:  in progress, future or done, where it runs, and how many of its items you haven't reviewed |
-| `epic summary <epic> [--json]` | prints an epic's phases, the next one, and its open questions, judgement calls, issues, todos, limits and manual tests |
+| `epic summary <epic> [--json] [--all]` | prints an epic's phases left, the next one, and its open questions, judgement calls, issues, todos and manual tests;  the done phases and the grey items (limits, ones handled in a phase) are only counted (`done`, `quiet` in the JSON), unless `--all` |
 | `epic stale <epic> [--json]` | the facts for judging which open calls, issues and todos have gone stale:  age from when each was written, phase, whether the files and names it mentions still exist (in its worktree or on `main`;  only what git's history has can be gone), commits since, later mentions, the todo made to follow it up, the done phases it says it waits for, its status cards;  decides nothing (`/epic tidy`).  `--underway`:  the open items whose Underway card is older than `--hours` (3), and whether their work is on `main`;  `--apply`:  on `main`, fixed for your review, else a Stale card, once;  never closes anything |
-| `epic summaries <page.html> ...` | prints `summary --json` for each page, by path, worktrees' too:  what `/epics` reads |
-| `epic items <epic>` | prints what a review walks:  sections, counts, items, the queue;  `--section issues`, `--filter unreviewed \| open \| reviewed \| queued \| all`, `--json`;  `--spec <file>`:  a review's item picker, as a details page's questions |
+| `epic summaries <page.html> ... [--all]` | prints `summary --json` for each page, by path, worktrees' too:  what `/epics` reads |
+| `epic items <epic>` | prints what a review walks:  sections, counts, items, the queue;  `--section issues`, `--filter unreviewed \| open \| reviewed \| queued \| all`, `--json`;  grey items (limits, handled) are counted, listed with `--all`;  `--spec <file>`:  a review's item picker, as a details page's questions |
 | `epic docs <epic> [--json]` | lists the docs an epic wrote besides its page (its guide, what its commits changed, docs that name it) and its changelog entry:  what `/docs-check` reads |
 | `epic decisions <epic> [--json]` | prints what a page settled:  phases' Done and Updated notes, items' answers and chosen options |
 | `epic owns <path> ... [--json]` | prints which open epics own each file, a path from the checkout's root:  their branch changes it (`branch`), or their page names it (`plan`);  each with its stage, `planning` or `building`;  `--` for a file no open epic owns:  what `/coherence` reads to land a finding in its epic |
@@ -654,7 +659,7 @@ Every key of the config file, and what `epic init` writes:  [README-config.md](R
 | --- | --- |
 | `epic config [<key>]` | prints where this repo keeps its epic things, from `.epic/config.json5`:  one value, or all of them (`--json`);  folders print absolute |
 | `epic settings [<key>] [--json]` | prints how the epic tooling behaves for you, each value and the file that set it:  three files named `epic_settings.json5`, merged key by key, the later winning:  the kit's own, the epic repo's root (your team's, optional), and `~/.spell/` (yours, optional);  a file that won't read, or a bad value, is said on stderr, and the layer below stands |
-| `epic init` | sets a repo up for epics, the one command to start (`npx spell@next epic init` before anything is installed):  the plugin, its config file, the epic folder beside it, the team's epic repo on GitHub or GitLab (made, private unless `--public`, or cloned when the config names one), the links and their `.gitignore` lines, your name and colour, the config and `.gitignore` committed on the base branch (asked first), then the epic server;  `--name <name>`, `--color <colour>`, `--content-repo <name>`, `--remote <address>`, `--no-remote`, `--host github|gitlab` (where the code is hosted, for an address that doesn't say:  [On GitLab](README-setup.md#on-gitlab)), `--protected-base` ([main takes only pull requests](README-setup.md#when-main-takes-only-pull-requests)), `--public`, `--install "<command>"`, `--local` ([nothing in your repo](README-setup.md#nothing-in-your-repo)), `--superpowers` (its stand-aside words in `AGENTS.md`, without asking), `--no-plugin`, `--no-commit`, `--no-server`, `--json`;  `--dry-run` first;  `--demo` shows it as someone new sees it, every question asked, changing nothing, in any folder;  safe to run again |
+| `epic init` | sets a repo up for epics, the one command to start (`npx spell@next epic init` before anything is installed):  the plugin, its config file, the epic folder beside it, the team's epic repo on GitHub or GitLab (made, private unless `--public`, or cloned when the config names one), the links and their `.gitignore` lines, your name and colour, the config and `.gitignore` committed on the base branch (asked first), then the epic server;  `--name <name>`, `--color <colour>`, `--content-repo <name>`, `--remote <address>`, `--no-remote`, `--host github|gitlab` (where the code is hosted, for an address that doesn't say:  [On GitLab](README-setup.md#on-gitlab)), `--protected-base` ([main takes only pull requests](README-setup.md#when-main-takes-only-pull-requests)), `--public`, `--install "<command>"`, `--local` ([nothing in your repo](README-setup.md#nothing-in-your-repo)), `--superpowers` (its stand-aside words in `AGENTS.md`, without asking), `--house-style` / `--no-house-style` (a starter house style, `.epic/house-style.md`, named as the `code` voice:  [Your house style](README-config.md#your-house-style)), `--no-plugin`, `--no-commit`, `--no-server`, `--json`;  `--dry-run` first;  `--demo` shows it as someone new sees it, every question asked, changing nothing, in any folder;  safe to run again |
 | `epic whoami [<name>]` | prints who you are on the epics:  your short name (kept, else your GitHub login, else git's `user.name`), your full name, and the agent running it;  with a name, keeps it;  `--rename [--dry-run]` also writes it over your old one on every page, part and comments file, wherever it says who wrote something;  `--json` |
 | `epic whois <name>` | what the pages say about someone:  their replies and comments, by place, and when last;  `--json` |
 | `epic plugin install` | installs the epic plugin in Claude Code as `epic@spell`, run in place from the kit's `epic/`:  the old `spell-epic@spell-epic` taken out, the marketplace `spell` added from the kit's main checkout, the cache, every skill and `~/.local/bin/epic` linked to it;  `--kit <folder>` names another checkout;  `--dry-run` first;  safe to run again, then `/reload-plugins`.  `--codex`:  for Codex instead, its end-of-turn and session-start hooks in `~/.codex/hooks.json` (`$CODEX_HOME`), your own hooks there kept, every skill linked in `~/.agents/skills/`, the designer, coherence and plan-check reviewers as Codex agents in `~/.codex/agents/`, and `epic` on your `PATH`;  then trust them in Codex's `/hooks` |

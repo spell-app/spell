@@ -14,6 +14,7 @@ import { fromTemplate } from "spell/epic/tools/pages.js"
 import {
   CardText,
   OPEN_KINDS,
+  QUIET_STATES,
   PlanDocError,
   REVIEW_SECTIONS,
   ShortTitle,
@@ -23,7 +24,9 @@ import {
   type CommitHistory,
   type Phase,
   type PhaseTimer,
-  type PlanSummary
+  type PlanSummary,
+  type ReviewSection,
+  type SummaryScope
 } from "./planDoc.types"
 
 import { BedtimeAll } from "./BedtimeAll"
@@ -34,6 +37,7 @@ import { EpicOwners, type PathOwners } from "./EpicOwners"
 import { EpicParts } from "./EpicParts"
 import { EpicTargets } from "./EpicTargets"
 import { FocusCommands } from "./FocusCommands"
+import { FreshCommands } from "./FreshCommands"
 import { InboxCommands } from "./InboxCommands"
 import { ItemPicker } from "./ItemPicker"
 import { ItemPictures, type PastedReader } from "./ItemPictures"
@@ -62,7 +66,7 @@ import { TestCommands } from "./TestCommands"
  * Used by the `/epic` skill and its agents.
  * - what's data:  `PLAN-DOC.md` beside this;  the elements:  `spell/epic/definitions`
  * - Commands:  `create`, `add-phase`, `phase`, `rename`, `estimate`, `add`, `calm`, `failed`, `decide`, `choose`, `option`, `close`, `stale`,
- *   `cancel`, `reopen`, `commit`, `commits`, `log`, `bedtime`, `focus`, `prompt`, `summary`, `docs`, `decisions`,
+ *   `cancel`, `reopen`, `commit`, `commits`, `log`, `bedtime`, `focus`, `fresh`, `prompt`, `summary`, `docs`, `decisions`,
  *   `owns`, `lint`, `open`, `migrate`, `split`, `join`, `inbox`, `details`, `summarize`, `status`, `original`
  *   (with no command, `yarn plan-doc` in spell-epic lists them:  `USAGE`).
  * - `docs`, `decisions` (`EpicDocs`, for `/docs-check`):
@@ -113,6 +117,8 @@ export class PlanDocCommands {
 
   /** the `focus` command (epic `epic-engine` T93):  focus mode, and what each running epic session is told */
   readonly focus: FocusCommands
+  /** the `fresh` command (epic `epic-engine` T113):  `/epic fresh all`, every running epic session handed on */
+  readonly fresh: FreshCommands
 
   /**
    * how long Claude worked on a phase while it was active, in minutes (`phase ... done`, `phase ... took`;  epic
@@ -148,6 +154,7 @@ export class PlanDocCommands {
     this.tests = new TestCommands(this)
     this.options = new OptionCommands(this)
     this.focus = new FocusCommands(this)
+    this.fresh = new FreshCommands(this)
   }
 
   ////////////////
@@ -173,7 +180,7 @@ export class PlanDocCommands {
 
   /** Run one command;  resolves to its exit code, `undefined` for 0. */
   private async main(argv: string[]): Promise<number | void> {
-    const { positional, flags, lists } = parseVerbArgs(argv)
+    const { positional, flags, lists } = parseVerbArgs(argv, SWITCHES)
     const [command, name, ...rest] = positional
     if (command === "list") return this.printEpics(this.files.listEpics(), Boolean(flags.json))
     // `bedtime all ...` and `bedtime status`:  every epic at once, not one page (`BedtimeAll`, epic `epic-engine` T85)
@@ -181,6 +188,8 @@ export class PlanDocCommands {
       return this.bedtimeAll(name === "status" ? ["status", ...rest] : rest, flags)
     // `focus on | off | status | summary`:  every running epic at once (`FocusCommands`, epic `epic-engine` T93)
     if (command === "focus") return this.focus.run(positional.slice(1), flags)
+    // `fresh all | status | drop`:  every running epic session to a fresh one (`FreshCommands`, epic `epic-engine` T113)
+    if (command === "fresh") return this.fresh.run(positional.slice(1), flags)
     if (command === "backfill") return this.backfill(name, flags)
     if (command === "migrate") return this.migrator.run(positional.slice(1), flags)
     // `saga page`:  a saga's page (`SagaPage`);  every other `saga` verb is the list's (`SagaCommands`)
@@ -191,7 +200,7 @@ export class PlanDocCommands {
     // `commits remap <map...> --repo <old repo>`:  every epic page's commits, not one page's (epic-engine's P49)
     if (command === "commits" && name === "remap") return this.remapCommits(rest, flags)
     if (!command || !name) return this.usage()
-    if (command === "summaries") return this.printSummaries(positional.slice(1))
+    if (command === "summaries") return this.printSummaries(positional.slice(1), summaryScope(flags))
     if (command === "owns")
       return this.printOwners(new EpicOwners({ files: this.files }).find(positional.slice(1)), Boolean(flags.json))
     // the shared doc, by THIS checkout's path (`findDoc()`);
@@ -478,7 +487,7 @@ export class PlanDocCommands {
       case "join":
         return this.joinDoc(file)
       case "summary":
-        return this.printSummary(this.read(file).summary(), Boolean(flags.json))
+        return this.printSummary(file, summaryScope(flags), Boolean(flags.json))
       case "docs":
         return this.printDocs(new EpicDocs({ files: this.files, name }).find(), Boolean(flags.json))
       case "decisions":
@@ -1423,7 +1432,6 @@ export class PlanDocCommands {
     this.print(lines.join("\n"))
   }
 
-  /** `summary`:  bullets for a reply (or JSON for a script). */
   /**
    * `log <name> [--last <n>]`:  the newest `n` review lines of the log (default `LOG_LAST`), newest last,
    * `2026-10-29 08:59  Q56 answered:  ...`.
@@ -1436,9 +1444,18 @@ export class PlanDocCommands {
     for (const { at, text } of this.read(file).reviewLines().slice(-count)) this.print(`${at}  ${text}`)
   }
 
-  private printSummary(summary: PlanSummary, json: boolean): void {
+  /**
+   * `summary`:  bullets for a reply (or JSON for a script).
+   * - scope `open` (the default;  `--all` for `all`):  finished phases and grey items are a count line each,
+   *   `84 phases done`, `27 grey items left out` (epic `epic-engine` T111)
+   */
+  private printSummary(file: string, scope: SummaryScope, json: boolean): void {
+    const summary = this.read(file).summary(scope)
     if (json) return this.print(JSON.stringify(summary, null, 2))
     const lines = [`${summary.title}`]
+    const isOpenOnly = scope === "open"
+    if (isOpenOnly && summary.done)
+      lines.push(`  ${summary.done} phase${summary.done === 1 ? "" : "s"} done  (--all lists them)`)
     for (const phase of summary.phases) {
       const mark = PHASE_MARKS[phase.status as keyof typeof PHASE_MARKS] ?? "[?]"
       // done and timed:  what it took, over how long by the clock, against its estimate (epic `epic-engine` P41, I127)
@@ -1461,6 +1478,8 @@ export class PlanDocCommands {
       lines.push(`open ${kind}s:`)
       for (const item of open) lines.push(`  - ${item.id.toUpperCase()}  ${item.title}`)
     }
+    if (isOpenOnly && summary.quiet)
+      lines.push(`${summary.quiet} grey item${summary.quiet === 1 ? "" : "s"} left out:  limits, handled  (--all)`)
     this.print(lines.join("\n"))
   }
 
@@ -1538,9 +1557,13 @@ export class PlanDocCommands {
    * - `--section <kind or label>`:  that section only
    * - `--json`:  `{ file, status, sections }`
    * - `--spec <file>`:  the review's item picker instead (`ItemPicker.spec()`), written to that file
+   * - grey items (`QUIET_STATES`:  limits, handled, canceled) left out, counted in each section's `quiet`,
+   *   unless `--all` (epic `epic-engine` T111);  never from the picker
    */
-  private printItems(plan: PlanReader, file: string, { section, filter = "unreviewed", json, spec }: Flags): void {
+  private printItems(plan: PlanReader, file: string, flags: Flags): void {
+    const { section, filter = "unreviewed", json, spec } = flags
     let sections = plan.reviewSections({ filter: spec ? "open" : (filter as string) })
+    if (!spec && summaryScope(flags) === "open") sections = sections.map(withoutQuiet)
     if (section) {
       const wanted = String(section).toLowerCase().replace(/s$/, "")
       sections = sections.filter((s) => s.kind === wanted || s.label.toLowerCase().replace(/s$/, "") === wanted)
@@ -1567,7 +1590,8 @@ export class PlanDocCommands {
     }
     for (const s of sections) {
       if (!s.total) continue
-      lines.push(`${s.label} · ${s.notReviewed}/${s.total} not reviewed  (showing:  ${filter})`)
+      const quiet = s.quiet ? `;  ${s.quiet} grey left out, --all` : ""
+      lines.push(`${s.label} · ${s.notReviewed}/${s.total} not reviewed  (showing:  ${filter}${quiet})`)
       for (const item of s.items) {
         const mark =
           item.state === "deferred" ? `  (deferred ${item.deferred})` : item.state === "queued" ? "  (to do)" : ""
@@ -1583,11 +1607,11 @@ export class PlanDocCommands {
    * - one run for every epic
    * - a doc that won't read gets `{ error }`, and the rest still print
    */
-  private printSummaries(files: string[]): void {
+  private printSummaries(files: string[], scope: SummaryScope): void {
     const found: Record<string, PlanSummary | { error: string }> = {}
     for (const file of files) {
       try {
-        found[file] = this.read(resolve(file)).summary()
+        found[file] = this.read(resolve(file)).summary(scope)
       } catch (error) {
         if (!(error instanceof PlanDocError)) throw error
         found[file] = { error: error.message }
@@ -1773,8 +1797,12 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
   focus on [--why "..."] | off | status | summary [<name>] [--since <t>] [--json]
                                                    focus mode (/focus, /back):  on and off print a TELL: line for
                                                    each running epic session;  summary:  what happened since
+  fresh all | status | drop [<session id>] [--json]
+                                                   /epic fresh all:  every running epic session marked to go to
+                                                   a fresh session at its next clear moment;  TELL: lines
   prompt <name> "text" | --file path               set the prompt that started the plan ("" removes it)
-  summary <name> [--json]                          open questions, issues, todos, limits, manual tests;  the next phase
+  summary <name> [--json] [--all]                  open questions, issues, todos, limits, manual tests;  the next phase;
+                                                   finished phases and grey items only counted, unless --all
   docs <name> [--json]                             the docs the epic wrote besides its epic page:  its
                                                    guide, what its commits changed (wrote), docs that name it
                                                    (related), docs it only links to (linked);  its
@@ -1789,14 +1817,15 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
   review <name> <id> ["outcome"]                   mark an item reviewed today;  the outcome goes in the log
   defer <name> <id>                                put an item off:  still not reviewed, dated
   queue <name> <id> "work"  /  unqueue <name> <id> work a review decided on, waiting  /  started or dropped
-  items <name> [--section issues] [--filter unreviewed|open|reviewed|queued|all] [--json]
-                                                   what a review walks:  sections, counts, items, the queue
+  items <name> [--section issues] [--filter unreviewed|open|reviewed|queued|all] [--json] [--all]
+                                                   what a review walks:  sections, counts, items, the queue;
+                                                   grey items (limits, handled) counted, listed with --all
   items <name> --section issues --spec <file>      the review's item picker, a details page spec:
                                                    \`epic ask create <slug> --from <file>\`
   list [--json]                                    every epic:  status, where it runs, not reviewed / all
   backfill <name> | --all [--apply]                items you already went through, from past sessions;
                                                    a dry run unless --apply (review-backfill.js)
-  summaries <file.html> ...                        \`summary --json\` of each doc, by path (worktrees' too):
+  summaries <file.html> ... [--all]                \`summary --json\` of each doc, by path (worktrees' too):
                                                    JSON \`{ <file>: summary | { error } }\`;  for \`/epics\`
   lint <name> [--no-browser] [--links]             ids, #id links, phases, parts (a split doc whole);  its
                                                    links (doc-links, SAGA:/ and <epic-link>), failing
@@ -1876,13 +1905,16 @@ Every checkout shares ONE copy of each doc (the epics link):  any checkout edits
 Every command reads <epic-*> markup only, and refuses a doc in the old markup (one restored from an old backup).
 --here is no longer needed:  accepted and ignored.`
 
-/** `summary`'s mark for a phase's status. */
 /** Where `commits --backfill` says a commit's Log entry went. */
 const LOG_LABEL = "Log"
 
 /** How many review lines `log <name>` prints with no `--last`. */
 const LOG_LAST = 20
 
+/** Flags that never take a value, so `epic summary --all seo` keeps `seo` as the epic. */
+const SWITCHES = ["all", "json"]
+
+/** `summary`'s mark for a phase's status. */
 const PHASE_MARKS = { todo: "[ ]", active: "[~]", done: "[x]", dropped: "[-]" }
 
 /** How often `bedtime all spec --wait` looks for the questions still to come. */
@@ -1968,6 +2000,17 @@ function failTest(plan: PlanDoc, id: string, issue: string | undefined): string 
   const line = `${label} failed -> ${filed.toUpperCase()}:  ${title}`
   plan.log(line)
   return line
+}
+
+/** `section` without its grey items (`QUIET_STATES`), counted in its `quiet` (`epic items` without `--all`). */
+function withoutQuiet(section: ReviewSection): ReviewSection {
+  const items = section.items.filter((item) => !QUIET_STATES.includes(item.docState))
+  return { ...section, items, quiet: section.items.length - items.length }
+}
+
+/** `summary`, `summaries` and `items`' scope:  `--all` lists finished phases and grey items too (epic `epic-engine` T111). */
+function summaryScope(flags: Flags): SummaryScope {
+  return flags.all ? "all" : "open"
 }
 
 /** `value`, or a usage error naming what's missing, and where the usage is. */

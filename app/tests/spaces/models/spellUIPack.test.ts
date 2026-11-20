@@ -28,6 +28,36 @@ describe("SPELL_UI_PACK", () => {
     expect(file!.compiled).toContain('h("ui-button", "Go")')
   })
 
+  test("a type built on one of its tags (epic `from-console` P11):  its attributes and hooks, in each language", () => {
+    const tree = SPACES.SPELL_UI_PACK.viewBaseFor!("tree", "en")!
+    expect(tree.tag).toBe("ui-tree")
+    expect(tree.attributes).toContainEqual({ name: "appearance", values: ["nav", "columns"] })
+    expect(tree.hooks).toEqual([{ name: "rowClass", words: "give the row class of (an item)" }])
+    const arbol = SPACES.SPELL_UI_PACK.viewBaseFor!("árbol", "es")!
+    expect(arbol.tag).toBe("ui-tree")
+    expect(arbol.attributes).toContainEqual({
+      name: "apariencia",
+      output: "appearance",
+      values: ["navegacion", "columnas"],
+      valueOutputs: { navegacion: "nav", columnas: "columns" }
+    })
+    expect(arbol.hooks).toEqual([{ name: "rowClass", words: "dar la clase de fila de (un elemento)" }])
+    expect(SPACES.SPELL_UI_PACK.viewBaseFor!("frobnicator", "en")).toBeUndefined()
+  })
+
+  test("so a Spell type is built on <ui-tree>, overriding its hook:  `a ui tree view`", () => {
+    const contents = [
+      'a "netlist column" is a ui tree view',
+      "	its appearance is columns",
+      "	to give the row class of (an item)",
+      '		return "port"'
+    ].join("\n")
+    const [file] = parseSpellProject([{ path: "/Harbor.spell", contents }]).files
+    expect(file!.errors).toEqual([])
+    expect(file!.compiled).toContain('static uiElement = "ui-tree"')
+    expect(file!.compiled).toContain("rowClass(item) {")
+  })
+
   test("<acción> takes Spell UI's Spanish names, as a Spanish ui-* tag does:  the same button as English's (P53)", () => {
     expect(
       SPACES.SPELL_UI_PACK.readAttribute!({ tag: "ui-button", attribute: "tamano", value: "pequeño" }, "es")

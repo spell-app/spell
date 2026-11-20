@@ -527,6 +527,37 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     }
   ],
 
+  fresh: [
+    {
+      name: "status",
+      usage: "[--json]",
+      description: "the sessions still waiting to go fresh (/epic fresh all), and why each waits (the default verb)",
+      example: "epic fresh status",
+      flags: {
+        "--json": "print them as JSON"
+      }
+    },
+    {
+      name: "all",
+      usage: "[--json]",
+      description:
+        "/epic fresh all:  every running epic session marked to go to a fresh session at its next clear moment " +
+        "(no agents running, no question waiting, no prompt in the last 5 minutes), this one last;  a TELL: line " +
+        "for each, and which go now and which later",
+      example: "epic fresh all",
+      flags: {
+        "--json": "print the round, the lines and each session's state as JSON"
+      }
+    },
+    {
+      name: "drop",
+      usage: "[<session id>]",
+      description: "a session no longer waits to go fresh, this one by default:  its epic window fresh was refused",
+      example: "epic fresh drop",
+      flags: {}
+    }
+  ],
+
   ////////////////
   // ## Worktrees, sessions, parked work, the epic repo:  this folder's classes
   ////////////////
@@ -913,6 +944,17 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       flags: {
         "--back": "back to the window it came from",
         "--prompt <text>": "what's typed into it there"
+      }
+    },
+    {
+      name: "fresh",
+      usage: "<epic> [--force]",
+      description:
+        "hand <epic> to a NEW session in this window when this turn ends, /epic resume <epic> typed in, this tab " +
+        "closed (/epic fresh);  refused while the epic's agents run",
+      example: "epic window fresh seo",
+      flags: {
+        "--force": "even with the epic's agents running (closing this tab cuts them off)"
       }
     },
     {
@@ -1334,7 +1376,8 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
  *   `hub` (`Hub`), `repo` (`Repos`), `turns` (`Turns`), `turn` (`TurnEnd`), `skills` (`SkillsCheck`),
  *   `plugin` (`PluginInstall`)
  * - the docs pages' tools:  `pages` (`EpicTools.runPages()`)
- * - the `epic` tool's, every epic at once:  `focus` (`FocusCommands`, epic `epic-engine` T93)
+ * - the `epic` tool's, every epic at once:  `focus` (`FocusCommands`, epic `epic-engine` T93), `fresh`
+ *   (`FreshCommands`, T113)
  * - the staged demo:  `demo` (`StagedDemo`, epic `epic-engine` P77)
  */
 export type GroupName =
@@ -1345,6 +1388,7 @@ export type GroupName =
   | "agents"
   | "airplane"
   | "focus"
+  | "fresh"
   | "demo"
   | "worktree"
   | "session"
@@ -1428,7 +1472,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   delete: {},
   change: { "--for <item>": "the item of the change marks that name none" },
   list: { "--json": "print them as JSON" },
-  summary: { "--json": "print it as JSON" },
+  summary: { "--json": "print it as JSON", "--all": "list finished phases and grey items too, not only counted" },
   stale: {
     "--json": "print them as JSON",
     "--underway": "the open items whose Underway card went stale, and whether their work is on main (T78)",
@@ -1436,11 +1480,12 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--hours <n>": "with --underway:  how old an Underway card must be (default 3)",
     "--quiet": "with --apply:  say nothing when nothing changed"
   },
-  summaries: {},
+  summaries: { "--all": "every phase and grey item, as summary --all" },
   items: {
     "--section <section>": "only that section:  questions, judgements, todos, issues or tests",
     "--filter <filter>": "unreviewed (the default), open, reviewed, queued or all",
     "--json": "print them as JSON",
+    "--all": "grey items too (limits, handled, canceled):  left out and counted without it",
     "--spec <file>": "write the review's item picker there:  a details page's questions"
   },
   docs: { "--json": "print them as JSON" },
