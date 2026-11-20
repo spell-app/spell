@@ -23,6 +23,7 @@ import { PassEvent } from "./PassEvent"
 import { CancelEvent } from "./CancelEvent"
 import { InputState } from "./InputState"
 import { WhileHandler } from "./WhileHandler"
+import { FileUploadHandler, UPLOAD_MOMENTS, WhenUploading } from "./Uploading"
 
 /** `on`, preferred for a property's change:  `on its score change` names the property, not event `its-score-change`. */
 const ON_CHANGE = On.specialize({ priority: Priority.preferred })
@@ -468,6 +469,23 @@ events.addRule(WhenMedia, {
       ]
     }
   ]
+})
+
+// a view's `<ui-uploader>` (epic `language` P67, r32;  OK'd in epic `from-console` Q14):  before it posts, while, and
+// after each file;  `cancel uploading` is `cancel_event`'s.  Above an event of the same words (`Priority.specific`)
+events.addRule(WhenUploading, {
+  syntax: "when uploading (:|,)? {statement_body}?",
+  tests: [{ compileAs: "block", tests: [["when uploading", 'on("uploading")']] }]
+})
+events.addRule(Wording.specialize({ ruleName: "upload_moment", meanings: UPLOAD_MOMENTS }), {
+  syntax: "((uploaded:is uploaded)|(fails_to_upload:fails to upload|is not uploaded))"
+})
+events.addRule(FileUploadHandler, {
+  roles: { band: "action", moment: "declaration" },
+  syntax: "when (a|an|the)? file {moment:upload_moment} (:|,)? {statement_body}?"
+})
+events.addRule(WhileHandler.specialize({ handler: "while_uploading" }), {
+  syntax: "while uploading (:|,)? {statement_body}?"
 })
 
 // `when flipped:`, the same as `on flipped:` (Q42:  `on` or `when`, either, for an event);

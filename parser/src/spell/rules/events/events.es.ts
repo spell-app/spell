@@ -23,6 +23,7 @@ import { PassEvent } from "./PassEvent"
 import { CancelEvent } from "./CancelEvent"
 import { InputState } from "./InputState"
 import { WhileHandler } from "./WhileHandler"
+import { FileUploadHandler, UPLOAD_MOMENTS, WhenUploading } from "./Uploading"
 
 /** Spanish's `events` rules. */
 export const eventsEs = new SpellParser({ module: "events" })
@@ -87,6 +88,8 @@ eventsEs.addRule(Send, {
 // las palabras de un manejador:  `pasar evento`, `cancelar evento`, `el remitente`, `el destino`, `el destino original`
 eventsEs.addRule(PassEvent, { syntax: "pasar (el? evento|{eventName:keyword}|{eventName:event_words})" })
 eventsEs.addRule(CancelEvent, { syntax: "cancelar (el? evento|{eventName:keyword}|{eventName:event_words})" })
+// `cancel uploading`, en `al subir:` (épica `language` P67)
+eventsEs.addRule(CancelEvent, { syntax: "cancelar la subida" })
 eventsEs.addRule(EventPart.specialize({ reads: "originalTarget" }), { syntax: "el destino original" })
 eventsEs.addRule(EventPart.specialize({ reads: "sender" }), { syntax: "el? remitente" })
 eventsEs.addRule(EventPart.specialize({ reads: "target" }), { syntax: "el? destino" })
@@ -388,6 +391,20 @@ eventsEs.addRule(WhenMedia, {
 })
 
 // `cuando volteada:`, lo mismo que `al volteada:` (Q42)
+// el `<ui-uploader>` de una vista (épica `language` P67, r32):  antes de subir, mientras, y después de cada archivo
+eventsEs.addRule(WhenUploading, {
+  syntax: "al subir (:|,)? {statement_body}?",
+  tests: [{ compileAs: "block", tests: [["al subir", 'on("uploading")']] }]
+})
+eventsEs.addRule(Wording.specialize({ ruleName: "upload_moment", meanings: UPLOAD_MOMENTS }), {
+  syntax: "((uploaded:se sube)|(fails_to_upload:no se puede subir|no se sube))"
+})
+eventsEs.addRule(FileUploadHandler, {
+  syntax: "cuando (un|el)? archivo {moment:upload_moment} (:|,)? {statement_body}?"
+})
+eventsEs.addRule(WhileHandler.specialize({ handler: "while_uploading" }), {
+  syntax: "mientras se sube (:|,)? {statement_body}?"
+})
 eventsEs.addRule(On, { syntax: "cuando {eventName:keyword} {props:with_props_arg}? (:|,)? {statement_body}?" })
 eventsEs.addRule(On, { syntax: "cuando {eventName:event_words} {props:with_props_arg}? (:|,)? {statement_body}?" })
 

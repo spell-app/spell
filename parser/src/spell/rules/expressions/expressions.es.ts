@@ -12,6 +12,7 @@ import { SpellParser } from "spell/parser/spell/SpellParser"
 import { And } from "./And"
 import { ArithmeticExpression } from "./ArithmeticExpression"
 import { AsAType } from "./AsAType"
+import { AsFileContents, FILE_READINGS } from "./AsFileContents"
 import { AsLowercase } from "./AsLowercase"
 import { AsTitleCase } from "./AsTitleCase"
 import { WithCommas } from "./WithCommas"
@@ -976,6 +977,12 @@ expressionsEs.addRule(AsAType, {
     }
   ]
 })
+
+// un archivo leído, `el archivo como json` (épica `language` P67)
+expressionsEs.addRule(Wording.specialize({ ruleName: "file_reading", meanings: FILE_READINGS }), {
+  syntax: "((json:json)|(binary:binario))"
+})
+expressionsEs.addRule(AsFileContents, { syntax: "como {kind:file_reading}" })
 
 expressionsEs.addRule(AsAType, {
   syntax: "como (type:texto)",

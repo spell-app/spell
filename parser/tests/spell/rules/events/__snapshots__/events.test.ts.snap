@@ -4,6 +4,7 @@ exports[`testing spell module events > rule group specs > match snapshot -- if t
 {
   "cancel_event": "eventName?",
   "declare_event": "type|event|props?",
+  "file_upload_handler": "moment|body?",
   "input_state": "operator?",
   "on": "eventName?|props?|body?|passive?|changed?",
   "pass_event": "eventName?",
@@ -12,6 +13,7 @@ exports[`testing spell module events > rule group specs > match snapshot -- if t
   "when_media": "media|happened|body?",
   "when_someone_else_changes": "body?",
   "when_thing_changes": "type|body?",
+  "when_uploading": "body?",
   "while_handler": "body?",
 }
 `;

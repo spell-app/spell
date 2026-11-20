@@ -25,6 +25,8 @@
  *   `sender` the thing that sent it (Q26) -- the event's `target`, `originalTarget`, `sender`.
  * - Pure javascript:  the mouse and keys come from `core.input` (`input.ts`), never from a browser event.
  * - The browser's events reach a view's thing through its element (spell-app's `SpellElement`), which calls `send()`.
+ *   - So do the events of a Spell UI element in its drawing (`<ui-uploader>`'s `ui-uploading`, as `uploading`),
+ *     the page's own event in `pageEvent`:  canceling the one cancels the other (epic `language` P67).
  */
 import { CanceledError } from "spell/util"
 
@@ -54,6 +56,11 @@ export class SentEvent extends SpellEvent {
   declare passed: boolean
   /** Has any handler taken it? */
   declare handled: boolean
+  /**
+   * The page event it carries, when an element's event came to the program (the page's bridge, epic `language` P67):
+   * `<ui-uploader>`'s `ui-uploading`, sent on as `uploading`.
+   */
+  declare pageEvent: Event | undefined
 
   /** `pass event`:  hand it on to the next handler up the chain, after this one. */
   pass(): this {
@@ -68,6 +75,8 @@ export class SentEvent extends SpellEvent {
    */
   cancel(): this {
     this.canceled = true
+    // an element's event:  cancelled there too, at once, while it's still being sent (`cancel uploading`)
+    if (this.pageEvent?.cancelable) this.pageEvent.preventDefault()
     return this
   }
 }

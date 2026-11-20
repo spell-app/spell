@@ -5,6 +5,7 @@ import type { stringMethods } from "./string"
 import type { dateMethods } from "./dates"
 import type { uiMethods } from "./ui"
 import type { mediaMethods } from "./media"
+import type { fileMethods } from "./files"
 import type { drawingMethods } from "./drawing"
 import type { elementsMethods } from "./elements"
 import type { referencesMethods } from "./references"
@@ -106,6 +107,7 @@ export type Core = typeof coreMethods &
   typeof dateMethods &
   typeof uiMethods &
   typeof mediaMethods &
+  typeof fileMethods &
   typeof drawingMethods &
   typeof elementsMethods &
   typeof referencesMethods &

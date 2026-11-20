@@ -11,6 +11,7 @@ import { expressions } from "./expressions.parser"
 import { And } from "./And"
 import { ArithmeticExpression } from "./ArithmeticExpression"
 import { AsAType } from "./AsAType"
+import { AsFileContents, FILE_READINGS } from "./AsFileContents"
 import { AsLowercase } from "./AsLowercase"
 import { AsTitleCase } from "./AsTitleCase"
 import { WithCommas } from "./WithCommas"
@@ -1025,6 +1026,12 @@ expressions.addRule(AsAType, {
     }
   ]
 })
+
+// a file read, `the file as json` (epic `language` P67):  `as text` is `as_a_type`'s, which reads a file too
+expressions.addRule(Wording.specialize({ ruleName: "file_reading", meanings: FILE_READINGS }), {
+  syntax: "((json:json)|(binary:binary))"
+})
+expressions.addRule(AsFileContents, { roles: { match: "value" }, syntax: "as {kind:file_reading}" })
 
 expressions.addRule(AsAType, {
   syntax: "as (type:text)",

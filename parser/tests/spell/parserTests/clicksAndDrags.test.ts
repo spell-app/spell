@@ -201,3 +201,81 @@ describe("files and folders dragged in from the desktop:  the drag lines, `file`
     expect(warnings).toEqual([expect.stringContaining('Your program makes its own kind of thing called "file"')])
   })
 })
+
+describe("the file uploader's words, English and Spanish (epic `language` P67, r32;  OK'd in from-console Q14)", () => {
+  /** A view's outline of `lines`, in `language`:  its code, its parse errors left out of it. */
+  function view(lines: string[], language: "en" | "es" = "en"): string {
+    const head = language === "es" ? "una caja es una vista:" : "a box is a view where:"
+    const contents = `${head}\n${lines.map((line) => `\t${line}`).join("\n")}`
+    const { files } = parseSpellProject([{ path: language === "es" ? "/caja.es.spell" : "/box.spell", contents }])
+    const file = files[0]!
+    expect(file.errors.map((error) => JSON.stringify(error))).toEqual([])
+    return normalized(file.compiled)
+  }
+
+  test("`when uploading:` with `cancel uploading`;  `while uploading:`;  after each file, `the file` in hand", () => {
+    const code = view([
+      "when uploading:",
+      "\tcancel uploading",
+      "while uploading:",
+      "\tprint 1",
+      "when a file is uploaded:",
+      "\tprint the file",
+      "when a file fails to upload:",
+      "\tprint the file"
+    ])
+    expect(code).toMatch(/onUploading\(event\) \{\s+event\.cancel\(\)/)
+    expect(code).toMatch(/whileUploading\(\) \{/)
+    expect(code).toMatch(/whenFileUploaded\(file\) \{\s+core\.console\.log\(file\)/)
+    expect(code).toMatch(/whenFileFailsToUpload\(file\) \{\s+core\.console\.log\(file\)/)
+  })
+
+  test("in Spanish:  the same methods, `el archivo` the same file", () => {
+    const code = view(
+      [
+        "al subir:",
+        "\tcancelar la subida",
+        "mientras se sube:",
+        "\timprimir 1",
+        "cuando un archivo se sube:",
+        "\timprimir el archivo",
+        "cuando un archivo no se puede subir:",
+        "\timprimir el archivo"
+      ],
+      "es"
+    )
+    expect(code).toMatch(/onUploading\(event\) \{\s+event\.cancel\(\)/)
+    expect(code).toMatch(/whileUploading\(\) \{/)
+    expect(code).toMatch(/whenFileUploaded\(archivo\) \{\s+core\.console\.log\(archivo\)/)
+    expect(code).toMatch(/whenFileFailsToUpload\(archivo\) \{\s+core\.console\.log\(archivo\)/)
+  })
+
+  test("`the file as text`, `as json`, `as binary` READ the file, waiting for it:  never an `as` cast", () => {
+    const code = view([
+      "when a file is dropped on it:",
+      "\tprint the file as text",
+      "\tprint the file as json",
+      "\tprint the file as binary",
+      "\tprint 1 as text"
+    ])
+    expect(code).toContain('core.console.log(await core.readFile(file, "text"))')
+    expect(code).toContain('core.console.log(await core.readFile(file, "json"))')
+    expect(code).toContain('core.console.log(await core.readFile(file, "binary"))')
+    // anything else `as text` is still the cast
+    expect(code).toContain("core.console.log(`${1}`)")
+    const es = view(
+      [
+        "cuando un archivo se suelta sobre ella:",
+        "\timprimir el archivo como texto",
+        "\timprimir el archivo como binario"
+      ],
+      "es"
+    )
+    expect(es).toContain('core.console.log(await core.readFile(archivo, "text"))')
+    expect(es).toContain('core.console.log(await core.readFile(archivo, "binary"))')
+  })
+
+  test("`while uploading` asks for no subject:  it's this view's own uploader", () => {
+    expect(view(["while uploading:", "\tprint 1"])).toMatch(/whileUploading\(\) \{\s+core\.console\.log\(1\)/)
+  })
+})

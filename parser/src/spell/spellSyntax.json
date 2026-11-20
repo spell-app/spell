@@ -1858,7 +1858,7 @@
           "ruleNames": ["as_a_type"],
           "internal": false,
           "file": "src/spell/rules/expressions/AsAType.ts",
-          "line": 18,
+          "line": 20,
           "purpose": "`as a`/`an {type}` -- casts value to `string`/`number`/`fraction`/`integer`/`text`.",
           "syntaxes": [
             {
@@ -2023,10 +2023,12 @@
             "duration_unit",
             "duration_part_name",
             "day_part",
+            "file_reading",
             "is_greater_or_less_than",
             "rounding",
             "passive_event",
             "media_event",
+            "upload_moment",
             "list_end",
             "before_or_after",
             "print_kind",
@@ -2110,6 +2112,9 @@
               "syntax": "((earlyEvening:early evening)|(lateEvening:late evening)|(morning:morning)|(afternoon:afternoon)|(evening:evening)|(night:night))"
             },
             {
+              "syntax": "((json:json)|(binary:binary))"
+            },
+            {
               "syntax": "((greater:is greater than)|(less:is less than)|(at_least:is greater than or equal to)|(at_most:is less than or equal to))"
             },
             {
@@ -2120,6 +2125,9 @@
             },
             {
               "syntax": "((ends:ends|finishes|is done)|(starts:starts playing|starts)|(pauses:pauses|is paused))"
+            },
+            {
+              "syntax": "((uploaded:is uploaded)|(fails_to_upload:fails to upload|is not uploaded))"
             },
             {
               "syntax": "((start:start|front|bottom)|(end:end|back|top))"
@@ -2261,6 +2269,20 @@
             }
           ],
           "aliases": []
+        },
+        {
+          "className": "AsFileContents",
+          "ruleNames": ["as_file_contents"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/AsFileContents.ts",
+          "line": 15,
+          "purpose": "A file read, waiting for it -- `the file as json`, `the file as binary` (epic `language` P67, r32; OK'd in epic `from-console` Q14); Spanish `el archivo como json`, `como binario`.",
+          "syntaxes": [
+            {
+              "syntax": "as {kind:file_reading}"
+            }
+          ],
+          "aliases": ["expression_suffix"]
         },
         {
           "className": "MeasureIn",
@@ -3392,6 +3414,32 @@
           "aliases": ["statement"]
         },
         {
+          "className": "WhenUploading",
+          "ruleNames": ["when_uploading"],
+          "internal": false,
+          "file": "src/spell/rules/events/Uploading.ts",
+          "line": 24,
+          "purpose": "In a view's outline, before its `<ui-uploader>` posts what was picked or dropped (epic `language` P67, r32; the words OK'd in epic `from-console` Q14).",
+          "syntaxes": [
+            {
+              "syntax": "when uploading (:|,)? {statement_body}?",
+              "example": "when uploading",
+              "outputs": {
+                "js": {
+                  "code": "on(\"uploading\")"
+                },
+                "ts": {
+                  "code": "on(\"uploading\")"
+                },
+                "py": {
+                  "code": "core.on(\"uploading\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "DeclareEvent",
           "ruleNames": ["declare_event"],
           "internal": false,
@@ -3478,6 +3526,20 @@
           "aliases": ["statement"]
         },
         {
+          "className": "FileUploadHandler",
+          "ruleNames": ["file_upload_handler"],
+          "internal": false,
+          "file": "src/spell/rules/events/Uploading.ts",
+          "line": 50,
+          "purpose": "In a view's outline, after its `<ui-uploader>` posts each file, or fails to (epic `language` P67, r32; OK'd in epic `from-console` Q14).",
+          "syntaxes": [
+            {
+              "syntax": "when (a|an|the)? file {moment:upload_moment} (:|,)? {statement_body}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "WhileHandler",
           "ruleNames": ["while_handler"],
           "internal": false,
@@ -3485,6 +3547,9 @@
           "line": 17,
           "purpose": "In a template's outline, steps that hold WHILE something stays true about one of its things, and are put back when it stops (epic `elemental-spell` P9, Q51, Q52 A): every property they set returns to what it was.",
           "syntaxes": [
+            {
+              "syntax": "while uploading (:|,)? {statement_body}?"
+            },
             {
               "syntax": "while the mouse is down (on it)? (:|,)? {statement_body}?"
             },

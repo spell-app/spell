@@ -1874,7 +1874,7 @@
           "ruleNames": ["as_a_type"],
           "internal": false,
           "file": "src/spell/rules/expressions/AsAType.ts",
-          "line": 18,
+          "line": 20,
           "purpose": "`as a`/`an {type}` -- casts value to `string`/`number`/`fraction`/`integer`/`text`.",
           "syntaxes": [
             {
@@ -2040,10 +2040,12 @@
             "duration_unit",
             "duration_part_name",
             "day_part",
+            "file_reading",
             "is_greater_or_less_than",
             "rounding",
             "passive_event",
             "media_event",
+            "upload_moment",
             "list_end",
             "before_or_after",
             "print_kind",
@@ -2127,6 +2129,9 @@
               "syntax": "((morning:mañana|manana)|(afternoon:tarde)|(earlyEvening:atardecer)|(evening:anochecer)|(lateEvening:primera hora de la noche)|(night:noche))"
             },
             {
+              "syntax": "((json:json)|(binary:binario))"
+            },
+            {
               "syntax": "((greater:es mayor que)|(less:es menor que)|(at_least:es mayor o igual (que|a)|es mayor que o igual (que|a))|(at_most:es menor o igual (que|a)|es menor que o igual (que|a)))"
             },
             {
@@ -2137,6 +2142,9 @@
             },
             {
               "syntax": "((ends:termina|acaba)|(starts:empieza a sonar|empieza|comienza)|(pauses:se pausa|se detiene))"
+            },
+            {
+              "syntax": "((uploaded:se sube)|(fails_to_upload:no se puede subir|no se sube))"
             },
             {
               "syntax": "((start:principio|comienzo|inicio|frente|abajo)|(end:final|fin|fondo|arriba))"
@@ -2278,6 +2286,20 @@
             }
           ],
           "aliases": []
+        },
+        {
+          "className": "AsFileContents",
+          "ruleNames": ["as_file_contents"],
+          "internal": false,
+          "file": "src/spell/rules/expressions/AsFileContents.ts",
+          "line": 15,
+          "purpose": "A file read, waiting for it -- `the file as json`, `the file as binary` (epic `language` P67, r32; OK'd in epic `from-console` Q14); Spanish `el archivo como json`, `como binario`.",
+          "syntaxes": [
+            {
+              "syntax": "como {kind:file_reading}"
+            }
+          ],
+          "aliases": ["expression_suffix"]
         },
         {
           "className": "MeasureIn",
@@ -3393,6 +3415,32 @@
           "aliases": ["statement"]
         },
         {
+          "className": "WhenUploading",
+          "ruleNames": ["when_uploading"],
+          "internal": false,
+          "file": "src/spell/rules/events/Uploading.ts",
+          "line": 24,
+          "purpose": "In a view's outline, before its `<ui-uploader>` posts what was picked or dropped (epic `language` P67, r32; the words OK'd in epic `from-console` Q14).",
+          "syntaxes": [
+            {
+              "syntax": "al subir (:|,)? {statement_body}?",
+              "example": "al subir",
+              "outputs": {
+                "js": {
+                  "code": "on(\"uploading\")"
+                },
+                "ts": {
+                  "code": "on(\"uploading\")"
+                },
+                "py": {
+                  "code": "core.on(\"uploading\")"
+                }
+              }
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "DeclareEvent",
           "ruleNames": ["declare_event"],
           "internal": false,
@@ -3460,6 +3508,9 @@
           "syntaxes": [
             {
               "syntax": "cancelar (el? evento|{eventName:keyword}|{eventName:event_words})"
+            },
+            {
+              "syntax": "cancelar la subida"
             }
           ],
           "aliases": ["statement"]
@@ -3479,6 +3530,20 @@
           "aliases": ["statement"]
         },
         {
+          "className": "FileUploadHandler",
+          "ruleNames": ["file_upload_handler"],
+          "internal": false,
+          "file": "src/spell/rules/events/Uploading.ts",
+          "line": 50,
+          "purpose": "In a view's outline, after its `<ui-uploader>` posts each file, or fails to (epic `language` P67, r32; OK'd in epic `from-console` Q14).",
+          "syntaxes": [
+            {
+              "syntax": "cuando (un|el)? archivo {moment:upload_moment} (:|,)? {statement_body}?"
+            }
+          ],
+          "aliases": ["statement"]
+        },
+        {
           "className": "WhileHandler",
           "ruleNames": ["while_handler"],
           "internal": false,
@@ -3486,6 +3551,9 @@
           "line": 17,
           "purpose": "In a template's outline, steps that hold WHILE something stays true about one of its things, and are put back when it stops (epic `elemental-spell` P9, Q51, Q52 A): every property they set returns to what it was.",
           "syntaxes": [
+            {
+              "syntax": "mientras se sube (:|,)? {statement_body}?"
+            },
             {
               "syntax": "mientras el (ratón|raton) (está|esta) presionado (sobre (ella|él|el))? (:|,)? {statement_body}?"
             },

@@ -2546,6 +2546,22 @@
     },
     {
       "kind": "method",
+      "name": "readFile",
+      "of": "core",
+      "module": "files",
+      "waits": true,
+      "params": [
+        {
+          "name": "file"
+        },
+        {
+          "name": "as"
+        }
+      ],
+      "description": "The contents of `file`, read `as` text, JSON or binary:  what `the file as text` compiles to."
+    },
+    {
+      "kind": "method",
       "name": "drawThing",
       "of": "core",
       "module": "drawing",

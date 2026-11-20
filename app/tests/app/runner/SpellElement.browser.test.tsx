@@ -910,6 +910,66 @@ describe("SpellElement", () => {
       }
     })
 
+    test("a Spell UI element's events reach the view's program:  `cancel uploading` cancels the page's, `while uploading` puts back (P67, r32)", async () => {
+      /** `a photo box is a view` with the uploader's lines, as compiled. */
+      class PhotoBox extends View {
+        static elementTag = core.defineElement(this, "Game")
+        heard: string[] = []
+        isFull = true
+        draw(): ReturnType<View["draw"]> {
+          return (h("i", {}, "photos") as unknown as () => ReturnType<View["draw"]>)()
+        }
+        get note(): string {
+          return this.getProp("note") ?? ""
+        }
+        set note(value: string) {
+          this.setProp("note", value)
+        }
+        onUploading(event: { cancel(): void }) {
+          this.heard.push("uploading")
+          if (this.isFull) event.cancel()
+        }
+        whileUploading() {
+          this.note = "uploading"
+        }
+        whenFileUploaded(file: File) {
+          this.heard.push(`uploaded ${file.name}`)
+        }
+      }
+      const box = new PhotoBox()
+      const root = document.createElement("div")
+      document.body.append(root)
+      const mounted = core.mountApp({ draw: () => core.drawThing(box) }, root)
+      flush()
+      await ElementFixture.settle(root)
+      const element = root.querySelector("game-photo-box") as HTMLElement & { renderRoot: ShadowRoot }
+      // an element in its drawing:  a stand-in for `<ui-uploader>`, sending its events
+      const uploader = document.createElement("div")
+      element.renderRoot.append(uploader)
+      const file = new File(["x"], "cat.png")
+      const send = (type: string, detail: object) => {
+        const event = new CustomEvent(type, { bubbles: true, composed: true, cancelable: true, detail })
+        uploader.dispatchEvent(event)
+        return event
+      }
+      try {
+        // full:  cancelled, so nothing is posted, and `while uploading` never starts
+        expect(send("ui-uploading", { files: [file] }).defaultPrevented).toBe(true)
+        expect(box.note).toBe("")
+        box.isFull = false
+        expect(send("ui-uploading", { files: [file] }).defaultPrevented).toBe(false)
+        core.flush()
+        expect(box.note).toBe("uploading")
+        send("ui-uploaded", { file, response: {} })
+        core.flush()
+        await vi.waitFor(() => expect(box.note).toBe(""))
+        expect(box.heard).toEqual(["uploading", "uploading", "uploaded cat.png"])
+      } finally {
+        mounted.unmount()
+        root.remove()
+      }
+    })
+
     test("a click selects a thing in its list;  command adds or takes one away, shift selects a range (outline-spell P29)", async () => {
       /** A token people may select:  `a bead can be selected`. */
       class Bead extends Token {

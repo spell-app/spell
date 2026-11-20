@@ -1,6 +1,7 @@
 import { proto } from "spell/util"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
+import { AsFileContents } from "./AsFileContents"
 import { PostfixOperatorSuffix } from "./PostfixOperatorSuffix"
 import { Precedence, type OperatorOperands } from "./expressions.shared"
 
@@ -14,6 +15,7 @@ import { Precedence, type OperatorOperands } from "./expressions.shared"
  * - `date` reads text as a date, `"2026-12-25" as a date` => `core.dateFrom("2026-12-25")`:  that day's midnight where
  *   it's read;  text that isn't a date is nothing (epic `language` P63).
  * - `the weekday of now as a number` is its weekday number, 1 to 7 (`weekdayRead()`).
+ * - A file dropped or uploaded, `the file as text`, is read instead:  see `AsFileContents`.
  */
 export class AsAType extends PostfixOperatorSuffix<"type"> {
   @proto static precedence = Precedence.comparison
@@ -32,6 +34,8 @@ export class AsAType extends PostfixOperatorSuffix<"type"> {
 
   compileASTExpression(match: P.MatchFor<this>, { lhs }: OperatorOperands): P.ASTExpression {
     const type = this.castType(match)
+    // a file, `the file as text`:  read, waiting for it (epic `language` P67)
+    if (type === "text" && AsFileContents.isAFile(match.scope, lhs)) return AsFileContents.read(match, lhs!, "text")
     if (type === "date") {
       return new P.ASTCoreMethodInvocation(match, { datatype: "date", methodName: "dateFrom", args: [lhs!] })
     }

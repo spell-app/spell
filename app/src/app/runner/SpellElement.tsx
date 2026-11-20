@@ -682,9 +682,12 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
    *   anywhere else the page is left alone, and the browser does what it always does.
    * - Never one of Spell's own drags, which hold no files.
    * - The innermost view that takes them, of views inside each other:  the browser's events bubble out to the rest.
+   * - Not for a program running elsewhere (Python):  a page's file can't reach it.
    */
   private takesFiles(event: DragEvent): boolean {
     if (FILES_HEARD.has(event) || !DroppedFiles.hasFiles(event) || !this.currentThing) return false
+    // a program running elsewhere (Python):  a page's file can't reach it
+    if (this.entry?.core.remote) return false
     const takes = FILE_HANDLERS.some(([timing, item, moment]) => this.fileHandlerFor(timing, item, moment))
     if (takes) FILES_HEARD.add(event)
     return takes
@@ -809,6 +812,71 @@ export class SpellElement<Thing extends object = object> extends E.UIComponent<t
     for (const file of each) {
       this.sendPageEvent("file-dropped-event", DroppedFiles.fileDetail(file, FILE_VIA))
       if (fileLine) core.runPressed(view, fileLine, () => core.runHandler(view, fileLine, file.file))
+    }
+  }
+
+  ////////////////
+  // ## Element events, carried to the program (epic `language` P67, r32)
+  ////////////////
+
+  /**
+   * The events of the Spell UI elements in our drawing, carried into the program's event chain (core's `send()`):
+   * our thing hears them first, then the lists holding it, then the app.
+   * - `ui-uploading` goes as `uploading`:  `when uploading:` hears it, `onUploading()`.
+   * - Its detail comes along, its params, and the page's event itself (`pageEvent`):
+   *   `cancel uploading` cancels that too, at once (core's `SentEvent.cancel()`), so nothing is posted.
+   * - The innermost view hears it:  a view around it leaves it alone (`ELEMENT_EVENTS_HEARD`).
+   * - Which events:  `BRIDGED_EVENTS`, the uploader's today;  any element's event works the same, once it's listed.
+   * - NOT for a program running elsewhere (Python's core has no `send()` yet):  its page hears them as before.
+   */
+  @E.whileConnected
+  protected carryElementEvents() {
+    const { domElement } = this
+    const carry = (event: Event) => this.carryElementEvent(event)
+    for (const name of BRIDGED_EVENTS) domElement.addEventListener(name, carry)
+    return () => {
+      for (const name of BRIDGED_EVENTS) domElement.removeEventListener(name, carry)
+    }
+  }
+
+  /** One element event, carried:  see `carryElementEvents()`;  and the uploader's own lines (`heardUploader()`). */
+  private carryElementEvent(event: Event) {
+    const view = this.currentThing
+    const core = this.entry?.core
+    if (!view || !core || core.remote || ELEMENT_EVENTS_HEARD.has(event) || !(event instanceof CustomEvent)) return
+    // a view's own page events (`ui-file-dropped`, `sendPageEvent()`):  the page's, never the program's again
+    if (SpellElement.componentOf(event.composedPath()[0] as Element) instanceof SpellElement) return
+    ELEMENT_EVENTS_HEARD.add(event)
+    const name = event.type.replace(/^ui-/, "")
+    const detail = (event.detail ?? {}) as Record<string, unknown>
+    // handlers that don't wait have run by the time it returns:  a cancel is in the page's event already
+    void core.send(view, name, { ...detail, pageEvent: event }).catch((error) => core.console.error(error))
+    this.heardUploader(name, detail, event)
+  }
+
+  /** How many files of the upload going on haven't answered yet:  `while uploading` ends at none. */
+  private filesUploading = 0
+
+  /**
+   * The uploader's own lines, on our thing:
+   * - `while uploading:` starts as the upload does, unless something cancelled it, and what it set goes back
+   *   once every file has posted or failed (`whileUploading()`)
+   * - `when a file is uploaded:`, `when a file fails to upload:`, once per file, with `the file`
+   *   (`whenFileUploaded(file)`, `whenFileFailsToUpload(file)`:  handed in by place, as the drag lines are)
+   */
+  private heardUploader(name: string, detail: Record<string, unknown>, event: Event) {
+    const view = this.currentThing as Record<string, unknown>
+    const core = this.entry!.core
+    if (name === "uploading") {
+      if (event.defaultPrevented || typeof view.whileUploading !== "function") return
+      this.filesUploading = Array.isArray(detail.files) ? detail.files.length : 1
+      return this.runHandler(() => core.startWhile(view, "whileUploading"))
+    }
+    if (name !== "uploaded" && name !== "upload-failed") return
+    const line = name === "uploaded" ? "whenFileUploaded" : "whenFileFailsToUpload"
+    if (typeof view[line] === "function") this.runHandler(() => core.runHandler(view, line, detail.file))
+    if (this.filesUploading > 0 && --this.filesUploading === 0) {
+      this.runHandler(() => core.endWhile(view, "whileUploading"))
     }
   }
 
@@ -2231,6 +2299,28 @@ function afterTheLimit(run: () => void): () => void {
 
 /** How long files from the desktop may be gone before they've left:  the browser's flicker inside us (Q77). */
 const FILES_LINGER = 0.1
+
+/**
+ * The element events a view carries to its program (`carryElementEvents()`):  `<ui-uploader>`'s, by their names.
+ * - A name added here reaches a program's `when <name>:` the same way, the `ui-` left off.
+ */
+const BRIDGED_EVENTS = [
+  "ui-file-dragged-over",
+  "ui-file-dragged-out",
+  "ui-folder-dragged-over",
+  "ui-folder-dragged-out",
+  "ui-file-dropping",
+  "ui-file-dropped",
+  "ui-folder-dropping",
+  "ui-folder-dropped",
+  "ui-uploading",
+  "ui-upload-progress",
+  "ui-uploaded",
+  "ui-upload-failed"
+]
+
+/** The element events a view has carried to its program:  a view around it leaves them alone. */
+const ELEMENT_EVENTS_HEARD = new WeakSet<Event>()
 
 /** The browser's file drag events a view has taken:  a view around it leaves them alone. */
 const FILES_HEARD = new WeakSet<Event>()

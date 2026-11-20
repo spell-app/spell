@@ -18,6 +18,10 @@
       "names": ["pickFileFor", "savePickedFile"]
     },
     {
+      "why": "A file dropped or picked on a page, read as text, json or binary (epic language P67):  a page's file never reaches a program running in Python",
+      "names": ["readFile"]
+    },
+    {
       "why": "A value that waits, on a page:  Python sends its page with its values (answer_of(), answer_now()), so it has no \"…\" to show (epic language P12)",
       "names": ["waitedValue", "waitedValueKeyFor", "whileWaiting"]
     },
