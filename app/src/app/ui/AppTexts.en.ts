@@ -30,9 +30,9 @@ export const APP_TEXTS = {
   // a project written for an older Spell, as it opens (`<UpgradeNotice>`, epic `language` P68):  once per project
   upgradeNotice:
     "This project was written for an older version of Spell.\n" +
-    "Some lines in it are written the way older versions of Spell expected.  They still work today, but a future version of Spell won't understand them.\n" +
-    "Upgrade rewrites those lines in your project's files in the new style.  What your project does stays the same.\n" +
-    "If you'd rather wait, close this notice.  It won't appear again, and each of those lines will show a warning with a Fix it button, so you can change them one at a time.",
+    "Some lines use an older way of writing Spell.  They work now, but a future version won't understand them.\n" +
+    "Upgrade rewrites those lines for you.  Your project works the same as before.\n" +
+    "Not ready?  Close this notice:  it won't appear again.  Each older line will then show a warning with a Fix it button, so you can update them one at a time.",
   upgrade: "Upgrade",
   upgradeNoticeClose: "Close",
   // once it's upgraded:  `{version}`, today's Spell, `0.9`;  `{count}`, how many lines changed

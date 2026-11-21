@@ -35,9 +35,9 @@ const APP_TEXTS_ES: AppTextPack = {
   restartNoticeClose: "Cerrar",
   upgradeNotice:
     "Este proyecto se escribió para una versión anterior de Encanto.\n" +
-    "Algunas de sus líneas están escritas como las esperaban las versiones anteriores de Encanto.  Hoy siguen funcionando, pero una versión futura de Encanto no las entenderá.\n" +
-    "Actualizar reescribe esas líneas en los archivos de tu proyecto con el estilo nuevo.  Lo que hace tu proyecto no cambia.\n" +
-    "Si prefieres esperar, cierra este aviso.  No volverá a aparecer, y cada una de esas líneas mostrará un aviso con un botón Arreglarlo, para que las cambies una a una.",
+    "Algunas líneas usan una forma antigua de escribir Encanto.  Ahora funcionan, pero una versión futura no las entenderá.\n" +
+    "Actualizar reescribe esas líneas por ti.  Tu proyecto funciona igual que antes.\n" +
+    "¿Aún no?  Cierra este aviso:  no volverá a aparecer.  Cada línea antigua mostrará entonces un aviso con un botón Arreglarlo, para que las actualices una a una.",
   upgrade: "Actualizar",
   upgradeNoticeClose: "Cerrar",
   upgraded:

@@ -16,7 +16,7 @@ function warningsIn(text: string): string[] {
 
 const OLD =
   'a card is a view where\n\tit has parts "front" and "back"\n\tto slow it\n\t\tpause for 1 sec\n' +
-  "\tto deal it\n\t\twait for: slow it  // so it shows\n"
+  "\tanimation deal it\n\t\twait for: slow it  // so it shows\n"
 
 describe("OldForms:  Spell's old forms, each a deprecation with its versions (epic `language` P68)", () => {
   afterEach(() => {
@@ -36,6 +36,8 @@ describe("OldForms:  Spell's old forms, each a deprecation with its versions (ep
     expect(warningsIn(OLD)).toEqual([
       'parts:  This line uses the old word "parts".  Spell now says "slots".  ' +
         "Spell 0.8 changed this on 2026-10-27.  Your program still runs, but this line will give an error from Spell 1.0 on, so it's best to fix it now.",
+      'animation:  This line uses the old word "animation".  Spell now says "to".  ' +
+        "Spell 0.8 changed this on 2026-10-31.  Your program still runs, but this line will give an error from Spell 1.0 on, so it's best to fix it now.",
       'wait for:  This line uses "wait for", which Spell doesn\'t need now:  it waits by itself.  ' +
         "Spell 0.8 changed this on 2026-10-31.  Your program still runs, but this line will give an error from Spell 1.0 on, so it's best to fix it now.",
       '// so it shows:  This note uses the old style:  it starts with "//" and sits after the code.  ' +
@@ -50,6 +52,7 @@ describe("OldForms:  Spell's old forms, each a deprecation with its versions (ep
     const uses = SP.OldForms.uses(file)
     expect(uses.map(({ form, written, replacement }) => [form.id, written, replacement])).toEqual([
       ["parts", "parts", "slots"],
+      ["animation", "animation", "to"],
       ["wait-for", "wait for", ""],
       ["line-end-comment", "// so it shows", "-- so it shows"]
     ])
@@ -65,7 +68,7 @@ describe("OldForms:  Spell's old forms, each a deprecation with its versions (ep
     SP.OldForms.spellVersion = "1.0.0"
     const file = parsed(OLD)
     const errors = (SP.Block.getParseErrors(file.match) ?? []).map((error) => error.message)
-    expect(errors, errors.join("\n")).toHaveLength(3)
+    expect(errors, errors.join("\n")).toHaveLength(4)
     expect(errors[0]).toBe(
       'This line uses the old word "parts".  Spell now says "slots".  ' +
         "Spell 0.8 changed this on 2026-10-27, and from Spell 1.0 on it's an error.  Fix it to run your program."

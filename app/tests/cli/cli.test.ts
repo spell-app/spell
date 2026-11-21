@@ -434,7 +434,7 @@ describe("spell lint:  the old words for waiting (epic language P13)", () => {
 describe("spell upgrade:  a project written for an older Spell, brought up to date (epic language P68)", () => {
   const SOURCE =
     'a card is a view:\n\t- it has parts "front" and "back"\n\t- to slow it:\n\t\tpause for 1 sec\n' +
-    "\t- to deal it:\n\t\twait for: slow it\nx is 3 // the count\n"
+    "\t- animation deal it:\n\t\twait for: slow it\nx is 3 // the count\n"
   const UPGRADED =
     'a card is a view:\n\t- it has slots "front" and "back"\n\t- to slow it:\n\t\tpause for 1 sec\n' +
     "\t- to deal it:\n\t\tslow it\nx is 3\n\t-- the count\n"
@@ -442,6 +442,12 @@ describe("spell upgrade:  a project written for an older Spell, brought up to da
 
   test("lint --fix rewrites each old form, then the project file names today's Spell;  a second run finds nothing", () => {
     const fixing = tempProject("Upgrading", SOURCE)
+    const before = spell(["lint", "."], fixing)
+    expect(before.status).toBe(0)
+    expect(before.stdout).toContain(
+      'Upgrading.spell:5:4  warning:  This line uses the old word "animation".  Spell now says "to".  ' +
+        "Spell 0.8 changed this on 2026-10-31.  Your program still runs, but this line will give an error from Spell 1.0 on, so it's best to fix it now."
+    )
     expect(spell(["lint", ".", "--fix"], fixing).status).toBe(0)
     expect(readFileSync(resolve(fixing, "Upgrading.spell"), "utf8")).toBe(UPGRADED)
     expect(projectFile(fixing)).toContain(`"spellVersion": "${SP.SPELL_VERSION}"`)
@@ -455,7 +461,7 @@ describe("spell upgrade:  a project written for an older Spell, brought up to da
     const dryRun = spell(["upgrade", ".", "--dry-run"], dry)
     expect(dryRun.status).toBe(0)
     expect(dryRun.stdout).toContain('DryRun.spell:2:11  would fix:  "parts" is now "slots"')
-    expect(dryRun.stdout).toContain("would change 3 lines, to match Spell 0.9")
+    expect(dryRun.stdout).toContain("would change 4 lines, to match Spell 0.9")
     expect(readFileSync(resolve(dry, "DryRun.spell"), "utf8")).toBe(SOURCE)
     expect(projectFile(dry)).toBe(before)
 
@@ -464,9 +470,10 @@ describe("spell upgrade:  a project written for an older Spell, brought up to da
     expect(status).toBe(0)
     expect(stdout.split("\n")).toEqual([
       'Upgraded.spell:2:11  fixed:  "parts" is now "slots"',
+      'Upgraded.spell:5:4  fixed:  "animation" is now "to"',
       `Upgraded.spell:6:3  fixed:  "wait for" isn't needed any more`,
       'Upgraded.spell:7:7  fixed:  a "//" note moved to the line under it, as "--"',
-      expect.stringMatching(/:  changed 3 lines, and now matches Spell 0\.9$/),
+      expect.stringMatching(/:  changed 4 lines, and now matches Spell 0\.9$/),
       ""
     ])
     expect(readFileSync(resolve(upgrading, "Upgraded.spell"), "utf8")).toBe(UPGRADED)

@@ -78,9 +78,9 @@ export const LSP_TEXTS = {
     "This project was written for an older version of Spell.  Some of its lines use old wording, which still works for now.  Upgrade it to change those lines to the new wording.",
   upgrade: "Upgrade",
   upgraded:
-    "Your project is up to date with Spell {version}.  {count} lines used old wording, and now use the new wording instead.  They still do the same thing, so there's nothing else to do.",
+    "Your project now matches Spell {version}.  Spell rewrote {count} lines that used an older style, so they're written the new way.  Your program works the same as before:  you don't need to do anything else.",
   upgradedOne:
-    "Your project is up to date with Spell {version}.  1 line used old wording, and now uses the new wording instead.  It still does the same thing, so there's nothing else to do.",
+    "Your project now matches Spell {version}.  Spell rewrote 1 line that used an older style, so it's written the new way.  Your program works the same as before:  you don't need to do anything else.",
 
   // a read of a place's field marked gone, changed to its likely new name (`SP.PlaceFieldMarks`, epic `language` P68)
   changeToNewField: 'Change to "{name}"',

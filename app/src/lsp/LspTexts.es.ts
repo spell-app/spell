@@ -77,9 +77,9 @@ export const LSP_TEXTS_ES: LspTextPack = {
     "Este proyecto se escribió para una versión anterior de Encanto.  Algunas de sus líneas usan palabras viejas, que de momento aún funcionan.  Actualízalo para cambiar esas líneas a las palabras nuevas.",
   upgrade: "Actualizar",
   upgraded:
-    "Tu proyecto está al día con Encanto {version}.  {count} líneas usaban palabras viejas, y ahora usan las nuevas.  Siguen haciendo lo mismo, así que no hay nada más que hacer.",
+    "Tu proyecto ya va con Encanto {version}.  Encanto reescribió {count} líneas que usaban un estilo antiguo, así que ahora están escritas de la forma nueva.  Tu programa funciona igual que antes:  no tienes que hacer nada más.",
   upgradedOne:
-    "Tu proyecto está al día con Encanto {version}.  1 línea usaba palabras viejas, y ahora usa las nuevas.  Sigue haciendo lo mismo, así que no hay nada más que hacer.",
+    "Tu proyecto ya va con Encanto {version}.  Encanto reescribió 1 línea que usaba un estilo antiguo, así que ahora está escrita de la forma nueva.  Tu programa funciona igual que antes:  no tienes que hacer nada más.",
 
   // a read of a place's field marked gone, changed to its likely new name (`SP.PlaceFieldMarks`, epic `language` P68)
   changeToNewField: 'Cambiar a "{name}"',

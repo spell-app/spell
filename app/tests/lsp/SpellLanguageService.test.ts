@@ -980,6 +980,29 @@ describe("SpellLanguageService", () => {
       })
     })
 
+    test("Upgrade this file:  applied, every old form in the file goes at once, not just the line's (epic `language` I179)", async () => {
+      const original = solitaire.contents!
+      const text =
+        `${original.trimEnd()}\nto toss it\n\tpause for 1 sec\nanimation spin it\n\twait for: toss it\n` +
+        "set x to 1  // so it runs"
+      try {
+        await workspace.update(solitaireUri, text)
+        expect(oldFormProblems()).toHaveLength(3)
+        const last = text.split("\n").length - 1
+        const actions = service.codeActions(solitaire, {
+          start: { line: last, character: 0 },
+          end: { line: last, character: 0 }
+        })
+        const upgrade = actions.find(({ title }) => title === "Upgrade this file to Spell 0.9")
+        const upgraded = applyEdits(text, upgrade!.edit!.changes![solitaireUri]!)
+        expect(upgraded).toMatch(/\nto spin it\n\ttoss it\nset x to 1\n\t-- so it runs$/)
+        await workspace.update(solitaireUri, upgraded)
+        expect(oldFormProblems()).toEqual([])
+      } finally {
+        await workspace.update(solitaireUri, original)
+      }
+    })
+
     test("past an old form's drop version (a test's own Spell):  an error, its fix still offered (epic `language` P68, J288)", async () => {
       SP.OldForms.spellVersion = "1.0.0"
       try {

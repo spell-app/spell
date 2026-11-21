@@ -272,7 +272,7 @@ describe("spell language server over stdio", () => {
       /^\[\*\*Fix it\*\*\]\(command:spell\.fixIt\?%5B%7B%22changes[^)]*\):  Move the note below/
     )
 
-    expect(await said).toMatch(/^Your project is up to date with Spell 0\.9\.  1 line used old wording/)
+    expect(await said).toMatch(/^Your project now matches Spell 0\.9\.  Spell rewrote 1 line that used an older style/)
     expect(asked).toEqual([expect.stringMatching(/^This project was written for an older version of Spell\./)])
     expect(readFileSync(main, "utf8")).toBe("set foo to 1\n\t-- the count\n")
     expect(readFileSync(projectFile, "utf8")).toContain('"spellVersion": "0.9.0"')
