@@ -56,6 +56,8 @@ function upgradeNote(
   const version = SP.OldForms.shortVersion(SP.SPELL_VERSION)
   const lines = `${fixed} line${fixed === 1 ? "" : "s"}`
   if (!fixed && !versioned) return `${project.projectId}:  already up to date with Spell ${version}`
+  // nothing old in it:  only its file's version
+  if (!fixed) return `${project.projectId}:  ${write ? "now says" : "would say"} it matches Spell ${version}`
   if (!write) return `${project.projectId}:  would change ${lines}, to match Spell ${version}`
   return `${project.projectId}:  changed ${lines}, and now matches Spell ${version}`
 }

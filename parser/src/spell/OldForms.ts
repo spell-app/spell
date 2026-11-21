@@ -97,6 +97,8 @@ export type OldFormUse = {
   replacement: string
   /** Is it past its drop version, an error? */
   isDropped: boolean
+  /** What its warning (or error) says, in the file's language, versions and all. */
+  message: string
   /** The edits rewriting it, none overlapping. */
   edits: OldFormEdit[]
 }
@@ -133,14 +135,16 @@ export class OldForms {
 
   /**
    * The language's words for `form`'s problem, `message` (its pack's own words for what to write instead),
-   * then the versions:  "It's old Spell ... stops working in Spell 1.0", or, dropped, "It stopped working ...".
+   * then when it changed and the versions:  "Spell 0.8 changed this on 2026-10-27 ... an error from Spell 1.0 on",
+   *   or, dropped, "... and from Spell 1.0 on it's an error".
    * - Versions said short:  `0.9`, `1.0` (`shortVersion()`).
    */
   static messageFor(scope: P.Scope, form: OldForm, message: string): string {
     const language = SP.Language.of(scope)
     const versions = {
       deprecatedIn: OldForms.shortVersion(form.deprecatedIn),
-      droppedIn: OldForms.shortVersion(OldForms.droppedIn(form))
+      droppedIn: OldForms.shortVersion(OldForms.droppedIn(form)),
+      date: form.date
     }
     const when = OldForms.isDropped(form) ? "old-form-dropped" : "old-form-deprecated"
     return `${message}  ${language.parserMessage(when, versions)}`
@@ -222,7 +226,8 @@ export class OldForms {
     const written = text.slice(start, end)
     const edits =
       oldForm === "line-end-comment" ? OldForms.lineEndNoteMoved(text, problem) : OldForms.wordsReplaced(text, problem)
-    return [{ form, start, end, written, replacement, isDropped: OldForms.isDropped(form), edits }]
+    const message = problem.message ?? ""
+    return [{ form, start, end, written, replacement, isDropped: OldForms.isDropped(form), message, edits }]
   }
 
   /**

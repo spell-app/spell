@@ -99,7 +99,10 @@ export class SpellLanguageServer {
     documents.onDidChangeContent(({ document }) =>
       this.enqueue(() => workspace.update(document.uri, document.getText()))
     )
-    documents.onDidOpen(({ document }) => void this.offerUpgrade(document.uri).catch((error) => this.logError(error)))
+    // after its `onDidChangeContent`, which fires next:  so the file's update is queued first
+    documents.onDidOpen(({ document }) =>
+      queueMicrotask(() => void this.offerUpgrade(document.uri).catch((error: unknown) => this.logError(error)))
+    )
     documents.onDidClose(({ document }) => this.enqueue(() => workspace.close(document.uri)))
     connection.onDidChangeWatchedFiles(({ changes }) => {
       for (const { uri, type } of changes) {
@@ -242,7 +245,7 @@ export class SpellLanguageServer {
     if (!fix) return hover
     const args = encodeURIComponent(JSON.stringify([fix.edit]))
     const label = LSP.LspTexts.for(file.language).text("fixIt")
-    const link = `[**${label}**](command:${FIX_IT_COMMAND}?${args} "${fix.title}"):  ${fix.title}`
+    const link = `[**${label}**](command:${FIX_IT_COMMAND}?${args}):  ${fix.title}`
     const contents = hover?.contents as MarkupContent | undefined
     const value = contents?.value ? `${link}\n\n---\n\n${contents.value}` : link
     return { contents: { kind: MarkupKind.Markdown, value }, range: hover?.range }

@@ -35,12 +35,12 @@ describe("OldForms:  Spell's old forms, each a deprecation with its versions (ep
   test("a warning for each, never an error, naming both versions;  the line still compiles", () => {
     expect(warningsIn(OLD)).toEqual([
       'parts:  This line uses the old word "parts".  Spell now says "slots".  ' +
-        "Spell 0.8 changed this.  Your program still runs, but this line will give an error from Spell 1.0 on, so it's best to fix it now.",
+        "Spell 0.8 changed this on 2026-10-27.  Your program still runs, but this line will give an error from Spell 1.0 on, so it's best to fix it now.",
       "wait for:  This line uses \"wait for\", which Spell doesn't need now:  it waits by itself.  " +
-        "Spell 0.8 changed this.  Your program still runs, but this line will give an error from Spell 1.0 on, so it's best to fix it now.",
+        "Spell 0.8 changed this on 2026-10-31.  Your program still runs, but this line will give an error from Spell 1.0 on, so it's best to fix it now.",
       '// so it shows:  This note uses the old style:  it starts with "//" and sits after the code.  ' +
         'Notes now go on the line under the code, and start with "--".  ' +
-        "Spell 0.9 changed this.  Your program still runs, but this line will give an error from Spell 1.0 on, so it's best to fix it now."
+        "Spell 0.9 changed this on 2026-11-19.  Your program still runs, but this line will give an error from Spell 1.0 on, so it's best to fix it now."
     ])
     expect(SP.Block.getParseErrors(parsed(OLD).match) ?? []).toEqual([])
   })
@@ -68,7 +68,7 @@ describe("OldForms:  Spell's old forms, each a deprecation with its versions (ep
     expect(errors, errors.join("\n")).toHaveLength(3)
     expect(errors[0]).toBe(
       'This line uses the old word "parts".  Spell now says "slots".  ' +
-        "Spell 0.8 changed this, and from Spell 1.0 on it's an error.  Fix it to run your program."
+        "Spell 0.8 changed this on 2026-10-27, and from Spell 1.0 on it's an error.  Fix it to run your program."
     )
     expect(SP.SpellWarnings.in(file.match)).toEqual([])
     const uses = SP.OldForms.uses(file)
@@ -88,7 +88,7 @@ describe("OldForms:  Spell's old forms, each a deprecation with its versions (ep
     const [warning] = SP.SpellWarnings.in(file.match)
     expect(warning?.message).toBe(
       'Esta línea usa la palabra vieja "partes".  Ahora Encanto dice "ranuras".  ' +
-        "Encanto 0.8 cambió esto.  Tu programa aún funciona, pero esta línea dará un error desde Encanto 1.0, así que conviene arreglarla ya."
+        "Encanto 0.8 cambió esto el 2026-10-27.  Tu programa aún funciona, pero esta línea dará un error desde Encanto 1.0, así que conviene arreglarla ya."
     )
     expect(SP.OldForms.upgraded(text, SP.OldForms.uses(file))).toBe(
       'una carta es una vista donde\n\ttiene ranuras "frente" y "dorso"\n'

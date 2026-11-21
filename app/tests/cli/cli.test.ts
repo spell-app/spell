@@ -374,17 +374,19 @@ describe("spell lint:  retired words (epic elemental-spell P27's parts;  epic la
     'a "card" is a view where:\n\t- its "rank" is a number\n\t- it has parts "front" and "back"\n' +
     "\t- animation flip it:\n\t\tpause for 1 sec\n"
 
-  test("each one is an error naming its new word, exit 1;  writes nothing", () => {
+  test("each one is a warning naming its new word and its versions, exit 0;  writes nothing (epic language P68)", () => {
     const retired = tempProject("Retired", SOURCE)
     const { status, stdout } = spell(["lint", "."], retired)
+    const versions = (date: string) =>
+      `Spell 0.8 changed this on ${date}.  Your program still runs, but this line will give an error from Spell 1.0 on, so it's best to fix it now.`
     expect(stdout).toBe(
       [
-        'Retired.spell:3:11  "parts" is now "slots":  say "slots" instead, or run `spell lint --fix`',
-        'Retired.spell:4:4  "animation" is now "to":  say "to" instead, or run `spell lint --fix`',
+        `Retired.spell:3:11  warning:  This line uses the old word "parts".  Spell now says "slots".  ${versions("2026-10-27")}  (old-form)`,
+        `Retired.spell:4:4  warning:  This line uses the old word "animation".  Spell now says "to".  ${versions("2026-10-31")}  (old-form)`,
         ""
       ].join("\n")
     )
-    expect(status).toBe(1)
+    expect(status).toBe(0)
     expect(readFileSync(resolve(retired, "Retired.spell"), "utf8")).toBe(SOURCE)
   })
 
@@ -427,6 +429,50 @@ describe("spell lint:  the old words for waiting (epic language P13)", () => {
     expect(spell(["lint", ".", "--fix"], fixing).status).toBe(0)
     expect(readFileSync(resolve(fixing, "Waiting.spell"), "utf8")).toBe(fixed)
   }, 30_000)
+})
+
+describe("spell upgrade:  a project written for an older Spell, brought up to date (epic language P68)", () => {
+  const SOURCE =
+    'a card is a view:\n\t- it has parts "front" and "back"\n\t- to slow it:\n\t\tpause for 1 sec\n' +
+    "\t- to deal it:\n\t\twait for: slow it\nx is 3 // the count\n"
+  const UPGRADED =
+    'a card is a view:\n\t- it has slots "front" and "back"\n\t- to slow it:\n\t\tpause for 1 sec\n' +
+    "\t- to deal it:\n\t\tslow it\nx is 3\n\t-- the count\n"
+  const projectFile = (folder: string) => readFileSync(resolve(folder, SP.PROJECT_FILE), "utf8")
+
+  test("lint --fix rewrites each old form, then the project file names today's Spell;  a second run finds nothing", () => {
+    const fixing = tempProject("Upgrading", SOURCE)
+    expect(spell(["lint", ".", "--fix"], fixing).status).toBe(0)
+    expect(readFileSync(resolve(fixing, "Upgrading.spell"), "utf8")).toBe(UPGRADED)
+    expect(projectFile(fixing)).toContain(`"spellVersion": "${SP.SPELL_VERSION}"`)
+    const again = spell(["lint", "."], fixing)
+    expect([again.status, again.stdout]).toEqual([0, ""])
+  }, 30_000)
+
+  test("spell upgrade on a fresh copy gives the same files;  --dry-run changes none", () => {
+    const dry = tempProject("DryRun", SOURCE)
+    const before = projectFile(dry)
+    const dryRun = spell(["upgrade", ".", "--dry-run"], dry)
+    expect(dryRun.status).toBe(0)
+    expect(dryRun.stdout).toContain('DryRun.spell:2:11  would fix:  "parts" is now "slots"')
+    expect(dryRun.stdout).toContain("would change 3 lines, to match Spell 0.9")
+    expect(readFileSync(resolve(dry, "DryRun.spell"), "utf8")).toBe(SOURCE)
+    expect(projectFile(dry)).toBe(before)
+
+    const upgrading = tempProject("Upgraded", SOURCE)
+    const { status, stdout } = spell(["upgrade", "."], upgrading)
+    expect(status).toBe(0)
+    expect(stdout.split("\n")).toEqual([
+      'Upgraded.spell:2:11  fixed:  "parts" is now "slots"',
+      `Upgraded.spell:6:3  fixed:  "wait for" isn't needed any more`,
+      'Upgraded.spell:7:7  fixed:  a "//" note moved to the line under it, as "--"',
+      expect.stringMatching(/:  changed 3 lines, and now matches Spell 0\.9$/),
+      ""
+    ])
+    expect(readFileSync(resolve(upgrading, "Upgraded.spell"), "utf8")).toBe(UPGRADED)
+    expect(projectFile(upgrading)).toContain(`"spellVersion": "${SP.SPELL_VERSION}"`)
+    expect(spell(["upgrade", "."], upgrading).stdout).toMatch(/:  already up to date with Spell 0\.9\n$/)
+  }, 60_000)
 })
 
 describe("spell lint:  a page's HTML habits (epic elemental-spell P8)", () => {

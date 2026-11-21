@@ -946,17 +946,47 @@ describe("SpellLanguageService", () => {
       await fixes("set y to", (titles) => expect(titles).toEqual([]))
     })
 
+    /** `service`'s warnings and errors in Solitaire about one of Spell's old forms, by their words. */
+    const oldFormProblems = () =>
+      service
+        .diagnostics(solitaire)
+        .filter((it) => typeof it.message === "string" && / changed this on \d{4}-\d\d-\d\d/.test(it.message))
+
     test("a note after a line's code, `// ...`:  moved to the line under it, as `--`, with its warning (epic `language` T166)", async () => {
       await fixes("set x to 1  // so it runs", async (titles, fixed) => {
-        expect(titles).toEqual(['Move the note below, changing "//" to "--"'])
+        expect(titles).toEqual(['Move the note below, changing "//" to "--"', "Upgrade this file to Spell 0.9"])
         expect(fixed).toMatch(/\nset x to 1\n\t-- so it runs$/)
-        const warned = service.diagnostics(solitaire).filter((it) => String(it.message).startsWith('A note after "//"'))
-        expect(warned).toHaveLength(1)
+        expect(oldFormProblems().map((it) => it.severity)).toEqual([DiagnosticSeverity.Warning])
         await workspace.update(solitaireUri, fixed!)
-        expect(
-          service.diagnostics(solitaire).filter((it) => String(it.message).startsWith('A note after "//"'))
-        ).toEqual([])
+        expect(oldFormProblems()).toEqual([])
       })
+    })
+
+    test("an old word:  Change ... to ..., the warning's preferred fix, its diagnostic attached;  applied, the warning goes (epic `language` P68)", async () => {
+      await fixes("to toss it\n\tpause for 1 sec\nto throw it\n\twait for: toss it", async (titles, fixed) => {
+        expect(titles).toEqual(['Take out "wait for"', "Upgrade this file to Spell 0.9"])
+        expect(fixed).toMatch(/\nto throw it\n\ttoss it$/)
+        const [warning] = oldFormProblems()
+        expect(warning?.message).toMatch(/^This line uses "wait for", which Spell doesn't need now/)
+        const last = solitaire.parseText.split("\n").length - 1
+        const [fix] = service.codeActions(solitaire, { start: { line: last, character: 0 }, end: { line: last, character: 0 } })
+        expect([fix?.isPreferred, fix?.diagnostics?.[0]?.message]).toEqual([true, warning?.message])
+        expect(service.oldFormFixAt(solitaire, { line: last, character: 3 })?.title).toBe('Take out "wait for"')
+        await workspace.update(solitaireUri, fixed!)
+        expect(oldFormProblems()).toEqual([])
+      })
+    })
+
+    test("past an old form's drop version (a test's own Spell):  an error, its fix still offered (epic `language` P68, J288)", async () => {
+      SP.OldForms.spellVersion = "1.0.0"
+      try {
+        await fixes("set x to 1  // so it runs", (titles) => {
+          expect(oldFormProblems().map((it) => it.severity)).toEqual([DiagnosticSeverity.Error])
+          expect(titles[0]).toBe('Move the note below, changing "//" to "--"')
+        })
+      } finally {
+        SP.OldForms.spellVersion = SP.SPELL_VERSION
+      }
     })
 
     test("a drawing's attribute value:  Make it code, or Make it text, its words kept (epic `editor` T74)", () => {

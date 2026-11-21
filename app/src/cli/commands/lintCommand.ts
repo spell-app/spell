@@ -8,6 +8,9 @@ import { writeSpellVersion } from "spell/parser/spell/node/projectFile"
 import { SourceEdits, type TextSpan } from "spell/app/lsp/SourceEdits"
 import { CLI } from "spell/app/cli"
 
+/** The warning for one of Spell's old forms, written the old way:  see `oldFormsIn()`. */
+const OLD_FORM = "old-form"
+
 /** The warning for a description written as a `<text>` just before its example:  see `descriptionsBeforeExamples()`. */
 const DESCRIPTION_BEFORE_EXAMPLE = "description-before-example"
 
@@ -31,7 +34,7 @@ const DESCRIPTION_BEFORE_EXAMPLE = "description-before-example"
  *   - What it can't put right is still an error.
  * - A `.spell` file's HTML habit it can't put right, `on-click=`, is an error -- see `htmlHabitsIn()`.
  * - A page's example described by a `<text>` just before it is a WARNING, which `--fix` puts right --
- *   see `pageHabitsIn()`.
+ *   see `pageHabitsIn()`;  so is each of Spell's old forms -- see `oldFormsIn()`.
  * - SIDE EFFECT:  compiles any project they import which has never been compiled --
  *   see `CliSession.compileImports()`.
  * - Returns the exit code:  `EXIT.ERRORS` if there were any errors;  warnings alone exit 0.
@@ -49,6 +52,7 @@ export async function lintCommand(session: CLI.CliSession, args: string[], optio
         if (options.fix) fixes.push(...(await fixHtmlHabits(session, project, resolved.file)))
         if (options.fix) fixes.push(...(await fixPageHabits(session, project, resolved.file)))
         problems.push(...(await checkProject(session, project, resolved.file, status)))
+        problems.push(...oldFormsIn(project, resolved.file))
         problems.push(...htmlHabitsIn(project, resolved.file))
         problems.push(...pageHabitsIn(project, resolved.file))
         continue
@@ -58,6 +62,7 @@ export async function lintCommand(session: CLI.CliSession, args: string[], optio
       if (options.fix) fixes.push(...(await fixPageHabits(session, resolved.project)))
       if (options.fix) upgradeSpellVersion(resolved.project)
       problems.push(...(await checkProject(session, resolved.project, undefined, status)))
+      problems.push(...oldFormsIn(resolved.project))
       problems.push(...htmlHabitsIn(resolved.project))
       problems.push(...pageHabitsIn(resolved.project))
       const pages = await checkPages(session, resolved.project, status, options)
@@ -230,6 +235,31 @@ async function fixPageHabits(
     fixes.push(...(await writeFixes(project, spellFile, edits)))
   }
   return fixes
+}
+
+/**
+ * Each of Spell's old forms still written in `project` -- only `file`'s, if given -- as a WARNING `--fix` puts right,
+ * `old-form` (`SP.OldForms`, epic `language` P68):  listed with the errors, so a run says what's old.
+ * - Not one past its drop version:  that's an error already, among the parse errors.
+ * - Read from the files as last parsed.
+ */
+function oldFormsIn(project: SP.SpellProject, file?: SP.SpellFile): CLI.Problem[] {
+  return (file ? [file] : project.spellFiles).flatMap((spellFile) => {
+    const text = spellFile.contents
+    if (!spellFile.match || text === undefined) return []
+    return SP.OldForms.uses(spellFile)
+      .filter((use) => !use.isDropped)
+      .map(
+        (use): CLI.Problem => ({
+          project: project.projectId,
+          path: spellFile.location.serverPath,
+          ...lineAndColumnOf(text, use.start),
+          message: use.message,
+          severity: "warning",
+          rule: OLD_FORM
+        })
+      )
+  })
 }
 
 /**

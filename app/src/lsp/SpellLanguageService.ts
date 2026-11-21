@@ -2390,6 +2390,8 @@ export class SpellLanguageService {
     for (const error of SP.Block.getParseErrors(file.match) ?? []) {
       const { start, end } = error
       if (start === undefined || end === undefined || end < from || start > to) continue
+      // an old form past its drop version:  its own fix, below, never a method to define
+      if ((error.data as SP.OldFormData).oldForm) continue
       const lineStart = text.lastIndexOf("\n", start - 1) + 1
       const scope = this.scopeAt(file, start)
       // after a statement that parsed, from its start -- else only a WHOLE line

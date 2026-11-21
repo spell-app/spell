@@ -363,8 +363,8 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "retired-word": 'Esta línea usa la palabra vieja "{words}".  Ahora Encanto dice "{replacement}".',
   "retired-word-gone": 'Esta línea usa "{words}", que Encanto ya no necesita:  espera por sí solo.',
   "old-form-deprecated":
-    "Encanto {deprecatedIn} cambió esto.  Tu programa aún funciona, pero esta línea dará un error desde Encanto {droppedIn}, así que conviene arreglarla ya.",
-  "old-form-dropped": "Encanto {deprecatedIn} cambió esto, y desde Encanto {droppedIn} es un error.  Arréglala para ejecutar tu programa.",
+    "Encanto {deprecatedIn} cambió esto el {date}.  Tu programa aún funciona, pero esta línea dará un error desde Encanto {droppedIn}, así que conviene arreglarla ya.",
+  "old-form-dropped": "Encanto {deprecatedIn} cambió esto el {date}, y desde Encanto {droppedIn} es un error.  Arréglala para ejecutar tu programa.",
   "css-not-a-view": 'Solo una vista tiene su propio <css>:  "{type}" no es una vista:  di "una ... es una vista"',
   "css-outside-outline": "Solo una vista tiene su propio <css>:  ponlo en el esquema de un tipo",
   "value-line-outside-getter":
