@@ -1,7 +1,7 @@
 ---
 name: epic
-description: Run an epic -- a piece of work planned and built against its live epic page, `epics/<name>/<name>.plan.html`, in its own worktree.  `/epic <name> [what to plan]` plans one (or "make this a plan doc" about this session's work);  `/epic review [<name>]` takes the person's marks, comments and Sends from the page ("review the seo epic", "go through its todos");  `/epic resume [<name>]` picks one back up where its page says it stopped;  `/epic future <name> [idea]` saves an idea as a future epic;  `/epic phase [ids] [name]` adds a phase;  `/epic start <P1 | ids>` works a phase or items now;  `/epic request <epic> [<rN>]` takes up a `/send` request;  `/epic tidy [<epic>]` closes items other work made obsolete;  `/epic fresh` hands this epic to a new session in this window (`all`:  every running epic session, each at its next clear moment);  `/epic done` is `/isolate done`.
-argument-hint: <name> [what to plan] | demo [pasted text] | done | review [<name>] | resume [<name>] | future <name> [idea] | phase [ids] [name] | start <P1 | ids> | request <epic> [<rN>] | tidy [<epic>] | fresh [all | --force] | color <look>
+description: Run an epic -- a piece of work planned and built against its live epic page, `epics/<name>/<name>.plan.html`, in its own worktree.  `/epic <name> [what to plan]` plans one (or "make this a plan doc" about this session's work);  `/epic review [<name>]` takes the person's marks, comments and Sends from the page ("review the seo epic", "go through its todos");  `/epic resume [<name>]` picks one back up where its page says it stopped;  `/epic future <name> [idea]` saves an idea as a future epic;  `/epic phase [ids] [name]` adds a phase;  `/epic start <P1 | ids>` works a phase or items now;  `/epic request <epic> [<rN>]` takes up a `/send` request;  `/epic tidy [<epic>]` closes items other work made obsolete;  `/epic hush` greys settled ones;  `/epic fresh` hands this epic to a new session in this window (`all`:  every running epic session, each at its next clear moment);  `/epic done` is `/isolate done`.
+argument-hint: <name> [what to plan] | demo [pasted text] | done | review [<name>] | resume [<name>] | future <name> [idea] | phase [ids] [name] | start <P1 | ids> | request <epic> [<rN>] | tidy [<epic>] | hush [<epic> | all] | fresh [all | --force] | color <look>
 ---
 
 # /epic
@@ -1999,6 +1999,31 @@ their next clear moment").
      in one line.
 - `epic fresh status`:  the sessions still waiting, and why each waits.
 
+## 17. Hush:  `/epic hush [<epic> | all]`
+
+Grey the green, yellow and orange items the person almost surely won't look at again (epic `epic-engine` T122;
+Owen, 2026-11-20:  "if you are 80% sure I don't care and the item was settled more than 3 days ago, mark it as
+settled").  Tidy's sibling:  tidy closes OPEN items other work made obsolete;  hush greys SETTLED ones.
+No `<epic>`:  this worktree's epic;  `all`:  every epic in progress.
+Only when the person asks:  it never runs by itself.
+
+1. `epic hush <epic> --dryrun`, and show the person its table:  each candidate's id, colour, age, hush or keep, why.
+   - Candidates (`Hush.candidates()`):  drawn green, yellow or orange (a fix waiting for review, a calm call, a
+     finished request), nothing on it for 3 days or more (its change stamp, its newest card or reply).
+   - Never:  red or blue items, open work (an open todo, an open issue not fixed), a manual test, a question, one
+     waiting on their pick, one they marked loud, one a tidy found promised, one with their mark not taken, Claude at
+     work on it, or a comment thread on it not finished with.
+   - The judge:  a fresh `claude -p` (Sonnet, nothing of the repo), 40 items a call, the rule:  hush only if 80% sure
+     they won't want to look again (routine fixes they asked for that shipped, calm calls following house style,
+     bookkeeping);  KEEP anything that changed what they'd notice, dropped or narrowed something, cost something, is
+     hard to undo, or is a choice they might have made differently.
+   - In Codex:  the same command;  it runs `claude -p` itself, so Claude Code must be installed.
+2. Only once they say go:  `epic hush <epic>` (the judge runs again:  its calls can differ a little from the dry run's).
+   - Each hushed item is approved as their ✓ would (a fix accepted, a call accepted, a finished item reviewed), its log
+     line `I4 hushed:  <why>`, then one line for the run, `Hush:  N greyed, M kept`;  one write of the page.
+   - It prints the counts and each kept item with its why.
+3. Reply:  the counts per epic, the kept ones worth their look, and the epic page's link pair.
+
 ## Migrations:  bringing epic pages up to today's markup
 
 Epic `epic-workflow` P8.  `epic migrate` runs named, dated steps over pages, by page kind
@@ -2069,6 +2094,7 @@ update <name> --standing [on|off]                   a standing epic:  each phase
 close <name>#<id>  /  reopen <name>#<id>            close (done) / open again, never delete
 close <name>#J3 <name>#I7 --why "<text>"            close as obsolete, the reason on each;  some refused ("14. Tidy")
 close <name> --why-file <file>                       a reason per item (JSON5 of id => reason), one write of the page
+hush [<name> | all] [--dryrun]                      grey settled items you won't look at again, 80% sure ("17. Hush")
 stale <name> [--json]                               the facts for judging which open items are stale;  decides nothing
 cancel <name>#<id> ["why"]                          made moot by another decision:  struck;  reopen undoes it
 change <name> [--for <item id>]                     stamp the <epic-change item> marks written by hand, list them,

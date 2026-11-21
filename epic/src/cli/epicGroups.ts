@@ -1480,6 +1480,11 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--hours <n>": "with --underway:  how old an Underway card must be (default 3)",
     "--quiet": "with --apply:  say nothing when nothing changed"
   },
+  hush: {
+    "--dryrun": "print the table (id, colour, age, hush or keep, why) and change nothing",
+    "--json": "print the calls as JSON",
+    "--model <model>": "the judge's model (default sonnet)"
+  },
   summaries: { "--all": "every phase and grey item, as summary --all" },
   items: {
     "--section <section>": "only that section:  questions, judgements, todos, issues or tests",

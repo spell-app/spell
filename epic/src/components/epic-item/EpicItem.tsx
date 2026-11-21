@@ -36,6 +36,7 @@ import {
   FLOW_TAGS,
   FOLD,
   GIT,
+  COMMIT_PILL,
   HAS_DETAILS,
   LABEL,
   LINE,
@@ -81,6 +82,8 @@ import itemCSS from "./EpicItem.css?inline"
  *   - the page's own buttons (`slot="actions"`, and the docs runtime's bullhorn):  before its own;
  *     a click on one never folds it
  *   - the bed icon (`overnight`:  made overnight), the git icon (with commits)
+ *     - its phase known (`commitPill`), the git icon is its `in P4` pill:  a click still shows its commits
+ *       (epic `epic-engine` I380)
  *   - handled in a phase (`handled`, epic `epic-engine` P31):  `in P4`, linking the phase;  the item grey
  *   - taken up in a phase (`taken-in`, epic `epic-engine` I128):  the same `in P4`, the item still green
  *   - the review label (`reviewed 10/6/26`, `deferred`, `to do`) and the review buttons
@@ -420,6 +423,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
       this.failed !== undefined ||
       !!this.phasePill ||
       !!this.donePill ||
+      !!this.fixIn ||
       this.hasCommits() ||
       !!this.review() ||
       this.reviewState.reviewing()
@@ -652,7 +656,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
           </span>
           {/* its phase, `in P4`, on a small line of its own under the buttons (I348):  the title wraps the same with or
               without it */}
-          <Show when={this.hasBeenNear && (this.phasePill || this.donePill)}>
+          <Show when={this.hasBeenNear && !this.commitPill && (this.phasePill || this.donePill || this.fixIn)}>
             <span class={PHASE_ROW}>
               <Show when={this.phasePill} fallback={this.doneMark()}>
                 {this.handledMark()}
@@ -667,7 +671,8 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   /**
    * The line's own marks and buttons, at its end:  bed, failed, git, review label or buttons,
    * then the (i) Clarify button (epic `epic-engine` T95:  on every item, its line, so it's found without opening it).
-   * - its phase pill (`in P4`) is under them, on a line of its own (`PHASE_ROW`, I348)
+   * - its phase pill (`in P4`) is under them, on a line of its own (`PHASE_ROW`, I348);
+   *   with commits, the git icon's place instead (`commitPill`, I380)
    */
   private lineMarks(): JSX.Element {
     return (
@@ -684,7 +689,11 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
           </span>
         </Show>
         <Show when={this.failed !== undefined}>{this.failedMark()}</Show>
-        <Show when={this.hasCommits()}>{this.gitButton()}</Show>
+        <Show when={this.hasCommits()}>
+          <Show when={this.commitPill} fallback={this.gitButton()}>
+            {this.commitMark()}
+          </Show>
+        </Show>
         <Show when={!this.reviewState.reviewing() && this.review()}>
           {(review) => (
             <span class={[REVIEW, review().look]} part={this.partForName("review")}>
@@ -778,39 +787,65 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
    * - `handled` keeps its own `in P4` pill (`phasePill`):  never both
    */
   get donePill(): string {
-    if (this.handled) return ""
-    if (!this.takenIn) return this.acceptingFixIn
+    if (this.handled || !this.takenIn) return ""
     return FINISHED.test(this.status ?? "") ? this.takenIn : ""
   }
 
   /**
-   * The phase his ✓ on a fix waiting for him (`fixed`, Accept the fix) will take this item up in, from the click:  the
-   * page's active phase, as the page server's apply stamps it (`PlanDoc.setItem()`'s `taken-in`);  else `""`
-   * (epic `epic-engine` I360).
-   * - so its `in P20` pill is there from the click, as the server will leave it:  appearing with the page's update,
-   *   it grew the line a row and moved everything under it as that update cross-faded in (Owen, 2026-11-20:  "still
-   *   seeing flash when claude comes back to mark the item as 'really grey'")
-   * - only work an active phase takes up (`PhaseTakes.isWork()`):  an issue, or a todo that isn't a limit
+   * The phase its git icon names, as its `in P21` pill, for an item with commits;  `""`:  the plain git icon
+   * (epic `epic-engine` I380;  Owen, 2026-11-20:  "show that when the code is committed, *before* the accept ... the
+   * in P21 pill could take the place of the git icon").
+   * - `handled`, else `taken-in`, else, still open, the phase its work is being done in:  the page's active one, as
+   *   the page server's apply will stamp it (`activeWorkPhase`)
+   * - so his ✓ and the apply change nothing on its line:  the pill was there, in the same place, since the commit
+   * - drawn instead of the phase row's pill:  never both
    */
-  get acceptingFixIn(): string {
-    if (this.status !== "open" || !this.fixed || this.limit) return ""
-    if (this.reviewState.liveOf().closingAs !== "approve" || !this.domElement.closest(WORK_SECTION)) return ""
+  get commitPill(): string {
+    if (!this.hasCommits()) return ""
+    if (this.handled) return this.handled
+    if (this.takenIn) return this.takenIn
+    return this.status === "open" ? this.activeWorkPhase : ""
+  }
+
+  /**
+   * A fix waiting for him with no commits (`fixed`, Accept the fix):  the phase his ✓ will take it up in, its pill's
+   * place on the phase row held from the start, the pill hidden till his click (epic `epic-engine` I380;  I360 drew
+   * it from the click, which added the row then);  else `""`.
+   */
+  get fixIn(): string {
+    if (this.status !== "open" || !this.fixed || this.phasePill || this.hasCommits()) return ""
+    return this.activeWorkPhase
+  }
+
+  /**
+   * The page's active phase, for work an active phase takes up as it's closed done (`PhaseTakes.isWork()`:  an
+   * issue, or a todo that isn't a limit), as `PlanDoc.setItem()` stamps its `taken-in`;  else `""`.
+   * - read from the page when drawn
+   */
+  private get activeWorkPhase(): string {
+    if (this.limit || !this.domElement.closest(WORK_SECTION)) return ""
     return this.domElement.closest(PAGE_TAG)?.querySelector(ACTIVE_PHASE)?.id ?? ""
   }
 
   /**
    * A finished item's `in P20` pill (`donePill`):  the same quiet grey label as a phase pill still to finish, a click
    * going to the phase;  no ⌥-click start, the work is done.
+   * - a fix waiting for him (`fixIn`):  the same pill, hidden (`data-reserved`) till his ✓, so the click and the
+   *   apply never add its row (epic `epic-engine` I380)
    */
   private doneMark(): JSX.Element {
-    const phase = () => this.phaseNamed(this.donePill)
+    const phaseId = () => this.donePill || this.fixIn
+    const phase = () => this.phaseNamed(phaseId())
+    const reserved = () => !this.donePill && this.reviewState.liveOf().closingAs !== "approve"
     return (
       <ui-label
         class={HANDLED}
         part={this.partForName("done-in")}
         size="mini"
         appearance="basic"
-        link={`#${this.donePill}`}
+        link={`#${phaseId()}`}
+        data-reserved={reserved() ? "" : undefined}
+        aria-hidden={reserved() ? "true" : undefined}
         data-tooltip={`${this.translationForKey("takenTip", { phase: phase().full })}\n${this.translationForKey("donePillTip", { phase: phase().short })}`}
       >
         {this.translationForKey("handledIn", { phase: phase().short })}
@@ -841,6 +876,49 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     if (!phaseId || phase?.localName !== "epic-phase") return
     const plan = phase.getAttribute("plan")
     this.reviewState.client?.press(phaseId.toLowerCase(), plan === "waiting" || plan === "held" ? "approve" : "todo")
+  }
+
+  /**
+   * The git icon as its phase's pill (`commitPill`, epic `epic-engine` I380):  `in P21`, in the git icon's place;  a
+   * click shows or hides its own commits, as the icon's did, pressed while they show.
+   * - still to finish (`phasePill`), an ⌥-click starts the phase, as the phase row's pill does (I271)
+   * - its tooltip names the phase and what a click does:  "in P21" doesn't say it shows commits
+   */
+  private commitMark(): JSX.Element {
+    const phase = () => this.phaseNamed(this.commitPill)
+    const words = () => this.translationForKey(this.showCommits ? "hideCommits" : "showCommits")
+    const where = () =>
+      this.translationForKey(
+        this.handled ? "handledTip" : FINISHED.test(this.status ?? "") ? "takenTip" : "workedTip",
+        { phase: phase().full }
+      )
+    const tip = () =>
+      [
+        where(),
+        words(),
+        ...(this.phasePill ? [this.translationForKey("startTip", { phase: phase().short })] : [])
+      ].join("\n")
+    const pill = () => this.translationForKey("handledIn", { phase: phase().short })
+    return (
+      <button
+        type="button"
+        class={[GIT, COMMIT_PILL]}
+        part={this.partForName("git")}
+        aria-pressed={this.showCommits ? "true" : "false"}
+        aria-label={`${pill()} · ${words()}`}
+        data-tooltip={tip()}
+        onClick={(event: MouseEvent) => {
+          if (event.altKey && this.phasePill) {
+            event.preventDefault()
+            this.startPhase(this.phasePill)
+          } else this.flipCommits()
+        }}
+      >
+        <ui-label class={HANDLED} size="mini" appearance="basic" selected={this.showCommits ? "" : undefined}>
+          {pill()}
+        </ui-label>
+      </button>
+    )
   }
 
   /** The git icon:  shows or hides its own commits;  pressed while they show. */
@@ -1203,7 +1281,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
 const FINISHED = /^(done|canceled|decided)$/
 
 /**
- * Where an item an active phase takes up when it's closed done sits (`acceptingFixIn`):  the issues, the todos
+ * Where an item an active phase takes up when it's closed done sits (`activeWorkPhase`):  the issues, the todos
  * (`PhaseTakes`' sections);  and the page and its active phase.
  */
 const WORK_SECTION = 'epic-section:is([kind="issues"], [kind="todos"], [kind="caveats"])'

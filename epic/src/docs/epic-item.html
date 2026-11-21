@@ -514,9 +514,12 @@ holding its id (Q7).  Its colour says where the item stands."
                       canceled, it goes. The <code>in P1</code> pill is the item's button for its phase (I271): a click goes to the phase, an
                       ⌥-click starts it, and a todo in a phase draws no plane. A finished item (done, canceled,
                       decided) draws the same <code>in P1</code> (J231; <code>done in P1</code> beside its buttons until I348):
-                      it has no plane, and the pill goes to the phase, with no ⌥-click start. Owen's ✓ on a fix waiting
-                      for him (Accept the fix) draws the active phase's pill from the click, as the page server's apply
-                      will stamp it, so the page's update never grows the line (I360).
+                      it has no plane, and the pill goes to the phase, with no ⌥-click start. With commits, the pill is the
+                      git icon instead, in its place on the line, a click showing the commits (I380): an open issue or
+                      todo with commits shows the active phase's pill from the commit on, as the page server's apply will
+                      stamp it. A fix waiting for him with no commits holds its pill's row from the start, the pill
+                      shown from his ✓ (Accept the fix): neither the click nor the page's update grows the line (I360,
+                      I380).
                     </td>
                     <td></td>
                   </tr>
@@ -686,7 +689,8 @@ holding its id (Q7).  Its colour says where the item stands."
                       <td>
                         With commits (<code>commits</code>, or <code>&lt;epic-commit&gt;</code> children): a git icon at
                         the line's end that shows or hides this item's own commits (T17);
-                        pressed while they show.
+                        pressed while they show. Its phase known (<code>handled</code>, <code>taken-in</code>, or an
+                        open issue or todo's active phase), it's that phase's <code>in P21</code> pill instead (I380).
                       </td>
                     </tr>
                     <tr>

@@ -293,6 +293,8 @@ export const MARKS = "marks"
 /** Under them, a small line of its own:  its phase pill, `in P4` (epic `epic-engine` I348). */
 export const PHASE_ROW = "phase-row"
 export const GIT = "git"
+/** The git icon drawn as its phase's pill, `in P21` (`EpicItem.commitPill`, epic `epic-engine` I380). */
+export const COMMIT_PILL = "commit-pill"
 export const OVERNIGHT = "overnight"
 /** Class of a failed test's mark on its line (`failed`, epic `epic-engine` P4). */
 export const FAILED = "failed"

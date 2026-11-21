@@ -794,7 +794,10 @@ function lookOf(host: Element): string {
       review?.shadowRoot?.querySelectorAll<HTMLElement>("ui-button[data-action]") ?? [],
       (button) => `${button.dataset.action}:${button.dataset.fill ?? ""}`
     ),
-    pill: root.querySelector("[part~='done-in']")?.textContent ?? "",
+    // the phase's pill as shown:  the phase row's (not while its place is only held) or the git icon's (I380)
+    pill: [root.querySelector("[part~='done-in']:not([data-reserved])"), root.querySelector("[part~='git']")]
+      .map((pill) => pill?.textContent ?? "")
+      .join(""),
     label: !!label?.shadowRoot?.querySelector("[part~='label']")
   })
 }
@@ -813,25 +816,30 @@ function watchLooks(host: Element): { looks: string[]; stop(): void } {
   return { looks, stop: () => (going = false) }
 }
 
-/** A page with an active phase, and issue I1, a fix waiting for Owen's review:  its `FIXED` label in its title. */
-const FIXED_PAGE = `<epic-page>
+/**
+ * A page with an active phase, and issue I1, a fix waiting for Owen's review:  its `FIXED` label in its title;
+ * `commits`, its fix's commit under it.
+ */
+const fixedPage = (commits = "") => `<epic-page>
   <epic-section kind="phases"><epic-phase id="p-two" title="Two" status="active"></epic-phase></epic-section>
   <epic-section kind="issues">
     <epic-item id="i1" status="open" state="replied" changed="2026-11-20T10:00:00-05:00" fixed
       ><span slot="title">It jumps when it loads <epic-update phase="2" became="fixed"></epic-update></span
-      ><p>The details.</p></epic-item
+      ><p>The details.</p>${commits}</epic-item
     >
   </epic-section>
 </epic-page>`
+const FIXED_PAGE = fixedPage()
+const COMMIT = `<epic-commit sha="abc1234">Fix the jump</epic-commit>`
 
 describe("<epic-item> his ✓ on a fix, then the page server's apply (I360)", () => {
   afterEach(() => ReviewClient.adopt(undefined))
 
   /** The page, reviewed, I1's ✓ (Accept the fix) pressed and drawn;  its host, client and routes. */
-  async function accepted() {
+  async function accepted(html = FIXED_PAGE) {
     const routes = new FakeRoutes()
     const client = await adoptClient(routes)
-    const page = await render<HTMLElement>(FIXED_PAGE)
+    const page = await render<HTMLElement>(html)
     const host = page.querySelector("epic-item")!
     await vi.waitFor(() => expect(lookOf(host)).toContain('"approve:none"'))
     client.press("i1", "approve")
@@ -858,6 +866,22 @@ describe("<epic-item> his ✓ on a fix, then the page server's apply (I360)", ()
     await ElementFixture.settle()
     await nextFrame(3)
   }
+
+  test("its pill's row held from the start, the pill shown from the click:  his ✓ never grows the line (I380)", async () => {
+    const routes = new FakeRoutes()
+    const client = await adoptClient(routes)
+    const page = await render<HTMLElement>(FIXED_PAGE)
+    const host = page.querySelector("epic-item")!
+    await vi.waitFor(() => expect(lookOf(host)).toContain('"approve:none"'))
+    const before = JSON.parse(lookOf(host)) as { height: number; pill: string }
+    // its place held, hidden:  no pill yet
+    expect(before.pill).toBe("")
+    expect(host.shadowRoot!.querySelector("[part~='done-in'][data-reserved]")).not.toBeNull()
+    client.press("i1", "approve")
+    await vi.waitFor(() => expect(lookOf(host)).toContain('"approve:dashed"'))
+    const after = JSON.parse(lookOf(host)) as { height: number; pill: string }
+    expect([after.pill, after.height]).toEqual(["in P1", before.height])
+  })
 
   test("held in view:  its `in P` pill from the click, so the page's update changes nothing on screen;  Send lets go once", async () => {
     const { host, client, routes } = await accepted()
@@ -893,5 +917,92 @@ describe("<epic-item> his ✓ on a fix, then the page server's apply (I360)", ()
     watch.stop()
     // before:  pressed again till the apply, then unpressed, a row taller and its label back a moment, as it landed
     expect(watch.looks).toHaveLength(1)
+  })
+})
+
+////////////////
+// ## The git icon is its phase's pill (I380)
+////////////////
+
+// epic `epic-engine` I380;  Owen, 2026-11-20:  "Can you show that when the code is committed, *before* the accept,
+// e.g. so the item text will be the same size before/after you've updated?  Also, the in P21 pill could take the place
+// of the git icon you're showing now."
+
+describe("<epic-item> with commits:  its phase's pill in the git icon's place (I380)", () => {
+  afterEach(() => ReviewClient.adopt(undefined))
+
+  test("a committed fix waiting for him:  `in P1` where the git icon was, no git glyph, no phase row;  a click shows its commits", async () => {
+    const page = await render<HTMLElement>(fixedPage(COMMIT))
+    const host = page.querySelector<ItemHost>("epic-item")!
+    await vi.waitFor(() => expect(host.shadowRoot!.querySelector("[part~='git']")).not.toBeNull())
+    const root = host.shadowRoot!
+    const git = root.querySelector<HTMLButtonElement>("[part~='git']")!
+    expect([git.textContent, git.classList.contains("commit-pill"), root.querySelector(".phase-row")]).toEqual([
+      "in P1",
+      true,
+      null
+    ])
+    // still open, not taken in yet:  no ⌥-click start, which is `taken-in`'s pill's (I271)
+    expect(git.dataset.tooltip).toBe("Worked on in P1 · Two\nShow this item's commits")
+    expect(root.querySelector("[part~='line'] .marks")!.contains(git)).toBe(true)
+    git.click()
+    await ElementFixture.tick()
+    expect([
+      host.open,
+      git.getAttribute("aria-pressed"),
+      git.querySelector("ui-label")!.hasAttribute("selected")
+    ]).toEqual([true, "true", true])
+    await expectAccessible(host)
+  })
+
+  test("his ✓ on a committed fix, then the apply:  the same pill in the same place, the line's height never changes", async () => {
+    const routes = new FakeRoutes()
+    const client = await adoptClient(routes)
+    const page = await render<HTMLElement>(fixedPage(COMMIT))
+    const host = page.querySelector("epic-item")!
+    await vi.waitFor(() => expect(lookOf(host)).toContain('"approve:none"'))
+    const heights: number[] = []
+    const pills = new Set<string>()
+    const watch = watchLooks(host)
+    const sample = () => {
+      const look = JSON.parse(lookOf(host)) as { height: number; pill: string }
+      heights.push(look.height)
+      pills.add(look.pill)
+    }
+    sample()
+    client.press("i1", "approve")
+    await vi.waitFor(() => expect(lookOf(host)).toContain('"approve:dashed"'))
+    sample()
+    delete routes.inbox.marks.i1
+    await client.refresh()
+    await nextFrame(2)
+    sample()
+    host.setAttribute("status", "done")
+    host.setAttribute("state", "recent")
+    host.setAttribute("reviewed", "2026-11-20")
+    host.setAttribute("review-as", "approve")
+    host.setAttribute("taken-in", "p-two")
+    host.removeAttribute("fixed")
+    host.querySelector("epic-update")!.remove()
+    await ElementFixture.settle()
+    await nextFrame(3)
+    sample()
+    await client.send()
+    await nextFrame(2)
+    sample()
+    watch.stop()
+    expect([...pills]).toEqual(["in P1"])
+    expect(
+      new Set([...heights, ...watch.looks.map((look) => (JSON.parse(look) as { height: number }).height)]).size
+    ).toBe(1)
+    expect(host.shadowRoot!.querySelector(".phase-row")).toBeNull()
+  })
+
+  test("no phase to name (a finished item never taken in):  the plain git icon", async () => {
+    const { host } = await item(
+      `<epic-item id="i2" title="Fixed" status="done"><p>Why.</p><epic-commit sha="abc1234">Fix it</epic-commit></epic-item>`
+    )
+    const git = host.shadowRoot!.querySelector("[part~='git']")!
+    expect([git.querySelector("ui-label"), git.textContent]).toEqual([null, ""])
   })
 })

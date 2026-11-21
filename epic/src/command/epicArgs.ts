@@ -470,7 +470,7 @@ const ITEM_VERBS = [
  * - or by a flag (`split --done`, `backfill --all`, `test --all`)
  * - or not on one (`saga`'s own verbs, `summaries`' files, `owns`' paths)
  */
-const NO_EPIC_VERBS = ["list", "migrate", "split", "backfill", "saga", "summaries", "owns", "update", "test"]
+const NO_EPIC_VERBS = ["list", "migrate", "split", "backfill", "saga", "summaries", "owns", "update", "test", "hush"]
 
 /** Verbs on one phase, its ref after the epic:  `epic phase seo#P3 done` -> `phase seo 3 done`. */
 const PHASE_VERBS = ["phase", "updated", "file"]
