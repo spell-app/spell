@@ -611,15 +611,13 @@ describe("reads after a wait", () => {
 })
 
 // epic `language` P13, Q9
-describe("the old words for waiting, retired", () => {
-  /** `lines`, a file of its own project:  each error's words and what replaces them, and its code. */
+describe("the old words for waiting, retired:  old forms, each a warning until Spell 1.0 (epic `language` P68)", () => {
+  /** `lines`, a file of its own project:  each old form's words and what replaces them, its warnings, and its code. */
   function parsed(path: string, lines: string[]) {
     const [file] = parseSpellProject([{ path, contents: lines.join("\n") }]).files
-    const errors = (SP.Block.getParseErrors(file!.match!) ?? []).map((error) => [
-      error.inputText.trim(),
-      error.data.replacement
-    ])
-    return { errors, messages: file!.errors.map((error) => `${error}`), code: file!.compiled }
+    const uses = SP.OldForms.uses({ match: file!.match, parseText: lines.join("\n") })
+    const errors = uses.map((use) => [use.written.trim(), use.replacement])
+    return { errors, messages: uses.map((use) => use.message), code: file!.compiled }
   }
 
   test.each([
@@ -639,7 +637,7 @@ describe("the old words for waiting, retired", () => {
       ...body
     ])
     expect(errors).toEqual([[words, replacement]])
-    expect(messages[0]).toContain("spell lint --fix")
+    expect(messages[0]).toContain("Spell 0.8 changed this on 2026-10-31")
   })
 
   test.each([
@@ -654,7 +652,7 @@ describe("the old words for waiting, retired", () => {
     const lines = ["una carta es una cosa donde:", "\t- para frenar:", "\t\tpausar 1 segundo", ...body]
     const { errors, messages } = parsed("/Prueba.es.spell", lines)
     expect(errors).toEqual([[words, replacement]])
-    expect(messages[0]).toContain("spell lint --fix")
+    expect(messages[0]).toContain("Encanto 0.8 cambió esto el 2026-10-31")
   })
 
   test("what stays:  `start process`, `process x is running`, a toast's `and wait`", () => {

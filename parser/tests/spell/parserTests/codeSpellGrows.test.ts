@@ -149,7 +149,7 @@ describe("slots (Q55, Q56;  P27)", () => {
     }
   })
 
-  test("the old `has parts` still reads, as an error naming `slots` over just the word (its quick fix)", () => {
+  test("the old `has parts` still reads, as an old form's warning naming `slots` over just the word (its quick fix;  epic `language` P68)", () => {
     for (const [path, lines, word, replacement] of [
       ["/test.spell", ['a "box" is a view where:', '\t- it has parts "lid" and "base"'], "parts", "slots"],
       [
@@ -162,9 +162,10 @@ describe("slots (Q55, Q56;  P27)", () => {
       const { files } = parseSpellProject([{ path, contents: lines.join("\n") }])
       const [file] = files
       const contents = lines.join("\n")
-      const errors = SP.Block.getParseErrors(file!.match!) ?? []
-      expect(errors.map((error) => contents.slice(error.start, error.end))).toEqual([word])
-      expect(errors.map((error) => error.data.replacement)).toEqual([replacement])
+      expect(SP.Block.getParseErrors(file!.match!) ?? []).toEqual([])
+      const uses = SP.OldForms.uses({ match: file!.match, parseText: contents })
+      expect(uses.map((use) => contents.slice(use.start, use.end))).toEqual([word])
+      expect(uses.map((use) => use.replacement)).toEqual([replacement])
       expect(file!.compiled).toContain(
         path.endsWith(".es.spell") ? 'static slots = ["tapa", "base"]' : 'static slots = ["lid", "base"]'
       )

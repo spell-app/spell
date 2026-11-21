@@ -8,10 +8,11 @@ describe("the language's spell commands (epic repo-split P13)", () => {
   languageCommands(spell)
   const names = spell.commands.map((command) => command.name())
 
-  test("Owen's names:  lint (was check), speedtest (was speed);  no explore;  translate for translating and the packs", () => {
+  test("Owen's names:  lint (was check), speedtest (was speed);  no explore;  translate for translating and the packs;  upgrade (epic language P68)", () => {
     expect(names).toEqual([
       "compile",
       "lint",
+      "upgrade",
       "describe",
       "run",
       "test",
