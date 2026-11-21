@@ -18,7 +18,9 @@ const NOT_A_PROJECTS_BUILD = /(^|\/)__draft(\/|$)/
  *   kind, and the NAME of its secret.  The page server parses nothing, and a page can say none of it.
  * - Each place's deployment, picked as `spell run` picks it (`SP.SpellProject.deploymentsIn()`), by
  *   `SPELL_DEPLOYMENT`:  its address, its secret's name, read only or not.
- *   - A deployment its project file doesn't list:  the place reads as its line says, and the log says so once.
+ *   - A deployment its project file doesn't list:  every place of that project is REFUSED, in
+ *     `SP.UnlistedDeploymentError`'s words, at startup and on every read (from-console J104).
+ *     Never read as its line says:  that would read the wrong server quietly.
  * - Every place for the secrets that aren't set:  every project's declarations under `build/`, built when the page
  *   server last compiled it (`ProjectBuild`), drafts' builds left out.
  * - Node only;  imported by path, by the app's route module.
@@ -28,12 +30,19 @@ export class ProjectPlaces implements AuthenticatedPlaceSource {
   private readonly from: Readonly<Record<string, string | undefined>>
   /** The build folder its declarations are read from. */
   private readonly buildDir: string
-  /** Projects whose deployment was said not to be listed:  said once each. */
-  private readonly saidUnlisted = new Set<string>()
+  /** Reads a project's file, by its address. */
+  private readonly projectFileOf: (projectId: string) => Promise<Pick<SP.ProjectManifestJSON5, "places">>
+  /** Projects whose file couldn't be read:  said once each. */
+  private readonly saidUnreadable = new Set<string>()
 
-  constructor({ from = process.env, buildDir = environment.buildDir }: ProjectPlacesProps = {}) {
+  constructor({
+    from = process.env,
+    buildDir = environment.buildDir,
+    projectFileOf = loadProjectFile
+  }: ProjectPlacesProps = {}) {
     this.from = from
     this.buildDir = buildDir
+    this.projectFileOf = projectFileOf
   }
 
   /** The place a request's path names (`@acme/jobs/jobs/jobs/12`), from its project's declarations. */
@@ -69,7 +78,7 @@ export class ProjectPlaces implements AuthenticatedPlaceSource {
     )
     if (!served.length) return []
     const project = projectId ?? projectIn(served[0]!.served.servedAt, served[0]!.name)
-    const deployments = await this.deploymentsOf(project)
+    const { deployments, refusal } = await this.deploymentsOf(project)
     return served.map(({ name, served: { at, kind, keyNamed, keyGoes, tokenFrom, readOnly } }) => {
       const deployed = deployments[name]
       const token = deployed?.tokenFrom ?? tokenFrom
@@ -81,25 +90,29 @@ export class ProjectPlaces implements AuthenticatedPlaceSource {
         keyNamed: deployed?.key ?? keyNamed,
         ...(keyGoes && { keyGoes }),
         ...(token !== undefined && { tokenFrom: token }),
-        ...((readOnly || deployed?.readOnly) && { readOnly: true })
+        ...((readOnly || deployed?.readOnly) && { readOnly: true }),
+        ...(refusal !== undefined && { refusal })
       }
     })
   }
 
   /**
    * Each place's deployment `SPELL_DEPLOYMENT` names, from `projectId`'s project file:  none when it names none.
-   * - NEVER throws:  a project file that lists no such deployment reads as its lines say, said once.
+   * - `refusal`:  a deployment the file doesn't list, in `SP.UnlistedDeploymentError`'s words.
+   * - NEVER throws:  a project file that can't be read reads as its lines say, logged once.
    */
-  private async deploymentsOf(projectId: string): Promise<ReturnType<typeof SP.SpellProject.deploymentsIn>> {
+  private async deploymentsOf(projectId: string): Promise<ProjectDeployments> {
     const deployment = this.from[SP.DEPLOYMENT_VARIABLE]
-    if (!deployment) return {}
+    if (!deployment) return { deployments: {} }
     try {
-      const { places } = await loadProjectFile(projectId)
-      return SP.SpellProject.deploymentsIn(places, deployment, projectId)
+      const { places } = await this.projectFileOf(projectId)
+      return { deployments: SP.SpellProject.deploymentsIn(places, deployment, projectId) }
     } catch (error) {
-      if (!this.saidUnlisted.has(projectId)) console.warn(`places:  ${(error as Error).message}`)
-      this.saidUnlisted.add(projectId)
-      return {}
+      if (error instanceof SP.UnlistedDeploymentError) return { deployments: {}, refusal: error.message }
+      if (!this.saidUnreadable.has(projectId))
+        console.error(`ProjectPlaces:  can't read ${projectId}'s project file`, error)
+      this.saidUnreadable.add(projectId)
+      return { deployments: {} }
     }
   }
 }
@@ -110,6 +123,16 @@ export type ProjectPlacesProps = {
   from?: Readonly<Record<string, string | undefined>>
   /** The build folder;  default the checkout's. */
   buildDir?: string
+  /** Reads a project's file, by its address;  default from disk (`loadProjectFile()`). */
+  projectFileOf?: (projectId: string) => Promise<Pick<SP.ProjectManifestJSON5, "places">>
+}
+
+/** A project's places' deployments, picked by `SPELL_DEPLOYMENT`, or why none can be. */
+type ProjectDeployments = {
+  /** Each place's, by its name as compiled code names it. */
+  deployments: ReturnType<typeof SP.SpellProject.deploymentsIn>
+  /** Why its places are refused:  a deployment its file doesn't list. */
+  refusal?: string
 }
 
 /** The project a request's path starts with, and the rest:  `undefined` for one no project group holds. */

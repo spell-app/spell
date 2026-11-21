@@ -834,6 +834,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       the NAME of its secret.  Nothing a page sends says where a secret goes.
     - In the deployment `SPELL_DEPLOYMENT` names, from the project file's `places`, as `spell run` picks it
       (`SP.SpellProject.deploymentsIn()`).
+      - A deployment the project file doesn't list:  that project's places are refused, never read as their lines say;
+        named as the page server starts, and every read refused, in `SP.UnlistedDeploymentError`'s words (from-console J104).
     - The secrets that aren't set, as the page server starts:  every project's declarations under `build/`.
     - Its test, end to end:  [ProjectPlaces.test.ts](../../tests/spaces/server/node/places/ProjectPlaces.test.ts).
   - Its tests:  [SpaceFolders.test.ts](../../tests/spaces/server/node/places/SpaceFolders.test.ts);

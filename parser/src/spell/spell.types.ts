@@ -303,6 +303,27 @@ export type ProjectManifestJSON5 = {
  */
 export const DEPLOYMENT_VARIABLE = "SPELL_DEPLOYMENT"
 
+/**
+ * Thrown by `SpellProject.deploymentsPicked()` for a deployment no place in the project's file lists:
+ * `spell run` stops with its words, and the page server refuses to read that project's places with them.
+ * - Its message names the project, the deployment asked for, the ones the file lists, and the fix,
+ *   in short lines.
+ */
+export class UnlistedDeploymentError extends TypeError {
+  declare cause: UnlistedDeploymentCause | undefined
+}
+UnlistedDeploymentError.prototype.name = "UnlistedDeploymentError"
+
+/** Why an `UnlistedDeploymentError` was thrown. */
+export type UnlistedDeploymentCause = {
+  /** The project, by address:  `@acme/jobs`. */
+  projectId: string
+  /** The deployment asked for:  `prod`. */
+  deployment: string
+  /** The deployments its file does list, in its order:  `["dev", "staging"]`. */
+  listed: string[]
+}
+
 /** A single entry in `contents.manifest`, augmented with `path`/`location`/`file` once loaded. */
 export type ProjectManifestEntry = {
   /** File creation time (ms epoch), from the server. */
