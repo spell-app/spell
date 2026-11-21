@@ -179,7 +179,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
         {
           type: "Site",
           superType: "App",
-          defined: "/Site.spell:498-737"
+          defined: "/Site.spell:498-743"
         },
         {
           property: "current_address",
@@ -192,7 +192,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           property: "theme",
           of: "Site",
           datatype: "text",
-          defined: "/Site.spell:630-737"
+          defined: "/Site.spell:630-743"
         }
       ],
       codeLines: [10, 14, 20]
@@ -206,7 +206,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           type: "Site",
           superType: "App",
           gender: "masculine",
-          defined: "/Site.es.spell:537-794"
+          defined: "/Site.es.spell:537-802"
         },
         {
           property: "dirección_actual",
@@ -220,7 +220,7 @@ export const BUILT_IN_TEMPLATE_DECLARATIONS: Record<string, Record<string, SP.Sp
           property: "tema",
           of: "Site",
           datatype: "text",
-          defined: "/Site.es.spell:679-794",
+          defined: "/Site.es.spell:679-802",
           output: "theme"
         }
       ],
