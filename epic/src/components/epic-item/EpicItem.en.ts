@@ -349,7 +349,9 @@ export const epicItemVocabulary = {
       name: "git",
       description:
         "With commits (`commits`, or `<epic-commit>` children):  a git icon at the line's end that shows or hides " +
-        "this item's own commits, whatever the page's git toggle says (T17);  pressed while they show."
+        "this item's own commits, whatever the page's git toggle says (T17);  pressed while they show.  Its phase " +
+        "known (`handled`, `taken-in`, or an open issue or todo's active phase), it's that phase's `in P21` pill " +
+        "instead, from the commit on, so Accept the fix changes nothing on the line (epic `epic-engine` I380)."
     },
     {
       name: "actions",
@@ -452,6 +454,18 @@ export const epicItemVocabulary = {
       key: "phasePillTip",
       text: "Go to {phase} · ⌥-click:  start it",
       description: "The phase link's tooltip's second line:  what a click and an ⌥-click do (epic `epic-engine` I271)."
+    },
+    {
+      key: "workedTip",
+      text: "Worked on in {phase}",
+      description:
+        "The git icon's `in P21` pill's tooltip on an item still open:  the phase its work is being done in (epic " +
+        "`epic-engine` I380)."
+    },
+    {
+      key: "startTip",
+      text: "⌥-click:  start {phase}",
+      description: "The git icon's `in P21` pill's tooltip's last line, its phase still to finish (I271, I380)."
     },
     {
       key: "takenTip",

@@ -313,6 +313,21 @@
     outline: 2px solid var(--ui-focus-color, Highlight);
     outline-offset: 0;
   }
+  /*
+   * the git icon as its phase's pill (`.commit-pill`, epic `epic-engine` I380):  as wide as the pill, the pill's own
+   * look;  pressed, the pill `selected`
+   */
+  .git.commit-pill {
+    width: auto;
+    border-radius: 999px;
+  }
+  .commit-pill > ui-label {
+    pointer-events: none;
+  }
+  /* a fix waiting for him (`fixIn`):  its pill's place held, the pill shown from his ✓ (I380) */
+  [part~="done-in"][data-reserved] {
+    visibility: hidden;
+  }
   .git svg {
     display: block;
     width: auto;
