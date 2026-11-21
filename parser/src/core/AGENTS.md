@@ -440,6 +440,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       one file a class, e.g. `Person.schema.json`, in a schemas folder.
     - The code:  cli's `writeSchemas()`.
   - Both read a property's kind through ONE function, `kindOf()`, so they can't disagree.
+    - It's in [kinds.ts](kinds.ts), which imports only `spell/util`:  the lazy sample rows (`placeSamples.ts`) read it
+      too, and through the checker they pulled `core` into the chunk every runtime copy shares (from-console I37).
   - In `spell/parser/core/model` too:  the people store checks with it.
 - A type as a LEXICON, AT Protocol's schema language ([lexicon.ts](lexicon.ts), epic `atmosphere` P10):
   - `lexiconFor(Class, { id })`:  its records' shape for other apps, by the same `kindOf()`.

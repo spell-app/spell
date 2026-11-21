@@ -261,6 +261,13 @@ export class EpicProgram {
       "epic stale seo --json"
     ).usage("<epic> [--json]")
     this.page(
+      epic.command("hush"),
+      "grey the green, yellow and orange items settled 3+ days ago that you almost surely don't care about (80% sure, " +
+        "judged one by one by a fresh claude -p), as your check would;  no epic:  this worktree's;  all:  every open " +
+        "epic;  --dryrun:  the table only (for /epic hush)",
+      "epic hush epic-engine --dryrun"
+    ).usage("[<epic> | all] [--dryrun] [--json] [--model sonnet]")
+    this.page(
       epic.command("summaries"),
       "`summary --json` of each page, by path (worktrees' too), for /epics;  --all as summary's",
       "epic summaries epics/seo/seo.plan.html"

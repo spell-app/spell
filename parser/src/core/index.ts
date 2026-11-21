@@ -91,7 +91,8 @@ export {
   type LoaderOptions
 } from "./saving"
 // A saved entry checked against its class, and the JSON Schema VS Code checks it with (P5):  see `checking.ts`.
-export { checkEntry, jsonSchemaFor, kindOf, type EntryProblem, type CheckOptions, type Kind } from "./checking"
+export { checkEntry, jsonSchemaFor, type EntryProblem, type CheckOptions } from "./checking"
+export { kindOf, type Kind } from "./kinds"
 // A type as a Lexicon, AT Protocol's schema language, and one read back as Spell (epic `atmosphere` P10):  see `lexicon.ts`.
 export {
   lexiconFor,

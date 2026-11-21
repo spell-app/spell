@@ -4,12 +4,14 @@ import { createRequire } from "node:module"
 import { basename, dirname, join, relative, resolve } from "node:path"
 
 import { SRV } from "spell/server"
+import { ThreadFacts } from "spell/epic/comments"
 import { duration, parseVerbArgs, stringFlag } from "spell/epic/command/command.types"
 import { WorkTime } from "spell/epic/command/WorkTime"
 import { EpicConfig } from "spell/epic/config/EpicConfig"
 import { DataFile } from "spell/epic/data/DataFile"
 import { Markup } from "spell/epic/markup"
 import { PageStages, PhaseStatuses } from "spell/epic/phases"
+import { partOf } from "spell/epic/review/review.types"
 import { fromTemplate } from "spell/epic/tools/pages.js"
 import {
   CardText,
@@ -38,6 +40,7 @@ import { EpicParts } from "./EpicParts"
 import { EpicTargets } from "./EpicTargets"
 import { FocusCommands } from "./FocusCommands"
 import { FreshCommands } from "./FreshCommands"
+import { Hush, type HushCall, type HushJudge } from "./Hush"
 import { InboxCommands } from "./InboxCommands"
 import { ItemPicker } from "./ItemPicker"
 import { ItemPictures, type PastedReader } from "./ItemPictures"
@@ -133,21 +136,36 @@ export class PlanDocCommands {
   readonly pastedReader: PastedReader | undefined
 
   /**
+   * decides which settled items `hush` greys (epic `epic-engine` T122):  default `claude -p` (`Hush`);  a test's gives
+   * its own;  STATIC for the object's life
+   */
+  readonly hushJudge: HushJudge | undefined
+
+  /**
    * - `files`:  the checkout's epic pages
    * - `sessionsOf`:  an epic's running sessions, for `migrate --notify`
    *   - the `spell` CLI gives it (`epicSessions()`)
    * - `phaseTimer`:  default the transcripts' (`WorkTime.ofPhase()`);  a test's gives its own
    * - `pastedReader`:  default the transcript's;  a test's gives its own
+   * - `hushJudge`:  default `claude -p`;  a test's gives its own
    */
   constructor({
     files = new PlanDocFiles(),
     sessionsOf,
     phaseTimer = (request) => new WorkTime().ofPhase(request).minutes,
-    pastedReader
-  }: { files?: PlanDocFiles; sessionsOf?: SessionFinder; phaseTimer?: PhaseTimer; pastedReader?: PastedReader } = {}) {
+    pastedReader,
+    hushJudge
+  }: {
+    files?: PlanDocFiles
+    sessionsOf?: SessionFinder
+    phaseTimer?: PhaseTimer
+    pastedReader?: PastedReader
+    hushJudge?: HushJudge
+  } = {}) {
     this.files = files
     this.phaseTimer = phaseTimer
     this.pastedReader = pastedReader
+    this.hushJudge = hushJudge
     this.inbox = new InboxCommands(this)
     this.migrator = new MigrateCommands(this, sessionsOf)
     this.sagas = new SagaCommands(this)
@@ -199,6 +217,8 @@ export class PlanDocCommands {
     if (command === "test" && flags.all) return this.tests.all(flags)
     // `commits remap <map...> --repo <old repo>`:  every epic page's commits, not one page's (epic-engine's P49)
     if (command === "commits" && name === "remap") return this.remapCommits(rest, flags)
+    // `hush [<epic> | all]`:  this checkout's epic with no name, every open epic with `all` (epic `epic-engine` T122)
+    if (command === "hush") return this.hush(name, flags)
     if (!command || !name) return this.usage()
     if (command === "summaries") return this.printSummaries(positional.slice(1), summaryScope(flags))
     if (command === "owns")
@@ -1109,6 +1129,66 @@ export class PlanDocCommands {
   }
 
   /**
+   * `hush [<epic> | all] [--dryrun] [--json] [--model sonnet]` (`Hush`, epic `epic-engine` T122):  each epic's green,
+   * yellow and orange items settled 3 days ago or more, judged one by one, and those Owen almost certainly doesn't
+   * care about greyed, as his ✓ would.
+   * - no epic:  the epic of this checkout's worktree;  `all`:  every epic in progress
+   * - `--dryrun`:  the table only (id, colour, age, hush or keep, why);  nothing written
+   * - else ONE write of each page with something to grey, its log saying each and `Hush:  N greyed, M kept`
+   * - prints, per epic, the counts, then the table (`--dryrun`) or the kept ones with their why
+   */
+  private async hush(name: string | undefined, flags: Flags): Promise<void> {
+    const dry = Boolean(flags.dryrun ?? flags.dryRun)
+    const names = name === "all" ? this.openEpics() : [name ?? this.checkoutEpic()]
+    const hush = new Hush({ judge: this.hushJudge, model: stringFlag(flags.model) })
+    const report: { epic: string; calls: HushCall[]; greyed: number }[] = []
+    for (const epic of names) {
+      const file = this.files.findDoc(epic)
+      const skip = PlanDocCommands.hushSkips(file)
+      const candidates = Hush.candidates(this.read(file), skip)
+      const calls = candidates.length ? hush.decide(epic, candidates) : []
+      const hushed = calls.filter((call) => call.hush)
+      const greyed = dry || !hushed.length ? 0 : (await this.edit(file, (plan) => Hush.apply(plan, calls, skip))).greyed
+      report.push({ epic, calls, greyed })
+      if (flags.json) continue
+      const kept = calls.filter((call) => !call.hush)
+      const counts = dry
+        ? `${calls.length} settled 3+ days:  ${hushed.length} to hush, ${kept.length} to keep (dry run:  nothing changed)`
+        : `Hush:  ${greyed} greyed, ${calls.length - greyed} kept`
+      const rows = dry ? Hush.table(calls) : Hush.table(kept)
+      this.print([`${epic}:  ${counts}`, ...rows].join("\n"))
+    }
+    if (flags.json) this.print(JSON.stringify(dry ? report.map(({ greyed: _, ...rest }) => rest) : report, null, 2))
+  }
+
+  /** The epics `hush all` goes through:  every one in progress. */
+  private openEpics(): string[] {
+    return this.files
+      .listEpics()
+      .filter((epic) => epic.status === "in progress")
+      .map((epic) => epic.name)
+  }
+
+  /** The epic of this checkout's worktree;  throws a `PlanDocError` when it's no epic's. */
+  private checkoutEpic(): string {
+    const name = EpicConfig.of(this.files.root).worktreeNameOf(this.files.root)
+    if (name && this.files.epicNames().includes(name)) return name
+    throw new PlanDocError("hush:  which epic?  this checkout is no epic's worktree:  epic hush <epic>, or all")
+  }
+
+  /** What `Hush` leaves out of epic page `file`, from its inbox:  his marks, Claude's work, threads not finished. */
+  private static hushSkips(file: string): { marked: Set<string>; working: Set<string>; commented: Set<string> } {
+    const inbox = ReviewInbox.read(ReviewInbox.pathFor(file))
+    const comments = inbox.commentList
+    const open = [...comments.waiting, ...comments.all.filter((comment) => ThreadFacts.turnOf(comment) === "person")]
+    return {
+      marked: PlanDocCommands.pendingMarks(file),
+      working: new Set(Object.keys(inbox.working).map((id) => id.toLowerCase())),
+      commented: new Set(open.map((comment) => partOf(comment.anchor)))
+    }
+  }
+
+  /**
    * `original <name> <id> --file <html> [--as-of "YYYY-MM-DD HH:MM"]`:
    * earlier text into an item's Original Discussion.
    */
@@ -1785,6 +1865,10 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    open items whose Underway card is older than n hours (3),
                                                    nobody working them:  on main => fixed for review;  else a
                                                    Stale card, once (--apply);  every turn's end runs it (T78)
+  hush [<name> | all] [--dryrun] [--json] [--model sonnet]
+                                                   grey the green, yellow and orange items settled 3+ days ago Owen
+                                                   almost surely won't look at again (80%, a fresh claude -p judges
+                                                   each), as his check would;  --dryrun:  the table only (T122)
   cancel <name> <id> ["why"]                       an item made moot by another decision:  struck through;
                                                    reopen undoes it
   commit <name> <sha> --phase N | --item <id> "sentence"
@@ -1917,7 +2001,7 @@ const LOG_LABEL = "Log"
 const LOG_LAST = 20
 
 /** Flags that never take a value, so `epic summary --all seo` keeps `seo` as the epic. */
-const SWITCHES = ["all", "json"]
+const SWITCHES = ["all", "json", "dryrun", "dryRun"]
 
 /** `summary`'s mark for a phase's status. */
 const PHASE_MARKS = { todo: "[ ]", active: "[~]", done: "[x]", dropped: "[-]" }

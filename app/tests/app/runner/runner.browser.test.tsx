@@ -140,6 +140,19 @@ import { shout } from "${SHOUT_MODULE}"
 core.console.log(shout("hello"))
 `
 
+/** An app that draws what a code file says:  `shout "hi"`, `HI`. */
+const SHOUTER = `
+import { core, App, h } from "@spell/core"
+import { shout } from "${SHOUT_MODULE}"
+export class Shouter extends App {
+  draw() {
+    return h("p", { class: "shouted" }, () => shout("hi"))
+  }
+}
+export let shouter = new Shouter()
+shouter.start()
+`
+
 /** A program with no app:  it only prints. */
 const PRINTER = `
 import { core } from "@spell/core"
@@ -1025,6 +1038,18 @@ describe("<SpellAppRunner>, a program that calls native code (from-console J110)
     expect(host.querySelector(".SpellAppToolbar .error")).toBeNull()
   })
 
+  test("a recompile with an app running:  a code file changed since runs it again, with the new code (from-console I37)", async () => {
+    let shoutJs = SHOUT_JS
+    const nativeUrl = () => `data:text/javascript,${encodeURIComponent(shoutJs)}`
+    const { host, setSource } = await mountSettable({ ...source(SHOUTER, "Shouter"), nativeUrl })
+    await waitFor(() => host.querySelector(".shouted")?.textContent === "HI", 10_000)
+
+    // the code file edited and saved;  the program recompiled, as a live edit would take it
+    shoutJs = SHOUT_JS.replace("()", '() + "!"')
+    setSource({ ...source(`${SHOUTER}\n// edited`, "Shouter"), nativeUrl })
+    await waitFor(() => host.querySelector(".shouted")?.textContent === "HI!", 10_000)
+  })
+
   test("a source with no `nativeUrl`:  it says it can't load the code file", async () => {
     const host = await mount(source(CALLS_NATIVE, "Shout"))
     const error = await waitFor(() => host.querySelector(".SpellAppToolbar .error"))
@@ -1068,6 +1093,34 @@ describe("<VSCodeRunner>", () => {
     await waitFor(() => posted.filter(({ type }) => type === "loadNative").length === 2)
     tellRunner({ type: "native", module: SHOUT_MODULE, javascript: SHOUT_JS })
     await waitFor(() => posted.some(({ type }) => type === "testResults"))
+  })
+
+  test("Restart asks for the code file again:  an edit to it shows (from-console I37)", async () => {
+    const { host, posted } = await mountVSCode()
+    await waitFor(() => posted.some(({ type }) => type === "ready"))
+    const asked = () => posted.filter(({ type }) => type === "loadNative").length
+    tellRunner({ type: "run", compiled: CALLS_NATIVE })
+    await waitFor(() => asked() === 1)
+    tellRunner({ type: "native", module: SHOUT_MODULE, javascript: SHOUT_JS })
+    await waitFor(() => testCore && consoleText().includes("HELLO"), 10_000)
+    // its tests, on a runtime of their own
+    await waitFor(() => asked() === 2)
+    tellRunner({ type: "native", module: SHOUT_MODULE, javascript: SHOUT_JS })
+    await waitFor(() => posted.some(({ type }) => type === "testResults"))
+
+    host.querySelector<HTMLElement>(".VSCodeRunnerToolbar .restart")!.click()
+    await waitFor(() => posted.some(({ type }) => type === "restart"))
+    // the extension compiles, and sends the same program again
+    tellRunner({ type: "run", compiled: CALLS_NATIVE })
+    await waitFor(() => asked() === 3)
+    const edited = SHOUT_JS.replace("()", '() + "!"')
+    tellRunner({ type: "native", module: SHOUT_MODULE, javascript: edited })
+    await waitFor(() => asked() === 4)
+    tellRunner({ type: "native", module: SHOUT_MODULE, javascript: edited })
+    await waitFor(() => posted.filter(({ type }) => type === "testResults").length === 2)
+    expect(consoleText()).toContain("HELLO!")
+    // and Output shows it
+    await waitFor(() => host.querySelector(".RunnerConsole")?.textContent?.includes("HELLO!"))
   })
 
   test("a code file the extension couldn't load:  its reason, as the run's error", async () => {
