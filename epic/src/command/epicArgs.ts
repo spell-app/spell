@@ -299,6 +299,8 @@ function updateArgs(args: string[], at: number, target: EpicTarget | undefined):
       const on = flags.noStanding ? "off" : flags.standing === true ? "on" : value("standing")
       runs.push(["standing", epic, on])
     }
+    // its git branch, when it isn't the epic's id (epic `epic-engine` I378):  `EpicConfig.branchOf()` reads it
+    if ("branch" in flags) runs.push(["branch", epic, value("branch")])
   } else if (phase !== undefined) {
     const body = PHASE_BODY.filter((key) => key in flags).flatMap((key) => [`--${key}`, value(key)])
     // a plan Owen accepted with his comments, folded in and written accepted (epic `epic-engine` I163)
@@ -567,4 +569,4 @@ const PHASE_FIELDS = [...PHASE_BODY, "accepted", "estimate", "title", "html"]
 const ITEM_FIELDS = ["title", "html", "calm", "loud", "requested", "failed"]
 
 /** What `update` sets on the page, camelCased as `flagsOf()` reads them (`--no-standing`). */
-const PAGE_FIELDS = ["standing", "noStanding"]
+const PAGE_FIELDS = ["standing", "noStanding", "branch"]

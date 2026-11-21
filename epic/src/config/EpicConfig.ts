@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs"
+import { closeSync, existsSync, openSync, readdirSync, readFileSync, readSync, statSync } from "node:fs"
 import { basename, dirname, isAbsolute, join, resolve, sep } from "node:path"
 
 import JSON5 from "json5"
@@ -820,7 +820,49 @@ export class EpicConfig {
    */
   worktreeFolder(name: string): string {
     const olds = this.worktreesFolders.slice(1).map((folder) => join(folder, name))
-    return [this.newWorktreeFolder(name), ...olds].find((folder) => existsSync(folder)) ?? this.newWorktreeFolder(name)
+    const found = [this.newWorktreeFolder(name), ...olds].find((folder) => existsSync(folder))
+    if (found) return found
+    // a branch named apart from its epic (`branchOf()`, epic `epic-engine` I378):  its worktree, wherever git has it
+    const branch = this.branchOf(name)
+    const listed =
+      branch === name
+        ? undefined
+        : (Git.out(["worktree", "list", "--porcelain"], this.main) ?? "")
+            .split("\n\n")
+            .find((entry) => entry.split("\n").includes(`branch refs/heads/${branch}`))
+    return listed?.split("\n")[0]?.slice("worktree ".length) ?? this.newWorktreeFolder(name)
+  }
+
+  /**
+   * Epic `epic`'s git branch:  its epic page's `<epic-page branch>`, else its id (epic `epic-engine` I378).
+   * - THE one place every verb asks (merge, merge-main, worktree status, park ...):  never the id by itself
+   * - set apart from the id by `epic update <epic> --branch <name>`:
+   *   `from-project` kept its id when its branch was renamed `from-console` (no customer names in branch names)
+   * - the id for no page, a future epic's (no `branch`), and one written `(detached)` or the base branch
+   *   (`epic create` in the main checkout wrote `main`), or one git has no branch for (a stale name)
+   * - reads only the page's first few KB, where `<epic-page>` starts:  no parsing library, so plain `node` loads it
+   * - NEVER throws
+   */
+  branchOf(epic: string): string {
+    const file = join(this.contentFolder, "epics", epic, `${epic}.plan.html`)
+    let head = ""
+    try {
+      const fd = openSync(file, "r")
+      try {
+        const buffer = Buffer.alloc(PAGE_HEAD_BYTES)
+        head = buffer.toString("utf8", 0, readSync(fd, buffer, 0, PAGE_HEAD_BYTES, 0))
+      } finally {
+        closeSync(fd)
+      }
+    } catch {
+      return epic
+    }
+    const page = /<epic-page\b[^>]*>/.exec(head)?.[0] ?? ""
+    const branch = /\sbranch="([^"]+)"/.exec(page)?.[1]
+    // `epic create` run in the main checkout wrote the base branch (epic-engine's own page said `main`):  not its branch
+    if (!branch || branch === epic || branch === "(detached)" || branch === this.baseBranch) return epic
+    // a stale name (a page made in another checkout, an old `worktree-<name>`):  only a branch git has counts
+    return Git.run(["rev-parse", "--verify", "--quiet", `refs/heads/${branch}`], this.main).ok ? branch : epic
   }
 
   /**
@@ -1523,6 +1565,9 @@ function isInEngineCheckout(folder: string): boolean {
   const real = RealPath.of(folder)
   return real === checkout || real.startsWith(`${checkout}${sep}`)
 }
+
+/** how much of an epic page `branchOf()` reads:  `<epic-page>` opens within its first lines */
+const PAGE_HEAD_BYTES = 8192
 
 /** The messages `warnOnce()` has written, this process. */
 const WARNED = new Set<string>()

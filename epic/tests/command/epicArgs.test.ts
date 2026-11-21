@@ -289,6 +289,13 @@ describe("planDocArgs():  update", () => {
     expect(planDocArgs("update", ["seo", "--no-standing"])).toEqual([["standing", "seo", "off"]])
   })
 
+  test("the page:  its branch, apart from its id (I378)", () => {
+    expect(planDocArgs("update", ["from-project", "--branch", "from-console"])).toEqual([
+      ["branch", "from-project", "from-console"]
+    ])
+    expect(() => planDocArgs("update", ["seo", "--branch"])).toThrow(/--branch needs a value/)
+  })
+
   test("refuses no field, a field the target lacks, and a field with no value", () => {
     expect(() => planDocArgs("update", ["seo#P3"])).toThrow(/which fields\?  phase P3 has --symptom/)
     expect(() => planDocArgs("update", ["seo#J3", "--goal", "g"])).toThrow(/item J3 has no --goal/)

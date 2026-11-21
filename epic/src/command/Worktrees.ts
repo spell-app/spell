@@ -465,9 +465,11 @@ export class Worktrees {
    */
   repoStates(name: string): RepoState[] {
     return this.config.repoCheckouts(name).map(({ repo, main, worktree }) => {
-      const base = new EpicConfig(main).baseBranch
+      const config = new EpicConfig(main)
+      const base = config.baseBranch
       const made = existsSync(join(worktree, ".git"))
-      const branch = Git.run(["rev-parse", "--verify", "--quiet", `refs/heads/${name}`], main).ok ? name : null
+      const named = config.branchOf(name)
+      const branch = Git.run(["rev-parse", "--verify", "--quiet", `refs/heads/${named}`], main).ok ? named : null
       const count = (range: string) => (branch ? Number(Git.run(["rev-list", "--count", range], main).out || 0) : 0)
       const dirty = made ? Git.run(["status", "--short"], worktree).out.split("\n").filter(Boolean) : []
       return {
@@ -476,8 +478,8 @@ export class Worktrees {
         made,
         branch,
         base,
-        ahead: count(`${base}..${name}`),
-        behind: count(`${name}..${base}`),
+        ahead: count(`${base}..${named}`),
+        behind: count(`${named}..${base}`),
         dirty
       }
     })
@@ -525,14 +527,15 @@ export class Worktrees {
     const main = this.main
     const config = this.config
     const worktree = config.worktreeFolder(name)
-    const branch = Git.run(["rev-parse", "--verify", "--quiet", `refs/heads/${name}`], main).ok ? name : null
+    const named = config.branchOf(name)
+    const branch = Git.run(["rev-parse", "--verify", "--quiet", `refs/heads/${named}`], main).ok ? named : null
     // a multi-repo top:  every repo's commits on branch `name` (epic `epic-engine` P10)
     const ahead = config.top
       ? this.repoStates(name).reduce((sum, state) => sum + state.ahead, 0)
       : branch
-        ? Number(Git.run(["rev-list", "--count", `${config.baseBranch}..${name}`], main).out || 0)
+        ? Number(Git.run(["rev-list", "--count", `${config.baseBranch}..${branch}`], main).out || 0)
         : 0
-    const reflog = branch ? Git.run(["reflog", "show", "--format=%H", `refs/heads/${name}`], main).out : ""
+    const reflog = branch ? Git.run(["reflog", "show", "--format=%H", `refs/heads/${branch}`], main).out : ""
     const moved = reflog.split("\n").filter(Boolean).length > 1
     const merged = !!branch && moved && ahead === 0
     const plan = this.planStatus(name, worktree)

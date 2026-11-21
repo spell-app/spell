@@ -123,6 +123,15 @@ A FUTURE epic (`/epic future <name>`, epic `epic-future`, 2026-10-07): an idea w
   naming the branch and worktree; its prompt, decisions and review page stay. Its first phase (`add-phase`)
   plans it too
 
+The page's BRANCH (`<epic-page branch>`, epic `epic-engine` I378): the epic's git branch, its id unless it names
+another (`EpicConfig.branchOf()`, which every verb asks: merge, merge-main, worktree status, pr ...).
+
+- `epic update <name> --branch <branch>` sets it, for a branch renamed apart from its id (epic `from-project`, branch
+  `from-console`: no customer names in branch names); its worktree is found by that branch when its folder is named
+  otherwise
+- one naming the base branch (`main`, written by `new` in the main checkout), or a branch git doesn't have (a stale
+  name), reads as the id
+
 The page's STAGE (`<epic-page stage>`, epic `epic-engine` P29): how far planning has got.
 
 - A section hides when it's empty, at every stage (epic `epic-engine` P70), and shows whenever it holds something. While
