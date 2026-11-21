@@ -116,6 +116,9 @@ when working with code in this folder, `src/spell/` of the kit's parser folder (
     its description);  and where an edit of them goes.
     - A later look keeps them with their line, drops them with it (saying so), and dates what it finds new or can't
       find:  `-- NEW as of 2026-11-18`, `-- APPARENTLY DELETED as of 2026-11-18` (`mergedSpell()`'s `marks`).
+    - A program's read of a field marked `APPARENTLY DELETED` gets a warning with that date, on each read, and a likely
+      new name when the same look marked one NEW:  `SP.PlaceFieldMarks` (epic `language` P68, Q82), reading the marks
+      off the field's parsed lines with `PlaceWords.markIn()`.
   - `PlaceSpec` (epic `data` P49):  an OpenAPI 3 description read whole as one more look (`--spec`), every list, field,
     write and action route from its schemas, `$ref`s by a small reader of its own;  each collection's `state` says
     whether it was tried, and `PlaceIngest.verify()` (`spell place verify`) tries it, on a deployment the project's

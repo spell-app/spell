@@ -991,6 +991,16 @@ A kind that says so is saved in a file of its own.
       - e.g. `the name of the pile` => `A pile never says it has a name:  declare it, e.g. "a pile has a name as text"`
       - Only on a type the project declares, all of whose super-types are its own or spell's:
         an imported type's importer may give it anything (`MemberReadExpression.warnIfUndeclared()`, `noteIf()`).
+    - a read of a place's field that a later look couldn't find (epic `language` P68, Q82), on EACH read
+      - the place's Spell file marks it inside its line:  `-- APPARENTLY DELETED as of 2026-11-19` (the ingest's
+        `mergedSpell()`)
+      - e.g. `the job's user` => `This reads the "user" of a job from netbox ... no longer had a "user" for a job`
+      - its rules:  every member read (`property_expression`, `possessive_property`, `the_own_property`,
+        `its_known_property`, `its_property`), through `SP.PlaceFieldMarks.warnIfGone()`, `noteIf()`
+      - its marks are read off the field's declaration as parsed, its body's `--` lines (`PlaceWords.markIn()`):
+        no file is read again
+      - the same look marked ONE field of the type NEW, of the same type of value:  the warning names it, and the
+        language server offers "Change to ..." (`SP.PlaceFieldMarks.renameAt()`)
     - an article that doesn't agree with its noun (epic `spanish` P8), the ONE warning no rule notes:
       - e.g. `a apple` => `Did you mean "an apple"?`
       - Spanish's:  `el carta` => `¿Querías decir "la carta"?`

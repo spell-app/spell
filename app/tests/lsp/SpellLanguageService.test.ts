@@ -1350,6 +1350,56 @@ describe("SpellLanguageService, outline style", () => {
 })
 
 /**
+ * A place's field marked gone, read by a program:  the warning, and "Change to ..." its likely new name
+ * (`SP.PlaceFieldMarks`, epic `language` P68, Q82).
+ * - Its own small project:  NetBox's Spell file as a later look left it, `user` gone and `owner` new the same day.
+ */
+describe("SpellLanguageService, a place's field marked gone", () => {
+  const dir = mkdtempSync(resolve(tmpdir(), "spell-lsp-place-"))
+  const netbox = [
+    'netbox is a web server at "https://demo.netbox.dev"',
+    "\tcheck it every 30 seconds",
+    '\tjobs live at "/api/jobs"',
+    "",
+    'a "job" is a thing',
+    "\tit lives in netbox",
+    '\tits "user" is text',
+    "\t\t-- APPARENTLY DELETED as of 2026-11-19",
+    '\tits "owner" is text',
+    "\t\t-- NEW as of 2026-11-19",
+    ""
+  ].join("\n")
+  const mainText = "to check (a job)\n\tset who to the job's user\n"
+  const mainUri = pathToFileURL(resolve(dir, "main.spell")).href
+  writeFileSync(resolve(dir, "NetBox.api.spell"), netbox)
+  writeFileSync(resolve(dir, "main.spell"), mainText)
+  const imports = ["main.spell", "NetBox.api.spell"].map((file) => ({ path: `/${file}`, active: true }))
+  writeFileSync(resolve(dir, SP.PROJECT_FILE), JSON.stringify({ title: "Jobs", imports }))
+  const workspace = new SpellDiskWorkspace()
+  const service = new LSP.SpellLanguageService(workspace)
+
+  test("Change to the new field:  applied, the warning goes", async () => {
+    await workspace.update(mainUri, mainText)
+    const main = workspace.fileFor(mainUri)!
+    const gone = () =>
+      service
+        .diagnostics(main)
+        .filter((it) => (typeof it.message === "string" ? it.message : it.message.value).includes("2026-11-19"))
+    expect(gone()).toHaveLength(1)
+    expect(gone()[0]!.severity).toBe(DiagnosticSeverity.Warning)
+    const actions = service.codeActions(main, rangeAt(mainText, 2, "user"))
+    expect(actions.map(({ title }) => title)).toEqual(['Change to "owner"'])
+    expect(actions[0]!.isPreferred).toBe(true)
+    expect(actions[0]!.diagnostics).toEqual([gone()[0]])
+    const fixed = applyEdits(mainText, actions[0]!.edit!.changes![mainUri]!)
+    expect(fixed).toBe("to check (a job)\n\tset who to the job's owner\n")
+    await workspace.update(mainUri, fixed)
+    expect(gone()).toEqual([])
+    expect(errorsIn(service, main)).toEqual([])
+  })
+})
+
+/**
  * Position of the `nth` (0-based) `word` on `line` of `source`:
  * 1-based, or the first line starting with that text (see `lineOf()`).
  * - Only where a word starts:  the `it` of `await` isn't one.

@@ -141,6 +141,15 @@ export const PARSER_MESSAGES = {
   /** A line says where a key goes, and no line names one. */
   "key-goes-with-no-key":
     'This says where its key goes, and no line names one:  add "it is authenticated with the secret "COOKBOOK_KEY""',
+  /**
+   * A read of a place's field its Spell file marks gone, `-- APPARENTLY DELETED as of {date}` (epic `language` P68,
+   * Q82):  `{field}` its words, `{aType}` its type with its article, `{place}` the place.
+   */
+  "place-field-gone":
+    'This reads the "{field}" of {aType} from {place}, where your program gets its data.\nWhen {place} was looked at on {date}, it no longer had a "{field}" for {aType}.\nThis line may fail when you run it.  Check {place} for its new name, then use that instead of "{field}".',
+  /** As `place-field-gone`, when the same look found one new field, `{newField}`, of the same type of value. */
+  "place-field-renamed":
+    'This reads the "{field}" of {aType} from {place}, where your program gets its data.\nWhen {place} was looked at on {date}, it no longer had a "{field}" for {aType}, but it had a new "{newField}".\nThat is probably the same thing under a new name.\nThis line may fail when you run it.  Try changing "{field}" to "{newField}".',
   /** A place that can't announce what changed:  `{kind}`. */
   "place-cant-announce":
     "This {kind} can't announce what's changed, so other people's changes won't show until this page reads again:  add \"check it every 30 seconds\" under it",

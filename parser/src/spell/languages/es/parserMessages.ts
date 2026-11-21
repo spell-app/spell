@@ -107,6 +107,10 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
     '"{name}" no puede ir en una dirección:  es una palabra de letras, dígitos, guiones y guiones bajos, p. ej. "api_key"',
   "key-goes-with-no-key":
     'Esto dice dónde va su clave, y ninguna línea la nombra:  agrega "se autentica con el secreto "CLAVE_RECETARIO""',
+  "place-field-gone":
+    'Esto lee "{field}" de {aType} desde {place}, de donde tu programa saca sus datos.\nCuando se revisó {place} el {date}, ya no tenía "{field}" para {aType}.\nEsta línea puede fallar al ejecutarla.  Busca en {place} su nombre nuevo, y úsalo en lugar de "{field}".',
+  "place-field-renamed":
+    'Esto lee "{field}" de {aType} desde {place}, de donde tu programa saca sus datos.\nCuando se revisó {place} el {date}, ya no tenía "{field}" para {aType}, pero tenía uno nuevo, "{newField}".\nProbablemente es lo mismo con otro nombre.\nEsta línea puede fallar al ejecutarla.  Prueba a cambiar "{field}" por "{newField}".',
   "place-cant-announce":
     'Un lugar de tipo "{kind}" no puede avisar de lo que cambió, así que los cambios de otras personas no se ven hasta que esta página vuelva a leer:  agrega "se revisa cada 30 segundos" debajo',
   "change-not-saved":

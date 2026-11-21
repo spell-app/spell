@@ -174,8 +174,11 @@ export class PlaceWords {
     }
   }
 
-  /** The mark `words` is, in any language:  `undefined` when it's a person's words. */
-  private static markIn(words: string): WordsMark | undefined {
+  /**
+   * The mark `words` is (its `--` off, or not), in any language:  `undefined` when it's a person's words.
+   * - The parser reads a field's marks with it too, off its parsed lines (`SP.PlaceFieldMarks`).
+   */
+  static markIn(words: string): WordsMark | undefined {
     const text = words.replace(/^--\s*/, "")
     for (const said of Object.values(MARKS)) {
       for (const is of ["new", "gone"] as const) {

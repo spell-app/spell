@@ -60,12 +60,14 @@ export class PossessiveProperty extends MemberReadExpression<"expression|possess
     if (count) {
       this.resolveMember(match, ownerType, `${property.raw}`)
       match.priority = Math.max(Priority.mostSpecific, ownerPriority)
+      SP.PlaceFieldMarks.warnIfGone(match, property)
       return match
     }
     if (!PossessiveProperty.isLoose(scope, property)) return undefined
     match.priority = Math.max(Priority.preferred, ownerPriority)
     match.data.member = ownerType?.getMember(`${property.value}`)
     if (!match.data.member && !misspelled) MemberReadExpression.warnIfUndeclared(match, ownerType, property)
+    SP.PlaceFieldMarks.warnIfGone(match, property)
     return match
   }
 

@@ -51,6 +51,7 @@ export class TheOwnProperty extends MemberReadExpression<"definite_article" | "p
     match.data.ownerType = ownerType
     match.data.thingName = thingName
     this.resolveMember(match, ownerType, words)
+    SP.PlaceFieldMarks.warnIfGone(match, property)
     return match
   }
 

@@ -67,6 +67,9 @@ export const LSP_TEXTS = {
   // a note after a line's code, `// ...`, moved to the line under it, `-- ...` (`SP.LineEndComments`, epic `language` T166)
   moveLineEndNote: 'Move the note below, changing "//" to "--"',
 
+  // a read of a place's field marked gone, changed to its likely new name (`SP.PlaceFieldMarks`, epic `language` P68)
+  changeToNewField: 'Change to "{name}"',
+
   ////////////////
   // ## The Template Explorer's tree (`ScopeExplorer`)
   ////////////////

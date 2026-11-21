@@ -2377,6 +2377,8 @@ export class SpellLanguageService {
    * - See `methodSignatureFor()` for how the words become a signature.
    * - And "Make it code" / "Make it text" on the attribute value the caret is in (`codeOrText()`, epic `editor` T74).
    * - And "Move the note below" on a line ending in an old `// ...` note (`lineEndNotesMoved()`, epic `language` T166).
+   * - And "Change to ..." on a read of a place's field marked gone, to its likely new name (`placeFieldsRenamed()`,
+   *   epic `language` P68).
    */
   codeActions(file: SP.SpellFile, range: Range): CodeAction[] {
     if (!file.match) return []
@@ -2414,6 +2416,7 @@ export class SpellLanguageService {
     const switched = this.codeOrText(file, from)
     if (switched) actions.push(switched)
     actions.push(...this.lineEndNotesMoved(file, from, to))
+    actions.push(...this.placeFieldsRenamed(file, from, to))
     return actions
   }
 
@@ -2445,6 +2448,37 @@ export class SpellLanguageService {
         isPreferred: true,
         edit: { changes: { [this.addresses.uriFor(file)]: edits } }
       }
+    })
+  }
+
+  /**
+   * "Change to "owner"" on each read of a place's field marked gone, on the lines `from` ... `to`,
+   * when the same look found its likely new name (`SP.PlaceFieldMarks`, epic `language` P68, Q82).
+   * - A quick fix for the warning the read noted, its diagnostic attached.
+   * - Keeps the read's quotes:  `the "user" of the job` => `the "owner" of the job`.
+   */
+  private placeFieldsRenamed(file: SP.SpellFile, from: number, to: number): CodeAction[] {
+    const text = file.parseText
+    const lineStart = text.lastIndexOf("\n", from - 1) + 1
+    const lineEnd = text.indexOf("\n", to) < 0 ? text.length : text.indexOf("\n", to)
+    return SP.SpellWarnings.in(file.match!).flatMap(({ at }): CodeAction[] => {
+      const name = SP.PlaceFieldMarks.renameAt(at)
+      const { start, end } = at
+      if (!name || start === undefined || end === undefined || end < lineStart || start > lineEnd) return []
+      const range = this.rangeOf(file, at)!
+      const newText = text.startsWith('"', start) ? `"${name}"` : name
+      const diagnostic = this.diagnostics(file).find(
+        (it) => it.severity === DiagnosticSeverity.Warning && this.offsetAt(file, it.range.start) === start
+      )
+      return [
+        {
+          title: LSP.LspTexts.of(at.scope).text("changeToNewField", { name }),
+          kind: CodeActionKind.QuickFix,
+          diagnostics: diagnostic ? [diagnostic] : undefined,
+          isPreferred: true,
+          edit: { changes: { [this.addresses.uriFor(file)]: [{ range, newText }] } }
+        }
+      ]
     })
   }
 
