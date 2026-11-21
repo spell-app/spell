@@ -10,6 +10,8 @@
  *   and shows each failed check in the editor, on its line:  `spell/testDiagnostics` -- see `showTestResults()`.
  * - Sends the compiled javascript of each project it imports, when the runner asks (`loadImport`):
  *   the server's `spell/compiledImport`.
+ * - Sends the javascript of each code file it calls (`call native`), when the runner asks (`loadNative`):
+ *   the server's `spell/codeFile`, which takes its types out.
  */
 import { existsSync, mkdirSync } from "fs"
 import JSON5 from "json5"
@@ -101,6 +103,7 @@ export class RunnerPanel {
       else if (message.type === "open") void RunnerPanel.open(message.href)
       else if (message.type === "setDescription") void this.setDescription(message)
       else if (message.type === "loadImport") void this.sendImport(message.projectId)
+      else if (message.type === "loadNative") void this.sendNative(message.module)
       else if (message.type === "testResults") void this.showTestResults(message.tests)
     })
     const watcher = RunnerPanel.watch(vscode.Uri.parse(info.compiledUri))
@@ -125,7 +128,8 @@ export class RunnerPanel {
       vscode.commands.registerCommand("spell.runTests", () => RunnerPanel.runTests(client, repoRoot)),
       // an edit may fix it, or move its line:  the next test run says
       vscode.workspace.onDidChangeTextDocument(({ document, contentChanges }) => {
-        if (RunnerPanel.isSpellDocument(document) && contentChanges.length) RunnerPanel.testDiagnostics.delete(document.uri)
+        if (RunnerPanel.isSpellDocument(document) && contentChanges.length)
+          RunnerPanel.testDiagnostics.delete(document.uri)
       }),
       client.onNotification("spell/projectCompiled", ({ project, compiled }: ProjectCompiled) => {
         const panel = RunnerPanel.panels.get(project)
@@ -287,6 +291,26 @@ export class RunnerPanel {
     else this.post({ type: "imported", projectId, error: `Couldn't load project '${projectId}':  does it compile?` })
   }
 
+  /**
+   * Send the webview the javascript of the code file ours calls as `module` (`call native`),
+   * e.g. `@spell/native/owen@spell/clipboard/clipboard.ts`:  the language server's `spell/codeFile`, its types taken out.
+   * - Asked for on every run, so an edit to it shows on the next.
+   * - Can't:  sends why instead, which the runner shows as the run's error.
+   */
+  async sendNative(module: string): Promise<void> {
+    const params = { uri: this.uri, module }
+    const javascript = await this.client.sendRequest<string | null>("spell/codeFile", params).catch(() => null)
+    if (javascript !== null) this.post({ type: "native", module, javascript })
+    else {
+      const codeFile = module.slice(module.lastIndexOf("/") + 1)
+      this.post({
+        type: "native",
+        module,
+        error: `Couldn't load ${codeFile}:  is it there, and is it valid TypeScript?`
+      })
+    }
+  }
+
   /** Send the webview the project's live scope tree, from the server's `spell/scopes`, for its Type Explorer. */
   async sendScopes(): Promise<void> {
     const tree = await this.client.sendRequest<unknown>("spell/scopes", { uri: this.uri })
@@ -360,7 +384,9 @@ export class RunnerPanel {
   static async open(href: string): Promise<void> {
     const uri = vscode.Uri.parse(href)
     const line = Number(/^L(\d+)$/.exec(uri.fragment)?.[1] ?? 1) - 1
-    const column = vscode.window.visibleTextEditors.find(({ document }) => RunnerPanel.isSpellDocument(document))?.viewColumn
+    const column = vscode.window.visibleTextEditors.find(({ document }) =>
+      RunnerPanel.isSpellDocument(document)
+    )?.viewColumn
     await vscode.window.showTextDocument(uri.with({ fragment: "" }), {
       viewColumn: column ?? vscode.ViewColumn.One,
       selection: new vscode.Range(line, 0, line, 0)
@@ -471,6 +497,7 @@ type ToRunnerMessage =
   | { type: "run"; compiled: string; words?: string[]; runTests?: boolean }
   | { type: "runTests" }
   | { type: "imported"; projectId: string; compiled?: string; error?: string }
+  | { type: "native"; module: string; javascript?: string; error?: string }
   | { type: "scopes"; tree: unknown }
   | { type: "settings"; settings: ProjectSettings }
   | { type: "details"; path: string; details: unknown }
@@ -485,6 +512,7 @@ type FromRunnerMessage =
   | { type: "details"; path: string }
   | { type: "refreshScopes" }
   | { type: "loadImport"; projectId: string }
+  | { type: "loadNative"; module: string }
   | { type: "testResults"; tests: TestReport[] }
 
 /**

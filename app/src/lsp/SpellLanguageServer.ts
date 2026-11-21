@@ -182,6 +182,9 @@ export class SpellLanguageServer {
     connection.onRequest("spell/compiledImport", ({ uri, projectId }: LSP.CompiledImportParams) =>
       this.compiledImport(uri, projectId)
     )
+    connection.onRequest("spell/codeFile", ({ uri, module }: LSP.CodeFileParams) =>
+      this.inQueue(uri, null, () => this.workspace.codeFileJavascript(module))
+    )
     connection.onRequest("spell/scopes", ({ uri }: { uri: string }) => this.scopeTree(uri))
     connection.onRequest("spell/scopeDetails", ({ uri, path }: { uri: string; path: string }) =>
       this.answer(uri, null, (file) => this.scopes.details(file.project, path))

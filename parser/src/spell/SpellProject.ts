@@ -562,8 +562,10 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
    * Each place's deployment named `deployment`, from our project file's `places`, by the place's name as compiled code
    * names it:  `{ netbox: { at: "...", readOnly: true } }` (epic `data` P49).
    * - `spell run` and the page server both pick this way, by `SP.DEPLOYMENT_VARIABLE`.
-   * - A place that lists no such deployment runs as its line says.
-   * - throws `TypeError` for a deployment no place in the project file has:  a mistake, named
+   * - A place that lists no such deployment runs as its line says,
+   *   as long as some other place lists it:  a place with one server needs no deployments.
+   * - throws `SP.UnlistedDeploymentError` for a deployment no place in the project file has:
+   *   a mistake, named with the ones it does list, never read quietly (from-console J104)
    */
   deploymentsPicked(deployment: string): Record<string, PlaceDeployment> {
     return SpellProject.deploymentsIn(this.contents?.places, deployment, this.projectId)
@@ -572,7 +574,7 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   /**
    * Each place's deployment named `deployment`, from `places`, a project file's:  see `deploymentsPicked()`.
    * - For a reader that has the project file but no project:  the page server.
-   * - throws `TypeError` for a deployment no place in it has
+   * - throws `SP.UnlistedDeploymentError` for a deployment no place in it has
    */
   static deploymentsIn(
     places: SP.ProjectManifestJSON5["places"],
@@ -583,9 +585,10 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
       deployments[deployment] ? [[snakeCase(place), deployments[deployment]] as const] : []
     )
     if (!picked.length) {
-      throw new TypeError(
-        `no place in ${projectId}'s project file has a deployment named "${deployment}":  list it under "places"`
-      )
+      const listed = [...new Set(Object.values(places ?? {}).flatMap((deployments) => Object.keys(deployments)))]
+      throw new SP.UnlistedDeploymentError(unlistedDeploymentText(projectId, deployment, listed), {
+        cause: { projectId, deployment, listed }
+      })
     }
     return Object.fromEntries(picked)
   }
@@ -1944,4 +1947,20 @@ function optionalText(text: unknown): string | undefined {
 /** `props` without the keys whose value is `undefined`:  an entry keeps only what a target wrote. */
 function definedOnly<T extends object>(props: T): T {
   return Object.fromEntries(Object.entries(props).filter(([, value]) => value !== undefined)) as T
+}
+
+/**
+ * What's said of a deployment no place in `projectId`'s file lists, in short lines:  what failed, why, and the fix.
+ * - `listed`:  the deployments it does list, the first named in the fix.
+ */
+function unlistedDeploymentText(projectId: string, deployment: string, listed: string[]): string {
+  return [
+    `Spell can't read the places in ${projectId}.`,
+    `It was told to use the deployment "${deployment}", but the project's settings file (${SP.PROJECT_FILE}) has no deployment by that name.`,
+    `(A deployment is one copy of a place's server, such as a test copy or the live one.  You pick one with ${SP.DEPLOYMENT_VARIABLE} when you start Spell.)`,
+    listed.length
+      ? `The file lists these:  ${listed.join(", ")}.  To use one, start Spell again with ${SP.DEPLOYMENT_VARIABLE}=${listed[0]} in front of the command.`
+      : `The file lists none yet.  To read each place as its line says, start Spell again without ${SP.DEPLOYMENT_VARIABLE}.`,
+    `Or open the settings file, find its "places" section, and add a deployment named "${deployment}" under a place there.`
+  ].join("\n")
 }

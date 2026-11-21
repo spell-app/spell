@@ -2,6 +2,7 @@
  * End to end:  a program's authenticated web server, read by a PAGE through the page server,
  * which adds the secret;  the secret never reaches the page;  a secret that isn't set is named at startup, and the
  * page's read refused in those words.
+ * - A deployment SPELL_DEPLOYMENT names that the project's file doesn't list:  named at startup, every read refused.
  * - The program is compiled here, in a project with an address, and its declarations written where the page server
  *   reads them (`ProjectPlaces`).
  * - The page:  the compiled program run on the core with nothing that holds a key, as in a browser, its requests to
@@ -77,10 +78,15 @@ async function standIn(): Promise<{ url: string; sent: string[] }> {
 
 /**
  * The page server:  the project compiled, its declarations where `ProjectPlaces` reads them, and `from` its environment.
+ * - `places`:  its project file's deployments;  default none.
  * - SIDE EFFECT:  this test's page has the page server's token, and its requests to `/api/...` go there;
  *   every answer it got is in `seen`.
  */
-async function pageServer(lines: string[], from: Record<string, string | undefined>) {
+async function pageServer(
+  lines: string[],
+  from: Record<string, string | undefined>,
+  places?: SP.ProjectManifestJSON5["places"]
+) {
   const { files } = parseSpellProject([{ path: "/Jobs.spell", contents: `${lines.join("\n")}\n` }], {
     projectPath: PROJECT
   })
@@ -99,7 +105,10 @@ async function pageServer(lines: string[], from: Record<string, string | undefin
 
   const router = new SRV.Router()
   const guard = new SRV.Guard({ token: TOKEN })
-  const places = AuthenticatedPlaces.for({ router, guard }, { from }).addSource(new ProjectPlaces({ from, buildDir }))
+  const projectFileOf = async () => ({ ...(places && { places }) })
+  const served = AuthenticatedPlaces.for({ router, guard }, { from }).addSource(
+    new ProjectPlaces({ from, buildDir, projectFileOf })
+  )
   const server = await serveHandler(router.handle)
   guard.allowPort(server.port)
   closing.push(() => server.close())
@@ -115,7 +124,7 @@ async function pageServer(lines: string[], from: Record<string, string | undefin
     seen.push(await answer.clone().text())
     return answer
   })
-  return { places, compiled: files[0]!.compiled, seen }
+  return { places: served, compiled: files[0]!.compiled, seen }
 }
 
 /** The program's jobs, read as its page reads them. */
@@ -165,6 +174,28 @@ describe("an authenticated place, read by a page through the page server", () =>
     expect(SP.SpellProject.deploymentsIn(places, "dev", PROJECT)).toEqual({
       jobs: { at: "https://dev.acme.test", key: "JOBS_DEV_TOKEN" }
     })
-    expect(() => SP.SpellProject.deploymentsIn(places, "prod", PROJECT)).toThrow(/no place in .* named "prod"/)
+    expect(() => SP.SpellProject.deploymentsIn(places, "prod", PROJECT)).toThrow(SP.UnlistedDeploymentError)
+    expect(() => SP.SpellProject.deploymentsIn(places, "prod", PROJECT)).toThrow(
+      /no deployment by that name\.\n[^]*The file lists these:  dev\.  To use one, start Spell again with SPELL_DEPLOYMENT=dev/
+    )
+  })
+
+  test("a deployment the project file doesn't list:  named as the page server starts, every read refused in those words", async () => {
+    const { url, sent } = await standIn()
+    const lines = program(url)
+    const deployments = { board: { dev: { at: url, key: "JOBS_TOKEN" } } }
+    const { places } = await pageServer(lines, { JOBS_TOKEN: SECRET, SPELL_DEPLOYMENT: "prod" }, deployments)
+    const said: string[] = []
+    await places.sayMissing((line) => said.push(line))
+    expect(said).toHaveLength(1)
+    expect(said[0]).toMatch(new RegExp(`^Spell can't read the places in ${PROJECT}\\.\\n`))
+    expect(said[0]).toContain(`the deployment "prod"`)
+    expect(said[0]).toContain("The file lists these:  dev.")
+
+    const read = jobsRead(lines)
+    await expect(read).rejects.toBeInstanceOf(PlaceError)
+    await expect(read).rejects.toMatchObject({ kind: "refused", message: said[0] })
+    // never read as its line says:  nothing reached its server
+    expect(sent).toEqual([])
   })
 })

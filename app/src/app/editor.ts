@@ -2855,12 +2855,11 @@ async function fetchCompiled(projectId: string): Promise<string> {
 }
 
 /**
- * Javascript of the code file a program imports as `module`, for `call native` (epic `from-console` P10):
- * `@spell/native/owen@spell/clipboard/clipboard.ts` => `/spaces/owen@spell/clipboard/clipboard.ts?as=javascript`,
- * which the page server answers with its types taken out.
+ * Javascript of the code file a program imports as `module`, for `call native` (epic `from-project` P10):
+ * `@spell/native/owen@spell/clipboard/clipboard.ts` => `/spaces/owen@spell/clipboard/clipboard.ts?as=javascript`
+ * (`SP.SpellUrls.codeFileUrl()`), which the page server answers with its types taken out.
  * - Fetched afresh each run, so an edit to it shows on the next.
  */
 async function fetchCodeFile(module: string): Promise<string> {
-  const path = decodeURI(module.slice(SP.SPELL_NATIVE_MODULE.length))
-  return $fetch<string>({ url: `${SP.SpellUrls.fileUrl(path)}?as=javascript`, cache: "no-cache" })
+  return $fetch<string>({ url: SP.SpellUrls.codeFileUrl(module), cache: "no-cache" })
 }

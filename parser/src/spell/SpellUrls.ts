@@ -1,4 +1,6 @@
 import type * as SP from "./spell.types"
+// Import directly:  value-light, its imports are types
+import { SPELL_NATIVE_MODULE } from "./spell.types"
 import type { SpellLocation } from "./SpellLocation"
 // Import directly:  this file stays as light as `SpellSetup`, so `<spell-viewer>` can build URLs without the barrel
 import { SpellSetup } from "./SpellSetup"
@@ -44,6 +46,26 @@ export const SpellUrls = {
   /** URL to SAVE the file at `path`:  `/api/projects/file/<address>`. */
   saveUrl(path: string | SpellLocation): string {
     return SpellUrls.SAVE + tailFor(path)
+  },
+
+  /**
+   * Address of the code file compiled spell imports as `module`, for `call native` (epic `from-project` P10):
+   * `@spell/native/owen@spell/clipboard/clipboard.ts` => `owen@spell/clipboard/clipboard.ts`.
+   * - throws `TypeError` for a module that isn't a code file's
+   */
+  codeFilePathFor(module: string): string {
+    if (!module.startsWith(SPELL_NATIVE_MODULE))
+      throw new TypeError(`SpellUrls:  '${module}' isn't a code file's module`)
+    return decodeURI(module.slice(SPELL_NATIVE_MODULE.length))
+  },
+
+  /**
+   * URL of the javascript of the code file compiled spell imports as `module`, for `call native`:
+   * `/spaces/owen@spell/clipboard/clipboard.ts?as=javascript`, which the page server answers with its types taken out.
+   * - Every runner that reads code files from Spell's server fetches this:  the editor's, `<spell-viewer>`'s.
+   */
+  codeFileUrl(module: string): string {
+    return `${SpellUrls.fileUrl(SpellUrls.codeFilePathFor(module))}?as=javascript`
   },
 
   /** URL of project `projectId`'s index:  `/api/projects/index/<address>`. */

@@ -308,6 +308,19 @@ export type CompiledImportParams = {
   projectId: string
 }
 
+/**
+ * Asked as `spell/codeFile`:  the javascript of a code file the project of `uri` calls (`call native`, epic `from-project` P10),
+ * for VS Code's runner to link it in -- see `runCompiled()`'s `loadNative`.
+ * - Answered with the file read fresh from disk, its types taken out (`SpellDiskWorkspace.codeFileJavascript()`).
+ * - `null` if it isn't there, or isn't valid TypeScript (logged).
+ */
+export type CodeFileParams = {
+  /** One of the calling project's spell files. */
+  uri: string
+  /** The module compiled spell imports it as:  `@spell/native/owen@spell/clipboard/clipboard.ts`. */
+  module: string
+}
+
 /** Sent as `spell/projectCompiled` after a project compiles, e.g. from `spell/compileProject`. */
 export type ProjectCompiled = {
   /** Project id, as `ProjectInfo.project`. */

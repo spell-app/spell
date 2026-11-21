@@ -4,7 +4,7 @@ import { fileURLToPath, pathToFileURL } from "url"
 
 import { SP } from "spell/parser/spell"
 import environment from "spell/app/spaces/server/node/environment"
-import { installDiskFetch, locationForDiskPath } from "spell/app/spaces/server/node/projects/disk-fetch"
+import { diskFetch, installDiskFetch, locationForDiskPath } from "spell/app/spaces/server/node/projects/disk-fetch"
 import { LSP } from "spell/app/lsp"
 
 /**
@@ -74,6 +74,22 @@ export class SpellDiskWorkspace implements LSP.FileAddresses {
     const diskPath = name && resolve(environment.coreDir, "templates", name)
     if (!diskPath || !existsSync(diskPath)) return undefined
     return { uri: pathToFileURL(diskPath).href, text: readFileSync(diskPath, "utf8") }
+  }
+
+  /**
+   * Javascript of the code file compiled spell imports as `module`, for `call native` (epic `from-project` P10):
+   * `@spell/native/owen@spell/clipboard/clipboard.ts` => `clipboard.ts` from disk, its types taken out.
+   * - What VS Code's runner links in (`spell/codeFile`), as the editor's runner links what the page server makes of it:
+   *   the same `codeFileAsJavascript()`.
+   * - Read afresh each time, so an edit to it shows on the next run.
+   * - throws `MissingResourceError` when it's not on disk, esbuild's error when it isn't valid TypeScript
+   */
+  async codeFileJavascript(module: string): Promise<string> {
+    const path = SP.SpellUrls.codeFilePathFor(module)
+    const code = await diskFetch<string>({ url: SP.SpellUrls.fileUrl(path) })
+    // loaded when asked:  its file brings esbuild and Solid's compiler, which nothing else here needs
+    const { codeFileAsJavascript } = await import("spell/parser/spell/node/buildTsx")
+    return codeFileAsJavascript(code, { filename: basename(path) })
   }
 
   ////////////////

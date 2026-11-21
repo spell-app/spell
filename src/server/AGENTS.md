@@ -606,6 +606,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - read only when its lines or its deployment say so:  a write refused, a graphql server's mutation too
       - a secret that isn't set:  refused in words naming it and the place, `PAGE_SERVER_ANSWER_HEADER` on the answer,
         which the page says;  and said as the server starts (`sayMissing()`), never a value
+      - a place its source refused (`AuthenticatedPlace.refusal`:  the app's, for a deployment its project file doesn't
+        list):  every request refused in those words, nothing passed on;  said as the server starts too
       - ONE per page server (`AuthenticatedPlaces.for()`):  `placeRoutes.ts` makes it;  its places come from SOURCES, the
         app's `ProjectPlaces` (every project's, from what it compiled to) and the Airtable base
       - behind `Guard`, reads too, as `PlaceServer` is;  an old run's write token is answered 403 marked

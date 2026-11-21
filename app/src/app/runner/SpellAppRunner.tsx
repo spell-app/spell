@@ -357,6 +357,12 @@ export type SpellAppSource = {
   declarations?: CompiledDeclarations
   /** URL of the compiled javascript of project `projectId`, which it imports. */
   importUrl: (projectId: string) => string
+  /**
+   * URL of the javascript of the code file it imports as `module`, for `call native` (epic `from-project` P10):
+   * a project's is its server's, `SpellUrls.codeFileUrl()`.
+   * - None:  a program that calls one won't run, and says so (`runCompiled()`).
+   */
+  nativeUrl?: (module: string) => string
   /** URL of the declarations of project `projectId`, which it imports -- if it may have them. */
   importDeclarationsUrl?: (projectId: string) => string
   /**
@@ -433,7 +439,7 @@ type SpellAppToolbarProps = {
 
 /**
  * Run `source`'s program in runtime copy `copy`, drawing into `appRoot`:
- * fetched again, with each project it imports.
+ * fetched again, with each project it imports and each code file it calls (`call native`).
  * - Afresh, unless `keepThings`:  then the last run's things carry over (`runCompiled()`).
  * - NOTE: its own javascript is NOT fetched if it's in memory, `source.compiled` -- its imports still are.
  * - Answers how it went, and the compiled javascript it loaded, by project id --
@@ -469,7 +475,8 @@ async function runProgram(
         const imported = await fetchText(source.importUrl(projectId))
         compiled.set(projectId, imported)
         return imported
-      }
+      },
+      ...(source.nativeUrl && { loadNative: (module: string) => fetchText(source.nativeUrl!(module)) })
     })
     return { error, hasApp: copy.runtime.appIsMounted(), compiled }
   } catch (problem) {
