@@ -409,7 +409,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -563,7 +563,7 @@
           "name": "appearance",
           "description": {
             "kind": "markdown",
-            "value": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance=\"circular\">` is.  Its old name was the bare `link` switch.\n\nTakes:  space-separated:  `link` · `circular`"
+            "value": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance=\"circular\">` is.  `dashed` -- a `kind=\"divider\"` (menu, dropdown):  a dashed line, 2px, a shade darker, where one kind of item ends and another begins, as `<ui-divider appearance=\"dashed\">`.  Its old name was the bare `link` switch.\n\nTakes:  space-separated:  `link` · `circular` · `dashed`"
           },
           "values": [
             {
@@ -571,6 +571,9 @@
             },
             {
               "name": "circular"
+            },
+            {
+              "name": "dashed"
             }
           ]
         },
@@ -925,7 +928,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -1259,7 +1262,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -1690,7 +1693,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -2458,7 +2461,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -2827,7 +2830,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -3161,7 +3164,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -3502,7 +3505,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -3843,7 +3846,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -4231,7 +4234,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -4895,7 +4898,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -5514,7 +5517,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -6159,7 +6162,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -6723,6 +6726,27 @@
           }
         },
         {
+          "name": "height",
+          "description": {
+            "kind": "markdown",
+            "value": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  `height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "min-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too, and a fluid one (`height=\"fluid\"`) squeezes no further.  On the same boxes as `height`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "max-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The tallest its box gets, any CSS length:  `max-height=\"60vh\"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.\n\nTakes:  text"
+          }
+        },
+        {
           "name": "tooltip",
           "description": {
             "kind": "markdown",
@@ -6747,7 +6771,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -7363,7 +7387,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -7750,7 +7774,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -8286,7 +8310,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -8656,6 +8680,27 @@
           }
         },
         {
+          "name": "height",
+          "description": {
+            "kind": "markdown",
+            "value": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  `height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "min-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too, and a fluid one (`height=\"fluid\"`) squeezes no further.  On the same boxes as `height`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "max-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The tallest its box gets, any CSS length:  `max-height=\"60vh\"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.\n\nTakes:  text"
+          }
+        },
+        {
           "name": "tooltip",
           "description": {
             "kind": "markdown",
@@ -8680,7 +8725,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -9039,7 +9084,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -9860,7 +9905,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -10201,7 +10246,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -10601,7 +10646,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -10942,7 +10987,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -11872,7 +11917,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -12213,7 +12258,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -12547,7 +12592,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -12881,7 +12926,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -13294,7 +13339,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -13649,7 +13694,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -14487,7 +14532,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -14849,7 +14894,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -15282,7 +15327,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -15448,6 +15493,18 @@
             "kind": "markdown",
             "value": "For dark backgrounds.\n\nTakes:  flag (present / absent)"
           }
+        },
+        {
+          "name": "appearance",
+          "description": {
+            "kind": "markdown",
+            "value": "The look:  `dashed` -- a dashed line, 2px, a shade darker (`--ui-divider-dashed-width`, `--ui-divider-dashed-color`):  where one kind of thing ends and another begins, as a menu's `<ui-item kind=\"divider\" appearance=\"dashed\">` draws it.\n\nTakes:  space-separated:  `dashed`"
+          },
+          "values": [
+            {
+              "name": "dashed"
+            }
+          ]
         },
         {
           "name": "align",
@@ -15789,7 +15846,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -16939,6 +16996,27 @@
           }
         },
         {
+          "name": "height",
+          "description": {
+            "kind": "markdown",
+            "value": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  `height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "min-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too, and a fluid one (`height=\"fluid\"`) squeezes no further.  On the same boxes as `height`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "max-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The tallest its box gets, any CSS length:  `max-height=\"60vh\"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.\n\nTakes:  text"
+          }
+        },
+        {
           "name": "tooltip",
           "description": {
             "kind": "markdown",
@@ -16956,7 +17034,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -17330,7 +17408,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -17750,7 +17828,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -18133,7 +18211,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -18474,7 +18552,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -18941,7 +19019,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -19416,7 +19494,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -19842,7 +19920,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -20210,7 +20288,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -20658,6 +20736,27 @@
           }
         },
         {
+          "name": "height",
+          "description": {
+            "kind": "markdown",
+            "value": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  `height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "min-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too, and a fluid one (`height=\"fluid\"`) squeezes no further.  On the same boxes as `height`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "max-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The tallest its box gets, any CSS length:  `max-height=\"60vh\"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.\n\nTakes:  text"
+          }
+        },
+        {
           "name": "tooltip",
           "description": {
             "kind": "markdown",
@@ -20682,7 +20781,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -21167,7 +21266,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -21502,6 +21601,27 @@
           }
         },
         {
+          "name": "height",
+          "description": {
+            "kind": "markdown",
+            "value": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  `height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "min-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too, and a fluid one (`height=\"fluid\"`) squeezes no further.  On the same boxes as `height`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "max-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The tallest its box gets, any CSS length:  `max-height=\"60vh\"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.\n\nTakes:  text"
+          }
+        },
+        {
           "name": "tooltip",
           "description": {
             "kind": "markdown",
@@ -21526,7 +21646,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -22103,6 +22223,27 @@
           }
         },
         {
+          "name": "height",
+          "description": {
+            "kind": "markdown",
+            "value": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  `height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "min-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too, and a fluid one (`height=\"fluid\"`) squeezes no further.  On the same boxes as `height`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "max-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The tallest its box gets, any CSS length:  `max-height=\"60vh\"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.\n\nTakes:  text"
+          }
+        },
+        {
           "name": "tooltip",
           "description": {
             "kind": "markdown",
@@ -22127,7 +22268,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -22677,7 +22818,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -23208,7 +23349,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -23624,7 +23765,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -24025,7 +24166,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -24637,7 +24778,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -25066,7 +25207,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -25439,7 +25580,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -26161,7 +26302,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -26315,7 +26456,7 @@
           "name": "appearance",
           "description": {
             "kind": "markdown",
-            "value": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance=\"circular\">` is.  Its old name was the bare `link` switch.\n\nTakes:  space-separated:  `link` · `circular`"
+            "value": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance=\"circular\">` is.  `dashed` -- a `kind=\"divider\"` (menu, dropdown):  a dashed line, 2px, a shade darker, where one kind of item ends and another begins, as `<ui-divider appearance=\"dashed\">`.  Its old name was the bare `link` switch.\n\nTakes:  space-separated:  `link` · `circular` · `dashed`"
           },
           "values": [
             {
@@ -26323,6 +26464,9 @@
             },
             {
               "name": "circular"
+            },
+            {
+              "name": "dashed"
             }
           ]
         },
@@ -26663,7 +26807,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -27093,7 +27237,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -27456,6 +27600,27 @@
           }
         },
         {
+          "name": "height",
+          "description": {
+            "kind": "markdown",
+            "value": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  `height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "min-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too, and a fluid one (`height=\"fluid\"`) squeezes no further.  On the same boxes as `height`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "max-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The tallest its box gets, any CSS length:  `max-height=\"60vh\"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.\n\nTakes:  text"
+          }
+        },
+        {
           "name": "tooltip",
           "description": {
             "kind": "markdown",
@@ -27480,7 +27645,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -27839,7 +28004,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -28471,7 +28636,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -28968,7 +29133,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -29402,7 +29567,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -29902,7 +30067,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -30398,7 +30563,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -30806,6 +30971,27 @@
           }
         },
         {
+          "name": "height",
+          "description": {
+            "kind": "markdown",
+            "value": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  `height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "min-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too, and a fluid one (`height=\"fluid\"`) squeezes no further.  On the same boxes as `height`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "max-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The tallest its box gets, any CSS length:  `max-height=\"60vh\"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.\n\nTakes:  text"
+          }
+        },
+        {
           "name": "tooltip",
           "description": {
             "kind": "markdown",
@@ -30830,7 +31016,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -31598,7 +31784,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -32080,7 +32266,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -32621,7 +32807,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -32955,7 +33141,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -33399,6 +33585,27 @@
           }
         },
         {
+          "name": "height",
+          "description": {
+            "kind": "markdown",
+            "value": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  `height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "min-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too, and a fluid one (`height=\"fluid\"`) squeezes no further.  On the same boxes as `height`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "max-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The tallest its box gets, any CSS length:  `max-height=\"60vh\"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.\n\nTakes:  text"
+          }
+        },
+        {
           "name": "tooltip",
           "description": {
             "kind": "markdown",
@@ -33423,7 +33630,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -33977,7 +34184,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -34311,7 +34518,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -34790,7 +34997,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -34861,6 +35068,18 @@
             "kind": "markdown",
             "value": "The drawer and the side bars float:  rounded cards with a soft shadow and room round them, over the page's own ground.  None:  the drawer a column of its own fill, the page's side a box beside it.\n\nTakes:  flag (present / absent)"
           }
+        },
+        {
+          "name": "page-height",
+          "description": {
+            "kind": "markdown",
+            "value": "`fluid`:  the layout is exactly as tall as what's seen of the window (or the pane it scrolls in), never scrolling it:  the page takes what's left under the menus, a column whose children with `height=\"fluid\"` share it out, each scrolling inside.  None:  as tall as the page, which the window scrolls.  A site's page asks for it on its line:  `home is a page, filling the window`.\n\nTakes:  `fluid`"
+          },
+          "values": [
+            {
+              "name": "fluid"
+            }
+          ]
         },
         {
           "name": "disabled",
@@ -35177,7 +35396,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -35865,7 +36084,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -36213,7 +36432,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -36554,7 +36773,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -36902,7 +37121,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -37263,7 +37482,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -37597,7 +37816,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -38170,7 +38389,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -38761,7 +38980,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -39264,7 +39483,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -40109,7 +40328,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -40851,7 +41070,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -41185,7 +41404,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -41519,7 +41738,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -41867,7 +42086,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -42389,7 +42608,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -42809,7 +43028,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -43292,7 +43511,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -43633,7 +43852,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -44084,7 +44303,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -44563,7 +44782,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -45142,6 +45361,27 @@
           }
         },
         {
+          "name": "height",
+          "description": {
+            "kind": "markdown",
+            "value": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  `height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "min-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too, and a fluid one (`height=\"fluid\"`) squeezes no further.  On the same boxes as `height`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "max-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The tallest its box gets, any CSS length:  `max-height=\"60vh\"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.\n\nTakes:  text"
+          }
+        },
+        {
           "name": "tooltip",
           "description": {
             "kind": "markdown",
@@ -45166,7 +45406,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -46430,7 +46670,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -46771,7 +47011,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -47030,7 +47270,7 @@
           "name": "scrolling",
           "description": {
             "kind": "markdown",
-            "value": "A capped height (per breakpoint) that scrolls;  `short` ... `very long` scale the cap.\n\nTakes:  flag, or `short` · `very short` · `long` · `very long`"
+            "value": "A capped height (per breakpoint) that scrolls;  `short` ... `very long` scale the cap.  With the shared `resizable`, bare or `height`, people drag its height from the cap, taller or shorter.\n\nTakes:  flag, or `short` · `very short` · `long` · `very long`"
           },
           "values": [
             {
@@ -47046,13 +47286,6 @@
               "name": "very long"
             }
           ]
-        },
-        {
-          "name": "resizable",
-          "description": {
-            "kind": "markdown",
-            "value": "With `scrolling`:  people can drag its height.\n\nTakes:  flag (present / absent)"
-          }
         },
         {
           "name": "visible",
@@ -47331,6 +47564,27 @@
           }
         },
         {
+          "name": "height",
+          "description": {
+            "kind": "markdown",
+            "value": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  `height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "min-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too, and a fluid one (`height=\"fluid\"`) squeezes no further.  On the same boxes as `height`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "max-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The tallest its box gets, any CSS length:  `max-height=\"60vh\"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.\n\nTakes:  text"
+          }
+        },
+        {
           "name": "tooltip",
           "description": {
             "kind": "markdown",
@@ -47349,6 +47603,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -47791,7 +48052,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -48254,7 +48515,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -48658,7 +48919,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -48992,7 +49253,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -49463,7 +49724,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -49865,7 +50126,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -50206,7 +50467,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -50554,7 +50815,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -50570,7 +50831,7 @@
       "name": "ui-site-nav",
       "description": {
         "kind": "markdown",
-        "value": "A site nav lists a site's pages as a tree, the page shown marked;  a click goes to a page.\n\nAlso known as:  site navigation, side navigation, sidebar menu, nav menu, site map, page tree.\n\n**Events:**  `ui-navigating`, `ui-opening`, `ui-closing`, `ui-starred`"
+        "value": "A site nav lists a site's pages as a tree, the page shown marked;  a click goes to a page.\n\nAlso known as:  site navigation, side navigation, sidebar menu, nav menu, site map, page tree.\n\n**Slots:**  `start`, `end`, `collapsed-start`, `collapsed-end`\n\n**Events:**  `ui-navigating`, `ui-opening`, `ui-closing`, `ui-starred`"
       },
       "attributes": [
         {
@@ -50600,10 +50861,25 @@
           ]
         },
         {
+          "name": "groups",
+          "description": {
+            "kind": "markdown",
+            "value": "How a group (`band` `group`) looks.  `wells` (the default):  an open group a slight inset well, its pages a step in from its label, folding as the person opens and closes it.  `headings`:  a small heading over its pages, always open, its pages in line with the rest, and a page's own pages beside a guide line.\n\nTakes:  `wells` · `headings`\nDefault:  `wells`"
+          },
+          "values": [
+            {
+              "name": "wells"
+            },
+            {
+              "name": "headings"
+            }
+          ]
+        },
+        {
           "name": "collapsed",
           "description": {
             "kind": "markdown",
-            "value": "Only the icons, in one column:  each row's title its tooltip, a page with no icon its title's first letter, and a group with no icon a thin line.  None:  the titles beside the icons.\n\nTakes:  flag (present / absent)"
+            "value": "Only the icons, in one column:  each row's title its tooltip, a page with no icon its title's first letter, a group with no icon a thin line, and a heading (`groups=\"headings\"`) a gap.  The `collapsed-start` and `collapsed-end` slots show in place of `start` and `end`, when they have content.  None:  the titles beside the icons.\n\nTakes:  flag (present / absent)"
           }
         },
         {
@@ -50921,7 +51197,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -51075,7 +51351,7 @@
           "name": "appearance",
           "description": {
             "kind": "markdown",
-            "value": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance=\"circular\">` is.  Its old name was the bare `link` switch.\n\nTakes:  space-separated:  `link` · `circular`"
+            "value": "The look:  `link` -- list / menu:  interactive without a `link`, a `<button>` with the link hover.  `circular` -- menu:  an icon alone in a circle, as wide as it's tall (`--ui-menu-circular-item-size`, 2em), its hover, chosen and pressed surrounds round, as `<ui-button appearance=\"circular\">` is.  `dashed` -- a `kind=\"divider\"` (menu, dropdown):  a dashed line, 2px, a shade darker, where one kind of item ends and another begins, as `<ui-divider appearance=\"dashed\">`.  Its old name was the bare `link` switch.\n\nTakes:  space-separated:  `link` · `circular` · `dashed`"
           },
           "values": [
             {
@@ -51083,6 +51359,9 @@
             },
             {
               "name": "circular"
+            },
+            {
+              "name": "dashed"
             }
           ]
         },
@@ -51441,7 +51720,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -51794,7 +52073,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -52375,7 +52654,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -52744,7 +53023,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -53527,6 +53806,27 @@
           }
         },
         {
+          "name": "height",
+          "description": {
+            "kind": "markdown",
+            "value": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  `height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "min-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too, and a fluid one (`height=\"fluid\"`) squeezes no further.  On the same boxes as `height`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "max-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The tallest its box gets, any CSS length:  `max-height=\"60vh\"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.\n\nTakes:  text"
+          }
+        },
+        {
           "name": "tooltip",
           "description": {
             "kind": "markdown",
@@ -53551,7 +53851,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -54018,7 +54318,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -54532,7 +54832,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -54980,7 +55280,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -55550,7 +55850,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -55905,7 +56205,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -56274,7 +56574,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -56608,7 +56908,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -57021,7 +57321,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -57166,13 +57466,6 @@
           "description": {
             "kind": "markdown",
             "value": "For dark backgrounds:  the dark scheme.\n\nTakes:  flag (present / absent)"
-          }
-        },
-        {
-          "name": "resizable",
-          "description": {
-            "kind": "markdown",
-            "value": "With `scrolling`:  people can drag the height.\n\nTakes:  flag (present / absent)"
           }
         },
         {
@@ -57786,6 +58079,27 @@
           }
         },
         {
+          "name": "height",
+          "description": {
+            "kind": "markdown",
+            "value": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  `height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "min-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too, and a fluid one (`height=\"fluid\"`) squeezes no further.  On the same boxes as `height`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "max-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The tallest its box gets, any CSS length:  `max-height=\"60vh\"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.\n\nTakes:  text"
+          }
+        },
+        {
           "name": "tooltip",
           "description": {
             "kind": "markdown",
@@ -57804,6 +58118,13 @@
           "description": {
             "kind": "markdown",
             "value": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "resizable",
+          "description": {
+            "kind": "markdown",
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -58384,7 +58705,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -58725,7 +59046,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -59092,7 +59413,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -59666,7 +59987,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -60171,7 +60492,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -60512,7 +60833,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -60928,7 +61249,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -61262,7 +61583,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -61596,7 +61917,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -62126,7 +62447,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -62521,7 +62842,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -63334,7 +63655,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -63714,7 +64035,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -64090,7 +64411,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -64533,7 +64854,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -64936,6 +65257,27 @@
           }
         },
         {
+          "name": "height",
+          "description": {
+            "kind": "markdown",
+            "value": "Its box's own height, any CSS length:  `height=\"18em\"`, `\"50vh\"`.  What doesn't fit scrolls inside it.  `height=\"fluid\"`:  what's left of its parent's height, shared with its other fluid children, in a column of boxes (a stack, a `stretched` grid's column, a fluid segment, a fluid grid's rows, a page `filling the window`);  a fluid segment lays its own content in a column, so a fluid child shares out its height in turn.  Only on the boxes whose height means something:  a tree, a table, a segment, a card, a graph, code, JSON, a flyout, a modal, an embed, markdown;  a stack, a grid and a grid's row.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "min-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The shortest its box gets, any CSS length:  `min-height=\"8em\"`;  a drag (`resizable`) stops there too, and a fluid one (`height=\"fluid\"`) squeezes no further.  On the same boxes as `height`.\n\nTakes:  text"
+          }
+        },
+        {
+          "name": "max-height",
+          "description": {
+            "kind": "markdown",
+            "value": "The tallest its box gets, any CSS length:  `max-height=\"60vh\"`;  what doesn't fit scrolls inside it, and a drag (`resizable`) stops there too.  On the same boxes as `height`.\n\nTakes:  text"
+          }
+        },
+        {
           "name": "tooltip",
           "description": {
             "kind": "markdown",
@@ -64953,7 +65295,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -65316,7 +65658,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -65731,7 +66073,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -66160,7 +66502,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -66585,7 +66927,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -66926,7 +67268,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -67316,7 +67658,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -67690,7 +68032,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {
@@ -68059,7 +68401,7 @@
           "name": "resizable",
           "description": {
             "kind": "markdown",
-            "value": "People can drag its corner to resize it:  bare or `both`, `horizontally` or `vertically`.  Limit it with plain CSS (`max-width: 50%`, `min-height: 4em`).  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-segment resizable>` drags its height).\n\nTakes:  text"
+            "value": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)\n\nTakes:  text"
           }
         },
         {

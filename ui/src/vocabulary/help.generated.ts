@@ -522,6 +522,8 @@ export const HELP_TABLE: Readonly<
       clearing: "Clears floated content above it.",
       section: "More space, to divide sections of content.",
       inverted: "For dark backgrounds.",
+      appearance:
+        'The look: `dashed` -- a dashed line, 2px, a shade darker (`--ui-divider-dashed-width`, `--ui-divider-dashed-color`): where one kind of thing ends and another begins, as a menu\'s `<ui-item kind="divider" appearance="dashed">` draws it.',
       align: 'With `direction="horizontal"`: where the text sits; `left` / `right` drop the rule on that side.',
       icon: "Icon name, shown before the text."
     }
@@ -1265,7 +1267,9 @@ export const HELP_TABLE: Readonly<
       right:
         '`hidden`: the right side bar isn\'t shown, until its button (`<ui-site-nav-button toggles="right">`) shows it again.',
       floating:
-        "The drawer and the side bars float: rounded cards with a soft shadow and room round them, over the page's own ground."
+        "The drawer and the side bars float: rounded cards with a soft shadow and room round them, over the page's own ground.",
+      "page-height":
+        "`fluid`: the layout is exactly as tall as what's seen of the window (or the pane it scrolls in), never scrolling it: the page takes what's left under the menus, a column whose children with `height=\"fluid\"` share it out, each scrolling inside."
     }
   },
   "ui-panel": {
@@ -1770,8 +1774,7 @@ export const HELP_TABLE: Readonly<
       inverted: "The dark scheme; everything inside follows (`color-scheme: dark`, `--ui-inverted`).",
       loading: "Dims its content under a spinner; `aria-busy`.",
       disabled: "Dimmed and inert.",
-      scrolling: "A capped height (per breakpoint) that scrolls; `short` ...",
-      resizable: "With `scrolling`: people can drag its height."
+      scrolling: "A capped height (per breakpoint) that scrolls; `short` ..."
     }
   },
   "ui-segments": {
@@ -1888,8 +1891,9 @@ export const HELP_TABLE: Readonly<
       label: "What a screen reader calls the navigation.",
       appearance:
         '`nav`: the docs site\'s look, its pages a tree with `appearance="nav"`: taller rows, the page shown a rounded box in the primary colour, and `band` pages as heading bands.',
+      groups: "How a group (`band` `group`) looks.",
       collapsed:
-        "Only the icons, in one column: each row's title its tooltip, a page with no icon its title's first letter, and a group with no icon a thin line.",
+        "Only the icons, in one column: each row's title its tooltip, a page with no icon its title's first letter, a group with no icon a thin line, and a heading (`groups=\"headings\"`) a gap.",
       remember: "Keep which pages are open for each person, under this name, across reloads and visits."
     }
   },
@@ -2122,7 +2126,6 @@ export const HELP_TABLE: Readonly<
       definition: "First column is a definition column; blank corner.",
       fixed: "`table-layout: fixed`; overflowing cell text is cut with `…`.",
       inverted: "For dark backgrounds: the dark scheme.",
-      resizable: "With `scrolling`: people can drag the height.",
       selectable: "Body rows highlight on hover.",
       editable: "Data mode: people edit the cells like a spreadsheet.",
       "single-line": "No wrapping: every cell's text stays on one line (`single line`).",
@@ -2570,6 +2573,12 @@ export const SHARED_HELP: Readonly<Record<string, string>> = {
   label: "Its name for screen readers (`aria-label`), where it has no words of its own.",
   movable:
     "People can drag it to a new place inside its container: bare or `both`, `horizontally` or `vertically` for one way only.",
-  resizable: "People can drag its corner to resize it: bare or `both`, `horizontally` or `vertically`.",
-  "on-platform": 'Shown only on these devices, a comma list: `on-platform="desktop, tablet"` hides it on phones.'
+  resizable:
+    'People can drag its corner to resize it, the sizes it names: `resizable="width, height"`, `"height"` or `"width"`.',
+  "on-platform": 'Shown only on these devices, a comma list: `on-platform="desktop, tablet"` hides it on phones.',
+  height: 'Its box\'s own height, any CSS length: `height="18em"`, `"50vh"`.',
+  "min-height":
+    'The shortest its box gets, any CSS length: `min-height="8em"`; a drag (`resizable`) stops there too, and a fluid one (`height="fluid"`) squeezes no further.',
+  "max-height":
+    'The tallest its box gets, any CSS length: `max-height="60vh"`; what doesn\'t fit scrolls inside it, and a drag (`resizable`) stops there too.'
 }
