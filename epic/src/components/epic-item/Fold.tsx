@@ -106,9 +106,10 @@ export class Fold implements Opener {
    * - Always `FOLD_BUTTON` among its classes:  how its band knows it
    * - The chevron turns down while open (`Fold.css`, or the element's own sheet).
    * - Its tooltip ends with what ⌥-click does (`DEEP_TIPS`;  not its name):  the click itself is `Fold.toggleFrom()`'s
+   *   - no `tips`, no tooltip at all:  an aside's title (epic `epic-engine` T120);  it's named by its `label` then
    */
   static button(opener: Opener, options: FoldButtonOptions): JSX.Element {
-    const tip = () => (opener.isOpen() ? options.tips.fold : options.tips.unfold)
+    const tip = () => (options.tips ? (opener.isOpen() ? options.tips.fold : options.tips.unfold) : undefined)
     return (
       <button
         type="button"
@@ -118,7 +119,7 @@ export class Fold implements Opener {
         aria-controls={options.controls}
         aria-labelledby={options.labelledBy}
         aria-label={options.labelledBy || options.label !== undefined ? undefined : tip()}
-        data-tooltip={Fold.withDeepTip(tip(), opener.isOpen())}
+        data-tooltip={tip() === undefined ? undefined : Fold.withDeepTip(tip()!, opener.isOpen())}
         onClick={options.clicks ? (event: MouseEvent) => Fold.toggleFrom(opener, event) : undefined}
         onKeyDown={(event: KeyboardEvent) => Fold.deepKey(event) && Fold.toggleFrom(opener, event)}
       >
@@ -438,8 +439,11 @@ export type FoldButtonOptions = {
   className?: string
   /** it folds on its own click (a panel's title);  a card's band takes the click instead */
   clicks?: boolean
-  /** its tooltip while open (`fold`) and while folded (`unfold`):  the card's `foldTip` / `unfoldTip` texts */
-  tips: FoldTips
+  /**
+   * its tooltip while open (`fold`) and while folded (`unfold`):  the card's `foldTip` / `unfoldTip` texts
+   * - none:  no tooltip (an aside's title, whose words are on it already);  give it a `label` or `labelledBy` then
+   */
+  tips?: FoldTips
 }
 
 /** A fold button's tooltips, from its card's vocabulary. */
