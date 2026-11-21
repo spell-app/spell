@@ -4346,6 +4346,33 @@
         }
       ],
       "href": "TypeExplorer.html"
+    },
+    {
+      "tag": "UpgradeNotice",
+      "name": "UpgradeNotice",
+      "folder": "Notice",
+      "mainTag": "Notice",
+      "main": false,
+      "page": false,
+      "topics": [
+        "notices"
+      ],
+      "aka": [],
+      "description": "Offers to upgrade a project written for an older Spell, as it opens (epic `language` P68): `editor.upgradeOffered`, while it's the project shown.",
+      "noun": "UpgradeNotice",
+      "attributes": [],
+      "slots": [],
+      "events": [],
+      "parts": [],
+      "states": [],
+      "texts": [],
+      "usedIn": [
+        {
+          "name": "index",
+          "file": "src/app/index.tsx"
+        }
+      ],
+      "href": "Notice.html#UpgradeNotice"
     }
   ],
   "docs": [],
@@ -4669,6 +4696,7 @@
       "docs": false,
       "tags": [
         "Notice",
+        "UpgradeNotice",
         "RestartNeeded",
         "BackToSite"
       ],
