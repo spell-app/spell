@@ -104,6 +104,7 @@ const vocabulary = {
  *   until `project`, `src`, `scopes`, `name` or `editor` changes (`pushedKey()`).
  * - Each runs on its own copy of the spell runtime (`spell-runtime.js` beside its script),
  *   so many can run on a page at once.
+ * - A `project`'s code files (`call native`), the javascript its server makes of them (`SpellUrls.codeFileUrl()`).
  * - A `project`'s app, or code an editor pushed for one, keeps its remembered props from run to run,
  *   under the project's address (`runCompiled()`);  a `src` app remembers nothing.
  * - A ROOT (`UIRoot`), as `<ui-root>` is, so a page needs nothing around it:
@@ -369,6 +370,8 @@ function projectSource(project: string): SpellAppSource {
     declarationsUrl: builtUrl(projectId, DECLARATIONS_JSON),
     scopesUrl: builtUrl(projectId, SCOPES_JS),
     importUrl: (id) => builtUrl(id, COMPILED_JS),
+    // its code files' javascript, as the editor's runner reads them (`call native`, epic `from-project` P10)
+    nativeUrl: (module) => SpellUrls.codeFileUrl(module),
     importDeclarationsUrl: (id) => builtUrl(id, DECLARATIONS_JSON),
     wordsUrl: builtUrl(projectId, WORDS_JS),
     importWordsUrl: (id) => builtUrl(id, WORDS_JS),
@@ -391,7 +394,11 @@ function builtUrl(projectId: string, suffix: string): string {
   return SpellUrls.SPACES + SpellUrls.encodeAddress(`${projectId}/${nameOf(projectId)}`) + suffix
 }
 
-/** What to run for `src="<url>"`:  from anywhere, with what goes with it beside it. */
+/**
+ * What to run for `src="<url>"`:  from anywhere, with what goes with it beside it.
+ * - No code files (`call native`):  only Spell's server takes their types out, so a program calling one says
+ *   it can't load it.
+ */
 function srcSource(src: string): SpellAppSource {
   const compiledUrl = new URL(src, document.baseURI).href
   const file = decodeURIComponent(new URL(compiledUrl).pathname.split("/").pop() ?? "")

@@ -196,6 +196,29 @@ describe("spell language server over stdio", () => {
     )
   }, 60_000)
 
+  test("`spell/codeFile` answers a code file's javascript, its types taken out, for VS Code's runner;  `null` for none (from-console J110)", async () => {
+    const projectDir = resolve(mkdtempSync(resolve(tmpdir(), "spell-stdio-")), "Native")
+    mkdirSync(projectDir)
+    writeFileSync(
+      resolve(projectDir, "project.json"),
+      JSON.stringify({ imports: [{ path: "/main.spell", active: true }] })
+    )
+    const text = "set foo to 1"
+    writeFileSync(resolve(projectDir, "main.spell"), text)
+    writeFileSync(resolve(projectDir, "shout.ts"), "export function shout(text: string): string { return text }\n")
+    const uri = pathToFileURL(resolve(projectDir, "main.spell")).href
+    await connection.sendNotification("textDocument/didOpen", {
+      textDocument: { uri, languageId: "spell", version: 1, text }
+    })
+    const info = (await connection.sendRequest("spell/project", { uri })) as { project: string }
+    // as `SP.NativeCode.moduleFor()` writes it
+    const module = `@spell/native/${encodeURI(info.project)}/shout.ts`
+    const javascript = (await connection.sendRequest("spell/codeFile", { uri, module })) as string
+    expect(javascript).toMatch(/function shout\(text\) {[\s\S]*export {\s*shout\s*}/)
+    const missing = `@spell/native/${encodeURI(info.project)}/nowhere.ts`
+    expect(await connection.sendRequest("spell/codeFile", { uri, module: missing })).toBe(null)
+  }, 60_000)
+
   test("`spell/compileProject` of a project that doesn't parse:  not ok, and sends nothing", async () => {
     const projectDir = resolve(mkdtempSync(resolve(tmpdir(), "spell-stdio-")), "Broken")
     mkdirSync(projectDir)
