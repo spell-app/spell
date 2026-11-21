@@ -3008,6 +3008,17 @@ export class PlanDoc extends PlanReader {
     return true
   }
 
+  /**
+   * The epic's git branch, apart from its id (`epic update <epic> --branch <name>`, epic `epic-engine` I378):
+   * `<epic-page branch>`, which `EpicConfig.branchOf()` reads for every verb that finds the branch.
+   * - e.g. `from-project` kept its id when its branch was renamed `from-console`
+   */
+  setBranch(branch: string): void {
+    const was = this.page.getAttribute("branch")
+    Markup.set(this.page, { branch })
+    this.log(`branch:  ${branch}${was && was !== branch ? ` (was ${was})` : ""}`)
+  }
+
   /** The page's branch and worktree (`null`:  none yet, a future epic). */
   setMeta({ branch, worktree }: { branch: string | null; worktree: string | null }): void {
     Markup.set(this.page, { branch: branch ?? undefined, worktree: worktree ?? undefined })

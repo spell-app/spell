@@ -511,16 +511,18 @@ export class Requests {
     { ditch = false, ditched = StrayFiles.folderFor(), label = "the main checkout", install = {} }: MergeOptions = {}
   ): MergeResult {
     const main = Git.mainRoot(cwd)
-    const base = new EpicConfig(main).baseBranch
+    const config = new EpicConfig(main)
+    const base = config.baseBranch
+    const branch = config.branchOf(epic)
     const moved = Requests.mergeCheck(epic, main, { ditch, label }).ditch({ folder: ditched, ditch })
     const result: MergeResult = { base, commits: [], ditched: moved, ...(moved.length ? { ditchedTo: ditched } : {}) }
-    const commits = Git.run(["log", "--reverse", "--oneline", `${base}..${epic}`], main)
+    const commits = Git.run(["log", "--reverse", "--oneline", `${base}..${branch}`], main)
       .out.split("\n")
       .filter(Boolean)
     if (!commits.length) return result
     const before = Git.out(["rev-parse", "HEAD"], main) ?? ""
-    const merged = Git.run(["merge", "--ff-only", epic], main)
-    if (!merged.ok) throw new EpicCommandError(`merge:  git merge --ff-only ${epic} failed:\n${merged.err}`)
+    const merged = Git.run(["merge", "--ff-only", branch], main)
+    if (!merged.ok) throw new EpicCommandError(`merge:  git merge --ff-only ${branch} failed:\n${merged.err}`)
     const installed = MainMerge.installAfter(main, before, install.command, install.run)
     return { ...result, commits, ...(installed ? { installed } : {}) }
   }
@@ -536,23 +538,24 @@ export class Requests {
         `merge:  ${base} takes only ${CodeHost.of(new EpicConfig(main)).words.pullRequest}s here (baseBranchProtected):  ` +
           `epic pr ${epic} pushes it and opens one;  nothing merged`
       )
-    const branch = Git.run(["branch", "--show-current"], main).out
-    if (branch !== base) throw new EpicCommandError(`merge:  ${label} is on '${branch}', not ${base}`)
+    const current = Git.run(["branch", "--show-current"], main).out
+    if (current !== base) throw new EpicCommandError(`merge:  ${label} is on '${current}', not ${base}`)
+    const branch = new EpicConfig(main).branchOf(epic)
     // only what the fast-forward would change:  anything else uncommitted there is left as it is (I270)
-    const changed = Git.run(["diff", "--name-only", "-z", `${base}...${epic}`], main)
+    const changed = Git.run(["diff", "--name-only", "-z", `${base}...${branch}`], main)
     const stray = new StrayFiles(main, undefined, new Set(changed.out.split("\0").filter(Boolean)))
     stray.check({ label, epic, ditch })
-    if (!Git.run(["rev-parse", "--verify", "--quiet", `refs/heads/${epic}`], main).ok) {
-      throw new EpicCommandError(`merge:  no branch '${epic}'`)
+    if (!Git.run(["rev-parse", "--verify", "--quiet", `refs/heads/${branch}`], main).ok) {
+      throw new EpicCommandError(`merge:  no branch '${branch}'`)
     }
     // an OLD-LAYOUT worktree (epic-engine's P49):  its child-repo branches' work isn't in the branch until it crosses
     const config = new EpicConfig(main)
     const worktree = config.worktreeFolder(epic)
     const said = config.leftBehindSaid(worktree, config.leftBehind(worktree))
     if (said) throw new EpicCommandError(`merge:  ${said};  nothing merged`)
-    if (!Git.run(["merge-base", "--is-ancestor", base, epic], main).ok) {
+    if (!Git.run(["merge-base", "--is-ancestor", base, branch], main).ok) {
       throw new EpicCommandError(
-        `merge:  ${label}'s ${base} has moved since ${epic} last took it:  in its worktree, epic worktree merge-main, ` +
+        `merge:  ${label}'s ${base} has moved since ${branch} last took it:  in its worktree, epic worktree merge-main, ` +
           "then again;  nothing merged"
       )
     }
@@ -597,8 +600,9 @@ export class Requests {
       : [main]
     const behind = repos.filter((checkout) => {
       const base = new EpicConfig(checkout).baseBranch
-      const branch = Git.run(["rev-parse", "--verify", "--quiet", `refs/heads/${epic}`], checkout).ok
-      return branch && !Git.run(["merge-base", "--is-ancestor", base, epic], checkout).ok
+      const branch = config.branchOf(epic)
+      const found = Git.run(["rev-parse", "--verify", "--quiet", `refs/heads/${branch}`], checkout).ok
+      return found && !Git.run(["merge-base", "--is-ancestor", base, branch], checkout).ok
     })
     if (!behind.length) return null
     const claimOf = Worktrees.claimsIn(worktree, as)
@@ -634,9 +638,10 @@ export class Requests {
     // an old-layout child checkout found inside (`found`):  `mergeCheck()` refuses it until it crosses over
     const repos = top.repoCheckouts(epic).flatMap(({ repo, main: checkout, found }) => {
       if (found) return []
-      const base = new EpicConfig(checkout).baseBranch
-      if (!Git.run(["rev-parse", "--verify", "--quiet", `refs/heads/${epic}`], checkout).ok) return []
-      const ahead = Number(Git.run(["rev-list", "--count", `${base}..${epic}`], checkout).out || 0)
+      const config = new EpicConfig(checkout)
+      const branch = config.branchOf(epic)
+      if (!Git.run(["rev-parse", "--verify", "--quiet", `refs/heads/${branch}`], checkout).ok) return []
+      const ahead = Number(Git.run(["rev-list", "--count", `${config.baseBranch}..${branch}`], checkout).out || 0)
       return ahead ? [{ repo, checkout, label: `${repo}'s main checkout` }] : []
     })
     for (const { checkout, label } of repos) Requests.mergeCheck(epic, checkout, { ditch, label })

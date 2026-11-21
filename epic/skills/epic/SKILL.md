@@ -904,6 +904,8 @@ Until a `/back:  ...` message (or `epic focus status` says off):
           - Never `ExitWorktree` and back for it:  entering asks the person every time (epic `epic-engine` P12, r11).
             - In Codex:  nothing to leave:  stay in the worktree's folder.
           - A multi-repo top:  every repo's main checkout;  only the repos whose `<name>` branch has commits move.
+          - The branch is the epic's id unless its page names another (`<epic-page branch>`, epic `epic-engine`
+            I378):  a branch renamed apart from its id, `epic update <name> --branch <branch>`, and every verb follows.
           It refuses, saying why (`main` moved again, uncommitted work there):  `add <name>#I`, and go on.
           - STRAY files in a main checkout (epic `epic-engine` I77;  "ask if I want to ditch them before merging
             rather than just bailing"):

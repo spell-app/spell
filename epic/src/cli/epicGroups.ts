@@ -1530,6 +1530,9 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--failed <issue>": 'a manual test failed, filed as that issue (I12):  "failed -> I12" on its line;  off:  not',
     "--standing [on|off]": "the page:  a standing epic, open for good, never done",
     "--no-standing": "the page:  not a standing epic",
+    "--branch <name>":
+      "the page:  the epic's git branch, when it isn't the epic's id (<epic-page branch>);  merge, merge-main, " +
+      "worktree status and pr use it",
     "--filed <what>": "a card:  done --filed is noted's older spelling"
   },
   updated: {

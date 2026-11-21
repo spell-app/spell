@@ -306,6 +306,8 @@ export class PlanDocCommands {
         })
       case "change":
         return this.changeMarks(file, flags)
+      case "branch":
+        return this.edit(file, (plan) => plan.setBranch(need(rest[0], "a branch name")))
       case "standing":
         return this.edit(file, (plan) => {
           const value = rest[0] ?? "on"
@@ -1689,6 +1691,9 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    id, time, answer, the words replaced;  every edit does
                                                    too), list them, new first;
                                                    --for:  the item of the marks that name none
+  branch <name> <branch>                           the epic's git branch, when it isn't its id (<epic-page branch>):
+                                                   every verb that finds the branch asks EpicConfig.branchOf();
+                                                   logged (epic update <name> --branch <branch>)
   standing <name> [on|off]                         a standing epic:  open for good, each phase merging on its own,
                                                    never done (epic epic-workflow)
   request <name> <N> <rN> --from "..." --file path a request sent from another session, into phase N's Requests
