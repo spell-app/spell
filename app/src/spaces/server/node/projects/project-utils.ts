@@ -15,6 +15,8 @@ import { basename, dirname, extname, relative, resolve, sep } from "path"
 import { findUp } from "spell/util/node/findUp"
 import { SRV } from "spell/server"
 import { json5Edited } from "spell/app/spaces/server/node/storage/json5"
+// a cycle of functions only, called after both have loaded
+import { setSpellVersion } from "./spellVersions"
 import environment from "spell/app/spaces/server/node/environment"
 
 import { SP } from "spell/parser/spell"
@@ -805,10 +807,17 @@ export function isDraftable(location: SP.SpellLocation): boolean {
 // ## Project manipulation
 ////////////////
 
-/** Create project `projectId` by creating file at `filePath` (default `DEFAULT_FILE`) within it. */
+/**
+ * Create project `projectId` by creating file at `filePath` (default `DEFAULT_FILE`) within it.
+ * - Its project file says it's written for today's Spell, `spellVersion` (epic `language` P68):
+ *   unless that first file IS its project file, an imported project's, which keeps the version it says.
+ */
 export const createProject = async (projectId: string, filePath: string, contents: any) => {
   const location = SP.SpellLocation.getFileLocation(projectId, filePath || DEFAULT_FILE.filePath)
-  return await fileUtils.saveFile(location.serverPath, contents || DEFAULT_FILE.contents)
+  const saved = await fileUtils.saveFile(location.serverPath, contents || DEFAULT_FILE.contents)
+  // its file only names its Spell after its first file is there:  `getIndex()` lists that file
+  if (!SP.isProjectFile(location.file ?? "")) await setSpellVersion(projectId)
+  return saved
 }
 
 /**
