@@ -106,16 +106,11 @@ export class EpicOptionForm extends E.UIComponent<typeof epicOptionFormVocabular
           (label) => this.removePicture(label)
         )}
         <span class="actions" part={this.partForName("actions")}>
-          <button
-            type="submit"
-            data-color="green"
-            disabled={this.isSaving}
-            data-tooltip={this.translationForKey("saveTip")}
-          >
+          <button type="submit" data-color="green" disabled={this.isSaving}>
             <ui-icon name="check" />
             {this.submit ?? this.translationForKey("save")}
           </button>
-          <button type="button" data-tooltip={this.translationForKey("cancelTip")} onClick={() => this.cancel()}>
+          <button type="button" onClick={() => this.cancel()}>
             {this.translationForKey("cancel")}
           </button>
           {/* VS Code's side bar never lets a dragged file reach the page:  a chooser does */}

@@ -826,11 +826,6 @@ export const REVIEW_TEXTS = [
   { key: "saidUnsent", text: "{how} · not sent yet", description: "A marked note:  not sent." },
   { key: "edit", text: "Edit", description: "A marked note's button:  back into the note box." },
   { key: "saidTaken", text: "You, {time}", description: "The note Claude took:  who wrote it, and when." },
-  {
-    key: "saidTakenTip",
-    text: "Claude has this note;  write a new one below",
-    description: "The note Claude took:  its tooltip."
-  },
   { key: "threadAnswer", text: "Your answer", description: "A thread's answer buttons, for a screen reader." },
   { key: "threadGood", text: "That's good", description: "A thread's check:  its name." },
   { key: "threadGoodTitle", text: "Done:  fold the thread", description: "A thread's check:  its tooltip." },

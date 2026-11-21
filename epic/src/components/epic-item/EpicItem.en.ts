@@ -458,9 +458,9 @@ export const epicItemVocabulary = {
       text: "Done in {phase}",
       description: "The phase link's tooltip with `taken-in`:  the phase's number and name (epic `epic-engine` I128)."
     },
-    { key: "tipTodo", text: "to do:  {work}", description: "Id chip and review label tooltip:  the queued work." },
+    { key: "tipTodo", text: "to do:  {work}", description: "Id chip tooltip:  the queued work." },
     { key: "tipReviewed", text: "reviewed {date}", description: "Id chip tooltip:  reviewed." },
-    { key: "tipDeferred", text: "deferred {date}", description: "Id chip and review label tooltip:  deferred." },
+    { key: "tipDeferred", text: "deferred {date}", description: "Id chip tooltip:  deferred." },
     { key: "tipNotReviewed", text: "not reviewed", description: "Id chip tooltip:  open, never reviewed." },
     {
       key: "tipMakeCalm",
@@ -494,12 +494,6 @@ export const epicItemVocabulary = {
       description: "A test that failed in a test run (`failed`):  its line's red mark, linking the issue."
     },
     { key: "failedMarkNone", text: "failed", description: "The same, with no issue named." },
-    {
-      key: "failedTip",
-      text: "Failed your test:  filed as {id}",
-      description: "The failed mark's tooltip."
-    },
-    { key: "failedTipNone", text: "Failed your test", description: "The failed mark's tooltip, no issue." },
     { key: "madeOvernight", text: "made overnight", description: "The bed icon's tooltip (`overnight`)." },
     { key: "sourceLoadError", text: "Couldn't load {source}.", description: "The part's fetch failed." },
     {

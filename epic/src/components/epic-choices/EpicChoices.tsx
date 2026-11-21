@@ -306,7 +306,6 @@ export class EpicChoices extends E.UIComponent<typeof epicChoicesVocabulary> {
             className: TOGGLE,
             part: this.partForName("toggle"),
             controls: PANELS_ID,
-            tips: { fold: this.translationForKey("foldTip"), unfold: this.translationForKey("unfoldTip") },
             label: (
               <>
                 {this.title ?? this.translationForKey("choices")}
@@ -370,13 +369,7 @@ export class EpicChoices extends E.UIComponent<typeof epicChoicesVocabulary> {
           />
         </Show>
         <Show when={this.canAdd && !this.isAdding}>
-          <button
-            type="button"
-            class={ADD}
-            part={this.partForName("add")}
-            data-tooltip={this.translationForKey("addTip")}
-            onClick={() => (this.isAdding = true)}
-          >
+          <button type="button" class={ADD} part={this.partForName("add")} onClick={() => (this.isAdding = true)}>
             <ui-icon name="plus" />
             {this.translationForKey("addChoice")}
           </button>
@@ -388,7 +381,7 @@ export class EpicChoices extends E.UIComponent<typeof epicChoicesVocabulary> {
 
   /**
    * The heading:  a standing set's title, then how it's answered.
-   * - reviewed:  a switch, `Pick any` on or off (`role="switch"`);  its tooltip says what flipping does
+   * - reviewed:  a switch, `Pick any` on or off (`role="switch"`)
    * - else the words, `Pick any` (pick one says nothing:  the old look)
    */
   private heading(): JSX.Element {
@@ -413,7 +406,6 @@ export class EpicChoices extends E.UIComponent<typeof epicChoicesVocabulary> {
             part={this.partForName("switch")}
             role="switch"
             aria-checked={this.isMultiple ? "true" : "false"}
-            data-tooltip={this.translationForKey(this.isMultiple ? "switchToOneTip" : "switchToAnyTip")}
             onClick={() => this.change((fields, state) => SetChange.flip(fields, state))}
           >
             <span class={KNOB} aria-hidden="true" />
@@ -468,7 +460,6 @@ export class EpicChoices extends E.UIComponent<typeof epicChoicesVocabulary> {
                 type="button"
                 class={[CHOOSE, { [SENT]: this.isSent }]}
                 aria-pressed={picked() ? "true" : "false"}
-                data-tooltip={this.translationForKey(picked() ? "tipNewPicked" : "tipNewChoose")}
                 onClick={() => this.change((fields, state) => SetChange.toggle(fields, state, option.key))}
               >
                 {this.translationForKey(picked() ? (this.isSent ? "chosenSent" : "chosenNotSent") : "choose")}
@@ -484,7 +475,6 @@ export class EpicChoices extends E.UIComponent<typeof epicChoicesVocabulary> {
                     class={THUMB}
                     src={shot()}
                     alt={option.title}
-                    data-tooltip={this.translationForKey("zoomTip")}
                     onClick={(event: MouseEvent) => EpicChoices.zoom(event)}
                   />
                 )}
@@ -560,7 +550,6 @@ export class EpicChoices extends E.UIComponent<typeof epicChoicesVocabulary> {
           className: TOGGLE,
           part: this.partForName("toggle"),
           controls: id,
-          tips: { fold: this.translationForKey("foldListTip"), unfold: this.translationForKey("unfoldListTip") },
           label: <span class={LIST_TITLE}>{this.translationForKey(key, { count })}</span>,
           clicks: true
         })}

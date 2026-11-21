@@ -257,13 +257,7 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
   private blankCell(): JSX.Element {
     return (
       <div class={[CELL, PICK]} part={this.partForName("pick")} role="cell">
-        <button
-          type="button"
-          class={COPY}
-          part={this.partForName("copy")}
-          data-tooltip={this.translationForKey("copyTip")}
-          onClick={this.onCopy}
-        >
+        <button type="button" class={COPY} part={this.partForName("copy")} onClick={this.onCopy}>
           <code>{this.current}</code>
         </button>
         {this.field(this.translationForKey("blankLabel", { current: this.current ?? "" }))}
@@ -359,12 +353,7 @@ export class EpicChoiceRow extends E.UIComponent<typeof epicChoiceRowVocabulary>
     const slash = file.lastIndexOf("/")
     return (
       <div class={[CELL, FILE]} part={this.partForName("file")} role="cell">
-        <a
-          class={LINK}
-          href={this.fileUrl}
-          data-tooltip={this.translationForKey("openTip", { file, line: String(this.line ?? 1) })}
-          onClick={this.onOpenFile}
-        >
+        <a class={LINK} href={this.fileUrl} onClick={this.onOpenFile}>
           {file.slice(slash + 1)}
           <span class={LINE}>:{this.line}</span>
         </a>

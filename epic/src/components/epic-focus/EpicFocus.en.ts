@@ -68,19 +68,12 @@ export const epicFocusVocabulary = {
     { key: "testsTab", text: "Tests" },
     { key: "tabsLabel", text: "Kinds of item", description: "The tabs' group, for a screen reader." },
     {
-      key: "tabTip",
-      text: "{tab}:  {count} to go",
-      description: "A tab's tooltip:  how many of its items show, by its chips."
-    },
-    {
       key: "where",
       text: "{at} of {total} · {tab} {atTab} of {inTab}",
       description: "Where you are:  overall, then in the tab."
     },
     { key: "back", text: "Back", description: "Back's words." },
-    { key: "backTip", text: "Previous item (←)", description: "Back's tooltip." },
     { key: "next", text: "Next", description: "Next's words." },
-    { key: "nextTip", text: "Next item (→)", description: "Next's tooltip." },
     {
       key: "nothing",
       text: "Nothing open to go through:  every item is done, decided or hidden by the chips.",

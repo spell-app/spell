@@ -150,7 +150,7 @@ describe("<epic-phase>", () => {
   })
 
   // epic `epic-engine` I273 (Owen:  "This says it's done, but it's not on main yet.  That should be indicated.")
-  test("done, its work not on main yet:  a `not on main` pill before its time pill, the branch in its tooltip", async () => {
+  test("done, its work not on main yet:  a `not on main` pill before its time pill, no tooltip (I370)", async () => {
     const host = await render(
       `<epic-section id="phases" kind="phases">` +
         `<epic-phase id="p-off" title="Off main" status="done" took="21m" unmerged="editor"></epic-phase>` +
@@ -163,7 +163,7 @@ describe("<epic-phase>", () => {
       const pill = phase.shadowRoot!.querySelector('[part~="unmerged"]')
       return pill && [pill.textContent, pill.getAttribute("data-tooltip")]
     })
-    expect(shown).toEqual([["not on main", "Done on editor, not merged yet"], null, null])
+    expect(shown).toEqual([["not on main", null], null, null])
   })
 
   // epic `epic-engine` I228 (atmosphere's r60, Owen:  "P18 should show as 'done', or better, crossed out somehow")

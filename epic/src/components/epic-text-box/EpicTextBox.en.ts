@@ -99,7 +99,6 @@ export const epicTextBoxVocabulary = {
         "with the rest:  drop one once it's said elsewhere.",
       description: "Under the kept text's title:  what it is."
     },
-    { key: "keptIdTip", text: "It was under {id}", description: "A kept text's title's tooltip:  its old id." },
     { key: "keptDrop", text: "Drop {label}", description: "A kept text's ×, for a screen reader." },
     {
       key: "keptDropTip",

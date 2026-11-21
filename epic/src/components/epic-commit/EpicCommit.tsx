@@ -170,7 +170,6 @@ export class EpicCommit extends E.UIComponent<typeof epicCommitVocabulary> {
               role={this.isLong ? "button" : undefined}
               tabindex={this.isLong ? "0" : undefined}
               aria-expanded={this.isLong ? (this.isUnfolded ? "true" : "false") : undefined}
-              data-tooltip={this.isLong ? this.translationForKey(this.isUnfolded ? "foldTip" : "unfoldTip") : undefined}
               onKeyDown={(event: KeyboardEvent) => this.onSentenceKey(event)}
             >
               <slot />

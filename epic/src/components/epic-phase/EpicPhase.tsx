@@ -239,7 +239,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
 
   /**
    * It can be DRAGGED to another place by its title row (epic `epic-engine` P34, the Phases section's `PhaseDrag`):
-   * still to do, on a page being reviewed;  its title row shows the grab cursor and says so in its tooltip.
+   * still to do, on a page being reviewed;  its title row shows the grab cursor (no tooltip:  I370).
    */
   @E.cssState("movable")
   get isMovable(): boolean {
@@ -387,11 +387,7 @@ export class EpicPhase extends EpicFold<typeof epicPhaseVocabulary> {
         <>
           <Show when={this.shownStatus === "done" && this.unmerged}>
             {(branch) => (
-              <span
-                class={UNMERGED}
-                part={this.partForName("unmerged")}
-                data-tooltip={this.translationForKey("unmergedTip", { branch: branch() })}
-              >
+              <span class={UNMERGED} part={this.partForName("unmerged")}>
                 {this.translationForKey("unmerged")}
               </span>
             )}

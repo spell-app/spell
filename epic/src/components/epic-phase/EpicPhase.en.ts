@@ -298,11 +298,6 @@ export const epicPhaseVocabulary = {
       description: "A done phase's pill while its work is on its epic's branch alone (`unmerged`, I273)."
     },
     {
-      key: "unmergedTip",
-      text: "Done on {branch}, not merged yet",
-      description: "That pill's tooltip."
-    },
-    {
       key: "spanTip",
       text: "{took} of work over {span}",
       description: "A done phase's time pill with its clock time, no estimate:  its tooltip (I127)."

@@ -243,16 +243,8 @@ describe("ThreadFacts", () => {
       ThreadFacts.headline(place({ kind: "page" })),
       ThreadFacts.headline(place({ excerpt: "", label: "", kind: "code" }))
     ]).toEqual(["“Name Kind Where”", "“a quote longer than forty characters, cu…”", "This page", "This code block"])
-    expect(ThreadFacts.aboutTip({ id: "c3", place: comment({ quote: "Kind" }) })).toBe(
-      "Comment C3, on a table in “2. Context”:  “Kind”"
-    )
-    expect(ThreadFacts.aboutTip({ place: comment({ kind: "section" }) })).toBe("On “2. Context”")
     // the whole Overview (epic `epic-engine` I55):  "the", as the page
-    const overview = place({ kind: "overview", excerpt: "", label: "" })
-    expect([ThreadFacts.headline(overview), ThreadFacts.aboutTip({ place: overview })]).toEqual([
-      "This Overview",
-      "On the Overview"
-    ])
+    expect(ThreadFacts.headline(place({ kind: "overview", excerpt: "", label: "" }))).toBe("This Overview")
   })
 
   test("times:  local, then no year", () => {

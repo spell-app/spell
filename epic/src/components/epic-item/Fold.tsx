@@ -90,7 +90,7 @@ export class Fold implements Opener {
 
   /**
    * THE fold button, of `opener`'s fold:  the chevron, then its `label`;  its `aria-expanded` as the fold stands,
-   * its tooltip (`tips`) what a click does.
+   * a chevron alone its tooltip (`tips`) what a click does.
    * - Its kinds:
    *   - FIRST in a card's heading band, so everything boxed in a section folds (Owen, 2026-10-08):
    *     `<epic-reply>`, `<epic-answer>`, `<epic-status>`, `<epic-note>`, an `<epic-update>` note, `<epic-updated>`
@@ -102,14 +102,17 @@ export class Fold implements Opener {
    *   - a panel's whole title, `clicks` (it folds on its own click), its words its `label`:
    *     More Details, Original Discussion, Choices, an option's panel (answering or reviewed), an aside or code panel
    * - Named by `labelledBy`, else its `label`, else its tooltip (`aria-label`)
-   * - `options` is read as the button draws:  a getter there (an item's `controls`, an option's `tips`) follows
+   * - A tooltip ONLY on the chevron alone (an item's line):  a button with words on it (a band, a panel's title)
+   *   shows none, whatever `tips` says (Owen, 2026-11-20, epic `epic-engine` I370:  no tooltips over what he reads)
+   * - `options` is read as the button draws:  a getter there (an item's `controls` and `tips`) follows
    * - Always `FOLD_BUTTON` among its classes:  how its band knows it
    * - The chevron turns down while open (`Fold.css`, or the element's own sheet).
    * - Its tooltip ends with what ⌥-click does (`DEEP_TIPS`;  not its name):  the click itself is `Fold.toggleFrom()`'s
-   *   - no `tips`, no tooltip at all:  an aside's title (epic `epic-engine` T120);  it's named by its `label` then
    */
   static button(opener: Opener, options: FoldButtonOptions): JSX.Element {
-    const tip = () => (options.tips ? (opener.isOpen() ? options.tips.fold : options.tips.unfold) : undefined)
+    const isChevronAlone = options.label === undefined && !options.labelledBy
+    const tip = () =>
+      options.tips && isChevronAlone ? (opener.isOpen() ? options.tips.fold : options.tips.unfold) : undefined
     return (
       <button
         type="button"
@@ -440,8 +443,8 @@ export type FoldButtonOptions = {
   /** it folds on its own click (a panel's title);  a card's band takes the click instead */
   clicks?: boolean
   /**
-   * its tooltip while open (`fold`) and while folded (`unfold`):  the card's `foldTip` / `unfoldTip` texts
-   * - none:  no tooltip (an aside's title, whose words are on it already);  give it a `label` or `labelledBy` then
+   * the chevron alone's tooltip while open (`fold`) and while folded (`unfold`), and its name:  an item's line
+   * - read only without a `label` or `labelledBy`:  a button with words on it shows no tooltip (I370)
    */
   tips?: FoldTips
 }

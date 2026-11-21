@@ -269,14 +269,12 @@ export const STATE_TIP_KEYS = {
 /** The review label's look:  `todo` blue (queued, not started), `deferred` grey, `reviewed` by state. */
 export type ReviewLook = "todo" | "deferred" | "recent" | "old"
 
-/** The review label on an item's line:  its words, look and tooltip. */
+/** The review label on an item's line:  its words and look;  no tooltip, its words are on it (epic `epic-engine` I370). */
 export type ReviewLabel = {
   /** what it says:  `to do`, `deferred`, `reviewed 10/6/26` */
   words: string
   /** its colour */
   look: ReviewLook
-  /** its tooltip:  the queued work, the date it was deferred */
-  tip?: string
 }
 
 ////////////////

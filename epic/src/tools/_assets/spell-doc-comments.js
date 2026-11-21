@@ -565,11 +565,7 @@ class PageComments {
     const state = unsent ? "unsent" : send.waiting.length ? "sent" : "idle"
     const button = el(SEND_BUTTONS_TAG, { state, count: unsent || undefined, "send-tip": sendWords(send, state) })
     button.addEventListener(SEND_ASKED, () => void this.sendNow())
-    const who = el(
-      "span",
-      { class: "spell-send-who", "data-listening": send.listening ? "yes" : "no", "data-tooltip": whoWords(send) },
-      whoLabel(send)
-    )
+    const who = el("span", { class: "spell-send-who", "data-listening": send.listening ? "yes" : "no" }, whoLabel(send))
     // the header's tools row, first (`addHeadTool()`)
     addHeadTool(
       head,
@@ -1017,7 +1013,7 @@ class PageComments {
     const id = `C${ThreadFacts.numberOf(comment.id)}`
     const row = el(
       "button",
-      { type: "button", class: `${PROMOTED}-row`, "data-tooltip": `${id}:  show this comment` },
+      { type: "button", class: `${PROMOTED}-row` },
       el("ui-icon", { name: "bullhorn" }),
       el("b", {}, id),
       el("span", {}, ThreadFacts.headline(comment))
@@ -1837,8 +1833,7 @@ class PageComments {
       PANE_TAG,
       {
         "data-spell-added": true,
-        headline: ThreadFacts.headline(open.place),
-        about: ThreadFacts.aboutTip(open)
+        headline: ThreadFacts.headline(open.place)
       },
       field
     ))
@@ -2096,14 +2091,6 @@ function whoLabel({ epic, owned, wakes, listening }) {
   if (listening) return `${epic} is listening`
   if (owned) return "nobody is listening"
   return wakes ? `nobody is listening:  Send wakes ${epic}` : "no epic owns this page"
-}
-
-/** The tooltip of who is listening, beside a docs page's Send (`drawSend()`):  where its comments go, and when. */
-function whoWords({ epic, owned, wakes, listening }) {
-  const where = owned ? epic : `${epic}, for pages no epic owns`
-  if (listening) return `Claude is reviewing ${where}:  Send hands these over now`
-  if (wakes) return `Nobody is reviewing ${where}:  Send wakes it`
-  return `No epic owns this page yet:  its comments wait`
 }
 
 /** The first line of `words`, cut to a short line with `…`. */

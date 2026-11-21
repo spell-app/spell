@@ -14,8 +14,7 @@ function part(element: Element, name: string): HTMLElement {
 /** A pane near `near`, its field slotted. */
 async function pane(near: { left: number; top: number; bottom: number } | undefined, attributes = "") {
   const host = document.createElement("epic-comment-pane") as HTMLElement & { near: unknown }
-  for (const [name, value] of Object.entries({ headline: "“2. Context”", about: "On a section in “2. Context”" }))
-    host.setAttribute(name, value)
+  for (const [name, value] of Object.entries({ headline: "“2. Context”" })) host.setAttribute(name, value)
   for (const name of attributes.split(" ").filter(Boolean)) host.setAttribute(name, "")
   host.near = near
   host.append(document.createElement("textarea"))
@@ -49,7 +48,7 @@ describe("<epic-comment-pane>", () => {
     host.remove()
   })
 
-  test("its header:  the first words (the block in full its tooltip), the floppy and trash once saved, ×;  a dialog", async () => {
+  test("its header:  the first words (no tooltip, I370), the floppy and trash once saved, ×;  a dialog", async () => {
     const fresh = await pane(undefined)
     expect({
       headline: part(fresh, "header").textContent,
@@ -61,7 +60,7 @@ describe("<epic-comment-pane>", () => {
       slotted: !!fresh.querySelector("textarea")!.assignedSlot
     }).toEqual({
       headline: "“2. Context”",
-      tip: "On a section in “2. Context”\nDrag to move",
+      tip: undefined,
       buttons: 1,
       floppy: false,
       role: "dialog",

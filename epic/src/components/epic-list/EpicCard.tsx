@@ -3,8 +3,6 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E, UI } from "spell/ui/core"
 
-import { PlanDates } from "spell/epic/dates"
-import { readEpicDate } from "spell/epic/list/EpicCards"
 import { epicStateFor, type EpicState } from "spell/epic/list/EpicState"
 import { ServerLink } from "spell/epic/review"
 
@@ -26,7 +24,7 @@ import cardCSS from "./EpicCard.css?inline"
  * ### `<epic-card>`
  * One epic's card on the Epics page (epic `epic-engine` P3), drawn from its attributes:
  * - a Spell UI card (`<ui-card>`):  its state's mark, then its title (the link it holds), its description, its
- *   saga's label (the saga's purpose its tooltip) and its meta line
+ *   saga's label and its meta line
  * - its STATE by the ONE rule every list and page draws it by (`spell/epic/list/EpicState`), as of now:
  *   in progress (`3/6`, blue), errors, paused, future, done;  why, the mark's tooltip
  * - the STAR at its top right (Owen, 2026-10-10:  "make it yellow"):  a click stars or unstars it at once
@@ -46,7 +44,7 @@ import cardCSS from "./EpicCard.css?inline"
  *   - the dialogs are Spell UI's (`UI.modals`), its family loaded the first time (`UI.modals.ready()`):  a close ✕ and
  *     Escape cancel
  *   - only served with a write token, as the star
- * - the day it was last worked on at its bottom right, no year (`10/9`), the full date and time its tooltip
+ * - the day it was last worked on at its bottom right, no year (`10/9`) (no tooltip since epic `epic-engine` I370)
  * - SIDE EFFECT:  a star click sets its own `favorite` attribute;  posts to the page server;  so does each menu entry
  ****************/
 export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
@@ -104,14 +102,7 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
               </ui-description>
             </Show>
             <Show when={this.saga}>
-              <ui-label
-                class={SAGA}
-                part={this.partForName("saga")}
-                size="mini"
-                appearance="basic"
-                icon="bullseye"
-                data-tooltip={this.sagaPurpose}
-              >
+              <ui-label class={SAGA} part={this.partForName("saga")} size="mini" appearance="basic" icon="bullseye">
                 {this.sagaTitle || this.saga}
               </ui-label>
             </Show>
@@ -124,7 +115,6 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
                 appearance="basic"
                 icon="bed"
                 link={this.awayLink}
-                data-tooltip={this.translationForKey("awayTip")}
               >
                 {this.translationForKey("away")}
               </ui-label>
@@ -138,12 +128,7 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
         {this.menu()}
         <Show when={shortDay(this.worked)}>
           {(day) => (
-            <time
-              class={WORKED}
-              part={this.partForName("worked")}
-              datetime={this.worked}
-              data-tooltip={this.workedTip()}
-            >
+            <time class={WORKED} part={this.partForName("worked")} datetime={this.worked}>
               {day()}
             </time>
           )}
@@ -243,12 +228,6 @@ export class EpicCard extends E.UIComponent<typeof epicCardVocabulary> {
         </For>
       </ui-dropdown>
     )
-  }
-
-  /** The day's tooltip:  its full date and time, as epic pages write dates (`10/9/26 14:34`). */
-  private workedTip(): string {
-    const date = readEpicDate(this.worked)
-    return date ? this.translationForKey("worked", { date: PlanDates.formatDate(date) }) : ""
   }
 
   ////////////////

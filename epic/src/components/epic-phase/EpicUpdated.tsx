@@ -67,8 +67,7 @@ export class EpicUpdated extends E.UIComponent<typeof epicUpdatedVocabulary> {
               {this.fold.button({
                 controls: BODY_ID,
                 labelledBy: LABEL_ID,
-                part: this.partForName("toggle"),
-                tips: { fold: this.translationForKey("foldTip"), unfold: this.translationForKey("unfoldTip") }
+                part: this.partForName("toggle")
               })}
             </Show>
           </span>

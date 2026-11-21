@@ -41,8 +41,7 @@ import textPageCSS from "./EpicStatus.text.css?inline"
  *     (a pick, a todo made or queued), so it never reads as work done (Owen, 2026-10-10)
  *   - `Claude (Ana) • Done`:  a card another person's session wrote (`from`;  epic `epic-friend` P2), to anyone but Ana
  *   - `Codex • Underway`:  another agent's card, by its name (`agent`;  epic `epic-friend` P10)
- * - the date at the right of the top line (`.header.dated`, as `EpicReply`'s):  `done-at` once finished, else `at`;
- *   once finished, the date's tooltip says when it was taken
+ * - the date at the right of the top line (`.header.dated`, as `EpicReply`'s):  `done-at` once finished, else `at`
  * - Its body:  the reading (its children), kept as it was when it turns done;
  *   then the summary (`slot="summary"`), only when there is one
  * - Folds by its band, reading and summary together (Owen, 2026-10-08:  everything in a section box folds):
@@ -50,7 +49,7 @@ import textPageCSS from "./EpicStatus.text.css?inline"
  * - Written by the epic tool (`plan-doc status`, `inbox apply`), never by hand;
  *   a later mark on the same item adds a new card, the old ones stay
  * - Done, its work not on main yet (`unmerged`, the epic tool's, from git;  epic `epic-engine` I273):  a small blue
- *   `not on main yet` pill after Done, the branch in its tooltip (Owen, 2026-11-14:  "This says it's done, but it's
+ *   `not on main yet` pill after Done (Owen, 2026-11-14:  "This says it's done, but it's
  *   not on main yet.  That should be indicated.")
  * - IN AN ITEM, a LINE, not a card (epic `epic-engine` P27, Owen's layout A):
  *   `✓ Noted 10/24/26 15:21 → Done 15:25 · what Claude did`
@@ -218,14 +217,6 @@ export class EpicStatus extends E.UIComponent<typeof epicStatusVocabulary> {
     return PlanDates.format(this.when)
   }
 
-  /** The date's tooltip once finished (`taken 10/8/26 14:20`);  none while underway, or with no `done-at`. */
-  get dateTip(): string | undefined {
-    const { doneAt, at } = this
-    return this.isFinished && doneAt && at
-      ? this.translationForKey("started", { date: PlanDates.format(at) })
-      : undefined
-  }
-
   protected get extraClass(): string | undefined {
     const last = this.line?.steps.at(-1)?.state ?? this.stepState
     return this.isLine ? `${last} ${LINE}` : this.stepState
@@ -267,11 +258,7 @@ export class EpicStatus extends E.UIComponent<typeof epicStatusVocabulary> {
         </span>
         <Show when={finished() && this.unmerged}>
           {(branch) => (
-            <span
-              class={UNMERGED}
-              part={this.partForName("unmerged")}
-              data-tooltip={this.translationForKey("unmergedTip", { branch: branch() })}
-            >
+            <span class={UNMERGED} part={this.partForName("unmerged")}>
               {this.translationForKey("unmerged")}
             </span>
           )}
@@ -306,15 +293,14 @@ export class EpicStatus extends E.UIComponent<typeof epicStatusVocabulary> {
             {this.fold.button({
               controls: BODY_ID,
               labelledBy: WHO_ID,
-              part: this.partForName("toggle"),
-              tips: { fold: this.translationForKey("foldTip"), unfold: this.translationForKey("unfoldTip") }
+              part: this.partForName("toggle")
             })}
           </Show>
           <span id={WHO_ID} class={WHO} part={this.partForName("who")}>
             {this.translationForKey(this.isDone ? "done" : this.isNoted ? "noted" : "underway", { who: this.who })}
           </span>
           <Show when={this.date}>
-            <time class={DATE} part={this.partForName("date")} datetime={this.when} data-tooltip={this.dateTip}>
+            <time class={DATE} part={this.partForName("date")} datetime={this.when}>
               {this.date}
             </time>
           </Show>

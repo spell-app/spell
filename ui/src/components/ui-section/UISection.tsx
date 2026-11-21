@@ -30,7 +30,10 @@ import sectionCSS from "./UISection.css?inline"
  *     so they follow its attributes, and a move to another section.
  *
  * - *Folding* (`collapsible`):  the toggle becomes a `<button>`;  its `disclosure` (the kit's `Disclosure`) folds.
- *   - Its accessible name is the label;  its `title` (the `fold` / `unfold` text) is only a tooltip.
+ *   - Its accessible name is the label.
+ *   - No tooltip while it has words (a `label`, or a `label` slot):  they say what it is, and a tooltip would
+ *     cover the page someone is reading.  A title with no words, a chevron alone, has its `title`, the
+ *     `fold` / `unfold` text (Owen, 2026-11-20, epic `epic-engine` I370).
  *   - Click, Enter and Space send the cancelable `ui-opening` / `ui-closing`,
  *     then flip `open` (controlled, like the accordion's).
  *   - Once it has folded or unfolded, by any route:  `ui-closed` / `ui-opened`.
@@ -236,7 +239,10 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
    */
   @E.state accessor toggleTipMore: string | undefined = undefined
 
-  /** The fold button's tooltip:  `Open this section` / `Close this section`, then `toggleTipMore`. */
+  /**
+   * The fold button's tooltip:  `Open this section` / `Close this section`, then `toggleTipMore`.
+   * - only where the button has no words (`hasTitleWords`), or on the chevron at the bar's end (`fold-icon="end"`)
+   */
   get toggleTip(): string {
     const tip = this.translationForKey(this.isFolded ? "openSection" : "closeSection")
     return this.toggleTipMore ? `${tip}\n${this.toggleTipMore}` : tip
@@ -484,6 +490,11 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
     return this.label ?? undefined
   }
 
+  /** Has words in its title (`label`, or the `label` slot)?  Then its fold button shows no tooltip. */
+  get hasTitleWords(): boolean {
+    return !!this.titleText || this.slots.hasContent(this.slotForName("label"))
+  }
+
   /** Hint text:  `hint`. */
   get hintText(): string | undefined {
     return this.hint ?? undefined
@@ -688,7 +699,7 @@ export class UISection extends E.UIComponent<SectionVocabulary> {
             part={this.partForName("toggle")}
             aria-expanded={this.isCollapsible ? this.disclosure.ariaExpanded : undefined}
             aria-controls={this.isCollapsible ? CONTENT_ID : undefined}
-            title={this.isCollapsible ? this.toggleTip : undefined}
+            title={this.isCollapsible && !this.hasTitleWords ? this.toggleTip : undefined}
             disabled={this.isCollapsible && this.disabled ? true : undefined}
             aria-describedby={this.hasDescription && this.isCollapsible ? TIP_ID : undefined}
             onClick={this.onToggleClick}

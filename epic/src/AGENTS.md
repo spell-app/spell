@@ -107,7 +107,8 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         - ⌥-click (Alt-click) on any fold's chevron or title, or ⌥+Enter / ⌥+Space on its focused chevron, opens it and
           everything in it, cards too, parts loading as they open (`expandAll()`);  on an open one, folds everything
           in it, then itself (`Fold.toggleFrom()`, `EpicFold.toggleDeep()`)
-        - every chevron's tooltip ends with what ⌥-click does (`DEEP_TIPS`;  `<ui-section>`'s `toggleTipMore`)
+        - an item line's lone chevron says it in its tooltip's last line (`DEEP_TIPS`);  a title with words shows no
+          tooltip (epic `epic-engine` I370)
         - the Log stays folded under it, as under the page's expand-all (`staysFolded`, I155)
         - the page toolbar keeps its one toggle-all (`Fold.toggleAllButton()`):  it has no chevron to hold
       - a GEAR in its place, last in the row, on the Phases section and each phase (epic `epic-engine` I166;
@@ -1108,14 +1109,14 @@ The shared folders:
       - The page server marks every card by it as it serves the page.
       - From `file://` the stars show, disabled, saying why.
     - The day it was last worked on, bottom right, no year (`10/9`).
-      - Its tooltip is the full date and time.
+      - No tooltip (epic `epic-engine` I370).
       - It's the latest of:
         - the epic page's `updated`
         - its last log line (the `log.html` part)
         - its branch's last commit (one `git for-each-ref`)
       - A running epic's card keeps the date `epic pages index` wrote when it's later than its doc's.
     - SAGAS (epic `epic-workflow` P15):  each card names its saga, a small label
-      (the saga's title, its purpose the tooltip).
+      (the saga's title;  no tooltip since epic `epic-engine` I370).
       - Above the groups, a row of SAGA CHIPS, one per saga with epics, in the person's order (`<epic-list sagas>`),
         then "No saga", each with its count.
         - A saga no epic names gets no chip (epic `epic-engine` P3:  its chip could only show nothing).
@@ -1435,7 +1436,7 @@ In `tools/`:
       - the title in the crumbs' type (mono capitals), twice their size and bold
       - the breadcrumb above it hides
       - a lighter ivory than the toolbar under it
-      - a "48 min read" chip after the title, its tooltip the word count (`wireReadingTime()`, epic `epic-engine` P14):
+      - a "48 min read" chip after the title, no tooltip (`wireReadingTime()`, epic `epic-engine` P14):
         prose at 230 words a minute, code words counted twice, folded sections included;
         none at phone width;  an epic page has none (2026-10-24:  "We can ditch the '14 minute read' thing")
     - While a sub-section's title is stuck under its parent's, the two are one row (`wireStuckTrail()`):
@@ -1591,7 +1592,7 @@ In `tools/`:
   - An EPIC PAGE:  `<epic-page>` markup, drawn by the `epics` pack (see "Overview").
     - Its elements draw themselves, in their shadow roots:
       - the page header, three columns (epic `epic-engine` P53):
-        - the h1, one line, cut short when narrow (its full name first in its tooltip)
+        - the h1, one line, cut short when narrow (no tooltip since epic `epic-engine` I370)
         - in the exact middle (the person's comment C7):
           Send while reviewed (`<epic-send-buttons countdown>`), alone (no session's line since epic `epic-engine`
           I340);  narrow, it follows the title, never over it
@@ -1804,6 +1805,10 @@ In `tools/`:
     - `data-tooltip="..."` on any element:  the runtime (`DataTooltips`) shows it in the top layer
     - a richer one:  `<ui-tooltip>`, or a component's own `TopLayerTip`
     - `aria-label` on icon-only controls, as well
+    - ONLY on a small control whose meaning isn't written on it:  an icon-only button or chip (save, delete, ×, the
+      bullhorn, a status chip).  NEVER on what holds text people read or type near (titles, fold headers, quotes,
+      item lines, comment heads, cards, dates), a whole-region drag handle, a large area, or a control with words on
+      it (Owen, 2026-11-20, epic `epic-engine` I370:  "no tooltips over sections where I am lingering to read or type").
     - The person's standing rule (Owen, 2026-11-19), now Spell UI's tooltips work:
       it replaces the 2026-10-10 one, "the browser's own `title`, never a `<ui-tooltip>`".
     - The epic pages, the comments, the docs runtime and `goals-live.js` were converted by epic `epic-engine` T106.
@@ -2525,7 +2530,8 @@ the epic page shown in both tabs).
     - just under the selection (or the bullhorn clicked);  above it when there's no room below
     - the page never scrolls for it;  the person drags it by its header
     - ivory, 8px inside on every side, with no buttons below the text
-    - Its header:  the first words of the selected text (else of the block;  its tooltip names the block),
+    - Its header:  the first words of the selected text (else of the block;  no tooltip, epic `epic-engine` I370:
+      Owen reads the page and types beside it;  it still drags the pane),
       a floppy, a trash (once the comment is saved) and ×.
     - Its field has no placeholder, only an `aria-label` (2026-10-10).
     - It saves itself as the person types:  the floppy shows saved (its tooltip the time), or turns red.
@@ -2600,7 +2606,7 @@ the epic page shown in both tabs).
       - a chevron
       - the bullhorn (a green check circle once done)
       - its id, `C3`:  small and muted, an outline and no fill (epic `epic-workflow` P23;  `M3` until `epic-engine` P44)
-      - the pane's summary (`ThreadFacts.headline()`):  the quote's first words, else the block's;  its tooltip the full place
+      - the pane's summary (`ThreadFacts.headline()`):  the quote's first words, else the block's;  no tooltip (I370)
         - a saved thread's header:  the start of the person's own words instead (I162):
           the page highlights what was selected
       - No date:  each message has its time.
@@ -2651,7 +2657,7 @@ the epic page shown in both tabs).
           "What does it look like when you're thinking?  You could put in a stub and replace that when you've thought".
       - Each one's time in its top right corner, `position: absolute`:
         - The first's carries the day (`10/10 09:12`), the rest only the time, unless the day changed.
-        - The full date and time is its tooltip.
+        - No tooltip (epic `epic-engine` I370).
         - A hidden copy floats there, so the first line's text stops short of it.
   - The REPLY BOX (`replyBoxFor()`):  last in EVERY open thread, no Revisit needed;  none once done, until Reopen.
     - 2026-10-10:  "How do I reply?  Probably should have a comment box at the bottom for me".

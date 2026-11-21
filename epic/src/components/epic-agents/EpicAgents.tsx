@@ -203,7 +203,7 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
   /**
    * One running agent's row, top to bottom:
    * - its name, status (`active` blue, `blocked on <name>` orange, else grey)
-   *   and age (its start time in the tooltip)
+   *   and age
    * - its task
    * - the redirects so far ("You · 10:42 · told 10:43", or "waiting for the session")
    * - a note box that grows as it's typed in, with Send (`Redirect`):  a blue plane in a circle, no word
@@ -222,9 +222,7 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
           <ui-label size="mini" appearance="basic" color={statusColorOf(agent().status)}>
             {agent().status}
           </ui-label>
-          <span class={AGENT_AGE} data-tooltip={this.startedTip(agent())}>
-            {ageOf(agent().started, Date.now())}
-          </span>
+          <span class={AGENT_AGE}>{ageOf(agent().started, Date.now())}</span>
         </div>
         <p class={AGENT_TASK}>{agent().task}</p>
         <Show when={agent().redirects.length}>
@@ -284,12 +282,6 @@ export class EpicAgents extends E.UIComponent<typeof epicAgentsVocabulary> {
   @E.untracked
   private redirectFor(agent: () => RunningAgent): Redirect {
     return new Redirect(agent().name, this.client!)
-  }
-
-  /** An age's tooltip:  when it started;  none when unknown. */
-  private startedTip(agent: RunningAgent): string | undefined {
-    const time = clockOf(agent.started)
-    return time ? this.translationForKey("agentStarted", { time }) : undefined
   }
 }
 

@@ -361,7 +361,6 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
             part={this.partForName("how")}
             role="switch"
             aria-checked={this.isMultiple ? "true" : "false"}
-            data-tooltip={this.translationForKey(this.isMultiple ? "toOneTip" : "toSeveralTip")}
             onClick={() => this.flip()}
           >
             <span class={KNOB} aria-hidden="true" />
@@ -387,7 +386,6 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
                   icon="filter"
                   selected={this.showing === "open" ? "" : undefined}
                   aria-pressed={this.showing === "open" ? "true" : "false"}
-                  data-tooltip={this.translationForKey("openTip")}
                   onClick={() => (this.showing = "open")}
                 >
                   {this.translationForKey("open")}
@@ -398,7 +396,6 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
                   icon="list check"
                   selected={this.showing === "all" ? "" : undefined}
                   aria-pressed={this.showing === "all" ? "true" : "false"}
-                  data-tooltip={this.translationForKey("allTip")}
                   onClick={() => (this.showing = "all")}
                 >
                   {this.translationForKey("all")}

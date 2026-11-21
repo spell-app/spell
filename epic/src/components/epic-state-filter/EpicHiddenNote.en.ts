@@ -32,9 +32,6 @@ export const epicHiddenNoteVocabulary = {
   slots: [],
   parts: [{ name: "base", description: "The line, a `<button>` drawn as a link." }],
   states: [],
-  texts: [
-    { key: "hiddenNote", text: "{count} hidden · show all", description: "The line;  a click shows all." },
-    { key: "hiddenTip", text: "Show everything", description: "The line's tooltip." }
-  ],
+  texts: [{ key: "hiddenNote", text: "{count} hidden · show all", description: "The line;  a click shows all." }],
   children: []
 } as const satisfies EpicVocabulary

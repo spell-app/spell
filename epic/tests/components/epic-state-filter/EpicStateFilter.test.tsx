@@ -208,10 +208,10 @@ describe("<epic-state-filter>", () => {
 })
 
 describe("<epic-hidden-note>", () => {
-  test("`3 hidden · show all`, its tooltip;  a click asks to show all;  axe", async () => {
+  test("`3 hidden · show all`, no tooltip;  a click asks to show all;  axe", async () => {
     const host = await ElementFixture.render(`<epic-hidden-note count="3"></epic-hidden-note>`)
     const button = host.shadowRoot!.querySelector("button")!
-    expect([button.textContent, button.dataset.tooltip]).toEqual(["3 hidden · show all", "Show everything"])
+    expect([button.textContent, button.dataset.tooltip]).toEqual(["3 hidden · show all", undefined])
     const heard = vi.fn()
     host.addEventListener("epic-all-showing", heard)
     button.click()

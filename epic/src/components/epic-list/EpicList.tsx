@@ -83,7 +83,7 @@ export class EpicList extends E.UIComponent<typeof epicListVocabulary> {
 
   /**
    * The chips:  one per listed saga a card names, in `sagas`' order, then No saga (`""`) when a card names none;
-   * each with its title, tooltip and count.  None at all without a listed saga that has epics.
+   * each with its title and count.  None at all without a listed saga that has epics.
    */
   @E.derived
   get chips(): SagaChip[] {
@@ -93,13 +93,12 @@ export class EpicList extends E.UIComponent<typeof epicListVocabulary> {
     for (const id of ids) {
       const mine = cards.filter((card) => card.saga === id)
       if (!mine.length) continue
-      chips.push({ id, title: mine[0]!.sagaTitle || id, tip: mine[0]!.sagaPurpose, count: mine.length })
+      chips.push({ id, title: mine[0]!.sagaTitle || id, count: mine.length })
     }
     if (!chips.length) return chips
     const none = cards.filter((card) => !ids.includes(card.saga)).length
     if (none) {
-      const tip = this.translationForKey("noSagaTip")
-      chips.push({ id: "", title: this.translationForKey("noSaga"), tip, count: none })
+      chips.push({ id: "", title: this.translationForKey("noSaga"), count: none })
     }
     return chips
   }
@@ -185,7 +184,6 @@ export class EpicList extends E.UIComponent<typeof epicListVocabulary> {
                     part={this.partForName("chip")}
                     data-saga={chip().id}
                     aria-pressed={on() ? "true" : "false"}
-                    data-tooltip={this.chipTip(chip(), on())}
                     onClick={() => this.pickSaga(chip().id)}
                   >
                     {chip().title} <span class={COUNT}>{chip().count}</span>
@@ -219,12 +217,6 @@ export class EpicList extends E.UIComponent<typeof epicListVocabulary> {
     )
   }
 
-  /** A chip's tooltip:  its saga's purpose, then what a click does. */
-  private chipTip(chip: SagaChip, on: boolean): string {
-    const does = this.translationForKey(on ? "showOnly" : "showToo", { saga: chip.title, count: chip.count })
-    return chip.tip ? `${chip.tip}\n${does}` : does
-  }
-
   /** Whether `group` is the first group with cards showing:  its heading has no space above it. */
   private isFirstShowing(group: EpicGroupName): boolean {
     return this.groups.find((each) => each.showing)?.group === group
@@ -255,8 +247,8 @@ export class EpicList extends E.UIComponent<typeof epicListVocabulary> {
 /** The vocabulary's attribute getters, typed (see "Attributes" in `UIComponent`). */
 export interface EpicList extends E.AttributeValues<typeof epicListVocabulary> {}
 
-/** One saga chip:  its saga's id (`""` for No saga), title, tooltip and how many cards name it. */
-type SagaChip = { id: string; title: string; tip: string; count: number }
+/** One saga chip:  its saga's id (`""` for No saga), title and how many cards name it. */
+type SagaChip = { id: string; title: string; count: number }
 
 /** A group as drawn:  its cards in order, each showing or not, and how many show. */
 type PlacedGroup = { group: EpicGroupName; cards: { card: ListedCard; shows: boolean }[]; showing: number }

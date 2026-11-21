@@ -22,13 +22,13 @@ afterEach(() => {
 })
 
 describe("<epic-update>", () => {
-  test("bare:  an inline orange UPDATE label, its phase in its tooltip", async () => {
+  test("bare:  an inline orange UPDATE label, no tooltip (I370)", async () => {
     const root = await ElementFixture.render(`<p>Changed <epic-update phase="5"></epic-update></p>`)
     const update = root.querySelector("epic-update")!
     const label = update.shadowRoot!.querySelector('[part~="label"]')!
     expect({ text: label.textContent, tip: label.getAttribute("data-tooltip") }).toEqual({
       text: "UPDATE",
-      tip: "Changed during P5"
+      tip: null
     })
     expect(update.matches(":state(block)")).toBe(false)
     expect(getComputedStyle(update).display).toBe("inline-block")
@@ -55,7 +55,7 @@ describe("<epic-update>", () => {
       label: shadow.querySelector('[part~="label"]')!.textContent,
       pill: pill.textContent,
       tip: pill.getAttribute("data-tooltip")
-    }).toEqual({ label: "FIXED", pill: "Not in main", tip: "On epic-engine, not merged yet" })
+    }).toEqual({ label: "FIXED", pill: "Not in main", tip: null })
     // merged:  the pill goes, the words stay
     update.removeAttribute("unmerged")
     await ElementFixture.settle(root)
@@ -78,7 +78,7 @@ describe("<epic-update>", () => {
     const time = shadow.querySelector('[part~="time"]')!
     expect({ text: time.textContent, tip: time.getAttribute("data-tooltip") }).toEqual({
       text: "10/11/26 14:30",
-      tip: "2026-10-11 14:30 · Written during P6"
+      tip: null
     })
     // the date on the title's right, on its first line
     const title = shadow.querySelector('[part~="title"]')!.getBoundingClientRect()
@@ -281,13 +281,11 @@ describe("<epic-update> new, seen, quiet", () => {
     await expectAccessible(old)
   })
 
-  test("`seen`:  quiet at once, whatever its age;  its date's tooltip says when", async () => {
+  test("`seen`:  quiet at once, whatever its age;  its date has no tooltip", async () => {
     const update = await ElementFixture.render(BLOCK.replace(">", ' seen="2026-10-12 08:00">'))
     await ElementFixture.tick()
     expect([update.matches(":state(quiet)"), update.matches(":state(open)")]).toEqual([true, false])
-    expect(update.shadowRoot!.querySelector('[part~="time"]')!.getAttribute("data-tooltip")).toBe(
-      "2026-10-11 14:30 · Seen 10/12/26 08:00"
-    )
+    expect(update.shadowRoot!.querySelector('[part~="time"]')!.getAttribute("data-tooltip")).toBeNull()
   })
 
   test("reviewed:  a ✓ Seen on a new block;  pressed, it's marked `seen` and folds to a grey line at once", async () => {

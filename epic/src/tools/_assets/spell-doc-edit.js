@@ -269,7 +269,6 @@ function tableBar(edit) {
         appearance: "circular basic",
         size: "mini",
         icon: change.icon,
-        "data-tooltip": change.tip,
         "aria-label": change.tip
       },
       change.label

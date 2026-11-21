@@ -99,8 +99,6 @@ export type SectionStack = {
   readonly stickTop: number
   /** where titles inside it stick:  below its own, px from the viewport's top */
   readonly innerStackTop: number
-  /** its fold button's tooltip's last line:  what ⌥-click does (`EpicFold.onTipShown()`) */
-  toggleTipMore: string | undefined
 }
 
 /** `detail` of a folding element's `ui-opening` / `ui-closing`. */

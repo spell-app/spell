@@ -6,7 +6,7 @@ import { PrefStore } from "spell/util/persist/PrefStore"
 import { E, UI } from "spell/ui/core"
 
 import { PageStages, PhaseStatuses } from "spell/epic/phases"
-import { NOBODY_LISTENING, SUMMARY_ID, type NewItem, type NewKind, type TestsEntry } from "spell/epic/review"
+import { SUMMARY_ID, type NewItem, type NewKind, type TestsEntry } from "spell/epic/review"
 // its view of the review inbox:  the file, not `epic-review`'s barrel (`index.ts` defines that family)
 import { ReviewState } from "spell/epic/components/epic-review/ReviewState"
 import type { ReviewShows } from "spell/epic/components/epic-review/EpicReview.types"
@@ -785,14 +785,6 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
             })
           : this.translationForKey("startTesting", { count: testing.open })
     }
-    const tip = () => {
-      const testing = state()
-      return testing.preparing
-        ? testing.queued
-          ? this.translationForKey("waitingTip", { why: this.reviewState.waitingWhy() })
-          : this.translationForKey("preparingTip")
-        : this.translationForKey(testing.prepared ? "focusTestsTip" : "startTestingTip")
-    }
     return (
       <ui-button
         class={START_TESTING}
@@ -802,7 +794,6 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
         size="mini"
         icon={state().preparing ? "circle notch" : state().prepared ? "bullseye" : "flask"}
         data-busy={state().preparing ? "" : undefined}
-        data-tooltip={tip()}
         onClick={(event: MouseEvent) => {
           // a title's tool:  not a click on the title, which would fold it
           event.stopPropagation()
@@ -1081,7 +1072,6 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
    * The new items of one kind waiting to be made, each a card:
    * its icon, "Todo" or "Question", its title, its note, what it's about (a link), then Edit and Remove.
    * - the fill rule (decision Q20):  dashed until sent, outlined once sent
-   * - its tooltip says which, and that it waits for a review while nobody is listening
    * - draws nothing while none waits
    */
   private newItemList(kind: NewKind): JSX.Element {
@@ -1091,11 +1081,7 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
         <ul class={NEW_LIST} part={this.partForName("new-list")}>
           <For each={items()} keyed={(it) => it.id}>
             {(it) => (
-              <li
-                class={NEW_CARD}
-                data-fill={this.isSent(it()) ? "outline" : "dashed"}
-                data-tooltip={this.cardTip(it())}
-              >
+              <li class={NEW_CARD} data-fill={this.isSent(it()) ? "outline" : "dashed"}>
                 <ui-icon name={NEW_KIND_LOOKS[it().kind].icon} />
                 <span class="what">{this.translationForKey(NEW_KIND_LOOKS[it().kind].label)}</span>
                 <span class="title">{it().title}</span>
@@ -1138,12 +1124,6 @@ export class EpicSection extends EpicFold<EpicSectionVocabulary> {
   /** Has waiting `item` gone with a send? */
   private isSent(item: NewItem): boolean {
     return this.reviewState.client?.isSent(item) ?? false
-  }
-
-  /** A waiting card's tooltip:  how far it got;  nobody listening, that it waits for a review. */
-  private cardTip(item: NewItem): string {
-    const state = this.translationForKey(this.isSent(item) ? "newSent" : "newUnsent")
-    return this.reviewState.listening() ? state : `${state}.  ${NOBODY_LISTENING}`
   }
 
   /** Edit on a waiting card:  the section's `<epic-new-item>` opens its form on it. */

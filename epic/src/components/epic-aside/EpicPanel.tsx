@@ -3,7 +3,7 @@ import type { JSX } from "@solidjs/web"
 import { E } from "spell/element"
 
 // the fold pieces every `<epic-*>` fold shares:  their files, not `epic-item`'s barrel (which would define it here)
-import { Fold, type FoldTips } from "spell/epic/components/epic-item/Fold"
+import { Fold } from "spell/epic/components/epic-item/Fold"
 
 /****************
  * ### `EpicPanel`
@@ -47,17 +47,7 @@ export abstract class EpicPanel<V extends E.ComponentVocabulary> extends E.UICom
     return false
   }
 
-  /**
-   * The fold button's tooltips, open and folded.
-   * - None by default:  an aside's title shows no tooltip (Owen, 2026-11-20, epic `epic-engine` T120);
-   *   its words name the button
-   * - `<epic-code>` keeps its own (`Close this code`)
-   */
-  protected foldTips(): FoldTips | undefined {
-    return undefined
-  }
-
-  /** The heading's words, after the chevron:  text, so a folded heading can carry them as its tooltip. */
+  /** The heading's words, after the chevron:  its button's name;  no tooltip, the words are on it. */
   protected abstract heading(): string
 
   /** What the body shows:  the element's children. */
@@ -73,7 +63,6 @@ export abstract class EpicPanel<V extends E.ComponentVocabulary> extends E.UICom
             className: TOGGLE,
             part: this.partForName("toggle" as never),
             controls: BODY_ID,
-            tips: this.foldTips(),
             // in full, wrapped, folded or open (EpicPanel.css)
             label: (
               <span class={HEADING} part={this.partForName("heading" as never)}>

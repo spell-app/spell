@@ -34,7 +34,7 @@ export class EpicPrompt extends E.UIComponent<typeof epicPromptVocabulary> {
   render(): JSX.Element {
     return (
       <details class={this.rootClass} part={this.partForName("base")}>
-        <summary class={TITLE} part={this.partForName("title")} data-tooltip={this.translationForKey("toggleTip")}>
+        <summary class={TITLE} part={this.partForName("title")}>
           <span class={CHEVRON} aria-hidden="true">
             {this.chevron.svg}
           </span>

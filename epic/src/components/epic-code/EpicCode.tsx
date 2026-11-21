@@ -2,8 +2,6 @@ import { isServer, type JSX } from "@solidjs/web"
 
 import { E } from "spell/element"
 
-import type { FoldTips } from "spell/epic/components/epic-item/Fold"
-
 // the folded panel, shared with `<epic-aside>`:  its file, not the `epic-aside` barrel (which would define it here)
 import { EpicPanel } from "spell/epic/components/epic-aside/EpicPanel"
 
@@ -43,11 +41,6 @@ export class EpicCode extends EpicPanel<typeof epicCodeVocabulary> {
   /** Open to start with when the doc says `open`. */
   protected startsOpen(): boolean {
     return !!this.open
-  }
-
-  /** Its fold button's tooltips:  `Close this code` / `Open this code`, then what ⌥-click does. */
-  protected foldTips(): FoldTips {
-    return { fold: this.translationForKey("foldTip"), unfold: this.translationForKey("unfoldTip") }
   }
 
   /** Its `title`, or `Code`. */

@@ -104,13 +104,7 @@ export class EpicClarify extends E.UIComponent<typeof epicClarifyVocabulary> {
       )
     return (
       <Show when={this.shows}>
-        <button
-          type="button"
-          class={[this.rootClass, LINK]}
-          part={this.partForName("base")}
-          data-tooltip={this.translationForKey("clarifyTip")}
-          onClick={this.clarify}
-        >
+        <button type="button" class={[this.rootClass, LINK]} part={this.partForName("base")} onClick={this.clarify}>
           {this.translationForKey("clarify")}
         </button>
       </Show>
