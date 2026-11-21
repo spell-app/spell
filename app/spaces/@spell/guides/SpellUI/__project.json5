@@ -1631,5 +1631,6 @@
       "path": "/SpellUI.spell",
       "active": true
     }
-  ]
+  ],
+  "spellVersion": "0.9.0"
 }

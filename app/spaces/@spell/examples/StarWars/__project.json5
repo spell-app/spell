@@ -27,5 +27,6 @@
   }],
   "development": {
     "apis": ["StarWars.api.json5", "Wikipedia.api.json5"]
-  }
+  },
+  "spellVersion": "0.9.0"
 }
