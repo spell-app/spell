@@ -27,6 +27,25 @@ export const APP_TEXTS = {
   restart: "Restart",
   takesEffectOnRestart: "This takes effect on restart",
   restartNoticeClose: "Close",
+  // a project written for an older Spell, as it opens (`<UpgradeNotice>`, epic `language` P68):  once per project
+  upgradeNotice:
+    "This project was written for an older version of Spell.\n" +
+    "Some lines in it are written the way older versions of Spell expected.  They still work today, but a future version of Spell won't understand them.\n" +
+    "Upgrade rewrites those lines in your project's files in the new style.  What your project does stays the same.\n" +
+    "If you'd rather wait, close this notice.  It won't appear again, and each of those lines will show a warning with a Fix it button, so you can change them one at a time.",
+  upgrade: "Upgrade",
+  upgradeNoticeClose: "Close",
+  // once it's upgraded:  `{version}`, today's Spell, `0.9`;  `{count}`, how many lines changed
+  upgraded:
+    "Your project now matches Spell {version}, the newest version.\n" +
+    "The editor changed {count} lines in your project to Spell {version}'s new style.\n" +
+    "They still do the same thing:  there's nothing else for you to do.",
+  upgradedOne:
+    "Your project now matches Spell {version}, the newest version.\n" +
+    "The editor changed 1 line in your project to Spell {version}'s new style.\n" +
+    "It still does the same thing:  there's nothing else for you to do.",
+  // the button on an old line's warning, in the code's problem popup:  its fix, in one click (Owen's C3)
+  fixIt: "Fix it",
   menuCode: "Code",
   emptyAppPrompt: "Drag something here from the + menu, or click one there to add it.",
   modes: "Run, edit or debug",
@@ -119,7 +138,8 @@ export const APP_TEXTS = {
   changeThisFinishing: "Finishing up…",
   changeThisWorking: "Your agent is working on it…",
   changeThisSeconds: "{seconds}s",
-  changeThisStalled: "Your agent didn't start on it within a minute,\nso it was stopped, and nothing changed.\nPress Send to try again.",
+  changeThisStalled:
+    "Your agent didn't start on it within a minute,\nso it was stopped, and nothing changed.\nPress Send to try again.",
   changeThisStart: "Start Claude Code",
   changeThisNoClaude: "Claude Code isn't on this computer,\nso nothing can make this change yet.",
   changeThisInstall: "Install Claude Code",
@@ -130,7 +150,8 @@ export const APP_TEXTS = {
   changeThisDone: "Your agent made the change.",
   changeThisNoChange: "Your agent finished,\nbut no file changed.\nTry saying the change another way.",
   changeThisFailed: "Your agent couldn't do that:\n{summary}",
-  changeThisStopped: "Your agent stopped before it was done,\nso your project may be only partly changed.\nCheck it before you go on.",
+  changeThisStopped:
+    "Your agent stopped before it was done,\nso your project may be only partly changed.\nCheck it before you go on.",
   changeThisRefused: "Change This only works on the Mac running Spell.",
   changeThisPicture: "A picture sent with it",
   changeThisRemovePicture: "Take this picture out",
@@ -177,6 +198,8 @@ export const APP_TEXTS = {
   codeCompilerWords: "Compiler details in hover",
   codeBubbly: "Bubbly look",
   codeWrapLines: "Wrap long lines",
+  // upgrade a project written for an older Spell as it opens, with no notice first (epic `language` P68)
+  codeUpgradeOnOpen: "Upgrade old Spell when a project opens",
   codePopupDelay: "Delay before showing help",
   codePopupDelayShort: "Short:  0.4 seconds",
   codePopupDelayStandard: "Standard:  0.8 seconds",
@@ -1000,6 +1023,9 @@ export const APP_TEXTS = {
   listsStartAtLabel: "Lists start at",
   listsStartAtTip:
     "How your lists number their items.\nAt 1, the first item is number 1, the way people count.\nAt 0, it's number 0, the way JavaScript and Python count.",
+  // the Spell it's written for, read only (`SP.ProjectManifestJSON5.spellVersion`, epic `language` P68)
+  writtenForSpell: "Written for Spell {version}",
+  writtenForOlderSpell: "Written for an older version of Spell",
 
   ////////////////
   // ## The code editor's own words:  CodeMirror's (`CodeMirrorSetup`'s table), and its menu's

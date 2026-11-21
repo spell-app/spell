@@ -73,6 +73,17 @@ describe("<ProjectSettings>", () => {
     expect(group.saves).toEqual([{ title: "Solitaire!", version: "1.0.0", targets: [], listsStartAt: 0 }])
   })
 
+  test("shows the Spell it's written for, read only:  its file's, or an older one when it names none (epic `language` P68)", async () => {
+    void openProjectSettings(project({ spellVersion: "0.9.0" }), root(), () => {})
+    let modal = await dialog()
+    expect(modal.querySelector(".ProjectSettingsSpell")!.textContent).toBe("Written for Spell 0.9")
+    for (const host of document.querySelectorAll(".ProjectSettingsRoot")) host.remove()
+
+    void openProjectSettings(project({}), root(), () => {})
+    modal = await dialog()
+    expect(modal.querySelector(".ProjectSettingsSpell")!.textContent).toBe("Written for an older version of Spell")
+  })
+
   test("refuses a version that isn't `1.2.0`-shaped:  nothing saved, the dialog stays", async () => {
     const group = root()
     void openProjectSettings(project({}), group, () => {})

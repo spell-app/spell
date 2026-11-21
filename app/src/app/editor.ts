@@ -21,7 +21,7 @@ import { navigate } from "spell/app/app/pages/navigation"
 import { RunSite, runSite } from "spell/app/app/pages/RunSite"
 import { THEME_PAGE, siteEditorUrlFor } from "spell/app/app/pages/pages.types"
 import { appTexts } from "spell/app/app/ui/AppTexts"
-import { editorPrefs } from "spell/app/app/editorPrefs"
+import { UPGRADE_ON_OPEN_PREF, editorPrefs } from "spell/app/app/editorPrefs"
 // Import directly, NOT through the runner barrel, which brings the runners
 import { wordsOfLanguages } from "spell/app/app/runner/words"
 // By file:  the runner barrel brings the runners themselves
@@ -586,6 +586,8 @@ export class EditorStore extends Observable {
       if (project.compiledFrom === "cache") void editor.compileBehind(project)
       // the Types tab:  its tree follows the code, compiled or not
       else await editor.refreshScopes()
+      // written for an older Spell:  upgraded, or the notice offering it (epic `language` P68)
+      void editor.offerUpgrade(project).catch((error) => editor.showError(error))
       const { compiled } = project
 
       if (compiled) {
@@ -1110,6 +1112,7 @@ export class EditorStore extends Observable {
     }
     editor.edits++
     await editor.refreshScopes()
+    void editor.offerUpgrade(project).catch((error) => editor.showError(error))
   }
 
   /**
@@ -2442,6 +2445,84 @@ export class EditorStore extends Observable {
   })
 
   ////////////////
+  // ## Upgrading old Spell
+  ////////////////
+
+  /**
+   * The project `<UpgradeNotice>` offers to upgrade, while it shows:  one written for an older Spell (epic `language`
+   * P68).  See `offerUpgrade()`.
+   */
+  @prop()
+  accessor upgradeOffered: SP.SpellProject | undefined
+
+  /**
+   * Offer to upgrade `project`, just parsed, if it's written for an older Spell and holds old forms
+   * (`SP.OldForms`, epic `language` P68):
+   * - Upgrade old Spell when a project opens on (Code Editor Settings…):  upgrade it now, then say what changed.
+   * - Off:  `<UpgradeNotice>`, ONCE per project, remembered in the browser (`UPGRADE_OFFERED_PREF`),
+   *   closed or not.
+   * - Looks once per project a page load, after its first parse:  `compileApp()` and `compileBehind()` call it.
+   * - Not Spell's own projects (`@spell/...`), upgraded with Spell itself;  never in the static build, which can't
+   *   write a project's file.
+   * - NEVER throws:  an upgrade that fails shows its error.
+   */
+  async offerUpgrade(project: SP.SpellProject): Promise<void> {
+    if (upgradeLooked.has(project.path) || project.compiledFrom === "cache") return
+    upgradeLooked.add(project.path)
+    if (isStaticBuild || project.path.startsWith(SPELLS_OWN_PROJECTS)) return
+    if (!SP.OldForms.isOlderSpell(project.contents?.spellVersion)) return
+    if (!project.spellFiles.some((file) => SP.OldForms.uses(file).length)) return
+    if (editorPrefs.get(UPGRADE_ON_OPEN_PREF) === true) return editor.upgradeProject(project)
+    const offered = editorPrefs.get<Record<string, true>>(UPGRADE_OFFERED_PREF) ?? {}
+    if (offered[project.path]) return
+    editorPrefs.set(UPGRADE_OFFERED_PREF, { ...offered, [project.path]: true })
+    editor.upgradeOffered = project
+  }
+
+  /**
+   * "Upgrade":  rewrite every old form in `project`'s files the new way, save them, then say in its project file that
+   * it matches today's Spell, and say what changed (epic `language` P68).
+   * - The same rewrite as `spell upgrade` and the language server's "Upgrade this file" (`SP.OldForms.upgraded()`).
+   * - Each file through the code editor when it's loaded, one undo step in each, else straight into the file;
+   *   then saved, as Save does:  your draft, where the project keeps them.
+   * - NEVER throws:  a failure shows its error.
+   */
+  async upgradeProject(project = editor.upgradeOffered): Promise<void> {
+    editor.upgradeOffered = undefined
+    if (!project) return
+    try {
+      let count = 0
+      const changed: SP.SpellFile[] = []
+      for (const file of project.spellFiles) {
+        const uses = SP.OldForms.uses(file)
+        if (!uses.length || editor.isLocked(file)) continue
+        const text = file.parseText
+        const edits = uses.flatMap((use) =>
+          use.edits.map(({ start, end, newText }) => ({
+            range: { start: SourceEdits.positionAt(text, start), end: SourceEdits.positionAt(text, end) },
+            newText
+          }))
+        )
+        if (!editor.codeEditorEdits?.(file, edits)) editor.takeText(file, SP.OldForms.upgraded(text, uses))
+        changed.push(file)
+        count += uses.length
+      }
+      await editor.saveFiles(changed)
+      await editor.refreshDrafts()
+      await new SPACES.SpellProjectRoot(new SP.SpellLocation(project.path).projectRoot!).saveSpellVersion(project)
+      const version = SP.OldForms.shortVersion(SP.SPELL_VERSION)
+      editor.showNotice(appTexts.text(count === 1 ? "upgradedOne" : "upgraded", { count, version }))
+    } catch (error) {
+      editor.showError(error)
+    }
+  }
+
+  /** Close `<UpgradeNotice>` without upgrading:  it doesn't show again for its project. */
+  dismissUpgrade(): void {
+    editor.upgradeOffered = undefined
+  }
+
+  ////////////////
   // ## UI
   ////////////////
 
@@ -2565,6 +2646,17 @@ if (typeof window !== "undefined") window.addEventListener("pagehide", () => edi
 
 /** Where each file started, for Revert Changes in the public preview (`discardChanges()`). */
 const startingPoints = new StartingPoints()
+
+/**
+ * The preference that remembers which projects `<UpgradeNotice>` has offered to upgrade, by path:
+ * once each (`editor.offerUpgrade()`).
+ */
+const UPGRADE_OFFERED_PREF = "upgradeOffered"
+editorPrefs.declare(UPGRADE_OFFERED_PREF, { type: "object", default: {} })
+/** Where Spell's own projects are, the built-in groups:  `offerUpgrade()` leaves them alone. */
+const SPELLS_OWN_PROJECTS = "@spell/"
+/** Projects `offerUpgrade()` has looked at since the page loaded, by path:  it looks once each, after its first parse. */
+const upgradeLooked = new Set<string>()
 
 /** The preference that remembers a visitor has been told where their work is kept:  `editor.showKept()`. */
 const KEPT_NOTE_PREF = "toldKeptInBrowser"

@@ -2,7 +2,7 @@ import { autocompletion, closeBrackets, closeBracketsKeymap } from "@codemirror/
 import { isolateHistory } from "@codemirror/commands"
 import { css, cssLanguage } from "@codemirror/lang-css"
 import { LanguageSupport, syntaxHighlighting } from "@codemirror/language"
-import { setDiagnostics } from "@codemirror/lint"
+import { type Diagnostic as LintDiagnostic, setDiagnostics } from "@codemirror/lint"
 import {
   Annotation,
   type ChangeSet,
@@ -23,6 +23,8 @@ import { observe } from "spell/util"
 import { after, type CancelablePromise } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
 import type { LSP } from "spell/app/lsp"
+import { appTexts } from "spell/app/app/ui/AppTexts"
+import { CodeEditorFeatures } from "spell/app/app/ui/CodeEditorFeatures"
 import { CodeRules } from "spell/app/app/ui/CodeRules"
 import { CodeMirrorBubbly, type Slice } from "./CodeMirrorBubbly"
 import { CodeMirrorCodeOrText } from "./CodeMirrorCodeOrText"
@@ -584,14 +586,43 @@ export class FileStates {
     if (!file.match || this.entries.get(file.path) !== entry) return
     const { state } = entry
     if (file.contents !== state.doc.toString()) return
-    const problems = this.service
-      .diagnostics(file)
-      .map((diagnostic) => LspToCodeMirror.diagnostic(state.doc, diagnostic))
+    const problems = this.withFixIt(
+      file,
+      this.service.diagnostics(file).map((diagnostic) => LspToCodeMirror.diagnostic(state.doc, diagnostic))
+    )
     const { effects } = setDiagnostics(state, problems)
     this.dispatch(entry, { effects: [...asList(effects), CodeMirrorSetup.PARSED.of(null)] })
     // its slices too, so their bubbly look takes the parse:
     // a slice made before it drew its `if`s as plain lines (epic `editor` I215)
     for (const slice of entry.slices) slice.dispatch({ effects: CodeMirrorSetup.PARSED.of(null) })
+  }
+
+  /**
+   * `problems` of `file`, each one with a fix in one click given a "Fix it" button in the problem popup
+   * (`CodeMirrorHovers`;  Owen's C3, epic `language` P68):  a warning on one of Spell's old forms,
+   * or the error it becomes once Spell drops it (`CodeEditorFeatures.fixItAt()`).
+   * - Pressed:  the fix is worked out again where the problem is now, and made through `applyEdits()`,
+   *   one undo step, kept or saved as any edit is.
+   */
+  private withFixIt(file: SP.SpellFile, problems: LintDiagnostic[]): LintDiagnostic[] {
+    const starts = CodeEditorFeatures.fixItStarts(file)
+    if (!starts.size) return problems
+    return problems.map((problem) =>
+      problem.severity !== "hint" && problem.severity !== "info" && starts.has(problem.from)
+        ? { ...problem, actions: [{ name: appTexts.text("fixIt"), apply: (view, from) => this.fixIt(file, from) }] }
+        : problem
+    )
+  }
+
+  /** The "Fix it" button pressed on the problem at `from` in `file`'s state:  its fix made, if it still has one. */
+  private fixIt(file: SP.SpellFile, from: number): void {
+    const entry = this.entries.get(file.path)
+    if (!entry) return
+    // the fix reads the parse:  of the text the state holds now
+    if (this.waiting.has(file.project)) this.parseNow()
+    const position = LspToCodeMirror.lspPosition(entry.state.doc, from)
+    const edit = CodeEditorFeatures.fixItAt(this.service, file, position)
+    if (edit) this.applyEdits(file, LspToCodeMirror.editsFor(edit, file.path))
   }
 }
 

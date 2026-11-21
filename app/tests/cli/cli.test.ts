@@ -1152,7 +1152,9 @@ describe("spell app create", () => {
     const { status, stdout } = spell(["app", "create", "Snake", "--in", TEMP])
     expect(status).toBe(0)
     expect(stdout).toBe(`${resolve(TEMP, "Snake")}\n`)
+    // written for today's Spell (epic `language` P68)
     expect(JSON.parse(readFileSync(resolve(TEMP, "Snake", SP.PROJECT_FILE), "utf8"))).toEqual({
+      spellVersion: SP.SPELL_VERSION,
       imports: [{ path: "/Snake.spell", active: true }]
     })
     expect(spell(["run", "."], resolve(TEMP, "Snake")).stdout).toBe("hello from Snake\n")
@@ -1172,6 +1174,7 @@ describe("spell app create", () => {
     expect(stderr).toContain("try  spell app serve")
     const folder = resolve(TEMP, "Atlas")
     expect(JSON.parse(readFileSync(resolve(folder, SP.PROJECT_FILE), "utf8"))).toEqual({
+      spellVersion: SP.SPELL_VERSION,
       imports: [
         { path: "/Atlas.site.spell", active: true },
         { path: "/main.page-layout.spell", active: true },

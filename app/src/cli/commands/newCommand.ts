@@ -10,7 +10,7 @@ import { thisMachinesPerson } from "spell/app/spaces/server/node/people/localPer
 
 /**
  * `spell app create <name>` (`spell new` until epic `repo-split` P13):  make a spell project --
- * folder `<name>/`, holding `__project.json5` and a starter
+ * folder `<name>/`, holding `__project.json5` (saying the Spell it's written for, `SP.SPELL_VERSION`) and a starter
  * `<name>.spell` which prints a hello, so `spell run` shows something straight away.
  * - `--site`:  a site instead (epic `mockup` T40), as the editor's Site card makes one (`SPACES.STARTER_PROGRAMS.site`):
  *   its routing in `<name>.site.spell`, its main page layout in `main.page-layout.spell`, its home page in `home.spell`
@@ -36,7 +36,11 @@ export async function newCommand(session: CLI.CliSession, args: string[], option
     ? siteFiles(name)
     : { [`${name}.spell`]: `// ${name}:  a new spell project\nprint "hello from ${name}"\n` }
   mkdirSync(folder, { recursive: true })
-  const manifest = { imports: Object.keys(files).map((fileName) => ({ path: `/${fileName}`, active: true })) }
+  // the Spell it's written for, today's (epic `language` P68)
+  const manifest = {
+    spellVersion: SP.SPELL_VERSION,
+    imports: Object.keys(files).map((fileName) => ({ path: `/${fileName}`, active: true }))
+  }
   writeFileSync(resolve(folder, SP.PROJECT_FILE), `${JSON.stringify(manifest, null, 2)}\n`)
   for (const [fileName, contents] of Object.entries(files)) writeFileSync(resolve(folder, fileName), contents)
 

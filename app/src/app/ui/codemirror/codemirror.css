@@ -361,6 +361,13 @@
     padding: 8px 12px;
     white-space: pre-line;
   }
+  /* a problem's fixes in one click, "Fix it" (`CodeMirrorHovers`' `actionButton()`):  a row under its message */
+  .cmb-error-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    white-space: normal;
+  }
   /* and between the hover's sections, its info and its errors */
   .cmb-error-row + .cmb-error-row,
   .cm-tooltip-section:not(.cm-tooltip-lint) ~ .cm-tooltip-section:not(.cm-tooltip-lint) {

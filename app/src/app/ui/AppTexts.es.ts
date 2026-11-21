@@ -33,6 +33,22 @@ const APP_TEXTS_ES: AppTextPack = {
   restart: "Reiniciar",
   takesEffectOnRestart: "Esto se aplica al reiniciar",
   restartNoticeClose: "Cerrar",
+  upgradeNotice:
+    "Este proyecto se escribió para una versión anterior de Encanto.\n" +
+    "Algunas de sus líneas están escritas como las esperaban las versiones anteriores de Encanto.  Hoy siguen funcionando, pero una versión futura de Encanto no las entenderá.\n" +
+    "Actualizar reescribe esas líneas en los archivos de tu proyecto con el estilo nuevo.  Lo que hace tu proyecto no cambia.\n" +
+    "Si prefieres esperar, cierra este aviso.  No volverá a aparecer, y cada una de esas líneas mostrará un aviso con un botón Arreglarlo, para que las cambies una a una.",
+  upgrade: "Actualizar",
+  upgradeNoticeClose: "Cerrar",
+  upgraded:
+    "Tu proyecto ya va con Encanto {version}, la versión más nueva.\n" +
+    "El editor cambió {count} líneas de tu proyecto al estilo nuevo de Encanto {version}.\n" +
+    "Siguen haciendo lo mismo:  no tienes que hacer nada más.",
+  upgradedOne:
+    "Tu proyecto ya va con Encanto {version}, la versión más nueva.\n" +
+    "El editor cambió 1 línea de tu proyecto al estilo nuevo de Encanto {version}.\n" +
+    "Sigue haciendo lo mismo:  no tienes que hacer nada más.",
+  fixIt: "Arreglarlo",
   menuCode: "Código",
   emptyAppPrompt: "Arrastra algo aquí desde el menú +, o haz clic en uno para añadirlo.",
   modes: "Ejecutar, editar o depurar",
@@ -124,7 +140,8 @@ const APP_TEXTS_ES: AppTextPack = {
   changeThisFinishing: "Terminando…",
   changeThisWorking: "Tu agente está trabajando en ello…",
   changeThisSeconds: "{seconds} s",
-  changeThisStalled: "Tu agente no empezó en un minuto,\nasí que se detuvo, y nada cambió.\nPulsa Enviar para probar otra vez.",
+  changeThisStalled:
+    "Tu agente no empezó en un minuto,\nasí que se detuvo, y nada cambió.\nPulsa Enviar para probar otra vez.",
   changeThisStart: "Arrancar Claude Code",
   changeThisNoClaude: "Claude Code no está en este ordenador,\nasí que nadie puede hacer este cambio todavía.",
   changeThisInstall: "Instalar Claude Code",
@@ -135,7 +152,8 @@ const APP_TEXTS_ES: AppTextPack = {
   changeThisDone: "Tu agente hizo el cambio.",
   changeThisNoChange: "Tu agente terminó,\npero ningún archivo cambió.\nPrueba a decir el cambio de otra forma.",
   changeThisFailed: "Tu agente no pudo hacerlo:\n{summary}",
-  changeThisStopped: "Tu agente se detuvo antes de terminar,\nasí que tu proyecto puede estar cambiado a medias.\nRevísalo antes de seguir.",
+  changeThisStopped:
+    "Tu agente se detuvo antes de terminar,\nasí que tu proyecto puede estar cambiado a medias.\nRevísalo antes de seguir.",
   changeThisRefused: "Cambiar esto solo funciona en el Mac donde corre Spell.",
   changeThisPicture: "Una imagen que va con el pedido",
   changeThisRemovePicture: "Quitar esta imagen",
@@ -181,6 +199,7 @@ const APP_TEXTS_ES: AppTextPack = {
   codeCompilerWords: "Detalles del compilador en la información",
   codeBubbly: "Aspecto de burbujas",
   codeWrapLines: "Ajustar las líneas largas",
+  codeUpgradeOnOpen: "Actualizar el Encanto antiguo al abrir un proyecto",
   codePopupDelay: "Espera antes de mostrar la ayuda",
   codePopupDelayShort: "Corta:  0,4 segundos",
   codePopupDelayStandard: "Normal:  0,8 segundos",
@@ -964,6 +983,8 @@ const APP_TEXTS_ES: AppTextPack = {
   listsStartAtLabel: "Las listas empiezan en",
   listsStartAtTip:
     "Cómo numeran tus listas sus elementos.\nEn 1, el primero es el número 1, como cuenta la gente.\nEn 0, es el número 0, como cuentan JavaScript y Python.",
+  writtenForSpell: "Escrito para Encanto {version}",
+  writtenForOlderSpell: "Escrito para una versión anterior de Encanto",
 
   ////////////////
   // ## The code editor's own words

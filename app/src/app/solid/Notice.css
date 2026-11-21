@@ -22,6 +22,17 @@
 }
 
 /*
+ * Look of `<UpgradeNotice>` (`Notice.tsx`):  its lines wrapped, each of its own lines on a line of its own,
+ * the Upgrade button under them.
+ */
+.UpgradeNotice {
+  & p {
+    margin: 0 0 12px;
+    white-space-collapse: preserve-breaks;
+  }
+}
+
+/*
  * Look of `<RestartNeeded>` (`Notice.tsx`):  one compact row, sized to what it holds
  *   (epic `editor` I181):  a restart icon, the message, a primary Restart button, a close button.
  * - Raised off the page as a popup is:  the theme's surface, border and floating shadow.

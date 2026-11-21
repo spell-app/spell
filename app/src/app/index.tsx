@@ -14,6 +14,7 @@ import {
   NamePage,
   Notice,
   RestartNeeded,
+  UpgradeNotice,
   addAppIconsPageWide
 } from "spell/app/app/solid"
 import { Routes } from "spell/app/app/pages/routes"
@@ -57,7 +58,8 @@ const [isNamed, setIsNamed] = createSignal(!LocalPerson.asks(local))
  * Draw the app, in Solid, into `#app-root` (inside `index.html`'s `<ui-root icons="fomantic">`).
  * - `<NamePage>` first, while nobody at this machine is named (`LocalPerson.asks()`).
  * - `<Routes>` picks `<ProjectChooser>` / `<SpellEditor>` (in Edit, Debug or Run) by URL.
- * - `<Notice>` / `<ErrorNotice>` show `editor.notice` / `editor.error` over every page.
+ * - `<Notice>` / `<ErrorNotice>` show `editor.notice` / `editor.error` over every page;
+ *   `<UpgradeNotice>`, a project written for an older Spell (`editor.upgradeOffered`).
  * - Dialogs need no root:  each `editor.alert()` / `choose()` ... opens its own `<ui-modal>`.
  * - A running program draws with the page's Solid, in its own root on `<AppRoot>`'s element:
  *   see `editor.setAppRoot()`.
@@ -69,6 +71,7 @@ render(
         <Routes />
       </Show>
       <Notice />
+      <UpgradeNotice />
       <RestartNeeded />
       <BackToSite />
       <ErrorNotice />
