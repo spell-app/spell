@@ -278,7 +278,9 @@ export class SpellLanguageServer {
     }
     const count = await this.inQueue(uri, 0, async () => this.workspace.upgrade(project))
     const version = SP.OldForms.shortVersion(SP.SPELL_VERSION)
-    this.connection.window.showInformationMessage(texts.text(count === 1 ? "upgradedOne" : "upgraded", { count, version }))
+    this.connection.window.showInformationMessage(
+      texts.text(count === 1 ? "upgradedOne" : "upgraded", { count, version })
+    )
   }
 
   /**

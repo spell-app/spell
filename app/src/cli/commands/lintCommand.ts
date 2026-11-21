@@ -1,7 +1,6 @@
 import { writeFileSync } from "fs"
 import type { TextEdit } from "vscode-languageserver"
 
-
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { writeSpellVersion } from "spell/parser/spell/node/projectFile"
@@ -249,16 +248,14 @@ function oldFormsIn(project: SP.SpellProject, file?: SP.SpellFile): CLI.Problem[
     if (!spellFile.match || text === undefined) return []
     return SP.OldForms.uses(spellFile)
       .filter((use) => !use.isDropped)
-      .map(
-        (use): CLI.Problem => ({
-          project: project.projectId,
-          path: spellFile.location.serverPath,
-          ...lineAndColumnOf(text, use.start),
-          message: use.message,
-          severity: "warning",
-          rule: OLD_FORM
-        })
-      )
+      .map((use): CLI.Problem => ({
+        project: project.projectId,
+        path: spellFile.location.serverPath,
+        ...lineAndColumnOf(text, use.start),
+        message: use.message,
+        severity: "warning",
+        rule: OLD_FORM
+      }))
   })
 }
 

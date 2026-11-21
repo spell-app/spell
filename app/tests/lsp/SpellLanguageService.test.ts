@@ -969,7 +969,10 @@ describe("SpellLanguageService", () => {
         const [warning] = oldFormProblems()
         expect(warning?.message).toMatch(/^This line uses "wait for", which Spell doesn't need now/)
         const last = solitaire.parseText.split("\n").length - 1
-        const [fix] = service.codeActions(solitaire, { start: { line: last, character: 0 }, end: { line: last, character: 0 } })
+        const [fix] = service.codeActions(solitaire, {
+          start: { line: last, character: 0 },
+          end: { line: last, character: 0 }
+        })
         expect([fix?.isPreferred, fix?.diagnostics?.[0]?.message]).toEqual([true, warning?.message])
         expect(service.oldFormFixAt(solitaire, { line: last, character: 3 })?.title).toBe('Take out "wait for"')
         await workspace.update(solitaireUri, fixed!)

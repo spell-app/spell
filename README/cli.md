@@ -624,12 +624,13 @@ They're `spell-parser`'s, but their work is `spell-app`'s for now, through its `
 | Command | What it does |
 | --- | --- |
 | `spell compile [projects...]` | compiles each project to JavaScript, `<Project>.spell.js` in its build folder, plus its other targets, its declarations and its words;  a lone `.spell` file prints its JavaScript |
-| `spell lint [projects...]` | lists every error as `path:line:col  message`, exit 1 if there are any;  its warnings too (a page's `description-before-example`), which alone exit 0;  a project's editor pages (`*.editor.html`) too, against its types |
+| `spell lint [projects...]` | lists every error as `path:line:col  message`, exit 1 if there are any;  its warnings too (a page's `description-before-example`, each line still written the old way, `old-form`), which alone exit 0;  a project's editor pages (`*.editor.html`) too, against its types |
+| `spell upgrade [projects...]` | brings projects written for an older Spell up to date:  rewrites each line still written the old way (`parts` => `slots`, a `// x` note after a line's code moved under it as `-- x`), then writes the Spell it now matches into the project file, `spellVersion`;  the same rewrite as `spell lint --fix` |
 | `spell watch [projects...]` | recompiles on every save and shows a live list of errors, until `q` or `Ctrl-C` |
 | `spell format [projects...]` | tidies the whitespace of `.spell` files, as VS Code's Format Document does;  never in the frozen test projects |
 
 <details>
-<summary>Every option of compile, lint, watch and format</summary>
+<summary>Every option of compile, lint, upgrade, watch and format</summary>
 
 | Option | What it does |
 | --- | --- |
@@ -638,7 +639,9 @@ They're `spell-parser`'s, but their work is `spell-app`'s for now, through its `
 | `spell compile --force` | recompiles the projects it imports too, even those already compiled |
 | `spell compile --stale` | only the projects that are out of date, and the same for what they import;  the rest say "up to date" |
 | `spell lint --json` | the errors as a JSON list |
-| `spell lint --fix` | puts right what it can:  each retired word (`parts` => `slots`);  a page's `<text>` just before an example => its `description=`, which plain `spell lint` warns of as `description-before-example`;  a note after a line's code, `// x`, moved to the line under it, `-- x`;  and the editor pages (drops gone properties, adds new ones, fixes controls that don't fit) |
+| `spell lint --fix` | puts right what it can:  each line still written the old way, as `spell upgrade` does (`parts` => `slots`;  a note after a line's code, `// x`, moved to the line under it, `-- x`), then the project file's `spellVersion`;  a page's `<text>` just before an example => its `description=`, which plain `spell lint` warns of as `description-before-example`;  and the editor pages (drops gone properties, adds new ones, fixes controls that don't fit) |
+| `spell upgrade --dry-run` | lists what it would change, and changes nothing |
+| `spell upgrade --json` | what it changed, as a JSON list |
 | `spell watch --check-only` | re-checks instead of recompiling:  writes nothing |
 | `spell watch --test` | runs each project's tests after each rebuild with no errors |
 | `spell watch --name <text>` | with `--test`:  only tests whose names contain it |

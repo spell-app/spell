@@ -185,9 +185,7 @@ export class OldForms {
       ...(SP.Block.getParseErrors(match) ?? []),
       ...SP.SpellWarnings.in(match).map(({ at }) => at)
     ].filter((problem, index, all) => (problem.data as OldFormData).oldForm && all.indexOf(problem) === index)
-    return problems
-      .flatMap((problem) => OldForms.useOf(text, problem))
-      .sort((one, other) => one.start - other.start)
+    return problems.flatMap((problem) => OldForms.useOf(text, problem)).sort((one, other) => one.start - other.start)
   }
 
   /** `text` with every one of `uses` (`uses()`'s, of the same text) rewritten the new way. */

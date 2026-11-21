@@ -129,14 +129,21 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **Flag:**  `inString|let depth = 0` in a new scan of spell text
 - **Copies:**  `--`  (epic `coherence` P16 moved spellx's tokenizer, view and writer onto them)
 
-### A retired word
+### An old form
 
-- **It is:**  a word the language no longer takes, listed in a language's `retiredWords` / `retiredRuleWords`:
-  it still reads, as a parse error naming its replacement (`""`:  simply gone), which `spell lint --fix` writes
-  (`SpellType.noteRetiredLiterals()`, `retiredWordErrorsIn()`, `spell/parser/spell`;  `fixRetiredWords()`, spell-app's `lintCommand.ts`)
-- **Use it when:**  taking a word out of the language:  no rewrite command of its own.
-- **Flag:**  a new `spell upgrade`, or a script rewriting spell source by text
-- **Copies:**  `--`  (epic `language` P13 nearly built a second one, for lack of this entry)
+- **It is:**  a way of writing Spell that still works but is on its way out, a deprecation:  ONE list,
+  `SP.OLD_FORMS` (`spell/parser/spell`'s `OldForms.ts`;  epic `language` P68), each with the day it changed, the Spell
+  that deprecated it and the one that drops it.
+  - Retired words are some (a language's `retiredWords` / `retiredRuleWords`, `SpellType.noteRetiredLiterals()`),
+    and so is a `//` note after a line's code (`SP.LineEndComments`).
+  - A warning until its drop version, an error from then on;  reported by `OldForms.report()`.
+  - ONE rewrite, `OldForms.uses()` + `upgraded()`:  `spell lint --fix` and `spell upgrade` (`fixOldForms()`, the
+    app's `lintCommand.ts`), the language server's quick fixes and "Fix it", the editor's Upgrade.
+- **Use it when:**  taking a word or a way of writing out of the language:  add a form, never a rewriter of its own.
+- **Flag:**  a second rewrite command or pass, a script rewriting spell source by text, a deprecation warning with no
+  form on the list
+- **Copies:**  `--`  (epic `language` P13 nearly built a second one, for lack of this entry;  T166's own pass joined
+  the list in P68)
 
 ### Our TypeScript, read
 

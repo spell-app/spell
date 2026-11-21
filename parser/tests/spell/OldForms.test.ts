@@ -36,7 +36,7 @@ describe("OldForms:  Spell's old forms, each a deprecation with its versions (ep
     expect(warningsIn(OLD)).toEqual([
       'parts:  This line uses the old word "parts".  Spell now says "slots".  ' +
         "Spell 0.8 changed this on 2026-10-27.  Your program still runs, but this line will give an error from Spell 1.0 on, so it's best to fix it now.",
-      "wait for:  This line uses \"wait for\", which Spell doesn't need now:  it waits by itself.  " +
+      'wait for:  This line uses "wait for", which Spell doesn\'t need now:  it waits by itself.  ' +
         "Spell 0.8 changed this on 2026-10-31.  Your program still runs, but this line will give an error from Spell 1.0 on, so it's best to fix it now.",
       '// so it shows:  This note uses the old style:  it starts with "//" and sits after the code.  ' +
         'Notes now go on the line under the code, and start with "--".  ' +

@@ -1485,8 +1485,9 @@ plain Spell.
   - `- it has slots "front" and "back"`:  [`has_slots`](rules/classes/HasSlots.ts) =>
     `static slots = ["front", "back"]`, and `P.TypeScope.declareSlot()` (journaled;  `hasSlot()` walks the chain).
     - Spanish:  `- tiene las ranuras "frente" y "dorso"`.
-    - The old word, `has parts` (`partes`), still reads:  an error over just the word, naming `slots`, whose
-      `data.replacement` `spell lint --fix` writes (the language's `retiredWords`, `SpellType.noteRetiredLiterals()`).
+    - The old word, `has parts` (`partes`), still reads:  one of Spell's old forms, a warning over just the word,
+      naming `slots`, whose `data.replacement` `spell lint --fix` writes (the language's `retiredWords`,
+      `SpellType.noteRetiredLiterals()`;  "Old forms", below).
   - `- to draw its front:` / `to "draw its front":`:  `draw_it`'s slot drawing => `drawFront()`, declaring the slot too.
     - Unquoted, `to draw its {slot:member_words}`;  quoted, the `draw_its_slot` word rule's lead (`draw its`,
       `dibujar su`) then the name.
@@ -1999,6 +2000,48 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
 - `where the person is the cook` and `where they are the cook` read the item's own field, in both languages:
   [`TheyAre`](rules/places/TheyAre.ts), and a field it hasn't got says so.
 
+## Old forms:  `it has parts "front"`, `x is 3  // the count` (epic `language` P68)
+
+Ways of writing Spell that still work, but are on their way out:  each one a DEPRECATION, rewritten the new way by
+one step.
+- The list:  `SP.OLD_FORMS`, in [OldForms.ts](OldForms.ts), oldest first.
+  - Each has an id, the day it changed, the epic that changed it, and two Spell versions (Owen, 2026-11-20, C2):
+    the one that deprecated it, and the one that drops it.
+  - It's dropped in the next major by default (`1.0.0` for `0.8.0` and `0.9.0`), unless its own `droppedIn` says
+    otherwise (J287).
+  - Today's:  `parts` (elemental-spell P27), `animation` and `wait-for` (language P13), all from `0.8.0`;
+    `line-end-comment` (T166), from `0.9.0`.
+- Until its drop version, each use is a WARNING (Q81):  the line still compiles and runs.
+  - Its words:  the language pack's own for the form, then `old-form-deprecated`, the Spell that changed it, the day,
+    and the Spell that drops it (`OldForms.messageFor()`).
+  - From the drop version on (Spell's own, `OldForms.spellVersion`, which a test sets), the same line is an ERROR,
+    `old-form-dropped`, among the parse errors;  its fix is still offered (J288).
+- Reported while parsing, by `OldForms.report()`, each problem's `data.oldForm` naming its form:
+  - a retired word, by `BlockLine`, from `SpellType.reportRetiredWords()`;  which form each word is, the language's
+    `oldForms` (`{ parts: "parts", "wait for": "wait-for" }`)
+  - a `//` note after a line's code, by `BlockLine`, as it pops the line's comment (`SP.LineEndComments`)
+- ONE rewrite:  `OldForms.uses(file)` reads a parsed file's warnings and errors back, each with its edits;
+  `OldForms.upgraded(text, uses)` makes them.
+  - `spell lint --fix` and `spell upgrade`:  the app's `fixOldForms()`, then the project file's `spellVersion`
+    (`writeSpellVersion()`, the parser's `node/projectFile`).  `spell lint` lists each as a warning, `old-form`.
+  - The language server:  each use's quick fix ("Change "parts" to "slots"", preferred) and "Upgrade this file";
+    VS Code's hover ends in a "Fix it" link (`spell.fixIt`), the editor's problem popup in a Fix it button.
+  - Opening a project written for an older Spell:  a notice offers to upgrade it, once;  with `spell.upgradeOnOpen`
+    (VS Code) or the editor's switch on, it's upgraded at once.
+- A project says which Spell it matches in its project file, `spellVersion` (Q79, Q83):  never a line of Spell.
+  - Written when it's made, and by every upgrade;  none means a project written before projects said
+    (`OldForms.isOlderSpell()`).
+- Not a test project's files:  they stay frozen.
+- Adding one:
+  1. Bump `SPELL_VERSION`'s minor (`spell.types.ts`);  the new form is deprecated in that version.
+  2. Add it to `OLD_FORMS`, with its day and the epic that changed it;  a `droppedIn` only when it should go sooner
+     or later than the next major.
+  3. Report it where the parser reads it, through `OldForms.report()`, its words a key in each language's
+     `parserMessages` (novice voice, checked cold).
+  4. Write its rewrite:  a case in `OldForms.useOf()`.
+  5. Upgrade the built-in projects:  `spell upgrade --all @spell/examples @spell/library @spell/guides @spell/sites`,
+     then `spell content check --bless`, and read the diff.
+
 ## Scope:  what's stored where
 
 - All scope collections are [`ScopeList`s](../parser/scope/ScopeList.ts):
@@ -2286,8 +2329,8 @@ What a drawing's markup may say, a page's or a plain file's (epic `elemental-spe
   - A statement which declares something it also uses records it on that match, e.g. `property_value_either`.
 - What waits is worked out for the whole project, before any of it is written (`P.WriterProject.findWaiting()`):
   - Nothing in the source says so.  The old words (`animation`, `wait for`, `await`, the old tag form's `animated`) are retired:
-    each still reads, as an error over just the word, which `spell lint --fix` rewrites or takes out
-    (the language's `retiredWords`, `SpellType.noteRetiredLiterals()`).
+    each still reads, as an old form's warning over just the word, which `spell lint --fix` rewrites or takes out
+    (the language's `retiredWords`, `SpellType.noteRetiredLiterals()`;  "Old forms", below).
   - It starts from what waits by itself (`core`'s calls in `P.CORE_CALLS_THAT_WAIT`, and old source's `wait for`),
     then adds every function that calls one, by name, until nothing changes.
   - A `notify` is the one slow thing nothing waits for, unless it says `and wait`.
@@ -2977,7 +3020,8 @@ sidebars any of them opens.
   - Else, as before:  the comment-only lines directly above it, else the comments on its own line
     (one in code spell).  So a file written before still compiles as it did.
   - A `//` note after a line's code is the OLD way (epic `language` T166;  Owen, 2026-11-18):
-    `BlockLine` warns about it (`line-end-comment`), as it pops the line's comment.
+    `BlockLine` warns about it (`line-end-comment`), as it pops the line's comment:  one of Spell's old forms
+    ("Old forms", below).
     - Its place now:  the first line inside the line, `-- ...`, at the indent of the lines under it, else one deeper.
     - `SP.LineEndComments` finds them (a plain `CommentToken` written `//`, after code, on a line with no markup)
       and works out the move:  the language server's quick fix and `spell lint --fix` make it.

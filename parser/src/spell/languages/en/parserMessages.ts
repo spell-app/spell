@@ -551,7 +551,8 @@ export const PARSER_MESSAGES = {
   "old-form-deprecated":
     "Spell {deprecatedIn} changed this on {date}.  Your program still runs, but this line will give an error from Spell {droppedIn} on, so it's best to fix it now.",
   /** After an old form's own words, once Spell has dropped it:  an error. */
-  "old-form-dropped": "Spell {deprecatedIn} changed this on {date}, and from Spell {droppedIn} on it's an error.  Fix it to run your program.",
+  "old-form-dropped":
+    "Spell {deprecatedIn} changed this on {date}, and from Spell {droppedIn} on it's an error.  Fix it to run your program.",
   /** A `<css>` block in a type that doesn't draw. */
   "css-not-a-view": 'Only a view has its own <css>:  "{type}" isn\'t a view:  say "a ... is a view"',
   /** A `<css>` block outside a type's outline. */

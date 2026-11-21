@@ -36,7 +36,8 @@ export async function upgradeCommand(
   }
 
   // a dry run says what it WOULD fix
-  const said = (change: CLI.Problem) => (write ? change : { ...change, message: change.message.replace(/^fixed:/, "would fix:") })
+  const said = (change: CLI.Problem) =>
+    write ? change : { ...change, message: change.message.replace(/^fixed:/, "would fix:") }
   const lines = changes.map((change) => session.problemLine(said(change)))
   if (options.json) {
     for (const line of [...lines, ...notes]) session.err(line)
