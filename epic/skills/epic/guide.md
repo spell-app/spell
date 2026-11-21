@@ -251,6 +251,21 @@ epic update <epic>#J3 promised "<what was promised, what's there instead>"   # w
   must pick:  the others still close.
 - Then say how many closed, how many noted, and each promised item with what's missing.
 
+## hush -- Grey settled items the person won't look at again
+
+Only when the person asks (the skill's word:  `$epic hush`):  the epic skill's "17. Hush".
+Candidates:  drawn green, yellow or orange, nothing on them for 3 days;  never red, blue, open work, tests, questions,
+or anything with their mark, a thread or Claude's work on it.  A fresh `claude -p` judges each:  hush only if 80% sure.
+
+```sh
+epic hush <epic> --dryrun     # the table:  id, colour, age, hush or keep, why;  nothing changed
+epic hush <epic>              # once they say go:  each hushed item approved as their check would, logged
+epic hush all --dryrun        # every epic in progress
+```
+
+- Show the dry run's table first;  run it for real only when they say so.
+- Then say the counts per epic, and the kept items worth a look.
+
 ## claude-only-tools -- What Claude Code has, and what any agent does instead
 
 The epic skills lean on Claude Code's own tools.

@@ -111,7 +111,7 @@ test("instructions:  a {voice} written inside the voice file stays as written", 
 test("verdictFrom:  claude -p's structured_output;  an error or no verdict throws", () => {
   expect(VoiceCheck.verdictFrom(JSON.stringify({ is_error: false, structured_output: PASSED }))).toEqual(PASSED)
   expect(() => VoiceCheck.verdictFrom(JSON.stringify({ is_error: true, result: "rate limited" }))).toThrow(
-    /no verdict:  rate limited/
+    /no answer:  rate limited/
   )
   expect(() => VoiceCheck.verdictFrom("not json")).toThrow(/isn't JSON/)
 })

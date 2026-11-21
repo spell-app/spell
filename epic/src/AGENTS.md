@@ -605,6 +605,8 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       and answers in a fixed shape (`--json-schema`):  comprehensible, concise, clear, agent speak, each problem with a
       rewrite, pass or fail (epic `epic-engine` T92);  its instructions [voices/check/prompt.md](../voices/check/prompt.md);
       the reader a constructor option, so its test never calls a model
+    - `ClaudePrint`:  the ONE runner of that fresh `claude -p` (its own system prompt, nothing of the repo, an answer in
+      a fixed shape), for `VoiceCheck` and `Hush`
     - `SessionMoves`:  whether a session's move to another window (`epic window handoff`, `launch --move`) will
       really happen, and what's said when it didn't (epic `epic-engine` P26, request r20)
       - why:  the move is ONLY the end-of-turn hook's ([handoff.mjs](../hooks/handoff.mjs))
@@ -783,6 +785,10 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         plain `node` loads it
     - `StaleFacts` (epic `epic-engine` Q69):  `epic stale`, the facts for judging which open items have gone stale,
       for `/epic tidy`;  it decides nothing;  git runs a fixed few times for a whole page, never per item
+    - `Hush` (epic `epic-engine` T122):  `epic hush [<epic> | all] [--dryrun]`, tidy's sibling:  the green, yellow and
+      orange items settled 3 days ago or more (`candidates()`, pure), each judged by a fresh `claude -p` (`ClaudePrint`;
+      hush only if 80% sure Owen won't look again), the hushed ones approved as his ✓ would (`apply()`), one write
+      per page;  the judge a constructor option, so its test never calls a model
     - `EpicTargets` (P15):  what a link to a saga, an epic, a phase or an item finds in a checkout
       - the page, the id, its title, what's broken (no saga, no page, no id, an epic under a saga it doesn't name)
       - read by:
