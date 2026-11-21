@@ -269,6 +269,13 @@ export type ProjectManifestJSON5 = {
   /** Targets it compiles to, from its project file, e.g. `["ts/solid"]` -- `js/solid` always:  see `SP.TARGETS`. */
   targets?: string[]
   /**
+   * The Spell it was written for, from its project file, e.g. `"0.9.0"` (epic `language` P68, Q79, Q83):
+   * so it says which of Spell's old forms it may still hold (`SP.OLD_FORMS`).
+   * - Written when it's made, and by `spell upgrade` / `spell lint --fix`;  none:  written before projects said.
+   * - Shown in Project Settings, never edited there:  only an upgrade changes it.
+   */
+  spellVersion?: string
+  /**
    * The component packs its drawings name components from, by their bare names (`<button>`), first first,
    * from its project file -- default:  Spell UI's, `["spell-ui"]` (`SP.ComponentPacks`, epic `elemental-spell` P7).
    */
@@ -713,8 +720,11 @@ export type ReadAsTemplate = {
  *   that don't touch what compiled projects can read.
  * - Bump the MAJOR when declarations' shape, or generated-name mangling (e.g. `frobnicate_$thing`), changes:
  *   declarations from another major are refused.
+ * - Bump the MINOR once for each new old form, `SP.OLD_FORMS` (epic `language` P68, Q79):
+ *   `0.9.0` for a note after a line's code, `//` (T166).
+ *   A project's file says which Spell it matches, `spellVersion`, so it says which old forms it may still hold.
  */
-export const SPELL_VERSION = "0.8.0"
+export const SPELL_VERSION = "0.9.0"
 
 /**
  * Everything a project added to scope while parsing, as plain data -- see `SpellDeclarations`.

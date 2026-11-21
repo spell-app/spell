@@ -15,6 +15,7 @@ import "spell/parser/spell/node/nativeExports"
 export const languageCommands: LanguageCommands = {
   compile: (args, options) => CLI.compileCommand(session(options), args, options),
   lint: (args, options) => CLI.lintCommand(session(options), args, options),
+  upgrade: (args, options) => CLI.upgradeCommand(session(options), args, options),
   describe: (args, options) => CLI.describeCommand(session(options), args, options),
   run: (args, options) => CLI.runCommand(session(options), args, options),
   test: (args, options) => CLI.testCommand(session(options), args, options),

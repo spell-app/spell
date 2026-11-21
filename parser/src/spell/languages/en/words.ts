@@ -190,6 +190,14 @@ export const englishWords: SP.LanguageWords = {
     await: "",
     "wait for": ""
   },
+  /** Which of Spell's old forms each retired word is (`SP.OLD_FORMS`, epic `language` P68). */
+  oldForms: {
+    parts: "parts",
+    animation: "animation",
+    "create animation": "animation",
+    await: "wait-for",
+    "wait for": "wait-for"
+  },
   /** A process was once also an animation. */
   retiredRuleWords: {
     start_process: { animation: "process" },

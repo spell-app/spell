@@ -2,9 +2,13 @@ import {
   CodeActionKind,
   DidChangeWatchedFilesNotification,
   FileChangeType,
+  MarkupKind,
   TextDocuments,
   TextDocumentSyncKind,
   type Connection,
+  type Hover,
+  type MarkupContent,
+  type Position,
   type ServerCapabilities
 } from "vscode-languageserver"
 import { TextDocument } from "vscode-languageserver-textdocument"
@@ -67,6 +71,8 @@ export class SpellLanguageServer {
 
   /** Every change so far, in order -- see `enqueue()`. */
   #queue: Promise<unknown> = Promise.resolve()
+  /** Projects `offerUpgrade()` has looked at already, by id:  it asks once per project. */
+  #upgradeOffered = new Set<string>()
   /** Files whose diagnostics are due, and the timer that will publish them. */
   #toPublish = new Set<SP.SpellFile>()
   #publishTimer: ReturnType<typeof setTimeout> | undefined
@@ -93,6 +99,7 @@ export class SpellLanguageServer {
     documents.onDidChangeContent(({ document }) =>
       this.enqueue(() => workspace.update(document.uri, document.getText()))
     )
+    documents.onDidOpen(({ document }) => void this.offerUpgrade(document.uri).catch((error) => this.logError(error)))
     documents.onDidClose(({ document }) => this.enqueue(() => workspace.close(document.uri)))
     connection.onDidChangeWatchedFiles(({ changes }) => {
       for (const { uri, type } of changes) {
@@ -127,7 +134,7 @@ export class SpellLanguageServer {
       this.answer(textDocument.uri, { data: [] }, (file) => service.semanticTokens(file, range))
     )
     connection.onHover(({ textDocument, position }) =>
-      this.answer(textDocument.uri, null, (file) => service.hover(file, position))
+      this.answer(textDocument.uri, null, (file) => this.withFixIt(file, position, service.hover(file, position)))
     )
     connection.onDefinition(({ textDocument, position }) =>
       this.answer(textDocument.uri, [], (file) => service.definition(file, position))
@@ -221,6 +228,54 @@ export class SpellLanguageServer {
         ]
       })
       .catch(() => undefined)
+  }
+
+  /**
+   * `hover`, with a "Fix it" link at its end when `position` is on one of Spell's old forms (epic `language` P68,
+   * Owen's C3):  one click applies its fix, the same edit as its quick fix.
+   * - A `command:` link to the extension's `spell.fixIt`, which applies the edit it's handed:
+   *   VS Code shows the warning's hover and ours in one box, so the link sits under the warning.
+   * - The extension trusts that one command in our hovers (its `markdown.isTrusted`).
+   */
+  private withFixIt(file: SP.SpellFile, position: Position, hover: Hover | null): Hover | null {
+    const fix = this.service.oldFormFixAt(file, position)
+    if (!fix) return hover
+    const args = encodeURIComponent(JSON.stringify([fix.edit]))
+    const label = LSP.LspTexts.for(file.language).text("fixIt")
+    const link = `[**${label}**](command:${FIX_IT_COMMAND}?${args} "${fix.title}"):  ${fix.title}`
+    const contents = hover?.contents as MarkupContent | undefined
+    const value = contents?.value ? `${link}\n\n---\n\n${contents.value}` : link
+    return { contents: { kind: MarkupKind.Markdown, value }, range: hover?.range }
+  }
+
+  /**
+   * Once per project, as one of its files opens:  if it was written for an older Spell and still holds old forms,
+   * upgrade it (`spell.upgradeOnOpen` on), or offer to (off, the default), in a notice (epic `language` P68, Q80).
+   * - The upgrade is `SpellDiskWorkspace.upgrade()`, `spell upgrade`'s rewrite;  then a notice says what it changed.
+   * - Its words are in the file's language (`LSP.LspTexts`).
+   * - Waits for the person's answer OUTSIDE the queue, so edits go on parsing meanwhile.
+   */
+  private async offerUpgrade(uri: string): Promise<void> {
+    const found = await this.inQueue(uri, null, async ({ project, language }) => {
+      if (this.#upgradeOffered.has(project.projectId)) return null
+      this.#upgradeOffered.add(project.projectId)
+      if (!SP.OldForms.isOlderSpell(project.contents?.spellVersion)) return null
+      const isOld = project.spellFiles.some((file) => SP.OldForms.uses(file).length)
+      return isOld ? { project, texts: LSP.LspTexts.for(language) } : null
+    })
+    if (!found) return
+    const { project, texts } = found
+    const settings = (await this.connection.workspace.getConfiguration("spell").catch(() => undefined)) as
+      | { upgradeOnOpen?: boolean }
+      | undefined
+    if (!settings?.upgradeOnOpen) {
+      const upgrade = { title: texts.text("upgrade") }
+      const picked = await this.connection.window.showInformationMessage(texts.text("upgradeNotice"), upgrade)
+      if (picked?.title !== upgrade.title) return
+    }
+    const count = await this.inQueue(uri, 0, async () => this.workspace.upgrade(project))
+    const version = SP.OldForms.shortVersion(SP.SPELL_VERSION)
+    this.connection.window.showInformationMessage(texts.text(count === 1 ? "upgradedOne" : "upgraded", { count, version }))
   }
 
   /**
@@ -380,6 +435,9 @@ export class SpellLanguageServer {
     this.connection.console.error(`spell: ${error instanceof Error ? error.stack : error}`)
   }
 }
+
+/** The VS Code extension's command a hover's "Fix it" link runs:  it applies the edit it's handed (`withFixIt()`). */
+const FIX_IT_COMMAND = "spell.fixIt"
 
 /** `LSP.DiskChange` for each `FileChangeType`. */
 const DISK_CHANGES: Record<number, LSP.DiskChange> = {

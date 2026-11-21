@@ -3,6 +3,7 @@ import { basename, dirname, resolve } from "path"
 import { fileURLToPath, pathToFileURL } from "url"
 
 import { SP } from "spell/parser/spell"
+import { writeSpellVersion } from "spell/parser/spell/node/projectFile"
 import environment from "spell/app/spaces/server/node/environment"
 import { diskFetch, installDiskFetch, locationForDiskPath } from "spell/app/spaces/server/node/projects/disk-fetch"
 import { LSP } from "spell/app/lsp"
@@ -150,6 +151,32 @@ export class SpellDiskWorkspace implements LSP.FileAddresses {
    */
   track(project: SP.SpellProject): Promise<void> {
     return this.parseOnce(project)
+  }
+
+  ////////////////
+  // ## Upgrading old Spell
+  ////////////////
+
+  /**
+   * Bring `project` up to date on disk (epic `language` P68):  each of its files with Spell's old forms rewritten the new
+   * way (`SP.OldForms`), then its project file naming the Spell it now matches (`writeSpellVersion()`).
+   * - The same rewrite `spell upgrade` makes;  for the language server's notice, and `spell.upgradeOnOpen`.
+   * - Writes the files, NOT the editor's copies:  an open file reloads from disk, as the editor sees it change.
+   * - Not a test project's:  they stay frozen.
+   * - Returns how many old forms it rewrote.
+   */
+  upgrade(project: SP.SpellProject): number {
+    const folder = new SP.SpellLocation(project.projectId).serverPath
+    if (folder.startsWith(environment.testFilesRoot)) return 0
+    let count = 0
+    for (const file of project.spellFiles) {
+      const uses = SP.OldForms.uses(file)
+      if (!uses.length) continue
+      writeFileSync(file.location.serverPath, SP.OldForms.upgraded(file.parseText, uses))
+      count += uses.length
+    }
+    if (writeSpellVersion(folder) && project.contents) project.contents.spellVersion = SP.SPELL_VERSION
+    return count
   }
 
   ////////////////

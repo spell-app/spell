@@ -46,13 +46,26 @@ export default function languageCommands(spell: Command): void {
     .option("--json", "print errors as JSON")
     .option(
       "--fix",
-      "put right what it can:  retired words (parts => slots), old spellings in a page " +
+      "put right what it can:  Spell's old forms (parts => slots, a note after a line's code moved to the line " +
+        "under it, // x => -- x), then the project file's spellVersion;  old spellings in a page " +
         "(<notebook> => <page notebook>, a description before an example => its description=), " +
-        "a note after a line's code moved to the line under it (// x => -- x), " +
         "and the editor pages (gone properties, new ones, controls that don't fit)"
     )
     .addHelpText("after", PROJECT_HELP)
     .action((projects: string[], _options, command: Command) => language("lint", projects, command))
+
+  spell
+    .command("upgrade")
+    .description(
+      "bring projects written for an older Spell up to date:  rewrite each old form the new way " +
+        "(parts => slots, // x => -- x on the line under it), then write the Spell they now match " +
+        "into the project file (spellVersion) -- the same rewrite as spell lint --fix"
+    )
+    .argument("[projects...]", PROJECTS_ARG)
+    .option("--dry-run", "list what it would change, and change nothing")
+    .option("--json", "print what it changed as JSON")
+    .addHelpText("after", PROJECT_HELP)
+    .action((projects: string[], _options, command: Command) => language("upgrade", projects, command))
 
   spell
     .command("describe")

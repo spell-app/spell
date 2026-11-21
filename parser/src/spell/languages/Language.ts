@@ -581,8 +581,10 @@ export type LanguageWords = {
    * English's `{ parts: "slots" }` (epic `elemental-spell` P27).
    * - Two words at most:  `wait for`.
    * - A replacement of nothing, `""`:  the word is simply gone, e.g. `wait for: deal` is now `deal` (epic `language` P13).
-   * - Still read where a rule spells it, so the line keeps its meaning;  but each is a parse error naming its
-   *   replacement, which `spell lint --fix` puts in its place -- see `SpellType.noteRetiredLiterals()`.
+   * - Still read where a rule spells it, so the line keeps its meaning;  but each is one of Spell's old forms, a
+   *   warning naming its replacement, which `spell lint --fix` puts in its place -- see `SpellType.noteRetiredLiterals()`
+   *   and `SP.OldForms` (epic `language` P68).
+   * - Which old form each is:  `oldForms`.
    * - None:  nothing retired.
    * - NOT a type's word:  the old words for views (`drawable thing`, `dibujable`) are gone,
    *   free for a program's own names (epic `language` T25).
@@ -593,6 +595,13 @@ export type LanguageWords = {
    * English's `{ start_process: { animation: "process" } }`, as `animation` alone is now `to`.
    */
   retiredRuleWords?: Record<string, Record<string, string>>
+  /**
+   * Which of Spell's old forms each of `retiredWords` (and `retiredRuleWords`) is, by its id in `SP.OLD_FORMS`:
+   * English's `{ parts: "parts", "wait for": "wait-for" ... }` (epic `language` P68).
+   * - The form says when it changed, and the Spell versions that deprecated it and will drop it.
+   * - A word not listed:  `"parts"`'s, the first.
+   */
+  oldForms?: Record<string, SP.OldFormId>
   /**
    * The line saying a thing has an ability, by the ability's English name:  `it is draggable`, Spanish's `es arrastrable`.
    * - What `DragAndDrop`'s warning for the old words (`can be dragged`) says to write.

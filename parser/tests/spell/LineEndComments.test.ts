@@ -54,8 +54,9 @@ describe("LineEndComments:  a note after a line's code, `// ...`, the old way (e
 
   test("a warning on each, saying what to do", () => {
     expect(warningsIn("to play\n\tset x to 1  // so it runs\n\t// a step\n")).toEqual([
-      '// so it runs:  A note after "//" at the end of a line will stop working in a later release.  ' +
-        'Put it on the line under this one, starting with "--".'
+      '// so it runs:  This note uses the old style:  it starts with "//" and sits after the code.  ' +
+        'Notes now go on the line under the code, and start with "--".  ' +
+        "Spell 0.9 changed this.  Your program still runs, but this line will give an error from Spell 1.0 on, so it's best to fix it now."
     ])
   })
 })

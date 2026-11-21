@@ -20,6 +20,7 @@ import type { GlobalOptions } from "spell/cli"
 export type LanguageCommands = {
   compile(projects: string[], options: CompileOptions): Promise<number>
   lint(projects: string[], options: LintOptions): Promise<number>
+  upgrade(projects: string[], options: UpgradeOptions): Promise<number>
   describe(args: string[], options: DescribeOptions): Promise<number>
   run(project: string[], options: RunOptions): Promise<number>
   test(projects: string[], options: TestOptions): Promise<number>
@@ -119,6 +120,16 @@ export type CompileOptions = GlobalOptions & {
 export type LintOptions = GlobalOptions & {
   json?: boolean
   fix?: boolean
+}
+
+/**
+ * `spell upgrade` flags (epic `language` P68).
+ * - `dryRun`:  list what it would change, and write nothing
+ * - `json`:  print what it changed (or would) as a JSON array of problems, one per change
+ */
+export type UpgradeOptions = GlobalOptions & {
+  dryRun?: boolean
+  json?: boolean
 }
 
 /**

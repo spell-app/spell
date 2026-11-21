@@ -67,6 +67,20 @@ export const LSP_TEXTS_ES: LspTextPack = {
   // a note after a line's code, `// ...`, moved to the line under it, `-- ...` (`SP.LineEndComments`, epic `language` T166)
   moveLineEndNote: 'Mover la nota abajo y cambiar "//" por "--"',
 
+  // Spell's old forms, rewritten the new way (`SP.OldForms`, epic `language` P68):  one, or every one in the file
+  changeOldForm: 'Cambiar "{written}" por "{replacement}"',
+  takeOutOldForm: 'Quitar "{written}"',
+  upgradeFile: "Actualizar este archivo a Encanto {version}",
+  // the link on an old form's hover, in VS Code:  its fix, in one click (Owen's C3)
+  fixIt: "Arreglarlo",
+  upgradeNotice:
+    "Este proyecto se escribió para una versión anterior de Encanto.  Algunas de sus líneas usan palabras viejas, que de momento aún funcionan.  Actualízalo para cambiar esas líneas a las palabras nuevas.",
+  upgrade: "Actualizar",
+  upgraded:
+    "Tu proyecto está al día con Encanto {version}.  {count} líneas usaban palabras viejas, y ahora usan las nuevas.  Siguen haciendo lo mismo, así que no hay nada más que hacer.",
+  upgradedOne:
+    "Tu proyecto está al día con Encanto {version}.  1 línea usaba palabras viejas, y ahora usa las nuevas.  Sigue haciendo lo mismo, así que no hay nada más que hacer.",
+
   // a read of a place's field marked gone, changed to its likely new name (`SP.PlaceFieldMarks`, epic `language` P68)
   changeToNewField: 'Cambiar a "{name}"',
 

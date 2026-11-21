@@ -12,6 +12,7 @@
  */
 export * from "./compileCommand"
 export * from "./lintCommand"
+export * from "./upgradeCommand"
 export * from "./describeCommand"
 export * from "./runCommand"
 export * from "./watchCommand"

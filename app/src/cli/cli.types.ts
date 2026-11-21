@@ -22,6 +22,7 @@ export type {
   TestOptions,
   TranslateOptions,
   TranslateTimeOptions,
+  UpgradeOptions,
   WatchOptions
 } from "spell/parser/cli"
 

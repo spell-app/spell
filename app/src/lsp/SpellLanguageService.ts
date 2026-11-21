@@ -2376,7 +2376,8 @@ export class SpellLanguageService {
    * - Goes just above the top-level statement the line is in, as a method is only visible to lines AFTER it.
    * - See `methodSignatureFor()` for how the words become a signature.
    * - And "Make it code" / "Make it text" on the attribute value the caret is in (`codeOrText()`, epic `editor` T74).
-   * - And "Move the note below" on a line ending in an old `// ...` note (`lineEndNotesMoved()`, epic `language` T166).
+   * - And a fix for each of Spell's old forms on the lines, "Change "parts" to "slots"", "Move the note below" ...,
+   *   and "Upgrade this file", every one in it at once (`oldFormsFixed()`, epic `language` P68).
    * - And "Change to ..." on a read of a place's field marked gone, to its likely new name (`placeFieldsRenamed()`,
    *   epic `language` P68).
    */
@@ -2415,40 +2416,79 @@ export class SpellLanguageService {
     }
     const switched = this.codeOrText(file, from)
     if (switched) actions.push(switched)
-    actions.push(...this.lineEndNotesMoved(file, from, to))
+    actions.push(...this.oldFormsFixed(file, from, to))
     actions.push(...this.placeFieldsRenamed(file, from, to))
     return actions
   }
 
   /**
-   * "Move the note below" on each old line-end note, `// ...` after a line's code, on the lines `from` ... `to`:
-   * to the first line inside its line, `-- ...` (`SP.LineEndComments`, epic `language` T166).
-   * - A quick fix for the warning `BlockLine` notes on it, its diagnostic attached.
+   * A fix for each of Spell's old forms on the lines `from` ... `to`, then "Upgrade this file" (epic `language` P68):
+   * - "Change "parts" to "slots"", "Take out "wait for"", "Move the note below ..." -- each the quick fix for the
+   *   warning (or, once Spell drops it, the error) it noted, its diagnostic attached, and PREFERRED:
+   *   the editor's "Fix it" button and VS Code's quick-fix key apply it (Owen's C3).
+   * - "Upgrade this file to Spell 0.9":  every old form in the file at once, when there are any.
+   * - The edits are `SP.OldForms`', the same `spell lint --fix` and `spell upgrade` make.
    */
-  private lineEndNotesMoved(file: SP.SpellFile, from: number, to: number): CodeAction[] {
+  private oldFormsFixed(file: SP.SpellFile, from: number, to: number): CodeAction[] {
+    const uses = SP.OldForms.uses(file)
+    if (!uses.length) return []
     const text = file.parseText
     const lineStart = text.lastIndexOf("\n", from - 1) + 1
     const lineEnd = text.indexOf("\n", to) < 0 ? text.length : text.indexOf("\n", to)
-    const comments = SP.LineEndComments.in(file.match!.tokens).filter(
-      (comment) => comment.start >= lineStart && comment.start <= lineEnd
-    )
-    return comments.map((comment): CodeAction => {
-      const at = comment.start
-      const diagnostic = this.diagnostics(file).find(
-        (it) => it.severity === DiagnosticSeverity.Warning && this.offsetAt(file, it.range.start) === at
-      )
-      const edits = SP.LineEndComments.moved(text, comment).map(({ start, end, newText }) => ({
+    const actions = uses
+      .filter((use) => use.end >= lineStart && use.start <= lineEnd)
+      .map((use): CodeAction => {
+        const diagnostic = this.diagnostics(file).find(
+          (it) => it.severity !== DiagnosticSeverity.Information && this.offsetAt(file, it.range.start) === use.start
+        )
+        return {
+          title: this.oldFormFixTitle(file, use),
+          kind: CodeActionKind.QuickFix,
+          diagnostics: diagnostic ? [diagnostic] : undefined,
+          isPreferred: true,
+          edit: this.oldFormsEdit(file, [use])
+        }
+      })
+    if (!actions.length) return []
+    const version = SP.OldForms.shortVersion(SP.SPELL_VERSION)
+    actions.push({
+      title: LSP.LspTexts.of(this.scopeAt(file, from)).text("upgradeFile", { version }),
+      kind: CodeActionKind.QuickFix,
+      edit: this.oldFormsEdit(file, uses)
+    })
+    return actions
+  }
+
+  /**
+   * The fix for the old form at `position` in `file`, if one is written there:  its title and its edit.
+   * - What the language server's hover offers as its "Fix it" link, in VS Code (Owen's C3).
+   * - `null` where there's none.
+   */
+  oldFormFixAt(file: SP.SpellFile, position: Position): { title: string; edit: WorkspaceEdit } | null {
+    const offset = this.offsetAt(file, position)
+    const use = SP.OldForms.uses(file).find((it) => it.start <= offset && offset <= it.end)
+    return use ? { title: this.oldFormFixTitle(file, use), edit: this.oldFormsEdit(file, [use]) } : null
+  }
+
+  /** What the fix for `use`, an old form in `file`, is called:  `Change "parts" to "slots"`. */
+  private oldFormFixTitle(file: SP.SpellFile, use: SP.OldFormUse): string {
+    const texts = LSP.LspTexts.of(this.scopeAt(file, use.start))
+    if (use.form.id === "line-end-comment") return texts.text("moveLineEndNote")
+    const replacement = use.edits[0]?.newText
+    return replacement
+      ? texts.text("changeOldForm", { written: use.written.trim(), replacement })
+      : texts.text("takeOutOldForm", { written: use.written.trim() })
+  }
+
+  /** The edit rewriting `uses`, old forms in `file`, the new way. */
+  private oldFormsEdit(file: SP.SpellFile, uses: readonly SP.OldFormUse[]): WorkspaceEdit {
+    const edits = uses.flatMap((use) =>
+      use.edits.map(({ start, end, newText }) => ({
         range: { start: this.positionAt(file, start), end: this.positionAt(file, end) },
         newText
       }))
-      return {
-        title: LSP.LspTexts.of(this.scopeAt(file, at)).text("moveLineEndNote"),
-        kind: CodeActionKind.QuickFix,
-        diagnostics: diagnostic ? [diagnostic] : undefined,
-        isPreferred: true,
-        edit: { changes: { [this.addresses.uriFor(file)]: edits } }
-      }
-    })
+    )
+    return { changes: { [this.addresses.uriFor(file)]: edits } }
   }
 
   /**

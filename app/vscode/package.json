@@ -103,6 +103,11 @@
           "type": "boolean",
           "default": false,
           "description": "On save, compile the project to its .output.js, so a running app picks it up."
+        },
+        "spell.upgradeOnOpen": {
+          "type": "boolean",
+          "default": false,
+          "description": "On opening a project written for an older Spell, change its old wording to the new wording at once, then say what changed.  Off:  a notice offers to."
         }
       }
     },

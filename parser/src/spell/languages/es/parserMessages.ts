@@ -28,7 +28,7 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "choose-from-what":
     'Esta línea no dice de qué {things} elegir.  Escríbelo después de "de", así:  elegir {thing} de tus {things}',
   "line-end-comment":
-    'Una nota con "//" al final de una línea dejará de funcionar en una próxima versión.  Ponla en la línea de abajo, empezando con "--".',
+    'Esta nota usa el estilo viejo:  empieza con "//" y va después del código.  Ahora las notas van en la línea de abajo, y empiezan con "--".',
   "untyped-parameter": 'Di qué es "{name}", p. ej. "({name} como {type})"',
   "untyped-property": 'Di qué es "{name}", p. ej. "{line} como {type}"',
   "untyped-list-property": 'Di qué contiene "{name}", p. ej. "{line} como una nueva lista de {items}"',
@@ -360,9 +360,11 @@ export const spanishParserMessages: Partial<SP.ParserMessages> = {
   "belongs-to-not-a-list": "No se puede decir {sentence}:  {aList} no es una lista",
   "markdown-outside-outline":
     "Un bloque <markdown> va en el esquema de un tipo, como su descripción, o en un dibujo:  devolver <markdown>...</markdown>",
-  "retired-word": '"{words}" ahora es "{replacement}":  di "{replacement}", o ejecuta `spell lint --fix`',
-  "retired-word-gone":
-    'Ya no hace falta "{words}", pues spell espera por sí solo:  quítalo, o ejecuta `spell lint --fix`',
+  "retired-word": 'Esta línea usa la palabra vieja "{words}".  Ahora Encanto dice "{replacement}".',
+  "retired-word-gone": 'Esta línea usa "{words}", que Encanto ya no necesita:  espera por sí solo.',
+  "old-form-deprecated":
+    "Encanto {deprecatedIn} cambió esto.  Tu programa aún funciona, pero esta línea dará un error desde Encanto {droppedIn}, así que conviene arreglarla ya.",
+  "old-form-dropped": "Encanto {deprecatedIn} cambió esto, y desde Encanto {droppedIn} es un error.  Arréglala para ejecutar tu programa.",
   "css-not-a-view": 'Solo una vista tiene su propio <css>:  "{type}" no es una vista:  di "una ... es una vista"',
   "css-outside-outline": "Solo una vista tiene su propio <css>:  ponlo en el esquema de un tipo",
   "value-line-outside-getter":

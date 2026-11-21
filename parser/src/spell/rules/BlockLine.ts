@@ -117,8 +117,16 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
         comments.push(comment)
         end -= 1
         // a note after the code, `// ...`:  the old way, its place now the first line inside (epic `language` T166)
-        if (line === written && SP.LineEndComments.endingLine(line))
-          SP.SpellWarnings.note(comment, SP.Language.of(scope).parserMessage("line-end-comment"))
+        // one of Spell's old forms:  a warning, or an error once Spell drops it (`SP.OldForms`, epic `language` P68)
+        const lineEndNote = line === written ? SP.LineEndComments.endingLine(line) : undefined
+        if (lineEndNote) {
+          const error = SP.OldForms.report(comment, [lineEndNote], {
+            id: "line-end-comment",
+            message: SP.Language.of(scope).parserMessage("line-end-comment"),
+            replacement: `-- ${String(lineEndNote.value ?? "").trim()}`.trimEnd()
+          })
+          if (error) errors.push(error)
+        }
       }
       // add comments BEFORE statement
       matched.push(...comments)
@@ -172,8 +180,9 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
       if (statement) {
         // Errors inside JSX `{...}` -- reported here, but compiled where they are, so NOT added to `matched`.
         errors.push(...SpellJSX.parseErrorsIn(statement))
-        // one of spell's old words, e.g. `parts` in `it has parts "front"`:  an error naming its new word, the line still compiled
-        errors.push(...SpellType.retiredWordErrorsIn(statement))
+        // one of spell's old words, e.g. `parts` in `it has parts "front"`:  an old form naming its new word, the line
+        // still compiled -- a warning, or an error once Spell drops it (`SP.OldForms`)
+        errors.push(...SpellType.reportRetiredWords(statement))
 
         const inlineBody = statement.rule instanceof SpellStatement ? statement.rule.getBody(statement) : undefined
         const committed = commitStatement(statement, nextItem)

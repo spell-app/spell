@@ -67,6 +67,21 @@ export const LSP_TEXTS = {
   // a note after a line's code, `// ...`, moved to the line under it, `-- ...` (`SP.LineEndComments`, epic `language` T166)
   moveLineEndNote: 'Move the note below, changing "//" to "--"',
 
+  // Spell's old forms, rewritten the new way (`SP.OldForms`, epic `language` P68):  one, or every one in the file
+  changeOldForm: 'Change "{written}" to "{replacement}"',
+  takeOutOldForm: 'Take out "{written}"',
+  upgradeFile: "Upgrade this file to Spell {version}",
+  // the link on an old form's hover, in VS Code:  its fix, in one click (Owen's C3)
+  fixIt: "Fix it",
+  // the notice as a project written for an older Spell opens, and after it's upgraded (`SpellLanguageServer.offerUpgrade()`)
+  upgradeNotice:
+    "This project was written for an older version of Spell.  Some of its lines use old wording, which still works for now.  Upgrade it to change those lines to the new wording.",
+  upgrade: "Upgrade",
+  upgraded:
+    "Your project is up to date with Spell {version}.  {count} lines used old wording, and now use the new wording instead.  They still do the same thing, so there's nothing else to do.",
+  upgradedOne:
+    "Your project is up to date with Spell {version}.  1 line used old wording, and now uses the new wording instead.  It still does the same thing, so there's nothing else to do.",
+
   // a read of a place's field marked gone, changed to its likely new name (`SP.PlaceFieldMarks`, epic `language` P68)
   changeToNewField: 'Change to "{name}"',
 
