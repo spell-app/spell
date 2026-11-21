@@ -292,8 +292,15 @@ const BUNDLED_ELEMENT_LEAVES = new Set(["spell/element/drawnWindow"])
 /**
  * Spell UI's leaves that are plain DOM, with no element and no state a page must share:  bundled, as `UI_DATA` is.
  * - `DroppedFiles`, the uploader's reading of a desktop drop, which a view that takes files reads too (epic `language` P67).
+ * - The theme tree, which a site's own theme is checked and built with (`SiteThemes`, I36):  `ThemeTokens` reads every
+ *   theme and palette file (a lazy chunk each), `ThemeFile` works one out, `styles.en` is the tree itself.
  */
-const BUNDLED_UI_LEAVES = new Set(["spell/ui/components/ui-uploader/DroppedFiles"])
+const BUNDLED_UI_LEAVES = new Set([
+  "spell/ui/components/ui-uploader/DroppedFiles",
+  "spell/ui/components/ui-theme-editor/ThemeTokens",
+  "spell/ui/styles/ThemeFile",
+  "spell/ui/styles/styles.en"
+])
 
 /** Any other import from Solid's or `ui`'s packages:  `sharedSolid()` refuses it, as the shared files may lack it. */
 const SOLID_FAMILY = /^(solid-js|@solidjs\/[^/]+|spell\/ui|spell\/element)(\/|$)/
