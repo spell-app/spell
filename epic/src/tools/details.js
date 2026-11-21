@@ -282,6 +282,7 @@ function findFile(path) {
  *   - `selectAll`:  "Select all" / "Select none" in its title (with `multiple`)
  *   - `filter`:  "Open | All" in its title;  Open (the default) hides options marked `done`
  *   - `moreDetails`:  a (?) "Provide more details" on each option;  the ones pressed come back as `<id>-more`
+ *   - `compact`:  its options as one select with a comment box, not a card each (epic `epic-engine` T121)
  * - an option:
  *   `{ letter?, title, summary?, body?, details?, detailsTitle?, recommended?, checked?, done?, badge?, badgeColor? }`
  *   - letters default to A, B ...
@@ -626,7 +627,8 @@ export function formatAnswer(page, answer) {
       const recommended = option?.hasAttribute("recommended") ? " (recommended)" : ""
       return `${letter} · ${option?.getAttribute("title") ?? "?"}${recommended}`
     })
-    if (got.other) picked.push(`Other:  ${got.other}`)
+    // a `compact` question's Other is its comment box (epic `epic-engine` T121)
+    if (got.other) picked.push(`${question.hasAttribute("compact") ? "Comment" : "Other"}:  ${got.other}`)
     lines.push(`  ${askHeader(question)}:  ${picked.join(";  ") || "(not decided yet)"}${isNew(key)}`)
   }
   // "Provide more details" (`moreDetails`):  `<question key>-more`, the options' letters

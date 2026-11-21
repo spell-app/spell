@@ -740,6 +740,22 @@ ui-button.spell-fold {
   font-weight: 600;
   white-space: pre;
 }
+/*
+ * the joined row stays on ONE line, inside the window:  cut short with "…" where it doesn't fit (epic `epic-engine`
+ * I368:  a long sub-section title after its parent's scrolled a phone's page sideways);  the title wraps again, in
+ * full, once nothing is joined to it
+ */
+.spell-doc-main ui-section[data-spell-trail] {
+  &::part(heading),
+  &::part(toggle) {
+    min-width: 0;
+  }
+  &::part(header) {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}
 /* the `open/all` count:  big enough to read at a glance beside a title */
 .spell-doc-main ui-section {
   --ui-section-badge-font-size: 0.9em;

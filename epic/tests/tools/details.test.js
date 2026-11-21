@@ -144,6 +144,25 @@ test("formats an answer with the page's titles", () => {
   )
 })
 
+// epic `epic-engine` T121:  a compact question's Other is its comment box
+test("formats a compact question's Other as its comment", () => {
+  const page = join(docs, "pages/details/pick-compact.html")
+  const layout = readFileSync(join(docs, "pages/details/pick-layout.html"), "utf8")
+  writeFileSync(page, layout.replace(/<epic-ask\b/, "<epic-ask compact"))
+  const answer = {
+    page: "/pages/details/pick-compact.html",
+    answered: "2026-10-03T22:00:00.000Z",
+    changes: 0,
+    answers: { q1: { picked: ["A"], other: "but later" } },
+    comments: {},
+    notes: ""
+  }
+  expect(formatAnswer(page, answer).split("\n")[2]).toBe(
+    "  Q1 · Short question:  A · First option (recommended);  Comment:  but later"
+  )
+  rmSync(page)
+})
+
 test("formats an option's comment with its question and title", () => {
   const page = join(docs, "pages/details/pick-layout.html")
   const answer = {

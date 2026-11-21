@@ -10,6 +10,8 @@ import "spell/epic/components/epic-choices"
 import "spell/epic/components/epic-question"
 // the boxes are `<ui-textarea grow>`s:  `<ui-root>` loads them on a page
 import "spell/ui/components/ui-input"
+// a compact question's select (`compact`, epic `epic-engine` T121)
+import "spell/ui/components/ui-select"
 
 ////////////////
 // ## Fixtures
@@ -281,5 +283,143 @@ describe("<epic-ask>", () => {
     await ElementFixture.settle()
     expect(option(section, "X").shadowRoot!.querySelector("[part~='tick']")).toBeNull()
     expect(option(section, "A").matches(":state(answering)")).toBe(true)
+  })
+})
+
+////////////////
+// ## Compact (epic `epic-engine` T121)
+////////////////
+
+/** The ROW of three options, Yes / No / Revisit, as solid-2-final's ranked page asks them. */
+const PICKS =
+  `<epic-option letter="Y" title="Yes" recommended><p>Do it.</p></epic-option>` +
+  `<epic-option letter="N" title="No"><p>Don't.</p></epic-option>` +
+  `<epic-option letter="R" title="Revisit"><p>Later.</p></epic-option>`
+
+/** Its select's native `<select>`, two shadow roots down. */
+function nativeSelect(ask: Element): HTMLSelectElement {
+  return part(ask, "select").shadowRoot!.querySelector("select")!
+}
+
+/** Pick `letter` in its select, as a person does:  the native select's value, then its `change`. */
+async function choose(ask: Element, letter: string) {
+  const select = nativeSelect(ask)
+  select.value = letter
+  select.dispatchEvent(new Event("change", { bubbles: true, composed: true }))
+  await ElementFixture.settle()
+}
+
+/** Type `text` in its comment box. */
+async function comment(ask: Element, text: string) {
+  const box = part(ask, "other").shadowRoot!.querySelector("ui-textarea")!.shadowRoot!.querySelector("textarea")!
+  box.value = text
+  box.dispatchEvent(new InputEvent("input", { bubbles: true, composed: true }))
+  await ElementFixture.settle()
+}
+
+describe("<epic-ask compact>", () => {
+  test("one row:  its chip, ONE Spell UI select of its options' titles, a comment box;  no cards, no switch;  axe", async () => {
+    const section = await ElementFixture.render(question("compact", PICKS))
+    const ask = section.querySelector("epic-ask")!
+    await ElementFixture.settle()
+    const row = part(ask, "row")
+    expect(row.querySelector('[part~="chip"]')!.textContent).toBe("Q1")
+    expect(part(ask, "select").localName).toBe("ui-select")
+    expect([...nativeSelect(ask).options].map((each) => [each.value, each.textContent])).toEqual([
+      ["", "Pick one"],
+      ["Y", "Yes (recommended)"],
+      ["N", "No"],
+      ["R", "Revisit"]
+    ])
+    expect(part(ask, "other").getAttribute("placeholder")).toBe("Comment (optional)")
+    expect(part(ask, "how")).toBeNull()
+    // the cards stay in the page, hidden:  the select lists them
+    expect(getComputedStyle(section.querySelector("epic-choices")!).display).toBe("none")
+    expect(section.getAttribute("data-state")).toBe("attention")
+    await expectAccessible(ask)
+  })
+
+  test("its pick and comment go out with Send, as a card pick and Other do;  the chip turns green", async () => {
+    const posts: { url: string; body: PageAnswer & { page: string } }[] = []
+    const fetch = vi.fn(async (url: string, init?: RequestInit) => {
+      if (init?.method === "POST") posts.push({ url, body: JSON.parse(init.body as string) })
+      return Response.json(
+        url.startsWith("/api/docs/details/answer") && init?.method === "POST"
+          ? { ok: true, answered: "2026-11-20T00:00:00.000Z" }
+          : { answer: null, draft: null }
+      )
+    })
+    const details = new AnswerForm({
+      page: "/pages/details/x.html",
+      server: { token: "t" },
+      protocol: "http:",
+      fetch: fetch as unknown as typeof globalThis.fetch
+    })
+    AnswerForm.adopt(details)
+    const section = await ElementFixture.render(question("compact", PICKS))
+    const ask = section.querySelector("epic-ask")!
+    await ElementFixture.settle()
+    await choose(ask, "N")
+    await comment(ask, "too big for now")
+    expect(details.gather().answers).toEqual({ q1: { picked: ["N"], other: "too big for now" } })
+    expect(ask.matches(":state(done)")).toBe(true)
+    await details.send()
+    const sent = posts.find((post) => post.url.startsWith("/api/docs/details/answer"))!
+    expect(sent.body.answers).toEqual({ q1: { picked: ["N"], other: "too big for now" } })
+    // the empty entry takes the pick back
+    await choose(ask, "")
+    expect(details.gather().answers.q1.picked).toEqual([])
+  })
+
+  test("an answer sent comes back into its select and comment box", async () => {
+    const section = await ElementFixture.render(question("compact", PICKS))
+    const ask = section.querySelector("epic-ask")! as HTMLElement & { component: { showAnswer(answer: object): void } }
+    await ElementFixture.settle()
+    const answer = { answers: { q1: { picked: ["R"], other: "after P3" } }, comments: {}, notes: "" }
+    // the page's form shows it to every part:  the question its pick, its comment box (a part of its own) the text
+    ask.component.showAnswer(answer)
+    ;(part(ask, "other") as unknown as { component: { showAnswer(answer: object): void } }).component.showAnswer(answer)
+    await ElementFixture.settle()
+    expect(nativeSelect(ask).value).toBe("R")
+    expect(part<HTMLElement & { value: string }>(ask, "other").value).toBe("after P3")
+  })
+})
+
+////////////////
+// ## Its chip's number (epic `epic-engine` I369)
+////////////////
+
+/** The chips of every question under `root`, in order. */
+function chips(root: Element): string[] {
+  return [...root.querySelectorAll("epic-ask")].map((ask) => part(ask, "chip").textContent ?? "")
+}
+
+/** A question of `PICKS`, `flags` on it. */
+function ask(flags = "") {
+  return `<epic-ask ${flags}><epic-choices>${PICKS}</epic-choices></epic-ask>`
+}
+
+describe("<epic-ask>'s chip", () => {
+  test("two questions in one item share its number, a letter each;  never a count of every question on the page", async () => {
+    const page = await ElementFixture.render(
+      `<div>` +
+        `<ui-section id="q1" label="1 · First">${ask('name="q1"')}${ask('name="q1-priority"')}</ui-section>` +
+        `<ui-section id="q2" label="2 · Second">${ask('name="q2"')}${ask('name="q2-priority"')}</ui-section>` +
+        `</div>`
+    )
+    await ElementFixture.settle()
+    expect(chips(page)).toEqual(["Q1 · a", "Q1 · b", "Q2 · a", "Q2 · b"])
+  })
+
+  test("its section's number, else its section's place;  `chip` as written wins", async () => {
+    const page = await ElementFixture.render(
+      `<div>` +
+        `<ui-section id="rename" label="12 · Rename it">${ask()}</ui-section>` +
+        `<ui-section id="plain" label="Which colour?">${ask()}${ask()}</ui-section>` +
+        `<ui-section id="mine" label="Mine">${ask('chip="R7"')}</ui-section>` +
+        `</div>`
+    )
+    await ElementFixture.settle()
+    expect(chips(page)).toEqual(["Q12", "Q2 · a", "Q2 · b", "R7"])
   })
 })

@@ -6,6 +6,7 @@
  *   A code block is any `<pre>`:  a docs page's code accordion.
  *   Inline `<code>` is prose.
  * - Folded sections count too:  they're on the page, just closed (C9).
+ * - A compact question's cards don't:  they're hidden, its select listing their titles (T121).
  * - Never below 1 minute, so an empty page still says "1 min read".
  * - Plain DOM, no globals:  the docs runtime runs it on the live page (`_assets/spell-doc-runtime.js`),
  *   the tests on linkedom.
@@ -15,8 +16,11 @@
 /** Prose words a minute;  code reads at half this. */
 export const WORDS_PER_MINUTE = 230
 
-/** What never counts:  scripts, styles, and what the runtime itself added to the page (the head's crumbs). */
-const SKIP = "script, style, template, [data-spell-added]"
+/**
+ * What never counts:  scripts, styles, what the runtime itself added to the page (the head's crumbs), and a compact
+ * question's cards, which its select shows as titles alone (`<epic-ask compact>`, epic `epic-engine` T121)
+ */
+const SKIP = "script, style, template, [data-spell-added], epic-ask[compact] > epic-choices"
 
 /**
  * How long `main` takes to read.

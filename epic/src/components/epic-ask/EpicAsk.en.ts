@@ -51,6 +51,22 @@ export const epicAskVocabulary = {
       description:
         'A (?) on each option, "Provide more details":  pressed, the option is ticked too, and the answer carries ' +
         "its letter under `<key>-more`, so Claude explains it in full before asking again."
+    },
+    {
+      name: "compact",
+      kind: "boolean",
+      description:
+        "Its options as ONE Spell UI select, with a comment box beside it, instead of a card each (epic " +
+        "`epic-engine` T121):  for a page of many short picks (Yes / No / Modify / Revisit).  Its options stay " +
+        "written as cards (their titles are the select's entries);  the comment is its Other, sent the same way."
+    },
+    {
+      name: "chip",
+      kind: "string",
+      description:
+        "Its chip's text, as written (`12`, `Q12`).  None:  its key's id (`q3`, `q3-priority` -> `Q3`), " +
+        "else its section's number (`12 · Rename it` -> `Q12`), else its section's place;  two questions in one " +
+        "section share it, a letter each (`Q12 · a`, `Q12 · b`)."
     }
   ],
   events: [],
@@ -67,7 +83,12 @@ export const epicAskVocabulary = {
       description: '`Pick one` / `Pick any`:  a switch you flip (`role="switch"`, epic `epic-engine` P50).'
     },
     { name: "tools", description: "Its buttons:  Select all, Open | All." },
-    { name: "other", description: 'The Other box, an `<epic-text-box type="other">`, after the options.' }
+    { name: "row", description: "`compact`:  its one row, under its text:  the chip, the select, the comment box." },
+    { name: "select", description: "`compact`:  its options as one `<ui-select>`." },
+    {
+      name: "other",
+      description: 'The Other box, an `<epic-text-box type="other">`, after the options;  `compact`:  its comment box.'
+    }
   ],
   states: [
     { name: "attention", description: "Nothing picked or written yet:  red." },
@@ -95,6 +116,12 @@ export const epicAskVocabulary = {
     { key: "allTip", text: "Show every option", description: "Tooltip of All." },
     { key: "otherOne", text: "Other:  your own answer", description: "The Other box's placeholder, pick one." },
     { key: "otherSeveral", text: "Other:  add your own", description: "The Other box's placeholder, pick several." },
+    { key: "comment", text: "Comment (optional)", description: "`compact`:  the comment box's placeholder." },
+    {
+      key: "recommended",
+      text: "{title} (recommended)",
+      description: "`compact`:  the select's entry for the option marked `recommended`."
+    },
     { key: "attentionTip", text: "{id}:  needs your answer", description: "The chip's tooltip:  nothing yet." },
     { key: "doneTip", text: "{id}:  decided", description: "The chip's tooltip:  an option picked." },
     {

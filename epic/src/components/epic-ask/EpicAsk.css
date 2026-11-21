@@ -112,6 +112,39 @@
   .other {
     margin: 10px 0 0;
   }
+
+  /*
+   * `compact` (epic `epic-engine` T121):  its text, then one row:  the chip, the select, the comment box taking the
+   * rest;  narrow, the comment box goes under them, the full width.  Its cards stay in the page, hidden.
+   */
+  :host([compact]) ::slotted(epic-choices) {
+    display: none;
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 8px 12px;
+    margin-top: 8px;
+  }
+  /* the chip and the select, centred on the comment box's first line:  its height, one line high to start */
+  .pick-line {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 12px;
+    max-width: 100%;
+    min-height: 2.4em;
+  }
+  .pick {
+    flex: none;
+    max-width: 100%;
+  }
+  .comment {
+    flex: 1 1 16em;
+    min-width: 0;
+    margin: 0;
+  }
 }
 
 @layer ui.components.epic-ask.states {
