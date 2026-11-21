@@ -37,6 +37,8 @@ import { LiveEdit, type ProgramText } from "./LiveEdit"
  * - Each code file it calls (`call native`) comes from `options.loadNative()`, linked onto a `blob:` URL of its own:
  *   kept while the program runs, so a live edit links onto the same module.
  *   Without `loadNative`, a program which calls one won't run.
+ *   - Asked for afresh on every run, and on every live edit:  a code file that changed runs the program again
+ *     (`takeEdit()`), so the new code shows (from-console I37).
  * - `runTests`:  then the tests it didn't run itself, as `spell test` does.
  * - `projectId`:  its remembered props come back from its last run, read before it starts (`core.remember()`).
  * - SIDE EFFECT:  hands its top-level things to `core.things`, for the Thing Explorer --
@@ -83,6 +85,8 @@ export async function runCompiled(compiled: string, options: RunCompiledOptions)
   const urls: string[] = []
   // blob URL of each code file the program calls, by module:  kept for live edits, so never revoked with `urls`
   const natives: Record<string, string> = {}
+  // and its javascript:  a live edit asks again, and runs afresh if it changed
+  const nativeTexts: Record<string, string> = {}
   try {
     // before it's imported:  importing it starts its app, which may read them
     if (options.projectId) await core.remember(options.projectId)
@@ -122,7 +126,7 @@ export async function runCompiled(compiled: string, options: RunCompiledOptions)
     lastCompiled = compiled
     keepImportUrls(imports, urls)
     for (const url of Object.values(lastProgram?.natives ?? {})) URL.revokeObjectURL(url)
-    lastProgram = { compiled, stamped: stampedFrom(compiled, options), exports: program, imports, natives }
+    lastProgram = { compiled, stamped: stampedFrom(compiled, options), exports: program, imports, natives, nativeTexts }
     return undefined
   } catch (error) {
     // the next recompile carries the last good run's things over, not this broken one's
@@ -157,7 +161,12 @@ export async function runCompiled(compiled: string, options: RunCompiledOptions)
       imports[projectId] = await url
     }
     for (const module of nativeImportsOf(source)) {
-      natives[module] ??= blobUrl(await loadNative!(module))
+      if (natives[module]) continue
+      const text = await loadNative!(module)
+      // another import linked it while this one waited
+      if (natives[module]) continue
+      nativeTexts[module] = text
+      natives[module] = blobUrl(text)
     }
     // the program itself carries its source map inline:  a `blob:` URL can't reach the map file beside it
     const stamped = !chain.length && options.placesFrom ? SourceMarks.stamped(source, options.placesFrom) : source
@@ -243,6 +252,7 @@ const NAMED_DECLARATION = /^(?:export\s+)?(?:async\s+)?(?:function\*?|class)\s+(
  * - What only moved in its file (a line typed above it) keeps its elements, given their new places.
  * - Answers `undefined` when this edit isn't for it, and the run goes on as usual:
  *   - no app mounted, nor a last run to go from
+ *   - a code file it calls is new, or changed since it was linked (`nativesChanged()`)
  *   - a project whose imports changed which projects they are:  a project added or dropped
  *   - a program it can't read for sure (`LiveEdit`'s `not-live`)
  *   - what the program can't take, for a runner that can't say so:  no `onRestartNeeded`
@@ -255,6 +265,8 @@ async function takeEdit(compiled: string, options: RunCompiledOptions): Promise<
   const importIds = projectImportsOf(compiled)
   // a code file the last run didn't link:  it runs again, linking it
   if (nativeImportsOf(compiled).some((module) => !last.natives[module])) return undefined
+  // one changed since:  it runs again too, as a live edit keeps the module it linked (from-console I37)
+  if (await nativesChanged(last, options)) return undefined
   // each project it imports, read again and weighed as the program is:  deepest first (epic `editor`, Live Edit Everywhere)
   const importEdits: Array<{ projectId: string; text: string; edit: LiveEdit }> = []
   if (importIds.length) {
@@ -324,7 +336,7 @@ async function takeEdit(compiled: string, options: RunCompiledOptions): Promise<
       core.things.setTopLevel(program)
       followDrawing(edit)
     }
-    lastProgram = { compiled, stamped, exports: program, imports, natives: last.natives }
+    lastProgram = { ...last, compiled, stamped, exports: program, imports }
     lastCompiled = compiled
     // the old modules' URLs:  their modules are retired, so nothing imports them again
     urls.forEach((url) => URL.revokeObjectURL(url))
@@ -336,6 +348,20 @@ async function takeEdit(compiled: string, options: RunCompiledOptions): Promise<
     console.error(error)
     return { problem: error instanceof Error ? error.message : String(error) }
   }
+}
+
+/**
+ * Has a code file the running program calls changed since it was linked?  Each asked for afresh, `loadNative()`.
+ * - `false` without `loadNative`;  a code file it can't load now counts as unchanged:  the edit keeps the one it has.
+ */
+async function nativesChanged(last: NonNullable<typeof lastProgram>, options: RunCompiledOptions): Promise<boolean> {
+  const { loadNative } = options
+  if (!loadNative) return false
+  for (const [module, text] of Object.entries(last.nativeTexts)) {
+    const now = await loadNative(module).catch(() => text)
+    if (now !== text) return true
+  }
+  return false
 }
 
 /**
@@ -386,7 +412,14 @@ function stampedFrom(compiled: string, options: RunCompiledOptions): string {
 
 /** The program running now, to take an edit as it runs -- see `takeEdit()`. */
 let lastProgram:
-  | (ProgramText & { exports: Record<string, unknown>; imports: RunningImports; natives: Record<string, string> })
+  | (ProgramText & {
+      exports: Record<string, unknown>
+      imports: RunningImports
+      /** `blob:` URL of each code file it calls, by module */
+      natives: Record<string, string>
+      /** each code file's javascript, by module:  what `nativesChanged()` compares */
+      nativeTexts: Record<string, string>
+    })
   | undefined
 
 /** Each project the running program imports, by id, deepest first:  the text it ran, its module's URL, what it exports. */

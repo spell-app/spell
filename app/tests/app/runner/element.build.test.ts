@@ -112,6 +112,10 @@ describe("runner builds", () => {
       // `resetRuntime` is `core`'s own -- see `core/runtime.ts`
       const withCore = files.filter((file) => readFileSync(join(dir, file), "utf8").includes("resetRuntime"))
       expect(withCore, dir).toEqual(["spell-runtime.js"])
+      // and `core` itself:  a chunk the runtime loads lazily once dragged it into `spell-shared.js`, through a helper
+      // they both read, so every copy shared one `core` (from-console I37)
+      const withCoreModule = files.filter((file) => sources(dir, file).some((source) => CORE_MODULE.test(source)))
+      expect(withCoreModule, dir).toEqual(["spell-runtime.js"])
       expectParses(dir, files)
     }
   })
@@ -352,6 +356,9 @@ const PACKAGES = {
 
 /** The code editor's CSS:  the bubbly look's in CodeMirror, `bubbly.css` and `codemirror.css`. */
 const CODE_EDITOR_CSS = /\.cmb-editor/
+
+/** The core's own module, which makes `core`:  only `spell-runtime.js` may hold it. */
+const CORE_MODULE = /\/parser\/src\/core\/core\.ts$/
 
 /** The app's editor page, its controller and its Solid parts:  never in `<spell-editor>`'s chunks. */
 const EDITOR_PAGE = /\/src\/app\/(editor\.ts|pages\/editorHotkeys\.ts|solid\/index\.ts)$/

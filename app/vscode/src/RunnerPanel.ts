@@ -15,7 +15,7 @@
  */
 import { existsSync, mkdirSync } from "fs"
 import JSON5 from "json5"
-import { resolve } from "path"
+import { resolve, sep } from "path"
 import * as vscode from "vscode"
 import type { Diagnostic, LanguageClient } from "vscode-languageclient/node"
 
@@ -25,6 +25,7 @@ import type { Diagnostic, LanguageClient } from "vscode-languageclient/node"
  * - Webview says `ready`, or Restart is pressed:  ask the server to compile.
  * - Every `spell/projectCompiled` for its project:  post `run` to the webview, with the javascript.
  * - Saving one of the project's spell files compiles too, unless `spell.compileOnSave` already does.
+ * - So does saving one of its code files (`call native`'s `clipboard.ts`):  the run asks for it afresh.
  * - `<Project>.spell.js` changing on disk runs it too, unless it has parse errors -- see `compiledChanged()`.
  * - A failed compile sends nothing, so the last good app keeps running.
  * - Runs the same javascript only ONCE, unless asked to -- a compile both notifies AND rewrites the file.
@@ -53,6 +54,8 @@ export class RunnerPanel {
   declare project: string
   /** One of the project's spell files, to name the project in requests. */
   declare uri: string
+  /** The project's folder, `ProjectInfo.folderUri`:  a code file saved inside it runs the project again. */
+  declare folderUri: string
   /** The project's `settings.json5`, beside its project file -- see `readSettings()`. */
   declare settingsUri: vscode.Uri
   /** The project's words, `<Project>.en.js`, beside its spell files, one per language -- see `sendWords()`. */
@@ -79,6 +82,7 @@ export class RunnerPanel {
     this.client = client
     this.project = info.project
     this.uri = uri
+    this.folderUri = info.folderUri
     this.settingsUri = vscode.Uri.joinPath(vscode.Uri.parse(info.folderUri), SETTINGS_FILE)
     this.wordsUris = info.wordsUris.map((uri) => vscode.Uri.parse(uri))
     const runner = vscode.Uri.file(resolve(repoRoot, "app/dist-runner"))
@@ -184,14 +188,32 @@ export class RunnerPanel {
    * - its project's panel compiles, unless nothing else will -- `spell.compileOnSave` makes the server compile
    *   every save itself, and we hear `spell/projectCompiled` anyway
    * - every OTHER panel fetches fresh scopes:  it may be a file of a project it imports
+   * - a code file instead (`clipboard.ts`):  its project's panel compiles -- see `codeFileSaved()`
    */
   static async saved(client: LanguageClient, document: vscode.TextDocument): Promise<void> {
-    if (!RunnerPanel.isSpellDocument(document) || !RunnerPanel.panels.size) return
+    if (!RunnerPanel.panels.size) return
+    if (!RunnerPanel.isSpellDocument(document)) return RunnerPanel.codeFileSaved(document)
     const compileOnSave = vscode.workspace.getConfiguration("spell").get<boolean>("compileOnSave")
     const info = await client.sendRequest<ProjectInfo | null>("spell/project", { uri: document.uri.toString() })
     for (const panel of RunnerPanel.panels.values()) {
       if (panel.project !== info?.project) void panel.sendScopes()
       else if (!compileOnSave) void panel.compile()
+    }
+  }
+
+  /**
+   * `document` was saved, and isn't spell:  if it's a code file in a running project's folder, that project compiles,
+   * and the run that follows asks for the code file afresh (from-console I37).
+   * - The program's text is the same, so it runs again only because the compile forces it (`compile()`).
+   */
+  static codeFileSaved(document: vscode.TextDocument): void {
+    // its own compiled javascript, `Clip.spell.js`, is no code file
+    if (!CODE_FILE.test(document.uri.path) || document.uri.path.endsWith(".spell.js")) return
+    // by path on disk:  the server's URIs and VS Code's encode a name's `@` differently
+    const saved = document.uri.fsPath
+    for (const panel of RunnerPanel.panels.values()) {
+      const folder = vscode.Uri.parse(panel.folderUri).fsPath
+      if (saved.startsWith(folder.endsWith(sep) ? folder : folder + sep)) void panel.compile()
     }
   }
 
@@ -457,6 +479,12 @@ export class RunnerPanel {
     }
   }
 }
+
+/**
+ * A code file a spell project can call (`call native`), by its ending.
+ * - SEE:  spell's `NativeCode.languageOf()`, which the extension doesn't bundle:  keep the two the same.
+ */
+const CODE_FILE = /\.(m?[jt]s|py)$/
 
 /** Name of the set of diagnostics the tests' failed checks show in:  the Problems panel says it. */
 const TEST_DIAGNOSTICS = "spell tests"
