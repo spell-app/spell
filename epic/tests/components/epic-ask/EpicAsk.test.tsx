@@ -317,6 +317,20 @@ async function comment(ask: Element, text: string) {
   await ElementFixture.settle()
 }
 
+/** How many lines `element`'s text takes. */
+function lineCount(element: Element): number {
+  const range = document.createRange()
+  range.selectNodeContents(element)
+  return new Set([...range.getClientRects()].map((rect) => Math.round(rect.top))).size
+}
+
+/** The box `element`'s text takes. */
+function textBox(element: Element): DOMRect {
+  const range = document.createRange()
+  range.selectNodeContents(element)
+  return range.getBoundingClientRect()
+}
+
 describe("<epic-ask compact>", () => {
   test("one row:  its chip, ONE Spell UI select of its options' titles, a comment box;  no cards, no switch;  axe", async () => {
     const section = await ElementFixture.render(question("compact", PICKS))
@@ -369,6 +383,34 @@ describe("<epic-ask compact>", () => {
     // the empty entry takes the pick back
     await choose(ask, "")
     expect(details.gather().answers.q1.picked).toEqual([])
+  })
+
+  test("in a narrow column its chip stays one line, never cut off:  the select gives way, or goes under", async () => {
+    // epic `epic-engine` I371:  solid-2-final's ranked page, a 20%-wide table column at 1200px, `Q50 · a` wrapped
+    // onto two lines inside its pill (squeezed to 37px of its 58)
+    for (const width of [150, 170, 200, 260]) {
+      const page = await ElementFixture.render(
+        `<div style="width: ${width}px"><ui-section id="q50" label="50 · Pick it">` +
+          `<epic-ask compact name="q50"><epic-choices>${PICKS}</epic-choices></epic-ask>` +
+          `<epic-ask compact name="q50-priority"><epic-choices>${PICKS}</epic-choices></epic-ask></ui-section></div>`
+      )
+      await ElementFixture.settle()
+      for (const ask of page.querySelectorAll("epic-ask")) {
+        const chip = part<HTMLElement>(ask, "chip")
+        expect(chip.textContent).toMatch(/^Q50 · [ab]$/)
+        expect(lineCount(chip), `${width}px`).toBe(1)
+        // the label inside its pill, its padding included:  never wider than the pill
+        const label = textBox(chip)
+        const pill = chip.getBoundingClientRect()
+        expect(label.left).toBeGreaterThanOrEqual(pill.left)
+        expect(label.right).toBeLessThanOrEqual(pill.right)
+        // nothing in the row runs out of the column
+        expect(part(ask, "row").getBoundingClientRect().right).toBeLessThanOrEqual(
+          page.getBoundingClientRect().right + 1
+        )
+      }
+      page.remove()
+    }
   })
 
   test("an answer sent comes back into its select and comment box", async () => {

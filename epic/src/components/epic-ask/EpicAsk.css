@@ -127,17 +127,28 @@
     gap: 8px 12px;
     margin-top: 8px;
   }
-  /* the chip and the select, centred on the comment box's first line:  its height, one line high to start */
+  /*
+   * the chip and the select, centred on the comment box's first line:  its height, one line high to start
+   * - the chip keeps its whole label on one line (epic `epic-engine` I371:  in a 20%-wide table column `Q50 · a` wrapped
+   *   and was cut off inside its pill);  the select gives way instead, and in a column too narrow for both it goes under
+   */
   .pick-line {
     display: inline-flex;
-    flex: none;
+    flex: 0 1 auto;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 12px;
+    gap: 8px 12px;
+    min-width: 0;
     max-width: 100%;
     min-height: 2.4em;
   }
-  .pick {
+  .pick-line > .chip {
     flex: none;
+    white-space: nowrap;
+  }
+  .pick {
+    flex: 0 1 auto;
+    min-width: 0;
     max-width: 100%;
   }
   .comment {
