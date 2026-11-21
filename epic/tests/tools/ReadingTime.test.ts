@@ -30,6 +30,15 @@ describe("readingTime()", () => {
     expect(readingTime(main)).toEqual({ words: 1380, code: 0, minutes: 6 })
   })
 
+  // epic `epic-engine` T121:  its select lists the titles alone;  the cards are hidden
+  test("a compact question's cards don't count;  a card question's do", () => {
+    const ask = (flags: string) =>
+      `<epic-ask ${flags}><epic-question><p>${wordsOf(230)}</p></epic-question>` +
+      `<epic-choices><epic-option letter="Y" title="Yes"><p>${wordsOf(230)}</p></epic-option></epic-choices></epic-ask>`
+    expect(readingTime(mainOf(ask("compact"))).minutes).toBe(1)
+    expect(readingTime(mainOf(ask(""))).minutes).toBe(2)
+  })
+
   test("code blocks count twice, in a docs accordion or an epic-code", () => {
     const main = mainOf(`
       <p>${wordsOf(230)}</p>

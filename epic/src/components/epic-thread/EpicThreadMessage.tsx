@@ -22,7 +22,7 @@ import messageCSS from "./EpicThreadMessage.css?inline"
  * - A bold "You:" / "Codex:" starts its first line:  floated before what was said (its slot), so it sits on the
  *   first line of the first paragraph, whatever that paragraph is.  The Done line has its check instead.
  * - Its time over its top right corner, `position: absolute`;  a hidden copy floats there, so the first line's text
- *   stops short of it and the rest run full width.  The full date and time is its tooltip.
+ *   stops short of it and the rest run full width.  No tooltip (I370).
  * - What was said is its children:  the thread's own markup (Owen's paragraphs, Claude's answer as the server
  *   gave it), styled by the thread's sheet.
  ****************/
@@ -62,7 +62,7 @@ export class EpicThreadMessage extends E.UIComponent<typeof epicThreadMessageVoc
               <span class={ROOM} aria-hidden="true">
                 {stamp()}
               </span>
-              <time class={WHEN} part={this.partForName("time")} datetime={this.at} data-tooltip={this.localTime}>
+              <time class={WHEN} part={this.partForName("time")} datetime={this.at}>
                 {stamp()}
               </time>
             </>
@@ -74,11 +74,6 @@ export class EpicThreadMessage extends E.UIComponent<typeof epicThreadMessageVoc
         </div>
       </div>
     )
-  }
-
-  /** Its full local date and time (`2026-10-10 09:12`), its time's tooltip. */
-  get localTime(): string {
-    return ThreadFacts.localStamp(this.at)
   }
 }
 

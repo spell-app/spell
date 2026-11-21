@@ -281,7 +281,8 @@ describe("<epic-option>'s Choose pill (P10)", () => {
       true,
       true
     ])
-    expect(pillOf(options[1])!.dataset.tooltip).toBe("B picked:  un-pick it · not sent yet")
+    // no tooltip:  its words are on it (I370)
+    expect(pillOf(options[1])!.dataset.tooltip).toBeUndefined()
     // the fill rule (Q20):  a pick not sent is DASHED green, pill and card
     expect([
       getComputedStyle(pillOf(options[1])!).borderTopStyle,
@@ -298,7 +299,7 @@ describe("<epic-option>'s Choose pill (P10)", () => {
     ])
   })
 
-  test("a pick once sent:  the pill and card outlined, no longer dashed (`sent`), its tooltip says so", async () => {
+  test("a pick once sent:  the pill and card outlined, no longer dashed (`sent`)", async () => {
     const { client } = await reviewing()
     const { options } = await choices(
       `<epic-item id="q1" title="Which?" status="open"><epic-choices>${OPTIONS}</epic-choices></epic-item>`
@@ -310,7 +311,7 @@ describe("<epic-option>'s Choose pill (P10)", () => {
     await settle()
     expect([pillOf(options[0])!.classList.contains("sent"), pillOf(options[0])!.dataset.tooltip]).toEqual([
       true,
-      "A picked:  un-pick it · sent"
+      undefined
     ])
     expect([
       part(options[0], "base")!.classList.contains("sent"),
@@ -334,7 +335,7 @@ describe("<epic-option>'s Choose pill (P10)", () => {
       applied.dataset.tooltip,
       getComputedStyle(applied).backgroundColor === getComputedStyle(applied).borderTopColor,
       options[0].matches(":state(picked)")
-    ]).toEqual([true, "true", "A chosen", true, false])
+    ]).toEqual([true, "true", undefined, true, false])
     applied.click()
     await settle()
     expect(routes.posts).toEqual([])
@@ -715,7 +716,7 @@ describe("<epic-choices> P50:  pick any, the switch, Add choice, edits", () => {
       "A2 · A named palette",
       "B2 · Any CSS colour"
     ])
-    expect(pillOf(second![1]!)!.dataset.tooltip).toBe("Pick B2")
+    expect(pillOf(second![1]!)!.textContent).toBe("Choose")
     pillOf(first![1]!)!.click()
     await settle()
     pillOf(second![1]!)!.click()
@@ -730,7 +731,7 @@ describe("<epic-choices> P50:  pick any, the switch, Add choice, edits", () => {
       ["Chosen · not sent", "true"],
       ["Chosen · not sent", "true"]
     ])
-    expect(pillOf(second![1]!)!.dataset.tooltip).toBe("B2 picked:  un-pick it · not sent yet")
+    expect(pillOf(second![1]!)!.dataset.tooltip).toBeUndefined()
   })
 
   test("a 2nd set answered names its pick `B2` in its folded heading (I227)", async () => {

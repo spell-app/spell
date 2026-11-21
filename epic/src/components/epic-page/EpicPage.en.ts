@@ -296,17 +296,6 @@ export const epicPageVocabulary = {
   states: [{ name: "future", description: "A future epic." }],
   texts: [
     {
-      key: "hungTip",
-      text: "How to restart a hung session",
-      description: "Plan hung?:  its tooltip."
-    },
-
-    {
-      key: "copyHeading",
-      text: "{name}:  copy {command}",
-      description: "The h1's name:  its tooltip, its full name first (narrow, the name is cut short)."
-    },
-    {
       key: "copiedText",
       text: "Copied {text}",
       description:
@@ -336,11 +325,6 @@ export const epicPageVocabulary = {
     { key: "updated", text: "updated", description: "Meta line:  before the last change's day." },
     { key: "durable", text: "Guide:", description: "Meta line:  before the guide's link." },
     { key: "saga", text: "Saga:", description: "Meta line:  before the link to the saga the epic serves." },
-    {
-      key: "sagaTip",
-      text: "Saga:  {purpose}",
-      description: "The saga link's tooltip, once the page server has said what the saga is for."
-    },
     { key: "done", text: "DONE", description: "Step label:  every phase is done." },
     { key: "future", text: "FUTURE", description: "Step label:  a future epic." },
     {
@@ -357,21 +341,11 @@ export const epicPageVocabulary = {
         "turns (epic `epic-engine` I340)."
     },
     { key: "bedtime", text: "Bedtime {phases}", description: "The bedtime label:  a `/bedtime` run is on." },
-    {
-      key: "bedtimeTip",
-      text: "Overnight run ({phases}):  its changes show green until reviewed",
-      description: "The bedtime label's tooltip."
-    },
     { key: "gearTip", text: "Settings", description: "The header's gear:  its tooltip, and its menu's name." },
     {
       key: "focusMode",
       text: "Focus mode",
       description: "The gear's first row while the page is reviewed (epic `epic-engine` P57):  opens Focus mode."
-    },
-    {
-      key: "focusModeTip",
-      text: "Open items, one at a time",
-      description: "Focus mode's row:  its tooltip."
     },
     { key: "autoSend", text: "Auto Send", description: "The gear's Auto Send row, and its sub-menu's name." },
     { key: "theme", text: "Theme", description: "The gear's Theme row, and its sub-menu's name." },
@@ -458,11 +432,6 @@ export const epicPageVocabulary = {
       description: "The same, for someone else's agent:  `{person}`, whose it is."
     },
     {
-      key: "listeningTitle",
-      text: "Listening:  your Send reaches it at once",
-      description: "The listening words' tooltip."
-    },
-    {
       key: "idleMine",
       text: "Your {agent} isn't listening:  ask it to run",
       description:
@@ -473,11 +442,6 @@ export const epicPageVocabulary = {
       key: "idleOf",
       text: "{person}'s {agent} isn't listening:  ask it to run",
       description: "The same, for someone else's agent."
-    },
-    {
-      key: "copyWait",
-      text: "Copy the command",
-      description: "The pill's tooltip, while it names an agent that isn't listening."
     },
     {
       key: "airplanePill",
@@ -498,12 +462,6 @@ export const epicPageVocabulary = {
       key: "reviewLineAirplane",
       text: "Airplane mode:  what you mark here waits for",
       description: "The review line in airplane mode (no Claude), before `/airplane land`."
-    },
-    { key: "copyCommand", text: "Copy the command", description: "The review line's tooltip." },
-    {
-      key: "startReview",
-      text: "Start the review in this epic's session",
-      description: "The nobody-listening pill's tooltip:  a click types the command into the epic's session."
     },
     { key: "copied", text: "copied", description: "The review line, just copied." },
     { key: "hung", text: "Plan hung?", description: "The planning aside's title." },

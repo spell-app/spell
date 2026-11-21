@@ -253,8 +253,7 @@ export class EpicField extends E.UIComponent<typeof epicFieldVocabulary> {
             controls: BODY_ID,
             labelledBy: LABEL_ID,
             clicks: true,
-            part: this.partForName("toggle"),
-            tips: { fold: this.translationForKey("foldFieldTip"), unfold: this.translationForKey("unfoldFieldTip") }
+            part: this.partForName("toggle")
           })}
         </span>
         <span class={ICON} part={this.partForName("icon")} aria-hidden="true" onClick={toggle}>
@@ -310,8 +309,7 @@ export class EpicField extends E.UIComponent<typeof epicFieldVocabulary> {
           {this.requestFold.button({
             controls: BODY_ID,
             labelledBy: LABEL_ID,
-            part: this.partForName("toggle"),
-            tips: { fold: this.translationForKey("foldTip"), unfold: this.translationForKey("unfoldTip") }
+            part: this.partForName("toggle")
           })}
           <b id={LABEL_ID} class={LABEL} part={this.partForName("label")}>
             {this.label}

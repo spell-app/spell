@@ -182,13 +182,12 @@ describe("<epic-send>", () => {
     const send = await ElementFixture.render(`<epic-send></epic-send>`)
     await vi.waitFor(() => expect(part(send, "who")?.textContent).toBe("repo-split is listening"))
     expect(part(send, "who")!.hasAttribute("data-listening")).toBe(true)
-    expect(part(send, "who")!.dataset.tooltip).toMatch(/^Waiting for your answer since \d\d:\d\d/)
+    expect(part(send, "who")!.dataset.tooltip).toBeUndefined()
     AnswerForm.adopt(undefined)
     adoptForm(fakeRoute({ listening: null }), "/epics/repo-split/details/layout.html")
     const other = await ElementFixture.render(`<epic-send></epic-send>`)
     await vi.waitFor(() => expect(part(other, "who")?.textContent).toBe("nobody is waiting yet"))
     expect(part(other, "who")!.hasAttribute("data-listening")).toBe(false)
-    expect(part(other, "who")!.dataset.tooltip).toMatch(/Send saves it/)
   })
 
   test("a route that can't tell who waits (before r6):  no line", async () => {

@@ -25,10 +25,7 @@ describe("<epic-sort>", () => {
     const host = await ElementFixture.render(`<epic-sort></epic-sort>`)
     expect(buttons(host)).toEqual(["A–Z*", "Date"])
     const [title, date] = Array.from(host.shadowRoot!.querySelectorAll("ui-button"))
-    expect([title!.getAttribute("data-tooltip"), title!.getAttribute("aria-label")]).toEqual([
-      "Sort A to Z",
-      "A–Z, in use"
-    ])
+    expect([title!.getAttribute("data-tooltip"), title!.getAttribute("aria-label")]).toEqual([null, "A–Z, in use"])
     const heard = vi.fn()
     document.addEventListener("epic-sorting", (event) => heard((event as CustomEvent).detail), { once: true })
     ;(date as HTMLElement).click()

@@ -5,7 +5,6 @@ import { E } from "spell/ui/core"
 
 import type { RunAnswer, RunColumn, RunOutcome, RunRow } from "spell/server/runs/runs.types"
 
-import { clockOf } from "spell/epic/review"
 import { keepOneLine, stopNewLine } from "spell/epic/answers"
 
 import { epicRunRowVocabulary } from "./EpicRunRow.en"
@@ -27,8 +26,8 @@ import runRowCSS from "./EpicRunRow.css?inline"
  *     holds is filled, so typing an alternative picks it too
  *   - the tick box, with the command's own label (`row.tick`)
  *   - its details, folded:  a line each (`row.details`)
- * - Taken by the command (`taken`, epic `epic-engine` P25):  a quiet `taken` mark beside the box, its time the
- *   tooltip;  his answer newer than that, an orange note under the box ("changed after the run took it").
+ * - Taken by the command (`taken`, epic `epic-engine` P25):  a quiet `taken` mark beside the box;
+ *   his answer newer than that, an orange note under the box ("changed after the run took it").
  * - It draws what it's given and says what Owen did (`epic-run-answered`):  `<epic-run>` keeps and saves it.
  *   - the outcome comes from the value:  the proposal is `accepted`, an alternative `picked`, anything else `typed`
  ****************/
@@ -137,11 +136,7 @@ export class EpicRunRow extends E.UIComponent<typeof epicRunRowVocabulary> {
         <div class={[CELL, ANSWER]} part={this.partForName("answer")} role="cell">
           {this.field()}
           <Show when={this.isChangedAfterTaken}>
-            <p
-              class={CHANGED_AFTER_TAKEN}
-              part={this.partForName("changed-after-taken")}
-              data-tooltip={this.translationForKey("changedAfterTakenTip")}
-            >
+            <p class={CHANGED_AFTER_TAKEN} part={this.partForName("changed-after-taken")}>
               {this.translationForKey("changedAfterTaken")}
             </p>
           </Show>
@@ -184,11 +179,7 @@ export class EpicRunRow extends E.UIComponent<typeof epicRunRowVocabulary> {
           </button>
         </Show>
         <Show when={this.taken}>
-          <span
-            class={TAKEN}
-            part={this.partForName("taken")}
-            data-tooltip={this.translationForKey("takenTip", { time: clockOf(this.taken) })}
-          >
+          <span class={TAKEN} part={this.partForName("taken")}>
             <ui-icon name="check" />
             {this.translationForKey("taken")}
           </span>
@@ -208,11 +199,7 @@ export class EpicRunRow extends E.UIComponent<typeof epicRunRowVocabulary> {
       >
         <For each={this.choices} keyed={false}>
           {(choice, index) => (
-            <label
-              class={[PICK, { proposed: index === 0 }]}
-              part={this.partForName("pick")}
-              data-tooltip={index === 0 ? this.translationForKey("proposed") : undefined}
-            >
+            <label class={[PICK, { proposed: index === 0 }]} part={this.partForName("pick")}>
               <input
                 type="radio"
                 name={PICK_GROUP}

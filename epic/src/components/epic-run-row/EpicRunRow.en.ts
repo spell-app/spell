@@ -23,8 +23,8 @@ export const epicRunRowVocabulary = {
     "with the command's own label (`Use for every project`);  and its details, folded under it.  Each change says " +
     "so (`epic-run-answered`), and `<epic-run>` saves it:  typing half a second after you stop, a pick or a tick at " +
     "once.  A row you answered differently from the proposal is orange, with a round button putting the proposal back.  " +
-    "A row the command has taken (acted on, epic `epic-engine` P25) has a quiet `taken` mark, its time in the " +
-    "tooltip;  changed after that, an orange note says so:  the command may pick the change up if it can.",
+    "A row the command has taken (acted on, epic `epic-engine` P25) has a quiet `taken` mark;  " +
+    "changed after that, an orange note says so:  the command may pick the change up if it can.",
   attributes: [
     {
       name: "row",
@@ -83,7 +83,7 @@ export const epicRunRowVocabulary = {
     { name: "details", description: "Its details, folded:  a line each." },
     {
       name: "taken",
-      description: "The quiet `taken` mark beside the box:  a check and the word, its time the tooltip."
+      description: "The quiet `taken` mark beside the box:  a check and the word."
     },
     {
       name: "changed-after-taken",
@@ -104,19 +104,12 @@ export const epicRunRowVocabulary = {
     { key: "reset", text: "Back to the proposal", description: "The reset button's name." },
     { key: "resetTip", text: "Back to {value}", description: "The reset button's tooltip." },
     { key: "picks", text: "Pick one", description: "The pick's name, for a screen reader." },
-    { key: "proposed", text: "proposed", description: "The proposal's pill's tooltip." },
     { key: "details", text: "Details · {count}", description: "The details' fold:  how many lines." },
     { key: "taken", text: "taken", description: "The taken mark's word." },
-    { key: "takenTip", text: "Taken at {time}", description: "The taken mark's tooltip." },
     {
       key: "changedAfterTaken",
       text: "changed after the run took it",
       description: "The orange note on a row changed after it was taken."
-    },
-    {
-      key: "changedAfterTakenTip",
-      text: "Changed after the run took it",
-      description: "The orange note's tooltip."
     }
   ],
   children: []

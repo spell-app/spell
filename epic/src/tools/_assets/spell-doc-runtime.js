@@ -98,6 +98,8 @@ import {
   noteToast,
   readJSON,
   restoreEpicFolds,
+  roomFor,
+  widenTable,
   writeJSON
 } from "./spell-doc-helpers.js"
 import {
@@ -430,7 +432,7 @@ function oneLineHead(main) {
 /**
  * The READING TIME chip, right after the page's title (epic `epic-engine` P14, Q5):
  * `SOLID 2 · 48 min read`, a quiet `<ui-label>` (`spell-doc.css`, "The reading time chip").
- * - its tooltip:  the exact count, "8,749 words, 2,281 of them code" (`readingTime()`, `ReadingTime.js`)
+ * - no tooltip:  its words are on it (epic `epic-engine` I370);  the minutes from `readingTime()` (`ReadingTime.js`)
  * - every page with the docs head:  guides, the index pages, details and choice pages
  * - NOT an epic or saga page:  `<epic-page>` draws its own head, and its own chip, counting only what's SHOWN
  *   (`shownReadingTime()`;  J91, Owen:  "Count what's shown"):  its items' bodies wait in part files until opened
@@ -448,17 +450,13 @@ function wireReadingTime(main) {
 function drawReadingTime(main) {
   const h1 = main.querySelector(PAGE_TITLE)
   if (!h1) return
-  const { words, code, minutes } = readingTime(main)
+  const { minutes } = readingTime(main)
   let chip = h1.querySelector(":scope > ui-label.spell-reading-time")
   if (!chip) {
     chip = el("ui-label", { class: "spell-reading-time", size: "tiny", appearance: "basic", "data-spell-added": true })
     h1.append(chip)
   }
-  const counted = code
-    ? `${words.toLocaleString()} words, ${code.toLocaleString()} of them code`
-    : `${words.toLocaleString()} words`
   if (chip.textContent !== `${minutes} min read`) chip.textContent = `${minutes} min read`
-  if (chip.dataset.tooltip !== counted) chip.dataset.tooltip = counted
 }
 
 /**
@@ -517,17 +515,7 @@ function wireTableWidths(main) {
       return alignBlockActions(row)
     }
     if (!parent.getClientRects().length) return
-    const room = roomFor(box, main)
-    // where the table starts in its column, read off the table itself with its own offset taken off:  its light-DOM
-    // parent is NOT where it's laid out when it's slotted (an `<epic-field>`'s table sits in the field's padded
-    // `.text` box), so measuring the parent put it 51px off, cut off at the phase's clipping edge (I315, r72)
-    box.style.removeProperty("margin-inline-start")
-    const start = `${room.left - box.getBoundingClientRect().left}px`
-    box.style.maxWidth = "none"
-    box.style.width = `${room.right - room.left}px`
-    box.style.marginInlineStart = start
-    row.style.width = box.style.width
-    row.style.marginInlineStart = start
+    widenTable(box, row, roomFor(box, main))
     alignBlockActions(row)
   }
   const flip = (box) => {
@@ -925,26 +913,6 @@ function tableKey(box, main) {
   return `${name}#${own}${nth > 1 ? `-${nth}` : ""}`
 }
 
-/**
- * How far a widened table `box` may run, as window x's `{ left, right }`:
- * `main`'s width less its gutter (`--spell-gutter`) on both sides,
- * cut to every ancestor between them that clips its overflow (`overflow-x` not `visible`), at its inner edges.
- * - up through slots and shadow roots:
- *   a table in an `<epic-*>` element's light DOM is laid out in its shadow root's boxes
- */
-function roomFor(box, main) {
-  const page = main.getBoundingClientRect()
-  const gutter = parseFloat(getComputedStyle(main).getPropertyValue("--spell-gutter")) || 16
-  const room = { left: page.left + gutter, right: page.right - gutter }
-  for (let el = layoutParent(box); el && el !== main; el = layoutParent(el)) {
-    if (getComputedStyle(el).overflowX === "visible") continue
-    const left = el.getBoundingClientRect().left + el.clientLeft
-    room.left = Math.max(room.left, left)
-    room.right = Math.min(room.right, left + el.clientWidth)
-  }
-  return room
-}
-
 /** How wide `roomFor()` lets `box` run. */
 function roomWidth(box, main) {
   const room = roomFor(box, main)
@@ -953,11 +921,6 @@ function roomWidth(box, main) {
 
 /** The least a widened table must gain on its column (px) for the expand button to show. */
 const MIN_WIDE_GAIN = 24
-
-/** The box `el` is laid out in:  its slot when it's slotted, else its parent, else its shadow root's host. */
-function layoutParent(el) {
-  return el.assignedSlot ?? el.parentElement ?? el.getRootNode().host ?? null
-}
 
 /**
  * The tables in `root`, each by its BOX:  its `<ui-table>` host, else the bare table.  Never a pinned header's copy
@@ -3449,13 +3412,7 @@ function wireNewEpic(main) {
   if (!ServerLink.isServed()) return
   const head = main.querySelector(".spell-page-head")
   if (!head || head.querySelector(".spell-new-epic")) return
-  // Spell UI's tooltip, after the standard delay (TOOLTIPS;  Owen, 2026-11-19, r80)
-  const tip = "Save an idea as a future epic"
-  const button = el(
-    "ui-button",
-    { appearance: "circular basic", size: "tiny", icon: "seedling", "data-tooltip": tip },
-    "New epic"
-  )
+  const button = el("ui-button", { appearance: "circular basic", size: "tiny", icon: "seedling" }, "New epic")
   button.addEventListener("click", openNewEpicBox)
   addHeadTool(head, el("span", { class: "spell-new-epic", "data-spell-added": true }, button), "page")
 }

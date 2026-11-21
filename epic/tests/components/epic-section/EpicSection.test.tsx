@@ -19,6 +19,7 @@ import "spell/epic/components/epic-event"
 import "spell/epic/components/epic-aside"
 // the page re-reads what hides when its attributes change (`LAYOUT_ATTRIBUTES`)
 import "spell/epic/components/epic-page"
+import "spell/epic/components/epic-comment-pane"
 
 /** Fixture parts the test server serves:  `fixtures/` beside this file, by its URL path. */
 const FIXTURES = new URL("fixtures", import.meta.url).pathname
@@ -625,8 +626,8 @@ describe("<epic-section> counts and state filter", () => {
         `<epic-phase id="p2" title="Two" status="todo"><p>Later.</p></epic-phase></epic-section>`
     )
     expect(host.shadowRoot!.querySelector('[part~="toggle-all"]')).toBeNull()
-    // the chevron's tooltip says what ⌥ does;  its name stays the label
-    expect(toggle(host).title).toBe("Open this section\n⌥-click:  open everything inside")
+    // no tooltip over the title (I370):  its name stays the label
+    expect(toggle(host).title).toBe("")
     const opened: string[] = []
     host.addEventListener("ui-opening", (event) => opened.push((event.target as Element).id))
     altClick(toggle(host))
@@ -639,7 +640,7 @@ describe("<epic-section> counts and state filter", () => {
     // each a click's open:  the page remembers the blocks' and items' folds by these
     expect(opened).toEqual(["phases", "p1", "p2", "q7"])
     await ElementFixture.tick()
-    expect(toggle(host).title).toBe("Close this section\n⌥-click:  fold everything inside")
+    expect(toggle(host).title).toBe("")
     // open:  ⌥-click folds everything inside, then itself
     altClick(toggle(host))
     await ElementFixture.tick()
@@ -1177,5 +1178,45 @@ describe("<epic-section> a link's target shows, whatever hides it", () => {
     await ElementFixture.tick()
     await ElementFixture.tick()
     expect(Array.from(todos.querySelectorAll("[data-epic-filtered]"), (item) => item.id)).toEqual(["t1"])
+  })
+})
+
+// epic `epic-engine` I370 (Owen, 2026-11-20:  "there shouldn't be tooltips over sections where I am lingering to read or
+// type"):  a tooltip only on a small control whose meaning isn't written on it
+describe("no tooltips over what Owen reads or types beside", () => {
+  /** Every element in `root` (and the shadow roots under it) carrying a tooltip:  `data-tooltip` or `title`. */
+  function tipped(root: ParentNode): Element[] {
+    const found: Element[] = []
+    for (const element of root.querySelectorAll("*")) {
+      if (element.getAttribute("data-tooltip") || element.getAttribute("title")) found.push(element)
+      if (element.shadowRoot) found.push(...tipped(element.shadowRoot))
+    }
+    return found
+  }
+
+  test("a section's title, folded or open, and the comment pane's head carry none;  the pane's icon buttons keep theirs", async () => {
+    const host = await render(
+      `<epic-section id="context" kind="context" title="2. Context"><p>Words.</p></epic-section>`
+    )
+    const title = () => inner(host).shadowRoot!.querySelector('[part~="title"]')!
+    expect(tipped(title())).toEqual([])
+    toggle(host).click()
+    await ElementFixture.tick()
+    expect([host.matches(":state(open)"), tipped(title())]).toEqual([true, []])
+    const pane = document.createElement("epic-comment-pane") as HTMLElement & { near: unknown }
+    pane.setAttribute("headline", "“short name, quoted phrase”")
+    pane.setAttribute("saved", "Saved 14:02")
+    pane.setAttribute("deletable", "")
+    pane.near = { left: 20, top: 20, bottom: 40 }
+    pane.append(document.createElement("textarea"))
+    document.body.append(pane)
+    await ElementFixture.settle(pane)
+    const head = pane.shadowRoot!.querySelector<HTMLElement>('[part~="header"]')!
+    // the head itself and its words:  none;  only the floppy, the trash and ×, icons with no words
+    expect([
+      head.hasAttribute("data-tooltip"),
+      Array.from(head.querySelectorAll("[data-tooltip], [title]"), (each) => each.localName)
+    ]).toEqual([false, ["span", "ui-button", "ui-button"]])
+    pane.remove()
   })
 })

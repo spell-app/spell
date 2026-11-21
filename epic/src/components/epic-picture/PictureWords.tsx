@@ -75,7 +75,7 @@ export class PictureWords {
   static pictureOf(path: string, label: string): JSX.Element {
     return (
       <epic-picture label={label}>
-        <img src={path} alt={label} data-tooltip={label} onClick={PictureWords.zoom} />
+        <img src={path} alt={label} onClick={PictureWords.zoom} />
       </epic-picture>
     )
   }

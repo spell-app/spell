@@ -37,6 +37,12 @@ const OPTION_ATTRIBUTES = [SELECTED, DONE, "letter"]
  *   - Options deeper inside (in an option's text, as the review's item picker quotes an epic page) are only text.
  * - It draws its line first:  its id chip in the epic page's state colours, `Pick one` / `Pick several`, and its
  *   tools (Select all, Open | All);  then its children;  then the Other box (`<epic-text-box type="other">`).
+ *   - its chip numbers what the author means (`chipLabel`, epic `epic-engine` I369):  its key's id, its section's
+ *     number, a letter each for two questions in one section (`Q12 · a`)
+ * - `compact` (epic `epic-engine` T121;  Owen:  "a select for each item and a comment field for each"):  its children,
+ *   then ONE row, the chip, its options as a Spell UI `<ui-select>` and a comment box (its Other, the same answer);
+ *   its cards stay in the page, hidden
+ *   - for a page of many short picks:  98 items of 4 + 3 cards read as 46 minutes
  * - It holds what's picked (`picks`) and what wants more details (`moreWanted`):  its options draw from them, and
  *   send a `ui-selected` / `ui-deselected` when Owen ticks one, which it takes (`onPick()`).
  *   - Before Owen picks:  the options marked `selected` (ticked to start with:  the review's item picker)
@@ -129,12 +135,37 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
     return this.name ?? this.domElement.closest("ui-section[id]")?.id ?? ""
   }
 
-  /** Its place among the page's questions, from 1;  set as it connects. */
+  /**
+   * Its place among the page's question HOLDERS, from 1:  its section (`ui-section[id]`), else itself;  two questions
+   * in one section share it.  Set as it connects.
+   */
   @E.state accessor position = 1
 
-  /** Its chip:  an epic-page id key in capitals (`q3` -> `Q3`), else `Q` and its place (`Q2`). */
+  /** Its place among its section's questions, from 0;  `-1` while it's the only one.  Set as it connects. */
+  @E.state accessor partIndex = -1
+
+  /**
+   * Its chip (epic `epic-engine` I369):  the number the AUTHOR means, never a count of every question on the page.
+   * - `chip`, when the page gives one:  as written (`12`, `Q12`)
+   * - else its key's id (`q3` -> `Q3`;  `q3-priority` -> `Q3`)
+   * - else its section's number (`12 · Rename it` -> `Q12`)
+   * - else `Q` and its section's place among the page's question sections (`Q2`)
+   * - two or more questions in one section share its number, a letter each:  `Q12 · a`, `Q12 · b`
+   */
   get chipLabel(): string {
-    return /^[a-z]\d+$/.test(this.key) ? this.key.toUpperCase() : `Q${this.position}`
+    if (this.chip) return this.chip
+    const number = this.chipNumber
+    return this.partIndex < 0 ? number : `${number}${PART_SEPARATOR}${String.fromCharCode(97 + this.partIndex)}`
+  }
+
+  /** Its chip's number, before a part's letter:  its key's id, its section's number, else its place. */
+  private get chipNumber(): string {
+    const id = ID_KEY.exec(this.key)?.[1]
+    if (id) return id.toUpperCase()
+    const label = this.domElement.closest("ui-section[id]")?.getAttribute("label") ?? ""
+    const number = NUMBERED_LABEL.exec(label)
+    if (number) return `${(number[1] || "Q").toUpperCase()}${number[2]}`
+    return `Q${this.position}`
   }
 
   /** Where it stands (`AskState`):  more details asked, or only Other written;  picked;  nothing yet. */
@@ -207,10 +238,19 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
   /** The page's form, while it's registered there. */
   private form: AnswerForm | undefined
 
-  /** While connected:  its place among the page's questions, and its part of the page's answer;  returns the undo. */
+  /**
+   * While connected:  its place among the page's question sections and among its section's questions, and its part
+   * of the page's answer;  returns the undo.
+   */
   @E.whileConnected
   protected joinForm() {
-    this.position = Array.from(document.querySelectorAll(this.domElement.localName)).indexOf(this.domElement) + 1
+    const holderOf = (ask: Element) => ask.closest("ui-section[id]") ?? ask
+    const asks = Array.from(document.querySelectorAll(this.domElement.localName))
+    const holders = [...new Set(asks.map(holderOf))]
+    const holder = holderOf(this.domElement)
+    const partners = asks.filter((ask) => holderOf(ask) === holder)
+    this.position = holders.indexOf(holder) + 1
+    this.partIndex = partners.length > 1 ? partners.indexOf(this.domElement) : -1
     const form = AnswerForm.forPage()
     this.form = form
     const leave = form.add(this)
@@ -242,21 +282,85 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
   render(): JSX.Element {
     return (
       <div class={this.rootClass} part={this.partForName("base")}>
-        <div class={LINE} part={this.partForName("line")}>
-          <span
-            class={CHIP}
-            part={this.partForName("chip")}
-            data-tooltip={this.translationForKey(`${this.askState}Tip`, { id: this.chipLabel })}
-          >
-            {this.chipLabel}
+        <Show when={this.compact} fallback={this.renderCards()}>
+          {this.renderCompact()}
+        </Show>
+      </div>
+    )
+  }
+
+  /** Its id chip, in its state's colour, its state in words its tooltip. */
+  private renderChip(): JSX.Element {
+    return (
+      <span
+        class={CHIP}
+        part={this.partForName("chip")}
+        data-tooltip={this.translationForKey(`${this.askState}Tip`, { id: this.chipLabel })}
+      >
+        {this.chipLabel}
+      </span>
+    )
+  }
+
+  /**
+   * `compact` (epic `epic-engine` T121):  its text, then ONE row, its chip, its options as one Spell UI select, and a
+   * comment box beside it (its Other, worded as a comment), wrapping under the select when narrow.
+   * - its `<epic-choices>` stay in the page, hidden:  the select lists them, their titles its entries
+   */
+  private renderCompact(): JSX.Element {
+    return (
+      <>
+        <slot />
+        <div class={ROW} part={this.partForName("row")}>
+          <span class={PICK_LINE}>
+            {this.renderChip()}
+            <ui-select
+              class={PICK}
+              part={this.partForName("select")}
+              size="small"
+              aria-label={this.groupLabel}
+              placeholder={this.translationForKey(this.isMultiple ? "pickSeveral" : "pickOne")}
+              multiple={this.isMultiple ? "" : undefined}
+              options={this.selectOptions}
+              value={this.isMultiple ? this.picks.join(",") : (this.picks[0] ?? "")}
+              on-ui-changed={this.onSelectPick}
+            />
           </span>
+          <epic-text-box
+            class={COMMENT}
+            part={this.partForName("other")}
+            type="other"
+            for={this.key}
+            placeholder={this.translationForKey("comment")}
+            onInput={this.onOtherInput}
+          />
+        </div>
+      </>
+    )
+  }
+
+  /** The select's entries:  each option's title (`recommended` says so), its letter the value. */
+  get selectOptions(): { value: string; text: string }[] {
+    return this.options.map((option) => {
+      const letter = letterOf(option)
+      const title = option.getAttribute("title") ?? letter
+      const text = option.hasAttribute("recommended") ? this.translationForKey("recommended", { title }) : title
+      return { value: letter, text }
+    })
+  }
+
+  /** Its options as cards (the default):  its line (chip, how, tools), its text and cards, then Other. */
+  private renderCards(): JSX.Element {
+    return (
+      <>
+        <div class={LINE} part={this.partForName("line")}>
+          {this.renderChip()}
           <button
             type="button"
             class={HOW}
             part={this.partForName("how")}
             role="switch"
             aria-checked={this.isMultiple ? "true" : "false"}
-            data-tooltip={this.translationForKey(this.isMultiple ? "toOneTip" : "toSeveralTip")}
             onClick={() => this.flip()}
           >
             <span class={KNOB} aria-hidden="true" />
@@ -282,7 +386,6 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
                   icon="filter"
                   selected={this.showing === "open" ? "" : undefined}
                   aria-pressed={this.showing === "open" ? "true" : "false"}
-                  data-tooltip={this.translationForKey("openTip")}
                   onClick={() => (this.showing = "open")}
                 >
                   {this.translationForKey("open")}
@@ -293,7 +396,6 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
                   icon="list check"
                   selected={this.showing === "all" ? "" : undefined}
                   aria-pressed={this.showing === "all" ? "true" : "false"}
-                  data-tooltip={this.translationForKey("allTip")}
                   onClick={() => (this.showing = "all")}
                 >
                   {this.translationForKey("all")}
@@ -311,7 +413,7 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
           placeholder={this.translationForKey(this.isMultiple ? "otherSeveral" : "otherOne")}
           onInput={this.onOtherInput}
         />
-      </div>
+      </>
     )
   }
 
@@ -369,6 +471,13 @@ export class EpicAsk extends E.UIComponent<typeof epicAskVocabulary> implements 
     const shown = this.shownOptions.map(letterOf)
     const rest = this.picks.filter((letter) => !shown.includes(letter))
     this.chosen = this.isAllSelected ? rest : [...rest, ...shown]
+    this.form?.edited()
+  }
+
+  /** `compact`:  a pick in its select, one letter (`""`:  none) or, picking several, the letters picked. */
+  private readonly onSelectPick = (event: CustomEvent<{ value: string | string[] }>) => {
+    const { value } = event.detail
+    this.chosen = (Array.isArray(value) ? value : [value]).filter(Boolean)
     this.form?.edited()
   }
 
@@ -463,7 +572,20 @@ const MORE_SUFFIX = "-more"
 /** The attribute its state goes in, on its section and the toolbar's button:  the docs runtime's. */
 const STATE_ATTRIBUTE = "data-state"
 
+/** A key that's an id, alone or before a dash (`q3`, `q3-priority`):  its chip's number (I369). */
+const ID_KEY = /^([a-z]\d+)(?:$|-)/
+
+/** A section label that starts with a number, after an id's letter or not (`12 · Rename it`, `Q3 · Which?`). */
+const NUMBERED_LABEL = /^\s*([A-Za-z]?)(\d+)\s*(?:·|\.|$)/
+
+/** Between a chip's number and its letter, when its section holds several questions:  `Q12 · a`. */
+const PART_SEPARATOR = " · "
+
 /** Classes of the shadow markup. */
+const ROW = "row"
+const PICK = "pick"
+const PICK_LINE = "pick-line"
+const COMMENT = "comment"
 const LINE = "line"
 const CHIP = "chip"
 const HOW = "how"

@@ -164,9 +164,7 @@ export class EpicTextBox extends E.UIComponent<typeof epicTextBoxVocabulary> imp
         <For each={this.kept}>
           {(item) => (
             <div class={KEPT_ITEM} part={this.partForName("kept-item")}>
-              <p class={KEPT_LABEL} data-tooltip={this.translationForKey("keptIdTip", { id: item.id })}>
-                {item.label}
-              </p>
+              <p class={KEPT_LABEL}>{item.label}</p>
               <p class={KEPT_TEXT}>{item.text}</p>
               <ui-button
                 class={KEPT_DROP}

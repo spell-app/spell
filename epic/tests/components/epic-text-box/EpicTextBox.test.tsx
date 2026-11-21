@@ -82,7 +82,7 @@ describe("<epic-text-box>", () => {
     const label = kept.querySelector<HTMLElement>(".kept-label")!
     expect([label.textContent, label.dataset.tooltip, kept.querySelector(".kept-text")!.textContent]).toEqual([
       "Q3 · Gone",
-      "It was under q3",
+      undefined,
       "picked B · Blue"
     ])
     await expectAccessible(box)

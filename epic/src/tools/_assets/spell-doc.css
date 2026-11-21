@@ -136,6 +136,22 @@ html {
   --epic-turn-duration: 0s;
   --epic-flash-duration: 0s;
 }
+/*
+ * the site's bar hides what scrolls under it, completely, as the page's head does (`spell-toolbar.css`, epic
+ * `epic-engine` I372):  a glass theme's bar colour, made opaque, and no blur behind it;  a browser without relative
+ * colours keeps the theme's glass
+ */
+@supports (color: rgb(from light-dark(red, blue) r g b / 1)) {
+  body.spell-doc-page {
+    --spell-site-bar-opaque: rgb(
+      from var(--ui-bar-background, var(--spell-site-header-fill, light-dark(#fff, #18181c))) r g b / 1
+    );
+  }
+  body.spell-doc-page spell-site-header {
+    --ui-bar-background: var(--spell-site-bar-opaque);
+    --ui-bar-filter: none;
+  }
+}
 body.plan-doc {
   --spell-site-header-fill: var(--spell-bg);
   --spell-site-header-rule: transparent;
@@ -739,6 +755,22 @@ ui-button.spell-fold {
   font-size: 0.72em;
   font-weight: 600;
   white-space: pre;
+}
+/*
+ * the joined row stays on ONE line, inside the window:  cut short with "…" where it doesn't fit (epic `epic-engine`
+ * I368:  a long sub-section title after its parent's scrolled a phone's page sideways);  the title wraps again, in
+ * full, once nothing is joined to it
+ */
+.spell-doc-main ui-section[data-spell-trail] {
+  &::part(heading),
+  &::part(toggle) {
+    min-width: 0;
+  }
+  &::part(header) {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
 }
 /* the `open/all` count:  big enough to read at a glance beside a title */
 .spell-doc-main ui-section {

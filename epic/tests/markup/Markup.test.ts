@@ -175,7 +175,6 @@ const SAMPLES: { [T in EpicTag]: EpicData<T> } = {
   },
   "epic-comment-pane": {
     headline: "“2. Context”",
-    about: "On “2. Context”",
     saved: "Saved 14:02",
     failed: true,
     deletable: true

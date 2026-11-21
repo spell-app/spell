@@ -172,16 +172,6 @@
       ],
       "texts": [
         {
-          "key": "foldTip",
-          "text": "Fold the answer",
-          "description": "Tooltip of its fold button while open."
-        },
-        {
-          "key": "unfoldTip",
-          "text": "Unfold the answer",
-          "description": "Tooltip of its fold button while folded."
-        },
-        {
           "key": "answer",
           "text": "Answer",
           "description": "The card's label, without an old decision's id."
@@ -262,16 +252,6 @@
       ],
       "texts": [
         {
-          "key": "foldTip",
-          "text": "Close this aside",
-          "description": "Tooltip of its fold button while open."
-        },
-        {
-          "key": "unfoldTip",
-          "text": "Open this aside",
-          "description": "Tooltip of its fold button while folded."
-        },
-        {
           "key": "aside",
           "text": "Aside",
           "description": "The heading, without a title."
@@ -329,6 +309,16 @@
           "name": "more-details",
           "kind": "boolean",
           "description": "A (?) on each option, \"Provide more details\":  pressed, the option is ticked too, and the answer carries its letter under `<key>-more`, so Claude explains it in full before asking again."
+        },
+        {
+          "name": "compact",
+          "kind": "boolean",
+          "description": "Its options as ONE Spell UI select, with a comment box beside it, instead of a card each (epic `epic-engine` T121):  for a page of many short picks (Yes / No / Modify / Revisit).  Its options stay written as cards (their titles are the select's entries);  the comment is its Other, sent the same way."
+        },
+        {
+          "name": "chip",
+          "kind": "string",
+          "description": "Its chip's text, as written (`12`, `Q12`).  None:  its key's id (`q3`, `q3-priority` -> `Q3`), else its section's number (`12 · Rename it` -> `Q12`), else its section's place;  two questions in one section share it, a letter each (`Q12 · a`, `Q12 · b`)."
         }
       ],
       "slots": [
@@ -360,8 +350,16 @@
           "description": "Its buttons:  Select all, Open | All."
         },
         {
+          "name": "row",
+          "description": "`compact`:  its one row, under its text:  the chip, the select, the comment box."
+        },
+        {
+          "name": "select",
+          "description": "`compact`:  its options as one `<ui-select>`."
+        },
+        {
           "name": "other",
-          "description": "The Other box, an `<epic-text-box type=\"other\">`, after the options."
+          "description": "The Other box, an `<epic-text-box type=\"other\">`, after the options;  `compact`:  its comment box."
         }
       ],
       "states": [
@@ -390,16 +388,6 @@
           "description": "Its line's switch, on:  `multiple` (or flipped)."
         },
         {
-          "key": "toSeveralTip",
-          "text": "Allow several picks",
-          "description": "The switch's tooltip while it's pick one (epic `epic-engine` P50)."
-        },
-        {
-          "key": "toOneTip",
-          "text": "Back to one pick:  the newest stays",
-          "description": "The switch's tooltip while it's pick any."
-        },
-        {
           "key": "selectAll",
           "text": "Select all",
           "description": "Ticks every option shown."
@@ -420,16 +408,6 @@
           "description": "The filter's second half:  every option."
         },
         {
-          "key": "openTip",
-          "text": "Show only the open ones",
-          "description": "Tooltip of Open."
-        },
-        {
-          "key": "allTip",
-          "text": "Show every option",
-          "description": "Tooltip of All."
-        },
-        {
           "key": "otherOne",
           "text": "Other:  your own answer",
           "description": "The Other box's placeholder, pick one."
@@ -438,6 +416,16 @@
           "key": "otherSeveral",
           "text": "Other:  add your own",
           "description": "The Other box's placeholder, pick several."
+        },
+        {
+          "key": "comment",
+          "text": "Comment (optional)",
+          "description": "`compact`:  the comment box's placeholder."
+        },
+        {
+          "key": "recommended",
+          "text": "{title} (recommended)",
+          "description": "`compact`:  the select's entry for the option marked `recommended`."
         },
         {
           "key": "attentionTip",
@@ -700,11 +688,6 @@
           "description": "`away`:  the mark's words."
         },
         {
-          "key": "awayTip",
-          "text": "Done while you were out",
-          "description": "`away`:  the mark's tooltip."
-        },
-        {
           "key": "star",
           "text": "Star {epic}",
           "description": "The star's name, not starred."
@@ -728,11 +711,6 @@
           "key": "offline",
           "text": "Needs the page server",
           "description": "The star's and the `...` menu's tooltip where they can't act:  opened from disk, or no write token."
-        },
-        {
-          "key": "worked",
-          "text": "Last worked on {date}",
-          "description": "The day's tooltip:  the full date and time."
         },
         {
           "key": "menu",
@@ -1287,11 +1265,6 @@
           "description": "With `blank`:  the box's name."
         },
         {
-          "key": "copyTip",
-          "text": "Copy into the box",
-          "description": "With `blank`:  today's text's tooltip."
-        },
-        {
           "key": "clear",
           "text": "Clear the box",
           "description": "With `blank`:  the reset button's name and tooltip."
@@ -1305,11 +1278,6 @@
           "key": "commentLabel",
           "text": "Your notes on {current}",
           "description": "The comment box's name, for a screen reader."
-        },
-        {
-          "key": "openTip",
-          "text": "Open {file}:{line} in VS Code",
-          "description": "The file link's tooltip."
         },
         {
           "key": "up",
@@ -1615,16 +1583,6 @@
       ],
       "texts": [
         {
-          "key": "foldTip",
-          "text": "Fold the choices",
-          "description": "Tooltip of its fold button while open."
-        },
-        {
-          "key": "unfoldTip",
-          "text": "Unfold the choices",
-          "description": "Tooltip of its fold button while folded."
-        },
-        {
           "key": "choices",
           "text": "Choices",
           "description": "The answered question's options' heading."
@@ -1665,24 +1623,9 @@
           "description": "The heading's switch, on (or its words):  several options."
         },
         {
-          "key": "switchToAnyTip",
-          "text": "Allow several picks",
-          "description": "The switch's tooltip while it's pick one."
-        },
-        {
-          "key": "switchToOneTip",
-          "text": "Back to one pick:  the newest stays",
-          "description": "The switch's tooltip while it's pick any."
-        },
-        {
           "key": "addChoice",
           "text": "Add choice",
           "description": "The button under the cards."
-        },
-        {
-          "key": "addTip",
-          "text": "Add your own option",
-          "description": "Add choice's tooltip."
         },
         {
           "key": "newChoice",
@@ -1720,16 +1663,6 @@
           "description": "An added option's pill, picked, sent."
         },
         {
-          "key": "tipNewChoose",
-          "text": "Pick it",
-          "description": "An added option's pill's tooltip."
-        },
-        {
-          "key": "tipNewPicked",
-          "text": "Yours, picked:  un-pick it",
-          "description": "... once picked."
-        },
-        {
           "key": "addedNotSent",
           "text": "Yours · not sent",
           "description": "Under an added option:  it goes with the next Send."
@@ -1750,11 +1683,6 @@
           "description": "A card's ✕:  its tooltip and name."
         },
         {
-          "key": "zoomTip",
-          "text": "Full size",
-          "description": "An option's picture:  its tooltip."
-        },
-        {
           "key": "pickedList",
           "text": "Picked ({count})",
           "description": "A standing set's folded list of picked options."
@@ -1763,16 +1691,6 @@
           "key": "removedList",
           "text": "Removed ({count})",
           "description": "The folded list of removed options."
-        },
-        {
-          "key": "foldListTip",
-          "text": "Fold the list",
-          "description": "A folded list's button, while open."
-        },
-        {
-          "key": "unfoldListTip",
-          "text": "Unfold the list",
-          "description": "A folded list's button, while folded."
         }
       ]
     },
@@ -1809,7 +1727,7 @@
         },
         {
           "name": "send",
-          "description": "\"Do it\" (`<ui-button>`):  its tooltip counts the changed boxes."
+          "description": "\"Do it\" (`<ui-button>`)."
         },
         {
           "name": "meta",
@@ -1845,16 +1763,6 @@
           "description": "The button."
         },
         {
-          "key": "sendTip",
-          "text": "Send {changed} of {rows} changed, and the feedback",
-          "description": "The button's tooltip:  the count."
-        },
-        {
-          "key": "sendTipCommented",
-          "text": "Send {changed} of {rows} changed, {commented} commented, and the feedback",
-          "description": "The button's tooltip, once a row's comment box holds anything (epic `epic-engine` P58)."
-        },
-        {
           "key": "copyAnswers",
           "text": "Copy my answers",
           "description": "Puts what's typed on the clipboard."
@@ -1863,16 +1771,6 @@
           "key": "copied",
           "text": "Copied",
           "description": "Copy my answers, for a moment after a click."
-        },
-        {
-          "key": "copyTip",
-          "text": "Copy your changes and feedback as JSON, when the page can't save",
-          "description": "Copy my answers' tooltip."
-        },
-        {
-          "key": "copyFailed",
-          "text": "Couldn't copy:  the browser blocked the clipboard",
-          "description": "Copy my answers' tooltip after a copy failed."
         },
         {
           "key": "expandAll",
@@ -1946,11 +1844,6 @@
           "key": "clarify",
           "text": "Clarify",
           "description": "The link's words."
-        },
-        {
-          "key": "clarifyTip",
-          "text": "Ask Claude for details now",
-          "description": "The link's tooltip."
         },
         {
           "key": "iconTip",
@@ -2052,16 +1945,6 @@
       ],
       "texts": [
         {
-          "key": "foldTip",
-          "text": "Close this code",
-          "description": "Tooltip of its fold button while open."
-        },
-        {
-          "key": "unfoldTip",
-          "text": "Open this code",
-          "description": "Tooltip of its fold button while folded."
-        },
-        {
           "key": "code",
           "text": "Code",
           "description": "The heading, without a title."
@@ -2086,18 +1969,13 @@
         "new comment",
         "floating pane"
       ],
-      "description": "The small floating pane you write a NEW comment in (epic `airplane` P11;  Owen, 2026-10-10:  \"a little floating pane below the selected text that I can move around -- don't scroll the page and lose context!\"), drawn by the docs runtime's comments when you click a bullhorn or comments on selected text.  Fixed on the screen just under what you clicked (`near`), above it when there's no room below;  you drag it by its header.  Ivory, 8px inside on every side, no buttons below its text.  Its header:  the bullhorn, the first words it's on (its tooltip the block in full), the floppy once saved, the trash once saved, and ×.  Its field is slotted:  the comments' code saves it as you type.",
+      "description": "The small floating pane you write a NEW comment in (epic `airplane` P11;  Owen, 2026-10-10:  \"a little floating pane below the selected text that I can move around -- don't scroll the page and lose context!\"), drawn by the docs runtime's comments when you click a bullhorn or comments on selected text.  Fixed on the screen just under what you clicked (`near`), above it when there's no room below;  you drag it by its header.  Ivory, 8px inside on every side, no buttons below its text.  Its header:  the bullhorn, the first words it's on the floppy once saved, the trash once saved, and ×.  Its field is slotted:  the comments' code saves it as you type.",
       "noun": "comment pane",
       "attributes": [
         {
           "name": "headline",
           "kind": "string",
           "description": "The first words it's on, in quotes (`“Leave a comment …”`), or `This page`."
-        },
-        {
-          "name": "about",
-          "kind": "string",
-          "description": "Which block it's on, in full (`On a table in “Comments”`):  its header's tooltip."
         },
         {
           "name": "saved",
@@ -2159,11 +2037,6 @@
           "key": "label",
           "text": "Comment on {headline}",
           "description": "The pane, a dialog, for a screen reader."
-        },
-        {
-          "key": "dragTip",
-          "text": "Drag to move",
-          "description": "After its header's tooltip."
         },
         {
           "key": "closeTitle",
@@ -2275,16 +2148,6 @@
           "key": "open",
           "text": "Open {sha} on GitHub",
           "description": "The sha link's tooltip."
-        },
-        {
-          "key": "unfoldTip",
-          "text": "Show it all",
-          "description": "A long sentence's tooltip, folded to two lines."
-        },
-        {
-          "key": "foldTip",
-          "text": "Fold to two lines",
-          "description": "A long sentence's tooltip, unfolded."
         },
         {
           "key": "refTip",
@@ -2512,26 +2375,6 @@
           "description": "A labelled block's label (`label`)."
         },
         {
-          "key": "foldTip",
-          "text": "Fold this request",
-          "description": "A request's fold button, while open."
-        },
-        {
-          "key": "unfoldTip",
-          "text": "Open this request",
-          "description": "A request's fold button, while folded."
-        },
-        {
-          "key": "foldFieldTip",
-          "text": "Fold this field",
-          "description": "A named field's fold button, while open."
-        },
-        {
-          "key": "unfoldFieldTip",
-          "text": "Open this field",
-          "description": "A named field's fold button, while folded."
-        },
-        {
           "key": "tasteItem",
           "text": "1 item",
           "description": "A folded field that's a list of one."
@@ -2678,11 +2521,6 @@
           "description": "The tabs' group, for a screen reader."
         },
         {
-          "key": "tabTip",
-          "text": "{tab}:  {count} to go",
-          "description": "A tab's tooltip:  how many of its items show, by its chips."
-        },
-        {
           "key": "where",
           "text": "{at} of {total} · {tab} {atTab} of {inTab}",
           "description": "Where you are:  overall, then in the tab."
@@ -2693,19 +2531,9 @@
           "description": "Back's words."
         },
         {
-          "key": "backTip",
-          "text": "Previous item (←)",
-          "description": "Back's tooltip."
-        },
-        {
           "key": "next",
           "text": "Next",
           "description": "Next's words."
-        },
-        {
-          "key": "nextTip",
-          "text": "Next item (→)",
-          "description": "Next's tooltip."
         },
         {
           "key": "nothing",
@@ -2774,11 +2602,6 @@
           "key": "hiddenNote",
           "text": "{count} hidden · show all",
           "description": "The line;  a click shows all."
-        },
-        {
-          "key": "hiddenTip",
-          "text": "Show everything",
-          "description": "The line's tooltip."
         }
       ]
     },
@@ -3278,7 +3101,7 @@
         {
           "key": "tipTodo",
           "text": "to do:  {work}",
-          "description": "Id chip and review label tooltip:  the queued work."
+          "description": "Id chip tooltip:  the queued work."
         },
         {
           "key": "tipReviewed",
@@ -3288,7 +3111,7 @@
         {
           "key": "tipDeferred",
           "text": "deferred {date}",
-          "description": "Id chip and review label tooltip:  deferred."
+          "description": "Id chip tooltip:  deferred."
         },
         {
           "key": "tipNotReviewed",
@@ -3334,16 +3157,6 @@
           "key": "failedMarkNone",
           "text": "failed",
           "description": "The same, with no issue named."
-        },
-        {
-          "key": "failedTip",
-          "text": "Failed your test:  filed as {id}",
-          "description": "The failed mark's tooltip."
-        },
-        {
-          "key": "failedTipNone",
-          "text": "Failed your test",
-          "description": "The failed mark's tooltip, no issue."
         },
         {
           "key": "madeOvernight",
@@ -3748,21 +3561,6 @@
           "key": "noSaga",
           "text": "No saga",
           "description": "The chip of the epics that name no saga."
-        },
-        {
-          "key": "noSagaTip",
-          "text": "Epics with no saga",
-          "description": "The No saga chip's tooltip."
-        },
-        {
-          "key": "showOnly",
-          "text": "Show only the {count} in {saga}",
-          "description": "A chip's tooltip's last line, while shown."
-        },
-        {
-          "key": "showToo",
-          "text": "Show the {count} in {saga} too",
-          "description": "A chip's tooltip's last line, while hidden."
         }
       ]
     },
@@ -4020,16 +3818,6 @@
       ],
       "texts": [
         {
-          "key": "foldTip",
-          "text": "Close this note",
-          "description": "Tooltip of its fold button while open."
-        },
-        {
-          "key": "unfoldTip",
-          "text": "Open this note",
-          "description": "Tooltip of its fold button while folded."
-        },
-        {
           "key": "update",
           "text": "UPDATE",
           "description": "The label of an `update` note."
@@ -4270,16 +4058,6 @@
       ],
       "texts": [
         {
-          "key": "foldTip",
-          "text": "Fold option {letter}",
-          "description": "Tooltip of its fold button while open."
-        },
-        {
-          "key": "unfoldTip",
-          "text": "Unfold option {letter}",
-          "description": "Tooltip of its fold button while folded."
-        },
-        {
           "key": "zoomTip",
           "text": "Full size",
           "description": "A picture in an edit not applied yet:  its tooltip."
@@ -4325,26 +4103,6 @@
           "description": "In an `<epic-ask>`:  the link its comment box folds under (P50, Q55)."
         },
         {
-          "key": "tipChosen",
-          "text": "{letter} picked:  un-pick it",
-          "description": "The picked pill's tooltip."
-        },
-        {
-          "key": "tipSent",
-          "text": "sent",
-          "description": "The picked pill's tooltip, once its mark went to Claude."
-        },
-        {
-          "key": "tipNotSent",
-          "text": "not sent yet",
-          "description": "The picked pill's tooltip, before Send."
-        },
-        {
-          "key": "tipApplied",
-          "text": "{letter} chosen",
-          "description": "The chosen option's pill's tooltip:  the pick applied."
-        },
-        {
           "key": "moreTip",
           "text": "Add details",
           "description": "In an `<epic-ask>`:  the (?)'s tooltip."
@@ -4375,16 +4133,6 @@
           "description": "The folded line of its earlier text."
         },
         {
-          "key": "foldWasTip",
-          "text": "Fold the earlier text",
-          "description": "The `Was` line's button, while open."
-        },
-        {
-          "key": "unfoldWasTip",
-          "text": "Show the earlier text",
-          "description": "The `Was` line's button, while folded."
-        },
-        {
           "key": "editedNotSent",
           "text": "Edited · not sent",
           "description": "Under a card edited, not sent yet."
@@ -4408,11 +4156,6 @@
           "key": "undo",
           "text": "Undo",
           "description": "After a change's line:  takes it back out of the mark."
-        },
-        {
-          "key": "undoTip",
-          "text": "Undo this change",
-          "description": "Undo's tooltip."
         }
       ]
     },
@@ -4464,16 +4207,6 @@
         }
       ],
       "texts": [
-        {
-          "key": "foldTip",
-          "text": "Fold the original discussion",
-          "description": "Tooltip of its fold button while open."
-        },
-        {
-          "key": "unfoldTip",
-          "text": "Unfold the original discussion",
-          "description": "Tooltip of its fold button while folded."
-        },
         {
           "key": "original",
           "text": "Original Discussion",
@@ -4629,11 +4362,6 @@
         }
       ],
       "texts": [
-        {
-          "key": "promptTip",
-          "text": "Fold or unfold the kickoff prompt",
-          "description": "The prompt fold's tooltip."
-        },
         {
           "key": "partNote",
           "text": "Loads from {source} when opened (needs the page server).",
@@ -4912,16 +4640,6 @@
       ],
       "texts": [
         {
-          "key": "hungTip",
-          "text": "How to restart a hung session",
-          "description": "Plan hung?:  its tooltip."
-        },
-        {
-          "key": "copyHeading",
-          "text": "{name}:  copy {command}",
-          "description": "The h1's name:  its tooltip, its full name first (narrow, the name is cut short)."
-        },
-        {
           "key": "copiedText",
           "text": "Copied {text}",
           "description": "The toast once something is copied (the h1's name, a meta line's code):  what went onto the clipboard."
@@ -5027,11 +4745,6 @@
           "description": "Meta line:  before the link to the saga the epic serves."
         },
         {
-          "key": "sagaTip",
-          "text": "Saga:  {purpose}",
-          "description": "The saga link's tooltip, once the page server has said what the saga is for."
-        },
-        {
           "key": "done",
           "text": "DONE",
           "description": "Step label:  every phase is done."
@@ -5062,11 +4775,6 @@
           "description": "The bedtime label:  a `/bedtime` run is on."
         },
         {
-          "key": "bedtimeTip",
-          "text": "Overnight run ({phases}):  its changes show green until reviewed",
-          "description": "The bedtime label's tooltip."
-        },
-        {
           "key": "gearTip",
           "text": "Settings",
           "description": "The header's gear:  its tooltip, and its menu's name."
@@ -5075,11 +4783,6 @@
           "key": "focusMode",
           "text": "Focus mode",
           "description": "The gear's first row while the page is reviewed (epic `epic-engine` P57):  opens Focus mode."
-        },
-        {
-          "key": "focusModeTip",
-          "text": "Open items, one at a time",
-          "description": "Focus mode's row:  its tooltip."
         },
         {
           "key": "autoSend",
@@ -5217,11 +4920,6 @@
           "description": "The same, for someone else's agent:  `{person}`, whose it is."
         },
         {
-          "key": "listeningTitle",
-          "text": "Listening:  your Send reaches it at once",
-          "description": "The listening words' tooltip."
-        },
-        {
           "key": "idleMine",
           "text": "Your {agent} isn't listening:  ask it to run",
           "description": "The pill while nobody listens and the last to listen was an agent other than Claude (Q14:  Send never wakes it), before the command it copies, `epic inbox wait <epic>`."
@@ -5230,11 +4928,6 @@
           "key": "idleOf",
           "text": "{person}'s {agent} isn't listening:  ask it to run",
           "description": "The same, for someone else's agent."
-        },
-        {
-          "key": "copyWait",
-          "text": "Copy the command",
-          "description": "The pill's tooltip, while it names an agent that isn't listening."
         },
         {
           "key": "airplanePill",
@@ -5255,16 +4948,6 @@
           "key": "reviewLineAirplane",
           "text": "Airplane mode:  what you mark here waits for",
           "description": "The review line in airplane mode (no Claude), before `/airplane land`."
-        },
-        {
-          "key": "copyCommand",
-          "text": "Copy the command",
-          "description": "The review line's tooltip."
-        },
-        {
-          "key": "startReview",
-          "text": "Start the review in this epic's session",
-          "description": "The nobody-listening pill's tooltip:  a click types the command into the epic's session."
         },
         {
           "key": "copied",
@@ -5723,11 +5406,6 @@
           "description": "A done phase's pill while its work is on its epic's branch alone (`unmerged`, I273)."
         },
         {
-          "key": "unmergedTip",
-          "text": "Done on {branch}, not merged yet",
-          "description": "That pill's tooltip."
-        },
-        {
           "key": "spanTip",
           "text": "{took} of work over {span}",
           "description": "A done phase's time pill with its clock time, no estimate:  its tooltip (I127)."
@@ -5994,11 +5672,6 @@
       "states": [],
       "texts": [
         {
-          "key": "toggleTip",
-          "text": "Fold or unfold the kickoff prompt",
-          "description": "The fold's tooltip."
-        },
-        {
           "key": "title",
           "text": "Kickoff prompt",
           "description": "The fold's title."
@@ -6157,16 +5830,6 @@
       ],
       "texts": [
         {
-          "key": "foldTip",
-          "text": "Close this reply",
-          "description": "Tooltip of its fold button while open."
-        },
-        {
-          "key": "unfoldTip",
-          "text": "Open this reply",
-          "description": "Tooltip of its fold button while folded."
-        },
-        {
           "key": "re",
           "text": "re: {re}",
           "description": "What the reply is about, in its heading."
@@ -6190,11 +5853,6 @@
           "key": "new",
           "text": "NEW",
           "description": "The tag on Claude's newest reply, until you've seen it."
-        },
-        {
-          "key": "newTip",
-          "text": "New since you looked",
-          "description": "The NEW tag's tooltip."
         }
       ]
     },
@@ -6436,7 +6094,7 @@
         "review row",
         "name review"
       ],
-      "description": "One row of a run page (epic `epic-engine` P23), drawn by `<epic-run>` in its table:  the command's own columns, then the answer.  The answer is the command's proposal, pre-filled in a box you type over;  a pick of the few alternatives the command offers, when it offers any, with the proposal first;  the row's tick box, with the command's own label (`Use for every project`);  and its details, folded under it.  Each change says so (`epic-run-answered`), and `<epic-run>` saves it:  typing half a second after you stop, a pick or a tick at once.  A row you answered differently from the proposal is orange, with a round button putting the proposal back.  A row the command has taken (acted on, epic `epic-engine` P25) has a quiet `taken` mark, its time in the tooltip;  changed after that, an orange note says so:  the command may pick the change up if it can.",
+      "description": "One row of a run page (epic `epic-engine` P23), drawn by `<epic-run>` in its table:  the command's own columns, then the answer.  The answer is the command's proposal, pre-filled in a box you type over;  a pick of the few alternatives the command offers, when it offers any, with the proposal first;  the row's tick box, with the command's own label (`Use for every project`);  and its details, folded under it.  Each change says so (`epic-run-answered`), and `<epic-run>` saves it:  typing half a second after you stop, a pick or a tick at once.  A row you answered differently from the proposal is orange, with a round button putting the proposal back.  A row the command has taken (acted on, epic `epic-engine` P25) has a quiet `taken` mark;  changed after that, an orange note says so:  the command may pick the change up if it can.",
       "noun": "run row",
       "attributes": [
         {
@@ -6512,7 +6170,7 @@
         },
         {
           "name": "taken",
-          "description": "The quiet `taken` mark beside the box:  a check and the word, its time the tooltip."
+          "description": "The quiet `taken` mark beside the box:  a check and the word."
         },
         {
           "name": "changed-after-taken",
@@ -6559,11 +6217,6 @@
           "description": "The pick's name, for a screen reader."
         },
         {
-          "key": "proposed",
-          "text": "proposed",
-          "description": "The proposal's pill's tooltip."
-        },
-        {
           "key": "details",
           "text": "Details · {count}",
           "description": "The details' fold:  how many lines."
@@ -6574,19 +6227,9 @@
           "description": "The taken mark's word."
         },
         {
-          "key": "takenTip",
-          "text": "Taken at {time}",
-          "description": "The taken mark's tooltip."
-        },
-        {
           "key": "changedAfterTaken",
           "text": "changed after the run took it",
           "description": "The orange note on a row changed after it was taken."
-        },
-        {
-          "key": "changedAfterTakenTip",
-          "text": "Changed after the run took it",
-          "description": "The orange note's tooltip."
         }
       ]
     },
@@ -6943,24 +6586,9 @@
           "description": "The Manual tests section's button on its title (epic `epic-engine` P4):  how many tests are open."
         },
         {
-          "key": "startTestingTip",
-          "text": "Claude checks what it can and writes out the rest, then the first test opens",
-          "description": "Start testing's tooltip (epic `epic-engine` P51)."
-        },
-        {
           "key": "preparingTests",
           "text": "Preparing tests",
           "description": "The Manual tests section's button while Claude prepares the tests (P51)."
-        },
-        {
-          "key": "preparingTip",
-          "text": "Claude is preparing the tests:  stop",
-          "description": "Preparing tests' tooltip."
-        },
-        {
-          "key": "waitingTip",
-          "text": "Asked:  {why} · stop",
-          "description": "Preparing tests' tooltip while nobody has taken it yet."
         },
         {
           "key": "focusTests",
@@ -6971,11 +6599,6 @@
           "key": "focusAllTests",
           "text": "Focus on the tests · {count}",
           "description": "The same, every open test answered already:  Focus mode on the first again."
-        },
-        {
-          "key": "focusTestsTip",
-          "text": "Go through the tests one at a time",
-          "description": "The button's tooltip once the tests are prepared."
         },
         {
           "key": "testsReady",
@@ -7016,16 +6639,6 @@
           "key": "newPhase",
           "text": "Phase",
           "description": "Kind:  a phase, which Claude drafts from its name and your note."
-        },
-        {
-          "key": "newUnsent",
-          "text": "not sent yet:  Send hands it to Claude",
-          "description": "A pending new item, not sent."
-        },
-        {
-          "key": "newSent",
-          "text": "sent:  Claude adds it at the next review",
-          "description": "A pending new item, sent, not made yet."
         },
         {
           "key": "newAbout",
@@ -7337,19 +6950,9 @@
           "description": "The title sort's words."
         },
         {
-          "key": "titleTip",
-          "text": "Sort A to Z",
-          "description": "The title sort's tooltip."
-        },
-        {
           "key": "date",
           "text": "Date",
           "description": "The date sort's words."
-        },
-        {
-          "key": "dateTip",
-          "text": "Sort by last worked on, newest first",
-          "description": "The date sort's tooltip."
         },
         {
           "key": "inUse",
@@ -7736,16 +7339,6 @@
       ],
       "texts": [
         {
-          "key": "foldTip",
-          "text": "Close this status card",
-          "description": "Tooltip of its fold button while open."
-        },
-        {
-          "key": "unfoldTip",
-          "text": "Open this status card",
-          "description": "Tooltip of its fold button while folded."
-        },
-        {
           "key": "underway",
           "text": "{who} • Underway",
           "description": "The heading while Claude is on it."
@@ -7764,11 +7357,6 @@
           "key": "unmerged",
           "text": "not on main yet",
           "description": "After Done, while its work is on its epic's branch alone (`unmerged`, I273)."
-        },
-        {
-          "key": "unmergedTip",
-          "text": "Done on {branch}, not merged yet",
-          "description": "That pill's tooltip."
         },
         {
           "key": "agent",
@@ -7799,11 +7387,6 @@
           "key": "earlier",
           "text": "your earlier comment",
           "description": "After a drive-by's steps:  it's about a comment you made before answering."
-        },
-        {
-          "key": "started",
-          "text": "taken {date}",
-          "description": "The date's tooltip once done or noted:  when Claude took the mark (`at`)."
         }
       ]
     },
@@ -7961,11 +7544,6 @@
           "description": "Under the kept text's title:  what it is."
         },
         {
-          "key": "keptIdTip",
-          "text": "It was under {id}",
-          "description": "A kept text's title's tooltip:  its old id."
-        },
-        {
           "key": "keptDrop",
           "text": "Drop {label}",
           "description": "A kept text's ×, for a screen reader."
@@ -8106,7 +7684,7 @@
         },
         {
           "name": "headline",
-          "description": "The first words it's on, in quotes;  its tooltip says the block in full."
+          "description": "The first words it's on, in quotes."
         },
         {
           "name": "answer",
@@ -8123,16 +7701,6 @@
       ],
       "states": [],
       "texts": [
-        {
-          "key": "foldTip",
-          "text": "Close this thread",
-          "description": "After the fold's tooltip while open."
-        },
-        {
-          "key": "unfoldTip",
-          "text": "Open this thread",
-          "description": "After the fold's tooltip while folded."
-        },
         {
           "key": "editTitle",
           "text": "Edit your last words",
@@ -8363,24 +7931,9 @@
       ],
       "texts": [
         {
-          "key": "foldTip",
-          "text": "Close this update",
-          "description": "Tooltip of its fold button while open."
-        },
-        {
-          "key": "unfoldTip",
-          "text": "Open this update",
-          "description": "Tooltip of its fold button while folded."
-        },
-        {
           "key": "buttonsLabel",
           "text": "this update",
           "description": "Seen's group, spoken."
-        },
-        {
-          "key": "seenAt",
-          "text": "Seen {when}",
-          "description": "The date's tooltip, after the full date:  when it was seen."
         },
         {
           "key": "title",
@@ -8388,19 +7941,9 @@
           "description": "A block's title, in bold, before `: <summary>`."
         },
         {
-          "key": "during",
-          "text": "Written during P{phase}",
-          "description": "The date's tooltip, after the full date."
-        },
-        {
           "key": "label",
           "text": "UPDATE",
           "description": "The bare label."
-        },
-        {
-          "key": "tip",
-          "text": "Changed during P{phase}",
-          "description": "The bare label's tooltip."
         },
         {
           "key": "became",
@@ -8441,11 +7984,6 @@
           "key": "unmerged",
           "text": "Not in main",
           "description": "The pill after the label while its work isn't merged."
-        },
-        {
-          "key": "unmergedTip",
-          "text": "On {branch}, not merged yet",
-          "description": "That pill's tooltip."
         }
       ]
     },
@@ -8521,16 +8059,6 @@
         }
       ],
       "texts": [
-        {
-          "key": "foldTip",
-          "text": "Close this plan change",
-          "description": "Tooltip of its fold button while open."
-        },
-        {
-          "key": "unfoldTip",
-          "text": "Open this plan change",
-          "description": "Tooltip of its fold button while folded."
-        },
         {
           "key": "updated",
           "text": "Updated",

@@ -172,15 +172,15 @@ describe("<epic-item>", () => {
     expect(chip.dataset.tooltip).toMatch(/^Fixed:  your review/)
   })
 
-  test("the review label:  `to do` (queued), else `deferred`, else `reviewed 10/6/26`;  none when unmarked", async () => {
+  test("the review label:  `to do` (queued), else `deferred`, else `reviewed 10/6/26`;  none when unmarked;  no tooltip (I370)", async () => {
     const labels = []
     for (const marks of [`queued="2026-10-06" work="Skip it"`, `deferred="2026-10-05"`, `reviewed="2026-10-06"`, ""]) {
       const { review } = await item(`<epic-item id="j1" title="A" status="open" state="recent" ${marks}></epic-item>`)
       labels.push(review() ? [review()!.textContent, review()!.className, review()!.dataset.tooltip] : null)
     }
     expect(labels).toEqual([
-      ["to do", "review todo", "Skip it"],
-      ["deferred", "review deferred", "deferred 10/5/26"],
+      ["to do", "review todo", undefined],
+      ["deferred", "review deferred", undefined],
       ["reviewed 10/6/26", "review old", undefined],
       null
     ])

@@ -287,24 +287,9 @@ export const epicSectionVocabulary = {
       description: "The Manual tests section's button on its title (epic `epic-engine` P4):  how many tests are open."
     },
     {
-      key: "startTestingTip",
-      text: "Claude checks what it can and writes out the rest, then the first test opens",
-      description: "Start testing's tooltip (epic `epic-engine` P51)."
-    },
-    {
       key: "preparingTests",
       text: "Preparing tests",
       description: "The Manual tests section's button while Claude prepares the tests (P51)."
-    },
-    {
-      key: "preparingTip",
-      text: "Claude is preparing the tests:  stop",
-      description: "Preparing tests' tooltip."
-    },
-    {
-      key: "waitingTip",
-      text: "Asked:  {why} · stop",
-      description: "Preparing tests' tooltip while nobody has taken it yet."
     },
     {
       key: "focusTests",
@@ -317,11 +302,6 @@ export const epicSectionVocabulary = {
       key: "focusAllTests",
       text: "Focus on the tests · {count}",
       description: "The same, every open test answered already:  Focus mode on the first again."
-    },
-    {
-      key: "focusTestsTip",
-      text: "Go through the tests one at a time",
-      description: "The button's tooltip once the tests are prepared."
     },
     {
       key: "testsReady",

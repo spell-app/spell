@@ -387,12 +387,9 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
 
   /** The review label, from its marks:  `to do`, else `deferred`, else `reviewed 10/6/26`;  none when unmarked. */
   readonly review = createMemo((): ReviewLabel | undefined => {
-    const { queued, deferred, reviewed, work } = this
-    if (queued) return { words: this.translationForKey("reviewTodo"), look: "todo", tip: work || undefined }
-    if (deferred) {
-      const tip = this.translationForKey("tipDeferred", { date: PlanDates.format(deferred) })
-      return { words: this.translationForKey("reviewDeferred"), look: "deferred", tip }
-    }
+    const { queued, deferred, reviewed } = this
+    if (queued) return { words: this.translationForKey("reviewTodo"), look: "todo" }
+    if (deferred) return { words: this.translationForKey("reviewDeferred"), look: "deferred" }
     if (reviewed) {
       const look = this.itemState() === "recent" ? "recent" : "old"
       return { words: this.translationForKey("reviewed", { date: PlanDates.format(reviewed) }), look }
@@ -690,7 +687,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
         <Show when={this.hasCommits()}>{this.gitButton()}</Show>
         <Show when={!this.reviewState.reviewing() && this.review()}>
           {(review) => (
-            <span class={[REVIEW, review().look]} part={this.partForName("review")} data-tooltip={review().tip}>
+            <span class={[REVIEW, review().look]} part={this.partForName("review")}>
               {review().words}
             </span>
           )}
@@ -719,7 +716,6 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
         appearance="basic"
         color="red"
         link={issue() ? `#${issue()}` : undefined}
-        data-tooltip={this.translationForKey(issue() ? "failedTip" : "failedTipNone", { id: issue().toUpperCase() })}
       >
         {this.translationForKey(issue() ? "failedMark" : "failedMarkNone", { id: issue().toUpperCase() })}
       </ui-label>

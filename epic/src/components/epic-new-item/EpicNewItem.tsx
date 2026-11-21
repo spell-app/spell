@@ -86,7 +86,6 @@ export class EpicNewItem extends E.UIComponent<EpicNewItemVocabulary> {
         part={this.partForName("button")}
         data-words=""
         aria-expanded={this.isOpen ? "true" : "false"}
-        data-tooltip={words()}
         onClick={() => (this.isOpen = !this.isOpen)}
       >
         <ui-icon name="plus" />
@@ -145,7 +144,6 @@ export class EpicNewItem extends E.UIComponent<EpicNewItemVocabulary> {
                 type="button"
                 data-kind={each}
                 aria-pressed={this.formKind === each ? "true" : "false"}
-                data-tooltip={this.translationForKey(NEW_KIND_LOOKS[each].tip)}
                 onClick={() => (this.formKind = each)}
               >
                 <ui-icon name={NEW_KIND_LOOKS[each].icon} />
@@ -186,16 +184,11 @@ export class EpicNewItem extends E.UIComponent<EpicNewItemVocabulary> {
             placeholder={this.translationForKey("newNear")}
             aria-label={this.translationForKey("newNear")}
           />
-          <button
-            type="submit"
-            data-color="green"
-            disabled={this.isSaving}
-            data-tooltip={this.translationForKey(item ? "newSaveTip" : "newAddTip")}
-          >
+          <button type="submit" data-color="green" disabled={this.isSaving}>
             <ui-icon name="check" />
             {this.translationForKey(item ? "newSave" : "newAdd")}
           </button>
-          <button type="button" data-tooltip={this.translationForKey("newCancelTip")} onClick={() => this.close()}>
+          <button type="button" onClick={() => this.close()}>
             {this.translationForKey("newCancel")}
           </button>
         </span>

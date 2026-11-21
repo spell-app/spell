@@ -129,7 +129,7 @@ export class EpicSend extends E.UIComponent<typeof epicSendVocabulary> {
             {this.stateLine.text}
           </span>
           <Show when={this.draftLine.text && !this.draftLine.isError}>
-            <span class={DRAFT} part={this.partForName("draft")} data-tooltip={this.draftLine.text}>
+            <span class={DRAFT} part={this.partForName("draft")}>
               {this.draftLine.text}
             </span>
           </Show>
@@ -146,7 +146,6 @@ export class EpicSend extends E.UIComponent<typeof epicSendVocabulary> {
               class={WHO}
               part={this.partForName("who")}
               data-listening={this.listenLine.isListening ? "" : undefined}
-              data-tooltip={this.listenLine.title}
             >
               {this.listenLine.text}
             </span>

@@ -116,6 +116,30 @@ the page is the same for both agents.
      - `title`:  2-5 words
      - the summary:  one line;  everything longer in an `<epic-aside title="Details">` (it folds)
      - pick several:  `multiple` on the `<epic-ask>` (tick boxes);  else pick one (round ones)
+     - MANY short picks (a ranked list, each item Yes / No / Modify / Revisit):  `compact` on each `<epic-ask>`.
+       - Its options draw as ONE select, with a comment box beside it, not a card each.
+       - Write the options as usual:  their titles are the select's entries (`recommended` says so).
+       - The comment is its Other:  the answer reads `Q12 · ...:  N · No;  Comment:  too big for now`.
+       - Spec (`--from`):  `compact: true` on the question.
+     - Its chip is the number you mean:  its key's id (`q12`, `q12-priority` -> `Q12`), else its section's number
+       (`12 · Rename it`), else its section's place.
+       - Two questions in one section share it, a letter each:  `Q12 · a`, `Q12 · b`.
+       - `chip="..."` on the `<epic-ask>` writes it yourself.
+
+       ```html
+       <ui-section id="q12" label="12 · Rename the store" collapsible dividing>
+         <epic-ask compact name="q12">
+           <epic-question><p>What it does, one or two lines.</p></epic-question>
+           <epic-choices fixed>
+             <epic-option letter="Y" title="Yes" recommended></epic-option>
+             <epic-option letter="N" title="No"></epic-option>
+             <epic-option letter="M" title="Modify"></epic-option>
+             <epic-option letter="R" title="Revisit"></epic-option>
+           </epic-choices>
+         </epic-ask>
+         <epic-ask compact name="q12-priority">...</epic-ask>
+       </ui-section>
+       ```
      - The elements draw the rest:
        - each option, its tick box and a comment box
        - each question, an "Other" box and its state chip

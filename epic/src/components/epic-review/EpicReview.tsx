@@ -681,7 +681,6 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
         <img
           src={src()}
           alt={this.translationForKey("pictureZoom")}
-          data-tooltip={this.translationForKey("pictureZoom")}
           onClick={(event: MouseEvent) => EpicReview.zoom(event)}
         />
         <button
@@ -808,12 +807,7 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
     return (
       <Show when={this.review.takenNote()}>
         {(mark) => (
-          <div
-            class={[SAID, SAID_TAKEN]}
-            part={this.partForName("taken")}
-            data-tooltip={this.translationForKey("saidTakenTip")}
-            aria-label={this.translationForKey("you")}
-          >
+          <div class={[SAID, SAID_TAKEN]} part={this.partForName("taken")} aria-label={this.translationForKey("you")}>
             <span class={SAID_WHO}>{this.translationForKey("saidTaken", { time: clockOf(mark().at) })} ·</span>
             <p class={SAID_NOTE}>{Pictures.labelled(mark().note ?? "")}</p>
             {this.saidPictures(mark().note)}
@@ -823,7 +817,6 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
                   class={SAID_PICTURE}
                   src={shot()}
                   alt={this.translationForKey("pictureZoom")}
-                  data-tooltip={this.translationForKey("pictureZoom")}
                   onClick={(event: MouseEvent) => EpicReview.zoom(event)}
                 />
               )}
@@ -849,7 +842,6 @@ export class EpicReview extends E.UIComponent<EpicReviewVocabulary> {
                   class={SAID_PICTURE}
                   src={shot()}
                   alt={this.translationForKey("pictureZoom")}
-                  data-tooltip={this.translationForKey("pictureZoom")}
                   onClick={(event: MouseEvent) => EpicReview.zoom(event)}
                 />
               )}

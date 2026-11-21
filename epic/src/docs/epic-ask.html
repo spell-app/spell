@@ -123,6 +123,19 @@
                   ><p>Its text.</p></epic-option
                 >
               </epic-choices>
+            </epic-ask>
+            <p>
+              The third is <code>compact</code>, for a page of many short picks: its options in one select, with a
+              comment box beside it.
+            </p>
+            <epic-ask compact name="compact-demo" chip="12">
+              <epic-question><p>Rename the store to match what it holds.</p></epic-question>
+              <epic-choices fixed>
+                <epic-option letter="Y" title="Yes" recommended><p>Do it as described.</p></epic-option>
+                <epic-option letter="N" title="No"><p>Don't do it.</p></epic-option>
+                <epic-option letter="M" title="Modify"><p>Do it differently: say how in the comment.</p></epic-option>
+                <epic-option letter="R" title="Revisit"><p>Not now: ask again later.</p></epic-option>
+              </epic-choices>
             </epic-ask></ui-section
           >
           <ui-section id="2-markup" label="2. Markup" sticky="stack" collapsible dividing open="false"
@@ -275,6 +288,27 @@
                     </td>
                     <td></td>
                   </tr>
+                  <tr>
+                    <td><code>compact</code></td>
+                    <td>present or absent</td>
+                    <td>
+                      Its options as ONE select, with a comment box beside it, instead of a card each (T121): for a
+                      page of many short picks. Write its options as usual: their titles are the select's entries. The
+                      comment is its Other, sent the same way, and read back as <code>Comment:</code>.
+                    </td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td><code>chip</code></td>
+                    <td>text</td>
+                    <td>
+                      Its chip, as written (<code>12</code>). None: its key's id (<code>q3-priority</code> gives
+                      <code>Q3</code>), else its section's number (<code>12 · Rename it</code> gives <code>Q12</code>),
+                      else its section's place. Two questions in one section share it, a letter each:
+                      <code>Q12 · a</code>, <code>Q12 · b</code> (I369).
+                    </td>
+                    <td></td>
+                  </tr>
                 </tbody></table
             ></ui-table>
             <ui-section id="epic-ask-slots" label="Slots" sticky="stack" collapsible dividing open="false"
@@ -341,7 +375,18 @@
                     </tr>
                     <tr>
                       <td><code>other</code></td>
-                      <td>The Other box, an <code>&lt;epic-text-box type="other"&gt;</code>, after the options.</td>
+                      <td>
+                        The Other box, an <code>&lt;epic-text-box type="other"&gt;</code>, after the options;
+                        <code>compact</code>: its comment box.
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><code>row</code></td>
+                      <td><code>compact</code>: its one row, under its text: the chip, the select, the comment box.</td>
+                    </tr>
+                    <tr>
+                      <td><code>select</code></td>
+                      <td><code>compact</code>: its options as one <code>&lt;ui-select&gt;</code>.</td>
                     </tr>
                   </tbody>
                 </table></ui-table
@@ -382,7 +427,8 @@
             ><ui-icon slot="icon" name="palette"></ui-icon>
             <ul>
               <li>
-                Its line: the chip (<code>Q1</code>, its key in capitals, else its place), <code>Pick one</code> or
+                Its line: the chip (<code>Q1</code>, the number its key, its section or <code>chip</code> gives;
+                <code>Q12 · a</code> and <code>Q12 · b</code> for two in one section), <code>Pick one</code> or
                 <code>Pick several</code>, its buttons at the right, pill shaped with icons.
               </li>
               <li>
@@ -394,6 +440,10 @@
                 the violet thumbs-up.
               </li>
               <li>Then the Other box, a box you type in, growing with its text.</li>
+              <li>
+                <code>compact</code>: its text, then one row: the chip, the select and the comment box, centred on the
+                box's first line, 12px apart; at phone width the comment box goes under them, the full width.
+              </li>
               <li>
                 Pick one: its Choose pills are one radio group to the keyboard. Tab stops on the picked one (else
                 the first), and the arrow keys move the pick to the next option shown or the one before.

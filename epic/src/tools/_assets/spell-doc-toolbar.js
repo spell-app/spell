@@ -519,10 +519,9 @@ function jumpWaitingList(pick) {
   const title = waiting.length === 1 ? "Waiting on you:" : `${waiting.length} waiting on you:`
   const lines = waiting.map((comment) => {
     const label = ThreadFacts.label(comment.id)
-    const tip = `${ThreadFacts.aboutTip({ id: comment.id, place: comment })}\n(Jump there)`
     const line = el(
       "ui-item",
-      { class: "spell-jump-thread", "data-tooltip": tip },
+      { class: "spell-jump-thread" },
       el("b", {}, label),
       " · ",
       el("span", {}, firstWords(comment.text))
