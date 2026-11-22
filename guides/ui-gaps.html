@@ -28,7 +28,7 @@
         <ui-accordion class="spell-code" appearance="styled">
           <ui-title>The same button, in old words and today's · 2 lines</ui-title>
           <ui-content>
-            <pre><code class="language-html">&lt;ui-button primary basic compact href=&quot;save.html&quot;&gt;Save&lt;/ui-button&gt;
+            <pre><code class="language-html">&lt;ui-button color=&quot;primary&quot; appearance=&quot;basic&quot; padding=&quot;compact&quot; link=&quot;save.html&quot;&gt;Save&lt;/ui-button&gt;
 &lt;ui-button color="primary" appearance="basic" padding="compact" link="save.html"&gt;Save&lt;/ui-button&gt;</code></pre>
           </ui-content>
         </ui-accordion>
@@ -91,7 +91,7 @@
         <ui-section id="2-the-words" label="2. One word per idea" sticky collapsible dividing open="false">
           <p>
             Fomantic UI, whose vocabulary Spell UI keeps, gave each look a bare switch of its own:
-            <code>&lt;ui-button primary basic&gt;</code>. That made a dozen spellings of one idea across tags. In Spell
+            <code>&lt;ui-button color=&quot;primary&quot; appearance=&quot;basic&quot;&gt;</code>. That made a dozen spellings of one idea across tags. In Spell
             UI each idea is one attribute, and the old switch is one of its values.
           </p>
           <ui-section id="the-renames" label="The words" sticky collapsible dividing open="false">
@@ -251,7 +251,7 @@ spell ui rename --write docs/    # rewrites them</code></pre>
               <li>It reads every old name from the vocabularies themselves, so it keeps no list of its own.</li>
               <li>
                 It rewrites HTML pages, Markdown, <code>.spell</code> files, CSS selectors and the JSX in TypeScript
-                files: whole tags too (<code>&lt;ui-docs-toc&gt;</code> becomes <code>&lt;ui-toc&gt;</code>).
+                files: whole tags too (<code>&lt;ui-toc&gt;</code> becomes <code>&lt;ui-toc&gt;</code>).
               </li>
               <li>Several old switches on one tag become one appearance.</li>
               <li>It lists what it can't see, a JSX expression or a tag it can't read, and never guesses.</li>
