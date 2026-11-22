@@ -656,6 +656,11 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
       "corner"
     ]
   },
+  "ui-icon-browser": {
+    folder: "ui-icon-browser",
+    skeleton: { height: "30em" },
+    attributes: ["pack", "query", "address"]
+  },
   "ui-icon-picker": {
     folder: "ui-icon-picker",
     skeleton: { display: "inline", width: "14em", height: "2.5em" },

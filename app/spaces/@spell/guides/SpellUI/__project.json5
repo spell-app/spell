@@ -644,6 +644,22 @@
       "active": true
     },
     {
+      "path": "/IconBrowser/Usage.spell",
+      "active": true
+    },
+    {
+      "path": "/IconBrowser/Examples.spell",
+      "active": true
+    },
+    {
+      "path": "/IconBrowser/API.spell",
+      "active": true
+    },
+    {
+      "path": "/IconBrowser/Theming.spell",
+      "active": true
+    },
+    {
       "path": "/IconPicker/Usage.spell",
       "active": true
     },

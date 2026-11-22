@@ -215,6 +215,11 @@
       "summary": "An icon is a glyph used to represent something else.",
       "status": "done"
     },
+    "ui-icon-browser": {
+      "title": "Icon Browser",
+      "summary": "An icon browser shows every icon of a pack, to search through:  clicking one copies the name that draws it.",
+      "status": "done"
+    },
     "ui-icon-picker": {
       "title": "Icon Picker",
       "summary": "An icon picker lets people choose an icon by searching for it and clicking its glyph.",

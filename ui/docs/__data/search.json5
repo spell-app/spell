@@ -1771,6 +1771,25 @@
       ]
     },
     {
+      "path": "ui-icon-browser.html",
+      "title": "Icon Browser",
+      "summary": "An icon browser shows every icon of a pack, to search through:  clicking one copies the name that draws it.",
+      "tag": "ui-icon-browser",
+      "tabs": {"examples":"Examples","usage":"Usage","api":"API","theming":"Theming"},
+      "sections": [
+        {"id":"examples-types","title":"Types","tab":"examples"},
+        {"id":"examples-types-icon-browser","title":"Icon Browser","parent":0},
+        {"id":"usage-using-it","title":"Using it","tab":"usage"},
+        {"id":"usage-keyboard","title":"Keyboard","tab":"usage"},
+        {"id":"usage-accessibility","title":"Accessibility","tab":"usage"},
+        {"id":"api-attributes","title":"Attributes","tab":"api"},
+        {"id":"api-parts","title":"Parts","tab":"api"},
+        {"id":"api-texts","title":"Texts","tab":"api"},
+        {"id":"theming-tokens","title":"Tokens","tab":"theming"},
+        {"id":"theming-themes","title":"Themes","tab":"theming"}
+      ]
+    },
+    {
       "path": "ui-icon-picker.html",
       "title": "Icon Picker",
       "summary": "An icon picker lets people choose an icon by searching for it and clicking its glyph.",

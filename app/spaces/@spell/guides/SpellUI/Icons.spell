@@ -31,11 +31,10 @@
 
 	<section label="Browse">
 		<markdown>
-			Open the picker for a search box and a grid of every icon this page knows, in Font Awesome's categories.
-			Type to filter, by name or by what it shows (`mail` finds `envelope`).
-			The name it shows is the one `name` takes.
+			Pick a pack, type to search (Font Awesome's search terms too: `mail` finds `envelope`), click an icon to copy the
+			name `name` takes. Each tile is labelled with that name; its other names are listed in its tooltip.
 		</>
-		<icon-picker value="star" aria-label="Icon"/>
+		<icon-browser address />
 		<markdown>
 			Icons: [Font Awesome 7 Free](https://fontawesome.com) (CC BY 4.0). Names in the Fomantic pack from
 			[Fomantic-UI](https://github.com/fomantic/Fomantic-UI) (MIT).

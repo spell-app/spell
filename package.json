@@ -432,6 +432,11 @@
       "types": "./ui/dist-types/src/components/ui-icon-picker/index.d.ts",
       "default": "./ui/src/components/ui-icon-picker/index.ts"
     },
+    "./ui/components/ui-icon-browser": {
+      "spell-source": "./ui/src/components/ui-icon-browser/index.ts",
+      "types": "./ui/dist-types/src/components/ui-icon-browser/index.d.ts",
+      "default": "./ui/src/components/ui-icon-browser/index.ts"
+    },
     "./ui/components/ui-image": {
       "spell-source": "./ui/src/components/ui-image/index.ts",
       "types": "./ui/dist-types/src/components/ui-image/index.d.ts",
