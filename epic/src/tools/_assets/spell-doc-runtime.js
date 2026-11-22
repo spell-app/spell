@@ -272,8 +272,11 @@ let foldWiring = null
 
 // still, from the first moment:  a page coming up draws its folds and marks as they ARE, never animating into them
 quietFor(QUIET_LOAD_MS)
+// a page that loads the bundle after it's parsed (the reference pages:  `core-reference.js` draws, then adds it) starts
+// once the bundle has run to its end:  a constant declared below `start()`'s callers (`LAZY_SCRIPT`) is still unset
+// while it runs, so starting at once threw (epic `epic-engine` T131)
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once: true })
-else void start()
+else queueMicrotask(() => void start())
 
 /**
  * QUIET (Owen, 2026-10-25:  "part of the reason the page continually flashes is that you are running animations when
