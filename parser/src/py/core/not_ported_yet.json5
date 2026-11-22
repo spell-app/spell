@@ -22,8 +22,8 @@
       "names": ["readFile"]
     },
     {
-      "why": "A value that waits, on a page:  Python sends its page with its values (answer_of(), answer_now()), so it has no \"…\" to show (epic language P12)",
-      "names": ["waitedValue", "waitedValueKeyFor", "whileWaiting"]
+      "why": "A value, or a part of a page, that waits:  Python sends its page with its values (answer_of(), answer_now()), so it has no \"…\" or spinner to show (epic language P12, old-console-redo T35)",
+      "names": ["waitedValue", "waitedValueKeyFor", "whileWaiting", "drawWaiting"]
     },
     {
       "why": "choose's dialog on a page (epic language P66):  Python's choose() names its rows itself, and asks its page for this",
