@@ -22,9 +22,9 @@
 		<markdown>Edit a value below to try it.</>
 		<html>
 			<ui-docs-tokens family="ui-transition" playground>
-				<button type="button" class="ui button" commandfor="transition-demo-fade-playground" command="--toggle">Fade up</>
-				<button type="button" class="ui button" commandfor="transition-demo-scale-playground" command="--toggle">Scale</>
-				<button type="button" class="ui button" commandfor="transition-demo-flip-playground" command="--toggle">Horizontal flip</>
+				<ui-button commandfor="transition-demo-fade-playground" command="--toggle">Fade up</ui-button>
+				<ui-button commandfor="transition-demo-scale-playground" command="--toggle">Scale</ui-button>
+				<ui-button commandfor="transition-demo-flip-playground" command="--toggle">Horizontal flip</ui-button>
 				<ui-stack class="ui-cluster">
 					<ui-transition id="transition-demo-fade-playground" animation="fade up" inline visible>
 						<ui-segment>Fade up</>
