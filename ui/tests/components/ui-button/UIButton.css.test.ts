@@ -1,7 +1,7 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
 import { ClassBuilder } from "spell/ui/elements"
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 import type { ComponentVocabulary } from "spell/ui/vocabulary"
 
 import { Fixture } from "spell/test-helpers/Fixture"
@@ -66,7 +66,7 @@ describe("UIButton.css source", () => {
   })
 
   it("covers every class word the vocabularies can emit", () => {
-    const css = buttonRaw + colorsCSS
+    const css = buttonRaw + colorsSharedCSS
     for (const vocabulary of [buttonVocabulary, buttonsVocabulary, orVocabulary]) {
       for (const phrase of classPhrases(vocabulary))
         expect(covers(css, phrase), `${vocabulary.tag}: ${phrase}`).toBe(true)

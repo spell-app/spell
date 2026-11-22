@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Recipe Box</title>
+    <meta
+      name="description"
+      content="Recipes kept on a real local server, added to and changed in the page, with a merge when two people change one recipe.  One line changes the back-end from REST to GraphQL to a folder of files to a spreadsheet."
+    />
+    <meta name="spell-saga" content="spell-language" />
+    <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+  </head>
+  <body class="spell-doc-page">
+    <spell-site-header></spell-site-header>
+    <div class="spell-doc">
+      <main class="spell-doc-main">
+        <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+          <ui-breadcrumb link="/pages/index.html" target="src-packages-docs-index-html">Spell Epic</ui-breadcrumb>
+          <ui-breadcrumb selected>The Recipe Box</ui-breadcrumb>
+        </ui-breadcrumbs>
+        <ui-sticky class="spell-h1"
+          ><header class="spell-page-head"><h1>The Recipe Box</h1></header></ui-sticky
+        >
+        <p class="lede">
+          Recipes on a real local server. Every change shows at once and is saved in the background, and nothing on the
+          page knows which kind of server it's talking to.
+        </p>
+
+        <p>
+          To see them all at once, showing that one set of recipes can have several ways in:
+          <a href="all-back-ends.html" target="src-guides-data-experiments-recipe-box-all-back-ends-html"
+            >every back-end, side by side</a
+          >.
+        </p>
+
+        <!-- The one line:  "rest", "graphql", "folder", "room", "sheet", "sheet-no-id", "device", "google-sheet", "airtable" or "atmosphere".  (Or leave it, and add ?back-end=sheet to the address.) -->
+        <recipe-box back-end="rest"></recipe-box>
+
+        <ui-section id="try-it" label="To try it" sticky collapsible dividing open="false">
+          <ol>
+            <li>
+              Start the servers, at the kit's root, and leave them running:
+              <pre><code>yarn tsx scripts/recipe-servers.ts</code></pre>
+              REST and GraphQL keep their recipes in one CSV file, and the folder and the room in one folder. They
+              print where both are, and both stay between runs.
+            </li>
+            <li>Add a recipe, or change one. "saving…" then "saved" shows at the top.</li>
+            <li>
+              For each person's own account: open
+              <a href="?back-end=atmosphere" target="src-guides-data-experiments-recipe-box">this address</a>, a fake of
+              AT Protocol's network the servers run, with two people on two hosts. Sign in as
+              <code>alice.test</code>, and in a second window as <code>bob.test</code>. Each sees everyone's recipes,
+              what either adds shows in the other at once, and changing the other's is refused. Your own real account:
+              <a href="recipe-box-account.html" target="src-guides-data-experiments-recipe-box-account-html"
+                >this page</a
+              >, where everything saved is public.
+            </li>
+            <li>Open this page in a second window. What you change in one shows in the other within 5 seconds.</li>
+            <li>
+              For a clash, open this page in a second window, and change one recipe's title in both within 5 seconds:
+              the second one's is kept, and a notice holds what the first wrote, with <b>Use theirs</b>. Change its
+              notes in the other window instead, and both stand with no notice. Or edit the row in the CSV file: it's
+              the same clash.
+            </li>
+            <li>
+              Switch to GraphQL: change <code>back-end="rest"</code> to <code>back-end="graphql"</code> in this page, or
+              open <a href="?back-end=graphql" target="src-guides-data-experiments-recipe-box">this address</a>. It's
+              the same recipes, in the same CSV file. GraphQL here has no versions, so a clash has no notice: the last
+              save wins that field.
+            </li>
+            <li>
+              Switch to a folder: change <code>back-end="rest"</code> to <code>back-end="folder"</code> in this page, or
+              open <a href="?back-end=folder" target="src-guides-data-experiments-recipe-box">this address</a>. The
+              servers print where the folder is: a list file, and one file per recipe. Open
+              <code>recipes/r-1.json</code> in VS Code, change its title, and save: the page follows within 5 seconds. A
+              change on the page is saved in that file. A file that isn't JSON yet is left alone until it is.
+            </li>
+            <li>
+              Switch to a CSV file: change <code>back-end="rest"</code> to <code>back-end="sheet"</code> in this page,
+              or open <a href="?back-end=sheet" target="src-guides-data-experiments-recipe-box">this address</a>. It
+              needs no server: the file,
+              <a href="recipes.csv" target="src-guides-data-experiments-recipe-box-recipes-csv"
+                ><code>recipes.csv</code></a
+              >, is beside this page. It's read only, so there's nothing to type in or press. Change a line of the file
+              in VS Code and save: the page follows within 5 seconds. Give two rows one id, or blank one, and it says
+              which rows it left out.
+            </li>
+            <li>
+              The same file with no id column named:
+              <a href="?back-end=sheet-no-id" target="src-guides-data-experiments-recipe-box">this address</a>. The rows
+              still show, and it says they share no identity.
+            </li>
+            <li>
+              Use a sample: press <b>Use a sample</b>, on the
+              <a href="?back-end=sheet" target="src-guides-data-experiments-recipe-box">read-only CSV file</a> or any
+              other. The same recipes come up, and now you can change them, add to them and remove them. None of it
+              reaches the real place, and
+              <a href="recipes.csv" target="src-guides-data-experiments-recipe-box-recipes-csv"
+                ><code>recipes.csv</code></a
+              >
+              doesn't change. <b>Use the real place</b> brings the real ones back, and <b>Use a sample</b> brings your
+              changes back again, even after a reload: they're kept in this browser. It's what the editor's side bar
+              will offer. With the servers stopped, it's how to see a place that can't be reached: on
+              <a href="?back-end=rest" target="src-guides-data-experiments-recipe-box">REST</a>, with no servers
+              running, a sample starts empty, as this page names no type to make records from.
+            </li>
+            <li>
+              Your own Google Sheet, read only, with no account: share it with "anyone with the link", give it columns
+              <code>id</code>, <code>title</code>, <code>servings</code> and <code>notes</code>, then add
+              <code>&amp;sheet=</code> and its address to
+              <a href="?back-end=sheet" target="src-guides-data-experiments-recipe-box">this one</a>, written as
+              <code>https://docs.google.com/spreadsheets/d/&lt;its id&gt;/export?format=csv&amp;gid=0</code>.
+            </li>
+            <li>
+              To write to it too, it goes through the servers, which hold the key: the epic page's manual test has every
+              step (<a href="?back-end=google-sheet" target="src-guides-data-experiments-recipe-box">this address</a>,
+              once they're started with it). There are no versions in a Google Sheet, so the last save wins each cell.
+            </li>
+            <li>
+              Airtable: <a href="?back-end=airtable" target="src-guides-data-experiments-recipe-box">this address</a>,
+              through the servers, which hold its key. It's a stub of Airtable until they're started with your own base:
+              the epic page's manual test has every step. The last save wins each field.
+            </li>
+            <li>
+              A room: open
+              <a href="?back-end=room" target="src-guides-data-experiments-recipe-box">this address</a> in two windows,
+              side by side. What one window does shows in the other at once, with nothing polling. Change one recipe's
+              title in both at the same moment: each may flicker, then both show one of them. Paste a long sentence into
+              its notes in both: the one that lost keeps its words in a notice, with <b>Use mine</b>. Press
+              <b>Remove</b> in one while typing in the same recipe in the other: it goes, with <b>Restore</b>. Press
+              <b>Up</b> or <b>Down</b> in both, and <b>One more serving</b> in both: nothing doubles, and both additions
+              count. <b>Go offline</b>, change something, and come back. A room trusts everyone in it: there are no
+              per-person rules yet.
+            </li>
+            <li>
+              Stop the servers and make a change. It stays on the page, says it's trying again, and goes through once
+              they're back, even after a reload.
+            </li>
+          </ol>
+        </ui-section>
+
+        <footer class="spell-doc-footer">
+          <ui-divider></ui-divider>
+          <p class="meta">Last checked 2026-10-31 against branch <code>data</code>.</p>
+        </footer>
+      </main>
+    </div>
+    <script src="/_epic/assets/highlight.min.js"></script>
+    <script src="/_epic/assets/spell-ui.js"></script>
+    <script src="recipe-box.bundle.js"></script>
+  </body>
+</html>

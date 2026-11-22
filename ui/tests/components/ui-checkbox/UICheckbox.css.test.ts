@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsCSS, colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
@@ -53,7 +53,7 @@ describe("UICheckbox.css source", () => {
   })
 
   it("covers every class word the vocabularies can emit, and the types", () => {
-    const css = checkboxRaw + colorsCSS
+    const css = checkboxRaw + colorsSharedCSS
     for (const vocabulary of [checkboxVocabulary, radioVocabulary]) {
       for (const phrase of Sheets.classPhrases(vocabulary))
         expect(Sheets.covers(css, phrase), `${vocabulary.tag}: ${phrase}`).toBe(true)

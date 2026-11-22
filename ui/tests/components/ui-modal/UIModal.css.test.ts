@@ -2,7 +2,7 @@ import { describe, expect, it, onTestFinished } from "vite-plus/test"
 import { page } from "vite-plus/test/browser"
 
 import { escapeRegExp } from "spell/util/string"
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
@@ -77,7 +77,7 @@ describe("UIModal.css source", () => {
   })
 
   it("covers every class word the vocabulary can emit", () => {
-    const css = modalRaw + colorsCSS
+    const css = modalRaw + colorsSharedCSS
     for (const phrase of Sheets.classPhrases(modalVocabulary))
       expect(Sheets.covers(css, phrase), `${modalVocabulary.tag}: ${phrase}`).toBe(true)
   })

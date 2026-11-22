@@ -251,7 +251,7 @@ Each folder hands it a list, named in the folder's own `package.json`:
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart BT
   base["spell, the base<br/>server · bundle · commands · wwod · publish · pony · help"]
-  lang["spell-parser<br/>compile · lint · run · test ... thirteen in all"] --> base
+  lang["spell-parser<br/>compile · lint · run · test ... fourteen in all"] --> base
   ui["spell-ui<br/>icon · ssr · pack · design"] --> base
   epic["spell-epic<br/>voice check"] --> base
   app["spell-app<br/>app create · serve · vscode, projects"] --> base
@@ -612,7 +612,7 @@ spell runbook check netbox-demo
 
 ## spell-parser
 
-The language's thirteen commands:  build a program, run it, test it, see what Spell made of what you wrote,
+The language's fourteen commands:  build a program, run it, test it, see what Spell made of what you wrote,
 and check its language packs.
 They're `spell-parser`'s, but their work is `spell-app`'s for now, through its `language` hook
 ([above](#each-folder-brings-its-own-commands));  the language packs' two are the exception, `spell-parser`'s own.
@@ -690,12 +690,13 @@ spell test @spell/examples/Solitaire 2>/dev/null
 <summary>Output</summary>
 
 ```text
-✓ test card setup  (19 checks)
-✓ test a new deck  (5 checks)
+✓ test card setup  (15 checks)
+✓ test card images  (10 checks)
 ✓ test piles  (8 checks)
+✓ test a new deck  (5 checks)
 ✓ test the moves  (11 checks)
 
-4 passed
+5 passed
 ```
 
 </details>
@@ -773,7 +774,7 @@ spell describe @spell/examples/Solitaire Card color
 
 ```text
 property color of Card
-app/spaces/@spell/examples/Solitaire/Card.spell:18
+app/spaces/@spell/examples/Solitaire/Card.spell:8
 
 Spell
     its "color" is one of red, black
@@ -831,6 +832,7 @@ Two more in action, a whole match tree from `spell parse` and FizzBuzz under `sp
 | `spell speedtest --by-module` | each test timed on its own too:  a table by module, then the rules that grew most |
 | `spell speedtest --baseline save` | saves this commit and its numbers as the baseline, in the command's `speedBaseline.json` |
 | `spell speedtest --budget 5` | times against the saved baseline, by module, and fails when the tests both sides have take over 5% longer |
+| `spell speedtest --pipeline` | times the editing pipeline instead:  Solitaire's cold parse, the incremental tests' four edits, a compile, startup, and one run of the compiled program;  with `--json`, `--baseline save` and `--budget 5` too |
 
 - A side's runs combine as the mean of their averages, the lowest min and the highest max.
   With 3 or more runs, one fluke (an average 25% over the median) is dropped.
@@ -846,6 +848,44 @@ Two more in action, a whole match tree from `spell parse` and FizzBuzz under `sp
   before merging.
   - A run always times the baseline's commit again, beside this one, on the same machine:
     the numbers saved with it are only a record.
+- `--pipeline` times what the editor does as you type, each number the median of the runs:
+  - CPU time after a warm-up, as the rule tests are, except the program's run, which is a child process:  the clock's
+  - its baseline is `spell perf`'s (below), so `--budget` compares with the numbers saved there, not a commit
+
+</details>
+
+### Measuring speed and size
+
+| Command | What it does |
+| --- | --- |
+| `spell perf run` | measures the editor, a docs page, an epic page and run mode in a headless browser, on a desktop and an emulated phone, then prints the report;  about 5 minutes |
+| `spell perf report` | the last run's numbers beside the run before it and the baseline, "WORSE" past 10% |
+| `spell perf budget` | every bundle's size, brotli, against its budget and its ceiling;  exits 1 when one grew past its ceiling |
+
+<details>
+<summary>Every option of perf, and how it measures</summary>
+
+| Option | What it does |
+| --- | --- |
+| `spell perf run --full` | every measurement, 5 loads each:  load, leaks, typing, accessibility, listeners, style sheets, a CPU profile and the editing pipeline |
+| `spell perf run --page editor,docs` | which pages:  `editor`, `docs`, `epic`, `run` (default all) |
+| `spell perf run --profile phone` | which profiles:  `desktop`, `phone`, `phonewide` (default `desktop` and `phone`) |
+| `spell perf run --steps load,typing` | which measurements (default `load`) |
+| `spell perf run --runs <count>` | cold loads per page and profile, medians reported (default 1, 5 with `--full`) |
+| `spell perf run --wait <minutes>` / `--force` | how long to wait for a quiet machine (default 10) / don't wait |
+| `spell perf run --baseline save` | this run is the baseline too, `perfBaseline.json` beside the command's code |
+| `spell perf budget --tighten` | lowers each ceiling to the bundle's size now plus 2%:  after a change that shrank one |
+
+- The phone is Playwright's Pixel 7, its CPU slowed 4x and a 5G-like network (20ms, 50 Mbps down, 20 up);
+  `phonewide` is the same at 1280 x 800, where the editor shows its code pane.
+- The editor is a production build made into a temporary folder and served, its server paths passed on to the running
+  page server:  start it first (`spell server start`).  Nothing in the checkout changes:  its writes are refused.
+- A run waits for the machine's test turn (`epic turns run test`), then for a quiet machine (a 1-minute load under half
+  the CPUs).  Still busy, it runs anyway, and says so:  times are noisy then, bytes and counts aren't.
+- Each run is a dated file in `.perf-results/` at the kit's root, git-ignored.
+- The budgets are `app/perf-budgets.json5`, brotli KB:  each with what it should weigh and a CEILING, its size the day
+  it was set plus 2%.  CI runs `spell perf budget`, so a bundle can only get smaller;  two of them are numbers a run
+  measures in a browser, and are checked only after one.
 
 </details>
 
@@ -1309,7 +1349,7 @@ owen@spell       Projects       ...
 @spell/guides    Guides         ... projects
 @spell/sites     Sites          1 project
 @spell/library   Libraries      ... projects
-@spell/editor    The editor     ... projects
+@spell/editor    The editor     ...
 @spell/test      Test fixtures  ... projects
 ```
 
@@ -1662,6 +1702,7 @@ They're named in the command line's goals and the commands page's roadmap.
 
 ## See also
 
+- The guide:  [The `spell` Command](../guides/cli.html), in the kit's guides/ folder
 - [README.md](../README.md):  setup from zero, and the index of every page
 - [README/server.md](server.md):  what `spell server` and `spell app serve` start
 - [spell-epic's README-cli.md](https://github.com/spell-app/spell/blob/main/epic/README-cli.md):  every `epic` verb, in full

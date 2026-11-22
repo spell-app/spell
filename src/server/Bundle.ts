@@ -13,7 +13,7 @@ import {
   writeFileSync
 } from "node:fs"
 import { dirname, join, posix, relative, resolve, sep } from "node:path"
-import { gzipSync } from "node:zlib"
+import { brotliCompressSync, constants as zlib, gzipSync } from "node:zlib"
 
 import { kb } from "spell/util/number"
 import { findUp } from "spell/util/node/findUp"
@@ -365,18 +365,36 @@ export class Bundle {
 
   /**
    * The lines that report the sizes of the bundle built in `folder`:  its eager files, the totals, the biggest lazy
-   * chunks;  raw and gzipped, in `kb()`.
-   * - eager:  `entries` and every chunk a JS one imports STATICALLY, transitively (what a page loads before any
-   *   `import()`)
-   * - counted:  every file under `folder` but the linked built-in files and dot files (the build record), or only those `only`
-   *   matches
+   * chunks;  raw, gzipped and brotli, in `kb()`.
+   * - eager and counted:  as `firstLoad()` says
    */
   static sizeReport({ name, folder, seconds, entries, only }: SRV.BundleSizeParams): string[] {
+    const { files: eager, lazy, all } = Bundle.firstLoad({ folder, entries, only })
+    return [
+      `${name} bundle (${seconds.toFixed(1)}s):  ${relative(process.cwd(), folder)}/`,
+      ...eager.slice(0, 4).map((size) => `  ${size.file.padEnd(28)} ${kb(size.raw).padStart(10)}  gz ${kb(size.gzip)}`),
+      `  eager ${kb(sum(eager, "raw"))} (gz ${kb(sum(eager, "gzip"))}, br ${kb(sum(eager, "brotli"))});  ` +
+        `all ${all.length} files ${kb(sum(all, "raw"))} (gz ${kb(sum(all, "gzip"))}), icon packs and sounds linked`,
+      `  biggest lazy:  ${lazy
+        .slice(0, 6)
+        .map((size) => `${size.file} ${kb(size.raw)}`)
+        .join(", ")}`
+    ]
+  }
+
+  /**
+   * What a page loads FIRST of the bundle built in `folder`, and the rest, each file sized raw, gzipped and brotli,
+   * the way a browser fetches them:  each file on its own (`sizesOf()`).
+   * - eager (`files`):  `entries` and every chunk a JS one imports STATICALLY, transitively (what a page loads before
+   *   any `import()`), biggest first;  `raw`, `gzip`, `brotli` are their sums
+   * - `lazy`:  every other file, biggest first;  `all`:  both
+   * - counted:  every file under `folder` but the linked built-in files and dot files (the build record), or only those
+   *   `only` matches
+   * - the ONE way a bundle is sized:  `sizeReport()`, and the app's size budgets (`spell perf budget`)
+   */
+  static firstLoad({ folder, entries, only }: Omit<SRV.BundleSizeParams, "name" | "seconds">): SRV.BundleLoad {
     const files = filesUnder(folder).filter((file) => !only || only.test(file))
-    const sizes = files.map((file) => {
-      const bytes = readFileSync(join(folder, file))
-      return { file, raw: bytes.length, gzip: gzipSync(bytes).length }
-    })
+    const sizes = files.map((file) => ({ file, ...Bundle.sizesOf(readFileSync(join(folder, file))) }))
     const eagerFiles = new Set<string>()
     for (const entry of entries) {
       if (entry.endsWith(".js")) staticGraph(folder, entry, eagerFiles)
@@ -384,17 +402,28 @@ export class Bundle {
     }
     const eager = sizes.filter((size) => eagerFiles.has(size.file)).sort((a, b) => b.raw - a.raw)
     const lazy = sizes.filter((size) => !eagerFiles.has(size.file)).sort((a, b) => b.raw - a.raw)
-    const sum = (list: readonly FileSize[], key: "raw" | "gzip") => list.reduce((total, size) => total + size[key], 0)
-    return [
-      `${name} bundle (${seconds.toFixed(1)}s):  ${relative(process.cwd(), folder)}/`,
-      ...eager.slice(0, 4).map((size) => `  ${size.file.padEnd(28)} ${kb(size.raw).padStart(10)}  gz ${kb(size.gzip)}`),
-      `  eager ${kb(sum(eager, "raw"))} (gz ${kb(sum(eager, "gzip"))});  all ${files.length} files ` +
-        `${kb(sum(sizes, "raw"))} (gz ${kb(sum(sizes, "gzip"))}), icon packs and sounds linked`,
-      `  biggest lazy:  ${lazy
-        .slice(0, 6)
-        .map((size) => `${size.file} ${kb(size.raw)}`)
-        .join(", ")}`
-    ]
+    return {
+      files: eager,
+      raw: sum(eager, "raw"),
+      gzip: sum(eager, "gzip"),
+      brotli: sum(eager, "brotli"),
+      lazy,
+      all: sizes
+    }
+  }
+
+  /**
+   * `bytes` raw, gzipped (level 9) and brotli (quality 11):  as a host that compresses its files ahead would send them.
+   * - brotli is the size budgets' unit (epic `solid-2-final` P1)
+   */
+  static sizesOf(bytes: Buffer): SRV.CompressedSizes {
+    return {
+      raw: bytes.length,
+      gzip: gzipSync(bytes, { level: 9 }).length,
+      brotli: brotliCompressSync(bytes, {
+        params: { [zlib.BROTLI_PARAM_QUALITY]: 11, [zlib.BROTLI_PARAM_SIZE_HINT]: bytes.length }
+      }).length
+    }
   }
 
   /** what its last build recorded;  `undefined` when never built, or unreadable */
@@ -462,5 +491,7 @@ function staticGraph(folder: string, entry: string, seen: Set<string>): void {
   }
 }
 
-/** One file's size, raw and gzipped, bytes. */
-type FileSize = { file: string; raw: number; gzip: number }
+/** The sum of `key` over `list`, bytes. */
+function sum(list: readonly SRV.FileSizes[], key: keyof SRV.CompressedSizes): number {
+  return list.reduce((total, size) => total + size[key], 0)
+}

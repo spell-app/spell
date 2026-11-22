@@ -139,6 +139,10 @@ export default function languageCommands(spell: Command): void {
     .option("--by-module", "time each test too:  a table by module, over the tests both sides have")
     .option("--baseline <save>", "save this checkout's commit and numbers as the baseline --budget times against")
     .option("--budget <percent>", "time against the saved baseline, by module, and fail over this much slower, e.g. 5")
+    .option(
+      "--pipeline",
+      "time the editing pipeline instead:  Solitaire's whole parse, edits, compile, a run and startup"
+    )
     .action((module: string | undefined, _options, command: Command) => language("speedtest", listOf(module), command))
 
   spell

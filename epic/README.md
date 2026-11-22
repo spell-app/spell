@@ -11,8 +11,8 @@ and you review it on the page itself, in VS Code, while it works.
 
 - **Real today:**  the repo this plugin lives in is built this way.  Its pages hold 70 epics, 48 of them done.
 - **Not yet:**  all of it in any agent but Claude Code.
-  It's a Claude Code plugin first;  Codex runs seventeen of its twenty-two skills and its end-of-turn hooks from the same
-  files, not yet tried with a real Codex (below, "Coming").
+  It's a Claude Code plugin first;  Codex runs most of its skills ([which](README-skills.md#in-codex)) and its
+  end-of-turn hooks from the same files, not yet tried with a real Codex (below, "Coming").
 
 Here to run one?  [Skip to "Try it"](#try-it--a-small-epic-in-your-own-repo).
 
@@ -337,28 +337,22 @@ epic summary spanish
 
 ```text
 Spanish
-  [x] P1 · Unicode Words  (2-3h)
-...
-  [x] P11 · Solitario  (3-4h)
-...
-  [x] P17 · Parser Warnings in Spanish  (3-4h)
-...
-estimate:  ... in all, ... left
-...
-open limits:
-  - T1  Agreement is a warning, never an error
-  - T2  ser and estar are interchangeable to the parser
+  32 phases done  (--all lists them)
+estimate:  ... in all, 0m left
+open judgements:
+  - J4  The inflector in play: the parsing parser's, else English
+  - J5  Element tags keep the project's name as written
 ...
 ```
 
 </details>
 
-_On Spell's own pages:  the plan for writing Spell in Spanish, its Solitario done, its limits still open._
+_On Spell's own pages:  the plan for writing Spell in Spanish, every phase done, its judgement calls still open for review._
 
 Every verb, by group, and how to name what one acts on:  [README-cli.md](README-cli.md).
 
-The skills are what you type:  `/epic`, `/isolate`, `/details`, `/bg` and eighteen more,
-plus fourteen hooks that run without being asked.
+The skills are what you type:  `/epic`, `/isolate`, `/details`, `/bg` and the rest,
+plus the hooks that run without being asked.
 When to reach for which:  [README-skills.md](README-skills.md).
 
 ## Beyond Spell:  what it takes
@@ -383,7 +377,7 @@ on top of WWOD, [the house style](https://github.com/spell-app/spell/blob/main/R
 | --- | --- |
 | [.claude-plugin/](.claude-plugin/) | the plugin's manifest, `epic`;  its marketplace, `spell`, is the repo's root `.claude-plugin/marketplace.json`.  Claude Code installs a copy of this folder, which `epic plugin install` links back to it |
 | [.codex-plugin/](.codex-plugin/) | the same plugin's manifest for Codex, naming this same folder:  `epic plugin install --codex` |
-| [skills/](skills/) | the twenty-two skills, a `SKILL.md` each |
+| [skills/](skills/) | the skills, a `SKILL.md` each ([README-skills.md](README-skills.md)) |
 | [coherence/](coherence/) | the coherence review's rules ([procedures](coherence/procedures.md)) and the `coherence` agent that reads them:  ONE way of doing each thing;  each repo's own catalog and word list are its `agents/coherence/` |
 | [designer/](designer/) | the design review's rules:  [the house taste](designer/designer.md), with the asks behind it quoted;  [craft](designer/craft.md), interfaces.dev's and jakub.kr's rules;  [procedures](designer/procedures.md);  and the `designer` agent that reads them |
 | [plan-check/](plan-check/) | the `plan-check` agent, which holds a phase's diff up against its accepted build plan before the phase closes:  what wasn't built, and what was built unasked |
@@ -461,7 +455,7 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
 | [README.md](README.md) | <ul><li>this page:  an epic page, and an epic's life</li><li>three things that move, if you know tickets, pull requests and chat</li><li>try it;  the words, what a page lets you do, the commands</li><li>beyond Spell;  working on it</li></ul> |
 | [README-how-it-works.md](README-how-it-works.md) | <ul><li>sagas, epics and guides:  how each holds the next</li><li>the workflow:  two Accepts, then it builds</li><li>the page in annotated pictures:  header, items, "While you were out", the Review tab</li></ul> |
 | [README-pages.md](README-pages.md) | <ul><li>your first review, in four moves</li><li>the header and toolbar;  eight sections whose ids never change</li><li>a review round, comments and manual tests;  what each colour means</li><li>saga, details and choice pages, guides, the home page;  the `<epic-*>` elements</li></ul> |
-| [README-skills.md](README-skills.md) | <ul><li>twenty-two skills you type, fourteen hooks that run by themselves</li><li>planning and review;  worktrees and sessions;  background and offline</li><li>the hooks, and the prompt gate that reads first</li><li>two names for every skill</li></ul> |
+| [README-skills.md](README-skills.md) | <ul><li>the skills you type, and the hooks that run by themselves:  how many, and what each does</li><li>planning and review;  worktrees and sessions;  background and offline</li><li>the hooks, and the prompt gate that reads first</li><li>two names for every skill</li></ul> |
 | [README-cli.md](README-cli.md) | <ul><li>the six commands you'll actually type</li><li>an address is a page and an id:  `seo#J3`</li><li>one copy of the code;  how a `wait` wakes a session</li><li>every verb, by group;  where it stops</li></ul> |
 | [README-vscode.md](README-vscode.md) | <ul><li>the Spell Epic extension:  three commands and a reload</li><li>two views, each a page that stays;  which server answers</li><li>the window bridge, and how a session moves</li><li>working on it</li></ul> |
 | [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md), at the kit's root | <ul><li>what an epic is, why you'd want one, how you'll use it</li><li>try it, in one command</li></ul> |

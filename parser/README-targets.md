@@ -59,7 +59,7 @@ The other three are for where your code has to live:  a typed codebase, a librar
 | `js/solid`:  JavaScript on Solid | what the editor, the runners and `spell run` run;  draws into the page;  compiled for every project, whatever its file asks for | no types:  the snapshots and the runs are all that check it |
 | `ts/solid`:  TypeScript on Solid | the same program as a Solid developer writes it:  types where Spell knows them, standard decorators, JSX;  `tsc` checks it | a build before it runs;  a program that draws can't open in a browser from `spell run` yet |
 | `ts/lib`:  a TypeScript library | a project's classes in a single `.lib.ts` file, for code that isn't Spell to import;  the core without Solid | no drawing and no top-level steps:  it never runs on its own |
-| `py`:  Python | Python as a person writes it:  PEP 8's names, `range()`, `elif`, `async def` only where it waits;  a program that draws becomes a web app | Python 3.12 and uv;  thinner type hints than TypeScript's;  87 of the core's names not ported yet |
+| `py`:  Python | Python as a person writes it:  PEP 8's names, `range()`, `elif`, `async def` only where it waits;  a program that draws becomes a web app | Python 3.12 and uv;  thinner type hints than TypeScript's;  107 of the core's names not ported yet |
 
 🌱 WebAssembly is the fifth, and not here yet (below, "Coming").
 
@@ -128,7 +128,7 @@ The differences sit in four places:  imports, types, the element, and each langu
 | The card says | JavaScript | TypeScript | Python |
 | --- | --- | --- | --- |
 | _no line of its own:  the imports_ | `core, Thing, List, App, View, ViewableList` from `@spell/core`:  the whole set, used or not | the same and `prop`;  `E, SpellElement` from `@spell/elements` | `from spell_core import View, prop`:  only what it uses |
-| `a "card" is a view:` | `class Card extends View`, its tag from `core.defineElement(this, "solitaire")` | the same, and a `CardElement` class after it | `class Card(View):`, and no element:  Python draws HTML as text |
+| `a "card" is a view` | `class Card extends View`, its tag from `core.defineElement(this, "solitaire")` | the same, and a `CardElement` class after it | `class Card(View):`, and no element:  Python draws HTML as text |
 | `- its "suit" is one of ...` | `static Suits`, a getter and a setter | `Suits` `as const`, then `@prop(...) accessor suit!: Suit` | `SUITS`, a tuple, then `suit = prop(one_of=SUITS)` |
 | `- its "color" is:` ... | `get color()`, asking `core.includes(["diamonds", "hearts"], this.suit)` | the same, character for character | `@property def color(self) -> Any:`, asking `self.suit in [...]` |
 | `- it "is a face card" if ...` | `get isAFaceCard()` | the same | `@property def is_a_face_card(self) -> bool:` |
@@ -253,26 +253,29 @@ TypeScript, by package name:  `import * as People from "spell/app/spaces/@spell/
 Compile a program as a library and you see what's left:
 
 ```sh
-spell compile @spell/examples/fizzbuzz --target ts/lib --stdout
+spell compile @spell/test/fizzbuzz --target ts/lib --stdout
 ```
 
 <details>
 <summary>Output</summary>
 
 ```text
-✓ @spell/examples/fizzbuzz
-import { core, trigger } from "spell/parser/core/model"
+✓ @spell/test/fizzbuzz
+import { core } from "spell/parser/core/model"
 
-...
+/** File FizzBuzz.spell */
 export function playFizzbuzz() {
-  core.getRange(1, 100).forEach((number) => {
-    ...
+  return core.asAction({ undoneAs: "Play Fizzbuzz" }, () => {
+    core.getRange(1, 100).forEach((number) => {
+      ...
+    })
   })
 }
 ```
 
 </details>
 
+That's the frozen FizzBuzz, which only prints:  the example in `@spell/examples` draws a page now, which a library can't.
 The JavaScript starts with a heading and ends by calling `playFizzbuzz()`;  the library does neither,
 so importing it plays nothing.
 
@@ -349,6 +352,18 @@ A program that draws runs as a web app, without `--no-browser`:
     ([quartApp.ts](src/py/quartApp.ts))
 - Each compile rewrites the app only while nobody has edited it:  its first line holds a hash of the rest.
 
+### Counting from 0, the runtime, and the web
+
+- **Positions:**  Spell counts from 1, and compiled Python counts from 0, as Python does.
+  `card 3` written out compiles to `deck[2]`;  a position known only when it runs goes through `position()`,
+  [positions.py](src/py/core/spell_core/positions.py), the twin of the JavaScript core's.
+  A project whose file says `"listsStartAt": 0` counts from 0 in its Spell too, and needs no helper.
+- **The runtime:**  `spell_core`, one object, `core`, standing in for the running program's own core:
+  one per web visitor.
+  Its undo history (`undoing.py`), timers, dialogs and places are twins of the JavaScript core's.
+- **On the web:**  a program that draws is a Quart app, `spell_quart`, a game per visitor (above);
+  its page draws what Python sends, and every click goes back to Python as a message.
+
 The checks:
 - pyright on every test project's Python, as Python 3.12, in the `basic` mode VS Code's Python extension uses:
   it finds nothing in any of the seven.
@@ -356,7 +371,7 @@ The checks:
 
 The cost, beyond Python and uv:
 - **Its type hints are thinner than TypeScript's:**  where TypeScript says `rank: Rank`, Python says `rank: Any`.
-- 44 of the JavaScript core's names aren't in `spell_core` yet, most of them a browser's own (below).
+- 107 of the JavaScript core's names aren't in `spell_core` yet, most of them a page's own (below).
 - Two test projects of the nine have no Python snapshot yet:  the to-do app (below), and Solitario,
   which compiles to Python but has no snapshot pinning it.
 - A kind of node the Python writer can't write yet stops the compile, naming the kind.
@@ -365,19 +380,24 @@ The cost, beyond Python and uv:
 <summary>What isn't Python yet</summary>
 
 [not_ported_yet.json5](src/py/core/not_ported_yet.json5) lists the JavaScript core's names `spell_core` doesn't
-have, grouped by why (44 names):
+have, grouped by why (107 names, in 21 groups):
 
 | Why | Names |
 | --- | --- |
-| a browser's only:  a view's element, a page's markup, its shadow root | 11 |
-| pauses and events Python's runtime hasn't needed | 4 |
+| a browser's only:  a view's own element, a page's markup, its shadow root | 18 |
+| actions run by a person's keys, clicks and menus | 17 |
+| not decided yet:  a word of Python's own, a browser's only, or ported when a program needs it | 12 |
+| sounds and videos:  a page's speakers and screen | 9 |
+| a site's pages by address:  a site runs in the browser first | 8 |
+| carrying things over a recompile:  the page's runners only | 8 |
+| the steps around a server's action:  Python's places call no server's actions yet | 5 |
+| a page's tour | 5 |
 | a page's drag handlers:  the page calls them;  a Python program's page sends them to its things | 5 |
-| carrying things over a recompile:  the page's runners only | 3 |
-| an element's id on the page | 1 |
-| what the lookups search:  Python's take it on each call | 1 |
+| a value, or a part of a page, that waits:  Python sends its page its values | 4 |
+| pauses and events Python's runtime hasn't needed | 4 |
+| a file a person picks on this computer | 2 |
 | running a project's tests from a runner:  Python's tests run under pytest | 2 |
-| remembered props:  a Python program keeps none yet | 1 |
-| not decided yet:  a word of Python's own, a browser's only, or ported when a program needs it | 16 |
+| eight more, one name each:  a dropped file, `choose`'s dialog, the person menu, what people may do to a thing, the mouse and keys, an element's id, what the lookups search, remembered props | 8 |
 
 And the [todos-form-based](https://github.com/spell-app/spell/tree/main/app/spaces/@spell/test/todos-form-based/) test project has no Python snapshot:
 the Python writer can't write its function's named arguments yet.
@@ -455,6 +475,7 @@ These guides need a checkout with the epic folder beside it, and the page server
 
 ## See also
 
+- The guide:  [Targets](../guides/targets/targets.html), in the kit's guides/ folder
 - [README-parser](README-parser.md#5-output):  how a writer walks the tree;  the same `if`, two writers
 - [README-core](README-core.md):  the runtime JavaScript and TypeScript import, and how `spell_core` keeps in step
 - [README-spell](README-spell.md#the-frozen-test-projects):  the test projects, and the two examples, whose snapshots pin every target

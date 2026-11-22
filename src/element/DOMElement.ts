@@ -31,6 +31,7 @@ const HTMLElementOrShim = (globalThis.HTMLElement ?? class {}) as typeof HTMLEle
  *   Names marked "DOM API" are the browser's, from `HTMLElement` and the custom-element spec, not ours:
  *   - DOM API:  `connectedCallback()` (added to a page)
  *   - DOM API:  `disconnectedCallback()` (removed)
+ *   - DOM API:  `connectedMoveCallback()` (moved within the page by `moveBefore()`:  no disconnect, no connect)
  *   - DOM API:  `attributeChangedCallback()` (an attribute changed)
  *   - DOM API:  `static observedAttributes`
  *   - DOM API:  `attachInternals()`, kept as `internals` (custom states, ARIA defaults, forms)
@@ -155,6 +156,23 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
   disconnectedCallback() {
     this.stopFollowingRootDefaults()
     this.component?.onDisconnect()
+  }
+
+  /**
+   * DOM API:  the element was moved within its page by `moveBefore()`, where the browser has it.
+   * - Defining it is what makes the browser call it INSTEAD of `disconnectedCallback()` and `connectedCallback()`:
+   *   nothing the element set up while connected (overlays, observers, listeners) is torn down and set up again.
+   * - What a move can change is looked at again:
+   *   - the nearest root's defaults:  it may be under another root now ("Root defaults")
+   *   - the component's `onMove()`
+   * - A plain `insertBefore()` / `append()` of a connected element still disconnects and connects it:
+   *   only `moveBefore()` moves.
+   */
+  connectedMoveCallback() {
+    if (DOMElement.isPending(this)) return
+    this.stopFollowingRootDefaults()
+    this.followRootDefaults()
+    this.component?.onMove()
   }
 
   /**

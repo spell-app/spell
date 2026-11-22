@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Every Back-End</title>
+    <meta
+      name="description"
+      content="The recipe box nine times on one page, proving one set of recipes can have several ways in:  one CSV file behind a sheet that writes only the lines that changed, REST and GraphQL;  one folder of files behind a folder and a room in two windows;  one Airtable base in two tabs;  and this device on its own."
+    />
+    <meta name="spell-saga" content="spell-language" />
+    <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+    <style>
+      .back-ends {
+        display: grid;
+        gap: 1rem;
+        margin-inline: 12px;
+        min-width: 0;
+      }
+      .back-ends h2 {
+        margin-block: 0 0.25rem;
+        font-size: 1.15rem;
+      }
+      .back-ends h2 small,
+      .back-ends h3 small {
+        font-size: 0.85rem;
+        font-weight: normal;
+        color: var(--ui-text-muted, GrayText);
+      }
+      .frames {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+        column-gap: 1rem;
+        row-gap: 0.25rem;
+      }
+      /* each frame's title, lines and box line up across its row, however many lines it has */
+      .frames section {
+        display: grid;
+        grid-row: span 3;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: subgrid;
+        min-width: 0;
+      }
+      .frames section > * {
+        grid-column: 1;
+      }
+      /* a docs page adds its comment button beside each code block:  it shares the block's row */
+      .frames section > h3 {
+        grid-row: 1;
+      }
+      .frames section > epic-actions,
+      .frames section > pre {
+        grid-row: 2;
+      }
+      .frames section > iframe {
+        grid-row: 3;
+      }
+      .frames h3 {
+        margin-block: 0;
+        font-size: 1rem;
+      }
+      .frames pre {
+        margin-block: 0 0.25rem;
+        padding-block: 0.25rem;
+        font-size: 0.75rem;
+        line-height: 1.3;
+        tab-size: 2;
+      }
+      .frames iframe {
+        display: block;
+        width: 100%;
+        height: clamp(18rem, calc(50vh - 17.5rem), 26rem);
+        border: 1px solid var(--ui-border-color, currentColor);
+        border-radius: 8px;
+      }
+      /* wide enough:  this device is a column of its own, beside the two rows */
+      @media (width >= 2200px) {
+        .back-ends {
+          grid-template-columns: minmax(0, 1fr) 26rem;
+        }
+        .back-ends > div:nth-child(1),
+        .back-ends > div:nth-child(2),
+        .back-ends > div:nth-child(4) {
+          grid-column: 1;
+        }
+        .back-ends > div:nth-child(3) {
+          grid-column: 2;
+          grid-row: 1;
+        }
+      }
+    </style>
+  </head>
+  <body class="spell-doc-page">
+    <spell-site-header></spell-site-header>
+    <div class="spell-doc">
+      <main class="spell-doc-main">
+        <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+          <ui-breadcrumb link="/pages/index.html" target="src-packages-docs-index-html">Spell Epic</ui-breadcrumb>
+          <ui-breadcrumb link="recipe-box.html">The Recipe Box</ui-breadcrumb>
+          <ui-breadcrumb selected>Every Back-End</ui-breadcrumb>
+        </ui-breadcrumbs>
+        <ui-sticky class="spell-h1"
+          ><header class="spell-page-head"><h1>Every Back-End</h1></header></ui-sticky
+        >
+        <p class="lede">
+          One set of recipes, several ways in. Change a recipe in a frame, or its file in VS Code, and every frame in
+          that row follows.
+        </p>
+
+        <recipe-servers-bar class="servers"></recipe-servers-bar>
+
+        <div class="back-ends spell-full-width">
+          <div>
+            <h2>
+              One CSV file, three ways in
+              <small>Each frame asks every second, so a change shows within a second or two.</small>
+            </h2>
+            <div class="frames">
+              <section>
+                <h3>The sheet <small>with a server in front, it writes, and only the lines that changed</small></h3>
+                <pre><code class="language-spell">family cookbook is a sheet at "http://127.0.0.1:4791/api/places/recipes-csv":
+	- its id is its "id"</code></pre>
+                <iframe
+                  title="The recipe box, the CSV file as a sheet, through its place server"
+                  src="recipe-box-frame.html?back-end=sheet-server&amp;poll=1"
+                ></iframe>
+              </section>
+              <section>
+                <h3>REST <small>says versions, so a clash merges</small></h3>
+                <pre><code class="language-spell">family cookbook is a web server at "http://127.0.0.1:4791":
+	- a recipe's title is its "name"
+	- its version is its "version"</code></pre>
+                <iframe
+                  title="The recipe box, the CSV file through REST"
+                  src="recipe-box-frame.html?back-end=rest&amp;poll=1"
+                ></iframe>
+              </section>
+              <section>
+                <h3>GraphQL <small>says no versions, so the last save wins a field</small></h3>
+                <pre><code class="language-spell">family cookbook is a graphql server at "http://127.0.0.1:4791/graphql":
+	- a recipe's title is its "name"</code></pre>
+                <iframe
+                  title="The recipe box, the CSV file through GraphQL"
+                  src="recipe-box-frame.html?back-end=graphql&amp;poll=1"
+                ></iframe>
+              </section>
+            </div>
+          </div>
+
+          <div>
+            <h2>
+              One folder of files, three windows
+              <small>The room hears a change at once, and nothing in it polls.</small>
+            </h2>
+            <div class="frames">
+              <section>
+                <h3>The folder <small>one JSON file per recipe</small></h3>
+                <pre><code class="language-spell">family cookbook is a data folder at "http://127.0.0.1:4791/api/places/recipes"</code></pre>
+                <iframe
+                  title="The recipe box, the folder of files"
+                  src="recipe-box-frame.html?back-end=folder&amp;poll=1"
+                ></iframe>
+              </section>
+              <section>
+                <h3>The room <small>a referee puts every change in order</small></h3>
+                <pre><code class="language-spell">family cookbook is a room at "http://127.0.0.1:4791/api/rooms/recipes"</code></pre>
+                <iframe
+                  title="The recipe box, the folder of files through a room"
+                  src="recipe-box-frame.html?back-end=room"
+                ></iframe>
+              </section>
+              <section>
+                <h3>The same room, a second window <small>Go offline, change both, come back</small></h3>
+                <pre><code class="language-spell">family cookbook is a room at "http://127.0.0.1:4791/api/rooms/recipes"</code></pre>
+                <iframe
+                  title="The recipe box, the same room, a second window"
+                  src="recipe-box-frame.html?back-end=room"
+                ></iframe>
+              </section>
+            </div>
+          </div>
+
+          <div>
+            <h2>Sharing nothing</h2>
+            <div class="frames">
+              <section>
+                <h3>This device <small>only this browser</small></h3>
+                <pre><code class="language-spell">family cookbook is a database on this device</code></pre>
+                <iframe title="The recipe box on this device" src="recipe-box-frame.html?back-end=device"></iframe>
+              </section>
+            </div>
+          </div>
+
+          <div>
+            <h2>
+              One Airtable base, two tabs
+              <small>A stub of Airtable, unless you started the servers with your own. Its key stays on the server.</small>
+            </h2>
+            <div class="frames">
+              <section>
+                <h3>Airtable <small>the last save wins a field, with no notice</small></h3>
+                <pre><code class="language-spell">family cookbook is an airtable at "appXXXXXXXXXXXXXX":
+	- recipes live at "Recipes"
+	- a recipe's title is its "Title"
+	- its id is its "Spell id"
+	- it is authenticated with the secret "AIRTABLE_KEY"
+	- check it every 2 seconds</code></pre>
+                <iframe
+                  title="The recipe box, in an Airtable base"
+                  src="recipe-box-frame.html?back-end=airtable&amp;poll=2"
+                ></iframe>
+              </section>
+              <section>
+                <h3>The same base, another tab <small>the two share one read of Airtable</small></h3>
+                <pre><code class="language-spell">family cookbook is an airtable at "appXXXXXXXXXXXXXX":
+	- recipes live at "Recipes"
+	- a recipe's title is its "Title"
+	- its id is its "Spell id"
+	- it is authenticated with the secret "AIRTABLE_KEY"
+	- check it every 2 seconds</code></pre>
+                <iframe
+                  title="The recipe box, in the same Airtable base"
+                  src="recipe-box-frame.html?back-end=airtable&amp;poll=2"
+                ></iframe>
+              </section>
+            </div>
+          </div>
+        </div>
+
+        <ui-section id="to-try" label="To try" sticky collapsible dividing open="false">
+          <ol>
+            <li>
+              <b>Press Start</b> at the top of the page, which also says where the CSV file and the folder are: open
+              both in VS Code. <b>Restart</b> goes back to the first recipes. What the buttons start ends when the page
+              server does. Started by hand, they stay until stopped:
+              <pre><code>yarn tsx scripts/recipe-servers.ts</code></pre>
+            </li>
+            <li>
+              <b>Change a recipe in REST.</b> It's in the CSV file at once, and GraphQL and the sheet show it within a
+              second or two.
+            </li>
+            <li>
+              <b>Add, move, change and remove a recipe in the sheet,</b> with the file's diff open in VS Code, or
+              <code>git diff --no-index</code> against a copy: only that line changes. A note with a comma keeps its
+              quotes, and the row you didn't touch stays byte for byte. Move a row and edit it at once, and both show.
+            </li>
+            <li><b>Edit a row in VS Code, and save.</b> All three show it within a second.</li>
+            <li>
+              <b>A clash:</b> type in the same recipe's title in REST, and in VS Code or GraphQL, within a second of
+              each other. REST keeps yours, and a notice holds the other, with <b>Use theirs</b>. Change another field
+              or another row, and both stand with no notice.
+            </li>
+            <li>
+              <b>Change a recipe in the folder frame,</b> or its file in VS Code. Both room windows show it at once.
+              Change it in the room, and it's in the file, and the folder frame shows it within a second.
+            </li>
+            <li>
+              <b>Change a recipe in one Airtable frame.</b> The other shows it within a few seconds: nothing tells it, and
+              it finds out by reading again. However many tabs are open, the server reads Airtable once for each read in
+              each window.
+            </li>
+            <li>
+              <b>Edit it the way someone in Airtable's own window would:</b> a request straight to the stub, as if a person
+              typed there. Both frames show it within a few seconds, and nobody is told who changed it.
+              <pre><code>curl -s http://127.0.0.1:4795/v0/appStubStubStub01/Recipes -H "Authorization: Bearer patStub.notARealToken" | head -c 300
+curl -s -X PATCH http://127.0.0.1:4795/v0/appStubStubStub01/Recipes -H "Authorization: Bearer patStub.notARealToken" -H "Content-Type: application/json" -d '{"records":[{"id":"rec00000000000001","fields":{"Title":"Edited in Airtable"}}]}'</code></pre>
+            </li>
+            <li>
+              <b>A clash in Airtable:</b> type in one recipe's title in both frames. The last save wins that field, and
+              the other frame's words go, with no notice. Airtable has no way to refuse a stale save. Two different fields
+              both stand.
+            </li>
+            <li>
+              <b>Clash in a room:</b> type in one recipe's title in both windows. Each may flicker, then both show one
+              of them, and whoever lost a long text keeps it in a notice.
+            </li>
+          </ol>
+        </ui-section>
+
+        <ui-section id="what-is-shared" label="What's shared, and what isn't" sticky collapsible dividing open="false">
+          <ul>
+            <li>
+              <b>The CSV file:</b> a copy of <code>recipes.csv</code>, made the first time the servers start, in the
+              system's temporary folder. The file beside this page never changes. On
+              <a href="recipe-box.html?back-end=sheet" target="src-guides-data-experiments-recipe-box-recipe-box-html"
+                >the recipe box's own page</a
+              >, the sheet reads that one, at its plain address, and can't write: a browser can only fetch a file, so a
+              program writing to a plain address won't compile. A server in front is its address: a place server's,
+              <code>/api/places/...</code>, with no other word.
+            </li>
+            <li>
+              <b>Saving compares new rows with old.</b> Rows are matched by the id column, so an edit and a move at once
+              are both understood. Only the lines that differ are rewritten: quotes, line ends, a byte order mark, blank
+              lines and columns the program doesn't know all stay.
+            </li>
+            <li>
+              <b>With no id column,</b> rows are matched by their whole text: an added or moved row is found, but an
+              edited row reads as one removed and one added. Saving a change to one such row from a program is refused,
+              and says why.
+            </li>
+            <li>
+              <b>Versions:</b> a CSV file has no version column, so a row's version is a hash of what it holds. Editing
+              one row moves only that row's version, so only that row can clash.
+            </li>
+            <li>
+              <b>How close "at the same time" is:</b> every request reads the file first, so a save is seen at the next
+              request. VS Code has its own say: with unsaved edits, it warns you the file changed on disk.
+            </li>
+            <li>
+              <b>A file that doesn't read:</b> half saved, not UTF-8, or with a blank or repeated id. Every way in
+              answers as it last read and refuses to save over it, in words. Two saves at once take turns, under the
+              file's lock, and neither loses a row.
+            </li>
+            <li>
+              <b>The folder:</b> the room's referee keeps its recipes there, in the same files. A recipe added in
+              the folder frame has no place in the room's order yet, so it shows last.
+            </li>
+            <li>
+              <b>Airtable:</b> behind the servers, which hold its key: no page ever sees it. A row added in Airtable has
+              no Spell id, so it goes by Airtable's own id, <code>rec...</code>. A formula column reads and takes no
+              write. Your own base is the epic page's manual test.
+            </li>
+            <li>
+              <b>This device</b> is only in this browser, with no server. It starts empty, and a reload keeps what you
+              add.
+            </li>
+            <li>
+              <b>One process.</b> The servers are one program on one port, so stopping it stops the eight frames that need
+              it.
+            </li>
+            <li>
+              <b>Not a compiled program.</b> Each frame runs the page's <code>&lt;recipe-box&gt;</code>, on the same
+              places a Spell program uses. The lines of Spell above are what a program says to reach that same place.
+              The built-in example <code>@spell/examples/RecipeBox</code> is that program.
+            </li>
+          </ul>
+        </ui-section>
+
+        <footer class="spell-doc-footer">
+          <ui-divider></ui-divider>
+          <p class="meta">Last checked 2026-10-31 against branch <code>data</code>.</p>
+        </footer>
+      </main>
+    </div>
+    <script src="/_epic/assets/highlight.min.js"></script>
+    <script src="/_epic/assets/spell-ui.js"></script>
+    <script src="recipe-box.bundle.js"></script>
+  </body>
+</html>

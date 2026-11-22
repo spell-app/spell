@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Editor</title>
+    <meta
+      name="description"
+      content="Spell's editor app as a programmer meets it:  the code editor on CodeMirror 6 (typing helps, language features, files and undo, every line one height), and the property editors it makes and reads (editor pages, a type's Inspector layout, Project Settings)."
+    />
+    <meta name="spell-audience" content="programmers" />
+    <meta name="spell-topic" content="The App" />
+    <meta name="spell-voice" content="readme 2026-11-21" />
+    <meta name="spell-saga" content="app" />
+    <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+  </head>
+  <body class="spell-doc-page">
+    <spell-site-header></spell-site-header>
+    <div class="spell-doc">
+      <main class="spell-doc-main">
+        <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+          <ui-breadcrumb>Guides</ui-breadcrumb>
+          <ui-breadcrumb selected>The Editor</ui-breadcrumb>
+        </ui-breadcrumbs>
+        <ui-sticky class="spell-h1"
+          ><header class="spell-page-head"><h1>The Editor</h1></header></ui-sticky
+        >
+        <figure>
+          <img
+            src="/guides/codemirror/solitaire-bubbly.png"
+            alt="Solitaire.spell in the editor's code pane, drawn bubbly"
+            width="720"
+          />
+          <figcaption><em>Solitaire in the editor's code pane, drawn bubbly.</em></figcaption>
+        </figure>
+        <p class="lede">
+          Every place Spell's editor shows code runs on CodeMirror 6: the code pane, the Inspector's Code card, the
+          compiled pane, Publish's diff, notebook cells and <code>&lt;spell-editor&gt;</code>. Its chunk is 681 kB,
+          loaded only once a program has compiled and run. This page is the editor as you work in it, and how it's
+          built, then the property editors it makes and reads.
+        </p>
+        <ui-list class="spell-meta">
+          <ui-item icon="user"
+            >Written for: anyone changing how the editor app shows or edits code, or lays out a type's
+            properties</ui-item
+          >
+          <ui-item icon="flask">Checked: 2026-11-21, every file, command and menu item against that day's code</ui-item>
+          <ui-item icon="book open"
+            >The reference beside it: <a href="/app/README-app.md" target="src-app-readme-app-md">README-app</a>, "The
+            editor", and the app code's own
+            <a href="/app/src/app/AGENTS.md" target="src-app-src-app-agents-md"
+              ><code title="app/src/app/AGENTS.md">AGENTS.md</code></a
+            >, "The app's CodeMirror plumbing"</ui-item
+          >
+        </ui-list>
+
+        <ui-section id="1-summary" label="1. Summary" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="lightbulb"></ui-icon>
+          <ul>
+            <li>
+              The code editor is CodeMirror 6, with Spell's language service in the page: suggestions, hovers, problems,
+              Go to Definition, Rename.
+            </li>
+            <li>
+              Spell's bubbly look is marks in the lines themselves, made only for the lines on screen. Every line is one
+              height, 25px.
+            </li>
+            <li>
+              One CodeMirror view, a state per open file: switching files keeps each one's typing, undo, folds, caret
+              and scroll.
+            </li>
+            <li>Every word it shows can be Spanish: its 33 phrases are keys in the app's texts.</li>
+            <li>
+              A property editor is a form Spell UI draws from a type's description. The editor writes one as a page,
+              <code>Card.editor.html</code>; a type's Inspector layout lives in <code>Card.editor.spell</code>.
+            </li>
+            <li><b>Not yet:</b> <code>&lt;spell-editor&gt;</code> has no right-click menu.</li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="2-using-it" label="2. Using it" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="book"></ui-icon>
+          <ui-section id="typing" label="Typing" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                Nine typing helps: indent after a tag or a block, Enter before a comment, Enter between a tag's
+                attributes lining up under the first, a paste taking the indent where it lands, Shift+Tab / ⌘[ / ⌘]
+                moving the lines under, the caret snapping into a blank line's body, closing quotes and tags.
+              </li>
+              <li>
+                A curly brace or a quote switches a value between code and text: typing <code>{</code> in
+                <code>color="blue"</code> makes it <code>color={blue}</code>.
+              </li>
+              <li>Each help is one undo step, and only the editor you type in helps.</li>
+              <li><code>|&gt;</code> typed in a tag writes <code>/&gt;</code>.</li>
+              <li>A comment's double dash, drawn as one dash, is one step for the caret, and Backspace takes both.</li>
+              <li>
+                The popups that show by themselves wait for typing to pause, as long as Settings… › "Delay before
+                showing help" says: Short 0.4 s, Standard 0.8 s, Long 1.5 s. Ctrl+Space shows them at once.
+              </li>
+              <li>Accents are fixed as you type: <code>numero</code> becomes <code>número</code>.</li>
+            </ul>
+          </ui-section>
+          <ui-section id="language" label="Language features" sticky collapsible dividing open="false">
+            <ul>
+              <li>Suggestions, in the language service's order; hover (⌥ shows it, as Settings… says); problems.</li>
+              <li>
+                Go to Definition (F12), Find All References (⇧F12), Rename Symbol (F2), type definition, signature help.
+              </li>
+              <li>Go to Definition on a Spell UI tag shows the tag's help.</li>
+              <li>
+                Peek Definition (⌥F12) and Peek References (⇧⌥F12): a box under the line shows the other place, read
+                only and drawn bubbly; Enter goes there, Esc closes it.
+              </li>
+              <li>Format Document, expand and shrink selection, Go to Symbol (⇧⌘O).</li>
+              <li>
+                The value picker and value choices under an attribute (colours, icons), link icons with ⌘-click, comment
+                headings.
+              </li>
+              <li>Pinned lines (Settings… › Pinned lines): the tags you're inside stay at the top as you scroll.</li>
+              <li>
+                The right-click menu is the app's own menu popup, the Palette's, its shortcuts from the editor's one
+                hotkey list.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="files" label="Files, undo and the gutter" sticky collapsible dividing open="false">
+            <ul>
+              <li>A file parses 200 ms after typing stops, and saves by itself.</li>
+              <li>⌘Z asks the file's own history first, then the app's.</li>
+              <li>
+                No line numbers unless View › Line Numbers turns them on; fold arrows show over the code's left padding
+                while the mouse is there.
+              </li>
+              <li>
+                ⌘F opens a find bar like VS Code's: Aa / ab / .* in the field, a match count, a Replace row that stays
+                folded once you fold it.
+              </li>
+              <li>Four clicks select the block a line is in, each click after that the block around it.</li>
+              <li>CSS files and property editors files (<code>Card.editor.spell</code>) are coloured too.</li>
+            </ul>
+          </ui-section>
+          <ui-section id="demo" label="The demo page" sticky collapsible dividing open="false">
+            <p>
+              <a href="/app/app/demo/codemirror.html" target="src-app-app-demo-codemirror-html"
+                ><code title="app/app/demo/codemirror.html">/demo/codemirror.html</code></a
+              >, on the editor's dev server, shows every look on one page: a Spell file, an HTML page, the look off, a
+              slice, both sides of a diff, the compiled code.
+            </p>
+            <ul>
+              <li><code>?lang=es</code>: in Spanish</li>
+              <li><code>?project=</code>: another project's files</li>
+              <li><code>?highlights=on</code>: the highlights, off in the app</li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="3-how-it-works" label="3. How it works" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="map"></ui-icon>
+          <ui-section id="one-height" label="Every line one height" sticky collapsible dividing open="false">
+            <figure>
+              <img
+                src="/guides/codemirror/feet-in-blank-line.png"
+                alt="Solitaire's actions drawn bubbly, each block's feet in the blank line under it"
+                width="640"
+              />
+              <figcaption><em>Each block's feet sit in the blank line under it, taking no room.</em></figcaption>
+            </figure>
+            <ul>
+              <li>
+                Drawn bubbly, every line is 25px: a block's feet are drawn over the blank line under it, else along the
+                bottom of its last line.
+              </li>
+              <li>
+                So CodeMirror's guess at the height of lines it hasn't drawn is always right, and scrolling never
+                changes the file's height.
+              </li>
+              <li>A description too wide for its band is cut short with …, its whole text in a tooltip.</li>
+            </ul>
+          </ui-section>
+          <ui-section id="on-screen" label="Marks for the lines on screen" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                The layout is worked out for the whole file; the bubbly marks are made only for the lines CodeMirror
+                draws, again as you scroll (<a
+                  href="/app/src/app/ui/codemirror/CodeMirrorRelayout.ts"
+                  target="src-app-src-app-ui-codemirror-codemirrorrelayout-ts"
+                  ><code title="app/src/app/ui/codemirror/CodeMirrorRelayout.ts">CodeMirrorRelayout</code></a
+                >).
+              </li>
+              <li>A keystroke in a 2,668-line file took 68 ms, measured on 2026-11-19; it was 157 before.</li>
+              <li>
+                Until its project's parse is in, a file is drawn from its text alone, with the same blocks and bands.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="one-view" label="One view, a state per file" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <a href="/app/src/app/ui/codemirror/FileStates.ts" target="src-app-src-app-ui-codemirror-filestates-ts"
+                  ><code title="app/src/app/ui/codemirror/FileStates.ts">FileStates</code></a
+                >
+                keeps one CodeMirror state per open file: its text, undo, folds and selection.
+              </li>
+              <li>The code pane is ONE view showing each file's state in turn.</li>
+              <li>
+                The Inspector's slices and the diff read the same state, so an edit anywhere is an edit everywhere.
+              </li>
+              <li>An outside edit (the side bar, Rename, the value picker) goes through it as one undo step.</li>
+            </ul>
+          </ui-section>
+          <ui-section id="shared-rules" label="Rules that know no editor" sticky collapsible dividing open="false">
+            <p>What's Spell's, not an editor's, lives once, where VS Code's extension can read it too:</p>
+            <ul>
+              <li>
+                the typing rules,
+                <a href="/app/src/lsp/SpellTyping.ts" target="src-app-src-lsp-spelltyping-ts"
+                  ><code title="app/src/lsp/SpellTyping.ts">LSP.SpellTyping</code></a
+                >
+              </li>
+              <li>
+                <code>spell:</code> file addresses,
+                <a href="/app/src/lsp/AppAddresses.ts" target="src-app-src-lsp-appaddresses-ts"
+                  ><code title="app/src/lsp/AppAddresses.ts">LSP.AppAddresses</code></a
+                >
+              </li>
+              <li>
+                what a hover says and which code actions show,
+                <a href="/app/src/app/ui/CodeEditorFeatures.ts" target="src-app-src-app-ui-codeeditorfeatures-ts"
+                  ><code title="app/src/app/ui/CodeEditorFeatures.ts">CodeEditorFeatures</code></a
+                >
+              </li>
+              <li>
+                the one colour table, from token to <code>--ui-code-*</code> colour,
+                <a href="/app/src/app/ui/CodeRules.ts" target="src-app-src-app-ui-coderules-ts"
+                  ><code title="app/src/app/ui/CodeRules.ts">CodeRules</code></a
+                >
+              </li>
+              <li>
+                the value popups' drawing,
+                <a href="/app/src/app/ui/ValuePopups.ts" target="src-app-src-app-ui-valuepopups-ts"
+                  ><code title="app/src/app/ui/ValuePopups.ts">ValuePopups</code></a
+                >
+              </li>
+            </ul>
+            <p>
+              The CodeMirror side is thin wiring over them, a file per feature (<code>CodeMirrorTyping</code>,
+              <code>CodeMirrorHovers</code> ...), and one converter of the language service's answers,
+              <code>LspToCodeMirror</code>.
+            </p>
+          </ui-section>
+          <ui-section id="lazy" label="Still lazy" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                CodeMirror loads after the program compiles and runs, never in the main bundle:
+                <a href="/app/src/app/solid/LazyCodeMirror.tsx" target="src-app-src-app-solid-lazycodemirror-tsx"
+                  ><code title="app/src/app/solid/LazyCodeMirror.tsx">LazyCodeMirror</code></a
+                >.
+              </li>
+              <li>
+                <code>&lt;spell-editor&gt;</code> has its own lazy chunk, which must not bring the editor page with it.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="property-editors" label="4. Property editors" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="sliders horizontal"></ui-icon>
+          <p>
+            A property editor is a form Spell UI draws from a description of a thing: groups, and a field per property
+            with its label, tip, choices and rules. In a hand-built form each field repeats them; here the markup says
+            only how this one form lays them out. The elements themselves are Spell UI's:
+            <code>&lt;ui-property-editor&gt;</code>, <code>&lt;ui-property-group&gt;</code>,
+            <code>&lt;ui-property&gt;</code>.
+          </p>
+          <ui-section id="editor-pages" label="Editor pages" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                A layout can live in a page of its own, <code>Card.editor.html</code>: plain markup, loaded as it is by
+                <code>&lt;ui-property-editor source="Card.editor.html"&gt;</code>.
+              </li>
+              <li>
+                The page holds only the layout: groups, order, controls, hints. Everything else comes from the type.
+              </li>
+              <li>
+                The editor's file menu writes one: New Property Editor…, then pick a template. It never writes over a
+                page; a second one is <code>Card2.editor.html</code>.
+              </li>
+              <li>
+                <code>spell lint</code> checks every <code>*.editor.html</code> in a project against its types as they
+                are now: a property the type dropped, one the page doesn't place, a control that no longer fits.
+                <code>spell lint --fix</code> mends what it can.
+              </li>
+              <li>
+                <code>spell compile</code> turns each one into a module defining <code>&lt;card-editor&gt;</code>, its
+                layout and the type's schema inlined, importing only Spell UI's property editor (<a
+                  href="/ui/src/property/PropertyEditorPages.ts"
+                  target="src-ui-src-property-propertyeditorpages-ts"
+                  ><code title="ui/src/property/PropertyEditorPages.ts">PropertyEditorPages</code></a
+                >).
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="inspector-layout" label="A type's Inspector layout" sticky collapsible dividing open="false">
+            <pre><code class="language-plaintext">&lt;property-editor "card"&gt;
+	&lt;ui-property-group label="Card" columns="2"&gt;
+		&lt;ui-property name="rank" label="Rank" /&gt;
+		&lt;ui-property name="suit" label="Suit" as="buttons" width="16" /&gt;
+		&lt;ui-property name="direction" label="Face" as="buttons" /&gt;
+	&lt;/ui-property-group&gt;
+	...
+&lt;/property-editor&gt;</code></pre>
+            <ul>
+              <li>
+                Solitaire's card lays out its Inspector card in
+                <a
+                  href="/app/spaces/@spell/examples/Solitaire/Card.editor.spell"
+                  target="src-app-spaces-spell-examples-solitaire-card-editor-spell"
+                  ><code title="app/spaces/@spell/examples/Solitaire/Card.editor.spell">Card.editor.spell</code></a
+                >.
+              </li>
+              <li>
+                One type's in <code>&lt;Type&gt;.editor.spell</code>, or any of the project's types' in
+                <code>&lt;Project&gt;.editors.spell</code>.
+              </li>
+              <li>The Inspector reads it; it's never compiled into the program.</li>
+              <li>It isn't an editor page: New Property Editor… writes those.</li>
+            </ul>
+          </ui-section>
+          <ui-section id="project-settings" label="Project Settings" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                The editor's Project Settings opens a dialog, "&lt;title&gt; settings", drawn by a property editor:
+                <a href="/app/src/app/pages/ProjectSettings.tsx" target="src-app-src-app-pages-projectsettings-tsx"
+                  ><code title="app/src/app/pages/ProjectSettings.tsx">ProjectSettings.tsx</code></a
+                >.
+              </li>
+              <li>
+                It edits the project file, held until Save: its title, its version, the languages it also compiles to,
+                and where lists start, 1 or 0.
+              </li>
+              <li>It shows the Spell the project was written for, read only.</li>
+              <li>Saving writes them into the project file, keeping its imports and comments.</li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="6-limits" label="5. Limits" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="flag"></ui-icon>
+          <ul>
+            <li>
+              <b><code>&lt;spell-editor&gt;</code> has no right-click menu and no Find All References.</b> The app's
+              menu can't load on a page holding only that element; Go to Definition, Rename, Find and Undo work there.
+            </li>
+            <li>In a diff, a gap for inserted lines cuts the rails on the other side.</li>
+            <li>With line numbers on, or scrolled sideways, a band with a description is off by their width.</li>
+            <li>A pinned line not drawn yet is pinned as plain text; at most 5 are pinned.</li>
+            <li>Go to Symbol lists what the file declares by each line's text, not as a nested outline.</li>
+            <li>
+              Go to Definition on a Spell UI tag shows its help from the second press, the first time: its table loads
+              on the first ask.
+            </li>
+            <li>A property editor's labels from a Spell type are its property names, in English.</li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="7-where" label="6. Where things are" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="folder open"></ui-icon>
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <tbody>
+                <tr>
+                  <th>Where</th>
+                  <th>What</th>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="/app/src/app/ui/codemirror/" target="src-app-src-app-ui-codemirror"
+                      ><code title="app/src/app/ui/codemirror">app/src/app/ui/codemirror</code></a
+                    >
+                  </td>
+                  <td>the editor layer: <code>SpellCodeMirror</code>, <code>FileStates</code>, a file per feature</td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="/app/src/app/solid/codemirror/" target="src-app-src-app-solid-codemirror"
+                      ><code title="app/src/app/solid/codemirror">app/src/app/solid/codemirror</code></a
+                    >
+                  </td>
+                  <td>
+                    the Solid editors: <code>CodeMirrorEditor</code>, <code>FileEditor</code>, <code>CodeSlice</code>,
+                    <code>DiffView</code>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="/app/src/lsp/" target="src-app-src-lsp"><code title="app/src/lsp">app/src/lsp</code></a>
+                  </td>
+                  <td>the rules that know no editor, and the language service</td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="/ui/src/property/" target="src-ui-src-property"
+                      ><code title="ui/src/property">ui/src/property</code></a
+                    >
+                  </td>
+                  <td>the property editor's schemas, layouts and pages</td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="/app/src/app/editor.ts" target="src-app-src-app-editor-ts"
+                      ><code title="app/src/app/editor.ts">editor.ts</code></a
+                    >
+                  </td>
+                  <td>the editor object, <code>createPropertyEditor()</code> among its methods</td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+          <ul>
+            <li>
+              <a href="/app/README-app.md" target="src-app-readme-app-md">README-app</a>: the editor, the runners and
+              the Inspector
+            </li>
+            <li>
+              <a href="/app/README-lsp.md" target="src-app-readme-lsp-md">README-lsp</a>: the language service the
+              editor asks
+            </li>
+            <li>
+              <a href="/guides/intellisense.html" target="src-guides-intellisense-html">VS Code</a>: the same language
+              service, in VS Code
+            </li>
+          </ul>
+        </ui-section>
+        <footer class="spell-doc-footer">
+          <ui-divider></ui-divider>
+          <p class="meta">Last checked 2026-11-21, against the kit's code that day.</p>
+        </footer>
+      </main>
+    </div>
+    <script src="/_epic/assets/highlight.min.js"></script>
+    <script src="/_epic/assets/spell-ui.js"></script>
+  </body>
+</html>

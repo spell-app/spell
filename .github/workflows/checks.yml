@@ -46,6 +46,8 @@ jobs:
       - run: yarn ts
       - run: yarn lint
       - run: yarn test
+      # every bundle's size against its ceiling:  a bundle that grew fails (epic `solid-2-final` P1)
+      - run: node bin/spell.mjs perf budget
       # epic's slow, process-spawning tests, which its `yarn test` leaves out (epic `epic-engine` I313)
       - run: yarn test:integration
         working-directory: epic

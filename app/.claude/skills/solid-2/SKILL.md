@@ -19,7 +19,7 @@ Distrust patterns from both.
 ## Going deeper
 
 - Why spell is built this way, the measurements and the rejected designs:
-  [the Solid 2 guide](../spell.epics/guides/solid/solid-2.html), especially §2 "Read-after-write" and §3 "Gotchas".
+  [the Solid 2 guide](../../../../guides/solid/solid-2.html), especially §2 "Read-after-write" and §3 "Gotchas".
 - Every new API, with an example:  [the Solid 2 cheatsheet](../spell.epics/guides/solid/cheatsheet.html).
   - Or Solid's own, `node_modules/solid-js/CHEATSHEET.md`, hoisted to the repo root.
   - Since rc.17, Solid ships its own skills beside it, `node_modules/solid-js/skills/`:

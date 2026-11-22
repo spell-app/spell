@@ -669,8 +669,8 @@ How it works:
 
 | Set | What it is | Its elements |
 | --- | --- | --- |
-| Spell UI | the host:  the runtime, `<ui-root>`, the styles and icons, `registerPack()` | 62 families, `<ui-accordion>` ... `<ui-visibility>`:  [spell-ui's README](https://github.com/spell-app/spell/blob/main/ui/README.md) |
-| spell-epic | a pack, prefix `epic-`:  every epic page loads it | 36 families, `<epic-page>`, `<epic-item>`, `<epic-thread>` ...:  [spell-epic's README](https://github.com/spell-app/spell/blob/main/epic/README.md) |
+| Spell UI | the host:  the runtime, `<ui-root>`, the styles and icons, `registerPack()` | 96 families, `<ui-accordion>` ... `<ui-visibility>`:  [spell-ui's README](https://github.com/spell-app/spell/blob/main/ui/README.md) |
+| spell-epic | a pack, prefix `epic-`:  every epic page loads it | 47 families, `<epic-page>`, `<epic-item>`, `<epic-thread>` ...:  [spell-epic's README](https://github.com/spell-app/spell/blob/main/epic/README.md) |
 | spell-app | a root subclass, `<spell-viewer>`, loading its own tags;  `<spell-editor>`;  each view's element in a Spell program (`<solitaire-card>`) | [spell-app's README](https://github.com/spell-app/spell/blob/main/app/README.md) |
 
 - Spell UI's core re-exports this whole framework, plus its own pieces:
@@ -812,6 +812,7 @@ and the page server running ([README/server.md](server.md)).
 
 ## See also
 
+- The guide:  [Custom Elements](../guides/custom-elements/custom-elements.html), in the kit's guides/ folder
 - [spell-ui's README](https://github.com/spell-app/spell/blob/main/ui/README.md):  the elements built on this, and the runtime they need
 - [spell-ui's README-runtime.md](https://github.com/spell-app/spell/blob/main/ui/README-runtime.md):  the runtime's half of every element, from words to
   the static render

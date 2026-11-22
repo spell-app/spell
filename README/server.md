@@ -1019,7 +1019,7 @@ What's left is a handful of facts the reference doesn't explain:
 | [scripts/favicon.ts](../scripts/favicon.ts) | `yarn favicon` |
 | [scripts/recipe-servers.ts](../scripts/recipe-servers.ts) | the recipe box demo's two fake servers |
 | [runs/](../src/server/runs/) | command runs:  `CommandRun`, and the files it shares with the page side ([runs.types.ts](../src/server/runs/runs.types.ts)) |
-| [Linker.ts](../src/server/Linker.ts), [format.ts](../src/server/format.ts), [Bundle.ts](../src/server/Bundle.ts), [DataFile.ts](../src/server/DataFile.ts), [contentFolder.ts](../src/server/contentFolder.ts) | writing a page:  `Linker` (`link()`, `check()`, `resolve()`, `targetFor()`);  `formatHTML()`;  `Bundle` (`all()`, `check()`, `isStale`, `build()`, `sourcesHash()`, `sourceFiles()`;  a build script's steps, `clearOutput()`, `linkBuiltInFiles()`, `sizeReport()`);  `DataFile`;  `contentFolderOf()`;  their types in [server.types.ts](../src/server/server.types.ts) (`LinkResult`, `LinkCheck`, `BundleSpec`, `BundleCheck`, `BundleBuilt`, `BundleSizeParams`, `BundleRecord`, `BUNDLES`) |
+| [Linker.ts](../src/server/Linker.ts), [format.ts](../src/server/format.ts), [Bundle.ts](../src/server/Bundle.ts), [DataFile.ts](../src/server/DataFile.ts), [contentFolder.ts](../src/server/contentFolder.ts) | writing a page:  `Linker` (`link()`, `check()`, `resolve()`, `targetFor()`);  `formatHTML()`;  `Bundle` (`all()`, `check()`, `isStale`, `build()`, `sourcesHash()`, `sourceFiles()`;  a build script's steps, `clearOutput()`, `linkBuiltInFiles()`, `sizeReport()`;  a bundle's first load sized raw, gzipped and brotli, `firstLoad()`, `sizesOf()`);  `DataFile`;  `contentFolderOf()`;  their types in [server.types.ts](../src/server/server.types.ts) (`LinkResult`, `LinkCheck`, `BundleSpec`, `BundleCheck`, `BundleBuilt`, `BundleSizeParams`, `BundleLoad`, `CompressedSizes`, `BundleRecord`, `BUNDLES`) |
 
 - Entries of their own, which plain `node` loads:
   `spell/server/checkout`, `/page/settings`, `/page/prune`, `/DataFile`, `/contentFolder`.
@@ -1041,7 +1041,6 @@ Tests (node), at the same paths under [tests/server/](../tests/server/):
 
 The docs site needs a checkout with the epic folder beside it, and this page server running.
 
-- The Page Server:  `/guides/server.html` (its endpoint names predate the `/api/` prefix:  this page's are current)
 - The Epic Repo, where the docs and epic pages live:  `/guides/shared-content.html`
 - The Python target:  `/guides/python-target.html`
 
@@ -1049,6 +1048,7 @@ The docs site needs a checkout with the epic folder beside it, and this page ser
 
 ## See also
 
+- The guide:  [The Page Server](../guides/server.html), in the kit's guides/ folder
 - [spell-app's README-page-server.md](https://github.com/spell-app/spell/blob/main/app/README-page-server.md):  what the app's part adds,
   the editor and its API
 - [README/element.md](element.md):  the element framework, whose packs and component pages this server serves

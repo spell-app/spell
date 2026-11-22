@@ -7,9 +7,17 @@
  * - Each sheet is a string (Vite `?inline`:  Lightning CSS-processed, `@import` / `@custom-media` resolved,
  *   minified in builds), for `new CSSStyleSheet().replaceSync()` -- the runtime's `Styles` registry adopts
  *   them into the document and into shadow roots.
- * - `foundationCSS` is the ADOPTION ORDER for every tree scope (document and each shadow root):
+ * - `foundationCSS` is the PAGE's adoption order:
  *   layers first (fixes the layer order), then reset, tokens, colours, sizes, animations, utilities.
  *   `pageCSS` adds the page-only sheets (`typography`, `native`), which style light-DOM markup.
+ * - `shadowFoundationCSS` is what a SHADOW ROOT may adopt of it (epic `solid-2-final` P3):
+ *   the same, less the token sheets' page parts (`tokens.css`, `colors.css`, `sizes.css`:  `@property` and `:root`
+ *   rules, which do nothing inside a shadow root).  The tokens reach it from the page, by inheritance.
+ *   - Every root takes layers and reset;  the colour and size parts, the animations and the utilities only where its
+ *     family uses them (`OPTIONAL_SHEETS`, `RootSheets`;  P4).
+ *   - `sheetWords.ts`:  the class words the colour and size parts' remaps match, which decide it.
+ *   - `fallbackCSS`:  the tokens' `:host` copies, for a shadow root on a page that never loaded them.
+ *   - The parts:  `StyleGenerator`'s class docs.
  * - NOTE: `?inline` relies on `css.lightningcss.targets` being modern browsers.  With Vite's default
  *   (`baseline-widely-available`) Lightning CSS lowers `light-dark()` to `--lightningcss-light` variables
  *   substituted where a token is DECLARED, which freezes `:root`'s scheme into `.ui-dark` subtrees.
@@ -25,8 +33,13 @@
 import layersCSS from "./layers.css?inline"
 import resetCSS from "./reset.css?inline"
 import tokensCSS from "./tokens.css?inline"
+import tokensFallbackCSS from "./tokens.fallback.css?inline"
 import colorsCSS from "./colors.css?inline"
+import colorsSharedCSS from "./colors.shared.css?inline"
+import colorsFallbackCSS from "./colors.fallback.css?inline"
 import sizesCSS from "./sizes.css?inline"
+import sizesSharedCSS from "./sizes.shared.css?inline"
+import sizesFallbackCSS from "./sizes.fallback.css?inline"
 import typographyCSS from "./typography.css?inline"
 import animationsCSS from "./animations.css?inline"
 import utilitiesCSS from "./utilities.css?inline"
@@ -35,18 +48,48 @@ import nativeCSS from "./native.css?inline"
 export * from "./styles.types"
 export * from "./styles.en"
 
-export { layersCSS, resetCSS, tokensCSS, colorsCSS, sizesCSS, typographyCSS, animationsCSS, utilitiesCSS, nativeCSS }
+export {
+  layersCSS,
+  resetCSS,
+  tokensCSS,
+  tokensFallbackCSS,
+  colorsCSS,
+  colorsSharedCSS,
+  colorsFallbackCSS,
+  sizesCSS,
+  sizesSharedCSS,
+  sizesFallbackCSS,
+  typographyCSS,
+  animationsCSS,
+  utilitiesCSS,
+  nativeCSS
+}
 
-/** Sheets every tree scope adopts, in order:  document and each shadow root. */
+/** Sheets the page adopts of the foundation, in order:  every part but the fallbacks. */
 export const foundationCSS: readonly string[] = [
   layersCSS,
   resetCSS,
   tokensCSS,
   colorsCSS,
+  colorsSharedCSS,
   sizesCSS,
+  sizesSharedCSS,
   animationsCSS,
   utilitiesCSS
 ]
+
+/** Sheets each shadow root adopts of the foundation, in order:  `foundationCSS` less the token sheets' page parts. */
+export const shadowFoundationCSS: readonly string[] = [
+  layersCSS,
+  resetCSS,
+  colorsSharedCSS,
+  sizesSharedCSS,
+  animationsCSS,
+  utilitiesCSS
+]
+
+/** The tokens' `:host` copies, in order:  for a shadow root on a page that never loaded the tokens. */
+export const fallbackCSS: readonly string[] = [tokensFallbackCSS, colorsFallbackCSS, sizesFallbackCSS]
 
 /** Sheets the PAGE adopts, in order:  the foundation plus page typography and native-markup rules. */
 export const pageCSS: readonly string[] = [...foundationCSS, typographyCSS, nativeCSS]

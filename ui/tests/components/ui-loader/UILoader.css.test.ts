@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
@@ -62,7 +62,7 @@ describe("UILoader.css source", () => {
   })
 
   it("covers every class word the vocabulary can emit", () => {
-    const css = loaderRaw + colorsCSS
+    const css = loaderRaw + colorsSharedCSS
     for (const phrase of Sheets.classPhrases(loaderVocabulary))
       expect(Sheets.covers(css, phrase), `${loaderVocabulary.tag}: ${phrase}`).toBe(true)
     // `speed` is `kind: "valueOnly"` (value alone), which `classPhrases` skips.

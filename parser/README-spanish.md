@@ -28,7 +28,7 @@ The proof is a whole game.
 [Solitario](https://github.com/spell-app/spell/tree/main/app/spaces/@spell/examples/Solitario/) is the Solitaire example
 written again in Spanish, file for file, cards and all, in plain Spell as Solitaire is, its words Spanish too
 (`una "carta" es una vista reversible`, `su "rango" es uno de as, 2 ... 10, jota, dama, rey`):
-it deals, plays and passes four tests, as Solitaire does.
+it deals, plays and passes five tests, as Solitaire does.
 A person wrote it;  `spell translate` writes a first draft of one for any English project
 (below, "Translating a project").
 
@@ -43,7 +43,7 @@ You need a checkout of the kit, and `spell` on your `PATH`:
 the kit's [setup from zero](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero) does both.
 
 **Run Solitario's tests.**
-Four, in Spanish:
+Five, in Spanish:
 
 ```sh
 spell test @spell/examples/Solitario
@@ -54,12 +54,13 @@ spell test @spell/examples/Solitario
 
 ```text
 ✓ Compiling @spell/examples/Solitario
-✓ test la preparación de la carta  (19 checks)
+✓ test la preparación de la carta  (15 checks)
+✓ test las imágenes de carta  (10 checks)
 ✓ test la creación del mazo  (5 checks)
 ✓ test las pilas  (8 checks)
 ✓ test los movimientos  (11 checks)
 
-4 passed
+5 passed
 ```
 
 </details>
@@ -84,14 +85,14 @@ spell explain si --in @spell/examples/Solitario
 backwards_if  si {operator:expression} (si no|sino|de lo contrario) es? {expression}
 e.g. imprimir 1 si bar si no 2
 
-if  si {condition:expression} (entonces|:)? {statement_body}?
+if  si {condition:expression} (entonces|:|,)? {statement_body}?
 e.g. si x
 
-if_there_are_none  si no hay (ninguno|ninguna|nada) :? {statement_body}?
+if_there_are_none  si no hay (ninguno|ninguna|nada) (:|,)? {statement_body}?
 
 if_that_fails_say  si falla decir {text:expression}
 
-if_that_fails  si falla :? {statement_body}?
+if_that_fails  si falla (:|,)? {statement_body}?
 ```
 
 </details>
@@ -113,13 +114,14 @@ plantilla Carta, subplantilla de TwoSidedView
 
 Una carta dice cuáles son su rango, su palo y su color:  un mazo, una pila o el juego solo los leen.
 
-propiedades:  rango, palo, color, nombre, valor, símbolo, nombre corto, imagen, levantada, pila
+propiedades:  rango, palo, color, nombre, valor, símbolo, nombre corto, pila, última pila
 enumeraciones:  Rangos, Palos, Colores
 declarado en Carta.es.spell:1
 
 export class Carta extends TwoSidedView {
   static elementTag = core.defineElement(this, "Solitario")
 }
+...
 ```
 
 </details>
@@ -487,6 +489,7 @@ Spell UI's Spanish, the runtime's messages and the editor's words are first draf
 
 ## See also
 
+- The guide:  [Spell in Spanish](../guides/spanish.html), in the kit's guides/ folder
 - [README-parser](README-parser.md#spell-in-another-human-language):  one rule's code in both languages, and how a third starts
 - [README-spell](README-spell.md):  everything a line of Spell can say, in English, and how to add a rule in both languages
 - [README-examples](https://github.com/spell-app/spell/blob/main/app/README-examples.md#solitario--the-same-game-in-spanish):  Solitario beside Solitaire

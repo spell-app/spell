@@ -17,6 +17,8 @@ node_modules
 *.code-workspace
 # `/park`'s note on where parked work stopped:  never committed
 PARKED-*.md
+# spell perf run's dated results (epic `solid-2-final` P1);  the baseline is app/src/cli/perf/perfBaseline.json
+.perf-results/
 # the page server's records, at its root:  the kit's since epic repo-split P16 (its pid file, the app's editor's);  its
 # logs are `*.log`
 .spell-server.json

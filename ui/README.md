@@ -48,7 +48,7 @@ Its blue is lighter, and the button's label turned from white to ink, Spell UI's
 white on that blue measures 2.43:1, under the 4.5:1 that WCAG AA asks of text, and the ink measures 8.10:1.
 Every colour carries the text colour that reads on it, in light and in dark, so your page never has to know.
 
-Spell UI is 76 families of these `<ui-*>` custom elements, 122 tags in all:
+Spell UI is 96 families of these `<ui-*>` custom elements, 149 tags in all:
 buttons, forms, dropdowns, cards, menus, modals, tables, a calendar, a tree diagram, a page frame, video ...
 It's Spell's component library ([the kit's front page](https://github.com/spell-app/spell/blob/main/README.md) says what Spell is),
 and a page needs nothing else of Spell's to use it.
@@ -56,7 +56,7 @@ and a page needs nothing else of Spell's to use it.
 - **Accessible:**  each element draws real, semantic markup into its shadow root,
   a `<button>`, a `<dialog>`, an `<input>`, never a `<div>` pretending to be one.
   The tests run axe, the accessibility checker, in a real browser,
-  on every example of every family that has examples:  72 of the 76.
+  on every example of every family that has examples:  92 of the 96.
 - **Themeable:**  everything draws from CSS tokens, in OKLCH colours that work in light and dark.
   Set a few, or switch the whole look to one of Spell's four themes with one call, `UI.themes.apply("merlot")`,
   or let people pick with `<ui-theme-menu>`.
@@ -93,7 +93,7 @@ The page above maps `spell-ui/` onto a copy of the library's build, and Solid on
 - `Save` never moved into the shadow root:  it's the page's own text, shown through the `<slot>`,
   so find-in-page still finds it.
 - `class="ui primary button"` is Fomantic UI's class grammar, written for you from the attributes
-  ([below](#the-families--76-in-fomantic-uis-groups), where the words come from).
+  ([below](#the-families--96-in-fomantic-uis-groups), where the words come from).
 
 </details>
 
@@ -371,7 +371,7 @@ It borrows the page's, so the page still has one Solid, and the pack's elements 
   [the kit's README/element.md](https://github.com/spell-app/spell/blob/main/README/element.md#packs-and-ui-root);
   the `spell pack` commands that make one:  [the kit's README/cli.md](https://github.com/spell-app/spell/blob/main/README/cli.md#spell-ui).
 
-## The families:  76, in Fomantic UI's groups
+## The families:  96, in Fomantic UI's groups
 
 Looking for a datepicker?  It's `<ui-calendar>`, and a snackbar is `<ui-toast>`.
 [The catalogue](README-components.md#the-catalogue) finds a family by the name your last library gave it:
@@ -606,13 +606,13 @@ The rest is on the page that owns each one:
 
 | Page | What's on it |
 | --- | --- |
-| [README.md](README.md) | <ul><li>this page:  a page in thirty seconds, every request it made, and two screenshots</li><li>three things that move, by contrast with a component library:  tags, the page holding the element, four doors for your CSS</li><li>`<ui-root>`, component packs, the 76 families, other ways to load</li><li>what a page costs and assumes;  working on it;  🌱 the first release</li></ul> |
+| [README.md](README.md) | <ul><li>this page:  a page in thirty seconds, every request it made, and two screenshots</li><li>three things that move, by contrast with a component library:  tags, the page holding the element, four doors for your CSS</li><li>`<ui-root>`, component packs, the 96 families, other ways to load</li><li>what a page costs and assumes;  working on it;  🌱 the first release</li></ul> |
 | [README-components.md](README-components.md) | <ul><li>a family is a folder, and a row</li><li>when two families look alike:  Select or Dropdown, Modal or Flyout, Toast or Nag ...</li><li>the catalogue:  every family by group, with a picture and what other libraries call it</li><li>how a family is laid out, and adding one step by step;  written from the data</li></ul> |
 | [README-runtime.md](README-runtime.md) | <ul><li>one runtime per page, not one per tree:  nineteen services, one field each</li><li>vocabularies and localization;  icons, and using another icon set;  the built-in sounds</li><li>styles;  the static render, served from Python too</li><li>Spell UI's half of the element core;  🌱 named icon sets, rendering from a Python app</li></ul> |
 | [README-themes.md](README-themes.md) | <ul><li>two things that move from MUI or Tailwind:  custom properties, one colour value</li><li>what ships:  about 400 tokens, dark mode, and Spell's four themes</li><li>five recipes, from tokens on `:root` to the app stylesheet and the theme editor</li><li>the theme menu, `<ui-theme-menu>`</li><li>🌱 themes per component</li></ul> |
 | [README-frameworks.md](README-frameworks.md) | <ul><li>the contract:  four rules every element keeps, and who decides the value</li><li>plain JavaScript, React 19, Vue 3 and Solid 2, each checked by a page that runs;  Svelte, Angular, Preact</li><li>types:  your editor knows every tag, and Solid's JSX does too</li><li>using it today with an import map;  what the smoke pages prove, and what they don't</li></ul> |
 | [README-migrating.md](README-migrating.md) | <ul><li>from Semantic UI, Fomantic UI or Semantic UI React:  your classes moved inside</li><li>a whole card, three ways;  every class word becomes an attribute</li><li>what changes under the words:  your CSS, jQuery calls, a few words</li><li>from Semantic UI React, no wrappers;  moving a page by hand;  🌱 the migration tool</li></ul> |
-| [README-site.md](README-site.md) | <ul><li>the docs site, 84 pages and 1,740 live examples, viewed with one command</li><li>a page is its head and one `main`;  writing one, flat</li><li>the scripts, and checking in a real browser;  🌱 deploying</li><li>the tools, the visual tests and their environment variables;  Spell UI's `spell` commands</li></ul> |
+| [README-site.md](README-site.md) | <ul><li>the docs site, 121 pages and 2,159 live examples, viewed with one command</li><li>a page is its head and one `main`;  writing one, flat</li><li>the scripts, and checking in a real browser;  🌱 deploying</li><li>the tools, the visual tests and their environment variables;  Spell UI's `spell` commands</li></ul> |
 
 Every other repo's pages:  [the kit's index](https://github.com/spell-app/spell/blob/main/README.md#every-readme).
 

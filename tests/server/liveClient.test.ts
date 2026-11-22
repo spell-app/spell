@@ -125,6 +125,18 @@ describe("liveAction():  what a changed file means to a page", () => {
     expect(SRV.liveAction("/epics/x/parts/q2.html", page)).toBe("file")
     expect(SRV.liveAction("/guides/x/data.json5", page)).toBe("file")
   })
+
+  // epic `solid-2-final` P1:  every change in the kit made the editor walk its ~400 scripts
+  test("a burst of 1,000 changes that aren't scripts asks for the page's scripts not once", () => {
+    const scripts = vi.fn(() => page.scripts)
+    for (let index = 0; index < 1000; index++) {
+      const path = index % 2 ? `/ui/src/x${index}.css` : `/parser/src/x${index}.ts`
+      SRV.liveAction(path, { file: page.file, scripts })
+    }
+    expect(scripts).not.toHaveBeenCalled()
+    expect(SRV.liveAction("/packages/epics/tools/_assets/spell-ui.js", { file: page.file, scripts })).toBe("script")
+    expect(scripts).toHaveBeenCalledTimes(1)
+  })
 })
 
 describe("servedPath()", () => {

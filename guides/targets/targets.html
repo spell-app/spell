@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Targets</title>
+    <meta
+      name="description"
+      content="How Spell compiles one program for four targets -- js/solid, ts/solid, ts/lib and py -- through one tree and a writer per language:  how each draws, the TypeScript's types, positions counted from 0, spell_core, Python apps on the web, and how the targets are held to the same output."
+    />
+    <meta name="spell-audience" content="programmers" />
+    <meta name="spell-topic" content="The Language Inside" />
+    <meta name="spell-voice" content="readme 2026-11-21" />
+    <meta name="spell-saga" content="output-targets" />
+    <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+  </head>
+  <body class="spell-doc-page">
+    <spell-site-header></spell-site-header>
+    <div class="spell-doc">
+      <main class="spell-doc-main">
+        <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+          <ui-breadcrumb>Guides</ui-breadcrumb>
+          <ui-breadcrumb selected>Targets</ui-breadcrumb>
+        </ui-breadcrumbs>
+        <ui-sticky class="spell-h1"
+          ><header class="spell-page-head"><h1>Targets</h1></header></ui-sticky
+        >
+        <pre><code class="language-sh">spell compile @spell/examples/fizzbuzz --target py --stdout</code></pre>
+        <ui-accordion class="spell-code" appearance="styled">
+          <ui-title>What it printed, its start</ui-title>
+          <ui-content>
+            <pre><code class="language-python">@core.as_action({"undone_as": "Play Fizzbuzz"})
+def play_fizzbuzz() -&gt; None:
+    """each number from 1 to 100, as one of four events:  fizzbuzz, fizz, buzz, or a plain number"""
+    for number in range(1, 101):
+        if (number / 15).is_integer():
+            core.trigger("fizzbuzz", number=number)
+        elif (number / 3).is_integer():
+            core.trigger("fizz", number=number)
+        elif (number / 5).is_integer():
+            core.trigger("buzz", number=number)
+        else:
+            core.trigger("plain-number", number=number)</code></pre>
+          </ui-content>
+        </ui-accordion>
+        <p class="lede">
+          That's Python as a Python programmer writes it: <code>range(1, 101)</code>, <code>elif</code>, PEP 8's names.
+          It isn't JavaScript translated. The parser reads the program ONCE, into a tree of what it means, and each
+          target has its own writer that turns the tree into that language's code. Then every test program is run on
+          every target, and each must print the same thing, line for line.
+        </p>
+        <ui-list class="spell-meta">
+          <ui-item icon="user"
+            >Written for: anyone about to change what the compiler writes, add a target, or read a Spell tree</ui-item
+          >
+          <ui-item icon="flask"
+            >Checked: 2026-11-21, every command and output on this page run against that day's code</ui-item
+          >
+          <ui-item icon="book open"
+            >The reference beside it:
+            <a href="/parser/README-targets.md" target="src-parser-readme-targets-md">README-targets</a>, and for the
+            core each target runs on,
+            <a href="/parser/README-core.md" target="src-parser-readme-core-md">README-core</a></ui-item
+          >
+        </ui-list>
+
+        <ui-section id="1-summary" label="1. Summary" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="lightbulb"></ui-icon>
+          <ul>
+            <li>
+              ONE tree in the middle: languages on the way in (English, Spanish), targets on the way out. N plus M,
+              never N times M.
+            </li>
+            <li>
+              Four targets:
+              <ul>
+                <li>
+                  <code>js/solid</code>: JavaScript on Solid, compiled for every project, since everything runs it
+                </li>
+                <li>
+                  <code>ts/solid</code>: the same program as a Solid developer types it, with types, decorators and JSX
+                </li>
+                <li>
+                  <code>ts/lib</code>: a project's classes as one TypeScript file, for code that isn't Spell to import
+                </li>
+                <li>
+                  <code>py</code>: Python on <code>spell_core</code>, the core's Python twin; a program that draws
+                  becomes a web app
+                </li>
+              </ul>
+            </li>
+            <li>
+              A writer is a class with one method per kind of node. A new target is a new class, not a new compiler.
+            </li>
+            <li>
+              Compiled code counts positions from 0, as JavaScript and Python do. How a project's SPELL counts is its
+              own setting.
+            </li>
+            <li>
+              Proven two ways: snapshots pin each target's code character for character, and the core contract runs
+              every test program on every target.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="2-targets" label="2. The targets" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="bullseye"></ui-icon>
+          <ui-section id="the-table" label="Each target, and what it costs" sticky collapsible dividing open="false">
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>Target</th>
+                    <th>Writer</th>
+                    <th>Writes</th>
+                    <th>Runs on</th>
+                    <th>Draws</th>
+                  </tr>
+                  <tr>
+                    <td><code>js/solid</code></td>
+                    <td>
+                      <a
+                        href="/parser/src/parser/writers/JSWriter.ts"
+                        target="src-parser-src-parser-writers-jswriter-ts"
+                        ><code title="parser/src/parser/writers/JSWriter.ts">JSWriter</code></a
+                      >
+                    </td>
+                    <td><code>&lt;Project&gt;.spell.js</code></td>
+                    <td><code>@spell/core</code></td>
+                    <td>into the page</td>
+                  </tr>
+                  <tr>
+                    <td><code>ts/solid</code></td>
+                    <td>
+                      <a
+                        href="/parser/src/parser/writers/TSWriter.ts"
+                        target="src-parser-src-parser-writers-tswriter-ts"
+                        ><code title="parser/src/parser/writers/TSWriter.ts">TSWriter</code></a
+                      >, on JavaScript's
+                    </td>
+                    <td><code>&lt;Project&gt;.spell.tsx</code></td>
+                    <td><code>@spell/core</code>; <code>@spell/elements</code> for a view's element</td>
+                    <td>into the page</td>
+                  </tr>
+                  <tr>
+                    <td><code>ts/lib</code></td>
+                    <td>
+                      <a
+                        href="/parser/src/parser/writers/LibraryWriter.ts"
+                        target="src-parser-src-parser-writers-librarywriter-ts"
+                        ><code title="parser/src/parser/writers/LibraryWriter.ts">LibraryWriter</code></a
+                      >, on TypeScript's
+                    </td>
+                    <td><code>&lt;Project&gt;.lib.ts</code>, beside the source, committed</td>
+                    <td><code>spell/parser/core/model</code>: the core with no Solid</td>
+                    <td>no, and never runs on its own</td>
+                  </tr>
+                  <tr>
+                    <td><code>py</code></td>
+                    <td>
+                      <a href="/parser/src/py/PyWriter.ts" target="src-parser-src-py-pywriter-ts"
+                        ><code title="parser/src/py/PyWriter.ts">PyWriter</code></a
+                      >
+                    </td>
+                    <td>
+                      <code>&lt;Project&gt;.spell.py</code>, its words <code>&lt;Project&gt;.py.en.json5</code>; for a
+                      program that draws, <code>&lt;Project&gt;.app.py</code> beside the source
+                    </td>
+                    <td><code>spell_core</code></td>
+                    <td>as HTML text</td>
+                  </tr>
+                  <tr>
+                    <td><code>py</code>'s page half</td>
+                    <td>
+                      <a href="/parser/src/py/ElementsWriter.ts" target="src-parser-src-py-elementswriter-ts"
+                        ><code title="parser/src/py/ElementsWriter.ts">ElementsWriter</code></a
+                      >, on JavaScript's
+                    </td>
+                    <td><code>&lt;Project&gt;.elements.spell.js</code></td>
+                    <td><code>@spell/core</code></td>
+                    <td>into the page, from the state Python sends</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ul>
+              <li>
+                The list is <code>SP.TARGETS</code>, in
+                <a href="/parser/src/spell/targets.ts" target="src-parser-src-spell-targets-ts"
+                  ><code title="parser/src/spell/targets.ts">targets.ts</code></a
+                >: each target's name, its writer, its file's ending, and what its runtime can do.
+              </li>
+              <li>
+                Code goes to the build folder, never committed. Only what others import or edit stays beside the source:
+                the library and the Python web app.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="picking" label="Picking targets" sticky collapsible dividing open="false">
+            <ul>
+              <li>Every project gets <code>js/solid</code>, whatever it asks for.</li>
+              <li>
+                A project asks for the others in its project file, <code>__project.json5</code>:
+                <code>"targets": ["js/solid", "ts/solid"]</code>.
+              </li>
+              <li>
+                <code>spell compile &lt;project&gt; --target py</code> adds one for a single run;
+                <code>--stdout</code> prints it instead of writing it.
+              </li>
+              <li>
+                <code>spell run &lt;project&gt; --target ts</code> or <code>--target py</code> runs one;
+                <code>js</code>, or none, is the default.
+              </li>
+            </ul>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>You ask for</th>
+                    <th>Spell says</th>
+                  </tr>
+                  <tr>
+                    <td><code>spell compile --target wasm</code></td>
+                    <td><code>There's no target 'wasm': try js/solid, ts/solid, py, ts/lib.</code></td>
+                  </tr>
+                  <tr>
+                    <td>a program that draws, as <code>ts/lib</code></td>
+                    <td><code>'Solitaire' draws a UI, which target 'ts/lib' can't.</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>spell run --target ts/lib</code></td>
+                    <td><code>"ts/lib" doesn't run: it's compiled for other code to import (`spell compile`)</code></td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="drawing" label="3. Drawing with Solid" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="paint brush"></ui-icon>
+          <p>
+            JavaScript and TypeScript draw with Solid, through the core's
+            <a href="/parser/src/core/drawing.ts" target="src-parser-src-core-drawing-ts"
+              ><code title="parser/src/core/drawing.ts">drawing.ts</code></a
+            >. A value that changes updates only its own node: turning a card over changes that card, and nothing
+            redraws the board.
+          </p>
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <tbody>
+                <tr>
+                  <th>Spell</th>
+                  <th>JavaScript</th>
+                  <th>TypeScript</th>
+                </tr>
+                <tr>
+                  <td>an element</td>
+                  <td>
+                    Solid's own <code>h()</code>:
+                    <code>h("ui-text", { color: () =&gt; this.color }, () =&gt; this.picture)</code>
+                  </td>
+                  <td>real JSX, which Solid's compiler builds</td>
+                </tr>
+                <tr>
+                  <td>a value that can change</td>
+                  <td>a function, so Solid calls it again</td>
+                  <td>an expression in braces</td>
+                </tr>
+                <tr>
+                  <td><code>draw the card</code></td>
+                  <td><code>core.drawThing(card)</code></td>
+                  <td>the same</td>
+                </tr>
+                <tr>
+                  <td>an <code>if ... return</code> in <code>to draw</code></td>
+                  <td>as written: <code>draw()</code> runs again when what it read changes</td>
+                  <td><code>&lt;Show&gt;</code> or <code>&lt;Switch&gt;</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+          <ul>
+            <li>JavaScript has no build step, so no JSX, decorators or types: it runs as it is.</li>
+            <li>
+              Each drawn thing sits in its own error boundary: a broken card shows a stand-in, and the rest keeps
+              drawing. In TypeScript that's <code>@drawn</code> on <code>draw()</code>.
+            </li>
+            <li>
+              A view shows as its own element. JavaScript makes its <code>&lt;solitaire-card&gt;</code> as the page
+              runs; TypeScript writes the class out, <code>CardElement</code>, and defines the tag with
+              <code>core.useElement(Card, CardElement)</code>, so the type checker sees it.
+            </li>
+            <li>
+              Spell and Spell UI share one reactive engine, in
+              <a href="/src/util/reactive/" target="src-src-util-reactive"
+                ><code title="src/util/reactive">spell/util/reactive</code></a
+              >.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="3-writers" label="4. Writers" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="pencil alternate"></ui-icon>
+          <ui-section id="finding-methods" label="One method per kind of node" sticky collapsible dividing open="false">
+            <ul>
+              <li>A writer has a method named for each node class it writes: <code>ASTIfStatement()</code>.</li>
+              <li>A node with no method of its own is written by its nearest base class's.</li>
+              <li>
+                <code>TSWriter</code> extends <code>JSWriter</code>, and <code>LibraryWriter</code> extends
+                <code>TSWriter</code>: each overrides only what it writes differently.
+              </li>
+              <li>
+                A writer writes a child with <code>this.write(child)</code>, so a subclass's overrides reach every
+                child.
+              </li>
+              <li>A node no method writes makes the writer throw, naming the node.</li>
+              <li>Methods are found by class NAME, so every build keeps class names.</li>
+            </ul>
+          </ui-section>
+          <ui-section
+            id="members"
+            label="ProgramWriter: the whole project first"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <p>
+              Under every writer is
+              <a
+                href="/parser/src/parser/writers/ProgramWriter.ts"
+                target="src-parser-src-parser-writers-programwriter-ts"
+                ><code title="parser/src/parser/writers/ProgramWriter.ts">ProgramWriter</code></a
+              >. It reads the whole project before writing a line, so it knows a card's rank is one of thirteen values,
+              not just some text. It holds what changes from one language to the next:
+            </p>
+            <ul>
+              <li>
+                how names are cased: <code>camelCase</code> for JavaScript; <code>snake_case</code> and
+                <code>UPPER_CASE</code> for Python
+              </li>
+              <li>where positions start (section 7)</li>
+              <li>each language's file separator and import lines</li>
+            </ul>
+          </ui-section>
+          <ui-section id="js-shape" label="Written as a person would" sticky collapsible dividing open="false">
+            <ul>
+              <li>Every target keeps the line of Spell that made a stored property, as a comment above it.</li>
+              <li>A list's own methods where it has them, events from <code>core</code>, and plain loops.</li>
+              <li>
+                Of the 207 examples in Spell's syntax table that carry their output, TypeScript writes 184 character for
+                character as JavaScript does. The other 23 add a type, declare a member added from outside its class, or
+                draw in JSX.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="types" label="5. TypeScript's types" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="check circle"></ui-icon>
+          <ul>
+            <li>
+              Types where Spell knows them: <code>Suit</code> and <code>Rank</code> from their values, parameters,
+              <code>List&lt;Card&gt;</code>, lists <code>as const</code>.
+            </li>
+            <li>
+              Where a program never says a type, what it does says it: a property's from the values it's given, a
+              method's from what it returns.
+            </li>
+            <li>
+              A type Spell doesn't know is written <code>any /* spell: type unknown */</code>, never a bare
+              <code>any</code>, so every gap shows and can be counted.
+            </li>
+            <li><code>tsc</code> checks each test project's TypeScript, and its report is pinned beside it.</li>
+            <li>
+              The catch: it never runs as it is. <code>spell run --target ts</code> builds it (esbuild, then Solid's
+              compiler) and runs it under node. <b>A program that draws can't open in a browser that way yet.</b>
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="4-meaning" label="6. The tree means things" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="sitemap"></ui-icon>
+          <ul>
+            <li>
+              The tree says what a program MEANS, not how one language writes it. Its 14 operators are meanings:
+              <code>and</code>, <code>or</code>, <code>equals</code>, <code>not equals</code>,
+              <code>exactly equals</code>, <code>not exactly equals</code>, <code>less than</code>,
+              <code>greater than</code>, <code>at most</code>, <code>at least</code>, <code>plus</code>,
+              <code>minus</code>, <code>times</code>, <code>divided by</code> (<a
+                href="/parser/src/parser/ast/AST.ts"
+                target="src-parser-src-parser-ast-ast-ts"
+                ><code title="parser/src/parser/ast/AST.ts">AST_OPERATORS</code></a
+              >).
+            </li>
+            <li>
+              Each writer spells them its way: <code>and</code> is <code>&amp;&amp;</code> in JavaScript and
+              <code>and</code> in Python.
+            </li>
+            <li><code>plus</code> adds numbers or joins text: a writer tells which from the two sides' datatypes.</li>
+            <li>Spell's own values stay values: <code>up</code>, which each writer quotes its own way.</li>
+          </ul>
+          <ui-section id="6-tree-diagrams" label="Seeing a tree" sticky collapsible dividing open="false">
+            <pre><code class="language-sh">spell parse --tree "fire event card click with card = 1"</code></pre>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>What it printed</ui-title>
+              <ui-content>
+                <pre><code class="language-plaintext">Core trigger
+  args: Text "card-click"
+  args: Object literal  Object
+    properties: Object literal property
+      property: Name card
+      value: Number 1
+
+trigger("card-click", { card: 1 })</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                <code>--tree --html</code> prints it as a <code>&lt;ui-tree-diagram&gt;</code> for a page:
+                <a href="/parser/src/parser/writers/TreeWriter.ts" target="src-parser-src-parser-writers-treewriter-ts"
+                  ><code title="parser/src/parser/writers/TreeWriter.ts">TreeWriter</code></a
+                >
+                is a writer too, its output boxes instead of code.
+              </li>
+              <li>The app shows the same tree in its Spell Tree pane.</li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="lists-from-0" label="7. Positions from 0" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="sort numeric down"></ui-icon>
+          <p>
+            Compiled code counts from 0 on every target, as its own language does: the first tile of a rack is
+            <code>rack[0]</code>. How a project's Spell counts is a setting only the compiler reads.
+          </p>
+          <ul>
+            <li>
+              Spell counts from 1, unless the project file says <code>"listsStartAt": 0</code>. Then the hover text and
+              the Type Explorer say "counts from 0".
+            </li>
+            <li>
+              Only NUMBERS change: <code>item 3 of the deck</code>, <code>the position of the queen</code>, a loop's
+              position.
+            </li>
+            <li>
+              Ordinals don't: <code>the first card</code> is the first card either way. Nor do negative positions:
+              <code>-1</code> is the last.
+            </li>
+            <li>Neither core takes a start: <code>deck.position_of(ace)</code>, with nothing more.</li>
+          </ul>
+          <ui-section id="positions-compiled" label="Spell that counts from 1" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                A number written out is worked out as it compiles: <code>item 4 of the deck</code> is
+                <code>core.getItemAt(deck, 3)</code>.
+              </li>
+              <li>
+                One known only when it runs goes through <code>position()</code>:
+                <code>core.getItemAt(deck, position(n))</code>, and in Python <code>position(column)</code>.
+              </li>
+              <li>
+                A position coming out goes back through <code>spellPosition()</code>; a range's end through
+                <code>endPosition()</code>.
+              </li>
+              <li><code>item 0</code>, counting from 1, is nothing, like a position past the end.</li>
+              <li>
+                The helpers are in both cores:
+                <a href="/parser/src/core/positions.ts" target="src-parser-src-core-positions-ts"
+                  ><code title="parser/src/core/positions.ts">positions.ts</code></a
+                >
+                and
+                <a
+                  href="/parser/src/py/core/spell_core/positions.py"
+                  target="src-parser-src-py-core-spell-core-positions-py"
+                  ><code title="parser/src/py/core/spell_core/positions.py">positions.py</code></a
+                >.
+              </li>
+              <li>
+                Counting from 0, nothing needs turning: the test project
+                <a href="/app/spaces/@spell/test/lists-from-zero/" target="src-app-spaces-spell-test-lists-from-zero"
+                  ><code title="app/spaces/@spell/test/lists-from-zero">lists-from-zero</code></a
+                >
+                compiles with no helper at all.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="positions-ranges" label="Ranges are slices" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                Counting from 0, <code>tiles 0 to 2 of the rack</code> is <code>rack.slice(0, 3)</code> in JavaScript,
+                <code>rack[0:3]</code> in Python.
+              </li>
+              <li>Spell's ranges include their end, and a slice leaves it out: the compiler adds the one.</li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section
+          id="spell-core"
+          label="8. spell_core: the core's Python twin"
+          sticky
+          collapsible
+          dividing
+          open="false"
+        >
+          <ui-icon slot="icon" name="python"></ui-icon>
+          <ul>
+            <li>
+              What compiled Python imports, for what Python has no word for:
+              <code>from spell_core import core, Thing, List, prop, h</code>, and only what it uses.
+            </li>
+            <li>
+              A uv project for Python 3.12 or later, in
+              <a href="/parser/src/py/core/" target="src-parser-src-py-core"
+                ><code title="parser/src/py/core">parser/src/py/core</code></a
+              >. Its dependencies are empty: the standard library only.
+            </li>
+            <li>
+              Each module is the twin of one in the JavaScript core: things, lists and their guards, types and equality,
+              Spell's tests, events and pauses on asyncio, JSON, drawing as HTML text, the seeded random, the position
+              helpers.
+            </li>
+            <li>
+              Its console prints exactly what node prints: <code>3.0</code> as <code>3</code>, yes and no as
+              <code>true</code> and <code>false</code>.
+            </li>
+            <li>
+              It runs a compiled program by itself: <code>python -m spell_core.run &lt;program&gt; --seed n</code>.
+            </li>
+            <li>
+              One seed deals the same cards in both languages: both cores have the same number generator (Park and
+              Miller's) and the same shuffle.
+            </li>
+          </ul>
+          <ui-section
+            id="core-method-list"
+            label="Keeping the two cores in step"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                The core's method list,
+                <a href="/parser/src/core/core.declarations.json5" target="src-parser-src-core-core-declarations-json5"
+                  ><code title="parser/src/core/core.declarations.json5">core.declarations.json5</code></a
+                >, is written from the core's docstrings by <code>yarn core:gen:declarations</code> in the parser
+                folder; a test fails when it's out of date.
+              </li>
+              <li>
+                A Python test checks <code>spell_core</code> against it, in snake_case. A missing name fails, unless
+                it's listed, with why, in
+                <a href="/parser/src/py/core/not_ported_yet.json5" target="src-parser-src-py-core-not-ported-yet-json5"
+                  ><code title="parser/src/py/core/not_ported_yet.json5">not_ported_yet.json5</code></a
+                >.
+              </li>
+              <li>That list fails too when it goes stale: a name it lists that <code>spell_core</code> now has.</li>
+              <li>
+                Today it lists 107 names, in 21 groups: most are a browser's only, or a page's actions, drags and
+                sounds.
+              </li>
+              <li>
+                The core reference table shows the list as a page, each name with Python's name for it and whether
+                <code>spell_core</code> has it yet.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="web" label="9. Python apps on the web" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="globe"></ui-icon>
+          <p>
+            A Python program that draws runs as a web app: Python keeps the logic, and the page draws what Python says.
+            <code>spell run &lt;project&gt; --target py</code> serves it and opens it in your browser, until Ctrl-C.
+          </p>
+          <ol>
+            <li>The page opens, and gets the whole state: every thing as JSON, each with an id.</li>
+            <li>
+              A click on the page calls Python: <code>this.turnOver()</code> is
+              <code>sendCall("turn_over", [], this)</code>.
+            </li>
+            <li>Python runs it, and sends back a patch: only the things that changed, each whole.</li>
+            <li>The page reads the patch INTO the things it has, by id, so what draws them redraws.</li>
+          </ol>
+          <ui-section id="web-state" label="The state, by id" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                Both cores have a state writer and a mirror:
+                <a href="/parser/src/py/core/spell_core/state.py" target="src-parser-src-py-core-spell-core-state-py"
+                  ><code title="parser/src/py/core/spell_core/state.py">state.py</code></a
+                >
+                and
+                <a href="/parser/src/core/state.ts" target="src-parser-src-core-state-ts"
+                  ><code title="parser/src/core/state.ts">state.ts</code></a
+                >.
+              </li>
+              <li>
+                A thing's first mention is whole; each later one is <code>{"@id": "3"}</code> alone, as JSON-LD writes a
+                reference. So a card in two places stays one card.
+              </li>
+              <li>
+                A saved state,
+                <a
+                  href="/parser/tests/core/stateById.expected.json5"
+                  target="src-parser-tests-core-statebyid-expected-json5"
+                  ><code title="parser/tests/core/stateById.expected.json5">stateById.expected.json5</code></a
+                >, is written and read back by both cores' tests: they agree on every character.
+              </li>
+              <li>A game per visitor.</li>
+            </ul>
+          </ui-section>
+          <ui-section id="web-quart" label="Served on Quart" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                Python's target writes two more files: the page half, <code>&lt;Project&gt;.elements.spell.js</code>,
+                and a short Quart web app, <code>&lt;Project&gt;.app.py</code>, with every route spelled out, for you to
+                grow (<a href="/parser/src/py/quartApp.ts" target="src-parser-src-py-quartapp-ts"
+                  ><code title="parser/src/py/quartApp.ts">quartApp.ts</code></a
+                >).
+              </li>
+              <li>
+                The app runs on <code>spell_quart</code>, in the app folder (<a
+                  href="/app/src/spaces/server/py/spell_quart/"
+                  target="src-app-src-spaces-server-py-spell-quart"
+                  ><code title="app/src/spaces/server/py/spell_quart">spell_quart</code></a
+                >).
+              </li>
+              <li>
+                Each compile rewrites the app only while nobody has edited it: its first line holds a hash of the rest.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="7-testing" label="10. How it's tested" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="flask"></ui-icon>
+          <ul>
+            <li>
+              Snapshots: every frozen test project's code, for each target, is pinned beside it, with what
+              <code>tsc</code> and pyright say about it. <code>spell content check --bless</code> rewrites them; then
+              read the diff.
+            </li>
+            <li>
+              Rule tests: each rule's tests say what both JavaScript and TypeScript write (<a
+                href="/parser/README-parser.md"
+                target="src-parser-readme-parser-md"
+                >README-parser</a
+              >, "Testing rules").
+            </li>
+            <li>
+              The core contract,
+              <a href="/app/tests/cli/contract.test.ts" target="src-app-tests-cli-contract-test-ts"
+                ><code title="app/tests/cli/contract.test.ts">contract.test.ts</code></a
+              >: every test project, compiled for each target, runs headless from seed 1, and must print the same thing,
+              its drawing included.
+              <ul>
+                <li>Only stdout is compared: a dumped thing goes to stderr, in each language's own look.</li>
+                <li>Python runs the projects its writer writes so far (<code>PYTHON_FIXTURES</code>).</li>
+              </ul>
+            </li>
+            <li>
+              pyright checks every test project's Python, as Python 3.12; ruff and pytest check <code>spell_core</code>,
+              in the parser folder's <code>yarn lint</code> and <code>yarn test</code>.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="8-adding-a-target" label="11. Adding a target" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="plus"></ui-icon>
+          <ol>
+            <li>A writer class, extending the nearest one that writes like it.</li>
+            <li>An entry in <code>SP.TARGETS</code>: its name, writer, file ending, and what its runtime can do.</li>
+            <li>A line in the core contract test.</li>
+            <li>A core, if the language is new: Python's is the worked example.</li>
+          </ol>
+        </ui-section>
+
+        <ui-section id="10-limits" label="12. Limits" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="exclamation circle"></ui-icon>
+          <ul>
+            <li>
+              A drawing program compiled as <code>ts/solid</code> can't open in a browser from
+              <code>spell run</code> yet.
+            </li>
+            <li>
+              Python's type hints are thinner than TypeScript's: where TypeScript says <code>rank: Rank</code>, Python
+              says <code>rank: Any</code>.
+            </li>
+            <li>107 of the JavaScript core's names aren't in <code>spell_core</code> yet.</li>
+            <li>
+              Python's writer can't write a function's named arguments yet: the test project
+              <a href="/app/spaces/@spell/test/todos-form-based/" target="src-app-spaces-spell-test-todos-form-based"
+                ><code title="app/spaces/@spell/test/todos-form-based">todos-form-based</code></a
+              >
+              has no Python snapshot.
+            </li>
+            <li>A kind of node the Python writer can't write stops the compile, naming it.</li>
+            <li>🌱 WebAssembly is planned, not built: <code>--target wasm</code> answers in one line, above.</li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="sources" label="13. Where things are" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="folder open"></ui-icon>
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <tbody>
+                <tr>
+                  <th>What</th>
+                  <th>Where</th>
+                </tr>
+                <tr>
+                  <td>the targets</td>
+                  <td>
+                    <a href="/parser/src/spell/targets.ts" target="src-parser-src-spell-targets-ts"
+                      ><code title="parser/src/spell/targets.ts">targets.ts</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>JavaScript, TypeScript, library and tree writers</td>
+                  <td>
+                    <a href="/parser/src/parser/writers/" target="src-parser-src-parser-writers"
+                      ><code title="parser/src/parser/writers">parser/src/parser/writers</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>Python's writers</td>
+                  <td>
+                    <a href="/parser/src/py/" target="src-parser-src-py"
+                      ><code title="parser/src/py">parser/src/py</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>spell_core</code></td>
+                  <td>
+                    <a href="/parser/src/py/core/" target="src-parser-src-py-core"
+                      ><code title="parser/src/py/core">parser/src/py/core</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>the frozen test projects</td>
+                  <td>
+                    <a href="/app/spaces/@spell/test/" target="src-app-spaces-spell-test"
+                      ><code title="app/spaces/@spell/test">app/spaces/@spell/test</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>compile, or run, as one target</td>
+                  <td>
+                    <code>spell compile &lt;project&gt; --target &lt;name&gt; --stdout</code>,
+                    <code>spell run &lt;project&gt; --target py</code>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+          <ul>
+            <li>
+              <a href="/parser/README-targets.md" target="src-parser-readme-targets-md">README-targets</a>: the card,
+              line by line, in all three languages
+            </li>
+            <li>
+              <a href="/parser/README-core.md" target="src-parser-readme-core-md">README-core</a>: the runtime, and the
+              two cores side by side
+            </li>
+            <li>
+              <a href="/guides/precedence/precedence.html" target="src-guides-precedence-precedence-html"
+                >How the Parser Works</a
+              >: how the tree gets built
+            </li>
+            <li>
+              <a href="/guides/prefs-and-undo.html" target="src-guides-prefs-and-undo-html"
+                >What Compiled Spell Runs On</a
+              >: undo, remembered properties and views
+            </li>
+          </ul>
+        </ui-section>
+        <footer class="spell-doc-footer">
+          <ui-divider></ui-divider>
+          <p class="meta">Last checked 2026-11-21, against the kit's code that day.</p>
+        </footer>
+      </main>
+    </div>
+    <script src="/_epic/assets/highlight.min.js"></script>
+    <script src="/_epic/assets/spell-ui.js"></script>
+  </body>
+</html>

@@ -403,7 +403,8 @@ the epic pages and their review loop, worktrees and VS Code windows, parking and
 and the `epic` command that drives them.
 ONE copy on the machine serves every repo and every window.
 
-- It adds 20 skills and 11 hooks, and puts `epic` on every session's `PATH`.
+- It adds its skills and hooks ([how many, and each one](https://github.com/spell-app/spell/blob/main/epic/README-skills.md)),
+  and puts `epic` on every session's `PATH`.
 - An edit to it is live at once for `epic` and the hooks (once `epic plugin install` links them);
   a skill's new text after `/reload-plugins`;  its inbox monitor in sessions started after.
 - A repo opts in with `.epic/config.json5`:  where its epic folder, worktrees and windows are.
@@ -484,13 +485,13 @@ The kit's [.epic/config.json5](../.epic/config.json5), key by key:
 A SKILL is a packaged workflow Claude runs when you type its name (`/epic seo`), or when what you ask matches it.
 A HOOK is a script Claude Code runs on an event:  a session starting, a prompt sent, a turn ending.
 
-The plugin brings 20 skills in three groups;  spell-app has five of its own.
+The plugin brings its skills in three groups;  spell-app has five of its own.
 
 | The plugin's [`skills/`](https://github.com/spell-app/spell/tree/main/epic/skills) | For |
 | --- | --- |
-| Planning and review:  `/epic`, `/epics`, `/details`, `/comment`, `/docs-check`, `/voice`, `/send` | an epic's life, from the first prompt to the last review |
+| Planning and review:  `/epic`, `/epics`, `/details`, `/comment`, `/docs-check`, `/voice`, `/send`, `/coherence`, `/designer` | an epic's life, from the first prompt to the last review |
 | Worktrees and sessions:  `/isolate`, `/park`, `/unpark`, `/wait-for`, `/worktrees`, `/session`, `/title`, `/wtf` | moving work between worktrees, windows and sessions, and keeping track of it |
-| Background and offline:  `/bg`, `/bedtime`, `/airplane` | work that runs while you're elsewhere:  a named background agent, phases built overnight, pages marked up offline |
+| Background and offline:  `/bg`, `/bedtime`, `/airplane`, `/focus`, `/back` | work that runs while you're elsewhere:  a named background agent, phases built overnight, pages marked up offline |
 
 - Each one, its arguments, and when to reach for it:
   [spell-epic's README-skills.md](https://github.com/spell-app/spell/blob/main/epic/README-skills.md).
@@ -547,6 +548,7 @@ Waking a session from the page, the worktree hook and window moves are still Cla
 
 ## See also
 
+- The guide:  [Working with Agents](../guides/wwod.html), in the kit's guides/ folder
 - [spell-epic's README](https://github.com/spell-app/spell/blob/main/epic/README.md):  epics, the method the agents here plan in
 - [spell-epic's README-skills.md](https://github.com/spell-app/spell/blob/main/epic/README-skills.md):  every skill and hook, and when to reach for which
 - [AGENTS.md](../AGENTS.md):  the kit's rules, the ones every session loads

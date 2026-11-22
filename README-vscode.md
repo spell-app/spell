@@ -614,6 +614,7 @@ an epic's worktree runs both for you (`extraInstalls`, in the epic settings).
 
 ## See also
 
+- The guide:  [VS Code](guides/intellisense.html), in the kit's guides/ folder
 - [spell-app's README-lsp.md](https://github.com/spell-app/spell/blob/main/app/README-lsp.md):  the language server under the extension,
   every feature it answers
 - [spell-epic's README-vscode.md](https://github.com/spell-app/spell/blob/main/epic/README-vscode.md):  Spell Epic in full,

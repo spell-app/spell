@@ -20,11 +20,11 @@ Here an example is markup in a plain HTML page, and the page server sends that p
 nothing is built between saving a page and reading it.
 The one thing built is a bundle every page loads, and the page server builds that itself when its sources change.
 
-There are 84 pages, with 1,740 live examples (counted 2026-10-21):
-- a page per family, 62 of them, each named for its main tag and laid out as fomantic-ui.com's are
-- a page of its own for 14 sub-tags:  `ui-radio`, `ui-textarea` and the content parts
-- eight more:  the home page, getting started, the class grammar, theming, utilities, icons,
-  the component index and the kitchen sink
+There are 121 pages, with 2,159 live examples (counted 2026-11-21):
+- a page per family, 96 of them, each named for its main tag and laid out as fomantic-ui.com's are
+- a page of its own for 15 sub-tags:  `ui-radio`, `ui-textarea` and the content parts
+- ten more:  the home page, getting started, the class grammar, theming, utilities, icons, the palette,
+  the theme bench, the component index and the kitchen sink
 
 Each family's page has four tabs, Examples, Usage, API and Theming, and an "On this page" rail beside them.
 A left nav lists every component, A-Z or by topic, with a search.
@@ -617,6 +617,7 @@ so they need a checkout with the epic folder and the page server running (above)
 
 ## See also
 
+- The guide:  [Spell UI's Docs Site](../guides/spell-ui-pages.html), in the kit's guides/ folder
 - [README.md](README.md):  Spell UI's front page, for what the elements are before the pages about them
 - [README-components.md](README-components.md):  every family with a picture, the catalogue `yarn readme:components` writes
 - [The kit's README/server.md](https://github.com/spell-app/spell/blob/main/README/server.md):  the page server the site runs on, its addresses and its live reload

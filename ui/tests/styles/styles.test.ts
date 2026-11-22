@@ -2,15 +2,27 @@ import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
 import * as UIT from "spell/ui/components/components.types"
 import { AnimationNames } from "spell/ui/runtime"
-import { breakpoints, colorsCSS, foundationCSS, pageCSS, sizes, utilitiesCSS } from "spell/ui/styles"
+import {
+  breakpoints,
+  colorsCSS,
+  fallbackCSS,
+  foundationCSS,
+  pageCSS,
+  shadowFoundationCSS,
+  sizes,
+  utilitiesCSS
+} from "spell/ui/styles"
 import { StyleGenerator } from "spell/ui/styles/StyleGenerator"
+import { SHEET_WORDS } from "spell/ui/styles/sheetWords"
 
 import { Fixture } from "spell/test-helpers/Fixture"
 
 import layersRaw from "spell/ui/styles/layers.css?raw"
 import tokensRaw from "spell/ui/styles/tokens.css?raw"
 import colorsRaw from "spell/ui/styles/colors.css?raw"
+import colorsSharedRaw from "spell/ui/styles/colors.shared.css?raw"
 import sizesRaw from "spell/ui/styles/sizes.css?raw"
+import sizesSharedRaw from "spell/ui/styles/sizes.shared.css?raw"
 import utilitiesRaw from "spell/ui/styles/utilities.css?raw"
 import animationsRaw from "spell/ui/styles/animations.css?raw"
 import mediaRaw from "spell/ui/styles/media.css?raw"
@@ -46,7 +58,10 @@ const FOUNDATION_GZIP_BUDGET = 14.5 * 1024
 const LIGHT_DARK_LOWERED = colorsCSS.includes("--lightningcss-light")
 
 /** Raw sheets, so `light-dark()` survives whatever the Lightning CSS targets. */
-const RAW_FOUNDATION = [layersRaw, tokensRaw, colorsRaw, sizesRaw, utilitiesRaw]
+const RAW_FOUNDATION = [layersRaw, tokensRaw, colorsRaw, colorsSharedRaw, sizesRaw, sizesSharedRaw, utilitiesRaw]
+
+/** What a shadow root adopts of `RAW_FOUNDATION`:  no token sheet's page part. */
+const RAW_SHADOW_FOUNDATION = [layersRaw, colorsSharedRaw, sizesSharedRaw, utilitiesRaw]
 
 ////////////////
 // ## The foundation
@@ -112,10 +127,10 @@ describe("foundationCSS", () => {
   })
 })
 
-describe("foundationCSS in shadow roots", () => {
+describe("shadowFoundationCSS", () => {
   it("resolves page tokens and remaps inside a shadow root", () => {
     adoptIntoPage(foundationCSS)
-    const inner = renderShadow(`<b class="ui red"></b>`, foundationCSS)
+    const inner = renderShadow(`<b class="ui red"></b>`, shadowFoundationCSS)
     expect(property(inner, "--ui-font-size")).toBe("16px")
     expect(getComputedStyle(inner).display).not.toBe("")
     const red = Fixture.render(`<span style="color: var(--ui-red)"></span>`)
@@ -124,7 +139,7 @@ describe("foundationCSS in shadow roots", () => {
   })
 
   it("falls back to :host tokens when the page never loaded them", () => {
-    const inner = renderShadow(`<b></b>`, foundationCSS)
+    const inner = renderShadow(`<b></b>`, [...shadowFoundationCSS, ...fallbackCSS])
     expect(property(document.documentElement, "--ui-font-size")).toBe("")
     expect(property(inner, "--ui-font-size")).toBe("16px")
     expect(property(inner, "--ui-size-large")).toBe(String(sizes.large))
@@ -132,13 +147,27 @@ describe("foundationCSS in shadow roots", () => {
 
   it("lets a wrapper override a token for the components inside it", () => {
     adoptIntoPage(foundationCSS)
-    const inner = renderShadow(`<b></b>`, foundationCSS, `style="--ui-font-size: 20px"`)
+    const inner = renderShadow(`<b></b>`, shadowFoundationCSS, `style="--ui-font-size: 20px"`)
     expect(property(inner, "--ui-font-size")).toBe("20px")
+  })
+
+  // solid-2-final P3:  `:root` matches nothing in a shadow root, so its 30 KB of tokens only cost style work there
+  it("adopts no :root rule and no @property:  the tokens come from the page, by inheritance", () => {
+    for (const sheet of toSheets(shadowFoundationCSS)) {
+      const selectors = styleRules(sheet.cssRules).map((rule) => rule.selectorText)
+      expect(selectors.filter((selector) => /:root\b/.test(selector))).toEqual([])
+      expect(styleRules(sheet.cssRules, CSSPropertyRule)).toEqual([])
+    }
+  })
+
+  it("adopts no :host copy of the tokens unless the page has none (the fallback parts)", () => {
+    for (const css of shadowFoundationCSS) expect(css).not.toContain("--ui-sheet-")
+    for (const css of fallbackCSS) expect(css).toMatch(/@container not style\(--ui-sheet-\w+: *loaded\)/)
   })
 
   it("resets shadow markup without touching the page", () => {
     adoptIntoPage(foundationCSS)
-    const inner = renderShadow(`<p>shadow</p>`, foundationCSS)
+    const inner = renderShadow(`<p>shadow</p>`, shadowFoundationCSS)
     expect(getComputedStyle(inner).marginBlockStart).toBe("0px")
     expect(getComputedStyle(Fixture.render(`<p>page</p>`)).marginBlockStart).not.toBe("0px")
   })
@@ -151,7 +180,7 @@ describe("foundationCSS in shadow roots", () => {
 describe("colors.css schemes", () => {
   it("flips tokens in a .ui-dark subtree, in the page and in shadow roots", () => {
     adoptIntoPage(RAW_FOUNDATION)
-    expectSchemes(RAW_FOUNDATION)
+    expectSchemes(RAW_SHADOW_FOUNDATION)
   })
 
   it("inverts relative to the parent scheme with .ui-invert", () => {
@@ -165,7 +194,7 @@ describe("colors.css schemes", () => {
   // Needs `css.lightningcss.targets` set to modern browsers in the Vite / Vitest configs -- see `index.ts`.
   it.skipIf(LIGHT_DARK_LOWERED)("keeps light-dark() in the barrel's sheets (modern lightningcss targets)", () => {
     adoptIntoPage(foundationCSS)
-    expectSchemes(foundationCSS)
+    expectSchemes(shadowFoundationCSS)
   })
 })
 
@@ -209,6 +238,22 @@ describe("src/styles/*.css", () => {
     }
   })
 
+  it("keeps the shared sheets' class words current (run `yarn gen:styles`;  solid-2-final P4)", () => {
+    expect(SHEET_WORDS).toEqual(new StyleGenerator().sheetWords())
+  })
+
+  // a registered colour resolves `light-dark()` where it's DECLARED (`:root`), freezing the page's scheme
+  it("registers no token whose value holds light-dark()", () => {
+    const sheet = toSheets([colorsRaw])[0]!
+    const registered = new Set(styleRules(sheet.cssRules, CSSPropertyRule).map((rule) => rule.name))
+    expect(registered.size).toBeGreaterThan(10)
+    for (const rule of styleRules(sheet.cssRules)) {
+      for (const name of rule.style) {
+        if (registered.has(name)) expect(rule.style.getPropertyValue(name), name).not.toContain("light-dark(")
+      }
+    }
+  })
+
   it("covers every runtime animation name", () => {
     for (const name of AnimationNames) {
       const directions = STATIC_ANIMATIONS.has(name) ? ["static"] : ["in", "out"]
@@ -224,7 +269,17 @@ describe("src/styles/*.css", () => {
 
   it(`fits the foundation in ${FOUNDATION_GZIP_BUDGET / 1024} KB gzipped`, async () => {
     // `?raw` + `minify()` ~== a production build with modern targets (the dev `?inline` text isn't minified)
-    const names = ["layers", "reset", "tokens", "colors", "sizes", "animations", "utilities"]
+    const names = [
+      "layers",
+      "reset",
+      "tokens",
+      "colors",
+      "colors.shared",
+      "sizes",
+      "sizes.shared",
+      "animations",
+      "utilities"
+    ]
     const text = names.map((name) => minify(RAW_SHEETS[`./${name}.css`] ?? "")).join("")
     expect(text.length).toBeGreaterThan(10_000)
     expect(await gzipSize(text)).toBeLessThanOrEqual(FOUNDATION_GZIP_BUDGET)
@@ -289,6 +344,19 @@ function toSheets(css: readonly string[]): CSSStyleSheet[] {
 /** Computed value of custom property `name` on `element`. */
 function property(element: Element, name: string): string {
   return getComputedStyle(element).getPropertyValue(name).trim()
+}
+
+/** Every rule of type `Type` in `rules`, inside `@layer` / `@media` / `@container` blocks too. */
+function styleRules<T extends CSSRule = CSSStyleRule>(
+  rules: CSSRuleList,
+  Type: abstract new (...args: never[]) => T = CSSStyleRule as never
+): T[] {
+  const found: T[] = []
+  for (const rule of rules) {
+    if (rule instanceof Type) found.push(rule)
+    if (rule instanceof CSSGroupingRule) found.push(...styleRules(rule.cssRules, Type))
+  }
+  return found
 }
 
 /** `css` without comments. */

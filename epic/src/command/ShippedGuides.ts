@@ -85,8 +85,8 @@ export class ShippedGuides {
 
   /**
    * What's wrong with the shipped guides, a line each (`guides/x.html:  ...`);  none:  `[]`.
-   * - `commandExists(words)`:  whether a command line's first words are a command (`spell server start`);  the
-   *   caller's, from every folder's command list (`Guides`)
+   * - `commandExists(words)`:  whether a command line's first words are a command (`spell server start`);
+   *   the caller's, from every folder's command list (`Guides`)
    * - `fileExists(path)`:  whether a path a guide names in code is there, from the checkout's root
    */
   check({ commandExists, fileExists = (path) => existsSync(join(this.checkout, path)) }: CheckProps): string[] {
@@ -98,7 +98,8 @@ export class ShippedGuides {
       const path = relative(this.checkout, file).split(sep).join("/")
       const say = (problem: string) => problems.push(`${path}:  ${problem}`)
       if (/<epic-link\b/.test(html)) say("an <epic-link>:  a link into the epic repo")
-      for (const [, href] of html.matchAll(LINK)) {
+      // a code sample's own markup (`&lt;a href="..."&gt;` in a <pre>) is text, not a link
+      for (const [, href] of html.replace(CODE_BLOCK, "").matchAll(LINK)) {
         const target = linkTarget(href!, dirname(path))
         if (target === undefined) continue
         if (EPIC_REPO.test(target)) say(`links ${href}, in the epic repo`)
@@ -187,8 +188,14 @@ const LINK = /\s(?:href|src)="([^"]*)"/g
 /** Every inline code span's inside:  `$1`. */
 const CODE = /<code\b[^>]*>([\s\S]*?)<\/code>/g
 
-/** A command line a guide names:  `spell` or `epic`, and up to two more words. */
-const COMMAND = /^(?:spell|epic)(?:\s+[a-z][\w-]*){1,2}/
+/**
+ * A command line a guide names:  `spell` or `epic`, a word, and a second only when it's a plain word, a verb
+ * (`spell server start`);  `spell bundle ui-site`'s `ui-site` is an argument, never checked.
+ */
+const COMMAND = /^(?:spell|epic)\s+[a-z][\w-]*(?:\s+[a-z]+(?![\w./-]))?/
+
+/** A `<pre>` or `<code>` block, whole:  a sample's markup in it is text. */
+const CODE_BLOCK = /<(pre|code)\b[^>]*>[\s\S]*?<\/\1>/g
 
 /** A path into one of the kit's folders, as a guide names it in code:  `parser/src/x.ts`, `src/server/`. */
 const FILE_PATH = /^(?:src|parser|ui|epic|app|tests|bin|tools|agents|README)\/[\w./-]+(?::\d+)?$/

@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>VS Code</title>
+    <meta
+      name="description"
+      content="What VS Code knows about Spell:  .spell files (the language server, compiled views, Run Project), and custom elements in JSX, HTML and CSS (the generated JSX types, typed events, the HTML and CSS data, the elements help for slots, parts and dashed names)."
+    />
+    <meta name="spell-audience" content="programmers" />
+    <meta name="spell-topic" content="The App" />
+    <meta name="spell-voice" content="readme 2026-11-21" />
+    <meta name="spell-saga" content="tooling" />
+    <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+  </head>
+  <body class="spell-doc-page">
+    <spell-site-header></spell-site-header>
+    <div class="spell-doc">
+      <main class="spell-doc-main">
+        <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+          <ui-breadcrumb>Guides</ui-breadcrumb>
+          <ui-breadcrumb selected>VS Code</ui-breadcrumb>
+        </ui-breadcrumbs>
+        <ui-sticky class="spell-h1"
+          ><header class="spell-page-head"><h1>VS Code</h1></header></ui-sticky
+        >
+        <p class="lede">
+          Type <code>&lt;ui-button sise="large"&gt;</code> in a <code>.tsx</code> file, and it's red: in the editor, and
+          in <code>yarn ts</code>. Fix it to <code>size="</code>, and the eight sizes complete, mini to massive, each
+          with its docs on hover.
+        </p>
+        <p>
+          That's one half of what Spell's VS Code extension does: custom elements, in JSX, HTML and CSS. The other half
+          is Spell itself: open a <code>.spell</code> file, and you get errors as you type, the TypeScript, JavaScript
+          or Python it compiles to beside it, and the project running in a panel. Both come from your checkout of the
+          kit, as it is on disk.
+        </p>
+        <ui-list class="spell-meta">
+          <ui-item icon="user"
+            >Written for: anyone writing Spell or <code>&lt;ui-*&gt;</code> tags in VS Code, or adding a program that
+            uses them</ui-item
+          >
+          <ui-item icon="flask">Checked: 2026-11-21, every count, file and setting against that day's code</ui-item>
+          <ui-item icon="book open"
+            >The reference beside it, with the install steps and every command and setting:
+            <a href="/README-vscode.md" target="src-readme-vscode-md">the kit's VS Code README</a></ui-item
+          >
+        </ui-list>
+
+        <ui-section id="1-summary" label="1. Summary" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="lightbulb"></ui-icon>
+          <ui-statistics class="spell-stats" size="mini">
+            <ui-statistic value="149" label="tags typed"></ui-statistic>
+            <ui-statistic value="1,604" label="CSS properties"></ui-statistic>
+            <ui-statistic value="18" label="colour themes"></ui-statistic>
+          </ui-statistics>
+          <ul>
+            <li>
+              One extension, Spell, built from the app folder's <code>vscode/</code>:
+              <code>spell app vscode</code> builds and installs it. It isn't on the Marketplace.
+            </li>
+            <li>
+              In a <code>.spell</code> file: the language server, the compiled TS, JS and PY views, Run Project and Run
+              Tests, the bubbly look, and Spell's themes as VS Code colour themes.
+            </li>
+            <li>
+              The <code>.vsix</code> carries no Spell: it runs the language server of the checkout your window is on, so
+              a change to the parser shows once the server restarts.
+            </li>
+            <li>
+              In JSX, every one of Spell UI's 149 <code>&lt;ui-*&gt;</code> tags completes, shows its docs on hover, and
+              is checked: a misspelt attribute or a wrong value is red, in the editor and in <code>yarn ts</code>.
+            </li>
+            <li>Each tag's events are typed, so <code>event.detail</code> is known.</li>
+            <li>
+              In HTML and CSS files, Spell UI's tags, custom properties, parts and states complete, in every window,
+              each tag once.
+            </li>
+            <li>
+              The elements help adds what types can't say: slot names, part names, and misspelt dashed attributes. It
+              runs in the editor only.
+            </li>
+            <li>The editor's TypeScript stays TypeScript 7: nothing to switch, no prompt.</li>
+          </ul>
+          <ui-message state="warning" heading="Rebuild the extension to see changes">
+            <ul>
+              <li>
+                The slot, part and HTML and CSS help are built into the extension: after
+                <code>spell app vscode</code>, reload the window (<a href="#5-plugin">The elements help</a>).
+              </li>
+              <li>A vocabulary change shows in HTML and CSS files after that rebuild too.</li>
+            </ul>
+          </ui-message>
+        </ui-section>
+
+        <ui-section id="spell-files" label="2. In a .spell file" sticky collapsible dividing open="false">
+          <p>
+            Most language extensions carry their language server inside them. Spell's carries no Spell at all: when a
+            window opens its first <code>.spell</code> file, the extension starts THAT window's checkout's language
+            server, from source, with the kit's <code>tsx</code>.
+          </p>
+          <ul>
+            <li>
+              So the editor runs Spell as it is on disk: change a rule in the parser, restart the server, and the
+              squiggles follow. No rebuild, no reinstall.
+            </li>
+            <li>
+              Which checkout: the <code>spell.parserRoot</code> setting when it's set, else the window's folders. The
+              Output panel's Spell channel says which it picked, and why.
+            </li>
+            <li>A window with no <code>.spell</code> file open starts no server.</li>
+          </ul>
+          <p>What you get in the file:</p>
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <thead>
+                <tr>
+                  <th>feature</th>
+                  <th>what it does</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>colours</td>
+                  <td>
+                    Spell's grammar, with <code>&lt;css&gt;</code> and <code>&lt;markdown&gt;</code> blocks coloured as
+                    their own languages; comments read as Markdown
+                  </td>
+                </tr>
+                <tr>
+                  <td>the language server</td>
+                  <td>errors as you type, hover, completion, go to definition and references, rename, an outline</td>
+                </tr>
+                <tr>
+                  <td>TS, JS, PY</td>
+                  <td>
+                    the code the file compiles to, read-only beside it, refreshed 300 ms after you stop typing; nothing
+                    is written to disk
+                  </td>
+                </tr>
+                <tr>
+                  <td>▶ Run Project</td>
+                  <td>
+                    the project, running in a panel beside its code, with the editor's own runner: a game in progress
+                    survives your change
+                  </td>
+                </tr>
+                <tr>
+                  <td>Run Tests</td>
+                  <td>
+                    the project's tests, as <code>spell test</code> runs them; each failed check is an error on its own
+                    line
+                  </td>
+                </tr>
+                <tr>
+                  <td>the bubbly look</td>
+                  <td>
+                    on by default (<code>spell.bubblyLook</code>): references bold, marks faint, a pill round what you
+                    typed
+                  </td>
+                </tr>
+                <tr>
+                  <td>themes</td>
+                  <td>Spell's themes as VS Code colour themes, light and dark, 18 in all ("Spell Light" ...)</td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+          <ul>
+            <li>
+              The catches: in an epic's window it runs the main checkout's server unless
+              <code>spell.parserRoot</code> names the worktree, and no command restarts Spell's server alone.
+            </li>
+            <li>
+              Every command, setting and error message, and how to install it:
+              <a href="/README-vscode.md" target="src-readme-vscode-md">the kit's VS Code README</a>.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="2-what-vs-code-knows" label="3. Custom elements" sticky collapsible dividing open="false">
+          <p>
+            One source feeds all of it: each element's vocabulary, the plain-data file that describes its attributes,
+            events, slots, parts and states.
+          </p>
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <thead>
+                <tr>
+                  <th>file kind</th>
+                  <th>what VS Code knows</th>
+                  <th>from</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>JSX (<code>.tsx</code>)</td>
+                  <td>exact types: completion, hover docs, errors</td>
+                  <td>the generated JSX types</td>
+                </tr>
+                <tr>
+                  <td>JSX, what types can't say</td>
+                  <td>slot and part names, dashed-name warnings</td>
+                  <td>the elements help, in the extension</td>
+                </tr>
+                <tr>
+                  <td>HTML</td>
+                  <td>tags, attributes and values, with docs, in every window</td>
+                  <td>VS Code's HTML data, in the extension</td>
+                </tr>
+                <tr>
+                  <td>CSS</td>
+                  <td>custom properties, <code>::part()</code>, <code>:state()</code></td>
+                  <td>VS Code's CSS data, in the extension</td>
+                </tr>
+                <tr>
+                  <td>Spell</td>
+                  <td colspan="2">the Spell language server already knows its own tags</td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+          <ui-section id="jsx" label="In JSX" sticky collapsible dividing open="false">
+            <p>Typing <code>&lt;ui-button </code> in a <code>.tsx</code> file:</p>
+            <ul>
+              <li>
+                every attribute the button has completes, then its values: <code>size="</code> offers the eight sizes,
+                mini to massive
+              </li>
+              <li>hovering an attribute shows its description, its values and its default</li>
+              <li>a misspelt name (<code>sise="large"</code>) or a value it doesn't take is an error</li>
+              <li>
+                still allowed: HTML's global attributes (class, id, slot, style, onClick ...), <code>aria-*</code>, and
+                any name with a dash in it (<a href="#7-limits">Limits</a>)
+              </li>
+            </ul>
+            <p>How values are typed:</p>
+            <ul>
+              <li>
+                a flag: <code>basic</code>, <code>basic={true}</code> or <code>basic=""</code>
+                <ul>
+                  <li><code>basic={false}</code> removes it</li>
+                </ul>
+              </li>
+              <li>a number: <code>{5}</code> or <code>"5"</code></li>
+              <li>a shared value set (the hues, the sizes): its real list, not plain text</li>
+              <li>
+                rich data (an object, an array, a function) as a plain prop, <code>options={[...]}</code>: it reaches
+                the element whole, as its property
+              </li>
+              <li>
+                <code>prop:options</code>, and <code>prop:</code> for every attribute, are marked deprecated: only
+                compiled Spell writes them
+              </li>
+            </ul>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>generated, shortened · Spell UI's JSX types · 12 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-ts">export interface UIButtonAttributes {
+  /**
+   * Size, `mini` ... `massive`;  `medium` is the default.
+   * - takes:  `mini` · `tiny` · `small` · `medium` · `large` · `big` · `huge` · `massive`
+   */
+  size?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+  /** `size`, as the DOM element's property. */
+  "prop:size"?: "mini" | "tiny" | "small" | "medium" | "large" | "big" | "huge" | "massive"
+}
+
+/** `&lt;ui-button&gt;` in JSX:  its own attributes, and HTML's global ones. */
+// "ui-button": UIButtonJSXAttributes, in Solid's JSX.IntrinsicElements</code></pre>
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+          <ui-section id="html-css" label="In HTML and CSS" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                In an <code>.html</code> file, <code>&lt;ui-</code> completes Spell UI's tags, then their attributes and
+                values, with docs.
+              </li>
+              <li>
+                In a <code>.css</code> file:
+                <ul>
+                  <li>
+                    custom properties complete where you set them, with their default and their tag in the hover: Spell
+                    UI's 1,604
+                  </li>
+                  <li><code>::part()</code> names: 245</li>
+                  <li><code>:state()</code> names: 189</li>
+                </ul>
+              </li>
+              <li>
+                Parts and states are offered after any selector, because VS Code's CSS data can't tie a name to a tag.
+                Each one's docs list the tags that have it instead.
+              </li>
+              <li>
+                The catch: inside <code>var(--</code>, VS Code completes only the variables the file itself declares.
+                The data helps where you set a property, not where you read it.
+              </li>
+              <li>
+                Both data files are written by Spell UI's <code>yarn site:data</code>, and copied into the extension
+                when it's built, so they work in every window, an epic's too.
+                <ul>
+                  <li>
+                    The catch: a vocabulary change shows here after the next <code>spell app vscode</code> and a window
+                    reload.
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section
+          id="3-turning-it-on"
+          label="4. Turning the types on in a program"
+          sticky
+          collapsible
+          dividing
+          open="false"
+        >
+          <p>
+            A TypeScript program gets the exact <code>&lt;ui-*&gt;</code> types by importing them once, in any of its
+            files. Its <code>.types.ts</code> file is a good home.
+          </p>
+          <ui-accordion class="spell-code" appearance="styled">
+            <ui-title>any one file of the program · 1 line</ui-title>
+            <ui-content>
+              <pre><code class="language-ts">import type {} from "spell/ui/jsx"</code></pre>
+            </ui-content>
+          </ui-accordion>
+          <ul>
+            <li>Then every <code>&lt;ui-*&gt;</code> tag in that program's JSX is checked.</li>
+            <li>Not through the tsconfig's <code>types</code> list: that finds packages, not a package's files.</li>
+            <li>Type-only: nothing is added at run time.</li>
+            <li>
+              Each tag's types can be imported by name too, for a wrapper's props:
+              <code>UIButtonAttributes</code> (its own attributes), <code>UIMenuJSXAttributes</code> (those plus
+              HTML's).
+            </li>
+          </ul>
+          <p>Who does it today:</p>
+          <ul>
+            <li>Spell UI itself, its docs elements and its tests</li>
+            <li>
+              the app, in
+              <a href="/app/src/app/solid/solid.types.ts" target="src-app-src-app-solid-solid-types-ts"
+                ><code title="app/src/app/solid/solid.types.ts">solid.types.ts</code></a
+              >
+            </li>
+            <li>
+              the epic pages' elements, in
+              <a
+                href="/epic/src/components/epic-page/EpicPage.types.ts"
+                target="src-epic-src-components-epic-page-epicpage-types-ts"
+                ><code title="epic/src/components/epic-page/EpicPage.types.ts">EpicPage.types.ts</code></a
+              >
+            </li>
+            <li>
+              the Spell compiler's type check of compiled Spell (<a
+                href="/parser/src/spell/node/typecheck.ts"
+                target="src-parser-src-spell-node-typecheck-ts"
+                ><code title="parser/src/spell/node/typecheck.ts">typecheck.ts</code></a
+              >)
+            </li>
+          </ul>
+          <p>Where the types come from:</p>
+          <ul>
+            <li>
+              <a href="/ui/src/tools/ElementManifests.ts" target="src-ui-src-tools-elementmanifests-ts"
+                ><code title="ui/src/tools/ElementManifests.ts">ElementManifests</code></a
+              >
+              writes them, one file, as part of Spell UI's <code>yarn site:data</code>, beside the HTML and CSS data and
+              the Custom Elements Manifest.
+            </li>
+            <li>A test fails while the file is stale: run <code>yarn site:data</code> after changing a vocabulary.</li>
+            <li>
+              The file is large, about 62,000 lines, and committed:
+              <a href="/ui/src/jsx.ts" target="src-ui-src-jsx-ts"><code title="ui/src/jsx.ts">jsx.ts</code></a
+              >.
+            </li>
+            <li>Never edit it by hand.</li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="4-events" label="5. Events" sticky collapsible dividing open="false">
+          <p>Every event a tag sends is typed, with its <code>event.detail</code>, in two places.</p>
+          <ui-accordion class="spell-code" appearance="styled">
+            <ui-title>events, in JSX and plain code · 6 lines</ui-title>
+            <ui-content>
+              <pre><code class="language-tsx">// JSX:  on- plus the event's name, one prop per event the tag sends
+&lt;ui-input on-ui-changed={(event) =&gt; setName(event.detail.value)} /&gt;
+
+// plain code:  the tag's own element knows its events
+const input = document.querySelector("ui-input")
+input?.addEventListener("ui-changed", (event) =&gt; event.detail.value)</code></pre>
+            </ui-content>
+          </ui-accordion>
+          <ul>
+            <li>
+              <b>In JSX</b>: <code>on-ui-changed</code>, typed per tag. Solid hands the function to the element, which
+              listens for the event.
+              <ul>
+                <li>
+                  The list of props is closed, but a misspelt one has a dash, so only the elements help catches it.
+                </li>
+              </ul>
+            </li>
+            <li>
+              <b>In plain code</b>: <code>querySelector("ui-input")</code>, or a JSX ref, gives an element whose
+              <code>addEventListener()</code> completes its events, each detail exact.
+              <ul>
+                <li>
+                  Its other members (<code>value</code>, <code>open()</code> ...) aren't typed there: cast to the DOM
+                  element class for those.
+                </li>
+              </ul>
+            </li>
+            <li>
+              <b>On the document, or any other element</b>: every <code>ui-*</code> event name completes, but its detail
+              is <code>unknown</code>.
+              <ul>
+                <li>Narrow it, or listen on the tag.</li>
+              </ul>
+            </li>
+            <li>
+              A detail's type names Spell UI's real types (close reasons, form changes ...): a name the generator
+              doesn't know makes <code>yarn site:data</code> fail, naming the table to add it to.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="5-plugin" label="6. The elements help" sticky collapsible dividing open="false">
+          <p>
+            The extension adds what types can't say, in every <code>.tsx</code> and <code>.jsx</code> file. It reads the
+            Custom Elements Manifest of the file's package and its dependencies, so any set that ships one gets it.
+          </p>
+          <ul>
+            <li><code>slot="</code> on a child of a custom tag lists the parent's slots, with their descriptions.</li>
+            <li><code>part="</code> in a component's own JSX lists its parts.</li>
+            <li>
+              A misspelt slot, part or dashed attribute gets a yellow warning in the Problems list, with "did you mean"
+              when one is close.
+              <ul>
+                <li>
+                  Always allowed besides the tag's own: <code>data-*</code>, <code>aria-*</code>, and an on- prop for
+                  each event the tag sends.
+                </li>
+              </ul>
+            </li>
+            <li>
+              Each file reads its own checkout's manifests: in an epic's window, a worktree's file gets the worktree's.
+            </li>
+            <li>
+              A manifest is re-read when it changes: a new <code>yarn site:data</code> shows at the next keystroke.
+            </li>
+          </ul>
+          <ui-section id="how-it-runs" label="How it runs" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                The checks are the kit's
+                <a
+                  href="/src/element-tools/jsx-help/JsxElementHelp.ts"
+                  target="src-src-element-tools-jsx-help-jsxelementhelp-ts"
+                  ><code title="src/element-tools/jsx-help/JsxElementHelp.ts">JsxElementHelp</code></a
+                >, which gives its results as plain data; the extension's
+                <a href="/app/vscode/src/ElementsHelp.ts" target="src-app-vscode-src-elementshelp-ts"
+                  ><code title="app/vscode/src/ElementsHelp.ts">ElementsHelp</code></a
+                >
+                shows them as completions and warnings.
+              </li>
+              <li>
+                The editor's own TypeScript stays TypeScript 7. Your settings are left alone, and nothing asks to
+                switch.
+              </li>
+              <li>
+                Inside, the extension reads the JSX with TypeScript 6's JavaScript API, which it carries: TypeScript 7
+                has none yet, and loads no plugins.
+              </li>
+              <li>It turns on as a window opens its first <code>.tsx</code> or <code>.jsx</code> file.</li>
+              <li>A change to the checks shows after <code>spell app vscode</code>, then "Reload Window".</li>
+              <li>
+                Not working? The Output panel's "Spell Elements" channel lists the manifests each package found, and
+                anything that failed.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="7-limits" label="7. Limits" sticky collapsible dividing open="false">
+          <ul>
+            <li>
+              <b>A misspelt dashed name passes <code>tsc</code></b
+              >: TypeScript never checks a JSX attribute with a dash in it, which is how <code>data-*</code> stays
+              allowed.
+              <ul>
+                <li>
+                  <code>&lt;ui-button text-alin="x"&gt;</code> passes, where <code>sise="large"</code> is an error.
+                </li>
+                <li>A dashed name the vocabulary does name is still typed: a wrong value is caught.</li>
+                <li>The elements help warns on the name in the editor; <code>yarn ts</code> doesn't run it.</li>
+              </ul>
+            </li>
+            <li>
+              <b>Plain text needs a cast</b>: a value your own types hold as a string (a card's colour) is handed to a
+              tag's attribute with a cast to its type, <code>UICardJSXAttributes["background"]</code>.
+            </li>
+            <li>
+              <b>HTML and CSS data are the extension's build</b>: they show what Spell UI had when the extension was
+              last built, from the checkout it was built in.
+              <ul>
+                <li>After a vocabulary change: <code>yarn site:data</code>, then <code>spell app vscode</code>.</li>
+                <li>The JSX help reads the manifests live, so it's never behind.</li>
+              </ul>
+            </li>
+            <li><b>Which children a tag takes isn't checked</b>: no vocabulary says so yet.</li>
+            <li>
+              <b>The epic pages' and the app's own tags</b> have loose JSX types (any attribute) and no Custom Elements
+              Manifest, so their slots and parts aren't completed either.
+            </li>
+            <li>
+              <b>"Show Tree for This Line"</b>, in a <code>.spell</code> file's right-click menu, has no command behind
+              it yet: <code>spell parse --tree "&lt;the line&gt;"</code> prints that tree in a terminal.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="9-see-also" label="8. Where things are" sticky collapsible dividing open="false">
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <thead>
+                <tr>
+                  <th>file or command</th>
+                  <th>what it is</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>spell app vscode</code></td>
+                  <td>builds the extension and installs it into VS Code</td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="/app/vscode/src/extension.ts" target="src-app-vscode-src-extension-ts"
+                      ><code title="app/vscode/src/extension.ts">extension.ts</code></a
+                    >
+                  </td>
+                  <td>starts the language server, and the TS, JS and PY views</td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="/app/vscode/src/ElementsHelp.ts" target="src-app-vscode-src-elementshelp-ts"
+                      ><code title="app/vscode/src/ElementsHelp.ts">ElementsHelp.ts</code></a
+                    >
+                  </td>
+                  <td>the elements help, as completions and warnings</td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="/app/vscode/build.mjs" target="src-app-vscode-build-mjs"
+                      ><code title="app/vscode/build.mjs">build.mjs</code></a
+                    >
+                  </td>
+                  <td>the extension's bundle, with the HTML and CSS data copied into <code>out/data/</code></td>
+                </tr>
+                <tr>
+                  <td>
+                    <a href="/ui/src/jsx.ts" target="src-ui-src-jsx-ts"><code title="ui/src/jsx.ts">jsx.ts</code></a>
+                  </td>
+                  <td>Spell UI's generated JSX types, imported as <code>spell/ui/jsx</code></td>
+                </tr>
+                <tr>
+                  <td>
+                    <a
+                      href="/src/element-tools/jsx-help/JsxElementHelp.ts"
+                      target="src-src-element-tools-jsx-help-jsxelementhelp-ts"
+                      ><code title="src/element-tools/jsx-help/JsxElementHelp.ts">JsxElementHelp</code></a
+                    >
+                  </td>
+                  <td>the slot, part and dashed-name checks, as plain data</td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+          <ul>
+            <li>
+              <a href="/README-vscode.md" target="src-readme-vscode-md">The kit's VS Code README</a>: installing the
+              extension, every command and setting, the epic pages' side bar and windows
+            </li>
+            <li>
+              <a href="/app/README-lsp.md" target="src-app-readme-lsp-md">README-lsp</a>: the language server under the
+              extension, every feature it answers
+            </li>
+            <li>
+              <a href="/README/element.md" target="src-readme-element-md">The element README</a>, "The elements help":
+              the checks, and where they learn the tags
+            </li>
+            <li>
+              Spell UI's
+              <a href="/ui/README-frameworks.md" target="src-ui-readme-frameworks-md">frameworks README</a>, "Types":
+              the same types, for someone using Spell UI from outside
+            </li>
+            <li>
+              <a href="/guides/codemirror.html" target="src-guides-codemirror-html">The Editor</a>: the same language
+              service, in Spell's own editor
+            </li>
+          </ul>
+        </ui-section>
+        <footer class="spell-doc-footer">
+          <ui-divider></ui-divider>
+          <p class="meta">Last checked 2026-11-21, against the kit's code that day.</p>
+        </footer>
+      </main>
+    </div>
+    <script src="/_epic/assets/highlight.min.js"></script>
+    <script src="/_epic/assets/spell-ui.js"></script>
+  </body>
+</html>

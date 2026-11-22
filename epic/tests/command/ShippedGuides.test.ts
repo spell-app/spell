@@ -106,6 +106,22 @@ describe("ShippedGuides", () => {
     expect(shipped.check({ commandExists }).at(-1)).toMatch(/names src\/server\/Gone.ts/)
   })
 
+  test("the check reads no link in a code sample, and no argument as a verb (I392, I397)", () => {
+    const root = repo("samples", {
+      "guides/samples.html": page(
+        "Samples",
+        '    <meta name="spell-audience" content="makers" />\n',
+        '<pre><code>&lt;a href="/epics/x.html"&gt;x&lt;/a&gt;</code></pre> <code>spell bundle ui-site</code>'
+      )
+    })
+    const shipped = new ShippedGuides(root)
+    shipped.write()
+    const asked: string[] = []
+    const commandExists = (words: string[]) => (asked.push(words.join(" ")), true)
+    expect(shipped.check({ commandExists })).toEqual([])
+    expect(asked).toEqual(["spell bundle"])
+  })
+
   test("commandsIn():  a group and its listed verb are commands;  a verb the group lacks isn't", () => {
     const has = commandsIn(join(import.meta.dirname, "../../.."))
     expect(has(["spell", "server", "start"])).toBe(true)

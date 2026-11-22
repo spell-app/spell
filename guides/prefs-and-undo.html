@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>What Compiled Spell Runs On</title>
+    <meta
+      name="description"
+      content="The runtime under compiled Spell:  the core and its classes, typed defaults, undo and redo (UndoStack), props remembered from run to run (PrefStore), a view's own custom element, and things carried over a recompile -- for anyone changing the core or reading compiled code."
+    />
+    <meta name="spell-audience" content="programmers" />
+    <meta name="spell-topic" content="The Language Inside" />
+    <meta name="spell-voice" content="readme 2026-11-21" />
+    <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+  </head>
+  <body class="spell-doc-page">
+    <spell-site-header></spell-site-header>
+    <div class="spell-doc">
+      <main class="spell-doc-main">
+        <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+          <ui-breadcrumb>Guides</ui-breadcrumb>
+          <ui-breadcrumb selected>What Compiled Spell Runs On</ui-breadcrumb>
+        </ui-breadcrumbs>
+        <ui-sticky class="spell-h1"
+          ><header class="spell-page-head"><h1>What Compiled Spell Runs On</h1></header></ui-sticky
+        >
+        <pre><code class="language-plaintext">a "card" is a thing where:
+	- its "direction" is either up or down
+	- to "turn over", undoable as "Turn Card":
+		set its direction to down</code></pre>
+        <ui-accordion class="spell-code" appearance="styled">
+          <ui-title>What <code>spell parse</code> compiled it to, its end</ui-title>
+          <ui-content>
+            <pre><code class="language-js">  turnOver() {
+    this.direction = "down"
+  }
+}
+core.describeAction(Card, "turnOver", { title: "Turn Over", undoneAs: "Turn Card" })</code></pre>
+          </ui-content>
+        </ui-accordion>
+        <p class="lede">
+          That last line is all it takes for ⌘Z to put the card back. The undo history, the defaults, the card's own
+          element on the page and the game kept across an edit are the RUNTIME's: <code>core</code>, the one object
+          every compiled program imports. This page is what it does for a program, and how.
+        </p>
+        <ui-list class="spell-meta">
+          <ui-item icon="user"
+            >Written for: anyone changing the core, giving a program undo, or reading compiled Spell</ui-item
+          >
+          <ui-item icon="flask">Checked: 2026-11-21, every output on this page printed by that day's code</ui-item>
+          <ui-item icon="book open"
+            >The reference beside it:
+            <a href="/parser/README-core.md" target="src-parser-readme-core-md">README-core</a>, and the kit's helpers
+            under it, <a href="/README/util.md" target="src-readme-util-md">README/util</a></ui-item
+          >
+        </ui-list>
+
+        <ui-section id="1-summary" label="1. Summary" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="lightbulb"></ui-icon>
+          <ul>
+            <li>
+              Compiled JavaScript imports one name, <code>@spell/core</code>: an object of helpers, and the classes a
+              program's types extend (<code>Thing</code>, <code>List</code>, <code>App</code>, <code>View</code>,
+              <code>ViewableList</code>).
+            </li>
+            <li>An unset property reads a default by its type: its first choice, 0, empty text, no.</li>
+            <li>Every action is one undo step by itself. Undo runs nothing backwards: it puts each prop back.</li>
+            <li>A prop declared remembered keeps its value from run to run, in the person's preferences.</li>
+            <li>
+              A view gets its own custom element, <code>&lt;solitaire-card&gt;</code>, whose attributes and its thing
+              always agree.
+            </li>
+            <li>
+              An edit in the editor keeps the game in progress: the things carry over, and the start doesn't run again.
+            </li>
+            <li>Every running app gets a core of its own.</li>
+          </ul>
+        </ui-section>
+
+        <ui-section
+          id="core-import"
+          label="2. One import, for what the language has no word for"
+          sticky
+          collapsible
+          dividing
+          open="false"
+        >
+          <ui-icon slot="icon" name="cube"></ui-icon>
+          <pre><code class="language-js">import { core, Thing, List, App, View, ViewableList } from "@spell/core"</code></pre>
+          <ul>
+            <li>
+              <code>@spell/core</code> isn't a package you install. Whatever runs the program points it at a copy of the
+              core: the page's runner, or node's module hooks under <code>spell run</code>.
+            </li>
+            <li>
+              Each writer uses the language's own word where it has one, the core only where it doesn't: JavaScript has
+              no range that includes its end, so <code>core.getRange(1, 100)</code>; Python writes
+              <code>range(1, 101)</code>.
+            </li>
+            <li>
+              The core is assembled as it loads: each module adds its helpers to the one object. Its pieces, and where
+              each is: <a href="/parser/README-core.md" target="src-parser-readme-core-md">README-core</a>, "The
+              pieces".
+            </li>
+            <li>
+              Python's twin is <code>spell_core</code>:
+              <a href="/guides/targets/targets.html" target="src-guides-targets-targets-html">Targets</a>.
+            </li>
+          </ul>
+          <ui-section id="2-typed-defaults" label="Typed defaults" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                An unset property reads its declared default, else its first choice, else its type's own: 0 for a
+                number, empty text, no for a choice.
+              </li>
+              <li>So a card made with no suit is a club, and black.</li>
+              <li>
+                The default is never stored: the card's JSON leaves it out, and its element has no
+                <code>suit</code> attribute.
+              </li>
+              <li><code>spell_core</code> reads the same defaults.</li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="2-undo-in-a-program" label="3. Undo and redo" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="undo"></ui-icon>
+          <p>
+            An editor's undo usually runs a command backwards. This one runs nothing: a step keeps each prop's value
+            before its first change and after its last, and each list's items, and undo sets them back.
+          </p>
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <tbody>
+                <tr>
+                  <th>Spell says</th>
+                  <th>The step</th>
+                </tr>
+                <tr>
+                  <td><code>to "turn over":</code></td>
+                  <td>one step, named by its title: "Undo Turn Over"</td>
+                </tr>
+                <tr>
+                  <td><code>to "turn over", undoable as "Turn Card":</code></td>
+                  <td>one step, "Undo Turn Card"</td>
+                </tr>
+                <tr>
+                  <td><code>to "give a hint", can't be undone:</code></td>
+                  <td>no step; the steps before it are kept</td>
+                </tr>
+                <tr>
+                  <td>a question (gives back yes or no), a drawing, a test</td>
+                  <td>never a step</td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+          <ul>
+            <li>
+              The same words go on a line indented under the action instead: <code>undoable as "Turn Card"</code>.
+            </li>
+            <li>
+              On a type it compiles to <code>core.describeAction(...)</code>; at the top level, the action runs inside
+              <code>core.asAction(...)</code>.
+            </li>
+            <li>
+              What another action calls joins that action's step. A deal that waits between cards is ONE step, and its
+              redo is instant.
+            </li>
+            <li>Each run has one history, of at most 100 steps; loading saved state clears it.</li>
+            <li>
+              The app has <code>undo()</code>, <code>redo()</code>, and live <code>canUndo</code>,
+              <code>undoTitle</code>, in the program's language. ⌘Z and ⇧⌘Z work while the app has the focus; a text
+              field and a modal keep their own.
+            </li>
+            <li>The catch: nothing undoes while an action still runs, so ⌘Z mid-deal waits for the deal to finish.</li>
+          </ul>
+          <ui-section id="2-undo-stack" label="UndoStack, under it" sticky collapsible dividing open="false">
+            <pre><code class="language-ts">await history.transaction("Deal", async () =&gt; {
+  for (const margin of [10, 20, 30]) {
+    await Promise.resolve() // a wait:  what comes after it still joins "Deal"
+    setMargin(margin)
+  }
+})
+history.undoTitle   // "Undo Deal":  three changes, one step
+history.undo()      // margin 0, at once
+history.redo()      // margin 30, at once:  nothing runs again</code></pre>
+            <ul>
+              <li>
+                The generic part is the kit's
+                <a href="/src/util/persist/UndoStack.ts" target="src-src-util-persist-undostack-ts"
+                  ><code title="src/util/persist/UndoStack.ts">UndoStack</code></a
+                >: a step is a title and its records, each saying how to undo and redo itself.
+              </li>
+              <li>
+                A transaction stays open until its function returns or its promise settles: anything recorded meanwhile
+                joins it.
+              </li>
+              <li>
+                A run of steps with the same title AND target folds into one: typing "hello" into a field undoes in one
+                go.
+              </li>
+              <li>Its titles read Spell cells, so a menu reading them redraws by itself.</li>
+              <li>Every method: <a href="/README/util.md" target="src-readme-util-md">README/util</a>, "UndoStack".</li>
+            </ul>
+          </ui-section>
+          <ui-section id="3-recorder" label="What an undo step records" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                The core's history,
+                <a href="/parser/src/core/undoing.ts" target="src-parser-src-core-undoing-ts"
+                  ><code title="parser/src/core/undoing.ts">undoing.ts</code></a
+                >, hears each prop set and each list's items changed while an action runs.
+              </li>
+              <li>A prop declared <code>undoable: false</code>, a selection say, is left out of every step.</li>
+              <li>While it undoes or redoes, nothing records, so what it puts back isn't a new step.</li>
+              <li>
+                Python's <code>spell_core</code> keeps the same history, in
+                <a
+                  href="/parser/src/py/core/spell_core/undoing.py"
+                  target="src-parser-src-py-core-spell-core-undoing-py"
+                  ><code title="parser/src/py/core/spell_core/undoing.py">undoing.py</code></a
+                >.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="2-remembered" label="4. Props that outlive a run" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="bookmark"></ui-icon>
+          <pre><code class="language-ts">class Solitaire extends App {
+  static {
+    this.declareProp("theme", { oneOf: ["light", "dark"], remembered: true })
+  }
+}
+await core.remember("@local/solitaire")
+new Solitaire().theme          // "light", its first choice
+new Solitaire().theme = "dark" // kept under @local/solitaire:theme
+// the next run:  remember() again, and it's "dark"</code></pre>
+          <ul>
+            <li>
+              Whoever runs the program calls <code>core.remember()</code> with the project's id first. The editor and
+              <code>&lt;spell-viewer&gt;</code> do; <code>spell run</code> and the tests don't, and there a remembered
+              prop is a plain one.
+            </li>
+            <li>
+              An app's prop is kept by its name; any other thing's under the id the program gave it. A thing with a
+              made-up id gets a new one each run, so its prop isn't kept, and the console says so once.
+            </li>
+            <li>Only text, numbers and choices. A kept value the prop no longer allows starts afresh.</li>
+            <li>
+              <b>Not yet:</b> Spell has no words for it, so a program's own TypeScript declares it, as the core's tests
+              do. And <code>spell_core</code> remembers nothing.
+            </li>
+          </ul>
+          <ui-section id="2-preferences" label="PrefStore, under it" sticky collapsible dividing open="false">
+            <pre><code class="language-ts">const prefs = new PrefStore("spell-site").declare("scheme", { oneOf: ["light", "dark", "auto"] })
+prefs.get("scheme")            // "light":  nothing kept yet, so the first choice
+prefs.set("scheme", "dark")    // localStorage now holds  spell-site:scheme = dark</code></pre>
+            <ul>
+              <li>
+                Remembered props are kept in a
+                <a href="/src/util/persist/PrefStore.ts" target="src-src-util-persist-prefstore-ts"
+                  ><code title="src/util/persist/PrefStore.ts">PrefStore</code></a
+                >
+                named for the project's id.
+              </li>
+              <li>
+                Every key starts with the store's name and a colon; every value is text people and plain scripts can
+                read.
+              </li>
+              <li>
+                It never throws when storage fails: blocked storage keeps values in memory for the visit, and says so
+                once.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="2-bigger-places" label="Where it keeps them" sticky collapsible dividing open="false">
+            <ul>
+              <li>The browser's storage, unless the runner names another place.</li>
+              <li>
+                Two places must be waited on: the browser's database, and the page server's <code>/api/prefs</code>, in
+                the person's space, so a preference follows them.
+              </li>
+              <li>The core reads them whole as the run starts, so after that they answer at once.</li>
+              <li>A place decides WHERE a value goes, never how it's asked for: the code that asks never changes.</li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="view-element" label="5. A view's own element" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="square outline"></ui-icon>
+          <pre><code class="language-html">&lt;solitaire-tableau id="T1"&gt;
+  &lt;solitaire-card id="queen-of-spades" rank="queen" suit="spades" pile="Tableau#T1"&gt;&lt;/solitaire-card&gt;
+  &lt;solitaire-card id="queen-of-spades-2" rank="queen" suit="spades" pile="Tableau#T1"&gt;&lt;/solitaire-card&gt;
+&lt;/solitaire-tableau&gt;</code></pre>
+          <p>
+            A type declared a <code>view</code> draws as its own custom element, so the browser's inspector says which
+            thing each one is.
+          </p>
+          <ul>
+            <li>
+              The class names its tag as it's declared:
+              <code>static elementTag = core.defineElement(this, "Solitaire")</code>.
+            </li>
+            <li>
+              The tag is the project's name, then the type's, in dashed lowercase: <code>Solitaire</code> and
+              <code>Card</code> make <code>&lt;solitaire-card&gt;</code>; <code>games</code> and
+              <code>BankAccount</code>, <code>&lt;games-bank-account&gt;</code>. An app's is
+              <code>&lt;solitaire-app&gt;</code>.
+            </li>
+            <li>
+              The core only NAMES the tag. The page defines it, on
+              <a href="/app/src/app/runner/SpellElement.tsx" target="src-app-src-app-runner-spellelement-tsx"
+                ><code title="app/src/app/runner/SpellElement.tsx">SpellElement</code></a
+              >, because the core may not import Solid or Spell UI.
+            </li>
+            <li>
+              The element draws its thing's own <code>to draw</code> in its shadow root, in an error boundary of its
+              own: a card that fails shows its own stand-in, and the rest keep drawing.
+            </li>
+          </ul>
+          <ui-section id="4-outside" label="Its outside" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                Each declared property is an attribute, kebab-cased, and an element property, camelCased:
+                <code>face up</code> is <code>face-up</code> and <code>faceUp</code>.
+              </li>
+              <li>Each method is an element method calling the thing's: <code>card.turnOver()</code>.</li>
+              <li>
+                A property holding another thing shows as its reference: <code>pile="Tableau#T1"</code>. A list is an
+                element property only.
+              </li>
+              <li>
+                The tag and its thing agree both ways: turning the card over changes <code>direction</code>, and setting
+                the attribute changes the card, which redraws.
+              </li>
+              <li>
+                The id is the thing's name; two of one name are numbered, <code>queen-of-spades-2</code>. A space is a
+                dash.
+              </li>
+              <li>
+                A tag written by hand finds its thing by its id (<code>&lt;solitaire-tableau id="T1"&gt;</code>), or,
+                with no id, as the program's one thing of that type.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section
+            id="ts-element"
+            label="In TypeScript, its own element class"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                Compiled TypeScript writes, after each view, its element class:
+                <code>class CardElement extends SpellElement&lt;Card&gt;</code>, with its attributes, its sheet, and one
+                method per method of the type.
+              </li>
+              <li>
+                It never defines the tag itself: <code>core.useElement(Card, CardElement)</code> hands the class to the
+                page.
+              </li>
+              <li>
+                Its base comes from a name of its own, <code>@spell/elements</code>: the app's real element for the type
+                check, the runtime's on a page, a stand-in that makes no element in a headless run.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="7-recompiles" label="6. Things carry over a recompile" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="sync"></ui-icon>
+          <p>
+            Edit a card's CSS in the editor mid-game, and the game stays where it was, drawn in the new colour. Fast
+            Refresh keeps a component's state; this keeps what the program MADE.
+          </p>
+          <ol>
+            <li>
+              The new program loads with its start skipped: its types, functions and top-level things are made, its
+              tests and its app's start aren't.
+            </li>
+            <li>
+              Each top-level thing of the last run, matched by name and type, is copied into the new run's, as the new
+              classes. A card held by the deck and a pile stays one card.
+            </li>
+            <li>
+              The console says so: <code>Kept allPiles, deck, ... from the last run: Restart starts afresh.</code>
+            </li>
+          </ol>
+          <ui-section id="start-once" label="The start runs once" sticky collapsible dividing open="false">
+            <pre><code class="language-js">if (!core.isCarryingOver) solitaire.start()
+if (!core.isCarryingOver) testCardSetup()</code></pre>
+            <ul>
+              <li>
+                A program's START is its top-level test calls and the line starting its app; the compiler marks each, at
+                a file's top level only.
+              </li>
+              <li>Every other top-level line still runs on an edit, a <code>print</code> included.</li>
+              <li>A property added gets the new thing's own starting value; one removed is dropped.</li>
+              <li>
+                It starts afresh, as Restart does, when the edit changed the file that starts the app, added or removed
+                a file, or changed a property's type or renamed a type. The console says why.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="restart" label="Starting afresh" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                Restart starts afresh on purpose: <code>&lt;spell-viewer&gt;</code>'s, the editor's and VS Code's.
+              </li>
+              <li>A first run, <code>spell run</code> and the core contract always run the whole program.</li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="one-core-per-app" label="7. One core per running app" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="clone outline"></ui-icon>
+          <ul>
+            <li>
+              A program's things, console, listeners and undo history live in its core, so every running app gets its
+              own.
+            </li>
+            <li>
+              In a page, only the app folder's runner imports the core's code, bundled as <code>spell-runtime.js</code>;
+              each <code>&lt;spell-viewer&gt;</code> imports a fresh copy, from a <code>blob:</code> address of its own.
+            </li>
+            <li>
+              Everything else, the editor and the parser among them, imports only the core's TYPES, which erase to
+              nothing.
+            </li>
+            <li>
+              <code>spell/parser/core/model</code> is the one other entry: the core without drawing, for libraries and
+              the server.
+            </li>
+            <li>
+              The core never touches <code>document</code>: an app runs in a shadow root, <code>core.appRoot</code>.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="5-limits" label="8. Limits" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="exclamation circle"></ui-icon>
+          <ul>
+            <li>Remembered props have no Spell words yet, and <code>spell_core</code> keeps none.</li>
+            <li>Nothing undoes while an undoable action still runs.</li>
+            <li>
+              A Python program never carries things over: thing references and element classes aren't in its runtime
+              yet.
+            </li>
+            <li>A plain top-level variable, a number or a text, starts again from the new start.</li>
+            <li>
+              A tag's attributes and methods are fixed the first time it's defined: one an edit adds needs a reload.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="6-where" label="9. Where things are" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="folder open"></ui-icon>
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <tbody>
+                <tr>
+                  <th>What</th>
+                  <th>Where</th>
+                </tr>
+                <tr>
+                  <td>the core</td>
+                  <td>
+                    <a href="/parser/src/core/" target="src-parser-src-core"
+                      ><code title="parser/src/core">parser/src/core</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>undo in a run</td>
+                  <td>
+                    <a href="/parser/src/core/undoing.ts" target="src-parser-src-core-undoing-ts"
+                      ><code title="parser/src/core/undoing.ts">undoing.ts</code></a
+                    >, on
+                    <a href="/src/util/persist/UndoStack.ts" target="src-src-util-persist-undostack-ts"
+                      ><code title="src/util/persist/UndoStack.ts">UndoStack</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>remembered props</td>
+                  <td>
+                    <a href="/parser/src/core/remembered.ts" target="src-parser-src-core-remembered-ts"
+                      ><code title="parser/src/core/remembered.ts">remembered.ts</code></a
+                    >, on
+                    <a href="/src/util/persist/PrefStore.ts" target="src-src-util-persist-prefstore-ts"
+                      ><code title="src/util/persist/PrefStore.ts">PrefStore</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>a view's tag name</td>
+                  <td>
+                    <a href="/src/util/spell/view.ts" target="src-src-util-spell-view-ts"
+                      ><code title="src/util/spell/view.ts">view.ts</code></a
+                    >, <code>elementTagFor()</code>
+                  </td>
+                </tr>
+                <tr>
+                  <td>defining the tag</td>
+                  <td>
+                    <a href="/parser/src/core/elements.ts" target="src-parser-src-core-elements-ts"
+                      ><code title="parser/src/core/elements.ts">elements.ts</code></a
+                    >; the page's
+                    <a href="/app/src/app/runner/SpellElement.tsx" target="src-app-src-app-runner-spellelement-tsx"
+                      ><code title="app/src/app/runner/SpellElement.tsx">SpellElement.tsx</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>carrying over</td>
+                  <td>
+                    <a href="/parser/src/core/carry.ts" target="src-parser-src-core-carry-ts"
+                      ><code title="parser/src/core/carry.ts">carry.ts</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>the action words</td>
+                  <td>
+                    <a
+                      href="/parser/src/spell/rules/methods/ActionModifier.ts"
+                      target="src-parser-src-spell-rules-methods-actionmodifier-ts"
+                      ><code title="parser/src/spell/rules/methods/ActionModifier.ts">ActionModifier.ts</code></a
+                    >,
+                    <a
+                      href="/parser/src/spell/rules/methods/ActionDetail.ts"
+                      target="src-parser-src-spell-rules-methods-actiondetail-ts"
+                      ><code title="parser/src/spell/rules/methods/ActionDetail.ts">ActionDetail.ts</code></a
+                    >
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+          <ul>
+            <li>
+              <a href="/parser/README-core.md" target="src-parser-readme-core-md">README-core</a>: every piece of the
+              core, and reactivity, positions and the two runtimes side by side
+            </li>
+            <li>
+              <a href="/README/util.md" target="src-readme-util-md">README/util</a>: <code>PrefStore</code>,
+              <code>UndoStack</code> and Spell cells, method by method
+            </li>
+            <li>
+              <a href="/guides/targets/targets.html" target="src-guides-targets-targets-html">Targets</a>: what each
+              target writes for the core to run
+            </li>
+          </ul>
+        </ui-section>
+        <footer class="spell-doc-footer">
+          <ui-divider></ui-divider>
+          <p class="meta">Last checked 2026-11-21, against the kit's code that day.</p>
+        </footer>
+      </main>
+    </div>
+    <script src="/_epic/assets/highlight.min.js"></script>
+    <script src="/_epic/assets/spell-ui.js"></script>
+  </body>
+</html>

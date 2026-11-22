@@ -84,19 +84,19 @@ yarn vp --version
 <summary>Output</summary>
 
 ```text
-vp v1.0.0
+vp v1.5.1
 
 Local vite-plus:
-  vite-plus  v1.0.0
+  vite-plus  v1.5.1
 
 Tools:
-  vite             v8.3.1
-  rolldown         v1.2.11
-  vitest           v5.0.1
-  oxfmt            v0.70.0
-  oxlint           v1.85.0
-  oxlint-tsgolint  v7.0.2003
-  tsdown           v0.23.0
+  vite             v8.3.7
+  rolldown         v1.2.18
+  vitest           v5.1.0
+  oxfmt            v0.76.0
+  oxlint           v1.91.0
+  oxlint-tsgolint  v7.0.2005
+  tsdown           v0.23.4
 ```
 
 </details>
@@ -119,9 +119,9 @@ the price is that its pins trail the standalone releases by a release or so.
 
 | Package | Version |
 | --- | --- |
-| `vite-plus` | 1.0.0 |
-| `vite` | `npm:@voidzero-dev/vite-plus-core@1.0.0`:  Vite+'s own build of Vite |
-| `vitest`, `@vitest/browser-playwright`, `@vitest/coverage-v8`, `@vitest/ui` | 5.0.1 |
+| `vite-plus` | 1.5.1 |
+| `vite` | `npm:@voidzero-dev/vite-plus-core@1.5.1`:  Vite+'s own build of Vite |
+| `vitest`, `@vitest/browser-playwright`, `@vitest/coverage-v8`, `@vitest/ui` | 5.1.0 |
 
 </details>
 
@@ -495,6 +495,7 @@ and the page server running ([README/server.md](server.md)).
 
 ## See also
 
+- The guide:  [Working on Spell](../guides/vite-plus.html), in the kit's guides/ folder
 - [README/development.md](development.md):  running these checks day to day, and how an import names a file
   in another repo
 - [README/element.md](element.md):  the decorators and helpers the component rules point you to

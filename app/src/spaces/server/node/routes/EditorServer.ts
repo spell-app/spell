@@ -258,26 +258,7 @@ export class EditorServer {
     guard: SRV.Guard,
     { thisMachineOnly }: { thisMachineOnly: boolean }
   ): Promise<number> {
-    const web = new SRV.WebServer({ mounts: [{ prefix: "/", dir: BUILT_EDITOR }], checkHost: false })
-    const pass = SRV.proxyTo(() => pagePort)
-    for (const prefix of PAGE_SERVER_PREFIXES) {
-      const withToken = TOKEN_PREFIXES.includes(prefix)
-      web.router.use(prefix, (request, reply) => {
-        if (withToken) request.headers[SERVER_TOKEN_HEADER] = guard.token
-        return pass(request, reply, () => {})
-      })
-    }
-    for (const prefix of WEBSOCKET_PREFIXES) {
-      const withToken = TOKEN_PREFIXES.includes(prefix)
-      web.upgrade(prefix, (raw, socket, head) => {
-        // a live room's opening request carries the token, as a data folder's requests do
-        if (withToken) raw.headers[SERVER_TOKEN_HEADER] = guard.token
-        SRV.proxyUpgrade(raw, socket, head, pagePort)
-      })
-    }
-    web.fallback.use((request, reply, next) =>
-      request.method === "GET" ? reply.sendFile(join(BUILT_EDITOR, "index.html")) : next()
-    )
+    const web = EditorServer.builtServer({ dir: BUILT_EDITOR, pagePort, token: () => guard.token })
     const wanted = await editorPort({ thisMachineOnly })
     const { port } = await web.listen({ port: wanted, host: thisMachineOnly ? "127.0.0.1" : "0.0.0.0" })
     this.port = port
@@ -288,6 +269,37 @@ export class EditorServer {
       `${JSON.stringify({ url: `http://localhost:${port}/`, pid: process.pid }, null, 2)}\n`
     )
     return port
+  }
+
+  /**
+   * A server, not listening yet, for a BUILT editor in `dir`:  its files, else its `index.html`;
+   * the page server's paths (`PAGE_SERVER_PREFIXES`) passed on to it at `pagePort`, websockets too,
+   * `token()` added where vite's proxy adds the write token.
+   * - what an npm install serves (`serveBuilt()`), and what `spell perf run` measures (a build in a temporary folder)
+   * - `token`:  none, no token is added
+   */
+  static builtServer({ dir, pagePort, token }: { dir: string; pagePort: number; token?: () => string }): SRV.WebServer {
+    const web = new SRV.WebServer({ mounts: [{ prefix: "/", dir }], checkHost: false })
+    const pass = SRV.proxyTo(() => pagePort)
+    for (const prefix of PAGE_SERVER_PREFIXES) {
+      const withToken = token && TOKEN_PREFIXES.includes(prefix)
+      web.router.use(prefix, (request, reply) => {
+        if (withToken) request.headers[SERVER_TOKEN_HEADER] = token()
+        return pass(request, reply, () => {})
+      })
+    }
+    for (const prefix of WEBSOCKET_PREFIXES) {
+      const withToken = token && TOKEN_PREFIXES.includes(prefix)
+      web.upgrade(prefix, (raw, socket, head) => {
+        // a live room's opening request carries the token, as a data folder's requests do
+        if (withToken) raw.headers[SERVER_TOKEN_HEADER] = token()
+        SRV.proxyUpgrade(raw, socket, head, pagePort)
+      })
+    }
+    web.fallback.use((request, reply, next) =>
+      request.method === "GET" ? reply.sendFile(join(dir, "index.html")) : next()
+    )
+    return web
   }
 
   /**

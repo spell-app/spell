@@ -1,0 +1,867 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>How the Parser Works</title>
+    <meta
+      name="description"
+      content="How Spell's parser reads a line:  one expression rule and a precedence table for binding, priority for ties, scope for words a program teaches it, a datatype on every match;  Rulex's traps and markdown in short -- for anyone about to change the parser's rules."
+    />
+    <meta name="spell-audience" content="programmers" />
+    <meta name="spell-topic" content="The Language Inside" />
+    <meta name="spell-voice" content="readme 2026-11-21" />
+    <meta name="spell-saga" content="spell-language" />
+    <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+  </head>
+  <body class="spell-doc-page">
+    <spell-site-header></spell-site-header>
+    <div class="spell-doc">
+      <main class="spell-doc-main">
+        <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+          <ui-breadcrumb>Guides</ui-breadcrumb>
+          <ui-breadcrumb selected>How the Parser Works</ui-breadcrumb>
+        </ui-breadcrumbs>
+        <ui-sticky class="spell-h1"
+          ><header class="spell-page-head"><h1>How the Parser Works</h1></header></ui-sticky
+        >
+        <pre><code class="language-plaintext">print the first card of the deck is face up</code></pre>
+        <pre><code class="language-js">core.console.log(core.getItemAt(deck, 0)?.isFaceUp)</code></pre>
+        <p class="lede">
+          The card is face up, not the deck. A parser that guessed from the shape of the line would get that wrong, and
+          an early one did. This page is how Spell's parser gets it right: how tightly each word binds, which rule wins
+          a tie, how a program teaches the parser its own words, and how every match knows what it IS.
+        </p>
+        <ui-list class="spell-meta">
+          <ui-item icon="user"
+            >Written for: anyone about to change the parser's rules, or wondering why a line read the way it
+            did</ui-item
+          >
+          <ui-item icon="flask"
+            >Checked: 2026-11-21, every output on this page printed by <code>spell parse</code> on that day's
+            code</ui-item
+          >
+          <ui-item icon="book open"
+            >The reference beside it: the parser's README,
+            <a href="/parser/README-parser.md" target="src-parser-readme-parser-md">README-parser</a>, and the deep map,
+            <a href="/parser/src/spell/PARSING.md" target="src-parser-src-spell-parsing-md"
+              ><code title="parser/src/spell/PARSING.md">PARSING.md</code></a
+            ></ui-item
+          >
+        </ui-list>
+
+        <ui-section id="1-summary" label="1. The parser in one screen" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="lightbulb"></ui-icon>
+          <ul>
+            <li>
+              The parser knows no language until rules are registered on it.
+              <ul>
+                <li>
+                  A rule is a class, plus a syntax string in Rulex, which reads like a regular expression over words.
+                </li>
+                <li>No grammar file, no generator, nothing generated to check in.</li>
+                <li>Spell is written on it, and so is GitHub markdown.</li>
+              </ul>
+            </li>
+            <li>
+              A line goes through six stages: tokens, rules, matches, the Spell tree, output, running it.
+              <a href="/parser/README-parser.md" target="src-parser-readme-parser-md">README-parser</a> follows one line
+              through all six.
+            </li>
+            <li>
+              Two numbers decide how a line reads, and they answer different questions:
+              <ul>
+                <li>
+                  <code>precedence</code>: how tightly an operator holds its operands (<code>*</code> before
+                  <code>+</code>)
+                </li>
+                <li><code>priority</code>: of several rules matching the same words, which one wins</li>
+              </ul>
+            </li>
+            <li>
+              Scope is what the program has declared so far. A line that declares something adds words, even whole
+              rules, for the lines after it.
+            </li>
+            <li>
+              Every match has a <code>datatype</code>, in Spell's words: <code>text</code>, <code>Card</code>,
+              <code>list of cards</code>. Calls use it to pick the right method.
+            </li>
+            <li>
+              The same text gives the same tree, every time. A line nothing understands stays a parse error, and the
+              rest still parses.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section
+          id="4-binding-power"
+          label="2. Binding: one expression rule and a table"
+          sticky
+          collapsible
+          dividing
+          open="false"
+        >
+          <ui-icon slot="icon" name="layer group"></ui-icon>
+          <p>
+            In a parser generator you'd write a grammar level per operator. Here there's ONE rule for every expression,
+            and a table of numbers says how the operators group.
+          </p>
+          <pre><code class="language-plaintext">print 1 + 2 * 3 is 7 and 2 is 2</code></pre>
+          <pre><code class="language-js">core.console.log(1 + 2 * 3 === 7 &amp;&amp; 2 === 2)</code></pre>
+          <ui-accordion class="spell-code" appearance="styled">
+            <ui-title>What <code>spell parse</code> printed: a flat chain of suffixes</ui-title>
+            <ui-content>
+              <pre><code class="language-plaintext">statement › print  print 1 + 2 * 3 is 7 and 2 is 2
+  Keyword  print
+  expressions: Repeat  1 + 2 * 3 is 7 and 2 is 2
+    expression  1 + 2 * 3 is 7 and 2 is 2
+      lhs: operand › number  1
+      Repeat  + 2 * 3 is 7 and 2 is 2
+        expression_suffix › plus  + 2
+          operator › Symbol  +
+          expression: operand › number  2
+        expression_suffix › times  * 3
+          operator › Symbol  *
+          expression: operand › number  3
+        expression_suffix › is_equal  is 7
+          operator: is_or_is_not › Keyword  is
+          expression: operand › number  7
+        expression_suffix › and  and 2
+          Keyword  and
+          expression: operand › number  2
+        expression_suffix › is_equal  is 2
+          operator: is_or_is_not › Keyword  is
+          expression: operand › number  2</code></pre>
+            </ui-content>
+          </ui-accordion>
+
+          <ui-section id="the-expression-loop" label="The expression loop" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <a
+                  href="/parser/src/spell/rules/expressions/CompoundExpression.ts"
+                  target="src-parser-src-spell-rules-expressions-compoundexpression-ts"
+                  ><code title="parser/src/spell/rules/expressions/CompoundExpression.ts">CompoundExpression</code></a
+                >
+                is THE <code>expression</code> rule: <code>{lhs:operand} {rhsChain:expression_suffix}*</code>.
+                <ul>
+                  <li>
+                    It reads one operand, then each suffix that binds tighter than its <code>bound</code> (0: all of
+                    them).
+                  </li>
+                  <li>
+                    No suffix: it hands back the operand's own match, so a rule can still ask what kind of thing it got.
+                  </li>
+                </ul>
+              </li>
+              <li>
+                An <dfn class="spell-term" tabindex="0">operand</dfn>
+                <ui-popup
+                  heading="operand"
+                  label="What an operator acts on:  one expression with no operator at its top, e.g. 5, the deck, the first card of the deck, (x + 1)."
+                ></ui-popup>
+                is what an operator acts on: <code>5</code>, <code>the deck</code>, <code>(x + 1)</code>.
+                <ul>
+                  <li>
+                    Every rule aliased <code>expression</code>, but this one, is registered as an operand instead.
+                  </li>
+                  <li>Operands nest: <code>the first card of the deck</code> holds <code>the deck</code>.</li>
+                  <li>
+                    An operand whose syntax STARTS with an expression throws when it registers: it would call itself
+                    forever. Something that follows an expression is a suffix instead.
+                  </li>
+                </ul>
+              </li>
+              <li>
+                Each suffix's right side is an operand, so the chain comes out flat, as above.
+                <code>getAST()</code> then groups it by precedence, a shunting-yard over the chain.
+              </li>
+              <li>
+                A postfix groups like an infix:
+                <code>x + y is empty</code> compiles to <code>core.isEmpty(x + y)</code>.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="binding-power-table" label="The Precedence table" sticky collapsible dividing open="false">
+            <p>
+              Every operator suffix takes its <code>precedence</code> from this table, in
+              <a
+                href="/parser/src/spell/rules/expressions/expressions.shared.ts"
+                target="src-parser-src-spell-rules-expressions-expressions-shared-ts"
+                ><code title="parser/src/spell/rules/expressions/expressions.shared.ts">expressions.shared.ts</code></a
+              >. Its constructor throws without one: a silent default is how <code>ends with</code> once went wrong.
+            </p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th class="num right aligned">level</th>
+                    <th>name</th>
+                    <th>operators</th>
+                  </tr>
+                  <tr>
+                    <td class="num right aligned">4</td>
+                    <td><code>ternary</code></td>
+                    <td><code>X if C otherwise Y</code>: loosest, whole expressions either side</td>
+                  </tr>
+                  <tr>
+                    <td class="num right aligned">5</td>
+                    <td><code>or</code></td>
+                    <td><code>or</code></td>
+                  </tr>
+                  <tr>
+                    <td class="num right aligned">6</td>
+                    <td><code>and</code></td>
+                    <td><code>and</code></td>
+                  </tr>
+                  <tr>
+                    <td class="num right aligned">10</td>
+                    <td><code>equality</code></td>
+                    <td><code>is</code>, <code>is exactly</code></td>
+                  </tr>
+                  <tr>
+                    <td class="num right aligned">11</td>
+                    <td><code>comparison</code></td>
+                    <td>
+                      <code>&lt;</code> and the rest, <code>is a</code>, <code>includes</code>, <code>is empty</code>,
+                      <code>as a date</code>, a project's quoted aliases such as <code>is face up</code>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="num right aligned">12</td>
+                    <td><code>takesSum</code></td>
+                    <td>
+                      not an operator: the <code>bound</code> of a slot that takes <code>+ - * /</code> and stops before
+                      a comparison
+                    </td>
+                  </tr>
+                  <tr>
+                    <td class="num right aligned">12</td>
+                    <td><code>join</code></td>
+                    <td><code>&amp;</code>, <code>&amp;&amp;</code>: joins into text, looser than <code>+</code></td>
+                  </tr>
+                  <tr>
+                    <td class="num right aligned">13</td>
+                    <td><code>sum</code></td>
+                    <td><code>+</code>, <code>-</code></td>
+                  </tr>
+                  <tr>
+                    <td class="num right aligned">14</td>
+                    <td><code>product</code></td>
+                    <td><code>*</code>, <code>/</code></td>
+                  </tr>
+                  <tr>
+                    <td class="num right aligned">15</td>
+                    <td><code>measure</code></td>
+                    <td><code>in feet</code>: converts the measure just before it</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ul>
+              <li>
+                Prefixes (<code>the first X of</code>, <code>the number of Xs in</code>) have no level: their last slot
+                is an operand, which holds no operator at all.
+              </li>
+              <li>A new level is a new name in the table, with a line saying why.</li>
+            </ul>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>Spell</th>
+                    <th>compiles to</th>
+                  </tr>
+                  <tr>
+                    <td><code>print the absolute value of x + 1 is 3</code></td>
+                    <td><code>core.absoluteValue(x + 1) === 3</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>print the number of items in names + 1</code></td>
+                    <td><code>core.itemCountOf(names) + 1</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>print "Total:" &amp;&amp; x + 1</code></td>
+                    <td><code>core.joined("Total:", x + 1, " ")</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>print x is 1 and y is 2 or z is 3</code></td>
+                    <td><code>(x === 1 &amp;&amp; y === 2) || z === 3</code></td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <p>
+              The catch: math prefixes like <code>the absolute value of</code> take the whole sum, while list prefixes
+              like <code>the number of</code> take one operand. Each reads naturally, but they differ on purpose.
+            </p>
+          </ui-section>
+
+          <ui-section id="two-numbers-two-jobs" label="Three kinds of slot" sticky collapsible dividing open="false">
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>Slot</th>
+                    <th>Takes</th>
+                    <th>For</th>
+                  </tr>
+                  <tr>
+                    <td><code>{x:expression}</code></td>
+                    <td>everything</td>
+                    <td>statements, and a slot a word closes, like a paren: <code>the position of {x} in</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>{x:operand}</code></td>
+                    <td>stops before any operator</td>
+                    <td>
+                      a prefix's LAST slot (<code>the first card of {list:operand}</code>), every suffix's right side
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>{x:arithmetic_expression}</code></td>
+                    <td><code>+ - * /</code> only</td>
+                    <td><code>absolute value</code>, <code>round</code></td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+          </ui-section>
+
+          <ui-section
+            id="arguments-stay-full-expressions"
+            label="Call arguments: whole, or an operand"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                As a STATEMENT, a method call takes whole expressions: <code>notify x + y</code> compiles to
+                <code>notifyMessage(x + y)</code>.
+              </li>
+              <li>
+                INSIDE an expression, its last slot is an operand:
+                <code>if double x is 4</code> compiles to <code>if (doubleN(x) === 4)</code>.
+              </li>
+              <li>
+                One flag does it, <code>operandInExpressions</code>: registering the statement registers an operand
+                twin, its last <code>{x:expression}</code> made <code>{x:operand}</code>.
+              </li>
+              <li>A project's declarations still write ONE rule: loading it makes both.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="bounded-backtracking" label="Give-back" sticky collapsible dividing open="false">
+            <p>
+              The parser doesn't backtrack, with one exception: a required word that fails right after a
+              <code>{slot}</code> makes the slot give back what it took.
+            </p>
+            <pre><code class="language-plaintext">remove the card of the pile            rule:  remove {thisArg:expression} of {callArgs:expression}
+{thisArg} takes "the card of the pile" (a property read)   -&gt;  needs the word `of`:  none left
+give back:  re-parse {thisArg} cut before the last `of` it took  -&gt;  "the card", and `of` fits
+{callArgs} = "the pile"   -&gt;  card.removeOfPile(pile)</code></pre>
+            <ul>
+              <li>
+                <a href="/parser/src/parser/rules/Sequence.ts" target="src-parser-src-parser-rules-sequence-ts"
+                  ><code title="parser/src/parser/rules/Sequence.ts">Sequence.giveBack()</code></a
+                >, tried only on the way to failing, so whatever parsed before still parses the same.
+              </li>
+              <li>Never while completing a line in the editor (expecting mode).</li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section
+          id="precedence-table"
+          label="3. Matching: ties, and words a program teaches"
+          sticky
+          collapsible
+          dividing
+          open="false"
+        >
+          <ui-icon slot="icon" name="random"></ui-icon>
+          <p>A <code>Choice</code> tries every alternative that can start with the line's first word, then keeps:</p>
+          <ol>
+            <li>the highest <code>priority</code>: only between rules matching the same words</li>
+            <li>then the longest match</li>
+            <li>then the one registered first</li>
+          </ol>
+          <p>
+            Nothing reports a tie: the earlier rule just wins. So the order of a module's registration file,
+            <code>&lt;module&gt;.en.ts</code>, is part of the grammar.
+          </p>
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <tbody>
+                <tr>
+                  <th class="num right aligned">priority</th>
+                  <th>name</th>
+                  <th>e.g.</th>
+                </tr>
+                <tr>
+                  <td class="num right aligned">-1</td>
+                  <td><code>overridable</code></td>
+                  <td>
+                    the built-in <code>move the card to the pile</code>, which a project's own
+                    <code>to move (a card) to (a pile)</code> replaces
+                  </td>
+                </tr>
+                <tr>
+                  <td class="num right aligned">0</td>
+                  <td><code>normal</code></td>
+                  <td>most rules: a call to a project's method, <code>x is y</code></td>
+                </tr>
+                <tr>
+                  <td class="num right aligned">1</td>
+                  <td><code>preferred</code></td>
+                  <td>a deck's declared <code>last card</code> over the ordinal <code>the last card of</code></td>
+                </tr>
+                <tr>
+                  <td class="num right aligned">2</td>
+                  <td><code>specific</code></td>
+                  <td><code>the biggest of the prices</code> as a maximum, not a property read</td>
+                </tr>
+                <tr>
+                  <td class="num right aligned">3</td>
+                  <td><code>mostSpecific</code></td>
+                  <td><code>the position of x in the list</code>, <code>the number of cards in the deck</code></td>
+                </tr>
+                <tr>
+                  <td class="num right aligned">9-11</td>
+                  <td><code>belowDeclaration</code>, <code>declaration</code>, <code>aboveDeclaration</code></td>
+                  <td>
+                    <code>a card is a thing</code> and <code>a card has a suit</code> over other statements of the same
+                    words
+                  </td>
+                </tr>
+                <tr>
+                  <td class="num right aligned">20</td>
+                  <td><code>userDeclared</code></td>
+                  <td>
+                    a project's own alias or class variable over any built-in reading:
+                    <code>is the queen of spades</code>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+          <ul>
+            <li>
+              The table: <code>Priority</code>, in
+              <a href="/parser/src/spell/rules/rules.types.ts" target="src-parser-src-spell-rules-rules-types-ts"
+                ><code title="parser/src/spell/rules/rules.types.ts">rules.types.ts</code></a
+              >.
+            </li>
+            <li>
+              Leave a rule's priority unset unless a tie goes wrong; then pick from the table, with a one-line why.
+            </li>
+            <li>
+              The "priority and precedence" test in
+              <a
+                href="/parser/tests/spell/rules/expressions/expressions.test.ts"
+                target="src-parser-tests-spell-rules-expressions-expressions-test-ts"
+                ><code title="parser/tests/spell/rules/expressions/expressions.test.ts">expressions.test.ts</code></a
+              >
+              snapshots every non-default priority and every suffix's precedence.
+            </li>
+          </ul>
+
+          <ui-section
+            id="scope-teaches"
+            label="How earlier lines teach later ones"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <pre><code class="language-plaintext">a card is a thing
+a card has a direction as either up or down
+a card "is face up" if its direction is up</code></pre>
+            <ul>
+              <li>
+                The third line declares an alias, and the alias becomes a RULE while it parses:
+                <code>{operator:is_or_is_not} face up</code>. So <code>the card is not face up</code> reads too.
+              </li>
+              <li>
+                Only a rule's <code>mutateScope()</code> changes scope. Building the Spell tree never does, nor looks
+                scope up.
+              </li>
+              <li>
+                A rule that needs something from scope looks it up WHILE PARSING, into <code>match.data</code>: a
+                member, a list's item type, a method's record.
+              </li>
+              <li>
+                Every type and method a project declares is stubbed before its files parse, so a line can use one
+                declared further down.
+              </li>
+              <li>
+                An alias can't be used above its definition yet: <code>spell lint</code> says
+                <code>Don't understand "is face up"</code>.
+              </li>
+              <li>
+                The editor re-parses only what an edit could change; every scope change is journaled, so a rewind is
+                cheap.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section
+          id="6-a-datatype-on-every-match"
+          label="4. A datatype on every match"
+          sticky
+          collapsible
+          dividing
+          open="false"
+        >
+          <ui-icon slot="icon" name="cubes"></ui-icon>
+          <p>
+            Binding gets the shape right. Knowing what an expression IS gets the meaning right:
+            <code>the length of title</code> is <code>title.length</code>, while <code>the length of the deck</code> is
+            <code>core.itemCountOf(deck)</code>.
+          </p>
+
+          <ui-section id="the-rule" label="The rule" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <code>match.datatype</code> remembers <code>rule.getDatatype(match)</code>; its default is the rule's
+                <code>datatype</code>.
+              </li>
+              <li>About a dozen rules work it out, reading only <code>match.data</code> and their child matches.</li>
+              <li>Unknown is <code>undefined</code>, and fits everything: nothing stops parsing for want of a type.</li>
+              <li>
+                The first datatype wins: a variable's is set when it's declared, never widened. Except a getter's
+                property and a method's return type, set once the body has parsed.
+              </li>
+              <li>
+                One normaliser, <code>SP.typeName()</code>, turns what people write (<code>string</code>,
+                <code>yes or no</code>, plurals) into Spell's words.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="sources-2" label="Where a datatype comes from" sticky collapsible dividing open="false">
+            <ul>
+              <li>literals, from their rule: <code>[1, 2, 3]</code> is a <code>list of numbers</code></li>
+              <li>a variable, from its scope record</li>
+              <li>
+                <code>a new card</code> is a <code>Card</code>; <code>a new list of cards</code> a
+                <code>list of cards</code>
+              </li>
+              <li>
+                <code>the X of Y</code> and <code>its X</code>, from the member found on Y's type; a built-in's from its
+                table
+              </li>
+              <li>
+                a method call, from what its method returns: every <code>return</code> agreeing, else unknown; a bare
+                <code>return</code> is <code>nothing</code>
+              </li>
+              <li>comparisons, aliases, <code>and</code>, <code>or</code>, <code>not</code>: <code>choice</code></li>
+              <li><code>- * /</code>: <code>number</code>; <code>+</code> of text: <code>text</code></li>
+              <li>a whole expression: the same shunting-yard as its tree, over each suffix's result</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="sinks" label="Where it's kept" sticky collapsible dividing open="false">
+            <ul>
+              <li>a new variable, from <code>set</code>, <code>get</code> or <code>X is Y</code></li>
+              <li>method arguments: <code>(a card)</code>, <code>(x as text)</code></li>
+              <li><code>it</code> inside a method or getter: its owner type</li>
+              <li>a loop's item, and a <code>where</code>'s: the list's item type</li>
+              <li><code>a deck is a list of cards</code>: <code>Card</code>, as the deck type's item type</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="member-tables" label="Typed calls" sticky collapsible dividing open="false">
+            <ul>
+              <li>A call rule is made for its method with that method's types: who owns it, and each parameter's.</li>
+              <li>
+                It refuses a match whose argument's datatype is KNOWN and can't be the parameter's. Unknown always fits.
+                <ul>
+                  <li><code>put the chip on the pot</code> finds the chip's <code>put</code>.</li>
+                  <li>
+                    <code>add the card to the deck</code> falls past a project's <code>to add a card to a pile</code>,
+                    to the built-in.
+                  </li>
+                </ul>
+              </li>
+              <li>
+                A project that imports another gets the same types: each declaration's marker comment carries them.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="built-in-types" label="Built-in types" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                The built-in types live in the root scope, in
+                <a href="/parser/src/parser/parser.types.ts" target="src-parser-src-parser-parser-types-ts"
+                  ><code title="parser/src/parser/parser.types.ts">BUILT_IN_TYPES</code></a
+                >: <code>text</code>, <code>number</code>, <code>integer</code>, <code>letter</code>,
+                <code>choice</code>, <code>date</code>, <code>list</code>, <code>thing</code>, <code>view</code>,
+                <code>page</code>, <code>app</code>, <code>place</code>, <code>dimension</code>, <code>nothing</code>,
+                and more.
+              </li>
+              <li>
+                Their members are DATA, <code>SP.BUILT_IN_TYPE_TABLE</code> in
+                <a href="/parser/src/spell/builtinTypes.ts" target="src-parser-src-spell-builtintypes-ts"
+                  ><code title="parser/src/spell/builtinTypes.ts">builtinTypes.ts</code></a
+                >: each entry's docs, item type (<code>text</code> holds <code>letter</code>s) and members.
+              </li>
+              <li>A project's own declaration wins over the table.</li>
+              <li>
+                The Type Explorer builds the built-ins from it, and <code>yarn lsp:scopes</code>, in the app folder,
+                writes the core's
+                <a href="/parser/src/core/core.scopes.js" target="src-parser-src-core-core-scopes-js"
+                  ><code title="parser/src/core/core.scopes.js">core.scopes.js</code></a
+                >
+                from it.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section
+          id="7-signatures-calls-and-members"
+          label="5. What it buys the language"
+          sticky
+          collapsible
+          dividing
+          open="false"
+        >
+          <ui-icon slot="icon" name="code"></ui-icon>
+          <p>
+            Binding and datatypes are what let Spell read signatures without parentheses, typed calls, members of
+            several words (<code>the short rank of the card</code>), membership and list guards. How each one is
+            written:
+            <a href="/guides/spell-language/spell-language.html" target="src-guides-spell-language-spell-language-html"
+              >The Spell Language</a
+            >. How each one is parsed:
+            <a href="/parser/src/spell/PARSING.md" target="src-parser-src-spell-parsing-md"
+              ><code title="parser/src/spell/PARSING.md">PARSING.md</code></a
+            >, "Members" and "Guards".
+          </p>
+        </ui-section>
+
+        <ui-section id="rulex-traps" label="6. Rulex: the traps" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="exclamation triangle"></ui-icon>
+          <p>
+            Every rule's syntax is Rulex, read ONCE when the rule registers. A bad syntax fails at load, naming the part
+            it couldn't read. The traps left are the ones that do something you didn't mean:
+          </p>
+          <ul>
+            <li>
+              Two tokenizers. Rulex reads each syntax with its own plain one, so <code>--</code>, <code>//</code>,
+              <code>#</code>, quotes and <code>&lt;tag&gt;</code> are ordinary symbols in a syntax. The LANGUAGE's
+              tokenizer decides what they are in the input: Spell's makes <code>--</code> a comment, and no rule ever
+              sees it.
+            </li>
+            <li>
+              <code>*</code> is Rulex's own: <code>**{text}**</code> is a repeat flag, so write
+              <code>\*\*{word}\*\*</code>.
+            </li>
+            <li>
+              Touching in the syntax means touching in the input; a space in the syntax allows one but doesn't require
+              it.
+            </li>
+            <li>
+              A bare <code>[</code>, <code>{</code> or <code>(</code> only ever OPENS a list, a rule or a choice. A
+              literal one is <code>\[</code>.
+            </li>
+            <li>
+              A rule may name itself, but not FIRST: <code>({sum} plus {num}|{num})</code> calls itself forever, and
+              dies with "Maximum call stack size exceeded". Write <code>{num} (plus {num})*</code>, or use the
+              precedence table.
+            </li>
+            <li>
+              Printing a rule back (<code>spell explain</code>) loses what the rule doesn't keep: redundant parentheses,
+              and the escapes in a choice of symbols.
+            </li>
+          </ul>
+          <p>
+            Every construct, with what it matches and what it doesn't:
+            <a href="/parser/README-rulex.md" target="src-parser-readme-rulex-md">README-rulex</a>.
+          </p>
+        </ui-section>
+
+        <ui-section id="markdown" label="7. Markdown: the second language" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="markdown"></ui-icon>
+          <ul>
+            <li>
+              GitHub markdown on the same parser, which never imports Spell: it passes all 670 of the spec's examples.
+            </li>
+            <li>
+              Rulex says what each LINE is; nesting and emphasis pairing are hand-written code, ported from
+              commonmark.js.
+            </li>
+            <li>The editor's docstrings, <code>&lt;spell-markdown&gt;</code> and the language server draw with it.</li>
+            <li>
+              The catch: about 1.6 times marked's time, and 98 kB to marked's 14 kB, minified and gzipped. So Spell UI's
+              <code>&lt;ui-markdown&gt;</code> keeps marked.
+            </li>
+          </ul>
+          <p>
+            How it's built, and how it was measured:
+            <a href="/parser/README-markdown.md" target="src-parser-readme-markdown-md">README-markdown</a>.
+          </p>
+        </ui-section>
+
+        <ui-section id="limits" label="8. Limits" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="exclamation circle"></ui-icon>
+          <ul>
+            <li>
+              Nothing reports a tie between two rules matching the same words equally well: the first registered wins.
+            </li>
+            <li>
+              Spell has no expression statement: a bare <code>the first letter of name as upper case</code> on its own
+              line is a parse error.
+            </li>
+            <li>
+              A typed parameter turns away a literal of the wrong type: with <code>to notify (message as text)</code>,
+              <code>notify 1</code> falls to the built-in <code>core.notify(1)</code>.
+            </li>
+            <li>
+              A member of several words needs its owner's type: <code>the short rank of x</code>, with <code>x</code> of
+              no known type, is a parse error.
+            </li>
+            <li>
+              Datatypes are still unknown in places, and unknown fits everything: a mis-parse that compiles is caught
+              only by the tests.
+            </li>
+            <li>An alias can't be used above the line that makes it.</li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="sources" label="9. Where things are" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="folder open"></ui-icon>
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <tbody>
+                <tr>
+                  <th>What</th>
+                  <th>Where</th>
+                </tr>
+                <tr>
+                  <td>the expression rule</td>
+                  <td>
+                    <a
+                      href="/parser/src/spell/rules/expressions/CompoundExpression.ts"
+                      target="src-parser-src-spell-rules-expressions-compoundexpression-ts"
+                      ><code title="parser/src/spell/rules/expressions/CompoundExpression.ts"
+                        >CompoundExpression.ts</code
+                      ></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>the precedence table</td>
+                  <td>
+                    <a
+                      href="/parser/src/spell/rules/expressions/expressions.shared.ts"
+                      target="src-parser-src-spell-rules-expressions-expressions-shared-ts"
+                      ><code title="parser/src/spell/rules/expressions/expressions.shared.ts"
+                        >expressions.shared.ts</code
+                      ></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>the priority table</td>
+                  <td>
+                    <a href="/parser/src/spell/rules/rules.types.ts" target="src-parser-src-spell-rules-rules-types-ts"
+                      ><code title="parser/src/spell/rules/rules.types.ts">rules.types.ts</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>how a choice is settled</td>
+                  <td>
+                    <a href="/parser/src/parser/rules/Choice.ts" target="src-parser-src-parser-rules-choice-ts"
+                      ><code title="parser/src/parser/rules/Choice.ts">Choice.ts</code></a
+                    >, <code>getBestMatch()</code>
+                  </td>
+                </tr>
+                <tr>
+                  <td>give-back</td>
+                  <td>
+                    <a href="/parser/src/parser/rules/Sequence.ts" target="src-parser-src-parser-rules-sequence-ts"
+                      ><code title="parser/src/parser/rules/Sequence.ts">Sequence.ts</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>the probe ledger: mixed-operator lines and what they compile to</td>
+                  <td>
+                    <a
+                      href="/app/tests/spell/grammar.probes.test.ts"
+                      target="src-app-tests-spell-grammar-probes-test-ts"
+                      ><code title="app/tests/spell/grammar.probes.test.ts">grammar.probes.test.ts</code></a
+                    >, in the app folder
+                  </td>
+                </tr>
+                <tr>
+                  <td>how a line reads</td>
+                  <td>
+                    <code>spell parse "&lt;line&gt;"</code>, <code>spell parse --tree</code>,
+                    <code>spell explain &lt;word&gt;</code>
+                  </td>
+                </tr>
+                <tr>
+                  <td>the rule tests, and blessing them</td>
+                  <td>
+                    <code>yarn spell:test:rules</code>, <code>yarn spell:test:rules:bless</code>, in the parser folder
+                  </td>
+                </tr>
+                <tr>
+                  <td>the frozen test projects, and blessing them</td>
+                  <td>
+                    <code>spell content check</code>, <code>--bless</code>; or
+                    <code>yarn spell:test:fixtures:bless</code> in the app folder
+                  </td>
+                </tr>
+                <tr>
+                  <td>the core's declarations</td>
+                  <td><code>yarn core:gen:declarations</code>, in the parser folder</td>
+                </tr>
+                <tr>
+                  <td>the parser's speed</td>
+                  <td><code>spell speedtest --against HEAD</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+          <ul>
+            <li>
+              <a href="/parser/README-parser.md" target="src-parser-readme-parser-md">README-parser</a>: the six stages,
+              rule kinds, matches, writers, a language in 23 lines
+            </li>
+            <li>
+              <a href="/parser/README-rulex.md" target="src-parser-readme-rulex-md">README-rulex</a>: every Rulex
+              construct
+            </li>
+            <li>
+              <a href="/parser/README-spell.md" target="src-parser-readme-spell-md">README-spell</a>: Spell's rule
+              modules, its compiler, and its recipe for adding a rule
+            </li>
+            <li>
+              <a href="/guides/targets/targets.html" target="src-guides-targets-targets-html">Targets</a>: what the
+              Spell tree is written as
+            </li>
+          </ul>
+        </ui-section>
+        <footer class="spell-doc-footer">
+          <ui-divider></ui-divider>
+          <p class="meta">
+            Last checked 2026-11-21, against the kit's code that day: every output on this page printed by
+            <code>spell parse</code>.
+          </p>
+        </footer>
+      </main>
+    </div>
+    <script src="/_epic/assets/highlight.min.js"></script>
+    <script src="/_epic/assets/spell-ui.js"></script>
+  </body>
+</html>

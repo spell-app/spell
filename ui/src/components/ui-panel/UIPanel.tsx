@@ -94,8 +94,12 @@ export class UIPanel extends UISection {
     return () => this.scrollShades.stop()
   }
 
-  /** What's in it changed:  its body may be another, or another size. */
-  @E.watches({ childList: true, subtree: true })
+  /**
+   * Its own children changed:  its body may be another.
+   * - Not every change inside it (epic `solid-2-final` P3):  deeper in only changes sizes, which `ScrollShades`'
+   *   resize watcher already sees, and each refresh here was a style read in a busy Inspector card.
+   */
+  @E.watches({ childList: true })
   protected onBodyChanged() {
     if (this.isReady && this.domElement.isConnected && this.isPane) this.scrollShades.refresh()
   }

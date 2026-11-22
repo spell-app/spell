@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
@@ -59,7 +59,7 @@ describe("UISegment.css source", () => {
   })
 
   it("covers every class word the vocabularies can emit", () => {
-    const css = segmentRaw + colorsCSS
+    const css = segmentRaw + colorsSharedCSS
     for (const vocabulary of [segmentVocabulary, segmentsVocabulary]) {
       for (const phrase of Sheets.classPhrases(vocabulary))
         expect(Sheets.covers(css, phrase), `${vocabulary.tag}: ${phrase}`).toBe(true)

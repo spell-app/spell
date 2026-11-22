@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
@@ -73,7 +73,7 @@ describe("UIDimmer.css source", () => {
   })
 
   it("covers every class word the vocabulary can emit", () => {
-    const css = dimmerRaw + colorsCSS
+    const css = dimmerRaw + colorsSharedCSS
     for (const phrase of Sheets.classPhrases(dimmerVocabulary))
       expect(Sheets.covers(css, phrase), `${dimmerVocabulary.tag}: ${phrase}`).toBe(true)
     for (const shade of ["medium", "light", "very light"]) expect(Sheets.covers(css, shade), shade).toBe(true)

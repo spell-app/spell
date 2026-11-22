@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Spell UI's Docs Site</title>
+    <meta
+      name="description"
+      content="Spell UI's docs site, for someone adding or changing a page:  what it is and where it lives, a page's shape and its four tabs, the doc-only elements and the data they read, the scripts that build it, and its limits."
+    />
+    <meta name="spell-audience" content="programmers" />
+    <meta name="spell-topic" content="Elements and UI" />
+    <meta name="spell-voice" content="readme 2026-10-22" />
+    <meta name="spell-saga" content="spell-ui" />
+    <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+  </head>
+  <body class="spell-doc-page">
+    <spell-site-header></spell-site-header>
+    <div class="spell-doc">
+      <main class="spell-doc-main">
+        <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+          <ui-breadcrumb>Guides</ui-breadcrumb>
+          <ui-breadcrumb selected>Spell UI's Docs Site</ui-breadcrumb>
+        </ui-breadcrumbs>
+        <ui-sticky class="spell-h1"
+          ><header class="spell-page-head"><h1>Spell UI's Docs Site</h1></header></ui-sticky
+        >
+        <!-- prettier-ignore -->
+        <ui-code language="html">&lt;ui-section id="examples-types-button" label="Button" sticky collapsible dividing&gt;
+  &lt;ui-example description="A standard button."&gt;
+    &lt;ui-button&gt;Follow&lt;/ui-button&gt;
+  &lt;/ui-example&gt;
+&lt;/ui-section&gt;</ui-code>
+        <p class="lede">
+          That's the first example on the Button page, and all of its source: in the browser it's a live
+          <code>&lt;ui-button&gt;</code> with a code button that shows these same lines. The site is 121 plain HTML
+          pages with 2,159 live examples like it, laid out as fomantic-ui.com's are, and nothing is built between saving
+          a page and reading it.
+        </p>
+        <ui-list class="spell-meta">
+          <ui-item icon="user">Written for: anyone adding a component's page, or changing how the site draws</ui-item>
+          <ui-item icon="flask">Checked: 2026-11-21, every count, path and script against that day's code</ui-item>
+          <ui-item icon="book open"
+            >The reference beside it: <a href="/ui/README-site.md" target="src-ui-readme-site-md">README-site</a>, every
+            script and file in full</ui-item
+          >
+        </ui-list>
+
+        <ui-section id="1-what-it-is" label="1. What the site is" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="lightbulb"></ui-icon>
+          <ul>
+            <li>
+              <b>121 pages</b> (counted 2026-11-21):
+              <ul>
+                <li>
+                  a page per component family, 96 of them, each named for its main tag (<code>ui-button.html</code>)
+                </li>
+                <li>
+                  a page of its own for 15 sub-tags: <code>ui-radio</code>, <code>ui-textarea</code> and the content
+                  parts
+                </li>
+                <li>
+                  ten more: the home page, getting started, the class grammar, theming, utilities, icons, the palette,
+                  the theme bench, the component index and the kitchen sink
+                </li>
+              </ul>
+            </li>
+            <li><b>2,159 live examples</b>, each showing its own markup: an example is written once.</li>
+            <li>
+              <b>Everything visible is a <code>ui-*</code> element.</b> The site's CSS is layout glue only; a rule there
+              that changes a look is a gap.
+            </li>
+            <li>
+              <b>A gap gets fixed in the element, never patched in the page.</b> A page that can only use the library
+              shows where the library falls short.
+            </li>
+            <li>
+              If you've written Storybook stories: a story is a function, built into an app of its own. Here an example
+              is markup in a plain page, which the page server sends exactly as it is on disk.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="2-layout" label="2. Where it lives, and how to see it" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="folder open"></ui-icon>
+          <!-- prettier-ignore -->
+          <ui-code language="sh" collapsed>spell server start all</ui-code>
+          <p>
+            Then open the docs site's row,
+            <a href="/components/ui/" target="src-ui-docs"><code>/components/ui/</code></a> on the page server. Three
+            things make the site:
+          </p>
+          <ui-table celled padding="compact" appearance="striped">
+            <table>
+              <tbody>
+                <tr>
+                  <th>What</th>
+                  <th>Where</th>
+                  <th>Made by</th>
+                </tr>
+                <tr>
+                  <td>the pages</td>
+                  <td>
+                    <a href="/ui/docs/" title="ui/docs" target="src-ui-docs"><code>ui/docs/</code></a
+                    >, one flat folder, tracked with the branch
+                  </td>
+                  <td>hand</td>
+                </tr>
+                <tr>
+                  <td>the data</td>
+                  <td>
+                    <a href="/components/ui/__data/" target="src-ui-docs-data"><code>ui/docs/__data/</code></a
+                    >, generated and committed
+                  </td>
+                  <td><code>yarn site:data</code></td>
+                </tr>
+                <tr>
+                  <td>the bundle</td>
+                  <td>
+                    <a href="/ui/site/_assets/" target="src-ui-site-assets"><code>ui/site/_assets/</code></a
+                    >, from <a href="/ui/site/_src/" target="src-ui-site-src"><code>ui/site/_src/</code></a
+                    >; never committed
+                  </td>
+                  <td><code>yarn site:bundle</code>, or the page server, when stale</td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+          <ul>
+            <li>
+              The page server lays the bundle over the pages at <code>/components/ui/_assets/</code>, because Spell UI's
+              part of its settings names the set.
+            </li>
+            <li>An open page reloads when the page, its layout, its data or the bundle changes.</li>
+            <li>
+              Every component set's pages load this one bundle: Epic UI's at
+              <a href="/components/epics/" target="src-epic-src-docs"><code>/components/epics/</code></a
+              >, App UI's at <a href="/components/app/" target="src-app-app-docs"><code>/components/app/</code></a
+              >.
+            </li>
+            <li>
+              <code>__parts/layout.html</code> is every page's chrome, written once: the top bar, the side column, the
+              <code>&lt;ui-root&gt;</code>. <code>__parts/footer.html</code> its footer.
+            </li>
+            <li>
+              <code>ui/docs/examples/</code> holds the files the examples load; <code>ui/docs/images/</code>, Fomantic's
+              docs images, at fomantic-ui.com's paths.
+            </li>
+            <li>
+              <b>Three catches:</b>
+              <ul>
+                <li>a page opened from disk shows bare markup: there's no <code>_assets/</code> beside it</li>
+                <li>
+                  <code>spell server url &lt;file&gt;</code> doesn't know the docs site yet: use
+                  <code>/components/ui/&lt;page&gt;</code>
+                </li>
+                <li>
+                  the main checkout's server never builds a worktree's bundle: after a change to its sources there, run
+                  <code>spell bundle</code> in the worktree, naming <code>ui-site</code>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="3-anatomy" label="3. A page:  its head and one main" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="file alternate outline"></ui-icon>
+          <ui-section id="template" label="The file" sticky collapsible dividing open="false">
+            <!-- prettier-ignore -->
+            <ui-code language="html" collapsed>&lt;head&gt;
+  &lt;title&gt;Button | Spell UI&lt;/title&gt;
+  &lt;meta name="description" content="A button indicates a possible user action." /&gt;
+  &lt;link rel="stylesheet" href="_assets/site.css" /&gt;
+  &lt;script type="module" src="_assets/site.js"&gt;&lt;/script&gt;
+  &lt;script defer src="/_epic/assets/spell-comments.js"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body class="ui-typography"&gt;
+  &lt;main id="main" class="site-main" data-toc-header="Button"&gt;
+    &lt;!-- the masthead, then &lt;ui-tabs id="site-tabs"&gt; and its four panes --&gt;
+  &lt;/main&gt;
+&lt;/body&gt;</ui-code>
+            <ul>
+              <li>
+                No top bar, no nav, no <code>&lt;ui-root&gt;</code>: the bundle puts the page's <code>main</code> inside
+                the layout.
+              </li>
+              <li>
+                The model page is
+                <a href="/ui/docs/ui-button.html" title="ui/docs/ui-button.html" target="src-ui-docs-ui-button-html"
+                  ><code>ui-button.html</code></a
+                >: open it beside yours, and copy its patterns.
+              </li>
+              <li>
+                Links are written as from the page's served address: <code>_assets/</code> is beside it,
+                <code>../epics/epic-item.html</code> another set's page.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section
+            id="the-frame"
+            label="The first load, and every one after"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                <b>Hidden until it's all there:</b> the site's CSS hides the bare <code>main</code>, 4 seconds at most,
+                while the bundle fetches the layout, wraps the page in it, puts in the viewer's theme, then defines
+                <code>&lt;ui-root display="when-ready"&gt;</code>, which shows the page once every element is ready.
+              </li>
+              <li>
+                <b>The examples' markup is kept FIRST</b>, before anything upgrades, so the code an example shows is
+                what you wrote.
+              </li>
+              <li>
+                <b>After the first page, a click doesn't load a page:</b> the site's router fetches the next one, swaps
+                only the <code>main</code>, and pushes its real URL. Back, forward, deep links and reloads work as with
+                plain pages.
+              </li>
+              <li>
+                <b>The catch:</b> inline scripts in <code>main</code> run again on every visit, and
+                <code>&lt;head&gt;</code> styles DON'T follow a swap. Put a page's styles in its <code>main</code>.
+              </li>
+              <li>
+                The layout's root is <code>&lt;ui-root class="site" stack-with="page"&gt;</code>, so an example stacks
+                by the SCREEN's width, not the docs column's.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="the-tabs" label="The four tabs" sticky collapsible dividing open="false">
+            <ul>
+              <li><b>Examples:</b> a section per topic, an example a section of its own inside it.</li>
+              <li>
+                <b>Usage:</b> what to write, the events with their <code>detail</code>, keyboard and accessibility.
+              </li>
+              <li>
+                <b>API:</b> done already. <code>&lt;ui-docs-api family="ui-button"&gt;</code> draws every table from the
+                site's data, a section per kind (Attributes, Events ...), a Tags section first for a family of 2+ tags.
+              </li>
+              <li>
+                <b>Theming:</b> <code>&lt;ui-docs-tokens family="ui-button" playground&gt;</code>, the family's tokens
+                live on its main example.
+              </li>
+              <li>
+                An "On this page" rail beside them, at 1200px and wider; a left nav lists every component, A-Z or by
+                topic.
+              </li>
+              <li>
+                Every section's title sticks below the tabs' bar; sections fold, remembered per page, and a link
+                (<code>#examples-types-emphasis</code>) opens the tab and unfolds what hides it.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="an-excerpt" label="Comments" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                People comment on these pages as on every guide: the bullhorns, threads and Send, from
+                <code>/_epic/assets/spell-comments.js</code> in each page's head.
+              </li>
+              <li>The layout loads the epics pack, whose elements draw the threads and the pane.</li>
+              <li>
+                A comment waits beside its page in <code>&lt;page&gt;.inbox.json5</code>, git-ignored, until Send hands
+                it on.
+              </li>
+              <li>
+                <b>The cost:</b> a page loads 555 kB of script and CSS before its first family, 155 kB gzipped; 305 kB,
+                79 kB gzipped, without what the pack shares.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="4-docs-elements" label="4. The doc-only elements" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="puzzle piece"></ui-icon>
+          <ui-section id="the-six" label="The elements" sticky collapsible dividing open="false">
+            <p>
+              The site's own widgets, written exactly like a component family, in
+              <a href="/ui/src/docs-components/" title="ui/src/docs-components" target="src-ui-src-docs-components"
+                ><code>ui/src/docs-components/</code></a
+              >:
+            </p>
+            <ul>
+              <li><code>&lt;ui-docs-api&gt;</code>: a family's tables, from its vocabularies</li>
+              <li><code>&lt;ui-docs-tokens&gt;</code>: its tokens, and the playground</li>
+              <li><code>&lt;ui-docs-inspector&gt;</code>: an element's attributes, properties and states, live</li>
+              <li>
+                <code>&lt;ui-docs-nav&gt;</code>: the side column; <code>&lt;ui-docs-search&gt;</code>: the search
+              </li>
+              <li>
+                <code>&lt;ui-docs-index&gt;</code>, <code>&lt;ui-docs-palette&gt;</code>,
+                <code>&lt;ui-docs-theme-bench&gt;</code>: a site's index page, the editor's palette and the theme bench
+              </li>
+              <li>
+                <code>&lt;ui-example&gt;</code>, <code>&lt;ui-toc&gt;</code> and
+                <code>&lt;ui-theme-menu&gt;</code> began here, and are real components now.
+              </li>
+              <li>
+                Not components: no library entry, and <code>&lt;ui-root&gt;</code> loads them only where the page's
+                bundle asked for them (the site's does).
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="site-data" label="The site data" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                The elements read <code>__data/components.json5</code>, never the vocabularies: every tag, family, token
+                and topic.
+              </li>
+              <li>
+                <code>icons.json5</code>: the icon browser's search terms; <code>search.json5</code>: every page's
+                sections.
+              </li>
+              <li>
+                Beside them, what editors read: <code>custom-elements.json</code>, <code>html-custom-data.json</code>,
+                <code>css-custom-data.json</code>.
+              </li>
+              <li>
+                <code>pages.json5</code> is kept by hand: each family's title, summary, status, and its sub-tags with a
+                page of their own. Fix a summary there, then <code>yarn site:data</code>.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="add-one" label="Adding one" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                A new doc-only element is a family folder like any other; the barrel's header says how to add one.
+              </li>
+              <li>A widget other pages need moves into the components folder instead, its old tag renamed.</li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="5-workflows" label="5. Writing and building" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="tools"></ui-icon>
+          <ui-section id="make-a-page" label="Make a page" sticky collapsible dividing open="false">
+            <!-- prettier-ignore -->
+            <ui-code language="sh" collapsed>cd ui
+yarn site:new ui-card
+yarn site:new getting-started --title "Getting started" --summary "One line."</ui-code>
+            <ul>
+              <li>
+                A tag writes its page, <code>docs/&lt;main tag&gt;.html</code>, from the template when it isn't there
+                yet, and its four pages in the Spell UI site, as Spell.
+              </li>
+              <li>A sub-tag its family lists under <code>pages</code> gets a page of its own, one tag's API.</li>
+              <li>Anything else is a guide page, one column, no tabs.</li>
+              <li>It refuses to overwrite a page; <code>--force</code> does, and loses what you wrote.</li>
+            </ul>
+          </ui-section>
+          <ui-section id="write-examples" label="Write examples" sticky collapsible dividing open="false">
+            <!-- prettier-ignore -->
+            <ui-code language="html" collapsed>&lt;ui-header level="2" dividing&gt;Types&lt;/ui-header&gt;
+&lt;ui-example heading="Button" description="A standard button."&gt;
+  &lt;ui-button&gt;Follow&lt;/ui-button&gt;
+&lt;/ui-example&gt;</ui-code>
+            <ul>
+              <li>
+                Write it flat, a level 2 header per topic; <code>yarn site:sections</code> nests it into sections and
+                writes their ids, and running it twice changes nothing.
+              </li>
+              <li>Fomantic's page, section by section and in its order; our extras after.</li>
+              <li>
+                The only attributes are the family's vocabulary's; the markup IS the code shown, with no
+                <code>style=</code>.
+              </li>
+              <li>
+                A Fomantic feature left out on purpose gets one line in its place:
+                <code>&lt;ui-message size="small" class="site-not-ported"&gt;</code>.
+              </li>
+              <li>
+                What an element can't render yet is a gap: a comment before its example's section, naming its issue.
+              </li>
+              <li>An example whose markup changes as it runs holds it in a <code>&lt;template&gt;</code> child.</li>
+            </ul>
+          </ui-section>
+          <ui-section id="build" label="Build" sticky collapsible dividing open="false">
+            <ui-table celled padding="compact" appearance="striped">
+              <table>
+                <tbody>
+                  <tr>
+                    <th>
+                      Script, from <a href="/ui/" target="src-ui"><code>ui/</code></a>
+                    </th>
+                    <th>What it writes</th>
+                  </tr>
+                  <tr>
+                    <td><code>yarn site:data</code></td>
+                    <td>the site's data, the editors' manifests and the JSX types</td>
+                  </tr>
+                  <tr>
+                    <td><code>yarn site:index</code></td>
+                    <td>the component index's cards</td>
+                  </tr>
+                  <tr>
+                    <td><code>yarn site:kitchen</code></td>
+                    <td>the kitchen sink, and each Theming playground</td>
+                  </tr>
+                  <tr>
+                    <td><code>yarn site:bundle</code></td>
+                    <td>
+                      the bundle, <a href="/ui/site/_assets/" target="src-ui-site-assets"><code>site/_assets/</code></a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>yarn site:build</code></td>
+                    <td>the four above, in turn</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ul>
+              <li>
+                Run <code>yarn site:build</code> after changing a vocabulary, a family's sheet, an example, or anything
+                the site shows.
+              </li>
+              <li><code>--check</code> writes nothing, and exits 1 if a file would change.</li>
+              <li>
+                A stale bundle, by hand: <code>spell bundle check ui-site</code>, then <code>spell bundle</code>, naming
+                <code>ui-site</code>.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="dev" label="Dev" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <code>yarn site:dev</code>: the bundle, then a watch build that rebuilds it on every source edit, while
+                the page server serves the site and the open pages reload.
+              </li>
+              <li>
+                It doesn't watch the data, the index or the kitchen sink: rerun <code>yarn site:build</code> for those.
+              </li>
+              <li>
+                Just the elements, no server: <code>yarn dev</code> opens the demo, every example beside its class
+                grammar.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="check" label="Check" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <code>yarn site:check &lt;page...&gt;</code> (or <code>--all</code>) loads the Spell UI site's pages, as
+                this checkout's editor runs them, in headless Chromium.
+              </li>
+              <li>
+                It fails on console errors and failed requests, undefined elements, an empty contents list, a deep link
+                that doesn't land, sideways scroll at phone width, a nav drawer that won't open.
+              </li>
+              <li>
+                <b>What it can't see:</b> overlap, clipping or ugly wrapping. Look at the screenshots in
+                <a href="/ui/results/site-check/" target="src-ui-results-site-check"><code>results/site-check/</code></a
+                >.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="commit" label="Commit rules" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                Commit what the scripts changed in <a href="/docs/" target="src-docs"><code>docs/</code></a
+                >, with the element it documents.
+              </li>
+              <li>The bundle is git-ignored: its hashed chunk names churned every diff.</li>
+              <li>
+                Never edit <a href="/ui/site/_assets/" target="src-ui-site-assets"><code>site/_assets/</code></a> or
+                <a href="/components/ui/__data/" target="src-ui-docs-data"><code>docs/__data/</code></a
+                >, but the hand-kept <code>pages.json5</code>.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="6-themes" label="6. Themes" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="paint brush"></ui-icon>
+          <ul>
+            <li>
+              The theme menu in the masthead and the top bar is <code>&lt;ui-theme-menu&gt;</code>: the viewer's pick,
+              light or dark, applied to every shadow root at once.
+            </li>
+            <li>
+              The theme bench page is the theme editor at full width: Spell's real pages side by side in the theme being
+              made, its big choices and every token, live.
+            </li>
+            <li>
+              How themes work, and how to make one:
+              <a href="/ui/README-themes.md" target="src-ui-readme-themes-md">README-themes</a>.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="8-limits" label="7. Limits" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="exclamation triangle"></ui-icon>
+          <ui-section id="site-caveats" label="Site caveats" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <b>Not deployed anywhere yet:</b> it runs from the page server. A static host would take
+                <a href="/docs/" target="src-docs"><code>docs/</code></a> with <code>_assets/</code> copied in beside
+                it, through its icon-packs link (<code>cp -RL</code>); every bundle URL is relative.
+              </li>
+              <li>The comments' addresses, <code>/_epic/...</code>, answer only on Spell's own servers.</li>
+              <li>A watch rebuild leaves old hashed chunks behind; <code>yarn site:build</code> clears them.</li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="9-see-also" label="8. See also" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="book open"></ui-icon>
+          <ul>
+            <li>
+              <a href="/ui/README-site.md" target="src-ui-readme-site-md">README-site</a>: every script, file and
+              environment variable, and the library's own tools
+            </li>
+            <li>
+              <a href="/ui/README-components.md" target="src-ui-readme-components-md">README-components</a>: every
+              family, with a picture
+            </li>
+            <li>
+              <a
+                href="/guides/custom-elements/custom-elements.html"
+                target="src-guides-custom-elements-custom-elements-html"
+                >Custom Elements</a
+              >: how the elements the pages show work
+            </li>
+            <li>
+              <a href="/guides/ui-gaps.html" target="src-guides-ui-gaps-html">Pages with Spell UI</a>: writing your own
+              page from <code>&lt;ui-*&gt;</code> tags
+            </li>
+          </ul>
+        </ui-section>
+        <footer class="spell-doc-footer">
+          <ui-divider></ui-divider>
+          <p class="meta">Last checked 2026-11-21, against the kit's code that day.</p>
+        </footer>
+      </main>
+    </div>
+    <script src="/_epic/assets/highlight.min.js"></script>
+    <script src="/_epic/assets/spell-ui.js"></script>
+  </body>
+</html>
