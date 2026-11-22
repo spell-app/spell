@@ -2,7 +2,6 @@
  * `yarn site:data [--check]`:  write the Spell UI site's data, and what editors read about its elements.
  * - The site's data, in `docs/__data/` (`SiteDataBuilder`):
  *   - `components.json5`
- *   - `icons.json5`:  the icon browser's search terms
  *   - not `search.json5`, every page's sections:  `yarn site:check --all` writes it, from the Spell pages as drawn
  *   - and `pages.json5`, kept complete
  * - From the same data, the editors' element descriptions (`ElementManifests`):
@@ -39,7 +38,6 @@ const manifests = new ElementManifests({ data, packageFolder: builder.root })
 const outputs: GeneratedOutput[] = [
   [builder.dataFile, SiteDataBuilder.stringify(data)],
   [builder.pagesFile, SiteDataBuilder.stringify(pages)],
-  [builder.iconsFile, builder.iconsText()],
   ...manifests.outputs(builder.dataFolder),
   await manifests.jsxOutput(),
   await DefaultsTable.output(builder.root, builder.componentsFolder),

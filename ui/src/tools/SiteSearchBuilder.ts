@@ -29,7 +29,7 @@ export class SiteSearchBuilder {
   /** Suffix of every page's `<title>`, dropped when a title falls back to it. */
   static readonly TITLE_SUFFIX = / \| Spell UI$/
 
-  /** the site's pages:  `docs/` (`SITE_PAGES`) */
+  /** the set's HTML pages:  its `docs/` */
   readonly site: string
 
   /** the set's tag prefix:  a page whose file name starts with it is a component's (`ui-`) */
