@@ -491,9 +491,12 @@ Their tabs share it, so a click in one shows in every one,
 and a patch goes down after each message and at each pause, so a game animates.
 That game lives in the server's memory, though:  restart the server, and every game ends.
 
-- One visitor's slow save holds nobody else up:  saves are sent beside the games,
+- A save is sent beside the games, so by itself it holds nobody else up,
   and stopping the app waits until the last one's sent.
-  A save its place refuses is a line in the server's log, not an error the program catches.
+  - Except where a program can't wait:  a drawing, or a thing being made, that reads while a save's being sent
+    waits for that save, and so does every other visitor.
+    An `in one go:` or a named operation there does the same.
+  - A save that fails is a line in the server's log, not an error the program catches.
 - A message that fails is logged, and the page carries on.
 - `--seed <n>` deals the same game every run.
 - A program that doesn't draw runs in the terminal instead, as `python -m spell_core.run`.
