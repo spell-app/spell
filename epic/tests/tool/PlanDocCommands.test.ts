@@ -732,6 +732,7 @@ describe("PlanDocCommands close --why", () => {
       add(plan, "issue", "Marked")
       add(plan, "todo", "Fine")
       Markup.set<"epic-item">(plan.item("i1"), { urgent: true })
+      Markup.set<"epic-item">(plan.item("i2"), { requested: true })
       plan.fixedForReview("i2", "changed it")
       const reply = plan.document.createElement("epic-reply")
       reply.setAttribute("agent", "claude")

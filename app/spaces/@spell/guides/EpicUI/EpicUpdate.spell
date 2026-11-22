@@ -317,7 +317,7 @@
 			<item>It folds by its title row and starts open. Folded, what changed is <text code>hidden="until-found"</>, so find-in-page reveals it.</>
 			<item>You comment on it with its own bullhorn (a block kind of its own, <text code>update</>), even inside an item or a field; the bullhorn moves left of the date.</>
 			<item>The bare label: solid orange, small bold capitals, centred on the text's middle.</>
-			<item>Restyled in one place, its own family (<text code>components/epic-update/</>): <text code>--epic-update-accent</> and <text code>--epic-update-background</>, or its parts.</>
+			<item>Restyled in one place, its own family (<text code>components/epic-update/</>): <text code>--epic-update-accent</> and <text code>--epic-update-background</>, or its parts. <text code>--epic-update-fixed-display: none</> leaves out the FIXED word where the line already starts with it, as an item's does.</>
 		</>
 	</>
 

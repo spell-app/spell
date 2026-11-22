@@ -27,7 +27,8 @@ function samplePlan(): PlanDoc {
   const plan = PlanDoc.parse(readFileSync(join(FIXTURES, "epic-plan.html"), "utf8"))
   const underway = (title: string, hoursAgo: number) => {
     plan.now = new Date(Date.now() - hoursAgo * HOUR)
-    const id = plan.addItem("issue", title)
+    // from his words:  a fix of one waits for his review (T143)
+    const id = plan.addItem("issue", title, { requested: true })
     plan.addStatus(id, "Reading it")
     return id
   }

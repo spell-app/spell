@@ -1031,9 +1031,11 @@ function holdScroll(top) {
 /**
  * Resolves once an epic page's elements are defined and have drawn (their hosts' `ready`), so their
  * `contentsEntry` can be read;  after `EPIC_WAIT_MS` at most (a pack that won't load:  the page goes on without).
+ * - waits ONLY for the tags the page holds:  a family loads once one of its elements is made,
+ *   so on a page with no phases, waiting for `<epic-phase>` took all 5 seconds (epic `epic-engine` I408)
  */
 async function epicsDrawn(main) {
-  const tags = ["epic-page", ...EPIC_FOLDS.split(", ")]
+  const tags = ["epic-page", ...EPIC_FOLDS.split(", ")].filter((tag) => main.querySelector(tag))
   const drawn = Promise.all(tags.map((tag) => whenAttached(tag))).then(() =>
     Promise.all(Array.from(main.querySelectorAll(EPIC_FOLDS), (host) => host.ready))
   )

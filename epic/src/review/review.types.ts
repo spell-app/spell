@@ -381,9 +381,9 @@ export type WriteOptions = {
  * - the list's own `RunningAgent` (`tools/AgentList.ts`), every field filled in (`agentsOf()`)
  * - `started`:  `""` for unknown
  * - `redirects`:  `[]` for none
- * - not `taskId`:  the page has no use for it
+ * - not `taskId`, nor what a pause saved:  the page has no use for them
  */
-export type RunningAgent = Required<Omit<ListedAgent, "taskId" | "redirects" | "files">> & {
+export type RunningAgent = Required<Omit<ListedAgent, "taskId" | "redirects" | "files" | "paused" | "resumedFrom">> & {
   redirects: AgentRedirect[]
 }
 

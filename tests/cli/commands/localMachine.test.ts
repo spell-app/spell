@@ -4,6 +4,7 @@ import { join } from "node:path"
 import { afterAll, beforeEach, describe, expect, test } from "vite-plus/test"
 
 import { MachineTools } from "spell/cli/commands/localMachine"
+import { vsixAt } from "spell/cli/test/vsixAt"
 
 /**
  * `MachineTools` in a made-up home, with a stand-in for the checkout's `epic`:  NEVER the real Claude Code or VS Code,
@@ -60,6 +61,19 @@ beforeEach(() => {
 })
 
 describe("MachineTools", () => {
+  test("on, the extension built before the last bump:  named as not built (epic `epic-engine` T140)", () => {
+    write({ "spell/epic/vscode/package.json": JSON.stringify({ version: "0.8.18" }) })
+    const vsix = join(kit, "epic", "vscode", "spell-epic.vsix")
+    try {
+      vsixAt(vsix, "0.8.17")
+      expect(machine().switchOn(app, kit).missingExtension).toBe(vsix)
+      vsixAt(vsix, "0.8.18")
+      expect(machine().switchOn(app, kit).missingExtension).toBeUndefined()
+    } finally {
+      rmSync(join(kit, "epic", "vscode"), { recursive: true, force: true })
+    }
+  })
+
   test("on:  the checkout's epic plugin install, its PATH link left to spell local;  recorded only when it changed", () => {
     localOn(app)
     changes = [

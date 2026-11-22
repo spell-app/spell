@@ -192,7 +192,9 @@ Everything else stands:
      - code:  an `<epic-code>`
      - a new `<p>` wherever the context changes (its "Rules")
    - CALM by default:  add `--calm` (last), so a call or an issue shows yellow (a call blue while its work isn't on main), rather than red.
-   - An issue filed from the person's own words:  add `--requested` too;  closed, it turns light orange until they've looked.
+   - An issue filed from the person's own words:  add `--requested` too;  fixed or closed, it turns light orange until they've looked.
+     - Without it, an issue you fix before they got to it goes grey by itself, `FIXED - <title>`:  nothing for them
+       to press, and not in the morning's list (epic `epic-engine` T143).  So never leave it off their words.
      - "if what you picked was reasonable, and I didn't explicitly state otherwise, [it] should be yellow"
        (2026-10-10, "the principle of least surprise").
      - RED (no `--calm`) only when it would surprise them:
@@ -233,7 +235,7 @@ Everything else stands:
   ```
 
 - `epic lint <name>`, then `epic open <name> --review`.
-  - The person wakes to the doc, the night's calls and issues red.
+  - The person wakes to the doc, the night's calls and issues red;  issues you found and fixed, grey (`FIXED - `).
   - Its FIRST section, "0. While you were out", says what was done and what needs them, a part per kind (epic
     `epic-engine` P62, I277:  waiting on you, under way, what was done, fixed to review, new issues, new tests):  the tool keeps it as every edit lands, from `NightSummary`, so nothing is written by hand;  only their
     Done reading takes it off.  The Epics page's card says it's there.

@@ -315,9 +315,35 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     },
     {
       name: "done",
-      usage: "<name>",
-      description: "an agent is back:  off the list",
+      usage: "<name> [--finished]",
+      description: "an agent is back:  off the list;  a paused one stays, unless --finished",
       example: "epic agents done docstrings",
+      flags: {
+        "--finished": "a paused agent whose whole task did finish:  off the list, what was saved dropped",
+        "--epic <epic>": "that epic's list (default this checkout's)"
+      }
+    },
+    {
+      name: "pause",
+      usage: '<name> --next "<step>" [--item <id>] [--tests "<runs>"]',
+      description:
+        "an agent is stopped:  saved so any session can start it again (task, item, claimed and uncommitted files, " +
+        "commits and whether merged, a merge left part way, the next step);  it keeps its claims",
+      example: 'epic agents pause docstrings --item T7 --next "the last two files, then the tests"',
+      flags: {
+        "--next <step>": "what it does next, in words",
+        "--item <id>": "the item or phase it's on (default:  the id in its task)",
+        "--tests <runs>": "the test runs abandoned, to run again",
+        "--epic <epic>": "that epic's list (default this checkout's)"
+      }
+    },
+    {
+      name: "resume",
+      usage: "<name>",
+      description:
+        "a paused agent starts again:  prints its brief and clears what was saved, so once only;  " +
+        "exit 1 while a pause is under way",
+      example: "epic agents resume docstrings",
       flags: {
         "--epic <epic>": "that epic's list (default this checkout's)"
       }
@@ -531,7 +557,9 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     {
       name: "status",
       usage: "[--json]",
-      description: "the sessions still waiting to go fresh (/epic fresh all), and why each waits (the default verb)",
+      description:
+        "the sessions still waiting to go fresh (/epic fresh all), and why each waits;  during a pause (all --pause), " +
+        "who is quiet and who is outstanding (the default verb)",
       example: "epic fresh status",
       flags: {
         "--json": "print them as JSON"
@@ -539,14 +567,46 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
     },
     {
       name: "all",
-      usage: "[--json]",
+      usage: "[--pause] [--json]",
       description:
         "/epic fresh all:  every running epic session marked to go to a fresh session at its next clear moment " +
         "(no agents running, no question waiting, no prompt in the last 5 minutes), this one last;  a TELL: line " +
         "for each, and which go now and which later",
       example: "epic fresh all",
       flags: {
+        "--pause":
+          "pause first:  each session stops and saves its agents, then reports back here;  " +
+          "run epic fresh all again, plain, once every one is quiet",
         "--json": "print the round, the lines and each session's state as JSON"
+      }
+    },
+    {
+      name: "quiet",
+      usage: "",
+      description:
+        "during a pause:  this session has saved its agents and runs nothing;  prints the line that reports back;  " +
+        "exit 1 while agents, tests or a merge of its own still run",
+      example: "epic fresh quiet",
+      flags: {}
+    },
+    {
+      name: "wait",
+      usage: "[--max <time>]",
+      description:
+        "during a pause:  wait until every session is quiet (exit 0);  when the time runs out, name who isn't " +
+        "(exit 2), skipping nobody;  no pause:  exit 3;  run it in the background",
+      example: "epic fresh wait",
+      flags: {
+        "--max <time>": "how long before it names who is outstanding (default 2m):  seconds, or 10m, 1h"
+      }
+    },
+    {
+      name: "cancel",
+      usage: "[--json]",
+      description: "call a pause off:  nobody goes fresh, and a TELL: line has each session restart its agents",
+      example: "epic fresh cancel",
+      flags: {
+        "--json": "print the lines as JSON"
       }
     },
     {
@@ -1186,6 +1246,15 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       }
     },
     {
+      name: "stop",
+      usage: "<kind>",
+      description:
+        "stop this session's own runs of that kind, held or waiting, and free the turn (tests abandoned for a pause);  " +
+        "never another session's, and never a merge",
+      example: "epic turns stop test",
+      flags: {}
+    },
+    {
       name: "list",
       usage: "",
       description:
@@ -1541,7 +1610,8 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   stale: {
     "--json": "print them as JSON",
     "--underway": "the open items whose Underway card went stale, and whether their work is on main (T78)",
-    "--apply": "with --underway:  on main => fixed for review;  else a Stale card, once;  never closes anything",
+    "--apply":
+      "with --underway:  on main => fixed (grey if Claude found it, else for your review);  else a Stale card, once",
     "--hours <n>": "with --underway:  how old an Underway card must be (default 3)",
     "--quiet": "with --apply:  say nothing when nothing changed"
   },

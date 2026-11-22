@@ -173,6 +173,8 @@ async function mountAt(url: string): Promise<{ host: HTMLElement; history: Memor
     host.remove()
   })
   await settle(host)
+  // each page but the editor's loads the first time it shows (`PageViews`):  a spinner until then
+  await vi.waitFor(() => expect(host.querySelector(".SpellPage")).not.toBeNull(), { timeout: 20_000 })
   // the panes are Spell, and come as its runtime has loaded (or, unable to, in a plain stand-in)
   await vi.waitFor(
     () => {

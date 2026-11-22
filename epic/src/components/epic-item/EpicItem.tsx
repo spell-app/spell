@@ -21,6 +21,7 @@ import { EpicBodies } from "./EpicBodies"
 import { epicItemVocabulary } from "./EpicItem.en"
 import { Fold, type FoldButtonOptions, type Opener } from "./Fold"
 import { NearScreen } from "./NearScreen"
+import { TitlePrefix, type TitlePrefixWord } from "./TitlePrefix"
 import {
   BED_ICON,
   CANCELED,
@@ -55,6 +56,7 @@ import {
   MANUAL_TEST,
   THREAD_ATTRIBUTES,
   TITLE,
+  TITLE_PREFIX,
   TOGGLE,
   UNDER_LINE,
   UNDER_TITLE,
@@ -429,6 +431,13 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
       this.reviewState.reviewing()
   )
 
+  /** The word its line starts with (`TitlePrefix`, epic `epic-engine` T143):  `fixed`;  `undefined` for none. */
+  readonly titlePrefix = createMemo((): TitlePrefixWord | undefined => {
+    const { status, state, fixed, selfFixed } = this
+    const { approved, closing } = this.reviewState.liveOf()
+    return TitlePrefix.of({ status, state, fixed, selfFixed }, { accepted: approved || closing })
+  })
+
   /**
    * The id chip's tooltip:  where it stands, then its review marks (`Needs attention · not reviewed yet`);
    * while it toggles, what a click does (and an urgency not sent yet).
@@ -441,11 +450,13 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
       this.translationForKey(
         this.fixed
           ? "stateFixed"
-          : this.isWaitingTest
-            ? "stateTestWaiting"
-            : this.isCommentTurn
-              ? "stateCommentReplied"
-              : STATE_TIP_KEYS[aged ? "recent" : this.itemState()]
+          : this.selfFixed && this.itemState() === "handled"
+            ? "stateSelfFixed"
+            : this.isWaitingTest
+              ? "stateTestWaiting"
+              : this.isCommentTurn
+                ? "stateCommentReplied"
+                : STATE_TIP_KEYS[aged ? "recent" : this.itemState()]
       )
     ]
     const mark = this.chipMark()
@@ -644,7 +655,16 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
           </Show>
         </span>
         {/* in full, wrapped, folded or open (EpicItem.css) */}
-        <span class={TITLE} part={this.partForName("title")}>
+        <span class={TITLE} part={this.partForName("title")} data-prefix={this.titlePrefix()}>
+          <Show when={this.titlePrefix()}>
+            {(word) => (
+              <>
+                <span class={TITLE_PREFIX} part={this.partForName("title-prefix")}>
+                  {this.translationForKey(word())}
+                </span>{" "}
+              </>
+            )}
+          </Show>
           <slot name={this.slotForName("title")}>{this.title}</slot>
         </span>
         <span class={EXTRAS} part={this.partForName("actions")} hidden={!this.hasExtras()}>

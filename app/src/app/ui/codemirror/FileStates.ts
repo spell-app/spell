@@ -27,6 +27,7 @@ import { LSP } from "spell/app/lsp"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { CodeEditorFeatures } from "spell/app/app/ui/CodeEditorFeatures"
 import { CodeRules } from "spell/app/app/ui/CodeRules"
+import { codeLook } from "spell/app/app/ui/codePopups"
 import { CodeMirrorBubbly, type Slice } from "./CodeMirrorBubbly"
 import { CodeMirrorCodeOrText } from "./CodeMirrorCodeOrText"
 import { CodeMirrorDebug } from "./CodeMirrorDebug"
@@ -58,6 +59,8 @@ import { LspToCodeMirror } from "./LspToCodeMirror"
  *   - Its parse waits till the typing pauses (`PARSE_WAIT`), so no keystroke waits on it:
  *     `project.takeText()`, with where it changed (`P.EditedSpan`), then `project.parseWaitingText()`,
  *     re-parsing as little as possible.
+ *   - Where the language worker parses it, longer (`SIDE_BAR_PARSE_WAIT`):  only what reads the page's parse
+ *     outside the code waits for it (epic `solid-2-final` T36).
  *   - Whatever must see the new parse sooner asks for it, `parseNow()`:  the language features (a hover, a suggestion),
  *     a click or a focus anywhere on the page (the side bar edits from the parse).
  * - File => state:  a change from outside the editors (a load, another editor of the file) comes in as the one change
@@ -103,6 +106,10 @@ export class FileStates {
     })
     this.onEdit = onEdit
     this.onTaken = onTaken
+    // the worker draws its parses in the editors' look
+    const sendLook = () => client.look(codeLook.isBubbly ? "bubbly" : "tokens")
+    codeLook.followers.add(sendLook)
+    sendLook()
     // a click or a focus elsewhere acts on the parse, e.g. the side bar's edits:  it mustn't be one keystroke behind
     const parseNow = () => this.parseNow()
     globalThis.document?.addEventListener("pointerdown", parseNow, { capture: true })
@@ -160,17 +167,63 @@ export class FileStates {
     return new Promise((resolve) => this.parsedWaiters.push(resolve))
   }
 
-  /** Parse `project`'s waiting text once the typing pauses for `PARSE_WAIT` msec. */
+  /**
+   * The answer to `method` about `file`, for what asks from outside the code, e.g. the Inspector
+   * (epic `solid-2-final` T36):  the language worker's where it parses, about the text as it is now.
+   * - SIDE EFFECT:  `file`'s project gets its states, so the worker has its files, shown in the code or not.
+   * - `undefined` when its text changed meanwhile, or it isn't parsed:  an answer about other text places edits wrong.
+   * - throws what the service throws (`LSP.RenameError` ...)
+   */
+  async ask<M extends LSP.LanguageMethod>(
+    file: SP.SpellFile,
+    method: M,
+    params: Omit<LSP.LanguageParams<M>, "textDocument">
+  ): Promise<LSP.LanguageAnswer<M> | undefined> {
+    const entry = this.entryFor(file)
+    // a change from outside the code reaches the state, and so the client, a microtask later
+    await Promise.resolve()
+    const { doc } = entry.state
+    if (!entry.language || !(await entry.language.fileParsed(doc))) return undefined
+    const answer = await entry.language.ask(method, params)
+    return entry.state.doc === doc ? answer : undefined
+  }
+
+  /**
+   * Parse `project`'s waiting text once the typing pauses for `PARSE_WAIT` msec:
+   * `SIDE_BAR_PARSE_WAIT` where the language worker parses it (epic `solid-2-final` T36).
+   */
   private parseSoon(project: SP.SpellProject): void {
     this.waiting.add(project)
     this.parseTimer?.cancel()
-    this.parseTimer = after(FileStates.PARSE_WAIT / 1000, () => this.parseNow())
+    this.parseTimer = after(FileStates.PARSE_WAIT / 1000, () => {
+      if ([...this.waiting].some((each) => this.parsesOnPageFor(each))) return this.parseNow()
+      // the text typed goes into its files at the pause, as ever:  only the parse waits
+      for (const each of this.waiting) each.takeWaitingText()
+      this.parseTimer = after((FileStates.SIDE_BAR_PARSE_WAIT - FileStates.PARSE_WAIT) / 1000, () => this.parseNow())
+    })
   }
 
   /**
    * How long the typing must pause before what's typed is parsed, in msec.
    */
   static PARSE_WAIT = 200
+
+  /**
+   * How long the typing must pause before what's typed is parsed on the page, in msec, where the language worker
+   * parses it too (epic `solid-2-final` T36).
+   * - The text typed still goes into its files at `PARSE_WAIT`:  only the parse waits.
+   * - Then only what reads the page's parse outside the code waits for it:  the Inspector, the Types and Sentence
+   *   tabs, the compiled pane, a site's writes;  the code itself is drawn from the worker's parses.
+   * - Before the running app takes the edit (`editor.compileAppSoon()`, 2 seconds), so the Types tab it refreshes
+   *   reads the new parse.
+   * - A click or a focus on the page parses at once all the same (`parseNow()`).
+   */
+  static SIDE_BAR_PARSE_WAIT = 1000
+
+  /** Is `project` parsed here for the code itself:  its problems, its look?  Else the language worker parses it. */
+  private parsesOnPageFor(project: SP.SpellProject): boolean {
+    return this.client.answersOnPage(project) || this.service.hostNames.some((names) => names.project === project.path)
+  }
 
   /** Projects with text typed and not parsed yet -- see `parseSoon()`. */
   private waiting = new Set<SP.SpellProject>()
@@ -373,7 +426,7 @@ export class FileStates {
           ? [
               closeBrackets(),
               keymap.of(closeBracketsKeymap),
-              CodeMirrorTyping.extension(fileOf, entry.language.file.language.lang),
+              CodeMirrorTyping.extension(fileOf, entry.language.file.language.lang, entry.language.elsewhere),
               CodeMirrorCodeOrText.extension(),
               CodeMirrorHovers.extension(),
               CodeMirrorHeadings.extension()
@@ -383,8 +436,8 @@ export class FileStates {
         CodeMirrorPopups.extension(),
         CodeMirrorLook.extension((isBubbly) =>
           isBubbly
-            ? CodeMirrorBubbly.extension(fileOf, (state) => drawnSlice(state))
-            : CodeMirrorTokens.extension(fileOf)
+            ? CodeMirrorBubbly.extension(fileOf, (state) => drawnSlice(state), entry.language?.elsewhere)
+            : CodeMirrorTokens.extension(fileOf, entry.language?.elsewhere)
         ),
         CodeMirrorSetup.extensions()
       ]
@@ -503,7 +556,7 @@ export class FileStates {
           closeBrackets(),
           keymap.of(closeBracketsKeymap),
           autocompletion({ override: [language.completions], icons: false }),
-          CodeMirrorTyping.extension(() => language.file, language.file.language.lang),
+          CodeMirrorTyping.extension(() => language.file, language.file.language.lang, language.elsewhere),
           CodeMirrorCodeOrText.extension(),
           CodeMirrorValues.extension(language.attributeValuesAt),
           CodeMirrorHovers.extension(),
@@ -512,7 +565,9 @@ export class FileStates {
           CodeMirrorDebug.extension(file.path),
           language.extensions(),
           CodeMirrorLook.extension((isBubbly) =>
-            isBubbly ? CodeMirrorBubbly.extension(() => language.file) : CodeMirrorTokens.extension(() => language.file)
+            isBubbly
+              ? CodeMirrorBubbly.extension(() => language.file, undefined, language.elsewhere)
+              : CodeMirrorTokens.extension(() => language.file, language.elsewhere)
           )
         ]
       : SP.isPropertyEditorsName(file.path) || SP.isSamplesName(file.path)
@@ -771,28 +826,35 @@ export class FileStates {
    *   that check is the page's alone.
    */
   private diagnosesOnPage(file: SP.SpellFile): boolean {
-    return (
-      this.client.answersOnPage(file.project) ||
-      this.service.hostNames.some((names) => names.project === file.project.path)
-    )
+    return this.parsesOnPageFor(file.project)
   }
 
   /**
-   * The language worker's problems for a file it parsed:  they become its state's, with their "Fix it" buttons,
-   * if they're of the text the state holds (`version`, its edits since it was opened);  a later parse's come after.
+   * The language worker's parse of a file:  if it's of the text the state holds (`version`, its edits since it was
+   * opened), its problems become the state's, with their "Fix it" buttons, and what the code's drawn with is kept
+   * (`CodeMirrorLanguage.tookParse()`), its slices' too;  a later parse's come after.
+   * - Its problems only where the worker diagnoses:  the editor's own Spell keeps the page's (`diagnosesOnPage()`).
    */
-  private parsedElsewhere({ uri, version, diagnostics, fixItStarts }: LSP.LanguageParsed): void {
+  private parsedElsewhere(parsed: LSP.LanguageParsed): void {
+    const { uri, version, diagnostics, fixItStarts } = parsed
     const path = LSP.AppAddresses.pathOf(uri)
     const entry = path === undefined ? undefined : this.entries.get(path)
     const file = entry?.file
-    if (!entry || entry.version !== version || !(file instanceof SP.SpellFile) || this.diagnosesOnPage(file)) return
+    if (!entry || entry.version !== version || !(file instanceof SP.SpellFile)) return
     const { state } = entry
-    const problems = this.withFixIt(
-      file,
-      diagnostics.map((diagnostic) => LspToCodeMirror.diagnostic(state.doc, diagnostic)),
-      new Set(fixItStarts)
-    )
-    this.dispatch(entry, { effects: asList(setDiagnostics(state, problems).effects) })
+    // what the code's drawn with:  its fold arrows, its look, the types its tags name
+    entry.language?.tookParse(parsed, state.doc, state.doc.toString())
+    const effects: StateEffect<unknown>[] = [CodeMirrorSetup.PARSED.of(null)]
+    if (!this.diagnosesOnPage(file)) {
+      const problems = this.withFixIt(
+        file,
+        diagnostics.map((diagnostic) => LspToCodeMirror.diagnostic(state.doc, diagnostic)),
+        new Set(fixItStarts)
+      )
+      effects.unshift(...asList(setDiagnostics(state, problems).effects))
+    }
+    this.dispatch(entry, { effects })
+    for (const slice of entry.slices) slice.dispatch({ effects: CodeMirrorSetup.PARSED.of(null) })
   }
 }
 

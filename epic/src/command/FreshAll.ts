@@ -30,6 +30,8 @@ import { Transcript } from "spell/epic/config/Transcript.ts"
  * - The session that typed `/epic fresh all` (`self`) goes LAST:  its own prompt doesn't count, and it waits for the
  *   others of its round, at most `SELF_WAIT_MS`
  * - Wakes a session at most once per `WAKE_GAP_MS` (`woken`):  a refused `epic window fresh` never loops
+ * - After a pause round (`FreshPause`, epic `epic-engine` T139) the marks are `paused`:  the agents each session saved
+ *   don't count as running, and wait for the fresh session
  * - Its position:  node's own modules, `json5`, and the epic config, home and transcript readers, by their `.ts` names
  *   (plain `node`);  NEVER the sessions finder, which needs `tsx`
  * - STATIC:  the marks are the machine's.  A test points the epic home elsewhere (`$SPELL_EPIC_HOME`).
@@ -45,9 +47,19 @@ export class FreshAll {
   ////////////////
 
   /** Mark session `sessionId` pending, for epic `epic`;  returns the mark.  `self`:  the session that asked. */
-  static mark(sessionId: string, epic: string, { self = false, round = "", now = Date.now() } = {}): FreshMark {
+  static mark(
+    sessionId: string,
+    epic: string,
+    { self = false, paused = false, round = "", now = Date.now() } = {}
+  ): FreshMark {
     if (!SESSION_ID.test(sessionId)) throw new TypeError(`FreshAll.mark():  '${sessionId}' isn't a session id`)
-    const mark: FreshMark = { epic, since: new Date(now).toISOString(), round, ...(self ? { self } : {}) }
+    const mark: FreshMark = {
+      epic,
+      since: new Date(now).toISOString(),
+      round,
+      ...(self && { self }),
+      ...(paused && { paused })
+    }
     mkdirSync(FreshAll.folder(), { recursive: true })
     writeFileSync(FreshAll.fileOf(sessionId), `${JSON.stringify(mark, null, 2)}\n`)
     return mark
@@ -109,7 +121,7 @@ export class FreshAll {
     const agents = FreshAll.runningAgents(mark.epic, cwd)
     if (agents.length) return `its agents are running (${agents.join(", ")})`
     const text = FreshAll.tailOf(transcript)
-    if (text && Transcript.pendingQuestion(text)) return "a question from it waits on you"
+    if (FreshAll.questionIn(text)) return "a question from it waits on you"
     const since = Date.parse(mark.since)
     const prompt = text ? FreshAll.lastPrompt(text) : undefined
     // the session that asked:  its own `/epic fresh all` isn't the person talking to it
@@ -120,6 +132,11 @@ export class FreshAll {
       if (others.length) return `it goes last:  ${others.length} other session(s) still to go`
     }
     return null
+  }
+
+  /** Whether a question from the session with transcript `transcript` waits on the person.  NEVER throws. */
+  static questionWaits(transcript: string | undefined): boolean {
+    return FreshAll.questionIn(FreshAll.tailOf(transcript))
   }
 
   /**
@@ -172,23 +189,35 @@ export class FreshAll {
 
   /** The line that wakes a session at its clear moment, for Claude. */
   static wakeLine(mark: FreshMark): string {
+    const paused = mark.paused ? "  Its paused agents stay saved:  don't restart them, the new session does." : ""
     return (
       `/epic fresh all:  this session is clear now (no agents running, nothing waiting on the person, no prompt from ` +
       `them in the last few minutes):  run /epic fresh for ${mark.epic} now, the epic skill's "16. Fresh";  ` +
-      "refused (no window ...):  `epic fresh drop`, and say why in one line."
+      "refused (no window ...):  `epic fresh drop`, and say why in one line." +
+      paused
     )
   }
 
   /**
    * The names of epic `epic`'s agents still running:  its `agents.json5` beside its page, in the epic folder of the
-   * checkout at `cwd` (`epic agents`' list);  `[]` when there's none or it won't read.
+   * checkout at `cwd` (`epic agents`' list), less the paused ones;  `[]` when there's none or it won't read.
    */
   static runningAgents(epic: string, cwd: string): string[] {
+    return FreshAll.listedAgents(epic, cwd).flatMap(({ name, paused }) => (paused ? [] : [name]))
+  }
+
+  /** The names of epic `epic`'s paused agents (`epic agents pause`), from the same list. */
+  static pausedAgents(epic: string, cwd: string): string[] {
+    return FreshAll.listedAgents(epic, cwd).flatMap(({ name, paused }) => (paused ? [name] : []))
+  }
+
+  /** Epic `epic`'s agents list, the entries with a name;  `[]` when there's none or it won't read. */
+  private static listedAgents(epic: string, cwd: string): { name: string; paused?: object }[] {
     try {
       const file = join(EpicConfig.contentOf(cwd), "epics", epic, AGENTS_FILE)
       if (!existsSync(file)) return []
       const agents = JSON5.parse(readFileSync(file, "utf8"))
-      return Array.isArray(agents) ? agents.map((agent) => agent?.name).filter(Boolean) : []
+      return Array.isArray(agents) ? agents.filter((agent) => agent?.name) : []
     } catch {
       return []
     }
@@ -233,6 +262,11 @@ export class FreshAll {
     return Boolean(words) && (!words.startsWith("<") || words.includes("<command-name>"))
   }
 
+  /** Whether a question waits on the person in transcript text `text`. */
+  private static questionIn(text: string | undefined): boolean {
+    return Boolean(text && Transcript.pendingQuestion(text))
+  }
+
   /** The end of transcript `transcript` (`TAIL_BYTES`), or `undefined` when there's none. */
   private static tailOf(transcript: string | undefined): string | undefined {
     try {
@@ -259,6 +293,8 @@ export type FreshMark = {
   round: string
   /** the session that typed `/epic fresh all`:  it goes last */
   self?: boolean
+  /** its agents were paused first (`epic fresh all --pause`):  it starts nothing, and the new session restarts them */
+  paused?: boolean
   /** when the hook last woke it, ISO */
   woken?: string
 }
@@ -311,4 +347,4 @@ const WAKE_GAP_MS = 30 * 60 * 1000
 const TAIL_BYTES = 2 * 1024 * 1024
 
 /** A Claude Code session id:  also what keeps a mark's file name plain. */
-const SESSION_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+export const SESSION_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i

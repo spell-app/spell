@@ -1,5 +1,6 @@
 import { ThreadFacts } from "spell/epic/comments"
 import { Markup } from "spell/epic/markup"
+import { TitlePrefix } from "spell/epic/components/epic-item/TitlePrefix"
 
 import { KINDS, OLD_DECISION, type OptionCard } from "./planDoc.types"
 
@@ -28,6 +29,11 @@ export class PlanItem {
     if (title !== null) return title
     const slot = element.querySelector(':scope > [slot="title"]')
     return slot ? PlanMarkup.squeeze(slot.textContent ?? "") : element.id
+  }
+
+  /** `item`'s title as a listing says it, behind the word its line starts with:  `FIXED - It jumps` (`TitlePrefix`). */
+  static listedTitle(item: Element): string {
+    return TitlePrefix.titled(PlanItem.titleOf(item), TitlePrefix.ofItem(item))
   }
 
   /**

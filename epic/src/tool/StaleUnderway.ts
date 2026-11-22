@@ -15,7 +15,8 @@ import { CLOSED, UNDERWAY_CARD } from "./planDoc.types"
  *   (`working`:  the inbox's, younger than `WORKING_HOURS`, as the page counts them, I280)
  * - its work on `main`:  a commit on `main` naming it (`<epic> I172:  ...`, this epic's only), or one of its own
  *   `<epic-commit>` cards' shas, found in ONE `git log` of `main` since the oldest such card
- * - `apply()`:  found on `main` => an issue or judgement call fixed for Owen's review (`PlanDoc.fixedForReview()`,
+ * - `apply()`:  found on `main` => an issue Claude found, grey (`SelfFix`);  any other issue or judgement call
+ *   fixed for Owen's review (`PlanDoc.fixedForReview()`,
  *   orange), the commit its evidence;  another kind (a todo) a Noted card with the evidence;  not found => a Noted card
  *   saying it's stale ("Stale:  ..."), once, so it's back on Owen's list instead of spinning blue forever
  *   - NEVER closes anything:  only Owen's Approve, or Claude's own `close`, does
@@ -104,7 +105,9 @@ export class StaleUnderway {
         for (const commit of item.onMain)
           if (!this.plan.hasCommit({ item: item.id }, commit.full))
             this.plan.addCommit({ item: item.id }, commit.full, StaleUnderway.sentenceOf(commit.subject))
-        lines.push(`${label} ${reviewable ? "fixed, for review" : "noted"}:  on main as ${first.sha}`)
+        const grey = this.plan.item(item.id).hasAttribute("self-fixed")
+        const said = grey ? "fixed, grey" : reviewable ? "fixed, for review" : "noted"
+        lines.push(`${label} ${said}:  on main as ${first.sha}`)
       } else if (!item.noted) {
         this.plan.noteStatus(
           item.id,

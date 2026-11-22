@@ -202,7 +202,7 @@ describe("a line's Read (I206)", () => {
   test("a line ends with a copy of its item's label;  the item's ✓ takes both off", () => {
     const plan = readPage()
     night(plan)
-    plan.addItem("issue", "It jumps")
+    plan.addItem("issue", "It jumps", { requested: true })
     plan.fixedForReview("i2", "Fixed")
     plan.refreshAway()
     const labelOf = (selector: string) => plan.page.querySelector(`${selector} > epic-update`)
@@ -224,12 +224,12 @@ describe("a line's Read (I206)", () => {
   test("a fix Claude made has its own part, Fixed, to review;  its Read leaves the issues and the calls", () => {
     const plan = readPage()
     night(plan)
-    plan.addItem("issue", "It jumps")
+    plan.addItem("issue", "It jumps", { requested: true })
     plan.fixedForReview("i2", "Fixed")
     plan.refreshAway()
     expect(lines(plan)).toEqual(expect.arrayContaining(["fixed", "i2", "issues", "i1"]))
     const fixed = plan.page.querySelector('epic-away-line[line="i2"]')!
-    expect([fixed.getAttribute("state"), fixed.textContent?.trim()]).toEqual(["replied", "1. I2 It jumps"])
+    expect([fixed.getAttribute("state"), fixed.textContent?.trim()]).toEqual(["replied", "1. I2 FIXED - It jumps"])
     expect(plan.page.querySelector('epic-section[kind="away"]')!.getAttribute("news")).toContain("replied:1")
     readLine(plan, "fixed", new Date(2026, 10, 3, 8, 0))
     expect(lines(plan)).not.toContain("i2")

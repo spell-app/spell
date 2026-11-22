@@ -260,12 +260,19 @@ describe("call native", () => {
 })
 
 describe("no project named", () => {
-  test("in a project's folder:  that project -- for every command", () => {
-    const here = tempProject("Here", 'print "here"\n')
-    expect(spell(["lint"], here).stderr).toContain("✓ @local/")
-    expect(spell(["compile"], here).stderr).toContain("wrote Here.spell.js")
-    expect(spell(["run"], here).stdout).toBe("here\n")
-    expect(spell(["describe"], here).stdout).toMatch(/^Here\n/)
+  let here: string
+  beforeAll(() => {
+    here = tempProject("Here", 'print "here"\n')
+  })
+
+  // a test per command:  each starts spell afresh, so four in one test shared the time limit meant for one
+  test.each([
+    ["lint", "stderr", /✓ @local\//],
+    ["compile", "stderr", /wrote Here\.spell\.js/],
+    ["run", "stdout", /^here\n$/],
+    ["describe", "stdout", /^Here\n/]
+  ] as const)("in a project's folder:  that project -- spell %s", (command, output, printed) => {
+    expect(spell([command], here)[output]).toMatch(printed)
   })
 
   test("outside a project, with no terminal to ask on:  says to name one", () => {

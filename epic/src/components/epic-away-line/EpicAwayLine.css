@@ -33,6 +33,10 @@
     flex: 1;
     min-inline-size: 0;
   }
+  /* a fix's line starts `FIXED -` (`TitlePrefix`, T143):  its label's copy doesn't say it again */
+  :host([state="replied"]) [part~="body"] {
+    --epic-update-fixed-display: none;
+  }
   :host(:state(heading)) {
     margin-block-start: 0.75em;
     font-weight: 600;

@@ -217,7 +217,8 @@ export class PlanDocCommands {
       return this.bedtimeAll(name === "status" ? ["status", ...rest] : rest, flags)
     // `focus on | off | status | summary`:  every running epic at once (`FocusCommands`, epic `epic-engine` T93)
     if (command === "focus") return this.focus.run(positional.slice(1), flags)
-    // `fresh all | status | drop`:  every running epic session to a fresh one (`FreshCommands`, epic `epic-engine` T113)
+    // `fresh all [--pause] | status | drop | quiet | wait | cancel`:  every running epic session to a fresh one
+    // (`FreshCommands`, epic `epic-engine` T113;  its pause round, T139)
     if (command === "fresh") return this.fresh.run(positional.slice(1), flags)
     if (command === "backfill") return this.backfill(name, flags)
     if (command === "migrate") return this.migrator.run(positional.slice(1), flags)
@@ -981,7 +982,10 @@ export class PlanDocCommands {
    *   - the spinner off
    *   - refused on an item with no underway card
    *   - an issue or judgement call Owen asked for with Do this is never closed by it:  `fixed`, below
+   *   - on an issue Claude found, it means `fixed` (epic `epic-engine` T143)
    * - `fixed`:  an issue or judgement call fixed, for Owen to review (epic `epic-engine` I232):  ORANGE, still open
+   *   - light orange from his own words (T143)
+   *   - an issue Claude found that he hadn't got to:  closed, grey, `FIXED - `, nothing for him (T143;  `SelfFix`)
    *   - its latest underway card turns green, the summary under it;  with no underway card, a Done card of the summary
    *   - his Accept the fix closes it;  his Revisit with a note sends it back, red (`PlanDoc.fixedForReview()`)
    *   - the spinner off
@@ -1023,11 +1027,16 @@ export class PlanDocCommands {
     } else if (state === "done") {
       const done = await this.edit(file, (plan) => plan.finishWork(id, text))
       title = done.title
-      if (done.closed) said = "done, closed"
+      if (done.closed) said = done.selfFixed ? SELF_FIXED_WORDS : "done, closed"
       if (done.fixed) said = FIXED_WORDS
     } else if (state === "fixed") {
-      title = await this.edit(file, (plan) => plan.fixedForReview(id, text))
-      said = FIXED_WORDS
+      let selfFixed = false
+      title = await this.edit(file, (plan) => {
+        const fixedTitle = plan.fixedForReview(id, text)
+        selfFixed = plan.item(id).hasAttribute("self-fixed")
+        return fixedTitle
+      })
+      said = selfFixed ? SELF_FIXED_WORDS : FIXED_WORDS
     } else if (state === "promised") {
       title = await this.edit(file, (plan) =>
         plan.promiseUnkept(id, need(text, "what was promised and never came (html)"))
@@ -1881,7 +1890,7 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    stale;  decides nothing (for /epic tidy)
   stale <name> --underway [--apply] [--hours n] [--json]
                                                    open items whose Underway card is older than n hours (3),
-                                                   nobody working them:  on main => fixed for review;  else a
+                                                   nobody working them:  on main => fixed;  else a
                                                    Stale card, once (--apply);  every turn's end runs it (T78)
   hush [<name> | all] [--dryrun] [--json] [--model sonnet]
                                                    grey the green, yellow and orange items settled 3+ days ago Owen
@@ -1904,9 +1913,11 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
   focus on [--why "..."] | off | status | summary [<name>] [--since <t>] [--json]
                                                    focus mode (/focus, /back):  on and off print a TELL: line for
                                                    each running epic session;  summary:  what happened since
-  fresh all | status | drop [<session id>] [--json]
+  fresh all [--pause] | status | drop [<session id>] | quiet | wait [--max <time>] | cancel [--json]
                                                    /epic fresh all:  every running epic session marked to go to
-                                                   a fresh session at its next clear moment;  TELL: lines
+                                                   a fresh session at its next clear moment;  TELL: lines;
+                                                   --pause:  each pauses and saves its agents first, says quiet,
+                                                   and all go only once every one is;  cancel calls that off
   prompt <name> "text" | --file path               set the prompt that started the plan ("" removes it)
   summary <name> [--json] [--all]                  open questions, issues, todos, limits, manual tests;  the next phase;
                                                    finished phases and grey items only counted, unless --all
@@ -1992,8 +2003,10 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    summary under it when there's something worth saying;  an
                                                    open issue or todo closes, as close does;  spinner off.
                                                    Refused with no underway card
-  status <name> <id> fixed ["html"]                an issue or judgement call fixed, for your review:  orange,
-                                                   still open;  Approve closes it.  A Do this's done means this too
+  status <name> <id> fixed ["html"]                an issue or judgement call fixed, for your review:  orange (light
+                                                   orange from your words), still open;  Approve closes it.  An issue
+                                                   Claude found that you hadn't got to:  closed, grey, "FIXED - ...".
+                                                   A Do this's done means this too, and done on an issue Claude found
   status <name> <id> promised "html"               /epic tidy:  it waits on finished work and what it promised never
                                                    came:  a "Promised, not delivered:" card, back on your list
   status <name> <id> noted "html"                  a STEP done, the item not finished:  your choice recorded,
@@ -2019,7 +2032,7 @@ const LOG_LABEL = "Log"
 const LOG_LAST = 20
 
 /** Flags that never take a value, so `epic summary --all seo` keeps `seo` as the epic. */
-const SWITCHES = ["all", "json", "dryrun", "dryRun", "titleOk"]
+const SWITCHES = ["all", "json", "dryrun", "dryRun", "titleOk", "pause"]
 
 /** A phase as `rename` takes it:  `P6`, `6`, `p6`. */
 const PHASE_REF = /^p?\d+$/i
@@ -2132,6 +2145,9 @@ function need(value: string | undefined, what: string): string {
 /** Where a usage error points:  the whole `USAGE` is long, and every error printing it buried the message. */
 /** What `epic update ... fixed` says it did. */
 const FIXED_WORDS = "fixed, for review"
+
+/** What `epic update ... fixed` or `done` says it did to an issue Claude found (`SelfFix`, T143). */
+const SELF_FIXED_WORDS = "fixed, grey, nothing for you to do"
 
 const USAGE_HINT = "`epic <verb> --help`;  a phase is `<epic>#P3` (or its name), an item `<epic>#J3`"
 

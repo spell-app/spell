@@ -7,6 +7,7 @@ import JSON5 from "json5"
 import { ClaudeHome } from "spell/epic/config/ClaudeHome.ts"
 import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
 import { EpicHome } from "spell/epic/config/EpicHome.ts"
+import { FreshPause } from "spell/epic/command/FreshPause.ts"
 
 /****************
  * ### `RestartWake`
@@ -24,6 +25,10 @@ import { EpicHome } from "spell/epic/config/EpicHome.ts"
  *   - one listed more than `STALE_MS` (2 days) is a leftover nobody marked done:  left alone too
  * - ONCE per batch:  several tabs starting together share one announcement, `<epic home>/restarts/<epic>.json`
  *   (`{ names, at }`);  the same agents again within `ONCE_MS` wake nobody
+ * - PAUSED agents (`epic agents pause`, epic `epic-engine` T139) are never cut off:  they're saved, waiting to start.
+ * - While a pause round is under way (`FreshPause`):
+ *   - agents cut off are to be saved, NOT resumed
+ *   - the epic of the session that started the round is woken with none cut off too:  its `epic fresh wait` is gone
  * - No agents cut off:  no line.  The inbox poller's own `SessionStart` hook starts listening by itself, so an idle
  *   session needs nothing.
  * - Its position:  node's own modules, `json5`, and the epic config and Claude's folder by their files, so plain
@@ -50,21 +55,21 @@ export class RestartWake {
       const epic = config.worktreeNameOf(cwd)
       if (!epic) return undefined
       const list = join(EpicConfig.contentOf(config.main), "epics", epic, "agents.json5")
-      if (!existsSync(list)) return undefined
-      const agents = JSON5.parse(readFileSync(list, "utf8")) as ListedAgent[]
+      const agents = existsSync(list) ? (JSON5.parse(readFileSync(list, "utf8")) as ListedAgent[]) : []
       const oldestSession = Math.min(
         now,
         ...sessions.filter((session) => config.worktreeNameOf(session.cwd) === epic).map(startOf)
       )
       const cutOff = agents.filter((agent) => {
         const started = Date.parse(agent.started)
-        return started < oldestSession && now - started <= STALE_MS
+        return !agent.paused && started < oldestSession && now - started <= STALE_MS
       })
-      if (cutOff.length === 0) return undefined
+      const round = FreshPause.round()
+      if (cutOff.length === 0 && round?.initiator.epic !== epic) return undefined
       const names = cutOff.map((agent) => agent.name).sort()
       if (RestartWake.announced(epic, names, now)) return undefined
       RestartWake.announce(epic, names, now)
-      return RestartWake.wording(epic, cutOff)
+      return round ? RestartWake.pauseWording(epic, cutOff) : RestartWake.wording(epic, cutOff)
     } catch {
       return undefined
     }
@@ -72,13 +77,26 @@ export class RestartWake {
 
   /** The line for `cutOff`, epic `epic`'s agents a restart cut off:  each with its id and task, then what to do. */
   static wording(epic: string, cutOff: ListedAgent[]): string {
-    const each = cutOff.map((agent) => `${agent.name} (${agent.taskId ?? "no id"}, "${agent.task}")`).join(", ")
+    const each = cutOff.map(describe).join(", ")
     const count = cutOff.length === 1 ? "1 agent" : `${cutOff.length} agents`
     return (
       `📬 ${epic}:  the restart cut off ${count}:  ${each}.  ` +
       "Resume each now with SendMessage to its id:  its work and transcript are saved.  " +
       `One with no id:  start it again from its task.  Then start \`epic inbox wait ${epic}\` again, in the ` +
       'background.  (The epic skill, "After a restart".)'
+    )
+  }
+
+  /** The line while a pause round is under way:  save what was cut off, resume none, and watch the round again. */
+  static pauseWording(epic: string, cutOff: ListedAgent[]): string {
+    const saved = cutOff.length
+      ? `It cut off ${cutOff.map(describe).join(", ")}:  resume none.  Save each from its task and the worktree:  ` +
+        '`epic agents pause <name> --next "<what it does next>"`, then run `epic fresh quiet` and send the line it prints.  '
+      : ""
+    return (
+      `📬 ${epic}:  restarted while epic fresh all --pause is under way.  ${saved}` +
+      "Start no new work.  `epic fresh status` says who is quiet;  if this session started the pause, start " +
+      '`epic fresh wait` again, in the background.  (The epic skill, "Pause first".)'
     )
   }
 
@@ -101,6 +119,12 @@ export class RestartWake {
   static fileOf(epic: string): string {
     return join(RestartWake.folder, `${epic}.json`)
   }
+}
+
+/** A cut-off agent in a line:  its name, id and task, and where it was last resumed from. */
+function describe({ name, taskId, task, resumedFrom }: ListedAgent): string {
+  const from = resumedFrom ? `, next step "${resumedFrom}"` : ""
+  return `${name} (${taskId ?? "no id"}, "${task}"${from})`
 }
 
 /** When a live session started, ms;  a record without `startedAt`:  now, so it never makes an agent look cut off. */
@@ -135,4 +159,8 @@ export type ListedAgent = {
   started: string
   /** Claude Code's id for it:  what `SendMessage` resumes */
   taskId?: string
+  /** saved by `epic agents pause`:  not running, so never cut off */
+  paused?: object
+  /** the next step it was last resumed at */
+  resumedFrom?: string
 }

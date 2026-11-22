@@ -1885,4 +1885,4 @@ function pillColorOf(color: StepLabel["color"] | undefined): StepLabel["color"] 
 const ACTIVE_ICON = "circle notch"
 
 /** The toolbar chips whose badge already says items need Owen:  the step label isn't red for them too (I216). */
-const URGENT_CHIPS: ReadonlySet<string> = new Set(URGENT_STATES)
+const URGENT_CHIPS: ReadonlySet<string> = new Set([...URGENT_STATES, "requested"])

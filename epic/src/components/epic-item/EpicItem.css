@@ -237,6 +237,16 @@
    * - the cells before it and the actions after it are one line tall, at the line's top:  they sit on its FIRST line
    * - its basis, `10em`, decides whether the actions fit beside it or wrap under it, at the right
    */
+  /*
+   * the word before the title (`FIXED -`, `TitlePrefix`, T143):  never broken at its dash;  it says what the same
+   * word's UPDATE label at the line's end did, so that label's word doesn't show (a slotted title inherits this)
+   */
+  .title-prefix {
+    white-space: nowrap;
+  }
+  .title[data-prefix="fixed"] {
+    --epic-update-fixed-display: none;
+  }
   /* a title with markup:  its links read as text, as today's */
   ::slotted(a) {
     color: inherit;

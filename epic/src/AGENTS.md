@@ -658,7 +658,8 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - off macOS (epic `epic-friend` P15):  links through the kit's `Links` (a folder a junction on Windows), and on
         Windows `epic.cmd` instead of the `epic` link (Windows runs no file without an extension);  and step 7, the VS
         Code extension from `vscode/spell-epic.vsix` (`code --install-extension`, skipped when VS Code has that
-        version, unless the `.vsix` was built after VS Code installed it:  `Editor.extensionsFolder()`, T72), which `spell publish` ships in `spell-epic`;  `epic init` runs the install every time, for it
+        version, unless the `.vsix` was built after VS Code installed it:  `Editor.extensionsFolder()`, T72;  never a `.vsix`
+        from before the last bump, epic `epic-engine` T140), which `spell publish` ships in `spell-epic`;  `epic init` runs the install every time, for it
       - `--codex` (epic `epic-friend` P11):  the plugin's Codex hooks ([codex-hooks.json](../hooks/codex-hooks.json))
         written into Codex's own `~/.codex/hooks.json` (`$CODEX_HOME`), by the kit's full path, the person's other
         hooks kept;  not the plugin's own hooks, which Codex's docs promise only for its desktop app
@@ -792,6 +793,11 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
         plain `node` loads it
     - `StaleFacts` (epic `epic-engine` Q69):  `epic stale`, the facts for judging which open items have gone stale,
       for `/epic tidy`;  it decides nothing;  git runs a fixed few times for a whole page, never per item
+    - `SelfFix` (epic `epic-engine` T143):  the ONE rule for an issue Claude found, fixed before the person got to it:
+      closed, grey (`<epic-item self-fixed>`), its line `FIXED - <title>`, nothing for them to press
+      - asked by every fix (`PlanDoc`) and the migration `self-fixed-issues`;  what they got to comes partly from the
+        review inbox (`PlanReader.readActedOn`)
+      - one from their words (`requested`) waits, light orange;  one they got to, orange
     - `Hush` (epic `epic-engine` T122):  `epic hush [<epic> | all] [--dryrun]`, tidy's sibling:  the green, yellow and
       orange items settled 3 days ago or more (`candidates()`, pure), each judged by a fresh `claude -p` (`ClaudePrint`;
       hush only if 80% sure Owen won't look again), the hushed ones approved as his ✓ would (`apply()`), one write
@@ -1452,8 +1458,9 @@ In `tools/`:
       blue, never red;  2026-10-26:  "badges don't match up")
       - red:  urgent (`state="attention"`);  on the Phases button, the phases drawn red (a plan waiting for their
         Accept, a choice open:  `PhaseState`, epic `epic-engine` I170)
-      - orange:  their turn to pick or review (`state="replied"`), light orange with it (`requested`, done, their turn
-        to see it:  every count by colour takes it as orange, the state chips too;  only the item's own chip keeps it;
+      - orange:  their turn to pick or review (`state="replied"`), light orange with it (`requested`, what they asked
+        for, fixed or done, their turn to see it, a fix still open too since epic `epic-engine` T143:
+        every count by colour takes it as orange, the state chips too;  only the item's own chip keeps it;
         epic `epic-engine` I347, 2026-11-18:  "Lump the light orange icons in with the orange")
       - blue, on the Phases button:  phases under way, or being worked on, and drawn blue:
         one changed since they looked

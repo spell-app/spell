@@ -525,8 +525,10 @@ export type ItemFacts = {
   requested: boolean
   /** a thing to know about, nobody's work (`<epic-item limit>`):  grey while open (epic `epic-engine` P63) */
   limit: boolean
-  /** fixed, waiting for his review:  orange (`<epic-item fixed>`, I232) */
+  /** fixed, waiting for his review:  orange (`<epic-item fixed>`, I232), light orange when `requested` (T143) */
   fixed: boolean
+  /** an issue Claude found and fixed before he got to it:  grey (`<epic-item self-fixed>`, T143;  `SelfFix`) */
+  selfFixed: boolean
   /** Claude answered it last, with options nothing is picked in yet (`PlanItem.awaitsPick()`) */
   awaitsPick: boolean
   /** how Claude handled Owen's last review mark (`<epic-item review-as>`, `REVIEW_AS`), or `undefined` */

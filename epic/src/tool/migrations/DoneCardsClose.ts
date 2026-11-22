@@ -1,6 +1,8 @@
 import { Markup } from "spell/epic/markup"
 import { PhaseTakes } from "spell/epic/tool/PhaseTakes"
+import { PlanItem } from "spell/epic/tool/PlanItem"
 import { PlanTime } from "spell/epic/tool/PlanTime"
+import { CALM_ID } from "spell/epic/tool/planDoc.types"
 
 import type { Migration, MigrationContext } from "./migrations.types"
 
@@ -12,6 +14,8 @@ import type { Migration, MigrationContext } from "./migrations.types"
  *   red;  since, the same command closes it (`PlanDoc.finishWork()`)
  * - which items:  open work (an issue, or a todo that isn't a `limit`:  `PhaseTakes.isWork()`) with a Done card
  *   NEWER than its last reopening (the log's `I3 reopened:  ...`), and no underway card (Claude is on it again)
+ *   - NEVER an issue waiting for the person:  fixed for their review (`fixed`) or their Do this (`urgent`), which
+ *     never closes on Claude's word since I232 (epic `epic-engine` T143:  the step would have closed 17 such fixes)
  * - closed as `epic close` closes:  `status="done"`, one log line each;  the runner recolours it and stamps the phase
  *   that took it up (`updateStates()`, `PhaseTakes`)
  * - each one closed is a note, with its card's time, so a dry run lists them for Owen to check:  an older page's
@@ -32,6 +36,8 @@ export class DoneCardsClose implements Migration {
     let closed = 0
     for (const item of Array.from(document.querySelectorAll("epic-page > epic-section > epic-item"))) {
       if (item.getAttribute("status") !== "open" || !PhaseTakes.isWork(item)) continue
+      // waiting for the person:  his check closes it, never this step (I232)
+      if (item.hasAttribute("fixed") || (CALM_ID.test(item.id) && item.hasAttribute("urgent"))) continue
       const cards = Array.from(item.querySelectorAll(":scope > epic-status"))
       if (cards.some((card) => card.getAttribute("state") === "underway")) continue
       const done = cards.filter((card) => card.getAttribute("state") === "done").at(-1)
@@ -46,7 +52,7 @@ export class DoneCardsClose implements Migration {
         `${label} closed:  its Done card (${doneAt}) said the work was finished`,
         context.now
       )
-      context.notes?.push(`done-cards-close:  ${label} closed, its Done card ${doneAt}:  ${item.getAttribute("title")}`)
+      context.notes?.push(`done-cards-close:  ${label} closed, its Done card ${doneAt}:  ${PlanItem.titleOf(item)}`)
       closed++
     }
     return closed > 0

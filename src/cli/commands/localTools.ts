@@ -5,6 +5,7 @@ import { dirname, join, relative, resolve } from "node:path"
 
 import { isOlder } from "spell/cli/kitCheckout"
 import { PathLink } from "spell/cli/PathLink"
+import { vsixIsStale } from "spell/cli/vsix"
 
 import { VSIX } from "./localMachine"
 import { type SpellServer, spellServers } from "./localServers"
@@ -133,6 +134,8 @@ function skillsRow(folder: string, kit: string | undefined): LocalTool {
  * VS Code's epic extension:  its version, against the checkout's;  `list` is `code --list-extensions --show-versions`.
  * - the same version:  it follows unless the checkout's `.vsix` was built after VS Code installed its copy (its folder
  *   in `~/.vscode/extensions/`), as `epic plugin install` decides
+ * - a `.vsix` from before the last bump counts as not built:  `epic plugin install` won't install it (epic
+ *   `epic-engine` T140)
  */
 function extensionRow(kit: string | undefined, home: string, list: () => string | undefined): LocalTool {
   const manifest = join(kit ?? "", dirname(VSIX), "package.json")
@@ -140,7 +143,7 @@ function extensionRow(kit: string | undefined, home: string, list: () => string 
   const id = `${own.publisher ?? "spell-app"}.${own.name ?? "spell-epic"}`.toLowerCase()
   const line = (list() ?? "").split(/\r?\n/).find((each) => each.trim().toLowerCase().startsWith(`${id}@`))
   const installed = line?.trim().split("@")[1]
-  const unbuilt = kit && !existsSync(join(kit, VSIX))
+  const unbuilt = kit && (!existsSync(join(kit, VSIX)) || vsixIsStale(join(kit, VSIX), own.version))
   const copy = join(home, ".vscode", "extensions", `${id}-${installed}`)
   const rebuilt =
     !unbuilt &&

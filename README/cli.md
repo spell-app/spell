@@ -100,7 +100,8 @@ yarn start                          # the page server and editor from ~/www/spel
     each session's next turn.
   - VS Code's epic extension, from your checkout's `epic/vscode/spell-epic.vsix`, when VS Code has another version or
     an older build of it:  reload each VS Code window after.
-    Your checkout builds it with `yarn vscode:package` in its `epic/`;  until then, VS Code keeps its own.
+    Your checkout builds it with `yarn vscode:package` in its `epic/`, again after each version bump;
+    until then, VS Code keeps its own.
   - `~/.spell/local-plugin.json` records that `spell local` switched them, and which projects use them.
 - `spell local off` puts the plugin and its skills back on the project's npm copy once no project still runs a
   checkout, and only when `spell local on` switched them;  VS Code keeps the extension it has, never an older one put

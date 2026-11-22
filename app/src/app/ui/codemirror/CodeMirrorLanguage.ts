@@ -28,7 +28,7 @@ import {
 import type { CodeAction, CompletionItem, DocumentSymbol, SignatureHelp, WorkspaceEdit } from "vscode-languageserver"
 
 import { after, waitUntil, type CancelablePromise } from "spell/util/timing"
-import type { SP } from "spell/parser/spell"
+import { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
 import { CodeEditorFeatures } from "spell/app/app/ui/CodeEditorFeatures"
 import { codeHover, hoverDelay, suggestsByItself, type SuggestMode } from "spell/app/app/ui/codePopups"
@@ -50,7 +50,10 @@ import { LspToCodeMirror, type CodeMirrorLocation } from "./LspToCodeMirror"
  * - Made by `FileStates`, one per spell file's state, which also follows the file both ways and shows its problems.
  * - Asks nothing of a file whose text isn't the editor's:  `fileReady()` parses what's waiting first,
  *   on the page;  the worker parses each edit it was sent before it answers.
- * - Folding still reads the page's own parse (`service`):  the fold arrows ask line by line, at once.
+ * - Where the language worker parses the file, what the editor draws it with comes with each of its parses
+ *   (`elsewhere`, `tookParse()`;  epic `solid-2-final` T36):  the blocks that fold, the bubbly drawing or the colours,
+ *   the types its tags name.  So the fold arrows, which ask line by line, at once, read no parse on the page.
+ *   - Else they read the page's own parse (`service`).
  * - What a hover says, which code actions show and what a rename says are the app's
  *   (`CodeEditorFeatures`);  where suggestions show by themselves, when the hover's info shows and whether signature
  *   help shows as you type, Settings…' choices (`CodeMirrorPopups`).
@@ -103,6 +106,64 @@ export class CodeMirrorLanguage {
       this.accentFixes(),
       this.helpShown()
     ]
+  }
+
+  ////////////////
+  // ## The worker's parse
+  ////////////////
+
+  /**
+   * Does the language worker parse the file, sending what it's drawn with (`tookParse()`)?
+   * - Not where the page's own service answers (`<spell-editor>`, the static build, a test, a worker that stopped).
+   */
+  get isParsedElsewhere(): boolean {
+    return !this.client.answersOnPage(this.file.project)
+  }
+
+  /**
+   * The language worker's last parse of the file came, of `text`, the state's text then (`doc`):
+   * kept for the fold arrows, the look and the typing helps (`FileStates.parsedElsewhere()`).
+   */
+  tookParse(parsed: LSP.LanguageParsed, doc: Text, text: string): void {
+    this.lastParse = { ...parsed, doc, text, types: new Set(parsed.types), views: new Set(parsed.views) }
+  }
+
+  /** The language worker's last parse, as `tookParse()` kept it. */
+  private lastParse:
+    | (Omit<LSP.LanguageParsed, "types" | "views"> & {
+        doc: Text
+        text: string
+        types: Set<string>
+        views: Set<string>
+        foldsByHead?: Map<number, number>
+      })
+    | undefined
+
+  /**
+   * What the code is drawn with, from the language worker's parses:  see `ParsedElsewhere`.
+   * - An arrow, so each look's extension holds it.
+   */
+  readonly elsewhere: ParsedElsewhere = {
+    isElsewhere: () => this.isParsedElsewhere,
+    hasParsed: () => !!this.lastParse,
+    drawingOf: (doc) => {
+      const parse = this.parseOf(doc)
+      return parse?.drawing && { ...parse.drawing, text: parse.text }
+    },
+    coloursOf: (doc) => this.parseOf(doc)?.colours,
+    isView: (tag) => !!tag && !!this.lastParse?.views.has(SP.typeName(tag)),
+    isType: (tag) => !!tag && !!this.lastParse?.types.has(SP.typeName(tag))
+  }
+
+  /** The language worker's last parse, if it's of `doc`'s text. */
+  private parseOf(doc: Text) {
+    const parse = this.lastParse
+    if (!parse) return undefined
+    if (parse.doc === doc) return parse
+    if (parse.text.length !== doc.length || parse.text !== doc.toString()) return undefined
+    // the same text in another state:  a slice's, or the text typed back
+    parse.doc = doc
+    return parse
   }
 
   /**
@@ -221,6 +282,7 @@ export class CodeMirrorLanguage {
    */
   private folding(): Extension {
     return foldService.of((state, lineStart) => {
+      if (this.isParsedElsewhere) return this.foldElsewhere(state, lineStart)
       const { file } = this
       // typing not handed over yet:  the last parse's blocks, as when the typing reached the file at once
       if (!file.match || (!this.isHolding() && !this.holdsFileText(state.doc))) return null
@@ -229,6 +291,20 @@ export class CodeMirrorLanguage {
       if (endLine === undefined) return null
       return { from: state.doc.line(line + 1).to, to: state.doc.line(endLine + 1).to }
     })
+  }
+
+  /**
+   * The block whose head line starts at `lineStart`, as the language worker's last parse says:
+   * its lines, though the typing since moved them, until the next parse comes, as the page's parse did.
+   */
+  private foldElsewhere(state: EditorState, lineStart: number): { from: number; to: number } | null {
+    const parse = this.lastParse
+    if (!parse) return null
+    if (parse.foldsByHead === undefined) parse.foldsByHead = new Map(parse.folds)
+    const line = state.doc.lineAt(lineStart).number - 1
+    const endLine = parse.foldsByHead.get(line)
+    if (endLine === undefined || endLine + 1 > state.doc.lines || endLine <= line) return null
+    return { from: state.doc.line(line + 1).to, to: state.doc.line(endLine + 1).to }
   }
 
   /**
@@ -763,4 +839,24 @@ function markdownDom(markdown: string, className: string): HTMLElement {
   drawn.textContent = markdown
   dom.append(drawn)
   return dom
+}
+
+/**
+ * What a file's code is drawn with where the language worker parses it, from its last parse
+ * (`CodeMirrorLanguage.elsewhere`;  epic `solid-2-final` T36):  the page reads no parse of its own for these.
+ * - Each MUST NOT throw.
+ */
+export type ParsedElsewhere = {
+  /** does the worker parse the file now?  Else the page's own parse is read, as ever */
+  isElsewhere(): boolean
+  /** has a parse of it come at all? */
+  hasParsed(): boolean
+  /** the bubbly look's drawing of `doc`'s text, if the last parse is of it */
+  drawingOf(doc: Text): SP.BubblyDrawing | undefined
+  /** its colours with the look off, if the last parse is of `doc`'s text */
+  coloursOf(doc: Text): SP.SpellHighlightSpan[] | undefined
+  /** does tag `tag` name one of the program's views, drawn as an element of its own (`<tableau>`)? */
+  isView(tag: string): boolean
+  /** does tag `tag` name one of the program's types? */
+  isType(tag: string): boolean
 }

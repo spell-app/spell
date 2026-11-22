@@ -1,4 +1,3 @@
-import { execFileSync } from "node:child_process"
 import {
   chmodSync,
   cpSync,
@@ -12,6 +11,7 @@ import {
 } from "node:fs"
 import { dirname, join } from "node:path"
 
+import { vsixVersion } from "spell/cli/vsix"
 import { DOC_FILES, PublishedPackage, type BuildReport, type PackedPackage, type PublishCheck } from "spell/cli/publish"
 
 /****************
@@ -161,7 +161,6 @@ export class PluginPackage extends PublishedPackage {
    * of the extension's source, `sourceManifest` (`epic/vscode/package.json`);  nothing wrong, `undefined`.
    * - Why (epic `epic-engine` I353):  the `.vsix` is git-ignored and built per checkout, so a stale one on disk
    *   shipped in spell-epic 0.8.13;  only its OWN `extension/package.json` says which build it is.
-   * - Read with `unzip -p` (macOS and Linux have it):  the kit has no zip reader of its own outside the app folder.
    * - NEVER throws:  every failure is the problem it returns
    */
   static vsixProblem(vsix: string, sourceManifest: string): string | undefined {
@@ -169,11 +168,7 @@ export class PluginPackage extends PublishedPackage {
     const expected = (JSON.parse(readFileSync(sourceManifest, "utf8")) as { version?: string }).version
     let built: string | undefined
     try {
-      const manifest = execFileSync("unzip", ["-p", vsix, "extension/package.json"], {
-        encoding: "utf8",
-        stdio: "pipe"
-      })
-      built = (JSON.parse(manifest) as { version?: string }).version
+      built = vsixVersion(vsix)
     } catch (error) {
       return `can't read extension/package.json in ${vsix}:  ${(error as Error).message.split("\n")[0]}`
     }

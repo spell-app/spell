@@ -208,7 +208,7 @@ export class EpicUpdate extends E.UIComponent<typeof epicUpdateVocabulary> {
   private renderLabel(): JSX.Element {
     return (
       <span class={this.rootClass} part={this.partForName("base")}>
-        <span class={LABEL} part={this.partForName("label")}>
+        <span class={LABEL} part={this.partForName("label")} data-became={this.became}>
           {this.labelText}
         </span>
         <Show when={this.became && this.unmerged}>

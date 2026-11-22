@@ -17,6 +17,9 @@ import { LSP } from "spell/app/lsp"
  * - Requests are the ONE table's (`LSP.LANGUAGE_REQUESTS`), the same VS Code's language server answers.
  * - After each parse, each open file it changed gets its problems sent (`onParsed`), as a language server publishes
  *   diagnostics, numbered by the edits they're of (`version`) so the editor drops a late one.
+ *   - With them, what the editor draws the file with, so the page never parses for it (epic `solid-2-final` T36):
+ *     the blocks that fold, the types its tags may name, and its look (`lookOf`:  the bubbly drawing, or the colours),
+ *     in the look the editor shows (`look()`).
  * - It compiles a project when asked (`compile()`), handing back what the compile wrote, for the editor to run.
  * - Its position in the import graph:  the parser and the language service;
  *   no DOM and no editor, so it runs in a worker, or in the page's own thread for a test.
@@ -25,12 +28,17 @@ export class LanguageHost {
   constructor({
     service = new LSP.SpellLanguageService(new LSP.AppAddresses()),
     onParsed = () => {},
-    onUnavailable = () => {}
+    onUnavailable = () => {},
+    lookOf = () => ({})
   }: LanguageHostProps = {}) {
     this.service = service
     this.onParsed = onParsed
     this.onUnavailable = onUnavailable
+    this.lookOf = lookOf
   }
+
+  /** What an open file looks like in the editor's look, after a parse:  see `LanguageHostProps.lookOf`. */
+  readonly lookOf: (file: SP.SpellFile, text: string, look: CodeLook) => LanguageLook
 
   /** Called with each project that won't load, e.g. one only the editor holds, not saved yet. */
   readonly onUnavailable: (projectId: string) => void
@@ -85,6 +93,22 @@ export class LanguageHost {
       for (const [uri] of this.texts) if (this.fileFor(uri)?.project.projectId === projectId) this.texts.delete(uri)
     })
   }
+
+  /**
+   * The editor shows its code in `look` now:  each open file's look is sent again in it, and after each parse.
+   * - Before any message says so:  `"bubbly"`, the editor's own default.
+   */
+  look({ look }: { look: CodeLook }): void {
+    this.pending = this.pending.then(() => {
+      if (look === this.codeLook) return
+      this.codeLook = look
+      this.sentParse.clear()
+      for (const loading of this.projects.values()) void loading.then((project) => this.sendProblems(project), () => {})
+    })
+  }
+
+  /** The look the editor shows its code in -- see `look()`. */
+  private codeLook: CodeLook = "bubbly"
 
   /**
    * Answer request `method` about the file `params` names, once every message before it is in and parsed.
@@ -185,14 +209,25 @@ export class LanguageHost {
    * - NEVER throws:  a file whose problems can't be worked out is said on the console, and skipped.
    */
   private sendProblems(project: SP.SpellProject): void {
-    for (const [uri] of this.texts) {
+    for (const [uri, text] of this.texts) {
       const file = this.fileFor(uri)
-      if (!file?.match || file.project !== project || this.sentParse.get(uri) === file.match) continue
+      if (!file?.match || file.project !== project) continue
+      const version = this.versions.get(uri) ?? 0
+      const sent = this.sentParse.get(uri)
+      if (sent?.match === file.match && sent.version === version) continue
       try {
-        this.sentParse.set(uri, file.match)
+        this.sentParse.set(uri, { match: file.match, version })
         const diagnostics = this.service.diagnostics(file)
         const fixItStarts = SP.OldForms.uses(file).map((use) => use.start)
-        this.onParsed({ uri, version: this.versions.get(uri) ?? 0, diagnostics, fixItStarts })
+        this.onParsed({
+          uri,
+          version,
+          diagnostics,
+          fixItStarts,
+          folds: this.foldsOf(file),
+          ...this.typesOf(file),
+          ...this.lookOf(file, text, this.codeLook)
+        })
         if (!LSP.SpellCSS.isLoaded && this.service.css.regionsIn(file.contents ?? "").length) {
           LSP.SpellCSS.load().then(
             () => {
@@ -208,11 +243,37 @@ export class LanguageHost {
     }
   }
 
+  /** Each block of `file` that folds, `[head line, last line]` from 0:  the first the service lists for a head line. */
+  private foldsOf(file: SP.SpellFile): LanguageFold[] {
+    const byHead = new Map<number, number>()
+    for (const range of this.service.foldingRanges(file)) {
+      if (!byHead.has(range.startLine)) byHead.set(range.startLine, range.endLine)
+    }
+    return [...byHead]
+  }
+
+  /**
+   * The types `file`'s tags may name, by name (`Card`):  every type its scope knows, and the ones drawn as elements
+   * of their own (`SP.SpellJSX.isDrawnType()`), which the bubbly look draws as the program's own views.
+   */
+  private typesOf(file: SP.SpellFile): { types: string[]; views: string[] } {
+    const types = new Set<string>()
+    const views = new Set<string>()
+    for (let list = file.scope?.types; list; list = list.parent as typeof list) {
+      for (const type of list.get() as P.TypeScope[]) {
+        if (!type.name || types.has(type.name)) continue
+        types.add(type.name)
+        if (SP.SpellJSX.isDrawnType(type)) views.add(type.name)
+      }
+    }
+    return { types: [...types], views: [...views] }
+  }
+
   /** Each open file's edits so far, since it was opened:  what its problems are numbered by. */
   private versions = new Map<string, number>()
 
-  /** The parse each open file's problems were last sent for. */
-  private sentParse = new Map<string, object>()
+  /** The parse each open file's problems were last sent for, and its edits then. */
+  private sentParse = new Map<string, { match: object; version: number }>()
 
   /** Each project's wait before it parses. */
   private parseTimers = new Map<SP.SpellProject, ReturnType<typeof setTimeout>>()
@@ -229,7 +290,29 @@ export type LanguageHostProps = {
   onParsed?: (parsed: LanguageParsed) => void
   /** called with each project that won't load.  Default:  nothing */
   onUnavailable?: (projectId: string) => void
+  /**
+   * What an open file looks like in `look`, after each parse:  sent with its problems, so the editor draws it from this
+   * parse and never parses it itself.
+   * - `text`:  its text, as the editor has it, which the parse is of
+   * - Default:  nothing, the editor working its look out itself.
+   * - The app's worker hands it in:  the colours need the app's reading of markup (`CodeColours`).
+   */
+  lookOf?: (file: SP.SpellFile, text: string, look: CodeLook) => LanguageLook
 }
+
+/** The look the editor shows code in:  bubbly, or coloured by its tokens (the look off). */
+export type CodeLook = "bubbly" | "tokens"
+
+/** What a file looks like in the editor's look:  `LanguageHostProps.lookOf`. */
+export type LanguageLook = {
+  /** the bubbly look's drawing of it, with no `text`:  the editor has that */
+  drawing?: Omit<SP.BubblyDrawing, "text">
+  /** its colours, with the look off */
+  colours?: SP.SpellHighlightSpan[]
+}
+
+/** A block that folds:  its head line and its last, from 0. */
+export type LanguageFold = [head: number, last: number]
 
 /** An open file's problems, after a parse changed them:  `LanguageHost.onParsed`. */
 export type LanguageParsed = {
@@ -241,7 +324,13 @@ export type LanguageParsed = {
   diagnostics: Diagnostic[]
   /** where each of its problems with a one-click fix starts, as offsets:  Spell's old forms (`SP.OldForms.uses()`) */
   fixItStarts: number[]
-}
+  /** each block that folds, by its head line */
+  folds: LanguageFold[]
+  /** every type its tags may name, by name (`Card`) */
+  types: string[]
+  /** the types among them drawn as elements of their own:  the program's views */
+  views: string[]
+} & LanguageLook
 
 /** The editor shows a file:  `LanguageHost.open()`. */
 export type LanguageOpen = {

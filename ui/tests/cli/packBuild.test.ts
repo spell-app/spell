@@ -49,15 +49,15 @@ beforeAll(async () => {
  * the kit's `tests/element-tools/`) on a pack found by name in a kit, its paths relative to the kit.
  */
 describe("buildPack() / checkPack()", () => {
-  test("an unbuilt pack is STALE:  every generated file missing", async () => {
+  test("an unbuilt pack is STALE:  every committed file missing;  its script is built, never committed", async () => {
     expect((await checkPack(ROOT, "demo")).stale).toEqual([
       "spell-demo/src/components/__pack/demo.catalog.ts:  missing",
-      "spell-demo/src/components/__pack/demo.entry.ts:  missing",
-      "spell-demo/src/components/__pack/demo.pack.js:  missing"
+      "spell-demo/src/components/__pack/demo.entry.ts:  missing"
     ])
   })
 
-  test("builds ONE classic script:  an IIFE taking Solid and Spell UI from `SpellUI.packModules`, registering itself", async () => {
+  // each family loads on first use since epic `solid-2-final` P7
+  test("builds ONE classic script, registering itself, and a module per family taking Solid and Spell UI from `SpellUI.packModules`", async () => {
     const report = await buildPack(ROOT, "demo")
     expect(report).toMatchObject({
       pack: "demo",
@@ -65,7 +65,8 @@ describe("buildPack() / checkPack()", () => {
       files: [
         "spell-demo/src/components/__pack/demo.catalog.ts",
         "spell-demo/src/components/__pack/demo.entry.ts",
-        "spell-demo/src/components/__pack/demo.pack.js"
+        "spell-demo/src/components/__pack/demo.pack.js",
+        "spell-demo/src/components/__pack/demo/demo-card.js"
       ]
     })
     const script = readFileSync(join(PACK, "src", "components", "__pack", "demo.pack.js"), "utf8")
@@ -73,17 +74,23 @@ describe("buildPack() / checkPack()", () => {
       `/* GENERATED -- do not edit:  \`spell pack build demo\`.  sources:  ${report.hash} */`
     )
     expect(script.split("\n")[1]).toMatch(/^\(function\(/)
-    expect(script).toMatch(
-      /\}\)\(globalThis\.SpellUI\.packModules\[`@solidjs\/web`\],globalThis\.SpellUI\.packModules\[`spell\/ui\/core`\]\);\s*$/
-    )
-    expect(script).not.toMatch(/\bimport\s*[{(*]|\bexport\s*\{/)
+    expect(script).toMatch(/\}\)\(\);\s*$/)
+    // a classic script:  its one import is a family's, by URL, as the page asks for it
+    expect(script).not.toMatch(/\bimport\s*[{*]|\bexport\s*\{/)
+    expect(script.match(/\bimport\s*\(/g)).toHaveLength(1)
     expect(script).toContain("registerPack({name:`demo`,prefix:`demo-`")
-    expect(script).toContain(":host")
+    expect(script).not.toContain(":host")
+    const family = readFileSync(join(PACK, "src", "components", "__pack", "demo", "demo-card.js"), "utf8")
+    expect(family).toContain('globalThis.SpellUI.packModules["@solidjs/web"]')
+    expect(family).toContain('globalThis.SpellUI.packModules["spell/ui/core"]')
+    // no import map names the page's modules, so no import of one is left
+    expect(family).not.toMatch(/\bimport\s*[{*]|\bfrom\s*["'`](?:solid-js|@solidjs\/|spell\/)/)
+    expect(family).toContain(":host")
     const catalog = readFileSync(join(PACK, "src", "components", "__pack", "demo.catalog.ts"), "utf8")
     expect(catalog).toContain(`// sources:  ${report.hash}\n`)
     expect(catalog).toContain(`"demo-card": {"folder":"demo-card","skeleton":{"height":"2em"},"attributes":[]}`)
-    expect(readFileSync(join(PACK, "src", "components", "__pack", "demo.entry.ts"), "utf8")).toContain(
-      `import("../demo-card")`
+    expect(readFileSync(join(PACK, "src", "components", "__pack", "demo.entry.ts"), "utf8")).toMatch(
+      /"demo-card": "[0-9a-f]+"/
     )
   }, 60_000)
 

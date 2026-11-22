@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { epicStateFor, idleDays, urgentWords } from "spell/epic/list/EpicState"
+import { URGENT_SELECTOR, epicStateFor, idleDays, needsOwen, urgentWords } from "spell/epic/list/EpicState"
 
 // epic `airplane` P8 (Owen, 2026-10-10):  in progress, errors, done, paused;  future as before;  no sleeping
 describe("epicStateFor()", () => {
@@ -65,6 +65,13 @@ describe("the rest", () => {
     ])
     expect(epicStateFor({ phases: ["done"], standing: true, urgent: ["q3"] }, now).name).toBe("errors")
     expect(epicStateFor({ phases: ["done", "todo"], standing: true, active: "P2 · x" }, now).name).toBe("progress")
+  })
+
+  it("light orange needs Owen while open, a fix of what he asked for (T143);  closed done, it holds nothing up", () => {
+    expect(needsOwen("requested", "open")).toBe(true)
+    expect(needsOwen("requested", "done")).toBe(false)
+    expect([needsOwen("replied", "open"), needsOwen("handled", "done")]).toEqual([true, false])
+    expect(URGENT_SELECTOR).toContain('[state="requested"][status="open"]')
   })
 
   it("counts calendar days, and words urgent items by kind", () => {

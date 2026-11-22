@@ -60,6 +60,11 @@
     --_epic-mark-background: var(--epic-state-replied, var(--ui-orange));
     --_epic-mark-color: var(--epic-state-replied-on, var(--ui-orange-on));
   }
+  /* light orange:  what the person asked for, fixed, waiting for their look (epic `epic-engine` T143) */
+  .chip[data-state="requested"] {
+    --_epic-mark-background: var(--epic-state-requested, var(--ui-orange-background));
+    --_epic-mark-color: var(--epic-state-requested-on, var(--ui-yellow-on));
+  }
   .chip[data-state="open"] {
     --_epic-mark-background: var(--epic-state-open, var(--ui-yellow));
     --_epic-mark-color: var(--epic-state-open-on, var(--ui-yellow-on));

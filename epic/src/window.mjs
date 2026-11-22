@@ -179,6 +179,7 @@
  *   - why:  a long session re-reads its whole transcript every turn;  a new one starts from the epic page
  *   - refused while the epic's agents run (`epic agents`):  closing the tab would cut them off;  `--force` anyway
  *   - the same record and end-of-turn hook as `handoff`, marked `fresh`
+ *   - refused while `epic fresh all --pause` is pausing that epic (`FreshPause`, T139), unless `--force`
  *   - ends this session's wait for a clear moment, when `/epic fresh all` marked it (`FreshAll.drop()`, T113)
  * - `open`, `launch`, `close`, `handoff` and `fresh` say first, on stderr (`sayBefore()`;  epic `epic-engine` P26):
  *   - this session's move promised earlier that now can't happen (`SessionMoves.missedMove()`), its record cleared
@@ -216,6 +217,7 @@ import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
 import { EpicHome } from "spell/epic/config/EpicHome.ts"
 import { SessionFolders } from "spell/epic/config/SessionFolders.ts"
 import { FreshAll } from "spell/epic/command/FreshAll.ts"
+import { FreshPause } from "spell/epic/command/FreshPause.ts"
 import { SessionMoves } from "spell/epic/command/SessionMoves.ts"
 import { WorktreeGuard } from "spell/epic/command/WorktreeGuard.ts"
 
@@ -931,11 +933,19 @@ export class Window {
    *   - no session, or nothing would carry the move out (`moveProblem()`, as `handoff()`)
    *   - no window:  the extension's bridge isn't running in this session's window
    *   - the epic's agents are running (`runningAgents()`):  closing this tab would cut them off;  `force`:  anyway
+   *   - a pause round has the epic (`FreshPause`, T139):  nobody goes fresh before all are quiet;  `force`:  anyway
    */
   static fresh(epic, sessionId, { force = false } = {}) {
     if (!SESSION_ID.test(sessionId ?? "")) throw new Error("no session:  $CLAUDE_CODE_SESSION_ID isn't set")
     const refused = Window.moveProblem(sessionId)
     if (refused) throw new Error(`this session can't hand ${epic} on:  ${refused.problem};  ${refused.fix}`)
+    // no session id here:  a session marked `paused` after the round is the one that SHOULD go
+    if (!force && FreshPause.holds(epic)) {
+      throw new Error(
+        "epic fresh all --pause is under way:  nobody goes fresh until every session is quiet;  " +
+          "see `epic fresh status`, or `epic fresh cancel`"
+      )
+    }
     const running = force ? [] : Window.runningAgents(epic)
     if (running.length) {
       throw new Error(

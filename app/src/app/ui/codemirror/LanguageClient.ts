@@ -15,6 +15,8 @@ import { LSP } from "spell/app/lsp"
  *     its parse its own, so a hover or a suggestion list never takes the page's time
  * - The worker's parse follows the page's files:  each spell file's state says it's open (`opened()`),
  *   and each edit as a list of changes (`changed()`), never the whole text.
+ * - After each parse it sends what the editor draws each open file with, in the editors' look (`look()`):
+ *   its problems, the blocks that fold, the bubbly drawing or the colours (`onParsed()`).
  * - A request goes after every edit before it, so its answer is about the text the editor had when it asked.
  * - Its position in the import graph:  the language service's table and types;  NEVER the worker's own file,
  *   handed in, so `<spell-editor>`'s build has none.
@@ -85,6 +87,9 @@ export abstract class LanguageClient {
 
   /** Project `project`'s states are gone. */
   closed(_project: SP.SpellProject): void {}
+
+  /** The editors show their code in `look` now:  what each parse sends is drawn in it (`LSP.LanguageParsed`). */
+  look(_look: LSP.CodeLook): void {}
 
   /** The address `file` goes by in a request. */
   static uriOf(file: SP.SpellFile): string {
@@ -215,6 +220,10 @@ class WorkerClient extends LanguageClient {
     this.post({ kind: "close", projectId: project.projectId })
   }
 
+  look(look: LSP.CodeLook): void {
+    this.post({ kind: "look", look })
+  }
+
   onParsed(listener: (parsed: LSP.LanguageParsed) => void): () => void {
     this.parsedListeners.add(listener)
     return () => this.parsedListeners.delete(listener)
@@ -266,6 +275,7 @@ export type LanguageWorkerMessage =
   | ({ kind: "open" } & LSP.LanguageOpen)
   | ({ kind: "change" } & LSP.LanguageChange)
   | { kind: "close"; projectId: string }
+  | { kind: "look"; look: LSP.CodeLook }
   | { kind: "request"; id: number; method: LSP.LanguageMethod; params: unknown }
   | ({ kind: "compile"; id: number } & LSP.LanguageCompile)
 
