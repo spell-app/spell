@@ -53,6 +53,7 @@ epic ui is a site
 	it has an epic choice row page at "/epic-choice-row", named "<epic-choice-row>"
 	it has an epic choice rows element page at "/epic-choice-rows", named "<epic-choice-rows>"
 	it has an epic choices bar page at "/epic-choices-bar", named "<epic-choices-bar>"
+	it has an epic feature set page at "/epic-feature-set", named "<epic-feature-set>"
 	it has an epic run page at "/epic-run", named "<epic-run>"
 	it has an epic run row page at "/epic-run-row", named "<epic-run-row>"
 	it has an epic send page at "/epic-send", named "<epic-send>"

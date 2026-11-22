@@ -749,7 +749,7 @@ The same group keeps the comments you leave on any docs page, the background age
 
 | Verb | What it does |
 | --- | --- |
-| `epic ask create <slug>` | makes a details page from the template, and prints its path;  `--epic <epic>`:  in that epic's `details/`, else a scratch page, swept after 14 days;  `--title`, `--description`;  `--from <questions.json5>`:  the whole page from a list of questions;  a near-copy's slug (`x-2` beside `x`) is refused:  that's `round` |
+| `epic ask create <slug>` | makes a details page from the template, and prints its path;  `--epic <epic>`:  in that epic's `details/`, else a scratch page, swept after 14 days;  `--title`, `--description`;  `--from <questions.json5>`:  the whole page from a list of questions;  `--template feature-set`:  a Feature Set, a ranked list to pick from, `--from` its sections and items;  a near-copy's slug (`x-2` beside `x`) is refused:  that's `round` |
 | `epic ask round <page>` | asks the same question again:  the ONE page rewritten in place (from `--from`, else left to edit), the round before folded at its bottom with what you sent;  `--title`, `--description` |
 | `epic ask show <page>` | shows the page in this session's Details tab, where a page still waiting for your answer stays in view and a new one waits its turn;  `--wait`:  then waits |
 | `epic ask wait <page>` | waits in the background until you send an answer, prints it and exits 0;  exit 2 after `--timeout` (8h) |

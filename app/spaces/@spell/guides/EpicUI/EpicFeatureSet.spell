@@ -1,0 +1,92 @@
+"epic feature set" is a notebook page
+	<header level="1">
+		&lt;epic-feature-set&gt;
+		<header>What makes a details page a Feature Set: a ranked list to pick from, which you can put in your own order.</>
+	</>
+
+	<text class="lede" paragraph>A Feature Set is a page you answer on: a ranked list, a table for each section, three columns: Item, Your pick, Facts. <text code>&lt;epic-feature-set&gt;</> is the element that makes it one.</>
+	<text class="meta" paragraph>For anyone writing a page you answer on, or changing this element.</>
+	<text class="meta" paragraph><label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-feature-set" link="/epic/src/components/epic-feature-set/"><text title="epic/src/components/epic-feature-set/" code>epic-feature-set/</></> (epic <text code>epic-engine</> P80).</>
+
+	<section label="1. Making a page">
+		<icon slot="icon" name="terminal"/>
+		<text paragraph>Never write one by hand: the command makes it from data.</>
+		<markdown>
+			```sh
+			epic ask create my-list --template feature-set --epic my-epic --from my-list.json5
+			```
+		</>
+		<list bulleted>
+			<item>The data: copy the starter, <text code>feature-set.json5</>, in the tool's templates.</>
+			<item>The next round: <text code>epic ask round my-list --from my-list.json5</>. Each item keeps its name.</>
+		</>
+	</>
+
+	<section label="2. What it does">
+		<icon slot="icon" name="hand pointer"/>
+		<list bulleted>
+			<item>Names: sections are S1, S2 and each one's items F1, F2, so S1F1 names one item. A name stays with its item, and is never used again.</>
+			<item>Reorder sections, and Reorder on each section: one dialog, dragged by the dots or moved by the arrows. Cancel, the ✕ and Escape change nothing.</>
+			<item>The order is part of the answer: Send tells Claude.</>
+			<item>Each section takes the colour of its picks: red until every one is decided.</>
+			<item>Links to other sites open a new tab; the rest open in the same window, and Back returns you to where you were.</>
+		</>
+	</>
+
+	<section label="3. Parts">
+		<icon slot="icon" name="table columns"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Part</>
+				<cell>What it is</>
+			</>
+			<row>
+				<cell>
+					<text code>base</>
+				</>
+				<cell>Its line: Reorder sections.</>
+			</>
+			<row>
+				<cell>
+					<text code>reorder</>
+				</>
+				<cell>The Reorder sections button.</>
+			</>
+			<row>
+				<cell>
+					<text code>dialog</>
+				</>
+				<cell>The dialog that reorders, a <text code>&lt;ui-modal&gt;</>.</>
+			</>
+			<row>
+				<cell>
+					<text code>list</>
+				</>
+				<cell>The dialog's list.</>
+			</>
+			<row>
+				<cell>
+					<text code>entry</>
+				</>
+				<cell>One row of that list: its handle, name, title and arrows.</>
+			</>
+			<row>
+				<cell>
+					<text code>cancel</>
+				</>
+				<cell>The dialog's Cancel.</>
+			</>
+			<row>
+				<cell>
+					<text code>save</>
+				</>
+				<cell>The dialog's Save order.</>
+			</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-11-22 against branch <ui-text code>epic-engine</> (P80).</>
+		</>
+	</>

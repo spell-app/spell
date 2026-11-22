@@ -74,6 +74,49 @@ function gathered(): PageAnswer {
 // ## Tests
 ////////////////
 
+describe("<epic-ask> with a follow-up (a Feature Set's Priority)", () => {
+  /** An item's pick, its Priority in its `then` slot;  Priority 2 picked to start with. */
+  const ITEM =
+    `<ui-section id="s1" label="S1 · Now"><epic-ask compact no-chip name="s1f1" label="S1F1 · Share a link"><epic-choices>` +
+    `<epic-option letter="Y" title="Yes"></epic-option><epic-option letter="N" title="No"></epic-option></epic-choices>` +
+    `<epic-ask slot="then" compact name="s1f1-priority" label="Priority" off-for="N"><epic-choices>` +
+    `<epic-option selected letter="2" title="Priority 2"></epic-option></epic-choices></epic-ask></epic-ask></ui-section>`
+
+  /** Pick `value` in question `ask`'s select, as a person does. */
+  async function pick(ask: Element, value: string) {
+    part(ask, "select").dispatchEvent(new CustomEvent("ui-changed", { detail: { value } }))
+    await ElementFixture.settle()
+  }
+
+  test("no chip, and ONE comment box for the two;  it's one question, and leaves its section's state alone;  axe", async () => {
+    const section = await ElementFixture.render(ITEM)
+    await ElementFixture.settle()
+    const [item, priority] = Array.from(section.querySelectorAll("epic-ask")) as [Element, Element]
+    for (const ask of [item, priority]) expect(part(ask, "chip")).toBeNull()
+    expect(part(item, "other").getAttribute("for")).toBe("s1f1")
+    expect(part(priority, "other")).toBeNull()
+    expect(form().decided).toEqual({ decided: 0, total: 1 })
+    expect(section.hasAttribute("data-state")).toBe(false)
+    expect(form().labels()["s1f1-priority"]).toBe("S1F1 · Share a link, Priority")
+    await expectAccessible(item)
+  })
+
+  test("No greys the Priority out and KEEPS what was picked in it;  another pick gives it back", async () => {
+    const section = await ElementFixture.render(ITEM)
+    await ElementFixture.settle()
+    const [item, priority] = Array.from(section.querySelectorAll("epic-ask")) as [Element, Element]
+    await pick(item, "N")
+    expect(priority.matches(":state(off)")).toBe(true)
+    expect(part(priority, "select").hasAttribute("disabled")).toBe(true)
+    // greyed, not hidden:  the rows don't jump
+    expect(priority.getClientRects().length).toBeGreaterThan(0)
+    expect(gathered().answers["s1f1-priority"]).toEqual({ picked: ["2"] })
+    await pick(item, "Y")
+    expect(priority.matches(":state(off)")).toBe(false)
+    expect(part(priority, "select").hasAttribute("disabled")).toBe(false)
+  })
+})
+
 describe("<epic-ask>", () => {
   test("its line:  a red chip (its section's key), Pick one;  its options a Choose pill each, a comment box, Other;  axe", async () => {
     const section = await ElementFixture.render(question())

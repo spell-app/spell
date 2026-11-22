@@ -19,16 +19,19 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
   ask: [
     {
       name: "create",
-      usage: '<slug> [--title "..."] [--epic <epic>] [--description "..."] [--from <questions.json5>]',
+      usage:
+        '<slug> [--title "..."] [--epic <epic>] [--description "..."] [--template feature-set] [--from <questions.json5>]',
       description:
         "make a details page from the template, and print its path;  --epic:  in that epic's details/ (else a " +
-        "scratch page, swept after 14 days);  --from:  the whole page from a list of questions",
+        "scratch page, swept after 14 days);  --from:  the whole page from a list of questions;  " +
+        "--template feature-set:  a Feature Set, a ranked list to pick from, --from its sections and items",
       example: 'epic ask create pick-layout --epic seo --title "Pick a layout"',
       flags: {
         "--title <title>": "the page's title",
         "--epic <epic>": "in that epic's details/, kept;  else a scratch page, swept after 14 days",
         "--description <text>": "what the page asks, under its title",
-        "--from <questions.json5>": "the whole page, from a list of questions"
+        "--template <name>": "feature-set:  a ranked list to pick from, a table per section, from --from's data",
+        "--from <questions.json5>": "the whole page, from a list of questions (a Feature Set:  its sections and items)"
       }
     },
     {

@@ -229,9 +229,9 @@ export class AnswerForm extends PageStore {
     this.changed()
   }
 
-  /** The questions, in page order. */
+  /** The questions, in page order;  a follow-up (a Priority) goes with its question, not counted by itself. */
   get asks(): AskPart[] {
-    return this.inPageOrder().filter((part): part is AskPart => "askState" in part)
+    return this.inPageOrder().filter((part): part is AskPart => "askState" in part && !(part as AskPart).isFollowUp)
   }
 
   /** How many questions are decided (anything but `attention`), of how many. */

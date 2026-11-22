@@ -1,11 +1,14 @@
 /**
  * `epic ask <command>` (once `spell dev details`):  details pages, questions Claude explains on a page and Owen
  * answers ON it (`/details`, `.claude/skills/details/SKILL.md`).
- * - `create <slug> [--title "..."] [--epic <name>] [--description "..."] [--from <questions.json>]` --
+ * - `create <slug> [--title "..."] [--epic <name>] [--description "..."] [--template feature-set]
+ *   [--from <questions.json>]` --
  *   a page from the tool's own template (`templates/details.html` beside it);  prints its path
  *   - built in the epics pack's `<epic-*>` elements (`answerPages.js`)
  *   - `--from`:  the whole page from a JSON list of questions (`DetailsSpec`, below),
  *     so a skill with many questions to ask (`/worktrees`, `/bedtime`) needn't hand-write it
+ *   - `--template feature-set`:  a ranked list to pick from, a table per section, from its own data
+ *     (`FeatureSet.js`, epic `epic-engine` P80);  a `round` of one stays one, its names kept
  *   - scratch:  `pages/details/<slug>.html`, ignored by version control, swept after 14 days
  *   - `--epic <name>`:  `epics/<name>/details/<slug>.html`, committed with the epic page
  * - `round <page> [--title "..."] [--description "..."] [--from <questions.json>]` -- the page's NEXT ROUND:  the one
@@ -45,7 +48,7 @@ import { basename, dirname, join, relative, resolve } from "node:path"
 
 import { parseHTML } from "linkedom"
 
-import { indented } from "spell/util/string.ts"
+import { commaList, indented } from "spell/util/string.ts"
 import { localDate } from "spell/util/time.ts"
 import { waitUntil } from "spell/util/timing.ts"
 import { duration, parseVerbArgs } from "spell/epic/command/command.types.ts"
@@ -64,6 +67,7 @@ import {
 } from "./answerPages.js"
 import { AskListeners } from "./AskListeners.ts"
 import { DetailsPages } from "./DetailsPages.ts"
+import { FEATURE_SET, FeatureSet } from "./FeatureSet.js"
 import { DataFile } from "spell/epic/data/DataFile.ts"
 import { SEED_EMPTIED } from "spell/epic/answers/answers.types.ts"
 import { CONTENT, ROOT, fromTemplate, inContent, openInVSCode, serialize } from "./pages.js"
@@ -159,7 +163,8 @@ async function main(argv) {
 }
 
 /** `epic ask` with no or a wrong command. */
-const USAGE = `usage:  epic ask create <slug> [--title "..."] [--epic <name>] [--description "..."] [--from <questions.json>]
+const USAGE = `usage:  epic ask create <slug> [--title "..."] [--epic <name>] [--description "..."]
+                              [--template feature-set] [--from <questions.json>]
         epic ask round <page> [--title "..."] [--description "..."] [--from <questions.json>]
         epic ask show <page> [--wait] [--timeout 8h]
         epic ask wait <page> [--timeout 8h]
@@ -181,15 +186,21 @@ const USAGE = `usage:  epic ask create <slug> [--title "..."] [--epic <name>] [-
  * - refuses a NEAR-COPY (epic `epic-engine` P37):  `event-names-2` beside `event-names` is its second round,
  *   `epic ask round event-names` (`rounds.js` `refuseNearCopy()`)
  * - `spec`:  the whole page (`fillFromSpec()`)
+ * - `template: "feature-set"`:  a Feature Set, from its data (`FeatureSet`)
  */
-export function createPage(docs, slug, { title, epic, description, spec } = {}) {
+export function createPage(docs, slug, { title, epic, description, spec, template } = {}) {
+  if (template !== undefined && template !== FEATURE_SET)
+    throw new Error(`no template '${template}':  the one there is is ${FEATURE_SET}`)
+  if (template && !spec)
+    throw new Error(`a Feature Set is made from data:  --from <data.json5>, like ${FeatureSet.starter}`)
+  if (!template && spec?.sections) throw new Error(`that's a Feature Set's data:  add --template ${FEATURE_SET}`)
   if (!slug || !SLUG.test(slug)) throw new Error(`a slug is lower-kebab-case:  '${slug ?? ""}'`)
   if (epic && !existsSync(join(docs, "epics", epic))) throw new Error(`no epic '${epic}' (epics/${epic}/)`)
   const folder = epic ? join(docs, "epics", epic, "details") : join(docs, "pages", "details")
   const file = join(folder, `${slug}.html`)
   if (existsSync(file)) throw new Error(`${relative(docs, file)} already exists`)
   refuseNearCopy(folder, slug, epic)
-  const document = pageDocument(docs, folder, { title, description, spec })
+  const document = pageDocument(docs, folder, { title, description, spec, template })
   mkdirSync(folder, { recursive: true })
   writeFileSync(file, serialize(document))
   return file
@@ -198,10 +209,13 @@ export function createPage(docs, slug, { title, epic, description, spec } = {}) 
 /**
  * A details page for `folder` (in epic folder `docs`), parsed, from the tool's template:  its head filled
  * (`title`, `description`, today's date), and the whole page from `spec` when given.
+ * - `template`:  a Feature Set's (`FEATURE_SET`), with `previous`, the round before, for its names
  */
-function pageDocument(docs, folder, { title, description, spec }) {
+function pageDocument(docs, folder, { title, description, spec, template, previous }) {
   title ??= spec?.title ?? "Details"
-  const { document } = parseHTML(fromTemplate(readFileSync(join(TOOL_TEMPLATES, "details.html"), "utf8")))
+  const document = template
+    ? FeatureSet.blankPage()
+    : parseHTML(fromTemplate(readFileSync(join(TOOL_TEMPLATES, "details.html"), "utf8"))).document
   // the date up top, under "Asked by":  the notes are the page's bottom, so no footer
   fillHead(document, {
     title,
@@ -209,7 +223,8 @@ function pageDocument(docs, folder, { title, description, spec }) {
     asked: "[data-details-asked]",
     date: localDate()
   })
-  if (spec) fillFromSpec(document, spec)
+  if (template) new FeatureSet({ document, spec, previous }).fill()
+  else if (spec) fillFromSpec(document, spec)
   return document
 }
 
@@ -219,6 +234,7 @@ function pageDocument(docs, folder, { title, description, spec }) {
  * - the round it was on folds into the page, at the bottom, with what was sent (`rounds.js` `foldRound()`)
  * - its answer moves into the answer file's `rounds` (`answer --round <n>` prints it);  a new answer is the new
  *   round's
+ * - a Feature Set stays one, and each of its items keeps its name
  * - `spec`:  the page rewritten from it, as `create --from`;  none:  the page as it is, for Claude to edit by hand
  * - a draft typed and not sent stays, and comes back over the new round;  a sent one goes
  * - a choice page:  refused, naming `epic choices round`
@@ -230,7 +246,8 @@ export function newRound(docs, target, { title, description, spec } = {}) {
     throw new Error(`a choice page:  epic choices round ${target} --rows <rows.json5>`)
   const { document: old } = parseHTML(readFileSync(file, "utf8"))
   title ??= spec?.title ?? old.querySelector("h1")?.textContent?.trim()
-  const document = spec ? pageDocument(docs, dirname(file), { title, description, spec }) : old
+  const template = FeatureSet.isOne(old) ? FEATURE_SET : undefined
+  const document = spec ? pageDocument(docs, dirname(file), { title, description, spec, template, previous: old }) : old
   const answer = readAnswer(file)
   const sent = answer && formatAnswer(file, answer)
   const draft = !answer && readDraft(file)
@@ -615,7 +632,8 @@ export function formatAnswer(page, answer) {
   if (answer.changes) lines[0] += `  (sent ${answer.changes + 1}×)`
   const changed = new Set(answer.changes ? (answer.changed ?? []) : [])
   const isNew = (key) => (changed.has(key) ? "  (new)" : "")
-  const questions = [...document.querySelectorAll(ASK)]
+  // a follow-up (a Priority) is said on its question's line, and isn't counted by itself (epic `epic-engine` P80)
+  const questions = [...document.querySelectorAll(ASK)].filter((question) => !isFollowUp(question))
   const decided = questions.filter((question) => {
     const got = answer.answers?.[askKey(question)]
     return got?.picked?.length || got?.other
@@ -625,15 +643,20 @@ export function formatAnswer(page, answer) {
   for (const question of questions) {
     const key = askKey(question)
     const got = answer.answers?.[key] ?? { picked: [] }
-    const picked = got.picked.map((letter) => {
-      const option = optionOf(question, letter)
-      const recommended = option?.hasAttribute("recommended") ? " (recommended)" : ""
-      return `${letter} · ${option?.getAttribute("title") ?? "?"}${recommended}`
-    })
+    const picked = pickedOf(question, got.picked)
+    const followUps = [...question.children].filter((child) => child.localName === ASK && isFollowUp(child))
+    if (followUps.length) {
+      // a pick not made is said first, so a Priority alone never reads as the answer
+      if (!got.picked.length && !got.other) picked.push("(not decided yet)")
+      for (const followUp of followUps) picked.push(...followUpPieces(followUp, got.picked, answer))
+    }
     // a `compact` question's Other is its comment box (epic `epic-engine` T121)
     if (got.other) picked.push(`${question.hasAttribute("compact") ? "Comment" : "Other"}:  ${got.other}`)
-    lines.push(`  ${askHeader(question)}:  ${picked.join(";  ") || "(not decided yet)"}${isNew(key)}`)
+    const keys = [key, ...followUps.map(askKey)]
+    const mark = keys.some((each) => changed.has(each)) ? "  (new)" : ""
+    lines.push(`  ${askHeader(question)}:  ${picked.join(";  ") || "(not decided yet)"}${mark}`)
   }
+  lines.push(...FeatureSet.orderLines(document, answer, { changed, isNew }))
   // "Provide more details" (`moreDetails`):  `<question key>-more`, the options' letters
   for (const question of questions.filter((each) => each.hasAttribute("more-details"))) {
     const key = askKey(question)
@@ -719,8 +742,35 @@ export function askKey(question) {
   return question.getAttribute("name") ?? question.closest("ui-section[id]")?.id ?? ""
 }
 
-/** A question's title, for people:  its section's `label` (`Q1 · Which layout?`), else its key. */
+/** Is `question` a follow-up:  written in another's `then` slot (a Feature Set's Priority)? */
+function isFollowUp(question) {
+  return question.getAttribute("slot") === "then" && question.parentElement?.localName === ASK
+}
+
+/** `letters` picked of `question`, for people:  `Y · Yes (recommended)`. */
+function pickedOf(question, letters) {
+  return letters.map((letter) => {
+    const option = optionOf(question, letter)
+    const recommended = option?.hasAttribute("recommended") ? " (recommended)" : ""
+    return `${letter} · ${option?.getAttribute("title") ?? "?"}${recommended}`
+  })
+}
+
+/**
+ * Follow-up `question`, as its question's line says it:  `Priority:  2 · Priority 2`.
+ * - greyed by that question's `picks` (`off-for`):  not needed, whatever was picked in it
+ */
+function followUpPieces(question, picks, answer) {
+  const label = question.getAttribute("label") ?? askKey(question)
+  if (commaList(question.getAttribute("off-for") ?? "").some((letter) => picks.includes(letter)))
+    return [`${label}:  not needed`]
+  const picked = pickedOf(question, answer.answers?.[askKey(question)]?.picked ?? [])
+  return picked.length ? [`${label}:  ${picked.join(", ")}`] : []
+}
+
+/** A question's title, for people:  its own `label`, else its section's (`Q1 · Which layout?`), else its key. */
 function askHeader(question) {
+  if (question.hasAttribute("label")) return question.getAttribute("label")
   return question.closest("ui-section[id]")?.getAttribute("label") ?? askKey(question)
 }
 
