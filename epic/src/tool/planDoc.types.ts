@@ -1030,6 +1030,11 @@ export type Landing = {
   ids: ReadonlySet<string>
   /** those commits' full shas:  a phase's or an item's listed `<epic-commit>` among them is not on main either */
   shas: readonly string[]
+  /**
+   * when `main`'s latest commit naming each phase was made (ms), by phase id (`p80`):  a judgement call made in that
+   * phase before it is on main, whatever the phase's later commits (epic `epic-engine` I439);  none:  not known
+   */
+  landed?: ReadonlyMap<string, number>
 }
 
 /** What a commit subject says it did (`PlanCommits.parseCommitSubject()`). */

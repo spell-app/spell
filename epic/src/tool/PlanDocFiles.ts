@@ -696,6 +696,7 @@ export class PlanDocFiles {
     if (!log.ok) return undefined
     const ids = new Set<string>()
     const shas: string[] = []
+    const landed = this.landedPhases(epic, branch, cwd)
     for (const line of log.out.split("\n").filter(Boolean)) {
       const [sha, subject = ""] = line.split("\t")
       shas.push(sha!)
@@ -706,7 +707,26 @@ export class PlanDocFiles {
       for (const phase of parsed.phases) ids.add(`p${phase}`)
       for (const item of parsed.items) ids.add(item.toLowerCase())
     }
-    return { branch, ids, shas }
+    return { branch, ids, shas, landed }
+  }
+
+  /**
+   * When `main`'s latest commit naming each of epic `epic`'s phases was made (ms), by phase id (`p80`):
+   * its last `LANDED_COMMITS` commits (epic `epic-engine` I439).
+   * - NEVER throws:  no git, none
+   */
+  private landedPhases(epic: string, branch: string, cwd: string): Map<string, number> {
+    const landed = new Map<string, number>()
+    const log = SRV.Git.run(["log", "-n", String(LANDED_COMMITS), "--format=%cI%x09%s", BASE_BRANCH], cwd)
+    if (!log.ok) return landed
+    for (const line of log.out.split("\n").filter(Boolean)) {
+      const [time = "", subject = ""] = line.split("\t")
+      const parsed = PlanCommits.parseCommitSubject(subject)
+      if (!parsed || (parsed.epic && parsed.epic !== epic && parsed.epic !== branch)) continue
+      const at = Date.parse(time)
+      for (const phase of parsed.phases) if (!landed.has(`p${phase}`)) landed.set(`p${phase}`, at)
+    }
+    return landed
   }
 
   /** The main checkout's root:  the parent of git's common dir (`.git`), the same from any worktree. */
@@ -1045,6 +1065,9 @@ const EARLIER_COMMITS = 3
 
 /** A commit as `docLog()` reads it:  its sha, its commit time (ISO with offset), its subject;  tab-separated. */
 const TIMED_FORMAT = "%H%x09%cI%x09%s"
+
+/** How far back `main`'s log is read for each phase's latest commit (`landedPhases()`):  newest first. */
+const LANDED_COMMITS = 400
 
 /** The branch a phase's commit is merged into (`isMerged()`). */
 const BASE_BRANCH = "main"

@@ -1375,6 +1375,20 @@ describe("PlanDoc states", () => {
     expect(stateOf(plan, "j1", "j2")).toEqual(["open", "progress"])
     expect(phases()).toEqual([null, null])
 
+    // its phase's later work not on main, but a commit of it from after the call is (I439):  landed, yellow
+    const made = Date.parse(el(plan, "j1").getAttribute("changed")!)
+    plan.landing = { branch: "editor", ids: new Set(["p1"]), shas: [], landed: new Map([["p1", made + 60_000]]) }
+    plan.updateStates()
+    expect(stateOf(plan, "j1")).toEqual(["open"])
+    // main's last commit of P1 is from before the call:  still blue
+    plan.landing = { branch: "editor", ids: new Set(["p1"]), shas: [], landed: new Map([["p1", made - 60_000]]) }
+    plan.updateStates()
+    expect(stateOf(plan, "j1")).toEqual(["progress"])
+    // retitled since:  made when it was first judged, not at the retitle
+    Markup.set(el(plan, "j1"), { judged: PlanTime.isoTime(new Date(made - 120_000)) })
+    plan.updateStates()
+    expect(stateOf(plan, "j1")).toEqual(["open"])
+
     // landed:  every mark gone, the calls yellow
     plan.landing = { branch: "editor", ids: new Set(), shas: [] }
     plan.updateStates()

@@ -2735,6 +2735,8 @@ export class PlanDoc extends PlanReader {
    *   - a done phase its commits not on main name (`P28:`), or with one of them listed under it
    *   - an item they name (`editor I55:`), the phase its `work` names, or one listed under it;  a judgement call also
    *     by the phase it was made in (`phase`):  its state reads it (`itemState()`:  a calm call stays blue)
+   *     - not once `main` has a commit of that phase from after the call (`landed`, `madeAt()`):  its work is in it
+   *       (epic `epic-engine` I439)
    *   - a done or fixed item's last finished status card, whose line then says `not on main yet`
    *   - that item's UPDATE label, when it names a status change (`FIXED`, T75):  its `Not in main` pill
    * - gone again once the work lands;  no `landing` (no git, a test):  nothing changes
@@ -2742,13 +2744,17 @@ export class PlanDoc extends PlanReader {
   updateLanded(): number {
     const landing = this.landing
     if (!landing) return 0
-    const { branch, ids, shas } = landing
+    const { branch, ids, shas, landed } = landing
     const isOffMain = (host: Element) =>
       Array.from(host.querySelectorAll(":scope > epic-commit")).some((commit) => {
         const listed = commit.getAttribute("sha") ?? ""
         return Boolean(listed) && shas.some((sha) => sha.startsWith(listed) || listed.startsWith(sha))
       })
     const phaseOf = (label: string | undefined) => /^P(\d+(?:\.\d+)?)\b/i.exec(label ?? "")?.[1]
+    // a call made in a phase is in that phase's next commit:  on main once main has one of the phase's from after it
+    // (epic `epic-engine` I439:  J330-J346 stayed NOT IN MAIN while later P80 work was on the branch alone)
+    const isLanded = (item: Element, { phase }: ItemFacts) =>
+      (landed?.get(`p${phase}`) ?? -Infinity) > PlanDoc.madeAt(item)
     let changed = 0
     const mark = (element: Element, on: boolean) => {
       const value = on ? branch : undefined
@@ -2766,7 +2772,10 @@ export class PlanDoc extends PlanReader {
       const offMain =
         ids.has(facts.id) ||
         (work !== undefined && ids.has(`p${work}`)) ||
-        (JUDGEMENT_ID.test(facts.id) && facts.phase !== undefined && ids.has(`p${facts.phase}`)) ||
+        (JUDGEMENT_ID.test(facts.id) &&
+          facts.phase !== undefined &&
+          ids.has(`p${facts.phase}`) &&
+          !isLanded(item, facts)) ||
         isOffMain(item)
       mark(item, offMain)
       const finished = CLOSED.has(facts.status) || facts.fixed
@@ -2778,6 +2787,20 @@ export class PlanDoc extends PlanReader {
       if (label) mark(label, offMain && finished && label.hasAttribute("became"))
     }
     return changed
+  }
+
+  /**
+   * About when `item` was made, in ms:  the earliest time on it -- its change stamp, when it was judged (P81), its
+   * cards' and replies' times;  `Infinity` with none.
+   * - not its change stamp alone:  a retitle or a review stamps that later (epic `epic-engine` I439)
+   */
+  static madeAt(item: Element): number {
+    const times = [
+      item.getAttribute("changed"),
+      item.getAttribute("judged"),
+      ...Array.from(item.querySelectorAll("[at]"), (dated) => dated.getAttribute("at"))
+    ].map((time) => Date.parse((time ?? "").replace(" ", "T")))
+    return Math.min(Infinity, ...times.filter((time) => Number.isFinite(time)))
   }
 
   /**
