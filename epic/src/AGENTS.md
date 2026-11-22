@@ -2370,7 +2370,8 @@ the epic page shown in both tabs).
     what it shows till then is the page's preset picks, or nothing, and neither is the person's.
     - a failed read is tried again every 3s;  this browser's old copy waits for it, never saved again as new
     - what they change meanwhile is laid over what's read, field by field (`AnswerDraft.withEdits()`), then saved
-    - closed before that, what they changed in that time is lost (J340)
+    - kept in this browser meanwhile, apart from the draft (`EARLY_KEY_PREFIX`, J340):  closed or reloaded before the
+      read, the next visit lays it over what it reads, unless an answer sent since is newer
   - An agent's rewrite reloads the page, or patches it in place:
     either way a question that's still there gets back what was typed in it.
   - Text whose id the rewrite removed is KEPT:  a box of its own above the notes, "Kept from before the page changed".

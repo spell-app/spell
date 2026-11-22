@@ -50,6 +50,12 @@ export const DETAILS_SETTLE_MS = 250
 export const DRAFT_KEY_PREFIX = "spell-details-draft:"
 
 /**
+ * The browser's copy of what was typed on a details page before it read the answers sent (`AnswerForm`, epic
+ * `epic-engine` J340):  this, then the page's path.  Apart from the draft:  the draft can't be saved till then.
+ */
+export const EARLY_KEY_PREFIX = "spell-details-early:"
+
+/**
  * How long after a draft's save FAILED an answer page tries again, in ms, until one goes through (epic `epic-engine`
  * P15):  a page server that's back takes it with no keystroke and no reload, its new token too (`ServerLink`).
  * - Why:  a failed save used to wait for the next keystroke, and with every box filled none came (r14).
