@@ -5,13 +5,9 @@
 	</>
 
 	<text class="lede" paragraph>One row of a choice page: the use site, what it's for, how it reads today, and a box pre-filled with Claude's call, which you type over or leave. Under the box, a comment box for your choice or notes on that row alone; the row's note, Claude's short why, is a column of its own, last.</>
-	<text class="meta" paragraph>
-		For anyone writing a page you answer on (a details or choice page), or changing this element.
-
-		<label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-choice-rows" link="/epic/src/components/epic-choice-rows/"><text title="epic/src/components/epic-choice-rows/" code>epic-choice-rows/</></> (epic <text code>epic-workflow</> P12; the comment box and the Explanation column, epic <text code>epic-engine</> P58).
-
-		Its vocabulary (every table below comes from it): <link target="src-spell-epic-src-components-epic-choice-rows-epicchoicerow-en-ts" link="/epic/src/components/epic-choice-rows/EpicChoiceRow.en.ts"><text title="epic/src/components/epic-choice-rows/EpicChoiceRow.en.ts" code>EpicChoiceRow.en.ts</></>.
-	</>
+	<text class="meta" paragraph>For anyone writing a page you answer on (a details or choice page), or changing this element.</>
+	<text class="meta" paragraph><label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-choice-rows" link="/epic/src/components/epic-choice-rows/"><text title="epic/src/components/epic-choice-rows/" code>epic-choice-rows/</></> (epic <text code>epic-workflow</> P12; the comment box and the Explanation column, epic <text code>epic-engine</> P58).</>
+	<text class="meta" paragraph>Its vocabulary (every table below comes from it): <link target="src-spell-epic-src-components-epic-choice-rows-epicchoicerow-en-ts" link="/epic/src/components/epic-choice-rows/EpicChoiceRow.en.ts"><text title="epic/src/components/epic-choice-rows/EpicChoiceRow.en.ts" code>EpicChoiceRow.en.ts</></>.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

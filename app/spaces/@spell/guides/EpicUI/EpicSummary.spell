@@ -7,15 +7,10 @@
 	<text class="lede" paragraph><text code>&lt;epic-summary&gt;</> is what the epic is, in two sentences, at the top of the Overview. It draws its text as a LEDE: the opening paragraph, a size up, in the headings' ink.</>
 
 	<!-- no ui-list.spell-meta here:  any ui-item element on the page leaves epic-item unstyled (issue I9 of epic-components) -->
-	<text class="meta" paragraph>
-		Written for: anyone reading or writing an epic page's markup, or changing this element.
-
-		Status: <label size="mini" color="green">built</>, in the <link target="src-spell-epic-src-components-epic-summary" link="/epic/src/components/epic-summary/"><text title="epic/src/components/epic-summary/" code>epic-summary</></> folder of the epics package.
-
-		Its vocabulary (attributes, slots, parts, children): <link target="src-spell-epic-src-components-epic-summary-epicsummary-en-ts" link="/epic/src/components/epic-summary/EpicSummary.en.ts"><text title="epic/src/components/epic-summary/EpicSummary.en.ts" code>EpicSummary.en.ts</></>.
-
-		The component: <link target="src-spell-epic-src-components-epic-summary-epicsummary-tsx" link="/epic/src/components/epic-summary/EpicSummary.tsx"><text title="epic/src/components/epic-summary/EpicSummary.tsx" code>EpicSummary.tsx</></>.
-	</>
+	<text class="meta" paragraph>Written for: anyone reading or writing an epic page's markup, or changing this element.</>
+	<text class="meta" paragraph>Status: <label size="mini" color="green">built</>, in the <link target="src-spell-epic-src-components-epic-summary" link="/epic/src/components/epic-summary/"><text title="epic/src/components/epic-summary/" code>epic-summary</></> folder of the epics package.</>
+	<text class="meta" paragraph>Its vocabulary (attributes, slots, parts, children): <link target="src-spell-epic-src-components-epic-summary-epicsummary-en-ts" link="/epic/src/components/epic-summary/EpicSummary.en.ts"><text title="epic/src/components/epic-summary/EpicSummary.en.ts" code>EpicSummary.en.ts</></>.</>
+	<text class="meta" paragraph>The component: <link target="src-spell-epic-src-components-epic-summary-epicsummary-tsx" link="/epic/src/components/epic-summary/EpicSummary.tsx"><text title="epic/src/components/epic-summary/EpicSummary.tsx" code>EpicSummary.tsx</></>.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

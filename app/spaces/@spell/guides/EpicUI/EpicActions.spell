@@ -5,15 +5,10 @@
 	</>
 
 	<text class="lede" paragraph><text code>&lt;epic-actions&gt;</> is a block's actions row on an epic page: the one row of a paragraph's, a list's or a table's own controls, a line of no height just before the block, its buttons over the block's top right corner. The comments' bullhorn comes first, then a table's expand button.</>
-	<text class="meta" paragraph>
-		For anyone adding a control to a block, or changing where the bullhorns sit.
-
-		Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> P45), its own <link target="src-spell-epic-src-components-epic-actions" link="/epic/src/components/epic-actions/"><text title="epic/src/components/epic-actions/" code>epic-actions</></> family.
-
-		Its vocabulary: <link target="src-spell-epic-src-components-epic-actions-epicactions-en-ts" link="/epic/src/components/epic-actions/EpicActions.en.ts"><text title="epic/src/components/epic-actions/EpicActions.en.ts" code>EpicActions.en.ts</></>
-
-		Its component: <link target="src-spell-epic-src-components-epic-actions-epicactions-tsx" link="/epic/src/components/epic-actions/EpicActions.tsx"><text title="epic/src/components/epic-actions/EpicActions.tsx" code>EpicActions.tsx</></>.
-	</>
+	<text class="meta" paragraph>For anyone adding a control to a block, or changing where the bullhorns sit.</>
+	<text class="meta" paragraph>Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> P45), its own <link target="src-spell-epic-src-components-epic-actions" link="/epic/src/components/epic-actions/"><text title="epic/src/components/epic-actions/" code>epic-actions</></> family.</>
+	<text class="meta" paragraph>Its vocabulary: <link target="src-spell-epic-src-components-epic-actions-epicactions-en-ts" link="/epic/src/components/epic-actions/EpicActions.en.ts"><text title="epic/src/components/epic-actions/EpicActions.en.ts" code>EpicActions.en.ts</></></>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-actions-epicactions-tsx" link="/epic/src/components/epic-actions/EpicActions.tsx"><text title="epic/src/components/epic-actions/EpicActions.tsx" code>EpicActions.tsx</></>.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

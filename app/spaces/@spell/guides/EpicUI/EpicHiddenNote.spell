@@ -5,15 +5,10 @@
 	</>
 
 	<text class="lede" paragraph><text code>&lt;epic-hidden-note&gt;</> is the quiet line under a list the state filter hides items of: "3 hidden · show all". A click shows them all again.</>
-	<text class="meta" paragraph>
-		For anyone changing how items are filtered.
-
-		Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> P3), in the <link target="src-spell-epic-src-components-epic-state-filter" link="/epic/src/components/epic-state-filter/"><text title="epic/src/components/epic-state-filter/" code>epic-state-filter</></> family, with <link target="src-spell-epic-src-docs-epic-state-filter-html" link="/epic-state-filter"><text code>&lt;epic-state-filter&gt;</></>.
-
-		Its vocabulary: <link target="src-spell-epic-src-components-epic-state-filter-epichiddennote-en-ts" link="/epic/src/components/epic-state-filter/EpicHiddenNote.en.ts"><text title="epic/src/components/epic-state-filter/EpicHiddenNote.en.ts" code>EpicHiddenNote.en.ts</></>
-
-		Its component: <link target="src-spell-epic-src-components-epic-state-filter-epichiddennote-tsx" link="/epic/src/components/epic-state-filter/EpicHiddenNote.tsx"><text title="epic/src/components/epic-state-filter/EpicHiddenNote.tsx" code>EpicHiddenNote.tsx</></>.
-	</>
+	<text class="meta" paragraph>For anyone changing how items are filtered.</>
+	<text class="meta" paragraph>Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> P3), in the <link target="src-spell-epic-src-components-epic-state-filter" link="/epic/src/components/epic-state-filter/"><text title="epic/src/components/epic-state-filter/" code>epic-state-filter</></> family, with <link target="src-spell-epic-src-docs-epic-state-filter-html" link="/epic-state-filter"><text code>&lt;epic-state-filter&gt;</></>.</>
+	<text class="meta" paragraph>Its vocabulary: <link target="src-spell-epic-src-components-epic-state-filter-epichiddennote-en-ts" link="/epic/src/components/epic-state-filter/EpicHiddenNote.en.ts"><text title="epic/src/components/epic-state-filter/EpicHiddenNote.en.ts" code>EpicHiddenNote.en.ts</></></>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-state-filter-epichiddennote-tsx" link="/epic/src/components/epic-state-filter/EpicHiddenNote.tsx"><text title="epic/src/components/epic-state-filter/EpicHiddenNote.tsx" code>EpicHiddenNote.tsx</></>.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

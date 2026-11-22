@@ -5,13 +5,9 @@
 	</>
 
 	<text class="lede" paragraph>A details page's Send, in its sticky header: where the answer stands, then Send (<link target="src-spell-epic-src-docs-epic-send-buttons-html" link="/epic-send-buttons"><text code>&lt;epic-send-buttons&gt;</></>). It sends the whole page, partial answers too, as often as you like: the page never locks. No Auto Send countdown here (J142, only an epic page's header has one): only a press sends. Beside them, the draft's save: what's typed and not sent is kept beside the page, and comes back when the page reloads or is rewritten. After the button, who hears it: <text code>repo-split is listening</> while a session waits for the answer, else <text code>nobody is waiting yet</>. Send works either way.</>
-	<text class="meta" paragraph>
-		For anyone writing a page you answer on (a details or choice page), or changing this element.
-
-		<label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-send" link="/epic/src/components/epic-send/"><text title="epic/src/components/epic-send/" code>epic-send/</></> (epic <text code>epic-workflow</> P12; the draft P18; who hears it, epic <text code>epic-engine</> r6).
-
-		Its vocabulary (every table below comes from it): <link target="src-spell-epic-src-components-epic-send-epicsend-en-ts" link="/epic/src/components/epic-send/EpicSend.en.ts"><text title="epic/src/components/epic-send/EpicSend.en.ts" code>EpicSend.en.ts</></>.
-	</>
+	<text class="meta" paragraph>For anyone writing a page you answer on (a details or choice page), or changing this element.</>
+	<text class="meta" paragraph><label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-send" link="/epic/src/components/epic-send/"><text title="epic/src/components/epic-send/" code>epic-send/</></> (epic <text code>epic-workflow</> P12; the draft P18; who hears it, epic <text code>epic-engine</> r6).</>
+	<text class="meta" paragraph>Its vocabulary (every table below comes from it): <link target="src-spell-epic-src-components-epic-send-epicsend-en-ts" link="/epic/src/components/epic-send/EpicSend.en.ts"><text title="epic/src/components/epic-send/EpicSend.en.ts" code>EpicSend.en.ts</></>.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

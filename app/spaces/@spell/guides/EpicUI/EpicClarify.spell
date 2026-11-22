@@ -7,15 +7,10 @@
 	<text class="lede" paragraph>An item with only a title says <text italic>What it says on the tin.</> where its details would be. <text code>&lt;epic-clarify&gt;</> is the <text bold>Clarify</> after those words: while the page is reviewed, a link that asks Claude for the item's details at once, without waiting for Send.</>
 	<text paragraph>With <text code>icon</>, it's a small (i) button, last on the line of every item, every kind (issues, judgement calls, todos, questions, manual tests), on an epic page being reviewed: found without opening the item. A click asks Claude to clarify that item's text at once; while Claude works on it, the icon turns like a coin. Until epic <text code>epic-engine</> T95 it was a circle-question at the right of an item's body, seen only once the item was opened.</>
 	<text paragraph>Either click leaves the page where it is: the link is a button drawn as a word, never a <text code>#</> link, and a session told of the request takes it by itself, so no notice appears at the page's top.</>
-	<text class="meta" paragraph>
-		For anyone reviewing an epic page.
-
-		Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> I281;  the icon, T76;  on every item's line, T95), its own <link target="src-spell-epic-src-components-epic-clarify" link="/epic/src/components/epic-clarify/"><text title="epic/src/components/epic-clarify/" code>epic-clarify</></> family.
-
-		Its vocabulary: <link target="src-spell-epic-src-components-epic-clarify-epicclarify-en-ts" link="/epic/src/components/epic-clarify/EpicClarify.en.ts"><text title="epic/src/components/epic-clarify/EpicClarify.en.ts" code>EpicClarify.en.ts</></>
-
-		Its component: <link target="src-spell-epic-src-components-epic-clarify-epicclarify-tsx" link="/epic/src/components/epic-clarify/EpicClarify.tsx"><text title="epic/src/components/epic-clarify/EpicClarify.tsx" code>EpicClarify.tsx</></>.
-	</>
+	<text class="meta" paragraph>For anyone reviewing an epic page.</>
+	<text class="meta" paragraph>Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> I281;  the icon, T76;  on every item's line, T95), its own <link target="src-spell-epic-src-components-epic-clarify" link="/epic/src/components/epic-clarify/"><text title="epic/src/components/epic-clarify/" code>epic-clarify</></> family.</>
+	<text class="meta" paragraph>Its vocabulary: <link target="src-spell-epic-src-components-epic-clarify-epicclarify-en-ts" link="/epic/src/components/epic-clarify/EpicClarify.en.ts"><text title="epic/src/components/epic-clarify/EpicClarify.en.ts" code>EpicClarify.en.ts</></></>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-clarify-epicclarify-tsx" link="/epic/src/components/epic-clarify/EpicClarify.tsx"><text title="epic/src/components/epic-clarify/EpicClarify.tsx" code>EpicClarify.tsx</></>.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

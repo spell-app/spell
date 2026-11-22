@@ -5,13 +5,9 @@
 	</>
 
 	<text class="lede" paragraph>One comment's whole thread: its header (the bullhorn, its id, the first words it's on), your answer while it's your turn, the messages in order, then your reply box. The docs runtime's comments draw one under the paragraph, list item or cell holding a comment's quote, else under its block, on every page that takes comments: a guide, an epic page, an Epic UI page.</>
-	<text class="meta" paragraph>
-		For anyone changing how comments look or work on a page.
-
-		Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-thread-epicthread-en-ts" link="/epic/src/components/epic-thread/EpicThread.en.ts"><text title="epic/src/components/epic-thread/EpicThread.en.ts" code>EpicThread.en.ts</></>.
-
-		Its component: <link target="src-spell-epic-src-components-epic-thread-epicthread-tsx" link="/epic/src/components/epic-thread/EpicThread.tsx"><text title="epic/src/components/epic-thread/EpicThread.tsx" code>EpicThread.tsx</></>, with its style sheet (<text code>.css</>) and tests beside it.
-	</>
+	<text class="meta" paragraph>For anyone changing how comments look or work on a page.</>
+	<text class="meta" paragraph>Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-thread-epicthread-en-ts" link="/epic/src/components/epic-thread/EpicThread.en.ts"><text title="epic/src/components/epic-thread/EpicThread.en.ts" code>EpicThread.en.ts</></>.</>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-thread-epicthread-tsx" link="/epic/src/components/epic-thread/EpicThread.tsx"><text title="epic/src/components/epic-thread/EpicThread.tsx" code>EpicThread.tsx</></>, with its style sheet (<text code>.css</>) and tests beside it.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

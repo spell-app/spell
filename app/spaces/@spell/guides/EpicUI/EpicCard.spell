@@ -12,15 +12,10 @@
 		<item>A <text code>...</> menu in its top right corner: Resume (its session in its own VS Code window), Rename Epic..., Complete and Delete Epic..., each asking first in a dialog.</>
 		<item>The day it was last worked on at its bottom right, the full date its tooltip.</>
 	</>
-	<text class="meta" paragraph>
-		For anyone changing the Epics page's cards.
-
-		Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> P3), in the <link target="src-spell-epic-src-components-epic-list" link="/epic/src/components/epic-list/"><text title="epic/src/components/epic-list/" code>epic-list</></> family, with <text code>&lt;epic-list&gt;</>, <text code>&lt;epic-card&gt;</> and <text code>&lt;epic-sort&gt;</>.
-
-		Its vocabulary: <link target="src-spell-epic-src-components-epic-list-epiccard-en-ts" link="/epic/src/components/epic-list/EpicCard.en.ts"><text title="epic/src/components/epic-list/EpicCard.en.ts" code>EpicCard.en.ts</></>
-
-		Its component: <link target="src-spell-epic-src-components-epic-list-epiccard-tsx" link="/epic/src/components/epic-list/EpicCard.tsx"><text title="epic/src/components/epic-list/EpicCard.tsx" code>EpicCard.tsx</></>.
-	</>
+	<text class="meta" paragraph>For anyone changing the Epics page's cards.</>
+	<text class="meta" paragraph>Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> P3), in the <link target="src-spell-epic-src-components-epic-list" link="/epic/src/components/epic-list/"><text title="epic/src/components/epic-list/" code>epic-list</></> family, with <text code>&lt;epic-list&gt;</>, <text code>&lt;epic-card&gt;</> and <text code>&lt;epic-sort&gt;</>.</>
+	<text class="meta" paragraph>Its vocabulary: <link target="src-spell-epic-src-components-epic-list-epiccard-en-ts" link="/epic/src/components/epic-list/EpicCard.en.ts"><text title="epic/src/components/epic-list/EpicCard.en.ts" code>EpicCard.en.ts</></></>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-list-epiccard-tsx" link="/epic/src/components/epic-list/EpicCard.tsx"><text title="epic/src/components/epic-list/EpicCard.tsx" code>EpicCard.tsx</></>.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

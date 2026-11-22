@@ -12,17 +12,11 @@
 		<item>The wand that turned the countdown on and off is gone for good (epic <text code>epic-engine</> P53).</>
 		<item>It sends nothing itself: it asks its owner, which sends its own way.</>
 	</>
-	<text class="meta" paragraph>
-		For anyone changing how a page's answers or marks reach Claude.
-
-		Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> P20, P53), in the <link target="src-spell-epic-src-components-epic-send-buttons" link="/epic/src/components/epic-send-buttons/"><text title="epic/src/components/epic-send-buttons/" code>epic-send-buttons</></> family.
-
-		Its vocabulary: <link target="src-spell-epic-src-components-epic-send-buttons-epicsendbuttons-en-ts" link="/epic/src/components/epic-send-buttons/EpicSendButtons.en.ts"><text title="epic/src/components/epic-send-buttons/EpicSendButtons.en.ts" code>EpicSendButtons.en.ts</></>
-
-		Its component: <link target="src-spell-epic-src-components-epic-send-buttons-epicsendbuttons-tsx" link="/epic/src/components/epic-send-buttons/EpicSendButtons.tsx"><text title="epic/src/components/epic-send-buttons/EpicSendButtons.tsx" code>EpicSendButtons.tsx</></>
-
-		The countdown: <link target="src-spell-epic-src-review-sendcountdown-ts" link="/epic/src/review/SendCountdown.ts"><text title="epic/src/review/SendCountdown.ts" code>SendCountdown</></>.
-	</>
+	<text class="meta" paragraph>For anyone changing how a page's answers or marks reach Claude.</>
+	<text class="meta" paragraph>Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> P20, P53), in the <link target="src-spell-epic-src-components-epic-send-buttons" link="/epic/src/components/epic-send-buttons/"><text title="epic/src/components/epic-send-buttons/" code>epic-send-buttons</></> family.</>
+	<text class="meta" paragraph>Its vocabulary: <link target="src-spell-epic-src-components-epic-send-buttons-epicsendbuttons-en-ts" link="/epic/src/components/epic-send-buttons/EpicSendButtons.en.ts"><text title="epic/src/components/epic-send-buttons/EpicSendButtons.en.ts" code>EpicSendButtons.en.ts</></></>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-send-buttons-epicsendbuttons-tsx" link="/epic/src/components/epic-send-buttons/EpicSendButtons.tsx"><text title="epic/src/components/epic-send-buttons/EpicSendButtons.tsx" code>EpicSendButtons.tsx</></></>
+	<text class="meta" paragraph>The countdown: <link target="src-spell-epic-src-review-sendcountdown-ts" link="/epic/src/review/SendCountdown.ts"><text title="epic/src/review/SendCountdown.ts" code>SendCountdown</></>.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

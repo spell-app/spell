@@ -10,15 +10,10 @@
 		no <ui-list class="spell-meta">:  its <ui-item>s take Spell UI's "item" style sheet name before the
 		              epics pack's elements can, and live examples may draw unstyled (issue I9 of epic-components)
 	-->
-	<text class="meta" paragraph>
-		For anyone reading or writing an epic page's markup, or changing this element.
-
-		Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-update-epicupdate-en-ts" link="/epic/src/components/epic-update/EpicUpdate.en.ts"><text title="epic/src/components/epic-update/EpicUpdate.en.ts" code>EpicUpdate.en.ts</></>.
-
-		Its component: <link target="src-spell-epic-src-components-epic-update-epicupdate-tsx" link="/epic/src/components/epic-update/EpicUpdate.tsx"><text title="epic/src/components/epic-update/EpicUpdate.tsx" code>EpicUpdate.tsx</></>, with its style sheet and tests beside it.
-
-		Since 2026-10-11 (epic <text code>epic-workflow</>), it also replaces <link target="src-packages-epics-docs-epic-updated-html" link="/epic-updated"><text code>&lt;epic-updated&gt;</></> and the Plan changes box.
-	</>
+	<text class="meta" paragraph>For anyone reading or writing an epic page's markup, or changing this element.</>
+	<text class="meta" paragraph>Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-update-epicupdate-en-ts" link="/epic/src/components/epic-update/EpicUpdate.en.ts"><text title="epic/src/components/epic-update/EpicUpdate.en.ts" code>EpicUpdate.en.ts</></>.</>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-update-epicupdate-tsx" link="/epic/src/components/epic-update/EpicUpdate.tsx"><text title="epic/src/components/epic-update/EpicUpdate.tsx" code>EpicUpdate.tsx</></>, with its style sheet and tests beside it.</>
+	<text class="meta" paragraph>Since 2026-10-11 (epic <text code>epic-workflow</>), it also replaces <link target="src-packages-epics-docs-epic-updated-html" link="/epic-updated"><text code>&lt;epic-updated&gt;</></> and the Plan changes box.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

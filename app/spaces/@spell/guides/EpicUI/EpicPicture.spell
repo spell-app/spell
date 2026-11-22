@@ -7,15 +7,10 @@
 	<text class="lede" paragraph>A picture you paste into the chat while asking for a fix goes onto the issue or todo it becomes. <text code>&lt;epic-picture&gt;</> shows it in the item, after your words: a thumbnail, which a click opens full size.</>
 	<text paragraph>Each picture has a label, IMG1, IMG2 and so on, in a small chip on its top left corner. Write "IMG2 is wrong" in a comment or a note, and Claude knows which file you mean. Every place on a page that takes pictures draws them this way: a comment, a note, an option's form, a new epic's kickoff box.</>
 	<text paragraph>On an epic page being reviewed, a trash sits at its top right corner. One click deletes it: it goes at once, with Undo in the page's notices for 6 seconds; then the page server takes it out of the item and deletes its file.</>
-	<text class="meta" paragraph>
-		For anyone reviewing an epic page.
-
-		Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> T87, labelled in P75), its own <link target="src-spell-epic-src-components-epic-picture" link="/epic/src/components/epic-picture/"><text title="epic/src/components/epic-picture/" code>epic-picture</></> family.
-
-		Its vocabulary: <link target="src-spell-epic-src-components-epic-picture-epicpicture-en-ts" link="/epic/src/components/epic-picture/EpicPicture.en.ts"><text title="epic/src/components/epic-picture/EpicPicture.en.ts" code>EpicPicture.en.ts</></>
-
-		Its component: <link target="src-spell-epic-src-components-epic-picture-epicpicture-tsx" link="/epic/src/components/epic-picture/EpicPicture.tsx"><text title="epic/src/components/epic-picture/EpicPicture.tsx" code>EpicPicture.tsx</></>.
-	</>
+	<text class="meta" paragraph>For anyone reviewing an epic page.</>
+	<text class="meta" paragraph>Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> T87, labelled in P75), its own <link target="src-spell-epic-src-components-epic-picture" link="/epic/src/components/epic-picture/"><text title="epic/src/components/epic-picture/" code>epic-picture</></> family.</>
+	<text class="meta" paragraph>Its vocabulary: <link target="src-spell-epic-src-components-epic-picture-epicpicture-en-ts" link="/epic/src/components/epic-picture/EpicPicture.en.ts"><text title="epic/src/components/epic-picture/EpicPicture.en.ts" code>EpicPicture.en.ts</></></>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-picture-epicpicture-tsx" link="/epic/src/components/epic-picture/EpicPicture.tsx"><text title="epic/src/components/epic-picture/EpicPicture.tsx" code>EpicPicture.tsx</></>.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

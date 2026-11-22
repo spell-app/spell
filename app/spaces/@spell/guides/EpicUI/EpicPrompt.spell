@@ -7,15 +7,10 @@
 	<text class="lede" paragraph><text code>&lt;epic-prompt&gt;</> is the prompt that started the plan, as you typed it. It draws a fold titled "Kickoff prompt" on faint violet, your colour; unfolded, the prompt shows as a quoted card.</>
 
 	<!-- no ui-list.spell-meta here:  any ui-item element on the page leaves epic-item unstyled (issue I9 of epic-components) -->
-	<text class="meta" paragraph>
-		Written for: anyone reading or writing an epic page's markup, or changing this element.
-
-		Status: <label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-prompt" link="/epic/src/components/epic-prompt/"><text title="epic/src/components/epic-prompt/" code>epic-prompt/</></>.
-
-		Its vocabulary (attributes, slots, parts, children): <link target="src-spell-epic-src-components-epic-prompt-epicprompt-en-ts" link="/epic/src/components/epic-prompt/EpicPrompt.en.ts"><text title="epic/src/components/epic-prompt/EpicPrompt.en.ts" code>EpicPrompt.en.ts</></>.
-
-		The component: <link target="src-spell-epic-src-components-epic-prompt-epicprompt-tsx" link="/epic/src/components/epic-prompt/EpicPrompt.tsx"><text title="epic/src/components/epic-prompt/EpicPrompt.tsx" code>EpicPrompt.tsx</></>.
-	</>
+	<text class="meta" paragraph>Written for: anyone reading or writing an epic page's markup, or changing this element.</>
+	<text class="meta" paragraph>Status: <label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-prompt" link="/epic/src/components/epic-prompt/"><text title="epic/src/components/epic-prompt/" code>epic-prompt/</></>.</>
+	<text class="meta" paragraph>Its vocabulary (attributes, slots, parts, children): <link target="src-spell-epic-src-components-epic-prompt-epicprompt-en-ts" link="/epic/src/components/epic-prompt/EpicPrompt.en.ts"><text title="epic/src/components/epic-prompt/EpicPrompt.en.ts" code>EpicPrompt.en.ts</></>.</>
+	<text class="meta" paragraph>The component: <link target="src-spell-epic-src-components-epic-prompt-epicprompt-tsx" link="/epic/src/components/epic-prompt/EpicPrompt.tsx"><text title="epic/src/components/epic-prompt/EpicPrompt.tsx" code>EpicPrompt.tsx</></>.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

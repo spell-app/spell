@@ -5,15 +5,10 @@
 	</>
 
 	<text class="lede" paragraph>A change mark: when an answer rewrites the Overview or a phase, the changed or new words show on an orange ground, with a small chip naming the question that changed them. A click on the words opens a popup: which answer changed them and when, the words they replaced, and Reopen, which opens the question again.</>
-	<text class="meta" paragraph>
-		For anyone reading or writing an epic page's markup, or changing this element.
-
-		Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-change-epicchange-en-ts" link="/epic/src/components/epic-change/EpicChange.en.ts"><text title="epic/src/components/epic-change/EpicChange.en.ts" code>EpicChange.en.ts</></>.
-
-		Its component: <link target="src-spell-epic-src-components-epic-change-epicchange-tsx" link="/epic/src/components/epic-change/EpicChange.tsx"><text title="epic/src/components/epic-change/EpicChange.tsx" code>EpicChange.tsx</></>, with its style sheet and tests beside it.
-
-		Since 2026-10-24 (epic <text code>epic-engine</> P30, Q13 B). The <link target="src-packages-epics-docs-epic-update-html" link="/epic-update"><text code>&lt;epic-update&gt;</></> blocks written before stay as they are.
-	</>
+	<text class="meta" paragraph>For anyone reading or writing an epic page's markup, or changing this element.</>
+	<text class="meta" paragraph>Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-change-epicchange-en-ts" link="/epic/src/components/epic-change/EpicChange.en.ts"><text title="epic/src/components/epic-change/EpicChange.en.ts" code>EpicChange.en.ts</></>.</>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-change-epicchange-tsx" link="/epic/src/components/epic-change/EpicChange.tsx"><text title="epic/src/components/epic-change/EpicChange.tsx" code>EpicChange.tsx</></>, with its style sheet and tests beside it.</>
+	<text class="meta" paragraph>Since 2026-10-24 (epic <text code>epic-engine</> P30, Q13 B). The <link target="src-packages-epics-docs-epic-update-html" link="/epic-update"><text code>&lt;epic-update&gt;</></> blocks written before stay as they are.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

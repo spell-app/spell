@@ -5,13 +5,9 @@
 	</>
 
 	<text class="lede" paragraph>A box you type in, on a page you answer on: one line to start, growing with its text. What you type is part of the page's answer, by its <text code>type</> and <text code>for</>. The page's notes box also shows what the page KEPT: text typed for a question, option or section an agent's rewrite took off the page. A box may start with Claude's suggested text, its seed, for you to edit into your own.</>
-	<text class="meta" paragraph>
-		For anyone writing a page you answer on (a details or choice page), or changing this element.
-
-		<label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-text-box" link="/epic/src/components/epic-text-box/"><text title="epic/src/components/epic-text-box/" code>epic-text-box/</></> (epic <text code>epic-workflow</> P12; the kept text P18; the seed and <text code>code</>, epic <text code>ast-markup</>).
-
-		Its vocabulary (every table below comes from it): <link target="src-spell-epic-src-components-epic-text-box-epictextbox-en-ts" link="/epic/src/components/epic-text-box/EpicTextBox.en.ts"><text title="epic/src/components/epic-text-box/EpicTextBox.en.ts" code>EpicTextBox.en.ts</></>.
-	</>
+	<text class="meta" paragraph>For anyone writing a page you answer on (a details or choice page), or changing this element.</>
+	<text class="meta" paragraph><label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-text-box" link="/epic/src/components/epic-text-box/"><text title="epic/src/components/epic-text-box/" code>epic-text-box/</></> (epic <text code>epic-workflow</> P12; the kept text P18; the seed and <text code>code</>, epic <text code>ast-markup</>).</>
+	<text class="meta" paragraph>Its vocabulary (every table below comes from it): <link target="src-spell-epic-src-components-epic-text-box-epictextbox-en-ts" link="/epic/src/components/epic-text-box/EpicTextBox.en.ts"><text title="epic/src/components/epic-text-box/EpicTextBox.en.ts" code>EpicTextBox.en.ts</></>.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>
@@ -49,10 +45,14 @@
 		<text paragraph>details page · a section's code, then a box seeded with the suggestion:</>
 		<markdown>
 			```html
-			<button>Save</button>
-
-			  
-			    <ui-button label="Save {name}"></ui-button>
+			<ui-section id="s1" label="1. Buttons">
+			  <ui-code language="html"><script type="text/plain"><button>Save</button></script></ui-code>
+			  <epic-text-box for="s1" code>
+			    <script type="text/plain">
+			      <ui-button label="Save {name}"></ui-button>
+			    </script>
+			  </epic-text-box>
+			</ui-section>
 			```
 		</>
 	</>

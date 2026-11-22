@@ -10,15 +10,10 @@
 		<item>It walks the items the page draws red, orange, blue or yellow. Done, decided and grey ones never show.</>
 		<item>Each item's buttons are the page's own: the same marks, the same Send.</>
 	</>
-	<text class="meta" paragraph>
-		For anyone changing how an epic page is reviewed.
-
-		Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> P57), in the <link target="src-spell-epic-src-components-epic-focus" link="/epic/src/components/epic-focus/"><text title="epic/src/components/epic-focus/" code>epic-focus</></> family.
-
-		Its vocabulary: <link target="src-spell-epic-src-components-epic-focus-epicfocus-en-ts" link="/epic/src/components/epic-focus/EpicFocus.en.ts"><text title="epic/src/components/epic-focus/EpicFocus.en.ts" code>EpicFocus.en.ts</></>
-
-		Its component: <link target="src-spell-epic-src-components-epic-focus-epicfocus-tsx" link="/epic/src/components/epic-focus/EpicFocus.tsx"><text title="epic/src/components/epic-focus/EpicFocus.tsx" code>EpicFocus.tsx</></>.
-	</>
+	<text class="meta" paragraph>For anyone changing how an epic page is reviewed.</>
+	<text class="meta" paragraph>Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> P57), in the <link target="src-spell-epic-src-components-epic-focus" link="/epic/src/components/epic-focus/"><text title="epic/src/components/epic-focus/" code>epic-focus</></> family.</>
+	<text class="meta" paragraph>Its vocabulary: <link target="src-spell-epic-src-components-epic-focus-epicfocus-en-ts" link="/epic/src/components/epic-focus/EpicFocus.en.ts"><text title="epic/src/components/epic-focus/EpicFocus.en.ts" code>EpicFocus.en.ts</></></>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-focus-epicfocus-tsx" link="/epic/src/components/epic-focus/EpicFocus.tsx"><text title="epic/src/components/epic-focus/EpicFocus.tsx" code>EpicFocus.tsx</></>.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

@@ -10,15 +10,10 @@
 	<text class="lede" paragraph><text code>&lt;epic-updated&gt;</> was one change to a phase's plan, after your feedback or something found while building. It draws a dashed orange FENCE (a box around it) headed <text code>Updated</> and its date, with what changed under it.</>
 
 	<!-- no ui-list.spell-meta here:  any ui-item element on the page leaves epic-item unstyled (issue I9 of epic-components) -->
-	<text class="meta" paragraph>
-		Written for: anyone reading or writing an epic page's markup, or changing this element.
-
-		Status: <label size="mini" color="green">built</>, in the <link target="src-spell-epic-src-components-epic-phase" link="/epic/src/components/epic-phase/"><text title="epic/src/components/epic-phase/" code>epic-phase</></> folder of the epics package.
-
-		Its vocabulary (attributes, slots, parts, children): <link target="src-spell-epic-src-components-epic-phase-epicupdated-en-ts" link="/epic/src/components/epic-phase/EpicUpdated.en.ts"><text title="epic/src/components/epic-phase/EpicUpdated.en.ts" code>EpicUpdated.en.ts</></>.
-
-		The component: <link target="src-spell-epic-src-components-epic-phase-epicupdated-tsx" link="/epic/src/components/epic-phase/EpicUpdated.tsx"><text title="epic/src/components/epic-phase/EpicUpdated.tsx" code>EpicUpdated.tsx</></>.
-	</>
+	<text class="meta" paragraph>Written for: anyone reading or writing an epic page's markup, or changing this element.</>
+	<text class="meta" paragraph>Status: <label size="mini" color="green">built</>, in the <link target="src-spell-epic-src-components-epic-phase" link="/epic/src/components/epic-phase/"><text title="epic/src/components/epic-phase/" code>epic-phase</></> folder of the epics package.</>
+	<text class="meta" paragraph>Its vocabulary (attributes, slots, parts, children): <link target="src-spell-epic-src-components-epic-phase-epicupdated-en-ts" link="/epic/src/components/epic-phase/EpicUpdated.en.ts"><text title="epic/src/components/epic-phase/EpicUpdated.en.ts" code>EpicUpdated.en.ts</></>.</>
+	<text class="meta" paragraph>The component: <link target="src-spell-epic-src-components-epic-phase-epicupdated-tsx" link="/epic/src/components/epic-phase/EpicUpdated.tsx"><text title="epic/src/components/epic-phase/EpicUpdated.tsx" code>EpicUpdated.tsx</></>.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

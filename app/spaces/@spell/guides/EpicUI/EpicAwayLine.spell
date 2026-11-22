@@ -5,15 +5,10 @@
 	</>
 
 	<text class="lede" paragraph>One line of an epic page's "0. While you were out" (a phase done, a call waiting, an issue, a test), or the heading of one of its parts, with a ✓ Read at its start while the page is reviewed. Read, it fades at once, and the page server takes it off the section straight away, with no Send;  the rest stays.  What it's about is seen too:  its phase's or item's new update blocks go quiet.  A heading's Read does all of that for every line of its part.</>
-	<text class="meta" paragraph>
-		For anyone reading or writing an epic page's markup, or changing this element.
-
-		Its vocabulary: <link target="src-epic-away-line-en" link="/epic/src/components/epic-away-line/EpicAwayLine.en.ts"><text title="epic/src/components/epic-away-line/EpicAwayLine.en.ts" code>EpicAwayLine.en.ts</></>.
-
-		Its component: <link target="src-epic-away-line-tsx" link="/epic/src/components/epic-away-line/EpicAwayLine.tsx"><text title="epic/src/components/epic-away-line/EpicAwayLine.tsx" code>EpicAwayLine.tsx</></>, with its style sheet and tests beside it.
-
-		Since 2026-11-03 (epic <text code>epic-engine</> I206;  "a tick per section as well, so I can say 'that's good' on part but not on the whole thing").
-	</>
+	<text class="meta" paragraph>For anyone reading or writing an epic page's markup, or changing this element.</>
+	<text class="meta" paragraph>Its vocabulary: <link target="src-epic-away-line-en" link="/epic/src/components/epic-away-line/EpicAwayLine.en.ts"><text title="epic/src/components/epic-away-line/EpicAwayLine.en.ts" code>EpicAwayLine.en.ts</></>.</>
+	<text class="meta" paragraph>Its component: <link target="src-epic-away-line-tsx" link="/epic/src/components/epic-away-line/EpicAwayLine.tsx"><text title="epic/src/components/epic-away-line/EpicAwayLine.tsx" code>EpicAwayLine.tsx</></>, with its style sheet and tests beside it.</>
+	<text class="meta" paragraph>Since 2026-11-03 (epic <text code>epic-engine</> I206;  "a tick per section as well, so I can say 'that's good' on part but not on the whole thing").</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

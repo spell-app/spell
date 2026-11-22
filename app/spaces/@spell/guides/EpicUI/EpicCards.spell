@@ -5,15 +5,10 @@
 	</>
 
 	<text class="lede" paragraph><text code>&lt;epic-cards&gt;</> is a saga page's Epics: a card for each epic whose page names the saga, in the Epics page's groups. It asks the page server for them, so it is never out of date.</>
-	<text class="meta" paragraph>
-		Written for: anyone reading or writing a saga page's markup, or changing this element.
-
-		Status: <label size="mini" color="green">built</> (epic <text code>epic-workflow</> P15), in the <link target="src-spell-epic-src-components-epic-cards" link="/epic/src/components/epic-cards/"><text title="epic/src/components/epic-cards/" code>epic-cards</></> folder of the epics package.
-
-		Its vocabulary (attributes, parts, texts): <link target="src-spell-epic-src-components-epic-cards-epiccards-en-ts" link="/epic/src/components/epic-cards/EpicCards.en.ts"><text title="epic/src/components/epic-cards/EpicCards.en.ts" code>EpicCards.en.ts</></>.
-
-		The component: <link target="src-spell-epic-src-components-epic-cards-epiccards-tsx" link="/epic/src/components/epic-cards/EpicCards.tsx"><text title="epic/src/components/epic-cards/EpicCards.tsx" code>EpicCards.tsx</></>.
-	</>
+	<text class="meta" paragraph>Written for: anyone reading or writing a saga page's markup, or changing this element.</>
+	<text class="meta" paragraph>Status: <label size="mini" color="green">built</> (epic <text code>epic-workflow</> P15), in the <link target="src-spell-epic-src-components-epic-cards" link="/epic/src/components/epic-cards/"><text title="epic/src/components/epic-cards/" code>epic-cards</></> folder of the epics package.</>
+	<text class="meta" paragraph>Its vocabulary (attributes, parts, texts): <link target="src-spell-epic-src-components-epic-cards-epiccards-en-ts" link="/epic/src/components/epic-cards/EpicCards.en.ts"><text title="epic/src/components/epic-cards/EpicCards.en.ts" code>EpicCards.en.ts</></>.</>
+	<text class="meta" paragraph>The component: <link target="src-spell-epic-src-components-epic-cards-epiccards-tsx" link="/epic/src/components/epic-cards/EpicCards.tsx"><text title="epic/src/components/epic-cards/EpicCards.tsx" code>EpicCards.tsx</></>.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

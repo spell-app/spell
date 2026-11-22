@@ -10,15 +10,10 @@
 		<item>A click toggles a chip and every state of its colour (turning off the last one shows the next colour instead); ⌥-click (Alt-click) a chip to show ONLY that colour, whatever showed (epic <text code>epic-engine</> I166).</>
 		<item>ONE element for every filter by state: an item section's title, an epic page's toolbar, the Epics page's lists.</>
 	</>
-	<text class="meta" paragraph>
-		For anyone changing how items are filtered.
-
-		Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> P3), in the <link target="src-spell-epic-src-components-epic-state-filter" link="/epic/src/components/epic-state-filter/"><text title="epic/src/components/epic-state-filter/" code>epic-state-filter</></> family, with <link target="src-spell-epic-src-docs-epic-hidden-note-html" link="/epic-hidden-note"><text code>&lt;epic-hidden-note&gt;</></>.
-
-		Its vocabulary: <link target="src-spell-epic-src-components-epic-state-filter-epicstatefilter-en-ts" link="/epic/src/components/epic-state-filter/EpicStateFilter.en.ts"><text title="epic/src/components/epic-state-filter/EpicStateFilter.en.ts" code>EpicStateFilter.en.ts</></>
-
-		Its component: <link target="src-spell-epic-src-components-epic-state-filter-epicstatefilter-tsx" link="/epic/src/components/epic-state-filter/EpicStateFilter.tsx"><text title="epic/src/components/epic-state-filter/EpicStateFilter.tsx" code>EpicStateFilter.tsx</></>.
-	</>
+	<text class="meta" paragraph>For anyone changing how items are filtered.</>
+	<text class="meta" paragraph>Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> P3), in the <link target="src-spell-epic-src-components-epic-state-filter" link="/epic/src/components/epic-state-filter/"><text title="epic/src/components/epic-state-filter/" code>epic-state-filter</></> family, with <link target="src-spell-epic-src-docs-epic-hidden-note-html" link="/epic-hidden-note"><text code>&lt;epic-hidden-note&gt;</></>.</>
+	<text class="meta" paragraph>Its vocabulary: <link target="src-spell-epic-src-components-epic-state-filter-epicstatefilter-en-ts" link="/epic/src/components/epic-state-filter/EpicStateFilter.en.ts"><text title="epic/src/components/epic-state-filter/EpicStateFilter.en.ts" code>EpicStateFilter.en.ts</></></>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-state-filter-epicstatefilter-tsx" link="/epic/src/components/epic-state-filter/EpicStateFilter.tsx"><text title="epic/src/components/epic-state-filter/EpicStateFilter.tsx" code>EpicStateFilter.tsx</></>.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

@@ -5,13 +5,9 @@
 	</>
 
 	<text class="lede" paragraph>A choice page's bar, last on the page and pinned to the window's bottom: the feedback, then "Do it", which sends every changed box and the feedback to Claude. What's typed is kept in the browser at once and saves itself to the page server as a draft as you type.</>
-	<text class="meta" paragraph>
-		For anyone writing a page you answer on (a details or choice page), or changing this element.
-
-		<label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-choices-bar" link="/epic/src/components/epic-choices-bar/"><text title="epic/src/components/epic-choices-bar/" code>epic-choices-bar/</></> (epic <text code>epic-workflow</> P12).
-
-		Its vocabulary (every table below comes from it): <link target="src-spell-epic-src-components-epic-choices-bar-epicchoicesbar-en-ts" link="/epic/src/components/epic-choices-bar/EpicChoicesBar.en.ts"><text title="epic/src/components/epic-choices-bar/EpicChoicesBar.en.ts" code>EpicChoicesBar.en.ts</></>.
-	</>
+	<text class="meta" paragraph>For anyone writing a page you answer on (a details or choice page), or changing this element.</>
+	<text class="meta" paragraph><label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-choices-bar" link="/epic/src/components/epic-choices-bar/"><text title="epic/src/components/epic-choices-bar/" code>epic-choices-bar/</></> (epic <text code>epic-workflow</> P12).</>
+	<text class="meta" paragraph>Its vocabulary (every table below comes from it): <link target="src-spell-epic-src-components-epic-choices-bar-epicchoicesbar-en-ts" link="/epic/src/components/epic-choices-bar/EpicChoicesBar.en.ts"><text title="epic/src/components/epic-choices-bar/EpicChoicesBar.en.ts" code>EpicChoicesBar.en.ts</></>.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

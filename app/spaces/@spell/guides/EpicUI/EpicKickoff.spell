@@ -6,15 +6,10 @@
 
 	<text class="lede" paragraph>A new epic starts on its page, not in the chat. <text code>/epic &lt;name&gt;</> opens an almost empty epic page, and the kickoff box sits at the top of its Overview: you type what the epic should do, as long as you like, and paste or drop pictures into it.</>
 	<text paragraph>The page's Send hands it to Claude. It becomes the Kickoff prompt, pictures and all, and the session plans from it, as it plans from a prompt typed after the name in the chat.</>
-	<text class="meta" paragraph>
-		For anyone starting an epic.
-
-		Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> P75), its own <link target="src-spell-epic-src-components-epic-kickoff" link="/epic/src/components/epic-kickoff/"><text title="epic/src/components/epic-kickoff/" code>epic-kickoff</></> family.
-
-		Its vocabulary: <link target="src-spell-epic-src-components-epic-kickoff-epickickoff-en-ts" link="/epic/src/components/epic-kickoff/EpicKickoff.en.ts"><text title="epic/src/components/epic-kickoff/EpicKickoff.en.ts" code>EpicKickoff.en.ts</></>
-
-		Its component: <link target="src-spell-epic-src-components-epic-kickoff-epickickoff-tsx" link="/epic/src/components/epic-kickoff/EpicKickoff.tsx"><text title="epic/src/components/epic-kickoff/EpicKickoff.tsx" code>EpicKickoff.tsx</></>.
-	</>
+	<text class="meta" paragraph>For anyone starting an epic.</>
+	<text class="meta" paragraph>Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> P75), its own <link target="src-spell-epic-src-components-epic-kickoff" link="/epic/src/components/epic-kickoff/"><text title="epic/src/components/epic-kickoff/" code>epic-kickoff</></> family.</>
+	<text class="meta" paragraph>Its vocabulary: <link target="src-spell-epic-src-components-epic-kickoff-epickickoff-en-ts" link="/epic/src/components/epic-kickoff/EpicKickoff.en.ts"><text title="epic/src/components/epic-kickoff/EpicKickoff.en.ts" code>EpicKickoff.en.ts</></></>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-kickoff-epickickoff-tsx" link="/epic/src/components/epic-kickoff/EpicKickoff.tsx"><text title="epic/src/components/epic-kickoff/EpicKickoff.tsx" code>EpicKickoff.tsx</></>.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

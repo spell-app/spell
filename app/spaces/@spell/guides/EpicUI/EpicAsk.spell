@@ -5,13 +5,9 @@
 	</>
 
 	<text class="lede" paragraph>A question you answer ON the page: a details page's. Its text and options are an epic page's own elements, so it reads as an epic page's question does; it adds a Choose pill to each option (the epic page's card look, epic <text code>epic-engine</> P50), a comment box folded under each, an Other box, and a chip in the epic page's state colours.</>
-	<text class="meta" paragraph>
-		For anyone writing a page you answer on (a details or choice page), or changing this element.
-
-		<label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-ask" link="/epic/src/components/epic-ask/"><text title="epic/src/components/epic-ask/" code>epic-ask/</></> (epic <text code>epic-workflow</> P12).
-
-		Its vocabulary (every table below comes from it): <link target="src-spell-epic-src-components-epic-ask-epicask-en-ts" link="/epic/src/components/epic-ask/EpicAsk.en.ts"><text title="epic/src/components/epic-ask/EpicAsk.en.ts" code>EpicAsk.en.ts</></>.
-	</>
+	<text class="meta" paragraph>For anyone writing a page you answer on (a details or choice page), or changing this element.</>
+	<text class="meta" paragraph><label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-ask" link="/epic/src/components/epic-ask/"><text title="epic/src/components/epic-ask/" code>epic-ask/</></> (epic <text code>epic-workflow</> P12).</>
+	<text class="meta" paragraph>Its vocabulary (every table below comes from it): <link target="src-spell-epic-src-components-epic-ask-epicask-en-ts" link="/epic/src/components/epic-ask/EpicAsk.en.ts"><text title="epic/src/components/epic-ask/EpicAsk.en.ts" code>EpicAsk.en.ts</></>.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

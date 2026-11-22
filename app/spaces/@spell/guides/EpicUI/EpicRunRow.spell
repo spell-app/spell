@@ -5,15 +5,10 @@
 	</>
 
 	<text class="lede" paragraph>One row of a run page: a thing a command asks about, and your answer to it.</>
-	<text class="meta" paragraph>
-		For anyone writing a command that asks you on a page, or changing this element.
-
-		<label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-run-row" link="/epic/src/components/epic-run-row/"><text title="epic/src/components/epic-run-row/" code>epic-run-row/</></> (epic <text code>epic-engine</> P23).
-
-		Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-run-row-epicrunrow-en-ts" link="/epic/src/components/epic-run-row/EpicRunRow.en.ts"><text title="epic/src/components/epic-run-row/EpicRunRow.en.ts" code>EpicRunRow.en.ts</></>.
-
-		Its component: <link target="src-spell-epic-src-components-epic-run-row-epicrunrow-tsx" link="/epic/src/components/epic-run-row/EpicRunRow.tsx"><text title="epic/src/components/epic-run-row/EpicRunRow.tsx" code>EpicRunRow.tsx</></>, with its style sheet (<text code>.css</>) and tests beside it.
-	</>
+	<text class="meta" paragraph>For anyone writing a command that asks you on a page, or changing this element.</>
+	<text class="meta" paragraph><label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-run-row" link="/epic/src/components/epic-run-row/"><text title="epic/src/components/epic-run-row/" code>epic-run-row/</></> (epic <text code>epic-engine</> P23).</>
+	<text class="meta" paragraph>Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-run-row-epicrunrow-en-ts" link="/epic/src/components/epic-run-row/EpicRunRow.en.ts"><text title="epic/src/components/epic-run-row/EpicRunRow.en.ts" code>EpicRunRow.en.ts</></>.</>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-run-row-epicrunrow-tsx" link="/epic/src/components/epic-run-row/EpicRunRow.tsx"><text title="epic/src/components/epic-run-row/EpicRunRow.tsx" code>EpicRunRow.tsx</></>, with its style sheet (<text code>.css</>) and tests beside it.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

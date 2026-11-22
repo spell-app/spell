@@ -10,13 +10,9 @@
 		no <ui-list class="spell-meta">:  its <ui-item>s take Spell UI's "item" style sheet name before the
 		              epics pack's elements can, and live examples may draw unstyled (issue I9 of epic-components)
 	-->
-	<text class="meta" paragraph>
-		For anyone reading or writing an epic page's markup, or changing this element.
-
-		Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-event-epicevent-en-ts" link="/epic/src/components/epic-event/EpicEvent.en.ts"><text title="epic/src/components/epic-event/EpicEvent.en.ts" code>EpicEvent.en.ts</></>.
-
-		Its component: <link target="src-spell-epic-src-components-epic-event-epicevent-tsx" link="/epic/src/components/epic-event/EpicEvent.tsx"><text title="epic/src/components/epic-event/EpicEvent.tsx" code>EpicEvent.tsx</></>, with its style sheet (<text code>.css</>) and tests beside it.
-	</>
+	<text class="meta" paragraph>For anyone reading or writing an epic page's markup, or changing this element.</>
+	<text class="meta" paragraph>Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-event-epicevent-en-ts" link="/epic/src/components/epic-event/EpicEvent.en.ts"><text title="epic/src/components/epic-event/EpicEvent.en.ts" code>EpicEvent.en.ts</></>.</>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-event-epicevent-tsx" link="/epic/src/components/epic-event/EpicEvent.tsx"><text title="epic/src/components/epic-event/EpicEvent.tsx" code>EpicEvent.tsx</></>, with its style sheet (<text code>.css</>) and tests beside it.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

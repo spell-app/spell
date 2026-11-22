@@ -5,13 +5,9 @@
 	</>
 
 	<text class="lede" paragraph>The comment threads under one block of a page, in order, a little apart. The comments' code puts one right after the paragraph, list item or cell holding the comments' quotes, else after their block.</>
-	<text class="meta" paragraph>
-		For anyone changing how comments look or work on a page.
-
-		Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-thread-epicthreads-en-ts" link="/epic/src/components/epic-thread/EpicThreads.en.ts"><text title="epic/src/components/epic-thread/EpicThreads.en.ts" code>EpicThreads.en.ts</></>.
-
-		Its component: <link target="src-spell-epic-src-components-epic-thread-epicthreads-tsx" link="/epic/src/components/epic-thread/EpicThreads.tsx"><text title="epic/src/components/epic-thread/EpicThreads.tsx" code>EpicThreads.tsx</></>, with its style sheet (<text code>.css</>) and tests beside it.
-	</>
+	<text class="meta" paragraph>For anyone changing how comments look or work on a page.</>
+	<text class="meta" paragraph>Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-thread-epicthreads-en-ts" link="/epic/src/components/epic-thread/EpicThreads.en.ts"><text title="epic/src/components/epic-thread/EpicThreads.en.ts" code>EpicThreads.en.ts</></>.</>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-thread-epicthreads-tsx" link="/epic/src/components/epic-thread/EpicThreads.tsx"><text title="epic/src/components/epic-thread/EpicThreads.tsx" code>EpicThreads.tsx</></>, with its style sheet (<text code>.css</>) and tests beside it.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

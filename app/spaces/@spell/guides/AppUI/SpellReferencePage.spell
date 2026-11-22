@@ -14,7 +14,7 @@
 		<icon slot="icon" name="eye"/>
 		<example "1. Example" description="Star Wars' place:  every section starts folded.">
 			<html>
-				<spell-reference-page src="/components/app/@spell/examples/StarWars/StarWars.api.json5"></spell-reference-page>
+				<spell-reference-page src="@spell/examples/StarWars/StarWars.api.json5"></spell-reference-page>
 			</html>
 		</example>
 		<text class="meta" paragraph>Live, from <text code>/element/spell.pack.js</> (<text code>yarn build:element</> in <link target="src-spell-app" link="/"><text code>spell-app</></>), which this set's pages load.</>

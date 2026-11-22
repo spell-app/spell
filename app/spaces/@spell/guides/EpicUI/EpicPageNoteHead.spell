@@ -5,13 +5,9 @@
 	</>
 
 	<text class="lede" paragraph>The head line of an old page note (<text code>&lt;spell-note&gt;</>), written into a guide before comments replaced them:  who and when, its first line while folded, its status.  A click folds the note.</>
-	<text class="meta" paragraph>
-		For anyone changing how comments look or work on a page.
-
-		Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-page-note-head-epicpagenotehead-en-ts" link="/epic/src/components/epic-page-note-head/EpicPageNoteHead.en.ts"><text title="epic/src/components/epic-page-note-head/EpicPageNoteHead.en.ts" code>EpicPageNoteHead.en.ts</></>.
-
-		Its component: <link target="src-spell-epic-src-components-epic-page-note-head-epicpagenotehead-tsx" link="/epic/src/components/epic-page-note-head/EpicPageNoteHead.tsx"><text title="epic/src/components/epic-page-note-head/EpicPageNoteHead.tsx" code>EpicPageNoteHead.tsx</></>, with its style sheet (<text code>.css</>) and tests beside it.
-	</>
+	<text class="meta" paragraph>For anyone changing how comments look or work on a page.</>
+	<text class="meta" paragraph>Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-page-note-head-epicpagenotehead-en-ts" link="/epic/src/components/epic-page-note-head/EpicPageNoteHead.en.ts"><text title="epic/src/components/epic-page-note-head/EpicPageNoteHead.en.ts" code>EpicPageNoteHead.en.ts</></>.</>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-page-note-head-epicpagenotehead-tsx" link="/epic/src/components/epic-page-note-head/EpicPageNoteHead.tsx"><text title="epic/src/components/epic-page-note-head/EpicPageNoteHead.tsx" code>EpicPageNoteHead.tsx</></>, with its style sheet (<text code>.css</>) and tests beside it.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

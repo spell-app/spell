@@ -9,15 +9,10 @@
 		<item>The one in use is pressed, and remembered in this browser.</>
 		<item>The groups stay where they are: only the cards inside each move.</>
 	</>
-	<text class="meta" paragraph>
-		For anyone changing the Epics page.
-
-		Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> P3), in the <link target="src-spell-epic-src-components-epic-list" link="/epic/src/components/epic-list/"><text title="epic/src/components/epic-list/" code>epic-list</></> family, with <text code>&lt;epic-list&gt;</>, <text code>&lt;epic-card&gt;</> and <text code>&lt;epic-sort&gt;</>.
-
-		Its vocabulary: <link target="src-spell-epic-src-components-epic-list-epicsort-en-ts" link="/epic/src/components/epic-list/EpicSort.en.ts"><text title="epic/src/components/epic-list/EpicSort.en.ts" code>EpicSort.en.ts</></>
-
-		Its component: <link target="src-spell-epic-src-components-epic-list-epicsort-tsx" link="/epic/src/components/epic-list/EpicSort.tsx"><text title="epic/src/components/epic-list/EpicSort.tsx" code>EpicSort.tsx</></>.
-	</>
+	<text class="meta" paragraph>For anyone changing the Epics page.</>
+	<text class="meta" paragraph>Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> P3), in the <link target="src-spell-epic-src-components-epic-list" link="/epic/src/components/epic-list/"><text title="epic/src/components/epic-list/" code>epic-list</></> family, with <text code>&lt;epic-list&gt;</>, <text code>&lt;epic-card&gt;</> and <text code>&lt;epic-sort&gt;</>.</>
+	<text class="meta" paragraph>Its vocabulary: <link target="src-spell-epic-src-components-epic-list-epicsort-en-ts" link="/epic/src/components/epic-list/EpicSort.en.ts"><text title="epic/src/components/epic-list/EpicSort.en.ts" code>EpicSort.en.ts</></></>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-list-epicsort-tsx" link="/epic/src/components/epic-list/EpicSort.tsx"><text title="epic/src/components/epic-list/EpicSort.tsx" code>EpicSort.tsx</></>.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

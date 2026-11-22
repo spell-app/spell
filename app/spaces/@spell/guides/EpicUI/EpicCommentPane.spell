@@ -5,13 +5,9 @@
 	</>
 
 	<text class="lede" paragraph>The small floating pane you write a NEW comment in:  a bullhorn's, or ⌘ / Ctrl I's on selected text.  It saves itself as you type;  once closed, the comment is a thread.  Paste or drop a picture in it (⌘ V, a screenshot too):  it is saved beside the page, and its path goes into your words, shown as a picture in the thread.</>
-	<text class="meta" paragraph>
-		For anyone changing how comments look or work on a page.
-
-		Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-comment-pane-epiccommentpane-en-ts" link="/epic/src/components/epic-comment-pane/EpicCommentPane.en.ts"><text title="epic/src/components/epic-comment-pane/EpicCommentPane.en.ts" code>EpicCommentPane.en.ts</></>.
-
-		Its component: <link target="src-spell-epic-src-components-epic-comment-pane-epiccommentpane-tsx" link="/epic/src/components/epic-comment-pane/EpicCommentPane.tsx"><text title="epic/src/components/epic-comment-pane/EpicCommentPane.tsx" code>EpicCommentPane.tsx</></>, with its style sheet (<text code>.css</>) and tests beside it.
-	</>
+	<text class="meta" paragraph>For anyone changing how comments look or work on a page.</>
+	<text class="meta" paragraph>Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-comment-pane-epiccommentpane-en-ts" link="/epic/src/components/epic-comment-pane/EpicCommentPane.en.ts"><text title="epic/src/components/epic-comment-pane/EpicCommentPane.en.ts" code>EpicCommentPane.en.ts</></>.</>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-comment-pane-epiccommentpane-tsx" link="/epic/src/components/epic-comment-pane/EpicCommentPane.tsx"><text title="epic/src/components/epic-comment-pane/EpicCommentPane.tsx" code>EpicCommentPane.tsx</></>, with its style sheet (<text code>.css</>) and tests beside it.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

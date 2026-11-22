@@ -11,17 +11,11 @@
 		<item>A chip per saga above the groups, then No saga: a click shows only that saga's epics.</>
 		<item>It never moves its cards: a live update, or the page server's running cards, just join it.</>
 	</>
-	<text class="meta" paragraph>
-		For anyone changing the Epics page, or what <text code>epic pages index</> writes.
-
-		Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> P3), in the <link target="src-spell-epic-src-components-epic-list" link="/epic/src/components/epic-list/"><text title="epic/src/components/epic-list/" code>epic-list</></> family, with <text code>&lt;epic-list&gt;</>, <text code>&lt;epic-card&gt;</> and <text code>&lt;epic-sort&gt;</>.
-
-		Its vocabulary: <link target="src-spell-epic-src-components-epic-list-epiclist-en-ts" link="/epic/src/components/epic-list/EpicList.en.ts"><text title="epic/src/components/epic-list/EpicList.en.ts" code>EpicList.en.ts</></>
-
-		Its component: <link target="src-spell-epic-src-components-epic-list-epiclist-tsx" link="/epic/src/components/epic-list/EpicList.tsx"><text title="epic/src/components/epic-list/EpicList.tsx" code>EpicList.tsx</></>
-
-		What its family shares: <link target="src-spell-epic-src-components-epic-list-epiclist-types-ts" link="/epic/src/components/epic-list/EpicList.types.ts"><text title="epic/src/components/epic-list/EpicList.types.ts" code>EpicList.types.ts</></>.
-	</>
+	<text class="meta" paragraph>For anyone changing the Epics page, or what <text code>epic pages index</> writes.</>
+	<text class="meta" paragraph>Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> P3), in the <link target="src-spell-epic-src-components-epic-list" link="/epic/src/components/epic-list/"><text title="epic/src/components/epic-list/" code>epic-list</></> family, with <text code>&lt;epic-list&gt;</>, <text code>&lt;epic-card&gt;</> and <text code>&lt;epic-sort&gt;</>.</>
+	<text class="meta" paragraph>Its vocabulary: <link target="src-spell-epic-src-components-epic-list-epiclist-en-ts" link="/epic/src/components/epic-list/EpicList.en.ts"><text title="epic/src/components/epic-list/EpicList.en.ts" code>EpicList.en.ts</></></>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-list-epiclist-tsx" link="/epic/src/components/epic-list/EpicList.tsx"><text title="epic/src/components/epic-list/EpicList.tsx" code>EpicList.tsx</></></>
+	<text class="meta" paragraph>What its family shares: <link target="src-spell-epic-src-components-epic-list-epiclist-types-ts" link="/epic/src/components/epic-list/EpicList.types.ts"><text title="epic/src/components/epic-list/EpicList.types.ts" code>EpicList.types.ts</></>.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

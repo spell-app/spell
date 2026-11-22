@@ -5,15 +5,10 @@
 	</>
 
 	<text class="lede" paragraph>A run page's body: a command stopped to ask you, and waits for your answers.</>
-	<text class="meta" paragraph>
-		For anyone writing a command that asks you on a page, or changing this element.
-
-		<label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-run" link="/epic/src/components/epic-run/"><text title="epic/src/components/epic-run/" code>epic-run/</></> (epic <text code>epic-engine</> P23).
-
-		Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-run-epicrun-en-ts" link="/epic/src/components/epic-run/EpicRun.en.ts"><text title="epic/src/components/epic-run/EpicRun.en.ts" code>EpicRun.en.ts</></>.
-
-		Its component: <link target="src-spell-epic-src-components-epic-run-epicrun-tsx" link="/epic/src/components/epic-run/EpicRun.tsx"><text title="epic/src/components/epic-run/EpicRun.tsx" code>EpicRun.tsx</></>, with its style sheet (<text code>.css</>) and tests beside it.
-	</>
+	<text class="meta" paragraph>For anyone writing a command that asks you on a page, or changing this element.</>
+	<text class="meta" paragraph><label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-run" link="/epic/src/components/epic-run/"><text title="epic/src/components/epic-run/" code>epic-run/</></> (epic <text code>epic-engine</> P23).</>
+	<text class="meta" paragraph>Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-run-epicrun-en-ts" link="/epic/src/components/epic-run/EpicRun.en.ts"><text title="epic/src/components/epic-run/EpicRun.en.ts" code>EpicRun.en.ts</></>.</>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-run-epicrun-tsx" link="/epic/src/components/epic-run/EpicRun.tsx"><text title="epic/src/components/epic-run/EpicRun.tsx" code>EpicRun.tsx</></>, with its style sheet (<text code>.css</>) and tests beside it.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

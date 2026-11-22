@@ -5,13 +5,9 @@
 	</>
 
 	<text class="lede" paragraph>One section's table on a choice page: File | Purpose | Current | Recommended | Explanation, then its rows, <text code>&lt;epic-choice-row&gt;</>s, each with a comment box under its box. It counts its section's rows on the section's title.</>
-	<text class="meta" paragraph>
-		For anyone writing a page you answer on (a details or choice page), or changing this element.
-
-		<label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-choice-rows" link="/epic/src/components/epic-choice-rows/"><text title="epic/src/components/epic-choice-rows/" code>epic-choice-rows/</></> (epic <text code>epic-workflow</> P12).
-
-		Its vocabulary (every table below comes from it): <link target="src-spell-epic-src-components-epic-choice-rows-epicchoicerows-en-ts" link="/epic/src/components/epic-choice-rows/EpicChoiceRows.en.ts"><text title="epic/src/components/epic-choice-rows/EpicChoiceRows.en.ts" code>EpicChoiceRows.en.ts</></>.
-	</>
+	<text class="meta" paragraph>For anyone writing a page you answer on (a details or choice page), or changing this element.</>
+	<text class="meta" paragraph><label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-choice-rows" link="/epic/src/components/epic-choice-rows/"><text title="epic/src/components/epic-choice-rows/" code>epic-choice-rows/</></> (epic <text code>epic-workflow</> P12).</>
+	<text class="meta" paragraph>Its vocabulary (every table below comes from it): <link target="src-spell-epic-src-components-epic-choice-rows-epicchoicerows-en-ts" link="/epic/src/components/epic-choice-rows/EpicChoiceRows.en.ts"><text title="epic/src/components/epic-choice-rows/EpicChoiceRows.en.ts" code>EpicChoiceRows.en.ts</></>.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>

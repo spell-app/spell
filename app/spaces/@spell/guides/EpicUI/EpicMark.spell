@@ -5,15 +5,10 @@
 	</>
 
 	<text class="lede" paragraph><text code>&lt;epic-mark&gt;</> draws an item's id as a chip in the item's state colour: <text code>&lt;epic-mark item="i126" link&gt;</> shows <text code>I126</>, red while it waits on you, blue while it's under way, green when it's newly decided, grey once it's old. Its tooltip is the item's title; with <text code>link</>, a click lands on the item and opens it.</>
-	<text class="meta" paragraph>
-		For anyone writing a phase's To review list, or naming an item in a page.
-
-		Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> P45), its own <link target="src-spell-epic-src-components-epic-mark" link="/epic/src/components/epic-mark/"><text title="epic/src/components/epic-mark/" code>epic-mark</></> family.
-
-		Its vocabulary: <link target="src-spell-epic-src-components-epic-mark-epicmark-en-ts" link="/epic/src/components/epic-mark/EpicMark.en.ts"><text title="epic/src/components/epic-mark/EpicMark.en.ts" code>EpicMark.en.ts</></>
-
-		Its component: <link target="src-spell-epic-src-components-epic-mark-epicmark-tsx" link="/epic/src/components/epic-mark/EpicMark.tsx"><text title="epic/src/components/epic-mark/EpicMark.tsx" code>EpicMark.tsx</></>.
-	</>
+	<text class="meta" paragraph>For anyone writing a phase's To review list, or naming an item in a page.</>
+	<text class="meta" paragraph>Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> P45), its own <link target="src-spell-epic-src-components-epic-mark" link="/epic/src/components/epic-mark/"><text title="epic/src/components/epic-mark/" code>epic-mark</></> family.</>
+	<text class="meta" paragraph>Its vocabulary: <link target="src-spell-epic-src-components-epic-mark-epicmark-en-ts" link="/epic/src/components/epic-mark/EpicMark.en.ts"><text title="epic/src/components/epic-mark/EpicMark.en.ts" code>EpicMark.en.ts</></></>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-mark-epicmark-tsx" link="/epic/src/components/epic-mark/EpicMark.tsx"><text title="epic/src/components/epic-mark/EpicMark.tsx" code>EpicMark.tsx</></>.</>
 
 	<section label="1. Example">
 		<icon slot="icon" name="eye"/>
