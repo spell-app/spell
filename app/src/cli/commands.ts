@@ -247,6 +247,7 @@ export default function appCommands(spell: Command): void {
     .option("--force", "don't wait for a quiet machine")
     .option("--out <file>", "write the results there, not in .perf-results/")
     .option("--baseline <save>", "save this run as the baseline the report compares with (perfBaseline.json)")
+    .option("--https", "serve the editor build over HTTPS and HTTP/2, with a throwaway certificate Chromium trusts")
     .action((_options, command: Command) =>
       CLI.runCommand(async () => (await import("./commands/perfCommand")).perfCommand("run", command.optsWithGlobals()))
     )

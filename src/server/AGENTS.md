@@ -256,6 +256,19 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - [Test helpers](test/checkouts.ts) that fake one:  `fakeMainCheckout()`, `fakeWorktree()`.
   - [proxy.ts](proxy.ts) -- `proxyTo()` / `proxyUpgrade()`:  HTTP and websockets to another local server
   - `WebServer` -- all of the above on node's HTTP server
+    - with a `certificate`, HTTPS and HTTP/2 too, on the SAME port (epic `solid-2-final` P14):  each connection
+      handed on by its first byte, a TLS hello to node's HTTP/2 server (`allowHTTP1`, so websockets still upgrade),
+      anything else to the plain one;  `url` stays `http://127.0.0.1:<port>` for the tools, `secureUrl` is
+      `https://localhost:<port>` for browsers
+    - HTTP/2's requests:  `Host` is its `:authority` (`Request.get()`), a body needs no length (`hasBody()`), and a
+      proxied one goes on as HTTP/1.1, its answer's connection headers dropped (`proxyTo()`)
+  - `LocalCertificate` -- a certificate this machine's browsers trust, made by mkcert (epic `solid-2-final` P14):
+    `state`, `make()`, `trust()` (`sudo security add-trusted-cert`, the password asked once), `undo()`;
+    its programs through `CertificateTools`, so tests run none
+    - the page server's:  `forPageServer()`, `localhost` / `127.0.0.1` / `::1` in `~/.spell/localhost/`;  made and
+      trusted only by `spell server certificate`, taken by `PageServer.certificateFor()` once it's `"ready"`
+      (never in tests or CI, nor with `SPELL_HTTPS=0`);  its HTTPS address is `ServerInfo.https`
+    - the house-network site's too (the app's `spell space local setup`):  its own names and folder, the same steps
   - [serveRoutes.ts](serveRoutes.ts) -- `serveRoutes()`, `folderRoute()`:  a small loopback server for a command's
     page (spell-app's `spell run`), each path answered with text, a file, or 404 (epic `coherence` P25)
   - [untilInterrupted.ts](untilInterrupted.ts) -- run until `Ctrl-C`

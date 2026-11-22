@@ -14,8 +14,12 @@ export const PERF_PAGE_NAMES = ["editor", "docs", "epic", "run"] as const
 /** One of `PERF_PAGE_NAMES`. */
 export type PerfPageName = (typeof PERF_PAGE_NAMES)[number]
 
-/** Where a page's addresses start:  the editor build being measured, and the page server. */
-export type PerfServers = { editor: string; pageServer: string }
+/**
+ * Where a page's addresses start:  the editor build being measured, and the page server.
+ * - `trustedKey`:  with `--https`, the editor build's throwaway certificate's key (its SPKI hash), which Chromium
+ *   is told to trust:  so it speaks HTTP/2 and caches as it would with a trusted certificate
+ */
+export type PerfServers = { editor: string; pageServer: string; trustedKey?: string }
 
 /**
  * A page measured.
@@ -152,6 +156,7 @@ export type PerfStep = (typeof PERF_STEPS)[number]
  * - `waitMinutes`:  how long to wait for a quiet machine;  `force`:  don't
  * - `out`:  write there instead of the dated file
  * - `baseline`:  `save`, this run is the new baseline too
+ * - `https`:  the editor build served over HTTPS, so HTTP/2, with a throwaway certificate (epic `solid-2-final` P14)
  */
 export type PerfRunOptions = {
   pages: PerfPageName[]
@@ -162,6 +167,7 @@ export type PerfRunOptions = {
   force: boolean
   out?: string
   baseline?: "save"
+  https?: boolean
 }
 
 /** The machine as a run saw it:  load averages, memory, the CPUs. */

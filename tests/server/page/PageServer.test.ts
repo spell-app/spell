@@ -125,6 +125,35 @@ describe("PageServer.start():  its port, or no start", () => {
   })
 })
 
+describe("PageServer with a certificate (epic solid-2-final P14)", () => {
+  /** a certificate in each state, its programs stand-ins:  only `state` and `tls` are read */
+  const certificateIn = (state: SRV.CertificateState) =>
+    ({ state, tls: state === "ready" ? { key: "KEY", cert: "CERT" } : undefined }) as SRV.LocalCertificate
+
+  it("takes the certificate only once it's ready;  else says why, in a line for its log", () => {
+    expect(PageServer.certificateFor(certificateIn("ready"), {})).toEqual({ tls: { key: "KEY", cert: "CERT" } })
+    expect(PageServer.certificateFor(certificateIn("untrusted"), {}).why).toMatch(/spell server certificate/)
+    expect(PageServer.certificateFor(certificateIn("no-mkcert"), {}).why).toMatch(/brew install mkcert/)
+  })
+
+  it("never in tests, CI, or with SPELL_HTTPS=0:  plain HTTP, saying nothing", () => {
+    for (const env of [{ VITEST: "true" }, { CI: "true" }, { SPELL_HTTPS: "0" }])
+      expect(PageServer.certificateFor(certificateIn("ready"), env)).toEqual({})
+  })
+
+  it("without one, says no HTTPS address:  as before", async () => {
+    const root = mkdtempSync(join(tmpdir(), "page-plain-"))
+    const server = await new PageServer({ root }).start({ port: 0, routes: false, pidFile: false })
+    try {
+      expect(server.info.https).toBeUndefined()
+      expect(server.web.secureUrl).toBeUndefined()
+    } finally {
+      await server.stop()
+      rmSync(root, { recursive: true, force: true })
+    }
+  })
+})
+
 describe("PageServer.codeFor()", () => {
   const scratch = mkdtempSync(join(tmpdir(), "page-code-"))
   afterAll(() => rmSync(scratch, { recursive: true, force: true }))

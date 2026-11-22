@@ -77,6 +77,14 @@ export default function kitCommands(spell: Command): void {
     .argument("<file>", "a file of this checkout, or of the epic folder")
     .action(() => pageServer("url"))
 
+  passThrough(server.command("certificate"))
+    .description(
+      "make the page server's HTTPS certificate, and have this computer trust it (asks for the password once)"
+    )
+    .option("--check", "only say what's missing;  exit 1 until it's ready")
+    .option("--undo", "remove it:  the page server goes back to plain HTTP at its next start")
+    .action(() => pageServer("certificate"))
+
   passThrough(server.command("prune"))
     .description("stop the page and Vite servers whose checkout is gone, on any checkout")
     .option("--dry-run", "only list them")

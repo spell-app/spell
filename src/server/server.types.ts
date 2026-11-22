@@ -140,6 +140,11 @@ export type ServerInfo = {
    * (`--spaces`), whose record is its own (`PidFile.forPageServer()`)
    */
   spaces?: string
+  /**
+   * its HTTPS address, for people's browsers, once this machine trusts its certificate (`SRV.LocalCertificate`):
+   * `https://localhost:4747`;  the same port still answers plain HTTP, which the tools use (epic `solid-2-final` P14)
+   */
+  https?: string
 }
 
 ////////////////

@@ -152,7 +152,10 @@ export class PageServer {
   /** CDN URLs pages load, each with its local copy's URL (`"localCopies"`, `withLocalCopies()`) */
   private readonly localCopies: Record<string, string>
 
-  constructor({ root, token }: { root: string; token?: string }) {
+  /**
+   * - `certificate`:  HTTPS and HTTP/2 too, on the same port (`certificateFor()`);  plain HTTP stays for the tools
+   */
+  constructor({ root, token, certificate }: { root: string; token?: string; certificate?: SRV.CertificateFiles }) {
     this.root = resolve(root)
     // its spaces' own record (`--spaces`, `SPELL_SPACES_DIR`)
     this.pidFile = SRV.PidFile.forPageServer(this.root)
@@ -180,6 +183,7 @@ export class PageServer {
     this.web = new SRV.WebServer({
       root: this.root,
       token,
+      certificate,
       live: true,
       caching: this.info.worktree ? "never" : "normal",
       mounts: [{ prefix: "/", dir: this.root, hashed: this.hashed.own }],
@@ -279,6 +283,7 @@ export class PageServer {
     }
     const { port: actual } = await this.web.listen({ port: wanted, fallback: false })
     this.info.port = actual
+    if (this.web.secureUrl) this.info.https = this.web.secureUrl
     if (pidFile) {
       this.pidFile.write(this.info)
       // for a program this machine's person runs against it:  a Python program's places (epic `data` P40)
@@ -289,6 +294,28 @@ export class PageServer {
         this.log.error("a route module's onListening failed:", error)
       })
     return this
+  }
+
+  /**
+   * The certificate a page server listens with for HTTPS and HTTP/2, when this machine has one it trusts
+   * (`SRV.LocalCertificate.forPageServer()`, made and trusted by `spell server certificate`);
+   * else why not, in a line for its log.
+   * - makes NOTHING and asks for nothing:  a server started from a skill has no terminal, and every page keeps working
+   *   on plain HTTP until the person runs `spell server certificate`
+   * - none in tests and CI (`VITEST`, `CI`), nor with `SPELL_HTTPS=0`:  `env`, default `process.env`
+   * - NEVER throws
+   */
+  static certificateFor(
+    certificate = SRV.LocalCertificate.forPageServer(),
+    env: Record<string, string | undefined> = process.env
+  ): { tls?: SRV.CertificateFiles; why?: string } {
+    if (env.VITEST || env.CI || env.SPELL_HTTPS === "0") return {}
+    const state = certificate.state
+    if (state === "ready") {
+      const tls = certificate.tls
+      return tls ? { tls } : { why: PLAIN_HTTP_WHY.missing }
+    }
+    return { why: PLAIN_HTTP_WHY[state] }
   }
 
   /** stop:  the bundles' build, route modules' stops, the pid file (if ours), the server */
@@ -715,6 +742,15 @@ const WORKTREES_PREFIX = "/worktrees/"
 
 /** A worktree's address, `/worktrees/<w>/...`:  `[1]` is `<w>`. */
 const WORKTREE_ADDRESS = /^\/worktrees\/([^/]+)\//
+
+/** Why a page server speaks plain HTTP only, by its certificate's state:  a line in its log. */
+const PLAIN_HTTP_WHY: Record<Exclude<SRV.CertificateState, "ready">, string> = {
+  "no-mkcert": "plain HTTP only:  HTTPS needs mkcert (brew install mkcert), then spell server certificate",
+  missing: "plain HTTP only:  for HTTPS, run spell server certificate",
+  uncovered: "plain HTTP only:  its certificate is out of date;  run spell server certificate",
+  expired: "plain HTTP only:  its certificate is out of date;  run spell server certificate",
+  untrusted: "plain HTTP only:  this computer doesn't trust its certificate yet;  run spell server certificate"
+}
 
 /** Port the page server asks for first:  `SPELL_SERVER_PORT`, else 4747 (the goals server's old port). */
 export const DEFAULT_PORT = Number(process.env.SPELL_SERVER_PORT) || 4747

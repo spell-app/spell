@@ -1,6 +1,13 @@
 import { createHash } from "node:crypto"
 import { readFileSync } from "node:fs"
 import { createServer, type IncomingMessage, type Server } from "node:http"
+import {
+  createSecureServer,
+  type Http2SecureServer,
+  type Http2ServerRequest,
+  type Http2ServerResponse
+} from "node:http2"
+import { createServer as createNetServer, type Server as NetServer, type Socket } from "node:net"
 import { relative, sep } from "node:path"
 import type { Duplex } from "node:stream"
 
@@ -17,6 +24,7 @@ import {
   type LiveVersions,
   type ServerConfig
 } from "./liveClient"
+import type { CertificateFiles } from "./LocalCertificate"
 import { LiveReload } from "./LiveReload"
 import { type ListenOptions, listenPreferred } from "./ports"
 import { underPrefix } from "./proxy"
@@ -42,6 +50,11 @@ import { APPLE_TOUCH_ICON_PNG, FAVICON_PNG_32, FAVICON_SVG } from "spell/server/
  *   `/favicon.svg`, `/favicon-32.png`, `/apple-touch-icon.png`, and `/favicon.ico` (its 32px PNG)
  *   - after the static files, so a folder's own icons win
  * - loopback only (`127.0.0.1`) unless `listen()` says otherwise
+ * - HTTPS and HTTP/2 too, with a `certificate` (epic `solid-2-final` P14):  plain HTTP stays, on the SAME port
+ *   - each connection is handed on by its first byte:  a TLS hello to node's HTTP/2 server, anything else to `server`
+ *   - so the `spell` and `epic` tools keep `url` (`http://127.0.0.1:<port>`):  node trusts no keychain;
+ *     people's browsers get `secureUrl` (`https://localhost:<port>`)
+ *   - HTTP/1.1 over TLS stays allowed (`allowHTTP1`):  websockets upgrade on it, as on plain HTTP
  */
 export class WebServer {
   /** folder pages are reported relative to (live reload, `SPELL_SERVER.file`);  `/` mount's folder by default */
@@ -62,8 +75,17 @@ export class WebServer {
   /** live reload, when asked for */
   readonly live?: LiveReload
 
-  /** node's server */
+  /** node's server:  plain HTTP */
   readonly server: Server
+
+  /** node's HTTP/2 server, with a `certificate`:  HTTPS, HTTP/1.1 over TLS allowed */
+  readonly secure?: Http2SecureServer
+
+  /** with a `certificate`, what listens:  each connection handed to `secure` or `server` by its first byte */
+  private readonly front?: NetServer
+
+  /** the front's connections, ended by `close()`:  `closeAllConnections()` doesn't see a handed-on one */
+  private connections = new Set<Socket>()
 
   /** extra fields for each page's `window.SPELL_SERVER` */
   private configure?: (served: ServedFile) => Record<string, unknown>
@@ -78,7 +100,7 @@ export class WebServer {
   port = 0
 
   constructor(props: WebServerProps = {}) {
-    const { mounts = [], html = [], transforms, caching, live = false, checkHost = true, onError } = props
+    const { mounts = [], html = [], transforms, caching, live = false, checkHost = true, onError, certificate } = props
     this.root = props.root ?? mounts.find((mount) => mount.prefix === "/")?.dir
     this.configure = props.configure
     this.guard = new Guard({ token: props.token })
@@ -109,8 +131,30 @@ export class WebServer {
     for (const [path, icon] of Object.entries(FAVICONS)) favicons.get(path, (_request, reply) => sendIcon(reply, icon))
     favicons.get("/favicon.ico", (_request, reply) => sendIcon(reply, FAVICONS[FAVICON_PNG]!))
     top.use(this.router, this.files.handle, favicons, this.fallback)
-    this.server = createServer(toListener(top.handle, { onError: onError ?? logError }))
+    const listener = toListener(top.handle, { onError: onError ?? logError })
+    this.server = createServer(listener)
     this.server.on("upgrade", (raw: IncomingMessage, socket: Duplex, head: Buffer) => this.onUpgrade(raw, socket, head))
+    if (certificate) {
+      // the compatibility API:  HTTP/2's request and response take the place of HTTP/1.1's
+      this.secure = createSecureServer({ ...certificate, allowHTTP1: true }, listener as unknown as Http2Listener)
+      this.secure.on("upgrade", (raw: IncomingMessage, socket: Duplex, head: Buffer) =>
+        this.onUpgrade(raw, socket, head)
+      )
+      this.front = createNetServer((socket) => this.handOn(socket))
+    }
+  }
+
+  /** a connection to the front, handed to `secure` (a TLS hello, byte 22) or `server` once its first bytes come */
+  private handOn(socket: Socket): void {
+    this.connections.add(socket)
+    socket.on("close", () => this.connections.delete(socket))
+    socket.on("error", () => socket.destroy())
+    socket.once("data", (first: Buffer) => {
+      socket.pause()
+      socket.unshift(first)
+      ;(first[0] === TLS_HANDSHAKE ? this.secure! : this.server).emit("connection", socket)
+      process.nextTick(() => socket.resume())
+    })
   }
 
   /**
@@ -167,9 +211,14 @@ export class WebServer {
     return versions
   }
 
-  /** base URL once listening, e.g. `http://127.0.0.1:4747` */
+  /** base URL once listening, e.g. `http://127.0.0.1:4747`:  plain HTTP, what tools ask */
   get url(): string {
     return `http://127.0.0.1:${this.port}`
+  }
+
+  /** the HTTPS base URL once listening, for people's browsers, `https://localhost:4747`;  `undefined` without one */
+  get secureUrl(): string | undefined {
+    return this.secure ? `https://localhost:${this.port}` : undefined
   }
 
   /**
@@ -177,7 +226,7 @@ export class WebServer {
    * - SIDE EFFECT:  the guard now accepts this port's host names
    */
   async listen(options: ListenOptions = {}): Promise<{ url: string; port: number }> {
-    this.port = await listenPreferred(this.server, options)
+    this.port = await listenPreferred(this.front ?? this.server, options)
     this.guard.allowPort(this.port)
     return { url: this.url, port: this.port }
   }
@@ -186,8 +235,11 @@ export class WebServer {
   close(): Promise<void> {
     this.live?.close()
     for (const socket of this.sockets) socket.destroy()
+    for (const socket of this.connections) socket.destroy()
     this.server.closeAllConnections()
-    return new Promise((done) => this.server.close(() => done()))
+    const listening = this.front ?? this.server
+    // a server that never listened says so:  done all the same
+    return new Promise((done) => listening.close(() => done()))
   }
 
   /** the config every live page gets, as `window.SPELL_SERVER` */
@@ -230,6 +282,7 @@ export class WebServer {
  * - `token`:  the guard's (default:  random)
  * - `checkHost`:  refuse foreign `Host` headers (default `true`)
  * - `onError`:  told of 5xx failures (default:  `console.error`)
+ * - `certificate`:  HTTPS and HTTP/2 too, on the same port (`SRV.LocalCertificate`'s `tls`)
  */
 export type WebServerProps = {
   mounts?: Mount[]
@@ -242,10 +295,17 @@ export type WebServerProps = {
   token?: string
   checkHost?: boolean
   onError?: (error: unknown, request: Request) => void
+  certificate?: CertificateFiles
 }
 
 /** Answers a websocket upgrade:  takes over `socket`. */
 export type UpgradeHandler = (raw: IncomingMessage, socket: Duplex, head: Buffer) => unknown
+
+/** What node's HTTP/2 server calls with each request:  its compatibility API's request and response */
+type Http2Listener = (request: Http2ServerRequest, response: Http2ServerResponse) => void
+
+/** A TLS connection's first byte:  its handshake record */
+const TLS_HANDSHAKE = 22
 
 /** the most paths one `LIVE_VERSIONS` call hashes:  an epic page loads a few hundred files */
 const MAX_VERSIONS = 1000
