@@ -641,11 +641,12 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       description:
         "merge main into this checkout's branch, regenerating the generated files both sides changed;  exit 1 " +
         "on other conflicts:  resolve, git add, then --continue;  one merge at a time on the machine (epic turns), " +
-        "and never moving aside a file another running agent claims (epic agents claim)",
+        "never moving aside a file another running agent claims (epic agents claim);  uncommitted files it doesn't " +
+        "change are left alone, a merge then made in a temporary worktree",
       example: "epic worktree merge-main --as docstrings",
       flags: {
         "--continue": "go on, once the conflicts are resolved and added",
-        "--as <agent>": "the agent merging:  its own claimed files may be moved aside",
+        "--as <agent>": "the agent merging:  its own claimed generated files may be moved aside",
         "--json": "print what it did as JSON"
       }
     },

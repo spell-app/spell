@@ -482,6 +482,9 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - `Worktrees` (`worktree`), with `MainMerge`
         (`worktree merge-main`:  installs the packages when it changed a lockfile or a `package.json`, a root lockfile both sides changed
         rewritten by its own tool, snapshots updated by the repo's own runner, `snapshotUpdateOf()`)
+        - uncommitted files it doesn't change are left alone (`clearTheWay()`, epic `epic-engine` I406):  agents share
+          a worktree;  a real merge then runs in a temporary worktree (`mergeAside()`), the branch fast-forwarded to it,
+          and what it regenerates is rebuilt in the worktree and committed by path;  a dirty file it changes refuses
         - then renames Spell UI's old names the branch still writes (`renameOldNames()`, epic `epic-engine` I143):
           the kit's `spell ui rename --write` over what the merged branch differs from `main` in, once every repo is
           merged, committed on its own;  generated files and links out of the checkout (the epic folder) left out;

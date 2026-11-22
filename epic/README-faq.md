@@ -120,6 +120,10 @@ They come from real trouble:  the papercuts and suspected-bugs logs, and the iss
 - Fix:  commit or stash them in `main`.
   - Generated output (bundles, snapshots) it moves aside by itself, into `~/.spell-epic/ditched/`.
   - Up to 3 hand-made files:  `epic merge <epic> --ditch` moves them aside too.
+- In an epic's worktree, other agents' uncommitted files never hold a merge up (epic `epic-engine` I406):
+  only a file the merge itself changes does, named with the agent working on it.
+  - Fix:  that agent commits it, or you wait for it.
+  - The rest are left exactly as they are;  taking `main` in then runs in a temporary worktree.
 
 ### A worktree window didn't open, or the session didn't move
 
