@@ -9,12 +9,16 @@ import { fileURLToPath } from "node:url"
 
 import { afterAll, afterEach, beforeEach, describe, expect, test, vi } from "vite-plus/test"
 
+import { EpicProgram } from "spell/epic/cli/EpicProgram"
+import { VERB_FLAGS } from "spell/epic/cli/epicGroups"
+import { planDocArgs } from "spell/epic/command/epicArgs"
 import { Markup } from "spell/epic/markup"
 import { PhaseIds } from "spell/epic/phases"
 import { PlanDoc } from "spell/epic/tool/PlanDoc"
 import { PlanDocCommands, movedDown } from "spell/epic/tool/PlanDocCommands"
 import { PlanDocFiles } from "spell/epic/tool/PlanDocFiles"
 import { PlanItem } from "spell/epic/tool/PlanItem"
+import { ShortTitle } from "spell/epic/tool/planDoc.types"
 import { ReviewInbox } from "spell/epic/tool/ReviewInbox"
 import { TitleReader, type TitleRequest, type TitleVerdict } from "spell/epic/tool/TitleReader"
 
@@ -963,6 +967,46 @@ describe("PlanDocCommands:  titles read cold", () => {
     expect(await reading().run(["rename", "x", "T1", `<b>${INSIDE}</b>`, "--html"])).toBe(1)
     expect(asked[0]!.text).toBe(`Kind:  item\nTitle:  ${INSIDE}`)
     expect(await reading().run(["rename", "x", "T1", INSIDE, "--title-ok"])).toBe(0)
+  })
+
+  /** `epic <verb> ...args` as the `epic` command takes it:  its flags checked, turned into the tool's order, run. */
+  async function typed(verb: string, args: string[]): Promise<number[]> {
+    const checked = EpicProgram.checkFlags(`epic ${verb}`, VERB_FLAGS[verb], args)
+    const codes: number[] = []
+    for (const run of planDocArgs(verb, [...checked])) codes.push(await reading().run(run))
+    return codes
+  }
+
+  // epic `epic-engine` I385:  the flag was the tool's, but the `epic` command refused it as "no such flag"
+  test("epic add and epic update --title take --title-ok, as typed", async () => {
+    expect(await typed("add", ["x#T", INSIDE, "--title-ok"])).toEqual([0])
+    expect(await typed("update", ["x#T1", "--title", INSIDE, "--title-ok"])).toEqual([0])
+    expect(asked).toEqual([])
+    expect(await typed("update", ["x#T1", "--title", INSIDE])).toEqual([1])
+  })
+
+  // epic `epic-engine` I385:  the coherence and designer skills tell sessions to end a title so
+  test("a known trailing tag, (coherence) or (designer), is a label:  the reader and the word count never see it", async () => {
+    const title = "The Send button keeps its place when the page reloads (coherence)"
+    expect(await typed("add", ["x#Q", title])).toEqual([0])
+    expect(asked[0]!.text).toBe("Kind:  question\nTitle:  The Send button keeps its place when the page reloads")
+    expect(await reading().run(["rename", "x", "Q1", "The Send button keeps its place (designer)"])).toBe(0)
+    expect(asked[0]!.text).toBe("Kind:  item\nTitle:  The Send button keeps its place")
+    // written as given, tag and all
+    expect(readFileSync(file, "utf8")).toContain("The Send button keeps its place (designer)")
+    // any other bracket at the end is the title's own
+    reading().titleReader.check("The Send button moves (sometimes)", "issue")
+    expect(asked[0]!.text).toBe("Kind:  issue\nTitle:  The Send button moves (sometimes)")
+  })
+})
+
+describe("ShortTitle", () => {
+  test("a known trailing tag isn't counted:  30 words plus (coherence) is a title, 31 isn't", () => {
+    const thirty = Array.from({ length: 30 }, (_, i) => `w${i}`).join(" ")
+    expect(ShortTitle.problemOf(`${thirty} (coherence)`)).toBeUndefined()
+    expect(ShortTitle.problemOf(`${thirty} (sometimes)`)).toBe("it's 31 words (the most is 30)")
+    expect(ShortTitle.withoutTag("  A title (designer) ")).toBe("A title")
+    expect(ShortTitle.withoutTag("A title (coherence) more")).toBe("A title (coherence) more")
   })
 })
 

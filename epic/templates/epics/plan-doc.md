@@ -70,6 +70,10 @@ How to write and update `epics/<name>/<name>.plan.html`, the live doc behind a `
   - A change with no visible effect ends "Nothing you'd see."
   - Nothing about a passing condition (a pid, "after the 4-line fix", "the turn was stuck").
   - At most 30 words, one sentence (plus "Nothing you'd see.");  the rest goes in --details.
+  - A tag a skill tells you to end it with, saying which review found it, is a LABEL, not part of the title:
+    `(coherence)` (the coherence skill's), `(designer)` (the designer skill's).
+    - Both checks below judge the title without it, so it counts for no words and the reader never sees it.
+    - The list:  `ShortTitle.TAGS`;  a skill prescribing a new tag adds it there and here (epic `epic-engine` I385).
   - Before and after (Owen, 2026-11-21, epic `epic-engine` T123):
 
     ```text

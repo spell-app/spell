@@ -411,6 +411,8 @@ As `plan-doc.md`, "Ids":
   - `add` and `rename` (`epic update --title`) refuse one over `ShortTitle.MOST_WORDS` (30) words, a `; ` list,
     or more than one sentence, asking for it rewritten;  NOT the tool's own titles (`M3 failed:  <title>`,
     `Follow up:  <title>`)
+  - a known trailing tag, `(coherence)` or `(designer)` (`ShortTitle.TAGS`), is a label:  both checks judge the title
+    without it (`ShortTitle.withoutTag()`;  I385)
   - An UPDATE label rides in the title (a bare `<epic-update>`, "Updates"):
     `<span slot="title">Title <epic-update phase="2"></epic-update></span>`.
   - `phase 2 done` removes it, and a title left plain goes back to `title`.

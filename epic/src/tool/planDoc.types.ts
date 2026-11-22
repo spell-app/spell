@@ -58,8 +58,25 @@ export class ShortTitle {
   /** The one second sentence a title may have:  a change with no visible effect says so (epic `epic-engine` T123). */
   static readonly NOTHING_TO_SEE = /\s+Nothing you['’]d see\.?$/
 
-  /** Why `title` isn't a title, or `undefined` when it is. */
-  static problemOf(title: string): string | undefined {
+  /**
+   * The LABELS a skill tells sessions to end a title with, saying which review found it (epic `epic-engine` I385):
+   * `(coherence)`, the coherence skill's;  `(designer)`, the designer skill's.
+   * - a label, not words of the title:  the word count and the fresh reader judge the title without it (`withoutTag()`)
+   * - a skill prescribing a new one adds it here, and to plan-doc.md's TITLES
+   */
+  static readonly TAGS = ["coherence", "designer"]
+
+  /** A known tag at the title's end, its space before it included. */
+  static readonly TAG = new RegExp(`\\s+\\((?:${ShortTitle.TAGS.join("|")})\\)$`)
+
+  /** `title` without a known trailing tag (`TAGS`):  `"X (coherence)"` => `"X"`;  any other title as it is. */
+  static withoutTag(title: string): string {
+    return title.trim().replace(ShortTitle.TAG, "")
+  }
+
+  /** Why `title` isn't a title, or `undefined` when it is;  a known trailing tag isn't counted (`withoutTag()`). */
+  static problemOf(_title: string): string | undefined {
+    const title = ShortTitle.withoutTag(_title)
     const words = title.trim().split(/\s+/).filter(Boolean).length
     if (words > ShortTitle.MOST_WORDS) return `it's ${words} words (the most is ${ShortTitle.MOST_WORDS})`
     if (ShortTitle.LIST.test(title)) return `it runs on, a list after ";"`

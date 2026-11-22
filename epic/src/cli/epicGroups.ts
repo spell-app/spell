@@ -1534,6 +1534,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--estimate <time>": "a phase's estimate, e.g. 1-2h",
     "--title <title>": "a phase's or an item's new title:  links that say the old one follow",
     "--html": "the title is HTML",
+    "--title-ok": "with --title:  keep the new title as it is, not read cold first (T123)",
     "--calm": "an item not urgent:  a judgement call grey, an issue yellow",
     "--loud": "an item urgent (red) again;  a todo too, red as a reminder until you review it (T94)",
     "--requested":
@@ -1570,6 +1571,7 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   // an epic page:  items
   add: {
     "--details <html>": "its details",
+    "--title-ok": "keep the title as it is, not read cold first (T123)",
     "--calm": "not urgent (a judgement call grey, an issue yellow):  it wouldn't surprise you",
     "--requested":
       "an issue or todo filed from the person's own words:  light orange once Claude closes it, until they review it",

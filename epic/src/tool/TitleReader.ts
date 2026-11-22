@@ -3,7 +3,7 @@ import { delimiter, join } from "node:path"
 
 import { ClaudePrint } from "spell/epic/command/ClaudePrint"
 
-import { PlanDocError } from "./planDoc.types"
+import { PlanDocError, ShortTitle } from "./planDoc.types"
 
 /****************
  * ### `TitleReader`
@@ -45,6 +45,7 @@ export class TitleReader {
 
   /**
    * Read `title` cold;  throw when it fails.
+   * - a known trailing tag (`(coherence)`:  `ShortTitle.TAGS`) is a label, so the reader never sees it (I385)
    * - `kind`:  the item's kind (`issue`, `todo` ...), or `phase`
    * - throws `PlanDocError` on a fail, with the reasons and the rewrite (`refusal()`)
    * - NEVER throws for a reader that can't run:  one line on stderr, and the title stands
@@ -58,7 +59,7 @@ export class TitleReader {
     }
     let verdict: TitleVerdict
     try {
-      verdict = this.ask({ system: RULE, text: TitleReader.question(title, kind) })
+      verdict = this.ask({ system: RULE, text: TitleReader.question(ShortTitle.withoutTag(title), kind) })
     } catch (error) {
       this.warn(`epic:  title not read cold:  ${(error as Error).message}`)
       return
