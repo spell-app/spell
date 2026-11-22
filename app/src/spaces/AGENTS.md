@@ -867,6 +867,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - `SpellSessions`:  a game per visitor (a cookie), the program run once for each, on a core of its own.
   - A page per WebSocket:  the state down when it opens,
     then a patch after each message and at each pause (`core.before_pause`).
+  - One loop serves every visitor, so nothing may wait on it:  a program's saves are sent off it (epic `data` P62).
+    `saves_sent()` waits for them, as a visitor's last page closes and as the app stops (`app.after_serving`).
 - `page_html()`:  the page.
   - It loads the page side (app's `yarn build:page`, into `dist-page/`), and the program's drawing half.
   - `assets_folder()` finds the page side in the app's folder, or at `$SPELL_PAGE_ASSETS`.

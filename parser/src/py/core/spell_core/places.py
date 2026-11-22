@@ -20,7 +20,11 @@ core.remove_saved(notes[0])                # remove it from the notes
 - Each read of a type is kept, its list the same each time, and follows this program's own writes:
   `reload_saved()` asks the place again.  A place whose line says `- check it every 30 seconds` is asked again
   once it's been that long, as a page's poll would.
-- Writes are sent as they're made, waiting for the place's answer;  reads wait off the event loop.
+- Writes and reads wait off the event loop (epic data P62):
+  - a write waits in its place's queue (`place_queue.py`), and whoever made it goes on
+    - so a place's no is a line on the console;  an `in one go:` waits for its answer, and raises it
+    - with no loop running (a plain script's top level) it's sent there and then, and raises
+  - a read of a place waits until that place's queue is empty, so it sees what was just saved
   - In a drawing, where nothing can wait (`core.answer_now()`), a read waits right there:
     a page is sent with its values.
 - A row is plain JSON, by the JavaScript names of its fields (`deviceCount`):
@@ -31,6 +35,7 @@ core.remove_saved(notes[0])                # remove it from the notes
 - Imports `core` only inside functions:  `core.py` mixes `PlaceMethods` in.
 """
 
+import asyncio
 import inspect
 import os
 import re
@@ -54,6 +59,7 @@ from spell_core.place_kinds import (
     javascript_name,
     place_behind,
 )
+from spell_core.place_queue import PlaceQueue, Sending
 from spell_core.saving import iso_text
 from spell_core.things import (
     CHANGE_WATCHERS,
@@ -143,6 +149,8 @@ class ProgramPlaces:
         self.details: dict[str, Mapping[str, Any]] = {}
         # what's behind each place, made when first used
         self.behinds: dict[str, PlaceBehind] = {}
+        # each place's saves waiting to be sent, by its name
+        self.queues: dict[str, PlaceQueue] = {}
         # each thing made from a row, by its type's name and id:  one object each
         self.things: dict[tuple[str, str], SpellObject] = {}
         # where each saved thing is kept
@@ -152,7 +160,7 @@ class ProgramPlaces:
         # while reading rows into things:  what changes then isn't a write
         self.reading = 0
         # an `in one go:` running:  its changes, held by place, to send together
-        self.held: dict[str, list[Change]] | None = None
+        self.held: dict[str, list[Sending]] | None = None
         # each draft, by its copy:  the thing it's a draft of
         self.drafts: weakref.WeakKeyDictionary[SpellObject, SpellObject] = weakref.WeakKeyDictionary()
         # who's here:  made when first asked
@@ -179,6 +187,12 @@ class ProgramPlaces:
             self.behinds[place_name] = place_behind(details, self.core.program_file)
         return self.behinds[place_name]
 
+    def queue(self, place_name: str) -> PlaceQueue:
+        """The saves waiting for the place `place_name`.  - throws `PlaceError`, as `behind()`"""
+        if place_name not in self.queues:
+            self.queues[place_name] = PlaceQueue(self.behind(place_name), self.report)
+        return self.queues[place_name]
+
     def home_of_class(self, cls: type) -> Home:
         """Where things of `cls` are kept, as its `saved_in` says.  - throws `TypeError` for a type kept nowhere"""
         saved_in = getattr(cls, "saved_in", None)
@@ -195,9 +209,15 @@ class ProgramPlaces:
         saved = self.read_of(cls, filter)
         if self.is_due(saved):
             behind = self.behind_of_class(cls)
+            home = self.home_of_class(cls)
+            queue = self.queue(home.place_name)
             # where nothing can wait, a drawing:  read right here (`core.run_at_once()`)
-            waits_here = getattr(self.core, "_running_at_once", 0)
-            rows = behind.rows_now(self.home_of_class(cls).collection) if waits_here else await self.listed(behind, cls)
+            if self.waits_here():
+                self.send_waiting(queue)
+                rows = behind.rows_now(home.collection)
+            else:
+                await queue.wait_until_sent()
+                rows = await self.listed(behind, cls)
             self.take(saved, rows)
         return saved.things
 
@@ -278,7 +298,13 @@ class ProgramPlaces:
         home = self.home_of_class(type(thing))
         behind = self.behind_of_class(type(thing))
         row = row_for(thing) | self.stamp(thing, home, self.times_of(type(thing), home))
-        self.send(home.place_name, {"kind": "insert", "collection": home.collection, "id": thing.id, "fields": row})
+        change = {"kind": "insert", "collection": home.collection, "id": thing.id, "fields": row}
+
+        def when_kept() -> None:
+            self.fill_in(thing, behind.fields_it_fills_in())
+
+        self.send(home.place_name, change, type(thing).__name__, when_kept)
+        # what it knows already;  again once it's kept:  an account may have signed in to keep it
         self.fill_in(thing, behind.fields_it_fills_in())
         self.homes[thing] = Home(home.place_name, home.collection, row_for(thing))
         self.things[(type(thing).__name__, str(thing.id))] = thing
@@ -298,13 +324,17 @@ class ProgramPlaces:
                 _set_field(thing, name, value, self.core)
         finally:
             self.reading -= 1
+        home = self.homes.get(thing)
+        if home and fields:
+            home.row = row_for(thing)
 
     def remove(self, thing: SpellObject) -> None:
         """SIDE EFFECT:  `thing` is gone from its place, and from every read:  nothing, if it's kept in none."""
         home = self.homes.pop(thing, None)
         if home is None:
             return
-        self.send(home.place_name, {"kind": "delete", "collection": home.collection, "id": str(thing.id)})
+        change = {"kind": "delete", "collection": home.collection, "id": str(thing.id)}
+        self.send(home.place_name, change, type(thing).__name__)
         self.things.pop((type(thing).__name__, str(thing.id)), None)
         for saved in self.reads.values():
             if thing in saved.things:
@@ -331,10 +361,11 @@ class ProgramPlaces:
             fields |= self.stamp(changed, home, [MODIFIED_FIELD])
         home.row = row_for(changed)
         change = {"kind": "update", "collection": home.collection, "id": str(changed.id), "fields": fields}
+        type_name = type(changed).__name__
         try:
-            self.send(home.place_name, change)
+            self.send(home.place_name, change, type_name)
         except PlaceError as error:
-            self.core.console.error(f"Couldn't keep the change to {type(changed).__name__}:  {error}")
+            self.report(Sending([change], type_name, error=error))
 
     def times_of(self, cls: type, home: Home) -> list[str]:
         """Which of Spell's two times `cls` keeps at `home`:  its compiled `saved_in`'s, that its place can hold."""
@@ -357,12 +388,54 @@ class ProgramPlaces:
             self.reading -= 1
         return dict.fromkeys(fields, now)
 
-    def send(self, place_name: str, change: Change) -> None:
-        """Send `change` to the place `place_name`:  held while an `in one go:` runs.  - throws `PlaceError`"""
+    def send(
+        self, place_name: str, change: Change, type_name: str, when_kept: Callable[[], None] | None = None
+    ) -> None:
+        """Send `change`, to a thing of `type_name`, to the place `place_name`:  off the loop, in its turn.
+
+        - Held while an `in one go:` runs.
+        - On a loop:  it returns at once;  a failure is reported when it's heard.
+        - No loop running:  sent now, after whatever was waiting.  - throws what it failed with
+        """
+        sending = Sending([change], type_name, when_kept)
         if self.held is not None:
-            self.held.setdefault(place_name, []).append(change)
+            self.held.setdefault(place_name, []).append(sending)
             return
-        self.behind(place_name).apply([change])
+        queue = self.queue(place_name)
+        if _loop_running():
+            queue.add(sending)
+            queue.send_beside()
+            return
+        # who made it hears a failure itself
+        sending.is_waited_for = True
+        queue.add(sending)
+        self.send_waiting(queue)
+        if sending.error:
+            raise sending.error
+
+    def send_waiting(self, queue: PlaceQueue) -> None:
+        """SIDE EFFECT:  send all that's waiting in `queue` right here, where nothing can wait."""
+        while queue.waiting:
+            queue.send_now()
+        queue.hear()
+
+    def report(self, sending: Sending) -> None:
+        """SIDE EFFECT:  say `sending` wasn't kept, as one line on the console."""
+        self.core.console.error(f"Couldn't keep the change to {sending.type_name}:  {sending.error}")
+
+    def waits_here(self) -> bool:
+        """Can nothing wait now:  in a drawing, or a thing's `create()` (`core.run_at_once()`)?"""
+        return bool(getattr(self.core, "_running_at_once", 0))
+
+    async def sent(self) -> None:
+        """Wait until every place's saves are sent, off the loop."""
+        for queue in list(self.queues.values()):
+            await queue.wait_until_sent()
+
+    def send_all_now(self) -> None:
+        """SIDE EFFECT:  send every place's saves right here, where nothing can wait:  a program's end."""
+        for queue in list(self.queues.values()):
+            self.send_waiting(queue)
 
     async def in_one_go(self, run: Callable[[], Any]) -> None:
         """Run `run`, every change it makes to each place sent together once it ends:  dropped if it throws."""
@@ -379,8 +452,38 @@ class ProgramPlaces:
             held = self.held
         finally:
             self.held = None
-        for place_name, changes in held.items():
-            self.behind(place_name).apply(changes)
+        sendings = [self.together(place_name, changes) for place_name, changes in held.items()]
+        # every place's queued before any's waited for:  a change made meanwhile goes after them
+        for queue, sending in sendings:
+            queue.add(sending)
+        if self.waits_here():
+            for queue, _sending in sendings:
+                self.send_waiting(queue)
+        else:
+            for queue, _sending in sendings:
+                queue.send_beside()
+            try:
+                for queue, sending in sendings:
+                    await queue.wait_for(sending)
+            except asyncio.CancelledError:
+                # nobody's left to hear a failure:  it's said on the console
+                for _queue, sending in sendings:
+                    sending.is_waited_for = False
+                raise
+        failed = next((sending.error for _queue, sending in sendings if sending.error), None)
+        if failed:
+            raise failed
+
+    def together(self, place_name: str, held: list[Sending]) -> tuple[PlaceQueue, Sending]:
+        """An `in one go:`'s changes to the place `place_name`, as one send, and the queue it waits in."""
+
+        def when_kept() -> None:
+            for sending in held:
+                if sending.when_kept:
+                    sending.when_kept()
+
+        changes = [change for sending in held for change in sending.changes]
+        return self.queue(place_name), Sending(changes, held[0].type_name, when_kept, is_waited_for=True)
 
     ################
     # ## Who's here
@@ -412,6 +515,15 @@ class ProgramPlaces:
 
 # A field a row doesn't have:  never equal to any value.
 _MISSING = object()
+
+
+def _loop_running() -> bool:
+    """Is an asyncio loop running here, so a save can be sent beside the program?"""
+    try:
+        asyncio.get_running_loop()
+    except RuntimeError:
+        return False
+    return True
 
 
 def _login() -> str:
@@ -582,8 +694,9 @@ class PlaceMethods:
     def save_thing(self, thing: object) -> None:
         """`thing`, made here, is now kept where its class says:  `add (a new note ...) to the notes`.
 
-        - Sent at once;  shown in every read of its class.
-        - throws `PlaceError` for a place that refused it;  `TypeError` for a type kept nowhere
+        - Shown in every read of its class at once;  sent in its turn, off the event loop.
+        - A place that refused it:  a line on the console.
+        - throws `TypeError` for a type kept nowhere;  with no loop running, `PlaceError` for a place that refused it
         """
         self._places.add(thing)  # type: ignore[arg-type]
 
@@ -699,7 +812,23 @@ class PlaceMethods:
         - throws `PlaceError` if the place says no, or takes no named operations
         """
         sent = {ID_FIELD: input.id, **row_for(input)} if isinstance(input, SpellObject) else to_json_value(input)
-        return self._places.behind(place_name).call(name, sent)
+        places = self._places
+        behind, queue = places.behind(place_name), places.queue(place_name)
+        if places.waits_here():
+            places.send_waiting(queue)
+            return behind.call(name, sent)
+        await queue.wait_until_sent()
+        return await asyncio.to_thread(behind.call, name, sent)
+
+    async def saves_sent(self) -> None:
+        """Wait until everything saved so far is sent, off the event loop."""
+        if self._program_places:
+            await self._program_places.sent()
+
+    def send_saves_now(self) -> None:
+        """SIDE EFFECT:  everything saved so far is sent, waiting right here:  as a program ends."""
+        if self._program_places:
+            self._program_places.send_all_now()
 
     ################
     # ## Drawing what's read

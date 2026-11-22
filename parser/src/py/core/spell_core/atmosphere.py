@@ -196,9 +196,12 @@ class AtmosphereAccount(PlaceBehind):
         return (session.did, session.handle) if session else None
 
     def fields_it_fills_in(self) -> Row:
-        """What it says of a new row by itself:  `owner`, the account signed in."""
-        who = self.signed_in_person()
-        return {OWNER_FIELD: who[0]} if who else {}
+        """What it says of a new row by itself:  `owner`, the account signed in.
+
+        - Nothing until it has signed in:  it doesn't sign in to say, which would hold up the event loop.
+        """
+        session = self._session
+        return {OWNER_FIELD: session.did} if session else {}
 
     def _signed_in(self, who: str, password: str) -> Session:
         """A new session for `who`.  - throws `PlaceError`"""

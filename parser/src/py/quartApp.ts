@@ -6,6 +6,7 @@
  *   - `/<Project>.elements.spell.js`, and each imported project's:  served from beside the program
  *   - `/spell/...`:  the javascript core, Solid and Spell UI (`spell_quart.assets_folder()`)
  *   - `/ws`:  the WebSocket:  a click up, the state and what changed down;  a game per visitor
+ *   - as it stops, every visitor's saves are sent first (epic `data` P62)
  *   - a place for their own routes
  * - The app is committed beside the project's source.
  * - The program and its page file are BUILT, into the project's build folder (epic `people-and-orgs` P11).
@@ -101,6 +102,12 @@ async def assets(path: str):
 async def ws():
     """The page's WebSocket:  its clicks up, the state and what changed down."""
     await sessions.serve(websocket, visitor_of(websocket))
+
+
+@app.after_serving
+async def stop():
+    """The app stops:  every visitor's saves are sent first."""
+    await sessions.saves_sent()
 
 
 # Your own routes go here, e.g.:
