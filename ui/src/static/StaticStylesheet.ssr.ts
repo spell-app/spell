@@ -15,6 +15,7 @@ import {
 import uiCSS from "spell/ui/styles/ui.css?inline"
 import { OPTIONAL_SHEETS, type OptionalSheetName } from "spell/ui/runtime/runtime.types"
 import { RootSheets } from "spell/ui/elements/RootSheets"
+import { E } from "spell/ui/core"
 
 import { SSR } from "spell/ui/static"
 // Import directly to avoid circular import:  the constants below the class read them
@@ -157,11 +158,21 @@ export class StaticStylesheet {
       }
     }
     const files = new Map<string, { file: string; css: string }>()
-    for (const [name, css] of texts) {
+    for (const [name, text] of texts) {
+      // a shadow root's sheets also select the custom states a server drawing writes as an attribute
+      const css = name === PAGE_FILE ? text : StaticStylesheet.withServerStates(text)
       const hash = createHash("sha256").update(css).digest("hex").slice(0, 8)
       files.set(name, { file: `${name.replace(/[^\w.-]/g, "-")}.${hash}.css`, css })
     }
     return files
+  }
+
+  /**
+   * `css` with each `:state(x)` also matching the attribute a server drawing writes the element's states into:
+   * `:is(:state(x), [data-ui-states~="x"])` (`UIComponent.SERVER_STATES`).
+   */
+  static withServerStates(css: string): string {
+    return css.replace(STATE, (state, name: string) => `:is(${state}, [${E.UIComponent.SERVER_STATES}~="${name}"])`)
   }
 
   /**
@@ -324,6 +335,9 @@ export class StaticStylesheet {
     return node.type === "atrule" && SCOPABLE_AT_RULES.has(node.name)
   }
 }
+
+/** A custom state in a selector, `:state(in-card)`, and its name. */
+const STATE = /:state\(([\w-]+)\)/g
 
 /** The shadow output's page sheet:  Spell UI's `ui.css`, which a page that loads no runtime links. */
 const PAGE_FILE = "ui"

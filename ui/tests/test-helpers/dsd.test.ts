@@ -32,8 +32,9 @@ it("paints the server's shadow roots styled before any script;  each element the
   expect(button.className).toBe("ui primary button")
   expect(frames.emptyRoots).toBe(0)
   expect(roots.map((root) => root.host.getBoundingClientRect().toJSON())).toEqual(boxes)
-  // its own sheets are in:  the server's links went
+  // its own sheets and states are in:  the server's links and its states' stand-in went
   expect(roots.every((root) => !root.querySelector("link"))).toBe(true)
+  expect(container.querySelector("[data-ui-states]")).toBeNull()
   expect(getComputedStyle(button).backgroundColor).toBe(color)
   // and it's live
   host.setAttribute("color", "red")

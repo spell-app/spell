@@ -70,6 +70,14 @@ describe('StaticRender.fragment(html, { output: "shadow" })', () => {
     expect(files.get(StaticStylesheet.pageFile)).toContain("--ui-page-sheet")
   })
 
+  it("writes an element's custom states as an attribute, which the linked sheets select beside :state()", () => {
+    const { document } = render(`<ui-card><ui-content><ui-header>Hi</ui-header></ui-content></ui-card>`)
+    expect(document.querySelector("ui-content")!.getAttribute("data-ui-states")).toContain("in-card")
+    expect(StaticStylesheet.withServerStates(":host(:state(in-card)) { gap: 0 }")).toBe(
+      ':host(:is(:state(in-card), [data-ui-states~="in-card"])) { gap: 0 }'
+    )
+  })
+
   it("nests:  an element in another's children gets its own root, and stays a child", () => {
     const { document } = render(`<ui-segment><ui-button>Go</ui-button></ui-segment>`)
     const segment = document.querySelector("ui-segment")!

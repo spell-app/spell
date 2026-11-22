@@ -1385,9 +1385,19 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
       domElement.takeServerDrawing()
       ShadowEvents.register(root)
       insert(root, view)
-      if (drawing) domElement.restoreServerFocus()
+      if (!drawing) return
+      domElement.restoreServerFocus()
+      // its own custom states are set by the time the page paints:  the server's stand-in for them goes
+      domElement.removeAttribute(UIComponent.SERVER_STATES)
     })
   }
+
+  /**
+   * The attribute a server drawing writes the element's custom states into (`in-card` ...), and its sheets select
+   * beside `:state()`:  a page can't set custom states before a script runs.
+   * - Spell UI's static render writes it, and the sheets it links say `:is(:state(x), [data-ui-states~="x"])`.
+   */
+  static readonly SERVER_STATES = "data-ui-states"
 
   /** `mount()`, put off from the first connect:  then the connect's own step, `onConnect()`, if it's still connected. */
   private static mountLater(
@@ -1431,6 +1441,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
   // - When the element starts, it waits for the runtime, as every first render does (`mount()`),
   //   then draws again in place of the server's drawing, in the same task:  nothing flashes, nothing moves,
   //   and the focus moves to the element in the same place (`DOMElement.takeServerDrawing()`).
+  // - Its custom states, which a page can't set before a script runs, came as an attribute (`SERVER_STATES`).
   // - The server's sheets go once its own are in (`DOMElement.markReady()`).
   // - Not hydrated:  Solid's hydration worked, but was slower than drawing again (epic `solid-2-final` J62).
   ////////////////

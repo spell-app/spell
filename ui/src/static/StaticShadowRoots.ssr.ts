@@ -1,4 +1,4 @@
-import { UIT } from "spell/ui/core"
+import { E, UIT } from "spell/ui/core"
 import { SSR } from "spell/ui/static"
 
 /****************
@@ -13,7 +13,8 @@ import { SSR } from "spell/ui/static"
  *   the same address for every root that adopts it, so the browser fetches and parses each once.
  * - Leaves out a family whose shadow root assigns its slots by hand (`slotAssignment: "manual"`):
  *   no template can say so, so it draws in the page as before.
- * - What a browser can't be told in markup is left to the element:  its custom states, and its internals' ARIA.
+ * - Its custom states, which markup can't set, go in an attribute the linked sheets select too
+ *   (`UIComponent.SERVER_STATES`, `StaticStylesheet.shadowSheets()`);  its internals' ARIA is left to the element.
  * - Node only (`spell/ui/static`), plain DOM on linkedom:  NEVER imported by a component or `spell-ui`.
  ****************/
 export class StaticShadowRoots {
@@ -47,5 +48,7 @@ export class StaticShadowRoots {
     for (const control of view.querySelectorAll(`[${UIT.STATIC_CONTROL}]`)) control.removeAttribute(UIT.STATIC_CONTROL)
     template.innerHTML = links + view.innerHTML
     element.insertBefore(template, element.firstChild)
+    const states = SSR.ServerDOMElement.stateFor(element)?.states
+    if (states?.size) element.setAttribute(E.UIComponent.SERVER_STATES, [...states].join(" "))
   }
 }
