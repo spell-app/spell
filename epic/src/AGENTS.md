@@ -658,7 +658,8 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - off macOS (epic `epic-friend` P15):  links through the kit's `Links` (a folder a junction on Windows), and on
         Windows `epic.cmd` instead of the `epic` link (Windows runs no file without an extension);  and step 7, the VS
         Code extension from `vscode/spell-epic.vsix` (`code --install-extension`, skipped when VS Code has that
-        version, unless the `.vsix` was built after VS Code installed it:  `Editor.extensionsFolder()`, T72), which `spell publish` ships in `spell-epic`;  `epic init` runs the install every time, for it
+        version, unless the `.vsix` was built after VS Code installed it:  `Editor.extensionsFolder()`, T72;  never a `.vsix`
+        from before the last bump, epic `epic-engine` T140), which `spell publish` ships in `spell-epic`;  `epic init` runs the install every time, for it
       - `--codex` (epic `epic-friend` P11):  the plugin's Codex hooks ([codex-hooks.json](../hooks/codex-hooks.json))
         written into Codex's own `~/.codex/hooks.json` (`$CODEX_HOME`), by the kit's full path, the person's other
         hooks kept;  not the plugin's own hooks, which Codex's docs promise only for its desktop app

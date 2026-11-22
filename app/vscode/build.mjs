@@ -14,24 +14,19 @@
  *   - So a vocabulary change shows in the editor after the next build and install (`yarn vscode`).
  * - Writes every Spell theme as a VS Code colour theme first (`scripts/vscode-themes.ts`, `VscodeThemes`):
  *   "Spell Matrix Dark" and the rest, in `themes/`, listed in `contributes.themes`.
- * - Fails unless our `version` matches `spell`'s -- the two are pinned together.
+ * - Fails unless our `version` is the kit's -- the two are pinned together.
  * - SIDE EFFECT: also builds `app`'s runner bundle, `dist-runner/`, for "Run Project".
  */
 import { execSync } from "child_process"
-import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs"
+import { copyFileSync, existsSync, mkdirSync, writeFileSync } from "fs"
 import { resolve } from "path"
 
-import { buildExtension } from "spell/toolchain/buildExtension"
+import { buildExtension, checkKitVersion } from "spell/toolchain/buildExtension"
 
 const here = import.meta.dirname
 
-// The extension's version is PINNED to spell's (spell-parser's one version, epic `repo-split` P11):  release them
-// together.
-const { version } = readJson(resolve(here, "package.json"))
-const { version: parserVersion } = readJson(resolve(here, "../../parser/package.json"))
-if (version !== parserVersion) {
-  throw new Error(`vscode extension version ${version} !== spell version ${parserVersion}:  change them together.`)
-}
+// The extension's version is PINNED to the kit's (epic `repo-split` P11):  release them together.
+checkKitVersion({ folder: here, kit: resolve(here, "../..") })
 
 // Every Spell theme as a VS Code theme, `themes/` and `contributes.themes`, current with the theme sheets (epic `debut`
 // P22):  written where they changed, so they're in the package below
@@ -57,8 +52,3 @@ for (const [set, folder] of Object.entries(DATA_SETS)) {
 }
 
 await buildExtension({ folder: here, constants: { BUILT_IN_SPELL_APP: resolve(here, "..") } })
-
-/** Contents of JSON file `path`. */
-function readJson(path) {
-  return JSON.parse(readFileSync(path, "utf8"))
-}

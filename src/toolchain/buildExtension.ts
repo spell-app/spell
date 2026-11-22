@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs"
 import Module, { createRequire } from "node:module"
 import { resolve } from "node:path"
 
@@ -12,6 +13,7 @@ import { sourceNames } from "./sourceNames.ts"
  *
  * ```js
  * // an extension's `build.mjs`, which keeps its own steps around this one
+ * checkKitVersion({ folder: import.meta.dirname, kit: resolve(import.meta.dirname, "../..") })
  * await buildExtension({ folder: import.meta.dirname, constants: { ENGINE_ROOT: resolve(import.meta.dirname, "..") } })
  * ```
  *
@@ -52,6 +54,25 @@ export async function buildExtension({
   })
   loadOnce(outfile)
   console.log("  loaded once:  no error as it loads")
+}
+
+/**
+ * Fail an extension's build unless its version is the kit's:  they're bumped and released together (epic
+ * `epic-engine` T140).
+ * - `folder`:  the extension's;  `kit`:  the kit's root
+ * - Each `build.mjs` calls it first, before its own steps.
+ * - throws if the two differ
+ */
+export function checkKitVersion({ folder, kit }: { folder: string; kit: string }): void {
+  const versionIn = (root: string) =>
+    (JSON.parse(readFileSync(resolve(root, "package.json"), "utf8")) as { version?: string }).version
+  const [version, kitVersion] = [versionIn(folder), versionIn(kit)]
+  if (version !== kitVersion) {
+    throw new Error(
+      `checkKitVersion():  the extension in ${folder} is version ${String(version)}, the kit ${String(kitVersion)};  ` +
+        "change them together, in their package.json files"
+    )
+  }
 }
 
 /** What `buildExtension()` builds, and how. */

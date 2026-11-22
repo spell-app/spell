@@ -111,6 +111,13 @@ describe("spell local", () => {
     )
   })
 
+  test("an extension the editor did not take is never said to be your checkout's (epic `epic-engine` T140)", async () => {
+    const change = "VS Code:  no code command, so spell-epic.vsix isn't installed;  in VS Code:  Install from VSIX..."
+    const run = () => ({ status: 0, stdout: JSON.stringify({ changes: [change] }), stderr: "" })
+    await localCommand("on", checkout, {}, { ...probes, run })
+    expect(printed.join("\n")).not.toContain("is your checkout's now")
+  })
+
   test("run again:  .gitignore left as it is", async () => {
     const before = readFileSync(join(project, ".gitignore"), "utf8")
     await localCommand("on", checkout, {}, probes)

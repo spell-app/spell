@@ -57,7 +57,8 @@ else, today.
 <details>
 <summary>Its name and ids, beside Spell's language extension</summary>
 
-- It shows as "Spell Epic";  its version is in its [package.json](vscode/package.json).
+- It shows as "Spell Epic";  its version is the kit's, kept in its [package.json](vscode/package.json) too
+  (the build fails when they differ).
   Its id is `spell-app.spell-epic`, and every id it has is `spellEpic.*`:
   so it runs beside Spell's language extension, spell-app's, whose ids are `spell.*`.
 - It starts with every window (`onStartupFinished`), since every window needs its bridge;
@@ -85,8 +86,8 @@ code --install-extension spell-epic.vsix
 
 Or, after `yarn package`, let `epic plugin install` (and so `epic init`) run that last line for you.
 **With no `spell-epic.vsix` it skips the step and says nothing, and a fresh clone has none.**
-It installs only when VS Code doesn't have that version yet, and a build alone doesn't change the version:
-so a REBUILT copy needs the `code` line above.
+It installs when VS Code has another version, or an older build of this one.
+After a version bump, build again first:  it won't install a package from the version before.
 
 Then reload each window ("Developer:  Reload Window", in the Command Palette):
 a window keeps running the copy it started with.
