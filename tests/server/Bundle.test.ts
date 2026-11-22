@@ -276,6 +276,19 @@ describe("a build script's steps", () => {
     const only = SRV.Bundle.sizeReport({ name: "b", folder: out, seconds: 0, entries: ["site.js"], only: /\.js$/ })
     expect(only.at(-2)).toMatch(/all 3 files/)
   })
+
+  // epic `solid-2-final` P1:  brotli is the size budgets' unit
+  test("firstLoad():  the eager files' sizes raw, gzipped and brotli, summed;  the rest lazy", () => {
+    const load = SRV.Bundle.firstLoad({ folder: out, entries: ["site.js"], only: /\.js$/ })
+    expect(load.files.map((size) => size.file).sort()).toEqual(["shared.js", "site.js"])
+    expect(load.lazy.map((size) => size.file)).toEqual(["lazy.js"])
+    expect(load.raw).toBe(load.files[0]!.raw + load.files[1]!.raw)
+    expect(load.brotli).toBe(load.files[0]!.brotli + load.files[1]!.brotli)
+    const big = Buffer.from("spell ".repeat(2000))
+    const sizes = SRV.Bundle.sizesOf(big)
+    expect(sizes.raw).toBe(12_000)
+    expect(sizes.brotli).toBeLessThan(sizes.gzip)
+  })
 })
 
 describe("Bundle.all()", () => {

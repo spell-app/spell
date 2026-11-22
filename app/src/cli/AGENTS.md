@@ -13,6 +13,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   Two things:
   - the app's OWN commands:
     - the editor:  `spell app create | serve | vscode [build|install]`, `spell projects`
+    - speed and size:  `spell perf run | report | budget` (epic `solid-2-final` P1)
     - the built-in projects:
       - `spell content check [--bless]`
       - `spell content compare [--against <ref>] [--target <name>]`
@@ -96,11 +97,23 @@ Only what's local is below;  a section named like a WWOD rule extends it.
   - [runProject.ts](runner/runProject.ts):  `spell run` / `spell test`
   - [speedTest.mts](runner/speedTest.mts):  `spell speedtest`
     - beside it, `speedBaseline.json`:  the commit `--budget` times against, saved by `--baseline save`
+  - [pipelineTimes.mts](runner/pipelineTimes.mts):  `spell speedtest --pipeline`, the editing pipeline on Solitaire
+    (epic `solid-2-final` P1);  its baseline is `spell perf`'s
   - They NEVER import `spell/app/cli`'s values:  they need only spell.
   - `speedTest.mts` is copied into other checkouts (`--against`), so it imports nothing of ours at all.
   - [compareProjects.mts](runner/compareProjects.mts):  `spell content compare`, one per checkout, each finding ITS
     OWN spell;  so its temp checkout links each package separately, never the whole `node_modules`.
 - [tempCheckout.ts](tempCheckout.ts):  the temp git worktree `--against` uses, for both.
+- [Baseline.ts](Baseline.ts):  a command's saved numbers, ONE committed JSON file, and the comparing of numbers now with
+  them, WORSE past 10%:  the speed test's and `spell perf`'s (epic `solid-2-final` P1).
+- [perf/](perf/):  `spell perf run | report | budget` (epic `solid-2-final` P1), its command
+  [perfCommand.ts](commands/perfCommand.ts), loading no spell:
+  - `PerfRun`:  a run, in the machine's test turn;  the editor built into a temporary folder and served (`PerfBuilds`);
+    the pages and profiles are data ([perf.types.ts](perf/perf.types.ts))
+  - one class per measurement:  `LoadMeasure`, `LeaksMeasure`, `TypingMeasure`, `A11yMeasure`, `ListenersMeasure`,
+    `SheetsMeasure`, `CpuMeasure`, each on `PerfBrowser` (a cold page in headless Chromium, its CPU and network slowed)
+  - `PerfResults`:  each run a dated file in the kit's `.perf-results/`;  the baseline, `perfBaseline.json` beside it
+  - `PerfBudget`:  the bundles' size budgets, [perf-budgets.json5](../../perf-budgets.json5) at the app folder's root
 - Each command's work is a file in [commands/](commands/), `<name>Command.ts`:
   `(session, args, options) => Promise<exitCode>`.
   - `lintCommand` was `checkCommand`, `speedtestCommand` `speedCommand`, until P13.

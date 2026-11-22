@@ -255,6 +255,19 @@ export type BundleSizeParams = {
   only?: RegExp
 }
 
+/** A file's size in bytes:  raw, gzipped and brotli, each on its own (`Bundle.sizesOf()`). */
+export type CompressedSizes = { raw: number; gzip: number; brotli: number }
+
+/** One file's sizes, by its path in its bundle's folder. */
+export type FileSizes = CompressedSizes & { file: string }
+
+/**
+ * What a page loads first of a bundle, and the rest (`Bundle.firstLoad()`).
+ * - `files`:  the eager files, biggest first;  `raw`, `gzip`, `brotli`:  their sums
+ * - `lazy`:  every other file, biggest first;  `all`:  both
+ */
+export type BundleLoad = CompressedSizes & { files: FileSizes[]; lazy: FileSizes[]; all: FileSizes[] }
+
 /** What a build records in its `output` folder (`BUNDLE_RECORD`), for `Bundle.check()` to compare. */
 export type BundleRecord = {
   /** the hash of the sources it was built from */

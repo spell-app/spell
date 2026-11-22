@@ -1,0 +1,88 @@
+// The bundles' size budgets (epic `solid-2-final` P1, Q14):  brotli on the wire, KB (1024 bytes).
+// - `spell perf budget` sizes each, and exits 1 when one grew past its CEILING:  its size the day it was set, plus 2%.
+// - `budget`:  what it should weigh, the web performance page's table;  most are over it today.
+//   Once a bundle has met its budget, its ceiling is the budget:  it can only get smaller.
+// - A phase that shrinks a bundle lowers its ceiling in the same change:  `spell perf budget --tighten`.
+// - How each is sized:  `build` (the app's, into a temporary folder) or `folder` (from the kit's root), its first
+//   load from `entries` (an `.html` file stands for what it loads);  or `run`, a number the last `spell perf run`
+//   measured in a browser.  The shape:  `BudgetEntry`, in `app/src/cli/perf/perf.types.ts`.
+{
+  budgets: [
+    {
+      id: "editor-first-js",
+      name: "The editor's first screen, JavaScript",
+      budget: 400,
+      ceiling: 99999,
+      build: "editor",
+      entries: ["index.html"],
+      only: "\\.js$"
+    },
+    {
+      id: "editor-first-all",
+      name: "The editor's first screen, everything",
+      budget: 500,
+      ceiling: 99999,
+      build: "editor",
+      entries: ["index.html"]
+    },
+    {
+      id: "editor-project-open",
+      name: "The editor, a project open",
+      budget: 700,
+      ceiling: 99999,
+      run: "load editor/desktop brotliLoaded"
+    },
+    {
+      id: "cloud-app",
+      name: "A cloud app:  <spell-viewer> and its runtime",
+      budget: 150,
+      ceiling: 99999,
+      build: "element",
+      entries: ["spell-viewer.js", "spell-solid.js", "spell-runtime.js"],
+      only: "\\.js$"
+    },
+    {
+      id: "docs-page-js",
+      name: "A docs or epic page, JavaScript (the docs bundle)",
+      budget: 250,
+      ceiling: 99999,
+      folder: "epic/src/tools/_assets",
+      entries: ["spell-ui.js", "spell-doc-runtime.js"]
+    },
+    {
+      id: "ui-site-page",
+      name: "A Spell UI site page",
+      budget: 200,
+      ceiling: 99999,
+      folder: "ui/site/_assets",
+      entries: ["site.js", "site.css"]
+    },
+    {
+      id: "editor-lazy-piece",
+      name: "Any lazy piece of the editor",
+      budget: 150,
+      ceiling: 99999,
+      build: "editor",
+      entries: ["index.html"],
+      only: "\\.js$",
+      measure: "lazy"
+    },
+    {
+      id: "docs-lazy-piece",
+      name: "Any lazy piece of a docs page",
+      budget: 150,
+      ceiling: 99999,
+      folder: "epic/src/tools/_assets",
+      entries: ["spell-ui.js", "spell-doc-runtime.js"],
+      only: "\\.js$",
+      measure: "lazy"
+    },
+    {
+      id: "warm-visit",
+      name: "A warm visit to the editor",
+      budget: 10,
+      ceiling: 99999,
+      run: "load editor/desktop warmBrotli"
+    }
+  ]
+}

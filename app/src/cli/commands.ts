@@ -32,6 +32,8 @@
  * - `spell space export <space> <folder>`:  a space as a folder of plain JSON, leaving Spell (epic `atmosphere` P7)
  * - `spell space delete <space | account> --yes`:  a space, or an account, deleted for good (epic `atmosphere` P7)
  * - `spell events write | check`:  the events page's data, every event a page can listen for (epic `language` P67)
+ * - `spell perf run | report | budget`:  how fast and how big Spell's pages are, on a desktop and an emulated phone,
+ *   and every bundle's size against its budget (epic `solid-2-final` P1)
  * - `spell app vscode [build|install]`:  the VS Code extension
  * - `spell projects [group]`:  the project groups, or one group's projects
  * - `spell content check [--bless]`:  every check of the `@spell` space's content, its examples, notebooks and
@@ -220,6 +222,51 @@ export default function appCommands(spell: Command): void {
     .description("fail while the events page's data is stale:  an event added or renamed since it was written")
     .action(() =>
       CLI.runCommand(async () => (await import("./commands/eventsCommand")).eventsCommand({ isCheck: true }))
+    )
+
+  // how fast and how big Spell's pages are, measured the same way every time (epic `solid-2-final` P1)
+  const perf = spell
+    .command("perf")
+    .description(
+      "how fast and how big Spell's pages are:  measured in a headless browser on a desktop and an emulated phone, " +
+        "and every bundle's size against its budget"
+    )
+
+  perf
+    .command("run")
+    .description(
+      "measure the editor, a docs page, an epic page and run mode on a desktop and an emulated phone (CPU slowed 4x, " +
+        "a 5G-like network), in the machine's test turn;  then the report.  About 5 minutes;  --full measures everything"
+    )
+    .option("--full", "every measurement:  load, leaks, typing, accessibility, listeners, sheets, CPU, the pipeline")
+    .option("--page <pages>", "which pages, e.g. editor,docs -- default editor, docs, epic, run")
+    .option("--profile <profiles>", "which profiles:  desktop, phone, phonewide -- default desktop, phone")
+    .option("--steps <steps>", "which measurements, e.g. load,typing -- default load (all with --full)")
+    .option("--runs <count>", "cold loads per page and profile, medians reported -- default 1 (5 with --full)")
+    .option("--wait <minutes>", "how long to wait for a quiet machine -- default 10")
+    .option("--force", "don't wait for a quiet machine")
+    .option("--out <file>", "write the results there, not in .perf-results/")
+    .option("--baseline <save>", "save this run as the baseline the report compares with (perfBaseline.json)")
+    .action((_options, command: Command) =>
+      CLI.runCommand(async () => (await import("./commands/perfCommand")).perfCommand("run", command.optsWithGlobals()))
+    )
+
+  perf
+    .command("report")
+    .description("the last run's numbers against the run before it and the baseline:  WORSE past 10%")
+    .action(() => CLI.runCommand(async () => (await import("./commands/perfCommand")).perfCommand("report", {})))
+
+  perf
+    .command("budget")
+    .description(
+      "every bundle's size, brotli, against its budget and its ceiling (perf-budgets.json5):  exits 1 when one grew " +
+        "past its ceiling"
+    )
+    .option("--tighten", "lower each ceiling to the bundle's size now plus 2%:  after a phase that shrank one")
+    .action((_options, command: Command) =>
+      CLI.runCommand(async () =>
+        (await import("./commands/perfCommand")).perfCommand("budget", command.optsWithGlobals())
+      )
     )
 
   // Spell's hosting:  its own noun, apart from the app (Owen, 2026-11-06, epic `atmosphere` P14)
