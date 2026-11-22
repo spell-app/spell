@@ -25,6 +25,7 @@ import { Wording } from "spell/parser/spell/rules/expressions"
  *   ```
  *
  *   - What's indented under the last of them is the statement's body:  `if a`, `and b`, then its steps under that.
+ * - A comment among those lines doesn't end them (epic `language` I181):  it goes first in what's under the joined line.
  * - A line of just `and` or `or` joins the lines on either side, each in parentheses:
  *
  *   ```spell
@@ -97,21 +98,33 @@ export class JoinedLines {
   ): (P.LineToken | P.BlockToken)[] | undefined {
     const items = below.tokens
     const lines: P.LineToken[] = [line]
+    // the comments among them:  first in what's under the joined line
+    const notes: P.LineToken[] = []
+    let passed: P.LineToken[] = []
     let taken = 0
     let deeper = false
-    for (; taken < items.length; taken++) {
-      const item = items[taken]!
-      const more = item instanceof P.LineToken ? [item] : JoinedLines.linesOf(item)
-      if (!more || !more.every((each, at) => JoinedLines.goesOn(scope, at ? more[at - 1]! : lines.at(-1)!, each))) break
+    for (let index = 0; index < items.length; index++) {
+      const item = items[index]!
+      const held = item instanceof P.LineToken ? [item] : JoinedLines.linesOf(item)
+      if (!held) break
+      const isNote = (each: P.LineToken) => JoinedLines.isNote(scope, each)
+      const more = held.filter((each) => !isNote(each))
+      passed.push(...held.filter(isNote))
+      if (!more.length) continue
+      if (!more.every((each, at) => JoinedLines.goesOn(scope, at ? more[at - 1]! : lines.at(-1)!, each))) break
       lines.push(...more)
+      notes.push(...passed)
+      passed = []
+      taken = index + 1
       deeper = item instanceof P.BlockToken
     }
     if (!taken) return undefined
     const rest = items.slice(taken)
     let body: P.BlockToken | undefined
     if (rest.length === 1 && rest[0] instanceof P.BlockToken) body = rest[0]
-    else if (rest.length && deeper) body = JoinedLines.blockOf(below, rest)
+    else if (rest.length && (deeper || JoinedLines.areNotes(scope, rest))) body = JoinedLines.blockOf(below, rest)
     else if (rest.length) return undefined
+    if (notes.length) body = JoinedLines.blockOf(below, [...notes, ...(body?.tokens ?? [])])
 
     const last = lines.at(-1)!
     // each line's code, a space after it;  the last line whole, with its comment
@@ -259,7 +272,8 @@ export class JoinedLines {
       const last = JoinedLines.codeOf(item).at(-1)
       return !!last && JoinedLines.joins(scope, last)
     }
-    const first = before instanceof P.LineToken && JoinedLines.linesOf(item)?.[0]
+    const first =
+      before instanceof P.LineToken && JoinedLines.linesOf(item)?.find((it) => !JoinedLines.isNote(scope, it))
     return !!first && JoinedLines.startsWithJoin(scope, first)
   }
 
@@ -278,6 +292,18 @@ export class JoinedLines {
   /** Is `token` a joining word, `and` or `or` in the language's words (`and_or`) -- `meaning`, if given? */
   private static joins(scope: P.Scope, token: P.Token, meaning?: "and" | "or"): boolean {
     return token instanceof P.WordToken && Wording.lengthAt(scope, "and_or", [token], 0, meaning) === 1
+  }
+
+  /** Is `line` a comment, or another aside with no say in how lines go on (`P.Tokenizer.isAside()`), not a blank? */
+  private static isNote(scope: P.Scope, line: P.LineToken): boolean {
+    return !!(line.tokens.length || line.leading) && !!scope.parser?.tokenizer.isAside(line)
+  }
+
+  /** Is every line in `items` a comment, or blank:  what trails the lines that go on? */
+  private static areNotes(scope: P.Scope, items: (P.LineToken | P.BlockToken)[]): boolean {
+    return items.every((item) =>
+      item instanceof P.LineToken ? !!scope.parser?.tokenizer.isAside(item) : JoinedLines.areNotes(scope, item.tokens)
+    )
   }
 
   /** `line`'s tokens, without a comment at its end. */
