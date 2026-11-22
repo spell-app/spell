@@ -12,7 +12,8 @@
       id: "editor-first-js",
       name: "The editor's first screen, JavaScript",
       budget: 400,
-      ceiling: 871,
+      // Smaller Built Code (epic solid-2-final P11):  854 => 741 KB, Spanish, the dialogs and the pages on first use
+      ceiling: 756,
       build: "editor",
       entries: ["index.html"],
       only: "\\.js$"
@@ -21,7 +22,8 @@
       id: "editor-first-all",
       name: "The editor's first screen, everything",
       budget: 500,
-      ceiling: 889,
+      // P11:  872 => 754 KB
+      ceiling: 769,
       build: "editor",
       entries: ["index.html"]
     },
@@ -36,7 +38,8 @@
       id: "cloud-app",
       name: "A cloud app:  <spell-viewer> and its runtime",
       budget: 150,
-      ceiling: 330,
+      // P11:  309 => 307 KB (lodash-es)
+      ceiling: 313,
       build: "element",
       entries: ["spell-viewer.js", "spell-solid.js", "spell-runtime.js"],
       only: "\\.js$"
