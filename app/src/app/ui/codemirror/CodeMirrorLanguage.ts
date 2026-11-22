@@ -222,19 +222,35 @@ export class CodeMirrorLanguage {
   private folding(): Extension {
     return foldService.of((state, lineStart) => {
       const { file } = this
-      const text = state.doc.toString()
       // typing not handed over yet:  the last parse's blocks, as when the typing reached the file at once
-      if (!file.match || (file.contents !== text && !this.isHolding())) return null
+      if (!file.match || (!this.isHolding() && !this.holdsFileText(state.doc))) return null
       const line = state.doc.lineAt(lineStart).number - 1
-      const endLine = this.blocksOf(file.match, text).get(line)
+      const endLine = this.blocksOf(file.match, file.contents ?? "").get(line)
       if (endLine === undefined) return null
       return { from: state.doc.line(line + 1).to, to: state.doc.line(endLine + 1).to }
     })
   }
 
   /**
+   * Is `doc` the file's text?  Worked out once per `doc`:  the fold arrows ask line by line, and a whole file made
+   * into one string for each cost a key 4ms in a 2,700-line file (epic `solid-2-final` T20, P18).
+   */
+  private holdsFileText(doc: Text): boolean {
+    if (this.checked?.doc !== doc || this.checked.contents !== this.file.contents) {
+      const { contents } = this.file
+      this.checked = { doc, contents, isSame: contents?.length === doc.length && contents === doc.toString() }
+    }
+    return this.checked.isSame
+  }
+
+  /** The last `holdsFileText()`:  its doc, the file's text it was checked against, and the answer. */
+  private checked?: { doc: Text; contents: string | undefined; isSame: boolean }
+
+  /**
    * Each block's last line, by its head line (both from 0), for the parse `match` of `text`;  kept until the next one.
    * - The text too:  a parse may keep its match as it takes an edit in.
+   * - `text`:  the file's text (`file.contents`), which the parse is of, never the editor's:  while the typing's held, each key's
+   *   text missed the cache, and every block of the file was worked out again on every key (epic `solid-2-final` T20).
    */
   private blocksOf(match: object, text: string): Map<number, number> {
     if (this.blocks?.match !== match || this.blocks.text !== text) {
