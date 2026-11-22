@@ -12,7 +12,7 @@
       id: "editor-first-js",
       name: "The editor's first screen, JavaScript",
       budget: 400,
-      ceiling: 99999,
+      ceiling: 1003,
       build: "editor",
       entries: ["index.html"],
       only: "\\.js$"
@@ -21,7 +21,7 @@
       id: "editor-first-all",
       name: "The editor's first screen, everything",
       budget: 500,
-      ceiling: 99999,
+      ceiling: 1020,
       build: "editor",
       entries: ["index.html"]
     },
@@ -29,14 +29,14 @@
       id: "editor-project-open",
       name: "The editor, a project open",
       budget: 700,
-      ceiling: 99999,
+      ceiling: 2103,
       run: "load editor/desktop brotliLoaded"
     },
     {
       id: "cloud-app",
       name: "A cloud app:  <spell-viewer> and its runtime",
       budget: 150,
-      ceiling: 99999,
+      ceiling: 412,
       build: "element",
       entries: ["spell-viewer.js", "spell-solid.js", "spell-runtime.js"],
       only: "\\.js$"
@@ -45,7 +45,7 @@
       id: "docs-page-js",
       name: "A docs or epic page, JavaScript (the docs bundle)",
       budget: 250,
-      ceiling: 99999,
+      ceiling: 989,
       folder: "epic/src/tools/_assets",
       entries: ["spell-ui.js", "spell-doc-runtime.js"]
     },
@@ -53,7 +53,7 @@
       id: "ui-site-page",
       name: "A Spell UI site page",
       budget: 200,
-      ceiling: 99999,
+      ceiling: 191,
       folder: "ui/site/_assets",
       entries: ["site.js", "site.css"]
     },
@@ -61,7 +61,7 @@
       id: "editor-lazy-piece",
       name: "Any lazy piece of the editor",
       budget: 150,
-      ceiling: 99999,
+      ceiling: 351,
       build: "editor",
       entries: ["index.html"],
       only: "\\.js$",
@@ -71,7 +71,7 @@
       id: "docs-lazy-piece",
       name: "Any lazy piece of a docs page",
       budget: 150,
-      ceiling: 99999,
+      ceiling: 1210,
       folder: "epic/src/tools/_assets",
       entries: ["spell-ui.js", "spell-doc-runtime.js"],
       only: "\\.js$",
@@ -81,7 +81,7 @@
       id: "warm-visit",
       name: "A warm visit to the editor",
       budget: 10,
-      ceiling: 99999,
+      ceiling: 2115,
       run: "load editor/desktop warmBrotli"
     }
   ]
