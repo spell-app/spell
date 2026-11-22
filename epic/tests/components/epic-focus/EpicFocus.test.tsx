@@ -275,6 +275,24 @@ describe("<epic-focus>", () => {
     history.replaceState(null, "", location.pathname)
   })
 
+  // epic `epic-engine` I415:  a fix waiting for a check drew an open issue's buttons, and no word before its title
+  test("a fix waiting for a check:  its own buttons, FIXED before its title;  on a page with badges, its badge (P81)", async () => {
+    await adoptClient()
+    const host = await render(`<epic-page epic="demo" title="Demo">
+      <epic-section id="issues" kind="issues">
+        <epic-item id="i1" title="It jumps" status="open" state="replied" fixed></epic-item>
+        <epic-item id="i2" title="It flashes" status="open" state="open" badge="willFix"></epic-item>
+      </epic-section>
+    </epic-page>`)
+    await open(host, { tab: "issues", item: "i1" })
+    const shadow = focusOf(host)!.shadowRoot!
+    expect(shadow.querySelector('epic-review[shows="buttons"]')!.getAttribute("buttons")).toBe("issue-fixed")
+    expect(shows(host).head).toBe("I1 FIXED - It jumps")
+    await open(host, { tab: "issues", item: "i2" })
+    expect(shadow.querySelector(".head .badge")!.textContent).toBe("WILL FIX")
+    expect(shows(host).head).toBe("I2 WILL FIX It flashes")
+  })
+
   test("its buttons are the page's:  the same mark, on the same client;  the item stays showing", async () => {
     await adoptClient()
     const host = await render()

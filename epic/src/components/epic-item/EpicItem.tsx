@@ -18,11 +18,13 @@ import {
 
 import { AnswerThread } from "./AnswerThread"
 import { EpicBodies } from "./EpicBodies"
-import { epicItemVocabulary } from "./EpicItem.en"
+import { epicItemVocabulary, type BadgeWord } from "./EpicItem.en"
 import { Fold, type FoldButtonOptions, type Opener } from "./Fold"
+import { ItemBadge } from "./ItemBadge"
 import { NearScreen } from "./NearScreen"
 import { TitlePrefix, type TitlePrefixWord } from "./TitlePrefix"
 import {
+  BADGE,
   BED_ICON,
   CANCELED,
   CELL,
@@ -72,6 +74,7 @@ import {
   buttonsForItem
 } from "./EpicItem.types"
 
+import badgeCSS from "./ItemBadge.css?inline"
 import itemCSS from "./EpicItem.css?inline"
 
 /****************
@@ -82,6 +85,8 @@ import itemCSS from "./EpicItem.css?inline"
  * - Its LINE, in the shadow root, sticky while open (under the section titles stuck above it):
  *   - the fold chevron (only with details)
  *   - the id chip (`Q7`, a link to `#q7`), in its state's colour
+ *   - its BADGE, first in the title, what happens next in the item's colour (`WILL FIX`;  epic `epic-engine` P81):
+ *     the word the tool wrote (`badge`), following what's live (`ItemBadge.drawn()`);  it replaces the UPDATE word
  *   - the title (`title`, or `slot="title"`):  in full, as many lines as it needs, folded or open (Owen,
  *     2026-10-19:  "always show the full title, wrapped")
  *   - the page's own buttons (`slot="actions"`, and the docs runtime's bullhorn):  before its own;
@@ -154,7 +159,7 @@ import itemCSS from "./EpicItem.css?inline"
 export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   @E.proto static vocabulary = epicItemVocabulary
   @E.protoMerged static elementSetup = {
-    styleSheets: { "epic-item": itemCSS },
+    styleSheets: { "epic-item": itemCSS, "epic-badge": badgeCSS },
     DOMElement: E.DOMLoadableBodyElement,
     // a container:  a click on its text must not jump to the fold button or a link inside
     delegatesFocus: false
@@ -339,11 +344,23 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
     const held = !!live.pressedAs
     if (held && was) return was
     const asWas = { ...live, closing: false, approved: false }
+    const isUnsent = this.markStage() === "unsent"
+    const state = isUnsent ? DrawnState.of(this.stateFields(), asWas) : this.itemState()
     return {
-      state: this.markStage() === "unsent" ? DrawnState.of(this.stateFields(), asWas) : this.itemState(),
+      state,
+      badge: ItemBadge.drawn(
+        { badge: TitlePrefix.knownBadge(this.badge), kind: ItemBadge.kindOf(this.id, !!this.limit) },
+        state,
+        isUnsent ? asWas : live
+      ),
       canceled: (this.status === CANCELED && !this.isReopening) || (!held && live.closingAs === "drop")
     }
   })
+
+  /** `badge`'s words, as its line says them:  `SEE T38`. */
+  private badgeText(badge: BadgeWord): string {
+    return this.translationForKey(`badge_${badge}`, { id: this.badgeItem?.toUpperCase() ?? "" })
+  }
 
   /**
    * Its id chip's fill:  its mark's once sent (`chipMark`), else its state's own (`STATE_FILLS`).
@@ -474,7 +491,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   readonly titlePrefix = createMemo((): TitlePrefixWord | undefined => {
     const { status, state, fixed, selfFixed } = this
     const { approved, closing } = this.reviewState.liveOf()
-    return TitlePrefix.of({ status, state, fixed, selfFixed }, { accepted: approved || closing })
+    return TitlePrefix.of({ status, state, fixed, selfFixed, badge: this.badge }, { accepted: approved || closing })
   })
 
   /**
@@ -694,7 +711,26 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
           </Show>
         </span>
         {/* in full, wrapped, folded or open (EpicItem.css) */}
-        <span class={TITLE} part={this.partForName("title")} data-prefix={this.titlePrefix()}>
+        <span
+          class={TITLE}
+          part={this.partForName("title")}
+          data-prefix={this.titlePrefix()}
+          data-badge={this.drawnLook().badge}
+        >
+          <Show when={this.drawnLook().badge}>
+            {(badge) => (
+              <>
+                <span
+                  class={BADGE}
+                  part={this.partForName("badge")}
+                  data-state={this.drawnLook().state}
+                  data-tooltip={this.judgedWhy}
+                >
+                  {this.badgeText(badge())}
+                </span>{" "}
+              </>
+            )}
+          </Show>
           <Show when={this.titlePrefix()}>
             {(word) => (
               <>

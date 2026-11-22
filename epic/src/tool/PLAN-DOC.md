@@ -445,6 +445,8 @@ As `plan-doc.md`, "Ids":
     | `quiet`     | grey   | open, nothing to think about:  a `calm` judgement call not reviewed, a limit (epic `epic-engine` P63) |
     | `recent`    | green  | open, settled by a review:  `review-as` `approve` or `todo` (`SETTLED_AS`)         |
     | `replied`   | orange | a manual test whose phase isn't done (epic `epic-engine` P63:  `PlanReader.manualTestState()`) |
+    | `recheck`   | light orange | a page with badges (P81):  WILL RECHECK, WILL CLOSE:  Claude's turn, never counted as needing the person (Q82) |
+    | `someday`   | light yellow | a page with badges (P81):  SOMEDAY, OPTIONAL:  open, no hurry               |
     | `open`      | yellow | anything else open:  still undecided, not urgent;  a calm issue, a test whose phase is done;  a revisit or request for now answered |
 
     - Green across the board for what's decided, grey only for what no longer matters (2026-10-08).
@@ -478,6 +480,35 @@ As `plan-doc.md`, "Ids":
     - `FIXED - `:  `fixed` while open (orange, light orange), or `self-fixed` (grey);  none while it's `progress`
     - drawn, and said by `summary`, `items`, `inbox` and "0. While you were out";  the stored title never changes
     - no `FIXED` at the line's end then:  the label stays in the markup, for its `Not in main` pill alone
+  - ITEM BADGES (epic `epic-engine` P81;  the tables Owen agreed:  T144):  on a page with them
+    (`<epic-page badges="trial | on">`, `epic badges <epic> trial | on`), a line STARTS with what happens next, in
+    the item's colour:  `WILL FIX`, `YOUR CALL`, `SOMEDAY` ...
+    - one rule, as tables:  `ItemBadge` (`components/epic-item/ItemBadge.ts`), the first row that matches wins.
+      Change a row there, never in an element or a list.
+    - what's stored is the judgement:  `care` and `doubt` (0-100), `severe`, `needs-you`, `judged`, `judged-why`
+      - care:  how likely the person wants it (an issue fixed, a todo built, a test worth their time;  a call:  they'd
+        have chosen differently)
+      - doubt:  how likely it's transient, done already, or overtaken by later work
+      - `severe`:  an issue blocks work, loses work or gives wrong answers;  a call changes or narrows what they said
+      - `needs-you`:  only they can decide the issue, OK the todo, run the test
+      - judged by `ItemJudge` as each item is created, and by `epic badges <epic> score`;  by hand:  `epic badges
+        <epic>#J3 set --care 80 --doubt 10`
+      - never judged on a page without badges
+    - what's written from it, on every edit:  `badge` (with `badge-item`, for `SEE T38`) and `state`
+      - the page follows what's live:  an agent on it (UNDERWAY, RECHECKING), a comment answered (YOUR TURN), their ✓
+    - the percentages:  `issueBadges` in the repo's `.epic/config.json5` (`recheckAt` 50, `closeBelow` 25,
+      `fixAbove` 60);  a change draws on the page's next edit
+    - no judgement (the judge failed, nobody asked):  drawn as a page without badges draws it
+    - GREY MEANS CLOSED, a limit apart:  a rule that would grey an open item leaves it as it is, with no badge, until
+      `epic badges <epic> close <ids>` closes it (`badge-closed`)
+      - never their words, what they got to, or a question:  theirs wait light orange, orange once they acted
+      - with badges `on`, a new item like that is closed as it's made;  `trial` closes nothing, and leaves what's
+        closed its colour
+    - turned into a todo, still open:  `SEE T38`, outlined blue, ahead of every rule but a comment waiting on them
+    - the badge replaces the UPDATE word at the line's end;  listings say it as a prefix (`WILL FIX - It jumps`)
+    - phases:  from their state alone (`badged`, written by the tool;  `ItemBadge.ofPhase()`)
+    - `epic badges <epic> off`:  the one undo.  Scores off, what a badge closed open again, drawn as before.
+    - no migration step:  every attribute is new and optional, and a page without `badges` draws as before
   - `changed`:  ISO local time with offset.
     - Stamped by every command that changes its status or review marks.
     - `bedtime` while a `/bedtime` run is on, until reviewed.
@@ -881,6 +912,8 @@ Drawn, never written:  one meaning per colour on every element (decision Q20, 20
 | ------ | ---------------------------------------- | ---------------------------------------------------------------------- |
 | red    | needs the person                               | `attention` chips;  the rail's count (only what needs them);  a todo the person flagged red as a reminder (`--loud`, T94), its buttons still a todo's (plane, revisit, x) |
 | yellow | open, still undecided (DARK text on it)  | `open` chips                                                              |
+| light yellow | open, no hurry (DARK text):  SOMEDAY, OPTIONAL | `someday` chips and badges;  counts in, and filters with, the yellow bubble (epic `epic-engine` P81) |
+| light orange | finished as they asked, their turn to see it (DARK text);  on a page with badges also Claude's turn to check again | `requested` and `recheck` chips and badges;  both filter with orange, but a recheck is never counted as needing the person (P81, Q82) |
 | blue   | do it now, or it's with Claude           | `progress` chips and the UNDERWAY label (solid);  `handed` chips (outlined);  `scheduled` chips (dotted);  a `to do` review label;  Revisit, Send;  Underway cards;  the active phase |
 | green  | decided or done, in the last day (a phase:  3 days);  older, grey       | `recent` chips;  Approve, Make Todo, a todo's plane (start now), a pick, the chosen option;  Done cards (filled), Noted cards (outlined);  DONE |
 | orange | changed since the person looked, or a warning;  an item Claude answered with options, waiting for the person's pick (2026-10-09) | UPDATE labels, `<epic-update>` blocks, a phase's changed pen;  "nobody is listening";  a blocked agent;  `replied` chips (DARK text on them), counted on the rail as needing the person |

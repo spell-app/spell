@@ -158,6 +158,15 @@
     --_chip-background: var(--epic-state-open, var(--ui-yellow));
     --_chip-color: var(--epic-state-open-on, var(--ui-yellow-on));
   }
+  /* light orange, Claude's turn to check it again;  light yellow, no hurry (epic `epic-engine` P81) */
+  .chip[data-state="recheck"] {
+    --_chip-background: var(--epic-state-requested, var(--ui-orange-background));
+    --_chip-color: var(--epic-state-requested-on, var(--ui-yellow-on));
+  }
+  .chip[data-state="someday"] {
+    --_chip-background: var(--epic-state-someday, var(--ui-yellow-background));
+    --_chip-color: var(--epic-state-someday-on, var(--ui-yellow-on));
+  }
   .chip[data-state="progress"] {
     --_chip-background: var(--epic-state-progress, var(--ui-blue));
     --_chip-color: var(--epic-state-progress-on, var(--ui-blue-on));

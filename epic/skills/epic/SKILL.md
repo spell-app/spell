@@ -2128,6 +2128,29 @@ Only when the person asks:  it never runs by itself.
    - It prints the counts and each kept item with its why.
 3. Reply:  the counts per epic, the kept ones worth their look, and the epic page's link pair.
 
+## 18. Item badges:  what each one asks of you
+
+Epic `epic-engine` P81.  On a page with badges (`<epic-page badges>`), each line starts with what happens next.
+The engine only stores judgements and draws them:  it starts no work.  These are YOUR steps, in that epic's session.
+
+- `URGENT`, `WILL FIX`, `WILL DO`:  do it without asking.  URGENT first, then WILL FIX, then WILL DO.
+  - Take it up as any item (an Underway card, an agent), and report it as usual (`fixed`, `done`).
+- `YOUR CALL`, `AGAINST YOUR ASK`:  WAIT on the person.  Never decide it, and never answer a question for them.
+- `WILL RECHECK`, `WILL CLOSE`:  check them in IDLE time, when nothing above is waiting.
+  - Put a card on it first (`epic update <epic>#I7 underway "Rechecking:  ..."`):  it reads RECHECKING.
+  - Then one of:
+    - it's real:  `epic badges <epic>#I7 set --doubt 5 [--care 80] --why "..."`, and the card noted
+    - it isn't, or isn't worth it:  `epic badges <epic> close I7 --as vanished | moot | duplicate | declined --why "..."`
+    - theirs (their words, or they got to it), so `close` refuses:  say what you found in a reply, and
+      `epic badges <epic>#I7 set --your-call yes`:  it waits on them
+- `SOMEDAY`, `OPTIONAL`:  nothing, unless asked.
+- `SEE T38`:  work the todo, never the item.  Its proposal needs an OK:  `epic badges <epic>#T38 set --your-call yes`.
+- `epic badges <epic> list`:  the scores, the badges, and what would close.
+- NEVER turn badges on, score, or close on an epic the person hasn't asked it for.
+  `trial` closes nothing;  `epic badges <epic> off` undoes them all.
+- In Codex:  the same commands;  the judge runs `claude -p`, so without Claude Code items stay unscored, drawn as
+  before badges.
+
 ## Migrations:  bringing epic pages up to today's markup
 
 Epic `epic-workflow` P8.  `epic migrate` runs named, dated steps over pages, by page kind

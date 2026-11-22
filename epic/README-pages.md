@@ -493,6 +493,23 @@ The FILL says how far a button, pill or chip has got:
   and the toolbar counts only those.
 - Colour-blind readers tell red and green apart least:  the chip's id, the icons and the words keep them readable.
 
+On a page with item badges (`epic badges <epic> on`), each line starts with what happens next, in that colour:
+
+| Badge | Means | Counts as yours |
+| --- | --- | --- |
+| `URGENT`, `WILL FIX`, `WILL DO` | the agent does it without asking | URGENT alone |
+| `YOUR CALL`, `AGAINST YOUR ASK` | only you can decide, or it changes what you said | yes |
+| `WILL RECHECK`, `WILL CLOSE` (light orange) | the agent checks it again first | no |
+| `SOMEDAY`, `OPTIONAL` (light yellow) | open, no hurry;  counted with yellow | no |
+| `SEE T38` (outlined blue) | you turned it into that todo, which carries it | no |
+| `UNDERWAY`, `RECHECKING`, `NOT IN MAIN` (blue) | with the agent, or not merged yet | no |
+
+- They come from two scores the agent stores on each item, care and doubt, and three percentages your repo sets
+  ([`issueBadges`](README-config.md)).
+- Grey always means closed, a limit apart.
+  Your words are never closed unseen, and a question is never answered for you.
+- `epic badges <epic> trial` tries them and closes nothing.  `epic badges <epic> off` undoes them.
+
 <details>
 <summary>The item states, and which colour wins</summary>
 

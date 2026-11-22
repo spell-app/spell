@@ -383,6 +383,22 @@
 			</>
 			<row>
 				<cell>
+					<text code>badge</>
+				</>
+				<cell>will fix, your call ...</>
+				<cell>On a page with item badges: what happens next, first on its line in its chip's colour, in place of the UPDATE word. The epic tool writes it with <text code>state</> from the item's <text code>care</> and <text code>doubt</>; the line follows an agent starting and your marks. <text code>badge-item</> is the todo a SEE badge names.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>care</>, <text code>doubt</>
+				</>
+				<cell>0 to 100</>
+				<cell>The judge's scores: how likely you want it, and how likely it's transient, done or overtaken. With them, <text code>severe</>, <text code>needs-you</>, <text code>judged</> and <text code>judged-why</> (the badge's tooltip); <text code>flagged</> when you called it urgent; <text code>closed-as</> and <text code>badge-closed</> when its badge closed it.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
 					<text code>source</>
 				</>
 				<cell>text</>

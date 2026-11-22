@@ -269,6 +269,14 @@ export class EpicProgram {
       "epic hush epic-engine --dryrun"
     ).usage("[<epic> | all] [--dryrun] [--json] [--model sonnet]")
     this.page(
+      epic.command("badges"),
+      "item badges:  each line starts with what happens next (WILL FIX, YOUR CALL ...), from each item's care and " +
+        "doubt;  trial:  nothing closed;  off:  undo them all;  score:  judge the open items never scored, this epic's alone",
+      "epic badges seo trial"
+    ).usage(
+      "<epic>[#<id>] [list [--json] | trial | on | off | score [ids] | set <ids> --care <n> --doubt <n> | close <ids> [--as <why>]]"
+    )
+    this.page(
       epic.command("summaries"),
       "`summary --json` of each page, by path (worktrees' too), for /epics;  --all as summary's",
       "epic summaries epics/seo/seo.plan.html"

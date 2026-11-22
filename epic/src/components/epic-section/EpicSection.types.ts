@@ -329,7 +329,11 @@ export const FILTER_STATES = [
   { state: "attention", color: "red", words: "stateAttention" },
   { state: "replied", color: "orange", words: "stateReplied" },
   { state: "requested", color: "orange", words: "stateRequested" },
+  // a recheck waits on Claude:  it filters with orange, not counted as needing them (epic `epic-engine` Q82)
+  { state: "recheck", color: "orange", words: "stateRecheck" },
   { state: "open", color: "yellow", words: "stateOpen" },
+  // light yellow counts in, and filters with, yellow (epic `epic-engine` P81)
+  { state: "someday", color: "yellow", words: "stateSomeday" },
   { state: "recent", color: "green", words: "stateRecent" },
   // handled in a phase (epic `epic-engine` P31):  grey, as quiet as canceled, counted apart
   { state: "handled", color: "grey", words: "stateHandled" },
@@ -422,6 +426,16 @@ export const FILTER_TEXTS = [
     description: "A state's words, counted in the blue badge:  `handed`."
   },
   { key: "stateOpen", text: "undecided", description: "A state chip's words:  `open` (yellow)." },
+  {
+    key: "stateRecheck",
+    text: "waiting for Claude to check again (not in the number)",
+    description: "A state chip's words:  `recheck` (light orange), filtered with orange, not counted (Q82)."
+  },
+  {
+    key: "stateSomeday",
+    text: "open, no hurry",
+    description: "A state chip's words:  `someday` (light yellow), counted with yellow (epic `epic-engine` P81)."
+  },
   {
     key: "stateScheduled",
     text: "agreed, not started",

@@ -319,6 +319,14 @@
 			</>
 			<row>
 				<cell>
+					<text code>badges</>
+				</>
+				<cell><text code>trial</> · <text code>on</></>
+				<cell>Item badges: each line starts with what happens next, in its colour, and a new item is scored for care and doubt as it's made. <text code>trial</> closes nothing and leaves what's closed its colour. Set by <text code>epic badges</>, and <text code>off</> undoes it. Absent: drawn as before badges.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
 					<text code>stage</>
 				</>
 				<cell><text code>overview</> · <text code>phases</> · <text code>building</></>

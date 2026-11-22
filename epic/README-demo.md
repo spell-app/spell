@@ -240,13 +240,13 @@ Then the toolbar buttons, one by one:  Judgement calls, Todo, Issues, Manual tes
 Unfold a red judgement call to show its options, and point at the coloured counts at the top right.
 Open 2. Phases:  P4 is green, P1 to P3 still to do.
 
-![The section 0. While you were out:  Waiting on you, J2;  What was done, P4 A Joke;  Fixed, to review, I2;  Newly
-opened issues, I1;  New manual tests, M1.](docs/images/demo/away.png)
+![The section 0. While you were out:  Waiting on you, J2;  What was done, P4 A Joke;  Fixed, to review, I2, its line
+starting FIXED;  Newly opened issues, I1;  New manual tests, M1.](docs/images/demo/away.png)
 
 _"0. While you were out":  what waits on you first, then what was done._
 
 ![The Judgement calls, Todo, Issues and Manual tests sections, each item with a coloured id chip:  J1 yellow, J2 red,
-T1 yellow, T2 grey, T3 blue and under way, I1 red, I2 orange and fixed, I3 light orange, M1
+T1 yellow, T2 grey, T3 solid blue with a blue UNDERWAY, I1 red, I2 orange, its line starting FIXED, I3 light orange, M1
 yellow.](docs/images/demo/items.png)
 
 _The items, in every colour._

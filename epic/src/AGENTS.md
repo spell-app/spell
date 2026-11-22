@@ -798,6 +798,14 @@ The `epic/` folder holds TWO things (Q23 of epic `people-and-orgs`, 2026-10-13):
       - asked by every fix (`PlanDoc`) and the migration `self-fixed-issues`;  what they got to comes partly from the
         review inbox (`PlanReader.readActedOn`)
       - one from their words (`requested`) waits, light orange;  one they got to, orange
+    - ITEM BADGES (epic `epic-engine` P81, T144):  each line starts with what happens next, WILL FIX, YOUR CALL ...;
+      only on a page with them (`<epic-page badges>`), the rules in PLAN-DOC.md ("ITEM BADGES")
+      - `ItemBadge` (`components/epic-item/ItemBadge.ts`):  the ONE rule, a table per kind, pure;  the page reads
+        what it wrote (`badge`, `state`), never works it out again
+      - `ItemBadges`:  one page's facts for it, `PlanReader.badges`;  `itemState()` takes its colour
+      - `ItemJudge`:  care and doubt, by a fresh `claude -p` (`ClaudePrint`), read as `Hush` reads an item (`JudgeText`);
+        a constructor option, so its test never calls a model
+      - `BadgeCommands`:  `epic badges`;  it stores judgements and starts no work
     - `Hush` (epic `epic-engine` T122):  `epic hush [<epic> | all] [--dryrun]`, tidy's sibling:  the green, yellow and
       orange items settled 3 days ago or more (`candidates()`, pure), each judged by a fresh `claude -p` (`ClaudePrint`;
       hush only if 80% sure Owen won't look again), the hushed ones approved as his ✓ would (`apply()`), one write

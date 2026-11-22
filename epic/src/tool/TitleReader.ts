@@ -285,7 +285,7 @@ function claudeReader({ system, text }: TitleRequest): TitleVerdict {
  * - a test runner (`VITEST`):  quietly, so no test's output changes
  * - no `claude` on the `PATH` (CI, Codex):  said once
  */
-function defaultSkipReason(): TitleSkip {
+export function defaultSkipReason(): TitleSkip {
   if (process.env.VITEST) return { why: "a test run", quiet: true }
   return hasClaude(process.env.PATH ?? "") ? undefined : { why: "no claude on the PATH" }
 }

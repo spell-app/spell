@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  c85c7d91a11d64e7
+// sources:  753913cb04819129
 
 import type { RootCatalogEntry } from "spell/ui"
 
@@ -27,7 +27,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-field": {"folder":"epic-phase","attributes":["name","accepted","label","open"]},
   "epic-focus": {"folder":"epic-focus","attributes":["for"]},
   "epic-hidden-note": {"folder":"epic-state-filter","skeleton":{"display":"inline","width":"8em","height":"1em"},"attributes":["count"]},
-  "epic-item": {"folder":"epic-item","attributes":["id","title","status","state","handled","taken-in","changed","phase","answered","reviewed","review-as","deferred","queued","work","working","limit","bedtime","overnight","calm","requested","urgent","unmerged","fixed","self-fixed","failed","prepared","source","part-ids","commits","to-accept","to-see","open"]},
+  "epic-item": {"folder":"epic-item","attributes":["id","title","status","state","handled","taken-in","changed","phase","answered","reviewed","review-as","deferred","queued","work","working","limit","bedtime","overnight","calm","care","doubt","severe","needs-you","judged","judged-why","flagged","closed-as","badge-closed","badge","badge-item","requested","urgent","unmerged","fixed","self-fixed","failed","prepared","source","part-ids","commits","to-accept","to-see","open"]},
   "epic-kickoff": {"folder":"epic-kickoff","skeleton":{"height":"4em"},"attributes":[]},
   "epic-link": {"folder":"epic-link","attributes":["saga","epic","item","phase"]},
   "epic-list": {"folder":"epic-list","skeleton":{"height":"8em"},"attributes":["sagas","no-favorites"]},
@@ -40,9 +40,9 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-option-form": {"folder":"epic-option-form","skeleton":{"height":"4em"},"attributes":["heading","option-title","note","shot","for","submit"]},
   "epic-original": {"folder":"epic-original","attributes":[]},
   "epic-overview": {"folder":"epic-overview","attributes":["id","estimate","open"]},
-  "epic-page": {"folder":"epic-page","skeleton":{"parts":[{"shape":"header"},{"shape":"paragraph","lines":4}]},"attributes":["epic","kind","title","branch","worktree","started","updated","future","standing","stage","saga","bedtime","away-read","away-seen","recent-since","repo","reviewing"]},
+  "epic-page": {"folder":"epic-page","skeleton":{"parts":[{"shape":"header"},{"shape":"paragraph","lines":4}]},"attributes":["epic","kind","title","branch","worktree","started","updated","future","standing","badges","stage","saga","bedtime","away-read","away-seen","recent-since","repo","reviewing"]},
   "epic-page-note-head": {"folder":"epic-page-note-head","attributes":["at","status","replies","preview","open"]},
-  "epic-phase": {"folder":"epic-phase","attributes":["id","number","title","status","estimate","took","span","unmerged","source","part-ids","commits","to-accept","to-see","choices-open","plan","done-at","changes","open"]},
+  "epic-phase": {"folder":"epic-phase","attributes":["id","number","title","status","estimate","took","span","unmerged","source","part-ids","commits","to-accept","to-see","choices-open","badged","plan","done-at","changes","open"]},
   "epic-picture": {"folder":"epic-picture","attributes":["label","removable"]},
   "epic-pills": {"folder":"epic-pills","skeleton":{"height":"2em"},"attributes":[]},
   "epic-prompt": {"folder":"epic-prompt","attributes":[]},

@@ -247,6 +247,13 @@
   .title[data-prefix="fixed"] {
     --epic-update-fixed-display: none;
   }
+  /* a badge replaces the UPDATE word at the line's end, whatever it says;  NOT IN MAIN its pill too (P81) */
+  .title[data-badge] {
+    --epic-update-word-display: none;
+  }
+  .title[data-badge="notInMain"] {
+    --epic-update-unmerged-display: none;
+  }
   /* a title with markup:  its links read as text, as today's */
   ::slotted(a) {
     color: inherit;
@@ -553,6 +560,18 @@
     --_epic-state: var(--epic-state-requested, var(--ui-orange-background));
     --_epic-state-on: var(--epic-state-requested-on, var(--ui-yellow-on));
     --_epic-state-text: var(--ui-orange-text, var(--_epic-state));
+  }
+  /* light orange too, but Claude's turn:  to check it again (`recheck`, epic `epic-engine` P81) */
+  .item.recheck {
+    --_epic-state: var(--epic-state-requested, var(--ui-orange-background));
+    --_epic-state-on: var(--epic-state-requested-on, var(--ui-yellow-on));
+    --_epic-state-text: var(--ui-orange-text, var(--_epic-state));
+  }
+  /* light yellow:  open, no hurry (`someday`, P81;  Owen:  "grey open is not really a thing to me") */
+  .item.someday {
+    --_epic-state: var(--epic-state-someday, var(--ui-yellow-background));
+    --_epic-state-on: var(--epic-state-someday-on, var(--ui-yellow-on));
+    --_epic-state-text: var(--ui-yellow-text, var(--_epic-state));
   }
   .item:is(.progress, .handed, .scheduled) {
     --_epic-state: var(--epic-state-progress, var(--ui-blue));

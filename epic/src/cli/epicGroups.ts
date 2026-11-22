@@ -1623,6 +1623,16 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
     "--json": "print the calls as JSON",
     "--model <model>": "the judge's model (default sonnet)"
   },
+  badges: {
+    "--json": "list:  print the scores, badges and what would close as JSON",
+    "--model <model>": "score:  the judge's model (default sonnet)",
+    "--care <n>": "set:  care, 0 to 100, how likely you want it",
+    "--doubt <n>": "set:  doubt, 0 to 100, how likely it's transient, done already or overtaken",
+    "--severe <yes|no>": "set:  an issue blocks or loses work;  a judgement call changes what you said",
+    "--your-call <yes|no>": "set:  only you can decide it, OK it or test it",
+    "--as <why>": "close:  what a recheck found:  vanished, moot, duplicate or declined",
+    "--why <text>": "set, close:  why, in one line"
+  },
   summaries: { "--all": "every phase and grey item, as summary --all" },
   items: {
     "--section <section>": "only that section:  questions, judgements, todos, issues or tests",

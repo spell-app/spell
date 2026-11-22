@@ -209,6 +209,31 @@ describe("<epic-item>", () => {
     expect(shows("label")).toBe(true)
   })
 
+  test("a badge (P81):  first in the title, in the chip's colour;  it replaces the UPDATE word at the end", async () => {
+    const { host, chip, title } = await item(
+      `<epic-item id="i7" status="open" state="open" badge="willFix" judged-why="It breaks Send"><span slot="title">It jumps <epic-update became="reopened"></epic-update></span></epic-item>`
+    )
+    const badge = title.querySelector<HTMLElement>("[part~='badge']")!
+    expect([title.firstElementChild, badge.textContent, badge.dataset.tooltip]).toEqual([
+      badge,
+      "WILL FIX",
+      "It breaks Send"
+    ])
+    expect(getComputedStyle(badge).backgroundColor).toBe(getComputedStyle(chip).backgroundColor)
+    const label = host.querySelector("epic-update")!.shadowRoot!.querySelector("[part~='label']")!
+    expect(getComputedStyle(label).display).toBe("none")
+    host.setAttribute("badge", "see")
+    host.setAttribute("badge-item", "t38")
+    host.setAttribute("state", "handed")
+    await ElementFixture.settle()
+    expect(title.querySelector("[part~='badge']")!.textContent).toBe("SEE T38")
+    expect(host.shadowRoot!.querySelector<HTMLElement>("[part~='id']")!.dataset.fill).toBe("outline")
+    // none, or one a newer engine wrote:  as a page without badges
+    host.setAttribute("badge", "somethingNew")
+    await ElementFixture.settle()
+    expect(title.querySelector("[part~='badge']")).toBeNull()
+  })
+
   test("the review label:  `to do` (queued), else `deferred`, else `reviewed 10/6/26`;  none when unmarked;  no tooltip (I370)", async () => {
     const labels = []
     for (const marks of [`queued="2026-10-06" work="Skip it"`, `deferred="2026-10-05"`, `reviewed="2026-10-06"`, ""]) {

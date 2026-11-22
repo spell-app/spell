@@ -22,6 +22,7 @@ import { parseSetLetter, reopensCanceled, setPicksOf } from "spell/epic/review/r
 import { Pictures } from "spell/epic/review/Pictures"
 import { EXCERPT_LENGTH } from "spell/epic/tools/BlockAnchors.js"
 import { TitlePrefix } from "spell/epic/components/epic-item/TitlePrefix"
+import type { ClosedAs } from "spell/epic/components/epic-item/ItemBadge"
 
 import { FIX_LABEL, FollowUpSummary } from "./FollowUpSummary"
 import {
@@ -953,6 +954,79 @@ export class PlanDoc extends PlanReader {
   }
 
   ////////////////
+  // ## Badges (epic `epic-engine` P81)
+  ////////////////
+
+  /**
+   * A judged item's id chip on a page with badges:  urgent (`flagged`:  URGENT, whatever was judged), or not;
+   * returns what it did, `undefined` for nothing.
+   * - not urgent takes `severe` off too:  their word beats the judge's
+   */
+  private setFlagged(item: Element, flagged: boolean): string | undefined {
+    const wasRed =
+      item.hasAttribute("flagged") ||
+      item.hasAttribute("severe") ||
+      (item.hasAttribute("urgent") && TODO_ID.test(item.id) && !item.hasAttribute("calm"))
+    if (flagged ? item.hasAttribute("flagged") : !wasRed && item.hasAttribute("calm")) return undefined
+    Markup.set<"epic-item">(item, {
+      flagged: flagged || undefined,
+      calm: !flagged || undefined,
+      ...(!flagged && { severe: undefined })
+    })
+    this.stamp(item)
+    return flagged ? "urgent" : "not urgent"
+  }
+
+  /**
+   * Close item `id` by its badge (`epic badges <epic> close`), logged;  returns the line.
+   * - as its badge says, or as a recheck found (`as`:  canceled, its badge saying which)
+   * - `badge-closed`:  so turning the badges off reopens it (`clearBadges()`)
+   * - NOT stamped `changed` nor labelled:  nothing changed but that nobody needs to look
+   * - the caller has asked `ItemBadges.closeRefusal()`
+   */
+  closeByBadge(id: string, { as, why }: { as?: ClosedAs; why?: string } = {}): string {
+    const item = this.item(id)
+    const status = as ? "canceled" : this.badges.badgeOf(item).closes?.status
+    if (!status) throw new PlanDocError(`${item.id.toUpperCase()}:  its badge wouldn't close it`)
+    const closedAs = as ?? (status === "canceled" ? "declined" : undefined)
+    this.finishUnderway(item, "noted")
+    Markup.set<"epic-item">(item, { status, closedAs, badgeClosed: true, working: undefined })
+    const reason = why ?? item.getAttribute("judged-why") ?? ""
+    const line = `${item.id.toUpperCase()} closed by its badge${as ? ` (${as})` : ""}${reason ? `:  ${reason}` : ""}`
+    this.log(line)
+    return line
+  }
+
+  /**
+   * Undo the badges (`epic badges <epic> off`):  each score and flag off, what a badge closed open again, logged.
+   * - the states and badges follow as every edit writes them (`updateStates()`):  the page is drawn as before
+   */
+  clearBadges(): { cleared: number; reopened: number } {
+    let cleared = 0
+    let reopened = 0
+    for (const item of this.allItems) {
+      if (item.hasAttribute("badge-closed")) {
+        Markup.set<"epic-item">(item, { status: "open", badgeClosed: undefined, closedAs: undefined })
+        reopened++
+      }
+      if (item.hasAttribute("care")) cleared++
+      else if (!item.hasAttribute("flagged")) continue
+      Markup.set<"epic-item">(item, {
+        care: undefined,
+        doubt: undefined,
+        severe: undefined,
+        needsYou: undefined,
+        judged: undefined,
+        judgedWhy: undefined,
+        flagged: undefined
+      })
+    }
+    Markup.set(this.page, { badges: undefined })
+    this.log(`item badges off:  ${cleared} scores cleared, ${reopened} reopened`)
+    return { cleared, reopened }
+  }
+
+  ////////////////
   // ## Items
   ////////////////
 
@@ -1229,6 +1303,9 @@ export class PlanDoc extends PlanReader {
     // closed, it's neither wanted nor waiting for review any more (I232)
     if (status !== "open")
       Markup.set<"epic-item">(item, { fixed: undefined, ...(CALM_ID.test(item.id) && { urgent: undefined }) })
+    // open again, it wasn't closed by a badge after all (P81)
+    if (status === "open" && item.hasAttribute("badge-closed"))
+      Markup.set<"epic-item">(item, { badgeClosed: undefined, closedAs: undefined })
     // a self fix canceled is only canceled;  one reopened is wanted, so its next fix waits for his look (T143)
     if (status !== "done" && item.hasAttribute("self-fixed"))
       Markup.set<"epic-item">(item, { selfFixed: undefined, ...(status === "open" && { urgent: true }) })
@@ -1325,6 +1402,7 @@ export class PlanDoc extends PlanReader {
     const todo = TODO_ID.test(item.id) && !item.hasAttribute("limit")
     if (!CALM_ID.test(item.id) && !todo)
       throw new PlanDocError(`${item.id.toUpperCase()} is never urgent:  only calls, issues and todos (not a limit)`)
+    if (this.badges.mode && item.hasAttribute("care")) return this.setFlagged(item, !calm)
     const red = item.hasAttribute("urgent") && !item.hasAttribute("calm") && !item.hasAttribute("reviewed")
     if (todo && !calm && !red) {
       Markup.set<"epic-item">(item, { urgent: true, calm: undefined, reviewed: undefined })
@@ -2662,10 +2740,22 @@ export class PlanDoc extends PlanReader {
     // and what isn't on main yet, which a judgement call's state reads (I273)
     changed += this.updateLanded()
     changed += PhaseTakes.stamp(this.document).length
+    this.badges.refresh()
     for (const item of this.allItems) {
-      const state = this.itemState(item)
-      if (item.getAttribute("state") === state) continue
-      Markup.set<"epic-item">(item, { state })
+      const { badge, item: named, state: coloured } = this.badges.badgeOf(item)
+      const state = coloured ?? this.plainState(item)
+      const isWritten =
+        item.getAttribute("state") === state &&
+        (item.getAttribute("badge") ?? undefined) === badge &&
+        (item.getAttribute("badge-item") ?? undefined) === named
+      if (isWritten) continue
+      Markup.set<"epic-item">(item, { state, badge, badgeItem: named })
+      changed++
+    }
+    const badged = !!this.badges.mode
+    for (const phase of this.phaseElements) {
+      if (phase.hasAttribute("badged") === badged) continue
+      Markup.set<"epic-phase">(phase, { badged: badged || undefined })
       changed++
     }
     for (const phase of this.phaseElements) if (this.updateToReview(phase)) changed++
@@ -3188,13 +3278,15 @@ export class PlanDoc extends PlanReader {
       element.append(...children)
       const item = this.findItem(key)
       const label = item && PlanItem.updateLabelOf(item)
-      if (label) element.append(" ", label.cloneNode(true))
+      // a badge starts the line and replaces that word;  only a Not in main pill is still worth saying (P81)
+      const saidByBadge = !!item?.hasAttribute("badge") && !label?.hasAttribute("unmerged")
+      if (label && !saidByBadge) element.append(" ", label.cloneNode(true))
       return element
     }
     // a fix's line starts `FIXED -`, as its item's does (T143)
     const titled = ({ id, title }: NeedLine) => {
       const item = this.findItem(id)
-      return TitlePrefix.titled(title, item ? TitlePrefix.ofItem(item) : undefined)
+      return TitlePrefix.titled(title, item)
     }
     const heading = (key: AwayPart, state: AwayState, text: string) => {
       const element = line(key, state, html("b", text))
