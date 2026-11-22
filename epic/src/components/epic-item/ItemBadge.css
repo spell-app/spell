@@ -1,6 +1,8 @@
 /*
  * A BADGE:  what happens next, first on an item's or a phase's line (epic `epic-engine` P81;  `ItemBadge`).
  * - the colour of where it stands (`data-state`, the id chip's:  an item's states and a phase's)
+ * - GREY beside an id chip of that same colour (`data-echo`, T149;  Owen:  "grey label is OK for these");
+ *   where there's no chip beside it (a phase, a While you were out line), it keeps its colour
  * - solid, but handed to Claude outlined and queued dotted, as the id chip
  * - the shape of the UPDATE label it replaces:  18px tall, small capitals, square-ish
  */
@@ -64,5 +66,14 @@
   .badge:is([data-state="old"], [data-state="handled"], [data-state="quiet"], [data-state="paused"]) {
     --_epic-badge: var(--epic-state-old, var(--ui-grey-background));
     --_epic-badge-on: var(--epic-state-old-on, var(--ui-grey-text));
+  }
+  /* last:  its colour is the chip's beside it, which says it already */
+  .badge[data-echo] {
+    --_epic-badge: var(--epic-state-echo, var(--ui-grey-background));
+    --_epic-badge-on: var(--epic-state-echo-on, var(--ui-text-color));
+    padding: 0 6px;
+    border: 0;
+    background: var(--_epic-badge);
+    color: var(--_epic-badge-on);
   }
 }

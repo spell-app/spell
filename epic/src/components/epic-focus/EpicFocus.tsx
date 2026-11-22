@@ -606,7 +606,8 @@ export class EpicFocus extends E.UIComponent<EpicFocusVocabulary> {
           <Show when={this.badgeOf(item())}>
             {(badge) => (
               <>
-                <span class={BADGE} data-state={item().state}>
+                {/* its chip beside it, a phase's too, says that colour already (T149) */}
+                <span class={BADGE} data-state={item().state} data-echo="">
                   {badge()}
                 </span>{" "}
               </>

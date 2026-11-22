@@ -61,6 +61,7 @@ import {
   TITLE,
   TITLE_PREFIX,
   TOGGLE,
+  UPDATE,
   UNDER_LINE,
   UNDER_TITLE,
   UNFOLDED,
@@ -87,6 +88,10 @@ import itemCSS from "./EpicItem.css?inline"
  *   - the id chip (`Q7`, a link to `#q7`), in its state's colour
  *   - its BADGE, first in the title, what happens next in the item's colour (`WILL FIX`;  epic `epic-engine` P81):
  *     the word the tool wrote (`badge`), following what's live (`ItemBadge.drawn()`);  it replaces the UPDATE word
+ *   - its UPDATE label, after the badge, next to the id chip (T149):  the one in its title, drawn here instead
+ *     (Owen:  "Update can stay next to the item number rather than at the end")
+ *   - a badge or label in the id chip's own colour is grey (T149;  Owen:  "Don't need to repeat the color in pill
+ *     and label if it is the same")
  *   - the title (`title`, or `slot="title"`):  in full, as many lines as it needs, folded or open (Owen,
  *     2026-10-19:  "always show the full title, wrapped")
  *   - the page's own buttons (`slot="actions"`, and the docs runtime's bullhorn):  before its own;
@@ -495,6 +500,34 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
   })
 
   /**
+   * Is its id chip in its state's colour, so a word beside it in that colour needn't say it again (epic
+   * `epic-engine` T149)?  Not while it wears a mark's:  sent, or a pick taken.
+   */
+  readonly chipWearsState = createMemo(() => {
+    if (this.markStage() === "sent") return false
+    const color = this.chipFill()?.color
+    return !color || color === STATE_FILLS[this.drawnLook().state]?.color
+  })
+
+  /**
+   * Its UPDATE label, as drawn next to the id chip (T149):  the one in its title, read off it.
+   * - none once his ✓ is on the item (as `EpicUpdate.isChecked`)
+   * - none with nothing left to show:  a badge, or `FIXED -`, says the word, and there's no `Not in main`
+   */
+  readonly updateLabel = createMemo((): UpdateLabel | undefined => {
+    void this.threadChange
+    if (isServer) return undefined
+    const label = this.domElement.querySelector(':scope > [slot="title"] > epic-update')
+    if (!label || this.reviewState.liveOf().approved) return undefined
+    const became = label.getAttribute("became") ?? undefined
+    const unmerged = label.getAttribute("unmerged") ?? undefined
+    const { badge } = this.drawnLook()
+    const saidWord = !!badge || (became === "fixed" && this.titlePrefix() === "fixed")
+    const saysUnmerged = !!became && !!unmerged && badge !== "notInMain"
+    return saidWord && !saysUnmerged ? undefined : { became, unmerged }
+  })
+
+  /**
    * The id chip's tooltip:  where it stands, then its review marks (`Needs attention · not reviewed yet`);
    * while it toggles, what a click does (and an urgency not sent yet).
    */
@@ -716,6 +749,7 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
           part={this.partForName("title")}
           data-prefix={this.titlePrefix()}
           data-badge={this.drawnLook().badge}
+          data-echo={this.chipWearsState() ? this.drawnLook().state : undefined}
         >
           <Show when={this.drawnLook().badge}>
             {(badge) => (
@@ -724,10 +758,23 @@ export class EpicItem extends E.UIComponent<EpicItemVocabulary> {
                   class={BADGE}
                   part={this.partForName("badge")}
                   data-state={this.drawnLook().state}
+                  data-echo={this.chipWearsState() ? "" : undefined}
                   data-tooltip={this.judgedWhy}
                 >
                   {this.badgeText(badge())}
                 </span>{" "}
+              </>
+            )}
+          </Show>
+          <Show when={this.updateLabel()}>
+            {(label) => (
+              <>
+                <epic-update
+                  class={UPDATE}
+                  part={this.partForName("update")}
+                  became={label().became}
+                  unmerged={label().unmerged}
+                />{" "}
               </>
             )}
           </Show>
@@ -1393,6 +1440,14 @@ const BODY = "body"
 const IN_THREAD = "in-thread"
 const THREAD_END = "thread-end"
 const THREAD_HIDDEN = "thread-hidden"
+
+/** An item's UPDATE label, as its line draws it (`EpicItem.updateLabel`). */
+type UpdateLabel = {
+  /** its status change:  `fixed` */
+  became?: string
+  /** its branch, while that work isn't on main */
+  unmerged?: string
+}
 
 /** `EpicItem.scanChildren()`'s answer. */
 type ChildScan = {

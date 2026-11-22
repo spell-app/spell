@@ -449,7 +449,18 @@ export const epicItemVocabulary = {
     },
     { name: "title", description: "The title." },
     { name: "title-prefix", description: "The word before the title:  `FIXED -`, on a fix (epic `epic-engine` T143)." },
-    { name: "badge", description: "The badge before the title, in the item's colour:  `WILL FIX` (P81)." },
+    {
+      name: "badge",
+      description:
+        "The badge before the title (P81):  `WILL FIX`;  grey where its colour is the id chip's, which says it " +
+        "already (epic `epic-engine` T149)."
+    },
+    {
+      name: "update",
+      description:
+        "Its UPDATE label, next to the id chip, after any badge (T149):  drawn from the one in its title, which " +
+        "doesn't show at the title's end."
+    },
     {
       name: "review",
       description:
