@@ -26,9 +26,12 @@
  * - Who's here (epic `data` P13):  `core.currentPerson()` and `core.peopleHere()`, from the program's first place that has people:
  *   plain data, one object per page, so `the name of the person is their name` means what it says.
  *   With no such place there's only you, and the compiler says so (`PLACE_KIND_ABILITIES`).
- * - A place where each person is someone (`Place.signIn`, epic `data` P16) is made as the program starts:
- *   who's signed in there is who's at this page;  once the program first reads or writes it, `showSignIn()` shows who,
+ * - The FIRST place where each person is someone (`Place.signIn`, epic `data` P16) is made as the program starts:
+ *   who's signed in there is who's at this page;  any other is made, and signed back in, on its first use
+ *   (epic `solid-2-final` P13);  once the program first reads or writes it, `showSignIn()` shows who,
  *   and offers to sign in and out (epic `language` T67).
+ * - What the last visit left waiting to be written, for a place this one never uses, goes at idle:  that place is made
+ *   then (`sendWaiting()`, epic `solid-2-final` P13).
  * - Loads Solid, as `waiting.ts` does:  NEVER imported by `core/model`.
  * - Part of `core`:  imported by `spell/parser/core`'s barrel for its side effect.
  */
@@ -39,7 +42,7 @@ import { Errored, For, Loading, createDeferred, createEffect, createMemo, getOwn
 import { msUntil, pollWhileVisible } from "spell/util/polling"
 import { rateLimitLeft, rateLimitResetAt, retryAfter } from "spell/util/retrying"
 import { snakeCase } from "spell/util"
-import { after } from "spell/util/timing"
+import { after, whenIdle } from "spell/util/timing"
 
 import { Cell, getProp, isOnlyShowing, schemaOf, untrackCells } from "spell/util/reactive"
 import { MOST_AT_ONCE, drawnInWindow, rowAt, type MorePages } from "spell/element/drawnWindow"
@@ -159,8 +162,11 @@ const MORE_PAGES = new WeakMap<object, SavedRead>()
 /** The kinds of place that know who's here, among those spell knows by itself. */
 const KINDS_WITH_PEOPLE = new Set(["room", "atmosphere account", "personal atmosphere account"])
 
-/** The kinds of place where each person is someone, so they sign in:  made as the program starts, to know who's at the page. */
+/** The kinds of place where each person is someone, so they sign in:  the program's first is made as it starts, to know who's at the page. */
 const KINDS_WITH_SIGN_IN = new Set(["atmosphere account", "personal atmosphere account", "the cloud"])
+
+/** The longest wait, in seconds, for an idle moment to send what the last visit left waiting:  `sendWaiting()`. */
+const WAITING_WRITES_WAIT = 5
 
 /** How long a read asked for ahead waits for the draw that wants it, once it has its answer, in msec. */
 const FIRST_READ_WAITS = 5_000
@@ -240,6 +246,7 @@ class ProgramPlaces {
     this.places = new folder.Places({ ...(keepPendingAs !== undefined && { keepPendingAs }) })
     this.things = new PlaceThings({ places: this.places, classNamed: (name) => this.classNamed(name) })
     this.places.onRows((change) => this.rowsChanged(change))
+    let restoredSignIn = false
     for (const [name, { details }] of this.declared) {
       // a file a person picks shows its line as the program starts:  "Open a file", "Reopen" (epic `editor` P41)
       if (details.picked && typeof document !== "undefined") {
@@ -247,10 +254,43 @@ class ProgramPlaces {
         // an uploader naming it hands it what's dropped:  `<uploader for="cookbook file" />` (Q75's B)
         this.stopDrops ??= listenForDroppedFiles((words) => this.pickedFile(snakeCase(words.trim())))
       }
-      if (!KINDS_WITH_SIGN_IN.has(details.kind ?? "")) continue
+      // only the FIRST place where each person is someone says who's here:  the others sign in as they're first used
+      if (!KINDS_WITH_SIGN_IN.has(details.kind ?? "") || restoredSignIn) continue
+      restoredSignIn = true
       const behind = this.places.placeFor(name) ?? this.placeNeedingNoClass(details)
       if (!this.places.placeFor(name)) this.places.add(name, behind)
       this.followSignIn(behind)
+    }
+    // what the last visit left waiting for a place this one never uses goes too, once the page has settled
+    whenIdle(() => this.sendWaiting(), { timeout: WAITING_WRITES_WAIT })
+  }
+
+  /**
+   * Make each place with writes left waiting on this device from the last visit, which this visit hasn't made yet:
+   * so what's waiting is sent, though nothing reads or writes it (epic `solid-2-final` P13, TLDR 18).
+   * - Made as a first use makes it, by a type saved in it (`makePlace()`), but with no sign-in bar:
+   *   nothing's shown for a place the program hasn't used.
+   * - A place with nothing waiting is still made only on its first use.
+   * - NEVER throws:  a place that can't be made says so on the console, and keeps what's waiting for next time.
+   */
+  private sendWaiting(): void {
+    for (const name of this.places!.waitingPlaceNames()) {
+      const declared = this.declared.get(name)
+      if (!declared) continue
+      try {
+        const Class = [...this.classes.values(), ...(CLASSES_DECLARED.values() as Iterable<SavedClass>)].find(
+          (each) => each.savedIn?.place === name
+        )
+        const behind = Class
+          ? this.makePlace(Class).behind
+          : declared.details.kind
+            ? this.placeNeedingNoClass(declared.details)
+            : (declared.thing.makePlace(declared.details, this.folder) as PlaceBehind)
+        if (!this.places!.placeFor(name)) this.places!.add(name, behind)
+        this.followSignIn(behind)
+      } catch (ignored) {
+        console.error(`core.place():  couldn't make "${name}" to send what's waiting for it`, ignored)
+      }
     }
   }
 
@@ -352,6 +392,16 @@ class ProgramPlaces {
    * - throws `TypeError` if the program declares no such place
    */
   placeFor(Class: SavedClass): { name: string; collection: string; behind: PlaceBehind } {
+    const made = this.makePlace(Class)
+    this.startSignIn(made.name, made.behind)
+    return made
+  }
+
+  /**
+   * The place `Class` is saved in, made if this is its first use, as `placeFor()`, but showing no sign-in bar.
+   * - throws `TypeError` if the program declares no such place
+   */
+  private makePlace(Class: SavedClass): { name: string; collection: string; behind: PlaceBehind } {
     this.noteClass(Class)
     const savedIn = savedInOf(Class)
     const declared = this.declared.get(savedIn.place)
@@ -389,7 +439,6 @@ class ProgramPlaces {
       limitOperations(behind, making)
       this.places!.add(name, behind)
     } else if (details.kind) knowCollection(behind, making)
-    this.startSignIn(name, behind)
     return { name, collection, behind }
   }
 
