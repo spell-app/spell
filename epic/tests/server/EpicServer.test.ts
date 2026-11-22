@@ -158,17 +158,14 @@ describe("EpicServer", () => {
 
   // epic-eject I21:  Epic UI answered 404 here, while spell-app's page server served it
   test("Epic UI at /components/epics/, as spell-app's page server serves it:  the engine's src/docs/, its site bundle at _assets/", async () => {
-    for (const path of [
-      "/components/epics/",
-      "/components/epics/epic-item.html",
-      "/components/epics/__parts/layout.html"
-    ]) {
+    // since epic `editor` P44 the folder holds one page, Epic UI's guide's viewer page
+    for (const path of ["/components/epics/", "/components/epics/index.html"]) {
       const page = await ask(port, "GET", path)
       expect(page.status, path).toBe(200)
     }
-    expect((await ask(port, "GET", "/components/epics/")).text).toContain("<title>The Epic Elements</title>")
+    expect((await ask(port, "GET", "/components/epics/")).text).toContain("<title>Epic UI</title>")
     expect((await ask(port, "GET", "/components/epics")).headers.location).toBe("/components/epics/")
-    expect(server.fileFor("/components/epics/epic-item.html")).toBe(join(ENGINE, "src/docs/epic-item.html"))
+    expect(server.fileFor("/components/epics/index.html")).toBe(join(ENGINE, "src/docs/index.html"))
     // the bundle:  the one the DEFAULT repo's settings give Epic UI, from its checkout (`SETS`)
     expect(server.fileFor("/components/epics/_assets/site.js")).toBe(join(top, "one", SETS.epics!.assets!, "site.js"))
     expect((await ask(port, "GET", "/components/epics/_assets/site.js")).text).toBe(`// one ${SETS.epics!.assets}`)
@@ -193,11 +190,11 @@ describe("EpicServer", () => {
       JSON.parse(/window\.SPELL_SERVER = (\{.*?\})<\/script>/.exec((await ask(port, "GET", path)).text)![1]!)
     expect((await config("/components/app/index.html")()).file).toBe("/components/app/index.html")
     expect((await config("/r/one/components/ui/")()).file).toBe("/r/one/components/ui/index.html")
-    expect((await config("/components/epics/epic-item.html")()).file).toBe("/components/epics/epic-item.html")
+    expect((await config("/components/epics/index.html")()).file).toBe("/components/epics/index.html")
     expect((await ask(port, "GET", "/components/ui")).headers.location).toBe("/components/ui/")
     expect((await ask(port, "GET", "/components/app/missing.html")).status).toBe(404)
     // Epic UI stays the engine's, not the repo's own folder of it
-    expect((await ask(port, "GET", "/components/epics/")).text).toContain("<title>The Epic Elements</title>")
+    expect((await ask(port, "GET", "/components/epics/")).text).toContain("<title>Epic UI</title>")
     expect((await ask(port, "GET", "/r/one/components/epics/")).status).toBe(404)
     // a repo whose settings name no component sets:  nothing, though it has Spell UI's folder
     expect((await ask(port, "GET", "/r/two/components/ui/")).status).toBe(404)

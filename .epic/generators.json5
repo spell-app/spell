@@ -83,14 +83,8 @@
       "run": ["yarn", "pack:build"]
     },
     {
-      "name": "Epic UI site data",
-      "outputs": ["epic/src/docs/__data/{components,search}.json5"],
-      "cwd": "epic",
-      "run": ["yarn", "site:data"]
-    },
-    {
       "name": "App UI data",
-      "outputs": ["app/app/docs/__data/{components,search}.json5"],
+      "outputs": ["app/app/docs/__data/components.json5"],
       "cwd": "app",
       "run": ["yarn", "site:data"]
     },

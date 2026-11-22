@@ -146,7 +146,7 @@ describe("served links:  routes and a test's action links", () => {
       `<a class="epic-test-action" href="/api/docs/show?path=${encodeURIComponent(path)}&amp;view=review">o</a>`
     const html = [
       show("/epics/seo/seo.plan.html"),
-      show("/components/epics/epic-item.html"),
+      show("/components/epics/index.html"),
       show("/worktrees/w/anything.html"),
       show("/epics/gone/gone.plan.html")
     ].join("")

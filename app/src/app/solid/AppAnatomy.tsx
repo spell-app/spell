@@ -274,7 +274,7 @@ export const ANATOMY_ICON = "layer group"
  * - `program`:  what's turned:  the app, with the editor's few wrappers round it.
  * - The app's elements are restyled while it shows, and put back as it closes (`AnatomyStyles`).
  * - Worked out again when the app draws something new (a card moved, a live edit), keeping the turn and focus.
- * - SEE:  its App UI components page, `app/docs/AppAnatomyView.html` (`/components/app/AppAnatomyView.html`).
+ * - SEE:  its page in App UI's guide, `/components/app/app-anatomy-view`.
  ****************/
 export function AppAnatomyView(props: {
   pane: () => HTMLElement | undefined

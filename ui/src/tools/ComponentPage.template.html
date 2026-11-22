@@ -1,49 +1,27 @@
 <!doctype html>
 <!--
-  TEMPLATE:  a Spell UI components page (`ui/`, shared), in Fomantic UI's docs layout, built ONLY from `<ui-*>` widgets.
-  - NEVER copy by hand:  `yarn site:new <tag|page>` (in `packages/ui`, `scripts/site-new.ts`) fills the `{{...}}`
-    placeholders from `packages/ui/docs/__data/pages.json5`, keeps the COMPONENT or the PAGE block, and rewrites the
-    `../ui/` paths for the page's depth.  This file opens as it is too (from the page server), with the
-    placeholders showing, so a layout change can be checked here first.
+  TEMPLATE:  `yarn site:new`'s, a new component's four pages in the Spell UI site (Usage, Examples, API, Theming), as
+  Spell UI's HTML, which `SpellUISite` writes as the site's Spell (`SpellMarkup`;  `ui/scripts/site-new.ts`).
+  - Never served, nor copied by hand:  `yarn site:new <tag>` fills the `{{...}}` placeholders from
+    `ui/docs/__data/pages.json5`, keeps the `site:component` blocks, drops the status label for a `done` family, and
+    rewrites the `../ui/` paths to the site's.
   - A family's page keeps the `site:family` API block;  a sub-tag with a page of its own (pages.json5 `pages`:
     `ui-radio`) keeps `site:tag` instead, and drops `site:theming` when no family token names it (`ui-meta`).
-  - How to write a page:  `epics/spell-ui-pages/PAGES.md`.  Check it:  `yarn site:check <page>`.
-  - A page is its `<head>` and ONE `<main id="main" class="site-main" data-toc-header>`, nothing else:  the chrome (top bar, nav,
-    footer, `<ui-root>`) is `packages/ui/docs/__parts/layout.html`, written once;  the site bundle wraps the `main` in it on first
-    load, and its router swaps only the `main` after that (`packages/ui/site/_src/SiteShell.ts`, `SiteRouter.ts`).  So inline
-    scripts in `main` re-run on every visit, and `<head>` styles don't follow a swap:  put styles in `main` or
-    `packages/ui/site/_src/site.css`.
-  - Layout:  `packages/ui/site/_src/site.css` (glue only:  grid areas, widths, sticky offsets).
-  - The COMMENTS (epic `epic-engine`, as every component set's):  `/_epic/assets/spell-comments.js` in the `<head>`,
-    after the site's bundle:  the bullhorns, threads, Send and the page's toolbar (spell-epic's
-    `src/tools/_assets/spell-comments.entry.js`);  the layout loads the epics pack, whose elements draw the threads.
+  - Only each tab's markup, the title and its summary are read:  the page's `<head>` and frame are left out.
+  - How to write a page:  `epics/spell-ui-pages/PAGES.md`.  Check the Spell pages it wrote:  `yarn site:check <page>`.
+  - It was spell-epic's components page template (`templates/spell-ui-docs.html`), the HTML components pages' every
+    page, until epic `editor` P44 moved the last of those pages to Spell guides.
 -->
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
-    <title>Spell UI Components Page Template</title>
+    <title>A new component's Spell UI site pages</title>
     <meta
       name="description"
-      content="Template for a Spell UI components page (or components guide):  Fomantic's docs layout in ui-* widgets -- nav, masthead, Examples / Usage / API / Theming tabs, an On this page rail."
+      content="yarn site:new's template:  a new component's Usage, Examples, API and Theming pages, which it writes as Spell."
     />
-    <!-- Before first paint:  the viewer's colour scheme (`ThemePreference.HEAD_SCRIPT`, as oxfmt lays it out).  The theme itself is restored by site.js. -->
-    <script>
-      try {
-        var l = localStorage,
-          d = document.documentElement,
-          s = l.getItem("spell-site:scheme") || l.getItem("spell-site:theme") || l.getItem("spell-ui-site:scheme")
-        if (s === "light" || s === "dark") {
-          d.classList.add("ui-" + s)
-          d.style.colorScheme = s
-        }
-      } catch (e) {}
-    </script>
-    <link rel="stylesheet" href="/components/ui/_assets/site.css" />
-    <script type="module" src="/components/ui/_assets/site.js"></script>
-    <!-- the comments (bullhorns, threads, Send):  the docs runtime's, alone, beside the site's Spell UI -->
-    <script defer src="/_epic/assets/spell-comments.js"></script>
   </head>
   <body class="ui-typography">
     <main id="main" class="site-main" data-toc-header="{{title}}">

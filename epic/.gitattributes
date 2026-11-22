@@ -12,6 +12,3 @@
 src/components/__pack/epics.catalog.ts                         linguist-generated merge=binary
 src/components/__pack/epics.entry.ts                           linguist-generated merge=binary
 
-# Epic UI's site data (`yarn site:data`);  `pages.json5` is hand-kept
-src/docs/__data/components.json5                               linguist-generated merge=binary
-src/docs/__data/search.json5                                   linguist-generated merge=binary

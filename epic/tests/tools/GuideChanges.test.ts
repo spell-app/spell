@@ -161,7 +161,8 @@ describe("GuideChanges.gather()", () => {
     expect(await changes.gather()).toMatchObject([
       { page: "components/epics/epic-item.html", as: "phase", comments: [id] }
     ])
-    expect(epicText()).toMatch(/href="\/components\/epics\/epic-item\.html#1-example"/)
+    // its link a page of Epic UI's guide (epic `editor` P44):  the link mender's address for the old page
+    expect(epicText()).toMatch(/href="\/components\/epics\/epic-item#1-example"/)
     expect(GuideInbox.read(inbox).comments[id]).toMatchObject({ status: "taken", taken: { epic: "gc" } })
   })
 
@@ -189,7 +190,8 @@ describe("GuideChanges.gather()", () => {
     expect(await changes.gather()).toMatchObject(
       Object.keys(pages).map((page) => ({ page, as: "phase", comments: [ids[page]] }))
     )
-    expect(epicText()).toMatch(/href="\/components\/app\/Chooser\.html#sizes"/)
+    // its link a page of App UI's guide (epic `editor` P44):  the link mender's address for the old page
+    expect(epicText()).toMatch(/href="\/components\/app\/chooser#sizes"/)
   })
 
   // epic `epic-workflow` P13:  a page an epic owns sends its comments to that epic, never into feedback

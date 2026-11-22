@@ -39,7 +39,7 @@ import "./TypeExplorer.css"
  *   a runner's bundle would get the whole editor through it (`Actions.tsx`).
  *   - So its `<ui-*>` tags are the CALLER's to define:  the barrel or `./loadUI`.
  *   - Not imported here:  `spell-ui` can't load under node (`customElements`), and the `node` tests render this.
- * - SEE:  its App UI components page, `app/docs/TypeExplorer.html` (`/components/app/TypeExplorer.html`).
+ * - SEE:  its page in App UI's guide, `/components/app/type-explorer`.
  ****************/
 export function TypeExplorer(props: TypeExplorerProps) {
   const [state, setState] = createSignal<TypeExplorerState>(untrack(() => props.state) ?? loadState())

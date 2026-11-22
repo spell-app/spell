@@ -4,15 +4,13 @@
  * (`IconPackError` ...).
  * - The component packs' shapes (their reports, `ComponentPackError`) are the kit's, beside its pack tooling:
  *   `spell/element-tools/tools.types` (epic `repo-split` P10).
- * - At the BOTTOM of the tools' import graph:  `import type` only, and node's own modules (`SPELL_UI_ROOT`,
- *   `sitePages()`),
+ * - At the BOTTOM of the tools' import graph:  `import type` only, and node's own modules (`SPELL_UI_ROOT`),
  *   so every tool (and Spell UI's `spell` commands, `src/cli/`, through `spell/ui/tools/tools.types`) imports it without
  *   loading another.
  * - Every `results/*-results.json` has one of these shapes;  `ReportTables` reads them.
  * - The perf shapes (`PerfRecord` ...) live beside the benchmark, in `src/test-helpers/PerfRun.ts` (it runs in the browser).
  */
 
-import { existsSync, readdirSync } from "node:fs"
 import { join, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -337,21 +335,6 @@ export const SPELL_UI_SITE_FOLDER = join(
  * - The site bundle (`SITE_BUILD`'s `_assets/`) is still laid over it (the page server's `componentSets` setting).
  */
 export const SITE_PAGES = "docs"
-
-/**
- * Every page of a component set's HTML site:  the `.html` files right in `folder`, A-Z, absolute;
- * none when it's missing.
- * - `folder`:  another set's pages (Epic UI's, App UI's), for its search file (`SiteDataBuilder`'s `set`).
- *   - Spell UI's site is Spell pages since epic `editor` P43:  `yarn site:check` draws them instead.
- * - Not a `_`-prefixed file:  a partial or a smoke page, never one of the site's pages.
- */
-export function sitePages(folder: string): string[] {
-  if (!existsSync(folder)) return []
-  return readdirSync(folder)
-    .filter((name) => name.endsWith(".html") && !name.startsWith("_"))
-    .sort()
-    .map((name) => join(folder, name))
-}
 
 /**
  * Spell UI's docs site's DATA, from the repo's root:  `docs/__data/`.

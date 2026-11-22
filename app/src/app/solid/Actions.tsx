@@ -34,7 +34,7 @@ import {
  *   the dropdown draws it from its attributes and text (`icon` included).
  *   Keep `title` TEXT:  an item with element children is a "rich" option.
  * - Reactivity is the caller's:  pass values read from `tracked()` accessors (see `Actions`).
- * - SEE:  its App UI components page, `app/docs/Actions.html` (`/components/app/Actions.html`).
+ * - SEE:  its page in App UI's guide, `/components/app/actions`.
  ****************/
 export function Action(props: ActionProps) {
   const rest = omit(props, "title", "button", "iconOnly", "inBar", "icon", "active", "menu", "shortcut", "tip")

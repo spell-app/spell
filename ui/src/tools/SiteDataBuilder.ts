@@ -12,15 +12,13 @@ import {
   type SiteFamily,
   type SitePageSeed,
   type SitePagesFile,
-  type SiteSet,
   type SiteTag,
   type SiteTagPage
 } from "spell/ui/docs-components/docs-components.types"
 import type { AttributeSpec, ComponentVocabulary, ValueSetName } from "spell/element/vocabulary.types"
-import { SITE_DATA, SITE_PAGES, SPELL_UI_ROOT } from "./tools.types.ts"
+import { SITE_DATA, SPELL_UI_ROOT } from "./tools.types.ts"
 import { FamilyTokens } from "./FamilyTokens.ts"
 import { FoundationTokens } from "./FoundationTokens.ts"
-import { SiteSearchBuilder } from "./SiteSearchBuilder.ts"
 import { VocabularyFiles } from "spell/element-tools/VocabularyFiles"
 
 /****************
@@ -39,12 +37,11 @@ import { VocabularyFiles } from "spell/element-tools/VocabularyFiles"
  *   - The first seeds came from the old Astro site's MDX pages (frontmatter + token-table props),
  *     deleted with it (epic `spell-ui-pages`, P7).
  * - Also the FOUNDATION tokens, grouped (`foundation`, `src/tools/FoundationTokens.ts`), for the theming page's tables.
- * - And, for another component set, its search file (`searchText()`, `src/tools/SiteSearchBuilder.ts`):
- *   every page's sections, read from the pages' markup.
- *   - Spell UI's own, `docs/__data/search.json5`, comes from its Spell pages as drawn:  `yarn site:check --all`
- *     (`SiteCheck`), never from here (epic `editor` P43).
- * - Another component set's data (`set`, `forSet()`):  its own groups as the topics, its own side-column links,
- *   its pages one flat folder;  the brand's, Epic UI's and App UI's are built so.
+ * - Not the site's search file, `docs/__data/search.json5`:  it comes from the Spell pages as drawn,
+ *   `yarn site:check --all` (`SiteCheck`;  epic `editor` P43).
+ * - Another folder's elements read the same way (`components`, `data`):  App UI's web components, for its
+ *   `AppUIDataBuilder`.  Until epic `editor` P44 a set's own groups and side-column links were laid over the data
+ *   here too (`forSet()`), for the other sets' HTML pages:  gone with them.
  * - Deterministic:  sorted, no dates, so a rebuild with nothing changed writes the same bytes.
  * - Node only;  imports `src/` data only (vocabularies, `ValueSets`, the site data's types), never the elements.
  ****************/
@@ -63,15 +60,6 @@ export class SiteDataBuilder {
   /** `docs/__data/` (`SITE_DATA`), or `options.data`. */
   get dataFolder(): string {
     return this.options.data ?? join(this.root, SITE_DATA)
-  }
-
-  /**
-   * Another component set's HTML pages, which its search file is read from (`searchText()`):  `options.pages`,
-   * else `docs/` (`SITE_PAGES`).
-   * - Spell UI's own site is Spell pages since epic `editor` P43:  its `docs/` holds only the page that shows them.
-   */
-  get pagesFolder(): string {
-    return this.options.pages ?? join(this.root, SITE_PAGES)
   }
 
   /** Component families:  `components/`, or `options.components`. */
@@ -93,15 +81,6 @@ export class SiteDataBuilder {
   /** `docs/__data/pages.json5`. */
   get pagesFile(): string {
     return join(this.dataFolder, "pages.json5")
-  }
-
-  /**
-   * The text of a component set's `search.json5` (`SiteSearchFile`):  every page's sections, read from its page files,
-   * for `<ui-docs-search>`.
-   * - App UI's (`AppUIDataBuilder`);  not Spell UI's own (the class's doc).
-   */
-  searchText(): string {
-    return new SiteSearchBuilder(this.pagesFolder).text()
   }
 
   /** Build both files' contents (nothing is written):  the data, and pages.json5 with any new family seeded. */
@@ -148,35 +127,7 @@ export class SiteDataBuilder {
       families,
       foundation
     }
-    return { data: this.options.set ? SiteDataBuilder.forSet(data, this.options.set) : data, pages }
-  }
-
-  /**
-   * `data` made a component set's (`set`, its hand-kept `pages.json5`):
-   * - its topics:  the set's groups, in order, then Other when a tag is in none
-   * - each tag's topic:  the group listing it, else a group listing no tags that its own `topics` name, else Other
-   * - each tag's page in the set's ONE flat folder (`components/ui-x.html` => `ui-x.html`)
-   * - its side column's own links, `nav`
-   * - Static:  pure;  Epic UI's and App UI's data, built from their own sources, go through it too.
-   */
-  static forSet(data: SiteDataFile, { groups, nav }: SiteSet): SiteDataFile {
-    const tags = [...data.components, ...data.docs]
-    const listing = new Map(groups.flatMap((group) => (group.tags ?? []).map((tag) => [tag, group.id] as const)))
-    const groupOf = (tag: SiteTag) =>
-      listing.get(tag.tag) ?? groups.find((group) => !group.tags && tag.topics.includes(group.id))?.id ?? OTHER.id
-    const hasOthers = tags.some((tag) => groupOf(tag) === OTHER.id)
-    const forTag = (tag: SiteTag): SiteTag => ({
-      ...tag,
-      topics: [groupOf(tag)],
-      ...(tag.href && { href: tag.href.replace(/^components\//, "") })
-    })
-    return {
-      ...data,
-      topics: [...groups, ...(hasOthers ? [OTHER] : [])].map(({ id, title }) => ({ id, title })),
-      components: data.components.map(forTag),
-      docs: data.docs.map(forTag),
-      nav
-    }
+    return { data, pages }
   }
 
   /** `value` as the files are written:  2-space JSON, a final newline. */
@@ -376,14 +327,7 @@ export type SiteDataBuilderProps = {
   docs?: string | false
   /** the folder of `components.json5` and `pages.json5`, as `docs/__data/` */
   data?: string
-  /** the site's pages, as `docs/` (`SITE_PAGES`):  what a set's `search.json5` is read from (`searchText()`) */
-  pages?: string
-  /** another component set's own facts:  `build()` makes the data the set's (`forSet()`) */
-  set?: SiteSet
 }
-
-/** The group of a set's tag no group files. */
-const OTHER = { id: "other", title: "Other" } as const
 
 /** A tag before its family is known. */
 type RawTag = Omit<SiteTag, "mainTag" | "main" | "page" | "href">

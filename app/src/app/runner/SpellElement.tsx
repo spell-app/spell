@@ -134,7 +134,7 @@ const STATES_CSS = `
  *   (`onClickToSelect()`);  a selected task drags with the others.
  * - Part of `spell-runtime.js`:  NEVER value-imports `spell/parser/core`.
  *   Each runtime copy hands itself over in `installSpellElements()`.
- * - SEE:  its App UI components page, `app/docs/spell-element.html` (`/components/app/spell-element.html`).
+ * - SEE:  its page in App UI's guide, `/components/app/spell-element`.
  ****************/
 export class SpellElement<Thing extends object = object> extends E.UIComponent<typeof spellElementVocabulary> {
   @E.proto static vocabulary = spellElementVocabulary

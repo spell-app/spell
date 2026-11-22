@@ -30,3 +30,20 @@ describe("SpellUIGuide.mendedPath()", () => {
     expect(SpellUIGuide.mendedPath("/components/app/spell-viewer.html")).toBeUndefined()
   })
 })
+
+describe("SpellUIGuide.setAddressOf() / setMendedPath()", () => {
+  it("names Epic UI's and App UI's pages for their tag or component, kebab-cased", () => {
+    expect(SpellUIGuide.setAddressOf("epics", "epic-card.html#parts")).toBe("/components/epics/epic-card#parts")
+    expect(SpellUIGuide.setAddressOf("app", "CodeMirrorEditor")).toBe("/components/app/code-mirror-editor")
+    expect(SpellUIGuide.setAddressOf("app", "index.html")).toBe("/components/app/")
+  })
+
+  it("mends a link to one of their old HTML pages, and leaves the rest", () => {
+    expect(SpellUIGuide.setMendedPath("/components/app/MenuBar.html")).toBe("/components/app/menu-bar")
+    expect(SpellUIGuide.setMendedPath("/components/epics/epic-item.html#3-markup")).toBe(
+      "/components/epics/epic-item#3-markup"
+    )
+    expect(SpellUIGuide.setMendedPath("/components/app/_images/Notice.png")).toBeUndefined()
+    expect(SpellUIGuide.setMendedPath("/components/ui/ui-button.html")).toBeUndefined()
+  })
+})

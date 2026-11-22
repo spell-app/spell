@@ -162,11 +162,12 @@ describe.skipIf(!SERVING)("the built-in sounds play", { timeout: 240_000 }, () =
 
     // retried:  about one load in four, the calculator here draws nothing at all, sounds or not
     // (the suspected-bugs log, "## app", 2026-11-18)
-    test("a docs page, whose Spell UI is its own:  the calculator's keys play `tap`", { retry: 2 }, async () => {
+    // App UI's guide page (epic `editor` P44):  the calculator in a `<spell-viewer>` inside the guide's own
+    test("App UI's guide page, a viewer in a viewer:  the calculator's keys play `tap`", { retry: 2 }, async () => {
       const page = await newPage()
       try {
         // its example's section starts folded:  its address opens it
-        await page.goto(`${PAGE_SERVER}/components/app/spell-viewer.html#1-example`, { timeout: 60_000 })
+        await page.goto(`${PAGE_SERVER}/components/app/spell-viewer#1-example`, { timeout: 60_000 })
         const key = page
           .locator("spell-viewer[project='@spell/examples/calculator'] ui-button")
           .filter({ hasText: "7" })
