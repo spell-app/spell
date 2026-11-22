@@ -118,6 +118,24 @@ async function drag(host: Element, from: number, to: number) {
   }
 }
 
+/** Contrast of `text` on `ground`, WCAG's, both as the browser paints them over the page's `canvas` colour. */
+function contrast(text: string, ground: string, canvas: string) {
+  const context = document.createElement("canvas").getContext("2d", { willReadFrequently: true })!
+  const lightnessOf = (...layers: string[]) => {
+    for (const layer of [canvas, ...layers]) {
+      context.fillStyle = layer
+      context.fillRect(0, 0, 1, 1)
+    }
+    const [red, green, blue] = Array.from(context.getImageData(0, 0, 1, 1).data, (value) => {
+      const channel = value / 255
+      return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4
+    })
+    return 0.2126 * red! + 0.7152 * green! + 0.0722 * blue!
+  }
+  const [dim, bright] = [lightnessOf(ground, text), lightnessOf(ground)].sort((one, other) => one - other)
+  return (bright! + 0.05) / (dim! + 0.05)
+}
+
 afterEach(() => AnswerForm.adopt(undefined))
 
 ////////////////
@@ -198,6 +216,24 @@ describe("<epic-feature-set>", () => {
     expect([chip(), state()]).toEqual([green, "done"])
     sheet.remove()
   })
+
+  for (const scheme of ["light", "dark"] as const)
+    test(`"Pick one" reads as text in ${scheme}, 4.5:1 or more;  only a select that's off is pale`, async () => {
+      const main = await ElementFixture.render(
+        `<main style="color-scheme: ${scheme}"><epic-feature-set></epic-feature-set>` +
+          `${section("s1", "Now", row("s1f1", "One", priority("s1f1")))}</main>`
+      )
+      await ElementFixture.settle()
+      const select = (selector: string) => {
+        const host = main.querySelector(selector)!.shadowRoot!.querySelector('[part~="select"]')!
+        return getComputedStyle(host.shadowRoot!.querySelector("select")!)
+      }
+      const canvas = scheme === "dark" ? "#1b1a22" : "#fff"
+      for (const selector of ["#s1f1 epic-ask", "#s1f1 epic-ask[slot]"]) {
+        const { color, backgroundColor } = select(selector)
+        expect(contrast(color, backgroundColor, canvas)).toBeGreaterThanOrEqual(4.5)
+      }
+    })
 
   test("a drag moves a row in the dialog, and the page's only with Save", async () => {
     const { main, host } = await page()

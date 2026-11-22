@@ -151,6 +151,10 @@
     min-width: 0;
     max-width: 100%;
   }
+  /* nothing picked yet is still text to read, 4.5:1 or more:  pale is only a select that's off (P80's design review) */
+  .pick:not([disabled])::part(select) {
+    --_ui-select-placeholder-color: var(--ui-text-muted);
+  }
   .comment {
     flex: 1 1 16em;
     min-width: 0;
