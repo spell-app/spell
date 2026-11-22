@@ -623,14 +623,15 @@ Where each of a tag's attributes goes in a property editor:  the spell editor's 
       `src/vocabulary/partsOfSpeech.generated.ts`, a small table the bubbly look reads (the app's `BubblyMarkup`)
       to colour a tag's band, without loading Spell UI.
 - `yarn site:check <page...> | --all`:
-  loads the `docs/` pages from the page server, at `/components/ui/` (Playwright).
+  loads the Spell UI site's pages (`@spell/guides/SpellUI`) as this checkout's editor runs them (Playwright),
+  a page by its address (`/button/examples`) or its tag.
   - [Its script](scripts/site-check.ts), on [the site check](src/tools/SiteCheck.ts).
   - It fails on:
     - console errors, 404s
     - an undefined or unrendered `ui-*`
-    - missing tabs, an empty toc
+    - an empty or hidden toc, a deep link that doesn't land
     - phone-width overflow
-    - a nav flyout that won't open
+    - a nav drawer that won't open
   - Screenshots go in `results/`, its `site-check/`.  LOOK at them.
 - Generators, each writing COMMITTED files (never edit their output):
   - `yarn gen:styles`:  the token sheets in `src/styles/`
