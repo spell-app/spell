@@ -2,7 +2,8 @@
 /* as tall as what it shows, up to the window's bottom;  wider windows, more columns, so it's shorter (epic `editor` I180, I185):
    - 4 columns, then 5 from 1280px wide, 6 from 1400px, 7 from 1800px
    - its rows 20px tall, not a tree's 22px:  a topic stays whole in its column, so Owen's longer topics
-     (Forms, Text, Layout) still fit a 1440 x 800 window without scrolling */
+     (Forms, Text, Layout) still fit a 1440 x 800 window without scrolling
+   - and in a window no taller than 840px, less room between topics (epic `language` I182) */
 .PalettePopup {
   --palette-width: min(740px, 88vw);
   --ui-popup-max-width: calc(var(--palette-width) + 40px);
@@ -57,6 +58,15 @@
     font-size: 12px;
     font-weight: var(--ui-font-weight-bold, 700);
     line-height: 16px;
+  }
+
+  /* a short window:  as the table grew, its tallest column was 18px too tall for a window 800px tall */
+  @media (height <= 840px) {
+    padding-block-end: 4px;
+
+    & h4 {
+      margin-block-end: 0;
+    }
   }
 }
 

@@ -24,6 +24,13 @@ The overview, for people:  [README-parser](../../README-parser.md) and [README-s
       (`indentWidth()`, epic `spanish`:  a stray space nested a card's `- its "value" ...` under the line above)
   - each extra level pushes a `BlockToken`
   - a blank line takes the indent of the NEXT non-blank line, so it doesn't break a nested block (lookahead)
+  - a comment on a line of its own never cuts a block, whatever its indent (`placeAsides()`, epic `language` I181):
+    - outdented from the code below it, or between a head and its body:  it's read at that code's indent
+      (but one deeper under a comment written at the body's indent stays under it)
+    - else as written:  a comment after a block's last line, or a description indented under its line
+    - the same for a line of only whitespace, and for a lone `-` or `/` (a comment being typed, still its own error)
+    - not a `#` heading, nor a page's prose
+    - the scans before parsing skip the same lines at the left edge (`COMMENT_AT_LEFT`)
   - a comment is a single `CommentToken`, to the end of the line:
     - `//` or `--`
     - or a heading's run of `#`s:  a markdown-style level (see `Block.getDocComments()`)
@@ -876,6 +883,8 @@ A kind that says so is saved in a file of its own.
     (`and the last card of each column`);  `and` then a condition goes on with it (`and it is red`)
     (`SpellStatement.conditionBeforeAlternatives()`;  epic `language` T152)
   - the tokens stay the lines' own:  every rule reads the joined line as one written whole
+  - a comment among those lines, or beside a lone `and` / `or`, doesn't end them:
+    it goes first in the joined line's body (epic `language` I181)
   - the editors indent the line after one as it's typed (`LSP.SpellKeywords.CONTINUES_LINE`)
 - Then it loops over the root `BlockToken`'s items:
   - a `LineToken` => `parser.parse(items, "line", scope)`
@@ -923,7 +932,7 @@ A kind that says so is saved in a file of its own.
   - `parseNestedBlock()` parses a `{nested_statements}` as a block.
     - in `statement.nestedScope`
     - It sets `data.enclose`.
-    - A `{nested_expression}` (e.g. `return`) accepts a single-line block only.
+    - A `{nested_expression}` (e.g. `return`) accepts a single line of code only, comments aside (epic `language` I181).
   - `nestedScope` comes from `rule.getNestedScopeForMatch()`:
     - default:  the same scope
     - `if` / `else` => a new `BlockScope`

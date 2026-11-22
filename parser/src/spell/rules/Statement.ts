@@ -166,6 +166,12 @@ export class SpellStatement<
     )
   }
 
+  /** Is `item`, a line or a block of them, comments and blank lines alone, however deep? */
+  private static holdsOnlyComments(item: P.LineToken | P.BlockToken): boolean {
+    if (item instanceof P.BlockToken) return item.tokens.every((each) => SpellStatement.holdsOnlyComments(each))
+    return !item.tokens.length || (item.tokens.length === 1 && item.tokens[0] instanceof P.CommentToken)
+  }
+
   /**
    * A `parse_error` match in place of statement `match`, saying why spell won't take it,
    * e.g. a property declared on a built-in type.
@@ -546,7 +552,7 @@ export class SpellStatement<
    * - Returns the nested body match if successful.
    * - `bodySpec.nestedAs` ~== `"block"` => parses the whole nested block via `statement.nestedScope` and marks
    *   the result `enclose`d (wrapped in `{}` when compiled), unless we're `flatBody`.  Otherwise, only a single-line nested block
-   *   can be parsed, as `nestedAs` directly (e.g. an `expression`).
+   *   can be parsed, as `nestedAs` directly (e.g. an `expression`), comments above or below it aside.
    * - SIDE EFFECT: on success, adds it to `statement.groups` as `body`,
    *   and records it as `statement.data.body` -- see `getBody()`.
    * - NOTE: this will throw if rule does not implement `getNestedScopeForMatch`.
@@ -570,10 +576,11 @@ export class SpellStatement<
       }
     } else {
       // if parsing as anything else, we can only handle a single line
-      if (nestedBlock.tokens.length > 1) return undefined
+      const code = nestedBlock.tokens.filter((item) => !SpellStatement.holdsOnlyComments(item))
+      if (code.length > 1) return undefined
       // get line to process, minus leading whitespace
-      // TODO: remove comment????
-      const first = nestedBlock.tokens[0]
+      // TODO: remove comment at the line's end????
+      const [first] = code
       // Only a `LineToken` (not a nested `BlockToken`) can be parsed as a single rule here.
       if (!(first instanceof P.LineToken)) return undefined
       const { tokens } = first

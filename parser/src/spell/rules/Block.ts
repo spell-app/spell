@@ -236,9 +236,15 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
 
   /**
    * Is `item`, one of a block's matches, a line of code:  not blank, and not only a comment?
+   * - A nested block is, when a line in it is:  a comment indented under a body's last line isn't its last line
+   *   (epic `language` I181).
    * - e.g. for a body's LAST line of code -- see `SpellStatement.returnsLastLine()`.
    */
   static isCodeLine(item: P.Match): boolean {
+    if (item.is(Block)) return item.matched.some((line) => line instanceof P.Match && Block.isCodeLine(line))
+    // nor is a comment being typed, a lone `-`:  its own error, never the body's value
+    const [written] = item.tokens
+    if (written instanceof P.LineToken && item.scope.parser?.tokenizer.isAside(written)) return false
     return item.matched.some(
       (it) =>
         it instanceof P.Match &&
@@ -260,10 +266,20 @@ export class Block extends P.Rule<P.RuleProps, never, BlockMatchData> {
         statements[index] = new P.ASTReturnStatement(value.match, { value })
         return true
       }
-      if (node instanceof P.ASTStatementGroup && node.statements) return Block.returnValue(node.statements, value)
+      if (node instanceof P.ASTStatementGroup && node.statements) {
+        if (Block.returnValue(node.statements, value)) return true
+        // a block of comments alone, under the value's line or beside it
+        if (Block.holdsOnlyComments(node)) continue
+      }
       return false
     }
     return false
+  }
+
+  /** Is `node` a group of comments and blank lines alone, however deep? */
+  private static holdsOnlyComments(node: P.ASTNode): boolean {
+    if (node instanceof P.ASTBlankLine || node instanceof P.ASTComment) return true
+    return node instanceof P.ASTStatementGroup && !!node.statements?.every((each) => Block.holdsOnlyComments(each))
   }
 
   /**
