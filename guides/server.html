@@ -166,8 +166,8 @@
               older than its own code is restarted, so after a merge the next opener gets the new routes.
             </li>
             <li>
-              Its facts go in <code>.spell-server.json</code> at the kit's root, where the openers find them; its
-              output, in colour, in
+              Its facts go in <code data-no-link>.spell-server.json</code> at the kit's root, where the openers find
+              them; its output, in colour, in
               <a href="/.spell-server.log" target="src-spell-server-log"><code>.spell-server.log</code></a
               >.
             </li>
@@ -192,12 +192,17 @@
               <tbody>
                 <tr>
                   <td><code>/</code></td>
-                  <td>a redirect to the docs home, <code>/pages/index.html</code></td>
+                  <td>a redirect to the docs home, <code data-no-link>/pages/index.html</code></td>
                 </tr>
                 <tr>
-                  <td><code>/guides/</code>, <code>/epics/</code>, <code>/sagas/</code>, <code>/pages/</code></td>
                   <td>
-                    the kit's own <code>guides/</code> first (the guides that ship with Spell), then the epic folder
+                    <a href="/guides/" target="src-guides"><code>/guides/</code></a
+                    >, <code data-no-link>/epics/</code>, <code data-no-link>/sagas/</code>,
+                    <code data-no-link>/pages/</code>
+                  </td>
+                  <td>
+                    the kit's own <a href="./" target="src-guides"><code>guides/</code></a> first (the guides that ship
+                    with Spell), then the epic folder
                   </td>
                 </tr>
                 <tr>
@@ -556,8 +561,9 @@ export default helloRoutes</code></pre>
           </ui-table>
           <ul>
             <li>
-              Where they live: the guides that ship with Spell in the kit's <code>guides/</code> folder, versioned with
-              the code; epic pages, sagas, details pages and the rest in the epic folder, beside the kit.
+              Where they live: the guides that ship with Spell in the kit's
+              <a href="./" target="src-guides"><code>guides/</code></a> folder, versioned with the code; epic pages,
+              sagas, details pages and the rest in the epic folder, beside the kit.
             </li>
             <li>
               A page loads ONE classic script, <code>/_epic/assets/spell-ui.js</code> (Solid, Spell UI and the page

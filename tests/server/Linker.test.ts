@@ -120,6 +120,12 @@ describe("Linker.link()", () => {
     expect(linked(`<a href="#x">${span}</a>`)).toBe(`<a href="#x">${span}</a>`)
   })
 
+  test("leaves a code span marked data-no-link as text, and doesn't report it (epic-engine I399)", () => {
+    const span = "<code data-no-link>packages/ui/tools/SiteCheck.ts</code>"
+    expect(link(`<p>${span} <code data-no-link>zz/missing.ts</code></p>`)).toMatchObject({ linked: 0, unresolved: [] })
+    expect(linked(`<p>${span}</p>`)).toBe(`<p>${span}</p>`)
+  })
+
   test("reports unresolved path-like spans, sorted, and leaves paths outside the repo as text", () => {
     const result = link("<code>zz/missing.ts</code> <code>nope.md</code> <code>word</code> <code>/etc/hosts</code>")
     expect(result.linked).toBe(0)
