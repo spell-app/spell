@@ -196,9 +196,12 @@ class AtmosphereAccount(PlaceBehind):
         return (session.did, session.handle) if session else None
 
     def fields_it_fills_in(self) -> Row:
-        """What it says of a new row by itself:  `owner`, the account signed in."""
-        who = self.signed_in_person()
-        return {OWNER_FIELD: who[0]} if who else {}
+        """What it says of a new row by itself:  `owner`, the account signed in.
+
+        - Nothing until it has signed in:  it doesn't sign in to say, which would hold up the event loop.
+        """
+        session = self._session
+        return {OWNER_FIELD: session.did} if session else {}
 
     def _signed_in(self, who: str, password: str) -> Session:
         """A new session for `who`.  - throws `PlaceError`"""
@@ -460,7 +463,9 @@ class AtmosphereAccount(PlaceBehind):
             return PlaceError(f"{url}:  {error} {message}".strip())
         if is_signed_in and (status == 401 or error in SESSION_OVER):
             self._session = None
-            return PlaceError(f"the sign-in has ended, so this wasn't kept:  {message};  the next write signs in again")
+            over = PlaceError(f"the sign-in has ended, so this wasn't kept:  {message};  the next write signs in again")
+            over.has_kept_nothing = True
+            return over
         if error == "InvalidSwap":
             return PlaceError(message, "out of date")
         if error in NOT_THERE or status == 404 or NO_SUCH_ACCOUNT.search(message):

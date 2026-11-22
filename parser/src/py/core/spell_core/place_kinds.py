@@ -19,6 +19,7 @@ behind.apply([{"kind": "insert", "collection": "device_notes", "id": "device-not
 - A place's key comes from the environment (`key_from()`):  a Python program is a server side, as `spell run` is.
 - A server asking it to wait is waited out, when that's soon (`open_minding_limits()`):  what `WebPlace` does.
 - Standard library only:  HTTP through `urllib`, its waiting off the event loop (`asyncio.to_thread()`).
+  - `apply()` and `call()` wait where they're called:  `places.py` calls them off the loop.
 - Knows nothing of things:  rows are plain JSON, by the JavaScript names of their fields.  `places.py` makes things.
 """
 
@@ -26,6 +27,7 @@ import asyncio
 import json
 import os
 import re
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -70,6 +72,12 @@ SNAKE_WORD = re.compile(r"_([a-z0-9])")
 PROGRAM_SUFFIX = ".spell.py"
 # The end of its device file's name, beside it:  `Notes.device.json`.
 DEVICE_SUFFIX = ".device.json"
+# One write of a device file at a time in this process:  saves run in threads, and every visitor's core has the file.
+DEVICE_WRITES = threading.Lock()
+
+
+# The failures that say a place kept none of what it was sent:  no answer might have kept it.
+NOTHING_KEPT = {"refused", "not found", "out of date"}
 
 
 class PlaceError(Exception):
@@ -77,6 +85,7 @@ class PlaceError(Exception):
 
     - `kind`:  why, as the JavaScript names it:  `"refused"`, `"not found"`, `"out of date"`, `"no answer"` ...
     - `why_not`:  for a refusal, what the place said:  `"owner"`, `"role"` ...
+    - `has_kept_nothing`:  is it sure none of what was sent was kept, so each change can be tried alone?
     """
 
     def __init__(self, message: str, kind: str = "no answer", why_not: str | None = None) -> None:
@@ -84,6 +93,7 @@ class PlaceError(Exception):
         super().__init__(message)
         self.kind = kind
         self.why_not = why_not
+        self.has_kept_nothing = kind in NOTHING_KEPT
 
 
 # A place that can hold whatever field it's handed:  `PlaceBehind.times_held`.
@@ -95,7 +105,7 @@ HOLDS_ANY_FIELD = {"data folder", "the cloud"}
 class PlaceBehind:
     """What's behind one place:  its rows, by collection, and the changes it takes.
 
-    - `rows()` waits, as any read does;  `apply()` doesn't, so a write is sent as it's made.
+    - `rows()` waits, as any read does;  `apply()` waits where it's called, in a thread (`place_queue.py`).
     """
 
     # the kind's word, as the program's line says it:  `data folder`
@@ -108,7 +118,10 @@ class PlaceBehind:
         return None
 
     def fields_it_fills_in(self) -> Row:
-        """What it says of a new row by itself, whatever the program sent:  an atmosphere account's `owner`."""
+        """What it says of a new row by itself, whatever the program sent:  an atmosphere account's `owner`.
+
+        - Only what it knows already:  it's asked on the event loop, so it NEVER waits for an answer.
+        """
         return {}
 
     def know_numbers(self, collection: str, fields: list[str]) -> None:
@@ -142,6 +155,7 @@ class DeviceFile(PlaceBehind):
     - Read whole when a read asks;  written whole on each change, through a temporary file and a rename,
       so a run stopped halfway leaves the file as it was.
     - Every place on this device shares the file:  each keeps its own collections.
+      - and every visitor of a web app does:  so one write at a time (`DEVICE_WRITES`), or one would undo another
     """
 
     kind = "database on this device"
@@ -161,6 +175,11 @@ class DeviceFile(PlaceBehind):
 
     def apply(self, changes: list[Change]) -> None:
         """Make `changes`, then write the file whole."""
+        with DEVICE_WRITES:
+            self._change_file(changes)
+
+    def _change_file(self, changes: list[Change]) -> None:
+        """Read, change and write the file:  only while holding `DEVICE_WRITES`."""
         data = self._read()
         for change in changes:
             rows = data.setdefault(change["collection"], {})
@@ -269,7 +288,7 @@ def open_minding_limits(request: urllib.request.Request) -> HTTPResponse:
       - told nothing:  it waits a second, then two, and asks again
       - told when, and that's over `LONGEST_WAIT_SECONDS`:  a `PlaceError` saying when, with nothing more sent
     - throws `urllib.error.HTTPError` for any other answer, and for one still saying to wait after `MOST_TRIES`
-    - SIDE EFFECT:  waits here, on the caller's thread:  a read is off the event loop, and a write waits for its answer.
+    - SIDE EFFECT:  waits here, on the caller's thread:  reads and writes are both off the event loop.
     """
     for attempt in range(MOST_TRIES):
         try:

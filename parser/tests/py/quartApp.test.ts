@@ -22,6 +22,8 @@ describe("PY.quartApp()", () => {
     expect(app).toContain('html = page_html("Solitaire", elements="/Solitaire.elements.spell.js", projects=projects)')
     expect(app).toContain('@app.get("/<name>.elements.spell.js")')
     expect(app).toContain('@app.websocket("/ws")')
+    expect(app).toContain("@app.after_serving")
+    expect(app).toContain("await sessions.saves_sent()")
     expect(app).toContain("# Your own routes go here")
   })
 

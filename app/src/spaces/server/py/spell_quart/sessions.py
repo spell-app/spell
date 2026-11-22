@@ -20,6 +20,8 @@ async def ws():
 - A dialog the program shows (`alert`, `confirm`, `prompt` ...) is asked of the page that sent the last message,
   what changed sent first:  it shows Spell UI's own, and answers up the same socket (`spell_core.ui_methods`).
   - That page closing answers it as a cancel:  `None`.
+- What a visitor's program saves is sent off the loop, so nobody else waits for it (epic data P62).
+  - Their last page closing waits until theirs are sent, and the app stopping until everyone's (`saves_sent()`).
 - A message that fails is logged, and the page goes on:
   it's sent `{"error": "ValueError: ...", "message": {...}}`, which its console shows as `< ERROR  >`.
 """
@@ -81,6 +83,11 @@ class Visit:
             if patch:
                 await send(json.dumps(patch, ensure_ascii=False))
 
+    async def saves_sent(self) -> None:
+        """Wait until what this visitor's program saved is sent, off the loop."""
+        with using_core(self.core):
+            await self.core.saves_sent()
+
     async def send_question(self, frame: dict[str, Any]) -> None:
         """SIDE EFFECT:  ask the page that sent the last message `frame`, a dialog, once it has what changed so far.
 
@@ -128,6 +135,10 @@ class SpellSessions:
             self.visits[visitor] = visit
         return visit
 
+    async def saves_sent(self) -> None:
+        """Wait until every visitor's saves are sent:  what a spell app does as it stops (`app.after_serving`)."""
+        await asyncio.gather(*(visit.saves_sent() for visit in list(self.visits.values())))
+
     async def serve(self, socket: Socket, visitor: str) -> None:
         """Serve one page of `visitor`'s over `socket`, until it closes:  see the module's docs."""
         visit = await self.visit(visitor)
@@ -174,6 +185,8 @@ class SpellSessions:
                 if visit.asking is send:
                     visit.asking = None
                     visit.asks.give_up()
+                if not visit.pages:
+                    await visit.saves_sent()
 
 
 def visitor_of(request: Any) -> str:
