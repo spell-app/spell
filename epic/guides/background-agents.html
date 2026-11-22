@@ -3,12 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Background agents: /bg</title>
+    <title>Background Agents</title>
     <meta
       name="description"
-      content="/bg runs a task in a named, budgeted background helper so the Claude panel stays free;  the running-agents list, claims and turns for agents sharing a worktree, steering one from the epic page's agents button, /epic phase and start, and the page server's self-restart."
+      content="/bg runs a task in a named, budgeted background helper so the Claude panel stays free;  the running-agents list (epic agents), claims and turns for agents sharing a worktree, steering one from the epic page's robot button, /focus, /epic phase and start, and the page server's self-restart."
     />
-    <meta name="spell-voice" content="readme 2026-11-17" />
+    <meta name="spell-voice" content="readme 2026-11-21" />
     <meta name="spell-saga" content="epics" />
     <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
   </head>
@@ -17,11 +17,11 @@
     <div class="spell-doc">
       <main class="spell-doc-main">
         <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
-          <ui-breadcrumb link="/pages/index.html">Spell Epic</ui-breadcrumb>
-          <ui-breadcrumb selected>Background agents: /bg</ui-breadcrumb>
+          <ui-breadcrumb>Guides</ui-breadcrumb>
+          <ui-breadcrumb selected>Background Agents</ui-breadcrumb>
         </ui-breadcrumbs>
         <ui-sticky class="spell-h1"
-          ><header class="spell-page-head"><h1>Background agents: /bg</h1></header></ui-sticky
+          ><header class="spell-page-head"><h1>Background Agents</h1></header></ui-sticky
         >
         <ui-accordion class="spell-code" appearance="styled">
           <ui-title>/bg, in epic skillz · the whole reply</ui-title>
@@ -41,9 +41,9 @@ started:  skillz-docstrings (2 agents)</code></pre>
         <ui-list class="spell-meta">
           <ui-item icon="robot"
             ><b>The rules:</b>
-            <a href="/epic/skills/bg/SKILL.md" target="src-epic-skills-bg-skill-md">the <code>/bg</code> skill</a>; the
-            standing rule, "Delegated work", in the kit's
-            <a href="/CLAUDE.md" target="src-claude-md">CLAUDE.md</a></ui-item
+            <a href="/epic/skills/bg/SKILL.md" target="src-epic-skills-bg-skill-md">the <code>/bg</code> skill</a>, the
+            full text of the standing rule a repo's <code>CLAUDE.md</code> names "Delegated work"; the list's verbs,
+            <code>epic agents --help</code></ui-item
           >
           <ui-item icon="book"
             ><b>In an epic:</b> <a href="/epic/README-skills.md" target="src-epic-readme-skills-md">README-skills</a>,
@@ -53,6 +53,7 @@ started:  skillz-docstrings (2 agents)</code></pre>
             >Written for: you, the Claude sessions starting agents, and whoever changes <code>/bg</code> or
             <code>epic agents</code></ui-item
           >
+          <ui-item icon="flask">Checked: 2026-11-21, every command and file against that day's code</ui-item>
         </ui-list>
 
         <ui-section id="1-bg" label="1. /bg:  name, budget, task" sticky collapsible dividing open="false">
@@ -195,7 +196,8 @@ started:  skillz-docstrings (2 agents)</code></pre>
             </li>
             <li>
               <b>Status cards in short paragraphs:</b> an item's card opens with one sentence saying what happened, then
-              short paragraphs or bullets; the tool refuses any over 50 words, so the long story goes in the item.
+              short paragraphs or bullets; <code>epic update</code> refuses a paragraph or bullet over 50 words, so the
+              long story goes in the item (<code>epic details &lt;epic&gt;#&lt;id&gt; --append</code>).
             </li>
             <li>
               <b>Claims:</b> before changing a file, it claims it (<code>epic agents claim</code>), a file, a folder or
@@ -209,7 +211,10 @@ started:  skillz-docstrings (2 agents)</code></pre>
               <b>Tests in three tiers:</b>
               <ol>
                 <li>per change, only the tests beside what changed</li>
-                <li>before merging, each touched folder's unit tests, in its turn</li>
+                <li>
+                  before merging, each touched folder's unit tests, in its turn:
+                  <code>epic turns run test -- yarn test:unit</code>
+                </li>
                 <li>
                   after merging, the full suite, only if <code>epic agents last</code> says it's the last agent
                   standing; what that finds becomes an issue
@@ -220,7 +225,10 @@ started:  skillz-docstrings (2 agents)</code></pre>
               <b>In an epic, merge at once:</b> once its work is done and checked, it merges into <code>main</code>
               itself, whenever that merges cleanly.
               <ul>
-                <li>The steps: commit by path, merge <code>main</code> in, unit tests, merge, mark the item fixed.</li>
+                <li>
+                  The steps: commit by path, merge <code>main</code> in, unit tests,
+                  <code>epic merge &lt;epic&gt;</code>, mark the item fixed.
+                </li>
                 <li>It can't: it says why in its report and on the item.</li>
               </ul>
             </li>
@@ -245,7 +253,7 @@ started:  skillz-docstrings (2 agents)</code></pre>
         >
           <ui-icon slot="icon" name="paper plane"></ui-icon>
           <p>
-            While any agent of the epic runs, the epic page's step pill, at the header's right, counts them:
+            While any agent of the epic runs, the epic page's header counts them, after the step label at its right:
             <code>2 🤖</code>, the robot button. Click it for a popover, a row per agent with its task, age and the
             notes sent to it, and a box under each.
           </p>
@@ -291,8 +299,8 @@ started:  skillz-docstrings (2 agents)</code></pre>
             </li>
             <li>The idle epics with news are listed in the session where you typed it.</li>
             <li>
-              It's one switch per machine (<code>epic focus on | off | status</code>); a session started meanwhile hears
-              it from a session-start hook.
+              It's one switch per machine (<code>epic focus on | off | status</code>, and <code>summary</code> for what
+              happened meanwhile); a session started meanwhile hears it from a session-start hook.
             </li>
             <li>The edge: Codex can't message another session, so there each session reads it at its next turn.</li>
           </ul>
@@ -343,9 +351,11 @@ started:  skillz-docstrings (2 agents)</code></pre>
             </li>
             <li>
               <b>Turns:</b> merges and full test runs take turns on the machine, first come, first served;
-              <code>epic turns list</code> shows the holder, how long, and the line.
+              <code>epic turns run test -- yarn test</code> waits for its turn, and <code>epic turns list</code> shows
+              each kind's holder, since when, and whether it's stalled.
               <ul>
-                <li>Why: three full runs at once drove the load to about 50, and tests failed on their timeouts.</li>
+                <li>Three full runs at once drove the load to about 50, and tests failed on their timeouts.</li>
+                <li>A command silent and idle for the stall window is stopped, and the turn freed.</li>
               </ul>
             </li>
             <li>
@@ -416,8 +426,8 @@ epic agents told aaa                        its notes were passed on
         <ui-section id="7-epic" label="7. /epic phase and /epic start" sticky collapsible dividing open="false">
           <ui-icon slot="icon" name="route"></ui-icon>
           <p>
-            Two <a href="/epic/" target="src-epic"><code>/epic</code></a> forms that act on the session's OWN epic. With
-            no epic, they say so and stop.
+            Two <a href="/epic/skills/epic/SKILL.md" target="src-epic-skills-epic-skill-md"><code>/epic</code></a> forms
+            that act on the session's OWN epic. With no epic, they say so and stop.
           </p>
           <ui-accordion class="spell-code" appearance="styled">
             <ui-title>the forms · 7 lines</ui-title>
@@ -490,51 +500,7 @@ epic agents told aaa                        its notes were passed on
           </ul>
         </ui-section>
 
-        <ui-section id="9-why" label="9. Why it's built this way" sticky collapsible dividing open="false">
-          <ui-icon slot="icon" name="gavel"></ui-icon>
-          <ul>
-            <li>
-              <b>The session starts the helper, not the skill itself:</b> forking the whole skill would free the panel
-              instantly, but then <code>?</code> and <code>stop</code> would fork too, and nothing would check two tasks
-              against the same files. The few seconds the session takes buy that check.
-            </li>
-            <li>
-              <b>The same checkout, not a worktree per helper:</b> most tasks are small and belong to the work under
-              way; a worktree would mean a merge per task, and a helper couldn't see uncommitted changes. Claims and
-              turns are what make sharing safe.
-            </li>
-            <li>
-              <b>Decide, record, stop only if stuck:</b> the same rule as <code>/bedtime</code>, so you review both the
-              same way. Always stopping would bring most tasks back half done.
-            </li>
-            <li>
-              <b>A command writes the list, never Claude by hand:</b> several helpers write at once, and one place knows
-              the path, the prefix and the format.
-            </li>
-            <li>
-              <b>Listed before it starts:</b> a clashing name is caught before any agent exists, and an interrupted
-              session still shows it. The cost is one more command, <code>set --task-id</code>.
-            </li>
-            <li>
-              <b>A list outside an epic, at the checkout's root:</b> it makes <code>/bg ?</code> and the same-files
-              check work on <code>main</code> too.
-            </li>
-            <li>
-              <b>The agents in a header button, not a panel above the page:</b> you asked for a button that opens them,
-              rather than a section at the top: the count is one glance up, and the rows open on demand.
-            </li>
-            <li>
-              <b>The rule in the kit's CLAUDE.md, its steps in the skill:</b> it's Claude-only (Codex has neither
-              <code>Agent</code> nor <code>TaskStop</code>), and a rule lives in one place.
-            </li>
-            <li>
-              <b>The server restarts when older than its code:</b> a restart on merge would miss a pull or a hand merge,
-              and a server can't reload its own routes: Node caches modules, and routes can't be removed.
-            </li>
-          </ul>
-        </ui-section>
-
-        <ui-section id="10-limits" label="10. Limits" sticky collapsible dividing open="false">
+        <ui-section id="10-limits" label="9. Limits" sticky collapsible dividing open="false">
           <ui-icon slot="icon" name="triangle exclamation"></ui-icon>
           <ul>
             <li>
@@ -558,7 +524,7 @@ epic agents told aaa                        its notes were passed on
           </ul>
         </ui-section>
 
-        <ui-section id="11-files" label="11. Where things are" sticky collapsible dividing open="false">
+        <ui-section id="11-files" label="10. Where things are" sticky collapsible dividing open="false">
           <ui-icon slot="icon" name="book"></ui-icon>
           <ui-table celled padding="compact" appearance="striped" unstackable>
             <table>
@@ -614,55 +580,14 @@ epic agents told aaa                        its notes were passed on
                     >
                   </td>
                 </tr>
-                <tr>
-                  <td>the commands' map: "Run a task in the background", "Track the agents running"</td>
-                  <td>
-                    <a href="/guides/dev/commands/commands.html" target="src-guides-dev-commands-commands-html"
-                      >Commands</a
-                    >
-                  </td>
-                </tr>
               </tbody>
             </table>
           </ui-table>
         </ui-section>
 
-        <ui-section id="12-history" label="12. History" sticky collapsible dividing open="false">
-          <ui-icon slot="icon" name="history"></ui-icon>
-          <ul>
-            <li>
-              Epic <a href="/epics/skillz/skillz.plan.html" target="skillz">skillz</a>, 2026-10-07 and 08, its decisions
-              Q1-Q13 and calls J1-J7:
-              <ul>
-                <li>/bg and the list (P2); the agents panel and redirects (P3)</li>
-                <li>/epic phase and /epic start (P4); tried live from the VS Code panel (P5)</li>
-                <li>
-                  Measured then: the first helper took 52s from start to report; a redirect reached a running agent in
-                  about 7s.
-                </li>
-              </ul>
-            </li>
-            <li>
-              Epic <code>epic-engine</code>:
-              <ul>
-                <li>the "Agents running" panel became the header's agents button (P35)</li>
-                <li>the session answers, agents build: claims, turns, merging at once (T77, T82)</li>
-                <li>
-                  three test tiers and <code>epic agents last</code> (T90); an agent never marks itself done (I288)
-                </li>
-                <li>the restart wake, and resuming cut-off agents (I310)</li>
-                <li>epic <code>epic-workflow</code>: the list as JSON5, keeping comments added by hand (P21)</li>
-                <li>the server's restart by the files it loaded (I309)</li>
-                <li>main's server on 4747 only (I332); the editor kept across a restart (I329)</li>
-                <li>/focus and /back (T93); the robot button described as built, no line beside Send (I330, I340)</li>
-              </ul>
-            </li>
-          </ul>
-        </ui-section>
-
         <footer class="spell-doc-footer">
           <ui-divider></ui-divider>
-          <p class="meta">Last checked 2026-11-18 against the kit's <code>main</code>.</p>
+          <p class="meta">Last checked 2026-11-21, against the epic plugin's code that day.</p>
         </footer>
       </main>
     </div>
