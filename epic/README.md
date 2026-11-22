@@ -479,6 +479,7 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
 | [README-teams.md](README-teams.md) | <ul><li>joining, who you are and your colour, every turn syncs</li><li>two people on one page;  whose agent answers whom</li><li>with Codex, or another agent</li></ul> |
 | [README-config.md](README-config.md) | <ul><li>the epic folder;  your settings;  every key of the config file</li><li>worktrees;  one epic server per machine</li><li>what's still Spell-shaped</li></ul> |
 | [README-superpowers.md](README-superpowers.md) | <ul><li>epics beside the superpowers plugin:  who plans, who finishes</li><li>the stand-aside words, and where they reach a session</li><li>a live trial;  common clashes and their fixes</li></ul> |
+| [README-demo.md](README-demo.md) | <ul><li>showing epics to a room in about 20 minutes:  one ask, a plan on a page, two Accepts, a phase built</li><li>the clock times, the pitch, and what to do when something goes wrong</li></ul> |
 | [README-faq.md](README-faq.md) | <ul><li>when something goes wrong:  what you see, why, and the fix</li></ul> |
 
 Every other folder's pages:  [the kit's index](https://github.com/spell-app/spell/blob/main/README.md#every-readme).

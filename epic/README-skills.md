@@ -404,13 +404,5 @@ Codex reads the same `SKILL.md` files Claude Code does:  type `$epic review seo`
 - [README-cli.md](README-cli.md):  the `epic` verbs every skill runs, for when you want one by hand
 - [README-vscode.md](README-vscode.md):  the Review tab, and the windows the handoff hook moves sessions between
 - [The kit's README/agents.md](https://github.com/spell-app/spell/blob/main/README/agents.md):  what an agent reads before any skill runs
-
-<details>
-<summary>More in the docs site</summary>
-
-In the epic folder, so only where a checkout has `spell.epics`, served by `spell server start`:
-
-- "Background agents:  /bg":  `/guides/background-agents.html`
-- "Airplane Mode":  `/guides/airplane.html`
-
-</details>
+- [Background Agents](guides/background-agents.html) and [Airplane Mode](guides/airplane.html):  the plugin's guides to
+  `/bg` and `/airplane`, shipped with it and shown in VS Code's Epic Docs tab
