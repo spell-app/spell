@@ -75,6 +75,11 @@ What it costs:
 The pages are plain HTML files, in a git repo of their own beside your code, so a whole team can share them.
 A question or a bug has an id you can say out loud:  "approve J3" works in the chat.
 
+A guide your users need can ship with your code instead, from any repo:
+- name a folder of your repo once, then `epic guides move` takes a guide there, versioned on branches like your code
+- it keeps its address, so every link to it still works, and `epic guides check` fails one that links the epic repo
+- every step:  [Guides that ship with your code](epic/README-config.md#guides-that-ship-with-your-code)
+
 ## Try it
 
 You need Claude Code, VS Code, git, Node 24.11 or later, and your code host's command, logged in.
