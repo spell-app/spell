@@ -170,6 +170,24 @@ describe("Turns", () => {
     waiter.kill()
   })
 
+  test("listLines():  a holder quiet past its stall window says stalled (I384)", () => {
+    const holder = sleeper()
+    lockHeldBy("quiet", holder.pid!, "yarn test", 15 * 60_000)
+    writeFileSync(join(HOME, "turns", "quiet.busy"), `${holder.pid} ${Date.now() - 12 * 60_000} ${10 * 60_000}`)
+    expect(Turns.listLines().join("\n")).toMatch(
+      /quiet:  yarn test, pid \d+, for 15m -- stalled \(no output or CPU for 12m\)/
+    )
+    holder.kill()
+  })
+
+  test("a holder whose process is gone is taken over at once, saying so", () => {
+    const dead = spawnSync(process.execPath, ["-e", "1"]).pid
+    lockHeldBy("dead", dead, "yarn test")
+    const said: string[] = []
+    expect(Turns.take("dead", "mine", () => "ran", { wait: 5_000, say: (line) => said.push(line) })).toBe("ran")
+    expect(said.join("\n")).toMatch(/holder is gone:  taking it over \(yarn test/)
+  })
+
   test("usual():  the median of a kind's last runs, written down as each turn ends", () => {
     for (let i = 0; i < 3; i++)
       Turns.take("timed", "quick", () => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 5))

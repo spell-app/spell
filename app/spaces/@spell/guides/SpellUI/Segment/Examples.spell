@@ -6,7 +6,7 @@
 
 	<!--
 		EXAMPLES:  Fomantic's segment page, section by section, in its order (Types, Groups, States, Variations).
-		- Fomantic's `<img class="ui wireframe image">` => `<ui-image src>`.
+		- Images are `<ui-image src>`.
 	-->
 	<section label="Types">
 		<section label="Segment" sticky="stack" collapsible dividing>

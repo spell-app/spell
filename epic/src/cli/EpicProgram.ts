@@ -1400,9 +1400,9 @@ const UPDATE_HELP = `
 A phase (seo#P3):
   --symptom, --changes, --goal, --files, --verify <html>   its body ("" removes one)
   --estimate <time>                                       its estimate, e.g. 1-2h
-  --title "New name" [--html]                             rename it:  links that say the old name follow
+  --title "New name" [--html] [--title-ok]                rename it:  links that say the old name follow
 An item (seo#J3):
-  --title "New title" [--html]                            retitle it:  at most 30 plain words, read cold, as add's
+  --title "New title" [--html] [--title-ok]               retitle it:  read cold first, as add's;  --title-ok skips that
   --calm  /  --loud                                       not urgent  /  urgent (red);  a todo too, red as a reminder
   --failed I12  /  --failed off                           a manual test:  failed, filed as that issue ("failed -> I12"
                                                           on its line, a Noted card linking it, left open)  /  not;
@@ -1459,9 +1459,13 @@ Prints the new item's id.  The letter after # is its kind:
 A todo (T) is work still to do;  --limit:  a limit to know about, not work.
 The letters before epic-engine P44 (C caveat, T test) moved:  #C is refused, naming these;  C is a comment's now.
 --calm (last):  a judgement call (grey) or issue (yellow) that wouldn't surprise you, rather than red.
-A title is at most 30 plain words saying what the item is.  Read it cold, as the person will hours later:  nothing
-about a passing condition (a pid, "after the 4-line fix").  The rest goes in --details.  One over 30 words, a "; "
-list, or two sentences is refused (epic-engine I322).
+A title is understood by a reader with no context:  what changed or what's wrong, effect first, named by what the
+person sees or types (a page, a button, a command), never an internal name;  no visible effect ends "Nothing you'd
+see."  At most 30 words;  the rest goes in --details (the rule:  plan-doc.md, "Rules", TITLES).
+One over 30 words, a "; " list, or two sentences is refused (epic-engine I322).  Then a fresh reader (claude -p,
+Sonnet) reads it cold:  a fail is refused with its reasons and a rewrite to use, exit 1 (T123).
+  --title-ok          keep the title as it is, unread:  a deliberate case
+  (no claude on the PATH, or a test run:  not read, one line on stderr says so)
 The person's pictures (T87), saved in pictures/ beside the page, shown after the item's words, deletable on the page:
   --picture <file>    a picture file;  repeat it for more
   --pasted <n>        the n pictures they pasted last into this session's chat (read from its transcript)

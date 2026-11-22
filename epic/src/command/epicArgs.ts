@@ -261,8 +261,8 @@ export function phaseRanges(text: string): string {
  *   - `--symptom`, `--changes`, `--goal`, `--files`, `--verify` (`phase-body`;  `""` removes one)
  *   - `--choices`:  its option sets, `<epic-choices>` HTML, its Choices field (epic `epic-engine` P50)
  *   - `--plan` [`--accepted`:  written accepted, his comments folded in;  epic `epic-engine` I163]
- *   - `--estimate` (`estimate`), `--title` [`--html`] (`rename`)
- * - an item (`seo#J3`):  `--title` [`--html`] (`rename`), `--calm` / `--loud` (`calm`), `--requested` (`requested`)
+ *   - `--estimate` (`estimate`), `--title` [`--html`] [`--title-ok`] (`rename`)
+ * - an item (`seo#J3`):  `--title` [`--html`] [`--title-ok`] (`rename`), `--calm` / `--loud` (`calm`), `--requested` (`requested`)
  *   - a manual test:  `--failed I12`, filed as that issue, `off` the mark taken off (`failed`;  epic `epic-engine` I174)
  * - the page (`seo`):  `--standing` [`on` | `off`], `--no-standing` (`standing`)
  * - Claude's status CARD on an item (or an Overview sub-section, a phase, the summary), a state word after the
@@ -292,7 +292,15 @@ function updateArgs(args: string[], at: number, target: EpicTarget | undefined):
     return it!
   }
   const rename = (id: string) => {
-    if ("title" in flags) runs.push(["rename", epic, id, value("title"), ...(flags.html ? ["--html"] : [])])
+    if ("title" in flags)
+      runs.push([
+        "rename",
+        epic,
+        id,
+        value("title"),
+        ...(flags.html ? ["--html"] : []),
+        ...(flags.titleOk ? ["--title-ok"] : [])
+      ])
   }
   if (ref === undefined) {
     if ("standing" in flags || "noStanding" in flags) {
@@ -318,6 +326,7 @@ function updateArgs(args: string[], at: number, target: EpicTarget | undefined):
     rename(ref)
   }
   if (flags.html && !("title" in flags)) throw new EpicCommandError("update:  --html goes with --title")
+  if (flags.titleOk && !("title" in flags)) throw new EpicCommandError("update:  --title-ok goes with --title")
   return runs
 }
 
@@ -350,7 +359,7 @@ function cardArgs(args: string[], at: number, { epic, ref }: EpicTarget, state: 
  * camelCased);  a word that's no field's value is refused.
  */
 function flagsOf(args: string[]): Record<string, string | true> {
-  const { positional, flags } = parseVerbArgs(args)
+  const { positional, flags } = parseVerbArgs(args, ["titleOk"])
   if (positional.length)
     throw new EpicCommandError(
       `update:  "${positional[0]}"?  --field value pairs after the target, or a card:  underway | done | fixed | noted | promised`
@@ -563,10 +572,10 @@ const CARD_EXAMPLES: Record<string, string> = {
 }
 
 /** What `update` sets on a phase. */
-const PHASE_FIELDS = [...PHASE_BODY, "accepted", "estimate", "title", "html"]
+const PHASE_FIELDS = [...PHASE_BODY, "accepted", "estimate", "title", "html", "titleOk"]
 
 /** What `update` sets on an item. */
-const ITEM_FIELDS = ["title", "html", "calm", "loud", "requested", "failed"]
+const ITEM_FIELDS = ["title", "html", "titleOk", "calm", "loud", "requested", "failed"]
 
 /** What `update` sets on the page, camelCased as `flagsOf()` reads them (`--no-standing`). */
 const PAGE_FIELDS = ["standing", "noStanding", "branch"]

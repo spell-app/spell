@@ -61,6 +61,7 @@ import { SagaCommands } from "./SagaCommands"
 import { SagaPage } from "./SagaPage"
 import { Sagas } from "./Sagas"
 import { TestCommands } from "./TestCommands"
+import { TitleReader } from "./TitleReader"
 
 /****************
  * ### `PlanDocCommands`
@@ -142,30 +143,40 @@ export class PlanDocCommands {
   readonly hushJudge: HushJudge | undefined
 
   /**
+   * reads a new or changed title cold, for `add` and `rename` (epic `epic-engine` T123):  default `claude -p`
+   * (`TitleReader`);  a test's gives its own;  STATIC for the object's life
+   */
+  readonly titleReader: TitleReader
+
+  /**
    * - `files`:  the checkout's epic pages
    * - `sessionsOf`:  an epic's running sessions, for `migrate --notify`
    *   - the `spell` CLI gives it (`epicSessions()`)
    * - `phaseTimer`:  default the transcripts' (`WorkTime.ofPhase()`);  a test's gives its own
    * - `pastedReader`:  default the transcript's;  a test's gives its own
    * - `hushJudge`:  default `claude -p`;  a test's gives its own
+   * - `titleReader`:  default `claude -p`, skipped under a test runner;  a test's gives its own
    */
   constructor({
     files = new PlanDocFiles(),
     sessionsOf,
     phaseTimer = (request) => new WorkTime().ofPhase(request).minutes,
     pastedReader,
-    hushJudge
+    hushJudge,
+    titleReader
   }: {
     files?: PlanDocFiles
     sessionsOf?: SessionFinder
     phaseTimer?: PhaseTimer
     pastedReader?: PastedReader
     hushJudge?: HushJudge
+    titleReader?: TitleReader
   } = {}) {
     this.files = files
     this.phaseTimer = phaseTimer
     this.pastedReader = pastedReader
     this.hushJudge = hushJudge
+    this.titleReader = titleReader ?? new TitleReader({ warn: (line) => this.warn(line) })
     this.inbox = new InboxCommands(this)
     this.migrator = new MigrateCommands(this, sessionsOf)
     this.sagas = new SagaCommands(this)
@@ -368,8 +379,10 @@ export class PlanDocCommands {
       case "rename": {
         const target = need(rest[0], "a phase (P6) or an item id")
         const title = need(rest[1], "the new title")
-        // at most 30 plain words, read cold (epic `epic-engine` I321, I322)
-        ShortTitle.check(flags.html ? title.replace(/<[^>]*>/g, "") : title)
+        // at most 30 plain words (epic `epic-engine` I321, I322), and read cold by a fresh reader (T123)
+        const plain = flags.html ? title.replace(/<[^>]*>/g, "") : title
+        ShortTitle.check(plain)
+        if (!flags.titleOk) this.titleReader.check(plain, PHASE_REF.test(target) ? "phase" : "item")
         const renamed = await this.edit(file, (plan) => plan.renameEntry(target, title, { html: !!flags.html }))
         const links = renamed.links ? `;  ${renamed.links} link${renamed.links === 1 ? "" : "s"} rewritten` : ""
         this.print(`${renamed.label} · ${renamed.title} (was "${renamed.was}"${links})`)
@@ -385,8 +398,10 @@ export class PlanDocCommands {
         const [kind, title] = [need(rest[0], "a kind"), need(rest[1], "a title")]
         // a standing option set, in the Choices section (epic `epic-engine` P50)
         if (kind === "choices") return this.options.addStanding(file, title, flags)
-        // at most 30 plain words, read cold;  the rest in its details (epic `epic-engine` I321, I322)
+        // at most 30 plain words, the rest in its details (epic `epic-engine` I321, I322);  read cold by a fresh
+        // reader (T123), unless --title-ok
         ShortTitle.check(title)
+        if (!flags.titleOk) this.titleReader.check(title, kind)
         const words = stringFlag(flags.start)
         if (flags.start === true) throw new PlanDocError(`--start needs the person's words:  --start "<his words>"`)
         // the person's pictures (epic `epic-engine` T87):  `--picture <file>`, repeatable, then the ones pasted last
@@ -1753,7 +1768,8 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    NOT for an answer's change:  --for q53 (or the ids the html
                                                    names, marked this pass) with change marks in the phase
                                                    writes nothing, "the change marks say it"
-  rename <name> <P6 | id> "New title" [--html]     retitle a phase or an item (a phase keeps its id);  links to
+  rename <name> <P6 | id> "New title" [--html] [--title-ok]
+                                                   retitle a phase or an item (a phase keeps its id);  links to
                                                    it that say the old title ("P6 · Old", "Old") say the new
                                                    one;  logged;  then
                                                    links-agree (stderr);  --html (last):  the title is HTML
@@ -1802,6 +1818,8 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    numbers, links and "P5 · Name" text follow (epic-engine P34);
                                                    numbers stay whole:  a phase moved is numbered by its place
   add <name> question|judgement|todo|limit|issue|test|decision "title" [--details html] [--calm] [--requested] [--loud]
+      [--title-ok]                                 the title read cold first by a fresh reader (T123):  a fail is
+                                                   refused with a rewrite;  --title-ok skips it
                                                    prints the new id (a decision:  a question born answered,
                                                    Q7);  --calm (last):  a judgement call or issue that
                                                    wouldn't surprise you, grey (a call) or yellow (an issue) rather than red;
@@ -2001,7 +2019,10 @@ const LOG_LABEL = "Log"
 const LOG_LAST = 20
 
 /** Flags that never take a value, so `epic summary --all seo` keeps `seo` as the epic. */
-const SWITCHES = ["all", "json", "dryrun", "dryRun"]
+const SWITCHES = ["all", "json", "dryrun", "dryRun", "titleOk"]
+
+/** A phase as `rename` takes it:  `P6`, `6`, `p6`. */
+const PHASE_REF = /^p?\d+$/i
 
 /** `summary`'s mark for a phase's status. */
 const PHASE_MARKS = { todo: "[ ]", active: "[~]", done: "[x]", dropped: "[-]" }
