@@ -411,7 +411,7 @@ export class SiteCheck {
   private async shootWhole(page: Page, check: CheckContext, file: string): Promise<void> {
     const viewport = page.viewportSize()!
     const height = await page.evaluate(scrollingHeight)
-    const tall = Math.min(Math.max(height, viewport.height), WHOLE_MAX_PX)
+    const tall = Math.ceil(Math.min(Math.max(height, viewport.height), WHOLE_MAX_PX))
     await page.setViewportSize({ width: viewport.width, height: tall })
     await page.waitForTimeout(SCROLL_SETTLE_MS)
     try {
@@ -644,6 +644,8 @@ function inspectElements() {
       const tag = el.localName
       if (el.shadowRoot) walk(el.shadowRoot)
       if (!tag.startsWith("ui-") && !tag.startsWith("spell-")) continue
+      // a plain marker on purpose, never defined:  `drawnInWindow()`'s "more below" at a list's end
+      if (tag === "spell-more-below") continue
       total++
       tags[tag] = (tags[tag] ?? 0) + 1
       if (!customElements.get(tag)) undefinedTags[tag] = (undefinedTags[tag] ?? 0) + 1

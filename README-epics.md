@@ -125,7 +125,8 @@ Four things to know before you start:
   Bitbucket or a bare git server work too, but you make the repo by hand and pass its address
   (`epic init --remote <address>`).
 - **Claude Code first, Codex beside it.**
-  Seventeen of the twenty-two skills run in both, from one copy;  the moves between worktrees and windows are Claude Code's,
+  Most of the skills run in both, from one copy ([which](epic/README-skills.md#in-codex));
+  the moves between worktrees and windows are Claude Code's,
   in VS Code or Cursor, on macOS, Linux or Windows (Cursor, Windows and Linux not yet tried by a person).
   Any other agent works an epic from `epic guide` and its own end-of-turn step:
   [With Codex](epic/README-teams.md#with-codex).

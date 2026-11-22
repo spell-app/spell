@@ -18,7 +18,8 @@ Plan mode can't make a worktree, so the hook refused the prompt and saved your w
 leave plan mode, type `/epic seo`, and the plan starts from what you wrote.
 
 The plugin gives Claude Code twenty-two skills, workflows you start by typing a name,
-and fourteen hooks, scripts Claude Code runs by itself when something happens.
+and fourteen hooks, scripts Claude Code runs by itself when something happens:
+seventeen entries in [hooks.json](hooks/hooks.json), since three of the scripts run at two moments.
 - Choosing a skill:  find the moment you're in, in the three tables below.
 - Something happened you didn't ask for (a session renamed, a prompt refused, a commit nobody made):
   [the hooks' table](#hooks) says which one did it.
@@ -306,7 +307,7 @@ Each of those is a row here, by when it happens.
 | a turn ends | [fresh-wait.mjs](hooks/fresh-wait.mjs);  `Stop`, `asyncRewake`, a day | only in a session `/epic fresh all` marked:  waits in the background for its clear moment (none of its epic's agents running, no question waiting on you, no prompt from you in the last 5 minutes;  the session that asked goes last), then wakes it to run `/epic fresh`;  a new turn ends the wait, and that turn's end starts it again |
 
 - They all come from the plugin's [hooks.json](hooks/hooks.json);  no repo's own Claude settings add one.
-- Thirteen scripts make those fourteen rows:  `worktree.mjs` answers both worktree events.
+- Fourteen scripts make those fifteen rows:  `worktree.mjs` answers both worktree events.
 - In a terminal session, the inbox poller also runs as the plugin's monitor ([monitors.json](monitors/monitors.json)).
   VS Code's panel never starts monitors, which is why the hook starts it too.
 - Codex gets three of them, from its own file, [codex-hooks.json](hooks/codex-hooks.json):
@@ -403,13 +404,5 @@ Codex reads the same `SKILL.md` files Claude Code does:  type `$epic review seo`
 - [README-cli.md](README-cli.md):  the `epic` verbs every skill runs, for when you want one by hand
 - [README-vscode.md](README-vscode.md):  the Review tab, and the windows the handoff hook moves sessions between
 - [The kit's README/agents.md](https://github.com/spell-app/spell/blob/main/README/agents.md):  what an agent reads before any skill runs
-
-<details>
-<summary>More in the docs site</summary>
-
-In the epic folder, so only where a checkout has `spell.epics`, served by `spell server start`:
-
-- "Background agents:  /bg":  `/guides/background-agents.html`
-- "Airplane Mode":  `/guides/airplane.html`
-
-</details>
+- [Background Agents](guides/background-agents.html) and [Airplane Mode](guides/airplane.html):  the plugin's guides to
+  `/bg` and `/airplane`, shipped with it and shown in VS Code's Epic Docs tab

@@ -626,6 +626,27 @@ const APP_TEXTS_ES: AppTextPack = {
   "themePage.epic": "Página de épica",
   "themePage.ui": "Spell UI",
   "themePage.notebook": "Cuaderno",
+  "palettePage.title": "Grupos del menú +",
+  "palettePage.hint":
+    "El menú + muestra en grupos los componentes que puedes añadir.\n" +
+    "Arrastra un componente a otro grupo, o a otro sitio de su grupo.\n" +
+    "Arrastra un grupo por su asa para moverlo.\n" +
+    'Los componentes de la última columna, "Fuera del menú +", no aparecen en el menú.\n' +
+    "Pulsa Guardar cuando termines.",
+  "palettePage.addGroup": "Añadir grupo",
+  "palettePage.save": "Guardar",
+  "palettePage.loading": "Cargando los grupos…",
+  "palettePage.unsaved": "Cambios sin guardar",
+  "palettePage.saved": "Guardado.  Recarga la pestaña del editor para ver los grupos nuevos en el menú +.",
+  "palettePage.noServer":
+    "No se pueden cargar los grupos.  Comprueba que Spell sigue en marcha en tu ordenador y recarga esta página.",
+  "palettePage.saveFailed": "No se pudo guardar:  {error}",
+  "palettePage.newGroup": "Grupo nuevo",
+  "palettePage.groupName": "Nombre del grupo",
+  "palettePage.groupIcon": "Icono del grupo {group} en el menú +",
+  "palettePage.removeGroup": "Quitar el grupo {group}.  Sus componentes siguen disponibles en Fuera del menú +.",
+  "palettePage.moveGroup": "Arrastra para mover el grupo {group}",
+  "palettePage.notOffered": "Fuera del menú +",
   inspectorEventHeading: "con {event}",
   inspectorActionOnlyWhen: "Solo cuando {condition}",
   inspectorActionNotWhen: "No cuando {condition}",

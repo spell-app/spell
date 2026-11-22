@@ -813,6 +813,18 @@ export const HELP_TABLE: Readonly<
       corner: "Inside `<ui-icons>`: a small badge on a corner of the group; bare `corner` is bottom right."
     }
   },
+  "ui-icon-browser": {
+    description:
+      "An icon browser shows every icon of a pack, to search through: clicking one copies the name that draws it.",
+    empty: true,
+    attributes: {
+      pack: "The pack it starts on: `fa7-free` (the default), `fa7-brands` or `fomantic`.",
+      query:
+        "What it starts searching for: a name or what an icon shows (`mail` finds `envelope`, by Font Awesome's terms).",
+      address:
+        "Opens on the search and the pack the page's address names, `?q=bell&pack=fa7-brands`, as `spell icon --open` writes it; ahead of `query` and `pack`."
+    }
+  },
   "ui-icon-picker": {
     description: "An icon picker lets people choose an icon by searching for it and clicking its glyph.",
     empty: true,

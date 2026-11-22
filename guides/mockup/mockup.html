@@ -1,0 +1,866 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sites and Mockups</title>
+    <meta
+      name="description"
+      content="A Spell site:  pages at addresses, a side nav, a site editor, page stories, thumbnails, tags and an index that draws itself, NERD / ERD diagrams, editable tables, a hand-drawn Mockup theme, and reading a site behind its sign-in."
+    />
+    <meta name="spell-audience" content="makers" />
+    <meta name="spell-topic" content="Data and Sites" />
+    <meta name="spell-start-here" content="4" />
+    <meta name="spell-saga" content="app" />
+    <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+  </head>
+  <body class="spell-doc-page">
+    <spell-site-header></spell-site-header>
+    <div class="spell-doc">
+      <main class="spell-doc-main">
+        <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+          <ui-breadcrumb>Guides</ui-breadcrumb>
+          <ui-breadcrumb selected>Sites and Mockups</ui-breadcrumb>
+        </ui-breadcrumbs>
+        <ui-sticky class="spell-h1"
+          ><header class="spell-page-head"><h1>Sites and Mockups</h1></header></ui-sticky
+        >
+        <p class="lede">
+          A Spell project can be a whole site: pages at real addresses, a side nav, a site editor, and a sketchy Mockup
+          theme to click through before anything looks finished.
+        </p>
+        <ui-list class="spell-meta">
+          <ui-item icon="user">Written for: someone about to build a site in Spell</ui-item>
+          <ui-item icon="flag"
+            >Status: <ui-label size="mini" color="green">built</ui-label>; signing in to a real company site not tried
+            yet</ui-item
+          >
+        </ui-list>
+
+        <ui-section id="1-the-star-wars-site" label="1. The Star Wars site" sticky collapsible dividing open="false">
+          <p>
+            This is a film's page in the example Star Wars site, running in the editor's Run view, in the Mockup theme:
+          </p>
+          <figure>
+            <img
+              src="images/p8-film.png"
+              alt="A New Hope's page:  the site nav on the left, the film's crawl, its people as buttons, its planets and ships as links, Add a review"
+              width="100%"
+            />
+            <figcaption>
+              <i>The film page at <code>/run/@spell/examples/StarWarsSite/films/1</code>, in a dark editor.</i>
+            </figcaption>
+          </figure>
+          <p>The whole site, its pages and their addresses, is a few lines of the project:</p>
+          <ui-accordion class="spell-code" appearance="styled">
+            <ui-title>StarWarsSite.spell · the site, shortened · 7 lines</ui-title>
+            <ui-content>
+              <pre><code class="language-spell">galaxy guide is a site with theme "mockup"
+	it has a films page at "/films", named "Films", icon "film"
+		it has a film page at "/films/:film", named "Film"
+	it has a reviews page at "/reviews", named "Reviews"
+	it has a review dialog
+	it has a person sidebar
+	it has a not found page</code></pre>
+            </ui-content>
+          </ui-accordion>
+          <ul>
+            <li>
+              <code>:film</code> isn't typed here: it's the film page's own property, <code>its "film" is a film</code>.
+              So the address fills it with that film.
+            </li>
+            <li>
+              The film page never names its address. Its people are buttons that run
+              <code>show the person sidebar for person</code>; its planets are links to
+              <code>the address of the planet page for planet</code>.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="2-what-it-is" label="2. What it is" sticky collapsible dividing open="false">
+          <p>
+            A Spell project on its own is one app, with no pages and no addresses. A site adds every piece between a
+            sketch of the screens and a site people can click through:
+          </p>
+          <ul>
+            <li>a SITE file listing pages, dialogs and sidebars, each page at an address with its parameters</li>
+            <li>a side nav drawn from it, and a site editor to add, move, rename and delete pages</li>
+            <li>each page's STORIES, what it must let people do, written first and kept for good</li>
+            <li>
+              a THUMBNAIL per page: a picture of the screen it stands for, shown until the page draws something of its
+              own
+            </li>
+            <li>TAGS on a site's pages, and an index page that draws itself from them, with a search</li>
+            <li>
+              the Mockup theme: hand-drawn corners and handwriting, so nobody mistakes a sketch for the finished look
+            </li>
+            <li>spreadsheet-style editable tables, and NERD / ERD diagrams of the data a site reads</li>
+            <li>
+              signing in to a private site once, then reading its data, its pages' rows and pictures of its pages as you
+            </li>
+          </ul>
+          <p>The examples to open: the Star Wars site, Spell UI's component site, and Spell's own app as a site.</p>
+          <p><b>Not yet:</b> signing in has only been tried against a made-up site, not a real company sign-in.</p>
+        </ui-section>
+
+        <ui-section id="3-how-to-use-it" label="3. How to use it" sticky collapsible dividing open="false">
+          <ui-section id="a-site-file" label="A site file" sticky collapsible dividing open="false">
+            <p>
+              The site lists every page, dialog and sidebar, a line each, a page's pages under it. A site kept in a
+              space says where:
+            </p>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>a site kept in a space · 6 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-spell">galaxy guide is a site at "owen@spell/galaxy"
+	it has a films page at "/films", named "Films"
+		it has a film page at "/films/:film"
+	it has a settings dialog
+	it has a person sidebar
+	it has a not found page</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                The editor refuses, at the line: an address not starting with <code>/</code>, a parameter the page has
+                no property for, and two pages at one address.
+              </li>
+              <li>
+                A name no file declares yet isn't refused: the page waits, and runs as its title with a line saying it
+                isn't made yet.
+              </li>
+              <li>Every site gets a not found page and an error page; delete one and a plain built-in one shows.</li>
+              <li>It reads in Spanish too: <code>guía galáctica es un sitio en la nube</code>.</li>
+              <li>
+                A page's line can also give its icon in the side nav (<code>, icon "film"</code>), keep it out of the
+                navigation (<code>, not in the navigation</code>), or draw it with no top bar (<code>, no top bar</code
+                >). <code>it has a link to "https://..."</code> puts an outside link in the nav.
+              </li>
+              <li>
+                A line can say where its card sits on the site editor's board, and its colour:
+                <code>, in row 2 column 3, colored blue</code>.
+                <ul>
+                  <li>The row and column count inside the card's section, so moving a section changes no other.</li>
+                  <li>A section's colour is one of Spell UI's colour names, and its pages take it.</li>
+                  <li>Dragging a card on the board writes these for you.</li>
+                </ul>
+              </li>
+              <li>
+                <code>/site/&lt;group&gt;</code> (<code>/site/owen@spell</code>) lists the group's sites, each linking
+                to its site editor.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section
+            id="a-site-of-addresses-alone"
+            label="A site of addresses alone"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <p>
+              A big site doesn't fit in one file. Its site file can be titles and addresses alone, named
+              <code>Galaxy.site.spell</code>, with each page a file of its own:
+            </p>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>Galaxy.site.spell · routing alone · 7 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-spell">galaxy guide is a site
+	group "Home", color red
+	it has a Home at "/"
+	it has a System Notices sidebar
+	group "My Stuff", color orange
+		// What each person keeps for themselves
+	it has a My Inbox at "/my-inbox", live "https://example.com/inbox"</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                A page's name is its title: <code>"My Inbox"</code>, no second <code>, named "..."</code>. The older
+                name-and-title lines keep working, and so do one-file sites.
+              </li>
+              <li>
+                A <code>group</code> line is flat and heads the lines after it: a section of the site editor's board,
+                and of the running site's navigation.
+                <ul>
+                  <li>
+                    Its colour comes after its name, <code>group "Home", color red</code>; its section's cards take it.
+                    <code>group "Home" with color red</code> and <code>, colored red</code> say the same.
+                  </li>
+                  <li>In Spanish: <code>grupo "Inicio", color rojo</code>, or <code>con color rojo</code>.</li>
+                  <li>Its description is the first comment under it, as any declaration's is.</li>
+                </ul>
+              </li>
+              <li>
+                <code>, live "https://..."</code> is the real page a mockup stands for. Its card in the site editor gets
+                a new-tab icon that opens it; a card without one has no icon.
+              </li>
+              <li>
+                In the site editor, a double click on a card opens its page's own file, and makes the file first when
+                there's none.
+              </li>
+              <li>A page line can also carry its tags, its state and its thumbnail, below.</li>
+            </ul>
+            <p>
+              <b>The catch:</b> a misspelled page name is no longer an error, it shows as a page still to make. A
+              sidebar's address (<code>at "/..."</code>) is read and shown on its card, but going to it doesn't open the
+              sidebar.
+            </p>
+          </ui-section>
+
+          <ui-section id="going-to-a-page" label="Going to a page" sticky collapsible dividing open="false">
+            <p>
+              Every way of moving names the page, never its address, so a page can move without anything else changing:
+            </p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Spell</th>
+                    <th>What it does</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>go to the film page for this film</code></td>
+                    <td>shows that page, its address in the URL</td>
+                  </tr>
+                  <tr>
+                    <td><code>show the film page with this film</code></td>
+                    <td>the same, in the words a program uses to show things</td>
+                  </tr>
+                  <tr>
+                    <td><code>show the person sidebar for person</code></td>
+                    <td>opens a slide-out panel (<code>&lt;ui-flyout&gt;</code>)</td>
+                  </tr>
+                  <tr>
+                    <td><code>show the settings dialog</code></td>
+                    <td>opens a modal (<code>&lt;ui-modal&gt;</code>)</td>
+                  </tr>
+                  <tr>
+                    <td><code>close the review dialog</code></td>
+                    <td>closes it, from a button inside it</td>
+                  </tr>
+                  <tr>
+                    <td><code>the address of the planet page for planet</code></td>
+                    <td>the text for a link</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ul>
+              <li>
+                In Run, a page's address is the part after the project:
+                <code>/run/@spell/examples/StarWarsSite/films/1</code>. Back and forward work.
+              </li>
+              <li>
+                A name the site doesn't list is an error at its line, wherever the page is declared, naming the pages
+                the site does have.
+              </li>
+              <li>
+                While designing, an address no page has offers "No such page. Would you like to create one?", which adds
+                the page as one undo step, and the running site goes straight to it.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="the-site-editor" label="The site editor" sticky collapsible dividing open="false">
+            <p>View › Site opens it, at <code>/site/&lt;project&gt;</code>, for a project that is a site. Two tabs:</p>
+            <ul>
+              <li>
+                <b>Pages:</b> a tree of the site's parts (drag to move), a board of cards (double-click opens the page
+                in Edit, with Back to the site there), and the picked page's form: name, title, address, parameters,
+                state, live link, stories.
+              </li>
+              <li><b>Data:</b> each place the site reads, as a NERD (below).</li>
+            </ul>
+            <ul>
+              <li>Every change is one undo step in the site file.</li>
+              <li>Renaming a page renames every line that names it, in every file.</li>
+              <li>Deleting a page with pages under it asks first, naming them.</li>
+            </ul>
+            <ul>
+              <li>
+                A page's state says how far along it is: old, new, mocked or built.
+                <ul>
+                  <li>On its line: <code>, old</code>.</li>
+                </ul>
+              </li>
+              <li>A card shows the page's thumbnail, when it has one, and its letter tile otherwise.</li>
+            </ul>
+            <p><b>The catch:</b> rows in the tree drop only before another row, never into one.</p>
+            <p>
+              The site editor's panes, in the editor's terms: the
+              <a href="/app/README-app.md" target="src-app-readme-app-md">app README</a>, "The site editor".
+            </p>
+          </ui-section>
+
+          <ui-section id="page-stories" label="A page's stories" sticky collapsible dividing open="false">
+            <p>Before a page is laid out, it says what it must let people do, first in its own declaration:</p>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>the film page's stories · 9 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-spell">film page is a page
+	&lt;stories&gt;
+		&lt;story "S1" done&gt;read the film's opening crawl&lt;/story&gt;
+		&lt;story "S2" done&gt;
+			As a fan, I want to see who's in a film, so that I can find their other films
+
+
+			Done when its people are listed, each a link to their page
+		&lt;/story&gt;
+	&lt;/stories&gt;</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                A story is its words, then two blank lines and its description, if it has one; <code>done</code> ticks
+                it off. The numbers are written for you.
+              </li>
+              <li>
+                Nothing draws them: they're kept for good, into the real site, and the site editor's side panel has one
+                field per story.
+              </li>
+              <li>In Spanish, <code>&lt;historias&gt;</code> and <code>&lt;historia "H1" hecha&gt;</code>.</li>
+              <li>The older markdown list of jobs is gone, and refused.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="thumbnails" label="Thumbnails" sticky collapsible dividing open="false">
+            <p>A page that is only a picture of a design says so in one line, and shows that picture when it runs:</p>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>SpellApp.spell · a page that is a picture · 2 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-spell">notebook page is a page
+	its thumbnail is "snapshots/notebook.jpg"</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                A page or a view with nothing to draw draws its thumbnail. Write a drawing and the picture steps aside:
+                nothing to remove.
+              </li>
+              <li>
+                A drawing that wants the picture under its buttons places it with <code>draw its thumbnail</code>, as
+                Spell's own app as a site does on its home page.
+              </li>
+              <li>Stories and properties aren't drawing: a page with both still shows its thumbnail.</li>
+              <li>
+                A thumbnail can be written on the page or view, or on the site's line. The site editor's card takes the
+                site line's, else the page's.
+              </li>
+              <li>
+                Each way, and in Spanish:
+                <ul>
+                  <li>on a page: <code>its thumbnail is "x.jpg"</code>, <code>su miniatura es "x.jpg"</code></li>
+                  <li>on a site line: <code>, thumbnail "x.jpg"</code>, <code>, miniatura "x.jpg"</code></li>
+                  <li>in a drawing: <code>draw its thumbnail</code>, <code>dibujar su miniatura</code></li>
+                </ul>
+              </li>
+              <li>The file name is read from the page's own project, so no page names its folder.</li>
+            </ul>
+            <p>
+              <b>The catch:</b> a page written in Spanish needs its thumbnail on the site line for its card to show it.
+              Nothing takes thumbnails for you; they're pictures someone saved.
+            </p>
+          </ui-section>
+
+          <ui-section
+            id="tags-and-the-index"
+            label="Tags, and an index that draws itself"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <p>A page line can carry tags. Spell UI's site tags each component's page with the topics it belongs to:</p>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>SpellUI.spell · one tagged page line</ui-title>
+              <ui-content>
+                <pre><code class="language-spell">it has an action usage page at "/action", named "Action", tab "Usage", tagged "Menus, Controls, Buttons", thumbnail "snapshots/action.jpg"</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                In Spanish, <code>, etiquetada "..."</code>. The site editor keeps them, and a page's tab, when it
+                rewrites a line.
+              </li>
+              <li>
+                <code>&lt;ui-docs-index&gt;</code> draws a card per page, grouped by tag, from the list the side nav
+                already has. A page with no tags shows under Other, so a new component appears by itself.
+              </li>
+              <li>
+                <code>&lt;ui-docs-search pages&gt;</code> finds pages by title and tag; the index draws it above the
+                cards.
+              </li>
+              <li>
+                Spell UI's Components page is a heading, a paragraph and <code>&lt;ui-docs-index&gt;</code>: its cards
+                are no longer kept by hand.
+              </li>
+            </ul>
+            <p>
+              <b>Not yet:</b> the site editor keeps tags but has no field for them; they're written in the site file.
+            </p>
+          </ui-section>
+
+          <ui-section id="the-mockup-theme" label="The Mockup theme" sticky collapsible dividing open="false">
+            <figure>
+              <img
+                src="images/p7-mockup-light.png"
+                alt="Spell UI's kitchen sink in the Mockup theme:  handwriting, ink lines, grey buttons"
+                width="100%"
+              />
+              <figcaption>
+                <i>Spell UI's kitchen sink with <code>?theme=mockup</code>.</i>
+              </figcaption>
+            </figure>
+            <ul>
+              <li>
+                A built-in theme in every theme menu: white page, grey fills, 2px ink lines, no shadows, handwriting
+                (Patrick Hand) for all but code.
+              </li>
+              <li>Corners are slightly uneven, more on cards and modals; a table's cells stay square.</li>
+              <li>
+                A site wears it with <code>is a site with theme "mockup"</code> on its line (or
+                <code>its "theme" is "mockup"</code> under it); in Run it takes the colours, font and lines, but not the
+                uneven corners.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="editable-tables" label="Editable tables" sticky collapsible dividing open="false">
+            <figure>
+              <img
+                src="images/p9-reviews-mockup.png"
+                alt="The Star Wars site's Reviews page:  an editable table of reviews"
+                width="100%"
+              />
+              <figcaption>
+                <i>The Reviews page, every review in <code>&lt;ui-table editable&gt;</code>.</i>
+              </figcaption>
+            </figure>
+            <ul>
+              <li>
+                Arrows, Tab, Enter and Home / End move a cell cursor; typing, F2 or Enter edits, Escape puts it back.
+              </li>
+              <li>
+                Each column gets an editor for its type: text, number, date, yes-no, choice, or a link as a dropdown.
+              </li>
+              <li>
+                The empty last row adds one; ⌘ Delete or the row's × removes one; a block pasted from Excel or Sheets
+                fills from the cursor.
+              </li>
+              <li>A table of a program's things writes them itself, each edit one undo step, "Edit Table".</li>
+            </ul>
+            <ul>
+              <li>Long tables draw only the rows in view. A Spanish program's table writes its things too.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="nerd-and-erd" label="NERD and ERD diagrams" sticky collapsible dividing open="false">
+            <figure>
+              <img
+                src="images/p11-nerd.png"
+                alt="The site editor's Data tab:  the Star Wars data as a NERD, boxes in columns with link lines"
+                width="100%"
+              />
+              <figcaption>
+                <i>The Star Wars data as a NERD; click a box and it turns over to its ERD side.</i>
+              </figcaption>
+            </figure>
+            <ul>
+              <li>
+                A NERD ("not an entity relationship diagram") shows only the fields that link, named for what they point
+                at: <code>homeworld</code>, never <code>homeworld_id</code>.
+              </li>
+              <li>
+                Solid lines for "contains", dashed for "refers to"; at most three columns by default, a Columns field to
+                change it.
+              </li>
+              <li>Drag a box, or focus it and use the arrow keys, and it stays put.</li>
+              <li>
+                A right-click menu holds Put back, Save as SVG and Save as JSON. <code>spell place nerd</code> writes
+                either from the command line.
+              </li>
+              <li>The picked collection's sample rows show under it in an editable table.</li>
+            </ul>
+            <p>
+              <code>&lt;ui-diagram&gt;</code> is the general component under it: boxes in columns, any links, groups and
+              lanes, a legend, draggable boxes, a box that holds anything (a <code>&lt;ui-shape&gt;</code> that flips).
+            </p>
+            <p>
+              Dragging comes from <code>movable</code> and <code>resizable</code>, which every Spell UI tag takes: a
+              drag inside its parent, the browser's corner grip, remembered per element id. Each tag's own options are
+              on its components page: <a href="/components/ui/ui-diagram.html" target="src-ui-docs-ui-diagram-html">&lt;ui-diagram&gt;</a>,
+              <a href="/components/ui/ui-table.html" target="src-ui-docs-ui-table-html">&lt;ui-table&gt;</a>.
+            </p>
+          </ui-section>
+
+          <ui-section
+            id="signed-in-reading"
+            label="Reading a site behind its sign-in"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <p>
+              The ingester reads open APIs and those that take a key. A company site wants its own sign-in, so Spell
+              signs in once, in a window of its own, and then reads as you:
+            </p>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>signing in, then reading · 4 commands</ui-title>
+              <ui-content>
+                <pre><code class="language-sh">spell place sign-in console https://example.com
+spell place ingest https://example.com/api --signed-in console
+spell place read-page https://example.com/racks --signed-in console --select table --as racks
+spell site screenshots owen@spell/my-site --signed-in console</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                <b>Signing in</b> opens Spell's own browser window, never your Chrome. You sign in as usual; the session
+                is kept in <code>~/.spell/place-sessions/</code>, readable only by you, and in no repo.
+              </li>
+              <li>
+                <b>Reading the API</b> with <code>--signed-in</code> sends the session's cookies:
+                <ul>
+                  <li>only to their own host, their values taken out of everything written</li>
+                  <li>again on every <code>spell place update</code></li>
+                  <li>a session that has run out says so, with the command to sign in again</li>
+                </ul>
+              </li>
+              <li>
+                <b>Rows only a page shows:</b> <code>spell place read-page</code> opens the page headlessly as you and
+                copies a table (by its headings) or each element a selector matches (its text) into samples beside the
+                place.
+              </li>
+              <li>
+                <b>Pictures of the old pages:</b> <code>spell site screenshots</code> opens a window with a small bar on
+                top. Walk the site; Save writes the picture and points the site's page at it, adding the page if it's
+                new, and records the page's <code>live</code> link.
+              </li>
+            </ul>
+            <p>
+              <b>Not yet:</b> it has been checked against a made-up site that wants a cookie, in a scripted browser, not
+              on a real company sign-in. Only cookies are sent: an API that wants a token from the page's own storage
+              isn't reached.
+            </p>
+          </ui-section>
+
+          <ui-section id="saving-and-drafts" label="Saving, and your draft" sticky collapsible dividing open="false">
+            <p>Save in the editor, reload, and your edit is there. Where it went depends on whose project it is:</p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr>
+                    <th>You save</th>
+                    <th>It goes</th>
+                    <th>Who sees it</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>A built-in library app, in the editor on a checkout</td>
+                    <td>into the file itself: <code>git status</code> shows it</td>
+                    <td>everyone, once it's committed</td>
+                  </tr>
+                  <tr>
+                    <td>A built-in example or guide, even on a checkout</td>
+                    <td>into your draft, until you keep it in your apps or throw it away</td>
+                    <td>you</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ul>
+              <li>
+                A draft shows wherever the file is read: the code, the project's list of files, and the running app,
+                which is YOUR build while you have drafts.
+              </li>
+              <li>AutoSave is on: a file is kept once you've stopped typing for 0.8 seconds, and as you leave.</li>
+              <li>
+                The rest (Delete Draft, Versions, Export and Import as a .zip, the File and project menus): the
+                <a href="/app/README-app.md" target="src-app-readme-app-md">app README</a>, "Run, Edit and Design".
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="4-how-it-works" label="4. How it works" sticky collapsible dividing open="false">
+          <ul>
+            <li>
+              <b>The site is a built-in template</b>, <code>Site</code>, beside the notebook's; its routing is a
+              hand-written base under it,
+              <a href="/parser/src/core/classes/SiteBase.ts" target="src-parser-src-core-classes-sitebase-ts"
+                ><code title="parser/src/core/classes/SiteBase.ts">SiteBase</code></a
+              >, because Spell can't say that part.
+            </li>
+            <li>
+              <b>One address grammar</b> for the page server's routes and a site's pages:
+              <a href="/src/util/addressPattern.ts" target="src-src-util-addresspattern-ts"
+                ><code title="src/util/addressPattern.ts">addressPattern</code></a
+              >.
+            </li>
+            <li>
+              <b>Adding a page doesn't restart a running site.</b> The editor already kept a program running through an
+              edit inside its types; now it takes a newly added type too, since nothing running can be one yet.
+            </li>
+            <li>
+              <b>The NERD reads what the ingester wrote</b>
+              (<a href="/parser/src/spell/ingest/PlaceNerd.ts" target="src-parser-src-spell-ingest-placenerd-ts"
+                ><code title="parser/src/spell/ingest/PlaceNerd.ts">PlaceNerd</code></a
+              >), never the API again, and lays it out in columns by what links to what.
+            </li>
+            <li>
+              <b>Spell UI never writes a place.</b> The editable table sends one cancelable
+              <code>ui-editing</code> event; the program's core writes its things and takes the event.
+            </li>
+            <li>
+              <b>A thumbnail is a slot every view has.</b> A view with nothing to draw draws that slot;
+              <code>draw its thumbnail</code> places it in a drawing.
+            </li>
+            <li>
+              <b>The index reads the site's own list</b>, the one the side nav already draws from, so a page line is all
+              a new component needs. The cards' words come from Spell UI's component data where the line has none.
+            </li>
+            <li>
+              <b>A session goes the way a key went.</b> The ingester's polite reader already sent a key and scrubbed it
+              from what it wrote, and the session's cookies take that same path.
+              <ul>
+                <li>A redirect to another host or to a sign-in page counts as the session having ended.</li>
+              </ul>
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="6-limits" label="5. Limits" sticky collapsible dividing open="false">
+          <ul>
+            <li>
+              Signing in is checked against a made-up site only, not a real company sign-in; only cookies are sent, so
+              an API wanting a token from the page's storage isn't reached, and an API that really redirects elsewhere
+              is misread as an ended session.
+            </li>
+            <li>
+              A misspelled page name in a site file is no longer an error: it shows as a page still to make. A sidebar's
+              address doesn't open it.
+            </li>
+            <li>A file a double click makes starts as a draft; deleting a page from a split site leaves its file.</li>
+            <li>A page written in Spanish needs its thumbnail on the site line for its card to show it.</li>
+            <li>The site editor has no field for tags.</li>
+            <li>
+              The language server in VS Code edits the files on disk, never your drafts; and a draft holds text alone,
+              so a picture is never drafted.
+            </li>
+            <li>Only a project's Manager can reorder its file tabs.</li>
+            <li>The Mockup theme's uneven corners don't show inside Run.</li>
+            <li>A Spell UI site's pages are other projects' notebooks, so they carry no stories.</li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="7-where-things-are" label="6. Where things are" sticky collapsible dividing open="false">
+          <p>Each name links to its file.</p>
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <thead>
+                <tr>
+                  <th>What</th>
+                  <th>Where</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>The site's words</td>
+                  <td>
+                    <a href="/parser/src/spell/rules/sites/" target="src-parser-src-spell-rules-sites"
+                      ><code title="parser/src/spell/rules/sites/">the sites rules</code></a
+                    >, the
+                    <a href="/parser/src/core/templates/Site.spell" target="src-parser-src-core-templates-site-spell"
+                      ><code title="parser/src/core/templates/Site.spell">Site</code></a
+                    >
+                    template
+                  </td>
+                </tr>
+                <tr>
+                  <td>A running site</td>
+                  <td>
+                    <a href="/parser/src/core/classes/SiteBase.ts" target="src-parser-src-core-classes-sitebase-ts"
+                      ><code title="parser/src/core/classes/SiteBase.ts">SiteBase</code></a
+                    >
+                    and the core's
+                    <a href="/parser/src/core/sites.ts" target="src-parser-src-core-sites-ts"
+                      ><code title="parser/src/core/sites.ts">sites</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>Its address in Run</td>
+                  <td>
+                    <a href="/app/src/app/pages/RunSite.ts" target="src-app-src-app-pages-runsite-ts"
+                      ><code title="app/src/app/pages/RunSite.ts">RunSite</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>The site editor</td>
+                  <td>
+                    <a href="/app/src/app/pages/SiteEditorPage.tsx" target="src-app-src-app-pages-siteeditorpage-tsx"
+                      ><code title="app/src/app/pages/SiteEditorPage.tsx">SiteEditorPage</code></a
+                    >
+                    and its writes,
+                    <a href="/app/src/app/pages/SiteWrites.ts" target="src-app-src-app-pages-sitewrites-ts"
+                      ><code title="app/src/app/pages/SiteWrites.ts">SiteWrites</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>Stories, and the Data tab</td>
+                  <td>
+                    <a href="/app/src/app/pages/PageStories.ts" target="src-app-src-app-pages-pagestories-ts"
+                      ><code title="app/src/app/pages/PageStories.ts">PageStories</code></a
+                    >,
+                    <a href="/app/src/app/pages/SiteData.tsx" target="src-app-src-app-pages-sitedata-tsx"
+                      ><code title="app/src/app/pages/SiteData.tsx">SiteData</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>Thumbnails on the board, the board's edits</td>
+                  <td>
+                    <a href="/app/src/app/pages/SiteEdits.ts" target="src-app-src-app-pages-siteedits-ts"
+                      ><code title="app/src/app/pages/SiteEdits.ts">SiteEdits</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>The index and its search</td>
+                  <td>
+                    <a href="/ui/src/docs-components/ui-docs-index/" target="src-ui-src-docs-components-ui-docs-index"
+                      ><code title="ui/src/docs-components/ui-docs-index/">&lt;ui-docs-index&gt;</code></a
+                    >,
+                    <a href="/ui/src/docs-components/ui-docs-search/" target="src-ui-src-docs-components-ui-docs-search"
+                      ><code title="ui/src/docs-components/ui-docs-search/">&lt;ui-docs-search&gt;</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>Signing in, and reading a page as you</td>
+                  <td>
+                    <a href="/parser/src/cli/placeSignIn.ts" target="src-parser-src-cli-placesignin-ts"
+                      ><code title="parser/src/cli/placeSignIn.ts">placeSignIn</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>Where a session is kept</td>
+                  <td>
+                    <a href="/src/server/places/PlaceSessions.ts" target="src-src-server-places-placesessions-ts"
+                      ><code title="src/server/places/PlaceSessions.ts">PlaceSessions</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>Sending the session</td>
+                  <td>
+                    <a
+                      href="/parser/src/spell/ingest/PoliteReader.ts"
+                      target="src-parser-src-spell-ingest-politereader-ts"
+                      ><code title="parser/src/spell/ingest/PoliteReader.ts">PoliteReader</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>Pictures of a site's old pages</td>
+                  <td>
+                    <a
+                      href="/app/src/cli/commands/siteScreenshots.ts"
+                      target="src-app-src-cli-commands-sitescreenshots-ts"
+                      ><code title="app/src/cli/commands/siteScreenshots.ts">spell site screenshots</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>The side nav</td>
+                  <td>
+                    <a href="/ui/src/components/ui-site-nav/" target="src-ui-src-components-ui-site-nav"
+                      ><code title="ui/src/components/ui-site-nav/">&lt;ui-site-nav&gt;</code></a
+                    >, on
+                    <a href="/ui/src/components/ui-tree/" target="src-ui-src-components-ui-tree"
+                      ><code title="ui/src/components/ui-tree/">&lt;ui-tree&gt;</code></a
+                    >'s nav look
+                  </td>
+                </tr>
+                <tr>
+                  <td>The diagram</td>
+                  <td>
+                    <a href="/ui/src/components/ui-diagram/" target="src-ui-src-components-ui-diagram"
+                      ><code title="ui/src/components/ui-diagram/">&lt;ui-diagram&gt;</code></a
+                    >; the NERD from the ingester,
+                    <a href="/parser/src/spell/ingest/PlaceNerd.ts" target="src-parser-src-spell-ingest-placenerd-ts"
+                      ><code title="parser/src/spell/ingest/PlaceNerd.ts">PlaceNerd</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>The editable table</td>
+                  <td>
+                    <a href="/ui/src/components/ui-table/" target="src-ui-src-components-ui-table"
+                      ><code title="ui/src/components/ui-table/">&lt;ui-table editable&gt;</code></a
+                    >; the core's writes,
+                    <a href="/parser/src/core/ui.ts" target="src-parser-src-core-ui-ts"
+                      ><code title="parser/src/core/ui.ts">listenForTableEdits()</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>The Mockup theme</td>
+                  <td>
+                    <a
+                      href="/ui/src/styles/themes/mockup.theme.json5"
+                      target="src-ui-src-styles-themes-mockup-theme-json5"
+                      ><code title="ui/src/styles/themes/mockup.theme.json5">mockup.theme.json5</code></a
+                    >
+                    and its
+                    <a href="/ui/src/styles/themes/rules/mockup.css" target="src-ui-src-styles-themes-rules-mockup-css"
+                      ><code title="ui/src/styles/themes/rules/mockup.css">rules sheet</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>The examples</td>
+                  <td>
+                    <a
+                      href="/app/spaces/@spell/examples/StarWarsSite/"
+                      target="src-app-spaces-spell-examples-starwarssite"
+                      ><code title="app/spaces/@spell/examples/StarWarsSite/">Star Wars Site</code></a
+                    >,
+                    <a href="/app/spaces/@spell/guides/SpellUI/" target="src-app-spaces-spell-guides-spellui"
+                      ><code title="app/spaces/@spell/guides/SpellUI/">Spell UI</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>Spell's own app as a site</td>
+                  <td>
+                    <a href="/app/spaces/@spell/sites/SpellApp/" target="src-app-spaces-spell-sites-spellapp"
+                      ><code title="app/spaces/@spell/sites/SpellApp/">SpellApp</code></a
+                    >
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+        </ui-section>
+
+        <footer class="spell-doc-footer">
+          <ui-divider></ui-divider>
+          <p class="meta">Updated 2026-11-21.</p>
+        </footer>
+      </main>
+    </div>
+    <script src="/_epic/assets/highlight.min.js"></script>
+    <script src="/_epic/assets/spell-ui.js"></script>
+  </body>
+</html>

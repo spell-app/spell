@@ -16348,6 +16348,290 @@
     },
     {
       "kind": "javascript-module",
+      "path": "src/components/ui-icon-browser/index.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "name": "UIIconBrowser",
+          "tagName": "ui-icon-browser",
+          "customElement": true,
+          "summary": "An icon browser shows every icon of a pack, to search through:  clicking one copies the name that draws it.",
+          "description": "An icon browser shows every icon of a pack, to search through:  clicking one copies the name that draws it.\n\nAlso known as:  icon gallery, icon list, icon finder, glyph browser, icon catalog, icon search.",
+          "attributes": [
+            {
+              "name": "pack",
+              "description": "The pack it starts on:  `fa7-free` (the default), `fa7-brands` or `fomantic`.  Its buttons switch to another;  each is loaded on its own, so the page's own icons never change.",
+              "type": {
+                "text": "\"fa7-free\" | \"fa7-brands\" | \"fomantic\""
+              },
+              "default": "\"fa7-free\"",
+              "fieldName": "pack"
+            },
+            {
+              "name": "query",
+              "description": "What it starts searching for:  a name or what an icon shows (`mail` finds `envelope`, by Font Awesome's terms).",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "query"
+            },
+            {
+              "name": "address",
+              "description": "Opens on the search and the pack the page's address names, `?q=bell&pack=fa7-brands`, as `spell icon --open` writes it;  ahead of `query` and `pack`.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "address"
+            },
+            {
+              "name": "disabled",
+              "description": "Can't be used:  dimmed, out of the tab order, and everything inside it inert;  `aria-disabled`.  Shared by every element;  a family may give it a meaning of its own (`elementSetup.disabled`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "disabled"
+            },
+            {
+              "name": "loading",
+              "description": "Busy:  dimmed under a loader, and inert;  `aria-busy`.  Shared by every element;  a family may draw its own loader (`elementSetup.loading`).",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "loading"
+            },
+            {
+              "name": "visible",
+              "description": "Shown:  the platform's `hidden`, turned round (`el.visible === !el.hidden`).  Writing either one shows or hides the element with its `animation`;  `visible=\"false\"` writes `hidden`.  Neither written:  the family decides (a modal starts hidden, a message shown).  Both written in markup and disagreeing:  `hidden` wins.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "visible"
+            },
+            {
+              "name": "animation",
+              "description": "How it shows and hides (Fomantic's names:  `fade up`, `scale`, `fly down` ...);  default its family's, else `fade`.  `none` turns motion off for it and everything inside it, as the person's reduced-motion setting does;  an element inside can't turn it back on.",
+              "type": {
+                "text": "\"fade\" | \"fade up\" | \"fade down\" | \"fade left\" | \"fade right\" | \"scale\" | \"zoom\" | \"drop\" | \"browse\" | \"browse right\" | \"fly\" | \"fly up\" | \"fly down\" | \"fly left\" | \"fly right\" | \"slide\" | \"slide up\" | \"slide down\" | \"slide left\" | \"slide right\" | \"swing\" | \"swing up\" | \"swing down\" | \"swing left\" | \"swing right\" | \"horizontal flip\" | \"vertical flip\" | \"flash\" | \"shake\" | \"bounce\" | \"tada\" | \"pulse\" | \"jiggle\" | \"glow\" | \"coin\" | \"none\""
+              },
+              "fieldName": "animation"
+            },
+            {
+              "name": "link",
+              "description": "Where a click on it goes, as a link's `href`:  `<ui-text link>` is a link in running text.  A family that draws its own link (text, button, image ...) draws an `<a>`;  on any other element a click goes there, except on a control of its own inside.  Its old name was `href`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "link"
+            },
+            {
+              "name": "target",
+              "description": "Where `link` opens:  `_blank` for a new tab, or a window's name;  as a link's `target`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "target"
+            },
+            {
+              "name": "font",
+              "description": "How its letters look, several words at once:  `bold`, `heavy`, `italic`, `underline`, `strikethrough`, `code`, `highlight`, `subscript`, `superscript`, `all-caps`, `title-caps` (`font=\"bold italic\"`);  a family from the theme, `headline`, `subhead`, `serif`, `sans-serif` or `typewriter`;  and a size in pixels, `14`, or with its line height, `10/20` (`font=\"bold serif 10/20\"`).  `<ui-text>` draws each face as its HTML element (`<strong>`, `<em>` ...), so screen readers hear it, and takes each word as a bare attribute too (`<ui-text bold serif>`);  every other element shows the look alone.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "font"
+            },
+            {
+              "name": "shadow",
+              "description": "A hard shadow behind its letters, down and to the right, in a hue:  `shadow=\"yellow\"`, a sticker's look for a logo or a title.  Its size follows the letters (0.06em).",
+              "type": {
+                "text": "\"primary\" | \"secondary\" | \"red\" | \"orange\" | \"yellow\" | \"olive\" | \"green\" | \"teal\" | \"blue\" | \"violet\" | \"purple\" | \"pink\" | \"brown\" | \"grey\" | \"black\" | \"positive\" | \"negative\""
+              },
+              "fieldName": "shadow"
+            },
+            {
+              "name": "width",
+              "description": "Its box's own width where it sits, any CSS length:  `width=\"10em\"`, `\"50%\"`.  In a row it keeps that width, never squeezed.  A family with a width of its own keeps it:  a container's centres its box, an image's is its size in pixels, a column's counts columns.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "width"
+            },
+            {
+              "name": "min-width",
+              "description": "The narrowest its box gets, any CSS length:  `min-width=\"16em\"`.  A `fluid` element in a row grows from there into the room left;  the row wraps it onto a line of its own before it gets any narrower.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "minWidth"
+            },
+            {
+              "name": "max-width",
+              "description": "The widest its box gets, any CSS length:  `max-width=\"36em\"`, so a bar or a field stops growing on a wide screen.  A family with a `max-width` of its own (`<ui-zoom>`) keeps it.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "maxWidth"
+            },
+            {
+              "name": "tooltip",
+              "description": "Its tooltip:  the browser's own, written as the element's `title`.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "tooltip"
+            },
+            {
+              "name": "label",
+              "description": "Its name for screen readers (`aria-label`), where it has no words of its own.  A family whose `label` is something else (a field's, a statistic's) keeps its own.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "label"
+            },
+            {
+              "name": "movable",
+              "description": "People can drag it to a new place inside its container:  bare or `both`, `horizontally` or `vertically` for one way only.  A press on a control of its own inside (a button, a field) stays that control's.  With an `id`, where each person put it is remembered.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "movable"
+            },
+            {
+              "name": "resizable",
+              "description": "People can drag its corner to resize it, the sizes it names:  `resizable=\"width, height\"`, `\"height\"` or `\"width\"`.  Bare, its family's own:  both, but a segment's or a table's height.  Limit it with `min-height` and `max-height`, `min-width` and `max-width`.  With an `id`, the size each person gave it is remembered.  A family with a `resizable` of its own keeps it (`<ui-split-panel>`).  (`both`, `horizontally` and `vertically` still work.)",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "resizable"
+            },
+            {
+              "name": "on-platform",
+              "description": "Shown only on these devices, a comma list:  `on-platform=\"desktop, tablet\"` hides it on phones.  `phone`:  a touch screen, small on at least one side (under 600px), either way up;  `tablet`:  a touch screen, big both ways;  `desktop`:  a mouse or a trackpad.  Follows a resize or a turn of the device at once.  For what a device can't do (a phone has no screen capture), or has no room for.",
+              "type": {
+                "text": "string"
+              },
+              "fieldName": "onPlatform"
+            }
+          ],
+          "members": [],
+          "events": [],
+          "slots": [],
+          "cssParts": [
+            {
+              "name": "packs",
+              "description": "The pack switch:  a `<ui-buttons>`, one `<ui-button>` per pack."
+            },
+            {
+              "name": "search",
+              "description": "The search box, a `<ui-input type=search>`."
+            },
+            {
+              "name": "usage",
+              "description": "What a page adds to use the pack shown:  a `<ui-message>`."
+            },
+            {
+              "name": "count",
+              "description": "How many icons match, of how many:  a `<ui-label>`."
+            },
+            {
+              "name": "copied",
+              "description": "The name just copied:  a green `<ui-label>`, once one is."
+            },
+            {
+              "name": "grid",
+              "description": "The icons, a grid of tiles:  the first ones, then more as it scrolls near."
+            },
+            {
+              "name": "tile",
+              "description": "One icon:  a `<ui-button>` showing its glyph over its name;  a click copies the name."
+            },
+            {
+              "name": "glyph",
+              "description": "A tile's glyph."
+            },
+            {
+              "name": "name",
+              "description": "A tile's name:  what `name` takes to draw it."
+            }
+          ],
+          "cssStates": [
+            {
+              "name": "disabled",
+              "description": "`disabled` is set (or, on a form control, a `<fieldset disabled>` around it)."
+            },
+            {
+              "name": "loading",
+              "description": "`loading` is set."
+            },
+            {
+              "name": "busy",
+              "description": "`loading`, and the element draws the shared loader:  a spinner over it (`elementSetup.loading`)."
+            },
+            {
+              "name": "dimmed",
+              "description": "Disabled or loading the shared way:  everything inside is inert, and dimmed."
+            },
+            {
+              "name": "hidden",
+              "description": "Hidden (`hidden`, or `visible=\"false\"`), once its animation has run."
+            },
+            {
+              "name": "still",
+              "description": "`animation=\"none\"`:  no motion here, nor anywhere inside it (`--ui-motion: none`)."
+            },
+            {
+              "name": "hiding",
+              "description": "Animating out:  `hidden` is already set, and the element stays on screen until it ends."
+            },
+            {
+              "name": "pending",
+              "description": "Defined by its `<ui-root>` before its family loaded:  no component yet, its values kept until it arrives."
+            },
+            {
+              "name": "ready",
+              "description": "Ready to go:  drawn with its styles (its `ready` promise has resolved)."
+            },
+            {
+              "name": "on-platform",
+              "description": "`on-platform` names some devices;  `on-phone`, `on-tablet` and `on-desktop` say which.  On any other device it's hidden."
+            }
+          ],
+          "cssProperties": [
+            {
+              "name": "--ui-icon-browser-tile-width",
+              "default": "8em"
+            },
+            {
+              "name": "--ui-icon-browser-glyph-size",
+              "default": "1.5em"
+            },
+            {
+              "name": "--ui-icon-browser-gap",
+              "default": "0.5em"
+            }
+          ]
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "UIIconBrowser",
+          "declaration": {
+            "name": "UIIconBrowser",
+            "module": "src/components/ui-icon-browser/index.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "ui-icon-browser",
+          "declaration": {
+            "name": "UIIconBrowser",
+            "module": "src/components/ui-icon-browser/index.ts"
+          }
+        }
+      ]
+    },
+    {
+      "kind": "javascript-module",
       "path": "src/components/ui-icon-picker/index.ts",
       "declarations": [
         {

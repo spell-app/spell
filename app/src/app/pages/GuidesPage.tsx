@@ -5,20 +5,28 @@ import { appTexts } from "spell/app/app/ui/AppTexts"
 import { SPACES } from "spell/app/spaces"
 import { Actions, on, SpellPage } from "spell/app/app/solid"
 import { GUIDES_PAGE, guideUrlFor } from "./pages.types"
-import { readGuideBody, readGuideList, startHereLine, type Audience, type ShippedGuide } from "./GuideList"
+import {
+  readGuideBody,
+  readGuideList,
+  startHereLine,
+  type Audience,
+  type ShippedGuide,
+  type StartHere
+} from "./GuideList"
 import { ProjectCards } from "./ProjectChooser"
 
 import "./GuidesPage.css"
 
 /****************
  * ### `<GuidesPage>`
- * The guides that ship with Spell, read in the app (epic `epic-engine` P79):  `/guides` lists them, `/guides/<path>`
- * shows one (`/guides/data/data.html`).
- * - The list:  "Start here" first, in its order (a chapter by its anchor:  Views, in The Spell Language);  then a
- *   section per topic of the guides for people making things;  then the programmers' guides, folded under their own
- *   heading, a section per topic;  a search box over titles and descriptions above it all.
- * - Read from the INSTALLED `spell` package, through the app's server (`/api/guides/`, `appRoutes.ts`):  its list,
- *   `guides.json5` (`epic guides index` writes it from each guide's head), and each page.
+ * The guides that ship with Spell, read in the app (epic `epic-engine` P79):
+ * `/guides` lists them, `/guides/<path>` shows one (`/guides/data/data.html`).
+ * - The list:  "Start here" first, in its order (a chapter by its anchor:  Views, in The Spell Language);
+ *   then a section per topic of the guides for people making things;
+ *   then the programmers' guides, folded under their own heading, a section per topic;
+ *   a search box over titles and descriptions above it all.
+ * - Read from the INSTALLED `spell` package, through the app's server (`/api/guides/`, `appRoutes.ts`):
+ *   its list, `guides.json5` (`epic guides index` writes it from each guide's head), and each page.
  * - One guide:  its page's body, shown in the app's own page and theme (`<GuideBody>`);  the epic pages' site header,
  *   comment button and editing are left out.
  * - The guides you open in the editor (Spell projects that teach by example, `@spell/guides`) are a topic of their
@@ -55,7 +63,11 @@ function GuideIndex() {
   const [search, setSearch] = createSignal("")
   const navigate = useNavigate()
   const shown = (guide: ShippedGuide) => matches(guide, search())
-  const topicsOf = (audience: Audience) => topics(list().guides.filter((guide) => guide.audience === audience))
+  const topicsOf = (audience: Audience) =>
+    topics(
+      list().guides.filter((guide) => guide.audience === audience),
+      list().startHere
+    )
   onTitle(appTexts.text("guidesTitle"))
   return (
     <Loading fallback={<ui-loader />}>
@@ -72,7 +84,7 @@ function GuideIndex() {
       <Show when={!search()}>
         <ui-section id="start-here" label={appTexts.text("guidesStartHere")} dividing="">
           <ui-icon slot="icon" name="flag" />
-          <ui-cards class="GuideCards">
+          <ui-cards class="GuideCards" columns="3" doubling="" stackable="">
             <For each={list().startHere}>
               {(entry) => (
                 <GuideCard
@@ -131,7 +143,7 @@ function TopicSection(props: {
   return (
     <Show when={guides().length}>
       <ui-section label={props.topic.name} dividing="">
-        <ui-cards class="GuideCards">
+        <ui-cards class="GuideCards" columns="3" doubling="" stackable="">
           <For each={guides()}>
             {(guide) => (
               <GuideCard title={guide.title} description={guide.description} onOpen={() => props.onOpen(guide)} />
@@ -202,11 +214,20 @@ function GuideBody(props: { path: string; hash: string }) {
 /** One topic's guides, in the list's order. */
 type Topic = { name: string; guides: ShippedGuide[] }
 
-/** Each topic's guides, topics in the order their first guide comes. */
-function topics(guides: ShippedGuide[]): Topic[] {
+/**
+ * Each topic's guides:  the topics holding a Start here guide first, in Start here's order, then the rest by name;
+ * each topic's guides in the list's order.
+ */
+function topics(guides: ShippedGuide[], startHere: StartHere[]): Topic[] {
   const byName = new Map<string, ShippedGuide[]>()
   for (const guide of guides) byName.set(guide.topic, [...(byName.get(guide.topic) ?? []), guide])
-  return [...byName].map(([name, list]) => ({ name, guides: list }))
+  const rank = (name: string) => {
+    const orders = startHere.filter((entry) => byName.get(name)!.some((guide) => guide.path === entry.path))
+    return orders.length ? Math.min(...orders.map((entry) => entry.order)) : Infinity
+  }
+  return [...byName]
+    .map(([name, list]) => ({ name, guides: list }))
+    .sort((a, b) => rank(a.name) - rank(b.name) || a.name.localeCompare(b.name))
 }
 
 /** Whether `guide` matches what's typed in the search box:  every word in its title or description. */

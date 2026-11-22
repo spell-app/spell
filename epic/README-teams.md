@@ -61,6 +61,8 @@ epic whoami
 Your SHORT NAME is who you are on the epics:  what's stamped on your replies, comments, picks and log lines.
 - It's the one you kept (`epic init` asks;  `epic whoami Ana` changes it),
   else your GitHub login, else git's `user.name`.
+  - Kept on your machine, in `~/.spell-epic/person.json5` (`$SPELL_EPIC_HOME` moves the folder), never in the code
+    repo.
 - Your full name is git's `user.name`;  the GitHub login is looked up once with `gh` and kept,
   so no page or hook waits on the network.
 - `epic whoami Ana --rename --dry-run` says what a new name would change:
@@ -75,14 +77,26 @@ Your SHORT NAME is who you are on the epics:  what's stamped on your replies, co
 On a page, your own replies say "You", and everyone else's their name.
 Claude's replies say "Claude", or "Claude (Ben)" when Ben's session wrote them,
 so you can tell your Claude at work from his.
+- An agent's words carry an attribute of their own, `<epic-reply from="Ben" agent="claude">`,
+  so a person who calls themselves "Claude" stays a person.
+- A person's words are violet and an agent's terracotta, on every page, until they pick their own.
+  - Your colour is the one `epic init` asked for, from the colour names nobody on the team has yet.
+  - It's kept WITH THE PLANS, `people/<name>.json5` in the epic repo, so it reaches everyone at the next sync,
+    and nobody commits anything in the code repo for it.
+  - The repo's settings can give anyone a colour, an agent too, and win:
+    `colors` ([README-config.md](README-config.md#the-config-file)).
+    A reply from Bob's Codex takes Codex's colour:  the agent wrote the words.
 
 ### Every turn syncs
 
 At the end of every turn, Claude Code's or Codex's, a hook commits the epic repo, one commit per epic, guide or folder.
 With an epic repo named in the config (`contentRemote`), the same hook then syncs it:
-1. pulls, rebasing this machine's commits on top of the others'
-2. renumbers any id both sides made (below)
-3. pushes
+1. fetches the others' commits;  offline, it stops there
+2. renumbers any id both sides made (below), BEFORE the rebase:
+   two new part files of one name, `parts/t22.html`, would stop it
+3. rebases this machine's commits on top of the others', settling the common clashes (below)
+4. re-sorts the logs both sides wrote, by time
+5. pushes
 
 `epic shared sync` does the same by hand:
 

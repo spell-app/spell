@@ -464,10 +464,3 @@ export class VocabularyTexts {
 
 /** A `{name}` placeholder in a text, the name in group 1. */
 const PLACEHOLDER = /\{(\w+)\}/g
-
-/**
- * Where the page server keeps the editor palette's table (`paletteGroups.json`):  `GET` reads it, `PUT` writes it.
- * - Spell UI's route module, `paletteRoutes`, answers it;  the palette groups page, `<ui-docs-palette>`, asks it
- *   (epic `editor` T81).
- */
-export const PALETTE_GROUPS_API = "/api/ui/palette-groups"

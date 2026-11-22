@@ -109,7 +109,7 @@
 
 		<section label="Fold icon" sticky="stack" collapsible dividing>
 			<example "Fold icon" description="`fold-icon`:  where a band's chevron sits.  `end` (the panel's default) at the far end of the band, after any actions;  `start` before the title, as a plain `<ui-section>`'s.">
-				<stack style="align-items: start" class="ui-cluster">
+				<stack style="align-items: start" direction="horizontal" wrap>
 					<panel label="Preview" collapsible style="width: 240px">
 						<button slot="actions" size="mini" icon="moon outline" appearance="circular basic">Dark</button>
 						<text paragraph>fold-icon="end"</text>
@@ -126,7 +126,7 @@
 	<section label="Variations">
 		<section label="Colors" sticky="stack" collapsible dividing>
 			<example "Colors" description="`color` paints the whole panel from a hue:  the header band, a lighter box, the border, the sub-head bands.  No `color` is `primary`;  sub-panels follow their panel's hue.  A hue a theme adds works too (the brand pages' `accent`).">
-				<stack style="align-items: start" class="ui-cluster">
+				<stack style="align-items: start" direction="horizontal" wrap>
 					<panel label="Default" style="width: 200px">
 						<panel label="Tweak">
 							<text paragraph>No <text code>color</text>: primary.</text>

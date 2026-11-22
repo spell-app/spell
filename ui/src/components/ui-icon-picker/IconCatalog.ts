@@ -2,7 +2,8 @@ import { E } from "spell/ui/core"
 
 /****************
  * ### `IconCatalog`
- * The icons an `<ui-icon-picker>` offers, how they're grouped, and how a search finds them.
+ * The icons an `<ui-icon-picker>` offers, how they're grouped, and how a search finds them;
+ * and the icons of one pack, for `<ui-icon-browser>` (`choicesOfPack()`).
  *
  * - Its icons are every icon the PICKER's icon packs know:
  *   its nearest `<ui-root icons>`'s, else the page's (`IconGlyph.packsFor()`), whatever names they take there.
@@ -42,20 +43,50 @@ export class IconCatalog {
     return choices
   }
 
-  /** The choices of `packs`, in order:  one per glyph, named as above. */
-  private static choicesOf(packs: readonly E.IconPack[]): IconChoice[] {
+  /**
+   * The choices ONE pack offers on its own, A-Z, named as it names them:  what `<ui-icon-browser>` lists for a pack.
+   * - Not the page's packs:  a name another pack would win on the page still goes to this pack's glyph.
+   * - A pack of names over ANOTHER pack's files (Fomantic's, over Font Awesome's:  `../fa7-free/solid/gear`)
+   *   labels each glyph by its own first name (`cog`), not the file's (`gear`):  those are the names it's for.
+   * - Made once per pack.
+   */
+  static choicesOfPack(pack: E.IconPack): readonly IconChoice[] {
+    let choices = IconCatalog.packCache.get(pack)
+    if (!choices) {
+      choices = IconCatalog.choicesOf([pack], (key, names) => {
+        if (!key.startsWith(BORROWED_FILE)) return undefined
+        return E.IconName.aliases(pack.index.icons[key]?.alias).find((alias) => names.includes(alias))
+      })
+      IconCatalog.packCache.set(pack, choices)
+    }
+    return choices
+  }
+
+  /** The lists made so far for one pack (`choicesOfPack()`). */
+  private static readonly packCache = new WeakMap<E.IconPack, readonly IconChoice[]>()
+
+  /**
+   * The choices of `packs`, in order:  one per glyph, named as above.
+   * - `labelFor`:  a glyph's label (by its index key, and its names) when not the usual one;  `undefined`:  the usual.
+   */
+  private static choicesOf(
+    packs: readonly E.IconPack[],
+    labelFor?: (key: string, names: readonly string[]) => string | undefined
+  ): IconChoice[] {
     // each name goes to the glyph of the LAST pack that has it, as `UI.icons` resolves a name
     const iconForName = new Map<string, E.IconPackIcon>()
     for (const pack of packs)
       for (const icon of pack.icons()) for (const name of icon.names) iconForName.set(name, icon)
-    const choiceForUrl = new Map<string, { name: string; names: string[]; file: string }>()
+    const choiceForUrl = new Map<string, { name: string; names: string[]; file: string; key: string }>()
     for (const [name, icon] of iconForName) {
       const choice = choiceForUrl.get(icon.url)
       if (choice) choice.names.push(name)
-      else choiceForUrl.set(icon.url, { name, names: [name], file: E.IconName.fileOf(icon.key) })
+      else choiceForUrl.set(icon.url, { name, names: [name], file: E.IconName.fileOf(icon.key), key: icon.key })
     }
-    const choices = [...choiceForUrl.values()]
-    for (const choice of choices) choice.name = E.IconName.labelOf(choice.file, choice.names)
+    const choices = [...choiceForUrl.values()].map(({ key, ...choice }) => ({
+      ...choice,
+      name: labelFor?.(key, choice.names) ?? E.IconName.labelOf(choice.file, choice.names)
+    }))
     return choices.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0))
   }
 
@@ -182,6 +213,9 @@ export type IconGroup = {
   /** its choices, A-Z */
   readonly choices: readonly IconChoice[]
 }
+
+/** How a pack's index key starts when the glyph is another pack's file:  `../fa7-free/solid/gear`. */
+const BORROWED_FILE = "../"
 
 /** `searchWords()` when the file won't load. */
 const NO_WORDS: IconSearchWords = { terms: {}, categories: [] }

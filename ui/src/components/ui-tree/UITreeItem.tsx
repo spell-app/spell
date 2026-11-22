@@ -55,14 +55,18 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
   /** Opening and closing it, as a person would. */
   readonly disclosure = new E.Disclosure({ component: this, member: "isOpen" })
 
-  /** How many rows it's inside. */
-  @E.state accessor depth = 0
+  /**
+   * How many rows it's inside.
+   * - `ownedWrite`, as `indent`, `treeElement` and `isInNav`:  `onConnect()` writes them,
+   *   and the browser runs it wherever the row is put in a page, inside a Solid render too.
+   */
+  @E.state({ ownedWrite: true }) accessor depth = 0
 
   /** How many rows it's inside that aren't `band`s:  how far in it's drawn, as a heading band adds no step. */
-  @E.state accessor indent = 0
+  @E.state({ ownedWrite: true }) accessor indent = 0
 
   /** The `<ui-tree>` it's in, found as it connects. */
-  @E.state accessor treeElement: E.DOMElement | undefined = undefined
+  @E.state({ ownedWrite: true }) accessor treeElement: E.DOMElement | undefined = undefined
 
   /** Its tree's component, once it has one. */
   private get tree(): UITree | undefined {
@@ -112,7 +116,7 @@ export class UITreeItem extends E.UIComponent<typeof treeItemVocabulary> {
   }
 
   /** Its tree is a side navigation (`appearance="nav"`):  `:state(nav)`. */
-  @E.cssState("nav") @E.state accessor isInNav = false
+  @E.cssState("nav") @E.state({ ownedWrite: true }) accessor isInNav = false
 
   /** It's a heading band over its rows:  `:state(band)`, with `band`'s value as a class of its row. */
   @E.cssState("band")

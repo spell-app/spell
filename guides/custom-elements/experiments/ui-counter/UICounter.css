@@ -1,0 +1,61 @@
+/*
+ * The style sheet of `<ui-counter>`, the custom elements guide's teaching element.
+ * - It styles the component's shadow DOM, in Fomantic's class grammar:
+ *   `<div class="ui [size] counter" part="counter">` holding the slot (a label), `<output part="count">` and
+ *   `<button part="button">`.
+ * - Sizes come free:  `size` adds its word to the class (`ui large counter`), and the em-based measures follow it.
+ * - In layers, as every Spell UI sheet:  a page's own rules (`ui.app`) win without `!important`.
+ */
+
+@layer ui.components.counter.types, ui.components.counter.content, ui.components.counter.variations, ui.components.counter.states;
+
+@layer ui.components.counter.types {
+  :host {
+    display: inline-block;
+  }
+
+  .ui.counter {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5em;
+    font-size: 1em;
+  }
+}
+
+@layer ui.components.counter.content {
+  output {
+    min-width: 2ch;
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--ui-font-weight-bold);
+    text-align: end;
+  }
+  button {
+    padding: 0.25em 0.75em;
+    border: var(--ui-border);
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-surface-strong);
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+  button:focus-visible {
+    outline: var(--ui-focus-width) solid var(--ui-primary-focus);
+    outline-offset: var(--ui-focus-offset);
+  }
+}
+
+@layer ui.components.counter.variations {
+  .ui.small.counter {
+    font-size: 0.875em;
+  }
+  .ui.large.counter {
+    font-size: 1.25em;
+  }
+}
+
+@layer ui.components.counter.states {
+  button:disabled {
+    opacity: var(--ui-disabled-opacity);
+    cursor: default;
+  }
+}

@@ -460,6 +460,62 @@ Where the bridge can let you down:
     so the two views may not show there:  **View: Open View...**, then drag the view where you want it, or
     **View: Move View**.  No person has tried that, nor a window move, in Cursor yet.
 
+## Windows you tell apart at a glance:  a look, a title, a ✅
+
+Three epics running means three windows, and the side bar alone won't say which is which.
+So each window can wear a LOOK, a window that stays for a worktree says so in its title, and a finished session's
+name gets a ✅.
+All three are `epic window` and `epic session` verbs ([README-cli.md](README-cli.md#windows-and-the-page-server)),
+written into the window's file, not the extension.
+
+```sh
+epic window color teal         # this window, teal, at once;  no look:  lists them
+```
+
+- A look is the WHOLE window in Tomorrow Night Blue's colours, its blues turned to another hue,
+  not just the title bar.
+  - Twelve of them:  `red`, `orange`, `amber`, `green`, `teal`, `cyan`, `blue`, `indigo`, `purple`, `pink`,
+    `brown`, `grey`;  `blue` is Tomorrow Night Blue itself.
+  - The theme's greys, whites and terminal colours stay, and so do the rest of your own colour settings.
+  - Named looks rather than any CSS colour:  short to type, always readable, and the same purple every time.
+- `/epic color <look>` runs it from the chat.
+  `/epic <name> -<look>` and `/isolate <name> -<look>` open the new window in that look
+  (`epic window open <name> --color <look>`);  with none, it takes the look of the window it's opened from.
+- A session that STAYS in its window for a worktree (`epic window stay <name>`, which the isolate, epic and unpark
+  skills run when you pick "Stay in this window") titles it `⎇ <name>` and tints its title bar, at once.
+  What it replaced is kept in the window file's `spell.stay`, and `/isolate done` puts it back (`stay --end`).
+- `epic session done` marks a finished session `✅ <title>`;  `done <name>` marks every session of that worktree.
+  `/isolate done` runs it after its merge.
+  Reopening the work (`/isolate <name>`, `/epic <name>`, `/unpark <name>`) takes the ✅ off.
+
+**The edges:**
+- Only a window opened from a `.code-workspace` file can take a look, or a title.
+  Every window the epic tools open is.
+- A new window shows older colours for a second or two first.
+  A starting window draws the colours VS Code cached from the last one, and reads its own only when they CHANGE,
+  so `epic window open` writes the file without them, waits until the window is up (then 1.5 seconds more), and
+  writes them as a live change.
+  A window not up within 60 seconds gets them anyway, and they apply on its next change.
+- The ✅ lands one prompt late:  after your next message to that session (even "thanks"), or when it's resumed.
+  The Claude panel ignores a title written into its file from outside, so the title is queued, and a hook applies it.
+  Marking OTHER sessions takes only as each one reopens.
+
+<details>
+<summary>Why a look doesn't restart the window</summary>
+
+Changing a window's folders has restarted its extensions, the Claude panel included.
+So looks and titles were tried on a throwaway worktree's window first, before anything relied on them:
+
+- its `workbench.colorCustomizations` and `window.title` changed by hand:  the window took both at once,
+  and its extension host kept its process id
+- the theme switched too (`workbench.colorTheme`, with colours scoped to it):  the same process id,
+  the window purple and retitled
+
+So `color` and `stay` write the window file, with no extension change and no window reload.
+The looks themselves are `LOOKS`, in [window.mjs](src/window.mjs).
+
+</details>
+
 ## Working on it
 
 The pages in the views are never the extension's:  they come from the epic folder and spell-epic's own routes.
@@ -481,7 +537,7 @@ or to the code it bundles:  the kit's page server, which the fallback runs, and 
 
 Two checks, both from spell-epic's root.
 The type check is `yarn vscode:check`.
-The tests are seventeen, of the pure parts, in [tests/vscode/](tests/vscode/), run by plain `node --test`:
+The tests are eighteen, of the pure parts, in [tests/vscode/](tests/vscode/), run by plain `node --test`:
 
 ```sh
 yarn test:vscode
@@ -496,9 +552,9 @@ yarn test:vscode
 ...
 ✔ folderIndex():  a window's folder by any spelling -- one reopened from the recent list after a move (I59) ...
 ...
-ℹ tests 17
+ℹ tests 18
 ℹ suites 0
-ℹ pass 17
+ℹ pass 18
 ℹ fail 0
 ...
 ```
@@ -518,12 +574,3 @@ yarn test:vscode
   epic server in full
 - [The kit's README-vscode.md](https://github.com/spell-app/spell/blob/main/README-vscode.md):  Spell's language extension beside this one, and how window files
   and worktrees are laid out
-
-<details>
-<summary>More in the docs site</summary>
-
-In the epic folder, so only where a checkout has `spell.epics`, served by `spell server start`:
-
-- "Windows and Review":  `/guides/windows-and-review.html`
-
-</details>

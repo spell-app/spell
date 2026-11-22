@@ -519,7 +519,7 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
 - A running epic's epic page is shared (below, "The epic repo"):  ONE file, the same in every checkout.
   - So the MAIN checkout's page server shows it too,
     listed on the Epics list page with the merged ones.
-  - `spell server url` gives that URL ([the page server guide](spell.epics/guides/server.html), "Running epics").
+  - `spell server url` gives that URL ([the page server guide](guides/server.html), "Running epics").
 - NEVER `code --add` / `--remove`:
   they act on the focused window, and a one-folder window restarts its extensions, Claude panel included.
 - NEVER `code -r`:  it restarts the session.
@@ -577,7 +577,8 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
   - Epic `claude-design` P4 split them into root folders, 2026-10-05.
 - The folders:
   - `epics/` -- epic pages, `epics/<name>/<name>.plan.html`, with their inboxes and details pages
-  - `guides/` -- every other docs page ([the Solid 2 guide](spell.epics/guides/solid/solid-2.html), say),
+  - `guides/` -- every other docs page ([the changelog](spell.epics/guides/changelog.html), say;  those that ship
+    with Spell are the kit's own `guides/`, below "How they're found"),
     with its Markdown, JSON and `experiments/`
   - `pages/` -- [the docs' home page](spell.epics/pages/index.html), and the scratch details pages, `pages/details/`
   - `ui/` -- Spell UI's hand-written docs pages (claude-design P6), LEFT for the other checkouts.
@@ -709,7 +710,8 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
 - WWOD (`agents/wwod/`) is TRACKED in the kit (epic `repo-split` P9):  a real `agents/` folder at its root.
   - Edit it here.
 - So are the Solid 2 rules, `agents/solid/solid-2.md` (epic `repo-split` P31;  the epic repo's `guides/solid/` before).
-  - The guides that explain them stay in the epic repo:  `guides/solid/solid-2.html`, `cheatsheet.html`.
+  - The guide that explains them ships with Spell:  the kit's [guides/solid/solid-2.html](guides/solid/solid-2.html),
+    the cheatsheet inside it.
 - Both ship in the npm `spell` package (`"spellPublish": { "files" }`), so another project can opt in to them:
   [README/agents.md](README/agents.md), "Using these rules in your own project".
   - Not the logs, nor `agents/coherence/`:  they're Spell's own.

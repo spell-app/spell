@@ -14,7 +14,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     It was the kit's `assembler/` (namespace `AS`) until epic `repo-split` P14 (Q43).
   - Before this package, six servers each had their own mime table, path check, port choice and opener.
     Now they share these.
-  - Docs:  [the page server guide](../../spell.epics/guides/server.html):  the library, the page server's flows,
+  - Docs:  [the page server guide](../../guides/server.html):  the library, the page server's flows,
     route modules, safety, why.
 - What's in it:
   - [mime.ts](mime.ts) -- ONE content-type table, `typeFor()`

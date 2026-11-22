@@ -471,6 +471,7 @@ The root (`~/www/spell`)
 
 ## See also
 
+- The guide:  [Working on Spell](../guides/vite-plus.html), in the kit's guides/ folder
 - [README/toolchain.md](toolchain.md):  what the checks run on, and how a type check reads another folder
 - [the `epic/` folder's README](https://github.com/spell-app/spell/blob/main/epic/README.md):  epic pages, the review loop, and the skills behind `/epic` and
   `/isolate`

@@ -1068,9 +1068,9 @@ A PAGE FILE is a page written the way it reads:  its head, a line of Spell, and 
 The notebooks and Spell UI's guides are written this way.
 
 ```spell
-a "counter" is a view:
+a "counter" is a view
 	its "count" is a number
-	to draw it:
+	to draw it
 		<button onClick={add 1 to its count}>Clicked {its count} times</button>
 
 "counter guide" is a notebook page
@@ -1574,10 +1574,13 @@ recipe box is an app
   - Each match leaves its place in one go, one Undo;  refused on a read-only place.
   - A loop over a read goes round a copy, so removing each one as it goes reaches every match.
 - A new thing with its fields:  `a new card with suit hearts, rank queen`;  `with the suit` takes the suit in reach.
-- A type with no place stays in memory, and Python can't write one yet:  a Python project with a place doesn't compile, and says why.
+- A type with no place stays in memory.
+- Python saves to five kinds of place:  a database on this device, a data folder, a sheet, an Excel file
+  and an atmosphere account.  A Python project with any other kind of place doesn't compile, and says why.
 
 ## See also
 
+- The guide:  [The Spell Language](../guides/spell-language/spell-language.html), in the kit's guides/ folder
 - [README-parser](README-parser.md):  what a rule is underneath, how a choice is settled, and how scope lets
   earlier lines teach later ones
 - [README-rulex](README-rulex.md):  the little language every syntax string here is written in

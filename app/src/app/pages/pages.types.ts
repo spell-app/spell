@@ -7,6 +7,9 @@ import type { EditorStore } from "spell/app/app/editor"
 /** The theme editor's address (`<ThemeEditorPage>`):  `editor.showThemeEditor()` goes there. */
 export const THEME_PAGE = "/theme"
 
+/** The palette groups page's address (`<PaletteGroupsPage>`):  the + menu's groups, to arrange and save (epic `editor` T81). */
+export const PALETTE_PAGE = "/palette"
+
 /**
  * Where the site editor's addresses start (`<SiteEditorPage>`):  `/site/<project>`, or a group's sites, `/site/<group>`.
  * - By itself, every site (`<SitesHomePage>`).

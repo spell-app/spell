@@ -93,6 +93,7 @@ export const joke: BriefingSource = {
 - You pressed Send before Accept:  Claude says to press Accept when it looks right.  Press it.
 - Claude seems stuck:  type `next` in the chat.  It carries on from where the page is.
 - The side bar says "waiting for the page server":  it loads by itself once the server answers.
+- The Review tab is empty:  `epic open morning-briefing` in a terminal, or the checklist button in the tab's title bar.
 - A permission prompt:  answer it on screen, and say why it asks.
 - The live run stalls for good:  play the recording.
 
@@ -289,6 +290,10 @@ _The items, in every colour._
 - "Can I try it today?"  Yes:  `npx spell@next epic init`, in a git repo.
   Say `@next`:  `latest` is still an old version.
 - "Staying current?"  `epic upgrade`, then `/reload-plugins` in any open Claude Code session.
+- "Will two plugins fight?"  No:  in an epic's worktree, superpowers is told to stand aside for planning,
+  worktrees and finishing.
+- "Where are the docs?"  The Docs tab on the epic pages' top bar:
+  setting up, the pages, the skills, the `epic` command, and a FAQ for when something goes wrong.
 
 ## Afterwards
 

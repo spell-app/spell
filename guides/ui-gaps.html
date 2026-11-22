@@ -1,0 +1,939 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pages with Spell UI</title>
+    <meta
+      name="description"
+      content="Writing a page from Spell UI's tags:  one word per idea, the attributes every tag takes, the tags a page needs with no native HTML (tables, stacks, text, links, a page frame, video, terms, captions), showing a file or code and saving it back, toolbars that fit, zoom, the page's contents, and a plain-HTML copy for search engines."
+    />
+    <meta name="spell-audience" content="makers" />
+    <meta name="spell-topic" content="Data and Sites" />
+    <meta name="spell-voice" content="readme 2026-10-25" />
+    <meta name="spell-saga" content="spell-ui" />
+    <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+  </head>
+  <body class="spell-doc-page">
+    <spell-site-header></spell-site-header>
+    <div class="spell-doc">
+      <main class="spell-doc-main">
+        <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+          <ui-breadcrumb>Guides</ui-breadcrumb>
+          <ui-breadcrumb selected>Pages with Spell UI</ui-breadcrumb>
+        </ui-breadcrumbs>
+        <ui-sticky class="spell-h1"
+          ><header class="spell-page-head"><h1>Pages with Spell UI</h1></header></ui-sticky
+        >
+        <ui-accordion class="spell-code" appearance="styled">
+          <ui-title>The same button, in old words and today's · 2 lines</ui-title>
+          <ui-content>
+            <pre><code class="language-html">&lt;ui-button color=&quot;primary&quot; appearance=&quot;basic&quot; padding=&quot;compact&quot; link=&quot;save.html&quot;&gt;Save&lt;/ui-button&gt;
+&lt;ui-button color="primary" appearance="basic" padding="compact" link="save.html"&gt;Save&lt;/ui-button&gt;</code></pre>
+          </ui-content>
+        </ui-accordion>
+        <p class="lede">
+          Every Spell UI tag says one idea with one word. And a page can be written without a single native HTML tag:
+          tables, paragraphs, links, layout, video and the page itself are Spell UI tags.
+        </p>
+        <p>
+          A Spell drawing holds no native HTML, so whatever HTML could draw and Spell UI couldn't would be a gap. This
+          page is the tour of what a page written from <code>&lt;ui-*&gt;</code> tags has: the words, the tags, showing
+          a file and saving it back, and a plain-HTML copy of the page for search engines.
+        </p>
+        <ui-list class="spell-meta">
+          <ui-item icon="user">Written for: someone writing a page or a drawing with Spell UI's tags</ui-item>
+          <ui-item icon="book"
+            >Each tag's own attributes, events and examples:
+            <a href="/components/ui/" target="src-ui-docs">its components page</a></ui-item
+          >
+        </ui-list>
+
+        <ui-section id="1-summary" label="1. Summary" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="lightbulb"></ui-icon>
+          <ul>
+            <li>
+              One word per idea, on every tag: color, appearance, padding, spacing, direction, align, attach, length,
+              selected, open, label, badge, heading, link, selector.
+            </li>
+            <li>
+              Attributes every tag takes: link and target, font, shadow, width and height (and their min and max),
+              tooltip, label, movable, resizable, on-platform.
+            </li>
+            <li>
+              Tags for what a page needs with no native HTML: table rows and cells, stack, text with paragraphs, link,
+              quote, keys, page, video and audio, terms, and an image's caption.
+            </li>
+            <li>
+              Three tags show a file: <code>&lt;ui-include&gt;</code> another page, <code>&lt;ui-code&gt;</code> code,
+              <code>&lt;ui-markdown&gt;</code> Markdown; each can save it back.
+            </li>
+            <li>
+              Toolbars that fit their row, zoom, a textarea that grows, the page's contents and live examples are tags
+              or attributes of their own.
+            </li>
+            <li>
+              <code>spell ssr page.html</code> writes a plain-HTML copy of the page, for search engines and readers with
+              JavaScript off.
+            </li>
+            <li>
+              <code>spell ui rename</code> rewrites markup written in the old words:
+              <b>the old names no longer do anything on a page.</b>
+            </li>
+          </ul>
+          <ui-message state="warning" heading="Not yet">
+            <ul>
+              <li>No drawing surface (shapes, a canvas, charts): the one large gap, set aside for later.</li>
+            </ul>
+          </ui-message>
+        </ui-section>
+
+        <ui-section id="2-the-words" label="2. One word per idea" sticky collapsible dividing open="false">
+          <p>
+            Fomantic UI, whose vocabulary Spell UI keeps, gave each look a bare switch of its own:
+            <code>&lt;ui-button color=&quot;primary&quot; appearance=&quot;basic&quot;&gt;</code>. That made a dozen spellings of one idea across tags. In Spell
+            UI each idea is one attribute, and the old switch is one of its values.
+          </p>
+          <ui-section id="the-renames" label="The words" sticky collapsible dividing open="false">
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>Attribute</th>
+                    <th>Says</th>
+                    <th>Example</th>
+                  </tr>
+                  <tr>
+                    <td><code>color</code></td>
+                    <td>its hue, positive and negative among them</td>
+                    <td><code>color="primary"</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>appearance</code></td>
+                    <td>its look, several words at once</td>
+                    <td><code>appearance="basic circular"</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>padding</code></td>
+                    <td>the room inside it</td>
+                    <td><code>padding="md"</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>spacing</code></td>
+                    <td>the room between its children</td>
+                    <td><code>spacing="lg"</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>direction</code></td>
+                    <td>which way it runs or opens</td>
+                    <td><code>direction="up left"</code> on a dropdown</td>
+                  </tr>
+                  <tr>
+                    <td><code>align</code></td>
+                    <td>how it lines up</td>
+                    <td><code>align="center"</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>attach</code></td>
+                    <td>which side it joins another on</td>
+                    <td><code>attach="top"</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>length</code></td>
+                    <td>how long it is</td>
+                    <td><code>length="short"</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>selected</code></td>
+                    <td>chosen</td>
+                    <td><code>&lt;ui-button selected&gt;</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>open</code></td>
+                    <td>open or folded</td>
+                    <td><code>&lt;ui-section open="false"&gt;</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>label</code></td>
+                    <td>its words</td>
+                    <td><code>&lt;ui-or label="or"&gt;</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>badge</code></td>
+                    <td>a count or word joined to it</td>
+                    <td><code>&lt;ui-button badge="2"&gt;</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>heading</code></td>
+                    <td>a card's, modal's, message's, toast's ... title</td>
+                    <td><code>&lt;ui-card heading="Hearts"&gt;</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>link</code></td>
+                    <td>where a click goes</td>
+                    <td><code>&lt;ui-card link="game.html"&gt;</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>selector</code></td>
+                    <td>which part of another page or element</td>
+                    <td><code>selector="#notes"</code></td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ul>
+              <li>
+                Each tag's components page lists its words on its API tab, with the old ones each replaced. Coming from
+                Fomantic or Semantic UI:
+                <a href="/ui/README-migrating.md" target="src-ui-readme-migrating-md">the migrating README</a>.
+              </li>
+              <li>
+                Fomantic's classes didn't change, so nothing looks different: a primary colour still draws
+                <code>ui primary button</code> in the shadow root.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="everywhere" label="Attributes every tag takes" sticky collapsible dividing open="false">
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>link, font, tooltip, label and width · 5 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-html">Read &lt;ui-text link="rules.html"&gt;the rules&lt;/ui-text&gt; first.
+It's &lt;ui-text font="bold italic"&gt;free&lt;/ui-text&gt;:  run &lt;ui-text font="code"&gt;spell&lt;/ui-text&gt;.
+&lt;ui-card link="game.html" tooltip="Start a game"&gt;...&lt;/ui-card&gt;
+&lt;ui-icon name="trash" label="Delete"&gt;&lt;/ui-icon&gt;
+&lt;ui-segment id="notes" width="24em" max-height="60vh" movable resizable="height"&gt;...&lt;/ui-segment&gt;</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                <code>link</code> and <code>target</code>: on text, a real link you reach with Tab. On a tag that draws
+                no link of its own, a click goes there.
+              </li>
+              <li>
+                <code>font</code> takes eight words, several at once: bold, italic, underline, strikethrough, code,
+                highlight, subscript, superscript. Inside text, each draws its HTML element, so a screen reader hears
+                it; on any other tag, the look alone.
+              </li>
+              <li>
+                <code>shadow</code>: a hard shadow behind its letters in a hue, <code>shadow="yellow"</code>, a
+                sticker's look for a logo or a title.
+              </li>
+              <li>
+                <code>width</code>, <code>height</code>, and each one's <code>min-</code> and <code>max-</code>: any CSS
+                length. In a row a width is kept, never squeezed; <code>height="fluid"</code> takes what's left of its
+                parent's height. A family with a width of its own keeps it (a column counts columns).
+              </li>
+              <li><code>tooltip</code>: the browser's own tooltip, written as the element's title.</li>
+              <li><code>label</code>: the accessible name, where the family has no label of its own.</li>
+              <li>
+                <code>movable</code>: people can drag it inside its container (bare, <code>horizontally</code> or
+                <code>vertically</code>). <code>resizable</code>: they can drag its corner, the sizes it names. With an
+                <code>id</code>, where each person put it, and the size, is remembered.
+              </li>
+              <li>
+                <code>on-platform="desktop, tablet"</code>: shown only on those devices, following a resize or a turn at
+                once.
+              </li>
+              <li>In Spanish: enlace, destino, letra, ayuda, etiqueta ...</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="spell-ui-rename" label="Rewriting old markup" sticky collapsible dividing open="false">
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>spell ui rename · 2 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-sh">spell ui rename docs/            # a dry run:  lists each file and what it would change
+spell ui rename --write docs/    # rewrites them</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>It reads every old name from the vocabularies themselves, so it keeps no list of its own.</li>
+              <li>
+                It rewrites HTML pages, Markdown, <code>.spell</code> files, CSS selectors and the JSX in TypeScript
+                files: whole tags too (<code>&lt;ui-toc&gt;</code> becomes <code>&lt;ui-toc&gt;</code>).
+              </li>
+              <li>Several old switches on one tag become one appearance.</li>
+              <li>It lists what it can't see, a JSX expression or a tag it can't read, and never guesses.</li>
+              <li>
+                <code>--markup-only</code> leaves escaped markup alone, for pages that quote old names on purpose.
+              </li>
+              <li>A dry run exits 1 when there's something to change.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section
+            id="breadcrumbs-and-floated"
+            label="Breadcrumbs, and floated"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                <code>&lt;ui-breadcrumbs&gt;</code> is the trail, and <code>&lt;ui-breadcrumb&gt;</code> one step.
+              </li>
+              <li>Floated is gone from ten tags: a stack places things left and right instead.</li>
+              <li>
+                <code>&lt;ui-image floated="left"&gt;</code> stays: text wraps round an image, which no stack can do.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="3-the-tags" label="3. Tags for what HTML did" sticky collapsible dividing open="false">
+          <p>
+            Each tag below is written <code>&lt;ui-stack&gt;</code> on a page, and <code>&lt;stack&gt;</code> in a Spell
+            drawing. Each has a components page with its every attribute, its Spanish name and its tests.
+          </p>
+          <ui-section id="tables" label="Table rows and cells" sticky collapsible dividing open="false">
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>A table of rows and cells · 9 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-html">&lt;ui-table celled appearance="striped" client-sort caption="Scores"&gt;
+  &lt;ui-row header&gt;
+    &lt;ui-cell&gt;Player&lt;/ui-cell&gt;&lt;ui-cell&gt;Score&lt;/ui-cell&gt;
+  &lt;/ui-row&gt;
+  &lt;ui-row&gt;
+    &lt;ui-cell header&gt;Ann&lt;/ui-cell&gt;&lt;ui-cell align="right"&gt;12&lt;/ui-cell&gt;
+  &lt;/ui-row&gt;
+  &lt;ui-row footer&gt;&lt;ui-cell span="2"&gt;One player&lt;/ui-cell&gt;&lt;/ui-row&gt;
+&lt;/ui-table&gt;</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>A row with header is the header row; a cell with header is its row's own header.</li>
+              <li>
+                Every table look works as on a native table: celled, striped, padding, selectable, inverted, a colour.
+                It stacks at phone width.
+              </li>
+              <li>Screen readers hear a real table, named by its caption. Sorting moves the row elements.</li>
+              <li>
+                <code>&lt;ui-row&gt;</code> is also the grid's row: in a table it's a table row, in a grid a grid row.
+              </li>
+              <li>
+                <b>The catch:</b> a cell covers columns (<code>span</code>), never rows. A caption draws inside the
+                table's border. Its page:
+                <a href="/components/ui/ui-table.html" target="src-ui-docs-ui-table-html">&lt;ui-table&gt;</a>.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="stack" label="Stack" sticky collapsible dividing open="false">
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>A row of buttons, and one at each end · 7 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-html">&lt;ui-stack direction="horizontal" wrap spacing="sm"&gt;
+  &lt;ui-button&gt;New game&lt;/ui-button&gt;
+  &lt;ui-button&gt;Undo&lt;/ui-button&gt;
+&lt;/ui-stack&gt;
+&lt;ui-stack direction="horizontal" justify="between"&gt;
+  &lt;ui-header&gt;Solitaire&lt;/ui-header&gt;&lt;ui-button&gt;Deal&lt;/ui-button&gt;
+&lt;/ui-stack&gt;</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>A column by default; a horizontal one is a row, and wrap lets it wrap.</li>
+              <li><code>spacing</code>: none to xl, md (1em) by default.</li>
+              <li><code>align</code> lines children up across it: start, center, end, stretch, baseline.</li>
+              <li><code>justify</code> places them along it: start, center, end, between, around.</li>
+              <li><code>fluid</code> takes the full width. No padding, border or colour of its own.</li>
+              <li>
+                Its page:
+                <a href="/components/ui/ui-stack.html" target="src-ui-docs-ui-stack-html">&lt;ui-stack&gt;</a>.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="text" label="Paragraphs, links, quotes and key caps" sticky collapsible dividing open="false">
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>Running text · 7 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-html">&lt;ui-text paragraph&gt;
+  You have 12 points.  Read &lt;ui-link link="rules.html"&gt;the rules&lt;/ui-link&gt;, then press Deal.
+&lt;/ui-text&gt;
+&lt;ui-quote cite="https://example.com/ada"&gt;Imagination is the discovering faculty.&lt;/ui-quote&gt;
+She said &lt;ui-quote inline&gt;go&lt;/ui-quote&gt;.
+Save with &lt;ui-keys shortcut="mod+S"&gt;&lt;/ui-keys&gt;.
+&lt;ui-keys shortcut="mod+S" platform="apple"&gt;&lt;/ui-keys&gt;</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li><code>paragraph</code> on a text makes it a paragraph.</li>
+              <li>A quote is a block, or a phrase with <code>inline</code>; <code>cite</code> says where it's from.</li>
+              <li>
+                <code>&lt;ui-keys&gt;</code> draws a shortcut as key caps, <code>mod</code> as ⌘ on a Mac and Ctrl
+                elsewhere, unless <code>platform</code> says which.
+              </li>
+              <li>
+                Their pages:
+                <a href="/components/ui/ui-text.html" target="src-ui-docs-ui-text-html">&lt;ui-text&gt;</a> (the link is
+                a section of it),
+                <a href="/components/ui/ui-quote.html" target="src-ui-docs-ui-quote-html">&lt;ui-quote&gt;</a>,
+                <a href="/components/ui/ui-keys.html" target="src-ui-docs-ui-keys-html">&lt;ui-keys&gt;</a>.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="page" label="Page" sticky collapsible dividing open="false">
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>A whole window · 7 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-html">&lt;ui-page&gt;
+  &lt;ui-header slot="header" level="1"&gt;Solitaire&lt;/ui-header&gt;
+  &lt;ui-menu slot="nav" direction="vertical"&gt;...&lt;/ui-menu&gt;
+  &lt;ui-stack&gt;... the game ...&lt;/ui-stack&gt;
+  &lt;ui-card slot="aside" heading="Best scores"&gt;&lt;/ui-card&gt;
+  &lt;ui-text slot="footer"&gt;Made with Spell&lt;/ui-text&gt;
+&lt;/ui-page&gt;</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                Its slots are the landmarks screen readers jump between: header, nav, aside, footer. What has no slot is
+                the main content.
+              </li>
+              <li>A Skip to content link comes first, shown only while it has the keyboard's focus.</li>
+              <li>
+                It's a root too, like <code>&lt;ui-root&gt;</code>: it loads what's inside it, and paints the window's
+                background. With no theme set, it follows the system's light or dark.
+              </li>
+              <li>One per page. On a narrow screen, the nav and aside stack above and below the content.</li>
+              <li>
+                Its page: <a href="/components/ui/ui-page.html" target="src-ui-docs-ui-page-html">&lt;ui-page&gt;</a>.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="media" label="Video and audio" sticky collapsible dividing open="false">
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>A video, and a sound played on a click · 3 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-html">&lt;ui-video src="intro.mp4" poster="intro.jpg" captions="intro.vtt" ratio="16/9"&gt;&lt;/ui-video&gt;
+&lt;ui-audio id="deal" src="deal.mp3"&gt;&lt;/ui-audio&gt;
+&lt;ui-button onclick="document.getElementById('deal').play()"&gt;Deal&lt;/ui-button&gt;</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                The browser's own players, each file relative to the page: keyboard, full screen and captions work.
+              </li>
+              <li>A video shows its controls unless <code>controls="false"</code>.</li>
+              <li>Without controls, an audio shows nothing: for a game's sounds.</li>
+              <li>From script: play(), pause() and currentTime; events: ui-play, ui-pause and ui-ended.</li>
+              <li>
+                Autoplay plays only when muted, or after the reader has clicked: browsers allow nothing else. Its page:
+                <a href="/components/ui/ui-video.html" target="src-ui-docs-ui-video-html">&lt;ui-video&gt;</a>.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="terms" label="Terms" sticky collapsible dividing open="false">
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>A card's details · 4 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-html">&lt;ui-terms&gt;
+  &lt;ui-term label="Suit" value="hearts"&gt;&lt;/ui-term&gt;
+  &lt;ui-term label="Owner"&gt;&lt;ui-link link="ann.html"&gt;Ann&lt;/ui-link&gt;&lt;/ui-term&gt;
+&lt;/ui-terms&gt;</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                Labels in one column, values in the next, lined up; <code>horizontal</code> puts the pairs in a row.
+              </li>
+              <li>A value can be anything inside the term; a label slot holds a label with markup.</li>
+              <li>
+                Screen readers hear term and definition. Its page:
+                <a href="/components/ui/ui-terms.html" target="src-ui-docs-ui-terms-html">&lt;ui-terms&gt;</a>.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="caption" label="An image with a caption" sticky collapsible dividing open="false">
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>caption · 1 line</ui-title>
+              <ui-content>
+                <pre><code class="language-html">&lt;ui-image src="deck.png" caption="The deck"&gt;&lt;/ui-image&gt;</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>With a caption it draws a figure and its caption, so screen readers tie the two.</li>
+              <li>A caption slot holds one with markup; an image without one draws as before.</li>
+              <li>
+                Its page:
+                <a href="/components/ui/ui-image.html" target="src-ui-docs-ui-image-html">&lt;ui-image&gt;</a>.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section
+          id="showing-files"
+          label="4. Showing a file, and saving it back"
+          sticky
+          collapsible
+          dividing
+          open="false"
+        >
+          <ui-icon slot="icon" name="file"></ui-icon>
+          <ui-accordion class="spell-code" appearance="styled">
+            <ui-title>Another page's part, a file of code, a Markdown file · 3 lines</ui-title>
+            <ui-content>
+              <pre><code class="language-html">&lt;ui-include source="/docs/part.html" selector="#release"&gt;Loading the release notes...&lt;/ui-include&gt;
+&lt;ui-code language="ts" source="example.ts" line-numbers copy&gt;&lt;/ui-code&gt;
+&lt;ui-markdown source="notes.md" heading-offset="2"&gt;&lt;/ui-markdown&gt;</code></pre>
+            </ui-content>
+          </ui-accordion>
+          <ul>
+            <li>
+              Three tags show a text file:
+              <ul>
+                <li><code>&lt;ui-include&gt;</code> shows another page of the site, or its part a selector matches</li>
+                <li><code>&lt;ui-code&gt;</code> shows highlighted code</li>
+                <li><code>&lt;ui-markdown&gt;</code> shows GitHub-flavoured Markdown</li>
+              </ul>
+            </li>
+            <li>
+              Each takes a <code>source</code> on the same site, or its own text written inside it (<code
+                >&lt;script type="text/plain"&gt;</code
+              >
+              keeps it exact). Each shows a loading and an error state.
+            </li>
+            <li>
+              An included page goes in its own shadow root, so page CSS stays out and Spell UI's tokens still apply;
+              <code>page-styles</code> puts it in the page instead. Its scripts don't run.
+            </li>
+            <li>
+              The engines load only when a page shows code or Markdown: highlight.js, marked, and DOMPurify too with
+              <code>sanitized</code>. A Spell block is coloured where the page has registered Spell's highlighter, as
+              Spell's own pages do.
+            </li>
+            <li>
+              To save one: change its <code>content</code>, then <code>save()</code>. The page decides where it goes:
+              <ul>
+                <li>it registers a saver, <code>UI.sources.saver</code>, which Spell UI doesn't ship;</li>
+                <li>or it cancels the element's <code>ui-save</code> event and saves the text itself.</li>
+              </ul>
+            </li>
+            <li>
+              On Spell's page server, pages save their text files in place. Each save is checked against the file's
+              version, so a file changed underneath is a conflict, not lost work.
+            </li>
+            <li>
+              Their pages:
+              <a href="/components/ui/ui-include.html" target="src-ui-docs-ui-include-html">&lt;ui-include&gt;</a>,
+              <a href="/components/ui/ui-code.html" target="src-ui-docs-ui-code-html">&lt;ui-code&gt;</a>,
+              <a href="/components/ui/ui-markdown.html" target="src-ui-docs-ui-markdown-html">&lt;ui-markdown&gt;</a>;
+              how loading and saving work inside:
+              <a href="/ui/README-runtime.md" target="src-ui-readme-runtime-md">the runtime README</a>.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section
+          id="4-docs-tricks"
+          label="5. Toolbars that fit, zoom, contents and examples"
+          sticky
+          collapsible
+          dividing
+          open="false"
+        >
+          <ui-section id="shrinkable" label="Menus and toolbars that fit" sticky collapsible dividing open="false">
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>A toolbar that fits its row · 4 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-html">&lt;ui-toolbar shrinkable&gt;
+  &lt;ui-item icon="question"&gt;Questions &lt;ui-label slot="badge"&gt;3&lt;/ui-label&gt;&lt;/ui-item&gt;
+  &lt;ui-item&gt;Todos&lt;/ui-item&gt;
+&lt;/ui-toolbar&gt;</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <p>Make the row narrower, and it gives way in four steps:</p>
+            <ol>
+              <li>Every title whole, while they fit.</li>
+              <li>The longest titles are cut first, each ending in "…".</li>
+              <li>
+                Once a title would be cut under 50px, the whole row shows icons only. An item with no icon shows its
+                title's first letter, and each title becomes its item's tooltip.
+              </li>
+              <li>
+                Once even an icon button would be under 34px, every item folds into one "…" button, whose menu holds
+                them all. A dot on it says an item inside has a count.
+              </li>
+            </ol>
+            <ul>
+              <li>
+                A segmented menu doesn't cut its titles: once a choice wouldn't fit, it becomes one button showing the
+                chosen item, opening the same choices.
+              </li>
+              <li>
+                Two tokens set the steps: <code>--ui-menu-title-min</code> (50px) and
+                <code>--ui-menu-item-min</code> (34px).
+              </li>
+              <li>A count that must stay goes in the item's badge slot.</li>
+              <li>Without <code>shrinkable</code>, a toolbar scrolls with ‹ › as before.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="zoom" label="Zoom" sticky collapsible dividing open="false">
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>Anything, shown shrunk, then full size · 4 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-html">&lt;ui-zoom max-width="320px" shrink="50%"&gt;
+  &lt;ui-table&gt;...&lt;/ui-table&gt;
+&lt;/ui-zoom&gt;
+&lt;ui-image src="board.png" alt="The board" zoom&gt;&lt;/ui-image&gt;</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                <code>&lt;ui-zoom&gt;</code> shows what it wraps at half size by default: <code>shrink</code> sets how
+                small, <code>max-width</code> and <code>max-height</code> cut it off.
+              </li>
+              <li>A click shows it full size, over the page; Escape, a click outside or its close button close it.</li>
+              <li><code>&lt;ui-image zoom&gt;</code> is a button: a click (or Enter) shows the image full size.</li>
+              <li>
+                Plain screenshots open full size on any page that loads Spell UI: an <code>&lt;img&gt;</code> shown
+                smaller than it really is, no markup needed.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="grow" label="A textarea that grows" sticky collapsible dividing open="false">
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>grow · 1 line</ui-title>
+              <ui-content>
+                <pre><code class="language-html">&lt;ui-textarea grow max-rows="8" placeholder="Tell me more"&gt;&lt;/ui-textarea&gt;</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>It starts one line tall, and grows a line as the text wraps.</li>
+              <li>At <code>max-rows</code> it stops and scrolls; without it, at a third of the window.</li>
+              <li>It gets shorter again as text goes.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section
+            id="toc-and-example"
+            label="Page contents and live examples"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>A page's contents, and one live example · 4 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-html">&lt;ui-toc heading="Buttons"&gt;&lt;/ui-toc&gt;
+&lt;ui-example heading="Emphasis" description="A primary button is the page's main action."&gt;
+  &lt;ui-button color="primary"&gt;Save&lt;/ui-button&gt;
+&lt;/ui-example&gt;</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                <code>&lt;ui-toc&gt;</code> lists the page's sections and examples as links, opens the one in view and
+                follows the scroll. Each section folds, and the reader's folds are kept.
+              </li>
+              <li>
+                <code>&lt;ui-example&gt;</code> shows its markup live, under a heading and description, with a button
+                that shows the same markup as code.
+              </li>
+              <li>Spanish: <code>&lt;es-indice&gt;</code>, <code>&lt;es-ejemplo&gt;</code>.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="renamed-tags" label="README pictures" sticky collapsible dividing open="false">
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>Drawing a README's examples · 1 line</ui-title>
+              <ui-content>
+                <pre><code class="language-sh">spell readme pictures README.md    # each html example block, drawn light and dark</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                GitHub runs no custom elements, so a README can't show a live example. Instead,
+                <code>spell readme pictures</code> draws each <code>html example</code> block headlessly, light and
+                dark, and puts the picture under it.
+              </li>
+              <li><code>spell readme check</code> fails a picture older than its markup.</li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section
+          id="plain-html"
+          label="6. A plain-HTML copy for search engines"
+          sticky
+          collapsible
+          dividing
+          open="false"
+        >
+          <ui-icon slot="icon" name="search"></ui-icon>
+          <p>
+            Search engines, link previews and readers with JavaScript off get the same page, as plain HTML: no shadow
+            DOM, no script. It looks the same, and its links and forms work.
+          </p>
+          <ui-accordion class="spell-code" appearance="styled">
+            <ui-title>spell ssr pricing.html, what it printed · 6 lines</ui-title>
+            <ui-content>
+              <pre><code class="language-text">Rendering 1 page...
+pricing.static.html
+pricing.html -> pricing.static.html  1.2 kB
+  removed scripts:  inline
+ui.static.css
+ui.static.css  259.3 kB from 308.2 kB, 1 page this run, 6 tags in all</code></pre>
+            </ui-content>
+          </ui-accordion>
+          <ul>
+            <li>
+              <code>spell ssr page.html</code> writes <code>page.static.html</code> beside it, and the folder's shared
+              stylesheet, <code>ui.static.css</code>, which holds only the families its pages use, minified.
+              <ul>
+                <li>Each element becomes its rendered HTML: a card an article, a modal a real dialog.</li>
+                <li>The scripts that load the elements are removed; the page's own scripts stay.</li>
+                <li>Rendering one page again never drops another's styles from the stylesheet.</li>
+              </ul>
+            </li>
+            <li>It never overwrites a page: an output naming an input is refused.</li>
+          </ul>
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <thead>
+                <tr>
+                  <th>Option</th>
+                  <th>Does</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>spell ssr docs/ -o site/</code></td>
+                  <td>every page in a folder (but <code>*.static.html</code>), into another</td>
+                </tr>
+                <tr>
+                  <td><code>-o out.html</code></td>
+                  <td>writes the page there instead</td>
+                </tr>
+                <tr>
+                  <td><code>--inline-css</code></td>
+                  <td>each page's stylesheet in a <code>&lt;style&gt;</code> in the page, no <code>.css</code> file</td>
+                </tr>
+                <tr>
+                  <td><code>--css site/ui.css</code></td>
+                  <td>ONE stylesheet for every page, linked from each</td>
+                </tr>
+                <tr>
+                  <td><code>--no-minify</code></td>
+                  <td>the stylesheet readable, to debug it</td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+          <h4>What works without JavaScript</h4>
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <thead>
+                <tr>
+                  <th>Family</th>
+                  <th>With JavaScript off</th>
+                  <th>How</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>modal, flyout, page dimmer</td>
+                  <td>opens, closes</td>
+                  <td>a native dialog; its buttons get the browser's own commands</td>
+                </tr>
+                <tr>
+                  <td>click popup</td>
+                  <td>opens</td>
+                  <td>a native popover</td>
+                </tr>
+                <tr>
+                  <td>accordion</td>
+                  <td>works</td>
+                  <td><code>&lt;details&gt;</code></td>
+                </tr>
+                <tr>
+                  <td>forms: input, textarea, checkbox, radio, select, dropdown, slider, rating, calendar, search</td>
+                  <td>submit</td>
+                  <td>native controls carry their name and value; a submit button is a real one</td>
+                </tr>
+                <tr>
+                  <td>sticky, progress, reveal</td>
+                  <td>works</td>
+                  <td>CSS</td>
+                </tr>
+                <tr>
+                  <td>sidebar</td>
+                  <td>overlay only</td>
+                  <td>a native dialog; push and uncover need JavaScript</td>
+                </tr>
+                <tr>
+                  <td>dropdown</td>
+                  <td>menu opens</td>
+                  <td>choosing needs JavaScript</td>
+                </tr>
+                <tr>
+                  <td>tabs</td>
+                  <td>the selected pane</td>
+                  <td>the other panes are in the HTML, hidden</td>
+                </tr>
+                <tr>
+                  <td>hover or focus popup</td>
+                  <td>read, not shown</td>
+                  <td>a hidden tooltip a screen reader reads</td>
+                </tr>
+                <tr>
+                  <td>search, shape, slider, element dimmer</td>
+                  <td>static</td>
+                  <td>first state only</td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+          <ul>
+            <li>
+              Spell UI's commands become the browser's own: <code>--show</code> becomes <code>show-modal</code>, so a
+              button opens its dialog with no script at all.
+            </li>
+            <li>Generated ids skip the page's own.</li>
+            <li>
+              <b>The catch:</b> open popups, modals and flyouts render closed. And the static page must never load the
+              elements as well: they'd take the rendered HTML for their content and show it twice.
+            </li>
+            <li>
+              55 of the 62 families render; the rest stay as they are and are listed: <code>ui-code</code>,
+              <code>ui-markdown</code>, <code>ui-include</code>, <code>ui-panel</code>, <code>ui-property-editor</code>,
+              <code>ui-tree-diagram</code>, <code>ui-components</code>.
+            </li>
+            <li>
+              The cost is the stylesheet, most of it the foundation: a page with one button gets 143 kB minified (20 kB
+              gzipped).
+            </li>
+            <li>
+              The same render from your own node code is the <code>SSR</code> namespace, <code>spell/ui/static</code>;
+              serving the files from Flask or Quart:
+              <a href="/ui/README-runtime.md" target="src-ui-readme-runtime-md">the runtime README</a>, "The static
+              render".
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="6-limits" label="7. Limits" sticky collapsible dividing open="false">
+          <ul>
+            <li>
+              <b>No drawing surface yet:</b> shapes, a canvas, charts. Maybe it's just SVG and its own tags; that's for
+              later.
+            </li>
+            <li>
+              <b>A page still in the old names</b> draws them as if they weren't there: run
+              <code>spell ui rename</code>.
+            </li>
+            <li>
+              A link on a tag that draws no link of its own (a segment) is a click only: no Tab stop, no middle-click,
+              no link role. A real link is text with a link, or the link tag.
+            </li>
+            <li>Font's highlight, subscript and superscript show only inside text.</li>
+            <li>Table cells span columns, never rows.</li>
+            <li>Video and audio look like the browser's players, not Spell UI.</li>
+            <li>
+              Fitting titles is checked in Chromium only: its steps are CSS style queries, untried in Firefox and
+              Safari.
+            </li>
+            <li>The "…" button's "More" is read once: a page that turns Spanish after the menu draws keeps "More".</li>
+            <li>A growing textarea doesn't measure again when only its width changes.</li>
+            <li><code>&lt;ui-zoom open&gt;</code> set from script keeps no room in the page while it's open.</li>
+            <li>
+              <code>spell ui rename</code> leaves a few lines for a person: JSX values it can't see, and a button label
+              that could be either.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="7-where" label="8. Where things are" sticky collapsible dividing open="false">
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <thead>
+                <tr>
+                  <th>What</th>
+                  <th>Where</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>every tag's attributes, events and examples</td>
+                  <td><a href="/components/ui/" target="src-ui-docs">the components pages</a></td>
+                </tr>
+                <tr>
+                  <td>the attributes every tag takes</td>
+                  <td>
+                    <a href="/ui/src/vocabulary/SharedVocabulary.ts" target="src-ui-src-vocabulary-sharedvocabulary-ts"
+                      ><code>ui/src/vocabulary/SharedVocabulary.ts</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>the tags</td>
+                  <td>
+                    <a href="/ui/src/components/" target="src-ui-src-components"><code>ui/src/components</code></a
+                    >, a folder each: <code>ui-table</code>, <code>ui-stack</code>, <code>ui-text</code>,
+                    <code>ui-quote</code>, <code>ui-keys</code>, <code>ui-page</code>, <code>ui-video</code>,
+                    <code>ui-terms</code>, <code>ui-zoom</code>, <code>ui-toc</code>,
+                    <code>ui-example</code>
+                  </td>
+                </tr>
+                <tr>
+                  <td>showing a file, and saving it</td>
+                  <td>
+                    <code>ui-include</code>, <code>ui-code</code>, <code>ui-markdown</code>; the loading and the saver,
+                    <a href="/ui/src/runtime/Sources.ts" target="src-ui-src-runtime-sources-ts"
+                      ><code>ui/src/runtime/Sources.ts</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>fitting titles</td>
+                  <td>
+                    <a href="/ui/src/components/ui-menu/TitleFit.ts" target="src-ui-src-components-ui-menu-titlefit-ts"
+                      ><code>ui/src/components/ui-menu/TitleFit.ts</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>the static render</td>
+                  <td>
+                    <a href="/ui/src/static/" target="src-ui-src-static"><code>ui/src/static</code></a
+                    >; the command,
+                    <a href="/ui/src/cli/ssrCommand.ts" target="src-ui-src-cli-ssrcommand-ts"
+                      ><code>ui/src/cli/ssrCommand.ts</code></a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>rewriting old names</td>
+                  <td>
+                    <code>spell ui rename</code>,
+                    <a href="/ui/src/tools/OldNames.ts" target="src-ui-src-tools-oldnames-ts"
+                      ><code>ui/src/tools/OldNames.ts</code></a
+                    >
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+        </ui-section>
+
+        <footer class="spell-doc-footer">
+          <ui-divider></ui-divider>
+          <p class="meta">Updated 2026-11-21.</p>
+        </footer>
+      </main>
+    </div>
+    <script src="/_epic/assets/highlight.min.js"></script>
+    <script src="/_epic/assets/spell-ui.js"></script>
+  </body>
+</html>

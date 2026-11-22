@@ -2,7 +2,7 @@
  * `yarn tsx src/tools/bundle-experiment.ts <entry.ts> [<out.js>]` (from spell-epic's root):  a guide's own live elements as
  * ONE classic script, built from a TypeScript entry in the guide's `experiments/` folder.
  *
- *     yarn tsx src/tools/bundle-experiment.ts ../spell.epics/guides/custom-elements/experiments/custom-elements.entry.ts
+ *     yarn tsx src/tools/bundle-experiment.ts ../guides/custom-elements/experiments/custom-elements.entry.ts
  *
  * - What it's for:  a page that teaches with WORKING elements of its own (the custom elements guide's
  *   `<ui-counter>`) loads the script right after `spell-ui.js`;  the elements it defines extend the page's own

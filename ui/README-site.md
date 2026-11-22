@@ -20,11 +20,11 @@ Here an example is markup in a plain HTML page, and the page server sends that p
 nothing is built between saving a page and reading it.
 The one thing built is a bundle every page loads, and the page server builds that itself when its sources change.
 
-There are 84 pages, with 1,740 live examples (counted 2026-10-21):
-- a page per family, 62 of them, each named for its main tag and laid out as fomantic-ui.com's are
-- a page of its own for 14 sub-tags:  `ui-radio`, `ui-textarea` and the content parts
-- eight more:  the home page, getting started, the class grammar, theming, utilities, icons,
-  the component index and the kitchen sink
+There are 121 pages, with 2,159 live examples (counted 2026-11-21):
+- a page per family, 96 of them, each named for its main tag and laid out as fomantic-ui.com's are
+- a page of its own for 15 sub-tags:  `ui-radio`, `ui-textarea` and the content parts
+- ten more:  the home page, getting started, the class grammar, theming, utilities, icons, the palette,
+  the theme bench, the component index and the kitchen sink
 
 Each family's page has four tabs, Examples, Usage, API and Theming, and an "On this page" rail beside them.
 A left nav lists every component, A-Z or by topic, with a search.
@@ -178,8 +178,9 @@ What a page can count on:
 - Links are written as from the page's served address:
   `_assets/` is beside it, `../../` is the page server's root, `../epics/epic-item.html` another set's page.
 - `<ui-root>` loads every family on first use, the doc-only `<ui-docs-*>` elements included:
-  `api`, `example`, `inspector`, `nav`, `search`, `toc` and `tokens`, in [their folder](src/docs-components/).
-  - The theme menu was one of them until epic `debut` P17:  `<ui-theme-menu>` is a real element now.
+  `api`, `index`, `inspector`, `nav`, `search`, `theme-bench` and `tokens`, in [their folder](src/docs-components/).
+  - Three were among them once, and are real elements now:
+    `<ui-theme-menu>` (epic `debut` P17), `<ui-example>` and `<ui-toc>` (epic `ui-gaps` P14).
   They read the site's data, [components.json5](docs/__data/components.json5), never the vocabularies.
 - The layout's root is `<ui-root class="site" stack-with="page" ...>`,
   so an example that stacks on a narrow screen stacks by the SCREEN's width, as on fomantic-ui.com,
@@ -617,6 +618,7 @@ so they need a checkout with the epic folder and the page server running (above)
 
 ## See also
 
+- The guide:  [Spell UI's Docs Site](../guides/spell-ui-pages.html), in the kit's guides/ folder
 - [README.md](README.md):  Spell UI's front page, for what the elements are before the pages about them
 - [README-components.md](README-components.md):  every family with a picture, the catalogue `yarn readme:components` writes
 - [The kit's README/server.md](https://github.com/spell-app/spell/blob/main/README/server.md):  the page server the site runs on, its addresses and its live reload

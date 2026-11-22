@@ -325,9 +325,7 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
           part={this.partForName("tree")}
           appearance={this.appearance}
           label={this.label ?? this.translationForKey("label")}
-          on-ui-selecting={(event: CustomEvent<{ item: HTMLElement | UIT.TreeItemData }>) => this.onSelecting(event)}
-          on-ui-opening={(event: CustomEvent<{ open: boolean }>) => this.onOpening(event, true)}
-          on-ui-closing={(event: CustomEvent<{ open: boolean }>) => this.onOpening(event, false)}
+          ref={(tree: HTMLElement) => this.listenToTree(tree)}
         >
           <For each={this.sitePages} keyed={UISiteNav.keyOf}>
             {(page) => this.row(page, () => this.sitePages)}
@@ -335,6 +333,16 @@ export class UISiteNav extends E.UIComponent<typeof siteNavVocabulary> {
         </ui-tree>
       </nav>
     )
+  }
+
+  /**
+   * Hear its tree's choices and folds:  a ref, not `on-ui-selecting={f}`,
+   * so Solid's dev build logs no `LOWERCASE_EVENT_ATTRIBUTE` (solid-2.md, "Events").
+   */
+  private listenToTree(tree: HTMLElement) {
+    tree.addEventListener("ui-selecting", (event) => this.onSelecting(event as CustomEvent))
+    tree.addEventListener("ui-opening", (event) => this.onOpening(event as CustomEvent, true))
+    tree.addEventListener("ui-closing", (event) => this.onOpening(event as CustomEvent, false))
   }
 
   /** One page's row, and its pages' rows inside it;  `siblings`, the pages beside it, itself among them. */

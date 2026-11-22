@@ -1,0 +1,24 @@
+"icon-browser api" is a notebook page
+	<header level="1">
+		Icon Browser
+		<header>An icon browser shows every icon of a pack, to search through: clicking one copies the name that draws it.</>
+	</>
+
+	<!-- API:  generated from the vocabularies (`site/_data/components.json5`);  nothing to write. -->
+	<section label="Attributes">
+		<html>
+			<ui-docs-api family="ui-icon-browser" only="attributes"></>
+		</>
+	</>
+
+	<section label="Parts">
+		<html>
+			<ui-docs-api family="ui-icon-browser" only="parts"></>
+		</>
+	</>
+
+	<section label="Texts">
+		<html>
+			<ui-docs-api family="ui-icon-browser" only="texts"></>
+		</>
+	</>

@@ -153,6 +153,7 @@
         {"id":"spell-ui-s-own-device","title":"Device","parent":68},
         {"id":"spell-ui-s-own-dimension","title":"Dimension","parent":68},
         {"id":"spell-ui-s-own-example","title":"Example","parent":68},
+        {"id":"spell-ui-s-own-icon-browser","title":"Icon Browser","parent":68},
         {"id":"spell-ui-s-own-icon-picker","title":"Icon Picker","parent":68},
         {"id":"spell-ui-s-own-keys","title":"Keys","parent":68},
         {"id":"spell-ui-s-own-markdown","title":"Markdown","parent":68},
@@ -181,7 +182,7 @@
     {
       "path": "palette.html",
       "title": "Palette groups",
-      "summary": "The Spell editor's palette, a column per group:  drag components between groups, reorder, rename, add or remove groups, then save.",
+      "summary": "The Spell editor's palette groups moved into the editor:  its own page, at /palette.",
       "sections": [
         {"id":"palette-groups","title":"The palette's groups"}
       ]
@@ -1766,6 +1767,25 @@
         {"id":"api-slots","title":"Slots","tab":"api"},
         {"id":"api-parts","title":"Parts","tab":"api"},
         {"id":"api-states","title":"States","tab":"api"},
+        {"id":"theming-tokens","title":"Tokens","tab":"theming"},
+        {"id":"theming-themes","title":"Themes","tab":"theming"}
+      ]
+    },
+    {
+      "path": "ui-icon-browser.html",
+      "title": "Icon Browser",
+      "summary": "An icon browser shows every icon of a pack, to search through:  clicking one copies the name that draws it.",
+      "tag": "ui-icon-browser",
+      "tabs": {"examples":"Examples","usage":"Usage","api":"API","theming":"Theming"},
+      "sections": [
+        {"id":"examples-types","title":"Types","tab":"examples"},
+        {"id":"examples-types-icon-browser","title":"Icon Browser","parent":0},
+        {"id":"usage-using-it","title":"Using it","tab":"usage"},
+        {"id":"usage-keyboard","title":"Keyboard","tab":"usage"},
+        {"id":"usage-accessibility","title":"Accessibility","tab":"usage"},
+        {"id":"api-attributes","title":"Attributes","tab":"api"},
+        {"id":"api-parts","title":"Parts","tab":"api"},
+        {"id":"api-texts","title":"Texts","tab":"api"},
         {"id":"theming-tokens","title":"Tokens","tab":"theming"},
         {"id":"theming-themes","title":"Themes","tab":"theming"}
       ]

@@ -9,7 +9,13 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 
 import { openInChromeTab } from "spell/server/open"
 import { RealPath, pathInside } from "spell/server/RealPath"
-import { componentSetAddressOf, componentSetFileOf, pageServerRoot, settingsParts } from "spell/server/page/settings"
+import {
+  componentSetAddressOf,
+  componentSetFileOf,
+  kitOf,
+  pageServerRoot,
+  settingsParts
+} from "spell/server/page/settings"
 import { Window, envCheckout } from "spell/epic/window.mjs"
 import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
@@ -84,13 +90,28 @@ export const REPO_TEMPLATES = repoTemplatesOf(ROOT)
 export const GUIDES = join(CONTENT, "guides")
 
 /**
+ * The checkout whose own guides folder counts:  the kit, when `ROOT` is one of its folders (the tools run from
+ * `epic/`, as `check-spell.js` is), else `ROOT`.
+ */
+const GUIDES_CHECKOUT = kitOf(ROOT) ?? ROOT
+
+/**
  * The checkout's OWN guides folder, when its repo names one (`guidesFolder` in `.epic/config.json5`:  the kit's
  * `guides/`;  epic `epic-engine` P79), else `undefined`.
  * - guides versioned with the code:  a worktree's are its branch's
  * - their page paths are from the checkout's root (`guides/x.html`, `pagePath()`), the same as the epic folder's
  *   guides', so a guide moved here keeps its address;  the code's copy wins (`pageAt()`, `findPages()`)
  */
-export const CODE_GUIDES = EpicConfig.guideFoldersOf(ROOT).find((each) => each.code)?.folder
+export const CODE_GUIDES = EpicConfig.guideFoldersOf(GUIDES_CHECKOUT).find((each) => each.code)?.folder
+
+/**
+ * The epic plugin's own guides folder (`EpicConfig.pluginGuides()`:  the engine's `guides/`;  epic `epic-engine`
+ * T130), when it's there, else `undefined`.
+ * - about the epic tooling:  shipped with the plugin, read in VS Code's Epic Docs tab, never in the Spell app's list
+ * - their page paths are from the engine's folder (`guides/plan-docs/plan-docs.html`):  the addresses they had in the
+ *   epic folder, which the plugin's engine route `/guides/` serves
+ */
+export const PLUGIN_GUIDES = EpicConfig.guideFoldersOf(GUIDES_CHECKOUT).find((each) => each.plugin)?.folder
 
 /** `pages/`:  the home page (`HOME`) and the scratch details pages (`DETAILS`). */
 export const PAGES = join(CONTENT, "pages")
@@ -125,14 +146,18 @@ export const SAGAS = join(CONTENT, "sagas")
 export const AREAS = [
   PAGES,
   ...(CODE_GUIDES ? [CODE_GUIDES] : []),
+  ...(PLUGIN_GUIDES ? [PLUGIN_GUIDES] : []),
   GUIDES,
   EPICS,
   TEMPLATES,
   ...(REPO_TEMPLATES ? [REPO_TEMPLATES] : [])
 ]
 
-/** Every folder guides are in:  the checkout's own first (`CODE_GUIDES`), then the epic folder's (`GUIDES`). */
-export const GUIDE_FOLDERS = [...(CODE_GUIDES ? [CODE_GUIDES] : []), GUIDES]
+/**
+ * Every folder guides are in:  the checkout's own first (`CODE_GUIDES`), the epic plugin's (`PLUGIN_GUIDES`), then the
+ * epic folder's (`GUIDES`).
+ */
+export const GUIDE_FOLDERS = [...(CODE_GUIDES ? [CODE_GUIDES] : []), ...(PLUGIN_GUIDES ? [PLUGIN_GUIDES] : []), GUIDES]
 
 /**
  * Each area's list page, `<area>/index.html`, written by `index.js` (claude-design P5).
@@ -198,7 +223,12 @@ export function pagePath(file) {
   const inSet = SETS.pageFor(path) ?? SETS.pageFor(RealPath.of(path), RealPath.of)
   if (inSet !== undefined) return inSet
   const content = insideContent(path)
-  return (content ?? relative(ROOT, path)).split(sep).join("/")
+  // a guide in the checkout's own guides folder:  from that checkout's root, as the page server serves it
+  const code = CODE_GUIDES && pathInside(CODE_GUIDES, path) !== undefined ? relative(GUIDES_CHECKOUT, path) : undefined
+  // a guide of the epic plugin's:  from the engine's folder, as its engine route serves it (`/guides/...`)
+  const plugin =
+    PLUGIN_GUIDES && pathInside(PLUGIN_GUIDES, path) !== undefined ? relative(dirname(PLUGIN_GUIDES), path) : undefined
+  return (content ?? code ?? plugin ?? relative(ROOT, path)).split(sep).join("/")
 }
 
 /**
@@ -245,13 +275,14 @@ export function pageAt(path) {
 }
 
 /**
- * The checkout's own copy of guide page path `path` (`guides/x.html`), when it has one (`CODE_GUIDES`);  else
- * `undefined`.
+ * The checkout's own copy of guide page path `path` (`guides/x.html`), when it has one (`CODE_GUIDES`), else the
+ * epic plugin's (`PLUGIN_GUIDES`);  else `undefined`.
  */
 function codeGuideAt(path) {
-  if (!CODE_GUIDES) return undefined
-  const file = resolve(ROOT, path)
-  return pathInside(CODE_GUIDES, file) !== undefined && existsSync(file) ? file : undefined
+  const code = CODE_GUIDES && resolve(GUIDES_CHECKOUT, path)
+  if (code && pathInside(CODE_GUIDES, code) !== undefined && existsSync(code)) return code
+  const plugin = PLUGIN_GUIDES && resolve(dirname(PLUGIN_GUIDES), path)
+  return plugin && pathInside(PLUGIN_GUIDES, plugin) !== undefined && existsSync(plugin) ? plugin : undefined
 }
 
 /**

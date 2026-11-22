@@ -1,0 +1,1384 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Epic Pages, a Tour</title>
+    <meta
+      name="description"
+      content="How an epic page works and how to review one:  its parts, its items and their colours, every review button by kind, Send and Auto Send, what the session and its agents do with your marks, finding your way, and working offline.  With live examples."
+    />
+    <meta name="spell-voice" content="readme 2026-11-21" />
+    <meta name="spell-saga" content="epics" />
+    <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+  </head>
+  <body class="spell-doc-page">
+    <ui-root
+      ><ui-components source="/_epic/pack/epics.pack.js"></ui-components><spell-site-header></spell-site-header>
+      <div class="spell-doc">
+        <main class="spell-doc-main">
+          <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+            <ui-breadcrumb>Guides</ui-breadcrumb>
+            <ui-breadcrumb selected>Epic Pages, a Tour</ui-breadcrumb>
+          </ui-breadcrumbs>
+          <ui-sticky class="spell-h1"
+            ><header class="spell-page-head"><h1>Epic Pages, a Tour</h1></header></ui-sticky
+          >
+          <epic-item
+            id="i4"
+            title="Folding an item from its stuck line made the page jump down"
+            status="open"
+            state="replied"
+            fixed
+            requested
+          >
+            <p>Fold an item you'd scrolled into, and everything moved up under you by as much as you'd read.</p>
+            <epic-net-effect
+              ><ul>
+                <li>folding keeps the item's line where it is on screen</li>
+              </ul></epic-net-effect
+            >
+            <epic-status slot="status" state="done" at="2026-10-09 21:40" done-at="2026-10-09 21:52"
+              ><p>Taken up at once: agent <code>airplane-fold</code> is on it.</p>
+              <p slot="summary">
+                Folding now scrolls the item's line back to where it was. Fixed for your review.
+              </p></epic-status
+            >
+          </epic-item>
+          <p class="lede">
+            That orange chip is an issue an agent fixed while you were doing something else. On a real epic page it
+            carries two buttons: Accept the fix closes it, and Revisit, with a note, sends it back.
+          </p>
+          <p>
+            An epic page is the plan, the questions only you can settle, the calls the agent made without you, and the
+            record of what was built, on ONE page the agent keeps true as it works. An issue tracker and a pull-request
+            thread split those four across two tools, and the open ones get buried.
+          </p>
+          <p>Here you review item by item, when you have time, and the answers come back INTO the items.</p>
+          <ui-list class="spell-meta">
+            <ui-item icon="book"
+              ><b>The reference:</b> <a href="/epic/README-pages.md" target="src-epic-readme-pages-md">README-pages</a>,
+              every control's table;
+              <a href="/epic/README-skills.md" target="src-epic-readme-skills-md">README-skills</a>, the session and its
+              agents</ui-item
+            >
+            <ui-item icon="user">Written for: you, reviewing epic pages, with Claude listening or not</ui-item>
+            <ui-item icon="flask">Checked: 2026-11-21, every command and example against that day's code</ui-item>
+            <ui-item icon="eye"
+              >Examples: LIVE, drawn by the same <code>&lt;epic-*&gt;</code> elements an epic page uses; click a line to
+              unfold it. Review buttons show only on a real epic page being reviewed, never in a guide.</ui-item
+            >
+          </ui-list>
+
+          <ui-section
+            id="1-first-review"
+            label="1. Your first review, in four moves"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ui-icon slot="icon" name="map"></ui-icon>
+            <ui-steps class="spell-steps" ordered direction="vertical">
+              <ui-step
+                heading="Start"
+                description="In Claude Code, type /epic review <name>.  The page opens in VS Code's side bar, the Review tab, and the session starts listening."
+              ></ui-step>
+              <ui-step
+                heading="Mark"
+                description="Open an item and press one of its buttons, or type in its note box.  The button goes DASHED:  saved on the page server, not sent."
+              ></ui-step>
+              <ui-step
+                heading="Send"
+                description="Press the paper plane in the header's middle, or leave the page alone:  Auto Send sends by itself after 2 minutes.  Dashed turns OUTLINED:  the session has it."
+              ></ui-step>
+              <ui-step
+                heading="Watch the item"
+                description="Approvals and new todos land as the session wakes, and the buttons clear.  A revisit comes back as an answer in the item, under a card that goes from blue (on it) to green (done)."
+              ></ui-step>
+            </ui-steps>
+            <ul>
+              <li>
+                Mark for an hour and send once: every key, click or scroll restarts Auto Send's wait, and a note box
+                you're typing in holds it. To send only when you press it, set the gear's Auto Send to Off.
+              </li>
+              <li>
+                An epic's own session listens by itself whenever it's open. Send with nobody listening, and the page
+                server types <code>/epic review &lt;name&gt;</code> into the epic's session for you; you press Enter.
+              </li>
+              <li>
+                Claude's answers go into the items, not the chat: the chat only links them, so a long review stays
+                readable.
+              </li>
+            </ul>
+            <p>
+              The catch: your marks wait in a file on THIS machine until they're applied. Mark on the laptop, press Send
+              on the desktop, and the desktop has nothing to send.
+            </p>
+          </ui-section>
+
+          <ui-section
+            id="2-the-page"
+            label="2. The header and toolbar never scroll away"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ui-icon slot="icon" name="layer group"></ui-icon>
+            <p>
+              They stick to the top as you scroll, so where the build stands and where you're needed are one glance up.
+              Nothing in them is written by hand: each draws itself from the page's data.
+            </p>
+
+            <ui-section
+              id="the-header"
+              label="The header says where the build is"
+              sticky
+              collapsible
+              dividing
+              open="false"
+            >
+              <ul>
+                <li>
+                  At the left, one line of crumbs, <code>DOCS / EPICS / &lt;NAME&gt;</code>. A click on the name copies
+                  <code>/epic resume &lt;name&gt;</code>.
+                </li>
+                <li>
+                  In the middle, while the page is reviewed: Send, the paper plane (section 6), and nothing beside it,
+                  so a long epic name never gets cut off.
+                </li>
+                <li>
+                  At the right, the step pill: the phase under way (<code>P13</code>), else the next one to do, DONE,
+                  FUTURE or STANDING. While the plan is still being agreed, it says the stage instead, OVERVIEW or
+                  PHASES.
+                  <ul>
+                    <li>Red when every phase is done but items still need you.</li>
+                    <li>Grey when the epic is paused, untouched for 3 days.</li>
+                    <li>
+                      ONE spinner says Claude is busy: while a phase builds, or the session is at other work, the pill's
+                      own icon turns, and its tooltip's last line says what Claude is on (<code
+                        >Claude: Building P35</code
+                      >); while it answers what you sent, a blue arc round the plane instead.
+                    </li>
+                  </ul>
+                </li>
+                <li>
+                  After it, while agents the epic started are running, their count and a robot, <code>2 🤖</code>. A
+                  click opens a popover, a row per agent with its task and a box whose words reach that agent mid-task
+                  (section 7).
+                </li>
+                <li>The gear: Focus mode (while the page is reviewed), Auto Send's wait, and the page's theme.</li>
+              </ul>
+            </ui-section>
+
+            <ui-section
+              id="the-toolbar"
+              label="The toolbar says where you're needed"
+              sticky
+              collapsible
+              dividing
+              open="false"
+            >
+              <ul>
+                <li>
+                  An icon per section jumps there. A red badge on it counts what needs you; an orange one, what's your
+                  turn to pick, review or see.
+                </li>
+                <li>
+                  At its right, a chip per colour of item with the whole page's count; each section has its own over its
+                  list.
+                  <ul>
+                    <li>A click toggles that chip: its items hide or show, and the others stay as they are.</li>
+                    <li>Option-click (Alt-click) shows only that group.</li>
+                    <li>The blues toggle together, and so do the oranges and the greys.</li>
+                    <li>
+                      Turn off the last chip showing, and the next one in the row turns on: a list is never empty by
+                      accident.
+                    </li>
+                  </ul>
+                </li>
+                <li>Then one button that unfolds every section, or folds them all again.</li>
+                <li>No new-item button here: each item section has its own at its end (New todo, New issue ...).</li>
+              </ul>
+            </ui-section>
+
+            <ui-section
+              id="the-meta"
+              label="Under them, how to start and where the work lives"
+              sticky
+              collapsible
+              dividing
+              open="false"
+            >
+              <ul>
+                <li>
+                  The meta lines: the review command (<code>/epic review &lt;name&gt;</code>, copied on a click), the
+                  branch and worktree, the dates, the saga it serves, and the epic's guide once Doc Review has written
+                  it.
+                </li>
+                <li>An orange pill under the first line when marks are waiting and no session is reviewing.</li>
+                <li>
+                  See Also: the pages the epic made or leans on (its guide, its details and choice pages, the guides it
+                  links), gathered by the page server each time it serves the page.
+                </li>
+                <li>While the plan is still being written, a folded "Plan hung?" notice says how to restart it.</li>
+              </ul>
+            </ui-section>
+          </ui-section>
+
+          <ui-section
+            id="3-sections"
+            label="3. Eight sections, and their ids never change"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ui-icon slot="icon" name="list ol"></ui-icon>
+            <p>
+              An issue tracker lets every project invent its labels. Every epic page has the same eight sections, in
+              this order, with the same ids: a link to <code>#todos</code> lands on the todos of any epic page, a year
+              from now.
+            </p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Section</th>
+                    <th>Its link</th>
+                    <th>What it holds</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>1. Overview</td>
+                    <td><code>#overview</code></td>
+                    <td>
+                      a two-sentence summary, the kickoff prompt (folded), the estimate added up from the phases, then
+                      the plan in numbered sub-sections (<code>#o1</code> ...)
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>2. Phases</td>
+                    <td><code>#phases</code></td>
+                    <td>a block per phase, <code>P1 · Short Name</code> (section 4)</td>
+                  </tr>
+                  <tr>
+                    <td>3. Questions (<code>Q1</code> ...)</td>
+                    <td><code>#decisions</code></td>
+                    <td>what only you can decide; the answered ones are the decisions</td>
+                  </tr>
+                  <tr>
+                    <td>4. Judgement calls (<code>J1</code> ...)</td>
+                    <td><code>#judgements</code></td>
+                    <td>choices the agent made without you, "chose X over Y because Z"</td>
+                  </tr>
+                  <tr>
+                    <td>5. Todo (<code>T1</code> ...)</td>
+                    <td><code>#todos</code></td>
+                    <td>work still to do, and limits the plan accepts (marked <code>limit</code>, drawn grey)</td>
+                  </tr>
+                  <tr>
+                    <td>6. Issues (<code>I1</code> ...)</td>
+                    <td><code>#issues</code></td>
+                    <td>problems found, open until fixed</td>
+                  </tr>
+                  <tr>
+                    <td>7. Manual tests (<code>M1</code> ...)</td>
+                    <td><code>#tests</code></td>
+                    <td>what you check by hand before merging: a Step, and what it Should do</td>
+                  </tr>
+                  <tr>
+                    <td>8. Log</td>
+                    <td><code>#log</code></td>
+                    <td>one entry per commit, newest first, with a chip per phase and item it names</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <p>Three more show only when they have something to say, and the eight never move for them:</p>
+            <ul>
+              <li>
+                <b>0. While you were out</b> (<code>#away</code>), above the Overview: what Claude did since you last
+                pressed Done reading, and what needs you now, a Read on each line. A finished phase ages out of it after
+                3 days.
+              </li>
+              <li>
+                <b>Choices</b> (<code>#choices</code>), between the Overview and the Phases: an open-ended list you pick
+                from, round after round.
+              </li>
+              <li>
+                <b>A report</b>, after the Overview: what a run wrote for you, like an overnight <code>/bedtime</code>.
+              </li>
+            </ul>
+            <ul>
+              <li>
+                Every phase and item has a short id, so you can name it in chat: "start P3", "J7 is fine". An id never
+                changes, and is never reused.
+              </li>
+              <li>A decision (<code>D7</code>) is a question born answered: it lives in the Questions.</li>
+            </ul>
+            <p>
+              A section hides while it's empty, and shows the moment it holds something. While you review, an empty
+              section with a New button stays, so you can add the first item.
+            </p>
+          </ui-section>
+
+          <ui-section id="4-phases" label="4. Phases, and agreeing the plan" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="flag checkered"></ui-icon>
+            <p>
+              No plan mode, and no plan in a chat: a new epic is agreed on its page, from its first minute, in three
+              stages. Each ends with your Accept.
+            </p>
+            <p>Start one with <code>/epic &lt;name&gt;</code> alone, and its Overview opens with a kickoff box.</p>
+            <ul>
+              <li>
+                Type what the epic should do, and paste or drop in any pictures: each gets a label, IMG1, IMG2 ...
+              </li>
+              <li>Press Send. The agent takes your words as its kickoff prompt, and starts planning.</li>
+            </ul>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Stage</th>
+                    <th>What's different</th>
+                    <th>How it ends</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>overview</code></td>
+                    <td>its phases, if any, are titled <code>P1. DRAFT: ...</code></td>
+                    <td>Accept Overview, on the Overview's title row</td>
+                  </tr>
+                  <tr>
+                    <td><code>phases</code></td>
+                    <td>each phase has Looks good and Defer; Accept and Defer once its build plan is up</td>
+                    <td>Accept Phases, on the Phases title row: one press takes the phases and every plan waiting</td>
+                  </tr>
+                  <tr>
+                    <td><code>building</code></td>
+                    <td>each phase still to do has Do this and Revisit</td>
+                    <td>every phase built, one after another, with no stop between them</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ul>
+              <li>
+                An Accept counts down 5 minutes, a green ring round its thumbs up, whatever Auto Send is set to. A
+                second press calls it off.
+                <ul>
+                  <li>When the ring ends it sends by itself.</li>
+                  <li>
+                    Press Send before then, and the Accept goes with it at once; Auto Send's own countdown never carries
+                    it early.
+                  </li>
+                </ul>
+              </li>
+              <li>The Accept's tooltip counts the open questions: a reminder, never a lock.</li>
+              <li>
+                Each answer to a question rewrites the Overview, its changed words orange for 3 days: nothing to
+                approve.
+              </li>
+              <li>
+                A plan you accepted shows a green thumbs up. Click it to hold the phase: it turns grey, with a pause
+                circle, is never built and never counted as waiting on you, until you accept its plan again.
+              </li>
+            </ul>
+
+            <ui-section id="phase-fields" label="What a phase says" sticky collapsible dividing open="false">
+              <ui-table celled padding="compact" appearance="striped" unstackable>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Field</th>
+                      <th>Says</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Symptom</td>
+                      <td>what's wrong today, one line</td>
+                    </tr>
+                    <tr>
+                      <td>Requests</td>
+                      <td>what you sent it from other sessions (<code>/send</code>), your words and screenshots</td>
+                    </tr>
+                    <tr>
+                      <td>Goal</td>
+                      <td>one bullet per outcome, in your terms: what you'll see or be able to do</td>
+                    </tr>
+                    <tr>
+                      <td>Changes</td>
+                      <td>what changes, two or three lines</td>
+                    </tr>
+                    <tr>
+                      <td>Update blocks</td>
+                      <td>each change to the phase's plan, dated, after the Goal; kept once the phase is done</td>
+                    </tr>
+                    <tr>
+                      <td>Build plan</td>
+                      <td>Claude's plan for building it, once written, waiting for your Accept</td>
+                    </tr>
+                    <tr>
+                      <td>Done, Commits</td>
+                      <td>written when it's built: what was built and where to look first, then its commits</td>
+                    </tr>
+                    <tr>
+                      <td>Files, Verify</td>
+                      <td>
+                        where the work goes and how it's checked: shown from the Phases title's gear, or the phase's own
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </ui-table>
+              <ul>
+                <li>
+                  The badge on the title is the estimate; once done, the time Claude took (<code>21m</code>), the
+                  estimate its tooltip. Done but not merged: a blue <code>not on main</code> pill before it.
+                </li>
+                <li>
+                  A phase takes ONE colour, the first that holds: red, a choice open in it; orange, its plan waits for
+                  your Accept, or it changed since you looked; blue, under way; dotted blue, still to do; green, done in
+                  the last 3 days; grey, done longer ago, or held.
+                </li>
+                <li>While a phase is under way, whatever it changed wears an orange UPDATE label.</li>
+                <li>
+                  A phase is marked done only with proof: its Done list ends with a <code>Checked:</code> bullet saying
+                  what was run and what it showed, and a plan-check agent compares what was built with the accepted plan
+                  first, listing what's missing and what's extra.
+                </li>
+              </ul>
+              <p>Live, a phase being built and one done:</p>
+              <epic-phase id="p2" title="Plan-Doc Notes" status="active" estimate="2-3h">
+                <epic-field name="symptom">On a plane, you can't leave a note on a phase or the summary.</epic-field>
+                <epic-field name="goal"
+                  ><ul>
+                    <li>a note on any phase, or the summary, from its own buttons</li>
+                    <li>a new todo or question from the page, made at the next review</li>
+                  </ul></epic-field
+                >
+                <epic-field name="changes"
+                  >The summary and every phase take Revisit; each item section gets a New button.</epic-field
+                >
+                <epic-update id="up1" at="2026-10-09 18:20" summary="New items wait in the inbox"
+                  ><p>New items wait in the inbox like any mark, so they work offline.</p></epic-update
+                >
+                <epic-field name="verify">Mark a phase and the summary; send; check the inbox.</epic-field>
+              </epic-phase>
+              <epic-phase id="p1" title="Offline Pages" status="done" estimate="1h" took="38m">
+                <epic-field name="symptom"
+                  >Pages fetched highlight.js from the internet, and hung with no wifi.</epic-field
+                >
+                <epic-field name="goal"
+                  ><ul>
+                    <li>every page opens offline, code coloured</li>
+                  </ul></epic-field
+                >
+                <epic-field name="changes">The page server serves the repo's own copy.</epic-field>
+                <epic-field name="done"
+                  ><ul>
+                    <li>Open any guide with Wi-Fi off: the code is coloured at once.</li>
+                  </ul></epic-field
+                >
+                <epic-commit sha="c97cf020226ee3e5da6b3a3c0830c7da2d3e8901"
+                  >The page server swaps the remote highlight.js for the repo's copy.</epic-commit
+                >
+              </epic-phase>
+            </ui-section>
+          </ui-section>
+
+          <ui-section
+            id="5-items"
+            label="5. Items, and what their colours mean"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ui-icon slot="icon" name="list check"></ui-icon>
+            <p>An item is one line: a fold arrow, its coloured id chip, its title. Click the line to unfold it.</p>
+            <p>
+              Every title says what the item is, read cold, hours later: at most 30 words, one sentence, no list joined
+              with semicolons. The <code>epic</code> tool refuses a longer one when it adds or retitles an item.
+            </p>
+
+            <ui-section id="item-kinds" label="Kinds" sticky collapsible dividing open="false">
+              <p>Five kinds, one element: the id's first letter is the kind. Live, one of each:</p>
+              <epic-item
+                id="q3"
+                title="Should a reload land on the section you were reading?"
+                status="open"
+                state="attention"
+              >
+                <epic-question
+                  ><p>A reload jumps back to the top today. Should it land where you were?</p></epic-question
+                >
+                <epic-choices>
+                  <epic-option letter="A" title="Land and unfold it" recommended
+                    ><ul>
+                      <li>the page opens where you left it</li>
+                    </ul></epic-option
+                  >
+                  <epic-option letter="B" title="Stay at the top"
+                    ><ul>
+                      <li>nothing changes</li>
+                    </ul></epic-option
+                  >
+                </epic-choices>
+                <epic-net-effect option="A" recommended
+                  ><ul>
+                    <li>a reload lands on the section in the address, unfolded</li>
+                  </ul></epic-net-effect
+                >
+              </epic-item>
+              <epic-item id="j7" title="New items wait in the inbox as ordinary marks" status="open" state="attention">
+                <p>Chose a mark of its own kind over a separate file, so new items work offline and go with Send.</p>
+                <epic-net-effect
+                  ><ul>
+                    <li>a new todo shows dashed at the end of its section until Claude makes it</li>
+                  </ul></epic-net-effect
+                >
+              </epic-item>
+              <epic-item id="t4" title="Keep a draft of the new-item form across a reload" status="open" state="open">
+                <p>A reload while typing in the form loses the text.</p>
+              </epic-item>
+              <epic-item
+                id="i1"
+                title="The progress bar's label is cut off at its left end"
+                status="open"
+                state="progress"
+                working
+              >
+                <p>At 280px the label starts off screen.</p>
+                <epic-status slot="status" state="underway" at="2026-10-09 14:20"
+                  ><p>Find why the label is cut off, fix it, and say what changed here.</p></epic-status
+                >
+              </epic-item>
+              <epic-item id="m1" title="With Wi-Fi off, open an epic page and a guide" status="open" state="open">
+                <epic-field label="Step"
+                  ><p>Turn Wi-Fi off, then open an epic page and a guide from the Review tab.</p></epic-field
+                >
+                <epic-field label="Should"><p>Both open, styled, with their code coloured.</p></epic-field>
+              </epic-item>
+              <ul>
+                <li>
+                  A judgement call or issue is CALM by default, yellow (a call grey), and red only when it would
+                  surprise you: it goes against something you said, narrows what you asked for, or needs your answer
+                  before work can go on. Click its chip while reviewing to flip it.
+                </li>
+                <li>
+                  A todo marked <code>limit</code> is a limit to know about, not work: grey, with no buttons to do it.
+                </li>
+                <li>
+                  A plain todo can be flagged red as a reminder (<code>epic update seo#T3 --loud</code>): red until you
+                  review it, its buttons still a todo's. <code>--calm</code> puts it back to yellow.
+                </li>
+              </ul>
+            </ui-section>
+
+            <ui-section id="item-states" label="Each colour means one thing" sticky collapsible dividing open="false">
+              <p>
+                The chip's colour is the item's state, which the tool works out from its status and your marks on every
+                edit. Only red and the two oranges ask for you, so you can read a page by its colours before you read a
+                word.
+              </p>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Colour</th>
+                      <th>Means</th>
+                      <th>Live</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><ui-label size="mini" color="red">red</ui-label></td>
+                      <td>
+                        needs you: an open question; an unreviewed call or issue that isn't calm; a todo flagged as a
+                        reminder
+                      </td>
+                      <td><a href="#q3">Q3</a>, <a href="#j7">J7</a></td>
+                    </tr>
+                    <tr>
+                      <td><ui-label size="mini" color="orange">orange</ui-label></td>
+                      <td>your turn: a fix to review, or the agent's options waiting for your pick</td>
+                      <td><a href="#i4">I4</a>, <a href="#q5">Q5</a></td>
+                    </tr>
+                    <tr>
+                      <td>light orange</td>
+                      <td>
+                        what you asked for is finished: an issue or todo filed from your own words, closed, until you
+                        see it
+                      </td>
+                      <td><a href="#t9">T9</a></td>
+                    </tr>
+                    <tr>
+                      <td><ui-label size="mini" color="yellow">yellow</ui-label></td>
+                      <td>open, not urgent: todos, a calm issue, a reviewed call</td>
+                      <td><a href="#t4">T4</a>, <a href="#i3">I3</a></td>
+                    </tr>
+                    <tr>
+                      <td><ui-label size="mini" color="blue">blue</ui-label></td>
+                      <td>with the agent: an Underway card, the spinner; dotted, queued and not started</td>
+                      <td><a href="#i1">I1</a></td>
+                    </tr>
+                    <tr>
+                      <td><ui-label size="mini" color="green">green</ui-label></td>
+                      <td>decided or done just now: an item for a day after its last change, then grey</td>
+                      <td><a href="#q8">Q8</a></td>
+                    </tr>
+                    <tr>
+                      <td><ui-label size="mini" color="grey">grey</ui-label></td>
+                      <td>no longer relevant: canceled (struck through), a limit, a calm judgement call</td>
+                      <td><a href="#t6">T6</a></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </ui-table>
+              <ul>
+                <li>Approving a green item greys it at once: green says "new since you looked".</li>
+                <li>
+                  Under the colour, an item's status is <b>open</b>, <b>decided</b> (an answered question),
+                  <b>done</b> (closed, never removed) or <b>canceled</b> (struck through; <code>epic reopen</code>
+                  undoes it).
+                </li>
+                <li>
+                  Which state wins when several apply, row by row, and the colours of every other kind of page:
+                  <a href="/epic/README-pages.md" target="src-epic-readme-pages-md">README-pages</a>, "Colours".
+                </li>
+              </ul>
+              <p>Live, the states not shown above:</p>
+              <epic-item id="q5" title="Where should the Send button sit?" status="open" state="replied">
+                <epic-question><p>Send is in the page header today. Is that the right place?</p></epic-question>
+                <epic-reply from="Ana" at="2026-10-09 10:02" re="revisit"
+                  ><p>Could it follow me down the page instead?</p></epic-reply
+                >
+                <epic-reply
+                  from="Claude"
+                  agent="claude"
+                  at="2026-10-09 10:15"
+                  re="Could it follow me down the page instead?"
+                  ><p>It can: the header already sticks, so Send is always on screen. Two ways to go:</p>
+                  <epic-choices>
+                    <epic-option letter="A" title="Keep it in the header" recommended
+                      ><ul>
+                        <li>always on screen already, nothing to build</li>
+                      </ul></epic-option
+                    >
+                    <epic-option letter="B" title="A floating button too"
+                      ><ul>
+                        <li>two Send buttons on screen at once</li>
+                      </ul></epic-option
+                    >
+                  </epic-choices></epic-reply
+                >
+              </epic-item>
+              <epic-item
+                id="t9"
+                title="Light up a todo I asked for once it's done"
+                status="done"
+                state="requested"
+                requested
+              >
+                <p>Filed from your words in the chat; closed by the agent, light orange until you press Saw it.</p>
+              </epic-item>
+              <epic-item
+                id="q8"
+                title="Which browser should the checks run in first?"
+                status="decided"
+                answered
+                state="recent"
+              >
+                <epic-question><p>Which browser should the checks run in first?</p></epic-question>
+                <epic-choices chosen="B">
+                  <epic-option letter="A" title="Firefox"
+                    ><ul>
+                      <li>not what the side bar runs</li>
+                    </ul></epic-option
+                  >
+                  <epic-option letter="B" title="Chrome" recommended
+                    ><ul>
+                      <li>what VS Code's side bar runs</li>
+                    </ul></epic-option
+                  >
+                </epic-choices>
+                <epic-answer title="Chrome"
+                  ><p>The side bar is Chromium, so Chrome finds its bugs first.</p></epic-answer
+                >
+              </epic-item>
+              <epic-item
+                id="i3"
+                title="The orange review line is a little too light"
+                status="open"
+                state="open"
+                calm
+                reviewed="2026-10-08"
+              >
+                <p>4.46:1 against the 4.5:1 a contrast check asks for.</p>
+              </epic-item>
+              <epic-item id="t6" title="A second Send button at the page's foot" status="canceled" state="old">
+                <p>Made moot by Q5: the header sticks.</p>
+              </epic-item>
+            </ui-section>
+
+            <ui-section
+              id="item-cards"
+              label="Inside an item, in the order things happened"
+              sticky
+              collapsible
+              dividing
+              open="false"
+            >
+              <ul>
+                <li><b>Question</b>: a question's text as first asked.</li>
+                <li><b>Its text</b>, and its option cards, A, B ..., one marked recommended with a thumbs-up.</li>
+                <li>
+                  <b>Pictures</b>: pictures you pasted or dropped with your ask show after its words, thumbnails that
+                  open full size, each with a label chip (<code>IMG1</code>, <code>IMG2</code> ...) that your words name
+                  it by. While you review, its trash deletes one, with Undo for 6 seconds, then its file too; the others
+                  keep their labels.
+                </li>
+                <li>
+                  <b>Net effect</b>: what concretely changes, one bullet each. Every question, issue and judgement call
+                  ends with one.
+                </li>
+                <li><b>Answer</b>: once a question is decided.</li>
+                <li>
+                  <b>More Details</b>: what Claude added when you asked for more. It goes under the text, never over it.
+                </li>
+                <li><b>Replies</b>: your notes and Claude's answers, dated, each quoting what it answers.</li>
+                <li><b>Original Discussion</b>, folded: any text Claude rewrote, as it was. Nothing is ever lost.</li>
+                <li><b>Commits</b>: the commits that fixed it.</li>
+                <li><b>Status cards</b>, last (below).</li>
+              </ul>
+              <ul>
+                <li>
+                  An item with no details yet reads "<i>What it says on the tin.</i>", then Clarify: a click asks Claude
+                  for its details at once, without waiting for Send.
+                </li>
+                <li>
+                  Every item, whatever its kind, has an (i) button last on its line while you review: a click asks
+                  Claude to rewrite the item more clearly, at once. It turns while Claude works; click again to call it
+                  off.
+                </li>
+                <li>
+                  Option cards take a Choose pill while you review: picking one answers a question with it, or approves
+                  any other item with it. Picked and applied, the card is green, as on <a href="#q8">Q8</a>.
+                  <ul>
+                    <li>
+                      A revisit on an answered question gives its other cards Choose pills again, so "B instead, because
+                      ..." is one mark.
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </ui-section>
+
+            <ui-section
+              id="status-cards"
+              label="Status cards:  what Claude took your mark to mean"
+              sticky
+              collapsible
+              dividing
+              open="false"
+            >
+              <ul>
+                <li>
+                  <b>Underway</b>, blue: the task as the agent read it, as it starts, naming the agent on it. The item
+                  turns blue.
+                </li>
+                <li>
+                  <b>Done</b>, green: the same card finished, with a short summary when there's something worth saying
+                  (a surprise, a choice made, something left undone).
+                </li>
+                <li>
+                  <b>Noted</b>, green: Claude heard you, and nothing is built yet. A pick gets "Chose B · ...", a Make
+                  Todo "Made todo T23 ...", a todo's plane "Start now: an agent takes it next"; an approval gets none.
+                </li>
+                <li>
+                  <b>Stale</b>: an item left Underway more than 3 hours with nobody on it is tidied at a turn's end, and
+                  nothing is closed this way.
+                  <ul>
+                    <li>Its work found on <code>main</code>: it turns fixed for your review, the commit named.</li>
+                    <li>Else: one <code>Stale:</code> card, and it's back on your list.</li>
+                  </ul>
+                </li>
+                <li>A later mark adds a new card; the old ones stay, as the record.</li>
+                <li>
+                  A card reads in short paragraphs and bullets: the tool refuses a paragraph or bullet over 50 words, so
+                  the long story goes in the item's own body.
+                </li>
+              </ul>
+              <p>Live, a card done:</p>
+              <epic-item id="t7" title="Weigh one JSON file for the pack templates" status="done" state="recent">
+                <p>One file, or a file per template?</p>
+                <epic-status slot="status" state="done" at="2026-10-08 14:20" done-at="2026-10-08 14:34"
+                  ><p>Weigh one JSON file for the pack templates against a file each, and answer here.</p>
+                  <p slot="summary">Recommended a file each: JSON would need every template escaped.</p></epic-status
+                >
+              </epic-item>
+            </ui-section>
+          </ui-section>
+
+          <ui-section
+            id="6-reviewing"
+            label="6. Reviewing:  your marks wait until you send them"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ui-icon slot="icon" name="gavel"></ui-icon>
+            <p>
+              A pull-request review is a batch: you comment, then you submit. This is the same idea, except the batch
+              can wait a day, and the answers come back as edits to the plan, not as replies stacked under your comment.
+            </p>
+
+            <ui-section
+              id="the-buttons"
+              label="Each kind of item has its own buttons"
+              sticky
+              collapsible
+              dividing
+              open="false"
+            >
+              <p>
+                The icon says what a button does, everywhere: the paper plane sends something to be worked, the check
+                accepts it or says you saw it, the history arrow talks it over, the x drops it. The thumbs up only means
+                "accept this": a plan's Accept, Looks good, the stage buttons.
+              </p>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>On</th>
+                      <th>Its buttons</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>a question, a manual test</td>
+                      <td>Make Todo, Revisit, Approve</td>
+                    </tr>
+                    <tr>
+                      <td>an open judgement call</td>
+                      <td>Do this (the plane), Revisit, Approve</td>
+                    </tr>
+                    <tr>
+                      <td>an open issue</td>
+                      <td>Do this, Revisit, the x, "Close it: not needed"</td>
+                    </tr>
+                    <tr>
+                      <td>an issue or call the agent fixed</td>
+                      <td>Revisit, then the check, "Accept the fix"</td>
+                    </tr>
+                    <tr>
+                      <td>a finished issue or call</td>
+                      <td>Revisit, then "Saw it"; a <code>done in P20</code> pill where a phase took it</td>
+                    </tr>
+                    <tr>
+                      <td>an open todo</td>
+                      <td>"Start it now" (the plane), Revisit, the x, "Drop it"</td>
+                    </tr>
+                    <tr>
+                      <td>a todo already in a phase</td>
+                      <td>its <code>in P52</code> pill (goes to the phase; Option-click starts it), Revisit, the x</td>
+                    </tr>
+                    <tr>
+                      <td>a finished todo</td>
+                      <td>Revisit, then "Saw it"</td>
+                    </tr>
+                    <tr>
+                      <td>the summary, an Overview sub-section</td>
+                      <td>Make Todo, Revisit</td>
+                    </tr>
+                    <tr>
+                      <td>a phase still to do</td>
+                      <td>Do this, Revisit (Looks good and Defer, or Accept and Defer, while the plan is agreed)</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </ui-table>
+              <p>And what each one does once applied:</p>
+              <ui-table celled padding="compact" appearance="striped" unstackable>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Button</th>
+                      <th>Applied</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><ui-icon name="check"></ui-icon> Approve</td>
+                      <td>
+                        an open question: answered with its recommended option (none recommended: left to talk over); an
+                        open call: closed, accepted; a test: closed, passed; anything else: marked reviewed
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><ui-icon name="check"></ui-icon> Accept the fix, Saw it</td>
+                      <td>a fixed issue or call closed; a finished one marked reviewed, its UPDATE label gone</td>
+                    </tr>
+                    <tr>
+                      <td><ui-icon name="paper plane"></ui-icon> Do this</td>
+                      <td>
+                        an issue or call: fixed in the item itself, no todo made; blue outlined until handled, orange
+                        once fixed. A phase: "yes, build this"
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><ui-icon name="paper plane"></ui-icon> Start it now</td>
+                      <td>
+                        the todo is started now: a Noted card, "Start now: an agent takes it next", and the session
+                        starts one on it. Never queued into an unrelated phase; a note asking for a phase gets it a new
+                        one
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><ui-icon name="history"></ui-icon> Revisit</td>
+                      <td>
+                        your note answered INTO the item, as a reply. On a fix you're not happy with, it sends the fix
+                        back, reopened
+                      </td>
+                    </tr>
+                    <tr>
+                      <td><ui-icon name="list check"></ui-icon> Make Todo</td>
+                      <td>a new todo, "Follow up: ...", linking back</td>
+                    </tr>
+                    <tr>
+                      <td><ui-icon name="xmark"></ui-icon> the x</td>
+                      <td>canceled: a todo dropped, an issue closed unfixed</td>
+                    </tr>
+                    <tr>
+                      <td>Choose, on an option card</td>
+                      <td>a question answered with it; any other item approved with it</td>
+                    </tr>
+                    <tr>
+                      <td>the id chip, on a call or issue</td>
+                      <td>flips it between urgent (red) and calm</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </ui-table>
+              <ul>
+                <li>Each applied mark logs one line: <code>J9 approved: closed (accepted)</code>.</li>
+                <li>
+                  Press a chosen button again to clear your mark. A mark you change meanwhile waits for the next Send.
+                </li>
+                <li>
+                  A fix you sent back, which the agent then handed on to another item ("being fixed as I148"), turns
+                  fixed again by itself once that item is, with a Done card naming it.
+                </li>
+                <li>
+                  Choose what to do with an item, and it folds, its line staying put: the next item is right under it.
+                  Revisit doesn't fold it, since it opens the note box.
+                </li>
+              </ul>
+            </ui-section>
+
+            <ui-section
+              id="the-note-box"
+              label="The note box:  type, and Revisit is on"
+              sticky
+              collapsible
+              dividing
+              open="false"
+            >
+              <ul>
+                <li>
+                  Revisit takes you to a box at the end of the item. It has no buttons of its own: the line's buttons
+                  above it carry the note along, and the first key you type turns Revisit on.
+                </li>
+                <li>
+                  It saves as you type, and at once when you leave it; a floppy says Saved, or turns red with why not. A
+                  reload keeps it.
+                </li>
+                <li>
+                  On a judgement call or a todo, an empty box starts with <code>do it</code>, selected: type over it to
+                  say something else.
+                </li>
+                <li>
+                  Paste pictures (⌘V), drop them in, or use the picture button at its corner: each goes in your words at
+                  the cursor as <code>![IMG1](...)</code>, a labelled strip under the box. On a manual test, that's how
+                  a screenshot of what you saw reaches the agent.
+                </li>
+                <li>Escape leaves it, the draft kept.</li>
+              </ul>
+            </ui-section>
+
+            <ui-section
+              id="the-fill"
+              label="The fill says how far a mark has got"
+              sticky
+              collapsible
+              dividing
+              open="false"
+            >
+              <ui-table celled padding="compact" appearance="striped" unstackable>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Fill</th>
+                      <th>Means</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>grey outline</td>
+                      <td>available: nothing pressed</td>
+                    </tr>
+                    <tr>
+                      <td>DASHED, in its colour</td>
+                      <td>you pressed it; not sent</td>
+                    </tr>
+                    <tr>
+                      <td>OUTLINE, in its colour</td>
+                      <td>sent, or the agent has it</td>
+                    </tr>
+                    <tr>
+                      <td>cleared</td>
+                      <td>handled: the button is a grey outline again, and the chip shows the result</td>
+                    </tr>
+                    <tr>
+                      <td>SOLID</td>
+                      <td>only on chips, the step pill's DONE, and a Choose pill once applied</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </ui-table>
+              <ul>
+                <li>
+                  So a dashed or outlined chip is ANSWERED: don't answer it again. Only a solid red, orange or light
+                  orange chip waits on you, and the toolbar counts only those.
+                </li>
+                <li>
+                  Hover a pressed button for where it stands: "not sent yet · click to clear", "sent · click to clear",
+                  "Claude is on it · click to call it off".
+                </li>
+                <li>
+                  Changed your mind about a request Claude is on: its button spins, so click it again. The session stops
+                  that item's agent, and refuses an answer that arrives after.
+                </li>
+              </ul>
+            </ui-section>
+
+            <ui-section id="send" label="Send and Auto Send" sticky collapsible dividing open="false">
+              <ul>
+                <li>
+                  Send is the paper plane in the header's middle: grey with nothing to send, blue with marks or comments
+                  waiting, outlined once sent. Its tooltip counts them ("2 marks, 1 comment").
+                </li>
+                <li>
+                  A press sends at once. Left alone, a ring round it drains over the wait the gear chose (Immediately, 2
+                  minutes by default, 5 minutes, or Off, remembered in this browser), and it sends by itself.
+                </li>
+                <li>Either way every revisit is asked now: an agent answers each into its item while you carry on.</li>
+                <li>
+                  Send with nobody listening wakes the epic: the page server types
+                  <code>/epic review &lt;name&gt;</code>
+                  into its running session, else opens a session tab in its worktree's window with the command typed in.
+                  It never sends for you, and never makes a worktree; an orange pill says what it did.
+                </li>
+              </ul>
+              <p>
+                The edge: the wake happens once per epic per 10 minutes, and not at all in airplane mode or when several
+                sessions are titled for the epic. Who it picks, in full:
+                <a href="/epic/README-pages.md" target="src-epic-readme-pages-md">README-pages</a>, "How Send wakes a
+                session".
+              </p>
+            </ui-section>
+          </ui-section>
+
+          <ui-section
+            id="7-session"
+            label="7. The session answers;  named agents build"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ui-icon slot="icon" name="robot"></ui-icon>
+            <p>
+              In an epic, the session you type to does almost no work itself. It answers within seconds, files what you
+              ask for as items, and hands anything longer than a minute to a named background agent.
+            </p>
+            <ol>
+              <li>Your Send wakes it, with a list of your marks.</li>
+              <li>
+                It applies the mechanical ones at once: approvals, picks, new todos, Do this, a todo's plane or x, new
+                items, Accepts, Seen and Read.
+              </li>
+              <li>
+                Each revisit asked now gets a blue Underway card, and a background agent writes the answer into the
+                item; the card turns green. An answer that offers options turns the item ORANGE: your pick.
+              </li>
+              <li>The page updates in place: the buttons clear, and the chips show the result.</li>
+              <li>
+                The session waits again, costing nothing. Killed mid-wait, the page says nobody is reviewing within 90
+                seconds.
+              </li>
+            </ol>
+            <ul>
+              <li>
+                Ask for a fix in the chat mid-phase, and you see it on the page at once: an issue, your words as its
+                body, blue, an Underway card naming the agent, any picture you pasted shown after the words.
+              </li>
+              <li>
+                Several agents share the epic's one worktree. Each claims the files it will change, commits only its
+                own, takes its turn for merges and full test runs, and merges its own work into <code>main</code> the
+                moment it's done, so you see it without waiting for the phase's end.
+              </li>
+              <li>
+                Tests run in three tiers: the tests beside each change; each touched folder's unit tests before merging;
+                the full suite after merging, only by the last agent standing (<code>epic agents last</code>).
+              </li>
+              <li>
+                Each agent shows in the header's <code>2 🤖</code> popover while it runs. Type in its box to steer it:
+                the session passes your words on mid-task (<a
+                  href="/guides/background-agents.html"
+                  target="src-guides-background-agents-html"
+                  >Background Agents</a
+                >).
+              </li>
+              <li>
+                A VS Code restart ends every background agent with its session. The session is woken at once, resumes
+                each agent from its saved transcript, and says so.
+              </li>
+            </ul>
+            <p>
+              The catch: Codex has no background agents, so there the session does the work itself, a step at a time,
+              and hears your Send only while it waits (<code>epic inbox wait</code>). In a scripted
+              <code>claude -p</code> run, the inbox poller stands down at once, so the run never waits on it.
+            </p>
+          </ui-section>
+
+          <ui-section id="8-finding-your-way" label="8. Finding your way" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="compass"></ui-icon>
+            <p>Everything starts folded: open what you want, and the page remembers it.</p>
+            <ul>
+              <li>
+                ⌘-K (Ctrl-K) asks "Jump to which item?": type an id (J7, q3, P2, C3), and the page lands on it,
+                unfolded.
+              </li>
+              <li>A letter key jumps to a section: hover a toolbar icon for its letter.</li>
+              <li>
+                A link to an id (<code>#q3</code>) lands below the stuck bars, unfolds what hides it, and opens it. Try
+                one here: <a href="#q3">Q3</a>, <a href="#q5">Q5</a>, <a href="#p2">P2</a>.
+              </li>
+              <li>The address follows the section you're reading, so a reload lands there.</li>
+              <li>
+                <code>&lt;epic-link epic="seo" item="J3"&gt;</code> links an item on another page by what it is; a plain
+                link can use a short address, <code>SAGA:/drawable-spell/python-target#T1</code>.
+              </li>
+            </ul>
+
+            <ui-section
+              id="focus-mode"
+              label="Focus mode:  one item at a time"
+              sticky
+              collapsible
+              dividing
+              open="false"
+            >
+              <p>
+                The gear's first row: a full-screen overlay that walks the open items and phases, whatever the page
+                draws red, orange, blue or yellow.
+              </p>
+              <p>
+                Not the same as <code>/focus</code>, typed in Claude Code: that tells every running epic session to
+                build on and ask you nothing until <code>/back</code> (<a
+                  href="/guides/background-agents.html"
+                  target="src-guides-background-agents-html"
+                  >Background Agents</a
+                >).
+              </p>
+              <ul>
+                <li>
+                  A tab per kind (Phases, Questions, Todos, Calls, Issues, Tests), each with its count and its own
+                  chips.
+                </li>
+                <li>
+                  One item at a time: its id, title and whole text, its buttons and note box, then Back and Next (← and
+                  →).
+                </li>
+                <li>Your marks are the page's, and Send rides in its top bar. Esc or × closes it.</li>
+                <li>
+                  On the Manual tests section, "Start testing" has the agent prepare the tests first (each checked where
+                  it can be, the rest written out step by step), then opens the first one here. From a terminal:
+                  <code>epic test &lt;name&gt;</code>.
+                </li>
+              </ul>
+              <p>The catch: its place (tab, item, chips) is kept in this browser only.</p>
+            </ui-section>
+          </ui-section>
+
+          <ui-section
+            id="9-comments"
+            label="9. Comments:  a bullhorn on every block"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ui-icon slot="icon" name="bullhorn"></ui-icon>
+            <p>
+              Marks are for items. For anything else (a sentence of a guide, a row of a table, a line of the Overview),
+              there's a comment: a thread anchored to the words it quotes, much like a code-review comment on a line.
+            </p>
+            <ul>
+              <li>
+                Press the bullhorn beside a block (a section, table, code block, card, item or phase field, or the
+                page's header), or select text and press ⌘-I (Ctrl-I). The pane saves as you type.
+              </li>
+              <li>
+                Saved, it's a thread, <code>C1</code>, <code>C2</code> ...: your messages, the agent's, and "thinking…"
+                while it works. Your turn, it goes orange, with three answers: ✓ that's good, reply, or × skip it.
+              </li>
+              <li>The trash deletes a comment at once, with Undo for 6 seconds.</li>
+              <li>
+                Comments ride the page's own Send. An epic page's go to that epic; a guide's, to the epic that owns it
+                (wrote it, or its page links it); any other page's, to the standing <code>feedback</code> epic.
+              </li>
+            </ul>
+            <p>
+              The edge: details and choice pages take no comments, since each sends its answers its own way; nor do
+              templates.
+            </p>
+          </ui-section>
+
+          <ui-section id="10-offline" label="10. Offline:  airplane mode" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="paper plane"></ui-icon>
+            <p>
+              Airplane mode lets you work on epic pages and guides with no internet and no Claude: everything saves on
+              the laptop, and Claude takes it when you land.
+            </p>
+            <ul>
+              <li>
+                Before the flight: <code>/airplane</code>. It checks the laptop is ready (page server, offline pages,
+                the extension), asks which running sessions to park, and turns airplane mode on.
+              </li>
+              <li>
+                On the plane: open an epic page from the Review tab's list button ("Review: Open Epic..."), any other
+                page from "Review: Epics Home".
+              </li>
+              <li>Mark and comment as usual. Send isn't needed: every mark is taken at landing, sent or not.</li>
+              <li>
+                A new epic: the Epics list's "New epic" writes a future epic at once. At landing, Claude asks which to
+                start.
+              </li>
+              <li>
+                After: <code>/airplane land</code>. Claude gathers everything you left, applies the marks, answers the
+                notes in the background, then starts <code>/epic review</code> on the epic with most waiting.
+                <ul>
+                  <li>Text you typed and never submitted is asked about, never acted on.</li>
+                </ul>
+              </li>
+            </ul>
+            <p>
+              More: <a href="/guides/airplane.html" target="src-guides-airplane-html">Airplane Mode</a>; when something
+              stops, the <a href="/epic/README-faq.md" target="src-epic-readme-faq-md">FAQ</a>.
+            </p>
+          </ui-section>
+
+          <ui-section id="11-commands" label="11. The commands behind it" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="terminal"></ui-icon>
+            <p>
+              Claude edits a page only through <code>epic</code> verbs, from any checkout, so ids, colours and counts
+              stay right. The ones you'll see in a session's output:
+            </p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <thead>
+                  <tr>
+                    <th><code>epic ...</code></th>
+                    <th>Does</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>create &lt;name&gt;</code>, <code>stage</code></td>
+                    <td>
+                      makes the page (<a href="/epic/skills/epic/SKILL.md" target="src-epic-skills-epic-skill-md"
+                        ><code>/epic</code></a
+                      >
+                      runs it); sets its stage
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>add-phase</code>, <code>phase &lt;name&gt;#P3 done</code></td>
+                    <td>adds a phase; sets its status, writing Done</td>
+                  </tr>
+                  <tr>
+                    <td><code>add &lt;name&gt;#J "..."</code></td>
+                    <td>adds an item (J, Q, I, T, M or D), printing its id; refuses a title over 30 words</td>
+                  </tr>
+                  <tr>
+                    <td><code>update &lt;name&gt;#J3 underway | done | fixed | noted | promised</code></td>
+                    <td>a status card; <code>--title</code> gives a phase or item a new title</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>decide · choose · close · cancel · reopen</code>
+                    </td>
+                    <td>answers a question, records a pick, closes, cancels or reopens an item</td>
+                  </tr>
+                  <tr>
+                    <td><code>details &lt;name&gt;#&lt;id&gt; --more | --append</code></td>
+                    <td>adds More Details, or a reply</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <code>inbox wait | apply | done &lt;name&gt;</code>
+                    </td>
+                    <td>reads and works through your marks</td>
+                  </tr>
+                  <tr>
+                    <td><code>summary · items · open · test</code></td>
+                    <td>what's open; what a review walks; the page in the side bar; your testing</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <p>
+              Every verb: <code>epic --help</code>, and
+              <a href="/epic/README-cli.md" target="src-epic-readme-cli-md">README-cli</a>. The rules for a page's data:
+              <a href="/epic/src/tool/PLAN-DOC.md" target="src-epic-src-tool-plan-doc-md">PLAN-DOC.md</a>; each element,
+              live:
+              <a href="/components/epics/index.html" target="src-components-epics-index-html">The Epic Elements</a>.
+            </p>
+          </ui-section>
+
+          <ui-section id="12-limits" label="12. Limits" sticky collapsible dividing open="false">
+            <ui-icon slot="icon" name="triangle exclamation"></ui-icon>
+            <ul>
+              <li><b>Marks are per machine.</b> They wait in a file beside the page, git-ignored, until applied.</li>
+              <li>
+                <b>A page needs the page server.</b> Opened straight from disk, it shows its prose unstyled: no buttons,
+                no part files.
+              </li>
+              <li>
+                <b>Find-in-page misses unopened bodies.</b> Each item's and phase's body is a part file, loaded the
+                first time you open it.
+              </li>
+              <li><b>Send wakes only Claude Code.</b> A Codex session hears it only while it waits on the inbox.</li>
+            </ul>
+          </ui-section>
+
+          <footer class="spell-doc-footer">
+            <ui-divider></ui-divider>
+            <p class="meta">Last checked 2026-11-21, against the epic plugin's code that day.</p>
+          </footer>
+        </main>
+      </div>
+    </ui-root>
+    <script src="/_epic/assets/highlight.min.js"></script>
+    <script src="/_epic/assets/spell-ui.js"></script>
+  </body>
+</html>

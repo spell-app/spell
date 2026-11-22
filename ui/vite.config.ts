@@ -91,6 +91,7 @@ export const COMPONENTS = [
   "ui-rating",
   "ui-sides",
   "ui-icon-picker",
+  "ui-icon-browser",
   "ui-slider",
   "ui-accordion",
   "ui-tab",

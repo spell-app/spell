@@ -2,7 +2,6 @@ import { describe, expect, it } from "vite-plus/test"
 
 import * as library from "spell/ui"
 import { ComponentDefinitions } from "spell/ui/components/ComponentDefinitions"
-import shippedTable from "spell/ui/components/paletteGroups.json"
 import { es } from "spell/ui/components/components.es"
 import { ValueSets } from "spell/ui/vocabulary"
 
@@ -70,9 +69,9 @@ describe("UIComponent.describe()", () => {
   })
 })
 
-describe("ComponentDefinitions.palette()", () => {
-  it("offers what has a snippet, each opening with its own tag, in both languages", () => {
-    const offered = ComponentDefinitions.palette()
+describe("ComponentDefinitions.snippetIn()", () => {
+  it("gives each snippet of a tag's own, opening with its tag, an icon and words in both languages", () => {
+    const offered = ComponentDefinitions.all.filter((definition) => definition.snippet?.startsWith(`<${definition.tag}`))
     expect(offered.length).toBeGreaterThan(10)
     for (const definition of offered) {
       expect(definition.snippet!.startsWith(`<${definition.tag}`), definition.tag).toBe(true)
@@ -82,82 +81,12 @@ describe("ComponentDefinitions.palette()", () => {
   })
 })
 
-describe("ComponentDefinitions.paletteGroups()", () => {
-  it("files every family once, what it offers ready-made first, then the rest", () => {
-    const groups = ComponentDefinitions.paletteGroups()
-    const tags = groups.flatMap(({ parts }) => parts.map((definition) => definition.tag))
-    expect(new Set(tags).size).toBe(tags.length)
-    expect(tags).toEqual(expect.arrayContaining(ComponentDefinitions.palette().map((definition) => definition.tag)))
-    expect(tags).toEqual(expect.arrayContaining(["ui-tabs", "ui-table", "ui-modal"]))
-    // a tag that stands alone, though not its folder's main one (epic `editor` I180)
-    expect(tags).toEqual(expect.arrayContaining(["ui-buttons", "ui-steps", "ui-textarea", "ui-cards"]))
-    // by today's rule, a part only inside another, and what a page holds once, are never offered;
-    // the table (Owen's, on the Palette groups page) may still list one on purpose
-    const byRule = ComponentDefinitions.paletteGroupsByTopic().flatMap(({ parts }) => parts.map((part) => part.tag))
-    expect(byRule).not.toContain("ui-tree-item")
-    expect(byRule).not.toContain("ui-tab")
-    expect(byRule).not.toContain("ui-or")
-    expect(byRule).not.toContain("ui-root")
-    expect(tags).not.toContain("ui-root")
-    expect(groups.every(({ parts }) => parts.length > 0)).toBe(true)
-    // by today's rule, in each topic, the ready-made ones (a snippet of their own) before the rest
-    for (const { parts } of ComponentDefinitions.paletteGroupsByTopic()) {
-      const readyMade = parts.map((definition) => !!definition.snippet?.startsWith(`<${definition.tag}`))
-      expect(readyMade, parts[0]!.tag).toEqual([...readyMade].sort((a, b) => Number(b) - Number(a)))
-    }
-  })
-})
-
-describe("ComponentDefinitions.paletteGroups() and its table (epic `editor` T81)", () => {
-  it("shows the table's groups and tags in its order;  skips a tag that isn't a component, or named twice", () => {
-    const groups = ComponentDefinitions.paletteGroups({
-      groups: [
-        { title: "Mine", tags: ["ui-card", "ui-button", "ui-no-such-tag"] },
-        { topic: "buttons", tags: ["ui-buttons", "ui-button"] }
-      ]
-    })
-    expect(groups[0]).toMatchObject({ title: "Mine" })
-    expect(groups[0]!.parts.map((definition) => definition.tag)).toEqual(["ui-card", "ui-button"])
-    expect(groups[1]!.parts.map((definition) => definition.tag)).toEqual(["ui-buttons"])
-  })
-
-  it("files what the table doesn't name by today's rule:  at its topic group's end, else a group of its own", () => {
-    const groups = ComponentDefinitions.paletteGroups({
-      groups: [{ topic: "buttons", tags: ["ui-buttons"] }],
-      hidden: ["ui-modal"]
-    })
-    const tags = groups.flatMap(({ parts }) => parts.map((definition) => definition.tag))
-    expect(groups[0]!.parts.map((definition) => definition.tag)).toEqual(["ui-buttons", "ui-button"])
-    // every other component still shows, under its topic, in today's order
-    expect(groups.slice(1).map(({ topic }) => topic)).toEqual(
-      ComponentDefinitions.paletteGroupsByTopic()
-        .map(({ topic }) => topic)
-        .filter((topic) => topic !== "buttons" && topic !== "dialogs")
-    )
-    expect(tags).toContain("ui-grid")
-    // what it hides doesn't
-    expect(tags).not.toContain("ui-modal")
-  })
-
-  it("the table it ships with names every component today's rule offers, or hides it:  nothing falls back", () => {
-    const named = new Set([...shippedTable.groups.flatMap(({ tags }) => tags), ...shippedTable.hidden])
-    const offered = ComponentDefinitions.paletteGroupsByTopic().flatMap(({ parts }) => parts.map(({ tag }) => tag))
-    expect(offered.filter((tag) => !named.has(tag))).toEqual([])
-  })
-
-  it("names a group by its own title, else its topic in the language", () => {
-    expect(ComponentDefinitions.groupNameIn({ topic: "forms" }, "es")).toBe("formularios")
-    expect(ComponentDefinitions.groupNameIn({ topic: "forms", title: "Fields" }, "es")).toBe("Fields")
-  })
-})
-
 describe("ComponentDefinitions.topicIn()", () => {
-  it("names each palette topic in the page's language, from Spell UI's dictionary", () => {
+  it("names each topic in the page's language, from Spell UI's dictionary", () => {
     expect(ComponentDefinitions.topicIn("forms", "es")).toBe("formularios")
     expect(ComponentDefinitions.topicIn("date & time", "es")).toBe("fecha y hora")
-    // every topic the palette shows has its own word (some, like `social`, are spelt the same)
-    for (const { topic } of ComponentDefinitions.paletteGroupsByTopic())
-      expect(es.values?.topics, topic).toHaveProperty([topic])
+    // every topic a component is filed under has its own word (some, like `social`, are spelt the same)
+    for (const topic of ComponentDefinitions.byTopic().keys()) expect(es.values?.topics, topic).toHaveProperty([topic])
   })
 
   it("keeps the English in English, and in a language it has no dictionary for", () => {

@@ -251,7 +251,7 @@ Each folder hands it a list, named in the folder's own `package.json`:
 %%{init: {"theme":"base","themeVariables":{"fontFamily":"-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif","fontSize":"15px","primaryColor":"#EFECFB","primaryBorderColor":"#6550CA","primaryTextColor":"#1A1C27","secondaryColor":"#F4F1E9","tertiaryColor":"#F7F6FC","lineColor":"#7F6FD6","textColor":"#7F6FD6","clusterBkg":"#F7F6FC","clusterBorder":"#B9B0E8","titleColor":"#1A1C27","edgeLabelBackground":"#F7F6FC","actorBkg":"#EFECFB","actorBorder":"#6550CA","actorTextColor":"#1A1C27","actorLineColor":"#9C90DE","signalColor":"#7F6FD6","signalTextColor":"#7F6FD6","labelBoxBkgColor":"#EFECFB","labelBoxBorderColor":"#6550CA","labelTextColor":"#1A1C27","loopTextColor":"#7F6FD6","noteBkgColor":"#F1E7D4","noteBorderColor":"#C9B48A","noteTextColor":"#1A1C27","activationBkgColor":"#DCD6F7","activationBorderColor":"#6550CA","sequenceNumberColor":"#FFFFFF"},"flowchart":{"curve":"basis","padding":12,"nodeSpacing":40,"rankSpacing":44}}}%%
 flowchart BT
   base["spell, the base<br/>server · bundle · commands · wwod · publish · pony · help"]
-  lang["spell-parser<br/>compile · lint · run · test ... thirteen in all"] --> base
+  lang["spell-parser<br/>compile · lint · run · test ... fourteen in all"] --> base
   ui["spell-ui<br/>icon · ssr · pack · design"] --> base
   epic["spell-epic<br/>voice check"] --> base
   app["spell-app<br/>app create · serve · vscode, projects"] --> base
@@ -612,7 +612,7 @@ spell runbook check netbox-demo
 
 ## spell-parser
 
-The language's thirteen commands:  build a program, run it, test it, see what Spell made of what you wrote,
+The language's fourteen commands:  build a program, run it, test it, see what Spell made of what you wrote,
 and check its language packs.
 They're `spell-parser`'s, but their work is `spell-app`'s for now, through its `language` hook
 ([above](#each-folder-brings-its-own-commands));  the language packs' two are the exception, `spell-parser`'s own.
@@ -690,12 +690,13 @@ spell test @spell/examples/Solitaire 2>/dev/null
 <summary>Output</summary>
 
 ```text
-✓ test card setup  (19 checks)
-✓ test a new deck  (5 checks)
+✓ test card setup  (15 checks)
+✓ test card images  (10 checks)
 ✓ test piles  (8 checks)
+✓ test a new deck  (5 checks)
 ✓ test the moves  (11 checks)
 
-4 passed
+5 passed
 ```
 
 </details>
@@ -773,7 +774,7 @@ spell describe @spell/examples/Solitaire Card color
 
 ```text
 property color of Card
-app/spaces/@spell/examples/Solitaire/Card.spell:18
+app/spaces/@spell/examples/Solitaire/Card.spell:8
 
 Spell
     its "color" is one of red, black
@@ -1348,7 +1349,7 @@ owen@spell       Projects       ...
 @spell/guides    Guides         ... projects
 @spell/sites     Sites          1 project
 @spell/library   Libraries      ... projects
-@spell/editor    The editor     ... projects
+@spell/editor    The editor     ...
 @spell/test      Test fixtures  ... projects
 ```
 
@@ -1701,6 +1702,7 @@ They're named in the command line's goals and the commands page's roadmap.
 
 ## See also
 
+- The guide:  [The `spell` Command](../guides/cli.html), in the kit's guides/ folder
 - [README.md](../README.md):  setup from zero, and the index of every page
 - [README/server.md](server.md):  what `spell server` and `spell app serve` start
 - [spell-epic's README-cli.md](https://github.com/spell-app/spell/blob/main/epic/README-cli.md):  every `epic` verb, in full

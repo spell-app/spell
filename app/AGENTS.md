@@ -385,7 +385,7 @@ As the kit's ([AGENTS.md](../AGENTS.md), "Commands"), plus:
   (the kit's [AGENTS.md](../AGENTS.md), at its top).
   - NOT `@`-imported on purpose:  it loads only when the task needs it.
   - Claude also has the [solid-2 skill](.claude/skills/solid-2/SKILL.md), which triggers on Solid work.
-- The why and the measurements:  [the Solid 2 guide](../spell.epics/guides/solid/solid-2.html).
+- The why and the measurements:  [the Solid 2 guide](../guides/solid/solid-2.html).
 - The API:  [the Solid 2 cheatsheet](../spell.epics/guides/solid/cheatsheet.html).
 - MUST keep `solid-2.md` up to date when a Solid decision changes, or an RC bump changes behaviour.
 - How `ui` writes its elements on Solid:  "Solid authoring" in [spell-ui's AGENTS.md](../ui/AGENTS.md).
