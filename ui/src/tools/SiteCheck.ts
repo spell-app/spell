@@ -1,15 +1,18 @@
 /// <reference types="node" />
 
-import { mkdirSync } from "node:fs"
+import { mkdirSync, readFileSync } from "node:fs"
 import { join, resolve } from "node:path"
 import { parseArgs } from "node:util"
 
 import type { Browser, Page } from "playwright"
 
+import type { SiteDataFile } from "spell/ui/docs-components/docs-components.types"
 import { BrowserPage, type BrowserPageProps } from "spell/element-tools/BrowserPage"
+import { writeOrCheck } from "spell/element-tools/generatedFiles"
 import { Terminal } from "spell/element-tools/Terminal"
 import { SPELL_UI_SITE, SPELL_UI_SITE_FILE, ensureEditor, ensurePageServer } from "./pageServer.ts"
-import { SPELL_UI_ROOT, SiteCheckError } from "./tools.types.ts"
+import { SiteSearchBuilder, type DrawnSpellPage } from "./SiteSearchBuilder.ts"
+import { SITE_DATA, SPELL_UI_ROOT, SiteCheckError } from "./tools.types.ts"
 import { environment } from "./environment.ts"
 
 /****************
@@ -34,6 +37,10 @@ import { environment } from "./environment.ts"
  *     what a fixer needs
  *   - a nav button (`ui-site-nav-button`) whose drawer doesn't open at phone width
  * - Every page is checked, whatever failed before it.
+ * - The site's search file, `docs/__data/search.json5` (`SiteSearchBuilder.spellSite()`):
+ *   `--all` writes it as it goes, from each page as it's drawn on desktop (its markup, with the ids its contents gave);
+ *   `--search` only does that, with no checks:  every page in one browser page, clicking from one to the next.
+ *   - Written only when every page was read:  a page that couldn't be is a problem, and the file stays as it was.
  * - Problems go to stderr, with each page's URL, counts and screenshots;  a JSON summary is the last thing on stdout.
  * - Look at the screenshots too:  the checks can't see overlap, clipping or ugly wrapping.
  * - Throws `SiteCheckError` when it can't start:  no such page, or no editor running the site (exit 2).
@@ -52,12 +59,22 @@ export class SiteCheck {
   /** The running editor's origin, with its `/`, e.g. `http://localhost:64794/`;  set by `run()`. */
   base = ""
 
+  /** What it does with the site's search file:  see `SiteCheckProps.search`. */
+  readonly search: SiteCheckProps["search"]
+
   /** The one browser every page shares;  set by `run()`. */
   private browser?: Browser
 
-  constructor({ addresses, out = DEFAULT_OUT }: SiteCheckProps) {
+  /** Each page as drawn, by address, for the search file;  filled as the pages are loaded. */
+  private readonly drawn = new Map<string, Omit<DrawnSpellPage, "title">>()
+
+  /** The site's navigation's `pages`, as the first page read drew it:  the pages' titles (`spellTitles()`). */
+  private navPages: unknown
+
+  constructor({ addresses, out = DEFAULT_OUT, search }: SiteCheckProps) {
     this.addresses = addresses
     this.out = out
+    this.search = search
   }
 
   /**
@@ -75,11 +92,13 @@ export class SiteCheck {
     if (values.help) return exit(USAGE, 0)
     try {
       const known = await SiteCheck.siteAddresses()
-      const addresses = values.all ? known : positionals.map((name) => SiteCheck.resolveAddress(name, known))
+      const isWhole = values.all || values.search
+      const addresses = isWhole ? known : positionals.map((name) => SiteCheck.resolveAddress(name, known))
       if (!addresses.length) return exit(USAGE, 2)
       const check = new SiteCheck({
         addresses: [...new Set(addresses)],
-        out: values.out === undefined ? undefined : resolve(environment.invocationDir, values.out)
+        out: values.out === undefined ? undefined : resolve(environment.invocationDir, values.out),
+        search: values.search ? "only" : values.all ? "also" : undefined
       })
       const reports = await check.run()
       const ok = reports.every((report) => report.ok)
@@ -159,15 +178,46 @@ export class SiteCheck {
     this.browser = await BrowserPage.launch()
     const reports: PageReport[] = []
     try {
-      for (const address of this.addresses) {
-        const report = await this.checkPage(address)
-        this.print(report)
-        reports.push(report)
+      if (this.search === "only") {
+        for (const report of await this.readEveryPage()) {
+          if (!report.ok) this.print(report)
+          reports.push(report)
+        }
+      } else {
+        for (const address of this.addresses) {
+          const report = await this.checkPage(address)
+          this.print(report)
+          reports.push(report)
+        }
       }
     } finally {
       await this.browser.close()
     }
+    if (this.search) this.writeSearch()
     return reports
+  }
+
+  /**
+   * Write the site's search file from every page as drawn (`SiteSearchBuilder.spellSite()`), unless one wasn't read.
+   * - SIDE EFFECT:  writes `docs/__data/search.json5` when it changed;  says what it did on stderr
+   */
+  private writeSearch(): void {
+    const missing = this.addresses.filter((address) => !this.drawn.has(address))
+    if (missing.length) {
+      Terminal.err(
+        `\nsearch.json5 NOT written:  ${missing.length} page(s) not read (${missing.slice(0, 5).join(", ")})`
+      )
+      return
+    }
+    const titles = SiteSearchBuilder.spellTitles(this.navPages)
+    const pages = this.addresses.map((address) => ({
+      ...this.drawn.get(address)!,
+      title: titles.get(address) ?? address
+    }))
+    const data = JSON.parse(readFileSync(DATA_FILE, "utf8")) as SiteDataFile
+    const text = SiteSearchBuilder.textOf(SiteSearchBuilder.spellSite(pages, data))
+    const written = writeOrCheck([[SEARCH_FILE, text]], { command: "site:check --all", isCheck: false })
+    Terminal.err(`\nsearch.json5:  ${pages.length} pages, ${written.length ? "written" : "unchanged"}`)
   }
 
   /**
@@ -196,6 +246,108 @@ export class SiteCheck {
 
   /** Check one page at desktop, phone and dark;  NEVER throws:  a crash is one more problem. */
   async checkPage(address: string): Promise<PageReport> {
+    const { context, finish } = this.started(address)
+    for (const step of [this.checkDesktop, this.checkDeepLink, this.checkPhone, this.checkDark]) {
+      try {
+        await step.call(this, context)
+      } catch (error) {
+        context.problem(`${step.name} crashed:  ${error}`)
+      }
+    }
+    return finish()
+  }
+
+  /**
+   * `--search`:  read every page for the search file, in ONE browser page, moving from page to page by the site's own
+   * links, as a person clicking through it would (`goWithin()`):  the site compiles once, not once a page.
+   * - The first page is loaded;  each problem goes to the page being read when it happens.
+   * - A fresh browser page every `PAGES_PER_LOAD` pages:  one page that has shown hundreds grows until it crashes.
+   * - A page whose reading crashed is loaded once more in a fresh browser page;  the next pages go on from there.
+   * - NEVER throws:  a crash is a problem of the page it happened on.
+   */
+  private async readEveryPage(): Promise<PageReport[]> {
+    const pages = this.addresses.map((address) => this.started(address))
+    let reading = pages[0]!.context
+    const relay: CheckContext = {
+      get address() {
+        return reading.address
+      },
+      get name() {
+        return reading.name
+      },
+      get report() {
+        return reading.report
+      },
+      problem: (text) => reading.problem(text)
+    }
+    let page: Page | undefined
+    let shown = 0
+    const fresh = async (context: CheckContext) => {
+      await page
+        ?.context()
+        .close()
+        .catch(() => {})
+      page = await this.open(relay, DESKTOP, "desktop")
+      shown = 0
+      await this.load(page, context.report.url, context)
+    }
+    try {
+      for (const { context } of pages) {
+        reading = context
+        try {
+          if (!page || shown >= PAGES_PER_LOAD) await fresh(context)
+          else await this.goWithin(page, context)
+          await this.readDrawn(page!, context)
+        } catch (error) {
+          context.report.notes.push(`reading crashed, loaded again:  ${String(error).split("\n")[0]}`)
+          try {
+            await fresh(context)
+            await this.readDrawn(page!, context)
+          } catch (again) {
+            context.problem(`reading crashed:  ${again}`)
+            page = undefined
+          }
+        }
+        shown++
+      }
+    } finally {
+      await page
+        ?.context()
+        .close()
+        .catch(() => {})
+    }
+    return pages.map(({ finish }) => finish())
+  }
+
+  /**
+   * Show `check`'s page in the site already loaded in `page`:  a click on a link to its address, which the site takes
+   * (`followSiteLink()`);  then wait for it to be drawn and settle (its contents give its sections ids).
+   * - A problem when the site has no frame to click in, or doesn't show the page in time.
+   */
+  private async goWithin(page: Page, check: CheckContext): Promise<void> {
+    const before = await page.evaluate(drawnTag)
+    if (!(await page.evaluate(followSiteLink, check.address)))
+      return check.problem("search:  no site frame to click in")
+    const isShown = await page
+      .waitForFunction(
+        ({ address, before }) => (globalThis as any).__spellDrawnAt(address, before),
+        { address: check.address, before },
+        { timeout: SETTLE_MS }
+      )
+      .then(
+        () => true,
+        () => false
+      )
+    if (!isShown) check.report.notes.push(`${check.address}:  not shown ${SETTLE_MS / 1000}s after its link's click`)
+    await page.waitForTimeout(RUNTIME_SETTLE_MS)
+  }
+
+  /**
+   * A page's report, started:  `context` for the steps, `finish()` to close it.
+   * - `problem()` records a problem once per distinct first line (800 characters at most):
+   *   a broken element logs the same error once per instance, counted, not repeated
+   */
+  private started(address: string): { context: CheckContext; finish: () => PageReport } {
     const report: PageReport = {
       page: address,
       url: `${this.base}${SPELL_UI_SITE}${address === "/" ? "/" : address}`,
@@ -206,27 +358,17 @@ export class SiteCheck {
       screenshots: []
     }
     const seen = new Map<string, number>()
-    const context: CheckContext = { address, name: SiteCheck.shotNameFor(address), report, problem }
-    for (const step of [this.checkDesktop, this.checkDeepLink, this.checkPhone, this.checkDark]) {
-      try {
-        await step.call(this, context)
-      } catch (error) {
-        problem(`${step.name} crashed:  ${error}`)
-      }
-    }
-    report.problems = [...seen].map(([text, count]) => (count > 1 ? `${text}  (x${count})` : text))
-    report.notes = [...new Set(report.notes)]
-    report.ok = report.problems.length === 0
-    return report
-
-    /**
-     * Record a problem once per distinct first line (800 characters at most).
-     * - a broken element logs the same error once per instance:  counted, not repeated
-     */
-    function problem(text: string) {
+    const problem = (text: string) => {
       const line = String(text).split("\n")[0]!.slice(0, 800)
       seen.set(line, (seen.get(line) ?? 0) + 1)
     }
+    const finish = () => {
+      report.problems = [...seen].map(([text, count]) => (count > 1 ? `${text}  (x${count})` : text))
+      report.notes = [...new Set(report.notes)]
+      report.ok = report.problems.length === 0
+      return report
+    }
+    return { context: { address, name: SiteCheck.shotNameFor(address), report, problem }, finish }
   }
 
   ////////////////
@@ -251,10 +393,33 @@ export class SiteCheck {
       // the contents list a page's sections:  a page without any (the home page) may leave it empty
       if (sections.length && toc && !toc.entries) problem("ui-toc has no entries, on a page with sections")
       if (sections.length && toc?.entries && !toc.isVisible) problem("ui-toc hidden on desktop")
+      if (this.search) await this.readDrawn(page, check)
       await this.shoot(page, check, `${name}-desk-top.png`)
       await this.shootWhole(page, check, `${name}-desk-full.png`)
     } finally {
       await page.context().close()
+    }
+  }
+
+  /**
+   * Keep the page as drawn for the search file (`drawnState()`):  its markup, once its contents gave its sections ids.
+   * - A problem when it isn't drawn, or the site shows another page than asked for.
+   */
+  private async readDrawn(page: Page, check: CheckContext): Promise<void> {
+    const drawn = await page.evaluate(drawnState, this.navPages === undefined)
+    if (!drawn) return check.problem("search:  no page drawn in the site's page layout to read")
+    if (drawn.current !== check.address)
+      return check.problem(`search:  the site shows ${drawn.current}, not ${check.address}`)
+    if (drawn.pages) this.navPages ??= SiteCheck.parsed(drawn.pages)
+    this.drawn.set(check.address, { address: check.address, html: drawn.html })
+  }
+
+  /** `text` as JSON;  `undefined` when it isn't. */
+  private static parsed(text: string): unknown {
+    try {
+      return JSON.parse(text)
+    } catch {
+      return undefined
     }
   }
 
@@ -370,6 +535,7 @@ export class SiteCheck {
     })
     page.setDefaultTimeout(STEP_MS)
     await page.addInitScript(`globalThis.__spellNavState = ${navState.toString()}`)
+    await page.addInitScript(`globalThis.__spellDrawnAt = ${drawnAt.toString()}`)
     page.on("response", (response) => {
       if (response.status() >= 400) problem(`HTTP ${response.status()} (${label}):  ${response.url()}`)
     })
@@ -439,6 +605,15 @@ export type SiteCheckProps = {
   addresses: string[]
   /** screenshot folder, absolute;  default `results/site-check/` */
   out?: string
+  /**
+   * the site's search file (`docs/__data/search.json5`), from every page as drawn:
+   * - `"also"`:  read as the pages are checked, then written (`--all`)
+   * - `"only"`:  read in one browser page, going from page to page by the site's links, and written;
+   *   no checks (`--search`)
+   * - none:  left as it is
+   * - written only when every page in `addresses` was read
+   */
+  search?: "also" | "only"
 }
 
 /**
@@ -524,6 +699,7 @@ function parseCommandLine(argv: string[]) {
     allowPositionals: true,
     options: {
       all: { type: "boolean" },
+      search: { type: "boolean" },
       out: { type: "string" },
       help: { type: "boolean", short: "h" }
     }
@@ -543,10 +719,20 @@ const HOME_NAMES = ["", "home", "index"]
 /** Default screenshot folder;  `results` is git-ignored. */
 const DEFAULT_OUT = join(SPELL_UI_ROOT, "results", "site-check")
 
+/** The site's data, which names the tag each family's Usage page documents. */
+const DATA_FILE = join(SPELL_UI_ROOT, SITE_DATA, "components.json5")
+
+/** The site's search file, written from the pages as drawn (`writeSearch()`). */
+const SEARCH_FILE = join(SPELL_UI_ROOT, SITE_DATA, "search.json5")
+
+/** Pages `--search` shows in one browser page before it starts a fresh one (`readEveryPage()`). */
+const PAGES_PER_LOAD = 40
+
 /** Printed on bad arguments and `--help`. */
-const USAGE = `usage:  yarn site:check <page...> | --all  [--out <dir>]
+const USAGE = `usage:  yarn site:check <page...> | --all | --search  [--out <dir>]
   page:  an address of the Spell UI site (/button/examples, button), a tag (ui-button), or home
-  --all:  every page its file (SpellUI.spell) lists
+  --all:  every page its file (SpellUI.spell) lists;  and writes the site's search file (docs/__data/search.json5)
+  --search:  only writes the search file:  reads every page, with no checks
   --out:  screenshot folder (default ${DEFAULT_OUT})`
 
 /** Desktop viewport. */
@@ -671,6 +857,100 @@ function sectionsState(): SectionState[] {
         sections.push({ id: el.id, isNested: !!el.parentElement?.closest("ui-section") })
       if (el.shadowRoot && !/^(spell-example|ui-example)$/.test(el.localName)) walk(el.shadowRoot, inLayout)
     }
+  }
+}
+
+/**
+ * The page the site drew, for the search file:  the first child of its `ui-page-layout` in no slot (as
+ * `TocIndex.layoutPage()`), its markup;  the site navigation's `current`, and its `pages` (as text) when `withPages`.
+ * `undefined` with no page layout.
+ */
+function drawnState(withPages: boolean) {
+  const layout = find(document, "ui-page-layout")
+  const page = layout && [...layout.children].find((child) => !child.hasAttribute("slot"))
+  if (!page) return undefined
+  const nav = find(document, "ui-site-nav")
+  return {
+    html: page.outerHTML,
+    current: nav?.getAttribute("current") ?? undefined,
+    pages: withPages ? (nav?.getAttribute("pages") ?? undefined) : undefined
+  }
+
+  /** The first `selector` under `root`, or in a shadow root there. */
+  function find(root: Document | ShadowRoot, selector: string): Element | undefined {
+    const here = root.querySelector(selector)
+    if (here) return here
+    for (const el of root.querySelectorAll("*")) {
+      const inner = el.shadowRoot && find(el.shadowRoot, selector)
+      if (inner) return inner
+    }
+    return undefined
+  }
+}
+
+/** The tag of the page the site drew (`spell-u-i-button-api`), or `""`:  to see a new one drawn. */
+function drawnTag(): string {
+  return find(document)?.localName ?? ""
+
+  /** The site's page under `root`, or in a shadow root there. */
+  function find(root: Document | ShadowRoot): Element | undefined {
+    const layout = root.querySelector("ui-page-layout")
+    if (layout) return [...layout.children].find((child) => !child.hasAttribute("slot"))
+    for (const el of root.querySelectorAll("*")) {
+      const inner = el.shadowRoot && find(el.shadowRoot)
+      if (inner) return inner
+    }
+    return undefined
+  }
+}
+
+/**
+ * Whether the site shows `address` now:  its navigation's `current` is it, and a page other than `before` is drawn.
+ * - Installed as `__spellDrawnAt()` (`open()`), for `waitForFunction()`.
+ */
+function drawnAt(address: string, before: string): boolean {
+  const nav = find(document, "ui-site-nav")
+  if (nav?.getAttribute("current") !== address) return false
+  const layout = find(document, "ui-page-layout")
+  const page = layout && [...layout.children].find((child) => !child.hasAttribute("slot"))
+  return !!page && page.localName !== before
+
+  /** The first `selector` under `root`, or in a shadow root there. */
+  function find(root: Document | ShadowRoot, selector: string): Element | undefined {
+    const here = root.querySelector(selector)
+    if (here) return here
+    for (const el of root.querySelectorAll("*")) {
+      const inner = el.shadowRoot && find(el.shadowRoot, selector)
+      if (inner) return inner
+    }
+    return undefined
+  }
+}
+
+/**
+ * Click a link to `address` inside the site's frame (`.spell-site-frame`), which the site takes as its own
+ * (`SiteBase.followLink()`);  `false` with no frame.
+ */
+function followSiteLink(address: string): boolean {
+  const frame = find(document)
+  if (!frame) return false
+  const link = document.createElement("a")
+  link.setAttribute("href", address)
+  link.hidden = true
+  frame.append(link)
+  link.click()
+  link.remove()
+  return true
+
+  /** The site's frame under `root`, or in a shadow root there. */
+  function find(root: Document | ShadowRoot): Element | undefined {
+    const here = root.querySelector(".spell-site-frame")
+    if (here) return here
+    for (const el of root.querySelectorAll("*")) {
+      const inner = el.shadowRoot && find(el.shadowRoot)
+      if (inner) return inner
+    }
+    return undefined
   }
 }
 

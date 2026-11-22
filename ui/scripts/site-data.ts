@@ -3,7 +3,7 @@
  * - The site's data, in `docs/__data/` (`SiteDataBuilder`):
  *   - `components.json5`
  *   - `icons.json5`:  the icon browser's search terms
- *   - `search.json5`:  every page's sections, for `<ui-docs-search>`, read from the pages beside it
+ *   - not `search.json5`, every page's sections:  `yarn site:check --all` writes it, from the Spell pages as drawn
  *   - and `pages.json5`, kept complete
  * - From the same data, the editors' element descriptions (`ElementManifests`):
  *   - `custom-elements.json`:  a Custom Elements Manifest
@@ -40,7 +40,6 @@ const outputs: GeneratedOutput[] = [
   [builder.dataFile, SiteDataBuilder.stringify(data)],
   [builder.pagesFile, SiteDataBuilder.stringify(pages)],
   [builder.iconsFile, builder.iconsText()],
-  [builder.searchFile, builder.searchText()],
   ...manifests.outputs(builder.dataFolder),
   await manifests.jsxOutput(),
   await DefaultsTable.output(builder.root, builder.componentsFolder),

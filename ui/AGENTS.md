@@ -505,8 +505,10 @@ Where each of a tag's attributes goes in a property editor:  the spell editor's 
 - The DATA, `docs/__data/`:  GENERATED, committed.
   - `components.json5`
   - `icons.json5`:  the icon browser's search terms
-  - `search.json5`:  every page's sections
-  - Written by `yarn site:data`, with the editors' manifests beside them:
+  - `search.json5`:  every page and its sections, for the site's search
+    - Written by `yarn site:check --all` (or `--search`, which only reads), from the Spell pages as drawn
+      (epic `editor` P43):  rerun it after adding, renaming or moving a section.
+  - The rest written by `yarn site:data`, with the editors' manifests beside them:
     `custom-elements.json`, `html-custom-data.json`, `css-custom-data.json`.
   - And, in `src/`, the JSX types of every `<ui-*>` tag, [`spell/ui/jsx`](src/jsx.ts):
     - each tag's attributes and events
@@ -567,7 +569,7 @@ Where each of a tag's attributes goes in a property editor:  the spell editor's 
   - `yarn report` rewrites the tables of [the report](../spell.epics/guides/ui/notes/report.md).
     Run it twice:  no diff.
 - `yarn site:build` ~== these four, in turn:
-  - `yarn site:data`:  `components.json5`, `icons.json5` and `search.json5`, in `docs/__data/`
+  - `yarn site:data`:  `components.json5` and `icons.json5`, in `docs/__data/`
   - `yarn site:index`:  the cards of [the component index](docs/components.html) (`--check`)
   - `yarn site:kitchen`:  the examples of [the kitchen sink](docs/kitchen-sink.html) (`--check`),
     from every family's `types.html` in `examples/elements/`
@@ -641,6 +643,8 @@ Where each of a tag's attributes goes in a property editor:  the spell editor's 
     - phone-width overflow
     - a nav drawer that won't open
   - Screenshots go in `results/`, its `site-check/`.  LOOK at them.
+  - `--all` also writes the site's search file, `docs/__data/search.json5`, from every page as drawn;
+    `--search` only does that, clicking through the site in one browser page, with no checks.
 - Generators, each writing COMMITTED files (never edit their output):
   - `yarn gen:styles`:  the token sheets in `src/styles/`
   - `gen:icons`:  the built-in icon packs.  Downloads Font Awesome, needs `reference/Fomantic-UI/`.

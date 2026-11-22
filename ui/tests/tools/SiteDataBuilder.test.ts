@@ -11,8 +11,9 @@ import { SITE_PAGES } from "spell/ui/tools/tools.types"
 
 /**
  * The site's committed data is what `yarn site:data` would write now.
- * - The data:  `docs/__data/`'s `components.json5`, `pages.json5`, `icons.json5`, `search.json5`
- * - Run it after changing a vocabulary, a family sheet's tokens, `pages.json5` or a page's sections.
+ * - The data:  `docs/__data/`'s `components.json5`, `pages.json5`, `icons.json5`
+ *   - not `search.json5`:  `yarn site:check --all` writes it from the Spell pages as drawn, which a unit test can't
+ * - Run it after changing a vocabulary, a family sheet's tokens or `pages.json5`.
  * - A comment written into one of them is kept by the writer (`keepingCommentsIn()`):  compared as it would write it.
  */
 describe("SiteDataBuilder.build()", () => {
@@ -29,10 +30,6 @@ describe("SiteDataBuilder.build()", () => {
     expect(
       readFileSync(builder.iconsFile, "utf8") === asWritten(builder.iconsFile, builder.iconsText()),
       "icons.json5"
-    ).toBe(true)
-    expect(
-      readFileSync(builder.searchFile, "utf8") === asWritten(builder.searchFile, builder.searchText()),
-      "search.json5"
     ).toBe(true)
   }, 60_000)
 

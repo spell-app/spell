@@ -4,6 +4,8 @@ import type { JSX } from "@solidjs/web"
 import { E, UIT } from "spell/ui/core"
 import { SiteData } from "spell/ui/docs-components/SiteData"
 import { SitePages, type SitePage } from "spell/ui/components/ui-site-nav/SitePages"
+// A leaf, not the barrel:  the barrel defines `<ui-toc>`
+import { TocIndex } from "spell/ui/components/ui-toc/TocIndex"
 import { docsSearchVocabulary } from "./UIDocsSearch.en"
 import { SearchData } from "./SearchData"
 import { SearchIndex } from "./SearchIndex"
@@ -81,8 +83,14 @@ export class DOMDocsSearchElement extends E.DOMElement<UIDocsSearch> {
  *   - vetoed:  a router took it
  *   - else a result on the page shown sets the hash,
  *     closing the drawer the field is in (the site's landing scrolls)
- *   - and any other loads its page
+ *   - and any other is followed as a plain link click (Enter clicks it):
+ *     a site that shows its pages itself (a Spell site) takes it, else the browser loads its page
  *   - then the field empties
+ * - In a Spell site (the Spell UI site), its links are the site's own addresses (`base="/"`:  `/button/api#attributes`):
+ *   - the page shown is the site's, the page of the page layout the field is in (`TocIndex.layoutPage()`),
+ *     wherever the site draws it (inside the editor's shadow root)
+ *   - its address is the site navigation's `current` (`SitePages.followNavAround()`), so its own sections link
+ *     there too (`/button#events`), and the search file's copy of it is skipped
  * - Data:  the page shown's sections are read live from its DOM on every focus (`SearchIndex.here()`, `page`);
  *   the rest come from the site's data, fetched on the FIRST focus or keystroke
  *   (`SiteData` + `SearchData`, `SearchIndex`).
@@ -166,11 +174,34 @@ export class UIDocsSearch extends E.UIComponent<DocsSearchVocabulary> {
     return this.dataWasRequested && !this.searchIndex
   }
 
+  /** The site navigation's `current` around the field, in a site that has one:  the page shown's address. */
+  @E.state accessor siteAddress: string | undefined = undefined
+
+  /** How to stop following the site navigation;  `undefined` until it's found. */
+  private stopFollowingNav: (() => void) | undefined
+
   /** Read the page shown:  its sections and its path. */
   private readPageShown() {
-    const page = this.page || DEFAULT_PAGE
-    this.pageOutline = SearchIndex.here(document.querySelector(page) ?? undefined)
-    this.currentPagePath = this.pagePath()
+    this.followSiteNav()
+    this.pageOutline = SearchIndex.here(this.pageShown())
+    this.currentPagePath = this.siteAddress ?? this.pagePath()
+  }
+
+  /**
+   * The element whose sections are "On this page":  `page`'s, else the page of the page layout around the field
+   * (a site's, across shadow roots), else `DEFAULT_PAGE`'s.
+   */
+  private pageShown(): Element | undefined {
+    if (this.page) return document.querySelector(this.page) ?? undefined
+    const layout = E.closestAcrossShadow<HTMLElement>(this.domElement, PAGE_LAYOUT)
+    return (layout && TocIndex.layoutPage(layout)) ?? document.querySelector(DEFAULT_PAGE) ?? undefined
+  }
+
+  /** Follow the site navigation around the field, once it's there:  `siteAddress`.  Stops when it's released. */
+  private followSiteNav() {
+    if (this.stopFollowingNav) return
+    this.stopFollowingNav = SitePages.followNavAround(this.domElement, ({ current }) => (this.siteAddress = current))
+    if (this.stopFollowingNav) this.domElement.addReleaseCallback(() => this.stopFollowingNav?.())
   }
 
   /** `pages`, the well-formed ones;  none:  it searches the site's data instead. */
@@ -433,8 +464,22 @@ export class UIDocsSearch extends E.UIComponent<DocsSearchVocabulary> {
     if (url.pathname === location.pathname && url.search === location.search) {
       event.preventDefault()
       this.jumpHere(url.hash)
-    } else if (event.type === "keydown") location.assign(href)
-    // a plain click on another page's link:  the browser follows it
+    } else if (event.type === "keydown") this.followAsLink(link)
+    // a plain click on another page's link:  followed as any link is (a site takes it, else the browser)
+  }
+
+  /**
+   * Follow `link` as a plain click on it would be:  a site that shows its pages itself takes it, as it takes any link
+   * (a Spell site, `SiteBase.followLink()`);  else the browser loads it.
+   * - A hidden copy, clicked:  the option itself is in the popover, whose clicks the card takes (`wireCard()`).
+   */
+  private followAsLink(link: HTMLAnchorElement) {
+    const copy = document.createElement("a")
+    copy.setAttribute("href", link.getAttribute("href")!)
+    copy.hidden = true
+    this.domElement.shadowRoot!.append(copy)
+    copy.click()
+    copy.remove()
   }
 
   /**
@@ -460,9 +505,20 @@ export class UIDocsSearch extends E.UIComponent<DocsSearchVocabulary> {
   // ## Links
   ////////////////
 
-  /** `path` (from the site root, or `#id`) as a link:  against `linkBase`;  a hash stays a hash. */
+  /**
+   * `path` (from the site root, a site address `/button/api`, or `#id`) as a link, against `linkBase`.
+   * - A hash stays a hash;  in a site, the page shown's address and its hash (`/button#events`), which the site takes.
+   * - A site address after a base ending in `/` loses its doubled `/`:  `base="/"` + `/button` => `/button`.
+   */
   private href(path: string): string {
-    return path.startsWith("#") ? path : this.linkBase + path
+    if (path.startsWith("#")) return this.siteAddress ? this.joined(this.siteAddress) + path : path
+    return this.joined(path)
+  }
+
+  /** `path` after `linkBase`, one `/` between them. */
+  private joined(path: string): string {
+    const base = this.linkBase
+    return path.startsWith("/") && base.endsWith("/") ? base.slice(0, -1) + path : base + path
   }
 
   /** Prefix of every link:  `base`, else the site root from `SiteData`. */
@@ -714,6 +770,9 @@ export class UIDocsSearch extends E.UIComponent<DocsSearchVocabulary> {
 
 /** The vocabulary getters, typed (`UIComponent`'s doc). */
 export interface UIDocsSearch extends E.AttributeValues<DocsSearchVocabulary> {}
+
+/** The element a site's page is drawn in:  its sections are the page shown's (`pageShown()`). */
+const PAGE_LAYOUT = "ui-page-layout"
 
 /** The index of nothing:  what the page shown is searched with until the data is in. */
 const NO_INDEX = new SearchIndex()

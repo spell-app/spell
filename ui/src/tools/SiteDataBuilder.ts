@@ -40,8 +40,10 @@ import { VocabularyFiles } from "spell/element-tools/VocabularyFiles"
  *   - The first seeds came from the old Astro site's MDX pages (frontmatter + token-table props),
  *     deleted with it (epic `spell-ui-pages`, P7).
  * - Also the FOUNDATION tokens, grouped (`foundation`, `src/tools/FoundationTokens.ts`), for the theming page's tables.
- * - And the search file, `docs/__data/search.json5` (`searchText()`, `src/tools/SiteSearchBuilder.ts`):
+ * - And, for another component set, its search file (`searchText()`, `src/tools/SiteSearchBuilder.ts`):
  *   every page's sections, read from the pages' markup.
+ *   - Spell UI's own, `docs/__data/search.json5`, comes from its Spell pages as drawn:  `yarn site:check --all`
+ *     (`SiteCheck`), never from here (epic `editor` P43).
  * - Another component set's data (`set`, `forSet()`):  its own groups as the topics, its own side-column links,
  *   its pages one flat folder;  the brand's, Epic UI's and App UI's are built so.
  * - Deterministic:  sorted, no dates, so a rebuild with nothing changed writes the same bytes.
@@ -95,12 +97,11 @@ export class SiteDataBuilder {
     return join(this.dataFolder, "icons.json5")
   }
 
-  /** `docs/__data/search.json5`:  beside the other data, built from the pages. */
-  get searchFile(): string {
-    return join(this.dataFolder, "search.json5")
-  }
-
-  /** The text of `search.json5` (`SiteSearchFile`):  every page's sections, for `<ui-docs-search>`. */
+  /**
+   * The text of a component set's `search.json5` (`SiteSearchFile`):  every page's sections, read from its page files,
+   * for `<ui-docs-search>`.
+   * - App UI's (`AppUIDataBuilder`);  not Spell UI's own (the class's doc).
+   */
   searchText(): string {
     return new SiteSearchBuilder(this.pagesFolder).text()
   }
@@ -395,9 +396,9 @@ export type SiteDataBuilderProps = {
   components?: string
   /** doc-only families, as `src/docs-components/`;  `false`:  none */
   docs?: string | false
-  /** the folder of `components.json5`, `pages.json5` and `search.json5`, as `docs/__data/` */
+  /** the folder of `components.json5` and `pages.json5`, as `docs/__data/` */
   data?: string
-  /** the site's pages, as `docs/` (`SITE_PAGES`):  what `search.json5` is read from */
+  /** the site's pages, as `docs/` (`SITE_PAGES`):  what a set's `search.json5` is read from (`searchText()`) */
   pages?: string
   /** another component set's own facts:  `build()` makes the data the set's (`forSet()`) */
   set?: SiteSet

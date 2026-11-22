@@ -5,8 +5,8 @@ import type { OutlineSection } from "./UIToc.types"
  * ### `PageOutline`
  * A page's sections, read the same way everywhere:
  * - LIVE from the page shown:  what the docs site's search (`<ui-docs-search>`) finds "On this page"
- * - by `yarn site:data`, into the search file for every page
- *   (`SiteSearchBuilder`, through `sections()`, on linkedom)
+ * - into the search file for every page (`SiteSearchBuilder`, through `sections()`, on linkedom):
+ *   Spell UI's from its Spell pages as drawn (`yarn site:check --all`), another set's from its page files
  * - the table of contents reads a page on top of it (`TocIndex.scan()`):  the same titles, the same demo markup left
  *   out (`titleOf()`, `demoAround()`)
  * - The docs search's until epic `ui-gaps` P14:  it moved with `<ui-toc>`, so a component never imports the docs
