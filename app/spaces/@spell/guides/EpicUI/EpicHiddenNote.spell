@@ -1,0 +1,117 @@
+"epic hidden note" is a notebook page
+	<header level="1">
+		&lt;epic-hidden-note&gt;
+		<header>The &lt;epic-hidden-note&gt; element: the line under a filtered list, 3 hidden · show all.</>
+	</>
+
+	<text class="lede" paragraph><text code>&lt;epic-hidden-note&gt;</> is the quiet line under a list the state filter hides items of: "3 hidden · show all". A click shows them all again.</>
+	<text class="meta" paragraph>
+		For anyone changing how items are filtered.
+
+		Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> P3), in the <link target="src-spell-epic-src-components-epic-state-filter" link="/epic/src/components/epic-state-filter/"><text title="epic/src/components/epic-state-filter/" code>epic-state-filter</></> family, with <link target="src-spell-epic-src-docs-epic-state-filter-html" link="/epic-state-filter"><text code>&lt;epic-state-filter&gt;</></>.
+
+		Its vocabulary: <link target="src-spell-epic-src-components-epic-state-filter-epichiddennote-en-ts" link="/epic/src/components/epic-state-filter/EpicHiddenNote.en.ts"><text title="epic/src/components/epic-state-filter/EpicHiddenNote.en.ts" code>EpicHiddenNote.en.ts</></>
+
+		Its component: <link target="src-spell-epic-src-components-epic-state-filter-epichiddennote-tsx" link="/epic/src/components/epic-state-filter/EpicHiddenNote.tsx"><text title="epic/src/components/epic-state-filter/EpicHiddenNote.tsx" code>EpicHiddenNote.tsx</></>.
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<example "Example">
+			<html>
+				<epic-hidden-note count="3"></epic-hidden-note>
+			</html>
+		</example>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>Nobody writes it in a doc: <link target="src-spell-epic-src-docs-epic-section-html" link="/epic-section"><text code>&lt;epic-section&gt;</></> draws it under its items, and the docs runtime under each of the Epics page's lists (<link target="src-spell-epic-src-tools-assets-spell-doc-runtime-js" link="/epic/src/tools/_assets/spell-doc-runtime.js"><text title="epic/src/tools/_assets/spell-doc-runtime.js" code>wireItemFilters()</></>). With nothing hidden, its owner leaves it out.</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="compass"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Parent</>
+				<cell>How many</>
+				<cell>As</>
+			</>
+			<row>
+				<cell><text code>&lt;epic-section&gt;</>, under its items</>
+				<cell>one</>
+				<cell>Its part <text code>hidden-note</>.</>
+			</>
+			<row>
+				<cell>a docs page, after a filtered list</>
+				<cell>one per list</>
+				<cell><text code>.spell-hidden-note</>.</>
+			</>
+		</>
+		<text paragraph>It has no children.</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="table columns"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Attribute</>
+				<cell>What it is</>
+			</>
+			<row>
+				<cell>
+					<text code>count</>
+				</>
+				<cell>How many items the filter hides.</>
+			</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<text paragraph>Pieces of what it draws.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The line, a <text code>&lt;button&gt;</> drawn as a link.</>
+				</>
+			</>
+		</>
+
+		<section label="Events" sticky="stack" collapsible dividing open="false">
+			<text paragraph>What it tells its owner.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Event</>
+					<cell>Detail</>
+					<cell>When</>
+				</>
+				<row>
+					<cell>
+						<text code>epic-all-showing</>
+					</>
+					<cell>
+						<text code>&#123;&#125;</>
+					</>
+					<cell>Its line was clicked: the owner clears the filter.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>Muted text, the accent and an underline under the pointer.</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-19 against branch <ui-text code>epic-engine</> (P3).</>
+		</>
+	</>

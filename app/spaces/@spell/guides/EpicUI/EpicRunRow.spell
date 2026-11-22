@@ -1,0 +1,131 @@
+"epic run row" is a notebook page
+	<header level="1">
+		&lt;epic-run-row&gt;
+		<header>The &lt;epic-run-row&gt; element: one row of a run page: the command's columns, then your answer.</>
+	</>
+
+	<text class="lede" paragraph>One row of a run page: a thing a command asks about, and your answer to it.</>
+	<text class="meta" paragraph>
+		For anyone writing a command that asks you on a page, or changing this element.
+
+		<label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-run-row" link="/epic/src/components/epic-run-row/"><text title="epic/src/components/epic-run-row/" code>epic-run-row/</></> (epic <text code>epic-engine</> P23).
+
+		Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-run-row-epicrunrow-en-ts" link="/epic/src/components/epic-run-row/EpicRunRow.en.ts"><text title="epic/src/components/epic-run-row/EpicRunRow.en.ts" code>EpicRunRow.en.ts</></>.
+
+		Its component: <link target="src-spell-epic-src-components-epic-run-row-epicrunrow-tsx" link="/epic/src/components/epic-run-row/EpicRunRow.tsx"><text title="epic/src/components/epic-run-row/EpicRunRow.tsx" code>EpicRunRow.tsx</></>, with its style sheet (<text code>.css</>) and tests beside it.
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>Two rows, as a run page draws them: one with alternatives, one with a tick box and details.</>
+		<html>
+			<epic-run-row columns="\[{\"key\":\"english\",\"label\":\"English\"},{\"key\":\"gender\",\"label\":\"Gender\"}]" answer-label="Spanish" row="{\"id\":\"task\",\"cells\":{\"english\":\"Task\",\"gender\":\"f\"},\"value\":\"Tarea\",\"alternatives\":\[\"Faena\",\"Labor\"]}"></>
+			<epic-run-row columns="\[{\"key\":\"english\",\"label\":\"English\"},{\"key\":\"gender\",\"label\":\"Gender\"}]" answer-label="Spanish" row="{\"id\":\"done\",\"cells\":{\"english\":\"done\",\"gender\":\"\"},\"value\":\"hecho\",\"tick\":{\"label\":\"Use for every project\"},\"details\":\[\"line 3:  the task is done\",\"line 9:  mark it done\"]}"></>
+			<epic-run-row columns="\[{\"key\":\"english\",\"label\":\"English\"},{\"key\":\"gender\",\"label\":\"Gender\"}]" answer-label="Spanish" row="{\"id\":\"todo\",\"cells\":{\"english\":\"Todo\",\"gender\":\"m\"},\"value\":\"Pendiente\"}" taken="2026-10-23T19:12:00.000Z" answer="{\"outcome\":\"typed\",\"value\":\"Por hacer\",\"at\":\"2026-10-23T19:13:00.000Z\"}"></>
+		</>
+		<text class="meta" paragraph>Live: the real element, drawn by the epics pack this page loads. Outside a run page nothing saves.</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>Never written in a page: <text code>&lt;epic-run&gt;</> draws one per row in its shadow root, giving it the row, the columns and your answer as properties. In markup, they're JSON.</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="map"/>
+		<list bulleted>
+			<item>Its parent: <link target="src-packages-epics-docs-epic-run-html" link="/epic-run"><text code>&lt;epic-run&gt;</></>'s table, in its shadow root.</>
+			<item>Its children: none.</>
+		</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="list check"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Name</>
+				<cell>Values</>
+				<cell>Meaning</>
+				<cell>Required</>
+			</>
+			<row>
+				<cell>
+					<text code>row</>
+				</>
+				<cell>a <text code>RunRow</></>
+				<cell>The row, as the command wrote it: <text code>id</>, <text code>cells</>, <text code>value</> (the proposal), <text code>alternatives</>, <text code>tick</>, <text code>details</>.</>
+				<cell>yes</>
+			</>
+			<row>
+				<cell>
+					<text code>columns</>
+				</>
+				<cell>a list of <text code>&#123; key, label &#125;</></>
+				<cell>Which cells to show, in order.</>
+				<cell>no</>
+			</>
+			<row>
+				<cell>
+					<text code>answer</>
+				</>
+				<cell>a <text code>RunAnswer</></>
+				<cell>Your answer so far; none: the proposal.</>
+				<cell>no</>
+			</>
+			<row>
+				<cell>
+					<text code>answer-label</>
+				</>
+				<cell>text</>
+				<cell>The answer column's name: the box's name for a screen reader.</>
+				<cell>no</>
+			</>
+			<row>
+				<cell>
+					<text code>taken</>
+				</>
+				<cell>a time, ISO</>
+				<cell>When the command took the row (acted on it; epic <text code>epic-engine</> P25). An answer saved after it shows the orange note.</>
+				<cell>no</>
+			</>
+		</>
+
+		<section label="Events" sticky="stack" collapsible dividing open="false">
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Event</>
+					<cell>Sent when</>
+				</>
+				<row>
+					<cell>
+						<text code>epic-run-answered</>
+					</>
+					<cell>You typed (<text code>now: false</>), picked or ticked (<text code>now: true</>); <text code>outcome</>: <text code>accepted</>, <text code>picked</> or <text code>typed</>.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>Its cells on the table's columns; the answer cell holds the box, the pick, the tick box, the details.</>
+			<item>The pick: small pills, the proposal's dashed until chosen; the chosen one raised and inked, as a segmented control's thumb.</>
+			<item>Answered differently from the proposal: an orange box, an orange edge, and a round button back.</>
+			<item>Taken by the command: a quiet check and <text code>taken</> beside the box, the time in its tooltip.</>
+			<item>Changed after it was taken: an orange note under the box, <text code>changed after the run took it</>; the command may still pick the change up.</>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item>Nobody: <text code>&lt;epic-run&gt;</> draws it, from the run's <text code>run.json5</>.</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-23 against branch <ui-text code>epic-engine</>.</>
+		</>
+	</>

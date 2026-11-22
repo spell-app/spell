@@ -1,0 +1,75 @@
+"epic page note head" is a notebook page
+	<header level="1">
+		&lt;epic-page-note-head&gt;
+		<header>The &lt;epic-page-note-head&gt; element: an old page note's head line.</>
+	</>
+
+	<text class="lede" paragraph>The head line of an old page note (<text code>&lt;spell-note&gt;</>), written into a guide before comments replaced them:  who and when, its first line while folded, its status.  A click folds the note.</>
+	<text class="meta" paragraph>
+		For anyone changing how comments look or work on a page.
+
+		Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-page-note-head-epicpagenotehead-en-ts" link="/epic/src/components/epic-page-note-head/EpicPageNoteHead.en.ts"><text title="epic/src/components/epic-page-note-head/EpicPageNoteHead.en.ts" code>EpicPageNoteHead.en.ts</></>.
+
+		Its component: <link target="src-spell-epic-src-components-epic-page-note-head-epicpagenotehead-tsx" link="/epic/src/components/epic-page-note-head/EpicPageNoteHead.tsx"><text title="epic/src/components/epic-page-note-head/EpicPageNoteHead.tsx" code>EpicPageNoteHead.tsx</></>, with its style sheet (<text code>.css</>) and tests beside it.
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<html>
+			<epic-page-note-head at="2026-10-09 22:10" status="done" replies="1" preview="Show icons as I will click them rather than saying \"the plus button\""></>
+			<epic-page-note-head at="2026-10-10 09:12" status="new" preview="Is the second step still right?"></>
+		</>
+		<text class="meta" paragraph>Live: the real element.  On a guide the docs runtime puts one first in each note, and a click opens the note.</>
+	</>
+
+	<section label="2. Attributes">
+		<icon slot="icon" name="list check"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Name</>
+				<cell>Values</>
+				<cell>Meaning</>
+			</>
+			<row>
+				<cell>
+					<text code>at</>
+				</>
+				<cell>a date and time</>
+				<cell>When you wrote it:  shown without the year, <text code>10/9 22:10</>.</>
+			</>
+			<row>
+				<cell>
+					<text code>status</>
+				</>
+				<cell><text code>new</>, <text code>answered</>, <text code>done</></>
+				<cell>Yellow, violet, grey.</>
+			</>
+			<row>
+				<cell>
+					<text code>replies</>
+				</>
+				<cell>a number</>
+				<cell>How many replies Claude wrote.</>
+			</>
+			<row>
+				<cell>
+					<text code>preview</>
+				</>
+				<cell>text</>
+				<cell>The note's first line, while folded.</>
+			</>
+			<row>
+				<cell>
+					<text code>open</>
+				</>
+				<cell>boolean</>
+				<cell>The note is open.  A click flips it and says so (<text code>epic-note-opened</> / <text code>epic-note-closed</>).</>
+			</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-19 against branch <ui-text code>epic-engine</>.</>
+		</>
+	</>

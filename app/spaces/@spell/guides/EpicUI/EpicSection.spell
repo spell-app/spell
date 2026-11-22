@@ -1,0 +1,597 @@
+"epic section" is a notebook page
+	<header level="1">
+		&lt;epic-section&gt;
+		<header>The &lt;epic-section&gt; element: one section of an epic page (Phases, Questions ... Log), an Overview sub-section, or a report.</>
+	</>
+
+	<text class="lede" paragraph><text code>&lt;epic-section&gt;</> is one section of an epic page.</>
+	<list bulleted>
+		<item>Its <text code>kind</> says what it holds: the phases, one kind of item (questions, todos ...), the log, an Overview sub-section's prose, or a run's report.</>
+		<item>It draws the numbered title, the kind's icon, the fold, the count, and the state filter.</>
+	</>
+
+	<!-- no ui-list.spell-meta here:  any ui-item element on the page leaves epic-item unstyled (issue I9 of epic-components) -->
+	<text class="meta" paragraph>
+		Written for: anyone reading or writing an epic page's markup, or changing this element.
+
+		Status: <label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-section" link="/epic/src/components/epic-section/"><text title="epic/src/components/epic-section/" code>epic-section/</></>.
+
+		Its vocabulary (attributes, slots, parts, children): <link target="src-spell-epic-src-components-epic-section-epicsection-en-ts" link="/epic/src/components/epic-section/EpicSection.en.ts"><text title="epic/src/components/epic-section/EpicSection.en.ts" code>EpicSection.en.ts</></>.
+
+		The component: <link target="src-spell-epic-src-components-epic-section-epicsection-tsx" link="/epic/src/components/epic-section/EpicSection.tsx"><text title="epic/src/components/epic-section/EpicSection.tsx" code>EpicSection.tsx</></>.
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<example "Example">
+			<html>
+				<epic-section id="decisions" kind="questions">
+					<epic-item id="q1" title="Which colour names can a window take?" status="open" state="attention">
+						<p>Which colour names the window command accepts.</p>
+					</epic-item>
+					<epic-item id="q2" title="Keep the old ids as anchors?" status="open" state="open">
+						<p>Talked over in a review; still open.</p>
+					</epic-item>
+					<epic-item id="q3" title="Where the code lives" status="decided" state="recent">
+						<p>A package of its own, <a href="/spell-epic/" target="src-spell-epic" title="spell-epic"><code>epics</code></a>.</p>
+					</epic-item>
+				</epic-section>
+			</html>
+		</example>
+		<list bulleted>
+			<item>Its title: <text code>1. Questions</> (its number is its place among the blocks around it), the question icon, and the count <text code>2/3</>: two of three open.</>
+			<item>At the title's end, the STATE FILTER: a grey filter chip, then one round chip per state its items are in (red needs you, yellow open, green decided). Click a chip to turn its colour on or off; ⌥-click (Alt-click) one to show only that colour.</>
+		</>
+
+		<section label="With buttons in its title row" sticky collapsible dividing open="false">
+			<text paragraph>A page's own buttons go in its title row: <text code>&lt;ui-button slot="actions"&gt;</> children (epic <text code>epic-workflow</> P25).</>
+			<list bulleted>
+				<item>They sit after the title, before its tools (the Phases section's state filter and gear, an item section's state filter, an Overview sub-section's review buttons); the fold chevron is at the row's start.</>
+				<item>⌥-click (Alt-click) on its chevron or title, or ⌥+Enter on the focused chevron, opens it and everything in it (sections, phases, items, asides and cards), parts loading as they open; on an open one it folds everything inside, then the block itself. The chevron's tooltip says so. Its title row has no expand-all or collapse-all button of its own (epic <text code>epic-engine</> I161): the page's toolbar keeps one.</>
+				<item>A click on one never folds or unfolds it.</>
+				<item>The docs runtime puts the block's bullhorn there too, so it never sits over a button.</>
+				<item>The count badge (the Phases section's) stays just after the title, where Spell UI's section draws it.</>
+			</>
+			<example "With buttons in its title row">
+				<html>
+					<epic-section id="todos-example" kind="todos">
+						<epic-item id="t43" title="Show the slot on every element's page" status="open" state="open"></epic-item>
+						<ui-button slot="actions" appearance="circular basic" size="mini" icon="copy" title="Copy a link to it" aria-label="Copy a link to it"></ui-button>
+					</epic-section>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>From real epic pages: the Phases section (<link title="epics/spell-element/spell-element.plan.html" target="spell-element" link="/epics/spell-element/spell-element.plan.html"><text code>spell-element.plan.html</></>), and Overview sub-sections (<link title="epics/epic-components/epic-components.plan.html" target="epic-components" link="/epics/epic-components/epic-components.plan.html"><text code>epic-components.plan.html</></>), cut short:</>
+		<text paragraph>Sections:</>
+		<markdown>
+			```html
+			<epic-section id="o1" kind="overview-part" title="Structure" source="parts/o1.html"></epic-section>
+
+			<epic-section id="phases" kind="phases">
+			  <epic-phase id="p-component-packs" title="Component Packs" status="done" estimate="3-4h" source="parts/p-component-packs.html" commits></epic-phase>
+			</epic-section>
+
+			<epic-section id="decisions" kind="questions">...<epic-item>s...</epic-section>
+			<epic-section id="log" kind="log" source="parts/log.html"></epic-section>
+
+			<epic-section id="overnight" kind="report" title="Overnight · 2026-10-04">...prose...</epic-section>
+			```
+		</>
+		<list bulleted>
+			<item>The page's sections have FIXED ids, one per kind: <text code>phases</>, <text code>decisions</> (Questions kept its old id), <text code>judgements</>, <text code>todos</>, <text code>issues</>, <text code>tests</>, <text code>log</>; a saga page's Epics, <text code>epics</>. An Overview sub-section is <text code>o1</>, <text code>o2</> ...; a report has its own.</>
+			<item>The page's sections draw their own titles; an Overview sub-section and a report need <text code>title</>.</>
+			<item>The last line is the report's shape, from <link title="epic/src/tool/PLAN-DOC.md" target="src-spell-epic-src-tool-plan-doc-md" link="/epic/src/tool/PLAN-DOC.md"><text code>PLAN-DOC.md</></>: no live doc has one today.</>
+		</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="compass"/>
+
+		<section label="Its parents" sticky="stack" collapsible dividing open="false">
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Parent</>
+					<cell>How</>
+					<cell>How many</>
+					<cell>As</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-page-html" link="/epic-page">
+							<text code>&lt;epic-page&gt;</>
+						</>
+					</>
+					<cell>as <text code>kind="report"</></>
+					<cell>any number</>
+					<cell>Reports a run wrote (an overnight <text code>/bedtime</> report), after the Overview: unnumbered.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-page-html" link="/epic-page">
+							<text code>&lt;epic-page&gt;</>
+						</>
+					</>
+					<cell>as <text code>kind="away"</></>
+					<cell>one at most</>
+					<cell>"0. While you were out" (epic <text code>epic-engine</> P62): what Claude did since you last pressed Done reading, and what needs you, in order. First on the page, before the Overview, unnumbered, its toolbar button red-badged; it opens by itself. Written only by the epic tool, on every edit; Done reading in its title row takes it off.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-page-html" link="/epic-page">
+							<text code>&lt;epic-page&gt;</>
+						</>
+					</>
+					<cell>as <text code>kind="phases"</></>
+					<cell>one at most</>
+					<cell>2. Phases.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-page-html" link="/epic-page">
+							<text code>&lt;epic-page&gt;</>
+						</>
+					</>
+					<cell>as <text code>kind="questions"</></>
+					<cell>one at most</>
+					<cell>3. Questions.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-page-html" link="/epic-page">
+							<text code>&lt;epic-page&gt;</>
+						</>
+					</>
+					<cell>as <text code>kind="judgements"</></>
+					<cell>one at most</>
+					<cell>4. Judgement calls.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-page-html" link="/epic-page">
+							<text code>&lt;epic-page&gt;</>
+						</>
+					</>
+					<cell>as <text code>kind="todos"</></>
+					<cell>one at most</>
+					<cell>5. Todo: work still to do, and limits to know about (<text code>limit</>); Caveats, <text code>kind="caveats"</>, from epic <text code>epic-engine</> P32 to P44.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-page-html" link="/epic-page">
+							<text code>&lt;epic-page&gt;</>
+						</>
+					</>
+					<cell>as <text code>kind="issues"</></>
+					<cell>one at most</>
+					<cell>6. Issues.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-page-html" link="/epic-page">
+							<text code>&lt;epic-page&gt;</>
+						</>
+					</>
+					<cell>as <text code>kind="tests"</></>
+					<cell>one at most</>
+					<cell>7. Manual tests (To test before epic <text code>epic-engine</> P44).</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-page-html" link="/epic-page">
+							<text code>&lt;epic-page&gt;</>
+						</>
+					</>
+					<cell>as <text code>kind="log"</></>
+					<cell>one at most</>
+					<cell>8. Log.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-overview-html" link="/epic-overview">
+							<text code>&lt;epic-overview&gt;</>
+						</>
+					</>
+					<cell>as <text code>kind="overview-part"</></>
+					<cell>any number</>
+					<cell>The sub-sections, <text code>o1</>, <text code>o2</> ...</>
+				</>
+			</>
+		</>
+
+		<section label="Its children" sticky="stack" collapsible dividing open="false">
+			<text paragraph>What it takes depends on its <text code>kind</>:</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Child</>
+					<cell>Where</>
+					<cell>How many</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>prose</>
+					<cell>
+						<text code>slot="title"</>
+					</>
+					<cell>one at most</>
+					<cell>A title with markup.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-updated-html" link="/epic-updated">
+							<text code>&lt;epic-updated&gt;</>
+						</>
+					</>
+					<cell><text code>slot="changes"</>, only when its <text code>kind</> is <text code>phases</></>
+					<cell>any number</>
+					<cell>An older doc's Plan changes (until 2026-10-11): a copy of each <text code>&lt;epic-updated&gt;</> of a phase still to do, its phase in <text code>of</>. Not drawn: each phase draws its own now, and the tool removes these on its next write.</>
+				</>
+				<row>
+					<cell>prose</>
+					<cell>only when its <text code>kind</> is <text code>overview-part</> or <text code>report</></>
+					<cell>any number</>
+					<cell>An Overview sub-section's prose, or a report's.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-status-html" link="/epic-status">
+							<text code>&lt;epic-status&gt;</>
+						</>
+					</>
+					<cell><text code>slot="status"</>, only when its <text code>kind</> is <text code>overview-part</></>
+					<cell>any number</>
+					<cell>An Overview sub-section's status cards from Claude, oldest first (<text code>plan-doc status</>).</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-phase-html" link="/epic-phase">
+							<text code>&lt;epic-phase&gt;</>
+						</>
+					</>
+					<cell>only when its <text code>kind</> is <text code>phases</></>
+					<cell>any number</>
+					<cell>The phases, in order.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-item-html" link="/epic-item">
+							<text code>&lt;epic-item&gt;</>
+						</>
+					</>
+					<cell>only when its <text code>kind</> is <text code>questions</> or <text code>judgements</> or <text code>todos</> or <text code>issues</> or <text code>tests</></>
+					<cell>any number</>
+					<cell>The items, their id's letter the section's (<text code>q</> in Questions, <text code>t</> in Todo, <text code>m</> in Manual tests).</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-event-html" link="/epic-event">
+							<text code>&lt;epic-event&gt;</>
+						</>
+					</>
+					<cell>only when its <text code>kind</> is <text code>log</></>
+					<cell>any number</>
+					<cell>The log's review lines, oldest first: written, never drawn (epic <text code>epic-engine</> P52).</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-commit-html" link="/epic-commit">
+							<text code>&lt;epic-commit&gt;</>
+						</>
+					</>
+					<cell>only when its <text code>kind</> is <text code>log</></>
+					<cell>any number</>
+					<cell>The Log's entries, one per commit of the epic, in the file by time: drawn newest first.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epic-components-elements-epic-cards-html" link="/epic-cards">
+							<text code>&lt;epic-cards&gt;</>
+						</>
+					</>
+					<cell>only when its <text code>kind</> is <text code>epics</></>
+					<cell>one at most</>
+					<cell>A saga page's Epics: the cards of the epics serving the saga, drawn from the page server.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="table columns"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Name</>
+				<cell>Values</>
+				<cell>Meaning</>
+				<cell>Required</>
+			</>
+			<row>
+				<cell>
+					<text code>id</>
+					<space/>
+					<text class="meta">JS property: <text code>epicId</></>
+				</>
+				<cell>text: anchor</>
+				<cell>Its id, which links use: FIXED per kind (<text code>phases</>, <text code>decisions</> for Questions ...); <text code>o1</>, <text code>o2</> ... for an Overview sub-section; a report's own (<text code>overnight</>).</>
+				<cell>yes</>
+			</>
+			<row>
+				<cell>
+					<text code>kind</>
+				</>
+				<cell><text code>overview-part</>, <text code>epics</>, <text code>phases</>, <text code>questions</>, <text code>judgements</>, <text code>todos</>, <text code>issues</>, <text code>tests</>, <text code>log</>, <text code>report</></>
+				<cell>What it holds: <text code>phases</> its <text code>&lt;epic-phase&gt;</>s; <text code>questions</> ... <text code>tests</> its <text code>&lt;epic-item&gt;</>s; <text code>log</> its <text code>&lt;epic-commit&gt;</>s (drawn, newest first) and <text code>&lt;epic-event&gt;</>s (written, not drawn); <text code>overview-part</> and <text code>report</> prose; <text code>epics</> (a saga page's) its <text code>&lt;epic-cards&gt;</>.</>
+				<cell>yes</>
+			</>
+			<row>
+				<cell>
+					<text code>title</>
+					<space/>
+					<text class="meta">JS property: <text code>epicTitle</></>
+				</>
+				<cell>text</>
+				<cell>An Overview sub-section's title, WITHOUT its number (<text code>Structure</>, drawn as <text code>1.1 Structure</>), or a report's (<text code>Overnight · 2026-10-04</>): required there (or a <text code>slot="title"</> child, for a title with markup). The page's sections draw their own.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>source</>
+				</>
+				<cell>text</>
+				<cell>Its body's part file (<text code>parts/o3.html</>, <text code>parts/log.html</>), loaded into its children when it opens.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>part-ids</>
+				</>
+				<cell>text: ids</>
+				<cell>The ids inside its part file: a link to one loads the body first, then lands.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>open</>
+				</>
+				<cell>boolean: there or not</>
+				<cell>Unfolded: PAGE state, never written in a doc (epic pages open folded). A click on the title, a link to it (or into it) and find-in-page set it; set it from code to open it.</>
+				<cell/>
+			</>
+		</>
+
+		<section label="Slots" sticky="stack" collapsible dividing open="false">
+			<text paragraph>Where its children show: a child goes in a slot by its <text code>slot</> attribute.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Slot</>
+					<cell>What goes in it</>
+				</>
+				<row>
+					<cell>(default)</>
+					<cell>Its phases, items, log events or prose.</>
+				</>
+				<row>
+					<cell>
+						<text code>title</>
+					</>
+					<cell>A title with markup, in place of <text code>title</>.</>
+				</>
+				<row>
+					<cell>
+						<text code>changes</>
+					</>
+					<cell>An older doc's Plan changes copies in the Phases section (until 2026-10-11: <text code>&lt;epic-updated slot="changes" of="3" at="..."&gt;</>). Not drawn: each phase draws its own Plan changes box now, and the epic tool removes these on its next write.</>
+				</>
+				<row>
+					<cell>
+						<text code>status</>
+					</>
+					<cell>An Overview sub-section's status cards from Claude (<text code>&lt;epic-status slot="status"&gt;</>, P13): at the end of its body, above the note box.</>
+				</>
+				<row>
+					<cell>
+						<text code>actions</>
+					</>
+					<cell>Buttons of the page's own in its title row (<text code>&lt;ui-button slot="actions"&gt;</>): after the title, before its own buttons; a click on one never folds it. The docs runtime puts the block's bullhorn here too.</>
+				</>
+			</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<text paragraph>Pieces of what it draws, which a page's CSS can style from outside with <text code>::part(name)</>.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The element's box.</>
+				</>
+				<row>
+					<cell>
+						<text code>section</>
+					</>
+					<cell>The <text code>&lt;ui-section&gt;</> drawing the title bar and fold: its own parts through <text code>::part()</> from inside.</>
+				</>
+				<row>
+					<cell>
+						<text code>body</>
+					</>
+					<cell>Around its children: sets <text code>--epic-stack</> for them.</>
+				</>
+				<row>
+					<cell>
+						<text code>note</>
+					</>
+					<cell>The <text code>Loads from parts/x.html ...</> line, when its part can't load.</>
+				</>
+				<row>
+					<cell>
+						<text code>tools</>
+					</>
+					<cell>At the title's end: the page's own buttons (the <text code>actions</> slot), then the Phases section's state filter, its Accept Phases while the phases are agreed, and its gear; an item section's state filter; an Overview sub-section's review buttons.</>
+				</>
+				<row>
+					<cell>
+						<text code>stage-button</>
+					</>
+					<cell>The Phases section's "Accept Phases" (an <text code>&lt;epic-stage-button&gt;</>, epic <text code>epic-engine</> I180), before its gear:  only while the page is reviewed and agrees its phases. A press accepts the phases and every build plan waiting, and sends;  outlined green until the session moves the page on.</>
+				</>
+				<row>
+					<cell>
+						<text code>gear</>
+					</>
+					<cell>The Phases section's gear, last in its title row (epic <text code>epic-engine</> I166): a <text code>&lt;ui-dropdown&gt;</> menu, "Show each phase's files" and "Show each phase's checks", ticked while on. A pick shows or hides that field in every phase, forgetting each phase's own choice of it.</>
+				</>
+				<row>
+					<cell>
+						<text code>filter</>
+					</>
+					<cell>An item section's state filter: a grey filter chip (show all / only what needs you), then one round chip per state its items are in, filled while that state's items show.</>
+				</>
+				<row>
+					<cell>
+						<text code>hidden-note</>
+					</>
+					<cell>Under a filtered list: "3 hidden · show all".</>
+				</>
+				<row>
+					<cell>
+						<text code>empty</>
+					</>
+					<cell>The short line on an empty section's title, saying what's missing ("Nothing to do"): shown while the page is reviewed, with its New button, or on a link to it.</>
+				</>
+				<row>
+					<cell>
+						<text code>review-buttons</>
+					</>
+					<cell>The review buttons (P9): the note bubble, a pick's letter, Make Todo / Revisit / Approve. Only while the page is reviewed (served by the page server, its inbox answering).</>
+				</>
+				<row>
+					<cell>
+						<text code>note-box</>
+					</>
+					<cell>The note box: the note, with its Saved mark and picture button in its corner.</>
+				</>
+				<row>
+					<cell>
+						<text code>said</>
+					</>
+					<cell>A note marked and closed: <text code>You · revisit soon · sent 10:42</>, the note, Edit.</>
+				</>
+			</>
+		</>
+
+		<section label="States" sticky="stack" collapsible dividing open="false">
+			<text paragraph>Custom states: CSS can match them with <text code>epic-section:state(name)</>.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>State</>
+					<cell>When</>
+				</>
+				<row>
+					<cell>
+						<text code>:state(open)</>
+					</>
+					<cell>Unfolded.</>
+				</>
+				<row>
+					<cell>
+						<text code>:state(loaded)</>
+					</>
+					<cell>Its <text code>source</> part is in.</>
+				</>
+				<row>
+					<cell>
+						<text code>:state(error)</>
+					</>
+					<cell>Its <text code>source</> part couldn't be loaded.</>
+				</>
+				<row>
+					<cell>
+						<text code>:state(tools)</>
+					</>
+					<cell>Its title has tools: the Phases gear, or a state filter (items in it).</>
+				</>
+			</>
+		</>
+
+		<section label="Events" sticky="stack" collapsible dividing open="false">
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Event</>
+					<cell>Cancelable</>
+					<cell>When</>
+				</>
+				<row>
+					<cell>
+						<text code>ui-opening</>
+					</>
+					<cell>yes</>
+					<cell>About to unfold: its title was clicked. Cancel to stay folded. After the fact for a link.</>
+				</>
+				<row>
+					<cell>
+						<text code>ui-closing</>
+					</>
+					<cell>yes</>
+					<cell>About to fold: its title was clicked. Cancel to stay open.</>
+				</>
+				<row>
+					<cell>
+						<text code>ui-loaded</>
+					</>
+					<cell/>
+					<cell>The <text code>source</> part arrived and is in its children (as <text code>&lt;ui-section source&gt;</>'s).</>
+				</>
+				<row>
+					<cell>
+						<text code>ui-error</>
+					</>
+					<cell>yes</>
+					<cell>The <text code>source</> part couldn't be loaded; its note says so unless cancelled.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>The Manual tests section's title, while the page is reviewed and a test is open (epic <text code>epic-engine</> P51): a blue <text bold>Start testing · 9</>, which asks Claude to prepare the tests (it checks what it can itself and writes out the rest, step by step, with a screenshot); <text bold>Preparing tests</>, its icon turning, while it does (a click calls it off); then <link target="src-spell-epic-src-docs-epic-focus-html" link="/epic-focus">Focus mode</> opens on its Tests tab, on the first test in that order (epic <text code>epic-engine</> P57, Q65), and the button is <text bold>Focus on the tests · 3 left</>, opening it there again. A test is answered where it is: Approve if it passed, a note (a screenshot pasted or dropped in it) for what you saw, the note box's x if it no longer applies. The address's <text code>?test=1</> presses the button as the page loads; with <text code>&amp;all=1</> (<text code>epic test --all</>), the section's last line links the next epic with open tests once every test here is answered.</>
+			<item>Its title: always in full, as many lines as it needs, folded or open. Everything in its title row sits on the title's first line, so nothing moves as it folds (2026-10-19).</>
+			<item><text bold>Its title:</> numbered by its place among the page's blocks (<text code>3. Questions</>); an Overview sub-section by its parent's (<text code>1.2 Why</>); a report not at all, so the sections after it keep their numbers. The kind's icon: <text code>phases</> layers, <text code>questions</> a file with a question mark, <text code>judgements</> a gavel, <text code>todos</> a list with checks, <text code>issues</> a bug, <text code>tests</> a flask, <text code>log</> a clock turning back, a saga page's <text code>epics</> a map.</>
+			<item><text bold>The count</>, on the title: <text code>open/all</> of its items or phases; open means any status but <text code>done</>, <text code>decided</> or <text code>canceled</>. None when it holds nothing. Counted again whenever an item comes, goes or changes.</>
+			<item><text bold>The state filter</> (item sections): in <link target="src-guides-epic-components-colours-html" link="/guides/epic-components/colours.html">the colour scheme</>, red needs you, blue Claude is working on it, yellow open, green decided or done, grey no longer relevant. A chip is FILLED while its items show. The grey chip flips between everything and only what needs you. A filtered list says <text code>3 hidden · show all</> under it. Remembered per page: the colours you turned off, so a colour that had no items when you clicked shows as soon as some appear. A link landing on an item the filter hides (a phase's To review chip, a <text code>#j2</> address) shows it anyway, until you pick a chip again; and a section hidden for being empty shows on a link to it (epic <text code>epic-engine</> I191).</>
+			<item><text bold>Counted as drawn</> (epic <text code>epic-engine</> I147; 2026-10-26: "badges don't match up"): every count reads each item's state as its id chip draws it, live from the review inbox. An item Claude is working on is blue in its chip, in the blue "with Claude" badge, and in the toolbar's counts, never red. The Phases section shows the same blue badge for its phases marked or being worked on.</>
+			<item><text bold>Phase chips</> (epic <text code>epic-engine</> I157, recoloured in I170; 2026-10-29: "The order, one chip per phase: red, orange, blue (working), dotted blue, green, grey"): the Phases section's chips count each phase once, by the first that holds. Red: its plan waits for your Accept, or a choice in it is open. Orange: changed since you looked. Blue: under way, or Claude at work on it; and scheduled, still to do (a dotted circle):  both in the ONE blue badge (I260). Green: done in the last 3 days. Grey: done before. Each phase's status circle wears the same colour, and the toolbar's Phases button counts the red ones and the blue ones.</>
+			<item><text bold>Phases</>: its title ends in a gear (epic <text code>epic-engine</> I166), whose menu shows or hides each phase's files and checks (its Files and Verify), remembered per page; each phase's own gear chooses for that phase alone. The state chips stay before it, in the row. While the page agrees its phases (<text code>stage="phases"</>), <text bold>Accept Phases</> sits before the gear, a green thumbs up and its words (epic <text code>epic-engine</> I180;  in the header's Send before):  a press starts a five-minute countdown (I181), a green ring round the thumbs up, a second press calling it off;  run out, it accepts the phases and every build plan waiting. No box above the phases since 2026-10-11: each phase shows its own changes, in a <text bold>Plan changes</> box atop its body (<link target="src-packages-epics-docs-epic-phase-html" link="/epic-phase"><text code>&lt;epic-phase&gt;</></>).</>
+			<item><text bold>An empty section hides</>, at every stage (epic <text code>epic-engine</> P70): the Phases, Questions, Judgement calls, Todo, Issues, Manual tests and a Log with no events. <list bulleted><item>While the page is being reviewed, one with a New button stays: its title, a short line on it saying what's missing ("Nothing to do", "No questions", "No issues", "No tests to try", "No phases yet"), and its New button.</> <item>Outside a review those hide too: no New button is drawn.</> <item>Its state is <text code>hidden</>. The numbers, the toolbar and Focus mode skip it, and a link to it still shows it.</> <item>Every other kind always shows: the Overview's sub-sections, a report, Choices.</></></>
+			<item><text bold>An Overview sub-section</> sits on the row band; while the page is reviewed it has review buttons (Make Todo, Revisit) and a note box, with Claude's status cards above the note box.</>
+			<item><text bold>Folding:</> a click on the title folds it; on an epic page every section starts folded, and the page remembers what you opened. With <text code>source</>, its body loads from its part file the first time it opens. Opened from disk, it can't load, and says <text code>Loads from parts/x.html when opened (needs the page server)</>.</>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item><text code>epic create</>: the template's sections, each kind once, in order, with its fixed id; and one Overview sub-section, <text code>o1</>.</>
+			<item>Its children, by kind: <text code>epic add-phase</> (phases), <text code>epic add</> and <text code>epic decide</> (items), <text code>epic log</> and every command that logs (the log's review lines), the commits backfill (the Log's commits).</>
+			<item>An older doc's Plan changes copies (<text code>slot="changes"</>): removed by the tool on its next write, which puts each phase's changes in that phase instead.</>
+			<item><text code>epic update &lt;epic&gt;#o3 underway | done</>: Claude's status cards on an Overview sub-section.</>
+			<item><text code>epic split</> / <text code>epic join</>: move a body into a part file (<text code>source</>, <text code>part-ids</>) and back.</>
+			<item>An Overview sub-section's prose: by hand, by the Claude session planning the epic.</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-11 against branch <ui-text code>epic-workflow</>: the tables come from its vocabulary file, so they change with it.</>
+		</>
+	</>

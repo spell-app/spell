@@ -1,0 +1,205 @@
+"epic change" is a notebook page
+	<header level="1">
+		&lt;epic-change&gt;
+		<header>The &lt;epic-change&gt; element: words an answer changed, marked in the text, with the question's folded chip, and a popup on a click.</>
+	</>
+
+	<text class="lede" paragraph>A change mark: when an answer rewrites the Overview or a phase, the changed or new words show on an orange ground, with a small chip naming the question that changed them. A click on the words opens a popup: which answer changed them and when, the words they replaced, and Reopen, which opens the question again.</>
+	<text class="meta" paragraph>
+		For anyone reading or writing an epic page's markup, or changing this element.
+
+		Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-change-epicchange-en-ts" link="/epic/src/components/epic-change/EpicChange.en.ts"><text title="epic/src/components/epic-change/EpicChange.en.ts" code>EpicChange.en.ts</></>.
+
+		Its component: <link target="src-spell-epic-src-components-epic-change-epicchange-tsx" link="/epic/src/components/epic-change/EpicChange.tsx"><text title="epic/src/components/epic-change/EpicChange.tsx" code>EpicChange.tsx</></>, with its style sheet and tests beside it.
+
+		Since 2026-10-24 (epic <text code>epic-engine</> P30, Q13 B). The <link target="src-packages-epics-docs-epic-update-html" link="/epic-update"><text code>&lt;epic-update&gt;</></> blocks written before stay as they are.
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>A paragraph with two marks, as an Overview holds them after an answer. The first is quiet now, older than 3 days; the second was accepted on a page from before. Click the words for their popup, a chip to unfold its question and answer.</>
+		<html>
+			<ui-text paragraph>Caveats and todos were two sections. Now there is <epic-change id="ch1" item="q16" at="2026-10-24 15:10" answer="One list, Caveats;  todos fold into it" was="a Caveats list and a Todo list">one list, Caveats, and todos fold into it</>, and tests take the letter <epic-change id="ch2" item="q16" at="2026-10-24 15:10" accepted="2026-10-24 19:02" answer="One list, Caveats;  todos fold into it">T</>.</>
+		</>
+		<text class="meta" paragraph>Live: the real element, drawn by the epics pack this page loads (the main checkout's, until this change merges). On an epic page, the question's title comes from the page too; here there is no Q16, so only the answer shows. Reopen shows only on an epic page being reviewed, while the change is new (3 days).</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>The rules: <link target="src-spell-epic-src-tool-plan-doc-md" link="/epic/src/tool/PLAN-DOC.md"><text title="epic/src/tool/PLAN-DOC.md" code>PLAN-DOC.md</></>, "Change marks".</>
+		<text paragraph>what Claude writes, the question's id alone:</>
+		<markdown>
+			```html
+			<p>Caveats and todos were two sections.  Now there is
+			  <epic-change item="q16">one list, Caveats, and todos fold into it</epic-change>.</p>
+			```
+		</>
+		<text paragraph>after the tool's next write:  stamped, with the words it replaced:</>
+		<markdown>
+			```html
+			<epic-change item="q16" id="ch1" at="2026-10-24 15:10" answer="One list, Caveats;  todos fold into it"
+			  was="a Caveats list and a Todo list"
+			  >one list, Caveats, and todos fold into it</epic-change
+			>
+			```
+		</>
+		<text paragraph>accepted, by epic inbox apply:</>
+		<markdown>
+			```html
+			<epic-change item="q16" id="ch1" at="2026-10-24 15:10" answer="..." accepted="2026-10-24 19:02">...</epic-change>
+			```
+		</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="map"/>
+		<html>
+			<ui-text paragraph><ui-text bold>Its parents:</> anywhere prose goes, inline, around the words that changed. It's a <dfn class="spell-term" tabindex="0">prose element</><ui-popup heading="prose element" label="An <epic-*> element marked flow in its vocabulary:  it goes wherever prose goes, so no parent has to list it."></>: an Overview sub-section's text, a phase's fields, an item's text.</>
+		</>
+		<text paragraph><text bold>Its children:</> the changed words, running text: links and code too.</>
+		<list bulleted>
+			<item>Mark the words that changed, not the whole paragraph (Q13 chose words over paragraphs, option C).</>
+			<item>One mark per change; a sentence may hold several, from one answer or from several.</>
+			<item>Its host (the Overview sub-section, phase or item whose body holds it) lists the marks still waiting, <text code>to-accept="ch1 ch3"</>, written by the tool: so the page counts them while the body isn't loaded.</>
+		</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="list check"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Name</>
+				<cell>Values</>
+				<cell>Meaning</>
+				<cell>Written by</>
+			</>
+			<row>
+				<cell>
+					<text code>item</>
+				</>
+				<cell>an item's id, any case (<text code>q16</>), or a comment's (<text code>c2</>)</>
+				<cell>The question whose answer made the change: the chip's name, and what Reopen reopens. <text code>epic lint</> fails a mark naming no item. A comment folded into the plan names the comment: the chip says C2, its words show unfolded and in the popup, with a link to its thread, and no Reopen.</>
+				<cell>Claude (required)</>
+			</>
+			<row>
+				<cell>
+					<text code>id</>
+				</>
+				<cell><text code>ch1</>, <text code>ch2</> ...</>
+				<cell>Its Reopen mark's key, and a link's target. None: no button yet.</>
+				<cell>the tool, on its next write</>
+			</>
+			<row>
+				<cell>
+					<text code>at</>
+				</>
+				<cell>a time (<text code>2026-10-24 15:10</>)</>
+				<cell>When the words changed: the popup's first line, "Changed by Q16 (10/24/26 15:10)".</>
+				<cell>the tool, when missing</>
+			</>
+			<row>
+				<cell>
+					<text code>answer</>
+				</>
+				<cell>a line of plain text</>
+				<cell>The question's answer in short, copied from its <text code>&lt;epic-answer title&gt;</>: the chip shows it unfolded, as it was then.</>
+				<cell>the tool, once the question has one</>
+			</>
+			<row>
+				<cell>
+					<text code>was</>
+				</>
+				<cell>plain text</>
+				<cell>The words it replaced: the popup's "Originally". None: new words, or a mark from before 2026-10-29 (epic <text code>epic-engine</> I160).</>
+				<cell>the tool, as it stamps the mark:  it finds them in the page as it was, on disk, else its last commits</>
+			</>
+			<row>
+				<cell>
+					<text code>accepted</>
+				</>
+				<cell>a time</>
+				<cell>Accepted on a page from before changes needed no approval: no orange, the chip stays.</>
+				<cell><text code>epic inbox apply</>, for an old Accept mark</>
+			</>
+		</>
+
+		<section label="Parts and states" sticky="stack" collapsible dividing open="false">
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part or state</>
+					<cell>Is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The whole mark.</>
+				</>
+				<row>
+					<cell>
+						<text code>words</>
+					</>
+					<cell>The changed words, a <text code>&lt;mark&gt;</>: orange while new (3 days). A click, Enter or Space opens the popup.</>
+				</>
+				<row>
+					<cell>
+						<text code>chip</>
+					</>
+					<cell>The question's id, a <text code>&lt;button&gt;</> that folds its question and answer.</>
+				</>
+				<row>
+					<cell>
+						<text code>qa</>
+					</>
+					<cell>The question's title and answer, after the chip, while unfolded.</>
+				</>
+				<row>
+					<cell>
+						<text code>popup</>
+					</>
+					<cell>The words' popup, a <text code>&lt;ui-popup&gt;</>: which answer changed them and when, "Originally" and the words they replaced, and Reopen while reviewed and new. A click elsewhere or Escape closes it.</>
+				</>
+				<row>
+					<cell>
+						<text code>:state(quiet)</>
+					</>
+					<cell>No longer new (3 days), or accepted before: no orange, the chip muted.</>
+				</>
+				<row>
+					<cell>
+						<text code>:state(open)</>
+					</>
+					<cell>Its chip unfolded (page state, never written).</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>Orange: changed since you looked, the one meaning orange has on every doc page (<link target="src-spell-epic-templates-epics-plan-doc-md" link="/epic/templates/epics/plan-doc.md"><text title="epic/templates/epics/plan-doc.md" code>plan-doc.md</></>, "Colours").</>
+			<item>The words: an orange ground behind the text, wrapping with the line, each line's piece rounded.</>
+			<item>The chip: small mono capitals in an orange outline; quiet, grey and muted.</>
+			<item>A click on the words (never a hover;  2026-10-29) opens the popup under them, its arrow at them: "Changed by Q16 (10/24/26 15:10)", then "<text italic>Originally:</> the words it replaced", then Reopen (blue) while the page is reviewed and the change new. A click elsewhere or Escape closes it.</>
+			<item>The popup is opaque, the page's own colour, its arrow the same:  a theme's glass blurs only behind the box, never behind its arrow, which then showed the text under it.</>
+			<item>Unfolded, the question and answer follow the chip in the line, smaller and muted.</>
+			<item>The page header counts the changes waiting, an orange label before Send that lands on the next; the stage button's tooltip (Accept Overview, Accept Phases) counts them too.</>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item>Claude, by hand, as it rewrites the Overview or a phase from an answer: <text code>&lt;epic-change item="q16"&gt;</> around the new words, in a part file or in the HTML it hands a command.</>
+			<item>Or as it folds the person's comment into the plan: <text code>&lt;epic-change item="c2"&gt;</>, the comment's words copied in as it's stamped. The mark changes nothing on the comment: Claude answers its thread as ever, naming the phase.</>
+			<item><text code>epic change &lt;epic&gt; \[--for q16]</> stamps them (id, time, answer, the words they replaced) and lists the ones waiting; any other <text code>epic</> edit stamps them too. <text code>--for</> names the marks written with no <text code>item</> (<text code>--for c2</>, a comment).</>
+			<item>Reopen is a mark in the page's inbox, under the mark's id; <text code>epic inbox apply</> reopens the question (an old Accept mark makes it <text code>accepted</>).</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-29 against branch <ui-text code>epic-engine</>.</>
+		</>
+	</>

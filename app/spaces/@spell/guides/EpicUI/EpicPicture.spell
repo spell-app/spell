@@ -1,0 +1,109 @@
+"epic picture" is a notebook page
+	<header level="1">
+		&lt;epic-picture&gt;
+		<header>The &lt;epic-picture&gt; element: a picture the person gave an item, a thumbnail with a trash that deletes it and its file.</>
+	</>
+
+	<text class="lede" paragraph>A picture you paste into the chat while asking for a fix goes onto the issue or todo it becomes. <text code>&lt;epic-picture&gt;</> shows it in the item, after your words: a thumbnail, which a click opens full size.</>
+	<text paragraph>Each picture has a label, IMG1, IMG2 and so on, in a small chip on its top left corner. Write "IMG2 is wrong" in a comment or a note, and Claude knows which file you mean. Every place on a page that takes pictures draws them this way: a comment, a note, an option's form, a new epic's kickoff box.</>
+	<text paragraph>On an epic page being reviewed, a trash sits at its top right corner. One click deletes it: it goes at once, with Undo in the page's notices for 6 seconds; then the page server takes it out of the item and deletes its file.</>
+	<text class="meta" paragraph>
+		For anyone reviewing an epic page.
+
+		Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> T87, labelled in P75), its own <link target="src-spell-epic-src-components-epic-picture" link="/epic/src/components/epic-picture/"><text title="epic/src/components/epic-picture/" code>epic-picture</></> family.
+
+		Its vocabulary: <link target="src-spell-epic-src-components-epic-picture-epicpicture-en-ts" link="/epic/src/components/epic-picture/EpicPicture.en.ts"><text title="epic/src/components/epic-picture/EpicPicture.en.ts" code>EpicPicture.en.ts</></>
+
+		Its component: <link target="src-spell-epic-src-components-epic-picture-epicpicture-tsx" link="/epic/src/components/epic-picture/EpicPicture.tsx"><text title="epic/src/components/epic-picture/EpicPicture.tsx" code>EpicPicture.tsx</></>.
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>An issue filed with a picture pasted in the chat. The trash shows only on an epic page being reviewed: here, the picture alone.</>
+		<html>
+			<ui-stack>
+				<epic-section id="issues" kind="issues" open>
+					<epic-item id="i9" title="The popup covers its button" status="open">
+						<p>Owen: “the popup covers the button, see the picture”</>
+						<epic-picture label="IMG1">
+							<img src="/components/ui/images/new_popup_alignment.png" alt="Picture pasted in the chat" />
+						</>
+					</>
+				</>
+			</>
+		</>
+		<text paragraph>The item above:</>
+		<markdown>
+			```html
+			<epic-item id="i9" title="The popup covers its button" status="open">
+			  <p>Owen: “the popup covers the button, see the picture”</p>
+			  <epic-picture label="IMG1"><img src="pictures/i9-20261116-1302.png" alt="Picture pasted in the chat" /></epic-picture>
+			</epic-item>
+			```
+		</>
+	</>
+
+	<section label="2. Behaviour">
+		<icon slot="icon" name="hand pointer"/>
+		<list bulleted>
+			<item>Its picture is the <text code>&lt;img&gt;</> inside it: a page with no script shows it too.</>
+			<item>A thumbnail, at most 320px wide and 240px tall, its shape kept; a click opens it full size.</>
+			<item>Its item is the <text code>&lt;epic-item&gt;</> it's written in.</>
+			<item>Not reviewed: no trash.</>
+			<item>The trash: one click, no dialog, as a comment's. The picture hides at once; "Picture deleted" shows with Undo for 6 seconds.</>
+			<item>Then the page server takes it out of the item, writes a line in the Log, and deletes its file. Leaving the page sooner sends the delete at once.</>
+			<item>Undo puts it back, and nothing changes on disk.</>
+			<item>Deleting one renumbers nothing: after IMG2 goes, the next one is still IMG3, so what was said about IMG3 stays true.</>
+			<item>In a box still being written (a note, the kickoff box, an option's form), an x takes the trash's place. It takes the picture's words out of the box, and the later labels move down one, in the words that name them too: IMG3 becomes IMG2.</>
+		</>
+	</>
+
+	<section label="3. Markup">
+		<icon slot="icon" name="code"/>
+		<list bulleted>
+			<item>The epic tool writes it: <text code>epic add &lt;epic&gt;#I "..." --picture &lt;file&gt;</> (repeatable), and <text code>--pasted &lt;n&gt;</>, the pictures pasted last into the session's chat.</>
+			<item>The files go beside the page, in <text code>pictures/</>, named for the item and the minute: <text code>pictures/i9-20261116-1302.png</>.</>
+			<item>It holds one <text code>&lt;img src alt&gt;</>.</>
+			<item><text code>label</>: its label, <text code>IMG2</>, written by the epic tool in the item's order.</>
+			<item><text code>removable</>: an x in place of the trash, for a box still being written; its <text code>epic-picture-removed</> event hands the box its label.</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Name</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The box around the picture.</>
+				</>
+				<row>
+					<cell>
+						<text code>delete</>
+					</>
+					<cell>The trash, at its top right corner, while the page is reviewed.</>
+				</>
+				<row>
+					<cell>
+						<text code>label</>
+					</>
+					<cell>Its label's chip, at its top left corner.</>
+				</>
+				<row>
+					<cell>
+						<text code>remove</>
+					</>
+					<cell>The x, at its top right corner, when <text code>removable</>.</>
+				</>
+			</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-11-17 against branch <ui-text code>epic-engine</> (T87, P75).</>
+		</>
+	</>

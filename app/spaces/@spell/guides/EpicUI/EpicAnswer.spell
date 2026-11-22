@@ -1,0 +1,269 @@
+"epic answer" is a notebook page
+	<header level="1">
+		&lt;epic-answer&gt;
+		<header>An answered question's answer: an ivory card titled Answer · &lt;the answer&gt;, holding why.</>
+	</>
+
+	<text class="lede" paragraph>An answered question's answer: an ivory card headed <text code>Answer · &lt;the answer in a few words&gt;</>, holding why. It comes after the question's text and Choices.</>
+
+	<!--
+		no <ui-list class="spell-meta">:  its <ui-item>s take the "item" style sheet before the pack's
+		              <epic-item> can, and the live items draw unstyled (issue I9 of epic-components)
+	-->
+	<text class="meta" paragraph>
+		For anyone reading or writing an epic page's markup, or changing this element.
+
+		<label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-answer" link="/epic/src/components/epic-answer/"><text title="epic/src/components/epic-answer/" code>epic-answer/</></>.
+
+		Its vocabulary (every table below comes from it): <link target="src-spell-epic-src-components-epic-answer-epicanswer-en-ts" link="/epic/src/components/epic-answer/EpicAnswer.en.ts"><text title="epic/src/components/epic-answer/EpicAnswer.en.ts" code>EpicAnswer.en.ts</></>.
+
+		The markup rules: <link target="src-spell-epic-src-tool-plan-doc-md" link="/epic/src/tool/PLAN-DOC.md"><text title="epic/src/tool/PLAN-DOC.md" code>PLAN-DOC.md</></>.
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>Live: the real element, drawn by the epics pack this page loads.</>
+		<list bulleted>
+			<item>Click a line to unfold it.</>
+			<item>The review buttons don't show here: they show only on an epic page being reviewed.</>
+		</>
+		<text paragraph>An answer with a body, then Q13 of the <text code>wwod</> epic, whose answer keeps its old decision id (D16) and has no body.</>
+		<html>
+			<epic-item id="q2" title="Which four colours for the review buttons?" status="decided" state="recent" answered open>
+				<epic-question>
+					<p>The four action colours, shown as real buttons.</>
+				</>
+				<epic-choices chosen="B">
+					<epic-option letter="A" title="Fomantic's own">
+						<p>no work; violet reads as a link</>
+					</>
+					<epic-option letter="B" title="Calm colours, by meaning" recommended>
+						<p>green = decided; none reads as an error</>
+					</>
+				</>
+				<epic-answer title="Calm colours, by meaning">
+					<p>A tight button group, in a fixed order.</>
+				</>
+			</>
+			<epic-item id="q13" title="Config-by-spread or subclassing for pluggable behaviour?" status="decided" state="recent" answered open>
+				<epic-question>
+					<p>WWOD §12: <code>&#123; ...BaseFileSpec, extensions, payloadFormat &#125;</> over a subclass.</>
+				</>
+				<epic-answer id="d16" title="Both, by kind: classes with behaviour subclass; plain config / spec records spread"></>
+			</>
+		</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>From Q13 of the <text code>wwod</> epic (<link title="epics/wwod/parts/q13.html" target="src-epics-wwod-parts-q13-html" link="/epics/wwod/parts/q13.html"><text code>q13.html</></>): an answer that keeps an old decision's id, so links to <text code>#d16</> still land. A new answer has no <text code>id</>, and usually a body: why.</>
+		<text paragraph>q13.html:</>
+		<markdown>
+			```html
+			<epic-answer
+			  id="d16"
+			  title="Both, by kind: classes with behaviour subclass; plain config / spec records spread"
+			></epic-answer>
+			```
+		</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="layer group"/>
+		<text paragraph>
+			<text bold>Its parents:</>
+		</>
+		<list bulleted>
+			<item><link target="src-packages-epics-docs-epic-item-html" link="/epic-item"><text code>&lt;epic-item&gt;</></>: a question's, after its text and Choices, one at most</>
+			<item><link target="src-packages-epics-docs-epic-version-html" link="/epic-version"><text code>&lt;epic-version&gt;</></>: an earlier answer, kept in the Original Discussion when the question was answered again</>
+		</>
+		<text paragraph>Its children:</>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Child</>
+				<cell>How many</>
+				<cell>What it holds</>
+			</>
+			<row>
+				<cell>prose, <text code>slot="title"</></>
+				<cell>one at most</>
+				<cell>A title with markup.</>
+			</>
+			<row>
+				<cell>prose</>
+				<cell>any number</>
+				<cell>The answer, and why.</>
+			</>
+		</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="table columns"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Name</>
+				<cell>Values</>
+				<cell>Meaning</>
+				<cell>Required</>
+			</>
+			<row>
+				<cell>
+					<text code>id</>
+				</>
+				<cell>an id, <text code>d7</></>
+				<cell>An old decision's id (<text code>d7</>), from before decisions became answers (2026-10-04): old <text code>#d7</> links land on it. Absent on new answers.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>title</>
+				</>
+				<cell>text</>
+				<cell>The answer in a few words (<text code>Named palette</>). A title with markup is a <text code>slot="title"</> child instead.</>
+				<cell/>
+			</>
+		</>
+
+		<section label="Slots" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A slot is a place in the drawing that a child goes to: a child with <text code>slot="name"</> goes to that name's place, every other child to the default one (shown as <text italic>default</>).</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Slot</>
+					<cell>What goes there</>
+				</>
+				<row>
+					<cell>
+						<text italic>default</>
+					</>
+					<cell>The answer, and why.</>
+				</>
+				<row>
+					<cell>
+						<text code>title</>
+					</>
+					<cell>A title with markup (<text code>The &lt;code&gt;x&lt;/code&gt; API</>), in place of <text code>title</>.</>
+				</>
+			</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A part is a piece of what the element draws in its shadow root (its own hidden markup), named so a stylesheet can reach it: <text code>epic-answer::part(header)</>.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The card.</>
+				</>
+				<row>
+					<cell>
+						<text code>header</>
+					</>
+					<cell>Its heading band: the fold chevron, <text code>Answer · &lt;title&gt;</>; a click folds it.</>
+				</>
+				<row>
+					<cell>
+						<text code>toggle</>
+					</>
+					<cell>The fold chevron, a <text code>&lt;button&gt;</>, first in the band; only with a body.</>
+				</>
+				<row>
+					<cell>
+						<text code>label</>
+					</>
+					<cell><text code>Answer</>, or the old decision's id (<text code>D7</>).</>
+				</>
+				<row>
+					<cell>
+						<text code>title</>
+					</>
+					<cell>The title.</>
+				</>
+				<row>
+					<cell>
+						<text code>body</>
+					</>
+					<cell>The answer, and why; not drawn when empty; hidden (<text code>until-found</>) while folded.</>
+				</>
+			</>
+		</>
+
+		<section label="States" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A state is a word the element sets on itself while something is true, for styling: <text code>epic-answer:state(open)</>. Never written in the file.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>State</>
+					<cell>When</>
+				</>
+				<row>
+					<cell>
+						<text code>open</>
+					</>
+					<cell>Unfolded: it starts so (page state, never written).</>
+				</>
+				<row>
+					<cell>
+						<text code>redundant</>
+					</>
+					<cell>Its item's Choices already say what was chosen (<text code>&lt;epic-choices chosen&gt;</>): no band.</>
+				</>
+				<row>
+					<cell>
+						<text code>unneeded</>
+					</>
+					<cell>Redundant, with no body: not drawn at all.</>
+				</>
+				<row>
+					<cell>
+						<text code>in-thread</>
+					</>
+					<cell>Redundant, with a body: the body alone, first in its item's thread.</>
+				</>
+				<row>
+					<cell>
+						<text code>thread-start</>
+					</>
+					<cell>First in the thread's block.</>
+				</>
+				<row>
+					<cell>
+						<text code>thread-end</>
+					</>
+					<cell>Last in the thread's block.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<text paragraph>The colours mean the same on every doc page: the whole scheme is on <link target="src-guides-epic-components-colours-html" link="/guides/epic-components/colours.html">Epic Page Colours</> (its source: <link title="epic/templates/epics/plan-doc.md" target="src-spell-epic-templates-epics-plan-doc-md" link="/epic/templates/epics/plan-doc.md"><text code>plan-doc.md</></>, "Colours").</>
+		<list bulleted>
+			<item>Violet, the colour of your voice: the answer is your decision.</>
+			<item>The band reads <text code>Answer · &lt;title&gt;</>, or <text code>D16 · &lt;title&gt;</> when it keeps an old decision's id.</>
+			<item>With no body, only the band shows, and it doesn't fold.</>
+			<item>In an item whose Choices already say "Chosen: X", it isn't needed (2026-10-24: "the answer block is not necessary"): no band; its body, if any, opens the item's thread; with none, it isn't drawn. An answer with no Choices (an issue's, a judgement call's) keeps its card.</>
+		</>
+		<text paragraph>It folds by its heading band: a click anywhere on the band (but on a link or a button in it) folds or unfolds it, the chevron first in the band. It starts open, since it's the text being read; folding is the reader's own and never written into the file. Folded text is still found by the browser's find-in-page, which unfolds it.</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item><text code>plan-doc decide &lt;name&gt; &lt;Q id&gt; "answer" \[--details html] \[--option A]</>: the answer (its <text code>title</>), the details its body; the question becomes <text code>decided</> and <text code>answered</></>
+			<item><text code>decide</> again: the answer is replaced in place; the old one goes into the question's Original Discussion, and an old decision's id stays on the new one</>
+			<item><text code>plan-doc add &lt;name&gt; decision "title"</>: a question born answered</>
+			<item><text code>epic inbox apply &lt;name&gt;</>, for your pick on a question: answered with that option</>
+			<item>older docs: the converter, from the old decision cards (<text code>d7</> became <text code>&lt;epic-answer id="d7"&gt;</>)</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-09 against branch <ui-text code>epic-components</>: the tables are its vocabulary's; the rest from its component, its stylesheet and <ui-link title="epic/src/tool/PLAN-DOC.md" target="src-spell-epic-src-tool-plan-doc-md" link="/epic/src/tool/PLAN-DOC.md"><ui-text code>PLAN-DOC.md</></>.</>
+		</>
+	</>

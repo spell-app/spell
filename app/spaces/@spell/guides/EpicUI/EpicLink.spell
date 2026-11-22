@@ -1,0 +1,172 @@
+"epic link" is a notebook page
+	<header level="1">
+		&lt;epic-link&gt;
+		<header>The &lt;epic-link&gt; element: a link to a saga, an epic, a phase or an item, written by what it points at.</>
+	</>
+
+	<text class="lede" paragraph>A link to a saga page, an epic page, or a phase or item on one, from any page.</>
+	<list bulleted>
+		<item>It's written by what it points at, never by a path: the same link works from any page, at any depth.</>
+		<item>With no text inside, it draws the short form: <text code>seo J3</>, just <text code>T3</> on its own page, <text code>P7 · Epic Migrate</> for a phase.</>
+		<item>The target's title is its tooltip.</>
+		<item>It means the same as a short address, <text code>SAGA:/&lt;saga&gt;/&lt;epic&gt;#&lt;id&gt;</>, which a plain link may use too.</>
+	</>
+
+	<!--
+		no <ui-list class="spell-meta">:  its <ui-item>s take Spell UI's "item" style sheet name before the
+		              epics pack's elements can, and live examples may draw unstyled (issue I9 of epic-components)
+	-->
+	<text class="meta" paragraph>
+		For anyone writing links in epic pages, saga pages or guides, or changing this element.
+
+		Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-link-epiclink-en-ts" link="/epic/src/components/epic-link/EpicLink.en.ts"><text title="epic/src/components/epic-link/EpicLink.en.ts" code>EpicLink.en.ts</></>.
+
+		Its component: <link target="src-spell-epic-src-components-epic-link-epiclink-tsx" link="/epic/src/components/epic-link/EpicLink.tsx"><text title="epic/src/components/epic-link/EpicLink.tsx" code>EpicLink.tsx</></>, with its style sheet (<text code>.css</>) and tests beside it.
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>Two links into this epic's page, the second with text of its own:</>
+		<html>
+			<ui-list bulleted>
+				<ui-item>The decision that settled the address: <epic-link saga="epics" epic="epic-workflow" item="J32"></></>
+				<ui-item>The phase that made it: <epic-link epic="epic-workflow" phase="15">the Sagas foundation</></>
+			</>
+		</>
+		<text class="meta" paragraph>Live: the real element, drawn by the epics pack this page loads. Served, the page server gives each link its tooltip. A link to an id that isn't there is struck through, its tooltip saying so.</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>Each way to point, and the short address that means the same:</>
+		<text paragraph>epic-link · every form:</>
+		<markdown>
+			```html
+			<epic-link saga="drawable-spell"></epic-link>                          <!-- SAGA:/drawable-spell -->
+			<epic-link saga="drawable-spell" item="T3"></epic-link>                <!-- SAGA:/drawable-spell#T3 -->
+			<epic-link saga="drawable-spell" epic="python-target"></epic-link>     <!-- SAGA:/drawable-spell/python-target -->
+			<epic-link epic="python-target" item="T1"></epic-link>                 <!-- SAGA:/output-targets/python-target#T1 -->
+			<epic-link item="T3"></epic-link>                                      <!-- T3, on the page it's in -->
+			<epic-link phase="epic-migrate"></epic-link>                           <!-- P7 · Epic Migrate, on its page -->
+			<epic-link epic="seo" phase="2">the meta tags phase</epic-link>         <!-- its own text -->
+			<a href="SAGA:/output-targets/python-target#T1">a plain link</a>         <!-- the page loader rewrites it -->
+			```
+		</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="map"/>
+		<text paragraph><text bold>Its parents:</> anywhere prose goes, in a paragraph or a list item, on any page that loads the epics pack.</>
+		<list bulleted>
+			<item>Epic pages, saga pages and details pages load it already.</>
+			<item>Every other page the docs runtime runs on loads it too, at start (epic <text code>epic-engine</> P3). Without the runtime, use a plain <text code>&lt;a href="SAGA:/..."&gt;</>, or add the pack to the page's <text code>&lt;ui-root&gt;</>: <text code>&lt;ui-components source="/_epic/pack/epics.pack.js"&gt;</>.</>
+		</>
+		<text paragraph>
+			<text bold>Its children:</>
+		</>
+		<list bulleted>
+			<item>prose: the link's text; none, the short form</>
+		</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="list check"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Name</>
+				<cell>Values</>
+				<cell>Meaning</>
+				<cell>Required</>
+			</>
+			<row>
+				<cell>
+					<text code>saga</>
+				</>
+				<cell>a saga's id</>
+				<cell>Alone: its saga page. With an epic: the saga it names. Not needed; one the epic doesn't name still links, and the link check flags it.</>
+				<cell>no</>
+			</>
+			<row>
+				<cell>
+					<text code>epic</>
+				</>
+				<cell>an epic's id</>
+				<cell>Its epic page.</>
+				<cell>no</>
+			</>
+			<row>
+				<cell>
+					<text code>item</>
+				</>
+				<cell>an id on that page, any case</>
+				<cell>Lands on it, opening an item: <text code>T1</>, <text code>j32</>, <text code>o1</>.</>
+				<cell>no</>
+			</>
+			<row>
+				<cell>
+					<text code>phase</>
+				</>
+				<cell>a number, or a name</>
+				<cell>A phase instead of an item: <text code>7</> or <text code>P7</>, the 7th; <text code>epic-migrate</>, the one whose title that is.</>
+				<cell>no</>
+			</>
+		</>
+		<text paragraph>None of <text code>saga</> or <text code>epic</>: the page it's in.</>
+
+		<section label="Slots" sticky="stack" collapsible dividing open="false">
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Slot</>
+					<cell>Holds</>
+				</>
+				<row>
+					<cell>(default)</>
+					<cell>The link's text; none, the short form.</>
+				</>
+			</>
+		</>
+
+		<section label="Parts and states" sticky="stack" collapsible dividing open="false">
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Name</>
+					<cell>Is</>
+				</>
+				<row>
+					<cell>
+						<text code>::part(base)</>
+					</>
+					<cell>The link, an <text code>&lt;a&gt;</>; plain text while it has nowhere to go.</>
+				</>
+				<row>
+					<cell>
+						<text code>:state(broken)</>
+					</>
+					<cell>What it points at isn't there: no page, or no such id on it.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>Inline, in the page's link colour, underlined on hover.</>
+			<item>Broken: struck through, in the muted ink, its tooltip saying what wasn't found.</>
+			<item>A link to another epic's page opens in that epic's tab, as every link to an epic page does.</>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item>Claude and you, by hand, in prose.</>
+			<item>Checked by <text code>epic lint --links</> and <text code>doc-links.js --check</>: a saga, page or id that isn't there is a broken link, and so is an epic under a saga it doesn't name.</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-14 against branch <ui-text code>epic-workflow-p15-link</>.</>
+		</>
+	</>

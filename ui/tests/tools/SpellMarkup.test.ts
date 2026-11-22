@@ -46,6 +46,14 @@ describe("SpellMarkup.body()", () => {
     expect(text).toContain("<item>a</item>")
   })
 
+  test("another pack's element keeps what's inside it as the web writes it:  it reads its own children", () => {
+    const html = `<ui-example heading="Card"><epic-card epic="x"><a href="/epics/x.html">X</a><span slot="meta">P1</span></epic-card></ui-example>`
+    const text = bodyOf(html)
+    expect(text).toContain('\t\t<a href="/epics/x.html">X</a>')
+    expect(text).toContain('\t\t<span slot="meta">P1</span>')
+    expect(text).not.toContain("<link")
+  })
+
   test("a tag with no Spell UI word, and a docs element, are an <html> block", () => {
     const html = `<ui-section id="api-x" label="Attributes"><ui-docs-api family="ui-tree" only="attributes"></ui-docs-api></ui-section>`
     expect(bodyOf(html)).toBe(

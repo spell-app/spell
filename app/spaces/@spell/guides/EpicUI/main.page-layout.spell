@@ -1,0 +1,27 @@
+// The frame round every page of Epic UI (epic `editor` P44), as the Spell UI site's (`@spell/guides/SpellUI`).
+// - The drawer:  the site's navigation, its pages in groups, which its button hides and shows.
+// - Above each page its app menu:  the drawer's button and where you are;  at its end the theme menu and the contents'
+//   button.
+// - Beside the page its contents, which that button or its ✕ closes.
+// - The `<epic-*>` elements load as a page draws one:  the epic pages' own pack, `epics.pack.js`.
+<ui-defaults>
+	<ui-page-layout floating drawer-hides />
+</ui-defaults>
+
+main layout is a page layout
+	to draw its app menu
+		<app-menu>
+			<site-nav-button slot="start" />
+			<site-breadcrumbs slot="start" />
+			<theme-menu slot="end" show="theme" compact />
+			<site-nav-button slot="end" toggles="right" icon="list ul" />
+		</app-menu>
+	to draw its page menu
+		// nothing to see:  only what loads the `<epic-*>` elements
+		<html>
+			<ui-components source="/_epic/pack/epics.pack.js"></ui-components>
+		</html>
+	to draw its right sidebar
+		<toc>
+			<site-nav-button slot="tools" toggles="right" icon="close" />
+		</>

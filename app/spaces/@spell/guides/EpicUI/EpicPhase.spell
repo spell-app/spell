@@ -1,0 +1,634 @@
+"epic phase" is a notebook page
+	<header level="1">
+		&lt;epic-phase&gt;
+		<header>The &lt;epic-phase&gt; element: one phase of a plan, in the Phases section.</>
+	</>
+
+	<text class="lede" paragraph><text code>&lt;epic-phase&gt;</> is one phase of the plan, in the Phases section.</>
+	<list bulleted>
+		<item>Its attributes hold its id, title, status, estimate and what it took; its children are its fields, plan changes and commits.</>
+		<item>It draws the title line (<text code>P2 · Title</>) with its status icon and the estimate (once done, what it took), and folds.</>
+		<item>Done, but its work not on main yet (<text code>unmerged</>, written by the epic tool from git), it shows a blue <text code>not on main</> pill before its time, the branch in its tooltip.</>
+		<item>Its plan changes are <link target="src-packages-epics-docs-epic-update-html" link="/epic-update"><text code>&lt;epic-update&gt;</></> blocks at the end of its description, with no box around them (2026-10-11).</>
+	</>
+
+	<!-- no ui-list.spell-meta here:  any ui-item element on the page leaves epic-item unstyled (issue I9 of epic-components) -->
+	<text class="meta" paragraph>
+		Written for: anyone reading or writing an epic page's markup, or changing this element.
+
+		Status: <label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-phase" link="/epic/src/components/epic-phase/"><text title="epic/src/components/epic-phase/" code>epic-phase/</></>.
+
+		Its vocabulary (attributes, slots, parts, children): <link target="src-spell-epic-src-components-epic-phase-epicphase-en-ts" link="/epic/src/components/epic-phase/EpicPhase.en.ts"><text title="epic/src/components/epic-phase/EpicPhase.en.ts" code>EpicPhase.en.ts</></>.
+
+		The component: <link target="src-spell-epic-src-components-epic-phase-epicphase-tsx" link="/epic/src/components/epic-phase/EpicPhase.tsx"><text title="epic/src/components/epic-phase/EpicPhase.tsx" code>EpicPhase.tsx</></>.
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<example "Example">
+			<html>
+				<epic-phase id="p-converter" title="Converter" status="active" estimate="4-6h" to-see="up1">
+					<epic-field name="symptom">26 docs in today's markup, in several generations of it.</epic-field>
+					<epic-field name="changes"><code>epic convert</code> rewrites a doc into <code>epic-*</code> markup, and proves nothing was lost: the same ids, the same link targets, the same text.</epic-field>
+					<epic-field name="goal">
+						<ul>
+							<li>reads every generation of the old markup</li>
+							<li>the 6 docs still in one file come out split</li>
+						</ul>
+					</epic-field>
+					<epic-update id="up1" at="2026-10-07 12:40" summary="The Overnight report section goes" phase="6">
+						<p>Your review: the old Overnight report section goes, so P6 is open again.</p>
+					</epic-update>
+				</epic-phase>
+			</html>
+		</example>
+		<list bulleted>
+			<item>Its title line: the blue load indicator (under way), <text code>P6 · Converter</>, and the estimate <text code>4-6h</>; and, since it has a new update, an orange pen and <text code>1</> (its <text code>to-see</>, written by the epic tool).</>
+			<item>The pen counts only updates still NEW (epic <text code>epic-engine</> I168): not marked Seen, and written less than 3 days ago. None left, no pen. Its tooltip says what Seen does. While the page is reviewed, a round ✓ after it marks every one Seen at once. (This example's update is weeks old, so it's grey already: its <text code>to-see</> is written by hand here, with no date.)</>
+			<item>Click it to open: Symptom, Changes and Goal, then its plan change, titled <text bold>Update</>: The Overnight report section goes, its date at the right.</>
+			<item>Shortened from <link target="epic-components" link="/epics/epic-components/epic-components.plan.html#p6">this epic's P6</>.</>
+		</>
+
+		<section label="With buttons in its title row" sticky collapsible dividing open="false">
+			<text paragraph>A page's own buttons go in its title row: <text code>&lt;ui-button slot="actions"&gt;</> children (epic <text code>epic-workflow</> P25).</>
+			<list bulleted>
+				<item>They sit after the title, before its review buttons (while the page is reviewed); the fold chevron is at the row's start.</>
+				<item>⌥-click (Alt-click) on its chevron or title, or ⌥+Enter on the focused chevron, opens it and everything in it (sections, phases, items, asides and cards), parts loading as they open; on an open one it folds everything inside, then the block itself. The chevron's tooltip says so. Its title row has no expand-all or collapse-all button of its own (epic <text code>epic-engine</> I161): the page's toolbar keeps one.</>
+				<item>The pointer over its chevron, status icon, title, time pill and buttons. Over the row's empty space: the grab cursor on a to-do phase while the page is reviewed (it drags there), else the pointer, as a click there folds it.</>
+				<item>A click on one never folds or unfolds it.</>
+				<item>The docs runtime puts the block's bullhorn there too, so it never sits over a button.</>
+				<item>The estimate (<text code>2-3h</>) comes just before the review buttons, one width on every row, so the buttons line up row to row.</>
+			</>
+			<example "With buttons in its title row">
+				<html>
+					<epic-phase id="p-actions-example" title="Header Actions Slot" status="active" estimate="2-3h">
+						<epic-field name="symptom">A block's bullhorn floated over its title row's buttons.</epic-field>
+						<ui-button slot="actions" appearance="circular basic" size="mini" icon="copy" title="Copy a link to it" aria-label="Copy a link to it"></ui-button>
+					</epic-phase>
+				</html>
+			</example>
+		</>
+
+		<section label="Done, and what it took" sticky="stack" collapsible dividing open="false">
+			<text paragraph>Once it's done, the pill says how long Claude really worked on it (<text code>took</>), in green; its estimate is the pill's tooltip (<text code>~3-4h</>). Epic <text code>epic-engine</> P41.</>
+			<list bulleted>
+				<item><text code>epic phase seo#P3 done</> writes it, from the transcripts of the agents that built it (else the epic's sessions while it was active), never the time waiting on you.</>
+				<item><text code>epic phase seo#P3 took</> works it out again for a phase done before.</>
+				<item>Beside it, how long it was under way by the clock, from going active to done, waits on you included (<text code>span</>, epic <text code>epic-engine</> I127): the pill reads <text code>34m / 4h</>, and its tooltip says it in words, <text code>34m of work over 4h, estimated ~3-4h</>.</>
+				<item>No start in the page's log: only the time worked.</>
+				<item>Not done yet, or never timed: the estimate, as before.</>
+			</>
+			<example "Done, and what it took">
+				<html>
+					<epic-phase id="p-took-example" title="Shared Page Patch" status="done" estimate="3-4h" took="34m" span="4h">
+						<epic-field name="symptom">Each page server patched pages its own way.</epic-field>
+					</epic-phase>
+				</html>
+			</example>
+		</>
+
+		<section label="Dropped" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A phase never built, and never to be (<text code>status="dropped"</>): its title struck through and grey, a crossed circle, its Dropped field saying why in place of Done. Epic <text code>epic-engine</> I228.</>
+			<list bulleted>
+				<item><text code>epic phase seo#P3 dropped --why "&lt;p&gt;Moved to P8&lt;/p&gt;"</> writes it; a phase it names (<text code>P8</>) becomes a link to it.</>
+				<item>It counts as finished, as a done phase does: never the next phase, counted in <text code>3/5</>, out of what's left of the estimate.</>
+				<item>Another phase may move past it:  nothing was built, so no commit says its number.</>
+			</>
+			<example "Dropped">
+				<html>
+					<epic-phase id="p-dropped-example" title="Real Sign-In Mail" status="dropped" estimate="1-2h">
+						<epic-field name="dropped">
+							<p>Moved to P8 · Real Sign-In Mail.</p>
+						</epic-field>
+					</epic-phase>
+				</html>
+			</example>
+		</>
+
+		<section label="While Claude works on it" sticky="stack" collapsible dividing open="false">
+			<text paragraph>While Claude is at work on a phase that isn't done, its status icon turns into the header's turning spinner, in blue (orange when its plan changed since you looked, red when it needs you; I170). Epic <text code>epic-engine</> I147 (2026-10-26: "repo-split is actively planning this (writing the plan) but there is no indication in the phase header").</>
+			<list bulleted>
+				<item>Its tooltip says what it's doing: "Claude is writing this phase's plan" while it's to do and its plan isn't accepted yet, else "Claude is working on it".</>
+				<item>It counts in the Phases section's blue badge ("with Claude") and the toolbar's: the Phases button's blue badge, the page's state filter.</>
+				<item>Where it comes from: the review inbox's <text code>working</>, under the phase's id, page state that's never in the file. So it shows only on a page the page server serves.</>
+			</>
+			<text paragraph>Turning it on and off:</>
+			<markdown>
+				```sh
+				epic phase repo-split#P20 planning        # Claude starts writing its plan
+				epic update repo-split#P20 --plan "..."   # the plan written, waiting for you:  off by itself
+				epic phase repo-split#P20 planning off    # given up
+				epic inbox working repo-split#P20 on      # any other work on it;  off ends it
+				```
+			</>
+		</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>From a real epic page (<link title="epics/epic-components/epic-components.plan.html" target="epic-components" link="/epics/epic-components/epic-components.plan.html"><text code>epic-components.plan.html</></>): in the doc itself, a phase is one line, its body in a part file; the part file holds its children (<link title="epics/claude-design/parts/p-pony.html" target="src-epics-claude-design-parts-p-pony-html" link="/epics/claude-design/parts/p-pony.html"><text code>p-pony.html</></>, cut short).</>
+		<text paragraph>A phase, and its part file:</>
+		<markdown>
+			```html
+			<epic-phase id="p-component-packs" title="Component Packs" status="done" estimate="3-4h" source="parts/p-component-packs.html" commits></epic-phase>
+
+			<!-- parts/p-component-packs.html -->
+			<epic-field name="goal"><ul><li>...</li></ul></epic-field>
+			<epic-field name="done"><ul><li>...</li></ul></epic-field>
+			<epic-commit sha="5995b15d143832bf0be54c7c02b10da6ba9b84fd">the ui-brand-* elements join ...</epic-commit>
+			<epic-field name="files">packages/brand (bundle, components.json5), the design export and bundle</epic-field>
+			<epic-field name="verify">a Design uses a ui-brand-color-picker;  the Brand tab lights on brand pages</epic-field>
+			<epic-field name="to-review"><a href="#j38">J38</a>, <a href="#j39">J39</a>, <a href="#t19">T19</a></epic-field>
+			```
+		</>
+		<list bulleted>
+			<item><text code>title</>: 2-4 words, WITHOUT <text code>P1 ·</>, which is drawn.</>
+			<item><text code>status</>: <text code>todo</>, <text code>active</> (one phase at a time), <text code>done</> or <text code>dropped</> (never built).</>
+		</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="compass"/>
+
+		<section label="Its parents" sticky="stack" collapsible dividing open="false">
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Parent</>
+					<cell>How</>
+					<cell>How many</>
+					<cell>As</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-section-html" link="/epic-section">
+							<text code>&lt;epic-section&gt;</>
+						</>
+					</>
+					<cell>only when its <text code>kind</> is <text code>phases</></>
+					<cell>any number</>
+					<cell>The phases, in order.</>
+				</>
+			</>
+		</>
+
+		<section label="Its children" sticky="stack" collapsible dividing open="false">
+			<text paragraph>In THIS order, always: the tool puts each child where it belongs, and the check refuses another order.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Child</>
+					<cell>Where</>
+					<cell>How many</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>prose</>
+					<cell>
+						<text code>slot="title"</>
+					</>
+					<cell>one at most</>
+					<cell>A title with markup.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-field-html" link="/epic-field">
+							<text code>&lt;epic-field name="symptom"&gt;</>
+						</>
+					</>
+					<cell/>
+					<cell>one at most</>
+					<cell>Symptom: what's wrong today, one line.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-field-html" link="/epic-field">
+							<text code>&lt;epic-field name="changes"&gt;</>
+						</>
+					</>
+					<cell/>
+					<cell>one at most</>
+					<cell>Changes: what changes, two or three lines.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-updated-html" link="/epic-updated">
+							<text code>&lt;epic-updated&gt;</>
+						</>
+					</>
+					<cell>
+						<text code>slot="changes"</>
+					</>
+					<cell>any number</>
+					<cell>RETIRED: an older doc's plan changes (2026-10-11, P6), drawn at the end of its body, unboxed, until the tool's next write migrates them to <text code>&lt;epic-update&gt;</> blocks.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-updated-html" link="/epic-updated">
+							<text code>&lt;epic-updated&gt;</>
+						</>
+					</>
+					<cell/>
+					<cell>any number</>
+					<cell>RETIRED: an older doc's plan changes, in no slot (until 2026-10-11): drawn among its fields until the tool's next write migrates them to <text code>&lt;epic-update&gt;</> blocks.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-field-html" link="/epic-field">
+							<text code>&lt;epic-field name="goal"&gt;</>
+						</>
+					</>
+					<cell/>
+					<cell>one at most</>
+					<cell>Goal: a bullet per outcome.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-update-html" link="/epic-update">
+							<text code>&lt;epic-update&gt;</>
+						</>
+					</>
+					<cell/>
+					<cell>any number</>
+					<cell>Its plan changes, oldest first, at the end of its description (2026-10-11): each a block, <text bold>Update</>: &lt;summary&gt; and its date, what changed under it; kept once done.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-field-html" link="/epic-field">
+							<text code>&lt;epic-field name="done"&gt;</>
+						</>
+					</>
+					<cell/>
+					<cell>one at most</>
+					<cell>Done: what was built, once done.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-commit-html" link="/epic-commit">
+							<text code>&lt;epic-commit&gt;</>
+						</>
+					</>
+					<cell/>
+					<cell>any number</>
+					<cell>Its commits, oldest first.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-field-html" link="/epic-field">
+							<text code>&lt;epic-field name="files"&gt;</>
+						</>
+					</>
+					<cell/>
+					<cell>one at most</>
+					<cell>Files: what changes.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-field-html" link="/epic-field">
+							<text code>&lt;epic-field name="verify"&gt;</>
+						</>
+					</>
+					<cell/>
+					<cell>one at most</>
+					<cell>Verify: how we know it worked.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-field-html" link="/epic-field">
+							<text code>&lt;epic-field name="to-review"&gt;</>
+						</>
+					</>
+					<cell/>
+					<cell>one at most</>
+					<cell>To review: the items added during it still open and not reviewed (written by the script).</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="table columns"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Name</>
+				<cell>Values</>
+				<cell>Meaning</>
+				<cell>Required</>
+			</>
+			<row>
+				<cell>
+					<text code>id</>
+					<space/>
+					<text class="meta">JS property: <text code>epicId</></>
+				</>
+				<cell>text: phase id</>
+				<cell>Stable, made from its name when it's added and kept through renames and inserts: <text code>p-epic-migrate</> (an older page's <text code>p2</>, until <text code>stable-phase-ids</>). Links and comments use it (<text code>#p-epic-migrate</>); the number shown, <text code>P2 · &lt;title&gt;</>, is its place among the whole-numbered phases, or its own <text code>number</>.</>
+				<cell>yes</>
+			</>
+			<row>
+				<cell>
+					<text code>number</>
+				</>
+				<cell>text: decimal phase number</>
+				<cell>A phase added on the fly: its own number, a decimal of the phase before it (<text code>11.1</>, drawn <text code>P11.1</>), so no other phase is renumbered. Absent: its number is its place among the phases without one.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>title</>
+					<space/>
+					<text class="meta">JS property: <text code>epicTitle</></>
+				</>
+				<cell>text</>
+				<cell>Its short name, 2-4 words, WITHOUT its id (<text code>Saved Replies</>, drawn as <text code>P1 · Saved Replies</>).</>
+				<cell>yes, or a <text code>slot="title"</> child</>
+			</>
+			<row>
+				<cell>
+					<text code>status</>
+				</>
+				<cell><text code>todo</>, <text code>active</>, <text code>done</>, <text code>dropped</></>
+				<cell><text code>todo</>, <text code>active</> (one at a time, blue: under way), <text code>done</> (green) or <text code>dropped</> (never built, and won't be: struck through and grey, a crossed circle, its Dropped field saying why; finished, as <text code>done</> is; epic <text code>epic-engine</> I228).</>
+				<cell>yes</>
+			</>
+			<row>
+				<cell>
+					<text code>estimate</>
+				</>
+				<cell>text</>
+				<cell>Wall-clock time for Claude to do it, agents included, your review not: <text code>30m</>, <text code>2h</>, <text code>1h30m</>, <text code>1-2h</>.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>took</>
+				</>
+				<cell>text</>
+				<cell>How long Claude really worked on it, written by the epic tool when it's done (<text code>epic phase … done</>, or <text code>… took</> later; epic <text code>epic-engine</> P41): <text code>21m</>, <text code>1h 30m</>. Its agents' and sessions' working time, side by side counted once, never the time waiting on you. A done phase shows it in place of its estimate, the estimate in its tooltip (<text code>~3-4h</>).</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>span</>
+				</>
+				<cell>text</>
+				<cell>How long it was under way by the clock, from going active to done, waits on you included, written beside <text code>took</> from the page's log (epic <text code>epic-engine</> I127): <text code>4h</>, <text code>1h 30m</>. A done phase's pill then reads <text code>34m / 4h</>. None when the log has no start for it: the pill shows only <text code>took</>.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>source</>
+				</>
+				<cell>text</>
+				<cell>Its body's part file (<text code>parts/p-epic-migrate.html</>), loaded into its children when it opens.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>part-ids</>
+				</>
+				<cell>text: ids</>
+				<cell>The ids inside its part file: a link to one loads the body first, then lands.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>commits</>
+				</>
+				<cell>boolean: there or not</>
+				<cell>Its body lists commits: its gear offers to show them.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>plan</>
+				</>
+				<cell><text code>waiting</> | <text code>accepted</></>
+				<cell>Claude's build plan, written by the epic tool: <text code>waiting</> for your Accept (its review buttons Accept, Revisit and Defer, the group ringed), or <text code>accepted</>. Still to do and accepted, its review group ends in a green thumbs up: good to go (epic <text code>epic-engine</> I140; a check before I181). Accept on a waiting plan is a thumbs up too: it means "accept this".</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>changes</>
+				</>
+				<cell>a number</>
+				<cell>How many plan changes (<text code>&lt;epic-update&gt;</> blocks) it holds, written by the epic tool on every edit: its title says so while it isn't done, folded too (a part's body loads only when it opens).</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>open</>
+				</>
+				<cell>boolean: there or not</>
+				<cell>Unfolded: PAGE state, never written in a doc (epic pages open folded). A click on the title, a link to it (or into it) and find-in-page set it; set it from code to open it.</>
+				<cell/>
+			</>
+		</>
+
+		<section label="Slots" sticky="stack" collapsible dividing open="false">
+			<text paragraph>Where its children show: a child goes in a slot by its <text code>slot</> attribute.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Slot</>
+					<cell>What goes in it</>
+				</>
+				<row>
+					<cell>(default)</>
+					<cell>Its fields, plan updates and commits.</>
+				</>
+				<row>
+					<cell>
+						<text code>title</>
+					</>
+					<cell>A title with markup, in place of <text code>title</>.</>
+				</>
+				<row>
+					<cell>
+						<text code>changes</>
+					</>
+					<cell>An older doc's plan changes (<text code>&lt;epic-updated slot="changes"&gt;</>), until the tool migrates them: drawn at the end of its body, unboxed.</>
+				</>
+				<row>
+					<cell>
+						<text code>actions</>
+					</>
+					<cell>Buttons of the page's own in its title row (<text code>&lt;ui-button slot="actions"&gt;</>): after the title, before its own buttons; a click on one never folds it. The docs runtime puts the block's bullhorn here too.</>
+				</>
+			</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<text paragraph>Pieces of what it draws, which a page's CSS can style from outside with <text code>::part(name)</>.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The element's box.</>
+				</>
+				<row>
+					<cell>
+						<text code>section</>
+					</>
+					<cell>The <text code>&lt;ui-section&gt;</> drawing the title bar and fold: its own parts through <text code>::part()</> from inside.</>
+				</>
+				<row>
+					<cell>
+						<text code>body</>
+					</>
+					<cell>Around its children: sets <text code>--epic-stack</> for them.</>
+				</>
+				<row>
+					<cell>
+						<text code>note</>
+					</>
+					<cell>The <text code>Loads from parts/x.html ...</> line, when its part can't load.</>
+				</>
+				<row>
+					<cell>
+						<text code>tools</>
+					</>
+					<cell>At the title's end: the page's own buttons (the <text code>actions</> slot), then its estimate (once done and timed, what it took), then its review buttons, while the page is reviewed: Do this (the plane: yes, build this phase; a thumbs up until I299, Make Todo before epic <text code>epic-engine</> I181), Revisit; while the page's phases are agreed (<text code>&lt;epic-page stage="phases"&gt;</>, epic <text code>epic-engine</> P29), an open phase's are Looks good and Defer (after the others, still to do); while its build plan waits, Accept, Revisit and Defer; still to do with its plan accepted, a green thumbs up, a state saying it's ready to build, then Revisit (no Do this: the accepted plan is the go-ahead). Revisit on a phase with your comments in its text marks it at once: those comments are its note. Its gear comes last.</>
+				</>
+				<row>
+					<cell>
+						<text code>gear</>
+					</>
+					<cell>Its gear, last in its title row, with an <text code>id</> (epic <text code>epic-engine</> I166): a <text code>&lt;ui-dropdown&gt;</> menu, "Show this phase's files" and "Show this phase's checks", ticked while it shows them. Its choice wins over the Phases section's gear, for this phase.</>
+				</>
+				<row>
+					<cell>
+						<text code>estimate</>
+					</>
+					<cell>Its time pill, just before its review buttons (<text code>2-3h</>), one width so they line up row to row; done and timed, what it <text code>took</> (<text code>21m</>), the estimate its tooltip; with a <text code>span</> too, <text code>34m / 4h</>, its tooltip in words.</>
+				</>
+				<row>
+					<cell>
+						<text code>status</>
+					</>
+					<cell>Its status icon, in its Phases chip's colour and fill (<text code>data-state</>, epic <text code>epic-engine</> I170); while Claude is at work on it (<text code>:state(working)</>), a turning spinner instead, in that colour.</>
+				</>
+				<row>
+					<cell>
+						<text code>changed</>
+					</>
+					<cell>In its title, while it isn't done: its plan changed, an orange pen and how many times (<text code>changes</>).</>
+				</>
+			</>
+		</>
+
+		<section label="States" sticky="stack" collapsible dividing open="false">
+			<text paragraph>Custom states: CSS can match them with <text code>epic-phase:state(name)</>.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>State</>
+					<cell>When</>
+				</>
+				<row>
+					<cell>
+						<text code>:state(open)</>
+					</>
+					<cell>Unfolded.</>
+				</>
+				<row>
+					<cell>
+						<text code>:state(loaded)</>
+					</>
+					<cell>Its <text code>source</> part is in.</>
+				</>
+				<row>
+					<cell>
+						<text code>:state(error)</>
+					</>
+					<cell>Its <text code>source</> part couldn't be loaded.</>
+				</>
+				<row>
+					<cell>
+						<text code>:state(working)</>
+					</>
+					<cell>Claude is at work on it, and it isn't done: the review inbox's <text code>working</>, under its id (writing its plan, or building it). Its status icon is a blue turning spinner.</>
+				</>
+				<row>
+					<cell>
+						<text code>:state(commits)</>
+					</>
+					<cell>Its own commits show: ticked in its gear.</>
+				</>
+			</>
+		</>
+
+		<section label="Events" sticky="stack" collapsible dividing open="false">
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Event</>
+					<cell>Cancelable</>
+					<cell>When</>
+				</>
+				<row>
+					<cell>
+						<text code>ui-opening</>
+					</>
+					<cell>yes</>
+					<cell>About to unfold: its title was clicked. Cancel to stay folded. After the fact for a link.</>
+				</>
+				<row>
+					<cell>
+						<text code>ui-closing</>
+					</>
+					<cell>yes</>
+					<cell>About to fold: its title was clicked. Cancel to stay open.</>
+				</>
+				<row>
+					<cell>
+						<text code>ui-loaded</>
+					</>
+					<cell/>
+					<cell>The <text code>source</> part arrived and is in its children (as <text code>&lt;ui-section source&gt;</>'s).</>
+				</>
+				<row>
+					<cell>
+						<text code>ui-error</>
+					</>
+					<cell>yes</>
+					<cell>The <text code>source</> part couldn't be loaded; its note says so unless cancelled.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>Its title: always in full, as many lines as it needs, folded or open. Everything in its title row, the plan-changed pen too, sits on the title's first line, so nothing moves as it folds (2026-10-19).</>
+			<item><text bold>The status icon</>, in <link target="src-guides-epic-components-colours-html" link="/guides/epic-components/colours.html">the colour scheme</>: its SHAPE by its status (to do, an empty circle; under way, a load indicator, standing still; done, a check; dropped, a crossed circle), its COLOUR as its Phases chip's, the first that holds (epic <text code>epic-engine</> I170; 2026-10-29): red, its plan waits for your Accept or a choice in it is open; orange, changed since you looked; blue, under way or worked on; a DOTTED blue circle, scheduled; green, done in the last 3 days (<text code>done-at</>); grey, done before, or dropped. A done phase's title reads quieter (muted); a dropped one's is struck through too.</>
+			<item><text bold>Claude at work on it:</> the status icon is a turning spinner, the header's, its tooltip saying whether it's writing its plan or working on it; blue, unless it's red or orange first.</>
+			<item><text bold>The estimate</> as a badge at the title's end.</>
+			<item><text bold>Plan changes:</> while it isn't done and its plan changed, an orange pen and the count on its title, folded too. Inside, each change is its own <link target="src-packages-epics-docs-epic-update-html" link="/epic-update"><text code>&lt;epic-update&gt;</></> block at the end of its description, with no box around them (2026-10-11: "lose the "Plan changes" surround"; before, a Plan changes box atop its body).</>
+			<item><text bold>Its title bar</> on the row band, edge to edge, sticking under the Phases section's title while you read inside it.</>
+			<item><text bold>Files and Verify</> stay hidden until a gear shows them: the Phases section's, for every phase, or the phase's own, last in its title row, which wins for it (epic <text code>epic-engine</> I166). Commits stay hidden until "Show this phase's commits" in its gear shows them (epic <text code>epic-engine</> I183; a git icon on its row before); the Log lists them all.</>
+			<item><text bold>Folding:</> a click on the title folds it; on an epic page it starts folded. With <text code>source</>, its body loads from its part file the first time it opens.</>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item><text code>epic add-phase &lt;epic&gt; "Short Name" --symptom ... --changes ... \[--goal ...] \[--files ...] \[--verify ...] \[--estimate 1-2h] \[--after N | --before N]</>: a new phase, <text code>todo</>; a field not given reads <text code>TBD</>. <text code>--after 11</> makes it P11.1 (then P11.2), right after P11, and renumbers nothing; <text code>--before N</> inserts it as PN and renumbers the rest. With neither, and a Doc Review last, it goes before the Doc Review as a decimal of the phase before it (P14.1), and a Doc Review under way or done is to do again.</>
+			<item><text code>epic update &lt;epic&gt;#P&lt;N&gt; --symptom ...</>: sets its fields.</>
+			<item><text code>epic phase &lt;epic&gt;#P&lt;N&gt; todo|active|done|dropped \[--done ...] \[--why ...]</>: its <text code>status</>, and its Done field; dropped, its Dropped field in place of Done, a phase it names (<text code>P38</>) linked.</>
+			<item><text code>epic update &lt;epic&gt;#P&lt;N&gt; --estimate "1-2h"</>: its <text code>estimate</> (the Overview's total follows).</>
+			<item><text code>epic updated &lt;epic&gt;#P&lt;N&gt; "..." \[--summary "..."]</>: an <text code>&lt;epic-update at summary&gt;</> block at the end of its description. The <text code>changes</> count is rewritten by the tool on every edit.</>
+			<item><text code>epic update &lt;epic&gt;#P6 --title "New title" \[--html]</>: its <text code>title</> (or its title slot, with <text code>--html</>); links that say the old title, and items queued for it, follow.</>
+			<item><text code>epic commit &lt;epic&gt;#P&lt;N&gt; &lt;sha&gt;</>, <text code>epic commits --backfill</>: its commits, and <text code>commits</>.</>
+			<item>Its To review field: rewritten by the tool on every edit.</>
+			<item><text code>epic split</>: <text code>source</> and <text code>part-ids</>.</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-11 against branch <ui-text code>epic-workflow</>: the tables come from its vocabulary file, so they change with it.</>
+		</>
+	</>

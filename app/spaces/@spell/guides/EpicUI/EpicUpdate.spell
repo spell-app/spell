@@ -1,0 +1,346 @@
+"epic update" is a notebook page
+	<header level="1">
+		&lt;epic-update&gt;
+		<header>The &lt;epic-update&gt; element: an update, titled Update: summary with its date, after what it changed; or a bare orange UPDATE label.</>
+	</>
+
+	<text class="lede" paragraph>An update: a block titled <text bold>Update</>: &lt;summary&gt;, its date at the right, what changed under it. A phase's plan change sits at the end of its phase's description; an update to prose, right after what it changed. Empty, it's the small orange UPDATE label on an item that changed.</>
+
+	<!--
+		no <ui-list class="spell-meta">:  its <ui-item>s take Spell UI's "item" style sheet name before the
+		              epics pack's elements can, and live examples may draw unstyled (issue I9 of epic-components)
+	-->
+	<text class="meta" paragraph>
+		For anyone reading or writing an epic page's markup, or changing this element.
+
+		Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-update-epicupdate-en-ts" link="/epic/src/components/epic-update/EpicUpdate.en.ts"><text title="epic/src/components/epic-update/EpicUpdate.en.ts" code>EpicUpdate.en.ts</></>.
+
+		Its component: <link target="src-spell-epic-src-components-epic-update-epicupdate-tsx" link="/epic/src/components/epic-update/EpicUpdate.tsx"><text title="epic/src/components/epic-update/EpicUpdate.tsx" code>EpicUpdate.tsx</></>, with its style sheet and tests beside it.
+
+		Since 2026-10-11 (epic <text code>epic-workflow</>), it also replaces <link target="src-packages-epics-docs-epic-updated-html" link="/epic-updated"><text code>&lt;epic-updated&gt;</></> and the Plan changes box.
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>First, the label in an item's title (hover it: "Changed during P6"). Then a plan change, as the end of a phase's description holds it, its text made up for this page: its title row folds it.</>
+		<html>
+			<ui-text paragraph>Plan changes in their phase <epic-update phase="6"></></>
+			<ui-text paragraph>An issue fixed in P6, its fix still on the epic's branch: <epic-update phase="6" became="fixed" unmerged="epic-engine"></></>
+			<ui-text paragraph>An issue Claude has taken up: <epic-update phase="6" became="underway"></></>
+			<epic-update at="2026-10-11 14:30" summary="No Plan changes box" phase="6">
+				<p>2026-10-11: lose the surround. Each change is its own block at the end of its phase's description.</>
+			</>
+		</>
+		<text class="meta" paragraph>Live: the real element, drawn by the epics pack this page loads (the main checkout's, until this change merges).</>
+
+		<section label="With buttons in its title row" sticky collapsible dividing open="false">
+			<text paragraph>A page's own buttons go in its title row: <text code>&lt;ui-button slot="actions"&gt;</> children (epic <text code>epic-workflow</> P25).</>
+			<list bulleted>
+				<item>They sit after the title, before its date, at the right of its first line.</>
+				<item>A click on one never folds or unfolds it.</>
+				<item>The docs runtime puts the block's bullhorn there too, so it never sits over a button.</>
+				<item>Only a block has a title row: a bare <text code>UPDATE</> label draws no slot.</>
+			</>
+			<example "With buttons in its title row">
+				<html>
+					<epic-update at="2026-10-17 12:00" summary="Bullhorns go in the title row" phase="25">
+						<p>Each titled block's bullhorn is in its own row now, never over its buttons.</p>
+						<ui-button slot="actions" appearance="circular basic" size="mini" icon="copy" title="Copy a link to it" aria-label="Copy a link to it"></ui-button>
+					</epic-update>
+				</html>
+			</example>
+		</>
+
+		<section label="New, seen, quiet" sticky collapsible dividing open="false">
+			<icon slot="icon" name="check"/>
+			<text paragraph>2026-10-29: "How do I clear these 'update' marks?" Three ways (epic <text code>epic-engine</> I168):</>
+			<list bulleted>
+				<item>Seen: a round ✓ before the date of a new block, while the page is reviewed. Pressed, the block folds to one grey line at once, and its phase's pen counts one fewer. The mark waits in the review inbox, as a change mark's Reopen does; Send carries it, and <text code>epic inbox apply</> writes <text code>seen="&lt;time&gt;"</> on the block, so it's seen for everyone.</>
+				<item>By itself: a block not marked seen goes quiet 3 days after its date, as a change mark does (one rule, <text code>PlanDates.isQuiet()</>).</>
+				<item>Never new: a block that carries out your own answer is no news for you (I179; 2026-10-29: "If its 'accepting the update' I shouldn't have to do that if you are doing what I said"). The epic tool writes it already seen, at its own date, and never lists it for the pen: every item it names (a question you answered or decided, a pick, your comment <text code>C3</>), or the items <text code>epic updated --for</> names, are yours, and it names no file and no estimate. A change Claude made on its own stays new.</>
+				<item>A phase's pen (<text code>&lt;epic-phase&gt;</>) counts only the new ones, and has a ✓ of its own for all of them at once.</>
+				<item>The epic tool gives each block its id (<text code>up3</>, the Seen mark's key) on its next write. Older blocks need no migration: they go quiet by age.</>
+			</>
+			<example "New, seen, quiet">
+				<html>
+					<epic-update at="2026-10-11 14:30" seen="2026-10-12 08:00" summary="Seen, the day after" phase="6">
+						<p>Folded to one grey line: its date's tooltip says when it was seen.</p>
+					</epic-update>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>The rules: <link target="src-spell-epic-src-tool-plan-doc-md" link="/epic/src/tool/PLAN-DOC.md"><text title="epic/src/tool/PLAN-DOC.md" code>PLAN-DOC.md</></>, "Updates".</>
+		<text paragraph>a plan change, at the end of its phase's description:</>
+		<markdown>
+			```html
+			<epic-field name="goal"><ul><li>a bullet per outcome</li></ul></epic-field>
+			<epic-update at="2026-10-11 14:30" summary="Split in two" phase="6">
+			  <p>what changed in the plan, and why</p>
+			</epic-update>
+			```
+		</>
+		<text paragraph>an update to prose, right after the paragraph it changed:</>
+		<markdown>
+			```html
+			<p>The page server serves every checkout.</p>
+			<epic-update at="2026-10-11 15:02" summary="One server, not two" phase="6">
+			  <p>Was:  one per checkout.</p>
+			</epic-update>
+			```
+		</>
+		<text paragraph>a bare label, in an item's title:</>
+		<markdown>
+			```html
+			<span slot="title">Plan changes in their phase <epic-update phase="6"></epic-update></span>
+			<span slot="title">The help is missing <epic-update phase="6" became="fixed" unmerged="epic-engine"></epic-update></span>
+			```
+		</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="map"/>
+		<text paragraph>
+			<text bold>Its parents:</>
+		</>
+		<html>
+			<ui-list bulleted>
+				<ui-item>a plan change: <ui-link target="src-packages-epics-docs-epic-phase-html" link="/epic-phase"><ui-text code>&lt;epic-phase&gt;</></>, at the END of its description (2026-10-11): after Goal and your kept notes, before Done, the commits, Files, Verify and To review</>
+				<ui-item>an update to prose: right AFTER the block it changed, anywhere prose goes. It's a <dfn class="spell-term" tabindex="0">prose element</><ui-popup heading="prose element" label="An <epic-*> element marked flow in its vocabulary:  it goes wherever prose goes, so no parent has to list it."></>: <ui-list bulleted><ui-item><ui-link target="src-packages-epics-docs-epic-item-html" link="/epic-item"><ui-text code>&lt;epic-item&gt;</></>: among an item's own text, before its cards</> <ui-item><ui-link target="src-packages-epics-docs-epic-field-html" link="/epic-field"><ui-text code>&lt;epic-field&gt;</></>: a phase's field, or a labelled block</> <ui-item><ui-link target="src-packages-epics-docs-epic-section-html" link="/epic-section"><ui-text code>&lt;epic-section&gt;</></>: an Overview sub-section's prose (an update to the whole sub-section goes last inside it)</> <ui-item><ui-link target="src-packages-epics-docs-epic-answer-html" link="/epic-answer"><ui-text code>&lt;epic-answer&gt;</></>, <ui-link target="src-packages-epics-docs-epic-reply-html" link="/epic-reply"><ui-text code>&lt;epic-reply&gt;</></>, <ui-link target="src-packages-epics-docs-epic-option-html" link="/epic-option"><ui-text code>&lt;epic-option&gt;</></>: the cards</></></>
+				<ui-item>a bare label: an item's title (the <ui-text code>&lt;span slot="title"&gt;</> of an <ui-link target="src-packages-epics-docs-epic-item-html" link="/epic-item"><ui-text code>&lt;epic-item&gt;</></>), or inline in any prose</>
+			</>
+		</>
+		<text paragraph>
+			<text bold>Its children:</>
+		</>
+		<list bulleted>
+			<item>prose: what changed, and why</>
+			<item>none: a bare label (or a block with only its summary)</>
+		</>
+		<text paragraph>A note that isn't an update (an item partly fixed elsewhere, a decision done) is an <link target="src-packages-epics-docs-epic-note-html" link="/epic-note"><text code>&lt;epic-note&gt;</></> instead.</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="list check"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Name</>
+				<cell>Values</>
+				<cell>Meaning</>
+				<cell>Required</>
+			</>
+			<row>
+				<cell>
+					<text code>at</>
+				</>
+				<cell>a time (<text code>2026-10-11 14:30</>, any form an epic page's dates take)</>
+				<cell>When it changed: drawn <text code>10/11/26 14:30</> at the title row's right.</>
+				<cell>a block's</>
+			</>
+			<row>
+				<cell>
+					<text code>summary</>
+				</>
+				<cell>one line of plain text</>
+				<cell>What changed: the title's words after <text bold>Update</>:. The tool's <text code>updated</> without <text code>--summary</> takes the first sentence of what changed.</>
+				<cell>a block's</>
+			</>
+			<row>
+				<cell>
+					<text code>phase</>
+				</>
+				<cell>a phase number (<text code>6</>)</>
+				<cell>The phase active when it was written (the date's tooltip, the label's <text code>Changed during P6</>). That phase's <text code>done</> removes its bare labels and its updates outside a phase; a phase's own plan changes stay.</>
+				<cell>a label's</>
+			</>
+			<row>
+				<cell>
+					<text code>became</>
+				</>
+				<cell><text code>fixed</>, <text code>done</>, <text code>canceled</>, <text code>decided</>, <text code>reopened</>, <text code>underway</></>
+				<cell>A label's status change (T75): drawn as the word alone, <text code>FIXED</> (I295). <text code>underway</> while its item's latest status card is Underway. Written by the epic tool; a later status change replaces it, a plain edit keeps it. None: a plain <text code>UPDATE</>.</>
+				<cell>no</>
+			</>
+			<row>
+				<cell>
+					<text code>unmerged</>
+				</>
+				<cell>a branch (<text code>epic-engine</>)</>
+				<cell>A label with <text code>became</> whose item's work isn't merged into main yet: a blue <text code>Not in main</> pill after it. Copied from the item's own <text code>unmerged</> on every edit; gone once it lands.</>
+				<cell>no</>
+			</>
+			<row>
+				<cell>
+					<text code>id</>
+				</>
+				<cell>
+					<text code>up3</>
+				</>
+				<cell>Given by the epic tool on its next write (I168): its Seen mark's key in the review inbox, and a link's target. None: just written, no Seen yet.</>
+				<cell>no</>
+			</>
+			<row>
+				<cell>
+					<text code>seen</>
+				</>
+				<cell>a time (<text code>2026-10-29 14:30</>)</>
+				<cell>When you marked it seen, written by <text code>epic inbox apply</> (I168): quiet for everyone. New and optional: an older block without it goes quiet 3 days after <text code>at</>. Or its own <text code>at</>, written by the tool: a block carrying out your own answer (I179).</>
+				<cell>no</>
+			</>
+		</>
+
+		<section label="Slots" sticky="stack" collapsible dividing open="false">
+			<html>
+				<ui-text paragraph>A <dfn class="spell-term" tabindex="0">slot</><ui-popup heading="slot" label="Where the element shows its own children:  the doc's prose, inside its drawing."></> is where the element's own children show.</>
+			</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Slot</>
+					<cell>Holds</>
+				</>
+				<row>
+					<cell>(default)</>
+					<cell>What changed, and why; none for a bare label.</>
+				</>
+				<row>
+					<cell>
+						<text code>actions</>
+					</>
+					<cell>Buttons of the page's own in its title row (<text code>&lt;ui-button slot="actions"&gt;</>): after the title, before its own buttons; a click on one never folds it. The docs runtime puts the block's bullhorn here too.</>
+				</>
+			</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<html>
+				<ui-text paragraph>A <dfn class="spell-term" tabindex="0">part</><ui-popup heading="part" label="A named piece of the element's drawing, which a page's CSS can reach from outside:  epic-update::part(time)."></> is a piece of the drawing a page's CSS can reach.</>
+			</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>Is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The block, or the bare label.</>
+				</>
+				<row>
+					<cell>
+						<text code>header</>
+					</>
+					<cell>A block's title row: the fold chevron, the title, the date.</>
+				</>
+				<row>
+					<cell>
+						<text code>toggle</>
+					</>
+					<cell>A block's fold chevron, a <text code>&lt;button&gt;</>, first.</>
+				</>
+				<row>
+					<cell>
+						<text code>title</>
+					</>
+					<cell>A block's <text bold>Update</>: &lt;summary&gt;.</>
+				</>
+				<row>
+					<cell>
+						<text code>time</>
+					</>
+					<cell>A block's date, at the right of its title row.</>
+				</>
+				<row>
+					<cell>
+						<text code>actions</>
+					</>
+					<cell>In its title row, after the title and before its own buttons: the <text code>actions</> slot.</>
+				</>
+				<row>
+					<cell>
+						<text code>seen</>
+					</>
+					<cell>A new block's ✓ Seen, before its date, while the page is reviewed: <text code>&lt;epic-review buttons="update"&gt;</>.</>
+				</>
+				<row>
+					<cell>
+						<text code>body</>
+					</>
+					<cell>What changed; hidden (<text code>until-found</>) while folded.</>
+				</>
+				<row>
+					<cell>
+						<text code>label</>
+					</>
+					<cell>The bare orange <text code>UPDATE</> label.</>
+				</>
+			</>
+		</>
+
+		<section label="States" sticky="stack" collapsible dividing open="false">
+			<html>
+				<ui-text paragraph>A <dfn class="spell-term" tabindex="0">state</><ui-popup heading="state" label="A CSS custom state the element sets on itself as it changes:  epic-update:state(open)."></> is set by the element on itself; none is ever written in the doc.</>
+			</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>State</>
+					<cell>When</>
+				</>
+				<row>
+					<cell>
+						<text code>block</>
+					</>
+					<cell>It has a summary, a date or children: drawn as a block, not a bare label.</>
+				</>
+				<row>
+					<cell>
+						<text code>open</>
+					</>
+					<cell>A block, unfolded. It starts so while new, folded once quiet.</>
+				</>
+				<row>
+					<cell>
+						<text code>quiet</>
+					</>
+					<cell>A block seen (<text code>seen</>, or its Seen mark in the inbox) or more than 3 days old: grey, folded to its title row.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>A block's title: always in full, folded or open, its lines under the date running the full width (2026-10-19).</>
+			<item>Orange: changed since you looked. On every doc page, orange means only that, and warnings (<link target="src-spell-epic-templates-epics-plan-doc-md" link="/epic/templates/epics/plan-doc.md"><text title="epic/templates/epics/plan-doc.md" code>plan-doc.md</></>, "Colours").</>
+			<item>A block: a faint orange ground and an orange hairline, rounded, while it's new.</>
+			<item>Quiet (epic <text code>epic-engine</> I168): seen, or more than 3 days after its date, the change marks' rule. Grey: the page's muted ink on a faint grey ground, a grey hairline. Folded to one line, its date and summary; it stays, as the record, and opens on a click.</>
+			<item>Its title row: the chevron, then <text bold>Update</>: &lt;summary&gt;, free to wrap; the date pinned to the right of its first line, as a comment thread's message shows its time (smaller, tabular figures, muted). The date's tooltip: the time as written, and the phase under way then.</>
+			<item>It folds by its title row and starts open. Folded, what changed is <text code>hidden="until-found"</>, so find-in-page reveals it.</>
+			<item>You comment on it with its own bullhorn (a block kind of its own, <text code>update</>), even inside an item or a field; the bullhorn moves left of the date.</>
+			<item>The bare label: solid orange, small bold capitals, centred on the text's middle.</>
+			<item>Restyled in one place, its own family (<text code>components/epic-update/</>): <text code>--epic-update-accent</> and <text code>--epic-update-background</>, or its parts.</>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item>A plan change: <text code>epic updated &lt;epic&gt;#P&lt;N&gt; "&lt;html&gt;" \[--summary "..."]</>, at the end of phase N's description (<text code>PlanDoc.addPhaseUpdate()</>). The phase's <text code>changes</> counts them, for the folded title's pen.</>
+			<item>An update to prose: Claude writes it by hand, right after the block it changed.</>
+			<item>A bare label: the tool adds one to an item's title when a command changes the item, once per item (<text code>PlanDoc.markUpdate()</>). On any epic, a phase under way or not (I290); a new item gets one only while a phase is under way.</>
+			<item>A bare label goes once Owen checks its item (his ✓, I285): at once on the page, and from the file as the mark is applied (<text code>PlanDoc.reviewedAs()</>). The next real change puts it back.</>
+			<item><text code>epic phase &lt;epic&gt;#P&lt;N&gt; done</> removes phase N's bare labels and its prose updates; its plan changes stay.</>
+			<item><text code>add-phase ... --before N</> renumbers <text code>phase</> with the phases.</>
+			<item>Older docs are migrated on the tool's next write, by the step <text code>updates-as-epic-update</> (<text code>Migrations</>, in the tool's <text code>migrations/</>): <list bulleted><item>a phase's <text code>&lt;epic-updated&gt;</> lines become blocks at the end of its description, and their copies in the Phases section go</> <item>an UPDATE note, which stood BEFORE the prose it was about, moves after it, dated and summed up</></></>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-11 against branch <ui-text code>epic-workflow</>.</>
+		</>
+	</>

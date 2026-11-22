@@ -1,0 +1,262 @@
+"epic updated" is a notebook page
+	<header level="1">
+		&lt;epic-updated&gt;
+		<header>RETIRED: the &lt;epic-updated&gt; element, an older doc's dated change to a phase's plan; &lt;epic-update&gt; replaces it.</>
+	</>
+
+	<message state="warning" heading="Retired, 2026-10-11">
+		<text paragraph><link target="src-packages-epics-docs-epic-update-html" link="/epic-update"><text code>&lt;epic-update at summary&gt;</></> replaces it ("lose the "Plan changes" surround", epic <text code>epic-workflow</>). The tool writes no more of them, and its next write to an older doc migrates each one, by the step <text code>updates-as-epic-update</>: a block at the end of its phase's description, titled <text bold>Update</>: &lt;its first sentence&gt;, its date kept. Until then it still draws, as below; a line in its phase's <text code>changes</> slot shows at the end of the phase's body, unboxed.</>
+	</>
+	<text class="lede" paragraph><text code>&lt;epic-updated&gt;</> was one change to a phase's plan, after your feedback or something found while building. It draws a dashed orange FENCE (a box around it) headed <text code>Updated</> and its date, with what changed under it.</>
+
+	<!-- no ui-list.spell-meta here:  any ui-item element on the page leaves epic-item unstyled (issue I9 of epic-components) -->
+	<text class="meta" paragraph>
+		Written for: anyone reading or writing an epic page's markup, or changing this element.
+
+		Status: <label size="mini" color="green">built</>, in the <link target="src-spell-epic-src-components-epic-phase" link="/epic/src/components/epic-phase/"><text title="epic/src/components/epic-phase/" code>epic-phase</></> folder of the epics package.
+
+		Its vocabulary (attributes, slots, parts, children): <link target="src-spell-epic-src-components-epic-phase-epicupdated-en-ts" link="/epic/src/components/epic-phase/EpicUpdated.en.ts"><text title="epic/src/components/epic-phase/EpicUpdated.en.ts" code>EpicUpdated.en.ts</></>.
+
+		The component: <link target="src-spell-epic-src-components-epic-phase-epicupdated-tsx" link="/epic/src/components/epic-phase/EpicUpdated.tsx"><text title="epic/src/components/epic-phase/EpicUpdated.tsx" code>EpicUpdated.tsx</></>.
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<html>
+			<epic-updated at="2026-10-07 12:40" phase="6">
+				<p>Your review: the old Overnight report section goes, so P6 is open again.</>
+				<ul>
+					<li>the converter drops the old report section; the proof lists it as an allowed loss</>
+					<li>items a <code>/bedtime</> night made carry an overnight marker instead</>
+				</>
+			</>
+		</>
+		<example "Example">
+			<html>
+				<epic-phase id="p-converter" title="Converter" status="active" changes="1">
+					<epic-updated slot="changes" at="2026-10-08 23:32" phase="6">
+						<p>P6 grows by your review notes on P5.</p>
+					</epic-updated>
+					<epic-field name="goal">reads every generation of the old markup</epic-field>
+				</epic-phase>
+			</html>
+		</example>
+		<list bulleted>
+			<item>The first: a line by itself, <text code>Updated 10/7/26 12:40 during P6</>. Click its chevron to fold it.</>
+			<item>The second: a line in its phase, as an epic page has it (<text code>slot="changes"</>). <list bulleted><item>Folded, the phase's title shows an orange pen and <text code>1</>: its <text code>changes</> attribute.</> <item>Open, the line sits in the phase's Plan changes box, above Goal: the box's heading, <text bold>Plan changes · 1</>, folds it.</></></>
+		</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>From <link target="src-epics-epic-components-parts-p-converter-html" link="/epics/epic-components/parts/p-converter.html"><text title="epics/epic-components/parts/p-converter.html">epic-components' phase 6</></>, cut short, with the <text code>slot</> the tool's next write gives it:</>
+		<text paragraph>A change to a phase's plan:</>
+		<markdown>
+			```html
+			<epic-field name="changes">...</epic-field>
+			<epic-updated slot="changes" at="2026-10-07 12:40"
+			  ><p>Driveby (review 2026-10-07), from your note on <a href="#i3">I3</a>: the old Overnight report section goes, so P6 is open again.</p></epic-updated
+			>
+			<epic-field name="goal">...</epic-field>
+			```
+		</>
+		<list bulleted>
+			<item>Its time, <text code>at</>, is written <text code>2026-10-07 12:40</> and drawn as 10/7/26 12:40.</>
+			<item>It goes after Symptom and Changes, one line per change, oldest first, and stays once the phase is done.</>
+			<item><text code>slot="changes"</> puts it in the phase's Plan changes box; the phase's <text code>changes</> attribute says how many there are. <list bulleted><item>An older doc's line has no slot and shows among the phase's fields until the tool's next write slots it.</></></>
+		</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="compass"/>
+
+		<section label="Its parents" sticky="stack" collapsible dividing open="false">
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Parent</>
+					<cell>How</>
+					<cell>How many</>
+					<cell>As</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-section-html" link="/epic-section">
+							<text code>&lt;epic-section&gt;</>
+						</>
+					</>
+					<cell>in its <text code>changes</> slot, only in the Phases section (<text code>kind="phases"</>)</>
+					<cell>any number</>
+					<cell>An older doc's Plan changes (until 2026-10-11): a copy of each <text code>&lt;epic-updated&gt;</> of a phase still to do, its phase in <text code>of</>. Never drawn; the tool removes them on its next write.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-phase-html" link="/epic-phase">
+							<text code>&lt;epic-phase&gt;</>
+						</>
+					</>
+					<cell>in its <text code>changes</> slot</>
+					<cell>any number</>
+					<cell>Changes to the phase's plan, one dated line each, oldest first: drawn in its Plan changes box.</>
+				</>
+				<row>
+					<cell>
+						<link target="src-packages-epics-docs-epic-phase-html" link="/epic-phase">
+							<text code>&lt;epic-phase&gt;</>
+						</>
+					</>
+					<cell/>
+					<cell>any number</>
+					<cell>An older doc's changes, in no slot (until 2026-10-11): drawn among its fields until the tool slots them.</>
+				</>
+			</>
+		</>
+
+		<section label="Its children" sticky="stack" collapsible dividing open="false">
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Child</>
+					<cell>Where</>
+					<cell>How many</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>prose</>
+					<cell/>
+					<cell>any number</>
+					<cell>What changed in the plan, and why.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="table columns"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Name</>
+				<cell>Values</>
+				<cell>Meaning</>
+				<cell>Required</>
+			</>
+			<row>
+				<cell>
+					<text code>at</>
+				</>
+				<cell>text: time</>
+				<cell>When the plan changed: <text code>2026-10-06 14:30</>, drawn <text code>10/6/26 14:30</>.</>
+				<cell>yes</>
+			</>
+			<row>
+				<cell>
+					<text code>phase</>
+				</>
+				<cell>a number</>
+				<cell>The phase active when it changed (<text code>3</>).</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>of</>
+				</>
+				<cell>a number</>
+				<cell>Only on an older doc's COPY in the Phases section (until 2026-10-11): the phase whose plan it changes (<text code>5</>). <list bulleted><item>Never drawn now.</> <item>The epic tool removes the copies on its next write.</> <item>Never on the line in its phase.</></></>
+				<cell/>
+			</>
+		</>
+
+		<section label="Slots" sticky="stack" collapsible dividing open="false">
+			<text paragraph>Where its children show: a child goes in a slot by its <text code>slot</> attribute.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Slot</>
+					<cell>What goes in it</>
+				</>
+				<row>
+					<cell>(default)</>
+					<cell>What changed in the plan, and why.</>
+				</>
+			</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<text paragraph>Pieces of what it draws, which a page's CSS can style from outside with <text code>::part(name)</>.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The fence: a dashed orange box.</>
+				</>
+				<row>
+					<cell>
+						<text code>toggle</>
+					</>
+					<cell>The fold chevron, a <text code>&lt;button&gt;</>, first: its heading row folds what changed.</>
+				</>
+				<row>
+					<cell>
+						<text code>icon</>
+					</>
+					<cell>Its icon, centred on its first line.</>
+				</>
+				<row>
+					<cell>
+						<text code>label</>
+					</>
+					<cell><text code>Updated</>, then its time.</>
+				</>
+				<row>
+					<cell>
+						<text code>body</>
+					</>
+					<cell>What changed, under the heading; hidden (<text code>until-found</>) while folded.</>
+				</>
+			</>
+		</>
+
+		<section label="States" sticky="stack" collapsible dividing open="false">
+			<text paragraph>Custom states: CSS can match them with <text code>epic-updated:state(name)</>.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>State</>
+					<cell>When</>
+				</>
+				<row>
+					<cell>
+						<text code>:state(open)</>
+					</>
+					<cell>Unfolded: it starts so (page state, never written).</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item><text bold>The fence:</> a dashed ORANGE box on a faint orange wash, its icon orange: orange means changed since you looked (<link target="src-guides-epic-components-colours-html" link="/guides/epic-components/colours.html">the colour scheme</>).</>
+			<item><text bold>Its heading:</> the fold chevron, the icon, <text bold>Updated</>, the time and <text code>during P6</> in small mono, muted.</>
+			<item><text bold>In its phase:</> in the phase's Plan changes box, atop its body, on a faint orange ground under a heading that folds it (chevron, pen, <text bold>Plan changes · 2</>). <list bulleted><item>The box is open while the phase isn't done, and folded once it is.</> <item>While the phase isn't done, its title shows an orange pen and how many changes, even folded.</></></>
+			<item><text bold>Folding:</> open to start with; a click on its heading folds what changed. <list bulleted><item>Folded text is still found by find-in-page.</> <item>Whether it's open is the reader's choice, never written in the doc.</></></>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item>Nothing any more: <text code>epic updated &lt;epic&gt;#P&lt;N&gt; "&lt;html&gt;"</> writes an <link target="src-packages-epics-docs-epic-update-html" link="/epic-update"><text code>&lt;epic-update&gt;</></> since 2026-10-11.</>
+			<item>Every edit migrates an older doc first (<text code>updates-as-epic-update</>): each line becomes an <text code>&lt;epic-update at phase summary&gt;</> at the end of its phase's description, and the copies in the Phases section (<text code>of</>) go.</>
+			<item><text code>epic add-phase ... --before N</>: renumbers the phases that move, in both attributes (<text code>phase</>, <text code>of</>).</>
+			<item><text code>epic convert</>: from an old phase's Updated field, one per dated line, then migrated to <text code>&lt;epic-update&gt;</> as it writes its files.</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-11 against branch <ui-text code>epic-workflow</>: the tables come from its vocabulary file, so they change with it.</>
+		</>
+	</>

@@ -26,6 +26,9 @@ const UI_ROOT = sourceOf("spell/ui/components/ui-root")
  */
 const DOCS_FAMILIES = sourceOf("spell/ui/docs-components/DocsFamilies.ts")
 
+/** What lets a page with only our bundles load a component pack (`SpellUI.registerPack`):  in `SHARED_SOLID.solid`. */
+const PAGE_PACKS = sourceOf("spell/app/app/components/PagePacks.ts")
+
 /** Spell UI's barrel, `spell/ui`:  in `SHARED_SOLID.ui`. */
 const UI_BARREL = sourceOf("spell/ui")
 
@@ -117,7 +120,10 @@ function sharedEntries(): Plugin {
       `DocsFamilies.add()`,
       // what `core` draws compiled spell with:  `sharedSolid()` hands it to `spell-runtime.js`
       `export { default as h } from "@solidjs/h"`,
-      `export const loadSpellUI = () => import(${JSON.stringify(UI_ENTRY)})`
+      `export const loadSpellUI = () => import(${JSON.stringify(UI_ENTRY)})`,
+      // a component pack in a page with only our bundles (`<ui-components source>` in a Spell page):  `PagePacks`
+      `import { PagePacks } from ${JSON.stringify(PAGE_PACKS)}`,
+      `PagePacks.share(loadSpellUI)`
     ].join("\n"),
     [UI_ENTRY]: [
       `export * from ${JSON.stringify(UI_BARREL)}`,

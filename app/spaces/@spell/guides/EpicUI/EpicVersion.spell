@@ -1,0 +1,173 @@
+"epic version" is a notebook page
+	<header level="1">
+		&lt;epic-version&gt;
+		<header>The &lt;epic-version&gt; element: one earlier version of an item's text, in its Original Discussion.</>
+	</>
+
+	<text class="lede" paragraph>One earlier version of an item's text, inside its <text code>&lt;epic-original&gt;</>. It draws a small heading, "As first written" or "As of &lt;date&gt;", then the text as it was.</>
+
+	<!--
+		no <ui-list class="spell-meta">:  its <ui-item>s take Spell UI's "item" style sheet name before the
+		              epics pack's elements can, and live examples may draw unstyled (issue I9 of epic-components)
+	-->
+	<text class="meta" paragraph>
+		For anyone reading or writing an epic page's markup, or changing this element.
+
+		Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-original-epicversion-en-ts" link="/epic/src/components/epic-original/EpicVersion.en.ts"><text title="epic/src/components/epic-original/EpicVersion.en.ts" code>EpicVersion.en.ts</></>.
+
+		Its component: <link target="src-spell-epic-src-components-epic-original-epicversion-tsx" link="/epic/src/components/epic-original/EpicVersion.tsx"><text title="epic/src/components/epic-original/EpicVersion.tsx" code>EpicVersion.tsx</></>, with its style sheet and tests beside it.
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>Unfold each Original Discussion below.</>
+		<list bulleted>
+			<item>The first holds ONE version, a real one (epic <text code>skillz</>, Q14), so it has no heading.</>
+			<item>The second holds two: "As first written", then "As of 10/4/26 20:49".</>
+		</>
+		<html>
+			<epic-original>
+				<epic-version>
+					<epic-question>
+						<p>Placeholder.</>
+					</>
+				</>
+			</>
+			<epic-original>
+				<epic-version>
+					<p>Which colours for the review buttons?</>
+				</>
+				<epic-version as-of="2026-10-04 20:49">
+					<p>Which four colours for the review buttons: Fomantic's own?</>
+					<p>Answer · Fomantic's own</>
+				</>
+			</>
+		</>
+		<text class="meta" paragraph>Live: the real element, drawn by the epics pack this page loads.</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>The tool's shape (<link target="src-spell-epic-src-tool-plan-doc-md" link="/epic/src/tool/PLAN-DOC.md"><text title="epic/src/tool/PLAN-DOC.md" code>PLAN-DOC.md</></>, "Items"): the first version undated, each later one dated.</>
+		<text paragraph>Two versions:</>
+		<markdown>
+			```html
+			<epic-original>
+			  <epic-version><p>as first written</p></epic-version>
+			  <epic-version as-of="2026-10-04 20:49"><p>the next text, as it stood when it was replaced</p></epic-version>
+			</epic-original>
+			```
+		</>
+		<text paragraph>No live epic page holds two versions yet; 75 hold one (in the epics' parts, <text title="epics/*/parts/" code>parts/</>).</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="map"/>
+		<text paragraph>
+			<text bold>Its parents:</>
+		</>
+		<list bulleted>
+			<item><link target="src-packages-epics-docs-epic-original-html" link="/epic-original"><text code>&lt;epic-original&gt;</></>: one or more, oldest first</>
+		</>
+		<text paragraph>
+			<text bold>Its children:</>
+		</>
+		<list bulleted>
+			<item><link target="src-packages-epics-docs-epic-question-html" link="/epic-question"><text code>&lt;epic-question&gt;</></>: at most one, a question's text as first asked, moved here by a rewrite</>
+			<item>prose: the text, as it was</>
+			<item><link target="src-packages-epics-docs-epic-answer-html" link="/epic-answer"><text code>&lt;epic-answer&gt;</></>: at most one, its answer card as it was</>
+			<item><link target="src-packages-epics-docs-epic-reply-html" link="/epic-reply"><text code>&lt;epic-reply&gt;</></>: its replies, as they were</>
+		</>
+		<text paragraph>The tool writes the cards it moves here as the prose they said (<text code>Answer · Chrome</>, <text code>B · Chrome (recommended), chosen</>). The converter kept a few hand-written cards as <text code>&lt;epic-answer&gt;</> / <text code>&lt;epic-reply&gt;</> instead.</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="list check"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Name</>
+				<cell>Values</>
+				<cell>Meaning</>
+				<cell>Required</>
+			</>
+			<row>
+				<cell>
+					<text code>as-of</>
+				</>
+				<cell>a time, <text code>YYYY-MM-DD HH:MM</> (<text code>2026-10-04 20:49</>)</>
+				<cell>When it was replaced: drawn <text code>As of 10/4/26 20:49</>. Absent on the first version, as first written.</>
+				<cell>no</>
+			</>
+		</>
+
+		<section label="Slots" sticky="stack" collapsible dividing open="false">
+			<html>
+				<ui-text paragraph>A <dfn class="spell-term" tabindex="0">slot</><ui-popup heading="slot" label="Where the element shows its own children:  the doc's prose, inside its drawing."></> is where the element's own children show.</>
+			</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Slot</>
+					<cell>Holds</>
+				</>
+				<row>
+					<cell>(default)</>
+					<cell>The text, as it was.</>
+				</>
+			</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<html>
+				<ui-text paragraph>A <dfn class="spell-term" tabindex="0">part</><ui-popup heading="part" label="A named piece of the element's drawing, which a page's CSS can reach from outside:  epic-note::part(label)."></> is a piece of the drawing a page's CSS can reach.</>
+			</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>Is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The version.</>
+				</>
+				<row>
+					<cell>
+						<text code>heading</>
+					</>
+					<cell><text code>As first written</> / <text code>As of &lt;as-of&gt;</>: none on a lone first version.</>
+				</>
+				<row>
+					<cell>
+						<text code>body</>
+					</>
+					<cell>The text, as it was.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>Its heading: small, muted, in capitals (an eyebrow over the text). No colour of its own.</>
+			<item>"As first written" shows only once there's a second version: a lone version needs no heading. It follows its parent live: when a second version arrives, the first gets its heading.</>
+			<item>Dates are written <text code>2026-10-04 20:49</> and drawn as 10/4/26 20:49 (<text code>PlanDates</>).</>
+			<item>It doesn't fold: its <text code>&lt;epic-original&gt;</> does.</>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item>Written with its <text code>&lt;epic-original&gt;</>, by the epic tool's commands that replace an item's text. <list bulleted><item><text code>details --file</>, and <text code>details --more</> again</> <item><text code>decide</> again</> <item><text code>original &lt;name&gt; &lt;id&gt; --file</></></></>
+			<item>The first version is undated; each later one gets <text code>as-of</> the time it was replaced (now, or <text code>original --as-of</>), kept in date order.</>
+			<item>Ids inside it become <text code>data-original-id</> (<text code>PlanItem.stripIds()</>).</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-09 against branch <ui-text code>epic-components</>.</>
+		</>
+	</>

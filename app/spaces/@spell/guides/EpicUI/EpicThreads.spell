@@ -1,0 +1,42 @@
+"epic threads element" is a notebook page
+	<header level="1">
+		&lt;epic-threads&gt;
+		<header>The &lt;epic-threads&gt; element: the comment threads under one block of a page.</>
+	</>
+
+	<text class="lede" paragraph>The comment threads under one block of a page, in order, a little apart. The comments' code puts one right after the paragraph, list item or cell holding the comments' quotes, else after their block.</>
+	<text class="meta" paragraph>
+		For anyone changing how comments look or work on a page.
+
+		Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-thread-epicthreads-en-ts" link="/epic/src/components/epic-thread/EpicThreads.en.ts"><text title="epic/src/components/epic-thread/EpicThreads.en.ts" code>EpicThreads.en.ts</></>.
+
+		Its component: <link target="src-spell-epic-src-components-epic-thread-epicthreads-tsx" link="/epic/src/components/epic-thread/EpicThreads.tsx"><text title="epic/src/components/epic-thread/EpicThreads.tsx" code>EpicThreads.tsx</></>, with its style sheet (<text code>.css</>) and tests beside it.
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>Two threads under a paragraph:</>
+		<html>
+			<epic-threads>
+				<epic-thread comment="{\"id\": \"c1\", \"anchor\": \"context\", \"kind\": \"section\", \"label\": \"2. Context\", \"excerpt\": \"\", \"text\": \"Is this still true?  `spell compile` changed.\", \"at\": \"2026-10-17T13:12:00.000Z\", \"status\": \"new\", \"turn\": \"claude\"}"></>
+				<epic-thread open unseen comment="{\"id\": \"c3\", \"anchor\": \"context\", \"kind\": \"section\", \"label\": \"2. Context\", \"excerpt\": \"\", \"text\": \"Why asyncio and not threads?\", \"at\": \"2026-10-17T13:12:00.000Z\", \"status\": \"answered\", \"turn\": \"person\", \"replies\": \[{\"by\": \"Claude\", \"at\": \"2026-10-18T12:05:00.000Z\", \"html\": \"<p>Because every target awaits the same way:  <code>await</code> maps one to one.</p>\"}]}"></>
+			</>
+		</>
+		<text class="meta" paragraph>Live: the real elements, drawn by the epics pack this page loads.</>
+	</>
+
+	<section label="2. Where it goes">
+		<icon slot="icon" name="map"/>
+		<list bulleted>
+			<item>Right after a block, or the paragraph holding a quote;  a docs section's first in its body;  inside a list item or cell, at its end.</>
+			<item>Its children:  <link link="/epic-thread"><text code>&lt;epic-thread&gt;</></>s.</>
+			<item>Its edges are the block's it's under (an epic page item's note box;  a guide paragraph's measure):  the page's sheet, <text title="epic/src/tools/_assets/spell-comments.css" code>spell-comments.css</>, sets them.</>
+			<item>The comments' code marks its own <text code>data-spell-added</>:  a live patch steps around it, and it never takes one a page writes, as this page's example.</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-19 against branch <ui-text code>epic-engine</>.</>
+		</>
+	</>

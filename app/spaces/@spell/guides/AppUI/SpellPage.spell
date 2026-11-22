@@ -1,0 +1,68 @@
+"spell page" is a notebook page
+	<header level="1">
+		SpellPage
+		<header>A whole page's box: its look, and its children laid out down or across it.</>
+	</>
+
+	<text class="lede" paragraph>The outermost box of each of the editor's pages: the project chooser, the editor and the runner. It fills the window, gives the page its dark background, and stacks the page's toolbar above what's under it.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone changing the spell app's pages, or reading their code</>
+		<item icon="image">A picture, not live: it's the box around a whole page of the editor</>
+	</>
+
+	<section label="1. What it looks like">
+		<icon slot="icon" name="image"/>
+		<text paragraph>The home page, the page the editor opens on. The SpellPage is the box filling the window: the top bar across it, then the page's sections, "Make something" and "Examples" among them, a card for each project.</>
+		<image src="/components/app/_images/SpellPage.png" alt="The home page:  a top bar, then Programs you can read out loud, then Make something, a card for each way to start, then Examples" appearance="bordered rounded"/>
+		<text class="meta" paragraph>A picture, taken by <text code>yarn site:pictures</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="2. Using it">
+		<icon slot="icon" name="code"/>
+		<text paragraph>Each page is one, holding its toolbar, then its content, down the window:</>
+		<text paragraph>ProjectChooser.tsx · the project chooser:</>
+		<markdown>
+			```typescript
+			<SpellPage id="ProjectChooser" fillWindow dark rows>
+			  <ChooserToolbar />
+			  <br />
+			  <ui-container>
+			    <ui-segment>
+			      {/* projects, examples, guides ... */}
+			    </ui-segment>
+			  </ui-container>
+			</SpellPage>
+			```
+		</>
+		<list bulleted>
+			<item>Its look is a set of switches, each a class on its <text code>&lt;div&gt;</>: bordered, dark, light, rounded, spaced, padded, scrolling.</>
+			<item><text code>fillWindow</> makes it as big as the window, whatever is around it.</>
+			<item><text code>rows</> lays its children out down the page, <text code>columns</> across it: a flexbox either way.</>
+			<item>Every other prop (<text code>id</>, <text code>style</> ...) goes on to the div it draws.</>
+			<item>The editor and runner pages put a <text code>&lt;ui-split-panel&gt;</> under their toolbar, to split the rest of the page into panes.</>
+		</>
+	</>
+
+	<section label="3. Props, and where it's drawn">
+		<icon slot="icon" name="list check"/>
+		<html>
+			<ui-docs-api family="SpellPage"></>
+		</>
+		<text class="meta" paragraph>From its code, by <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="4. Its code">
+		<icon slot="icon" name="folder open"/>
+		<list bulleted>
+			<item><link target="src-packages-app-src-solid-spellpage-tsx" link="/src/app/solid/SpellPage.tsx"><text title="src/app/solid/SpellPage.tsx" code>SpellPage.tsx</></>: the component, and its props</>
+			<item><link target="src-packages-app-src-solid-spellpage-css" link="/src/app/solid/SpellPage.css"><text title="src/app/solid/SpellPage.css" code>SpellPage.css</></>: its look, one class per switch</>
+			<item><link target="src-tests-app-src-solid-shell-browser-test-tsx" link="/tests/app/solid/shell.browser.test.tsx"><text title="tests/app/solid/shell.browser.test.tsx" code>shell.browser.test.tsx</></>: its tests, with the other pieces of the pages' shell</>
+			<item>In the app's Solid components, <text code>app/app/solid</>: <link target="src-packages-app-src-solid" link="/src/app/solid/"><text title="src/app/solid/" code>src/solid/</></></>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-12 against branch <ui-text code>epic-workflow</>.</>
+		</>
+	</>

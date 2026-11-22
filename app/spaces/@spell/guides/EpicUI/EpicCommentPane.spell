@@ -1,0 +1,120 @@
+"epic comment pane" is a notebook page
+	<header level="1">
+		&lt;epic-comment-pane&gt;
+		<header>The &lt;epic-comment-pane&gt; element: the floating pane you write a new comment in.</>
+	</>
+
+	<text class="lede" paragraph>The small floating pane you write a NEW comment in:  a bullhorn's, or ⌘ / Ctrl I's on selected text.  It saves itself as you type;  once closed, the comment is a thread.  Paste or drop a picture in it (⌘ V, a screenshot too):  it is saved beside the page, and its path goes into your words, shown as a picture in the thread.</>
+	<text class="meta" paragraph>
+		For anyone changing how comments look or work on a page.
+
+		Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-comment-pane-epiccommentpane-en-ts" link="/epic/src/components/epic-comment-pane/EpicCommentPane.en.ts"><text title="epic/src/components/epic-comment-pane/EpicCommentPane.en.ts" code>EpicCommentPane.en.ts</></>.
+
+		Its component: <link target="src-spell-epic-src-components-epic-comment-pane-epiccommentpane-tsx" link="/epic/src/components/epic-comment-pane/EpicCommentPane.tsx"><text title="epic/src/components/epic-comment-pane/EpicCommentPane.tsx" code>EpicCommentPane.tsx</></>, with its style sheet (<text code>.css</>) and tests beside it.
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>Click any bullhorn on this page (the masthead's, a section title's):  that's this element, opened by the comments' code under it.  It's fixed on the screen, so no copy of it sits here.</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<markdown>
+			```html
+			<epic-comment-pane headline="“2. Context”" about="On a section in “2. Context”" saved="Saved 14:02 · waiting for Claude" deletable>
+			  <textarea class="spell-comment-field" rows="3" aria-label="Your comment"></textarea>
+			</epic-comment-pane>
+			```
+		</>
+		<text paragraph>Its <text code>near</> property, <text code>&#123; left, top, bottom &#125;</>, is the box of what you clicked or selected.</>
+	</>
+
+	<section label="3. Attributes">
+		<icon slot="icon" name="list check"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Name</>
+				<cell>Values</>
+				<cell>Meaning</>
+			</>
+			<row>
+				<cell>
+					<text code>headline</>
+				</>
+				<cell>text</>
+				<cell>The first words it's on, in quotes, or <text code>This page</>.</>
+			</>
+			<row>
+				<cell>
+					<text code>about</>
+				</>
+				<cell>text</>
+				<cell>Which block it's on, in full:  its header's tooltip.</>
+			</>
+			<row>
+				<cell>
+					<text code>saved</>
+				</>
+				<cell>text</>
+				<cell>The floppy, and its tooltip.  It fades out 10 seconds after the save, or at once when something new is typed;  a red one stays.</>
+			</>
+			<row>
+				<cell>
+					<text code>failed</>
+				</>
+				<cell>boolean</>
+				<cell>The last save failed:  the floppy red.</>
+			</>
+			<row>
+				<cell>
+					<text code>deletable</>
+				</>
+				<cell>boolean</>
+				<cell>Saved:  the trash shows.</>
+			</>
+			<row>
+				<cell>
+					<text code>near</>
+				</>
+				<cell>JSON (a property)</>
+				<cell>Where to open:  8px under it, above it when there's no room below, inside the window.</>
+			</>
+		</>
+
+		<section label="Events" sticky="stack" collapsible dividing open="false">
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Event</>
+					<cell>When</>
+				</>
+				<row>
+					<cell>
+						<text code>epic-comment-closing</>
+					</>
+					<cell>×:  the comments' code saves what's typed, then closes it.</>
+				</>
+				<row>
+					<cell>
+						<text code>epic-comment-removing</>
+					</>
+					<cell>The trash:  deleted at once, Undo in the toast.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="4. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>Ivory, 8px inside on every side, lifted off the page by a shadow;  no buttons below its text.</>
+			<item>Its header:  the bullhorn, the first words (italic, cut short), the floppy, the trash, ×.  You drag it by its header.</>
+			<item>The page never scrolls for it (2026-10-10:  "don't scroll the page and lose context!").</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-19 against branch <ui-text code>epic-engine</>.</>
+		</>
+	</>

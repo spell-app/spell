@@ -1,0 +1,155 @@
+"epic more" is a notebook page
+	<header level="1">
+		&lt;epic-more&gt;
+		<header>More Details: a plain card holding an item's text, made clear, in place of the unclear text.</>
+	</>
+
+	<text class="lede" paragraph>More Details: a plain white card headed <text bold>More Details</>, holding what Clarify (Add Details) wrote IN PLACE of the item's unclear text. It never folds, and there's no <text code>Original reply</> label any more (epic <text code>epic-engine</> I301).</>
+
+	<!--
+		no <ui-list class="spell-meta">:  its <ui-item>s take the "item" style sheet before the pack's
+		              <epic-item> can, and the live items draw unstyled (issue I9 of epic-components)
+	-->
+	<text class="meta" paragraph>
+		For anyone reading or writing an epic page's markup, or changing this element.
+
+		<label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-answer" link="/epic/src/components/epic-answer/"><text title="epic/src/components/epic-answer/" code>epic-answer/</></>.
+
+		Its vocabulary (every table below comes from it): <link target="src-spell-epic-src-components-epic-answer-epicmore-en-ts" link="/epic/src/components/epic-answer/EpicMore.en.ts"><text title="epic/src/components/epic-answer/EpicMore.en.ts" code>EpicMore.en.ts</></>.
+
+		The markup rules: <link target="src-spell-epic-src-tool-plan-doc-md" link="/epic/src/tool/PLAN-DOC.md"><text title="epic/src/tool/PLAN-DOC.md" code>PLAN-DOC.md</></>.
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>Live: the real element, drawn by the epics pack this page loads.</>
+		<list bulleted>
+			<item>Click the item's line to unfold it; the More Details card itself never folds.</>
+			<item>The review buttons don't show here: they show only on an epic page being reviewed.</>
+		</>
+		<text paragraph>Cut down from judgement call J24 of the <text code>epic-components</> epic.</>
+		<html>
+			<epic-item id="j24" title="P6 converter: only a question's own option grid becomes <epic-choices>" status="done" state="recent" open>
+				<epic-more>
+					<p>Across the 26 converted plan docs, 20 option grids are left as plain grids. You see them as side-by-side cards, exactly as today. Only 13 grids, the ones that are a question's own, became <code>&lt;epic-choices&gt;</>.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>From J24 of the <text code>epic-components</> epic (<link title="epics/epic-components/parts/j24.html" target="src-epics-epic-components-parts-j24-html" link="/epics/epic-components/parts/j24.html"><text code>j24.html</></>), its table and lists left out.</>
+		<text paragraph>j24.html:</>
+		<markdown>
+			```html
+			<epic-more
+			  ><p>
+			    Across the 26 converted plan docs, 20 option grids are left as plain grids. You see them as side-by-side cards,
+			    exactly as today. Only 13 grids, the ones that are a question's own, became <code>&lt;epic-choices&gt;</code>.
+			  </p>
+			  ...
+			</epic-more>
+			```
+		</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="layer group"/>
+		<text paragraph>
+			<text bold>Its parents:</>
+		</>
+		<list bulleted>
+			<item><link target="src-packages-epics-docs-epic-item-html" link="/epic-item"><text code>&lt;epic-item&gt;</></>: after its text and answer, before its replies; one at most</>
+		</>
+		<text paragraph>Its children:</>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Child</>
+				<cell>How many</>
+				<cell>What it holds</>
+			</>
+			<row>
+				<cell>prose</>
+				<cell>any number</>
+				<cell>What the item's text left out.</>
+			</>
+		</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="table columns"/>
+		<text paragraph>None: it draws the same wherever it is.</>
+
+		<section label="Slots" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A slot is a place in the drawing that a child goes to: a child with <text code>slot="name"</> goes to that name's place, every other child to the default one (shown as <text italic>default</>).</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Slot</>
+					<cell>What goes there</>
+				</>
+				<row>
+					<cell>
+						<text italic>default</>
+					</>
+					<cell>What the item's text left out.</>
+				</>
+			</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A part is a piece of what the element draws in its shadow root (its own hidden markup), named so a stylesheet can reach it: <text code>epic-more::part(header)</>.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The card.</>
+				</>
+				<row>
+					<cell>
+						<text code>heading</>
+					</>
+					<cell>Its <text code>More Details</> heading.</>
+				</>
+				<row>
+					<cell>
+						<text code>body</>
+					</>
+					<cell>The item's text, made clear.</>
+				</>
+			</>
+		</>
+
+		<section label="States" sticky="stack" collapsible dividing open="false">
+			<text paragraph>None: it never folds, so it has no <text code>open</> state any more (I301).</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>A plain card (the page's own surface, a thin rule round it): no colour meaning.</>
+			<item>Its heading, <text bold>More Details</>, is in the text's own size and ink, bold, as a Net effect's label.</>
+			<item>It never folds: it IS the item's text now, so hiding it would hide what the item says.</>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item><text code>epic details &lt;name&gt;#&lt;id&gt; --more --file html</> (Add Details, Clarify): the file's HTML goes in the card, REPLACING the item's unclear text. The given "What it says on the tin" body goes for good; the item's own prose moves into its Original Discussion; your quoted words and every card (Choices, Net effect, code, replies, commits) stay. An agent writes it when you click the item's (i) button or Clarify.</>
+			<item>A second <text code>--more</> replaces the card; the old card's text moves into the Original Discussion, as a rewrite's does</>
+			<item>older docs: the converter, from the old More Details block</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-09 against branch <ui-text code>epic-components</>: the tables are its vocabulary's; the rest from its component, its stylesheet and <ui-link title="epic/src/tool/PLAN-DOC.md" target="src-spell-epic-src-tool-plan-doc-md" link="/epic/src/tool/PLAN-DOC.md"><ui-text code>PLAN-DOC.md</></>.</>
+		</>
+	</>

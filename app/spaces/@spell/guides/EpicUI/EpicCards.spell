@@ -1,0 +1,132 @@
+"epic cards element" is a notebook page
+	<header level="1">
+		&lt;epic-cards&gt;
+		<header>The &lt;epic-cards&gt; element: a saga page's Epics, a card per epic serving the saga, grouped by state.</>
+	</>
+
+	<text class="lede" paragraph><text code>&lt;epic-cards&gt;</> is a saga page's Epics: a card for each epic whose page names the saga, in the Epics page's groups. It asks the page server for them, so it is never out of date.</>
+	<text class="meta" paragraph>
+		Written for: anyone reading or writing a saga page's markup, or changing this element.
+
+		Status: <label size="mini" color="green">built</> (epic <text code>epic-workflow</> P15), in the <link target="src-spell-epic-src-components-epic-cards" link="/epic/src/components/epic-cards/"><text title="epic/src/components/epic-cards/" code>epic-cards</></> folder of the epics package.
+
+		Its vocabulary (attributes, parts, texts): <link target="src-spell-epic-src-components-epic-cards-epiccards-en-ts" link="/epic/src/components/epic-cards/EpicCards.en.ts"><text title="epic/src/components/epic-cards/EpicCards.en.ts" code>EpicCards.en.ts</></>.
+
+		The component: <link target="src-spell-epic-src-components-epic-cards-epiccards-tsx" link="/epic/src/components/epic-cards/EpicCards.tsx"><text title="epic/src/components/epic-cards/EpicCards.tsx" code>EpicCards.tsx</></>.
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<example "Example">
+			<html>
+				<epic-cards saga="epics"></epic-cards>
+			</html>
+		</example>
+		<text paragraph>The Epic Tooling saga's epics, live from this page server. Opened from disk, it says it needs the page server instead; with no epic naming the saga yet, it says how to name one.</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>The saga page template's Epics:</>
+		<markdown>
+			```html
+			<epic-section id="epics" kind="epics">
+			  <epic-cards saga="{{id}}"></epic-cards>
+			</epic-section>
+			```
+		</>
+		<text paragraph>From the tool's saga page template (<link target="src-spell-epic-src-tool-templates-saga-html" link="/epic/src/tool/templates/saga.html"><text title="epic/src/tool/templates/saga.html" code>saga.html</></>), which <text code>epic saga page &lt;id&gt;</> fills in. Nothing else goes in it: the cards come from the epic pages.</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="compass"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Parent</>
+				<cell>How</>
+				<cell>How many</>
+				<cell>As</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-section-html" link="/epic-section">
+						<text code>&lt;epic-section&gt;</>
+					</>
+				</>
+				<cell>
+					<text code>kind="epics"</>
+				</>
+				<cell>one at most</>
+				<cell>A saga page's Epics.</>
+			</>
+		</>
+		<text paragraph>It has no children.</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="table columns"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Attribute</>
+				<cell>Value</>
+				<cell>What it is</>
+			</>
+			<row>
+				<cell><text code>saga</> (required)</>
+				<cell>a saga id</>
+				<cell>The saga whose epics it shows: <text code>drawable-spell</>.</>
+			</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<text paragraph>Pieces of what it draws, which a page's CSS can style from outside with <text code>::part(name)</>.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The box around the list.</>
+				</>
+				<row>
+					<cell>
+						<text code>list</>
+					</>
+					<cell>The cards, an <link target="src-spell-epic-src-docs-epic-list-html" link="/epic-list"><text code>&lt;epic-list no-favorites&gt;</></> of <link target="src-spell-epic-src-docs-epic-card-html" link="/epic-card"><text code>&lt;epic-card&gt;</></>s: the Epics page's groups and cards.</>
+				</>
+				<row>
+					<cell>
+						<text code>note</>
+					</>
+					<cell>Instead of cards: no epic names the saga yet, the page opened from disk, or no answer.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>The Epics page's own list and cards (epic <text code>epic-engine</> I39): an <link target="src-spell-epic-src-docs-epic-list-html" link="/epic-list"><text code>&lt;epic-list&gt;</></> of <link target="src-spell-epic-src-docs-epic-card-html" link="/epic-card"><text code>&lt;epic-card&gt;</></>s, so an epic looks and behaves the same on both pages: its mark, star, saga label and last-worked day.</>
+			<item>Its groups, in the Epics page's order: Active, Planning, Urgent, Done. No Favorites: that's your own list, on the Epics page (<text code>no-favorites</>); a starred epic keeps its group, its star solid.</>
+			<item>Each card: the title links to the epic page, in that epic's own tab; the summary, at most four lines; then the state, phases done of all, and the phase under way.</>
+			<item>A grid of cards at least 260px wide: three to a row in an epic page's column, one in the side bar.</>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item><text code>epic saga page &lt;id&gt;</>: the saga page template writes it, once.</>
+			<item>What it draws comes from the page server, <text code>GET /api/epics/saga?saga=&lt;id&gt;</> (<link target="src-spell-epic-src-tool-sagaepics-ts" link="/epic/src/tool/SagaEpics.ts"><text title="epic/src/tool/SagaEpics.ts" code>SagaEpics</></>): every epic page whose <text code>&lt;epic-page saga&gt;</> names it. It asks again whenever an epic page changes.</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-19 against branch <ui-text code>epic-engine</> (I39): the tables come from its vocabulary file, so they change with it.</>
+		</>
+	</>

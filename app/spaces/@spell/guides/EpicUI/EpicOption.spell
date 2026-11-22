@@ -1,0 +1,415 @@
+"epic option" is a notebook page
+	<header level="1">
+		&lt;epic-option&gt;
+		<header>One option card: its letter and title drawn in its header, its pros and cons its children.</>
+	</>
+
+	<text class="lede" paragraph>One option card in a set of <link target="src-packages-epics-docs-epic-choices-html" link="/epic-choices"><text code>&lt;epic-choices&gt;</></>. It draws its header (the letter, the title, a thumbs-up when it's the recommended one) and holds the option's pros and cons as its children.</>
+
+	<!--
+		no <ui-list class="spell-meta">:  its <ui-item>s take the "item" style sheet before the pack's
+		              <epic-item> can, and the live items draw unstyled (issue I9 of epic-components)
+	-->
+	<text class="meta" paragraph>
+		For anyone reading or writing an epic page's markup, or changing this element.
+
+		<label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-choices" link="/epic/src/components/epic-choices/"><text title="epic/src/components/epic-choices/" code>epic-choices/</></>.
+
+		Its vocabulary (every table below comes from it): <link target="src-spell-epic-src-components-epic-choices-epicoption-en-ts" link="/epic/src/components/epic-choices/EpicOption.en.ts"><text title="epic/src/components/epic-choices/EpicOption.en.ts" code>EpicOption.en.ts</></>.
+
+		The markup rules: <link target="src-spell-epic-src-tool-plan-doc-md" link="/epic/src/tool/PLAN-DOC.md"><text title="epic/src/tool/PLAN-DOC.md" code>PLAN-DOC.md</></>.
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>Live: the real element, drawn by the epics pack this page loads.</>
+		<list bulleted>
+			<item>Click a line to unfold it.</>
+			<item>The review buttons don't show here: they show only on an epic page being reviewed.</>
+		</>
+		<text paragraph>Option A recommended; the second set answered with B, so B is the chosen panel.</>
+		<html>
+			<epic-item id="q1" title="Which colour names can a window take?" status="open" state="attention" open>
+				<epic-question>
+					<p>Which colour names <code>/epic &lt;name&gt; -&lt;color&gt;</> accepts.</>
+				</>
+				<epic-choices>
+					<epic-option letter="A" title="A named palette" recommended>
+						<ul>
+							<li>12 names, each a dark title-bar shade</>
+							<li>an unknown name lists the 12</>
+						</>
+					</>
+					<epic-option letter="B" title="Any CSS colour">
+						<ul>
+							<li>anything goes</>
+							<li>a light colour makes the white title unreadable</>
+						</>
+					</>
+				</>
+			</>
+			<epic-item id="q2" title="Which four colours for the review buttons?" status="decided" state="recent" answered open>
+				<epic-question>
+					<p>The four action colours.</>
+				</>
+				<epic-choices chosen="B">
+					<epic-option letter="A" title="Fomantic's own">
+						<p>no work; violet reads as a link</>
+					</>
+					<epic-option letter="B" title="Calm colours, by meaning" recommended>
+						<p>green = decided; none reads as an error</>
+					</>
+				</>
+				<epic-answer title="Calm colours, by meaning"></>
+			</>
+		</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>From Q13 of the <text code>wwod</> epic (<link title="epics/wwod/parts/q13.html" target="src-epics-wwod-parts-q13-html" link="/epics/wwod/parts/q13.html"><text code>q13.html</></>): one recommended, one not. A title with markup goes in a <text code>&lt;span slot="title"&gt;</> child instead of <text code>title</>.</>
+		<text paragraph>q13.html:</>
+		<markdown>
+			```html
+			<epic-option letter="A" title="Both, by kind" recommended
+			  ><p>Classes with behaviour subclass (ours); plain config / spec records spread (WWOD).</p></epic-option
+			><epic-option letter="B" title="Subclass"><p>Drop WWOD's rule.</p></epic-option>
+			```
+		</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="layer group"/>
+		<text paragraph>
+			<text bold>Its parents:</>
+		</>
+		<list bulleted>
+			<item><link target="src-packages-epics-docs-epic-choices-html" link="/epic-choices"><text code>&lt;epic-choices&gt;</></>, only</>
+		</>
+		<text paragraph>Its children:</>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Child</>
+				<cell>How many</>
+				<cell>What it holds</>
+			</>
+			<row>
+				<cell>prose, <text code>slot="title"</></>
+				<cell>one at most</>
+				<cell>A title with markup.</>
+			</>
+			<row>
+				<cell>prose</>
+				<cell>any number</>
+				<cell>Its pros and cons.</>
+			</>
+		</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="table columns"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Name</>
+				<cell>Values</>
+				<cell>Meaning</>
+				<cell>Required</>
+			</>
+			<row>
+				<cell>
+					<text code>letter</>
+				</>
+				<cell>text</>
+				<cell><text code>A</>, <text code>B</> ...: what <text code>&lt;epic-choices chosen&gt;</> and your pick name.</>
+				<cell>yes</>
+			</>
+			<row>
+				<cell>
+					<text code>title</>
+				</>
+				<cell>text</>
+				<cell>The option in a few words, WITHOUT its letter (<text code>A named palette</>).</>
+				<cell>yes, or a <text code>slot="title"</> child</>
+			</>
+			<row>
+				<cell>
+					<text code>recommended</>
+				</>
+				<cell>present or absent</>
+				<cell>The one Claude recommends.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>selected</>
+				</>
+				<cell>present or absent</>
+				<cell>In an <text code>&lt;epic-ask&gt;</>: ticked to start with, until you pick (the review's item picker ticks what isn't reviewed yet). The tick itself is page state, its question's.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>done</>
+				</>
+				<cell>present or absent</>
+				<cell>In an <text code>&lt;epic-ask filter&gt;</>: hidden while the filter shows Open.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>badge</>
+				</>
+				<cell>text</>
+				<cell>In an <text code>&lt;epic-ask&gt;</>: a small label after its title (<text code>deferred</>).</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>badge-color</>
+				</>
+				<cell>text</>
+				<cell>Its badge's colour, a Spell UI hue (<text code>blue</>, <text code>orange</> ...); none: grey.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>state-icon</>
+				</>
+				<cell>text</>
+				<cell>In an <text code>&lt;epic-ask&gt;</>: an icon at the end of its header saying where it stands (the item picker's <text code>circle check</>: reviewed), from the page's icons.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>state-color</>
+				</>
+				<cell>text</>
+				<cell>Its state icon's colour, a Spell UI hue; none: grey.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>state-label</>
+				</>
+				<cell>text</>
+				<cell>Its state icon's words: its tooltip, and its name.</>
+				<cell/>
+			</>
+		</>
+
+		<section label="Slots" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A slot is a place in the drawing that a child goes to: a child with <text code>slot="name"</> goes to that name's place, every other child to the default one (shown as <text italic>default</>).</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Slot</>
+					<cell>What goes there</>
+				</>
+				<row>
+					<cell>
+						<text italic>default</>
+					</>
+					<cell>Its pros and cons.</>
+				</>
+				<row>
+					<cell>
+						<text code>title</>
+					</>
+					<cell>A title with markup, in place of <text code>title</>.</>
+				</>
+			</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A part is a piece of what the element draws in its shadow root (its own hidden markup), named so a stylesheet can reach it: <text code>epic-option::part(base)</>.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The card; answered, a panel.</>
+				</>
+				<row>
+					<cell>
+						<text code>header</>
+					</>
+					<cell>Its header: letter, title, the recommended thumbs-up, the Choose pill.</>
+				</>
+				<row>
+					<cell>
+						<text code>toggle</>
+					</>
+					<cell>The <text code>&lt;button&gt;</> that folds the card or panel (its header's text, the chevron first); a card with no pros and cons: a plain span.</>
+				</>
+				<row>
+					<cell>
+						<text code>check</>
+					</>
+					<cell>Answered and chosen: the check before its letter.</>
+				</>
+				<row>
+					<cell>
+						<text code>title</>
+					</>
+					<cell><text code>A · A named palette</>.</>
+				</>
+				<row>
+					<cell>
+						<text code>recommended</>
+					</>
+					<cell>The recommended one's terracotta thumbs-up, after its title, labelled <text code>Recommended</>.</>
+				</>
+				<row>
+					<cell>
+						<text code>actions</>
+					</>
+					<cell>While the page is reviewed: the box at the header's end holding the pill.</>
+				</>
+				<row>
+					<cell>
+						<text code>choose</>
+					</>
+					<cell>The Choose pill (<text code>&lt;button aria-pressed&gt;</>): marks its letter as the item's pick in the page's review inbox; on the chosen option, solid and <text code>aria-disabled</>: the pick applied.</>
+				</>
+				<row>
+					<cell>
+						<text code>body</>
+					</>
+					<cell>Its pros and cons; hidden (<text code>until-found</>) while folded.</>
+				</>
+				<row>
+					<cell>
+						<text code>tick</>
+					</>
+					<cell>In an <text code>&lt;epic-ask&gt;</>: its Choose pill, a radio (pick one) or a checkbox to a screen reader, labelled by its title.</>
+				</>
+				<row>
+					<cell>
+						<text code>badge</>
+					</>
+					<cell>In an <text code>&lt;epic-ask&gt;</>: its <text code>badge</>, a small <text code>&lt;ui-label&gt;</>.</>
+				</>
+				<row>
+					<cell>
+						<text code>more</>
+					</>
+					<cell>In an <text code>&lt;epic-ask more-details&gt;</>: the (?) <text code>&lt;button aria-pressed&gt;</>.</>
+				</>
+				<row>
+					<cell>
+						<text code>state</>
+					</>
+					<cell>In an <text code>&lt;epic-ask&gt;</>: its state icon, <text code>state-label</> its tooltip.</>
+				</>
+				<row>
+					<cell>
+						<text code>comment</>
+					</>
+					<cell>In an <text code>&lt;epic-ask&gt;</>: the comment box under it, an <text code>&lt;epic-text-box&gt;</> for <text code>&lt;key&gt;-&lt;letter&gt;</>.</>
+				</>
+			</>
+		</>
+
+		<section label="States" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A state is a word the element sets on itself while something is true, for styling: <text code>epic-option:state(answered)</>. Never written in the file.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>State</>
+					<cell>When</>
+				</>
+				<row>
+					<cell>
+						<text code>answered</>
+					</>
+					<cell>Its question is answered: a panel under Choices.</>
+				</>
+				<row>
+					<cell>
+						<text code>chosen</>
+					</>
+					<cell>Its <text code>letter</> is its <text code>&lt;epic-choices chosen&gt;</>.</>
+				</>
+				<row>
+					<cell>
+						<text code>open</>
+					</>
+					<cell>Unfolded: a card starts so; an answered panel only when it's the chosen one (page state).</>
+				</>
+				<row>
+					<cell>
+						<text code>picked</>
+					</>
+					<cell>Its letter is the item's pick in the review inbox, in its card set, not applied yet: framed green: dashed until sent, then outlined.</>
+				</>
+				<row>
+					<cell>
+						<text code>answering</>
+					</>
+					<cell>An option of an <text code>&lt;epic-ask&gt;</>: a Choose pill, a comment box folded under a Comment link.</>
+				</>
+				<row>
+					<cell>
+						<text code>ticked</>
+					</>
+					<cell>In an <text code>&lt;epic-ask&gt;</>: ticked, framed green (a pick is a decision).</>
+				</>
+				<row>
+					<cell>
+						<text code>filtered</>
+					</>
+					<cell>In an <text code>&lt;epic-ask filter&gt;</>: <text code>done</>, and hidden while it shows Open.</>
+				</>
+			</>
+		</>
+
+		<section label="Events" sticky="stack" collapsible dividing open="false">
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Event</>
+					<cell>Detail</>
+					<cell>Cancelable</>
+					<cell>When</>
+				</>
+				<row>
+					<cell>
+						<text code>ui-changed</>
+					</>
+					<cell>
+						<text code>&#123; letter: string, selected: boolean, more: boolean &#125;</>
+					</>
+					<cell/>
+					<cell>In an <text code>&lt;epic-ask&gt;</>: you ticked or unticked it (<text code>selected</>), or pressed its (?) (<text code>more</>). Its question takes it, and draws the result.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<text paragraph>The colours mean the same on every doc page: the whole scheme is on <link target="src-guides-epic-components-colours-html" link="/guides/epic-components/colours.html">Epic Page Colours</> (its source: <link title="epic/templates/epics/plan-doc.md" target="src-spell-epic-templates-epics-plan-doc-md" link="/epic/templates/epics/plan-doc.md"><text code>plan-doc.md</></>, "Colours").</>
+		<list bulleted>
+			<item>Its header reads <text code>A · A named palette</>; the recommended one adds a terracotta thumbs-up (terracotta: Claude's voice), labelled <text code>Recommended</>.</>
+			<item>It folds by its header (the chevron first), and starts open; a card with no pros and cons doesn't fold.</>
+			<item>Answered: a panel under <text code>Choices</>. The chosen one has a check before its letter, green text, and is the only panel open.</>
+			<item>While the page is reviewed, a Choose pill at the header's end marks the letter as your pick. <list bulleted><item>It's green, since a pick is a decision: dashed until sent, outlined once sent.</> <item>The card is framed to match.</> <item>On the chosen option the pill is solid green: the pick applied.</> <item>Edited in place (epic <text code>epic-engine</> P50), while the page is reviewed and its set open: a pencil and an ✕ on its band, shown on hover. The pencil opens a form in the card; saved, the card shows the new title and text, dashed, "Edited · not sent", with Undo. The ✕ fades it, "Removed · not sent". Applied, its earlier text folds under Was (its <text code>was</> slot); a removed one moves to its set's Removed list. Its pictures are thumbnails; a click shows one full size.</> <item>In an <link target="src-packages-epic-components-elements-epic-ask-html" link="/epic-ask"><text code>&lt;epic-ask&gt;</></> (a page you answer on, epic <text code>epic-workflow</> P12): a card a row, in the epic page's look (epic <text code>epic-engine</> P50): its title folds it, the badge, the (?) of "Provide more details" and its state icon, then its Choose pill; its comment box folded under a Comment link; picked, framed green; <text code>done</>, hidden under its question's Open.</></></>
+		</>
+		<text paragraph>While an epic page is being reviewed (<text code>&lt;epic-page reviewing&gt;</>, served by the page server), its marks go to the doc's review inbox: the file of your marks that Claude reads (<text code>&lt;name&gt;.inbox.json</>).</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<text paragraph>Written with its <link target="src-packages-epics-docs-epic-choices-html" link="/epic-choices"><text code>&lt;epic-choices&gt;</></>: the same commands (<text code>add --details</>, <text code>details --file</>), and an old option grid is turned into cards on the way in.</>
+		<list bulleted>
+			<item>Mark ONE option <text code>recommended</>.</>
+			<item>The pick isn't written on the option: it's the set's <text code>chosen</>.</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-09 against branch <ui-text code>epic-components</>: the tables are its vocabulary's; the rest from its component, its stylesheet and <ui-link title="epic/src/tool/PLAN-DOC.md" target="src-spell-epic-src-tool-plan-doc-md" link="/epic/src/tool/PLAN-DOC.md"><ui-text code>PLAN-DOC.md</></>.</>
+		</>
+	</>

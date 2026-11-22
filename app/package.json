@@ -126,7 +126,8 @@
       "app": {
         "name": "App UI",
         "dir": "app/docs",
-        "assets": "../ui/site/_assets"
+        "assets": "../ui/site/_assets",
+        "sitePage": "index.html"
       }
     },
     "engineRoutes": {

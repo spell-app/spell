@@ -1,0 +1,217 @@
+"epic aside" is a notebook page
+	<header level="1">
+		&lt;epic-aside&gt;
+		<header>The &lt;epic-aside&gt; element: a folded aside, a digression the main text can skip.</>
+	</>
+
+	<text class="lede" paragraph>A folded aside in prose: a digression the main text can skip. It draws an ivory panel headed "Aside: &lt;title&gt;"; the aside is its children.</>
+
+	<!--
+		no <ui-list class="spell-meta">:  its <ui-item>s take Spell UI's "item" style sheet name before the
+		              epics pack's elements can, and live examples may draw unstyled (issue I9 of epic-components)
+	-->
+	<text class="meta" paragraph>
+		For anyone reading or writing an epic page's markup, or changing this element.
+
+		Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-aside-epicaside-en-ts" link="/epic/src/components/epic-aside/EpicAside.en.ts"><text title="epic/src/components/epic-aside/EpicAside.en.ts" code>EpicAside.en.ts</></>.
+
+		Its component: <link target="src-spell-epic-src-components-epic-aside-epicaside-tsx" link="/epic/src/components/epic-aside/EpicAside.tsx"><text title="epic/src/components/epic-aside/EpicAside.tsx" code>EpicAside.tsx</></>, with its style sheet (<text code>.css</>) and tests beside it.
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>A real one, from epic <text code>docs-workspace</> (O3). Click its heading to unfold it.</>
+		<html>
+			<epic-aside title="why a script, not hand edits?">
+				<p>Ids, icons, UPDATE markers and the "updated" stamp must agree across the phase list, the phase sections and the items. Agents editing by hand drift; the script also locks the file so parallel agents take turns.</>
+			</>
+		</>
+		<text class="meta" paragraph>Live: the real element, drawn by the epics pack this page loads.</>
+
+		<section label="With buttons in its title row" sticky collapsible dividing open="false">
+			<text paragraph>A page's own buttons go in its title row: <text code>&lt;ui-button slot="actions"&gt;</> children (epic <text code>epic-workflow</> P25).</>
+			<list bulleted>
+				<item>They sit at the right of the title row, after the heading. The heading is its fold button, and it ends where they start.</>
+				<item>A click on one never folds or unfolds it.</>
+				<item>The docs runtime puts the block's bullhorn there too, so it never sits over a button.</>
+			</>
+			<example "With buttons in its title row">
+				<html>
+					<epic-aside title="why a slot, not a float">
+						<p>A button floated over the heading's corner sat on the fold button; in the row, each has its own room.</p>
+						<ui-button slot="actions" appearance="circular basic" size="mini" icon="copy" title="Copy a link to it" aria-label="Copy a link to it"></ui-button>
+					</epic-aside>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>From <link title="epics/docs-workspace/parts/o3.html" target="src-epics-docs-workspace-parts-o3-html" link="/epics/docs-workspace/parts/o3.html"><text code>o3.html</></>:</>
+		<text paragraph>o3.html · its aside:</>
+		<markdown>
+			```html
+			<epic-aside title="why a script, not hand edits?"
+			  ><p>
+			    Ids, icons, UPDATE markers and the "updated" stamp must agree across the phase list, the phase sections and the
+			    items. Agents editing by hand drift; the script also locks the file so parallel agents take turns.
+			  </p></epic-aside
+			>
+			```
+		</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="map"/>
+		<text paragraph>
+			<text bold>Its parents:</>
+		</>
+		<html>
+			<ui-list bulleted>
+				<ui-item>Anywhere prose goes: it's a <dfn class="spell-term" tabindex="0">prose element</><ui-popup heading="prose element" label="An <epic-*> element marked flow in its vocabulary:  it goes wherever prose goes, so no parent has to list it."></>: <ui-list bulleted><ui-item><ui-link target="src-packages-epics-docs-epic-item-html" link="/epic-item"><ui-text code>&lt;epic-item&gt;</></>: among an item's own text, before its cards</> <ui-item><ui-link target="src-packages-epics-docs-epic-answer-html" link="/epic-answer"><ui-text code>&lt;epic-answer&gt;</></>, <ui-link target="src-packages-epics-docs-epic-more-html" link="/epic-more"><ui-text code>&lt;epic-more&gt;</></>, <ui-link target="src-packages-epics-docs-epic-reply-html" link="/epic-reply"><ui-text code>&lt;epic-reply&gt;</></>: the cards under an item</> <ui-item><ui-link target="src-packages-epics-docs-epic-option-html" link="/epic-option"><ui-text code>&lt;epic-option&gt;</></>: an option card's pros and cons</> <ui-item><ui-link target="src-packages-epics-docs-epic-field-html" link="/epic-field"><ui-text code>&lt;epic-field&gt;</></>: a phase's field, or a labelled block</> <ui-item><ui-link target="src-packages-epics-docs-epic-updated-html" link="/epic-updated"><ui-text code>&lt;epic-updated&gt;</></>: a change to a phase's plan</> <ui-item><ui-link target="src-packages-epics-docs-epic-section-html" link="/epic-section"><ui-text code>&lt;epic-section&gt;</></>: an Overview sub-section's prose, or a report's</> <ui-item><ui-link target="src-packages-epics-docs-epic-version-html" link="/epic-version"><ui-text code>&lt;epic-version&gt;</></>: an earlier version, kept as it was</> <ui-item>another prose element (a note inside an aside), or plain HTML around it (a <ui-text code>&lt;li&gt;</>, a <ui-text code>&lt;div&gt;</>)</></></>
+			</>
+		</>
+		<text paragraph>
+			<text bold>Its children:</>
+		</>
+		<list bulleted>
+			<item>prose: the aside</>
+		</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="list check"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Name</>
+				<cell>Values</>
+				<cell>Meaning</>
+				<cell>Required</>
+			</>
+			<row>
+				<cell>
+					<text code>title</>
+				</>
+				<cell>text</>
+				<cell>What it's about, WITHOUT <text code>Aside:</> (drawn): <text code>why not now</>, drawn <text code>Aside: why not now</>. None: <text code>Aside</>.</>
+				<cell>no</>
+			</>
+		</>
+
+		<section label="Slots" sticky="stack" collapsible dividing open="false">
+			<html>
+				<ui-text paragraph>A <dfn class="spell-term" tabindex="0">slot</><ui-popup heading="slot" label="Where the element shows its own children:  the doc's prose, inside its drawing."></> is where the element's own children show.</>
+			</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Slot</>
+					<cell>Holds</>
+				</>
+				<row>
+					<cell>(default)</>
+					<cell>The aside.</>
+				</>
+				<row>
+					<cell>
+						<text code>actions</>
+					</>
+					<cell>Buttons of the page's own in its title row (<text code>&lt;ui-button slot="actions"&gt;</>): after the title, before its own buttons; a click on one never folds it. The docs runtime puts the block's bullhorn here too.</>
+				</>
+			</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<html>
+				<ui-text paragraph>A <dfn class="spell-term" tabindex="0">part</><ui-popup heading="part" label="A named piece of the element's drawing, which a page's CSS can reach from outside:  epic-note::part(label)."></> is a piece of the drawing a page's CSS can reach.</>
+			</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>Is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The panel.</>
+				</>
+				<row>
+					<cell>
+						<text code>head</>
+					</>
+					<cell>Its title row: <text code>toggle</>, then <text code>actions</>.</>
+				</>
+				<row>
+					<cell>
+						<text code>toggle</>
+					</>
+					<cell>Its heading, a <text code>&lt;button&gt;</> that folds it: the chevron, then <text code>heading</>.</>
+				</>
+				<row>
+					<cell>
+						<text code>heading</>
+					</>
+					<cell>The heading's words.</>
+				</>
+				<row>
+					<cell>
+						<text code>body</>
+					</>
+					<cell>What it folds; hidden (<text code>until-found</>) while folded.</>
+				</>
+				<row>
+					<cell>
+						<text code>actions</>
+					</>
+					<cell>In its title row, after the title and before its own buttons: the <text code>actions</> slot.</>
+				</>
+			</>
+		</>
+
+		<section label="States" sticky="stack" collapsible dividing open="false">
+			<html>
+				<ui-text paragraph>A <dfn class="spell-term" tabindex="0">state</><ui-popup heading="state" label="A CSS custom state the element sets on itself as it changes:  epic-aside:state(open)."></> is set by the element on itself; none is ever written in the doc.</>
+			</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>State</>
+					<cell>When</>
+				</>
+				<row>
+					<cell>
+						<text code>open</>
+					</>
+					<cell>Unfolded: the reader opened it.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>Its heading: always in full, as many lines as it needs, folded or open. The chevron and the slot's buttons sit on its first line, so nothing moves as it folds (2026-10-19).</>
+			<item>No tooltip on its heading, folded or open: its words already say what it is, and name the button for a screen reader. ⌥-click still opens or folds everything inside (2026-11-20).</>
+			<item>The brand's ivory panel, as the docs' asides (<text code>ui-accordion.spell-aside</>): warm, rounded, no border (<text code>--epic-aside</> from <text code>&lt;epic-page&gt;</>, with a fallback).</>
+			<item>Its heading in the headings' italic serif, so it reads as an aside, not a section. Its text a step smaller than the page's.</>
+			<item>No state colour: the ivory is the panel's, not a meaning.</>
+			<item>Folded to start with. A click on the heading, or find-in-page, unfolds it; folding is the page's, never written.</>
+			<item>It shares its shape with <text code>&lt;epic-code&gt;</> (<text code>EpicPanel</>, in the same family folder).</>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item>Claude writes it inside the HTML it passes to <text code>epic</> (<text code>add ... --details</>, <text code>decide --details</>, <text code>details --file</>, <text code>updated</>): no command makes one by itself.</>
+			<item>The epic tool turns the OLD hand-shaped markup into this element, so a doc never holds the old shape. <list bulleted><item>It does this in any HTML a command takes: <text code>add --details</>, <text code>decide --details</>, <text code>details --file</>, <text code>updated</>.</> <item>The code that does it: <text code>IncomingHtml</> and <text code>ProseRewrite</>.</> <item>Prose edited by hand in a part file isn't passed through it.</> <item>The old shape: <text code>ui-accordion.spell-aside</>.</></></>
+			<item>The converter did the same to every converted doc (<text code>ProseUpgrader</>).</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-09 against branch <ui-text code>epic-components</>.</>
+		</>
+	</>

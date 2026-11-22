@@ -1,0 +1,56 @@
+"epic away line" is a notebook page
+	<header level="1">
+		&lt;epic-away-line&gt;
+		<header>The &lt;epic-away-line&gt; element: one line of "0. While you were out", with its own Read tick.</>
+	</>
+
+	<text class="lede" paragraph>One line of an epic page's "0. While you were out" (a phase done, a call waiting, an issue, a test), or the heading of one of its parts, with a ✓ Read at its start while the page is reviewed. Read, it fades at once, and the page server takes it off the section straight away, with no Send;  the rest stays.  What it's about is seen too:  its phase's or item's new update blocks go quiet.  A heading's Read does all of that for every line of its part.</>
+	<text class="meta" paragraph>
+		For anyone reading or writing an epic page's markup, or changing this element.
+
+		Its vocabulary: <link target="src-epic-away-line-en" link="/epic/src/components/epic-away-line/EpicAwayLine.en.ts"><text title="epic/src/components/epic-away-line/EpicAwayLine.en.ts" code>EpicAwayLine.en.ts</></>.
+
+		Its component: <link target="src-epic-away-line-tsx" link="/epic/src/components/epic-away-line/EpicAwayLine.tsx"><text title="epic/src/components/epic-away-line/EpicAwayLine.tsx" code>EpicAwayLine.tsx</></>, with its style sheet and tests beside it.
+
+		Since 2026-11-03 (epic <text code>epic-engine</> I206;  "a tick per section as well, so I can say 'that's good' on part but not on the whole thing").
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>A part's heading, then two lines, as the tool writes them (the ticks show on a page being reviewed):</>
+		<html>
+			<epic-away-line line="done" heading>
+				<b>What was done</>
+			</>
+			<epic-away-line line="p-example"><a href="#p-example">P7 · Example</> done:  the thing, built (a10023c2a, merged)</>
+			<epic-away-line line="issues" heading state="open">
+				<b>Newly opened issues</>
+			</>
+			<epic-away-line line="i9" state="open">1. <a href="#i9">I9</> it flickers</>
+			<epic-away-line line="fixed" heading state="replied">
+				<b>Fixed, to review</>
+			</>
+			<epic-away-line line="i12" state="replied">1. <a href="#i12">I12</> it jumps <epic-update phase="7" became="fixed"></></>
+		</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<list bulleted>
+			<item><text code>line</>:  what it's about, a phase's or an item's id (<text code>p-x</>, <text code>i205</>), or a part's (<text code>done</>, <text code>underway</>, <text code>fixed</>, <text code>issues</>, <text code>tests</>, <text code>asks</>:  epic <text code>epic-engine</> I277).  Its Read is a Seen on <text code>away:&lt;line&gt;</>.</>
+			<item><text code>heading</>:  a part's heading;  read, every line of its part fades at once, and the whole part leaves.</>
+			<item>A line about an item ends with a copy of the item's own label, the <text code>&lt;epic-update&gt;</> its title shows (<text code>FIXED</>, <text code>UNDERWAY</> ...;  epic <text code>epic-engine</> I302), drawn again on every edit, so it follows the item;  the item's ✓ hides both at once.</>
+			<item>The section lists its lines' keys in its <text code>lines</>, and the page remembers when each was read in its <text code>away-seen</>:  a line read before its last change shows again.</>
+		</>
+	</>
+
+	<section label="3. Written by">
+		<icon slot="icon" name="terminal"/>
+		<text paragraph>The epic tool, every time it writes the page (<text code>PlanDoc.refreshAway()</>), from <text code>NightSummary</>;  never by hand.  The page server applies a Read the moment it's ticked (<text code>InstantMarks.applyNow()</>, epic <text code>epic-engine</> I268, I304:  no Send), as <text code>epic inbox apply</> would:  <text code>PlanDoc.readAwayLine()</>, and <text code>PlanDoc.seeUpdatesFor()</> for the update blocks;  Done reading on the section forgets every line's.</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-11-15 against branch <ui-text code>epic-engine</>.</>
+		</>
+	</>

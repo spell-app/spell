@@ -1,0 +1,358 @@
+"epic choices element" is a notebook page
+	<header level="1">
+		&lt;epic-choices&gt;
+		<header>A set of option cards: side by side while open, folded under Choices with the chosen one marked once answered.</>
+	</>
+
+	<text class="lede" paragraph>A set of option cards (<link target="src-packages-epics-docs-epic-option-html" link="/epic-option"><text code>&lt;epic-option&gt;</></>s): the options a question offers, or the options any item's text weighs. While open it draws the cards side by side; once answered, it folds them under a <text code>Choices</> heading, the chosen one marked.</>
+
+	<!--
+		no <ui-list class="spell-meta">:  its <ui-item>s take the "item" style sheet before the pack's
+		              <epic-item> can, and the live items draw unstyled (issue I9 of epic-components)
+	-->
+	<text class="meta" paragraph>
+		For anyone reading or writing an epic page's markup, or changing this element.
+
+		<label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-choices" link="/epic/src/components/epic-choices/"><text title="epic/src/components/epic-choices/" code>epic-choices/</></>.
+
+		Its vocabulary (every table below comes from it): <link target="src-spell-epic-src-components-epic-choices-epicchoices-en-ts" link="/epic/src/components/epic-choices/EpicChoices.en.ts"><text title="epic/src/components/epic-choices/EpicChoices.en.ts" code>EpicChoices.en.ts</></>.
+
+		The markup rules: <link target="src-spell-epic-src-tool-plan-doc-md" link="/epic/src/tool/PLAN-DOC.md"><text title="epic/src/tool/PLAN-DOC.md" code>PLAN-DOC.md</></>.
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>Live: the real element, drawn by the epics pack this page loads.</>
+		<list bulleted>
+			<item>Click a line to unfold it.</>
+			<item>The review buttons don't show here: they show only on an epic page being reviewed.</>
+		</>
+		<text paragraph>The same question twice: open, then answered with option A (<text code>chosen="A"</>). Q13 of the <text code>wwod</> epic.</>
+		<html>
+			<epic-item id="q13" title="Config-by-spread or subclassing for pluggable behaviour?" status="open" state="attention" open>
+				<epic-question>
+					<p>WWOD §12: <code>&#123; ...BaseFileSpec, extensions, payloadFormat &#125;</> over a subclass. Spell's rules subclass on purpose.</>
+				</>
+				<epic-choices>
+					<epic-option letter="A" title="Both, by kind" recommended>
+						<p>Classes with behaviour subclass (ours); plain config / spec records spread (WWOD).</>
+					</>
+					<epic-option letter="B" title="Subclass">
+						<p>Drop WWOD's rule.</>
+					</>
+				</>
+			</>
+			<epic-item id="q31" title="Config-by-spread or subclassing for pluggable behaviour?" status="decided" state="recent" answered open>
+				<epic-question>
+					<p>WWOD §12: <code>&#123; ...BaseFileSpec, extensions, payloadFormat &#125;</> over a subclass. Spell's rules subclass on purpose.</>
+				</>
+				<epic-choices chosen="A" chosen-on="2026-10-29" chosen-note="recorded as the answer;  waiting for a phase to take it up">
+					<epic-option letter="A" title="Both, by kind" recommended>
+						<p>Classes with behaviour subclass (ours); plain config / spec records spread (WWOD).</>
+					</>
+					<epic-option letter="B" title="Subclass">
+						<p>Drop WWOD's rule.</>
+					</>
+				</>
+				<epic-answer title="Both, by kind:  classes with behaviour subclass;  plain config / spec records spread"></>
+			</>
+		</>
+		<text paragraph>Pick any (<text code>multiple</>, epic <text code>epic-engine</> P50): several options picked at once. On an epic page being reviewed, its heading is a switch, Pick one / Pick any, and Add choice sits under the cards; each card has a pencil and an ✕. Option B has an earlier text, folded under Was; option C was removed, folded under Removed.</>
+		<html>
+			<epic-item id="q40" title="Which pages get the new toolbar?" status="decided" state="recent" open>
+				<epic-question>
+					<p>Every page kind could take it.</>
+				</>
+				<epic-choices multiple chosen="A B">
+					<epic-option letter="A" title="Guides">
+						<p>The most read.</>
+					</>
+					<epic-option letter="B" title="Details pages" edited="2026-10-29">
+						<p>You answer on them.</>
+						<div slot="was" data-title="Details and review pages">
+							<p>Both kinds you answer on.</>
+						</>
+					</>
+					<epic-option letter="C" title="Epic UI's pages" slot="removed" removed="2026-10-29">
+						<p>They have the site's own.</>
+					</>
+				</>
+			</>
+		</>
+		<text paragraph>A standing set (<text code>standing</>), in a page's Choices section: it never folds away as answered. Its title is its heading; each round's picks fold under Picked, and Claude adds more. An option's picture is a thumbnail: a click shows it full size.</>
+		<html>
+			<epic-choices id="s-upgrades" title="Upgrades on offer" standing multiple>
+				<epic-option letter="A" title="A dark theme for code blocks">
+					<p>Matches the editor.</>
+					<img src="/epic/docs/images/epic-item.png" alt="An epic page item, for the picture" />
+				</>
+				<epic-option letter="B" title="Wider tables">
+					<p>Full width on a click.</>
+				</>
+				<epic-option letter="C" title="Sticky table heads" slot="picked" picked-on="2026-10-28">
+					<p>Picked last round.</>
+				</>
+			</>
+		</>
+		<text paragraph>A closed set (<text code>closed</>): done. No picks, adds or edits; drawn answered.</>
+		<html>
+			<epic-choices closed chosen="A">
+				<epic-option letter="A" title="Keep the old names">
+					<p>Nothing to migrate.</>
+				</>
+				<epic-option letter="B" title="Rename everything">
+					<p>One big migration.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>Q13 of the <text code>wwod</> epic, answered (<link title="epics/wwod/parts/q13.html" target="src-epics-wwod-parts-q13-html" link="/epics/wwod/parts/q13.html"><text code>q13.html</></>).</>
+		<text paragraph>q13.html:</>
+		<markdown>
+			```html
+			<epic-choices chosen="A"
+			  ><epic-option letter="A" title="Both, by kind" recommended
+			    ><p>Classes with behaviour subclass (ours); plain config / spec records spread (WWOD).</p></epic-option
+			  ><epic-option letter="B" title="Subclass"><p>Drop WWOD's rule.</p></epic-option></epic-choices
+			>
+			```
+		</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="layer group"/>
+		<text paragraph>
+			<text bold>Its parents:</>
+		</>
+		<html>
+			<ui-text paragraph>Anywhere prose goes (it's a <dfn class="spell-term" tabindex="0">flow</><ui-popup heading="flow" label="An element that counts as prose:  it may sit wherever the content model allows text, paragraphs and lists."></> element), so on any item kind:</>
+		</>
+		<list bulleted>
+			<item><link target="src-packages-epics-docs-epic-item-html" link="/epic-item"><text code>&lt;epic-item&gt;</></>: a question's own set, last in its text; or the options a judgement call or issue weighs. An item may hold several sets.</>
+			<item>A holder's 2nd set is lettered <text code>A2</>, <text code>B2</> ... on the page, its 3rd <text code>A3</> ..., so a pick in each reads apart (epic <text code>epic-engine</> I227). Only what's shown: each option's <text code>letter</> stays <text code>A</>. The holder's one mark keeps a pick for each of its sets, and <text code>epic choose</> or <text code>decide --option</> takes <text code>B2</> for <text code>B</> of the 2nd set.</>
+			<item><link target="src-packages-epics-docs-epic-reply-html" link="/epic-reply"><text code>&lt;epic-reply&gt;</></> and <link target="src-packages-epics-docs-epic-more-html" link="/epic-more"><text code>&lt;epic-more&gt;</></>: options a reply or More Details weighs (test V1 of the <text code>epic-components</> epic has a reply ending in one)</>
+			<item><link target="src-packages-epics-docs-epic-version-html" link="/epic-version"><text code>&lt;epic-version&gt;</></>: as it was, in an Original Discussion</>
+			<item><link target="src-packages-epics-docs-epic-field-html" link="/epic-field"><text code>&lt;epic-field name="choices"&gt;</></>: a phase's own sets, so its forks stay in its story (P50); its picks are keyed by the phase, and its title says "1 choice open" until picked</>
+			<item><link target="src-packages-epics-docs-epic-section-html" link="/epic-section"><text code>&lt;epic-section kind="choices"&gt;</></>: the page's standing sets (<text code>standing</>, each with its own <text code>id</> and <text code>title</>), between the Overview and the Phases (P50)</>
+		</>
+		<text paragraph>Its children:</>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Child</>
+				<cell>How many</>
+				<cell>What it holds</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-option-html" link="/epic-option">
+						<text code>&lt;epic-option&gt;</>
+					</>
+				</>
+				<cell>one or more</>
+				<cell>The options, <text code>A</>, <text code>B</> ...</>
+			</>
+		</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="table columns"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Name</>
+				<cell>Values</>
+				<cell>Meaning</>
+				<cell>Required</>
+			</>
+			<row>
+				<cell>
+					<text code>chosen</>
+				</>
+				<cell>text</>
+				<cell>The chosen option's <text code>letter</>, once answered; absent while the question is open. A <text code>multiple</> set's may name several: <text code>chosen="A C"</>.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>multiple</>
+				</>
+				<cell>boolean</>
+				<cell>Pick any: several options may be picked. Its heading's switch flips it while reviewed.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>fixed</>
+				</>
+				<cell>boolean</>
+				<cell>No Add choice: you may not add options. Without it, every open set takes yours.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>closed</>
+				</>
+				<cell>boolean</>
+				<cell>Done: no picks, and no options added, edited or removed; drawn answered.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>standing</>
+				</>
+				<cell>boolean</>
+				<cell>A standing set, in the Choices section: never folds away; each round's picks fold under Picked.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>title</>
+				</>
+				<cell>text</>
+				<cell>A standing set's heading. Its <text code>id</> keys its marks.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>chosen-on</>
+				</>
+				<cell>date</>
+				<cell>The day your pick was recorded (<text code>epic inbox apply</>, <text code>epic choose</>, a revisit's pick kept); shown inside the unfolded Choices, with <text code>chosen-note</>.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>chosen-note</>
+				</>
+				<cell>text</>
+				<cell>What recording the pick did, and what happens next: <text code>recorded as the answer; waiting for a phase to take it up</>. Shown inside the unfolded Choices, so a pick needs no Noted card of its own (I153).</>
+				<cell/>
+			</>
+		</>
+
+		<section label="Slots" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A slot is a place in the drawing that a child goes to: a child with <text code>slot="name"</> goes to that name's place, every other child to the default one (shown as <text italic>default</>).</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Slot</>
+					<cell>What goes there</>
+				</>
+				<row>
+					<cell>
+						<text italic>default</>
+					</>
+					<cell>The options.</>
+				</>
+				<row>
+					<cell>
+						<text code>picked</>
+					</>
+					<cell>A standing set's picked options (<text code>picked-on</>): folded under Picked.</>
+				</>
+				<row>
+					<cell>
+						<text code>removed</>
+					</>
+					<cell>Its removed options (<text code>removed</>), never erased: folded under Removed.</>
+				</>
+			</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A part is a piece of what the element draws in its shadow root (its own hidden markup), named so a stylesheet can reach it: <text code>epic-choices::part(base)</>.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The cards side by side; answered, the folded Choices aside.</>
+				</>
+				<row>
+					<cell>
+						<text code>toggle</>
+					</>
+					<cell>Answered: the <text code>Choices</> <text code>&lt;button&gt;</> that folds the options.</>
+				</>
+				<row>
+					<cell>
+						<text code>chosen</>
+					</>
+					<cell>Answered with an option chosen: <text code>✓ Chosen: B · Bananas</> in the toggle, green, folded or not.</>
+				</>
+				<row>
+					<cell>
+						<text code>panels</>
+					</>
+					<cell>Answered: the box of option panels, hidden while folded.</>
+				</>
+				<row>
+					<cell>
+						<text code>note</>
+					</>
+					<cell>Answered, with <text code>chosen-on</> or <text code>chosen-note</>: the pick's line atop the panels, <text code>Chosen 10/29/26: ...</>.</>
+				</>
+			</>
+		</>
+
+		<section label="States" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A state is a word the element sets on itself while something is true, for styling: <text code>epic-choices:state(answered)</>. Never written in the file.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>State</>
+					<cell>When</>
+				</>
+				<row>
+					<cell>
+						<text code>answered</>
+					</>
+					<cell>Its question is answered (<text code>chosen</>, or <text code>answered</> on its item): folded.</>
+				</>
+				<row>
+					<cell>
+						<text code>open</>
+					</>
+					<cell>Answered, and its options unfolded.</>
+				</>
+				<row>
+					<cell>
+						<text code>answering</>
+					</>
+					<cell>An <text code>&lt;epic-ask&gt;</>'s options (a page you answer on): one card a row, each with a tick box.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<text paragraph>The colours mean the same on every doc page: the whole scheme is on <link target="src-guides-epic-components-colours-html" link="/guides/epic-components/colours.html">Epic Page Colours</> (its source: <link title="epic/templates/epics/plan-doc.md" target="src-spell-epic-templates-epics-plan-doc-md" link="/epic/templates/epics/plan-doc.md"><text code>plan-doc.md</></>, "Colours").</>
+		<list bulleted>
+			<item><text bold>Open</> (no <text code>chosen</>): the cards side by side, as many columns as fit. Each card folds by its header, and starts open.</>
+			<item><text bold>Answered</> (<text code>chosen</>, or <text code>answered</> on its item): folded under a <text code>Choices</> heading on a warm aside fill; a click on it unfolds the options as panels. The chosen panel has a check before its letter and green text, and is the only one open.</>
+			<item>While the page is reviewed, each card gets a Choose pill: the fill rule in green, dashed until sent, outlined once sent, solid on the chosen option (the pick applied). See <link target="src-packages-epics-docs-epic-option-html" link="/epic-option"><text code>&lt;epic-option&gt;</></>.</>
+			<item>In an <link target="src-packages-epic-components-elements-epic-ask-html" link="/epic-ask"><text code>&lt;epic-ask&gt;</></> (epic <text code>epic-workflow</> P12): one card a row, full width, each with its tick box and comment box.</>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item>Any command taking HTML (<text code>add --details</>, <text code>decide --details</>, <text code>details --file</>): an <text code>&lt;epic-choices&gt;</> is kept; an old option grid (<text code>ui-grid.spell-pros-cons</>, labels <text code>A · Title (recommended)</>) is turned into one on the way in (<text code>IncomingHtml</>)</>
+			<item><text code>plan-doc decide &lt;name&gt; &lt;Q id&gt; "answer" --option B</>: sets <text code>chosen</> on the question's set; a question has one answer, so no other set stays chosen</>
+			<item><text code>epic inbox apply &lt;name&gt;</>, for your pick: sets <text code>chosen</> on THAT set (picks name a set by its position in the item or phase); a question is answered with the option, any other item approved with it; a pick in each of a holder's sets applies on its own</>
+			<item><text code>details --file</> on an answered question keeps the chosen letter when the new options still have it</>
+			<item>older docs: the converter, from a question's own option grid</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-09 against branch <ui-text code>epic-components</>: the tables are its vocabulary's; the rest from its component, its stylesheet and <ui-link title="epic/src/tool/PLAN-DOC.md" target="src-spell-epic-src-tool-plan-doc-md" link="/epic/src/tool/PLAN-DOC.md"><ui-text code>PLAN-DOC.md</></>.</>
+		</>
+	</>

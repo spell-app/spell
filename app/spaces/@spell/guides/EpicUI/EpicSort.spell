@@ -1,0 +1,114 @@
+"epic sort" is a notebook page
+	<header level="1">
+		&lt;epic-sort&gt;
+		<header>The &lt;epic-sort&gt; element: the Epics page's sort buttons, A to Z or newest first, for every list on the page.</>
+	</>
+
+	<text class="lede" paragraph><text code>&lt;epic-sort&gt;</> is the Epics page's pair of sort buttons, A–Z and Date: how every <link target="src-spell-epic-src-docs-epic-list-html" link="/epic-list"><text code>&lt;epic-list&gt;</></> on the page sorts the cards in each group.</>
+	<list bulleted>
+		<item>The one in use is pressed, and remembered in this browser.</>
+		<item>The groups stay where they are: only the cards inside each move.</>
+	</>
+	<text class="meta" paragraph>
+		For anyone changing the Epics page.
+
+		Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> P3), in the <link target="src-spell-epic-src-components-epic-list" link="/epic/src/components/epic-list/"><text title="epic/src/components/epic-list/" code>epic-list</></> family, with <text code>&lt;epic-list&gt;</>, <text code>&lt;epic-card&gt;</> and <text code>&lt;epic-sort&gt;</>.
+
+		Its vocabulary: <link target="src-spell-epic-src-components-epic-list-epicsort-en-ts" link="/epic/src/components/epic-list/EpicSort.en.ts"><text title="epic/src/components/epic-list/EpicSort.en.ts" code>EpicSort.en.ts</></>
+
+		Its component: <link target="src-spell-epic-src-components-epic-list-epicsort-tsx" link="/epic/src/components/epic-list/EpicSort.tsx"><text title="epic/src/components/epic-list/EpicSort.tsx" code>EpicSort.tsx</></>.
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<example "Example">
+			<html>
+				<epic-sort></epic-sort>
+			</html>
+		</example>
+		<text paragraph>The same choice as the Epics page's, and <link target="src-spell-epic-src-docs-epic-list-html" link="/epic-list">epic-list's example</>'s: they share it.</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>Nobody writes it: the docs runtime puts one in the Epics page's header, beside New epic, when the page has an <text code>&lt;epic-list&gt;</> (<link target="src-spell-epic-src-tools-assets-spell-doc-runtime-js" link="/epic/src/tools/_assets/spell-doc-runtime.js"><text title="epic/src/tools/_assets/spell-doc-runtime.js" code>wireEpicSort()</></>).</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="compass"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Parent</>
+				<cell>How many</>
+				<cell>As</>
+			</>
+			<row>
+				<cell>the page header, <text code>.spell-page-head</></>
+				<cell>one</>
+				<cell>The Epics page's sort.</>
+			</>
+		</>
+		<text paragraph>It has no children.</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="table columns"/>
+		<text paragraph>None.</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<text paragraph>Pieces of what it draws.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The pair, a <text code>&lt;ui-buttons appearance="circular basic" size="tiny"&gt;</>.</>
+				</>
+			</>
+		</>
+
+		<section label="Events" sticky="stack" collapsible dividing open="false">
+			<text paragraph>What it tells the page.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Event</>
+					<cell>Detail</>
+					<cell>When</>
+				</>
+				<row>
+					<cell>
+						<text code>epic-sort</>
+					</>
+					<cell>
+						<text code>&#123; sort: "title" | "date" &#125;</>
+					</>
+					<cell>The reader picked a sort: every list on the page sorts by it.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>Spell UI's grouped pill of buttons, each with its icon; the one in use <text code>active</>.</>
+			<item>Not <text code>toggle</>: its pressed look is the positive green.</>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item>The docs runtime, on the Epics page (before epic <text code>epic-engine</> P3, it drew the buttons itself).</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-19 against branch <ui-text code>epic-engine</> (P3).</>
+		</>
+	</>

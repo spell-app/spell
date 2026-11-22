@@ -1,0 +1,215 @@
+"epic text box" is a notebook page
+	<header level="1">
+		&lt;epic-text-box&gt;
+		<header>A box you type in on a page you answer on: notes, a comment, Other, feedback.</>
+	</>
+
+	<text class="lede" paragraph>A box you type in, on a page you answer on: one line to start, growing with its text. What you type is part of the page's answer, by its <text code>type</> and <text code>for</>. The page's notes box also shows what the page KEPT: text typed for a question, option or section an agent's rewrite took off the page. A box may start with Claude's suggested text, its seed, for you to edit into your own.</>
+	<text class="meta" paragraph>
+		For anyone writing a page you answer on (a details or choice page), or changing this element.
+
+		<label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-text-box" link="/epic/src/components/epic-text-box/"><text title="epic/src/components/epic-text-box/" code>epic-text-box/</></> (epic <text code>epic-workflow</> P12; the kept text P18; the seed and <text code>code</>, epic <text code>ast-markup</>).
+
+		Its vocabulary (every table below comes from it): <link target="src-spell-epic-src-components-epic-text-box-epictextbox-en-ts" link="/epic/src/components/epic-text-box/EpicTextBox.en.ts"><text title="epic/src/components/epic-text-box/EpicTextBox.en.ts" code>EpicTextBox.en.ts</></>.
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>Live: the real element, drawn by the epics pack this page loads. Off a details page's own address nothing is saved or sent: Send says so.</>
+		<html>
+			<epic-text-box for="context"></>
+			<epic-text-box type="notes"></>
+		</>
+		<text paragraph>A seeded <text code>code</> box: change a line, and "Back to the suggestion" shows under it. (Here a <text code>note</>: on this page a comment box is a bullhorn comment, which fills it itself.)</>
+		<html>
+			<epic-text-box type="note" label="Suggested markup" code>
+				<script type="text/plain">
+					<ui-button label="Save {name}" appearance="primary">
+					  <ui-icon name="check"></ui-icon> Save
+					</ui-button>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>Written in a page: a section's comment box, last in it; the page's notes, after the last question. The rest are drawn by other elements, in their shadow roots.</>
+		<text paragraph>details page · a comment box and the notes:</>
+		<markdown>
+			```html
+			<ui-section id="context" label="1. Context">
+			  <p>What's going on.</p>
+			  <epic-text-box for="context"></epic-text-box>
+			</ui-section>
+			<epic-text-box type="notes"></epic-text-box>
+			```
+		</>
+		<text paragraph>A seeded box: its starting text in a <text code>&lt;script type="text/plain"&gt;</> child, so markup with <text code>&lt;</>, quotes and braces needs no escaping (a <text code>&lt;template&gt;</> works too, as for <text code>&lt;ui-code&gt;</>). Its shared indent is taken off.</>
+		<text paragraph>details page · a section's code, then a box seeded with the suggestion:</>
+		<markdown>
+			```html
+			<button>Save</button>
+
+			  
+			    <ui-button label="Save {name}"></ui-button>
+			```
+		</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="layer group"/>
+		<list bulleted>
+			<item>Written in a details page: last in a section that isn't a question (<text code>for</> its id), and once after the last question (<text code>type="notes"</>).</>
+			<item>Drawn by <link target="src-packages-epics-docs-epic-ask-html" link="/epic-ask"><text code>&lt;epic-ask&gt;</></> (its Other), <link target="src-packages-epics-docs-epic-option-html" link="/epic-option"><text code>&lt;epic-option&gt;</></> (its comment, in an ask) and <link target="src-packages-epics-docs-epic-choices-bar-html" link="/epic-choices-bar"><text code>&lt;epic-choices-bar&gt;</></> (the feedback).</>
+			<item>One child at most, its seed:  a <text code>&lt;script type="text/plain"&gt;</> (or a <text code>&lt;template&gt;</>) holding the text it starts with.</>
+			<item>A seeded box's answer is what's typed only once it differs from the seed: left as it was, it sends nothing, and <text code>epic ask answer</> lists it under "Kept as suggested"; emptied, it sends "(emptied: none of the suggested text kept)". A draft and an answer sent come back into it the same way.</>
+			<item>Seeds are for pages you answer on (details pages). On a guide a comment box is a bullhorn comment, and the comments fill it with their own text, over the seed.</>
+		</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="table columns"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Name</>
+				<cell>Values</>
+				<cell>Meaning</>
+				<cell>Required</>
+			</>
+			<row>
+				<cell>
+					<text code>type</>
+				</>
+				<cell><text code>notes</>, <text code>comment</>, <text code>other</>, <text code>feedback</>, <text code>note</></>
+				<cell>What it holds: <text code>notes</> (the page's notes for Claude, once a page), <text code>comment</> (on the section <text code>for</> names, or an option, <text code>q1-B</>), <text code>other</> (question <text code>for</>'s Other, drawn by <text code>&lt;epic-ask&gt;</>), <text code>feedback</> (a choice page's, drawn by <text code>&lt;epic-choices-bar&gt;</>), <text code>note</> (none of a page's answer:  read by the element drawing it, <text code>&lt;epic-option-form&gt;</>, <text code>&lt;epic-new-item&gt;</>).</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>for</>
+				</>
+				<cell>text</>
+				<cell>Whose it is: a comment's section id (<text code>context</>) or option (<text code>q1-B</>), Other's question key (<text code>q1</>). Notes and feedback need none.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>placeholder</>
+				</>
+				<cell>text</>
+				<cell>Its grey hint while empty; none: its type's own (<text code>Notes for Claude: anything, any time</>).</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>label</>
+				</>
+				<cell>text</>
+				<cell>Its name for a screen reader; none: its placeholder.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>max-height</>
+				</>
+				<cell>text</>
+				<cell>How tall it grows before it scrolls, a CSS length: <text code>40vh</>; none: a third of the window.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>code</>
+				</>
+				<cell>yes / no</>
+				<cell>For code or markup: monospace, lines never wrap (it scrolls sideways), Tab indents (Shift-Tab takes it back; Escape, then Tab, moves on); it still grows with its lines.</>
+				<cell/>
+			</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A part is a piece of what the element draws in its shadow root (its own hidden markup), named so a stylesheet can reach it: <text code>epic-text-box::part(base)</>.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The box around the text field.</>
+				</>
+				<row>
+					<cell>
+						<text code>field</>
+					</>
+					<cell>The <text code>&lt;textarea&gt;</>: one line to start, growing with its text to a third of the window.</>
+				</>
+				<row>
+					<cell>
+						<text code>kept</>
+					</>
+					<cell>A notes box's KEPT text, above its field, while there is any: an orange-edged box, "Kept from before the page changed", then each text.</>
+				</>
+				<row>
+					<cell>
+						<text code>kept-item</>
+					</>
+					<cell>One kept text: its old title (the id it was under on hover), what was typed, and a × to drop it.</>
+				</>
+				<row>
+					<cell>
+						<text code>reset</>
+					</>
+					<cell>A seeded box's button back to its suggested text, under its field while what's in it differs.</>
+				</>
+			</>
+		</>
+
+		<section label="States" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A state is a word the element sets on itself while something is true, for styling: <text code>epic-text-box:state(filled)</>. Never written in the file.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>State</>
+					<cell>When</>
+				</>
+				<row>
+					<cell>
+						<text code>filled</>
+					</>
+					<cell>Something is typed in it.</>
+				</>
+				<row>
+					<cell>
+						<text code>edited</>
+					</>
+					<cell>A seeded box no longer holds its suggested text.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>The page's ground, a quiet rule, 6px corners; its type's grey hint while empty.</>
+			<item>One line to start; it grows with its text to a third of the window, then scrolls (2026-10-06: every "tell me more" box grows).</>
+			<item>The notes box's kept text (epic <text code>epic-workflow</> P18), above its field, only while there is any: <list bulleted><item>an ORANGE edge and title, "Kept from before the page changed": the page changed under you, a warning</> <item>each text in your violet, your own words: its old title (<text code>Q3 · Which layout?</>, the id it was under on hover), then what you typed or picked (<text code>picked B · Blue; Other: neither</>)</> <item>a round × on each drops it: it's no longer sent</></></>
+			<item><text code>code</>: the page's monospace, a little smaller, lines kept whole and scrolling sideways; a seeded box's "Back to the suggestion" sits under it, at its end, while it's changed.</>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item><text code>epic ask create</>: the template's context box and notes; a spec's context gets its box.</>
+			<item>Older pages: the migration step <text code>answer-elements</>, where the old page script added one.</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-11-21 against branch <ui-text code>ast-markup</> (the seed): the tables are its vocabulary's (epic-text-box); the rest from its component and its stylesheet.</>
+		</>
+	</>

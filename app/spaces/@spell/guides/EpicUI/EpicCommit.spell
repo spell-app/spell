@@ -1,0 +1,231 @@
+"epic commit" is a notebook page
+	<header level="1">
+		&lt;epic-commit&gt;
+		<header>The &lt;epic-commit&gt; element: one commit that built a phase or fixed an item, its short sha linked.</>
+	</>
+
+	<text class="lede" paragraph>One commit that built a phase or fixed an item.</>
+	<list bulleted>
+		<item>It draws the commit's short sha (its first 7 characters), linked to GitHub, then the doc's sentence about it.</>
+		<item>The first of a run also draws a "Commits:" heading.</>
+	</>
+
+	<!--
+		no <ui-list class="spell-meta">:  its <ui-item>s take Spell UI's "item" style sheet name before the
+		              epics pack's elements can, and live examples may draw unstyled (issue I9 of epic-components)
+	-->
+	<text class="meta" paragraph>
+		For anyone reading or writing an epic page's markup, or changing this element.
+
+		Its vocabulary (every name it uses): <link target="src-spell-epic-src-components-epic-commit-epiccommit-en-ts" link="/epic/src/components/epic-commit/EpicCommit.en.ts"><text title="epic/src/components/epic-commit/EpicCommit.en.ts" code>EpicCommit.en.ts</></>.
+
+		Its component: <link target="src-spell-epic-src-components-epic-commit-epiccommit-tsx" link="/epic/src/components/epic-commit/EpicCommit.tsx"><text title="epic/src/components/epic-commit/EpicCommit.tsx" code>EpicCommit.tsx</></>, with its style sheet (<text code>.css</>) and tests beside it.
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>Two real commits of this epic's P14.</>
+		<list bulleted>
+			<item>Commits are hidden until something shows them: here a <text code>div</> shows them, as an item's or a phase's git icon does (<text code>--epic-commits-display: block</>).</>
+			<item>Outside an <text code>&lt;epic-page repo&gt;</>, the sha is plain code, not a link.</>
+		</>
+		<html>
+			<ui-stack style="--epic-commits-display: block">
+				<epic-commit sha="c56a42c6721933234e88a24b980679b70a85c894">details pages show recommended as a violet thumbs-up, no word (your comment on Q20)</>
+				<epic-commit sha="f38e6060dafa3be79646bf56050f870da5e02072">the Plan changes box (chevron, a count, folded to start) and the Agents running panel (open to start)</>
+			</>
+		</>
+		<text class="meta" paragraph>Live: the real element, drawn by the epics pack this page loads.</>
+		<text paragraph>In the Log, the epic's change log (epic <text code>epic-engine</> P52): with its time (<text code>at</>) and a chip for each phase and item it names (<text code>refs</>). The Log shows them always, newest first; here a <text code>div</> shows them. A ref this page doesn't have is plain text.</>
+		<html>
+			<ui-stack style="--epic-commits-display: block">
+				<epic-commit sha="f3f554068c0ffee0000000000000000000000000" at="2026-10-29T10:56-04:00" refs="p-choices-questions q55">an option set works anywhere and answers any way</>
+				<epic-commit sha="e75a0e081c0ffee0000000000000000000000000" at="2026-10-29T11:46-04:00" refs="p-tests-inline">a manual test is answered where it is, in the epic page's Manual tests section</>
+			</>
+		</>
+		<text class="meta" paragraph>The second commit's Plan changes box sat above the phases then; since 2026-10-11 (epic <text code>epic-workflow</> P6) each phase has its own, atop its body.</>
+		<text paragraph>A long sentence (epic <text code>epic-engine</> J184): clamped to two lines, ending in "…". A click on its text, or Enter on it, unfolds it; another folds it. The chips come before the sentence, so a folded one still shows every one; the sha and the chips stay links.</>
+		<html>
+			<ui-stack style="--epic-commits-display: block; max-width: 420px">
+				<epic-commit sha="9f402c0941c0ffee000000000000000000000000" at="2026-10-31T00:12-04:00" refs="p-commit-log">the Log draws every commit of the epic newest first, each with its time, its short sha and a chip for each phase and item its subject names, and a sentence this long folds to two lines, so the side bar shows the run of entries, not one entry's paragraph</>
+			</>
+		</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>From <link title="epics/epic-components/parts/p-more-components.html" target="src-epics-epic-components-parts-p-more-components-html" link="/epics/epic-components/parts/p-more-components.html"><text code>p-more-components.html</></>, the body of phase P14:</>
+		<text paragraph>p14.html · two of its commits:</>
+		<markdown>
+			```html
+			<epic-commit sha="c56a42c6721933234e88a24b980679b70a85c894"
+			  >details pages show recommended as a violet thumbs-up, no word (your comment on Q20)</epic-commit
+			><epic-commit sha="f38e6060dafa3be79646bf56050f870da5e02072"
+			  >the Plan changes box (chevron, a count, folded to start) and the Agents running panel (open to start)</epic-commit
+			>
+			```
+		</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="map"/>
+		<text paragraph>
+			<text bold>Its parents:</>
+		</>
+		<list bulleted>
+			<item><link target="src-packages-epics-docs-epic-phase-html" link="/epic-phase"><text code>&lt;epic-phase&gt;</></>: its commits, oldest first, after Done (else Goal) and before Files</>
+			<item><link target="src-packages-epics-docs-epic-item-html" link="/epic-item"><text code>&lt;epic-item&gt;</></>: the commits that fixed or built it, oldest first, last in the item</>
+			<item><link target="src-packages-epics-docs-epic-section-html" link="/epic-section"><text code>&lt;epic-section kind="log"&gt;</></>: the Log, one per commit of the epic, with <text code>at</> and <text code>refs</>, among the review lines by time (epic <text code>epic-engine</> P52); drawn newest first</>
+		</>
+		<text paragraph>
+			<text bold>Its children:</>
+		</>
+		<list bulleted>
+			<item>prose: what it did, one or two sentences</>
+		</>
+		<text paragraph>Its link comes from its own <text code>repo</> (a child repo's commit), else the nearest <text code>&lt;epic-page repo&gt;</>: <text code>&lt;repo&gt;/commit/&lt;sha&gt;</>, opening in one shared GitHub tab.</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="list check"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Name</>
+				<cell>Values</>
+				<cell>Meaning</>
+				<cell>Required</>
+			</>
+			<row>
+				<cell>
+					<text code>sha</>
+				</>
+				<cell>the commit's full sha (hex)</>
+				<cell>The commit. Drawn as its first 7 characters.</>
+				<cell>yes</>
+			</>
+			<row>
+				<cell>
+					<text code>repo</>
+				</>
+				<cell>a GitHub page (<text code>https://github.com/spell-app/spell-parser</>)</>
+				<cell>The repo the commit is in, when it isn't the page's: a child repo's or a peer's commit links there.</>
+				<cell>no</>
+			</>
+			<row>
+				<cell>
+					<text code>at</>
+				</>
+				<cell>a time with its offset (<text code>2026-10-29T11:46-04:00</>)</>
+				<cell>When it went in, git's commit time: drawn first, <text code>2026-10-29 11:46</>. The Log's.</>
+				<cell>no</>
+			</>
+			<row>
+				<cell>
+					<text code>refs</>
+				</>
+				<cell>ids, space-separated (<text code>p-commit-log q56</>)</>
+				<cell>The phases (by lasting id) and items its subject names: a chip each, a phase's showing its number today (<text code>P52</>), landing there. The Log's.</>
+				<cell>no</>
+			</>
+		</>
+
+		<section label="Slots" sticky="stack" collapsible dividing open="false">
+			<html>
+				<ui-text paragraph>A <dfn class="spell-term" tabindex="0">slot</><ui-popup heading="slot" label="Where the element shows its own children:  the doc's prose, inside its drawing."></> is where the element's own children show.</>
+			</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Slot</>
+					<cell>Holds</>
+				</>
+				<row>
+					<cell>(default)</>
+					<cell>What it did, one or two sentences.</>
+				</>
+			</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<html>
+				<ui-text paragraph>A <dfn class="spell-term" tabindex="0">part</><ui-popup heading="part" label="A named piece of the element's drawing, which a page's CSS can reach from outside:  epic-note::part(label)."></> is a piece of the drawing a page's CSS can reach.</>
+			</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>Is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The commit: its heading (the first of a run only), then its line.</>
+				</>
+				<row>
+					<cell>
+						<text code>heading</>
+					</>
+					<cell><text code>Commits:</> with its icon, over the first of a run of commits.</>
+				</>
+				<row>
+					<cell>
+						<text code>line</>
+					</>
+					<cell>Its line: the time (with <text code>at</>), the sha, the chips, its sentence.</>
+				</>
+				<row>
+					<cell>
+						<text code>sentence</>
+					</>
+					<cell>Its sentence (its children): a long one is a button that unfolds it, or folds it to two lines.</>
+				</>
+				<row>
+					<cell>
+						<text code>time</>
+					</>
+					<cell>With <text code>at</>: its time, to the minute.</>
+				</>
+				<row>
+					<cell>
+						<text code>sha</>
+					</>
+					<cell>The short sha: a link when the page has a <text code>repo</>.</>
+				</>
+				<row>
+					<cell>
+						<text code>ref</>
+					</>
+					<cell>With <text code>refs</>: a chip per phase or item it names, after the sha, before its sentence.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>Hidden until shown: an item's or a phase's git icon shows its own, and the Log shows every one. They set <text code>--epic-commits-display</>. No page-wide git toggle since epic <text code>epic-engine</> P53: the Log lists every commit.</>
+			<item>The sha: a small chip on the code-well background, in mono, the link colour. Without a <text code>repo</> it's plain code, in the text's ink.</>
+			<item>The first of a run carries <text code>Commits:</> and a code-branch icon; the lines sit under the heading's text.</>
+			<item>With <text code>at</> (a Log entry): a row like a log line's, the code-branch icon in its column, the time muted in mono, then the sha, the chips and its sentence; no heading, a hairline between entries.</>
+			<item>A chip: a rounded outline in the link colour; one the page no longer has, muted.</>
+			<item>A sentence longer than two lines (measured as its box changes size): clamped to two, ending in "…", the pointer over its text. A click on its text (not the sha or a chip, nor the end of a text selection) unfolds it, another folds it; the sentence is a button, so Enter or Space does the same. Unfolded ones are remembered per page in this browser, by sha (<text code>spell-commit-folds:&lt;path&gt;</>), so the same commit in the Log and under its phase folds as one (epic <text code>epic-engine</> J184).</>
+			<item>No state colour; a short sentence doesn't fold.</>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item><text code>epic commit &lt;epic&gt;#&lt;id&gt; &lt;sha&gt; "&lt;sentence&gt;"</>: lists one, replacing the entry already there for that sha.</>
+			<item><text code>epic commits &lt;epic&gt; --backfill</>: every phase and item commit in the doc's git history not listed yet, read from subjects (<text code>P3: Name -- summary</>, <text code>&lt;epic&gt; I3: ...</>). It reads the kit and every child repo, and files a phase commit by the phase's name, not its number alone: a phase renumbered since, or another epic's P3, is left out.</>
+			<item>The backfill (<text code>commits --backfill</>, <text code>epic phase ... done</>, <text code>epic merge</>) also adds each commit to the Log, with its time and refs; it reads the kit, its child repos and its peers, merge commits left out. The migration <text code>log-commits</> filled every page's Log from its history once.</>
+			<item>Both write <text code>&lt;epic-page repo&gt;</> from the checkout's <text code>origin</> remote, when it's on GitHub, and a child repo's commit's own <text code>repo</> from that repo's.</>
+			<item>The converter turned the old phase and item commit lists into it (<text code>CardConverter</>, <text code>PhaseConverter</>).</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-31 against branch <ui-text code>epic-engine</>.</>
+		</>
+	</>

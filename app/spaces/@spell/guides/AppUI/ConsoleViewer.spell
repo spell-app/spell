@@ -1,0 +1,62 @@
+"console viewer" is a notebook page
+	<header level="1">
+		ConsoleViewer
+		<header>What running programs print, in the editor's Program Output tab.</>
+	</>
+
+	<text class="lede" paragraph>The editor's "Program Output" tab, in Debug's Program panel under the code: what compiling and running the project logged, and what the program prints. Clear Console empties it.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone changing the spell app's editor, or reading its code</>
+		<item icon="image">A picture, not live: it needs the whole editor, and the program it ran</>
+	</>
+
+	<section label="1. What it looks like">
+		<icon slot="icon" name="image"/>
+		<text paragraph>The Program panel's Output tab, in Debug, just after Solitaire compiled and ran its tests: its lines, in groups that open and close. The panel draws it without its toolbar.</>
+		<image src="/components/app/_images/ConsoleViewer.png" alt="The Output tab:  Compiling, Compiled to javascript and Executing example groups, each test passed, then Example executed without errors" appearance="bordered rounded"/>
+		<text class="meta" paragraph>A picture, taken by <text code>yarn site:pictures</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="2. Using it">
+		<icon slot="icon" name="code"/>
+		<text paragraph>In Debug, the editor's page draws it as <text code>ConsoleRoot</>, without its toolbar, in the Program panel's first tab: the panel's own bar has Clear Console, while this tab shows.</>
+		<text paragraph>SpellEditor.tsx · the Program panel's first tab:</>
+		<markdown>
+			```typescript
+			<Match when={tab() === "output"}>
+			  <ConsoleRoot showToolbar={false} />
+			</Match>
+			```
+		</>
+		<list bulleted>
+			<item><link link="#ConsoleRoot">ConsoleRoot</> is the pane: a <link link="#ConsoleToolbar">ConsoleToolbar</> above a <text code>ConsoleViewer</>.</>
+			<item><text code>ConsoleViewer</> shows the console of the spell runtime the editor runs programs on, once it's loaded. Its lines are drawn by <link target="src-packages-app-docs-consolelines-html" link="/console-lines">ConsoleLines</>, so a line logged adds just its own row.</>
+			<item>It knows parsed spell: a parsed piece shows as "Match &#123;...&#125;", or "ParseError", and clicking it selects its code in the editor.</>
+			<item>An error drawing the lines shows in their place, and goes to <text code>showError</>.</>
+			<item>The toolbar's "Program Output" header, then Clear Console, as an icon.</>
+		</>
+	</>
+
+	<section label="3. Props, and where it's drawn">
+		<icon slot="icon" name="list check"/>
+		<html>
+			<ui-docs-api family="ConsoleViewer"></>
+		</>
+		<text class="meta" paragraph>From its code, by <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="4. Its code">
+		<icon slot="icon" name="folder open"/>
+		<list bulleted>
+			<item><link target="src-packages-app-src-solid-consoleviewer-tsx" link="/src/app/solid/ConsoleViewer.tsx"><text title="src/app/solid/ConsoleViewer.tsx" code>ConsoleViewer.tsx</></>: the pane, its toolbar and the viewer, and their props</>
+			<item><link target="src-packages-app-src-solid-consoleviewer-css" link="/src/app/solid/ConsoleViewer.css"><text title="src/app/solid/ConsoleViewer.css" code>ConsoleViewer.css</></>: its look</>
+			<item>Its tests: <link target="src-tests-app-src-solid-consoleviewer-browser-test-tsx" link="/tests/app/solid/ConsoleViewer.browser.test.tsx"><text title="tests/app/solid/ConsoleViewer.browser.test.tsx" code>ConsoleViewer.browser.test.tsx</></></>
+			<item>Where it's drawn: <link target="src-packages-app-src-pages-spelleditor-tsx" link="/src/app/pages/SpellEditor.tsx"><text title="src/app/pages/SpellEditor.tsx" code>SpellEditor.tsx</></></>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-12 against branch <ui-text code>epic-workflow</>.</>
+		</>
+	</>
