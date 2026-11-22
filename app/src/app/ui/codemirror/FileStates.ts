@@ -254,6 +254,9 @@ export class FileStates {
   /** Let go of every state we have, and stop following their files. */
   disposeAll(): void {
     for (const entry of this.entries.values()) entry.dispose()
+    for (const project of new Set([...this.entries.values()].map((entry) => entry.file.project))) {
+      this.client.closed(project)
+    }
     this.entries.clear()
     this.project = undefined
   }
@@ -465,7 +468,7 @@ export class FileStates {
       }
     }
     this.entries.set(file.path, entry)
-    if (file instanceof SP.SpellFile) this.client.opened(file, entry.state.doc.toString())
+    this.openInClient(entry)
     const stopContents = observe(() => this.whenContentsChange(entry))
     const stopParse = file instanceof SP.SpellFile ? observe(() => this.whenParsed(entry, file)) : undefined
     return entry
@@ -534,6 +537,18 @@ export class FileStates {
     ]
   }
 
+  /**
+   * Tell the client `entry`'s spell file is open, with its state's text, once its file has text:
+   * a file not loaded yet is an empty state, which the worker's own copy of it mustn't take (epic `solid-2-final` P18).
+   * - From then on each change of its state goes to the client (`took()`).
+   */
+  private openInClient(entry: FileEntry): void {
+    const { file } = entry
+    if (entry.isOpenInClient || !(file instanceof SP.SpellFile) || file.contents === undefined) return
+    entry.isOpenInClient = true
+    this.client.opened(file, entry.state.doc.toString())
+  }
+
   /** Make `spec`'s change to `entry`'s state:  through the view showing it, else into the state itself. */
   private dispatch(entry: FileEntry, spec: TransactionSpec): void {
     if (entry.view) {
@@ -552,7 +567,8 @@ export class FileStates {
   private took(entry: FileEntry, state: EditorState, changes: ChangeSet | undefined, way?: EditWay): void {
     entry.state = state
     if (!changes) return
-    if (entry.file instanceof SP.SpellFile) this.client.changed(entry.file, changes)
+    if (entry.isOpenInClient) this.client.changed(entry.file as SP.SpellFile, changes)
+    else this.openInClient(entry)
     this.toSlices(entry, changes)
     this.stateEdited(entry, changes, way)
   }
@@ -788,6 +804,8 @@ type FileEntry = {
   handedOver?: string
   /** the views showing a slice of it (`showSlice()`) */
   slices: Set<EditorView>
+  /** the client was told it's open, with its text:  each change goes to it (`openInClient()`) */
+  isOpenInClient?: boolean
   /** where it was scrolled to when last shown */
   scroll?: StateEffect<unknown>
   /** stops following its file */

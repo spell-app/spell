@@ -215,7 +215,8 @@ async function explain(editor: SpellCodeMirror): Promise<void> {
  *   the whole of it, as the language service's outline says where it ends (`documentSymbols()`)
  * - else the line the caret is on
  * - Their shared indent taken off (`sharedIndent()`):  they show from the margin.
- * - Each line's words:  the plain hovers over its words (`hover(..., "plain")`), as the code shows them.
+ * - Each line's words:  the plain hovers over its words (`hover(..., "plain")`), as the code shows them,
+ *   asked of the language worker where it runs.
  */
 export async function explainedLines(editor: SpellCodeMirror): Promise<ExplainedLine[]> {
   const { state } = editor.view
@@ -226,7 +227,7 @@ export async function explainedLines(editor: SpellCodeMirror): Promise<Explained
   const first = doc.lineAt(main.from).number
   let last = doc.lineAt(main.to).number
   if (main.empty) {
-    const action = file && actionHeadedAt(language!.service.documentSymbols(file), first - 1)
+    const action = file && actionHeadedAt(await language!.ask("textDocument/documentSymbol", {}), first - 1)
     if (action) last = Math.min(doc.lines, action.range.end.line + 1)
   }
   const written: string[] = []
@@ -234,16 +235,22 @@ export async function explainedLines(editor: SpellCodeMirror): Promise<Explained
   // the blank lines an outline's range may end with
   while (written.length > 1 && !written.at(-1)!.trim()) written.pop()
   const indent = sharedIndent(written)
-  return written.map((text, index) => {
-    if (!file || !language || !text.trim()) return { text: text.slice(indent) }
-    const line = first - 1 + index
-    const hovers = [...text.matchAll(/\S+/g)].map((word) => {
-      const hover = language.service.hover(file, { line, character: word.index + 1 }, "plain")
-      const contents = hover?.contents
-      return contents && typeof contents === "object" && "value" in contents ? contents.value : null
+  // asked all at once:  the language worker answers them off the page's thread (epic `solid-2-final` P18)
+  return Promise.all(
+    written.map(async (text, index) => {
+      if (!file || !language || !text.trim()) return { text: text.slice(indent) }
+      const line = first - 1 + index
+      const hovers = await Promise.all(
+        [...text.matchAll(/\S+/g)].map(async (word) => {
+          const position = { line, character: word.index + 1 }
+          const hover = await language.ask("textDocument/hover", { position, detail: "plain" })
+          const contents = hover?.contents
+          return contents && typeof contents === "object" && "value" in contents ? contents.value : null
+        })
+      )
+      return { text: text.slice(indent), words: wordsForLine(text, hovers) }
     })
-    return { text: text.slice(indent), words: wordsForLine(text, hovers) }
-  })
+  )
 }
 
 /** How many tabs or spaces the non-blank `lines` all start with. */

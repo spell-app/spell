@@ -50,6 +50,16 @@ export abstract class LanguageClient {
     params: LSP.LanguageParams<M>
   ): Promise<LSP.LanguageAnswer<M>>
 
+  /**
+   * What a compile of `project` as the editor has it wrote, compiled off the page's thread:
+   * for the page to take as its own (`SP.SpellProject.takeCompiled()`).
+   * - `undefined` where the page compiles it itself:  in its own thread, or a project the worker hasn't been sent,
+   *   or a compile that failed there (said on the console).
+   */
+  async compile(_project: SP.SpellProject): Promise<SP.CompiledEntry | undefined> {
+    return undefined
+  }
+
   /** `file`'s state was made, holding `text`. */
   opened(_file: SP.SpellFile, _text: string): void {}
 
@@ -130,9 +140,36 @@ class WorkerClient extends LanguageClient {
     for (const { again } of waiting) again()
   }
 
-  opened(file: SP.SpellFile, text: string): void {
-    this.post({ kind: "open", uri: LanguageClient.uriOf(file), projectId: file.project.projectId, text })
+  async compile(project: SP.SpellProject): Promise<SP.CompiledEntry | undefined> {
+    if (this.hasStopped || !this.openProjects.has(project.projectId)) return undefined
+    const id = ++this.lastId
+    try {
+      return await new Promise<SP.CompiledEntry>((resolve, reject) => {
+        const again = () => reject(new Error("the language worker stopped"))
+        this.waiting.set(id, { resolve: resolve as (answer: unknown) => void, reject, again })
+        const pagesInPlay = project.pagesInPlay && [...project.pagesInPlay]
+        this.post({ kind: "compile", id, projectId: project.projectId, ...(pagesInPlay && { pagesInPlay }) })
+      })
+    } catch (error) {
+      console.error(`the language worker couldn't compile ${project.projectId}:  the page compiles it`, error)
+      return undefined
+    }
   }
+
+  opened(file: SP.SpellFile, text: string): void {
+    this.openProjects.add(file.project.projectId)
+    const { projectId, pagesInPlay } = file.project
+    this.post({
+      kind: "open",
+      uri: LanguageClient.uriOf(file),
+      projectId,
+      text,
+      ...(pagesInPlay && { pagesInPlay: [...pagesInPlay] })
+    })
+  }
+
+  /** The projects whose files were opened and not closed:  the worker has every edit of theirs. */
+  private openProjects = new Set<string>()
 
   changed(file: SP.SpellFile, changes: ChangeSet): void {
     const list: LSP.LanguageTextChange[] = []
@@ -141,6 +178,7 @@ class WorkerClient extends LanguageClient {
   }
 
   closed(project: SP.SpellProject): void {
+    this.openProjects.delete(project.projectId)
     this.post({ kind: "close", projectId: project.projectId })
   }
 
@@ -174,6 +212,7 @@ export type LanguageWorkerMessage =
   | ({ kind: "change" } & LSP.LanguageChange)
   | { kind: "close"; projectId: string }
   | { kind: "request"; id: number; method: LSP.LanguageMethod; params: unknown }
+  | ({ kind: "compile"; id: number } & LSP.LanguageCompile)
 
 /** The language worker's reply to a request:  its answer, or the error it threw. */
 export type LanguageWorkerReply = { id: number; answer: unknown } | { id: number; error: LanguageWorkerError }

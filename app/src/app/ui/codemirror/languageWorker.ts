@@ -21,7 +21,13 @@ addEventListener("message", (event: MessageEvent<LanguageWorkerMessage>) => {
   if (message.kind === "open") host.open(message)
   else if (message.kind === "change") host.change(message)
   else if (message.kind === "close") host.close(message)
-  else /* if (message.kind === "request") */ {
+  else if (message.kind === "compile") {
+    const { id, ...compile } = message
+    host.compile(compile).then(
+      (answer) => reply({ id, answer }),
+      (error: unknown) => reply({ id, error: plainError(error) })
+    )
+  } else /* if (message.kind === "request") */ {
     const { id, method, params } = message
     host.request(method, params as never).then(
       (answer) => reply({ id, answer }),

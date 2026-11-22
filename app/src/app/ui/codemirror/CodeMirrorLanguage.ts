@@ -132,7 +132,7 @@ export class CodeMirrorLanguage {
    * The answer to `method` about this file, `params` naming the rest:  the file's address is added.
    * - throws what the service throws (`LSP.RenameError` ...)
    */
-  private ask<M extends LSP.LanguageMethod>(
+  ask<M extends LSP.LanguageMethod>(
     method: M,
     params: Omit<LSP.LanguageParams<M>, "textDocument">
   ): Promise<LSP.LanguageAnswer<M>> {

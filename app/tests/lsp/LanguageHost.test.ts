@@ -63,6 +63,19 @@ describe("LanguageHost", () => {
     expect(back!.range).toEqual(first!.range)
   })
 
+  test("compiles the project as it has it, handing back what the compile wrote, for the editor to take", async () => {
+    host.change({ uri, changes: [[0, 0, "-- compiled with this line\n"]] })
+    const entry = await host.compile({ projectId: solitaire })
+    expect(entry.compiled).toContain("class Card")
+    expect(entry.targets["js/solid"]!.map).toContain("Card.spell")
+    const project = host.service.addresses.fileFor(uri)!.project
+    await project.takeCompiled(entry, { save: false })
+    expect(project.compiledFrom).toBe("elsewhere")
+    expect(project.compiled).toBe(entry.compiled)
+    host.change({ uri, changes: [[0, 27, ""]] })
+    expect((await host.compile({ projectId: solitaire })).compiled).not.toBe(entry.compiled)
+  })
+
   test("a file it doesn't know answers the table's fallback", async () => {
     const elsewhere = { uri: LSP.AppAddresses.uriOf(`${solitaire}/Nowhere.spell`) }
     expect(await host.request("textDocument/documentSymbol", { textDocument: elsewhere })).toEqual([])

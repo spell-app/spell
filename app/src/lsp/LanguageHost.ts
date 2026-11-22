@@ -13,6 +13,7 @@ import { LSP } from "spell/app/lsp"
  * - It parses once the edits pause (`PARSE_WAIT`), or at once when a request comes:
  *   so an answer is always about the text the editor had when it asked.
  * - Requests are the ONE table's (`LSP.LANGUAGE_REQUESTS`), the same VS Code's language server answers.
+ * - It compiles a project when asked (`compile()`), handing back what the compile wrote, for the editor to run.
  * - Its position in the import graph:  the parser and the language service;
  *   no DOM and no editor, so it runs in a worker, or in the page's own thread for a test.
  ****************/
@@ -31,8 +32,9 @@ export class LanguageHost {
    * - Loads its project the first time;  the file then takes `text` if it isn't what was loaded.
    * - NEVER throws:  a project that won't load answers nothing (the fallbacks), and says so on the console.
    */
-  open({ uri, projectId, text }: LanguageOpen): void {
+  open({ uri, projectId, text, pagesInPlay }: LanguageOpen): void {
     const opening = this.projectFor(projectId).then((project) => {
+      project.pagesInPlay = pagesInPlay ? new Set(pagesInPlay) : undefined
       const file = this.fileFor(uri)
       if (!file || file.project !== project) return
       if (file.contents !== text) project.takeText(file, text)
@@ -80,19 +82,35 @@ export class LanguageHost {
     return LSP.answerRequest(this.service, file, method, params)
   }
 
+  /**
+   * Compile project `projectId` as it is now, every message before this in, and answer what the compile wrote:
+   * for the editor to take as its own (`SP.SpellProject.takeCompiled()`), the program run on the page as ever.
+   * - Nothing saved:  the editor saves what it takes, as it would its own compile's.
+   * - `pagesInPlay`:  the alone pages the editor's compile is limited to, by path (`SP.SpellProject.pagesInPlay`)
+   * - throws what the compile throws
+   */
+  async compile({ projectId, pagesInPlay }: LanguageCompile): Promise<SP.CompiledEntry> {
+    await this.pending
+    const project = await this.projectFor(projectId)
+    project.pagesInPlay = pagesInPlay ? new Set(pagesInPlay) : undefined
+    await project.compile(undefined, { save: false, cached: false })
+    return project.cachedEntry()
+  }
+
   ////////////////
   // ## Projects
   ////////////////
 
-  /** Project `projectId`, loaded and parsed:  once each. */
+  /**
+   * Project `projectId`, loaded:  once each.
+   * - Parsed later (`parseNow()`), once a message has said which of its pages are in play, as the editor's are
+   *   (`SP.SpellProject.pagesInPlay`):  a guide's 50,000 lines parsed whole took 18 seconds.
+   */
   private projectFor(projectId: string): Promise<SP.SpellProject> {
     let loading = this.projects.get(projectId)
     if (!loading) {
       const project = new SP.SpellProject(projectId)
-      loading = project
-        .load(undefined)
-        .then(() => project.parse())
-        .then(() => project)
+      loading = project.load(undefined).then(() => project)
       loading.catch((error: unknown) => console.error(`LanguageHost:  couldn't load ${projectId}`, error))
       this.projects.set(projectId, loading)
     }
@@ -126,11 +144,15 @@ export class LanguageHost {
     )
   }
 
-  /** Parse `project`'s waiting text now.  NEVER throws:  a parse error shows on its line, as ever. */
+  /**
+   * Parse `project`'s waiting text now:  the whole project, the first time.
+   * - NEVER throws:  a parse error shows on its line, as ever.
+   */
   private async parseNow(project: SP.SpellProject): Promise<void> {
     clearTimeout(this.parseTimers.get(project))
     this.parseTimers.delete(project)
-    await project.parseWaitingText().catch((error: unknown) => console.error("LanguageHost:  couldn't parse", error))
+    const parsing = project.needsFullParse ? project.parse() : project.parseWaitingText()
+    await parsing.catch((error: unknown) => console.error("LanguageHost:  couldn't parse", error))
   }
 
   /** Each project's wait before it parses. */
@@ -148,6 +170,16 @@ export type LanguageOpen = {
   projectId: string
   /** its text in the editor */
   text: string
+  /** the alone pages its project is limited to in the editor, by path (`SP.SpellProject.pagesInPlay`);  none:  every file */
+  pagesInPlay?: string[]
+}
+
+/** A project to compile:  `LanguageHost.compile()`. */
+export type LanguageCompile = {
+  /** its id, `@spell/examples/Solitaire` */
+  projectId: string
+  /** the alone pages the compile is limited to, by path;  none:  every file */
+  pagesInPlay?: string[]
 }
 
 /** A file's text changed:  `LanguageHost.change()`. */
