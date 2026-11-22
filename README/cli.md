@@ -311,6 +311,7 @@ If a pony in a wizard hat tells you "Neigh-tive custom elements, at your service
 | `spell wwod [check] [files...]` | checks every WWOD citation and repo path in WWOD, every `AGENTS.md` and `CLAUDE.md`, and the skills |
 | `spell wwod init` | asks which of the rules the `spell` package ships a project's agents should read, and writes them into its `CLAUDE.md` and `AGENTS.md` ([README/agents.md](agents.md#using-these-rules-in-your-own-project)) |
 | `spell deps [check]` | fails on a deprecated package, or a critical or high advisory not on `deps-known-open.json5`;  runs by itself before a push to `main` |
+| `spell names [check] [revisions...]` | fails when what's about to leave this machine names something on your private list, `~/.spell/private-names`:  files, commit messages, branch names, pictures;  runs by itself before every push, and in `spell publish` |
 | `spell publish [--dry-run] [--tag <tag>]` | builds, packs and checks the npm packages, installs them in a scratch project, then publishes them under the tag `next`, lowest first;  `--dry-run` stops before publishing;  a real one runs in the publish workflow, started from GitHub's Actions tab, with no npm token |
 | `spell map <verb>` | a map of every repo's code, and one of the docs:  what already does this, what uses it, which pages name it ([below](#asking-the-map)) |
 | `spell coherence score` | how coherent the code is:  each mechanism's copies left and its users, scored 0-100, and saved so it trends ([below](#scoring-coherence)) |
@@ -363,6 +364,7 @@ run from any folder of an epic's worktree, `spell server start` starts that work
 | `spell wwod init --here` | in a workspace, writes in the nearest folder with a `package.json`, not the workspace's root (asked, else the root) |
 | `spell wwod init --dry-run` | says what it would change, and writes nothing |
 | `spell deps --json` | the report as JSON |
+| `spell names check --push <remote>` | what git's pre-push hook hands it, on stdin |
 | `spell publish --dry-run` | everything but the publish:  build, pack, check, scratch install |
 | `spell publish --no-scratch` | skips the scratch install, which needs the network |
 | `spell publish --json` | the packed packages and every check as JSON |

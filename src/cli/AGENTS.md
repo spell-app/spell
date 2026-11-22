@@ -71,7 +71,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
 - The kit's own commands:  [commands.ts](commands.ts) is their list, [commands/](commands/) their work.
 
   ```
-  server  bundle  commands  wwod  local  deps  readme  map  coherence  runbook  publish  epic  pony  (help is the program's own)
+  server  bundle  commands  wwod  local  deps  names  readme  map  coherence  runbook  publish  epic  pony  (help is the program's own)
   ```
 
 - `spell publish`'s work is a folder of its own, [publish/](publish/) (`spell/cli/publish`), with its own barrel:

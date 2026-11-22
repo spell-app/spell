@@ -271,7 +271,8 @@ function links(): number {
 }
 
 /**
- * The git hook that checks the dependencies before a push to `main` (`tools/pre-push.ts`;  epic `epic-engine` P67).
+ * The git hook that checks every push for the private names (epic `epic-engine` T153), and the dependencies before
+ * a push to `main` (P67):  `tools/pre-push.ts`.
  * - In the checkout's shared git folder, so every worktree has it;  it runs whichever checkout is pushing's own tool.
  * - A checkout from before the tool has no such file:  the hook does nothing there.
  * - Leaves alone a hook it didn't write, and a checkout with no git (an unpacked copy).

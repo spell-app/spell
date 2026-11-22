@@ -359,6 +359,9 @@ export class PackageBuild {
    * Copy the repo's built declarations (`dist-types/src/`, `spell-types`'s) into `dist/`, but those of excluded files,
    * without their source-map line:  the source doesn't ship.
    * - None built (spell-epic and spell-app have none:  no repo above reads them):  nothing to copy.
+   * - Only those whose source is still there (epic `epic-engine` T153):  an incremental build never deletes the
+   *   declarations of a file moved or deleted, so a checkout's `dist-types/` keeps them, as main's held 50 naming what
+   *   the repo mustn't, from before the source changed.
    */
   private copyDeclarations(): void {
     const types = join(this.root, "dist-types", "src")
@@ -368,6 +371,8 @@ export class PackageBuild {
       if (!file.endsWith(".d.ts")) continue
       const source = file.replace(/\.d\.ts$/, ".ts")
       if (matchesAny(source, excluded) || matchesAny(`${source}x`, excluded)) continue
+      // left from a source file since moved or deleted:  the build never deletes one, and it'd ship stale
+      if (!existsSync(join(this.root, "src", source)) && !existsSync(join(this.root, "src", `${source}x`))) continue
       const out = join(this.dist, file)
       if (existsSync(out)) continue // a hand-written `.d.ts`, copied from `src/`
       mkdirSync(dirname(out), { recursive: true })
