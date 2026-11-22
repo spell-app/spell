@@ -212,6 +212,33 @@ test("formats a page with no questions:  its comments and notes, no count of wha
   ])
 })
 
+// epic `ast-markup`:  a SEEDED box sends only what changed;  the rest reads as kept
+test("formats seeded boxes:  the person's version, an emptied one, the ones kept as suggested", () => {
+  const page = join(docs, "seeded.html")
+  const box = (id, label) =>
+    `<ui-section id="${id}" label="${label}"><epic-text-box for="${id}" code>` +
+    `<script type="text/plain"><ui-button label="{x}"></ui-button></script></epic-text-box></ui-section>`
+  writeFileSync(page, `<h1>Shapes</h1>${box("s1", "1. Buttons")}${box("s2", "2. Lists")}${box("s3", "3. Forms")}`)
+  const answer = {
+    page: "/x",
+    answered: "2026-11-21T02:22:00.000Z",
+    changes: 0,
+    answers: {},
+    comments: { s1: '<ui-button label="{y}">\n  go\n</ui-button>', s2: "(emptied:  none of the suggested text kept)" },
+    notes: ""
+  }
+  expect(formatAnswer(page, answer).split("\n").slice(1)).toEqual([
+    "  Comments:",
+    "    1. Buttons, their version of the suggestion:",
+    '      <ui-button label="{y}">',
+    "        go",
+    "      </ui-button>",
+    "    2. Lists:  (emptied:  none of the suggested text kept)",
+    "  Kept as suggested:  3. Forms"
+  ])
+  rmSync(page)
+})
+
 // epic `epic-engine` T79 (request r71):  the page's bullhorn comments, sent with its answer
 test("formats the page's bullhorn comments sent with it, and how to answer each", () => {
   const page = join(docs, "pages/details/pick-layout.html")

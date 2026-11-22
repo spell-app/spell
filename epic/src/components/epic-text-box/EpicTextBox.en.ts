@@ -13,7 +13,7 @@ import type { EpicVocabulary } from "spell/epic/definitions"
 export const epicTextBoxVocabulary = {
   tag: "epic-text-box",
   topics: ["forms", "text"],
-  aka: ["notes box", "comment box", "textarea", "text field", "other", "feedback"],
+  aka: ["notes box", "comment box", "textarea", "text field", "other", "feedback", "suggested text", "code box"],
   skeleton: "2 tall",
   noun: "text box",
   ui: false,
@@ -22,7 +22,8 @@ export const epicTextBoxVocabulary = {
     "text.  What you type is part of the page's answer, by `type` and `for`:  the page's notes, a comment on a " +
     "section or an option, a question's Other, a choice page's feedback.  The page's notes box also " +
     "shows what the page KEPT (P18):  text typed for a question, option or section an agent's rewrite took off " +
-    "the page, under its old title, sent with the rest until you drop it.",
+    "the page, under its old title, sent with the rest until you drop it.  A box may start with Claude's SUGGESTED " +
+    "text, its seed (epic `ast-markup`):  you edit it into your own, and a box left as it was is sent as kept.",
   attributes: [
     {
       name: "type",
@@ -59,6 +60,13 @@ export const epicTextBoxVocabulary = {
       description:
         "How tall it grows before it scrolls, a CSS length:  `40vh`, `50vh`;  none:  a third of the window.  " +
         "For a box another element draws, with room of its own (`<epic-agents>`' redirect box, `<epic-new-item>`)."
+    },
+    {
+      name: "code",
+      kind: "boolean",
+      description:
+        "For code or markup:  monospace, lines never wrap (it scrolls sideways), Tab indents (Shift-Tab takes it " +
+        "back;  Escape, then Tab, moves on);  it still grows with its lines."
     }
   ],
   events: [],
@@ -80,9 +88,16 @@ export const epicTextBoxVocabulary = {
     {
       name: "kept-item",
       description: "One kept text:  its old title (the id it was under on hover), what was typed, and a × to drop it."
+    },
+    {
+      name: "reset",
+      description: "A seeded box's button back to its suggested text, under its field while what's in it differs."
     }
   ],
-  states: [{ name: "filled", description: "Something is typed in it." }],
+  states: [
+    { name: "filled", description: "Something is typed in it." },
+    { name: "edited", description: "A seeded box no longer holds its suggested text." }
+  ],
   texts: [
     { key: "notes", text: "Notes for Claude:  anything, any time", description: "A `notes` box's placeholder." },
     { key: "note", text: "Your note", description: "A `note` box's placeholder, without one of its own." },
@@ -106,6 +121,12 @@ export const epicTextBoxVocabulary = {
       description: "A kept text's ×'s tooltip."
     },
     { key: "comment", text: "Comment on this section", description: "A `comment` box's placeholder." },
+    { key: "reset", text: "Back to the suggestion", description: "A seeded box's reset button." },
+    {
+      key: "resetTip",
+      text: "Put Claude's suggested text back, and lose your changes",
+      description: "The reset button's tooltip."
+    },
     { key: "other", text: "Other:  your own answer", description: "An `other` box's placeholder." },
     {
       key: "feedback",
@@ -113,5 +134,13 @@ export const epicTextBoxVocabulary = {
       description: "A `feedback` box's placeholder."
     }
   ],
-  children: []
+  children: [
+    {
+      tag: "flow",
+      max: 1,
+      description:
+        'Its SEED, the text it starts with:  a `<script type="text/plain">` (or a `<template>`), read as ' +
+        "`<ui-code>` reads its own, dedented;  `<`, quotes and braces need no escaping.  Sent only once it's changed."
+    }
+  ]
 } as const satisfies EpicVocabulary
