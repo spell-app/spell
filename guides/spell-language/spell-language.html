@@ -1,0 +1,906 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Spell Language</title>
+    <meta
+      name="description"
+      content="Writing Spell:  templates and their properties, new words from aliases, actions and the events and menus that run them, lists, views that draw themselves (slots, lists, ids, dragging), pages, and tests, every example in today's plain Spell."
+    />
+    <meta name="spell-audience" content="makers" />
+    <meta name="spell-topic" content="Writing Spell" />
+    <meta name="spell-start-here" content="1" />
+    <meta name="spell-start-here" content="5" data-anchor="views" data-title="Views" />
+    <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+  </head>
+  <body class="spell-doc-page">
+    <spell-site-header></spell-site-header>
+    <div class="spell-doc">
+      <main class="spell-doc-main">
+        <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+          <ui-breadcrumb>Guides</ui-breadcrumb>
+          <ui-breadcrumb selected>The Spell Language</ui-breadcrumb>
+        </ui-breadcrumbs>
+        <ui-sticky class="spell-h1"
+          ><header class="spell-page-head"><h1>The Spell Language</h1></header></ui-sticky
+        >
+        <!-- prettier-ignore -->
+        <ui-code language="spell">a "card" is a draggable two sided view
+	its "rank" is one of ace, 2 ... 10, jack, queen, king
+	its "suit" is one of clubs, diamonds, hearts or spades
+	its "color" is
+		red if its suit is diamonds or hearts
+		black otherwise
+	it "is a face card" if its rank is jack, queen or king
+	it "is the (rank) of (suit)"</ui-code>
+        <p class="lede">
+          That's a playing card, and it's a program: it compiles, it draws, and it can be dragged. Each quoted line
+          teaches Spell new words, so the next line can say <code>the card is the queen of spades</code>. This page is
+          how to write Spell, a part of the language at a time.
+        </p>
+        <ui-list class="spell-meta">
+          <ui-item icon="user">Written for: someone writing their first Spell program, or their fiftieth</ui-item>
+          <ui-item icon="flask"
+            >Checked: 2026-11-21, every example compiled and linted with that day's <code>spell</code></ui-item
+          >
+          <ui-item icon="book open"
+            >The reference beside it:
+            <a href="/parser/README-spell.md" target="src-parser-readme-spell-md">README-spell</a>, every line the
+            language reads and the JavaScript it becomes</ui-item
+          >
+        </ui-list>
+
+        <ui-section id="1-summary" label="1. What it adds up to" sticky collapsible dividing open="false">
+          <ul>
+            <li>
+              <b>A program is a list of what's true.</b> A line names a thing, and the lines indented under it say what
+              it has and does.
+            </li>
+            <li>
+              <b>It grows its own words.</b> A quoted phrase, <code>it "is a face card" if ...</code>, is a new way to
+              talk from the next line on.
+            </li>
+            <li>
+              <b>It doesn't guess.</b> The same line compiles to the same code every time. A line nothing reads is an
+              error where it stands, and <code>spell lint</code> names its file, line and column.
+            </li>
+            <li>
+              <b>A view draws itself.</b> <code>a "card" is a view</code> makes every card its own element on the page,
+              with its own drawing, slots and styles.
+            </li>
+            <li><b>Waiting is free.</b> An action that pauses makes every caller wait, with no word in the source.</li>
+            <li>
+              <b>It speaks Spanish too:</b> every line here has a Spanish twin (<a
+                href="/guides/spanish.html"
+                target="src-guides-spanish-html"
+                >Spell in Spanish</a
+              >).
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="2-a-first-program" label="2. A first program" sticky collapsible dividing open="false">
+          <p>
+            Save the card above as <code>Card.spell</code> in a folder of its own, beside a project file holding just
+            <code>{}</code>. Then ask Spell how it reads a line about it:
+          </p>
+          <!-- prettier-ignore -->
+          <ui-code language="sh" collapsed>spell parse --in ./game 'the card is a new card whose rank is 7 and suit is hearts
+print the card is a face card, the card is not a 7, the color of the card'</ui-code>
+          <ui-accordion class="spell-code" appearance="styled">
+            <ui-title>What it printed, the end of it · 7 lines</ui-title>
+            <ui-content>
+              <pre><code class="language-text">... the match tree, and in it:
+    expression_suffix › is_a_face_card  is a face card
+    expression_suffix › is_a_$rank  is not a 7
+
+export const card = new Card({ rank: 7, suit: "hearts" })
+core.console.log(card.isAFaceCard, !card.isARank(7), card.color)</code></pre>
+            </ui-content>
+          </ui-accordion>
+          <ul>
+            <li>
+              <code>is_a_face_card</code> and <code>is_a_$rank</code> are rules nobody wrote: the card's own lines made
+              them, a moment before.
+            </li>
+            <li>
+              The <code>not</code> came free: a phrase that starts with <code>is</code> reads <code>is not</code> too.
+            </li>
+            <li>
+              If you've grown a grammar for a parser generator, that's the part to notice. There, a new phrase is an
+              edit to a grammar file and a rebuild. Here, a program adds rules of its own as it's read.
+            </li>
+            <li>
+              The commands you'll use most:
+              <ul>
+                <li><code>spell lint ./game</code>: every error, one a line, as file, line and column</li>
+                <li><code>spell test ./game</code>: runs every <code>to test ...</code> (section 12)</li>
+                <li><code>spell run ./game</code>: compiles it and opens it in your browser</li>
+                <li><code>spell compile ./game --stdout</code>: prints the JavaScript, and writes nothing</li>
+              </ul>
+            </li>
+            <li>
+              The friendliest next step is a whole app, simplest first:
+              <a href="/guides/examples/examples.html" target="src-guides-examples-examples-html">Example Apps</a>.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="3-lines" label="3. A line, and what's under it" sticky collapsible dividing open="false">
+          <p>
+            A line with lines indented under it needs no colon: what's under it is its body. Inside a template, a bare
+            line is about the template the first line names.
+          </p>
+          <!-- prettier-ignore -->
+          <ui-code language="spell" collapsed>a "card" is a draggable two sided view, aka "playing card"
+	-- A playing card:  its rank and suit, and which way up it is
+	its "score" is a number, starting at -1
+
+	group "Drawing"
+	to draw its front
+		&lt;text color={its color}&gt;{its rank} of {its suit}&lt;/text&gt;</ui-code>
+          <ul>
+            <li>
+              <b>Abilities</b> go before the template: <code>draggable</code>, <code>droppable</code>,
+              <code>selectable</code> and <code>clickable</code>.
+            </li>
+            <li>
+              <b>The first comment inside</b> a declaration describes it. An editor shows it on hover, and the compiled
+              code carries it as a doc comment.
+            </li>
+            <li>
+              <b>A comment is <code>--</code>, on a line of its own.</b> An old <code>//</code> at a line's end still
+              reads, with a warning; <code>spell lint --fix</code> moves it to the line under it.
+            </li>
+            <li>
+              <b>After a comma</b>, the declaring line can say more: a short name (<code>, aka "playing card"</code>), a
+              start (<code>, starting at -1</code>), a default (<code>, with default down</code>).
+            </li>
+            <li>
+              <b><code>group "Drawing"</code></b> heads the members under it, as the editor's Inspector shows them.
+            </li>
+            <li>A colon still reads where one is written: older Spell, <code>a game:</code>, compiles the same.</li>
+          </ul>
+          <ui-accordion class="spell-aside" appearance="styled">
+            <ui-title>The same facts as sentences</ui-title>
+            <ui-content>
+              <p>A template can also be written one sentence a line, with no body. Both compile to the same class.</p>
+              <!-- prettier-ignore -->
+              <ui-code language="spell" collapsed>a card is a thing
+cards have a suit as one of clubs, diamonds, hearts or spades
+the color of a card is red if its suit is either diamonds or hearts otherwise it is black
+a card "is a face card" if its rank is one of jack, queen or king</ui-code>
+              <ul>
+                <li>The body form is how every example is written today; sentences suit a one-off fact.</li>
+                <li>A file may mix them: a sentence can add to a template another file declares.</li>
+              </ul>
+            </ui-content>
+          </ui-accordion>
+        </ui-section>
+
+        <ui-section id="4-templates" label="4. Templates and properties" sticky collapsible dividing open="false">
+          <p>A template is a kind of thing. Its properties are stored, or worked out each time they're read.</p>
+          <!-- prettier-ignore -->
+          <ui-code language="spell" collapsed>a "pile" is a viewable list of cards
+	its "layout" is one of stacked or vertical
+	its "value" is
+		0 if it is empty
+		otherwise the value of its last card
+
+solitaire is an app
+	"stock" is a new pile
+	its "score" is a number</ui-code>
+          <ul>
+            <li>
+              <b>The built-in kinds:</b> <code>a thing</code>, <code>a list of cards</code>, <code>an app</code>, and
+              the ones that draw: <code>a view</code>, <code>a viewable list</code>, <code>a two sided view</code>,
+              <code>a page</code>.
+            </li>
+            <li>
+              <b>A stored property</b> says its type or its choices: <code>its "rank" is one of ace, 2 ... 10</code>.
+              <code>2 ... 10</code> is the nine numbers between.
+            </li>
+            <li>
+              <b>A worked-out one</b> has its values under it, one a line, each with its condition:
+              <code>its "value" is</code> above.
+            </li>
+            <li>
+              <b>A member made new</b> needs no <code>its</code>: <code>"stock" is a new pile</code> is the app's stock,
+              and its id is <code>stock</code>.
+            </li>
+            <li>
+              <b>Choices are a kind of their own:</b> a card's suits make <code>card suit</code>. Another template can
+              have one, <code>its "suit" is a card suit</code>; the list is <code>card suits</code>.
+            </li>
+            <li>
+              <b>Names can be several words.</b> <code>the short rank of a card</code> reads <code>short rank</code>,
+              stopping at the first word like <code>of</code>, <code>is</code> or <code>and</code>.
+            </li>
+            <li>
+              <b>Every file knows every template</b> of its project, so a line may use one declared further down, or in
+              another file.
+            </li>
+            <li>
+              <b><code>the X</code> and <code>its X</code></b
+              >: inside an action, <code>the X</code> is the thing the action runs on, <code>its X</code> whatever
+              <code>it</code> is now. <code>the card's name</code> is <code>the name of the card</code>, said the other
+              way.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="5-aliases" label="5. New words:  aliases" sticky collapsible dividing open="false">
+          <p>An alias in quotes is a new phrase, as a rule of its own, from the next line on.</p>
+          <ui-table celled padding="compact" appearance="striped">
+            <table>
+              <tbody>
+                <tr>
+                  <th>The card's line</th>
+                  <th>What later lines can say</th>
+                </tr>
+                <tr>
+                  <td><code>it "is a face card" if its rank is jack, queen or king</code></td>
+                  <td><code>the card is a face card</code>, <code>the card is not a face card</code></td>
+                </tr>
+                <tr>
+                  <td><code>it "is a (rank)"</code></td>
+                  <td><code>the card is a 7</code>, <code>the card is a queen</code> ...</td>
+                </tr>
+                <tr>
+                  <td><code>it "is the (rank) of (suit)"</code></td>
+                  <td><code>the card is the queen of spade</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+          <ul>
+            <li>A blank in brackets, <code>(rank)</code>, stands for each value of that list.</li>
+            <li>
+              The blank reads the word as you wrote it: <code>(suit)</code> reads <code>spade</code>,
+              <code>(suits)</code> reads <code>spades</code>. Write the one you'll say.
+            </li>
+            <li>An alias reaches every file of its project, and any project that imports it.</li>
+            <li>
+              <b>The catch, and it's a sharp one:</b> a phrase in the other form doesn't fail, it reads as something
+              else. <code>spell lint</code> passes it, and only a test catches it: one more reason to write tests
+              (section 12).
+            </li>
+            <li>
+              <b>Not yet:</b> an alias used above the line that makes it. <code>spell lint</code> says so at the line.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="6-actions" label="6. Actions" sticky collapsible dividing open="false">
+          <p>
+            <code>to ...</code> defines an action. Its first line is how you call it, and <code>a</code> or
+            <code>an</code> before a known type is a blank to fill.
+          </p>
+          <!-- prettier-ignore -->
+          <ui-code language="spell" collapsed>to move a card to a pile
+	add the card to the pile
+
+to deal
+	for card in the deck
+		move it to the stock
+		pause for 50 msec
+	print "dealt"</ui-code>
+          <ul>
+            <li>
+              <b>No brackets needed:</b> <code>to move a card to a pile</code> takes a card and a pile.
+              <code>the</code> before a word keeps it literal: <code>to reset the stock pile</code>.
+            </li>
+            <li>
+              <b>The types choose:</b> with <code>to put a card on a pile</code> and
+              <code>to put a chip on a stack</code>, <code>put the card on the pile</code> calls the card's.
+            </li>
+            <li>
+              <b>An action of a template</b> may be written in any file: Solitaire's <code>to play a card</code> is a
+              method of its card.
+            </li>
+            <li>
+              <b>The last line is the value</b>, when it is one, as in Ruby: no <code>return</code> needed. A step
+              (<code>set</code>, <code>if</code>, <code>print</code>) stays a step.
+            </li>
+            <li>
+              <b>Waiting is free.</b> <code>pause for 50 msec</code> makes <code>deal</code> wait, and everything that
+              calls <code>deal</code>, with no word in the source.
+              <ul>
+                <li>
+                  The old <code>animation</code>, <code>wait for</code> and <code>await</code> are errors now, and
+                  <code>spell lint --fix</code> rewrites them.
+                </li>
+                <li>
+                  A program's top level starts its actions and carries on, so a long deal doesn't hold the first draw.
+                </li>
+              </ul>
+            </li>
+            <li>
+              <b>Not waiting</b> says so: <code>at the same time</code> runs the lines under it at once, and
+              <code>meanwhile load the scores</code> (or <code>load the scores without waiting</code>) starts it and
+              carries on.
+            </li>
+            <li>
+              <b>What a person starts runs one at a time:</b> a double click on Deal deals once, and three clicks during
+              a deal run the third.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="7-lists" label="7. Lists" sticky collapsible dividing open="false">
+          <!-- prettier-ignore -->
+          <ui-code language="spell" collapsed>a card belongs to one pile
+
+a "discard pile" is a pile
+	it can never take a card
+	its cards are draggable when the card is its last card
+
+a "column" is a pile
+	it is droppable when
+		it is empty and the card is a king</ui-code>
+          <ul>
+            <li>
+              <b>Positions count from 1</b>, as people count: <code>the first card of the deck</code>,
+              <code>item 3 of the hand</code>, <code>the last card</code>.
+            </li>
+            <li>
+              <b><code>where</code></b> filters, and <code>sorted by</code> orders:
+              <code>cards in the pile where it is face up</code>,
+              <code>every message, sorted by its sent, newest first</code>.
+            </li>
+            <li>
+              <b><code>a card belongs to one pile</code></b
+              >: moving a card to a pile takes it out of the last one, and <code>the pile of the card</code> is the pile
+              holding it.
+            </li>
+            <li>
+              <b>A list guards what it takes and gives up.</b> <code>move the card to the column</code> asks both piles
+              first, and nothing moves if either says no.
+              <ul>
+                <li><code>it can never take a card</code>, <code>it can never let go of a card</code>: always no</li>
+                <li><code>it is droppable when ...</code>: what it takes, and its cards can be dropped on it</li>
+                <li>
+                  <code>its cards are draggable when ...</code>: what it gives up, and its cards can be dragged off it
+                </li>
+                <li>
+                  Asking without moving: <code>the column can take the card</code>,
+                  <code>the stock cannot give up the card</code>
+                </li>
+                <li>
+                  <code>add</code>, <code>remove</code> and <code>clear</code> never ask: dealing, gathering cards back.
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="8-events" label="8. Events" sticky collapsible dividing open="false">
+          <p>A thing hears an event by a handler, its event on its own line and its steps under it.</p>
+          <!-- prettier-ignore -->
+          <ui-code language="spell" collapsed>a "card" is a two sided view
+	it sends "flipped" with side as a direction
+	on double click
+		turn it over
+		send flipped to it with side = up
+
+a "pile" is a viewable list of cards
+	when flipped
+		print "a card turned over"
+
+a card belongs to one pile</ui-code>
+          <ul>
+            <li><code>on</code> and <code>when</code> say the same.</li>
+            <li>
+              <b><code>send</code> goes to ONE thing</b>, then up its chain until a handler takes it: the thing, the
+              list holding it, the app, then the program's own listeners.
+              <ul>
+                <li><code>pass event</code> hands it on up the chain.</li>
+                <li>
+                  An event still happening (<code>closing</code>, <code>dropping</code>) can be stopped with
+                  <code>cancel event</code>.
+                </li>
+                <li>
+                  <code>target</code> is the thing whose handler is running, <code>the original target</code> the thing
+                  it was sent to.
+                </li>
+              </ul>
+            </li>
+            <li>
+              <b><code>trigger card-click</code></b> goes to every listener at once, with no chain.
+            </li>
+            <li>
+              <b>The mouse and keys</b> can be read anywhere: <code>the shift key is down</code>,
+              <code>the mouse is down</code>, <code>the thing under the mouse</code>.
+            </li>
+            <li>
+              <b><code>while the mouse is down</code></b> holds while it's true: every property its steps set goes back
+              as the mouse goes up.
+            </li>
+          </ul>
+          <ui-accordion class="spell-aside" appearance="styled">
+            <ui-title>Every event a thing hears</ui-title>
+            <ui-content>
+              <ui-table celled padding="compact" appearance="striped">
+                <table>
+                  <tbody>
+                    <tr>
+                      <th>Event</th>
+                      <th>When</th>
+                    </tr>
+                    <tr>
+                      <td>
+                        <code>click</code>, <code>double click</code>, <code>right click</code>,
+                        <code>center click</code>
+                      </td>
+                      <td>a click on the thing's view, innermost thing first</td>
+                    </tr>
+                    <tr>
+                      <td><code>long press</code></td>
+                      <td>a finger held still half a second; with no mouse, a <code>right click</code> too</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <code>mouse down</code>, <code>mouse up</code>, <code>mouse enter</code>,
+                        <code>mouse leave</code>
+                      </td>
+                      <td>a button pressed or let go; the mouse coming onto the view, or leaving it</td>
+                    </tr>
+                    <tr>
+                      <td><code>mouse still down</code></td>
+                      <td>held a second, moving 4 pixels at most</td>
+                    </tr>
+                    <tr>
+                      <td><code>key down</code></td>
+                      <td>a key pressed, to the focused thing, else the app; <code>key</code> is its name</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <code>a card is dragged over it</code>, <code>dragged out of it</code>,
+                        <code>dropped on it</code>
+                      </td>
+                      <td>a drag over a list's view (<a href="#dragging">Dragging and dropping</a>)</td>
+                    </tr>
+                    <tr>
+                      <td><code>when creating a card</code></td>
+                      <td>a thing is made: its creation step, not an event</td>
+                    </tr>
+                    <tr>
+                      <td>one a template declares, <code>flipped</code></td>
+                      <td><code>send flipped</code>: the thing, then up its chain</td>
+                    </tr>
+                    <tr>
+                      <td>one the program triggers, <code>card-click</code></td>
+                      <td><code>trigger card-click</code>: the app, every page, every listener</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </ui-table>
+            </ui-content>
+          </ui-accordion>
+        </ui-section>
+
+        <ui-section id="9-menus" label="9. Actions in menus and on keys" sticky collapsible dividing open="false">
+          <p>
+            An action can describe itself, in lines under it before its steps: then menus, keys and buttons know it.
+          </p>
+          <!-- prettier-ignore -->
+          <ui-code language="spell" collapsed>a card
+	to turn it over
+		shortcut meta+T
+		enabled when it is face down
+		undoable as "Turn Card"
+		set its direction to up
+
+solitaire is an app
+	its "game" menu has actions "deal", "-", "undo" and "redo"
+	its menu bar is "game menu"
+	to "deal" with title "Deal", icon "play", shortcut "meta+N"
+		print "dealt"
+	to draw it
+		&lt;action "deal" /&gt;</ui-code>
+          <ul>
+            <li>
+              <b>The lines it may have:</b> <code>shortcut</code> (once per key), <code>enabled when</code>,
+              <code>selected when</code>, <code>undoable</code>, <code>icon</code>, <code>titled</code>, and
+              <code>a new one replaces the last one</code>.
+            </li>
+            <li><code>meta</code> is command on a Mac, control elsewhere.</li>
+            <li>
+              <b>Its title</b> is its words in Initial Caps: <code>to turn it over</code> is Turn It Over.
+              <code>titled "..."</code>, or a quoted head line, says another.
+            </li>
+            <li>
+              <b>Its head line can say it all</b>, its name in quotes:
+              <code>to "deal" with title "Deal", icon "play", shortcut "meta+N"</code>.
+            </li>
+            <li>
+              <b>Undo:</b> run any way, <code>undoable as "Turn Card"</code> is one undo step, and the app's undo reads
+              Undo Turn Card.
+            </li>
+            <li>
+              <b>A menu</b> lists actions, <code>"-"</code> a line between groups; <code>its menu bar is</code> puts it
+              in the app's menu bar.
+            </li>
+            <li>
+              <b>A button</b> is <code>&lt;action "deal" /&gt;</code>: its title, icon, key and enabled are the
+              action's, live.
+            </li>
+            <li>
+              <b>A right-click menu</b> is written inside its element: <code>&lt;context-menu&gt;</code> holding
+              <code>&lt;action "..." /&gt;</code>s and <code>&lt;divider /&gt;</code>s.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="views" label="10. Views" sticky collapsible dividing open="false">
+          <p>
+            One line, <code>a "card" is a view</code>, and every card draws as its own element on the page,
+            <code>&lt;solitaire-card&gt;</code> in an app named Solitaire. A React component is a function the page
+            never holds; here each card is an element the page holds, with its own styles and its own error net.
+          </p>
+          <ui-section id="views-drawing" label="Drawing one" sticky collapsible dividing open="false">
+            <!-- prettier-ignore -->
+            <ui-code language="spell" collapsed>a "scoreboard" is a view
+	its "title" is text
+	its "scores" is a list of numbers
+	to draw it
+		&lt;header&gt;{its title}&lt;/header&gt;
+		if its scores is empty
+			&lt;text color="grey"&gt;No scores yet&lt;/text&gt;
+		otherwise
+			for score in its scores
+				&lt;text&gt;{score}&lt;/text&gt;</ui-code>
+            <ul>
+              <li>
+                <b>A line of markup IS what it draws</b>, with no <code>return</code>: the lines around it pick which,
+                and a loop draws one each time round.
+              </li>
+              <li>
+                <b>Spell UI's components go bare:</b> <code>&lt;text&gt;</code> is <code>&lt;ui-text&gt;</code>,
+                <code>&lt;stack&gt;</code> is <code>&lt;ui-stack&gt;</code>; <code>&lt;/&gt;</code> closes any element.
+              </li>
+              <li><b>Braces hold Spell:</b> <code>&lt;text color={its color}&gt;</code>.</li>
+              <li>
+                <b><code>draw the card</code></b> draws another thing, on its own line or inside markup:
+                <code>&lt;segment&gt;{draw the card}&lt;/segment&gt;</code>.
+              </li>
+              <li>
+                <b>A thing has ONE drawing</b>, its <code>to draw it</code>. A change to one card redraws that card
+                only, and a card that fails to draw shows its own "can't draw" while the rest keep drawing.
+              </li>
+              <li>
+                <b>Its look:</b> the project's stylesheet reaches inside every view, so <code>.card .title</code>
+                styles what the card draws.
+              </li>
+              <li>
+                <b>Its tag</b> is the app's name, then the template's, in dashed lowercase words: a stock pile in
+                Solitaire is <code>&lt;solitaire-stock-pile&gt;</code>.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="views-slots" label="Slots" sticky collapsible dividing open="false">
+            <p>A view can have SLOTS: named drawings it places, which whoever draws it can fill.</p>
+            <!-- prettier-ignore -->
+            <ui-code language="spell" collapsed>a "badge" is a view
+	it has slots "icon" and "label"
+	to draw its icon
+		&lt;icon name="star" /&gt;
+	to draw its label
+		&lt;text&gt;New&lt;/text&gt;
+	to draw it
+		&lt;stack direction="horizontal"&gt;
+			{draw its icon}
+			{draw its label}
+		&lt;/stack&gt;</ui-code>
+            <ul>
+              <li><code>to draw its icon</code> draws one; <code>draw its icon</code> places it.</li>
+              <li>
+                Where the view is drawn, a slot can be filled from outside:
+                <code>&lt;badge&gt;&lt;text in="label"&gt;Sale&lt;/text&gt;&lt;/badge&gt;</code>. That badge shows Sale;
+                every other one draws its own.
+              </li>
+              <li><code>in=</code> is Spell's word for the web's <code>slot=</code>, which works too.</li>
+              <li>
+                A slot's drawing carries its name for CSS, so a page can style it with <code>::part(label)</code>.
+              </li>
+              <li>
+                The old <code>it has parts ...</code> reads as an error naming slots, and
+                <code>spell lint --fix</code> rewrites it.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="views-two-sided" label="A two sided view" sticky collapsible dividing open="false">
+            <p>
+              <code>a "card" is a two sided view</code> gives it a front and a back, so the card says only how each side
+              looks:
+            </p>
+            <!-- prettier-ignore -->
+            <ui-code language="spell" collapsed>a "card" is a two sided view
+	to draw its front
+		&lt;text color={its color}&gt;{its rank} of {its suit}&lt;/text&gt;
+	to draw its back
+		&lt;text color="blue"&gt;?&lt;/text&gt;</ui-code>
+            <ul>
+              <li>
+                It gives each card a direction, <code>down</code> or <code>up</code>, starting face down; the words
+                <code>it is face up</code> and <code>turn it over</code>.
+              </li>
+              <li>
+                It draws both sides back to back, turning over in 3D as the direction changes.
+                <code>--spell-turn-perspective</code> sets how deep, <code>--spell-turn-time</code> how long.
+              </li>
+              <li>It's written in Spell itself, and compiled once into Spell's runtime.</li>
+            </ul>
+          </ui-section>
+          <ui-section id="views-lists" label="Lists that draw" sticky collapsible dividing open="false">
+            <p>
+              A viewable list, a pile of cards, is an element whose children are its items' elements. Its drawing is
+              only the frame around them.
+            </p>
+            <!-- prettier-ignore -->
+            <ui-code language="spell" collapsed>a "pile" is a viewable list of cards
+	to draw it
+		&lt;stack&gt;
+			&lt;children /&gt;
+		&lt;/stack&gt;
+	to draw its placeholder
+		&lt;text color="grey"&gt;Empty&lt;/text&gt;</ui-code>
+            <ul>
+              <li><code>&lt;children /&gt;</code> says where the items show: Spell's word for the web's slot.</li>
+              <li>With no <code>to draw it</code>, the list draws just its items.</li>
+              <li><code>to draw its placeholder</code> is what it shows while it's empty.</li>
+              <li><code>to draw each item</code> wraps each item's drawing.</li>
+              <li>
+                A second place, <code>&lt;children name="header" /&gt;</code>, is filled by a child written
+                <code>&lt;h3 in="header"&gt;</code>.
+              </li>
+              <li>
+                Each item gets <code>--index</code>, from 0, and the list its <code>--count</code>, so CSS can lay the
+                cards out with no code.
+              </li>
+              <li>A thing that moves from one list to another glides there on the page.</li>
+            </ul>
+          </ui-section>
+          <ui-section id="views-ids" label="Ids, and naming one thing" sticky collapsible dividing open="false">
+            <p>
+              Every thing has an <code>id</code>, built in, and each view's element takes it, so the browser's inspector
+              says which thing it draws.
+            </p>
+            <!-- prettier-ignore -->
+            <ui-code language="spell" collapsed>t1 is a new tableau with id "T1"
+
+to show the tableaus
+	print the id of tableau T1
+	print the id of the first tableau
+
+a "board" is a view
+	to draw it
+		&lt;stack&gt;
+			&lt;discard-pile "stock" /&gt;
+			&lt;card rank=ace suit=spades&gt;&lt;text in="front"&gt;Ace&lt;/text&gt;&lt;/card&gt;
+		&lt;/stack&gt;</ui-code>
+            <ul>
+              <li>
+                <b>By name:</b> <code>tableau T1</code> is the tableau whose id is T1, written in text as
+                <code>Tableau#T1</code>.
+              </li>
+              <li>
+                <b>By place:</b> <code>the first tableau</code> is the first one made, <code>Tableau#1</code>. Every
+                ordinal works, <code>second</code> to <code>last</code>.
+              </li>
+              <li>One the program hasn't made is nothing, not an error.</li>
+              <li>
+                <b>A tag names its thing</b> by its quoted id, <code>&lt;discard-pile "stock" /&gt;</code>. Until the
+                program has it, the tag shows a stand-in, then draws it as soon as it's made.
+              </li>
+              <li>
+                <b>A tag with no id</b> draws a new thing, made from its attributes:
+                <code>&lt;card rank=ace suit=spades&gt;</code>.
+              </li>
+              <li>
+                <b>The element and its thing agree, both ways.</b> The card's properties are the tag's attributes, so
+                turning the card over changes the tag's <code>direction</code>, and setting the attribute turns the
+                card.
+              </li>
+              <li>
+                Two things of one name, as in a game with two decks, are numbered on the page:
+                <code>queen-of-spades</code>, then <code>queen-of-spades-2</code>.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="dragging" label="Dragging and dropping" sticky collapsible dividing open="false">
+            <p>
+              Dragging is opt-in: a template says its things can be dragged, and a list says things can be dropped on
+              it.
+            </p>
+            <!-- prettier-ignore -->
+            <ui-code language="spell" collapsed>a "card" is a draggable two sided view
+
+a "pile" is a viewable, droppable list of cards
+	it is droppable when
+		it is empty and the card is a king
+	when a card is dropped
+		move the card to the pile
+	while a card is dragged over it
+		set the hint of the game to "drop it here"</ui-code>
+            <ul>
+              <li>
+                <b>The abilities:</b> <code>draggable</code> on the card's line, <code>droppable</code> on the pile's.
+                <code>it is draggable</code> under the line says the same.
+              </li>
+              <li>
+                <b>The list's rules decide:</b> while a card is over a list that would take it, the list glows; a drop
+                it won't take does nothing, and the card slides back.
+              </li>
+              <li><b>The cards after it come along</b>: a column's face-up card drags with the cards on it.</li>
+              <li>
+                <b>A list's handlers</b>, where the card is already a card:
+                <ul>
+                  <li><code>when a card is dragged over it</code>, <code>when a card is dragged out of it</code></li>
+                  <li><code>when a card is dropped on it</code>: in place of just moving it there</li>
+                  <li>
+                    <code>while a card is dragged over it</code>: what it sets goes back as the card leaves, or lands
+                  </li>
+                  <li><code>when something is dropped on it</code>: any thing</li>
+                  <li><code>when a file is dropped on it</code>: a file from the desktop, on any view</li>
+                </ul>
+              </li>
+              <li>A mouse and a finger alike: a finger drags the card, rather than scrolling the page.</li>
+            </ul>
+          </ui-section>
+          <ui-section id="selecting" label="Selecting and reordering" sticky collapsible dividing open="false">
+            <!-- prettier-ignore -->
+            <ui-code language="spell" collapsed>a "task" is a draggable, selectable view
+	its "title" is text
+	to draw it
+		&lt;text&gt;{its title}&lt;/text&gt;
+
+a "checklist" is a viewable list of tasks
+	its items can be reordered immediately
+	when a task is dropped on it
+		print "moved"
+
+todo is an app
+	"checklist" is a new checklist
+	its "picked" is the selection of the checklist</ui-code>
+            <ul>
+              <li>
+                <b><code>selectable</code></b
+                >: a click selects a task, shift selects a range, command (control) one more.
+                <code>the selection of the checklist</code> is what's selected.
+              </li>
+              <li>
+                <b><code>its items can be reordered</code></b
+                >: people drag a list's items to new places in it.
+                <ul>
+                  <li>A line shows where they'd go; once the pointer rests 2 seconds, they move there.</li>
+                  <li><code>... after 1.5 seconds</code> waits less, <code>... immediately</code> not at all.</li>
+                  <li>A selected item drags with every other selected one.</li>
+                  <li>The items must be draggable themselves.</li>
+                </ul>
+              </li>
+              <li>The list's <code>when a task is dropped on it</code> still runs, after the items moved.</li>
+              <li>
+                The Task List example keeps the order you drag its tasks into:
+                <a href="/guides/examples/examples.html" target="src-guides-examples-examples-html">Example Apps</a>.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="11-pages" label="11. Pages that draw themselves" sticky collapsible dividing open="false">
+          <p>A PAGE FILE is a page written the way it reads: its head, then its body indented under it.</p>
+          <!-- prettier-ignore -->
+          <ui-code language="spell" collapsed>a "counter" is a view
+	its "count" is a number
+	to draw it
+		&lt;button onClick={add 1 to its count}&gt;Clicked {its count} times&lt;/button&gt;
+
+"counter guide" is a notebook page
+	A button that counts its clicks.
+
+	## Try it
+	&lt;example "one counter"&gt;
+		&lt;counter /&gt;
+	&lt;/example&gt;</ui-code>
+          <ul>
+            <li>
+              <b>The head</b> is the page's quoted name, its flags, then <code>page</code>:
+              <ul>
+                <li><code>notebook</code> lets the editor edit it in place</li>
+                <li><code>locked</code> keeps it from being edited</li>
+              </ul>
+            </li>
+            <li>
+              <b>Its body draws, line by line:</b>
+              <ul>
+                <li>a line of prose is Markdown, and a <code>##</code> heading starts a foldable section</li>
+                <li>markup and <code>&lt;example "..."&gt;</code> are drawn as written</li>
+                <li>
+                  <code>&lt;if ...&gt;</code>, <code>&lt;otherwise&gt;</code> and <code>&lt;for ...&gt;</code> pick and
+                  repeat what's drawn
+                </li>
+                <li><code>&lt;!-- ... --&gt;</code> is a comment, anywhere</li>
+              </ul>
+            </li>
+            <li>Its indentation ends it: no closing tag.</li>
+            <li>It compiles to what the same page in plain Spell would: a page whose body is its drawing.</li>
+            <li>
+              Pages at addresses, with a site around them:
+              <a href="/guides/mockup/mockup.html" target="src-guides-mockup-mockup-html">Sites and Mockups</a>.
+            </li>
+            <li><b>Not yet:</b> <code>spell translate</code> leaves page files as they are.</li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="12-tests" label="12. Tests, in English" sticky collapsible dividing open="false">
+          <!-- prettier-ignore -->
+          <ui-code language="spell" collapsed>a "card" is a two sided view
+	-- the card at the top of this page, its lines left out
+	to test card setup
+		get a new card whose rank is queen, suit is spades and direction is up
+		its color should be black
+		it is a face card should be yes
+		it is the queen of spade should be yes
+		it is a 7 should be no</ui-code>
+          <ul>
+            <li><code>to test ...</code> is a test, and each <code>should be</code> line one check.</li>
+            <li>Inside a template, a test starts with a new one of it as its <code>it</code>.</li>
+            <li>Each check keeps its words, so a failure says in English what was wrong.</li>
+            <li>A program runs its tests the first time it loads, never on a reload.</li>
+            <li>
+              <code>spell test ./game</code> runs them: <code>✓ test card setup (4 checks)</code>, then
+              <code>1 passed</code>.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="13-see-also" label="13. See also" sticky collapsible dividing open="false">
+          <ul>
+            <li>
+              <a href="/parser/README-spell.md" target="src-parser-readme-spell-md">README-spell</a>: every line the
+              language reads, and what it compiles to, units, prompts, sounds and tours among them
+            </li>
+            <li>
+              The spell syntax table: every rule and syntax, generated from the parser, in a checkout with the docs
+              beside it
+            </li>
+            <li>
+              <a href="/guides/examples/examples.html" target="src-guides-examples-examples-html">Example Apps</a>:
+              whole programs, simplest first
+            </li>
+            <li>
+              <a href="/guides/data/data.html" target="src-guides-data-data-html">Data</a>: where a program's things
+              live, in one line
+            </li>
+            <li>
+              <a href="/guides/mockup/mockup.html" target="src-guides-mockup-mockup-html">Sites and Mockups</a>: pages
+              at addresses
+            </li>
+            <li>
+              <a href="/guides/spanish.html" target="src-guides-spanish-html">Spell in Spanish</a>: every line here, in
+              Spanish
+            </li>
+            <li>
+              <a href="/guides/precedence/precedence.html" target="src-guides-precedence-precedence-html"
+                >How the Parser Works</a
+              >: how a line becomes a match, for anyone changing the language
+            </li>
+            <li>
+              <a href="/guides/prefs-and-undo.html" target="src-guides-prefs-and-undo-html"
+                >What Compiled Spell Runs On</a
+              >: the runtime under every view, undo and carry-over
+            </li>
+          </ul>
+        </ui-section>
+        <footer class="spell-doc-footer">
+          <ui-divider></ui-divider>
+          <p class="meta">Last checked 2026-11-21, against the kit's code that day.</p>
+        </footer>
+      </main>
+    </div>
+    <script src="/_epic/assets/highlight.min.js"></script>
+    <script src="/_epic/assets/spell-ui.js"></script>
+  </body>
+</html>
