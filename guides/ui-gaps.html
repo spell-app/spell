@@ -1,0 +1,1090 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Spell UI Gaps</title>
+    <meta
+      name="description"
+      content="Spell UI's attributes in one set of words (color, appearance, padding, spacing, link, font ...), spell ui rename to rewrite old markup, and the tags a drawing needs with no native HTML:  table rows and cells, a stack, paragraphs, links, quotes, key caps, a page frame, video, audio, term lists and image captions;  and what only the docs could do, now Spell UI's:  shrinkable menus and toolbars, ui-zoom, a textarea that grows, ui-toc and ui-example, README pictures."
+    />
+    <meta name="spell-voice" content="readme 2026-10-25" />
+    <meta name="spell-saga" content="spell-ui" />
+    <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+  </head>
+  <body class="spell-doc-page">
+    <spell-site-header></spell-site-header>
+    <div class="spell-doc">
+      <main class="spell-doc-main">
+        <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+          <ui-breadcrumb link="/pages/index.html">Spell Epic</ui-breadcrumb>
+          <ui-breadcrumb selected>Spell UI Gaps</ui-breadcrumb>
+        </ui-breadcrumbs>
+        <ui-sticky class="spell-h1"
+          ><header class="spell-page-head"><h1>Spell UI Gaps</h1></header></ui-sticky
+        >
+        <ui-accordion class="spell-code" appearance="styled">
+          <ui-title>The same button, before and after · 2 lines</ui-title>
+          <ui-content>
+            <pre><code class="language-html">&lt;ui-button primary basic compact href="save.html"&gt;Save&lt;/ui-button&gt;
+&lt;ui-button color="primary" appearance="basic" padding="compact" link="save.html"&gt;Save&lt;/ui-button&gt;</code></pre>
+          </ui-content>
+        </ui-accordion>
+        <p class="lede">
+          Every Spell UI tag now says one idea with one word. And a page can be drawn without a single native HTML tag:
+          tables, paragraphs, links, layout, video and the page itself are Spell UI tags.
+        </p>
+        <p>
+          A Spell drawing holds no native HTML, so whatever HTML could draw and Spell UI couldn't was a gap. This epic
+          closed the gaps drawings need.
+        </p>
+        <p>First it gave every attribute one name, so the new tags were born in the new words.</p>
+        <p>
+          Then it moved what only the docs pages could do into Spell UI: toolbars that fit their titles, zoom, a
+          textarea that grows, the page contents and the live example.
+        </p>
+        <ui-list class="spell-meta">
+          <ui-item icon="map"
+            ><b>Epic page:</b> <a href="/epics/ui-gaps/ui-gaps.plan.html" target="ui-gaps">epic ui-gaps</a></ui-item
+          >
+          <ui-item icon="user"
+            >Written for: someone writing a page or a drawing with Spell UI, or a developer adding a tag or an
+            attribute</ui-item
+          >
+          <ui-item icon="flag"
+            >Status: <ui-label size="mini" color="green">merged</ui-label> into main, a phase at a time, 2026-10-24 to
+            2026-10-26</ui-item
+          >
+          <ui-item icon="code branch"
+            >Branch <code>ui-gaps</code>, in the kit, spell-ui, spell-parser, spell-epic, spell-brand and
+            spell-app</ui-item
+          >
+          <ui-item icon="flask"
+            >Checked on: branch <code>ui-gaps</code>, 2026-10-26, against Spell UI's vocabularies and the epic page's
+            decisions</ui-item
+          >
+        </ui-list>
+
+        <ui-section id="1-summary" label="1. Summary" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="lightbulb"></ui-icon>
+          <ui-statistics class="spell-stats" size="mini">
+            <ui-statistic value="13" label="new tags"></ui-statistic>
+            <ui-statistic value="265" label="old names, in 66 tags"></ui-statistic>
+            <ui-statistic value="76" label="families now"></ui-statistic>
+          </ui-statistics>
+          <ul>
+            <li>
+              One word per idea, on every tag: color, appearance, padding, spacing, direction, align, attach, length,
+              selected, open, label, badge, heading, selector.
+            </li>
+            <li>Five attributes every tag takes: link and target, font, tooltip, label.</li>
+            <li>
+              <code>spell ui rename</code> rewrites old markup.
+              <b>The old names no longer do anything on a page:</b> run it on anything written before.
+            </li>
+            <li>
+              Ten new tags for drawings: cell (with row, in a table), stack, link, quote, keys, page, video, audio,
+              terms and term; then zoom, toc and example.
+            </li>
+            <li>Two new attributes: a paragraph on text, a caption on an image or a table.</li>
+            <li>Floated is gone, but on an image: a stack places things instead.</li>
+            <li>
+              What only the docs pages could do is Spell UI's now: menus and toolbars that fit their titles, zoom, a
+              textarea that grows, the page contents and the live example (section 4).
+            </li>
+            <li><code>spell readme pictures</code> draws a README's examples, since GitHub can't run them.</li>
+          </ul>
+          <ui-message state="warning" heading="Not yet">
+            <ul>
+              <li>
+                No drawing surface (shapes, a canvas, charts): the one large gap, set aside for later (section 6).
+              </li>
+            </ul>
+          </ui-message>
+        </ui-section>
+
+        <ui-section id="2-the-words" label="2. One word per idea" sticky collapsible dividing open="false">
+          <p>
+            Fomantic UI, whose vocabulary Spell UI keeps, gave each look a bare switch of its own:
+            <code>&lt;ui-button primary basic&gt;</code>.
+          </p>
+          <p>
+            That made a dozen spellings of one idea across tags. Now each idea is one attribute, and the old switch is
+            one of its values.
+          </p>
+
+          <ui-section id="the-renames" label="The renames" sticky collapsible dividing open="false">
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>New attribute</th>
+                    <th>The old names it replaced</th>
+                    <th>Example</th>
+                  </tr>
+                  <tr>
+                    <td><code>color</code></td>
+                    <td>primary, secondary, positive, negative</td>
+                    <td><code>color="primary"</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>appearance</code>, several words at once</td>
+                    <td>
+                      basic, circular, raised, striped, tertiary, structured ...; a checkbox's type; the bare link look
+                    </td>
+                    <td><code>appearance="basic circular"</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>padding</code></td>
+                    <td>compact, padded, fitted, unpadded</td>
+                    <td><code>padding="md"</code> draws Fomantic's padded</td>
+                  </tr>
+                  <tr>
+                    <td><code>spacing</code>, the room between children</td>
+                    <td>spaced (md), relaxed (lg)</td>
+                    <td><code>spacing="lg"</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>direction</code></td>
+                    <td>vertical, horizontal, upward (up), reversed</td>
+                    <td><code>direction="up left"</code> on a dropdown</td>
+                  </tr>
+                  <tr>
+                    <td><code>align</code></td>
+                    <td>centered, right-aligned, text-align</td>
+                    <td><code>align="center"</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>attach</code></td>
+                    <td>attached</td>
+                    <td><code>attach="top"</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>length</code></td>
+                    <td>short, long, very-short, very-long</td>
+                    <td><code>length="short"</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>selected</code></td>
+                    <td>active, where it means chosen</td>
+                    <td><code>&lt;ui-button selected&gt;</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>open</code></td>
+                    <td>collapsed, turned round</td>
+                    <td><code>&lt;ui-section open="false"&gt;</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>label</code></td>
+                    <td>text, content</td>
+                    <td><code>&lt;ui-or label="or"&gt;</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>badge</code></td>
+                    <td>the button's joined label</td>
+                    <td><code>&lt;ui-button badge="2"&gt;</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>heading</code></td>
+                    <td>header, on card, modal, step, message, popup, toast and flyout</td>
+                    <td><code>&lt;ui-card heading="Hearts"&gt;</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>link</code></td>
+                    <td>href</td>
+                    <td><code>&lt;ui-card link="game.html"&gt;</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>selector</code></td>
+                    <td>select, on include, section, accordion, panel, property editor and group</td>
+                    <td><code>selector="#notes"</code></td>
+                  </tr>
+                  <tr>
+                    <td>wrap, clip, limit</td>
+                    <td>wrapped, unclipped, unlimited</td>
+                    <td><code>clip="none"</code></td>
+                  </tr>
+                  <tr>
+                    <td>reveal, hover</td>
+                    <td>animated, on a button and a list</td>
+                    <td><code>hover="indent"</code></td>
+                  </tr>
+                  <tr>
+                    <td>persistent, kind</td>
+                    <td>persist; an item's type</td>
+                    <td><code>&lt;ui-item kind="divider"&gt;</code></td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ul>
+              <li>
+                Each tag's components page lists them on its API tab: every attribute names the old ones it replaced.
+              </li>
+              <li>
+                Fomantic's classes didn't change, so nothing looks different. A primary colour still draws
+                <code>ui primary button</code> in the shadow root.
+              </li>
+              <li>Positive and negative are hues now, on every tag that takes a colour.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="everywhere" label="Five attributes on every tag" sticky collapsible dividing open="false">
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>link, font, tooltip and label · 4 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-html">Read &lt;ui-text link="rules.html"&gt;the rules&lt;/ui-text&gt; first.
+It's &lt;ui-text font="bold italic"&gt;free&lt;/ui-text&gt;:  run &lt;ui-text font="code"&gt;spell&lt;/ui-text&gt;.
+&lt;ui-card link="game.html" tooltip="Start a game"&gt;...&lt;/ui-card&gt;
+&lt;ui-icon name="trash" label="Delete"&gt;&lt;/ui-icon&gt;</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                <code>link</code> and target: on text, a real link you reach with Tab. On a tag that draws no link of
+                its own, a click goes there.
+              </li>
+              <li>
+                <code>font</code> takes eight words, several at once: bold, italic, underline, strikethrough, code,
+                highlight, subscript, superscript.
+                <ul>
+                  <li>Inside text, each draws its HTML element, so a screen reader hears it.</li>
+                  <li>On any other tag, the look alone.</li>
+                </ul>
+              </li>
+              <li><code>tooltip</code>: the browser's own tooltip, written as the element's title.</li>
+              <li><code>label</code>: the accessible name, where the family has no label of its own.</li>
+              <li>In Spanish: enlace, destino, letra, ayuda, etiqueta.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="spell-ui-rename" label="Rewriting old markup" sticky collapsible dividing open="false">
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>spell ui rename · 2 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-sh">spell ui rename docs/            # a dry run:  lists each file and what it would change
+spell ui rename --write docs/    # rewrites them</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>It reads every old name from the vocabularies themselves, so it keeps no list of its own.</li>
+              <li>
+                It rewrites HTML pages, Markdown and the JSX in TypeScript files: tags in markup, and escaped markup in
+                code samples.
+              </li>
+              <li>Several old switches on one tag become one appearance.</li>
+              <li>It lists what it can't see, a JSX expression or a tag it can't read, and never guesses.</li>
+              <li>
+                <code>--markup-only</code> leaves escaped markup alone, for pages that quote old names on purpose.
+              </li>
+              <li>A dry run exits 1 when there's something to change.</li>
+              <li>It ran over every repo and the content pages: 3172 files in the epic repo alone.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section
+            id="breadcrumbs-and-floated"
+            label="Breadcrumbs, and floated"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                <code>&lt;ui-breadcrumbs&gt;</code> is the trail now, and <code>&lt;ui-breadcrumb&gt;</code> one step.
+                <ul>
+                  <li>The old trail's name became the new step's, so the two couldn't both work at once.</li>
+                  <li>Every page changed in the same commit.</li>
+                </ul>
+              </li>
+              <li>Floated is gone from ten tags: a stack places things left and right instead.</li>
+              <li>
+                <code>&lt;ui-image floated="left"&gt;</code> stays: text wraps round an image, which no stack can do.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="3-the-tags" label="3. The new tags" sticky collapsible dividing open="false">
+          <p>
+            Each tag below is written <code>&lt;ui-stack&gt;</code> on a page, and <code>&lt;stack&gt;</code> in a
+            drawing.
+          </p>
+          <p>Each has a components page (Link's is a section of Text's), its Spanish name and its tests.</p>
+
+          <ui-section id="tables" label="Table rows and cells" sticky collapsible dividing open="false">
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>A table of rows and cells · 9 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-html">&lt;ui-table celled appearance="striped" client-sort caption="Scores"&gt;
+  &lt;ui-row header&gt;
+    &lt;ui-cell&gt;Player&lt;/ui-cell&gt;&lt;ui-cell&gt;Score&lt;/ui-cell&gt;
+  &lt;/ui-row&gt;
+  &lt;ui-row&gt;
+    &lt;ui-cell header&gt;Ann&lt;/ui-cell&gt;&lt;ui-cell align="right"&gt;12&lt;/ui-cell&gt;
+  &lt;/ui-row&gt;
+  &lt;ui-row footer&gt;&lt;ui-cell span="2"&gt;One player&lt;/ui-cell&gt;&lt;/ui-row&gt;
+&lt;/ui-table&gt;</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>A row with header is the header row; a cell with header is its row's own header.</li>
+              <li>A row with footer is a footer row.</li>
+              <li>
+                Every table look works as on a native table: celled, striped, padding, selectable, inverted, a colour.
+                It stacks at phone width.
+              </li>
+              <li>Screen readers hear a real table: rows, column and row headers, cells, named by the caption.</li>
+              <li>Sorting moves the row elements, header rows first, footer rows last.</li>
+            </ul>
+            <ul>
+              <li>
+                <b>Why one row tag:</b> <code>&lt;ui-row&gt;</code> already was the grid's row. Its parent decides: in a
+                table it's a table row, in a grid the grid row it was.
+              </li>
+              <li>
+                It beat a separate grid row, which would have changed every grid, and <code>&lt;table-row&gt;</code>,
+                longer and not the name Owen asked for.
+              </li>
+              <li>
+                <b>Why tags at all:</b> column tags filled from a list were cheaper, but a cell holding more than text
+                would have needed a cell template. A drawing's own <code>for each</code> fills typed-out rows instead.
+              </li>
+              <li>
+                <b>The catch:</b> a cell covers columns (<code>span</code>), never rows. And a caption draws inside the
+                table's border, not above it as a native table's does.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="stack" label="Stack" sticky collapsible dividing open="false">
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>A row of buttons, and one at each end · 7 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-html">&lt;ui-stack direction="horizontal" wrap spacing="sm"&gt;
+  &lt;ui-button&gt;New game&lt;/ui-button&gt;
+  &lt;ui-button&gt;Undo&lt;/ui-button&gt;
+&lt;/ui-stack&gt;
+&lt;ui-stack direction="horizontal" justify="between"&gt;
+  &lt;ui-header&gt;Solitaire&lt;/ui-header&gt;&lt;ui-button&gt;Deal&lt;/ui-button&gt;
+&lt;/ui-stack&gt;</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>A column by default; a horizontal one is a row, and wrap lets it wrap.</li>
+              <li><code>spacing</code>: none to xl, md (1em) by default.</li>
+              <li><code>align</code> lines children up across it: start, center, end, stretch, baseline.</li>
+              <li><code>justify</code> places them along it: start, center, end, between, around.</li>
+              <li><code>fluid</code> takes the full width. No padding, border or colour of its own.</li>
+            </ul>
+            <ul>
+              <li>
+                <b>Why one tag:</b> Web Awesome, whose layout Spell UI's utility classes copy, has six layouts. They're
+                all CSS classes on a <code>&lt;div&gt;</code>, and a drawing has none, so it needs an element.
+              </li>
+              <li>Stack and cluster are what drawings need nine times in ten, so they're one tag.</li>
+              <li>
+                Six tags (flank, split, frame ...) meant six words to learn and translate. One layout tag with a type
+                meant six sets of attributes on one tag.
+              </li>
+              <li>
+                <b>Why justify beside align:</b> the plan had one align. But in a column, center means across it, and
+                between only makes sense along it: so it takes two, as CSS does.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="text" label="Paragraphs, links, quotes and key caps" sticky collapsible dividing open="false">
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>Running text · 7 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-html">&lt;ui-text paragraph&gt;
+  You have 12 points.  Read &lt;ui-link link="rules.html"&gt;the rules&lt;/ui-link&gt;, then press Deal.
+&lt;/ui-text&gt;
+&lt;ui-quote cite="https://example.com/ada"&gt;Imagination is the discovering faculty.&lt;/ui-quote&gt;
+She said &lt;ui-quote inline&gt;go&lt;/ui-quote&gt;.
+Save with &lt;ui-keys shortcut="mod+S"&gt;&lt;/ui-keys&gt;.
+&lt;ui-keys shortcut="mod+S" platform="apple"&gt;&lt;/ui-keys&gt;</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                <code>&lt;ui-text paragraph&gt;</code> draws a paragraph: a block, with a line height for reading and
+                room after it. Font and link work inside it.
+              </li>
+              <li>
+                <code>&lt;ui-link&gt;</code> is text's link as a tag of its own: disabled fades it and drops the link.
+              </li>
+              <li>
+                <code>&lt;ui-quote&gt;</code> is a block quote; inline, a quotation in a sentence, with the language's
+                own marks.
+              </li>
+              <li>A quote's <code>cite</code> is the address it's from, for readers' tools, not shown.</li>
+              <li>
+                <code>&lt;ui-keys&gt;</code> draws key caps: <code>mod+S</code> is ⌘S on a Mac, Ctrl S elsewhere.
+                <ul>
+                  <li>Mod (or modifier) is ⌘ or Ctrl; meta is the Meta key itself.</li>
+                  <li>
+                    <code>platform="apple"</code> draws a Mac's keys whatever the reader has, and other everyone else's.
+                  </li>
+                  <li>The docs search draws its own keys with it.</li>
+                </ul>
+              </li>
+            </ul>
+            <ul>
+              <li>
+                <b>Why a paragraph is text's:</b> everything text takes (size, colour, font) works on it too, and
+                there's one less tag to learn and translate.
+              </li>
+              <li>
+                <b>Why a link tag as well as the attribute:</b> Owen picked both. The tag is closer to an HTML habit;
+                the cost is two ways to write one link.
+              </li>
+              <li>
+                <b>Why the keys go in shortcut:</b> it's the action's own word, so a shortcut copies straight across.
+                Keys written as text couldn't hold a value, and translation would read them as words.
+              </li>
+              <li><b>Why a quote isn't a font word:</b> a quotation isn't a way letters look.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="page" label="Page" sticky collapsible dividing open="false">
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>A whole window · 7 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-html">&lt;ui-page&gt;
+  &lt;ui-header slot="header" level="1"&gt;Solitaire&lt;/ui-header&gt;
+  &lt;ui-menu slot="nav" direction="vertical"&gt;...&lt;/ui-menu&gt;
+  &lt;ui-stack&gt;... the game ...&lt;/ui-stack&gt;
+  &lt;ui-card slot="aside" heading="Best scores"&gt;&lt;/ui-card&gt;
+  &lt;ui-text slot="footer"&gt;Made with Spell&lt;/ui-text&gt;
+&lt;/ui-page&gt;</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                Its slots are the landmarks screen readers jump between: header, nav, aside, footer. What has no slot is
+                the main content.
+              </li>
+              <li>A Skip to content link comes first, shown only while it has the keyboard's focus.</li>
+              <li>
+                It's a root too, like <code>&lt;ui-root&gt;</code>: it loads what's inside it, and paints the window's
+                background.
+              </li>
+              <li>With no theme set, it follows the system's light or dark.</li>
+              <li>One per page: a second notes itself in the console, and still draws.</li>
+              <li>On a narrow screen, the nav and aside stack above and below the content.</li>
+            </ul>
+            <ul>
+              <li>
+                <b>Why not body:</b> HTML's body is the whole document, not its regions. And "body" already means a
+                card's or a modal's main text in Spell UI.
+              </li>
+              <li><b>Not yet:</b> a nav that becomes a drawer on phones; a sticky header.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="media" label="Video and audio" sticky collapsible dividing open="false">
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>A video, and a sound played on a click · 3 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-html">&lt;ui-video src="intro.mp4" poster="intro.jpg" captions="intro.vtt" ratio="16/9"&gt;&lt;/ui-video&gt;
+&lt;ui-audio id="deal" src="deal.mp3"&gt;&lt;/ui-audio&gt;
+&lt;ui-button onclick="document.getElementById('deal').play()"&gt;Deal&lt;/ui-button&gt;</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>The browser's own players, each file relative to the page.</li>
+              <li>A video shows its controls unless <code>controls="false"</code>.</li>
+              <li>Without controls, an audio shows nothing: for a game's sounds.</li>
+              <li>From script: play(), pause() and currentTime.</li>
+              <li>Events: <code>ui-play</code>, <code>ui-pause</code> and ui-ended.</li>
+              <li>
+                Autoplay plays only when muted, or after the reader has clicked. Browsers allow nothing else, and
+                there's no workaround.
+              </li>
+              <li>One family: importing <code>spell-ui/ui-video</code> defines both players.</li>
+            </ul>
+            <ul>
+              <li><b>Why the browser's players:</b> keyboard, full screen and captions work everywhere, for free.</li>
+              <li>A player in Spell UI's own look would have taken a day or more, rebuilding all three by hand.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="terms" label="Terms" sticky collapsible dividing open="false">
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>A card's details · 4 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-html">&lt;ui-terms&gt;
+  &lt;ui-term label="Suit" value="hearts"&gt;&lt;/ui-term&gt;
+  &lt;ui-term label="Owner"&gt;&lt;ui-link link="ann.html"&gt;Ann&lt;/ui-link&gt;&lt;/ui-term&gt;
+&lt;/ui-terms&gt;</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>Labels in one column, values in the next, lined up.</li>
+              <li>A horizontal one puts the pairs in a row.</li>
+              <li>A value can be anything inside the term; a label slot holds a label with markup.</li>
+              <li>
+                Screen readers hear term and definition, through ARIA roles: HTML's own list can't reach across each
+                term's shadow root.
+              </li>
+              <li>
+                <b>Why not a list:</b> a list's item is a bullet row, and its look and role would change by an attribute
+                on its parent.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="caption" label="An image with a caption" sticky collapsible dividing open="false">
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>caption · 1 line</ui-title>
+              <ui-content>
+                <pre><code class="language-html">&lt;ui-image src="deck.png" caption="The deck"&gt;&lt;/ui-image&gt;</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>With a caption it draws a figure and its caption, so screen readers tie the two.</li>
+              <li>A caption slot holds one with markup.</li>
+              <li>An image without one draws exactly as before.</li>
+              <li>
+                <b>Why not a figure tag:</b> a caption is part of the image, the way a field's label is part of the
+                field.
+              </li>
+              <li>A figure round a table or a video waits until something needs it.</li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section
+          id="4-docs-tricks"
+          label="4. What only the docs pages could do"
+          sticky
+          collapsible
+          dividing
+          open="false"
+        >
+          <p>
+            The docs pages had a few tricks of their own: toolbars that fit their titles, screenshots that open full
+            size, boxes that grow, the page contents and the live example. Each lived in the docs' own scripts, so no
+            other page could have it.
+          </p>
+          <p>Now each is a Spell UI tag or attribute, and the docs pages use those like any page would.</p>
+
+          <ui-section id="shrinkable" label="Menus and toolbars that fit" sticky collapsible dividing open="false">
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>A toolbar that fits its row · 4 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-html">&lt;ui-toolbar shrinkable&gt;
+  &lt;ui-item icon="question"&gt;Questions &lt;ui-label slot="badge"&gt;3&lt;/ui-label&gt;&lt;/ui-item&gt;
+  &lt;ui-item&gt;Todos&lt;/ui-item&gt;
+&lt;/ui-toolbar&gt;</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <p>Make the row narrower, and it gives way in four steps:</p>
+            <ol>
+              <li>Every title whole, while they fit.</li>
+              <li>The longest titles are cut first, each ending in "…".</li>
+              <li>
+                Once a title would be cut under 50px, the whole row shows icons only. An item with no icon shows its
+                title's first letter, and each title becomes its item's tooltip.
+              </li>
+              <li>
+                Once even an icon button would be under 34px, every item folds into one "…" button, whose menu holds
+                them all. A dot on it says an item inside has a count.
+              </li>
+            </ol>
+            <ul>
+              <li>
+                A segmented menu doesn't cut its titles: once a choice wouldn't fit, it becomes one button showing the
+                chosen item, opening the same choices.
+              </li>
+              <li>
+                Two tokens set the steps: <code>--ui-menu-title-min</code> (50px) and
+                <code>--ui-menu-item-min</code> (34px).
+              </li>
+              <li>A page can style each step by its state: icons only, overflow, and a segmented menu's dropdown.</li>
+              <li>
+                A count that must stay goes in the item's badge slot; the "…" button's own look in its overflow slot.
+              </li>
+              <li>A shrinkable toolbar folds into its "…" menu instead of scrolling with ‹ ›.</li>
+              <li>Without <code>shrinkable</code>, nothing changes: a toolbar scrolls as before.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="zoom" label="Zoom" sticky collapsible dividing open="false">
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>Anything, shown shrunk, then full size · 4 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-html">&lt;ui-zoom max-width="320px" shrink="50%"&gt;
+  &lt;ui-table&gt;...&lt;/ui-table&gt;
+&lt;/ui-zoom&gt;
+&lt;ui-image src="board.png" alt="The board" zoom&gt;&lt;/ui-image&gt;</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                <code>&lt;ui-zoom&gt;</code> wraps any content and shows it at half size, by default.
+                <ul>
+                  <li><code>shrink</code> sets how small.</li>
+                  <li><code>max-width</code> and <code>max-height</code> cut it off.</li>
+                </ul>
+              </li>
+              <li>A click shows it full size, over the page; Escape, a click outside or its close button close it.</li>
+              <li>
+                <code>&lt;ui-image zoom&gt;</code> is a button: a click (or Enter) shows the image full size. The zoom
+                loads on that first click.
+              </li>
+              <li>
+                Plain screenshots open full size on any page that loads Spell UI: an <code>&lt;img&gt;</code> shown
+                smaller than it really is, no markup needed.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="grow" label="A textarea that grows" sticky collapsible dividing open="false">
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>grow · 1 line</ui-title>
+              <ui-content>
+                <pre><code class="language-html">&lt;ui-textarea grow max-rows="8" placeholder="Tell me more"&gt;&lt;/ui-textarea&gt;</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>It starts one line tall, and grows a line as the text wraps.</li>
+              <li>At <code>max-rows</code> it stops and scrolls; without it, at a third of the window.</li>
+              <li>It gets shorter again as text goes.</li>
+              <li>
+                The epic pages' text boxes, the review note, the choice pages' answers and the editor Inspector's event
+                code use it now, looking the same as before.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section
+            id="toc-and-example"
+            label="Page contents and live examples"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>A page's contents, and one live example · 4 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-html">&lt;ui-toc heading="Buttons"&gt;&lt;/ui-toc&gt;
+&lt;ui-example heading="Emphasis" description="A primary button is the page's main action."&gt;
+  &lt;ui-button color="primary"&gt;Save&lt;/ui-button&gt;
+&lt;/ui-example&gt;</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                <code>&lt;ui-toc&gt;</code> lists the page's sections and examples as links, opens the one in view and
+                follows the scroll. Each section folds, and the reader's folds are kept.
+              </li>
+              <li>
+                <code>&lt;ui-example&gt;</code> shows its markup live, under a heading and description, with a button
+                that shows the same markup as code.
+              </li>
+              <li>
+                They were the docs site's <code>&lt;ui-docs-toc&gt;</code> and <code>&lt;ui-docs-example&gt;</code>.
+                Every page in every repo was rewritten to the new names.
+              </li>
+              <li>Spanish: <code>&lt;es-indice&gt;</code>, <code>&lt;es-ejemplo&gt;</code>.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="renamed-tags" label="Old tags, and README pictures" sticky collapsible dividing open="false">
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>Renaming old tags, and drawing a README's examples · 2 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-sh">spell ui rename --write docs/      # &lt;ui-docs-toc&gt; becomes &lt;ui-toc&gt;, in markup and CSS
+spell readme pictures README.md    # each html example block, drawn light and dark</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                <code>spell ui rename</code> renames whole tags now, as well as attributes: in markup, in CSS selectors
+                and tokens, and in <code>.spell</code> files.
+              </li>
+              <li>
+                A branch cut before the new names gets them when it merges <code>main</code>: the merge runs the rename
+                by itself.
+              </li>
+              <li>
+                GitHub runs no custom elements, so a README can't show a live example. Instead,
+                <code>spell readme pictures</code> draws each <code>html example</code> block headlessly, light and
+                dark, and puts the picture under it.
+              </li>
+              <li><code>spell readme check</code> fails a picture older than its markup.</li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="5-why" label="5. Why it's built this way" sticky collapsible dividing open="false">
+          <ul>
+            <li>
+              <b>Renames first, then the tags:</b> every new tag was born in the new words, so nothing was renamed
+              twice; the cost, the first new tag landed after the renames.
+            </li>
+            <li>
+              <b>Appearance, not style.</b> Style is HTML's inline CSS, on every element: the browser would read
+              <code>style="basic"</code> as CSS.
+            </li>
+            <li>Web Awesome uses appearance for the same idea.</li>
+            <li>
+              <b>Heading, not title:</b> title draws the browser's own tooltip over the whole card, so title became
+              tooltip's old name, and header became heading.
+            </li>
+            <li>
+              <b>Selector, not part.</b> Part is the browser's attribute for styling inside a component, and it splits a
+              selector with spaces into words.
+            </li>
+            <li>
+              <b>The old names worked until the epic's end, then stopped.</b> Other branches still wrote them meanwhile:
+              each was told to run the rename.
+            </li>
+            <li>
+              The vocabularies keep each attribute's old names as a record. The rename and the API tables read it; pages
+              don't.
+            </li>
+            <li>
+              <b>Kept as they were:</b> labeled, source and speed (each one idea after all); both panel and section; a
+              field's type.
+            </li>
+            <li>
+              <b>A button keeps its type:</b> <code>type="submit"</code> is how a button submits its form. Dropping it,
+              as asked, would have broken every form.
+            </li>
+            <li>
+              <b>An include keeps page-styles:</b> the docs site draws its header and footer with it. Dropping it needs
+              another way to put a part into a page first.
+            </li>
+            <li>
+              <b>Spanish tag names stay ASCII</b> (<code>es-celda</code>, <code>es-pila</code>). A drawing's Spanish
+              words keep their accents, and its reader maps the two.
+            </li>
+            <li>
+              <b>A plain <code>shrinkable</code>, no <code>fit=</code>:</b> nothing else would share a fit attribute (<a
+                href="/epics/epic-engine/epic-engine.plan.html#q29"
+                target="epic-engine"
+                >epic-engine Q29</a
+              >).
+            </li>
+            <li>
+              <b>A toolbar opts in:</b> one that isn't shrinkable scrolls with ‹ › as before; a shrinkable one folds
+              into its "…" menu instead (<a href="/epics/epic-engine/epic-engine.plan.html#q34" target="epic-engine"
+                >Q34</a
+              >, <a href="/epics/epic-engine/epic-engine.plan.html#q38" target="epic-engine">Q38</a>).
+            </li>
+            <li>
+              <b>Every item goes into the "…" menu</b>, none stays in the row, and a token sets how small a button may
+              get first (<a href="/epics/epic-engine/epic-engine.plan.html#q35" target="epic-engine">Q35</a>, Owen's
+              ask). The button is "…" unless a page puts its own in the overflow slot (<a
+                href="/epics/epic-engine/epic-engine.plan.html#q36"
+                target="epic-engine"
+                >Q36</a
+              >).
+            </li>
+            <li>
+              <b>A segmented menu becomes a dropdown</b>, rather than being left alone or cut: one choice whose labels
+              vanish is a different control (<a href="/epics/epic-engine/epic-engine.plan.html#q31" target="epic-engine"
+                >Q31</a
+              >, Owen's own answer).
+            </li>
+            <li>
+              <b>A first letter for an item with no icon</b>, so every row can go to icons only; two items starting
+              alike are told apart by their tooltips (<a
+                href="/epics/epic-engine/epic-engine.plan.html#q32"
+                target="epic-engine"
+                >Q32</a
+              >).
+            </li>
+            <li>
+              <b>The item marks its title and counts:</b> a title box round its text, a badge slot for counts that must
+              stay (<a href="/epics/epic-engine/epic-engine.plan.html#q30" target="epic-engine">Q30</a>). Icons only is
+              just <code>:state(icons-only)</code>, no extra class (<a
+                href="/epics/epic-engine/epic-engine.plan.html#q33"
+                target="epic-engine"
+                >Q33</a
+              >); a dot, not a sum, on the "…" button (<a
+                href="/epics/epic-engine/epic-engine.plan.html#q37"
+                target="epic-engine"
+                >Q37</a
+              >).
+            </li>
+            <li>
+              <b>Zoom two ways:</b> a <code>&lt;ui-zoom&gt;</code> that wraps anything, not only images, and
+              <code>zoom</code> on an image (<a href="/epics/epic-engine/epic-engine.plan.html#q22" target="epic-engine"
+                >Q22</a
+              >, Owen's own answer).
+            </li>
+            <li>
+              <b>Growing is opt-in</b>, not every textarea's default (<a
+                href="/epics/epic-engine/epic-engine.plan.html#q24"
+                target="epic-engine"
+                >Q24</a
+              >). The two "tell me more" boxes moved onto it; the brand composer and the kit's section editor stayed (<a
+                href="/epics/epic-engine/epic-engine.plan.html#q25"
+                target="epic-engine"
+                >Q25</a
+              >).
+            </li>
+            <li>
+              <b>Two inspectors, for now:</b> the docs' live view and the editor's Inspector stay apart, a todo to share
+              one (<a href="/epics/epic-engine/epic-engine.plan.html#q26" target="epic-engine">Q26</a>).
+            </li>
+            <li>
+              <b>The Spanish names</b> follow the words already chosen: zoom is ampliacion, the contents indice, the
+              example ejemplo; shrinkable is encogible, grow crece (<a
+                href="/epics/epic-engine/epic-engine.plan.html#q23"
+                target="epic-engine"
+                >Q23</a
+              >).
+            </li>
+            <li>
+              <b>Merging main renames old tags by itself</b>, so an older branch can't bring them back (<a
+                href="/epics/epic-engine/epic-engine.plan.html#q27"
+                target="epic-engine"
+                >Q27</a
+              >).
+            </li>
+            <li>
+              <b>READMEs get a picture of each example</b>, not a live one: GitHub runs no custom elements (<a
+                href="/epics/epic-engine/epic-engine.plan.html#q28"
+                target="epic-engine"
+                >Q28</a
+              >).
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="6-limits" label="6. Limits" sticky collapsible dividing open="false">
+          <ul>
+            <li>
+              <b>No drawing surface yet:</b> shapes, a canvas, charts. Maybe it's just SVG and its own tags; that's for
+              later.
+            </li>
+            <li><b>A page outside the repos</b> still in the old names draws them as if they weren't there.</li>
+            <li>
+              A link on a tag that draws no link of its own (a segment) is a click only: no Tab stop, no middle-click,
+              no link role.
+            </li>
+            <li>A real link is text with a link, or the link tag.</li>
+            <li>Font's highlight, subscript and superscript show only inside text.</li>
+            <li>Table cells span columns, never rows.</li>
+            <li>The new families have no visual-test baselines yet: they need Docker.</li>
+            <li>A table of rows has no static server render yet.</li>
+            <li>Video and audio look like the browser's players, not Spell UI.</li>
+            <li>Web Awesome's flank, split and frame stay CSS classes, until a drawing needs one.</li>
+            <li>
+              Two checks wait for a person with VoiceOver: a table of rows and cells read as a table, and a page's
+              landmarks and Skip to content.
+            </li>
+            <li>
+              <b>Fitting titles is checked in Chromium only.</b> Its steps are CSS style queries, untried in Firefox and
+              Safari, and it has no visual-test baselines yet.
+            </li>
+            <li>The "…" button's "More" is read once: a page that turns Spanish after the menu draws keeps "More".</li>
+            <li>A growing textarea doesn't measure again when only its width changes.</li>
+            <li><code>&lt;ui-zoom open&gt;</code> set from script keeps no room in the page while it's open.</li>
+            <li>
+              <code>spell ui rename</code> still lists 8 lines it leaves for a person: JSX values it can't see, and a
+              button label that could be either.
+            </li>
+            <li>
+              It still renames the old <code>ui-docs-toc</code> and <code>ui-docs-example</code> until every open branch
+              has merged main.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="7-where" label="7. Where things are" sticky collapsible dividing open="false">
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <tbody>
+                <tr>
+                  <th>What</th>
+                  <th>Where</th>
+                </tr>
+                <tr>
+                  <td>table rows and cells</td>
+                  <td>
+                    <a href="/spell-ui/src/components/ui-table/" target="src-spell-ui-src-components-ui-table"
+                      >ui-table</a
+                    >, and the grid's row
+                  </td>
+                </tr>
+                <tr>
+                  <td>the stack</td>
+                  <td>
+                    <a href="/spell-ui/src/components/ui-stack/" target="src-spell-ui-src-components-ui-stack"
+                      >ui-stack</a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>paragraph, link</td>
+                  <td>
+                    <a href="/spell-ui/src/components/ui-text/" target="src-spell-ui-src-components-ui-text">ui-text</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>quote, keys, page</td>
+                  <td>
+                    <a href="/spell-ui/src/components/ui-quote/" target="src-spell-ui-src-components-ui-quote"
+                      >ui-quote</a
+                    >,
+                    <a href="/spell-ui/src/components/ui-keys/" target="src-spell-ui-src-components-ui-keys">ui-keys</a
+                    >,
+                    <a href="/spell-ui/src/components/ui-page/" target="src-spell-ui-src-components-ui-page">ui-page</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>video and audio</td>
+                  <td>
+                    <a href="/spell-ui/src/components/ui-video/" target="src-spell-ui-src-components-ui-video"
+                      >ui-video</a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>terms</td>
+                  <td>
+                    <a href="/spell-ui/src/components/ui-terms/" target="src-spell-ui-src-components-ui-terms"
+                      >ui-terms</a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>the five shared attributes</td>
+                  <td>
+                    <a
+                      href="/spell-ui/src/vocabulary/SharedVocabulary.ts"
+                      target="src-spell-ui-src-vocabulary-sharedvocabulary-ts"
+                      >SharedVocabulary</a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>an attribute's old names</td>
+                  <td>
+                    <a href="/src/element/vocabulary.types.ts" target="src-src-element-vocabulary-types-ts"
+                      >AttributeSpec</a
+                    >, its replaces
+                  </td>
+                </tr>
+                <tr>
+                  <td>fitting titles</td>
+                  <td>
+                    <a
+                      href="/spell-ui/src/components/ui-menu/TitleFit.ts"
+                      target="src-spell-ui-src-components-ui-menu-titlefit-ts"
+                      >TitleFit</a
+                    >, beside the menu
+                  </td>
+                </tr>
+                <tr>
+                  <td>zoom</td>
+                  <td>
+                    <a href="/spell-ui/src/components/ui-zoom/" target="src-spell-ui-src-components-ui-zoom">ui-zoom</a
+                    >, with ImageZoom for plain screenshots
+                  </td>
+                </tr>
+                <tr>
+                  <td>the growing textarea</td>
+                  <td>
+                    <a href="/spell-ui/src/components/ui-input/" target="src-spell-ui-src-components-ui-input"
+                      >ui-input</a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>page contents, live example</td>
+                  <td>
+                    <a href="/spell-ui/src/components/ui-toc/" target="src-spell-ui-src-components-ui-toc">ui-toc</a>,
+                    <a href="/spell-ui/src/components/ui-example/" target="src-spell-ui-src-components-ui-example"
+                      >ui-example</a
+                    >
+                  </td>
+                </tr>
+                <tr>
+                  <td>README pictures</td>
+                  <td><code>spell readme pictures [pages...]</code>, or <code>yarn readme:pictures</code></td>
+                </tr>
+                <tr>
+                  <td>the rename command</td>
+                  <td><code>spell ui rename [--write] [--markup-only] &lt;paths...&gt;</code></td>
+                </tr>
+                <tr>
+                  <td>the components pages</td>
+                  <td><a href="/components/ui/" target="src-spell-ui-docs">Spell UI's docs site</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+        </ui-section>
+
+        <ui-section id="8-history" label="8. History" sticky collapsible dividing open="false">
+          <p class="meta">Each phase merged into main as it finished, newest first.</p>
+          <ui-feed class="spell-history" size="small">
+            <ui-event icon="check">
+              <ui-content>
+                <ui-summary
+                  >P13-P14: fitting titles; zoom, the growing textarea, the page contents and live example moved into
+                  Spell UI; README pictures <ui-date>2026-10-26</ui-date></ui-summary
+                >
+              </ui-content>
+            </ui-event>
+            <ui-event icon="check">
+              <ui-content>
+                <ui-summary
+                  >The first doc review: the old names stop working; this guide, the READMEs
+                  <ui-date>2026-10-25</ui-date></ui-summary
+                >
+              </ui-content>
+            </ui-event>
+            <ui-event icon="check">
+              <ui-content>
+                <ui-summary
+                  >P9-P12: paragraph, link, quote, keys, page, video, audio, terms, caption
+                  <ui-date>2026-10-25</ui-date></ui-summary
+                >
+              </ui-content>
+            </ui-event>
+            <ui-event icon="check">
+              <ui-content>
+                <ui-summary
+                  >P7-P8: table rows and cells; the stack, floated gone <ui-date>2026-10-25</ui-date></ui-summary
+                >
+              </ui-content>
+            </ui-event>
+            <ui-event icon="check">
+              <ui-content>
+                <ui-summary
+                  >P1-P6: the names, the rename mechanism, the shared attributes, the renames, spell ui rename
+                  <ui-date>2026-10-25</ui-date></ui-summary
+                >
+              </ui-content>
+            </ui-event>
+            <ui-event icon="gavel">
+              <ui-content>
+                <ui-summary
+                  >Owen's request r1: the attribute renames, from epic debut <ui-date>2026-10-25</ui-date></ui-summary
+                >
+              </ui-content>
+            </ui-event>
+          </ui-feed>
+        </ui-section>
+
+        <footer class="spell-doc-footer">
+          <ui-divider></ui-divider>
+          <p class="meta">Last checked 2026-10-26 against branch <code>ui-gaps</code>.</p>
+        </footer>
+      </main>
+    </div>
+    <script src="/_epic/assets/highlight.min.js"></script>
+    <script src="/_epic/assets/spell-ui.js"></script>
+  </body>
+</html>
