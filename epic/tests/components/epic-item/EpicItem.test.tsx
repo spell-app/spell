@@ -458,23 +458,23 @@ describe("<epic-item>", () => {
   })
 
   // epic `epic-engine` I308:  "it looks correct, then flashes ... when the update comes in.  Shouldn't flash"
-  test("closing at his x:  struck and grey from the click, as the server will leave it, so its update changes nothing", async () => {
+  test("closing at his x:  as it was till his Send, a ring round its id (T145), so its update changes nothing", async () => {
     const closing = vi.spyOn(ReviewClient.prototype, "isClosing").mockReturnValue(true)
     const closingAs = vi.spyOn(ReviewClient.prototype, "closingAs").mockReturnValue("drop")
     const held = vi.spyOn(ReviewClient.prototype, "isHeldInView").mockReturnValue(true)
     try {
       const { host, chip } = await item(`<epic-item id="i8" title="Gone soon" status="open"></epic-item>`)
       const base = () => host.shadowRoot!.querySelector("[part~='base']")!.className
-      expect(base()).toBe("old canceled item")
-      // its x still pressed, though the server took the mark off the inbox
-      expect(chip.dataset.fill).toBe("dashed")
+      expect(base()).toBe("open item")
+      // marked, its x still pressed, though the server took the mark off the inbox:  the chip's own fill, ringed
+      expect([chip.dataset.fill, chip.dataset.marked]).toEqual([undefined, "unsent"])
       // the server's update lands:  the same look
       host.setAttribute("status", "canceled")
       host.setAttribute("state", "old")
       await Promise.resolve()
-      expect(base()).toBe("old canceled item")
+      expect(base()).toBe("open item")
       const chipNow = host.shadowRoot!.querySelector<HTMLElement>("[part~='id']")!
-      expect([chipNow.dataset.fill, chipNow.hasAttribute("data-marked")]).toEqual(["dashed", true])
+      expect([chipNow.dataset.fill, chipNow.dataset.marked]).toEqual([undefined, "unsent"])
     } finally {
       closing.mockRestore()
       closingAs.mockRestore()
@@ -919,6 +919,24 @@ describe("<epic-item> his ✓ on a fix, then the page server's apply (I360)", ()
     await vi.waitFor(() => expect(lookOf(host)).toContain('"approve:dashed"'))
     const after = JSON.parse(lookOf(host)) as { height: number; pill: string }
     expect([after.pill, after.height]).toEqual(["in P1", before.height])
+  })
+
+  test("his ✓ keeps its colour and title till his Send, a ring round its id;  his Send greys it (T145)", async () => {
+    const routes = new FakeRoutes()
+    const client = await adoptClient(routes)
+    const host = (await render<HTMLElement>(FIXED_PAGE)).querySelector("epic-item")!
+    await vi.waitFor(() => expect(lookOf(host)).toContain('"approve:none"'))
+    type Look = { base: string; ink: string; chip: [string, boolean, string] }
+    const before = JSON.parse(lookOf(host)) as Look
+    client.press("i1", "approve")
+    await vi.waitFor(() => expect(lookOf(host)).toContain('"approve:dashed"'))
+    const marked = JSON.parse(lookOf(host)) as Look
+    expect([marked.base, marked.ink, marked.chip]).toEqual([before.base, before.ink, ["", true, before.chip[2]]])
+    const chip = host.shadowRoot!.querySelector<HTMLElement>("[part~='id']")!
+    expect([chip.dataset.marked, getComputedStyle(chip).outlineStyle]).toEqual(["unsent", "dotted"])
+    await client.send()
+    await nextFrame(2)
+    expect((JSON.parse(lookOf(host)) as Look).base).toMatch(/^old\b/)
   })
 
   test("held in view:  its `in P` pill from the click, so the page's update changes nothing on screen;  Send lets go once", async () => {

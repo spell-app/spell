@@ -67,10 +67,39 @@ export const epicAskVocabulary = {
         "Its chip's text, as written (`12`, `Q12`).  None:  its key's id (`q3`, `q3-priority` -> `Q3`), " +
         "else its section's number (`12 · Rename it` -> `Q12`), else its section's place;  two questions in one " +
         "section share it, a letter each (`Q12 · a`, `Q12 · b`)."
+    },
+    {
+      name: "no-chip",
+      kind: "boolean",
+      description:
+        "No chip:  its id stays internal (a Feature Set's Your pick, epic `epic-engine` P80);  its state still " +
+        "shows as its `:state()`."
+    },
+    {
+      name: "label",
+      kind: "string",
+      description:
+        "Its name for people, when it shares its section with others (a row of a table:  `S1F2 · Share a link`):  " +
+        "the answer, a screen reader and kept text say it.  It then leaves its section's state alone."
+    },
+    {
+      name: "off-for",
+      kind: "string",
+      description:
+        "A follow-up's (`slot=\"then\"`):  the letters of the question's picks that grey it out, comma-separated " +
+        "(`N`).  What was picked in it stays."
     }
   ],
   events: [],
-  slots: [{ name: "", description: "The question:  an `<epic-question>`, then an `<epic-choices>`;  prose too." }],
+  slots: [
+    { name: "", description: "The question:  an `<epic-question>`, then an `<epic-choices>`;  prose too." },
+    {
+      name: "then",
+      description:
+        "`compact`:  a follow-up question, an `<epic-ask compact>` drawn between the select and the one comment " +
+        "box (a Priority).  No chip, no box of its own;  not counted by itself."
+    }
+  ],
   parts: [
     { name: "base", description: "The question's box." },
     { name: "line", description: "Its line:  the chip, how to answer, its tools." },
@@ -93,7 +122,8 @@ export const epicAskVocabulary = {
   states: [
     { name: "attention", description: "Nothing picked or written yet:  red." },
     { name: "done", description: "An option picked:  green." },
-    { name: "working", description: '"Provide more details" asked, or only Other written:  blue, Claude\'s to do.' }
+    { name: "working", description: '"Provide more details" asked, or only Other written:  blue, Claude\'s to do.' },
+    { name: "off", description: "A follow-up greyed by the question's pick (`off-for`)." }
   ],
   texts: [
     { key: "pickOne", text: "Pick one", description: "Its line's switch, off:  without `multiple` (or flipped)." },
@@ -105,6 +135,12 @@ export const epicAskVocabulary = {
     { key: "otherOne", text: "Other:  your own answer", description: "The Other box's placeholder, pick one." },
     { key: "otherSeveral", text: "Other:  add your own", description: "The Other box's placeholder, pick several." },
     { key: "comment", text: "Comment (optional)", description: "`compact`:  the comment box's placeholder." },
+    { key: "commentOn", text: "Comment on {question}", description: "With `label`:  the comment box's name." },
+    {
+      key: "offTip",
+      text: "{label} isn't needed when you pick {pick}.\nPick something else to turn it back on.",
+      description: "A greyed follow-up's tooltip."
+    },
     {
       key: "recommended",
       text: "{title} (recommended)",
@@ -121,6 +157,7 @@ export const epicAskVocabulary = {
   children: [
     { tag: "epic-question", max: 1, description: "The question, in full." },
     { tag: "epic-choices", max: 1, description: "Its options, each with a tick box." },
+    { tag: "epic-ask", max: 1, slot: "then", description: "`compact`:  its follow-up question (a Priority)." },
     { tag: "flow", description: "Anything else it needs:  a table, a picture." }
   ]
 } as const satisfies EpicVocabulary

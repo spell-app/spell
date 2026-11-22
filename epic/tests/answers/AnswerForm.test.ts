@@ -356,6 +356,73 @@ describe("AnswerForm's draft (P18)", () => {
     expect(form.fill).toBe("pending")
   })
 
+  test("a pick made before the answer sent is read back changes that question alone (epic `epic-engine` I377)", async () => {
+    const server = new FakeServer()
+    server.answer = sentOf("2026-10-13T20:00:00.000Z", {
+      answers: { q1: { picked: ["C"] }, q2: { picked: ["B"] } },
+      comments: { context: "ok" }
+    })
+    const form = formOn(server, { storage: new FakeStorage() })
+    const [first, second, box] = [
+      new FakeAsk(at("a"), "q1"),
+      new FakeAsk(at("b"), "q2"),
+      new FakeBox(at("c"), "context")
+    ]
+    // the page's preset picks
+    first.picks = ["A"]
+    second.picks = ["A"]
+    for (const part of [first, second, box]) form.add(part)
+    const loading = form.load()
+    first.picks = ["B"]
+    form.edited()
+    await loading
+    await form.saveDraft()
+    expect([first.picks, second.picks, box.text]).toEqual([["B"], ["B"], "ok"])
+    expect(server.drafts.at(-1)).toMatchObject({
+      answers: { q1: { picked: ["B"] }, q2: { picked: ["B"] } },
+      comments: { context: "ok" }
+    })
+  })
+
+  test("an answer that can't be read yet:  no preset is saved or sent as a pick (epic `epic-engine` I377)", async () => {
+    const server = new FakeServer()
+    const reads = server.fetch.getMockImplementation()!
+    server.fetch.mockImplementation(async (url: string, init?: RequestInit) =>
+      !init?.body && url.startsWith("/api/docs/details/answer?") ? json({ error: "busy" }, 503) : reads(url, init)
+    )
+    const form = formOn(server, { storage: new FakeStorage() })
+    const [first, second] = [new FakeAsk(at("a"), "q1"), new FakeAsk(at("b"), "q2")]
+    second.picks = ["A"]
+    form.add(first)
+    form.add(second)
+    await form.load()
+    first.picks = ["B"]
+    form.edited()
+    await form.saveDraft()
+    await form.send()
+    expect([server.drafts, server.posts]).toEqual([[], []])
+  })
+
+  test("loading alone, the answer unread:  an old copy in the browser is never saved again as new (epic `epic-engine` I377)", async () => {
+    const server = new FakeServer()
+    const reads = server.fetch.getMockImplementation()!
+    // the page server restarting:  the read fails, and the save a moment later would go through
+    server.fetch.mockImplementation(async (url: string, init?: RequestInit) =>
+      url.startsWith("/api/docs/details/answer?") ? json({ error: "busy" }, 503) : reads(url, init)
+    )
+    const storage = new FakeStorage()
+    const left = formOn(new FakeServer(), { storage })
+    const was = new FakeAsk(at("a"), "q1")
+    left.add(was)
+    was.picks = ["A"]
+    left.edited()
+    const form = formOn(server, { storage })
+    form.add(new FakeAsk(at("a"), "q1"))
+    await form.load()
+    await form.saveDraft()
+    expect(server.drafts).toEqual([])
+  })
+
   test("keeps nothing off a details page (an element's docs page);  from `file://`, the browser's copy only", async () => {
     vi.useFakeTimers()
     const storage = new FakeStorage()

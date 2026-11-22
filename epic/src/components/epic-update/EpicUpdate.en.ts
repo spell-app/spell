@@ -92,7 +92,10 @@ export const epicUpdateVocabulary = {
         'A new block\'s ✓ Seen, before its date, while the page is reviewed:  an `<epic-review buttons="update">`.'
     },
     { name: "body", description: "What changed, under the title row;  hidden (`until-found`) while folded." },
-    { name: "label", description: "The bare orange `UPDATE` label (just `FIXED`, `UNDERWAY` ... with `became`)." },
+    {
+      name: "label",
+      description: "The bare orange `UPDATE` label (just `FIXED` ... with `became`;  `UNDERWAY` solid blue)."
+    },
     {
       name: "unmerged",
       description: "A bare label's `Not in main` pill, after it, while its item's work is on its branch alone."

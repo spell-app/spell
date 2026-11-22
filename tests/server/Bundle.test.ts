@@ -1,7 +1,9 @@
+import { execFile } from "node:child_process"
 import {
   existsSync,
   mkdirSync,
   mkdtempSync,
+  readFileSync,
   readdirSync,
   readlinkSync,
   realpathSync,
@@ -12,6 +14,7 @@ import {
 } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join } from "node:path"
+import { promisify } from "node:util"
 import { afterAll, describe, expect, test } from "vite-plus/test"
 
 import { SRV } from "spell/server"
@@ -106,6 +109,10 @@ describe("Bundle", () => {
     expect(bundle.check().stale).toBe("built from older sources")
     bundle.build({ stdio: "ignore" })
     const later = new Date(Date.now() + 60_000)
+    utimesSync(join(root, "pkg/out/entry.js"), later, later)
+    // built by hand from the same sources (epic `epic-engine` I363):  the same bytes, written again
+    expect(bundle.check().stale).toBeUndefined()
+    put(root, "pkg/out/entry.js", "someone else's")
     utimesSync(join(root, "pkg/out/entry.js"), later, later)
     expect(bundle.check().stale).toBe("entry.js changed since")
     rmSync(join(root, "pkg/out/entry.js"))
@@ -391,6 +398,46 @@ describe("Bundle.specs()", () => {
     const outputs = SRV.Bundle.specs(every).map((spec) => spec.name)
     expect([...outputs].sort()).toEqual(SRV.BUNDLES.map((spec) => spec.name).sort())
     expect(new Set(outputs).size).toBe(outputs.length)
+  })
+})
+
+// two page servers watch one worktree, its own and main's:  each starts a check when a source changes
+describe("builds of one bundle take turns (epic `epic-engine` I363)", () => {
+  const top = mkdtempSync(join(tmpdir(), "assembler-bundle-turns-"))
+  install(top, { "@demo/pkg": "pkg" })
+  put(top, "pkg/src/a.ts", "a")
+
+  afterAll(() => rmSync(top, { recursive: true, force: true }))
+
+  test("two that find it stale at once build it once;  the second finds it current", { timeout: 60_000 }, async () => {
+    const write = `const fs = require("fs");  fs.appendFileSync("runs", "x");  setTimeout(() => {
+      fs.mkdirSync("out", { recursive: true });  fs.writeFileSync("out/entry.js", "built")
+    }, 1000)`
+    const spec = { ...SPEC, run: [process.execPath, "-e", write] }
+    // each a process of its own, as the servers' `spell bundle --stale`:  it waits till both have found it stale
+    const check = `
+      import { existsSync, writeFileSync } from "node:fs"
+      import { SRV } from "spell/server"
+      const [top, spec, me, other] = JSON.parse(process.env.TURN)
+      const bundle = new SRV.Bundle(top, spec)
+      if (!bundle.isStale) throw new Error("not stale to start with")
+      writeFileSync(top + "/ready-" + me, "")
+      while (!existsSync(top + "/ready-" + other)) await new Promise((done) => setTimeout(done, 20))
+      bundle.buildIfStale({ stdio: "ignore" })
+    `
+    const run = (me: string, other: string) =>
+      promisify(execFile)(process.execPath, ["--import", "tsx", "--input-type=module", "-e", check], {
+        cwd: KIT,
+        timeout: 50_000,
+        env: {
+          ...process.env,
+          TSX_TSCONFIG_PATH: join(KIT, "tsconfig.node.json"),
+          TURN: JSON.stringify([top, spec, me, other])
+        }
+      })
+    await Promise.all([run("a", "b"), run("b", "a")])
+    expect(readFileSync(join(top, "pkg/runs"), "utf8")).toBe("x")
+    expect(new SRV.Bundle(top, spec).isStale).toBe(false)
   })
 })
 

@@ -584,6 +584,7 @@ The page server builds the stale ones itself, once it's listening
 ([BundleBuild.ts](../src/server/page/BundleBuild.ts)):
 - It runs `spell bundle --stale` as a child process, which rebuilds only a bundle that's stale.
   A start with nothing changed builds nothing.
+  Two servers watching one worktree, its own and main's, build a change once:  the second waits for the first.
 - It runs the kit's OWN `spell`, as the kit's install finds it, never the one on your PATH:
   so a worktree's server builds with the worktree's code.
 - Its output goes to the server's log, each line starting `bundles:  `:

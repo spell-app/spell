@@ -69,8 +69,8 @@ describe("<ui-dimmer> classes", () => {
   it.each([
     ["", "ui dimmer"],
     ["visible", "ui active dimmer"],
-    ['shade="very light" inverted', "ui very light inverted dimmer"],
-    ['blurring appearance="simple" vertical-align="top"', "ui blurring simple top aligned dimmer"],
+    ['shade="very light" inverted', "ui very light inverted dimmer very-light"],
+    ['blurring appearance="simple" vertical-align="top"', "ui blurring simple top aligned dimmer top-aligned"],
     ["page", "ui page dimmer"],
     ["visible disabled", "ui disabled dimmer"]
   ])("<ui-dimmer %s>", async (attributes, classes) => {

@@ -331,6 +331,7 @@ export abstract class PlanReader {
    *   decided question is work too)
    * - canceled (made moot, struck through):  `old`, grey -- the ONE "no longer relevant"
    * - handled in a phase (`handled`, epic `epic-engine` P31):  `handled`, grey:  its answer is that phase's text now
+   *   - NEVER an open fix waiting for his check (`fixed`, epic `epic-engine` I411:  I88, reopened, stayed grey)
    * - an issue Claude found and fixed itself, never needing Owen (epic `epic-engine` I236):  `handled`, grey:
    *   closed done, `calm`, never reviewed, not one he asked for (Owen:  "I don't need to worry about transient stuff")
    * - an issue Claude found, fixed before he got to it (`self-fixed`, epic `epic-engine` T143):  `handled`, grey
@@ -367,7 +368,8 @@ export abstract class PlanReader {
     if (facts.underway || facts.working) return "progress"
     if (facts.status === CANCELED) return "old"
     // its answer in a phase's text now (epic `epic-engine` P31):  quiet, out of "what needs you"
-    if (facts.handled || facts.selfFixed || isSelfFixed(facts)) return "handled"
+    const awaitsCheck = facts.fixed && facts.status === "open"
+    if (!awaitsCheck && (facts.handled || facts.selfFixed || isSelfFixed(facts))) return "handled"
     if (isRequestedFix(facts)) return "requested"
     if (CLOSED.has(facts.status) || OLD_DECISION.test(facts.id)) return "recent"
     if (facts.fixed) return facts.requested ? "requested" : "replied"
