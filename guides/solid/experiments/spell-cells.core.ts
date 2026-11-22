@@ -5,7 +5,7 @@
 
 export const mode = process.argv[2] ?? "prod"
 export const S = await import(
-  `${process.env.SOLID_NODE_MODULES ?? new URL("../../../../node_modules", import.meta.url).pathname}/@solidjs/signals/dist/${mode === "dev" ? "dev.js" : "prod/index.js"}`
+  `${process.env.SOLID_NODE_MODULES ?? new URL("../../../node_modules", import.meta.url).pathname}/@solidjs/signals/dist/${mode === "dev" ? "dev.js" : "prod/index.js"}`
 )
 export const { createRoot, createRenderEffect, flush, enableExternalSource } = S
 export const log = console.log
