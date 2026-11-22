@@ -230,8 +230,10 @@ export function FollowAlong() {
         // only a new place runs it, so what it reads (the selection, the trail) it reads as it is now,
         // untracked on purpose (I88)
         if (followed.from === "code" || followed.from === "edit") void followCodeCursor(followed, codeEditor, ifNone)
-        else if (followed.from !== "parts")
-          untrack(() => Inspector.selectWrittenAt(followed.path, followed.line, { ifNone }))
+        else if (followed.from !== "parts") {
+          const isWanted = () => editor.followed === followed
+          untrack(() => void Inspector.selectWrittenAt(followed.path, followed.line, { ifNone, isWanted }))
+        }
       }
       if (followed.from === "code" || followed.from === "edit") return follower.clear()
       if (!codeEditor || codeEditor.view.hasFocus) return
@@ -258,7 +260,8 @@ export function FollowAlong() {
 /**
  * The code's cursor rests at `followed`:  select the thing the word under it names, when it names one the app draws,
  * else what its line draws or makes, as ever (`Inspector.selectWrittenAt()`).
- * - The word is read by the language service, from its declaration (`<stock-pile "stock"/>`, `"stock" is a new ...`):
+ * - The word is read by the language service, the language worker's where it parses,
+ *   from its declaration (`<stock-pile "stock"/>`, `"stock" is a new ...`):
  *   that line's part is the thing, so what's inspected is what the program declared, never a guess from the text.
  * - Only a property or a variable counts (`declaredThingAt()`):  a type, an action or a keyword falls back to the line.
  * - A place followed since (the cursor moved on) is left alone:  the language service loads lazily.
@@ -271,10 +274,9 @@ async function followCodeCursor(
 ): Promise<void> {
   const named = codeEditor && (await thingNamedAtCursor(codeEditor, followed).catch(() => undefined))
   if (editor.followed !== followed) return
-  untrack(() => {
-    if (named && Inspector.selectWrittenAt(named.path, named.line)) return
-    Inspector.selectWrittenAt(followed.path, followed.line, { ifNone })
-  })
+  const isWanted = () => editor.followed === followed
+  if (named && (await untrack(() => Inspector.selectWrittenAt(named.path, named.line, { isWanted })))) return
+  if (isWanted()) await untrack(() => Inspector.selectWrittenAt(followed.path, followed.line, { ifNone, isWanted }))
 }
 
 /**
@@ -289,17 +291,15 @@ async function thingNamedAtCursor(
   const { main } = state.selection
   const caretLine = state.doc.lineAt(main.head)
   if (!main.empty || caretLine.number !== followed.line + 1) return undefined
-  const { SpellCodeMirror } = await LazyCodeMirror.load()
-  // the language service's own parse of the code showing, as its other features read it
-  SpellCodeMirror.states.parseNow()
-  const { file } = codeEditor
-  if (!(file instanceof SP.SpellFile) || !file.match || file.contents !== codeEditor.view.state.doc.toString())
-    return undefined
-  const declared = SpellCodeMirror.service.declaredThingAt(file, {
-    line: caretLine.number - 1,
-    character: main.head - caretLine.from
-  })
-  return declared && { path: SP.SpellProject.sourceNameOf(declared.file.path), line: declared.line }
+  await LazyCodeMirror.load()
+  const { language } = codeEditor
+  // the parse of the code showing, as its other features read it:  the language worker's, else the page's
+  if (!language || !(await language.fileReady(state.doc))) return undefined
+  const position = { line: caretLine.number - 1, character: main.head - caretLine.from }
+  const declared = await language.ask("spell/declaredThing", { position })
+  // typed in since it asked:  the answer is about other text
+  if (!declared || codeEditor.view.state.doc !== state.doc) return undefined
+  return { path: SP.SpellProject.sourceNameOf(declared.path), line: declared.line }
 }
 
 /**

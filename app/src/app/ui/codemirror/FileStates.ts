@@ -168,6 +168,27 @@ export class FileStates {
   }
 
   /**
+   * The answer to `method` about `file`, for what asks from outside the code, e.g. the Inspector
+   * (epic `solid-2-final` T36):  the language worker's where it parses, about the text as it is now.
+   * - SIDE EFFECT:  `file`'s project gets its states, so the worker has its files, shown in the code or not.
+   * - `undefined` when its text changed meanwhile, or it isn't parsed:  an answer about other text places edits wrong.
+   * - throws what the service throws (`LSP.RenameError` ...)
+   */
+  async ask<M extends LSP.LanguageMethod>(
+    file: SP.SpellFile,
+    method: M,
+    params: Omit<LSP.LanguageParams<M>, "textDocument">
+  ): Promise<LSP.LanguageAnswer<M> | undefined> {
+    const entry = this.entryFor(file)
+    // a change from outside the code reaches the state, and so the client, a microtask later
+    await Promise.resolve()
+    const { doc } = entry.state
+    if (!entry.language || !(await entry.language.fileParsed(doc))) return undefined
+    const answer = await entry.language.ask(method, params)
+    return entry.state.doc === doc ? answer : undefined
+  }
+
+  /**
    * Parse `project`'s waiting text once the typing pauses for `PARSE_WAIT` msec:
    * `SIDE_BAR_PARSE_WAIT` where the language worker parses it (epic `solid-2-final` T36).
    */

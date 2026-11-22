@@ -124,6 +124,14 @@ describe("LanguageHost", () => {
     expect(unavailable).toEqual([missing])
   })
 
+  test("says where the thing a word names was declared, as plain data:  Follow Along's question", async () => {
+    const lines = text.split("\n")
+    const line = lines.findIndex((it) => it.includes('its "suit" is one of'))
+    const position = { line, character: lines[line]!.indexOf("suit") + 1 }
+    expect(await host.request("spell/declaredThing", { textDocument, position })).toEqual({ path, line })
+    expect(await host.request("spell/declaredThing", { textDocument, position: { line, character: 0 } })).toBe(null)
+  })
+
   test("a file it doesn't know answers the table's fallback", async () => {
     const elsewhere = { uri: LSP.AppAddresses.uriOf(`${solitaire}/Nowhere.spell`) }
     expect(await host.request("textDocument/documentSymbol", { textDocument: elsewhere })).toEqual([])
