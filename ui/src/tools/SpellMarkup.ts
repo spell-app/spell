@@ -564,8 +564,9 @@ export class SpellMarkup {
     const rest = words.filter((word) => word !== CLUSTER)
     if (rest.length) stack.setAttribute("class", rest.join(" "))
     else stack.removeAttribute("class")
-    stack.setAttribute("direction", "horizontal")
+    // linkedom lists the newest attribute first:  set in the reverse of the order they're written
     stack.setAttribute("wrap", "")
+    stack.setAttribute("direction", "horizontal")
   }
 
   /**
