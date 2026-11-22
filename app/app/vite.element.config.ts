@@ -29,6 +29,8 @@ const ENTRY_IDS = Object.values(ENTRIES).map((entry) => fileURLToPath(new URL(en
  *   - `<spell-viewer>` imports `spell-ui.js` not at all:  it's a root, loading each Spell UI family it draws from `ui/`.
  *   - `spell-runtime.js` takes Solid and `h` through `spell-solid-shared.js` too
  *     (compiled spell draws with Solid), never `spell-ui.js`.
+ * - Nor spell's grammar, for a layout's spell (`LayoutSpell.js`):  it comes from `spell-grammar.js` beside it,
+ *   `vite.code.config.ts`'s, which `<spell-code>`'s colours load too -- one grammar per page (`sharedGrammar()`).
  * - Fixed names, no hashes:  the element finds the runtime, styles and scope packs beside itself.
  * - One `spell-app.css`, which the element puts in each shadow root -- see `shadowStyles.ts`.
  * - `static/` is copied in, so Lato sits beside the bundle --
@@ -40,7 +42,8 @@ const ENTRY_IDS = Object.values(ENTRIES).map((entry) => fileURLToPath(new URL(en
 const shared = appConfig()
 export default defineConfig({
   ...shared,
-  plugins: [...shared.plugins, sharedSolid(), builtInsPack(), componentPack()],
+  // `sharedGrammar()` after `sharedSolid()`:  it adds its path to the one `paths` that sets
+  plugins: [...shared.plugins, sharedSolid(), sharedGrammar(), builtInsPack(), componentPack()],
   // its lazy chunk (`LayoutSpell.js`, a layout's spell) is preloaded from beside `spell-viewer.js`, not the page's root
   base: "./",
   publicDir: "static",
@@ -105,6 +108,43 @@ function bothEntriesImport(ctx: ChunkingContext): Set<string> {
 
 /** What Rolldown hands a chunk group's `name()`:  each module's imports. */
 type ChunkingContext = { getModuleInfo(moduleId: string): { importedIds: readonly string[] } | null }
+
+////////////////
+// ## The shared grammar
+////////////////
+
+/** The import names `sharedGrammar()` takes from `spell-grammar.js`:  the parser's barrel and spell's. */
+const GRAMMAR_NAMES = new Set(["spell/parser/parser", "spell/parser/spell"])
+
+/** The id an import of the grammar resolves to here, external;  its path in the bundle, beside the chunk. */
+const GRAMMAR = { id: "\0spell-grammar", path: "./spell-grammar.js" }
+
+/**
+ * Spell's grammar from `spell-grammar.js`, NOT bundled (epic `solid-2-final` P11):
+ * `vite.code.config.ts` builds it once (`src/app/spellGrammar.ts`), for `<spell-code>`'s colours and this.
+ * - Each `spell/parser/parser` and `spell/parser/spell` import is that file's `P` and `SP`:
+ *   only `LayoutSpell`'s are values, and the runner loads it lazily, so nothing up front loads the grammar
+ *   (`element.build.test.ts` checks).
+ * - A deep import (`spell/parser/spell/SpellUrls`) stays bundled:  the viewer's up-front pieces use a few,
+ *   and a second copy of each is a few small modules.
+ * - Fine for `LayoutSpell`:  it hands the grammar text, and runs what comes back on the program's own `core`.
+ */
+function sharedGrammar(): Plugin {
+  return {
+    name: "spell-shared-grammar",
+    apply: "build",
+    enforce: "pre",
+    resolveId: (source) => (GRAMMAR_NAMES.has(source) ? { id: GRAMMAR.id, external: true } : null),
+    outputOptions(options) {
+      const { paths } = options
+      return {
+        ...options,
+        paths: (id: string) =>
+          id === GRAMMAR.id ? GRAMMAR.path : typeof paths === "function" ? paths(id) : (paths?.[id] ?? id)
+      }
+    }
+  }
+}
 
 /**
  * Copy the built-in types' scope pack, `core`'s `src/core.scopes.js`, beside the bundle --

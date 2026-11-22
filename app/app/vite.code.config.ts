@@ -10,6 +10,9 @@ import { appConfig, sharedSolid } from "./vite.shared.ts"
  *   - `spell-reference-page.js`:  `<spell-reference-page>`, a reference page (`src/app/components/spell-reference-page/`)
  *   - `spell-language.js`:  ONLY `spell` registered, for a page with Spell UI of its own (`src/app/spellLanguage.ts`):
  *     what the page server adds to the docs pages it serves
+ *   - `spell-grammar.js`:  spell's parser and rules, `P` and `SP` (`src/app/spellGrammar.ts`), the ONE grammar of the
+ *     element builds (epic `solid-2-final` P11):  the colours here, and a `<spell-viewer>` layout's spell, import it
+ *     (`sharedGrammar()`, `vite.element.config.ts`)
  * - The component pack, `spell.pack.js` (`vite.element.config.ts`), imports the first three too.
  * - Its own build, not more entries of `vite.element.config.ts`:
  *   that one puts everything its entries share in ONE chunk (`spell-shared.js`), which `<spell-viewer>` loads up front.
@@ -45,8 +48,11 @@ export default defineConfig({
         "spell-code": "../src/app/components/spell-code/index.ts",
         "spell-markdown": "../src/app/components/spell-markdown/index.ts",
         "spell-reference-page": "../src/app/components/spell-reference-page/index.ts",
-        "spell-language": "../src/app/spellLanguage.ts"
+        "spell-language": "../src/app/spellLanguage.ts",
+        "spell-grammar": "../src/app/spellGrammar.ts"
       },
+      // `spell-grammar.js` keeps `P` and `SP`:  the viewer's build imports them from it, by URL
+      preserveEntrySignatures: "exports-only",
       output: {
         entryFileNames: "[name].js",
         chunkFileNames: "spell-code-[name].js",

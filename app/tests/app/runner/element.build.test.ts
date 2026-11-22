@@ -36,6 +36,8 @@ import { afterAll, beforeAll, describe, test, expect } from "vite-plus/test"
  * - And `spell-runtime.js` draws with the page's one Solid (epic `output-targets` P10):
  *   - it imports Solid and `h` through `spell-solid-shared.js`, bundles none of its own, and never loads `ui`
  *   - it exports that same `h`:  what compiled javascript draws with (P20)
+ * - ONE grammar (spell's parser and rules) for a layout's spell and `<spell-code>`'s colours, `spell-grammar.js`
+ *   (`sharedGrammar()`, `vite.element.config.ts`);  `<spell-editor>` keeps its own.
  * - CodeMirror only in `<spell-editor>`'s lazy chunk:  the parser compiles, and apps run, before it loads.
  * - Icon packs beside the chunk holding `BuiltInPacks`, where it looks -- complete enough for every Fomantic name.
  * - Every bundle MUST parse:  a build can succeed and still write javascript no browser runs --
@@ -280,6 +282,18 @@ describe("runner builds", () => {
     expect(readFileSync(join(element, "spell-ui.js"), "utf8")).toMatch(/SpellUI\b[^;]*registerPack/)
   })
 
+  test("one grammar for a layout's spell and `<spell-code>`'s colours:  `spell-grammar.js`'s;  `<spell-editor>` keeps its own", () => {
+    // spell's rules, in every chunk but the editor's own (its language service watches its projects through its own
+    // `spell/util`):  ONE chunk, which `spell-grammar.js` imports (epic `solid-2-final` P11)
+    const withRules = chunks(element).filter(
+      (file) => !file.startsWith("spell-editor") && sources(element, file).some((source) => SPELL_RULES.test(source))
+    )
+    expect(withRules).toHaveLength(1)
+    expect(staticImports(element, "spell-grammar.js")).toContain(withRules[0])
+    // a layout's spell imports it by its name, from the code build;  it bundles no rule of its own
+    expect(staticImports(element, "LayoutSpell.js")).toContain("spell-grammar.js")
+  })
+
   test("<spell-code> and <spell-markdown>:  Spell UI's families through `spell-ui-shared.js`;  `spell-language.js` imports none of it up front", () => {
     for (const entry of ["spell-code.js", "spell-markdown.js", "spell-reference-page.js"]) {
       const files = staticImports(element, entry)
@@ -375,6 +389,9 @@ const PACKAGES = {
 const CODE_EDITOR_CSS = /\.cmb-editor/
 
 /** The parser:  its rules, its writers (but `SourceMarks`, a program's source map), its tokenizer, and spell's grammar. */
+/** A grammar rule's module, `parser/src/spell/rules/...`:  in the one grammar chunk only. */
+const SPELL_RULES = /\/parser\/src\/spell\/rules\//
+
 const PARSER =
   /\/parser\/src\/(parser\/(rules|writers\/(?!SourceMarks)|tokenizer\/(?!.*\.types)|Parser\.ts)|spell\/rules\/)/
 
