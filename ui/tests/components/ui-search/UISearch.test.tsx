@@ -139,7 +139,7 @@ describe("<ui-search> markup", () => {
     const { root, input } = await search(
       `<ui-search size="large" category fluid align="right" loading aria-label="x"></ui-search>`
     )
-    expect(root.className).toBe("ui large category fluid loading right aligned search")
+    expect(root.className).toBe("ui large category fluid loading right aligned search right-aligned")
     expect(input.parentElement!.className).toBe("ui icon input loading fluid")
     expect(input.getAttribute("aria-busy")).toBe("true")
   })

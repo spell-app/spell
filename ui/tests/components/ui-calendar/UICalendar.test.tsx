@@ -91,7 +91,7 @@ describe("<ui-calendar> markup", () => {
   it("renders a field, an icon button and a closed popover dialog", async () => {
     const { root, input, trigger, popup } = await calendar(DATE)
     expect(root.className).toBe("ui calendar")
-    expect(input.parentElement!.className).toBe("ui left icon input")
+    expect(input.parentElement!.className).toBe("ui left icon input left-icon")
     // the field is the anchor, the popup hangs from it:  one name per element
     const anchor = input.parentElement!.style.getPropertyValue("anchor-name")
     expect(anchor).toMatch(/^--ui-calendar-\d+$/)
@@ -104,7 +104,7 @@ describe("<ui-calendar> markup", () => {
     expect(trigger.getAttribute("aria-controls")).toBe(popup.id)
     expect(popup.getAttribute("popover")).toBe("manual")
     expect(popup.getAttribute("role")).toBe("dialog")
-    expect(popup.className).toBe("ui calendar popup bottom left")
+    expect(popup.className).toBe("ui calendar popup bottom left bottom-left")
     expect(popup.matches(":popover-open")).toBe(false)
     expect(popup.childElementCount).toBe(0)
   })
@@ -113,7 +113,9 @@ describe("<ui-calendar> markup", () => {
     const { root, grid, title, heads, cells, stop } = await calendar(INLINE)
     expect(root.firstElementChild!.className).toBe("calendar")
     expect(root.querySelector("input")).toBeNull()
-    expect(grid().className).toBe("ui celled center aligned unstackable seven column table day")
+    expect(grid().className).toBe(
+      "ui celled center aligned unstackable seven column table day center-aligned seven-column"
+    )
     expect(grid().getAttribute("aria-labelledby")).toBe(title().id)
     expect(title().textContent).toBe("September 2026")
     expect(heads().map((head) => head.textContent)).toEqual(["S", "M", "T", "W", "T", "F", "S"])

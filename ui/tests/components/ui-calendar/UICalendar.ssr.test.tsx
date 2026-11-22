@@ -20,7 +20,7 @@ describe("<ui-calendar> static render", () => {
       `<ui-calendar id="due" type="date" name="due" value="2026-09-30" placeholder="Due"></ui-calendar>`
     )
     expect(html).toMatch(
-      /^<div [^>]*class="ui calendar"[^>]*><div class="ui left icon input" part="input" style="anchor-name:--ui-calendar-\d+"><input /
+      /^<div [^>]*class="ui calendar"[^>]*><div class="ui left icon input left-icon" part="input" style="anchor-name:--ui-calendar-\d+"><input /
     )
     const field = html.match(/<input [^>]*part="control"[^>]*>/)?.[0] ?? ""
     expect(field).toContain(`value="September 30, 2026"`)
@@ -30,7 +30,7 @@ describe("<ui-calendar> static render", () => {
     expect(html).not.toContain("data-ui-control")
     expect(field).not.toContain(`name=`)
     expect(html).toContain(`<input type="hidden" name="due" value="2026-09-30">`)
-    expect(html).toMatch(/<div [^>]*class="ui calendar popup bottom left"[^>]*popover="manual"[^>]*role="dialog"/)
+    expect(html).toMatch(/<div [^>]*class="ui calendar popup bottom left bottom-left"[^>]*popover="manual"[^>]*role="dialog"/)
     expect(html).not.toContain("<ui-")
   })
 

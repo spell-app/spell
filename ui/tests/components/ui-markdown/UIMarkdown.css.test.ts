@@ -2,7 +2,6 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { markdownVocabulary } from "spell/ui/components/ui-markdown/UIMarkdown.en"
@@ -38,7 +37,7 @@ describe("UIMarkdown.css source", () => {
 describe("UIMarkdown.css examples", () => {
   it("draws GitHub's look:  ruled h1 / h2, bordered cells, task items without bullets", () => {
     Sheets.adopt([...foundationCSS, markdownCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const h1 = getComputedStyle(root.querySelector("h1")!)
     expect(h1.borderBottomStyle).toBe("solid")
     expect(parseFloat(h1.fontSize)).toBeCloseTo(32, 0)
@@ -49,7 +48,7 @@ describe("UIMarkdown.css examples", () => {
 
   it("restyles headings, rules, bold and inline code by token (the brand's serif headings)", () => {
     Sheets.adopt([...foundationCSS, markdownCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<article class="ui markdown" style="--ui-markdown-heading-font-family: serif; --ui-markdown-heading-weight: 700;` +
         ` --ui-markdown-heading-rule: none; --ui-markdown-heading-rule-gap: 0; --ui-markdown-h2-size: 28px;` +
         ` --ui-markdown-heading-margin: 30px 10px; --ui-markdown-hr-height: 1px;` +
@@ -73,7 +72,7 @@ describe("UIMarkdown.css examples", () => {
 
   it("keeps GitHub's look with no tokens:  headings in the text's font, bold and code in its colour", () => {
     Sheets.adopt([...foundationCSS, markdownCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<article class="ui markdown" style="font-family: monospace; color: rgb(1, 2, 3)">` +
         `<p>x</p><h2>Two</h2><p><strong>bold</strong> <code>code</code></p></article>`
     )
@@ -85,7 +84,7 @@ describe("UIMarkdown.css examples", () => {
 
   it("scales with `size`", () => {
     Sheets.adopt([...foundationCSS, markdownCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const normal = parseFloat(getComputedStyle(root.querySelector(".ui.markdown:not(.small)")!).fontSize)
     const small = parseFloat(getComputedStyle(root.querySelector(".ui.small.markdown")!).fontSize)
     expect(small).toBeLessThan(normal)

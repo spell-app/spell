@@ -2,7 +2,6 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { transitionVocabulary } from "spell/ui/components/ui-transition/UITransition.en"
@@ -33,7 +32,7 @@ const ALLOWED_IMPORTANT = 0
 /** Adopt the sheets and render the class-grammar example. */
 function example(): HTMLElement {
   Sheets.adopt([...foundationCSS, buttonCSS, segmentCSS, transitionCSS])
-  return Fixture.render(EXAMPLES["./examples/transition.html"]!)
+  return Sheets.render(EXAMPLES["./examples/transition.html"]!)
 }
 
 ////////////////
@@ -98,7 +97,7 @@ describe("UITransition.css examples", () => {
 
   it("the protocol beats the class grammar's reset:  `.ui.transition[data-ui-animation]` runs its keyframes", () => {
     Sheets.adopt([...foundationCSS, transitionCSS])
-    const box = Fixture.render(`<div class="ui transition" data-ui-animation="fade-up out">x</div>`)
+    const box = Sheets.render(`<div class="ui transition" data-ui-animation="fade-up out">x</div>`)
     expect(getComputedStyle(box).animationName).toBe("ui-fade-up-out")
   })
 })

@@ -4,7 +4,6 @@ import { page } from "vite-plus/test/browser"
 import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 import { itemVocabulary } from "spell/ui/components/ui-item"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { menuVocabulary } from "spell/ui/components/ui-menu/UIMenu.en"
@@ -77,7 +76,7 @@ describe("UIMenu.css source", () => {
 describe("UIMenu.css examples", () => {
   it.each(Object.keys(EXAMPLES))("styles every menu and item in %s", (path) => {
     Sheets.adopt([...foundationCSS, menuCSS])
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     const menus = root.querySelectorAll<HTMLElement>(".ui.menu")
     expect(menus.length).toBeGreaterThan(0)
     for (const menu of menus) {
@@ -93,7 +92,7 @@ describe("UIMenu.css examples", () => {
   it("lays a basic menu out as a row of padded items with end dividers", async () => {
     await resize(1000)
     Sheets.adopt([...foundationCSS, menuCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const menu = root.querySelector<HTMLElement>(".ui.three.item.menu")!
     const [first, second, third] = menu.querySelectorAll<HTMLElement>(".item")
     expect(first!.getBoundingClientRect().top).toBe(third!.getBoundingClientRect().top)
@@ -106,7 +105,7 @@ describe("UIMenu.css examples", () => {
 
   it("stacks a vertical menu, hairlines between items, none above the first", () => {
     Sheets.adopt([...foundationCSS, menuCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const menu = root.querySelector<HTMLElement>(".ui.vertical.menu")!
     const [first, second] = menu.querySelectorAll<HTMLElement>(".item")
     expect(getComputedStyle(first!).display).toBe("block")
@@ -118,7 +117,7 @@ describe("UIMenu.css examples", () => {
 
   it("gives a menu nested in a vertical menu its OWN only-item corners, not the outer vertical radius", () => {
     Sheets.adopt([...foundationCSS, menuCSS])
-    const root = Fixture.render(`
+    const root = Sheets.render(`
       <div class="ui vertical menu">
         <div class="item">Outer<div class="menu"><a class="item" id="sub">Sub only</a></div></div>
         <div class="item"><div class="ui menu"><a class="item" id="nested">Nested only</a></div></div>
@@ -133,7 +132,7 @@ describe("UIMenu.css examples", () => {
 
   it("resolves type combinations into item looks:  secondary pointing, tabular, text, pagination", () => {
     Sheets.adopt([...foundationCSS, menuCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const underline = root.querySelector<HTMLElement>(".ui.secondary.pointing.menu .active.item")!
     expect(getComputedStyle(underline).borderBottomWidth).toBe("2px")
     expect(getComputedStyle(underline).fontWeight).toBe("700")
@@ -152,7 +151,7 @@ describe("UIMenu.css examples", () => {
 
   it("scales by size on Fomantic's flatter ladder;  medium is the default", () => {
     Sheets.adopt([...foundationCSS, menuCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const size = (selector: string) => parseFloat(getComputedStyle(root.querySelector(selector)!).fontSize)
     expect(size(".ui.mini.menu")).toBeCloseTo(16 * Math.sqrt(0.625), 1)
     expect(size(".ui.huge.menu")).toBeCloseTo(16 * Math.sqrt(1.5), 1)
@@ -161,19 +160,19 @@ describe("UIMenu.css examples", () => {
 
   it("inverts to the dark scheme;  an inverted coloured menu fills with its hue", () => {
     Sheets.adopt([...foundationCSS, menuCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const inverted = root.querySelector<HTMLElement>(".ui.inverted.menu")!
     expect(getComputedStyle(inverted).colorScheme).toBe("dark")
     const green = root.querySelector<HTMLElement>(".ui.inverted.green.menu")!
     // the dark scheme's green, as an inverted segment's:  `--ui-green` is a `light-dark()` token
-    const swatch = Fixture.render(`<span style="color-scheme: dark; background: var(--ui-green)"></span>`)
+    const swatch = Sheets.render(`<span style="color-scheme: dark; background: var(--ui-green)"></span>`)
     expect(getComputedStyle(green).backgroundColor).toBe(getComputedStyle(swatch).backgroundColor)
   })
 
   it("stacks a stackable menu on mobile, not on a desktop", async () => {
     Sheets.adopt([...foundationCSS, menuCSS])
     await resize(1000)
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const menu = root.querySelector<HTMLElement>(".ui.stackable.menu")!
     expect(getComputedStyle(menu).flexDirection).toBe("row")
     await page.viewport(500, 800)
@@ -185,7 +184,7 @@ describe("UIMenu.css examples", () => {
 
   it("takes a public token from a wrapper or the menu itself (static markup)", () => {
     Sheets.adopt(sheets())
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-menu-item-padding: 20px"><div class="ui menu"><a class="item">A</a><a class="item">B</a>` +
         `</div></div><div class="ui menu" style="--ui-menu-radius: 10px"><a class="item">C</a><a class="item">D</a></div>`
     )

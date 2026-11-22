@@ -63,6 +63,7 @@ class VisualPage {
       throw new Error(`VisualPage.render():  no ${this.kind} example "${this.example}";  check \`?example=\``)
     }
     this.root.innerHTML = await load()
+    if (this.kind !== "elements") FamilySheets.joinPhrases(this.root)
     await this.settle()
   }
 

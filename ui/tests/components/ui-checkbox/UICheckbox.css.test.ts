@@ -2,7 +2,6 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { colorsCSS, colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { checkboxVocabulary } from "spell/ui/components/ui-checkbox/UICheckbox.en"
@@ -65,7 +64,7 @@ describe("UICheckbox.css source", () => {
 describe("UICheckbox.css examples", () => {
   it.each(Object.keys(EXAMPLES))("styles every checkbox in %s", (path) => {
     Sheets.adopt([...foundationCSS, checkboxCSS])
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     const boxes = root.querySelectorAll<HTMLElement>(".ui.checkbox")
     expect(boxes.length).toBeGreaterThan(0)
     for (const box of boxes) {
@@ -79,7 +78,7 @@ describe("UICheckbox.css examples", () => {
 
   it("draws a box, fills its mark when checked, and a dash when indeterminate", () => {
     Sheets.adopt([...foundationCSS, checkboxCSS, NO_TRANSITIONS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div class="ui checkbox"><input type="checkbox" id="c1"><label for="c1">A</label></div>`
     )
     const input = root.querySelector("input")!
@@ -98,7 +97,7 @@ describe("UICheckbox.css examples", () => {
 
   it("rounds radios and moves a toggle's handle when checked", () => {
     Sheets.adopt([...foundationCSS, checkboxCSS, NO_TRANSITIONS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const radio = root.querySelector(".ui.radio.checkbox label")!
     expect(getComputedStyle(radio, "::before").borderTopLeftRadius).not.toBe("0px")
     const toggle = root.querySelector<HTMLElement>(".ui.toggle.checkbox")!
@@ -110,15 +109,15 @@ describe("UICheckbox.css examples", () => {
 
   it("colours the chosen state from the remap", () => {
     Sheets.adopt([...foundationCSS, checkboxCSS, colorsCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
-    const probe = Fixture.render(`<span style="background-color: var(--ui-green)"></span>`)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
+    const probe = Sheets.render(`<span style="background-color: var(--ui-green)"></span>`)
     const lane = getComputedStyle(root.querySelector(".ui.green.toggle.checkbox label")!, "::before")
     expect(lane.backgroundColor).toBe(getComputedStyle(probe).backgroundColor)
   })
 
   it("takes a public token from a wrapper (static markup)", () => {
     Sheets.adopt([...foundationCSS, checkboxCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-checkbox-radius: 6px"><div class="ui checkbox"><input type="checkbox" id="t"><label for="t">A</label></div></div>`
     )
     expect(getComputedStyle(root.querySelector("label")!, "::before").borderTopLeftRadius).toBe("6px")
@@ -126,7 +125,7 @@ describe("UICheckbox.css examples", () => {
 
   it("fills a checked box from the CHECKED tokens;  a colour still wins", () => {
     Sheets.adopt([...foundationCSS, checkboxCSS, colorsCSS, NO_TRANSITIONS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-checkbox-checked-background: rgb(101, 80, 202); --ui-checkbox-checked-mark-color: rgb(255, 255, 255)">
         <div class="ui checkbox"><input type="checkbox" id="k1" checked><label for="k1">A</label></div>
         <div class="ui checkbox"><input type="checkbox" id="k2"><label for="k2">B</label></div>
@@ -142,7 +141,7 @@ describe("UICheckbox.css examples", () => {
 
   it("scales every part with `size`", () => {
     Sheets.adopt([...foundationCSS, checkboxCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const size = (selector: string) =>
       parseFloat(getComputedStyle(root.querySelector(`${selector} label`)!, "::before").width)
     expect(size(".ui.huge.checkbox") / size(".ui.mini.checkbox")).toBeGreaterThan(2)

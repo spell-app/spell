@@ -231,7 +231,7 @@
     --_ui-accordion-content-padding: 0.25em 0 0.5em;
     --_ui-accordion-content-last-padding: 0.25em 0 0;
   }
-  .ui[class*="very compact"].accordion:not(.styled) {
+  .ui.very-compact.accordion:not(.styled) {
     --_ui-accordion-title-padding: 0.125em 0;
     --_ui-accordion-content-padding: 0.125em 0 0.25em;
     --_ui-accordion-content-last-padding: 0.125em 0 0;
@@ -241,7 +241,7 @@
     --_ui-accordion-content-padding: 0.25em 0.5em 0.75em;
     --_ui-accordion-content-last-padding: 0.25em 0.5em 0.75em;
   }
-  .ui[class*="very compact"].styled.accordion {
+  .ui.very-compact.styled.accordion {
     --_ui-accordion-title-padding: 0.1875em 0.25em;
     --_ui-accordion-content-padding: 0.125em 0.25em 0.375em;
     --_ui-accordion-content-last-padding: 0.125em 0.25em 0.375em;

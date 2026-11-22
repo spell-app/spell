@@ -182,13 +182,13 @@ describe("<ui-header> standalone", () => {
     ['dividing="no"', "ui header"],
     ['sub="yes"', "ui sub header"],
     ["icon block", "ui block icon header"],
-    ['attach-to="top"', "ui top attached header"],
+    ['attach-to="top"', "ui top attached header top-attached"],
     ['attach-to="both"', "ui attached header"],
-    ['align="center"', "ui center aligned header"],
+    ['align="center"', "ui center aligned header center-aligned"],
     ['align="justified"', "ui justified header"],
     // the old names (epic ui-gaps P4), and the new
     ['padding="none" disabled inverted', "ui fitted disabled inverted header"],
-    ['attach-to="top"', "ui top attached header"],
+    ['attach-to="top"', "ui top attached header top-attached"],
     ['size="huge" color="teal" inverted', "ui huge teal inverted header"]
   ])("<ui-header %s>", async (attributes, classes) => {
     const host = await ElementFixture.render(`<ui-header ${attributes}>H</ui-header>`)

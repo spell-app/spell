@@ -73,12 +73,12 @@ describe("<ui-list> classes and markup", () => {
     ['bulleted="no"', "ui list"],
     ["ordered suffixed", "ui ordered suffixed list"],
     ['spacing="lg"', "ui relaxed list"],
-    ['spacing="xl"', "ui very relaxed list"],
+    ['spacing="xl"', "ui very relaxed list very-relaxed"],
     ["", "ui list"],
     ['divided spacing="lg" selection', "ui relaxed divided selection list"],
     ['direction="horizontal" inverted', "ui horizontal inverted list"],
     ['appearance="link" hover="indent" padding="none" celled', "ui animated fitted celled link list"],
-    ['vertical-align="middle"', "ui middle aligned list"]
+    ['vertical-align="middle"', "ui middle aligned list middle-aligned"]
   ])("<ui-list %s>", async (attributes, classes) => {
     const { root } = await list(attributes)
     expect(root.className).toBe(classes)

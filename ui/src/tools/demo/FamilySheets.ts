@@ -4,6 +4,7 @@
  * - A page script, served by Vite (browser code, Spell UI by its package name):  never imported by node.
  */
 
+import { E } from "spell/ui/core"
 import { UI } from "spell/ui/runtime"
 
 import popupAnchoredCSS from "spell/ui/components/ui-popup/UIPopup.anchored.css?raw"
@@ -28,6 +29,17 @@ export class FamilySheets {
       }
     }
     UI.styles.register("popup-anchored", popupAnchoredCSS, { page: true })
+  }
+
+  /**
+   * Each class under `root` with its phrases' joined words, as the elements write them (`ClassBuilder.withPhrases()`):
+   * the class-grammar originals are Fomantic's markup (`ui top attached segment`), and the family sheets style the
+   * joined word (`.top-attached`).
+   */
+  static joinPhrases(root: ParentNode): void {
+    for (const element of root.querySelectorAll("[class]")) {
+      element.setAttribute("class", E.ClassBuilder.withPhrases(element.getAttribute("class")!))
+    }
   }
 
   /**

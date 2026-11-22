@@ -1,10 +1,10 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
 import { ClassBuilder } from "spell/ui/elements"
+import { CLASS_PHRASES } from "spell/ui/elements/ClassPhrases"
 import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
+import { Sheets } from "spell/ui/test-helpers/Sheets"
 import type { AttributeSpec, ComponentVocabulary } from "spell/ui/vocabulary"
-
-import { Fixture } from "spell/test-helpers/Fixture"
 
 import { dropdownVocabulary } from "spell/ui/components/ui-dropdown/UIDropdown.en"
 
@@ -93,7 +93,7 @@ describe("UIDropdown.css source", () => {
 describe("UIDropdown.css examples", () => {
   it.each(Object.keys(EXAMPLES))("styles every dropdown in %s", (path) => {
     adoptIntoPage(SHEETS)
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     const dropdowns = root.querySelectorAll<HTMLElement>(".ui.dropdown")
     expect(dropdowns.length).toBeGreaterThan(0)
     for (const dropdown of dropdowns) {
@@ -108,7 +108,7 @@ describe("UIDropdown.css examples", () => {
 
   it("opens a popover menu below its root, anchored and as wide as a selection", () => {
     adoptIntoPage(SHEETS)
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const dropdown = root.querySelector<HTMLElement>(".ui.selection.dropdown")!
     const menu = open(dropdown)
     const style = getComputedStyle(menu)
@@ -124,14 +124,14 @@ describe("UIDropdown.css examples", () => {
 
   it("opens upward, toward the start, and beside the root when pointing sideways", () => {
     adoptIntoPage(SHEETS)
-    const root = Fixture.render(`<div style="padding: 12em">${EXAMPLES["./examples/variations.html"]!}</div>`)
+    const root = Sheets.render(`<div style="padding: 12em">${EXAMPLES["./examples/variations.html"]!}</div>`)
     const upward = root.querySelector<HTMLElement>(".ui.upward.dropdown")!
     expect(open(upward).getBoundingClientRect().bottom).toBeLessThanOrEqual(upward.getBoundingClientRect().top)
     close(upward)
     const left = root.querySelector<HTMLElement>(".ui.dropdown:has(> .left.menu)")!
     expect(Math.abs(open(left).getBoundingClientRect().right - left.getBoundingClientRect().right)).toBeLessThan(1)
     close(left)
-    const pointing = root.querySelector<HTMLElement>('.ui[class="ui left pointing dropdown"]')!
+    const pointing = root.querySelector<HTMLElement>('.ui[class="ui left pointing dropdown left-pointing"]')!
     const menu = open(pointing)
     expect(menu.getBoundingClientRect().left).toBeGreaterThan(pointing.getBoundingClientRect().right)
     expect(getComputedStyle(menu, "::after").content).toBe('""')
@@ -141,7 +141,7 @@ describe("UIDropdown.css examples", () => {
 
   it("shows a static menu on an active root, below it", () => {
     adoptIntoPage(SHEETS)
-    const root = Fixture.render(EXAMPLES["./examples/states.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/states.html"]!)
     const dropdown = root.querySelector<HTMLElement>(".ui.active.selection.dropdown")!
     const menu = dropdown.querySelector<HTMLElement>(".menu")!
     expect(getComputedStyle(menu).display).toBe("block")
@@ -153,7 +153,7 @@ describe("UIDropdown.css examples", () => {
 
   it("takes a public token from a wrapper (static markup)", () => {
     adoptIntoPage(SHEETS)
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-dropdown-radius: 12px"><div class="ui selection dropdown"><span class="text">A</span></div></div>`
     )
     expect(getComputedStyle(root.querySelector(".ui.dropdown")!).borderTopLeftRadius).toBe("12px")
@@ -161,7 +161,7 @@ describe("UIDropdown.css examples", () => {
 
   it("scales by size;  medium is the default", () => {
     adoptIntoPage(SHEETS)
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const size = (selector: string) => parseFloat(getComputedStyle(root.querySelector(selector)!).fontSize)
     expect(size(".ui.mini.dropdown")).toBeLessThan(size(".ui.massive.dropdown"))
     expect(size(".ui.medium.dropdown")).toBe(size(".ui.compact.dropdown"))
@@ -169,8 +169,8 @@ describe("UIDropdown.css examples", () => {
 
   it("tints form states, dims disabled, and hides delete icons when read-only", () => {
     adoptIntoPage(SHEETS)
-    const root = Fixture.render(EXAMPLES["./examples/states.html"]!)
-    const tint = Fixture.render(`<span style="background-color: var(--ui-error-background)"></span>`)
+    const root = Sheets.render(EXAMPLES["./examples/states.html"]!)
+    const tint = Sheets.render(`<span style="background-color: var(--ui-error-background)"></span>`)
     const error = root.querySelector(".ui.error.dropdown")!
     expect(getComputedStyle(error).backgroundColor).toBe(getComputedStyle(tint).backgroundColor)
     expect(parseFloat(getComputedStyle(root.querySelector(".ui.disabled.dropdown")!).opacity)).toBeCloseTo(0.45, 2)
@@ -182,7 +182,7 @@ describe("UIDropdown.css examples", () => {
 
   it("draws labels, hides the placeholder behind them, and draws icons without icon data", () => {
     adoptIntoPage(SHEETS)
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const multiple = root.querySelector(".ui.multiple.selection.dropdown:not(.search)")!
     expect(getComputedStyle(multiple.querySelector(".default.text")!).display).toBe("none")
     expect(getComputedStyle(multiple.querySelector(".label")!).display).toBe("inline-block")
@@ -194,7 +194,7 @@ describe("UIDropdown.css examples", () => {
 
   it("keeps a multiple search dropdown's placeholder above its own box (its own stacking context)", () => {
     adoptIntoPage(SHEETS)
-    const root = Fixture.render(
+    const root = Sheets.render(
       '<div><div class="ui fluid multiple search selection dropdown"><input class="search"><div class="default text">State</div></div></div>'
     )
     const dropdown = root.querySelector(".ui.multiple.search.dropdown")!
@@ -204,7 +204,7 @@ describe("UIDropdown.css examples", () => {
 
   it("switches an inverted dropdown to the dark scheme", () => {
     adoptIntoPage(SHEETS)
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     expect(getComputedStyle(root.querySelector(".ui.inverted.dropdown")!).colorScheme).toBe("dark")
   })
 })
@@ -216,7 +216,7 @@ describe("UIDropdown.css examples", () => {
 describe("UIDropdown.css in a shadow root", () => {
   it("places the menu under its root, by the anchor the component names inline", () => {
     adoptIntoPage(foundationCSS)
-    const host = Fixture.render(`<span></span>`)
+    const host = Sheets.render(`<span></span>`)
     const shadow = host.attachShadow({ mode: "open" })
     shadow.adoptedStyleSheets = toSheets(SHEETS)
     shadow.innerHTML = `
@@ -238,7 +238,7 @@ describe("UIDropdown.css in a shadow root", () => {
     // `.dropdown.icon`'s own children, so a `>` selector (the old rule) would leave it unstyled and it'd render at
     // the browser's default SVG size.
     adoptIntoPage(foundationCSS)
-    const host = Fixture.render(`<span></span>`)
+    const host = Sheets.render(`<span></span>`)
     const shadow = host.attachShadow({ mode: "open" })
     shadow.adoptedStyleSheets = toSheets(SHEETS)
     shadow.innerHTML = `
@@ -263,7 +263,7 @@ describe("UIDropdown.css in a shadow root", () => {
     // slotted content, reached only through `::slotted()` -- the old rule had none, so the icon would fall
     // back to the browser's default SVG size instead of the ~1.18em icon token.
     adoptIntoPage(foundationCSS)
-    const host = Fixture.render(`<span></span>`)
+    const host = Sheets.render(`<span></span>`)
     const shadow = host.attachShadow({ mode: "open" })
     shadow.adoptedStyleSheets = toSheets(SHEETS)
     shadow.innerHTML = `
@@ -273,7 +273,7 @@ describe("UIDropdown.css in a shadow root", () => {
         <span class="dropdown icon"></span>
       </div>`
     host.innerHTML = `<svg slot="trigger" viewBox="0 0 32 32" aria-hidden="true"><path d="M0 0h32v32H0z" /></svg>`
-    const reference = Fixture.render(`<span style="display: inline-block; width: 1.18em"></span>`)
+    const reference = Sheets.render(`<span style="display: inline-block; width: 1.18em"></span>`)
     const slotted = host.querySelector<SVGSVGElement>("svg")!
     expect(slotted.getBoundingClientRect().width).toBeCloseTo(reference.getBoundingClientRect().width, 1)
   })
@@ -309,7 +309,8 @@ function close(dropdown: Element) {
  */
 function classPhrases(vocabulary: ComponentVocabulary): string[] {
   const builder = new ClassBuilder(vocabulary)
-  const skip = new Set(["ui", vocabulary.noun])
+  // the phrases' joined words too:  `covers()` looks for them itself
+  const skip = new Set(["ui", vocabulary.noun, ...CLASS_PHRASES.map((phrase) => phrase.replaceAll(" ", "-"))])
   const phrases = new Set<string>()
   for (const spec of vocabulary.attributes) {
     if (spec.kind === "size" || (spec.kind === "color" && !Array.isArray(spec.values))) continue
@@ -332,10 +333,9 @@ function listOf(spec: AttributeSpec): string[] {
   return Array.isArray(spec.values) ? [...(spec.values as readonly string[])] : []
 }
 
-/** `css` styles `phrase`:  as a `[class*="..."]` phrase, or every word as a class selector. */
+/** `css` styles `phrase`:  as its joined word (`.bottom-attached`), or every word as a class selector. */
 function covers(css: string, phrase: string): boolean {
-  if (css.includes(`[class*="${phrase}"]`)) return true
-  return phrase.split(" ").every((word) => new RegExp(`\\.${word}(?![\\w-])`).test(css))
+  return Sheets.covers(css, phrase)
 }
 
 /** Every `CSSStyleRule` in `sheet`, including those nested in `@layer` / `@media`. */

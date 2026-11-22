@@ -87,7 +87,7 @@ describe("<ui-slider> markup", () => {
       'direction="reversed vertical" smooth hover appearance="basic" inverted',
       "ui hover inverted smooth basic reversed vertical slider"
     ],
-    ['labeled align="bottom"', "ui labeled bottom aligned slider"],
+    ['labeled align="bottom"', "ui labeled bottom aligned slider bottom-aligned"],
     ["readonly disabled", "ui disabled read-only slider"]
   ])("<ui-slider %s>", async (attributes, classes) => {
     const { root } = await slider(`${attributes} aria-label="S"`)

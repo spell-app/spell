@@ -38,13 +38,13 @@ describe("<ui-icon> classes", () => {
     ["disabled loading", "ui disabled loading icon"],
     ['padding="none" appearance="link"', "ui fitted link icon"],
     ["flipped", "ui flipped icon"],
-    ['flipped="vertically"', "ui vertically flipped icon"],
+    ['flipped="vertically"', "ui vertically flipped icon vertically-flipped"],
     ["rotated", "ui rotated icon"],
-    ['rotated="counterclockwise"', "ui counterclockwise rotated icon"],
-    ['rotated="when stacked"', "ui when stacked rotated icon"],
+    ['rotated="counterclockwise"', "ui counterclockwise rotated icon clockwise-rotated counterclockwise-rotated"],
+    ['rotated="when stacked"', "ui when stacked rotated icon when-stacked-rotated"],
     ["corner", "ui corner icon"],
-    ['corner="top left"', "ui top left corner icon"],
-    ['size="huge" color="blue" rotated="halfway"', "ui huge blue halfway rotated icon"]
+    ['corner="top left"', "ui top left corner icon left-corner top-left top-left-corner"],
+    ['size="huge" color="blue" rotated="halfway"', "ui huge blue halfway rotated icon halfway-rotated"]
   ])("<ui-icon %s>", async (attributes, classes) => {
     const { root } = await icon(`<ui-icon name="house" ${attributes}></ui-icon>`)
     expect(root.className).toBe(classes)
@@ -176,7 +176,9 @@ describe("<ui-icons>", () => {
     const [base, corner] = group.querySelectorAll<DOMElement>("ui-icon")
     expect(base!.matches(":state(in-icons)")).toBe(true)
     expect(corner!.matches(":state(in-icons)")).toBe(true)
-    expect(corner!.shadowRoot!.querySelector("[part~=icon]")!.className).toBe("ui top right corner icon")
+    expect(corner!.shadowRoot!.querySelector("[part~=icon]")!.className).toBe(
+      "ui top right corner icon right-corner top-right top-right-corner"
+    )
     // positioned by the group:  the corner's root is absolutely positioned against the group's root
     expect(getComputedStyle(corner!.shadowRoot!.querySelector("[part~=icon]")!).position).toBe("absolute")
   })

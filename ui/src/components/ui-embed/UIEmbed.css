@@ -7,7 +7,7 @@
  *     default `<slot>` -- Fomantic's `> .placeholder` and `> i.icon`, inside a real button
  *   - or, once active, `<div class="embed" part="frame"><iframe title="..."></iframe></div>`
  * - Ratios with `aspect-ratio` (Fomantic's `padding-bottom` trick needed a zero height):  `16:9` by default,
- *   `[class*="4:3"]`, `[class*="21:9"]`, `square`.
+ *   `4:3`, `21:9` (their class words, escaped:  `.\34 \:3`), `square`.
  * - The icon:  Fomantic's `::before` glyph is the `<svg>`, its `::after` the darkening overlay (a radial gradient,
  *   stronger on hover / focus).
  * - The play button fills the box;  its focus ring is drawn INSIDE (the box clips its overflow).
@@ -154,13 +154,13 @@
   .ui.square.embed {
     --_ui-embed-ratio: 1 / 1;
   }
-  .ui[class*="4:3"].embed {
+  .ui.\34 \:3.embed {
     --_ui-embed-ratio: 4 / 3;
   }
-  .ui[class*="16:9"].embed {
+  .ui.\31 6\:9.embed {
     --_ui-embed-ratio: 16 / 9;
   }
-  .ui[class*="21:9"].embed {
+  .ui.\32 1\:9.embed {
     --_ui-embed-ratio: 21 / 9;
   }
 }

@@ -2,7 +2,6 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { colorsCSS, colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { sliderVocabulary } from "spell/ui/components/ui-slider/UISlider.en"
@@ -33,7 +32,7 @@ const ALLOWED_IMPORTANT = 0
 /** A static slider in a 400px wide box;  returns its root. */
 function render(classes: string, inner: string, thumbs: string, extra = ""): HTMLElement {
   Sheets.adopt([...foundationCSS, colorsCSS, sliderCSS, NO_TRANSITIONS])
-  const box = Fixture.render(`<div style="width: 400px; height: 300px"><div class="${classes}">
+  const box = Sheets.render(`<div style="width: 400px; height: 300px"><div class="${classes}">
     <div class="inner" style="${inner}"><div class="track"></div><div class="track-fill"></div>${thumbs}</div>
     ${extra}</div></div>`)
   return box.firstElementChild as HTMLElement
@@ -82,7 +81,7 @@ describe("UISlider.css source", () => {
 describe("UISlider.css examples", () => {
   it.each(Object.keys(EXAMPLES))("lays out every slider in %s", (path) => {
     Sheets.adopt([...foundationCSS, colorsCSS, sliderCSS, NO_TRANSITIONS])
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     const sliders = root.querySelectorAll<HTMLElement>(".ui.slider")
     expect(sliders.length).toBeGreaterThan(0)
     for (const slider of sliders) {
@@ -180,7 +179,7 @@ describe("UISlider.css examples", () => {
 
   it("takes a public token from a wrapper (static markup)", () => {
     Sheets.adopt([...foundationCSS, colorsCSS, sliderCSS, NO_TRANSITIONS])
-    const box = Fixture.render(`<div style="--ui-slider-track-height: 10px"><div class="ui slider">
+    const box = Sheets.render(`<div style="--ui-slider-track-height: 10px"><div class="ui slider">
       <div class="inner"><div class="track"></div></div></div></div>`)
     expect(getComputedStyle(box.querySelector(".track")!).height).toBe("10px")
   })

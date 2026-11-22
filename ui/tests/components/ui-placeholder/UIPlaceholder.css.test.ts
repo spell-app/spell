@@ -2,7 +2,6 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { placeholderHeaderVocabulary } from "spell/ui/components/ui-placeholder/UIPlaceholderHeader.en"
@@ -94,7 +93,7 @@ describe("UIPlaceholder.css source", () => {
 describe("UIPlaceholder.css examples", () => {
   it.each(Object.keys(EXAMPLES))("paints every shape in %s with the shared, fixed shimmer", (path) => {
     Sheets.adopt([...foundationCSS, placeholderCSS])
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     const shapes = root.querySelectorAll<HTMLElement>(SHAPES)
     expect(shapes.length).toBeGreaterThan(0)
     for (const shape of shapes) {
@@ -117,7 +116,7 @@ describe("UIPlaceholder.css examples", () => {
 
   it("spaces lines and blocks, none before the first, and varies line lengths by position", () => {
     Sheets.adopt([...foundationCSS, placeholderCSS])
-    const root = Fixture.render(EXAMPLES["./examples/content.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/content.html"]!)
     const [lines, , , paragraphs] = root.querySelectorAll<HTMLElement>(".ui.placeholder")
     const bars = [...lines!.querySelectorAll<HTMLElement>(".line")]
     const width = lines!.getBoundingClientRect().width
@@ -137,7 +136,7 @@ describe("UIPlaceholder.css examples", () => {
 
   it("draws headers with taller, shorter lines, and an image header's square beside them", () => {
     Sheets.adopt([...foundationCSS, placeholderCSS])
-    const root = Fixture.render(EXAMPLES["./examples/content.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/content.html"]!)
     const [header, imageHeader] = root.querySelectorAll<HTMLElement>(".ui.placeholder .header")
     const [one, two] = header!.querySelectorAll<HTMLElement>(".line")
     const width = header!.getBoundingClientRect().width
@@ -154,7 +153,7 @@ describe("UIPlaceholder.css examples", () => {
 
   it("sizes images by height or by aspect", () => {
     Sheets.adopt([...foundationCSS, placeholderCSS])
-    const root = Fixture.render(EXAMPLES["./examples/content.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/content.html"]!)
     const rect = (selector: string) => root.querySelector(selector)!.getBoundingClientRect()
     expect(rect('.ui.placeholder .image[class="image"]').height).toBeCloseTo(100, 0)
     expect(rect(".square.image").height).toBeCloseTo(rect(".square.image").width, 0)
@@ -163,7 +162,7 @@ describe("UIPlaceholder.css examples", () => {
 
   it("sets line lengths explicitly, and lets fluid placeholders fill their container", () => {
     Sheets.adopt([...foundationCSS, placeholderCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
     const [lengths, fluid] = root.querySelectorAll<HTMLElement>(".ui.placeholder")
     const width = lengths!.getBoundingClientRect().width
     const percents = [...lengths!.querySelectorAll(".line")].map((line) =>
@@ -176,7 +175,7 @@ describe("UIPlaceholder.css examples", () => {
 
   it("spaces consecutive placeholders apart", () => {
     Sheets.adopt([...foundationCSS, placeholderCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const section = [...root.querySelectorAll("section")].at(-1)!
     const [first, second, third] = section.querySelectorAll<HTMLElement>(".ui.placeholder")
     expect(getComputedStyle(first!).marginTop).toBe("0px")
@@ -186,7 +185,7 @@ describe("UIPlaceholder.css examples", () => {
 
   it("inverts into the dark scheme, and the shapes' ink follows", () => {
     Sheets.adopt([...foundationCSS, placeholderCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div><div class="ui placeholder"><div class="line"></div></div>` +
         `<div class="ui inverted placeholder"><div class="line"></div></div></div>`
     )
@@ -205,7 +204,7 @@ describe("UIPlaceholder.css examples", () => {
 describe("UIPlaceholder.css tokens", () => {
   it("takes a public token from a wrapper, the placeholder or a shape (static markup)", () => {
     Sheets.adopt([...foundationCSS, placeholderCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-placeholder-max-width: 200px"><div class="ui placeholder"><div class="line"></div></div></div>` +
         `<div class="ui placeholder" style="--ui-placeholder-radius: 7px"><div class="line"></div>` +
         `<div class="line" style="--ui-placeholder-radius: 3px"></div></div>`
@@ -225,7 +224,7 @@ describe("UIPlaceholder.css in shadow roots", () => {
   it("decides line spacing, lengths and block spacing by element position, through nested shadow roots", () => {
     Sheets.adopt(foundationCSS)
     const placeholder = shapeHost(PLACEHOLDER_TAG, `<div class="ui placeholder" part="placeholder"><slot></slot></div>`)
-    Fixture.render(`<div style="width: 600px"></div>`).append(placeholder)
+    Sheets.render(`<div style="width: 600px"></div>`).append(placeholder)
     const header = shapeHost("span", `<div class="image header" part="header"><slot></slot></div>`)
     const paragraph = shapeHost("span", `<div class="paragraph" part="paragraph"><slot></slot></div>`)
     placeholder.append(header, paragraph)
@@ -260,7 +259,7 @@ describe("UIPlaceholder.css in shadow roots", () => {
 
   it("hands the dark scheme to its shapes, and spaces consecutive placeholder hosts by their state", () => {
     Sheets.adopt(foundationCSS)
-    const box = Fixture.render(`<div><p>Before</p></div>`)
+    const box = Sheets.render(`<div><p>Before</p></div>`)
     const [first, second] = [0, 1].map(() => {
       const host = shapeHost(PLACEHOLDER_TAG, `<div class="ui inverted placeholder"><slot></slot></div>`)
       host.append(line())

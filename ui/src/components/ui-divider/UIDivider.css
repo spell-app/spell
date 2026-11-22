@@ -103,11 +103,11 @@
     border-top: var(--_ui-divider-line-width) solid var(--ui-color, var(--_ui-divider-line-color));
     border-bottom: var(--_ui-divider-line-width) solid var(--_ui-divider-highlight);
   }
-  .ui[class*="center aligned"].horizontal.divider {
+  .ui.center-aligned.horizontal.divider {
     justify-content: center;
   }
-  .ui[class*="left aligned"].horizontal.divider::before,
-  .ui[class*="right aligned"].horizontal.divider::after {
+  .ui.left-aligned.horizontal.divider::before,
+  .ui.right-aligned.horizontal.divider::after {
     display: none;
   }
 

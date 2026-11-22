@@ -2,7 +2,6 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { accordionVocabulary } from "spell/ui/components/ui-accordion/UIAccordion.en"
@@ -37,7 +36,7 @@ function adopt() {
 /** Render example `name`. */
 function example(name: string): HTMLElement {
   adopt()
-  return Fixture.render(EXAMPLES[`./examples/${name}.html`]!)
+  return Sheets.render(EXAMPLES[`./examples/${name}.html`]!)
 }
 
 /** Computed style of the first element matching `selector` under `root`. */
@@ -87,7 +86,7 @@ describe("UIAccordion.css source", () => {
 describe("UIAccordion.css examples", () => {
   it.each(Object.keys(EXAMPLES))("styles every title in %s as a pointer row", (path) => {
     adopt()
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     const titles = root.querySelectorAll<HTMLElement>(".accordion > .title, .accordion > details > .title")
     expect(titles.length).toBeGreaterThan(0)
     for (const title of titles) {
@@ -170,7 +169,7 @@ describe("UIAccordion.css examples", () => {
 describe("UIAccordion.css tokens", () => {
   it("takes a public token set on a wrapper of static markup", () => {
     Sheets.adopt([...foundationCSS, accordionCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-accordion-title-padding: 20px 0"><div class="ui accordion"><div class="title">T</div><div class="content">C</div></div></div>`
     )
     expect(getComputedStyle(root.querySelector(".ui.accordion > .title")!).paddingTop).toBe("20px")
