@@ -16,6 +16,12 @@
 		</>
 	</>
 
+	<section label="States">
+		<html>
+			<ui-docs-api family="ui-dimension" only="states"></>
+		</>
+	</>
+
 	<section label="Texts">
 		<html>
 			<ui-docs-api family="ui-dimension" only="texts"></>

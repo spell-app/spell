@@ -65,6 +65,9 @@
 			starts there. Where the browser has View Transitions, the pane swap runs in one (not under reduced
 			motion). Give the panes a `value`, so the hash reads as a word. One `history` tab set per page:
 			two would fight for the hash.
+
+			`parameter="section"` does the same with a query parameter (`?section=photos`), keeping the page's
+			other parameters and its hash:  any number of tab sets and form fields can each keep one.
 		</>
 	</>
 

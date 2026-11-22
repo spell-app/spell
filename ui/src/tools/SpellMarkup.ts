@@ -799,8 +799,10 @@ function defaultTagFor(bare: string): string | undefined {
 /** `name="value"` in Spell's markup:  a boolean bare, its value escaped (`escapeAttribute()`). */
 function attributeText(name: string, value: string): string {
   if (value === "" && !STRING_ATTRIBUTES.test(name)) return name
-  // a value the formatter wrapped across lines (a long `style`) is one line in Spell
-  return `${name}="${escapeAttribute(collapsed(value))}"`
+  // a value the formatter wrapped across lines (a long `style`, JSON) is one line in Spell;
+  // any other keeps its line breaks:  a script's (`onclick`), a multi-line tooltip's
+  const isWrapped = name === "style" || /^\s*[[{]/.test(value)
+  return `${name}="${escapeAttribute(isWrapped ? collapsed(value) : value)}"`
 }
 
 /** A quoted value's `"` and `\` escaped, and its `[` a real bracket (`\[`), not a fill-in. */

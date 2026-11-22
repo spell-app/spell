@@ -4,10 +4,17 @@
 		<header>A root loads the components inside it on demand, sets their theme, size, icons and emoji, and shows
               them once they're ready.</>
 	</>
+
 	<!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
 	<section label="Attributes">
 		<html>
 			<ui-docs-api family="ui-root" only="attributes"></>
+		</>
+	</>
+
+	<section label="Properties">
+		<html>
+			<ui-docs-api family="ui-root" only="properties"></>
 		</>
 	</>
 

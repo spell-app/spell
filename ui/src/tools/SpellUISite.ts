@@ -46,7 +46,8 @@ export class SpellUISite {
    */
   addressFor(file: string, title: string | undefined, addresses = this.addressesByTitle()): string | undefined {
     const bare = `/${file.replace(/^ui-/, "")}`
-    return (title && addresses.get(title)) ?? ([...addresses.values()].includes(bare) ? bare : undefined)
+    // a title several pages share ("Theming") names none of them:  the address alone then
+    return (title && addresses.get(title)) ?? (this.siteText.includes(`page at "${bare}"`) ? bare : undefined)
   }
 
   /** The folder of a component titled `title` (`App menu` => `AppMenu`):  its pages' folder in the project. */

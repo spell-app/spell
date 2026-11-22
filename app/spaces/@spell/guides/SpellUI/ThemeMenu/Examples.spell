@@ -36,6 +36,14 @@
 				<theme-menu show="scheme"/>
 			</example>
 		</>
+
+		<section label="In a menu" sticky="stack" collapsible dividing>
+			<example "In a menu" description="The palette's panel alone, drawn in place:  `show=\"menu\"`.  For the body of a sub-menu in a menu of your own, which gives it its box;  `bench=\"none\"` leaves out Theme bench.">
+				<segment style="max-width: 15em">
+					<theme-menu show="menu" bench="none"/>
+				</segment>
+			</example>
+		</>
 	</>
 
 	<section label="Variations">

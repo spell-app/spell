@@ -1260,6 +1260,10 @@
       "active": true
     },
     {
+      "path": "/SiteLinks/Theming.spell",
+      "active": true
+    },
+    {
       "path": "/SiteNav/Usage.spell",
       "active": true
     },
@@ -1285,6 +1289,10 @@
     },
     {
       "path": "/SiteNavButton/API.spell",
+      "active": true
+    },
+    {
+      "path": "/SiteNavButton/Theming.spell",
       "active": true
     },
     {

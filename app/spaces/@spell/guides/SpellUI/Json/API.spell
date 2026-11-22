@@ -17,6 +17,12 @@
 		</>
 	</>
 
+	<section label="Parts">
+		<html>
+			<ui-docs-api family="ui-json" only="parts"></>
+		</>
+	</>
+
 	<section label="States">
 		<html>
 			<ui-docs-api family="ui-json" only="states"></>

@@ -4,6 +4,7 @@
 		<header>An embed displays content from other websites, like YouTube videos, loaded only when asked
               for.</>
 	</>
+
 	<!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
 	<section label="Attributes">
 		<html>

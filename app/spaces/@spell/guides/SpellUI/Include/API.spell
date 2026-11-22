@@ -4,6 +4,7 @@
 		<header>An include shows part of another page from this site in this one, loaded at once, when idle or when
               scrolled into view.</>
 	</>
+
 	<!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
 	<section label="Attributes">
 		<html>

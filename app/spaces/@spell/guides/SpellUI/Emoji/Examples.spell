@@ -106,7 +106,7 @@
 						<emoji name="slightly_smiling_face" appearance="link"/>
 					</link>
 				</segment>
-				<message slot="description" size="small"><text code>appearance="link"</text> is only the look, a pointer cursor. Wrap the emoji in a <text code>&lt;ui-button&gt;</text> or <text code>&lt;a&gt;</text> that does the work, and name that.</message>
+				<message slot="description" size="small"><text code>appearance="link"</text> is only the look, the cursor controls have. Wrap the emoji in a <text code>&lt;ui-button&gt;</text> or <text code>&lt;a&gt;</text> that does the work, and name that.</message>
 			</example>
 		</>
 	</>

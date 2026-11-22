@@ -18,6 +18,37 @@
 				<ui-site-nav style="max-width: 16em" pages="\[{ \"title\": \"Forms\", \"icon\": \"edit outline\", \"pages\": \[{ \"title\": \"Input\", \"href\": \"#input\" }, { \"title\": \"Dropdown\", \"href\": \"#dropdown\" }] }, { \"title\": \"Lists\", \"icon\": \"list\", \"pages\": \[{ \"title\": \"Tree\", \"href\": \"#tree\" }, { \"title\": \"Table\", \"href\": \"#table\" }] }]"/>
 			</example>
 		</>
+
+		<section label="Headings" sticky="stack" collapsible dividing>
+			<example "Headings" description="`groups=\"headings\"`:  each group is a small plain heading over its pages, as an ops console's sidebar draws them:  no well, no icon, always open, and a click on it goes nowhere.  A page's own pages still fold under it, beside a guide line.">
+				<html>
+					<ui-site-nav appearance="nav" groups="headings" style="max-width: 16em" current="#explore" pages="\[{ \"title\": \"Home\", \"icon\": \"gauge\", \"href\": \"#home\" }, { \"title\": \"Design\", \"band\": \"group\", \"pages\": \[{ \"title\": \"Explore\", \"icon\": \"binoculars\", \"href\": \"#explore\" }, { \"title\": \"Resources\", \"icon\": \"server\", \"href\": \"#resources\", \"pages\": \[{ \"title\": \"Assets\", \"icon\": \"tag\", \"href\": \"#assets\" }, { \"title\": \"Commissioning\", \"icon\": \"clipboard\", \"href\": \"#commissioning\" }] }] }, { \"title\": \"Run\", \"band\": \"group\", \"pages\": \[{ \"title\": \"Jobs\", \"icon\": \"bolt\", \"href\": \"#jobs\" }, { \"title\": \"Reservations\", \"icon\": \"calendar check\", \"href\": \"#reservations\" }] }]"></ui-site-nav>
+				</html>
+			</example>
+		</>
+
+		<section label="Start and end" sticky="stack" collapsible dividing>
+			<example "Start and end" description="Its `start` slot shows above its pages, a logo or a picker;  its `end` slot at its foot, pushed to the bottom of the box it fills, a row of buttons.  Each is drawn only while it has something in it.  A Spell layout that draws its own drawer fills these around the site's pages.">
+				<html>
+					<ui-site-nav appearance="nav" groups="headings" style="max-width: 16em; height: 22em" current="#jobs" pages="\[{ \"title\": \"Home\", \"icon\": \"gauge\", \"href\": \"#home\" }, { \"title\": \"Run\", \"band\": \"group\", \"pages\": \[{ \"title\": \"Jobs\", \"icon\": \"bolt\", \"href\": \"#jobs\" }, { \"title\": \"Reservations\", \"icon\": \"calendar check\", \"href\": \"#reservations\" }] }]">
+						<ui-text slot="start" size="large" bold>Orbital Lab</ui-text>
+						<ui-stack slot="end" direction="horizontal" justify="between">
+							<ui-button icon="gear" appearance="tertiary" aria-label="Settings"></ui-button>
+							<ui-button icon="book" appearance="tertiary" aria-label="Docs"></ui-button>
+							<ui-button icon="sun" appearance="tertiary" aria-label="Theme"></ui-button>
+						</ui-stack>
+					</ui-site-nav>
+				</html>
+			</example>
+		</>
+
+		<section label="Collapsed" sticky="stack" collapsible dividing>
+			<example "Collapsed" description="`collapsed` shows only the icons, each row's title its tooltip:  every icon in one column, with no step in, an open group still in its well:  a page with no icon shows its title's first letter, and a group with no icon is a thin line.">
+				<html>
+					<ui-site-nav appearance="nav" collapsed style="width: 3.5em" current="#explore" pages="\[{ \"title\": \"Design\", \"band\": \"group\", \"icon\": \"palette\", \"pages\": \[{ \"title\": \"Explore\", \"icon\": \"binoculars\", \"href\": \"#explore\" }, { \"title\": \"Validations\", \"icon\": \"clipboard check\", \"href\": \"#validations\" }, { \"title\": \"Notes\", \"href\": \"#notes\" }] }, { \"title\": \"Run\", \"band\": \"group\", \"pages\": \[{ \"title\": \"Jobs\", \"icon\": \"briefcase\", \"href\": \"#jobs\" }, { \"title\": \"Queue\", \"icon\": \"calendar check\", \"href\": \"#queue\" }] }]"></ui-site-nav>
+				</html>
+			</example>
+		</>
 	</>
 
 	<section label="Variations">
