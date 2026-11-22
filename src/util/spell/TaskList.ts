@@ -1,4 +1,4 @@
-import { after, soon } from "spell/util/timing"
+import { after, letBrowserIn, soon } from "spell/util/timing"
 import { TaskStatus, TaskResolveWith } from "./constants"
 import { Task, type TaskProps } from "./Task"
 
@@ -188,8 +188,14 @@ export class TaskList extends Task {
             result = error
           }
 
-          // Execute the next task on a slight delay to allow the UI to catch up
-          void after((this.delayBetweenTasks || 0) / 1000, () => processNextTask(result)).catch(reject)
+          // Let the browser in before the next task, e.g. a key typed during a compile (epic `solid-2-final` P9);
+          // or wait the delay asked for
+          const { delayBetweenTasks } = this
+          if (!delayBetweenTasks)
+            void letBrowserIn()
+              .then(() => processNextTask(result))
+              .catch(reject)
+          else void after(delayBetweenTasks / 1000, () => processNextTask(result)).catch(reject)
         }
         // Get the party started in the next tick
         soon(() => void processNextTask(initialValue).catch(reject))

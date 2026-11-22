@@ -132,7 +132,7 @@ export class RepoApp {
    */
   route(router: SRV.Router, prefix: string): void {
     router.get(`${prefix}${this.path}`, async (_request, reply) => {
-      reply.set("Cache-Control", "no-store")
+      reply.noStore()
       const status = await this.status()
       if (status.up) return void reply.redirect(status.url!)
       const { app } = this.settings()
@@ -146,7 +146,7 @@ export class RepoApp {
     router.get(`${APP_API}/:repo`, async (request, reply) => {
       const app = apps.find((each) => each.repo.name === request.params.repo)
       if (!app) return void reply.status(404).json({ error: `no repo ${request.params.repo}` })
-      reply.set("Cache-Control", "no-store").json(await app.status())
+      reply.noStore().json(await app.status())
     })
   }
 

@@ -46,6 +46,8 @@ import {
  * - A hole is spell exactly, as everywhere else:  `{the score of the game}`, never `{score of the game}` (J26).
  * - Kept live by Solid effects:  a hole re-runs when what it read changes.
  * - Holds spell's PARSER:  the runner loads it lazily, only for a layout with spell in it (`layoutHasSpell()`).
+ *   - Built, the parser is `spell-grammar.js`'s, the grammar `<spell-code>`'s colours load too:
+ *     one per page (`sharedGrammar()`, `vite.element.config.ts`;  epic `solid-2-final` P11).
  * - `bind()` returns what takes it all back:  the layout's markup as it was written.
  ****************/
 export class LayoutSpell {

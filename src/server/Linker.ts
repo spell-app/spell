@@ -20,6 +20,9 @@ import { pathInside } from "./RealPath"
  *   when the path resolves to a real file or folder
  *   - an existing `<a href>` without a target gets one (external:  per URL;  sibling docs:  per file)
  *   - a name with its path as its tooltip, `<code title="path">name</code>`, links to that path the same way
+ *   - `<code data-no-link>` stays text, and isn't reported:  a span that names a path but mustn't lead there
+ *     (a shipped guide naming `/epics/` or `/pages/index.html`, which live in the epic repo;  epic `epic-engine` I399)
+ *     - so does any code span with another attribute:  only a bare one, or one with a `title` alone, is linked
  * - `check()`:
  *   - every local href resolves INSIDE the repo
  *   - every non-anchor link has a target

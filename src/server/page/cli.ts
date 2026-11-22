@@ -13,6 +13,12 @@
  *     when that one runs and serves worktrees (`SRV.mainServerUrl()`)
  *   - a file of the epic folder:  its path there (`/epics/...`), on the main checkout's server if it runs,
  *     else this checkout's (`SRV.contentPathOf()`)
+ * - `certificate [--check] [--undo]` -- the certificate that gives the page server HTTPS and HTTP/2 (epic `solid-2-final`
+ *   P14):  made by mkcert, and trusted by this computer, asking for the password once in the terminal
+ *   (`SRV.LocalCertificate`);  a running server takes it at its next start
+ *   - `--check`:  only says what's missing;  exit 1 until it's ready
+ *   - `--undo`:  its files go;  the next start is plain HTTP only
+ *   - without it, every server speaks plain HTTP, as before;  with it, plain HTTP stays on the same port, for the tools
  * - `prune [--dry-run]` -- stop the page and vite servers whose checkout is gone (`pruneServers()`), on any checkout;
  *   `--dry-run` only says which
  * - `--root <dir>`:  the kit (default:  the kit holding the folder `yarn` ran in, `INIT_CWD`, from any folder of it,
@@ -38,6 +44,38 @@ import {
   pruneReport,
   pruneServers
 } from "spell/server/page"
+
+/** What `spell server certificate` says, for each state and step. */
+const CERTIFICATE_WORDS = {
+  ready:
+    "Ready.  Your computer trusts the certificate, so browsers open your pages over a secure (HTTPS) link.\n" +
+    "Each server that shows your pages uses it from its next start:  https://localhost:4747",
+  "no-mkcert": SRV.INSTALL_MKCERT,
+  missing:
+    "There's no certificate yet.  A certificate lets your browser open your pages over a secure (HTTPS) link.\n" +
+    "To make one, type this in a terminal:  spell server certificate",
+  uncovered: "The certificate is out of date.  To make a new one, type this in a terminal:  spell server certificate",
+  expired: "The certificate is out of date.  To make a new one, type this in a terminal:  spell server certificate",
+  untrusted:
+    "The certificate is made, but your computer doesn't trust it yet, so browsers would warn you.\n" +
+    "To fix that, type this in a terminal:  spell server certificate",
+  needsTerminal:
+    "The certificate is made.  To trust it, your computer asks for your password.\n" +
+    "To finish, type this in a terminal:  spell server certificate",
+  asking:
+    "Your computer will now ask for the password you use to log in to it.\n" +
+    "Type it in to continue.  It asks only once.",
+  done:
+    "Done.  Your computer now trusts the certificate for the server that shows your pages.\n" +
+    "To start using it, restart that server.  Type  spell server stop,  then  spell server start.\n" +
+    "Then open your pages at https://localhost:4747.\n" +
+    "Other spell commands still use http://127.0.0.1:4747.  You don't need to change anything.\n" +
+    "If you use Firefox, it needs one more step.  Run  brew install nss,  then run  spell server certificate  again.",
+  undone:
+    "Done.  The certificate is gone.\n" +
+    "Your pages will open without the secure link (HTTP) again.\n" +
+    "To apply this, restart the server.  Type  spell server stop,  then  spell server start."
+} as const
 
 await main(process.argv.slice(2))
 
@@ -74,10 +112,13 @@ async function main(args: string[]): Promise<void> {
         process.exitCode = 2
         return
       }
-      const server = await new PageServer({ root }).start({ port })
+      const https = PageServer.certificateFor()
+      const server = await new PageServer({ root, certificate: https.tls }).start({ port })
       // a group of its own, so each start stands out in the log
       server.log.gap()
       server.log.info(`${server.web.url}/  (root ${root})`)
+      if (server.web.secureUrl) server.log.info(`${server.web.secureUrl}/  (HTTPS and HTTP/2, for browsers)`)
+      else if (https.why) server.log.info(https.why)
       server.log.gap()
       await SRV.untilInterrupted(server.web.server, () => server.stop())
       return
@@ -102,25 +143,77 @@ async function main(args: string[]): Promise<void> {
       if (!file) throw new Error("usage:  spell server url <file>")
       const absolute = resolve(process.env.INIT_CWD ?? process.cwd(), file)
       // a worktree's file:  the MAIN checkout's server, when it serves worktrees, so every link is on one port
+      // for people:  the server's HTTPS address once it has one;  the tools fetch the plain one
       const main = await SRV.mainServerUrl(absolute, root)
-      if (main) return console.log(main)
+      if (main) return console.log(forPeople(main, await SRV.serverAt(new URL(main).origin)))
       const running = await PageServer.ensure(root, port)
       const path = relative(root, absolute)
       const served =
         SRV.contentPathOf(absolute, running) ??
         componentSetAddressOf(root, absolute) ??
         `/${path.split(sep).map(encodeURIComponent).join("/")}`
-      return console.log(`${running.base}${served}`)
+      return console.log(forPeople(`${running.base}${served}`, running))
     }
+    case "certificate":
+      process.exitCode = certificate(rest)
+      return
     case "prune": {
       const dryRun = rest.includes("--dry-run")
       return console.log(pruneReport(pruneServers({ dryRun }), { dryRun }))
     }
     default:
       console.log(
-        `usage:  spell server local|start|stop|status|url <file>|prune [--dry-run]  [--root <dir>] [--port <n>] [--spaces <dir>]`
+        `usage:  spell server local|start|stop|status|url <file>|certificate [--check] [--undo]|prune [--dry-run]  [--root <dir>] [--port <n>] [--spaces <dir>]`
       )
   }
+}
+
+/**
+ * `spell server certificate [--check] [--undo]`:  make and trust the page server's certificate;  its exit code.
+ * - trusting it asks for this computer's password, so only in a terminal:  elsewhere it says to run it in one
+ */
+function certificate(args: string[]): number {
+  const local = SRV.LocalCertificate.forPageServer()
+  try {
+    if (args.includes("--undo")) {
+      local.undo()
+      console.log(CERTIFICATE_WORDS.undone)
+      return 0
+    }
+    if (args.includes("--check")) {
+      console.log(CERTIFICATE_WORDS[local.state])
+      return local.state === "ready" ? 0 : 1
+    }
+    if (local.state === "no-mkcert") {
+      console.log(SRV.INSTALL_MKCERT)
+      return 1
+    }
+    if (local.makeIfNeeded() === "untrusted") {
+      if (!process.stdin.isTTY) {
+        console.log(CERTIFICATE_WORDS.needsTerminal)
+        return 1
+      }
+      console.log(CERTIFICATE_WORDS.asking)
+      local.trust()
+    }
+    const ready = local.state === "ready"
+    console.log(ready ? CERTIFICATE_WORDS.done : CERTIFICATE_WORDS[local.state])
+    return ready ? 0 : 1
+  } catch (error) {
+    if (!(error instanceof SRV.CertificateError)) throw error
+    console.error(error.message)
+    return 1
+  }
+}
+
+/** `url`, at `server`'s HTTPS address when it has one:  the address people open. */
+function forPeople(url: string, server: { https?: string } | undefined): string {
+  if (!server?.https) return url
+  const plain = new URL(url)
+  const secure = new URL(server.https)
+  plain.protocol = secure.protocol
+  plain.host = secure.host
+  return plain.href
 }
 
 /** Value after `name` in `args`. */

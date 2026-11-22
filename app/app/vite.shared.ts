@@ -6,6 +6,7 @@ import type { Plugin, PluginOption, ProxyOptions, UserConfig } from "vite"
 
 import { standardDecorators } from "spell/toolchain/decorators"
 import { packageVersion } from "spell/toolchain/packageVersion"
+import { brotliCopies } from "spell/toolchain/brotliCopies"
 import { ruleTestsOutOfBuilds } from "spell/toolchain/stripRuleTests"
 import { CSS_TARGETS, DEV_SERVER_SETTINGS, SOLID_DEDUPE, cssBuildTarget } from "spell/element-tools/elementConfig"
 import { emitIconPacks, emitSoundLibrary } from "spell/ui/vite.config.ts"
@@ -51,6 +52,8 @@ export const TOP_REPO = (() => {
  * - `standardDecorators()` BEFORE the Solid plugin:  both are `enforce: "pre"`,
  *   and the Solid compiler must see decorator-free code.
  * - `compiledSpell()`:  every config, so a test or a build that reaches `<FileTabs>` reads its `.spell`.
+ * - `brotliCopies()`:  a BUILD writes a brotli copy beside each text file it writes (`x.js.br`), which the kit's
+ *   servers send as is to a browser that takes brotli (epic `solid-2-final` P2)
  * - `builtInFiles`:  a BUILD that bundles `spell-ui` emits its built-in icon packs and sounds
  *   beside the chunks that load them (`builtInFilesBesideTheirCode()`).
  *   Omit for `vitest`, and for builds that import `ui` from `spell-ui.js`.
@@ -65,7 +68,8 @@ export function appConfig({ builtInFiles }: { builtInFiles?: boolean } = {}) {
     packageVersion(import.meta.dirname),
     solid({ exclude: [NOT_SOLID_SOURCE] }),
     compiledSpell(),
-    cssBuildTarget()
+    cssBuildTarget(),
+    brotliCopies()
   ]
   if (builtInFiles) plugins.push(builtInFilesBesideTheirCode())
   return {

@@ -2,7 +2,6 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { sectionVocabulary } from "spell/ui/components/ui-section/UISection.en"
@@ -31,7 +30,7 @@ const ALLOWED_IMPORTANT = 0
 /** Render example `name` with the foundation and the section sheet adopted. */
 function example(name: string): HTMLElement {
   Sheets.adopt([...foundationCSS, sectionCSS])
-  return Fixture.render(EXAMPLES[`./examples/${name}.html`]!)
+  return Sheets.render(EXAMPLES[`./examples/${name}.html`]!)
 }
 
 /** The section in `root` titled `header`. */
@@ -96,7 +95,7 @@ describe("UISection.css source", () => {
 describe("UISection.css examples", () => {
   it.each(Object.keys(EXAMPLES))("styles every section in %s", (path) => {
     Sheets.adopt([...foundationCSS, sectionCSS])
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     const sections = root.querySelectorAll<HTMLElement>(".ui.section")
     expect(sections.length).toBeGreaterThan(0)
     for (const section of sections) {
@@ -130,7 +129,7 @@ describe("UISection.css examples", () => {
     const dividing = child(titled(root, "Installation"), "title")
     expect(dividing.borderBottomStyle).toBe("solid")
     expect(dividing.borderBottomWidth).toBe("1px")
-    const surface = Fixture.render(`<span style="background: var(--ui-surface-strong)"></span>`)
+    const surface = Sheets.render(`<span style="background: var(--ui-surface-strong)"></span>`)
     expect(child(titled(root, "Configuration"), "title").backgroundColor).toBe(
       getComputedStyle(surface).backgroundColor
     )
@@ -193,8 +192,8 @@ describe("UISection.css examples", () => {
 
   it("tints the title and its rule from the colour", () => {
     Sheets.adopt([...foundationCSS, sectionCSS])
-    const root = Fixture.render(EXAMPLES["./examples/variations.html"]!)
-    const teal = Fixture.render(`<span style="color: var(--ui-teal-header); outline-color: var(--ui-teal)"></span>`)
+    const root = Sheets.render(EXAMPLES["./examples/variations.html"]!)
+    const teal = Sheets.render(`<span style="color: var(--ui-teal-header); outline-color: var(--ui-teal)"></span>`)
     const title = child(titled(root, "Teal"), "title")
     expect(title.color).toBe(getComputedStyle(teal).color)
     expect(title.borderBottomColor).toBe(getComputedStyle(teal).outlineColor)
@@ -342,7 +341,7 @@ describe("UISection.css groups", () => {
 describe("UISection.css tokens", () => {
   it("takes a public token set on a wrapper of static markup", () => {
     Sheets.adopt([...foundationCSS, sectionCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-section-radius: 20px"><section class="ui bordered section"><div class="content">x</div></section></div>`
     )
     expect(getComputedStyle(root.querySelector(".ui.section")!).borderTopLeftRadius).toBe("20px")
@@ -350,7 +349,7 @@ describe("UISection.css tokens", () => {
 
   it("turns the chevron by the rotate tokens, start and end, negated right to left", () => {
     Sheets.adopt([...foundationCSS, sectionCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-section-fold-icon-rotate: 180deg; --ui-section-fold-icon-folded-rotate: 0deg">` +
         bar(true, false) +
         bar(false, false) +

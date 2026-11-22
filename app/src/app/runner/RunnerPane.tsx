@@ -96,11 +96,13 @@ export function runnerSplit(split: number, unit: "%" | "px", onSplit: (split: nu
   return {
     rows: isPixels ? `auto,${split}px` : `${split}%,${100 - split}%`,
     "min-size": isPixels ? MIN_PIXELS : MIN_SHARE,
-    "on-ui-changed": (event: Event) => {
-      if (event.target !== event.currentTarget) return
-      const [top, bottom] = (event as CustomEvent<{ sizes: string }>).detail.sizes.split(",")
-      onSplit(Math.round(parseFloat(isPixels ? bottom : top)))
-    }
+    // a ref, not `on-ui-changed`:  Solid's dev build warns of a dashed event name, and the console must stay clean
+    ref: (panel: Element) =>
+      panel.addEventListener("ui-changed", (event) => {
+        if (event.target !== event.currentTarget) return
+        const [top, bottom] = (event as CustomEvent<{ sizes: string }>).detail.sizes.split(",")
+        onSplit(Math.round(parseFloat(isPixels ? bottom : top)))
+      })
   }
 }
 

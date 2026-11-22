@@ -298,44 +298,44 @@
 
   /*
    * Beside, lined up with the target's top / bottom edge (ours, not Fomantic's).  Class words have no order,
-   * so `left top` carries the same words as `top left`:  these match the PHRASE (`[class*="left top"]`,
+   * so `left top` carries the same words as `top left`:  these match the PHRASE (`.left-top`,
    * Fomantic's `very wide` idiom) plus the side word, which ties `.ui.top.left.popup` on specificity and wins by coming
    * later. They set everything the above / below rules set (margin, arrow edge and inset, transform origin).
    */
-  .ui[class*="left top"].left.popup,
-  .ui[class*="left bottom"].left.popup {
+  .ui.left-top.left.popup,
+  .ui.left-bottom.left.popup {
     margin: 0 var(--_ui-popup-distance) 0 0;
     --_popup-arrow-shadow: 1px -1px 0 0 var(--_popup-arrow-edge);
     --_popup-arrow-clip: polygon(-5px -2px, calc(100% + 2px) -2px, calc(100% + 2px) calc(100% + 5px));
   }
-  .ui[class*="right top"].right.popup,
-  .ui[class*="right bottom"].right.popup {
+  .ui.right-top.right.popup,
+  .ui.right-bottom.right.popup {
     margin: 0 0 0 var(--_ui-popup-distance);
     --_popup-arrow-shadow: -1px 1px 0 0 var(--_popup-arrow-edge);
     --_popup-arrow-clip: polygon(-2px -5px, calc(100% + 5px) calc(100% + 2px), -2px calc(100% + 2px));
   }
-  .ui[class*="left top"].left.popup {
+  .ui.left-top.left.popup {
     transform-origin: right top;
   }
-  .ui[class*="left bottom"].left.popup {
+  .ui.left-bottom.left.popup {
     transform-origin: right bottom;
   }
-  .ui[class*="right top"].right.popup {
+  .ui.right-top.right.popup {
     transform-origin: left top;
   }
-  .ui[class*="right bottom"].right.popup {
+  .ui.right-bottom.right.popup {
     transform-origin: left bottom;
   }
-  .ui[class*="left top"].left.popup::before {
+  .ui.left-top.left.popup::before {
     inset: var(--_ui-popup-arrow-edge-distance) var(--_ui-popup-arrow-offset) auto auto;
   }
-  .ui[class*="left bottom"].left.popup::before {
+  .ui.left-bottom.left.popup::before {
     inset: auto var(--_ui-popup-arrow-offset) var(--_ui-popup-arrow-edge-distance) auto;
   }
-  .ui[class*="right top"].right.popup::before {
+  .ui.right-top.right.popup::before {
     inset: var(--_ui-popup-arrow-edge-distance) auto auto var(--_ui-popup-arrow-offset);
   }
-  .ui[class*="right bottom"].right.popup::before {
+  .ui.right-bottom.right.popup::before {
     inset: auto auto var(--_ui-popup-arrow-edge-distance) var(--_ui-popup-arrow-offset);
   }
 
@@ -353,12 +353,12 @@
   .ui.wide.popup {
     --_ui-popup-max-width: var(--_ui-popup-wide-width);
   }
-  .ui[class*="very wide"].popup {
+  .ui.very-wide.popup {
     --_ui-popup-max-width: var(--_ui-popup-very-wide-width);
   }
   @media (--ui-mobile) {
     .ui.wide.popup,
-    .ui[class*="very wide"].popup {
+    .ui.very-wide.popup {
       --_ui-popup-max-width: var(--ui-popup-max-width, 250px);
     }
   }

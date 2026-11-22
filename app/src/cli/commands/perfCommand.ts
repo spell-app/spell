@@ -129,7 +129,8 @@ export function runOptionsOf(options: PerfOptions): PerfRunOptions {
     waitMinutes: wait,
     force: !!options.force,
     ...(options.out && { out: resolve(options.out) }),
-    ...(options.baseline && { baseline: "save" as const })
+    ...(options.baseline && { baseline: "save" as const }),
+    ...(options.https && { https: true })
   }
 }
 
@@ -167,4 +168,5 @@ export type PerfOptions = {
   out?: string
   baseline?: string
   tighten?: boolean
+  https?: boolean
 }

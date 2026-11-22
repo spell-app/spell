@@ -4,6 +4,7 @@
  *   - `afterSolidUpdate(fn)` -- as soon as the current code finishes
  *   - `beforeNextPaint(fn)` -- just before the browser next draws the page
  *   - `soon(fn)` -- in the next task, once the browser has had a turn
+ *   - `await letBrowserIn()` -- between steps of long work:  keys and clicks waiting go first, then the work carries on
  *   - `after(seconds, fn)` -- once, `seconds` from now:  a promise to await, or cancel
  *   - `every(seconds, fn)` -- every `seconds`, until you stop it
  * - Why not the platform's calls (`queueMicrotask()`, `setTimeout()` ...):
@@ -60,6 +61,18 @@ export function beforeNextPaint(fn: (time: number) => void): () => void {
 export function soon(fn: () => void): () => void {
   const timer = setTimeout(fn, 0)
   return () => clearTimeout(timer)
+}
+
+/**
+ * Let the browser handle what's waiting -- a key typed, a click, a paint -- then carry on:  `await letBrowserIn()`.
+ * - Between the steps of long work, e.g. a compile's files (`TaskList`), so a key typed during it isn't held up.
+ * - Over `scheduler.yield()` where there is one (Chrome, Edge):  the work carries on ahead of other tasks.
+ * - Else a zero-delay task, as `soon()`:  so in node, and in tests, it's the next task, as `after(0)` was.
+ */
+export function letBrowserIn(): Promise<void> {
+  const scheduler = (globalThis as { scheduler?: { yield?: () => Promise<void> } }).scheduler
+  if (scheduler?.yield) return scheduler.yield()
+  return new Promise((resolve) => setTimeout(resolve, 0))
 }
 
 ////////////////

@@ -1,4 +1,8 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { spawnSync } from "node:child_process"
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { createServer, request as httpRequest, type IncomingMessage, type Server } from "node:http"
+import { connect as http2Connect } from "node:http2"
+import { request as httpsRequest } from "node:https"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { afterAll, beforeAll, describe, expect, it } from "vite-plus/test"
@@ -124,5 +128,145 @@ describe("WebServer's /api/server/versions", () => {
     expect((await versions("/app.js"))["/app.js"]).toBe(first["/app.js"])
     writeFileSync(join(root, "app.js"), "console.log(2)\n")
     expect((await versions("/app.js"))["/app.js"]).not.toBe(first["/app.js"])
+  })
+})
+
+/** A certificate for `localhost` and `127.0.0.1`, made by openssl in `folder`;  `undefined` without openssl. */
+function testCertificate(folder: string): SRV.CertificateFiles | undefined {
+  const [key, cert] = [join(folder, "key.pem"), join(folder, "cert.pem")]
+  const named = spawnSync(
+    "openssl",
+    [
+      "req",
+      "-x509",
+      "-newkey",
+      "ec",
+      "-pkeyopt",
+      "ec_paramgen_curve:prime256v1",
+      "-nodes",
+      "-days",
+      "2",
+      "-subj",
+      "/CN=localhost",
+      "-addext",
+      "subjectAltName=DNS:localhost,IP:127.0.0.1",
+      "-keyout",
+      key,
+      "-out",
+      cert
+    ],
+    { stdio: "ignore" }
+  )
+  if (named.error || named.status !== 0) return undefined
+  return { key: readFileSync(key, "utf8"), cert: readFileSync(cert, "utf8") }
+}
+
+describe("WebServer with a certificate:  HTTP/2, HTTPS and plain HTTP on one port (epic solid-2-final P14)", () => {
+  const root = mkdtempSync(join(tmpdir(), "srv-web-h2-"))
+  const certificate = testCertificate(root)
+  let web: SRV.WebServer
+  let target: Server
+  let targetPort: number
+
+  beforeAll(async () => {
+    if (!certificate) return
+    writeFileSync(join(root, "page.txt"), "served\n")
+    // the server behind a proxied path:  says what it got
+    target = createServer((request, response) => {
+      response.writeHead(200, { "content-type": "application/json", connection: "keep-alive" })
+      response.end(JSON.stringify({ url: request.url, version: request.httpVersion, headers: request.headers }))
+    })
+    targetPort = await SRV.listenPreferred(target)
+    web = new SRV.WebServer({ mounts: [{ prefix: "/", dir: root }], certificate, live: true })
+    web.router.post("/echo", SRV.parseBodies(), (request, reply) =>
+      reply.json({ body: request.body as unknown, version: request.raw.httpVersion })
+    )
+    web.router.all(
+      "/behind/*",
+      SRV.proxyTo(() => targetPort)
+    )
+    await web.listen()
+  })
+
+  afterAll(async () => {
+    await web?.close()
+    target?.close()
+    rmSync(root, { recursive: true, force: true })
+  })
+
+  /** `method` `path` over HTTP/2, trusting the test's certificate:  its status, text and version */
+  function askHttp2(path: string, { method = "GET", body }: { method?: string; body?: string } = {}) {
+    return new Promise<{ status: number; text: string }>((done, fail) => {
+      const session = http2Connect(`https://localhost:${web.port}`, { ca: certificate!.cert })
+      session.on("error", fail)
+      const headers = { ":path": path, ":method": method, ...(body && { "content-type": "application/json" }) }
+      const stream = session.request(headers)
+      let status = 0
+      let text = ""
+      stream.on("response", (answer) => (status = Number(answer[":status"])))
+      stream.on("data", (chunk: Buffer) => (text += chunk.toString()))
+      stream.on("end", () => {
+        session.close()
+        done({ status, text })
+      })
+      stream.end(body)
+    })
+  }
+
+  it.skipIf(!certificate)("answers HTTP/2 over HTTPS, the host check reading its `:authority`", async () => {
+    expect(web.secureUrl).toBe(`https://localhost:${web.port}`)
+    const answer = await askHttp2("/page.txt")
+    expect(answer).toEqual({ status: 200, text: "served\n" })
+  })
+
+  it.skipIf(!certificate)("reads a body sent over HTTP/2", async () => {
+    const answer = await askHttp2("/echo", { method: "POST", body: JSON.stringify({ a: 1 }) })
+    expect(JSON.parse(answer.text)).toEqual({ body: { a: 1 }, version: "2.0" })
+  })
+
+  it.skipIf(!certificate)(
+    "passes an HTTP/2 request on as HTTP/1.1, and its answer back without connection headers",
+    async () => {
+      const answer = await askHttp2("/behind/x?y=1")
+      expect(answer.status).toBe(200)
+      const got = JSON.parse(answer.text) as { url: string; version: string; headers: Record<string, string> }
+      expect(got.url).toBe("/behind/x?y=1")
+      expect(got.version).toBe("1.1")
+      expect(Object.keys(got.headers).filter((name) => name.startsWith(":"))).toEqual([])
+    }
+  )
+
+  it.skipIf(!certificate)("still answers plain HTTP on the same port:  what the tools ask", async () => {
+    const answer = await ask(web.port, "GET", "/page.txt")
+    expect(answer.status).toBe(200)
+    expect(answer.text).toBe("served\n")
+  })
+
+  it.skipIf(!certificate)("upgrades a websocket over TLS and over plain HTTP, on the same port", async () => {
+    const upgradeHeaders = {
+      connection: "Upgrade",
+      upgrade: "websocket",
+      "sec-websocket-version": "13",
+      "sec-websocket-key": "dGhlIHNhbXBsZSBub25jZQ=="
+    }
+    const upgraded = (send: typeof httpRequest | typeof httpsRequest, host: string) =>
+      new Promise<number>((done, fail) => {
+        const asking = send({
+          host,
+          port: web.port,
+          path: SRV.LIVE_EVENTS,
+          headers: upgradeHeaders,
+          ...(send === httpsRequest && { ca: certificate!.cert })
+        })
+        asking.on("upgrade", (answer: IncomingMessage, socket) => {
+          socket.destroy()
+          done(answer.statusCode ?? 0)
+        })
+        asking.on("response", (answer) => done(answer.statusCode ?? 0))
+        asking.on("error", fail)
+        asking.end()
+      })
+    expect(await upgraded(httpsRequest, "localhost")).toBe(101)
+    expect(await upgraded(httpRequest, "127.0.0.1")).toBe(101)
   })
 })

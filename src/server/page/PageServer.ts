@@ -70,6 +70,9 @@ export const PAGE_SCRIPT_ATTRIBUTE = "data-spell-page-script"
  * - NO redirects for old URLs (epic `people-and-orgs`, Q30):  an old address answers "not found"
  * - The server knows nothing of what the sets, routes, scripts and tabs are:  they come from the settings
  *   (epic `repo-split` P4).
+ * - CACHING (epic `solid-2-final` P2):  a worktree's server says "never store" (`caching: "never"`), so development
+ *   never sees a stale file;  the main checkout's `"normal"`:  pages and files checked each time by their `ETag`
+ *   ("not modified"), the bundles' hashed names (`builtNames()`) kept a year
  * - port:  `DEFAULT_PORT` (4747) for the main checkout, and ONLY that:  taken, it fails to start
  *   (epic `epic-engine` I332:  a restart that found an orphan on 4747 started on 59931, and the side bar lost it);
  *   a WORKTREE's server never asks for it (`portFor()`), and takes any free one:
@@ -125,6 +128,9 @@ export class PageServer {
   /** the folders `/worktrees/<w>/` serves, in order, once `serveWorktrees()` has said;  none before */
   private worktrees: string[] = []
 
+  /** which names are a build's hashed ones (`builtNames()`):  in this checkout, and in each worktree it serves */
+  private readonly hashed: { own: RegExp; worktrees: RegExp }
+
   /** the epic folder served after the checkout, once `serveContent()` has said;  none before */
   private content?: string
 
@@ -146,7 +152,10 @@ export class PageServer {
   /** CDN URLs pages load, each with its local copy's URL (`"localCopies"`, `withLocalCopies()`) */
   private readonly localCopies: Record<string, string>
 
-  constructor({ root, token }: { root: string; token?: string }) {
+  /**
+   * - `certificate`:  HTTPS and HTTP/2 too, on the same port (`certificateFor()`);  plain HTTP stays for the tools
+   */
+  constructor({ root, token, certificate }: { root: string; token?: string; certificate?: SRV.CertificateFiles }) {
     this.root = resolve(root)
     // its spaces' own record (`--spaces`, `SPELL_SPACES_DIR`)
     this.pidFile = SRV.PidFile.forPageServer(this.root)
@@ -170,11 +179,14 @@ export class PageServer {
       tab.path.startsWith(`${COMPONENTS_PREFIX}/`) && !tab.sets?.some((set) => served.has(set))
     this.siteTabs = siteTabs?.filter((tab) => !unserved(tab))
     this.bundles = new BundleBuild({ root: this.root })
+    this.hashed = builtNames(this.root)
     this.web = new SRV.WebServer({
       root: this.root,
       token,
+      certificate,
       live: true,
-      mounts: [{ prefix: "/", dir: this.root }],
+      caching: this.info.worktree ? "never" : "normal",
+      mounts: [{ prefix: "/", dir: this.root, hashed: this.hashed.own }],
       html: [
         (page) => this.withLocalCopies(page),
         (page, served) => this.withPageScripts(page, served),
@@ -191,7 +203,7 @@ export class PageServer {
         ...this.contentFileConfig(served.file),
         edit: PageEditor.PREFIX,
         // its own file in the writable folders:  the docs runtime edits its text in place (epic `epic-engine` P60)
-        writable: this.writes.writable.some((folder) => SRV.pathInside(folder, served.file)),
+        writable: this.writes.canWrite(served.file),
         // a stale generated file, as a page finds it (`reportStale()`):  rebuilt in a worktree (epic `epic-engine` P54)
         staleReport: STALE_API,
         etag: SRV.StaticHandler.etagOf(statSync(served.file)),
@@ -228,7 +240,7 @@ export class PageServer {
       router.get(set.prefix, (request, reply, next) =>
         request.path.endsWith("/") ? next() : reply.redirect(`${set.prefix}/`)
       )
-    router.get(SERVER_API, (_request, reply) => reply.set("Cache-Control", "no-store").json(this.info))
+    router.get(SERVER_API, (_request, reply) => reply.noStore().json(this.info))
     router.post(STALE_API, this.web.guard.writeCheck, SRV.parseBodies(), this.onStaleReport)
     router.get(SERVER_REPORTS_API, this.onReportsAsked)
     // NOTE: no body parsing here:  each route parses its own (the app's `/api` is JSON5), and the proxy streams.
@@ -273,6 +285,7 @@ export class PageServer {
     }
     const { port: actual } = await this.web.listen({ port: wanted, fallback: false })
     this.info.port = actual
+    if (this.web.secureUrl) this.info.https = this.web.secureUrl
     if (pidFile) {
       this.pidFile.write(this.info)
       // for a program this machine's person runs against it:  a Python program's places (epic `data` P40)
@@ -283,6 +296,28 @@ export class PageServer {
         this.log.error("a route module's onListening failed:", error)
       })
     return this
+  }
+
+  /**
+   * The certificate a page server listens with for HTTPS and HTTP/2, when this machine has one it trusts
+   * (`SRV.LocalCertificate.forPageServer()`, made and trusted by `spell server certificate`);
+   * else why not, in a line for its log.
+   * - makes NOTHING and asks for nothing:  a server started from a skill has no terminal, and every page keeps working
+   *   on plain HTTP until the person runs `spell server certificate`
+   * - none in tests and CI (`VITEST`, `CI`), nor with `SPELL_HTTPS=0`:  `env`, default `process.env`
+   * - NEVER throws
+   */
+  static certificateFor(
+    certificate = SRV.LocalCertificate.forPageServer(),
+    env: Record<string, string | undefined> = process.env
+  ): { tls?: SRV.CertificateFiles; why?: string } {
+    if (env.VITEST || env.CI || env.SPELL_HTTPS === "0") return {}
+    const state = certificate.state
+    if (state === "ready") {
+      const tls = certificate.tls
+      return tls ? { tls } : { why: PLAIN_HTTP_WHY.missing }
+    }
+    return { why: PLAIN_HTTP_WHY[state] }
   }
 
   /** stop:  the bundles' build, route modules' stops, the pid file (if ours), the server */
@@ -407,8 +442,10 @@ export class PageServer {
     for (const dir of dirs.map((each) => resolve(each))) {
       if (this.worktrees.includes(dir)) continue
       this.worktrees.push(dir)
-      this.web.files.mount({ prefix: WORKTREES_PREFIX, dir })
+      this.web.files.mount({ prefix: WORKTREES_PREFIX, dir, hashed: this.hashed.worktrees })
     }
+    // a worktree's page edited in place saves in that worktree (epic `epic-engine` T132)
+    this.writes.worktrees = [...this.worktrees]
     this.info.worktrees = this.worktrees[0]
     this.info.worktreesFolders = [...this.worktrees]
     this.mountContentInWorktrees()
@@ -668,7 +705,7 @@ export class PageServer {
         .then(report)
         .catch(() => undefined)
     )
-    reply.set("Cache-Control", "no-store").json((await Promise.all(asked)).filter(Boolean))
+    reply.noStore().json((await Promise.all(asked)).filter(Boolean))
   }
 }
 
@@ -707,6 +744,15 @@ const WORKTREES_PREFIX = "/worktrees/"
 
 /** A worktree's address, `/worktrees/<w>/...`:  `[1]` is `<w>`. */
 const WORKTREE_ADDRESS = /^\/worktrees\/([^/]+)\//
+
+/** Why a page server speaks plain HTTP only, by its certificate's state:  a line in its log. */
+const PLAIN_HTTP_WHY: Record<Exclude<SRV.CertificateState, "ready">, string> = {
+  "no-mkcert": "plain HTTP only:  HTTPS needs mkcert (brew install mkcert), then spell server certificate",
+  missing: "plain HTTP only:  for HTTPS, run spell server certificate",
+  uncovered: "plain HTTP only:  its certificate is out of date;  run spell server certificate",
+  expired: "plain HTTP only:  its certificate is out of date;  run spell server certificate",
+  untrusted: "plain HTTP only:  this computer doesn't trust its certificate yet;  run spell server certificate"
+}
 
 /** Port the page server asks for first:  `SPELL_SERVER_PORT`, else 4747 (the goals server's old port). */
 export const DEFAULT_PORT = Number(process.env.SPELL_SERVER_PORT) || 4747
@@ -910,4 +956,28 @@ function checkoutInfo(root: string): { branch?: string; worktree?: string } {
   const found = SRV.checkoutOf(root)
   const worktree = found?.root === resolve(root) ? found.worktree : undefined
   return { ...(branch && { branch }), ...(worktree && { worktree }) }
+}
+
+/** A `Mount.hashed` that takes no name. */
+const NO_NAMES = /(?!)/
+
+/**
+ * The hashed names of the bundles the checkout at `root` builds and never commits (`SRV.Bundle.specs()`:  Spell UI's
+ * site bundle, `ui/site/_assets/`), as `Mount.hashed`:  for the checkout's own mount (`own`), and for every worktree's
+ * at `/worktrees/<w>/` (`worktrees`).
+ * - NEVER a committed bundle's (the docs bundle, the epics pack):  their names carry no hash, so a year would be stale
+ * - NEVER throws:  settings that won't read have none
+ */
+function builtNames(root: string): { own: RegExp; worktrees: RegExp } {
+  let folders: string[] = []
+  try {
+    folders = SRV.Bundle.all(root)
+      .filter((bundle) => !bundle.spec.committed)
+      .map((bundle) => relative(root, bundle.outputDir).split(sep).join("/"))
+      .filter((folder) => folder && !folder.startsWith(".."))
+  } catch {
+    // no bundles to mark:  everything is checked each time
+  }
+  if (!folders.length) return { own: NO_NAMES, worktrees: NO_NAMES }
+  return { own: SRV.hashedIn(...folders), worktrees: SRV.hashedIn(...folders.map((folder) => `*/${folder}`)) }
 }

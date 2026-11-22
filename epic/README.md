@@ -318,6 +318,22 @@ _Trimmed from the real files:  data in attributes, prose in children, and the bo
 - The `epic` command writes its markup from the same element definitions the elements are drawn from,
   so the tool and the page can't disagree about what a tag holds.
 
+Think of a stylesheet, one level up.
+CSS restyles a page without touching its HTML;  these elements re-DRAW a page, its chips, buttons and cards,
+without touching its file.
+So a change to the look is a change to one element, and every epic page follows at once, with none rewritten.
+
+- What an element draws itself (the id chip, the review buttons, the fold) lives in its shadow root,
+  as every Spell UI element's does.
+- The prose stays the page's own children:
+  find-in-page and `#id` links reach it, and a live edit patches it in place,
+  so an open item stays open and a half-typed note keeps its text.
+- Questions, judgement calls, todos, issues and manual tests are all one element, `<epic-item>`:
+  its kind is its id's letter (`q7`, `j3`) and the section it sits in, so there's one element to style and test,
+  and no kind attribute to keep in step with the id.
+- A change to the markup ships with a migration that rewrites every page, never with a second way to read the old
+  markup:  no tag carries a version, and `epic migrate` brings each page up to today's.
+
 The cost:  nothing draws without a server, the epic server or a checkout's page server.
 How a page loads its elements, what it looks like from disk, and every element:
 [README-pages.md](README-pages.md#the-epic--elements--the-page-is-data-they-draw-it).
@@ -452,17 +468,18 @@ yarn vscode:package     # the extension's bundle and spell-epic.vsix:  NOT insta
 
 | Page | What's on it |
 | --- | --- |
-| [README.md](README.md) | <ul><li>this page:  an epic page, and an epic's life</li><li>three things that move, if you know tickets, pull requests and chat</li><li>try it;  the words, what a page lets you do, the commands</li><li>beyond Spell;  working on it</li></ul> |
+| [README.md](README.md) | <ul><li>this page:  an epic page, and an epic's life</li><li>three things that move, if you know tickets, pull requests and chat</li><li>try it;  the words, what a page lets you do;  how a page is built;  the commands</li><li>beyond Spell;  working on it</li></ul> |
 | [README-how-it-works.md](README-how-it-works.md) | <ul><li>sagas, epics and guides:  how each holds the next</li><li>the workflow:  two Accepts, then it builds</li><li>the page in annotated pictures:  header, items, "While you were out", the Review tab</li></ul> |
-| [README-pages.md](README-pages.md) | <ul><li>your first review, in four moves</li><li>the header and toolbar;  eight sections whose ids never change</li><li>a review round, comments and manual tests;  what each colour means</li><li>saga, details and choice pages, guides, the home page;  the `<epic-*>` elements</li></ul> |
+| [README-pages.md](README-pages.md) | <ul><li>your first review, in four moves</li><li>the header and toolbar;  eight sections whose ids never change</li><li>a review round and Claude's status cards, comments and manual tests;  what each colour means</li><li>saga, details, choice and run pages, guides, the home page;  the `<epic-*>` elements</li></ul> |
 | [README-skills.md](README-skills.md) | <ul><li>the skills you type, and the hooks that run by themselves:  how many, and what each does</li><li>planning and review;  worktrees and sessions;  background and offline</li><li>the hooks, and the prompt gate that reads first</li><li>two names for every skill</li></ul> |
-| [README-cli.md](README-cli.md) | <ul><li>the six commands you'll actually type</li><li>an address is a page and an id:  `seo#J3`</li><li>one copy of the code;  how a `wait` wakes a session</li><li>every verb, by group;  where it stops</li></ul> |
-| [README-vscode.md](README-vscode.md) | <ul><li>the Spell Epic extension:  three commands and a reload</li><li>two views, each a page that stays;  which server answers</li><li>the window bridge, and how a session moves</li><li>working on it</li></ul> |
+| [README-cli.md](README-cli.md) | <ul><li>the six commands you'll actually type</li><li>an address is a page and an id:  `seo#J3`</li><li>one copy of the code;  one writer for every epic page;  how a `wait` wakes a session</li><li>every verb, by group;  where it stops</li></ul> |
+| [README-vscode.md](README-vscode.md) | <ul><li>the Spell Epic extension:  three commands and a reload</li><li>three views, each a page that stays;  which server answers</li><li>the window bridge, and how a session moves</li><li>windows you tell apart:  a look, a title, a ✅</li><li>working on it</li></ul> |
 | [README-epics.md](https://github.com/spell-app/spell/blob/main/README-epics.md), at the kit's root | <ul><li>what an epic is, why you'd want one, how you'll use it</li><li>try it, in one command</li></ul> |
 | [README-setup.md](README-setup.md) | <ul><li>every step of setting a repo up;  the extension</li><li>on GitLab;  when main takes only pull or merge requests</li><li>the plans live beside your repo;  what your AGENTS.md adds</li></ul> |
-| [README-teams.md](README-teams.md) | <ul><li>joining, who you are, every turn syncs</li><li>two people on one page;  whose agent answers whom</li><li>with Codex, or another agent</li></ul> |
+| [README-teams.md](README-teams.md) | <ul><li>joining, who you are and your colour, every turn syncs</li><li>two people on one page;  whose agent answers whom</li><li>with Codex, or another agent</li></ul> |
 | [README-config.md](README-config.md) | <ul><li>the epic folder;  your settings;  every key of the config file</li><li>worktrees;  one epic server per machine</li><li>what's still Spell-shaped</li></ul> |
 | [README-superpowers.md](README-superpowers.md) | <ul><li>epics beside the superpowers plugin:  who plans, who finishes</li><li>the stand-aside words, and where they reach a session</li><li>a live trial;  common clashes and their fixes</li></ul> |
+| [README-demo.md](README-demo.md) | <ul><li>showing epics to a room in about 20 minutes:  one ask, a plan on a page, two Accepts, a phase built</li><li>the clock times, the pitch, and what to do when something goes wrong</li></ul> |
 | [README-faq.md](README-faq.md) | <ul><li>when something goes wrong:  what you see, why, and the fix</li></ul> |
 
 Every other folder's pages:  [the kit's index](https://github.com/spell-app/spell/blob/main/README.md#every-readme).

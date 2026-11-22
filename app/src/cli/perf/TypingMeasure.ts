@@ -1,6 +1,6 @@
 import type { PerfProfileName, PerfServers } from "./perf.types"
 import { PerfBrowser, median, percentile, type PerfWindow } from "./PerfBrowser"
-import { focusLineTwo } from "./LeaksMeasure"
+import { focusLineTwo, showCardFile } from "./LeaksMeasure"
 
 /**
  * Typing in the editor's code pane:  100 keys into a comment (Card.spell's line 2), one every 120ms, a quick typist.
@@ -18,7 +18,7 @@ export class TypingMeasure {
     try {
       await browser.load()
       const { page } = browser
-      await page.getByText("Card.spell", { exact: true }).filter({ visible: true }).first().click({ force: true })
+      await page.evaluate(showCardFile)
       await page.waitForTimeout(800)
       await page.evaluate(focusLineTwo)
       await page.evaluate(watchFrames)

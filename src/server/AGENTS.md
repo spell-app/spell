@@ -25,7 +25,24 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - html / per-extension hooks
     - overlays:  one folder laid over another
     - an `ETag`
+    - CACHING, its `caching` setting (`Caching`;  epic `solid-2-final` P2):
+      - `"never"`, the default:  `Cache-Control: no-store`;  every worktree's page server, so development never sees a
+        stale file
+      - `"normal"`:  the main checkout's page server, the built editor (`EditorServer.builtServer()`), the cloud's
+        `/element/`
+        - a name carrying a build's hash (`Mount.hashed`, made by `hashedIn()`) kept a year, `immutable`
+        - everything else `no-cache`:  checked each time, "not modified" (304) while the browser's copy matches its
+          `ETag`;  a page through the `html` hooks only while they'd make the same page again
   - `Request`, `Reply`, `Router` and [bodies.ts](bodies.ts) -- the part of Express the app's API uses
+    - `Reply` COMPRESSES what it sends, when the browser takes it ([compress.ts](compress.ts), node's zlib;
+      epic `solid-2-final` P2):
+      - `sendFile()`:  the file's brotli copy beside it (`x.js.br`, no older than the file), as it is;
+        else text of 1 KB or more gzipped, a file's gzip kept in memory by its path, size and time (128 MB at most)
+      - `send()` / `json()`:  text of 1 KB or more gzipped
+      - each says `Vary: Accept-Encoding`;  a request that takes neither gets the body as it is
+      - the brotli copies:  the builds' `brotliCopies()` (`spell/toolchain/brotliCopies`), in the app's builds,
+        Spell UI's site bundle and the docs pages' bundle;  never a committed file, which is gzipped once a run instead
+    - `reply.noStore()`:  the ONE way an answer says "never keep a copy" (`Cache-Control: no-store`), every route's
   - [listener.ts](listener.ts) -- `toListener()`:  a handler as node's `(req, res)`, with the 404 / error answers
   - [ports.ts](ports.ts) -- choosing a port:
 
@@ -88,8 +105,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - a stylesheet it uses:  swapped in place, no reload
         - in VS Code's side-bar views too (spell-epic's Review and Details):  the live client runs inside their frame,
           with its own socket (the frame is cross-origin to the view)
-        - nothing caches a stale one:  every answer is `Cache-Control: no-store`, `_assets/` included,
-          so a reload always fetches the stylesheet as it is now
+        - nothing caches a stale one:  a worktree's server answers `Cache-Control: no-store`, `_assets/` included;
+          the main checkout's checks each file every time (`no-cache`, "not modified" while it's current),
+          so a reload always gets the stylesheet as it is now
       - a script it loaded, or one beside it:  reloaded, keeping the scroll
         - which:  its `<script src>` tags, and `performance`'s resource entries
           (lazy chunks, `epics.pack.js`, an experiment's `*.bundle.js`)
@@ -238,6 +256,19 @@ Only what's local is below;  a section named like a WWOD rule extends it.
     - [Test helpers](test/checkouts.ts) that fake one:  `fakeMainCheckout()`, `fakeWorktree()`.
   - [proxy.ts](proxy.ts) -- `proxyTo()` / `proxyUpgrade()`:  HTTP and websockets to another local server
   - `WebServer` -- all of the above on node's HTTP server
+    - with a `certificate`, HTTPS and HTTP/2 too, on the SAME port (epic `solid-2-final` P14):  each connection
+      handed on by its first byte, a TLS hello to node's HTTP/2 server (`allowHTTP1`, so websockets still upgrade),
+      anything else to the plain one;  `url` stays `http://127.0.0.1:<port>` for the tools, `secureUrl` is
+      `https://localhost:<port>` for browsers
+    - HTTP/2's requests:  `Host` is its `:authority` (`Request.get()`), a body needs no length (`hasBody()`), and a
+      proxied one goes on as HTTP/1.1, its answer's connection headers dropped (`proxyTo()`)
+  - `LocalCertificate` -- a certificate this machine's browsers trust, made by mkcert (epic `solid-2-final` P14):
+    `state`, `make()`, `trust()` (`sudo security add-trusted-cert`, the password asked once), `undo()`;
+    its programs through `CertificateTools`, so tests run none
+    - the page server's:  `forPageServer()`, `localhost` / `127.0.0.1` / `::1` in `~/.spell/localhost/`;  made and
+      trusted only by `spell server certificate`, taken by `PageServer.certificateFor()` once it's `"ready"`
+      (never in tests or CI, nor with `SPELL_HTTPS=0`);  its HTTPS address is `ServerInfo.https`
+    - the house-network site's too (the app's `spell space local setup`):  its own names and folder, the same steps
   - [serveRoutes.ts](serveRoutes.ts) -- `serveRoutes()`, `folderRoute()`:  a small loopback server for a command's
     page (spell-app's `spell run`), each path answered with text, a file, or 404 (epic `coherence` P25)
   - [untilInterrupted.ts](untilInterrupted.ts) -- run until `Ctrl-C`
@@ -744,9 +775,11 @@ The steps between a page's content and its file on disk, for every tool that wri
 
   - HOW each is built:  `BUNDLES`, in [server.types.ts](server.types.ts):
     - `ui-site`:  Spell UI's docs site
+    - `epics-pack`:  the epics pack's script and its families' modules
+    - `epic-docs`:  the docs pages' bundle (`_assets/spell-ui/`), and the scripts beside it
   - `check()`:  stale when never built, its entry missing or rewritten, or its sources' hash changed.
-  - A COMMITTED one (`committed`, epic `epic-engine` P54):  a generated file the repo commits, the root catalog, the
-    epics pack, spell-epic's docs bundle
+  - A COMMITTED one (`committed`, epic `epic-engine` P54):  a generated file the repo commits, the root catalog
+    (the epics pack and spell-epic's docs bundle were too, until epic `solid-2-final` P7:  bundles now, git-ignored)
     - built by `--stale` only in a worktree (`buildsWhenStale`);  named (`spell bundle ui-root`), anywhere
     - its record in the install's git-ignored cache, `node_modules/.cache/spell-bundles/`, never beside it
     - the main checkout tells by its `check` command (`yarn pack:check`);  a worktree by its record, or that check

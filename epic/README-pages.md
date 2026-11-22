@@ -289,6 +289,34 @@ Every mark, and what applying it does:
   a phase still to do takes Do this and Revisit.
 - A fix you sent back with a note that the agent then handed on to another item ("being fixed as I148")
   turns fixed again by itself once that item is fixed, with a Done card naming it.
+- A Choose pill shows on EVERY option card while you review:  a question's own, and the cards in a judgement call's
+  text, a reply or More Details.
+  - Your pick names which set of cards it's from, so two sets on one item never get mixed up;
+    the cards in an Original Discussion are never counted.
+  - A closed item's cards take pills too, but only while you revisit it:  "pick B instead, because ...".
+- After an item's id, a review label says where it stands with you, while nobody is reviewing:
+  green `reviewed 10/3/26` (gone through with you that day, the outcome in the log),
+  grey `deferred` (put off, still not reviewed) or blue `to do` (work a review decided on, not started).
+  Applying your marks sets them, and every session marks the items it talks through with you.
+
+<details>
+<summary>Claude's status cards:  what it took your mark to mean, then that it's done</summary>
+
+Each mark the agent takes gets ONE card, under your note, and only the tool writes them:
+
+| Card | When | What it says |
+| --- | --- | --- |
+| `Claude • Underway`, blue | the moment it takes a revisit or a Do this | one or two sentences on what it understood, no file names;  the item turns blue until the work lands |
+| `Claude • Done`, green | the SAME card, once the work lands | the reading kept, a summary under it only when there's something worth saying:  a surprise, a choice made, something left undone |
+| `Claude • Noted`, a calm outline | a pick, a todo made or queued | what it recorded, and what happens next:  `Chose B · Keep one file per template:  recorded as the answer` |
+
+- A plain Approve gets no card:  nothing to read, nothing to report.
+- A later mark on the same item gets a new card;  the old ones stay, as the record.
+- A run of cards about one task draws as one line, last in the item's thread:
+  `✓ Noted 10/24/26 15:21 → Done 15:25 · what Claude did`.
+- A card is short paragraphs and bullets:  the long story goes in the item's body.
+
+</details>
 
 <details>
 <summary>How Send wakes a session</summary>
@@ -442,6 +470,10 @@ A new element takes its colour from this table, never one that means something e
 
 - Approving a green item greys it at once:  green says "new since you looked".
 - A person or an agent can have a colour of their own:  `colors` in the repo's epic settings.
+- One shade per meaning:  no light blue, no light green.
+  Light orange is the one exception, a paler orange.
+- Colours are drawn, never stored in a page:  change one in the elements' styles, and every page recolours,
+  with no page edited.
 
 The FILL says how far a button, pill or chip has got:
 
@@ -453,6 +485,9 @@ The FILL says how far a button, pill or chip has got:
 | cleared | handled:  the button is a grey outline again, and the chip has the result |
 | solid | only on chips, the step pill's DONE, and a Choose pill once applied |
 
+- The buttons are your INPUT, so they never show the agent's verdict:  the id chip does.
+  While your mark is live, the chip matches the button you chose, its colour and its fill:
+  an Approve pressed and not sent is a dashed green chip, a revisit sent an outlined blue one.
 - So a dashed or outlined chip is ANSWERED:  don't answer it again.
   Only a solid red (needs you), orange (your pick or review) or light orange (yours to see) chip waits on you,
   and the toolbar counts only those.
@@ -549,6 +584,52 @@ _A details page after you've answered:  the recommended option has the thumbs-up
 - `/details` makes one (through `epic ask create`).
   A REVIEW PAGE is the same tool for several calls at once, keep, change or talk over each,
   made from a template of its own;  the tools count it as a details page.
+- Page or modal goes by size:
+  a question that fits the modal and needs no picture is asked in the modal;
+  one that fits but a picture would help gets a PICTURE PAGE (no questions on it), then the modal;
+  only one that doesn't fit gets a details page.
+- The page never locks.
+  A partial answer is fine, and sending again replaces the answer:  the agent is told what changed since your last Send.
+- The agent ends its turn and waits in the background (`epic ask show <page> --wait`), so you can still type to it.
+  Answer in the chat instead, and it stops waiting;  no answer in 8 hours, and the wait gives up, once.
+- An epic's details pages live in its own `details/` folder and are committed with its page,
+  because the decisions they led to link them.
+  The scratch ones, from outside an epic, are swept after 14 days.
+
+<details>
+<summary>What's kept while you type, and where</summary>
+
+Everything you pick or type and haven't sent is a DRAFT:
+every pick, Other, option comment, section comment and the notes, by the id it's under.
+
+- It's saved beside the page, `<slug>.draft.json5`, a moment after each change and as the page goes away;
+  a copy stays in the browser, for when the page server can't take it.
+- Send's line says how it stands, muted:  `draft saved 14:04`.
+  When the page server can't take it, a red line says so:  the browser keeps it, and tries again every 3 seconds.
+- When the page loads again (a reload, an agent's rewrite), the newest draft newer than your last Send goes back
+  into each box by id, over what was sent, and Send says "Changes not sent".
+- Text whose question the rewrite REMOVED shows in a box of its own above the notes,
+  "Kept from before the page changed", under its old title.
+  It's sent with the rest, and the agent reads it after your answers.
+- Once sent, the draft and the browser's copy go.
+  The answer is `<slug>.answer.json5`, beside the page.
+- The catch:  the same page open in two places (the side bar and a browser) keeps ONE draft,
+  and the last to save wins.
+
+The routes, on the page server and the epic server alike, each POST checked for the server's token and its own origin:
+
+| Route | What it does |
+| --- | --- |
+| `POST /api/docs/details/answer` | your Send:  writes the answer, deletes the draft, and carries the page's comments with it |
+| `GET /api/docs/details/answer?page=<path>` | the answer sent, or `{ answer: null }`, and who's waiting for it |
+| `POST /api/docs/details/draft` | what's typed and not sent;  wakes nobody |
+| `GET /api/docs/details/draft?page=<path>` | the draft, or `{ draft: null }` |
+| `GET /api/docs/details/listening?page=<path>` | the session waiting for the answer, or `null`:  the page asks every 30 seconds |
+
+- `page` is the page's address as it was served, a worktree's (`/worktrees/<w>/...`) too.
+- Only a page in a `details/` folder:  anything else is refused (403).
+
+</details>
 
 ### Choice pages
 
@@ -576,6 +657,53 @@ The first is the Spanish translator, with the names it drafted.
 - A row per thing to answer:  the command's columns, then its proposal in a box you type over,
   a pick of its alternatives when it has any, and its tick box (`Use for every project`).
 - Each answer is saved as you give it;  Send, at the bottom, wakes the waiting command.
+
+Unlike a choice page, which waits for the agent to read it, a run page talks to a process that is RUNNING:
+the command can work on, and take each answer as it arrives.
+
+- Each row's box starts with the command's proposal:  leave it, type over it, or pick a pill under it.
+  - Typing is saved half a second after you stop;  a pick or a tick at once.  There's no Save button.
+  - Anything other than the proposal turns the row orange, with a round button that puts the proposal back.
+  - A row you never touch has no answer saved:  the command reads it as its own proposal.
+- Send says you're done.
+  Nothing sends by itself, there's no countdown, and the page never locks:  Send again whenever you like.
+- Once the command has acted on a row, the row shows a quiet `✓ taken`.
+  Change it after that, and an orange note says so:  the command gets the new answer, and uses it if it still can.
+- When the command reports its passes, a status card has a line per pass:  its name, a small bar, how far it got,
+  its calls and its time.
+  The catch:  those move only when the command writes them, so a pass that stalls looks frozen, not slow.
+- When the command offers one, the card has an effort picker (the translator's `fast | balanced | best`).
+  A pick takes effect at the next pass, so each pass line says what it ran at;  once the run is over, it greys out.
+- Once it's over, the header says how it ended:  "The command finished", "The command stopped" or
+  "The command's wait ran out", then "nobody is waiting".
+- Closing the page stops nothing:  everything is in the run's files, so the page picks it back up when it opens again.
+- **Not yet:**  the page can't stop a run, or start one again.  Stop it where it runs.
+
+<details>
+<summary>A run's three files, and its routes</summary>
+
+A run is a folder of the epic folder, `pages/runs/<id>/`:
+
+| File | Who writes it | What's in it |
+| --- | --- | --- |
+| `run.json5` | the command | the title, columns and rows;  progress lines;  the passes, the effort's choices, the rows taken;  how it stands |
+| `answers.json5` | the page's routes | each row's answer as it's given, the effort picked, and `sent` at Send |
+| `waiting.json5` | the command | a heartbeat every 30 seconds while it listens:  the green dot, stale after 90 |
+
+| Route | What it does |
+| --- | --- |
+| `GET /runs/<id>/` | the page, titled with the run's title |
+| `GET /api/runs/<id>` | `{ page, answers, waiting }` |
+| `POST /api/runs/<id>/answer` | one row's answer:  `{ rowId, outcome, value, ticked }` |
+| `POST /api/runs/<id>/effort` | the effort picked, `{ effort }`;  400 unless the run offers it |
+| `POST /api/runs/<id>/send` | Send:  stamps `sent`, afresh each time |
+
+- Every write is under the file's lock, so the command never reads half a file.
+- A run id is `[a-z0-9-]` only, and the routes refuse a row the run doesn't have.
+- The command's side, and a run that steers as it goes:
+  [the kit's README/server.md](https://github.com/spell-app/spell/blob/main/README/server.md).
+
+</details>
 
 ### Guides
 
@@ -754,16 +882,9 @@ Adding a new element:
 - [The kit's README/element.md](https://github.com/spell-app/spell/blob/main/README/element.md):  how packs and elements work, before you write an `epic-*` one
 
 <details>
-<summary>More in the docs site</summary>
+<summary>More, served by the page server</summary>
 
-In the epic folder, so only where `spell.epics` sits beside the repos
-([the kit's setup](https://github.com/spell-app/spell/blob/main/README.md#setup-from-zero) says where), served by `spell server start`:
-
-- "Epic Pages":  `/guides/plan-docs/plan-docs.html`, every part of the page, every colour and button
-- "Reviewing an Epic Page":  `/guides/epic-components/review.html`
-- "Epic Pages as Components":  `/guides/epic-components/epic-components.html`
-- "Epic Page Colours":  `/guides/epic-components/colours.html`
-- "Details Pages":  `/guides/details.html`
+- [Epic Pages, a Tour](guides/plan-docs/plan-docs.html):  every part of an epic page, each drawn live
 - Epic UI, every `<epic-*>` element with a live example:  `/components/epics/`
 
 </details>

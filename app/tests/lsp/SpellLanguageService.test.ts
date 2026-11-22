@@ -1198,6 +1198,8 @@ describe("SpellLanguageService", () => {
   })
 
   describe("<css> blocks (see LSP.SpellCSS)", () => {
+    // the CSS service loads on first use:  in before these ask it
+    beforeAll(() => LSP.SpellCSS.load())
     // a block in the card type's outline, its CSS with a typo:  `colr`
     const withBlock = cardText.replace(
       'a "card" is a two sided view:\n',

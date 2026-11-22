@@ -28,8 +28,8 @@ import type { PackedPackage, PublishCheck } from "spell/cli/publish"
  *   2. a page Vite builds, importing `spell/ui/ui-button` and `spell/element`, draws a `<ui-button>` in headless Chromium,
  *      with ONE element base:  the button's class extends the page's own `E.DOMElement`, and the built page holds one
  *      `class DOMElement`
- *   3. `npx spell help` runs, and the command the lean install couldn't;  and `npx epic --help`, and the epic checks
- *      above, when `spell-epic` is among them
+ *   3. `npx spell help` runs, and the command the lean install couldn't;  and `npx epic --help`, the plugin's own
+ *      guides (`guidesMissing()`) and the epic checks above, when `spell-epic` is among them
  * - Both are held to `DependencyCheck`'s rules (epic `epic-engine` P67):  what someone outside gets, deprecated or
  *   audited, which the lockfile can't show.  The publish fails on what isn't on the known-open list.
  * - Third-party packages come from the npm registry:  it needs the network.
@@ -103,6 +103,7 @@ export class ScratchInstall {
     ]
     if (this.packed.some((pkg) => pkg.name === "spell-epic")) {
       checks.push(this.step("whole:  npx epic --help runs (spell-epic's bin, on spell's code)", () => this.epicHelp()))
+      checks.push(this.step("whole:  the plugin holds its own guides", () => this.pluginGuides()))
       const epic = (...args: string[]) => ["--no-install", "epic", ...args]
       checks.push(
         await this.asyncStep("whole:  the epic server starts and serves an epic page", () => this.epicServer(epic))
@@ -180,6 +181,17 @@ export class ScratchInstall {
     )
     if (strays.length) throw new Error(`the epic repo's folders shipped:  ${strays.join(", ")}`)
     return `${list.guides.length} guides`
+  }
+
+  /**
+   * The epic plugin's own guides (epic `epic-engine` P79):  every page of the checkout's `epic/guides/` in the
+   * installed `spell-epic`'s `guides/`, which VS Code's Epic Docs tab and the `/guides/` engine route serve.
+   */
+  private pluginGuides(): string {
+    const source = join(CLI.KIT_ROOT, "epic", "guides")
+    const missing = guidesMissing(source, join(this.project, "node_modules", "spell-epic", "guides"))
+    if (missing.length) throw new Error(`not shipped:  ${missing.join(", ")}`)
+    return `${guidePages(source).length} guides`
   }
 
   /** The add-ons as the published `spell` lists them:  its optional `peerDependencies`. */
@@ -393,6 +405,22 @@ export class ScratchInstall {
 }
 
 /** The one package everything else is built on, and the only one `npx spell@next epic init` installs. */
+/**
+ * The pages (`.html`) of the guides folder `source` that `installed` doesn't hold, by their path in it.
+ * - for a packed plugin:  its own guides, checked by `ScratchInstall`
+ */
+export function guidesMissing(source: string, installed: string): string[] {
+  return guidePages(source).filter((page) => !existsSync(join(installed, page)))
+}
+
+/** Every page (`.html`) under the guides folder `folder`, by its path in it;  `[]` for none. */
+function guidePages(folder: string): string[] {
+  if (!existsSync(folder)) return []
+  return readdirSync(folder, { recursive: true, encoding: "utf8" })
+    .filter((page) => page.endsWith(".html"))
+    .sort()
+}
+
 const SPELL = "spell"
 
 /**

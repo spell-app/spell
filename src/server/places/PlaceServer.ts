@@ -261,7 +261,7 @@ export class PlaceServer {
       if (status >= 500 && !stop.signal.aborted) console.error(this.keys.scrubbed(`PlaceServer:  ${String(error)}`))
     }
     if (reply.raw.destroyed) return
-    reply.status(status).set("Cache-Control", "no-store").type("application/json")
+    reply.status(status).noStore().type("application/json")
     reply.send(this.keys.scrubbed(JSON.stringify(answered ?? {})))
   }
 

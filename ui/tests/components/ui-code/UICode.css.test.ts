@@ -2,7 +2,6 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { codeVocabulary } from "spell/ui/components/ui-code/UICode.en"
@@ -38,7 +37,7 @@ describe("UICode.css source", () => {
 describe("UICode.css examples", () => {
   it("sets code in the mono font, one block per line, coloured by group", () => {
     Sheets.adopt([...foundationCSS, codeCSS])
-    const root = Fixture.render(EXAMPLES["./examples/types.html"]!)
+    const root = Sheets.render(EXAMPLES["./examples/types.html"]!)
     const pre = root.querySelector("pre")!
     expect(getComputedStyle(pre).fontFamily).toMatch(/mono/i)
     const lines = root.querySelectorAll(".ui.code:not(.numbered) .line")
@@ -51,7 +50,7 @@ describe("UICode.css examples", () => {
 
   it("numbers lines past the counter reset, and wraps under the text, not the number", () => {
     Sheets.adopt([...foundationCSS, codeCSS])
-    const root = Fixture.render(`<div style="width: 20em">${EXAMPLES["./examples/types.html"]!}</div>`)
+    const root = Sheets.render(`<div style="width: 20em">${EXAMPLES["./examples/types.html"]!}</div>`)
     const lines = root.querySelectorAll<HTMLElement>(".ui.numbered.code .line")
     expect(getComputedStyle(root.querySelector(".ui.numbered.code pre")!).counterReset).toBe("line 9")
     expect(getComputedStyle(lines[0]!).counterIncrement).toBe("line 1")
@@ -64,7 +63,7 @@ describe("UICode.css examples", () => {
 
   it("takes a public colour token from the page", () => {
     Sheets.adopt([...foundationCSS, codeCSS])
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-code-keyword: rgb(255, 0, 0)">${EXAMPLES["./examples/types.html"]!}</div>`
     )
     expect(getComputedStyle(root.querySelector(".hljs-keyword")!).color).toBe("rgb(255, 0, 0)")

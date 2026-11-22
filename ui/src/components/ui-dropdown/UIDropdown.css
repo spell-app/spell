@@ -720,15 +720,15 @@
     font-family: var(--_ui-flag-font-family);
     line-height: 1;
   }
-  .ui.dropdown > .text [class*="right floated"],
+  .ui.dropdown > .text .right-floated,
   .ui.dropdown > .text ::slotted([class*="right floated"]),
-  .ui.dropdown .menu > :is(.item, .header) > [class*="right floated"] {
+  .ui.dropdown .menu > :is(.item, .header) > .right-floated {
     float: inline-end;
     margin-inline: 1em 0;
   }
-  .ui.dropdown > .text [class*="left floated"],
+  .ui.dropdown > .text .left-floated,
   .ui.dropdown > .text ::slotted([class*="left floated"]),
-  .ui.dropdown .menu > :is(.item, .header) > [class*="left floated"] {
+  .ui.dropdown .menu > :is(.item, .header) > .left-floated {
     float: inline-start;
     margin-inline: 0 1em;
   }
@@ -839,13 +839,13 @@
   .ui.selection.short.dropdown > .menu {
     max-height: calc(var(--_ui-dropdown-menu-max-height) * 0.75);
   }
-  .ui.selection[class*="very short"].dropdown > .menu {
+  .ui.selection.very-short.dropdown > .menu {
     max-height: calc(var(--_ui-dropdown-menu-max-height) * 0.5);
   }
   .ui.selection.long.dropdown > .menu {
     max-height: calc(var(--_ui-dropdown-menu-max-height) * 2);
   }
-  .ui.selection[class*="very long"].dropdown > .menu {
+  .ui.selection.very-long.dropdown > .menu {
     max-height: calc(var(--_ui-dropdown-menu-max-height) * 3);
   }
 
@@ -891,16 +891,16 @@
   .ui.column.dropdown > .menu {
     flex-wrap: wrap;
   }
-  .ui[class*="two column"].dropdown .menu > .item {
+  .ui.two-column.dropdown .menu > .item {
     width: 50%;
   }
-  .ui[class*="three column"].dropdown .menu > .item {
+  .ui.three-column.dropdown .menu > .item {
     width: 33.333%;
   }
-  .ui[class*="four column"].dropdown .menu > .item {
+  .ui.four-column.dropdown .menu > .item {
     width: 25%;
   }
-  .ui[class*="five column"].dropdown .menu > .item {
+  .ui.five-column.dropdown .menu > .item {
     width: 20%;
   }
 
@@ -982,53 +982,53 @@
     background: color-mix(in oklab, var(--_ui-dropdown-menu-background), var(--_ui-dropdown-item-background-hover));
   }
   /* top left */
-  .ui[class*="top left pointing"].dropdown > .menu[popover] {
+  .ui.top-left-pointing.dropdown > .menu[popover] {
     position-area: block-end span-inline-end;
   }
-  .ui[class*="top left pointing"].dropdown > .menu::after {
+  .ui.top-left-pointing.dropdown > .menu::after {
     left: var(--_ui-dropdown-pointing-edge);
     margin: 0;
   }
   /* top right */
-  .ui[class*="top right pointing"].dropdown > .menu[popover] {
+  .ui.top-right-pointing.dropdown > .menu[popover] {
     position-area: block-end span-inline-start;
   }
-  .ui[class*="top right pointing"].dropdown > .menu:not([popover]) {
+  .ui.top-right-pointing.dropdown > .menu:not([popover]) {
     inset-inline: auto 0;
   }
-  .ui[class*="top right pointing"].dropdown > .menu::after {
+  .ui.top-right-pointing.dropdown > .menu::after {
     left: auto;
     right: var(--_ui-dropdown-pointing-edge);
     margin: 0;
   }
   /* left / right:  beside the root, top edges aligned. */
-  .ui[class*="left pointing"]:not([class*="top left"], [class*="bottom left"]).dropdown > .menu[popover] {
+  .ui.left-pointing:not(.top-left, .bottom-left).dropdown > .menu[popover] {
     position-area: inline-end span-block-end;
     margin: 0 0 0 var(--_ui-dropdown-pointing-edge);
   }
-  .ui[class*="right pointing"]:not([class*="top right"], [class*="bottom right"]).dropdown > .menu[popover] {
+  .ui.right-pointing:not(.top-right, .bottom-right).dropdown > .menu[popover] {
     position-area: inline-start span-block-end;
     margin: 0 var(--_ui-dropdown-pointing-edge) 0 0;
   }
-  .ui[class*="left pointing"]:not([class*="top left"], [class*="bottom left"]).dropdown > .menu:not([popover]) {
+  .ui.left-pointing:not(.top-left, .bottom-left).dropdown > .menu:not([popover]) {
     top: 0;
     left: 100%;
     right: auto;
     margin: 0 0 0 var(--_ui-dropdown-pointing-edge);
   }
-  .ui[class*="right pointing"]:not([class*="top right"], [class*="bottom right"]).dropdown > .menu:not([popover]) {
+  .ui.right-pointing:not(.top-right, .bottom-right).dropdown > .menu:not([popover]) {
     top: 0;
     left: auto;
     right: 100%;
     margin: 0 var(--_ui-dropdown-pointing-edge) 0 0;
   }
-  .ui[class*="left pointing"]:not([class*="top left"], [class*="bottom left"]).dropdown > .menu::after {
+  .ui.left-pointing:not(.top-left, .bottom-left).dropdown > .menu::after {
     top: 1em;
     left: calc(var(--_ui-dropdown-arrow-size) / -2);
     margin: 0;
     rotate: -45deg;
   }
-  .ui[class*="right pointing"]:not([class*="top right"], [class*="bottom right"]).dropdown > .menu::after {
+  .ui.right-pointing:not(.top-right, .bottom-right).dropdown > .menu::after {
     top: 1em;
     left: auto;
     right: calc(var(--_ui-dropdown-arrow-size) / -2);
@@ -1036,42 +1036,31 @@
     rotate: 135deg;
   }
   /* bottom (and upward pointing):  above the root. */
-  .ui:is(
-      [class*="bottom pointing"],
-      [class*="bottom left pointing"],
-      [class*="bottom right pointing"],
-      .pointing.upward
-    ).dropdown
+  .ui:is(.bottom-pointing, .bottom-left-pointing, .bottom-right-pointing, .pointing.upward).dropdown
     > .menu:not([popover]) {
     top: auto;
     bottom: 100%;
     margin: 0 0 var(--_ui-dropdown-menu-offset);
   }
-  .ui:is([class*="bottom pointing"], .pointing.upward).dropdown > .menu[popover] {
+  .ui:is(.bottom-pointing, .pointing.upward).dropdown > .menu[popover] {
     position-area: block-start center;
   }
-  .ui[class*="bottom left pointing"].dropdown > .menu[popover] {
+  .ui.bottom-left-pointing.dropdown > .menu[popover] {
     position-area: block-start span-inline-end;
   }
-  .ui[class*="bottom right pointing"].dropdown > .menu[popover] {
+  .ui.bottom-right-pointing.dropdown > .menu[popover] {
     position-area: block-start span-inline-start;
   }
-  .ui:is(
-      [class*="bottom pointing"],
-      [class*="bottom left pointing"],
-      [class*="bottom right pointing"],
-      .pointing.upward
-    ).dropdown
-    > .menu::after {
+  .ui:is(.bottom-pointing, .bottom-left-pointing, .bottom-right-pointing, .pointing.upward).dropdown > .menu::after {
     top: auto;
     bottom: calc(var(--_ui-dropdown-arrow-size) / -2);
     rotate: -135deg;
   }
-  .ui[class*="bottom left pointing"].dropdown > .menu::after {
+  .ui.bottom-left-pointing.dropdown > .menu::after {
     left: var(--_ui-dropdown-pointing-edge);
     margin: 0;
   }
-  .ui[class*="bottom right pointing"].dropdown > .menu::after {
+  .ui.bottom-right-pointing.dropdown > .menu::after {
     left: auto;
     right: var(--_ui-dropdown-pointing-edge);
     margin: 0;

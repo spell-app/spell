@@ -52,6 +52,9 @@ export class PerfBrowser {
   /** every response the page got, by URL:  its type and sizes */
   readonly responses = new Map<string, PerfResponse>()
 
+  /** what the network said of each URL (Chrome's own events):  laid onto `responses` by `sized()` */
+  private readonly network = new Map<string, Pick<PerfResponse, "fromCache" | "wire" | "protocol" | "waitMs">>()
+
   /** the response bodies being read and sized (`sized()`) */
   private readonly reading = new Set<Promise<void>>()
 
@@ -79,7 +82,11 @@ export class PerfBrowser {
   ): Promise<PerfBrowser> {
     const spec = PERF_PAGES[pageName]
     const profile = PERF_PROFILES[profileName]
-    const browser = await BrowserPage.launch({ args: ["--js-flags=--expose-gc", "--enable-precise-memory-info"] })
+    // `--https`:  the editor build's throwaway certificate trusted by its key alone, as a trusted one would be
+    const trust = servers.trustedKey ? [`--ignore-certificate-errors-spki-list=${servers.trustedKey}`] : []
+    const browser = await BrowserPage.launch({
+      args: ["--js-flags=--expose-gc", "--enable-precise-memory-info", ...trust]
+    })
     const page = await browser.newPage({ ...(await contextFor(profile)), ...context })
     await page.addInitScript(BrowserPage.NAME_HELPER)
     const cdp = await page.context().newCDPSession(page)
@@ -159,6 +166,16 @@ export class PerfBrowser {
    */
   async sized(): Promise<void> {
     await Promise.race([Promise.all([...this.reading]), new Promise((resolve) => setTimeout(resolve, SIZED_WAIT_MS))])
+    for (const [url, facts] of this.network) {
+      const entry = this.responses.get(url)
+      if (entry) Object.assign(entry, facts)
+    }
+  }
+
+  /** Forget every response so far:  before the same page loads again (a warm visit). */
+  forgetResponses(): void {
+    this.responses.clear()
+    this.network.clear()
   }
 
   /** Close the browser.  NEVER throws. */
@@ -172,15 +189,24 @@ export class PerfBrowser {
    */
   private async watch(): Promise<void> {
     const { page, spec, cdp } = this
+    // through Chrome's own interception, never Playwright's `page.route()`:  that turns the browser's cache off,
+    // so a warm visit fetched everything again (epic `solid-2-final` P2)
     if (spec.blockWrites) {
-      await page.route("**/*", (route) => {
-        const request = route.request()
-        if (WRITES.test(request.method()) && !COMPILES.test(request.url())) {
-          this.writesBlocked.push(`${request.method()} ${request.url()}`)
-          return route.fulfill({ status: 200, contentType: "application/json", body: "{}" })
-        }
-        return route.fallback()
+      cdp.on("Fetch.requestPaused", ({ requestId, request }) => {
+        const refused = WRITES.test(request.method) && !COMPILES.test(request.url)
+        if (refused) this.writesBlocked.push(`${request.method} ${request.url}`)
+        const answer = refused
+          ? cdp.send("Fetch.fulfillRequest", {
+              requestId,
+              responseCode: 200,
+              responseHeaders: [{ name: "Content-Type", value: "application/json" }],
+              body: Buffer.from("{}").toString("base64")
+            })
+          : cdp.send("Fetch.continueRequest", { requestId })
+        // the page went:  nothing left to answer
+        answer.catch(() => {})
       })
+      await cdp.send("Fetch.enable", { patterns: [{ urlPattern: "*", requestStage: "Request" }] })
     }
     if (spec.storage) {
       await page.addInitScript((storage) => {
@@ -211,9 +237,35 @@ export class PerfBrowser {
       this.reading.add(read)
       void read.finally(() => this.reading.delete(read))
     })
-    cdp.on("Network.responseReceived", ({ response }) => {
+    // what really crossed the network (epic `solid-2-final` P2):  a compressed body, a "not modified" answer's headers;
+    // kept by URL, and laid onto `responses` once they're sized (`sized()`), as Playwright's answer may come later
+    const urls = new Map<string, string>()
+    // a copy from the memory cache says so only here:  its response says neither disk nor service worker
+    const fromMemory = new Set<string>()
+    cdp.on("Network.requestServedFromCache", ({ requestId }) => fromMemory.add(requestId))
+    // when the page asked for each:  its wait for a connection is from then until it's sent (epic `solid-2-final` P14)
+    const asked = new Map<string, number>()
+    cdp.on("Network.requestWillBeSent", ({ requestId, timestamp }) => asked.set(requestId, timestamp))
+    cdp.on("Network.responseReceived", ({ requestId, response }) => {
+      urls.set(requestId, response.url)
+      const fromCache = response.fromDiskCache || response.fromServiceWorker || fromMemory.has(requestId)
+      const { timing, protocol } = response
+      const askedAt = asked.get(requestId)
+      const waitMs =
+        timing && askedAt !== undefined && !fromCache
+          ? Math.max(0, (timing.requestTime - askedAt) * 1000 + Math.max(0, timing.sendStart))
+          : undefined
+      this.network.set(response.url, {
+        fromCache,
+        ...(protocol && { protocol }),
+        ...(waitMs !== undefined && { waitMs })
+      })
       const entry = this.responses.get(response.url)
-      if (entry) entry.fromCache = response.fromDiskCache || response.fromServiceWorker
+      if (entry) entry.fromCache = fromCache
+    })
+    cdp.on("Network.loadingFinished", ({ requestId, encodedDataLength }) => {
+      const facts = this.network.get(urls.get(requestId) ?? "")
+      if (facts && !facts.fromCache) facts.wire = encodedDataLength
     })
     cdp.on("Network.webSocketFrameReceived", () => this.liveMessages++)
   }
@@ -438,6 +490,12 @@ export type PerfResponse = {
   raw?: number
   brotli?: number
   fromCache?: boolean
+  /** the bytes that crossed the network, headers included, as the server sent them (compressed or not) */
+  wire?: number
+  /** how it came:  `h2`, `http/1.1` ... (Chrome's word);  none from the cache */
+  protocol?: string
+  /** from the page asking for it until it was sent:  the queue, the wait for a free connection, the connecting */
+  waitMs?: number
 }
 
 /** What `domCensus()` counts. */

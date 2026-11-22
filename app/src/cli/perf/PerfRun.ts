@@ -63,7 +63,7 @@ export class PerfRun {
     const busyAtStart = this.machine.isBusy
     if (busyAtStart) this.say(`BUSY MACHINE:  1-minute load ${before.load[0]}:  times will be noisy`)
     const started = new Date()
-    const builds = new PerfBuilds(join(this.kitRoot, "app", "app"))
+    const builds = new PerfBuilds(join(this.kitRoot, "app", "app"), { https: options.https })
     const data: PerfRecord["data"] = {}
     let chromeVersion = ""
     try {
@@ -176,7 +176,8 @@ export class PerfRun {
     if (!needsEditor) return { editor: { editor: "", pageServer } }
     this.say("Building the editor into a temporary folder ...")
     const editor = await builds.serve(builds.build("editor"), pagePort)
-    return { editor: { editor, pageServer } }
+    const trustedKey = builds.trustedKey
+    return { editor: { editor, pageServer, ...(trustedKey && { trustedKey }) } }
   }
 
   /** The speed test's editing pipeline, `spell speedtest --pipeline --json`:  its medians. */

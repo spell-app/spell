@@ -105,7 +105,10 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
     } else {
       // a tag defined early, its family not loaded yet:  pending until `attach()` ("Defined early")
       EARLY.get(this.constructor as DOMElementClass)?.pending.add(this)
-      if (DOMElement.isPending(this)) this.setState(PENDING, true)
+      if (DOMElement.isPending(this)) {
+        this.setState(PENDING, true)
+        DOMElement.pendingMade?.(this.localName)
+      }
     }
     // capture on the DOM element itself, so a disabled element swallows clicks before page listeners on it run
     this.addEventListener("click", (event) => this.swallowClickWhileDisabled(event), { capture: true })
@@ -770,6 +773,16 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
     customElements.define(tag, Class)
     return Class
   }
+
+  /**
+   * Told of every element made while its tag is pending (defined early, its family not loaded):  its tag.
+   * - So a page can load a family the FIRST time one of its elements is made, anywhere:  in the page, in another
+   *   element's shadow root, or by a script (`document.createElement()`), which no root's scan of its content sees.
+   * - Spell UI's `RootLoader.loadOnFirstUse()` sets it, on the docs pages (epic `solid-2-final` P7);
+   *   none elsewhere, so it's one property read per pending element.
+   * - Called from the element's constructor:  it MUST NOT touch the element, only start a load.
+   */
+  static pendingMade?: (tag: string) => void
 
   /** Is `Class` a tag defined early whose family hasn't loaded? */
   static isEarly(Class: CustomElementConstructor | undefined): Class is DOMElementClass {

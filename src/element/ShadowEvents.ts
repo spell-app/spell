@@ -242,14 +242,18 @@ export class ShadowEvents {
    * - Solid sets `node._$$click = handler` (`addEvent()`);  the setter makes that an OWN property of the node,
    *   so every later read and write is a plain one, then notes the node (`noteHandler()`).
    * - No getter:  a node without a handler reads `undefined`, as before.
-   * - SIDE EFFECT:  page-wide, once, as this file loads:  an element may draw before its root is registered
+   * - SIDE EFFECT:  page-wide, as this file loads:  an element may draw before its root is registered
    *   (its content is built inside its error boundary first).
    *   - Where there is no DOM yet (node), the first `register()` installs it.
+   * - And again at every `register()`, for the kinds Solid delegates SINCE (`watched`):  a bundle that loads each
+   *   family on first use (the docs bundle, epic `solid-2-final` P7) runs a family's `delegateEvents(["click"])` long
+   *   after the first element drew;  unwatched, its buttons' handlers reached no listener, and no fold folded.
    */
   static watchHandlers() {
-    if (isWatching || typeof Element === "undefined") return
-    isWatching = true
+    if (typeof Element === "undefined") return
     for (const type of DelegatedEvents) {
+      if (watched.has(type)) continue
+      watched.add(type)
       const key = `${HANDLER}${type}`
       Object.defineProperty(Element.prototype, key, {
         configurable: true,
@@ -349,8 +353,8 @@ let registering: Node | undefined
 /** Each bridged shadow root's kinds in use (`used`), and `use(type)`, which adds Solid's held listener. */
 const kindsInUse = new WeakMap<Node, { used: Set<string>; use(type: string): void }>()
 
-/** Whether `watchHandlers()` has run. */
-let isWatching = false
+/** The kinds `watchHandlers()` has put a setter on `Element.prototype` for. */
+const watched = new Set<string>()
 
 /** Nodes given a handler before they were in a root, and its kind:  `settle()` looks again. */
 let waiting: { node: WeakRef<Element>; type: string }[] = []

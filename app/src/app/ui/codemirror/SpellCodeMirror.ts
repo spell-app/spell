@@ -79,6 +79,9 @@ export class SpellCodeMirror implements CodeEditorHandle {
       service: SpellCodeMirror.service,
       onEdit: (file) => {
         for (const listener of SpellCodeMirror.editListeners) listener(file)
+      },
+      onTaken: (file) => {
+        for (const listener of SpellCodeMirror.takenListeners) listener(file)
       }
     })
     return SpellCodeMirror._states
@@ -97,6 +100,18 @@ export class SpellCodeMirror implements CodeEditorHandle {
 
   /** Who hears each edit -- see `onEdit()`. */
   private static editListeners = new Set<(file: SP.AnySpellFile) => void>()
+
+  /**
+   * Hear each time a spell file's typed text reaches its `contents`:  once the typing pauses, or as something reads it
+   * (`FileStates`, epic `solid-2-final` P9).  Returns what stops it.
+   */
+  static onTaken(listener: (file: SP.SpellFile) => void): () => void {
+    SpellCodeMirror.takenListeners.add(listener)
+    return () => SpellCodeMirror.takenListeners.delete(listener)
+  }
+
+  /** Who hears each hand-over -- see `onTaken()`. */
+  private static takenListeners = new Set<(file: SP.SpellFile) => void>()
 
   /**
    * An editor of project files in `view`, showing `options.file`'s state.

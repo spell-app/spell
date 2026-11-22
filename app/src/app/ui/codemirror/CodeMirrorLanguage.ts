@@ -55,10 +55,11 @@ import { LspToCodeMirror, type CodeMirrorLocation } from "./LspToCodeMirror"
  *   the parser, the language service, the app's editor-neutral `ui` files, CodeMirror.
  ****************/
 export class CodeMirrorLanguage {
-  constructor({ service, file, parseNow }: CodeMirrorLanguageProps) {
+  constructor({ service, file, parseNow, isHolding = () => false }: CodeMirrorLanguageProps) {
     this.service = service
     this.file = file
     this.parseNow = parseNow
+    this.isHolding = isHolding
   }
 
   /** the language service */
@@ -69,6 +70,9 @@ export class CodeMirrorLanguage {
 
   /** parse what's typed and not parsed yet, now:  the file states' (`FileStates.parseNow()`) */
   private readonly parseNow: () => void
+
+  /** does the state hold text typed and not in the file yet?  (`FileStates`:  it's handed over as typing pauses) */
+  private readonly isHolding: () => boolean
 
   /**
    * Every extension:  hover, folding, signature help and accent fixes;  a Spell UI tag's help;
@@ -188,7 +192,8 @@ export class CodeMirrorLanguage {
     return foldService.of((state, lineStart) => {
       const { file } = this
       const text = state.doc.toString()
-      if (!file.match || file.contents !== text) return null
+      // typing not handed over yet:  the last parse's blocks, as when the typing reached the file at once
+      if (!file.match || (file.contents !== text && !this.isHolding())) return null
       const line = state.doc.lineAt(lineStart).number - 1
       const endLine = this.blocksOf(file.match, text).get(line)
       if (endLine === undefined) return null
@@ -558,6 +563,8 @@ export type CodeMirrorLanguageProps = {
   file: SP.SpellFile
   /** parse what's typed and not parsed yet, now */
   parseNow: () => void
+  /** does the state hold text typed and not in the file yet?  Default:  never */
+  isHolding?: () => boolean
 }
 
 ////////////////

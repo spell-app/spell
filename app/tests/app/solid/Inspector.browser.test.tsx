@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, test, vi } from "vite-plus/test"
+import { afterEach, beforeAll, describe, expect, test, vi } from "vite-plus/test"
 import { flush } from "solid-js"
 import { render } from "@solidjs/web"
 
@@ -21,6 +21,9 @@ afterEach(() => {
   Inspector.close()
   flush()
 })
+
+// the Inspector's views load the first time it opens (`Inspector.views`):  in before any test draws them
+beforeAll(() => Inspector.views.load())
 
 describe("Inspector.partFor()", () => {
   test("a Spell UI element:  itself, with its tag's attributes", async () => {

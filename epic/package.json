@@ -74,7 +74,7 @@
   "pageServer": {
     "bundles": [
       "src/components/__pack",
-      "src/tools/_assets"
+      "src/tools/_assets/spell-ui"
     ],
     "routes": [
       "src/tools/detailsRoutes.ts",
@@ -122,12 +122,17 @@
   },
   "spellPublish": {
     "build": "vscode:package",
+    "bundles": [
+      "epics-pack",
+      "epic-docs"
+    ],
     "exclude": [
       "demo/**"
     ],
     "verbatim": [
       "tools/_assets/**",
-      "components/__pack/*.js"
+      "components/__pack/*.js",
+      "components/__pack/epics/**"
     ],
     "files": [
       "epic_settings.json5",

@@ -162,7 +162,7 @@
   .ui.lightly.padded.container {
     padding: var(--_ui-container-lightly-padded);
   }
-  .ui[class*="very padded"].container {
+  .ui.very-padded.container {
     padding: var(--_ui-container-very-padded);
   }
 
@@ -193,13 +193,13 @@
   }
 
   /* Aligned */
-  .ui[class*="left aligned"].container {
+  .ui.left-aligned.container {
     text-align: left;
   }
-  .ui[class*="center aligned"].container {
+  .ui.center-aligned.container {
     text-align: center;
   }
-  .ui[class*="right aligned"].container {
+  .ui.right-aligned.container {
     text-align: right;
   }
   .ui.justified.container {
@@ -217,13 +217,13 @@
   .ui.short.scrolling.container {
     --_container-scroll-ratio: 0.75;
   }
-  .ui[class*="very short scrolling"].short.container {
+  .ui.very-short-scrolling.short.container {
     --_container-scroll-ratio: 0.5;
   }
   .ui.long.scrolling.container {
     --_container-scroll-ratio: 2;
   }
-  .ui[class*="very long scrolling"].long.container {
+  .ui.very-long-scrolling.long.container {
     --_container-scroll-ratio: 3;
   }
   @media (--ui-tablet), (--ui-computer) {

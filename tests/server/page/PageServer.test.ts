@@ -126,6 +126,35 @@ describe("PageServer.start():  its port, or no start", () => {
   })
 })
 
+describe("PageServer with a certificate (epic solid-2-final P14)", () => {
+  /** a certificate in each state, its programs stand-ins:  only `state` and `tls` are read */
+  const certificateIn = (state: SRV.CertificateState) =>
+    ({ state, tls: state === "ready" ? { key: "KEY", cert: "CERT" } : undefined }) as SRV.LocalCertificate
+
+  it("takes the certificate only once it's ready;  else says why, in a line for its log", () => {
+    expect(PageServer.certificateFor(certificateIn("ready"), {})).toEqual({ tls: { key: "KEY", cert: "CERT" } })
+    expect(PageServer.certificateFor(certificateIn("untrusted"), {}).why).toMatch(/spell server certificate/)
+    expect(PageServer.certificateFor(certificateIn("no-mkcert"), {}).why).toMatch(/brew install mkcert/)
+  })
+
+  it("never in tests, CI, or with SPELL_HTTPS=0:  plain HTTP, saying nothing", () => {
+    for (const env of [{ VITEST: "true" }, { CI: "true" }, { SPELL_HTTPS: "0" }])
+      expect(PageServer.certificateFor(certificateIn("ready"), env)).toEqual({})
+  })
+
+  it("without one, says no HTTPS address:  as before", async () => {
+    const root = mkdtempSync(join(tmpdir(), "page-plain-"))
+    const server = await new PageServer({ root }).start({ port: 0, routes: false, pidFile: false })
+    try {
+      expect(server.info.https).toBeUndefined()
+      expect(server.web.secureUrl).toBeUndefined()
+    } finally {
+      await server.stop()
+      rmSync(root, { recursive: true, force: true })
+    }
+  })
+})
+
 describe("PageServer.codeFor()", () => {
   const scratch = mkdtempSync(join(tmpdir(), "page-code-"))
   afterAll(() => rmSync(scratch, { recursive: true, force: true }))
@@ -592,6 +621,47 @@ describe("PageServer", () => {
       expect(readFileSync(join(content, "guides", "new", "notes.md"), "utf8")).toBe("# New\n")
       expect(existsSync(join(main, "guides"))).toBe(false)
       expect((await ask(at, "PUT", "/api/files?path=/other/x.md", { headers: text, body: "x" })).status).toBe(403)
+    } finally {
+      await served.stop()
+      for (const dir of [main, content, worktrees]) rmSync(dir, { recursive: true, force: true })
+    }
+  })
+
+  // epic `epic-engine` P79:  a guide moved out of the epic folder keeps its address, as the checkout's file wins
+  it("serves a moved guide at its old address, on main and under a worktree's:  the checkout's copy, not the epic folder's", async () => {
+    const main = mkdtempSync(join(tmpdir(), "srv-moved-"))
+    const content = `${main}.epics`
+    const worktrees = `${main}.worktrees`
+    const put = (file: string, text: string) => {
+      mkdirSync(dirname(file), { recursive: true })
+      writeFileSync(file, `<!doctype html><head></head><p>${text}</p>\n`)
+    }
+    // the original, left in the epic folder;  the kit's copy (`guidesFolder`), main's and the branch's
+    put(join(content, "guides", "rulex", "rulex.html"), "original")
+    put(join(main, "guides", "rulex", "rulex.html"), "main's")
+    put(join(worktrees, "w", "guides", "rulex", "rulex.html"), "the branch's")
+    // a guide of the epic plugin (`epic/guides/`), at its engine route:  ONE copy, this checkout's
+    put(join(content, "guides", "airplane.html"), "original")
+    put(join(main, "epic", "guides", "airplane.html"), "the plugin's")
+    // a guide that never moved:  the epic folder's, at both addresses
+    put(join(content, "guides", "stays.html"), "the epic folder's")
+    const engineRoutes = { "/guides/": "epic/guides" }
+    writeFileSync(join(main, "package.json"), JSON.stringify({ pageServer: { engineRoutes } }))
+    const served = await new PageServer({ root: main }).start({ port: 0, routes: false, pidFile: false })
+    try {
+      served.serveContent(content)
+      served.serveWorktrees(worktrees)
+      const text = async (path: string) => {
+        const answer = await ask(served.info.port, "GET", path)
+        expect(answer.status, path).toBe(200)
+        return /<p>(.*?)<\/p>/.exec(answer.text)?.[1]
+      }
+      expect(await text("/guides/rulex/rulex.html")).toBe("main's")
+      expect(await text("/worktrees/w/guides/rulex/rulex.html")).toBe("the branch's")
+      expect(await text("/guides/airplane.html")).toBe("the plugin's")
+      expect(await text("/worktrees/w/guides/airplane.html")).toBe("the plugin's")
+      expect(await text("/guides/stays.html")).toBe("the epic folder's")
+      expect(await text("/worktrees/w/guides/stays.html")).toBe("the epic folder's")
     } finally {
       await served.stop()
       for (const dir of [main, content, worktrees]) rmSync(dir, { recursive: true, force: true })

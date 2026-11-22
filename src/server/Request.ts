@@ -76,9 +76,13 @@ export class Request {
     return query
   }
 
-  /** header `name` (any case);  a repeated header is joined with `, ` */
+  /**
+   * header `name` (any case);  a repeated header is joined with `, `
+   * - `host` over HTTP/2, which has none:  its `:authority`, the same thing
+   */
   get(name: string): string | undefined {
-    const value = this.raw.headers[name.toLowerCase()]
+    const lower = name.toLowerCase()
+    const value = this.raw.headers[lower] ?? (lower === "host" ? this.raw.headers[":authority"] : undefined)
     return Array.isArray(value) ? value.join(", ") : value
   }
 

@@ -49,6 +49,19 @@ and in the app's build folder, `app/` at the app folder's root.
   - `ui/`:  `UI`, shared UI types, CodeMirror's plumbing,
     and the editor's words, `AppTexts` ([README-app.md](../../README-app.md), "The editor's words")
   - `runner/`:  runs compiled spell (below)
+  - `run/`:  the RUN PAGE, `/run/<project>` opened straight (epic `solid-2-final` P12):  the project running by
+    itself, with no editor, code pane, language service or parser in the page;  its Edit opens `/edit/<project>`
+    - its page is `run.html`, beside `index.html`, a second entry of `vite.config.ts`;  which page an address gets is
+      ONE function, spaces' `editorPageFor()`, which the dev server (`runPageInDev()`) and the built editor's server
+      (`EditorServer.builtServer()`) both ask
+    - it runs what the server built of the project, as `<spell-viewer project>` does (`projectSource()`), on the
+      editor's own `spell-runtime.js`;  a site keeps its address in the page's (`RunSiteHost`)
+    - the editor's own switch from Edit to Run stays on the editor's page:  live edits and the game in progress carry
+      over
+    - a phone opening `/edit/<project>` goes there before the editor downloads (`index.html`'s first script):
+      a phone only runs
+    - the static build keeps its Run in the editor:  a host sends `index.html` for every address
+    - `build.test.ts` pins that it loads no editor, CodeMirror, Inspector, language service or parser
   - `spellEditor/`:  `<spell-editor>`'s pane (below)
   - `editor.ts`:  the editor's state and actions, ONE `editor` for the page
   - `EditorHistory.ts`:  what's undone outside the code, the side bar's changes and a notebook's (`editor.history`);
@@ -607,7 +620,7 @@ and in the app's build folder, `app/` at the app folder's root.
     - typed by `SPACES.MeAnswer`
   - The name page ([NamePage.tsx](solid/NamePage.tsx), epic `repo-split` P27):  `index.tsx` reads who's at this machine
     (`/api/people/local`) before it draws anything, and asks their name first while nobody is, on this machine.
-  - `<spell-viewer>` loads only the light files, without the parser:
+  - `<spell-viewer>` and the run page load only the light files, without the parser:
     - `spell/app/spaces/models/projectGroups`, which registers spell's project groups
     - `spell/parser/spell/SpellSetup`
     - `spell/parser/spell/SpellUrls`

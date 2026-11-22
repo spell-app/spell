@@ -4,8 +4,6 @@ import type { JSX } from "@solidjs/web"
 import { E } from "spell/element"
 import { UI } from "spell/ui/core"
 import { UIRoot, type RootVocabulary } from "spell/ui/components/ui-root"
-// Import directly, NOT through the `spell/parser/spell` barrel, which would pull in the whole parser.
-import { SpellUrls } from "spell/parser/spell/SpellUrls"
 // Import directly:  spell's project groups alone (for `@spell/examples/...`), without spaces' or spell's barrels
 import "spell/app/spaces/models/projectGroups"
 // Import directly, NOT through the `spell/app/app/runner` barrel, which would pull in `runCompiled()`, and so `core`.
@@ -23,6 +21,7 @@ import {
   type SpellAppSource
 } from "spell/app/app/runner/SpellAppRunner"
 import { spellViewerVocabulary } from "./SpellViewer.en"
+import { COMPILED_JS, DECLARATIONS_JSON, SCOPES_JS, WORDS_JS, projectSource } from "./projectSource"
 
 import "./SpellViewer.css"
 
@@ -361,43 +360,6 @@ const BUNDLE = import.meta.url.slice(0, import.meta.url.lastIndexOf("/") + 1)
 const SPELL_FAMILIES: ReadonlySet<string> = new Set(["spell-editor", "spell-code", "spell-markdown"])
 
 /**
- * What to run for `project="<projectId>"`:  from the spell server (the page's own), sources and all.
- * - Every file by its URL, `/spaces/<project>/<file>` (`SpellUrls`):  a compiled file sits beside its source's.
- */
-function projectSource(project: string): SpellAppSource {
-  const projectId = project
-  return {
-    name: nameOf(projectId),
-    projectId,
-    compiledUrl: builtUrl(projectId, COMPILED_JS),
-    declarationsUrl: builtUrl(projectId, DECLARATIONS_JSON),
-    scopesUrl: builtUrl(projectId, SCOPES_JS),
-    importUrl: (id) => builtUrl(id, COMPILED_JS),
-    // its code files' javascript, as the editor's runner reads them (`call native`, epic `from-project` P10)
-    nativeUrl: (module) => SpellUrls.codeFileUrl(module),
-    importDeclarationsUrl: (id) => builtUrl(id, DECLARATIONS_JSON),
-    wordsUrl: builtUrl(projectId, WORDS_JS),
-    importWordsUrl: (id) => builtUrl(id, WORDS_JS),
-    // `spell:/@spell/examples/Solitaire/Solitaire.spell` => its project id, then its file
-    sourceUrl: (uri) => SpellUrls.fileUrl(decodeURI(uri.replace(/^spell:\//, "")))
-  }
-}
-
-/** Name of project `projectId`, e.g. `solitaire`:  its address's last part. */
-function nameOf(projectId: string): string {
-  return projectId.slice(projectId.lastIndexOf("/") + 1)
-}
-
-/**
- * URL of project `projectId`'s `<project><suffix>`, e.g. `/spaces/@spell/examples/Solitaire/Solitaire.spell.js`.
- * - `suffix` goes on AFTER the address is encoded:  the words' `{lang}` must stay as it is, for the runner to fill in
- *   (encoded, `%7Blang%7D`, the runner never saw it, so a Spanish app loaded no words and drew no Spanish tags).
- */
-function builtUrl(projectId: string, suffix: string): string {
-  return SpellUrls.SPACES + SpellUrls.encodeAddress(`${projectId}/${nameOf(projectId)}`) + suffix
-}
-
-/**
  * What to run for `src="<url>"`:  from anywhere, with what goes with it beside it.
  * - No code files (`call native`):  only Spell's server takes their types out, so a program calling one says
  *   it can't load it.
@@ -418,25 +380,6 @@ function srcSource(src: string): SpellAppSource {
     importWordsUrl: (id) => new URL(`${id.slice(id.lastIndexOf("/") + 1)}${WORDS_JS}`, compiledUrl).href
   }
 }
-
-/**
- * End of a compiled project's file name:  `SP.COMPILED_JS_SUFFIX`.
- * - NOTE: copies, NOT imported:  `spell/parser/spell` would pull the whole parser into the bundle.
- */
-const COMPILED_JS = ".spell.js"
-
-/** End of a scope pack's file name:  `SP.SCOPES_JS_SUFFIX`. */
-const SCOPES_JS = ".scopes.js"
-
-/** End of a project's declarations file's name:  `SP.DECLARATIONS_JSON_SUFFIX`. */
-const DECLARATIONS_JSON = ".declarations.json5"
-
-/**
- * End of a project's words file's name, in one of its languages:  `SP.wordsSuffixFor()`, e.g. `.en.js`, `.es.js`.
- * - `{lang}` is filled in with each language its declarations name when the words load
- *   (`SpellAppRunner`'s `wordsInLanguages()`):  a project mixing languages has a file in each (epic `spanish` P19).
- */
-const WORDS_JS = ".{lang}.js"
 
 /** `width` / `height` attribute `value` as a CSS size:  `""` for `fluid`, or none. */
 function cssSize(value: string | null | undefined): string {

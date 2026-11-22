@@ -2,7 +2,6 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { formVocabulary } from "spell/ui/components/ui-form/UIForm.en"
@@ -74,7 +73,7 @@ describe("UIForm.css source", () => {
 describe("UIForm.css examples", () => {
   it.each(Object.keys(EXAMPLES))("styles every field in %s", (path) => {
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(`<div style="width: 900px">${EXAMPLES[path]!}</div>`)
+    const root = Sheets.render(`<div style="width: 900px">${EXAMPLES[path]!}</div>`)
     const fields = root.querySelectorAll<HTMLElement>(".ui.form .field")
     expect(fields.length).toBeGreaterThan(0)
     for (const field of fields) {
@@ -86,11 +85,11 @@ describe("UIForm.css examples", () => {
 
   it("shares rows by `two fields` and `N wide`, and gives equal width forms equal fields", () => {
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(`<div style="width: 900px">${EXAMPLES["./examples/variations.html"]!}</div>`)
+    const root = Sheets.render(`<div style="width: 900px">${EXAMPLES["./examples/variations.html"]!}</div>`)
     const [first, middle, last] = root.querySelectorAll<HTMLElement>(".fields:not(.inline, .grouped) > .field")
     expect(first!.getBoundingClientRect().width / middle!.getBoundingClientRect().width).toBeCloseTo(1.5, 1)
     expect(last!.getBoundingClientRect().width).toBeCloseTo(first!.getBoundingClientRect().width, 0)
-    const content = Fixture.render(`<div style="width: 900px">${EXAMPLES["./examples/content.html"]!}</div>`)
+    const content = Sheets.render(`<div style="width: 900px">${EXAMPLES["./examples/content.html"]!}</div>`)
     const [a, b] = content.querySelectorAll<HTMLElement>(".two.fields > .field")
     expect(a!.getBoundingClientRect().width).toBeCloseTo(b!.getBoundingClientRect().width, 0)
     expect(a!.getBoundingClientRect().top).toBe(b!.getBoundingClientRect().top)
@@ -98,10 +97,10 @@ describe("UIForm.css examples", () => {
 
   it("marks required labels, and shows only the messages of the form's state", () => {
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(`<div style="width: 900px">${EXAMPLES["./examples/variations.html"]!}</div>`)
+    const root = Sheets.render(`<div style="width: 900px">${EXAMPLES["./examples/variations.html"]!}</div>`)
     const required = root.querySelector(".required.field > label")!
     expect(getComputedStyle(required, "::after").content).toBe('"*"')
-    const states = Fixture.render(EXAMPLES["./examples/states.html"]!)
+    const states = Sheets.render(EXAMPLES["./examples/states.html"]!)
     const success = states.querySelector(".ui.success.form")!
     expect(getComputedStyle(success.querySelector(".success.message")!).display).toBe("block")
     expect(getComputedStyle(success.querySelector(".error.message")!).display).toBe("none")
@@ -109,7 +108,7 @@ describe("UIForm.css examples", () => {
 
   it("dims a loading form behind a spinner", () => {
     Sheets.adopt(SHEETS)
-    const states = Fixture.render(EXAMPLES["./examples/states.html"]!)
+    const states = Sheets.render(EXAMPLES["./examples/states.html"]!)
     const loading = states.querySelector(".ui.loading.form")!
     expect(getComputedStyle(loading, "::before").position).toBe("absolute")
     expect(getComputedStyle(loading, "::after").animationName).toBe("ui-form-spin")
@@ -118,7 +117,7 @@ describe("UIForm.css examples", () => {
 
   it("takes a public token from a wrapper (static markup)", () => {
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-form-gutter: 40px; width: 800px"><div class="ui form"><div class="two fields"><div class="field">A</div><div class="field">B</div></div></div></div>`
     )
     expect(getComputedStyle(root.querySelector(".fields")!).marginLeft).toBe("-20px")
@@ -126,7 +125,7 @@ describe("UIForm.css examples", () => {
 
   it("stacks a row on a narrow form", () => {
     Sheets.adopt(SHEETS)
-    const root = Fixture.render(`<div style="width: 400px">${EXAMPLES["./examples/content.html"]!}</div>`)
+    const root = Sheets.render(`<div style="width: 400px">${EXAMPLES["./examples/content.html"]!}</div>`)
     const [a, b] = root.querySelectorAll<HTMLElement>(".two.fields > .field")
     expect(b!.getBoundingClientRect().top).toBeGreaterThan(a!.getBoundingClientRect().top)
   })

@@ -100,11 +100,25 @@
       "topic": "Writing Spell"
     },
     {
+      "path": "guides/spell-syntax/spell-syntax.html",
+      "title": "Spell Syntax",
+      "description": "Every rule of the base spell language, by module: its class, an example, what the javascript, TypeScript and Python writers make of it, and what it's for. Generated from the code; type over a box to suggest a change, or use the wand to ask for more details.",
+      "audience": "programmers",
+      "topic": "The Language Inside"
+    },
+    {
       "path": "guides/spell-ui-pages.html",
       "title": "Spell UI's Docs Site",
       "description": "Spell UI's docs site, for someone adding or changing a page: what it is and where it lives, a page's shape and its four tabs, the doc-only elements and the data they read, the scripts that build it, and its limits.",
       "audience": "programmers",
       "topic": "Elements and UI"
+    },
+    {
+      "path": "guides/targets/core-reference.html",
+      "title": "Core Reference",
+      "description": "Every name the javascript core offers compiled code, file by file: what every core must have, Python's name for each, and whether spell_core has it yet. Drawn from the core's method list in the checkout serving the page.",
+      "audience": "programmers",
+      "topic": "The Language Inside"
     },
     {
       "path": "guides/targets/targets.html",

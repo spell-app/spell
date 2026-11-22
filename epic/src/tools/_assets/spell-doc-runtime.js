@@ -99,6 +99,7 @@ import {
   readJSON,
   restoreEpicFolds,
   roomFor,
+  whenAttached,
   widenTable,
   writeJSON
 } from "./spell-doc-helpers.js"
@@ -272,8 +273,11 @@ let foldWiring = null
 
 // still, from the first moment:  a page coming up draws its folds and marks as they ARE, never animating into them
 quietFor(QUIET_LOAD_MS)
+// a page that loads the bundle after it's parsed (the reference pages:  `core-reference.js` draws, then adds it) starts
+// once the bundle has run to its end:  a constant declared below `start()`'s callers (`LAZY_SCRIPT`) is still unset
+// while it runs, so starting at once threw (epic `epic-engine` T131)
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once: true })
-else void start()
+else queueMicrotask(() => void start())
 
 /**
  * QUIET (Owen, 2026-10-25:  "part of the reason the page continually flashes is that you are running animations when
@@ -346,7 +350,7 @@ async function start() {
   const folds = wireFolds(main, outline, kept)
   addFoldAll(main, folds)
   const used = TAGS.filter((tag) => document.querySelector(tag))
-  await Promise.all(used.map((tag) => customElements.whenDefined(tag)))
+  await Promise.all(used.map((tag) => whenAttached(tag)))
   const sticky = trackStickyHeights(main, outline)
   const follow = followScroll(main, outline, rail)
   // before the anchors:  a short address into this page becomes a `#id` link they take
@@ -387,7 +391,7 @@ async function start() {
  *   path) loads it by THAT source, and its root's load and this one are the same.
  * - No `<ui-root>` needed:  the pack defines its tags for the whole document.  Most guides have none.
  * - Async (a `<script>` added):  it never holds up the first paint, or `start()`.
- *   An element made before it registers upgrades as it does;  wait with `customElements.whenDefined()`.
+ *   An element made before it registers upgrades as it does;  wait with `whenAttached()` (the docs helpers).
  * - A pack that can't load (a page from `file://`):  a console warning, and the page goes on without.
  */
 function loadEpicsPack() {
@@ -1030,7 +1034,7 @@ function holdScroll(top) {
  */
 async function epicsDrawn(main) {
   const tags = ["epic-page", ...EPIC_FOLDS.split(", ")]
-  const drawn = Promise.all(tags.map((tag) => customElements.whenDefined(tag))).then(() =>
+  const drawn = Promise.all(tags.map((tag) => whenAttached(tag))).then(() =>
     Promise.all(Array.from(main.querySelectorAll(EPIC_FOLDS), (host) => host.ready))
   )
   await Promise.race([drawn, new Promise((done) => setTimeout(done, EPIC_WAIT_MS))])

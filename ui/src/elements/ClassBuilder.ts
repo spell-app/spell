@@ -1,13 +1,14 @@
 // Import directly to avoid circular import
 import { proto } from "spell/ui/util"
 import { E } from "spell/ui/core"
+import { CLASS_PHRASES } from "./ClassPhrases"
 
 /****************
  * ### `ClassBuilder`
  * Turns a component's property values into its canonical Fomantic class string, e.g. `ui small red basic button`.
  * - Why:  shadow markup keeps Fomantic's class grammar (`<button class="ui small primary button">`),
  *   so the CSS is a mechanical port of the `.less`,
- *   and multi-word phrases (`[class*="four wide"]`) need a fixed order.
+ *   and multi-word phrases (`four wide`, styled as `.four-wide`) need a fixed order.
  * - Semantics are SUI React's `classNameBuilders.js` exactly:
  *   `useKeyOnly`, `useValueAndKey`, `useKeyOrValueAndKey`, `useMultipleProp`, `useWidthProp`, `useTextAlignProp`,
  *   `useVerticalAlignProp`.
@@ -16,6 +17,10 @@ import { E } from "spell/ui/core"
  *   multiple, width, textAlign, verticalAlign, `extra`, noun (the vocabulary's, or `options.noun`).
  * - A spec with `classes` maps its values to Fomantic's words first (`padding="md"` => `padded`), in its kind's place.
  * - The constructor sorts the vocabulary ONCE;  `build()` only walks that list and fills one array.
+ * - Every phrase of two or more words the CSS styles is ALSO written as one joined word:
+ *   `ui bottom attached segment` => `ui bottom attached segment bottom-attached` (`withPhrases()`;  epic `solid-2-final` P5).
+ *   The sheets style the joined word, a plain class, never a substring (`[class*="bottom attached"]`).
+ *   The words stay, so a page's override written for Fomantic still matches.
  * - Reads attribute names and CSS keys from the vocabulary, never literals.
  *   The grammar's own connective words (`aligned`, `wide` ...) are `@proto static grammar`.
  * - No DOM, no Solid:  of the core (`E`), it uses only the foundation (`E.ValueSets`, `E.Warnings`),
@@ -124,7 +129,44 @@ export class ClassBuilder {
     }
     if (options.extra) classes.push(options.extra)
     classes.push(options.noun ?? this.vocabulary.noun)
-    return classes.join(" ")
+    return ClassBuilder.withPhrases(classes.join(" "))
+  }
+
+  /**
+   * `text` plus the joined word of every class phrase it holds (`CLASS_PHRASES`):
+   * `ui top left pointing label` => `... top-left left-pointing top-left-pointing`.
+   * - A phrase is found as a SUBSTRING, as `[class*="left pointing"]` found it, so the sheets match what they did.
+   * - For a class string written by hand in a template (`"ui left icon input"`);  `build()` calls it itself.
+   * - Idempotent:  joined words already in `text` are left out of the search (`bottom left bottom-left` holds no
+   *   `left bottom`), and not written twice.
+   * - Remembered per text:  a page builds the same few strings again and again.
+   */
+  static withPhrases(text: string): string {
+    let result = PHRASED.get(text)
+    if (result !== undefined) return result
+    const words = text.includes("-") ? text.split(" ") : undefined
+    const plain = words ? words.filter((word) => !JOINED.has(word)).join(" ") : text
+    result = text
+    for (const phrase of CLASS_PHRASES) {
+      if (!plain.includes(phrase)) continue
+      const joined = phrase.replaceAll(" ", "-")
+      if (!words?.includes(joined)) result += ` ${joined}`
+    }
+    if (PHRASED.size >= MAX_PHRASED) PHRASED.clear()
+    PHRASED.set(text, result)
+    return result
+  }
+
+  /**
+   * `text` without the phrases' joined words `withPhrases()` added:  Fomantic's own class string.
+   * - For a sheet that keeps Fomantic's substring selectors (`UITable.css`, which styles the page's own markup too).
+   */
+  static withoutPhrases(text: string): string {
+    if (!text.includes("-")) return text
+    return text
+      .split(" ")
+      .filter((word) => !JOINED.has(word))
+      .join(" ")
   }
 
   ////////////////
@@ -198,3 +240,12 @@ export class ClassBuilder {
     return undefined
   }
 }
+
+/** Every phrase's joined word. */
+const JOINED = new Set(CLASS_PHRASES.map((phrase) => phrase.replaceAll(" ", "-")))
+
+/** `withPhrases()`'s answers, by text. */
+const PHRASED = new Map<string, string>()
+
+/** How many answers `withPhrases()` keeps before it starts again:  a page has a few hundred class strings. */
+const MAX_PHRASED = 4000

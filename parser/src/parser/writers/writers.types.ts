@@ -79,7 +79,21 @@ export type WriterOptions = {
    * - Default:  none, the shipped build.
    */
   debugging?: DebugOptions
+  /**
+   * Who the code is for (epic `solid-2-final` P11):
+   * - `"editor"` (the default):  the editor's own compile, which keeps everything the editor shows from the code:
+   *   - each line's spell as a comment above its code, docstrings, `//` comments and banners
+   *   - `declaredAt` marks, each saved property's line, for the editor's side bar
+   *   - a heading's `core.heading()`, for the Thing Explorer
+   * - `"built"`:  a built site, the cloud, `spell compile` -- none of those, a third smaller.
+   *   - Kept:  `/*! ... *\/` comments, which are data (a declaration's marker), and a parse error's.
+   *   - Only the running target's:  a library's `.lib.ts` is source people read.
+   */
+  compiledFor?: CompiledFor
 }
+
+/** Who compiled code is for:  see `P.WriterOptions.compiledFor`. */
+export type CompiledFor = "editor" | "built"
 
 /** What a debugging build is told:  see `P.WriterOptions.debugging`. */
 export type DebugOptions = {

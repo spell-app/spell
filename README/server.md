@@ -229,6 +229,35 @@ Each folder brings its own part:
 - the app folder's:  the editor, `/api/projects/`, Spell colouring, and the App/UI tab
 - the `epic/` folder's:  the epic folder itself, so the epic pages and the guides come from one of its modules
 
+### HTTPS and HTTP/2, on the same port
+
+Over plain HTTP a browser opens at most 6 connections to a server, so the editor's 85 first-load files wait their turn.
+HTTP/2 sends them all over one connection, and browsers speak it only over HTTPS.
+So the page server speaks both, on one port, once this computer trusts its certificate:
+
+```sh
+brew install mkcert
+spell server certificate
+spell server stop && spell server start
+```
+
+- `spell server certificate` has mkcert make a certificate for `localhost`, `127.0.0.1` and `::1`, kept in
+  `~/.spell/localhost/`, and has this computer trust mkcert's own authority:  it asks for the password once, in the
+  terminal.
+  - `--check` only says what's missing, and exits 1 until it's ready.
+  - `--undo` deletes the certificate;  the authority stays trusted, since `spell space local setup` uses it too.
+- Each connection is handed on by its first byte:  a TLS hello to node's HTTP/2 server, anything else to the plain one.
+  - Browsers open `https://localhost:4747`:  `spell server url` prints it, and `spell server status` says `https`.
+  - The `spell` and `epic` tools keep `http://127.0.0.1:4747`:  node trusts no keychain.
+  - Websockets (live reload) upgrade on HTTP/1.1 over TLS, as on plain HTTP.
+- Without a trusted certificate nothing changes:  plain HTTP, and one line in the log saying how to turn HTTPS on.
+  - `spell server start` never makes or trusts one itself:  it often runs from a skill, with no terminal to ask in.
+  - Tests and CI never use one (`VITEST`, `CI`);  `SPELL_HTTPS=0` turns it off.
+- Firefox keeps a list of its own:  mkcert fills it only when `certutil` is installed (`brew install nss`).
+- Not yet over HTTPS:  the VS Code side bar and `epic pages link` (their tools check the address from node first),
+  and the editor's dev server (Vite), which Caddy's house-network site and the tests reach over plain HTTP.
+- The code:  `LocalCertificate`, and `WebServer`'s `certificate`.
+
 ## Five flows, a picture each
 
 ### 1. A request:  routes first, files after
@@ -860,7 +889,7 @@ Spell UI's tools, spaces' API server and spell-epic's own server are built from 
 
 | Piece | What it does |
 | --- | --- |
-| `StaticHandler` | folders under URL prefixes (longest prefix wins), one laid over another;  dot files refused;  every answer `Cache-Control: no-store` with an ETag;  hooks to rewrite HTML or transform by extension |
+| `StaticHandler` | folders under URL prefixes (longest prefix wins), one laid over another;  dot files refused;  an ETag on every answer, and its `caching` setting:  `no-store` (a worktree's), or checked each time with "not modified" answers and hashed names kept a year (the main checkout's);  hooks to rewrite HTML or transform by extension |
 | `Router`, `Request`, `Reply` | the part of Express the app's API uses, with Express's names;  one difference:  `:name*` holds the whole rest of the path |
 | `LiveReload` | the websocket that tells pages a file changed;  its page-side client is served at `/api/server/live.js` |
 | `FolderWatch` | a folder watched for changes:  dot files, `node_modules`, lock files and editors' temp files skipped;  a burst reported once it's quiet, if asked |

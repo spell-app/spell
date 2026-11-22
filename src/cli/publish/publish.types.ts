@@ -20,6 +20,9 @@
  * - `build`:  the repo's own yarn script, run in its folder before it's staged, for a `files` entry it builds
  *   (the app's `build`:  the editor, `app/dist/`, which an install serves;  epic `repo-split` P26;
  *   epic's `vscode:package`:  its VS Code extension, epic `epic-engine` I353)
+ * - `bundles`:  the page server's bundles (`SRV.BUNDLES`, by name) whose files ship though git ignores them (epic
+ *   `solid-2-final` P7:  epic's docs bundle and epics pack, `["epics-pack", "epic-docs"]`):  each built first, after
+ *   `build` (`spell bundle <name>`), then every file it wrote under `src/` shipped as `verbatim` says
  * - `exports`:  more names the package answers, each to the module under `src/` it means, `*` allowed
  *   (Spell UI's short names, `"./ui-*": "components/ui-*\/index"`, for outside the repos)
  * - `bin`:  each command the package puts on the `PATH`, by the module under `src/` it runs (`cli/main`):
@@ -39,6 +42,7 @@ export type PublishSettings = {
   reactJsx?: string[]
   files?: string[]
   build?: string
+  bundles?: string[]
   exports?: Record<string, string>
   bin?: Record<string, string>
   sideEffects?: string[]

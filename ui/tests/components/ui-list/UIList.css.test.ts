@@ -2,7 +2,6 @@ import { describe, expect, it } from "vite-plus/test"
 
 import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
-import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
 
 import { listVocabulary } from "spell/ui/components/ui-list/UIList.en"
@@ -42,7 +41,7 @@ function adopt() {
 /** Render example `name`;  returns its root. */
 function example(name: string): HTMLElement {
   adopt()
-  return Fixture.render(EXAMPLES[`./examples/${name}.html`]!)
+  return Sheets.render(EXAMPLES[`./examples/${name}.html`]!)
 }
 
 /** The `index`th `.ui.list` in `root` whose `<h4>` says `title`. */
@@ -121,7 +120,7 @@ describe("UIList.css source", () => {
 describe("UIList.css examples", () => {
   it.each(Object.keys(EXAMPLES))("lays out every list in %s", (path) => {
     adopt()
-    const root = Fixture.render(EXAMPLES[path]!)
+    const root = Sheets.render(EXAMPLES[path]!)
     const lists = root.querySelectorAll<HTMLElement>(".ui.list")
     expect(lists.length).toBeGreaterThan(0)
     for (const list of lists) {
@@ -252,7 +251,7 @@ describe("UIList.css examples", () => {
 
   it("takes a public token from a wrapper or the list itself (static markup)", () => {
     adopt()
-    const root = Fixture.render(
+    const root = Sheets.render(
       `<div style="--ui-list-item-padding-block: 10px"><div class="ui list">` +
         `<div class="item">A</div><div class="item">B</div><div class="item">C</div></div></div>` +
         `<div class="ui celled list" style="--ui-list-item-border-color: rgb(255, 0, 0)">` +

@@ -105,7 +105,7 @@
     --_rail-split: calc(var(--_ui-rail-close-distance) / 2);
     width: calc(var(--_ui-rail-width) + var(--_rail-split));
   }
-  .ui[class*="very close"].rail {
+  .ui.very-close.rail {
     --_rail-split: calc(var(--_ui-rail-very-close-distance) / 2);
   }
 

@@ -27,6 +27,8 @@ import { CLI } from "spell/app/cli"
  * - A library (`ts/lib`) compiled with no errors also gets each of its types' JSON Schema, for VS Code:
  *   `<build folder>/schemas/Person.schema.json` (`CLI.writeSchemas()`, epic `people-and-orgs` P5);
  *   and its Lexicon beside it, AT Protocol's schema language, `Person.lexicon.json` (epic `atmosphere` P10).
+ * - The running code is a built site's (`compiledFor: "built"`, epic `solid-2-final` P11):
+ *   no comments, no `declaredAt` marks, no headings, a third smaller.  The editor's own compile keeps them.
  * - A `.spell` file:  prints its compiled javascript.  Writes nothing.
  * - Projects it imports that have never been compiled are compiled first -- see `CliSession.compileImports()`.
  *   `--force`:  ALL of them, even those already compiled.
@@ -90,7 +92,12 @@ async function compileProject(
         return true
       }
     }
-    await project.compile(undefined, { save: !stdout, targets: target ? [target] : undefined })
+    // for a built site, the cloud, a page's `<spell-viewer>`:  none of the editor's text (epic `solid-2-final` P11)
+    await project.compile(undefined, {
+      save: !stdout,
+      targets: target ? [target] : undefined,
+      compiledFor: "built"
+    })
     targets = project.targets
   } catch (error) {
     status.done(row, "failed", error instanceof Error ? error.message : String(error))

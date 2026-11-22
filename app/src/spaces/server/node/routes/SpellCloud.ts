@@ -242,9 +242,9 @@ export class SpellCloud {
       signIn: this.signIn
     })
     router.get(TERMS_PATH, (_request, reply) => reply.sendFile(TERMS_FILE))
-    router.get("/hello", (_request, reply) => reply.set("Cache-Control", "no-store").json({ message: "Spell's cloud" }))
+    router.get("/hello", (_request, reply) => reply.noStore().json({ message: "Spell's cloud" }))
     router.get(`${CLOUD_APPS_PREFIX}/:project*`, async (request, reply) => {
-      reply.set("Cache-Control", "no-store")
+      reply.noStore()
       if (request.path.endsWith(`/${PROGRAM_CLIENT_FILE}`)) return reply.json(await this.clientFileFor(request))
       const path = `/${request.params.project ?? ""}/`
       if (SERVED_GROUPS.test(path)) return reply.sendFile(APP_PAGE)
@@ -255,7 +255,7 @@ export class SpellCloud {
       return reply.sendFile(APP_PAGE)
     })
     router.get(HOMES_API, async (request, reply) =>
-      reply.set("Cache-Control", "no-store").json({
+      reply.noStore().json({
         ...(request.person && { person: request.person }),
         spaces: await this.homes.spacesFor(request.person)
       })
@@ -263,19 +263,20 @@ export class SpellCloud {
     router.get(`${HOMES_API}/orgs/:org`, async (request, reply) => {
       const org = await this.homes.orgFor(`${request.params.org}`, request.person)
       if (!org) throw new SRV.HttpError(404, "no such org here")
-      reply.set("Cache-Control", "no-store").json({ ...(request.person && { person: request.person }), org })
+      reply.noStore().json({ ...(request.person && { person: request.person }), org })
     })
-    router.get("/", (_request, reply) => reply.set("Cache-Control", "no-store").sendFile(HOME_PAGE))
-    router.get(SIGN_IN_ADDRESS, (_request, reply) => reply.set("Cache-Control", "no-store").sendFile(SIGN_IN_PAGE))
+    router.get("/", (_request, reply) => reply.noStore().sendFile(HOME_PAGE))
+    router.get(SIGN_IN_ADDRESS, (_request, reply) => reply.noStore().sendFile(SIGN_IN_PAGE))
     router.get("/:org", async (request, reply, next) => {
       const address = `${request.params.org}`
       if (!address.startsWith("@")) return next()
-      reply.set("Cache-Control", "no-store")
+      reply.noStore()
       const org = await this.homes.orgFor(address.slice(1), request.person)
       return reply.sendFile(org ? HOME_PAGE : SIGN_IN_PAGE)
     })
     router.use("/spaces", this.onlyServedPrograms, spaceFiles)
-    router.use(new SRV.StaticHandler({ mounts: [{ prefix: "/element", dir: ELEMENT_DIR }] }).handle)
+    // the built elements, checked each time ("not modified" when current) and compressed (epic `solid-2-final` P2)
+    router.use(new SRV.StaticHandler({ mounts: [{ prefix: "/element", dir: ELEMENT_DIR }], caching: "normal" }).handle)
   }
 
   /**
@@ -315,7 +316,7 @@ export class SpellCloud {
     if (request.method !== "GET" || request.path !== HANDLE_LOOKUP_PATH) throw new SRV.HttpError(404, "a handle's host")
     const did = await this.accounts.didForHandle(host)
     if (!did) throw new SRV.HttpError(404, `no account has the handle ${host}`)
-    reply.type("text/plain; charset=utf-8").set("Cache-Control", "no-store").send(did)
+    reply.type("text/plain; charset=utf-8").noStore().send(did)
   }
 
   /**

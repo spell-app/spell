@@ -373,13 +373,13 @@
   .ui.short.search > .results {
     max-height: var(--_ui-search-results-max-height);
   }
-  .ui[class*="very short"].search > .results {
+  .ui.very-short.search > .results {
     max-height: calc(var(--_ui-search-results-max-height) * 0.75);
   }
   .ui.long.search > .results {
     max-height: calc(var(--_ui-search-results-max-height) * 2);
   }
-  .ui[class*="very long"].search > .results {
+  .ui.very-long.search > .results {
     max-height: calc(var(--_ui-search-results-max-height) * 3);
   }
   .ui.scrolling.resizable.search > .results {
@@ -404,16 +404,16 @@
   }
 
   /* Aligned:  which edge the results line up with. */
-  .ui[class*="left aligned"].search > .results:not([popover]) {
+  .ui.left-aligned.search > .results:not([popover]) {
     inset-inline: 0 auto;
   }
-  .ui[class*="right aligned"].search > .results:not([popover]) {
+  .ui.right-aligned.search > .results:not([popover]) {
     inset-inline: auto 0;
   }
-  .ui[class*="left aligned"].search > .results[popover] {
+  .ui.left-aligned.search > .results[popover] {
     position-area: block-end span-inline-end;
   }
-  .ui[class*="right aligned"].search > .results[popover] {
+  .ui.right-aligned.search > .results[popover] {
     position-area: block-end span-inline-start;
   }
 

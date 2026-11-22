@@ -734,6 +734,20 @@ As WWOD §18, plus:
     - NEVER rename one into the other (epic `wwod-spell-ui`, Q13).
 - WWOD §18 › "Naming" (PascalCase root classes, nested parts) is for app sheets.
   - Shadow sheets keep Fomantic's class grammar (`.ui.small.button`):  "UI rules" above.
+- A phrase of class words (`bottom attached`, `four wide computer`) is styled by its JOINED word,
+  `.bottom-attached`, NEVER by a substring (`[class*="bottom attached"]`, the slowest selector there is;
+  epic `solid-2-final` P5).
+  - `ClassBuilder` writes the joined word beside the words (`ui bottom attached segment bottom-attached`):
+    every phrase in [the phrase list](src/elements/ClassPhrases.ts) the class string holds, as a substring,
+    exactly what the old selector matched.
+  - A class string written by hand in a template goes through `E.ClassBuilder.withPhrases()` (`UICalendar`'s input).
+  - A new phrase:  add it to the list, in order.
+    [The phrases test](tests/elements/ClassPhrases.test.ts) fails on a substring selector, and on a phrase no sheet styles.
+  - Except a page's OWN markup, which no builder writes:
+    `UITable.css` (also the page's sheet for a light-DOM table's `<td class="right aligned">`), and inside `::slotted()`.
+    The list's `MARKUP_SHEETS` names them;  the table's mirror writes Fomantic's words only (`withoutPhrases()`).
+  - Class-grammar markup in tests and on the dev pages gets the joined words the same way:
+    `Sheets.render()` / `Sheets.attach()`, `FamilySheets.joinPhrases()`.
 - Breakpoints:  `@custom-media` only ([the media sheet](src/styles/media.css)), never a bare px media query
   (WWOD §18 › "Check at phone width").
 - Utilities ([the utilities sheet](src/styles/utilities.css);  [the theming doc](../spell.epics/guides/ui/notes/theming.md), "Utilities"):
@@ -1194,7 +1208,9 @@ THE LINT GUARD (epic `spell-element` P10):  `yarn lint` holds component files to
   - From epic `epic-components` P1.
   - Restated in `wwod-spell-ui`'s names when `main` merged in (2026-10-08),
     in place of `wwod-spell-ui` P12's JSON packs.
-- The pack is ONE classic script, so it works from `file://`.
+- The pack is ONE classic script a page names, which registers it at once;  its families are ES modules beside it,
+  each loaded the first time one of its elements is made on the docs pages, all at once elsewhere (`loadFamily`,
+  `define()`;  epic `solid-2-final` P7).
   - Built by the kit's pack tooling, [ComponentPack](../src/element-tools/ComponentPack.ts)
     (Spell UI's from epic `repo-split` P5 to P10):
     - `spell-pack build | check [<folder>]`, the kit's bin ([its script](../bin/spell-pack.mjs)),

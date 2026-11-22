@@ -112,7 +112,7 @@ export class AuthenticatedPlaces {
     (request, reply, next) => {
       const token = request.get(TOKEN_HEADER)
       if (request.person !== undefined || token === undefined || token === guard.token) return next()
-      reply.status(403).set("Cache-Control", "no-store").set(PAGE_SERVER_ANSWER_HEADER, STALE_TOKEN_ANSWER)
+      reply.status(403).noStore().set(PAGE_SERVER_ANSWER_HEADER, STALE_TOKEN_ANSWER)
       reply.type("application/json")
       reply.send(
         JSON.stringify({ error: "this page's write token is from before the page server restarted:  reload the page" })
@@ -212,7 +212,7 @@ export class AuthenticatedPlaces {
       }).catch((error: unknown) => {
         throw new SRV.HttpError(502, keys.scrubbed(`${place.name} didn't answer:  ${(error as Error).message}`))
       })
-      reply.status(answer.status).set("Cache-Control", "no-store")
+      reply.status(answer.status).noStore()
       answer.headers.forEach((value, name) => {
         if (PASSED_BACK.test(name)) reply.set(name, keys.scrubbed(value.replaceAll(place.at, servedAddress(served))))
       })
@@ -222,10 +222,7 @@ export class AuthenticatedPlaces {
     } catch (error) {
       if (!(error instanceof PlaceError)) throw error
       const { kind, whyNot } = error.cause ?? ({} as Partial<PlaceErrorCause>)
-      reply
-        .status(PlaceServer.statusOf(error))
-        .set("Cache-Control", "no-store")
-        .set(PAGE_SERVER_ANSWER_HEADER, "refused")
+      reply.status(PlaceServer.statusOf(error)).noStore().set(PAGE_SERVER_ANSWER_HEADER, "refused")
       reply.type("application/json")
       reply.send(
         keys.scrubbed(JSON.stringify({ error: error.message, ...(kind && { kind }), ...(whyNot && { whyNot }) }))

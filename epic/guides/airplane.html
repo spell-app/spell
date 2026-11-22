@@ -6,9 +6,9 @@
     <title>Airplane Mode</title>
     <meta
       name="description"
-      content="Working on the epics and docs with no Claude:  what to run before a flight, what works on the plane, and how Claude takes what you left when you land."
+      content="Working on the epics and docs with no Claude:  what /airplane checks before a flight, what works on the plane, and how /airplane land takes what you left."
     />
-    <meta name="spell-voice" content="readme 2026-10-22" />
+    <meta name="spell-voice" content="readme 2026-11-21" />
     <meta name="spell-saga" content="epics" />
     <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
   </head>
@@ -17,40 +17,46 @@
     <div class="spell-doc">
       <main class="spell-doc-main">
         <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
-          <ui-breadcrumb link="/pages/index.html" target="src-packages-docs-index-html"
-            >Docs</ui-breadcrumb
-          >
+          <ui-breadcrumb>Guides</ui-breadcrumb>
           <ui-breadcrumb selected>Airplane Mode</ui-breadcrumb>
         </ui-breadcrumbs>
         <ui-sticky class="spell-h1"
           ><header class="spell-page-head"><h1>Airplane Mode</h1></header></ui-sticky
         >
+        <ui-accordion class="spell-code" appearance="styled">
+          <ui-title>epic airplane check, on a laptop about to fly · 5 lines</ui-title>
+          <ui-content>
+            <pre><code class="language-text">fail  checkout        ... is a worktree:  run it from the main checkout
+ok    page server     http://127.0.0.1:65076
+fail  offline pages   1 remote loads, the first epics/language/details/quote-fonts.html:9:  `epic pages offline`
+ok    extension       Review:  Open Epic... installed
+note  waiting         51 marks in 9 epics, already waiting</code></pre>
+          </ui-content>
+        </ui-accordion>
         <p class="lede">
-          On the plane, you mark items, comments and adds new epics in VS Code's side bar, and every click saves on
-          the laptop. On the ground, <code>/airplane land</code> gathers it all and works through it in the background.
+          On the plane, you mark items, comment and add new epics in VS Code's side bar, and every click saves on the
+          laptop. On the ground, <code>/airplane land</code> gathers it all and works through it in the background.
         </p>
         <p>
           Airplane mode is how you work on the epics and docs with no Claude (a plane, bad wifi), and how Claude takes
-          what you left once you're back. Most days a mark goes straight to a session that answers it; here it waits in an
-          inbox on this laptop until the landing.
+          what you left once you're back. Most days a mark goes straight to a session that answers it; here it waits in
+          an inbox on this laptop until the landing.
         </p>
         <ui-list class="spell-meta">
-          <ui-item icon="map"
-            ><b>Epic page:</b>
-            <a href="/epics/airplane/airplane.plan.html" target="airplane">epic airplane</a></ui-item
+          <ui-item icon="robot"
+            ><b>The steps:</b>
+            <a href="/epic/skills/airplane/SKILL.md" target="src-epic-skills-airplane-skill-md"
+              >the <code>/airplane</code> skill</a
+            >; its commands, <code>epic airplane --help</code></ui-item
           >
           <ui-item icon="book"
             >How an epic page works, and how to review one:
-            <a href="/guides/plan-docs/plan-docs.html" target="src-guides-plan-docs-plan-docs-html">Epic Pages</a></ui-item
+            <a href="/guides/plan-docs/plan-docs.html" target="src-guides-plan-docs-plan-docs-html"
+              >Epic Pages, a Tour</a
+            ></ui-item
           >
           <ui-item icon="user">Written for: you before and after a flight, and any agent running the landing</ui-item>
-          <ui-item icon="flag"
-            >Status: <ui-label size="mini" color="green">built</ui-label> P1-P11, merged into <code>main</code> (P1-P7
-            2026-10-09, P8-P11 2026-10-10); P12 (Click To Review) in progress</ui-item
-          >
-          <ui-item icon="flask"
-            >Checked: each package's tests, and the whole flow end to end on a scratch epic and guide (P5)</ui-item
-          >
+          <ui-item icon="flask">Checked: 2026-11-21, every command and file against that day's code</ui-item>
         </ui-list>
 
         <ui-section id="1-summary" label="1. Summary" sticky collapsible dividing open="false">
@@ -58,8 +64,15 @@
           <ul>
             <li>Everything you do on a page saves to this laptop's page server: no internet, no Claude.</li>
             <li>
-              <code>/airplane</code> before the flight: checks the laptop is ready, fixes what it can, turns airplane
-              mode on. It asks first whether to run <code>/docs-check</code> on the epics merged since the last flight.
+              <code>/airplane</code> before the flight:
+              <ul>
+                <li>checks the laptop is ready and fixes what it can (<code>epic airplane check --fix</code>)</li>
+                <li>asks which running sessions to <code>/park</code>: a session mid-work stalls offline</li>
+                <li>
+                  asks, every time, whether to run <code>/docs-check</code> on the epics merged since the last flight
+                </li>
+                <li>turns airplane mode on (<code>epic airplane on</code>)</li>
+              </ul>
             </li>
             <li>
               On the plane, in VS Code's side bar:
@@ -71,16 +84,18 @@
               </ul>
             </li>
             <li>
-              <code>/airplane land</code> after: gathers everything you left, by place, and works through it in the
-              background. Then <code>/epic review</code> for what came back.
+              <code>/airplane land</code> after: gathers everything you left, by place, brings the parked sessions back,
+              and works through it in the background. Then <code>/epic review</code> for what came back.
             </li>
           </ul>
-          <ui-message state="positive" heading="Before you fly">
-            <p>Three things, because the side bar shows the MAIN checkout's page server:</p>
+          <ui-message state="positive" heading="Run it from any session">
+            <p>
+              The side bar shows the MAIN checkout's page server, so <code>/airplane</code> runs its commands there,
+              from whichever session you type it in, a worktree's too.
+            </p>
             <ul>
-              <li>The <code>airplane</code> branch is merged into <code>main</code>.</li>
-              <li>The VS Code extension is reinstalled from <code>main</code>.</li>
-              <li><code>/airplane</code> runs in the main checkout.</li>
+              <li>Its <code>extension</code> check rebuilds the VS Code extension when it's older than the code.</li>
+              <li>Then reload the window once (Developer: Reload Window).</li>
             </ul>
           </ui-message>
         </ui-section>
@@ -99,13 +114,16 @@
                 <tr>
                   <td>open an epic page</td>
                   <td>
-                    <ui-icon name="list check" title="Review:  Open Epic..."></ui-icon> in the Review tab's title bar
+                    <ui-icon name="list ul" title="Review:  Open Epic..."></ui-icon> "Review: Open Epic...", in the
+                    Review tab's title bar
                   </td>
                   <td>(nothing)</td>
                 </tr>
                 <tr>
                   <td>open any other page</td>
-                  <td>"Review: Home Page" (command palette), or the Spell Docs tab</td>
+                  <td>
+                    "Review: Epics Home", then its cards; the epic plugin's own READMEs and guides in the Epic Docs tab
+                  </td>
                   <td>(nothing)</td>
                 </tr>
                 <tr>
@@ -117,20 +135,15 @@
                 </tr>
                 <tr>
                   <td>a note on a phase or the summary</td>
-                  <td>its Revisit or Make Todo button, with a note</td>
+                  <td>its Revisit button (the summary's Make Todo too), with a note</td>
                   <td>the epic's inbox</td>
                 </tr>
                 <tr>
                   <td>a new todo or question</td>
                   <td>
-                    <ui-icon name="comment dots" title="New todo or question"></ui-icon> at the right of the toolbar, or
-                    New todo / New question at the end of that section
+                    <ui-icon name="plus" title="New todo or question"></ui-icon> New todo, New question ..., at the end
+                    of that section
                   </td>
-                  <td>the epic's inbox</td>
-                </tr>
-                <tr>
-                  <td>Do Now</td>
-                  <td><ui-icon name="wand magic sparkles" title="Do Now"></ui-icon> on the item: it waits, dashed</td>
                   <td>the epic's inbox</td>
                 </tr>
                 <tr>
@@ -157,8 +170,8 @@
                 <tr>
                   <td>hand marks and comments to Claude</td>
                   <td>
-                    <ui-icon name="paper plane" title="Send"></ui-icon> Send, at the epic page header's right; not
-                    needed on the plane
+                    <ui-icon name="paper plane" title="Send"></ui-icon> Send, in the middle of the epic page's header;
+                    not needed on the plane
                   </td>
                   <td>the epic's inbox</td>
                 </tr>
@@ -174,75 +187,53 @@
                 </tr>
                 <tr>
                   <td>fold everything under a header</td>
-                  <td><ui-icon name="angles up" title="Collapse all"></ui-icon> beside its fold chevron</td>
+                  <td>⌥-click its fold chevron; the toolbar's own button folds the whole page</td>
                   <td>(nothing)</td>
                 </tr>
                 <tr>
                   <td>find text</td>
-                  <td>⌘ F; jump to an item by its id: ⌘ K</td>
+                  <td>⌘ F; jump to an item or a comment by its id (<code>J7</code>, <code>C3</code>): ⌘ K</td>
                   <td>(nothing)</td>
                 </tr>
               </tbody>
             </table>
           </ui-table>
-          <ui-message state="warning" heading="If something stops">
-            <ul>
-              <li>
-                Pages blank or unstyled: the page server stopped (laptop asleep, restarted). The fix is the Review tab's
-                "Restart Page Server" button.
-              </li>
-              <li>Wifi that asks you to pay first makes requests hang: turn Wi-Fi fully off while reading.</li>
-              <li>
-                A page acting up in the side bar: <ui-icon name="magnifying glass" title="Inspect"></ui-icon> Inspect or
-                <ui-icon name="terminal" title="Show Console"></ui-icon> Show Console, in the tab's title bar, opens the
-                developer tools. Their tooltips say which tab to pick.
-              </li>
-            </ul>
-          </ui-message>
-          <spell-notes for="2-on-the-plane">
-            <spell-note id="n4" status="done" at="2026-10-09 22:10">
-              <p>Show icons as I will click them rather than saying "the plus button"</p>
-              <spell-note-reply by="Claude" at="2026-10-09 23:27">
-                <p>
-                  Done: the table above now shows each button's icon, as you'll click it (Open Epic, Send, the new-item
-                  button, Do Now, the bullhorn, New epic, the star, collapse all), and adds rows for favourites,
-                  collapse all and find.
-                </p>
-              </spell-note-reply>
-            </spell-note>
-          </spell-notes>
+          <p>
+            Pages blank, wifi that hangs, a page acting up in the side bar: the epic plugin's
+            <a href="/epic/README-faq.md" target="src-epic-readme-faq-md">FAQ</a>.
+          </p>
         </ui-section>
 
         <ui-section id="3-the-design" label="3. The design" sticky collapsible dividing open="false">
           <ui-icon slot="icon" name="list check"></ui-icon>
           <p>
-            Five parts, one per gap the explore agents found, then what reviewing all day on 2026-10-10 asked for:
-            toolbars, the header, the side bar, comment threads.
+            What makes the pages work with no internet and no Claude, and what they look like while they wait: toolbars,
+            the header, the side bar, comment threads.
           </p>
 
           <ui-section id="offline-pages" label="Offline pages" sticky collapsible dividing open="false">
             <ul>
               <li>
-                Every docs page loaded its code highlighter (highlight.js) from the internet, and waited for it. On a
-                hanging network, the page showed raw markup for tens of seconds.
+                Docs pages once loaded their code highlighter (highlight.js) from the internet, and waited for it. On a
+                hanging network, a page showed raw markup for tens of seconds.
               </li>
               <li>
-                The repo now has its own copy,
+                The epic plugin has its own copy,
                 <a
-                  href="/spell-epic/src/tools/_assets/highlight.min.js"
-                  target="src-spell-epic-src-tools-assets-highlight-min-js"
-                  title="spell-epic/src/tools/_assets/highlight.min.js"
+                  href="/epic/src/tools/_assets/highlight.min.js"
+                  target="src-epic-src-tools-assets-highlight-min-js"
+                  title="epic/src/tools/_assets/highlight.min.js"
                   ><code>highlight.min.js</code></a
-                >.
+                >, served at <code>/_epic/assets/highlight.min.js</code>.
               </li>
               <li>
-                The page server points each page at that copy as it serves it (<code>localHighlight()</code>): no page
-                changes on disk.
+                The page server points each page still naming the internet copy at the local one, as it serves it (its
+                <code>localCopies</code> setting): no page changes on disk.
               </li>
-              <li>New epic pages and list pages use the local copy from the start.</li>
+              <li>New pages load the local copy from the start: the templates do.</li>
               <li>
                 <code>epic pages offline</code> lists anything a page still fetches from the internet; with
-                <code>--fix</code>, it points the old tags at the local copy.
+                <code>--fix</code>, it points the old tags at the local copy. <code>/airplane</code>'s check runs it.
               </li>
             </ul>
           </ui-section>
@@ -253,19 +244,16 @@
                 One switch per machine, in a small file: <code title="{ on: true, since }">~/.spell/airplane.json</code>
                 (read and written by
                 <a
-                  href="/spell-epic/src/tools/AirplaneMode.ts"
-                  target="src-spell-epic-src-tools-airplanemode-ts"
-                  title="spell-epic/src/tools/AirplaneMode.ts"
+                  href="/epic/src/tools/AirplaneMode.ts"
+                  target="src-epic-src-tools-airplanemode-ts"
+                  title="epic/src/tools/AirplaneMode.ts"
                   ><code>AirplaneMode</code></a
-                >, in the epics tools).
-                <ul>
-                  <li>
-                    It was the page server's own until epic <code>epic-eject</code> (P4): on <code>main</code> it stays
-                    there until that epic merges.
-                  </li>
-                </ul>
+                >).
               </li>
-              <li><code>epic airplane on | off | status</code> flips and reads it.</li>
+              <li>
+                <code>epic airplane on | off | status</code> flips and reads it; <code>check</code> and
+                <code>inbox</code> are the skill's before and after.
+              </li>
               <li>
                 The page server tells each page whether it's on, as it serves the page (<code
                   title="window.SPELL_SERVER.airplane"
@@ -273,10 +261,10 @@
                 >).
               </li>
               <li>
-                With it on, an epic page says "queued for when you land" wherever it said "no Claude session is
-                reviewing".
+                With it on, an epic page's review line says "Airplane mode: what you mark here waits for
+                <code>/airplane land</code>", and its pill "Airplane mode: this waits for <code>/airplane land</code>",
+                where they'd say "No Claude session is reviewing".
               </li>
-              <li>Its review line names <code>/airplane land</code>, with no orange warning.</li>
               <li>
                 <code>/airplane</code> asks, every time, whether to run <code>/docs-check</code> first, on the epics
                 merged since the last flight. Its fixes wait in Source Control to review on the plane.
@@ -287,7 +275,8 @@
           <ui-section id="plan-doc-notes" label="Epic-page notes" sticky collapsible dividing open="false">
             <ul>
               <li>
-                The summary and every phase take Revisit, Make Todo and Do Now, as Overview sections do (no Approve).
+                The summary takes Make Todo and Revisit, as Overview sections do (no Approve); a phase takes Revisit,
+                beside its Do this or Accept plan.
               </li>
               <li>
                 A new item is a mark of its own kind in the inbox (<code
@@ -338,35 +327,34 @@
               <li>
                 Finds them where they wait, on this laptop, git-ignored:
                 <ul>
-                  <li>a docs page's in <code>&lt;page&gt;.inbox.json</code>, beside it</li>
-                  <li>an epic page's in the epic's review inbox (ids <code>cm1</code>, <code>cm2</code> ...)</li>
+                  <li>a docs page's in <code>&lt;page&gt;.inbox.json5</code>, beside it</li>
+                  <li>an epic page's in the epic's review inbox (ids <code>C1</code>, <code>C2</code> ...)</li>
                 </ul>
               </li>
               <li>
-                Marks one you're thinking about: the thread shows "Claude: thinking…" until your answer replaces it.
+                Marks one it's thinking about: the thread shows "Claude: thinking…" until its answer replaces it.
                 <ul>
-                  <li>docs pages: <code>epic comments working &lt;page&gt;#cmN on</code></li>
-                  <li>epic pages: <code>epic inbox working &lt;name&gt;#cmN on</code></li>
+                  <li>docs pages: <code>epic comments working &lt;page&gt;#C3 on</code></li>
+                  <li>epic pages: <code>epic inbox working &lt;name&gt;#C3 on</code></li>
                 </ul>
               </li>
               <li>
                 Answers on the thread:
                 <ul>
-                  <li>docs pages: <code>epic comments answer &lt;page&gt;#cmN --file &lt;answer.html&gt;</code></li>
-                  <li>epic pages: <code>epic inbox done &lt;name&gt;#cmN --file &lt;answer.html&gt;</code></li>
+                  <li>docs pages: <code>epic comments answer &lt;page&gt;#C3 --file &lt;answer.html&gt;</code></li>
+                  <li>epic pages: <code>epic inbox done &lt;name&gt;#C3 --file &lt;answer.html&gt;</code></li>
                 </ul>
               </li>
               <li>
                 Or, at the landing, <code>epic comments gather</code> puts each docs page's comments into the standing
-                epic <code>feedback</code>, one phase per page (epic <code>epic-engine</code> T9;
-                <code>guide-changes</code> before).
+                epic <code>feedback</code>, one phase per page.
               </li>
               <li>
-                A docs page an epic owns is left out of that (epic <code>epic-workflow</code> P13): its comments go to
-                that epic, with the page header's Send, and its session answers them, as an epic page's.
+                A docs page an epic owns is left out of that: its comments go to that epic, with the page header's Send,
+                and its session answers them, as an epic page's.
               </li>
               <li>
-                Comments replace P3's page notes (J31). Notes already written still show, read only, and
+                Comments replaced the older page notes. Notes already written still show, read only, and
                 <code>epic notes</code> still answers them.
               </li>
             </ul>
@@ -379,30 +367,30 @@
                 <ul>
                   <li>a guide's: a button per top-level section, titles shrinking to fit</li>
                   <li>
-                    an epic page's: a round icon per section, with a red or orange badge counting what waits on you; on
-                    its right, the state chips, collapse-all and the new-item button
+                    an epic page's: a round icon per section, with a red, orange or blue badge counting what waits; on
+                    its right, the state chips and one button folding or unfolding every section
                   </li>
                 </ul>
               </li>
               <li>
-                The epic page's header: only its <code>/epic &lt;name&gt;</code> row sticks; the title under it scrolls
-                away.
-              </li>
-              <li>
-                At its right: Send and Review Now (grey when there's nothing to send), Bedtime when set, the step pill,
-                git.
+                The epic page's header is one line:
                 <ul>
-                  <li>the step pill carries the epic's state: its icon and colour, and why in its tooltip</li>
+                  <li>the epic's title, cut short when narrow</li>
+                  <li>Send in its middle, while the page is reviewed, with Auto Send's countdown ring round it</li>
                   <li>
-                    the orange "nobody is reviewing" pill (or the airplane one) sits under the review line, and scrolls
-                    away
+                    at its right, the step label, carrying the epic's state (its icon and colour, why in its tooltip),
+                    then the gear: Auto Send and Theme
                   </li>
                 </ul>
+              </li>
+              <li>
+                Under it, the review line, and the pill while nobody is reviewing (or the airplane one). A click copies
+                its command; out of airplane mode it also starts the review in the epic's own session.
               </li>
               <li>
                 An item folds once you pick its action, animated (300ms, as sections do); none under reduced motion.
               </li>
-              <li>No more jumping: a fold, a click on a line or a link's landing never moves the page.</li>
+              <li>No jumping: a fold, a click on a line or a link's landing never moves the page.</li>
               <li>
                 Narrow (VS Code's side bar), the site header shows the breadcrumb instead of its tabs, and the page
                 starts right under it.
@@ -412,20 +400,18 @@
 
           <ui-section id="in-the-side-bar" label="In VS Code's side bar" sticky collapsible dividing open="false">
             <ul>
+              <li>The side bar has three tabs, Review, Details and Epic Docs, each holding one live page.</li>
               <li>
-                VS Code's keys work from inside a page in the Review and Spell Docs tabs: ⌘ ⇧ P, ⌘ P, ⌘ B, ⌘ W, F1 ...
+                VS Code's keys work from inside a page there: ⌘ ⇧ P, ⌘ P, ⌘ B, ⌘ W, F1 ...
                 <ul>
                   <li>the page's own keys stay its own: ⌘ A / C / X / V / Z / F, ⌘ K, ⌘ I</li>
                 </ul>
               </li>
               <li>
                 Right-click shows VS Code's menu: Cut / Copy / Paste / Select All, Back / Forward / Reload, Open in
-                Browser, Inspect.
+                Browser, Inspect (Developer Tools).
               </li>
-              <li>
-                Inspect and Show Console, in each tab's title bar, open the developer tools; a second click closes them.
-              </li>
-              <li>The catch: VS Code can't open them on a given tab, so the tooltips say which to pick.</li>
+              <li>Each tab's title bar has Back, Forward, Reload, Restart Page Server and Open in Browser.</li>
             </ul>
           </ui-section>
 
@@ -444,8 +430,8 @@
               </li>
               <li>So the red badges in the toolbar are only what needs you.</li>
               <li>
-                <code>epic calm &lt;name&gt;#&lt;id&gt;...</code> calms items already written; <code>--loud</code> makes
-                them urgent again.
+                <code>epic calm &lt;name&gt;#&lt;id&gt; ...</code> calms items already written; <code>--loud</code>
+                makes them urgent again.
               </li>
             </ul>
           </ui-section>
@@ -458,12 +444,20 @@
               ></ui-step>
               <ui-step heading="switch off" description="epic airplane off"></ui-step>
               <ui-step
+                heading="back online"
+                description="Every session parked before the flight is told to /unpark;  one not running is listed, with /session <name> to reopen it (epic park list)."
+              ></ui-step>
+              <ui-step
                 heading="apply"
-                description="For each epic, apply every approval, pick, todo and new item, sent or not (plan-doc inbox <name> apply --all)."
+                description="For each epic, apply every approval, pick, todo and new item, sent or not (epic inbox apply <name> --all)."
               ></ui-step>
               <ui-step
                 heading="answer"
-                description="Docs pages' comments go into the standing epic feedback, unless an epic owns the page:  then that epic's session answers them.  Up to 5 background agents answer each Do Now, revisit and epic-page comment INTO its item.  Drafts are asked about, never acted on."
+                description="Docs pages' comments go into the standing epic feedback (epic comments gather --json), unless an epic owns the page:  then that epic's session answers them.  Up to 5 background agents answer each request for now, revisit, phase note and epic-page comment INTO its item.  Drafts are asked about, never acted on."
+              ></ui-step>
+              <ui-step
+                heading="new epics"
+                description="Which of the epics you made to start:  each one picked opens in its own window, with a new session planning it (epic window launch <name>)."
               ></ui-step>
               <ui-step
                 heading="review"
@@ -473,51 +467,7 @@
           </ui-section>
         </ui-section>
 
-        <ui-section id="4-why" label="4. Why" sticky collapsible dividing open="false">
-          <ui-icon slot="icon" name="gavel"></ui-icon>
-          <ul>
-            <li>
-              <b>Queue only, no Claude mid-flight</b> (Q6): plane wifi is too flaky to run a session on. Everything
-              waits for the landing.
-            </li>
-            <li>
-              <b>Comments wait on this laptop, as marks do</b> (J33). Q2 first put notes inside the page. P11's comments
-              replaced them, kept in a git-ignored file until the landing gathers them.
-            </li>
-            <li>
-              <b>The landing takes every mark, sent or not</b> (Q3): nobody was there to send them to. Drafts are asked
-              about, since you never submitted them.
-            </li>
-            <li>
-              <b>The landing works in the background, then hands over to a review</b> (Q4): like <code>/bedtime</code>,
-              so a 30-60 mark backlog isn't hours of one-at-a-time talk.
-            </li>
-            <li>
-              <b>The page server swaps the internet highlighter for the local one</b> (J1).
-              <ul>
-                <li>
-                  The shared pages keep the internet one until this branch is on <code>main</code>, so
-                  <code>main</code>'s pages never lose their code colours.
-                </li>
-                <li><code>/airplane</code> rewrites them after.</li>
-              </ul>
-            </li>
-            <li>
-              <b>Old marks get taken too</b> (J9): an inbox can't tell a mark made on the plane from one left earlier.
-              <code>/airplane</code>'s <code>waiting</code> line lists them before the flight.
-            </li>
-            <li>
-              <b>Comments are threads, answered on the page</b> (J56): the whole talk in one place, under the paragraph
-              it's about. You answer with the same pills as an epic page's item.
-            </li>
-            <li>
-              <b>Judgement calls are calm by default</b>: a red badge should mean you are needed, not that Claude
-              decided something you'd have decided the same way.
-            </li>
-          </ul>
-        </ui-section>
-
-        <ui-section id="5-limits" label="5. Limits" sticky collapsible dividing open="false">
+        <ui-section id="5-limits" label="4. Limits" sticky collapsible dividing open="false">
           <ui-icon slot="icon" name="triangle exclamation"></ui-icon>
           <ul>
             <li>Inboxes and comments live on this laptop only, until the landing takes them.</li>
@@ -527,25 +477,19 @@
             </li>
             <li>The new-item form keeps no draft: a reload while typing loses it.</li>
             <li>
-              <b>Not yet tried:</b> the landing's background half never ran on a real backlog. Expect to steer the first
-              one.
+              Old marks get taken too: an inbox can't tell a mark made on the plane from one left earlier.
+              <code>/airplane</code>'s <code>waiting</code> line lists them before the flight.
             </li>
             <li>
-              The orange "nobody is reviewing" line fails the contrast check (4.46:1 against 4.5); airplane mode doesn't
-              show it.
+              <b>Not yet tried:</b> the landing's background half on a real backlog. Expect to steer the first one.
             </li>
-            <li>Comments, threads and replies need a page server running <code>main</code> from 2026-10-10 on.</li>
             <li>Untested by hand yet: the floating bullhorn on selected text, clicking a quote, clearing a comment.</li>
-            <li>
-              Clicking the "nobody is reviewing" pill to start a review is P12, still being built: today it copies the
-              command.
-            </li>
           </ul>
         </ui-section>
 
         <footer class="spell-doc-footer">
           <ui-divider></ui-divider>
-          <p class="meta">Last checked 2026-10-10 against <code>main</code>.</p>
+          <p class="meta">Last checked 2026-11-21, against the epic plugin's code that day.</p>
         </footer>
       </main>
     </div>
