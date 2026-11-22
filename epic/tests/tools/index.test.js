@@ -198,6 +198,15 @@ describe("the list pages", () => {
     expect(skeleton(LISTS.find((list) => list.id === "templates"))).toContain(`id="writing-docs"`)
   })
 
+  it("name the Feature Set on the Templates page, with the command that makes one", () => {
+    const html = listSection(
+      LISTS.find((list) => list.id === "templates"),
+      []
+    )
+    expect(html).toContain("<ui-header>Feature Set Template</ui-header>")
+    expect(html).toContain("epic ask create &lt;slug&gt; --template feature-set --from &lt;data.json5&gt;")
+  })
+
   it("carry the page notes Owen left in the list over when it's written again (epic airplane P3)", () => {
     const templates = LISTS.find((list) => list.id === "templates")
     const written = `${START}\n${listSection(templates, [page("templates/a.html")])}\n${END}`.replace(

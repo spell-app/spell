@@ -9,10 +9,11 @@
  *     so a skill with many questions to ask (`/worktrees`, `/bedtime`) needn't hand-write it
  *   - `--template feature-set`:  a ranked list to pick from, a table per section, from its own data
  *     (`FeatureSet.js`, epic `epic-engine` P80);  a `round` of one stays one, its names kept
+ *     - `round <page> --template feature-set`:  an ordinary page turned into one, what was sent kept as a round
  *   - scratch:  `pages/details/<slug>.html`, ignored by version control, swept after 14 days
  *   - `--epic <name>`:  `epics/<name>/details/<slug>.html`, committed with the epic page
- * - `round <page> [--title "..."] [--description "..."] [--from <questions.json>]` -- the page's NEXT ROUND:  the one
- *   page rewritten in place (from `--from`, else left for Claude to edit), the round before folded at its bottom, with
+ * - `round <page> [--title "..."] [--description "..."] [--template feature-set] [--from <questions.json>]` --
+ *   the page's NEXT ROUND:  the one page rewritten in place (from `--from`, else left for Claude to edit), the round before folded at its bottom, with
  *   what was sent (`newRound()`, epic `epic-engine` P37);  `create` refuses a second page on the same question
  * - `show <page> [--wait]` -- start the page server if needed, and show the page in THIS session's VS Code window
  *   - the right side bar's "Details" tab, where Owen answers things (epic `epic-engine` P59;  the "Review" tab from
@@ -165,7 +166,8 @@ async function main(argv) {
 /** `epic ask` with no or a wrong command. */
 const USAGE = `usage:  epic ask create <slug> [--title "..."] [--epic <name>] [--description "..."]
                               [--template feature-set] [--from <questions.json>]
-        epic ask round <page> [--title "..."] [--description "..."] [--from <questions.json>]
+        epic ask round <page> [--title "..."] [--description "..."] [--template feature-set]
+                              [--from <questions.json>]
         epic ask show <page> [--wait] [--timeout 8h]
         epic ask wait <page> [--timeout 8h]
         epic ask answer <page> [--round <n>]
@@ -189,11 +191,7 @@ const USAGE = `usage:  epic ask create <slug> [--title "..."] [--epic <name>] [-
  * - `template: "feature-set"`:  a Feature Set, from its data (`FeatureSet`)
  */
 export function createPage(docs, slug, { title, epic, description, spec, template } = {}) {
-  if (template !== undefined && template !== FEATURE_SET)
-    throw new Error(`no template '${template}':  the one there is is ${FEATURE_SET}`)
-  if (template && !spec)
-    throw new Error(`a Feature Set is made from data:  --from <data.json5>, like ${FeatureSet.starter}`)
-  if (!template && spec?.sections) throw new Error(`that's a Feature Set's data:  add --template ${FEATURE_SET}`)
+  checkTemplate(template, spec)
   if (!slug || !SLUG.test(slug)) throw new Error(`a slug is lower-kebab-case:  '${slug ?? ""}'`)
   if (epic && !existsSync(join(docs, "epics", epic))) throw new Error(`no epic '${epic}' (epics/${epic}/)`)
   const folder = epic ? join(docs, "epics", epic, "details") : join(docs, "pages", "details")
@@ -204,6 +202,22 @@ export function createPage(docs, slug, { title, epic, description, spec, templat
   mkdirSync(folder, { recursive: true })
   writeFileSync(file, serialize(document))
   return file
+}
+
+/**
+ * Check `template`, as asked for, against `spec`, the data given.
+ * - throws for no such template, a Feature Set with no data, and its data without its template
+ *   (filled as questions, it would leave an empty page)
+ */
+function checkTemplate(template, spec) {
+  if (template !== undefined && template !== FEATURE_SET)
+    throw new Error(`no template '${template}':  the one there is is ${FEATURE_SET}`)
+  if (template && !spec)
+    throw new Error(`a Feature Set is made from data:  --from <data.json5>, like ${FeatureSet.starter}`)
+  if (!template && spec?.sections)
+    throw new Error(
+      `your file has sections, which only a Feature Set page uses.  Run the same command again with --template ${FEATURE_SET}`
+    )
 }
 
 /**
@@ -234,19 +248,24 @@ function pageDocument(docs, folder, { title, description, spec, template, previo
  * - the round it was on folds into the page, at the bottom, with what was sent (`rounds.js` `foldRound()`)
  * - its answer moves into the answer file's `rounds` (`answer --round <n>` prints it);  a new answer is the new
  *   round's
- * - a Feature Set stays one, and each of its items keeps its name
+ * - a Feature Set stays one, and each of its items keeps its name in its section
+ * - `template: "feature-set"`, with its data:  an ordinary page becomes one, at the same address;
+ *   its data without that is refused, writing nothing
  * - `spec`:  the page rewritten from it, as `create --from`;  none:  the page as it is, for Claude to edit by hand
  * - a draft typed and not sent stays, and comes back over the new round;  a sent one goes
  * - a choice page:  refused, naming `epic choices round`
  * - SIDE EFFECT:  writes the page and its answer file;  may delete its draft
  */
-export function newRound(docs, target, { title, description, spec } = {}) {
+export function newRound(docs, target, { title, description, spec, template: wanted } = {}) {
   const file = findPage(docs, target)
   if (DataFile.exists(DataFile.besidePage(file, "rows")))
     throw new Error(`a choice page:  epic choices round ${target} --rows <rows.json5>`)
   const { document: old } = parseHTML(readFileSync(file, "utf8"))
+  const isFeatureSet = FeatureSet.isOne(old)
+  // one already needs no template, and no data for a round edited by hand
+  if (wanted !== undefined || !isFeatureSet) checkTemplate(wanted, spec)
   title ??= spec?.title ?? old.querySelector("h1")?.textContent?.trim()
-  const template = FeatureSet.isOne(old) ? FEATURE_SET : undefined
+  const template = isFeatureSet ? FEATURE_SET : wanted
   const document = spec ? pageDocument(docs, dirname(file), { title, description, spec, template, previous: old }) : old
   const answer = readAnswer(file)
   const sent = answer && formatAnswer(file, answer)
