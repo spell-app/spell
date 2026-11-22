@@ -1,4 +1,6 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "vite-plus/test"
+import { OBSERVE } from "solid-js"
+import { attribution } from "solid-js/attribution"
 
 import { UI, type SourceSaver } from "spell/ui/runtime"
 import { expectAccessible } from "spell/test-helpers/A11y"
@@ -52,13 +54,13 @@ describe("<ui-include> loading", () => {
     const host = await ElementFixture.render<DOMIncludeElement>(
       `<ui-include source="${DIR}/part.html" load="visible" style="display:block;margin-top:300vh">Wait</ui-include>`
     )
-    expect(host.shadowRoot!.querySelector("slot")).not.toBeNull()
+    expect(host.shadowRoot!.querySelector("slot")!.hidden).toBe(false)
     expect(box(host).childElementCount).toBe(0)
     host.scrollIntoView()
     await host.loaded
     await ElementFixture.tick()
     expect(box(host).querySelector("p.part")!.textContent).toBe("A part, with a label.")
-    expect(host.shadowRoot!.querySelector("slot")).toBeNull()
+    expect(host.shadowRoot!.querySelector("slot")!.hidden).toBe(true)
     expect(host.contentRoot).toBe(box(host))
   })
 
@@ -234,5 +236,34 @@ describe("<ui-include> examples", () => {
     )
     await ElementFixture.tick()
     await expectAccessible(root)
+  })
+})
+
+////////////////
+// ## Solid's warnings
+////////////////
+
+describe("<ui-include> and Solid", () => {
+  it("hides its placeholder as the markup goes in, in one step:  no `EFFECT_RELAY_TEAR`", async () => {
+    // the relay detector lives in Solid's attribution engine (dev only)
+    attribution.enable()
+    const events = OBSERVE!.diagnostics.capture()
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {})
+    const info = vi.spyOn(console, "info").mockImplementation(() => {})
+    const log = vi.spyOn(console, "log").mockImplementation(() => {})
+    try {
+      const host = await include(`<ui-include source="${DIR}/part.html">Wait</ui-include>`)
+      host.content = "<p>Next</p>"
+      await ElementFixture.tick()
+      await ElementFixture.tick()
+      expect(box(host).textContent).toBe("Next")
+      const tears = events.stop().filter((event) => event.code === "EFFECT_RELAY_TEAR")
+      expect(tears.map((event) => event.message)).toEqual([])
+    } finally {
+      attribution.disable()
+      warn.mockRestore()
+      info.mockRestore()
+      log.mockRestore()
+    }
   })
 })
