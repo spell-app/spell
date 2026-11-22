@@ -197,7 +197,11 @@ export class BlockLine extends P.Rule<P.RuleProps, never, BlockMatchData> {
           bodyErrorsAt = errors.length
           if (nestedBlockMatch.is(Block)) errors.push(...(nestedBlockMatch.data.errors ?? []))
           // a body that's ONE expression, e.g. `return` with its markup on the lines below:  errors in its JSX
-          else errors.push(...SpellJSX.parseErrorsIn(nestedBlockMatch))
+          else
+            errors.push(
+              ...SpellJSX.parseErrorsIn(nestedBlockMatch),
+              ...SpellStatement.typedMarkErrorsOf(nestedBlockMatch)
+            )
           // add the nestedBlock to `tokensMatched` to account for it in the output:  a twin's, the block it took
           if (!twin) tokensMatched.push(nextItem!)
           else if (twin.takesNextItem) tokensMatched.push(lines[1]!)
