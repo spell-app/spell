@@ -10,4 +10,12 @@ describe("absoluteImports()", () => {
         `const c=import("https://example.com/element/lazy.js");import d from "react"`
     )
   })
+
+  test("makes the dev server's root paths absolute too, never a protocol-relative one (epic `solid-2-final` P12)", () => {
+    const source = `import "/@vite/client";import{x}from"/src/app/runner/runCompiled.ts";import y from "//cdn.example.com/y.js"`
+    expect(absoluteImports(source, "http://localhost:3000/src/app/runner/spellRuntime.ts")).toBe(
+      `import "http://localhost:3000/@vite/client";import{x}from"http://localhost:3000/src/app/runner/runCompiled.ts";` +
+        `import y from "//cdn.example.com/y.js"`
+    )
+  })
 })
