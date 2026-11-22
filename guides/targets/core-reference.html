@@ -8,6 +8,8 @@
       name="description"
       content="Every name the javascript core offers compiled code, file by file:  what every core must have, Python's name for each, and whether spell_core has it yet.  Drawn from the core's method list in the checkout serving the page."
     />
+    <meta name="spell-audience" content="programmers" />
+    <meta name="spell-topic" content="The Language Inside" />
     <meta name="spell-voice" content="readme 2026-10-22" />
     <meta name="spell-saga" content="output-targets" />
     <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
@@ -15,14 +17,14 @@
   <body
     class="spell-doc-page"
     data-spell-needs-server
-    data-core-declarations="/spell-parser/src/core/core.declarations.json"
-    data-not-ported="/spell-parser/src/py/core/not_ported_yet.json"
+    data-core-declarations="/parser/src/core/core.declarations.json5"
+    data-not-ported="/parser/src/py/core/not_ported_yet.json5"
   >
     <spell-site-header></spell-site-header>
     <div class="spell-doc">
       <main class="spell-doc-main">
         <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
-          <ui-breadcrumb link="/pages/index.html">Spell Epic</ui-breadcrumb>
+          <ui-breadcrumb>Guides</ui-breadcrumb>
           <ui-breadcrumb selected>Core Reference</ui-breadcrumb>
         </ui-breadcrumbs>
         <ui-sticky class="spell-h1"
@@ -37,35 +39,22 @@
           row per name, with Python's name for it, and whether Python's core has it yet.
         </p>
         <ui-list class="spell-meta">
-          <ui-item icon="map"
-            ><b>Epic page:</b>
-            <a href="/epics/python-target/python-target.plan.html" target="python-target"
-              >epic python-target</a
-            ></ui-item
-          >
           <ui-item icon="user"
             >Written for: anyone porting the core to a new language, or looking up what a core method does</ui-item
           >
-          <ui-item icon="flag"
-            >Status: built in epic <code>python-target</code> P29, 2026-10-11, on branch
-            <code>python-target</code></ui-item
-          >
+          <ui-item icon="flag">Status: built 2026-10-11, checked 2026-11-21 against the kit's parser</ui-item>
           <ui-item icon="folder"
             >Data: the core's method list,
-            <a
-              href="/spell-parser/src/core/core.declarations.json5"
-              target="src-spell-parser-src-core-core-declarations-json5"
-              ><code title="spell-parser/src/core/core.declarations.json5">core.declarations.json5</code></a
+            <a href="/parser/src/core/core.declarations.json5" target="src-parser-src-core-core-declarations-json5"
+              ><code title="parser/src/core/core.declarations.json5">core.declarations.json5</code></a
             >, and what Python lacks,
-            <a
-              href="/spell-parser/src/py/core/not_ported_yet.json5"
-              target="src-spell-parser-src-py-core-not-ported-yet-json5"
-              ><code title="spell-parser/src/py/core/not_ported_yet.json5">not_ported_yet.json</code></a
+            <a href="/parser/src/py/core/not_ported_yet.json5" target="src-parser-src-py-core-not-ported-yet-json5"
+              ><code title="parser/src/py/core/not_ported_yet.json5">not_ported_yet.json5</code></a
             >; drawn by the page server, from the checkout serving this page</ui-item
           >
           <ui-item icon="book"
             >Related: <a href="targets.html" target="src-guides-targets-targets-html">Targets and Writers</a>,
-            <a href="/guides/python-target.html" target="src-guides-python-target-html">The Python Target</a></ui-item
+            <a href="/parser/README-targets.md" target="src-parser-readme-targets-md">README-targets</a></ui-item
           >
         </ui-list>
 
@@ -123,9 +112,7 @@
                 </tr>
                 <tr>
                   <td>?</td>
-                  <td>
-                    this checkout has no list of what Python lacks (a branch before epic <code>python-target</code>)
-                  </td>
+                  <td>this checkout has no list of what Python lacks</td>
                 </tr>
               </tbody>
             </table>
@@ -183,8 +170,8 @@
               <ul>
                 <li>
                   What <code>core</code> has is the type
-                  <a href="/spell-parser/src/core/core.types.ts" target="src-spell-parser-src-core-core-types-ts"
-                    ><code title="spell-parser/src/core/core.types.ts">SC.Core</code></a
+                  <a href="/parser/src/core/core.types.ts" target="src-parser-src-core-core-types-ts"
+                    ><code title="parser/src/core/core.types.ts">SC.Core</code></a
                   >, and compiled code calls it directly.
                 </li>
                 <li>Neither compiler nor runner opens the list.</li>
@@ -192,25 +179,23 @@
             </li>
             <li>
               The javascript core writes it:
-              <a
-                href="/spell-parser/src/core/core.declarations.json5"
-                target="src-spell-parser-src-core-core-declarations-json5"
-                ><code title="spell-parser/src/core/core.declarations.json5">core.declarations.json5</code></a
+              <a href="/parser/src/core/core.declarations.json5" target="src-parser-src-core-core-declarations-json5"
+                ><code title="parser/src/core/core.declarations.json5">core.declarations.json5</code></a
               >, at core's root.
               <ul>
                 <li>
-                  <code>yarn gen:declarations</code>, in core, runs
+                  <code>yarn core:gen:declarations</code>, in the parser folder, runs
                   <a
-                    href="/spell-parser/src/core/writeCoreDeclarations.ts"
-                    target="src-spell-parser-src-core-writecoredeclarations-ts"
-                    ><code title="spell-parser/src/core/writeCoreDeclarations.ts">writeCoreDeclarations.ts</code></a
+                    href="/parser/src/core/writeCoreDeclarations.ts"
+                    target="src-parser-src-core-writecoredeclarations-ts"
+                    ><code title="parser/src/core/writeCoreDeclarations.ts">writeCoreDeclarations.ts</code></a
                   >.
                 </li>
                 <li>
                   The names are read from the core as it runs: nothing is listed by hand (<a
-                    href="/spell-parser/src/core/coreDeclarations.ts"
-                    target="src-spell-parser-src-core-coredeclarations-ts"
-                    ><code title="spell-parser/src/core/coreDeclarations.ts">coreDeclarations.ts</code></a
+                    href="/parser/src/core/coreDeclarations.ts"
+                    target="src-parser-src-core-coredeclarations-ts"
+                    ><code title="parser/src/core/coreDeclarations.ts">coreDeclarations.ts</code></a
                   >).
                 </li>
                 <li>Each name's heading and description come from the comments in its source file.</li>
@@ -223,9 +208,9 @@
             <li>
               A core test fails when the list is out of date:
               <a
-                href="/spell-parser/tests/core/coreDeclarations.test.ts"
-                target="src-spell-parser-tests-core-coredeclarations-test-ts"
-                ><code title="spell-parser/tests/core/coreDeclarations.test.ts">coreDeclarations.test.ts</code></a
+                href="/parser/tests/core/coreDeclarations.test.ts"
+                target="src-parser-tests-core-coredeclarations-test-ts"
+                ><code title="parser/tests/core/coreDeclarations.test.ts">coreDeclarations.test.ts</code></a
               >.
             </li>
             <li>
@@ -234,16 +219,16 @@
                 <li>
                   Python's test,
                   <a
-                    href="/spell-parser/tests/py/core/tests/test_core_declarations.py"
-                    target="src-spell-parser-tests-py-core-tests-test-core-declarations-py"
-                    ><code title="spell-parser/tests/py/core/tests/test_core_declarations.py"
+                    href="/parser/tests/py/core/tests/test_core_declarations.py"
+                    target="src-parser-tests-py-core-tests-test-core-declarations-py"
+                    ><code title="parser/tests/py/core/tests/test_core_declarations.py"
                       >test_core_declarations.py</code
                     ></a
                   >: spell_core must have each name, snake_cased, or list it in
                   <a
-                    href="/spell-parser/src/py/core/not_ported_yet.json5"
-                    target="src-spell-parser-src-py-core-not-ported-yet-json5"
-                    ><code title="spell-parser/src/py/core/not_ported_yet.json5">not_ported_yet.json</code></a
+                    href="/parser/src/py/core/not_ported_yet.json5"
+                    target="src-parser-src-py-core-not-ported-yet-json5"
+                    ><code title="parser/src/py/core/not_ported_yet.json5">not_ported_yet.json5</code></a
                   >
                   with why.
                 </li>
@@ -260,8 +245,7 @@
           <ui-icon slot="icon" name="cubes"></ui-icon>
           <p>
             Each file of the core under
-            <a href="/spell-parser/src/core/" target="src-spell-parser-src-core"
-              ><code>spell-parser/src/core</code></a
+            <a href="/parser/src/core/" target="src-parser-src-core"><code>parser/src/core</code></a
             >, with its names. Rows without a label are methods of <code>core</code>.
           </p>
           <div class="spell-filter">
@@ -274,10 +258,8 @@
           <ui-icon slot="icon" name="seedling"></ui-icon>
           <p>
             What spell_core doesn't have yet, by why, from
-            <a
-              href="/spell-parser/src/py/core/not_ported_yet.json5"
-              target="src-spell-parser-src-py-core-not-ported-yet-json5"
-              ><code title="spell-parser/src/py/core/not_ported_yet.json5">not_ported_yet.json</code></a
+            <a href="/parser/src/py/core/not_ported_yet.json5" target="src-parser-src-py-core-not-ported-yet-json5"
+              ><code title="parser/src/py/core/not_ported_yet.json5">not_ported_yet.json5</code></a
             >.
           </p>
           <p>A name comes out of it as it's ported: Python's test fails while a ported name is still listed.</p>
@@ -287,8 +269,8 @@
         <footer class="spell-doc-footer">
           <ui-divider></ui-divider>
           <p class="meta">
-            Last checked 2026-10-11 against branch <code>python-target</code>: the tables are drawn from that checkout's
-            core, so they're as current as the checkout serving the page.
+            Last checked 2026-11-21 against the kit's parser: the tables are drawn from the checkout's core, so they're
+            as current as the checkout serving the page.
           </p>
         </footer>
       </main>
