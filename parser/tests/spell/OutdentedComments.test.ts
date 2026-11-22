@@ -215,8 +215,8 @@ describe.each(Object.entries(PROGRAMS))(
     )
 
     test("being typed beside a body's one value, a lone `-` is its line's error alone", () => {
-      // up to the last value but `return`'s, which takes one line under it, and that line only
-      const written = [lines[0]!, ...values.slice(0, -3)]
+      // `return`'s too, which takes one line under it (epic `language` J307)
+      const written = [lines[0]!, ...values]
       for (let at = 1; at < written.length; at++)
         for (const indent of ["", "\t", "\t\t", "\t\t\t"]) {
           const { errors } = parsed([...written.slice(0, at + 1), `${indent}-`, ...written.slice(at + 1)])
