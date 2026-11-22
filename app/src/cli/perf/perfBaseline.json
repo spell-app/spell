@@ -1,6 +1,6 @@
 {
-  "commit": "a8e56469520e074432e3c0b45fca17ae871de4cd",
-  "saved": "2026-11-22T06:14:34.885Z",
+  "commit": "58580a0dc6f64ba8ef8850e3de15350b64d38db7",
+  "saved": "2026-11-22T10:02:31.948Z",
   "numbers": {
     "load editor/desktop fcp": 304,
     "load editor/desktop lcp": 304,
@@ -191,7 +191,25 @@
     "pipeline Solitaire edit.duplicateLine": 254.26,
     "pipeline Solitaire run": 5121.61,
     "load run/desktop wireLoaded": 526739,
-    "load run/phone wireLoaded": 525701
+    "load run/phone wireLoaded": 525701,
+    "lists docs/phone table drawnMs": 50,
+    "lists docs/phone table drawnRows": 400,
+    "lists docs/phone table nodesAfter": 48969,
+    "lists docs/phone table heapAfter": 250406248,
+    "lists docs/phone table frame.count": 5281,
+    "lists docs/phone table frame.median": 16.7,
+    "lists docs/phone table frame.p95": 16.8,
+    "lists docs/phone table frame.max": 50.1,
+    "lists docs/phone table frame.over50": 1,
+    "lists docs/phone tree drawnMs": 103,
+    "lists docs/phone tree drawnRows": 304,
+    "lists docs/phone tree nodesAfter": 52075,
+    "lists docs/phone tree heapAfter": 263630804,
+    "lists docs/phone tree frame.count": 1719,
+    "lists docs/phone tree frame.median": 16.7,
+    "lists docs/phone tree frame.p95": 33.4,
+    "lists docs/phone tree frame.max": 116.7,
+    "lists docs/phone tree frame.over50": 14
   },
-  "when": "2026-11-22T06:14:04.409Z"
+  "when": "2026-11-22T09:59:04.353Z"
 }

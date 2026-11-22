@@ -161,9 +161,25 @@ and in the app's build folder, `app/` at the app folder's root.
 - [The app's CodeMirror plumbing](ui/codemirror/) (no UI):  every place the app shows code is CodeMirror 6
   (epic `codemirror`, 2026-11-16):  the code pane and its fallback editor, the Inspector's Code card, the compiled
   pane, Publish's diff, notebook cells and `<spell-editor>`.
-  - Its language features call the SAME `LSP.SpellLanguageService`, in-process
-    ([CodeMirrorLanguage](ui/codemirror/CodeMirrorLanguage.ts)).
-    So `spell/app/lsp` stays browser-safe:  [lsp's AGENTS.md](../lsp/AGENTS.md).
+  - Its language features ask the SAME `LSP.SpellLanguageService` VS Code's language server does, by the ONE table of
+    requests (`LSP.LANGUAGE_REQUESTS`), through a [LanguageClient](ui/codemirror/LanguageClient.ts)
+    ([CodeMirrorLanguage](ui/codemirror/CodeMirrorLanguage.ts);  epic `solid-2-final` P18):
+    - in the editor app, the editor's LANGUAGE WORKER answers ([languageWorker.ts](ui/codemirror/languageWorker.ts),
+      an `LSP.LanguageHost`):  the parser and the service off the page's thread, its own parse of each project,
+      sent each edit as changes, never the whole text
+      - started by the app alone (`startLanguageWorker()`, from `LazyCodeMirror`):  `<spell-editor>`, the static build
+        and the tests ask the page's own service, in-process (`LanguageClient.inThread()`)
+      - a worker that stops hands every question to the page's own service;  so does a project the worker can't load
+        (one only the page holds, made from a start card and not saved yet:  `LanguageClient.onFallback()`)
+      - the editor's compile too (`editor.compileApp()`, through `editor.compileElsewhere`):  the worker compiles its
+        copy of the project, the pages in play as the page has them, and hands back what the compile wrote
+        (`SP.CompiledEntry`), which the page takes as its own and runs (`SpellProject.takeCompiled()`);
+        `compiledFrom` says `"elsewhere"`
+      - each file's problems too, sent after each of the worker's parses, numbered by the edits they're of
+        (`FileStates.parsedElsewhere()`);  the editor's own Spell keeps the page's, which checks the names it fills
+      - still on the page's parse:  folding, the bubbly look, and every reader outside the code
+        (the list:  the epic page's P18)
+    - So `spell/app/lsp` stays browser-safe:  [lsp's AGENTS.md](../lsp/AGENTS.md).
     - Its answers reach CodeMirror through one converter, [LspToCodeMirror](ui/codemirror/LspToCodeMirror.ts).
     - Suggestions, hover, folding, signature help (⇧⌘Space, or once a space is typed and the typing pauses, while Settings… says),
       highlights of the word at the caret (off unless the editor asks), go to definition and type definition,

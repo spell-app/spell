@@ -868,7 +868,7 @@ Two more in action, a whole match tree from `spell parse` and FizzBuzz under `sp
 
 | Option | What it does |
 | --- | --- |
-| `spell perf run --full` | every measurement, 5 loads each:  load, leaks, typing, accessibility, listeners, style sheets, a CPU profile and the editing pipeline |
+| `spell perf run --full` | every measurement, 5 loads each:  load, leaks, huge lists (a 100,000-row table and tree scrolled on the docs page), typing, accessibility, listeners, style sheets, a CPU profile and the editing pipeline |
 | `spell perf run --page editor,docs` | which pages:  `editor`, `docs`, `epic`, `run` (default all) |
 | `spell perf run --profile phone` | which profiles:  `desktop`, `phone`, `phonewide` (default `desktop` and `phone`) |
 | `spell perf run --steps load,typing` | which measurements (default `load`) |

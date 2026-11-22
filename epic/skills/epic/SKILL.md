@@ -578,6 +578,9 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
   - never mark ITSELF done (`epic agents done`):  the session does, when its notice arrives;  done early, `epic agents
     wait` stopped while it still worked (epic `epic-engine` I288)
   - merge with `epic worktree merge-main --as <name>`:  it never moves aside a file another running agent claims
+    - nor waits for another agent's uncommitted files (epic `epic-engine` I406):  only a file the merge changes holds it
+      up, named with the agent claiming it;  the rest are left alone, a real merge made in a temporary worktree
+    - `epic merge <epic>` the same:  it fast-forwards `main` to the branch's COMMITS, however dirty the worktree
   - test in THREE TIERS, never a full run per commit (epic `epic-engine` T90;  Owen, 2026-11-16, r74:  "this is taking
     too long!!!  Do we need to cut down on tests?":  the language epic's agents each ran the parser's and the app's full
     suites on every commit, 10-25 minutes each under load, one turn at a time, again after `merge-main`, and the speed

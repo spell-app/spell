@@ -115,6 +115,27 @@ describe("mergeTakingMain() (T83)", () => {
     expect(commits.map((line) => line.replace(/^\w+ /, ""))).toEqual(["P5"])
   })
 
+  test("another agent's uncommitted file in the worktree:  main still taken in and merged, the file left alone (I406)", () => {
+    commit("h.txt", "eight", "h on main")
+    commit("i.txt", "nine", "P6", WORKTREE)
+    commit("wip.txt", "committed", "an agent's file", WORKTREE)
+    writeFileSync(join(WORKTREE, "wip.txt"), "another agent, mid-change")
+    const { commits } = Requests.mergeTakingMain("tooling", REPO)[0]!
+    expect(commits.some((line) => line.endsWith("P6"))).toBe(true)
+    expect(readFileSync(join(REPO, "i.txt"), "utf8")).toBe("nine")
+    expect(readFileSync(join(WORKTREE, "h.txt"), "utf8")).toBe("eight")
+    expect(readFileSync(join(WORKTREE, "wip.txt"), "utf8")).toBe("another agent, mid-change")
+    expect(execFileSync("git", ["status", "--porcelain"], { cwd: WORKTREE, encoding: "utf8" })).toBe(" M wip.txt\n")
+
+    // one the merge would change:  refused, naming it;  nothing merged
+    commit("wip.txt", "main's", "wip on main")
+    const before = git("rev-parse", "main")
+    expect(() => Requests.mergeTakingMain("tooling", REPO)).toThrow(/files the merge changes.*\n  wip\.txt/s)
+    expect(git("rev-parse", "main")).toBe(before)
+    expect(readFileSync(join(WORKTREE, "wip.txt"), "utf8")).toBe("another agent, mid-change")
+    execFileSync("git", ["checkout", "--", "wip.txt"], { cwd: WORKTREE })
+  })
+
   test("a conflict it can't settle:  stops, naming the files, and merges nothing", () => {
     commit("x.txt", "main's", "x on main")
     commit("x.txt", "the branch's", "x on the branch", WORKTREE)

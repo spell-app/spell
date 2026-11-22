@@ -139,9 +139,60 @@ describe("MainMerge.run()", () => {
     expect(new MainMerge({ root: repo, ...OPTIONS }).run().result).toBe("fast-forward")
     expect(read(repo, "src/a.txt")).toBe("A2\n")
 
+    // an uncommitted file the merge doesn't change:  left alone, and it fast-forwards (I406)
     writeFileSync(join(repo, "src/b.txt"), "dirty\n")
-    expect(() => new MainMerge({ root: repo, ...OPTIONS }).run()).toThrow(/uncommitted changes/)
+    expect(new MainMerge({ root: repo, ...OPTIONS }).run()).toMatchObject({ result: "up-to-date" })
+    change(repo, "main", { "src/a.txt": "A3\n" }, ["src/b.txt"])
+    expect(new MainMerge({ root: repo, ...OPTIONS }).run()).toMatchObject({
+      result: "fast-forward",
+      leftAlone: ["src/b.txt"]
+    })
+    expect(read(repo, "src/b.txt")).toBe("dirty\n")
+    // one it changes:  refused, naming it
+    change(repo, "main", { "src/b.txt": "B3\n" }, ["src/b.txt"])
+    expect(() => new MainMerge({ root: repo, ...OPTIONS }).run()).toThrow(/files the merge changes.*\n  src\/b.txt$/s)
+    expect(read(repo, "src/b.txt")).toBe("dirty\n")
     expect(() => new MainMerge({ root: repo, ...OPTIONS }).run("continue")).toThrow(/no merge in progress/)
+  })
+
+  test("main moved and the worktree has another agent's uncommitted file:  merged aside, the file untouched (I406)", () => {
+    const repo = makeRepo("aside")
+    change(repo, "main", { "src/a.txt": "A2\n" })
+    change(repo, "wip", { "src/b.txt": "B2\n", "docs/notes.txt": "notes\n" })
+    put(repo, { "docs/notes.txt": "an agent's notes, mid-change\n", "docs/new.txt": "a new file\n" })
+    git(repo, "add", "docs/new.txt")
+
+    const report = new MainMerge({ root: repo, ...OPTIONS }).run()
+    expect(report).toMatchObject({ result: "merged", aside: true, conflicts: [], unstaged: [] })
+    expect(report.leftAlone?.sort()).toEqual(["docs/new.txt", "docs/notes.txt"])
+    // both sides changed the generated files:  rebuilt here, from the merged source, and committed on their own
+    expect(report.regenerated.map((step) => step.name)).toEqual(["gen", "p snapshots"])
+    expect(read(repo, "gen/out.txt")).toBe("A2\nB2\n")
+    expect(readdirSync(join(repo, "gen")).sort()).toEqual(["chunk-6.txt", "out.txt"])
+    expect(report.review).toEqual([{ file: "packages/p/src/__snapshots__/x.test.ts.snap", keys: ["ab 1"] }])
+    expect(git(repo, "log", "-2", "--format=%s").split("\n")).toEqual([
+      "merge-main:  generated files rebuilt from the merged source",
+      "Merge main into wip"
+    ])
+    // the uncommitted files exactly as they were, the staged one still staged;  no temporary worktree left
+    expect(read(repo, "docs/notes.txt")).toBe("an agent's notes, mid-change\n")
+    expect(git(repo, "status", "--porcelain")).toBe("A  docs/new.txt\n M docs/notes.txt")
+    expect(git(repo, "worktree", "list").split("\n")).toHaveLength(1)
+  })
+
+  test("merged aside, a conflict:  refused, nothing merged, the uncommitted file untouched (I406)", () => {
+    const repo = makeRepo("aside-conflict")
+    change(repo, "main", { "src/a.txt": "main's A\n" })
+    change(repo, "wip", { "src/a.txt": "wip's A\n" })
+    put(repo, { "src/b.txt": "mid-change\n" })
+    const before = git(repo, "rev-parse", "HEAD")
+
+    expect(() => new MainMerge({ root: repo, ...OPTIONS }).run()).toThrow(
+      /conflicts in src\/a.txt.*temporary worktree.*nothing merged/s
+    )
+    expect(git(repo, "rev-parse", "HEAD")).toBe(before)
+    expect(git(repo, "status", "--porcelain")).toBe("M src/b.txt")
+    expect(git(repo, "worktree", "list").split("\n")).toHaveLength(1)
   })
   test("generated files left uncommitted are moved aside, then it merges;  someone's change still refuses", () => {
     process.env.SPELL_EPIC_HOME = join(TEMP, "home")
@@ -152,16 +203,25 @@ describe("MainMerge.run()", () => {
     change(repo, "main", { "src/a.txt": "A2\n" })
     put(repo, { "lib/x.ts": "2\n", "lib/x.ts.map": "{}", "gen/out.txt": "stale" })
 
+    // the merge changes `gen/out.txt`:  moved aside;  the others it doesn't change are left alone (I406)
     const report = new MainMerge({ root: repo, ...OPTIONS }).run()
-    expect(report.result).toBe("merged")
-    expect(report.ditched).toEqual(["gen/out.txt", "lib/x.ts", "lib/x.ts.map"])
-    expect(read(join(report.ditchedTo!), "lib/x.ts")).toBe("2\n")
-    expect(read(repo, "lib/x.ts")).toBe("1\n")
-    expect(existsSync(join(repo, "lib/x.ts.map"))).toBe(false)
+    expect(report).toMatchObject({
+      result: "merged",
+      ditched: ["gen/out.txt"],
+      leftAlone: ["lib/x.ts", "lib/x.ts.map"]
+    })
+    expect(read(join(report.ditchedTo!), "gen/out.txt")).toBe("stale")
+    expect(read(repo, "gen/out.txt")).toBe("A2\nB\n")
+    expect(read(repo, "lib/x.ts")).toBe("2\n")
 
-    put(repo, { "lib/x.ts": "3\n", "src/b.txt": "mine\n" })
-    expect(() => new MainMerge({ root: repo, ...OPTIONS }).run()).toThrow(/commit them first\n  src\/b.txt$/)
-    expect(read(repo, "lib/x.ts")).toBe("3\n")
+    // someone's change in a file the merge changes still refuses, naming the agent changing it
+    change(repo, "main", { "src/b.txt": "B2\n" }, ["lib/x.ts"])
+    put(repo, { "src/b.txt": "mine\n" })
+    const claimOf = (path: string) => (path === "src/b.txt" ? { name: "seo-r3", claim: "src/" } : undefined)
+    expect(() => new MainMerge({ root: repo, ...OPTIONS, claimOf }).run()).toThrow(
+      /commit them first.*\n  src\/b.txt:  seo-r3 is changing it \(src\/\)$/s
+    )
+    expect(read(repo, "src/b.txt")).toBe("mine\n")
     delete process.env.SPELL_EPIC_HOME
   })
 
@@ -507,14 +567,20 @@ function makeRepo(name: string): string {
   return repo
 }
 
-/** On `branch`, write `files`, regenerate, commit;  then back to `wip`. */
-function change(repo: string, branch: string, files: Record<string, string>) {
+/**
+ * On `branch`, write `files`, regenerate, commit;  then back to `wip`.
+ * - `keep`:  uncommitted files on `wip` to carry across the switches, as they were (git won't switch over them)
+ */
+function change(repo: string, branch: string, files: Record<string, string>, keep: string[] = []) {
+  const kept = keep.map((file) => [file, read(repo, file)] as const)
+  if (kept.length) git(repo, "checkout", "--", ...keep)
   git(repo, "switch", "-q", branch)
   put(repo, files)
   regenerate(repo)
   git(repo, "add", "-A")
   git(repo, "commit", "-q", "-m", `${branch} work`)
   git(repo, "switch", "-q", "wip")
+  put(repo, Object.fromEntries(kept))
 }
 
 /** Run both fake generators, as their owners would before committing. */

@@ -1,4 +1,5 @@
 import { cssSecondsFor } from "./dom"
+import { whenIdle } from "./timing"
 
 /****************
  * ### `LoadOnce`
@@ -12,7 +13,7 @@ import { cssSecondsFor } from "./dom"
  *   - `"forgotten offline"`:  forgotten only while the browser says it's offline (`navigator.onLine`):
  *     then the failure may be the connection, not the file (an icon's SVG)
  * - A caller that mustn't see a rejection catches it itself:  `loads.get(key).catch(() => undefined)`.
- * - Plain promises, no Solid;  imports only `./dom`'s CSS time:  the runtime's lazy chunk uses it too,
+ * - Plain promises, no Solid;  imports only `./dom`'s CSS time and `./timing`'s idle wait:  the runtime's lazy chunk uses it too,
  *   and so do the places' shared reads (`PlaceReads`).
  * - `LoadOnce.abortable()`:  one caller's wait ends early, while the shared load runs on for the others.
  * - Loading AHEAD of use, the ONE way (epic `solid-2-final` P6;  the editor's modes, later its routes and pages):
@@ -141,18 +142,13 @@ export class LoadOnce<K, V> {
    * Call `start()` once the browser is idle, or after `timeout` ms at the most;  returns what cancels it.
    * - `ahead`, the default:  a load ahead of use, so skipped under Save-Data (`isSavingData()`).
    *   `ahead: false`, a load that must happen, only later (a `load="idle"` source):  it runs under Save-Data too.
-   * - No `requestIdleCallback()` (Safari before 18.2, node):  on the next turn instead.
+   * - The idle wait itself is `whenIdle()`'s (`spell/util/timing`):  with no `requestIdleCallback()`, the next turn.
    * - The timeout:  a busy page (or a slow machine running tests) may never be idle.
    * - STATIC:  no cache, as `ahead()`.
    */
   static atIdle(start: () => void, { timeout = IDLE_LIMIT_MS, ahead = true }: AtIdleOptions = {}): () => void {
     if (ahead && LoadOnce.isSavingData()) return () => undefined
-    if (typeof requestIdleCallback === "function") {
-      const id = requestIdleCallback(start, { timeout })
-      return () => cancelIdleCallback(id)
-    }
-    const timer = setTimeout(start, 0)
-    return () => clearTimeout(timer)
+    return whenIdle(start, { timeout: timeout / 1000 })
   }
 
   /**

@@ -16,7 +16,8 @@ export function projectSource(projectId: string): SpellAppSource {
   return {
     name: nameOf(projectId),
     projectId,
-    compiledUrl: builtUrl(projectId, COMPILED_JS),
+    // a built site's main chunk, each page alone in its file a chunk of its own (epic `solid-2-final` P13, `LazyPages`)
+    compiledUrl: `${builtUrl(projectId, COMPILED_JS)}?${LAZY_PAGES_QUERY}`,
     declarationsUrl: builtUrl(projectId, DECLARATIONS_JSON),
     scopesUrl: builtUrl(projectId, SCOPES_JS),
     importUrl: (id) => builtUrl(id, COMPILED_JS),
@@ -49,6 +50,12 @@ function builtUrl(projectId: string, suffix: string): string {
  * - NOTE: copies, NOT imported:  `spell/parser/spell` would pull the whole parser into the bundle.
  */
 export const COMPILED_JS = ".spell.js"
+
+/**
+ * What asks the spell server for a program's main chunk, its pages alone in their files cut out (`SP.PageChunks`):
+ * a host that sends files as they are sends it whole, and it runs whole.
+ */
+export const LAZY_PAGES_QUERY = "pages=lazy"
 
 /** End of a scope pack's file name:  `SP.SCOPES_JS_SUFFIX`. */
 export const SCOPES_JS = ".scopes.js"

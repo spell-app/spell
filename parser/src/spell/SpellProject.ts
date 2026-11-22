@@ -490,11 +490,13 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
   static compileCache: SP.CompileCache | undefined
 
   /**
-   * Where our last `compile()`'s output came from:  `"compile"`, or `"cache"`.
+   * Where our last `compile()`'s output came from:  `"compile"`, `"cache"`, or `"elsewhere"`.
    * - `"cache"`:  nothing parsed, so `scope` and each file's `match` are still to come, from a `parse()`.
+   * - `"elsewhere"`:  a compile of our very text somewhere else, the editor's language worker (`takeCompiled()`);
+   *   our own parse is our own, as it was.
    * - NOTE: plain field, as `saveCompiled`.
    */
-  compiledFrom: "compile" | "cache" | undefined
+  compiledFrom: "compile" | "cache" | "elsewhere" | undefined
 
   /** Counts our `compile()`s, so one that waited on the cache knows a later one took over. */
   private compileRun = 0
@@ -556,6 +558,25 @@ export class SpellProject extends JSON5File<SP.ProjectManifestJSON5> {
     this.compiledLanguages = entry.languages
     for (const [lang, text] of Object.entries(entry.words)) this.wordsFileFor(lang).contents = text
     this.compiledFrom = "cache"
+  }
+
+  /**
+   * Take `entry`, what a compile of our very text wrote somewhere else, as our compile's output, and save it as
+   * `compile()` would (`save`):  the editor's language worker compiles off the page's thread (epic `solid-2-final` P18).
+   * - Our own parse stays as it is:  only what a compile writes is taken (`takeCachedEntry()`), so `compiledFrom` says
+   *   `"elsewhere"`.
+   * - A `compile()` still waiting on the cache gives way to it.
+   * - Limited to some pages (`pagesInPlay`):  never saved, as `compile()`'s isn't.
+   * - Returns what `saveOutput()` returns.
+   */
+  async takeCompiled(entry: SP.CompiledEntry, { save = true }: { save?: SaveCompiled } = {}): Promise<unknown> {
+    if (this.pagesInPlay && this.hasAlonePages) save = false
+    this.compileRun++
+    this.saveCompiled = save
+    this.targetsThisRun = undefined
+    this.takeCachedEntry(entry)
+    this.compiledFrom = "elsewhere"
+    return await this.saveOutput()
   }
 
   /**

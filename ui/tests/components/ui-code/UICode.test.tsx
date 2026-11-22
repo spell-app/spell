@@ -1,6 +1,6 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "vite-plus/test"
 
-import { E } from "spell/ui/core"
+import { GivenDrawings } from "spell/ui/elements/GivenDrawings"
 import { UI } from "spell/ui/runtime"
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
@@ -192,13 +192,13 @@ describe("<ui-code> accessibility", () => {
 describe("<ui-code> drawn on the page server", () => {
   afterEach(() => {
     document.querySelectorAll("script[data-spell-drawings]").forEach((table) => table.remove())
-    E.GivenDrawings.reset()
+    GivenDrawings.reset()
     vi.restoreAllMocks()
   })
 
   it("shows the colours the page was given for its text, and loads no highlight.js", async () => {
     const text = "const x = 1"
-    const key = E.GivenDrawings.keyFor({ kind: "code", settings: { language: "typescript", drawing: true }, text })
+    const key = GivenDrawings.keyFor({ kind: "code", settings: { language: "typescript", drawing: true }, text })
     const table = document.createElement("script")
     table.type = "application/json"
     table.setAttribute("data-spell-drawings", "")
@@ -215,7 +215,7 @@ describe("<ui-code> drawn on the page server", () => {
   })
 
   it("colours it in the page when its text isn't the one drawn", async () => {
-    const key = E.GivenDrawings.keyFor({ kind: "code", settings: { language: "typescript", drawing: true }, text: "a" })
+    const key = GivenDrawings.keyFor({ kind: "code", settings: { language: "typescript", drawing: true }, text: "a" })
     const table = document.createElement("script")
     table.type = "application/json"
     table.setAttribute("data-spell-drawings", "")

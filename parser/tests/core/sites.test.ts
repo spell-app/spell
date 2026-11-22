@@ -797,10 +797,28 @@ describe("a running site", () => {
       expect(await shown()).toContain("Films")
       const frame = element.querySelector("ui-page-layout")!
       expect(frame.hasAttribute("data-layout")).toBe(false)
-      expect([...frame.children].map((child) => child.getAttribute("slot") ?? child.localName)).toEqual([
+      // the page in its own box, which takes no room of its own (`.spell-site-page`):  kept while another shows (P13)
+      expect([...frame.children].map((child) => child.getAttribute("slot") ?? child.className)).toEqual([
         "drawer",
-        "h1"
+        "spell-site-page"
       ])
+      expect(frame.querySelector(".spell-site-page > h1")).not.toBeNull()
+    })
+
+    test("the last 3 pages stay drawn:  Back to one is the same elements;  an older one is let go (P13)", async () => {
+      dispose?.()
+      drawSite()
+      await site.showAddress("/films")
+      await shown()
+      const films = element.querySelector(".spell-site-page")
+      await site.showAddress("/films/a-new-hope")
+      await shown()
+      // only the page shown is on the page:  a table of contents finds only its sections
+      expect(element.querySelectorAll(".spell-site-page")).toHaveLength(1)
+      expect(element.querySelector(".spell-site-page")).not.toBe(films)
+      await site.showAddress("/films")
+      await shown()
+      expect(element.querySelector(".spell-site-page")).toBe(films)
     })
   })
 

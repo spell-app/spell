@@ -83,10 +83,18 @@ describe("production build", () => {
         expect(existsSync(join(packs, pack, "pack.js")), pack).toBe(true)
       }
       // the built-in sounds where `BuiltInSounds` looks:  beside its own chunk (epic `mockup` P28)
-      const soundCode = files.filter((file) =>
-        sources(join(assets, file)).some((source) => BUILT_IN_SOUNDS.test(source))
+      // - the language worker keeps its own copy, for their names in the suggestions (epic `solid-2-final` P18)
+      const soundCode = files.filter(
+        (file) =>
+          !LANGUAGE_WORKER.test(file) && sources(join(assets, file)).some((source) => BUILT_IN_SOUNDS.test(source))
       )
       expect(soundCode).toHaveLength(1)
+      // the language worker:  its own bundle, the parser in it, rule names kept as the page's are
+      const worker = files.find((file) => LANGUAGE_WORKER.test(file))
+      expect(worker).toBeDefined()
+      expect(readFileSync(join(assets, worker!), "utf8")).toMatch(
+        new RegExp(String.raw`\b${RULE}\s*=\s*class\b|\bclass ${RULE}\b|\([\w$]+,\s*[\`"']${RULE}[\`"']\)`)
+      )
       expect(existsSync(join(assets, dirname(soundCode[0]!), "sound-library", "card-slide.ogg"))).toBe(true)
     }
   })
@@ -364,6 +372,9 @@ const REACT = /\/node_modules\/(react|react-dom|scheduler|semantic-ui-react)\//
 
 /** `ui`'s `BuiltInPacks`, which looks for the packs beside its own chunk. */
 const BUILT_IN_PACKS = /\/ui\/src\/icons\/BuiltInPacks\.ts$/
+
+/** The editor's language worker's chunk (`languageWorker.ts`). */
+const LANGUAGE_WORKER = /^languageWorker-[\w-]+\.js$/
 
 /** `ui`'s `BuiltInSounds`, which looks for the sounds beside its own chunk. */
 const BUILT_IN_SOUNDS = /\/ui\/src\/sounds\/BuiltInSounds\.ts$/

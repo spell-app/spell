@@ -586,7 +586,11 @@ export class EditorStore extends Observable {
       output.group(appTexts.text("consoleCompiling"), project)
 
       editor.clearCompileAppSoon()
-      await project.compile(undefined, { save: onPurpose ? true : "later" })
+      const save = onPurpose ? true : "later"
+      // off the page's thread, where the language worker has every edit (epic `solid-2-final` P18)
+      const elsewhere = await editor.compileElsewhere?.(project)
+      if (elsewhere) await project.takeCompiled(elsewhere, { save })
+      else await project.compile(undefined, { save })
       // its built text changed:  a program that imports it reads it again (`fetchCompiled()`)
       forgetCompiled(project.projectId)
       // every file's loaded now, whichever was shown first
@@ -2477,6 +2481,13 @@ export class EditorStore extends Observable {
   codeEditorEdits:
     | ((file: SP.AnySpellFile, edits: Parameters<typeof SourceEdits.applied>[1], way?: EditWay) => boolean)
     | undefined = undefined
+
+  /**
+   * Compiles a project off the page's thread, once the code editor's loaded:  the language worker's compile
+   * (`LanguageClient.compile()`, epic `solid-2-final` P18);  `undefined` where the page compiles it itself.
+   * See `LazyCodeMirror`.
+   */
+  compileElsewhere: ((project: SP.SpellProject) => Promise<SP.CompiledEntry | undefined>) | undefined = undefined
 
   /**
    * What's undone outside the code:  the side bar's changes and a notebook's -- see `EditorHistory`.

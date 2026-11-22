@@ -31,22 +31,26 @@ import { after, waitUntil, type CancelablePromise } from "spell/util/timing"
 import type { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
 import { CodeEditorFeatures } from "spell/app/app/ui/CodeEditorFeatures"
-import { hoverDelay, suggestsByItself, type SuggestMode } from "spell/app/app/ui/codePopups"
+import { codeHover, hoverDelay, suggestsByItself, type SuggestMode } from "spell/app/app/ui/codePopups"
 import { RenameRefusedError } from "spell/app/app/ui/ui.types"
 import { CodeMirrorHovers } from "./CodeMirrorHovers"
 import { CodeMirrorPopups } from "./CodeMirrorPopups"
 import { CodeMirrorValues } from "./CodeMirrorValues"
+import { LanguageClient } from "./LanguageClient"
 import { LspToCodeMirror, type CodeMirrorLocation } from "./LspToCodeMirror"
 
 /****************
  * ### `CodeMirrorLanguage`
- * Spell's language service for one file's CodeMirror state, answered IN-PROCESS by `LSP.SpellLanguageService`,
- * as VS Code's language server is.
+ * Spell's language service for one file's CodeMirror state, asked by the ONE table's requests (`LSP.LANGUAGE_REQUESTS`),
+ * as VS Code asks its language server:  through a `LanguageClient`, the page's own service or the editor's language
+ * worker (epic `solid-2-final` P18).
  * - Suggestions, hover, folding, signature help, accent fixes as you type, each a CodeMirror extension;
  *   go to definition and type definition, references, rename, code actions and highlights, each a method
  *   or an extension its editor asks for (`SpellCodeMirror`).
  * - Made by `FileStates`, one per spell file's state, which also follows the file both ways and shows its problems.
- * - Asks nothing of a file whose text isn't the editor's:  `fileReady()` parses what's waiting first.
+ * - Asks nothing of a file whose text isn't the editor's:  `fileReady()` parses what's waiting first,
+ *   on the page;  the worker parses each edit it was sent before it answers.
+ * - Folding still reads the page's own parse (`service`):  the fold arrows ask line by line, at once.
  * - What a hover says, which code actions show and what a rename says are the app's
  *   (`CodeEditorFeatures`);  where suggestions show by themselves, when the hover's info shows and whether signature
  *   help shows as you type, Settings…' choices (`CodeMirrorPopups`).
@@ -55,15 +59,25 @@ import { LspToCodeMirror, type CodeMirrorLocation } from "./LspToCodeMirror"
  *   the parser, the language service, the app's editor-neutral `ui` files, CodeMirror.
  ****************/
 export class CodeMirrorLanguage {
-  constructor({ service, file, parseNow, isHolding = () => false }: CodeMirrorLanguageProps) {
+  constructor({
+    service,
+    client = LanguageClient.inThread(service),
+    file,
+    parseNow,
+    isHolding = () => false
+  }: CodeMirrorLanguageProps) {
     this.service = service
+    this.client = client
     this.file = file
     this.parseNow = parseNow
     this.isHolding = isHolding
   }
 
-  /** the language service */
+  /** the page's language service:  folding reads the page's parse through it */
   readonly service: LSP.SpellLanguageService
+
+  /** what answers each request:  the page's own service, or the language worker */
+  readonly client: LanguageClient
 
   /** the file whose state this is */
   readonly file: SP.SpellFile
@@ -96,6 +110,8 @@ export class CodeMirrorLanguage {
    * - Parses what's waiting first:  the incremental parse is done by the time `parseNow()` returns.
    */
   async fileReady(doc: Text): Promise<SP.SpellFile | undefined> {
+    // the worker parses what it was sent before it answers:  the page's parse isn't asked for
+    if (!this.client.answersOnPage(this.file.project)) return this.file
     this.parseNow()
     const { file } = this
     return file.match && file.contents === doc.toString() ? file : undefined
@@ -110,6 +126,18 @@ export class CodeMirrorLanguage {
    */
   async fileParsed(doc: Text): Promise<SP.SpellFile | undefined> {
     return (await this.fileReady(doc)) ?? waitUntil(() => this.fileReady(doc), { timeout: PARSE_WAIT_SECONDS })
+  }
+
+  /**
+   * The answer to `method` about this file, `params` naming the rest:  the file's address is added.
+   * - throws what the service throws (`LSP.RenameError` ...)
+   */
+  ask<M extends LSP.LanguageMethod>(
+    method: M,
+    params: Omit<LSP.LanguageParams<M>, "textDocument">
+  ): Promise<LSP.LanguageAnswer<M>> {
+    const textDocument = { uri: LanguageClient.uriOf(this.file) }
+    return this.client.request(method, { ...params, textDocument } as LSP.LanguageParams<M>)
   }
 
   ////////////////
@@ -130,8 +158,10 @@ export class CodeMirrorLanguage {
     const file = await this.fileReady(context.state.doc)
     if (!file || context.aborted) return null
     const { doc } = context.state
-    const { items } = this.service.completion(file, LspToCodeMirror.lspPosition(doc, context.pos))
-    if (!items.length) return null
+    const { items } = await this.ask("textDocument/completion", {
+      position: LspToCodeMirror.lspPosition(doc, context.pos)
+    })
+    if (!items.length || context.aborted) return null
     return {
       from: word?.from ?? context.pos,
       options: inServiceOrder(items).map((item, rank) => ({
@@ -172,8 +202,9 @@ export class CodeMirrorLanguage {
           if (!CodeEditorFeatures.showsHoverInfo(hoverInfo, CodeMirrorHovers.isAltHeld(view))) return null
           const { doc } = view.state
           const file = await this.fileReady(doc)
-          const hover = file && CodeEditorFeatures.hover(this.service, file, LspToCodeMirror.lspPosition(doc, pos))
-          if (!hover) return null
+          const position = LspToCodeMirror.lspPosition(doc, pos)
+          const hover = file && (await this.ask("textDocument/hover", { position, detail: codeHover.detail }))
+          if (!hover || view.state.doc !== doc) return null
           const { from, to, text } = LspToCodeMirror.hover(doc, hover, pos)
           return { pos: from, end: to, above: true, create: () => ({ dom: markdownDom(text, HOVER_CLASS) }) }
         },
@@ -191,19 +222,35 @@ export class CodeMirrorLanguage {
   private folding(): Extension {
     return foldService.of((state, lineStart) => {
       const { file } = this
-      const text = state.doc.toString()
       // typing not handed over yet:  the last parse's blocks, as when the typing reached the file at once
-      if (!file.match || (file.contents !== text && !this.isHolding())) return null
+      if (!file.match || (!this.isHolding() && !this.holdsFileText(state.doc))) return null
       const line = state.doc.lineAt(lineStart).number - 1
-      const endLine = this.blocksOf(file.match, text).get(line)
+      const endLine = this.blocksOf(file.match, file.contents ?? "").get(line)
       if (endLine === undefined) return null
       return { from: state.doc.line(line + 1).to, to: state.doc.line(endLine + 1).to }
     })
   }
 
   /**
+   * Is `doc` the file's text?  Worked out once per `doc`:  the fold arrows ask line by line, and a whole file made
+   * into one string for each cost a key 4ms in a 2,700-line file (epic `solid-2-final` T20, P18).
+   */
+  private holdsFileText(doc: Text): boolean {
+    if (this.checked?.doc !== doc || this.checked.contents !== this.file.contents) {
+      const { contents } = this.file
+      this.checked = { doc, contents, isSame: contents?.length === doc.length && contents === doc.toString() }
+    }
+    return this.checked.isSame
+  }
+
+  /** The last `holdsFileText()`:  its doc, the file's text it was checked against, and the answer. */
+  private checked?: { doc: Text; contents: string | undefined; isSame: boolean }
+
+  /**
    * Each block's last line, by its head line (both from 0), for the parse `match` of `text`;  kept until the next one.
    * - The text too:  a parse may keep its match as it takes an edit in.
+   * - `text`:  the file's text (`file.contents`), which the parse is of, never the editor's:  while the typing's held, each key's
+   *   text missed the cache, and every block of the file was worked out again on every key (epic `solid-2-final` T20).
    */
   private blocksOf(match: object, text: string): Map<number, number> {
     if (this.blocks?.match !== match || this.blocks.text !== text) {
@@ -235,7 +282,8 @@ export class CodeMirrorLanguage {
   ): Promise<CodeMirrorLocation | undefined> {
     const { doc } = view.state
     const file = await this.fileParsed(doc)
-    const [location] = file ? this.service[method](file, LspToCodeMirror.lspPosition(doc, pos)) : []
+    const position = LspToCodeMirror.lspPosition(doc, pos)
+    const [location] = file ? await this.ask(`textDocument/${method}`, { position }) : []
     return location && LspToCodeMirror.location(location)
   }
 
@@ -243,7 +291,10 @@ export class CodeMirrorLanguage {
   async referencesAt(view: EditorView, pos: number): Promise<CodeMirrorLocation[]> {
     const { doc } = view.state
     const file = await this.fileParsed(doc)
-    const locations = file ? this.service.references(file, LspToCodeMirror.lspPosition(doc, pos), true) : []
+    const position = LspToCodeMirror.lspPosition(doc, pos)
+    const locations = file
+      ? await this.ask("textDocument/references", { position, context: { includeDeclaration: true } })
+      : []
     return locations.flatMap((location) => LspToCodeMirror.location(location) ?? [])
   }
 
@@ -253,7 +304,8 @@ export class CodeMirrorLanguage {
     const file = await this.fileReady(doc)
     if (!file) return []
     const range = LspToCodeMirror.lspRange(doc, view.state.selection.main)
-    return CodeEditorFeatures.codeActions(this.service, file, range)
+    const actions = await this.ask("textDocument/codeAction", { range, context: { diagnostics: [] } })
+    return CodeEditorFeatures.withEdits(actions)
   }
 
   /** Make `action`'s edits to this file in `view`, one undo step. */
@@ -270,7 +322,8 @@ export class CodeMirrorLanguage {
   async renameRangeAt(view: EditorView, pos: number): Promise<{ from: number; to: number; name: string } | undefined> {
     const { doc } = view.state
     const file = await this.fileReady(doc)
-    const prepared = file && this.service.prepareRename(file, LspToCodeMirror.lspPosition(doc, pos))
+    const prepared =
+      file && (await this.ask("textDocument/prepareRename", { position: LspToCodeMirror.lspPosition(doc, pos) }))
     return prepared ? { ...LspToCodeMirror.range(doc, prepared.range), name: prepared.placeholder } : undefined
   }
 
@@ -283,7 +336,8 @@ export class CodeMirrorLanguage {
     const { doc } = view.state
     const file = await this.fileReady(doc)
     if (!file) throw new RenameRefusedError(CodeEditorFeatures.renameNothingHere())
-    return CodeEditorFeatures.rename(this.service, file, LspToCodeMirror.lspPosition(doc, pos), names)
+    const position = LspToCodeMirror.lspPosition(doc, pos)
+    return CodeEditorFeatures.renamed(() => this.ask("spell/renameSaying", { position, newName: names.newName }), names)
   }
 
   ////////////////
@@ -318,8 +372,11 @@ export class CodeMirrorLanguage {
     const { doc, selection } = view.state
     const file = await this.fileReady(doc)
     if (!file || view.state.doc !== doc || !selection.main.empty) return
-    const marks = this.service
-      .documentHighlights(file, LspToCodeMirror.lspPosition(doc, selection.main.head))
+    const found = await this.ask("textDocument/documentHighlight", {
+      position: LspToCodeMirror.lspPosition(doc, selection.main.head)
+    })
+    if (view.state.doc !== doc) return
+    const marks = found
       .map(({ range, kind }) => {
         const { from, to } = LspToCodeMirror.range(doc, range)
         return (kind === WRITE_HIGHLIGHT ? HIGHLIGHT_WRITE : HIGHLIGHT_READ).range(from, to)
@@ -337,7 +394,7 @@ export class CodeMirrorLanguage {
   async showHelp(view: EditorView, pos: number): Promise<boolean> {
     const { doc } = view.state
     const file = await this.fileReady(doc)
-    const help = file && this.service.componentHover(file, LspToCodeMirror.lspPosition(doc, pos))
+    const help = file && (await this.ask("spell/componentHover", { position: LspToCodeMirror.lspPosition(doc, pos) }))
     if (!help || view.state.doc !== doc) return false
     const { from, text } = LspToCodeMirror.hover(doc, help, pos)
     const tooltip: Tooltip = { pos: from, above: true, create: () => ({ dom: markdownDom(text, HOVER_CLASS) }) }
@@ -378,8 +435,10 @@ export class CodeMirrorLanguage {
     const { doc } = view.state
     const file = await this.fileReady(doc)
     if (!file || view.state.doc !== doc) return
-    const edits = this.service.formatting(file, { tabSize: view.state.tabSize, insertSpaces: false })
-    if (!edits.length) return
+    const edits = await this.ask("textDocument/formatting", {
+      options: { tabSize: view.state.tabSize, insertSpaces: false }
+    })
+    if (!edits.length || view.state.doc !== doc) return
     view.dispatch({ changes: LspToCodeMirror.changes(doc, edits), userEvent: "input.format" })
   }
 
@@ -403,7 +462,10 @@ export class CodeMirrorLanguage {
     }
     const file = await this.fileReady(doc)
     if (!file || view.state.doc !== doc) return
-    const [nested] = this.service.selectionRanges(file, [LspToCodeMirror.lspPosition(doc, selection.main.head)])
+    const [nested] = await this.ask("textDocument/selectionRange", {
+      positions: [LspToCodeMirror.lspPosition(doc, selection.main.head)]
+    })
+    if (view.state.doc !== doc) return
     let wider: { from: number; to: number } | undefined
     for (let range: typeof nested | undefined = nested; range && !wider; range = range.parent) {
       const each = LspToCodeMirror.range(doc, range.range)
@@ -431,7 +493,7 @@ export class CodeMirrorLanguage {
         walk(symbol.children ?? [], depth + 1)
       }
     }
-    walk(this.service.documentSymbols(file), 0)
+    walk(await this.ask("textDocument/documentSymbol", {}), 0)
     return found
   }
 
@@ -495,7 +557,9 @@ export class CodeMirrorLanguage {
     const file = await this.fileReady(doc)
     if (view.state.doc !== doc) return
     const pos = selection.main.head
-    const help = file && this.service.signatureHelp(file, LspToCodeMirror.lspPosition(doc, pos))
+    const help =
+      file && (await this.ask("textDocument/signatureHelp", { position: LspToCodeMirror.lspPosition(doc, pos) }))
+    if (view.state.doc !== doc) return
     const text = help && signatureMarkdown(help)
     const tooltip: Tooltip | null = text
       ? { pos, above: true, create: () => ({ dom: markdownDom(text, SIGNATURE_CLASS) }) }
@@ -536,8 +600,13 @@ export class CodeMirrorLanguage {
   private async fixAccents(view: EditorView, doc: Text, pos: number, trigger: string): Promise<void> {
     const file = await this.fileReady(doc)
     if (!file || view.state.doc !== doc) return
-    const edits = this.service.onTypeFormatting(file, LspToCodeMirror.lspPosition(doc, pos), trigger)
-    if (!edits.length) return
+    const position = LspToCodeMirror.lspPosition(doc, pos)
+    const edits = await this.ask("textDocument/onTypeFormatting", {
+      position,
+      ch: trigger,
+      options: { tabSize: view.state.tabSize, insertSpaces: false }
+    })
+    if (!edits.length || view.state.doc !== doc) return
     view.dispatch({ changes: LspToCodeMirror.changes(doc, edits), userEvent: "input.type.accent" })
   }
 
@@ -551,14 +620,19 @@ export class CodeMirrorLanguage {
    */
   attributeValuesAt = async (state: EditorState, pos: number): Promise<LSP.AttributeValues | undefined> => {
     const file = await this.fileReady(state.doc)
-    return file && this.service.attributeValuesAt(file, LspToCodeMirror.lspPosition(state.doc, pos))
+    return file
+      ? ((await this.ask("spell/attributeValues", { position: LspToCodeMirror.lspPosition(state.doc, pos) })) ??
+          undefined)
+      : undefined
   }
 }
 
 /** How a `CodeMirrorLanguage` is made. */
 export type CodeMirrorLanguageProps = {
-  /** the language service */
+  /** the page's language service */
   service: LSP.SpellLanguageService
+  /** what answers each request:  default, `service` itself (`LanguageClient.inThread()`) */
+  client?: LanguageClient
   /** the file whose state it's for */
   file: SP.SpellFile
   /** parse what's typed and not parsed yet, now */

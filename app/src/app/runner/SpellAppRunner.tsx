@@ -9,6 +9,7 @@ import { appTexts, type AppTextKey } from "spell/app/app/ui/AppTexts"
 // Import directly, NOT through the `spell/app/app/solid` barrel, which pulls in the editor
 import { TypeExplorer } from "spell/app/app/solid/TypeExplorer"
 import { ThingExplorer } from "spell/app/app/solid/ThingExplorer"
+import { LazyPages } from "./LazyPages"
 import { loadRuntime, type LoadedRuntime } from "./loadRuntime"
 import { ViewerSiteHost } from "./ViewerSiteHost"
 import { fetchJSON, fetchText } from "./fetchFresh"
@@ -467,9 +468,12 @@ async function runProgram(
   }: { layout: boolean; keepThings: boolean; messages?: Record<string, string>; siteHost: SiteHost }
 ): Promise<Ran> {
   const compiled = new Map<string, string>()
+  stopFetchingAhead.get(appRoot)?.()
   try {
     const text = source.compiled ?? (await fetchText(source.compiledUrl))
     compiled.set(MAIN_PROJECT, text)
+    // a built site's pages, each loaded the first time it's shown (epic `solid-2-final` P13)
+    const lazy = source.compiled === undefined ? LazyPages.forProgram(text, source.compiledUrl, copy) : undefined
     const error = await copy.runtime.runApp(text, {
       sourceMap: source.compiled === undefined ? await sourceMapOf(text, source.compiledUrl) : undefined,
       appRoot,
@@ -477,7 +481,7 @@ async function runProgram(
       keepThings,
       messages,
       projectId: source.projectId,
-      siteHost,
+      siteHost: lazy ? lazy.hostFor(siteHost) : siteHost,
       // only a program this page fetched:  an editor's own compiles would each ask every other window to reload
       ...(source.compiled === undefined && { programVersion: textChecksum(text) }),
       coreUrl: copy.coreUrl,
@@ -488,11 +492,15 @@ async function runProgram(
       },
       ...(source.nativeUrl && { loadNative: (module: string) => fetchText(source.nativeUrl!(module)) })
     })
+    if (lazy && !error) stopFetchingAhead.set(appRoot, lazy.fetchAheadIn(appRoot))
     return { error, hasApp: copy.runtime.appIsMounted(), compiled }
   } catch (problem) {
     return { error: messageOf(problem), hasApp: false, compiled }
   }
 }
+
+/** What stops fetching a built site's pages ahead, for the program drawn in each app root (`LazyPages`). */
+const stopFetchingAhead = new WeakMap<HTMLElement, () => void>()
 
 /**
  * The source map compiled javascript `text`, fetched from `url`, names on its last line (epic `elemental-spell` P14):

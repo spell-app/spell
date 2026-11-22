@@ -5,6 +5,8 @@ import { isServer, type JSX } from "@solidjs/web"
 import { PrefStore } from "spell/util/persist/PrefStore"
 import { ColorScheme } from "spell/util/persist/ColorScheme"
 import { E, UI, UIT } from "spell/ui/core"
+// Import directly:  in no family's barrel nor `core`, so it's in the drawing families' chunks, not every page's
+import { GivenDrawings, type GivenDrawing } from "spell/ui/elements/GivenDrawings"
 // Import directly:  the one door to ELK, in no barrel (its header says why)
 import { ElkEngine } from "spell/ui/util/ElkEngine"
 import { mermaidDiagramVocabulary } from "./UIMermaidDiagram.en"
@@ -62,7 +64,7 @@ export class DOMMermaidDiagramElement extends E.DOMLoadableElement<UIMermaidDiag
  *   or a `source` file (see `LoadableComponent`);  it redraws when either changes.
  * - Mermaid loads on the first draw (`MermaidDrawer` -> `MermaidEngine`, the lazy chunk):  a page without a drawing
  *   pays nothing.
- * - DRAWN AHEAD by the page server when it served the page (`E.GivenDrawings`, kind `mermaid`):  a drawing it was
+ * - DRAWN AHEAD by the page server when it served the page (`GivenDrawings`, kind `mermaid`):  a drawing it was
  *   given for THIS text, these settings and the page's colours shows with no Mermaid and no ELK loaded;
  *   its first drawing asks the page server, when it draws diagrams, before loading Mermaid
  *   - one per light and dark:  Mermaid works its colours out as plain ones, so a drawing is for one scheme
@@ -162,7 +164,7 @@ export class UIMermaidDiagram extends E.LoadableComponent<typeof mermaidDiagramV
   }
 
   /**
-   * The page server's drawing of `text` (`E.GivenDrawings`):  the page's, else asked for on the first draw;
+   * The page server's drawing of `text` (`GivenDrawings`):  the page's, else asked for on the first draw;
    * `undefined` for none, and it's drawn here.
    * - only one drawn in the colours this page's tokens give, and its text style (`MermaidDrawer.lookOf()`):  a theme
    *   the reader wears that the server's page doesn't, or a page of another font, is drawn here
@@ -177,8 +179,8 @@ export class UIMermaidDiagram extends E.LoadableComponent<typeof mermaidDiagramV
     const bodyText = MermaidDrawer.bodyTextOf(this.domElement.ownerDocument)
     const look = MermaidDrawer.lookOf(config, bodyText)
     const item = { kind: MERMAID_DRAWINGS, settings, text, hints: { config, bodyText } }
-    const fits = (drawing: E.GivenDrawing) => drawing.data?.look === look
-    const given = await E.GivenDrawings.find(item, { ask, fits })
+    const fits = (drawing: GivenDrawing) => drawing.data?.look === look
+    const given = await GivenDrawings.find(item, { ask, fits })
     if (!given || !fits(given)) return undefined
     return { svg: given.markup, diagramType: typeof given.data?.diagramType === "string" ? given.data.diagramType : "" }
   }
@@ -500,7 +502,7 @@ export interface UIMermaidDiagram extends E.AttributeValues<typeof mermaidDiagra
 /** `seed` when none is given:  fixed, so a hand-drawn drawing doesn't wobble each redraw. */
 const DEFAULT_SEED = 1
 
-/** The page server's kind of drawing for diagrams (`E.GivenDrawings`):  Spell UI's `MermaidOnServer`. */
+/** The page server's kind of drawing for diagrams (`GivenDrawings`):  Spell UI's `MermaidOnServer`. */
 const MERMAID_DRAWINGS = "mermaid"
 
 /** `layout`'s ELK. */

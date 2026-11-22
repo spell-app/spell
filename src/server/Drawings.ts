@@ -1,6 +1,6 @@
 import { join } from "node:path"
 
-import { stableHash, textHash } from "spell/util/string"
+import { stableHash, textHash } from "spell/util/hash"
 import { parseBodies } from "./bodies"
 import { DiskCache } from "./DiskCache"
 import { Router } from "./Router"

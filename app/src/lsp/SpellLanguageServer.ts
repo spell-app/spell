@@ -113,81 +113,23 @@ export class SpellLanguageServer {
       }
     })
 
-    connection.onDocumentSymbol(({ textDocument }) =>
-      this.answer(textDocument.uri, [], (file) => service.documentSymbols(file))
-    )
-    connection.onFoldingRanges(({ textDocument }) =>
-      this.answer(textDocument.uri, [], (file) => service.foldingRanges(file))
-    )
-    connection.onSelectionRanges(({ textDocument, positions }) =>
-      this.answer(textDocument.uri, [], (file) => service.selectionRanges(file, positions))
+    // every request about a file, from the ONE table the app's editor answers from too (`LSP.LANGUAGE_REQUESTS`)
+    for (const method of Object.keys(LSP.LANGUAGE_REQUESTS) as LSP.LanguageMethod[]) {
+      if (method === "textDocument/hover") continue
+      const { fallback } = LSP.LANGUAGE_REQUESTS[method] as { fallback: unknown }
+      connection.onRequest(method, (params: LSP.FileParams): Promise<unknown> =>
+        this.answer(LSP.uriOf(params), fallback, (file) => LSP.answerRequest(service, file, method, params as never))
+      )
+    }
+    // the table's, with a "Fix it" link where there's one
+    connection.onHover(({ textDocument, position }) =>
+      this.answer(textDocument.uri, null, (file) => this.withFixIt(file, position, service.hover(file, position)))
     )
     connection.onWorkspaceSymbol(async ({ query }) => {
       await this.#queue
       return service.workspaceSymbols(query)
     })
 
-    connection.languages.semanticTokens.on(({ textDocument }) =>
-      this.answer(textDocument.uri, { data: [] }, (file) => service.semanticTokens(file))
-    )
-    connection.languages.semanticTokens.onDelta(({ textDocument, previousResultId }) =>
-      this.answer(textDocument.uri, { data: [] }, (file) => service.semanticTokensDelta(file, previousResultId))
-    )
-    connection.languages.semanticTokens.onRange(({ textDocument, range }) =>
-      this.answer(textDocument.uri, { data: [] }, (file) => service.semanticTokens(file, range))
-    )
-    connection.onHover(({ textDocument, position }) =>
-      this.answer(textDocument.uri, null, (file) => this.withFixIt(file, position, service.hover(file, position)))
-    )
-    connection.onDefinition(({ textDocument, position }) =>
-      this.answer(textDocument.uri, [], (file) => service.definition(file, position))
-    )
-    connection.onTypeDefinition(({ textDocument, position }) =>
-      this.answer(textDocument.uri, [], (file) => service.typeDefinition(file, position))
-    )
-    connection.onReferences(({ textDocument, position, context }) =>
-      this.answer(textDocument.uri, [], (file) => service.references(file, position, context.includeDeclaration))
-    )
-    connection.onDocumentHighlight(({ textDocument, position }) =>
-      this.answer(textDocument.uri, [], (file) => service.documentHighlights(file, position))
-    )
-    connection.onPrepareRename(({ textDocument, position }) =>
-      this.answer(textDocument.uri, null, (file) => service.prepareRename(file, position))
-    )
-    connection.onRenameRequest(({ textDocument, position, newName }) =>
-      this.answer(textDocument.uri, null, (file) => service.rename(file, position, newName))
-    )
-    connection.onDocumentFormatting(({ textDocument, options }) =>
-      this.answer(textDocument.uri, [], (file) => service.formatting(file, options))
-    )
-    connection.onDocumentRangeFormatting(({ textDocument, range, options }) =>
-      this.answer(textDocument.uri, [], (file) => service.formatting(file, options, range))
-    )
-    connection.onDocumentOnTypeFormatting(({ textDocument, position, ch }) =>
-      this.answer(textDocument.uri, [], (file) => service.onTypeFormatting(file, position, ch))
-    )
-    connection.onCompletion(({ textDocument, position }) =>
-      this.answer(textDocument.uri, { isIncomplete: false, items: [] }, (file) => service.completion(file, position))
-    )
-    connection.onSignatureHelp(({ textDocument, position }) =>
-      this.answer(textDocument.uri, null, (file) => service.signatureHelp(file, position))
-    )
-    connection.onCodeAction(({ textDocument, range }) =>
-      this.answer(textDocument.uri, [], (file) => service.codeActions(file, range))
-    )
-
-    connection.onRequest("spell/compiled", ({ uri, target }: LSP.CompiledParams) =>
-      this.answer(uri, null, (file) => service.compiled(file, target))
-    )
-    connection.onRequest("spell/bubbly", ({ uri }: { uri: string }) =>
-      this.answer(uri, [], (file) => service.bubbly(file))
-    )
-    connection.onRequest("spell/lineTree", ({ uri, line }: { uri: string; line: number }) =>
-      this.answer(uri, null, (file) => service.lineTree(file, line))
-    )
-    connection.onRequest("spell/project", ({ uri }: { uri: string }) =>
-      this.answer(uri, null, (file) => service.projectInfo(file))
-    )
     connection.onRequest("spell/compileProject", ({ uri }: { uri: string }) => this.compileProject(uri))
     connection.onRequest("spell/compiledImport", ({ uri, projectId }: LSP.CompiledImportParams) =>
       this.compiledImport(uri, projectId)

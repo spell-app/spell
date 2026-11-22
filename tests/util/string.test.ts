@@ -10,8 +10,6 @@ import {
   kebabCase,
   levenshtein,
   numberToWord,
-  stableHash,
-  textHash,
   slug,
   suggest,
   withArticle,
@@ -239,23 +237,5 @@ describe("withArticle()", () => {
     expect(withArticle("")).toBe("")
     expect(withArticle("3 cards")).toBe("3 cards")
     expect(withArticle("árbol")).toBe("árbol")
-  })
-})
-
-describe("textHash()", () => {
-  it("is 32 hex letters, the same for the same text", () => {
-    expect(textHash("flowchart LR")).toMatch(/^[0-9a-f]{32}$/)
-    expect(textHash("flowchart LR")).toBe(textHash("flowchart LR"))
-    expect(textHash("flowchart LR")).not.toBe(textHash("flowchart RL"))
-    expect(textHash("")).toMatch(/^[0-9a-f]{32}$/)
-  })
-})
-
-describe("stableHash()", () => {
-  it("hashes objects alike whatever the order of their keys", () => {
-    expect(stableHash(["code", { language: "js", drawing: true }, "x"])).toBe(
-      stableHash(["code", { drawing: true, language: "js" }, "x"])
-    )
-    expect(stableHash({ a: 1 })).not.toBe(stableHash({ a: 2 }))
   })
 })

@@ -238,7 +238,7 @@ export default function appCommands(spell: Command): void {
       "measure the editor, a docs page, an epic page and run mode on a desktop and an emulated phone (CPU slowed 4x, " +
         "a 5G-like network), in the machine's test turn;  then the report.  About 5 minutes;  --full measures everything"
     )
-    .option("--full", "every measurement:  load, leaks, typing, accessibility, listeners, sheets, CPU, the pipeline")
+    .option("--full", "every measurement:  load, leaks, huge lists, typing, accessibility, listeners, sheets, CPU, the pipeline")
     .option("--page <pages>", "which pages, e.g. editor,docs -- default editor, docs, epic, run")
     .option("--profile <profiles>", "which profiles:  desktop, phone, phonewide -- default desktop, phone")
     .option("--steps <steps>", "which measurements, e.g. load,typing -- default load (all with --full)")

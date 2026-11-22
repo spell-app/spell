@@ -1,3 +1,4 @@
+import { stableHash } from "spell/util/hash"
 import { E } from "spell/ui/core"
 import {
   DarkTwins,
@@ -127,7 +128,7 @@ export class MermaidDrawer {
    * - The page server's drawings carry it (`data.look`):  an element shows one only when its own is the same.
    */
   static lookOf(config: Record<string, unknown>, bodyText: Record<string, string>): string {
-    return E.stableHash({ config, bodyText })
+    return stableHash({ config, bodyText })
   }
 
   /**

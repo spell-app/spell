@@ -531,6 +531,8 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
 - Leave with `ExitWorktree` `keep`.
   - The hook's `remove` never deletes uncommitted or unmerged work.
 - Merge main into a branch with `epic worktree merge-main`, never a bare `git merge main`.
+  - Another agent's uncommitted files never hold it up, nor `epic merge` (epic `epic-engine` I406):
+    only a file the merge changes refuses it, named with its agent;  the rest are left alone.
   - It REGENERATES each generated file both sides changed, from the merged source:
     bundles, site data, snapshots, `yarn.lock`.
   - It stops on any other conflict;  `--continue` once they're resolved and added.

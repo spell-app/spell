@@ -5,6 +5,7 @@
  *   - `beforeNextPaint(fn)` -- just before the browser next draws the page
  *   - `soon(fn)` -- in the next task, once the browser has had a turn
  *   - `await letBrowserIn()` -- between steps of long work:  keys and clicks waiting go first, then the work carries on
+ *   - `whenIdle(fn)` -- once the browser has nothing else to do (2 seconds at the most)
  *   - `after(seconds, fn)` -- once, `seconds` from now:  a promise to await, or cancel
  *   - `every(seconds, fn)` -- every `seconds`, until you stop it
  * - Why not the platform's calls (`queueMicrotask()`, `setTimeout()` ...):
@@ -74,6 +75,26 @@ export function letBrowserIn(): Promise<void> {
   if (scheduler?.yield) return scheduler.yield()
   return new Promise((resolve) => setTimeout(resolve, 0))
 }
+
+/**
+ * Run `fn` once the browser has nothing else to do:  an idle moment, over `requestIdleCallback()`.
+ * - Work that matters, but not now:  what's waiting to be saved, a page fetched ahead of a click.
+ * - `timeout`:  the longest wait, in SECONDS, before it runs anyway (2 by default):
+ *   a busy page, or a slow machine running tests, may never be idle.
+ * - No `requestIdleCallback()` (Safari before 18.2, node):  in the next task instead, as `soon()`.
+ * - Returns a function that cancels it, if it hasn't run yet.
+ * - The ONE idle wait:  `LoadOnce.atIdle()` is this, skipped under Save-Data.
+ */
+export function whenIdle(fn: () => void, { timeout = IDLE_LIMIT }: { timeout?: number } = {}): () => void {
+  if (typeof requestIdleCallback === "function") {
+    const id = requestIdleCallback(() => fn(), { timeout: timeout * 1000 })
+    return () => cancelIdleCallback(id)
+  }
+  return soon(fn)
+}
+
+/** `whenIdle()`'s longest wait for an idle moment, in seconds, before it runs anyway. */
+const IDLE_LIMIT = 2
 
 ////////////////
 // ## Later

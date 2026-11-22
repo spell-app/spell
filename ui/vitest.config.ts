@@ -89,7 +89,7 @@ const MOTION_TESTS = [
  *   - the plugin picks its posture (client, or the server build of `@solidjs/web`)
  *     from `test.environment` of the config it's created in
  *   - it never sees a project's `environment` through `extends: true`
- * - NOTE: `ssr` runs FIRST:  it writes `.cache/ssr-button.html`, which `tests/test-helpers/dsd.test.ts` imports.
+ * - NOTE: `ssr` runs FIRST:  it writes `.cache/ssr-shadow.html`, which `tests/test-helpers/dsd.test.ts` imports.
  *   - `yarn test` here runs the projects one after the other.
  *   - In the root's single run, `sequence.groupOrder` does it:
  *     vitest runs project groups in ascending order, and a group finishes before the next starts.

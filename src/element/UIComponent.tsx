@@ -1355,6 +1355,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
    *   it lives until `domElement.dispose()`, whatever happens around it.
    *   - So a Solid app's context doesn't reach inside (`appContext` does that).
    * - Inside an error boundary (Solid's `<Errored>`), always:  see "Errors and fallback".
+   * - A shadow root the server drew (`domElement.serverDrawing`):  see "Server-drawn shadow roots".
    * - Released with the DOM element:  the root is disposed, the shadow root emptied.
    */
   private static mount(
@@ -1363,6 +1364,16 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
     domElement: DOMElement,
     Fallback: E.FallbackClass | undefined
   ) {
+    const drawing = domElement.serverDrawing
+    // a server's drawing shows meanwhile, styled:  the component waits for the runtime, as its first render needs it
+    const { runtime } = E.SpellSolid.settings
+    if (drawing && !runtime.isLoaded) {
+      runtime
+        .load()
+        .then(() => UIComponent.mountLater(Class, definition, domElement, Fallback))
+        .catch((error: unknown) => console.error(`<${domElement.localName}>:  the runtime didn't load`, error))
+      return
+    }
     E.Reactive.ownRoot((dispose) => {
       const root = domElement.renderRoot
       domElement.addReleaseCallback(() => {
@@ -1370,22 +1381,70 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
         root.textContent = ""
         dispose()
       })
-      // `<Errored>` called as a function;  `children` is a GETTER, so the component is built inside the boundary
-      const view = Errored({
-        get children() {
-          return untrack(() => new Class(domElement, definition).onMount())
-        },
-        fallback: (error: Accessor<unknown>) => {
-          const cause = error()
-          const showsFallback = runWithOwner(null, () => UIComponent.onError(domElement, cause))
-          return showsFallback ? UIComponent.renderFallback(domElement, cause, Fallback) : undefined
-        }
-      })
-      domElement.clearServerContent()
+      const view = UIComponent.boundary(Class, definition, domElement, Fallback)
+      domElement.takeServerDrawing()
       ShadowEvents.register(root)
       insert(root, view)
+      if (!drawing) return
+      domElement.restoreServerFocus()
+      // its own custom states are set by the time the page paints:  the server's stand-in for them goes
+      domElement.removeAttribute(UIComponent.SERVER_STATES)
     })
   }
+
+  /**
+   * The attribute a server drawing writes the element's custom states into (`in-card` ...), and its sheets select
+   * beside `:state()`:  a page can't set custom states before a script runs.
+   * - Spell UI's static render writes it, and the sheets it links say `:is(:state(x), [data-ui-states~="x"])`.
+   */
+  static readonly SERVER_STATES = "data-ui-states"
+
+  /** `mount()`, put off from the first connect:  then the connect's own step, `onConnect()`, if it's still connected. */
+  private static mountLater(
+    Class: E.UIComponentClass,
+    definition: E.ElementDefinition,
+    domElement: DOMElement,
+    Fallback: E.FallbackClass | undefined
+  ) {
+    UIComponent.mount(Class, definition, domElement, Fallback)
+    if (domElement.isConnected) domElement.component?.onConnect()
+  }
+
+  /**
+   * `Class`'s component, built and drawn inside its error boundary:  `<Errored>`, called as a function.
+   * - `children` is a GETTER, so the component is built inside the boundary.
+   */
+  private static boundary(
+    Class: E.UIComponentClass,
+    definition: E.ElementDefinition,
+    domElement: DOMElement,
+    Fallback: E.FallbackClass | undefined
+  ): JSX.Element {
+    return Errored({
+      get children() {
+        return untrack(() => new Class(domElement, definition).onMount())
+      },
+      fallback: (error: Accessor<unknown>) => {
+        const cause = error()
+        const showsFallback = runWithOwner(null, () => UIComponent.onError(domElement, cause))
+        return showsFallback ? UIComponent.renderFallback(domElement, cause, Fallback) : undefined
+      }
+    })
+  }
+
+  ////////////////
+  // ## Server-drawn shadow roots
+  //
+  // A page drawn on the server (Spell UI's static render, its shadow output) holds each element's shadow root
+  // already, as a declarative `<template shadowrootmode>`:  it paints before any script (epic `solid-2-final` P16).
+  // - Meanwhile it shows as the server drew it, styled by the sheets the server linked.
+  // - When the element starts, it waits for the runtime, as every first render does (`mount()`),
+  //   then draws again in place of the server's drawing, in the same task:  nothing flashes, nothing moves,
+  //   and the focus moves to the element in the same place (`DOMElement.takeServerDrawing()`).
+  // - Its custom states, which a page can't set before a script runs, came as an attribute (`SERVER_STATES`).
+  // - The server's sheets go once its own are in (`DOMElement.markReady()`).
+  // - Not hydrated:  Solid's hydration worked, but was slower than drawing again (epic `solid-2-final` J62).
+  ////////////////
 
   ////////////////
   // ## Errors and fallback

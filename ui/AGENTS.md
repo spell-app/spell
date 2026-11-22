@@ -197,12 +197,19 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
   - `CodeOnServer`:  `<ui-code>`'s colours, highlight.js in the server's process;  `MermaidOnServer`:
     `<ui-mermaid-diagram>`'s diagrams, in ONE headless page (the site bundle's second entry, `site/_src/drawings.ts`)
   - Spell UI's route module adds them (`drawingRoutes.server.ts`, its part of the page server's settings, `"routes"`).
-  - The elements' half:  `E.GivenDrawings` (`src/elements/`), which both elements ask before loading their engine;
+  - The elements' half:  `GivenDrawings` (`src/elements/`, imported by file:  in no page's first load), which both
+    elements ask before loading their engine;
     a text edited since, or a server that can't, draws in the page as always.
   - Node only, every file `.server.ts`;  its tests run in node (`tests/drawings/`, the `ssr` project).
 - [`src/static/`](src/static/) (`spell/ui/static`, `SSR`):  the STATIC server render, for SEO.
   - `StaticRender.page()` / `fragment()` turn `ui-*` markup into plain light-DOM HTML in node:
     no shadow DOM, no JS.
+  - Or, its SHADOW output (`{ output: "shadow" }`, `spell ssr --shadow-roots`;  epic `solid-2-final` P16):
+    each element keeps its tag and gets its shadow root drawn ahead, a declarative template (`StaticShadowRoots`).
+    - It paints before any script;  each root links the sheets it adopts in a browser (`StaticStylesheet.shadowLinks()`),
+      the same files for every root, and its custom states come as `data-ui-states`.
+    - The page keeps its scripts:  each element waits for the runtime, then draws again in place, in the same task
+      (`UIComponent`, "Server-drawn shadow roots";  not hydrated:  that was slower, J62).
   - How:
     - stand-in DOM elements are linkedom elements (`ServerDOMElement`)
     - components render with `renderToString`
@@ -547,7 +554,7 @@ Where each of a tag's attributes goes in a property editor:  the spell editor's 
   - entries:  `core`, `forms`, one per family, `styles`, `index`;  and `dist/icon-packs/`
   - `.d.ts` files beside the bundle's `exports` paths, from `declarations()` in `vite.config.ts`
 - `yarn test`:  the `ssr` project, then `browser`.
-  - `ssr` first:  it writes `ssr-button.html` in `.cache/`,
+  - `ssr` first:  it writes `ssr-shadow.html` and its sheets in `.cache/`,
     which [the DSD test](./tests/test-helpers/dsd.test.ts) reads.
 - `yarn test:all`:  chromium + firefox + webkit (`yarn test:browsers` once first).
 - `yarn test:visual`:  screenshot tests of every element example, light + dark,
@@ -782,7 +789,9 @@ As WWOD §18, plus:
     E.g. `styleSheets: { nag: nagCSS }`, `DOMElement: DOMNagElement`, `delegatesFocus: false`, a form control's `Fallback` ...
   - reactive members (below)
   - `render()`, returning JSX
-  - The DOM element creates one on its first connect, and keeps it (`keepAlive`) until `domElement.dispose()`.
+  - The DOM element creates one on its first connect, and keeps it (`keepAlive`) until `domElement.dispose()`:
+    one Solid draws is disposed by itself once its drawing is let go and it's off the page (DOMElement's
+    "Disposed with its drawing", epic `solid-2-final` I34).
   - `UI<Name>.define()` in the family's `index.ts` registers it.
 - A FORM CONTROL (`F.FormComponent`) inherits what every control needs:
   - `isDisabled`:  `disabled`, or a disabled fieldset, with its class
@@ -1141,8 +1150,13 @@ Components, DOM element classes AND `UI<Name>.fallback.ts` import:
     - `ShadowEvents` guarantees it, by undoing what Solid's shadow-root delegation leaves on the event:
       `target`, `currentTarget`, its handled marker.
     - NEVER work around a wrong `target` in a component:  fix it there.
-- **`keepAlive`:**  a removed element keeps its reactive root, until `dispose()` or garbage collection.
+- **`keepAlive`:**  a removed element keeps its reactive root, until `dispose()`.
   - So anything page-wide (overlay entries, document listeners) follows `isConnected`, never disposal.
+  - Moved, or on a page kept drawn (`KeptPages`), it lives on;  taken off for good, it's disposed:
+    - one Solid drew, once the drawing that made it is let go (a `<For>` row taken out, a kept page let go)
+    - one in a shadow root, with its host, drawn or made from HTML (a `<ui-markdown>`'s `<ui-code>`)
+  - An element made in an effect's callback has no drawing (the callback has no owner):  make it under the
+    drawing's owner (`runWithOwner()`), or it lives until `dispose()` (a table's header row did, I34).
 - **Slots carry no Solid context:**  an element's root is owned by whoever CREATED it,
   never by the `<slot>` it's assigned to (epic `spell-element`, Q8).
   - So a `<slot>` may live in any `<Show>` / `<Dynamic>` branch.

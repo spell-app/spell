@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 
-import { textHash } from "spell/util/string"
+import { textHash } from "spell/util/hash"
 import { SRV } from "spell/server"
 // Import directly:  node-safe and import-free, the text `<ui-code>` itself reads (`LoadableComponent`)
 import { InlineText } from "spell/ui/elements/InlineText"

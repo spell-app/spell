@@ -188,3 +188,23 @@ function runText(text: string, imports: Record<string, unknown>): Promise<Record
   const run = (0, eval)(text) as (imports: Record<string, unknown>) => Promise<Record<string, unknown>>
   return run(imports)
 }
+
+describe("asFunction() for a page's chunk (solid-2-final P13)", () => {
+  test("reads what the running program declared by name, but never what it declares itself", async () => {
+    const chunk = [
+      `import { core, Page } from "blob:core"`,
+      `export class Grammar extends Page {}`,
+      `export const grammar = new Grammar(home)`
+    ].join("\n")
+    const program = asFunction(chunk, "Grammar", ["home", "Grammar", "spellUi"])!
+    expect(program.text.split("\n")[0]).toContain("const { home, spellUi } = __spellGiven__;")
+    expect(program.text).toMatch(/^\(async \(__spellImports__, __spellGiven__\) =>/)
+    class Page {
+      constructor(readonly from?: unknown) {}
+    }
+    // oxlint-disable-next-line no-eval -- the program's own text, as `runProgram()` runs it
+    const run = (0, eval)(program.text) as (imports: unknown, given: unknown) => Promise<Record<string, unknown>>
+    const exports = await run({ "blob:core": { core: {}, Page } }, { home: "the home page", spellUi: {} })
+    expect((exports.grammar as Page).from).toBe("the home page")
+  })
+})

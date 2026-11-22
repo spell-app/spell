@@ -9,6 +9,7 @@ import { PerfBuilds } from "./PerfBuilds"
 import { PerfResults } from "./PerfResults"
 import { LoadMeasure } from "./LoadMeasure"
 import { LeaksMeasure } from "./LeaksMeasure"
+import { HugeListsMeasure } from "./HugeListsMeasure"
 import { TypingMeasure } from "./TypingMeasure"
 import { A11yMeasure } from "./A11yMeasure"
 import { ListenersMeasure } from "./ListenersMeasure"
@@ -145,6 +146,11 @@ export class PerfRun {
         const profile = page === "editor" ? forEditor(firstProfile) : firstProfile
         await step("leaks", `${page}/${profile}`, () => LeaksMeasure.measure(page, profile, on))
       }
+    }
+    // huge lists are put on the docs page, which defines both:  on the phone when it's asked for
+    if (steps.includes("lists") && pages.includes("docs")) {
+      const profile: PerfProfileName = profiles.includes("phone") ? "phone" : firstProfile
+      await step("lists", `docs/${profile}`, () => HugeListsMeasure.measure("docs", profile, on))
     }
     if (steps.includes("typing") && pages.includes("editor")) {
       for (const profile of [...new Set(profiles.map(forEditor))])
