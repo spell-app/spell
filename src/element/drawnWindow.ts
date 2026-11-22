@@ -254,6 +254,9 @@ class ListWindow<Item> {
   /** What it draws:  the `<For>` over its entries. */
   readonly drawing: JSX.Element
 
+  /** Every item there is now, as the caller says, read once per change. */
+  readonly items: () => readonly Item[]
+
   /** Its entries now:  the items drawn, with the stand-ins and lot marks between them. */
   readonly layout: () => Layout<Item>
 
@@ -313,8 +316,10 @@ class ListWindow<Item> {
         scrollMargin: AHEAD_OF_THE_VIEW
       } as IntersectionObserverInit
     )
+    // read once for every reader:  a caller's list may be worked out afresh each time it's read (a filtered column)
+    this.items = createMemo(() => settings.items())
     this.layout = createMemo(() => {
-      const all = settings.items()
+      const all = this.items()
       if (!this.isKeyed) this.comeBack()
       this.countChanged.read()
       this.drawThrough(settings.through?.() ?? -1, all.length)
@@ -338,7 +343,10 @@ class ListWindow<Item> {
         entry instanceof Piece
           ? (entry.node as unknown as JSX.Element)
           : // its own memo:  a row that follows its position moves only when it does, not each time the window does
-            settings.drawItem(entry, createMemo(() => this.layout().positions[index()] ?? -1))
+            settings.drawItem(
+              entry,
+              createMemo(() => this.layout().positions[index()] ?? -1)
+            )
     )
   }
 
@@ -425,7 +433,7 @@ class ListWindow<Item> {
 
   /** Draw more:  the next lot in hand, else the next page. */
   private drawMore() {
-    const total = this.lotsIn(this.settings.items().length)
+    const total = this.lotsIn(this.items().length)
     if (this.to < total) {
       this.endBefore = (this.moreBelow.node as Element).getBoundingClientRect().top
       this.to++
@@ -435,7 +443,7 @@ class ListWindow<Item> {
 
   /** Find or a print:  everything drawn, up to `MOST_FOR_FIND`, and kept till the person scrolls. */
   private drawForFind() {
-    const length = this.settings.items().length
+    const length = this.items().length
     const wanted = this.lotsIn(Math.min(length, MOST_FOR_FIND))
     if (this.from === 0 && this.to >= wanted) return
     this.from = 0
@@ -721,7 +729,7 @@ class ListWindow<Item> {
     const kept = new Set<number>()
     const focused = this.lotHolding(parent, deepActiveElement())
     if (focused !== undefined) kept.add(focused)
-    const all = this.settings.items()
+    const all = this.items()
     const through = untrack(() => this.settings.through?.() ?? -1)
     if (through >= 0 && through < all.length) kept.add(Math.floor(through / this.atOnce))
     for (const item of this.edited) {
@@ -749,7 +757,7 @@ class ListWindow<Item> {
     const onInput = (event: Event) => {
       const lot = this.lotHolding(parent, event.composedPath()[0] as Node)
       if (lot === undefined) return
-      const all = this.settings.items()
+      const all = this.items()
       for (const item of all.slice(lot * this.atOnce, (lot + 1) * this.atOnce)) this.edited.add(item)
     }
     parent.addEventListener("input", onInput, { capture: true })
@@ -762,26 +770,27 @@ class ListWindow<Item> {
 
   /** The height of lots `first` up to `end`:  each as measured, else the average. */
   heightOf(first: number, end: number, perItem = this.itemHeight()): number {
+    const length = untrack(() => this.items().length)
     let height = 0
-    for (let lot = first; lot < end; lot++) height += this.heights.get(lot) ?? perItem * this.itemsIn(lot)
+    for (let lot = first; lot < end; lot++) height += this.heights.get(lot) ?? perItem * this.itemsIn(lot, length)
     return height
   }
 
   /** An item's height on average, of the lots measured;  `ITEM_PX_GUESS` before any is. */
   itemHeight(): number {
+    const length = untrack(() => this.items().length)
     let measured = 0
     let items = 0
     for (const [lot, height] of this.heights) {
       measured += height
-      items += this.itemsIn(lot)
+      items += this.itemsIn(lot, length)
     }
     return items ? measured / items : ITEM_PX_GUESS
   }
 
-  /** How many items lot `lot` holds:  `atOnce`, but the last. */
-  itemsIn(lot: number): number {
-    const all = untrack(() => this.settings.items().length)
-    return Math.max(0, Math.min(this.atOnce, all - lot * this.atOnce))
+  /** How many items lot `lot` holds, of `length`:  `atOnce`, but the last. */
+  itemsIn(lot: number, length: number): number {
+    return Math.max(0, Math.min(this.atOnce, length - lot * this.atOnce))
   }
 
   /** `piece`, a stand-in, as tall as the lots it stands for. */

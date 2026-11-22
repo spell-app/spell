@@ -1,5 +1,5 @@
 import { isServer } from "@solidjs/web"
-import { For, Show, type Accessor } from "solid-js"
+import { For, Show, createMemo, type Accessor } from "solid-js"
 
 import { Dragging } from "spell/util/Dragging"
 import { PrefStore } from "spell/util/persist/PrefStore"
@@ -2559,9 +2559,11 @@ export class UITree extends E.UIComponent<typeof treeVocabulary> {
    *   come back:  never the row with the tab stop, or the focus (epic `solid-2-final` P17).
    */
   private itemRows(shown: () => readonly TreeItemData[], depth: number) {
+    // read once per change, not by every row:  `shown()` filters the whole column each time it's read
+    const setSize = createMemo(() => shown().length)
     return drawnInWindow({
       items: shown,
-      drawItem: (item, position) => this.itemRow(item, depth, position, () => shown().length),
+      drawItem: (item, position) => this.itemRow(item, depth, position, setSize),
       through: () => {
         const list = shown()
         const key = this.keyItemIn(depth)
