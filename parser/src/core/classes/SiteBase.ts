@@ -160,7 +160,7 @@ export class SiteBase extends App {
     if (!entry)
       throw new TypeError(`SiteBase.show():  ${this.constructor.name} has no page or part "${name}";  list it`)
     const param = thing === undefined ? undefined : this.paramFor(entry, thing)
-    this.navigate(this.addressWith(name, thing), param ? { [propertyFor(param)]: thing } : {})
+    void this.navigate(this.addressWith(name, thing), param ? { [propertyFor(param)]: thing } : {})
   }
 
   /**
@@ -188,10 +188,12 @@ export class SiteBase extends App {
   /**
    * Go to `address`:  through the host when there is one (the editor's Run puts it in its URL), and shown here at once.
    * - `known`:  a parameter's thing, when the program handed it over:  no need to look it up again.
+   * - Resolves once its page is shown (`showAddress()`):  a link's `#section` is landed on then, not on the page left.
+   * - NEVER rejects.
    */
-  navigate(address: string, known: Record<string, unknown> = {}): void {
+  navigate(address: string, known: Record<string, unknown> = {}): Promise<void> {
     core.siteHost?.go(address)
-    void this.showAddress(address, known)
+    return this.showAddress(address, known)
   }
 
   /**
@@ -305,7 +307,7 @@ export class SiteBase extends App {
   start(): void {
     const host = core.siteHost
     void this.showAddress(host?.address() ?? this.currentAddressHere ?? "/")
-    host?.listen((address) => void this.showAddress(address))
+    host?.listen((address) => this.showAddress(address))
     this.wearTheme()
     super.start()
   }
@@ -533,7 +535,7 @@ export class SiteBase extends App {
       event.preventDefault()
       const { href } = (event as CustomEvent<{ href: string }>).detail
       // a link out of the site (`- it has a link to ...`):  a new tab, the site left as it is
-      if (SiteBase.isOwnAddress(href)) this.navigate(href)
+      if (SiteBase.isOwnAddress(href)) void this.navigate(href)
       else globalThis.open?.(href, "_blank", "noopener")
     })
   }
@@ -761,8 +763,10 @@ export class SiteBase extends App {
   /**
    * A click on a link to one of its own addresses:  shown here, not loaded as a new page.
    * - A link to download a file, or one with its own `target`, is left to the browser.
-   * - An address may end in a `#section`:  the part before it picks the page,
-   *   and Spell UI's `HashLanding` lands on the section, as the docs site's links do.
+   * - An address may end in a `#section`:  the part before it picks the page, and the host lands on the section
+   *   (`SiteHost.landOn()`) once that page is shown, as the docs site's links do.
+   *   - Not before:  the page being left may have a section of the same id (Button's Usage and Examples both have
+   *     "State texts"), and the landing would find that one (epic `editor` I293).
    */
   followLink(event: MouseEvent): void {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) return
@@ -773,8 +777,8 @@ export class SiteBase extends App {
     if (!href || !SiteBase.isOwnAddress(href) || link?.target || link?.hasAttribute("download")) return
     event.preventDefault()
     const [address = "", section] = href.split("#")
-    this.navigate(address)
-    if (section) core.siteHost?.landOn?.(section)
+    const shown = this.navigate(address)
+    if (section) void shown.then(() => core.siteHost?.landOn?.(section))
   }
 
   /** What it shows now:  its page (a spinner while its parameters are read), the not found page or the error page. */
