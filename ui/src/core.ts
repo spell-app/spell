@@ -77,6 +77,8 @@ export * from "spell/ui/elements/LoadableComponent"
 export * from "spell/ui/elements/SourceMarkup"
 export * from "spell/ui/elements/LoadableBody"
 export * from "spell/ui/elements/DOMLoadableBodyElement"
+export * from "spell/ui/elements/InlineText"
+export * from "spell/ui/elements/GivenDrawings"
 
 /**
  * The package namespace (WWOD §4):

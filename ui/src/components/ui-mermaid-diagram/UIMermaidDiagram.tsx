@@ -62,6 +62,11 @@ export class DOMMermaidDiagramElement extends E.DOMLoadableElement<UIMermaidDiag
  *   or a `source` file (see `LoadableComponent`);  it redraws when either changes.
  * - Mermaid loads on the first draw (`MermaidDrawer` -> `MermaidEngine`, the lazy chunk):  a page without a drawing
  *   pays nothing.
+ * - DRAWN AHEAD by the page server when it served the page (`E.GivenDrawings`, kind `mermaid`):  a drawing it was
+ *   given for THIS text, these settings and the page's colours shows with no Mermaid and no ELK loaded;
+ *   its first drawing asks the page server, when it draws diagrams, before loading Mermaid
+ *   - one per light and dark:  Mermaid works its colours out as plain ones, so a drawing is for one scheme
+ *   - text edited since, icons in it (the page's own packs), other colours, or a server that can't:  drawn here
  * - Its colours:  `theme`, else `spell` (Spell UI's tokens, read from the page);  light or dark:  `scheme`, else
  *   the page's, redrawn when the page switches or wears another theme.
  *   - A reader's picks from the menu win over both (`controls`), kept under `remember` (`PrefStore`).
@@ -97,6 +102,9 @@ export class UIMermaidDiagram extends E.LoadableComponent<typeof mermaidDiagramV
   /** Draws started;  only the latest one's drawing is shown. */
   private ticket = 0
 
+  /** Has it asked the page server for a drawing yet?  Only its first draw asks:  an edit is drawn here. */
+  private hasAsked = false
+
   /** The text and settings last drawn (or tried):  the same again draws nothing. */
   private lastDrawn: string | undefined
 
@@ -122,14 +130,10 @@ export class UIMermaidDiagram extends E.LoadableComponent<typeof mermaidDiagramV
     this.isDrawing = true
     try {
       const ui = await UI.load()
-      const engine = await MermaidDrawer.load()
+      const given = await this.givenDrawing(text)
       if (ticket !== this.ticket) return
-      if (this.usesElk(text)) ElkEngine.load().catch(() => undefined)
-      const icons = await this.iconsFor(engine.iconsIn(text), ui)
-      if (ticket !== this.ticket) return
-      const config = MermaidDrawer.configFor(this.probe, this.drawSettings)
-      const drawn = await engine.instance.draw(text, { config, icons })
-      if (ticket !== this.ticket) return
+      const drawn = given ?? (await this.drawHere(text, ui, ticket))
+      if (!drawn || ticket !== this.ticket) return
       this.drawn = drawn
       this.problem = undefined
       if (this.loadStatus === E.SourceStatus.error) {
@@ -144,6 +148,39 @@ export class UIMermaidDiagram extends E.LoadableComponent<typeof mermaidDiagramV
     } finally {
       if (ticket === this.ticket) this.isDrawing = false
     }
+  }
+
+  /** `text` drawn in this page, Mermaid loaded;  `undefined` when a newer draw started meanwhile. */
+  private async drawHere(text: string, ui: { icons: E.IconPacks }, ticket: number) {
+    const engine = await MermaidDrawer.load()
+    if (ticket !== this.ticket) return undefined
+    if (this.usesElk(text)) ElkEngine.load().catch(() => undefined)
+    const icons = await this.iconsFor(engine.iconsIn(text), ui)
+    if (ticket !== this.ticket) return undefined
+    const config = MermaidDrawer.configFor(this.probe, this.drawSettings)
+    return engine.instance.draw(text, { config, icons })
+  }
+
+  /**
+   * The page server's drawing of `text` (`E.GivenDrawings`):  the page's, else asked for on the first draw;
+   * `undefined` for none, and it's drawn here.
+   * - only one drawn in the colours this page's tokens give, and its text style (`MermaidDrawer.lookOf()`):  a theme
+   *   the reader wears that the server's page doesn't, or a page of another font, is drawn here
+   * - never with icons:  they're the page's own packs
+   */
+  private async givenDrawing(text: string): Promise<{ svg: string; diagramType: string } | undefined> {
+    if (MermaidDrawer.mayHaveIcons(text)) return undefined
+    const ask = !this.hasAsked
+    this.hasAsked = true
+    const settings = this.drawSettings
+    const config = MermaidDrawer.configFor(this.probe, settings)
+    const bodyText = MermaidDrawer.bodyTextOf(this.domElement.ownerDocument)
+    const look = MermaidDrawer.lookOf(config, bodyText)
+    const item = { kind: MERMAID_DRAWINGS, settings, text, hints: { config, bodyText } }
+    const fits = (drawing: E.GivenDrawing) => drawing.data?.look === look
+    const given = await E.GivenDrawings.find(item, { ask, fits })
+    if (!given || !fits(given)) return undefined
+    return { svg: given.markup, diagramType: typeof given.data?.diagramType === "string" ? given.data.diagramType : "" }
   }
 
   /** What the drawing is drawn with now:  the settled theme and scheme, and the attributes. */
@@ -462,6 +499,9 @@ export interface UIMermaidDiagram extends E.AttributeValues<typeof mermaidDiagra
 
 /** `seed` when none is given:  fixed, so a hand-drawn drawing doesn't wobble each redraw. */
 const DEFAULT_SEED = 1
+
+/** The page server's kind of drawing for diagrams (`E.GivenDrawings`):  Spell UI's `MermaidOnServer`. */
+const MERMAID_DRAWINGS = "mermaid"
 
 /** `layout`'s ELK. */
 const ELK = "elk"

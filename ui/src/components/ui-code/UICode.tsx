@@ -1,7 +1,7 @@
 import { Show } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
-import { E, UI } from "spell/ui/core"
+import { E, UI, UIT } from "spell/ui/core"
 import { codeVocabulary } from "./UICode.en"
 import { CodeHighlighter } from "./CodeHighlighter"
 import { CodeLines } from "./CodeLines"
@@ -46,6 +46,10 @@ export class DOMCodeElement extends E.DOMLoadableElement<UICode> {
  *   - a language `UI.code` knows (a page's own, e.g. spell's):  its own highlighter
  *   - one that draws its code whole (`CodeLanguage.draw`, spell's bubbly look):  that drawing, in place of the
  *     `<pre>`, with the sheet it hands over;  unless `line-numbers` or `wrap` asks for lines
+ * - DRAWN AHEAD by the page server when it served the page (`E.GivenDrawings`, kind `code`):  colours (or a
+ *   language's drawing) it was given for THIS text and these settings show with nothing loaded, no highlight.js, no
+ *   spell parser;  its first colouring asks the page server, when it draws code, before loading either
+ *   - text edited since, or a server that can't:  coloured in the page, as below
  * - The code shows plain until the colours arrive.
  *   An unknown language stays plain, with a `render` `ui-error` (no message:  the code is still there).
  * - `line-numbers` (from `start`) and `wrap` are CSS:  counters, and a hanging indent per `.line`.
@@ -72,6 +76,9 @@ export class UICode extends E.LoadableComponent<typeof codeVocabulary> {
 
   /** Highlights started;  only the latest one's result is shown. */
   private ticket = 0
+
+  /** Has it asked the page server for a drawing yet?  Only its first colouring asks:  an edit is coloured here. */
+  private hasAsked = false
 
   /** The lines as HTML:  coloured once the colours for THIS text arrive, escaped plain text until then (or drawn). */
   @E.derived
@@ -134,8 +141,11 @@ export class UICode extends E.LoadableComponent<typeof codeVocabulary> {
   private async highlight(code: string, language: string | undefined) {
     const ticket = ++this.ticket
     try {
-      await UI.load()
-      const result = await CodeHighlighter.highlight(code, language, { drawing: this.isDrawable })
+      let result = await this.givenColours(code, language)
+      if (!result) {
+        await UI.load()
+        result = await CodeHighlighter.highlight(code, language, { drawing: this.isDrawable })
+      }
       if (ticket !== this.ticket) return
       this.highlighted = { ...result, code }
       this.send("ui-coloured", { language: result.language, detected: result.detected })
@@ -144,6 +154,28 @@ export class UICode extends E.LoadableComponent<typeof codeVocabulary> {
       this.highlighted = undefined
       const kind = E.SourceError.kindFor(error, "render")
       this.sendSourceEvent("ui-error", { kind, source: this.source || undefined, error })
+    }
+  }
+
+  /**
+   * The page server's colours for `code` as `language` (`E.GivenDrawings`):  the page's, else asked for on the
+   * first colouring;  `undefined` for none, and the page colours it.
+   * - plain text never:  nothing loads for it anyway
+   */
+  private async givenColours(code: string, language: string | undefined): Promise<Highlighted | undefined> {
+    if (language?.toLowerCase() === UIT.TEXT) return undefined
+    const ask = !this.hasAsked
+    this.hasAsked = true
+    const settings = { language: language ?? "", drawing: this.isDrawable }
+    const given = await E.GivenDrawings.find({ kind: CODE_DRAWINGS, settings, text: code }, { ask })
+    if (!given) return undefined
+    const data = given.data ?? {}
+    return {
+      html: given.markup,
+      styles: given.sheet,
+      isDrawn: data.isDrawn === true,
+      language: typeof data.language === "string" ? data.language : undefined,
+      detected: data.detected === true
     }
   }
 
@@ -227,6 +259,9 @@ export class UICode extends E.LoadableComponent<typeof codeVocabulary> {
 
 /** The vocabulary getters, typed (`UIComponent`'s doc). */
 export interface UICode extends E.AttributeValues<typeof codeVocabulary> {}
+
+/** The page server's kind of drawing for code (`E.GivenDrawings`):  Spell UI's `CodeOnServer`, the app's Spell. */
+const CODE_DRAWINGS = "code"
 
 /** Class of each line's span inside `<code>`. */
 const LINE_CLASS = "line"

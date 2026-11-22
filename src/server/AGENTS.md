@@ -236,7 +236,26 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - the page server's setting `cacheLimit` sets it (below), `sizeInBytes()` reading `"200MB"`, `"1GB"` ...
     - `codeVersion(paths)`:  a version for some code, a hash of its files' text, read again only when one changes
     - `DiskCache.home`:  Spell's caches on this machine, `~/.spell/cache`
-    - Today one:  the app's compile cache, `/api/compiles` (spaces' `api.ts`):  it knows nothing of spell projects.
+    - Today two:  the app's compile cache, `/api/compiles` (spaces' `api.ts`):  it knows nothing of spell projects;
+      and the drawings' (`Drawings`, below)
+  - `Drawings` -- what pages show that never changes, DRAWN AHEAD on the server (epic `solid-2-final` P15):
+    Mermaid's diagrams and coloured code, so a page whose drawings are all in loads none of what draws them
+    - ONE mechanism, a DRAWER per kind (`SRV.Drawer`:  its kind, name and version, `find()` in a page, `draw()`),
+      handed in by each folder's route module (`RouteContext.drawings.add()`):  it names none itself
+      - Spell UI's:  `<ui-code>`'s highlight.js, in process;  `<ui-mermaid-diagram>`'s Mermaid, in ONE headless page
+        it keeps open (`spell/ui/drawings`)
+      - the app's:  Spell's bubbly look, in process (`SpellOnServer`);  it `replaces` `spell-language.js`
+    - ONE cache on disk, a `DiskCache` per drawer, `~/.spell/cache/drawings/<drawer>/<version>/<key>`, under
+      `cacheLimit`;  the key a hash of the item's kind, settings and text (`Drawings.keyFor()`, on util's
+      `stableHash()`), the same in a page (Spell UI's `GivenDrawings`)
+    - FILLED IN as a page is served (`fill()`, an html hook before the page scripts):  what's cached goes into a table
+      in its `<head>`, `<script type="application/json" data-spell-drawings>`, a shared sheet once;  the rest is drawn
+      in the background, one at a time, for the next view
+      - a page whose items a drawer takes are ALL in doesn't get the page scripts it `replaces` (`withPageScripts()`)
+    - ASKED for:  `POST /api/server/drawings/<kind>`, `{ text, settings, hints? }`, same origin, no token;
+      the drawing, or 204 when none came in 2s (a headless browser starting):  the page draws it itself meanwhile
+    - told every page as `SPELL_SERVER.drawings` (`DrawingsConfig`):  its address, its kinds, its tables' selector
+    - NEVER fails a page:  a drawer that throws is logged (`SPELL_DEBUG=server:drawings`), and the page draws as before
   - `Git` -- running git, for every tool in every repo (epic `coherence` P7, from spell-epic):
     `run()` (never throws), `out()`, `lines()`, `mustRun()` (throws a `GitError`), `mainRoot()`
   - `RealPath` -- comparing paths by where they really are, links followed (`of()`, `same()`, `isIn()`, `from()`;
@@ -339,13 +358,16 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - lists end to end;  maps (`componentSets`, `engineRoutes`, `localCopies`) entry by entry, a later part winning
         - outside a kit:  `root`'s own `package.json` alone (the tests' scratch checkouts)
       - `componentSets()` and `engineRoutes()` read their two lists out of them;  `repoSettings()` reads one part.
+      - `ui/`'s route module adds its drawers, `src/drawings/drawingRoutes.server.ts`;  the app's, Spell's,
+        `src/app/components/spell-code/spellDrawingRoutes.server.ts` (`SRV.Drawings`, above)
       - route modules, watched folders, writable folders, bundles, page scripts, component sets, engine routes,
         local copies, what's gone, the site header's tabs, the caches' cap
     - THE CACHES' CAP (`"cacheLimit"`, epic `language` Q41):  the most the server's caches on disk may take, every
       version's entries together, e.g. `"200MB"`, `"1GB"`, `"512KB"` (`SRV.sizeInBytes()`);  200 MB by default
       - the kit's part says `"200MB"`;  a later part's wins, so the epic repo's `page-server.json5` may change it
       - past it, a write drops the entries used least recently first (`SRV.DiskCache`)
-      - today one cache:  the app's compile cache, `~/.spell/cache/compiles` (its route module sets the cap as it starts)
+      - two caches:  the app's compile cache, `~/.spell/cache/compiles` (its route module sets the cap as it starts),
+        and each drawer's, `~/.spell/cache/drawings/<drawer>` (`SRV.Drawings`)
       - Plain `node` loads `settings.ts` and `page.types.ts` by path (spell-epic's tools):
         node built-ins, `json5`, `spell/server/contentFolder`, `spell/server/kitFolders`, `spell/util/node/findUp`
         and type imports only,

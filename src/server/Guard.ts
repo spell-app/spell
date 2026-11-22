@@ -98,6 +98,21 @@ export class Guard {
     if (origin && !this.origins.has(origin)) throw new HttpError(403, "wrong origin")
   }
 
+  /**
+   * `HttpError(403)` when `request` comes from a page of another origin;  no token needed
+   * - for a request that changes nothing a person keeps, but costs the server work (`SRV.Drawings`)
+   */
+  checkOrigin(request: Request): void {
+    const origin = request.get("origin")
+    if (origin && !this.origins.has(origin)) throw new HttpError(403, "wrong origin")
+  }
+
+  /** middleware:  `checkOrigin` */
+  originCheck: Handler = (request, _reply, next) => {
+    this.checkOrigin(request)
+    next()
+  }
+
   /** middleware:  `checkHost` */
   hostCheck: Handler = (request, _reply, next) => {
     this.checkHost(request)

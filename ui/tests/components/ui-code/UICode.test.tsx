@@ -1,9 +1,11 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from "vite-plus/test"
 
+import { E } from "spell/ui/core"
 import { UI } from "spell/ui/runtime"
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 
+import { CodeHighlighter } from "spell/ui/components/ui-code"
 import type { DOMCodeElement } from "spell/ui/components/ui-code/UICode"
 
 import "spell/ui/components/ui-code"
@@ -184,5 +186,43 @@ describe("<ui-code> accessibility", () => {
     const html = EXAMPLES[path]!
     const root = await code(html, html.match(/<ui-code\b/g)?.length ?? 0)
     await expectAccessible(root)
+  })
+})
+
+describe("<ui-code> drawn on the page server", () => {
+  afterEach(() => {
+    document.querySelectorAll("script[data-spell-drawings]").forEach((table) => table.remove())
+    E.GivenDrawings.reset()
+    vi.restoreAllMocks()
+  })
+
+  it("shows the colours the page was given for its text, and loads no highlight.js", async () => {
+    const text = "const x = 1"
+    const key = E.GivenDrawings.keyFor({ kind: "code", settings: { language: "typescript", drawing: true }, text })
+    const table = document.createElement("script")
+    table.type = "application/json"
+    table.setAttribute("data-spell-drawings", "")
+    const markup = '<span class="hljs-keyword">given</span> x'
+    table.textContent = JSON.stringify({
+      drawings: { [key]: { markup, data: { language: "typescript", detected: false } } },
+      sheets: {}
+    })
+    document.head.append(table)
+    const highlight = vi.spyOn(CodeHighlighter, "highlight")
+    const host = await code(`<ui-code language="typescript">${text}</ui-code>`)
+    expect(codeOf(host).querySelector(".hljs-keyword")?.textContent).toBe("given")
+    expect(highlight).not.toHaveBeenCalled()
+  })
+
+  it("colours it in the page when its text isn't the one drawn", async () => {
+    const key = E.GivenDrawings.keyFor({ kind: "code", settings: { language: "typescript", drawing: true }, text: "a" })
+    const table = document.createElement("script")
+    table.type = "application/json"
+    table.setAttribute("data-spell-drawings", "")
+    table.textContent = JSON.stringify({ drawings: { [key]: { markup: "given" } }, sheets: {} })
+    document.head.append(table)
+    const host = await code(`<ui-code language="typescript">const b = 2</ui-code>`)
+    expect(codeOf(host).textContent).not.toContain("given")
+    expect(codeOf(host).querySelector(".hljs-keyword")?.textContent).toBe("const")
   })
 })

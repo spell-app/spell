@@ -114,6 +114,9 @@
   },
   "customElements": "./docs/__data/custom-elements.json",
   "pageServer": {
+    "routes": [
+      "src/drawings/drawingRoutes.server.ts"
+    ],
     "bundles": [
       "src/components/ui-root",
       "site/_assets"

@@ -191,6 +191,14 @@ Two words for the two objects behind every tag (epic `wwod-spell-ui`, P15):
   - They read the site's data through `SiteData` ([the components data](docs/__data/components.json5)),
     NEVER the vocabularies.
   - The barrel's header says how to add one.
+- [`src/drawings/`](src/drawings/) (`spell/ui/drawings/...`, by file):  what Spell UI's elements show, DRAWN AHEAD on
+  the page server (the kit's `SRV.Drawings`, epic `solid-2-final` P15).
+  - `CodeOnServer`:  `<ui-code>`'s colours, highlight.js in the server's process;  `MermaidOnServer`:
+    `<ui-mermaid-diagram>`'s diagrams, in ONE headless page (the site bundle's second entry, `site/_src/drawings.ts`)
+  - Spell UI's route module adds them (`drawingRoutes.server.ts`, its part of the page server's settings, `"routes"`).
+  - The elements' half:  `E.GivenDrawings` (`src/elements/`), which both elements ask before loading their engine;
+    a text edited since, or a server that can't, draws in the page as always.
+  - Node only, every file `.server.ts`;  its tests run in node (`tests/drawings/`, the `ssr` project).
 - [`src/static/`](src/static/) (`spell/ui/static`, `SSR`):  the STATIC server render, for SEO.
   - `StaticRender.page()` / `fragment()` turn `ui-*` markup into plain light-DOM HTML in node:
     no shadow DOM, no JS.

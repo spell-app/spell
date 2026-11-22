@@ -153,6 +153,13 @@ export class PageServer {
   private readonly localCopies: Record<string, string>
 
   /**
+   * what pages show drawn ahead (`SRV.Drawings`, epic `solid-2-final` P15):  route modules add their drawers
+   * (`RouteContext.drawings`);  each page filled in as it's served, the rest asked for at `SRV.Drawings.API`
+   * - its cache under the settings' `cacheLimit`, as the compile cache's
+   */
+  readonly drawings: SRV.Drawings
+
+  /**
    * - `certificate`:  HTTPS and HTTP/2 too, on the same port (`certificateFor()`);  plain HTTP stays for the tools
    */
   constructor({ root, token, certificate }: { root: string; token?: string; certificate?: SRV.CertificateFiles }) {
@@ -168,7 +175,11 @@ export class PageServer {
       ...(this.pidFile.spaces && { spaces: this.pidFile.spaces })
     }
     const settings = this.settings()
-    const { writable, pageScripts = [], siteTabs, localCopies = {}, gone = [] } = settings
+    const { writable, pageScripts = [], siteTabs, localCopies = {}, gone = [], cacheLimit } = settings
+    this.drawings = new SRV.Drawings({
+      ...(cacheLimit !== undefined && { limit: SRV.sizeInBytes(cacheLimit) }),
+      log: new SRV.ServerLog({ prefix: "drawings" })
+    })
     this.pageScripts = pageScripts
     this.localCopies = localCopies
     this.componentSets = componentSets(settings)
@@ -189,6 +200,8 @@ export class PageServer {
       mounts: [{ prefix: "/", dir: this.root, hashed: this.hashed.own }],
       html: [
         (page) => this.withLocalCopies(page),
+        // before the page scripts:  a page whose drawings are all in needs none of the scripts that draw them
+        (page, served) => this.drawings.fillServed(page, served),
         (page, served) => this.withPageScripts(page, served),
         (page, served) => this.withWorktreeLoads(page, served)
       ],
@@ -209,6 +222,8 @@ export class PageServer {
         etag: SRV.StaticHandler.etagOf(statSync(served.file)),
         // the site header's tabs:  what the settings name (`"siteTabs"`)
         ...(this.siteTabs && { siteTabs: this.siteTabs }),
+        // what it draws ahead, and where a page asks for the rest (`SRV.Drawings`)
+        ...(this.drawings.pageConfig() && { drawings: this.drawings.pageConfig() }),
         // e.g. Owen is offline, no Claude:  pages say "queued for when you land" (epics' airplane mode)
         ...Object.assign({}, ...this.pageConfigs.map((add) => add(served)))
       })
@@ -241,6 +256,8 @@ export class PageServer {
     router.get(SERVER_API, (_request, reply) => reply.noStore().json(this.info))
     router.post(STALE_API, this.web.guard.writeCheck, SRV.parseBodies(), this.onStaleReport)
     router.get(SERVER_REPORTS_API, this.onReportsAsked)
+    // drawings asked for by a page:  its own origin only, no token (a page from an earlier run asks too)
+    router.use(SRV.Drawings.API, this.web.guard.originCheck, this.drawings.router())
     // NOTE: no body parsing here:  each route parses its own (the app's `/api` is JSON5), and the proxy streams.
 
     // `/api/pages` and `/api/files`:  saving, making, moving and deleting files, only inside the `"writable"` folders
@@ -321,6 +338,7 @@ export class PageServer {
   /** stop:  the bundles' build, route modules' stops, the pid file (if ours), the server */
   async stop(): Promise<void> {
     this.bundles.stop()
+    await this.drawings.stop()
     for (const build of this.worktreeBuilds.values()) build.stop()
     for (const stop of this.stops) await Promise.resolve(stop()).catch(() => {})
     this.pidFile.removeIfOurs()
@@ -537,15 +555,21 @@ export class PageServer {
    * each one whose file exists, unless `served`'s path is under one of its `skip` prefixes.
    * - The settings are read as the server starts;  the files at each page, so a build that lands meanwhile counts.
    * - The server knows nothing of what they are (the app's `spell-language.js`):  the paths come from the settings.
+   * - a script a drawer replaces (`SRV.Drawer.replaces`) is left out of a page whose items that drawer takes are all
+   *   filled in (`SRV.Drawings.fill()`):  spell's `spell-language.js`, on a page whose spell is drawn already
    * - each tag is marked `data-spell-page-script`:  the docs runtime patches a page in place only when every script
    *   on it is one it knows, and without the mark this one made every epic page reload on every edit (2026-10-25)
    */
   withPageScripts(page: string, served: ServedFile): string {
     const path = served.path.replace(WORKTREE_ADDRESS, "/")
+    const filled = this.drawings.filledFor(served)
+    const replaced = filled ? this.drawings.replacedScripts(filled) : new Set<string>()
     const tags = this.pageScripts
       .filter(
-        ({ file, skip }) =>
-          !skip?.some((prefix) => path.startsWith(prefix)) && (!file || existsSync(join(this.root, file)))
+        ({ src, file, skip }) =>
+          !replaced.has(src) &&
+          !skip?.some((prefix) => path.startsWith(prefix)) &&
+          (!file || existsSync(join(this.root, file)))
       )
       // marked, so a page patching itself in place knows the server added it (`PAGE_SCRIPT_ATTRIBUTE`)
       .map(({ src }) => `<script type="module" src="${src}" ${PAGE_SCRIPT_ATTRIBUTE}></script>\n`)
@@ -687,6 +711,7 @@ export class PageServer {
       serveWorktrees: (...dirs) => void this.serveWorktrees(...dirs),
       serveContent: (dir) => void this.serveContent(dir),
       addPageConfig: (add) => void this.addPageConfig(add),
+      drawings: this.drawings,
       onListening: (start) => this.listenings.push(start),
       onStop: (stop) => this.stops.push(stop),
       addServerReport: (report) => this.reports.push(report)

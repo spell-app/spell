@@ -111,7 +111,8 @@
   },
   "pageServer": {
     "routes": [
-      "src/spaces/server/node/routes/appRoutes.ts"
+      "src/spaces/server/node/routes/appRoutes.ts",
+      "src/app/components/spell-code/spellDrawingRoutes.server.ts"
     ],
     "pageScripts": [
       {

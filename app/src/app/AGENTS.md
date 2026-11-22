@@ -525,6 +525,9 @@ and in the app's build folder, `app/` at the app folder's root.
         - what the page server adds to the docs pages it serves (its `"pageScripts"`:
           [the kit's server AGENTS.md](../../../src/server/AGENTS.md)), so epic pages and guides colour spell (Q23)
         - it needs only the page's core, so any docs bundle will do
+        - left off a page whose spell the page server drew ahead (epic `solid-2-final` P15):  `SpellOnServer`,
+          the parser and `BubblyHtml` in the server's process, added by the app's drawing route module
+          (`spellDrawingRoutes.server.ts`), `replaces` it;  the kit's `SRV.Drawings`
     - Compiled spell's `<markdown>` blocks stay `<ui-markdown>` (marked):
       they're plain text in a drawing (`LayoutSpell.ts`, `MarkdownBlock`).
 - `<spell-reference-page>`:  a REFERENCE PAGE, made from its source each time, with a person's words about each thing
