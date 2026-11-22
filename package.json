@@ -1534,7 +1534,8 @@
     "files": [
       "repos.json5",
       "agents/wwod",
-      "agents/solid"
+      "agents/solid",
+      "guides"
     ],
     "bin": {
       "spell": "cli/main",
