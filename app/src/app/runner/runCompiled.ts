@@ -48,6 +48,22 @@ import { LiveEdit, type ProgramText } from "./LiveEdit"
  * - Answers the error message if it threw, else `undefined`.
  */
 export async function runCompiled(compiled: string, options: RunCompiledOptions): Promise<string | undefined> {
+  let finished!: () => void
+  const run = new Promise<void>((resolve) => (finished = resolve))
+  runInProgress = run
+  try {
+    return await runCompiledNow(compiled, options)
+  } finally {
+    finished()
+    if (runInProgress === run) runInProgress = undefined
+  }
+}
+
+/** The run under way, if any:  a page's chunk waits for it, so it runs on the program that's starting (`runPageChunk()`). */
+let runInProgress: Promise<void> | undefined
+
+/** `runCompiled()`'s work. */
+async function runCompiledNow(compiled: string, options: RunCompiledOptions): Promise<string | undefined> {
   if (options.keepThings) {
     const taken = await takeEdit(compiled, options)
     if (taken) return taken.problem
@@ -119,7 +135,7 @@ export async function runCompiled(compiled: string, options: RunCompiledOptions)
       // with its start skipped, a thing that starts afresh by itself would miss what the start does to it
       restoreConsole()
       core.console.info(`Started afresh:  ${problems.join(";  ")}.`)
-      const problem = await runCompiled(compiled, { ...options, keepThings: false, keepConsole: true })
+      const problem = await runCompiledNow(compiled, { ...options, keepThings: false, keepConsole: true })
       if (problem) carryAfterFailure = previous
       return problem
     }
@@ -397,9 +413,14 @@ function blobUrl(text: string): string {
  * - `projectId`:  names it in dev tools, `<projectId>.spell.js`.
  * - throws what the program throws as it runs, or a `SyntaxError`
  */
-export async function runProgram(linked: string, projectId?: string): Promise<Record<string, unknown>> {
-  const program = canRunText() ? asFunction(linked, projectId) : undefined
+export async function runProgram(
+  linked: string,
+  projectId?: string,
+  given?: Record<string, unknown>
+): Promise<Record<string, unknown>> {
+  const program = canRunText() ? asFunction(linked, projectId, given ? Object.keys(given) : []) : undefined
   if (!program) {
+    if (given) throw new Error("runProgram():  this page can't run a page's chunk:  it forbids running text as code")
     const url = blobUrl(linked)
     try {
       return (await import(/* @vite-ignore */ url)) as Record<string, unknown>
@@ -411,8 +432,40 @@ export async function runProgram(linked: string, projectId?: string): Promise<Re
   for (const url of program.imports) modules[url] = (await import(/* @vite-ignore */ url)) as Record<string, unknown>
   // indirect:  in the page's own scope, never this file's
   // oxlint-disable-next-line no-eval -- running the program's own text is what this is for
-  const run = (0, eval)(program.text) as (imports: typeof modules) => Promise<Record<string, unknown>>
-  return run(modules)
+  const run = (0, eval)(program.text) as (
+    imports: typeof modules,
+    given?: Record<string, unknown>
+  ) => Promise<Record<string, unknown>>
+  return run(modules, given)
+}
+
+/**
+ * Run `chunk`, one page's chunk of a built site, on the program running now:  its page made, its classes known
+ * (epic `solid-2-final` P13, `LazyPages`).
+ * - Its imports are linked as the program's were:  the runtime, each project it imports, each code file it calls.
+ * - It reads what the program declared by name (`asFunction()`'s `given`), as if it were still one module.
+ * - SIDE EFFECT:  its classes go to `core.things`, for `core.fromJSON()`;  its top-level things join the program's,
+ *   for the Thing Explorer;  its page is listed as it's made (`core.RUNTIME.pages`).
+ * - `name`:  names it in dev tools, `<name>.spell.js`.
+ * - throws with no program running, or what the chunk throws
+ */
+export async function runPageChunk(chunk: string, { coreUrl, name }: { coreUrl: string; name: string }): Promise<void> {
+  // the site asks for its first page as the program starts:  its chunk runs once the program has
+  await runInProgress
+  const running = lastProgram
+  if (!running) throw new Error(`runPageChunk():  no program is running to add ${name} to`)
+  const linked = linkModule(chunk, coreUrl, urlsOf(running.imports), running.natives)
+  const exports = await runProgram(linked, name, running.exports)
+  core.things.addClasses(exports)
+  const together = Object.defineProperties(
+    {},
+    {
+      ...Object.getOwnPropertyDescriptors(running.exports),
+      ...Object.getOwnPropertyDescriptors(exports)
+    }
+  )
+  running.exports = together
+  core.things.setTopLevel(together)
 }
 
 /**
@@ -423,10 +476,16 @@ export async function runProgram(linked: string, projectId?: string): Promise<Re
  * - `undefined` for a shape it doesn't know:  `export default`, `export { ... }`, `export *`, a side-effect import,
  *   a destructured export.
  * - Its exports are getters, so they stay live as a module's are:  `export let x`, set later, reads as it is now.
+ * - `given`:  names it reads from a second argument, each it doesn't declare itself:  a page's chunk, reading what the
+ *   running program declared (`runPageChunk()`).
  * - An import is read once, as the program starts:  what a project exports is set once it has loaded.
  * - Pure.
  */
-export function asFunction(linked: string, projectId?: string): { text: string; imports: string[] } | undefined {
+export function asFunction(
+  linked: string,
+  projectId?: string,
+  given: readonly string[] = []
+): { text: string; imports: string[] } | undefined {
   const mapAt = linked.search(SOURCE_MAP_COMMENT)
   const [code, map] = mapAt >= 0 ? [linked.slice(0, mapAt), linked.slice(mapAt)] : [linked, ""]
   const imports: string[] = []
@@ -447,9 +506,12 @@ export function asFunction(linked: string, projectId?: string): { text: string; 
     exported.push(name)
     return `${kind} ${name}`
   })
+  // a page's chunk reads what the program running declared:  each name it doesn't declare itself
+  const takes = given.filter((name) => !exported.includes(name) && IS_NAME.test(name))
+  if (takes.length) reads.push(`const { ${takes.join(", ")} } = ${GIVEN};`)
   const name = `${projectId ?? "program"}.spell.js`
   const text =
-    `(async (${IMPORTS}) => { "use strict"; ${reads.join(" ")} ${body}\n` +
+    `(async (${takes.length ? `${IMPORTS}, ${GIVEN}` : IMPORTS}) => { "use strict"; ${reads.join(" ")} ${body}\n` +
     `return { ${exported.map((it) => `get ${it}() { return ${it} }`).join(", ")} }\n})\n${map}\n//# sourceURL=${name}\n`
   return { text, imports }
 }
@@ -476,6 +538,12 @@ let canEval: boolean | undefined
 
 /** The name a program run as a function reads its imports by:  each module, by URL. */
 const IMPORTS = "__spellImports__"
+
+/** The name a page's chunk, run as a function, reads what the running program declared by (`runPageChunk()`). */
+const GIVEN = "__spellGiven__"
+
+/** A name a program declares, as javascript spells one. */
+const IS_NAME = /^[\p{L}_$][\p{L}\p{N}_$]*$/u
 
 /** An `import { a, b as c } from "url"` on its own line, as the compiler writes them:  its names, then its URL. */
 const IMPORT_LINE = /^import\s*\{([^}]*)\}\s*from\s*"([^"]+)";?[ \t]*$/gm
