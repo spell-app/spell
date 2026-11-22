@@ -23,13 +23,14 @@ import { StallWatch, type WatchProps } from "./StallWatch"
  *   named by its time and pid;  the turn goes to the oldest live ticket, and a ticket whose process is gone is dropped.
  *   - Before I313 whoever looked first after the lock freed won, so an early waiter could lose to later ones.
  * - A holder is taken over at once when its process is gone, STOPPED (suspended) or a zombie (`holderState()`);
- *   a live one never is, however long it runs (J233):  its waiters wait, and say so.
+ *   a live one only once STALLED (below), never for how long it runs (J233, I400):  its waiters wait, and say so.
  * - HOW LONG IS USUAL:  every turn's run is written down (`turns/history.jsonl`);  usual is the median of its kind's
  *   last runs (`usual()`), else `DEFAULT_USUAL`.
- *   - past 3 times usual (`LONG`), `epic turns list` and its waiters say "longer than usual"
- *   - past 6 times usual (`STUCK`), its waiters give up, naming it:  the queue isn't moving
- *   - a waiter never gives up while the queue moves (I313:  a fixed 30 minutes made T83's and T84's waits give up
- *     behind a kit-wide `yarn review` that was still running)
+ *   - past 3 times usual (`LONG`), `epic turns list` and its waiters say "longer than usual":  words only
+ * - A waiter NEVER gives up on a live holder that isn't stalled, however long it runs;
+ *   only a `wait` it's handed ends its wait (`TakeProps`).
+ *   - I400:  a 5-15 minute `spell perf run` passed 6 times a usual ~30s test run, and its waiters gave up.
+ *   - I313:  a fixed 30 minutes made T83's and T84's waits give up behind a kit-wide `yarn review`.
  * - The same kind inside a turn runs straight away:  a turn's commands are told their kinds (`ENV`), so
  *   `epic turns run test -- yarn test` at the kit's root, whose folders' tests might queue again, never waits on itself.
  * - Kinds are open:  any lowercase word (`merge`, `test`, `build` ...).
@@ -38,6 +39,8 @@ import { StallWatch, type WatchProps } from "./StallWatch"
  *   CPU over its whole process tree for the stall window (10 minutes;  `--stall <minutes>`, `SPELL_EPIC_TURN_STALL`,
  *   `0` off), one line saying where it was;  `epic turns list` says "stalled" for a holder past it.
  *   - Its output is piped through to watch it (colours kept when ours is a terminal:  `FORCE_COLOR`).
+ *   - A holder still quiet a minute past its window (`STALL_MARGIN`:  its own watch failed to stop it)
+ *     is taken over by its waiters, its tree stopped:  stalled is the only "stuck" for a live holder (I400).
  ****************/
 export class Turns {
   /** Run `epic turns <args>`;  resolves to the exit code.  Throws `EpicCommandError` for a bad command line. */
@@ -65,7 +68,8 @@ export class Turns {
    * Run `fn` holding the `kind` turn;  returns what it returns.
    * - `label`:  what the lock says it's for, in another waiter's message
    * - waits in line (`TurnQueue`), saying who it waits for, and again when that changes
-   * - throws `SRV.FileLockError` when the queue is stuck (`STUCK`), or after `props.wait` ms when given
+   * - waits while the holder lives and isn't stalled, however long;
+   *   throws `SRV.FileLockError` after `props.wait` ms, only when that's given
    */
   static take<T>(kind: string, label: string, fn: () => T, props: TakeProps = {}): T {
     if (Turns.inTurn(kind)) return fn()
@@ -287,8 +291,11 @@ export class Turns {
   /** A run past this many times usual is "longer than usual". */
   static readonly LONG = 3
 
-  /** A run past this many times usual has its waiters give up:  the queue is stuck. */
-  static readonly STUCK = 6
+  /**
+   * How far past its stall window a quiet holder is taken over by a waiter, ms:  a minute.
+   * - its own watch stops it within a look (15s at most) and the grace (10s):  past this, that watch is hung too
+   */
+  static readonly STALL_MARGIN = 60_000
 
   /**
    * Usual run times before 3 are written down, ms, by kind:  a guess on the long side, replaced by `history.jsonl`'s
@@ -381,7 +388,7 @@ export type TurnRun = { kind: string; label: string; ms: number; at: string }
 
 /**
  * `Turns.take()` props.
- * - `wait`:  longest wait, ms;  by default none:  it waits while the queue moves, and gives up only when it's stuck
+ * - `wait`:  longest wait, ms;  by default none:  it waits while the holder lives and isn't stalled, however long
  * - `say`:  where the waiting lines go (default stderr)
  */
 export type TakeProps = { wait?: number; say?: (line: string) => void }
@@ -410,7 +417,7 @@ class TurnQueue {
   /** what the lock says the turn is for */
   readonly label: string
 
-  /** how long to wait at most, seconds:  `props.wait`, else for ever (stuck ends it, `poll()`) */
+  /** how long to wait at most, seconds:  `props.wait`, else for ever */
   readonly waitSeconds: number
 
   private readonly kind: string
@@ -418,7 +425,6 @@ class TurnQueue {
   private ticket: string | undefined
   private toldHolder = ""
   private toldLong = false
-  private stuck: SRV.FileLockHolder | undefined
 
   constructor(kind: string, label: string, props: TakeProps) {
     Turns.checkKind(kind)
@@ -441,17 +447,12 @@ class TurnQueue {
 
   /**
    * One look:  the turn when our ticket is first and the lock is free;  `false` to look again.
-   * - throws `SRV.FileLockError` once the holder has run past `STUCK` times usual
+   * - NEVER gives up on a live holder, however long it's held (I400):  only a dead or stalled one is taken over
    */
   poll(): boolean {
     this.takeOverDead()
     if (this.isFirst() && this.lock.tryAcquire()) return true
     this.tell()
-    const holder = this.lock.holder()
-    if (holder && Date.now() - holder.since.getTime() > Turns.usual(this.kind) * Turns.STUCK) {
-      this.stuck = holder
-      throw this.timeout()
-    }
     return false
   }
 
@@ -461,12 +462,12 @@ class TurnQueue {
     this.ticket = undefined
   }
 
-  /** The error for giving up:  the queue stuck behind its holder, or `wait` run out. */
+  /** The error for giving up:  `wait` run out. */
   timeout(): SRV.FileLockError {
-    const holder = this.stuck ?? this.lock.holder()
+    const holder = this.lock.holder()
     const who = holder ? Turns.holderLine(holder, this.kind) : "nobody"
-    const why = this.stuck ? "stuck" : `not free in ${Math.round((this.waitSeconds * 1000) / 60_000)}m`
-    return new SRV.FileLockError(`epic turns:  the ${this.kind} turn is ${why}:  held by ${who}`)
+    const wait = Math.round((this.waitSeconds * 1000) / 60_000)
+    return new SRV.FileLockError(`epic turns:  the ${this.kind} turn is not free in ${wait}m:  held by ${who}`)
   }
 
   /** The kinds with anyone waiting. */
@@ -521,13 +522,22 @@ class TurnQueue {
     return TurnQueue.ticketsOf(this.kind)[0]?.file === this.ticket
   }
 
-  /** A holder whose process is gone, stopped or a zombie:  its lock removed at once, saying so. */
+  /**
+   * A holder whose process is gone, stopped or a zombie:  its lock removed at once, saying so.
+   * - and a live one still quiet `STALL_MARGIN` past its stall window (`Turns.quietFor()`):
+   *   its tree stopped too, as its own watch would have
+   */
   private takeOverDead(): void {
     const holder = this.lock.holder()
     if (!holder?.pid || holder.pid === process.pid) return
     const state = Turns.holderState(holder.pid)
-    if (state === "running") return
-    this.say(`epic turns:  the ${this.kind} turn's holder is ${state}:  taking it over (${Turns.holderLine(holder)})`)
+    // quiet past the window as of a margin ago:  past the window plus the margin now
+    const quiet =
+      state === "running" ? Turns.quietFor(this.kind, holder.pid, Date.now() - Turns.STALL_MARGIN) : undefined
+    if (state === "running" && quiet === undefined) return
+    const why = quiet === undefined ? state : `stalled (no output or CPU for ${minutes(quiet + Turns.STALL_MARGIN)})`
+    this.say(`epic turns:  the ${this.kind} turn's holder is ${why}:  taking it over (${Turns.holderLine(holder)})`)
+    if (quiet !== undefined) StallWatch.stop(holder.pid)
     rmSync(this.lock.lockFile, { force: true })
   }
 

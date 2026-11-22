@@ -110,8 +110,9 @@ They come from real trouble:  the papercuts and suspected-bugs logs, and the iss
 ### "the test turn is stuck"
 
 - Why:  one test run at a time per machine (`epic turns`);  another agent's run holds the turn, or died holding it.
-- Fix:  `epic turns` names who holds it and since when.
-  A live run:  wait.  A dead process:  the next run takes the turn over by itself.
+- Fix:  `epic turns` names who holds it, for how long, and whether it has stalled.
+  A live run:  wait, however long it takes;  a waiter never gives up on it.
+  A dead process, or a run with no output or CPU for 10 minutes:  the turn is taken over by itself.
 
 ### A merge is refused for uncommitted files
 
