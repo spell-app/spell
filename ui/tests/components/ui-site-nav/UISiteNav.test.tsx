@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vite-plus/test"
+import { userEvent } from "vite-plus/test/browser"
 
 import { expectAccessible } from "spell/test-helpers/A11y"
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
@@ -183,6 +184,35 @@ describe("<ui-site-nav> pages' extras", () => {
     expect(seen).not.toHaveBeenCalled()
     box.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true }))
     expect(seen).toHaveBeenCalledTimes(1)
+  })
+
+  it("a real click on a page's link asks `ui-navigating`, once, and so does Enter on its row;  Command-click doesn't", async () => {
+    const host = await navOf([{ title: "Films", href: "#/films" }])
+    const films = row(host, "Films")
+    const link = films.querySelector<HTMLAnchorElement>(":scope > a")!
+    const asked = vi.fn((event: Event) => event.preventDefault())
+    host.addEventListener("ui-navigating", asked)
+    const before = location.href
+
+    await userEvent.click(link)
+    expect(asked).toHaveBeenCalledTimes(1)
+    expect(location.href).toBe(before)
+
+    films.focus()
+    await userEvent.keyboard("{Enter}")
+    expect(asked).toHaveBeenCalledTimes(2)
+
+    // what a modified click leaves to the browser, stopped here so the test opens no tab
+    let wasLeft: boolean | undefined
+    const atWindow = (event: MouseEvent) => {
+      wasLeft = !event.defaultPrevented
+      event.preventDefault()
+    }
+    addEventListener("click", atWindow, { once: true })
+    link.dispatchEvent(new MouseEvent("click", { bubbles: true, composed: true, cancelable: true, metaKey: true }))
+    expect(wasLeft).toBe(true)
+    expect(asked).toHaveBeenCalledTimes(2)
+    expect(location.href).toBe(before)
   })
 
   it("draws `band`, `count` and `badge` on the rows, in the tree's `nav` look", async () => {
