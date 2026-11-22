@@ -237,11 +237,11 @@ every sentence it understands matches a syntax like these, and a sentence that m
 <details>
 <summary>Run it yourself</summary>
 
-[The Solitaire example's card](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/examples/Solitaire/Card.spell) has the
-same alias, written `alias="is a (rank)"` on its rank, and Spell writes it the same syntax:
+[The games library's card](https://github.com/spell-app/spell/blob/main/app/spaces/@spell/library/games/cards/Card.spell) has the
+same alias, `it "is a (rank)"`, under its rank, and Spell writes it the same syntax:
 
 ```sh
-spell parse --in @spell/examples/Solitaire $'set the card to a new card\nprint the card is a queen'
+spell parse --in @spell/library/games $'set the card to a new card\nprint the card is a queen'
 ```
 
 <details>
@@ -256,7 +256,7 @@ core.console.log(card.isARank("queen"))
 </details>
 
 - A project writes its aliases' syntaxes down, so another project can register the same rules from data:
-  that example's are in
+  the Solitaire example's (`is the (rank) of (suit)` ...) are in
   [Solitaire.snapshot.declarations.json5](https://github.com/spell-app/spell/blob/main/app/tests/spell/__examples__/Solitaire/Solitaire.snapshot.declarations.json5),
   its test's copy of what a compile writes.
 - The code that builds an alias's syntax, word by word:
