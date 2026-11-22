@@ -130,6 +130,17 @@ export const LANGUAGE_REQUESTS = {
     null
   ),
   "spell/project": request((service, file, _params: FileParams) => service.projectInfo(file), null),
+  /**
+   * The names the file's project declares with `query`'s letters in order, as Go to Symbol lists them:
+   * the app's Spell Console line suggests them (epic `solid-2-final` T36)
+   */
+  "spell/projectSymbols": request(
+    (service, file, { query }: FileParams & { query: string }) =>
+      service
+        .workspaceSymbols(query)
+        .filter((symbol) => service.addresses.fileFor(symbol.location.uri)?.project === file.project),
+    []
+  ),
   /** a Spell UI tag's or attribute's help, what Go to Definition shows on one (epic `editor` I148) */
   "spell/componentHover": request(
     (service, file, { position }: TextDocumentPositionParams) => service.componentHover(file, position),
