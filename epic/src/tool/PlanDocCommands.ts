@@ -217,7 +217,8 @@ export class PlanDocCommands {
       return this.bedtimeAll(name === "status" ? ["status", ...rest] : rest, flags)
     // `focus on | off | status | summary`:  every running epic at once (`FocusCommands`, epic `epic-engine` T93)
     if (command === "focus") return this.focus.run(positional.slice(1), flags)
-    // `fresh all | status | drop`:  every running epic session to a fresh one (`FreshCommands`, epic `epic-engine` T113)
+    // `fresh all [--pause] | status | drop | quiet | wait | cancel`:  every running epic session to a fresh one
+    // (`FreshCommands`, epic `epic-engine` T113;  its pause round, T139)
     if (command === "fresh") return this.fresh.run(positional.slice(1), flags)
     if (command === "backfill") return this.backfill(name, flags)
     if (command === "migrate") return this.migrator.run(positional.slice(1), flags)
@@ -1904,9 +1905,11 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
   focus on [--why "..."] | off | status | summary [<name>] [--since <t>] [--json]
                                                    focus mode (/focus, /back):  on and off print a TELL: line for
                                                    each running epic session;  summary:  what happened since
-  fresh all | status | drop [<session id>] [--json]
+  fresh all [--pause] | status | drop [<session id>] | quiet | wait [--max <time>] | cancel [--json]
                                                    /epic fresh all:  every running epic session marked to go to
-                                                   a fresh session at its next clear moment;  TELL: lines
+                                                   a fresh session at its next clear moment;  TELL: lines;
+                                                   --pause:  each pauses and saves its agents first, says quiet,
+                                                   and all go only once every one is;  cancel calls that off
   prompt <name> "text" | --file path               set the prompt that started the plan ("" removes it)
   summary <name> [--json] [--all]                  open questions, issues, todos, limits, manual tests;  the next phase;
                                                    finished phases and grey items only counted, unless --all
@@ -2019,7 +2022,7 @@ const LOG_LABEL = "Log"
 const LOG_LAST = 20
 
 /** Flags that never take a value, so `epic summary --all seo` keeps `seo` as the epic. */
-const SWITCHES = ["all", "json", "dryrun", "dryRun", "titleOk"]
+const SWITCHES = ["all", "json", "dryrun", "dryRun", "titleOk", "pause"]
 
 /** A phase as `rename` takes it:  `P6`, `6`, `p6`. */
 const PHASE_REF = /^p?\d+$/i

@@ -2,14 +2,16 @@ import { statSync } from "node:fs"
 
 import { ClaudeHome } from "spell/epic/config/ClaudeHome"
 import { FreshAll } from "spell/epic/command/FreshAll"
+import { FreshPause } from "spell/epic/command/FreshPause"
 import { PlanDocError } from "./planDoc.types"
 
-import type { EpicSession } from "./FocusCommands"
+import { tellLines, type EpicSession } from "./FocusCommands"
+import { FreshPauseCommands } from "./FreshPauseCommands"
 import type { Flags, PlanDocCommands } from "./PlanDocCommands"
 
 /****************
  * ### `FreshCommands`
- * `epic fresh all | status | drop` (epic `epic-engine` T113):  `/epic fresh all`, every running epic session handed to a
+ * `epic fresh all | status | drop | quiet | wait | cancel` (epic `epic-engine` T113):  `/epic fresh all`, every running epic session handed to a
  * fresh session, each at its first clear moment (`FreshAll`).
  * - `all [--json]`:  marks every running epic session pending (`FreshAll.mark()`), the session running it too (`self`,
  *   last), then prints:
@@ -18,6 +20,10 @@ import type { Flags, PlanDocCommands } from "./PlanDocCommands"
  * - `status [--json]`:  the sessions still pending, and why each waits
  * - `drop [<session id>]`:  one session let off, this one by default (`$CLAUDE_CODE_SESSION_ID`):  its
  *   `epic window fresh` was refused
+ * - PAUSE FIRST (`all --pause`, `quiet`, `wait`, `cancel`;  epic `epic-engine` T139):  `FreshPauseCommands`
+ *   - while a round is under way `all` refuses until every session is quiet, then marks them `paused` and ends it
+ *   - `status` then says who is quiet and who is outstanding
+ *   - no round:  every verb here as it was
  * - The running sessions:  `FocusCommands.runningSessions()`, the epics in progress only
  * - The sessions' own end-of-turn hook does the rest ([fresh-wait.mjs](../../hooks/fresh-wait.mjs)):  nothing here
  *   moves a session
@@ -25,9 +31,12 @@ import type { Flags, PlanDocCommands } from "./PlanDocCommands"
 export class FreshCommands {
   /** the epic-page command line this belongs to:  its files, output and running sessions.  STATIC */
   readonly owner: PlanDocCommands
+  /** the pause round's verbs (epic `epic-engine` T139).  STATIC */
+  readonly pause: FreshPauseCommands
 
   constructor(owner: PlanDocCommands) {
     this.owner = owner
+    this.pause = new FreshPauseCommands(owner)
   }
 
   /** `fresh <verb> ...`, `positional` after `fresh`;  resolves to the exit code, `undefined` for 0. */
@@ -35,13 +44,21 @@ export class FreshCommands {
     const json = Boolean(flags.json)
     switch (verb) {
       case "all":
-        return this.all(json)
+        return flags.pause ? this.pause.start(json) : this.all(json)
       case "status":
         return this.status(json)
+      case "quiet":
+        return this.pause.quiet()
+      case "wait":
+        return this.pause.wait(typeof flags.max === "string" ? flags.max : undefined)
+      case "cancel":
+        return this.pause.cancel(json)
       case "drop":
         return this.drop(rest[0] ?? process.env.CLAUDE_CODE_SESSION_ID)
       default:
-        throw new PlanDocError(`fresh what?  all | status | drop (not '${verb}');  one epic:  epic window fresh <epic>`)
+        throw new PlanDocError(
+          `fresh what?  all | status | drop | quiet | wait | cancel (not '${verb}');  one epic:  epic window fresh <epic>`
+        )
     }
   }
 
@@ -49,27 +66,41 @@ export class FreshCommands {
   // ## The verbs
   ////////////////
 
-  /** `all`:  every running epic session marked pending;  `TELL:` lines, and which go now and which later. */
-  private async all(json: boolean): Promise<void> {
-    const { others, self } = await this.owner.focus.runningSessions()
+  /**
+   * `all`:  every running epic session marked pending;  `TELL:` lines, and which go now and which later.
+   * - a pause round under way:  exit 1 until all are quiet;  then the marks are `paused`, and the round is over
+   */
+  private async all(json: boolean): Promise<number | void> {
+    const running = await this.owner.focus.runningSessions()
+    const pausing = FreshPause.round()
+    if (pausing && !this.pause.mayGoFresh(pausing, running)) return 1
+    const { others, self } = running
     const me = process.env.CLAUDE_CODE_SESSION_ID
     const now = Date.now()
     const round = `${me ?? "none"}@${new Date(now).toISOString()}`
-    for (const { epic, sessionId } of others) FreshAll.mark(sessionId, epic, { round, now })
-    for (const { epic, sessionId } of self) FreshAll.mark(sessionId, epic, { round, now, self: true })
-    const tell = others.map(({ epic, session }) => ({ epic, session, line: tellLine(epic) }))
+    // a round's marks stay paused when it's run again before they've all gone
+    const pausedOf = (sessionId: string) => Boolean(pausing || FreshAll.pending(sessionId)?.paused)
+    const tell: { epic: string; session: string; line: string }[] = []
+    for (const { epic, session, sessionId } of others) {
+      const paused = pausedOf(sessionId)
+      FreshAll.mark(sessionId, epic, { round, now, paused })
+      tell.push({ epic, session, line: tellLine(epic, paused) })
+    }
+    for (const { epic, sessionId } of self)
+      FreshAll.mark(sessionId, epic, { round, now, self: true, paused: pausedOf(sessionId) })
+    // the marks hold them now:  the round is over
+    if (pausing) FreshPause.end()
     const states = [...others, ...self].map((one) => ({ ...one, why: this.whyNot(one, now) }))
     if (json) return this.owner.print(JSON.stringify({ round, tell, sessions: states }, null, 2))
-    if (tell.length) {
-      this.owner.print("TELL:  send each running session its line (SendMessage:  this command can't send them itself)")
-      for (const { session, line } of tell) this.owner.print(`  to ${session}:  ${line}`)
-    }
+    for (const line of tellLines(tell)) this.owner.print(line)
     for (const { epic } of self) this.owner.print(`this session:  ${epic}:  goes last, at its own next clear moment`)
     this.printStates(states)
   }
 
-  /** `status`:  the sessions still pending, and why each waits. */
-  private status(json: boolean): void {
+  /** `status`:  the sessions still pending, and why each waits;  during a pause round, who is quiet and who isn't. */
+  private async status(json: boolean): Promise<void> {
+    const pausing = FreshPause.round()
+    if (pausing) return this.pause.status(pausing, json)
     const now = Date.now()
     const pending = FreshAll.allPending().map(({ sessionId, mark }) => ({
       epic: mark.epic,
@@ -93,8 +124,10 @@ export class FreshCommands {
       this.owner.warn(`epic:  fresh drop:  ${sessionId ?? "this session"} isn't waiting to go fresh`)
       return 1
     }
+    const { paused } = FreshAll.pending(sessionId)!
     FreshAll.drop(sessionId)
     this.owner.print(`${sessionId.slice(0, 8)} no longer waits to go fresh`)
+    if (paused) this.owner.print("its agents are paused:  epic agents resume each, and start it as that prints")
   }
 
   ////////////////
@@ -127,11 +160,13 @@ export class FreshCommands {
 }
 
 /** What each running epic session is told. */
-function tellLine(epic: string): string {
+function tellLine(epic: string, paused: boolean): string {
+  const saved = paused ? "  Your paused agents stay saved:  don't restart them, the fresh session does." : ""
   return (
     `/epic fresh all:  ${epic} goes to a fresh session at your next clear moment.  Nothing to do but finish what ` +
     "you're on and end your turn:  your end-of-turn hook wakes you once you're clear (no agents running, no question " +
-    "waiting on the person, no prompt from them in the last few minutes), and then you run /epic fresh.  No reply."
+    "waiting on the person, no prompt from them in the last few minutes), and then you run /epic fresh.  No reply." +
+    saved
   )
 }
 

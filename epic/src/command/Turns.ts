@@ -3,8 +3,10 @@ import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSyn
 import { basename, join } from "node:path"
 
 import { waitUntilSync } from "spell/util/node/timing"
-import { waitUntil } from "spell/util/timing"
+import { after, waitUntil } from "spell/util/timing"
 import { SRV } from "spell/server"
+import { Processes } from "spell/server/Processes"
+import { ClaudeHome } from "spell/epic/config/ClaudeHome"
 import { EpicHome } from "spell/epic/config/EpicHome"
 
 import { EXIT, EpicCommandError } from "./command.types"
@@ -34,6 +36,9 @@ import { StallWatch, type WatchProps } from "./StallWatch"
  * - The same kind inside a turn runs straight away:  a turn's commands are told their kinds (`ENV`), so
  *   `epic turns run test -- yarn test` at the kit's root, whose folders' tests might queue again, never waits on itself.
  * - Kinds are open:  any lowercase word (`merge`, `test`, `build` ...).
+ * - A session may STOP ITS OWN runs (`stop()`, epic `epic-engine` T139:  a pause abandons its tests):
+ *   - its own:  the processes under that session's `claude` process, its agents' included;  never another session's
+ *   - NEVER a merge, nor a run with one inside it or around it:  a merge is left to finish
  * - A single test file (`yarn vitest run <file>`) takes no turn:  it's light, and an agent runs one often.
  * - A STALLED command is stopped, freeing the turn (`StallWatch`, epic `epic-engine` I384):  no output and next to no
  *   CPU over its whole process tree for the stall window (10 minutes;  `--stall <minutes>`, `SPELL_EPIC_TURN_STALL`,
@@ -51,7 +56,9 @@ export class Turns {
       for (const line of Turns.listLines()) console.log(line)
       return EXIT.OK
     }
-    if (verb !== "run") throw new EpicCommandError(`unknown verb '${verb}':  epic turns run <kind> -- <command> | list`)
+    if (verb === "stop") return Turns.stopCommand(kind)
+    if (verb !== "run")
+      throw new EpicCommandError(`unknown verb '${verb}':  epic turns run <kind> -- <command> | stop <kind> | list`)
     const command = split === -1 ? [] : args.slice(split + 1)
     if (!kind || !command.length)
       throw new EpicCommandError("usage:  epic turns run <kind> [--stall <minutes>] -- <command> [args...]")
@@ -159,6 +166,76 @@ export class Turns {
         }),
       props
     )
+  }
+
+  /**
+   * The turn runs, held or waiting, of session `sessionId`:  those under its `claude` process.
+   * - `parents`:  each process's parent (a test's to stub);  a session no process runs:  `[]`
+   */
+  static runsOf(
+    sessionId: string | undefined,
+    { live = ClaudeHome.liveSessions(), parents = Processes.parents() }: OwnRunsProps = {}
+  ): OwnRun[] {
+    const roots = live.filter((session) => session.sessionId === sessionId).map(({ pid }) => pid)
+    if (!roots.length) return []
+    const held = Turns.held().flatMap(({ kind, holder: { pid, label } }): OwnRun[] =>
+      pid ? [{ kind, pid, label: label ?? "", waiting: false }] : []
+    )
+    const waiting = TurnQueue.kindsWaiting().flatMap((kind) =>
+      TurnQueue.ticketsOf(kind).map(({ pid, label }): OwnRun => ({ kind, pid, label, waiting: true }))
+    )
+    return [...waiting, ...held].filter(({ pid }) => !isGone(pid) && roots.some((root) => isUnder(pid, root, parents)))
+  }
+
+  /**
+   * Stop session `sessionId`'s own `kind` runs, waiters first, each with its whole process tree, and free its turn;
+   * resolves to what it stopped and what it left.
+   * - left:  a merge of that session's, and a run sharing a process tree with one:  a merge is never killed half way
+   * - throws for the `merge` kind
+   */
+  static async stop(
+    kind: string,
+    sessionId: string | undefined,
+    { graceMs = STOP_GRACE_MS, ...props }: OwnRunsProps & { graceMs?: number } = {}
+  ): Promise<{ stopped: OwnRun[]; left: OwnRun[] }> {
+    Turns.checkKind(kind)
+    if (kind === MERGE) throw new EpicCommandError("epic turns stop:  a merge is never stopped:  let it finish")
+    const parents = props.parents ?? Processes.parents()
+    const own = Turns.runsOf(sessionId, { ...props, parents })
+    const merges = own.filter((run) => run.kind === MERGE)
+    const stopped = own.filter(
+      (run) =>
+        run.kind === kind && !merges.some(({ pid }) => isUnder(pid, run.pid, parents) || isUnder(run.pid, pid, parents))
+    )
+    if (stopped.length) {
+      for (const { pid } of stopped) StallWatch.stop(pid, graceMs)
+      // the SIGKILL comes at the grace's end:  stay for it
+      await after(graceMs / 1000)
+      await waitUntil(() => stopped.every(({ pid }) => Turns.holderState(pid) !== "running"), { timeout: 2 })
+      const lock = new SRV.FileLock(join(Turns.folder(), kind))
+      const holder = lock.holder()
+      if (holder?.pid && stopped.some(({ pid }) => pid === holder.pid) && Turns.holderState(holder.pid) !== "running") {
+        rmSync(lock.lockFile, { force: true })
+        rmSync(Turns.busyFile(kind), { force: true })
+      }
+    }
+    return { stopped, left: own.filter((run) => !stopped.includes(run)) }
+  }
+
+  /** `stop <kind>`:  this session's own runs of it stopped, and what's left said. */
+  private static async stopCommand(kind: string | undefined): Promise<number> {
+    if (!kind) throw new EpicCommandError("usage:  epic turns stop <kind>:  this session's own runs of it (test)")
+    const me = process.env.CLAUDE_CODE_SESSION_ID
+    if (!ClaudeHome.liveSessions().some((session) => session.sessionId === me))
+      throw new EpicCommandError("epic turns stop:  can't tell which runs are this session's, so it stops none")
+    const { stopped, left } = await Turns.stop(kind, me)
+    for (const run of stopped) console.log(`stopped, abandoned:  ${runLine(run)}`)
+    if (!stopped.length) console.log(`none of this session's ${kind} runs to stop`)
+    for (const run of left) {
+      const merge = run.kind === MERGE ? " -- let it finish, and stop no agent until it has" : ""
+      console.log(`left running:  ${runLine(run)}${merge}`)
+    }
+    return EXIT.OK
   }
 
   /** The stall window, ms:  `SPELL_EPIC_TURN_STALL` (minutes;  `0` off), else `StallWatch.DEFAULT_MS`. */
@@ -380,6 +457,12 @@ export class Turns {
   }
 }
 
+/** One of a session's turn runs (`Turns.runsOf()`):  held, or waiting for it. */
+export type OwnRun = { kind: string; pid: number; label: string; waiting: boolean }
+
+/** `Turns.runsOf()`'s options:  the running sessions and each process's parent, a test's to stub. */
+export type OwnRunsProps = { live?: { sessionId: string; pid: number }[]; parents?: Map<number, number> }
+
 /** What `Turns.holderState()` answers. */
 export type HolderState = "running" | "stopped" | "zombie" | "gone"
 
@@ -560,6 +643,27 @@ class TurnQueue {
 
 /** A waiter's ticket (`TurnQueue.ticketsOf()`). */
 type Ticket = { file: string; at: number; pid: number; label: string }
+
+/** The kind of turn a merge takes:  never stopped. */
+const MERGE = "merge"
+
+/** SIGTERM to SIGKILL for a run its own session abandons:  shorter than a stall's, a pause is in a hurry. */
+const STOP_GRACE_MS = 3_000
+
+/** Whether process `pid` is `root` or runs under it, by `parents`. */
+function isUnder(pid: number, root: number, parents: Map<number, number>): boolean {
+  const seen = new Set<number>()
+  for (let at = pid; at > 1 && !seen.has(at); at = parents.get(at) ?? 0) {
+    if (at === root) return true
+    seen.add(at)
+  }
+  return false
+}
+
+/** A session's own run as a person reads it:  `test:  yarn test, pid 123 (waiting)`. */
+function runLine({ kind, label, pid, waiting }: OwnRun): string {
+  return `${kind}:  ${label || "someone"}, pid ${pid}${waiting ? " (waiting)" : ""}`
+}
 
 /** Whether process `pid` has ended:  `kill(pid, 0)` alone, cheap enough for every look at the line. */
 function isGone(pid: number): boolean {

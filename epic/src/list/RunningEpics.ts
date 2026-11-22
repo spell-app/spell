@@ -575,10 +575,10 @@ function badgesOf(
   return badges.urgent || badges.replied || badges.running ? badges : undefined
 }
 
-/** How many agents run for the epic page at `file` (`AgentList`);  `0` when its list won't read.  NEVER throws. */
+/** How many agents run for the epic page at `file`, paused ones left out (`AgentList.running`);  `0` when its list won't read.  NEVER throws. */
 function agentsOf(file: string): number {
   try {
-    return AgentList.forPlanDoc(file).agents.length
+    return AgentList.forPlanDoc(file).running.length
   } catch {
     return 0
   }

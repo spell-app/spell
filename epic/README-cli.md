@@ -509,6 +509,9 @@ Housekeeping, most of it run once, or after a change to the page markup.
 | `epic log <epic> ["text"]` | adds a timestamped line to the page's log;  no text:  prints the newest (`--last <n>`, 20 by default) |
 | `epic prompt <epic> "text"` | sets the prompt that started the epic, quoted in the Overview;  `--file <file>`;  `""` removes it |
 | `epic bedtime <epic> start "P3-P6,P9"` | turns bedtime mode on, for an overnight `/bedtime` run:  its changes stay green until you review them;  `done "summary"` turns it off |
+| `epic fresh all [--pause]` | hands every running epic session to a fresh one, each at its next clear moment, printing a `TELL:` line for each;  `--pause`:  each stops and saves its agents and reports back first, and plain `epic fresh all` then refuses until every one is quiet |
+| `epic fresh [status] \| quiet \| wait \| cancel` | during a pause:  who is quiet and who is outstanding;  `quiet`:  this session is, and the line that reports it;  `wait`:  until all are, or names who isn't (`--max 2m`);  `cancel`:  calls it off, and each session starts its agents again |
+| `epic fresh drop [<session id>]` | lets one session off going fresh, this one by default |
 | `epic focus [status] \| on [--why "..."] \| off \| summary [<epic>]` | focus mode, one switch for the machine (`/focus`, `/back`):  every running epic keeps building and asks you nothing;  `on` and `off` print a `TELL:` line for each running epic session;  `summary`:  what happened on an epic since focus started, waiting on you, merged, still running |
 | `epic backfill <epic> \| --all` | marks items reviewed that past sessions show you went through;  a dry run unless `--apply` |
 | `epic split <epic>` | stores a page as a skeleton plus part files, `parts/<id>.html`, loaded when it opens;  `--done`:  every finished epic;  `--dry-run` |
@@ -644,6 +647,7 @@ Codex, or any agent without the skills, works an epic from these;  `skills check
 | --- | --- |
 | `epic guide [<topic>]` | prints the epic workflow in plain steps:  find the epic, plan, build each phase, take what you send from the page, end each turn, finish;  a topic alone (`epic guide build`), `--list` the topics, `--path` the guide's file.  `superpowers` is the words that tell the superpowers plugin to stand aside in an epic ([With superpowers](README-superpowers.md));  `tidy`, closing what other work made obsolete.  Its last topic, `claude-only-tools`, is the plain way to do each step that needs a tool only Claude Code has;  `--root` prints the plugin's folder, what a skill's `${CLAUDE_PLUGIN_ROOT}` names |
 | `epic turns run <kind> -- <command>` | runs a command in its turn:  one of each kind at a time on the machine, so five agents' full test runs queue rather than fight (`epic turns run test -- yarn test`);  it waits, saying who has the turn.  `epic merge` and `merge-main` take the `merge` turn by themselves |
+| `epic turns stop <kind>` | stops this session's own runs of that kind, held or waiting, and frees the turn (`epic turns stop test`, for a pause);  never another session's, never a merge |
 | `epic turns [list]` | the turns taken now:  each kind's holder, and since when |
 | `epic turn end` | ends an agent's turn:  the epic folder committed and synced, as `epic shared commit` does;  what Claude Code's and Codex's end-of-turn hooks run;  quiet with nothing to do, safe to run twice;  `--session <id>`, `--quiet` |
 | `epic skills check` | checks the plugin's skills hold for Claude Code and Codex alike:  each step naming a Claude-only tool (the question modal, background agents, the worktree tools ...) has an "In Codex:" line beside it, each Claude-only skill its `agents/openai.yaml`, and the descriptions fit Codex's list;  exits 1 on a problem;  `--json` |
@@ -769,7 +773,9 @@ The same group keeps the comments you leave on any docs page, the background age
 | `epic agents claims [--json]` | every running agent's claimed files, one line each |
 | `epic agents set <name>` | sets an agent's status (`active`, or `"blocked on <name>"`) or its task id |
 | `epic agents last <name>` | is this agent the last of its epic still running?  Exit 0 when no other is listed, so it runs the full test suite after merging;  exit 1 listing the others |
-| `epic agents done <name>` | takes an agent off the list:  it's back;  says how long it worked, and logs it on the epic page |
+| `epic agents done <name>` | takes an agent off the list:  it's back;  says how long it worked, and logs it on the epic page;  a paused one stays, unless `--finished` |
+| `epic agents pause <name> --next "<step>"` | saves a stopped agent so any session can start it again:  task, item, claimed and uncommitted files, commits and whether merged, a merge left part way, the next step;  `--item`, `--tests`;  it keeps its claims, and doesn't count as running |
+| `epic agents resume <name>` | starts a paused agent again, once:  prints its brief and clears what was saved;  exit 1 while a pause is under way |
 | `epic agents wait` | waits until you send an agent a note from the epic page (exit 0, printing it) or none is left running (exit 3);  `--every 2`, `--max 3600` seconds |
 | `epic agents told <name>` | marks your notes to the agent as passed on:  the page shows them told |
 | `epic airplane [status]` | says whether airplane mode is on, and since when |

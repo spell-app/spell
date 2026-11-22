@@ -210,6 +210,56 @@ describe("Turns", () => {
     expect(said.join("\n")).toMatch(/holder is gone:  taking it over \(yarn test/)
   })
 
+  test("stop():  a session's own test run and its tree;  NEVER another session's", async () => {
+    const child = `require("node:child_process").spawn(process.execPath, ["-e", "setInterval(() => {}, 1000)"], { stdio: "ignore" })`
+    const own = spawn(
+      process.execPath,
+      ["-e", `const under = ${child}; console.log(under.pid); setInterval(() => {}, 1000)`],
+      { stdio: ["ignore", "pipe", "ignore"] }
+    )
+    const others = sleeper()
+    try {
+      const under = Number(await new Promise((done) => own.stdout!.once("data", (data) => done(String(data)))))
+      lockHeldBy("test", own.pid!, "yarn test")
+      const ticket = ticketFor("test", others.pid!, "another session's", 1000)
+      const live = [{ sessionId: "mine", pid: 1000001 }]
+      const parents = new Map([[own.pid!, 1000001]])
+      expect(Turns.runsOf("mine", { live, parents })).toMatchObject([{ kind: "test", pid: own.pid }])
+      const { stopped } = await Turns.stop("test", "mine", { live, parents, graceMs: 300 })
+      expect(stopped.map((run) => run.pid)).toEqual([own.pid])
+      expect(existsSync(join(HOME, "turns", "test.lock"))).toBe(false)
+      expect(Turns.holderState(under)).not.toBe("running")
+      expect(Turns.holderState(others.pid!)).toBe("running")
+      rmSync(ticket, { force: true })
+    } finally {
+      own.kill("SIGKILL")
+      others.kill("SIGKILL")
+    }
+  })
+
+  test("stop():  a merge is NEVER stopped, nor a test run with one under it", async () => {
+    const [testing, merging] = [sleeper(), sleeper()]
+    try {
+      lockHeldBy("test", testing.pid!, "yarn test && epic merge")
+      lockHeldBy("merge", merging.pid!, "epic merge seo")
+      const live = [{ sessionId: "mine", pid: 1000001 }]
+      const parents = new Map([
+        [testing.pid!, 1000001],
+        [merging.pid!, testing.pid!]
+      ])
+      await expect(Turns.stop("merge", "mine", { live, parents })).rejects.toThrow(/never stopped/)
+      const { stopped, left } = await Turns.stop("test", "mine", { live, parents, graceMs: 100 })
+      expect(stopped).toEqual([])
+      expect(left.map((run) => run.kind).sort()).toEqual(["merge", "test"])
+      expect(Turns.holderState(testing.pid!)).toBe("running")
+      expect(Turns.holderState(merging.pid!)).toBe("running")
+    } finally {
+      testing.kill("SIGKILL")
+      merging.kill("SIGKILL")
+      for (const kind of ["test", "merge"]) rmSync(join(HOME, "turns", `${kind}.lock`), { force: true })
+    }
+  })
+
   test("usual():  the median of a kind's last runs, written down as each turn ends", () => {
     for (let i = 0; i < 3; i++)
       Turns.take("timed", "quick", () => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 5))

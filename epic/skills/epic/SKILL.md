@@ -1,6 +1,6 @@
 ---
 name: epic
-description: Run an epic -- a piece of work planned and built against its live epic page, `epics/<name>/<name>.plan.html`, in its own worktree.  `/epic <name> [what to plan]` plans one (or "make this a plan doc" about this session's work);  `/epic review [<name>]` takes the person's marks, comments and Sends from the page ("review the seo epic", "go through its todos");  `/epic resume [<name>]` picks one back up where its page says it stopped;  `/epic future <name> [idea]` saves an idea as a future epic;  `/epic phase [ids] [name]` adds a phase;  `/epic start <P1 | ids>` works a phase or items now;  `/epic request <epic> [<rN>]` takes up a `/send` request;  `/epic tidy [<epic>]` closes items other work made obsolete;  `/epic hush` greys settled ones;  `/epic fresh` hands this epic to a new session in this window (`all`:  every running epic session, each at its next clear moment);  `/epic done` is `/isolate done`.
+description: Run an epic -- a piece of work planned and built against its live epic page, `epics/<name>/<name>.plan.html`, in its own worktree.  `/epic <name> [what to plan]` plans one (or "make this a plan doc" about this session's work);  `/epic review [<name>]` takes the person's marks, comments and Sends from the page ("review the seo epic", "go through its todos");  `/epic resume [<name>]` picks one back up where its page says it stopped;  `/epic future <name> [idea]` saves an idea as a future epic;  `/epic phase [ids] [name]` adds a phase;  `/epic start <P1 | ids>` works a phase or items now;  `/epic request <epic> [<rN>]` takes up a `/send` request;  `/epic tidy [<epic>]` closes items other work made obsolete;  `/epic hush` greys settled ones;  `/epic fresh` hands this epic to a new session in this window (`all [--pause]`:  every running epic session, at a clear moment);  `/epic done` is `/isolate done`.
 argument-hint: <name> [what to plan] | demo [pasted text] | done | review [<name>] | resume [<name>] | future <name> [idea] | phase [ids] [name] | start <P1 | ids> | request <epic> [<rN>] | tidy [<epic>] | hush [<epic> | all] | fresh [all | --force] | color <look>
 ---
 
@@ -128,6 +128,8 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
     from the page:  NOT a new epic.  Go to "16. Fresh" (epic `epic-engine` T110).
     - `/epic fresh all`, typed in ANY session:  every running epic session does, each at its next clear moment.
       Go to "16. Fresh", "All epics" (epic `epic-engine` T113).
+    - `/epic fresh all --pause`:  every session pauses and saves its agents first, then all go.
+      Go to "16. Fresh", "Pause first" (epic `epic-engine` T139).
   - `demo`:  `/epic demo [pasted text]` runs the STAGED DEMO when its step files are ready (`epic demo check`):
     NOT a new epic.  Go to "15. Staged demo", and skip everything else here (epic `epic-engine` P77).
   - `done`:  `/epic done` is `/isolate done`, word for word.
@@ -666,6 +668,9 @@ cut-off agents, "it should have restarted automatically").
   - start `epic inbox wait <epic>` again, in the background
   - then one line to the person:  "the restart cut off N agents:  resumed <names>"
 - No agents listed:  no wake.  The inbox poller's own hook listens again by itself.
+- PAUSED agents (`epic agents` says `paused`) weren't cut off:  never resume one for a restart.
+- A pause under way (the `📬` line says so, or `epic fresh status`):  resume none.  Save what was cut off
+  (`epic agents pause <name> --next "..."`), and go on from "Pause first" below.
 - In Codex:  no background agents to cut off:  `epic guide` says to start the epic's open items again from the page.
 
 ### Focus mode (`/focus`, `/back`)
@@ -1561,9 +1566,17 @@ A NEW session picks up an epic whose own session is gone (closed, crashed, compa
      In a new window:  after the handoff, as "2. Session", step 5.
    - `epic inbox wait <name>` in the background again ("7. Review", "This session LISTENS"):  a session started by
      `/epic fresh` (or a restart) has none running.
+   - Paused agents (`epic agents` says `paused`;  "Pause first", under "16. Fresh") start again now, once each,
+     with no modal:  it's work that was under way.  For each:
+     1. `epic agents resume <name>`:  it prints the brief, and clears what was saved, so it can't start twice
+        - refused, a pause still under way:  start none, say so, and start them when its go or cancel comes
+     2. start that agent:  `Agent`, its full name first in the description, the whole printed brief as its prompt
+     3. `epic agents set <name> --task-id <its id>`, then `epic agents wait` in the background once
+     - In Codex:  no background agents:  do each one's work here, one at a time, from the printed brief.
 5. Reply, for someone who remembers nothing:  three lines at most.
    - What the epic is, where it stopped, and what's waiting on the person (open questions, issues, tests).
    - Uncommitted work in bold.
+   - Paused agents restarted:  name them, and what each is on.  They're the carrying on, so ask nothing about them.
    - Then:
      - a phase `active` with work under way:
        AskUserQuestion "Carry on with P<N> · <Name> (Recommended)" / "Stop here"
@@ -1959,7 +1972,9 @@ A NEW session takes this session's epic on, in this window, from its page;  this
 
 0. Which epic:  this session's, its title (`🚧 <name>`), else its worktree's (`epic worktree path <name>`).
    None:  say so, and stop.
-1. Agents:  `epic agents`.  Any listed:  refuse, in one line naming them;  closing this tab would cut them off.
+1. Agents:  `epic agents`.  Any listed but not `paused`:  refuse, in one line naming them;  closing this tab would
+   cut them off.  Paused ones don't count:  they're saved, and the new session starts them ("8. Resume").
+   - A pause under way:  `epic window fresh` refuses until all are quiet.  Never `--force` past it.
    - Wait for their notices, then `/epic fresh` again;  or the person types `/epic fresh --force`.
    - Background waits (`epic inbox wait`, `epic agents wait`) don't count:  the new session starts its own.
 2. Write down what's open but NOT on the page yet:  the new session knows only the page.
@@ -2005,7 +2020,78 @@ their next clear moment").
      step 0.
    - Refused there (no window, the end-of-turn hook won't run):  `epic fresh drop`, so it isn't woken again, and say why
      in one line.
+     - Its agents were paused ("Pause first"):  it's carrying on, so it resumes each ("8. Resume", step 4).
 - `epic fresh status`:  the sessions still waiting, and why each waits.
+
+### Pause first:  `/epic fresh all --pause`
+
+Every session stops its agents as fast as it can, saving enough to start them again;
+then, once ALL are quiet, all go fresh (epic `epic-engine` T139;  Owen, 2026-11-22:  "pause all active agents as
+quickly as possible, saving enough info about what is happening to restart again cleanly.  Test runs can be abandoned.
+Once they are quiet, they should report back to the initiating agent.  Then that session runs epic fresh all").
+- Quiet:  its agents paused and saved, no test or merge of its own running.
+- Settled by Owen, the same day:
+  - a session that doesn't report holds the round up:  name it to the person and wait, NEVER skip it after a time
+    - one whose process has exited doesn't hold it up
+  - a merge running finishes, or stops where it can be picked up again:  NEVER killed half way
+  - a round can be cancelled, and the agents then pick their work back up
+
+The session that starts it (any session, an epic's or not):
+1. `epic fresh all --pause`.  Send each `TELL:` line, as is, with `SendMessage`, all in one message.
+   - In Codex:  it can't start a round, or message a session:  say so, and have the person type it into a Claude Code
+     session.
+2. An epic's session itself:  pause your own agents, the steps below, and `epic fresh quiet`.
+3. `epic fresh wait` in the background, then END THE TURN, so reports reach you.
+   Reply one line:  "pausing <N> sessions;  I'll say who's outstanding".
+   - exit 2, time's up:  name each outstanding session and why to the person, in bold
+     (one waiting on their answer:  which window), then `epic fresh wait --max 10m` again.  Skip nobody.
+   - a report:  `epic fresh status`;  not all quiet yet, just end the turn
+   - a session that started since:  `epic fresh all --pause` again tells it
+   - exit 3:  it's over or cancelled:  nothing to do
+4. All quiet (exit 0, or status says so):  stop that wait, then `epic fresh all`, "All epics" above, from its step 1.
+   Never before:  it refuses, and there's no forcing it.
+   - This session went away meanwhile:  any session may run it once all are quiet.
+
+Each epic's session, when the line comes (and the one that started it):
+1. Start nothing new from now on:  no agent, item, phase, test or merge.  A Send waits in the inbox for the new session.
+2. `epic turns stop test`:  abandons this session's test runs, its agents' too, and frees the turn;  nobody else's.
+   - It names any merge of yours still running:  that finishes.
+   - A test of your own outside a turn, in a background Bash:  `TaskStop` it.
+   - In Codex:  Ctrl-C the test you started.
+3. Message EVERY running agent at once (`SendMessage`, one message with a call each;  `epic agents --json` has the ids):
+
+   > Stop now:  we're going fresh.  Start nothing.  Stop any test you started and don't rerun it.  A merge running:
+   > let it finish;  one stopped on conflicts:  leave it as it is, never abort it.  Don't commit unfinished work, and
+   > never stash, discard or commit another's files.  Claim what you changed (`epic agents claim`), then run
+   > `epic agents pause <name> --item <id> --next "<the next step, for someone who wasn't here>" --tests "<runs dropped>"`
+   > and return at once, saying it's paused.
+
+   - In Codex:  no background agents:  save your own state on the page and run `epic fresh quiet`.
+4. One not back within about a minute:
+   - `epic turns list` first:  a merge of yours running, wait for it;  stop no agent meanwhile
+   - then `TaskStop` it, and save for it:  `epic agents pause <name> --next "<from its task, its last report and
+     the diff>"`
+     - In Codex:  stop that sub-agent, and save for it the same way.
+   - what's saved by itself:  its task, item, claims, uncommitted files, commits and whether each is merged, a merge
+     stopped part way and how to carry it on.  The next step and the tests dropped are yours or the agent's to say.
+   - its uncommitted files stay put, and its claims keep other agents and merges off them
+   - a paused agent's notice arriving is NOT `epic agents done` (it refuses):  it's still saved
+     - it had finished its whole task:  `epic agents done <name> --finished`
+5. "16. Fresh", step 2:  what's open and not on the page, your own unfinished work too.
+6. `epic fresh quiet`:  it refuses, naming what still runs.  Send the line it prints to who started the pause
+   (`SendMessage`), reply one line, and end the turn.
+   - In Codex:  print the line for the person to paste there.
+7. Stay paused until `/epic fresh all`'s line comes:  then as "All epics", step 4.  Don't restart your agents:  the new
+   session does, "8. Resume", step 4.
+   - The person asks for work meanwhile:  say the pause is on, and that `epic fresh cancel` calls it off.
+
+Calling it off:  `epic fresh cancel`, from any session, until a session has gone fresh.
+- Send each `TELL:` line it prints (`SendMessage`).
+  - In Codex:  print each for the person to paste.
+- Each session told (and this one) resumes each paused agent:  `epic agents resume <name>`, then what it prints
+  (`SendMessage` to the agent in the session that paused it, else a new `Agent`).
+  - In Codex:  do each one's work here, from that brief.
+- `epic fresh status`:  who is quiet, and who is outstanding.
 
 ## 17. Hush:  `/epic hush [<epic> | all]`
 
@@ -2110,6 +2196,11 @@ change <name> [--for <item id>]                     stamp the <epic-change item>
 log <name> ["text"] [--last <n>]                    timestamped review line in the log;  no text:  print the newest
 bedtime <name> start "P3-P6" | done "summary"       bedtime mode on / off:  the run's changes stay green (`/bedtime`)
 focus status | summary <name> [--since <t>]         focus mode:  on?  what happened since (`/focus`, `/back`)
+fresh all [--pause] | status | drop                 every running epic session to a fresh one;  --pause:  agents
+                                                    paused and saved first ("16. Fresh", "Pause first")
+fresh quiet | wait [--max <t>] | cancel             a pause:  this session's quiet;  wait for all;  call it off
+agents pause <agent> --next ".." / agents resume <agent>   save a stopped agent / start it again, once
+turns stop test                                     this session's own test runs abandoned;  never a merge
 prompt <name> "text" | --file f                     set the prompt quoted in the Overview
 migrate [<kind>] [<name>... | --all] [--file f] [--step s] [--dry-run] [--notify] [--list]
                                                     pages up to today's markup, every step of their kind, oldest

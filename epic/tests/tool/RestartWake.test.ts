@@ -11,6 +11,7 @@ import { fileURLToPath } from "node:url"
 
 import { afterAll, beforeAll, beforeEach, expect, test } from "vite-plus/test"
 
+import { FreshPause } from "spell/epic/command/FreshPause"
 import { RestartWake } from "spell/epic/tool/RestartWake"
 import { fakeMainCheckout, fakeWorktree } from "spell/server/test/checkouts"
 
@@ -107,4 +108,25 @@ test("the hook:  a line goes to stderr with exit 2 (asyncRewake wakes the sessio
   expect(woken.status).toBe(2)
   expect(woken.stderr).toContain("📬 big:  the restart cut off 2 agents")
   expect(woken.stdout).toBe("")
+})
+
+test("paused agents are never woken as cut off (epic-engine T139)", () => {
+  listAgents(LISTED.map((agent) => ({ ...agent, status: "paused", paused: { next: "the tests" } })))
+  expect(RestartWake.lineFor(big, { now: NOW, sessions: [] })).toBeUndefined()
+})
+
+test("a restart during a pause round:  cut-off agents are saved, not resumed;  the round's starter watches again", () => {
+  const session = { epic: "big", session: "🚧 big", sessionId: "0a1b2c3d-0000-4000-8000-000000000001" }
+  FreshPause.start({ initiator: session, running: [session] })
+  try {
+    listAgents(LISTED)
+    const cutOff = RestartWake.lineFor(big, { now: NOW, sessions: [] })
+    expect(cutOff).toContain("resume none")
+    expect(cutOff).toContain("epic agents pause")
+    expect(cutOff).not.toContain("Resume each now")
+    listAgents([])
+    expect(RestartWake.lineFor(big, { now: NOW, sessions: [] })).toContain("epic fresh wait")
+  } finally {
+    FreshPause.end()
+  }
 })

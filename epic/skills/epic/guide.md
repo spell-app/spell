@@ -81,6 +81,16 @@ A merge that changed a lockfile or a `package.json` installs the packages in the
 its page server and editor, and says so;  a FAILED install leaves the merge in, and prints what to run by hand.
 After a restart, agents it started are gone:  start each again from its task, as the epic's running list
 (`epic agents`) names it.
+Not the ones it lists as `paused`:  they were saved for a fresh start.
+
+Agents paused for a fresh start (`epic fresh all --pause`):
+- picking the epic up, start each again once:  `epic agents resume <name>` prints its whole brief
+  (no background agents:  do that work here, one at a time)
+- while a pause is under way (`epic fresh status`), start nothing new;  asked to pause:
+  - drop your tests, finish a merge under way
+  - `epic agents pause <name> --item <id> --next "<next step>" --tests "<runs dropped>"` for each agent
+  - leave everyone's uncommitted files where they are
+- `epic fresh cancel` calls a pause off
 
 1. `epic phase <epic>#P3 active`, and say what you're doing:  `epic inbox status <epic> "Building P3"` (the page's step label turns, the words its tooltip).
 2. Check the accepted plan still fits.
@@ -283,6 +293,7 @@ Without them, every step still works:  each skill's "In Codex:" lines say it in 
 | a background command (Bash `run_in_background`, `TaskStop`) | waiting on `epic ask wait` / `epic inbox wait` while the chat stays free | run it in the foreground and wait:  it ends when the person sends;  stop it with Ctrl-C |
 | plan mode (`/comment`) | the person comments on a file in the plan tab | none:  take their notes in the chat, or open it as a guide with comments (`epic pages link <page> --show`) |
 | `${CLAUDE_PLUGIN_ROOT}` in a skill | the epic plugin's own folder, which Claude Code fills in | `epic guide --root` prints it:  read `${CLAUDE_PLUGIN_ROOT}` as that folder |
+| the pause before a fresh start (`epic fresh all --pause`) | every session saves its agents and reports back | can't start one:  it needs Claude Code's session messages;  `epic fresh status` and `cancel` work anywhere |
 | the inbox poller (its `Stop` hook) | wakes the session when the person sends | `epic inbox wait <epic>`, run yourself |
 | the end-of-turn hook | commits and syncs the plans | `epic turn end` (Codex's hook runs it too) |
 | `EnterWorktree` / `ExitWorktree` | moving the session into the epic's worktree | `epic worktree create <name>` (or `git worktree add`), then `cd "$(epic worktree path <epic>)"`;  leaving:  `cd` back to the main checkout |
