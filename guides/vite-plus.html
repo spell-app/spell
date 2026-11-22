@@ -76,8 +76,12 @@ epic worktree merge-main
           </ui-statistics>
           <ul>
             <li>
-              One repo, one install, one <a href="/yarn.lock" target="src-yarn-lock"><code>yarn.lock</code></a>: the kit's <a href="/src/" target="src-src"><code>src/</code></a>, and four big folders
-              beside it (<a href="/parser/" target="src-parser"><code>parser/</code></a>, <a href="/ui/" target="src-ui"><code>ui/</code></a>, <a href="/epic/" target="src-epic"><code>epic/</code></a>, <a href="/app/" target="src-app"><code>app/</code></a>).
+              One repo, one install, one <a href="/yarn.lock" target="src-yarn-lock"><code>yarn.lock</code></a
+              >: the kit's <a href="/src/" target="src-src"><code>src/</code></a
+              >, and four big folders beside it (<a href="/parser/" target="src-parser"><code>parser/</code></a
+              >, <code>ui/</code>, <a href="/epic/" target="src-epic"><code>epic/</code></a
+              >, <a href="/app/" target="src-app"><code>app/</code></a
+              >).
             </li>
             <li>
               Every folder answers to the same four checks, <code>ts</code>, <code>lint</code>, <code>format</code>,
@@ -189,8 +193,10 @@ Tools:
           <ui-section id="versions" label="Versions" sticky collapsible dividing open="false">
             <ul>
               <li>
-                Every version lives in one yarn <code>catalog:</code>, in the kit's <a href="/.yarnrc.yml" target="src-yarnrc-yml"><code>.yarnrc.yml</code></a>, and each
-                <a href="/package.json" target="src-package-json"><code>package.json</code></a> says <code>"catalog:"</code>:
+                Every version lives in one yarn <code>catalog:</code>, in the kit's
+                <a href="/.yarnrc.yml" target="src-yarnrc-yml"><code>.yarnrc.yml</code></a
+                >, and each <a href="/package.json" target="src-package-json"><code>package.json</code></a> says
+                <code>"catalog:"</code>:
                 <ul>
                   <li><code>vite-plus</code>: 1.5.1</li>
                   <li><code>vite</code>: <code>npm:@voidzero-dev/vite-plus-core@1.5.1</code>, Vite+'s own build</li>
@@ -209,7 +215,8 @@ Tools:
           <ui-section id="lint-fmt" label="Lint and format settings" sticky collapsible dividing open="false">
             <p>
               ESLint shares rules through <code>extends</code>, a name that resolves to a published package. Here each
-              folder's ONE <a href="/vite.config.ts" target="src-vite-config-ts"><code>vite.config.ts</code></a> imports the settings like any other code, and spreads them in.
+              folder's ONE <a href="/vite.config.ts" target="src-vite-config-ts"><code>vite.config.ts</code></a> imports
+              the settings like any other code, and spreads them in.
             </p>
             <ui-accordion class="spell-code" appearance="styled">
               <ui-title>the parser folder's vite.config.ts, but for its docstring · 10 lines</ui-title>
@@ -257,16 +264,18 @@ export default defineConfig({
 
         <ui-section id="readmes" label="4. The READMEs" sticky collapsible dividing open="false">
           <p>
-            Every big folder has a front page, its <a href="/README.md" target="src-readme-md"><code>README.md</code></a>, and a
-            <code>README-&lt;topic&gt;.md</code> beside it for each major folder or topic; the kit keeps its topic pages
-            in <a href="/README/" target="src-readme"><code>README/</code></a>. The kit's front page indexes all 44.
+            Every big folder has a front page, its <a href="/README.md" target="src-readme-md"><code>README.md</code></a
+            >, and a <code>README-&lt;topic&gt;.md</code> beside it for each major folder or topic; the kit keeps its
+            topic pages in <a href="/README/" target="src-readme"><code>README/</code></a
+            >. The kit's front page indexes all 44.
           </p>
           <ui-section id="3-the-brief" label="How a page is written" sticky collapsible dividing open="false">
             <ul>
               <li>
                 First for developers who know another framework, by contrast with what they know; second for coding
-                agents. The rules for working on the code stay in the folder's <a href="/AGENTS.md" target="src-agents-md"><code>AGENTS.md</code></a>, which the page
-                links.
+                agents. The rules for working on the code stay in the folder's
+                <a href="/AGENTS.md" target="src-agents-md"><code>AGENTS.md</code></a
+                >, which the page links.
               </li>
               <li>
                 In the readme voice: proof first (real code, real output), the model, the edges, then the next command.
@@ -372,8 +381,9 @@ export default defineConfig({
         <ui-section id="5-limits" label="5. Limits" sticky collapsible dividing open="false">
           <ul>
             <li>
-              <b>The editor's lint reads only the nearest config</b>: a nested <a href="/vite.config.ts" target="src-vite-config-ts"><code>vite.config.ts</code></a> inherits
-              nothing from the root's, so it spreads <code>packageLint()</code> itself.
+              <b>The editor's lint reads only the nearest config</b>: a nested
+              <a href="/vite.config.ts" target="src-vite-config-ts"><code>vite.config.ts</code></a> inherits nothing
+              from the root's, so it spreads <code>packageLint()</code> itself.
             </li>
             <li><b>The format check skips Markdown</b>: the README check is the only check a README gets.</li>
             <li>
@@ -398,7 +408,9 @@ export default defineConfig({
               </thead>
               <tbody>
                 <tr>
-                  <td><a href="/.yarnrc.yml" target="src-yarnrc-yml"><code>.yarnrc.yml</code></a></td>
+                  <td>
+                    <a href="/.yarnrc.yml" target="src-yarnrc-yml"><code>.yarnrc.yml</code></a>
+                  </td>
                   <td>the catalog: every tool version</td>
                 </tr>
                 <tr>
@@ -407,7 +419,10 @@ export default defineConfig({
                       ><code title="src/toolchain/lint.ts">lint.ts</code></a
                     >
                   </td>
-                  <td>the lint and format settings every <a href="/vite.config.ts" target="src-vite-config-ts"><code>vite.config.ts</code></a> spreads in</td>
+                  <td>
+                    the lint and format settings every
+                    <a href="/vite.config.ts" target="src-vite-config-ts"><code>vite.config.ts</code></a> spreads in
+                  </td>
                 </tr>
                 <tr>
                   <td>
@@ -423,7 +438,9 @@ export default defineConfig({
                       ><code title="vitest.config.ts">vitest.config.ts</code></a
                     >
                   </td>
-                  <td>the kit's Vitest projects, one per folder of <a href="/src/" target="src-src"><code>src/</code></a></td>
+                  <td>
+                    the kit's Vitest projects, one per folder of <a href="/src/" target="src-src"><code>src/</code></a>
+                  </td>
                 </tr>
                 <tr>
                   <td>
