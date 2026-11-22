@@ -1404,6 +1404,8 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
       it as it was fixed, and its reason may be gone from the page since (`reviewed`;  I375)
     - never on an edit:  it closes items, and an edit can't see every page's inbox
     - idempotent:  a closed or light orange one is left
+  - `items-in-order` (2026-11-22, on command;  epic `epic-engine` T151):  each section's items back in number
+    order (`ItemsInOrder`).  An item keeps its place:  a new one goes last, an open question no longer on top.
 - A new step:  a class implementing `Migration` in `migrations/`, its instance added LAST to `Migrations.all`, in the
   SAME commit as the markup change it follows (epics' `AGENTS.md`, "Rules").  Another kind's:  an entry in the docs
   tool's `STEPS`, last.  Either way:  idempotent, every word kept, and a test (a before page becomes the after page,

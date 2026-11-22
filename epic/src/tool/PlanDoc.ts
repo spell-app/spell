@@ -1098,9 +1098,8 @@ export class PlanDoc extends PlanReader {
    *   elements on the way in (`IncomingHtml`);  a question's lead, the question as asked, goes in an
    *   `<epic-question>` (P14) unless the HTML has one
    * - `titleHTML`:  `title` is HTML;  with markup, it's a `slot="title"` child
-   * - a question goes after the open questions at the top of its section;  a decision is a question born answered
-   *   (D13):  the next `q` id, `decided`, `answered`, `title` its answer, among the answered ones;
-   *   everything else at the end
+   * - at its section's end, so every section stays in number order (epic `epic-engine` T151);  no item ever moves
+   * - a decision is a question born answered (D13):  the next `q` id, `decided`, `answered`, `title` its answer
    * - while a phase is active:  `phase` (its "To review" line lists it) and an UPDATE marker
    * - in bedtime mode (a `/bedtime` run):  `overnight`, for good (the bed icon on its line)
    * - `calm`:  not urgent (yellow, not red, until reviewed):  a judgement call or issue that wouldn't surprise Owen
@@ -1139,7 +1138,6 @@ export class PlanDoc extends PlanReader {
     // no details:  "What it says on the tin.  Clarify" as its body, so it opens and takes a comment (epic `epic-engine` I209)
     PlanItem.giveBody(item)
     section.append(item)
-    if (spec.prefix === KINDS.question.prefix) this.placeQuestion(item)
     this.stamp(item)
     // a new item is new, not an update:  labelled only while a phase is active, as it always was
     if (this.activePhase) this.markUpdate(item)
@@ -1195,7 +1193,6 @@ export class PlanDoc extends PlanReader {
       this.dropOtherAnswers(question, this.chooseOption(question, option, choices))
     }
     Markup.set<"epic-item">(question, { status: "decided", answered: true })
-    this.placeQuestion(question)
     this.stamp(question)
     this.markUpdate(question, "decided")
     return question.id
@@ -1243,45 +1240,9 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * Put question `item` where it belongs in its section:  an open one after the open questions on top;
-   * an answered (or dropped) one among the answered, in id order.
-   */
-  placeQuestion(item: Element): void {
-    const section = item.parentElement!
-    if (item.getAttribute("status") === "open") {
-      const last = this.openQuestions(section)
-        .filter((other) => other !== item)
-        .at(-1)
-      if (last) last.after(item)
-      else section.prepend(item)
-      return
-    }
-    const n = PlanItem.idNumber(item.id)
-    const later = Array.from(section.children).find(
-      (other) =>
-        other !== item &&
-        QUESTION_ID.test(other.id) &&
-        other.getAttribute("status") !== "open" &&
-        PlanItem.idNumber(other.id) > n
-    )
-    if (later) later.before(item)
-    else section.append(item)
-  }
-
-  /** The open questions at the top of `section`, in order. */
-  openQuestions(section: Element): Element[] {
-    const run: Element[] = []
-    for (const item of section.children) {
-      if (!QUESTION_ID.test(item.id) || item.getAttribute("status") !== "open") break
-      run.push(item)
-    }
-    return run
-  }
-
-  /**
    * Set item `id` open, done or canceled;  closed items stay (`canceled` ones struck through).  Returns its title.
    * - "open" means the kind's live status:  a reopened answered question is `decided` again, an unanswered one `open`
-   * - a question moves to its place (`placeQuestion()`);  stamped (`stamp()`)
+   * - stamped (`stamp()`);  it stays in its place (epic `epic-engine` T151)
    * - TAKEN UP (`taken-in`, epic `epic-engine` I128):  an issue or todo closed done while a phase is active is taken
    *   in that phase (`PhaseTakes`);  reopened or canceled, it's taken in none
    * - closed (done or canceled):  every status card still underway finishes (`finishUnderway()`), so it never stays
@@ -1319,7 +1280,6 @@ export class PlanDoc extends PlanReader {
       const active = this.phaseElements.find((phase) => phase.getAttribute("status") === "active")
       if (active) Markup.set<"epic-item">(item, { takenIn: active.id })
     }
-    if (question) this.placeQuestion(item)
     this.stamp(item)
     this.markUpdate(item, status === "open" ? (reopened ? "reopened" : undefined) : (status as "done" | "canceled"))
     return PlanItem.titleOf(item)
@@ -3657,7 +3617,6 @@ export class PlanDoc extends PlanReader {
         // open, red, Owen's to answer again:  `setItem()` would keep an answered question decided.
         // Its answer stays, readable, until he answers again
         Markup.set<"epic-item">(question, { status: "open" })
-        if (QUESTION_ID.test(question.id)) this.placeQuestion(question)
         this.stamp(question)
         this.markUpdate(question, "reopened")
       }
