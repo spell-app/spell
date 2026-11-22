@@ -256,6 +256,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       the drawing, or 204 when none came in 2s (a headless browser starting):  the page draws it itself meanwhile
     - told every page as `SPELL_SERVER.drawings` (`DrawingsConfig`):  its address, its kinds, its tables' selector
     - NEVER fails a page:  a drawer that throws is logged (`SPELL_DEBUG=server:drawings`), and the page draws as before
+    - `SPELL_DRAWINGS=0` in the page server's environment turns it off:  every page draws as it did before
   - `Git` -- running git, for every tool in every repo (epic `coherence` P7, from spell-epic):
     `run()` (never throws), `out()`, `lines()`, `mustRun()` (throws a `GitError`), `mainRoot()`
   - `RealPath` -- comparing paths by where they really are, links followed (`of()`, `same()`, `isIn()`, `from()`;

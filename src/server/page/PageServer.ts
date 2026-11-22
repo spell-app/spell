@@ -156,6 +156,7 @@ export class PageServer {
    * what pages show drawn ahead (`SRV.Drawings`, epic `solid-2-final` P15):  route modules add their drawers
    * (`RouteContext.drawings`);  each page filled in as it's served, the rest asked for at `SRV.Drawings.API`
    * - its cache under the settings' `cacheLimit`, as the compile cache's
+   * - `SPELL_DRAWINGS=0` in its environment:  route modules get no `drawings`, so nothing is drawn ahead
    */
   readonly drawings: SRV.Drawings
 
@@ -713,7 +714,8 @@ export class PageServer {
       serveWorktrees: (...dirs) => void this.serveWorktrees(...dirs),
       serveContent: (dir) => void this.serveContent(dir),
       addPageConfig: (add) => void this.addPageConfig(add),
-      drawings: this.drawings,
+      // `SPELL_DRAWINGS=0`:  none, so every page draws as it did before (a before / after measure)
+      ...(process.env.SPELL_DRAWINGS !== "0" && { drawings: this.drawings }),
       onListening: (start) => this.listenings.push(start),
       onStop: (stop) => this.stops.push(stop),
       addServerReport: (report) => this.reports.push(report)
