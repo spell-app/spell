@@ -230,7 +230,11 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
       () => this.styleSheetNames.join(separator),
       (names) => {
         if (untrack(() => this.isReady)) {
-          E.SpellSolid.settings.styles.adoptInto(this.domElement.renderRoot, names ? names.split(separator) : [])
+          E.SpellSolid.settings.styles.adoptInto(
+            this.domElement.renderRoot,
+            names ? names.split(separator) : [],
+            this.vocabulary
+          )
         }
       },
       { defer: true }
@@ -677,21 +681,24 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
 
   /**
    * Keep the sheet of `hostLayout` current, for a class that works one out (it overrides the hook).
-   * - The sheet is made on the first declarations, and emptied when there are none.
+   * - The sheet is the page's ONE sheet for those declarations, shared by value (`HostLayoutSheets`):
+   *   200 stacks with the same attributes adopt one sheet, not 200 (epic `solid-2-final` P4).
+   * - New declarations swap the root's sheet for theirs;  none, and it has none.
    * - Spell UI's `UI.styles` keeps it when it adopts the class's own sheets again (a sheet it didn't make).
    */
   private followHostLayout() {
     if (isServer || !UIComponent.overrides(this, "hostLayout")) return
     const root = this.domElement.renderRoot
-    let sheet: CSSStyleSheet | undefined
     const declarations = createMemo(() => this.hostLayout ?? "")
     createEffect(declarations, (text) => {
-      if (!text && !sheet) return
-      if (!sheet) {
-        sheet = new CSSStyleSheet()
-        root.adoptedStyleSheets = [...root.adoptedStyleSheets, sheet]
+      if (!text) return
+      const sheet = HostLayoutSheets.take(text)
+      root.adoptedStyleSheets = [...root.adoptedStyleSheets, sheet]
+      // before the next declarations, and as the element is disposed
+      return () => {
+        HostLayoutSheets.release(text)
+        root.adoptedStyleSheets = root.adoptedStyleSheets.filter((each) => each !== sheet)
       }
-      sheet.replaceSync(text ? `:host { ${text} }` : "")
     })
   }
 
@@ -854,7 +861,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
   private adoptStyleSheets() {
     const { styles } = E.SpellSolid.settings
     styles.registerOnce(this.elementSetup.styleSheets)
-    styles.adoptInto(this.domElement.renderRoot, this.styleSheetNames)
+    styles.adoptInto(this.domElement.renderRoot, this.styleSheetNames, this.vocabulary)
   }
 
   ////////////////
@@ -1651,6 +1658,37 @@ const ON_PLATFORM = "on-platform"
 
 /** The attribute naming the container an element joins ("Parent"). */
 const PARENT = "parent"
+
+/****************
+ * ### `HostLayoutSheets`
+ * The page's `:host` sheets for `UIComponent.hostLayout`, ONE per text of declarations, shared by every root that
+ * uses it (epic `solid-2-final` P4).
+ * - Counted:  a sheet no root uses any more is let go.
+ * - NEVER changes a sheet's text:  other roots hold it.  A root whose declarations change takes another.
+ * - Static:  page-wide, as the sheets are.
+ ****************/
+class HostLayoutSheets {
+  /** The sheet for `declarations`, made the first time;  one more root uses it. */
+  static take(declarations: string): CSSStyleSheet {
+    let entry = HostLayoutSheets.byText.get(declarations)
+    if (!entry) {
+      const sheet = new CSSStyleSheet()
+      sheet.replaceSync(`:host { ${declarations} }`)
+      HostLayoutSheets.byText.set(declarations, (entry = { sheet, users: 0 }))
+    }
+    entry.users++
+    return entry.sheet
+  }
+
+  /** One root fewer uses the sheet for `declarations`;  the last one lets it go. */
+  static release(declarations: string) {
+    const entry = HostLayoutSheets.byText.get(declarations)
+    if (entry && --entry.users <= 0) HostLayoutSheets.byText.delete(declarations)
+  }
+
+  /** declarations => their sheet, and how many roots use it */
+  private static readonly byText = new Map<string, { sheet: CSSStyleSheet; users: number }>()
+}
 
 /** `UIComponent.internalState`:  what only the base class uses inside. */
 type InternalState = {

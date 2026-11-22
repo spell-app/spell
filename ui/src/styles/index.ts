@@ -10,9 +10,12 @@
  * - `foundationCSS` is the PAGE's adoption order:
  *   layers first (fixes the layer order), then reset, tokens, colours, sizes, animations, utilities.
  *   `pageCSS` adds the page-only sheets (`typography`, `native`), which style light-DOM markup.
- * - `shadowFoundationCSS` is what each SHADOW ROOT adopts of it (epic `solid-2-final` P3):
+ * - `shadowFoundationCSS` is what a SHADOW ROOT may adopt of it (epic `solid-2-final` P3):
  *   the same, less the token sheets' page parts (`tokens.css`, `colors.css`, `sizes.css`:  `@property` and `:root`
  *   rules, which do nothing inside a shadow root).  The tokens reach it from the page, by inheritance.
+ *   - Every root takes layers and reset;  the colour and size parts, the animations and the utilities only where its
+ *     family uses them (`OPTIONAL_SHEETS`, `RootSheets`;  P4).
+ *   - `sheetWords.ts`:  the class words the colour and size parts' remaps match, which decide it.
  *   - `fallbackCSS`:  the tokens' `:host` copies, for a shadow root on a page that never loaded them.
  *   - The parts:  `StyleGenerator`'s class docs.
  * - NOTE: `?inline` relies on `css.lightningcss.targets` being modern browsers.  With Vite's default

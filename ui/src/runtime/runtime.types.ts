@@ -276,10 +276,32 @@ export type StyleRegisterOptions = {
 export const APP_STYLESHEET_ID = "ui-app-stylesheet"
 
 /**
- * Name of the utilities sheet (`utilities.css`), adopted into every shadow root AFTER its component sheets.
+ * The foundation sheets a shadow root takes only when its family uses them, by what they hold
+ * (epic `solid-2-final` P4):  every root takes the rest (layers, reset).
+ * - `colors`, `sizes`:  the colour and size remaps and utilities (`colors.shared.css`, `sizes.shared.css`)
+ * - `utilities`:  `utilities.css`
+ * - `animations`:  `animations.css`, also adopted into a root the first time `UI.transitions` animates a box in it
+ * - Which families use which:  `RootSheets` (Spell UI's element core), from the vocabulary and `UIRoot.sheets.ts`.
+ * - Their names in `UI.styles`.
+ */
+export const OPTIONAL_SHEETS = {
+  colors: "colors-shared",
+  sizes: "sizes-shared",
+  utilities: "utilities",
+  animations: "animations"
+} as const
+
+/** One of `OPTIONAL_SHEETS`' names. */
+export type OptionalSheetName = (typeof OPTIONAL_SHEETS)[keyof typeof OPTIONAL_SHEETS]
+
+/**
+ * Name of the utilities sheet (`utilities.css`), adopted into a shadow root AFTER its component sheets.
  * - `Styles`' default `setUtilities()` list;  `UIRuntime` registers the sheet under it.
  */
-export const UTILITIES_SHEET = "utilities"
+export const UTILITIES_SHEET = OPTIONAL_SHEETS.utilities
+
+/** Name of the animations sheet (`animations.css`) in `UI.styles`. */
+export const ANIMATIONS_SHEET = OPTIONAL_SHEETS.animations
 
 ////////////////
 // ## Transitions

@@ -13,6 +13,7 @@ import {
   utilitiesCSS
 } from "spell/ui/styles"
 import { StyleGenerator } from "spell/ui/styles/StyleGenerator"
+import { SHEET_WORDS } from "spell/ui/styles/sheetWords"
 
 import { Fixture } from "spell/test-helpers/Fixture"
 
@@ -235,6 +236,10 @@ describe("src/styles/*.css", () => {
     for (const [name, css] of Object.entries(new StyleGenerator().sheets())) {
       expect(squash(RAW_SHEETS[`./${name}`] ?? ""), name).toBe(squash(css))
     }
+  })
+
+  it("keeps the shared sheets' class words current (run `yarn gen:styles`;  solid-2-final P4)", () => {
+    expect(SHEET_WORDS).toEqual(new StyleGenerator().sheetWords())
   })
 
   // a registered colour resolves `light-dark()` where it's DECLARED (`:root`), freezing the page's scheme

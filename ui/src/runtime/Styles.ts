@@ -8,18 +8,23 @@ import { AppStylesheet } from "./AppStylesheet"
  * - Why a registry:  every component instance shares ONE `CSSStyleSheet` per name (no per-instance `<style>`),
  *   and re-registering a name updates it everywhere at once.
  * - Order inside every shadow root (`adoptInto()`):
- *   1. foundation sheets, in `setFoundation()` order (layers, reset, the colour and size remaps ...)
+ *   1. foundation sheets, in `setFoundation()` order (layers, reset, the colour and size remaps, animations),
+ *      an OPTIONAL one only where the root takes it (below)
  *   1b. the FALLBACK sheets (`setFallback()`), only while the page has no tokens of its own
  *   2. the component's own sheets, as passed
  *   2b. the PAGE sheets, only in a root that draws `ui-*` elements in its own light content (`adoptPageSheetsInto()`)
  *   3. any sheets someone else put on the root (kept, not clobbered)
- *   4. utilities (`setUtilities()`, default `["utilities"]`)
+ *   4. utilities (`setUtilities()`, default `["utilities"]`), an optional one only where the root takes it
  *   5. `shadow: true` sheets (themes), in registration order
  *   6. the app stylesheet (`#ui-app-stylesheet`) -- ALWAYS last, see `AppStylesheet`
  * - Unregistered names are skipped, not errors:
  *   foundation / utilities may be registered after components connect,
  *   and every adopted root is re-pushed when they are.
  * - Roots are held WEAKLY, so a disconnected component's shadow root can be collected.
+ * - OPTIONAL sheets (`setOptional()`;  epic `solid-2-final` P4):  foundation and utility sheets a root takes only when
+ *   its family uses them, as `adoptInto()`'s `takes` says, or when `addInto()` adds one (the animations, as a box
+ *   inside it first animates).  A root adopted with no `takes` takes them all.
+ *   - So a plain root (an icon, an item) adopts about 16 KB of the foundation, not every colour, size and utility rule.
  * - The tokens are set on the PAGE only (`pageOnly` sheets), and reach every shadow root by inheritance
  *   (epic `solid-2-final` P3):  a shadow root adopts no `:root` rule, and no `:host` copy of the tokens while the page
  *   has them.
@@ -47,6 +52,10 @@ export class Styles {
   private pageHasTokens: boolean | undefined
   /** utility names, in order */
   private utilities: string[] = [UTILITIES_SHEET]
+  /** foundation and utility names a root takes only when it asks for them:  see `setOptional()` */
+  private readonly optional = new Set<string>()
+  /** the optional names each root takes;  none for a root that takes them all */
+  private readonly rootTakes = new WeakMap<ShadowRoot, Set<string>>()
   /** every root `adoptInto()` has seen */
   private readonly roots = new Set<WeakRef<ShadowRoot>>()
   /** component sheet names per root */
@@ -176,6 +185,17 @@ export class Styles {
     this.refreshRoots()
   }
 
+  /**
+   * Set the OPTIONAL sheet names:  foundation and utility sheets a root takes only when it asks for them
+   * (`adoptInto()`'s `takes`, `addInto()`);  re-pushes every adopted root.
+   * - A root adopted without `takes` takes every one of them.
+   */
+  setOptional(names: readonly string[]) {
+    this.optional.clear()
+    for (const name of names) this.optional.add(name)
+    this.refreshRoots()
+  }
+
   /** Set the utility sheet names (adopted after component sheets);  re-pushes every adopted root. */
   setUtilities(names: readonly string[]) {
     this.utilities = [...names]
@@ -191,13 +211,34 @@ export class Styles {
    * and remember `root` so later registrations reach it.
    * - Called as the component is set up (`UIComponent.onMount()`), and again when its `styleSheetNames` change.
    * - Calling again with other names replaces that root's component sheets.
+   * - `takes`:  the optional sheets (`setOptional()`) its family uses (Spell UI's `RootSheets`);  added to what it
+   *   took before, never taken away.  Left out on a root's first call, it takes every optional sheet.
    * - SIDE EFFECT:  first call starts watching `#ui-app-stylesheet`.
    */
-  adoptInto(root: ShadowRoot, names: string[]) {
+  adoptInto(root: ShadowRoot, names: string[], takes?: readonly string[]) {
     const isKnown = this.rootNames.has(root)
     this.rootNames.set(root, [...names])
+    if (takes && (!isKnown || this.rootTakes.has(root))) {
+      const taken = this.rootTakes.get(root) ?? new Set<string>()
+      for (const name of takes) taken.add(name)
+      this.rootTakes.set(root, taken)
+    }
     if (!isKnown) this.roots.add(new WeakRef(root))
     void this.startApp()
+    this.push(root)
+  }
+
+  /**
+   * `root` takes optional sheet `name` too (`setOptional()`), now and from then on.
+   * - What `UI.transitions` calls before it animates a box inside a shadow root:
+   *   the animations reach only the roots that animate.
+   * - Nothing to do for a root `adoptInto()` doesn't know, one that takes every optional sheet, or a name that isn't
+   *   optional.
+   */
+  addInto(root: ShadowRoot, name: string) {
+    const taken = this.rootTakes.get(root)
+    if (!taken || taken.has(name) || !this.optional.has(name)) return
+    taken.add(name)
     this.push(root)
   }
 
@@ -261,13 +302,15 @@ export class Styles {
   private push(root: ShadowRoot) {
     const names = this.rootNames.get(root) ?? []
     const foreign = root.adoptedStyleSheets.filter((sheet) => !this.owned.has(sheet))
+    const taken = this.rootTakes.get(root)
+    const isTaken = (name: string) => !taken || taken.has(name) || !this.optional.has(name)
     const sheets = [
-      ...this.lookup(this.foundation),
+      ...this.lookup(this.foundation.filter(isTaken)),
       ...(this.fallback.length && !this.hasPageTokens ? this.lookup(this.fallback) : []),
       ...this.lookup(names),
       ...(this.pageSheetRoots.has(root) ? this.lookup(this.sharedPageNames()) : []),
       ...foreign,
-      ...this.lookup(this.utilities),
+      ...this.lookup(this.utilities.filter(isTaken)),
       ...this.lookup(this.shadowNames),
       ...(this.app ? [this.app.sheet] : [])
     ]

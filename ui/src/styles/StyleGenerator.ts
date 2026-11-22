@@ -104,6 +104,36 @@ export class StyleGenerator {
     }
   }
 
+  /**
+   * `sheetWords.ts`:  the class words each shared part's remaps match, by axis (`.ui.red` => `red`, `.ui.small` =>
+   * `small`), as a module of data (epic `solid-2-final` P4).
+   * - So a shadow root takes a shared part only when its family can put one of those words on a box:
+   *   Spell UI's `RootSheets` reads them against each family's vocabulary.
+   * - Written beside the sheets, from the same lists the remaps are written from:  a new colour reaches every family
+   *   that offers it.
+   */
+  wordsModule(): string {
+    const { colors, sizes } = this.sheetWords()
+    // unquoted keys, as the formatter writes them
+    const words = `{ colors: ${JSON.stringify(colors)}, sizes: ${JSON.stringify(sizes)} }`
+    return [
+      BANNER,
+      "",
+      "/**",
+      " * The class words each shared sheet's remaps match (`.ui.red`, `.ui.small`), by axis:",
+      " * `colors.shared.css`, `sizes.shared.css`.",
+      " * - A shadow root takes a shared sheet only when its family can put one of its words on a box (`RootSheets`).",
+      " */",
+      `export const SHEET_WORDS = ${words} as const`,
+      ""
+    ].join("\n")
+  }
+
+  /** The class words `wordsModule()` writes, by axis. */
+  sheetWords(): { colors: string[]; sizes: string[] } {
+    return { colors: this.colorNames(), sizes: this.keys(sizes) }
+  }
+
   ////////////////
   // ## tokens.css
   ////////////////

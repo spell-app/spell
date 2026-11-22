@@ -210,6 +210,44 @@ describe("Styles.adoptPageSheetsInto()", () => {
   })
 })
 
+describe("Styles.setOptional()", () => {
+  it("a root takes an optional sheet only when its `takes` names it;  the others, and roots without `takes`, take all (solid-2-final P4)", async () => {
+    const layers = styles.register("layers", "@layer a;")
+    const colors = styles.register("colors-shared", ".ui.red { --c: red }")
+    const animations = styles.register("animations", "[data-ui-animation] { --a: 1 }")
+    const utilities = styles.register("utilities", ".ui-bold { font-weight: bold }")
+    styles.setFoundation(["layers", "colors-shared", "animations"])
+    styles.setOptional(["colors-shared", "animations", "utilities"])
+    const plain = shadowHost().root
+    const red = shadowHost().root
+    const old = shadowHost().root
+    styles.adoptInto(plain, [], [])
+    styles.adoptInto(red, [], ["colors-shared"])
+    styles.adoptInto(old, [])
+    await styles.appSheetReady
+    expect([...plain.adoptedStyleSheets]).toEqual([layers, styles.appSheet])
+    expect([...red.adoptedStyleSheets]).toEqual([layers, colors, styles.appSheet])
+    expect([...old.adoptedStyleSheets]).toEqual([layers, colors, animations, utilities, styles.appSheet])
+  })
+
+  it("`addInto()` adds one to a root for good, in the foundation's order;  a later `adoptInto()` keeps it", async () => {
+    const layers = styles.register("layers", "@layer a;")
+    const colors = styles.register("colors-shared", ".ui.red { --c: red }")
+    const animations = styles.register("animations", "[data-ui-animation] { --a: 1 }")
+    styles.setFoundation(["layers", "colors-shared", "animations"])
+    styles.setOptional(["colors-shared", "animations"])
+    const { root } = shadowHost()
+    styles.adoptInto(root, [], ["colors-shared"])
+    styles.addInto(root, "animations")
+    styles.adoptInto(root, [], ["colors-shared"])
+    await styles.appSheetReady
+    expect([...root.adoptedStyleSheets]).toEqual([layers, colors, animations, styles.appSheet])
+    // a name that isn't optional changes nothing
+    styles.addInto(root, "layers")
+    expect([...root.adoptedStyleSheets]).toEqual([layers, colors, animations, styles.appSheet])
+  })
+})
+
 describe("Styles.setFallback()", () => {
   /** A sheet setting the colours' marker on `:root`, as `colors.css` does:  the page has the tokens. */
   const MARKER = ":root { --ui-sheet-colors: loaded }"

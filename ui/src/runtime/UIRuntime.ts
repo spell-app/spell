@@ -25,6 +25,7 @@ import {
   RUNTIME_KEY,
   RUNTIME_VERSION,
   UTILITIES_SHEET,
+  OPTIONAL_SHEETS,
   type Disposer,
   type RuntimeGlobal,
   type ToastHandle,
@@ -97,7 +98,7 @@ export class UIRuntime {
     styles: this.styles
   })
   /** keyframe catalogue runner */
-  readonly transitions = new Transitions({ browser: this.browser })
+  readonly transitions = new Transitions({ browser: this.browser, styles: this.styles })
   /** scroll position callbacks and lazy images, on `IntersectionObserver` */
   readonly visibility = new Visibility({ transitions: this.transitions })
   /** strings and `Intl` formatting */
@@ -160,6 +161,8 @@ export class UIRuntime {
    * Register the CSS foundation with `styles`, so every shadow root adopts it and the page gets the light-side sheets.
    * - Every sheet goes on the page (`PAGE_SHEETS`);  shadow roots adopt `FOUNDATION_SHEETS` first, and the
    *   utilities after their own sheets (`Styles`' default `setUtilities()`).
+   * - A shadow root takes the remaps, the utilities and the animations (`OPTIONAL_SHEETS`) only where its family uses
+   *   them (`setOptional()`;  Spell UI's `RootSheets`, epic `solid-2-final` P4).
    * - The tokens are on the page only (`TOKEN_SHEETS`, `pageOnly`):  they reach every shadow root by inheritance.
    *   A shadow root adopts their `:host` copies (`FALLBACK_SHEETS`) only on a page without them (`setFallback()`).
    * - Here rather than in `spell/ui/styles`:  the runtime chunk is loaded exactly once per page, which is also how often
@@ -172,6 +175,7 @@ export class UIRuntime {
     }
     for (const [name, css] of Object.entries(FALLBACK_SHEETS)) this.styles.register(name, css)
     this.styles.setFoundation(Object.keys(FOUNDATION_SHEETS))
+    this.styles.setOptional(Object.values(OPTIONAL_SHEETS))
     this.styles.setFallback(Object.keys(FALLBACK_SHEETS))
   }
 
