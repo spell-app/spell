@@ -95,6 +95,8 @@ describe("production build", () => {
    * The editor's first screen (epic `solid-2-final` P6):  what `index.html` loads at once, its scripts and preloads and
    * every chunk they import statically, holds none of the pieces loaded on first use.
    * - Each mode's and box's view (`LazyPiece`), and VS Code's CSS service (`SpellCSS.load()`).
+   * - Each dialog, every page but the editor's (`PageViews`), Spanish's grammar and Spell UI's Spanish dictionary
+   *   (epic `solid-2-final` P11).
    * - A static import of one, from anything in the first load, would put it back:  this names the chunk.
    */
   test("the first screen holds no view loaded on first use, nor the CSS service", () => {
@@ -303,7 +305,7 @@ const PER_COPY = /\/(parser\/src\/core|app\/src\/app\/runner)\//
 
 /** What the editor loads on first use, as it appears in a sourcemap's `sources`:  the views a `LazyPiece` loads, the CSS service. */
 const ON_FIRST_USE =
-  /\/app\/src\/app\/solid\/(InspectorView|InspectorParts|PaletteView|AppAnatomyStack|DesignView|ChangeThisView|EditorToursView)\.tsx$|\/node_modules\/vscode-css-languageservice\//
+  /\/app\/src\/app\/(solid\/(InspectorView|InspectorParts|PaletteView|AppAnatomyStack|DesignView|ChangeThisView|EditorToursView)\.tsx|solid\/modals\/\w+\.tsx|pages\/(ProjectChooser|ThemeEditorPage|SiteEditorPage|PlaceReference|GuidesPage|PaletteGroupsPage)\.tsx)$|\/node_modules\/vscode-css-languageservice\/|\/parser\/src\/spell\/(languages\/es\/|rules\/.*\.es\.ts$)|\/ui\/src\/components\/components\.es\.ts$/
 
 /**
  * What the run page never loads, as it appears in a sourcemap's `sources`:  the editor, CodeMirror, the Inspector,

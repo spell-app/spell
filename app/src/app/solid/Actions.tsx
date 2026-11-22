@@ -8,6 +8,7 @@ import { appTexts } from "spell/app/app/ui/AppTexts"
 import type * as Modals from "spell/app/app/solid/modals"
 import { barTooltip, tracked } from "spell/app/app/solid"
 import { isStaticBuild } from "spell/app/app/static/staticBuild"
+import { PageViews } from "spell/app/app/pages/pageViews"
 import {
   EDITOR_HOTKEYS,
   runCodeEditorCommand,
@@ -158,9 +159,15 @@ export const Actions = {
   showProjectSettings: (props: ActionProps) => (
     <Action title={appTexts.text("settings")} icon="setting" onClick={() => editor.showProjectSettings()} {...props} />
   ),
-  /** Home:  the landing page, where every project is chosen or made. */
+  /** Home:  the landing page, where every project is chosen or made;  loaded ahead while the pointer rests on it. */
   showProjectChooser: (props: ActionProps) => (
-    <Action title={appTexts.text("home")} icon="home" onClick={() => editor.showProjectChooser()} {...props} />
+    <Action
+      title={appTexts.text("home")}
+      icon="home"
+      onClick={() => editor.showProjectChooser()}
+      ref={(element: Element) => PageViews.home.ahead(element)}
+      {...props}
+    />
   ),
   showHelp: (props: ActionProps) => (
     <Action title={appTexts.text("help")} icon="help circle" onClick={() => editor.showHelp()} {...props} />
