@@ -191,7 +191,7 @@ export class PageServer {
         ...this.contentFileConfig(served.file),
         edit: PageEditor.PREFIX,
         // its own file in the writable folders:  the docs runtime edits its text in place (epic `epic-engine` P60)
-        writable: this.writes.writable.some((folder) => SRV.pathInside(folder, served.file)),
+        writable: this.writes.canWrite(served.file),
         // a stale generated file, as a page finds it (`reportStale()`):  rebuilt in a worktree (epic `epic-engine` P54)
         staleReport: STALE_API,
         etag: SRV.StaticHandler.etagOf(statSync(served.file)),
@@ -407,6 +407,8 @@ export class PageServer {
       this.worktrees.push(dir)
       this.web.files.mount({ prefix: WORKTREES_PREFIX, dir })
     }
+    // a worktree's page edited in place saves in that worktree (epic `epic-engine` T132)
+    this.writes.worktrees = [...this.worktrees]
     this.info.worktrees = this.worktrees[0]
     this.info.worktreesFolders = [...this.worktrees]
     this.mountContentInWorktrees()
