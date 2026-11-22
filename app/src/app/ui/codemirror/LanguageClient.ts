@@ -60,6 +60,14 @@ export abstract class LanguageClient {
     return undefined
   }
 
+  /**
+   * Hear each open file's problems, after each parse the worker makes that changes them:  in its own thread, never
+   * (the page works them out from its own parse).  Returns what stops it.
+   */
+  onParsed(_listener: (parsed: LSP.LanguageParsed) => void): () => void {
+    return () => {}
+  }
+
   /** `file`'s state was made, holding `text`. */
   opened(_file: SP.SpellFile, _text: string): void {}
 
@@ -182,8 +190,20 @@ class WorkerClient extends LanguageClient {
     this.post({ kind: "close", projectId: project.projectId })
   }
 
-  /** A reply came:  its request answered, or refused with the worker's error. */
+  onParsed(listener: (parsed: LSP.LanguageParsed) => void): () => void {
+    this.parsedListeners.add(listener)
+    return () => this.parsedListeners.delete(listener)
+  }
+
+  /** Who hears each file's problems -- see `onParsed()`. */
+  private parsedListeners = new Set<(parsed: LSP.LanguageParsed) => void>()
+
+  /** A reply came:  its request answered, or refused with the worker's error;  or a file's problems, unasked. */
   private replied(reply: LanguageWorkerReply): void {
+    if ("kind" in reply) {
+      for (const listener of this.parsedListeners) listener(reply)
+      return
+    }
     const waiting = this.waiting.get(reply.id)
     if (!waiting) return
     this.waiting.delete(reply.id)
@@ -215,7 +235,10 @@ export type LanguageWorkerMessage =
   | ({ kind: "compile"; id: number } & LSP.LanguageCompile)
 
 /** The language worker's reply to a request:  its answer, or the error it threw. */
-export type LanguageWorkerReply = { id: number; answer: unknown } | { id: number; error: LanguageWorkerError }
+export type LanguageWorkerReply =
+  | { id: number; answer: unknown }
+  | { id: number; error: LanguageWorkerError }
+  | ({ kind: "parsed" } & LSP.LanguageParsed)
 
 /** An error the worker threw, as plain data:  its class's name, message and `cause`. */
 export type LanguageWorkerError = { name: string; message: string; cause?: unknown }

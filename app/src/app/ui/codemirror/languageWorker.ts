@@ -1,7 +1,8 @@
 /**
  * The editor's language worker:  the parser and the language service, off the page's thread (epic `solid-2-final` P18).
  * - A `LSP.LanguageHost`, fed the page's `LanguageClient.inWorker()` messages:
- *   files opened, their edits as changes, requests from the ONE table (`LSP.LANGUAGE_REQUESTS`).
+ *   files opened, their edits as changes, requests from the ONE table (`LSP.LANGUAGE_REQUESTS`), compiles;
+ *   it sends each open file's problems back after each parse that changes them.
  * - It loads each project itself, through the page server, as the page does.
  * - Spaces' models register spell's project groups and Spell UI's names for a drawing's tags, as on the page.
  * - Its position in the import graph:  an entry of its own, made by `new Worker(new URL(...))`:
@@ -12,7 +13,8 @@ import "spell/app/spaces"
 import { LSP } from "spell/app/lsp"
 import { plainError, type LanguageWorkerMessage, type LanguageWorkerReply } from "./LanguageClient"
 
-const host = new LSP.LanguageHost()
+// each open file's problems, after each parse that changes them
+const host = new LSP.LanguageHost({ onParsed: (parsed) => postMessage({ kind: "parsed", ...parsed }) })
 // its value's words list a Pick row first, which the editor opens the picker for (epic `editor` T61)
 host.service.picksValues = true
 
@@ -37,7 +39,7 @@ addEventListener("message", (event: MessageEvent<LanguageWorkerMessage>) => {
 })
 
 /** Send `message` back to the page:  an answer a message can't carry is an error saying so.  NEVER throws. */
-function reply(message: LanguageWorkerReply): void {
+function reply(message: Extract<LanguageWorkerReply, { id: number }>): void {
   try {
     postMessage(message)
   } catch (error) {

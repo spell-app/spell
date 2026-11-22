@@ -174,7 +174,9 @@ and in the app's build folder, `app/` at the app folder's root.
         copy of the project, the pages in play as the page has them, and hands back what the compile wrote
         (`SP.CompiledEntry`), which the page takes as its own and runs (`SpellProject.takeCompiled()`);
         `compiledFrom` says `"elsewhere"`
-      - still on the page's parse:  folding, problems, the bubbly look, and every reader outside the code
+      - each file's problems too, sent after each of the worker's parses, numbered by the edits they're of
+        (`FileStates.parsedElsewhere()`);  the editor's own Spell keeps the page's, which checks the names it fills
+      - still on the page's parse:  folding, the bubbly look, and every reader outside the code
         (the list:  the epic page's P18)
     - So `spell/app/lsp` stays browser-safe:  [lsp's AGENTS.md](../lsp/AGENTS.md).
     - Its answers reach CodeMirror through one converter, [LspToCodeMirror](ui/codemirror/LspToCodeMirror.ts).

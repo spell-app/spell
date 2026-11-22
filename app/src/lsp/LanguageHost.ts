@@ -1,3 +1,5 @@
+import type { Diagnostic } from "vscode-languageserver"
+
 import type { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
@@ -13,19 +15,26 @@ import { LSP } from "spell/app/lsp"
  * - It parses once the edits pause (`PARSE_WAIT`), or at once when a request comes:
  *   so an answer is always about the text the editor had when it asked.
  * - Requests are the ONE table's (`LSP.LANGUAGE_REQUESTS`), the same VS Code's language server answers.
+ * - After each parse, each open file it changed gets its problems sent (`onParsed`), as a language server publishes
+ *   diagnostics, numbered by the edits they're of (`version`) so the editor drops a late one.
  * - It compiles a project when asked (`compile()`), handing back what the compile wrote, for the editor to run.
  * - Its position in the import graph:  the parser and the language service;
  *   no DOM and no editor, so it runs in a worker, or in the page's own thread for a test.
  ****************/
 export class LanguageHost {
   constructor({
-    service = new LSP.SpellLanguageService(new LSP.AppAddresses())
-  }: { service?: LSP.SpellLanguageService } = {}) {
+    service = new LSP.SpellLanguageService(new LSP.AppAddresses()),
+    onParsed = () => {}
+  }: LanguageHostProps = {}) {
     this.service = service
+    this.onParsed = onParsed
   }
 
   /** the language service answering every request */
   readonly service: LSP.SpellLanguageService
+
+  /** Called with an open file's problems each time a parse changes them:  see `LanguageParsed`. */
+  readonly onParsed: (parsed: LanguageParsed) => void
 
   /**
    * The editor shows `uri`'s file, of project `projectId`, holding `text`.
@@ -39,6 +48,8 @@ export class LanguageHost {
       if (!file || file.project !== project) return
       if (file.contents !== text) project.takeText(file, text)
       this.texts.set(uri, text)
+      this.versions.set(uri, 0)
+      this.sentParse.delete(uri)
       this.parseSoon(project)
     })
     this.pending = Promise.all([this.pending, opening]).then(() => undefined)
@@ -55,6 +66,7 @@ export class LanguageHost {
       if (!file || before === undefined) return
       const { text, span } = applied(before, changes)
       this.texts.set(uri, text)
+      this.versions.set(uri, (this.versions.get(uri) ?? 0) + 1)
       file.project.takeText(file, text, span)
       this.parseSoon(file.project)
     })
@@ -153,13 +165,74 @@ export class LanguageHost {
     this.parseTimers.delete(project)
     const parsing = project.needsFullParse ? project.parse() : project.parseWaitingText()
     await parsing.catch((error: unknown) => console.error("LanguageHost:  couldn't parse", error))
+    this.sendProblems(project)
   }
+
+  ////////////////
+  // ## Problems
+  ////////////////
+
+  /**
+   * Send the problems of each open file of `project` whose parse changed since they were last sent (`onParsed`).
+   * - A `<css>` block before the CSS service is in:  sent again once it lands, with its mistakes
+   *   (`LSP.SpellCSS.load()`).
+   * - NEVER throws:  a file whose problems can't be worked out is said on the console, and skipped.
+   */
+  private sendProblems(project: SP.SpellProject): void {
+    for (const [uri] of this.texts) {
+      const file = this.fileFor(uri)
+      if (!file?.match || file.project !== project || this.sentParse.get(uri) === file.match) continue
+      try {
+        this.sentParse.set(uri, file.match)
+        const diagnostics = this.service.diagnostics(file)
+        const fixItStarts = SP.OldForms.uses(file).map((use) => use.start)
+        this.onParsed({ uri, version: this.versions.get(uri) ?? 0, diagnostics, fixItStarts })
+        if (!LSP.SpellCSS.isLoaded && this.service.css.regionsIn(file.contents ?? "").length) {
+          LSP.SpellCSS.load().then(
+            () => {
+              this.sentParse.delete(uri)
+              this.sendProblems(project)
+            },
+            () => undefined // logged by `SpellCSS`
+          )
+        }
+      } catch (error) {
+        console.error(`LanguageHost:  couldn't work out the problems of ${uri}`, error)
+      }
+    }
+  }
+
+  /** Each open file's edits so far, since it was opened:  what its problems are numbered by. */
+  private versions = new Map<string, number>()
+
+  /** The parse each open file's problems were last sent for. */
+  private sentParse = new Map<string, object>()
 
   /** Each project's wait before it parses. */
   private parseTimers = new Map<SP.SpellProject, ReturnType<typeof setTimeout>>()
 
   /** How long the edits pause before the host parses by itself, msec:  a request parses at once. */
   static PARSE_WAIT = 100
+}
+
+/** How a `LanguageHost` is made. */
+export type LanguageHostProps = {
+  /** the language service:  default, one addressing the app's files (`LSP.AppAddresses`) */
+  service?: LSP.SpellLanguageService
+  /** called with an open file's problems each time a parse changes them.  Default:  nothing */
+  onParsed?: (parsed: LanguageParsed) => void
+}
+
+/** An open file's problems, after a parse changed them:  `LanguageHost.onParsed`. */
+export type LanguageParsed = {
+  /** the file's address */
+  uri: string
+  /** how many edits it has taken since it was opened:  the problems are of the text they made */
+  version: number
+  /** its problems, as `textDocument/publishDiagnostics` sends them */
+  diagnostics: Diagnostic[]
+  /** where each of its problems with a one-click fix starts, as offsets:  Spell's old forms (`SP.OldForms.uses()`) */
+  fixItStarts: number[]
 }
 
 /** The editor shows a file:  `LanguageHost.open()`. */

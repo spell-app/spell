@@ -64,6 +64,8 @@ import { LspToCodeMirror } from "./LspToCodeMirror"
  *   that makes them the same, kept out of undo, so the caret and the file's own undo stay right.
  * - Parse => problems:  whenever a spell file's `match` changes, even from an edit to ANOTHER file, its diagnostics
  *   become its state's problems, and its fold arrows and bubbly look follow (`CodeMirrorSetup.PARSED`).
+ *   - Where the language worker answers, its problems come from the worker's parse, sent after each one
+ *     (`parsedElsewhere()`;  epic `solid-2-final` P18):  the page's parse still draws the rest.
  * - Edits from outside the code (the Inspector, the side bar, a rename, the value picker) come in through
  *   `applyEdits()`:  one undo step each, carrying their `EditWay` (`FileStates.EDIT_WAY`), the one "not typed" mark
  *   the typing helps read to leave them alone.
@@ -91,6 +93,8 @@ export class FileStates {
   }: FileStatesProps) {
     this.service = service
     this.client = client
+    // the worker's problems for each file it parsed, where it works them out
+    client.onParsed((parsed) => this.parsedElsewhere(parsed))
     this.onEdit = onEdit
     this.onTaken = onTaken
     // a click or a focus elsewhere acts on the parse, e.g. the side bar's edits:  it mustn't be one keystroke behind
@@ -546,6 +550,7 @@ export class FileStates {
     const { file } = entry
     if (entry.isOpenInClient || !(file instanceof SP.SpellFile) || file.contents === undefined) return
     entry.isOpenInClient = true
+    entry.version = 0
     this.client.opened(file, entry.state.doc.toString())
   }
 
@@ -567,8 +572,10 @@ export class FileStates {
   private took(entry: FileEntry, state: EditorState, changes: ChangeSet | undefined, way?: EditWay): void {
     entry.state = state
     if (!changes) return
-    if (entry.isOpenInClient) this.client.changed(entry.file as SP.SpellFile, changes)
-    else this.openInClient(entry)
+    if (entry.isOpenInClient) {
+      entry.version = (entry.version ?? 0) + 1
+      this.client.changed(entry.file as SP.SpellFile, changes)
+    } else this.openInClient(entry)
     this.toSlices(entry, changes)
     this.stateEdited(entry, changes, way)
   }
@@ -687,18 +694,22 @@ export class FileStates {
     if (!file.match || this.entries.get(file.path) !== entry) return
     const { state } = entry
     if (file.contents !== state.doc.toString()) return
-    if (!LSP.SpellCSS.isLoaded && this.service.css.regionsIn(file.contents ?? "").length) {
-      LSP.SpellCSS.load().then(
-        () => this.parseChanged(entry, file),
-        () => undefined // logged by `SpellCSS`
+    if (!this.diagnosesOnPage(file)) {
+      this.dispatch(entry, { effects: CodeMirrorSetup.PARSED.of(null) })
+    } else {
+      if (!LSP.SpellCSS.isLoaded && this.service.css.regionsIn(file.contents ?? "").length) {
+        LSP.SpellCSS.load().then(
+          () => this.parseChanged(entry, file),
+          () => undefined // logged by `SpellCSS`
+        )
+      }
+      const problems = this.withFixIt(
+        file,
+        this.service.diagnostics(file).map((diagnostic) => LspToCodeMirror.diagnostic(state.doc, diagnostic))
       )
+      const { effects } = setDiagnostics(state, problems)
+      this.dispatch(entry, { effects: [...asList(effects), CodeMirrorSetup.PARSED.of(null)] })
     }
-    const problems = this.withFixIt(
-      file,
-      this.service.diagnostics(file).map((diagnostic) => LspToCodeMirror.diagnostic(state.doc, diagnostic))
-    )
-    const { effects } = setDiagnostics(state, problems)
-    this.dispatch(entry, { effects: [...asList(effects), CodeMirrorSetup.PARSED.of(null)] })
     // its slices too, so their bubbly look takes the parse:
     // a slice made before it drew its `if`s as plain lines (epic `editor` I215)
     for (const slice of entry.slices) slice.dispatch({ effects: CodeMirrorSetup.PARSED.of(null) })
@@ -711,8 +722,11 @@ export class FileStates {
    * - Pressed:  the fix is worked out again where the problem is now, and made through `applyEdits()`,
    *   one undo step, kept or saved as any edit is.
    */
-  private withFixIt(file: SP.SpellFile, problems: LintDiagnostic[]): LintDiagnostic[] {
-    const starts = CodeEditorFeatures.fixItStarts(file)
+  private withFixIt(
+    file: SP.SpellFile,
+    problems: LintDiagnostic[],
+    starts = CodeEditorFeatures.fixItStarts(file)
+  ): LintDiagnostic[] {
     if (!starts.size) return problems
     return problems.map((problem) =>
       problem.severity !== "hint" && problem.severity !== "info" && starts.has(problem.from)
@@ -725,11 +739,51 @@ export class FileStates {
   private fixIt(file: SP.SpellFile, from: number): void {
     const entry = this.entries.get(file.path)
     if (!entry) return
+    const { doc } = entry.state
+    const position = LspToCodeMirror.lspPosition(doc, from)
+    if (!this.diagnosesOnPage(file)) {
+      // the worker's fix, of the text the state holds now
+      const textDocument = { uri: LanguageClient.uriOf(file) }
+      void this.client
+        .request("spell/oldFormFix", { textDocument, position })
+        .then((fix) => {
+          if (fix && entry.state.doc === doc) this.applyEdits(file, LspToCodeMirror.editsFor(fix.edit, file.path))
+        })
+        .catch((error: unknown) => console.error("FileStates:  couldn't fix it", error))
+      return
+    }
     // the fix reads the parse:  of the text the state holds now
     if (this.waiting.has(file.project)) this.parseNow()
-    const position = LspToCodeMirror.lspPosition(entry.state.doc, from)
     const edit = CodeEditorFeatures.fixItAt(this.service, file, position)
     if (edit) this.applyEdits(file, LspToCodeMirror.editsFor(edit, file.path))
+  }
+
+  /**
+   * Are `file`'s problems worked out from the page's own parse?
+   * - Not where the language worker answers:  it sends them after each parse (`parsedElsewhere()`).
+   * - Except in a project whose names its host fills (the editor's own Spell, `service.hostNames`):
+   *   that check is the page's alone.
+   */
+  private diagnosesOnPage(file: SP.SpellFile): boolean {
+    return this.client.parsesOnPage || this.service.hostNames.some((names) => names.project === file.project.path)
+  }
+
+  /**
+   * The language worker's problems for a file it parsed:  they become its state's, with their "Fix it" buttons,
+   * if they're of the text the state holds (`version`, its edits since it was opened);  a later parse's come after.
+   */
+  private parsedElsewhere({ uri, version, diagnostics, fixItStarts }: LSP.LanguageParsed): void {
+    const path = LSP.AppAddresses.pathOf(uri)
+    const entry = path === undefined ? undefined : this.entries.get(path)
+    const file = entry?.file
+    if (!entry || entry.version !== version || !(file instanceof SP.SpellFile) || this.diagnosesOnPage(file)) return
+    const { state } = entry
+    const problems = this.withFixIt(
+      file,
+      diagnostics.map((diagnostic) => LspToCodeMirror.diagnostic(state.doc, diagnostic)),
+      new Set(fixItStarts)
+    )
+    this.dispatch(entry, { effects: asList(setDiagnostics(state, problems).effects) })
   }
 }
 
@@ -806,6 +860,8 @@ type FileEntry = {
   slices: Set<EditorView>
   /** the client was told it's open, with its text:  each change goes to it (`openInClient()`) */
   isOpenInClient?: boolean
+  /** how many changes went to the client since it was opened:  the worker's problems name it (`parsedElsewhere()`) */
+  version?: number
   /** where it was scrolled to when last shown */
   scroll?: StateEffect<unknown>
   /** stops following its file */

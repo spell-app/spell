@@ -76,6 +76,21 @@ describe("LanguageHost", () => {
     expect((await host.compile({ projectId: solitaire })).compiled).not.toBe(entry.compiled)
   })
 
+  test("sends an open file's problems after each parse that changes them, numbered by the edits they're of", async () => {
+    const sent: LSP.LanguageParsed[] = []
+    const watched = new LSP.LanguageHost({ onParsed: (parsed) => sent.push(parsed) })
+    watched.open({ uri, projectId: solitaire, text })
+    await watched.request("textDocument/documentSymbol", { textDocument })
+    expect(sent.at(-1)).toMatchObject({ uri, version: 0, diagnostics: [] })
+    watched.change({ uri, changes: [[text.length, text.length, "\n\tits zzz is ++\n"]] })
+    await watched.request("textDocument/documentSymbol", { textDocument })
+    expect(sent.at(-1)!.version).toBe(1)
+    expect(sent.at(-1)!.diagnostics.length).toBeGreaterThan(0)
+    watched.open({ uri, projectId: solitaire, text })
+    await watched.request("textDocument/documentSymbol", { textDocument })
+    expect(sent.at(-1)).toMatchObject({ version: 0, diagnostics: [] })
+  })
+
   test("a file it doesn't know answers the table's fallback", async () => {
     const elsewhere = { uri: LSP.AppAddresses.uriOf(`${solitaire}/Nowhere.spell`) }
     expect(await host.request("textDocument/documentSymbol", { textDocument: elsewhere })).toEqual([])
