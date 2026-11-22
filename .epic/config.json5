@@ -85,6 +85,11 @@
   //   (epic `epic-engine` I150), so their sessions aren't told they're in the wrong repo.
   "renamedRepos": { "https://github.com/spell-app/spell-kit": "https://github.com/spell-app/spell" },
 
+  // The guides that ship with Spell (epic `epic-engine` P79):  the kit's `guides/`, versioned with the code, each one
+  // moved here from the epic repo's `guides/` (`epic guides move`) at the same path, so its address stays
+  // `/guides/<path>`.  The epic tools find a guide here first, then in the epic repo (`EpicConfig.guideFoldersOf()`).
+  "guidesFolder": "guides",
+
   // The epic engine:  the spell-epic child repo, already inside the top repo, so no link (`""`, epic-engine P10).
   "engineFolder": "",
 

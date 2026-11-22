@@ -92,6 +92,7 @@ export class EpicConfig {
     sharedFolders: ["epics", "sagas", "guides", "pages"],
     engineFolder: "",
     repoTemplates: "",
+    guidesFolder: "",
     app: { path: "/editor/", url: "", urlFile: "", start: "" },
     repos: "",
     voices: {},
@@ -751,6 +752,54 @@ export class EpicConfig {
   }
 
   /**
+   * the repo's OWN guides folder, as written:  a path from each checkout's root (`"guides"`, the kit's;
+   * epic `epic-engine` P79);  `""` (the default):  none, every guide is in the epic folder's `guides/`
+   * - its guides are versioned with the code:  a worktree's are its branch's, edited and merged like any file
+   * - a guide's address is its path from the checkout's root, so a folder named `guides` at the root keeps the
+   *   addresses the epic folder's guides have (`/guides/x.html`), and the page server serves the checkout's first
+   * - every tool finds guides in both places through `guideFoldersOf()`, the checkout's first
+   */
+  get guidesFolder(): string {
+    return this.settings.guidesFolder
+  }
+
+  /**
+   * Every folder checkout `root`'s guides are in, the CODE's first (epic `epic-engine` P79):
+   * - `<root>/<guidesFolder>`, when the repo names one and the checkout has it (`code: true`)
+   * - then the epic folder's `guides/` (`<contentFolder>/guides`), when it's there
+   * - a guide in both (moved on a branch not merged yet, `epic guides move`):  the code's is the one
+   *   (`guideFileOf()`);  every lister keeps the first of each page path
+   * - NEVER throws:  a config that won't read gives the epic folder's alone
+   */
+  static guideFoldersOf(root: string): GuideFolder[] {
+    const folders: GuideFolder[] = []
+    let written = ""
+    try {
+      written = EpicConfig.of(root).guidesFolder
+    } catch {
+      // a config that won't read:  no code guides
+    }
+    const code = written ? resolve(root, written) : undefined
+    if (code && existsSync(code)) folders.push({ folder: code, code: true, base: resolve(root) })
+    const content = EpicConfig.contentOf(root)
+    const shared = join(content, "guides")
+    if (existsSync(shared) && shared !== code) folders.push({ folder: shared, code: false, base: content })
+    return folders
+  }
+
+  /**
+   * The file guide page path `page` (`guides/solid/solid-2.html`, from the checkout's root or the epic folder:  the
+   * same) names in checkout `root`:  the code's copy first, else the epic folder's;  `undefined` when neither has it.
+   */
+  static guideFileOf(root: string, page: string): string | undefined {
+    for (const { base } of EpicConfig.guideFoldersOf(root)) {
+      const file = join(base, page)
+      if (existsSync(file)) return file
+    }
+    return undefined
+  }
+
+  /**
    * the folder the VS Code window files are in (`epic window`;  epic `epic-eject` P13):
    * each machine's own, never tracked
    * - package windows and the whole repo's (`windowFile()`), and the worktrees' in its `ongoing/`
@@ -1016,6 +1065,7 @@ export class EpicConfig {
       sharedFolders: this.sharedFolders.join(","),
       engineFolder: this.engineFolder ?? "",
       repoTemplates: this.repoTemplates,
+      guidesFolder: this.guidesFolder,
       windowsFolder: this.windowsFolder,
       "app.path": this.settings.app.path,
       "app.url": this.settings.app.url,
@@ -1246,6 +1296,7 @@ export class EpicConfig {
       sharedFolders: foldersOf(given, "sharedFolders", defaults.sharedFolders, file),
       engineFolder: valueOf(given, "engineFolder", defaults.engineFolder, file, "", { empty: true }),
       repoTemplates: valueOf(given, "repoTemplates", defaults.repoTemplates, file, "", { empty: true }),
+      guidesFolder: valueOf(given, "guidesFolder", defaults.guidesFolder, file, "", { empty: true }),
       windowsFolder: valueOf(given, "windowsFolder", defaults.windowsFolder, file, "", { empty: true }),
       repos: reposOf(given, defaults.repos, file),
       voices: namesTo(given, "voices", defaults.voices, file),
@@ -1309,6 +1360,14 @@ export type RepoCheckout = {
   /** a found checkout of one of the repo's `peers` (in an old-layout worktree) */
   peer?: boolean
 }
+
+/**
+ * One of `EpicConfig.guideFoldersOf()`:  a folder holding guides.
+ * - `folder`:  absolute
+ * - `code`:  the checkout's own (`guidesFolder`), versioned with the code;  else the epic folder's `guides/`
+ * - `base`:  what its guides' page paths are from:  the checkout's root, or the epic folder
+ */
+export type GuideFolder = { folder: string; code: boolean; base: string }
 
 /** One of `EpicConfig.peers`:  a repo beside this one (`spell-x`), and its MAIN checkout, absolute. */
 export type EpicPeer = { name: string; main: string }
@@ -1400,6 +1459,9 @@ export type EpicOldLayout = { carryOn: string; commitMaps: string; oldClones: st
  *   I5);  `""` (the default):  no link, a repo that only runs `epic`
  * - `repoTemplates`:  the repo's own page templates, a folder from each checkout's root (`""`, none:  the default);
  *   listed beside the engine's (spell-epic's `templates/`, epic `epic-eject` T11), and found by name before them
+ * - `guidesFolder`:  the repo's own guides, a folder from each checkout's root (`"guides"`, the kit's;  `""`, none:
+ *   the default);  versioned with the code, and found before the epic folder's (`guideFoldersOf()`, epic `epic-engine`
+ *   P79)
  * - `windowsFolder`:  the VS Code window files' folder, relative to the main checkout (`epic window`, epic `epic-eject`
  *   P13);  the epic folder's `windows/` (`../my-app.epics/windows`);  `""` means it too
  *   - each machine's own, never tracked:  the epic repo git-ignores `windows/`
@@ -1461,6 +1523,7 @@ export type EpicSettings = {
   sharedFolders: string[]
   engineFolder: string
   repoTemplates: string
+  guidesFolder: string
   windowsFolder: string
   app: EpicApp
   repos: string | string[]

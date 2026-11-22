@@ -1758,6 +1758,9 @@ export class RepoInit {
   "voices": ${value("voices")}
   // and the repo's app, which the docs' App tab opens through the epic server (started there when it isn't up):
   // "app": { "path": "/editor/", "url": "http://localhost:3000/", "start": "npm run dev" }
+  // and the repo's own guides, a folder from each checkout's root, versioned with the code and found before the
+  // epic folder's guides/ (\`epic guides move\` moves one there):
+  // "guidesFolder": "guides"
   // and fixes every checkout gets at once, the worktrees behind main too (\`epic worktree patch\`):  main's file
   // copied in where it isn't tracked yet, or a command run once in each checkout:
   // "checkoutPatches": [{ "id": "vscode-ignore", "date": "2026-10-22", "why": "...", "copy": ".ignore" }]

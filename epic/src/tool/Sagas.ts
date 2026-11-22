@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs"
-import { join, relative } from "node:path"
+import { join, relative, sep } from "node:path"
 
 // By file name, `.ts` and all:  plain `node` loads this file by path (the docs index, `src/tools/index.js`)
 import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
@@ -37,9 +37,13 @@ export class Sagas {
    */
   readonly content: string
 
+  /** the checkout asked from (or the epic folder):  its own guides (`guidesFolder`) count too (epic `epic-engine` P79) */
+  readonly checkout: string
+
   /** The sagas of checkout `root`'s repo (or of epic folder `root`). */
   constructor(root: string) {
     this.content = EpicConfig.contentOf(root)
+    this.checkout = root
   }
 
   /** The list's file:  `<content>/sagas/sagas.json5`. */
@@ -141,25 +145,32 @@ export class Sagas {
 
   /**
    * Every guide (`guides/**.html`, as page paths) and the saga its meta names (`sagaOf()`), by path.
+   * - in every guides folder (`EpicConfig.guideFoldersOf()`):  the checkout's own first, then the epic folder's;
+   *   a page in both is the checkout's (moved, its branch not merged yet:  `epic guides move`)
    * - skips the folders that hold no pages:  `experiments/`, `examples/`, `details/`, `parts/`, `node_modules/`
    *   (the docs tools' `SKIP_DIRS`), and the Guides list page itself
    */
   guides(): GuideSaga[] {
     const found: GuideSaga[] = []
-    const walk = (dir: string) => {
+    const seen = new Set<string>()
+    const walk = (dir: string, base: string) => {
       if (!existsSync(dir)) return
       for (const entry of readdirSync(dir, { withFileTypes: true })) {
         if (entry.name.startsWith(".")) continue
         const path = join(dir, entry.name)
         if (entry.isDirectory()) {
-          if (!NO_PAGES.has(entry.name)) walk(path)
+          if (!NO_PAGES.has(entry.name)) walk(path, base)
         } else if (entry.name.endsWith(".html")) {
-          const from = relative(this.content, path)
-          if (from !== GUIDES_LIST) found.push({ path: from, saga: Sagas.sagaOf(readFileSync(path, "utf8")) })
+          const from = relative(base, path).split(sep).join("/")
+          if (from === GUIDES_LIST || seen.has(from)) continue
+          seen.add(from)
+          found.push({ path: from, file: path, saga: Sagas.sagaOf(readFileSync(path, "utf8")) })
         }
       }
     }
-    walk(join(this.content, GUIDES))
+    const folders = EpicConfig.guideFoldersOf(this.checkout)
+    if (!folders.length) walk(join(this.content, GUIDES), this.content)
+    for (const { folder, base } of folders) walk(folder, base)
     return found.sort((a, b) => a.path.localeCompare(b.path))
   }
 
@@ -226,6 +237,8 @@ export type Saga = {
 export type GuideSaga = {
   /** a page path (from the epic folder):  `guides/solid/solid-2.html` */
   path: string
+  /** its file, absolute:  in the checkout's own guides folder, or the epic folder's */
+  file: string
   /** the saga its meta names;  `null` for none (the Guides page's Misc) */
   saga: string | null
 }

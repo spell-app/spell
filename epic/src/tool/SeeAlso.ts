@@ -60,10 +60,21 @@ export class SeeAlso {
    */
   readonly content: string
 
+  /** the checkout asked from:  its own guides (`guidesFolder`) are found before the epic folder's (epic-engine P79) */
+  readonly checkout: string
+
   /** The See Alsos of the epics of the repo checkout `root` is in. */
   constructor(root: string) {
     this.content = EpicConfig.contentOf(root)
+    this.checkout = root
   }
+
+  /**
+   * The file page path `path` names:  a guide the checkout's own guides folder has, else the epic folder's
+   * (`EpicConfig.guideFileOf()`);  else the epic folder's, there or not.
+   */
+  fileOf = (path: string): string =>
+    (GUIDE.test(path) ? EpicConfig.guideFileOf(this.checkout, path) : undefined) ?? join(this.content, path)
 
   ////////////////
   // ## An epic's See Also
@@ -78,9 +89,9 @@ export class SeeAlso {
   linksOf(name: string): SeeAlsoLink[] {
     const epic = join(this.content, EPICS, name)
     if (!existsSync(epic)) return []
-    const { durable, guides } = linksIn(this.content, name)
+    const { durable, guides } = linksIn(this.content, name, this.fileOf)
     const page = (path: string, kind: SeeAlsoKind): SeeAlsoLink => {
-      const file = join(this.content, path)
+      const file = this.fileOf(path)
       return {
         href: `/${path}`,
         title: titleOf(file),
@@ -154,7 +165,7 @@ export class SeeAlso {
       if (epicNamed(name) === FEEDBACK) continue
       const facts = factsOf(this.content, name)
       if (!facts) continue
-      const { durable, guides } = linksIn(this.content, name)
+      const { durable, guides } = linksIn(this.content, name, this.fileOf)
       for (const path of new Set([...durable, ...guides])) {
         if (NEVER_CLAIMED.test(path)) continue
         const claim = { epic: name, durable: durable.includes(path), ...facts }
@@ -288,8 +299,13 @@ function factsOf(root: string, name: string): EpicFacts | undefined {
  * - `guides`:  every page under `guides/` its phases' part files (`parts/p-<slug>.html`) link to, once each, sorted;
  *   an item's part, the Overview's or the summary's links never count (J94)
  * - each `href` read from its own file's folder (a part's from `parts/`);  a page that isn't there is left out
+ * - `fileOf`:  a page path's file, the checkout's own guide first (`SeeAlso.fileOf()`)
  */
-function linksIn(root: string, name: string): { durable: string[]; guides: string[] } {
+function linksIn(
+  root: string,
+  name: string,
+  fileOf: (path: string) => string = (path) => join(root, path)
+): { durable: string[]; guides: string[] } {
   const folder = join(root, EPICS, name)
   const doc = planDocOf(root, name)
   const parts = join(folder, "parts")
@@ -306,7 +322,7 @@ function linksIn(root: string, name: string): { durable: string[]; guides: strin
     for (const [tag] of html.matchAll(/<a\b[^>]*>/g)) {
       const href = /\shref="([^"]*)"/.exec(tag)?.[1]
       const path = href && pathOf(root, file, href)
-      if (!path || !existsSync(join(root, path))) continue
+      if (!path || !existsSync(fileOf(path))) continue
       if (file === doc) {
         if (/\sslot="durable"/.test(tag)) durable.add(path)
       } else if (GUIDE.test(path)) guides.add(path)
