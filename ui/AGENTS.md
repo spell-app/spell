@@ -486,9 +486,9 @@ Where each of a tag's attributes goes in a property editor:  the spell editor's 
       - its layout is `__parts/layout.html` there
       - its data is `__data/components.json5` there
   - EVERY component set's pages load it (the page server's `componentSets` setting):
-    pages in Spell UI's shape, each set in its own `docs/` (a folder of the kit, or spell-brand beside it),
+    pages in Spell UI's shape, each set in its own `docs/` (a folder of the kit, or a project beside it),
     which the page server serves with this bundle as their `_assets/`.
-    - Epic UI at `/components/epics/`, App UI at `/components/app/`, the brand's at `/components/brand/`
+    - Epic UI at `/components/epics/`, App UI at `/components/app/`
     - It holds `SitePacks.ts`:  `globalThis.SpellUI` (`registerPack`, `packModules`).
       - So a component pack's script shares the page's Solid and Spell UI.
       - A pack's `define()` waits for every family first, as its elements draw Spell UI's in their shadow roots.
@@ -612,8 +612,9 @@ Where each of a tag's attributes goes in a property editor:  the spell editor's 
 - `yarn design:build [--out <dir>] [--brand <folder>] [--brand-book <file>]` (`spell design build`):
   the claude.ai design system's files (epic `claude-design`).
   - [Its script](scripts/design-build.ts), on [the design export](src/tools/DesignExport.ts).
-  - `--brand`:  the brand's package folder, its `<brand-*>` cards;  `--brand-book`:  Claude Design's brand book.
-    - Spell UI's code never names either (epic `repo-split` P5):  `spell design build` passes the kit's spell-brand.
+  - `--brand`:  a brand package's folder, its `<brand-*>` cards;  `--brand-book`:  Claude Design's brand book.
+    - Spell UI's code never names either (epic `repo-split` P5):  `spell design build` passes the brand book from the
+      epic repo;  no `--brand` since spell-brand was dropped (epic `epic-engine` T124).
     - Without them:  no Brand cards and no content rules, and the README's "Not synced" says so.
   - Written to `<dir>/project/`;  by default `build/design-system/` (git-ignored).
   - Made from the site's components data, the element examples and the Spell theme.
@@ -1157,7 +1158,6 @@ THE LINT GUARD (epic `spell-element` P10):  `yarn lint` holds component files to
 - Where:  EVERY set's component folders (all written on `spell/element`).
   - `PATTERN_FOLDERS`, in [the toolchain's lint settings](../src/toolchain/lint.ts):
     - `ui`:  `src/components/`, `src/docs-components/`
-    - `brand`:  `src/components/`
   - The others, by `patternLintIn()` in their own `vite.config.ts`:
     - spell-epic:  `src/components/`
     - spell-app:  `src/app/components/` (`<spell-viewer>`, `<spell-editor>`;  since epic `people-and-orgs` P17)
@@ -1198,13 +1198,13 @@ THE LINT GUARD (epic `spell-element` P10):  `yarn lint` holds component files to
   - Built by the kit's pack tooling, [ComponentPack](../src/element-tools/ComponentPack.ts)
     (Spell UI's from epic `repo-split` P5 to P10):
     - `spell-pack build | check [<folder>]`, the kit's bin ([its script](../bin/spell-pack.mjs)),
-      run from the pack's own folder or repo:  `epic/`'s and the brand's `yarn pack:build` / `pack:check`
+      run from the pack's own folder or repo:  `epic/`'s `yarn pack:build` / `pack:check`
     - Spell UI's `spell pack build <pack>` ([its cli/](src/cli/AGENTS.md)) finds the pack by name,
       and calls the same tool
     - `spell-pack` runs the tool's source through `tsx`, with the PACK's `tsconfig.json`:
-      the pack's vocabularies import by package name (`spell-brand/...`), as its own build resolves them.
+      the pack's vocabularies import by package name (`spell-x/...`), as its own build resolves them.
     - Its generated files name `spell pack build <pack>` (epic `repo-split` P14, `spell-pack 2`).
-  - A new pack:  `spell pack create <name>` writes a repo laid out as spell-brand is
+  - A new pack:  `spell pack create <name>` writes a repo of its own
     (ALL its code in ONE `src/`, its families in `src/components/`, imports by package name);
     `spell pack add <pack> <tag>` adds a family, its test and its `exports` key ([templates](src/cli/templates/)).
   - As it runs, it calls `SpellUI.registerPack({ name, prefix, catalog, define })`.
@@ -1313,7 +1313,7 @@ As WWOD §4, plus these deliberate EXCEPTIONS.
 - How every tool finds them:  the kit's [package.json](../package.json) `exports`, no alias table anywhere.
   - TypeScript:  the `spell-source` condition (`customConditions` in [tsconfig.json](tsconfig.json))
     reads Spell UI's SOURCE, from every folder.
-  - Only a program that reads declarations (the app's node program, spell-brand) gets the built ones
+  - Only a program that reads declarations (the app's node program, a project beside the kit) gets the built ones
     (`types`, `ui/dist-types/src/...`, `spell-types`).
   - Vite, Vitest, `tsx`:  `default`, the source, adding the extension themselves.
   - Every folder barrel has an explicit key (`"./ui/components/ui-button"`, `"./ui/runtime"` ...):
@@ -1342,7 +1342,7 @@ As WWOD §4, plus these deliberate EXCEPTIONS.
   - PAGE scripts Vite serves or SSR-loads (the demo's `*.ts`, the visual tests' `fixture.ts`, `StaticFixture.ts`,
     `StaticDocument.ts`) import Spell UI as `src/` does (`SSR` for `spell/ui/static`).
   - [`StyleGenerator`](src/styles/StyleGenerator.ts):  a leaf file, never a barrel with `?inline` CSS
-- The other folders (`epic/`, `app/`) and spell-brand import Spell UI the same way, by those names:
+- The other folders (`epic/`, `app/`) and projects beside the kit import Spell UI the same way, by those names:
   everything in `src/` is importable while developing (Q47 reverses J38), through `exports`.
   - What their code, tools and tests import:
     - `spell/ui/core`, `spell/ui/components/ui-code`, `spell/ui/property`, `spell/ui/test-helpers/MemberClashes`

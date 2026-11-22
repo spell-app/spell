@@ -998,7 +998,6 @@ const MERGED_REPOS: Readonly<Record<string, string>> = {
 /** The repos that are ONE package of no folders of its own, by npm name:  the short name of the package each was. */
 const ONE_PACKAGE_REPOS: Readonly<Record<string, string>> = {
   "spell-ui": "ui",
-  "spell-brand": "brand",
   "spell-epic": "epics"
 }
 

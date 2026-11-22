@@ -31,6 +31,7 @@ import {
 import { EpicCheckout } from "./EpicCheckout"
 import { parseTarget, phaseLabel, phaseOf, ITEM_REF } from "./epicArgs"
 import { EpicTools } from "./EpicTools"
+import { Guides } from "./Guides"
 import { MainMerge } from "./MainMerge"
 import { Sessions } from "./Sessions"
 import { StrayFiles } from "./StrayFiles"
@@ -130,6 +131,11 @@ export class Requests {
       const installs = Requests.installReport(merged)
       for (const line of installs.lines) CLI.out(line)
       await Requests.recordMerged(named, merged)
+      // guides the branch moved into the code:  the epic folder's copies go, main's are the one copy (epic-engine P79)
+      if (merged.some(({ commits }) => commits.length)) {
+        const pruned = Guides.prune(process.cwd())
+        if (pruned.length) CLI.out(`guides now in the code:  ${pruned.length} file(s) deleted from the epic folder`)
+      }
       if (merged.some(({ commits }) => commits.length))
         await Requests.refreshPageServer(process.cwd(), { restart: installs.restart })
       return EXIT.OK

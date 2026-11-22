@@ -149,15 +149,11 @@ export class SagaCommands {
    * - the list first:  it refuses an `old` that isn't a saga, a `new` that's taken or malformed, before anything else
    */
   private async rename(from: string, to: string): Promise<void> {
-    const { root } = this.files
     this.sagas.rename(from, to)
     const epics = [...this.epicSagas()].filter(([, saga]) => saga === from).map(([name]) => name)
     for (const epic of epics) await this.owner.edit(this.files.findDoc(epic), (plan) => plan.setSaga(to))
     const guides = this.sagas.guides().filter((guide) => guide.saga === from)
-    for (const guide of guides) {
-      const file = join(root, guide.path)
-      writeFileSync(file, Sagas.withSaga(readFileSync(file, "utf8"), to))
-    }
+    for (const { file } of guides) writeFileSync(file, Sagas.withSaga(readFileSync(file, "utf8"), to))
     const moved = this.moveFolder(from, to)
     const links = this.rewriteLinks(from, to)
     this.print(

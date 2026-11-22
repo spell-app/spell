@@ -44,9 +44,16 @@ export class FileOperations {
     return this.content ?? this.root
   }
 
-  /** absolute folders `/api/files` may change things in;  nothing outside them */
+  /**
+   * absolute folders `/api/files` may change things in;  nothing outside them
+   * - once there's an epic folder, its folders AND the checkout's own folders of those names that it has:
+   *   a guide moved into the code (the kit's `guides/`, epic `epic-engine` P79) is edited where it is, on its branch
+   */
   get writable(): string[] {
-    return this.writableNames.map((folder) => resolve(this.writableRoot, folder))
+    const folders = this.writableNames.map((folder) => resolve(this.writableRoot, folder))
+    if (!this.content) return folders
+    const own = this.writableNames.map((folder) => resolve(this.root, folder)).filter((folder) => existsSync(folder))
+    return [...own, ...folders]
   }
 
   ////////////////
@@ -147,6 +154,7 @@ export class FileOperations {
 
   /**
    * The file a request names by URL path:  under `writableRoot`, inside a `writable` folder, there or not.
+   * - the checkout's own file first, when it has one in a writable folder of its own (`writable`)
    * - throws `HttpError`:  400 no path or a bad one;  403 `..`, a dot file, or not in a `writable` folder
    *   (nor a `writable` folder itself)
    * - the page editor (`/api/pages`) holds its writes to the same list through this
@@ -156,7 +164,9 @@ export class FileOperations {
     if (typeof one !== "string" || !one)
       throw new SRV.HttpError(400, "a path is required, e.g. /guides/server/notes.md")
     const path = one.startsWith("/") ? one : `/${one}`
-    const file = SRV.fileInside(this.writableRoot, path)
+    // a file the checkout itself has, in a writable folder of its own (a moved guide):  that one, as it's served
+    const own = this.content ? SRV.fileInside(this.root, path) : undefined
+    const file = own && existsSync(own) ? own : SRV.fileInside(this.writableRoot, path)
     const writable = this.writable
     if (!writable.some((folder) => file !== folder && SRV.isInside(folder, file))) {
       const folders = writable.map((folder) => `${relative(this.writableRoot, folder)}/`).join(", ")

@@ -5,7 +5,7 @@ import { CLI } from "spell/cli"
 /**
  * `spell bundle [names...]` / `spell bundle check [names...]`:  the bundles the page server serves, BUILT on demand
  * instead of committed (the page server's settings, `"bundles"`:  `ui-site`, Spell UI's docs site, in spell-ui's
- * part;  `brand`, the brand pages, in spell-brand's).  The logic:  the server's `Bundle` (`SRV.Bundle`).
+ * part).  The logic:  the server's `Bundle` (`SRV.Bundle`).
  * - And the COMMITTED generated files the page server's pages need (epic `epic-engine` P54):  `ui-root` (Spell UI's root
  *   catalog), `epics-pack`, `epic-docs` (spell-epic's docs bundle);  `SRV.BundleSpec.committed`
  *   - `--stale`, or no name:  built only in a WORKTREE;  the main checkout writes nothing, it says what to run

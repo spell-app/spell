@@ -61,7 +61,7 @@ export function bareName(label: string): string {
   return label.replace(/^\./, "").replace(/\(\)$/, "")
 }
 
-/** A package's own index files, for an import of its bare name (`spell-brand`). */
+/** A package's own index files, for an import of its bare name (`spell-x`). */
 const INDEXES = (base: string) => [`${base}/index.ts`, `${base}/index.tsx`]
 
 /** The line `index` is on in `text`, from 1. */

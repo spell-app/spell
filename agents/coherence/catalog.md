@@ -42,7 +42,7 @@ What `/coherence sweep` reads, an agent each.
 | `ui-docs-tools` | `ui/src/docs-components/`, `ui/src/tools/`, `ui/site/`, `ui/scripts/` |
 | `epic-pages` | `epic/src/components/`, `epic/src/tools/_assets/` (hand-written only), `epic/src/answers/`, `epic/src/review/` |
 | `epic-tools-kit` | `epic/src/` (the rest), `epic/hooks/`, the kit's `src/`, `tools/`, `scripts/` |
-| `parser-app` | `parser/src/`, `app/src/`, `spell-brand/src/`, `spell-brand/scripts/` |
+| `parser-app` | `parser/src/`, `app/src/` |
 | `ui-shared` | `ui/src/`'s other folders:  `cli/`, `icons/`, `property/`, `util/`, `vocabulary/`, its top-level files |
 | `vscode` | the two VS Code extensions:  `app/vscode/`, `epic/vscode/` |
 
@@ -395,7 +395,6 @@ The surfaces:  what people and agents USE, not code (sweep 2, Owen, 2026-10-26:
 - **Score:**  `function parseArgs\(|argv\.indexOf\(["']--`
   · home `src/cli/`, `epic/src/cli/`
 - **Copies:**
-  - `spell-brand/scripts/compare.ts`
   - the kit's `tools/content-links.ts`, `scripts/favicon.ts`, `tools/repos.ts`;  spell-epic's demo checks'
     `flagValue()`
   - P20 moved spell-epic's onto `parseVerbArgs()`:  six hand-written `parseArgs()` (`PlanDocCommands`, `design.js`,

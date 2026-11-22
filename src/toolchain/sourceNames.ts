@@ -26,7 +26,7 @@ import { findUp } from "spell/util/node/findUp"
  * - A name it can't find is left to esbuild's own resolver.
  * - `packages`:  which names, default every Spell repo's (`spell`, `spell-ui` ...).
  * - Used by every direct esbuild build:  spell-epic's extension and docs bundle, Spell UI's bundle measure and static
- *   server, the brand's design bundle, spell-parser's library test.
+ *   server, spell-parser's library test.
  * - Node's modules only (esbuild's type erased):  plain `node` loads it, types stripped.
  ****************/
 export function sourceNames(packages: RegExp = SPELL_PACKAGES): Plugin {

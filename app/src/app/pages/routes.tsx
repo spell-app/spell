@@ -4,13 +4,14 @@ import { createRouter, defineRoutes, useNavigate, type RouterHistory, type Route
 
 import { editor } from "spell/app/app/editor"
 import { setNavigator } from "./navigation"
+import { GuidesPage } from "./GuidesPage"
 import { PaletteGroupsPage } from "./PaletteGroupsPage"
 import { PlaceReferencePage } from "./PlaceReference"
 import { ProjectChooser } from "./ProjectChooser"
 import { SiteEditorRoute } from "./SiteEditorPage"
 import { ProjectPageRoute } from "./SpellEditor"
 import { ThemeEditorPage } from "./ThemeEditorPage"
-import { PALETTE_PAGE, PLACE_PAGE, SITE_PAGE, THEME_PAGE } from "./pages.types"
+import { GUIDES_PAGE, PALETTE_PAGE, PLACE_PAGE, SITE_PAGE, THEME_PAGE } from "./pages.types"
 
 /**
  * The app's routes (`@solidjs/router`):  `/edit/`, `/design/` or `/run/`, then an address (decision Q40, epic
@@ -25,6 +26,8 @@ import { PALETTE_PAGE, PLACE_PAGE, SITE_PAGE, THEME_PAGE } from "./pages.types"
  * - `/site/<group>`:  the group's sites (`<SiteGroupPage>`);  a registered group's address, else it's a project's
  * - `/place/<description>`:  a place's reference page (`<PlaceReferencePage>`, epic `data` P52), e.g.
  *   `/place/@spell/examples/StarWars/StarWars.api.json5`
+ * - `/guides`:  the guides that ship with Spell (`<GuidesPage>`, epic `epic-engine` P79);  `/guides/<path>` one of them,
+ *   e.g. `/guides/data/data.html`
  * - ONE route for all three (`ProjectPageRoute`), so switching between them keeps the page.
  * - anything else:  `<ProjectChooser>`
  * - Each page is ONE route:  it stays mounted while only its address changes, e.g.
@@ -40,6 +43,7 @@ export const ROUTES = defineRoutes([
   { path: PALETTE_PAGE, component: PaletteGroupsPage },
   { path: `${SITE_PAGE}/*address`, component: SiteEditorRoute },
   { path: `${PLACE_PAGE}/*address`, component: PlaceReferencePage },
+  { path: [GUIDES_PAGE, `${GUIDES_PAGE}/*path`], component: GuidesPage },
   { path: "*", component: HomeRoute }
 ])
 

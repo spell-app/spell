@@ -83,6 +83,15 @@ export const REPO_TEMPLATES = repoTemplatesOf(ROOT)
 /** `guides/`:  every other docs page, with its `.md`, `.json`, `experiments/` and `examples/` beside it. */
 export const GUIDES = join(CONTENT, "guides")
 
+/**
+ * The checkout's OWN guides folder, when its repo names one (`guidesFolder` in `.epic/config.json5`:  the kit's
+ * `guides/`;  epic `epic-engine` P79), else `undefined`.
+ * - guides versioned with the code:  a worktree's are its branch's
+ * - their page paths are from the checkout's root (`guides/x.html`, `pagePath()`), the same as the epic folder's
+ *   guides', so a guide moved here keeps its address;  the code's copy wins (`pageAt()`, `findPages()`)
+ */
+export const CODE_GUIDES = EpicConfig.guideFoldersOf(ROOT).find((each) => each.code)?.folder
+
 /** `pages/`:  the home page (`HOME`) and the scratch details pages (`DETAILS`). */
 export const PAGES = join(CONTENT, "pages")
 
@@ -113,7 +122,17 @@ export const GOALS = join(CONTENT, "goals")
 export const SAGAS = join(CONTENT, "sagas")
 
 /** Every folder `findPages()` walks:  the home first, then the areas (the repo's own templates last, if any). */
-export const AREAS = [PAGES, GUIDES, EPICS, TEMPLATES, ...(REPO_TEMPLATES ? [REPO_TEMPLATES] : [])]
+export const AREAS = [
+  PAGES,
+  ...(CODE_GUIDES ? [CODE_GUIDES] : []),
+  GUIDES,
+  EPICS,
+  TEMPLATES,
+  ...(REPO_TEMPLATES ? [REPO_TEMPLATES] : [])
+]
+
+/** Every folder guides are in:  the checkout's own first (`CODE_GUIDES`), then the epic folder's (`GUIDES`). */
+export const GUIDE_FOLDERS = [...(CODE_GUIDES ? [CODE_GUIDES] : []), GUIDES]
 
 /**
  * Each area's list page, `<area>/index.html`, written by `index.js` (claude-design P5).
@@ -217,10 +236,22 @@ function insideContent(path) {
 export function pageAt(path) {
   const [top, ...rest] = path.split(/[\\/]/)
   if (top === "templates") return join(TEMPLATES, ...rest)
+  const code = codeGuideAt(path)
+  if (code) return code
   const inSet = SETS.fileFor(path)
   if (inSet) return inSet
   const content = resolve(CONTENT, path)
   return existsSync(content) || contentTop(top) ? content : resolve(ROOT, path)
+}
+
+/**
+ * The checkout's own copy of guide page path `path` (`guides/x.html`), when it has one (`CODE_GUIDES`);  else
+ * `undefined`.
+ */
+function codeGuideAt(path) {
+  if (!CODE_GUIDES) return undefined
+  const file = resolve(ROOT, path)
+  return pathInside(CODE_GUIDES, file) !== undefined && existsSync(file) ? file : undefined
 }
 
 /**
@@ -354,7 +385,7 @@ export function planDocIn(dir, name) {
  * - a missing folder has no pages
  */
 export function findPages(dir = AREAS) {
-  if (Array.isArray(dir)) return dir.flatMap((each) => findPages(each))
+  if (Array.isArray(dir)) return firstOfEach(dir.flatMap((each) => findPages(each)))
   if (!existsSync(dir)) return []
   const found = []
   for (const entry of readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
@@ -366,6 +397,20 @@ export function findPages(dir = AREAS) {
     } else if (entry.name.endsWith(".html")) found.push(path)
   }
   return found
+}
+
+/**
+ * `files` with one file per page path, the first of each:  a guide moved into the checkout (`CODE_GUIDES`, walked
+ * first) and its copy still in the epic folder until the branch merges (`epic guides move`) are ONE page.
+ */
+function firstOfEach(files) {
+  const seen = new Set()
+  return files.filter((file) => {
+    const path = pagePath(file)
+    if (seen.has(path)) return false
+    seen.add(path)
+    return true
+  })
 }
 
 /**

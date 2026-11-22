@@ -99,7 +99,7 @@ The big folders beside `src/` (`parser/`, `ui/`, `epic/`, `app/`) have their own
 | [toolchain](src/toolchain/AGENTS.md) | `spell/toolchain/...` | | what every repo's configs share:  the lint and format settings and their rules, the decorator pre-pass, the version stamp, the base tsconfig, the global types, `spell-types`, the esbuild resolver (`sourceNames()`) |
 | [server](src/server/AGENTS.md) | `spell/server` | `SRV` | serving pages locally:  static folders, an Express-shaped router, live reload, ports, openers, a file lock, the generic page server, the site header;  and assembling them:  link targets (`Linker`), `formatHTML()`, bundles built on demand (`Bundle`), `DataFile`, `contentFolderOf()` |
 | [cli](src/cli/AGENTS.md) | `spell/cli` | `CLI` | the `spell` command's base:  arguments, help, every repo's commands and hooks;  the kit's own commands (server, bundle, commands, wwod, pony) |
-| [element](src/element/AGENTS.md) | `spell/element` | `E` | what makes a custom element on Solid 2, for every set's elements (Spell UI's, the epics', the app's, the brand's) |
+| [element](src/element/AGENTS.md) | `spell/element` | `E` | what makes a custom element on Solid 2, for every set's elements (Spell UI's, the epics', the app's) |
 | [element-tools](src/element/AGENTS.md) | `spell/element-tools/...` | | the element tools, node only:  the pack build, the root catalog, the elements' Vite settings;  their bin, `spell-pack` (element's `AGENTS.md`) |
 | [test-helpers](src/element/AGENTS.md) | `spell/test-helpers/...` | | the test helpers every set's tests use (element's `AGENTS.md`) |
 
@@ -151,7 +151,8 @@ yarn kit:review       # the finishing pass:  ts, lint:fix, format, test
   `yarn ts`, `yarn test`, `yarn lint`, `yarn review`.
   - They're plain scripts over its one `src/`, in its folder manifest.
 - `yarn clone`, `yarn pull`, `yarn status`, `yarn repos`:  over the repos BESIDE the kit only
-  ([repos.json5](repos.json5):  spell-brand).
+  ([repos.json5](repos.json5)):  none today, so each says so and succeeds (spell-brand, the only one, was dropped:
+  epic `epic-engine` T124).
 - The kit's rename codemods:
   - `spell rename imports`:  rewrites old names to the folders' (`spell-ui/x` => `spell/ui/x` ...)
   - `spell rename branches`:  carries an open epic's old child-repo branches into the folders
@@ -232,7 +233,6 @@ yarn kit:review       # the finishing pass:  ts, lint:fix, format, test
 - Node 24 (`engines`).
 - The versions are the yarn `catalog:` in the kit's [.yarnrc.yml](.yarnrc.yml).
   - Bump them here, together:  `vite-plus` and every `catalog:` entry, to what `vp toolchain` lists.
-  - Then spell-brand's copy of `.yarnrc.yml` (beside the kit, its own install).
   - NEVER pin one tool on its own.
 - In any repo, at its root:
 
@@ -301,10 +301,10 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
 | [app/](app/AGENTS.md) | `app`, `spaces`, `lsp`, `cli` (and `vscode`, its own yarn project) | `spell/app/...` |
 
 - Each big folder's code is under its ONE `src/`, its tests in its `tests/`, at the same paths.
-- Beside the kit, NOT in it:  spell-brand, its own private repo and project, with its own install
-  (`"spell": "portal:../spell"`), at `~/www/spell-brand` (`repos.json5`, a peer).
-  - Brand work is its own `/isolate`, in its own repo.
-  - The kit's page server serves its part of the settings from that peer entry;  a kit worktree uses main's.
+- Beside the kit, NOT in it:  nothing today.
+  - A project of its own beside it (`"spell": "portal:../spell"`) would be a PEER in [repos.json5](repos.json5):
+    the kit's page server serves its part of the settings, and a kit worktree uses main's.
+  - spell-brand was the only one, dropped by epic `epic-engine` T124 (solid-2-final Q23).
 - Data, not code:  `spell.epics/` (the epic repo), inside the kit, and `spell.spaces/` (your projects), beside it
   (`~/www/spell.spaces`).
 
@@ -318,7 +318,7 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
   - The `epic/` folder's old name, `spell-epic/...`, is gone since epic `epic-engine` P49:  write `spell/epic/...`.
 - The kit's `package.json` `exports`:  one wildcard entry per folder (`./ui/*` => `./ui/src/*`), in three conditions:
   - `spell-source`:  TypeScript reads the SOURCE (every program's `customConditions`)
-  - `types`:  built declarations (`dist-types/`, `spell-types`), for the app's node program and for spell-brand
+  - `types`:  built declarations (`dist-types/`, `spell-types`), for the app's node program and for a project beside it
   - `default`:  Vite, Vitest, `tsx` and lint
   - plus `./*.ts` entries for plain node, which adds no extension
 - TypeScript reads every folder's source, so no `spell-types --below` runs between them;  except the app's node
@@ -344,7 +344,7 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
 - Each big folder declares ITS OWN part of its settings in its folder manifest, `"pageServer"`, paths from its folder.
 - The Epic repo's part is its `page-server.json5`:  the site's tabs, the writable folders, what's `gone`.
 - Merged:  the kit's, the epic repo's, each folder's (`workspaces` order), each peer `repos.json5` names
-  (spell-brand), then each project a checkout's own git-ignored `page-server.local.json5` names
+  (none today), then each project a checkout's own git-ignored `page-server.local.json5` names
   (`{ projects: ["../x"] }`, someone's project trying the epic framework).
 - How:  [the server's AGENTS.md](src/server/AGENTS.md), "The page server's settings".
 - It keeps a WORKTREE's generated files current by itself (epic `epic-engine` P54):  Spell UI's root catalog, the
@@ -365,7 +365,7 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
     - `src/test-helpers/` are every set's (`spell/test-helpers/ElementFixture` ...;  epic `repo-split` P10, Q39):
       [element's AGENTS.md](src/element/AGENTS.md), "Tests".
 - Tests only reach DOWN:
-  - a higher repo's tests may use a lower repo's helpers (spell-app's and spell-brand's run Spell UI's setup,
+  - a higher repo's tests may use a lower repo's helpers (spell-app's run Spell UI's setup,
     `spell/ui/test-helpers/setup.ts`;  spell-app's run spell-parser's `parseSpellProject()`) and its test data
   - a lower repo's never read a higher one's:  a fixture of its own, or the test moves up
     - e.g. Spell's frozen test projects (`@spell/test`) and the tests that compile them whole are spell-app's, beside
@@ -381,7 +381,6 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
   hand.
   - uv (parser's and app's Python), Playwright, the two VS Code extensions' installs, then `yarn ts`, `yarn lint`,
     `yarn test` over the kit and its folders.
-- spell-brand has its own, which checks it against this repo.
 
 ## Words
 
@@ -532,7 +531,7 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
   - The hook's `remove` never deletes uncommitted or unmerged work.
 - Merge main into a branch with `epic worktree merge-main`, never a bare `git merge main`.
   - It REGENERATES each generated file both sides changed, from the merged source:
-    bundles, site and brand data, snapshots, `yarn.lock`.
+    bundles, site data, snapshots, `yarn.lock`.
   - It stops on any other conflict;  `--continue` once they're resolved and added.
   - Those generated files are marked in each repo's root `.gitattributes`:
     - `merge=binary`:  never line-merged
@@ -544,7 +543,6 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
   - NOT committed at all (since 2026-10-07):  the bundles only the page server serves,
     whose hashed chunk names churned every diff.
     - Spell UI's docs site:  its `_assets/`, in [spell-ui's site](ui/site/)
-    - the brand pages':  `_assets/ui/`, in spell-brand (`../spell-brand/`, beside the kit)
     - They're git-ignored.
       The page server builds the stale ones when it starts, and a page waits for them.
     - By hand:  `spell bundle [--stale]`, or `check`.
@@ -585,8 +583,9 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
   - `ui/` -- Spell UI's hand-written docs pages (claude-design P6), LEFT for the other checkouts.
     - Since epic `people-and-orgs` P18 they're in [spell-ui's docs/](ui/docs/), served at `/components/ui/`.
     - The page server answers "not found" for `/ui/`;  that epic's merge removes the folder (its T3).
-  - `brand/` -- the Brand tab's pages (spell-brand's AGENTS.md, in `../spell-brand/`):
-    Claude Design's exports and their Spell UI copies
+  - `brand/` -- the old Brand tab's pages:  Claude Design's exports and their Spell UI copies
+    - kept, but no longer offered:  the Brand tab, its `/_brand/assets/` and brand bundle routes went with spell-brand
+      (epic `epic-engine` T124), so the pages draw without their `<brand-*>` elements
   - `sagas/` -- the SAGAS, each an epic of epics (epic `epic-workflow` P15):
     - `sagas/sagas.json5`:  the list, in Owen's order;  changed only through `epic saga ...`
     - `sagas/<id>/<id>.saga.html`:  each saga's page
@@ -603,6 +602,13 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
     - WWOD's old copy (`agents/wwod/`):  WWOD is tracked in the kit since epic `repo-split` P9 (below);
       the copy here stays for the checkouts from before the split, until a later todo deletes it
 
+- The guides that SHIP with Spell are not in it:  they're the kit's own [guides/](guides/), versioned with the code
+  (epic `epic-engine` P79;  `guidesFolder` in [the kit's epic settings](.epic/config.json5)).
+  - Each keeps its address, `/guides/<path>`:  the page server serves the checkout's copy first.
+  - Moved in on a branch with `epic guides move <page>`;  the epic repo's copy goes once `main` has it (`epic merge`).
+  - Edited like any file, on a branch;  their list, `guides/guides.json5`, is `epic guides index`'s.
+  - The Spell app's Guides page reads them from the installed package (`/guides`).
+
 ### How they're found
 
 - They're ONE epic repo, the same for main and every worktree.
@@ -610,7 +616,7 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
     - `~/www/spell-app/spell-app.epics` before.
     - An epic's worktree has a link to it, `spell.epics`.
   - Where it is:  `contentFolder`, in [the kit's epic settings](.epic/config.json5) (epic `epic-eject` P4);
-    spell-brand's names the kit's (`{ top: "../spell" }`).
+    a peer's names the kit's (`{ top: "../spell" }`).
     `epic config contentFolder` prints it.
   - So every worktree sees every edit at once:  no per-branch copy, and these files never conflict on merge.
 - Found in the epic folder itself, never linked in at a checkout's root (epic `epic-eject` P12):
@@ -710,8 +716,7 @@ Lowest first, each using only the ones above it in this table (the lint's `spell
 - The three logs stay in the epic repo (Q31):
   `agents/PAPERCUTS.md`, `SUSPECTED-BUGS.md` and `CODE-DEBT.md` are links into `../spell.epics/agents/`.
   - Edit them at their REAL path, `spell.epics/agents/<log>`, never through the link (above, "The epic repo").
-- Every big folder has an `agents` link at its root (git-ignored there), to the kit's `../agents`;
-  spell-brand's comes from its own `postinstall`, to `node_modules/spell/agents`:
+- Every big folder has an `agents` link at its root (git-ignored there), to the kit's `../agents`:
   so its instructions name `agents/wwod/WWOD.md`, `agents/PAPERCUTS.md` ...
   - Every `yarn install` here makes them:  so an epic's worktree and CI have them too.
     - The install's step:  the `postinstall`, `tools/repos.ts links` (epic `repo-split` P12).

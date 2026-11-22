@@ -32,6 +32,20 @@ export function placeReferenceUrlFor(path: string): string {
   return `${PLACE_PAGE}/${path}`
 }
 
+/**
+ * Where the guides that ship with Spell are read (`<GuidesPage>`, epic `epic-engine` P79):  `/guides` lists them,
+ * `/guides/<path inside the guides folder>` shows one.
+ */
+export const GUIDES_PAGE = "/guides"
+
+/**
+ * The app's address of the guide at page path `path` (`guides/data/data.html`, its address in the guides' list), and
+ * of a chapter in it (`anchor`):  `/guides/data/data.html`, `/guides/spell-language/spell-language.html#views`.
+ */
+export function guideUrlFor(path: string, anchor?: string): string {
+  return `${GUIDES_PAGE}/${path.replace(/^guides\//, "")}${anchor ? `#${anchor}` : ""}`
+}
+
 /** Params parsed out of the `/:page/*address` route:  `/edit/...`, `/run/...`. */
 export type SpellRouteParams = {
   /** Which page:  `edit` or `run`. */

@@ -66,7 +66,7 @@ a folder of the kit `spell`.
       copied to the repo's `.epic/house-style.md` and named its `code` voice (`RepoInit.houseStyleStep()`).
   - Configurable (epic `readme` P13):  a repo's `.epic/config.json5` names its own voices (`"voices"`, a name to a
     file) and which voice each kind of page takes (`"pageVoices"`);  a repo whose settings name a top
-    (spell-brand's name the kit) takes the top's.
+    (a peer's names the kit) takes the top's.
     The skills ask by name:  `epic voice <name>`, `epic voice --for <kind>` print the file (`EpicConfig.voiceFile()`).
   - `epic voice check [--voice <name>] <file | - | --text "...">` (`VoiceCheck`, epic `epic-engine` T92):  a FRESH
     reader, `claude -p` with Sonnet and nothing of the repo, checks a text against a voice (novice by default):

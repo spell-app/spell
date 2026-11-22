@@ -1112,7 +1112,20 @@ const APP_TEXTS_ES: AppTextPack = {
   debugValues: "Lo que ha guardado hasta ahora",
   debugCalledFrom: "Cómo llegó aquí",
   debugNothing: "Nada todavía",
-  debugValueOf: "un {type}"
+  debugValueOf: "un {type}",
+  // las guías que vienen con Encanto (`<GuidesPage>`, epic `epic-engine` P79)
+  guidesTitle: "Guías",
+  guidesLede:
+    "Aprende a hacer apps con Encanto, y cómo funciona Encanto por dentro.\nLee primero las guías de Empieza aquí.\nPara encontrar lo demás, usa la búsqueda.",
+  guidesSearch: "Buscar en las guías",
+  guidesStartHere: "Empieza aquí",
+  guidesForProgrammers: "Para quienes programan Encanto",
+  guidesAll: "Todas las guías",
+  guidesChapterOf: "Un capítulo de {guide}.",
+  guidesMissing:
+    "No se pudieron abrir las guías.\nVienen con Encanto:  cierra la app y ábrela otra vez.\nSi no funciona, vuelve a instalar Encanto.",
+  guidesInTheEditor: "Guías que se abren en el editor",
+  guidesHomeLink: "Todas las guías"
 }
 
 /** Everything Spanish the app shows:  its own texts, then each web component's. */

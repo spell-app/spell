@@ -174,13 +174,13 @@ export type LinkCheck = {
  * - a committed one (epic `epic-engine` P54):  Spell UI's root catalog, the epics pack, spell-epic's docs bundle
  */
 export type BundleSpec = {
-  /** what the command line calls it, e.g. `brand` */
+  /** what the command line calls it, e.g. `ui-site` */
   name: string
   /** what it is, for people */
   title: string
   /**
-   * the package it's built in, by its npm name, e.g. `spell-brand`:  found through the checkout's `node_modules`,
-   * wherever its repo is (epic `repo-split` P8:  Spell UI's and the brand's are repos beside spell-app's)
+   * the package it's built in, by its npm name, e.g. `spell-ui`:  found through the checkout's `node_modules`,
+   * wherever its repo is (epic `repo-split` P8)
    */
   package: string
   /** the folder its build runs in, relative to `package`'s folder */
@@ -243,7 +243,7 @@ export type BundleBuilt = {
 
 /** What `Bundle.sizeReport()` reports on:  a build script's output, as it ends. */
 export type BundleSizeParams = {
-  /** what the report calls it, e.g. `site`, `brand` */
+  /** what the report calls it, e.g. `site` */
   name: string
   /** the output folder, absolute */
   folder: string
@@ -299,7 +299,7 @@ const EPIC_SOURCES = [
 /**
  * How each bundle built on demand is built.
  * - WHICH are built:  the ones whose `output` folders the page server's settings name
- *   (`"bundles"`, in spell-ui's and spell-brand's parts:  `Bundle.specs()`), the list the page server reads too
+ *   (`"bundles"`, in spell-ui's part:  `Bundle.specs()`), the list the page server reads too
  * - the page server builds the stale ones when it starts (`spell bundle --stale`)
  * - `sources`:  generous, so a change never leaves one stale unnoticed
  *   - `Bundle.sourceFiles()` skips tests, snapshots, dot files and the icon packs
@@ -307,7 +307,7 @@ const EPIC_SOURCES = [
  *   their folders' lists, so what's built from them builds after (epic `epic-engine` P54)
  * - each by its PACKAGE, never by the checkout's layout (epic `repo-split` P8):  `sources` by the package's npm name
  *   and a path in it (`spell/ui/src`:  the ONE package's `ui/src/`, epic `repo-split` P20);  a project beside the
- *   kit (spell-brand) found as one of the page server's settings parts (`Bundle.packageDirFor()`)
+ *   kit found as one of the page server's settings parts (`Bundle.packageDirFor()`)
  */
 export const BUNDLES: BundleSpec[] = [
   {
@@ -342,16 +342,6 @@ export const BUNDLES: BundleSpec[] = [
       "spell/ui/vite.site.config.ts",
       "spell/ui/scripts/site-bundle.ts"
     ]
-  },
-  {
-    name: "brand",
-    title: "brand pages' bundle",
-    package: "spell-brand",
-    cwd: ".",
-    run: ["yarn", "build"],
-    output: "_assets/ui",
-    entry: "brand-ui.js",
-    sources: [...SPELL_UI_SOURCES, "spell-brand/src", "spell-brand/vite.config.ts", "spell-brand/scripts/build.ts"]
   },
   {
     name: "epics-pack",

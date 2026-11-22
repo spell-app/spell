@@ -1194,6 +1194,60 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       flags: {}
     }
   ],
+  guides: [
+    {
+      name: "list",
+      usage: "[--json]",
+      description:
+        "every guide and where it is:  code (the repo's guidesFolder), epic (the epic folder's guides/), or both " +
+        "(moved on a branch not merged yet);  the default verb",
+      example: "epic guides list",
+      flags: {
+        "--json": "print it as JSON"
+      }
+    },
+    {
+      name: "move",
+      usage: "<page | SAGA:/id>... [--dry-run]",
+      description:
+        "copy guides from the epic folder into the checkout's guides folder, at the same path, with their twins, " +
+        "pictures and experiments (not their comments), for the branch to commit;  the epic folder keeps its copy " +
+        "until the branch merges into main",
+      example: "epic guides move guides/data/data.html",
+      flags: {
+        "--dry-run": "copy nothing:  say what it would"
+      }
+    },
+    {
+      name: "prune",
+      usage: "[--dry-run]",
+      description:
+        "in the main checkout:  delete the epic folder's copy of every file main's guides folder tracks, so the " +
+        "code's is the one copy;  epic merge runs it after each merge",
+      example: "epic guides prune --dry-run",
+      flags: {
+        "--dry-run": "delete nothing:  say what it would"
+      }
+    },
+    {
+      name: "index",
+      usage: "",
+      description:
+        "write the shipped guides' list, guides.json5 in the guides folder, from each guide's metas (spell-audience, " +
+        "spell-topic, spell-start-here):  what the Spell app's Guides page reads",
+      example: "epic guides index",
+      flags: {}
+    },
+    {
+      name: "check",
+      usage: "",
+      description:
+        "check the shipped guides stand on their own:  no link into the epic repo, no command or file they name " +
+        "that isn't there, their list up to date;  exit 1 naming each problem",
+      example: "epic guides check",
+      flags: {}
+    }
+  ],
   turn: [
     {
       name: "end",
@@ -1406,6 +1460,7 @@ export type GroupName =
   | "repos"
   | "turns"
   | "turn"
+  | "guides"
   | "skills"
   | "plugin"
   | "pages"
