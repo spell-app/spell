@@ -208,7 +208,8 @@ export type TypedAnswer = PageAnswer & { labels: PartLabels }
 /**
  * A details page's draft, `<slug>.draft.json5` beside it (P18):  what was typed and not sent, saved a moment after
  * each change, and put back when the page loads again (a reload, an agent's rewrite).
- * - `page`:  the page's URL path;  `saved`:  when, ISO
+ * - `page`:  the page's URL path
+ * - `saved`:  when it was typed, ISO:  putting it back or saving it again NEVER makes it newer
  * - only a draft NEWER than the answer sent counts:  Send deletes it
  */
 export type DetailsDraft = TypedAnswer & { page: string; saved: string }
