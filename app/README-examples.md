@@ -943,7 +943,7 @@ even `spell format` leaves the test projects alone.
 
 ## See also
 
-- The guide:  [Example Apps](../guides/examples/examples.html), in the kit's guides/ folder
+- The guide:  [Example Apps](../guides/example-apps/example-apps.html), in the kit's guides/ folder
 - [The editor and the runners](README-app.md):  how the editor runs an example as you type,
   and keeps a game going across an edit
 - [Spaces](README-spaces.md):  addresses, your own space, and importing a library into a project

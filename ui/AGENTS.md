@@ -9,7 +9,7 @@ the kit's layout, and the house style every folder shares.
 - A section named like a WWOD rule extends it.
 
 **New to how a `<ui-*>` element works:
-READ [the custom elements guide](../spell.epics/guides/custom-elements/custom-elements.html),**
+READ [the custom elements guide](../guides/custom-elements/custom-elements.html),**
 with live elements to click.
 - It covers the platform, the DOM element / component pair, the decorators, every hook.
 - The rules below are its short form.

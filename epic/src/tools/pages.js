@@ -9,7 +9,13 @@ import { fileURLToPath, pathToFileURL } from "node:url"
 
 import { openInChromeTab } from "spell/server/open"
 import { RealPath, pathInside } from "spell/server/RealPath"
-import { componentSetAddressOf, componentSetFileOf, pageServerRoot, settingsParts } from "spell/server/page/settings"
+import {
+  componentSetAddressOf,
+  componentSetFileOf,
+  kitOf,
+  pageServerRoot,
+  settingsParts
+} from "spell/server/page/settings"
 import { Window, envCheckout } from "spell/epic/window.mjs"
 import { EngineFiles } from "spell/epic/config/EngineFiles.mjs"
 import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
@@ -84,13 +90,19 @@ export const REPO_TEMPLATES = repoTemplatesOf(ROOT)
 export const GUIDES = join(CONTENT, "guides")
 
 /**
+ * The checkout whose own guides folder counts:  the kit, when `ROOT` is one of its folders (the tools run from
+ * `epic/`, as `check-spell.js` is), else `ROOT`.
+ */
+const GUIDES_CHECKOUT = kitOf(ROOT) ?? ROOT
+
+/**
  * The checkout's OWN guides folder, when its repo names one (`guidesFolder` in `.epic/config.json5`:  the kit's
  * `guides/`;  epic `epic-engine` P79), else `undefined`.
  * - guides versioned with the code:  a worktree's are its branch's
  * - their page paths are from the checkout's root (`guides/x.html`, `pagePath()`), the same as the epic folder's
  *   guides', so a guide moved here keeps its address;  the code's copy wins (`pageAt()`, `findPages()`)
  */
-export const CODE_GUIDES = EpicConfig.guideFoldersOf(ROOT).find((each) => each.code)?.folder
+export const CODE_GUIDES = EpicConfig.guideFoldersOf(GUIDES_CHECKOUT).find((each) => each.code)?.folder
 
 /** `pages/`:  the home page (`HOME`) and the scratch details pages (`DETAILS`). */
 export const PAGES = join(CONTENT, "pages")
@@ -198,7 +210,9 @@ export function pagePath(file) {
   const inSet = SETS.pageFor(path) ?? SETS.pageFor(RealPath.of(path), RealPath.of)
   if (inSet !== undefined) return inSet
   const content = insideContent(path)
-  return (content ?? relative(ROOT, path)).split(sep).join("/")
+  // a guide in the checkout's own guides folder:  from that checkout's root, as the page server serves it
+  const code = CODE_GUIDES && pathInside(CODE_GUIDES, path) !== undefined ? relative(GUIDES_CHECKOUT, path) : undefined
+  return (content ?? code ?? relative(ROOT, path)).split(sep).join("/")
 }
 
 /**
@@ -250,7 +264,7 @@ export function pageAt(path) {
  */
 function codeGuideAt(path) {
   if (!CODE_GUIDES) return undefined
-  const file = resolve(ROOT, path)
+  const file = resolve(GUIDES_CHECKOUT, path)
   return pathInside(CODE_GUIDES, file) !== undefined && existsSync(file) ? file : undefined
 }
 
