@@ -1228,6 +1228,24 @@ export const GROUP_VERBS: Record<GroupName, GroupVerb[]> = {
       flags: {
         "--dry-run": "delete nothing:  say what it would"
       }
+    },
+    {
+      name: "index",
+      usage: "",
+      description:
+        "write the shipped guides' list, guides.json5 in the guides folder, from each guide's metas (spell-audience, " +
+        "spell-topic, spell-start-here):  what the Spell app's Guides page reads",
+      example: "epic guides index",
+      flags: {}
+    },
+    {
+      name: "check",
+      usage: "",
+      description:
+        "check the shipped guides stand on their own:  no link into the epic repo, no command or file they name " +
+        "that isn't there, their list up to date;  exit 1 naming each problem",
+      example: "epic guides check",
+      flags: {}
     }
   ],
   turn: [

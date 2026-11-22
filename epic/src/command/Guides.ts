@@ -2,16 +2,18 @@ import { copyFileSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync,
 import { basename, dirname, extname, join, relative, resolve, sep } from "node:path"
 
 import { CLI } from "spell/cli"
+import { commandSources } from "spell/cli/commands/commandsCommand"
 import { Git } from "spell/server/Git"
 import { pathInside } from "spell/server/RealPath"
 import { EpicConfig } from "spell/epic/config/EpicConfig.ts"
 import { Sagas } from "spell/epic/tool/Sagas.ts"
 
 import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types.ts"
+import { ShippedGuides } from "./ShippedGuides.ts"
 
 /****************
  * ### `Guides`
- * `epic guides list | move | prune`:  guides moved out of the epic folder into the code, where they're versioned and
+ * `epic guides list | move | prune | index | check`:  guides moved out of the epic folder into the code, where they're versioned and
  * shipped with it (epic `epic-engine` P79).
  * - A repo names its own guides folder in its epic settings, `guidesFolder` (the kit's:  `guides`, at its root);
  *   every tool finds a guide there first, then in the epic folder's `guides/` (`EpicConfig.guideFoldersOf()`).
@@ -24,6 +26,7 @@ import { EXIT, EpicCommandError, parseVerbArgs } from "./command.types.ts"
  *   - `SAGA:/<id>`:  every guide naming that saga (`<meta name="spell-saga">`)
  * - `prune`, in the main checkout:  the epic folder's copy of every file `main`'s guides folder tracks, deleted, so the
  *   code's is the one copy;  `epic merge` runs it after every merge that moved something onto `main`.
+ * - `index`, `check`:  the shipped guides' list and their check (`ShippedGuides`)
  * - Its position:  node only;  the epic folder's files are changed by path, never through git (the turn's end commits
  *   them, `epic turn end`).
  ****************/
@@ -57,7 +60,26 @@ export class Guides {
       for (const path of pruned) CLI.out(`  ${path}`)
       return EXIT.OK
     }
-    throw new EpicCommandError(`unknown verb '${verb}':  epic guides list | move | prune`)
+    if (verb === "index") {
+      const shipped = new ShippedGuides(this.checkout)
+      if (!shipped.file) throw new EpicCommandError("guides index:  this repo has no guides folder (guidesFolder)")
+      const changed = shipped.write()
+      const { guides, startHere } = shipped.build()
+      CLI.out(
+        `${relative(this.checkout, shipped.file)}:  ${guides.length} guides, ${startHere.length} Start here` +
+          `${changed ? "" : ", already"}`
+      )
+      return EXIT.OK
+    }
+    if (verb === "check") {
+      const problems = new ShippedGuides(this.checkout).check({ commandExists: commandsIn(this.checkout) })
+      for (const problem of problems) CLI.out(problem)
+      CLI.err(
+        problems.length ? `${problems.length} problem(s) in the shipped guides` : "the shipped guides stand alone"
+      )
+      return problems.length ? EXIT.ERRORS : EXIT.OK
+    }
+    throw new EpicCommandError(`unknown verb '${verb}':  epic guides list | move | prune | index | check`)
   }
 
   ////////////////
@@ -180,6 +202,25 @@ export class Guides {
       found.add(file)
     }
     return [...found]
+  }
+}
+
+/**
+ * Whether a command line's first words are a command, in checkout `root`:  every folder's `spell` commands and the
+ * `epic` verbs, as the commands page reads them (`commandSources()`).
+ * - `spell server start`:  `spell server` is, and so is its `start`;  `spell server bogus` isn't, since the group
+ *   lists its verbs;  `epic guides move`:  only `epic guides`, whose verbs aren't listed there
+ */
+export function commandsIn(root: string): (words: string[]) => boolean {
+  let names: Set<string> | undefined
+  return (words) => {
+    names ??= new Set(commandSources(root).map((command) => command.name))
+    const [receiver, first, second] = words
+    const group = `${receiver} ${first}`
+    if (!names.has(group)) return false
+    if (!second) return true
+    const verbs = [...names].filter((name) => name.startsWith(`${group} `))
+    return !verbs.length || names.has(`${group} ${second}`)
   }
 }
 
