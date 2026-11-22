@@ -23,7 +23,7 @@ import { packageRootFor } from "spell/toolchain/sourceNames"
 
 /**
  * One bundle of the checkout at `root` that is BUILT on demand, never committed (`SRV.BUNDLES`).
- * - The brand pages' and Spell UI's docs site's:  only the page server serves them.
+ * - Spell UI's docs site's:  only the page server serves it.
  * - Or a COMMITTED generated file (`spec.committed`;  epic `epic-engine` P54):  Spell UI's root catalog, the epics
  *   pack, spell-epic's docs bundle
  *   - rebuilt only in a WORKTREE (`buildsWhenStale`;  Owen, Q61:  "Only in a worktree"):  the main checkout's
@@ -42,7 +42,7 @@ import { packageRootFor } from "spell/toolchain/sourceNames"
  *   (every installed repo's `"pageServer"` part, merged:  `pageServerSettings()`), the list the page server reads too
  *   (`Bundle.specs()`)
  * - Its build scripts share their steps through it (`clearOutput()`, `linkBuiltInFiles()`, `sizeReport()`):
- *   Spell UI's site bundle and the brand's.
+ *   Spell UI's site bundle's.
  * - Knows no checkout's LAYOUT:  each bundle by its PACKAGE (`SRV.BUNDLES`), found through the checkout's
  *   `node_modules` wherever its repo is (epic `repo-split` P8);  imports no other package.
  */
@@ -58,7 +58,7 @@ export class Bundle {
     this.spec = spec
   }
 
-  /** the bundle's name, e.g. `brand` */
+  /** the bundle's name, e.g. `ui-site` */
   get name(): string {
     return this.spec.name
   }
@@ -124,7 +124,7 @@ export class Bundle {
 
   /**
    * The bundles of the checkout at `root`:  for each folder the page server's settings name in `"bundles"`
-   * (`pageServerSettings()`:  spell-ui's part names its site's, spell-brand's its pages'), in that order, the one of
+   * (`pageServerSettings()`:  spell-ui's part names its site's), in that order, the one of
    * `SRV.BUNDLES` that builds into it.
    * - ONE list, which the page server reads too (its `BundleBuild` waits on those folders)
    * - none without a list, as the page server
@@ -144,7 +144,7 @@ export class Bundle {
 
   /**
    * Package `name`'s folder, as the checkout at `root` finds it:  installed (`node_modules`), else one of the page
-   * server's settings parts by that name (a project beside the kit with its own install:  spell-brand, epic
+   * server's settings parts by that name (a project beside the kit with its own install, epic
    * `repo-split` P20);  `undefined` when neither has it.
    */
   static packageDirFor(name: string, root: string): string | undefined {
@@ -361,14 +361,6 @@ export class Bundle {
         throw new Error(`Bundle.linkBuiltInFiles():  ${link} doesn't lead to ${from};  delete it, and build again`)
       }
     }
-  }
-
-  /**
-   * DEPRECATED:  `linkBuiltInFiles()`, which links the sounds too.
-   * - Kept while spell-brand's build (`scripts/build.ts`, its own repo) still calls it.
-   */
-  static linkIconPacks(folder: string): void {
-    Bundle.linkBuiltInFiles(folder)
   }
 
   /**

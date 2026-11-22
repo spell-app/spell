@@ -3,7 +3,8 @@ import "spell/parser/spell/node/packageVersion.node"
 
 import { existsSync, readFileSync } from "fs"
 import JSON5 from "json5"
-import { basename, join } from "path"
+import { createRequire } from "module"
+import { basename, dirname, join } from "path"
 import { fileURLToPath } from "url"
 
 import { PREF_SAVED_EVENT } from "spell/util"
@@ -27,6 +28,18 @@ import { api, compileCache, projectBuild, spaceFiles } from "./api"
 import { spacesDailyRound } from "./DailyRound"
 import { APP_DIR, EditorServer } from "./EditorServer"
 import { LocalSiteServer } from "./LocalSiteServer"
+
+/**
+ * Where the app reads the guides that ship with Spell (epic `epic-engine` P79):  `/api/guides/<path>`, a guide's path
+ * inside the package's `guides/` (`/api/guides/guides.json5`, `/api/guides/data/data.html`).
+ */
+export const GUIDES_API = "/api/guides"
+
+/**
+ * The shipped guides' folder:  the INSTALLED `spell` package's `guides/`, found through `spell/package.json`, never a
+ * path into another folder (a checkout's is the kit's own `guides/`, an npm install's `node_modules/spell/guides/`).
+ */
+const GUIDES_DIR = join(dirname(createRequire(import.meta.url).resolve("spell/package.json")), "guides")
 
 /** Spell's terms page:  what it keeps, leaving with a space, deleting, backups, limits (epic `atmosphere` P7, T5). */
 const TERMS_FILE = fileURLToPath(new URL("../places/terms.html", import.meta.url))
@@ -71,6 +84,8 @@ const TERMS_FILE = fileURLToPath(new URL("../places/terms.html", import.meta.url
  *   - BACKUPS (epic `atmosphere` P7):  every space, each night, a week kept (`SpaceBackups`);
  *     a missed night is in its log
  *   - each real Space's member list, in step with its org's roles (`MemberLists`):  a term ending on its date
+ *   - `/api/guides/...` -- the guides that ship with Spell, from the installed package (`GUIDES_API`, epic
+ *     `epic-engine` P79):  the app's Guides page reads them
  *   - `/hello` -- liveness
  *   - `/element/...` -- `<spell-viewer>` / `<spell-editor>`'s bundles, `dist-element/` (`yarn build:element`)
  *     - for the demo page, `/demo/spell-editor.html` on the editor:  vite passes `/element` on to us, as it does `/api`
@@ -155,6 +170,9 @@ const appRoutes: RouteModule = {
     // the compile cache's cap:  the page server's `cacheLimit` setting (epic `language` Q41)
     const { cacheLimit } = pageServerSettings(root)
     if (cacheLimit !== undefined) compileCache.limit = SRV.sizeInBytes(cacheLimit)
+    // the guides that ship with Spell, read by the app's Guides page (epic `epic-engine` P79):  the installed
+    // package's `guides/`, its list `guides.json5` and each page;  before `/api`, whose last answers every path
+    router.use(new SRV.StaticHandler({ mounts: [{ prefix: GUIDES_API, dir: GUIDES_DIR }] }).handle)
     router.use("/api", refuseForeignOrigins, SRV.parseBodies({ limit: 10 * 1024 * 1024, parseJson: JSON5.parse }), api)
     router.use("/spaces", spaceFiles)
     router.get("/hello", (_request, reply) => reply.json({ message: "Hello from the API!" }))

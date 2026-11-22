@@ -40,7 +40,7 @@
 			</example>
 		</>
 
-		<section label="Labeled" sticky="stack" collapsible dividing id="types-labeled">
+		<section label="Labeled" sticky="stack" collapsible dividing>
 			<example "Labeled" description="A button can appear alongside a badge:  `badge`, or the label slot, joins one. `labeled=\"left\"` puts it first.">
 				<button icon="heart" badge="2,048">Like</button>
 				<button labeled="left" icon="heart" badge="2,048">Like</button>
@@ -256,7 +256,7 @@
 			</example>
 		</>
 
-		<section label="State texts" sticky="stack" collapsible dividing id="states-state-texts">
+		<section label="State texts" sticky="stack" collapsible dividing>
 			<example "State texts" description="A toggle button's label can say its state:  `inactive-text` while off, `active-text` while on.  Click to follow, again to unfollow.">
 				<button toggle inactive-text="Follow" active-text="Following"/>
 				<button toggle selected inactive-text="Subscribe" active-text="Subscribed" color="primary"/>
@@ -371,7 +371,7 @@
 			</example>
 		</>
 
-		<section label="Circular" sticky="stack" collapsible dividing id="variations-circular">
+		<section label="Circular" sticky="stack" collapsible dividing>
 			<example "Circular" description="A button can be circular.">
 				<button icon="settings" aria-label="Settings" appearance="circular"/>
 			</example>
@@ -380,6 +380,14 @@
 				<button color="teal" icon="twitter" aria-label="Twitter" appearance="circular"/>
 				<button color="blue" icon="linkedin" aria-label="LinkedIn" appearance="circular"/>
 				<button color="red" icon="google plus" aria-label="Google Plus" appearance="circular"/>
+			</example>
+		</>
+
+		<section label="Raised" sticky="stack" collapsible dividing>
+			<example "Raised" description="A button can stand on a lip of its own colour, darker, and sink into it when pressed:  a big, friendly button, a game's.  Set `--ui-button-raised-lip` for a taller lip.">
+				<button appearance="raised">Raised</button>
+				<button color="yellow" size="large" appearance="pill raised" icon="wand magic sparkles">Surprise me!</button>
+				<button color="blue" appearance="raised">Play again</button>
 			</example>
 		</>
 
@@ -560,7 +568,7 @@
 			</example>
 		</>
 
-		<section label="Wrapping Buttons" sticky collapsible dividing id="group-variations-wrapping-buttons">
+		<section label="Wrapping Buttons" sticky collapsible dividing>
 			<example "Wrapping Buttons" description="Grouped buttons can automatically wrap, sharing the overall available width.">
 				<buttons wrapping>
 					<button>One</button>
@@ -651,15 +659,15 @@
 
 			- **Focusable `<div>` buttons** ([Types](#types)):  every `<ui-button>` draws a real
 			  button (or link), so it's always keyboard-focusable.
-			- **Pointing labels** ([Labeled](#types-labeled)):  the joined badge has no
+			- **Pointing labels** ([Labeled](#labeled)):  the joined badge has no
 			  `right pointing` / `left pointing` shape.
 			  Shapes belong to `<ui-label>`, so the badge is a plain basic label.
-			- **The rest of the state behaviour** ([State texts](#states-state-texts)):
+			- **The rest of the state behaviour** ([State texts](#state-texts)):
 			  hover texts, `flash`, `sync`, API and automatic states.
 			  A name that changes under the pointer confuses screen readers.
-			- **Social buttons** ([Circular](#variations-circular)):  no `facebook`, `twitter` ...
+			- **Social buttons** ([Circular](#circular)):  no `facebook`, `twitter` ...
 			  Brand colours age fast:  colour a button with `color` or `--ui-color`, and give it a brand icon.
-			- **The `wrapped` helper** ([Wrapping Buttons](#group-variations-wrapping-buttons)):
+			- **The `wrapped` helper** ([Wrapping Buttons](#wrapping-buttons)):
 			  Fomantic's corner fix for a group known to wrap.
 			  Each row of a `wrapping` group is a rounded track of its own, so it needs no hint.
 		</>

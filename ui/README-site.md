@@ -242,8 +242,10 @@ yarn site:new ui-card                                                          #
 yarn site:new getting-started --title "Getting started" --summary "One line."  # docs/getting-started.html
 ```
 
-- A tag (any tag of the family:  `ui-cards` works too) writes its family's page, `docs/<main tag>.html`:
-  a masthead with the theme menu, and the four tabs.
+- A tag (any tag of the family:  `ui-cards` works too) writes its four pages in the Spell UI site
+  (`<Title>/Usage.spell` ... in `@spell/guides/SpellUI`, and their lines in its site file), as Spell, from its
+  family's page, `docs/<main tag>.html`:  a masthead with the theme menu, and the four tabs, from the template
+  when it isn't there yet.
 - A sub-tag its family lists under `pages` writes a page of its own, `docs/<tag>.html`:
   ONE tag's API (`<ui-docs-api tag>`, where `#<tag>` lands), and a Theming tab only when a family token names it.
 - Anything else is a guide page, one column, no tabs:  `--title` (default:  the name in Title Case) and `--summary`.
@@ -255,7 +257,7 @@ yarn site:new getting-started --title "Getting started" --summary "One line."  #
 ```text
 $ yarn site:new my-guide --title "My Guide"
 wrote docs/my-guide.html  (page)
-  view:  spell server url .../ui/docs/my-guide.html   (from the repo root);  check:  yarn site:check my-guide.html
+  check:  yarn site:check my-guide.html
 ```
 
 ### The Examples pane:  write it flat, and let a script nest it
@@ -348,7 +350,7 @@ Then commit what it changed in `docs/`;  the bundle is never committed.
 | `yarn site:bundle` | `site/_assets/`, from [the site's entry](site/_src/site.ts) and [its Vite config](vite.site.config.ts);  prints the sizes.  The page server runs it as `spell bundle ui-site` |
 | `yarn site:build` | the four above, in turn |
 | `yarn site:dev` | `site:bundle`, then live editing:  the page server (started if needed) serves `/components/ui/` while a Vite watch build rebuilds the bundle on every source edit, and the open pages reload |
-| `yarn site:new <tag\|page>` | a page, from the template (above) |
+| `yarn site:new <tag\|page>` | a component's four Spell UI site pages and its page from the template, or a guide page (above) |
 | `yarn site:sections [--check] [page...]` | nests every page's flat headers into `<ui-section>`s and writes their ids, and splits each API tab into a section per kind of table;  no page named:  every page |
 | `yarn site:check <page...> \| --all` | loads pages in a headless browser, and fails on what's broken (below) |
 | `yarn readme:components [--check]` | the catalogue in [README-components.md](README-components.md), from the site's data;  `--shoot <url> [family ...]` retakes its thumbnails from the served site |
@@ -380,19 +382,22 @@ Then commit what it changed in `docs/`;  the bundle is never committed.
 
 ### Checking:  a real browser, at desktop, phone width and dark
 
-`yarn site:check <page...>`, or `yarn site:check --all`, loads pages from the kit's page server (started if needed),
+`yarn site:check <page...>`, or `yarn site:check --all`, loads pages of the Spell UI site
+(the Spell pages of `@spell/guides/SpellUI`) as this checkout's editor runs them (started if needed),
 in Playwright's Chromium, and fails on:
 - console errors, page errors, failed requests and responses of 400 or more
 - `ui-*` or `spell-*` elements still undefined once settled, or defined ones with no shadow root
-- on a family's page, anything but the four tabs (Theming may be missing), or a tab that doesn't show from its `#hash`
-- an "On this page" rail hidden or empty on desktop, or showing on a phone
-- a section id that doesn't follow its nesting, a flat level 2 header left, a deep link that doesn't land
+- the contents (`ui-toc`) hidden or empty on desktop on a page with sections, or showing on a phone
+- a deep link to a section that doesn't land near the top
 - horizontal scroll at phone width:  it names the elements past the edge, which is what a fix needs
-- a nav button whose flyout won't open
+- a nav button whose drawer won't open
+
+A page is its address in the site (`/button/examples`, `button`), or a tag (`ui-button`).
+Until epic `editor` P42 it checked Spell UI's components pages (`docs/*.html`) instead.
 
 It checks every page, whatever failed before it.
 Problems go to stderr, a JSON summary is the last thing on stdout,
-and it exits 0 when clean, 1 on any problem, 2 when it can't start (no such page, no page server serving the bundle).
+and it exits 0 when clean, 1 on any problem, 2 when it can't start (no such page, no editor running the site).
 
 **What it can't see:  overlap, clipping or ugly wrapping.**
 The screenshots go to `results/site-check/` (or `--out <dir>`):  LOOK at them.
@@ -483,8 +488,8 @@ yarn test:visual [--os local|linux|both] [--browsers all|chrome|webkit|firefox] 
 | [FamilyExamples.ts](src/tools/FamilyExamples.ts) | a family's element examples, read one way:  its files, main one first, and each file's sections;  for the kitchen sink, its playgrounds and the design export |
 | [FamilyTokens.ts](src/tools/FamilyTokens.ts) | one family's public CSS tokens, read from its sheets:  its page's token table |
 | [FoundationTokens.ts](src/tools/FoundationTokens.ts) | the foundation tokens (`--ui-font-size`, palette, radii, motion ...), grouped for the theming page, read from the generated sheets |
-| [SiteCheck.ts](src/tools/SiteCheck.ts) | `yarn site:check`:  the docs pages in headless Chromium, from the kit's page server's `/components/ui/` (started with `spell server start`, run in spell-app's folder);  the checks above, screenshots in `results/site-check/`, a JSON summary on stdout |
-| [pageServer.ts](src/tools/pageServer.ts) | the kit whose page server `site:dev` and `site:check` start, from its root, and the kit's own `spell`:  both found by package, never the `spell` on the `PATH`;  `ensurePageServer()` starts it |
+| [SiteCheck.ts](src/tools/SiteCheck.ts) | `yarn site:check`:  the Spell UI site's pages in headless Chromium, as this checkout's editor runs them (`spell server start all`, from the kit's root);  the checks above, screenshots in `results/site-check/`, a JSON summary on stdout |
+| [pageServer.ts](src/tools/pageServer.ts) | the kit whose page server `site:dev` and `site:check` start, from its root, and the kit's own `spell`:  both found by package, never the `spell` on the `PATH`;  `ensurePageServer()` starts it, `ensureEditor()` the editor too, which runs the Spell UI site (`SPELL_UI_SITE`) |
 | [StaticRenderer.ts](src/tools/StaticRenderer.ts) | the server-only Vite server the static render runs on from node:  it compiles the components' JSX for the server, which `tsx` can't;  used by the visual tests' static pages, and by `spell ssr` in its child process (`src/cli/runner/renderStatic.ts`) |
 | [StaticDocument.ts](src/tools/StaticDocument.ts) | loaded BY that server, never by node:  `render(html, options)` turns a whole page static, `stylesheet(tags)` builds and minifies (Lightning CSS) the sheet for those families;  `spell ssr`'s engine |
 | [DesignExport.ts](src/tools/DesignExport.ts), `DesignTokens.ts`, `DesignColor.ts`, `DesignComponents.ts` | `yarn design:build`, also `spell design build`:  the claude.ai design system's files in `<dir>/project/`:  `tokens.json`, `components/index.d.ts`, a README and `preview.html` per family, the cover, `design-system.json`;  it leaves the design bundle's `components/bundle.js` and `bundle.css` alone |

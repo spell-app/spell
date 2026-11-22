@@ -43,7 +43,9 @@ and in the app's build folder, `app/` at the app folder's root.
     each page a file of its own, made by a double click (`SiteWrites.openPart()`, P17);  a group's sites, `/site/<group>` (`SiteGroupPage`);  every site, `/site` (`SitesHomePage`);
     a place's reference page, `/place/<its description>` (`PlaceReference`, epic `data` P52), linked from the Data tab (`SiteData`):
     a `<spell-reference-page editable>` (below, `components/`), whose words it saves into the place's Spell file
-    through `editor.applySourceEdits()` (epic `data` P53)
+    through `editor.applySourceEdits()` (epic `data` P53);  the guides that ship with Spell, `/guides` (`GuidesPage`, epic
+    `epic-engine` P79), read from the installed package through the app's server (`/api/guides/`, `GuideList.ts`),
+    whose Start here guides the home page's guides row shows
   - `ui/`:  `UI`, shared UI types, CodeMirror's plumbing,
     and the editor's words, `AppTexts` ([README-app.md](../../README-app.md), "The editor's words")
   - `runner/`:  runs compiled spell (below)

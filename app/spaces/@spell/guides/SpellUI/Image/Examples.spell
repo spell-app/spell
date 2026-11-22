@@ -72,6 +72,14 @@
 			</example>
 		</>
 
+		<section label="Aspect Ratio and Crop" sticky="stack" collapsible dividing>
+			<example "Aspect Ratio and Crop" description="An image can take a shape, width to height (aspect-ratio: 2:3, 16:9, 1), showing the whole picture inside it;  with crop it fills the shape, cut to fit, keeping the middle or the part crop names (top, bottom, top left ...).  So a row of cards lines up, whatever shape each picture is.">
+				<image size="small" spacing="right" src="/components/ui/images/bear-waving.jpg" alt="" aspect-ratio="2:3"/>
+				<image size="small" spacing="right" src="/components/ui/images/bear-waving.jpg" alt="" aspect-ratio="2:3" crop/>
+				<image size="small" spacing="right" src="/components/ui/images/bear-waving.jpg" alt="" aspect-ratio="1" crop="left"/>
+			</example>
+		</>
+
 		<section label="Rounded" sticky="stack" collapsible dividing>
 			<example "Rounded" description="An image may appear rounded.">
 				<image size="large" src="/components/ui/images/wireframe/square-image.png" alt="" appearance="rounded"/>
@@ -81,6 +89,13 @@
 		<section label="Circular" sticky="stack" collapsible dividing>
 			<example "Circular" description="An image may appear circular.">
 				<image size="large" src="/components/ui/images/wireframe/square-image.png" alt="" appearance="circular"/>
+			</example>
+		</>
+
+		<section label="Background" sticky="stack" collapsible dividing>
+			<example "Background" description="`background`:  a hue behind the picture, drawn soft (its light tint), with room round it.  With `circular` it's a disc, and the picture sits whole on it, never cropped.  A transparent drawing on a coloured disc, so no hairline round it:  the theme's hairline is for photos with white edges, which `bordered` names.">
+				<image size="small" src="/components/ui/images/icons/rocket.png" alt="" background="yellow" appearance="circular" aspect-ratio="1"/>
+				<image size="small" src="/components/ui/images/icons/heart.png" alt="" background="pink" appearance="rounded" aspect-ratio="1"/>
 			</example>
 		</>
 

@@ -5,7 +5,8 @@
  *   - So:  node's own modules, `json5` and the kit's plain-node files (`spell/server/Git`, `spell/server/kitFolders`)
  *     only, `import type` for types, no `enum` or parameter property.
  * - The kit's folders, lowest first:  its `package.json`'s `workspaces` (`parser`, `ui`, `epic`, `app`).
- * - The repos BESIDE it (spell-brand), each with its own install:  `repos.json5`, by `path` from the kit's folder.
+ * - The repos BESIDE it, each with its own install:  `repos.json5`, by `path` from the kit's folder.
+ *   - None today (epic `epic-engine` T124):  each command says so in one line, and succeeds.
  *
  * ```sh
  * yarn clone [repo ...]     # clone the repos beside the kit that are missing (none named:  all), then each one's own
@@ -47,19 +48,28 @@ const TOP = resolve(import.meta.dirname, "..")
 
 /** One repo beside the kit, as `repos.json5` lists it. */
 type Repo = {
-  /** its name on GitHub:  `spell-brand` */
+  /** its name on GitHub:  `spell-x` */
   name: string
   /** where `yarn clone` clones it from */
   url: string
-  /** its folder, from the kit's:  `../spell-brand` */
+  /** its folder, from the kit's:  `../spell-x` */
   path: string
 }
 
-/** Every repo beside the kit (`repos.json5`). */
+/** Every repo beside the kit (`repos.json5`);  none, when it lists none. */
 function repos(): Repo[] {
   const text = readFileSync(join(TOP, "repos.json5"), "utf8")
-  return (JSON5.parse(text) as { repos: Repo[] }).repos
+  return (JSON5.parse(text) as { repos?: Repo[] }).repos ?? []
 }
+
+/** Says so, and is `true`, when `repos.json5` lists no repo:  what every command over them does then. */
+function saidNone(all = repos()): boolean {
+  if (!all.length) console.log(NO_REPOS)
+  return !all.length
+}
+
+/** What a command over the repos beside the kit says when there are none. */
+const NO_REPOS = "no repos beside the kit:  repos.json5 lists none"
 
 /** Repo `repo`'s folder, absolute. */
 function dirOf(repo: Repo): string {
@@ -75,7 +85,7 @@ function isCloned(repo: Repo): boolean {
 function named(names: string[], all = repos()): Repo[] {
   for (const name of names)
     if (!all.some((repo) => repo.name === name))
-      throw new Error(`no repo ${name} in repos.json5;  it lists ${all.map((repo) => repo.name).join(", ")}`)
+      throw new Error(`no repo ${name} in repos.json5;  it lists ${all.map((repo) => repo.name).join(", ") || "none"}`)
   return names.length ? all.filter((repo) => names.includes(repo.name)) : all
 }
 
@@ -173,6 +183,7 @@ function clone(args: string[]): number {
     return 2
   }
   const { names, options } = parsed
+  if (!names.length && saidNone()) return 0
   let wanted: Repo[]
   try {
     wanted = named(names)
@@ -310,6 +321,7 @@ function linkKit(): number {
 
 /** `yarn pull`:  `git pull --ff-only` in every repo beside the kit that's there. */
 function pull(): number {
+  if (saidNone()) return 0
   let failed = 0
   for (const repo of repos().filter(isCloned)) {
     console.log(`== ${repo.name}`)
@@ -323,6 +335,7 @@ const SHOWN = 12
 
 /** `yarn status`:  each repo beside the kit:  its branch, how far from its upstream, its changes (the first `SHOWN`). */
 function status(): number {
+  if (saidNone()) return 0
   for (const repo of repos()) {
     const dir = dirOf(repo)
     if (!isCloned(repo)) {
@@ -347,6 +360,7 @@ function status(): number {
 
 /** `yarn repos`:  the list, with what's there. */
 function list(): number {
+  if (saidNone()) return 0
   for (const repo of repos()) console.log(`${isCloned(repo) ? "✓" : " "} ${repo.name.padEnd(14)} ${repo.path}`)
   return 0
 }

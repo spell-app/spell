@@ -252,3 +252,20 @@ describe("FileOperations.route()", () => {
     expect(existsSync(join(ROOT, "pages", "made.md"))).toBe(true)
   })
 })
+
+describe("FileOperations, once there's an epic folder (epic-engine P79)", () => {
+  test("a file the checkout has in a writable folder of its own (a moved guide) is that one;  the rest the epic folder's", () => {
+    const top = join(DIR, "moved")
+    const checkout = join(top, "checkout")
+    const content = join(top, "checkout.epics")
+    mkdirSync(join(checkout, "guides"), { recursive: true })
+    mkdirSync(join(content, "guides"), { recursive: true })
+    writeFileSync(join(checkout, "guides", "moved.html"), "<p>code</p>\n")
+    const files = new SRV.FileOperations({ root: checkout, writable: ["guides", "epics"] })
+    files.content = content
+    expect(files.writable).toEqual([join(checkout, "guides"), join(content, "guides"), join(content, "epics")])
+    expect(files.writableFile("/guides/moved.html").file).toBe(join(checkout, "guides", "moved.html"))
+    expect(files.writableFile("/guides/private.html").file).toBe(join(content, "guides", "private.html"))
+    expect(() => files.writableFile("/packages/x.html")).toThrow(/only files in/)
+  })
+})

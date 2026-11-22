@@ -33,7 +33,7 @@
 		<markdown>Edit a value below to try it.</>
 		<html>
 			<ui-docs-tokens family="ui-dimmer" playground>
-				<ui-button commandfor="dimmer-types-plain-playground" command="--toggle">Toggle</ui-button>
+				<ui-button commandfor="dimmer-types-plain-playground" command="--toggle">Toggle</>
 				<ui-segment>
 					<ui-text paragraph>A segment holding some text that the dimmer covers.</>
 					<ui-text paragraph>Another paragraph, so the segment has some height.</>

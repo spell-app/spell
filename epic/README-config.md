@@ -95,6 +95,7 @@ It's ONE file per repo, `.epic/config.json5` in the main checkout, read by
 | `editor` | not written:  `""` | the editor the tools drive, `code` (VS Code) or `cursor`, when neither this machine (`SPELL_EPIC_EDITOR`) nor the window they run in says;  `""`:  VS Code |
 | `engineFolder` | `""` | an engine checkout to link in at each checkout's root, for a repo whose own code imports the engine;  `""`:  none |
 | `repoTemplates` | `""` | the repo's own page templates, a folder from each checkout's root;  `""`:  only the engine's |
+| `guidesFolder` | not written:  `""` | the repo's own guides, a folder from each checkout's root (`"guides"`):  versioned with your code and shipped with it;  [Guides that ship with your code](#guides-that-ship-with-your-code) |
 | `app.path` | not written:  a comment shows how | the repo's APP:  its address on the epic server, `/editor/`, the top bar's App tab |
 | `app.url` | not written | where the app answers (`"http://localhost:3000/"`);  `""` with no `urlFile`:  no app |
 | `app.urlFile` | not written | or a JSON file its server writes once it's up, `{ "url": ... }`, from the main checkout |
@@ -134,6 +135,26 @@ A key the file leaves out reads as `epic init` would write it for your repo:  th
   - The engine's folder's own list is `[]`.
 
 </details>
+
+## Guides that ship with your code
+
+A guide starts in the epic folder's `guides/`, beside the plans.
+One your users need belongs with your code instead:  versioned on branches, reviewed as a diff, shipped in your package.
+- Name the folder once, in the config file:  `"guidesFolder": "guides"`, at your repo's root.
+  - Named `guides`, a guide keeps its address (`/guides/data/data.html`):  the page server serves your checkout's
+    copy first, the epic folder's after it.
+- Move a guide in, in a worktree:  `epic guides move guides/data/data.html` (or `SAGA:/<id>`, every guide naming
+  that saga).
+  - It's copied, with its pictures, experiments and twin `.md`;  its comments stay in the epic folder.
+  - The epic folder keeps its copy until the branch merges:  `epic merge` then deletes it (`epic guides prune`).
+- Every epic tool finds a guide in both places, yours first:  the Guides list page, saga pages, See Also, the voice
+  pass, editing in place.
+- Say who each shipped guide is for in its head, then write their list:
+  `<meta name="spell-audience" content="makers">` (or `programmers`), `spell-topic`, and `spell-start-here` with its
+  order;  `epic guides index` writes `guides.json5` beside them, for your app to read.
+- `epic guides check` fails a shipped guide that links your epic repo or a guide that doesn't ship, or names a
+  command or file that isn't there.
+- `epic guides list` says where each guide is:  `code`, `epic`, or `both` while a move waits for its merge.
 
 ## <a id="your-house-style"></a>Your house style
 

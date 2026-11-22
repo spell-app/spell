@@ -1,4 +1,6 @@
+import { existsSync } from "node:fs"
 import { readFile, stat } from "node:fs/promises"
+import { join } from "node:path"
 import { parse } from "parse5"
 
 import { SRV } from "spell/server"
@@ -104,14 +106,19 @@ export class PageEditor {
   /**
    * The file a request names in `?path=`:  one that `allowed` matches, or an `HttpError`.
    * - to `read`:  the checkout's, else the epic folder's, as the page server serves them
-   * - to `write`:  in the folder the `writable` folders are in (`SRV.FileOperations.writableRoot`)
+   * - to `write`:  in the folder the `writable` folders are in (`SRV.FileOperations.writableRoot`);  the checkout's
+   *   own file first, in a writable folder of its own (a guide moved into the code, epic `epic-engine` P79)
    */
   private pageFile(request: SRV.Request, allowed: RegExp, to: "read" | "write"): { path: string; file: string } {
     const asked = one(request.query.path)
     if (!asked) throw new SRV.HttpError(400, "?path= required, e.g. /pages/index.html")
     const path = asked.startsWith("/") ? asked : `/${asked}`
     const { content, writableRoot } = this.files
-    const roots = to === "write" ? [writableRoot] : [this.root, ...(content ? [content] : [])]
+    // to write:  the checkout's own file first, when it's in one of its writable folders (a moved guide, P79)
+    const mine = join(this.root, path)
+    const own = to === "write" && existsSync(mine) && this.files.writable.some((folder) => SRV.isInside(folder, mine))
+    const roots =
+      to === "write" ? [...(own ? [this.root] : []), writableRoot] : [this.root, ...(content ? [content] : [])]
     let resolved!: SRV.Resolved
     for (const root of roots) {
       resolved = SRV.resolveInside(root, path, { index: false })

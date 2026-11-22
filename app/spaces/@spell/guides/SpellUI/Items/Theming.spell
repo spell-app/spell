@@ -4,6 +4,7 @@
 		<header>A group of items presents a set of site content for display, each an image beside its
               text.</>
 	</>
+
 	<!-- THEMING:  the family's tokens, live, plus how to set them and which themes touch it. -->
 	<section label="Tokens">
 		<markdown>

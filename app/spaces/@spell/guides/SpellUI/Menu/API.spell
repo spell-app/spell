@@ -5,6 +5,12 @@
 	</>
 
 	<!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
+	<section label="Tags">
+		<html>
+			<ui-docs-api family="ui-menu" only="tags"></>
+		</>
+	</>
+
 	<section label="Attributes">
 		<html>
 			<ui-docs-api family="ui-menu" only="attributes"></>

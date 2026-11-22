@@ -288,7 +288,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         - `epic/`:  its route modules, engine routes, watched folders, Epic UI, `localCopies`
         - `app/`:  the app's route module, App UI, `pageScripts`
       - A project beside the kit declares its part the same way, in its own `package.json`:
-        spell-brand, its set, engine routes, watched folders, bundle.
+        its set, engine routes, watched folders, bundle (none today:  spell-brand, the only one, was dropped by epic
+        `epic-engine` T124).
       - The epic repo's part:  `page-server.json5` at the epic folder's root
         (`CONTENT_SETTINGS`;  the folder `contentFolderOf()` names):  the site's tabs, the writable folders, `gone`.
       - The kit's own part (its `package.json`'s `"pageServer"`):  two route modules:  the recipe box demo's servers' start and stop
@@ -298,7 +299,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
         server starts, a line for each secret a place needs that isn't set.
       - `pageServerSettings(root)` merges them (`settingsParts()`):
         the kit's, the epic repo's, each big folder's (the kit's `workspaces`, lowest first:  `kitFolders()`),
-        each peer `repos.json5` names that's there (`peerRepos()`:  spell-brand, beside the MAIN checkout;  the ONE
+        each peer `repos.json5` names that's there (`peerRepos()`:  none today, beside the MAIN checkout;  the ONE
         reader of the kit's peers, each one's name and folder, epic `coherence` P29),
         then each project the checkout's git-ignored `page-server.local.json5` names (`localProjects()`).
         - names no folder:  the lists are the kit's data
@@ -349,10 +350,8 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - The list:  the settings' `"engineRoutes"`, each a route and its folder (epic `repo-split` P4).
       - Today spell-epic's (`/_epic/assets/`, `/_epic/pack/` and `/templates/`):
         where spell-epic's one server per machine serves the engine too, and the pages load it from.
-      - And spell-brand's:
-        - `/_brand/assets/`:  its `assets/`, the logo, fonts and reference images (epic `repo-split` P10)
-        - `/packages/brand/_assets/` and `/packages/brand/components/__pack/`:  its `_assets/` and its pack,
-          at the paths the Brand tab's pages load them by (`../packages/brand/_assets/...`)
+      - spell-brand's (`/_brand/assets/`, `/packages/brand/...`) went with it (epic `epic-engine` T124):
+        the epic repo's `brand/` pages that load them draw without them.
       - A kit without spell-epic answers "not found" there, and loads no epic route module.
       - Live reload reports a change in one at its route.
     - Route modules add to every page's `window.SPELL_SERVER`:  `addPageConfig()`.
@@ -386,7 +385,7 @@ Only what's local is below;  a section named like a WWOD rule extends it.
       - The list:  the settings' `"componentSets"`, by id, in the top bar's order
         (`componentSets()`, epic `repo-split` P4;  `ComponentSet`, in [page.types.ts](page/page.types.ts)).
         - Each:  its `name`, its pages' folder (`dir`) and the site bundle laid over it (`assets`).
-        - Today four, one per repo's part:  Spell UI, the brand's, Epic UI, App UI (repo order).
+        - Today three, one per folder's part:  Spell UI, Epic UI, App UI (folder order).
       - Since epic `epic-workflow` P10 / P11;  one layout since `people-and-orgs` P18.
       - Each at `/components/<id>/`.  A new set is one more entry in the settings.
       - No dev server:  the pages are static, loading their site bundle.
@@ -732,7 +731,7 @@ The steps between a page's content and its file on disk, for every tool that wri
   It was the docs tools' `plan-parts.js`'s.
 - `Bundle` -- the bundles only the page server serves, BUILT on demand instead of committed.
   - WHICH bundles exist:  the output folders the page server's settings list (`Bundle.specs()`),
-    from spell-ui's and spell-brand's parts.
+    from spell-ui's part.
     The page server reads the same list:
 
     ```json
@@ -741,7 +740,6 @@ The steps between a page's content and its file on disk, for every tool that wri
 
   - HOW each is built:  `BUNDLES`, in [server.types.ts](server.types.ts):
     - `ui-site`:  Spell UI's docs site
-    - `brand`:  the brand pages
   - `check()`:  stale when never built, its entry missing or rewritten, or its sources' hash changed.
   - A COMMITTED one (`committed`, epic `epic-engine` P54):  a generated file the repo commits, the root catalog, the
     epics pack, spell-epic's docs bundle
@@ -763,7 +761,7 @@ The steps between a page's content and its file on disk, for every tool that wri
     - its output folder in its folder's part of the settings (above)
     - and in the `.gitignore` of the folder that builds it (`/site/_assets/`, in `ui/`'s)
 - JSON5 written with its comments kept moved to util, `spell/util/node/json5` (epic `repo-split` P1):
-  its users (ui's tools, app, brand, spaces, spell-epic) need util, not the assembler.
+  its users (ui's tools, app, spaces, spell-epic) need util, not the assembler.
   - `DataFile` writes through it.
 - Grow it by capability:  one class per file, its types in [server.types.ts](server.types.ts).
 - Node only:  node's file system and child processes, `git`, oxfmt and linkedom.
@@ -781,7 +779,7 @@ The steps between a page's content and its file on disk, for every tool that wri
     - `packages/*/src`, and `packages/*/components` (a component set's elements):
       the old monorepo's spelling, in every page written before the split
       - Under the kit, an old `packages/<name>/` is found through `node_modules`:
-        spell-ui, spell-brand, spell-epic, and the folders of spell, spell-parser and spell-app.
+        spell-ui, spell-epic, and the folders of spell, spell-parser and spell-app.
       - A folder now in its repo's one `src/` drops the old `src/` (epic `repo-split` P11, P14):
         `packages/server/src/x.ts` is the kit's `src/server/x.ts`.
     - `tests/`, where every package's tests live

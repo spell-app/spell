@@ -55,7 +55,7 @@ export class ComponentPack {
   readonly src: string
   /** its element families' folder, absolute:  `<dir>/components`, or the brand's `src/components` */
   readonly components: string
-  /** its package's npm name (`spell-brand`):  its own files, imported by it, are the pack's too (`sources()`) */
+  /** its package's npm name (`spell-x`):  its own files, imported by it, are the pack's too (`sources()`) */
   readonly packageName: string | undefined
 
   constructor({
@@ -262,7 +262,7 @@ export class ComponentPack {
    * - Imports are found by the kit's TypeScript reader (`readTypeScript()`):
    *   static ones, re-exports and `import("...")`.
    * - Resolved as the build does:  relative, the package's own name
-   *   (`spell-brand/components/brand-color`:  its `src/`);
+   *   (`spell-x/components/x-color`:  its `src/`);
    *   `?inline` and other queries dropped, extensions and `index` tried.
    * - Tests and snapshots never count.
    */
@@ -458,7 +458,7 @@ ${families.join(",\n")}
 
   /**
    * The file import `specifier` in file `from` names, when it's the pack's own:  relative, its package's own name
-   * (`spell-brand/X` ~== `<folder>/src/X`).
+   * (`spell-x/X` ~== `<folder>/src/X`).
    * - `undefined` for anything else (Spell UI, Solid, npm), or a path that isn't a file.
    */
   private resolveImport(from: string, specifier: string): string | undefined {
@@ -475,7 +475,7 @@ ${families.join(",\n")}
     return candidates.find((it) => existsSync(it) && statSync(it).isFile())
   }
 
-  /** Whether import `specifier` names its own package, or a file of it:  `spell-brand`, `spell-brand/components`. */
+  /** Whether import `specifier` names its own package, or a file of it:  `spell-x`, `spell-x/components`. */
   private isOwnName(specifier: string): boolean {
     const own = this.packageName
     return own !== undefined && (specifier === own || specifier.startsWith(`${own}/`))

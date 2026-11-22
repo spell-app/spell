@@ -203,7 +203,7 @@
     "ui-graph": {
       "title": "Graph",
       "summary": "A graph draws nodes joined by edges, laid out left to right.  A node may hold a graph of its own, opened in place, in a modal, or in its stead.",
-      "status": "in-progress"
+      "status": "done"
     },
     "ui-grid": {
       "title": "Grid",
@@ -425,7 +425,7 @@
     "ui-property-editor": {
       "title": "Property Editor",
       "summary": "A property editor draws a form from a schema:  one field per property, in folding groups, for one thing or many.",
-      "status": "in-progress"
+      "status": "done"
     },
     "ui-quote": {
       "title": "Quote",
@@ -465,7 +465,7 @@
     "ui-section": {
       "title": "Section",
       "summary": "A section is a titled block of content that can fold away and keep its title in view.",
-      "status": "in-progress"
+      "status": "done"
     },
     "ui-segment": {
       "title": "Segment",
@@ -635,7 +635,7 @@
     "ui-theme-editor": {
       "title": "Theme Editor",
       "summary": "A theme editor makes a theme from an existing one:  its colours, fonts and shapes, or any token, live on real pages, then copied as a theme file or kept in the browser.",
-      "status": "in-progress"
+      "status": "done"
     },
     "ui-theme-menu": {
       "title": "Theme Menu",

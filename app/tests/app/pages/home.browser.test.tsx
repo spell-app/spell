@@ -96,7 +96,9 @@ describe("the home page's rows", () => {
     const host = await mountHome()
     // Task List is hidden too:  the Start row's to-do list copies it (epic `mockup` T42)
     expect(cardsIn(host, "examples")).toEqual(["Calculator", "Weather", "Solitaire"])
-    expect(cardsIn(host, "guides")).toEqual(["How the Calculator works"])
+    // the guides' row shows only the Start here guides that ship with Spell, none without a server to read them;
+    // the project guides moved to the Guides page (epic `epic-engine` P79)
+    expect(cardsIn(host, "guides")).toEqual([])
     for (const id of ["library", "editor", "sign-in"]) expect(host.querySelector(`#${id}`), id).toBeNull()
     expect(host.textContent).not.toMatch(/FizzBuzz|Family Cookbook|Statusphere|Org Admin/)
   })
@@ -142,7 +144,6 @@ describe("the home page's rows", () => {
   test('the Spanish examples and guides:  their own section, "En español", out of the English ones (I46)', async () => {
     const host = await mountHome()
     expect(cardsIn(host, "examples")).toEqual(["Calculator", "Weather", "Solitaire"])
-    expect(cardsIn(host, "guides")).toEqual(["How the Calculator works"])
     expect(host.querySelector("#spanish h2")?.textContent).toMatch(/^En español\./)
     // the examples, then the guides, each under its line;  Lista de tareas hidden, as Task List is
     expect(cardsIn(host, "spanish")).toEqual(["Calculadora", "Solitario", "Cómo funciona Solitario"])

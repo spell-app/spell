@@ -25,6 +25,7 @@ import { Requests } from "spell/epic/command/Requests"
 import { Sessions } from "spell/epic/command/Sessions"
 import { Shared } from "spell/epic/command/Shared"
 import { Stock } from "spell/epic/command/Stock"
+import { Guides } from "spell/epic/command/Guides"
 import { TurnEnd } from "spell/epic/command/TurnEnd"
 import { Turns } from "spell/epic/command/Turns"
 import { Upgrade } from "spell/epic/command/Upgrade"
@@ -559,6 +560,13 @@ export class EpicProgram {
         'list [--json] | set <epic> <saga> | set <epic> --none | create <id> "Title" --purpose "..." | page <id> | ...'
       )
       .addHelpText("after", SAGA_HELP)
+
+    this.group(
+      epic.command("guides"),
+      "guides moved into the code (the repo's guidesFolder):  where each one is, moving one there, pruning the epic " +
+        "folder's copies once main has them",
+      (args) => new Guides().run(args)
+    )
   }
 
   ////////////////

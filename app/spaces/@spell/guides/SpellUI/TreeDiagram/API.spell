@@ -5,6 +5,12 @@
 	</>
 
 	<!-- API:  generated from the vocabularies (`docs/__data/components.json5`);  nothing to write. -->
+	<section label="Tags">
+		<html>
+			<ui-docs-api family="ui-tree-diagram" only="tags"></>
+		</>
+	</>
+
 	<section label="Attributes">
 		<html>
 			<ui-docs-api family="ui-tree-diagram" only="attributes"></>
@@ -14,6 +20,18 @@
 	<section label="Properties">
 		<html>
 			<ui-docs-api family="ui-tree-diagram" only="properties"></>
+		</>
+	</>
+
+	<section label="Events">
+		<html>
+			<ui-docs-api family="ui-tree-diagram" only="events"></>
+		</>
+	</>
+
+	<section label="Slots">
+		<html>
+			<ui-docs-api family="ui-tree-diagram" only="slots"></>
 		</>
 	</>
 

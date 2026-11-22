@@ -1136,7 +1136,20 @@ export const APP_TEXTS = {
   debugCalledFrom: "How it got here",
   debugNothing: "Nothing yet",
   // a value it can't show as text:  `{type}`, its kind
-  debugValueOf: "a {type}"
+  debugValueOf: "a {type}",
+  // the guides that ship with Spell (`<GuidesPage>`, epic `epic-engine` P79)
+  guidesTitle: "Guides",
+  guidesLede:
+    "Learn to build apps with Spell, and how Spell works inside.\nRead the guides under Start here first.\nTo find anything else, use the search box.",
+  guidesSearch: "Search the guides",
+  guidesStartHere: "Start here",
+  guidesForProgrammers: "For programmers working on Spell",
+  guidesAll: "All guides",
+  guidesChapterOf: "A chapter of {guide}.",
+  guidesMissing:
+    "The guides couldn't be opened.\nThey come with Spell, so try closing and opening the app again.\nIf that doesn't help, install Spell again.",
+  guidesInTheEditor: "Guides you open in the editor",
+  guidesHomeLink: "All guides"
 } as const
 
 /** Key of one of the editor's texts, e.g. `"save"`. */

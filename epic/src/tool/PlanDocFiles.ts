@@ -762,9 +762,9 @@ export class PlanDocFiles {
   /**
    * The repos a doc's commits can be in, the doc's checkout first:  it, then each of its child repos that's there
    * (`EpicConfig.repos`:  a multi-repo top's, `spell-parser` ...;  none for a single repo), then each of the kit's
-   * PEERS that's on disk (`EpicConfig.peers`:  spell-brand, beside the kit;  epic `epic-engine` P52, J150).
+   * PEERS that's on disk (`EpicConfig.peers`:  none today, beside the kit;  epic `epic-engine` P52, J150).
    * - every repo's work counts toward an epic (epic `epic-engine` r17):  outline-spell's phases are mostly
-   *   spell-parser's, spell-ui's and spell-app's commits;  a spell-brand commit naming the epic is its too
+   *   spell-parser's, spell-ui's and spell-app's commits;  a peer's commit naming the epic is its too
    * - a peer by its MAIN checkout:  its own worktrees' commits count once merged there
    */
   repoFolders(file: string): string[] {

@@ -1,0 +1,37 @@
+"app-menu usage" is a notebook page
+	<header level="1">
+		App menu
+		<header>An app menu is an app's top bar, joined to the top of its window or page: a start section (a menu or side bar button, then a title or breadcrumb), a middle that stays on the bar's centre, and an end section for buttons.</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			Put `<ui-app-menu>` first in its page or window, outside any padding:  it runs the whole width,
+			with a hairline under it.
+
+			- Its items go in one of three sections, by their `slot`:
+			  - `slot="start"`:  a menu or side bar button first, then the app's name, a title or a breadcrumb
+			  - no slot:  the middle, which stays on the bar's centre (a page's modes, its tabs)
+			  - `slot="end"`:  buttons, pushed to the bar's end
+			- A section may hold a sub-menu (`<ui-menu slot="start">`) instead of loose items:
+			  its items are the bar's all the same.
+			- It is a `<ui-menu>`:  every menu attribute works (`interactive` for a menubar, `size` ...),
+			  and it sends the menu's `ui-choosing`.
+			- Too narrow for all three sections, the bar scrolls sideways:  it never overlaps or wraps.
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			As a menu's:  Tab reaches each link and button;  with `interactive`, the bar is one Tab stop,
+			and the arrow keys, Home and End move between its items.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- It's a `<nav>` landmark, or a `menubar` with `interactive`:  give it an `aria-label`.
+			- An item that shows only an icon needs an `aria-label` of its own.
+		</>
+	</>

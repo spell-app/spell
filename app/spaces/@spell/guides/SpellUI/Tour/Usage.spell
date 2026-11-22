@@ -1,0 +1,43 @@
+"tour usage" is a notebook page
+	<header level="1">
+		Tour
+		<header>A tour leads someone through a feature one numbered step at a time, pointing at what each step is about.</>
+	</>
+
+	<!-- USAGE:  how to use it (attributes in practice, events, framework snippets), keyboard, accessibility. -->
+	<section label="Using it">
+		<markdown>
+			A tour is a `<ui-tour>` holding its steps, `<ui-tour-step>`s, in order.  It draws nothing until it starts.
+
+			- Each step says what it says in its content, and points at its `target`:
+			  the name of a part of the app (its `id`), a `data-tour` name, or a CSS selector.
+			  A step with no target shows near the top of the screen;  a target that isn't on the page skips its step.
+			- Start it with `start()`, a `<button commandfor="its id" command="--start">`, or in Spell, `start tour "its name"`.
+			- Move with `next()`, `back()` and `show(3)` (or `show("save")`, a step's `name`);  `stop()` ends it.
+			- A tour that should start by itself calls `offerToStart()`:  it asks first, as `offer` says,
+			  and with `remember` it isn't offered again once taken.
+			- Only one tour runs at a time on a page.
+		</>
+		<markdown>
+			```js
+			const tour = document.querySelector("ui-tour")
+			tour.addEventListener("ui-ended", (event) => console.log(event.detail.reason)) // done, closed or stopped
+			tour.start()
+			```
+		</>
+	</>
+
+	<section label="Keyboard">
+		<markdown>
+			- Escape closes the tour, whatever has the focus.
+			- With the focus in a step's box:  → shows the next step, ← the one before;  Tab moves through its buttons.
+		</>
+	</>
+
+	<section label="Accessibility">
+		<markdown>
+			- Each step's box is a `dialog`, named by the tour's `name`;  its Next button takes the focus as a step shows.
+			- "Step 2 of 5" is read out as the step changes.
+			- The ✕ is a real button with a name, "Close the tour".
+		</>
+	</>

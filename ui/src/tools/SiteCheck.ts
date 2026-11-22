@@ -1,81 +1,70 @@
 /// <reference types="node" />
 
-import { existsSync, mkdirSync, realpathSync, statSync } from "node:fs"
-import { basename, isAbsolute, join, relative, resolve, sep } from "node:path"
+import { mkdirSync } from "node:fs"
+import { join, resolve } from "node:path"
 import { parseArgs } from "node:util"
 
 import type { Browser, Page } from "playwright"
 
-import { pathInside } from "spell/server/RealPath"
 import { BrowserPage, type BrowserPageProps } from "spell/element-tools/BrowserPage"
-import { FOLDS_KEY } from "spell/ui/site/_src/site.types"
-import { TocIndex } from "spell/ui/components/ui-toc/TocIndex"
-import { KIT_ROOT, SITE_ADDRESS, ensurePageServer } from "./pageServer.ts"
-import { SITE_PAGES, SPELL_UI_ROOT, SiteCheckError, sitePages } from "./tools.types.ts"
-import { environment } from "./environment.ts"
 import { Terminal } from "spell/element-tools/Terminal"
+import { SPELL_UI_SITE, SPELL_UI_SITE_FILE, ensureEditor, ensurePageServer } from "./pageServer.ts"
+import { SPELL_UI_ROOT, SiteCheckError } from "./tools.types.ts"
+import { environment } from "./environment.ts"
 
 /****************
  * ### `SiteCheck`
- * Checks the plain-HTML pages of Spell UI's docs site in headless chromium, served by this checkout's page server at
- * `/components/ui/`.
- * - The pages:  `docs/*.html`, in one folder (`SITE_PAGES`;  an element's page is its tag, `ui-button.html`).
- * - Run:  `yarn site:check <page...>` (in `packages/ui`), or `yarn site:check --all`.
+ * Checks the pages of the Spell UI site in headless chromium:
+ * the Spell pages of `@spell/guides/SpellUI`, as this checkout's editor runs them
+ * (`<editor>/run/@spell/guides/SpellUI/<address>`, the editor's `RunSite`).
+ * - Run:  `yarn site:check <page...>` (in `ui/`), or `yarn site:check --all`.
  *   - `--out <dir>` for the screenshots (default `results/site-check/`, git-ignored).
  *   - `scripts/site-check.ts` is the command, which hands its arguments to `SiteCheck.main()`:
  *     a class file runs nothing when imported.
- * - A page is one of (`resolvePage()`):
- *   - a path:  absolute, from the cwd, or from `docs/`
- *   - a tag:  `ui-button` => `docs/ui-button.html`
- *   - a name:  `index` => `docs/index.html`
+ * - A page is its ADDRESS in the site (`resolveAddress()`), as the site's file lists it (`SpellUI.spell`):
+ *   - `/button/examples`, or `button/examples`
+ *   - a tag, `ui-button` => `/button`
+ *   - `home` => `/`
  * - Problems (`PageReport.problems`;  exit 1):
- *   - console errors, page errors, failed requests and responses >= 400 (the favicon too:  the page server has one)
+ *   - console errors, page errors, failed requests and responses >= 400
  *   - `ui-*` / `spell-*` elements still undefined once settled;  defined `ui-*` with no shadow root
- *   - components pages (`ui-*.html`):
- *     - not exactly one `ui-tabs.site-tabs` with panes `examples`, `usage`, `api`, `theming` (`theming` optional)
- *     - a pane that isn't the shown one when loaded with its `#hash`, or shows under 50px
- *   - `ui-toc`:  hidden or empty on desktop, visible on phone
- *   - sections (`yarn site:sections`):
- *     - an id that doesn't follow its nesting
- *     - a flat level 2 header left
- *     - a deep link to the first nested section that doesn't land
- *       (pane shown, unfolded, its title on its line below the stuck ones)
+ *   - the contents (`ui-toc`):  empty or hidden on desktop on a page with sections;  visible on phone
+ *   - a deep link to the first nested section that doesn't land:  its title not near the top once loaded
  *   - horizontal scroll at phone width, listing the elements past the edge, outermost and deepest:
  *     what a fixer needs
- *   - a nav button (`ui-button.site-menu-button`) whose flyout doesn't open
+ *   - a nav button (`ui-site-nav-button`) whose drawer doesn't open at phone width
  * - Every page is checked, whatever failed before it.
  * - Problems go to stderr, with each page's URL, counts and screenshots;  a JSON summary is the last thing on stdout.
  * - Look at the screenshots too:  the checks can't see overlap, clipping or ugly wrapping.
- * - Throws `SiteCheckError` when it can't start:  no such page, or no page server serving the site (exit 2).
- * - Replaces the Astro site's `check` script.
- *   Model:  the docs' checker, `epic/src/tools/check-spell.js`.
- * - Node only;  reads the site's `FOLDS_KEY` (`site/_src/site.types.ts`, pure data) and `TocIndex.slug()`.
+ * - Throws `SiteCheckError` when it can't start:  no such page, or no editor running the site (exit 2).
+ * - Until epic `editor` P42 it checked Spell UI's components pages (`docs/*.html`) instead,
+ *   with two checks only they needed (four site tabs a page;  `site:sections`' ids):  gone with them.
+ * - The page's elements are all in shadow roots (the editor's, the site's):  every probe walks them.
+ * - Node only.
  ****************/
 export class SiteCheck {
-  /** Page files to check, absolute. */
-  readonly files: string[]
+  /** The site's addresses to check, `/button/examples` ... */
+  readonly addresses: string[]
 
   /** Screenshot folder, absolute. */
   readonly out: string
 
-  /** Page server origin, e.g. `http://127.0.0.1:54769`;  set by `run()`. */
+  /** The running editor's origin, with its `/`, e.g. `http://localhost:64794/`;  set by `run()`. */
   base = ""
 
   /** The one browser every page shares;  set by `run()`. */
   private browser?: Browser
 
-  constructor({ files, out = DEFAULT_OUT }: SiteCheckProps) {
-    this.files = files
+  constructor({ addresses, out = DEFAULT_OUT }: SiteCheckProps) {
+    this.addresses = addresses
     this.out = out
   }
 
   /**
    * `yarn site:check`:  parse the command line, check every page, print, and exit.
-   * - SIDE EFFECT:  `process.exit()`:  0 all clean, 1 any problem, 2 bad arguments, no such page or no server
+   * - SIDE EFFECT:  `process.exit()`:  0 all clean, 1 any problem, 2 bad arguments, no such page or no editor
    */
   static async main(argv: string[] = process.argv.slice(2)): Promise<never> {
-    // `yarn site:check` runs in `packages/ui`;  paths the person typed are relative to where they typed them
-    const cwd = environment.invocationDir
     let parsed: ReturnType<typeof parseCommandLine>
     try {
       parsed = parseCommandLine(argv)
@@ -85,11 +74,12 @@ export class SiteCheck {
     const { values, positionals } = parsed
     if (values.help) return exit(USAGE, 0)
     try {
-      const names = values.all ? sitePages() : positionals.map((name) => SiteCheck.resolvePage(name, cwd))
-      if (!names.length) return exit(USAGE, 2)
+      const known = await SiteCheck.siteAddresses()
+      const addresses = values.all ? known : positionals.map((name) => SiteCheck.resolveAddress(name, known))
+      if (!addresses.length) return exit(USAGE, 2)
       const check = new SiteCheck({
-        files: [...new Set(names)],
-        out: values.out === undefined ? undefined : resolve(cwd, values.out)
+        addresses: [...new Set(addresses)],
+        out: values.out === undefined ? undefined : resolve(environment.invocationDir, values.out)
       })
       const reports = await check.run()
       const ok = reports.every((report) => report.ok)
@@ -108,52 +98,69 @@ export class SiteCheck {
   }
 
   /**
-   * Find a page file from what was typed, first match wins:
-   * - absolute path
-   * - relative to `cwd`
-   * - relative to `docs/`
-   * - a tag, `ui-button` => `docs/ui-button.html`;  a name, `index` => `docs/index.html`
-   * - throws `SiteCheckError` when nothing matches, or the page isn't under `docs/` (the server wouldn't serve it)
+   * The site's address for what was typed, one of `known`:
+   * - `/button/examples` or `button/examples`
+   * - a tag, `ui-button` => `/button`
+   * - `home` or `index` => `/`
+   * - throws `SiteCheckError` when it names no page of the site
    */
-  static resolvePage(name: string, cwd: string): string {
-    const html = name.endsWith(".html") ? name : `${name}.html`
-    const candidates = isAbsolute(name) ? [name] : [resolve(cwd, name), join(SITE, name), join(SITE, html)]
-    const file = candidates.find((path) => existsSync(path) && statSync(path).isFile())
-    if (!file) {
-      throw new SiteCheckError(`SiteCheck.resolvePage():  no page "${name}";  tried:\n  ${candidates.join("\n  ")}`)
-    }
-    const inside = pathInside(realpathSync(SITE), realpathSync(file))
-    if (inside === undefined) {
+  static resolveAddress(name: string, known: readonly string[]): string {
+    const bare = name.replace(/^\/+|\/+$/g, "").replace(/^ui-/, "")
+    const address = HOME_NAMES.includes(bare) ? "/" : `/${bare}`
+    if (!known.includes(address)) {
       throw new SiteCheckError(
-        `SiteCheck.resolvePage():  ${file} is not under ${SITE};  the page server serves only that`
+        `SiteCheck.resolveAddress():  the Spell UI site has no page "${name}" (${address});  ` +
+          "its pages are the addresses its file lists (`SpellUI.spell`)"
       )
     }
-    return join(SITE, inside)
+    return address
   }
 
   /**
-   * A page's screenshot prefix:  its file name (`ui-button`, `grammar`), or its path for a folder's `index.html`
-   * (`components/index.html` => `components-index`), which would else overwrite the home page's shots.
+   * Every page's address, in the order the site's file lists them (`it has ... page at "/button" ...`):
+   * read from the page server (`SPELL_UI_SITE_FILE`).
+   * - SIDE EFFECT:  `spell server start` starts the page server if it isn't running
+   * - throws `SiteCheckError` when the page server can't start, or doesn't serve the file
    */
-  static shotNameFor(path: string): string {
-    const name = basename(path, ".html")
-    return name === "index" && path.includes("/") ? path.replace(/\.html$/, "").replaceAll("/", "-") : name
+  static async siteAddresses(): Promise<string[]> {
+    let base: string
+    try {
+      base = ensurePageServer()
+    } catch (error) {
+      throw new SiteCheckError(`SiteCheck.siteAddresses():  can't start or find the page server:  ${error}`)
+    }
+    const url = `${base}/${SPELL_UI_SITE_FILE}`
+    const response = await fetch(url, { signal: AbortSignal.timeout(PROBE_MS) }).catch((error: unknown) => {
+      throw new SiteCheckError(`SiteCheck.siteAddresses():  ${url} didn't answer:  ${error}`)
+    })
+    if (!response.ok) throw new SiteCheckError(`SiteCheck.siteAddresses():  ${url} => ${response.status}`)
+    return SiteCheck.addressesIn(await response.text())
+  }
+
+  /** The page addresses a site file's text lists, in its order:  `at "/button"` => `/button`. */
+  static addressesIn(siteText: string): string[] {
+    return [...siteText.matchAll(PAGE_LINE)].map((match) => match[1]!)
+  }
+
+  /** A page's screenshot prefix:  its address, `/` => `home`, `/button/examples` => `button-examples`. */
+  static shotNameFor(address: string): string {
+    return address === "/" ? "home" : address.replace(/^\//, "").replaceAll("/", "-")
   }
 
   /**
-   * Find the page server, then check every page in one browser.
-   * - SIDE EFFECT:  `spell server start` starts the server if it isn't running;  writes screenshots to `out`;
-   *   prints each page's result to stderr
-   * - throws `SiteCheckError` when there's no page server serving the site
+   * Find the editor, then check every page in one browser.
+   * - SIDE EFFECT:  `spell server start all` starts the page server and the editor if they aren't running;
+   *   writes screenshots to `out`;  prints each page's result to stderr
+   * - throws `SiteCheckError` when there's no editor running the site
    */
   async run(): Promise<PageReport[]> {
-    this.base = await this.ensureServer()
+    this.base = await this.ensureEditor()
     mkdirSync(this.out, { recursive: true })
     this.browser = await BrowserPage.launch()
     const reports: PageReport[] = []
     try {
-      for (const file of this.files) {
-        const report = await this.checkPage(file)
+      for (const address of this.addresses) {
+        const report = await this.checkPage(address)
         this.print(report)
         reports.push(report)
       }
@@ -164,39 +171,34 @@ export class SiteCheck {
   }
 
   /**
-   * The page server's origin, once it serves the site bundle (`ensurePageServer()`, as `site:dev` starts it).
-   * - throws `SiteCheckError` when there's no server, or it doesn't serve `/components/ui/_assets/site.js`
+   * The running editor's origin, once it runs the site (`ensureEditor()`).
+   * - throws `SiteCheckError` when there's no editor, or it doesn't answer the site's home page
    */
-  async ensureServer(): Promise<string> {
+  async ensureEditor(): Promise<string> {
     let base: string
     try {
-      base = ensurePageServer()
+      base = ensureEditor()
     } catch (error) {
       throw new SiteCheckError(
-        `SiteCheck.ensureServer():  can't start or find the page server (\`spell server start\` in ${KIT_ROOT}):  ` +
+        `SiteCheck.ensureEditor():  can't start or find this checkout's editor (\`spell server start all\`):  ` +
           `${error};  start it by hand and read its output`
       )
     }
-    const probe = `${base}${SITE_ADDRESS}/_assets/site.js`
+    const probe = `${base}${SPELL_UI_SITE}/`
     const status = await fetch(probe, { signal: AbortSignal.timeout(PROBE_MS) }).then(
       (response) => response.status,
       (error: unknown) => String(error)
     )
-    if (status !== 200) {
-      throw new SiteCheckError(
-        `SiteCheck.ensureServer():  the page server doesn't serve the site bundle (${probe} => ${status});  ` +
-          "run `yarn site:build`"
-      )
-    }
+    if (status !== 200)
+      throw new SiteCheckError(`SiteCheck.ensureEditor():  the editor doesn't answer ${probe} (${status})`)
     return base
   }
 
   /** Check one page at desktop, phone and dark;  NEVER throws:  a crash is one more problem. */
-  async checkPage(file: string): Promise<PageReport> {
-    const path = relative(SITE, file).split(sep).join("/")
+  async checkPage(address: string): Promise<PageReport> {
     const report: PageReport = {
-      page: path,
-      url: `${this.base}${SITE_ADDRESS}/${path}`,
+      page: address,
+      url: `${this.base}${SPELL_UI_SITE}${address === "/" ? "/" : address}`,
       ok: false,
       problems: [],
       notes: [],
@@ -204,15 +206,8 @@ export class SiteCheck {
       screenshots: []
     }
     const seen = new Map<string, number>()
-    const context: CheckContext = {
-      file,
-      path,
-      name: SiteCheck.shotNameFor(path),
-      report,
-      problem,
-      isUnsettled: false
-    }
-    for (const step of [this.checkDesktop, this.checkSections, this.checkPhone, this.checkDark]) {
+    const context: CheckContext = { address, name: SiteCheck.shotNameFor(address), report, problem }
+    for (const step of [this.checkDesktop, this.checkDeepLink, this.checkPhone, this.checkDark]) {
       try {
         await step.call(this, context)
       } catch (error) {
@@ -238,11 +233,7 @@ export class SiteCheck {
   // ## Viewports
   ////////////////
 
-  /**
-   * Desktop:  errors, element definitions, tabs (each loaded fresh from its `#hash`), contents list, screenshots.
-   * - the components guide's pages:  tabs only if they have `ui-tabs.site-tabs`;
-   *   else a top and a full-page screenshot
-   */
+  /** Desktop:  errors, element definitions, the contents, screenshots of the top and the whole page. */
   private async checkDesktop(check: CheckContext): Promise<void> {
     const { report, problem, name } = check
     const page = await this.open(check, DESKTOP, "desktop")
@@ -253,108 +244,51 @@ export class SiteCheck {
       report.counts.tags = Object.keys(elements.tags).length
       for (const [tag, count] of Object.entries(elements.undefined)) problem(`${count} <${tag}> never defined`)
       for (const [tag, count] of Object.entries(elements.unrendered)) problem(`${count} <${tag}> without a shadow root`)
-
-      const tabs = await page.evaluate(tabsState)
-      // a components page (`ui-<tag>.html`:  a family's or a sub-tag's), NOT the component index
-      const isComponent = check.path.startsWith("ui-")
-      report.counts.tabs = tabs.values
-      let values: string[] = []
-      if (isComponent) {
-        if (tabs.count !== 1) problem(`${tabs.count} ui-tabs.site-tabs (a components page needs exactly one)`)
-        const required = TABS.filter((value) => !OPTIONAL_TABS.includes(value))
-        if (tabs.values.join() !== TABS.join() && tabs.values.join() !== required.join())
-          problem(`tab panes [${tabs.values.join(", ")}], expected [${TABS.join(", ")}]`)
-        values = tabs.values.filter((value) => TABS.includes(value))
-      } else if (tabs.count) values = tabs.values.filter(Boolean)
-
-      if (!values.length) {
-        await this.tocCheck(page, check, { where: "the page", isRequired: true })
-        await this.shoot(page, check, `${name}-desk-top.png`)
-        await this.shoot(page, check, `${name}-desk-full.png`, { fullPage: true })
-        return
-      }
-      report.counts.toc = {}
-      report.counts.paneHeights = {}
-      for (const value of values) {
-        // a fresh load, so the hash-on-load path is what's tested
-        await page.goto("about:blank")
-        await this.load(page, `${report.url}#${value}`, check)
-        await page.evaluate(() => window.scrollTo(0, 0))
-        const state = await page.evaluate(tabsState)
-        const index = state.values.indexOf(value)
-        const height = state.heights[index] ?? 0
-        report.counts.paneHeights[value] = height
-        if (state.shown.join() !== value)
-          problem(`#${value} loaded, but the shown pane is [${state.shown.join(", ") || "none"}]`)
-        if (height <= MIN_PANE_HEIGHT) problem(`pane "${value}" is ${height}px tall:  no visible content`)
-        await this.tocCheck(page, check, { where: `#${value}`, isRequired: value === values[0] })
-        await this.shoot(page, check, `${name}-desk-${value}.png`)
-        if (value === values[0]) await this.shoot(page, check, `${name}-desk-full.png`, { fullPage: true })
-      }
+      const sections = await page.evaluate(sectionsState)
+      report.counts.sections = sections.length
+      const toc = await page.evaluate(tocState)
+      report.counts.toc = toc?.entries
+      // the contents list a page's sections:  a page without any (the home page) may leave it empty
+      if (sections.length && toc && !toc.entries) problem("ui-toc has no entries, on a page with sections")
+      if (sections.length && toc?.entries && !toc.isVisible) problem("ui-toc hidden on desktop")
+      await this.shoot(page, check, `${name}-desk-top.png`)
+      await this.shootWhole(page, check, `${name}-desk-full.png`)
     } finally {
       await page.context().close()
     }
   }
 
   /**
-   * Sections (`yarn site:sections`):
-   * ids that follow their nesting, no flat level 2 header left, and a deep link that lands.
-   * - every page section's id is its parent section's id + `-` + the slug of its header (`TocIndex.slug()`),
-   *   maybe + `-<n>` (made unique)
-   *   - the parent at the top:  its pane's value;  a page without tabs:  nothing
-   * - no `<ui-header level="2">` in a tab pane (outside examples), nor straight inside a page's article
-   * - a deep link to the first NESTED section (else the first), with its top-level section saved folded, lands with:
-   *   - that pane shown
-   *   - every section around it unfolded
-   *   - its title on its line below the stuck ones
-   *     (or below it, on a page too short to scroll it that far:  scrolled to the bottom)
+   * A deep link to the first NESTED section (else the first) lands:  loaded with its `#id`,
+   * its title is near the top of the page's scrolling box (`LANDED_PX`),
+   * unless the page is too short to scroll it that far.
    * - screenshot `<page>-desk-deep.png`
    */
-  private async checkSections(check: CheckContext): Promise<void> {
+  private async checkDeepLink(check: CheckContext): Promise<void> {
     const { report, problem, name } = check
-    const page = await this.open(check, DESKTOP, "sections")
+    const page = await this.open(check, DESKTOP, "deep link")
     try {
       await this.load(page, report.url, check)
-      const state = await page.evaluate(sectionsState)
-      report.counts.sections = state.sections.length
-      for (const text of state.flat) problem(`flat <ui-header level="2"> (${text}):  \`yarn site:sections\` nests it`)
-      for (const section of state.sections) {
-        const prefix = section.parent ?? section.pane
-        const base = prefix ? `${prefix}-${TocIndex.slug(section.text)}` : TocIndex.slug(section.text)
-        const follows = section.id === base || new RegExp(`^${base}-\\d+$`).test(section.id)
-        if (!follows)
-          problem(`section #${section.id || "(no id)"} should be #${base}:  \`yarn site:sections\` fixes the ids`)
-      }
-      const target = state.sections.find((section) => section.parent) ?? state.sections[0]
+      const sections = await page.evaluate(sectionsState)
+      const target = sections.find((section) => section.isNested) ?? sections[0]
       if (!target?.id) return
-      // fold its top-level section first:  the landing must unfold it (and not save that)
-      const outer = SiteCheck.outermostFor(state.sections, target)
-      const key = `${FOLDS_KEY}${new URL(report.url).pathname}`
-      await page.evaluate(([key, id]) => localStorage.setItem(key!, JSON.stringify({ [id!]: true })), [key, outer.id])
       await page.goto("about:blank")
       await this.load(page, `${report.url}#${target.id}`, check)
       await page.waitForTimeout(LAND_MS)
       const landed = await page.evaluate(landedState, target.id)
       report.counts.deepLink = { id: target.id, ...landed }
-      if (!landed) problem(`deep link #${target.id}:  no such element once loaded`)
-      else {
-        if (!landed.isShown) problem(`deep link #${target.id}:  its pane isn't the shown one`)
-        if (landed.isFolded) problem(`deep link #${target.id}:  still folded (it or a section around it)`)
-        // a short page can't scroll its last sections up to the line:  below it, at the bottom, is as far as it goes
-        const isClamped = landed.isAtBottom && landed.top > landed.line
-        if (Math.abs(landed.top - landed.line) > 3 && !isClamped)
-          problem(`deep link #${target.id}:  its title at ${landed.top}px, not on its line ${landed.line}px`)
-      }
+      if (!landed) problem(`deep link #${target.id}:  no such section once loaded`)
+      else if (landed.top > LANDED_PX && !landed.isAtBottom)
+        problem(`deep link #${target.id}:  its title is ${landed.top}px down the page, not at the top`)
       await this.shoot(page, check, `${name}-desk-deep.png`)
-      await page.evaluate((key) => localStorage.removeItem(key), key)
     } finally {
       await page.context().close()
     }
   }
 
   /**
-   * Phone:  horizontal scroll (with its widest leaf offenders), the contents list hidden, the nav flyout opening.
-   * Screenshots top, middle, full page and nav.
+   * Phone:  horizontal scroll (with its widest leaf offenders), the contents hidden, the nav drawer opening.
+   * Screenshots top, whole page and nav.
    */
   private async checkPhone(check: CheckContext): Promise<void> {
     const { report, problem, name } = check
@@ -374,30 +308,30 @@ export class SiteCheck {
       const toc = await page.evaluate(tocState)
       if (toc?.isVisible) problem("ui-toc visible at phone width (should be hidden)")
       await this.shoot(page, check, `${name}-phone-top.png`)
-      await page.evaluate(() => window.scrollTo(0, (document.documentElement.scrollHeight - window.innerHeight) / 2))
-      await page.waitForTimeout(SCROLL_SETTLE_MS)
-      await this.shoot(page, check, `${name}-phone-mid.png`)
-      await this.shoot(page, check, `${name}-phone-full.png`, { fullPage: true })
+      await this.shootWhole(page, check, `${name}-phone-full.png`)
 
-      await page.evaluate(() => window.scrollTo(0, 0))
-      const menu = page.locator("ui-button.site-menu-button").first()
+      // Playwright's CSS locators look inside open shadow roots
+      const menu = page.locator("ui-site-nav-button:visible").first()
       if (!(await menu.count())) {
-        report.notes.push("no ui-button.site-menu-button:  nav flyout not checked")
+        report.notes.push("no visible ui-site-nav-button:  nav drawer not checked")
         return
       }
+      const before = await page.evaluate(navState)
       let error = ""
       try {
         await menu.click({ timeout: CLICK_MS })
       } catch (thrown) {
         error = `:  ${String(thrown).split("\n")[0]}`
       }
-      const isOpen = await page.waitForFunction(navState, undefined, { timeout: NAV_OPEN_MS }).then(
-        () => true,
-        () => false
-      )
+      const isOpen = await page
+        .waitForFunction((was) => (globalThis as any).__spellNavState() !== was, before, { timeout: NAV_OPEN_MS })
+        .then(
+          () => true,
+          () => false
+        )
       if (isOpen) await page.waitForTimeout(NAV_SLIDE_MS)
       report.counts.navOpen = isOpen
-      if (!isOpen) problem(`nav flyout didn't open from ui-button.site-menu-button${error}`)
+      if (!isOpen) problem(`nav drawer didn't open from ui-site-nav-button${error}`)
       await this.shoot(page, check, `${name}-phone-nav.png`)
     } finally {
       await page.context().close()
@@ -423,10 +357,9 @@ export class SiteCheck {
    * A page in a fresh context, its errors and failed requests reported as `check`'s problems, labelled `label`.
    * - ignores console "Failed to load resource" lines
    *   (the response / request listeners report those, with their URL)
-   * - NOTE:  a favicon 404 is a problem too, since 2026-10-04:
-   *   the page server answers `/favicon.ico` and injects its own icon links (`spell/server`'s `WebServer`)
-   * - `net::ERR_ABORTED` is a note:  a navigation (the next tab's fresh load) cancels what's still in flight
+   * - `net::ERR_ABORTED` is a note:  a navigation (the next load) cancels what's still in flight
    * - the response / request listeners stay here:  `BrowserPage` reports only the page's own errors
+   * - `__spellNavState()`:  the nav state probe (`navState()`), for `waitForFunction()` to compare against
    */
   private async open(check: CheckContext, props: BrowserPageProps, label: string): Promise<Page> {
     const { problem, report } = check
@@ -436,6 +369,7 @@ export class SiteCheck {
       onProblem: (text, kind) => problem(`${kind === "page error" ? kind : "console"} (${label}):  ${text}`)
     })
     page.setDefaultTimeout(STEP_MS)
+    await page.addInitScript(`globalThis.__spellNavState = ${navState.toString()}`)
     page.on("response", (response) => {
       if (response.status() >= 400) problem(`HTTP ${response.status()} (${label}):  ${response.url()}`)
     })
@@ -448,55 +382,43 @@ export class SiteCheck {
   }
 
   /**
-   * Go to `url` and let it settle (`BrowserPage.settle()`):
-   * every `ui-*` / `spell-*` element defined (at most `SETTLE_MS`), the network idle, then `RUNTIME_SETTLE_MS` for
-   * the runtime.
-   * - NOT `BrowserPage.open()`:  an error status is a problem the response listener reports, not a throw
-   * - a page that doesn't settle is NOT a problem here:  `inspectElements` reports what stayed undefined
-   * - SIDE EFFECT:  sets `check.isUnsettled` when it doesn't, so later loads wait only `RESETTLE_MS`
+   * Go to `url` and let it settle:  the site drawn (its `ui-page-layout`, at most `SETTLE_MS`), every `ui-*` /
+   * `spell-*` element defined, the network idle, then `RUNTIME_SETTLE_MS` for the runtime.
+   * - a page that doesn't settle is NOT a problem here:  a note, and `inspectElements` reports what stayed undefined
    */
   private async load(page: Page, url: string, check: CheckContext): Promise<void> {
     await page.goto(url, { timeout: LOAD_MS })
-    const timeout = check.isUnsettled ? RESETTLE_MS : SETTLE_MS
-    const isSettled = await BrowserPage.settle(page, {
-      tags: OUR_TAGS,
-      timeout,
-      networkIdle: NETWORK_IDLE_MS,
-      quiet: RUNTIME_SETTLE_MS
-    })
-    if (!isSettled) {
-      check.isUnsettled = true
-      check.report.notes.push(`${url}:  not every element defined after ${timeout / 1000}s`)
-    }
+    const isDrawn = await page.waitForFunction(siteDrawn, undefined, { timeout: SETTLE_MS }).then(
+      () => true,
+      () => false
+    )
+    if (!isDrawn) check.report.notes.push(`${url}:  the site's page layout not drawn after ${SETTLE_MS / 1000}s`)
+    await page.waitForLoadState("networkidle", { timeout: NETWORK_IDLE_MS }).catch(() => {})
+    await page.waitForTimeout(RUNTIME_SETTLE_MS)
+  }
+
+  /** Screenshot `page` to `out/<file>`:  the viewport.  Listed in the report. */
+  private async shoot(page: Page, check: CheckContext, file: string): Promise<void> {
+    const path = join(this.out, file)
+    await page.screenshot({ path, timeout: SCREENSHOT_MS })
+    check.report.screenshots.push(path)
   }
 
   /**
-   * The contents list (`ui-toc`), if the page has one:  visible on desktop while it has entries.
-   * - `where` labels the problem;  `isRequired` makes zero entries a problem (the first pane), else a note.
+   * Screenshot the WHOLE page:  the page scrolls inside the editor's box, not the window,
+   * so the window is made as tall as what's in that box (at most `WHOLE_MAX_PX`), then put back.
    */
-  private async tocCheck(page: Page, check: CheckContext, { where, isRequired }: TocCheckParams): Promise<void> {
-    const toc = await page.evaluate(tocState)
-    if (!toc) return
-    const counts = (check.report.counts.toc ??= {})
-    counts[where] = toc.entries
-    // an EMPTY toc's rail is hidden on purpose (site.css:  the content takes its room, e.g. the API tab)
-    if (!toc.isVisible && toc.entries) check.problem(`ui-toc hidden on desktop (${where})`)
-    if (!toc.entries) {
-      if (isRequired) check.problem(`ui-toc has no entries (${where})`)
-      else check.report.notes.push(`ui-toc has no entries (${where})`)
+  private async shootWhole(page: Page, check: CheckContext, file: string): Promise<void> {
+    const viewport = page.viewportSize()!
+    const height = await page.evaluate(scrollingHeight)
+    const tall = Math.min(Math.max(height, viewport.height), WHOLE_MAX_PX)
+    await page.setViewportSize({ width: viewport.width, height: tall })
+    await page.waitForTimeout(SCROLL_SETTLE_MS)
+    try {
+      await this.shoot(page, check, file)
+    } finally {
+      await page.setViewportSize(viewport)
     }
-  }
-
-  /** Screenshot `page` to `out/<file>`:  the viewport, or the whole page;  listed in the report. */
-  private async shoot(
-    page: Page,
-    check: CheckContext,
-    file: string,
-    { fullPage = false }: { fullPage?: boolean } = {}
-  ): Promise<void> {
-    const path = join(this.out, file)
-    await page.screenshot({ path, fullPage, timeout: SCREENSHOT_MS })
-    check.report.screenshots.push(path)
   }
 
   /** Print one page's result to stderr:  URL, problems, notes, counts, screenshots. */
@@ -506,26 +428,15 @@ export class SiteCheck {
     for (const text of report.notes) lines.push(`  NOTE:  ${text}`)
     lines.push(`  counts:  ${JSON.stringify(report.counts)}`)
     lines.push(`  screenshots:  ${this.out}`)
-    for (const path of report.screenshots) lines.push(`    ${basename(path)}`)
+    for (const path of report.screenshots) lines.push(`    ${path.slice(this.out.length + 1)}`)
     Terminal.err(lines.join("\n"))
-  }
-
-  /** The top-level section holding `section` (or `section` itself), from `sectionsState()`'s list. */
-  private static outermostFor(sections: readonly SectionState[], section: SectionState): SectionState {
-    let outer = section
-    while (outer.parent) {
-      const parent = sections.find((other) => other.id === outer.parent)
-      if (!parent) break
-      outer = parent
-    }
-    return outer
   }
 }
 
 /** Constructor props of `SiteCheck`. */
 export type SiteCheckProps = {
-  /** page files to check, absolute (`SiteCheck.resolvePage()`, `sitePages()`) */
-  files: string[]
+  /** the site's addresses to check (`SiteCheck.resolveAddress()`, `siteAddresses()`) */
+  addresses: string[]
   /** screenshot folder, absolute;  default `results/site-check/` */
   out?: string
 }
@@ -536,9 +447,9 @@ export type SiteCheckProps = {
  *   a check that can't START throws `SiteCheckError` instead.
  */
 export type PageReport = {
-  /** path under `docs/`, e.g. `ui-button.html` */
+  /** its address in the site, e.g. `/button/examples` */
   page: string
-  /** served URL, under `/components/ui/` */
+  /** where the editor runs it */
   url: string
   /** no problems */
   ok: boolean
@@ -558,14 +469,10 @@ export type PageCounts = {
   elements?: number
   /** distinct tags among them */
   tags?: number
-  /** the site tabs' pane values */
-  tabs?: string[]
-  /** contents list entries, by where they were counted (`the page`, `#usage` ...) */
-  toc?: Record<string, number>
-  /** each pane's height when shown, px */
-  paneHeights?: Record<string, number>
-  /** page sections */
+  /** the page's sections */
   sections?: number
+  /** the contents' entries */
+  toc?: number
   /** where the deep link landed (`landedState()`) */
   deepLink?: { id: string } & Partial<LandedState>
   /** horizontal scroll at phone width, px */
@@ -574,58 +481,36 @@ export type PageCounts = {
   phoneOffenders?: string[]
   /** the outermost elements past the edge */
   phoneOutermost?: string[]
-  /** the nav flyout opened */
+  /** the nav drawer opened */
   navOpen?: boolean
 }
 
-/** One page section, as `sectionsState()` reads it. */
+/** One of the page's sections, as `sectionsState()` reads it. */
 type SectionState = {
   /** its id, `""` for none */
   id: string
-  /** its title:  `label`, else its `slot="label"` child's text */
-  text: string
-  /** the id of the section it's in;  `undefined` at the top */
-  parent?: string
-  /** the value of the site tab pane it's in;  `undefined` on a page without tabs */
-  pane?: string
+  /** it's inside another section */
+  isNested: boolean
 }
 
 /** Where a deep link landed, as `landedState()` reads it. */
 type LandedState = {
-  /** its title's top, px from the viewport's */
+  /** its top, px from the top of the page's scrolling box */
   top: number
-  /** where its title should be:  below the stuck titles of the sections around it */
-  line: number
-  /** it, or a section around it, is still folded */
-  isFolded: boolean
-  /** its tab pane is the shown one (or it's in none) */
-  isShown: boolean
-  /** the page is scrolled to its bottom */
+  /** the scrolling box is scrolled to its bottom */
   isAtBottom: boolean
 }
 
 /** What the viewport steps share for one page. */
 type CheckContext = {
-  /** page file, absolute */
-  file: string
-  /** path under `ui/`, `/`-separated */
-  path: string
-  /** file name without `.html`:  the screenshots' prefix */
+  /** its address in the site */
+  address: string
+  /** the screenshots' prefix */
   name: string
   /** filled in as the steps go */
   report: PageReport
   /** record a problem;  deduped by its first line */
   problem: (text: string) => void
-  /** a load timed out waiting for definitions:  later loads wait less */
-  isUnsettled: boolean
-}
-
-/** `SiteCheck.tocCheck()`'s inputs. */
-type TocCheckParams = {
-  /** labels the problem:  `the page`, `#usage` */
-  where: string
-  /** zero entries is a problem (the first pane), else a note */
-  isRequired: boolean
 }
 
 ////////////////
@@ -649,26 +534,20 @@ function parseCommandLine(argv: string[]) {
 // ## Constants
 ////////////////
 
-/** The site's pages, `docs/` (`SITE_PAGES`):  what the page server serves at `SITE_ADDRESS`. */
-const SITE = join(SPELL_UI_ROOT, SITE_PAGES)
+/** A page's line in the site's file:  its address, the quoted path after `at`. */
+const PAGE_LINE = /^\s*it has an? [^\n]*? page at "([^"]+)"/gm
+
+/** What may name the home page, `/`. */
+const HOME_NAMES = ["", "home", "index"]
 
 /** Default screenshot folder;  `results` is git-ignored. */
 const DEFAULT_OUT = join(SPELL_UI_ROOT, "results", "site-check")
 
 /** Printed on bad arguments and `--help`. */
 const USAGE = `usage:  yarn site:check <page...> | --all  [--out <dir>]
-  page:  a path (absolute, from here, or from docs/), a tag (ui-button), or a name (index)
-  --all:  docs/*.html, minus _-prefixed files
+  page:  an address of the Spell UI site (/button/examples, button), a tag (ui-button), or home
+  --all:  every page its file (SpellUI.spell) lists
   --out:  screenshot folder (default ${DEFAULT_OUT})`
-
-/**
- * Components pages' tab panes, in order.
- * - `theming` may be left out:  a page whose tag has no tokens of its own (`ui-meta`, styled by its owners)
- */
-const TABS = ["examples", "usage", "api", "theming"]
-
-/** Panes a components page may leave out (the last of `TABS`). */
-const OPTIONAL_TABS = ["theming"]
 
 /** Desktop viewport. */
 const DESKTOP: BrowserPageProps = { viewport: { width: 1440, height: 900 } }
@@ -679,49 +558,36 @@ const PHONE: BrowserPageProps = {
   context: { isMobile: true, hasTouch: true, deviceScaleFactor: 2 }
 }
 
-/**
- * The tags a page must define before it's checked:  Spell UI's and the app's.
- * - any other undefined tag (a third party's) is none of our business:  it would never settle
- */
-const OUR_TAGS = /^(ui|spell)-/
+/** How long the editor may take to draw the site's page:  its first page compiles the whole site. */
+const SETTLE_MS = 30000
 
-/** Pane shorter than this counts as empty, px. */
-const MIN_PANE_HEIGHT = 50
+/** A deep-linked section's title lands within this of the scrolling box's top, px:  under the page's title and stuck titles. */
+const LANDED_PX = 320
 
-/** How long a page may take to define its elements;  past it, the undefined ones are reported, not waited on. */
-const SETTLE_MS = 15000
-
-/** The same page's later loads, once one didn't settle:  it won't settle now either, so don't wait it out again. */
-const RESETTLE_MS = 3000
-
-/**
- * How long a deep link may take to land after the page settles.
- * - A SLEEP, deliberately:  the landing scrolls after its own 400ms settle timer (`SiteSections`),
- *   and nothing on the page says it's done.
- *   900ms covers that and the scroll.
- */
-const LAND_MS = 900
+/** How long a deep link may take to land after the page settles;  a SLEEP:  nothing says it's done. */
+const LAND_MS = 1500
 
 /**
  * After a load settles, for the runtime:
  * late work after the elements are defined (a reveal, a lazy family, the section folds restored).
  * - A SLEEP:  no one event says the page is done.
- *   `document.getAnimations()` doesn't see the shadow roots' motion
- *   (tried, 2026-10-06:  the nav flyout's slide went unseen).
  */
-const RUNTIME_SETTLE_MS = 500
+const RUNTIME_SETTLE_MS = 1000
 
-/** After scrolling the phone page halfway, for what scrolling starts (lazy images, sticky headers) to draw;  a SLEEP. */
+/** After the window is resized for a whole-page picture, for the page to lay out again;  a SLEEP. */
 const SCROLL_SETTLE_MS = 400
 
-/** How long the nav flyout may take to report itself open after its button's click (`navState()`). */
+/** The tallest whole-page picture, px:  Chromium's screenshots fail past about 16k. */
+const WHOLE_MAX_PX = 12000
+
+/** How long the nav drawer may take to change after its button's click (`navState()`). */
 const NAV_OPEN_MS = 3000
 
-/** The nav flyout's slide-in, once it's open, so its screenshot shows it whole;  a SLEEP (no event ends it). */
+/** The nav drawer's slide-in, once it's open, so its screenshot shows it whole;  a SLEEP (no event ends it). */
 const NAV_SLIDE_MS = 600
 
 /** A page load (`goto()`). */
-const LOAD_MS = 30000
+const LOAD_MS = 60000
 
 /** The network going idle after a load:  past it, the checks go on (a long poll would never let it). */
 const NETWORK_IDLE_MS = 10000
@@ -732,22 +598,37 @@ const STEP_MS = 20000
 /** Clicking the nav button. */
 const CLICK_MS = 3000
 
-/** One screenshot (a full page can be tall). */
+/** One screenshot (a whole page can be tall). */
 const SCREENSHOT_MS = 30000
 
-/** Fetching the site bundle from the server, to see it's served. */
+/** Fetching from a server, to see it answers. */
 const PROBE_MS = 10000
 
 ////////////////
 // ## In-page probes
 // Serialized into the page by `page.evaluate()` / `waitForFunction()`:  self-contained, no closures over this module.
+// Each walks the light DOM and every open shadow root:  the editor draws the site in its own.
 ////////////////
+
+/** Whether the site has drawn its page:  its `ui-page-layout`, anywhere. */
+function siteDrawn(): boolean {
+  let found = false
+  walk(document)
+  return found
+
+  /** Look for it under `root`, and in the shadow roots there. */
+  function walk(root: Document | ShadowRoot) {
+    if (found || root.querySelector("ui-page-layout")) {
+      found = true
+      return
+    }
+    for (const el of root.querySelectorAll("*")) if (el.shadowRoot) walk(el.shadowRoot)
+  }
+}
 
 /**
  * Elements of ours across the light DOM and every open shadow root:
  * totals per tag, the undefined (`ui-*` / `spell-*`), the defined `ui-*` with no shadow root.
- * - every `spell-ui` element renders into an open shadow root (the docs' `check-spell.js` rule):
- *   no light-DOM exceptions
  */
 function inspectElements() {
   const tags: Record<string, number> = {}
@@ -772,104 +653,101 @@ function inspectElements() {
 }
 
 /**
- * The page's `ui-tabs.site-tabs`:  how many, the first one's pane values, heights, and which is shown.
- * - shown:  `:state(selected)`;  a browser without custom states:  the panes with a height
+ * The page's own sections:  the `ui-section`s the site's page draws (inside its `ui-page-layout`),
+ * not the demos inside examples (`spell-example`, `ui-example`).
  */
-function tabsState() {
-  const all = document.querySelectorAll("ui-tabs.site-tabs")
-  const panes = all[0] ? [...all[0].querySelectorAll(":scope > ui-tab")] : []
-  const values = panes.map((pane) => pane.getAttribute("value") ?? "")
-  const heights = panes.map((pane) => Math.round(pane.getBoundingClientRect().height))
-  let shown: string[]
-  try {
-    shown = values.filter((_, i) => panes[i]!.matches(":state(selected)"))
-  } catch {
-    shown = values.filter((_, i) => heights[i]! > 0)
-  }
-  return { count: all.length, values, heights, shown }
-}
+function sectionsState(): SectionState[] {
+  const sections: SectionState[] = []
+  walk(document, false)
+  return sections
 
-/**
- * The page's sections (every `ui-section` in `main` but the demos inside examples),
- * and the level 2 headers left flat:  any in a site tab pane outside an example, or straight inside a page's article.
- */
-function sectionsState(): { sections: SectionState[]; flat: string[] } {
-  const main = document.querySelector("main#main")
-  const tabs = main?.querySelector("ui-tabs.site-tabs")
-  // a demo inside an example or a Theming playground (its family's main example) isn't the page's
-  const page = (element: Element) => !element.parentElement?.closest("ui-example, ui-docs-tokens, template")
-  const sections = [...(main?.querySelectorAll("ui-section") ?? [])].filter(page).map((section) => {
-    const pane = section.closest("ui-tab")
-    const slotted = section.querySelector(':scope > [slot="label"]')
-    // `getAttribute()` is the platform's:  `null` when absent
-    const paneValue = tabs && pane?.parentElement === tabs ? pane.getAttribute("value") : undefined
-    return {
-      id: section.id,
-      text: (section.getAttribute("label") || slotted?.textContent || "").replace(/\s+/g, " ").trim(),
-      parent: section.parentElement?.closest("ui-section")?.id,
-      pane: paneValue ?? undefined
+  /** Collect them under `root`;  `isInLayout`:  inside the site's page layout already. */
+  function walk(root: Document | ShadowRoot, isInLayout: boolean) {
+    for (const el of root.querySelectorAll("*")) {
+      const inLayout = isInLayout || !!el.closest("ui-page-layout")
+      if (inLayout && el.localName === "ui-section" && !el.closest("spell-example, ui-example"))
+        sections.push({ id: el.id, isNested: !!el.parentElement?.closest("ui-section") })
+      if (el.shadowRoot && !/^(spell-example|ui-example)$/.test(el.localName)) walk(el.shadowRoot, inLayout)
     }
-  })
-  const flat: string[] = []
-  const roots = tabs
-    ? [...tabs.querySelectorAll(":scope > ui-tab")]
-    : [...(main?.querySelectorAll(".site-article") ?? [])]
-  for (const root of roots) {
-    const headers = root.querySelectorAll(tabs ? 'ui-header[level="2"]' : ':scope > ui-header[level="2"]')
-    for (const header of [...headers].filter(page))
-      flat.push(`${root.getAttribute("value") ?? "article"}:  ${header.textContent?.replace(/\s+/g, " ").trim()}`)
   }
-  return { sections, flat }
 }
 
-/**
- * Where the section `id` landed;  `undefined` if there's no such element.
- * - its title's top (its sentinel's:  where it is unstuck)
- * - the line it should be on (its top-level section's `offset` + the titles of the sections around it)
- * - folded (it or one around it)
- * - its pane shown
- */
+/** Where the section `id` landed, from the top of the box the page scrolls in;  `undefined`:  no such section. */
 function landedState(id: string): LandedState | undefined {
-  const target = document.getElementById(id)
+  const target = find(document)
   if (!target) return undefined
-  const around: Element[] = []
-  let section = target.parentElement?.closest("ui-section")
-  while (section) {
-    around.push(section)
-    section = section.parentElement?.closest("ui-section")
+  const box = scroller(target)
+  const top = box ? box.getBoundingClientRect().top : 0
+  const isAtBottom = box
+    ? box.scrollTop >= box.scrollHeight - box.clientHeight - 2
+    : scrollY >= document.documentElement.scrollHeight - innerHeight - 2
+  return { top: Math.round(target.getBoundingClientRect().top - top), isAtBottom }
+
+  /** The section with that id under `root`, or in a shadow root there. */
+  function find(root: Document | ShadowRoot): Element | undefined {
+    const here = root.querySelector(`ui-section[id="${CSS.escape(id)}"]`)
+    if (here) return here
+    for (const el of root.querySelectorAll("*")) {
+      const inner = el.shadowRoot && find(el.shadowRoot)
+      if (inner) return inner
+    }
+    return undefined
   }
-  let line = Number((around.at(-1) ?? target).getAttribute("offset") || 0)
-  for (const section of around)
-    line += section.shadowRoot?.querySelector('[part~="title"]')?.getBoundingClientRect().height ?? 0
-  const pane = target.closest("ui-tab")
-  let isShown = true
-  try {
-    isShown = !pane || pane.matches(":state(selected)")
-  } catch {
-    // a browser without custom states:  not checked
+
+  /** The nearest box around `el` that scrolls, across shadow roots. */
+  function scroller(el: Element): Element | undefined {
+    let node: Node | null = el.parentNode
+    while (node) {
+      if (node instanceof ShadowRoot) node = node.host
+      if (node instanceof Element && node.scrollHeight > node.clientHeight + 1) {
+        const overflow = getComputedStyle(node).overflowY
+        if (overflow === "auto" || overflow === "scroll") return node
+      }
+      node = node.parentNode
+    }
+    return undefined
   }
-  const box = target.shadowRoot?.querySelector(".sentinel") ?? target
-  return {
-    top: Math.round(box.getBoundingClientRect().top),
-    line: Math.round(line),
-    isFolded: [target, ...around].some((section) => section.getAttribute("open") === "false"),
-    isShown,
-    isAtBottom: scrollY >= document.documentElement.scrollHeight - innerHeight - 2
+}
+
+/** How tall the page's content is:  the tallest box that scrolls (the editor's), else the document. */
+function scrollingHeight(): number {
+  let tallest = document.documentElement.scrollHeight
+  walk(document)
+  return tallest
+
+  /** Measure every scrolling box under `root`, and in the shadow roots there. */
+  function walk(root: Document | ShadowRoot) {
+    for (const el of root.querySelectorAll("*")) {
+      if (el.scrollHeight > el.clientHeight + 1 && /auto|scroll/.test(getComputedStyle(el).overflowY))
+        tallest = Math.max(tallest, el.scrollHeight + el.getBoundingClientRect().top)
+      if (el.shadowRoot) walk(el.shadowRoot)
+    }
   }
 }
 
 /**
- * The site's `ui-toc` (the layout's, `.site-toc`;  a components page's examples may show tocs of their own), or
- * `undefined`:  whether it has a box, and its entries (`ui-item` / `a` in its shadow root).
+ * The site's contents, its layout's `ui-toc` (a page's examples may show contents of their own), or `undefined`:
+ * whether it has a box, and its entries (`ui-item` / `a` in its shadow root).
  */
 function tocState() {
-  const toc = document.querySelector("ui-toc.site-toc")
+  const toc = find(document)
   if (!toc) return undefined
   const rect = toc.getBoundingClientRect()
   const style = getComputedStyle(toc)
   return {
     isVisible: rect.width > 0 && rect.height > 0 && style.display !== "none" && style.visibility !== "hidden",
     entries: toc.shadowRoot?.querySelectorAll("ui-item, a").length ?? 0
+  }
+
+  /** The first `ui-toc` straight in a page layout's slot, under `root` or a shadow root there. */
+  function find(root: Document | ShadowRoot): Element | undefined {
+    const here = [...root.querySelectorAll("ui-toc")].find((el) => !el.closest("spell-example, ui-example"))
+    if (here) return here
+    for (const el of root.querySelectorAll("*")) {
+      const inner = el.shadowRoot && find(el.shadowRoot)
+      if (inner) return inner
+    }
+    return undefined
   }
 }
 
@@ -882,13 +760,14 @@ function tocState() {
  * - NOTE:  measured against `documentElement.clientWidth`, NEVER `innerWidth`:
  *   with `isMobile`, chromium widens the layout viewport to fit wide content,
  *   so `innerWidth` grows to `scrollWidth` and the overflow reads 0
+ * - a box that scrolls sideways itself (a wide table's, a code block's) is fine:  what's inside it isn't counted
  */
 function overflowState() {
   const width = document.documentElement.clientWidth
-  const overflow = document.documentElement.scrollWidth - width
   const offenders: { el: Element; right: number; label: string }[] = []
   const parents = new Set<Element>()
   walk(document, "")
+  const overflow = Math.max(document.documentElement.scrollWidth - width, ...offenders.map((o) => o.right - width), 0)
   const found = new Set(offenders.map((offender) => offender.el))
   const deepest = offenders.filter((offender) => !parents.has(offender.el)).sort(widest)
   const outermost = offenders.filter((offender) => !hasOffendingAncestor(offender.el)).sort(widest)
@@ -907,6 +786,7 @@ function overflowState() {
   function walk(root: Document | ShadowRoot, prefix: string) {
     for (const el of root.querySelectorAll("*")) {
       if (el instanceof SVGElement && el.localName !== "svg") continue
+      if (isInsideSideScroller(el)) continue
       const rect = el.getBoundingClientRect()
       if (rect.width > 0 && rect.right > width + 1) {
         offenders.push({ el, right: Math.round(rect.right), label: prefix + describe(el) })
@@ -914,6 +794,15 @@ function overflowState() {
       }
       if (el.shadowRoot) walk(el.shadowRoot, `${prefix}${describe(el)} >> `)
     }
+  }
+
+  /** Whether a box around `el` (in its own tree) scrolls or clips sideways, so `el` can't widen the page. */
+  function isInsideSideScroller(el: Element) {
+    for (let node = el.parentElement; node; node = node.parentElement) {
+      const overflow = getComputedStyle(node).overflowX
+      if (overflow !== "visible") return true
+    }
+    return false
   }
 
   /** Whether an ancestor of `el`, across shadow boundaries, is an offender too. */
@@ -945,9 +834,21 @@ function overflowState() {
 }
 
 /**
- * Whether a `ui-flyout` / `ui-sidebar` is shown, by its `hidden`:
- * the shared `visible` / `hidden`, one fact, kept in the `hidden` attribute.
+ * The nav's state, as one string to compare before and after its button's click:
+ * every `ui-page-layout`'s `drawer` and `open` attributes, and which `ui-flyout` / `ui-sidebar` show.
  */
-function navState() {
-  return [...document.querySelectorAll<HTMLElement>("ui-flyout, ui-sidebar")].some((el) => !el.hidden)
+function navState(): string {
+  const parts: string[] = []
+  walk(document)
+  return parts.join(" ")
+
+  /** Read them under `root`, and in the shadow roots there. */
+  function walk(root: Document | ShadowRoot) {
+    for (const el of root.querySelectorAll("*")) {
+      if (el.localName === "ui-page-layout")
+        parts.push(`layout:${el.getAttribute("drawer")}:${el.getAttribute("open")}:${el.className}`)
+      if (/^ui-(flyout|sidebar)$/.test(el.localName)) parts.push(`${el.localName}:${(el as HTMLElement).hidden}`)
+      if (el.shadowRoot) walk(el.shadowRoot)
+    }
+  }
 }
