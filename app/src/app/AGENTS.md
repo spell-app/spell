@@ -359,7 +359,7 @@ and in the app's build folder, `app/` at the app folder's root.
         and goes to the extension, which shows each failed check on its line (lsp's `spell/testDiagnostics`).
     - the `<spell-viewer>` web component, in `components/spell-viewer/`
       - built by `yarn build:element`, into `dist-element/`
-      - its demo:  `/demo/spell-viewer.html`, on the dev server
+      - its page:  [spell-viewer.html](../../app/docs/spell-viewer.html), in App UI's docs
   - Solid (P7), on `spell-ui`.
     - The runners import the Solid panes' FILES, never the `spell/app/app/solid` barrel (it pulls in the editor).
       - e.g. `spell/app/app/solid/ThingExplorer`, `.../ConsoleLines`, `.../loadUI`

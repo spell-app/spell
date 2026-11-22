@@ -5,7 +5,7 @@
 <div class="ui-stack">
   <section>
     <h4>Shape</h4>
-    <button type="button" class="ui button" commandfor="shape-demo-plain" command="--next">Flip left</button>
+    <ui-button commandfor="shape-demo-plain" command="--next">Flip left</ui-button>
     <ui-shape id="shape-demo-plain">
       <ui-side><p>This side starts visible.</p></ui-side>
       <ui-side><p>This is yet another side.</p></ui-side>
@@ -15,8 +15,8 @@
 
   <section>
     <h4>Cube</h4>
-    <button type="button" class="ui button" commandfor="shape-demo-cube" command="--next">Flip up</button>
-    <button type="button" class="ui button" commandfor="shape-demo-cube" command="--previous">Back</button>
+    <ui-button commandfor="shape-demo-cube" command="--next">Flip up</ui-button>
+    <ui-button commandfor="shape-demo-cube" command="--previous">Back</ui-button>
     <ui-shape id="shape-demo-cube" cube direction="up">
       <ui-side><span>1</span></ui-side>
       <ui-side><span>2</span></ui-side>
@@ -26,7 +26,7 @@
 
   <section>
     <h4>Text</h4>
-    <button type="button" class="ui button" commandfor="shape-demo-text" command="--next">Flip down</button>
+    <ui-button commandfor="shape-demo-text" command="--next">Flip down</ui-button>
     <p>
       Flip to
       <ui-shape id="shape-demo-text" text direction="down" active-index="1">
