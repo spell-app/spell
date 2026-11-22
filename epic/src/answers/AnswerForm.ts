@@ -4,6 +4,7 @@ import { PageStore, ServerLink, clockOf, sentence, type ServerLinkOptions, type 
 import { AnswerDraft } from "./AnswerDraft"
 import { DraftSaver } from "./DraftSaver"
 import {
+  ANSWER_RETRY_MS,
   DETAILS_API,
   DETAILS_DRAFT_API,
   DETAILS_LISTEN_POLL_MS,
@@ -65,6 +66,8 @@ export type AnswerFormOptions = ServerLinkOptions & {
  *   - saved by the page's `DraftSaver` (epic `coherence` C10):  one save at a time, a failure said in red and tried
  *     again every 3s until one goes through (a page server back on its address takes it, with its new token)
  *   - the draft wakes nobody:  only Send does;  Send deletes it
+ *   - until the answer sent is read back, nothing is saved or sent:  the page still shows its preset picks, which
+ *     aren't Owen's.  What he changed meanwhile is laid over the answer once it's read (epic `epic-engine` I377)
  *   - on load, the newest draft newer than the answer (the server's, else the browser's) goes back into the parts,
  *     by id, over the answer sent (`AnswerDraft.over()`):  "Changes not sent"
  *   - an agent's rewrite patched IN PLACE replaces the questions that changed:
@@ -127,6 +130,15 @@ export class AnswerForm extends PageStore {
   /** The page server, as answers are sent to it:  the write token, its refresh. */
   private readonly link: ServerLink
 
+  /** The answer sent has been read back (or there's no server to ask):  only then is the page Owen's. */
+  private hasRead = false
+
+  /** Owen changed something before that. */
+  private isEditedEarly = false
+
+  /** The page as each part joined it before that:  its preset picks. */
+  private readonly untouched: PageAnswer = { answers: {}, comments: {}, notes: "" }
+
   /** `load()`'s promise:  one load per form. */
   private loading: Promise<void> | undefined
 
@@ -135,6 +147,9 @@ export class AnswerForm extends PageStore {
 
   /** `settle()` waiting for the parts of a rewrite to join. */
   private settleTimer: ReturnType<typeof setTimeout> | undefined
+
+  /** `read()` waiting to try again. */
+  private readTimer: ReturnType<typeof setTimeout> | undefined
 
   /**
    * The page as typed just before each `settle()` that kept something, laid over the last:
@@ -181,6 +196,7 @@ export class AnswerForm extends PageStore {
    */
   add(part: AnswerPart): () => void {
     this.parts.add(part)
+    if (!this.hasRead) part.gatherInto(this.untouched)
     const isTakenBack = this.takeBack(part)
     const shown = this.shown
     if (shown) {
@@ -221,7 +237,11 @@ export class AnswerForm extends PageStore {
    * `typed` at once, the browser's copy at once, the page server's a moment later.
    */
   edited() {
-    if (this.keepsDrafts) {
+    if (this.isReading) {
+      this.isEditedEarly = true
+      // saved once the answer sent is read back (`putEarly()`)
+      this.drafts.tell("not saved yet")
+    } else if (this.keepsDrafts) {
       this.typed = AnswerDraft.over(this.typed ?? EMPTY, this.current())
       this.writeLocal()
       this.saveSoon()
@@ -355,6 +375,10 @@ export class AnswerForm extends PageStore {
    */
   async send(): Promise<void> {
     if (this.isSending) return
+    if (this.isReading) {
+      await this.loading
+      if (this.isReading) return this.fail(STILL_READING)
+    }
     if (!this.sent && this.isEmpty && !this.pageComments)
       return this.fail("Pick an option, or write something (Other, a comment, a note) first.")
     if (!this.link.isServed)
@@ -397,13 +421,25 @@ export class AnswerForm extends PageStore {
     return this.loading
   }
 
-  /** `load()`'s work. */
+  /** The answer sent is still to be read back:  the page shows its preset picks. */
+  private get isReading(): boolean {
+    return !!this.loading && !this.hasRead && this.keepsDrafts
+  }
+
+  /** `load()`'s work;  tried again every `ANSWER_RETRY_MS` while the page server doesn't answer. */
   private async read() {
     if (!this.keepsDrafts) return
     const [reply, draft] = await Promise.all([
       this.fetchReply<{ answer?: SentAnswer | null; listening?: AnswerListener | null }>(DETAILS_API),
       this.fetchJson<DetailsDraft>(DETAILS_DRAFT_API, "draft")
     ])
+    if (!reply && this.link.isServed) {
+      this.readAgainSoon()
+      return
+    }
+    const early = this.isEditedEarly ? this.current() : undefined
+    this.hasRead = true
+    if (this.error === STILL_READING) this.error = ""
     const answer = reply?.answer ?? undefined
     if (reply && reply.listening !== undefined) this.listening = reply.listening
     if (answer) {
@@ -415,6 +451,7 @@ export class AnswerForm extends PageStore {
     const local = this.readLocal()
     const newest = AnswerDraft.newest([draft, local], answer)
     if (newest) this.putBack(newest, { isSaved: newest === draft })
+    if (early) this.putEarly(early)
     this.changed()
   }
 
@@ -431,6 +468,19 @@ export class AnswerForm extends PageStore {
     this.drafts.tell(`draft from ${clockOf(draft.saved)} put back`)
     if (!isSaved) this.saveSoon()
     this.settleSoon()
+  }
+
+  /** `read()` again in `ANSWER_RETRY_MS`:  the page server didn't answer. */
+  private readAgainSoon() {
+    if (this.readTimer) clearTimeout(this.readTimer)
+    this.readTimer = setTimeout(() => void this.read(), ANSWER_RETRY_MS)
+  }
+
+  /** Lay what Owen changed before the read over what it found, as a change of his. */
+  private putEarly(early: TypedAnswer) {
+    const view = AnswerDraft.withEdits(this.shown ?? this.untouched, this.untouched, early)
+    for (const part of this.parts) part.showAnswer({ page: this.options.page, answered: "", changes: 0, ...view })
+    this.edited()
   }
 
   /**
@@ -518,6 +568,7 @@ export class AnswerForm extends PageStore {
    *   and it tries again in 3s (`DraftSaver`)
    */
   async saveDraft({ keepalive = false }: { keepalive?: boolean } = {}): Promise<void> {
+    if (!keepalive && this.isReading) await this.loading
     await this.drafts.save({ keepalive })
   }
 
@@ -538,6 +589,8 @@ export class AnswerForm extends PageStore {
    * - SIDE EFFECT:  listens on `window` and its document until undone
    */
   watch(window: Window): () => void {
+    // `<epic-send>` moved or redrawn while the read was waiting to try again
+    if (this.isReading && this.readTimer) this.readAgainSoon()
     const unsave = this.drafts.watch(window)
     const unpoll = ServerLink.watch(window, undefined, () => void this.refreshListening(), {
       every: DETAILS_LISTEN_POLL_MS
@@ -550,6 +603,7 @@ export class AnswerForm extends PageStore {
       unsave()
       unpoll()
       if (this.settleTimer) clearTimeout(this.settleTimer)
+      if (this.readTimer) clearTimeout(this.readTimer)
     }
   }
 
@@ -629,6 +683,9 @@ const NOBODY_NOTICE = "Saved:  nobody is waiting yet;  Claude reads it when it n
 function epicOf(page: string): string | undefined {
   return /\/epics\/([^/]+)\/details\/[^/]+\.html$/.exec(page)?.[1]
 }
+
+/** What Send says before the answer sent is read back. */
+const STILL_READING = "This page is still loading the answers you sent before.  Wait a moment, then press Send again."
 
 /** A page with nothing on it:  what a first change is laid over. */
 const EMPTY: TypedAnswer = { answers: {}, comments: {}, notes: "", labels: {} }
