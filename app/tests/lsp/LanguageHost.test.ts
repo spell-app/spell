@@ -81,14 +81,51 @@ describe("LanguageHost", () => {
     const watched = new LSP.LanguageHost({ onParsed: (parsed) => sent.push(parsed) })
     watched.open({ uri, projectId: solitaire, text })
     await watched.request("textDocument/documentSymbol", { textDocument })
-    expect(sent.at(-1)).toMatchObject({ uri, version: 0, diagnostics: [] })
+    await vi.waitFor(() => expect(sent.at(-1)).toMatchObject({ uri, version: 0, diagnostics: [] }))
     watched.change({ uri, changes: [[text.length, text.length, "\n\tits zzz is ++\n"]] })
     await watched.request("textDocument/documentSymbol", { textDocument })
-    expect(sent.at(-1)!.version).toBe(1)
+    await vi.waitFor(() => expect(sent.at(-1)!.version).toBe(1))
     expect(sent.at(-1)!.diagnostics.length).toBeGreaterThan(0)
     watched.open({ uri, projectId: solitaire, text })
     await watched.request("textDocument/documentSymbol", { textDocument })
-    expect(sent.at(-1)).toMatchObject({ version: 0, diagnostics: [] })
+    await vi.waitFor(() => expect(sent.at(-1)).toMatchObject({ version: 0, diagnostics: [] }))
+  })
+
+  test("sends no parse the edits have outrun:  the editor would drop it", async () => {
+    const sent: LSP.LanguageParsed[] = []
+    const watched = new LSP.LanguageHost({ onParsed: (parsed) => sent.push(parsed) })
+    watched.open({ uri, projectId: solitaire, text })
+    await watched.request("textDocument/documentSymbol", { textDocument })
+    await vi.waitFor(() => expect(sent.at(-1)?.version).toBe(0))
+    sent.length = 0
+    watched.change({ uri, changes: [[0, 0, "-- one\n"]] })
+    await watched.request("textDocument/documentSymbol", { textDocument })
+    // an edit before its problems went
+    watched.change({ uri, changes: [[0, 0, "-- two\n"]] })
+    await vi.waitFor(() => expect(sent.at(-1)?.version).toBe(2))
+    expect(sent.map((parsed) => parsed.version)).toEqual([2])
+    watched.open({ uri, projectId: solitaire, text })
+    await watched.request("textDocument/documentSymbol", { textDocument })
+  })
+
+  test("drops a parse an edit outran while its problems were worked out", async () => {
+    const sent: LSP.LanguageParsed[] = []
+    let isEdited = false
+    const watched: LSP.LanguageHost = new LSP.LanguageHost({
+      onParsed: (parsed) => sent.push(parsed),
+      lookOf: () => {
+        if (!isEdited) {
+          isEdited = true
+          watched.change({ uri, changes: [[0, 0, "-- typed meanwhile\n"]] })
+        }
+        return {}
+      }
+    })
+    watched.open({ uri, projectId: solitaire, text })
+    await watched.request("textDocument/documentSymbol", { textDocument })
+    await vi.waitFor(() => expect(sent.map((parsed) => parsed.version)).toEqual([1]))
+    watched.open({ uri, projectId: solitaire, text })
+    await watched.request("textDocument/documentSymbol", { textDocument })
   })
 
   test("sends with them what the editor draws the file with:  its folds, its types, its look in the look asked for", async () => {
@@ -98,6 +135,7 @@ describe("LanguageHost", () => {
     const watched = new LSP.LanguageHost({ onParsed: (parsed) => sent.push(parsed), lookOf })
     watched.open({ uri, projectId: solitaire, text })
     await watched.request("textDocument/documentSymbol", { textDocument })
+    await vi.waitFor(() => expect(sent.at(-1)).toBeDefined())
     const parsed = sent.at(-1)!
     const file = watched.service.addresses.fileFor(uri)!
     const firstFold = watched.service.foldingRanges(file)[0]!
@@ -131,6 +169,48 @@ describe("LanguageHost", () => {
     } finally {
       LSP.LanguageHost.PARSE_WAIT = wait
     }
+  })
+
+  test("typing without a pause still ends in a drawing of the last edit", async () => {
+    const sent: LSP.LanguageParsed[] = []
+    let isTyping = false
+    let typed = text
+    let edits = 0
+    /** A key typed at the end. */
+    const type = () => {
+      edits++
+      watched.change({ uri, changes: [[typed.length, typed.length, "x"]] })
+      typed += "x"
+    }
+    const watched: LSP.LanguageHost = new LSP.LanguageHost({
+      onParsed: (parsed) => sent.push(parsed),
+      lookOf: (_file, at) => {
+        // faster than the file is drawn:  each of the first keys lands while the last one's drawing is worked out
+        if (isTyping && edits < 5) type()
+        return { drawing: { nodes: [], declaringTags: [at.length] } }
+      }
+    })
+    const start = `${text}\n-- `
+    typed = start
+    watched.open({ uri, projectId: solitaire, text: start })
+    await watched.request("textDocument/documentSymbol", { textDocument })
+    await vi.waitFor(() => expect(sent.at(-1)?.version).toBe(0))
+    sent.length = 0
+    isTyping = true
+    type()
+    await vi.waitFor(() => expect(edits).toBe(5), { timeout: 10_000 })
+    // then keys closer together than the host waits to parse
+    for (let key = 0; key < 20; key++) {
+      type()
+      await new Promise((resolve) => setTimeout(resolve, LSP.LanguageHost.PARSE_WAIT / 5))
+    }
+    await vi.waitFor(
+      () =>
+        expect(sent.at(-1)).toMatchObject({ version: edits, drawing: { nodes: [], declaringTags: [typed.length] } }),
+      { timeout: 10_000 }
+    )
+    watched.open({ uri, projectId: solitaire, text })
+    await watched.request("textDocument/documentSymbol", { textDocument })
   })
 
   test("a project it can't load is said, and holds nothing else up", async () => {

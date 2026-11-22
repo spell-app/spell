@@ -20,7 +20,7 @@ import { styleTags, tags } from "@lezer/highlight"
 import type { TextEdit } from "vscode-languageserver"
 
 import { observe } from "spell/util"
-import { after, type CancelablePromise } from "spell/util/timing"
+import { after, beforeNextPaint, soon, type CancelablePromise } from "spell/util/timing"
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
@@ -636,6 +636,7 @@ export class FileStates {
     if (entry.isOpenInClient) {
       entry.version = (entry.version ?? 0) + 1
       this.client.changed(entry.file as SP.SpellFile, changes)
+      this.untilPainted(entry)
     } else this.openInClient(entry)
     this.toSlices(entry, changes)
     this.stateEdited(entry, changes, way)
@@ -833,9 +834,35 @@ export class FileStates {
    * The language worker's parse of a file:  if it's of the text the state holds (`version`, its edits since it was
    * opened), its problems become the state's, with their "Fix it" buttons, and what the code's drawn with is kept
    * (`CodeMirrorLanguage.tookParse()`), its slices' too;  a later parse's come after.
-   * - Its problems only where the worker diagnoses:  the editor's own Spell keeps the page's (`diagnosesOnPage()`).
+   * - An edit's is taken once that edit is painted (epic `solid-2-final` I45):  taken before, laying the file out
+   *   again made the browser work the whole page's layout out first, and the key showed up to a second later.
+   *   - At once when it's painted already, as it is once the typing pauses:  waiting for another frame there held
+   *     the drawing back 600 msec in a big file.  At once too with nothing to paint:  a hidden page, no DOM.
    */
   private parsedElsewhere(parsed: LSP.LanguageParsed): void {
+    const path = LSP.AppAddresses.pathOf(parsed.uri)
+    const entry = path === undefined ? undefined : this.entries.get(path)
+    if (!entry?.isUnpainted || globalThis.document?.hidden !== false) return this.takeParsed(parsed)
+    beforeNextPaint(() => soon(() => this.takeParsed(parsed)))
+  }
+
+  /** `entry`'s edit is unpainted till the browser has drawn a frame:  see `parsedElsewhere()`. */
+  private untilPainted(entry: FileEntry): void {
+    if (!entry.view || globalThis.document?.hidden !== false) return
+    const { version } = entry
+    entry.isUnpainted = true
+    beforeNextPaint(() =>
+      soon(() => {
+        if (entry.version === version) entry.isUnpainted = false
+      })
+    )
+  }
+
+  /**
+   * Take `parsed` as `parsedElsewhere()` says, unless the state was edited since.
+   * - Its problems only where the worker diagnoses:  the editor's own Spell keeps the page's (`diagnosesOnPage()`).
+   */
+  private takeParsed(parsed: LSP.LanguageParsed): void {
     const { uri, version, diagnostics, fixItStarts } = parsed
     const path = LSP.AppAddresses.pathOf(uri)
     const entry = path === undefined ? undefined : this.entries.get(path)
@@ -931,6 +958,8 @@ type FileEntry = {
   slices: Set<EditorView>
   /** the client was told it's open, with its text:  each change goes to it (`openInClient()`) */
   isOpenInClient?: boolean
+  /** its last edit isn't painted yet:  the worker's parse of it waits till it is (`parsedElsewhere()`) */
+  isUnpainted?: boolean
   /** how many changes went to the client since it was opened:  the worker's problems name it (`parsedElsewhere()`) */
   version?: number
   /** where it was scrolled to when last shown */

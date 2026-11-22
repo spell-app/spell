@@ -1,5 +1,6 @@
 import type { Diagnostic } from "vscode-languageserver"
 
+import { soon } from "spell/util/timing"
 import type { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
@@ -17,6 +18,8 @@ import { LSP } from "spell/app/lsp"
  * - Requests are the ONE table's (`LSP.LANGUAGE_REQUESTS`), the same VS Code's language server answers.
  * - After each parse, each open file it changed gets its problems sent (`onParsed`), as a language server publishes
  *   diagnostics, numbered by the edits they're of (`version`) so the editor drops a late one.
+ *   - Not a parse already behind the edits:  the editor would drop it, once it had read the whole file's drawing
+ *     (`sendSoon()`;  epic `solid-2-final` I45).
  *   - With them, what the editor draws the file with, so the page never parses for it (epic `solid-2-final` T36):
  *     the blocks that fold, the types its tags may name, and its look (`lookOf`:  the bubbly drawing, or the colours),
  *     in the look the editor shows (`look()`).
@@ -103,7 +106,11 @@ export class LanguageHost {
       if (look === this.codeLook) return
       this.codeLook = look
       this.sentParse.clear()
-      for (const loading of this.projects.values()) void loading.then((project) => this.sendProblems(project), () => {})
+      for (const loading of this.projects.values())
+        void loading.then(
+          (project) => this.sendProblems(project),
+          () => {}
+        )
     })
   }
 
@@ -144,8 +151,7 @@ export class LanguageHost {
       await project.compile(undefined, { save: false, cached: false })
       return project.cachedEntry()
     } finally {
-      // not with an edit made as it compiled:  its own parse sends
-      if (!this.parseTimers.has(project)) this.sendProblems(project)
+      this.sendSoon(project)
     }
   }
 
@@ -205,7 +211,7 @@ export class LanguageHost {
     this.parseTimers.delete(project)
     const parsing = project.needsFullParse ? project.parse() : project.parseWaitingText()
     await parsing.catch((error: unknown) => console.error("LanguageHost:  couldn't parse", error))
-    this.sendProblems(project)
+    this.sendSoon(project)
   }
 
   ////////////////
@@ -213,9 +219,21 @@ export class LanguageHost {
   ////////////////
 
   /**
+   * `sendProblems()` in the next task, so the edits that came during the parse are in first:
+   * with one waiting to be parsed, nothing's worked out or sent till its own parse (epic `solid-2-final` I45).
+   */
+  private sendSoon(project: SP.SpellProject): void {
+    soon(() => {
+      if (!this.parseTimers.has(project)) this.sendProblems(project)
+    })
+  }
+
+  /**
    * Send the problems of each open file of `project` whose parse changed since they were last sent (`onParsed`).
    * - A `<css>` block before the CSS service is in:  sent again once it lands, with its mistakes
    *   (`LSP.SpellCSS.load()`).
+   * - Sent a task after they're worked out, and only if no edit came meanwhile:  working out a big file's drawing
+   *   outlasts a key, and the editor spends 20 msec reading one on a phone, to drop it (epic `solid-2-final` I45).
    * - NEVER throws:  a file whose problems can't be worked out is said on the console, and skipped.
    */
   private sendProblems(project: SP.SpellProject): void {
@@ -229,7 +247,7 @@ export class LanguageHost {
         this.sentParse.set(uri, { match: file.match, version })
         const diagnostics = this.service.diagnostics(file)
         const fixItStarts = SP.OldForms.uses(file).map((use) => use.start)
-        this.onParsed({
+        const parsed: LanguageParsed = {
           uri,
           version,
           diagnostics,
@@ -237,6 +255,9 @@ export class LanguageHost {
           folds: this.foldsOf(file),
           ...this.typesOf(file),
           ...this.lookOf(file, text, this.codeLook)
+        }
+        soon(() => {
+          if (this.texts.get(uri) === text && (this.versions.get(uri) ?? 0) === version) this.onParsed(parsed)
         })
         if (!LSP.SpellCSS.isLoaded && this.service.css.regionsIn(file.contents ?? "").length) {
           LSP.SpellCSS.load().then(
