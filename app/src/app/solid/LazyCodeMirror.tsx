@@ -81,6 +81,7 @@ function loadCodeMirror(): Promise<CodeMirrorModule> {
     SpellCodeMirror.onTaken((file) => editor.onFileTextTaken(file))
     editor.codeEditorEdits = (file, edits, way) => SpellCodeMirror.states.applyEdits(file, edits, way)
     editor.compileElsewhere = (project) => SpellCodeMirror.states.client.compile(project)
+    editor.oldFormsElsewhere = (file) => SpellCodeMirror.states.oldForms(file)
     // the Types tab's tree, from the same language service:  `spell/app/lsp` is already in CodeMirror's chunk
     const { LSP } = await import("spell/app/lsp")
     const { service } = SpellCodeMirror

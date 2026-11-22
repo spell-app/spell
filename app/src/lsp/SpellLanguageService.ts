@@ -2470,6 +2470,15 @@ export class SpellLanguageService {
   }
 
   /**
+   * The old forms of Spell written in `file` (`SP.OldForms.uses()`), as one list of edits rewriting them all the new
+   * way, with how many there are:  the `spell/oldForms` request (epic `solid-2-final` T36).
+   */
+  oldForms(file: SP.SpellFile): { count: number; edits: SP.OldFormEdit[] } {
+    const uses = SP.OldForms.uses(file)
+    return { count: uses.length, edits: uses.flatMap((use) => use.edits) }
+  }
+
+  /**
    * The fix for the old form at `position` in `file`, if one is written there:  its title and its edit.
    * - What the language server's hover offers as its "Fix it" link, in VS Code (Owen's C3).
    * - `null` where there's none.

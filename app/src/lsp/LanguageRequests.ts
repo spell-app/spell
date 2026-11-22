@@ -187,6 +187,11 @@ export const LANGUAGE_REQUESTS = {
     (service, file, { position }: TextDocumentPositionParams) => service.oldFormFixAt(file, position),
     null
   ),
+  /**
+   * The old forms of Spell written in the file, as one list of edits rewriting them all the new way, with how many
+   * there are:  the editor's offer to upgrade a project, and its Upgrade (epic `solid-2-final` T36)
+   */
+  "spell/oldForms": request((service, file, _params: FileParams) => service.oldForms(file), { count: 0, edits: [] }),
   /** the file's problems, as `textDocument/publishDiagnostics` sends them */
   "spell/diagnostics": request((service, file, _params: FileParams) => service.diagnostics(file), []),
   /** a `<css>` block in the file:  is there one (the CSS service loads only for a file with one) */

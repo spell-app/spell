@@ -14,7 +14,7 @@ import type { SpellRuntime } from "spell/app/app/runner"
 import type { TestRun } from "spell/app/app/runner/spellRuntime"
 import type * as UIT from "spell/app/app/ui/ui.types"
 import { EDITOR_PIECES } from "spell/app/app/ui/ui.types"
-import type { EditWay, SpellCodeMirror } from "spell/app/app/ui/codemirror"
+import type { EditWay, OldFormsFound, SpellCodeMirror } from "spell/app/app/ui/codemirror"
 // NOTE: types only:  the dialogs themselves load on first use, see `dialogs()`.
 import type * as Modals from "spell/app/app/solid/modals"
 import { navigate } from "spell/app/app/pages/navigation"
@@ -2490,6 +2490,12 @@ export class EditorStore extends Observable {
   compileElsewhere: ((project: SP.SpellProject) => Promise<SP.CompiledEntry | undefined>) | undefined = undefined
 
   /**
+   * The old forms written in a file, asked of the language worker's parse once the code editor's loaded
+   * (`FileStates.oldForms()`, epic `solid-2-final` T36);  `undefined` where it can't say.  See `oldFormsIn()`.
+   */
+  oldFormsElsewhere: ((file: SP.SpellFile) => Promise<OldFormsFound | undefined>) | undefined = undefined
+
+  /**
    * What's undone outside the code:  the side bar's changes and a notebook's -- see `EditorHistory`.
    * - Forgotten when another project opens:  its steps are about that project's files.
    */
@@ -2527,7 +2533,7 @@ export class EditorStore extends Observable {
     upgradeLooked.add(project.path)
     if (isStaticBuild || project.path.startsWith(SPELLS_OWN_PROJECTS)) return
     if (!SP.OldForms.isOlderSpell(project.contents?.spellVersion)) return
-    if (!project.spellFiles.some((file) => SP.OldForms.uses(file).length)) return
+    if (!(await editor.hasOldForms(project))) return
     if (editorPrefs.get(UPGRADE_ON_OPEN_PREF) === true) return editor.upgradeProject(project)
     const offered = editorPrefs.get<Record<string, true>>(UPGRADE_OFFERED_PREF) ?? {}
     if (offered[project.path]) return
@@ -2538,7 +2544,8 @@ export class EditorStore extends Observable {
   /**
    * "Upgrade":  rewrite every old form in `project`'s files the new way, save them, then say in its project file that
    * it matches today's Spell, and say what changed (epic `language` P68).
-   * - The same rewrite as `spell upgrade` and the language server's "Upgrade this file" (`SP.OldForms.upgraded()`).
+   * - The same rewrite as `spell upgrade` and the language server's "Upgrade this file" (`SP.OldForms.uses()`'s edits),
+   *   asked of the language worker's parse where it parses the file (`oldFormsIn()`).
    * - Each file through the code editor when it's loaded, one undo step in each, else straight into the file;
    *   then saved, as Save does:  your draft, where the project keeps them.
    * - NEVER throws:  a failure shows its error.
@@ -2550,18 +2557,17 @@ export class EditorStore extends Observable {
       let count = 0
       const changed: SP.SpellFile[] = []
       for (const file of project.spellFiles) {
-        const uses = SP.OldForms.uses(file)
-        if (!uses.length || editor.isLocked(file)) continue
-        const text = file.parseText
-        const edits = uses.flatMap((use) =>
-          use.edits.map(({ start, end, newText }) => ({
-            range: { start: SourceEdits.positionAt(text, start), end: SourceEdits.positionAt(text, end) },
-            newText
-          }))
-        )
-        if (!editor.codeEditorEdits?.(file, edits)) editor.takeText(file, SP.OldForms.upgraded(text, uses))
+        if (editor.isLocked(file)) continue
+        const found = await editor.oldFormsIn(file)
+        if (!found.count) continue
+        const { text } = found
+        const edits = found.edits.map(({ start, end, newText }) => ({
+          range: { start: SourceEdits.positionAt(text, start), end: SourceEdits.positionAt(text, end) },
+          newText
+        }))
+        if (!editor.codeEditorEdits?.(file, edits)) editor.takeText(file, SourceEdits.applied(text, edits))
         changed.push(file)
-        count += uses.length
+        count += found.count
       }
       await editor.saveFiles(changed)
       await editor.refreshDrafts()
@@ -2571,6 +2577,23 @@ export class EditorStore extends Observable {
     } catch (error) {
       editor.showError(error)
     }
+  }
+
+  /** Is any of `project`'s files written with an old form of Spell (`oldFormsIn()`)? */
+  async hasOldForms(project: SP.SpellProject): Promise<boolean> {
+    for (const file of project.spellFiles) if ((await editor.oldFormsIn(file)).count) return true
+    return false
+  }
+
+  /**
+   * The old forms of Spell written in `file`, with the text they're found in:  asked of the language worker's parse
+   * where it parses the file (`oldFormsElsewhere`), else read off the page's own (epic `solid-2-final` T36).
+   */
+  async oldFormsIn(file: SP.SpellFile): Promise<OldFormsFound> {
+    const elsewhere = await editor.oldFormsElsewhere?.(file)
+    if (elsewhere) return elsewhere
+    const uses = SP.OldForms.uses(file)
+    return { text: file.parseText, count: uses.length, edits: uses.flatMap((use) => use.edits) }
   }
 
   /** Close `<UpgradeNotice>` without upgrading:  it doesn't show again for its project. */

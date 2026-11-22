@@ -213,6 +213,18 @@ describe("LanguageHost", () => {
     await watched.request("textDocument/documentSymbol", { textDocument })
   })
 
+  test("answers the old forms of Spell a file is written with, as edits rewriting them:  the editor's Upgrade", async () => {
+    // `parts`, a view's old word for its slots
+    const old = `${text}\nan old card is a view where\n\tit has parts "front"\n`
+    host.open({ uri, projectId: solitaire, text: old })
+    const found = await host.request("spell/oldForms", { textDocument })
+    expect(found.count).toBe(1)
+    expect(found.edits).toEqual([expect.objectContaining({ newText: "slots" })])
+    expect(found).toEqual(host.service.oldForms(host.service.addresses.fileFor(uri)!))
+    host.open({ uri, projectId: solitaire, text })
+    expect(await host.request("spell/oldForms", { textDocument })).toEqual({ count: 0, edits: [] })
+  })
+
   test("a project it can't load is said, and holds nothing else up", async () => {
     const unavailable: string[] = []
     const lonely = new LSP.LanguageHost({ onUnavailable: (projectId) => unavailable.push(projectId) })

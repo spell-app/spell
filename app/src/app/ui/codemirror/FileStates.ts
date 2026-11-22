@@ -189,6 +189,19 @@ export class FileStates {
   }
 
   /**
+   * The old forms of Spell written in `file`, as `ask()` answers `spell/oldForms`, with the text they're found in:
+   * the editor's offer to upgrade a project, and its Upgrade (`editor.oldFormsIn()`;  epic `solid-2-final` T36).
+   * - `undefined` when its text changed as it asked, or it isn't parsed.
+   */
+  async oldForms(file: SP.SpellFile): Promise<OldFormsFound | undefined> {
+    const entry = this.entryFor(file)
+    await Promise.resolve()
+    const { doc } = entry.state
+    const answer = await this.ask(file, "spell/oldForms", {})
+    return answer && entry.state.doc === doc ? { text: doc.toString(), ...answer } : undefined
+  }
+
+  /**
    * Parse `project`'s waiting text once the typing pauses for `PARSE_WAIT` msec:
    * `SIDE_BAR_PARSE_WAIT` where the language worker parses it (epic `solid-2-final` T36).
    */
@@ -923,6 +936,15 @@ function spanOf(changes: ChangeSet): P.EditedSpan | undefined {
  * a step of its own, or part of a run of typing -- see `FileStates.applyEdits()`.
  */
 export type EditWay = "step" | "typing"
+
+/**
+ * The old forms of Spell written in a file, with the text they're found in (`FileStates.oldForms()`).
+ * - `count`:  how many;  `edits`:  one list rewriting them all the new way, offsets in `text`
+ */
+export type OldFormsFound = LSP.LanguageAnswer<"spell/oldForms"> & {
+  /** the file's text the edits are in */
+  text: string
+}
 
 /** The lines `FileStates.showSlice()` shows:  see there. */
 export type SliceLines = {

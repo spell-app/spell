@@ -115,6 +115,24 @@ describe("upgrading a project written for an older Spell", () => {
     expect(versioned).toEqual(["owen@spell/upgrade-c"])
   })
 
+  test("asks the language worker where it parses the files:  offered and upgraded with no parse on the page", async () => {
+    const { project, file } = projectOf("owen@spell/upgrade-g", OLD, "0.8.0")
+    // what the worker's parse of the same text finds
+    const uses = SP.OldForms.uses(file)
+    ;(file as { match?: unknown }).match = undefined
+    const asked: string[] = []
+    editor.oldFormsElsewhere = async (each) => {
+      asked.push(each.path)
+      return { text: OLD, count: uses.length, edits: uses.flatMap((use) => use.edits) }
+    }
+    cleanups.push(() => (editor.oldFormsElsewhere = undefined))
+    await editor.offerUpgrade(project)
+    expect(editor.upgradeOffered).toBe(project)
+    await editor.upgradeProject()
+    expect(file.contents).toBe(NEW)
+    expect(asked).toEqual([file.path, file.path])
+  })
+
   test("nothing for today's Spell, a project with no old form, or one of Spell's own", async () => {
     await editor.offerUpgrade(projectOf("owen@spell/upgrade-d", OLD, SP.SPELL_VERSION).project)
     await editor.offerUpgrade(projectOf("owen@spell/upgrade-e", NEW).project)
