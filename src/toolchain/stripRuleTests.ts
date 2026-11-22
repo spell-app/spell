@@ -1,8 +1,9 @@
 import { readFile } from "node:fs/promises"
 import type { Plugin as EsbuildPlugin } from "esbuild"
-import type TS from "@typescript/typescript6"
 import type { SourceMap } from "magic-string"
 import type { Plugin } from "vite"
+
+import type { SourceNode } from "spell/util/node/typescript"
 
 /**
  * The grammar rules' tests, taken out of BUILT code:  a build-only Vite plugin, and the same as an esbuild plugin.
@@ -16,8 +17,8 @@ import type { Plugin } from "vite"
  *   - a rule with no such test loses `tests` altogether
  * - Fails the build on a `tests` it can't read:  not an array literal of `{ tests: [...] }` blocks.
  *   So it never ships the tests by mistake, nor a cut it isn't sure of.
- * - Reads the files with TypeScript 6's JavaScript API (`@typescript/typescript6`), and cuts with `magic-string`:
- *   both dev dependencies, imported only when a language file is built.
+ * - Reads the files with the kit's one TypeScript reader, `readTypeScript()` (oxc's, which Vite+ ships), and cuts with
+ *   `magic-string`, a dev dependency:  both imported only when a language file is built (epic `solid-2-final` P11).
  *   So a build outside the kit that never meets one (spell-brand's, through the elements' settings) needs neither.
  * - NOTE:  `SP.spellParser.speedTest()` in a BUILT editor's console times only those first examples.
  */
@@ -62,54 +63,63 @@ export async function withoutRuleTests(
   file: string
 ): Promise<{ code: string; map: SourceMap } | undefined> {
   if (!code.includes("tests")) return undefined
-  const [{ default: ts }, { default: MagicString }] = await Promise.all([
-    import("@typescript/typescript6"),
+  const [{ readTypeScript, walk }, { default: MagicString }] = await Promise.all([
+    import("spell/util/node/typescript"),
     import("magic-string")
   ])
-  const source = ts.createSourceFile(file, code, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS)
+  const source = readTypeScript(file, code, { lang: "ts" })
+  if (source.errors.length) {
+    throw new SyntaxError(`ruleTestsOutOfBuilds():  ${file}:  doesn't parse:  ${source.errors[0]}`)
+  }
   const out = new MagicString(code)
   let cuts = 0
 
+  /** The text of `node`, as written. */
+  const textOf = (node: SourceNode) => code.slice(node.start, node.end)
+
   /** Throws for `node`, a `tests` this can't read. */
-  const unreadable = (node: TS.Node, problem: string): never => {
-    const { line } = source.getLineAndCharacterOfPosition(node.getStart())
+  const unreadable = (node: SourceNode, problem: string): never => {
+    const line = code.slice(0, node.start).split("\n").length
     throw new SyntaxError(
-      `ruleTestsOutOfBuilds():  ${file}:${line + 1}:  ${problem};  ` +
+      `ruleTestsOutOfBuilds():  ${file}:${line}:  ${problem};  ` +
         "write a rule's tests as `tests: [{ tests: [...] }, ...]`, array and object literals"
     )
   }
 
+  /** `object`'s plain `name: value` property, if it has one. */
+  const propertyOf = (object: SourceNode, name: string) =>
+    (object.properties as SourceNode[]).find((property) => keyOf(property) === name)
+
   /** A test's input is the empty string or list, which `firstExample()` passes over. */
-  const isEmptyInput = (input: TS.Expression | undefined) =>
+  const isEmptyInput = (input: SourceNode | undefined) =>
     !!input &&
-    (((ts.isStringLiteral(input) || ts.isNoSubstitutionTemplateLiteral(input)) && input.text === "") ||
-      (ts.isArrayLiteralExpression(input) && input.elements.length === 0))
+    ((input.type === "Literal" && input.value === "") ||
+      (input.type === "TemplateLiteral" &&
+        !(input.expressions as SourceNode[]).length &&
+        (input.quasis as SourceNode[]).every((quasi) => !(quasi.value as { cooked: string }).cooked)) ||
+      (input.type === "ArrayExpression" && !(input.elements as unknown[]).length))
 
   /** The first test of `blocks` whose input isn't empty, cut to its input;  checks every block on the way. */
-  const firstExampleOf = (blocks: TS.ArrayLiteralExpression) => {
+  const firstExampleOf = (blocks: SourceNode) => {
     let first: string | undefined
-    for (const block of blocks.elements) {
-      if (!ts.isObjectLiteralExpression(block)) unreadable(block, "a test block that isn't an object literal")
-      const tests = (block as TS.ObjectLiteralExpression).properties.find(
-        (property) => property.name && ts.isIdentifier(property.name) && property.name.text === "tests"
-      )
-      if (!tests || !ts.isPropertyAssignment(tests)) unreadable(block, "a test block with no `tests: [...]` of its own")
-      const list = (tests as TS.PropertyAssignment).initializer
-      if (!ts.isArrayLiteralExpression(list)) unreadable(list, "a test block whose `tests` isn't an array literal")
+    for (const block of blocks.elements as SourceNode[]) {
+      if (block?.type !== "ObjectExpression") unreadable(block, "a test block that isn't an object literal")
+      const tests = propertyOf(block, "tests")
+      if (!tests || !isPlainProperty(tests)) unreadable(block, "a test block with no `tests: [...]` of its own")
+      const list = tests!.value as SourceNode
+      if (list.type !== "ArrayExpression") unreadable(list, "a test block whose `tests` isn't an array literal")
       if (first !== undefined) continue
-      for (const test of (list as TS.ArrayLiteralExpression).elements) {
-        const input = ts.isArrayLiteralExpression(test)
-          ? test.elements[0]
-          : ts.isObjectLiteralExpression(test)
-            ? test.properties.find(
-                (property): property is TS.PropertyAssignment =>
-                  ts.isPropertyAssignment(property) && ts.isIdentifier(property.name) && property.name.text === "input"
-              )?.initializer
-            : unreadable(test, "a test that isn't an array or object literal")
+      for (const test of list.elements as SourceNode[]) {
+        const input =
+          test?.type === "ArrayExpression"
+            ? (test.elements as SourceNode[])[0]
+            : test?.type === "ObjectExpression"
+              ? (propertyOf(test, "input")?.value as SourceNode | undefined)
+              : unreadable(test, "a test that isn't an array or object literal")
         if (!input || isEmptyInput(input)) continue
         // its input alone, in the test's own shape:  `[input, js]` or `{ input, js }`
-        const text = input.getText(source)
-        first = ts.isArrayLiteralExpression(test) ? `[${text}]` : `{ input: ${text} }`
+        const text = textOf(input)
+        first = test.type === "ArrayExpression" ? `[${text}]` : `{ input: ${text} }`
         break
       }
     }
@@ -117,41 +127,45 @@ export async function withoutRuleTests(
   }
 
   /** Cuts the `tests` of one rule's registration, `definition`. */
-  const cutTests = (definition: TS.ObjectLiteralExpression) => {
-    const { properties } = definition
-    const index = properties.findIndex(
-      (property) => property.name && ts.isIdentifier(property.name) && property.name.text === "tests"
-    )
+  const cutTests = (definition: SourceNode) => {
+    const properties = definition.properties as SourceNode[]
+    const index = properties.findIndex((property) => keyOf(property) === "tests")
     if (index < 0) return
     const property = properties[index]!
-    if (!ts.isPropertyAssignment(property)) unreadable(property, "a `tests` that isn't `tests: [...]`")
-    const blocks = (property as TS.PropertyAssignment).initializer
-    if (!ts.isArrayLiteralExpression(blocks)) unreadable(blocks, "a `tests` that isn't an array literal")
-    const example = firstExampleOf(blocks as TS.ArrayLiteralExpression)
-    if (example !== undefined) out.overwrite(blocks.getStart(source), blocks.getEnd(), `[{ tests: [${example}] }]`)
+    if (!isPlainProperty(property)) unreadable(property, "a `tests` that isn't `tests: [...]`")
+    const blocks = property.value as SourceNode
+    if (blocks.type !== "ArrayExpression") unreadable(blocks, "a `tests` that isn't an array literal")
+    const example = firstExampleOf(blocks)
+    if (example !== undefined) out.overwrite(blocks.start, blocks.end, `[{ tests: [${example}] }]`)
     // no example:  the property and its comma go
-    else if (index < properties.length - 1)
-      out.remove(property.getStart(source), properties[index + 1]!.getStart(source))
-    else if (index > 0) out.remove(properties[index - 1]!.getEnd(), property.getEnd())
-    else out.remove(property.getStart(source), property.getEnd())
+    else if (index < properties.length - 1) out.remove(property.start, properties[index + 1]!.start)
+    else if (index > 0) out.remove(properties[index - 1]!.end, property.end)
+    else out.remove(property.start, property.end)
     cuts++
   }
 
-  const visit = (node: TS.Node): void => {
-    if (
-      ts.isCallExpression(node) &&
-      ts.isPropertyAccessExpression(node.expression) &&
-      node.expression.name.text === "addRule"
-    ) {
-      for (const argument of node.arguments) if (ts.isObjectLiteralExpression(argument)) cutTests(argument)
-      return
-    }
-    ts.forEachChild(node, visit)
-  }
-  visit(source)
+  walk(source.program, (node) => {
+    const callee = node.callee as SourceNode | undefined
+    if (node.type !== "CallExpression" || callee?.type !== "MemberExpression") return
+    if ((callee.property as SourceNode).name !== "addRule") return
+    for (const argument of node.arguments as SourceNode[]) if (argument.type === "ObjectExpression") cutTests(argument)
+    return false
+  })
 
   if (!cuts) return undefined
   return { code: out.toString(), map: out.generateMap({ source: file, includeContent: true, hires: "boundary" }) }
+}
+
+/** A property's name, when it's a plain one (`tests:`, `"tests":`);  else `undefined`. */
+function keyOf(property: SourceNode): string | undefined {
+  if (property.type !== "Property" || property.computed) return undefined
+  const key = property.key as SourceNode
+  return key.type === "Identifier" ? (key.name as string) : typeof key.value === "string" ? key.value : undefined
+}
+
+/** Is `property` a plain `name: value`, not a method, a getter or a shorthand? */
+function isPlainProperty(property: SourceNode): boolean {
+  return property.type === "Property" && property.kind === "init" && !property.method && !property.shorthand
 }
 
 /**
