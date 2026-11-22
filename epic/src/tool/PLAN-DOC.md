@@ -406,7 +406,8 @@ As `plan-doc.md`, "Ids":
   - A rewrite moves the old one into the Original Discussion, with the rest of the old text.
   - `--append` never makes one.
 - `title`:  WITHOUT its id;  with markup, a `<span slot="title">` child instead.
-  - at most 30 plain words saying what it is, read cold (epic `epic-engine` I322;  plan-doc.md, "Rules")
+  - read cold by someone not following the work, at most 30 words (epic `epic-engine` I322, T123;  plan-doc.md,
+    "Rules", TITLES);  `add` and `rename` hand it to a fresh reader first (`TitleReader`), `--title-ok` skipping it
   - `add` and `rename` (`epic update --title`) refuse one over `ShortTitle.MOST_WORDS` (30) words, a `; ` list,
     or more than one sentence, asking for it rewritten;  NOT the tool's own titles (`M3 failed:  <title>`,
     `Follow up:  <title>`)

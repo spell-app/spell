@@ -94,8 +94,9 @@ After a restart, agents it started are gone:  start each again from its task, as
    Three or more steps for the person, with commands to type:  a runbook they start with one command,
    `spell runbook start <name>`, never a list in a reply (Spell's AGENTS.md, "Commands").
    Record as you go
-   (a title is at most 30 plain words saying what it is, read cold, hours later:
-   nothing about a passing condition;  the rest goes in --details;  the full rule:  plan-doc.md's "Rules"):
+   (a title is read by someone NOT following the work:  what changed or what's wrong, effect first, named by what the
+   person sees or types, never an internal name;  the rest goes in --details;  the rule:  plan-doc.md's "Rules",
+   TITLES;  `epic add` has a fresh reader check it):
    - a problem found:  `epic add <epic>#I "title" --calm --details "<p>...</p>"`
      (filed from the person's own words:  add `--requested`, so it turns light orange once closed, until they've looked;
      taken up at once:  `--requested --start "<their words>"`, so it shows blue, under way, never red as if it waited

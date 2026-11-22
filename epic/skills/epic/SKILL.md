@@ -78,6 +78,7 @@ Plan, then build, in worktree `<name>`, keeping the EPIC PAGE current the whole 
   - a **Net effect** list (`<epic-net-effect>`) closing every question, issue, judgement call and decision
   - NOT caveman (2026-10-04).
   - Replies:  short, the same plain words.
+  - Items listed in a reply:  a line each, `<ID> - <STATUS> - <title>`, the status word as the page shows it (OPEN, FIXED, DONE ...);  two blank lines between sections.
   - Replies with more than one topic:  a `##` header per topic, never `#` (Owen, 2026-11-17, r75 from epic `language`).
     - Anything waiting on the person comes FIRST, under `## Waiting on you`:  a page to answer, a modal's question,
       a pick, with its link pair.
@@ -611,6 +612,8 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
       (epic `epic-engine` I313)
     - waiters go first come, first served, and wait while the line moves;  `epic turns list` shows the holder, how
       long, and the line
+    - a run silent and idle (no output, next to no CPU) for 10 minutes is stopped by `epic turns run` itself, saying
+      where it was, and the turn freed (exit 1;  `--stall <minutes>`, epic `epic-engine` I384):  report it as an issue
   - record its choices as items (`epic add <epic>#J "<title>" --details "..." --calm`;  titles:  plan-doc.md's "Rules"),
     and come back with any question for the person,
     rather than ask it:  an agent has no question modal
@@ -702,8 +705,10 @@ Until a `/back:  ...` message (or `epic focus status` says off):
      - Fix what it finds, or say in the item why a finding is wrong;  its verdict goes in the item's details.
      - In Codex:  the same command;  it runs `claude -p` itself.
    Record as you go, not at the end:
-   - Every item's title is at most 30 plain words saying what it is, read cold, hours later:
-     nothing about a passing condition;  the rest goes in --details (the full rule:  [plan-doc.md](${CLAUDE_PLUGIN_ROOT}/templates/epics/plan-doc.md), "Rules").
+   - Every item's title is read by someone NOT following the work:  what changed or what's wrong, effect first,
+     named by what the person sees or types, never an internal name;  no visible effect ends "Nothing you'd see."
+     (the rule:  [plan-doc.md](${CLAUDE_PLUGIN_ROOT}/templates/epics/plan-doc.md), "Rules", TITLES;  `epic add`
+     has a fresh reader check it).  Tell every agent you start the same, pointing there.
    - Found a problem:  `add <name>#I`.
    - A limit we accept:  `add <name>#T ... --limit`.
    - A choice:  `add <name>#D` (a question born answered).

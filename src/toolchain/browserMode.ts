@@ -12,10 +12,14 @@ export interface BrowserModeProps {
   animations?: "off" | "on"
 }
 
-/** What `browserMode()` hands its `playwright` provider:  Playwright's settings for each page's browser context. */
+/** What `browserMode()` hands its `playwright` provider:  Playwright's settings, and its bounds. */
 export interface ProviderSettings {
   /** Playwright's `browser.newContext()` options */
   contextOptions: { reducedMotion: ReducedMotion }
+  /** Playwright's `browserType.launch()` options:  `timeout`, the most a browser may take to start, ms */
+  launchOptions: { timeout: number }
+  /** the most a `userEvent` action (a click, typing) may take, ms;  Vitest's default, 0, waits for ever */
+  actionTimeout: number
 }
 
 /** Playwright's `prefers-reduced-motion` emulation. */
@@ -38,6 +42,15 @@ type ReducedMotion = "reduce" | "no-preference"
  *     and the setting is the page's, so it would turn motion on for the files beside it too.
  * - `commands.emulateReducedMotion(reduce)`:  Playwright's media emulation, in every browser;  for one test.
  *   - Its types:  a repo's tests declare it where they use it (Spell UI's `tests/tests.types.ts`).
+ * - BOUNDED, so a hung browser can't hold a run for ever (epic `epic-engine` I384:  twice on 2026-11-20 a full run sat
+ *   silent at 0% CPU in a browser project for ~40 minutes, holding the machine's test turn):
+ *   - `connectTimeout`:  the most the browser may take to connect to Vitest, 60s (Vitest's default, said here)
+ *   - `launchOptions.timeout`:  the most Playwright may take to start it, 60s (Playwright's 180s before)
+ *   - `actionTimeout`:  the most one `userEvent` action may take, 30s (no limit before)
+ *   - a test, a hook and the run's close are bounded by Vitest itself:  each project's `testTimeout` (15s in
+ *     browser mode unless the project says), `hookTimeout` (30s in browser mode) and `teardownTimeout` (10s);
+ *     no config here raises the last two
+ *   - and a run silent and idle past 10 minutes in its turn is stopped by `epic turns run` (spell-epic's `StallWatch`)
  * - A fresh object each call:  Vitest names each project's in place.
  */
 export function browserMode<Provider>(
@@ -46,8 +59,13 @@ export function browserMode<Provider>(
 ) {
   return {
     enabled: true,
-    provider: playwright({ contextOptions: { reducedMotion: animations === "off" ? "reduce" : "no-preference" } }),
+    provider: playwright({
+      contextOptions: { reducedMotion: animations === "off" ? "reduce" : "no-preference" },
+      launchOptions: { timeout: 60_000 },
+      actionTimeout: 30_000
+    }),
     headless: true,
+    connectTimeout: 60_000,
     commands: { emulateReducedMotion },
     instances: browsers.map((browser) => ({ browser }))
   }
