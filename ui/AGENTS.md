@@ -789,7 +789,9 @@ As WWOD §18, plus:
     E.g. `styleSheets: { nag: nagCSS }`, `DOMElement: DOMNagElement`, `delegatesFocus: false`, a form control's `Fallback` ...
   - reactive members (below)
   - `render()`, returning JSX
-  - The DOM element creates one on its first connect, and keeps it (`keepAlive`) until `domElement.dispose()`.
+  - The DOM element creates one on its first connect, and keeps it (`keepAlive`) until `domElement.dispose()`:
+    one Solid draws is disposed by itself once its drawing is let go and it's off the page (DOMElement's
+    "Disposed with its drawing", epic `solid-2-final` I34).
   - `UI<Name>.define()` in the family's `index.ts` registers it.
 - A FORM CONTROL (`F.FormComponent`) inherits what every control needs:
   - `isDisabled`:  `disabled`, or a disabled fieldset, with its class
@@ -1145,8 +1147,13 @@ Components, DOM element classes AND `UI<Name>.fallback.ts` import:
     - `ShadowEvents` guarantees it, by undoing what Solid's shadow-root delegation leaves on the event:
       `target`, `currentTarget`, its handled marker.
     - NEVER work around a wrong `target` in a component:  fix it there.
-- **`keepAlive`:**  a removed element keeps its reactive root, until `dispose()` or garbage collection.
+- **`keepAlive`:**  a removed element keeps its reactive root, until `dispose()`.
   - So anything page-wide (overlay entries, document listeners) follows `isConnected`, never disposal.
+  - Moved, or on a page kept drawn (`KeptPages`), it lives on;  taken off for good, it's disposed:
+    - one Solid drew, once the drawing that made it is let go (a `<For>` row taken out, a kept page let go)
+    - one in a shadow root, with its host, drawn or made from HTML (a `<ui-markdown>`'s `<ui-code>`)
+  - An element made in an effect's callback has no drawing (the callback has no owner):  make it under the
+    drawing's owner (`runWithOwner()`), or it lives until `dispose()` (a table's header row did, I34).
 - **Slots carry no Solid context:**  an element's root is owned by whoever CREATED it,
   never by the `<slot>` it's assigned to (epic `spell-element`, Q8).
   - So a `<slot>` may live in any `<Show>` / `<Dynamic>` branch.

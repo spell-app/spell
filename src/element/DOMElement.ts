@@ -1,5 +1,5 @@
 /*! Derived from `@solidjs/element` and `component-register`:  MIT licence, (c) Ryan Carniato. */
-import { createEffect, untrack } from "solid-js"
+import { createEffect, getOwner, onCleanup, untrack } from "solid-js"
 
 import { NodeType } from "spell/util/dom"
 import type { E } from "spell/element"
@@ -27,6 +27,8 @@ const HTMLElementOrShim = (globalThis.HTMLElement ?? class {}) as typeof HTMLEle
  * - Its COMPONENT (a `UIComponent` subclass, `UIButton`) holds the state and draws the shadow DOM:
  *   `domElement.component` points at it, `component.domElement` back here.
  *   The component is built the first time the element connects, and lives across moves, until `dispose()`d.
+ * - An element Solid draws is disposed with its drawing:  once the drawing that made it is let go AND the element is
+ *   off the page (see "Disposed with its drawing").
  *
  * - This class is the browser's side of a custom element.
  *   Names marked "DOM API" are the browser's, from `HTMLElement` and the custom-element spec, not ours:
@@ -94,6 +96,7 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
     })
     this.ready = new Promise((resolve) => (connectedState.resolveReady = resolve))
     this.internals = this.attachInternals()
+    this.followDrawing()
     const definition = this.tagSetup?.elementDefinition
     if (definition) {
       for (const attribute of definition.attributes) {
@@ -160,6 +163,8 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
   disconnectedCallback() {
     this.stopFollowingRootDefaults()
     this.component?.onDisconnect()
+    // its drawing was let go while it was still on the page:  off it now, it's gone for good
+    if (this.connectedState.drawingIsGone) this.goneForGood()
   }
 
   /**
@@ -181,6 +186,8 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
 
   /**
    * Release the component and everything it holds (release callbacks, newest first);  idempotent.
+   * - The elements in its shadow root go with it, drawn or made from HTML (a `<ui-markdown>`'s `<ui-code>`):
+   *   they're its own ("Disposed with its drawing").
    * - A later connect builds a new component.
    */
   dispose() {
@@ -189,8 +196,58 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
     connectedState.isMounted = false
     this.stopFollowingRootDefaults()
     connectedState.propertyChangedCallbacks.length = 0
+    const own = this.shadowRoot ? DOMElement.elementsIn(this.shadowRoot) : []
     let callback
     while ((callback = connectedState.releaseCallbacks.pop())) callback(this)
+    for (const element of own) if (!element.isConnected) element.dispose()
+  }
+
+  ////////////////
+  // ## Disposed with its drawing
+  //
+  // An element lives until `dispose()`:  so moving it, or a page kept drawn while another is shown (`KeptPages`),
+  // keeps its state.
+  // An element Solid draws (a component's JSX, a program's drawing) is disposed by itself once it's gone for good
+  // (epic `solid-2-final` I34):
+  // - the drawing that made it is let go (the Solid owner it was made under is disposed:  a `<For>` row taken out,
+  //   a `<Show>` branch left, a kept page let go, its host element disposed)
+  // - AND it's off the page:  at once if it already is, else when it's next taken off
+  // Without it, every element a drawing ever made stayed in memory:  its shadow root held by Solid's event delegation,
+  // its component by the page-wide owner of every element's root (`Reactive.ownRoot()`).
+  // - An element in a shadow root goes with its host's `dispose()`, drawn or not (HTML a component parsed).
+  // - Any other element made outside any drawing (`document.createElement()` in a handler, parsed HTML) lives until
+  //   `dispose()`, as before.
+  // - Moved with `moveBefore()`, or re-parented within one task, it's never off the page:  nothing changes.
+  ////////////////
+
+  /**
+   * Note the Solid owner the element is made under, so it's disposed with that drawing ("Disposed with its drawing").
+   * - NEVER throws:  an owner that takes no cleanups (inside `createTrackedEffect()`) leaves the element to `dispose()`.
+   */
+  private followDrawing() {
+    if (!getOwner()) return
+    try {
+      onCleanup(() => this.drawingEnded())
+    } catch {
+      // a scope that refuses cleanups:  the element lives until `dispose()`
+    }
+  }
+
+  /** The DOM elements in `root`'s tree (not in theirs:  each one's own `dispose()` sees to those). */
+  private static elementsIn(root: ShadowRoot): DOMElement[] {
+    return [...root.querySelectorAll("*")].filter((element): element is DOMElement => element instanceof DOMElement)
+  }
+
+  /** The drawing that made it was let go:  disposed now if it's off the page, else when it's next taken off. */
+  private drawingEnded() {
+    this.connectedState.drawingIsGone = true
+    if (!this.isConnected) this.goneForGood()
+  }
+
+  /** Off the page, its drawing let go:  disposed, and no longer waiting for its family if it's pending. */
+  private goneForGood() {
+    EARLY.get(this.constructor as DOMElementClass)?.pending.delete(this)
+    this.dispose()
   }
 
   /** Run `callback` when the element is released (`dispose()`), newest first. */
@@ -1200,4 +1257,6 @@ type ConnectedState = {
   defaultedValues?: Map<string, E.ResolvedAttribute>
   /** stops following the roots' defaults ("Root defaults");  set while connected */
   stopDefaults?: () => void
+  /** the Solid drawing that made it was let go:  it's disposed when it's off the page ("Disposed with its drawing") */
+  drawingIsGone?: boolean
 }
