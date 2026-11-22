@@ -4,10 +4,26 @@
 		<header>A site nav lists a site's pages as a tree, the page shown marked;  a click goes to a page.</>
 	</>
 
+	<!--
+		EXAMPLES:  Fomantic's page, section by section, in its order (Types, Content, States, Variations,
+		Groups ...).  Rules, the class-grammar mappings, gaps:  epics/spell-ui-pages/PAGES.md.
+		- A section:  `<ui-section id="examples-types" label="Types" sticky="stack" collapsible dividing>` around
+		  its examples;  ids spell out the nesting (`<tab>-<section>-<example>`, lowercase kebab of the headers).
+		- An example:  its own nested section (`label` = the example's name) around
+		  `<ui-example description="...">` and the live markup;  the markup IS the code shown.  A richer
+		  description:  `<p slot="description">` (+ `<ui-message slot="description">`).  Fomantic's header-less
+		  `.another.example`:  a second `<ui-example>` in the same section.
+		- Or write it flat (`<ui-header level="2">`, `<ui-example heading>`) and run `yarn site:sections`:
+		  it nests it and writes the ids (and fixes them after a title changes).
+		- A gap:  an HTML comment `GAP I<n>:  ...` BEFORE the example's section (a comment inside the example
+		  shows in its code).
+	-->
 	<section label="Types">
 		<section label="Pages in pages" sticky="stack" collapsible dividing>
 			<example "Pages in pages" description="`pages` lists the site's pages, each with its `title` and `href`, nested as the navigation nests them.  The page shown is marked, and every page it's under opens:  here, this page.">
-				<ui-site-nav current="#site-nav" style="max-width: 16em" pages="\[{ \"title\": \"Overview\", \"href\": \"#index\" }, { \"title\": \"Components\", \"href\": \"#components\", \"pages\": \[{ \"title\": \"Button\", \"href\": \"#button\" }, { \"title\": \"Site nav\", \"href\": \"#site-nav\" }, { \"title\": \"Tree\", \"href\": \"#tree\" }] }, { \"title\": \"Themes\", \"href\": \"#themes\" }]"/>
+				<html>
+					<ui-site-nav style="max-width: 16em" pages="\[{ \"title\": \"Overview\", \"href\": \"index.html\" }, { \"title\": \"Components\", \"href\": \"components.html\", \"pages\": \[{ \"title\": \"Button\", \"href\": \"ui-button.html\" }, { \"title\": \"Site nav\", \"href\": \"ui-site-nav.html\" }, { \"title\": \"Tree\", \"href\": \"ui-tree.html\" }] }, { \"title\": \"Themes\", \"href\": \"themes.html\" }]"></ui-site-nav>
+				</html>
 			</example>
 		</>
 	</>
@@ -15,7 +31,27 @@
 	<section label="Content">
 		<section label="Groups" sticky="stack" collapsible dividing>
 			<example "Groups" description="A page with no `href` only holds pages:  a click opens or closes it.  `icon` puts an icon before a title.">
-				<ui-site-nav style="max-width: 16em" pages="\[{ \"title\": \"Forms\", \"icon\": \"edit outline\", \"pages\": \[{ \"title\": \"Input\", \"href\": \"#input\" }, { \"title\": \"Dropdown\", \"href\": \"#dropdown\" }] }, { \"title\": \"Lists\", \"icon\": \"list\", \"pages\": \[{ \"title\": \"Tree\", \"href\": \"#tree\" }, { \"title\": \"Table\", \"href\": \"#table\" }] }]"/>
+				<html>
+					<ui-site-nav style="max-width: 16em" pages="\[{ \"title\": \"Forms\", \"icon\": \"edit outline\", \"pages\": \[{ \"title\": \"Input\", \"href\": \"ui-input.html\" }, { \"title\": \"Dropdown\", \"href\": \"ui-dropdown.html\" }] }, { \"title\": \"Lists\", \"icon\": \"list\", \"pages\": \[{ \"title\": \"Tree\", \"href\": \"ui-tree.html\" }, { \"title\": \"Table\", \"href\": \"ui-table.html\" }] }]"></ui-site-nav>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="Variations">
+		<section label="Nav" sticky="stack" collapsible dividing>
+			<example "Nav" description="`appearance=\"nav\"` draws it as the docs site's side navigation does:  a page's `band` is a heading band over its pages (`heading`, or a lighter `subheading`), `count` and `badge` label its title, and `starred` gives it a star, which sends `ui-starred`.">
+				<html>
+					<ui-site-nav appearance="nav" style="max-width: 16em" pages="\[{ \"title\": \"Get started\", \"band\": \"heading\", \"open\": true, \"pages\": \[{ \"title\": \"Overview\", \"icon\": \"house\", \"href\": \"index.html\" }] }, { \"title\": \"Components\", \"band\": \"heading\", \"count\": 3, \"open\": true, \"pages\": \[{ \"title\": \"Forms\", \"band\": \"subheading\", \"count\": 2, \"open\": true, \"pages\": \[{ \"title\": \"Input\", \"href\": \"ui-input.html\", \"starred\": true }, { \"title\": \"Calendar\", \"href\": \"ui-calendar.html\", \"badge\": \"in progress\", \"starred\": false }] }, { \"title\": \"Lists\", \"band\": \"subheading\", \"count\": 1, \"pages\": \[{ \"title\": \"Tree\", \"href\": \"ui-tree.html\", \"starred\": false }] }] }]"></ui-site-nav>
+				</html>
+			</example>
+		</>
+
+		<section label="Groups" sticky="stack" collapsible dividing>
+			<example "Groups" description="A page's `band=\"group\"` is a quiet label over its pages, with no arrow, as a Spell site's groups are:  it opens by itself while the page shown is under it, and a click on it opens it and goes to its first page.  Its `icon` shows before its label, and its pages are a step in from it.  An open group sits in a slight inset well, its label and its pages inside it (`--ui-site-nav-group-background`, `--ui-site-nav-group-radius`).  A page with no `icon` beside pages with one keeps an icon's room, so the titles line up.">
+				<html>
+					<ui-site-nav appearance="nav" style="max-width: 16em" current="#explore" pages="\[{ \"title\": \"Design\", \"band\": \"group\", \"icon\": \"palette\", \"pages\": \[{ \"title\": \"Explore\", \"icon\": \"binoculars\", \"href\": \"#explore\" }, { \"title\": \"Validations\", \"icon\": \"clipboard check\", \"href\": \"#validations\" }, { \"title\": \"Notes\", \"href\": \"#notes\" }] }, { \"title\": \"Run\", \"band\": \"group\", \"icon\": \"play\", \"pages\": \[{ \"title\": \"Jobs\", \"icon\": \"briefcase\", \"href\": \"#jobs\" }, { \"title\": \"Queue\", \"icon\": \"calendar check\", \"href\": \"#queue\" }] }]"></ui-site-nav>
+				</html>
 			</example>
 		</>
 
@@ -51,18 +87,12 @@
 		</>
 	</>
 
-	<section label="Variations">
-		<section label="Nav" sticky="stack" collapsible dividing>
-			<example "Nav" description="`appearance=\"nav\"` draws it as the docs site's side navigation does:  a page's `band` is a heading band over its pages (`heading`, or a lighter `subheading`), `count` and `badge` label its title, and `starred` gives it a star, which sends `ui-starred`.">
-				<ui-site-nav appearance="nav" style="max-width: 16em" pages="\[{ \"title\": \"Get started\", \"band\": \"heading\", \"open\": true, \"pages\": \[{ \"title\": \"Overview\", \"icon\": \"house\", \"href\": \"#index\" }] }, { \"title\": \"Components\", \"band\": \"heading\", \"count\": 3, \"open\": true, \"pages\": \[{ \"title\": \"Forms\", \"band\": \"subheading\", \"count\": 2, \"open\": true, \"pages\": \[{ \"title\": \"Input\", \"href\": \"#input\", \"starred\": true }, { \"title\": \"Calendar\", \"href\": \"#calendar\", \"badge\": \"in progress\", \"starred\": false }] }, { \"title\": \"Lists\", \"band\": \"subheading\", \"count\": 1, \"pages\": \[{ \"title\": \"Tree\", \"href\": \"#tree\", \"starred\": false }] }] }]"/>
-			</example>
-		</>
-	</>
-
 	<section label="States">
 		<section label="Remembered" sticky="stack" collapsible dividing>
 			<example "Remembered" description="With `remember`, the pages a person opens and closes stay so when they come back:  open one, then reload the page.">
-				<ui-site-nav style="max-width: 16em" remember="docs-example" current="#tree" pages="\[{ \"title\": \"Elements\", \"pages\": \[{ \"title\": \"Button\", \"href\": \"#button\" }, { \"title\": \"Icon\", \"href\": \"#icon\" }] }, { \"title\": \"Collections\", \"pages\": \[{ \"title\": \"Menu\", \"href\": \"#menu\" }, { \"title\": \"Tree\", \"href\": \"#tree\" }] }]"/>
+				<html>
+					<ui-site-nav style="max-width: 16em" remember="docs-example" current="ui-tree.html" pages="\[{ \"title\": \"Elements\", \"pages\": \[{ \"title\": \"Button\", \"href\": \"ui-button.html\" }, { \"title\": \"Icon\", \"href\": \"ui-icon.html\" }] }, { \"title\": \"Collections\", \"pages\": \[{ \"title\": \"Menu\", \"href\": \"ui-menu.html\" }, { \"title\": \"Tree\", \"href\": \"ui-tree.html\" }] }]"></ui-site-nav>
+				</html>
 			</example>
 		</>
 	</>
