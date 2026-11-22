@@ -170,6 +170,7 @@ function noNetwork() {
  *     (`withShadowsInPlace()`).
  *   - Each tag's attributes are sorted (`withSortedAttributes()`).
  *   - Without the empty comments Solid marks its places with, which javascript's `h()` never writes.
+ *   - Without a function or object given to a tag Spell UI would define (`RichAttributes`'s patch holds it).
  * - Only for the core contract test, `contract.test.ts`:  a real browser is `spell run`'s.
  *   The contract seeds the random numbers too (`spec.seed`), so a shuffle deals the same cards on every target.
  */
@@ -185,6 +186,11 @@ async function fakeDom() {
       writable: true
     })
   }
+  // a function or object given to a tag not defined here (`<ui-flyout on-ui-closed={f}>`) is held, as on a page,
+  // never printed as its source:  that differs by target (`this` in javascript, `_self$2` in TypeScript's build)
+  // Import directly:  `spell/element`'s barrel leaves it out, and its page-wide patch goes in as the file loads
+  const { RichAttributes } = await import("spell/element/RichAttributes")
+  RichAttributes.installPatch()
   core.installStyles = () => {}
   // Solid follows spell's values, as a runner's page does (`cellsBridge.ts`):  the hooks give us its browser build
   const { enableExternalSource, flush } = await import("solid-js")
