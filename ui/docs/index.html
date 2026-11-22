@@ -4,9 +4,10 @@
   - The page server answers every one of the site's addresses under `/components/ui/` with this page
     (the component set's `sitePage`), and its `<spell-viewer>` shows the page that address names:
     `/components/ui/button/api` is the Button's API page, `#section` and all.
-  - Going to another page changes the address, so the browser's back and forward work (`ViewerSiteHost`).
+  - Going to another page changes the address, so the browser's back and forward work (`RunSiteHost`).
   - The same under a worktree's address, `/worktrees/<w>/components/ui/...`:  the base and the viewer's script are
     worked out from the page's own address.
+  - `/components/ui` is written here by hand:  a plain page can't import `SpellUIGuide.address`, its one home.
   - A guide page is changed in the editor, with Change this (Q83):  this page is for reading.
 -->
 <html lang="en">
