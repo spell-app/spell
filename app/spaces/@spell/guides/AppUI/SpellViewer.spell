@@ -1,0 +1,84 @@
+"spell viewer" is a notebook page
+	<header level="1">
+		&lt;spell-viewer&gt;
+		<header>Runs a spell project in any page, in its own shadow root.</>
+	</>
+
+	<text class="lede" paragraph>One tag runs a spell program in a page, with no editor: from the spell server, from compiled files anywhere, or what a <link target="src-packages-app-docs-spell-editor-html" link="/spell-editor"><text code>&lt;spell-editor&gt;</></> beside it compiles. Its toolbar restarts it, and opens a debug pane of its things, its types and its console.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone putting a spell program in a page, or changing the runner</>
+		<item icon="play">Live: the real element, from the app's element build this page loads</>
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>The calculator example, from the spell server, with its toolbar. Click Debug to see its things, its types and its console.</>
+		<example "1. Example" description="A project from the spell server, with its toolbar.">
+			<html>
+				<spell-viewer project="@spell/examples/calculator" toolbar height="460px"></spell-viewer>
+			</html>
+		</example>
+		<example "1. Example" description="A program with no app of its own:  its console instead, on the debug pane.">
+			<html>
+				<spell-viewer project="@spell/examples/fizzbuzz" toolbar debug="console" height="320px"></spell-viewer>
+			</html>
+		</example>
+		<text class="meta" paragraph>Live, from the app's element build, which this set's pages load: <text code>/element/spell.pack.js</>. <link target="src-packages-app" link="/src/app/">The app package</> builds it with <text code>yarn build:element</>.</>
+	</>
+
+	<section label="2. Using it">
+		<icon slot="icon" name="code"/>
+		<text paragraph>A page loads it either way:</>
+		<list bulleted>
+			<item>by itself, its own script, with nothing around it: each <text code>&lt;spell-viewer&gt;</> is a root, as <text code>&lt;ui-root&gt;</> is</>
+			<item>under a <text code>&lt;ui-root&gt;</> that has Spell UI already (a docs page, this one): the element pack, which shares the page's Solid and Spell UI</>
+		</>
+		<text paragraph>By itself:</>
+		<markdown>
+			```html
+			<script type="module" src="/element/spell-viewer.js"></script>
+			<spell-viewer project="@spell/examples/Solitaire" toolbar></spell-viewer>
+			```
+		</>
+		<text paragraph>Under a root, by the element pack:</>
+		<markdown>
+			```html
+			<ui-root>
+			  <ui-components source="/element/spell.pack.js"></ui-components>
+			  <spell-viewer project="@spell/examples/Solitaire" toolbar></spell-viewer>
+			</ui-root>
+			```
+		</>
+		<list bulleted>
+			<item>What it runs, one of: <list bulleted><item><text code>project</>: a project from the spell server</> <item><text code>src</>: compiled files, from anywhere</> <item><text code>editor</>: what that editor compiles</></></>
+			<item>Its script API: <text code>run(compiled)</> and <text code>restart()</>.</>
+			<item>Each loads its OWN copy of the spell runtime, so apps on a page don't share their things.</>
+			<item>Inside it, the runner's pieces: <text code>&lt;ui-split-panel&gt;</>, <link target="src-packages-app-docs-runnerpane-html" link="/runner-pane">RunnerPane</>, <link target="src-packages-app-docs-thingexplorer-html" link="/thing-explorer">ThingExplorer</>, <link target="src-packages-app-docs-typeexplorer-html" link="/type-explorer">TypeExplorer</> and <link target="src-packages-app-docs-runnerconsole-html" link="/runner-console">RunnerConsole</>; a view draws as its own <link target="src-packages-app-docs-spell-element-html" link="/spell-element">element</>.</>
+			<item>More, the editor's demo: <text code>/demo/spell-editor.html</> on the editor's server.</>
+		</>
+	</>
+
+	<section label="3. Attributes, events and texts">
+		<icon slot="icon" name="list check"/>
+		<text paragraph>Its own names, then those it takes as a root (<text code>&lt;ui-root&gt;</>'s):</>
+		<html>
+			<ui-docs-api family="spell-viewer"></>
+		</>
+		<text class="meta" paragraph>From its vocabulary, by <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="4. Its code">
+		<icon slot="icon" name="folder open"/>
+		<list bulleted>
+			<item><link target="src-packages-app-components-spell-app-spellapp-tsx" link="/src/app/components/spell-viewer/SpellViewer.tsx"><text title="src/app/components/spell-viewer/SpellViewer.tsx" code>SpellViewer.tsx</></>: its DOM element (the script API) and its component, a root</>
+			<item><link target="src-packages-app-components-spell-app-spellapp-en-ts" link="/src/app/components/spell-viewer/SpellViewer.en.ts"><text title="src/app/components/spell-viewer/SpellViewer.en.ts" code>SpellViewer.en.ts</></>: its vocabulary, every name it uses</>
+			<item><link target="src-packages-app-src-runner-spellapprunner-tsx" link="/src/app/runner/SpellAppRunner.tsx"><text title="src/app/runner/SpellAppRunner.tsx" code>SpellAppRunner.tsx</></>: what it draws, the runner</>
+			<item>Its build: <text title="writes app/dist-element/" code>yarn build:element</>, served at <text code>/element/</></>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-12 against branch <ui-text code>epic-workflow</>.</>
+		</>
+	</>

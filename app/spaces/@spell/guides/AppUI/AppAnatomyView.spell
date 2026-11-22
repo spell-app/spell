@@ -1,0 +1,52 @@
+"app anatomy view" is a notebook page
+	<header level="1">
+		AppAnatomyView
+		<header>Anatomy: the running app pulled apart into layers, in 3D, one for each view it draws.</>
+	</>
+
+	<text class="lede" paragraph>Anatomy shows how a running app is put together. Its switch is beside Inspect app in the top bar, or View › Anatomy (⌥⌘A). The app tilts back and comes apart into layers: the app at the bottom, each view it draws a layer above the view that holds it, each with a tag naming its type.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone changing the spell app's editor, or reading its code</>
+		<item icon="image">A picture, not live: it needs the whole editor round it</>
+	</>
+
+	<section label="1. What it looks like">
+		<icon slot="icon" name="image"/>
+		<text paragraph>Solitaire, pulled apart in the app pane:</>
+		<image src="/components/app/_images/AppAnatomyView.png" alt="Solitaire tilted back, its piles and cards lifted into layers, each tagged with its type" appearance="bordered rounded"/>
+		<text class="meta" paragraph>A picture, taken by <text code>yarn site:pictures</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="2. Using it">
+		<icon slot="icon" name="code"/>
+		<list bulleted>
+			<item>Drag to turn it, scroll to zoom; Front looks straight at it again.</>
+			<item>Spacing pulls the layers apart.</>
+			<item>A click on a layer selects it, as a click on the app does: the Views tree, the properties and the code follow along. A double-click, or F, shows one layer and what's inside it alone; Esc goes back.</>
+			<item>Views | Named | Outlines: Views shows the app itself on its layers, Named adds each layer's type as a tag, Outlines draws each layer as an empty frame. The full-window button lifts the pane over the editor.</>
+			<item>The app keeps running: a card moved, or a live edit, shows on its layer. Hold ⌥ to play it.</>
+			<item>Turned off, every style it set on the app is put back as it was. A view whose look cuts off what's inside it comes apart in one piece, its tag saying so.</>
+		</>
+	</>
+
+	<section label="3. Props, and where it's drawn">
+		<icon slot="icon" name="list check"/>
+		<html>
+			<ui-docs-api family="AppAnatomyView"></>
+		</>
+		<text class="meta" paragraph>From its code, by <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="4. Its code">
+		<icon slot="icon" name="folder open"/>
+		<list bulleted>
+			<item><link target="src-packages-app-src-solid-appanatomy-tsx" link="/src/app/solid/AppAnatomy.tsx"><text title="src/app/solid/AppAnatomy.tsx" code>AppAnatomy.tsx</></>: the view, its bar, and the styles it lends the app</>
+			<item><link target="src-packages-app-src-solid-appanatomyfloors-ts" link="/src/app/solid/AppAnatomyFloors.ts"><text title="src/app/solid/AppAnatomyFloors.ts" code>AppAnatomyFloors.ts</></>: which elements are layers, and which can't come apart</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-11-18 against branch <ui-text code>editor</>.</>
+		</>
+	</>

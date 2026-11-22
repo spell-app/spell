@@ -1,0 +1,79 @@
+"type explorer" is a notebook page
+	<header level="1">
+		TypeExplorer
+		<header>The scopes a project parses in, as a tree, with the details of the one picked.</>
+	</>
+
+	<text class="lede" paragraph>The "Type Explorer" tab of a runner's debug pane: everything a project's code declares, and all it can use, as a tree of scopes on the left, and the details of the one picked on the right. It's how you see what spell made of your code: its types, their properties and actions, and the javascript each became.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone changing the runners' debug pane, or reading its code</>
+		<item icon="play">Live: a real <text code>&lt;spell-viewer&gt;</>, its debug pane opened on this tab</>
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>Solitaire, its debug pane open on "Type Explorer": the pane under the game IS this component. In the "Scopes" tree, open Card.spell under Solitaire and click Card, to see its details beside it.</>
+		<example "1. Example" description="Solitaire, its debug pane on the Type Explorer tab.">
+			<html>
+				<spell-viewer project="@spell/examples/Solitaire" toolbar debug="explorer" height="820px"></spell-viewer>
+			</html>
+		</example>
+		<text class="meta" paragraph>Live, from the app's element build, which this set's pages load: <text code>/element/spell.pack.js</>. <link target="src-packages-app" link="/src/app/">The app package</> builds it with <text code>yarn build:element</>.</>
+	</>
+
+	<section label="2. Using it">
+		<icon slot="icon" name="code"/>
+		<text paragraph>Each runner draws one in its debug pane. VS Code's runner gives it the most: the scopes the extension sends, and a way to save docstrings and refresh:</>
+		<text paragraph>VSCodeRunner.tsx · the Type Explorer tab:</>
+		<markdown>
+			```typescript
+			/** The Type Explorer, from the scopes the extension sends. */
+			function explorer() {
+			  return (
+			    <TypeExplorer
+			      tree={tree()}
+			      onOpen={(href) => post({ type: "open", href })}
+			      onSaveDescription={(at, text) => post({ type: "setDescription", ...at, text })}
+			      loadDetails={loadDetails}
+			      onRefresh={() => post({ type: "refreshScopes" })}
+			      state={settings().typeExplorer}
+			      onStateChange={(typeExplorer) => save({ typeExplorer })}
+			    />
+			  )
+			}
+			```
+		</>
+		<list bulleted>
+			<item><text code>tree</> is the tree of scopes: from the language server in VS Code, or from the project's scope pack in a <link target="src-packages-app-docs-spell-viewer-html" link="/spell-viewer"><text code>&lt;spell-viewer&gt;</></>, which needs no parser in the page.</>
+			<item>A scope's details are asked for with <text code>loadDetails()</> the first time it's picked, and kept until a new tree comes.</>
+			<item>The right side is a <link target="src-packages-app-docs-scopedetailspane-html" link="/scope-details-pane">ScopeDetailsPane</>, made afresh for each scope picked.</>
+			<item>It lists things as they're declared, with a marker for each heading they're under, or in alphabetical order: the buttons in its header switch.</>
+			<item>What's picked and open is kept by each scope's path, so it stays put as new trees come in, after each run. <text code>state</> and <text code>onStateChange</> remember it, else it's kept in the browser.</>
+			<item><text code>readonly</>, as in a <text code>&lt;spell-viewer&gt;</>: docstrings can't be edited.</>
+			<item>Each row of its tree is a <link link="#TreeRow">TreeRow</>: its arrow opens and closes it, the rest picks it. The <link target="src-packages-app-docs-thingexplorer-html" link="/thing-explorer">ThingExplorer</>'s tree uses it too.</>
+		</>
+	</>
+
+	<section label="3. Props, and where it's drawn">
+		<icon slot="icon" name="list check"/>
+		<html>
+			<ui-docs-api family="TypeExplorer"></>
+		</>
+		<text class="meta" paragraph>From its code, by <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="4. Its code">
+		<icon slot="icon" name="folder open"/>
+		<list bulleted>
+			<item><link target="src-packages-app-src-solid-typeexplorer-tsx" link="/src/app/solid/TypeExplorer.tsx"><text title="src/app/solid/TypeExplorer.tsx" code>TypeExplorer.tsx</></>: the component and its props, its tree's rows, and <text code>TreeRow</></>
+			<item><link target="src-packages-app-src-solid-typeexplorer-css" link="/src/app/solid/TypeExplorer.css"><text title="src/app/solid/TypeExplorer.css" code>TypeExplorer.css</></>: its look, which the Thing Explorer shares</>
+			<item>Its tests: <link target="src-tests-app-src-solid-typeexplorer-test-tsx" link="/tests/app/solid/TypeExplorer.test.tsx"><text title="tests/app/solid/TypeExplorer.test.tsx" code>TypeExplorer.test.tsx</></>, <link target="src-tests-app-src-solid-typeexplorer-browser-test-tsx" link="/tests/app/solid/TypeExplorer.browser.test.tsx"><text title="tests/app/solid/TypeExplorer.browser.test.tsx" code>TypeExplorer.browser.test.tsx</></></>
+			<item>Where the runners draw it: <link target="src-packages-app-src-runner-spellapprunner-tsx" link="/src/app/runner/SpellAppRunner.tsx"><text title="src/app/runner/SpellAppRunner.tsx" code>SpellAppRunner.tsx</></>, <link target="src-packages-app-src-runner-vscoderunner-tsx" link="/src/app/runner/VSCodeRunner.tsx"><text title="src/app/runner/VSCodeRunner.tsx" code>VSCodeRunner.tsx</></></>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-12 against branch <ui-text code>epic-workflow</>.</>
+		</>
+	</>

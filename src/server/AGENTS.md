@@ -448,6 +448,9 @@ Only what's local is below;  a section named like a WWOD rule extends it.
           - it loads the component packs a set's pages name (`SitePacks`):  the epics pack, for the comments, on all
           - the other sets had their own build (its `sets/`), until epic `epic-engine`
         - the rest is the set's own folder:  its pages, `__parts/`, `__data/`
+        - a set whose guide is a Spell site (`sitePage`, `componentSetSitePath()`;  epic `editor` P43-P44):  every
+          address with no file of its own and no `.` in its last part gets its viewer page;  all three since P44, so
+          the site bundle and `__parts/` serve no set's pages now
       - The same at `/worktrees/<w>/components/<set>/`.
         - with that worktree's own site bundle (epic `epic-engine` r35):
           - a page there that loads a set's address by its root path (`/components/ui/_assets/site.js`)

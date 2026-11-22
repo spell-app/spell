@@ -10,7 +10,7 @@ import type { SiteDataFile } from "spell/ui/docs-components/docs-components.type
 import { BrowserPage, type BrowserPageProps } from "spell/element-tools/BrowserPage"
 import { writeOrCheck } from "spell/element-tools/generatedFiles"
 import { Terminal } from "spell/element-tools/Terminal"
-import { SpellUIGuide } from "spell/ui/util/SpellUIGuide"
+import { SpellUIGuide, type GuideSet } from "spell/ui/util/SpellUIGuide"
 import { SPELL_UI_SITE_FILE, ensurePageServer } from "./pageServer.ts"
 import { SiteSearchBuilder, type DrawnSpellPage } from "./SiteSearchBuilder.ts"
 import { SITE_DATA, SPELL_UI_ROOT, SiteCheckError } from "./tools.types.ts"
@@ -22,6 +22,9 @@ import { environment } from "./environment.ts"
  * the Spell pages of `@spell/guides/SpellUI`, as the page server shows them, with no editor
  * (`<page server>/components/ui/<address>`:  one page, its `<spell-viewer>` showing the site;  epic `editor` P43).
  * - Run:  `yarn site:check <page...>` (in `ui/`), or `yarn site:check --all`.
+ *   - `--site epics` or `--site app`:  Epic UI's or App UI's guide instead (`@spell/guides/EpicUI`, `AppUI`, at
+ *     `/components/epics/`, `/components/app/`;  epic `editor` P44), a page by its address or the tag or component
+ *     its old HTML page was named for (`epic-card`, `MenuBar`);  they have no search file.
  *   - `--out <dir>` for the screenshots (default `results/site-check/`, git-ignored).
  *   - `--server <origin>` for another page server than this checkout's (`http://127.0.0.1:47431`);
  *     by default this checkout's, started if it isn't running (`ensurePageServer()`).
@@ -84,7 +87,11 @@ export class SiteCheck {
   /** The site's navigation's `pages`, as the first page read drew it:  the pages' titles (`spellTitles()`). */
   private navPages: unknown
 
-  constructor({ addresses, out = DEFAULT_OUT, search, server, jobs = 1 }: SiteCheckProps) {
+  /** The site checked:  the Spell UI site, Epic UI's guide or App UI's (`--site`). */
+  readonly site: GuideSite
+
+  constructor({ addresses, out = DEFAULT_OUT, search, server, jobs = 1, site = SPELL_UI_SITE }: SiteCheckProps) {
+    this.site = site
     this.jobs = Math.max(1, Math.floor(jobs))
     this.addresses = addresses
     this.server = server?.replace(/\/+$/, "")
@@ -106,16 +113,18 @@ export class SiteCheck {
     const { values, positionals } = parsed
     if (values.help) return exit(USAGE, 0)
     try {
+      const site = SiteCheck.siteFor(values.site)
       const server = values.server ?? SiteCheck.pageServer()
-      const known = await SiteCheck.siteAddresses(server)
+      const known = await SiteCheck.siteAddresses(server, site)
       const isWhole = values.all || values.search
-      const addresses = isWhole ? known : positionals.map((name) => SiteCheck.resolveAddress(name, known))
+      const addresses = isWhole ? known : positionals.map((name) => SiteCheck.resolveAddress(name, known, site))
       if (!addresses.length) return exit(USAGE, 2)
       const check = new SiteCheck({
         addresses: [...new Set(addresses)],
         out: values.out === undefined ? undefined : resolve(environment.invocationDir, values.out),
-        search: values.search ? "only" : values.all ? "also" : undefined,
+        search: !site.hasSearch ? undefined : values.search ? "only" : values.all ? "also" : undefined,
         server,
+        site,
         jobs: values.jobs === undefined ? undefined : SiteCheck.jobsFor(values.jobs)
       })
       const reports = await check.run()
@@ -141,16 +150,36 @@ export class SiteCheck {
    * - `home` or `index` => `/`
    * - throws `SiteCheckError` when it names no page of the site
    */
-  static resolveAddress(name: string, known: readonly string[]): string {
-    const bare = name.replace(/^\/+|\/+$/g, "").replace(/^ui-/, "")
-    const address = HOME_NAMES.includes(bare) ? "/" : `/${bare}`
+  static resolveAddress(name: string, known: readonly string[], site: GuideSite = SPELL_UI_SITE): string {
+    const trimmed = name.replace(/^\/+|\/+$/g, "")
+    const bare = site.set
+      ? SpellUIGuide.setAddressOf(site.set, trimmed).slice(site.address.length + 1)
+      : trimmed.replace(/^ui-/, "")
+    const address = HOME_NAMES.includes(bare) || !bare ? "/" : `/${bare}`
     if (!known.includes(address)) {
       throw new SiteCheckError(
-        `SiteCheck.resolveAddress():  the Spell UI site has no page "${name}" (${address});  ` +
-          "its pages are the addresses its file lists (`SpellUI.spell`)"
+        `SiteCheck.resolveAddress():  ${site.name} has no page "${name}" (${address});  ` +
+          `its pages are the addresses its file lists (\`${site.siteFile.split("/").at(-1)}\`)`
       )
     }
     return address
+  }
+
+  /** The site `--site` names (`epics`, `app`), else the Spell UI site;  throws `SiteCheckError` on another name. */
+  static siteFor(name: string | undefined): GuideSite {
+    if (name === undefined || name === "ui") return SPELL_UI_SITE
+    if (!Object.hasOwn(SpellUIGuide.sets, name))
+      throw new SiteCheckError(`SiteCheck.siteFor():  --site takes ui, epics or app, not "${name}"`)
+    const set = name as GuideSet
+    const { address, project } = SpellUIGuide.sets[set]
+    const folder = project.split("/").at(-1)!
+    return {
+      set,
+      name: `${folder.replace(/UI$/, " UI")}'s guide`,
+      address,
+      siteFile: `spaces/${project}/${folder}.spell`,
+      hasSearch: false
+    }
   }
 
   /**
@@ -168,11 +197,11 @@ export class SiteCheck {
 
   /**
    * Every page's address, in the order the site's file lists them (`it has ... page at "/button" ...`):
-   * read from the page server at `server`, an origin (`SPELL_UI_SITE_FILE`).
+   * read from the page server at `server`, an origin (`site.siteFile`:  the Spell UI site's `SPELL_UI_SITE_FILE`).
    * - throws `SiteCheckError` when the page server doesn't serve the file
    */
-  static async siteAddresses(server: string): Promise<string[]> {
-    const url = `${server.replace(/\/+$/, "")}/${SPELL_UI_SITE_FILE}`
+  static async siteAddresses(server: string, site: GuideSite = SPELL_UI_SITE): Promise<string[]> {
+    const url = `${server.replace(/\/+$/, "")}/${site.siteFile}`
     const response = await fetch(url, { signal: AbortSignal.timeout(PROBE_MS) }).catch((error: unknown) => {
       throw new SiteCheckError(`SiteCheck.siteAddresses():  ${url} didn't answer:  ${error}`)
     })
@@ -187,10 +216,12 @@ export class SiteCheck {
 
   /**
    * Where the page server at `server` (an origin) shows the site's page at `address`:
-   * `/button/api` => `<server>/components/ui/button/api`, `/` => `<server>/components/ui/` (`SpellUIGuide.addressOf()`).
+   * `/button/api` => `<server>/components/ui/button/api`, `/` => `<server>/components/ui/` (`SpellUIGuide.addressOf()`);
+   * another site's under its address, `/epic-card` => `<server>/components/epics/epic-card`.
    */
-  static pageUrl(server: string, address: string): string {
-    return `${server.replace(/\/+$/, "")}${SpellUIGuide.addressOf(address)}`
+  static pageUrl(server: string, address: string, site: GuideSite = SPELL_UI_SITE): string {
+    const page = site.set ? `${site.address}${address}` : SpellUIGuide.addressOf(address)
+    return `${server.replace(/\/+$/, "")}${page}`
   }
 
   /** `--jobs`'s text as a count, 1 or more;  throws `SiteCheckError` on anything else. */
@@ -273,7 +304,7 @@ export class SiteCheck {
    */
   async ensureSite(): Promise<string> {
     const base = this.server ?? SiteCheck.pageServer()
-    const probe = SiteCheck.pageUrl(base, "/")
+    const probe = SiteCheck.pageUrl(base, "/", this.site)
     const status = await fetch(probe, { signal: AbortSignal.timeout(PROBE_MS) }).then(
       (response) => response.status,
       (error: unknown) => String(error)
@@ -389,7 +420,7 @@ export class SiteCheck {
   private started(address: string): { context: CheckContext; finish: () => PageReport } {
     const report: PageReport = {
       page: address,
-      url: SiteCheck.pageUrl(this.base, address),
+      url: SiteCheck.pageUrl(this.base, address, this.site),
       ok: false,
       problems: [],
       notes: [],
@@ -643,6 +674,8 @@ export class SiteCheck {
 export type SiteCheckProps = {
   /** the site's addresses to check (`SiteCheck.resolveAddress()`, `siteAddresses()`) */
   addresses: string[]
+  /** the site checked (`--site`, `SiteCheck.siteFor()`);  default the Spell UI site */
+  site?: GuideSite
   /** screenshot folder, absolute;  default `results/site-check/` */
   out?: string
   /** the page server's origin (`http://127.0.0.1:47431`);  default this checkout's, started if needed */
@@ -747,6 +780,7 @@ function parseCommandLine(argv: string[]) {
       out: { type: "string" },
       server: { type: "string" },
       jobs: { type: "string" },
+      site: { type: "string" },
       help: { type: "boolean", short: "h" }
     }
   })
@@ -755,6 +789,14 @@ function parseCommandLine(argv: string[]) {
 ////////////////
 // ## Constants
 ////////////////
+
+/** The Spell UI site, `yarn site:check`'s own:  the one with a search file. */
+const SPELL_UI_SITE: GuideSite = {
+  name: "the Spell UI site",
+  address: SpellUIGuide.address,
+  siteFile: SPELL_UI_SITE_FILE,
+  hasSearch: true
+}
 
 /** A page's line in the site's file:  its address, the quoted path after `at`. */
 const PAGE_LINE = /^\s*it has an? [^\n]*? page at "([^"]+)"/gm
@@ -775,8 +817,9 @@ const SEARCH_FILE = join(SPELL_UI_ROOT, SITE_DATA, "search.json5")
 const PAGES_PER_LOAD = 40
 
 /** Printed on bad arguments and `--help`. */
-const USAGE = `usage:  yarn site:check <page...> | --all | --search  [--out <dir>] [--server <origin>] [--jobs <n>]
+const USAGE = `usage:  yarn site:check <page...> | --all | --search  [--site <set>] [--out <dir>] [--server <origin>] [--jobs <n>]
   page:  an address of the Spell UI site (/button/examples, button), a tag (ui-button), or home
+  --site:  epics or app:  Epic UI's or App UI's guide instead (a page by its address, or its tag or component:  epic-card, MenuBar)
   --all:  every page its file (SpellUI.spell) lists;  and writes the site's search file (docs/__data/search.json5)
   --search:  only writes the search file:  reads every page, with no checks
   --out:  screenshot folder (default ${DEFAULT_OUT})
@@ -1184,4 +1227,18 @@ function navState(): string {
       if (el.shadowRoot) walk(el.shadowRoot)
     }
   }
+}
+
+/** A guide site `SiteCheck` checks:  the Spell UI site, or another component set's guide (`--site`). */
+export type GuideSite = {
+  /** another set's guide:  its set (`epics`, `app`);  none for the Spell UI site */
+  set?: GuideSet
+  /** what messages call it, `the Spell UI site` */
+  name: string
+  /** where the page server shows it, `/components/ui` */
+  address: string
+  /** its site file, from the page server's root:  every page's address */
+  siteFile: string
+  /** it has a search file, written by `--all` and `--search` */
+  hasSearch: boolean
 }

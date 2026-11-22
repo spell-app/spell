@@ -1,0 +1,65 @@
+"app container" is a notebook page
+	<header level="1">
+		AppContainer
+		<header>The box a compiled spell program draws in.</>
+	</>
+
+	<text class="lede" paragraph>An empty box the running program draws itself into. The app draws the box once and never touches what's inside it: that belongs to the program.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone changing how the spell app runs programs</>
+		<item icon="image">A picture, not live: the box with Solitaire drawn in it</>
+	</>
+
+	<section label="1. What it looks like">
+		<icon slot="icon" name="image"/>
+		<text paragraph>The editor's App pane without its toolbar, as the editor draws it: the scrolling box, with the Solitaire example filling it.</>
+		<image src="/components/app/_images/AppContainer.png" alt="A box filled by a game of Spell Solitaire:  its dark header, then the cards on green" appearance="bordered rounded"/>
+		<text class="meta" paragraph>A picture, taken by <text code>yarn site:pictures</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="2. Using it">
+		<icon slot="icon" name="code"/>
+		<text paragraph>Only <link target="src-packages-app-docs-approot-html" link="/app-root">AppRoot</> draws one, and hands its box to the editor:</>
+		<text paragraph>AppRoot.tsx · the program's box:</>
+		<markdown>
+			```typescript
+			<AppContainer
+			  scrolling={props.scrolling ?? true}
+			  padded={props.padded ?? true}
+			  appRef={(element) => {
+			    appElement = element
+			    editor.setAppRoot(element)
+			  }}
+			/>
+			```
+		</>
+		<list bulleted>
+			<item><text code>appRef</> is told which element the program draws in, once it's on the page.</>
+			<item>The program draws with its own Solid root on that element, when it starts: the app's Solid draws the element once and leaves what's inside alone.</>
+			<item>The element's id is <text code>spell-app-root</>: where a program draws when no one has said where. The id is written out, not imported, because the app must never load the program's runtime itself.</>
+			<item>It imports nothing from the app's other components, so a runner could use it without pulling in the editor. The VS Code runner draws a box with the same class and look, but not this component.</>
+		</>
+	</>
+
+	<section label="3. Props, and where it's drawn">
+		<icon slot="icon" name="list check"/>
+		<html>
+			<ui-docs-api family="AppContainer"></>
+		</>
+		<text class="meta" paragraph>From its code, by <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="4. Its code">
+		<icon slot="icon" name="folder open"/>
+		<list bulleted>
+			<item><link target="src-packages-app-src-solid-appcontainer-tsx" link="/src/app/solid/AppContainer.tsx"><text title="src/app/solid/AppContainer.tsx" code>AppContainer.tsx</></>: the component, and its props</>
+			<item><link target="src-packages-app-src-solid-appcontainer-css" link="/src/app/solid/AppContainer.css"><text title="src/app/solid/AppContainer.css" code>AppContainer.css</></>: its look, shared with the VS Code runner's box</>
+			<item>In the app's Solid components, <text code>app/app/solid</>: <link target="src-packages-app-src-solid" link="/src/app/solid/"><text title="src/app/solid/" code>src/solid/</></></>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-12 against branch <ui-text code>epic-workflow</>.</>
+		</>
+	</>

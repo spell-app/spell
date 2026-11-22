@@ -1,0 +1,68 @@
+"spell code" is a notebook page
+	<header level="1">
+		&lt;spell-code&gt;
+		<header>A block of spell, coloured by spell's own parser.</>
+	</>
+
+	<text class="lede" paragraph>A <link target="src-packages-ui-docs-ui-code-html" link="/components/ui/code"><text code>&lt;ui-code&gt;</></> whose language is spell unless it says otherwise. Loading it registers spell with the page's Spell UI, so every <text code>&lt;ui-code language="spell"&gt;</> on the page is coloured too, and every spell block of a markdown.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone showing spell in a page, or changing how spell is coloured</>
+		<item icon="play">Live: the real element, from the app's element build this page loads</>
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>A snippet, and the same in a plain <text code>&lt;ui-code language="spell"&gt;</> beside it.</>
+		<example "1. Example" description="`<spell-code>`:  spell, by default.">
+			<html>
+				<spell-code>
+					<script type="text/plain">
+						## Piles
+						a pile is a list of cards
+						the value of a pile is:
+							return 0
+					</script>
+				</spell-code>
+			</html>
+		</example>
+		<example "1. Example" description="Spell UI's `<ui-code language=\"spell\">`, coloured once `<spell-code>` has loaded.">
+			<code language="spell">a card is a view</code>
+		</example>
+		<text class="meta" paragraph>Live, from <text code>/element/spell.pack.js</> (<text code>yarn build:element</> in <link target="src-spell-app" link="/"><text code>spell-app</></>), which this set's pages load.</>
+	</>
+
+	<section label="2. Using it">
+		<icon slot="icon" name="code"/>
+		<list bulleted>
+			<item>Everything <text code>&lt;ui-code&gt;</> takes: inline text or a <text code>source</> file, <text code>line-numbers</>, <text code>wrap</>, <text code>copy</>, another <text code>language</>.</>
+			<item><text code>spell/&lt;lang&gt;</> asks for a translation; one that doesn't exist stays plain, with a <text code>ui-error</>.</>
+			<item>The colours come from spell's own parser, a lazy chunk fetched the first time a page shows spell.</>
+			<item>Spell UI itself knows nothing of spell: this is one more language a page registers with <text code>UI.code.register()</>.</>
+			<item>The docs pages (epic pages, guides) colour spell without it: the page server adds the app's <text code>spell-language.js</> to them, which registers the language and defines no element.</>
+		</>
+	</>
+
+	<section label="3. Attributes, events and texts">
+		<icon slot="icon" name="list check"/>
+		<text paragraph>Its own names; the rest are <link target="src-packages-ui-docs-ui-code-html" link="/components/ui/code"><text code>&lt;ui-code&gt;</></>'s, which it extends:</>
+		<html>
+			<ui-docs-api family="spell-code"></>
+		</>
+		<text class="meta" paragraph>From its vocabulary, by <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="4. Its code">
+		<icon slot="icon" name="folder open"/>
+		<list bulleted>
+			<item><link target="src-packages-app-components-spell-code-spellcode-tsx" link="/src/app/components/spell-code/SpellCode.tsx"><text title="src/app/components/spell-code/SpellCode.tsx" code>SpellCode.tsx</></>: its component, a <text code>UICode</></>
+			<item><link target="src-packages-app-components-spell-code-spellcode-en-ts" link="/src/app/components/spell-code/SpellCode.en.ts"><text title="src/app/components/spell-code/SpellCode.en.ts" code>SpellCode.en.ts</></>: what its vocabulary adds to <text code>&lt;ui-code&gt;</>'s</>
+			<item><link target="src-packages-app-components-spell-code-spelllanguage-ts" link="/src/app/components/spell-code/SpellLanguage.ts"><text title="src/app/components/spell-code/SpellLanguage.ts" code>SpellLanguage.ts</></>: the <text code>spell</> language it registers</>
+			<item>Its build: <text code>yarn build:element</>, into <text code>dist-element/</>, served at <text code>/element/</></>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-20 against branch <ui-text code>repo-split</>.</>
+		</>
+	</>

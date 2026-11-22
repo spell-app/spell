@@ -17,7 +17,7 @@ import "./RunnerSplit.css"
  *   Whoever mounts a runner defines the `<ui-*>` tags,
  *   with `spell/app/app/solid/loadUI`, or a root around it (`<spell-viewer>`),
  *   and gives it Fomantic's icon names (`<ui-root icons="fomantic">`, `<spell-viewer>`'s default `icons`).
- * - SEE:  its App UI components page, `app/docs/RunnerPane.html` (`/components/app/RunnerPane.html`).
+ * - SEE:  its page in App UI's guide, `/components/app/runner-pane`.
  ****************/
 export function RunnerPane<Id extends string>(props: RunnerPaneProps<Id>) {
   // what a screen reader calls the pane:  the tab it shows

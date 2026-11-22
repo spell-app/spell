@@ -1,0 +1,120 @@
+"epic clarify" is a notebook page
+	<header level="1">
+		&lt;epic-clarify&gt;
+		<header>The &lt;epic-clarify&gt; element: Clarify, and the (i) button on every item's line, asking Claude to clarify it at once.</>
+	</>
+
+	<text class="lede" paragraph>An item with only a title says <text italic>What it says on the tin.</> where its details would be. <text code>&lt;epic-clarify&gt;</> is the <text bold>Clarify</> after those words: while the page is reviewed, a link that asks Claude for the item's details at once, without waiting for Send.</>
+	<text paragraph>With <text code>icon</>, it's a small (i) button, last on the line of every item, every kind (issues, judgement calls, todos, questions, manual tests), on an epic page being reviewed: found without opening the item. A click asks Claude to clarify that item's text at once; while Claude works on it, the icon turns like a coin. Until epic <text code>epic-engine</> T95 it was a circle-question at the right of an item's body, seen only once the item was opened.</>
+	<text paragraph>Either click leaves the page where it is: the link is a button drawn as a word, never a <text code>#</> link, and a session told of the request takes it by itself, so no notice appears at the page's top.</>
+	<text class="meta" paragraph>For anyone reviewing an epic page.</>
+	<text class="meta" paragraph>Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> I281;  the icon, T76;  on every item's line, T95), its own <link target="src-spell-epic-src-components-epic-clarify" link="/epic/src/components/epic-clarify/"><text title="epic/src/components/epic-clarify/" code>epic-clarify</></> family.</>
+	<text class="meta" paragraph>Its vocabulary: <link target="src-spell-epic-src-components-epic-clarify-epicclarify-en-ts" link="/epic/src/components/epic-clarify/EpicClarify.en.ts"><text title="epic/src/components/epic-clarify/EpicClarify.en.ts" code>EpicClarify.en.ts</></></>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-clarify-epicclarify-tsx" link="/epic/src/components/epic-clarify/EpicClarify.tsx"><text title="epic/src/components/epic-clarify/EpicClarify.tsx" code>EpicClarify.tsx</></>.</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>A todo with no details. Clarify shows only on an epic page being reviewed: here, the words alone.</>
+		<html>
+			<ui-stack>
+				<epic-section id="todo" kind="todo" open>
+					<epic-item id="t9" title="Tidy the window names" status="open">
+						<p data-title-body>
+							<em>What it says on the tin.</>
+							<epic-clarify></>
+						</>
+					</>
+				</>
+			</>
+		</>
+		<text paragraph>The item above:</>
+		<markdown>
+			```html
+			<epic-item id="t9" title="Tidy the window names" status="open">
+			  <p data-title-body=""><em>What it says on the tin.</em><epic-clarify></epic-clarify></p>
+			</epic-item>
+			```
+		</>
+		<text paragraph>The icon on its own, as <text code>&lt;epic-item&gt;</> draws it at the end of its line. Not reviewed here, so nothing shows.</>
+		<html>
+			<ui-stack>
+				<epic-clarify of="t9" icon></>
+			</>
+		</>
+		<text paragraph>The icon:</>
+		<markdown>
+			```html
+			<epic-clarify of="t9" icon></epic-clarify>
+			```
+		</>
+	</>
+
+	<section label="2. Behaviour">
+		<icon slot="icon" name="hand pointer"/>
+		<list bulleted>
+			<item>Its item is <text code>of</>, else the <text code>&lt;epic-item&gt;</> it's written in.</>
+			<item>A click is the old Add Details: a request for now, posted to the page server at once. The epic's session takes it, or the page server wakes the epic when nobody is listening.</>
+			<item>The item then shows the request under way, as any request for now; its busy button calls it off.</>
+			<item>Not reviewed: nothing is drawn.</>
+			<item>The link: not drawn while the request is on its way or under way.</>
+			<item>The icon: kept while Claude works on its item's details, turning like a coin, then resting a second; a click then calls the request off. With reduced motion it stands still, in the accent colour.</>
+			<item>Link and icon are one ask: a given body shows both, and the icon turns while Claude answers either.</>
+		</>
+	</>
+
+	<section label="3. Markup">
+		<icon slot="icon" name="code"/>
+		<list bulleted>
+			<item>The epic tool writes it, in the body it gives an item with only a title (<text code>PlanItem.giveBody()</>); the migration <text code>item-bodies</> brings older bodies up to it on the page's next edit.</>
+			<item><text code>&lt;epic-item&gt;</> draws the icon itself, in its shadow root, last on its line while the page is reviewed (its part <text code>clarify</>): Spell UI's <text code>info circle</>, a review button's 24px square, centred on the line with the review buttons. Like the rest of the line's marks it's drawn once the line comes near the screen, so a folded section's items carry none.</>
+			<item>It holds nothing.</>
+		</>
+
+		<section label="Attributes" sticky="stack" collapsible dividing open="false">
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Name</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>of</>
+					</>
+					<cell>Its item's id, when it isn't written inside the item.</>
+				</>
+				<row>
+					<cell>
+						<text code>icon</>
+					</>
+					<cell>An (i) button instead of the Clarify link, last on an item's line.</>
+				</>
+			</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Name</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The Clarify link, or the icon's button, in the page's link colour (<text code>--epic-clarify-color</>).</>
+				</>
+				<row>
+					<cell>
+						<text code>icon</>
+					</>
+					<cell>The (i) glyph (<text code>info circle</>):  it turns while Claude works (<text code>:state(turning)</>).</>
+				</>
+			</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-11-15 against branch <ui-text code>epic-engine</> (I281, T76).</>
+		</>
+	</>

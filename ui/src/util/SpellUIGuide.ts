@@ -53,7 +53,49 @@ export class SpellUIGuide {
     const match = /^\/components\/ui\/([^/?#]+\.html)([?#].*)?$/.exec(path)
     return match ? SpellUIGuide.addressOf(`${match[1]}${match[2] ?? ""}`) : undefined
   }
+
+  ////////////////
+  // ## The other component sets' guides
+  ////////////////
+
+  /**
+   * The other component sets' guide sites, each at its set's address, as the Spell UI site is (epic `editor` P44):
+   * Epic UI, the `<epic-*>` elements the epic pages are built from;  App UI, the editor's own components.
+   * - Each page is named for what its old HTML page was named for, a tag or a component:
+   *   `/components/epics/epic-card`, `/components/app/menu-bar` (`setAddressOf()`).
+   */
+  static readonly sets: Readonly<Record<GuideSet, { readonly address: string; readonly project: string }>> = {
+    epics: { address: "/components/epics", project: "@spell/guides/EpicUI" },
+    app: { address: "/components/app", project: "@spell/guides/AppUI" }
+  }
+
+  /**
+   * The page server's address of `page` in set `set`'s guide:  a tag or a component's name, or one of its old HTML
+   * pages', `?query` and `#section` kept:  `epic-card.html#parts` => `/components/epics/epic-card#parts`,
+   * `MenuBar` => `/components/app/menu-bar`;  the guide's home for `""`, `index.html`.
+   */
+  static setAddressOf(set: GuideSet, page: string): string {
+    const [, path = "", rest = ""] = /^([^?#]*)(.*)$/.exec(page) ?? []
+    const name = path
+      .replace(/\.html$/, "")
+      .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+      .toLowerCase()
+    return `${SpellUIGuide.sets[set].address}/${name === "index" ? "" : name}${rest}`
+  }
+
+  /**
+   * The address of a link written for one of the other sets' old HTML pages, `/components/app/MenuBar.html`:
+   * its guide page's, `/components/app/menu-bar`;  `undefined` for any other path.
+   * - What the page server's link mender asks for those sets, as `mendedPath()` for Spell UI's.
+   */
+  static setMendedPath(path: string): string | undefined {
+    const match = /^\/components\/(epics|app)\/([^/?#]+\.html)([?#].*)?$/.exec(path)
+    return match ? SpellUIGuide.setAddressOf(match[1] as GuideSet, `${match[2]}${match[3] ?? ""}`) : undefined
+  }
 }
+
+/** The component sets with a guide of their own beside Spell UI's:  Epic UI, App UI. */
+export type GuideSet = "epics" | "app"
 
 /**
  * The old components pages whose Spell page isn't their name without `ui-`:

@@ -1,0 +1,94 @@
+"chrome" is a notebook page
+	<header level="1">
+		Chrome
+		<header>The menus and toolbars around the panes: bars, sections, springs, "..." menus.</>
+	</>
+
+	<text class="lede" paragraph>The pieces every toolbar in the editor is built from: the bar across the top of each page, the header on top of each pane, the left, middle and right sections inside them, and the "..." menus. The theme picked dresses them all, as it does the rest of the editor.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone adding to, or changing, the spell app's toolbars</>
+		<item icon="image">A picture, not live: the editor page's top bar, an AppMenu</>
+	</>
+
+	<section label="1. What it looks like">
+		<icon slot="icon" name="image"/>
+		<text paragraph>The editor page's AppMenu, in three sections: the project's menu (Spell's hat, its name) and File · Edit · View · Run · Help on the left; Run | Edit in the middle; on the right, one group of icons, their glyphs 12px apart: the code's icon, the compiled code's, Inspect App and Add to the app; then, at the far right, Restart, the theme menu and your avatar.</>
+		<image src="/components/app/_images/chrome.png" alt="The editor's top bar: Spell's hat and the Solitaire menu, then File, Edit, View, Run and Help on the left; Run and Edit in the middle, then the code, compiled code, Inspect App and Add icons; Restart, the theme menu and an avatar on the right" appearance="bordered rounded"/>
+		<text class="meta" paragraph>A picture, taken by <text code>yarn site:pictures</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+		<text paragraph>The menus themselves are <text title="app/src/app/solid/MenuBar.tsx" code>MenuBar.tsx</>'s: each a <text code>&lt;BarMenu&gt;</>, its items <link target="src-packages-app-docs-actions-html" link="/actions">Actions</> drawn as <text code>&lt;ui-action&gt;</>s with their keys. A pane's own toolbar is a PanelMenu, the pane's header.</>
+	</>
+
+	<section label="2. Using it">
+		<icon slot="icon" name="code"/>
+		<text paragraph>The editor page's top bar, above: an AppMenu of three Submenus:</>
+		<text paragraph>SpellEditor.tsx · the editor page's top bar:</>
+		<markdown>
+			```typescript
+			<AppMenu class="EditorBar">
+			  <Submenu slot="start" left spring>
+			    <ProjectBarMenu useRunner={props.mode === "run"} />
+			    <AppBarMenus mode={props.mode} />
+			  </Submenu>
+			  <Submenu center spring>
+			    <ModeButtons current={props.mode} />
+			  </Submenu>
+			  <Submenu slot="end" right spring class="BarTools">
+			    <Submenu appearance="capsule">
+			      <Show when={props.mode === "edit"}>
+			        <InspectAppButton id={INSPECT_APP_ID} />
+			        <InspectHelp for={INSPECT_APP_ID} />
+			        <InspectorToggle />
+			        <span class="BarToolsLine" role="separator" />
+			      </Show>
+			      <Actions.restartApp iconOnly />
+			      <ThemeMenu />
+			    </Submenu>
+			    <Actions.you />
+			  </Submenu>
+			</AppMenu>
+			```
+		</>
+		<text paragraph>TreeViewer.tsx · a pane's toolbar:</>
+		<markdown>
+			```typescript
+			<PanelMenu>
+			  <Submenu left spring>
+			    <MenuHeader>Spell Tree</MenuHeader>
+			  </Submenu>
+			</PanelMenu>
+			```
+		</>
+		<list bulleted>
+			<item>The bars: <text code>&lt;AppMenu&gt;</>, joined to the top of the window, is Spell UI's app bar, <link link="/components/ui/app-menu"><text code>&lt;ui-app-menu&gt;</></>, its sections by <text code>slot</> (<text code>start</>, none for the middle, <text code>end</>); <text code>&lt;PanelMenu&gt;</>, on top of a pane, is a plain menu, which the theme shapes (<text title="app/src/app/solid/EditorTheme.css" code>EditorTheme.css</>). Each holds <text code>&lt;ui-item&gt;</>s.</>
+			<item><text code>&lt;Submenu&gt;</>: a left, middle or right section, each at least a third of the bar, so the three line up. With <text code>spring</>, a <text code>&lt;Spring&gt;</> pushes it away from its neighbours.</>
+			<item><text code>&lt;Spring&gt;</>: an invisible item that takes up the room left over.</>
+			<item><text code>&lt;MenuHeader&gt;</>: a pane's name on its bar, "App" or "Spell Tree".</>
+			<item><text code>&lt;MoreMenu&gt;</>: a "..." dropdown of <link target="src-packages-app-docs-actions-html" link="/actions">Actions</>. Choosing one clicks it, so an action works the same in a menu or on a bar. <list bulleted><item>Same-titled items need their own <text code>value</>s.</> <item><text code>stub</>: a dimmed "..." that does nothing yet.</></></>
+			<item>The project's actions are its menu's (<text code>&lt;ProjectBarMenu&gt;</>): Rename, Delete, Duplicate, Reset to Saved, Publish, Versions, Delete Draft, Project Settings, Export, Import, the theme and Home. The file's actions are the File menu's; New Example is the Spell menu's, beside the projects.</>
+			<item>Each piece's host takes no room of its own (<text code>display: contents</>): style the boxes inside through their parts, never the host.</>
+		</>
+	</>
+
+	<section label="3. Props, and where it's drawn">
+		<icon slot="icon" name="list check"/>
+		<html>
+			<ui-docs-api family="chrome"></>
+		</>
+		<text class="meta" paragraph>From its code, by <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="4. Its code">
+		<icon slot="icon" name="folder open"/>
+		<list bulleted>
+			<item><link target="src-packages-app-src-solid-chrome-tsx" link="/src/app/solid/chrome.tsx"><text title="src/app/solid/chrome.tsx" code>chrome.tsx</></>: every piece above, and the icons the app's menus use</>
+			<item><link target="src-packages-app-src-solid-chrome-css" link="/src/app/solid/chrome.css"><text title="src/app/solid/chrome.css" code>chrome.css</></>: their look</>
+			<item><link target="src-tests-app-src-solid-sharedui-browser-test-tsx" link="/tests/app/solid/sharedUI.browser.test.tsx"><text title="tests/app/solid/sharedUI.browser.test.tsx" code>sharedUI.browser.test.tsx</></>: their tests, with the Actions'</>
+			<item>In the app's Solid components, <text code>app/app/solid</>: <link target="src-packages-app-src-solid" link="/src/app/solid/"><text title="src/app/solid/" code>src/solid/</></></>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-12 against branch <ui-text code>epic-workflow</>.</>
+		</>
+	</>

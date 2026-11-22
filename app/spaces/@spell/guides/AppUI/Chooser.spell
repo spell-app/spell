@@ -1,0 +1,60 @@
+"chooser" is a notebook page
+	<header level="1">
+		Chooser
+		<header>A dialog to choose one value from a list, or several.</>
+	</>
+
+	<text class="lede" paragraph>The dialog the editor shows when it needs a person to pick from a short list. It's a list of radio buttons (or checkboxes, to pick several), with Cancel and OK, and it hands back what was picked.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone asking a question in the spell app's editor</>
+		<item icon="image">A picture, not live: it's opened by the editor's <text code>editor.choose()</></>
+	</>
+
+	<section label="1. What it looks like">
+		<icon slot="icon" name="image"/>
+		<text paragraph>Over the editor, asked for by <text code>editor.choose()</>: "Pick one" of A, B and C.</>
+		<image src="/components/app/_images/Chooser.png" alt="A dialog headed Pick one: a message, three radio buttons A, B and C, then Cancel and OK" appearance="bordered rounded"/>
+		<text class="meta" paragraph>A picture, taken by <text code>yarn site:pictures</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="2. Using it">
+		<icon slot="icon" name="code"/>
+		<text paragraph>Nobody draws it in JSX: ask the editor, with <text code>editor.choose()</>, and wait for the answer. <text code>Actions.choose</> is a button that does, though no toolbar shows one today.</>
+		<text paragraph>From code · asking the editor:</>
+		<markdown>
+			```typescript
+			const pick = await editor.choose({ message: "Which deck?", options: ["Red", "Blue"] })
+			```
+		</>
+		<list bulleted>
+			<item>Call <text code>editor.choose()</> to ask: it needs a <text code>message</> and its options. It opens the chooser with <text code>openChooser()</>, which adds it to the page and takes it away once it's closed.</>
+			<item><text code>options</> can be plain values, <text code>&#123; value, text &#125;</> objects, or a map of value to text. The answer is the caller's own value: a number option answers a number.</>
+			<item>The answer, once the dialog has gone: OK gives the value picked (with <text code>multiple</>, a list of them); Cancel or Escape gives <text code>undefined</>.</>
+			<item><text code>defaultValue</> picks some to start with. Enter anywhere in it is OK; a click outside it does nothing.</>
+			<item>It looks like the editor's other dialogs: small, Cancel first. It's a plain list, fine for a handful of options; a long one would want a searchable dropdown.</>
+		</>
+	</>
+
+	<section label="3. Props, and where it's drawn">
+		<icon slot="icon" name="list check"/>
+		<html>
+			<ui-docs-api family="Chooser"></>
+		</>
+		<text class="meta" paragraph>From its code, by <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="4. Its code">
+		<icon slot="icon" name="folder open"/>
+		<list bulleted>
+			<item><link target="src-packages-app-src-solid-modals-chooser-tsx" link="/src/app/solid/modals/Chooser.tsx"><text title="src/app/solid/modals/Chooser.tsx" code>Chooser.tsx</></>: the dialog, <text code>openChooser()</>, and how options are read</>
+			<item><link target="src-packages-app-src-solid-modals-modals-types-ts" link="/src/app/solid/modals/modals.types.ts"><text title="src/app/solid/modals/modals.types.ts" code>modals.types.ts</></>: what <text code>editor.choose()</> takes, and the other dialogs'</>
+			<item><link target="src-packages-app-src-solid-modals-dialogs-ts" link="/src/app/solid/modals/dialogs.ts"><text title="src/app/solid/modals/dialogs.ts" code>dialogs.ts</></>: the editor's dialogs, this one among them</>
+			<item><link target="src-tests-app-src-solid-modals-modals-browser-test-tsx" link="/tests/app/solid/modals/modals.browser.test.tsx"><text title="tests/app/solid/modals/modals.browser.test.tsx" code>modals.browser.test.tsx</></>: its tests, with the other dialogs'</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-12 against branch <ui-text code>epic-workflow</>.</>
+		</>
+	</>

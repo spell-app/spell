@@ -34,7 +34,7 @@ const vocabulary = {
  * - `<ui-table>`'s sheet is adopted into its shadow root too, for the tables (`styleSheetNames`).
  * - On a page with Spell UI of its own (a docs page), it extends the PAGE's `UIMarkdown`
  *   (`spell-ui-shared.js`, `vite.solid.config.ts`).
- * - SEE:  its App UI components page, `app/docs/spell-markdown.html` (`/components/app/spell-markdown.html`).
+ * - SEE:  its page in App UI's guide, `/components/app/spell-markdown`.
  ****************/
 export class SpellMarkdown extends UIMarkdown {
   @E.proto static vocabulary: E.ComponentVocabulary = vocabulary

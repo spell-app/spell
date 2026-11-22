@@ -48,7 +48,7 @@ import "./FileTabs.css"
  *   - No key closes one:  ⌘W is the browser's, closing the page's own tab.
  *   - A site's own file (`Dashboard.site.spell`, `SiteEdits.isRoutingOnly()`) is always a tab, beside the file
  *     showing (epic `editor` I188:  "have the `.site.spell` file open and the 'more files' button on the right").
- * - SEE:  its App UI components page, `app/docs/FileTabs.html` (`/components/app/FileTabs.html`).
+ * - SEE:  its page in App UI's guide, `/components/app/file-tabs`.
  ****************/
 export function FileTabs() {
   const state = trackProjectFiles()

@@ -1,0 +1,93 @@
+"epic kickoff" is a notebook page
+	<header level="1">
+		&lt;epic-kickoff&gt;
+		<header>The &lt;epic-kickoff&gt; element: the box at the top of a new epic's Overview, where you type what the epic should do, pictures and all.</>
+	</>
+
+	<text class="lede" paragraph>A new epic starts on its page, not in the chat. <text code>/epic &lt;name&gt;</> opens an almost empty epic page, and the kickoff box sits at the top of its Overview: you type what the epic should do, as long as you like, and paste or drop pictures into it.</>
+	<text paragraph>The page's Send hands it to Claude. It becomes the Kickoff prompt, pictures and all, and the session plans from it, as it plans from a prompt typed after the name in the chat.</>
+	<text class="meta" paragraph>For anyone starting an epic.</>
+	<text class="meta" paragraph>Status: <label size="mini" color="green">built</> (epic <text code>epic-engine</> P75), its own <link target="src-spell-epic-src-components-epic-kickoff" link="/epic/src/components/epic-kickoff/"><text title="epic/src/components/epic-kickoff/" code>epic-kickoff</></> family.</>
+	<text class="meta" paragraph>Its vocabulary: <link target="src-spell-epic-src-components-epic-kickoff-epickickoff-en-ts" link="/epic/src/components/epic-kickoff/EpicKickoff.en.ts"><text title="epic/src/components/epic-kickoff/EpicKickoff.en.ts" code>EpicKickoff.en.ts</></></>
+	<text class="meta" paragraph>Its component: <link target="src-spell-epic-src-components-epic-kickoff-epickickoff-tsx" link="/epic/src/components/epic-kickoff/EpicKickoff.tsx"><text title="epic/src/components/epic-kickoff/EpicKickoff.tsx" code>EpicKickoff.tsx</></>.</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph><text code>&lt;epic-overview&gt;</> draws it, in its own shadow root, only on an epic page being reviewed that is in its Overview stage and has no Kickoff prompt and no phases yet:  never on a saga page. So this page shows it alone, as the Overview would.</>
+		<html>
+			<ui-stack>
+				<epic-kickoff></>
+			</>
+		</>
+	</>
+
+	<section label="2. Behaviour">
+		<icon slot="icon" name="hand pointer"/>
+		<list bulleted>
+			<item>One box that grows as you type, up to a third of the window.</>
+			<item>Pictures: paste or drop several at once, or choose them with the small picture button (VS Code's side bar lets no file be dragged in). Each is saved beside the page, in its <text code>pictures/</> folder, and written into your words on a line of its own, labelled: <text code>!\[IMG2](pictures/kickoff-...png)</>.</>
+			<item>A strip under the box shows them, each with its label and an x.</>
+			<item>The x takes the picture out, and the later labels move down one, in the words that name them too: IMG3 becomes IMG2. Deleting a picture's whole line by hand does the same.</>
+			<item>Saved as you type, ten seconds after the last key, and at once when a picture comes or goes, the box loses the focus, or the page closes: a <text code>kickoff</> mark in the review inbox.</>
+			<item>The header's Send hands it over. <text code>epic inbox apply</> writes it as the Kickoff prompt, its pictures labelled, and the box gives way to it.</>
+		</>
+	</>
+
+	<section label="3. Markup">
+		<icon slot="icon" name="code"/>
+		<list bulleted>
+			<item>Never written in a page: <text code>&lt;epic-overview&gt;</> draws it.</>
+			<item>No attributes, slots or events of its own.</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Name</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The box around it: your violet card.</>
+				</>
+				<row>
+					<cell>
+						<text code>lead</>
+					</>
+					<cell>Its first line: What should this epic do?</>
+				</>
+				<row>
+					<cell>
+						<text code>words</>
+					</>
+					<cell>Its one box, which grows as it's typed.</>
+				</>
+				<row>
+					<cell>
+						<text code>hint</>
+					</>
+					<cell>How pictures are named, and what Send does.</>
+				</>
+				<row>
+					<cell>
+						<text code>choose</>
+					</>
+					<cell>The picture button.</>
+				</>
+				<row>
+					<cell>
+						<text code>saved</>
+					</>
+					<cell>When it was last saved, or why not.</>
+				</>
+			</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-11-17 against branch <ui-text code>epic-engine</> (P75).</>
+		</>
+	</>

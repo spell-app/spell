@@ -18,7 +18,6 @@
     "/////// PACK AND DOCS": "",
     "pack:build": "spell-pack build",
     "pack:check": "spell-pack check",
-    "site:data": "tsx scripts/site-data.ts",
     "docs:update": "node src/tools/update.js",
     "docs:index": "node src/tools/index.js",
     "docs:new": "node src/tools/new-page.js",
@@ -29,10 +28,10 @@
     "/////// CORRECTNESS": "",
     "review": "yarn ts && yarn lint && yarn test && yarn test:integration && echo '== REVIEW PASSED\n===========\n'",
     "ts": "echo '>>>>>>>>>>>\n>> RUNNING TSC' && tsc && tsc -p tests && echo '<< TSC PASSED\n'",
-    "lint": "echo '>>>>>>>>>>>\n>> LINTING WITH OXLINT' && vp lint --report-unused-disable-directives --max-warnings 0 src scripts tests vscode/src && echo '<< OXLINT PASSED\n'",
-    "lint:fix": "vp lint --fix src scripts tests vscode/src",
-    "format": "vp fmt src scripts tests vscode/src vscode/build.mjs vite.config.ts vitest.config.ts",
-    "format:check": "vp fmt src scripts tests vscode/src vscode/build.mjs vite.config.ts vitest.config.ts --check",
+    "lint": "echo '>>>>>>>>>>>\n>> LINTING WITH OXLINT' && vp lint --report-unused-disable-directives --max-warnings 0 src tests vscode/src && echo '<< OXLINT PASSED\n'",
+    "lint:fix": "vp lint --fix src tests vscode/src",
+    "format": "vp fmt src tests vscode/src vscode/build.mjs vite.config.ts vitest.config.ts",
+    "format:check": "vp fmt src tests vscode/src vscode/build.mjs vite.config.ts vitest.config.ts --check",
     "/////// TESTING": "",
     "test": "echo '>>>>>>>>>>>\n>> RUNNING TESTS' && vp test run --project node --project browser --project motion && yarn test:scripts && echo '<< TESTS PASSED\n'",
     "test:integration": "vp test run --project integration",
@@ -99,7 +98,8 @@
       "epics": {
         "name": "Epic UI",
         "dir": "src/docs",
-        "assets": "../ui/site/_assets"
+        "assets": "../ui/site/_assets",
+        "sitePage": "index.html"
       }
     },
     "engineRoutes": {

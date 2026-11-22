@@ -1,0 +1,340 @@
+"epic ask" is a notebook page
+	<header level="1">
+		&lt;epic-ask&gt;
+		<header>A question you answer on the page: its options as the epic page's cards, each with a Choose pill, Other, its state as a chip.</>
+	</>
+
+	<text class="lede" paragraph>A question you answer ON the page: a details page's. Its text and options are an epic page's own elements, so it reads as an epic page's question does; it adds a Choose pill to each option (the epic page's card look, epic <text code>epic-engine</> P50), a comment box folded under each, an Other box, and a chip in the epic page's state colours.</>
+	<text class="meta" paragraph>For anyone writing a page you answer on (a details or choice page), or changing this element.</>
+	<text class="meta" paragraph><label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-ask" link="/epic/src/components/epic-ask/"><text title="epic/src/components/epic-ask/" code>epic-ask/</></> (epic <text code>epic-workflow</> P12).</>
+	<text class="meta" paragraph>Its vocabulary (every table below comes from it): <link target="src-spell-epic-src-components-epic-ask-epicask-en-ts" link="/epic/src/components/epic-ask/EpicAsk.en.ts"><text title="epic/src/components/epic-ask/EpicAsk.en.ts" code>EpicAsk.en.ts</></>.</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>Live: the real element, drawn by the epics pack this page loads. Off a details page's own address nothing is saved or sent: Send says so.</>
+		<list bulleted>
+			<item>Tick an option: the chip turns green. Write only Other: blue.</>
+			<item>The second one is the review's item picker: pick several, Select all, Open | All, and the (?) of "Provide more details".</>
+		</>
+		<html>
+			<epic-ask name="q1">
+				<epic-question>
+					<p>Revisit asks Claude to look again. Which colour says so?</>
+				</>
+				<epic-choices>
+					<epic-option letter="A" title="Blue: an ask of Claude" recommended>
+						<p>Like Revisit: every button that sets Claude working is blue.</>
+						<epic-aside title="Details">
+							<p>Only the timing differs.</>
+						</>
+					</>
+					<epic-option letter="B" title="Yellow: still undecided">
+						<p>A revisit keeps the item open.</>
+					</>
+				</>
+			</>
+			<epic-ask name="items" multiple select-all filter more-details>
+				<epic-choices>
+					<epic-option letter="J1" title="First call" selected state-icon="circle outline" state-color="red" state-label="Not reviewed yet">
+						<p>Its text.</>
+					</>
+					<epic-option letter="J2" title="Second call" selected badge="deferred" badge-color="yellow" state-icon="circle pause" state-color="yellow" state-label="Deferred 10/10/26">
+						<p>Its text.</>
+					</>
+					<epic-option letter="J3" title="Reviewed already" done state-icon="circle check" state-color="green" state-label="Reviewed 10/11/26">
+						<p>Its text.</>
+					</>
+				</>
+			</>
+		</>
+		<text paragraph>The third is <text code>compact</>, for a page of many short picks: its options in one select, with a comment box beside it.</>
+		<html>
+			<epic-ask compact name="compact-demo" chip="12">
+				<epic-question>
+					<p>Rename the store to match what it holds.</>
+				</>
+				<epic-choices fixed>
+					<epic-option letter="Y" title="Yes" recommended>
+						<p>Do it as described.</>
+					</>
+					<epic-option letter="N" title="No">
+						<p>Don't do it.</>
+					</>
+					<epic-option letter="M" title="Modify">
+						<p>Do it differently: say how in the comment.</>
+					</>
+					<epic-option letter="R" title="Revisit">
+						<p>Not now: ask again later.</>
+					</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>A question's section, as <text code>epic ask create</> writes it from a spec (<link target="src-spell-epic-src-tools-details-js" link="/epic/src/tools/details.js"><text code>details.js</></>, <link target="src-spell-epic-src-tools-answerpages-js" link="/epic/src/tools/answerPages.js"><text code>answerPages.js</></>): the section's id is the answer's key.</>
+		<text paragraph>details page · a question:</>
+		<markdown>
+			```html
+			<ui-section id="q1" label="Q1 · Which colour for Revisit?">
+			  <epic-ask>
+			    <epic-question><p>Revisit asks Claude to look again. Which colour says so?</p></epic-question>
+			    <epic-choices>
+			      <epic-option letter="A" title="Blue: an ask of Claude" recommended>
+			        <p>Like Revisit: every button that sets Claude working is blue.</p>
+			        <epic-aside title="Details"><p>Only the timing differs.</p></epic-aside>
+			      </epic-option>
+			      <epic-option letter="B" title="Yellow: still undecided"><p>A revisit keeps the item open.</p></epic-option>
+			    </epic-choices>
+			  </epic-ask>
+			</ui-section>
+			```
+		</>
+		<text paragraph>the review's item picker:</>
+		<markdown>
+			```html
+			<ui-section id="items" label="Judgement calls (2/3)">
+			  <epic-ask multiple select-all filter more-details>
+			    <epic-choices>
+			      <epic-option letter="J1" title="First call" selected state-icon="circle outline" state-color="red" state-label="Not reviewed yet"><p>Its text.</p></epic-option>
+			      <epic-option letter="J2" title="Second call" selected badge="deferred" badge-color="yellow" state-icon="circle pause" state-color="yellow" state-label="Deferred 10/10/26"><p>Its text.</p></epic-option>
+			      <epic-option letter="J3" title="Reviewed already" done state-icon="circle check" state-color="green" state-label="Reviewed 10/11/26"><p>Its text.</p></epic-option>
+			    </epic-choices>
+			  </epic-ask>
+			</ui-section>
+			```
+		</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="layer group"/>
+		<text paragraph><text bold>Its parent:</> a <text code>&lt;ui-section id&gt;</> of a details page, one question each; its answer goes under that id (or its <text code>name</>).</>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Child</>
+				<cell>How many</>
+				<cell>What it holds</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-question-html" link="/epic-question">
+						<text code>&lt;epic-question&gt;</>
+					</>
+				</>
+				<cell>one at most</>
+				<cell>The question, in full.</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-choices-html" link="/epic-choices">
+						<text code>&lt;epic-choices&gt;</>
+					</>
+				</>
+				<cell>one at most</>
+				<cell>Its options, <text code>&lt;epic-option&gt;</>s: each draws a Choose pill, as an option of an ask.</>
+			</>
+			<row>
+				<cell>prose</>
+				<cell>any number</>
+				<cell>Anything else it needs: a table, a picture.</>
+			</>
+		</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="table columns"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Name</>
+				<cell>Values</>
+				<cell>Meaning</>
+				<cell>Required</>
+			</>
+			<row>
+				<cell>
+					<text code>name</>
+				</>
+				<cell>text</>
+				<cell>The key its answer goes under (<text code>q1</>); none: its <text code>&lt;ui-section&gt;</>'s id. Its options' comments are <text code>&lt;key&gt;-&lt;letter&gt;</> (<text code>q1-B</>).</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>multiple</>
+				</>
+				<cell>present or absent</>
+				<cell>Pick several to start with; without it, pick one. Its line's switch flips it on the page (P50).</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>select-all</>
+				</>
+				<cell>present or absent</>
+				<cell>With <text code>multiple</>: a Select all / Select none button on its line, for the options shown.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>filter</>
+				</>
+				<cell>present or absent</>
+				<cell>An Open | All toggle on its line: Open (the default) hides the options marked <text code>done</>.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>more-details</>
+				</>
+				<cell>present or absent</>
+				<cell>A (?) on each option, "Provide more details": pressed, the option is ticked too, and the answer carries its letter under <text code>&lt;key&gt;-more</>, so Claude explains it in full before asking again.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>compact</>
+				</>
+				<cell>present or absent</>
+				<cell>Its options as ONE select, with a comment box beside it, instead of a card each (T121): for a page of many short picks. Write its options as usual: their titles are the select's entries. The comment is its Other, sent the same way, and read back as <text code>Comment:</>.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>chip</>
+				</>
+				<cell>text</>
+				<cell>Its chip, as written (<text code>12</>). None: its key's id (<text code>q3-priority</> gives <text code>Q3</>), else its section's number (<text code>12 · Rename it</> gives <text code>Q12</>), else its section's place. Two questions in one section share it, a letter each: <text code>Q12 · a</>, <text code>Q12 · b</> (I369).</>
+				<cell/>
+			</>
+		</>
+
+		<section label="Slots" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A slot is a place in the drawing that a child goes to: a child with <text code>slot="name"</> goes to that name's place, every other child to the default one (shown as <text italic>default</>).</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Slot</>
+					<cell>What goes there</>
+				</>
+				<row>
+					<cell>
+						<text italic>default</>
+					</>
+					<cell>The question: an <text code>&lt;epic-question&gt;</>, then an <text code>&lt;epic-choices&gt;</>; prose too.</>
+				</>
+			</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A part is a piece of what the element draws in its shadow root (its own hidden markup), named so a stylesheet can reach it: <text code>epic-ask::part(base)</>.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The question's box.</>
+				</>
+				<row>
+					<cell>
+						<text code>line</>
+					</>
+					<cell>Its line: the chip, how to answer, its tools.</>
+				</>
+				<row>
+					<cell>
+						<text code>chip</>
+					</>
+					<cell>Its id chip (<text code>Q1</>), in the epic page's state colours: red needs you, green picked, blue Claude's.</>
+				</>
+				<row>
+					<cell>
+						<text code>how</>
+					</>
+					<cell><text code>Pick one</> or <text code>Pick several</>.</>
+				</>
+				<row>
+					<cell>
+						<text code>tools</>
+					</>
+					<cell>Its buttons: Select all, Open | All.</>
+				</>
+				<row>
+					<cell>
+						<text code>other</>
+					</>
+					<cell>The Other box, an <text code>&lt;epic-text-box type="other"&gt;</>, after the options; <text code>compact</>: its comment box.</>
+				</>
+				<row>
+					<cell>
+						<text code>row</>
+					</>
+					<cell><text code>compact</>: its one row, under its text: the chip, the select, the comment box.</>
+				</>
+				<row>
+					<cell>
+						<text code>select</>
+					</>
+					<cell><text code>compact</>: its options as one <text code>&lt;ui-select&gt;</>.</>
+				</>
+			</>
+		</>
+
+		<section label="States" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A state is a word the element sets on itself while something is true, for styling: <text code>epic-ask:state(attention)</>. Never written in the file.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>State</>
+					<cell>When</>
+				</>
+				<row>
+					<cell>
+						<text code>attention</>
+					</>
+					<cell>Nothing picked or written yet: red.</>
+				</>
+				<row>
+					<cell>
+						<text code>done</>
+					</>
+					<cell>An option picked: green.</>
+				</>
+				<row>
+					<cell>
+						<text code>working</>
+					</>
+					<cell>"Provide more details" asked, or only Other written: blue, Claude's to do.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<list bulleted>
+			<item>Its line: the chip (<text code>Q1</>, the number its key, its section or <text code>chip</> gives; <text code>Q12 · a</> and <text code>Q12 · b</> for two in one section), <text code>Pick one</> or <text code>Pick several</>, its buttons at the right, pill shaped with icons.</>
+			<item>The chip in the epic page's colours: red needs you (nothing yet), green decided (picked), blue Claude's to do (more details asked, or only Other). The same colour goes on its section's toolbar button.</>
+			<item>Its options one card a row, full width; a ticked one framed green (a pick is a decision). Recommended: the violet thumbs-up.</>
+			<item>Then the Other box, a box you type in, growing with its text.</>
+			<item><text code>compact</>: its text, then one row: the chip, the select and the comment box, centred on the box's first line, 12px apart; at phone width the comment box goes under them, the full width.</>
+			<item>Pick one: its Choose pills are one radio group to the keyboard. Tab stops on the picked one (else the first), and the arrow keys move the pick to the next option shown or the one before.</>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<list bulleted>
+			<item><text code>epic ask create &lt;slug&gt; \[--from &lt;spec.json&gt;]</>: each question of the spec (<link target="src-spell-epic-src-tools-details-js" link="/epic/src/tools/details.js"><text code>details.js</></> <text code>DetailsSpec</>); the template's example otherwise, for Claude to write over.</>
+			<item><text code>/bedtime</>, <text code>/worktrees</> and the review's item picker (<text code>epic items --spec</>), through <text code>--from</>.</>
+			<item>Older pages: the migration step <text code>answer-elements</> (<link target="src-spell-epic-src-tools-migrate-js" link="/epic/src/tools/migrate.js"><text code>migrate.js</></>), from <text code>ui-section.spell-question</>.</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-14 against branch <ui-text code>epic-workflow</> (P12): the tables are its vocabulary's (epic-ask); the rest from its component and its stylesheet.</>
+		</>
+	</>

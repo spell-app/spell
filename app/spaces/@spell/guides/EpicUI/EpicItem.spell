@@ -1,0 +1,750 @@
+"epic item" is a notebook page
+	<header level="1">
+		&lt;epic-item&gt;
+		<header>One item of an epic page: a question, judgement call, todo, issue or manual test, drawn as a line that unfolds.</>
+	</>
+
+	<html>
+		<ui-text class="lede" paragraph>One item of an epic page: a question, a judgement call, a todo, an issue or a manual test, all ONE element, the kind told by its id's first letter. It draws the item's line (a fold arrow, the coloured <dfn class="spell-term" tabindex="0">id chip</><ui-popup heading="id chip" label="The small coloured box at the start of an item's line, holding its id (Q7).  Its colour says where the item stands."></>, the title, its review label and buttons), and folds its details away under it.</>
+	</>
+
+	<!--
+		no <ui-list class="spell-meta">:  its <ui-item>s take the "item" style sheet before the pack's
+		              <epic-item> can, and the live items draw unstyled (issue I9 of epic-components)
+	-->
+	<text class="meta" paragraph>For anyone reading or writing an epic page's markup, or changing this element.</>
+	<text class="meta" paragraph><label size="mini" color="green">built</> in <link target="src-spell-epic-src-components-epic-item" link="/epic/src/components/epic-item/"><text title="epic/src/components/epic-item/" code>epic-item/</></>.</>
+	<text class="meta" paragraph>Its vocabulary (every table below comes from it): <link target="src-spell-epic-src-components-epic-item-epicitem-en-ts" link="/epic/src/components/epic-item/EpicItem.en.ts"><text title="epic/src/components/epic-item/EpicItem.en.ts" code>EpicItem.en.ts</></>.</>
+	<text class="meta" paragraph>The markup rules: <link target="src-spell-epic-src-tool-plan-doc-md" link="/epic/src/tool/PLAN-DOC.md"><text title="epic/src/tool/PLAN-DOC.md" code>PLAN-DOC.md</></>.</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<text paragraph>Live: the real element, drawn by the epics pack this page loads.</>
+		<list bulleted>
+			<item>Click a line to unfold it.</>
+			<item>The review buttons don't show here: they show only on an epic page being reviewed.</>
+		</>
+		<text paragraph>One item per colour. Q13 and T1 are real (the <text code>wwod</> and <text code>windows-and-review</> epics); the others are cut down from real ones.</>
+		<html>
+			<epic-item id="q21" title="Behaviour switches: ALL-CAPS static, or @proto static?" status="open" state="attention">
+				<epic-question>
+					<p>§12 says behaviour switches are ALL-CAPS statics at the top, and also "prefer <code>@proto static</> for any per-class constant behaviour switch".</>
+				</>
+				<epic-choices>
+					<epic-option letter="A" title="Split by who sets it" recommended>
+						<p>ALL-CAPS static: a developer / debug switch. <code>@proto static</>: a behaviour a subclass overrides.</>
+					</>
+					<epic-option letter="B" title="@proto for all">
+						<p>Drop the ALL-CAPS switch form.</>
+					</>
+				</>
+			</>
+			<epic-item id="t9" title="Make ui-components a Spell UI library entry" status="open" state="progress" working>
+				<p>Add it to the library's entries, and give it a docs page.</>
+				<epic-status slot="status" state="underway" at="2026-10-08 15:02">
+					<p>Add ui-components to the library's entries and give it a docs page.</>
+				</>
+			</>
+			<epic-item id="i6" title="An open item's details flicker when its part is edited" status="open" state="open" calm>
+				<p>A re-fetch counted as "on its way" again, so an open item hid its details until the new part arrived.</>
+			</>
+			<epic-item id="q13" title="Config-by-spread or subclassing for pluggable behaviour?" status="decided" state="recent" answered reviewed="2026-10-06">
+				<epic-question>
+					<p>WWOD §12: <code>&#123; ...BaseFileSpec, extensions, payloadFormat &#125;</> over a subclass.</>
+				</>
+				<epic-choices chosen="A">
+					<epic-option letter="A" title="Both, by kind" recommended>
+						<p>Classes with behaviour subclass (ours); plain config / spec records spread (WWOD).</>
+					</>
+					<epic-option letter="B" title="Subclass">
+						<p>Drop WWOD's rule.</>
+					</>
+				</>
+				<epic-answer id="d16" title="Both, by kind"></>
+			</>
+			<epic-item id="t1" title="Recolouring a window might restart its extensions" status="done" state="recent">
+				<p>Unchecked: whether changing only a window's settings (title bar colours, title) restarts its extensions.</>
+				<epic-reply from="Claude" at="2026-10-06 23:55" re="as built (Doc Review)">
+					<p>Checked in P5 on a throwaway window: changing a window's colours, theme or title restarts nothing.</>
+				</>
+			</>
+			<epic-item id="j5" title="Kept the old answer ids, so #d7 links still land" status="canceled" state="old">
+				<p>Made moot by the converter keeping every id.</>
+			</>
+		</>
+
+		<section label="With buttons in its title row" sticky collapsible dividing open="false">
+			<text paragraph>A page's own buttons go in its title row: <text code>&lt;ui-button slot="actions"&gt;</> children (epic <text code>epic-workflow</> P25).</>
+			<list bulleted>
+				<item>They sit after the title, before its bed icon, git icon, review label and review buttons.</>
+				<item>A click on one never folds or unfolds it.</>
+				<item>The docs runtime puts the block's bullhorn there too, so it never sits over a button.</>
+				<item>Its bed icon (made overnight) is its own: the copy button sits before it.</>
+			</>
+			<example "With buttons in its title row">
+				<html>
+					<epic-item id="t42" title="Give ui-components a docs page" status="open" state="open" overnight>
+						<p>Add it to the library's entries, and give it a page.</p>
+						<ui-button slot="actions" appearance="circular basic" size="mini" icon="copy" title="Copy its id" aria-label="Copy its id"></ui-button>
+					</epic-item>
+				</html>
+			</example>
+		</>
+	</>
+
+	<section label="2. Markup">
+		<icon slot="icon" name="code"/>
+		<text paragraph>A todo with a reply, from the <text code>windows-and-review</> epic (a caveat, <text code>c1</>, until epic <text code>epic-engine</> P44). The doc is split, so on disk the item's details are in a part file (<text code>parts/t1.html</>, loaded when it opens); here they're joined back, as <text code>epic join</> would write them.</>
+		<text paragraph>windows-and-review.plan.html, #t1:</>
+		<markdown>
+			```html
+			<epic-item
+			  id="t1"
+			  title="Recolouring a window might restart its extensions"
+			  status="done"
+			  state="recent"
+			  changed="2026-10-06T23:52:17-04:00"
+			>
+			  <p>
+			    Unchecked: whether changing only a window's settings (title bar colours, title) restarts its extensions, the
+			    Claude panel included. ...
+			  </p>
+			  <epic-reply from="Claude" at="2026-10-06 23:55" re="as built (Doc Review)"
+			    ><p>Checked in P5 on a throwaway window: changing a window's colours, theme or title restarts nothing (Q11). ...</p></epic-reply
+			  >
+			</epic-item>
+			```
+		</>
+	</>
+
+	<section label="3. Where it goes">
+		<icon slot="icon" name="layer group"/>
+		<text paragraph>
+			<text bold>Its parents:</>
+		</>
+		<list bulleted>
+			<item><link target="src-packages-epics-docs-epic-section-html" link="/epic-section"><text code>&lt;epic-section&gt;</></> of kind <text code>questions</>, <text code>judgements</>, <text code>todos</>, <text code>issues</> or <text code>tests</>: the item's id letter is its section's (<text code>q</> in Questions, <text code>j</> in Judgement calls, <text code>t</> in Todo, <text code>i</> in Issues, <text code>m</> in Manual tests)</>
+		</>
+		<text paragraph>Its children, in this order:</>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Child</>
+				<cell>How many</>
+				<cell>What it holds</>
+			</>
+			<row>
+				<cell>prose, <text code>slot="title"</></>
+				<cell>one at most</>
+				<cell>A title with markup.</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-question-html" link="/epic-question">
+						<text code>&lt;epic-question&gt;</>
+					</>
+				</>
+				<cell>one at most</>
+				<cell>A question's text as first asked, before the rest of its text.</>
+			</>
+			<row>
+				<cell>prose</>
+				<cell>any number</>
+				<cell>Its text: the question as asked, the call and why, the details; with the prose elements (<text code>flow</>) among it: option cards (<text code>&lt;epic-choices&gt;</>, a question's own last, on any kind: P14), labelled blocks (<text code>&lt;epic-field label="Where"&gt;</>), Net effect, code, asides, notes.</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-answer-html" link="/epic-answer">
+						<text code>&lt;epic-answer&gt;</>
+					</>
+				</>
+				<cell>one at most</>
+				<cell>An answered question's answer.</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-more-html" link="/epic-more">
+						<text code>&lt;epic-more&gt;</>
+					</>
+				</>
+				<cell>one at most</>
+				<cell>More Details, added after its text.</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-reply-html" link="/epic-reply">
+						<text code>&lt;epic-reply&gt;</>
+					</>
+				</>
+				<cell>any number</>
+				<cell>Replies, oldest first.</>
+			</>
+			<row>
+				<cell><link target="src-packages-epics-docs-epic-status-html" link="/epic-status"><text code>&lt;epic-status&gt;</></>, <text code>slot="status"</></>
+				<cell>any number</>
+				<cell>Claude's status cards, oldest first: one per review mark Claude took (<text code>plan-doc status</>).</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-original-html" link="/epic-original">
+						<text code>&lt;epic-original&gt;</>
+					</>
+				</>
+				<cell>one at most</>
+				<cell>Its earlier text, folded.</>
+			</>
+			<row>
+				<cell>
+					<link target="src-packages-epics-docs-epic-commit-html" link="/epic-commit">
+						<text code>&lt;epic-commit&gt;</>
+					</>
+				</>
+				<cell>any number</>
+				<cell>Commits that fixed or built it, oldest first.</>
+			</>
+		</>
+	</>
+
+	<section label="4. Attributes">
+		<icon slot="icon" name="table columns"/>
+		<table celled padding="compact" appearance="striped" unstackable>
+			<row header>
+				<cell>Name</>
+				<cell>Values</>
+				<cell>Meaning</>
+				<cell>Required</>
+			</>
+			<row>
+				<cell>
+					<text code>id</>
+				</>
+				<cell>an item id, <text code>q7</></>
+				<cell><text code>q7</> (question), <text code>j3</> (judgement call), <text code>t1</> (todo), <text code>t4</> (todo), <text code>i2</> (issue), <text code>m1</> (manual test): shown as <text code>Q7</>; links use it (<text code>#q7</>).</>
+				<cell>yes</>
+			</>
+			<row>
+				<cell>
+					<text code>title</>
+				</>
+				<cell>text</>
+				<cell>Its line, WITHOUT its id (<text code>Which colour names?</>); an answered question keeps its question's.</>
+				<cell>yes, or a <text code>slot="title"</> child</>
+			</>
+			<row>
+				<cell>
+					<text code>status</>
+				</>
+				<cell><text code>open</>, <text code>decided</>, <text code>done</>, <text code>canceled</></>
+				<cell><text code>open</>; <text code>decided</> (an answered question: a decision in force); <text code>done</> (closed: fixed, passed, accepted); <text code>canceled</> (made moot: struck through).</>
+				<cell>yes</>
+			</>
+			<row>
+				<cell>
+					<text code>state</>
+				</>
+				<cell><text code>attention</>, <text code>progress</>, <text code>open</>, <text code>recent</>, <text code>old</></>
+				<cell>Its id chip's colour, written by the script on every edit: <text code>attention</> (red: needs you), <text code>progress</> (blue: Claude is working on it), <text code>open</> (yellow: still undecided, or queued work), <text code>recent</> (green: decided or done, however long ago), <text code>old</> (grey: no longer relevant, canceled).</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>changed</>
+				</>
+				<cell>a time, <text code>2026-10-06 23:55</></>
+				<cell>When a command last changed its status or review marks (ISO, with offset).</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>phase</>
+				</>
+				<cell>a number</>
+				<cell>The phase active when it was added: its To review line lists it.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>answered</>
+				</>
+				<cell>present or absent</>
+				<cell>An answered question: its details read question, Choices, then the answer.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>reviewed</>
+				</>
+				<cell>a date, <text code>2026-10-06</></>
+				<cell>Gone through with you, that day.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>review-as</>
+				</>
+				<cell><text code>approve</>, <text code>todo</>, <text code>revisit</>, <text code>now</></>
+				<cell>How your review mark was handled (<text code>now</>: a request for now, done): the record, not drawn on the buttons (they clear once handled); <text code>approve</> or <text code>todo</> on an open item make it <text code>recent</> (green).</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>deferred</>
+				</>
+				<cell>a date, <text code>2026-10-06</></>
+				<cell>Put off, that day: still not reviewed, offered again next review.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>queued</>
+				</>
+				<cell>a date, <text code>2026-10-06</></>
+				<cell>A review decided on work, that day, not started yet: the next review offers it first.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>work</>
+				</>
+				<cell>text</>
+				<cell>The queued work, in a few words (<text code>Skip short sections</>).</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>working</>
+				</>
+				<cell>present or absent</>
+				<cell>Work on it is under way.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>bedtime</>
+				</>
+				<cell>present or absent</>
+				<cell>Changed during a <text code>/bedtime</> run, until reviewed (it no longer colours the chip).</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>overnight</>
+				</>
+				<cell>present or absent</>
+				<cell>Made during a <text code>/bedtime</> run (the converter: an old doc's <text code>data-bedtime</> item, or one its Overnight report linked): a small bed icon on its line, for good. The tool sets it on every item added in bedtime mode.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>failed</>
+				</>
+				<cell>item id</>
+				<cell>A test that FAILED in your test run (epic <text code>epic-engine</> P4): the issue it was filed as (<text code>i42</>). Drawn on its line as a red "failed → I42" linking the issue. It stays open;  gone once a run passes it.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>taken-in</>
+				</>
+				<cell>phase id</>
+				<cell>The phase that TOOK IT UP (epic <text code>epic-engine</> I128): fixed or did it (<text code>p-fix-open-issues</>). Drawn as a grey <text code>in P1</> linking the phase, on a small line of its own under the item's buttons (I348: so the title wraps the same with or without it), as a handled question's is, but the item stays green. Set when an issue or todo is closed while that phase is active, or when a done phase's text links it (the latest such phase); reopened or canceled, it goes. The <text code>in P1</> pill is the item's button for its phase (I271): a click goes to the phase, an ⌥-click starts it, and a todo in a phase draws no plane. A finished item (done, canceled, decided) draws the same <text code>in P1</> (J231; <text code>done in P1</> beside its buttons until I348): it has no plane, and the pill goes to the phase, with no ⌥-click start. With commits, the pill is the git icon instead, in its place on the line, a click showing the commits (I380): an open issue or todo with commits shows the active phase's pill from the commit on, as the page server's apply will stamp it. A fix waiting for him with no commits holds its pill's row from the start, the pill shown from his ✓ (Accept the fix): neither the click nor the page's update grows the line (I360, I380).</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>calm</>
+				</>
+				<cell>present or absent</>
+				<cell>Not urgent: an open judgement call or issue not reviewed yet is <text code>open</> (yellow), not <text code>attention</> (red). For a call that simply follows WWOD (<text code>plan-doc add ... --calm</>); you flip it by clicking the id chip while the page is reviewed (the inbox's <text code>urgency</>, applied by <text code>epic inbox apply</>).</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>urgent</>
+				</>
+				<cell>present or absent</>
+				<cell>A todo that asks you to act (Make Todo's follow-up): red (<text code>attention</>) until it's reviewed, queued or done, as an open issue is. Its details say the Problem and the Proposed fix, read from what it came from. Its id chip flips it to yellow (<text code>calm</>) and back. On a judgement call or issue it's your Do this: red until handled, reviewed or not.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>fixed</>
+				</>
+				<cell>present or absent</>
+				<cell>A judgement call or issue Claude has fixed (<text code>epic update ... fixed</>): orange (<text code>replied</>), your turn to review it. Accept the fix closes it; Revisit, with a note, sends it back.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>source</>
+				</>
+				<cell>text</>
+				<cell>Its details' part file (<text code>parts/q7.html</>), loaded into its children the first time it opens (its children without a <text code>slot</> are a placeholder the part replaces).</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>part-ids</>
+				</>
+				<cell>ids, space-separated: <text code>d7 d8</></>
+				<cell>The ids inside its part file (an old <text code>d7</> answer): a link to one loads the body first, then lands.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>commits</>
+				</>
+				<cell>present or absent</>
+				<cell>Its details list commits: its git icon shows.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>open</>
+				</>
+				<cell>present or absent</>
+				<cell>Unfolded: a click on its line, a link to it (<text code>#q7</>, or an id in <text code>part-ids</>), find-in-page. Page state only: the script never writes it, so a doc opens folded.</>
+				<cell/>
+			</>
+		</>
+
+		<section label="Slots" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A slot is a place in the drawing that a child goes to: a child with <text code>slot="name"</> goes to that name's place, every other child to the default one (shown as <text italic>default</>).</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Slot</>
+					<cell>What goes there</>
+				</>
+				<row>
+					<cell>
+						<text italic>default</>
+					</>
+					<cell>Its details.</>
+				</>
+				<row>
+					<cell>
+						<text code>title</>
+					</>
+					<cell>A title with markup, in place of <text code>title</>.</>
+				</>
+				<row>
+					<cell>
+						<text code>status</>
+					</>
+					<cell>Claude's status cards (<text code>&lt;epic-status slot="status"&gt;</>, P13): drawn last in its details, under your marked note, above the note box. A note Claude has taken shows there read-only and quiet (<text code>You, 10:11 · ...</>), and the box under the cards empties for a new note (epic-engine I190).</>
+				</>
+				<row>
+					<cell>
+						<text code>actions</>
+					</>
+					<cell>Buttons of the page's own in its title row (<text code>&lt;ui-button slot="actions"&gt;</>): after the title, before its own buttons; a click on one never folds it. The docs runtime puts the block's bullhorn here too.</>
+				</>
+			</>
+		</>
+
+		<section label="Parts" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A part is a piece of what the element draws in its shadow root (its own hidden markup), named so a stylesheet can reach it: <text code>epic-item::part(header)</>.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Part</>
+					<cell>What it is</>
+				</>
+				<row>
+					<cell>
+						<text code>base</>
+					</>
+					<cell>The item.</>
+				</>
+				<row>
+					<cell>
+						<text code>line</>
+					</>
+					<cell>Its line: fold button, id chip, title, review label, actions; sticky while open.</>
+				</>
+				<row>
+					<cell>
+						<text code>toggle</>
+					</>
+					<cell>The fold <text code>&lt;button&gt;</> (the chevron), on an item with details.</>
+				</>
+				<row>
+					<cell>
+						<text code>id</>
+					</>
+					<cell>The id chip (<text code>Q7</>), a link to the item, in its state's colour. While the page is reviewed, an open judgement call's, issue's or follow-up todo's chip is a button instead: urgent (red) &lt;-&gt; not urgent (yellow).</>
+				</>
+				<row>
+					<cell>
+						<text code>title</>
+					</>
+					<cell>The title.</>
+				</>
+				<row>
+					<cell>
+						<text code>review</>
+					</>
+					<cell>The review label: <text code>reviewed 10/6/26</>, <text code>deferred</>, <text code>to do</>. Not while the page is reviewed: the review buttons' tooltips say it then.</>
+				</>
+				<row>
+					<cell>
+						<text code>overnight</>
+					</>
+					<cell>With <text code>overnight</>: the bed icon at the line's end, <text code>made overnight</>.</>
+				</>
+				<row>
+					<cell>
+						<text code>git</>
+					</>
+					<cell>With commits (<text code>commits</>, or <text code>&lt;epic-commit&gt;</> children): a git icon at the line's end that shows or hides this item's own commits (T17); pressed while they show. Its phase known (<text code>handled</>, <text code>taken-in</>, or an open issue or todo's active phase), it's that phase's <text code>in P21</> pill instead (I380).</>
+				</>
+				<row>
+					<cell>
+						<text code>actions</>
+					</>
+					<cell>The box at the end of the line: the <text code>actions</> slot (the page's own buttons, the bullhorn), then the git icon, the review label and the review buttons.</>
+				</>
+				<row>
+					<cell>
+						<text code>details</>
+					</>
+					<cell>Its details: hidden while folded.</>
+				</>
+				<row>
+					<cell>
+						<text code>label</>
+					</>
+					<cell><text code>Original question</> over an answered question's own text.</>
+				</>
+				<row>
+					<cell>
+						<text code>error</>
+					</>
+					<cell>With <text code>source</>: the line saying the part couldn't be loaded.</>
+				</>
+				<row>
+					<cell>
+						<text code>review-buttons</>
+					</>
+					<cell>The review buttons (P9): the note bubble, a pick's letter, Make Todo / Revisit / Approve. Only while the page is reviewed (served by the page server, its inbox answering).</>
+				</>
+				<row>
+					<cell>
+						<text code>note-box</>
+					</>
+					<cell>The note box: the note, with its Saved mark and picture button in its corner.</>
+				</>
+				<row>
+					<cell>
+						<text code>said</>
+					</>
+					<cell>A note marked and closed: <text code>You · revisit soon · sent 10:42</>, the note, Edit.</>
+				</>
+			</>
+		</>
+
+		<section label="States" sticky="stack" collapsible dividing open="false">
+			<text paragraph>A state is a word the element sets on itself while something is true, for styling: <text code>epic-item:state(open)</>. Never written in the file.</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>State</>
+					<cell>When</>
+				</>
+				<row>
+					<cell>
+						<text code>open</>
+					</>
+					<cell>Unfolded.</>
+				</>
+				<row>
+					<cell>
+						<text code>loaded</>
+					</>
+					<cell>With <text code>source</>: the part is in its children.</>
+				</>
+				<row>
+					<cell>
+						<text code>error</>
+					</>
+					<cell>With <text code>source</>: the part couldn't be loaded.</>
+				</>
+				<row>
+					<cell>
+						<text code>commits</>
+					</>
+					<cell>Its own commits show: its git icon pressed.</>
+				</>
+			</>
+		</>
+
+		<section label="Events" sticky="stack" collapsible dividing open="false">
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>Event</>
+					<cell>Detail</>
+					<cell>Cancelable</>
+					<cell>When</>
+				</>
+				<row>
+					<cell>
+						<text code>ui-opening</>
+					</>
+					<cell>
+						<text code>&#123; open: boolean, item: Element, originalEvent?: Event &#125;</>
+					</>
+					<cell>yes</>
+					<cell>About to unfold: its line was clicked; after the fact (not cancelable) for a link or find-in-page. Cancel to stay folded.</>
+				</>
+				<row>
+					<cell>
+						<text code>ui-closing</>
+					</>
+					<cell>
+						<text code>&#123; open: boolean, item: Element, originalEvent?: Event &#125;</>
+					</>
+					<cell>yes</>
+					<cell>About to fold: its line was clicked. Cancel to stay open.</>
+				</>
+				<row>
+					<cell>
+						<text code>ui-loaded</>
+					</>
+					<cell>
+						<text code>&#123; source: string, content: string &#125;</>
+					</>
+					<cell/>
+					<cell>Its <text code>source</> part arrived and is in its children (<text code>content</> is the file's text).</>
+				</>
+				<row>
+					<cell>
+						<text code>ui-error</>
+					</>
+					<cell>
+						<text code>&#123; kind: 'load' | 'cross-origin' | 'file-protocol' | 'render', source: string, error: unknown &#125;</>
+					</>
+					<cell>yes</>
+					<cell>Its <text code>source</> part couldn't be loaded; <text code>kind</> says why. A note shows in its details unless cancelled; opening it again tries again.</>
+				</>
+			</>
+		</>
+	</>
+
+	<section label="5. How it looks">
+		<icon slot="icon" name="palette"/>
+		<text paragraph>The colours mean the same on every doc page: the whole scheme is on <link target="src-guides-epic-components-colours-html" link="/guides/epic-components/colours.html">Epic Page Colours</> (its source: <link title="epic/templates/epics/plan-doc.md" target="src-spell-epic-templates-epics-plan-doc-md" link="/epic/templates/epics/plan-doc.md"><text code>plan-doc.md</></>, "Colours").</>
+
+		<section label="The id chip" sticky="stack" collapsible dividing open="false">
+			<text paragraph>The chip shows the id in capitals (<text code>Q7</>) and is a link to the item. Its colour is the item's <text code>state</>, solid:</>
+			<table celled padding="compact" appearance="striped" unstackable>
+				<row header>
+					<cell>state</>
+					<cell>colour</>
+					<cell>means</>
+				</>
+				<row>
+					<cell>
+						<text code>attention</>
+					</>
+					<cell>
+						<label size="mini" color="red">red</>
+					</>
+					<cell>needs you: an open question; an open judgement call or issue not reviewed yet</>
+				</>
+				<row>
+					<cell>
+						<text code>progress</>
+					</>
+					<cell>
+						<label size="mini" color="blue">blue</>
+					</>
+					<cell>Claude is working on it (an underway status card, or <text code>working</>)</>
+				</>
+				<row>
+					<cell>
+						<text code>open</>
+					</>
+					<cell>
+						<label size="mini" color="yellow">yellow</>
+					</>
+					<cell>open, still undecided, or work a review queued; dark text on it</>
+				</>
+				<row>
+					<cell>
+						<text code>recent</>
+					</>
+					<cell>
+						<label size="mini" color="green">green</>
+					</>
+					<cell>decided or done, however long ago</>
+				</>
+				<row>
+					<cell>
+						<text code>old</>
+					</>
+					<cell>
+						<label size="mini" color="grey">grey</>
+					</>
+					<cell>canceled: no longer relevant</>
+				</>
+			</>
+			<list bulleted>
+				<item>Its title: always in full, as many lines as it needs, folded or open. The buttons after it sit on its first line, so nothing moves as it folds (2026-10-19).</>
+				<item>A canceled item's title is struck through.</>
+				<item>An item made overnight (<text code>overnight</>) has a small bed icon at the end of its line.</>
+				<item>While your review mark on it is live (pressed, or sent but not yet handled), the chip wears that button's colour and fill instead (see below). Once Claude has handled the mark, the chip goes back to its state's colour: the result.</>
+				<item>While the page is reviewed, an open judgement call's, issue's or follow-up todo's chip is a button: a click flips it between urgent (red) and not urgent (yellow, <text code>calm</>).</>
+			</>
+		</>
+
+		<section label="The review buttons" sticky="stack" collapsible dividing open="false">
+			<text paragraph>While an epic page is being reviewed (<text code>&lt;epic-page reviewing&gt;</>, served by the page server), its marks go to the doc's review inbox: the file of your marks that Claude reads (<text code>&lt;name&gt;.inbox.json</>).</>
+			<text paragraph>Then the line ends with three buttons in one group: Make Todo (green), Revisit (blue), Approve (green); on an issue or a judgement call the first is Do this, the plane, worked in the item itself with no todo made. An open issue ends in the x instead (close it: not needed), a fixed one waiting for you shows Revisit and Accept the fix (epic <text code>epic-engine</> I299: one icon per meaning), and a finished one Revisit and Saw it, its <text code>in P1</> pill under them (J231, I348). The plane is the icon alone; its words, "Send to Claude", are the page's own Send's, at the top (I305). No Do Now (the wand) since 2026-10-25: "In practice, I'm never using the wand." Each wears the fill rule, which says how far a mark has got:</>
+			<list bulleted>
+				<item>a grey outline: available</>
+				<item>dashed in its colour: you pressed it, not sent yet</>
+				<item>outlined in its colour: sent (or a revisit now taken, its icon turning while Claude works)</>
+				<item>a revisit now with nobody listening stays dashed, "waiting for a session": the page server wakes the epic (types <text code>/epic review &lt;name&gt;</> into its session) and the tooltip says how</>
+				<item>a grey outline again once Claude has handled it: the chip shows the result</>
+			</>
+			<text paragraph>They're drawn once the item's line comes near the screen, a screen's height away or less, and stay from then on, the (i) Clarify button last on the line among them (epic <text code>epic-engine</> T95); the note box and a marked note inside its details, from the first time it opens. An item in a folded section draws none of them: epic-engine's page of 800 items was 190,000 nodes and nearly 500 MB with every item's drawn up front (epic <text code>epic-engine</> I333).</>
+			<text paragraph>Revisit (the history icon) opens the item's note box, the cursor in it. TYPING in the box turns Revisit on, at the first key, and the box stays open while you type (2026-10-22, epic <text code>epic-engine</> P20): Send hands your words over with no press of Later.</>
+			<text paragraph>A PICTURE goes in any note box (epic <text code>epic-engine</> P51): pasted (⌘V) or dropped on the box, or chosen with the small picture button in the field's corner. It's saved beside the epic page, shown as a thumbnail under the words (a click opens it full size), and goes with the note's mark, so Send hands it to Claude too; its ✕ takes it out. On a manual test, that's how you show what you saw, and the box's ✕ says the test no longer applies.</>
+			<text paragraph>With your comments waiting in its text (a bullhorn's, or selected text's) and nothing typed, Revisit opens no box: it turns on at once, its note "see my comments in its text: C1", and Send hands those comments over as its content (2026-10-26, epic <text code>epic-engine</> I140: "The inline mark(s) are my comment"). The same on a phase and an Overview part.</>
+			<text paragraph>On a judgement call or a todo whose box is empty (no draft, no earlier note), the box already holds <text code>do it</>, selected, as if you had typed it (2026-10-19: "When I press the 'review' button in a Judgement call or todo, I generally want you to just do it"):</>
+			<list bulleted>
+				<item>your first key replaces it;  a box that holds your words is left alone</>
+				<item>Revisit turns on with it at once, so a reload keeps it, and Send takes it along</>
+				<item>Claude reads a revisit note <text code>do it</> as: do it, no question back</>
+				<item>questions, issues, limits, manual tests and the plan's parts: an empty box, as before</>
+			</>
+			<text paragraph>Out of review, the line shows a review label instead: <text code>reviewed 10/6/26</>, <text code>deferred</>, or <text code>to do</> (yellow).</>
+		</>
+
+		<section label="Folding" sticky="stack" collapsible dividing open="false">
+			<list bulleted>
+				<item>An item starts folded: only its line shows. A click on the line unfolds it, and so do a link to it (<text code>#q7</>, or an id listed in its <text code>part-ids</>) and find-in-page.</>
+				<item>While open, its line sticks to the top as you scroll its details.</>
+				<item>Its details: a question's text under a small <text code>Question</> label, then its text, option cards, the answer, More Details, replies, earlier versions and commits. An answered question's own text is labelled <text code>Original question</>. More Details replaces the text it clarifies, so there's no <text code>Original reply</> label any more (I301).</>
+				<item>The talk after its question (epic <text code>epic-engine</> P27, your layout A): <list bulleted><item>Your and Claude's replies are ONE section, the THREAD, in the order said: one card frame round them all, a thin rule between them, and the first reply's fold folds the whole thread; Claude's status cards are ONE line (<text code>✓ Noted 15:21 → Done 15:25 · what Claude did</>), last in it.</> <item>A status taken before your first reply (a DRIVE-BY, about an earlier comment of yours) is a line first in its details, above the Choices.</> <item>No Answer strip when its Choices already say "Chosen: X".</> <item>Claude's newest reply: an orange edge and <text code>NEW</> until you have seen it.</> <item>Worked out by the item from its light children (<text title="epic/src/components/epic-item/AnswerThread.ts" code>AnswerThread</>): the page's markup is unchanged.</></></>
+				<item><text code>open</> is page state: the tool never writes it, so a doc always opens folded.</>
+			</>
+		</>
+	</>
+
+	<section label="6. Written by">
+		<icon slot="icon" name="terminal"/>
+		<text paragraph>Only the epic tool (<text code>epic</>) writes items, and it rewrites every item's <text code>state</> on every edit.</>
+		<list bulleted>
+			<item><text code>add &lt;name&gt; question|judgement|todo|limit|issue|test|decision "title" \[--details html] \[--calm]</>: a new item, its id the next of its kind; a <text code>decision</> is a question born answered</>
+			<item><text code>decide</>, <text code>close</>, <text code>reopen</>, <text code>cancel</>: its <text code>status</></>
+			<item><text code>review</>, <text code>defer</>, <text code>queue</> / <text code>unqueue</>, and the inbox's <text code>apply</>, <text code>working</> and <text code>done</>: its review marks (<text code>reviewed</>, <text code>deferred</>, <text code>queued</>, <text code>work</>, <text code>working</>, <text code>review-as</>, <text code>calm</>)</>
+			<item><text code>details &lt;name&gt; &lt;id&gt; --file html \[--append | --more]</>: its details; a rewrite moves the old text into its Original Discussion (<link target="src-packages-epics-docs-epic-original-html" link="/epic-original"><text code>&lt;epic-original&gt;</></>), never dropping it</>
+			<item><text code>status</>: Claude's status cards (<link target="src-packages-epics-docs-epic-status-html" link="/epic-status"><text code>&lt;epic-status&gt;</></>); <text code>commit</>: its commits</>
+			<item><text code>split</> / <text code>join</>: its details into a part file (<text code>source</>, <text code>part-ids</>) and back</>
+			<item>older docs: a one-time converter made every item from the old markup (gone since epic <text code>repo-split</>)</>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-10-09 against branch <ui-text code>epic-components</>: the tables are its vocabulary's; the rest from its component, its stylesheet and <ui-link title="epic/src/tool/PLAN-DOC.md" target="src-spell-epic-src-tool-plan-doc-md" link="/epic/src/tool/PLAN-DOC.md"><ui-text code>PLAN-DOC.md</></>.</>
+		</>
+	</>

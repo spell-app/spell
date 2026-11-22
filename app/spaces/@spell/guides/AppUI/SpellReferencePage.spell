@@ -1,0 +1,57 @@
+"spell reference page" is a notebook page
+	<header level="1">
+		&lt;spell-reference-page&gt;
+		<header>A reference page, made from its source, whose words you make clearer with an option-click.</>
+	</>
+
+	<text class="lede" paragraph>A place's reference, drawn from its description each time it's shown: its lists by tag, each with its fields, what it can change and how trying it went. Your words about each thing are kept in the place's Spell file, and an option-click makes them clearer.</>
+	<list class="spell-meta">
+		<item icon="user">Written for: anyone showing what a data source holds, or building another kind of reference page</>
+		<item icon="play">Live: the real element, from the app's element build this page loads</>
+	</>
+
+	<section label="1. Example">
+		<icon slot="icon" name="eye"/>
+		<example "1. Example" description="Star Wars' place:  every section starts folded.">
+			<html>
+				<spell-reference-page src="@spell/examples/StarWars/StarWars.api.json5"></spell-reference-page>
+			</html>
+		</example>
+		<text class="meta" paragraph>Live, from <text code>/element/spell.pack.js</> (<text code>yarn build:element</> in <link target="src-spell-app" link="/"><text code>spell-app</></>), which this set's pages load.</>
+	</>
+
+	<section label="2. Using it">
+		<icon slot="icon" name="code"/>
+		<list bulleted>
+			<item><text code>src</> names a place's description, as <text code>spell place ingest</> wrote it. Its words come from the Spell file beside it.</>
+			<item>Your words are <text code>--</> lines in that file: the place's own under its line, a type's or a field's on the first line inside it, which Spell already reads as its description.</>
+			<item>Each time <text code>spell place update</> looks again, your words stay with their line. A line that's gone takes its words with it, and the update says so. What it finds new, or can't find, gets a dated line: <text code>-- NEW as of 2026-11-18</>.</>
+			<item>With <text code>editable</>, an option-click on something opens its words. The page around it saves them, through <text code>spell-reference-edit</>: the editor's place reference does.</>
+			<item>Each part is a tag of its own, so a page can style it: <text code>&lt;spell-reference-section&gt;</>, <text code>&lt;spell-reference-item&gt;</>, <text code>&lt;spell-reference-state&gt;</>.</>
+			<item>Its labels are in the reader's language; your words are in the file's.</>
+		</>
+	</>
+
+	<section label="3. Attributes, events and texts">
+		<icon slot="icon" name="list check"/>
+		<html>
+			<ui-docs-api family="spell-reference-page"></>
+		</>
+		<text class="meta" paragraph>From its vocabulary, by <text code>yarn site:data</> in <link target="src-spell-app" link="/"><text code>spell-app</></>.</>
+	</>
+
+	<section label="4. Its code">
+		<icon slot="icon" name="folder open"/>
+		<list bulleted>
+			<item><link target="src-packages-app-components-spell-reference-page-spellreferencepage-tsx" link="/src/app/components/spell-reference-page/SpellReferencePage.tsx"><text title="src/app/components/spell-reference-page/SpellReferencePage.tsx" code>SpellReferencePage.tsx</></>: its component, drawing any reference it's handed</>
+			<item><link target="src-packages-app-components-spell-reference-page-placereferencesource-ts" link="/src/app/components/spell-reference-page/PlaceReferenceSource.ts"><text title="src/app/components/spell-reference-page/PlaceReferenceSource.ts" code>PlaceReferenceSource.ts</></>: a place's reference, from its description and its Spell file</>
+			<item><link target="src-packages-app-components-spell-reference-page-spellreferencepage-types-ts" link="/src/app/components/spell-reference-page/SpellReferencePage.types.ts"><text title="src/app/components/spell-reference-page/SpellReferencePage.types.ts" code>SpellReferencePage.types.ts</></>: what any reference hands it, for the language's and an app's to come</>
+			<item>Its build: <text code>yarn build:element</>, into <text code>dist-element/</>, served at <text code>/element/</></>
+		</>
+	</>
+	<html>
+		<footer class="site-page-footer">
+			<ui-divider></>
+			<ui-text class="meta" paragraph>Last checked 2026-11-18 against branch <ui-text code>data</>.</>
+		</>
+	</>

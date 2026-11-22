@@ -11,9 +11,10 @@ description: Start the spell web servers of this checkout that aren't running --
      The page server starts the editor once it listens ([EditorServer.ts](src/spaces/server/node/routes/EditorServer.ts)).
    - It waits for the editor:  up to 90s, since vite may be building its dependency cache.
    - Then it checks the component sets' bundle, by asking for it, `/components/ui/_assets/site.js`.
-     - Spell UI's docs are the Spell UI site, a Spell guide, shown at `/components/ui/` with no editor
-       (one page, `../ui/docs/index.html`, at every address);  the other sets' HTML pages load the bundle,
-       this branch's built `_assets/` (from `../ui/site/`), laid over Spell UI's docs folder.
+     - Every set's guide is a Spell guide, shown with no editor at `/components/ui/`, `/components/epics/` and
+       `/components/app/` (one page each, its set's `docs/index.html`, at every address);  no set's pages load the
+       bundle any more (epic `editor` P44), but the page server still builds it, this branch's `_assets/` (from
+       `../ui/site/`), laid over each set's docs folder.
      - The bundle is NOT committed.
        The page server builds it (and the brand pages' bundle) when it starts, if stale,
        and the request waits for that.

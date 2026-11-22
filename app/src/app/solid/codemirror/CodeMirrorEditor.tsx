@@ -20,7 +20,7 @@ import "./CodeMirrorEditor.css"
  * - Works in a shadow root too:  the view's root is the element's.
  * - NOTE: the view is a plain variable, not a signal:  the effects below only follow PROPS, and making the view
  *   reads the props as they are then, so a prop changed before it's made is still taken.
- * - SEE:  its App UI components page, `app/docs/CodeMirrorEditor.html` (`/components/app/CodeMirrorEditor.html`).
+ * - SEE:  its page in App UI's guide, `/components/app/code-mirror-editor`.
  ****************/
 export function CodeMirrorEditor(props: CodeMirrorEditorProps) {
   let element!: HTMLDivElement

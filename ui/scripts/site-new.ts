@@ -11,14 +11,13 @@
  *   - ONE tag's API tables (`<ui-docs-api tag>`)
  *   - the Theming page only when one of the family's tokens names it
  *     (`--ui-checkbox-radio-size`;  `ui-meta` has none:  its owners style it)
- * - How:  it fills spell-epic's components page template, `templates/spell-ui-docs.html`, in memory,
+ * - How:  it fills its template, `src/tools/ComponentPage.template.html`, in memory,
  *   and writes that as Spell (`SpellMarkup`).  What it does to the template:
  *   - fills its `{{...}}` placeholders
  *   - keeps the `site:component` blocks
  *   - drops the status label for a `done` family, and the Fomantic link when Fomantic has no such page
  *   - rewrites its paths to the site (`../ui/`, `../components/ui/`)
- *   - Until epic `editor` P43 it also wrote the HTML components page, `docs/<tag>.html`, and guide pages;
- *     the template stays for the other component sets' pages.
+ *   - Until epic `editor` P43 it also wrote the HTML components page, `docs/<tag>.html`, and guide pages.
  * - A guide page (not a tag) is written in the Spell UI site by hand:  it says so, exit 1.
  * - Leaves a component the site has already as it is, without `--force` (exit 1).
  * - Prints what it wrote, what to tidy by hand (a script that drives an example), and the check to run.
@@ -45,16 +44,17 @@ import { SpellUISite } from "spell/ui/tools/SpellUISite"
 import { STATUS_TEXT } from "spell/ui/tools/generatedFiles"
 
 /**
- * The template, in the `epic/` folder's `templates/` (epic `epic-eject` T11:  every template is the engine's), found
- * through the ONE package `spell` (epic `repo-split` P20);  served at `/templates/spell-ui-docs.html`.
- * - Spell UI never imports spell-epic (it's above):  this only reads one of its files.
+ * The template, beside Spell UI's site tools:  `src/tools/ComponentPage.template.html`, found through the ONE package
+ * `spell`.
+ * - spell-epic's `templates/spell-ui-docs.html` until epic `editor` P44:  the HTML components pages' template, gone
+ *   with the last of them.
  */
 const TEMPLATE = path.join(
   path.dirname(fileURLToPath(import.meta.resolve("spell/package.json"))),
-  "epic/templates/spell-ui-docs.html"
+  "ui/src/tools/ComponentPage.template.html"
 )
 
-/** The template's own path prefix to the site's pages (it's served at `/templates/`, beside `/components/`). */
+/** The template's own path prefix to the site's pages, as it was written to be served at `/templates/`. */
 const TEMPLATE_SITE = /\.\.\/(?:components\/)?ui\//g
 
 /** Fomantic's docs pages, by group folder. */

@@ -121,7 +121,7 @@ const vocabulary = {
  *   site at `/components/ui/` (epic `editor` P43).
  * - `width` / `height` set our inline style, so page CSS works too.
  * - Leaving the page stops the app and lets go of its runtime, a microtask later:  a move in one go keeps it.
- * - SEE:  its App UI components page, `app/docs/spell-viewer.html` (`/components/app/spell-viewer.html`).
+ * - SEE:  its page in App UI's guide, `/components/app/spell-viewer`.
  ****************/
 export class SpellViewer extends UIRoot<typeof vocabulary> {
   @E.proto static vocabulary = vocabulary

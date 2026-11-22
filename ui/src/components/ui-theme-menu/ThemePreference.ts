@@ -76,7 +76,7 @@ const ADDRESS_PARAMS = { theme: "theme", scheme: "scheme" } as const
  *   and `subscribe()`d listeners hear when the OS switches (the icon showing the scheme stays right).
  *   - Other tabs' switches arrive the same way (`ColorScheme.watch()`).
  * - Before first paint:  a module script runs too late,
- *   so pages inline `HEAD_SCRIPT` in `<head>` (the page template, `templates/spell-ui-docs.html`).
+ *   so pages inline `HEAD_SCRIPT` in `<head>` (a component set's viewer page, `ui/docs/index.html`).
  *   - It re-applies the SCHEME synchronously.
  *   - The THEME can't be:  its sheet is a lazy chunk.
  *     `restore()` starts that load as the site bundle evaluates, alongside the families' own chunks,
@@ -124,7 +124,7 @@ export class ThemePreference {
 
   /**
    * Inline `<head>` script re-applying the stored scheme before first paint, as `applyScheme()` does.
-   * - The page template (`templates/spell-ui-docs.html`) inlines it, in `<head>` before the stylesheet `<link>`.
+   * - A component set's viewer page (`ui/docs/index.html`) inlines it, in `<head>`.
    * - ES5, no dependencies, never throws:  so it reads the key raw, not through `PrefStore`,
    *   whose text it matches (a scheme is kept as `dark`, unquoted).
    * - Reads the old keys too (`OLD_COLOR_SCHEME_KEYS`) while the new one is absent:  `restore()` moves them over.
