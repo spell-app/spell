@@ -8,7 +8,7 @@
  *   - For objects: use natural key order for position.
  * - TODO: collections for `words`, `lines`, etc?
  */
-import range from "lodash/range"
+import { range } from "lodash-es"
 import { core } from "./core"
 // Import directly, never through the barrel:
 // `spell/parser/core/model` loads this file, and must not load drawing (Solid)

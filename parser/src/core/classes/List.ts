@@ -1,7 +1,7 @@
 /**
  * Base classes for spell.
  */
-import range from "lodash/range"
+import { range } from "lodash-es"
 
 import {
   Cell,

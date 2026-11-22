@@ -4,7 +4,7 @@
  * - A program never declares it:  it's there on every thing, and on every list.
  * - Imports only `spell/util` and lodash:  `Thing.ts` and `List.ts` both import it.
  */
-import kebabCase from "lodash/kebabCase"
+import { kebabCase } from "lodash-es"
 
 import { peekProp, type PropInfo } from "spell/util"
 
