@@ -35,9 +35,9 @@ describe("<epic-update>", () => {
     await expectAccessible(root)
   })
 
-  test("bare, under way (I295):  `UNDERWAY`, in the item pill's orange (`--epic-state-replied`)", async () => {
+  test("bare, under way (T146):  `UNDERWAY`, in the id chip's solid blue (`--epic-state-progress`)", async () => {
     const root = await ElementFixture.render(
-      `<p style="--epic-state-replied: rgb(1, 2, 3)">Taken up <epic-update phase="5" became="underway"></epic-update></p>`
+      `<p style="--epic-state-progress: rgb(1, 2, 3)">Taken up <epic-update phase="5" became="underway"></epic-update></p>`
     )
     const label = root.querySelector("epic-update")!.shadowRoot!.querySelector<HTMLElement>('[part~="label"]')!
     expect(label.textContent).toBe("UNDERWAY")

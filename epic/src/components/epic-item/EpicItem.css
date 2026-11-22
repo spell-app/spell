@@ -536,7 +536,8 @@
    * - grey:  no longer relevant (canceled), handled in a phase (`handled`, epic `epic-engine` P31), or open with nothing
    *   to think about (`quiet`, P63), a quiet tint
    * - light orange (dark text):  what Owen asked for is finished, his turn to see it (`requested`, P63)
-   * - blue outlined (`handed`) or dotted (`scheduled`):  with Claude, nothing for Owen to do (P63;  the chip's `chipMark`)
+   * - blue solid (`progress`:  under way, T146), outlined (`handed`) or dotted (`scheduled`):  with Claude, nothing
+   *   for Owen to do (P63;  the chip's `chipFill`)
    */
   .item.attention {
     --_epic-state: var(--epic-state-attention, light-dark(var(--ui-red), var(--ui-red-on-light)));
@@ -569,11 +570,11 @@
     --_epic-state-text: var(--ui-grey-text, var(--_epic-state));
   }
   /*
-   * The chip's FILL says how far an answer got (Q20):  dashed until sent, outlined once sent.
+   * The chip's FILL says where the item stands now:  solid, unless it's answered or handed on (Q20;  T146).
    * - Owen's own mark in flight keeps the item's STATE colour (no `data-color`), so the chip still matches the
-   *   section's counts:  a red item marked Revisit stays red, outlined (Owen, 2026-10-11, J3;  before:  the button's
+   *   section's counts:  a red item marked Revisit stays red (Owen, 2026-10-11, J3;  before:  the button's
    *   colour, 2026-10-08)
-   * - work Claude still owes wears its own colour:  blue while it's with Claude, a taken pick green
+   * - work Claude still owes wears its own colour:  blue while it's handed or queued, a taken pick green
    * - the letters in the colour's readable ink, over the line's band
    */
   .chip[data-fill]:not([data-color]) {
@@ -598,24 +599,30 @@
     background: transparent;
     color: var(--_epic-mark-text);
   }
-  .chip[data-fill="dashed"] {
-    border-style: dashed;
-  }
   /* agreed, not started (`scheduled`, epic `epic-engine` P63):  a scheduled phase's dotted blue;  2px, or the dots blur */
   .chip[data-fill="dotted"] {
     border-width: 2px;
     border-style: dotted;
   }
   /*
-   * marked in this pass, not applied yet (epic `epic-engine` P43):  ONE ring, 2px dotted in the blue badge's blue, in
+   * marked, and SENT, not applied yet (epic `epic-engine` P43):  ONE ring, 2px dotted in the blue badge's blue, in
    * place of its own, and blue letters:  all blue, "handed to Claude" (Owen, 2026-10-26;  red letters before, which read
    * as "needs you")
    */
-  .chip[data-marked] {
+  .chip[data-marked="sent"] {
     border: 2px dotted var(--ui-blue, #2185d0);
     outline: none;
     background: transparent;
     color: var(--ui-blue-text, var(--ui-blue, #2185d0));
+  }
+  /*
+   * marked, NOT sent (epic `epic-engine` T145;  Owen, 2026-11-22:  "leave those the color they were before, but do the
+   * dotted outline on them"):  the chip as it was, the ring OUTSIDE it, a gap between so it shows on solid blue too
+   * - never over the keyboard's focus ring
+   */
+  .chip[data-marked="unsent"]:not(:focus-visible) {
+    outline: 2px dotted var(--ui-blue, #2185d0);
+    outline-offset: 2px;
   }
 
   /*
