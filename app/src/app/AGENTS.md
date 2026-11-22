@@ -177,8 +177,16 @@ and in the app's build folder, `app/` at the app folder's root.
         `compiledFrom` says `"elsewhere"`
       - each file's problems too, sent after each of the worker's parses, numbered by the edits they're of
         (`FileStates.parsedElsewhere()`);  the editor's own Spell keeps the page's, which checks the names it fills
-      - still on the page's parse:  folding, the bubbly look, and every reader outside the code
-        (the list:  the epic page's P18)
+      - what the code is drawn with comes with each of the worker's parses too (`LSP.LanguageParsed`, in the look the
+        editors show):  the blocks that fold, the bubbly drawing or the colours with the look off (`CodeColours`,
+        CodeMirror-free, so the worker reads it), the types a tag may name (a space after a tag's name);
+        the page lays out and colours nothing from a parse of its own (`CodeMirrorLanguage.elsewhere`)
+      - what the thing a word names is, as the cursor rests there (Follow Along):  `spell/declaredThing`
+      - the Sentence tab's tree:  `spell/lineTree`;  has a site's part a page yet:  `spell/hasPageOrView`
+      - the tag drawn around a line, which the Inspector selects:  `spell/partPlace`;
+      - an action renamed in the Inspector:  `spell/renameAction`.
+        From outside the code, ask through `FileStates.ask()`:  it opens the file in the worker first
+      - still on the page's parse:  every other reader outside the code (the list:  the epic page's P18, T36)
     - So `spell/app/lsp` stays browser-safe:  [lsp's AGENTS.md](../lsp/AGENTS.md).
     - Its answers reach CodeMirror through one converter, [LspToCodeMirror](ui/codemirror/LspToCodeMirror.ts).
     - Suggestions, hover, folding, signature help (⇧⌘Space, or once a space is typed and the typing pauses, while Settings… says),

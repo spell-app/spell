@@ -4,6 +4,7 @@ import { type DecorationSet, EditorView } from "@codemirror/view"
 
 import { P } from "spell/parser/parser"
 import { SP } from "spell/parser/spell"
+import { CodeColours } from "spell/app/app/ui/CodeColours"
 import { CodeRules, type CodeRole } from "spell/app/app/ui/CodeRules"
 import { CodeMirrorTokens } from "spell/app/app/ui/codemirror/CodeMirrorTokens"
 
@@ -112,7 +113,7 @@ describe("CodeMirrorTokens", () => {
     const page = ['"cards" is a page', '\t<for card in its cards loading="Wait">', "\t\t<card />", "\t</for>"].join(
       "\n"
     )
-    const spans = CodeMirrorTokens.pageSpans(page, pageParser())
+    const spans = CodeColours.pageSpans(page, pageParser())
     for (const [index, span] of spans.entries()) {
       expect(span.end).toBeGreaterThan(span.start)
       if (index) expect(span.start).toBeGreaterThanOrEqual(spans[index - 1]!.end)

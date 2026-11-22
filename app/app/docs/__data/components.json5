@@ -4262,6 +4262,11 @@
       "texts": [],
       "props": [
         {
+          "name": "tree",
+          "type": "P.TreeNode",
+          "description": "The tree to draw, worked out already:  then `match` and `offset` aren't read."
+        },
+        {
           "name": "match",
           "type": "P.Match",
           "description": "The file's whole match."

@@ -73,21 +73,23 @@ export class CodeMirrorRelayout {
   /**
    * The extension keeping `decorationsOf(state)` on the editor:  at once, then again `msec` after the typing pauses.
    * - `decorationsOf()` MUST NOT throw:  it's called from CodeMirror's update.
+   *   - `undefined`:  nothing to lay `state`'s text out from yet (the language worker's parse of it is on its way):
+   *     the last layout stays, following the text, till a parse brings one (`CodeMirrorSetup.PARSED`).
    */
   static extension(
-    decorationsOf: (state: EditorState) => DecorationSet | LaidOut,
+    decorationsOf: (state: EditorState) => DecorationSet | LaidOut | undefined,
     msec: number,
     { isAwaitingParse = () => false, isParseOnItsWay = () => false, drawnAtOnce, marksTyped }: RelayoutOptions = {}
   ): Extension {
     /** each view on this extension, so a transaction can find its own and keep its caret's line still */
     const views = new Set<EditorView>()
     const laidOut = StateEffect.define<Layout>()
-    const layoutOf = (state: EditorState): Layout => {
+    const layoutOf = (state: EditorState): Layout | undefined => {
       const made = decorationsOf(state)
-      return "decorations" in made ? made : { decorations: made }
+      return !made || "decorations" in made ? made : { decorations: made }
     }
     const field = StateField.define<Layout>({
-      create: (state) => layoutOf(state),
+      create: (state) => layoutOf(state) ?? { decorations: Decoration.none },
       update(layout, transaction) {
         for (const effect of transaction.effects) if (effect.is(laidOut)) return effect.value
         if (
@@ -95,7 +97,8 @@ export class CodeMirrorRelayout {
             (effect) => effect.is(foldEffect) || effect.is(unfoldEffect) || effect.is(CodeMirrorSetup.PARSED)
           )
         ) {
-          return layoutOf(transaction.state)
+          const made = layoutOf(transaction.state)
+          if (made) return made
         }
         if (!transaction.docChanged) return layout
         const moved = layout.decorations.map(transaction.changes)
@@ -196,7 +199,8 @@ export class CodeMirrorRelayout {
           this.timer = after(wait / 1000, () => {
             const { state } = this.view
             if (wait === msec && isParseOnItsWay(state)) return this.relayoutSoon(CodeMirrorRelayout.AWAIT_PARSE_MSEC)
-            this.view.dispatch({ effects: laidOut.of(layoutOf(state)) })
+            const layout = layoutOf(state)
+            if (layout) this.view.dispatch({ effects: laidOut.of(layout) })
           })
         }
 

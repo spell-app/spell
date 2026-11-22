@@ -1,7 +1,9 @@
+import { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
 import { SourceEdits } from "spell/app/lsp/SourceEdits"
 import { editor } from "spell/app/app/editor"
 import { appTexts } from "spell/app/app/ui/AppTexts"
+import { LazyCodeMirror } from "spell/app/app/solid/LazyCodeMirror"
 import { PageStories, type PageStory } from "./PageStories"
 import { SiteBoard, type CardDrop } from "./SiteBoard"
 import { SiteEdits, type SitePart, type SitePartPlace } from "./SiteEdits"
@@ -78,7 +80,7 @@ export class SiteWrites {
     if (!site || !project) return
     const part = SiteEdits.partNamed(site.contents ?? "", name)
     const file = part.kind === "group" ? undefined : SiteWrites.declaringFile(name)
-    if (part.kind !== "group" && !file && project.scope && !project.hasPageOrView(name)) {
+    if (part.kind !== "group" && !file && (await SiteWrites.needsPage(site, name))) {
       return SiteWrites.createPartFile(part, site)
     }
     const shown = file ?? site
@@ -87,6 +89,17 @@ export class SiteWrites {
     const line = text.slice(0, at).split("\n").length - 1
     editor.cameFromSite = project.path
     await editor.showFileAt(shown.path, { anchor: { line, ch: 0 }, head: { line, ch: 0 } })
+  }
+
+  /**
+   * Has `site`'s project no page or view called `name`, as the language service reads its parse
+   * (`spell/hasPageOrView`:  the language worker's, where it parses;  epic `solid-2-final` T36)?
+   * - `false` where it can't tell:  no file is made on a guess.
+   */
+  private static async needsPage(site: SiteFile, name: string): Promise<boolean> {
+    if (!(site instanceof SP.SpellFile)) return false
+    const { states } = (await LazyCodeMirror.load()).SpellCodeMirror
+    return (await states.ask(site, "spell/hasPageOrView", { words: name })) === false
   }
 
   /** SIDE EFFECT:  a new file for `part`, its own, beside the site's `site`, and shown. */

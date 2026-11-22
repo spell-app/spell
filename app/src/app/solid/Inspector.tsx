@@ -330,11 +330,11 @@ export class Inspector {
    * - Returns whether it found something there.
    * - NEVER throws.
    */
-  static selectWrittenAt(
+  static async selectWrittenAt(
     path: string,
     line: number,
-    { ifNone = "keep" }: { ifNone?: "keep" | "deselect" } = {}
-  ): boolean {
+    { ifNone = "keep", isWanted = () => true }: { ifNone?: "keep" | "deselect"; isWanted?: () => boolean } = {}
+  ): Promise<boolean> {
     const area = appArea
     if (!area) return false
     const written = Inspector.partsIn(area)
@@ -343,7 +343,14 @@ export class Inspector {
         const place = placeOfPart(element)
         return place?.path === path && place.line === line
       })
-    const found = written.length ? written : Inspector.drawnInTagAround(area, path, line)
+    const found = written.length
+      ? written
+      : await Inspector.drawnInTagAround(area, path, line).catch((error: unknown) => {
+          console.error("Inspector.selectWrittenAt():  couldn't read the tag around the line", error)
+          return []
+        })
+    // what selected it has moved on while the language service answered
+    if (!isWanted()) return false
     // what's selected already, with no trail from it (another line of the same tag):  nothing to do again (I69)
     if (found.length && !trail().length && isSameElements(selectedParts(), found)) return true
     if (found.length) Inspector.selectAll(found)
@@ -351,15 +358,18 @@ export class Inspector {
     return found.length > 0
   }
 
-  /** The parts in `area` the innermost tag around line `line` of file `path` draws, read from its parse. */
-  private static drawnInTagAround(area: Element, path: string, line: number): Element[] {
+  /**
+   * The parts in `area` the innermost tag around line `line` of file `path` draws, as the language service reads
+   * its parse:  the language worker's, where it parses (`spell/partPlace`;  epic `solid-2-final` T36).
+   */
+  private static async drawnInTagAround(area: Element, path: string, line: number): Promise<Element[]> {
     const file = InspectorWrites.fileNamed(path)
-    if (!(file instanceof SP.SpellFile) || !file.match || file.contents === undefined) return []
+    if (!(file instanceof SP.SpellFile) || file.contents === undefined) return []
     const lines = file.contents.split("\n")
     if (line >= lines.length) return []
-    const indent = Math.max(0, lines[line]!.search(/\S/))
-    const offset = lines.slice(0, line).reduce((sum, text) => sum + text.length + 1, 0) + indent
-    const tag = SP.SpellProject.partPlaceAt(file.match, offset)
+    const character = Math.max(0, lines[line]!.search(/\S/))
+    const { states } = (await LazyCodeMirror.load()).SpellCodeMirror
+    const tag = await states.ask(file, "spell/partPlace", { position: { line, character } })
     if (!tag) return []
     // by `path` as the stamps name it:  the parse's own path is the file's whole one
     const key = placeKey({ ...tag, path })
@@ -930,7 +940,8 @@ export class Inspector {
 
   /**
    * Call `thing`'s action `action` `newWords`, wherever it's named (epic `editor` I111):  its head, each call and each
-   * `<action "...">`, in every file of the project, as the language service finds them (`renameActionAt()`).
+   * `<action "...">`, in every file of the project, as the language service finds them (`renameActionAt()`),
+   * the language worker's where it parses (`spell/renameAction`).
    * - ONE step of the editor's history, however many files it changes;  then a compile.
    * - Each place it's named is a change of its own, the last first (I168):
    *   one change from its first place to its last replaced every line between,
@@ -951,9 +962,15 @@ export class Inspector {
     const at = head.toLowerCase().indexOf(action.words.toLowerCase())
     if (!file || at < 0) throw new UIError(appTexts.text("renameActionNotAction", { action: action.words }))
     try {
-      const { service } = (await LazyCodeMirror.load()).SpellCodeMirror
+      const { service, states } = (await LazyCodeMirror.load()).SpellCodeMirror
       const { addresses } = service
-      const { changes = {} } = service.renameActionAt(file, { line: place!.line, character: at + 1 }, newWords)
+      const renamed = await states.ask(file, "spell/renameAction", {
+        position: { line: place!.line, character: at + 1 },
+        newName: newWords
+      })
+      if (!renamed)
+        throw new RenameError("renameAction():  no parse of its text as it is", { cause: { kind: "not-an-action" } })
+      const { changes = {} } = renamed
       const wanted = newWords.trim().replace(/\s+/g, " ")
       const title = appTexts.text("renameAction", { action: action.words, newName: wanted })
       editor.history.transaction(title, () => {

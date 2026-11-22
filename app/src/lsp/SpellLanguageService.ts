@@ -1229,6 +1229,14 @@ export class SpellLanguageService {
   }
 
   /**
+   * Where the innermost tag drawn around `position` is written, as the compiler stamps what it draws
+   * (`SP.SpellProject.partPlaceAt()`):  the Inspector selects what that tag draws.
+   */
+  partPlaceAt(file: SP.SpellFile, position: Position): P.SourcePlace | undefined {
+    return file.match && SP.SpellProject.partPlaceAt(file.match, this.offsetAt(file, position))
+  }
+
+  /**
    * Where the thing a word at `position` names was declared, when it names one a running program has:
    * a property or variable (`the stock`, `the deck`, `la reserva`), never a type, an action or a keyword.
    * - Its file and line, from 0:  the editor inspects what that line makes or draws (epic `editor` T64).

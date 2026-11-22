@@ -21,6 +21,7 @@ import {
   type Rail,
   type Region
 } from "./CodeMirrorMarkup"
+import type { ParsedElsewhere } from "./CodeMirrorLanguage"
 import { CodeMirrorRelayout, type LaidOut } from "./CodeMirrorRelayout"
 import { CodeMirrorSelection } from "./CodeMirrorSelection"
 
@@ -61,19 +62,28 @@ export class CodeMirrorBubbly {
    * The extension drawing a Spell file bubbly.
    * - `fileOf()`:  the project file the editor shows, if it is one, so the layout reads the project's own parse of it.
    * - `sliceOf(state)`:  the lines shown, when it's a slice of its file (`FileStates.showSlice()`)
+   * - `elsewhere`:  where the language worker parses the file, the drawing it sends with each parse
+   *   (epic `solid-2-final` T36):  the page lays nothing out from a parse of its own;
+   *   between drawings, the last one follows the text as it's typed.
    */
   static extension(
     fileOf: () => SP.SpellFile | undefined,
-    sliceOf: (state: EditorState) => Slice | undefined = () => undefined
+    sliceOf: (state: EditorState) => Slice | undefined = () => undefined,
+    elsewhere?: ParsedElsewhere
   ): Extension {
     return [
       CodeMirrorRelayout.extension(
-        (state) => CodeMirrorBubbly.laidOutOf(state, fileOf(), sliceOf(state)),
+        (state) =>
+          elsewhere?.isElsewhere()
+            ? CodeMirrorBubbly.laidOutElsewhere(state, elsewhere, sliceOf(state))
+            : CodeMirrorBubbly.laidOutOf(state, fileOf(), sliceOf(state)),
         CodeMirrorBubbly.RELAYOUT_MSEC,
         {
-          isAwaitingParse: () => CodeMirrorRelayout.isUnparsed(fileOf()),
+          isAwaitingParse: () =>
+            elsewhere?.isElsewhere() ? !elsewhere.hasParsed() : CodeMirrorRelayout.isUnparsed(fileOf()),
           // a project's file just typed in:  its project parses it again once the typing pauses
           isParseOnItsWay: (state) => {
+            if (elsewhere?.isElsewhere()) return !elsewhere.drawingOf(state.doc)
             const file = fileOf()
             return !!file?.match && !SP.BubblyLayout.isParseOf(file, state.doc.toString())
           },
@@ -120,23 +130,47 @@ export class CodeMirrorBubbly {
    */
   static laidOutOf(state: EditorState, within?: SP.SpellFile, slice?: Slice): LaidOut {
     try {
-      const drawing = drawingOf(state, within)
-      const isView = (tag: string) => isViewTag(within, tag)
-      const readings: MarkupReadings = new Map()
-      const decorations = new BubblyDecorations(state, drawing, { isView, slice, readings, part: "whole" }).build()
-      const marksIn = (region: Region) => {
-        try {
-          return new BubblyDecorations(state, drawing, { isView, slice, readings, part: "marks", region }).build()
-        } catch (error) {
-          console.error("CodeMirrorBubbly:  couldn't mark the code on screen", error)
-          return Decoration.none
-        }
-      }
-      return { decorations, marksIn }
+      return CodeMirrorBubbly.laidOutFrom(state, drawingOf(state, within), (tag) => isViewTag(within, tag), slice)
     } catch (error) {
       console.error("CodeMirrorBubbly:  couldn't lay the code out", error)
       return { decorations: Decoration.none }
     }
+  }
+
+  /**
+   * `state`'s text laid out bubbly from the language worker's last drawing, as `laidOutOf()`:
+   * `undefined` while that drawing isn't of this text, the last layout staying.
+   * - NEVER throws:  no decorations when the layout fails.
+   */
+  static laidOutElsewhere(state: EditorState, elsewhere: ParsedElsewhere, slice?: Slice): LaidOut | undefined {
+    const drawing = elsewhere.drawingOf(state.doc)
+    if (!drawing) return undefined
+    try {
+      return CodeMirrorBubbly.laidOutFrom(state, drawing, (tag) => elsewhere.isView(tag), slice)
+    } catch (error) {
+      console.error("CodeMirrorBubbly:  couldn't lay the code out", error)
+      return { decorations: Decoration.none }
+    }
+  }
+
+  /** `state`'s text laid out from `drawing`, its views as `isView` says:  see `laidOutOf()`.  Throws as it fails. */
+  private static laidOutFrom(
+    state: EditorState,
+    drawing: SP.BubblyDrawing,
+    isView: (tag: string) => boolean,
+    slice?: Slice
+  ): LaidOut {
+    const readings: MarkupReadings = new Map()
+    const decorations = new BubblyDecorations(state, drawing, { isView, slice, readings, part: "whole" }).build()
+    const marksIn = (region: Region) => {
+      try {
+        return new BubblyDecorations(state, drawing, { isView, slice, readings, part: "marks", region }).build()
+      } catch (error) {
+        console.error("CodeMirrorBubbly:  couldn't mark the code on screen", error)
+        return Decoration.none
+      }
+    }
+    return { decorations, marksIn }
   }
 }
 

@@ -130,6 +130,17 @@ export const LANGUAGE_REQUESTS = {
     null
   ),
   "spell/project": request((service, file, _params: FileParams) => service.projectInfo(file), null),
+  /**
+   * The names the file's project declares with `query`'s letters in order, as Go to Symbol lists them:
+   * the app's Spell Console line suggests them (epic `solid-2-final` T36)
+   */
+  "spell/projectSymbols": request(
+    (service, file, { query }: FileParams & { query: string }) =>
+      service
+        .workspaceSymbols(query)
+        .filter((symbol) => service.addresses.fileFor(symbol.location.uri)?.project === file.project),
+    []
+  ),
   /** a Spell UI tag's or attribute's help, what Go to Definition shows on one (epic `editor` I148) */
   "spell/componentHover": request(
     (service, file, { position }: TextDocumentPositionParams) => service.componentHover(file, position),
@@ -140,9 +151,35 @@ export const LANGUAGE_REQUESTS = {
     (service, file, { position }: TextDocumentPositionParams) => service.attributeValuesAt(file, position) ?? null,
     null
   ),
+  /**
+   * Where the thing the word at a position names was declared, its file by path and its line from 0:
+   * the app inspects it as the code's cursor rests there (epic `solid-2-final` T36)
+   */
+  "spell/declaredThing": request((service, file, { position }: TextDocumentPositionParams) => {
+    const declared = service.declaredThingAt(file, position)
+    return declared ? { path: declared.file.path, line: declared.line } : null
+  }, null),
   /** `rename`, an action renamed as the Inspector renames it:  throws `LSP.RenameError` saying why it can't */
   "spell/renameSaying": request(
     (service, file, { position, newName }: RenameParams) => service.renameSaying(file, position, newName),
+    null
+  ),
+  /** does the file's project declare a page or a view in these words:  the site editor makes one's file if not */
+  "spell/hasPageOrView": request(
+    (_service, file, { words }: FileParams & { words: string }) => file.project.hasPageOrView(words),
+    true
+  ),
+  /** Where the innermost tag around a position is written, as its drawn elements are stamped (epic `solid-2-final` T36) */
+  "spell/partPlace": request(
+    (service, file, { position }: TextDocumentPositionParams) => service.partPlaceAt(file, position) ?? null,
+    null
+  ),
+  /**
+   * An action renamed wherever it's named, as the Inspector renames it, its action's only (epic `solid-2-final` T36):
+   * throws `LSP.RenameError` saying why it can't
+   */
+  "spell/renameAction": request(
+    (service, file, { position, newName }: RenameParams) => service.renameActionAt(file, position, newName),
     null
   ),
   /** the fix of one of Spell's old forms at a position, for a hover's or a problem's "Fix it" (epic `language` P68) */
