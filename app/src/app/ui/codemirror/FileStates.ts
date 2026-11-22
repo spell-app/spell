@@ -22,7 +22,7 @@ import type { TextEdit } from "vscode-languageserver"
 import { observe } from "spell/util"
 import { after, type CancelablePromise } from "spell/util/timing"
 import { SP } from "spell/parser/spell"
-import type { LSP } from "spell/app/lsp"
+import { LSP } from "spell/app/lsp"
 import { appTexts } from "spell/app/app/ui/AppTexts"
 import { CodeEditorFeatures } from "spell/app/app/ui/CodeEditorFeatures"
 import { CodeRules } from "spell/app/app/ui/CodeRules"
@@ -581,11 +581,19 @@ export class FileStates {
    * `file`'s parse changed:  its diagnostics become its state's problems, and `CodeMirrorSetup.PARSED` tells the rest,
    * its slices' views too.
    * - Only a parse of the text the state holds:  an older one would put its problems in the wrong places.
+   * - A `<css>` block before the CSS service is in shows no CSS mistakes:  worked out again once it lands
+   *   (`LSP.SpellCSS.load()`, epic `solid-2-final` P6).
    */
   private parseChanged(entry: FileEntry, file: SP.SpellFile): void {
     if (!file.match || this.entries.get(file.path) !== entry) return
     const { state } = entry
     if (file.contents !== state.doc.toString()) return
+    if (!LSP.SpellCSS.isLoaded && this.service.css.regionsIn(file.contents ?? "").length) {
+      LSP.SpellCSS.load().then(
+        () => this.parseChanged(entry, file),
+        () => undefined // logged by `SpellCSS`
+      )
+    }
     const problems = this.withFixIt(
       file,
       this.service.diagnostics(file).map((diagnostic) => LspToCodeMirror.diagnostic(state.doc, diagnostic))

@@ -91,6 +91,33 @@ describe("production build", () => {
     }
   })
 
+  /**
+   * The editor's first screen (epic `solid-2-final` P6):  what `index.html` loads at once, its scripts and preloads and
+   * every chunk they import statically, holds none of the pieces loaded on first use.
+   * - Each mode's and box's view (`LazyPiece`), and VS Code's CSS service (`SpellCSS.load()`).
+   * - A static import of one, from anything in the first load, would put it back:  this names the chunk.
+   */
+  test("the first screen holds no view loaded on first use, nor the CSS service", () => {
+    const html = readFileSync(join(outDir, "index.html"), "utf8")
+    const entries = [
+      ...html.matchAll(/<(?:script[^>]*type="module"[^>]*src|link[^>]*rel="modulepreload"[^>]*href)="\/([^"]+\.js)"/g)
+    ].map(([, file]) => file!)
+    expect(entries.length).toBeGreaterThan(0)
+    const eager = new Set(entries.flatMap((entry) => [entry, ...importedChunks(outDir, entry, "static")]))
+    const held = [...eager].flatMap((file) =>
+      sources(join(outDir, file))
+        .filter((source) => ON_FIRST_USE.test(source))
+        .map((source) => `${file}:  ${source.replace(/^.*\/(app|node_modules)\//, "$1/")}`)
+    )
+    expect(held).toEqual([])
+    // and they ARE built, each its own lazy chunk
+    const all = readdirSync(join(outDir, "assets")).filter((file) => file.endsWith(".js"))
+    const built = all
+      .flatMap((file) => sources(join(outDir, "assets", file)))
+      .filter((source) => ON_FIRST_USE.test(source))
+    expect(built.length).toBeGreaterThanOrEqual(8)
+  })
+
   test("what a runtime keeps per copy -- `core` and the runner -- is in `spell-runtime.js`, never in a chunk it loads", () => {
     // every chunk it loads, at once or lazily:  a copy shares them all (`loadRuntime()`)
     const loaded = importedChunks(outDir, "spell-runtime.js")
@@ -251,18 +278,27 @@ function importsOf(source: string): string[] {
 /** What a runtime keeps per copy, as it appears in a sourcemap's `sources`:  `PER_COPY` in `vite.config.ts`. */
 const PER_COPY = /\/(parser\/src\/core|app\/src\/app\/runner)\//
 
+/** What the editor loads on first use, as it appears in a sourcemap's `sources`:  the views a `LazyPiece` loads, the CSS service. */
+const ON_FIRST_USE =
+  /\/app\/src\/app\/solid\/(InspectorView|InspectorParts|PaletteView|AppAnatomyStack|DesignView|ChangeThisView|EditorToursView)\.tsx$|\/node_modules\/vscode-css-languageservice\//
+
+/** A static relative import in minified output, never a lazy one:  `from"./x.js"`, `import"./x.js"`. */
+const STATIC_IMPORT = /(?:\bfrom|\bimport)\s*["'`](\.{1,2}\/[^"'`]+\.js)["'`]/g
+
 /** A relative import in minified output, static or lazy:  `from"./x.js"`, `import"./x.js"`, ``import(`./x.js`)``. */
 const RELATIVE_IMPORT = /(?:\bfrom|\bimport)\s*\(?\s*["'`](\.{1,2}\/[^"'`]+\.js)["'`]/g
 
 /**
  * `entry`'s chunks, every one it imports, transitively, at once or lazily -- paths from `dir`, `entry` left out.
  * - Reads the minified output's relative imports (`RELATIVE_IMPORT`).
+ * - `"static"`:  only what it imports at once (`STATIC_IMPORT`), what loads with it.
  */
-function importedChunks(dir: string, entry: string): string[] {
+function importedChunks(dir: string, entry: string, imports: "all" | "static" = "all"): string[] {
+  const pattern = imports === "static" ? STATIC_IMPORT : RELATIVE_IMPORT
   const seen = new Set<string>([entry])
   const queue = [entry]
   for (let file = queue.shift(); file; file = queue.shift()) {
-    for (const [, specifier] of readFileSync(join(dir, file), "utf8").matchAll(RELATIVE_IMPORT)) {
+    for (const [, specifier] of readFileSync(join(dir, file), "utf8").matchAll(pattern)) {
       const imported = posix.join(posix.dirname(file), specifier!)
       if (seen.has(imported)) continue
       seen.add(imported)

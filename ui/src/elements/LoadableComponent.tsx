@@ -2,7 +2,7 @@ import { untrack } from "solid-js"
 import { isServer, type JSX } from "@solidjs/web"
 
 // Import directly to avoid circular import
-import { lazy, proto, protoMerged } from "spell/ui/util"
+import { LoadOnce, lazy, proto, protoMerged } from "spell/ui/util"
 import { E, UI, type UIT } from "spell/ui/core"
 // Import directly to avoid circular import:  spell-element imports nothing of Spell UI, so it has always loaded first
 import { UIComponent, cssState, watches, onChange, state, untracked } from "spell/element"
@@ -204,9 +204,9 @@ export abstract class LoadableComponent<V extends E.ComponentVocabulary = E.Comp
       void UI.load().then(() => {
         if (!controller.signal.aborted) undo = UI.visibility.observe(this.domElement, { onOnScreen: start, once: true })
       })
-    } else if (policy === "idle" && typeof requestIdleCallback === "function") {
-      const id = requestIdleCallback(start, { timeout: IDLE_LOAD_LIMIT_MS })
-      undo = () => cancelIdleCallback(id)
+    } else if (policy === "idle") {
+      // a load that must happen, only later:  so it runs under Save-Data too
+      undo = LoadOnce.atIdle(start, { timeout: IDLE_LOAD_LIMIT_MS, ahead: false })
     } else start()
     return () => {
       controller.abort()

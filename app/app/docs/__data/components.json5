@@ -3130,7 +3130,7 @@
         },
         {
           "name": "DesignPicker",
-          "file": "src/app/solid/Design.tsx"
+          "file": "src/app/solid/DesignView.tsx"
         },
         {
           "name": "TreeToolbar",
