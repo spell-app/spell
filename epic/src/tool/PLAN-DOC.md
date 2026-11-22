@@ -413,6 +413,9 @@ As `plan-doc.md`, "Ids":
     `Follow up:  <title>`)
   - a known trailing tag, `(coherence)` or `(designer)` (`ShortTitle.TAGS`), is a label:  both checks judge the title
     without it (`ShortTitle.withoutTag()`;  I385)
+  - the reader converges (I390):  it passes unless a reader with no context would truly be lost;  its rewrite is
+    offered only when it meets `ShortTitle` (cut to its first sentence, else none:  `TitleReader.offerable()`);  a title
+    that IS a rewrite it offered in the last hour passes unread (`title-suggestions.json5` in the epic home)
   - An UPDATE label rides in the title (a bare `<epic-update>`, "Updates"):
     `<span slot="title">Title <epic-update phase="2"></epic-update></span>`.
   - `phase 2 done` removes it, and a title left plain goes back to `title`.

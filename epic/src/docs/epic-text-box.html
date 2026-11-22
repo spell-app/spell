@@ -50,7 +50,8 @@
           <p class="lede">
             A box you type in, on a page you answer on: one line to start, growing with its text. What you type is
             part of the page's answer, by its <code>type</code> and <code>for</code>. The page's notes box also shows
-            what the page KEPT: text typed for a question, option or section an agent's rewrite took off the page.
+            what the page KEPT: text typed for a question, option or section an agent's rewrite took off the page. A box
+            may start with Claude's suggested text, its seed, for you to edit into your own.
           </p>
           <p class="meta">
             For anyone writing a page you answer on (a details or choice page), or changing this element.<br />
@@ -60,7 +61,8 @@
               target="src-spell-epic-src-components-epic-text-box"
               ><code title="epic/src/components/epic-text-box/">epic-text-box/</code></a
             >
-            (epic <code>epic-workflow</code> P12; the kept text P18).<br />
+            (epic <code>epic-workflow</code> P12; the kept text P18; the seed and <code>code</code>, epic
+            <code>ast-markup</code>).<br />
             Its vocabulary (every table below comes from it):
             <a
               href="/epic/src/components/epic-text-box/EpicTextBox.en.ts"
@@ -74,8 +76,19 @@
               Live: the real element, drawn by the epics pack this page loads. Off a details page's own address nothing
               is saved or sent: Send says so.
             </p>
-            <epic-text-box for="context"></epic-text-box><epic-text-box type="notes"></epic-text-box
-          ></ui-section>
+            <epic-text-box for="context"></epic-text-box><epic-text-box type="notes"></epic-text-box>
+            <p>
+              A seeded <code>code</code> box: change a line, and "Back to the suggestion" shows under it. (Here a
+              <code>note</code>: on this page a comment box is a bullhorn comment, which fills it itself.)
+            </p>
+            <epic-text-box type="note" label="Suggested markup" code
+              ><script type="text/plain">
+                <ui-button label="Save {name}" appearance="primary">
+                  <ui-icon name="check"></ui-icon> Save
+                </ui-button>
+              </script></epic-text-box
+            ></ui-section
+          >
           <ui-section id="2-markup" label="2. Markup" sticky="stack" collapsible dividing open="false"
             ><ui-icon slot="icon" name="code"></ui-icon>
             <p>
@@ -93,6 +106,28 @@
                     </ui-section>
                     <epic-text-box type="notes"></epic-text-box>
                   </script></ui-code
+                ></ui-content
+              ></ui-accordion
+            >
+            <p>
+              A seeded box: its starting text in a <code>&lt;script type="text/plain"&gt;</code> child, so markup with
+              <code>&lt;</code>, quotes and braces needs no escaping (a <code>&lt;template&gt;</code> works too, as for
+              <code>&lt;ui-code&gt;</code>). Its shared indent is taken off.
+            </p>
+            <ui-accordion class="spell-code" appearance="styled"
+              ><ui-title>details page · a section's code, then a box seeded with the suggestion · 9 lines</ui-title
+              ><ui-content
+                ><ui-code language="html"
+                  ><template>
+                    <ui-section id="s1" label="1. Buttons">
+                      <ui-code language="html"><script type="text/plain"><button>Save</button></script></ui-code>
+                      <epic-text-box for="s1" code>
+                        <script type="text/plain">
+                          <ui-button label="Save {name}"></ui-button>
+                        </script>
+                      </epic-text-box>
+                    </ui-section>
+                  </template></ui-code
                 ></ui-content
               ></ui-accordion
             ></ui-section
@@ -117,7 +152,19 @@
                 >
                 (the feedback).
               </li>
-              <li>No children.</li>
+              <li>
+                One child at most, its seed:  a <code>&lt;script type="text/plain"&gt;</code> (or a
+                <code>&lt;template&gt;</code>) holding the text it starts with.
+              </li>
+              <li>
+                A seeded box's answer is what's typed only once it differs from the seed: left as it was, it sends
+                nothing, and <code>epic ask answer</code> lists it under "Kept as suggested"; emptied, it sends
+                "(emptied: none of the suggested text kept)". A draft and an answer sent come back into it the same way.
+              </li>
+              <li>
+                Seeds are for pages you answer on (details pages). On a guide a comment box is a bullhorn comment, and
+                the comments fill it with their own text, over the seed.
+              </li>
             </ul></ui-section
           >
           <ui-section id="4-attributes" label="4. Attributes" sticky="stack" collapsible dividing open="false"
@@ -170,6 +217,23 @@
                     <td>Its name for a screen reader; none: its placeholder.</td>
                     <td></td>
                   </tr>
+                  <tr>
+                    <td><code>max-height</code></td>
+                    <td>text</td>
+                    <td>
+                      How tall it grows before it scrolls, a CSS length: <code>40vh</code>; none: a third of the window.
+                    </td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td><code>code</code></td>
+                    <td>yes / no</td>
+                    <td>
+                      For code or markup: monospace, lines never wrap (it scrolls sideways), Tab indents (Shift-Tab
+                      takes it back; Escape, then Tab, moves on); it still grows with its lines.
+                    </td>
+                    <td></td>
+                  </tr>
                 </tbody></table
             ></ui-table>
             <ui-section id="epic-text-box-parts" label="Parts" sticky="stack" collapsible dividing open="false"
@@ -210,6 +274,10 @@
                         One kept text: its old title (the id it was under on hover), what was typed, and a × to drop it.
                       </td>
                     </tr>
+                    <tr>
+                      <td><code>reset</code></td>
+                      <td>A seeded box's button back to its suggested text, under its field while what's in it differs.</td>
+                    </tr>
                   </tbody>
                 </table></ui-table
               ></ui-section
@@ -231,6 +299,10 @@
                     <tr>
                       <td><code>filled</code></td>
                       <td>Something is typed in it.</td>
+                    </tr>
+                    <tr>
+                      <td><code>edited</code></td>
+                      <td>A seeded box no longer holds its suggested text.</td>
                     </tr>
                   </tbody>
                 </table></ui-table
@@ -260,6 +332,10 @@
                   <li>a round × on each drops it: it's no longer sent</li>
                 </ul>
               </li>
+              <li>
+                <code>code</code>: the page's monospace, a little smaller, lines kept whole and scrolling sideways; a
+                seeded box's "Back to the suggestion" sits under it, at its end, while it's changed.
+              </li>
             </ul></ui-section
           >
           <ui-section id="6-written-by" label="6. Written by" sticky="stack" collapsible dividing open="false"
@@ -274,7 +350,7 @@
           <footer class="site-page-footer">
             <ui-divider></ui-divider>
             <p class="meta">
-              Last checked 2026-10-14 against branch <code>epic-workflow-p18</code> (P18): the tables are its
+              Last checked 2026-11-21 against branch <code>ast-markup</code> (the seed): the tables are its
               vocabulary's (epic-text-box); the rest from its component and its stylesheet.
             </p>
           </footer>

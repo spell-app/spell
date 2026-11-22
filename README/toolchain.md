@@ -1,3 +1,4 @@
+| [stripRuleTests.ts](../src/toolchain/stripRuleTests.ts) | `spell/toolchain/stripRuleTests` | `ruleTestsOutOfBuilds()` for Vite, `ruleTestsOutOfBundles()` for esbuild:  a build ships each grammar rule with its first example, not its tests |
 # `spell/toolchain`:  what every repo's checks share
 
 ```tsx
