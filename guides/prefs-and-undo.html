@@ -3,13 +3,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Preferences and Undo</title>
+    <title>What Compiled Spell Runs On</title>
     <meta
       name="description"
-      content="One pref store for every repo:  a theme, a panel's width or a whole file kept in the browser, its database or the person's space on the page server, every key byte for byte;  undo and redo with transactions;  and, in Spell's runtime, undoable actions, properties that default by their type and properties remembered from run to run."
+      content="The runtime under compiled Spell:  the core and its classes, typed defaults, undo and redo (UndoStack), props remembered from run to run (PrefStore), a view's own custom element, and things carried over a recompile -- for anyone changing the core or reading compiled code."
     />
-    <meta name="spell-voice" content="readme 2026-10-25" />
-    <meta name="spell-saga" content="drawable-spell" />
+    <meta name="spell-audience" content="programmers" />
+    <meta name="spell-topic" content="The Language Inside" />
+    <meta name="spell-voice" content="readme 2026-11-21" />
     <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
   </head>
   <body class="spell-doc-page">
@@ -17,1338 +18,547 @@
     <div class="spell-doc">
       <main class="spell-doc-main">
         <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
-          <ui-breadcrumb link="/pages/index.html">Spell Epic</ui-breadcrumb>
-          <ui-breadcrumb selected>Preferences and Undo</ui-breadcrumb>
+          <ui-breadcrumb>Guides</ui-breadcrumb>
+          <ui-breadcrumb selected>What Compiled Spell Runs On</ui-breadcrumb>
         </ui-breadcrumbs>
         <ui-sticky class="spell-h1"
-          ><header class="spell-page-head"><h1>Preferences and Undo</h1></header></ui-sticky
+          ><header class="spell-page-head"><h1>What Compiled Spell Runs On</h1></header></ui-sticky
         >
-        <p class="lede">
-          <code>new PrefStore("spell-site").set("scheme", "dark")</code> writes
-          <code>spell-site:scheme = dark</code> into the browser's storage: the same bytes the site's head script has
-          always read.
-        </p>
+        <pre><code class="language-plaintext">a "card" is a thing where:
+	- its "direction" is either up or down
+	- to "turn over", undoable as "Turn Card":
+		set its direction to down</code></pre>
         <ui-accordion class="spell-code" appearance="styled">
-          <ui-title>A preference kept, and a card game's deal undone · 12 lines</ui-title>
+          <ui-title>What <code>spell parse</code> compiled it to, its end</ui-title>
           <ui-content>
-            <pre><code class="language-ts">const site = new PrefStore("spell-site")       // every key it writes starts "spell-site:"
-site.declare("scheme", { oneOf: ["light", "dark", "auto"] })
-site.get("scheme")           // "light":  nothing kept yet, so its first choice
-site.set("scheme", "dark")   // the browser's storage now holds  spell-site:scheme = dark
-
-// a card game, written the way compiled Spell writes it, its deal declared undoable
-static { this.declareAction("deal", { undoneAs: "Deal" }) }
-
-await game.deal(3)           // waits between cards, turns each one over:  ONE step
-game.undoTitle               // "Undo Deal"
-game.undo()                  // every card back in the stock, face down, at once
-game.redo()                  // dealt again at once:  the deal doesn't run again</code></pre>
+            <pre><code class="language-js">  turnOver() {
+    this.direction = "down"
+  }
+}
+core.describeAction(Card, "turnOver", { title: "Turn Over", undoneAs: "Turn Card" })</code></pre>
           </ui-content>
         </ui-accordion>
-        <p>
-          Every repo now keeps people's preferences through ONE pref store, and Spell apps can undo. Before, a dozen
-          one-off stores each guarded their own storage and picked their own keys, and nothing anywhere had undo.
+        <p class="lede">
+          That last line is all it takes for ⌘Z to put the card back. The undo history, the defaults, the card's own
+          element on the page and the game kept across an edit are the RUNTIME's: <code>core</code>, the one object
+          every compiled program imports. This page is what it does for a program, and how.
         </p>
-        <ul>
-          <li>
-            A preference lives in the browser's storage, its database, memory, or the person's space on the page server:
-            the app asks the same way for each.
-          </li>
-          <li>The undo stack under it all is generic, and Spell's runtime builds undoable actions on it.</li>
-          <li>
-            Spell properties also learned two things: an unset one reads a default by its type, and one declared
-            remembered keeps its value from run to run.
-          </li>
-        </ul>
         <ui-list class="spell-meta">
-          <ui-item icon="map"
-            ><b>Epic page:</b>
-            <a href="/epics/prefs-and-undo/prefs-and-undo.plan.html" target="prefs-and-undo"
-              >epic prefs-and-undo</a
-            ></ui-item
-          >
           <ui-item icon="user"
-            >Written for: anyone keeping a preference in Spell UI, the editor or the epic pages, giving a Spell app
-            undo, or changing Spell's runtime</ui-item
+            >Written for: anyone changing the core, giving a program undo, or reading compiled Spell</ui-item
           >
-          <ui-item icon="flag"
-            >Status: <ui-label size="mini" color="green">built</ui-label> and merged into <code>main</code> in the kit,
-            spell-parser, Spell UI, spell-epic and spell-app. The spell words for undoable actions and remembered
-            properties are not written yet.</ui-item
-          >
-          <ui-item icon="code branch"
-            >Checked on: <code>main</code> of each repo, 2026-10-25 (the kit at <code>dc9756b</code>), against the code,
-            its tests and the epic page.</ui-item
+          <ui-item icon="flask">Checked: 2026-11-21, every output on this page printed by that day's code</ui-item>
+          <ui-item icon="book open"
+            >The reference beside it:
+            <a href="/parser/README-core.md" target="src-parser-readme-core-md">README-core</a>, and the kit's helpers
+            under it, <a href="/README/util.md" target="src-readme-util-md">README/util</a></ui-item
           >
         </ui-list>
 
         <ui-section id="1-summary" label="1. Summary" sticky collapsible dividing open="false">
           <ui-icon slot="icon" name="lightbulb"></ui-icon>
-          <ui-statistics class="spell-stats" size="mini">
-            <ui-statistic value="4" label="places to keep a value"></ui-statistic>
-            <ui-statistic value="100" label="undo steps a run keeps"></ui-statistic>
-            <ui-statistic value="1.9 kB" label="kept off every Spell UI page"></ui-statistic>
-          </ui-statistics>
           <ul>
             <li>
-              <a href="/src/util/persist/PrefStore.ts" target="src-src-util-persist-prefstore-ts"
-                ><code title="src/util/persist/PrefStore.ts">PrefStore</code></a
-              >
-              is one app's preferences, in the kit's util (<a href="#2-preferences">Preferences</a>).
-              <ul>
-                <li>Every key is its name, a colon, and the key: existing keys stay byte for byte.</li>
-                <li>Values are text people and plain scripts can read: <code>dark</code>, <code>240</code>.</li>
-                <li>A pref can be declared, with its choices and a default.</li>
-                <li>It never throws when storage fails: it logs, and answers the default.</li>
-              </ul>
+              Compiled JavaScript imports one name, <code>@spell/core</code>: an object of helpers, and the classes a
+              program's types extend (<code>Thing</code>, <code>List</code>, <code>App</code>, <code>View</code>,
+              <code>ViewableList</code>).
+            </li>
+            <li>An unset property reads a default by its type: its first choice, 0, empty text, no.</li>
+            <li>Every action is one undo step by itself. Undo runs nothing backwards: it puts each prop back.</li>
+            <li>A prop declared remembered keeps its value from run to run, in the person's preferences.</li>
+            <li>
+              A view gets its own custom element, <code>&lt;solitaire-card&gt;</code>, whose attributes and its thing
+              always agree.
             </li>
             <li>
-              Two places that must be waited on (<a href="#2-bigger-places">The database and the server</a>):
-              <ul>
-                <li>the browser's database, for whole files and file handles</li>
-                <li>the person's space on the page server, so a preference follows them</li>
-              </ul>
+              An edit in the editor keeps the game in progress: the things carry over, and the start doesn't run again.
+            </li>
+            <li>Every running app gets a core of its own.</li>
+          </ul>
+        </ui-section>
+
+        <ui-section
+          id="core-import"
+          label="2. One import, for what the language has no word for"
+          sticky
+          collapsible
+          dividing
+          open="false"
+        >
+          <ui-icon slot="icon" name="cube"></ui-icon>
+          <pre><code class="language-js">import { core, Thing, List, App, View, ViewableList } from "@spell/core"</code></pre>
+          <ul>
+            <li>
+              <code>@spell/core</code> isn't a package you install. Whatever runs the program points it at a copy of the
+              core: the page's runner, or node's module hooks under <code>spell run</code>.
             </li>
             <li>
-              Every store in the kit, Spell UI, the editor and the epic pages moved onto it (<a href="#3-what-moved"
-                >What moved over</a
-              >).
+              Each writer uses the language's own word where it has one, the core only where it doesn't: JavaScript has
+              no range that includes its end, so <code>core.getRange(1, 100)</code>; Python writes
+              <code>range(1, 101)</code>.
             </li>
             <li>
-              <a href="/src/util/persist/UndoStack.ts" target="src-src-util-persist-undostack-ts"
-                ><code title="src/util/persist/UndoStack.ts">UndoStack</code></a
-              >
-              is generic undo and redo (<a href="#2-undo-stack">The undo stack</a>).
-              <ul>
-                <li>A TRANSACTION is one step for everything an action does, waits included.</li>
-                <li>Undo and redo put changes back at once: nothing runs again.</li>
-              </ul>
+              The core is assembled as it loads: each module adds its helpers to the one object. Its pieces, and where
+              each is: <a href="/parser/README-core.md" target="src-parser-readme-core-md">README-core</a>, "The
+              pieces".
             </li>
             <li>
-              In a running Spell app (<a href="#2-undo-in-a-program">Undo in a running program</a>):
-              <ul>
-                <li>a method declared undoable is one step</li>
-                <li>every app has <code>undo()</code>, <code>redo()</code> and live titles for an Edit menu</li>
-                <li>⌘Z and ⇧⌘Z undo and redo while the app has the focus</li>
-              </ul>
-            </li>
-            <li>
-              An unset Spell property reads a default by its type: 0 for a number, empty text, false, its first choice
-              (<a href="#2-typed-defaults">Typed defaults</a>).
-            </li>
-            <li>
-              A property declared remembered keeps its value from run to run, under the project's id (<a
-                href="#2-remembered"
-                >Remembered properties</a
-              >).
+              Python's twin is <code>spell_core</code>:
+              <a href="/guides/targets/targets.html" target="src-guides-targets-targets-html">Targets</a>.
             </li>
           </ul>
-          <ui-message state="warning" heading="Not yet">
-            <ul>
-              <li>
-                <b>No spell words write an undoable action, a remembered property or a declared default yet.</b>
-                The runtime has them all; the compiler writes them once the elemental-spell epic settles the words.
-              </li>
-              <li>
-                <b>So ⌘Z and remembered properties haven't been tried by hand in a running app.</b> The core's tests run
-                them on a card game written the way compiled Spell writes it.
-              </li>
-            </ul>
-          </ui-message>
-        </ui-section>
-
-        <ui-section id="2-how-to-use-it" label="2. How to use it" sticky collapsible dividing open="false">
-          <ui-icon slot="icon" name="compass"></ui-icon>
-          <p>
-            Each part the way you meet it: a preference first, then the places that must be waited on, then undo, then
-            what Spell's properties gained.
-          </p>
-
-          <ui-section id="2-preferences" label="Preferences" sticky collapsible dividing open="false">
-            <p>
-              Make one store per app, named for it, and ask it for each value. The browser's storage holds every key
-              under the store's name and a colon, so two apps on one site never share a value, and
-              <code>forgetAll()</code> forgets only its own.
-            </p>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>A store, its keys, its values · from the pref store's tests · 9 lines</ui-title>
-              <ui-content>
-                <pre><code class="language-ts">import { PrefStore } from "spell/util/persist/PrefStore"
-
-const prefs = new PrefStore("PrefStore-test-values")
-prefs.set("count", 1)              // localStorage:  PrefStore-test-values:count  = 1
-prefs.set("label", "1")            //                PrefStore-test-values:label  = "1"
-prefs.set("layout", { left: 30 })  //                PrefStore-test-values:layout = {"left":30}
-prefs.get("count")                 // 1
-prefs.get("label")                 // "1"
-prefs.get("width", 250)            // 250:  nothing kept, so the fallback</code></pre>
-              </ui-content>
-            </ui-accordion>
-            <p>
-              A value is read as JSON only when it looks like JSON; anything else is text. So a key a person or a plain
-              script wrote reads back as written.
-            </p>
-            <ui-table celled padding="compact" appearance="striped" unstackable>
-              <table>
-                <tbody>
-                  <tr>
-                    <th>set</th>
-                    <th>kept as</th>
-                    <th>reads back</th>
-                  </tr>
-                  <tr>
-                    <td><code>set("scheme", "dark")</code></td>
-                    <td><code>dark</code></td>
-                    <td>the text <code>"dark"</code></td>
-                  </tr>
-                  <tr>
-                    <td><code>set("width", 240)</code></td>
-                    <td><code>240</code></td>
-                    <td>the number <code>240</code></td>
-                  </tr>
-                  <tr>
-                    <td><code>set("tab", "1")</code></td>
-                    <td><code>"1"</code>, quoted</td>
-                    <td>the text <code>"1"</code></td>
-                  </tr>
-                  <tr>
-                    <td><code>set("open", ["a", "b"])</code></td>
-                    <td><code>["a","b"]</code></td>
-                    <td>the list</td>
-                  </tr>
-                  <tr>
-                    <td><code>set("on", true)</code></td>
-                    <td><code>true</code></td>
-                    <td>the choice <code>true</code></td>
-                  </tr>
-                </tbody>
-              </table>
-            </ui-table>
-            <ul>
-              <li>
-                JSON means: it starts with a double quote, a curly brace or a square bracket, or it's a number, or one
-                of the words true, false and null.
-              </li>
-              <li>A string that would read back as something else is quoted when it's written.</li>
-            </ul>
-            <p>
-              A pref can be declared, with its type, its choices and its default. A declared pref answers its default
-              while nothing's kept, and refuses to keep a value it doesn't allow.
-            </p>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>Declared prefs · from the pref store's tests · 9 lines</ui-title>
-              <ui-content>
-                <pre><code class="language-ts">const prefs = new PrefStore("PrefStore-test-default").declare("scheme", {
-  oneOf: ["light", "dark", "auto"],
-  default: "auto"
-})
-prefs.get("scheme")            // "auto":  the declared default;  with none, "light", the first choice
-prefs.get("scheme", "dark")    // "dark":  a fallback passed in wins over both
-prefs.set("scheme", "purple")  // throws TypeError:  `scheme` is one of light, dark, auto;  not `purple`
-
-new PrefStore("t").declare("count", { type: "number" }).get("count")    // 0;  text "", a choice false</code></pre>
-              </ui-content>
-            </ui-accordion>
-            <ul>
-              <li>
-                A kept value its declaration no longer allows (a choice the app dropped) reads as the default, logged.
-              </li>
-              <li>
-                Keys with a shared start act like a folder: <code>keysUnder("layout/")</code>,
-                <code>forgetUnder("layout/")</code>.
-              </li>
-              <li><code>rename(oldKey, newKey)</code> moves a value once, when a pref is renamed.</li>
-            </ul>
-            <p>It NEVER throws when storage fails.</p>
-            <ul>
-              <li>
-                Blocked storage (a private window): it keeps values in memory for the visit, and says so on the console
-                once.
-              </li>
-              <li>A full one: it logs, and answers the default.</li>
-              <li>
-                A <code>TypeError</code> means a caller's mistake: no key, a store name with a colon, a value its
-                declaration doesn't allow.
-              </li>
-            </ul>
-            <p>
-              The catch: it isn't in Spell UI's util barrel. In the core bundle it cost every page 1.9 kB, so the few
-              Spell UI files that keep preferences import <code>spell/util/persist/PrefStore</code> by file.
-            </p>
-          </ui-section>
-
-          <ui-section id="2-bigger-places" label="The database and the server" sticky collapsible dividing open="false">
-            <p>
-              Hand a store a place, and the same calls keep its values somewhere else. Two of the four places must be
-              waited on: there, use <code>load()</code> and <code>save()</code>, which answer promises.
-            </p>
-            <ui-table celled padding="compact" appearance="striped" unstackable>
-              <table>
-                <tbody>
-                  <tr>
-                    <th>place</th>
-                    <th>lasts</th>
-                    <th>waited on</th>
-                    <th>for</th>
-                  </tr>
-                  <tr>
-                    <td><code>"local"</code> (the default), <code>"session"</code></td>
-                    <td>per site, or until the tab closes</td>
-                    <td>no</td>
-                    <td>small values: a theme, a panel's width</td>
-                  </tr>
-                  <tr>
-                    <td><code>"memory"</code></td>
-                    <td>until the page goes</td>
-                    <td>no</td>
-                    <td>servers, tests, and when the browser blocks storage</td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <a href="/src/util/persist/DatabasePlace.ts" target="src-src-util-persist-databaseplace-ts"
-                        ><code title="src/util/persist/DatabasePlace.ts">DatabasePlace.shared</code></a
-                      >
-                    </td>
-                    <td>per site</td>
-                    <td>yes</td>
-                    <td>big values, files, file handles</td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <a href="/src/util/persist/ServerPlace.ts" target="src-src-util-persist-serverplace-ts"
-                        ><code title="src/util/persist/ServerPlace.ts">ServerPlace.shared</code></a
-                      >
-                    </td>
-                    <td>in the person's space</td>
-                    <td>yes</td>
-                    <td>anything that should follow a person to another browser</td>
-                  </tr>
-                </tbody>
-              </table>
-            </ui-table>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>The browser's database, and the page server · 9 lines</ui-title>
-              <ui-content>
-                <pre><code class="language-ts">const files = new PrefStore("spell-static", { place: DatabasePlace.shared })
-await files.save("@owen/solitaire/cards.png", blob)   // kept as the browser copies it:  a Blob comes back a Blob
-await files.load("@owen/solitaire/cards.png")
-
-const prefs = new PrefStore("spellEditor", { place: ServerPlace.shared })
-await prefs.save("mode", "split")     // spell.spaces/@spell/owen@/__prefs/spellEditor.json5
-await prefs.update&lt;number&gt;("visits", (visits) =&gt; visits + 1)   // read, change and save as ONE step
-
-prefs.get("mode")   // throws TypeError:  ... must be waited on;  use `load()` or `loadKeysUnder()`</code></pre>
-              </ui-content>
-            </ui-accordion>
-            <ul>
-              <li>
-                The browser's database is one IndexedDB database for the site, <code>spell-prefs</code>, with one table,
-                each value under its store and key.
-                <ul>
-                  <li>A file's Blob, a Date or a Map comes back as it went in, and so would a file handle.</li>
-                  <li>A 10 MB string fits.</li>
-                  <li>
-                    <code>update()</code> runs in one database transaction, so two tabs never read the same value.
-                  </li>
-                  <li>No database, or one the browser refuses: memory for the visit, said once.</li>
-                </ul>
-              </li>
-              <li>
-                The page server keeps each store as a JSON5 file in the person's space, in its
-                <code>__prefs/</code> folder.
-                <ul>
-                  <li>
-                    A store named like a project is a folder and a file:
-                    <code>__prefs/@owen/solitaire.json5</code>.
-                  </li>
-                  <li>You can read the file, and a comment you write in it stays.</li>
-                  <li>Values travel as JSON: plain data only, no <code>Blob</code>.</li>
-                  <li>Offline, refused or an error: it logs, and a read answers the default.</li>
-                </ul>
-              </li>
-              <li>A quick <code>set()</code> on a waited-on place saves a moment later; a failure is logged.</li>
-            </ul>
-            <p>
-              The server's side is four requests under <code>/api/prefs</code>, answered by the spaces on the page
-              server (<a
-                href="/spell-app/src/spaces/server/node/prefs/prefsRoutes.ts"
-                target="src-spell-app-src-spaces-server-node-prefs-prefsroutes-ts"
-                ><code title="spell-app/src/spaces/server/node/prefs/prefsRoutes.ts">prefsRoutes</code></a
-              >):
-            </p>
-            <ui-table celled padding="compact" appearance="striped" unstackable>
-              <table>
-                <tbody>
-                  <tr>
-                    <th>request</th>
-                    <th>answers</th>
-                  </tr>
-                  <tr>
-                    <td><code>GET /api/prefs/load?store=&amp;key=</code></td>
-                    <td><code>{ value }</code>, no <code>value</code> for none</td>
-                  </tr>
-                  <tr>
-                    <td><code>POST /api/prefs/save</code>, <code>{ store, key, value }</code></td>
-                    <td><code>{ value }</code>; no <code>value</code> forgets the key</td>
-                  </tr>
-                  <tr>
-                    <td><code>GET /api/prefs/keys?store=&amp;under=</code></td>
-                    <td><code>{ keys }</code></td>
-                  </tr>
-                  <tr>
-                    <td><code>POST /api/prefs/forget</code>, <code>{ store, under }</code></td>
-                    <td><code>{ keys }</code>, the keys left</td>
-                  </tr>
-                </tbody>
-              </table>
-            </ui-table>
-            <p>Not yet: there's no sign-in, so every person on one page server is this machine's person, owen.</p>
-            <ul>
-              <li>One function names the person, and sign-in replaces it.</li>
-              <li>A store name that would reach outside the person's <code>__prefs/</code> answers 400.</li>
-            </ul>
-          </ui-section>
-
-          <ui-section id="2-undo-stack" label="The undo stack" sticky collapsible dividing open="false">
-            <p>
-              <code>UndoStack</code> is an app's undo history: two stacks of steps, each step a title and the records of
-              what it changed. Each record says how to undo and redo itself, so the stack knows nothing about what it
-              puts back.
-            </p>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>A transaction that waits · from the undo stack's tests · 13 lines</ui-title>
-              <ui-content>
-                <pre><code class="language-ts">const history = new UndoStack()
-const dealt = history.transaction("Deal", async () =&gt; {
-  for (const cards of [1, 2, 3]) {
-    await Promise.resolve()
-    change(history, pile, cards, "Move Card")   // records { undo, redo }
-  }
-})
-history.transaction("Flip", () =&gt; change(history, pile, 9, "Flip"))   // begun while Deal waits:  joins it
-await dealt
-history.steps.map((step) =&gt; step.title)   // ["Deal"]
-history.undo()                              // pile.cards is 0 again
-history.redo()                              // instant:  nothing runs again
-history.undoTitle                           // "Undo Deal"</code></pre>
-              </ui-content>
-            </ui-accordion>
-            <ul>
-              <li>
-                A transaction is ONE step: open until its function returns, or until its promise settles, chains
-                included.
-                <ul>
-                  <li>Work nested in it, or begun while it waits, joins it: never a step of its own.</li>
-                  <li>A throw still records what changed, and passes the error on. Nothing recorded: no step.</li>
-                </ul>
-              </li>
-              <li>
-                FOLDING: a step with the same title AND the same target as the newest joins it.
-                <ul>
-                  <li>So typing "hello" into one field undoes to "" and redoes to "hello".</li>
-                  <li>A step with no target never folds.</li>
-                </ul>
-              </li>
-              <li>
-                The stacks move before the records run, so whatever they set off already sees the new history. Nothing
-                records while it undoes or redoes.
-              </li>
-              <li>
-                A new step empties the redo stack; <code>limit</code> drops the oldest; <code>clear()</code> forgets
-                both.
-              </li>
-              <li>
-                What an Edit menu reads is live (spell cells), so a menu drawn from it redraws by itself:
-                <code>canUndo</code> and <code>undoTitle</code>, and the same for redo.
-              </li>
-              <li>
-                Titles are English by default; <code>titleFor</code> words them whole in another language,
-                <code>Deshacer «Margen»</code>.
-              </li>
-            </ul>
-          </ui-section>
-
-          <ui-section id="2-undo-in-a-program" label="Undo in a running program" sticky collapsible dividing open="false">
-            <p>
-              Spell's runtime gives each run an undo history on that stack. Only an action declared undoable is
-              recorded: a plain property write is no step.
-            </p>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>A card game's actions · from the core's undo tests · 22 lines</ui-title>
-              <ui-content>
-                <pre><code class="language-ts">class Card extends Thing {
-  static {
-    this.declareProp("faceUp", { type: "choice" })
-    this.declareProp("picked", { type: "choice", undoable: false })   // never undone, e.g. a selection
-  }
-  turnOver(): void {
-    this.faceUp = !this.faceUp
-  }
-  static { this.declareAction("turnOver", { undoneAs: "Turn Card" }) }
-}
-
-class Game extends App {
-  async deal(count: number) { ... }   // waits between cards, moves each to the waste, turns it over
-  hint() { ... }
-  newGame() { ... }
-  static {
-    this.declareAction("deal", { undoneAs: "Deal" })
-    this.declareAction("hint", { cantBeUndone: "keeps history" })      // left out;  earlier steps stay
-    this.declareAction("newGame", { cantBeUndone: "clears history" })  // left out;  every step forgotten
-  }
-}
-
-await game.deal(3);  game.undo()   // the stock holds all three again, in order, face down, owned by the stock</code></pre>
-              </ui-content>
-            </ui-accordion>
-            <ul>
-              <li>
-                <code>declareAction()</code> goes in a static block after the method. An action says exactly one of
-                <code>undoneAs</code> and <code>cantBeUndone</code>; neither or both throws.
-              </li>
-              <li>
-                An undoable action is ONE step however long it waits: the cards it turns over, and every action it
-                calls, join it.
-              </li>
-              <li>
-                A step keeps the least it needs: each property's value before its first change and after its last, and
-                each list's items before and after. A 3-card deal is six records.
-              </li>
-              <li>At most 100 steps a run.</li>
-              <li>
-                While an undoable action still runs, undo and redo do nothing: ⌘Z mid-deal is ignored, and the next one
-                undoes the whole deal.
-              </li>
-              <li>
-                One history per run. A new run starts with none, and loading saved state (<code>core.fromJSON()</code>,
-                a <code>Loader</code>) forgets it: the person's document changed.
-              </li>
-            </ul>
-            <p>Every app has what an Edit menu needs:</p>
-            <ui-table celled padding="compact" appearance="striped" unstackable>
-              <table>
-                <tbody>
-                  <tr>
-                    <th>on the app</th>
-                    <th>what it does</th>
-                  </tr>
-                  <tr>
-                    <td><code>undo()</code>, <code>redo()</code></td>
-                    <td>undo the newest step, redo the last one undone; <code>false</code> with none</td>
-                  </tr>
-                  <tr>
-                    <td><code>canUndo</code>, <code>canRedo</code></td>
-                    <td>live: a menu item greys out by itself</td>
-                  </tr>
-                  <tr>
-                    <td><code>undoTitle</code>, <code>redoTitle</code></td>
-                    <td>
-                      <code>Undo Turn Card</code>, or just Undo; in the program's language, e.g. Spanish's
-                      <code>Deshacer Turn Card</code>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </ui-table>
-            <p>
-              ⌘Z and ⇧⌘Z (Ctrl on other platforms) undo and redo while the app has the focus, or nothing does. They go
-              through Spell UI's keyboard registry, so a modal open over the app keeps its own keys.
-            </p>
-            <ul>
-              <li>A text field in the app keeps its own ⌘Z: the key passes on to it.</li>
-              <li>With nothing to undo, the key passes on too.</li>
-              <li>A page without Spell UI has no undo keys; <code>undo()</code> still works from a button.</li>
-            </ul>
-          </ui-section>
-
           <ui-section id="2-typed-defaults" label="Typed defaults" sticky collapsible dividing open="false">
-            <p>
-              An unset Spell property used to read as nothing, whatever its type. Now it reads its declared default,
-              else its first choice, else its type's.
-            </p>
-            <ui-table celled padding="compact" appearance="striped" unstackable>
-              <table>
-                <tbody>
-                  <tr>
-                    <th>a property that's</th>
-                    <th>read while unset, before</th>
-                    <th>now</th>
-                  </tr>
-                  <tr>
-                    <td>a number</td>
-                    <td>nothing</td>
-                    <td><code>0</code></td>
-                  </tr>
-                  <tr>
-                    <td>a choice (yes / no)</td>
-                    <td>nothing</td>
-                    <td><code>false</code></td>
-                  </tr>
-                  <tr>
-                    <td>text</td>
-                    <td>nothing</td>
-                    <td><code>""</code></td>
-                  </tr>
-                  <tr>
-                    <td>one of a list</td>
-                    <td>nothing</td>
-                    <td>its first value</td>
-                  </tr>
-                  <tr>
-                    <td>a list</td>
-                    <td>a new list</td>
-                    <td>a new list</td>
-                  </tr>
-                  <tr>
-                    <td>a thing</td>
-                    <td>nothing</td>
-                    <td>nothing</td>
-                  </tr>
-                </tbody>
-              </table>
-            </ui-table>
-            <ul>
-              <li>A declared default, or a starting value, wins.</li>
-              <li>The default is never stored, so saved JSON doesn't change.</li>
-              <li>
-                Python's runtime reads the same, so every target draws the same thing. Prefs and properties share one
-                rule,
-                <a href="/src/util/persist/values.ts" target="src-src-util-persist-values-ts"
-                  ><code title="src/util/persist/values.ts">defaultFor()</code></a
-                >.
-              </li>
-              <li>
-                A drawn thing's element still shows no attribute for a value nobody set, as HTML doesn't:
-                <code>&lt;solitaire-card&gt;</code> doesn't grow <code>direction="up"</code>. A read-only getter's value
-                always shows.
-              </li>
-            </ul>
-            <p>
-              What people see change: the Task List, Lista de tareas and Habit Tracker examples' Add button starts
-              disabled. An unset draft is <code>""</code> now, which is empty, so the button waits until something is
-              typed.
-            </p>
-          </ui-section>
-
-          <ui-section id="2-remembered" label="Remembered properties" sticky collapsible dividing open="false">
-            <p>
-              A property declared <code>remembered: true</code> keeps its value from one run to the next, in the
-              person's preferences.
-            </p>
-            <ui-accordion class="spell-code" appearance="styled">
-              <ui-title>A remembered theme · from the core's tests · 10 lines</ui-title>
-              <ui-content>
-                <pre><code class="language-ts">class Solitaire extends App {
-  static { this.declareProp("theme", { oneOf: ["light", "dark"], remembered: true }) }
-}
-
-core.resetRuntime()
-await core.remember("@owen/solitaire")   // what its last run kept, read now
-new Solitaire().theme = "dark"           // kept at  @owen/solitaire:theme
-
-core.resetRuntime()
-await core.remember("@owen/solitaire")
-new Solitaire().theme                    // "dark";  another project's id reads "light"</code></pre>
-              </ui-content>
-            </ui-accordion>
             <ul>
               <li>
-                Read the first time it's asked for: what the last run set, else its starting value, else its typed
-                default. Kept again every time it's set.
+                An unset property reads its declared default, else its first choice, else its type's own: 0 for a
+                number, empty text, no for a choice.
               </li>
+              <li>So a card made with no suit is a club, and black.</li>
               <li>
-                The keys are the project's id, then:
-                <ul>
-                  <li>on the app, the property's name: <code>@owen/solitaire:theme</code></li>
-                  <li>
-                    on any other thing, the id the program chose and the name: <code>@owen/solitaire:main.zoom</code>
-                  </li>
-                  <li>
-                    a thing whose id was made up (new each run) isn't remembered: a warning on the console, once, naming
-                    the fix, <code>new Settings({ id: "main" })</code>
-                  </li>
-                </ul>
+                The default is never stored: the card's JSON leaves it out, and its element has no
+                <code>suit</code> attribute.
               </li>
-              <li>
-                Whoever runs the program says which project, with <code>core.remember(projectId)</code> before it loads.
-                The editor and <code>&lt;spell-viewer&gt;</code> (a published page) both do.
-              </li>
-              <li>
-                Any place works, the page server's too: everything kept is read in one go before the program starts, so
-                the program never waits for it.
-              </li>
-              <li>
-                Only text, numbers and yes / no are kept: a thing or a list isn't, said once. A remembered value the
-                property no longer allows is passed over, said once.
-              </li>
+              <li><code>spell_core</code> reads the same defaults.</li>
             </ul>
           </ui-section>
         </ui-section>
 
-        <ui-section id="3-how-it-works" label="3. How it works" sticky collapsible dividing open="false">
-          <ui-icon slot="icon" name="puzzle piece"></ui-icon>
+        <ui-section id="2-undo-in-a-program" label="3. Undo and redo" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="undo"></ui-icon>
           <p>
-            Three ideas carry the rest: a store's name is the start of its keys, a place decides only where values live,
-            and an undo step records what changed, not a snapshot of everything.
+            An editor's undo usually runs a command backwards. This one runs nothing: a step keeps each prop's value
+            before its first change and after its last, and each list's items, and undo sets them back.
           </p>
-
-          <ui-section id="3-what-moved" label="Every key, byte for byte" sticky collapsible dividing open="false">
-            <p>
-              A store's name is the key's part before its first colon, so every store that moved over kept what people
-              had saved. The site header's store, <code>spell-site</code>, keeps its scheme at
-              <code>spell-site:scheme</code>: exactly the key the site's head script reads before the page draws.
-            </p>
-            <ui-table celled padding="compact" appearance="striped" unstackable>
-              <table>
-                <tbody>
-                  <tr>
-                    <th>where</th>
-                    <th>what it keeps</th>
-                    <th>now</th>
-                  </tr>
-                  <tr>
-                    <td>the site header, on every docs page</td>
-                    <td>light or dark, and the per-tab edit mode (still <code>1</code>)</td>
-                    <td>a pref store</td>
-                  </tr>
-                  <tr>
-                    <td>Spell UI's docs site</td>
-                    <td>its theme, nav favourites, open topics, section folds, a viewer's saved theme</td>
-                    <td>pref stores, each imported by file</td>
-                  </tr>
-                  <tr>
-                    <td>the editor</td>
-                    <td>its mode, tabs, panel sizes, the type explorer</td>
-                    <td>one store, <code>spellEditor</code>; its doubled old keys moved over once</td>
-                  </tr>
-                  <tr>
-                    <td>the editor's static preview</td>
-                    <td>a visitor's edits to an example: whole files</td>
-                    <td>the browser's database, store <code>spell-static</code>, moved over once</td>
-                  </tr>
-                  <tr>
-                    <td>the epic pages</td>
-                    <td>folds, drafts, filters, read marks, the Epics list's sort</td>
-                    <td>pref stores; four keys with no store's name renamed, moved once</td>
-                  </tr>
-                  <tr>
-                    <td>Spell UI's nag (<code>DismissalStore</code>)</td>
-                    <td>that a nag was dismissed</td>
-                    <td>stays: its keys are the page author's, and it keeps cookies too</td>
-                  </tr>
-                  <tr>
-                    <td>the head scripts, the live-reload client, the syntax colourer, the page checker</td>
-                    <td>light or dark before the page draws, the scroll position, keys set from a test</td>
-                    <td>stay raw: they run before any module, or can't import one</td>
-                  </tr>
-                </tbody>
-              </table>
-            </ui-table>
-            <p>
-              Old keys move with <code>PrefStore.moveOldKey()</code>: once, byte for byte, and a value already at the
-              new key wins. The editor's <code>spellEditor:spellEditor.mode</code> became
-              <code>spellEditor:mode</code> that way.
-            </p>
-          </ui-section>
-
-          <ui-section id="3-places" label="A place decides where, never how" sticky collapsible dividing open="false">
-            <p>
-              Code that writes <code>localStorage.setItem()</code> itself also has to guard it, prefix it and parse it;
-              each of the old stores did all three its own way. Here the store asks, and a place answers.
-            </p>
-            <ul>
-              <li>
-                Quick places answer at once:
-                <a href="/src/util/persist/StoragePlace.ts" target="src-src-util-persist-storageplace-ts"
-                  ><code title="src/util/persist/StoragePlace.ts">StoragePlace</code></a
-                >
-                over the browser's storage, and
-                <a href="/src/util/persist/MemoryStorage.ts" target="src-src-util-persist-memorystorage-ts"
-                  ><code title="src/util/persist/MemoryStorage.ts">MemoryStorage</code></a
-                >.
-              </li>
-              <li>
-                Waited-on ones (<a
-                  href="/src/util/persist/WaitedOnPlace.ts"
-                  target="src-src-util-persist-waitedonplace-ts"
-                  ><code title="src/util/persist/WaitedOnPlace.ts">WaitedOnPlace</code></a
-                >: the database, the server) refuse a quick read with a message naming <code>load()</code>, and save a
-                quick write later.
-              </li>
-              <li>
-                A test hands a store a <code>StoragePlace</code> over its own storage; a class that took a
-                <code>Storage</code> for its tests still does.
-              </li>
-              <li>
-                The folder imports nothing from outside itself but util's reactive engine (for the undo stack's live
-                titles), so Spell UI can use it.
-              </li>
-            </ul>
-          </ui-section>
-
-          <ui-section id="3-recorder" label="What an undo step records" sticky collapsible dividing open="false">
-            <p>
-              Many undo libraries snapshot the whole state, or replay commands. This records only what an undoable
-              action changed, as it changes it.
-            </p>
-            <ul>
-              <li>
-                Every property write in Spell's runtime comes through ONE place,
-                <a href="/spell-parser/src/core/core.ts" target="src-spell-parser-src-core-core-ts"
-                  ><code title="spell-parser/src/core/core.ts">noteSetting()</code></a
-                >, and every list change through
-                <a href="/spell-parser/src/core/core.ts" target="src-spell-parser-src-core-core-ts"
-                  ><code title="spell-parser/src/core/core.ts">noteItems()</code></a
-                >.
-                <ul>
-                  <li>
-                    The run's history (<a
-                      href="/spell-parser/src/core/undoing.ts"
-                      target="src-spell-parser-src-core-undoing-ts"
-                      ><code title="spell-parser/src/core/undoing.ts">UndoHistory</code></a
-                    >) records them while an undoable action runs.
-                  </li>
-                  <li>
-                    A <code>while</code> handler's put-back, and a program running in Python, hear of the same writes.
-                  </li>
-                </ul>
-              </li>
-              <li>
-                Each property is one record in its step, however often it changes: its first value and its last. Each
-                list is one record: its items before the step and after it, the same things, not copies.
-              </li>
-              <li>
-                Undo and redo set them back through the setters, so what draws them redraws, a pile's cards know their
-                pile again, and a page's mirror hears of it.
-              </li>
-              <li>
-                <code>declareAction()</code> wraps the method in <code>UndoHistory.run()</code>; with no program
-                running, the method just runs.
-              </li>
-            </ul>
-          </ui-section>
-        </ui-section>
-
-        <ui-section id="4-why" label="4. Why it's built this way" sticky collapsible dividing open="false">
-          <ui-icon slot="icon" name="gavel"></ui-icon>
-          <p>The choices a reader would question, each with the option it beat.</p>
-
-          <ui-section id="4-why-prefs" label="Preferences" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                <b>In the browser by default; the app may move them to the server.</b>
-                <ul>
-                  <li>It works today, with no sign-in.</li>
-                  <li>An app with signed-in people names a server place, and changes nothing else.</li>
-                  <li>It beat server first.</li>
-                </ul>
-              </li>
-              <li>
-                <b>Values are text unless they look like JSON.</b>
-                <ul>
-                  <li>Head scripts and people read the keys as they are: <code>spell-site:scheme</code> holds dark.</li>
-                  <li>The words true, false and null read as JSON too, so a choice comes back a choice.</li>
-                  <li>It beat a serializer that keeps dates, and a format option per store.</li>
-                </ul>
-              </li>
-              <li>
-                <b>A store's name is the key's part before the first colon.</b>
-                <ul>
-                  <li>No saved setting is lost, and nothing needs moving.</li>
-                  <li>It beat the old app store's <code>name::key</code>, which would have changed every key.</li>
-                </ul>
-              </li>
-              <li>
-                <b>One folder in the kit's util, generic.</b>
-                <ul>
-                  <li>Spell UI may import it, as it may not import Spell's own corner of util.</li>
-                  <li>It beat a kit folder of its own, with its own namespace and test project.</li>
-                </ul>
-              </li>
-              <li>
-                <b>Out of Spell UI's util barrel.</b>
-                <ul>
-                  <li>
-                    Measured, it grew the core bundle from 38.12 kB to 39.98 kB: a page with one button went from 73.78
-                    kB to 75.64 kB.
-                  </li>
-                  <li>Only a few files keep preferences, so they import it by file.</li>
-                </ul>
-              </li>
-              <li>
-                <b>The browser's database store is built now, and written here.</b>
-                <ul>
-                  <li>
-                    It holds whole files with no 5 MB ceiling, and file handles, for saving straight to disk later.
-                  </li>
-                  <li>
-                    About 80 lines on the browser's own IndexedDB beat adding a library; its tests cover three bugs an
-                    earlier version of the idea had.
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <b>One database table, each value under its store and key.</b>
-                <ul>
-                  <li>A browser database adds a table only while it changes version.</li>
-                  <li>
-                    So a table per store would mean a new version, and a wait on every other open tab, for each new
-                    store.
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <b>Four named routes, the store and key in the query or the body.</b>
-                <ul>
-                  <li>A store is often named like a project, <code>@owen/solitaire</code>.</li>
-                  <li>Its slashes would tangle with a path per key.</li>
-                </ul>
-              </li>
-              <li>
-                <b>Kept in the person's space, through spaces.</b>
-                <ul>
-                  <li>One file per store, readable, its comments kept.</li>
-                  <li>Sign-in changes one function.</li>
-                </ul>
-              </li>
-            </ul>
-          </ui-section>
-
-          <ui-section id="4-why-undo" label="Undo" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                <b>Only actions marked undoable record.</b>
-                <ul>
-                  <li>Nothing is recorded by surprise.</li>
-                  <li>The cost: an app has no undo until each action that should undo is marked.</li>
-                  <li>It beat every change recording itself, folded.</li>
-                </ul>
-              </li>
-              <li>
-                <b>An undoable action is a transaction, waits included.</b>
-                <ul>
-                  <li>"Undo Deal" puts every card back.</li>
-                  <li>
-                    It beat the runtime's old rule, which kept only what was set before the first wait: dealing 28 cards
-                    would have been 28 steps.
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <b>One history per app, cleared on a new run and when saved state loads.</b>
-                <ul>
-                  <li>That's what a person expects of ⌘Z in most apps.</li>
-                  <li>The runtime has no notion of opening a document yet, so those two moments stand in for it.</li>
-                  <li>It beat a history per document or view.</li>
-                </ul>
-              </li>
-              <li>
-                <b>The undo stack is generic.</b>
-                <ul>
-                  <li>A step is records that undo and redo themselves.</li>
-                  <li>Spell's runtime adds the recorder of property and list changes; spell-app may add its own.</li>
-                </ul>
-              </li>
-              <li>
-                <b>A list keeps its items before and after, whole.</b>
-                <ul>
-                  <li>Putting one pile back moves its cards out of the others.</li>
-                  <li>So by the time the next pile's record runs, a recorded splice's place in it would be wrong.</li>
-                  <li>Whole lists end right in any order, for one array of references per changed list per step.</li>
-                </ul>
-              </li>
-              <li>
-                <b>Options in words, not true or false.</b>
-                <ul>
-                  <li>An undoable action: <code>undoneAs</code> and its step's title.</li>
-                  <li>One that can't be undone: <code>cantBeUndone</code>, "keeps history" or "clears history".</li>
-                  <li>A property left out: <code>undoable: false</code>.</li>
-                </ul>
-              </li>
-              <li>
-                <b>An action that can't be undone says whether it empties the history.</b>
-                <ul>
-                  <li>Emptying it means undo never puts back a state the world has moved past.</li>
-                  <li>As Finder's Empty Trash can't be undone.</li>
-                </ul>
-              </li>
-              <li>
-                <b>⌘Z through Spell UI's keyboard registry, while the app has the focus or nothing does.</b>
-                <ul>
-                  <li>
-                    Clicking a card doesn't move the focus: with the app's element alone, ⌘Z would do nothing right
-                    after a move.
-                  </li>
-                  <li>It beat a plain key listener on the app: one more key mechanism to replace later.</li>
-                </ul>
-              </li>
-              <li>
-                <b>Undo waits out a running action.</b>
-                <ul>
-                  <li>Putting the step before it back mid-deal would tangle the two.</li>
-                  <li>The deal would go on moving cards out of piles just put back under it.</li>
-                </ul>
-              </li>
-              <li>
-                <b><code>declareAction()</code> on the class, kept.</b>
-                <ul>
-                  <li>
-                    The elemental-spell epic, whose actions and menus will describe every command, asked for a plain
-                    runtime call instead.
-                  </li>
-                  <li>
-                    It stays, as a thin wrapper over the run's history, which that epic can call when it takes actions
-                    over.
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </ui-section>
-
-          <ui-section id="4-why-spell" label="Defaults and remembered properties" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                <b>Build the runtime now, the words later.</b>
-                <ul>
-                  <li>The store and the stack don't depend on Spell's words, so they landed first.</li>
-                  <li>It beat waiting for the elemental-spell epic to settle its words.</li>
-                </ul>
-              </li>
-              <li>
-                <b>Every property defaults by its type, with a declared default to override.</b>
-                <ul>
-                  <li>One helper for prefs and properties, so they can't disagree.</li>
-                </ul>
-              </li>
-              <li>
-                <b>The project's id names an app's keys.</b>
-                <ul>
-                  <li>Two people's Solitaires on one site never share preferences.</li>
-                  <li>The runner sets it, with no compiler change.</li>
-                  <li>
-                    It beat the app's name, which two projects can share: the very bug that once mixed two apps'
-                    preferences in one pool.
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <b>Only on the app, or a thing whose id the program chose.</b>
-                <ul>
-                  <li>A made-up id is new each run, so nothing kept under it would be found again.</li>
-                </ul>
-              </li>
-              <li>
-                <b>A warning, not an error, for a thing with no chosen id.</b>
-                <ul>
-                  <li>Nothing knows at the declaration whether a thing will be given an id.</li>
-                  <li>A throw at its first read would break a running app over a preference.</li>
-                </ul>
-              </li>
-            </ul>
-          </ui-section>
-        </ui-section>
-
-        <ui-section id="5-limits" label="5. Limits" sticky collapsible dividing open="false">
-          <ui-icon slot="icon" name="warning"></ui-icon>
-
-          <ui-section id="5-not-yet" label="Not built yet" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                <b>No spell words for any of it.</b>
-                <ul>
-                  <li>
-                    The compiler writes no undoable action, remembered property or declared default until the
-                    elemental-spell epic settles the words.
-                  </li>
-                  <li>Until then, they're reached from hand-written programs and tests.</li>
-                </ul>
-              </li>
-              <li>
-                <b>No hand test of ⌘Z or a remembered property in a running app</b>, since no compiled program uses
-                either yet.
-                <ul>
-                  <li>
-                    Then: ⌘Z and ⇧⌘Z in Solitaire in the editor's runner, and a theme surviving a restart and a reload.
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <b>The public preview keeping a visitor's edit across a reload hasn't been checked in a browser</b>:
-                only the static files' tests have.
-              </li>
-              <li>
-                <b>The VS Code runner remembers nothing.</b>
-                <ul>
-                  <li>Its panel gets fresh browser storage each time it opens, so it hands the run no project id.</li>
-                  <li>Remembering through the page server's place would fix it.</li>
-                </ul>
-              </li>
-              <li>
-                <b>An app drawn by its page's markup gets no ⌘Z</b>: a <code>&lt;spell-viewer&gt;</code> with markup
-                inside.
-                <ul>
-                  <li>The keys are listened for when an app mounts its own drawing.</li>
-                  <li>Its <code>undo()</code> still works from a button.</li>
-                </ul>
-              </li>
-              <li><b>No sign-in:</b> everyone on one page server is the same person, owen.</li>
-              <li>
-                <b>File handles are kept, but nothing uses one yet</b>, e.g. the editor saving a project straight to a
-                folder on disk.
-              </li>
-            </ul>
-          </ui-section>
-
-          <ui-section id="5-by-design" label="What it won't do" sticky collapsible dividing open="false">
-            <ul>
-              <li>
-                A key a plain script reads raw, or its value's form, can never change without changing that script too.
-              </li>
-              <li>
-                Something else that changes things while an undoable action waits (a timer, a second click) joins that
-                action's step: the browser can't tell whose change it was.
-              </li>
-              <li>
-                A change made outside any undoable action isn't recorded: undoing an older step can put its values back
-                over it.
-              </li>
-              <li>A recompile that keeps the game in progress is a new run, so its undo history starts empty.</li>
-              <li>
-                A remembered value is the property's value like any other:
-                <ul>
-                  <li>it's in the thing's saved JSON</li>
-                  <li>
-                    a value given when the thing is made wins, every run:
-                    <code>new Settings({ id: "main", zoom: 1 })</code>
-                  </li>
-                </ul>
-              </li>
-              <li><code>spell run</code> and tests remember nothing: they never call <code>core.remember()</code>.</li>
-              <li>
-                With two apps on one page and nothing focused, ⌘Z goes to the app whose keys were registered last.
-              </li>
-              <li>A page with no Spell UI has no undo keys; its app's <code>undo()</code> still works.</li>
-              <li>
-                Typed defaults change what programs see: a new counter's count was nothing, and is 0 now. A program that
-                checked for nothing behaves differently.
-              </li>
-            </ul>
-          </ui-section>
-        </ui-section>
-
-        <ui-section id="6-where" label="6. Where things are" sticky collapsible dividing open="false">
-          <ui-icon slot="icon" name="folder"></ui-icon>
           <ui-table celled padding="compact" appearance="striped" unstackable>
             <table>
               <tbody>
                 <tr>
-                  <th>what</th>
-                  <th>where</th>
+                  <th>Spell says</th>
+                  <th>The step</th>
                 </tr>
                 <tr>
-                  <td>the pref store, its places, the value rules</td>
-                  <td>
-                    <a href="/src/util/persist/PrefStore.ts" target="src-src-util-persist-prefstore-ts"
-                      >PrefStore.ts</a
-                    >, <a href="/src/util/persist/values.ts" target="src-src-util-persist-values-ts">values.ts</a>,
-                    <a href="/src/util/persist/StoragePlace.ts" target="src-src-util-persist-storageplace-ts"
-                      >StoragePlace.ts</a
-                    >,
-                    <a href="/src/util/persist/MemoryStorage.ts" target="src-src-util-persist-memorystorage-ts"
-                      >MemoryStorage.ts</a
-                    >, in the kit's
-                    <a href="/src/util/persist/index.ts" target="src-src-util-persist-index-ts">persist folder</a>
-                  </td>
+                  <td><code>to "turn over":</code></td>
+                  <td>one step, named by its title: "Undo Turn Over"</td>
                 </tr>
                 <tr>
-                  <td>the waited-on places, and the server's protocol</td>
+                  <td><code>to "turn over", undoable as "Turn Card":</code></td>
+                  <td>one step, "Undo Turn Card"</td>
+                </tr>
+                <tr>
+                  <td><code>to "give a hint", can't be undone:</code></td>
+                  <td>no step; the steps before it are kept</td>
+                </tr>
+                <tr>
+                  <td>a question (gives back yes or no), a drawing, a test</td>
+                  <td>never a step</td>
+                </tr>
+              </tbody>
+            </table>
+          </ui-table>
+          <ul>
+            <li>
+              The same words go on a line indented under the action instead: <code>undoable as "Turn Card"</code>.
+            </li>
+            <li>
+              On a type it compiles to <code>core.describeAction(...)</code>; at the top level, the action runs inside
+              <code>core.asAction(...)</code>.
+            </li>
+            <li>
+              What another action calls joins that action's step. A deal that waits between cards is ONE step, and its
+              redo is instant.
+            </li>
+            <li>Each run has one history, of at most 100 steps; loading saved state clears it.</li>
+            <li>
+              The app has <code>undo()</code>, <code>redo()</code>, and live <code>canUndo</code>,
+              <code>undoTitle</code>, in the program's language. ⌘Z and ⇧⌘Z work while the app has the focus; a text
+              field and a modal keep their own.
+            </li>
+            <li>The catch: nothing undoes while an action still runs, so ⌘Z mid-deal waits for the deal to finish.</li>
+          </ul>
+          <ui-section id="2-undo-stack" label="UndoStack, under it" sticky collapsible dividing open="false">
+            <pre><code class="language-ts">await history.transaction("Deal", async () =&gt; {
+  for (const margin of [10, 20, 30]) {
+    await Promise.resolve() // a wait:  what comes after it still joins "Deal"
+    setMargin(margin)
+  }
+})
+history.undoTitle   // "Undo Deal":  three changes, one step
+history.undo()      // margin 0, at once
+history.redo()      // margin 30, at once:  nothing runs again</code></pre>
+            <ul>
+              <li>
+                The generic part is the kit's
+                <a href="/src/util/persist/UndoStack.ts" target="src-src-util-persist-undostack-ts"
+                  ><code title="src/util/persist/UndoStack.ts">UndoStack</code></a
+                >: a step is a title and its records, each saying how to undo and redo itself.
+              </li>
+              <li>
+                A transaction stays open until its function returns or its promise settles: anything recorded meanwhile
+                joins it.
+              </li>
+              <li>
+                A run of steps with the same title AND target folds into one: typing "hello" into a field undoes in one
+                go.
+              </li>
+              <li>Its titles read Spell cells, so a menu reading them redraws by itself.</li>
+              <li>Every method: <a href="/README/util.md" target="src-readme-util-md">README/util</a>, "UndoStack".</li>
+            </ul>
+          </ui-section>
+          <ui-section id="3-recorder" label="What an undo step records" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                The core's history,
+                <a href="/parser/src/core/undoing.ts" target="src-parser-src-core-undoing-ts"
+                  ><code title="parser/src/core/undoing.ts">undoing.ts</code></a
+                >, hears each prop set and each list's items changed while an action runs.
+              </li>
+              <li>A prop declared <code>undoable: false</code>, a selection say, is left out of every step.</li>
+              <li>While it undoes or redoes, nothing records, so what it puts back isn't a new step.</li>
+              <li>
+                Python's <code>spell_core</code> keeps the same history, in
+                <a
+                  href="/parser/src/py/core/spell_core/undoing.py"
+                  target="src-parser-src-py-core-spell-core-undoing-py"
+                  ><code title="parser/src/py/core/spell_core/undoing.py">undoing.py</code></a
+                >.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="2-remembered" label="4. Props that outlive a run" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="bookmark"></ui-icon>
+          <pre><code class="language-ts">class Solitaire extends App {
+  static {
+    this.declareProp("theme", { oneOf: ["light", "dark"], remembered: true })
+  }
+}
+await core.remember("@local/solitaire")
+new Solitaire().theme          // "light", its first choice
+new Solitaire().theme = "dark" // kept under @local/solitaire:theme
+// the next run:  remember() again, and it's "dark"</code></pre>
+          <ul>
+            <li>
+              Whoever runs the program calls <code>core.remember()</code> with the project's id first. The editor and
+              <code>&lt;spell-viewer&gt;</code> do; <code>spell run</code> and the tests don't, and there a remembered
+              prop is a plain one.
+            </li>
+            <li>
+              An app's prop is kept by its name; any other thing's under the id the program gave it. A thing with a
+              made-up id gets a new one each run, so its prop isn't kept, and the console says so once.
+            </li>
+            <li>Only text, numbers and choices. A kept value the prop no longer allows starts afresh.</li>
+            <li>
+              <b>Not yet:</b> Spell has no words for it, so a program's own TypeScript declares it, as the core's tests
+              do. And <code>spell_core</code> remembers nothing.
+            </li>
+          </ul>
+          <ui-section id="2-preferences" label="PrefStore, under it" sticky collapsible dividing open="false">
+            <pre><code class="language-ts">const prefs = new PrefStore("spell-site").declare("scheme", { oneOf: ["light", "dark", "auto"] })
+prefs.get("scheme")            // "light":  nothing kept yet, so the first choice
+prefs.set("scheme", "dark")    // localStorage now holds  spell-site:scheme = dark</code></pre>
+            <ul>
+              <li>
+                Remembered props are kept in a
+                <a href="/src/util/persist/PrefStore.ts" target="src-src-util-persist-prefstore-ts"
+                  ><code title="src/util/persist/PrefStore.ts">PrefStore</code></a
+                >
+                named for the project's id.
+              </li>
+              <li>
+                Every key starts with the store's name and a colon; every value is text people and plain scripts can
+                read.
+              </li>
+              <li>
+                It never throws when storage fails: blocked storage keeps values in memory for the visit, and says so
+                once.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="2-bigger-places" label="Where it keeps them" sticky collapsible dividing open="false">
+            <ul>
+              <li>The browser's storage, unless the runner names another place.</li>
+              <li>
+                Two places must be waited on: the browser's database, and the page server's <code>/api/prefs</code>, in
+                the person's space, so a preference follows them.
+              </li>
+              <li>The core reads them whole as the run starts, so after that they answer at once.</li>
+              <li>A place decides WHERE a value goes, never how it's asked for: the code that asks never changes.</li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="view-element" label="5. A view's own element" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="square outline"></ui-icon>
+          <pre><code class="language-html">&lt;solitaire-tableau id="T1"&gt;
+  &lt;solitaire-card id="queen-of-spades" rank="queen" suit="spades" pile="Tableau#T1"&gt;&lt;/solitaire-card&gt;
+  &lt;solitaire-card id="queen-of-spades-2" rank="queen" suit="spades" pile="Tableau#T1"&gt;&lt;/solitaire-card&gt;
+&lt;/solitaire-tableau&gt;</code></pre>
+          <p>
+            A type declared a <code>view</code> draws as its own custom element, so the browser's inspector says which
+            thing each one is.
+          </p>
+          <ul>
+            <li>
+              The class names its tag as it's declared:
+              <code>static elementTag = core.defineElement(this, "Solitaire")</code>.
+            </li>
+            <li>
+              The tag is the project's name, then the type's, in dashed lowercase: <code>Solitaire</code> and
+              <code>Card</code> make <code>&lt;solitaire-card&gt;</code>; <code>games</code> and
+              <code>BankAccount</code>, <code>&lt;games-bank-account&gt;</code>. An app's is
+              <code>&lt;solitaire-app&gt;</code>.
+            </li>
+            <li>
+              The core only NAMES the tag. The page defines it, on
+              <a href="/app/src/app/runner/SpellElement.tsx" target="src-app-src-app-runner-spellelement-tsx"
+                ><code title="app/src/app/runner/SpellElement.tsx">SpellElement</code></a
+              >, because the core may not import Solid or Spell UI.
+            </li>
+            <li>
+              The element draws its thing's own <code>to draw</code> in its shadow root, in an error boundary of its
+              own: a card that fails shows its own stand-in, and the rest keep drawing.
+            </li>
+          </ul>
+          <ui-section id="4-outside" label="Its outside" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                Each declared property is an attribute, kebab-cased, and an element property, camelCased:
+                <code>face up</code> is <code>face-up</code> and <code>faceUp</code>.
+              </li>
+              <li>Each method is an element method calling the thing's: <code>card.turnOver()</code>.</li>
+              <li>
+                A property holding another thing shows as its reference: <code>pile="Tableau#T1"</code>. A list is an
+                element property only.
+              </li>
+              <li>
+                The tag and its thing agree both ways: turning the card over changes <code>direction</code>, and setting
+                the attribute changes the card, which redraws.
+              </li>
+              <li>
+                The id is the thing's name; two of one name are numbered, <code>queen-of-spades-2</code>. A space is a
+                dash.
+              </li>
+              <li>
+                A tag written by hand finds its thing by its id (<code>&lt;solitaire-tableau id="T1"&gt;</code>), or,
+                with no id, as the program's one thing of that type.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section
+            id="ts-element"
+            label="In TypeScript, its own element class"
+            sticky
+            collapsible
+            dividing
+            open="false"
+          >
+            <ul>
+              <li>
+                Compiled TypeScript writes, after each view, its element class:
+                <code>class CardElement extends SpellElement&lt;Card&gt;</code>, with its attributes, its sheet, and one
+                method per method of the type.
+              </li>
+              <li>
+                It never defines the tag itself: <code>core.useElement(Card, CardElement)</code> hands the class to the
+                page.
+              </li>
+              <li>
+                Its base comes from a name of its own, <code>@spell/elements</code>: the app's real element for the type
+                check, the runtime's on a page, a stand-in that makes no element in a headless run.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="7-recompiles" label="6. Things carry over a recompile" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="sync"></ui-icon>
+          <p>
+            Edit a card's CSS in the editor mid-game, and the game stays where it was, drawn in the new colour. Fast
+            Refresh keeps a component's state; this keeps what the program MADE.
+          </p>
+          <ol>
+            <li>
+              The new program loads with its start skipped: its types, functions and top-level things are made, its
+              tests and its app's start aren't.
+            </li>
+            <li>
+              Each top-level thing of the last run, matched by name and type, is copied into the new run's, as the new
+              classes. A card held by the deck and a pile stays one card.
+            </li>
+            <li>
+              The console says so: <code>Kept allPiles, deck, ... from the last run: Restart starts afresh.</code>
+            </li>
+          </ol>
+          <ui-section id="start-once" label="The start runs once" sticky collapsible dividing open="false">
+            <pre><code class="language-js">if (!core.isCarryingOver) solitaire.start()
+if (!core.isCarryingOver) testCardSetup()</code></pre>
+            <ul>
+              <li>
+                A program's START is its top-level test calls and the line starting its app; the compiler marks each, at
+                a file's top level only.
+              </li>
+              <li>Every other top-level line still runs on an edit, a <code>print</code> included.</li>
+              <li>A property added gets the new thing's own starting value; one removed is dropped.</li>
+              <li>
+                It starts afresh, as Restart does, when the edit changed the file that starts the app, added or removed
+                a file, or changed a property's type or renamed a type. The console says why.
+              </li>
+            </ul>
+          </ui-section>
+          <ui-section id="restart" label="Starting afresh" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                Restart starts afresh on purpose: <code>&lt;spell-viewer&gt;</code>'s, the editor's and VS Code's.
+              </li>
+              <li>A first run, <code>spell run</code> and the core contract always run the whole program.</li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="one-core-per-app" label="7. One core per running app" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="clone outline"></ui-icon>
+          <ul>
+            <li>
+              A program's things, console, listeners and undo history live in its core, so every running app gets its
+              own.
+            </li>
+            <li>
+              In a page, only the app folder's runner imports the core's code, bundled as <code>spell-runtime.js</code>;
+              each <code>&lt;spell-viewer&gt;</code> imports a fresh copy, from a <code>blob:</code> address of its own.
+            </li>
+            <li>
+              Everything else, the editor and the parser among them, imports only the core's TYPES, which erase to
+              nothing.
+            </li>
+            <li>
+              <code>spell/parser/core/model</code> is the one other entry: the core without drawing, for libraries and
+              the server.
+            </li>
+            <li>
+              The core never touches <code>document</code>: an app runs in a shadow root, <code>core.appRoot</code>.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="5-limits" label="8. Limits" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="exclamation circle"></ui-icon>
+          <ul>
+            <li>Remembered props have no Spell words yet, and <code>spell_core</code> keeps none.</li>
+            <li>Nothing undoes while an undoable action still runs.</li>
+            <li>
+              A Python program never carries things over: thing references and element classes aren't in its runtime
+              yet.
+            </li>
+            <li>A plain top-level variable, a number or a text, starts again from the new start.</li>
+            <li>
+              A tag's attributes and methods are fixed the first time it's defined: one an edit adds needs a reload.
+            </li>
+          </ul>
+        </ui-section>
+
+        <ui-section id="6-where" label="9. Where things are" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="folder open"></ui-icon>
+          <ui-table celled padding="compact" appearance="striped" unstackable>
+            <table>
+              <tbody>
+                <tr>
+                  <th>What</th>
+                  <th>Where</th>
+                </tr>
+                <tr>
+                  <td>the core</td>
                   <td>
-                    <a href="/src/util/persist/WaitedOnPlace.ts" target="src-src-util-persist-waitedonplace-ts"
-                      >WaitedOnPlace.ts</a
-                    >,
-                    <a href="/src/util/persist/DatabasePlace.ts" target="src-src-util-persist-databaseplace-ts"
-                      >DatabasePlace.ts</a
-                    >,
-                    <a href="/src/util/persist/ServerPlace.ts" target="src-src-util-persist-serverplace-ts"
-                      >ServerPlace.ts</a
-                    >,
-                    <a href="/src/util/persist/persist.types.ts" target="src-src-util-persist-persist-types-ts"
-                      >persist.types.ts</a
+                    <a href="/parser/src/core/" target="src-parser-src-core"
+                      ><code title="parser/src/core">parser/src/core</code></a
                     >
                   </td>
                 </tr>
                 <tr>
-                  <td>the undo stack</td>
+                  <td>undo in a run</td>
                   <td>
+                    <a href="/parser/src/core/undoing.ts" target="src-parser-src-core-undoing-ts"
+                      ><code title="parser/src/core/undoing.ts">undoing.ts</code></a
+                    >, on
                     <a href="/src/util/persist/UndoStack.ts" target="src-src-util-persist-undostack-ts"
-                      >UndoStack.ts</a
+                      ><code title="src/util/persist/UndoStack.ts">UndoStack</code></a
                     >
                   </td>
                 </tr>
                 <tr>
-                  <td>the server's side</td>
+                  <td>remembered props</td>
                   <td>
-                    spell-app's
-                    <a
-                      href="/spell-app/src/spaces/server/node/prefs/SpacePrefs.ts"
-                      target="src-spell-app-src-spaces-server-node-prefs-spaceprefs-ts"
-                      >SpacePrefs.ts</a
-                    >
-                    and
-                    <a
-                      href="/spell-app/src/spaces/server/node/prefs/prefsRoutes.ts"
-                      target="src-spell-app-src-spaces-server-node-prefs-prefsroutes-ts"
-                      >prefsRoutes.ts</a
+                    <a href="/parser/src/core/remembered.ts" target="src-parser-src-core-remembered-ts"
+                      ><code title="parser/src/core/remembered.ts">remembered.ts</code></a
+                    >, on
+                    <a href="/src/util/persist/PrefStore.ts" target="src-src-util-persist-prefstore-ts"
+                      ><code title="src/util/persist/PrefStore.ts">PrefStore</code></a
                     >
                   </td>
                 </tr>
                 <tr>
-                  <td>undo in a running program</td>
+                  <td>a view's tag name</td>
                   <td>
-                    spell-parser's
-                    <a href="/spell-parser/src/core/undoing.ts" target="src-spell-parser-src-core-undoing-ts"
-                      >undoing.ts</a
-                    >, the keys in
-                    <a href="/spell-parser/src/core/ui.ts" target="src-spell-parser-src-core-ui-ts">ui.ts</a>
+                    <a href="/src/util/spell/view.ts" target="src-src-util-spell-view-ts"
+                      ><code title="src/util/spell/view.ts">view.ts</code></a
+                    >, <code>elementTagFor()</code>
                   </td>
                 </tr>
                 <tr>
-                  <td>remembered properties</td>
+                  <td>defining the tag</td>
                   <td>
-                    spell-parser's
-                    <a href="/spell-parser/src/core/remembered.ts" target="src-spell-parser-src-core-remembered-ts"
-                      >remembered.ts</a
-                    >; the runner's
-                    <a
-                      href="/spell-app/src/app/runner/runCompiled.ts"
-                      target="src-spell-app-src-app-runner-runcompiled-ts"
-                      >runCompiled.ts</a
+                    <a href="/parser/src/core/elements.ts" target="src-parser-src-core-elements-ts"
+                      ><code title="parser/src/core/elements.ts">elements.ts</code></a
+                    >; the page's
+                    <a href="/app/src/app/runner/SpellElement.tsx" target="src-app-src-app-runner-spellelement-tsx"
+                      ><code title="app/src/app/runner/SpellElement.tsx">SpellElement.tsx</code></a
                     >
                   </td>
                 </tr>
                 <tr>
-                  <td>typed defaults</td>
+                  <td>carrying over</td>
                   <td>
-                    <code>defaultFor()</code> in
-                    <a href="/src/util/persist/values.ts" target="src-src-util-persist-values-ts">values.ts</a>; the
-                    props in
-                    <a href="/src/util/reactive/extend.ts" target="src-src-util-reactive-extend-ts">extend.ts</a>
-                  </td>
-                </tr>
-                <tr>
-                  <td>the tests</td>
-                  <td>
-                    the kit's
-                    <a href="/tests/util/persist/PrefStore.test.ts" target="src-tests-util-persist-prefstore-test-ts"
-                      >persist tests</a
-                    >; spell-parser's
-                    <a
-                      href="/spell-parser/tests/core/undoing.test.ts"
-                      target="src-spell-parser-tests-core-undoing-test-ts"
-                      >undoing.test.ts</a
-                    >
-                    and
-                    <a
-                      href="/spell-parser/tests/core/remembered.test.ts"
-                      target="src-spell-parser-tests-core-remembered-test-ts"
-                      >remembered.test.ts</a
-                    >; spell-app's
-                    <a
-                      href="/spell-app/tests/spaces/server/node/prefs/SpacePrefs.test.ts"
-                      target="src-spell-app-tests-spaces-server-node-prefs-spaceprefs-test-ts"
-                      >SpacePrefs.test.ts</a
+                    <a href="/parser/src/core/carry.ts" target="src-parser-src-core-carry-ts"
+                      ><code title="parser/src/core/carry.ts">carry.ts</code></a
                     >
                   </td>
                 </tr>
                 <tr>
-                  <td>the rules for each folder</td>
+                  <td>the action words</td>
                   <td>
-                    the kit's <a href="/src/util/AGENTS.md" target="src-src-util-agents-md">util AGENTS.md</a>, "Kept
-                    values";
-                    <a href="/spell-parser/src/core/AGENTS.md" target="src-spell-parser-src-core-agents-md"
-                      >core's AGENTS.md</a
-                    >, "Remembered props" and "Undo and redo"; the kit's
-                    <a href="/README/util.md" target="src-readme-util-md">README-util</a>
-                  </td>
-                </tr>
-                <tr>
-                  <td>its checks</td>
-                  <td>
-                    <code>yarn kit:review</code> in the kit; <code>yarn review</code> in spell-parser and spell-app
+                    <a
+                      href="/parser/src/spell/rules/methods/ActionModifier.ts"
+                      target="src-parser-src-spell-rules-methods-actionmodifier-ts"
+                      ><code title="parser/src/spell/rules/methods/ActionModifier.ts">ActionModifier.ts</code></a
+                    >,
+                    <a
+                      href="/parser/src/spell/rules/methods/ActionDetail.ts"
+                      target="src-parser-src-spell-rules-methods-actiondetail-ts"
+                      ><code title="parser/src/spell/rules/methods/ActionDetail.ts">ActionDetail.ts</code></a
+                    >
                   </td>
                 </tr>
               </tbody>
             </table>
           </ui-table>
+          <ul>
+            <li>
+              <a href="/parser/README-core.md" target="src-parser-readme-core-md">README-core</a>: every piece of the
+              core, and reactivity, positions and the two runtimes side by side
+            </li>
+            <li>
+              <a href="/README/util.md" target="src-readme-util-md">README/util</a>: <code>PrefStore</code>,
+              <code>UndoStack</code> and Spell cells, method by method
+            </li>
+            <li>
+              <a href="/guides/targets/targets.html" target="src-guides-targets-targets-html">Targets</a>: what each
+              target writes for the core to run
+            </li>
+          </ul>
         </ui-section>
-
-        <ui-section id="7-history" label="7. History" sticky collapsible dividing open="false">
-          <ui-icon slot="icon" name="clock rotate left"></ui-icon>
-          <p class="meta">
-            Built in one epic, from ideas proven in another project, newest first. The epic page has every phase, its
-            commits, and the questions behind each choice.
-          </p>
-          <ui-feed class="spell-history" size="small">
-            <ui-event icon="book">
-              <ui-content>
-                <ui-summary>P9: the doc review, and this guide <ui-date>2026-10-25</ui-date></ui-summary>
-              </ui-content>
-            </ui-event>
-            <ui-event icon="check">
-              <ui-content>
-                <ui-summary
-                  >P6: undo in the runtime, built last, after the elemental-spell epic said its runtime was settled;
-                  <code>declareAction()</code> kept (Q21) <ui-date>2026-10-24</ui-date></ui-summary
-                >
-              </ui-content>
-            </ui-event>
-            <ui-event icon="check">
-              <ui-content>
-                <ui-summary>P8: remembered properties <ui-date>2026-10-24</ui-date></ui-summary>
-              </ui-content>
-            </ui-event>
-            <ui-event icon="check">
-              <ui-content>
-                <ui-summary>P7: typed defaults <ui-date>2026-10-24</ui-date></ui-summary>
-              </ui-content>
-            </ui-event>
-            <ui-event icon="check">
-              <ui-content>
-                <ui-summary>P5: the undo stack <ui-date>2026-10-24</ui-date></ui-summary>
-              </ui-content>
-            </ui-event>
-            <ui-event icon="check">
-              <ui-content>
-                <ui-summary>P4: the epic pages' stores <ui-date>2026-10-24</ui-date></ui-summary>
-              </ui-content>
-            </ui-event>
-            <ui-event icon="check">
-              <ui-content>
-                <ui-summary
-                  >P3: the kit's, Spell UI's and the editor's stores moved over
-                  <ui-date>2026-10-24</ui-date></ui-summary
-                >
-              </ui-content>
-            </ui-event>
-            <ui-event icon="check">
-              <ui-content>
-                <ui-summary>P2: the database and server places <ui-date>2026-10-24</ui-date></ui-summary>
-              </ui-content>
-            </ui-event>
-            <ui-event icon="check">
-              <ui-content>
-                <ui-summary>P1: the pref store <ui-date>2026-10-24</ui-date></ui-summary>
-              </ui-content>
-            </ui-event>
-          </ui-feed>
-        </ui-section>
-
         <footer class="spell-doc-footer">
           <ui-divider></ui-divider>
-          <p class="meta">
-            Last checked 2026-10-25 against <code>main</code> of each repo (the kit at <code>dc9756b</code>). To update
-            it, re-read the epic page and the persist folder's tests.
-          </p>
+          <p class="meta">Last checked 2026-11-21, against the kit's code that day.</p>
         </footer>
       </main>
     </div>
