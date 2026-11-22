@@ -264,6 +264,12 @@ export type StyleRegisterOptions = {
    * appear:  themes, whose class-grammar overrides (`.ui.button`) must reach the markup inside components
    */
   shadow?: boolean
+  /**
+   * `page` sheet NO shadow root adopts, not even one that takes the page sheets (`adoptPageSheetsInto()`):
+   * the token sheets' page parts, whose `@property` and `:root` rules do nothing inside a shadow root
+   * (epic `solid-2-final` P3)
+   */
+  pageOnly?: boolean
 }
 
 /** `id` of the ONE app stylesheet components adopt -- see `notes/runtime.md`. */

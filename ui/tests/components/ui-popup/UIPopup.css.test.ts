@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, onTestFinished } from "vite-plus/test
 import { page, userEvent } from "vite-plus/test/browser"
 import { Keys } from "spell/ui/test-helpers/Keys"
 
-import { colorsCSS, foundationCSS, nativeCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS, nativeCSS } from "spell/ui/styles"
 
 import { ElementFixture } from "spell/test-helpers/ElementFixture"
 import { Fixture } from "spell/test-helpers/Fixture"
@@ -90,7 +90,7 @@ describe("UIPopup.css source", () => {
   })
 
   it("covers every class word the vocabulary can emit", () => {
-    const css = popupRaw + colorsCSS
+    const css = popupRaw + colorsSharedCSS
     for (const phrase of Sheets.classPhrases(popupVocabulary))
       expect(Sheets.covers(css, phrase), `${popupVocabulary.tag}: ${phrase}`).toBe(true)
   })

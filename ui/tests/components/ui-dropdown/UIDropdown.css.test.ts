@@ -1,7 +1,7 @@
 import { describe, expect, it, onTestFinished } from "vite-plus/test"
 
 import { ClassBuilder } from "spell/ui/elements"
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 import type { AttributeSpec, ComponentVocabulary } from "spell/ui/vocabulary"
 
 import { Fixture } from "spell/test-helpers/Fixture"
@@ -76,7 +76,7 @@ describe("UIDropdown.css source", () => {
   // NOTE: not `itemVocabulary`:  the dropdown draws its own `.item` rows (`active`, `disabled`);
   // a `<ui-item>`'s own class words are its list / menu owners' to style
   it("covers every class word the vocabulary can emit", () => {
-    const css = dropdownRaw + colorsCSS
+    const css = dropdownRaw + colorsSharedCSS
     for (const vocabulary of [dropdownVocabulary]) {
       for (const phrase of classPhrases(vocabulary)) {
         if (DEFAULT_PHRASES.has(phrase)) continue

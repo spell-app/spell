@@ -7,11 +7,16 @@ import { BuiltInSounds } from "spell/ui/sounds"
 import {
   animationsCSS,
   colorsCSS,
+  colorsFallbackCSS,
+  colorsSharedCSS,
   layersCSS,
   nativeCSS,
   resetCSS,
   sizesCSS,
+  sizesFallbackCSS,
+  sizesSharedCSS,
   tokensCSS,
+  tokensFallbackCSS,
   typographyCSS,
   utilitiesCSS
 } from "spell/ui/styles"
@@ -155,15 +160,19 @@ export class UIRuntime {
    * Register the CSS foundation with `styles`, so every shadow root adopts it and the page gets the light-side sheets.
    * - Every sheet goes on the page (`PAGE_SHEETS`);  shadow roots adopt `FOUNDATION_SHEETS` first, and the
    *   utilities after their own sheets (`Styles`' default `setUtilities()`).
+   * - The tokens are on the page only (`TOKEN_SHEETS`, `pageOnly`):  they reach every shadow root by inheritance.
+   *   A shadow root adopts their `:host` copies (`FALLBACK_SHEETS`) only on a page without them (`setFallback()`).
    * - Here rather than in `spell/ui/styles`:  the runtime chunk is loaded exactly once per page, which is also how often
    *   the foundation must be registered;  `spell/ui/styles` stays plain data.
    */
   private registerFoundation() {
     // `linked`:  `ui.css` carries every one of these, so a page that links it doesn't get them twice
     for (const [name, css] of Object.entries(PAGE_SHEETS)) {
-      this.styles.register(name, css, { page: true, linked: true })
+      this.styles.register(name, css, { page: true, linked: true, pageOnly: name in TOKEN_SHEETS })
     }
+    for (const [name, css] of Object.entries(FALLBACK_SHEETS)) this.styles.register(name, css)
     this.styles.setFoundation(Object.keys(FOUNDATION_SHEETS))
+    this.styles.setFallback(Object.keys(FALLBACK_SHEETS))
   }
 
   ////////////////
@@ -199,23 +208,43 @@ export class UIRuntime {
 
 /**
  * Sheets every shadow root adopts BEFORE its own, by name, in cascade order:
- * `foundationCSS` (`spell/ui/styles`) less the utilities, which `Styles` adopts after a component's sheets.
+ * `shadowFoundationCSS` (`spell/ui/styles`) less the utilities, which `Styles` adopts after a component's sheets.
  */
 const FOUNDATION_SHEETS = {
   layers: layersCSS,
   reset: resetCSS,
-  tokens: tokensCSS,
-  colors: colorsCSS,
-  sizes: sizesCSS,
+  "colors-shared": colorsSharedCSS,
+  "sizes-shared": sizesSharedCSS,
   animations: animationsCSS
 }
 
+/** The token sheets' page parts:  `@property` and `:root` rules, on the page alone (`pageOnly`). */
+const TOKEN_SHEETS = {
+  tokens: tokensCSS,
+  colors: colorsCSS,
+  sizes: sizesCSS
+}
+
+/** The tokens' `:host` copies:  for shadow roots on a page that has no tokens (`Styles.setFallback()`). */
+const FALLBACK_SHEETS = {
+  "tokens-fallback": tokensFallbackCSS,
+  "colors-fallback": colorsFallbackCSS,
+  "sizes-fallback": sizesFallbackCSS
+}
+
 /**
- * Every sheet the runtime registers, by name, in `pageCSS` order (`spell/ui/styles`):  all go on the page.
+ * Every sheet the runtime puts on the page, by name, in `pageCSS` order (`spell/ui/styles`).
  * - `typography` and `native` style light-DOM markup only;  shadow roots never adopt them.
  */
 const PAGE_SHEETS = {
-  ...FOUNDATION_SHEETS,
+  layers: layersCSS,
+  reset: resetCSS,
+  tokens: tokensCSS,
+  colors: colorsCSS,
+  "colors-shared": colorsSharedCSS,
+  sizes: sizesCSS,
+  "sizes-shared": sizesSharedCSS,
+  animations: animationsCSS,
   [UTILITIES_SHEET]: utilitiesCSS,
   typography: typographyCSS,
   native: nativeCSS

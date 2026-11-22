@@ -8,7 +8,8 @@ import { AppStylesheet } from "./AppStylesheet"
  * - Why a registry:  every component instance shares ONE `CSSStyleSheet` per name (no per-instance `<style>`),
  *   and re-registering a name updates it everywhere at once.
  * - Order inside every shadow root (`adoptInto()`):
- *   1. foundation sheets, in `setFoundation()` order (layers, tokens, reset ...)
+ *   1. foundation sheets, in `setFoundation()` order (layers, reset, the colour and size remaps ...)
+ *   1b. the FALLBACK sheets (`setFallback()`), only while the page has no tokens of its own
  *   2. the component's own sheets, as passed
  *   2b. the PAGE sheets, only in a root that draws `ui-*` elements in its own light content (`adoptPageSheetsInto()`)
  *   3. any sheets someone else put on the root (kept, not clobbered)
@@ -19,6 +20,9 @@ import { AppStylesheet } from "./AppStylesheet"
  *   foundation / utilities may be registered after components connect,
  *   and every adopted root is re-pushed when they are.
  * - Roots are held WEAKLY, so a disconnected component's shadow root can be collected.
+ * - The tokens are set on the PAGE only (`pageOnly` sheets), and reach every shadow root by inheritance
+ *   (epic `solid-2-final` P3):  a shadow root adopts no `:root` rule, and no `:host` copy of the tokens while the page
+ *   has them.
  ****************/
 export class Styles {
   /** name -> sheet */
@@ -31,10 +35,16 @@ export class Styles {
   private readonly pageNames = new Set<string>()
   /** names also adopted into every shadow root, after utilities, see `StyleRegisterOptions.shadow` */
   private readonly shadowNames = new Set<string>()
+  /** page names no shadow root takes, even one that takes the page sheets:  see `StyleRegisterOptions.pageOnly` */
+  private readonly pageOnlyNames = new Set<string>()
   /** page names `ui.css` already carries, see `StyleRegisterOptions.linked` */
   private readonly linkedNames = new Set<string>()
   /** foundation names, in order */
   private foundation: string[] = []
+  /** fallback names, in order:  adopted into shadow roots only while the page has no tokens */
+  private fallback: string[] = []
+  /** Does the page carry the tokens?  Read once, on the first push that needs it;  `undefined` until then. */
+  private pageHasTokens: boolean | undefined
   /** utility names, in order */
   private utilities: string[] = [UTILITIES_SHEET]
   /** every root `adoptInto()` has seen */
@@ -57,6 +67,7 @@ export class Styles {
    *   so every root already using it updates with no re-push.
    * - A `CSSStyleSheet`:  used as-is;  a different object for an existing name is swapped into every root.
    * - `page: true`:  also pushed onto `document.adoptedStyleSheets`, once.
+   *   With `pageOnly: true` too, never into a shadow root, even one that takes the page sheets.
    *   With `linked: true` too, only while the page doesn't link `ui.css` (see `StyleRegisterOptions`),
    *   also when `linked` comes on a later call.
    * - `shadow: true`:  also adopted into EVERY shadow root `adoptInto()` knows, now and later, after utilities
@@ -64,13 +75,13 @@ export class Styles {
    * - `""` UNREGISTERS `name`, whatever options it was registered with:
    *   dropped from the page, every shadow root and the registry (`has()` turns false).
    *   Returns an empty, detached sheet.
-   * - NOTE: `page` / `shadow` / `linked` only ever ADD:  a later call without them keeps what an earlier one set.
+   * - NOTE: `page` / `shadow` / `linked` / `pageOnly` only ever ADD:  a later call without them keeps what an earlier one set.
    * - NOTE: `replaceSync` drops `@import` -- registered text MUST be self-contained.
    */
   register(
     name: string,
     css: StyleSource,
-    { page = false, linked = false, shadow = false }: StyleRegisterOptions = {}
+    { page = false, linked = false, shadow = false, pageOnly = false }: StyleRegisterOptions = {}
   ): CSSStyleSheet {
     if (css === "") return this.unregister(name)
     let sheet = this.sheets.get(name)
@@ -96,6 +107,7 @@ export class Styles {
     const isNewLinked = page && linked && !this.linkedNames.has(name)
     if (isNewPage) this.pageNames.add(name)
     if (isNewLinked) this.linkedNames.add(name)
+    if (page && pageOnly) this.pageOnlyNames.add(name)
     // a page sheet that just became `linked` may have to come OFF the page (epic `wwod-spell-ui`, I2)
     if (isNewPage || isNewLinked || (isSwapped && this.pageNames.has(name))) this.refreshPage()
     // a root that takes the page sheets takes a new one too
@@ -116,7 +128,10 @@ export class Styles {
     const isKnown = this.sheets.delete(name)
     this.texts.delete(name)
     this.linkedNames.delete(name)
+    this.pageOnlyNames.delete(name)
     this.shadowNames.delete(name)
+    // the page may have lost its tokens:  read it again
+    this.pageHasTokens = undefined
     if (this.pageNames.delete(name)) this.refreshPage()
     if (isKnown) this.refreshRoots()
     return new CSSStyleSheet()
@@ -145,6 +160,19 @@ export class Styles {
   /** Set the foundation sheet names, in cascade order;  re-pushes every adopted root. */
   setFoundation(names: readonly string[]) {
     this.foundation = [...names]
+    this.refreshRoots()
+  }
+
+  /**
+   * Set the FALLBACK sheet names, in cascade order;  re-pushes every adopted root.
+   * - The tokens' `:host` copies (`spell/ui/styles`' `fallbackCSS`):  a shadow root adopts them, after the
+   *   foundation, only while the page has no tokens of its own.
+   * - The page "has tokens" when its root element carries the colours' marker (`--ui-sheet-colors: loaded`):
+   *   read once, and again when the page's sheets change while it had none.
+   *   A page that links `ui.css` has them.
+   */
+  setFallback(names: readonly string[]) {
+    this.fallback = [...names]
     this.refreshRoots()
   }
 
@@ -235,8 +263,9 @@ export class Styles {
     const foreign = root.adoptedStyleSheets.filter((sheet) => !this.owned.has(sheet))
     const sheets = [
       ...this.lookup(this.foundation),
+      ...(this.fallback.length && !this.hasPageTokens ? this.lookup(this.fallback) : []),
       ...this.lookup(names),
-      ...(this.pageSheetRoots.has(root) ? this.lookup(this.pageNames) : []),
+      ...(this.pageSheetRoots.has(root) ? this.lookup(this.sharedPageNames()) : []),
       ...foreign,
       ...this.lookup(this.utilities),
       ...this.lookup(this.shadowNames),
@@ -261,6 +290,26 @@ export class Styles {
     }
   }
 
+  /** The page names a shadow root that takes the page sheets takes:  all but the `pageOnly` ones. */
+  private sharedPageNames(): string[] {
+    return [...this.pageNames].filter((name) => !this.pageOnlyNames.has(name))
+  }
+
+  /**
+   * Does the page carry the tokens?  See `setFallback()`.
+   * - Read once and remembered:  a style read, so never once per root.
+   * - `false` where there's no page to read (a server).
+   */
+  private get hasPageTokens(): boolean {
+    if (this.pageHasTokens === undefined) {
+      this.pageHasTokens =
+        typeof document !== "undefined" &&
+        typeof getComputedStyle === "function" &&
+        getComputedStyle(document.documentElement).getPropertyValue(TOKENS_MARKER).trim() === LOADED
+    }
+    return this.pageHasTokens
+  }
+
   /** Put the page sheets onto `document.adoptedStyleSheets`, keeping anything else already there. */
   private refreshPage() {
     if (typeof document === "undefined") return
@@ -270,6 +319,11 @@ export class Styles {
     const isLinked = this.isPageLinked
     const ours = this.lookup([...this.pageNames].filter((name) => !isLinked || !this.linkedNames.has(name)))
     document.adoptedStyleSheets = [...foreign, ...ours]
+    // a page that had no tokens may have them now:  read it again, and give its roots the fallback or not
+    if (this.pageHasTokens === false) {
+      this.pageHasTokens = undefined
+      this.refreshRoots()
+    }
     if (!isLinked && !this.isWatchingLoad && document.readyState !== "complete") {
       // a `<link>` still loading may bring the marker;  re-check once the page has settled
       this.isWatchingLoad = true
@@ -298,3 +352,9 @@ const PAGE_SHEET_PROPERTY = "--ui-page-sheet"
 
 /** `PAGE_SHEET_PROPERTY`'s value on a page that links `ui.css`. */
 const LINKED = "linked"
+
+/** The colours' marker, set on `:root` wherever the page carries the tokens (`colors.css`, or `ui.css`). */
+const TOKENS_MARKER = "--ui-sheet-colors"
+
+/** `TOKENS_MARKER`'s value where the tokens are. */
+const LOADED = "loaded"

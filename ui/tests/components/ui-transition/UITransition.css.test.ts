@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vite-plus/test"
 
-import { colorsCSS, foundationCSS } from "spell/ui/styles"
+import { colorsSharedCSS, foundationCSS } from "spell/ui/styles"
 
 import { Fixture } from "spell/test-helpers/Fixture"
 import { Sheets } from "spell/ui/test-helpers/Sheets"
@@ -61,7 +61,7 @@ describe("UITransition.css source", () => {
   })
 
   it("covers every class word the vocabulary can emit (with animations.css's states)", () => {
-    const css = transitionRaw + animationsRaw + colorsCSS
+    const css = transitionRaw + animationsRaw + colorsSharedCSS
     for (const phrase of Sheets.classPhrases(transitionVocabulary))
       expect(Sheets.covers(css, phrase), `${transitionVocabulary.tag}: ${phrase}`).toBe(true)
   })

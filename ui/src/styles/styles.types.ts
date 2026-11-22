@@ -210,8 +210,19 @@ export type ShadowLayer = readonly [x: number, y: number, blur: number, spread: 
 // ## Generator
 ////////////////
 
-/** File names `StyleGenerator.sheets()` writes, inside `src/styles/`. */
-export type GeneratedSheetName = "tokens.css" | "colors.css" | "sizes.css"
+/**
+ * File names `StyleGenerator.sheets()` writes, inside `src/styles/`:  each axis's page, shared and fallback parts.
+ * - `tokens` has no shared part:  it's only tokens.
+ */
+export type GeneratedSheetName =
+  | "tokens.css"
+  | "tokens.fallback.css"
+  | "colors.css"
+  | "colors.shared.css"
+  | "colors.fallback.css"
+  | "sizes.css"
+  | "sizes.shared.css"
+  | "sizes.fallback.css"
 
 /** One `property: value` pair `StyleGenerator` writes, e.g. `["--ui-radius", "var(--ui-radius-m)"]`. */
 export type GeneratedDeclaration = [property: string, value: string]
