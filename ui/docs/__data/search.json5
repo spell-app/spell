@@ -181,7 +181,7 @@
     {
       "path": "palette.html",
       "title": "Palette groups",
-      "summary": "The Spell editor's palette, a column per group:  drag components between groups, reorder, rename, add or remove groups, then save.",
+      "summary": "The Spell editor's palette groups moved into the editor:  its own page, at /palette.",
       "sections": [
         {"id":"palette-groups","title":"The palette's groups"}
       ]

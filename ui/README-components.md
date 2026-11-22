@@ -231,7 +231,7 @@ Every family, by group, A-Z inside each.
 
 <!-- components:start -->
 
-96 families, 149 tags;  4 families in progress.
+97 families, 150 tags;  0 families in progress.
 
 ### Elements
 
@@ -269,7 +269,7 @@ Pieces made of several kinds of part.
 |  | [Grid](docs/ui-grid.html) | `<ui-grid>` `<ui-column>` `<ui-row>` | A grid is used to harmonize negative space in a layout. | columns, row, flex grid, layout grid |
 | <img src="docs/images/components/ui-menu.png" alt="Menu, its first example" width="200" height="18"> | [Menu](docs/ui-menu.html) | `<ui-menu>` `<ui-submenu>` | A menu displays grouped navigation actions. | navbar, nav, tabs bar, toolbar |
 | <img src="docs/images/components/ui-message.png" alt="Message, its first example" width="200" height="36"> | [Message](docs/ui-message.html) | `<ui-message>` | A message displays information that explains nearby content. | alert, callout, notice, banner |
-| <img src="docs/images/components/ui-property-editor.png" alt="Property Editor, its first example" width="95" height="96"> | [Property Editor](docs/ui-property-editor.html) *(In progress)* | `<ui-property-editor>` `<ui-property>` `<ui-property-group>` | A property editor draws a form from a schema:  one field per property, in folding groups, for one thing or many. | inspector, property sheet, properties panel, settings form |
+| <img src="docs/images/components/ui-property-editor.png" alt="Property Editor, its first example" width="95" height="96"> | [Property Editor](docs/ui-property-editor.html) | `<ui-property-editor>` `<ui-property>` `<ui-property-group>` | A property editor draws a form from a schema:  one field per property, in folding groups, for one thing or many. | inspector, property sheet, properties panel, settings form |
 | <img src="docs/images/components/ui-table.png" alt="Table, its first example" width="200" height="65"> | [Table](docs/ui-table.html) | `<ui-table>` `<ui-cell>` | A table displays a collection of data grouped into rows. | data table, data grid, grid, spreadsheet |
 |  | [Terms](docs/ui-terms.html) | `<ui-terms>` `<ui-term>` | Terms list facts as a label and a value each, lined up:  Suit hearts, Rank queen. | dl, definition list, description list, key value list |
 |  | [Toolbar](docs/ui-toolbar.html) | `<ui-toolbar>` | A toolbar is a horizontal menu whose items scroll sideways when they don't fit, with a button at each end while there's more to see that way;  `shrinkable`, it fits their titles to its width instead.  It takes every `<ui-menu>` attribute. | toolbar, tool bar, scrolling tabs, overflow menu |
@@ -285,7 +285,7 @@ Ways to present a kind of content.
 | <img src="docs/images/components/ui-comment.png" alt="Comment, its first example" width="115" height="96"> | [Comment](docs/ui-comment.html) | `<ui-comment>` `<ui-comments>` | One comment:  who wrote it, when, what, and the replies to it. | reply, post, message |
 |  | [Diagram](docs/ui-diagram.html) | `<ui-diagram>` `<ui-diagram-node>` | A diagram draws boxes in columns and the links between them, solid for what a box contains and dashed for what it refers to.  Drag a box to move it. | graph, node graph, network diagram, boxes and lines |
 | <img src="docs/images/components/ui-feed.png" alt="Feed, its first example" width="96" height="96"> | [Feed](docs/ui-feed.html) | `<ui-feed>` `<ui-event>` | A feed presents people's activity chronologically. | activity feed, timeline, news feed, activity stream |
-|  | [Graph](docs/ui-graph.html) *(In progress)* | `<ui-graph>` | A graph draws nodes joined by edges, laid out left to right.  A node may hold a graph of its own, opened in place, in a modal, or in its stead. | graph, node graph, network diagram, flow chart |
+|  | [Graph](docs/ui-graph.html) | `<ui-graph>` | A graph draws nodes joined by edges, laid out left to right.  A node may hold a graph of its own, opened in place, in a modal, or in its stead. | graph, node graph, network diagram, flow chart |
 |  | [Item](docs/ui-item.html) | `<ui-item>` | An item of a dropdown, list, menu or Items view. | list item, media object, row |
 | <img src="docs/images/components/ui-items.png" alt="Items, its first example" width="144" height="96"> | [Items](docs/ui-items.html) | `<ui-items>` | A group of items:  site content, each an image beside its header, meta, description and extra. | item list, media list, product list, results |
 |  | [Mermaid diagram](docs/ui-mermaid-diagram.html) | `<ui-mermaid-diagram>` | A Mermaid diagram draws a flowchart, a sequence, a timeline or any other kind of diagram Mermaid knows, from the element's own text or a file on this site. | mermaid, diagram, flowchart, chart |
@@ -346,6 +346,7 @@ Elements with no Fomantic counterpart.
 |  | [Device](docs/ui-device.html) | `<ui-device>` | A device draws a phone, tablet or desktop round what it holds, at that device's screen size, with buttons in its thick bottom edge. | device frame, phone frame, mockup, device mockup |
 |  | [Dimension](docs/ui-dimension.html) | `<ui-dimension>` | A dimension shows one measure in the reader's own units:  5 ft 8 in in the US, 172 cm elsewhere. | measure, measurement, unit, number with units |
 |  | [Example](docs/ui-example.html) | `<ui-example>` | An example shows its own markup live, under a heading and description, with the same markup as code a button shows and hides. | example, demo, live example, code sample |
+|  | [Icon Browser](docs/ui-icon-browser.html) | `<ui-icon-browser>` | An icon browser shows every icon of a pack, to search through:  clicking one copies the name that draws it. | icon gallery, icon list, icon finder, glyph browser |
 |  | [Icon Picker](docs/ui-icon-picker.html) | `<ui-icon-picker>` | An icon picker lets people choose an icon by searching for it and clicking its glyph. | icon chooser, icon selector, glyph picker, symbol picker |
 |  | [Keys](docs/ui-keys.html) | `<ui-keys>` | Keys show a keyboard shortcut as key caps, the way the reader's own keyboard writes it. | kbd, keyboard shortcut, key caps, hotkey |
 | <img src="docs/images/components/ui-markdown.png" alt="Markdown, its first example" width="131" height="96"> | [Markdown](docs/ui-markdown.html) | `<ui-markdown>` | Markdown renders GitHub-flavoured markdown -- tables, task lists, code blocks -- from the element's own text or a file on this site. | markdown, md, gfm, readme |
@@ -354,7 +355,7 @@ Elements with no Fomantic counterpart.
 | <img src="docs/images/components/ui-panel.png" alt="Panel, its first example" width="169" height="96"> | [Panel](docs/ui-panel.html) | `<ui-panel>` | A panel is an inspector:  a tinted box of fields under a header band, with sub-head bands that open and close.  It takes every `<ui-section>` attribute. | inspector, property panel, properties, settings panel |
 |  | [Quote](docs/ui-quote.html) | `<ui-quote>` | A quote holds someone else's words:  a block of its own, or a few words inside a sentence. | blockquote, quotation, q, pull quote |
 | <img src="docs/images/components/ui-root.png" alt="Root, its first example" width="200" height="51"> | [Root](docs/ui-root.html) | `<ui-root>` | A root loads the components inside it on demand, sets their theme and size, and shows them once they're ready. | app shell, app root, provider, loader |
-| <img src="docs/images/components/ui-section.png" alt="Section, its first example" width="200" height="21"> | [Section](docs/ui-section.html) *(In progress)* | `<ui-section>` `<ui-sections>` | A section is a titled block of content that can close and keep its title in view. | section, panel, collapsible, disclosure |
+| <img src="docs/images/components/ui-section.png" alt="Section, its first example" width="200" height="21"> | [Section](docs/ui-section.html) | `<ui-section>` `<ui-sections>` | A section is a titled block of content that can close and keep its title in view. | section, panel, collapsible, disclosure |
 |  | [Sides](docs/ui-sides.html) | `<ui-sides>` | Sides edit four lengths at once, top, left, right and bottom, as a margin or a padding:  a number box per side. | margin, padding, box model, spacing |
 |  | [Site breadcrumbs](docs/ui-site-breadcrumbs.html) | `<ui-site-breadcrumbs>` | Site breadcrumbs say where you are in a site:  the group, the pages above the page shown, then the page (Hardware › Systems), each page above a link. | breadcrumb trail, you are here, location, page path |
 |  | [Site links](docs/ui-site-links.html) | `<ui-site-links>` | Site links are the page shown's own links, for an app menu's end:  the real page it stands for (its `live` link, Fomantic UI's original for Spell UI's pages), and a way to report a problem with it. | page links, page actions, report a bug, original page |
@@ -365,14 +366,14 @@ Elements with no Fomantic counterpart.
 |  | [Split Panel](docs/ui-split-panel.html) | `<ui-split-panel>` | A split panel lays its children out side by side or one above the other, with bars to resize them. | split view, split pane, resizable panes, panes |
 |  | [Stack](docs/ui-stack.html) | `<ui-stack>` | A stack lays its children out in a column, or a row that wraps, evenly spaced.  It has no look of its own. | stack, cluster, flex box, row |
 |  | [Table of contents](docs/ui-toc.html) | `<ui-toc>` | A table of contents lists the page's sections and examples as links, opens the one in view and follows the scroll.  Each section folds and opens by its chevron, and one button in its header opens or folds them all;  the viewer's folds are kept. | table of contents, on this page, page index, scrollspy |
-|  | [Theme Editor](docs/ui-theme-editor.html) *(In progress)* | `<ui-theme-editor>` `<ui-color-chip>` `<ui-theme-token>` | A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, or set any token by hand, watch real pages follow in light and dark, then copy the theme file or keep it in the browser. | theme editor, theme builder, theme bench, theme creator |
+|  | [Theme Editor](docs/ui-theme-editor.html) | `<ui-theme-editor>` `<ui-color-chip>` `<ui-theme-token>` | A theme editor makes a theme from an existing one:  pick its colours, fonts and shapes, or set any token by hand, watch real pages follow in light and dark, then copy the theme file or keep it in the browser. | theme editor, theme builder, theme bench, theme creator |
 |  | [Theme Menu](docs/ui-theme-menu.html) | `<ui-theme-menu>` | A theme menu switches the page between light and dark, and picks its theme from Spell's own, and remembers both for the next page. | theme picker, theme switcher, dark mode toggle, colour scheme |
 |  | [Tree](docs/ui-tree.html) | `<ui-tree>` `<ui-tree-item>` | A tree shows rows nested in rows, which open and close, and can be selected one or many at a time. | tree view, outline, hierarchy, file tree |
 |  | [Uploader](docs/ui-uploader.html) | `<ui-uploader>` | An uploader takes files someone picks or drops on it, or whole folders, then posts them to its `destination`, or hands them to its `action`. | file upload, file uploader, upload, dropzone |
 |  | [Zoom](docs/ui-zoom.html) | `<ui-zoom>` | A zoom shows something full size, over the page.  Round any content it shows it shrunk, within a width and height, and full size on a click;  with `src` it shows that image full size.  Escape, a click outside it or its close button close it. | lightbox, zoom, full size, image viewer |
 
 <details>
-<summary>The docs site's own elements:  8 families, never in the library</summary>
+<summary>The docs site's own elements:  7 families, never in the library</summary>
 
 | Family | Tags | What it is | Also called |
 | --- | --- | --- | --- |

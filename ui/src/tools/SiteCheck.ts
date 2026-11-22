@@ -644,6 +644,8 @@ function inspectElements() {
       const tag = el.localName
       if (el.shadowRoot) walk(el.shadowRoot)
       if (!tag.startsWith("ui-") && !tag.startsWith("spell-")) continue
+      // a plain marker on purpose, never defined:  `drawnInWindow()`'s "more below" at a list's end
+      if (tag === "spell-more-below") continue
       total++
       tags[tag] = (tags[tag] ?? 0) + 1
       if (!customElements.get(tag)) undefinedTags[tag] = (undefinedTags[tag] ?? 0) + 1
