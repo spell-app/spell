@@ -1039,4 +1039,55 @@ describe("TitleReader", () => {
     new TitleReader({ ask, skipReason: () => undefined, warn: (line) => void lines.push(line) }).check("A", "todo")
     expect(lines).toEqual(["epic:  title not read cold:  claude -p didn't run"])
   })
+
+  // epic `epic-engine` I390:  its rewrite ran past 30 words, which `epic add` then refused
+  test("offers only a rewrite epic add would take:  tidied, cut to its first sentence, else none", () => {
+    const long = Array.from({ length: 31 }, () => "word").join(" ")
+    expect(TitleReader.offerable(`">The Send button keeps its place."`)).toBe("The Send button keeps its place.")
+    expect(TitleReader.offerable(`The Send button keeps its place. And ${long}`)).toBe(
+      "The Send button keeps its place."
+    )
+    expect(TitleReader.offerable("The cache is smaller.  Nothing you'd see.")).toBe(
+      "The cache is smaller.  Nothing you'd see."
+    )
+    expect(TitleReader.offerable(long)).toBeUndefined()
+    expect(TitleReader.offerable("")).toBeUndefined()
+  })
+
+  /** A reader failing every title but `passing`, rewriting to `rewrite`;  its asks counted. */
+  function failing(rewrite: string, file: string, clock = { now: 0 }) {
+    const asked: string[] = []
+    const reader = new TitleReader({
+      ask: ({ text }) => {
+        asked.push(text)
+        return { pass: false, reasons: ["unclear"], rewrite }
+      },
+      skipReason: () => undefined,
+      suggestionsFile: file,
+      now: () => clock.now,
+      warn: () => {}
+    })
+    return { reader, asked, clock }
+  }
+
+  test("a too-long rewrite isn't offered", () => {
+    const long = Array.from({ length: 31 }, () => "word").join(" ")
+    const { reader } = failing(long, join(mkdtempSync(join(tmpdir(), "titles-")), "kept.json5"))
+    expect(() => reader.check("The thing", "todo")).toThrow(/^(?![\s\S]*Try:)/)
+  })
+
+  // epic `epic-engine` I390:  it refused two of its own rewrites
+  test("its own rewrite, given back within the hour, passes unread;  after it, it's read again", () => {
+    const file = join(mkdtempSync(join(tmpdir(), "titles-")), "home", "kept.json5")
+    const REWRITE = "The Send button keeps its place when the page reloads."
+    const { reader, asked, clock } = failing(REWRITE, file)
+    expect(() => reader.check("The poller keeps it", "todo")).toThrow(`Try:  "${REWRITE}"`)
+    expect(asked).toHaveLength(1)
+    reader.check(REWRITE, "todo")
+    reader.check("the send button keeps its place  when the page reloads (coherence)", "todo")
+    expect(asked).toHaveLength(1)
+    clock.now = 60 * 60 * 1000
+    expect(() => reader.check(REWRITE, "todo")).toThrow()
+    expect(asked).toHaveLength(2)
+  })
 })
