@@ -1,0 +1,2258 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>People and Orgs</title>
+    <meta
+      name="description"
+      content="Spell's first person and org, saved as readable JSON5 files:  one address scheme for groups, projects, files and types;  things saved by id inside what holds them, with references, versions and checking;  the people library, the storage adapter and the You panel;  the spaces package and spell-spaces on disk;  JSON5 everywhere;  and the repo's new layout."
+    />
+    <meta name="spell-voice" content="readme 2026-10-22" />
+    <link rel="stylesheet" href="/_epic/assets/spell-doc.css" />
+  </head>
+  <body class="spell-doc-page">
+    <spell-site-header></spell-site-header>
+    <div class="spell-doc">
+      <main class="spell-doc-main">
+        <ui-breadcrumbs class="spell-crumbs" size="small" aria-label="Breadcrumb">
+          <ui-breadcrumb link="/pages/index.html" target="src-packages-docs-index-html"
+            >Docs</ui-breadcrumb
+          >
+          <ui-breadcrumb selected>People and Orgs</ui-breadcrumb>
+        </ui-breadcrumbs>
+        <ui-sticky class="spell-h1"
+          ><header class="spell-page-head"><h1>People and Orgs</h1></header></ui-sticky
+        >
+        <p class="lede">
+          <code>owen@spell/__me.json5</code> is Owen: a readable JSON5 file that keeps its comments through every save,
+          found by the same kind of address as <code>@spell/examples/solitaire/Card.spell</code>. Spell now names
+          everything with one kind of address, saves things as readable JSON5 files, and keeps its first person and org
+          on disk, in a package of their own.
+        </p>
+        <ui-list class="spell-meta">
+          <ui-item icon="user"
+            >Written for: a developer new to spaces, saving or addresses, about to change how projects, people or saved
+            files are found, read or written</ui-item
+          >
+          <ui-item icon="flag"
+            >Status: <ui-label size="mini" color="green">built</ui-label> on branch <code>people-and-orgs</code>, not
+            merged into <code>main</code> yet; epic
+            <a href="/epics/people-and-orgs/people-and-orgs.plan.html" target="people-and-orgs"
+              >People and Orgs</a
+            ></ui-item
+          >
+          <ui-item icon="flask"
+            >Checked on: branch <code>people-and-orgs</code>, 2026-10-14, against the code and the packages' own rules
+            (their AGENTS.md files)</ui-item
+          >
+        </ui-list>
+
+        <ui-section id="summary" label="1. Summary" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="lightbulb"></ui-icon>
+          <ui-statistics class="spell-stats" size="mini">
+            <ui-statistic value="1" label="address scheme, slashes only"></ui-statistic>
+            <ui-statistic value="2" label="new packages: spaces, spell-solid"></ui-statistic>
+            <ui-statistic value="49" label="files renamed .json to .json5"></ui-statistic>
+            <ui-statistic value="4" label="component sets, one layout"></ui-statistic>
+          </ui-statistics>
+          <ul>
+            <li>
+              Everything Spell names has ONE kind of address: a group, a project, a file, a folder, a page of a running
+              app, a type.
+              <ul>
+                <li>e.g. <code>@spell/examples/solitaire/Card.spell</code>, or <code>owen@spell/errors</code>.</li>
+                <li>
+                  The old forms (<code>@system:examples:Solitaire</code>, <code>@examples/...</code>) are read nowhere.
+                </li>
+              </ul>
+            </li>
+            <li>
+              Every thing has a built-in <code>id</code>, and saves by it.
+              <ul>
+                <li>A thing is written inside what holds it, whole the first time and a reference after.</li>
+                <li>So a card in two piles saves once, and reads back as one card.</li>
+                <li>A kind that says so, like a person, gets a file of its own.</li>
+              </ul>
+            </li>
+            <li>
+              Saved files have versions, upgraded as they're read, and are checked against their class.
+              <ul>
+                <li>The Spell declaration is the only description anyone writes.</li>
+                <li>VS Code gets a JSON Schema made from it, never committed.</li>
+              </ul>
+            </li>
+            <li>
+              Spell has its first person and org: the people library, written in Spell, compiled to a TypeScript library
+              the server imports.
+              <ul>
+                <li>A person is a readable <code>__me.json5</code> file, an org an <code>__org.json5</code>.</li>
+                <li>Saving keeps every comment in the file.</li>
+                <li>The app's "Log In" is now "You", a small panel that edits your own file.</li>
+              </ul>
+            </li>
+            <li>
+              Where projects and people live is a package of its own, <b>spaces</b>.
+              <ul>
+                <li>
+                  It holds Spell's project groups, the built-in projects, the editor's server and Python's web server.
+                </li>
+                <li>Owen's own projects and people are in spell-spaces, a folder outside git.</li>
+              </ul>
+            </li>
+            <li>
+              Spell's own files are JSON5, and the repo has a new layout:
+              <ul>
+                <li>
+                  tests in <code>tests/&lt;package&gt;/</code>, compiled output in
+                  <a href="/spell-app/build/" target="src-spell-app-build"><code>build/</code></a>
+                </li>
+                <li>the docs tooling folded into the epics package</li>
+                <li>the code that makes custom elements in its own package, spell-solid</li>
+                <li>every component set laid out the same way, served at <code>/components/&lt;set&gt;/</code></li>
+              </ul>
+            </li>
+          </ul>
+          <p>The numbers above, with their caveats:</p>
+          <ul>
+            <li>
+              One address scheme: about 450 old addresses were rewritten, in about 100 files of code, tests and docs.
+            </li>
+            <li>Two new packages, and one gone: the docs package's tools are now the epics package's.</li>
+            <li>
+              49 files renamed: project files, declarations, test data and the core's method list. The component sets'
+              12 site data files are still <code>.json</code> (<a href="#files">section 6</a>).
+            </li>
+            <li>Four component sets: Spell UI, Epic UI, App UI and Brand UI.</li>
+          </ul>
+          <ui-message state="info" heading="Still to come, in other epics">
+            <ul>
+              <li>
+                Spaces: a person's or org's folder of projects, with its special folders for settings, sessions, docs
+                and data.
+              </li>
+              <li>Sign-in, roles and invites, on Better Auth.</li>
+              <li>Sharing and live editing together, in the crdt epic.</li>
+            </ul>
+          </ui-message>
+        </ui-section>
+
+        <ui-section id="addresses" label="2. Addresses" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="compass"></ui-icon>
+          <p>One scheme names every group, project, file, folder, page and type, with slashes only.</p>
+          <p>
+            Its reader is Spell's
+            <a href="/spell-parser/src/spell/SpellLocation.ts" target="src-spell-parser-src-spell-spelllocation-ts"
+              ><code title="spell-parser/src/spell/SpellLocation.ts">SpellLocation</code></a
+            >.
+          </p>
+
+          <ui-section id="address-forms" label="The forms" sticky collapsible dividing open="false">
+            <ul>
+              <li>A SPACE is an org, <code>@spell</code>, or a person at an org, <code>owen@spell</code>.</li>
+              <li>A GROUP is a space and a short name, or a person's space alone.</li>
+              <li>A PROJECT is its group, a slash, and ONE part, its name in lower-kebab.</li>
+              <li>What follows the project is told apart by its last part.</li>
+            </ul>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>names</th>
+                    <th>e.g.</th>
+                    <th>told by</th>
+                  </tr>
+                  <tr>
+                    <td>a group</td>
+                    <td><code>@spell/examples</code>, <code>owen@spell</code></td>
+                    <td>one of spaces' project groups</td>
+                  </tr>
+                  <tr>
+                    <td>a project</td>
+                    <td><code>@spell/examples/solitaire</code></td>
+                    <td>the group, then one part</td>
+                  </tr>
+                  <tr>
+                    <td>a file</td>
+                    <td><code>@spell/examples/solitaire/Card.spell</code></td>
+                    <td>a dot in the last part</td>
+                  </tr>
+                  <tr>
+                    <td>a folder</td>
+                    <td><code>@spell/examples/solitaire/assets/</code></td>
+                    <td>a slash at the end</td>
+                  </tr>
+                  <tr>
+                    <td>a space's own file</td>
+                    <td><code>owen@spell/__me.json5</code></td>
+                    <td>a dot, right after the space</td>
+                  </tr>
+                  <tr>
+                    <td>a page of a running app</td>
+                    <td><code>owen@spell/solitaire/rules</code></td>
+                    <td>neither a dot nor a slash at the end</td>
+                  </tr>
+                  <tr>
+                    <td>a type</td>
+                    <td><code>@spell/library/people/Person</code></td>
+                    <td>looks like a page, read as a type only where one is expected</td>
+                  </tr>
+                  <tr>
+                    <td>one version of a type</td>
+                    <td><code>@spell/library/people/Person__v2</code></td>
+                    <td><code>__v</code> and a number at the end</td>
+                  </tr>
+                  <tr>
+                    <td>a thing in another place</td>
+                    <td><code>Person#matt@three-degrees</code></td>
+                    <td>a saved reference: type, <code>#</code>, id, <code>@</code>, place</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ul>
+              <li>
+                Every file has a dot in its name; a group's, a project's or a page's name has none.
+                <ul>
+                  <li>So <code>.hidden</code> is a file, and <code>rules</code> a page.</li>
+                </ul>
+              </li>
+              <li>
+                Where a project ends needs no lookup: its group's address, then one part. There are no nested projects.
+              </li>
+              <li>An address with an empty part is refused, so <code>solitaire//Card.spell</code> is an error.</li>
+              <li>
+                A type is read by <code>SpellLocation.typeFor()</code>, in a <code>"$schema"</code> or a reference.
+                <ul>
+                  <li>It gives the project, the type and the version, if the address names one.</li>
+                  <li>Without <code>__v2</code>, the address means the newest version.</li>
+                </ul>
+              </li>
+              <li>
+                A reference to another place splits at the FIRST @ after the #, since the place can hold an @ of its
+                own.
+                <ul>
+                  <li>So an id may never hold an <code>@</code>: saving one throws.</li>
+                </ul>
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="address-groups" label="The groups" sticky collapsible dividing open="false">
+            <p>
+              The groups are spaces', not Spell's:
+              <a
+                href="/spell-app/src/spaces/models/projectGroups.ts"
+                target="src-spell-app-src-spaces-models-projectgroups-ts"
+                ><code title="spell-app/src/spaces/models/projectGroups.ts">PROJECT_GROUPS</code></a
+              >. Loading it registers them with Spell, whose registry starts empty.
+            </p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>group</th>
+                    <th>what it holds</th>
+                    <th>folder</th>
+                  </tr>
+                  <tr>
+                    <td><code>@spell/examples</code></td>
+                    <td>the examples: solitaire, todos, fizzbuzz ...</td>
+                    <td>in the spaces package, committed</td>
+                  </tr>
+                  <tr>
+                    <td><code>@spell/library</code></td>
+                    <td>libraries: cards, people</td>
+                    <td>in the spaces package, committed</td>
+                  </tr>
+                  <tr>
+                    <td><code>@spell/guides</code></td>
+                    <td>the guides' projects</td>
+                    <td>in the spaces package, committed</td>
+                  </tr>
+                  <tr>
+                    <td><code>@spell/test</code></td>
+                    <td>the test projects, listed in the app in dev only</td>
+                    <td>
+                      in
+                      <a
+                        href="/spell-parser/tests/spaces/@spell/test/"
+                        target="src-spell-parser-tests-spaces-spell-test"
+                        ><code>spell-parser/tests/spaces/@spell/test/</code></a
+                      >, committed and frozen
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>owen@spell</code></td>
+                    <td>Owen's own projects</td>
+                    <td>spell-spaces, outside git</td>
+                  </tr>
+                  <tr>
+                    <td><code>@local/&lt;folder&gt;</code></td>
+                    <td>a folder an editor opened</td>
+                    <td>wherever it is: it says its own folder</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ul>
+              <li>
+                Every program that reads a Spell address loads the groups first. The ways in:
+                <ul>
+                  <li>
+                    the
+                    <a href="/spell-app/spaces/" target="src-spell-app-spaces"><code>spell-app/spaces</code></a>
+                    barrel
+                  </li>
+                  <li>spaces' disk reader, in node</li>
+                  <li>the groups file alone, as <code>&lt;spell-viewer&gt;</code> does to stay light</li>
+                </ul>
+              </li>
+              <li>
+                Who "you" are is a constant for now, <code>SPACES.LOCAL_PERSON</code>: owen, so your space is
+                <code>owen@spell</code>.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="address-names" label="Project names and titles" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                A project's folder is its name, lower-kebab: the address IS the folder.
+                <ul>
+                  <li>e.g. <code>drawable-solitaire/</code> and <code>todos-form-based/</code></li>
+                  <li>
+                    <code>SpellLocation</code> makes one from typed text: "Drawable Solitaire" is
+                    <code>drawable-solitaire</code>.
+                  </li>
+                </ul>
+              </li>
+              <li>
+                The editor's menus and the <code>spell</code> command's picker show a TITLE, "Drawable Solitaire".
+                <ul>
+                  <li>Made from the folder's name by default.</li>
+                  <li>
+                    Or the project file's optional <code>"title"</code> key, when the name can't say it: "Todos - Form
+                    Based", "FizzBuzz".
+                  </li>
+                  <li>
+                    A group's list sends each project as <code>{ path, title }</code>, so the menus show it without
+                    opening the project.
+                  </li>
+                  <li>
+                    Creating, copying or renaming a project writes the title typed, only when the name can't say it.
+                  </li>
+                </ul>
+              </li>
+            </ul>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>__project.json5 · a project with a title · 9 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-json">{
+  "title": "Todos - Form Based",
+  "imports": [
+    {
+      "path": "/todo.spell",
+      "active": true
+    }
+  ]
+}</code></pre>
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section id="address-urls" label="In URLs" sticky collapsible dividing open="false">
+            <p>
+              Every URL holds the address as it is. ONE function makes them all, Spell's
+              <a href="/spell-parser/src/spell/SpellUrls.ts" target="src-spell-parser-src-spell-spellurls-ts"
+                ><code title="spell-parser/src/spell/SpellUrls.ts">SpellUrls</code></a
+              >.
+            </p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>what</th>
+                    <th>URL</th>
+                  </tr>
+                  <tr>
+                    <td>edit a file in the app</td>
+                    <td><code>/edit/@spell/examples/solitaire/Card.spell</code></td>
+                  </tr>
+                  <tr>
+                    <td>run an app</td>
+                    <td><code>/run/owen@spell/solitaire</code></td>
+                  </tr>
+                  <tr>
+                    <td>read a project's file</td>
+                    <td><code>/spaces/@spell/examples/solitaire/Card.spell</code></td>
+                  </tr>
+                  <tr>
+                    <td>save it</td>
+                    <td><code>POST /api/projects/file/&lt;project&gt;/&lt;file&gt;</code></td>
+                  </tr>
+                  <tr>
+                    <td>a project's index</td>
+                    <td><code>/api/projects/index/&lt;project&gt;</code></td>
+                  </tr>
+                  <tr>
+                    <td>a group's projects</td>
+                    <td><code>/api/projects/list/owen@spell</code></td>
+                  </tr>
+                  <tr>
+                    <td>a compiled file</td>
+                    <td>
+                      <code>/spaces/@spell/examples/solitaire/solitaire.spell.js</code>, served from the build folder
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ul>
+              <li>
+                A URL is split by its group and ONE part for the project before any path is made
+                (<code>SpellUrls.split()</code>).
+                <ul>
+                  <li>Each part is encoded and decoded on its own, never the whole address.</li>
+                  <li>A <code>/spaces/</code> URL that names no project's file answers 400.</li>
+                </ul>
+              </li>
+              <li>
+                A page of a running app, <code>/run/owen@spell/solitaire/rules</code>, runs the app for now: apps have
+                no pages yet.
+              </li>
+              <li>No old URL is redirected: an old address answers "not found".</li>
+              <li>
+                Spell never sees a path on disk. In node (the language server, the <code>spell</code> command, tests),
+                spaces' disk reader answers the same URLs from disk.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="address-cli" label="On the command line" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                The <code>spell</code> command takes addresses:
+                <ul>
+                  <li>a space, every group in it: <code>spell compile @spell</code></li>
+                  <li>a group: <code>spell compile @spell/library</code></li>
+                  <li>a project: <code>spell run owen@spell/errors</code></li>
+                  <li>a file: <code>@spell/test/solitaire/Card.spell</code></li>
+                </ul>
+              </li>
+              <li>
+                <code>@here</code> is the command's own word for the project in the current folder.
+                <ul>
+                  <li><code>@here</code> alone is <code>.</code></li>
+                  <li><code>@here/Card.spell</code> is <code>./Card.spell</code></li>
+                  <li>It isn't an address: the command checks for it before reading one.</li>
+                  <li>With no project named at all, the command takes the one you're in.</li>
+                </ul>
+              </li>
+              <li>
+                <code>spell projects</code> lists the groups by address, and its picker goes group, project, file.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="saving" label="3. Things and saving" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="floppy disk outline"></ui-icon>
+          <p>What lasts, as opposed to a page's state: things saved by id, read back as the same objects.</p>
+          <p>
+            The code: the core's
+            <a href="/spell-parser/src/core/saving.ts" target="src-spell-parser-src-core-saving-ts"
+              ><code title="spell-parser/src/core/saving.ts">Saver</code></a
+            >
+            and <code>Loader</code>, and their Python twin.
+          </p>
+
+          <ui-section id="saving-ids" label="Ids" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                Every thing and list has an <code>id</code>, built in. No program declares it.
+                <ul>
+                  <li><code>a person has an id as text</code> is refused, saying every thing has one built in.</li>
+                </ul>
+              </li>
+              <li>
+                Read before it's set, it's made up, like <code>person-k3x9q2mf</code>.
+                <ul>
+                  <li>From real randomness, never the seeded random, so saved ids never repeat.</li>
+                </ul>
+              </li>
+              <li>
+                Set it like any property: <code>set the id of the person to "owen"</code>, or
+                <code>a new person with id = "owen"</code>.
+              </li>
+              <li>A view's element leaves the built-in id out, so it can't clash with the element's own id.</li>
+              <li>Python's core has the same, with the item type of each list.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="saving-inside" label="Saved inside what holds it" sticky collapsible dividing open="false">
+            <p>A thing is saved INSIDE what holds it, by default.</p>
+            <ul>
+              <li>
+                Written whole the first time it's reached, a reference after: <code>{ "$ref": "Card#ace" }</code>.
+              </li>
+              <li>Its <code>id</code> is written only when something else holds it too.</li>
+              <li>So a saved game is a handful of entries, never a file per card.</li>
+              <li>
+                A property's plain list is its items, a JSON array: it's part of its owner.
+                <ul>
+                  <li>A list TYPE (<code>a club is a list of people</code>) is a thing, inside like any other.</li>
+                </ul>
+              </li>
+              <li>
+                A list says what it holds before it holds anything, so saving knows a list of people holds people:
+                <ul>
+                  <li><code>a person has dates as a new list of dated-events</code></li>
+                  <li>or in its outline body, <code>- its "dates" is a list of dated-events</code></li>
+                </ul>
+              </li>
+              <li>
+                An entry is written in this order:
+                <ul>
+                  <li><code>"$type"</code>, then its <code>id</code></li>
+                  <li>its props, then the plain fields it was made with</li>
+                  <li>a list's <code>"$items"</code></li>
+                </ul>
+              </li>
+              <li>Dates are written as ISO text.</li>
+            </ul>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>savedById.expected.json5 · two friends, saved and read by both cores · 17 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-json">{
+  "root": "Person#owen",
+  "entries": {
+    "Person#owen": {
+      "$type": "Person",
+      "id": "owen",
+      "name": "Owen",
+      "dates": [{ "$type": "DatedEvent", "label": "birthday", "day": "1970-01-01T00:00:00.000Z" }],
+      "friends": [{ "$ref": "Person#matt" }]
+    },
+    "Person#matt": {
+      "$type": "Person",
+      "id": "matt",
+      "name": "Matt",
+      "friends": [{ "$ref": "Person#owen" }]
+    }
+  }
+}</code></pre>
+              </ui-content>
+            </ui-accordion>
+            <ul>
+              <li>
+                <code>new Saver().save(thing)</code> gives every entry it made, by key, and the key it started from.
+              </li>
+              <li>
+                <code>new Loader({ entryFor }).load(key)</code> makes each entry once, however many references name it.
+                <ul>
+                  <li>Two people who are each other's friends load as two things, each holding the other.</li>
+                </ul>
+              </li>
+              <li>Where entries live is the caller's: a map in a test, a file each in the people store.</li>
+              <li>
+                Both cores write and read the same example file,
+                <a
+                  href="/spell-parser/tests/core/savedById.expected.json5"
+                  target="src-spell-parser-tests-core-savedbyid-expected-json5"
+                  ><code title="spell-parser/tests/core/savedById.expected.json5">savedById.expected.json5</code></a
+                >, so they agree.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="saving-references" label="References" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                A reference is <code>{ "$ref": "Person#matt" }</code>: the type, <code>#</code>, the id.
+                <ul>
+                  <li>The same text names a thing anywhere: a view element's <code>pile="Tableau#T1"</code>, say.</li>
+                </ul>
+              </li>
+              <li>
+                A reference from another entry says which entry the thing is written in:
+                <code>{ "$ref": "Card#ace", "$in": "Game#g" }</code>.
+                <ul>
+                  <li>So a loader reads that entry first.</li>
+                </ul>
+              </li>
+              <li>
+                A thing kept in ANOTHER place is a reference with that place: <code>Person#matt@three-degrees</code>.
+                <ul>
+                  <li>It gets no entry here: its own place saves it.</li>
+                  <li>The saver's <code>placeOf</code> option says where each thing is kept.</li>
+                  <li><code>parseRef()</code> reads one, <code>refText()</code> writes one, in both cores.</li>
+                </ul>
+              </li>
+              <li>
+                Every key the JSON uses for itself starts with <code>$</code>, never a property of the thing:
+                <ul>
+                  <li><code>$type</code>: a thing's class</li>
+                  <li><code>$items</code>: a list type's items</li>
+                  <li><code>$ref</code> and <code>$in</code>: a reference, and the entry it's in</li>
+                  <li><code>$id</code>: a thing's number in a page's state</li>
+                  <li><code>$version</code> and <code>$schema</code>: a file's version and type</li>
+                </ul>
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="saving-own-file" label="Saved in its own file" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                A kind that says so gets an entry of its own, and what holds it writes a reference to that.
+                <ul>
+                  <li>
+                    <code>a person is saved in its own file</code>, or <code>- it is saved in its own file</code> in its
+                    outline body
+                  </li>
+                  <li>compiled to <code>Person.savedInFile = true</code>, after the class; a plain thing says false</li>
+                  <li>refused for a built-in type</li>
+                </ul>
+              </li>
+              <li>
+                <code>a dated-event is saved inline</code> says the default, and changes nothing.
+                <ul>
+                  <li>A view may say it.</li>
+                </ul>
+              </li>
+              <li>
+                <b>Not built:</b> one property opting out (<code>..., saved externally</code>), and the comma form on a
+                declaration (<code>a person is a thing, saved in its own file</code>). Nothing needs them yet.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="saving-versions" label="Versions and upgrades" sticky collapsible dividing open="false">
+            <p>A type has versions, so renaming a property doesn't break the files written before.</p>
+            <ul>
+              <li>
+                A version step renames or drops a property:
+                <ul>
+                  <li>
+                    <code>a person version 2 renames name to names</code>, compiled to
+                    <code>Person.v2RenamesName = "names"</code>
+                  </li>
+                  <li>
+                    <code>a person version 3 drops nickname</code>, compiled to
+                    <code>Person.v3DropsNickname = true</code>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                An upgrade method does the rest: <code>to upgrade (a person) to version 4: ...</code>, compiled to
+                <code>upgradeToVersion4()</code>.
+                <ul>
+                  <li>It runs on the thing read from an older file, after that version's renames and drops.</li>
+                  <li>
+                    What an old file holds that the type no longer declares stays as plain fields, for it to read.
+                  </li>
+                </ul>
+              </li>
+              <li>
+                A type's version is the highest its steps name: 1 with none.
+                <ul>
+                  <li>Adding a property needs no new version: only renaming, dropping or changing one does.</li>
+                </ul>
+              </li>
+              <li>
+                The saver writes <code>"$version"</code> past 1, right after <code>"$type"</code>. A file with none is
+                version 1.
+              </li>
+              <li>The loader brings an older entry up step by step, and the next save writes the newest version.</li>
+              <li>
+                A file NEWER than its type reads as it is, and its save writes the type's own version.
+                <ul>
+                  <li>So a checkout behind a branch's Person can drop what it doesn't know: no special rule for it.</li>
+                </ul>
+              </li>
+              <li>Python's core doesn't upgrade old files yet.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="saving-checking" label="Checking a file" sticky collapsible dividing open="false">
+            <p>
+              The Spell declaration is the ONLY description of a type anyone writes. Both checks are made from the
+              compiled class, in the core's
+              <a href="/spell-parser/src/core/checking.ts" target="src-spell-parser-src-core-checking-ts"
+                ><code title="spell-parser/src/core/checking.ts">checking.ts</code></a
+              >.
+            </p>
+            <ui-cards class="spell-flow" stackable>
+              <ui-card>
+                <ui-content>
+                  <ui-header>checkEntry()</ui-header>
+                  <ui-description>
+                    For the app, the store and the command line: each property declared, of its kind. It returns the
+                    problems, by property.
+                  </ui-description>
+                </ui-content>
+              </ui-card>
+              <ui-card>
+                <ui-content>
+                  <ui-header>jsonSchemaFor()</ui-header>
+                  <ui-description>
+                    For VS Code only: the same, as JSON Schema. Made by a compile, never committed, never edited.
+                  </ui-description>
+                </ui-content>
+              </ui-card>
+            </ui-cards>
+            <ul>
+              <li>
+                <code>checkEntry(entry, { classNamed })</code> checks each property is one the class declares, of its
+                kind: text, a number, yes or no, a date, a list, or a thing.
+                <ul>
+                  <li>
+                    A thing may be a reference naming that type or a kind of it, or written whole inside, which is
+                    checked too.
+                  </li>
+                  <li>Nothing (<code>null</code>) is always allowed.</li>
+                  <li>A key starting with <code>$</code> is the file's own, never a property.</li>
+                  <li>
+                    A problem says where and what:
+                    <code>{ property: "dates[0].label", message: "label is text, not a number" }</code>.
+                  </li>
+                </ul>
+              </li>
+              <li>An old file is checked as its type reads it today, after its version's renames.</li>
+              <li>Both read a property's kind through ONE function, <code>kindOf()</code>, so they can't disagree.</li>
+              <li>No JSON Schema library: the checker reads the class's own description, what the saver reads.</li>
+              <li>Only the JavaScript core checks: nothing in Python reads a person's file yet.</li>
+            </ul>
+            <h4>In VS Code</h4>
+            <ul>
+              <li>
+                <code>spell compile</code> writes a library's schemas into its build folder, in a schemas folder.
+                <ul>
+                  <li>One file a class: Person's is <code>Person.schema.json</code>.</li>
+                </ul>
+              </li>
+              <li>
+                The repo's VS Code settings map a file's NAME to its schema: <code>__me.json5</code> to Person's,
+                <code>__org.json5</code> to Org's.
+                <ul>
+                  <li>
+                    VS Code resolves a <code>"$schema"</code> only as a URL or a path, so a bare address names nothing
+                    it can fetch.
+                  </li>
+                  <li>A file the mapping doesn't name isn't checked in VS Code; the app still checks it.</li>
+                  <li>The schemas are there once the library has been compiled in that checkout.</li>
+                </ul>
+              </li>
+              <li>
+                <code>.json5</code> files open as "JSON with comments", the one mode VS Code checks schemas in.
+                <ul>
+                  <li>Spell writes keys and text in double quotes, so its files read cleanly there.</li>
+                  <li>A bare key typed by hand gets one squiggle, and the schema check still runs.</li>
+                </ul>
+              </li>
+            </ul>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>The repo's VS Code settings · the schema mapping · 5 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-json">"files.associations": { "*.json5": "jsonc" },
+"json.schemas": [
+  { "fileMatch": ["__me.json5"], "url": "./build/spaces/@spell/library/people/schemas/Person.schema.json" },
+  { "fileMatch": ["__org.json5"], "url": "./build/spaces/@spell/library/people/schemas/Org.schema.json" }
+]</code></pre>
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section id="saving-model" label="The model core and libraries" sticky collapsible dividing open="false">
+            <p>The server imports compiled Spell like any module, without running a program.</p>
+            <ul>
+              <li>
+                <b>The model core</b>,
+                <a href="/spell-parser/src/core/model.ts" target="src-spell-parser-src-core-model-ts"
+                  ><code title="spell-parser/src/core/model.ts">spell-parser/core/model</code></a
+                >: things, lists and properties, with no drawing and no Solid.
+                <ul>
+                  <li>
+                    Imported by its name, <code>spell-parser/core/model</code>: the package's name plus its path, like
+                    every file (before the repo split, <code>@spell-app/core/model</code>, the one export in its package
+                    file).
+                  </li>
+                  <li>Things made outside a running program stay out of its list of things.</li>
+                  <li>Its things are plain data, so the server and the app may each hold a copy.</li>
+                  <li>Code it loads asks <code>programThings()</code> for the running program's things.</li>
+                </ul>
+              </li>
+              <li>
+                <b>A library</b>, the <code>ts/lib</code> target: one TypeScript file,
+                <code>&lt;Project&gt;.lib.ts</code>, beside its source.
+                <ul>
+                  <li>
+                    The project's classes and top-level functions: no drawing, no headings, tests or top-level steps.
+                  </li>
+                  <li>Checked by <code>tsc</code>, as the Solid TypeScript target is.</li>
+                  <li>
+                    Written as every target writes a class (P19):
+                    <ul>
+                      <li>where it's saved first, <code>static savedInFile = true</code>, whatever line said it</li>
+                      <li>
+                        each property below the Spell that made it, in a comment:
+                        <code>// - its "notes" is a list of notes</code>
+                      </li>
+                      <li>
+                        a decorator with arguments on the line above its accessor; one without on the same line,
+                        <code>@derived get state()</code>
+                      </li>
+                    </ul>
+                  </li>
+                  <li>Committed, and marked generated, so a merge recompiles it.</li>
+                  <li>A test fails while it isn't what its Spell compiles to now.</li>
+                  <li>A project asks for it in its project file: <code>"targets": ["ts/lib"]</code>.</li>
+                  <li><code>spell run</code> refuses it: a library doesn't run.</li>
+                </ul>
+              </li>
+              <li>
+                Vite, <code>tsx</code> and the repo's type check read a <code>.lib.ts</code> as it is. A bare browser
+                page, or plain node, can't without a build.
+              </li>
+            </ul>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>people.lib.ts · Person, as the library target writes it · 27 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-ts">export class Person extends Thing {
+  static savedInFile = true
+
+  // - it has names as text
+  @prop({ type: "text" })
+  accessor names!: string
+
+  // - it has a nickname as text
+  @prop({ type: "text" })
+  accessor nickname!: string
+
+  // - its "emails" is a list of text
+  @prop({ itemType: "text", init: () =&gt; new List&lt;string&gt;({ instanceType: "text" }) })
+  accessor emails!: List&lt;string&gt;
+
+  // - its "dates" is a list of dated-events
+  @prop({ itemType: "DatedEvent", init: () =&gt; new List&lt;DatedEvent&gt;({ instanceType: "DatedEvent" }) })
+  accessor dates!: List&lt;DatedEvent&gt;
+
+  // - its "friend-lists" is a list of friend-lists
+  @prop({ itemType: "FriendList", init: () =&gt; new List&lt;FriendList&gt;({ instanceType: "FriendList" }) })
+  accessor friendLists!: List&lt;FriendList&gt;
+
+  // - its "notes" is a list of notes
+  @prop({ itemType: "Note", init: () =&gt; new List&lt;Note&gt;({ instanceType: "Note" }) })
+  accessor notes!: List&lt;Note&gt;
+}</code></pre>
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section id="saving-lookups" label="Finding things by name" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                A reference names one thing by its name, <code>Tableau#T1</code>, or its place, <code>Tableau#1</code>
+                (the first tableau made).
+                <ul>
+                  <li>A name finds a sub-type's thing too: <code>Pile#T1</code> is the tableau T1.</li>
+                </ul>
+              </li>
+              <li>
+                The lookups search the running program's things, or what the caller hands
+                <code>core.searchThings()</code> instead.
+                <ul>
+                  <li>
+                    So a library's code finds <code>Person#owen</code> under the model core, among the people store's
+                    people and orgs.
+                  </li>
+                  <li><code>searchThings()</code> returns what was searched before, for the caller to put back.</li>
+                </ul>
+              </li>
+              <li>
+                The code: the core's
+                <a href="/spell-parser/src/core/references.ts" target="src-spell-parser-src-core-references-ts"
+                  ><code title="spell-parser/src/core/references.ts">references.ts</code></a
+                >.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="people" label="4. People and orgs" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="users"></ui-icon>
+          <p>One person on this machine, and their orgs, in readable files. No sign-in.</p>
+
+          <ui-section id="people-library" label="The people library" sticky collapsible dividing open="false">
+            <p>Person and Org are a built-in library written in Spell, <code>@spell/library/people</code>.</p>
+            <p>
+              Its source is
+              <a
+                href="/spell-app/spaces/@spell/library/people/People.spell"
+                target="src-spell-app-spaces-spell-library-people-people-spell"
+                ><code title="spell-app/spaces/@spell/library/people/People.spell">People.spell</code></a
+              >, compiled to
+              <a
+                href="/spell-app/spaces/@spell/library/people/people.lib.ts"
+                target="src-spell-app-spaces-spell-library-people-people-lib-ts"
+                ><code title="spell-app/spaces/@spell/library/people/people.lib.ts">people.lib.ts</code></a
+              >.
+            </p>
+            <ul>
+              <li>
+                A person, saved in their own file: names (one text), a nickname, emails, dated events, friend lists and
+                notes.
+              </li>
+              <li>A friend list holds relationships: a kind such as "brother", a person by reference, and notes.</li>
+              <li>
+                An org, saved in its own file: a name, and its members.
+                <ul>
+                  <li>Each member is a membership: a person and a role, guest, member, admin or spell-admin.</li>
+                  <li>A value per member, like a role, is a thing of its own: Spell has no "per" syntax.</li>
+                </ul>
+              </li>
+              <li>The app, the people store and the <code>spell</code> command import the compiled library.</li>
+              <li>
+                Person and Org hold data and plain methods only: no events, and no rules that run when a value changes.
+                <ul>
+                  <li>
+                    Compiled Spell runs on one shared core per process, so what fires for one person could reach
+                    another.
+                  </li>
+                  <li>Events can come once there's a core per request.</li>
+                </ul>
+              </li>
+            </ul>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>People.spell · the whole library · 39 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-plaintext">a person is a thing:
+	- it is saved in its own file
+	- it has names as text
+	- it has a nickname as text
+	- its "emails" is a list of text
+	- its "dates" is a list of dated-events
+	- its "friend-lists" is a list of friend-lists
+	- its "notes" is a list of notes
+
+## What a person keeps
+a dated-event is a thing:
+	- it has a label as text
+	- it has a day as a date
+	- its "notes" is a list of notes
+
+a note is a thing where:
+	- it has a title as text
+	- it has a body as text
+	- it has created as a date
+	- it has a modified as date
+
+a relationship is a thing where:
+	- it has a kind as text
+	- it has a person as a person
+	- its "notes" is a list of notes
+
+a friend-list is a thing where:
+	- it has a name as text
+	- its "relationships" is a list of relationships
+
+## Orgs, and who's in them
+an org is a thing where:
+	- it is saved in its own file
+	- it has a name as text
+	- its "members" is a list of memberships
+
+a membership is a thing where:
+	- it has a person as a person
+	- its "role" is one of guest, member, admin, spell-admin</code></pre>
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section id="people-storage" label="The storage adapter" sticky collapsible dividing open="false">
+            <p>
+              Spaces' files go through ONE interface,
+              <a
+                href="/spell-app/src/spaces/models/SpaceStorage.ts"
+                target="src-spell-app-src-spaces-models-spacestorage-ts"
+                ><code title="spell-app/src/spaces/models/SpaceStorage.ts">SpaceStorage</code></a
+              >, so S3 or Git can replace the disk later.
+            </p>
+            <ul>
+              <li>Five calls: read, write, list, remove, watch.</li>
+              <li>Paths are relative to spell-spaces: <code>@spell/owen@/__me.json5</code>.</li>
+              <li>Text in, text out: JSON5 is a layer above it.</li>
+              <li>
+                The disk's is
+                <a
+                  href="/spell-app/src/spaces/server/node/storage/DiskStorage.ts"
+                  target="src-spell-app-src-spaces-server-node-storage-diskstorage-ts"
+                  ><code title="spell-app/src/spaces/server/node/storage/DiskStorage.ts">DiskStorage</code></a
+                >:
+                <ul>
+                  <li>It writes through the page server's file operations, under the file's lock, all at once.</li>
+                  <li>
+                    It keeps each folder's list in memory; one watcher on the root drops a folder's list when anyone
+                    changes it.
+                  </li>
+                  <li>A path outside its root, or a dot file, is refused.</li>
+                  <li>No index file on disk: the lists are memory only.</li>
+                </ul>
+              </li>
+              <li>
+                The page server's <code>--spaces &lt;dir&gt;</code> points it elsewhere, as
+                <code>SPELL_SPACES_DIR</code> does.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="people-json5" label="JSON5 with comments kept" sticky collapsible dividing open="false">
+            <p>
+              JSON5 is read and written in ONE place, spaces'
+              <a
+                href="/spell-app/src/spaces/server/node/storage/json5.ts"
+                target="src-spell-app-src-spaces-server-node-storage-json5-ts"
+                ><code title="spell-app/src/spaces/server/node/storage/json5.ts">json5.ts</code></a
+              >, on the json5-writer library.
+            </p>
+            <ul>
+              <li>
+                json5-writer writes a WHOLE value at a time, and removes any key the value leaves out.
+                <ul>
+                  <li>So an edit reads the file, changes the object, and writes all of it back.</li>
+                  <li>Every comment stays where it was, one at a line's end included.</li>
+                </ul>
+              </li>
+              <li>Spell writes keys and text in double quotes, with no trailing commas.</li>
+              <li>The library has no types of its own: the repo's root types give them.</li>
+              <li>Node only: json5-writer stands on jscodeshift.</li>
+              <li>Behind this one file, so the library can be swapped later.</li>
+            </ul>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>json5Edited() · a value changed, its comment kept · 2 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-ts">json5Edited('{\n  // who\n  "name": "Owen"\n}', { name: "O" })
+// =&gt; '{\n  // who\n  "name": "O"\n}'</code></pre>
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section id="people-store" label="The people store" sticky collapsible dividing open="false">
+            <p>
+              <a
+                href="/spell-app/src/spaces/server/node/people/PeopleStore.ts"
+                target="src-spell-app-src-spaces-server-node-people-peoplestore-ts"
+                ><code title="spell-app/src/spaces/server/node/people/PeopleStore.ts">PeopleStore</code></a
+              >
+              reads and writes people and orgs through the storage adapter, as the people library's things.
+            </p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>who</th>
+                    <th>reference</th>
+                    <th>file</th>
+                  </tr>
+                  <tr>
+                    <td>a person</td>
+                    <td><code>Person#owen@spell</code></td>
+                    <td><code>@spell/owen@/__me.json5</code></td>
+                  </tr>
+                  <tr>
+                    <td>a person at another org</td>
+                    <td><code>Person#matt@three-degrees</code></td>
+                    <td><code>@three-degrees/matt@/__me.json5</code></td>
+                  </tr>
+                  <tr>
+                    <td>an org, its members inside</td>
+                    <td><code>Org#spell</code></td>
+                    <td><code>@spell/__org.json5</code></td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ul>
+              <li>
+                Reading a person:
+                <ul>
+                  <li>their file is read as JSON5, and checked against its class after its version's renames</li>
+                  <li>its problems are returned, and the file is read anyway</li>
+                  <li>it's brought up to its class's version</li>
+                  <li>every person or org it names is read too, all at once, each file once</li>
+                </ul>
+              </li>
+              <li>
+                A person's reference always says their org.
+                <ul>
+                  <li>
+                    A bare <code>Person#matt</code> in owen's file is <code>Person#matt@spell</code>: the org of the
+                    file it's in.
+                  </li>
+                </ul>
+              </li>
+              <li>
+                Writing: ONE file at a time, its comments kept.
+                <ul>
+                  <li>A friend is written as a reference with their org, never into their own file.</li>
+                </ul>
+              </li>
+              <li><code>orgs()</code> finds every org by the <code>__org.json5</code> in its folder.</li>
+              <li><code>rolesOf(person)</code> says a person's role in each.</li>
+              <li>
+                While a file loads, references by name search what's been read, through <code>searchThings()</code>.
+              </li>
+            </ul>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>@spell/__org.json5 · an org and a member · 6 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-json">{
+  "$type": "Org",
+  "id": "spell",
+  "name": "Spell",
+  "members": [{ "$type": "Membership", "person": { "$ref": "Person#owen@spell" }, "role": "spell-admin" }]
+}</code></pre>
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section id="people-you" label="Its routes and the You panel" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                Two routes, in spaces'
+                <a
+                  href="/spell-app/src/spaces/server/node/people/peopleRoutes.ts"
+                  target="src-spell-app-src-spaces-server-node-people-peopleroutes-ts"
+                  ><code title="spell-app/src/spaces/server/node/people/peopleRoutes.ts">peopleRoutes.ts</code></a
+                >:
+                <ul>
+                  <li>
+                    <code>GET /api/people/me</code>: this machine's person, their orgs and roles, and their files'
+                    problems
+                  </li>
+                  <li><code>POST /api/people/me</code>: their changes written, answered as <code>GET</code></li>
+                </ul>
+              </li>
+              <li>
+                The answers' types are spaces'
+                <a href="/spell-app/src/spaces/models/people.ts" target="src-spell-app-src-spaces-models-people-ts"
+                  ><code title="spell-app/src/spaces/models/people.ts">people.ts</code></a
+                >, safe in a browser.
+              </li>
+              <li>
+                The app's "Log In" is now "You", in the editor's and the chooser's headers.
+                <ul>
+                  <li>A panel of names, nickname, emails (one a line) and dates (one a row).</li>
+                  <li>The orgs and your role in each, read only.</li>
+                  <li>Save and Cancel.</li>
+                </ul>
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="people-starter" label="The starter file" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                The first <code>GET /api/people/me</code> writes your <code>__me.json5</code>, if there's none.
+                <ul>
+                  <li>Your names and email come from git's settings.</li>
+                  <li>A comment at its top says what the file is.</li>
+                </ul>
+              </li>
+              <li>No starter org file: the You panel lists no orgs until an org's file names you.</li>
+            </ul>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>@spell/owen@/__me.json5 · as first written · 9 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-json">// You, as spell knows you:  a person of spell's people library (@spell/library/people).
+// The app's You panel changes it;  so can you, here.  Comments stay where they are.
+{
+  "$type": "Person",
+  "id": "owen",
+  "names": "Owen Williams",
+  "emails": ["owen@example.com"]
+}</code></pre>
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section id="people-not-yet" label="What it doesn't do yet" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <b>Nobody is refused a save</b>, under <code>@spell</code> either.
+                <ul>
+                  <li>The spell-admin role is read and shown, and nothing checks it.</li>
+                  <li>
+                    A permissions UI for a space's members and roles is todo
+                    <a href="/epics/people-and-orgs/people-and-orgs.plan.html#t10" target="people-and-orgs">T10</a>.
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <b>The last save wins.</b> Two saves of one file at once: the later replaces the earlier, with no merge
+                and no warning.
+                <ul>
+                  <li>Files are small, one thing each, so two edits rarely touch the same file.</li>
+                  <li>The file lock means a file is never half-written.</li>
+                  <li>Shared editing comes with the crdt epic.</li>
+                </ul>
+              </li>
+              <li>One person per machine: <code>owen</code>, a constant.</li>
+              <li>Saving isn't a Spell phrase: it's code the store calls.</li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="spaces" label="5. Spaces" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="folder"></ui-icon>
+          <p>
+            Where projects and people live, and the servers that serve them: the spaces package,
+            <a href="/spell-app/spaces/" target="src-spell-app-spaces"><code>spell-app/spaces</code></a
+            >, namespace <code>SPACES</code>. Its rules:
+            <a href="/spell-app/src/spaces/AGENTS.md" target="src-spell-app-src-spaces-agents-md">spaces' AGENTS.md</a
+            >.
+          </p>
+
+          <ui-section id="spaces-package" label="The package" sticky collapsible dividing open="false">
+            <ui-cards class="spell-flow" stackable>
+              <ui-card>
+                <ui-content>
+                  <ui-header>@spell/</ui-header>
+                  <ui-description
+                    >The built-in projects, committed: the examples, the libraries, the guides.</ui-description
+                  >
+                </ui-content>
+              </ui-card>
+              <ui-card>
+                <ui-content>
+                  <ui-header>models/</ui-header>
+                  <ui-description>
+                    Safe in a browser, the barrel: the project groups, a group's list, a project's file edits, spaces'
+                    own names, the storage and people types.
+                  </ui-description>
+                </ui-content>
+              </ui-card>
+              <ui-card>
+                <ui-content>
+                  <ui-header>server/node/</ui-header>
+                  <ui-description>
+                    Node only, imported by path: where things are on disk, projects on disk, storage, people, and the
+                    editor's server.
+                  </ui-description>
+                </ui-content>
+              </ui-card>
+              <ui-card>
+                <ui-content>
+                  <ui-header>server/py/</ui-header>
+                  <ui-description>spell_quart, Python's web server, a uv project.</ui-description>
+                </ui-content>
+              </ui-card>
+            </ui-cards>
+            <ul>
+              <li>
+                It imports Spell (and Spell's node files), the page server's package, the core and util.
+                <ul>
+                  <li>NEVER the app, the language server or the CLI: they import it.</li>
+                  <li>Spell NEVER imports it.</li>
+                </ul>
+              </li>
+              <li>
+                The editor edits projects through its models:
+                <ul>
+                  <li>
+                    a group's projects, and their create, copy, rename and delete: <code>SPACES.SpellProjectRoot</code>
+                  </li>
+                  <li>a project's files: <code>new SPACES.ProjectFiles(project)</code></li>
+                  <li>Spell's <code>SpellProject</code> only reads, compiles and saves</li>
+                </ul>
+              </li>
+              <li><code>yarn review</code> here covers its TypeScript, then spell_quart's ruff and pytest.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="spaces-disk" label="spell-spaces on disk" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                spell-spaces is ONE folder for main and every worktree, beside the main checkout, outside any repo.
+                <ul>
+                  <li><code>SPELL_SPACES_DIR</code>, or the page server's <code>--spaces</code>, sets it.</li>
+                </ul>
+              </li>
+              <li>
+                Laid out by org, each person's space inside it, so <code>@</code> says what each folder is.
+                <ul>
+                  <li><code>owen@spell/errors</code> is <code>@spell/owen@/errors/</code>.</li>
+                </ul>
+              </li>
+            </ul>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>spell-spaces · the layout · 9 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-plaintext">spell-spaces/                 beside the main checkout
+  @spell/                     the spell org
+    __org.json5               the org, and its members
+    owen@/                    Owen's space:  owen@spell
+      __me.json5              Owen
+      errors/                 owen@spell/errors, a project
+  @three-degrees/             another org
+    __org.json5
+    matt@/__me.json5          Person#matt@three-degrees</code></pre>
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+
+          <ui-section id="spaces-folders" label="Where everything is" sticky collapsible dividing open="false">
+            <p>
+              Spaces'
+              <a
+                href="/spell-app/src/spaces/server/node/environment.ts"
+                target="src-spell-app-src-spaces-server-node-environment-ts"
+                ><code title="spell-app/src/spaces/server/node/environment.ts">environment.ts</code></a
+              >
+              says where each folder is. Tests point them at temporary folders.
+            </p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>name</th>
+                    <th>folder</th>
+                    <th>tests set it with</th>
+                  </tr>
+                  <tr>
+                    <td><code>spaceFolders.builtins</code></td>
+                    <td>
+                      <a href="/spell-app/spaces/" target="src-spell-app-spaces"><code>spell-app/spaces/</code></a>
+                    </td>
+                    <td><code>SPELL_BUILTINS_DIR</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>spaceFolders.tests</code></td>
+                    <td>
+                      <a href="/spell-parser/tests/spaces/" target="src-spell-parser-tests-spaces"
+                        ><code>spell-parser/tests/spaces/</code></a
+                      >
+                    </td>
+                    <td><code>SPELL_TESTS_DIR</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>spaceFolders.spaces</code></td>
+                    <td>spell-spaces</td>
+                    <td><code>SPELL_SPACES_DIR</code></td>
+                  </tr>
+                  <tr>
+                    <td><code>buildDir</code></td>
+                    <td>
+                      <a href="/spell-app/build/" target="src-spell-app-build"><code>build/</code></a> at the repo
+                      root
+                    </td>
+                    <td><code>SPELL_BUILD_DIR</code></td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ul>
+              <li>
+                A group's projects are its folder's sub-folders, less spaces' own <code>__</code> names (<a
+                  href="#files-names"
+                  >section 6</a
+                >).
+              </li>
+              <li>
+                Each change to a project's file goes through the page server's file operations, in-process: under the
+                file lock, written all at once.
+              </li>
+              <li>
+                The page server answers the same operations over HTTP, at <code>/api/files</code>, only inside its
+                writable folders.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="spaces-build" label="The build folder" sticky collapsible dividing open="false">
+            <p>
+              What Spell BUILDS for a project goes in
+              <a href="/spell-app/build/" target="src-spell-app-build"><code>build/</code></a> at the repo root: never
+              committed, each checkout its own. It mirrors the project's path.
+            </p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>source</th>
+                    <th>built into</th>
+                    <th>e.g.</th>
+                  </tr>
+                  <tr>
+                    <td><code>packages/X</code></td>
+                    <td><code>build/X</code></td>
+                    <td>
+                      <a
+                        href="/spell-app/build/spaces/@spell/examples/solitaire/"
+                        target="src-spell-app-build-spaces-spell-examples-solitaire"
+                        ><code>build/spaces/@spell/examples/solitaire/</code></a
+                      >
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><code>tests/X</code></td>
+                    <td><code>build/X</code></td>
+                    <td>
+                      <a
+                        href="/spell-parser/tests/spaces/@spell/test/fizzbuzz/"
+                        target="src-spell-parser-tests-spaces-spell-test-fizzbuzz"
+                        ><code>build/spaces/@spell/test/fizzbuzz/</code></a
+                      >
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>spell-spaces' <code>X</code></td>
+                    <td><code>build/spell-spaces/X</code></td>
+                    <td>
+                      <code>build/spell-spaces/@spell/owen@/errors/</code>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>anywhere else</td>
+                    <td>beside the source</td>
+                    <td>a <code>@local/&lt;folder&gt;</code> group</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ui-grid class="spell-pros-cons" columns="2" stackable>
+              <ui-column>
+                <ui-segment>
+                  <ui-label attach-to="top" color="grey"><ui-icon name="folder"></ui-icon> In build/</ui-label>
+                  <ul>
+                    <li>the program, <code>&lt;Project&gt;.spell.js</code></li>
+                    <li>the other targets' <code>.spell.tsx</code> and <code>.spell.py</code></li>
+                    <li>a Python program's page file, <code>.elements.spell.js</code></li>
+                    <li>the scope pack, <code>.scopes.js</code></li>
+                    <li>a library's JSON Schemas</li>
+                  </ul>
+                </ui-segment>
+              </ui-column>
+              <ui-column>
+                <ui-segment>
+                  <ui-label attach-to="top" color="grey"
+                    ><ui-icon name="code branch"></ui-icon> Committed, beside the source</ui-label
+                  >
+                  <ul>
+                    <li>declarations, <code>.declarations.json5</code>: what other projects compile against</li>
+                    <li>words, <code>.en.js</code>, and Python's <code>.py.en.json5</code></li>
+                    <li>a library, <code>.lib.ts</code></li>
+                    <li>a Python web app, <code>.app.py</code>: written once, then yours to edit</li>
+                  </ul>
+                </ui-segment>
+              </ui-column>
+            </ui-grid>
+            <ul>
+              <li>
+                A compiled file's name says it came from Spell: <code>.spell.</code> before its language's ending.
+              </li>
+              <li>
+                Every reader asks for a file by project and name, as for any file.
+                <ul>
+                  <li>
+                    ONE mapping decides where it is on disk: <code>buildFolderFor()</code>, in spaces' project
+                    utilities.
+                  </li>
+                </ul>
+              </li>
+              <li>
+                A project's file list leaves out what Spell builds, under its old names too:
+                <code>GENERATED_SUFFIXES</code>.
+              </li>
+              <li>
+                Renaming or deleting a project deletes its build folder, and the old name's generated files beside its
+                source. The next compile writes the new one's.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="spaces-built-when-needed" label="Built when needed" sticky collapsible dividing open="false">
+            <p>A fresh checkout or worktree needs nothing run by hand.</p>
+            <ul>
+              <li>
+                The page server, as it starts, compiles the built-in projects that are out of date, in the background:
+                <code>spell compile --stale --all @spell/examples @spell/library</code>.
+              </li>
+              <li>
+                A request for a built file that isn't there compiles its project first, then serves it.
+                <ul>
+                  <li>One compile per project at a time; a request waits at most a minute.</li>
+                  <li>It compiles only when a built file is MISSING, never when one is merely out of date.</li>
+                </ul>
+              </li>
+              <li>
+                Both are spaces'
+                <a
+                  href="/spell-app/src/spaces/server/node/routes/ProjectBuild.ts"
+                  target="src-spell-app-src-spaces-server-node-routes-projectbuild-ts"
+                  ><code title="spell-app/src/spaces/server/node/routes/ProjectBuild.ts">ProjectBuild</code></a
+                >, running the checkout's own <code>spell compile</code> as a child.
+              </li>
+              <li>
+                By hand: <code>spell compile --all &lt;group&gt;</code>; <code>--stale</code> for only what's out of
+                date.
+                <ul>
+                  <li>
+                    Out of date: a built file is missing, or the project's files, its project file, an import's
+                    declarations or Spell's compiler are newer than its oldest built file.
+                  </li>
+                </ul>
+              </li>
+              <li>A compile leaves nothing new to commit.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="spaces-servers" label="The servers" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <b>The editor's server</b>, spaces'
+                <a
+                  href="/spell-app/src/spaces/server/node/routes/"
+                  target="src-spell-app-src-spaces-server-node-routes"
+                  ><code title="spell-app/src/spaces/server/node/routes/">routes/</code></a
+                >:
+                <ul>
+                  <li>
+                    two route tables: the app's API, <code>/api/...</code>, and reading a file, <code>/spaces/...</code>
+                  </li>
+                  <li>a route module the page server loads by its path, from the root's package file</li>
+                  <li>it starts the editor, vite's dev server, once the page server listens</li>
+                  <li>the API alone, on port 3001, for the app's <code>yarn start:server</code></li>
+                </ul>
+              </li>
+              <li>
+                <b>Python's web server</b>, spell_quart: a Python Spell program served as a web app on Quart.
+                <ul>
+                  <li>Its link to py's <code>spell_core</code> is a path in its project file.</li>
+                  <li>
+                    A Python web app names its program's folder inside the checkout's
+                    <a href="/spell-app/build/" target="src-spell-app-build"><code>build/</code></a
+                    >, e.g.
+                    <a
+                      href="/spell-app/spaces/@spell/examples/solitaire/"
+                      target="src-spell-app-spaces-spell-examples-solitaire"
+                      ><code>spaces/@spell/examples/solitaire</code></a
+                    >.
+                  </li>
+                  <li>
+                    <code>spell_quart.built_folder()</code> finds that checkout's build folder, so the app needs no
+                    <code>../</code>.
+                  </li>
+                </ul>
+              </li>
+            </ul>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>A Python web app's program folder · 1 line</ui-title>
+              <ui-content>
+                <pre><code class="language-python">OUTPUTS = built_folder("spaces/@spell/examples/solitaire")</code></pre>
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="files" label="6. Files and names" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="code"></ui-icon>
+          <p>Spell's own files are JSON5, and spaces' special files and folders start with <code>__</code>.</p>
+
+          <ui-section id="files-json5" label="JSON5 everywhere" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                Spell's own <code>.json</code> files are <code>.json5</code> now, but for the few below:
+                <ul>
+                  <li>a project's file, <code>__project.json5</code> (21 committed ones)</li>
+                  <li>every declarations file, and its test snapshot</li>
+                  <li>
+                    the core's method list,
+                    <a
+                      href="/spell-parser/src/core/core.declarations.json5"
+                      target="src-spell-parser-src-core-core-declarations-json5"
+                      ><code>core.declarations.json5</code></a
+                    >
+                  </li>
+                  <li>Python's words, <code>&lt;Project&gt;.py.en.json5</code></li>
+                  <li>
+                    the core's three expected files, and Python's
+                    <a
+                      href="/spell-parser/src/py/core/not_ported_yet.json5"
+                      target="src-spell-parser-src-py-core-not-ported-yet-json5"
+                      ><code>not_ported_yet.json5</code></a
+                    >
+                  </li>
+                  <li>the record of moved packages, <code>package-moves.json5</code></li>
+                </ul>
+              </li>
+              <li>
+                Spell writes the JSON-compatible part of JSON5: keys and text in double quotes.
+                <ul>
+                  <li>So VS Code reads them as "JSON with comments", and checks them against a schema.</li>
+                  <li>The formatter keeps a <code>.json5</code> file's keys quoted.</li>
+                </ul>
+              </li>
+              <li>
+                A project's file keeps its comments when the editor saves it: it goes through the same JSON5 editor as a
+                person's file.
+              </li>
+              <li>
+                Python reads them with its own <code>json</code> module, and has no JSON5 editor: no Python code changes
+                a file a person edits.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="files-json" label="What stays .json" sticky collapsible dividing open="false">
+            <p>A file a tool finds by its name stays <code>.json</code>.</p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>files</th>
+                    <th>why</th>
+                  </tr>
+                  <tr>
+                    <td>
+                      <a href="/package.json" target="src-package-json"><code>package.json</code></a>
+                    </td>
+                    <td>yarn, npm and node look for that name</td>
+                  </tr>
+                  <tr>
+                    <td><code>tsconfig*.json</code></td>
+                    <td>TypeScript and every editor look for that name</td>
+                  </tr>
+                  <tr>
+                    <td>VS Code's and Claude Code's settings</td>
+                    <td>read by name</td>
+                  </tr>
+                  <tr>
+                    <td>the VS Code extension's language configuration and grammars</td>
+                    <td>read by name</td>
+                  </tr>
+                  <tr>
+                    <td>third-party data: the emoji data, the GFM spec, a code sample</td>
+                    <td>kept as published</td>
+                  </tr>
+                  <tr>
+                    <td><code>custom-elements.json</code>, <code>html-custom-data.json</code></td>
+                    <td>a standard manifest, and VS Code's</td>
+                  </tr>
+                  <tr>
+                    <td>Claude Design's palette and design system</td>
+                    <td>the brand's rule: never edited</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      spell's syntax table,
+                      <a
+                        href="/spell-parser/src/spell/spellSyntax.json"
+                        target="src-spell-parser-src-spell-spellsyntax-json"
+                        ><code>spellSyntax.json</code></a
+                      >
+                    </td>
+                    <td>the choices tool reads it as a rows file</td>
+                  </tr>
+                  <tr>
+                    <td class="meh warning">the component sets' site data: components, pages, search, icons</td>
+                    <td class="meh warning">for now: the move needs every set's pages checked by eye (todo T9)</td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+          </ui-section>
+
+          <ui-section id="files-old-names" label="Old names still read" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                A project's file is read by its old name, <code>project.json</code>, too, and written as
+                <code>__project.json5</code>.
+              </li>
+              <li>
+                A <code>.json5</code> file a compile hasn't written yet is read by its old <code>.json</code> name.
+                <ul>
+                  <li>e.g. an <code>Errors.declarations.json</code> left by a compile before the rename.</li>
+                  <li>The code: <code>fileOrOldName()</code>, in spaces' project utilities.</li>
+                </ul>
+              </li>
+              <li>The core reference page's script reads the core's method list by its new name first.</li>
+              <li>
+                A project file's list leaves out compiled files under their names before the rename too, like
+                <code>Solitaire.compiled.js</code>.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="files-names" label="Spaces' own __ names" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                A space's or a project's special files and folders start with <code>__</code>.
+                <ul>
+                  <li>They sort to the top, and need no quoting in a shell, as <code>$</code> would.</li>
+                </ul>
+              </li>
+              <li>
+                They're known by a LIST,
+                <a
+                  href="/spell-app/src/spaces/models/spaceNames.ts"
+                  target="src-spell-app-src-spaces-models-spacenames-ts"
+                  ><code title="spell-app/src/spaces/models/spaceNames.ts">SPACE_NAMES</code></a
+                >, never by how they start.
+                <ul>
+                  <li><code>isSpaceName()</code> asks the list.</li>
+                  <li>
+                    So Python's
+                    <a
+                      href="/spell-app/src/spaces/server/py/spell_quart/__init__.py"
+                      target="src-spell-app-src-spaces-server-py-spell-quart-init-py"
+                      ><code>__init__.py</code></a
+                    >
+                    and a tests' <code>__snapshots__/</code> are still a project's files.
+                  </li>
+                  <li>A rule of thumb: ours never END in <code>__</code>.</li>
+                </ul>
+              </li>
+              <li>
+                The keys INSIDE a file keep their <code>$</code>, as in <code>"$type"</code>.
+                <ul>
+                  <li>Only names on disk take the underscores.</li>
+                </ul>
+              </li>
+              <li>
+                So does one version of a type: <code>Person__v2</code>, since a shell reads <code>$v2</code> as an empty
+                variable.
+              </li>
+            </ul>
+            <ui-accordion class="spell-code" appearance="styled">
+              <ui-title>SPACE_NAMES · 13 lines</ui-title>
+              <ui-content>
+                <pre><code class="language-ts">export const SPACE_NAMES = [
+  "__me.json5",
+  "__org.json5",
+  "__project.json5",
+  "__members",
+  "__settings",
+  "__sessions",
+  "__docs",
+  "__data",
+  "__friend-lists",
+  "__parts",
+  "__pack"
+] as const</code></pre>
+              </ui-content>
+            </ui-accordion>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="layout" label="7. The repo's layout" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="layer group"></ui-icon>
+          <p>
+            Where things moved, so a reader knows where to look. The root
+            <a href="/AGENTS.md" target="agents-md">AGENTS.md</a> has the package table and the import diagram.
+          </p>
+
+          <ui-section id="layout-tests" label="Tests in tests/" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                Every package's tests live in <code>tests/&lt;package&gt;/</code>, at the same path as the code they
+                test.
+                <ul>
+                  <li>
+                    e.g. core's
+                    <a href="/spell-parser/src/core/saving.ts" target="src-spell-parser-src-core-saving-ts"
+                      ><code title="spell-parser/src/core/saving.ts">saving.ts</code></a
+                    >
+                    is tested by
+                    <a
+                      href="/spell-parser/tests/core/saving.test.ts"
+                      target="src-spell-parser-tests-core-saving-test-ts"
+                      ><code title="spell-parser/tests/core/saving.test.ts">saving.test.ts</code></a
+                    >, at the same path in core's tests folder.
+                  </li>
+                  <li>
+                    With their snapshots and test data: core's expected files, epics' fixtures, cli's contract outputs.
+                  </li>
+                  <li>
+                    Python's tests too: the core's in
+                    <a href="/spell-parser/tests/py/core/tests/" target="src-spell-parser-tests-py-core-tests"
+                      ><code>spell-parser/tests/py/core/tests/</code></a
+                    >, spell_quart's in spaces'.
+                  </li>
+                </ul>
+              </li>
+              <li>
+                A test reaches the code by its alias, <code>spell-parser/core/saving</code>, never a long relative path.
+              </li>
+              <li>
+                Each package's checks cover its tests there:
+                <ul>
+                  <li>its Vitest, by an absolute folder, so runs from the root work too</li>
+                  <li>its type check, through each tests folder's own project file</li>
+                  <li>lint and format; the root's <code>yarn review</code> runs them all</li>
+                </ul>
+              </li>
+              <li>
+                Two things stayed: the test helpers (<code>spell-parser/spell/test</code>,
+                <code>spell-ui/test</code> ...), in their packages.
+              </li>
+              <li>
+                The test projects are spaces' test data,
+                <a href="/spell-parser/tests/spaces/@spell/test/" target="src-spell-parser-tests-spaces-spell-test"
+                  ><code>spell-parser/tests/spaces/@spell/test/</code></a
+                >: frozen, never updated to follow an example.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="layout-epics" label="The docs tooling, in epics" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                The docs package is gone: its tools and the <code>_assets</code> every page loads are the epics
+                package's, in
+                <a href="/spell-epic/src/tools/" target="src-spell-epic-src-tools"
+                  ><code title="spell-epic/src/tools/">tools/</code></a
+                >.
+                <ul>
+                  <li>The docs tools and the epic tool import each other, and the copies between them went.</li>
+                  <li>
+                    Its rules are a section of
+                    <a href="/spell-epic/AGENTS.md" target="src-spell-epic-agents-md">epics' AGENTS.md</a>.
+                  </li>
+                </ul>
+              </li>
+              <li>
+                Every call is under <code>/api/</code>, one prefix per package that answers it:
+                <ul>
+                  <li>the page server's own: <code>/api/server</code>, and its page editor and file operations</li>
+                  <li>
+                    epics' <code>/api/epics/</code> (review, agents, running) and <code>/api/docs/</code> (details,
+                    choices, comments)
+                  </li>
+                  <li>spaces' <code>/api/projects/</code> and <code>/api/people/</code></li>
+                  <li>the old paths answer "not found": no redirects</li>
+                </ul>
+              </li>
+              <li>
+                An epic's state, the Epics page's cards and the running epics moved out of the page server into epics'
+                <code>list/</code>.
+              </li>
+              <li>
+                ONE list of bundles, in the root's package file: it says which exist, the assembler says how each is
+                built.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="layout-spell-solid" label="spell-solid" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                What makes a custom element on Solid is its own package, <code>spell/element</code>, namespace
+                <code>E</code>, out of Spell UI.
+                <ul>
+                  <li>
+                    The component and DOM element bases, the decorators of reactive members, shadow events, hot
+                    reloading, cells.
+                  </li>
+                  <li>About 4,500 lines, with the MIT notices of the two libraries four of its files began as.</li>
+                </ul>
+              </li>
+              <li>Every set's elements are written on it: Spell UI's, the epics', the app's, the brand's.</li>
+              <li>
+                It imports only util's helpers and Solid, never Spell UI.
+                <ul>
+                  <li>
+                    What it needs of a page's runtime (words, styles, focus, animations) Spell UI hands it as it loads.
+                  </li>
+                  <li>A tag defined before that waits for it.</li>
+                </ul>
+              </li>
+              <li>
+                ONE copy per page: Spell UI's core bundle carries all of it, and a component pack reads it from the
+                page, as it reads Solid.
+              </li>
+              <li>Spell UI's lint guard holds the app's elements to the same patterns.</li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="layout-sets" label="Component sets, one layout" sticky collapsible dividing open="false">
+            <p>A component set is a set of elements and their docs pages, beside the code they describe.</p>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>set</th>
+                    <th>its pages</th>
+                    <th>served at</th>
+                  </tr>
+                  <tr>
+                    <td>Spell UI</td>
+                    <td>
+                      ui's
+                      <a href="/components/ui/" target="src-components-ui"
+                        ><code title="packages/ui/notes/">docs/</code></a
+                      >
+                    </td>
+                    <td><code>/components/ui/</code></td>
+                  </tr>
+                  <tr>
+                    <td>Epic UI</td>
+                    <td>
+                      epics'
+                      <a href="/components/epics/" target="src-components-epics"
+                        ><code title="spell-epic/docs/">docs/</code></a
+                      >
+                    </td>
+                    <td><code>/components/epics/</code></td>
+                  </tr>
+                  <tr>
+                    <td>App UI</td>
+                    <td>
+                      the app's
+                      <a href="/components/app/" target="src-components-app"
+                        ><code title="spell-app/app/docs/">docs/</code></a
+                      >
+                    </td>
+                    <td><code>/components/app/</code></td>
+                  </tr>
+                  <tr>
+                    <td>Brand UI</td>
+                    <td>
+                      the brand's
+                      <a href="/components/brand/" target="src-components-brand"
+                        ><code title="spell-brand/docs/">docs/</code></a
+                      >
+                    </td>
+                    <td><code>/components/brand/</code></td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+            <ul>
+              <li>
+                Every set has the same folders:
+                <ul>
+                  <li>
+                    <code>&lt;package&gt;/components/</code>: the elements; a pack's build in its <code>__pack/</code>
+                  </li>
+                  <li>
+                    <code>&lt;package&gt;/docs/</code>: one flat folder of pages, an element's named by its tag,
+                    <code>epic-item.html</code>
+                  </li>
+                  <li>
+                    in it, <code>__parts/</code>, every page's frame, and <code>__data/</code>, the side column's data
+                  </li>
+                </ul>
+              </li>
+              <li>
+                Spell UI is laid out like the rest: its elements in
+                <a href="/spell-ui/src/components/" target="src-spell-ui-src-components"><code>components/</code></a
+                >, its design notes in <code>notes/</code>.
+              </li>
+              <li>
+                The brand is a component pack, prefix <code>brand-</code>, for all 11 families.
+                <ul>
+                  <li>e.g. <code>&lt;brand-logo&gt;</code>, which was <code>&lt;ui-brand-logo&gt;</code>.</li>
+                </ul>
+              </li>
+              <li>
+                The page server lays a build of Spell UI's site over each set's folder at <code>_assets/</code>.
+                <ul>
+                  <li>
+                    The old addresses answer "not found", with no redirects: Spell UI's was
+                    <code>/components/ui/</code>.
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <ui-section id="left" label="8. What's left" sticky collapsible dividing open="false">
+          <ui-icon slot="icon" name="list check"></ui-icon>
+          <p>Each id links to its item on the epic page.</p>
+
+          <ui-section id="left-merge" label="At the merge" sticky collapsible dividing open="false">
+            <p>
+              The shared pages are one copy for every checkout, and <code>main</code> still needs the old names until
+              this branch merges. So these run then:
+            </p>
+            <ul>
+              <li>
+                <a href="/epics/people-and-orgs/people-and-orgs.plan.html#t5" target="people-and-orgs">T5</a>: the
+                shared pages' links follow the moves.
+                <ul>
+                  <li>
+                    A script rewrites links into the docs package's old folder: about 1,416 links in 498 files, tried on
+                    a copy.
+                  </li>
+                  <li>Tests named at their old place, and compiled files by their old names, follow.</li>
+                  <li>Until then this branch's page server still answers the old <code>_assets</code> path.</li>
+                </ul>
+              </li>
+              <li>
+                <a href="/epics/people-and-orgs/people-and-orgs.plan.html#t6" target="people-and-orgs">T6</a>: drop
+                <code>ui</code> from the shared links, then delete the shared
+                <a href="/components/ui/" target="src-components-ui"><code>ui/</code></a> folder.
+              </li>
+              <li>
+                <a href="/epics/people-and-orgs/people-and-orgs.plan.html#t7" target="people-and-orgs">T7</a>: rename
+                the <code>ui-brand-*</code> tags in the shared brand pages, with the brand's
+                <code>yarn rename:shared</code>.
+              </li>
+              <li>
+                <a href="/epics/people-and-orgs/people-and-orgs.plan.html#t8" target="people-and-orgs">T8</a>: the
+                living shared docs' old addresses to the new form: the CLI guide, the Python target guide, the drawable
+                thing guide, the commands page's data and three of WWOD's spokes.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="left-todos" label="Open todos" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <a href="/epics/people-and-orgs/people-and-orgs.plan.html#t4" target="people-and-orgs">T4</a>: the
+                Python target and targets guides still write the old <code>@</code> keys, as in <code>@type</code>.
+              </li>
+              <li>
+                <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j40" target="people-and-orgs">J40</a>: the new
+                test fixture is named TodosFormBased, and Python skips it.
+              </li>
+              <li>
+                <a href="/epics/people-and-orgs/people-and-orgs.plan.html#t10" target="people-and-orgs">T10</a>: a
+                permissions UI for a space's members and roles.
+              </li>
+              <li>
+                <a href="/epics/people-and-orgs/people-and-orgs.plan.html#t11" target="people-and-orgs">T11</a>: move
+                the component sets' site data to <code>.json5</code>, checking each set's pages.
+              </li>
+              <li>
+                <a href="/epics/people-and-orgs/people-and-orgs.plan.html#t12" target="people-and-orgs">T12</a>: a
+                text pass over the files this branch only moved, 2,666 writing misses left.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="left-issues" label="Open issues" sticky collapsible dividing open="false">
+            <ul>
+              <li>
+                <a href="/epics/people-and-orgs/people-and-orgs.plan.html#i5" target="people-and-orgs">I5</a>: Python
+                reads a method's named arguments as attributes of a dict, so the form-based fixture skips Python.
+              </li>
+              <li>
+                <a href="/epics/people-and-orgs/people-and-orgs.plan.html#i6" target="people-and-orgs">I6</a>: two
+                projects compiled on demand at once may both compile a project they import.
+              </li>
+              <li>
+                <a href="/epics/people-and-orgs/people-and-orgs.plan.html#i7" target="people-and-orgs">I7</a>:
+                <code>spell compile --stale --target X</code> doesn't check X's output.
+              </li>
+              <li>
+                <a href="/epics/people-and-orgs/people-and-orgs.plan.html#i8" target="people-and-orgs">I8</a>: a
+                project with errors pays a compile on every scope-pack request.
+              </li>
+              <li>
+                <a href="/epics/people-and-orgs/people-and-orgs.plan.html#i9" target="people-and-orgs">I9</a>: the
+                merge command doesn't regenerate declarations or words, and words aren't marked generated.
+              </li>
+              <li>
+                <a href="/epics/people-and-orgs/people-and-orgs.plan.html#i11" target="people-and-orgs">I11</a>: the
+                editor's file and project create, copy, rename and delete had been failing; fixed, and open for Owen to
+                confirm.
+              </li>
+            </ul>
+          </ui-section>
+
+          <ui-section id="left-calls" label="Calls Owen hasn't reviewed" sticky collapsible dividing open="false">
+            <p>
+              Judgement calls made while building, each built as it says. Two are red: they narrow or go against what
+              Owen said.
+            </p>
+            <ui-message state="negative" heading="Red: needs Owen">
+              <ul>
+                <li>
+                  <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j98" target="people-and-orgs">J98</a>: an
+                  org's roles are kept in its own file, <code>__org.json5</code>, not in a
+                  <code>__members/</code> folder.
+                </li>
+                <li>
+                  <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j105" target="people-and-orgs">J105</a>:
+                  the component sets' site data stays <code>.json</code> for now.
+                </li>
+              </ul>
+            </ui-message>
+            <ui-table celled padding="compact" appearance="striped" unstackable>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>area</th>
+                    <th>calls</th>
+                  </tr>
+                  <tr>
+                    <td>addresses, spaces' names</td>
+                    <td>
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j50" target="people-and-orgs">J50</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j51" target="people-and-orgs">J51</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j52" target="people-and-orgs">J52</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j55" target="people-and-orgs">J55</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j56" target="people-and-orgs">J56</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j60" target="people-and-orgs">J60</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>checking, versions, saving</td>
+                    <td>
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j91" target="people-and-orgs">J91</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j92" target="people-and-orgs">J92</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j93" target="people-and-orgs">J93</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j94" target="people-and-orgs">J94</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j95" target="people-and-orgs">J95</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>people, storage, the You panel</td>
+                    <td>
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j96" target="people-and-orgs">J96</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j97" target="people-and-orgs">J97</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j99" target="people-and-orgs">J99</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j100" target="people-and-orgs">J100</a
+                      >,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j101" target="people-and-orgs">J101</a
+                      >,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j102" target="people-and-orgs">J102</a
+                      >,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j103" target="people-and-orgs">J103</a
+                      >,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j104" target="people-and-orgs"
+                        >J104</a
+                      >
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>JSON5 and old names</td>
+                    <td>
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j106" target="people-and-orgs">J106</a
+                      >,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j107" target="people-and-orgs">J107</a
+                      >,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j108" target="people-and-orgs">J108</a
+                      >,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j109" target="people-and-orgs">J109</a
+                      >,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j110" target="people-and-orgs"
+                        >J110</a
+                      >
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>building on demand</td>
+                    <td>
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j35" target="people-and-orgs">J35</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j36" target="people-and-orgs">J36</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j57" target="people-and-orgs">J57</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j58" target="people-and-orgs">J58</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j59" target="people-and-orgs">J59</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>the spaces package, the page server</td>
+                    <td>
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j49" target="people-and-orgs">J49</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j53" target="people-and-orgs">J53</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j54" target="people-and-orgs">J54</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j61" target="people-and-orgs">J61</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j63" target="people-and-orgs">J63</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j64" target="people-and-orgs">J64</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j65" target="people-and-orgs">J65</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j68" target="people-and-orgs">J68</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j70" target="people-and-orgs">J70</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>the docs tooling in epics</td>
+                    <td>
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j62" target="people-and-orgs">J62</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j66" target="people-and-orgs">J66</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j67" target="people-and-orgs">J67</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j69" target="people-and-orgs">J69</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j111" target="people-and-orgs"
+                        >J111</a
+                      >
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>spell-solid</td>
+                    <td>
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j71" target="people-and-orgs">J71</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j72" target="people-and-orgs">J72</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j73" target="people-and-orgs">J73</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j74" target="people-and-orgs">J74</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j75" target="people-and-orgs">J75</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>component sets</td>
+                    <td>
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j76" target="people-and-orgs">J76</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j77" target="people-and-orgs">J77</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j78" target="people-and-orgs">J78</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j79" target="people-and-orgs">J79</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j80" target="people-and-orgs">J80</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j81" target="people-and-orgs">J81</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j82" target="people-and-orgs">J82</a>,
+                      <a href="/epics/people-and-orgs/people-and-orgs.plan.html#j84" target="people-and-orgs">J84</a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </ui-table>
+          </ui-section>
+
+          <ui-section id="left-checks" label="Hand checks" sticky collapsible dividing open="false">
+            <p>Not tried by hand yet:</p>
+            <ul>
+              <li>
+                <a href="/epics/people-and-orgs/people-and-orgs.plan.html#m1" target="people-and-orgs">M1</a>: make a
+                mistake in your <code>__me.json5</code> in VS Code, and see it underlined.
+              </li>
+              <li>
+                <a href="/epics/people-and-orgs/people-and-orgs.plan.html#m2" target="people-and-orgs">M2</a>: edit
+                your nickname in the You panel; the file changes, its comments stay.
+              </li>
+              <li>
+                <a href="/epics/people-and-orgs/people-and-orgs.plan.html#m3" target="people-and-orgs">M3</a> and
+                <a href="/epics/people-and-orgs/people-and-orgs.plan.html#m8" target="people-and-orgs">M8</a>: open an
+                example and one of your projects by address in the editor.
+              </li>
+              <li>
+                <a href="/epics/people-and-orgs/people-and-orgs.plan.html#m4" target="people-and-orgs">M4</a> and
+                <a href="/epics/people-and-orgs/people-and-orgs.plan.html#m5" target="people-and-orgs">M5</a>: a
+                person can't declare an id in VS Code; the test project People runs.
+              </li>
+              <li>
+                <a href="/epics/people-and-orgs/people-and-orgs.plan.html#m6" target="people-and-orgs">M6</a> and
+                <a href="/epics/people-and-orgs/people-and-orgs.plan.html#m7" target="people-and-orgs">M7</a>: each
+                component set at its new address; a brand element page's Theming tab lists its tokens.
+              </li>
+              <li>
+                <a href="/epics/people-and-orgs/people-and-orgs.plan.html#m9" target="people-and-orgs">M9</a>: save a
+                project from the editor, then open its <code>__project.json5</code> in VS Code.
+              </li>
+            </ul>
+          </ui-section>
+        </ui-section>
+
+        <footer class="spell-doc-footer">
+          <ui-divider></ui-divider>
+          <p class="meta">
+            Last checked 2026-10-14 against branch <code>people-and-orgs</code>, at its Doc Review, before it merged
+            into <code>main</code>.
+          </p>
+        </footer>
+      </main>
+    </div>
+    <script src="/_epic/assets/highlight.min.js"></script>
+    <script src="/_epic/assets/spell-ui.js"></script>
+  </body>
+</html>
