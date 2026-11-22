@@ -1424,7 +1424,10 @@ word after the target, never with fields:
   done ["<summary>"]                                      the item's WORK finished:  that card green, the summary
                                                           under it;  an open issue or todo closes (as close does)
   fixed ["<what changed>"]                                an issue or judgement call fixed, for your review:  orange
-                                                          until Approve closes it;  a Do this's done means this too
+                                                          (light orange from your words) until Approve closes it;
+                                                          an issue Claude found that you hadn't got to:  grey by
+                                                          itself, "FIXED - <title>";  a Do this's done means this
+                                                          too, and done on an issue Claude found
   noted "<what>"                                          a STEP done, the item not finished:  your choice
                                                           recorded, an answer or details written:  a Noted card
   A card's text:  a short lead sentence, then short paragraphs or bullets, one idea each:

@@ -12,6 +12,9 @@ import type { EpicVocabulary } from "spell/epic/definitions"
 import { ACTIONS_CHILD, ACTIONS_SLOT_SPEC } from "spell/epic/components/epic-item/Fold.types"
 import { REVIEW_NAME_TEXTS, REVIEW_PARTS } from "spell/epic/components/epic-review/EpicReview.types"
 
+/** What an item's line may START with, by what it says (`TitlePrefix`, epic `epic-engine` T143). */
+export const TITLE_PREFIX_WORDS = { fixed: "FIXED -" } as const
+
 /****************
  * ### `<epic-item>`
  * One item of an epic page:  a question, judgement call, todo, issue or manual test.
@@ -182,7 +185,7 @@ export const epicItemVocabulary = {
       kind: "boolean",
       description:
         "An issue or todo filed from the person's own words (`epic add ... --requested`, `epic file`, epic " +
-        "`epic-engine` P63;  a todo since T88):  closed by Claude, it's `requested` (light orange) until they review it, never the grey of a thing " +
+        "`epic-engine` P63;  a todo since T88):  fixed (T143) or closed by Claude, it's `requested` (light orange) until they review it, never the grey of a thing " +
         "Claude tripped over."
     },
     {
@@ -206,7 +209,16 @@ export const epicItemVocabulary = {
       kind: "boolean",
       description:
         "A judgement call or issue Claude has fixed (`epic update ... fixed`, epic `epic-engine` I232):  `replied` " +
-        "(orange), your turn to review it;  Accept the fix closes it, Revisit (with a note) sends it back."
+        "(orange), or `requested` (light orange) from your own words (T143):  your turn to review it;  Accept the fix " +
+        "closes it, Revisit (with a note) sends it back."
+    },
+    {
+      name: "self-fixed",
+      kind: "boolean",
+      description:
+        "An issue Claude found and fixed before you got to it (epic `epic-engine` T143):  closed, `handled` (grey) at " +
+        "once, its line starting `FIXED - `, nothing for you to press.  Revisit (with a note) or a comment still " +
+        "reaches Claude;  your turn on a comment draws it orange.  Never with `requested`."
     },
     {
       name: "failed",
@@ -319,6 +331,7 @@ export const epicItemVocabulary = {
         "judgement call's or issue's chip is a button instead:  urgent (red) <-> not urgent (yellow)."
     },
     { name: "title", description: "The title." },
+    { name: "title-prefix", description: "The word before the title:  `FIXED -`, on a fix (epic `epic-engine` T143)." },
     {
       name: "review",
       description:
@@ -396,6 +409,12 @@ export const epicItemVocabulary = {
       description: "Id chip tooltip, `state=replied`."
     },
     { key: "stateFixed", text: "Fixed:  your review", description: "Id chip tooltip, `fixed`." },
+    {
+      key: "stateSelfFixed",
+      text: "Claude found this and fixed it.\nNothing for you to do.",
+      description: "Id chip tooltip, `self-fixed` (epic `epic-engine` T143)."
+    },
+    { key: "fixed", text: TITLE_PREFIX_WORDS.fixed, description: "A fix's line starts with it (T143)." },
     {
       key: "stateCommentReplied",
       text: "Your comment answered:  ✓ closes it",

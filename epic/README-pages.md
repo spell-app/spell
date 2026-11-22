@@ -259,7 +259,7 @@ The command behind each step, and why a finished `wait` is what wakes a session:
   A picture you pasted with it shows under its words, a thumbnail that opens full size;
   while you review, its trash deletes it, with Undo for 6 seconds, then its file too.
 - An item left Underway more than 3 hours with nobody on it gets tidied at a turn's end:
-  - its work found on `main`:  turned fixed for your review, the commit named
+  - its work found on `main`:  turned fixed, the commit named (grey if the agent found it, else for your review)
   - else one `Stale:` card, back on your list
 
 ![One judgement call, J9, unfolded:  a yellow J9 chip and its title;  at the right one group of three review buttons;
@@ -276,7 +276,7 @@ Every mark, and what applying it does:
 | Approve | the check, green | an open question:  answered with its recommended option (none recommended:  left to talk over);  an open judgement call:  closed, accepted;  an open test:  closed, passed;  anything else:  marked reviewed.  Its name says what it means on each:  "Accept the fix" on an issue or call fixed for your review, which closes it;  "Saw it" on a finished one |
 | a pick | Choose, on an option card | a question:  answered with that option;  any other item:  approved with that option |
 | Make Todo | the list, green | a new todo, "Follow up:  ...", linking back;  on an item, the summary or an Overview sub-section |
-| Do this | the paper plane, green, first on an open issue, an open judgement call or a phase still to do | an issue or call:  fixed in the item itself, no todo;  blue outlined until handled, orange once fixed, and your Accept the fix closes it;  a phase:  "yes, build this" |
+| Do this | the paper plane, green, first on an open issue, an open judgement call or a phase still to do | an issue or call:  fixed in the item itself, no todo;  blue outlined until handled, orange once fixed (light orange from your own words), and your Accept the fix closes it;  a phase:  "yes, build this" |
 | Revisit | the history arrow, blue, then a note | asked now:  answered INTO the item as a reply;  a plain note left for later:  a comment thread on the item;  with a pick or a picture:  talked over first, and recorded once you agree;  on a fix you're not happy with, it sends the fix back, reopened |
 | a todo's plane | "Start it now", green | started now:  an agent takes it next, never into an unrelated phase;  a note asking for a phase leaves it for a new one.  A todo already in a phase has no plane:  its `in P52` pill goes to the phase, and Option-click (Alt-click) starts it |
 | an x | "Drop it" on a todo, "Close it:  not needed" on an open issue, grey | canceled:  "dropped in review", or closed unfixed |
@@ -503,10 +503,11 @@ The FIRST row that applies wins, top to bottom.
 | --- | --- | --- |
 | `progress` | blue | the agent is working on it:  an Underway card, or the spinner |
 | `old` | grey | canceled:  made moot, struck through |
-| `handled` | grey | its answer is a phase's text now;  or an issue the agent found and fixed itself, calm, never one you asked for |
+| `handled` | grey | its answer is a phase's text now;  or an issue the agent found and fixed before you got to it, its line starting `FIXED -`, nothing for you to press |
 | `requested` | light orange | an issue or todo filed from your own words, closed done, not reviewed yet |
 | `recent` | green | decided or done |
-| `replied` | orange | an issue or call the agent has fixed:  your turn to review it, and Approve closes it |
+| `requested` | light orange | an issue from your own words the agent has fixed:  your turn to review it, and Approve closes it |
+| `replied` | orange | a call, or an issue you got to first, that the agent has fixed:  your turn to review it, and Approve closes it |
 | `scheduled` | blue, dotted | work a review queued, agreed, not started |
 | `replied` | orange | open, and the agent's last reply holds options nothing is picked in yet:  your turn |
 | `attention` | red | an open question |

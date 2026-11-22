@@ -16,6 +16,7 @@ import { TakenInPhase } from "./TakenInPhase"
 import { ToReviewMarks } from "./ToReviewMarks"
 import { TookAsMinutes } from "./TookAsMinutes"
 import { ReopenedFixes } from "./ReopenedFixes"
+import { SelfFixedIssues } from "./SelfFixedIssues"
 import { UpdateLabels } from "./UpdateLabels"
 import { UpdatesSaidByMarks } from "./UpdatesSaidByMarks"
 import { WholePhaseNumbers } from "./WholePhaseNumbers"
@@ -64,7 +65,8 @@ export class Migrations {
     new ClarifiedBodies(),
     new ReopenedFixes(),
     new HandedOnFixes(),
-    new PictureLabels()
+    new PictureLabels(),
+    new SelfFixedIssues()
   ]
 
   /** The steps every edit runs too (`PlanDoc.migrate()`):  the cheap markup ones. */

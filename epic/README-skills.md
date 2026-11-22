@@ -168,7 +168,8 @@ an issue, your words as its body, blue, its spinner on, and an Underway card nam
   The session is woken at once ([the restart hook](#hooks)), resumes each agent from its saved transcript, and says so.
   Agents paused for a fresh start are left saved.
 - At the end of a turn, at most hourly per epic, items left Underway more than 3 hours with nobody on them are tidied:
-  - work found on `main` turns the item fixed for your review, the commit as its evidence
+  - work found on `main` turns the item fixed, the commit as its evidence:  grey if the agent found the issue and you
+    hadn't got to it, else for your review
   - otherwise it gets one `Stale:` card, and is back on your list
   - nothing is closed this way
 

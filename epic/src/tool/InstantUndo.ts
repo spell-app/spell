@@ -105,7 +105,7 @@ export class InstantUndo {
 const KEPT = 20
 
 /** The attributes that say an item still stands as an instant mark left it:  any other change refuses an undo. */
-const WATCHED = ["status", "fixed", "urgent", "review-as"] as const
+const WATCHED = ["status", "fixed", "self-fixed", "urgent", "review-as"] as const
 
 /** `element`'s attributes, name -> value. */
 function attributesOf(element: Element): Record<string, string> {

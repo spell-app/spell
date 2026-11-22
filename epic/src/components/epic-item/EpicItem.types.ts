@@ -287,6 +287,8 @@ export const FOLD = "fold"
 export const TOGGLE = "toggle"
 export const CHIP = "chip"
 export const TITLE = "title"
+/** The word before the title (`TitlePrefix`:  `FIXED -`, epic `epic-engine` T143). */
+export const TITLE_PREFIX = "title-prefix"
 export const EXTRAS = "extras"
 /** The end of the line's first row:  the page's buttons, the item's marks and review buttons. */
 export const MARKS = "marks"

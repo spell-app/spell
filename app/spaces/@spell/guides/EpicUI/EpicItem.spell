@@ -370,7 +370,15 @@
 					<text code>fixed</>
 				</>
 				<cell>present or absent</>
-				<cell>A judgement call or issue Claude has fixed (<text code>epic update ... fixed</>): orange (<text code>replied</>), your turn to review it. Accept the fix closes it; Revisit, with a note, sends it back.</>
+				<cell>A judgement call or issue Claude has fixed (<text code>epic update ... fixed</>): orange (<text code>replied</>), or light orange (<text code>requested</>) from your own words, your turn to review it. Accept the fix closes it; Revisit, with a note, sends it back.</>
+				<cell/>
+			</>
+			<row>
+				<cell>
+					<text code>self-fixed</>
+				</>
+				<cell>present or absent</>
+				<cell>An issue Claude found and fixed before you got to it: closed, grey (<text code>handled</>) at once, its line starting <text code>FIXED -</>, with nothing for you to press. A Revisit or a comment still reaches Claude; your turn on a comment draws it orange.</>
 				<cell/>
 			</>
 			<row>
@@ -477,6 +485,12 @@
 						<text code>title</>
 					</>
 					<cell>The title.</>
+				</>
+				<row>
+					<cell>
+						<text code>title-prefix</>
+					</>
+					<cell>The word the line starts with, worked out from the item's state: <text code>FIXED -</> on a fix, waiting for you or not. The <text code>FIXED</> label at the line's end then shows no word, only its Not in main pill.</>
 				</>
 				<row>
 					<cell>

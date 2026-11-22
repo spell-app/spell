@@ -172,6 +172,43 @@ describe("<epic-item>", () => {
     expect(chip.dataset.tooltip).toMatch(/^Fixed:  your review/)
   })
 
+  test("`self-fixed` (T143):  grey, `FIXED -` before its title, the stored title as it was;  finished buttons", async () => {
+    const { host, chip, title } = await item(
+      `<epic-item id="i7" title="It jumps" status="done" state="handled" self-fixed></epic-item>`
+    )
+    expect(host.shadowRoot!.querySelector("[part~='base']")!.className).toBe("handled item")
+    expect(title.querySelector("[part~='title-prefix']")!.textContent).toBe("FIXED -")
+    expect(title.textContent).toBe("FIXED - It jumps")
+    expect(host.getAttribute("title")).toBe("It jumps")
+    expect(chip.dataset.tooltip).toMatch(/^Claude found this and fixed it\./)
+    expect(buttonsForItem("i7", { status: "done" })).toBe("issue-done")
+  })
+
+  test("a fix from his words (T143):  light orange, waiting for his look, `FIXED -` first too", async () => {
+    const { host, chip, title } = await item(
+      `<epic-item id="i7" title="It jumps" status="open" state="requested" requested fixed></epic-item>`
+    )
+    expect(host.shadowRoot!.querySelector("[part~='base']")!.className).toBe("requested item")
+    expect(title.querySelector("[part~='title-prefix']")!.textContent).toBe("FIXED -")
+    expect(chip.dataset.tooltip).toMatch(/^Fixed:  your review/)
+  })
+
+  test("FIXED is said first, once (T143):  no word at the line's end, `Not in main` still there", async () => {
+    const { host, title } = await item(
+      `<epic-item id="i7" status="open" state="replied" fixed><span slot="title">It jumps <epic-update became="fixed" unmerged="branch"></epic-update></span></epic-item>`
+    )
+    const update = host.querySelector("epic-update")!.shadowRoot!
+    const shows = (part: string) => getComputedStyle(update.querySelector(`[part~='${part}']`)!).display !== "none"
+    expect(title.querySelector("[part~='title-prefix']")!.textContent).toBe("FIXED -")
+    expect([shows("label"), shows("unmerged")]).toEqual([false, true])
+    // sent back and reopened:  no prefix, and the label says its word again
+    host.removeAttribute("fixed")
+    host.querySelector("epic-update")!.setAttribute("became", "reopened")
+    await ElementFixture.settle()
+    expect(title.querySelector("[part~='title-prefix']")).toBeNull()
+    expect(shows("label")).toBe(true)
+  })
+
   test("the review label:  `to do` (queued), else `deferred`, else `reviewed 10/6/26`;  none when unmarked;  no tooltip (I370)", async () => {
     const labels = []
     for (const marks of [`queued="2026-10-06" work="Skip it"`, `deferred="2026-10-05"`, `reviewed="2026-10-06"`, ""]) {
@@ -798,6 +835,7 @@ function lookOf(host: Element): string {
     pill: [root.querySelector("[part~='done-in']:not([data-reserved])"), root.querySelector("[part~='git']")]
       .map((pill) => pill?.textContent ?? "")
       .join(""),
+    prefix: root.querySelector("[part~='title-prefix']")?.textContent ?? "",
     label: !!label?.shadowRoot?.querySelector("[part~='label']")
   })
 }

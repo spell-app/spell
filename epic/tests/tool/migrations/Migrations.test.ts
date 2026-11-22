@@ -42,7 +42,8 @@ describe("Migrations", () => {
       "clarified-bodies",
       "reopened-fixes",
       "handed-on-fixes",
-      "picture-labels"
+      "picture-labels",
+      "self-fixed-issues"
     ])
     expect(Migrations.named("links-agree")?.kind).toBe("epic")
     expect(Migrations.named("nope")).toBeUndefined()

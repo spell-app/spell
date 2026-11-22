@@ -21,9 +21,17 @@ import { parseSetLetter, reopensCanceled, setPicksOf } from "spell/epic/review/r
 // the words' pictures alone:  the review barrel is the browser client's
 import { Pictures } from "spell/epic/review/Pictures"
 import { EXCERPT_LENGTH } from "spell/epic/tools/BlockAnchors.js"
+import { TitlePrefix } from "spell/epic/components/epic-item/TitlePrefix"
 
 import { FIX_LABEL, FollowUpSummary } from "./FollowUpSummary"
-import { NightSummary, OLD_TODO, type AwayPart, type NeedPart, type SummaryOptions } from "./NightSummary"
+import {
+  NightSummary,
+  OLD_TODO,
+  type AwayPart,
+  type NeedLine,
+  type NeedPart,
+  type SummaryOptions
+} from "./NightSummary"
 
 import {
   CALM_ID,
@@ -94,6 +102,7 @@ import { PlanItem } from "./PlanItem"
 import { PlanMarkup } from "./PlanMarkup"
 import { PlanReader } from "./PlanReader"
 import { PlanTime } from "./PlanTime"
+import { SelfFix } from "./SelfFix"
 import { UpdateMarks } from "./UpdateMarks"
 import { UpdateSummary } from "./UpdateSummary"
 import { HandedOnFixes, Migrations } from "./migrations"
@@ -979,6 +988,7 @@ export class PlanDoc extends PlanReader {
       requested: Boolean(data.requested),
       limit: Boolean(data.limit),
       fixed: Boolean(data.fixed),
+      selfFixed: Boolean(data.selfFixed),
       awaitsPick: PlanItem.awaitsPick(item),
       reviewAs: data.reviewAs,
       handled: data.handled,
@@ -1219,6 +1229,9 @@ export class PlanDoc extends PlanReader {
     // closed, it's neither wanted nor waiting for review any more (I232)
     if (status !== "open")
       Markup.set<"epic-item">(item, { fixed: undefined, ...(CALM_ID.test(item.id) && { urgent: undefined }) })
+    // a self fix canceled is only canceled;  one reopened is wanted, so its next fix waits for his look (T143)
+    if (status !== "done" && item.hasAttribute("self-fixed"))
+      Markup.set<"epic-item">(item, { selfFixed: undefined, ...(status === "open" && { urgent: true }) })
     // closed, nobody is on it any more:  every card still underway finishes (epic `epic-engine` I355)
     if (status !== "open") this.finishUnderway(item, status === "done" ? "done" : "noted")
     if (status !== "done") Markup.set<"epic-item">(item, { takenIn: undefined })
@@ -1294,7 +1307,8 @@ export class PlanDoc extends PlanReader {
     if (!REQUESTED_ID.test(item.id) || item.hasAttribute("limit"))
       throw new PlanDocError(`${item.id.toUpperCase()} isn't an issue or a todo:  only those are marked requested`)
     if (item.hasAttribute("requested")) return undefined
-    Markup.set<"epic-item">(item, { requested: true })
+    // his words after all:  a fix of it waits for his look, light orange (T143)
+    Markup.set<"epic-item">(item, { requested: true, selfFixed: undefined })
     return "requested"
   }
 
@@ -1680,6 +1694,7 @@ export class PlanDoc extends PlanReader {
    * issue as above.  When you've done the fix, make it orange so I know to go and review"):  a mark of its own, no todo.
    * - it stays where it is, wanted (`urgent`):  BLUE outlined (`handed`) until handled, reviewed or not (`PlanReader.itemState()`)
    * - closed:  reopened;  `calm` and an earlier `fixed` go, so pressing it again on a fix he doesn't like turns it red
+   * - a self fix he had marked before it was fixed:  back for his check, orange (epic `epic-engine` T143)
    * - his note and picture kept on it, his words;  a Noted card says go ahead
    * - `did`:  what the agent does next (`doThisSteps()`)
    * - EXCEPT one fixed AFTER he marked it (`fixedSince()`;  epic `epic-engine` I292):  he pressed Do this while it was
@@ -1690,6 +1705,11 @@ export class PlanDoc extends PlanReader {
   private doThis(item: Element, { note, at, shot }: Pick<PlanMark, "note" | "at" | "shot">): MarkResult {
     if (this.fixedSince(item, at)) {
       if (note || shot) this.keepNote(item.id, { note: note ?? "", action: "do this", at, shot })
+      // he got to it first, so the fix is his to check (T143)
+      if (item.hasAttribute("self-fixed")) {
+        this.setItem(item.id, "open")
+        this.markFixed(item, PlanItem.titleOf(item))
+      }
       return { applied: true, did: `already fixed since you marked it:  nothing to do, still waiting for your review` }
     }
     if (item.getAttribute("status") !== "open") this.setItem(item.id, "open")
@@ -2255,13 +2275,22 @@ export class PlanDoc extends PlanReader {
    * - a Done card never reopens:  it's the fix itself (`fixedForReview()` with no underway card)
    * - a CLOSED item keeps its status under a new card (I148's rule):  sending a done todo or an accepted call back is
    *   Do this, which opens it (`doThis()`)
+   *   - EXCEPT a self fix he sent back since (epic `epic-engine` T143;  "He can still reopen"):  reopened the same way
    * - the migration `reopened-fixes` reopens the fixes taken up before
    */
   private reopenTakenUp(item: Element, state: string): boolean {
-    if (state === "done" || item.getAttribute("status") !== "open") return false
-    if (!item.hasAttribute("fixed") || !CALM_ID.test(item.id)) return false
+    if (state === "done") return false
+    if (this.isSentBackSelfFix(item)) this.setItem(item.id, "open")
+    else if (item.getAttribute("status") !== "open" || !item.hasAttribute("fixed") || !CALM_ID.test(item.id))
+      return false
     this.reopenFix(item)
     return true
+  }
+
+  /** Is `item` a self fix the person came back on, with more than his ✓ or x (`SelfFix.isGotTo()`;  T143)? */
+  private isSentBackSelfFix(item: Element): boolean {
+    if (!item.hasAttribute("self-fixed") || SETTLING_MARKS.has(item.getAttribute("review-as") ?? "")) return false
+    return SelfFix.isGotTo(item, this.readActedOn?.())
   }
 
   /**
@@ -2318,21 +2347,23 @@ export class PlanDoc extends PlanReader {
    *   - an Overview sub-section, a phase, the summary;  an item closed already
    * - an issue or a call Owen asked for with Do this (`urgent`, I232):  it NEVER closes on Claude's word:
    *   fixed, for his review (`fixedForReview()`), so an agent's `done` out of habit still turns it orange
+   * - an issue Claude found (epic `epic-engine` T143;  `SelfFix`):  what `fixed` does
+   *   - fixed before he got to it:  closed, grey, `FIXED - ` (`selfFixed` answered)
+   *   - he got to it first:  orange, for his check
+   * - an issue from his words closes, light orange until he's seen it
    * - Before I148 it wrote only the card:  a fixed issue stayed red (repo-split's I65).
    *   The migration `done-cards-close` closes the ones left so.
    * - throws as `finishStatus()` does:  no underway card
    */
-  finishWork(id: string, summary?: string): { title: string; closed: boolean; fixed?: boolean } {
+  finishWork(id: string, summary?: string): { title: string; closed: boolean; fixed?: boolean; selfFixed?: boolean } {
     const title = this.finishStatus(id, summary)
     const host = this.statusHost(id)
-    if (
-      host.localName === "epic-item" &&
-      CALM_ID.test(host.id) &&
-      host.hasAttribute("urgent") &&
-      host.getAttribute("status") === "open"
-    ) {
-      this.markFixed(host, title)
-      return { title, closed: false, fixed: true }
+    if (host.localName === "epic-item" && CALM_ID.test(host.id) && host.getAttribute("status") === "open") {
+      const isClaudesFind = ISSUE_ID.test(host.id) && !host.hasAttribute("requested")
+      if (isClaudesFind || host.hasAttribute("urgent")) {
+        const selfFixed = this.markFixed(host, title)
+        return selfFixed ? { title, closed: true, selfFixed } : { title, closed: false, fixed: true }
+      }
     }
     if (host.localName !== "epic-item" || host.getAttribute("status") !== "open" || !PhaseTakes.isWork(host))
       return { title, closed: false }
@@ -2343,15 +2374,19 @@ export class PlanDoc extends PlanReader {
   }
 
   /**
-   * Claude has fixed issue or judgement call `id`:  ORANGE, Owen's turn to review it
+   * Claude has fixed issue or judgement call `id`:  Owen's turn to review it, or grey when there's nothing for him
    * (`epic update <name>#<id> fixed ["<what changed>"]`;  epic `epic-engine` I232).  Returns its title.
-   * - stays open;  Owen's Accept the fix closes it (`acceptFix()`), his Revisit with a note sends it back, red
+   * - an issue Claude found, fixed before he got to it:  closed, grey, `FIXED - ` (epic `epic-engine` T143;  `SelfFix`)
+   * - the rest stay open, ORANGE, light orange from his own words (`requested`):
+   *   Owen's Accept the fix closes it (`acceptFix()`), his Revisit with a note sends it back, red
+   * - fixed again when grey already:  only `summary` added
    * - its latest underway card turns Done with `summary` under it;  no underway card:  `summary` is a Done card
-   * - throws on anything but an open issue or call:  a todo's `done` closes it, a question is decided
+   * - throws on anything but an open issue or call, or a self fix:  a todo's `done` closes it, a question is decided
    */
   fixedForReview(id: string, summary?: string): string {
     const item = this.item(id)
-    if (!CALM_ID.test(item.id) || item.getAttribute("status") !== "open")
+    const alreadyGrey = item.hasAttribute("self-fixed")
+    if (!alreadyGrey && (!CALM_ID.test(item.id) || item.getAttribute("status") !== "open"))
       throw new PlanDocError(
         `${item.id.toUpperCase()}:  only an open issue or judgement call waits for review of a fix`
       )
@@ -2360,17 +2395,30 @@ export class PlanDoc extends PlanReader {
       : summary
         ? this.addStatus(item.id, summary, { state: "done" })
         : PlanItem.titleOf(item)
-    this.markFixed(item, title)
+    if (!alreadyGrey) this.markFixed(item, title)
     return title
   }
 
-  /** `item` waits for Owen's review of its fix:  not "reviewed" any more, so it's on his list again;  logged. */
-  private markFixed(item: Element, title: string): void {
+  /**
+   * `item` is fixed;  logged.  Returns whether it went grey by itself.
+   * - Claude found it and Owen hadn't got to it (`SelfFix`, T143):  closed, grey, nothing for him
+   * - else it waits for his review:  not "reviewed" any more, so it's on his list again
+   */
+  private markFixed(item: Element, title: string): boolean {
+    const label = item.id.toUpperCase()
+    if (SelfFix.isTheirsToSkip(item, this.readActedOn?.())) {
+      this.setItem(item.id, "done")
+      SelfFix.mark(item)
+      this.log(`${label} fixed, grey (found by Claude):  ${title}`)
+      this.fixHandedOn()
+      return true
+    }
     Markup.set<"epic-item">(item, { fixed: true, reviewed: undefined })
     this.stamp(item)
     this.markUpdate(item, "fixed")
-    this.log(`${item.id.toUpperCase()} fixed, for review:  ${title}`)
+    this.log(`${label} fixed, for review:  ${title}`)
     this.fixHandedOn()
+    return false
   }
 
   /**
@@ -3142,6 +3190,11 @@ export class PlanDoc extends PlanReader {
       if (label) element.append(" ", label.cloneNode(true))
       return element
     }
+    // a fix's line starts `FIXED -`, as its item's does (T143)
+    const titled = ({ id, title }: NeedLine) => {
+      const item = this.findItem(id)
+      return TitlePrefix.titled(title, item ? TitlePrefix.ofItem(item) : undefined)
+    }
     const heading = (key: AwayPart, state: AwayState, text: string) => {
       const element = line(key, state, html("b", text))
       element.setAttribute("heading", "")
@@ -3154,7 +3207,7 @@ export class PlanDoc extends PlanReader {
       if (!needs.length) return
       body.push(heading(part.key, part.state, part.title))
       for (const [index, need] of needs.entries())
-        body.push(line(need.id, part.state, `${index + 1}. `, link(need.id, need.label), ` ${need.title}`))
+        body.push(line(need.id, part.state, `${index + 1}. `, link(need.id, need.label), ` ${titled(need)}`))
     }
     needPart(NEED_PARTS[0])
     // done and dropped (I228) alike:  each line says which
@@ -3985,6 +4038,9 @@ function filedDid({ id, hasFix }: FiledFollowUp): string {
   const made = `to todo ${id.toUpperCase()}`
   return hasFix ? made : `${made}:  no fix proposed yet, write one in its "${FIX_LABEL}" field`
 }
+
+/** The review marks that settle an item (his ✓, his x), as against sending it back (`isSentBackSelfFix()`). */
+const SETTLING_MARKS: ReadonlySet<string> = new Set(["approve", "drop", "skip"])
 
 /** A Done status card, among an item's children. */
 const DONE_CARD = ':scope > epic-status[state="done"]'

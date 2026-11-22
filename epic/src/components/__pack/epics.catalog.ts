@@ -1,5 +1,5 @@
 /* GENERATED -- do not edit:  `spell pack build epics`, from every vocabulary, `<Name>.en.ts` */
-// sources:  1dbc33432611fcf7
+// sources:  3dcefb744b9fa4d4
 
 import type { RootCatalogEntry } from "spell/ui"
 
@@ -26,7 +26,7 @@ export const CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
   "epic-field": {"folder":"epic-phase","attributes":["name","accepted","label","open"]},
   "epic-focus": {"folder":"epic-focus","attributes":["for"]},
   "epic-hidden-note": {"folder":"epic-state-filter","skeleton":{"display":"inline","width":"8em","height":"1em"},"attributes":["count"]},
-  "epic-item": {"folder":"epic-item","attributes":["id","title","status","state","handled","taken-in","changed","phase","answered","reviewed","review-as","deferred","queued","work","working","limit","bedtime","overnight","calm","requested","urgent","unmerged","fixed","failed","prepared","source","part-ids","commits","to-accept","to-see","open"]},
+  "epic-item": {"folder":"epic-item","attributes":["id","title","status","state","handled","taken-in","changed","phase","answered","reviewed","review-as","deferred","queued","work","working","limit","bedtime","overnight","calm","requested","urgent","unmerged","fixed","self-fixed","failed","prepared","source","part-ids","commits","to-accept","to-see","open"]},
   "epic-kickoff": {"folder":"epic-kickoff","skeleton":{"height":"4em"},"attributes":[]},
   "epic-link": {"folder":"epic-link","attributes":["saga","epic","item","phase"]},
   "epic-list": {"folder":"epic-list","skeleton":{"height":"8em"},"attributes":["sagas","no-favorites"]},

@@ -166,7 +166,7 @@ Then, for what it printed:
 3. Sent marks:  `epic inbox apply <epic>` lands approvals, picks and todos.
    Do this, on an issue or a judgement call:  NO todo;  it stays in the item, red, and `apply` prints your steps.
    Work in the item:  no proposed fix yet?  write one first, in its "Proposed fix" field;  then build it, commits named
-   `<epic> I3:  ...`.  Done:  `epic update <epic>#I3 fixed "<what changed>"` turns it orange, for the person to review;
+   `<epic> I3:  ...`.  Done:  `epic update <epic>#I3 fixed "<what changed>"` turns it orange (light orange, from their words), for the person to review;
    their Approve closes it.  Never `epic close` it yourself.
    Every card (underway, done, fixed, noted):  a short lead sentence saying what happened, then short paragraphs or
    `- ` bullets, one idea each (`\n\n` between);  code names and numbers only where the reader needs them;

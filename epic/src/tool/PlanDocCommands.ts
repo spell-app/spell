@@ -982,7 +982,10 @@ export class PlanDocCommands {
    *   - the spinner off
    *   - refused on an item with no underway card
    *   - an issue or judgement call Owen asked for with Do this is never closed by it:  `fixed`, below
+   *   - on an issue Claude found, it means `fixed` (epic `epic-engine` T143)
    * - `fixed`:  an issue or judgement call fixed, for Owen to review (epic `epic-engine` I232):  ORANGE, still open
+   *   - light orange from his own words (T143)
+   *   - an issue Claude found that he hadn't got to:  closed, grey, `FIXED - `, nothing for him (T143;  `SelfFix`)
    *   - its latest underway card turns green, the summary under it;  with no underway card, a Done card of the summary
    *   - his Accept the fix closes it;  his Revisit with a note sends it back, red (`PlanDoc.fixedForReview()`)
    *   - the spinner off
@@ -1024,11 +1027,16 @@ export class PlanDocCommands {
     } else if (state === "done") {
       const done = await this.edit(file, (plan) => plan.finishWork(id, text))
       title = done.title
-      if (done.closed) said = "done, closed"
+      if (done.closed) said = done.selfFixed ? SELF_FIXED_WORDS : "done, closed"
       if (done.fixed) said = FIXED_WORDS
     } else if (state === "fixed") {
-      title = await this.edit(file, (plan) => plan.fixedForReview(id, text))
-      said = FIXED_WORDS
+      let selfFixed = false
+      title = await this.edit(file, (plan) => {
+        const fixedTitle = plan.fixedForReview(id, text)
+        selfFixed = plan.item(id).hasAttribute("self-fixed")
+        return fixedTitle
+      })
+      said = selfFixed ? SELF_FIXED_WORDS : FIXED_WORDS
     } else if (state === "promised") {
       title = await this.edit(file, (plan) =>
         plan.promiseUnkept(id, need(text, "what was promised and never came (html)"))
@@ -1882,7 +1890,7 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    stale;  decides nothing (for /epic tidy)
   stale <name> --underway [--apply] [--hours n] [--json]
                                                    open items whose Underway card is older than n hours (3),
-                                                   nobody working them:  on main => fixed for review;  else a
+                                                   nobody working them:  on main => fixed;  else a
                                                    Stale card, once (--apply);  every turn's end runs it (T78)
   hush [<name> | all] [--dryrun] [--json] [--model sonnet]
                                                    grey the green, yellow and orange items settled 3+ days ago Owen
@@ -1995,8 +2003,10 @@ export const USAGE = `usage:  yarn plan-doc <command> <name> ...    (doc:  epics
                                                    summary under it when there's something worth saying;  an
                                                    open issue or todo closes, as close does;  spinner off.
                                                    Refused with no underway card
-  status <name> <id> fixed ["html"]                an issue or judgement call fixed, for your review:  orange,
-                                                   still open;  Approve closes it.  A Do this's done means this too
+  status <name> <id> fixed ["html"]                an issue or judgement call fixed, for your review:  orange (light
+                                                   orange from your words), still open;  Approve closes it.  An issue
+                                                   Claude found that you hadn't got to:  closed, grey, "FIXED - ...".
+                                                   A Do this's done means this too, and done on an issue Claude found
   status <name> <id> promised "html"               /epic tidy:  it waits on finished work and what it promised never
                                                    came:  a "Promised, not delivered:" card, back on your list
   status <name> <id> noted "html"                  a STEP done, the item not finished:  your choice recorded,
@@ -2135,6 +2145,9 @@ function need(value: string | undefined, what: string): string {
 /** Where a usage error points:  the whole `USAGE` is long, and every error printing it buried the message. */
 /** What `epic update ... fixed` says it did. */
 const FIXED_WORDS = "fixed, for review"
+
+/** What `epic update ... fixed` or `done` says it did to an issue Claude found (`SelfFix`, T143). */
+const SELF_FIXED_WORDS = "fixed, grey, nothing for you to do"
 
 const USAGE_HINT = "`epic <verb> --help`;  a phase is `<epic>#P3` (or its name), an item `<epic>#J3`"
 

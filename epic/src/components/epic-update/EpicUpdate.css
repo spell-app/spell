@@ -15,6 +15,8 @@
  *   just the status word after a status change (`FIXED`, `UNDERWAY`;  T75, I295), then a blue `Not in main` pill
  *   while its work isn't merged.
  * - Public tokens (`--epic-update-*`) are never declared here:  read through private aliases.
+ *   - `--epic-update-fixed-display`:  the `FIXED` word's `display`;  `none` where the line already starts with it
+ *     (epic `epic-engine` T143), its `Not in main` pill still showing
  *   - `--epic-update-accent`:  the orange of the box, its outline and the label:  by default the pages' own amber orange,
  *     the one an item's orange id pill wears (`--epic-state-replied`), else `--ui-orange`
  *     (Owen, 2026-11-15, epic `epic-engine` I295:  "The `update` pill should be the same orange as the 'updated' pill
@@ -27,6 +29,7 @@
 @layer ui.components.epic-update.types {
   :host {
     --_epic-update-accent: var(--epic-update-accent, var(--epic-state-replied, var(--ui-orange)));
+    --_epic-update-fixed-display: var(--epic-update-fixed-display, inline-flex);
     --_epic-update-background: var(
       --epic-update-background,
       color-mix(in srgb, var(--_epic-update-accent) 8%, var(--epic-bg, var(--ui-background)))
@@ -120,6 +123,10 @@
     color: var(--epic-state-replied-on, var(--ui-orange-on));
     font: 700 10px/1 var(--epic-sans, var(--ui-font-family));
     letter-spacing: 0.06em;
+  }
+  /* FIXED, not said again at the end of a line that starts with it (T143) */
+  .label[data-became="fixed"] {
+    display: var(--_epic-update-fixed-display);
   }
   /* its status change's work not in main yet (T75):  a small blue outlined pill, as a status card's (I273) */
   .unmerged {

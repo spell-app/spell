@@ -1610,7 +1610,8 @@ export const VERB_FLAGS: Record<string, VerbFlags> = {
   stale: {
     "--json": "print them as JSON",
     "--underway": "the open items whose Underway card went stale, and whether their work is on main (T78)",
-    "--apply": "with --underway:  on main => fixed for review;  else a Stale card, once;  never closes anything",
+    "--apply":
+      "with --underway:  on main => fixed (grey if Claude found it, else for your review);  else a Stale card, once",
     "--hours <n>": "with --underway:  how old an Underway card must be (default 3)",
     "--quiet": "with --apply:  say nothing when nothing changed"
   },

@@ -96,6 +96,13 @@ export abstract class PlanReader {
    */
   readComments?: () => Record<string, Comment>
 
+  /**
+   * The items the person acted on in the epic's review inbox (`SelfFix.actedOn()`), read as an issue is fixed
+   * (epic `epic-engine` T143).
+   * - set by the command line's `read()`;  none (a test, a page off disk):  the page alone says what they got to
+   */
+  readActedOn?: () => ReadonlySet<string>
+
   constructor(
     document: Document,
     now = new Date(),
@@ -264,7 +271,12 @@ export abstract class PlanReader {
     const item = this.findItem(id)
     if (!item) return null
     const facts = this.facts(item)
-    return { id: facts.id.toUpperCase(), kind: PlanItem.kindOf(facts.id), status: facts.status, title: facts.title }
+    return {
+      id: facts.id.toUpperCase(),
+      kind: PlanItem.kindOf(facts.id),
+      status: facts.status,
+      title: PlanItem.listedTitle(item)
+    }
   }
 
   /**
@@ -282,11 +294,11 @@ export abstract class PlanReader {
       OPEN_KINDS.map((kind) => {
         const items: ItemSummary[] = []
         for (const item of this.itemsOf(kind)) {
-          const { id, title, status } = this.facts(item)
+          const { id, status } = this.facts(item)
           if (status !== "open") continue
           const isQuiet = QUIET_STATES.includes(this.itemState(item))
           if (isQuiet) quiet++
-          if (!isQuiet || scope === "all") items.push({ id, title, status })
+          if (!isQuiet || scope === "all") items.push({ id, title: PlanItem.listedTitle(item), status })
         }
         return [kind, items]
       })
@@ -321,12 +333,17 @@ export abstract class PlanReader {
    * - handled in a phase (`handled`, epic `epic-engine` P31):  `handled`, grey:  its answer is that phase's text now
    * - an issue Claude found and fixed itself, never needing Owen (epic `epic-engine` I236):  `handled`, grey:
    *   closed done, `calm`, never reviewed, not one he asked for (Owen:  "I don't need to worry about transient stuff")
+   * - an issue Claude found, fixed before he got to it (`self-fixed`, epic `epic-engine` T143):  `handled`, grey
+   *   (`SelfFix` decides as it's fixed)
    * - an issue or todo filed from his own words (`requested`;  a todo since T88), closed done, never reviewed:
    *   `requested`, light orange
    *   (epic `epic-engine` P63;  Owen, 2026-11-08:  "light orange until reviewed")
    * - closed otherwise (done, decided, an old doc's `d7`):  `recent`, green, however long ago (Owen, 2026-10-08:
    *   "green across the board is good")
-   * - fixed, waiting for his review (`fixed`, epic `epic-engine` I232):  `replied`, orange, Owen's turn
+   * - fixed, waiting for his review (`fixed`, epic `epic-engine` I232):  Owen's turn
+   *   - from his own words (`requested`):  `requested`, light orange (T143;  Owen, 2026-11-22:  "Issue from my words
+   *     which you are leaving orange should be light orange")
+   *   - else `replied`, orange
    * - work a review queued, not started (`queued`):  `scheduled`, blue dotted:  agreed, nothing for him to do
    *   (epic `epic-engine` P63)
    * - Claude answered it last, with options nothing is picked in yet (`PlanItem.awaitsPick()`):  `replied`, Owen's
@@ -350,10 +367,10 @@ export abstract class PlanReader {
     if (facts.underway || facts.working) return "progress"
     if (facts.status === CANCELED) return "old"
     // its answer in a phase's text now (epic `epic-engine` P31):  quiet, out of "what needs you"
-    if (facts.handled || isSelfFixed(facts)) return "handled"
+    if (facts.handled || facts.selfFixed || isSelfFixed(facts)) return "handled"
     if (isRequestedFix(facts)) return "requested"
     if (CLOSED.has(facts.status) || OLD_DECISION.test(facts.id)) return "recent"
-    if (facts.fixed) return "replied"
+    if (facts.fixed) return facts.requested ? "requested" : "replied"
     if (facts.queued !== undefined) return "scheduled"
     if (facts.awaitsPick) return "replied"
     if (QUESTION_ID.test(facts.id)) return "attention"
@@ -438,7 +455,7 @@ export abstract class PlanReader {
     const facts = this.facts(item)
     return {
       id: facts.id.toUpperCase(),
-      title: facts.title,
+      title: PlanItem.listedTitle(item),
       status: facts.status,
       state: this.reviewState(item),
       docState: this.itemState(item),

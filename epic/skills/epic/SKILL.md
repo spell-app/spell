@@ -560,7 +560,9 @@ Owen, 2026-11-15:  "the main session should just respond to me rather than doing
         with no body)
       - a picture they pasted with it goes in too, never described in words instead (epic `epic-engine` T87):
         `--pasted <n>`, as the guide's "build" says (`epic guide build`)
-      - the agent's `epic update <epic>#I<n> fixed "..."` turns it orange for their review
+      - the agent's `epic update <epic>#I<n> fixed "..."` turns it light orange, for their review
+        (`--requested`:  never leave it off their words, or the fix goes grey with nothing for them to press,
+        epic `epic-engine` T143)
   - passes their redirects on to the agent doing that work (`SendMessage`)
   - relays what an agent found, its first line bold, by itself:  `**Agent <full name> came back with:**`
   - keeps the inbox listener open the whole time (7, "This session LISTENS")
@@ -1216,10 +1218,18 @@ Every card you finish says what REALLY happened, one of three
   - an answer or reply written, details added, the item condensed:  `"Answered their note:  options A and B"`
   - called off:  `"Called off on the page:  nothing written."`
   - An underway card turns noted.
-- `status ... fixed ["<what changed>"]`:  an issue or judgement call fixed, for the person to review
-  (`epic update <epic>#I3 fixed`):  orange, still open;  they close it.  `epic guide review`, "Do this".
+- `status ... fixed ["<what changed>"]`:  an issue or judgement call fixed (`epic update <epic>#I3 fixed`).
+  Who found it decides (epic `epic-engine` T143;  `done` on an issue you found means the same):
+  - an issue you found, fixed before they got to it:  grey by itself, `FIXED - <title>`, closed, nothing for them to
+    press (2026-11-22:  "Issues which are fixed before I get to them can just be labeled `FIXED - <description>` and
+    go to grey automatically")
+  - got to:  their Do this, Revisit or other mark, a comment or note, its id chip clicked.  Then orange, still open;
+    they close it, as with a judgement call
+  - an issue from their words (`--requested`):  light orange, still open;  they close it
+  - `epic guide review`, "Do this".
 - `status ... done ["<summary>"]` ONLY when the item's work is FINISHED:  an issue fixed, a todo built.
   - An open issue or todo CLOSES with it (status done, green, its phase stamped, logged), as `epic close` does.
+    - Except an issue you found:  it's `fixed`, below (grey, or orange if they got to it first;  epic `epic-engine` T143).
   - A question, judgement call or manual test keeps its status:  a question is decided (`decide`, `choose`), the
     other two are the person's to close (except a test you checked yourself, Q58:  "Start testing" below).
   - Meant "this step done"?  That's `noted`.
@@ -2173,7 +2183,7 @@ inbox working <name>#P<N> on|off                    Claude at work on a phase (o
 add <name>#Q|#J|#T|#I|#M|#D "title" [--details "<p>html</p>"] [--calm] [--requested]   prints the id (T3)
 add <name>#I "title" --requested --start "<their words>" [--agent <name>]   filed and taken up at once:  blue (T78)
 add <name>#I|#T "title" ... --pasted <n> | --picture <file>...   with the pictures pasted last, or files (T87)
-stale <name> --underway [--apply]                   stale Underway items:  on main => fixed for review;  else a Stale card
+stale <name> --underway [--apply]                   stale Underway items:  on main => fixed;  else a Stale card
 add <name>#T "title" [--limit | --loud]             a todo:  work still to do;  --limit:  a limit to know about;  --loud:  red, a reminder
 add <name>#M "title" --step .. --should .. [--example <png> | ".."] [--if-not ..]   a manual test, the person does it on the page
 details <name>#M3 --prepared <n>                    stamp a test prepared, its place in the person's order (1 first)

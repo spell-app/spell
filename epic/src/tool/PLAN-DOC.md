@@ -98,7 +98,8 @@ once an epic page is in the `<epic-*>` markup (epic `epic-components`, P8).
     - An item the person addressed leaves it, however recently it changed (`NightSummary.isAddressed()`,
       epic `epic-engine`
       I235):  reviewed, deferred, queued, made a todo, or a sent mark waiting in the inbox;  a closed one too.
-      A fix Claude made since (orange) is back, under Fixed, to review.
+      A fix Claude made since that waits for their look (orange, or light orange) is back, under Fixed, to review;
+      an issue Claude found and fixed before they got to it is not (`self-fixed`, epic `epic-engine` T143).
     - A finished phase, and a bedtime run's lead line, age out after `away.finishedPhaseDays` days (3;  `epic settings`),
       by `done-at`.  One with no `done-at` stays until read.
     - Drawn on every edit:  an edit is what brings an idle page up to date.
@@ -433,10 +434,12 @@ As `plan-doc.md`, "Ids":
     | ----------- | ------ | ---------------------------------------------------------------------------------- |
     | `progress`  | blue   | Claude is working on it:  an underway status card, or `working`                    |
     | `old`       | grey   | canceled:  no longer relevant (made moot, struck through)                          |
+    | `handled`   | grey   | taken into a phase's text (`handled`);  an issue Claude found, fixed before the person got to it (`self-fixed`, epic `epic-engine` T143) |
     | `recent`    | green  | decided or done (`decided`, `done`, an old `d7`), in the last day (a phase:  3 days);  older, grey                 |
     | `requested` | light orange | an issue or todo filed from the person's own words (`requested`;  a todo since epic `epic-engine` T88), closed done, not reviewed:  their turn to see it (P63) |
     | `scheduled` | blue, dotted | work a review queued (`queued`), agreed, not started (epic `epic-engine` P63) |
-    | `replied`   | orange | open, and Claude has fixed it (`fixed`, a judgement call or issue:  the person reviews it), or Claude's LAST reply holds options nothing is picked in yet:  the person's turn |
+    | `requested` | light orange | open, and Claude has fixed it (`fixed`), an issue from the person's own words (`requested`):  the person reviews it (epic `epic-engine` T143) |
+    | `replied`   | orange | open, and Claude has fixed it (`fixed`, a judgement call, or an issue they got to first:  the person reviews it), or Claude's LAST reply holds options nothing is picked in yet:  the person's turn |
     | `attention` | red    | an open question;  an open judgement call, issue or `urgent` todo (Make Todo's follow-up, or a todo flagged red as a reminder:  `epic update <epic>#T3 --loud`, `epic add <epic>#T ... --loud`;  epic `epic-engine` T94) not reviewed, unless `calm`;  a judgement call or issue the person asked for with Do this (`urgent`), reviewed or not |
     | `handed`    | blue, outlined | a judgement call or issue the person pressed Do this on (`urgent`), Claude hasn't started (epic `epic-engine` P63) |
     | `quiet`     | grey   | open, nothing to think about:  a `calm` judgement call not reviewed, a limit (epic `epic-engine` P63) |
@@ -452,6 +455,27 @@ As `plan-doc.md`, "Ids":
       - A reply that asks without cards (a yes / no in prose) doesn't make it.
       - It counts as needing the person, as `attention` does:  the rail's count, the "only what needs you" filter.
 
+  - `self-fixed`:  an issue Claude found, fixed before the person got to it (epic `epic-engine` T143;  2026-11-22:
+    "Issues which are fixed before I get to them can just be labeled `FIXED - <description>` and go to grey
+    automatically", "Only ones Claude found").  `SelfFix` is the one rule.
+    - written by a fix (`update ... fixed`, `done`, the stale tidy):  closed, `done`, with no `fixed`
+    - their line starts `FIXED - `, as every fix's does ("Title prefix", below)
+    - they need press nothing:  it folds away with the greys, and no count takes it as waiting
+    - never with `requested`:  that fix waits, light orange ("Issue from my words which you are leaving orange should
+      be light orange")
+    - never when they got to it first, so that fix waits, orange:
+      - Do this, a review, deferral or queued work
+      - a Revisit, a reply or a note
+      - a click on its id chip
+      - a mark, request or comment of theirs in the inbox, sent or not
+    - reopened (`reopen`, Do this, their Revisit taken up with a card):  gone, the item wanted (`urgent`),
+      so its next fix waits for their check
+  - Title prefix (epic `epic-engine` T143;  2026-11-22:  "item title prefixes are great, it will help me sort
+    quickly ... put it first rather than at the end"):  a line STARTS with a word worked out from the item's state
+    (`TitlePrefix`, the one rule)
+    - `FIXED - `:  `fixed` while open (orange, light orange), or `self-fixed` (grey);  none while it's `progress`
+    - drawn, and said by `summary`, `items`, `inbox` and "0. While you were out";  the stored title never changes
+    - no `FIXED` at the line's end then:  the label stays in the markup, for its `Not in main` pill alone
   - `changed`:  ISO local time with offset.
     - Stamped by every command that changes its status or review marks.
     - `bedtime` while a `/bedtime` run is on, until reviewed.
@@ -710,7 +734,9 @@ As `plan-doc.md`, "Ids":
     their note kept on it, a Noted card saying go ahead;  it prints what the agent does next.
   - Claude works IN the item:  a "Proposed fix" field first when it has none, commits named for it.
   - Fixed:  `epic update <epic>#I3 fixed ["<what changed>"]` (also what `done` means on one):  still open, `fixed`,
-    ORANGE, on their list to review again.
+    ORANGE (light orange from their own words), on their list to review again.
+    - an issue Claude found that they hadn't got to (no Do this, so this is every other fix):  grey, `self-fixed`
+      ("Attributes" above;  epic `epic-engine` T143)
   - Sent back, and its note handed on to another item (a Noted card naming it:  "Your C2 is being fixed as I148"):
     fixed again by itself once that one is fixed or done (`HandedOnFixes`, epic `epic-engine` I317)
   - Its buttons are Revisit and Accept the fix (epic `epic-engine` I299, J231):  Accept the fix closes it;  Revisit,
@@ -816,10 +842,12 @@ Two kinds of finished card, so a card for one STEP never reads as the item finis
   - `update <name>#<id> done ["<summary>"]`:  the item's WORK is finished.
     - The LATEST underway card turns done (`done-at`), the reading kept;  spinner off.
     - An open ISSUE or TODO (not a `limit`) closes in the same write, as `close` does (`PlanDoc.finishWork()`):
-      `done`, green, `taken-in` its phase, the log's `I3 closed:  <title>`.
+      `done`, green (an issue from their words light orange), `taken-in` its phase, the log's `I3 closed:  <title>`.
     - Only the card on the rest:  a question is decided, never done;  a judgement call or manual test is the person's to
       close (Approve;  a test Claude checked itself it closes with `close`, Q58);  a `limit` has nothing to do.
     - Refused with no underway card.
+    - on an issue Claude found it means `fixed` (epic `epic-engine` T143):  grey, `self-fixed`, or orange if the
+      person got to it first
     - Before I148 it wrote only the card, and the item stayed open:  the migration `done-cards-close` closes those.
   - `update <name>#<id> promised "<what>"` (`/epic tidy`):  a Noted card starting `Promised, not delivered:`, for an
     item waiting on finished work whose promised thing never came;  it goes back on the person's list (red), and
@@ -857,7 +885,7 @@ Drawn, never written:  one meaning per colour on every element (decision Q20, 20
 | violet | a person's voice                         | their reply cards, the note box, the forms and kept text of their own words |
 | terracotta | an agent's voice (Claude's, Codex's) | their reply cards' mark and name;  "recommended", a thumbs-up with no word |
 | ivory  | the page's warm ground               | the toolbar, the rail, a comment thread's ground                       |
-| light orange | what they asked for is finished, their turn to see it | `requested` chips (DARK text);  only the item's own:  every COUNT by colour takes it as orange (the page's and a section's state chips, the toolbar's badges, the Epics list page's chips;  epic `epic-engine` I347, Owen, 2026-11-18:  "Lump the light orange icons in with the orange") |
+| light orange | what they asked for is finished, or fixed (T143), their turn to see it | `requested` chips (DARK text);  only the item's own:  every COUNT by colour takes it as orange (the page's and a section's state chips, the toolbar's badges, the Epics list page's chips;  epic `epic-engine` I347, Owen, 2026-11-18:  "Lump the light orange icons in with the orange") |
 | grey   | no longer relevant, inactive, not chosen, nothing to think about | `quiet` chips (a calm call, a limit);  `old` chips (canceled);  a todo's x (drop it);  the note box's x (skip this);  a phase to do;  FUTURE;  buttons at rest |
 
 The FILL, on every button, pill and chip with a lifecycle.
@@ -897,7 +925,7 @@ In the person's words (2026-10-10):
 | a pick (the Choose pill)               | green  | picked            | sent;  still outlined once `apply` takes it, until the doc's `chosen` reaches the page | green:  a question answered, a call accepted (a Noted card) |
 | an open question answered (Approve:  its recommended option;  or a pick) | green | as above | as above                  | green `decided` |
 | Make Todo                            | green  | pressed           | sent                                         | green:  settled;  the new todo is its own item (yellow until queued) |
-| Do this (an issue, a judgement call) | green  | pressed           | sent                                         | BLUE outlined (`handed`), in the item, until Claude's fix turns it orange;  Approve closes it |
+| Do this (an issue, a judgement call) | green  | pressed           | sent                                         | BLUE outlined (`handed`), in the item, until Claude's fix turns it orange (light orange, their own words);  Approve closes it |
 | a todo's plane:  "start it now" | green | pressed      | sent;  then QUEUED (`queued`):  dotted blue until the todo is closed | green, once done |
 | a review's "do it" (`queue <id> "work"`) | green | --              | queued:  dotted blue until started and done  | green, once done                |
 | a todo's x:  "drop it"               | grey   | pressed           | sent                                         | grey `old` (canceled)           |
@@ -1093,7 +1121,8 @@ An item a PHASE fixed or did names it, `<epic-item taken-in="p-fix-open-issues">
 2026-10-25:  "issues should say "in P14" like questions do"):  its line says `in P1`, linking the phase, as a handled
 question's does.
 
-- NOT `handled`:  that's a state too (grey), and its change mark's Reopen takes it off;  a fixed issue stays green.
+- NOT `handled`:  that's a state too (grey), and its change mark's Reopen takes it off;  a fixed issue keeps its own
+  colour.
 - Written two ways (`PhaseTakes`):
   - an issue or todo closed while a phase is active is taken in it (`setItem()`)
   - a closed item (done, decided) a done or active phase's text links (`<a href="#i1">`, `<epic-link item>`) is taken
@@ -1276,6 +1305,8 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
   - `done-cards-close` (2026-10-26, on command;  epic `epic-engine` I148):  an open issue or todo (not a `limit`)
     whose work a Done card said was finished is closed (`DoneCardsClose`), as `update ... done` closes one since
     - which:  a Done card NEWER than its last reopening (the log's `I3 reopened:  ...`), and no underway card
+      - never an issue waiting for the person, `fixed` or their Do this (`urgent`):  their check closes it, never
+        this step (I232;  epic `epic-engine` T143, I410)
     - closed as `close` does:  `done`, a log line each (`I3 closed:  its Done card (2026-10-24 10:00) said the work was
       finished`);  the write recolours it and stamps its phase (`updateStates()`)
     - each one a note in the report, with its card's time and title:  an older page's Done card may have meant only
@@ -1326,6 +1357,13 @@ Named, dated, idempotent steps that bring an older page's markup up to today's, 
       at the time they were fixed;  `PlanDoc` runs it after every fix or close, logging each, so it turns in the
       same write
     - idempotent:  a fixed item is left
+  - `self-fixed-issues` (2026-11-22, on command;  epic `epic-engine` T143):  the fixes waiting for review on a page
+    from before take today's colours (`SelfFixedIssues`)
+    - an issue Claude found that the person hasn't got to (`SelfFix`, with the inbox's marks and comments):
+      grey, `self-fixed`, closed;  its `changed` left alone
+    - one from their own words:  light orange, still open;  one they got to, and one with work under way:  left
+    - never on an edit:  it closes items, and an edit can't see every page's inbox
+    - idempotent:  a closed or light orange one is left
 - A new step:  a class implementing `Migration` in `migrations/`, its instance added LAST to `Migrations.all`, in the
   SAME commit as the markup change it follows (epics' `AGENTS.md`, "Rules").  Another kind's:  an entry in the docs
   tool's `STEPS`, last.  Either way:  idempotent, every word kept, and a test (a before page becomes the after page,

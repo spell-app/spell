@@ -38,6 +38,7 @@ import { PART_SOURCE, PARTS_DIR, PlanParts } from "./PlanParts"
 import { ReviewInbox } from "./ReviewInbox"
 import { SagaPage } from "./SagaPage"
 import { epicNamed } from "./SeeAlso"
+import { SelfFix } from "./SelfFix"
 import { ServedFolders } from "./ServedFolders"
 
 /****************
@@ -303,6 +304,8 @@ export class PlanDocFiles {
     plan.parts = assembleEpic(plan.document, file)
     // the epic's comments, for a change mark naming one (epic `epic-engine` T100):  read only when one does
     plan.readComments = () => ReviewInbox.read(ReviewInbox.pathFor(file)).comments
+    // what the person got to, read only as an issue is fixed (epic `epic-engine` T143)
+    plan.readActedOn = () => SelfFix.actedOn(ReviewInbox.read(ReviewInbox.pathFor(file)))
     for (const id of plan.parts.missing)
       process.stderr.write(
         `epic:  ${relative(this.content, PlanParts.partFile(file, id))} is missing:  #${id} has no body\n`
@@ -398,12 +401,14 @@ export class PlanDocFiles {
     const inboxFile = ReviewInbox.pathFor(file)
     const result = await lockedPage(file, async (): Promise<MigrateResult> => {
       const plan = this.read(file, { recentSince: this.recentSince(file) })
+      const inbox = ReviewInbox.read(inboxFile)
       const context: MigrationContext = {
         now,
         epic: basename(file).replace(/(\.plan)?\.html$/, ""),
         folder: dirname(file),
         root: this.content,
-        inbox: inboxView(ReviewInbox.read(inboxFile)),
+        inbox: inboxView(inbox),
+        actedOn: SelfFix.actedOn(inbox),
         rootLinks: (html) => this.linker.rootLinks(html, dirname(file), { mend: true }).changes,
         history: () => this.historyOrNone(file),
         notes: [],

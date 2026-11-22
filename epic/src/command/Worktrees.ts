@@ -12,7 +12,7 @@ import { EpicHome } from "spell/epic/config/EpicHome"
 import { EpicRepo } from "spell/epic/config/EpicRepo"
 import { CodeHost, type CodeHostClient } from "spell/epic/config/CodeHost"
 import { SessionFolders } from "spell/epic/config/SessionFolders"
-import { URGENT_STATES } from "spell/epic/list/EpicState"
+import { needsOwen } from "spell/epic/list/EpicState"
 import { PhaseStatuses } from "spell/epic/phases"
 
 import {
@@ -694,7 +694,7 @@ export class Worktrees {
    * from its skeleton's markup, with no parsing library (`PlanFacts`).
    * - `phases`:  each `<epic-phase status>`
    * - `updated`, `future`, `standing`:  `<epic-page updated future standing>`
-   * - `urgent`:  the ids of the items that need Owen (`<epic-item state>`, `URGENT_STATES`:  red and orange chips)
+   * - `urgent`:  the ids of the items that need Owen (`<epic-item state>`, `needsOwen()`:  red and orange chips)
    * - a doc still in the old markup (one restored from an old backup) reads as empty:
    *   the `epic` tool refuses it until it's converted (epic `epic-components` P15)
    * - static:  one file, wherever it is
@@ -705,7 +705,7 @@ export class Worktrees {
     const attribute = (tag: string, name: string) => new RegExp(`\\s${name}="([^"]*)"`).exec(tag)?.[1]
     const page = tags("epic-page")[0] ?? ""
     const urgent = tags("epic-item")
-      .filter((tag) => (URGENT_STATES as readonly string[]).includes(attribute(tag, "state") ?? ""))
+      .filter((tag) => needsOwen(attribute(tag, "state"), attribute(tag, "status")))
       .map((tag) => attribute(tag, "id") ?? "")
       .filter(Boolean)
     return {
