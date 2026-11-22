@@ -91,6 +91,16 @@ describe("LanguageHost", () => {
     expect(sent.at(-1)).toMatchObject({ version: 0, diagnostics: [] })
   })
 
+  test("a project it can't load is said, and holds nothing else up", async () => {
+    const unavailable: string[] = []
+    const lonely = new LSP.LanguageHost({ onUnavailable: (projectId) => unavailable.push(projectId) })
+    const missing = "@spell/examples/NoSuchProject"
+    lonely.open({ uri: LSP.AppAddresses.uriOf(`${missing}/Nothing.spell`), projectId: missing, text: "" })
+    lonely.open({ uri, projectId: solitaire, text })
+    expect((await lonely.request("textDocument/documentSymbol", { textDocument })).length).toBeGreaterThan(0)
+    expect(unavailable).toEqual([missing])
+  })
+
   test("a file it doesn't know answers the table's fallback", async () => {
     const elsewhere = { uri: LSP.AppAddresses.uriOf(`${solitaire}/Nowhere.spell`) }
     expect(await host.request("textDocument/documentSymbol", { textDocument: elsewhere })).toEqual([])

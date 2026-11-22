@@ -95,6 +95,12 @@ export class FileStates {
     this.client = client
     // the worker's problems for each file it parsed, where it works them out
     client.onParsed((parsed) => this.parsedElsewhere(parsed))
+    // a project the worker can't load:  its problems worked out here from now on
+    client.onFallback((project) => {
+      for (const entry of this.entries.values()) {
+        if (entry.file.project === project && entry.file instanceof SP.SpellFile) this.whenParsed(entry, entry.file)
+      }
+    })
     this.onEdit = onEdit
     this.onTaken = onTaken
     // a click or a focus elsewhere acts on the parse, e.g. the side bar's edits:  it mustn't be one keystroke behind
@@ -765,7 +771,10 @@ export class FileStates {
    *   that check is the page's alone.
    */
   private diagnosesOnPage(file: SP.SpellFile): boolean {
-    return this.client.parsesOnPage || this.service.hostNames.some((names) => names.project === file.project.path)
+    return (
+      this.client.answersOnPage(file.project) ||
+      this.service.hostNames.some((names) => names.project === file.project.path)
+    )
   }
 
   /**

@@ -24,11 +24,16 @@ import { LSP } from "spell/app/lsp"
 export class LanguageHost {
   constructor({
     service = new LSP.SpellLanguageService(new LSP.AppAddresses()),
-    onParsed = () => {}
+    onParsed = () => {},
+    onUnavailable = () => {}
   }: LanguageHostProps = {}) {
     this.service = service
     this.onParsed = onParsed
+    this.onUnavailable = onUnavailable
   }
+
+  /** Called with each project that won't load, e.g. one only the editor holds, not saved yet. */
+  readonly onUnavailable: (projectId: string) => void
 
   /** the language service answering every request */
   readonly service: LSP.SpellLanguageService
@@ -39,7 +44,7 @@ export class LanguageHost {
   /**
    * The editor shows `uri`'s file, of project `projectId`, holding `text`.
    * - Loads its project the first time;  the file then takes `text` if it isn't what was loaded.
-   * - NEVER throws:  a project that won't load answers nothing (the fallbacks), and says so on the console.
+   * - NEVER throws:  a project that won't load answers nothing (the fallbacks), and says so (`onUnavailable`).
    */
   open({ uri, projectId, text, pagesInPlay }: LanguageOpen): void {
     const opening = this.projectFor(projectId).then((project) => {
@@ -52,7 +57,8 @@ export class LanguageHost {
       this.sentParse.delete(uri)
       this.parseSoon(project)
     })
-    this.pending = Promise.all([this.pending, opening]).then(() => undefined)
+    // a project that won't load holds nothing else up
+    this.pending = Promise.all([this.pending, opening.catch(() => undefined)]).then(() => undefined)
   }
 
   /**
@@ -123,7 +129,7 @@ export class LanguageHost {
     if (!loading) {
       const project = new SP.SpellProject(projectId)
       loading = project.load(undefined).then(() => project)
-      loading.catch((error: unknown) => console.error(`LanguageHost:  couldn't load ${projectId}`, error))
+      loading.catch(() => this.onUnavailable(projectId))
       this.projects.set(projectId, loading)
     }
     return loading
@@ -221,6 +227,8 @@ export type LanguageHostProps = {
   service?: LSP.SpellLanguageService
   /** called with an open file's problems each time a parse changes them.  Default:  nothing */
   onParsed?: (parsed: LanguageParsed) => void
+  /** called with each project that won't load.  Default:  nothing */
+  onUnavailable?: (projectId: string) => void
 }
 
 /** An open file's problems, after a parse changed them:  `LanguageHost.onParsed`. */

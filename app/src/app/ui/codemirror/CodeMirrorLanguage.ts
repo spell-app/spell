@@ -111,7 +111,7 @@ export class CodeMirrorLanguage {
    */
   async fileReady(doc: Text): Promise<SP.SpellFile | undefined> {
     // the worker parses what it was sent before it answers:  the page's parse isn't asked for
-    if (!this.client.parsesOnPage) return this.file
+    if (!this.client.answersOnPage(this.file.project)) return this.file
     this.parseNow()
     const { file } = this
     return file.match && file.contents === doc.toString() ? file : undefined

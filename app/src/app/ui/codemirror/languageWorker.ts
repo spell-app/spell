@@ -14,7 +14,11 @@ import { LSP } from "spell/app/lsp"
 import { plainError, type LanguageWorkerMessage, type LanguageWorkerReply } from "./LanguageClient"
 
 // each open file's problems, after each parse that changes them
-const host = new LSP.LanguageHost({ onParsed: (parsed) => postMessage({ kind: "parsed", ...parsed }) })
+// and each project it can't load, which the page answers for itself
+const host = new LSP.LanguageHost({
+  onParsed: (parsed) => postMessage({ kind: "parsed", ...parsed }),
+  onUnavailable: (projectId) => postMessage({ kind: "unavailable", projectId })
+})
 // its value's words list a Pick row first, which the editor opens the picker for (epic `editor` T61)
 host.service.picksValues = true
 

@@ -169,7 +169,8 @@ and in the app's build folder, `app/` at the app folder's root.
       sent each edit as changes, never the whole text
       - started by the app alone (`startLanguageWorker()`, from `LazyCodeMirror`):  `<spell-editor>`, the static build
         and the tests ask the page's own service, in-process (`LanguageClient.inThread()`)
-      - a worker that stops hands every question to the page's own service
+      - a worker that stops hands every question to the page's own service;  so does a project the worker can't load
+        (one only the page holds, made from a start card and not saved yet:  `LanguageClient.onFallback()`)
       - the editor's compile too (`editor.compileApp()`, through `editor.compileElsewhere`):  the worker compiles its
         copy of the project, the pages in play as the page has them, and hands back what the compile wrote
         (`SP.CompiledEntry`), which the page takes as its own and runs (`SpellProject.takeCompiled()`);

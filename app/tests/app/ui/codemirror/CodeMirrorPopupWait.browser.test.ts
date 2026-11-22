@@ -49,7 +49,7 @@ describe("popups wait for a pause in the typing (I22)", () => {
       "textDocument/signatureHelp": () => service.signatureHelp(file, { line: 0, character: 0 })
     }
     const client = {
-      parsesOnPage: true,
+      answersOnPage: () => true,
       request: async (method: string) => answers[method]?.() ?? null
     } as unknown as LanguageClient
     // the file always holds the editor's text, as one just parsed

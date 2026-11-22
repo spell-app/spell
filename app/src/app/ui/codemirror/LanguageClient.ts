@@ -1,6 +1,6 @@
 import type { ChangeSet } from "@codemirror/state"
 
-import type { SP } from "spell/parser/spell"
+import { SP } from "spell/parser/spell"
 import { LSP } from "spell/app/lsp"
 
 /****************
@@ -35,11 +35,20 @@ export abstract class LanguageClient {
   }
 
   /**
-   * Does the page parse what this client answers about?
-   * - `true`:  a question waits for the page's parse of the text first (`CodeMirrorLanguage.fileReady()`)
+   * Are questions about `project` answered from the page's own parse?
+   * - `true`:  a question waits for the page's parse of the text first (`CodeMirrorLanguage.fileReady()`),
+   *   and the page works out its files' problems itself
    * - `false`:  the worker parses;  the page asks straight away
    */
-  abstract readonly parsesOnPage: boolean
+  abstract answersOnPage(project: SP.SpellProject): boolean
+
+  /**
+   * Hear each project the worker can't load (one only the page holds, made from a start card and not saved yet):
+   * from then on the page answers for it.  Returns what stops it.
+   */
+  onFallback(_listener: (project: SP.SpellProject) => void): () => void {
+    return () => {}
+  }
 
   /**
    * The answer to `method` about the file `params` names.
@@ -92,7 +101,9 @@ class InThreadClient extends LanguageClient {
     super()
   }
 
-  readonly parsesOnPage = true
+  answersOnPage(_project: SP.SpellProject): boolean {
+    return true
+  }
 
   async request<M extends LSP.LanguageMethod>(
     method: M,
@@ -109,6 +120,8 @@ class InThreadClient extends LanguageClient {
  * - Every message in order, over one worker:  open, change, close, request.
  * - An error the worker's service threw comes back as itself where the page tells them apart (`LSP.RenameError`).
  * - A worker that stops:  its waiting questions, and every one after, go to the page's own service (`fallback`).
+ * - A project the worker can't load (only the page holds it):  every question about it goes to the page's own service,
+ *   and its problems are the page's (`onFallback()`), for the rest of the page's life.
  ****************/
 class WorkerClient extends LanguageClient {
   constructor(
@@ -121,15 +134,27 @@ class WorkerClient extends LanguageClient {
     this.worker.addEventListener("error", (event) => this.stopped(event.message))
   }
 
-  get parsesOnPage(): boolean {
-    return this.hasStopped
+  answersOnPage(project: SP.SpellProject): boolean {
+    return this.hasStopped || this.unavailable.has(project.projectId)
   }
+
+  /** The projects the worker said it can't load. */
+  private unavailable = new Set<string>()
+
+  onFallback(listener: (project: SP.SpellProject) => void): () => void {
+    this.fallbackListeners.add(listener)
+    return () => this.fallbackListeners.delete(listener)
+  }
+
+  /** Who hears each project the page answers for from now on -- see `onFallback()`. */
+  private fallbackListeners = new Set<(project: SP.SpellProject) => void>()
 
   /** Has the worker stopped, its questions going to the page's own service? */
   private hasStopped = false
 
   request<M extends LSP.LanguageMethod>(method: M, params: LSP.LanguageParams<M>): Promise<LSP.LanguageAnswer<M>> {
-    if (this.hasStopped) return this.fallback.request(method, params)
+    const project = this.fallback.service.addresses.fileFor(LSP.uriOf(params as LSP.FileParams))?.project
+    if (this.hasStopped || (project && this.answersOnPage(project))) return this.fallback.request(method, params)
     const id = ++this.lastId
     return new Promise((resolve, reject) => {
       const again = () => this.fallback.request(method, params).then(resolve, reject)
@@ -149,7 +174,7 @@ class WorkerClient extends LanguageClient {
   }
 
   async compile(project: SP.SpellProject): Promise<SP.CompiledEntry | undefined> {
-    if (this.hasStopped || !this.openProjects.has(project.projectId)) return undefined
+    if (this.answersOnPage(project) || !this.openProjects.has(project.projectId)) return undefined
     const id = ++this.lastId
     try {
       return await new Promise<SP.CompiledEntry>((resolve, reject) => {
@@ -159,7 +184,7 @@ class WorkerClient extends LanguageClient {
         this.post({ kind: "compile", id, projectId: project.projectId, ...(pagesInPlay && { pagesInPlay }) })
       })
     } catch (error) {
-      console.error(`the language worker couldn't compile ${project.projectId}:  the page compiles it`, error)
+      console.info(`the language worker couldn't compile ${project.projectId}:  the page compiles it`, error)
       return undefined
     }
   }
@@ -201,7 +226,8 @@ class WorkerClient extends LanguageClient {
   /** A reply came:  its request answered, or refused with the worker's error;  or a file's problems, unasked. */
   private replied(reply: LanguageWorkerReply): void {
     if ("kind" in reply) {
-      for (const listener of this.parsedListeners) listener(reply)
+      if (reply.kind === "parsed") for (const listener of this.parsedListeners) listener(reply)
+      else this.cantLoad(reply.projectId)
       return
     }
     const waiting = this.waiting.get(reply.id)
@@ -209,6 +235,15 @@ class WorkerClient extends LanguageClient {
     this.waiting.delete(reply.id)
     if ("error" in reply) waiting.reject(errorFrom(reply.error))
     else waiting.resolve(reply.answer)
+  }
+
+  /** The worker can't load project `projectId`:  the page answers for it from now on.  Said once on the console. */
+  private cantLoad(projectId: string): void {
+    if (this.unavailable.has(projectId)) return
+    this.unavailable.add(projectId)
+    console.info(`the language worker can't load ${projectId}:  the page answers for it`)
+    const project = SP.SpellProject.registry.get(projectId)
+    if (project) for (const listener of this.fallbackListeners) listener(project)
   }
 
   /** Send `message` to the worker. */
@@ -239,6 +274,7 @@ export type LanguageWorkerReply =
   | { id: number; answer: unknown }
   | { id: number; error: LanguageWorkerError }
   | ({ kind: "parsed" } & LSP.LanguageParsed)
+  | { kind: "unavailable"; projectId: string }
 
 /** An error the worker threw, as plain data:  its class's name, message and `cause`. */
 export type LanguageWorkerError = { name: string; message: string; cause?: unknown }
