@@ -5,19 +5,20 @@ import {
   createEffect,
   createMemo,
   createRenderEffect,
+  createRoot,
   getOwner,
   runWithOwner,
   untrack,
   type Accessor
 } from "solid-js"
-import { insert, isServer, type JSX } from "@solidjs/web"
+import { hydrate, insert, isServer, type JSX } from "@solidjs/web"
 
 // Import directly to avoid circular import
 import { protoMerged } from "spell/util/decorators"
 import { PLATFORMS, platformsIn } from "spell/util/platform"
 import { E } from "spell/element"
 // Import directly to avoid circular import
-import { DOMElement, type TagSetup } from "./DOMElement"
+import { DOMElement, HYDRATION_KEY, type ServerDrawing, type TagSetup } from "./DOMElement"
 import { controlled, cssState, on, onChange, state, untracked } from "./Reactive"
 // a leaf of its own (Solid only), not part of `E`
 import { ShadowEvents } from "./ShadowEvents"
@@ -239,11 +240,16 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
       },
       { defer: true }
     )
-    const { canRenderUnstyled } = this.elementSetup
+    // a server's drawing is styled already, by the sheets it came with:  it never waits for the runtime
+    const drawsAtOnce = this.elementSetup.canRenderUnstyled || !!this.domElement.serverDrawing
     // `untrack`:  `<Show>` evaluates its children in a TRACKED computation,
     // so a reactive read in `render()`'s body (outside its JSX) would run it again and rebuild the whole view;
-    // it runs ONCE
-    return <Show when={canRenderUnstyled || this.isReady}>{untrack(() => this.render())}</Show>
+    // it runs ONCE.
+    // In a root of its own (owned by the `<Show>`), with the same id on the server and in the page:  the hydration keys of what it draws
+    // depend on `render()` alone, not on how many effects the constructor and `onMount()` started on each side
+    return (
+      <Show when={drawsAtOnce || this.isReady}>{untrack(() => createRoot(() => this.render(), { id: VIEW_ID }))}</Show>
+    )
   }
 
   /**
@@ -1355,6 +1361,7 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
    *   it lives until `domElement.dispose()`, whatever happens around it.
    *   - So a Solid app's context doesn't reach inside (`appContext` does that).
    * - Inside an error boundary (Solid's `<Errored>`), always:  see "Errors and fallback".
+   * - A shadow root the server drew (`domElement.serverDrawing`):  see "Server-drawn shadow roots".
    * - Released with the DOM element:  the root is disposed, the shadow root emptied.
    */
   private static mount(
@@ -1363,6 +1370,16 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
     domElement: DOMElement,
     Fallback: E.FallbackClass | undefined
   ) {
+    // an element connected while another hydrates would claim that one's nodes:  it waits until it's done
+    if (UIComponent.hydrating) {
+      UIComponent.hydrating.push(() => {
+        UIComponent.mount(Class, definition, domElement, Fallback)
+        if (domElement.isConnected) domElement.component?.onConnect()
+      })
+      return
+    }
+    const drawing = domElement.serverDrawing
+    if (drawing?.isHydratable && UIComponent.hydrateDrawing(Class, definition, domElement, Fallback, drawing)) return
     E.Reactive.ownRoot((dispose) => {
       const root = domElement.renderRoot
       domElement.addReleaseCallback(() => {
@@ -1370,22 +1387,112 @@ export abstract class UIComponent<V extends E.ComponentVocabulary = E.ComponentV
         root.textContent = ""
         dispose()
       })
-      // `<Errored>` called as a function;  `children` is a GETTER, so the component is built inside the boundary
-      const view = Errored({
-        get children() {
-          return untrack(() => new Class(domElement, definition).onMount())
-        },
-        fallback: (error: Accessor<unknown>) => {
-          const cause = error()
-          const showsFallback = runWithOwner(null, () => UIComponent.onError(domElement, cause))
-          return showsFallback ? UIComponent.renderFallback(domElement, cause, Fallback) : undefined
-        }
-      })
-      domElement.clearServerContent()
+      const view = UIComponent.boundary(Class, definition, domElement, Fallback)
+      domElement.takeServerDrawing()
       ShadowEvents.register(root)
       insert(root, view)
+      if (drawing) domElement.restoreServerFocus()
     })
   }
+
+  /**
+   * `Class`'s component, built and drawn inside its error boundary:  `<Errored>`, called as a function.
+   * - `children` is a GETTER, so the component is built inside the boundary.
+   */
+  private static boundary(
+    Class: E.UIComponentClass,
+    definition: E.ElementDefinition,
+    domElement: DOMElement,
+    Fallback: E.FallbackClass | undefined
+  ): JSX.Element {
+    return Errored({
+      get children() {
+        return untrack(() => new Class(domElement, definition).onMount())
+      },
+      fallback: (error: Accessor<unknown>) => {
+        const cause = error()
+        const showsFallback = runWithOwner(null, () => UIComponent.onError(domElement, cause))
+        return showsFallback ? UIComponent.renderFallback(domElement, cause, Fallback) : undefined
+      }
+    })
+  }
+
+  ////////////////
+  // ## Server-drawn shadow roots
+  //
+  // A page drawn on the server (Spell UI's static render, its shadow-root output) holds each element's shadow root
+  // already, as a declarative `<template shadowrootmode>`:  it paints before any script.
+  // When the element starts, it keeps what's there (epic `solid-2-final` P16):
+  // - it HYDRATES it:  Solid claims the nodes the server marked (`HYDRATION_KEY`) and wires them up, drawing nothing
+  //   again;  the nodes stay the same nodes, so focus, scroll and anything typed stay too
+  // - a drawing it can't claim in full (a family that draws differently on the server, a drawing with no keys) is
+  //   drawn again, in its place, in the same task:  nothing flashes, nothing moves, and the focus stays where it was
+  //   (`takeServerDrawing()`)
+  // - either way it shows at once, styled by the sheets the server linked;  those go once its own are in
+  //   (`DOMElement.markReady()`)
+  ////////////////
+
+  /**
+   * Hydrate the shadow root the server drew, `drawing`;  returns whether every node it marked was claimed.
+   * - Not all:  everything it built is released again and the root is as the server left it, sheets and all, for
+   *   `mount()` to draw in its place.
+   * - NEVER throws:  a hydration that throws counts as not claimed.
+   */
+  private static hydrateDrawing(
+    Class: E.UIComponentClass,
+    definition: E.ElementDefinition,
+    domElement: DOMElement,
+    Fallback: E.FallbackClass | undefined,
+    drawing: ServerDrawing
+  ): boolean {
+    const root = domElement.renderRoot
+    const marked = [...root.querySelectorAll(`[${HYDRATION_KEY}]`)]
+    const claimed = UIComponent.hydrationRecord()
+    const mark = domElement.releaseMark()
+    const waiting: (() => void)[] = (UIComponent.hydrating = [])
+    let dispose: (() => void) | undefined
+    let isClaimed = false
+    try {
+      E.Reactive.ownRoot(() => {
+        dispose = hydrate(() => UIComponent.boundary(Class, definition, domElement, Fallback), root)
+      })
+      isClaimed = marked.every((node) => claimed.has(node))
+    } catch (error) {
+      console.warn(`<${domElement.localName}>:  its server drawing didn't hydrate;  drawn again`, error)
+    } finally {
+      UIComponent.hydrating = undefined
+    }
+    if (isClaimed) {
+      ShadowEvents.register(root)
+      domElement.addReleaseCallback(() => {
+        ShadowEvents.unregister(root)
+        root.textContent = ""
+        dispose?.()
+      })
+    } else {
+      dispose?.()
+      domElement.releaseSince(mark)
+      domElement.component = undefined
+      root.replaceChildren(...drawing.sheets, ...drawing.nodes)
+    }
+    for (const mountLater of waiting) mountLater()
+    return isClaimed
+  }
+
+  /**
+   * The page's hydration record, Solid's `_$HY`, made when no server script set it up:  `completed` holds every node
+   * a hydration claimed, so `hydrateDrawing()` can tell whether it claimed them all.
+   */
+  private static hydrationRecord(): WeakSet<Node> {
+    const global = globalThis as { _$HY?: HydrationRecord }
+    const record = (global._$HY ??= { events: [], r: {} })
+    // Solid hydrates a page ONCE, and marks it `done` after:  here each element hydrates as its family arrives
+    record.done = false
+    return (record.completed ??= new WeakSet())
+  }
+
+  /** Mounts waiting for the hydration under way to end (`mount()`);  `undefined` when none is under way. */
+  private static hydrating: (() => void)[] | undefined
 
   ////////////////
   // ## Errors and fallback
@@ -1645,6 +1752,24 @@ const NOT_A_BOX = "slot, style, link"
 /** The shared sizes, by name:  any CSS length each, or `undefined` (`UIComponent.sharedSizes`). */
 type SharedSizes = Record<(typeof SIZES)[number], string | undefined>
 const TOOLTIP = "tooltip"
+/**
+ * The id of the owner every `render()` runs under (`onMount()`), the same on the server and in the page:
+ * so the hydration keys of a drawing depend only on what `render()` draws.
+ */
+const VIEW_ID = "v"
+
+/** Solid's hydration record on the page (`_$HY`):  the parts `UIComponent` makes when nothing else did. */
+type HydrationRecord = {
+  /** events caught before hydration, for Solid to replay */
+  events: unknown[]
+  /** serialized values, by id */
+  r: Record<string, unknown>
+  /** every node a hydration claimed */
+  completed?: WeakSet<Node>
+  /** Solid set it once the page's hydration is over:  a later `hydrate()` only draws */
+  done?: boolean
+}
+
 /** The shared `movable`:  people drag it to a new place. */
 const MOVABLE = "movable"
 /** The shared `resizable`:  people drag its corner to resize it. */

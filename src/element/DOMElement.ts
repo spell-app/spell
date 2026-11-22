@@ -1,6 +1,7 @@
 /*! Derived from `@solidjs/element` and `component-register`:  MIT licence, (c) Ryan Carniato. */
 import { createEffect, untrack } from "solid-js"
 
+import { NodeType } from "spell/util/dom"
 import type { E } from "spell/element"
 
 // Import directly:  this file loads before the barrel's values are there (it holds only types for `E`)
@@ -195,6 +196,22 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
   /** Run `callback` when the element is released (`dispose()`), newest first. */
   addReleaseCallback(callback: (domElement: DOMElement) => void) {
     this.connectedState.releaseCallbacks.push(callback)
+  }
+
+  /** How many release and property callbacks it has now, for `releaseSince()`. */
+  releaseMark(): ReleaseMark {
+    const { releaseCallbacks, propertyChangedCallbacks } = this.connectedState
+    return { releases: releaseCallbacks.length, properties: propertyChangedCallbacks.length }
+  }
+
+  /**
+   * Release what was added since `mark` (`releaseMark()`), newest first, and stop the property callbacks added since:
+   * a component given up on (a server drawing that didn't hydrate), before another is built.
+   */
+  releaseSince(mark: ReleaseMark) {
+    const { releaseCallbacks, propertyChangedCallbacks } = this.connectedState
+    propertyChangedCallbacks.length = Math.min(propertyChangedCallbacks.length, mark.properties)
+    while (releaseCallbacks.length > mark.releases) releaseCallbacks.pop()!(this)
   }
 
   ////////////////
@@ -544,26 +561,109 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
 
   /**
    * Where the component draws:  the shadow root, made on first use with the tag's `shadowRootInit`.
-   * - A shadow root the server rendered (a declarative `<template shadowrootmode>`) is used as is,
-   *   and emptied right before the first render (`clearServerContent()`):  no hydration, its content is replaced.
+   * - A shadow root the server drew (a declarative `<template shadowrootmode>`) is used as is:
+   *   what it holds is the element's `serverDrawing`, until its first render takes it.
    */
   get renderRoot(): ShadowRoot {
     const { connectedState } = this
     if (connectedState.root) return connectedState.root
     const existing = this.shadowRoot ?? this.internals.shadowRoot
     if (existing) {
-      connectedState.hasServerContent = existing.childNodes.length > 0
+      connectedState.serverDrawing = DOMElement.serverDrawingIn(existing)
       return (connectedState.root = existing)
     }
     return (connectedState.root = this.attachShadow(this.tagSetup.shadowRootInit))
   }
 
-  /** Empty a server-rendered shadow root once, right before the first render. */
-  clearServerContent() {
-    const root = this.renderRoot
-    if (!this.connectedState.hasServerContent) return
-    this.connectedState.hasServerContent = false
-    root.replaceChildren()
+  /**
+   * What the server drew in the shadow root, before the first render took it;  `undefined` when it drew nothing.
+   * - The first render either hydrates it (`isHydratable`:  Solid claims its nodes and wires them up)
+   *   or draws again in its place (`takeServerDrawing()`), in the same task:  nothing flashes, nothing moves.
+   * - Its sheets (`<link rel="stylesheet">`, `<style>`) stay until the element's own are in (`markReady()`),
+   *   so it stays styled meanwhile.
+   */
+  get serverDrawing(): ServerDrawing | undefined {
+    return this.renderRoot && this.connectedState.serverDrawing
+  }
+
+  /**
+   * Take what the server drew out of the shadow root, so a render can draw in its place;  returns it.
+   * - Its sheets stay (see `serverDrawing`);  so does a node whose place the render takes:  focus moves to the
+   *   new node in the same place (`ServerDrawing.focusPath`).
+   * - Idempotent:  `undefined` the second time, or when the server drew nothing.
+   */
+  takeServerDrawing(): ServerDrawing | undefined {
+    const drawing = this.serverDrawing
+    if (!drawing || drawing.isTaken) return undefined
+    drawing.isTaken = true
+    drawing.focusPath = DOMElement.focusPathIn(this.renderRoot)
+    for (const node of drawing.nodes) node.remove()
+    return drawing
+  }
+
+  /**
+   * Move the focus back where it was in the server's drawing:  to the element at the same place in the new one.
+   * - After a render drew in place of the server's (`takeServerDrawing()`).
+   */
+  restoreServerFocus() {
+    const path = this.connectedState.serverDrawing?.focusPath
+    if (!path) return
+    let element: Element | undefined
+    let children: readonly Element[] = DOMElement.drawnChildren(this.renderRoot)
+    for (const index of path) {
+      element = children[index]
+      if (!element) return
+      children = [...element.children]
+    }
+    ;(element as HTMLElement | undefined)?.focus?.({ preventScroll: true })
+  }
+
+  /** Drop the server's sheets:  the element's own are in.  Once. */
+  private dropServerSheets() {
+    const drawing = this.connectedState.serverDrawing
+    if (!drawing) return
+    this.connectedState.serverDrawing = undefined
+    for (const sheet of drawing.sheets) sheet.remove()
+  }
+
+  /** What the server drew in `root`;  `undefined` for an empty root. */
+  private static serverDrawingIn(root: ShadowRoot): ServerDrawing | undefined {
+    if (!root.childNodes.length) return undefined
+    const sheets: Element[] = []
+    const nodes: ChildNode[] = []
+    for (const node of root.childNodes) {
+      if (DOMElement.isSheet(node)) sheets.push(node as Element)
+      else nodes.push(node)
+    }
+    return { nodes, sheets, isHydratable: !!root.querySelector(`[${HYDRATION_KEY}]`), isTaken: false }
+  }
+
+  /** A `<link rel="stylesheet">` or `<style>`. */
+  private static isSheet(node: Node): boolean {
+    if (node.nodeType !== NodeType.element) return false
+    const element = node as Element
+    return (
+      element.localName === "style" ||
+      (element.localName === "link" && /\bstylesheet\b/i.test(element.getAttribute("rel") ?? ""))
+    )
+  }
+
+  /** The drawn elements of `root`, in order:  its sheets left out, so a path means the same in both drawings. */
+  private static drawnChildren(root: ShadowRoot): Element[] {
+    return [...root.children].filter((child) => !DOMElement.isSheet(child))
+  }
+
+  /** Where the focus is in `root`, as each element's index among its parent's elements;  `undefined`:  not there. */
+  private static focusPathIn(root: ShadowRoot): number[] | undefined {
+    let element = root.activeElement
+    if (!element) return undefined
+    const path: number[] = []
+    for (; element.parentNode !== root; element = element.parentElement!) {
+      if (!element.parentElement) return undefined
+      path.unshift([...element.parentElement.children].indexOf(element))
+    }
+    path.unshift(DOMElement.drawnChildren(root).indexOf(element))
+    return path
   }
 
   ////////////////
@@ -633,6 +733,7 @@ export class DOMElement<C extends E.UIComponent<any> = E.UIComponent<any>> exten
   markReady() {
     const states = this.tagSetup?.elementDefinition.vocabulary.states
     if (!states?.some(({ name }) => name === READY)) this.setState(READY, true)
+    this.dropServerSheets()
     this.connectedState.resolveReady()
   }
 
@@ -987,6 +1088,12 @@ const VISIBLE = "visible"
 /** The state of an element defined early whose family hasn't loaded ("Defined early"). */
 const PENDING = "pending"
 
+/**
+ * The attribute Solid's server render marks each node with, so the page's code can claim it (hydration):
+ * a shadow root holding one was drawn to be hydrated.
+ */
+export const HYDRATION_KEY = "_hk"
+
 /** The state of an element ready to go:  rendered with its styles (`markReady()`). */
 const READY = "ready"
 
@@ -1074,6 +1181,30 @@ export type DOMElementHotHooks = {
  * What `DOMElement`'s custom-element callbacks share, kept in ONE private field, `connectedState`:
  * one name an attribute property could clash with, not one per member below.
  */
+/** `DOMElement.releaseMark()`:  how many callbacks of each kind it had. */
+export type ReleaseMark = {
+  /** release callbacks */
+  releases: number
+  /** property-changed callbacks */
+  properties: number
+}
+
+/**
+ * What the server drew in an element's shadow root (`DOMElement.serverDrawing`), until the first render takes it.
+ */
+export type ServerDrawing = {
+  /** what it drew, its sheets left out */
+  nodes: ChildNode[]
+  /** its `<link rel="stylesheet">`s and `<style>`s:  they style the root until the element's own sheets are in */
+  sheets: Element[]
+  /** it carries Solid's hydration keys (`HYDRATION_KEY`):  the first render may claim its nodes */
+  isHydratable: boolean
+  /** a render has drawn in its place (`takeServerDrawing()`) */
+  isTaken: boolean
+  /** where the focus was in it then, by element index (`restoreServerFocus()`);  `undefined`:  not in it */
+  focusPath?: number[]
+}
+
 type ConnectedState = {
   /** the component has been built (and not disposed since) */
   isMounted: boolean
@@ -1091,8 +1222,8 @@ type ConnectedState = {
   isVisibleSettled?: boolean
   /** the shadow root, once made */
   root?: ShadowRoot
-  /** the shadow root came from the server, with content to clear before the first render */
-  hasServerContent?: boolean
+  /** what the server drew in the shadow root, until the element's own sheets are in (`DOMElement.serverDrawing`) */
+  serverDrawing?: ServerDrawing
   /** form state the browser reported before the component existed */
   earlyForm?: { form?: HTMLFormElement | null; disabled?: boolean }
   /** the attributes the element sets itself (its attribute, or a property), by key:  no root's default reaches them */

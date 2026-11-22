@@ -4,6 +4,8 @@ import { parseHTML } from "linkedom"
 
 import { E } from "spell/ui/core"
 import { SSR } from "spell/ui/static"
+// Import directly to avoid circular import:  the constant below the class reads it
+import { SHADOW_SHEETS_FOLDER } from "./static.types.ssr"
 
 /****************
  * ### `StaticRender`
@@ -18,8 +20,12 @@ import { SSR } from "spell/ui/static"
  *   4. flatten (`StaticFlattener`):  DOM elements replaced by their roots, slots by their children
  *   5. wire what works without scripts (`StaticInteractions`:  dialogs, popovers, unique ids)
  *   6. rewrite the page's own `<style>`s for that (`StaticPageStyles`:  `::part()`, `:state()`, `ui-*` tags)
+ * - Its SHADOW output (`{ output: "shadow" }`) keeps every element and writes its view into a declarative shadow root
+ *   instead (`StaticShadowRoots`), with Solid's hydration keys:  steps 4-6 don't run, and the page keeps its scripts,
+ *   so the elements start over what's there and hydrate it.
  * - Families are opt-in (`define()`):  a `ui-*` tag without one stays as it is.
- * - NOTE: the page MUST NOT load the elements too:  an upgrade would take the flattened markup for slotted content.
+ * - NOTE: a page of the light output MUST NOT load the elements too:
+ *   an upgrade would take the flattened markup for slotted content.
  * - The TOP of `spell/ui/static`'s graph (with `StaticCatalog`):  uses `spell/ui/core` and every peer, but no family.
  *   Node only, NEVER imported by a component or `spell-ui`.
  * - STATIC:  one set of families per process, as `customElements` is one registry per page.
@@ -73,17 +79,17 @@ export class StaticRender {
     await Promise.all(loads)
   }
 
-  /** Render a whole document;  returns its HTML. */
-  static page(html: string): string {
+  /** Render a whole document;  returns its HTML.  `options.output`:  light DOM (the default) or shadow roots. */
+  static page(html: string, options: SSR.StaticRenderOptions = {}): string {
     const { document } = parseHTML(html)
-    StaticRender.render(document)
+    StaticRender.render(document, options)
     return (document.doctype ? "<!doctype html>\n" : "") + document.documentElement.outerHTML
   }
 
-  /** Render a fragment (body content);  returns its HTML. */
-  static fragment(html: string): string {
+  /** Render a fragment (body content);  returns its HTML.  `options`:  as `page()`'s. */
+  static fragment(html: string, options: SSR.StaticRenderOptions = {}): string {
     const { document } = parseHTML(`<!doctype html><html><head></head><body>${html}</body></html>`)
-    StaticRender.render(document)
+    StaticRender.render(document, options)
     return document.body.innerHTML
   }
 
@@ -108,13 +114,16 @@ export class StaticRender {
   ////////////////
 
   /** Every step after parsing (the class docs' "Steps"), on a parsed `document`. */
-  private static render(document: Document) {
+  private static render(document: Document, { output = "light", sheets = DEFAULT_SHEETS }: SSR.StaticRenderOptions) {
     const ids = SSR.ServerRuntime.install().ids as unknown as SSR.ServerIds
     // generated ids skip the page's own, numbered from 1 per page
     ids.reset(document)
-    const elements = [...document.querySelectorAll("*")].filter((element) =>
-      StaticRender.families.has(element.localName)
-    )
+    const isShadow = output === "shadow"
+    const elements = [...document.querySelectorAll("*")].filter((element) => {
+      const family = StaticRender.families.get(element.localName)
+      // the shadow output:  only roots a template can describe, and never one the page already drew
+      return family && (!isShadow || (SSR.StaticShadowRoots.takes(family) && !StaticRender.hasTemplate(element)))
+    })
     StaticRender.lastTags = new Set(elements.map((element) => element.localName))
     const { built, dispose } = createRoot((dispose) => ({
       built: elements.map((element) => StaticRender.build(element)),
@@ -125,21 +134,48 @@ export class StaticRender {
       const views: SSR.StaticView[] = built.map(({ domElement, family }) => ({
         element: domElement as unknown as Element,
         family,
-        // `NoHydration`:  nothing hydrates a static page, so no `_hk` keys
-        html: renderToString(() =>
-          createComponent(NoHydration, {
-            get children() {
-              return untrack(() => domElement.component!.onMount())
-            }
-          })
-        )
+        sheetNames: untrack(() => domElement.component?.styleSheetNames),
+        html: isShadow ? StaticRender.hydratableView(domElement) : StaticRender.staticView(domElement)
       }))
+      if (isShadow) {
+        SSR.StaticShadowRoots.attach(document, views, sheets)
+        return
+      }
       SSR.StaticFlattener.flatten(document, views)
       SSR.StaticInteractions.wire(document, ids)
       StaticRender.rewriteStyles(document)
     } finally {
       dispose()
     }
+  }
+
+  /**
+   * `domElement`'s view as HTML with no hydration keys:  nothing hydrates the light output.
+   * - Nor Solid's markers (`<!--$-->` ... `<!--/-->`), which a hydratable build writes around each dynamic part.
+   */
+  private static staticView(domElement: E.DOMElement): string {
+    const html = renderToString(() =>
+      createComponent(NoHydration, {
+        get children() {
+          return untrack(() => domElement.component!.onMount())
+        }
+      })
+    )
+    return html.replace(SOLID_MARKERS, "")
+  }
+
+  /**
+   * `domElement`'s view as HTML with Solid's hydration keys, for the element to claim in the page.
+   * - Keyed by what `render()` draws alone (`UIComponent.onMount()` runs it under a root of a fixed id),
+   *   so every element's keys are its own, and the same as the page's.
+   */
+  private static hydratableView(domElement: E.DOMElement): string {
+    return renderToString(() => untrack(() => domElement.component!.onMount()))
+  }
+
+  /** Does `element` already hold a declarative shadow root (a page drawn before)? */
+  private static hasTemplate(element: Element): boolean {
+    return [...element.children].some((child) => child.localName === "template" && child.hasAttribute("shadowrootmode"))
   }
 
   /** Stand-in DOM element + component for one element;  MUST run under the render's root. */
@@ -179,3 +215,9 @@ export class StaticRender {
     }
   }
 }
+
+/** The comments a hydratable server build marks its dynamic parts with:  `<!--$-->`, `<!--/-->`, `<!--!$-->`. */
+const SOLID_MARKERS = /<!--!?[$/][^>]*?-->/g
+
+/** Where the shadow output links its sheets, unless told:  a folder beside the page. */
+const DEFAULT_SHEETS: SSR.ShadowSheets = { href: SHADOW_SHEETS_FOLDER }
