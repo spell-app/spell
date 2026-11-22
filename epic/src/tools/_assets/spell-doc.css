@@ -358,6 +358,13 @@ body.spell-doc-page .spell-doc-main ui-section {
 body.spell-doc-page .spell-doc-main ui-section ui-section {
   --ui-section-title-padding: var(--spell-title-top) var(--spell-column-inset) 6px;
 }
+/*
+ * a nested section inside a block that sits in the column already (a kept round in a <div>):  only the small inset
+ * - with the column inset again, a wide window left its title no width, a word to a line (epic epic-engine I429)
+ */
+body.spell-doc-page .spell-doc-main ui-section > :not(ui-section, .spell-full-width) ui-section {
+  --ui-section-title-padding: var(--spell-title-top) 4px 6px;
+}
 body.spell-doc-page .spell-doc-main ui-section::part(title) {
   margin-inline: 0;
 }
