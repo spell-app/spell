@@ -865,6 +865,30 @@ export const APP_TEXTS = {
   "themePage.epic": "Epic page",
   "themePage.ui": "Spell UI",
   "themePage.notebook": "Notebook",
+  // the palette groups page (`<PaletteGroupsPage>`, `/palette`):  the + menu's groups, to arrange and save (epic `editor` T81)
+  "palettePage.title": "Groups in the + menu",
+  "palettePage.hint":
+    "The + menu lists the components you can add, in groups.\n" +
+    "Drag a component into another group, or to a new spot in its own group.\n" +
+    "Drag a group by its handle to move it.\n" +
+    'Components in the last column, "Not in the + menu", stay out of the menu.\n' +
+    "Press Save when you're done.",
+  "palettePage.addGroup": "Add group",
+  "palettePage.save": "Save",
+  "palettePage.loading": "Loading the groups…",
+  "palettePage.unsaved": "Changes not saved yet",
+  "palettePage.saved": "Saved.  Reload the editor's tab to see the new groups in the + menu.",
+  "palettePage.noServer":
+    "Can't load the groups.  Check that Spell is still running on your computer, then reload this page.",
+  // `{error}` says why
+  "palettePage.saveFailed": "Couldn't save:  {error}",
+  "palettePage.newGroup": "New group",
+  "palettePage.groupName": "Group name",
+  // `{group}` is the group's name
+  "palettePage.groupIcon": "Icon for the {group} group in the + menu",
+  "palettePage.removeGroup": "Remove the {group} group.  Its components stay available under Not in the + menu.",
+  "palettePage.moveGroup": "Drag to move the {group} group",
+  "palettePage.notOffered": "Not in the + menu",
   // an event's heading over its code (Owen:  "make label `on click`")
   inspectorEventHeading: "on {event}",
   // a dimmed action's tooltip:  `{condition}` is its `enabled when`, in its own words

@@ -6,10 +6,10 @@ import { afterAll, beforeAll, describe, expect, test } from "vite-plus/test"
 import { SRV } from "spell/server"
 import { PageServer } from "spell/server/page"
 import { ask } from "spell/server/test/serve"
-import { PALETTE_GROUPS_API } from "spell/ui/docs-components/docs-components.types"
-import { paletteRoutesFor, paletteTableOrDie } from "spell/ui/tools/paletteRoutes"
+import { PALETTE_GROUPS_API } from "spell/app/spaces/models/paletteTable"
+import { paletteRoutesFor, paletteTableOrDie } from "spell/app/spaces/server/node/routes/paletteRoutes"
 
-/** A table as the palette groups page saves it. */
+/** A table as the palette groups page (`<PaletteGroupsPage>`) saves it. */
 const TABLE = {
   groups: [
     { topic: "buttons", icon: "hand pointer", tags: ["ui-buttons", "ui-button"] },
@@ -27,7 +27,7 @@ describe("the palette groups route (epic `editor` T81)", () => {
   beforeAll(async () => {
     writeFileSync(file, `${JSON.stringify({ groups: [{ topic: "layout", tags: ["ui-grid"] }] })}\n`)
     server = new PageServer({ root: folder })
-    await paletteRoutesFor(file).setup(server.routeContext())
+    server.routeContext().router.use(PALETTE_GROUPS_API, paletteRoutesFor(file))
     await server.start({ port: 0, routes: false, pidFile: false })
     port = server.info.port
   })
@@ -37,11 +37,11 @@ describe("the palette groups route (epic `editor` T81)", () => {
     rmSync(folder, { recursive: true, force: true })
   })
 
-  /** PUT `body` from a page this server served (its token, its origin);  the status and the answer */
-  async function save(body: unknown, token = server.web.guard.token) {
+  /** PUT `body`;  the status and the answer */
+  async function save(body: unknown) {
     const answer = await ask(port, "PUT", PALETTE_GROUPS_API, {
       body: JSON.stringify(body),
-      headers: { "content-type": "application/json", "x-server-token": token, origin: `http://127.0.0.1:${port}` }
+      headers: { "content-type": "application/json" }
     })
     return { status: answer.status, body: JSON.parse(answer.text) as unknown }
   }
@@ -58,8 +58,7 @@ describe("the palette groups route (epic `editor` T81)", () => {
     expect(JSON.parse((await ask(port, "GET", PALETTE_GROUPS_API)).text)).toEqual(TABLE)
   })
 
-  test("refuses a write without the page's token, and a body that isn't a table", async () => {
-    expect((await save(TABLE, "wrong")).status).toBe(403)
+  test("refuses a body that isn't a table", async () => {
     expect(await save({ groups: [{ topic: "layout" }] })).toEqual({
       status: 400,
       body: { error: `PUT ${PALETTE_GROUPS_API}:  group 1 needs \`tags\`, a list of tags` }

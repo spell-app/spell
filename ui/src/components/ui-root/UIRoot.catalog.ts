@@ -425,7 +425,6 @@ export const ROOT_CATALOG: Readonly<Record<string, RootCatalogEntry>> = {
     },
     attributes: ["current", "base", "view", "size"]
   },
-  "ui-docs-palette": { folder: "ui-docs-palette", skeleton: { height: "40em" }, attributes: [] },
   "ui-docs-search": {
     folder: "ui-docs-search",
     skeleton: { width: "16em", height: "2.25em" },

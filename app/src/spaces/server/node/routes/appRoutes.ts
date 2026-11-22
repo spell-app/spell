@@ -16,6 +16,7 @@ import { AuthenticatedPlaces } from "spell/server/places"
 import { SP } from "spell/parser/spell"
 import environment from "spell/app/spaces/server/node/environment"
 import { isSpaceName } from "spell/app/spaces/models/spaceNames"
+import { PALETTE_GROUPS_API } from "spell/app/spaces/models/paletteTable"
 import { isSourceCheckout } from "spell/app/spaces/server/node/spellSpacesDir"
 import { peopleStore } from "spell/app/spaces/server/node/people/peopleRoutes"
 import { SpellAccounts } from "spell/app/spaces/server/node/people/SpellAccounts"
@@ -27,6 +28,7 @@ import { api, compileCache, projectBuild, spaceFiles } from "./api"
 import { spacesDailyRound } from "./DailyRound"
 import { APP_DIR, EditorServer } from "./EditorServer"
 import { LocalSiteServer } from "./LocalSiteServer"
+import { paletteRoutesFor } from "./paletteRoutes"
 
 /** Spell's terms page:  what it keeps, leaving with a space, deleting, backups, limits (epic `atmosphere` P7, T5). */
 const TERMS_FILE = fileURLToPath(new URL("../places/terms.html", import.meta.url))
@@ -42,6 +44,9 @@ const TERMS_FILE = fileURLToPath(new URL("../places/terms.html", import.meta.url
  *       (`PREF_SAVED_EVENT`):  a theme picked in one place shows in every other at once
  *     - every page it serves is told the prefs are here (`window.SPELL_SERVER.prefs`):
  *       a server without this module (spell-epic's own) has none, and its pages never ask
+ *   - `/api/palette-groups` -- the editor palette's groups, as Owen arranged them (`paletteRoutes`, epic `editor` T81):
+ *     the palette groups page (`/palette` on the editor) reads and saves them;  mounted before the rest of `/api`,
+ *     with its own body parser, behind the same check of where a write comes from
  *   - `/api/compiles/...` -- the compile cache (`compileCache`, `./api`), capped at the page server's `cacheLimit`
  *   - `/spaces/<project>/<file>` -- a project's file, by its URL (`spaceFiles`, `./api`):  how spell reads every file
  *   - `/api/places/spaces/<address>/...` -- every project data folder, by its address (`SpaceFolders`, epic `atmosphere` P1):
@@ -76,6 +81,8 @@ const TERMS_FILE = fileURLToPath(new URL("../places/terms.html", import.meta.url
  *     - for the demo page, `/demo/spell-editor.html` on the editor:  vite passes `/element` on to us, as it does `/api`
  *   - `/editor` -- the site header's "Editor":  redirects to the editor, from its record (`EditorServer.recordFile`,
  *     this page server's spaces' own)
+ *     - `/editor/<page>`:  that page of the editor, `/editor/palette` => the editor's `/palette`:  how a docs page
+ *       links one, whichever port the editor took
  *     - not up yet (vite takes seconds) or not running:  says so
  * - The editor UI (`EditorServer`):  vite's dev server, started once the page server listens and stopped with it.
  *   The page server and the editor are ONE thing to start.
@@ -155,13 +162,14 @@ const appRoutes: RouteModule = {
     // the compile cache's cap:  the page server's `cacheLimit` setting (epic `language` Q41)
     const { cacheLimit } = pageServerSettings(root)
     if (cacheLimit !== undefined) compileCache.limit = SRV.sizeInBytes(cacheLimit)
+    router.use(PALETTE_GROUPS_API, refuseForeignOrigins, paletteRoutesFor())
     router.use("/api", refuseForeignOrigins, SRV.parseBodies({ limit: 10 * 1024 * 1024, parseJson: JSON5.parse }), api)
     router.use("/spaces", spaceFiles)
     router.get("/hello", (_request, reply) => reply.json({ message: "Hello from the API!" }))
     router.use(new SRV.StaticHandler({ mounts: [{ prefix: "/element", dir: ELEMENT_DIR }] }).handle)
-    router.get("/editor", async (_request, reply) => {
+    const toEditor = async (request: SRV.Request, reply: SRV.Reply) => {
       const url = await editorUrl(editor.recordFile)
-      if (url) return void reply.redirect(url)
+      if (url) return void reply.redirect(new URL(`/${request.params.page ?? ""}`, url).href)
       reply
         .status(503)
         .type("text/html")
@@ -169,7 +177,9 @@ const appRoutes: RouteModule = {
           `<!doctype html><title>Editor</title><p>The editor isn't up:  it starts with the page server, and takes a few ` +
             `seconds -- reload.  Still not?  See <code>${basename(editor.logFile)}</code>.</p>`
         )
-    })
+    }
+    router.get("/editor", toEditor)
+    router.get("/editor/:page*", toEditor)
   }
 }
 

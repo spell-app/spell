@@ -4,12 +4,13 @@ import { createRouter, defineRoutes, useNavigate, type RouterHistory, type Route
 
 import { editor } from "spell/app/app/editor"
 import { setNavigator } from "./navigation"
+import { PaletteGroupsPage } from "./PaletteGroupsPage"
 import { PlaceReferencePage } from "./PlaceReference"
 import { ProjectChooser } from "./ProjectChooser"
 import { SiteEditorRoute } from "./SiteEditorPage"
 import { ProjectPageRoute } from "./SpellEditor"
 import { ThemeEditorPage } from "./ThemeEditorPage"
-import { PLACE_PAGE, SITE_PAGE, THEME_PAGE } from "./pages.types"
+import { PALETTE_PAGE, PLACE_PAGE, SITE_PAGE, THEME_PAGE } from "./pages.types"
 
 /**
  * The app's routes (`@solidjs/router`):  `/edit/`, `/design/` or `/run/`, then an address (decision Q40, epic
@@ -18,6 +19,7 @@ import { PLACE_PAGE, SITE_PAGE, THEME_PAGE } from "./pages.types"
  * - `/design/<address>`:  the same page in Design (epic `editor` P37), e.g. `/design/@spell/examples/Solitaire/Card.spell`
  * - `/run/<address>`:  the same page in Run, e.g. `/run/owen@spell/errors`
  * - `/theme`:  the theme editor (`<ThemeEditorPage>`)
+ * - `/palette`:  the + menu's groups, to arrange and save (`<PaletteGroupsPage>`, epic `editor` T81)
  * - `/site`:  every site there is (`<SitesHomePage>`)
  * - `/site/<project>`:  a site's editor, its pages and their addresses (`<SiteEditorPage>`, epic `mockup` P4)
  * - `/site/<group>`:  the group's sites (`<SiteGroupPage>`);  a registered group's address, else it's a project's
@@ -35,6 +37,7 @@ export const ROUTES = defineRoutes([
     component: ProjectPageRoute
   },
   { path: THEME_PAGE, component: ThemeEditorPage },
+  { path: PALETTE_PAGE, component: PaletteGroupsPage },
   { path: `${SITE_PAGE}/*address`, component: SiteEditorRoute },
   { path: `${PLACE_PAGE}/*address`, component: PlaceReferencePage },
   { path: "*", component: HomeRoute }
