@@ -38,8 +38,8 @@ function fakeSession(snapshot: HeapSnapshotJSON, size: number): CDPSession {
   const { snapshot: header, nodes, edges, strings } = snapshot
   const counts = { node_count: nodes.length / 5, edge_count: edges.length / 3 }
   const text =
-    `{"snapshot":${JSON.stringify({ ...header, ...counts })},\n"nodes":[${[...nodes].join(",")}],\n` +
-    `"edges":[${[...edges].join(",\n")}],\n"trace_tree":[[1,[2]]],"samples":[],\n"strings":${JSON.stringify(strings)}}`
+    `{"snapshot":${JSON.stringify({ ...header, ...counts })},\n"nodes":[${Array.from(nodes).join(",")}],\n` +
+    `"edges":[${Array.from(edges).join(",\n")}],\n"trace_tree":[[1,[2]]],"samples":[],\n"strings":${JSON.stringify(strings)}}`
   return {
     on: (_event: string, listener: (event: { chunk: string }) => void) => listeners.push(listener),
     off: () => {},
